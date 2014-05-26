@@ -42,6 +42,7 @@ QtObject {
     property string statusBar
     property string mediaTrack
     property string image
+    property string secondaryImage
 
     function reset () {
         console.debug("enter")

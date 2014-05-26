@@ -105,11 +105,12 @@ Item {
         }
     }
 
-    function show (showStrings, alignment, graphic, softButtons, customPresets, appID) {
+    function show (showStrings, alignment, graphic, secondaryGraphic, softButtons, customPresets, appID) {
         var softButtonsLog = "",
             showStringsLog = "",
             customPresetsLog = "",
-            graphiLog = "";
+            graphiLog = "",
+            secondaryGraphicLog = "";
         if (showStrings) {
             for (var i = 0; i < showStrings.length; i++) {
                 showStringsLog += "{fieldName: '" + showStrings[i].fieldName + "', " +
@@ -135,11 +136,15 @@ Item {
         if (graphic) {
             graphiLog = "{value: '" + graphic.value + "', imageType: " + graphic.imageType + "}";
         }
+        if (secondaryGraphic) {
+            secondaryGraphicLog = "{value: '" + secondaryGraphic.value + "', imageType: " + secondaryGraphic.imageType + "}";
+        }
 
         console.log("Message Received - {method: 'UI.Show', params:{ " +
                     "showStrings: [" + showStringsLog + "], " +
                     "alignment: " + alignment + "', " +
                     "graphic: " + graphiLog + ", " +
+                    "secondaryGraphic: " + secondaryGraphicLog+ ", " +
                     "softButtons: [" + softButtonsLog + "], " +
                     "customPresets: [" + customPresetsLog + "], " +
                     "appID: " + appID +
@@ -191,6 +196,7 @@ Item {
         if (fieldSubstrings[Common.TextFieldName.statusBar] !== undefined) { showData.hmiUIText.statusBar = fieldSubstrings[Common.TextFieldName.statusBar]; }
         if (fieldSubstrings[Common.TextFieldName.mediaTrack] !== undefined) { showData.hmiUIText.mediaTrack = fieldSubstrings[Common.TextFieldName.mediaTrack]; }
         if (graphic) { showData.hmiUIText.image = graphic.value; }
+        if (secondaryGraphic) { showData.hmiUIText.secondaryImage = secondaryGraphic.value; }
         if (textAlignment) { showData.hmiUITextAlignment = textAlignment; }
         if (fieldSubstrings[Common.TextFieldName.mediaClock]) {
             showData.mediaClock = {
