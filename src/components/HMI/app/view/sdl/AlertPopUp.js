@@ -140,7 +140,7 @@ SDL.AlertPopUp = Em.ContainerView.create({
         this.set('content2', '');
         this.set('content3', '');
 
-        if (reason == 'timeout' && this.softbuttons.buttons.childViews.length > 0) {
+        if (reason == 'timeout' && this.softbuttons.buttons._childViews.length > 0) {
             SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['ABORTED'], this.alertRequestId);
         } else {
             SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);
@@ -246,6 +246,6 @@ SDL.AlertPopUp = Em.ContainerView.create({
         clearTimeout(this.timer);
         this.timer = setTimeout(function() {
             self.deactivate('timeout');
-        }, message.duration ? message.duration : 10000); //default timeout defined for Alert popUp
+        }, message.duration ? message.duration : 30000); //default timeout defined for Alert popUp
     }
 });
