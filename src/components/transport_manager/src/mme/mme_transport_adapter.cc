@@ -53,7 +53,6 @@ TransportAdapter::Error MmeTransportAdapter::Init() {
   if (TransportAdapter::OK == error) {
     initialised_ = true;
   }
-  device_scanner_->Scan(); // no MME events come for existing devices
   return error;
 }
 
