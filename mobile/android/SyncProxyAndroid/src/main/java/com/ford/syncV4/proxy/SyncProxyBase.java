@@ -127,7 +127,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * negotiated with the Sync.
      */
     static final int HEARTBEAT_INTERVAL = 5000;
-    
+
     /** Delay between proxy disconnect (e.g., transport error) and another proxy
      * reconnect attempt.
      */
@@ -970,7 +970,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         synchronized (CONNECTION_REFERENCE_LOCK) {
             if (mSyncConnection == null) {
                 mSyncConnection = new SyncConnection(_interfaceBroker);
-                final HeartbeatMonitor heartbeatMonitor = 
+                final HeartbeatMonitor heartbeatMonitor =
                         new HeartbeatMonitor();
                 heartbeatMonitor.setInterval(heartBeatInterval);
                 heartbeatMonitor.isSendHeartbeatAck(heartBeatAck);
