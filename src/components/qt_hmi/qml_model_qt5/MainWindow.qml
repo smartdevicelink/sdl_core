@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
-//import com.ford.sdl.hmi.log4cxx 1.0
+import com.ford.sdl.hmi.log4cxx 1.0
 import com.ford.sdl.hmi.named_pipe_notifier 1.0
 import "./controls"
 import "./views"
@@ -58,7 +58,7 @@ Rectangle {
         id: dataContainer
 
         onSystemContextChanged: {
-            sdlUI.onSystemContext(systemContext)
+            sdlUI.onSystemContext(systemContext, currentApplication.appId)
         }
 
         // Please note that applicationContext is changed only after setting currentApplication
