@@ -242,6 +242,6 @@ SDL.AlertPopUp = Em.ContainerView.create({
         clearTimeout(this.timer);
         this.timer = setTimeout(function() {
             self.deactivate();
-        }, message.duration);
+        }, message.duration ? message.duration : 10000); //default timeout defined for Alert popUp
     }
 });
