@@ -49,6 +49,7 @@
 #include "config_profile/profile.h"
 #include "application_manager/usage_statistics.h"
 #include "policy/policy_types.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace policy {
 typedef std::set<utils::SharedPtr<application_manager::Application>> ApplicationList;
@@ -404,6 +405,10 @@ void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
       app->app_id(), permissions);
     application_manager::ApplicationManagerImpl::instance()
     ->DeactivateApplication(app);
+    application_manager::MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+        app->app_id(), mobile_apis::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
+    application_manager::ApplicationManagerImpl::instance()->
+        UnregisterApplication(app->app_id(), mobile_apis::Result::INVALID_ENUM, false);
     app->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
     return;
