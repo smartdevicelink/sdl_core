@@ -12,7 +12,7 @@ import static org.mockito.Mockito.mock;
 
 
 /**
- * Created by Andrew Batutin on 8/20/13.
+ * Created by Andrew Batutin on 8/20/13
  */
 public class MobileNavSessionTest extends InstrumentationTestCase{
 
@@ -34,19 +34,21 @@ public class MobileNavSessionTest extends InstrumentationTestCase{
         WiProProtocol wiProProtocol = mock(WiProProtocol.class);
         Session session = new Session();
         session.setSessionId((byte) 0x01);
-        Mockito.doThrow(new IllegalArgumentException("Can't call this method")).when(wiProProtocol).StartProtocolService(ServiceType.Mobile_Nav, session);
+        Mockito.doThrow(new IllegalArgumentException("Can't call this method"))
+                .when(wiProProtocol).StartProtocolService(ServiceType.Mobile_Nav,
+                session.getSessionId());
         return wiProProtocol;
     }
 
     public void testMobileNavigationSessionCreation() throws Exception {
         MobileNavSession mobileNavSessionSession = new MobileNavSession(_protocol);
-        assertNotNull("mobile Nav currentSession should be created", mobileNavSessionSession);
+        assertNotNull("mobile Nav syncSession should be created", mobileNavSessionSession);
     }
 
     public void testMobileNavigationStartSession() throws Exception {
         Session session = new Session();
         session.setSessionId((byte)0x0A);
-        _sut.startSession(session);
+        _sut.startSession(session.getSessionId());
         assertTrue("should get here",true);
     }
 }

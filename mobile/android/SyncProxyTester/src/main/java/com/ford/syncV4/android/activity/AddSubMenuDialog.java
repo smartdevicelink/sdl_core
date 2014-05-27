@@ -78,7 +78,7 @@ public class AddSubMenuDialog extends DialogFragment {
 
                         AddSubMenu addSubMenu = RPCRequestFactory.buildAddSubMenu();
                         addSubMenu.setCorrelationID(((SyncProxyTester) getActivity())
-                                .getCorrelationid());
+                                .getNextCorrelationIdForCurrentFragment());
 
                         SyncSubMenu subMenu = new SyncSubMenu();
                         subMenu.setName(editMenuName.getText().toString());

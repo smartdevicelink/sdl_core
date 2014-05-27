@@ -267,7 +267,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
         msg.setCorrelationID(6000);
 
         if (mBoundProxyService != null) {
-            mBoundProxyService.syncProxySendRPCRequest(msg);
+            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
         }
     }
 
@@ -527,7 +527,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                             Logger.i("syncp", "msg: " + msg);
 
                             if (mBoundProxyService != null) {
-                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
                             }
                         } catch (UnsupportedEncodingException e) {
                             Logger.e("SyncProxyTester", e.toString());

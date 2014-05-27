@@ -78,10 +78,6 @@ ConnectionHandlerImpl::~ConnectionHandlerImpl() {
 void ConnectionHandlerImpl::set_connection_handler_observer(
   ConnectionHandlerObserver* observer) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::set_connection_handler_observer()");
-  if (!observer) {
-    LOG4CXX_ERROR(logger_, "Null pointer to observer.");
-    return;
-  }
   connection_handler_observer_ = observer;
 }
 

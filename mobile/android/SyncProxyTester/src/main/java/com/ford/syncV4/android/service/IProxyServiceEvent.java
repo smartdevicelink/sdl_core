@@ -37,7 +37,7 @@ public interface IProxyServiceEvent {
      * @param serviceType a type of the service
      * @param sessionId   Id of the session
      */
-    public void onServiceStart(ServiceType serviceType, byte sessionId);
+    public void onServiceStart(ServiceType serviceType, byte sessionId, String appId);
 
     /**
      * Dispatch when receive Ack message
@@ -45,12 +45,14 @@ public interface IProxyServiceEvent {
      * @param frameReceived frame received number
      * @param serviceType   a type of the service
      */
-    public void onAckReceived(int frameReceived, ServiceType serviceType);
+    public void onAckReceived(String appId, byte sessionId, int frameReceived,
+                              ServiceType serviceType);
 
     /**
      * Dispatch when Service Nack received
      *
+     * @param sessionId Id of the session
      * @param serviceType a type of the service
      */
-    public void onStartServiceNackReceived(ServiceType serviceType);
+    public void onStartServiceNackReceived(String appId, byte sessionId, ServiceType serviceType);
 }

@@ -593,9 +593,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 		}
 		
 		// Test SYNC availability 
-		if (!_appInterfaceRegisterd) {
+		/*if (!mAppInterfaceRegistered) {
 			throw new SyncException("SYNC is unavailable. Unable to get the buttonCapabilities.", SyncExceptionCause.SYNC_UNAVAILALBE);
-		}
+		}*/
 		return _buttonCapabilities;
 	}
 	
@@ -613,9 +613,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 		}
 		
 		// Test SYNC availability 
-		if (!_appInterfaceRegisterd) {
+		/*if (!mAppInterfaceRegistered) {
 			throw new SyncException("SYNC is not connected. Unable to get the softButtonCapabilities.", SyncExceptionCause.SYNC_UNAVAILALBE);
-		}
+		}*/
 		return _softButtonCapabilities;
 	}
 	
@@ -633,9 +633,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 		}
 		
 		// Test SYNC availability 
-		if (!_appInterfaceRegisterd) {
+		/*if (!mAppInterfaceRegistered) {
 			throw new SyncException("SYNC is not connected. Unable to get the presetBankCapabilities.", SyncExceptionCause.SYNC_UNAVAILALBE);
-		}
+		}*/
 		return _presetBankCapabilities;
 	}
 	
@@ -653,9 +653,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 		}
 		
 		// Test SYNC availability 
-		if (!_appInterfaceRegisterd) {
+		/*if (!mAppInterfaceRegistered) {
 			throw new SyncException("SYNC is unavailable. Unable to get the displayCapabilities.", SyncExceptionCause.SYNC_UNAVAILALBE);
-		}
+		}*/
 		return _displayCapabilities;
 	}
 	
@@ -673,9 +673,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 		}
 		
 		// Test SYNC availability 
-		if (!_appInterfaceRegisterd) {
+		/*if (!mAppInterfaceRegistered) {
 			throw new SyncException("SYNC is unavailable. Unable to get the hmiZoneCapabilities.", SyncExceptionCause.SYNC_UNAVAILALBE);
-		}
+		}*/
 		return _hmiZoneCapabilities;
 	}
 	
@@ -693,10 +693,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 		}
 		
 		// Test SYNC availability 
-		if (!_appInterfaceRegisterd) {
+		/*if (!mAppInterfaceRegistered) {
 			throw new SyncException("SYNC is unavailable. Unable to get the speechCapabilities.", SyncExceptionCause.SYNC_UNAVAILALBE);
-		}
-		
+		}*/
 		return _speechCapabilities;
 	}
 	
@@ -714,9 +713,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 		}
 		
 		// Test SYNC availability 
-		if (!_appInterfaceRegisterd) {
+		/*if (!mAppInterfaceRegistered) {
 			throw new SyncException("SYNC is unavailable. Unable to get the syncLanguage.", SyncExceptionCause.SYNC_UNAVAILALBE);
-		}
+		}*/
 		return _syncLanguage;
 	}
 	
@@ -734,9 +733,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 		}
 		
 		// Test SYNC availability 
-		if (!_appInterfaceRegisterd) {
+		/*if (!mAppInterfaceRegistered) {
 			throw new SyncException("SYNC is not connected. Unable to get the hmiDisplayLanguage.", SyncExceptionCause.SYNC_UNAVAILALBE);
-		}
+		}*/
 		return _hmiDisplayLanguage;
 	}
 	
@@ -754,9 +753,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 		}
 		
 		// Test SYNC availability 
-		if (!_appInterfaceRegisterd) {
+		/*if (!mAppInterfaceRegistered) {
 			throw new SyncException("SYNC is unavailable. Unable to get the syncMsgVersion.", SyncExceptionCause.SYNC_UNAVAILALBE);
-		}
+		}*/
 		return _syncMsgVersion;
 	}
 	
@@ -774,9 +773,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 		}
 		
 		// Test SYNC availability 
-		if (!_appInterfaceRegisterd) {
+		/*if (!mAppInterfaceRegistered) {
 			throw new SyncException("SYNC is unavailable. Unable to get the vrCapabilities.", SyncExceptionCause.SYNC_UNAVAILALBE);
-		}
+		}*/
 		return _vrCapabilities;
 	}
 	
@@ -794,9 +793,9 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 		}
 		
 		// Test SYNC availability 
-		if (!_appInterfaceRegisterd) {
+		/*if (!mAppInterfaceRegistered) {
 			throw new SyncException("SYNC is not connected. Unable to get the vehicleType.", SyncExceptionCause.SYNC_UNAVAILALBE);
-		}
+		}*/
 		return _vehicleType;
 	}
 }

@@ -55,10 +55,10 @@ class MockTransportAdapterListener : public TransportAdapterListener {
       void(const TransportAdapter* transport_adapter));
   MOCK_METHOD2(OnSearchDeviceFailed,
       void(const TransportAdapter* transport_adapter, const SearchDeviceError& error));
+  MOCK_METHOD2(OnApplicationListUpdated,
+      void(const TransportAdapter* adapter, const DeviceUID& device_handle));
   MOCK_METHOD1(OnDeviceListUpdated,
       void(const TransportAdapter* transport_adapter));
-  MOCK_METHOD2(OnApplicationListUpdated,
-               void(const TransportAdapter* adapter, const DeviceUID& device_handle));
   MOCK_METHOD3(OnConnectDone,
       void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle));
   MOCK_METHOD4(OnConnectFailed,
