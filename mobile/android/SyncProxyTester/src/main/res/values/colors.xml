@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="log_regular_text_color">#DDD</color>
-    
+    <color name="app_regular_text_color">#DDD</color>
+    <color name="main_bg_color">#2b4f7f</color>
 </resources>

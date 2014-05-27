@@ -102,7 +102,7 @@ public class PerformAudioPassThruDialog extends DialogFragment {
                             performAudioPassThru.setAudioType((AudioType) spnAudioType.getSelectedItem());
                             performAudioPassThru.setMuteAudio(chkMuteAudio.isChecked());
                             performAudioPassThru.setCorrelationID(((SyncProxyTester) getActivity())
-                                    .getCorrelationid());
+                                    .getNextCorrelationIdForCurrentFragment());
 
                             ((SyncProxyTester) getActivity())
                                     .onPerformAudioPassThruDialogResult(performAudioPassThru);

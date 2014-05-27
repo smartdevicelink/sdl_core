@@ -234,7 +234,8 @@ public class SendProtocolMessageProcessor {
      * @param sessionId             id of the session
      */
     public void processStartSession(final byte protocolVersionToSend, final byte sessionId) {
-        Logger.d(LOG_TAG + " Start Session, ver:" + protocolVersionToSend);
+        Logger.d(LOG_TAG + " Start Session, prtcl ver:" + protocolVersionToSend +
+                ", sesId:" + sessionId);
         Runnable runnable = new Runnable() {
             @Override
             public void run() {

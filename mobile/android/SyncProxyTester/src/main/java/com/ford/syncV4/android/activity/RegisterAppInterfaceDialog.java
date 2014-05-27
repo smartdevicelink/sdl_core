@@ -114,7 +114,7 @@ public class RegisterAppInterfaceDialog extends DialogFragment {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         RegisterAppInterface registerAppInterface = new RegisterAppInterface();
-                        registerAppInterface.setCorrelationID(((SyncProxyTester) getActivity()).getCorrelationid());
+                        registerAppInterface.setCorrelationID(((SyncProxyTester) getActivity()).getNextCorrelationIdForCurrentFragment());
 
                         if (useSyncMsgVersion.isChecked()) {
                             SyncMsgVersion version = new SyncMsgVersion();
@@ -171,8 +171,12 @@ public class RegisterAppInterfaceDialog extends DialogFragment {
 
                         registerAppInterface.setDeviceInfo(getDeviceInfoFromView(layout));
 
+                        CheckBox createNewSessionView =
+                                (CheckBox) layout.findViewById(R.id.registerappinterface_new_session);
+
                         ((SyncProxyTester) getActivity())
-                                .onRegisterAppInterfaceDialogResult(registerAppInterface);
+                                .onRegisterAppInterfaceDialogResult(registerAppInterface,
+                                        createNewSessionView.isChecked());
                     }
                 })
                 .setNegativeButton("Cancel",

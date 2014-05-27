@@ -55,7 +55,6 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 
-
 public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 											ISyncEncodedSyncPDataListener,
 											ISyncSyncPDataListener,
@@ -68,7 +67,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * @param notification - Contains information about the HMI Level,
 	 * system context and audio streaming state.
 	 */
-	public void onOnHMIStatus(OnHMIStatus notification);
+	public void onOnHMIStatus(byte sessionId, OnHMIStatus notification);
 
 	/**
 	 * onProxyClosed has different functionality for the different models.
@@ -106,7 +105,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param notification - Contains information about the command chosen.
 	 */
-	public void onOnCommand(OnCommand notification);
+	public void onOnCommand(byte sessionId, OnCommand notification);
 	
 	/**
 	 * onAddCommandResponse() being called indicates that SYNC has responded to
@@ -114,7 +113,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onAddCommandResponse(AddCommandResponse response);
+	public void onAddCommandResponse(byte sessionId, AddCommandResponse response);
 	
 	/**
 	 * onAddSubMenuResponse() being called indicates that SYNC has responded to
@@ -122,7 +121,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onAddSubMenuResponse(AddSubMenuResponse response);
+	public void onAddSubMenuResponse(byte sessionId, AddSubMenuResponse response);
 	
 	/**
 	 * onCreateInteractionChoiceSetResponse() being called indicates that SYNC has
@@ -130,7 +129,8 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onCreateInteractionChoiceSetResponse(CreateInteractionChoiceSetResponse response);
+	public void onCreateInteractionChoiceSetResponse(byte sessionId,
+                                                     CreateInteractionChoiceSetResponse response);
 	
 	/**
 	 * onAlertResponse being called indicates that SYNC has
@@ -138,7 +138,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onAlertResponse(AlertResponse response);
+	public void onAlertResponse(byte sessionId, AlertResponse response);
 	
 	/**
 	 * onDeleteCommandResponse being called indicates that SYNC has
@@ -146,7 +146,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onDeleteCommandResponse(DeleteCommandResponse response);
+	public void onDeleteCommandResponse(byte sessionId, DeleteCommandResponse response);
 	
 	/**
 	 * onDeleteCommandResponse being called indicates that SYNC has
@@ -154,7 +154,8 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onDeleteInteractionChoiceSetResponse(DeleteInteractionChoiceSetResponse response);
+	public void onDeleteInteractionChoiceSetResponse(byte sessionId,
+                                                     DeleteInteractionChoiceSetResponse response);
 	
 	/**
 	 * onDeleteCommandResponse being called indicates that SYNC has
@@ -162,7 +163,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onDeleteSubMenuResponse(DeleteSubMenuResponse response);
+	public void onDeleteSubMenuResponse(byte sessionId, DeleteSubMenuResponse response);
 	
 	/**
 	 * onEncodedSyncPDataResponse being called indicates that SYNC has
@@ -170,9 +171,9 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onEncodedSyncPDataResponse(EncodedSyncPDataResponse response);
+	public void onEncodedSyncPDataResponse(byte sessionId, EncodedSyncPDataResponse response);
 
-	public void onSyncPDataResponse(SyncPDataResponse response);
+	public void onSyncPDataResponse(byte sessionId, SyncPDataResponse response);
 	
 	/**
 	 * onPerformInteractionResponse being called indicates that SYNC has
@@ -180,7 +181,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onPerformInteractionResponse(PerformInteractionResponse response);
+	public void onPerformInteractionResponse(byte sessionId, PerformInteractionResponse response);
 	
 	/**
 	 * onResetGlobalPropertiesResponse being called indicates that SYNC has
@@ -188,7 +189,8 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onResetGlobalPropertiesResponse(ResetGlobalPropertiesResponse response);
+	public void onResetGlobalPropertiesResponse(byte sessionId,
+                                                ResetGlobalPropertiesResponse response);
 	
 	/**
 	 * onSetGlobalPropertiesResponse being called indicates that SYNC has
@@ -196,7 +198,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onSetGlobalPropertiesResponse(SetGlobalPropertiesResponse response);
+	public void onSetGlobalPropertiesResponse(byte sessionId, SetGlobalPropertiesResponse response);
 	
 	/**
 	 * onSetMediaClockTimerResponse being called indicates that SYNC has
@@ -204,7 +206,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onSetMediaClockTimerResponse(SetMediaClockTimerResponse response);
+	public void onSetMediaClockTimerResponse(byte sessionId, SetMediaClockTimerResponse response);
 	
 	/**
 	 * onShowResponse being called indicates that SYNC has
@@ -212,7 +214,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onShowResponse(ShowResponse response);
+	public void onShowResponse(byte sessionId, ShowResponse response);
 	
 	/**
 	 * onSpeakResponse being called indicates that SYNC has
@@ -220,14 +222,14 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onSpeakResponse(SpeakResponse response);
+	public void onSpeakResponse(byte sessionId, SpeakResponse response);
 	
 	/**
 	 * onButtonEvent being called indicates that a button event has occurred. 
 	 * 
 	 * @param notification - Contains information about the notification sent from SYNC.
 	 */
-	public void onOnButtonEvent(OnButtonEvent notification);
+	public void onOnButtonEvent(byte sessionId, OnButtonEvent notification);
 
 	/**
 	 * onButtonPress being called indicates that SYNC has a button has 
@@ -235,7 +237,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param notification - Contains information about the notification sent from SYNC.
 	 */
-	public void onOnButtonPress(OnButtonPress notification);
+	public void onOnButtonPress(byte sessionId, OnButtonPress notification);
 	
 	/**
 	 * onSubscribeButtonResponse being called indicates that SYNC has
@@ -243,7 +245,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onSubscribeButtonResponse(SubscribeButtonResponse response);
+	public void onSubscribeButtonResponse(byte sessionId, SubscribeButtonResponse response);
 	
 	/**
 	 * onUnsubscribeButtonResponse being called indicates that SYNC has
@@ -251,7 +253,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param response - Contains information about the response sent from SYNC.
 	 */
-	public void onUnsubscribeButtonResponse(UnsubscribeButtonResponse response);
+	public void onUnsubscribeButtonResponse(byte sessionId, UnsubscribeButtonResponse response);
 
 	/**
 	 * onOnPermissionsChange being called indicates that your app permissions have 
@@ -260,81 +262,82 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	 * 
 	 * @param notification - Contains information about the changed permissions.
 	 */
-	public void onOnPermissionsChange(OnPermissionsChange notification);
+	public void onOnPermissionsChange(byte sessionId, OnPermissionsChange notification);
 	
-	public void onSubscribeVehicleDataResponse(SubscribeVehicleDataResponse response);
+	public void onSubscribeVehicleDataResponse(byte sessionId, SubscribeVehicleDataResponse response);
 	
-	public void onUnsubscribeVehicleDataResponse(UnsubscribeVehicleDataResponse response);
+	public void onUnsubscribeVehicleDataResponse(byte sessionId, UnsubscribeVehicleDataResponse response);
 	
-	public void onGetVehicleDataResponse(GetVehicleDataResponse response);
+	public void onGetVehicleDataResponse(byte sessionId, GetVehicleDataResponse response);
 	
-	public void onReadDIDResponse(ReadDIDResponse response);
+	public void onReadDIDResponse(byte sessionId, ReadDIDResponse response);
 	
-	public void onGetDTCsResponse(GetDTCsResponse response);
+	public void onGetDTCsResponse(byte sessionId, GetDTCsResponse response);
 	
-	public void onOnVehicleData(OnVehicleData notification);
+	public void onOnVehicleData(byte sessionId, OnVehicleData notification);
 	
-	public void onPerformAudioPassThruResponse(PerformAudioPassThruResponse response);
+	public void onPerformAudioPassThruResponse(byte sessionId, PerformAudioPassThruResponse response);
 	
-	public void onEndAudioPassThruResponse(EndAudioPassThruResponse response);
+	public void onEndAudioPassThruResponse(byte sessionId, EndAudioPassThruResponse response);
 	
-	public void onOnAudioPassThru(OnAudioPassThru notification);
+	public void onOnAudioPassThru(byte sessionId, OnAudioPassThru notification);
 
-	public void onPutFileResponse(PutFileResponse response);
+	public void onPutFileResponse(byte sessionId, PutFileResponse response);
 	
-	public void onDeleteFileResponse(DeleteFileResponse response);
+	public void onDeleteFileResponse(byte sessionId, DeleteFileResponse response);
 	
-	public void onListFilesResponse(ListFilesResponse response);
+	public void onListFilesResponse(byte sessionId, ListFilesResponse response);
 
-	public void onSetAppIconResponse(SetAppIconResponse response);
+	public void onSetAppIconResponse(byte sessionId, SetAppIconResponse response);
 	
-	public void onScrollableMessageResponse(ScrollableMessageResponse response);
+	public void onScrollableMessageResponse(byte sessionId, ScrollableMessageResponse response);
 
-	public void onChangeRegistrationResponse(ChangeRegistrationResponse response);
+	public void onChangeRegistrationResponse(byte sessionId, ChangeRegistrationResponse response);
 
-	public void onSetDisplayLayoutResponse(SetDisplayLayoutResponse response);
+	public void onSetDisplayLayoutResponse(byte sessionId, SetDisplayLayoutResponse response);
 	
-	public void onOnLanguageChange(OnLanguageChange notification);
+	public void onOnLanguageChange(byte sessionId, OnLanguageChange notification);
 	
-	public void onSliderResponse(SliderResponse response);
+	public void onSliderResponse(byte sessionId, SliderResponse response);
 
-	public void onAlertManeuverResponse(AlertManeuverResponse response);
+	public void onAlertManeuverResponse(byte sessionId, AlertManeuverResponse response);
 	
-	public void onShowConstantTBTResponse(ShowConstantTBTResponse response);
+	public void onShowConstantTBTResponse(byte sessionId, ShowConstantTBTResponse response);
 	
-	public void onUpdateTurnListResponse(UpdateTurnListResponse response);
+	public void onUpdateTurnListResponse(byte sessionId, UpdateTurnListResponse response);
 
-    public void onSystemRequestResponse(SystemRequestResponse response);
+    public void onSystemRequestResponse(byte sessionId, SystemRequestResponse response);
 
-    public void onMobileNaviStart();
+    public void onMobileNaviStart(String appId, byte sessionId);
 
-    public void onMobileNavAckReceived(int frameReceivedNumber);
+    public void onMobileNavAckReceived(String appId, byte sessionId, int frameReceivedNumber);
 
-    public void onOnTouchEvent(OnTouchEvent notification);
+    public void onOnTouchEvent(byte sessionId, OnTouchEvent notification);
 
-    public void onKeyboardInput(OnKeyboardInput msg);
+    public void onKeyboardInput(byte sessionId, OnKeyboardInput msg);
 
-    public void onOnSystemRequest(OnSystemRequest notification);
+    public void onOnSystemRequest(byte sessionId, OnSystemRequest notification);
 
-    void onRegisterAppRequest(RegisterAppInterface msg);
+    public void onRegisterAppRequest(byte sessionId, RegisterAppInterface msg);
 
-    public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg);
+    public void onAppUnregisteredAfterLanguageChange(byte sessionId, OnLanguageChange msg);
 
-    public void onAppUnregisteredReason(AppInterfaceUnregisteredReason reason);
+    public void onAppUnregisteredReason(byte sessionId, AppInterfaceUnregisteredReason reason);
 
-    public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID);
+    public void onProtocolServiceEnded(ServiceType serviceType, byte sessionId);
+
+    public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId);
 
     /**
-     * This callback is to inform SPT that session i going to be started
-     * @param sessionID Id of the session to start with
+     * This callback is to inform SPT that session is going to be started
      */
-    public void onStartSession(byte sessionID);
+    public void onStartSession();
 
-    public void onSessionStarted(byte sessionID, String correlationID);
+    public void onSessionStarted(String appId, byte sessionId);
 
-    public void onAudioServiceStart();
+    public void onAudioServiceStart(String appId, byte sessionId);
 
-    public void onStartServiceNackReceived(ServiceType serviceType);
+    public void onStartServiceNackReceived(String appId, byte sessionId, ServiceType serviceType);
 
     /**
      * Notification containing an updated hashID which can be used over connection cycles
@@ -342,9 +345,10 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
      * Sent after initial registration and subsequently after any change in the calculated hash
      * of all persisted app data.
      *
+     * @param sessionId Id of the Session for the particular Notification
      * @param onHashChange {@link com.ford.syncV4.proxy.rpc.OnHashChange} notification
      */
-    public void onHashChange(OnHashChange onHashChange);
+    public void onHashChange(byte sessionId, OnHashChange onHashChange);
 
     /**
      * Provide a callback to listener in case of USB problem
@@ -352,7 +356,8 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
      */
     public void onUSBNoSuchDeviceException();
 
-    public void onDiagnosticMessageResponse(DiagnosticMessageResponse diagnosticMessageResponse);
+    public void onDiagnosticMessageResponse(byte sessionId,
+                                            DiagnosticMessageResponse diagnosticMessageResponse);
 
     /**
      * Provide a callback (in most cases for the test purposes) when
@@ -360,5 +365,5 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
      *
      * @param putFile {@link com.ford.syncV4.proxy.rpc.PutFile}
      */
-    public void onPutFileRequest(PutFile putFile);
+    public void onPutFileRequest(byte sessionId, PutFile putFile);
 }

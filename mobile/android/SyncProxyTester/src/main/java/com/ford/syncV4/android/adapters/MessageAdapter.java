@@ -65,7 +65,7 @@ public class MessageAdapter extends ArrayAdapter<Object> {
 
             lblBottom.setVisibility(View.VISIBLE);
             lblBottom.setText(null);
-            lblTop.setTextColor(getContext().getResources().getColor(R.color.log_regular_text_color));
+            lblTop.setTextColor(getContext().getResources().getColor(R.color.app_regular_text_color));
             lblTop.setText(null);
         }
 

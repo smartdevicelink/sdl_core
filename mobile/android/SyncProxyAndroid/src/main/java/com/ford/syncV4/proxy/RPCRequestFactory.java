@@ -424,13 +424,17 @@ public class RPCRequestFactory {
 		putFile.setBulkData(fileData);
 		return putFile;
 	}
-	
+
+    public static RegisterAppInterface buildRegisterAppInterface() {
+        return new RegisterAppInterface();
+    }
+
 	public static RegisterAppInterface buildRegisterAppInterface(
 			SyncMsgVersion syncMsgVersion, Object appName, Vector<TTSChunk> ttsName,
             Object ngnMediaScreenAppName, Vector<String> vrSynonyms, Object isMediaApp,
 			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
             Object appID, Integer correlationID, String hashId, DeviceInfo deviceInfo) {
-		RegisterAppInterface msg = new RegisterAppInterface();
+		RegisterAppInterface msg = buildRegisterAppInterface();
 		
 		if (correlationID == null) {
 			correlationID = 1;
