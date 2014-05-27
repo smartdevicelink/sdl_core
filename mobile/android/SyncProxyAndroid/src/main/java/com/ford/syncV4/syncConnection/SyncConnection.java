@@ -176,20 +176,18 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         return _protocol;
     }
 
-    public void setHeartbeatMonitor(byte sessionId, int heartBeatInterval, boolean heartBeatAck) {
-        if (heartbeatMonitors.containsKey(sessionId)) {
-            heartbeatMonitors.remove(sessionId);
+    public void setHeartbeatMonitor(IHeartbeatMonitor heartbeatMonitor) {
+        if (heartbeatMonitors.containsKey(heartbeatMonitor.getSessionId())) {
+            heartbeatMonitors.remove(heartbeatMonitor.getSessionId());
         }
-        final HeartbeatMonitor heartbeatMonitor = new HeartbeatMonitor(sessionId);
-        heartbeatMonitor.setInterval(heartBeatInterval);
-        heartbeatMonitor.isSendHeartbeatAck(heartBeatAck);
         heartbeatMonitor.setListener(this);
 
-        Logger.d(CLASS_NAME + " Set HB monitor, sesId:" + sessionId);
-        heartbeatMonitors.put(sessionId, heartbeatMonitor);
+        Logger.d(CLASS_NAME + " Set HB monitor, sesId:" + heartbeatMonitor.getSessionId());
+        heartbeatMonitors.put(heartbeatMonitor.getSessionId(), heartbeatMonitor);
+    }
 
-        //mHeartbeatMonitor = heartbeatMonitor;
-        //mHeartbeatMonitor.setListener(this);
+    protected IHeartbeatMonitor getHeartbeatMonitor(byte sessionId) {
+        return heartbeatMonitors.get(sessionId);
     }
 
     public void closeConnection(byte rpcSessionID, boolean keepConnection) {
@@ -250,6 +248,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     private void stopHeartbeatMonitor(byte sessionId) {
         IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        Logger.d(CLASS_NAME + " Stop HeartBeat, sesId:" + sessionId + " " + heartbeatMonitor);
         if (heartbeatMonitor != null) {
             Logger.d(CLASS_NAME + " Stop HeartBeat, sesId:" + sessionId);
             heartbeatMonitor.stop();
@@ -615,10 +614,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         if (heartbeatMonitor != null) {
             heartbeatMonitor.notifyTransportOutputActivity();
         }
-
-        /*if (mHeartbeatMonitor != null) {
-            mHeartbeatMonitor.notifyTransportOutputActivity();
-        }*/
     }
 
     @Override

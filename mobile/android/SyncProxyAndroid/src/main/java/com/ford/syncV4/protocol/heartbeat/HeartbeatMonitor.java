@@ -3,6 +3,7 @@ package com.ford.syncV4.protocol.heartbeat;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.logger.Logger;
 
 /**
@@ -17,7 +18,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
     private final Object HeartbeatThreadHandler_Lock = new Object();
     private final Object Listener_Lock = new Object();
     //
-    private int interval;
+    private int interval = 5000;
     private boolean isHeartbeatAck = true;
     private IHeartbeatMonitorListener listener;
     private boolean ackReceived;
@@ -29,7 +30,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
     /**
      * Identifier of the Session to which this particular HB belongs
      */
-    private byte mSessionId;
+    private byte mSessionId = Session.DEFAULT_SESSION_ID;
 
     public HeartbeatMonitor(byte mSessionId) {
         this.mSessionId = mSessionId;

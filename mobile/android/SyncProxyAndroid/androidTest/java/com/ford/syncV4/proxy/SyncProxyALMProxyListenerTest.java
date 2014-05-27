@@ -14,6 +14,7 @@ import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
+import com.ford.syncV4.session.Session;
 
 import org.json.JSONException;
 import org.mockito.ArgumentCaptor;
@@ -59,13 +60,14 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
 
         ArgumentCaptor<SystemRequestResponse> responseCaptor =
                 ArgumentCaptor.forClass(SystemRequestResponse.class);
+        ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         verify(proxyListenerMock,
                 timeout(CALLBACK_WAIT_TIMEOUT)).onSystemRequestResponse(
-                ProtocolConstants.PROTOCOL_VERSION_TWO,
+                sessionIdCaptor.capture(),
                 responseCaptor.capture());
         assertThat(responseCaptor.getValue().getSuccess(), is(true));
-        assertThat(responseCaptor.getValue().getResultCode(),
-                is(Result.SUCCESS));
+        assertThat(responseCaptor.getValue().getResultCode(), is(Result.SUCCESS));
+        assertEquals(Session.DEFAULT_SESSION_ID, sessionIdCaptor.getValue().byteValue());
     }
 
     public void testOnOnSystemRequestShouldBeCalledOnNotification()
@@ -90,9 +92,10 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
 
         ArgumentCaptor<OnSystemRequest> notificationCaptor =
                 ArgumentCaptor.forClass(OnSystemRequest.class);
+        ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         verify(proxyListenerMock,
                 timeout(CALLBACK_WAIT_TIMEOUT)).onOnSystemRequest(
-                ProtocolConstants.PROTOCOL_VERSION_TWO,
+                sessionIdCaptor.capture(),
                 notificationCaptor.capture());
         final OnSystemRequest notification = notificationCaptor.getValue();
         assertThat(notification.getRequestType(), is(requestType));
@@ -100,6 +103,7 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
         assertThat(notification.getFileType(), is(fileType));
         assertThat(notification.getOffset(), is(offset));
         assertThat(notification.getLength(), is(length));
+        assertEquals(Session.DEFAULT_SESSION_ID, sessionIdCaptor.getValue().byteValue());
     }
 
     public void testOnHashChangeShouldBeCalledOnNotification() throws SyncException,
@@ -113,10 +117,12 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
                 params, ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
 
         ArgumentCaptor<OnHashChange> notificationCaptor = ArgumentCaptor.forClass(OnHashChange.class);
+        ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         verify(proxyListenerMock, timeout(CALLBACK_WAIT_TIMEOUT)).onHashChange(
-                ProtocolConstants.PROTOCOL_VERSION_TWO, notificationCaptor.capture());
+                sessionIdCaptor.capture(), notificationCaptor.capture());
 
         final OnHashChange notification = notificationCaptor.getValue();
         assertThat(notification.getHashID(), is(hashId));
+        assertEquals(Session.DEFAULT_SESSION_ID, sessionIdCaptor.getValue().byteValue());
     }
 }

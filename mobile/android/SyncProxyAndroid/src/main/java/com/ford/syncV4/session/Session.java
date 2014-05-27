@@ -18,15 +18,6 @@ public class Session {
     public static final byte DEFAULT_SESSION_ID = 0;
     public static final byte UNDEFINED_SESSION_ID = Byte.MIN_VALUE;
 
-    public static Session createSession(ServiceType serviceType, byte sessionId) {
-        Session session = new Session();
-        session.setSessionId(sessionId);
-        Service service = new Service();
-        service.setServiceType(serviceType);
-        session.addService(service);
-        return session;
-    }
-
     private static final String CLASS_NAME = Session.class.getSimpleName();
 
     /**
@@ -58,7 +49,7 @@ public class Session {
      * Add new Session Id associated with a provided AppId
      * @param appId AppId
      */
-    public void addSessionId(String appId) {
+    public void putDefaultSessionIdToAppId(String appId) {
         Logger.d("Add sessionId:" + DEFAULT_SESSION_ID + " to AppId:" + appId);
         sessionIds.put(appId, DEFAULT_SESSION_ID);
     }
@@ -101,6 +92,7 @@ public class Session {
         return sessionIds.size();
     }
 
+    @Deprecated
     public void setSessionId(byte sessionId) {
         this.sessionId = sessionId;
     }
@@ -124,6 +116,17 @@ public class Session {
 
     public List<Service> getServicesList() {
         return servicesList;
+    }
+
+    public Service getServiceBySessionId(byte sessionId, ServiceType serviceType) {
+        for (Service service : servicesList) {
+            if (service.getSessionId() == sessionId && service.getServiceType() == serviceType) {
+                Logger.i(CLASS_NAME + " GetService '" + serviceType + " ' BySessionId:" + sessionId);
+                return service;
+            }
+        }
+        Logger.w(CLASS_NAME + " getServiceBySessionId return null");
+        return null;
     }
 
     public boolean hasService(String appId, ServiceType serviceType) {
@@ -174,11 +177,13 @@ public class Session {
         byte sessionId = getSessionIdByAppId(appId);
         List<Service> tobeRemoved = new ArrayList<Service>();
         for (Service service : servicesList) {
+            Logger.i(CLASS_NAME + " Stop session sesId:" + service.getSessionId() + " " + sessionId);
             if (service.getSessionId() == sessionId) {
                 tobeRemoved.add(service);
             }
         }
         for (Service service: tobeRemoved) {
+            Logger.i(CLASS_NAME + " Stop session remove:" + service);
             servicesList.remove(service);
         }
         tobeRemoved.clear();

@@ -289,7 +289,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         ArgumentCaptor<ServiceType> sessionTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         proxyALM.handleEndServiceAck(ServiceType.RPC, SESSION_ID);
-        verify(listenerALM).onProtocolServiceEnded(sessionTypeCaptor.capture(),
+        verify(listenerALM).onProtocolServiceEndedAck(sessionTypeCaptor.capture(),
                 sessionIdCaptor.capture());
         assertEquals(ServiceType.RPC, sessionTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());

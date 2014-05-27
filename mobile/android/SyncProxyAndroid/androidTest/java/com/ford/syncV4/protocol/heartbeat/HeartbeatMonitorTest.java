@@ -3,6 +3,7 @@ package com.ford.syncV4.protocol.heartbeat;
 import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.proxy.rpc.TestCommon;
+import com.ford.syncV4.session.SessionTest;
 
 import org.mockito.Matchers;
 import org.mockito.Mockito;
@@ -20,6 +21,7 @@ import static org.mockito.Mockito.verify;
  * Created by enikolsky on 2013-12-26.
  */
 public class HeartbeatMonitorTest extends InstrumentationTestCase {
+
     private static final int MAX_TIMER_DRIFT = 20;
     private static final int HEARTBEAT_TEST_INTERVAL = 30;
     private IHeartbeatMonitorListener listenerMock;
@@ -31,7 +33,7 @@ public class HeartbeatMonitorTest extends InstrumentationTestCase {
         TestCommon.setupMocking(this);
 
         listenerMock = Mockito.mock(IHeartbeatMonitorListener.class);
-        heartbeatMonitor = new HeartbeatMonitor();
+        heartbeatMonitor = new HeartbeatMonitor(SessionTest.SESSION_ID);
     }
 
     @Override

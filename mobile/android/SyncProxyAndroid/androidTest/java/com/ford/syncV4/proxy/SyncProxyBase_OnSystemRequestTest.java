@@ -125,7 +125,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onFilesDownloadRequest(Session.DEFAULT_SESSION_ID,
+        verify(handlerMock, times(1)).onFilesDownloadRequest(eq(Session.DEFAULT_SESSION_ID),
                 notNull(ISystemRequestProxy.class), eq(urls), eq(fileType));
     }
 
@@ -145,7 +145,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, never()).onFilesDownloadRequest(Session.DEFAULT_SESSION_ID,
+        verify(handlerMock, never()).onFilesDownloadRequest(eq(Session.DEFAULT_SESSION_ID),
                 any(ISystemRequestProxy.class), anyListOf(String.class),
                 any(FileType.class));
     }
@@ -166,7 +166,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onFilesDownloadRequest(Session.DEFAULT_SESSION_ID,
+        verify(handlerMock, times(1)).onFilesDownloadRequest(eq(Session.DEFAULT_SESSION_ID),
                 notNull(ISystemRequestProxy.class), eq(urls),
                 isNull(FileType.class));
     }
@@ -262,7 +262,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onFileResumeRequest(Session.DEFAULT_SESSION_ID,
+        verify(handlerMock, times(1)).onFileResumeRequest(eq(Session.DEFAULT_SESSION_ID),
                 notNull(ISystemRequestProxy.class), eq(filename), eq(offset),
                 eq(length), eq(fileType));
     }
@@ -287,7 +287,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, never()).onFileResumeRequest(Session.DEFAULT_SESSION_ID,
+        verify(handlerMock, never()).onFileResumeRequest(eq(Session.DEFAULT_SESSION_ID),
                 any(ISystemRequestProxy.class), anyString(), anyInt(), anyInt(),
                 any(FileType.class));
     }
@@ -313,7 +313,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, never()).onFileResumeRequest(Session.DEFAULT_SESSION_ID,
+        verify(handlerMock, never()).onFileResumeRequest(eq(Session.DEFAULT_SESSION_ID),
                 any(ISystemRequestProxy.class), anyString(), anyInt(), anyInt(),
                 any(FileType.class));
     }
@@ -339,7 +339,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, never()).onFileResumeRequest(Session.DEFAULT_SESSION_ID,
+        verify(handlerMock, never()).onFileResumeRequest(eq(Session.DEFAULT_SESSION_ID),
                 any(ISystemRequestProxy.class), anyString(), anyInt(), anyInt(),
                 any(FileType.class));
     }
@@ -365,7 +365,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onFileResumeRequest(Session.DEFAULT_SESSION_ID,
+        verify(handlerMock, times(1)).onFileResumeRequest(eq(Session.DEFAULT_SESSION_ID),
                 notNull(ISystemRequestProxy.class), eq(filename), eq(offset),
                 eq(length), isNull(FileType.class));
     }
@@ -473,7 +473,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onFileResumeRequest(Session.DEFAULT_SESSION_ID,
+        verify(handlerMock, times(1)).onFileResumeRequest(eq(Session.DEFAULT_SESSION_ID),
                 notNull(ISystemRequestProxy.class), eq(filename0), eq(offset),
                 eq(length), eq(fileType));
     }
@@ -549,7 +549,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(Session.DEFAULT_SESSION_ID,
+        verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(eq(Session.DEFAULT_SESSION_ID),
                 notNull(ISystemRequestProxy.class), eq(data), eq(fileType), eq(requestType));
     }
 
@@ -572,7 +572,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         Thread.sleep(WAIT_TIMEOUT);
 
-        verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(Session.DEFAULT_SESSION_ID,
+        verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(eq(Session.DEFAULT_SESSION_ID),
                 notNull(ISystemRequestProxy.class), eq(data), eq(fileType), eq(requestType));
     }
 

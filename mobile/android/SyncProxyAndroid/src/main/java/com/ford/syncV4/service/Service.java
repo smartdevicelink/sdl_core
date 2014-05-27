@@ -1,6 +1,7 @@
 package com.ford.syncV4.service;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
 
 /**
  * Created by Andrew Batutin on 1/21/14
@@ -8,8 +9,13 @@ import com.ford.syncV4.protocol.enums.ServiceType;
  */
 public class Service {
 
-    private byte sessionId;
-    private ServiceType serviceType;
+    private static final String CLASS_NAME = Service.class.getSimpleName();
+
+    private byte sessionId = Session.UNDEFINED_SESSION_ID;
+    /**
+     * By default a Service is RPC type
+     */
+    private ServiceType serviceType = ServiceType.RPC;
 
     public void setSessionId(byte value) {
         sessionId = value;
@@ -20,6 +26,9 @@ public class Service {
     }
 
     public void setServiceType(ServiceType value) {
+        if (value == null) {
+            throw new NullPointerException(CLASS_NAME + " set Service can not be null");
+        }
         serviceType = value;
     }
 
@@ -32,22 +41,21 @@ public class Service {
         return "Service {sessionId:" + sessionId + ", serviceType:" + serviceType + "}";
     }
 
-    /*@Override
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Service service = (Service) o;
+        if (o instanceof Service) {
+            Service service = (Service) o;
+            if (sessionId == service.sessionId && serviceType.equals(service.serviceType))
+                return true;
+        }
 
-        if (serviceType != null ? !serviceType.equals(service.serviceType) : service.serviceType != null)
-            return false;
-        if (sessionId != null ? !sessionId.equals(service.sessionId) : service.sessionId != null)
-            return false;
-
-        return true;
+        return false;
     }
 
-    @Override
+    /*@Override
     public int hashCode() {
         int result = sessionId != null ? sessionId.hashCode() : 0;
         result = 31 * result + (serviceType != null ? serviceType.hashCode() : 0);

@@ -18,8 +18,6 @@ import java.util.Hashtable;
 
 public class WiProProtocol extends AbstractProtocol {
 
-    Hashtable<Byte, Integer> hashID = new Hashtable<Byte, Integer>();
-
     protected Hashtable<Byte, Object> _messageLocks = new Hashtable<Byte, Object>();
 
     private static final String CLASS_NAME = WiProProtocol.class.getSimpleName();
@@ -31,6 +29,8 @@ public class WiProProtocol extends AbstractProtocol {
 
     private final SendProtocolMessageProcessor sendProtocolMessageProcessor =
             new SendProtocolMessageProcessor();
+
+    private final Hashtable<Byte, Integer> sessionsHashIds = new Hashtable<Byte, Integer>();
 
     private ProtocolFrameHeader mCurrentHeader = null;
     // NOTE: To date, not implemented on SYNC
@@ -102,8 +102,9 @@ public class WiProProtocol extends AbstractProtocol {
 
     @Override
     public void EndProtocolService(ServiceType serviceType, byte sessionId) {
-        Logger.d("End Service hashId:" + hashID.get(sessionId) + " sesId:" + sessionId);
-        sendProtocolMessageProcessor.processEndService(serviceType, hashID.get(sessionId),
+        int hasId = getHashIdBySessionId(sessionId);
+        Logger.d("End Service hashId:" + hasId + " sesId:" + sessionId);
+        sendProtocolMessageProcessor.processEndService(serviceType, hasId,
                 getProtocolVersion(), sessionId);
     }
 
@@ -375,9 +376,9 @@ public class WiProProtocol extends AbstractProtocol {
                     messageLock = new Object();
                     _messageLocks.put(sessionId, messageLock);
                 }
-                //hashID = BitConverter.intFromByteArray(data, 0);
+                //sessionsHashIds = BitConverter.intFromByteArray(data, 0);
                 if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-                    hashID.put(sessionId, header.getMessageID());
+                    sessionsHashIds.put(sessionId, header.getMessageID());
                 }
                 inspectStartServiceACKHeader(header);
             } else if (frameData == FrameDataControlFrameType.StartServiceNACK.getValue()) {
@@ -456,7 +457,7 @@ public class WiProProtocol extends AbstractProtocol {
 
     private void handleEndServiceFrame(byte sessionId, ProtocolFrameHeader header) {
         if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-            if (hashID.get(sessionId) == header.getMessageID()) {
+            if (getHashIdBySessionId(sessionId) == header.getMessageID()) {
                 handleProtocolServiceEnded(header.getServiceType(), header.getSessionID());
             }
         } else {
@@ -466,7 +467,7 @@ public class WiProProtocol extends AbstractProtocol {
 
     private void handleEndServiceAckFrame(byte sessionId, ProtocolFrameHeader header) {
         if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-            if (hashID.get(sessionId) == header.getMessageID()) {
+            if (getHashIdBySessionId(sessionId) == header.getMessageID()) {
                 handleProtocolServiceEndedAck(header.getServiceType(), header.getSessionID());
             }
         } else {
@@ -476,5 +477,18 @@ public class WiProProtocol extends AbstractProtocol {
 
     private void handleStartServiceNackFrame(byte sessionId, ServiceType serviceType) {
         _protocolListener.onStartServiceNackReceived(sessionId, serviceType);
+    }
+
+    /**
+     * Return Hash Id of the Session. This method declared as public for the Test purposes
+     * @param sessionId Id of the Session
+     * @return Hash Id
+     */
+    public int getHashIdBySessionId(byte sessionId) {
+        Integer result = sessionsHashIds.get(sessionId);
+        if (result == null) {
+            result = 0;
+        }
+        return result;
     }
 }

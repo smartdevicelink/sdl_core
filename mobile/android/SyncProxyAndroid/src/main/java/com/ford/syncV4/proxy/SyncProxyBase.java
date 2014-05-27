@@ -17,6 +17,7 @@ import com.ford.syncV4.net.SyncPDataSender;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.protocol.heartbeat.HeartbeatBuilder;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
 import com.ford.syncV4.proxy.callbacks.OnProxyClosed;
@@ -1720,7 +1721,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         // Throw exception if RPCRequest is sent when SYNC is unavailable
-        if (!mAppInterfaceRegistered.get(mActiveAppId) &&
+        Boolean isAppInterfaceRegistered = mAppInterfaceRegistered.get(mActiveAppId);
+        if (isAppInterfaceRegistered == null) {
+            isAppInterfaceRegistered = false;
+        }
+        if (!isAppInterfaceRegistered &&
                 !request.getFunctionName().equals(Names.RegisterAppInterface)) {
             if (!allowExtraTesting()) {
                 Logger.w("Application attempted to send an RPCRequest (non-registerAppInterface), " +
@@ -1784,6 +1789,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private void startProtocolSession(final byte sessionId) {
         syncSession.setSessionId(sessionId);
         final String associatedAppId = syncSession.updateSessionId(sessionId);
+        Logger.d("Start Protocol session appId:" + associatedAppId + " " + sessionId + " " + syncSession.hasService(sessionId, ServiceType.RPC));
         if (!syncSession.hasService(sessionId, ServiceType.RPC)) {
             Service service = new Service();
             service.setServiceType(ServiceType.RPC);
@@ -2974,6 +2980,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private void endSession(byte sessionId) {
         String appId = syncSession.getAppIdBySessionId(sessionId);
         stopAllServicesByAppId(appId);
+        Logger.d(LOG_TAG + " End Session, sesId'sN:" + syncSession.getSessionIdsNumber());
         if (syncSession.getSessionIdsNumber() == 1) {
             closeSyncConnection(sessionId, true);
         } else {
@@ -2991,7 +2998,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void initializeSession() {
         // Initialize a start session procedure
         Logger.d(LOG_TAG, "Init session, id:" + mActiveAppId);
-        syncSession.addSessionId(mActiveAppId);
+        syncSession.putDefaultSessionIdToAppId(mActiveAppId);
         mSyncConnection.initialiseSession(Session.DEFAULT_SESSION_ID);
     }
 
@@ -3100,7 +3107,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             startProtocolSession(sessionId);
 
-            mSyncConnection.setHeartbeatMonitor(sessionId, heartBeatInterval, heartBeatAck);
+            mSyncConnection.setHeartbeatMonitor(
+                    HeartbeatBuilder.buildHeartbeatMonitor(sessionId, heartBeatInterval,
+                            heartBeatAck));
             mSyncConnection.startHeartbeatTimer(sessionId);
         }
 
@@ -3111,8 +3120,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void
-        onProtocolServiceEnded(ServiceType serviceType, byte sessionId) {
+        public void onProtocolServiceEnded(ServiceType serviceType, byte sessionId) {
             Logger.i("EndService received serType:" + serviceType.getName() + " sesId:" + sessionId);
             handleEndService(serviceType, sessionId);
         }
