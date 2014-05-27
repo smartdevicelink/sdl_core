@@ -772,10 +772,9 @@ void ApplicationManagerImpl::OnApplicationListUpdated(
   smart_objects::SmartObject& applications =
       (*request)[strings::msg_params][strings::applications];
 
-  std::list<uint32_t>::iterator it;
-  it = applications_ids.begin();
-  uint32_t i = 0;
-  for (; it != applications_ids.end(); ++it) {
+  uint32_t app_count = 0;
+  for (std::list<uint32_t>::iterator it = applications_ids.begin();
+       it != applications_ids.end(); ++it) {
     ApplicationSharedPtr app = application(*it);
 
     if (!app.valid()) {
@@ -788,12 +787,12 @@ void ApplicationManagerImpl::OnApplicationListUpdated(
       LOG4CXX_ERROR(logger_, "can't CreateHMIApplicationStruct ', id = " << *it);
       continue;
     }
-    applications[i++] = hmi_application;
+    applications[app_count++] = hmi_application;
   }
-  if (i > 0) {
+  if (app_count > 0) {
     ManageHMICommand(request);
   } else {
-    LOG4CXX_INFO(logger_, "Empty applications list");
+    LOG4CXX_WARN(logger_, "Empty applications list");
   }
 }
 
