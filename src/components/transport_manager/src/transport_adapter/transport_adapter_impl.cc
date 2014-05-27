@@ -650,7 +650,7 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
         break;
     }
   }
-  return errors_occured ? OK : FAIL;
+  return errors_occured ? FAIL : OK;
 }
 
 void TransportAdapterImpl::RemoveDevice(const DeviceUID& device_handle) {
