@@ -1,0 +1,13 @@
+Common code 1
+#ifdef GOD_EXIST
+God Exist! Common code 2 
+#endif 
+Common code 3
+Zombie code
+Common code 4
+if (usa != NULL) {
+	delete usa;
+	usa = NULL;
+}
+
+Some othe line
