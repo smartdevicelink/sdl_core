@@ -764,8 +764,6 @@ void ApplicationManagerImpl::OnApplicationListUpdated(
     return;
   }
 
-  std::list<uint32_t>::iterator it;
-  it = applications_ids.begin();
   smart_objects::SmartObject* request = MessageHelper::CreateModuleInfoSO(
                                           hmi_apis::FunctionID::BasicCommunication_UpdateAppList);
   (*request)[strings::msg_params][strings::applications] =
@@ -773,6 +771,9 @@ void ApplicationManagerImpl::OnApplicationListUpdated(
 
   smart_objects::SmartObject& applications =
       (*request)[strings::msg_params][strings::applications];
+
+  std::list<uint32_t>::iterator it;
+  it = applications_ids.begin();
   uint32_t i = 0;
   for (; it != applications_ids.end(); ++it) {
     ApplicationSharedPtr app = application(*it);
@@ -789,7 +790,11 @@ void ApplicationManagerImpl::OnApplicationListUpdated(
     }
     applications[i++] = hmi_application;
   }
-  ManageHMICommand(request);
+  if (i > 0) {
+    ManageHMICommand(request);
+  } else {
+    LOG4CXX_INFO(logger_, "Empty applications list");
+  }
 }
 
 void ApplicationManagerImpl::RemoveDevice(
