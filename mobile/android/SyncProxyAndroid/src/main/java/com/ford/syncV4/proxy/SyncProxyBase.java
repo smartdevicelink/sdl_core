@@ -126,7 +126,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * negotiated with the Sync.
      */
     static final int HEARTBEAT_INTERVAL = 5000;
-    
+
     /** Delay between proxy disconnect (e.g., transport error) and another proxy
      * reconnect attempt.
      */

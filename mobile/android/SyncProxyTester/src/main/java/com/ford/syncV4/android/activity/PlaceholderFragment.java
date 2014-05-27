@@ -902,7 +902,7 @@ public class PlaceholderFragment extends Fragment {
     }
 
     private void audioButtonListener() {
-        //mBoundProxyService.playPauseAnnoyingRepetitiveAudio();
+        ((SyncProxyTester) getActivity()).mBoundProxyService.playPauseAnnoyingRepetitiveAudio();
     }
 
     private void sendMessageListener() {

@@ -10,7 +10,6 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitorListener;
 import com.ford.syncV4.proxy.constants.Names;
@@ -70,6 +69,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     static final Object END_PROTOCOL_SERVICE_AUDIO_LOCK = new Object();
     static final Object END_PROTOCOL_SERVICE_VIDEO_LOCK = new Object();
     static final Object END_PROTOCOL_SERVICE_RPC_LOCK = new Object();
+    static final Object START_PROTOCOL_SESSION_LOCK = new Object();
+    static final Object START_SERVICE_LOCK = new Object();
 
     private boolean mIsInit = false;
     private Session mSyncSession;
@@ -396,6 +397,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 return;
             }
             _protocol.StartProtocolService(ServiceType.Mobile_Nav, sessionId);
+            synchronized (START_SERVICE_LOCK){
+                try {
+                    START_SERVICE_LOCK.wait(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -408,6 +416,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 return;
             }
             _protocol.StartProtocolService(ServiceType.Audio_Service, sessionId);
+            synchronized (START_SERVICE_LOCK){
+                try {
+                    START_SERVICE_LOCK.wait(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -466,6 +481,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             }
             Logger.d(CLASS_NAME + " StartProtocolSession, id:" + sessionId);
             _protocol.StartProtocolSession(sessionId);
+
+            synchronized (START_PROTOCOL_SESSION_LOCK) {
+                try {
+                    START_PROTOCOL_SESSION_LOCK.wait(1000);
+                } catch (InterruptedException e) {
+                }
+            }
         }
     }
 
@@ -543,6 +565,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void onProtocolSessionStarted(byte sessionId, byte version) {
         mConnectionListener.onProtocolSessionStarted(sessionId, version);
+        synchronized (START_PROTOCOL_SESSION_LOCK) {
+            START_PROTOCOL_SESSION_LOCK.notify();
+        }
     }
 
     @Override
@@ -639,8 +664,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version) {
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version){
         mConnectionListener.onProtocolServiceStarted(serviceType, sessionID, version);
+        synchronized (START_SERVICE_LOCK){
+            START_SERVICE_LOCK.notify();
+        }
     }
 
     @Override
