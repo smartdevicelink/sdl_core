@@ -351,6 +351,12 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
   }
 }
 
+void TransportAdapterImpl::SearchApplicationsDone(const DeviceSptr& device) {
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
+       it != listeners_.end(); ++it)
+    (*it)->OnApplicationListUpdated(this, device->unique_device_id());
+}
+
 void TransportAdapterImpl::SearchDeviceFailed(const SearchDeviceError& error) {
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it)
