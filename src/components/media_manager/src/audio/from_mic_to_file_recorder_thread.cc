@@ -97,7 +97,7 @@ void FromMicToFileRecorderThread::threadMain() {
   initArgs();
 
   GstElement* pipeline;
-  GstElement* alsasrc, *panorama, *wavenc, *filesink;
+  GstElement* alsasrc, *wavenc, *filesink;
   GstBus* bus;
 
   const gchar* device = "hw:0,0";
@@ -158,26 +158,23 @@ void FromMicToFileRecorderThread::threadMain() {
 
   // Create all of the elements to be added to the pipeline
   alsasrc = gst_element_factory_make("alsasrc", "alsasrc0");
-  panorama = gst_element_factory_make("audiopanorama", "panorama0");
   wavenc = gst_element_factory_make("wavenc", "wavenc0");
   filesink = gst_element_factory_make("filesink", "filesink0");
 
   // Assert that all the elements were created
-  if (!alsasrc || !panorama || !wavenc || !filesink) {
+  if (!alsasrc || !wavenc || !filesink) {
     g_error("Failed creating one or more of the pipeline elements.\n");
   }
 
   // Set input and output destinations
   g_object_set(G_OBJECT(alsasrc), "device", device, NULL);
-  g_object_set(G_OBJECT(panorama), "panorama", 0.5, NULL);
   g_object_set(G_OBJECT(filesink), "location", outfile, NULL);
 
   // Add the elements to the pipeline
-  gst_bin_add_many(GST_BIN(pipeline), alsasrc,
-                   panorama, wavenc, filesink, NULL);
+  gst_bin_add_many(GST_BIN(pipeline), alsasrc, wavenc, filesink, NULL);
 
   // Link the elements
-  gst_element_link_many(alsasrc, panorama, wavenc, filesink, NULL);
+  gst_element_link_many(alsasrc, wavenc, filesink, NULL);
 
   gst_element_set_state(pipeline, GST_STATE_PLAYING);
 
