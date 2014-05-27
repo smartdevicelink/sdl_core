@@ -2,7 +2,6 @@ package com.ford.syncV4.syncConnection;
 
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.session.Session;
 
 public interface ISyncConnectionListener {
 
@@ -19,18 +18,19 @@ public interface ISyncConnectionListener {
 	
 	public void onProtocolMessageReceived(ProtocolMessage msg);
 	
-	public void onProtocolSessionStarted(Session session, byte version, String correlationID);
+	public void onProtocolSessionStarted(byte sessionId, byte version);
 	
-	public void onProtocolServiceEnded(ServiceType serviceType,
-                                       byte sessionID, String correlationID);
+	public void onProtocolServiceEnded(ServiceType serviceType, byte sessionId);
+
+    public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId);
 	
 	public void onProtocolError(String info, Throwable e);
 
-    public void onMobileNavAckReceived(int frameReceivedNumber);
+    public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber);
 
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID);
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version);
 
-    public void onStartServiceNackReceived(ServiceType serviceType);
+    public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType);
 
     /**
      * Sends {@link com.ford.syncV4.protocol.ProtocolMessage} to the

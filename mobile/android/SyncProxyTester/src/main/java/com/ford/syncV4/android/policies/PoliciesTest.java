@@ -164,7 +164,7 @@ public class PoliciesTest {
 			 */
             if (sProxyService != null) {
                 //sendRPCRequestPrivate(encodedSyncPDataRequest);
-                sProxyService.syncProxySendRPCRequest(encodedSyncPDataRequest);
+                sProxyService.syncProxySendRPCRequestWithPreprocess(encodedSyncPDataRequest);
             }
             return returnVal;
         } catch (JSONException e) {

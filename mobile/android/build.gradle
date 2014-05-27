@@ -86,5 +86,5 @@ String latestBuildToolsAvailable(String defaultBuildTools) {
     }
 }
 
-ext.compileSdkVersion = highestSdkAvailable(18)
-ext.buildToolsVersion = latestBuildToolsAvailable("19.0.0")
+ext.compileSdkVersion = highestSdkAvailable(19)
+ext.buildToolsVersion = latestBuildToolsAvailable("19.0.3")

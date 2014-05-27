@@ -1051,7 +1051,7 @@ public class ModuleTest {
                     IJsonRPCMarshaller currentMarshaller = (customJSON != null) ? customMarshaller :
                                     (generateInvalidJSON ? invalidMarshaller : defaultMarshaller);
                     mProxyService.syncProxySetJsonRPCMarshaller(currentMarshaller);
-                    mProxyService.syncProxySendRPCRequest(rpc);
+                    mProxyService.syncProxySendRPCRequestWithPreprocess(rpc);
 
                     // restore the default marshaller
                     if (currentMarshaller instanceof InvalidJsonRPCMarshaller) {

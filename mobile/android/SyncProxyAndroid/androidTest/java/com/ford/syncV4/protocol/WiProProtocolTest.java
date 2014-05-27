@@ -6,8 +6,8 @@ import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
-import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.Session;
+import com.ford.syncV4.session.SessionTest;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.logger.Logger;
 
@@ -336,7 +336,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
         final byte[] StartSessionACKMessage = StartSessionACKMessageStream.toByteArray();
         wiProProtocol.HandleReceivedBytes(StartSessionACKMessage, StartSessionACKMessage.length);
-        Assert.assertEquals("HashID is incorrect", 0x1234CDEF, wiProProtocol.hashID);
+        assertEquals(0, wiProProtocol.getHashIdBySessionId(SESSION_ID));
     }
 
     public void testSendingHashIDWithEndSession() throws IOException {
@@ -344,30 +344,22 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             private int sendCount = 0;
 
             @Override
-            public void onProtocolMessageBytesToSend(byte[] msgBytes,
-                                                     int offset, int length) {
+            public void onProtocolMessageBytesToSend(byte[] msgBytes, int offset, int length) {
                 // This method is called twice, sending header and then data
                 final byte[] expectedMsgMessageID =
                         new byte[]{(byte) 0xCD, (byte) 0xEF, 0x12, 0x34};
 
                 switch (sendCount) {
                     case 0:
-                        final byte[] msgDataSize =
-                                extractByteArrayPart(msgBytes, 4, 4);
-                        final byte[] expectedMsgDataSize =
-                                new byte[]{0x00, 0x00, 0x00, 0x04};
+                        final byte[] msgDataSize = extractByteArrayPart(msgBytes, 4, 4);
+                        final byte[] expectedMsgDataSize = new byte[]{0x00, 0x00, 0x00, 0x04};
                         Assert.assertEquals("Data Size is incorrect",
-                                BitConverter
-                                        .intFromByteArray(expectedMsgDataSize,
-                                                0),
+                                BitConverter.intFromByteArray(expectedMsgDataSize, 0),
                                 BitConverter.intFromByteArray(msgDataSize, 0));
 
-                        final byte[] msgMessageID =
-                                extractByteArrayPart(msgBytes, 8, 4);
+                        final byte[] msgMessageID = extractByteArrayPart(msgBytes, 8, 4);
                         Assert.assertEquals("Message ID should be hash ID",
-                                BitConverter
-                                        .intFromByteArray(expectedMsgMessageID,
-                                                0),
+                                BitConverter.intFromByteArray(expectedMsgMessageID, 0),
                                 BitConverter.intFromByteArray(msgMessageID, 0));
                         break;
 
@@ -394,28 +386,26 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(Session session,
-                                                 byte version,
-                                                 String correlationID) {
+            public void onProtocolSessionStarted(byte sessionId,
+                                                 byte version) {
             }
 
             @Override
             public void onProtocolServiceEnded(ServiceType sessionType,
-                                               byte sessionID,
-                                               String correlationID) {
+                                               byte sessionID) {
             }
 
             @Override
-            public void onProtocolHeartbeatACK() {
+            public void onProtocolHeartbeatACK(byte sessionId) {
             }
 
             @Override
-            public void onProtocolHeartbeat() {
+            public void onProtocolHeartbeat(byte sessionId) {
 
             }
 
             @Override
-            public void onResetHeartbeatAck() {
+            public void onResetHeartbeatAck(byte sessionId) {
 
             }
 
@@ -424,7 +414,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onMobileNavAckReceived(int frameReceivedNumber) {
+            public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber) {
 
             }
 
@@ -434,25 +424,32 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
+                                                 byte version) {
 
             }
 
             @Override
-            public void onStartServiceNackReceived(ServiceType serviceType) {
+            public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType) {
 
             }
 
             @Override
-            public void onResetHeartbeat() {
+            public void onResetHeartbeat(byte sessionId) {
+
+            }
+
+            @Override
+            public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId) {
 
             }
         };
 
+        byte sessionId = (byte) 0x01;
         final WiProProtocol protocol = new WiProProtocol(protocolListener);
-        protocol.hashID = 0xCDEF1234;
+        //protocol.hashID.put(sessionId, 0xCDEF1234);
         protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
-        protocol.EndProtocolService(ServiceType.RPC, (byte) 0x01);
+        protocol.EndProtocolService(ServiceType.RPC, sessionId);
     }
 
     public void testEndSessionACKFrameReceived() throws Exception {
@@ -462,37 +459,39 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setSessionID(SESSION_ID);
         frameHeader.setServiceType(ServiceType.RPC);
         frameHeader.setDataSize(0);
-        IProtocolListener mock = mock(IProtocolListener.class);
-        WiProProtocol.MessageFrameAssembler messageFrameAssembler = new WiProProtocol(mock).new MessageFrameAssembler();
+        IProtocolListener protocolListenerMock = mock(IProtocolListener.class);
+        WiProProtocol.MessageFrameAssembler messageFrameAssembler =
+                new WiProProtocol(protocolListenerMock).new MessageFrameAssembler();
         ArgumentCaptor<ServiceType> sessionTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
-        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolServiceEnded(sessionTypeCaptor.capture(), sessionIdCaptor.capture(), correlationIdCaptor.capture());
+        verify(protocolListenerMock).onProtocolServiceEndedAck(sessionTypeCaptor.capture(),
+                sessionIdCaptor.capture());
         assertEquals(ServiceType.RPC, sessionTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
-        assertEquals("", correlationIdCaptor.getValue());
     }
 
     public void testStartServiceWithSessionId() throws Exception {
-        final byte id = 13;
+        final byte sessionId = 13;
         WiProProtocol protocol = new WiProProtocol(mock(IProtocolListener.class)) {
             @Override
-            protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset, int length) {
+            protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
+                                                     int offset, int length) {
                 super.handleProtocolFrameToSend(header, data, offset, length);
-                assertEquals("Session ID should be same", id, header.getSessionID());
+                assertEquals("Session ID should be same", sessionId, header.getSessionID());
             }
         };
-        Session session = new Session();
-        session.setSessionId(id);
-        protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+        Session session = SessionTest.getInitializedSession();
+        session.updateSessionId(sessionId);
+        protocol.StartProtocolService(ServiceType.Mobile_Nav, sessionId);
     }
 
     public void testStartSessionWithSessionId() throws Exception {
         final byte id = 13;
         WiProProtocol protocol = new WiProProtocol(mock(IProtocolListener.class)) {
             @Override
-            protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset, int length) {
+            protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
+                                                     int offset, int length) {
                 super.handleProtocolFrameToSend(header, data, offset, length);
                 assertEquals("Session ID should be same", id, header.getSessionID());
             }
@@ -503,9 +502,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
     public void testStartSessionNavigationWith0SessionIDThrowsExp() throws Exception {
         WiProProtocol protocol = new WiProProtocol(mock(IProtocolListener.class));
         try {
-            Session session = new Session();
-            session.setSessionId((byte) 0);
-            protocol.StartProtocolService(ServiceType.Mobile_Nav, session);
+            protocol.StartProtocolService(ServiceType.Mobile_Nav, Session.DEFAULT_SESSION_ID);
             assertTrue("Should not get here", false);
         } catch (IllegalArgumentException exp) {
             assertNotNull("Should get and exception", exp);
@@ -526,31 +523,28 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(Session session, byte version, String correlationID) {
-                assertEquals("currentSession id should be SESSION_ID", SESSION_ID, session.getSessionId());
-                Service service = session.getServiceList().get(0);
-                assertEquals("should be RPC service", ServiceType.RPC, service.getServiceType());
-                assertEquals("service should belong to the currentSession", session, service.getSession());
+            public void onProtocolSessionStarted(byte sessionId, byte version) {
+                assertEquals("syncSession id should be SESSION_ID", SESSION_ID, sessionId);
                 passed[0] = true;
             }
 
             @Override
-            public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID, String correlationID) {
+            public void onProtocolServiceEnded(ServiceType serviceType, byte sessionID) {
 
             }
 
             @Override
-            public void onProtocolHeartbeatACK() {
+            public void onProtocolHeartbeatACK(byte sessionId) {
 
             }
 
             @Override
-            public void onProtocolHeartbeat() {
+            public void onProtocolHeartbeat(byte sessionId) {
 
             }
 
             @Override
-            public void onResetHeartbeatAck() {
+            public void onResetHeartbeatAck(byte sessionId) {
 
             }
 
@@ -560,7 +554,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onMobileNavAckReceived(int frameReceivedNumber) {
+            public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber) {
 
             }
 
@@ -570,22 +564,28 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version, String correlationID) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID,
+                                                 byte version) {
 
             }
 
             @Override
-            public void onStartServiceNackReceived(ServiceType serviceType) {
+            public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType) {
 
             }
 
             @Override
-            public void onResetHeartbeat() {
+            public void onResetHeartbeat(byte sessionId) {
+
+            }
+
+            @Override
+            public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId) {
 
             }
         });
         protocol.handleProtocolSessionStarted(ServiceType.RPC, SESSION_ID,
-                ProtocolConstants.PROTOCOL_VERSION_THREE, "");
+                ProtocolConstants.PROTOCOL_VERSION_THREE);
         assertTrue("test should pass", passed[0]);
     }
 
@@ -598,14 +598,13 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setServiceType(ServiceType.RPC);
         frameHeader.setDataSize(0);
         IProtocolListener mock = mock(IProtocolListener.class);
-        WiProProtocol.MessageFrameAssembler messageFrameAssembler = new WiProProtocol(mock).new MessageFrameAssembler();
-        ArgumentCaptor<Session> sessionTypeCaptor = ArgumentCaptor.forClass(Session.class);
+        WiProProtocol.MessageFrameAssembler messageFrameAssembler =
+                new WiProProtocol(mock).new MessageFrameAssembler();
+        ArgumentCaptor<Byte> sessionId = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
-        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolSessionStarted(sessionTypeCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
-        assertEquals(0, sessionTypeCaptor.getValue().getSessionId());
-        assertEquals(ServiceType.RPC, sessionTypeCaptor.getValue().getServiceList().get(0).getServiceType());
+        Mockito.verify(mock).onProtocolSessionStarted(sessionId.capture(), versionCaptor.capture());
+        assertEquals((byte)0x00, (byte)sessionId.getValue());
     }
 
     public void testStartServiceACK_Mobile_Nav_FrameReceived() throws Exception {
@@ -619,17 +618,17 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         IProtocolListener mock = mock(IProtocolListener.class);
         WiProProtocol protocol = new WiProProtocol(mock);
         protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
-        WiProProtocol.MessageFrameAssembler messageFrameAssembler = protocol.new MessageFrameAssembler();
+        WiProProtocol.MessageFrameAssembler messageFrameAssembler =
+                protocol.new MessageFrameAssembler();
         ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
-        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
+        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(),
+                sessionIDCaptor.capture(), versionCaptor.capture());
         assertEquals(ServiceType.Mobile_Nav, serviceTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
         assertEquals(ProtocolConstants.PROTOCOL_VERSION_THREE, versionCaptor.getValue().byteValue());
-        assertEquals("", correlationIdCaptor.getValue());
     }
 
     public void testStartServiceACK_RPC_SessionID0_NotthorwExp() throws Exception {
@@ -687,13 +686,12 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
-        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
         messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(), sessionIDCaptor.capture(), versionCaptor.capture(), correlationIdCaptor.capture());
+        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(),
+                sessionIDCaptor.capture(), versionCaptor.capture());
         assertEquals(ServiceType.Audio_Service, serviceTypeCaptor.getValue());
         assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
         assertEquals(ProtocolConstants.PROTOCOL_VERSION_THREE, versionCaptor.getValue().byteValue());
-        assertEquals("", correlationIdCaptor.getValue());
     }
 
 
@@ -708,7 +706,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         frameHeader.setServiceType(ServiceType.RPC);
         frameHeader.setDataSize(0);
         protocol.handleProtocolFrameToSend(frameHeader, null,0,0 );
-        verify(protocolListener).onResetHeartbeatAck();
+        verify(protocolListener).onResetHeartbeatAck(SESSION_ID);
     }
 
     public void testFrameHeaderAndDataSendWithOneChunk() throws Exception {

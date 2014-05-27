@@ -1,40 +1,32 @@
 package com.ford.syncV4.android.adapters;
 
-import android.app.Activity;
 import android.util.Log;
 
+import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.util.ArrayList;
 
 public class LogAdapter extends MessageAdapter {
     
-    private String logTag;
-    boolean fullUIDebug;
-    Activity activity;
+    private String mLogTag;
+    private boolean mFullUIDebug;
+    private int mSessionId = 0;
+    private String mAppId = "";
 
-    public LogAdapter(String logTag, boolean fullUIDebug, Activity activity,
-                      int textViewResourceId, ArrayList<Object> items) {
-        super(activity, textViewResourceId, items);
-        this.activity = activity;
-        this.logTag = logTag;
-        this.fullUIDebug = fullUIDebug;
-    }
-
-    private void addMessageToUI(final Object m) {
-        activity.runOnUiThread(new Runnable() {
-            public void run() {
-                addMessage(m);
-            }
-        });
+    public LogAdapter(String logTag, boolean fullUIDebug, int textViewResourceId,
+                      ArrayList<Object> items) {
+        super(MainApp.getInstance(), textViewResourceId, items);
+        mLogTag = logTag;
+        mFullUIDebug = fullUIDebug;
     }
 
     public void logMessage(final Object m) {
         if (m == null) {
             return;
         }
-       Logger.i(logTag, m.toString());
-        if (fullUIDebug) {
+       Logger.i(mLogTag, m.toString());
+        if (mFullUIDebug) {
             addMessageToUI(m);
         }
     }
@@ -43,7 +35,7 @@ public class LogAdapter extends MessageAdapter {
         if (m == null) {
             return;
         }
-       Logger.i(logTag, m.toString());
+       Logger.i(mLogTag, m.toString());
         if (addToUI) {
             addMessageToUI(m);
         }
@@ -53,23 +45,23 @@ public class LogAdapter extends MessageAdapter {
         if (m instanceof String) {
             switch (type) {
                 case Log.DEBUG:
-                   Logger.d(logTag, m.toString());
+                   Logger.d(mLogTag, m.toString());
                     break;
                 case Log.ERROR:
-                   Logger.e(logTag, m.toString());
+                   Logger.e(mLogTag, m.toString());
                     break;
                 case Log.VERBOSE:
-                   Logger.d(logTag, m.toString());
+                   Logger.d(mLogTag, m.toString());
                     break;
                 case Log.WARN:
-                   Logger.w(logTag, m.toString());
+                   Logger.w(mLogTag, m.toString());
                     break;
                 default:
-                   Logger.i(logTag, m.toString());
+                   Logger.i(mLogTag, m.toString());
                     break;
             }
         }
-        if (fullUIDebug) {
+        if (mFullUIDebug) {
             addMessageToUI(m);
         }
     }
@@ -78,19 +70,19 @@ public class LogAdapter extends MessageAdapter {
         if (m instanceof String) {
             switch (type) {
                 case Log.DEBUG:
-                   Logger.d(logTag, m.toString());
+                   Logger.d(mLogTag, m.toString());
                     break;
                 case Log.ERROR:
-                   Logger.e(logTag, m.toString());
+                   Logger.e(mLogTag, m.toString());
                     break;
                 case Log.VERBOSE:
-                   Logger.d(logTag, m.toString());
+                   Logger.d(mLogTag, m.toString());
                     break;
                 case Log.WARN:
-                   Logger.w(logTag, m.toString());
+                   Logger.w(mLogTag, m.toString());
                     break;
                 default:
-                   Logger.i(logTag, m.toString());
+                   Logger.i(mLogTag, m.toString());
                     break;
             }
         }
@@ -103,23 +95,23 @@ public class LogAdapter extends MessageAdapter {
         if (m instanceof String) {
             switch (type) {
                 case Log.DEBUG:
-                   Logger.d(logTag, m.toString());
+                   Logger.d(mLogTag, m.toString());
                     break;
                 case Log.ERROR:
-                   Logger.e(logTag + " " + m.toString(), tr);
+                   Logger.e(mLogTag + " " + m.toString(), tr);
                     break;
                 case Log.VERBOSE:
-                   Logger.d(logTag, m.toString());
+                   Logger.d(mLogTag, m.toString());
                     break;
                 case Log.WARN:
-                   Logger.w(logTag, m.toString());
+                   Logger.w(mLogTag, m.toString());
                     break;
                 default:
-                   Logger.i(logTag, m.toString());
+                   Logger.i(mLogTag, m.toString());
                     break;
             }
         }
-        if (fullUIDebug) {
+        if (mFullUIDebug) {
             addMessageToUI(m);
         }
     }
@@ -128,24 +120,48 @@ public class LogAdapter extends MessageAdapter {
         if (m instanceof String) {
             switch (type) {
                 case Log.DEBUG:
-                   Logger.d(logTag, m.toString());
+                   Logger.d(mLogTag, m.toString());
                     break;
                 case Log.ERROR:
-                   Logger.e(logTag +" " + m.toString(), tr);
+                   Logger.e(mLogTag +" " + m.toString(), tr);
                     break;
                 case Log.VERBOSE:
-                   Logger.d(logTag, m.toString());
+                   Logger.d(mLogTag, m.toString());
                     break;
                 case Log.WARN:
-                   Logger.w(logTag, m.toString());
+                   Logger.w(mLogTag, m.toString());
                     break;
                 default:
-                   Logger.i(logTag, m.toString());
+                   Logger.i(mLogTag, m.toString());
                     break;
             }
         }
         if (addToUI) {
             addMessageToUI(m);
         }
+    }
+
+    public int getSessionId() {
+        return mSessionId;
+    }
+
+    public void setSessionId(int value) {
+        mSessionId = value;
+    }
+
+    public String getAppId() {
+        return mAppId;
+    }
+
+    public void setAppId(String mAppId) {
+        this.mAppId = mAppId;
+    }
+
+    private void addMessageToUI(final Object m) {
+        MainApp.getInstance().runInUIThread(new Runnable() {
+            public void run() {
+                addMessage(m);
+            }
+        });
     }
 }

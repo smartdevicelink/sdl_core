@@ -264,7 +264,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	public void registerAppInterface(
 			SyncMsgVersion syncMsgVersion, String appName, String ngnMediaScreenAppName,
 			Vector<String> vrSynonyms, Boolean isMediaApp, Language languageDesired, 
-			String autoActivateID, Integer correlationID) 
+			String autoActivateID, Integer correlationID, byte sessionId)
 			throws SyncException {
 		
 		// Test if proxy has been disposed
@@ -285,7 +285,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				null,
 				autoActivateID,
 				correlationID,
-                getHashId(), getDeviceInfo());
+                getHashId(appName), getDeviceInfo(), sessionId);
 	}
 	
 	/**
@@ -296,9 +296,8 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	 * @param autoActivateID
 	 * @throws SyncException
 	 */
-	public void registerAppInterface(
-			String appName, Boolean isMediaApp, String autoActivateID, Integer correlationID) 
-			throws SyncException {
+	public void registerAppInterface(String appName, Boolean isMediaApp, String autoActivateID,
+                                     Integer correlationID, byte sessionId) throws SyncException {
 		
 		registerAppInterface(
 				/*syncMsgVersion*/null, 
@@ -308,44 +307,44 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 				isMediaApp, 
 				/*languageDesired*/null,
 				autoActivateID,
-				correlationID);
+				correlationID, sessionId);
 	}
 	
 	/**
-	 * Sends a RegisterAppInterface RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
+	 * Sends a RegisterAppInterface RPCRequest to SYNC. Responses are captured through callback
+     * on IProxyListener.
 	 * 
 	 * @param appName
 	 * @throws SyncException
 	 */
-	public void registerAppInterface(String appName, Integer correlationID) 
-			throws SyncException {
-		
-		registerAppInterface(appName, false, "", correlationID);
+	public void registerAppInterface(String appName, Integer correlationId, byte sessionId)
+            throws SyncException {
+		registerAppInterface(appName, false, "", correlationId, sessionId);
 	}
 	
 	/**
-	 * Sends an UnregisterAppInterface RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
+	 * Sends an UnregisterAppInterface RPCRequest to SYNC. Responses are captured through callback
+     * on IProxyListener.
 	 * 
 	 * @param correlationID
 	 * @throws SyncException
 	 */
-	public void unregisterAppInterface(Integer correlationID) 
-			throws SyncException {		
+	/*public void unregisterAppInterface(Integer correlationID) throws SyncException {
 		// Test if proxy has been disposed
 		if (_proxyDisposed) {
-			throw new SyncException("This SyncProxy object has been disposed, it is no long capable of executing methods.", 
-										SyncExceptionCause.SYNC_PROXY_DISPOSED);
+			throw new SyncException("This SyncProxy object has been disposed, it is no long " +
+                    "capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}		
 				
 		unregisterAppInterfacePrivate(correlationID);
-	}
+	}*/
 	
 	/**
 	 * Returns is isConnected state of the SYNC transport.
 	 * 
 	 * @return Boolean isConnected
 	 */
-	public Boolean getIsConnected() {
+	public boolean getIsConnected() {
 		return super.getIsConnected();
 	}
 }

@@ -46,10 +46,14 @@ import com.ford.syncV4.util.logger.Logger;
  */
 public class AppSetUpDialog extends DialogFragment {
 
-    private static final String LOG_TAG = "AppSetUpDialog";
+    private static final String LOG_TAG = AppSetUpDialog.class.getSimpleName();
+    private static final String ARG_KEY_IS_TRANSPORT_VISIBLE = "ARG_KEY_IS_TRANSPORT_VISIBLE";
 
-    public static AppSetUpDialog newInstance() {
+    public static AppSetUpDialog newInstance(boolean isTransportViewVisible) {
         AppSetUpDialog appSetupDialog = new AppSetUpDialog();
+        Bundle bundle = new Bundle();
+        bundle.putBoolean(ARG_KEY_IS_TRANSPORT_VISIBLE, isTransportViewVisible);
+        appSetupDialog.setArguments(bundle);
         return appSetupDialog;
     }
 
@@ -60,6 +64,8 @@ public class AppSetUpDialog extends DialogFragment {
                 getActivity().LAYOUT_INFLATER_SERVICE);
         final View view = inflater.inflate(R.layout.selectprotocol,
                 (ViewGroup) getActivity().findViewById(R.id.selectprotocol_Root));
+
+        manageConnectionSettingsView(view, getArguments().getBoolean(ARG_KEY_IS_TRANSPORT_VISIBLE));
 
         ArrayAdapter<Language> langAdapter = new ArrayAdapter<Language>(getActivity(),
                 android.R.layout.simple_spinner_item, Language.values());
@@ -122,7 +128,11 @@ public class AppSetUpDialog extends DialogFragment {
         customAppIdView.setChecked(AppPreferencesManager.getIsCustomAppId());
 
         final EditText customAppIdEditView = (EditText) view.findViewById(R.id.selectprotocol_appId);
-        customAppIdEditView.setText(AppPreferencesManager.getCustomAppId());
+        if (!AppPreferencesManager.getIsCustomAppId()) {
+            processCustomAppIdCheck(view, customAppIdView.isChecked());
+        } else {
+            customAppIdEditView.setText(AppPreferencesManager.getCustomAppId());
+        }
         /*customAppIdEditView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -231,11 +241,6 @@ public class AppSetUpDialog extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        if (AppPreferencesManager.getIsCustomAppId()) {
-                            AppPreferencesManager.setCustomAppId(
-                                    customAppIdEditView.getText().toString().trim());
-                        }
-
                         saveProtocolVersion(view);
 
                         boolean isMedia = mediaCheckBox.isChecked();
@@ -250,9 +255,14 @@ public class AppSetUpDialog extends DialogFragment {
                         int tcpPort = Integer.parseInt(tcpPortEditText.getText().toString());
                         boolean autoSetAppIcon = autoSetAppIconCheckBox.isChecked();
                         boolean mNSDPrefValue = mIsNSDSupported && nsdToggle.isChecked();
+
                         // save the configs
-                        boolean success = prefs
-                                .edit()
+
+                        String appId = customAppIdEditView.getText().toString().trim();
+                        if (AppPreferencesManager.getIsCustomAppId()) {
+                            AppPreferencesManager.setCustomAppId(appId);
+                        }
+                        boolean success = prefs.edit()
                                 .putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
                                 .putBoolean(Const.PREFS_KEY_ISNAVIAPP, isNavi)
                                 .putBoolean(Const.Transport.PREFS_KEY_IS_NSD, mNSDPrefValue)
@@ -269,7 +279,7 @@ public class AppSetUpDialog extends DialogFragment {
                         }
 
                         setupHeartbeat(view);
-                        ((SyncProxyTester) getActivity()).onSetUpDialogResult();
+                        ((SyncProxyTester) getActivity()).onSetUpDialogResult(appId);
                     }
                 }).setView(view).show();
     }
@@ -334,5 +344,11 @@ public class AppSetUpDialog extends DialogFragment {
 
         AppPreferencesManager.setProtocolMinVersion(protocolMinVersion);
         AppPreferencesManager.setProtocolMaxVersion(protocolMaxVersion);
+    }
+
+    private void manageConnectionSettingsView(View view, boolean isVisible) {
+        final LinearLayout transportLayout = (LinearLayout) view.findViewById(
+                R.id.app_set_up_dialog_transport_view);
+        transportLayout.setVisibility(isVisible ? View.VISIBLE : View.GONE);
     }
 }

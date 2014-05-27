@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/main_bg_color"
     android:layout_width="fill_parent"
     android:layout_height="match_parent">
 
@@ -9,6 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+        android:textColor="@color/app_regular_text_color"
         android:checked="false"
         android:enabled="false"
         android:hint="@string/mobile_navi_hint"
@@ -30,6 +32,7 @@
         android:layout_height="wrap_content"
         android:text="Start File Streaming"
         android:id="@+id/file_streaming"
+        android:textColor="@color/app_regular_text_color"
         android:layout_below="@+id/videobutton"
         android:enabled="false"
         android:layout_centerHorizontal="true" />
