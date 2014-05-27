@@ -57,6 +57,8 @@ class IAP2Device : public MmeDevice {
 
   ~IAP2Device();
 
+  virtual bool Init();
+
   virtual Protocol protocol() const {
     return IAP2;
   }

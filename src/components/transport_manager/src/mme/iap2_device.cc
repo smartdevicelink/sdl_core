@@ -48,8 +48,19 @@ IAP2Device::IAP2Device(const std::string& mount_point,
                        const std::string& name,
                        const DeviceUID& unique_device_id,
                        TransportAdapterController* controller) :
-  MmeDevice(mount_point, name, unique_device_id), controller_(controller), last_app_id_(0) {
+  MmeDevice(mount_point, name, unique_device_id),
+  controller_(controller),
+  last_app_id_(0) {
+}
 
+IAP2Device::~IAP2Device() {
+  for (ThreadContainer::const_iterator i = connection_threads_.begin(); i != connection_threads_.end(); ++i) {
+    utils::SharedPtr<threads::Thread> thread = i->second;
+    thread->stop();
+  }
+}
+
+bool IAP2Device::Init() {
   const IAP2Device::ProtocolNameContainer& protocol_names = ProtocolNames();
   for (IAP2Device::ProtocolNameContainer::const_iterator i = protocol_names.begin(); i != protocol_names.end(); ++i) {
     ::std::string protocol_name = *i;
@@ -60,13 +71,7 @@ IAP2Device::IAP2Device(const std::string& mount_point,
     thread->start();
     connection_threads_.insert(std::make_pair(protocol_name, thread));
   }
-}
-
-IAP2Device::~IAP2Device() {
-  for (ThreadContainer::const_iterator i = connection_threads_.begin(); i != connection_threads_.end(); ++i) {
-    utils::SharedPtr<threads::Thread> thread = i->second;
-    thread->stop();
-  }
+  return true;
 }
 
 ApplicationList IAP2Device::GetApplicationList() const {

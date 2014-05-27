@@ -50,6 +50,8 @@ class MmeDevice : public Device {
     return mount_point_;
   }
 
+  virtual bool Init() = 0;
+
   virtual Protocol protocol() const = 0;
 
  protected:

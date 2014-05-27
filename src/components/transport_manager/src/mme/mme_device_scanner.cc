@@ -250,6 +250,11 @@ void MmeDeviceScanner::OnDeviceArrived(msid_t msid) {
         devices_.insert(std::make_pair(msid, mme_device));
         devices_lock_.Release();
         NotifyDevicesUpdated();
+// new device must be initialized
+// after ON_SEARCH_DEVICE_DONE notification
+// because ON_APPLICATION_LIST_UPDATED event can occur immediately
+// which doesn't make sense until device list is updated
+        mme_device->Init();
         break;
       }
       case MmeDevice::IAP2: {
@@ -258,6 +263,11 @@ void MmeDeviceScanner::OnDeviceArrived(msid_t msid) {
         devices_.insert(std::make_pair(msid, mme_device));
         devices_lock_.Release();
         NotifyDevicesUpdated();
+// new device must be initialized
+// after ON_SEARCH_DEVICE_DONE notification
+// because ON_APPLICATION_LIST_UPDATED event can occur immediately
+// which doesn't make sense until device list is updated
+        mme_device->Init();
         break;
       }
       case MmeDevice::UnknownProtocol:

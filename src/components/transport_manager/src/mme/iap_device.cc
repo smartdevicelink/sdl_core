@@ -44,20 +44,9 @@ IAPDevice::IAPDevice(const std::string& mount_point,
                      const std::string& name,
                      const DeviceUID& unique_device_id,
                      TransportAdapterController* controller) :
-  MmeDevice(mount_point, name, unique_device_id), controller_(controller), last_app_id_(0) {
-
-  LOG4CXX_TRACE(logger_, "iAP: connecting to " << mount_point);
-  ipod_hdl_ = ipod_connect(mount_point.c_str(), 0);
-  if (ipod_hdl_ != 0) {
-    LOG4CXX_DEBUG(logger_, "iAP: connected to " << mount_point);
-
-    receiver_thread_ = new threads::Thread("iAP event notifier",
-      new IAPEventThreadDelegate(ipod_hdl_, this));
-    receiver_thread_->start();
-  }
-  else {
-    LOG4CXX_ERROR(logger_, "iAP: could not connect to " << mount_point);
-  }
+  MmeDevice(mount_point, name, unique_device_id),
+  controller_(controller),
+  last_app_id_(0) {
 }
 
 IAPDevice::~IAPDevice() {
@@ -69,6 +58,25 @@ IAPDevice::~IAPDevice() {
   }
   else {
     LOG4CXX_WARN(logger_, "iAP: could not disconnect from " << mount_point());
+  }
+}
+
+bool IAPDevice::Init() {
+  LOG4CXX_TRACE(logger_, "iAP: connecting to " << mount_point());
+  ipod_hdl_ = ipod_connect(mount_point().c_str(), 0);
+  if (ipod_hdl_ != 0) {
+    LOG4CXX_DEBUG(logger_, "iAP: connected to " << mount_point());
+
+    receiver_thread_ = new threads::Thread("iAP event notifier",
+      new IAPEventThreadDelegate(ipod_hdl_, this));
+    receiver_thread_->start();
+
+    return true;
+  }
+  else {
+    LOG4CXX_ERROR(logger_, "iAP: could not connect to " << mount_point());
+
+    return false;
   }
 }
 
