@@ -6,8 +6,8 @@ Common code 3
 Zombie code
 Common code 4
 if (usa != NULL) {
-	delete usa;
-	usa = NULL;
+  delete usa;
+  usa = NULL;
 }
 
 Some othe line

@@ -268,6 +268,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   if (connection_handler_) {
     connection_handler::ConnectionHandlerImpl* con_handler_impl =
       static_cast<connection_handler::ConnectionHandlerImpl*>(
+
         connection_handler_);
     if (con_handler_impl->GetDataOnSessionKey(connection_key, &app_id,
         &sessions_list, &device_id)

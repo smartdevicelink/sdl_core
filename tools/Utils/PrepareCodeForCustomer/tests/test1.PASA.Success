@@ -9,6 +9,6 @@ God Exist! Pasa code 2
 Common code 3
 Common code 4
 if (usa != NULL) {
-	delete usa;
-	usa = NULL;
+  delete usa;
+  usa = NULL;
 }

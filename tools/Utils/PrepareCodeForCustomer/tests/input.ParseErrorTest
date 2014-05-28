@@ -20,6 +20,6 @@ Zombie code
 #endif
 Common code 4
 if (usa != NULL) {
-	delete usa;
-	usa = NULL;
+  delete usa;
+  usa = NULL;
 }
