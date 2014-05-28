@@ -33,7 +33,7 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
     }
 
     @Override
-    public void onFilesDownloadRequest(final byte sessionId, final ISystemRequestProxy proxy, List<String> urls,
+    public void onFilesDownloadRequest(final String appId, final ISystemRequestProxy proxy, List<String> urls,
                                        FileType fileType) {
 
         // Simulate Files downloading request and future processing
@@ -45,7 +45,7 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
             public void run() {
                 final byte[] data = AppUtils.contentsOfResource(R.raw.audio_short);
                 try {
-                    proxy.putSystemFile(sessionId, "system.update", data, FileType.AUDIO_WAVE);
+                    proxy.putSystemFile(appId, "system.update", data, FileType.AUDIO_WAVE);
                 } catch (SyncException e) {
                     // TODO : Logging to be refactored
                     if (mLogAdapter != null) {
@@ -58,7 +58,7 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
     }
 
     @Override
-    public void onFileResumeRequest(final byte sessionId, final ISystemRequestProxy proxy, String filename,
+    public void onFileResumeRequest(final String appId, final ISystemRequestProxy proxy, String filename,
                                     final Integer offset, final Integer length, FileType fileType) {
 
         // Simulate Files download resumption request and future processing
@@ -71,7 +71,7 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
                 final byte[] data = Arrays.copyOfRange(
                         AppUtils.contentsOfResource(R.raw.audio_short), offset, offset + length);
                 try {
-                    proxy.putSystemFile(sessionId, "system.update", data, offset, FileType.AUDIO_WAVE);
+                    proxy.putSystemFile(appId, "system.update", data, offset, FileType.AUDIO_WAVE);
                 } catch (SyncException e) {
                     // TODO : Logging to be refactored
                     if (mLogAdapter != null) {
@@ -84,7 +84,7 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
     }
 
     @Override
-    public void onPolicyTableSnapshotRequest(final byte sessionId, final ISystemRequestProxy proxy,
+    public void onPolicyTableSnapshotRequest(final String appId, final ISystemRequestProxy proxy,
                                              byte[] data,
                                              final FileType fileType, final RequestType requestType) {
         // TODO : Logging to be refactored

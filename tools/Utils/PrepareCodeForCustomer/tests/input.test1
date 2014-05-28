@@ -1,0 +1,22 @@
+Common code 1
+#ifdef CUSTOMER_FORD
+Ford code
+#endif
+#ifdef GOD_EXIST
+God Exist! Common code 2 
+#endif 
+#ifdef CUSTOMER_PASA
+Pasa code
+#ifdef GOD_EXIST
+God Exist! Pasa code 2 
+#endif 
+#endif
+Common code 3
+#ifdef CUSTOMER_UMBRELLA
+Zombie code
+#endif
+Common code 4
+if (usa != NULL) {
+	delete usa;
+	usa = NULL;
+}

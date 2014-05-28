@@ -2,7 +2,6 @@ package com.ford.syncV4.syncConnection;
 
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.session.Session;
 
 public interface ISyncConnectionListener {
 

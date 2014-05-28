@@ -34,7 +34,7 @@ public interface ISyncALMLifeCycleListener {
 	 * @param notification - Contains information about the HMI Level,
 	 * system context and audio streaming state.
 	 */
-	public void onOnHMIStatus(byte sessionId, OnHMIStatus notification);
+	public void onOnHMIStatus(String appId, OnHMIStatus notification);
 
 	/**
 	 * onProxyClosed has different functionality for the different models.

@@ -310,7 +310,7 @@ public class SendProtocolMessageProcessorTest extends TestCase {
 
         }
 
-        countDownLatch.await(1, TimeUnit.SECONDS);
+        countDownLatch.await(3, TimeUnit.SECONDS);
 
         processor.shutdownAllExecutors();
 

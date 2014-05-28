@@ -63,6 +63,8 @@ set(ENABLE_LOG_OPTION 	"$ENV{ENABLE_LOG}")
 if (OS_TYPE_OPTION)
   if (${OS_TYPE_OPTION} STREQUAL "QNX")
     message(STATUS "Jenkins integration: set build process for QNX")
+    #do not use include after project() command. 
+    #Such usecase results in infinite cycle of reinitialization of compiler and other variables
     INCLUDE("./qnx_6.5.0_linux_x86.cmake")
     #tests are not supported yet for QNX build
     set (BUILD_TESTS OFF)
@@ -92,7 +94,7 @@ endif()
 if (DEBUG_OPTION)
   if (${DEBUG_OPTION} STREQUAL "DBG_OFF")
     message(STATUS "Jenkins integration: build release version")
-    set (CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
   endif()
 endif()
 
@@ -118,7 +120,6 @@ endif()
 
 #Jenkins integration section end
 
-# This command must be here after Jenkins integration section
 project (${PROJECT})
 
 #ADD_DEPENDENCIES(${PROJECT} Policy)
@@ -370,5 +371,4 @@ FIND_PACKAGE(Doxygen)
     MESSAGE(STATUS "To enable processing of MscGen comments please install mscgen")
     MESSAGE(STATUS "sudo apt-get install mscgen")
 ENDIF(DOXYGEN_FOUND)
-
 

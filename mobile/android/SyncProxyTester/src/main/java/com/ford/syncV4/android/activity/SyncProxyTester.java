@@ -487,7 +487,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     @Override
-    public void onServiceStart(ServiceType serviceType, byte sessionId, String appId) {
+    public void onServiceStart(ServiceType serviceType, String appId) {
 
         final PlaceholderFragment fragment = getFragmentByAppId(appId);
         if (fragment == null) {
@@ -503,8 +503,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             return;
         }
 
-        Logger.d(LOG_TAG + " Fragment '" + fragment + "' associated with " +
-                "sessionId:" + sessionId + " appId:" + appId);
+        Logger.d(LOG_TAG + " Fragment '" + fragment + "' appId:" + appId);
 
         if (fragment == getCurrentActiveFragment()) {
             mBoundProxyService.setActiveAppId(appId);
@@ -518,7 +517,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 @Override
                 public void run() {
                     OutputStream outputStream = mBoundProxyService
-                            .syncProxyStartAudioDataTransfer(fragment.getSessionId());
+                            .syncProxyStartAudioDataTransfer(fragment.getAppId());
                     if (outputStream == null) {
                         return;
                     }
@@ -530,7 +529,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 @Override
                 public void run() {
                     OutputStream outputStream = mBoundProxyService
-                            .syncProxyStartH264(fragment.getSessionId());
+                            .syncProxyStartH264(fragment.getAppId());
                     if (outputStream == null) {
                         return;
                     }
@@ -538,19 +537,15 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 }
             });
         } else if (serviceType == ServiceType.RPC) {
-            // TODO : In production case - there is no need to inform a Fragment about SessionId
-            // Fragment must know only AppId (and other related information from RAI)
-
-            // Assign Session Id to the associated Fragment (by AppId)
-            fragment.setSessionId(sessionId);
+            // Assign Application Id to the associated Fragment
+            fragment.setAppId(appId);
         }
 
         //mServicesCounter.incrementAndGet();
     }
 
     @Override
-    public void onAckReceived(String appId, byte sessionId, int frameReceived,
-                              ServiceType serviceType) {
+    public void onAckReceived(String appId, int frameReceived, ServiceType serviceType) {
         PlaceholderFragment fragment = getFragmentByAppId(appId);
         if (fragment == null) {
             return;
@@ -560,7 +555,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     @Override
-    public void onStartServiceNackReceived(final String appId, final byte sessionId, final ServiceType serviceType) {
+    public void onStartServiceNackReceived(final String appId, final ServiceType serviceType) {
         final PlaceholderFragment fragment = getFragmentByAppId(appId);
         if (fragment == null) {
             Logger.w("OnStartServiceNack, Fragment with AppId'" + appId + "' is null");
@@ -1168,8 +1163,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * Called when a CreateChoiceSetResponse comes. If successful, add it to the
      * adapter. In any case, remove the key from the map.
      */
-    public void onCreateChoiceSetResponse(byte sessionId, boolean success) {
-        PlaceholderFragment fragment = getFragmentBySessionId(sessionId);
+    public void onCreateChoiceSetResponse(String appId, boolean success) {
+        PlaceholderFragment fragment = getFragmentByAppId(appId);
         if (fragment == null) {
             return;
         }
@@ -1180,8 +1175,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * Called when a DeleteChoiceSetResponse comes. If successful, remove it
      * from the adapter.
      */
-    public void onDeleteChoiceSetResponse(byte sessionId, boolean success) {
-        PlaceholderFragment fragment = getFragmentBySessionId(sessionId);
+    public void onDeleteChoiceSetResponse(String appId, boolean success) {
+        PlaceholderFragment fragment = getFragmentByAppId(appId);
         if (fragment == null) {
             return;
         }
@@ -1193,8 +1188,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * the adapter. We also need to delete all the commands that were added to
      * this submenu.
      */
-    public void onDeleteSubMenuResponse(byte sessionId, boolean success) {
-        PlaceholderFragment fragment = getFragmentBySessionId(sessionId);
+    public void onDeleteSubMenuResponse(String appId, boolean success) {
+        PlaceholderFragment fragment = getFragmentByAppId(appId);
         if (fragment == null) {
             return;
         }
@@ -1205,8 +1200,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * Called when a AddSubMenuResponse comes. If successful, add it to the
      * adapter.
      */
-    public void onAddSubMenuResponse(byte sessionId, boolean success) {
-        PlaceholderFragment fragment = getFragmentBySessionId(sessionId);
+    public void onAddSubMenuResponse(String appId, boolean success) {
+        PlaceholderFragment fragment = getFragmentByAppId(appId);
         if (fragment == null) {
             return;
         }
@@ -1217,8 +1212,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * Called when a AddCommandResponse comes. If successful, add it to the
      * adapter.
      */
-    public void onAddCommandResponse(byte sessionId, boolean success) {
-        PlaceholderFragment fragment = getFragmentBySessionId(sessionId);
+    public void onAddCommandResponse(String appId, boolean success) {
+        PlaceholderFragment fragment = getFragmentByAppId(appId);
         if (fragment == null) {
             return;
         }
@@ -1229,8 +1224,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * Called when a DeleteCommandResponse comes. If successful, remove it from
      * the adapter.
      */
-    public void onDeleteCommandResponse(byte sessionId, boolean success) {
-        PlaceholderFragment fragment = getFragmentBySessionId(sessionId);
+    public void onDeleteCommandResponse(String appId, boolean success) {
+        PlaceholderFragment fragment = getFragmentByAppId(appId);
         if (fragment == null) {
             return;
         }
@@ -1448,7 +1443,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-                mBoundProxyService.syncProxyStartMobileNavService(fragment.getSessionId());
+                mBoundProxyService.syncProxyStartMobileNavService(fragment.getAppId());
             }
         });
     }
@@ -1498,7 +1493,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-                mBoundProxyService.syncProxyStopMobileNaviService(fragment.getSessionId());
+                mBoundProxyService.syncProxyStopMobileNaviService(fragment.getAppId());
                 closeMobileNaviOutputStream();
             }
         });
@@ -1542,7 +1537,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-                mBoundProxyService.syncProxyStartAudioService(fragment.getSessionId());
+                mBoundProxyService.syncProxyStartAudioService(fragment.getAppId());
             }
         });
     }
@@ -1566,17 +1561,17 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-                mBoundProxyService.syncProxyStopAudioService(fragment.getSessionId());
+                mBoundProxyService.syncProxyStopAudioService(fragment.getAppId());
                 closeAudioOutputStream();
             }
         });
     }
 
-    public void onTouchEventReceived(OnTouchEvent notification) {
+    public void onTouchEventReceived(String appId, OnTouchEvent notification) {
 
     }
 
-    public void onKeyboardInputReceived(OnKeyboardInput event) {
+    public void onKeyboardInputReceived(String appId, OnKeyboardInput event) {
 
     }
 
@@ -1629,22 +1624,11 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         return null;
     }
 
-    private PlaceholderFragment getFragmentWithoutSessionId() {
-        PlaceholderFragment fragment = null;
-        int pagesCount = mViewPager.getAdapter().getCount();
-        for (int i = 0; i < pagesCount; i++) {
-            fragment = (PlaceholderFragment) getSupportFragmentManager()
-                    .findFragmentByTag("android:switcher:" + R.id.pager + ":" + i);
-            if (fragment == null) {
-                continue;
-            }
-            if (fragment.getSessionId() == 0) {
-                return fragment;
-            }
-        }
-        return fragment;
-    }
-
+    /**
+     * Return Fragment instance associated with the provided Application Id
+     * @param appId Application Id
+     * @return {@link com.ford.syncV4.android.activity.PlaceholderFragment}
+     */
     private PlaceholderFragment getFragmentByAppId(String appId) {
         PlaceholderFragment fragment = null;
         int pagesCount = mViewPager.getAdapter().getCount();
@@ -1655,28 +1639,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 continue;
             }
             if (fragment.getAppId().equals(appId)) {
-                return fragment;
-            }
-        }
-        return fragment;
-    }
-
-    /**
-     * This method must be replaced with {@code getFragmentByAppId}
-     * @param sessionId identifier of the Session
-     * @return {@link com.ford.syncV4.android.activity.PlaceholderFragment}
-     */
-    @Deprecated
-    private PlaceholderFragment getFragmentBySessionId(byte sessionId) {
-        PlaceholderFragment fragment = null;
-        int pagesCount = mViewPager.getAdapter().getCount();
-        for (int i = 0; i < pagesCount; i++) {
-            fragment = (PlaceholderFragment) getSupportFragmentManager()
-                    .findFragmentByTag("android:switcher:" + R.id.pager + ":" + i);
-            if (fragment == null) {
-                continue;
-            }
-            if (fragment.getSessionId() == sessionId) {
                 return fragment;
             }
         }

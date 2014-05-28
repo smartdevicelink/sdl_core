@@ -82,7 +82,7 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         this.timer = setTimeout(function() {
 
             self.DeactivateTTS();
-        }, 2000); // 2 second timeout for TTS popUp
+        }, 5000); // timeout for TTS popUp in milliseconds
         FFW.TTS.Started();
     },
 

@@ -126,6 +126,11 @@ public class PlaceholderFragment extends Fragment {
     // NO STATIC fields must be declared here except the ones described values
     // The reason is that this class represent each instance of the SyncProxyTester application
 
+    /**
+     * Placeholder for the Application Id field
+     */
+    public static final String EMPTY_APP_ID = "";
+
     private static final String LOG_TAG = PlaceholderFragment.class.getSimpleName();
     private static final String MOBILE_NAV_FRAGMENT_TAG = "MOBILE_NAV_FRAGMENT_TAG";
     private static final String AUDIO_FRAGMENT_TAG = "AUDIO_FRAGMENT_TAG";
@@ -184,11 +189,10 @@ public class PlaceholderFragment extends Fragment {
     private int mAutoIncCorrId = 0;
     private int autoIncChoiceSetId = 1;
     private int mTabId = 0;
-    private String mAppId = "";
     /**
-     * Session Id associated with concrete instance of this Fragment
+     * Application Id associated with the Fragment
      */
-    private byte mSessionId = 0;
+    private String mAppId = "";
     private Integer mLatestDeleteCommandCmdID = null;
     /**
      * Reference to PutFile dialog's local filename text field, so that the
@@ -257,10 +261,18 @@ public class PlaceholderFragment extends Fragment {
         return autoIncChoiceId++;
     }
 
+    /**
+     * Return Application Id associated with the specific Fragment
+     * @return Application Id
+     */
     public String getAppId() {
         return mAppId;
     }
 
+    /**
+     * Set Application Id for the specific Fragment
+     * @param value Application Id
+     */
     public void setAppId(String value) {
         mAppId = value;
         mLogAdapter.setAppId(mAppId);
@@ -630,15 +642,6 @@ public class PlaceholderFragment extends Fragment {
         return mAutoIncCorrId++;
     }
 
-    public byte getSessionId() {
-        return mSessionId;
-    }
-
-    public void setSessionId(byte value) {
-        mSessionId = value;
-        mLogAdapter.setSessionId(mSessionId);
-    }
-
     public void setAudioServiceStateOn(OutputStream outputStream) {
         if (mAudioServicePreviewFragment != null) {
             mAudioServicePreviewFragment.setAudioServiceStateOn(outputStream);
@@ -902,7 +905,7 @@ public class PlaceholderFragment extends Fragment {
     }
 
     private void audioButtonListener() {
-        //mBoundProxyService.playPauseAnnoyingRepetitiveAudio();
+        ((SyncProxyTester) getActivity()).mBoundProxyService.playPauseAnnoyingRepetitiveAudio();
     }
 
     private void sendMessageListener() {

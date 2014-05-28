@@ -1957,7 +1957,7 @@ public class SyncProxyALMManager {
 	private class ALMInterfaceBroker implements IProxyListenerALM {
 		
 		@Override
-		public void onAddSubMenuResponse(byte sessionId, AddSubMenuResponse response) {
+		public void onAddSubMenuResponse(String appId, AddSubMenuResponse response) {
 			final ISyncAddSubMenuResponseListener listener = _addSubMenuResponseListeners.get(response.getCorrelationID());
 			SyncSubMenu syncSubMenuToReturn = null;
 			Object tagToReturn = null;
@@ -1984,7 +1984,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onAlertResponse(byte sessionId, AlertResponse response) {
+		public void onAlertResponse(String appId, AlertResponse response) {
 			final ISyncAlertResponseListener listener = _alertResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2004,7 +2004,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onCreateInteractionChoiceSetResponse(byte sessionId,
+		public void onCreateInteractionChoiceSetResponse(String appId,
                                                          CreateInteractionChoiceSetResponse response) {
 			final ISyncCreateInteractionChoiceSetResponseListener listener = _createInteractionChoiceSetResponseListeners.get(response.getCorrelationID());
 			SyncChoiceSet syncChoiceSetToReturn = null;
@@ -2033,7 +2033,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onDeleteCommandResponse(byte sessionId, DeleteCommandResponse response) {
+		public void onDeleteCommandResponse(String appId, DeleteCommandResponse response) {
 			final ISyncDeleteCommandResponseListener listener = _createDeleteCommandResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2053,7 +2053,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onDeleteInteractionChoiceSetResponse(byte sessionId,
+		public void onDeleteInteractionChoiceSetResponse(String appId,
                                                          DeleteInteractionChoiceSetResponse response) {
 			final ISyncDeleteInteractionChoiceSetResponseListener listener = _deleteInteractionchoiceSetResponseListeners.get(response.getCorrelationID());		
 			Object tagToReturn = null;
@@ -2073,7 +2073,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onDeleteSubMenuResponse(byte sessionId, DeleteSubMenuResponse response) {
+		public void onDeleteSubMenuResponse(String appId, DeleteSubMenuResponse response) {
 			final ISyncDeleteSubMenuResponseListener listener = _deleteSubMenuResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2120,7 +2120,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onEncodedSyncPDataResponse(byte sessionId, EncodedSyncPDataResponse response) {
+		public void onEncodedSyncPDataResponse(String appId, EncodedSyncPDataResponse response) {
 			final ISyncEncodedSyncPDataResponseListener listener = _encodedSyncPDataResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2140,7 +2140,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onSyncPDataResponse(byte sessionId, SyncPDataResponse response) {
+		public void onSyncPDataResponse(String appId, SyncPDataResponse response) {
 			final ISyncSyncPDataResponseListener listener = _syncPDataResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2165,7 +2165,7 @@ public class SyncProxyALMManager {
 		}
 		
 		@Override
-		public void onPerformInteractionResponse(byte sessionId, PerformInteractionResponse response) {
+		public void onPerformInteractionResponse(String appId, PerformInteractionResponse response) {
 			final ISyncPerformInteractionResponseListener listener = _performInteractionResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2207,7 +2207,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onResetGlobalPropertiesResponse(byte sessionId,
+		public void onResetGlobalPropertiesResponse(String appId,
                                                     ResetGlobalPropertiesResponse response) {
 			final ISyncResetGlobalPropertiesListener listener = _resetGlobalPropertiesResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
@@ -2228,7 +2228,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onSetGlobalPropertiesResponse(byte sessionId,
+		public void onSetGlobalPropertiesResponse(String appId,
                                                   SetGlobalPropertiesResponse response) {
 			final ISyncSetGlobalPropertiesResponseListener listener = _setGlobalPropertiesResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
@@ -2249,7 +2249,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onSetMediaClockTimerResponse(byte sessionId, SetMediaClockTimerResponse response) {
+		public void onSetMediaClockTimerResponse(String appId, SetMediaClockTimerResponse response) {
 			final ISyncSetMediaClockTimerResponseListener listener = _setMediaClockTimerResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2269,7 +2269,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onShowResponse(byte sessionId, ShowResponse response) {
+		public void onShowResponse(String appId, ShowResponse response) {
 			final ISyncShowResponseListener listener = _showResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2289,7 +2289,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onSpeakResponse(byte sessionId, SpeakResponse response) {
+		public void onSpeakResponse(String appId, SpeakResponse response) {
 			final ISyncSpeakResponseListener listener = _speakResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2309,7 +2309,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onOnButtonEvent(byte sessionId, OnButtonEvent notification) {
+		public void onOnButtonEvent(String appId, OnButtonEvent notification) {
 			final ISyncButtonListener listener = _buttonListeners.get(notification.getButtonName());
 			
 			// Return if listener is null
@@ -2321,7 +2321,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onOnButtonPress(byte sessionId, OnButtonPress notification) {
+		public void onOnButtonPress(String appId, OnButtonPress notification) {
 			final ISyncButtonListener listener = _buttonListeners.get(notification.getButtonName());
 			
 			// Return if listener is null
@@ -2333,7 +2333,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onSubscribeButtonResponse(byte sessionId, SubscribeButtonResponse response) {
+		public void onSubscribeButtonResponse(String appId, SubscribeButtonResponse response) {
 			final ISyncButtonListener listener = _buttonResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2353,7 +2353,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onOnCommand(byte sessionId, OnCommand notification) {
+		public void onOnCommand(String appId, OnCommand notification) {
 			final ISyncCommandListener listener = _commandListeners.get(notification.getCmdID());
 			final SyncCommand syncCommand = _syncCommandsByCommandID.get(notification.getCmdID());
 			Object tagToReturn = null;
@@ -2368,7 +2368,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onAddCommandResponse(byte sessionId, AddCommandResponse response) {
+		public void onAddCommandResponse(String appId, AddCommandResponse response) {
 			final ISyncCommandListener listener = _commandResponseListeners.get(response.getCorrelationID());
 			SyncCommand syncCommandToReturn = null;
 			Object tagToReturn = null;
@@ -2404,7 +2404,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onUnsubscribeButtonResponse(byte sessionId, UnsubscribeButtonResponse response) {
+		public void onUnsubscribeButtonResponse(String appId, UnsubscribeButtonResponse response) {
 			final ISyncUnsubscribeButtonResponseListener listener = _unsubscribeButtonResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2429,13 +2429,13 @@ public class SyncProxyALMManager {
 		}
 		
 		@Override
-		public void onOnPermissionsChange(byte sessionId, OnPermissionsChange notification) {
+		public void onOnPermissionsChange(String appId, OnPermissionsChange notification) {
 			_lifecycleListener.onOnPermissionsChange(notification);
 		}
 
 		@Override
-		public void onOnHMIStatus(byte sessionId, OnHMIStatus notification) {
-			_lifecycleListener.onOnHMIStatus(sessionId, notification);
+		public void onOnHMIStatus(String appId, OnHMIStatus notification) {
+			_lifecycleListener.onOnHMIStatus(appId, notification);
 		}
 
 		@Override
@@ -2451,87 +2451,87 @@ public class SyncProxyALMManager {
 		}
 
 		@Override
-		public void onSubscribeVehicleDataResponse(byte sessionId, SubscribeVehicleDataResponse response) {
+		public void onSubscribeVehicleDataResponse(String appId, SubscribeVehicleDataResponse response) {
 			_lifecycleListener.onSubscribeVehicleDataResponse(response);
 		}
 
 		@Override
-		public void onUnsubscribeVehicleDataResponse(byte sessionId, UnsubscribeVehicleDataResponse response) {
+		public void onUnsubscribeVehicleDataResponse(String appId, UnsubscribeVehicleDataResponse response) {
 			_lifecycleListener.onUnsubscribeVehicleDataResponse(response);
 		}
 
 		@Override
-		public void onGetVehicleDataResponse(byte sessionId, GetVehicleDataResponse response) {
+		public void onGetVehicleDataResponse(String appId, GetVehicleDataResponse response) {
 			_lifecycleListener.onGetVehicleDataResponse(response);
 		}
 
 		@Override
-		public void onReadDIDResponse(byte sessionId, ReadDIDResponse response) {
+		public void onReadDIDResponse(String appId, ReadDIDResponse response) {
 			_lifecycleListener.onReadDIDResponse(response);
 		}
 
 		@Override
-		public void onGetDTCsResponse(byte sessionId, GetDTCsResponse response) {
+		public void onGetDTCsResponse(String appId, GetDTCsResponse response) {
 			_lifecycleListener.onGetDTCsResponse(response);
 		}
 
 		@Override
-		public void onOnVehicleData(byte sessionId, OnVehicleData notification) {
+		public void onOnVehicleData(String appId, OnVehicleData notification) {
 			_lifecycleListener.onOnVehicleData(notification);
 		}
 		
 		@Override
-		public void onPerformAudioPassThruResponse(byte sessionId, PerformAudioPassThruResponse response) {
+		public void onPerformAudioPassThruResponse(String appId, PerformAudioPassThruResponse response) {
 			_lifecycleListener.onPerformAudioPassThruResponse(response);
 		}
 
 		@Override
-		public void onEndAudioPassThruResponse(byte sessionId, EndAudioPassThruResponse response) {
+		public void onEndAudioPassThruResponse(String appId, EndAudioPassThruResponse response) {
 			_lifecycleListener.onEndAudioPassThruResponse(response);
 		}
 
 		@Override
-		public void onOnAudioPassThru(byte sessionId, OnAudioPassThru notification) {
+		public void onOnAudioPassThru(String appId, OnAudioPassThru notification) {
 			_lifecycleListener.onOnAudioPassThru(notification);
 		}
 
 		@Override
-		public void onPutFileResponse(byte sessionId, PutFileResponse response) {
+		public void onPutFileResponse(String appId, PutFileResponse response) {
 			_lifecycleListener.onPutFileResponse(response);
 		}
 
 		@Override
-		public void onDeleteFileResponse(byte sessionId, DeleteFileResponse response) {
+		public void onDeleteFileResponse(String appId, DeleteFileResponse response) {
 			_lifecycleListener.onDeleteFileResponse(response);
 		}
 
 		@Override
-		public void onListFilesResponse(byte sessionId, ListFilesResponse response) {
+		public void onListFilesResponse(String appId, ListFilesResponse response) {
 			_lifecycleListener.onListFilesResponse(response);
 		}
 
 		@Override
-		public void onSetAppIconResponse(byte sessionId, SetAppIconResponse response) {
+		public void onSetAppIconResponse(String appId, SetAppIconResponse response) {
 			_lifecycleListener.onSetAppIconResponse(response);
 		}
 
 		@Override
-		public void onScrollableMessageResponse(byte sessionId, ScrollableMessageResponse response) {
+		public void onScrollableMessageResponse(String appId, ScrollableMessageResponse response) {
 			_lifecycleListener.onScrollableMessageResponse(response);
 		}
 
 		@Override
-		public void onChangeRegistrationResponse(byte sessionId, ChangeRegistrationResponse response) {
+		public void onChangeRegistrationResponse(String appId, ChangeRegistrationResponse response) {
 			_lifecycleListener.onChangeRegistrationResponse(response);
 		}
 
 		@Override
-		public void onSetDisplayLayoutResponse(byte sessionId, SetDisplayLayoutResponse response) {
+		public void onSetDisplayLayoutResponse(String appId, SetDisplayLayoutResponse response) {
 			_lifecycleListener.onSetDisplayLayoutResponse(response);
 		}
 
 		@Override
-		public void onOnLanguageChange(byte sessionId, OnLanguageChange notification) {
+		public void onOnLanguageChange(String appId, OnLanguageChange notification) {
 			_lifecycleListener.onOnLanguageChange(notification);
 		}
 		public void onSliderResponse(SliderResponse response) {
@@ -2539,81 +2539,81 @@ public class SyncProxyALMManager {
 		}
 
 		@Override
-		public void onAlertManeuverResponse(byte sessionId, AlertManeuverResponse response) {
+		public void onAlertManeuverResponse(String appId, AlertManeuverResponse response) {
 			_lifecycleListener.onAlertManeuverResponse(response);
 		}
 
 		@Override
-		public void onShowConstantTBTResponse(byte sessionId, ShowConstantTBTResponse response) {
+		public void onShowConstantTBTResponse(String appId, ShowConstantTBTResponse response) {
 			_lifecycleListener.onShowConstantTBTResponse(response);
 		}
 
 		@Override
-		public void onUpdateTurnListResponse(byte sessionId, UpdateTurnListResponse response) {
+		public void onUpdateTurnListResponse(String appId, UpdateTurnListResponse response) {
 			_lifecycleListener.onUpdateTurnListResponse(response);
 		}
 
         @Override
-        public void onSystemRequestResponse(byte sessionId, SystemRequestResponse response) {
+        public void onSystemRequestResponse(String appId, SystemRequestResponse response) {
 
         }
 
         @Override
-        public void onMobileNaviStart(String appId, byte sessionId) {
+        public void onMobileNaviStart(String appId) {
 
         }
 
         @Override
-        public void onMobileNavAckReceived(String appId, byte sessionId, int frameReceivedNumber) {
+        public void onMobileNavAckReceived(String appId, int frameReceivedNumber) {
 
         }
 
         @Override
-        public void onOnTouchEvent(byte sessionId, OnTouchEvent notification) {
+        public void onOnTouchEvent(String appId, OnTouchEvent notification) {
 
         }
 
         @Override
-        public void onKeyboardInput(byte sessionId, OnKeyboardInput msg) {
+        public void onKeyboardInput(String appId, OnKeyboardInput msg) {
 
         }
 
         @Override
-        public void onOnSystemRequest(byte sessionId, OnSystemRequest notification) {
+        public void onOnSystemRequest(String appId, OnSystemRequest notification) {
         }
 
         @Override
-        public void onRegisterAppRequest(byte sessionId, RegisterAppInterface msg) {
-
-        }
-
-        @Override
-        public void onAppUnregisteredAfterLanguageChange(byte sessionId, OnLanguageChange msg) {
+        public void onRegisterAppRequest(String appId, RegisterAppInterface msg) {
 
         }
 
         @Override
-        public void onAppUnregisteredReason(byte sessionId, AppInterfaceUnregisteredReason reason) {
+        public void onAppUnregisteredAfterLanguageChange(String appId, OnLanguageChange msg) {
 
         }
 
         @Override
-        public void onProtocolServiceEnded(ServiceType serviceType, byte sessionId) {
+        public void onAppUnregisteredReason(String appId, AppInterfaceUnregisteredReason reason) {
 
         }
 
         @Override
-        public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId) {
+        public void onProtocolServiceEnded(ServiceType serviceType, String appId) {
 
         }
 
         @Override
-        public void onSessionStarted(String appId, byte sessionId) {
+        public void onProtocolServiceEndedAck(ServiceType serviceType, String appId) {
 
         }
 
         @Override
-        public void onAudioServiceStart(String appId, byte sessionId) {
+        public void onSessionStarted(String appId) {
+
+        }
+
+        @Override
+        public void onAudioServiceStart(String appId) {
 
         }
 
@@ -2623,18 +2623,18 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onDiagnosticMessageResponse(byte sessionId,
+        public void onDiagnosticMessageResponse(String appId,
                                                 DiagnosticMessageResponse diagnosticMessageResponse) {
 
         }
 
         @Override
-        public void onStartServiceNackReceived(String appId, byte sessionId, ServiceType serviceType) {
+        public void onStartServiceNackReceived(String appId, ServiceType serviceType) {
 
         }
 
         @Override
-        public void onHashChange(byte sessionId, OnHashChange onHashChange) {
+        public void onHashChange(String appId, OnHashChange onHashChange) {
 
         }
 
@@ -2644,12 +2644,12 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onPutFileRequest(byte sessionId, PutFile putFile) {
+        public void onPutFileRequest(String appId, PutFile putFile) {
 
         }
 
         @Override
-        public void onSliderResponse(byte sessionId, SliderResponse response) {
+        public void onSliderResponse(String appId, SliderResponse response) {
 
         }
     }

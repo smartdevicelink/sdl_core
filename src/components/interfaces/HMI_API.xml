@@ -3074,6 +3074,9 @@
       	Array of bytes comprising CAN message.
       </description>
     </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
+    </param>
   </function>
   <function name="DiagnosticMessage" messagetype="response">
     <param name="messageDataResult" type="Integer" minvalue="0" maxvalue="255" minsize="1" maxsize="65535" array="true" mandatory="true">

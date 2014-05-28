@@ -9,9 +9,9 @@ import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
  */
 public interface IProxyListenerALMTesting extends IProxyListenerALM {
 
-	public void onRegisterAppInterfaceResponse(byte sessionId,
+	public void onRegisterAppInterfaceResponse(String appId,
                                                RegisterAppInterfaceResponse response);
 
-	public void onUnregisterAppInterfaceResponse(byte sessionId,
+	public void onUnregisterAppInterfaceResponse(String appId,
                                                  UnregisterAppInterfaceResponse response);
 }

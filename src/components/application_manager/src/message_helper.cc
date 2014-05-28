@@ -572,9 +572,6 @@ smart_objects::SmartObject* MessageHelper::CreateModuleInfoSO(
   uint32_t function_id) {
   smart_objects::SmartObject* module_info = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
-  if (NULL == module_info) {
-    return NULL;
-  }
   smart_objects::SmartObject& object = *module_info;
   object[strings::params][strings::message_type] = static_cast<int>(kRequest);
   object[strings::params][strings::function_id] = static_cast<int>(function_id);
@@ -1093,6 +1090,35 @@ smart_objects::SmartObject* MessageHelper::CreateAddVRCommandToHMI(
   (*vr_command)[strings::msg_params] = msg_params;
 
   return vr_command;
+}
+
+bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
+                                               smart_objects::SmartObject& output) {
+
+  if (false == app.valid()) {
+    return false;
+  }
+
+  const smart_objects::SmartObject* app_types = app->app_types();
+  const smart_objects::SmartObject* ngn_media_screen_name = app->ngn_media_screen_name();
+  const connection_handler::DeviceHandle handle = app->device();
+  std::string device_name = ApplicationManagerImpl::instance()->GetDeviceName(handle);
+
+  output = smart_objects::SmartObject(smart_objects::SmartType_Map);
+  output[strings::app_name] = app->name();
+  output[strings::icon] = app->app_icon_path();
+  output[strings::device_name] = device_name;
+  output[strings::app_id] = app->app_id();
+  output[strings::hmi_display_language_desired] = app->ui_language();
+  output[strings::is_media_application] = app->is_media_application();
+
+  if (NULL != ngn_media_screen_name) {
+    output[strings::ngn_media_screen_app_name] = ngn_media_screen_name;
+  }
+  if (NULL != app_types) {
+    output[strings::app_type] = *app_types;
+  }
+  return true;
 }
 
 void MessageHelper::SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app) {
