@@ -1355,7 +1355,7 @@ void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 
   // If application is revoked it should not be activated
-  if (permissions.appRevoked) {
+  if (permissions.appRevoked || !permissions.isSDLAllowed) {
     return;
   }
 

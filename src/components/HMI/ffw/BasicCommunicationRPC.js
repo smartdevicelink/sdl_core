@@ -265,7 +265,9 @@ FFW.BasicCommunication = FFW.RPCObserver
                             SDL.SDLModel.stateLimited = null;
                         }
 
-                        SDL.SDLController.getApplicationModel(appID).turnOnSDL(appID);
+                        if (response.result.isSDLAllowed) {
+                            SDL.SDLController.getApplicationModel(appID).turnOnSDL(appID);
+                        }
                     }
 
                     delete SDL.SDLModel.activateAppRequestsList[response.id];

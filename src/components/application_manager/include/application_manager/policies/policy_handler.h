@@ -91,8 +91,8 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * @param Device id or 0, if concern to all SDL functionality
    * @param User consent from response
    */
-  void OnAllowSDLFunctionalityNotification(bool is_allowed, uint32_t device_id =
-                                               0);
+  void OnAllowSDLFunctionalityNotification(bool is_allowed,
+                                           uint32_t device_id = 0);
 
   /**
    * @brief Increment counter for ignition cycles
@@ -274,6 +274,7 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   PTExchangeHandler* exchange_handler_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
   bool on_ignition_check_done_;
+  uint32_t last_activated_app_;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI

@@ -381,6 +381,27 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(uint32_t key,
   return result;
 }
 
+struct CompareMAC {
+  explicit CompareMAC(const std::string& mac) : mac_(mac) {}
+  bool operator () (const DeviceList::value_type& device) {
+    return strcasecmp(device.second.mac_address().c_str(), mac_.c_str()) == 0;
+  }
+ private:
+   std::string mac_;
+};
+
+bool ConnectionHandlerImpl::GetDeviceID(const std::string& mac_address,
+                         DeviceHandle* device_handle) {
+  DeviceList::const_iterator it = std::find_if(device_list_.begin(),
+                                               device_list_.end(),
+                                               CompareMAC(mac_address));
+  if (it != device_list_.end()) {
+    *device_handle = it->first;
+    return true;
+  }
+  return false;
+}
+
 int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   DeviceHandle device_handle, std::string* device_name,
   std::list<uint32_t>* applications_list,
