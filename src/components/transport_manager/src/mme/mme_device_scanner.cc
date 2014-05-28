@@ -204,7 +204,8 @@ bool MmeDeviceScanner::IsInitialised() const {
   return initialised_;
 }
 
-void MmeDeviceScanner::OnDeviceArrived(msid_t msid) {
+void MmeDeviceScanner::OnDeviceArrived(const MmeDeviceInfo* mme_device_info) {
+  msid_t msid = mme_device_info->msid;
   std::string mount_point;
   MmeDevice::Protocol protocol;
   std::string unique_device_id;
@@ -212,7 +213,12 @@ void MmeDeviceScanner::OnDeviceArrived(msid_t msid) {
   std::string product;
   bool attached; // not used
   if (GetMmeInfo(msid, mount_point, protocol, unique_device_id, vendor, product, attached)) {
+#define CONSTRUCT_DEVICE_NAME 0
+#if CONSTRUCT_DEVICE_NAME
     std::string device_name = vendor + " " + product;
+#else
+    std::string device_name = std::string(mme_device_info->name);
+#endif
     switch (protocol) {
       case MmeDevice::IAP: {
         MmeDevicePtr mme_device(new IAPDevice(mount_point, device_name, unique_device_id, controller_));
@@ -247,7 +253,8 @@ void MmeDeviceScanner::OnDeviceArrived(msid_t msid) {
   }
 }
 
-void MmeDeviceScanner::OnDeviceLeft(msid_t msid) {
+void MmeDeviceScanner::OnDeviceLeft(const MmeDeviceInfo* mme_device_info) {
+  msid_t msid = mme_device_info->msid;
   bool erased;
   devices_lock_.Acquire();
   DeviceContainer::iterator i = devices_.find(msid);
@@ -419,8 +426,10 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
           MmeDeviceInfo* mme_device_info = (MmeDeviceInfo*) (&buffer_[1]);
           msid_t msid = mme_device_info->msid;
           const char* name = mme_device_info->name;
-          LOG4CXX_DEBUG(logger_, "SDL_MSG_IPOD_DEVICE_CONNECT: msid = " << msid << ", name = " << name);
-          parent_->OnDeviceArrived(msid);
+          const char* protocol = mme_device_info->iAP2 ? "iAP2" : "iAP";
+          LOG4CXX_DEBUG(logger_, "SDL_MSG_IPOD_DEVICE_CONNECT: msid = " << msid
+            << ", name = " << name << ", protocol = " << protocol);
+          parent_->OnDeviceArrived(mme_device_info);
           LOG4CXX_DEBUG(logger_, "Sending SDL_MSG_IPOD_DEVICE_CONNECT_ACK");
           ack_buffer_[0] = SDL_MSG_IPOD_DEVICE_CONNECT_ACK;
           LOG4CXX_TRACE(logger_, "Sending message to " << ack_mq_name);
@@ -436,8 +445,10 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
           MmeDeviceInfo* mme_device_info = (MmeDeviceInfo*) (&buffer_[1]);
           msid_t msid = mme_device_info->msid;
           const char* name = mme_device_info->name;
-          LOG4CXX_DEBUG(logger_, "SDL_MSG_IPOD_DEVICE_DISCONNECT: msid = " << msid << ", name = " << name);
-          parent_->OnDeviceLeft(msid);
+          const char* protocol = mme_device_info->iAP2 ? "iAP2" : "iAP";
+          LOG4CXX_DEBUG(logger_, "SDL_MSG_IPOD_DEVICE_DISCONNECT: msid = " << msid
+            << ", name = " << name << ", protocol = " << protocol);
+          parent_->OnDeviceLeft(mme_device_info);
           LOG4CXX_DEBUG(logger_, "Sending SDL_MSG_IPOD_DEVICE_DISCONNECT_ACK");
           ack_buffer_[0] = SDL_MSG_IPOD_DEVICE_DISCONNECT_ACK;
           LOG4CXX_TRACE(logger_, "Sending message to " << ack_mq_name);

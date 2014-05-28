@@ -66,8 +66,8 @@ private:
   typedef std::vector<msid_t> MsidContainer;
   typedef std::map<msid_t, MmeDevicePtr> DeviceContainer;
 
-  void OnDeviceArrived(msid_t msid);
-  void OnDeviceLeft(msid_t msid);
+  void OnDeviceArrived(const MmeDeviceInfo* mme_device_info);
+  void OnDeviceLeft(const MmeDeviceInfo* mme_device_info);
   void NotifyDevicesUpdated();
   bool GetMmeList(MsidContainer& msids);
   bool GetMmeInfo(
