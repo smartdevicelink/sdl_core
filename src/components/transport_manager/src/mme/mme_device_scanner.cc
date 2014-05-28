@@ -351,48 +351,79 @@ bool MmeDeviceScanner::GetMmeInfo(
   qdb_result_t* res = qdb_query(qdb_hdl_, 0, query, msid);
   if (res != 0) {
     LOG4CXX_DEBUG(logger_, "Parsing result");
+    bool errors_occured = false;
     char* data = (char*) qdb_cell(res, 0, 0); // mountpath
-    mount_point = std::string(data);
-    LOG4CXX_DEBUG(logger_, "Mount point " << mount_point);
-    data = (char*) qdb_cell(res, 0, 1); // fs_type
-    if (0 == strcmp(data, "ipod")) {
-      protocol = MmeDevice::IAP;
-      LOG4CXX_DEBUG(logger_, "Protocol iAP");
-    }
-    else if (0 == strcmp(data, "iap2")) {
-      protocol = MmeDevice::IAP2;
-      LOG4CXX_DEBUG(logger_, "Protocol iAP2");
+    if (data != 0) {
+      mount_point = std::string(data);
+      LOG4CXX_DEBUG(logger_, "Mount point " << mount_point);
     }
     else {
-      protocol = MmeDevice::UnknownProtocol;
-      LOG4CXX_WARN(logger_, "Unsupported protocol " << data);
+      LOG4CXX_ERROR(logger_, "Error parsing column mountpath");
+      errors_occured = true;
+    }
+    data = (char*) qdb_cell(res, 0, 1); // fs_type
+    if (data != 0) {
+      if (0 == strcmp(data, "ipod")) {
+        protocol = MmeDevice::IAP;
+        LOG4CXX_DEBUG(logger_, "Protocol iAP");
+      }
+      else if (0 == strcmp(data, "iap2")) {
+        protocol = MmeDevice::IAP2;
+        LOG4CXX_DEBUG(logger_, "Protocol iAP2");
+      }
+      else {
+        protocol = MmeDevice::UnknownProtocol;
+        LOG4CXX_WARN(logger_, "Unsupported protocol " << data);
+      }
+    }
+    else {
+      LOG4CXX_ERROR(logger_, "Error parsing column fs_type");
+      errors_occured = true;
     }
     data = (char*) qdb_cell(res, 0, 2); // serial
-    unique_device_id = std::string(data);
-    LOG4CXX_DEBUG(logger_, "Device ID " << unique_device_id);
+    if (data != 0) {
+      unique_device_id = std::string(data);
+      LOG4CXX_DEBUG(logger_, "Device ID " << unique_device_id);
+    }
+    else {
+      LOG4CXX_ERROR(logger_, "Error parsing column serial");
+      errors_occured = true;
+    }
     data = (char*) qdb_cell(res, 0, 3); // manufacturer
-    vendor = std::string(data);
-    LOG4CXX_DEBUG(logger_, "Vendor " << vendor);
+    if (data != 0) {
+      vendor = std::string(data);
+      LOG4CXX_DEBUG(logger_, "Vendor " << vendor);
+    }
+    else {
+      LOG4CXX_ERROR(logger_, "Error parsing column manufacturer");
+      errors_occured = true;
+    }
     data = (char*) qdb_cell(res, 0, 4); // device_name
-    if (strcmp(data, "") != 0) {
+    if (data != 0) {
       product = std::string(data);
       LOG4CXX_DEBUG(logger_, "Product " << product);
     }
-    else { // for some reason device_name can be empty
-      product = "Unnamed device";
-      LOG4CXX_WARN(logger_, "Unnamed product");
+    else {
+      LOG4CXX_ERROR(logger_, "Error parsing column device_name");
+      errors_occured = true;
     }
     qdb_int* attached_data = (qdb_int*) qdb_cell(res, 0, 5); // attached
-    qdb_int attached_int = *attached_data;
-    attached = (attached_int != 0);
-    if (attached) {
-      LOG4CXX_DEBUG(logger_, "Device is attached");
+    if (attached_data != 0) {
+      qdb_int attached_int = *attached_data;
+      attached = (attached_int != 0);
+      if (attached) {
+        LOG4CXX_DEBUG(logger_, "Device is attached");
+      }
+      else {
+        LOG4CXX_DEBUG(logger_, "Device isn\'t attached");
+      }
     }
     else {
-      LOG4CXX_DEBUG(logger_, "Device isn\'t attached");
+      LOG4CXX_ERROR(logger_, "Error parsing column attached");
+      errors_occured = true;
     }
     qdb_freeresult(res);
-    return true;
+    return !errors_occured;
   }
   else {
     LOG4CXX_ERROR(logger_, "Error querying " << mme_db_name);
