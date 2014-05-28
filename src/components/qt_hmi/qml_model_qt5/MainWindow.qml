@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
-import com.ford.sdl.hmi.log4cxx 1.0
+//import com.ford.sdl.hmi.log4cxx 1.0
 import com.ford.sdl.hmi.named_pipe_notifier 1.0
 import "./controls"
 import "./views"
@@ -310,6 +310,7 @@ Rectangle {
         id: sdlProxy
 
         onAppRegistered: {
+            console.debug("enter onAppRegistered")
             var appTypeToAdd = 0
             if (application.appType !== undefined) {
                 for (var index in application.appType) {
@@ -339,14 +340,11 @@ Rectangle {
                     "startTimeForProgress": -1
                 }
              });
+            console.debug("exit onAppRegistered")
         }
 
         onAppUnregistered: {
-            console.debug("enter")
-            console.debug("Resume unregister:", resume)
-            if (resume) {
-                dataContainer.stashApplication(appId);
-            }
+            console.debug("enter onAppUnregistered")
             dataContainer.removeApplication(appId);
             if ((dataContainer.currentApplication.appId === appId)) {
                 if (dataContainer.applicationContext) {
@@ -357,7 +355,7 @@ Rectangle {
                 }
                 dataContainer.currentApplication.reset()
             }
-            console.debug("exit")
+            console.debug("exit onAppUnregistered")
         }
 
         onPlayTone: {

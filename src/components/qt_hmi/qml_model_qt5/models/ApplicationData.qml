@@ -41,8 +41,8 @@ QtObject {
     property string mainField4
     property string statusBar
     property string mediaTrack
-    property string image
-    property string secondaryImage
+    property string image: ""
+    property string secondaryImage: ""
 
     function reset () {
         console.debug("enter")
@@ -53,6 +53,7 @@ QtObject {
         statusBar = ""
         mediaTrack = ""
         image = ""
+        secondaryImage = ""
         console.debug("exit")
     }
 }

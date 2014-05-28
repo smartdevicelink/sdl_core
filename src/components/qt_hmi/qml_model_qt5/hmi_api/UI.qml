@@ -197,6 +197,7 @@ Item {
         if (fieldSubstrings[Common.TextFieldName.mediaTrack] !== undefined) { showData.hmiUIText.mediaTrack = fieldSubstrings[Common.TextFieldName.mediaTrack]; }
         if (graphic) { showData.hmiUIText.image = graphic.value; }
         if (secondaryGraphic) { showData.hmiUIText.secondaryImage = secondaryGraphic.value; }
+
         if (textAlignment) { showData.hmiUITextAlignment = textAlignment; }
         if (fieldSubstrings[Common.TextFieldName.mediaClock]) {
             showData.mediaClock = {

@@ -147,6 +147,9 @@ QtObject {
                 if (application.hmiUIText.image !== undefined) {
                     currentApplication.hmiUIText.image = application.hmiUIText.image
                 }
+                if (application.hmiUIText.secondaryImage!== undefined) {
+                    currentApplication.hmiUIText.secondaryImage= application.hmiUIText.secondaryImage
+                }
                 if (application.hmiUITextAlignment !== undefined) {
                     currentApplication.hmiUITextAlignment = application.hmiUITextAlignment
                 }
