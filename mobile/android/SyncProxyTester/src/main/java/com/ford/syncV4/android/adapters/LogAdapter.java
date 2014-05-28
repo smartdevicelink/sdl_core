@@ -3,6 +3,7 @@ package com.ford.syncV4.android.adapters;
 import android.util.Log;
 
 import com.ford.syncV4.android.MainApp;
+import com.ford.syncV4.android.activity.PlaceholderFragment;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.util.ArrayList;
@@ -11,8 +12,10 @@ public class LogAdapter extends MessageAdapter {
     
     private String mLogTag;
     private boolean mFullUIDebug;
-    private int mSessionId = 0;
-    private String mAppId = "";
+    /**
+     * Application Id associated with the concrete Fragment
+     */
+    private String mAppId = PlaceholderFragment.EMPTY_APP_ID;
 
     public LogAdapter(String logTag, boolean fullUIDebug, int textViewResourceId,
                       ArrayList<Object> items) {
@@ -141,20 +144,15 @@ public class LogAdapter extends MessageAdapter {
         }
     }
 
-    public int getSessionId() {
-        return mSessionId;
-    }
-
-    public void setSessionId(int value) {
-        mSessionId = value;
-    }
-
     public String getAppId() {
         return mAppId;
     }
 
-    public void setAppId(String mAppId) {
-        this.mAppId = mAppId;
+    public void setAppId(String value) {
+        if (value == null) {
+            return;
+        }
+        mAppId = value;
     }
 
     private void addMessageToUI(final Object m) {

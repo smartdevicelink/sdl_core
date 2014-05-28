@@ -5,13 +5,12 @@ import android.test.InstrumentationTestCase;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.OnLanguageChange;
 import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.Language;
-import com.ford.syncV4.session.Session;
+import com.ford.syncV4.session.SessionTest;
 
 import org.json.JSONException;
 import org.mockito.ArgumentCaptor;
@@ -40,8 +39,7 @@ public class LanguageChangeTest extends InstrumentationTestCase {
     public void testCorrectLanguageChange()
             throws SyncException, JSONException {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
-        SyncProxyALM proxy =
-                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        SyncProxyALM proxy = TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
 
         // send OnLanguageChange first
@@ -64,12 +62,12 @@ public class LanguageChangeTest extends InstrumentationTestCase {
                 ProtocolMessage.RPCTYPE_NOTIFICATION, 2));
 
         ArgumentCaptor<OnLanguageChange> argument = ArgumentCaptor.forClass(OnLanguageChange.class);
-        ArgumentCaptor<Byte> sessionIdCapture = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<String> appIdCapture = ArgumentCaptor.forClass(String.class);
         verify(proxyListenerMock,
                 timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredAfterLanguageChange(
-                sessionIdCapture.capture(),
+                appIdCapture.capture(),
                 argument.capture());
-        assertEquals(Session.DEFAULT_SESSION_ID, sessionIdCapture.getValue().byteValue());
+        assertEquals(SessionTest.APP_ID_DEFAULT, appIdCapture.getValue());
         assertEquals(lang, argument.getValue().getLanguage());
         assertEquals(hmiLang, argument.getValue().getHmiDisplayLanguage());
     }
@@ -80,7 +78,6 @@ public class LanguageChangeTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        //proxy.mWiproVersion = 2;
 
         // send OnLanguageChange first
         Hashtable<String, Object> params = new Hashtable<String, Object>();
@@ -103,17 +100,14 @@ public class LanguageChangeTest extends InstrumentationTestCase {
 
         verify(proxyListenerMock,
                 timeout(CALLBACK_WAIT_TIMEOUT).never()).onAppUnregisteredAfterLanguageChange(
-                Session.DEFAULT_SESSION_ID,
+                SessionTest.APP_ID,
                 null);
     }
 
-    public void testAppUnregisteredWithoutLanguageChange()
-            throws SyncException, JSONException {
+    public void testAppUnregisteredWithoutLanguageChange() throws SyncException, JSONException {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
-        SyncProxyALM proxy =
-                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        SyncProxyALM proxy = TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
         assertNotNull(proxy);
-        //proxy.mWiproVersion = 2;
 
         // send OnAppInterfaceUnregistered
         Hashtable<String, Object> params = new Hashtable<String, Object>();
@@ -126,7 +120,7 @@ public class LanguageChangeTest extends InstrumentationTestCase {
 
         verify(proxyListenerMock,
                 timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredAfterLanguageChange(
-                Session.DEFAULT_SESSION_ID,
+                SessionTest.APP_ID_DEFAULT,
                 null);
     }
 
@@ -167,12 +161,12 @@ public class LanguageChangeTest extends InstrumentationTestCase {
 
         ArgumentCaptor<OnLanguageChange> argument =
                 ArgumentCaptor.forClass(OnLanguageChange.class);
-        ArgumentCaptor<Byte> sessionIdCapture = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<String> appIdCapture = ArgumentCaptor.forClass(String.class);
         verify(proxyListenerMock, timeout(CALLBACK_WAIT_TIMEOUT)).
                          onAppUnregisteredAfterLanguageChange(
-                                 sessionIdCapture.capture(),
+                                 appIdCapture.capture(),
                                  argument.capture());
-        assertEquals(Session.DEFAULT_SESSION_ID, sessionIdCapture.getValue().byteValue());
+        assertEquals(SessionTest.APP_ID_DEFAULT, appIdCapture.getValue());
         assertEquals(lang, argument.getValue().getLanguage());
         assertEquals(hmiLang, argument.getValue().getHmiDisplayLanguage());
     }

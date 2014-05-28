@@ -13,6 +13,7 @@ import java.util.List;
 public class SessionTest extends AndroidTestCase {
 
     public static final String APP_ID = "APP_ID";
+    public static final String APP_ID_DEFAULT = "";
     public static final byte SESSION_ID = 0x01;
 
     public void testSessionIsCreated() throws Exception {

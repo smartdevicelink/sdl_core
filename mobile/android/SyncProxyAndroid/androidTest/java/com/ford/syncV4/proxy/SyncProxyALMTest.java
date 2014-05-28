@@ -13,6 +13,7 @@ import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.session.Session;
+import com.ford.syncV4.session.SessionTest;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.SyncTransport;
@@ -163,8 +164,8 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
             @Override
-            protected void startMobileNaviService(byte sessionID) {
-                super.startMobileNaviService(sessionID);
+            protected void onProtocolServiceStarted_MobileNavi(byte sessionID) {
+                super.onProtocolServiceStarted_MobileNavi(sessionID);
                 assertEquals("Session ID should be equal", syncSession.getSessionId(), (byte) 48);
             }
         };
@@ -284,17 +285,15 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                     }
                 }
             }
-
         };
         ArgumentCaptor<ServiceType> sessionTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
-        ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<String> appIdCaptor = ArgumentCaptor.forClass(String.class);
         proxyALM.handleEndServiceAck(ServiceType.RPC, SESSION_ID);
         verify(listenerALM).onProtocolServiceEndedAck(sessionTypeCaptor.capture(),
-                sessionIdCaptor.capture());
+                appIdCaptor.capture());
         assertEquals(ServiceType.RPC, sessionTypeCaptor.getValue());
-        assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
+        assertEquals(SessionTest.APP_ID_DEFAULT, appIdCaptor.getValue());
     }
-
 
     public void testSyncProxyBaseStartSessionCallbackTest() throws Exception {
         SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
@@ -346,12 +345,10 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
         };
-        ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<String> appIdCaptor = ArgumentCaptor.forClass(String.class);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION);
-        verify(listenerALM).onSessionStarted(appIdCaptor.capture(), sessionIdCaptor.capture());
-        assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
-        // TODO: Implement appId assertion
+        verify(listenerALM).onSessionStarted(appIdCaptor.capture());
+        assertEquals(SessionTest.APP_ID_DEFAULT, appIdCaptor.getValue());
     }
 
     public void testHeartBeatIsSet() throws Exception {

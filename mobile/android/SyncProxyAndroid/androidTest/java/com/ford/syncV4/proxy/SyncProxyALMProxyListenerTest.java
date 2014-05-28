@@ -5,7 +5,6 @@ import android.test.InstrumentationTestCase;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.OnHashChange;
 import com.ford.syncV4.proxy.rpc.OnSystemRequest;
@@ -14,7 +13,7 @@ import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
-import com.ford.syncV4.session.Session;
+import com.ford.syncV4.session.SessionTest;
 
 import org.json.JSONException;
 import org.mockito.ArgumentCaptor;
@@ -24,7 +23,6 @@ import java.util.Vector;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -60,14 +58,14 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
 
         ArgumentCaptor<SystemRequestResponse> responseCaptor =
                 ArgumentCaptor.forClass(SystemRequestResponse.class);
-        ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<String> appIdCaptor = ArgumentCaptor.forClass(String.class);
         verify(proxyListenerMock,
                 timeout(CALLBACK_WAIT_TIMEOUT)).onSystemRequestResponse(
-                sessionIdCaptor.capture(),
+                appIdCaptor.capture(),
                 responseCaptor.capture());
         assertThat(responseCaptor.getValue().getSuccess(), is(true));
         assertThat(responseCaptor.getValue().getResultCode(), is(Result.SUCCESS));
-        assertEquals(Session.DEFAULT_SESSION_ID, sessionIdCaptor.getValue().byteValue());
+        assertEquals(SessionTest.APP_ID_DEFAULT, appIdCaptor.getValue());
     }
 
     public void testOnOnSystemRequestShouldBeCalledOnNotification()
@@ -92,10 +90,10 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
 
         ArgumentCaptor<OnSystemRequest> notificationCaptor =
                 ArgumentCaptor.forClass(OnSystemRequest.class);
-        ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<String> appIdCaptor = ArgumentCaptor.forClass(String.class);
         verify(proxyListenerMock,
                 timeout(CALLBACK_WAIT_TIMEOUT)).onOnSystemRequest(
-                sessionIdCaptor.capture(),
+                appIdCaptor.capture(),
                 notificationCaptor.capture());
         final OnSystemRequest notification = notificationCaptor.getValue();
         assertThat(notification.getRequestType(), is(requestType));
@@ -103,7 +101,7 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
         assertThat(notification.getFileType(), is(fileType));
         assertThat(notification.getOffset(), is(offset));
         assertThat(notification.getLength(), is(length));
-        assertEquals(Session.DEFAULT_SESSION_ID, sessionIdCaptor.getValue().byteValue());
+        assertEquals(SessionTest.APP_ID_DEFAULT, appIdCaptor.getValue());
     }
 
     public void testOnHashChangeShouldBeCalledOnNotification() throws SyncException,
@@ -117,12 +115,12 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
                 params, ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
 
         ArgumentCaptor<OnHashChange> notificationCaptor = ArgumentCaptor.forClass(OnHashChange.class);
-        ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
+        ArgumentCaptor<String> appIdCaptor = ArgumentCaptor.forClass(String.class);
         verify(proxyListenerMock, timeout(CALLBACK_WAIT_TIMEOUT)).onHashChange(
-                sessionIdCaptor.capture(), notificationCaptor.capture());
+                appIdCaptor.capture(), notificationCaptor.capture());
 
         final OnHashChange notification = notificationCaptor.getValue();
         assertThat(notification.getHashID(), is(hashId));
-        assertEquals(Session.DEFAULT_SESSION_ID, sessionIdCaptor.getValue().byteValue());
+        assertEquals(SessionTest.APP_ID_DEFAULT, appIdCaptor.getValue());
     }
 }

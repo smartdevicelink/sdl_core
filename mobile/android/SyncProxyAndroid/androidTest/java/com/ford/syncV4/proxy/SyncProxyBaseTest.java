@@ -84,7 +84,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         SyncProxyBase proxyALM = getSyncProxyBase();
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav,
                 SessionTest.SESSION_ID, ProtocolConstants.PROTOCOL_VERSION_THREE);
-        proxyALM.stopMobileNaviService(SessionTest.SESSION_ID);
+        proxyALM.stopMobileNaviService(SessionTest.APP_ID);
         assertEquals("pool should be empty", false,
                 proxyALM.hasServiceInServicesPool(SessionTest.APP_ID, ServiceType.Mobile_Nav));
     }
@@ -127,7 +127,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     public void testStopMobileNaviSessionForUnexcitingSessionDontThrowsException() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         try {
-            proxyALM.stopMobileNaviService(SessionTest.SESSION_ID);
+            proxyALM.stopMobileNaviService(SessionTest.APP_ID);
         } catch (ArrayIndexOutOfBoundsException e) {
             assertNull("exception should not be thrown", e);
         }
@@ -218,8 +218,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 ProtocolConstants.PROTOCOL_VERSION_THREE);
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service,
                 SessionTest.SESSION_ID, ProtocolConstants.PROTOCOL_VERSION_THREE);
-        Mockito.verify(proxyListenerMock, times(1)).onAudioServiceStart(SessionTest.APP_ID,
-                SessionTest.SESSION_ID);
+        Mockito.verify(proxyListenerMock, times(1)).onAudioServiceStart(SessionTest.APP_ID);
     }
 
     public void testAudioServiceRemovedFromPoolOnStopAudioService() throws Exception {
@@ -234,7 +233,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 SessionTest.SESSION_ID, ProtocolConstants.PROTOCOL_VERSION_THREE);
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service,
                 SessionTest.SESSION_ID, ProtocolConstants.PROTOCOL_VERSION_THREE);
-        proxyALM.stopAudioService(SessionTest.SESSION_ID);
+        proxyALM.stopAudioService(SessionTest.APP_ID);
         Service mobileNaviService = new Service();
         mobileNaviService.setSessionId(SessionTest.SESSION_ID);
         mobileNaviService.setServiceType(ServiceType.Mobile_Nav);
@@ -254,7 +253,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 ProtocolConstants.PROTOCOL_VERSION_THREE);
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service,
                 SessionTest.SESSION_ID, ProtocolConstants.PROTOCOL_VERSION_THREE);
-        proxyALM.startAudioDataTransfer(SessionTest.SESSION_ID);
+        proxyALM.startAudioDataTransfer(SessionTest.APP_ID);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
         verify(proxyALM.mSyncConnection, times(1)).startAudioDataTransfer(sessionIDCaptor.capture());
     }
@@ -267,7 +266,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 ProtocolConstants.PROTOCOL_VERSION_THREE);
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service,
                 SessionTest.SESSION_ID, ProtocolConstants.PROTOCOL_VERSION_THREE);
-        OutputStream stream = proxyALM.startAudioDataTransfer(SessionTest.SESSION_ID);
+        OutputStream stream = proxyALM.startAudioDataTransfer(SessionTest.APP_ID);
         assertNotNull("stream should not be null", stream);
     }
 
@@ -309,7 +308,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
 
         verify(proxyListenerMock,
-                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(Session.DEFAULT_SESSION_ID,
+                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(SessionTest.APP_ID_DEFAULT,
                 reason);
     }
 
@@ -326,7 +325,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
 
         verify(proxyListenerMock,
-                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(Session.DEFAULT_SESSION_ID,
+                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(SessionTest.APP_ID_DEFAULT,
                 reason);
     }
 
@@ -343,7 +342,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
 
         verify(proxyListenerMock,
-                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(Session.DEFAULT_SESSION_ID,
+                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(SessionTest.APP_ID_DEFAULT,
                 reason);
     }
 

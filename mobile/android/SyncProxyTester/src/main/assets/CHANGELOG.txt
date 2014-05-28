@@ -1,4 +1,5 @@
 [CW21]
++ SyncProxyTester | SyncProxyAndroid SDK: Hide SessionId inside mobile SyncSDK, AppId - is a key for the each application
 + SyncProxyAndroid SDK: start/stop service are sync now
 + SyncProxyTester | SyncProxyAndroid SDK: Multiple Sessions support, general look and feel update
 

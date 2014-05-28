@@ -13,20 +13,20 @@ import java.util.List;
 public interface IOnSystemRequestHandler {
     /**
      * Requests to download the files from the given URLs. When done, each of
-     * the files should be uploaded with the {@link ISystemRequestProxy#putSystemFile(byte,
+     * the files should be uploaded with the {@link ISystemRequestProxy#putSystemFile(java.lang.String,
      * String, byte[], Integer, com.ford.syncV4.proxy.rpc.enums.FileType)} method.
      *
      * @param proxy    the proxy used to upload the downloaded files
      * @param urls     a list of URLs to download files from
      * @param fileType optional file type for HTTP requests
      */
-    public void onFilesDownloadRequest(byte sessionId, ISystemRequestProxy proxy,
+    public void onFilesDownloadRequest(String appId, ISystemRequestProxy proxy,
                                        List<String> urls, FileType fileType);
 
     /**
      * Requests the rest of the given file ([offset … offset+length] bytes).
      * When done, the data should be uploaded with the {@link
-     * ISystemRequestProxy#putSystemFile(byte, String, byte[],
+     * ISystemRequestProxy#putSystemFile(java.lang.String, String, byte[],
      * com.ford.syncV4.proxy.rpc.enums.FileType)}
      * method.
      *
@@ -36,7 +36,7 @@ public interface IOnSystemRequestHandler {
      * @param length   length of the requested data
      * @param fileType optional file type
      */
-    public void onFileResumeRequest(final byte sessionId, ISystemRequestProxy proxy, String filename,
+    public void onFileResumeRequest(String appId, ISystemRequestProxy proxy, String filename,
                                     Integer offset, Integer length,
                                     FileType fileType);
 
@@ -49,6 +49,6 @@ public interface IOnSystemRequestHandler {
      * @param fileType type of the file
      * @param requestType type of the request
      */
-    public void onPolicyTableSnapshotRequest(final byte sessionId, final ISystemRequestProxy proxy,
+    public void onPolicyTableSnapshotRequest(String appId, final ISystemRequestProxy proxy,
                                              byte[] data, FileType fileType, RequestType requestType);
 }
