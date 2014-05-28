@@ -273,9 +273,7 @@ IAPDevice::IAPEventThreadDelegate::IAPEventThreadDelegate(
 
 bool IAPDevice::IAPEventThreadDelegate::ArmEvent(struct sigevent* event) {
   LOG4CXX_TRACE(logger_, "Arming for iAP event notification");
-  if (ipod_notify(ipod_hdl_,
-    _NOTIFY_ACTION_POLLARM, _NOTIFY_COND_OBAND | _NOTIFY_COND_INPUT, event) != -1) {
-
+  if (ipod_notify(ipod_hdl_, _NOTIFY_ACTION_POLLARM, _NOTIFY_COND_OBAND, event) != -1) {
     LOG4CXX_DEBUG(logger_, "Successfully armed for iAP event notification");
     return true;
   }
