@@ -46,7 +46,6 @@ def main():
   First argument is customer name,
   Others : file names 
   '''
-  print "RUN"
   customer = sys.argv[1]
   files = sys.argv[2:]
   for input_file in files:
@@ -54,7 +53,7 @@ def main():
     r = customer_prepare.Remover(input_file, customer)
     parced_lines = r.get_parsed_lines()
     input_lines = r.lines
-    if is_diff(input_lines, parced_lines):
+    if is_diff(input_lines, input_lines):
       print "Changes"
       save_lines(input_file, parced_lines)
     else :

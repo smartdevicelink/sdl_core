@@ -5,6 +5,11 @@ import customer_prepare
 import os
 
 class FilesTester:
+#  Class to test Remover with real files
+#  parce folder for testfiles
+#  inputfiles mus be named like that: input_TestName
+#  Expected result files: TestName.CUSTOMER.Result
+#  $Result can be: Success, ParceFail, LengthFail, MatchFail
   input_mask = "input"
   results_dir = "results/"
   def __init__(self, foldername):
@@ -39,6 +44,7 @@ class FilesTester:
       print p
 
   def run(self):
+#	Run All tests
     for input_file_name, expected_result_file_name, customer_name, test_name, expected_result in self.pairs:
       print 80 * "="
       print test_name, "|", customer_name
@@ -53,6 +59,7 @@ class FilesTester:
       print 80 * "="
       
   def test(self, input_file_name, expected_result_file_name, customer_name, test_name):
+#	Run one test and return relust
     remover = customer_prepare.Remover(input_file_name, customer_name)
     expected_result_file = open(expected_result_file_name, "rb")
     expected_lines = expected_result_file.readlines()
@@ -86,6 +93,7 @@ class FilesTester:
     return "Success"
     
   def write_output(self, origin_lines, expected_lines, result_lines, customer_name, test_name):
+#	Write changed by Remover files to FS in result/ filder 
     f = open(self.results_dir + "origin_"+test_name + customer_name, "wb")
     for l in origin_lines:
       f.write(l)

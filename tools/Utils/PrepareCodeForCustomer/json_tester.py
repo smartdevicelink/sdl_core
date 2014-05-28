@@ -8,6 +8,8 @@ def toBool(value):
   return True if value == "True" else False if value == "False" else value
   
 class JsonTester:
+#  Class to test Validator util with json tests
+#  Each test contains preconditions and postconditions and result
   def __init__(self, file_name):
     self.file_name = file_name
     test_file = open(file_name, "rb")
@@ -15,12 +17,15 @@ class JsonTester:
     self.log = False
     
   def run(self):
+#	Run all tests
     print "Run test"
     self.Validator = customer_prepare.Validator(None)
     for test in self.test_cases:
       self.run_test(test)
       
   def run_test(self, test):
+#	run one test 'test'
+#	@param test is json test object
     print 80 * "="
     test_name = test["name"]
     preconditions = test["preconditions"]
@@ -69,6 +74,7 @@ class JsonTester:
     print 80 * "="
   
   def check_post_conditions(self, postconditions):
+#	 Validate post conditions 
     if (self.log == True):
       print "Expected Postconditions:"
     
@@ -91,6 +97,7 @@ class JsonTester:
     return False
   
   def print_status(self):
+#	Print current state of Validator
     r = self.Validator
     print "Real status:"
     print "\tcustomer_name", r.customer_name

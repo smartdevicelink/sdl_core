@@ -14,4 +14,3 @@ then
 fi
 
 find $REPO | grep -E "(.\.c$)|(.\.cc$)|(.\.h&)|(.\.cpp$)"|xargs python ./main.py $CUSTOMER |grep Changes
-

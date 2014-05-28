@@ -5,6 +5,11 @@ import sys
 args = sys.argv[1:]
 
 class Validator:
+#  Class to validate one string of code
+#  Make desigion if current line should be printed or not 
+#  according to self state.
+#  One instance of Validator should be created for each file
+#  or Validator instance should be reseted with reset() method
   customer_tamplate = "CUSTOMER_"
   ifdef_ = "#ifdef "
   startif_ = "#if"
@@ -17,14 +22,11 @@ class Validator:
     self.my_customer_block = False
     self.other_customer_block = False
     self.if_deep = 0
-    
-  def re_init(self, file_name, customer_name):
-    self.file_lines = None
-    self.customer_name = customer_name
-    file_to_read = open(file_name,"rb")
-    self.file_lines = file_to_read.readlines
-    
+
   def validate(self, line):
+#	Make desigion if current line should be printed or not
+#	and change self tate if needed
+#
     if (self.if_deep < 0):
       raise BaseException("deep < 0")
       
@@ -76,18 +78,27 @@ class Validator:
     
   
   def my_customer_line(self, line):
+#	Return true if current line is:
+#        #ifdef CUSTOMER<TARGET_CUSTOMER>
+#	if it's customer line, otherwise return False
     ifdefline = self.ifdef_ + self.customer_tamplate + self.customer_name
     if ( line.find(ifdefline) == -1):
       return False
     return True
   
   def any_customer_line(self, line):
+#	Return true if current line is:
+#        #ifdef CUSTOMER<AY_CUSTOMER>
+#	Otherwise return False
     ifdefline = self.ifdef_ + self.customer_tamplate
     if ( line.find(ifdefline) == -1):
       return False
     return True
     
   def other_customer_line(self, line):
+#	Return true if current line is:
+#        #ifdef CUSTOMER<any customer except TARGET_CUSTOMER>
+#	Otherwise return False
     ifdefline = self.ifdef_ + self.customer_tamplate
     pos = line.find(ifdefline)
     if ( pos == -1):
@@ -98,16 +109,24 @@ class Validator:
     return True
     
   def start_if(self, line):
+#	Return true if current line is:
+#        #if<any code>
+#	Otherwise return False
     if (line.find(self.startif_) != -1):
       return True
     return False
 
   def end_if(self, line):
+#	Return true if current line is:
+#        #endif<any code>
+#	Otherwise return False
     if (line.find(self.endif_) != -1):
       return True
     return False
 
 class Remover:
+#	Class that parce each line of input file with Validator
+#	With method get_parsed_lines, you can get parced code
   def __init__(self, file_name, customer_name):
     input_file = open(file_name, "rb")
     self.lines = input_file.readlines()
@@ -115,6 +134,7 @@ class Remover:
     self.validator = Validator(customer_name)
     
   def get_parsed_lines(self):
+#	return array of lines parced by Validator
     v = self.validator
     output = []
     for line in self.lines:
