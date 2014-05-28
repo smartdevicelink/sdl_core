@@ -198,6 +198,15 @@ class MessageHelper {
       uint32_t cmd_id, const smart_objects::SmartObject& vr_commands,
       uint32_t app_id);
 
+    /*
+     * @brief Create Common.HMIApplication struct application instance
+     * @param app : applicaton instace
+     * @param output smart object to store Common.HMIApplication struct
+     * @return true on succes, otherwise return false;
+     */
+    static bool CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
+                                      smart_objects::SmartObject& output);
+
     static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
     static SmartObjectList CreateAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
 
