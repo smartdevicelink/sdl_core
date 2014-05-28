@@ -48,12 +48,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 MmeDeviceScanner::MmeDeviceScanner(TransportAdapterController* controller)
   : controller_(controller)
   , initialised_(false)
-#ifdef MME_MQ
   , event_mqd_(-1)
   , ack_mqd_(-1)
-#else
-  , mme_hdl_(0)
-#endif
   , qdb_hdl_(0)
 {
 }
@@ -75,7 +71,6 @@ TransportAdapter::Error MmeDeviceScanner::Init() {
     error = TransportAdapter::FAIL;
   }
 
-#ifdef MME_MQ
   const std::string& event_mq_name = profile::Profile::instance()->event_mq_name();
   const std::string& ack_mq_name = profile::Profile::instance()->ack_mq_name();
 #define CREATE_MME_MQ 0
@@ -124,21 +119,6 @@ TransportAdapter::Error MmeDeviceScanner::Init() {
     notify_thread_ = new threads::Thread("MME MQ notifier", new NotifyThreadDelegate(event_mqd_, ack_mqd_, this));
     notify_thread_->start();
   }
-#else
-  const std::string& mme_name = profile::Profile::instance()->mme_sync_name();
-  LOG4CXX_TRACE(logger_, "Connecting to " << mme_name);
-  mme_hdl_ = mme_connect(mme_name.c_str(), 0);
-  if (mme_hdl_ != 0) {
-    LOG4CXX_DEBUG(logger_, "Connected to " << mme_name);
-
-    notify_thread_ = new threads::Thread("MME notifier", new NotifyThreadDelegate(mme_hdl_, this));
-    notify_thread_->start();
-  }
-  else {
-    LOG4CXX_ERROR(logger_, "Could not connect to " << mme_name);
-    error = TransportAdapter::FAIL;
-  }
-#endif
 
   initialised_ = true;
   return error;
@@ -192,7 +172,7 @@ void MmeDeviceScanner::Terminate() {
   if (notify_thread_) {
     notify_thread_->stop();
   }
-#ifdef MME_MQ
+
   const std::string& event_mq_name = profile::Profile::instance()->event_mq_name();
   LOG4CXX_TRACE(logger_, "Closing " << event_mq_name);
   if (mq_close(event_mqd_) != -1) {
@@ -209,16 +189,6 @@ void MmeDeviceScanner::Terminate() {
   else {
     LOG4CXX_WARN(logger_, "Could not close " << ack_mq_name);
   }
-#else
-  const std::string& mme_name = profile::Profile::instance()->mme_sync_name();
-  LOG4CXX_TRACE(logger_, "Disconnecting from " << mme_name);
-  if (mme_disconnect(mme_hdl_) != -1) {
-    LOG4CXX_DEBUG(logger_, "Disconnected from " << mme_name);
-  }
-  else {
-    LOG4CXX_WARN(logger_, "Could not disconnect from " << mme_name);
-  }
-#endif
 
   const std::string& mme_db_name = profile::Profile::instance()->mme_db_name();
   LOG4CXX_TRACE(logger_, "Disconnecting from " << mme_db_name);
@@ -431,7 +401,6 @@ bool MmeDeviceScanner::GetMmeInfo(
   }
 }
 
-#ifdef MME_MQ
 MmeDeviceScanner::NotifyThreadDelegate::NotifyThreadDelegate(mqd_t event_mqd, mqd_t ack_mqd, MmeDeviceScanner* parent) : parent_(parent), event_mqd_(event_mqd), ack_mqd_(ack_mqd), run_(true) {
 }
 
@@ -487,51 +456,6 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
     }
   }
 }
-#else
-MmeDeviceScanner::NotifyThreadDelegate::NotifyThreadDelegate(mme_hdl_t* mme_hdl, MmeDeviceScanner* parent) : parent_(parent), mme_hdl_(mme_hdl) {
-}
 
-bool MmeDeviceScanner::NotifyThreadDelegate::ArmEvent(sigevent* event) {
-  LOG4CXX_TRACE(logger_, "Arming for MME event notification");
-  if (mme_register_for_events(mme_hdl_, MME_EVENT_CLASS_SYNC, event) != -1) {
-    LOG4CXX_DEBUG(logger_, "Successfully armed for MME event notification");
-    return true;
-  }
-  else {
-    LOG4CXX_WARN(logger_, "Could not arm for MME event notification");
-    return false;
-  }
-}
-
-void MmeDeviceScanner::NotifyThreadDelegate::OnPulse() {
-  mme_event_t* mme_event;
-  LOG4CXX_TRACE(logger_, "Getting MME event");
-  if (mme_get_event(mme_hdl_, &mme_event) != -1) {
-    LOG4CXX_DEBUG(logger_, "Parsing MME event");
-    switch (mme_event->type) {
-      case MME_EVENT_MS_STATECHANGE: {
-        mme_ms_statechange_t* mme_ms_statechange = (mme_ms_statechange_t*) (mme_event->data);
-        msid_t msid = mme_ms_statechange->msid;
-        uint32_t old_state = mme_ms_statechange->old_state;
-        uint32_t new_state = mme_ms_statechange->new_state;
-        LOG4CXX_DEBUG(logger_, "MME event MME_EVENT_MS_STATECHANGE: msid = " << msid << ", old_state = " << old_state << ", new_state = " << new_state);
-// Can't obtain any on documentation on state codes, these are empirical
-        if (3 == old_state) {
-          parent_->OnDeviceLeft(msid);
-        }
-        if (3 == new_state) {
-          parent_->OnDeviceArrived(msid);
-        }
-        break;
-      }
-      default:
-        LOG4CXX_DEBUG(logger_, "Not an event of interest");
-    }
-  }
-  else {
-    LOG4CXX_WARN(logger_, "Could not get MME event");
-  }
-}
-#endif
 }  // namespace transport_adapter
 }  // namespace transport_manager

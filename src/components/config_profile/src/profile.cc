@@ -120,7 +120,6 @@ const char* kPolicyOffKey = "PolicySwitchOff";
 const char* kMmeDatabaseNameKey = "MMEDatabase";
 const char* kEventMQKey = "EventMQ";
 const char* kAckMQKey = "AckMQ";
-const char* kMmeSyncNameKey = "MMESync";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -132,7 +131,6 @@ const char* kDefaultTtsDelimiter = ",";
 const char* kDefaultMmeDatabaseName = "/dev/qdb/mediaservice_db";
 const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
 const char* kDefaultAckMQ = "/dev/mqueue/FromSDLCoreUSBAdapter";
-const char* kDefaultMmeSyncName = "/dev/mmsync";
 const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
 const char* kDefaultRecordingFileName = "record.wav";
 const uint32_t kDefaultHeartBeatTimeout = 0;
@@ -203,6 +201,9 @@ Profile::Profile()
     system_files_path_(kDefaultSystemFilesPath),
     transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort),
     tts_delimiter_(kDefaultTtsDelimiter),
+    mme_db_name_(kDefaultMmeDatabaseName),
+    event_mq_name_(kDefaultEventMQ),
+    ack_mq_name_(kDefaultAckMQ),
     recording_file_source_(kDefaultRecordingFileSourceName),
     recording_file_name_(kDefaultRecordingFileName) {
 }
@@ -425,10 +426,6 @@ const std::string& Profile::event_mq_name() const {
 
 const std::string& Profile::ack_mq_name() const {
   return ack_mq_name_;
-}
-
-const std::string& Profile::mme_sync_name() const {
-  return mme_sync_name_;
 }
 
 void Profile::UpdateValues() {
@@ -875,14 +872,6 @@ void Profile::UpdateValues() {
                   kAckMQKey);
 
   LOG_UPDATED_VALUE(ack_mq_name_, kAckMQKey, kTransportManagerSection);
-
-  // MME sync name
-  ReadStringValue(&mme_sync_name_,
-                  kDefaultMmeSyncName,
-                  kTransportManagerSection,
-                  kMmeSyncNameKey);
-
-  LOG_UPDATED_VALUE(mme_sync_name_, kMmeSyncNameKey, kTransportManagerSection);
 
   // Transport manager disconnect timeout
   ReadUIntValue(&transport_manager_disconnect_timeout_,

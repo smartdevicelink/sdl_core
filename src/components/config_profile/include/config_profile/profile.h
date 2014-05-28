@@ -323,8 +323,6 @@ class Profile : public utils::Singleton<Profile> {
 
     const std::string& ack_mq_name() const;
 
-    const std::string& mme_sync_name() const;
-
   private:
     /**
      * Default constructor
@@ -461,7 +459,6 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;
     std::string                     ack_mq_name_;
-    std::string                     mme_sync_name_;
     std::string                     recording_file_source_;
     std::string                     recording_file_name_;
 

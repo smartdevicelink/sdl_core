@@ -41,7 +41,6 @@ option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OF
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
 option(BUILD_MME_SUPPORT "Apple devices support" OFF)
-option(MME_MQ "PASA mqueue event system for Apple devices" ON)
 option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
 option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
@@ -156,9 +155,6 @@ endif()
 
 if (BUILD_MME_SUPPORT)
   add_definitions(-DMME_SUPPORT)
-  if (MME_MQ)
-    add_definitions(-DMME_MQ)
-  endif(MME_MQ)
 endif(BUILD_MME_SUPPORT)
 
 if (BUILD_AVAHI_SUPPORT)
