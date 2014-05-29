@@ -552,6 +552,14 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::Buttons_GetCapabilities));
   ManageHMICommand(button_capabilities);
+#ifdef CUSTOMER_PASA
+  //Line start of transportManager component was left for panasonic
+  if (!connection_handler_) {
+	  LOG4CXX_WARN(logger_, "Connection handler is not set.");
+  } else {
+	  connection_handler_->StartTransportManager();
+  }
+#endif // CUSTOMER_PASA
 }
 
 uint32_t ApplicationManagerImpl::GetNextHMICorrelationID() {
@@ -1227,16 +1235,15 @@ void ApplicationManagerImpl::SendMessageToHMI(
     logger_,
     "Attached schema to message, result if valid: " << message->isValid());
 
-#ifdef HMI_JSON_API
+
+#ifdef HMI_DBUS_API
+  message_to_send->set_smart_object(*message);
+#else
   if (!ConvertSOtoMessage(*message, *message_to_send)) {
     LOG4CXX_WARN(logger_,
                  "Cannot send message to HMI: failed to create string");
     return;
   }
-#endif  // HMI_JSON_API
-
-#ifdef HMI_DBUS_API
-  message_to_send->set_smart_object(*message);
 #endif  // HMI_DBUS_API
 
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message_to_send));
@@ -1588,15 +1595,13 @@ void ApplicationManagerImpl::ProcessMessageFromHMI(
     return;
   }
 
-#ifdef HMI_JSON_API
+#ifdef HMI_DBUS_API
+  *smart_object = message->smart_object();
+#else
   if (!ConvertMessageToSO(*message, *smart_object)) {
     LOG4CXX_ERROR(logger_, "Cannot create smart object from message");
     return;
   }
-#endif  // HMI_JSON_API
-
-#ifdef HMI_DBUS_API
-  *smart_object = message->smart_object();
 #endif  // HMI_DBUS_API
 
   LOG4CXX_INFO(logger_, "Converted message, trying to create hmi command");

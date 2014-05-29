@@ -50,6 +50,19 @@ MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler_param,
   LOG4CXX_INFO(logger_, "Created MessageBrokerAdapter");
 }
 
+#ifdef CUSTOMER_PASA
+#ifdef PASA_HMI
+// Todd: PASA support
+MessageBrokerAdapter::MessageBrokerAdapter(HMIMessageHandler* handler,
+										   const std::string& mqsend,
+										   const std::string& mqrecv)
+    : HMIMessageAdapter(handler),
+      MessageBrokerController(mqsend, mqrecv, "SDL"){
+  LOG4CXX_INFO(logger_, "Created MessageBrokerAdapter");
+}
+#endif  // PASA_HMI
+#endif  // CUSTOMER_PASA
+
 MessageBrokerAdapter::~MessageBrokerAdapter() {
 }
 

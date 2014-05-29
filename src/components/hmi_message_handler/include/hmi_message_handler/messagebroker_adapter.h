@@ -47,7 +47,15 @@ class MessageBrokerAdapter : public HMIMessageAdapter,
  public:
   MessageBrokerAdapter(HMIMessageHandler* handler_param, const std::string&
                                 server_address, uint16_t port);
-  ~MessageBrokerAdapter();
+#ifdef CUSTOMER_PASA
+// Todd: PASA support
+#ifdef PASA_HMI
+  explicit MessageBrokerAdapter(HMIMessageHandler* handler,
+		  	  	  	  	  	    const std::string& mqsend,
+		  	  	  	  	  	    const std::string& mqrecv);
+#endif  // PASA_HMI
+#endif  // CUSTOMER_PASA
+    ~MessageBrokerAdapter();
   void SendMessageToHMI(MessageSharedPointer message);
 
   /*Methods from CMessageBrokerController*/
