@@ -353,6 +353,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         createInfoMessageForAdapter("ProxyService.startProxy()");
         Logger.i(TAG + " Start Proxy");
 
+        String appId = "";
         if (mSyncProxy == null) {
             try {
                 SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
@@ -384,7 +385,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 Vector<AppHMIType> appHMITypes = createAppTypeVector(isNaviApp);
                 BaseTransportConfig transportConfig = null;
                 TransportType transportType = AppPreferencesManager.getTransportType();
-                String appID = AppIdManager.getAppIdByTransport(transportType);
+                appId = AppIdManager.getAppIdByTransport(transportType);
                 switch (transportType) {
                     case BLUETOOTH:
                         transportConfig = new BTTransportConfig();
@@ -401,7 +402,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
                 // Apply custom AppId in case of such possibility selected
                 if (AppPreferencesManager.getIsCustomAppId()) {
-                    appID = AppPreferencesManager.getCustomAppId();
+                    appId = AppPreferencesManager.getCustomAppId();
                 }
 
                 SyncProxyConfigurationResources syncProxyConfigurationResources =
@@ -422,7 +423,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                         syncMsgVersion,
                         /*language desired*/lang,
                         /*HMI Display Language Desired*/hmiLang,
-                        appID,
+                        appId,
                         /*autoActivateID*/null,
                         /*callbackToUIThre1ad*/ false,
                         /*preRegister*/ false,
@@ -438,9 +439,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             }
         }
 
-        // TODO : Add LogAdapters
-        //OnSystemRequestHandler mOnSystemRequestHandler = new OnSystemRequestHandler(mLogAdapters);
-        OnSystemRequestHandler mOnSystemRequestHandler = new OnSystemRequestHandler(null);
+        LogAdapter logAdapter = getLogAdapterByAppId(appId);
+        OnSystemRequestHandler mOnSystemRequestHandler = new OnSystemRequestHandler(logAdapter);
 
         mSyncProxy.setActiveAppId(mActiveAppId);
         mSyncProxy.setOnSystemRequestHandler(mOnSystemRequestHandler);
@@ -483,9 +483,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     public void sendPolicyTableUpdate(String appId, FileType fileType, RequestType requestType) {
-        // TODO : Add LogAdapters
-        //PolicyFilesManager.sendPolicyTableUpdate(mSyncProxy, fileType, requestType, mLogAdapters);
-        PolicyFilesManager.sendPolicyTableUpdate(appId, mSyncProxy, fileType, requestType, null);
+        LogAdapter logAdapter = getLogAdapterByAppId(appId);
+        PolicyFilesManager.sendPolicyTableUpdate(appId, mSyncProxy, fileType, requestType, logAdapter);
     }
 
     public void setCloseSessionCallback(ICloseSession closeSessionCallback) {
@@ -608,9 +607,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     public void startModuleTest(String appId) {
-        // TODO : Add LogAdapters
-        //mTesterMain = new ModuleTest(this, mLogAdapters);
-        mTesterMain = new ModuleTest(appId, this, null);
+        LogAdapter logAdapter = getLogAdapterByAppId(appId);
+        if (logAdapter != null) {
+            mTesterMain = new ModuleTest(appId, this, logAdapter);
+        } else {
+            Logger.w(TAG + " new ModuleTest Log adapter is null");
+        }
     }
 
     public void waiting(boolean waiting) {
@@ -719,10 +721,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 if (hmiFull) {
                     if (firstHMIStatusChange) {
                         showLockMain();
-                        // TODO : Add LogAdapters
-                        //mTesterMain = new ModuleTest(this, mLogAdapters);
-                        mTesterMain = new ModuleTest(appId, this, null);
-                        //mTesterMain = ModuleTest.getModuleTestInstance();
+
+                        LogAdapter logAdapter = getLogAdapterByAppId(appId);
+                        if (logAdapter != null) {
+                            mTesterMain = new ModuleTest(appId, this, logAdapter);
+                            //mTesterMain = ModuleTest.getModuleTestInstance();
+                        } else {
+                            Logger.w(TAG + " new ModuleTest Log adapter is null");
+                        }
 
                         // Process an init state of the predefined requests here, assume that if
                         // hashId is not null means this is resumption
@@ -791,9 +797,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 mTesterMain.restart(appId, null);
                 break;
             case POLICIES_TEST_COMMAND:
-                // TODO : Add LogAdapters
-                //PoliciesTest.runPoliciesTest(this, mLogAdapters);
-                PoliciesTest.runPoliciesTest(appId, this, null);
+                LogAdapter logAdapter = getLogAdapterByAppId(appId);
+                if (logAdapter != null) {
+                    PoliciesTest.runPoliciesTest(appId, this, logAdapter);
+                } else {
+                    Logger.w(TAG + " PoliciesTest.runPoliciesTest Log adapter is null");
+                }
                 break;
             default:
                 break;
@@ -2465,6 +2474,18 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 }
             }
         }
+    }
+
+    private LogAdapter getLogAdapterByAppId(String appId) {
+        for (LogAdapter logAdapter : mLogAdapters) {
+            if (logAdapter.getAppId() == null) {
+                continue;
+            }
+            if (logAdapter.getAppId().equals(appId)) {
+                return logAdapter;
+            }
+        }
+        return null;
     }
 
     @Override

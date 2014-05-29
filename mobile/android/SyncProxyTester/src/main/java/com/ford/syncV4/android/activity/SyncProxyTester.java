@@ -105,7 +105,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * String to join/split help, timeout, VR prompts, etc.
      */
     public static final String JOIN_STRING = ",";
-    public final static int REQUEST_CHOOSE_XML_TEST = 51;
     private static SyncProxyTester sActivityInstance;
     private static byte[] _ESN;
     /**
@@ -788,7 +787,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         super.finish();
     }
 
-    private void xmlTestContinue(String appId, String filePath) {
+    public void xmlTestContinue(String appId, String filePath) {
         if (mTesterMain != null) {
             SafeToast.showToastAnyThread("start your engines");
         } else {
@@ -1434,22 +1433,9 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_CHOOSE_XML_TEST:
-                if (resultCode == RESULT_OK) {
-                    String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
-                    if (filePath != null) {
-                        if (getCurrentActiveFragment() == null) {
-                            return;
-                        }
-                        xmlTestContinue(getCurrentActiveFragment().getAppId(), filePath);
-                    }
-                }
-                break;
-            default:
-                Logger.i("Unknown request code: " + requestCode);
-                break;
-        }
+        super.onActivityResult(requestCode, resultCode, data);
+        Logger.i(LOG_TAG + " OnActivityResult, request:" + requestCode + ", result:" + resultCode +
+                ", data:" + data);
     }
 
     /**

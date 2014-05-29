@@ -555,13 +555,11 @@ public class PlaceholderFragment extends Fragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        Logger.i("OnActivityResult, request:" + requestCode + ", result:" + resultCode +
+        Logger.i(LOG_TAG + " OnActivityResult, request:" + requestCode + ", result:" + resultCode +
                 ", data:" + data);
         switch (requestCode) {
             case REQUEST_LIST_SOFTBUTTONS:
                 if (resultCode == Activity.RESULT_OK) {
-
                     currentSoftButtons = (Vector<SoftButton>) IntentHelper.
                             getObjectForKey(Const.INTENTHELPER_KEY_OBJECTSLIST);
 
@@ -586,6 +584,22 @@ public class PlaceholderFragment extends Fragment {
                         txtLocalFileName.setText(fileName);
                     }
                 }
+                break;
+            case Const.REQUEST_CHOOSE_XML_TEST:
+                if (resultCode == Activity.RESULT_OK) {
+                    String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
+                    Logger.d("XML test path:" + filePath);
+                    if (filePath != null) {
+                        SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+                        if (syncProxyTester == null) {
+                            return;
+                        }
+                        syncProxyTester.xmlTestContinue(getAppId(), filePath);
+                    }
+                }
+                break;
+            default:
+                Logger.w(LOG_TAG + " Unknown request code: " + requestCode);
                 break;
         }
     }
@@ -2807,7 +2821,7 @@ public class PlaceholderFragment extends Fragment {
         intent.putExtra(FileDialog.CAN_SELECT_DIR, true);
         intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
         intent.putExtra(FileDialog.FORMAT_FILTER, new String[]{"xml"});
-        startActivityForResult(intent, SyncProxyTester.REQUEST_CHOOSE_XML_TEST);
+        startActivityForResult(intent, Const.REQUEST_CHOOSE_XML_TEST);
     }
 
     private void sendRPCRequestToProxy(RPCRequest rpcRequest) {
