@@ -49,8 +49,6 @@
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
-#include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "config_profile/profile.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
