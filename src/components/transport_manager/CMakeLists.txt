@@ -99,7 +99,8 @@ if (BUILD_AVAHI_SUPPORT)
 endif()
 
 if(ENABLE_LOG)
-  target_link_libraries(${target} log4cxx)
+  add_dependencies(${target} liblog4cxx)
+  target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
 if (BUILD_BT_SUPPORT)

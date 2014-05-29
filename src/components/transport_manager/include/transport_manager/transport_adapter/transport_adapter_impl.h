@@ -241,6 +241,13 @@ class TransportAdapterImpl : public TransportAdapter,
   virtual void SearchDeviceDone(const DeviceVector& devices);
 
   /**
+   * @brief Search for application in device done, if it is not there - adds it.
+   *
+   * @param device Smart pointers to devices.
+   */
+  virtual void SearchApplicationsDone(const DeviceSptr& device);
+
+  /**
    * @brief Launch OnSearchDeviceFailed event in device adapter listener.
    *
    * @param error Error class that contains details of this error situation.

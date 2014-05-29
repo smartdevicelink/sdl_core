@@ -268,6 +268,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   if (connection_handler_) {
     connection_handler::ConnectionHandlerImpl* con_handler_impl =
       static_cast<connection_handler::ConnectionHandlerImpl*>(
+
         connection_handler_);
     if (con_handler_impl->GetDataOnSessionKey(connection_key, &app_id,
         &sessions_list, &device_id)
@@ -665,12 +666,11 @@ std::string ApplicationManagerImpl::GetDeviceName(
   DCHECK(connection_handler_ != 0);
 
   std::string device_name = "";
-  std::list<uint32_t> applications_list;
   connection_handler::ConnectionHandlerImpl* con_handler_impl =
     static_cast<connection_handler::ConnectionHandlerImpl*>(
       connection_handler_);
   if (con_handler_impl->GetDataOnDeviceID(handle, &device_name,
-                                          &applications_list) == -1) {
+                                          NULL) == -1) {
     LOG4CXX_ERROR(logger_, "Failed to extract device name for id " << handle);
   } else {
     LOG4CXX_INFO(logger_, "\t\t\t\t\tDevice name is " << device_name);
@@ -748,7 +748,50 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
 
 void ApplicationManagerImpl::OnApplicationListUpdated(
     const connection_handler::DeviceHandle& device_handle) {
-  LOG4CXX_INFO(logger_, "device_handle " << device_handle);
+  LOG4CXX_INFO(logger_, "OnApplicationListUpdated. device_handle" << device_handle);
+  DCHECK(connection_handler_ != 0);
+
+  std::string device_name = "";
+  std::list<uint32_t> applications_ids;
+  connection_handler::ConnectionHandlerImpl* con_handler_impl =
+    static_cast<connection_handler::ConnectionHandlerImpl*>(
+      connection_handler_);
+  if (con_handler_impl->GetDataOnDeviceID(device_handle, &device_name,
+                                          &applications_ids) == -1) {
+    LOG4CXX_ERROR(logger_, "Failed to extract device list for id " << device_handle);
+    return;
+  }
+
+  smart_objects::SmartObject* request = MessageHelper::CreateModuleInfoSO(
+                                          hmi_apis::FunctionID::BasicCommunication_UpdateAppList);
+  (*request)[strings::msg_params][strings::applications] =
+      smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+  smart_objects::SmartObject& applications =
+      (*request)[strings::msg_params][strings::applications];
+
+  uint32_t app_count = 0;
+  for (std::list<uint32_t>::iterator it = applications_ids.begin();
+       it != applications_ids.end(); ++it) {
+    ApplicationSharedPtr app = application(*it);
+
+    if (!app.valid()) {
+      LOG4CXX_ERROR(logger_, "application not foud , id = " << *it);
+      continue;
+    }
+
+    smart_objects::SmartObject hmi_application(smart_objects::SmartType_Map);;
+    if (false == MessageHelper::CreateHMIApplicationStruct(app, hmi_application)) {
+      LOG4CXX_ERROR(logger_, "can't CreateHMIApplicationStruct ', id = " << *it);
+      continue;
+    }
+    applications[app_count++] = hmi_application;
+  }
+  if (app_count > 0) {
+    ManageHMICommand(request);
+  } else {
+    LOG4CXX_WARN(logger_, "Empty applications list");
+  }
 }
 
 void ApplicationManagerImpl::RemoveDevice(
@@ -806,22 +849,40 @@ uint32_t ApplicationManagerImpl::GenerateNewHMIAppID() {
 }
 
 void ApplicationManagerImpl::ReplaceMobileByHMIAppId(
-  smart_objects::SmartObject& message) {
-
+    smart_objects::SmartObject& message) {
+  MessageHelper::PrintSmartObject(message);
+  flush(std::cout);
   if (message.keyExists(strings::app_id)) {
     ApplicationSharedPtr application =
-      ApplicationManagerImpl::instance()->application(
-        message[strings::app_id].asUInt());
+        ApplicationManagerImpl::instance()->application(
+          message[strings::app_id].asUInt());
     if (application.valid()) {
       LOG4CXX_INFO(logger_, "ReplaceMobileByHMIAppId from " << message[strings::app_id].asInt()
                    << " to " << application->hmi_app_id());
       message[strings::app_id] = application->hmi_app_id();
     }
   } else {
-    std::set<std::string> keys = message.enumerate();
-    std::set<std::string>::const_iterator key = keys.begin();
-    for (; key != keys.end(); ++key) {
-      ReplaceMobileByHMIAppId(message[*key]);
+    switch (message.getType()) {
+      case smart_objects::SmartType::SmartType_Array: {
+        smart_objects::SmartArray* message_array = message.asArray();
+        smart_objects::SmartArray::iterator it = message_array->begin();
+        for(; it != message_array->end(); ++it) {
+          ReplaceMobileByHMIAppId(*it);
+        }
+        break;
+      }
+      case smart_objects::SmartType::SmartType_Map: {
+        std::set<std::string> keys = message.enumerate();
+        std::set<std::string>::const_iterator key = keys.begin();
+        for (; key != keys.end(); ++key) {
+          std::string k = *key;
+          ReplaceMobileByHMIAppId(message[*key]);
+        }
+        break;
+      }
+      default: {
+        break;
+      }
     }
   }
 }
@@ -839,10 +900,26 @@ void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
       message[strings::app_id] = application->app_id();
     }
   } else {
-    std::set<std::string> keys = message.enumerate();
-    std::set<std::string>::const_iterator key = keys.begin();
-    for (; key != keys.end(); ++key) {
-      ReplaceHMIByMobileAppId(message[*key]);
+    switch (message.getType()) {
+      case smart_objects::SmartType::SmartType_Array: {
+        smart_objects::SmartArray* message_array = message.asArray();
+        smart_objects::SmartArray::iterator it = message_array->begin();
+        for(; it != message_array->end(); ++it) {
+          ReplaceHMIByMobileAppId(*it);
+        }
+        break;
+      }
+      case smart_objects::SmartType::SmartType_Map: {
+        std::set<std::string> keys = message.enumerate();
+        std::set<std::string>::const_iterator key = keys.begin();
+        for (; key != keys.end(); ++key) {
+          ReplaceHMIByMobileAppId(message[*key]);
+        }
+        break;
+      }
+      default: {
+        break;
+      }
     }
   }
 }
@@ -853,7 +930,6 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   const protocol_handler::ServiceType& type) {
   LOG4CXX_INFO(logger_,
                "OnServiceStartedCallback " << type << " in session " << session_key);
-
   ApplicationSharedPtr app = application(session_key);
 
   switch (type) {

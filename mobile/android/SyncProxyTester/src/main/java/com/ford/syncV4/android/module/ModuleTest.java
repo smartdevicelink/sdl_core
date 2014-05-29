@@ -181,7 +181,7 @@ public class ModuleTest {
     private ProxyService mProxyService;
 
     // TODO : Reconsider!
-	public ModuleTest(ProxyService proxyService, LogAdapter logAdapter) {
+	public ModuleTest(String appId, ProxyService proxyService, LogAdapter logAdapter) {
         mProxyService = proxyService;
 		mActivityInstance = SyncProxyTester.getInstance();
 		mLogAdapter = logAdapter;
@@ -190,7 +190,7 @@ public class ModuleTest {
 		sInstance = this;
 		mActivityInstance.setTesterMain(sInstance);
 		
-		mainThread = makeThread();
+		mainThread = makeThread(appId);
 	}
 	
 	/**
@@ -211,17 +211,17 @@ public class ModuleTest {
 	 *            path to XML test file or directory with XML test files to use.
 	 *            Pass null to use the previously set value.
 	 */
-	public void restart(String filePath) {
+	public void restart(String appId, String filePath) {
 		mainThread.interrupt();
 		mainThread = null;
 		if (filePath != null) {
 			this.mFilePath = filePath;
 		}
-		mainThread = makeThread();
+		mainThread = makeThread(appId);
 		mainThread.start();
 	}
 	
-	public Thread makeThread () {
+	public Thread makeThread (final String appId) {
 		return new Thread(new Runnable() {
 			public void run() {
 				if (mFilePath != null) {
@@ -595,7 +595,7 @@ public class ModuleTest {
                                         int numPass = 0;
                                         boolean doInterrupt = false;
                                         while (i > 0) {
-                                            TestResult testResult = xmlTest();
+                                            TestResult testResult = xmlTest(appId);
                                             if (testResult.isTestComplete()) {
                                                 numPass++;
                                             } else {
@@ -981,7 +981,7 @@ public class ModuleTest {
         newThread.interrupt();
     }
 	
-	private TestResult xmlTest() {
+	private TestResult xmlTest(final String appId) {
 
         final TestResult testResult = new TestResult();
 
@@ -1051,7 +1051,7 @@ public class ModuleTest {
                     IJsonRPCMarshaller currentMarshaller = (customJSON != null) ? customMarshaller :
                                     (generateInvalidJSON ? invalidMarshaller : defaultMarshaller);
                     mProxyService.syncProxySetJsonRPCMarshaller(currentMarshaller);
-                    mProxyService.syncProxySendRPCRequest(rpc);
+                    mProxyService.syncProxySendRPCRequestWithPreprocess(appId, rpc);
 
                     // restore the default marshaller
                     if (currentMarshaller instanceof InvalidJsonRPCMarshaller) {

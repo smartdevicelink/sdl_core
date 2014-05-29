@@ -4,24 +4,32 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.session.Session;
 
 /**
- * Created by Andrew Batutin on 1/21/14.
+ * Created by Andrew Batutin on 1/21/14
+ * Co-author Chernyshov Yuriy
  */
 public class Service {
 
-    // TODO: Reconsider this field, probably, as alternative, create 'sessionId' field here
-    private Session session;
-    private ServiceType serviceType;
+    private static final String CLASS_NAME = Service.class.getSimpleName();
 
-    public void setSession(Session session) {
-        this.session = session;
+    private byte sessionId = Session.UNDEFINED_SESSION_ID;
+    /**
+     * By default a Service is RPC type
+     */
+    private ServiceType serviceType = ServiceType.RPC;
+
+    public void setSessionId(byte value) {
+        sessionId = value;
     }
 
-    public Session getSession() {
-        return session;
+    public byte getSessionId() {
+        return sessionId;
     }
 
-    public void setServiceType(ServiceType serviceType) {
-        this.serviceType = serviceType;
+    public void setServiceType(ServiceType value) {
+        if (value == null) {
+            throw new NullPointerException(CLASS_NAME + " set Service can not be null");
+        }
+        serviceType = value;
     }
 
     public ServiceType getServiceType() {
@@ -30,10 +38,7 @@ public class Service {
 
     @Override
     public String toString() {
-        return "Service{" +
-                "currentSession=" + session +
-                ", serviceType=" + serviceType +
-                '}';
+        return "Service {sessionId:" + sessionId + ", serviceType:" + serviceType + "}";
     }
 
     @Override
@@ -41,20 +46,19 @@ public class Service {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Service service = (Service) o;
+        if (o instanceof Service) {
+            Service service = (Service) o;
+            if (sessionId == service.sessionId && serviceType.equals(service.serviceType))
+                return true;
+        }
 
-        if (serviceType != null ? !serviceType.equals(service.serviceType) : service.serviceType != null)
-            return false;
-        if (session != null ? !session.equals(service.session) : service.session != null)
-            return false;
-
-        return true;
+        return false;
     }
 
-    @Override
+    /*@Override
     public int hashCode() {
-        int result = session != null ? session.hashCode() : 0;
+        int result = sessionId != null ? sessionId.hashCode() : 0;
         result = 31 * result + (serviceType != null ? serviceType.hashCode() : 0);
         return result;
-    }
+    }*/
 }

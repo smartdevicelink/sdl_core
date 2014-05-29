@@ -9,6 +9,13 @@ dependencies {
     compile project(':SyncProxyAndroid')
     compile project(':FileExplorer')
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
+    compile 'com.android.support:appcompat-v7:19.+'
+}
+
+// The support library (com.android.support) is being included more than once in the project
+// It should exclude the support library from being exported via other project dependencies
+configurations {
+    all*.exclude group: 'com.android.support', module: 'support-v4'
 }
 
 def isReleaseSigningSetup = false
@@ -16,8 +23,6 @@ def isReleaseSigningSetup = false
 android {
     compileSdkVersion rootProject.compileSdkVersion
     buildToolsVersion rootProject.buildToolsVersion
-
-
 
     sourceSets {
         androidTest {

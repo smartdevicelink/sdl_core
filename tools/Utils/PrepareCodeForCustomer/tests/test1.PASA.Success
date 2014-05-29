@@ -1,0 +1,14 @@
+Common code 1
+#ifdef GOD_EXIST
+God Exist! Common code 2 
+#endif 
+Pasa code
+#ifdef GOD_EXIST
+God Exist! Pasa code 2 
+#endif 
+Common code 3
+Common code 4
+if (usa != NULL) {
+  delete usa;
+  usa = NULL;
+}

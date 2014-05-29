@@ -1,0 +1,11 @@
+Common code 1
+Ford code
+#ifdef GOD_EXIST
+God Exist! Common code 2 
+#endif 
+Common code 3
+Common code 4
+if (usa != NULL) {
+  delete usa;
+  usa = NULL;
+}

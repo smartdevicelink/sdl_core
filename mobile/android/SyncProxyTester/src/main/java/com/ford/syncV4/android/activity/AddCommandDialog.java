@@ -21,6 +21,7 @@ import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.Image;
 import com.ford.syncV4.proxy.rpc.MenuParams;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Arrays;
 import java.util.Vector;
@@ -31,21 +32,16 @@ import java.util.Vector;
  * Date: 2/21/14
  * Time: 10:09 AM
  */
-public class AddCommandDialog extends DialogFragment {
+public class AddCommandDialog extends BaseDialogFragment {
 
     private static final String LOG_TAG = "AddCommandDialog";
 
     private static int sItemCmdId = 1;
 
-    public static AddCommandDialog newInstance() {
-        AddCommandDialog sendAddCommandDialog = new AddCommandDialog();
-        return sendAddCommandDialog;
-    }
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        final Context mContext = getActivity();
-        LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
+        final Context context = getActivity();
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
         View layout = inflater.inflate(R.layout.addcommand,
                 (ViewGroup) getActivity().findViewById(R.id.itemRoot));
@@ -57,8 +53,8 @@ public class AddCommandDialog extends DialogFragment {
         final EditText editVrSynonyms = (EditText) layout.findViewById(R.id.addcommand_vrSynonym);
         final CheckBox chkUseMenuParams = (CheckBox) layout.findViewById(R.id.addcommand_useMenuParams);
         final CheckBox chkUseParentID = (CheckBox) layout.findViewById(R.id.addcommand_useParentID);
-        final Spinner s = (Spinner) layout.findViewById(R.id.addcommand_availableSubmenus);
-        s.setAdapter(((SyncProxyTester) getActivity()).getSubMenuAdapter());
+        final Spinner subMenuSpinner = (Spinner) layout.findViewById(R.id.addcommand_availableSubmenus);
+        subMenuSpinner.setAdapter(((SyncProxyTester) getActivity()).getSubMenuAdapter());
         final CheckBox chkUseMenuPos = (CheckBox) layout.findViewById(R.id.addcommand_useMenuPos);
         final EditText editMenuPos = (EditText) layout.findViewById(R.id.addcommand_menuPos);
         final CheckBox chkUseIcon = (CheckBox) layout.findViewById(R.id.addcommand_useIcon);
@@ -73,7 +69,7 @@ public class AddCommandDialog extends DialogFragment {
         spnIconType.setAdapter(imageTypeArrayAdapter);
         spnIconType.setSelection(imageTypeArrayAdapter.getPosition(ImageType.DYNAMIC));
 
-        return new AlertDialog.Builder(mContext)
+        return new AlertDialog.Builder(context)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         String cmdIDString = editCmdID.getText().toString();
@@ -98,7 +94,7 @@ public class AddCommandDialog extends DialogFragment {
 
                         AddCommand addCommand = RPCRequestFactory.buildAddCommand();
                         addCommand.setCorrelationID(((SyncProxyTester) getActivity())
-                                .getCorrelationid());
+                                  .getNextCorrelationIdForCurrentFragment());
                         addCommand.setCmdID(cmdID);
 
                         if (chkUseMenuParams.isChecked()) {
@@ -112,7 +108,7 @@ public class AddCommandDialog extends DialogFragment {
                                 menuParams.setPosition(pos);
                             }
                             if (chkUseParentID.isChecked()) {
-                                SyncSubMenu sm = (SyncSubMenu) s.getSelectedItem();
+                                SyncSubMenu sm = (SyncSubMenu) subMenuSpinner.getSelectedItem();
                                 if (sm != null) {
                                     menuParams.setParentID(sm.getSubMenuId());
                                 }
@@ -133,7 +129,8 @@ public class AddCommandDialog extends DialogFragment {
                             addCommand.setCmdIcon(icon);
                         }
 
-                        ((SyncProxyTester) getActivity()).onAddCommandDialogResult(addCommand);
+                        ((SyncProxyTester) getActivity()).onAddCommandDialogResult(
+                                getArguments().getString(APP_ID_KEY), addCommand);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

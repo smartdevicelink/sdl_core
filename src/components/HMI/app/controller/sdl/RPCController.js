@@ -78,7 +78,22 @@ SDL.RPCController = Em.Object
 
                 resultStruct: {},
 
-		/**
+                /**
+                 * Validate method for request UpdateAppList
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                UpdateAppList: function(params) {
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
                  * Validate method for request UpdateDeviceList
                  * 
                  * @param {Object}
@@ -1236,16 +1251,7 @@ SDL.RPCController = Em.Object
 
                         return this.resultStruct;
                     }
-                    if (params.duration == null) {
-
-                        this.resultStruct = {
-                            "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],
-                            "resultMessage": "Parameter 'duration' does not exists!"
-                        };
-
-                        return this.resultStruct;
-                    }
-                    if (typeof params.duration != 'number') {
+                    if ('duration' in params && typeof params.duration != 'number') {
 
                         this.resultStruct = {
                             "resultCode": SDL.SDLModel.resultCode["INVALID_DATA"],

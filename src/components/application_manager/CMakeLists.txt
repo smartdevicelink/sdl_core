@@ -419,5 +419,6 @@ add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COM
 target_link_libraries("ApplicationManager" ${LIBRARIES})
 
 if(ENABLE_LOG)
-  target_link_libraries("ApplicationManager" log4cxx)
+  add_dependencies("ApplicationManager" liblog4cxx)
+  target_link_libraries("ApplicationManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
