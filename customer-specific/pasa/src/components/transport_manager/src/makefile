@@ -179,7 +179,7 @@ binary: base \
 subdirs:
 	$(MAKE) -C transport_adapter $(MAKECMDGOALS)
 	$(MAKE) -C tcp $(MAKECMDGOALS)
-	$(MAKE) -C bluetooth $(MAKECMDGOALS) 
+	$(MAKE) -C pasa_bt $(MAKECMDGOALS) 
 	#$(MAKE) -C usb $(MAKECMDGOALS) 
 	$(MAKE) -C mme $(MAKECMDGOALS)
 	 
