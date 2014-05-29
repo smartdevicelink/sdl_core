@@ -2,7 +2,6 @@ package com.ford.syncV4.android.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -21,7 +20,7 @@ import java.util.Vector;
  * Date: 2/24/14
  * Time: 2:19 PM
  */
-public class SubscriptionsVehicleDataDialog extends DialogFragment {
+public class SubscriptionsVehicleDataDialog extends BaseDialogFragment {
 
     private static final String LOG_TAG = "SubscriptionsVehicleDataDialog";
 
@@ -54,11 +53,6 @@ public class SubscriptionsVehicleDataDialog extends DialogFragment {
                 put(VehicleDataType.VEHICLEDATA_CLUSTERMODESTATUS, "ClusterModeStatus");
                 put(VehicleDataType.VEHICLEDATA_MYKEY, "MyKey");
             }};
-
-    public static SubscriptionsVehicleDataDialog newInstance() {
-        SubscriptionsVehicleDataDialog subscriptionsVehicleDataDialog = new SubscriptionsVehicleDataDialog();
-        return subscriptionsVehicleDataDialog;
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -122,7 +116,9 @@ public class SubscriptionsVehicleDataDialog extends DialogFragment {
                             ((SyncProxyTester) getActivity()).onUnsubscribeVehicleDialogResult(msg);
                         }
                         ((SyncProxyTester) getActivity())
-                                .setIsVehicleDataSubscribed(checkedVehicleDataTypes.clone());
+                                .setIsVehicleDataSubscribed(
+                                        getArguments().getString(APP_ID_KEY),
+                                        checkedVehicleDataTypes.clone());
 
                         if (subscribeVehicleData.isEmpty() && unsubscribeVehicleData.isEmpty()) {
                             SafeToast.showToastAnyThread("Nothing new here");

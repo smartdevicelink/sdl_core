@@ -29,14 +29,9 @@ import com.ford.syncV4.util.logger.Logger;
  * Date: 2/26/14
  * Time: 4:46 PM
  */
-public class HashIdSetUpDialog extends DialogFragment {
+public class HashIdSetUpDialog extends BaseDialogFragment {
 
     private static final String LOG_TAG = "HashIdSetUpDialog";
-
-    public static HashIdSetUpDialog newInstance() {
-        HashIdSetUpDialog hashIdSetUpDialog = new HashIdSetUpDialog();
-        return hashIdSetUpDialog;
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

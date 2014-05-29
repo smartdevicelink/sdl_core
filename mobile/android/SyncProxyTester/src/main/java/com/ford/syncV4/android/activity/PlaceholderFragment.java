@@ -298,7 +298,9 @@ public class PlaceholderFragment extends Fragment {
 
         if (isFirstActivityRun) {
             int fragmentsCounter = ((SyncProxyTester) getActivity()).getFragmentsCount();
-            DialogFragment appSetupDialogFragment = AppSetUpDialog.newInstance(fragmentsCounter <= 1);
+            BaseDialogFragment appSetupDialogFragment =
+                    BaseDialogFragment.newInstance(AppSetUpDialog.class.getName(), getAppId(),
+                                                   fragmentsCounter <= 1);
             appSetupDialogFragment.show(getActivity().getFragmentManager(), APP_SETUP_DIALOG_TAG);
             //appSetupDialogFragment.setCancelable(false);
         } else {
@@ -483,18 +485,21 @@ public class PlaceholderFragment extends Fragment {
                 break;
             case MenuConstants.MENU_POLICIES_TEST:
                 if (PoliciesTesterActivity.getInstance() == null) {
-                    Intent i = new Intent(getActivity(), PoliciesTesterActivity.class);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
-                    startActivity(i);
+                    Intent intent = new Intent(getActivity(), PoliciesTesterActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_USER_ACTION);
+                    intent.putExtra(BaseDialogFragment.APP_ID_KEY, getAppId());
+                    startActivity(intent);
                     if (SyncProxyTester.getESN() != null) {
                         PoliciesTesterActivity.setESN(SyncProxyTester.getESN());
+                        PoliciesTesterActivity.setAppId(getAppId());
                     }
                 }
                 //PoliciesTest.runPoliciesTest();
                 break;
             case MenuConstants.MENU_SET_UP_POLICY_FILES:
-                DialogFragment mPolicyFilesSetUpDialog = PolicyFilesSetUpDialog.newInstance();
+                BaseDialogFragment mPolicyFilesSetUpDialog = BaseDialogFragment.newInstance(
+                        PolicyFilesSetUpDialog.class.getName(), getAppId());
                 mPolicyFilesSetUpDialog.show(getActivity().getFragmentManager(),
                         POLICY_FILES_SETUP_DIALOG_TAG);
                 break;
@@ -534,7 +539,8 @@ public class PlaceholderFragment extends Fragment {
                 AppPreferencesManager.toggleDisableLock();
                 break;
             case MenuConstants.MENU_HASH_ID_SETUP:
-                DialogFragment hashIdSetUpDialog = HashIdSetUpDialog.newInstance();
+                BaseDialogFragment hashIdSetUpDialog = BaseDialogFragment.newInstance(
+                        HashIdSetUpDialog.class.getName(), getAppId());
                 hashIdSetUpDialog.show(getActivity().getFragmentManager(), HASH_ID_SET_UP_DIALOG_TAG);
                 break;
             case MenuConstants.MENU_FEEDBACK:
@@ -893,8 +899,8 @@ public class PlaceholderFragment extends Fragment {
         ProxyService boundProxyService = ((SyncProxyTester) getActivity()).mBoundProxyService;
         if (boundProxyService != null) {
             int choiceSetID = autoIncChoiceSetId++;
-            boundProxyService.commandCreateInteractionChoiceSetResumable(choices, choiceSetID,
-                    getCorrelationId());
+            boundProxyService.commandCreateInteractionChoiceSetResumable(getAppId(), choices,
+                    choiceSetID, getCorrelationId());
 
             if (mLatestCreateChoiceSetId != CHOICESETID_UNSET) {
                 Logger.w("Latest createChoiceSetId should be unset, but equals to " +
@@ -929,7 +935,14 @@ public class PlaceholderFragment extends Fragment {
             }
         });
 
-        final ProxyService mBoundProxyService = ((SyncProxyTester) getActivity()).mBoundProxyService;
+        final SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        if (syncProxyTester == null) {
+            return;
+        }
+        final ProxyService boundProxyService = syncProxyTester.mBoundProxyService;
+        if (boundProxyService == null) {
+            return;
+        }
         final ArrayAdapter<ImageType> imageTypeAdapter =
                 ((SyncProxyTester) getActivity()).getImageTypeAdapter();
 
@@ -982,21 +995,27 @@ public class PlaceholderFragment extends Fragment {
                                     Vector<TTSChunk> chunks = new Vector<TTSChunk>();
 
                                     if (speak1.length() > 0) {
-                                        chunks.add(TTSChunkFactory.createChunk((SpeechCapabilities) spnSpeakType1.getSelectedItem(), speak1));
+                                        chunks.add(TTSChunkFactory
+                                                .createChunk((SpeechCapabilities) spnSpeakType1
+                                                        .getSelectedItem(), speak1));
                                     }
                                     if (speak2.length() > 0) {
-                                        chunks.add(TTSChunkFactory.createChunk((SpeechCapabilities) spnSpeakType2.getSelectedItem(), speak2));
+                                        chunks.add(TTSChunkFactory
+                                                .createChunk((SpeechCapabilities) spnSpeakType2
+                                                        .getSelectedItem(), speak2));
                                     }
                                     if (speak3.length() > 0) {
-                                        chunks.add(TTSChunkFactory.createChunk((SpeechCapabilities) spnSpeakType3.getSelectedItem(), speak3));
+                                        chunks.add(TTSChunkFactory
+                                                .createChunk((SpeechCapabilities) spnSpeakType3
+                                                        .getSelectedItem(), speak3));
                                     }
                                     if (speak4.length() > 0) {
-                                        chunks.add(TTSChunkFactory.createChunk(SpeechCapabilities.SAPI_PHONEMES, speak4));
+                                        chunks.add(TTSChunkFactory
+                                                .createChunk(SpeechCapabilities.SAPI_PHONEMES,
+                                                        speak4));
                                     }
                                     msg.setTtsChunks(chunks);
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                    }
+                                    sendRPCRequestToProxy(msg);
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -1019,18 +1038,14 @@ public class PlaceholderFragment extends Fragment {
                                     ButtonName buttonName = ButtonName.values()[which];
                                     int corrId = getCorrelationId();
                                     if (needToSubscribe) {
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.commandSubscribeButtonResumable(
-                                                    buttonName, corrId);
-                                        }
+                                        boundProxyService.commandSubscribeButtonResumable(getAppId(),
+                                                buttonName, corrId);
                                     } else {
                                         UnsubscribeButton msg = new UnsubscribeButton();
                                         msg.setCorrelationID(corrId);
                                         msg.setButtonName(buttonName);
                                         mLogAdapter.logMessage(msg, true);
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                        }
+                                        sendRPCRequestToProxy(msg);
                                     }
                                     isButtonSubscribed[which] = !isButtonSubscribed[which];
                                 }
@@ -1065,11 +1080,10 @@ public class PlaceholderFragment extends Fragment {
                                     msg.setCorrelationID(getCorrelationId());
                                     int commandSetID = mChoiceSetAdapter.getItem(which);
                                     msg.setInteractionChoiceSetID(commandSetID);
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                    }
+                                    sendRPCRequestToProxy(msg);
                                     if (_latestDeleteChoiceSetId != CHOICESETID_UNSET) {
-                                        Logger.w("Latest deleteChoiceSetId should be unset, but equals to " + _latestDeleteChoiceSetId);
+                                        Logger.w("Latest deleteChoiceSetId should be unset, but " +
+                                                "equals to " + _latestDeleteChoiceSetId);
                                     }
                                     _latestDeleteChoiceSetId = commandSetID;
                                 }
@@ -1144,9 +1158,7 @@ public class PlaceholderFragment extends Fragment {
                                     }
                                     currentSoftButtons = null;
                                     chkIncludeSoftButtons = null;
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                    }
+                                    sendRPCRequestToProxy(msg);
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -1189,9 +1201,7 @@ public class PlaceholderFragment extends Fragment {
                                     msg.setLanguage((Language) spnLanguage.getSelectedItem());
                                     msg.setHmiDisplayLanguage((Language) spnHmiDisplayLanguage.getSelectedItem());
                                     msg.setCorrelationID(getCorrelationId());
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                    }
+                                    sendRPCRequestToProxy(msg);
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -1203,7 +1213,8 @@ public class PlaceholderFragment extends Fragment {
                             dlg = builder.create();
                             dlg.show();
                         } else if (adapter.getItem(which).equals(Names.PutFile)) {
-                            DialogFragment putFileDialogFragment = PutFileDialog.newInstance(getCorrelationId());
+                            BaseDialogFragment putFileDialogFragment = BaseDialogFragment.newInstance(
+                                    PutFileDialog.class.getName(), getAppId());
                             putFileDialogFragment.show(getActivity().getFragmentManager(), PUT_FILE_DIALOG_TAG);
                         } else if (adapter.getItem(which).equals(Names.DeleteFile)) {
                             //DeleteFile
@@ -1215,9 +1226,7 @@ public class PlaceholderFragment extends Fragment {
                                     DeleteFile msg = new DeleteFile();
                                     msg.setSyncFileName(syncFileName);
                                     msg.setCorrelationID(getCorrelationId());
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                    }
+                                    sendRPCRequestToProxy(msg);
                                     mPutFileAdapter.remove(syncFileName);
                                 }
                             });
@@ -1225,9 +1234,7 @@ public class PlaceholderFragment extends Fragment {
                             dlg.show();
                         } else if (adapter.getItem(which).equals(Names.ListFiles)) {
                             //ListFiles
-                            if (mBoundProxyService != null) {
-                                mBoundProxyService.commandListFiles();
-                            }
+                            boundProxyService.commandListFiles(getAppId());
                         } else if (adapter.getItem(which).equals(Names.SetAppIcon)) {
                             //SetAppIcon
                             AlertDialog.Builder builder;
@@ -1247,9 +1254,7 @@ public class PlaceholderFragment extends Fragment {
                                     SetAppIcon msg = new SetAppIcon();
                                     msg.setSyncFileName(syncFileName);
                                     msg.setCorrelationID(getCorrelationId());
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                    }
+                                    sendRPCRequestToProxy(msg);
                                 }
                             });
                             builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -1261,15 +1266,16 @@ public class PlaceholderFragment extends Fragment {
                             dlg = builder.create();
                             dlg.show();
                         } else if (adapter.getItem(which).equals(Names.PerformAudioPassThru)) {
-                            DialogFragment performAudioPassThruDialog = PerformAudioPassThruDialog.newInstance();
-                            performAudioPassThruDialog.show(getActivity().getFragmentManager(), PERFORM_AUDIO_PASS_THRU_DIALOG_TAG);
+                            BaseDialogFragment performAudioPassThruDialog =
+                                    BaseDialogFragment.newInstance(
+                                            PerformAudioPassThruDialog.class.getName(), getAppId());
+                            performAudioPassThruDialog.show(getActivity().getFragmentManager(),
+                                    PERFORM_AUDIO_PASS_THRU_DIALOG_TAG);
                         } else if (adapter.getItem(which).equals(Names.EndAudioPassThru)) {
                             //EndAudioPassThru
                             EndAudioPassThru msg = new EndAudioPassThru();
                             msg.setCorrelationID(getCorrelationId());
-                            if (mBoundProxyService != null) {
-                                mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                            }
+                            sendRPCRequestToProxy(msg);
                         } else if (adapter.getItem(which).equals(SyncProxyTester.VehicleDataSubscriptions)) {
                             sendVehicleDataSubscriptions();
                         } else if (adapter.getItem(which).equals(Names.GetVehicleData)) {
@@ -1297,9 +1303,7 @@ public class PlaceholderFragment extends Fragment {
                                         msg.setEcuName(Integer.parseInt(txtECUNameDID.getText().toString()));
                                         msg.setDidLocation(didlocations);
                                         msg.setCorrelationID(getCorrelationId());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                        }
+                                        sendRPCRequestToProxy(msg);
                                     } catch (NumberFormatException e) {
                                         SafeToast.showToastAnyThread("Couldn't parse number");
                                     }
@@ -1407,9 +1411,7 @@ public class PlaceholderFragment extends Fragment {
                                         }
                                     }
                                     currentSoftButtons = null;
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                    }
+                                    sendRPCRequestToProxy(msg);
                                 } else {
                                     SafeToast.showToastAnyThread("No TTS Chunks entered");
                                 }
@@ -1437,10 +1439,7 @@ public class PlaceholderFragment extends Fragment {
                                 msg.setCorrelationID(getCorrelationId());
                                 int cmdID = mCommandAdapter.getItem(which);
                                 msg.setCmdID(cmdID);
-                                if (mBoundProxyService != null) {
-                                    mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                }
-
+                                sendRPCRequestToProxy(msg);
                                 if (mLatestDeleteCommandCmdID != null) {
                                     Logger.w("Latest deleteCommand should be null, but it is " +
                                             mLatestDeleteCommandCmdID);
@@ -1526,9 +1525,7 @@ public class PlaceholderFragment extends Fragment {
                                             (currentSoftButtons.size() > 0)) {
                                         msg.setSoftButtons(currentSoftButtons);
                                     }
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                    }
+                                    sendRPCRequestToProxy(msg);
                                 } catch (NumberFormatException e) {
                                     SafeToast.showToastAnyThread("Couldn't parse number");
                                 }
@@ -1575,10 +1572,7 @@ public class PlaceholderFragment extends Fragment {
                                         DeleteSubMenu msg = new DeleteSubMenu();
                                         msg.setCorrelationID(getCorrelationId());
                                         msg.setMenuID(menu.getSubMenuId());
-                                        if (mBoundProxyService != null) {
-                                            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                        }
-
+                                        sendRPCRequestToProxy(msg);
                                         if (_latestDeleteSubmenu != null) {
                                             Logger.w("Latest deleteSubmenu should be null, but equals to " + _latestDeleteSubmenu);
                                         }
@@ -1627,9 +1621,7 @@ public class PlaceholderFragment extends Fragment {
                                         GetVehicleData.class, setterName);
 
                                 msg.setCorrelationID(getCorrelationId());
-                                if (mBoundProxyService != null) {
-                                    mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                }
+                                sendRPCRequestToProxy(msg);
                             }
                         });
                         builder.show();
@@ -1655,9 +1647,7 @@ public class PlaceholderFragment extends Fragment {
                                     msg.setEcuName(Integer.parseInt(txtECUNameDTC.getText().toString()));
                                     msg.setDTCMask(Integer.parseInt(txtdtcMask.getText().toString()));
                                     msg.setCorrelationID(getCorrelationId());
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                    }
+                                    sendRPCRequestToProxy(msg);
                                 } catch (NumberFormatException e) {
                                     SafeToast.showToastAnyThread("Couldn't parse number");
                                 }
@@ -1676,12 +1666,16 @@ public class PlaceholderFragment extends Fragment {
                      * Opens the dialog for AddSubMenu message and sends it.
                      */
                     private void sendAddSubmenu() {
-                        DialogFragment addSubMenuDialogFragment = AddSubMenuDialog.newInstance();
-                        addSubMenuDialogFragment.show(getActivity().getFragmentManager(), ADD_SUB_MENU_DIALOG_TAG);
+                        BaseDialogFragment addSubMenuDialogFragment =
+                                BaseDialogFragment.newInstance(AddSubMenuDialog.class.getName(),
+                                        getAppId());
+                        addSubMenuDialogFragment.show(getActivity().getFragmentManager(),
+                                ADD_SUB_MENU_DIALOG_TAG);
                     }
 
                     private void sendSystemRequest(){
-                        DialogFragment fragment = SystemRequestDialog.newInstance();
+                        BaseDialogFragment fragment = BaseDialogFragment.newInstance(
+                                SystemRequestDialog.class.getName(), getAppId());
                         fragment.show(getActivity().getFragmentManager(), SYSTEM_REQST_DIALOG_TAG);
                     }
 
@@ -1689,8 +1683,11 @@ public class PlaceholderFragment extends Fragment {
                      * Opens the dialog for AddCommand message and sends it.
                      */
                     private void sendAddCommand() {
-                        DialogFragment addCommandDialogFragment = AddCommandDialog.newInstance();
-                        addCommandDialogFragment.show(getActivity().getFragmentManager(), ADD_COMMAND_DIALOG_TAG);
+                        BaseDialogFragment addCommandDialogFragment =
+                                BaseDialogFragment.newInstance(AddCommandDialog.class.getName(),
+                                        getAppId());
+                        addCommandDialogFragment.show(getActivity().getFragmentManager(),
+                                ADD_COMMAND_DIALOG_TAG);
                     }
 
                     /**
@@ -1739,9 +1736,7 @@ public class PlaceholderFragment extends Fragment {
                                         msg.setBulkData(data);
                                         request = msg;
                                     }
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(request);
-                                    }
+                                    sendRPCRequestToProxy(request);
                                 } else {
                                     Toast.makeText(mContext, "Can't read data from file", Toast.LENGTH_LONG).show();
                                 }
@@ -1882,9 +1877,7 @@ public class PlaceholderFragment extends Fragment {
                                             msg.setSoftButtons(new Vector<SoftButton>());
                                         }
                                     }
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                    }
+                                    sendRPCRequestToProxy(msg);
                                 } catch (NumberFormatException e) {
                                     SafeToast.showToastAnyThread("Couldn't parse number");
                                 }
@@ -2092,9 +2085,7 @@ public class PlaceholderFragment extends Fragment {
                                     msg.setCustomPresets(new Vector<String>(Arrays.
                                             asList(customPresetsList)));
                                 }
-                                if (mBoundProxyService != null) {
-                                    mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                }
+                                sendRPCRequestToProxy(msg);
                             }
                         });
                         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -2263,10 +2254,7 @@ public class PlaceholderFragment extends Fragment {
                                             .getItem(interactionLayoutSpinner
                                                     .getSelectedItemPosition()));
                                 }
-                                if (mBoundProxyService != null) {
-                                    mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                }
-
+                                sendRPCRequestToProxy(msg);
                             }
                         });
                         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -2361,13 +2349,10 @@ public class PlaceholderFragment extends Fragment {
                                         }
                                     }
                                     currentSoftButtons = null;
-
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                    }
+                                    sendRPCRequestToProxy(msg);
                                 } else {
-                                    Toast.makeText(mContext, "Both fields are empty, nothing to send",
-                                            Toast.LENGTH_LONG).show();
+                                    SafeToast.showToastAnyThread("Both fields are empty, " +
+                                            "nothing to send");
                                 }
                             }
                         });
@@ -2471,9 +2456,7 @@ public class PlaceholderFragment extends Fragment {
 
                                     msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
                                     msg.setCorrelationID(getCorrelationId());
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                    }
+                                    sendRPCRequestToProxy(msg);
                                 } catch (NumberFormatException e) {
                                     SafeToast.showToastAnyThread("Couldn't parse number");
                                 }
@@ -2489,15 +2472,17 @@ public class PlaceholderFragment extends Fragment {
                     }
 
                     private void sendVehicleDataSubscriptions() {
-                        DialogFragment subscriptionsVehicleDataDialog =
-                                SubscriptionsVehicleDataDialog.newInstance();
+                        BaseDialogFragment subscriptionsVehicleDataDialog =
+                                BaseDialogFragment.newInstance(
+                                        SubscriptionsVehicleDataDialog.class.getName(), getAppId());
                         subscriptionsVehicleDataDialog.show(getActivity().getFragmentManager(),
                                 SUBSCRIPTION_VEHICLE_DATA_DIALOG_TAG);
                     }
 
                     private void sendSetGlobalProperties() {
-                        DialogFragment setGlobalPropertiesDialog =
-                                SetGlobalPropertiesDialog.newInstance();
+                        BaseDialogFragment setGlobalPropertiesDialog =
+                                BaseDialogFragment.newInstance(
+                                        SetGlobalPropertiesDialog.class.getName(), getAppId());
                         setGlobalPropertiesDialog.show(getActivity().getFragmentManager(),
                                 SET_GLOBAL_PROPERTIES_DIALOG_TAG);
                     }
@@ -2556,9 +2541,7 @@ public class PlaceholderFragment extends Fragment {
                                 if (!properties.isEmpty()) {
                                     msg.setProperties(properties);
                                     msg.setCorrelationID(getCorrelationId());
-                                    if (mBoundProxyService != null) {
-                                        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                    }
+                                    sendRPCRequestToProxy(msg);
                                 } else {
                                     SafeToast.showToastAnyThread("No items selected");
                                 }
@@ -2572,7 +2555,6 @@ public class PlaceholderFragment extends Fragment {
                         builder.setView(layout);
                         builder.create().show();
                     }
-
 
                     /**
                      * Opens the dialog for SetDisplayLayout message and sends it.
@@ -2592,9 +2574,7 @@ public class PlaceholderFragment extends Fragment {
                                 SetDisplayLayout msg = new SetDisplayLayout();
                                 msg.setCorrelationID(getCorrelationId());
                                 msg.setDisplayLayout(editDisplayLayout.getText().toString());
-                                if (mBoundProxyService != null) {
-                                    mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                                }
+                                sendRPCRequestToProxy(msg);
                             }
                         });
                         builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -2612,15 +2592,12 @@ public class PlaceholderFragment extends Fragment {
                     private void sendGenericRequest() {
                         GenericRequest msg = new GenericRequest();
                         msg.setCorrelationID(getCorrelationId());
-                        if (mBoundProxyService != null) {
-                            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                        }
+                        sendRPCRequestToProxy(msg);
                     }
                 })
                 .setNegativeButton("Close", null)
                 .show();
     }
-
 
     private void sendSetMediaClockTimer() {
         AlertDialog.Builder builder;
@@ -2692,9 +2669,7 @@ public class PlaceholderFragment extends Fragment {
                 } catch (NumberFormatException e) {
                     // skip setting start time if parsing failed
                 }
-                if (((SyncProxyTester) getActivity()).mBoundProxyService != null) {
-                    ((SyncProxyTester) getActivity()).mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
-                }
+                sendRPCRequestToProxy(msg);
             }
         });
         builder.setNegativeButton("Cancel",
@@ -2753,7 +2728,8 @@ public class PlaceholderFragment extends Fragment {
                         msg.setMessageData(data);
                     }
                     if (((SyncProxyTester) getActivity()).mBoundProxyService != null) {
-                        ((SyncProxyTester) getActivity()).mBoundProxyService.syncProxySendRPCRequestWithPreprocess(msg);
+                        ((SyncProxyTester) getActivity()).mBoundProxyService
+                                .syncProxySendRPCRequestWithPreprocess(getAppId(), msg);
                     }
                 } catch (NumberFormatException e) {
                     SafeToast.showToastAnyThread("Couldn't parse number");
@@ -2774,7 +2750,9 @@ public class PlaceholderFragment extends Fragment {
      * Sends RegisterAppInterface message.
      */
     private void sendRegisterAppInterface() {
-        DialogFragment registerAppInterfaceDialog = RegisterAppInterfaceDialog.newInstance();
+        BaseDialogFragment registerAppInterfaceDialog =
+                BaseDialogFragment.newInstance(RegisterAppInterfaceDialog.class.getName(),
+                        getAppId());
         registerAppInterfaceDialog.show(getActivity().getFragmentManager(),
                 REGISTER_APP_INTERFACE_DIALOG_TAG);
     }
@@ -2830,5 +2808,17 @@ public class PlaceholderFragment extends Fragment {
         intent.putExtra(FileDialog.SELECTION_MODE, SelectionMode.MODE_OPEN);
         intent.putExtra(FileDialog.FORMAT_FILTER, new String[]{"xml"});
         startActivityForResult(intent, SyncProxyTester.REQUEST_CHOOSE_XML_TEST);
+    }
+
+    private void sendRPCRequestToProxy(RPCRequest rpcRequest) {
+        final SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        if (syncProxyTester == null) {
+            return;
+        }
+        final ProxyService boundProxyService = syncProxyTester.mBoundProxyService;
+        if (boundProxyService == null) {
+            return;
+        }
+        boundProxyService.syncProxySendRPCRequestWithPreprocess(getAppId(), rpcRequest);
     }
 }

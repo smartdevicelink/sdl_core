@@ -1,6 +1,7 @@
 package com.ford.syncV4.android.manager;
 
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.activity.PlaceholderFragment;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.proxy.RPCRequestFactory;
@@ -16,19 +17,14 @@ import com.ford.syncV4.util.logger.Logger;
  */
 public class ApplicationIconManager {
 
-    private static ApplicationIconManager sInstance = new ApplicationIconManager();
-
     private static final String TAG = ApplicationIconManager.class.getSimpleName();
     private static final String ICON_SYNC_FILENAME = "icon.png";
 
     private int mAwaitingInitIconResponseCorrelationID = 0;
+    private String mAppId = PlaceholderFragment.EMPTY_APP_ID;
 
-    public static ApplicationIconManager getInstance() {
-        return sInstance;
-    }
-
-    private ApplicationIconManager() {
-
+    public ApplicationIconManager(String appId) {
+        mAppId = appId;
     }
 
     public void setApplicationIcon(ProxyService proxyService) {
@@ -52,7 +48,7 @@ public class ApplicationIconManager {
     private void sendPutFileForAppIcon(ProxyService proxyService) {
         Logger.d(TAG + " PutFile");
         mAwaitingInitIconResponseCorrelationID = proxyService.getNextCorrelationID();
-        proxyService.commandPutFile(FileType.GRAPHIC_PNG, ICON_SYNC_FILENAME,
+        proxyService.commandPutFile(mAppId, FileType.GRAPHIC_PNG, ICON_SYNC_FILENAME,
                 AppUtils.contentsOfResource(R.raw.main_logo),
                 mAwaitingInitIconResponseCorrelationID, true);
     }
@@ -73,7 +69,7 @@ public class ApplicationIconManager {
         setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
         setAppIcon.setCorrelationID(proxyService.getNextCorrelationID());
 
-        proxyService.syncProxySendRPCRequestWithPreprocess(setAppIcon);
+        proxyService.syncProxySendRPCRequestWithPreprocess(mAppId, setAppIcon);
 
         Logger.i(TAG + " Application Icon set up complete");
 

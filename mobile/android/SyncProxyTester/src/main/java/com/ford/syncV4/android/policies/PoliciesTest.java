@@ -36,13 +36,15 @@ public class PoliciesTest {
     private static final String TAG = "PoliciesTest";
     private static LogAdapter sMsgAdapter;
     private static ProxyService sProxyService;
+    private static String sAppId;
 
-    public static void runPoliciesTest(ProxyService syncProxy, LogAdapter logAdapter) {
+    public static void runPoliciesTest(String appId, ProxyService syncProxy, LogAdapter logAdapter) {
         if (logAdapter == null) {
             throw new NullPointerException(PoliciesTest.class.getSimpleName() + " LogAdapter can " +
                     "not be null");
         }
 
+        sAppId = appId;
         sProxyService = syncProxy;
         sMsgAdapter = logAdapter;
 
@@ -164,7 +166,7 @@ public class PoliciesTest {
 			 */
             if (sProxyService != null) {
                 //sendRPCRequestPrivate(encodedSyncPDataRequest);
-                sProxyService.syncProxySendRPCRequestWithPreprocess(encodedSyncPDataRequest);
+                sProxyService.syncProxySendRPCRequestWithPreprocess(sAppId, encodedSyncPDataRequest);
             }
             return returnVal;
         } catch (JSONException e) {

@@ -153,7 +153,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                                     new Thread() {
                                         @Override
                                         public void run() {
-                                            syncProxyBase.sendEncodedSyncPDataToUrl(
+                                            syncProxyBase.sendEncodedSyncPDataToUrl(appId,
                                                     msg.getUrl(), msg.getData(), msg.getTimeout());
                                         }
                                     };
@@ -889,7 +889,8 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     Thread handleOffboardSyncTransmissionTread = new Thread() {
                         @Override
                         public void run() {
-                            syncProxyBase.sendEncodedSyncPDataToUrl(msg.getUrl(), msg.getData(), msg.getTimeout());
+                            syncProxyBase.sendEncodedSyncPDataToUrl(appId, msg.getUrl(),
+                                    msg.getData(), msg.getTimeout());
                         }
                     };
 
@@ -917,7 +918,8 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                     Thread handleOffboardSyncTransmissionTread = new Thread() {
                         @Override
                         public void run() {
-                            syncProxyBase.sendSyncPDataToUrl(msg.getUrl(), msg.getSyncPData(), msg.getTimeout());
+                            syncProxyBase.sendSyncPDataToUrl(appId, msg.getUrl(),
+                                    msg.getSyncPData(), msg.getTimeout());
                         }
                     };
 

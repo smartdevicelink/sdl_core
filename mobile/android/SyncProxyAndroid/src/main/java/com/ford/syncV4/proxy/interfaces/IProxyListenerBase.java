@@ -331,7 +331,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     /**
      * This callback is to inform SPT that session is going to be started
      */
-    public void onStartSession();
+    public void onStartSession(String appId);
 
     public void onSessionStarted(String appId);
 

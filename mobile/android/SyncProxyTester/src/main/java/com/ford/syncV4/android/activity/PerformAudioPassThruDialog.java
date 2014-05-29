@@ -2,7 +2,6 @@ package com.ford.syncV4.android.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -30,14 +29,9 @@ import java.util.Vector;
  * Date: 14.03.14
  * Time: 10:51
  */
-public class PerformAudioPassThruDialog extends DialogFragment {
+public class PerformAudioPassThruDialog extends BaseDialogFragment {
 
-    private static final String LOG_TAG = "PerformAudioPassThruDialog";
-
-    public static PerformAudioPassThruDialog newInstance() {
-        PerformAudioPassThruDialog performAudioPassThruDialog = new PerformAudioPassThruDialog();
-        return performAudioPassThruDialog;
-    }
+    private static final String LOG_TAG = PerformAudioPassThruDialog.class.getSimpleName();
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -105,7 +99,9 @@ public class PerformAudioPassThruDialog extends DialogFragment {
                                     .getNextCorrelationIdForCurrentFragment());
 
                             ((SyncProxyTester) getActivity())
-                                    .onPerformAudioPassThruDialogResult(performAudioPassThru);
+                                    .onPerformAudioPassThruDialogResult(
+                                            getArguments().getString(APP_ID_KEY),
+                                            performAudioPassThru);
                         } catch (NumberFormatException e) {
                             SafeToast.showToastAnyThread("Couldn't parse number");
                         }
