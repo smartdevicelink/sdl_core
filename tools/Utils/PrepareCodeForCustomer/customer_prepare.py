@@ -14,6 +14,7 @@ class Validator:
   ifdef_ = "#ifdef "
   startif_ = "#if"
   endif_ = "#endif"
+  ifndef_ = "#ifndef"
   
   def __init__(self, customer_name):
     if (customer_name == None ):
@@ -31,7 +32,7 @@ class Validator:
       raise BaseException("deep < 0")
       
     if (self.other_customer_block and self.my_customer_block):
-      raise BaseException("other_customer_block == other_customer_block")
+      raise BaseException("Validator is on bad state. Can't continue processing")
     
     if (self.other_customer_block == True):
       if (self.any_customer_line(line) == True):
@@ -82,8 +83,11 @@ class Validator:
 #        #ifdef CUSTOMER<TARGET_CUSTOMER>
 #	if it's customer line, otherwise return False
     ifdefline = self.ifdef_ + self.customer_tamplate + self.customer_name
-    if ( line.find(ifdefline) == -1):
+    pos = line.find(ifdefline)
+    if (pos == -1):
       return False
+    if ((len(line) > len(ifdefline)) and (line[len(ifdefline)] not in [" ",'/', "\n"])):
+		return False # to avoid #ifdef <MY_CUSTOMER_NAME>SOME TEXT
     return True
   
   def any_customer_line(self, line):
@@ -103,8 +107,7 @@ class Validator:
     pos = line.find(ifdefline)
     if ( pos == -1):
       return False
-    last = line[pos + len(ifdefline):]
-    if (last.find(self.customer_name) == 0):
+    if (line.find(self.customer_name,pos + len(ifdefline)) == 0):
       return False
     return True
     
@@ -112,17 +115,13 @@ class Validator:
 #	Return true if current line is:
 #        #if<any code>
 #	Otherwise return False
-    if (line.find(self.startif_) != -1):
-      return True
-    return False
+    return (line.find(self.startif_) != -1)
 
   def end_if(self, line):
 #	Return true if current line is:
 #        #endif<any code>
 #	Otherwise return False
-    if (line.find(self.endif_) != -1):
-      return True
-    return False
+    return (line.find(self.endif_) != -1)
 
 class Remover:
 #	Class that parce each line of input file with Validator

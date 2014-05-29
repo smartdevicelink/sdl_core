@@ -11,12 +11,10 @@ import sys
 import customer_prepare
 
 def is_diff(lines1, lines2):
-  '''
-  @brief Checks if line arrays are different
-  @param lines1 array of strings containes first lines
-  @param lines2 array of strings containes second lines
-  @return True if line arrays are different otherwise return False
-  '''
+#  @brief Checks if line arrays are different
+#  @param lines1 array of strings containes first lines
+#  @param lines2 array of strings containes second lines
+#  @return True if line arrays are different otherwise return False
   length1 = len(lines1)
   length2 = len(lines2)
   if (length1 != length2):
@@ -29,23 +27,20 @@ def is_diff(lines1, lines2):
   return False
 
 def save_lines(f_name, lines):
-  '''
-  @brief Save linearray to files
-  @param f_name array of strings containes first lines
-  @param lines2 array of strings containes second lines
-  @return True if line arrays are different otherwise return False
-  '''
+#  @brief Save linearray to files
+#  @param f_name array of strings containes first lines
+#  @param lines2 array of strings containes second lines
+#  @return True if line arrays are different otherwise return False
   f = open(f_name,"w+")
   for l in lines:
     f.write(l)
   f.close()
    
 def main():
-  '''
-  main fincton
-  First argument is customer name,
-  Others : file names 
-  '''
+#  main fincton
+#  First argument is customer name,
+#  Others : file names 
+  print "Hi"
   customer = sys.argv[1]
   files = sys.argv[2:]
   for input_file in files:
@@ -53,7 +48,7 @@ def main():
     r = customer_prepare.Remover(input_file, customer)
     parced_lines = r.get_parsed_lines()
     input_lines = r.lines
-    if is_diff(input_lines, input_lines):
+    if is_diff(input_lines, parced_lines):
       print "Changes"
       save_lines(input_file, parced_lines)
     else :

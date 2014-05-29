@@ -13,4 +13,4 @@ then
     exit
 fi
 
-find $REPO | grep -E "(.\.c$)|(.\.cc$)|(.\.h&)|(.\.cpp$)"|xargs python ./main.py $CUSTOMER |grep Changes
+find $REPO -name '*.c' -o -name '*.cc' -o -name '*.h' -o -name '*.cpp' |xargs python ./main.py $CUSTOMER | grep Changes
