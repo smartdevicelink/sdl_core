@@ -105,7 +105,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * String to join/split help, timeout, VR prompts, etc.
      */
     public static final String JOIN_STRING = ",";
-    public final static int REQUEST_CHOOSE_XML_TEST = 51;
     private static SyncProxyTester sActivityInstance;
     private static byte[] _ESN;
     /**
@@ -225,6 +224,9 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             return;
         }
         Logger.d("Current active fragment hash:" + fragment.hashCode());
+        if (mBoundProxyService == null) {
+            return;
+        }
         mBoundProxyService.setActiveAppId(fragment.getAppId());
     }
 
@@ -785,14 +787,14 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         super.finish();
     }
 
-    private void xmlTestContinue(String filePath) {
+    public void xmlTestContinue(String appId, String filePath) {
         if (mTesterMain != null) {
             SafeToast.showToastAnyThread("start your engines");
         } else {
-            mBoundProxyService.startModuleTest();
+            mBoundProxyService.startModuleTest(appId);
             SafeToast.showToastAnyThread("Start the app on SYNC first");
         }
-        mTesterMain.restart(filePath);
+        mTesterMain.restart(appId, filePath);
     }
 
     public int getFragmentsCount() {
@@ -970,9 +972,14 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * @param unsubscribeVehicleData {@link com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData}
      */
     public void onUnsubscribeVehicleDialogResult(UnsubscribeVehicleData unsubscribeVehicleData) {
-        if (mBoundProxyService != null) {
-            mBoundProxyService.commandUnsubscribeVehicleInterface(unsubscribeVehicleData);
+        if (mBoundProxyService == null) {
+            return;
         }
+        if (getCurrentActiveFragment() == null) {
+            return;
+        }
+        mBoundProxyService.commandUnsubscribeVehicleInterface(
+                getCurrentActiveFragment().getAppId(), unsubscribeVehicleData);
     }
 
     /**
@@ -983,7 +990,11 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     public void onSubscribeVehicleDialogResult(SubscribeVehicleData subscribeVehicleData) {
         if (mBoundProxyService != null) {
-            mBoundProxyService.commandSubscribeVehicleInterfaceResumable(subscribeVehicleData);
+            if (getCurrentActiveFragment() == null) {
+                return;
+            }
+            mBoundProxyService.commandSubscribeVehicleInterfaceResumable(
+                    getCurrentActiveFragment().getAppId(), subscribeVehicleData);
         }
     }
 
@@ -993,9 +1004,10 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      *
      * @param setGlobalProperties {@link com.ford.syncV4.proxy.rpc.SetGlobalProperties} request
      */
-    public void onSetGlobalPropertiesDialogResult(SetGlobalProperties setGlobalProperties) {
+    public void onSetGlobalPropertiesDialogResult(String appId,
+                                                  SetGlobalProperties setGlobalProperties) {
         if (mBoundProxyService != null) {
-            mBoundProxyService.commandSetGlobalPropertiesResumable(setGlobalProperties);
+            mBoundProxyService.commandSetGlobalPropertiesResumable(appId, setGlobalProperties);
         }
     }
 
@@ -1006,9 +1018,13 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * @param addSubMenu  {@link com.ford.syncV4.android.activity.AddSubMenuDialog} request
      * @param syncSubMenu SubMenu structure
      */
-    public void onAddSubMenuDialogResult(AddSubMenu addSubMenu, SyncSubMenu syncSubMenu) {
+    public void onAddSubMenuDialogResult(String appId, AddSubMenu addSubMenu,
+                                         SyncSubMenu syncSubMenu) {
         if (mBoundProxyService != null) {
-            mBoundProxyService.commandAddSubMenuResumable(addSubMenu);
+            if (getCurrentActiveFragment() == null) {
+                return;
+            }
+            mBoundProxyService.commandAddSubMenuResumable(appId, addSubMenu);
         }
         if (getCurrentActiveFragment() == null) {
             Logger.w("onAddSubMenuDialogResult cur frag is null");
@@ -1021,10 +1037,11 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * This is a callback function for the result of the
      * {@link com.ford.syncV4.android.activity.PolicyFilesSetUpDialog}
      */
-    public void onPolicyFilesSetUpDialogResult_SendUpdate(FileType fileType, RequestType requestType) {
+    public void onPolicyFilesSetUpDialogResult_SendUpdate(String appId, FileType fileType,
+                                                          RequestType requestType) {
         Logger.d("PolicyFilesSetUpDialogResult fileType:" + fileType + " requestType:" + requestType);
         if (mBoundProxyService != null) {
-            mBoundProxyService.sendPolicyTableUpdate(fileType, requestType);
+            mBoundProxyService.sendPolicyTableUpdate(appId, fileType, requestType);
         }
     }
 
@@ -1034,13 +1051,14 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      *
      * @param addCommand {@link com.ford.syncV4.proxy.rpc.AddCommand}
      */
-    public void onAddCommandDialogResult(AddCommand addCommand) {
-        if (mBoundProxyService != null) {
-            mBoundProxyService.commandAddCommandResumable(addCommand);
+    public void onAddCommandDialogResult(String appId, AddCommand addCommand) {
+        if (mBoundProxyService == null) {
+            return;
         }
         if (getCurrentActiveFragment() == null) {
             return;
         }
+        mBoundProxyService.commandAddCommandResumable(appId, addCommand);
         getCurrentActiveFragment().onAddCommandDialogResult(addCommand);
     }
 
@@ -1050,11 +1068,13 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      *
      * @param performAudioPassThru {@link com.ford.syncV4.proxy.rpc.PerformAudioPassThru}
      */
-    public void onPerformAudioPassThruDialogResult(PerformAudioPassThru performAudioPassThru) {
+    public void onPerformAudioPassThruDialogResult(String appId,
+                                                   PerformAudioPassThru performAudioPassThru) {
         latestPerformAudioPassThruMsg = performAudioPassThru;
-        if (mBoundProxyService != null) {
-            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(performAudioPassThru);
+        if (mBoundProxyService == null) {
+            return;
         }
+        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(appId, performAudioPassThru);
     }
 
     /**
@@ -1065,26 +1085,29 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * @param createNewSession     indicates whether to create a new session or send a request to
      *                             existing one
      */
-    public void onRegisterAppInterfaceDialogResult(RegisterAppInterface registerAppInterface,
+    public void onRegisterAppInterfaceDialogResult(String appId,
+                                                   RegisterAppInterface registerAppInterface,
                                                    boolean createNewSession) {
-        if (mBoundProxyService != null) {
-            if (mBoundProxyService.isSyncProxyConnected()) {
-                if (createNewSession) {
-                    mBoundProxyService.syncProxySendRPCRequestWithPreprocess(registerAppInterface);
-                } else {
-                    mBoundProxyService.syncProxySendRPCRequest(registerAppInterface);
-                }
-            } else {
-                // This may happen if "UnregisterAppInterface" command has been sent manually
-                // from the SPT
-
-                Logger.w("OnRegisterAppInterfaceDialogResult -> SyncProxy not connected");
-
-                // TODO : Seems like this case is out of date
-                //onSetUpDialogResult();
-            }
-        } else {
+        if (mBoundProxyService == null) {
             Logger.w("OnRegisterAppInterfaceDialogResult -> mBoundProxyService is NULL");
+            return;
+        }
+        if (!mBoundProxyService.isSyncProxyConnected()) {
+
+            // This may happen if "UnregisterAppInterface" command has been sent manually
+            // from the SPT
+
+            Logger.w("OnRegisterAppInterfaceDialogResult -> SyncProxy not connected");
+
+            // TODO : Seems like this case is out of date
+            //onSetUpDialogResult();
+            return;
+        }
+        if (createNewSession) {
+            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(
+                    appId, registerAppInterface);
+        } else {
+            mBoundProxyService.syncProxySendRPCRequest(appId, registerAppInterface);
         }
     }
 
@@ -1098,16 +1121,20 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     public void onSingleRPCCommandDialogResult(RPCRequest rpcRequest, boolean doEncode,
                                                boolean doCloseUSBReader) {
-        if (mBoundProxyService != null) {
-
-            if (doCloseUSBReader) {
-                // When set this value to true it is important to revert it back to false when Test is
-                // complete!
-                mBoundProxyService.getTestConfig().setDoKeepUSBTransportConnected(true);
-            }
-
-            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(rpcRequest);
+        if (mBoundProxyService == null) {
+            return;
         }
+        if (doCloseUSBReader) {
+            // When set this value to true it is important to revert it back to false when Test is
+            // complete!
+            mBoundProxyService.getTestConfig().setDoKeepUSBTransportConnected(true);
+        }
+
+        if (getCurrentActiveFragment() == null) {
+            return;
+        }
+        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(
+                getCurrentActiveFragment().getAppId(), rpcRequest);
     }
 
     //upon onDestroy(), dispose current proxy and create a new one to enable auto-start
@@ -1155,8 +1182,12 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      *
      * @param value
      */
-    public void setIsVehicleDataSubscribed(boolean[] value) {
-        getCurrentActiveFragment().setIsVehicleDataSubscribed(value);
+    public void setIsVehicleDataSubscribed(String appId, boolean[] value) {
+        PlaceholderFragment fragment = getFragmentByAppId(appId);
+        if (fragment == null) {
+            return;
+        }
+        fragment.setIsVehicleDataSubscribed(value);
     }
 
     /**
@@ -1328,7 +1359,11 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             if (mBoundProxyService == null) {
                 return;
             }
-            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(latestPerformAudioPassThruMsg);
+            if (getCurrentActiveFragment() == null) {
+                return;
+            }
+            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(
+                    getCurrentActiveFragment().getAppId(), latestPerformAudioPassThruMsg);
         }
     }
 
@@ -1398,19 +1433,9 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode) {
-            case REQUEST_CHOOSE_XML_TEST:
-                if (resultCode == RESULT_OK) {
-                    String filePath = data.getStringExtra(FileDialog.RESULT_PATH);
-                    if (filePath != null) {
-                        xmlTestContinue(filePath);
-                    }
-                }
-                break;
-            default:
-                Logger.i("Unknown request code: " + requestCode);
-                break;
-        }
+        super.onActivityResult(requestCode, resultCode, data);
+        Logger.i(LOG_TAG + " OnActivityResult, request:" + requestCode + ", result:" + resultCode +
+                ", data:" + data);
     }
 
     /**
@@ -1769,14 +1794,16 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         });
     }
 
-    public void onSystemRequestDialogResult(SystemRequest systemRequest) {
+    public void onSystemRequestDialogResult(String appId, SystemRequest systemRequest) {
         PlaceholderFragment fragment = getCurrentActiveFragment();
         if (fragment == null) {
             return;
         }
+        // TODO : Reconsider
         systemRequest.setCorrelationID(fragment.getCorrelationId());
-        if (mBoundProxyService != null) {
-            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(systemRequest);
+        if (mBoundProxyService == null) {
+            return;
         }
+        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(appId, systemRequest);
     }
 }

@@ -882,7 +882,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return _interfaceBroker;
     }
 
-    public void sendEncodedSyncPDataToUrl(String urlString, Vector<String> encodedSyncPData, Integer timeout) {
+    public void sendEncodedSyncPDataToUrl(final String appId, String urlString,
+                                          Vector<String> encodedSyncPData, Integer timeout) {
         SyncPDataSender syncPDataSender = new SyncPDataSender(getPoliciesCorrelationId());
         syncPDataSender.sendEncodedPData(urlString, encodedSyncPData, timeout,
                 new SyncPDataSender.SyncPDataSenderCallback() {
@@ -890,7 +891,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     public void onComplete(RPCRequest rpcRequest) {
                         if (getIsConnected()) {
                             try {
-                                sendRPCRequestPrivate(rpcRequest);
+                                sendRPCRequestPrivate(appId, rpcRequest);
                                 Logger.i("Encoded SyncPData sent to SDL");
                             } catch (SyncException e) {
                                 Logger.i("Error sending Encoded SyncPData to SDL:" + e.getMessage());
@@ -905,14 +906,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 });
     }
 
-    public void sendSyncPDataToUrl(String urlString, byte[] bytes, Integer timeout) {
+    public void sendSyncPDataToUrl(final String appId, String urlString, byte[] bytes, Integer timeout) {
         SyncPDataSender syncPDataSender = new SyncPDataSender(getPoliciesCorrelationId());
         syncPDataSender.sendPData(urlString, bytes, timeout, new SyncPDataSender.SyncPDataSenderCallback() {
             @Override
             public void onComplete(RPCRequest rpcRequest) {
                 if (getIsConnected()) {
                     try {
-                        sendRPCRequestPrivate(rpcRequest);
+                        sendRPCRequestPrivate(appId, rpcRequest);
                         Logger.i("SyncPData sent to SDL");
                     } catch (SyncException e) {
                         Logger.i("Error sending SyncPData to SDL:" + e.getMessage());
@@ -1206,7 +1207,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void scheduleInitializeProxy() {
-        Logger.d("Scheduling proxy init, services count:" + syncSession.getServicesList().size());
+        Logger.d("Scheduling proxy init, services count:" + syncSession.getServicesNumber());
 
         if (getCurrentReconnectTimerTask() != null) {
             Logger.d("Current reconnect task is already scheduled, canceling it first");
@@ -1456,9 +1457,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     // Private sendPRCRequest method. All RPCRequests are funneled through this method after
     // error checking.
     // FIXME: return to private?
-    void sendRPCRequestPrivate(RPCRequest request) throws SyncException {
-        // TODO : Modify it to get AppId as parameter
-        byte sessionId = syncSession.getSessionIdByAppId(mActiveAppId);
+    void sendRPCRequestPrivate(String appId, RPCRequest request) throws SyncException {
+        byte sessionId = syncSession.getSessionIdByAppId(appId);
         sendRPCRequestPrivate(sessionId, request);
     }
 
@@ -1687,7 +1687,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      *
      * @throws SyncException
      */
-    public void sendRPCRequest(RPCRequest request) throws SyncException {
+    public void sendRPCRequest(String appId, RPCRequest request) throws SyncException {
         if (_proxyDisposed) {
             throw new SyncException("This object has been disposed, it is no long capable of " +
                     "executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
@@ -1743,7 +1743,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
         }
 
-        sendRPCRequestPrivate(request);
+        sendRPCRequestPrivate(appId, request);
     }
 
     private void checkSyncConnection() throws SyncException {
@@ -1782,7 +1782,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void startProtocolSession(final byte sessionId) {
-        syncSession.setSessionId(sessionId);
         final String associatedAppId = syncSession.updateSessionId(sessionId);
         Logger.d("Start Protocol session appId:" + associatedAppId + " " + sessionId + " " +
                 syncSession.hasService(sessionId, ServiceType.RPC));
@@ -2011,15 +2010,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private boolean removeServiceFromSession(byte sessionId, ServiceType serviceType) {
-        List<Service> servicePool = getServicePool();
-        for (Service service : servicePool) {
-            if ((service.getSessionId() == sessionId) &&
-                    (serviceType.equals(service.getServiceType()))) {
-                syncSession.removeService(service);
-                return true;
-            }
-        }
-        return false;
+        return syncSession.removeService(sessionId, serviceType);
+    }
+
+    /**
+     * Will be removed soon, do not use it any more
+     * @return
+     */
+    @Deprecated
+    public List<Service> getServicePool() {
+        return syncSession.getServicePool();
     }
 
     // Queue internal callback message
@@ -2081,14 +2081,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID correlation Id
      * @throws SyncException
      */
-    public void addCommand(Integer commandID, String menuText, Integer parentID, Integer position,
-                           Vector<String> vrCommands, Integer correlationID)
+    public void addCommand(String appId, Integer commandID, String menuText, Integer parentID,
+                           Integer position, Vector<String> vrCommands, Integer correlationID)
             throws SyncException {
 
-        AddCommand addCommand = RPCRequestFactory.buildAddCommand(commandID, menuText, parentID, position,
-                vrCommands, correlationID);
+        AddCommand addCommand = RPCRequestFactory.buildAddCommand(commandID, menuText, parentID,
+                position, vrCommands, correlationID);
 
-        sendRPCRequest(addCommand);
+        sendRPCRequest(appId, addCommand);
     }
 
     /**
@@ -2101,11 +2101,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void addCommand(Integer commandID, String menuText, Integer position,
+    public void addCommand(String appId, Integer commandID, String menuText, Integer position,
                            Vector<String> vrCommands, Integer correlationID)
             throws SyncException {
 
-        addCommand(commandID, menuText, null, position, vrCommands, correlationID);
+        addCommand(appId, commandID, menuText, null, position, vrCommands, correlationID);
     }
 
     /**
@@ -2117,11 +2117,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void addCommand(Integer commandID, String menuText, Integer position,
+    public void addCommand(String appId, Integer commandID, String menuText, Integer position,
                            Integer correlationID)
             throws SyncException {
 
-        addCommand(commandID, menuText, null, position, null, correlationID);
+        addCommand(appId, commandID, menuText, null, position, null, correlationID);
     }
 
     /**
@@ -2132,10 +2132,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void addCommand(Integer commandID, String menuText, Integer correlationID)
+    public void addCommand(String appId, Integer commandID, String menuText, Integer correlationID)
             throws SyncException {
 
-        addCommand(commandID, menuText, null, null, null, correlationID);
+        addCommand(appId, commandID, menuText, null, null, null, correlationID);
     }
 
     /**
@@ -2147,10 +2147,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID correlation Id
      * @throws SyncException
      */
-    public void addCommand(Integer commandID, String menuText, Vector<String> vrCommands,
+    public void addCommand(String appId, Integer commandID, String menuText, Vector<String> vrCommands,
                            Integer correlationID)
             throws SyncException {
-        addCommand(commandID, menuText, null, null, vrCommands, correlationID);
+        addCommand(appId, commandID, menuText, null, null, vrCommands, correlationID);
     }
 
     /**
@@ -2161,14 +2161,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void addCommand(Integer commandID, Vector<String> vrCommands, Integer correlationID)
+    public void addCommand(String appId, Integer commandID, Vector<String> vrCommands,
+                           Integer correlationID)
             throws SyncException {
 
-        addCommand(commandID, null, null, null, vrCommands, correlationID);
+        addCommand(appId, commandID, null, null, null, vrCommands, correlationID);
     }
 
     /**
-     * Sends an AddSubMenu RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
+     * Sends an AddSubMenu RPCRequest to SYNC. Responses are captured through callback on
+     * IProxyListener.
      *
      * @param menuID
      * @param menuName
@@ -2176,27 +2178,29 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void addSubMenu(Integer menuID, String menuName, Integer position, Integer correlationID)
+    public void addSubMenu(String appId, Integer menuID, String menuName, Integer position,
+                           Integer correlationID)
             throws SyncException {
 
         AddSubMenu msg = RPCRequestFactory.buildAddSubMenu(menuID, menuName,
                 position, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
-     * Sends an AddSubMenu RPCRequest to SYNC. Responses are captured through callback on IProxyListener.
+     * Sends an AddSubMenu RPCRequest to SYNC. Responses are captured through callback on
+     * IProxyListener.
      *
      * @param menuID
      * @param menuName
      * @param correlationID
      * @throws SyncException
      */
-    public void addSubMenu(Integer menuID, String menuName, Integer correlationID)
+    public void addSubMenu(String appId, Integer menuID, String menuName, Integer correlationID)
             throws SyncException {
 
-        addSubMenu(menuID, menuName, null, correlationID);
+        addSubMenu(appId, menuID, menuName, null, correlationID);
     }
 
     /**
@@ -2205,10 +2209,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID correlation Id
      * @throws SyncException
      */
-    public void listFiles(Integer correlationID) throws SyncException {
+    public void listFiles(String appId, Integer correlationID) throws SyncException {
         ListFiles listFiles = new ListFiles();
         listFiles.setCorrelationID(correlationID);
-        sendRPCRequest(listFiles);
+        sendRPCRequest(appId, listFiles);
     }
 
     /**
@@ -2218,11 +2222,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID correlation Id
      * @throws SyncException
      */
-    public void setAppIcon(String fileName, Integer correlationID) throws SyncException {
+    public void setAppIcon(String appId, String fileName, Integer correlationID) throws SyncException {
         SetAppIcon setAppIcon = new SetAppIcon();
         setAppIcon.setSyncFileName(fileName);
         setAppIcon.setCorrelationID(correlationID);
-        sendRPCRequest(setAppIcon);
+        sendRPCRequest(appId, setAppIcon);
     }
 
     /**
@@ -2230,9 +2234,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      *
      * @param putFile PutFile object to be send
      */
-    public void putFile(PutFile putFile) throws SyncException {
+    public void putFile(String appId, PutFile putFile) throws SyncException {
         if (putFile != null) {
-            sendRPCRequest(putFile);
+            sendRPCRequest(appId, putFile);
         } else {
             // TODO : Process null object here
         }
@@ -2245,12 +2249,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void encodedSyncPData(Vector<String> data, Integer correlationID)
+    public void encodedSyncPData(String appId, Vector<String> data, Integer correlationID)
             throws SyncException {
 
-        Logger.i("pt", "encodedSyncPData() giving to sync");
+        Logger.i("encodedSyncPData() giving to sync");
         EncodedSyncPData msg = RPCRequestFactory.buildEncodedSyncPData(data, correlationID);
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2260,12 +2264,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void syncPData(byte[] data, Integer correlationID)
+    public void syncPData(String appId, byte[] data, Integer correlationID)
             throws SyncException {
 
-        Logger.i("pt", "syncPData() giving to sync");
+        Logger.i("syncPData() giving to sync");
         SyncPData msg = RPCRequestFactory.buildSyncPData(data, correlationID);
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2279,14 +2283,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void alert(String ttsText, String alertText1,
+    public void alert(String appId, String ttsText, String alertText1,
                       String alertText2, Boolean playTone, Integer duration,
                       Integer correlationID) throws SyncException {
 
         Alert msg = RPCRequestFactory.buildAlert(ttsText, alertText1, alertText2,
                 playTone, duration, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2300,14 +2304,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void alert(Vector<TTSChunk> ttsChunks,
+    public void alert(String appId, Vector<TTSChunk> ttsChunks,
                       String alertText1, String alertText2, Boolean playTone,
                       Integer duration, Integer correlationID) throws SyncException {
 
         Alert msg = RPCRequestFactory.buildAlert(ttsChunks, alertText1, alertText2, playTone,
                 duration, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2318,10 +2322,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void alert(String ttsText, Boolean playTone,
+    public void alert(String appId, String ttsText, Boolean playTone,
                       Integer correlationID) throws SyncException {
 
-        alert(ttsText, null, null, playTone, null, correlationID);
+        alert(appId, ttsText, null, null, playTone, null, correlationID);
     }
 
     /**
@@ -2332,10 +2336,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void alert(Vector<TTSChunk> chunks, Boolean playTone,
+    public void alert(String appId, Vector<TTSChunk> chunks, Boolean playTone,
                       Integer correlationID) throws SyncException {
 
-        alert(chunks, null, null, playTone, null, correlationID);
+        alert(appId, chunks, null, null, playTone, null, correlationID);
     }
 
     /**
@@ -2348,11 +2352,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void alert(String alertText1, String alertText2,
+    public void alert(String appId, String alertText1, String alertText2,
                       Boolean playTone, Integer duration, Integer correlationID)
             throws SyncException {
 
-        alert((Vector<TTSChunk>) null, alertText1, alertText2, playTone, duration, correlationID);
+        alert(appId, (Vector<TTSChunk>) null, alertText1, alertText2, playTone, duration, correlationID);
     }
 
     /**
@@ -2363,14 +2367,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID correlation Id
      * @throws SyncException
      */
-    public void createInteractionChoiceSet(Vector<Choice> choiceSet, Integer interactionChoiceSetID,
+    public void createInteractionChoiceSet(String appId, Vector<Choice> choiceSet, Integer interactionChoiceSetID,
                                            Integer correlationID) throws SyncException {
 
         CreateInteractionChoiceSet createInteractionChoiceSet =
                 RPCRequestFactory.buildCreateInteractionChoiceSet(choiceSet,
                         interactionChoiceSetID, correlationID);
 
-        sendRPCRequest(createInteractionChoiceSet);
+        sendRPCRequest(appId, createInteractionChoiceSet);
     }
 
     /**
@@ -2380,12 +2384,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void deleteCommand(Integer commandID,
+    public void deleteCommand(String appId, Integer commandID,
                               Integer correlationID) throws SyncException {
 
         DeleteCommand msg = RPCRequestFactory.buildDeleteCommand(commandID, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2395,14 +2399,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void deleteInteractionChoiceSet(
-            Integer interactionChoiceSetID, Integer correlationID)
+    public void deleteInteractionChoiceSet(String appId,
+                                           Integer interactionChoiceSetID, Integer correlationID)
             throws SyncException {
 
         DeleteInteractionChoiceSet msg = RPCRequestFactory.buildDeleteInteractionChoiceSet(
                 interactionChoiceSetID, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2412,12 +2416,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void deleteSubMenu(Integer menuID,
+    public void deleteSubMenu(String appId, Integer menuID,
                               Integer correlationID) throws SyncException {
 
         DeleteSubMenu msg = RPCRequestFactory.buildDeleteSubMenu(menuID, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2429,14 +2433,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void performInteraction(String initPrompt,
+    public void performInteraction(String appId, String initPrompt,
                                    String displayText, Integer interactionChoiceSetID,
                                    Integer correlationID) throws SyncException {
 
         PerformInteraction msg = RPCRequestFactory.buildPerformInteraction(initPrompt,
                 displayText, interactionChoiceSetID, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2448,7 +2452,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void performInteraction(String initPrompt,
+    public void performInteraction(String appId, String initPrompt,
                                    String displayText, Integer interactionChoiceSetID,
                                    String helpPrompt, String timeoutPrompt,
                                    InteractionMode interactionMode, Integer timeout,
@@ -2459,7 +2463,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 helpPrompt, timeoutPrompt, interactionMode,
                 timeout, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2475,7 +2479,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void performInteraction(String initPrompt,
+    public void performInteraction(String appId, String initPrompt,
                                    String displayText, Vector<Integer> interactionChoiceSetIDList,
                                    String helpPrompt, String timeoutPrompt,
                                    InteractionMode interactionMode, Integer timeout,
@@ -2486,7 +2490,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 helpPrompt, timeoutPrompt, interactionMode, timeout,
                 correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2502,8 +2506,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void performInteraction(
-            Vector<TTSChunk> initChunks, String displayText,
+    public void performInteraction(String appId,
+                                   Vector<TTSChunk> initChunks, String displayText,
             Vector<Integer> interactionChoiceSetIDList,
             Vector<TTSChunk> helpChunks, Vector<TTSChunk> timeoutChunks,
             InteractionMode interactionMode, Integer timeout,
@@ -2514,7 +2518,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 helpChunks, timeoutChunks, interactionMode, timeout,
                 correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     // Protected registerAppInterface used to ensure only non-ALM applications call
@@ -2531,7 +2535,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 languageDesired, hmiDisplayLanguageDesired, appHMIType, appId, correlationID, hashId,
                 deviceInfo);
 
-        sendRPCRequestPrivate(msg);
+        sendRPCRequestPrivate((String) appId, msg);
 
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -2554,14 +2558,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void setGlobalProperties(
-            String helpPrompt, String timeoutPrompt, Integer correlationID)
+    public void setGlobalProperties(String appId,
+                                    String helpPrompt, String timeoutPrompt, Integer correlationID)
             throws SyncException {
 
         SetGlobalProperties req = RPCRequestFactory.buildSetGlobalProperties(helpPrompt,
                 timeoutPrompt, correlationID);
 
-        sendRPCRequest(req);
+        sendRPCRequest(appId, req);
     }
 
     /**
@@ -2572,17 +2576,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void setGlobalProperties(
-            Vector<TTSChunk> helpChunks, Vector<TTSChunk> timeoutChunks,
+    public void setGlobalProperties(String appId,
+                                    Vector<TTSChunk> helpChunks, Vector<TTSChunk> timeoutChunks,
             Integer correlationID) throws SyncException {
 
         SetGlobalProperties req = RPCRequestFactory.buildSetGlobalProperties(
                 helpChunks, timeoutChunks, correlationID);
 
-        sendRPCRequest(req);
+        sendRPCRequest(appId, req);
     }
 
-    public void resetGlobalProperties(Vector<GlobalProperty> properties,
+    public void resetGlobalProperties(String appId, Vector<GlobalProperty> properties,
                                       Integer correlationID) throws SyncException {
 
         ResetGlobalProperties req = new ResetGlobalProperties();
@@ -2590,7 +2594,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         req.setCorrelationID(correlationID);
         req.setProperties(properties);
 
-        sendRPCRequest(req);
+        sendRPCRequest(appId, req);
     }
 
     /**
@@ -2603,14 +2607,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void setMediaClockTimer(Integer hours,
+    public void setMediaClockTimer(String appId, Integer hours,
                                    Integer minutes, Integer seconds, UpdateMode updateMode,
                                    Integer correlationID) throws SyncException {
 
         SetMediaClockTimer msg = RPCRequestFactory.buildSetMediaClockTimer(hours,
                 minutes, seconds, updateMode, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2619,13 +2623,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void pauseMediaClockTimer(Integer correlationID)
+    public void pauseMediaClockTimer(String appId, Integer correlationID)
             throws SyncException {
 
         SetMediaClockTimer msg = RPCRequestFactory.buildSetMediaClockTimer(0,
                 0, 0, UpdateMode.PAUSE, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2634,13 +2638,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void resumeMediaClockTimer(Integer correlationID)
+    public void resumeMediaClockTimer(String appId, Integer correlationID)
             throws SyncException {
 
         SetMediaClockTimer msg = RPCRequestFactory.buildSetMediaClockTimer(0,
                 0, 0, UpdateMode.RESUME, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2649,12 +2653,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void clearMediaClockTimer(Integer correlationID)
+    public void clearMediaClockTimer(String appId, Integer correlationID)
             throws SyncException {
 
         Show msg = RPCRequestFactory.buildShow(null, null, null, "     ", null, null, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2669,7 +2673,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void show(String mainText1, String mainText2,
+    public void show(String appId, String mainText1, String mainText2,
                      String statusBar, String mediaClock, String mediaTrack,
                      TextAlignment alignment, Integer correlationID)
             throws SyncException {
@@ -2678,7 +2682,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 statusBar, mediaClock, mediaTrack,
                 alignment, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2690,11 +2694,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void show(String mainText1, String mainText2,
+    public void show(String appId, String mainText1, String mainText2,
                      TextAlignment alignment, Integer correlationID)
             throws SyncException {
 
-        show(mainText1, mainText2, null, null, null, alignment, correlationID);
+        show(appId, mainText1, mainText2, null, null, null, alignment, correlationID);
     }
 
     /**
@@ -2704,13 +2708,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void speak(String ttsText, Integer correlationID)
+    public void speak(String appId, String ttsText, Integer correlationID)
             throws SyncException {
 
         Speak msg = RPCRequestFactory.buildSpeak(TTSChunkFactory.createSimpleTTSChunks(ttsText),
                 correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2720,12 +2724,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void speak(Vector<TTSChunk> ttsChunks,
+    public void speak(String appId, Vector<TTSChunk> ttsChunks,
                       Integer correlationID) throws SyncException {
 
         Speak msg = RPCRequestFactory.buildSpeak(ttsChunks, correlationID);
 
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2735,9 +2739,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void subscribeButton(ButtonName buttonName, Integer correlationID) throws SyncException {
+    public void subscribeButton(String appId, ButtonName buttonName, Integer correlationID) throws SyncException {
         SubscribeButton msg = RPCRequestFactory.buildSubscribeButton(buttonName, correlationID);
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2748,10 +2752,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param correlationID
      * @throws SyncException
      */
-    public void unsubscribeButton(ButtonName buttonName, Integer correlationID)
+    public void unsubscribeButton(String appId, ButtonName buttonName, Integer correlationID)
             throws SyncException {
         UnsubscribeButton msg = RPCRequestFactory.buildUnsubscribeButton(buttonName, correlationID);
-        sendRPCRequest(msg);
+        sendRPCRequest(appId, msg);
     }
 
     /**
@@ -2871,11 +2875,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         restartRPCProtocolSession(syncSession.getSessionIdByAppId(appId));
     }
 
-    // TODO: Need to refactor it
-    public List<Service> getServicePool() {
-        return syncSession.getServicesList();
-    }
-
     public boolean hasServiceInServicesPool(String appId, ServiceType serviceType) {
         return !syncSession.isServicesEmpty() && syncSession.hasService(appId, serviceType);
     }
@@ -2887,14 +2886,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     public int getServicesNumber() {
         return syncSession.getServicesNumber();
-    }
-
-    /**
-     * @return id of te current session
-     */
-    @Deprecated
-    public int getSessionId() {
-        return syncSession.getSessionId();
     }
 
     protected byte getSessionIdByAppId(String appId) {
@@ -3022,7 +3013,25 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     public void initializeSession() {
         // Initialize a start session procedure
         Logger.d(LOG_TAG, "Init session, id:" + mActiveAppId);
-        syncSession.putDefaultSessionIdToAppId(mActiveAppId);
+
+        final int sessionIdsNumber = syncSession.getSessionIdsNumber();
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    for (int i = 0; i < sessionIdsNumber; i++) {
+                        _proxyListener.onStartSession(mActiveAppId);
+                    }
+                }
+            });
+        } else {
+            for (int i = 0; i < sessionIdsNumber; i++) {
+                _proxyListener.onStartSession(mActiveAppId);
+            }
+        }
+
+        syncSession.addAppId(mActiveAppId);
         mSyncConnection.initialiseSession(Session.DEFAULT_SESSION_ID);
     }
 
@@ -3035,22 +3044,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onTransportConnected() {
-            final int sessionIdsNumber = syncSession.getSessionIdsNumber();
-            if (_callbackToUIThread) {
-                // Run in UI thread
-                _mainUIHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        for (int i = 0; i < sessionIdsNumber; i++) {
-                            _proxyListener.onStartSession();
-                        }
-                    }
-                });
-            } else {
-                for (int i = 0; i < sessionIdsNumber; i++) {
-                    _proxyListener.onStartSession();
-                }
-            }
             initializeSession();
         }
 
@@ -3289,12 +3282,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _proxyListener.onPutFileRequest(appId, putFile);
         }
 
-        sendRPCRequest(putFile);
+        sendRPCRequest(appId, putFile);
         internalRequestCorrelationIDs.add(correlationID);
     }
 
     @Override
-    public void putPolicyTableUpdateFile(String filename, byte[] data, FileType fileType,
+    public void putPolicyTableUpdateFile(String appId, String filename, byte[] data, FileType fileType,
                                          RequestType requestType)
             throws SyncException {
         final int correlationID = nextCorrelationId();
@@ -3303,12 +3296,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             PutFile putFile = RPCRequestFactory.buildPutFile(filename, FileType.JSON, null, data,
                     correlationID);
 
-            sendRPCRequest(putFile);
+            sendRPCRequest(appId, putFile);
         } else if (fileType == FileType.JSON) {
             SystemRequest systemRequest = RPCRequestFactory.buildSystemRequest(filename, data,
                     correlationID, requestType);
 
-            sendRPCRequest(systemRequest);
+            sendRPCRequest(appId, systemRequest);
         }
 
         internalRequestCorrelationIDs.add(correlationID);

@@ -7,6 +7,7 @@ package com.ford.syncV4.android.manager;
  * Time: 12:25 PM
  */
 
+import com.ford.syncV4.android.activity.PlaceholderFragment;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.rpc.PutFile;
@@ -20,7 +21,8 @@ import java.util.Vector;
 public class RPCRequestsResumableManager {
 
     public interface RPCRequestsResumableManagerCallback {
-        public void onSendRequest(RPCRequest request);
+
+        public void onSendRequest(String appId, RPCRequest request);
     }
 
     // This Vector keep all RPC requests since the last successful application start in case of
@@ -36,10 +38,15 @@ public class RPCRequestsResumableManager {
     private RPCRequestsResumableManagerCallback callback;
 
     /**
+     * Application Id
+     */
+    private String mAppId = PlaceholderFragment.EMPTY_APP_ID;
+
+    /**
      * Constructor
      */
-    public RPCRequestsResumableManager() {
-
+    public RPCRequestsResumableManager(String appId) {
+        mAppId = appId;
     }
 
     /**
@@ -86,7 +93,7 @@ public class RPCRequestsResumableManager {
     public void sendAllRequestsConnected() throws SyncException {
         for (RPCRequest request : rpcRequestsResumableConnected) {
             if (callback != null) {
-                callback.onSendRequest(request);
+                callback.onSendRequest(mAppId, request);
             }
         }
     }
@@ -99,7 +106,7 @@ public class RPCRequestsResumableManager {
     public void sendAllRequestsDisconnected() throws SyncException {
         for (RPCRequest request : rpcRequestsResumableDisconnected) {
             if (callback != null) {
-                callback.onSendRequest(request);
+                callback.onSendRequest(mAppId, request);
             }
         }
     }

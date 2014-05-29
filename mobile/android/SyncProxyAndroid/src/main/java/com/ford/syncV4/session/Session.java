@@ -15,7 +15,13 @@ import java.util.Set;
  */
 public class Session {
 
+    /**
+     * Default Id of the Session
+     */
     public static final byte DEFAULT_SESSION_ID = 0;
+    /**
+     * Undefined value of the Session Id, for example in case of the initialization of the Service
+     */
     public static final byte UNDEFINED_SESSION_ID = Byte.MIN_VALUE;
 
     private static final String CLASS_NAME = Session.class.getSimpleName();
@@ -25,13 +31,19 @@ public class Session {
      */
     private final Hashtable<String, Byte> sessionIds = new Hashtable<String, Byte>();
 
-    private byte sessionId = DEFAULT_SESSION_ID;
+    /**
+     * Collection of the non Sync Services (RPC, Navi, Audio, etc ...)
+     */
     private final List<Service> servicesList = new ArrayList<Service>();
 
     /**
-     * Assign Session Id to the first available Session
-     * @param value session id
-     * @return AppId associated with the assigned Session
+     * Assign Session Id to the first available {@link com.ford.syncV4.session.Session} (assuming
+     * that available Session has {@code DEFAULT_SESSION_ID}). This can be done for example in case
+     * of Start Service ACK for the RPC Service which is received with a Session Id value.
+     *
+     * @param value Session Id
+     *
+     * @return AppId associated with the assigned {@link com.ford.syncV4.session.Session}
      */
     public String updateSessionId(byte value) {
         for (String key: sessionIds.keySet()) {
@@ -46,18 +58,22 @@ public class Session {
     }
 
     /**
-     * Add new Session Id associated with a provided AppId
+     * Add new AppId in to the collection and assign {@code DEFAULT_SESSION_ID} to it. Associated
+     * Session Id will be updated later on when Start Service ACK will be received.
+     *
      * @param appId AppId
      */
-    public void putDefaultSessionIdToAppId(String appId) {
+    public void addAppId(String appId) {
         Logger.d("Add sessionId:" + DEFAULT_SESSION_ID + " to AppId:" + appId);
         sessionIds.put(appId, DEFAULT_SESSION_ID);
     }
 
     /**
-     * Get Session Id associated with AppId
-     * @param appId
-     * @return
+     * Get Session Id associated with provided AppId.
+     *
+     * @param appId Application Id
+     *
+     * @return Session Id
      */
     public byte getSessionIdByAppId(String appId) {
         if (sessionIds.containsKey(appId)) {
@@ -66,10 +82,13 @@ public class Session {
         return DEFAULT_SESSION_ID;
     }
 
-    public Set<String> getSessionIdsKeys() {
-        return sessionIds.keySet();
-    }
-
+    /**
+     * Get AppId associated with provided Session Id.
+     *
+     * @param sessionId Session Id
+     *
+     * @return Application Id value
+     */
     public String getAppIdBySessionId(byte sessionId) {
         for (String key : sessionIds.keySet()) {
             if (key == null) {
@@ -86,38 +105,52 @@ public class Session {
     }
 
     /**
-     * @return Returns the number of Session Id's
+     * @return a Set of the Session Id's
+     */
+    public Set<String> getSessionIdsKeys() {
+        return sessionIds.keySet();
+    }
+
+    /**
+     * @return a number of Session Id's
      */
     public int getSessionIdsNumber() {
         return sessionIds.size();
     }
 
-    @Deprecated
-    public void setSessionId(byte sessionId) {
-        this.sessionId = sessionId;
-    }
-
-    @Deprecated
-    public byte getSessionId() {
-        return sessionId;
-    }
-
+    /**
+     * Check whether Session with provided Id exists int he collection
+     *
+     * @param sessionId Session Id
+     *
+     * @return <b>true</b> if exists, <b>false</b> otherwise
+     */
     public boolean hasSessionId(byte sessionId) {
         return sessionIds.contains(sessionId);
     }
 
+    /**
+     * Add {@link com.ford.syncV4.service.Service} tot he collection
+     *
+     * @param service {@link com.ford.syncV4.service.Service}
+     */
     public void addService(Service service) {
         Logger.i(CLASS_NAME + " Add " + service + ", contains:" + servicesList.contains(service));
         if (servicesList.contains(service)) {
+            Logger.d(CLASS_NAME + " Service already exists");
             return;
         }
         servicesList.add(service);
     }
 
-    public List<Service> getServicesList() {
-        return servicesList;
-    }
-
+    /**
+     * Get {@link com.ford.syncV4.service.Service} by provided Session Id
+     *
+     * @param sessionId   Session Id
+     * @param serviceType {@link com.ford.syncV4.protocol.enums.ServiceType}
+     *
+     * @return {@link com.ford.syncV4.service.Service}
+     */
     public Service getServiceBySessionId(byte sessionId, ServiceType serviceType) {
         for (Service service : servicesList) {
             if (service.getSessionId() == sessionId && service.getServiceType() == serviceType) {
@@ -129,11 +162,40 @@ public class Session {
         return null;
     }
 
+    /**
+     * Check whether {@link com.ford.syncV4.service.Service} with provided
+     * {@link com.ford.syncV4.protocol.enums.ServiceType} and AppId exists in the collection
+     *
+     * @param appId       Application Id
+     * @param serviceType {@link com.ford.syncV4.protocol.enums.ServiceType}
+     *
+     * @return true if {@link com.ford.syncV4.service.Service} exists, false - otherwise
+     */
     public boolean hasService(String appId, ServiceType serviceType) {
         byte sessionId = getSessionIdByAppId(appId);
         return hasService(sessionId, serviceType);
     }
 
+    /**
+     * Check whether provided {@link com.ford.syncV4.service.Service} exists in the collection
+     *
+     * @param service {@link com.ford.syncV4.service.Service}
+     *
+     * @return true if {@link com.ford.syncV4.service.Service} exists, false - otherwise
+     */
+    public boolean hasService(Service service) {
+        return service != null && servicesList.contains(service);
+    }
+
+    /**
+     * Check whether {@link com.ford.syncV4.service.Service} with provided
+     * {@link com.ford.syncV4.protocol.enums.ServiceType} and Session Id exists in the collection
+     *
+     * @param sessionId   Session Id
+     * @param serviceType {@link com.ford.syncV4.protocol.enums.ServiceType}
+     *
+     * @return true if {@link com.ford.syncV4.service.Service} exists, false - otherwise
+     */
     public boolean hasService(byte sessionId, ServiceType serviceType) {
         if (servicesList.isEmpty()) {
             return false;
@@ -146,26 +208,60 @@ public class Session {
         return false;
     }
 
+    /**
+     * @return number of the services in the collection
+     */
     public int getServicesNumber() {
         return servicesList.size();
     }
 
+    /**
+     * @return whether collection is empty or not
+     */
     public boolean isServicesEmpty() {
         return servicesList.isEmpty();
     }
 
-    @Override
-    public String toString() {
-        return "Session{" +
-                "sessionId=" + sessionId + ", servicesList size=" + servicesList.size() + '}';
+    /**
+     * Removes a {@link com.ford.syncV4.service.Service} from collection by provided Session Id
+     * and {@link com.ford.syncV4.protocol.enums.ServiceType}
+     *
+     * @param sessionId   Session Id
+     * @param serviceType {@link com.ford.syncV4.protocol.enums.ServiceType}
+     *
+     * @return true in case of success, false - otherwise
+     */
+    public boolean removeService(byte sessionId, ServiceType serviceType) {
+        for (Service aService : servicesList) {
+            if ((aService.getSessionId() == sessionId) &&
+                    (aService.getServiceType() == serviceType)) {
+                return removeService(aService);
+            }
+        }
+        return false;
     }
 
+    /**
+     * Removes a {@link com.ford.syncV4.service.Service} from collection
+     *
+     * @param service {@link com.ford.syncV4.service.Service}
+     *
+     * @return true in case of success, false - otherwise
+     */
     public boolean removeService(Service service) {
         boolean result = servicesList.remove(service);
         Logger.i(CLASS_NAME + " Remove " + service.getServiceType() + ", complete:" + result);
         return result;
     }
 
+    /**
+     * Creates a {@link com.ford.syncV4.service.Service} by
+     * {@link com.ford.syncV4.protocol.enums.ServiceType}
+     *
+     * @param serviceType {@link com.ford.syncV4.protocol.enums.ServiceType}
+     *
+     * @return created {@link com.ford.syncV4.service.Service}
+     */
     public Service createService(ServiceType serviceType) {
         Logger.i(CLASS_NAME + " Create " + serviceType);
         Service service = new Service();
@@ -173,6 +269,13 @@ public class Session {
         return service;
     }
 
+    /**
+     * Stops a {@link com.ford.syncV4.session.Session} associated with provided Application Id.
+     * Remove all associated {@link com.ford.syncV4.service.Service}'s and drop Session Id to
+     * {@code DEFAULT_SESSION_ID}
+     *
+     * @param appId Application Id
+     */
     public void stopSession(String appId) {
         byte sessionId = getSessionIdByAppId(appId);
         List<Service> tobeRemoved = new ArrayList<Service>();
@@ -190,5 +293,20 @@ public class Session {
         sessionIds.remove(appId);
 
         Logger.i(CLASS_NAME + " Stop appId:" + appId);
+    }
+
+    @Override
+    public String toString() {
+        return "Session{" +
+                "sessionId's:" + sessionIds + ", servicesList:" + servicesList + '}';
+    }
+
+    /**
+     * Will be removed soon, do not use it any more
+     * @return
+     */
+    @Deprecated
+    public List<Service> getServicePool() {
+        return servicesList;
     }
 }

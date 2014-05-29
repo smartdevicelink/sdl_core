@@ -112,7 +112,8 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
             @Override
             public void run() {
 
-                PolicyFilesManager.sendPolicyTableUpdate(proxy, fileType, requestType, mLogAdapter);
+                PolicyFilesManager.sendPolicyTableUpdate(appId, proxy, fileType, requestType,
+                        mLogAdapter);
 
             }
         }, 500);

@@ -32,16 +32,11 @@ import java.util.Vector;
  * Date: 2/21/14
  * Time: 10:09 AM
  */
-public class AddCommandDialog extends DialogFragment {
+public class AddCommandDialog extends BaseDialogFragment {
 
     private static final String LOG_TAG = "AddCommandDialog";
 
     private static int sItemCmdId = 1;
-
-    public static AddCommandDialog newInstance() {
-        AddCommandDialog sendAddCommandDialog = new AddCommandDialog();
-        return sendAddCommandDialog;
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -134,7 +129,8 @@ public class AddCommandDialog extends DialogFragment {
                             addCommand.setCmdIcon(icon);
                         }
 
-                        ((SyncProxyTester) getActivity()).onAddCommandDialogResult(addCommand);
+                        ((SyncProxyTester) getActivity()).onAddCommandDialogResult(
+                                getArguments().getString(APP_ID_KEY), addCommand);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

@@ -92,7 +92,8 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(syncSession.getSessionId(), false);
+                        mSyncConnection.closeConnection(
+                                syncSession.getSessionIdByAppId(SessionTest.APP_ID), false);
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -150,7 +151,8 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(syncSession.getSessionId(), false);
+                        mSyncConnection.closeConnection(
+                                syncSession.getSessionIdByAppId(SessionTest.APP_ID), false);
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -164,9 +166,10 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
             @Override
-            protected void onProtocolServiceStarted_MobileNavi(byte sessionID) {
-                super.onProtocolServiceStarted_MobileNavi(sessionID);
-                assertEquals("Session ID should be equal", syncSession.getSessionId(), (byte) 48);
+            protected void onProtocolServiceStarted_MobileNavi(byte sessionId) {
+                super.onProtocolServiceStarted_MobileNavi(sessionId);
+                assertEquals("Session ID should be equal",
+                        syncSession.getSessionIdByAppId(SessionTest.APP_ID), SESSION_ID);
             }
         };
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION);
@@ -209,7 +212,8 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(syncSession.getSessionId(), false);
+                        mSyncConnection.closeConnection(
+                                syncSession.getSessionIdByAppId(SessionTest.APP_ID), false);
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -226,13 +230,13 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             protected void handleMobileNavMessage(ProtocolMessage message) {
                 super.handleMobileNavMessage(message);
                 assertEquals(message.getServiceType(), ServiceType.Mobile_Nav);
-                assertEquals(message.getVersion(), (byte) 2);
-                assertTrue(message.getSessionID() == (byte) 48);
+                assertEquals(message.getVersion(), ProtocolConstants.PROTOCOL_VERSION_TWO);
+                assertTrue(message.getSessionID() == SESSION_ID);
             }
         };
         ProtocolMessage message = new ProtocolMessage();
-        message.setVersion((byte) 2);
-        message.setSessionID((byte) 48);
+        message.setVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+        message.setSessionID(SESSION_ID);
         message.setServiceType(ServiceType.Mobile_Nav);
         proxyALM.dispatchIncomingMessage(message);
     }
@@ -273,7 +277,8 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(syncSession.getSessionId(), false);
+                        mSyncConnection.closeConnection(
+                                syncSession.getSessionIdByAppId(SessionTest.APP_ID), false);
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -331,7 +336,8 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(syncSession.getSessionId(), false);
+                        mSyncConnection.closeConnection(
+                                syncSession.getSessionIdByAppId(SessionTest.APP_ID), false);
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -387,7 +393,8 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(syncSession.getSessionId(), false);
+                        mSyncConnection.closeConnection(
+                                syncSession.getSessionIdByAppId(SessionTest.APP_ID), false);
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);

@@ -21,18 +21,11 @@ public class SessionTest extends AndroidTestCase {
         assertNotNull("syncSession object should be created",session);
     }
 
-    public void testSessionIdShouldBeSet() throws Exception {
-        Session session = new Session();
-        session.setSessionId(SESSION_ID);
-        assertEquals("syncSession id should be 1", SESSION_ID, session.getSessionId());
-    }
-
     public void testServiceAddedToServiceList() throws Exception {
         Session session = new Session();
         Service service = new Service();
         session.addService(service);
-        List<Service> services = session.getServicesList();
-        assertEquals("service should be at list",service, services.get(0));
+        assertTrue("service should be at list", session.hasService(service));
     }
 
     public void testServiceRemovedFromServiceList() throws Exception {
@@ -41,7 +34,7 @@ public class SessionTest extends AndroidTestCase {
         session.addService(service);
         boolean res = session.removeService(service);
         assertTrue("element should be removed", res);
-        assertEquals("service list should be empty", 0, session.getServicesList().size());
+        assertFalse("service list should be empty", session.hasService(service));
     }
 
     public void testSessionAddRPCService() throws Exception {
@@ -69,8 +62,8 @@ public class SessionTest extends AndroidTestCase {
     public void testStopSessionClearsServiceList() throws Exception {
         Session session = getInitializedSession();
         session.stopSession(APP_ID);
-        assertEquals("service list should be 0", 0, session.getServicesList().size());
-        assertEquals("session id should be 0", 0, session.getSessionId());
+        assertEquals("service list should be 0", 0, session.getServicesNumber());
+        assertEquals("session id should be 0", 0, session.getSessionIdByAppId(APP_ID));
     }
 
     public void testEmptyServicesList() {
@@ -111,7 +104,7 @@ public class SessionTest extends AndroidTestCase {
 
     public static Session getInitializedSession() {
         Session session = new Session();
-        session.putDefaultSessionIdToAppId(APP_ID);
+        session.addAppId(APP_ID);
         session.updateSessionId(SESSION_ID);
         return session;
     }

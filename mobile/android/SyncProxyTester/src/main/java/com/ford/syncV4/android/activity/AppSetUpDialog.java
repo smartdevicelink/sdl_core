@@ -2,7 +2,6 @@ package com.ford.syncV4.android.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -44,18 +43,9 @@ import com.ford.syncV4.util.logger.Logger;
  * HMI language, transport settings, etc ...).
  * Starts the proxy after selecting.
  */
-public class AppSetUpDialog extends DialogFragment {
+public class AppSetUpDialog extends BaseDialogFragment {
 
     private static final String LOG_TAG = AppSetUpDialog.class.getSimpleName();
-    private static final String ARG_KEY_IS_TRANSPORT_VISIBLE = "ARG_KEY_IS_TRANSPORT_VISIBLE";
-
-    public static AppSetUpDialog newInstance(boolean isTransportViewVisible) {
-        AppSetUpDialog appSetupDialog = new AppSetUpDialog();
-        Bundle bundle = new Bundle();
-        bundle.putBoolean(ARG_KEY_IS_TRANSPORT_VISIBLE, isTransportViewVisible);
-        appSetupDialog.setArguments(bundle);
-        return appSetupDialog;
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {

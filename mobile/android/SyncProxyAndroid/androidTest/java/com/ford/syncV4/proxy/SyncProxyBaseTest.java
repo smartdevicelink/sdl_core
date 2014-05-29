@@ -178,7 +178,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                         mSyncConnection.startTransport();
                     }
                 }
-                syncSession.putDefaultSessionIdToAppId(SessionTest.APP_ID);
+                syncSession.addAppId(SessionTest.APP_ID);
                 syncSession.updateSessionId(SessionTest.SESSION_ID);
             }
 
@@ -388,7 +388,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         proxy.getInterfaceBroker().onProtocolSessionStarted(SessionTest.SESSION_ID,
                 ProtocolConstants.PROTOCOL_VERSION_THREE);
         assertEquals("only one rpc service should be in service list", 1,
-                proxy.syncSession.getServicesList().size());
+                proxy.syncSession.getServicesNumber());
     }
 
     public void testUnregisterAppResponseTriggersStopServicesAndSession() throws Exception {
@@ -570,7 +570,6 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
             Service service = new Service();
             service.setServiceType(ServiceType.RPC);
             service.setSessionId(SessionTest.SESSION_ID);
-            proxy.syncSession.setSessionId(SessionTest.SESSION_ID);
             proxy.syncSession.addService(service);
         }
     }
