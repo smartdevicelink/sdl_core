@@ -120,10 +120,11 @@ TransportAdapter::Error TransportAdapterImpl::Init() {
 }
 
 void TransportAdapterImpl::ApplicationListUpdated(const DeviceUID& device_handle) {
-    for (TransportAdapterListenerList::iterator it = listeners_.begin();
-         it != listeners_.end(); ++it) {
-      (*it)->OnApplicationListUpdated(this, device_handle);
-    }
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
+    it != listeners_.end(); ++it) {
+
+    (*it)->OnApplicationListUpdated(this, device_handle);
+  }
 }
 
 TransportAdapter::Error TransportAdapterImpl::SearchDevices() {

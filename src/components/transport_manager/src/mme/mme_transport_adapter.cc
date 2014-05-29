@@ -56,6 +56,10 @@ TransportAdapter::Error MmeTransportAdapter::Init() {
   return error;
 }
 
+void MmeTransportAdapter::ApplicationListUpdated(const DeviceUID& device_handle) {
+  ConnectDevice(device_handle);
+}
+
 bool MmeTransportAdapter::ToBeAutoConnected(DeviceSptr device) const {
   return true;
 }

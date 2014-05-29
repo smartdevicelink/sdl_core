@@ -92,7 +92,6 @@ void ConnectionHandlerImpl::OnDeviceListUpdated(
 void ConnectionHandlerImpl::OnApplicationListUpdated(DeviceHandle device_handle) {
   LOG4CXX_DEBUG(logger_,"ConnectionHandlerImpl::OnApplicationListUpdated() device_handle "
                << device_handle);
-  ConnectToDevice(device_handle);
   if (connection_handler_observer_) {
     connection_handler_observer_->OnApplicationListUpdated(device_handle);
   }
