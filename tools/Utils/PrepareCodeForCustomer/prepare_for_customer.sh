@@ -1,5 +1,12 @@
 #! /bin/sh
 
+if [ "$1" = "-h" ]
+then
+	echo "Usage:"
+	echo "./prepare_for_customers.sh CUSTOMER_NAME PATH_TO_REPO"
+	exit
+fi
+
 CUSTOMER=$1
 REPO=$2
 if [ "$CUSTOMER" = "" ]
