@@ -66,7 +66,7 @@ Connection::~Connection() {
   delete heart_beat_monitor_thread_;
 }
 
-int32_t Connection::AddNewSession() {
+int32_t Connection::AddNewSession(const uint8_t& protocol_version) {
   sync_primitives::AutoLock lock(session_map_lock_);
 
   int32_t result = -1;
@@ -75,16 +75,24 @@ int32_t Connection::AddNewSession() {
   int32_t size = session_map_.size();
   if (max_connections > size) {
 
-   for (uint8_t session_id = 1; session_id <= 255; ++session_id) {
-     if (session_map_.end() == session_map_.find(session_id)) {
-       /* whenever new session created RPC and Bulk services are
-       established automatically */
-       session_map_[session_id].push_back(protocol_handler::kRpc);
-       session_map_[session_id].push_back(protocol_handler::kBulk);
-       result = session_id;
-       break;
-     }
-   }
+    ++size;
+    /* whenever new session created RPC and Bulk services are
+    established automatically */
+    session_map_[size].push_back(
+        static_cast<uint8_t>(protocol_handler::kRpc));
+    session_map_[size].push_back(
+        static_cast<uint8_t>(protocol_handler::kBulk));
+
+    if (protocol_handler::PROTOCOL_VERSION_3 == protocol_version) {
+      heartbeat_monitor_->AddSession(size);
+
+      // start monitoring thread when first session with heartbeat added
+      if (1 == size) {
+        heart_beat_monitor_thread_->start();
+      }
+    }
+
+    result = size;
   }
 
   return result;
@@ -168,6 +176,7 @@ const SessionMap Connection::session_map() const {
 
 void Connection::CloseSession(uint8_t session_id) {
   size_t size;
+  ServiceList service_list;
 
   {
     sync_primitives::AutoLock lock(session_map_lock_);
@@ -178,23 +187,16 @@ void Connection::CloseSession(uint8_t session_id) {
     }
 
     size = session_map_.size();
+    service_list = session_map_[session_id];
   }
 
   //Close connection if it is last session
   if (1 == size) {
-    connection_handler_->CloseConnection(connection_handle_);
+  connection_handler_->CloseConnection(connection_handle_);
   } else {
-    connection_handler_->CloseSession(connection_handle_, session_id);
+    connection_handler_->CloseSession(connection_handle_, session_id,
+                                      service_list);
   }
-}
-
-void Connection::StartHeartBeat(uint8_t session_id) {
-    bool is_first_session = heartbeat_monitor_->AddSession(session_id);
-
-    // start monitoring thread when first session with heartbeat added
-    if (is_first_session) {
-      heart_beat_monitor_thread_->start();
-    }
 }
 
 void Connection::SendHeartBeat(uint8_t session_id) {

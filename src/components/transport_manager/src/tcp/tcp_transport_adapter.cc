@@ -77,6 +77,7 @@ DeviceType TcpTransportAdapter::GetDeviceType() const {
 
 void TcpTransportAdapter::Store() const {
   LOG4CXX_TRACE_ENTER(logger_);
+
   Json::Value tcp_adapter_dictionary;
   Json::Value devices_dictionary;
   DeviceList device_ids = GetDeviceList();
@@ -122,6 +123,7 @@ void TcpTransportAdapter::Store() const {
 bool TcpTransportAdapter::Restore() {
   LOG4CXX_TRACE_ENTER(logger_);
   bool errors_occured = false;
+#ifndef CUSTOMER_PASA
   const Json::Value tcp_adapter_dictionary =
     resumption::LastState::instance()->dictionary["TransportManager"]["TcpAdapter"];
   const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
@@ -146,6 +148,7 @@ bool TcpTransportAdapter::Restore() {
       }
     }
   }
+#endif
   LOG4CXX_TRACE_EXIT(logger_);
   return !errors_occured;
 }
