@@ -60,14 +60,15 @@ class FilesTester:
       
   def test(self, input_file_name, expected_result_file_name, customer_name, test_name):
 #	Run one test and return relust
-    remover = customer_prepare.Remover(input_file_name, customer_name)
+    input_file = open(input_file_name, "rb")
+    inp_lines = input_file.readlines()
+    input_file.close()
     expected_result_file = open(expected_result_file_name, "rb")
     expected_lines = expected_result_file.readlines()
     expected_result_file.close()
     output = []
-    inp_lines = remover.lines
     try:
-      output = remover.get_parsed_lines()
+      output = customer_prepare.get_parsed_lines(inp_lines, customer_name)
     except BaseException, ex:
       print input_file_name,": Error parsing file: ", ex;
       self.write_output(inp_lines, expected_lines, output, customer_name, test_name)

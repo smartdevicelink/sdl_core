@@ -35,7 +35,7 @@ def save_lines(f_name, lines):
   for l in lines:
     f.write(l)
   f.close()
-   
+
 def main():
 #  main fincton
 #  First argument is customer name,
@@ -43,14 +43,15 @@ def main():
   print "Hi"
   customer = sys.argv[1]
   files = sys.argv[2:]
-  for input_file in files:
-    print "Process: ", input_file,
-    r = customer_prepare.Remover(input_file, customer)
-    parced_lines = r.get_parsed_lines()
-    input_lines = r.lines
+  for input_file_name in files:
+    print "Process: ", input_file_name,
+    input_file = open(input_file_name, "rb")
+    input_lines = input_file.readlines()
+    input_file.close()
+    parced_lines = customer_prepare.get_parsed_lines(input_lines, customer)
     if is_diff(input_lines, parced_lines):
       print "Changes"
-      save_lines(input_file, parced_lines)
+      save_lines(input_file_name, parced_lines)
     else :
       print ""
   return 0
