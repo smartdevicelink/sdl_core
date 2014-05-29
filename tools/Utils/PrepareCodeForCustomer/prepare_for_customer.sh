@@ -13,4 +13,5 @@ then
     exit
 fi
 
-find $REPO -name '*.c' -o -name '*.cc' -o -name '*.h' -o -name '*.cpp' |xargs python ./main.py $CUSTOMER | grep Changes
+
+find $REPO -regextype posix-egrep -regex '.*\.(c|cc|cpp|h)$' -exec python ./main.py FORD {} + | grep Changes

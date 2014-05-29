@@ -67,31 +67,35 @@ class FilesTester:
     expected_lines = expected_result_file.readlines()
     expected_result_file.close()
     output = []
+    result_code = ""
+    warnings = ""
     try:
-      output = customer_prepare.get_parsed_lines(inp_lines, customer_name)
-    except BaseException, ex:
+      output, warnings = customer_prepare.get_parsed_lines(inp_lines, customer_name)
+    except customer_prepare.Error, ex:
       print input_file_name,": Error parsing file: ", ex;
-      self.write_output(inp_lines, expected_lines, output, customer_name, test_name)
-      return "ParceFail"
+      result_code = "ParceFail"
       
     if (len(output) != len(expected_lines)):
       print input_file_name,customer_name, ": Length does not matches: ", len(output), " != ", len(expected_lines)
-      self.write_output(inp_lines, expected_lines, output, customer_name, test_name)
-      return "LengthFail"
-      
-    length = len(output)
-    i = 0
-    while (i < length):
-      result_line = output[i]
-      expected_line = expected_lines[i]
-      if (result_line != expected_line):
-        print input_file_name, customer_name, "Match fail line ", i
-        print "\t\t result_line :", result_line[:-1]
-        print "\t\t expected_line :", expected_line[:-1]
-        self.write_output(inp_lines, expected_lines, output, customer_name, test_name)
-        return "MatchFail"
-      i += 1
-    return "Success"
+      result_code += "LengthFail"
+    else:
+      length = len(output)
+      i = 0
+      while (i < length):
+        result_line = output[i]
+        expected_line = expected_lines[i]
+        if (result_line != expected_line):
+          print input_file_name, customer_name, "Match fail line ", i
+          print "\t\t result_line :", result_line[:-1]
+          print "\t\t expected_line :", expected_line[:-1]
+          result_code += "MatchFail"
+          break
+        i += 1
+    self.write_output(inp_lines, expected_lines, output, customer_name, test_name)
+    if (len(result_code) == 0):
+      return "Success"
+    else:
+      return result_code
     
   def write_output(self, origin_lines, expected_lines, result_lines, customer_name, test_name):
 #	Write changed by Remover files to FS in result/ filder 

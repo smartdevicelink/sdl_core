@@ -4,6 +4,23 @@
 import sys
 args = sys.argv[1:]
 
+class ParceExeption(BaseException):
+	def __init__(self, text, line = None):
+		super(BaseException, self).__init__(text)
+		self.line = line
+		self.text = text
+
+class Warning(ParceExeption):
+	#Throw if there are some exeption, but it is posible to continue parsing
+	def __init__(self, text, line = None):
+		super(ParceExeption, self).__init__(text, line)
+
+class Error(ParceExeption):
+	#Throw if there are some exeption, but it is not posible to continue parsing
+	def __init__(self, text, line = None):
+		super(ParceExeption, self).__init__(text, line)
+		
+
 class Validator:
 #  Class to validate one string of code
 #  Make desigion if current line should be printed or not 
@@ -29,14 +46,15 @@ class Validator:
 #	and change self tate if needed
 #
     if (self.if_deep_customer_nested < 0):
-      raise BaseException("deep < 0")
+      raise Error("deep < 0", line)
       
     if (self.other_customer_block and self.my_customer_block):
-      raise BaseException("Validator is on bad state. Can't continue processing")
+      raise Error("Validator is on bad state. Can't continue processing", line)
     
     if (self.other_customer_block):
       if (self.any_customer_line(line)):
-        raise BaseException("Recurcive customers bloks")
+        self.if_deep_customer_nested += 1
+        raise Warning("Recurcive customers bloks", line)
       if (self.start_if(line)):
         self.if_deep_customer_nested += 1
         return False
@@ -50,7 +68,8 @@ class Validator:
     
     if (self.my_customer_block):
       if (self.any_customer_line(line)):
-        raise BaseException("Recurcive customers bloks") 
+        self.if_deep_customer_nested += 1
+        raise Warning("Recurcive customers bloks", line) 
       if (self.start_if(line)):
         self.if_deep_customer_nested += 1
         return True
@@ -64,14 +83,14 @@ class Validator:
     
     if (self.my_customer_line(line)):
       if (self.if_deep_customer_nested > 0):
-        raise BaseException("Can't start customer section with not null @if deep")
+        raise Error("if_deep_customer_nested can't be greter then zerro in commmon code. Bad Validator state  ", line)
       self.my_customer_block = True
       self.if_deep_customer_nested = 0
       return False
       
     if (self.other_customer_line(line)):
       if (self.if_deep_customer_nested > 0):
-        raise BaseException("Can't start customer section with not null @if deep")
+        raise Error("if_deep_customer_nested can't be greter then zerro in commmon code. Bad Validator state  ", line)
       self.other_customer_block = True
       self.if_deep_customer_nested = 0
       return False
@@ -105,7 +124,7 @@ class Validator:
 #	Otherwise return False
     ifdefline = self.ifdef_ + self.customer_template
     pos = line.find(ifdefline)
-    if ( pos == -1):
+    if (pos == -1):
       return False
     if (line.find(self.customer_name,pos + len(ifdefline)) == 0):
       return False
@@ -128,7 +147,16 @@ def get_parsed_lines(lines, customer_name):
 #	return array of lines parced by Validator
   v = Validator(customer_name)
   output = []
+  warnings = ""
   for line in lines:
-    if v.validate(line):
+    try:
+      is_valid = v.validate(line)
+    except Warning , err:
+      is_valid = True
+      warnings += err[0]
+    except Error, err:
+      is_valid = False
+      raise err
+    if is_valid:
       output.append(line)
-  return output
+  return output, warnings

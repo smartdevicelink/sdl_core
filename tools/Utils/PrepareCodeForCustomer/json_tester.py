@@ -55,10 +55,15 @@ class JsonTester:
     
     try:
       result = self.Validator.validate(line)
-    except BaseException, err:
-      result = "error"
+    except customer_prepare.Error, err:
+      result = "Error"
       if (self.log):
         print "Exeption: ", err
+    except customer_prepare.Warning, err:
+      result = "Warning"
+      if (self.log):
+        print "Exeption: ", err
+        
     if (expected_result == result):
       if (self.check_post_conditions(postconditions)):
         print "PASSED"

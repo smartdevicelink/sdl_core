@@ -40,20 +40,23 @@ def main():
 #  main fincton
 #  First argument is customer name,
 #  Others : file names 
-  print "Hi"
   customer = sys.argv[1]
   files = sys.argv[2:]
+  print "Start preparing code for customer:" , customer
   for input_file_name in files:
     print "Process: ", input_file_name,
     input_file = open(input_file_name, "rb")
     input_lines = input_file.readlines()
     input_file.close()
-    parced_lines = customer_prepare.get_parsed_lines(input_lines, customer)
-    if is_diff(input_lines, parced_lines):
-      print "Changes"
-      save_lines(input_file_name, parced_lines)
-    else :
-      print ""
+    try:
+      parced_lines, warnings = customer_prepare.get_parsed_lines(input_lines, customer)
+      if is_diff(input_lines, parced_lines):
+        print "Changes"
+        save_lines(input_file_name, parced_lines)
+      else :
+        print ""
+    except:
+      print "Error"
   return 0
 
 if __name__ == '__main__':

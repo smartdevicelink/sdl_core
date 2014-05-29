@@ -6,7 +6,7 @@
 		"other_customer_block" : "True",
 		"if_deep_customer_nested" : 0 },
 	"line": "#ifdef __QNX__",
-	"expected_result" : "error",
+	"expected_result" : "Error",
 	"postconditions": "None" },
 	
 {   "name" : "Targer customer with  block with 0 deep. Simple code",
@@ -136,8 +136,12 @@
 		"other_customer_block" : "False",
 		"if_deep_customer_nested" : 0 },
 	"line": "#ifdef CUSTOMER_PASA",
-	"expected_result" : "error",
-	"postconditions": "None" }, 
+	"expected_result" : "Warning",
+	"postconditions": {
+		"customer_name" : "PASA",
+		"my_customer_block" : "True",
+		"other_customer_block" : "False",
+		"if_deep_customer_nested" : 1 }}, 
 
 { "name" : "Doubling start Other customer section inside target customer sections ",
 	"preconditions": {
@@ -146,8 +150,12 @@
 		"other_customer_block" : "False",
 		"if_deep_customer_nested" : 0 },
 	"line": "#ifdef CUSTOMER_FORD",
-	"expected_result" : "error",
-	"postconditions": "None" },
+	"expected_result" : "Warning",
+	"postconditions": {
+		"customer_name" : "PASA",
+		"my_customer_block" : "True",
+		"other_customer_block" : "False",
+		"if_deep_customer_nested" : 1 }},
 
 { "name" : "Doubling start Other customer section inside other customer sections ",
 	"preconditions": {
@@ -156,8 +164,12 @@
 		"other_customer_block" : "True",
 		"if_deep_customer_nested" : 0 },
 	"line": "#ifdef CUSTOMER_FORD",
-	"expected_result" : "error",
-	"postconditions": "None" },
+	"expected_result" : "Warning",
+	"postconditions": {
+		"customer_name" : "PASA",
+		"my_customer_block" : "False",
+		"other_customer_block" : "True",
+		"if_deep_customer_nested" : 1 }},
 	
 { "name" : "Deep < 0",
 	"preconditions": {
@@ -166,7 +178,7 @@
 		"other_customer_block" : "True",
 		"if_deep_customer_nested" : -1 },
 	"line": "#ifdef CUSTOMER_FORD",
-	"expected_result" : "error",
+	"expected_result" : "Error",
 	"postconditions": "None" }, 
 
 { "name" : "Common code, start tagret customer section",
@@ -202,7 +214,7 @@
 		"other_customer_block" : "False",
 		"if_deep_customer_nested" : 4 },
 	"line": "#ifdef CUSTOMER_FORD",
-	"expected_result" : "error",
+	"expected_result" : "Error",
 	"postconditions": "None"},
 
 { "name" : "Common code, any code",
@@ -216,5 +228,17 @@
 	"postconditions": {
 		"my_customer_block" : "False",
 		"other_customer_block" : "False",
+		"if_deep_customer_nested" : 0 }},
+{ "name" : "Partialy named Customer",
+	"preconditions": {
+		"customer_name" : "FOR",
+		"my_customer_block" : "False",
+		"other_customer_block" : "False",
+		"if_deep_customer_nested" : 0 },
+	"line": "#ifdef CUSTOMER_FORD",
+	"expected_result" : "False",
+	"postconditions": {
+		"my_customer_block" : "False",
+		"other_customer_block" : "True",
 		"if_deep_customer_nested" : 0 }}
 ]
