@@ -754,6 +754,7 @@ void TransportManagerImpl::EventListenerThread(void) {
             RaiseEvent(&TransportManagerListener::OnUnexpectedDisconnect,
                        connection->id,
                        *static_cast<CommunicationError*>(error));
+            RemoveConnection(connection->id);
           } else {
             LOG4CXX_ERROR(logger_, "Connection ('" << device_id << ", "
                                                    << app_handle

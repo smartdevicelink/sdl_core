@@ -64,7 +64,7 @@ Lock::~Lock() {
   }
 }
 
-void Lock::Ackquire() {
+void Lock::Acquire() {
   int32_t status = pthread_mutex_lock(&mutex_);
   if (status != 0) {
     LOG4CXX_ERROR(logger_, "Failed to acquire mutex");

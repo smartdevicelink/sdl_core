@@ -6,7 +6,7 @@ import android.widget.CheckBox;
 import com.ford.syncV4.android.R;
 
 /**
- * Created by Andrew Batutin on 1/24/14.
+ * Created by Andrew Batutin on 1/24/14
  */
 public class AudioServiceCheckboxState extends CheckBoxState {
 

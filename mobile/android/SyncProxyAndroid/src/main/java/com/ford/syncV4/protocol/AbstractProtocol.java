@@ -3,11 +3,9 @@ package com.ford.syncV4.protocol;
 import android.os.Environment;
 
 import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
-import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
-import com.ford.syncV4.session.Session;
 import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.util.logger.Logger;
 
@@ -43,7 +41,6 @@ public abstract class AbstractProtocol {
         setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MIN);
     }// end-ctor
 
-
     // This method receives raw bytes as they arrive from transport.  Those bytes
     // are then collected by the protocol and assembled into complete messages and
     // handled internally by the protocol or propagated to the protocol listener.
@@ -54,7 +51,7 @@ public abstract class AbstractProtocol {
     // it for transmission over the transport.  The results of this processing will
     // be sent to the onProtocolMessageBytesToSend() method on protocol listener
     // interface.  Note that the ProtocolMessage itself contains information
-    // about the type of message (e.g. RPC, BULK, etc.) and the protocol currentSession
+    // about the type of message (e.g. RPC, BULK, etc.) and the protocol syncSession
     // over which to send the message, etc.
     public abstract void SendMessage(ProtocolMessage msg);
 
@@ -104,19 +101,19 @@ public abstract class AbstractProtocol {
     public abstract void SendHeartBeatAckMessage(byte sessionId);
 
     /**
-     * This method starts a protocol currentSession. A corresponding call to the protocol
+     * This method starts a protocol syncSession. A corresponding call to the protocol
      * listener onProtocolSessionStarted() method will be made when the protocol
-     * currentSession has been established.
+     * syncSession has been established.
      *
      * @param sessionId ID of the current active session
      */
     public abstract void StartProtocolSession(byte sessionId);
 
-    public abstract void StartProtocolService(ServiceType serviceType, Session session);
+    public abstract void StartProtocolService(ServiceType serviceType, byte sessionId);
 
-    // This method ends a protocol currentSession.  A corresponding call to the protocol
+    // This method ends a protocol syncSession.  A corresponding call to the protocol
     // listener onProtocolServiceEnded() method will be made when the protocol
-    // currentSession has ended.
+    // syncSession has ended.
     public abstract void EndProtocolService(ServiceType serviceType, byte sessionID);
 
     // TODO REMOVE
@@ -136,7 +133,7 @@ public abstract class AbstractProtocol {
         } else {
             Logger.w(CLASS_NAME + " receive null bytes");
         }
-        resetHeartbeat();
+        resetHeartbeat(header.getSessionID());
         assembler.handleFrame(header, data);
     }
 
@@ -148,7 +145,10 @@ public abstract class AbstractProtocol {
         } else {
             Logger.w(CLASS_NAME + " transmit null bytes");
         }
-        resetHeartbeatAck();
+
+        Logger.d(CLASS_NAME + " transmit ProtocolFrameHeader:" + header.toString());
+
+        resetHeartbeatAck(header.getSessionID());
         composeMessage(header, data, offset, length);
     }
 
@@ -174,15 +174,15 @@ public abstract class AbstractProtocol {
         }
     }
 
-    private synchronized void resetHeartbeatAck() {
+    private synchronized void resetHeartbeatAck(byte sessionId) {
         if (_protocolListener != null) {
-            _protocolListener.onResetHeartbeatAck();
+            _protocolListener.onResetHeartbeatAck(sessionId);
         }
     }
 
-    private synchronized void resetHeartbeat() {
+    private synchronized void resetHeartbeat(byte sessionId) {
         if (_protocolListener != null) {
-            _protocolListener.onResetHeartbeat();
+            _protocolListener.onResetHeartbeat(sessionId);
         }
     }
 
@@ -268,38 +268,44 @@ public abstract class AbstractProtocol {
         _protocolListener.onProtocolMessageReceived(message);
     }
 
-    // This method handles the end of a protocol currentSession. A callback is
-    // sent to the protocol listener.
-    protected void handleProtocolServiceEnded(ServiceType serviceType,
-                                              byte sessionID, String correlationID) {
-        _protocolListener.onProtocolServiceEnded(serviceType, sessionID, correlationID);
+    /**
+     * This method handles response of the EndService coming from SDL.
+     * A callback is sent to the protocol listener.
+     */
+    protected void handleProtocolServiceEnded(ServiceType serviceType, byte sessionId) {
+        _protocolListener.onProtocolServiceEnded(serviceType, sessionId);
     }
 
     /**
-     * This method handles the startup of a protocol currentSession. A callback is sent to the
+     * This method handles response of the EndServiceAck coming from SDL.
+     * A callback is sent to the protocol listener.
+     */
+    protected void handleProtocolServiceEndedAck(ServiceType serviceType, byte sessionId) {
+        _protocolListener.onProtocolServiceEndedAck(serviceType, sessionId);
+    }
+
+    /**
+     * This method handles the startup of a protocol syncSession. A callback is sent to the
      * protocol listener.
      *
      * @param serviceType
-     * @param sessionID
+     * @param sessionId
      * @param version
-     * @param correlationID
      */
     protected void handleProtocolSessionStarted(ServiceType serviceType,
-                                                byte sessionID, byte version,
-                                                String correlationID) {
-        Session session = Session.createSession(serviceType, sessionID);
-        _protocolListener.onProtocolSessionStarted(session, version, correlationID);
+                                                byte sessionId, byte version) {
+        _protocolListener.onProtocolSessionStarted(sessionId, version);
     }
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,
-                                                byte sessionID, byte version, String correlationID) {
+                                                byte sessionID, byte version) {
         if (serviceType.equals(ServiceType.RPC)) {
-            throw new IllegalArgumentException("Can't create RPC service without creating currentSession. serviceType" + serviceType + ";sessionID " + sessionID);
+            throw new IllegalArgumentException("Can't create RPC service without creating syncSession. serviceType" + serviceType + ";sessionID " + sessionID);
         }
         if (sessionID == 0) {
             throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
         }
-        _protocolListener.onProtocolServiceStarted(serviceType, sessionID, version, correlationID);
+        _protocolListener.onProtocolServiceStarted(serviceType, sessionID, version);
     }
 
     // This method handles protocol errors. A callback is sent to the protocol
@@ -312,12 +318,12 @@ public abstract class AbstractProtocol {
         _protocolListener.onProtocolAppUnregistered();
     }
 
-    protected void handleProtocolHeartbeatACK() {
-        _protocolListener.onProtocolHeartbeatACK();
+    protected void handleProtocolHeartbeatACK(byte sessionId) {
+        _protocolListener.onProtocolHeartbeatACK(sessionId);
     }
 
-    protected void handleProtocolHeartbeat() {
-        _protocolListener.onProtocolHeartbeat();
+    protected void handleProtocolHeartbeat(byte sessionId) {
+        _protocolListener.onProtocolHeartbeat(sessionId);
     }
 
     protected void updateDataStructureToProtocolVersion(byte version) {

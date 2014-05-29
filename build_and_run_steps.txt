@@ -37,11 +37,13 @@
     3.2.1.  Download and install QNX SDP 6.5.0 SP1 cross platform tools for Linux (http://www.qnx.com/download/download/21179/qnxsdp-6.5.0-201007091524-linux.bin).
       Note: it is necessary to obtain license key: either trial or commercial one (Register on http://www.qnx.com/ website, enter 'QNX product evaluation' and apply for a license key).
       Note: during tools installation mark "GNU Public Licence Utility" check-box.
-    3.2.2. SSH configuration on Linux host:
-      3.2.2.1. Install Open-SSH server (For Xubuntu run "sudo apt-get install ssh", for Ubuntu run "sudo apt-get install openssh-server"). 
-      3.2.2.1. Restart computer if necessary.
-    3.2.3 Unpack crossbuild archive of log4cxx on Linux host “unzip ./log4cxx.qnx.cross.build.files.zip -d /”
-      Note: log4cxx crossbuild archive "log4cxx.qnx.cross.build.files.zip" is located in git folder git@adc.luxoft.com:applink/src/thirdPartyLibs/ 
+    3.2.2. To build SDL with MME support (iPhone connection over USB) unpack iap archives from src/thirdPartyLibs:
+      # tar -xjf iap.build.tar.bz2 -C $QNX_TARGET
+      # tar -xjf iap.armv7-qnx.runtime.tar.bz2 -C $QNX_TARGET/armle-v7
+      Note: MME is supported only for ARMv7 platform
+    3.2.3. SSH configuration on Linux host:
+      3.2.3.1. Install Open-SSH server (For Xubuntu run "sudo apt-get install ssh", for Ubuntu run "sudo apt-get install openssh-server"). 
+      3.2.3.1. Restart computer if necessary.
 
   3.3. To run specially prepared QNX in virtual machine:
     3.3.1. Download and install VMware Player from https://my.vmware.com/web/vmware/downloads
@@ -63,25 +65,11 @@
       3.4.2.2. Run "ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key".
       3.4.2.3. Run "ssh-keygen -t dsa -f /etc/ssh/ssh_host_dsa_key".
       3.4.2.4. Run ssh server if it is not running "/usr/sbin/sshd".
-    3.4.3. Download 'D-Bus' version 1.7.8 and 'Expat' version 2.1.0
-        Note: for more details see https://adc.luxoft.com/confluence/display/APPLINK/How+to+install+D-Bus
-    3.4.4. Log4cxx installing for QNX
-      3.4.4.1. Download log4cxx development archive "log4cxx.qnx.cross.build.files.zip" and runtime archive "log4cxx.qnx.runtime.files.zip"
-        Note: For development purpose use git folder git@adc.luxoft.com:applink/src/thirdPartyLibs/
-              For releases purpose use delivery svn folder https://adc.luxoft.com/svn/APPLINK/doc/technical/Delivery/{Release_name}/binaries/qnx650
-      3.4.4.2. Unpack crossbuild archive of log4cxx on Linux host “unzip ./log4cxx.qnx.cross.build.files.zip -d /”
-      3.4.4.3. Download log4cxx runtime archive to QNX “scp <linuxhost_user>@<linuxhost_ip>:/<Delivery_Package_Path>/ log4cxx.qnx.runtime.files.zip ./”
-      3.4.4.4. Unpack on QNX server log4cxx binary files of log4cxx QNX port “unzip ./log4cxx.qnx.runtime.files.zip -d /” (this file is also located in git)
-    3.4.5. Set up dbus-daemon and sshd to run at time login
-      3.4.5.1 Create file "/etc/profile.d/sshd.sh" with command "/usr/sbin/sshd"
-      3.4.5.1 Create file "/etc/profile.d/dbus.sh" with command
-        "if test -z "$DBUS_SESSION_BUS_ADDRESS" ; then
-          DBUS_SESSION_BUS_ADDRESS=`dbus-daemon --fork --session --print-address`
-          export DBUS_SESSION_BUS_ADDRESS
-        fi"
-    3.4.6. Set up USB access mode
-      3.4.6.1 If file "/etc/rc.d/rc.local" is either absent or empty then copy file "<Project_Root_Src>/qnx/rc.local" to folder "/etc/rc.d"
-      3.4.6.2 If file "/etc/rc.d/rc.local" exists and is nonempty then append the last line of file "<Project_Root_Src>/qnx/rc.local" to its end
+    3.4.3. Set up sshd to run at time login
+      3.4.3.1 Create file "/etc/profile.d/sshd.sh" with command "/usr/sbin/sshd"
+    3.4.4. Set up USB access mode
+      3.4.4.1 If file "/etc/rc.d/rc.local" is either absent or empty then copy file "<Project_Root_Src>/qnx/rc.local" to folder "/etc/rc.d"
+      3.4.4.2 If file "/etc/rc.d/rc.local" exists and is nonempty then append the last line of file "<Project_Root_Src>/qnx/rc.local" to its end
 
   3.5. To set up Android Simulator for using instead of real device:
     3.5.1. Install and configure the Android Simulator in keeping with the following instructions https://adc.luxoft.com/confluence/display/APPLINK/How+to+install+and+setup+android+emulator+on+Ubuntu
@@ -131,9 +119,11 @@
   7.1. Log as root and make sure you are not running Photon
   7.2. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_Qt>/bin/* ./” .
   7.3. QnxServ: download 3rd party folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_Qt>/3rd_party/* ./” .
-  7.4. Prepare Policy as described in Additions, p.1
-  7.5. Prepare log4cxx as described in Additions, p.2
-  7.6. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
+  7.4. Prepare QDB on QNX as described in Additions, p.1 
+  7.5. Prepare Policy as described in Additions, p.2
+  7.6. Prepare log4cxx as described in Additions, p.3
+  7.7. Prepare D-Bus as described in Additions, p.4
+  7.8. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
     Note: For QML usage start SDL as root “su -c ./smartDeviceLinkCore”.
 
 ==========================================================================================================
@@ -154,13 +144,15 @@
   9.2. Log as root and make sure you are not running Photon
   9.3. QnxServ: download binary folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_Qt>/bin/* ./” .
   9.4. QnxServ: download 3rd party folder “scp -r <linux_host_user>@<linux_host_ip>:/<Project_QNX_Build_Qt>/3rd_party/* ./” .
-  9.5. Prepare Policy as described in Additions, p.1
-  9.6. Prepare log4cxx as described in Additions, p.2
-  9.7. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
+  9.5. Prepare QDB on QNX as described in Additions, p.1
+  9.6. Prepare Policy as described in Additions, p.2
+  9.7. Prepare log4cxx as described in Additions, p.3
+  9.8. Prepare D-Bus as described in Additions, p.4
+  9.9. QnxServ: start SDL “su -c ./smartDeviceLinkCore”.
     Note: For USB transport usage start SDL as root “su -c ./smartDeviceLinkCore”.
-    Note: If SDL unexpectedly terminates (with any error) check that real IP of QNX Server is same to IP in "/usr/etc/dbus-1/session.conf"
+    Note: If SDL unexpectedly terminates (with any error) check that real IP of QNX Server is same to IP in "/etc/dbus-1/session.conf"
           If not perform steps 4.2 and restart QNX server
-  9.8. LinHost: goto "<Project_Linux_Build_Qt>/bin" folder and execute "<QT_HOME_DIR>/qmlscene -I ./hmi/plugins ./hmi/MainWindow.qml" command.
+  9.10. LinHost: goto "<Project_Linux_Build_Qt>/bin" folder and execute "<QT_HOME_DIR>/qmlscene -I ./hmi/plugins ./hmi/MainWindow.qml" command.
 ===========================================================================================================
 Additions: 
 1. To use library of policy (libPolicy.so) execute following commands:
@@ -172,3 +164,27 @@ Additions:
 2. To use log4cxx execute
     export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<PATH_TO_3RD_PARTY_LIBS>
     e.g. export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../3rd_party/lib
+
+4. To use D-Bus execute
+    DBUS_SESSION_BUS_ADDRESS=`<PATH_TO_DBUS_DAEMON_BINARY>/dbus-daemon --config-file=<PATH_TO_DBUS_DAEMON_CONFIG>/session.conf --fork --print-address`
+    (e.g. DBUS_SESSION_BUS_ADDRESS=`../3rd_party/bin/dbus-daemon --config-file=../3rd_party/etc/dbus-1/session.conf --fork --print-address`)
+    export DBUS_SESSION_BUS_ADDRESS
+
+    Note: it might be necessary to create directory session.d in the same folder with session.conf
+    e.g. mkdir ../3rd_party/etc/dbus-1/session.d
+
+    Note: D-Bus can be started automatically:
+    Copy dbus-daemon binary and config to system folders, e.g.
+
+    cp ../3rd_party/bin/dbus-daemon /usr/bin
+    cp -r ../3rd_party/etc/dbus-1 /etc
+    mkdir /etc/dbus-1/session.d
+
+    Create file "/etc/profile.d/dbus.sh" with command
+
+    "if test -z "$DBUS_SESSION_BUS_ADDRESS" ; then
+      DBUS_SESSION_BUS_ADDRESS=`/usr/bin/dbus-daemon --fork --config-file=/etc/dbus-1/session.conf --print-address`
+      export DBUS_SESSION_BUS_ADDRESS
+    fi"
+
+    In this case system has to be rebooted and this step is no more needed

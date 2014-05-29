@@ -27,7 +27,7 @@ public class ChoiceListActivity extends RPCStructListActivity<Choice> {
     protected Choice createNewObject() {
         Choice choice = new Choice();
 
-        choice.setChoiceID(SyncProxyTester.getNewChoiceId());
+        choice.setChoiceID(PlaceholderFragment.getNewChoiceId());
         choice.setMenuName("The Show");
         choice.setSecondaryText("Must");
         choice.setTertiaryText("Go On");

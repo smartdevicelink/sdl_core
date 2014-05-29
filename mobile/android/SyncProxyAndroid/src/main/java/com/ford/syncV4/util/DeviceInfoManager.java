@@ -47,7 +47,7 @@ public class DeviceInfoManager {
      * @param copyFrom {@link com.ford.syncV4.proxy.rpc.DeviceInfo} object to copy from
      */
     public static void copyDeviceInfo(DeviceInfo copyTo, DeviceInfo copyFrom) {
-        if (copyFrom == null && copyTo == null) {
+        if (copyFrom == null || copyTo == null) {
             return;
         }
         copyTo.setHardware(copyFrom.getHardware());

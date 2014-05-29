@@ -119,6 +119,14 @@ TransportAdapter::Error TransportAdapterImpl::Init() {
   return error;
 }
 
+void TransportAdapterImpl::ApplicationListUpdated(const DeviceUID& device_handle) {
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
+    it != listeners_.end(); ++it) {
+
+    (*it)->OnApplicationListUpdated(this, device_handle);
+  }
+}
+
 TransportAdapter::Error TransportAdapterImpl::SearchDevices() {
   LOG4CXX_INFO(logger_, "enter");
   if (device_scanner_ == NULL) {
@@ -349,6 +357,12 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
       ConnectDevice(device);
     }
   }
+}
+
+void TransportAdapterImpl::SearchApplicationsDone(const DeviceSptr& device) {
+  for (TransportAdapterListenerList::iterator it = listeners_.begin();
+       it != listeners_.end(); ++it)
+    (*it)->OnApplicationListUpdated(this, device->unique_device_id());
 }
 
 void TransportAdapterImpl::SearchDeviceFailed(const SearchDeviceError& error) {
@@ -643,7 +657,7 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
         break;
     }
   }
-  return errors_occured ? OK : FAIL;
+  return errors_occured ? FAIL : OK;
 }
 
 void TransportAdapterImpl::RemoveDevice(const DeviceUID& device_handle) {

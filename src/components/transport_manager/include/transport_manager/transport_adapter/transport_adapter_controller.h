@@ -56,12 +56,22 @@ class TransportAdapterController {
    */
   virtual DeviceSptr AddDevice(DeviceSptr device) = 0;
 
+    //!!!!!!!!!!!!!
+  virtual void ApplicationListUpdated(const DeviceUID& device_handle) = 0;
+
   /**
    * @brief Search for device in container of devices, if it is not there - adds it.
    *
    * @param devices Container(vector) of smart pointers to devices.
    */
   virtual void SearchDeviceDone(const DeviceVector& devices) = 0;
+
+  /**
+   * @brief Search for application in device done, if it is not there - adds it.
+   *
+   * @param device Smart pointers to devices.
+   */
+  virtual void SearchApplicationsDone(const DeviceSptr& device) = 0;
 
   /**
    * @brief Launch OnSearchDeviceFailed event in device adapter listener.

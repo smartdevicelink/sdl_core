@@ -2,10 +2,18 @@ package com.ford.syncV4.android.constants;
 
 import com.ford.syncV4.proxy.rpc.enums.Language;
 
-/** Stores application-wide constants. */
+/**
+ * Stores application-wide constants.
+ */
 public class Const {
+
 	// Shared preference name for protocol properties
 	public static final String PREFS_NAME = "SyncProxyTesterPrefs";
+
+    /**
+     * The fragment argument representing the application Id associate with the fragment.
+     */
+    public static final String ARG_APP_ID = "ARG_APP_ID";
 
 	// Protocol properties
 	public static final String PREFS_KEY_PROTOCOL_MIN_VERSION = "protocolMinVersion";
@@ -85,6 +93,7 @@ public class Const {
     public static final int REQUEST_FILE_OPEN = 50;
     public static final int REQUEST_POLICY_UPDATE_FILE_OPEN = 51;
     public static final int REQUEST_SYSTEM_REQUEST_FILE_OPEN = 52;
+    public final static int REQUEST_CHOOSE_XML_TEST = 53;
 
     public static final String PREF_KEY_IS_CUSTOM_APP_ID = "IsCustomAppId";
     public static final String PREF_KEY_CUSTOM_APP_ID = "CustomAppId";

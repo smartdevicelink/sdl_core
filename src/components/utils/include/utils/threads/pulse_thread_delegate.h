@@ -72,7 +72,7 @@ class PulseThreadDelegate : public ThreadDelegate {
   virtual void OnPulse() = 0;
 
  private:
-  enum {PULSE_CODE_EAP = _PULSE_CODE_MINAVAIL + 1};
+  enum {PULSE_CODE = _PULSE_CODE_MINAVAIL + 1};
 
   bool run_;
   int chid_;

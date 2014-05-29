@@ -5,48 +5,48 @@ import android.test.InstrumentationTestCase;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.session.Session;
+import com.ford.syncV4.session.SessionTest;
 
 import org.mockito.Mockito;
 
 import static org.mockito.Mockito.mock;
 
-
 /**
- * Created by Andrew Batutin on 8/20/13.
+ * Created by Andrew Batutin on 8/20/13
  */
-public class MobileNavSessionTest extends InstrumentationTestCase{
+public class MobileNavSessionTest extends InstrumentationTestCase {
 
-    MobileNavSession _sut;
-    private WiProProtocol _protocol;
+    private MobileNavSession mMobileNavSession;
+    private WiProProtocol mWiProProtocol;
 
     public MobileNavSessionTest() {
+
     }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
-        _protocol = createMockWiProProtocol();
-        _sut = new MobileNavSession(_protocol);
+        System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext()
+                .getCacheDir().getPath());
+        mWiProProtocol = createMockWiProProtocol();
+        mMobileNavSession = new MobileNavSession(mWiProProtocol);
     }
 
-    private WiProProtocol createMockWiProProtocol(){
+    private WiProProtocol createMockWiProProtocol() {
         WiProProtocol wiProProtocol = mock(WiProProtocol.class);
-        Session session = new Session();
-        session.setSessionId((byte) 0x01);
-        Mockito.doThrow(new IllegalArgumentException("Can't call this method")).when(wiProProtocol).StartProtocolService(ServiceType.Mobile_Nav, session);
+        Mockito.doThrow(new IllegalArgumentException("Can't call this method"))
+                .when(wiProProtocol).StartProtocolService(ServiceType.Mobile_Nav,
+                Session.DEFAULT_SESSION_ID);
         return wiProProtocol;
     }
 
-    public void testMobileNavigationSessionCreation() throws Exception {
-        MobileNavSession mobileNavSessionSession = new MobileNavSession(_protocol);
-        assertNotNull("mobile Nav currentSession should be created", mobileNavSessionSession);
+    public void testMobileNavigationSessionCreation() {
+        MobileNavSession mobileNavSessionSession = new MobileNavSession(mWiProProtocol);
+        assertNotNull("mobile Nav syncSession should be created", mobileNavSessionSession);
     }
 
-    public void testMobileNavigationStartSession() throws Exception {
-        Session session = new Session();
-        session.setSessionId((byte)0x0A);
-        _sut.startSession(session);
+    public void testMobileNavigationStartSession() {
+        mMobileNavSession.startService(SessionTest.SESSION_ID);
         assertTrue("should get here",true);
     }
 }

@@ -33,6 +33,7 @@
 #include "utils/logger.h"
 
 #include "transport_manager/mme/iap2_connection.h"
+#include "transport_manager/mme/iap2_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
@@ -40,56 +41,42 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-const char* IAP2Connection::protocol = "com.ford.sync.prot0";  // TODO(nvaganov@luxoft.com) choose protocol name
-
 IAP2Connection::IAP2Connection(const DeviceUID& device_uid,
   const ApplicationHandle& app_handle,
   TransportAdapterController* controller,
-  const std::string& device_path) : device_uid_(device_uid),
+  IAP2Device* parent) : device_uid_(device_uid),
   app_handle_(app_handle),
   controller_(controller),
-  device_path_(device_path) {
+  parent_(parent) {
 }
 
 bool IAP2Connection::Init() {
-#if IAP2_CONNECT
-  LOG4CXX_TRACE(logger_, "iAP2: connecting to " << device_path_);
-  iap2_hdl_ = iap2_connect(device_path_.c_str(), 0);
-  if (iap2_hdl_ != 0) {
-    LOG4CXX_DEBUG(logger_, "iAP2: connected to " << device_path_);
+  IAP2Device::AppRecord record;
+  if (parent_->RecordByAppId(app_handle_, record)) {
+    protocol_name_ = record.first;
+    iap2ea_hdl_ = record.second;
+    std::string thread_name = "iAP2 receiver (" + protocol_name_ + ")";
+    receiver_thread_ = new threads::Thread(thread_name.c_str(),
+      new ReceiverThreadDelegate(iap2ea_hdl_, this));
+    receiver_thread_->start();
+
+    controller_->ConnectDone(device_uid_, app_handle_);
+    return true;
   }
   else {
-    LOG4CXX_ERROR(logger_, "iAP2: could not connect to " << device_path_);
     return false;
   }
-#endif
-  LOG4CXX_TRACE(logger_, "iAP2: opening protocol " << protocol);
-  iap2ea_hdl_ = iap2_eap_open(device_path_.c_str(), protocol, 0);
-  if (iap2ea_hdl_ != 0) {
-    LOG4CXX_DEBUG(logger_, "iAP2: protocol " << protocol << " opened");
-  }
-  else {
-    LOG4CXX_ERROR(logger_, "iAP2: could not open protocol " << protocol);
-    return false;
-  }
-
-  receiver_thread_ = new threads::Thread("iAP2 receiver",
-    new ReceiverThreadDelegate(iap2ea_hdl_, this));
-  receiver_thread_->start();
-
-  controller_->ConnectDone(device_uid_, app_handle_);
-  return true;
 }
 
 TransportAdapter::Error IAP2Connection::SendData(RawMessageSptr message) {
-  LOG4CXX_TRACE(logger_, "iAP2: sending data");
+  LOG4CXX_TRACE(logger_, "iAP2: sending data on protocol " << protocol_name_);
   if (iap2_eap_send(iap2ea_hdl_, message->data(), message->data_size()) != -1) {
-    LOG4CXX_INFO(logger_, "iAP2: data sent successfully");
+    LOG4CXX_INFO(logger_, "iAP2: data on protocol " << protocol_name_ << " sent successfully");
     controller_->DataSendDone(device_uid_, app_handle_, message);
     return TransportAdapter::OK;
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP2: error occured while sending data");
+    LOG4CXX_WARN(logger_, "iAP2: error occured while sending data on protocol " << protocol_name_);
     controller_->DataSendFailed(device_uid_, app_handle_, message, DataSendError());
     return TransportAdapter::FAIL;
   }
@@ -100,34 +87,31 @@ TransportAdapter::Error IAP2Connection::Disconnect() {
 
   receiver_thread_->stop();
 
-  LOG4CXX_TRACE(logger_, "iAP2: closing protocol " << protocol);
+  LOG4CXX_TRACE(logger_, "iAP2: closing connection on protocol " << protocol_name_);
   if (iap2_eap_close(iap2ea_hdl_) != -1) {
-    LOG4CXX_DEBUG(logger_, "iAP2: protocol " << protocol << " closed");
+    LOG4CXX_DEBUG(logger_, "iAP2: connection on protocol " << protocol_name_ << " closed");
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP2: could not close protocol " << protocol);
+    LOG4CXX_WARN(logger_, "iAP2: could not close connection on protocol " << protocol_name_);
     error = TransportAdapter::FAIL;
   }
-#if IAP2_CONNECT
-  LOG4CXX_TRACE(logger_, "iAP2: disconnecting from " << device_path_);
-  if (iap2_disconnect(iap2_hdl_) != -1) {
-    LOG4CXX_DEBUG(logger_, "iAP2: disconnected from " << device_path_);
-  }
-  else {
-    LOG4CXX_WARN(logger_, "iAP2: could not disconnect from " << device_path_);
-    error = TransportAdapter::FAIL;
-  }
-#endif
+  parent_->OnDisconnect(app_handle_);
   controller_->DisconnectDone(device_uid_, app_handle_);
   return error;
 }
 
-void IAP2Connection::OnDataReceived(RawMessageSptr message) {
-  controller_->DataReceiveDone(device_uid_, app_handle_, message);
-}
-
-void IAP2Connection::OnReceiveFailed() {
-  controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
+void IAP2Connection::ReceiveData() {
+  LOG4CXX_TRACE(logger_, "iAP2: receiving data on protocol " << protocol_name_);
+  int size = iap2_eap_recv(iap2ea_hdl_, buffer_, kBufferSize);
+  if (size != -1) {
+    LOG4CXX_INFO(logger_, "iAP2: received " << size << " bytes on protocol " << protocol_name_);
+    RawMessageSptr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
+    controller_->DataReceiveDone(device_uid_, app_handle_, message);
+  }
+  else {
+    LOG4CXX_WARN(logger_, "iAP2: error occured while receiving data on protocol " << protocol_name_);
+    controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
+  }
 }
 
 IAP2Connection::ReceiverThreadDelegate::ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl,
@@ -136,39 +120,25 @@ IAP2Connection::ReceiverThreadDelegate::ReceiverThreadDelegate(iap2ea_hdl_t* iap
 }
 
 bool IAP2Connection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event) {
-  LOG4CXX_TRACE(logger_, "Arming for iAP2 input notification");
+  LOG4CXX_TRACE(logger_, "iAP2: arming for input notification");
   int arm_result = iap2_eap_event_arm(iap2ea_hdl_, event);
   switch (arm_result) {
     case -1: // failure
-      LOG4CXX_WARN(logger_, "Could not arm for iAP2 input notification");
+      LOG4CXX_WARN(logger_, "iAP2: could not arm for input notification");
       return false;
     case 0: // successfully armed
-      LOG4CXX_DEBUG(logger_, "Successfully armed for iAP2 input notification");
+      LOG4CXX_DEBUG(logger_, "iAP2: successfully armed for input notification");
       return true;
     case 1: // data is available
       LOG4CXX_DEBUG(logger_, "iAP2: data is already available");
-      ReceiveData();
+      parent_->ReceiveData();
       return false; // don't need to wait for Pulse in this case
   }
   return false;
 }
 
 void IAP2Connection::ReceiverThreadDelegate::OnPulse() {
-  ReceiveData();
-}
-
-void IAP2Connection::ReceiverThreadDelegate::ReceiveData() {
-  LOG4CXX_TRACE(logger_, "iAP2: receiving data");
-  int size = iap2_eap_recv(iap2ea_hdl_, buffer_, kBufferSize);
-  if (size != -1) {
-    LOG4CXX_INFO(logger_, "iAP2: received " << size << " bytes");
-    RawMessageSptr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
-    parent_->OnDataReceived(message);
-  }
-  else {
-    LOG4CXX_WARN(logger_, "iAP2: error occured while receiving data");
-    parent_->OnReceiveFailed();
-  }
+  parent_->ReceiveData();
 }
 
 }  // namespace transport_adapter

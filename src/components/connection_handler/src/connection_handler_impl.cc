@@ -406,7 +406,10 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
         const SessionMap& session_map = (itr->second)->session_map();
         for (SessionMapConstIterator session_it = session_map.begin(),
              end = session_map.end(); session_it != end; ++session_it) {
-          applications_list->push_back(it->first);
+          const transport_manager::ConnectionUID& connection_handle = itr->first;
+          const uint32_t session_id = session_it->first;
+          uint32_t session_key = KeyFromPair(connection_handle, session_id); //application_id
+          applications_list->push_back(session_key);
         }
       }
     }

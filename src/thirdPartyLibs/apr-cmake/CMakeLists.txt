@@ -29,32 +29,52 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 set(APR_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../apr-1.5.0)
+set(APR_BUILD_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/../apr-build)
 
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  add_custom_command(OUTPUT ${APR_SOURCE_DIRECTORY}/Makefile
-    COMMAND CC=${CMAKE_C_COMPILER} ./configure --host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx ac_cv_file__dev_zero=yes ac_cv_func_setpgrp_void=yes apr_cv_process_shared_works=yes apr_cv_mutex_recursive=yes apr_cv_mutex_robust_shared=no apr_cv_tcp_nodelay_with_cork=no ac_cv_sizeof_struct_iovec=8
-    WORKING_DIRECTORY ${APR_SOURCE_DIRECTORY}
-  )
-else ()
-  add_custom_command(OUTPUT ${APR_SOURCE_DIRECTORY}/Makefile
-    COMMAND CC=${CMAKE_C_COMPILER} ./configure
-    WORKING_DIRECTORY ${APR_SOURCE_DIRECTORY}
-  )
-endif ()
+file(MAKE_DIRECTORY
+  ${APR_BUILD_DIRECTORY}/include/private
+  ${APR_SOURCE_DIRECTORY}/include/private
+)
 
-add_custom_command(OUTPUT ${APR_SOURCE_DIRECTORY}/include/private
-  COMMAND mkdir include/private
-  WORKING_DIRECTORY ${APR_SOURCE_DIRECTORY}
+file(COPY ${APR_SOURCE_DIRECTORY}/tools/gen_test_char.c
+  DESTINATION ${APR_BUILD_DIRECTORY}/tools
+)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  set(CONFIGURE_FLAGS
+    "--host=${CMAKE_SYSTEM_PROCESSOR}-nto-qnx"
+    "ac_cv_file__dev_zero=yes"
+    "ac_cv_func_setpgrp_void=yes"
+    "apr_cv_process_shared_works=yes"
+    "apr_cv_mutex_recursive=yes"
+    "apr_cv_mutex_robust_shared=no"
+    "apr_cv_tcp_nodelay_with_cork=no"
+    "ac_cv_sizeof_struct_iovec=8"
+  )
+else()
+  set(CONFIGURE_FLAGS "")
+endif()
+
+add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/Makefile
+  COMMAND CC=${CMAKE_C_COMPILER} ${APR_SOURCE_DIRECTORY}/configure ${CONFIGURE_FLAGS}
+  COMMAND ${CMAKE_COMMAND} -E copy include/apr.h ${APR_SOURCE_DIRECTORY}/include
+  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
+)
+
+add_custom_command(OUTPUT ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
+  DEPENDS ${APR_BUILD_DIRECTORY}/Makefile
+  COMMAND make include/private/apr_escape_test_char.h
+  COMMAND ${CMAKE_COMMAND} -E copy include/private/apr_escape_test_char.h ${APR_SOURCE_DIRECTORY}/include/private
+  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
 )
 
 add_custom_target(libapr-1 ALL make
-  DEPENDS ${APR_SOURCE_DIRECTORY}/Makefile
-  DEPENDS ${APR_SOURCE_DIRECTORY}/include/private
-  WORKING_DIRECTORY ${APR_SOURCE_DIRECTORY}
+  DEPENDS ${APR_BUILD_DIRECTORY}/include/private/apr_escape_test_char.h
+  WORKING_DIRECTORY ${APR_BUILD_DIRECTORY}
 )
 
 install(
-  DIRECTORY ${APR_SOURCE_DIRECTORY}/.libs/
+  DIRECTORY ${APR_BUILD_DIRECTORY}/.libs/
   DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/lib
   USE_SOURCE_PERMISSIONS
   FILES_MATCHING PATTERN libapr-1.so*

@@ -53,7 +53,6 @@ class MockTransportAdapterListener : public TransportAdapterListener {
  public:
   MOCK_METHOD1(OnSearchDeviceDone,
       void(const TransportAdapter* transport_adapter));
-
   MOCK_METHOD2(OnSearchDeviceFailed,
       void(const TransportAdapter* transport_adapter, const SearchDeviceError& error));
   MOCK_METHOD2(OnApplicationListUpdated,

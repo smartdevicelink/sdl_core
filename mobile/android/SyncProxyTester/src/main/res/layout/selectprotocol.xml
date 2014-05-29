@@ -217,121 +217,129 @@
             </LinearLayout>
         </LinearLayout>
 
-        <RadioGroup
-            android:id="@+id/selectprotocol_radioGroupTransport"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <RadioButton
-                android:id="@+id/selectprotocol_radioWiFi"
-                android:layout_weight="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/selectprotocol_wifi" />
-
-            <RadioButton
-                android:id="@+id/selectprotocol_radioBT"
-                android:layout_weight="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="@string/selectprotocol_bluetooth" />
-
-            <RadioButton
-                android:id="@+id/selectprotocol_radioUSB"
-                android:layout_weight="1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:checked="true"
-                android:gravity="center"
-                android:text="@string/selectprotocol_usb" />
-
-        </RadioGroup>
-
         <LinearLayout
-            android:id="@+id/nsd_use_layout"
-            android:layout_width="match_parent"
+            android:id="@+id/app_set_up_dialog_transport_view"
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content">
 
-            <TextView
-                android:id="@+id/nsd_label_view"
-                android:layout_width="wrap_content"
+            <RadioGroup
+                android:id="@+id/selectprotocol_radioGroupTransport"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:layout_marginTop="10dp"
-                android:text="@string/nsd_use_label"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:orientation="horizontal">
 
-            <ToggleButton
-                android:id="@+id/nsd_toggle_btn"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:layout_marginRight="5dp"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content" />
-        </LinearLayout>
+                <RadioButton
+                    android:id="@+id/selectprotocol_radioWiFi"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/selectprotocol_wifi" />
 
-        <TextView
-            android:id="@+id/nsd_unsupported_api_label_view"
-            android:text="@string/nsd_unsupported_api_level_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:visibility="gone"
-            android:layout_marginBottom="20dp" />
+                <RadioButton
+                    android:id="@+id/selectprotocol_radioBT"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/selectprotocol_bluetooth" />
 
-        <LinearLayout
-            android:id="@+id/ip_address_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+                <RadioButton
+                    android:id="@+id/selectprotocol_radioUSB"
+                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true"
+                    android:gravity="center"
+                    android:text="@string/selectprotocol_usb" />
 
-            <TextView
-                android:id="@+id/select_protocol_ip_address_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:text="@string/selectprotocol_ipAddress"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+            </RadioGroup>
 
-            <EditText
-                android:id="@+id/select_protocol_ip_address_edit_view"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
-                android:layout_weight="1"
-                android:ems="10"
-                android:inputType="text"
-                android:maxLength="15"
-                android:text="@string/selectprotocol_ipAddressDefault" />
-        </LinearLayout>
+            <LinearLayout
+                android:id="@+id/nsd_use_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
 
-        <LinearLayout
-            android:id="@+id/port_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/nsd_label_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginTop="10dp"
+                    android:text="@string/nsd_use_label"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <ToggleButton
+                    android:id="@+id/nsd_toggle_btn"
+                    android:layout_gravity="center"
+                    android:layout_weight="1"
+                    android:layout_marginRight="5dp"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
 
             <TextView
-                android:layout_width="wrap_content"
+                android:id="@+id/nsd_unsupported_api_label_view"
+                android:text="@string/nsd_unsupported_api_level_text"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                android:text="@string/selectprotocol_tcpPort"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:gravity="center"
+                android:visibility="gone"
+                android:layout_marginBottom="20dp" />
 
-            <EditText
-                android:id="@+id/selectprotocol_tcpPort"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="5dp"
-                android:layout_weight="1"
-                android:ems="10"
-                android:inputType="number"
-                android:maxLength="5"
-                android:text="@string/selectprotocol_tcpPortDefault" />
+            <LinearLayout
+                android:id="@+id/ip_address_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/select_protocol_ip_address_view"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:text="@string/selectprotocol_ipAddress"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/select_protocol_ip_address_edit_view"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="text"
+                    android:maxLength="15"
+                    android:text="@string/selectprotocol_ipAddressDefault" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/port_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    android:text="@string/selectprotocol_tcpPort"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <EditText
+                    android:id="@+id/selectprotocol_tcpPort"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1"
+                    android:ems="10"
+                    android:inputType="number"
+                    android:maxLength="5"
+                    android:text="@string/selectprotocol_tcpPortDefault" />
+            </LinearLayout>
+
         </LinearLayout>
 
         <TextView
