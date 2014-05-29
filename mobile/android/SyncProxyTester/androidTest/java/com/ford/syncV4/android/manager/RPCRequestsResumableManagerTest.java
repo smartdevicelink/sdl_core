@@ -13,18 +13,25 @@ import junit.framework.TestCase;
  */
 public class RPCRequestsResumableManagerTest extends TestCase {
 
+    private static final String APP_ID = "APP_ID";
+    
     public void testInitConnectedCollectionEmpty() {
-        RPCRequestsResumableManager rpcRequestsResumableManager = new RPCRequestsResumableManager();
+        RPCRequestsResumableManager rpcRequestsResumableManager = new RPCRequestsResumableManager(
+                APP_ID);
         assertEquals(0, rpcRequestsResumableManager.getRequestsConnectedSize());
     }
 
     public void testInitDisconnectedCollectionEmpty() {
-        RPCRequestsResumableManager rpcRequestsResumableManager = new RPCRequestsResumableManager();
+        RPCRequestsResumableManager rpcRequestsResumableManager = new RPCRequestsResumableManager(
+                APP_ID
+        );
         assertEquals(0, rpcRequestsResumableManager.getRequestsDisconnectedSize());
     }
 
     public void testFillConnectedCollection() {
-        RPCRequestsResumableManager rpcRequestsResumableManager = new RPCRequestsResumableManager();
+        RPCRequestsResumableManager rpcRequestsResumableManager = new RPCRequestsResumableManager(
+                APP_ID
+        );
         RPCRequest notification;
         int count = 10;
         for (int i = 0; i < count; i++) {
@@ -35,7 +42,9 @@ public class RPCRequestsResumableManagerTest extends TestCase {
     }
 
     public void testFillDisconnectedCollection() {
-        RPCRequestsResumableManager rpcRequestsResumableManager = new RPCRequestsResumableManager();
+        RPCRequestsResumableManager rpcRequestsResumableManager = new RPCRequestsResumableManager(
+                APP_ID
+        );
         RPCRequest notification;
         int count = 10;
         for (int i = 0; i < count; i++) {
@@ -46,7 +55,9 @@ public class RPCRequestsResumableManagerTest extends TestCase {
     }
 
     public void testCleanConnectedCollection() {
-        RPCRequestsResumableManager rpcRequestsResumableManager = new RPCRequestsResumableManager();
+        RPCRequestsResumableManager rpcRequestsResumableManager = new RPCRequestsResumableManager(
+                APP_ID
+        );
         RPCRequest notification;
         int count = 10;
         for (int i = 0; i < count; i++) {
@@ -61,7 +72,9 @@ public class RPCRequestsResumableManagerTest extends TestCase {
     }
 
     public void testCleanDisconnectedCollection() {
-        RPCRequestsResumableManager rpcRequestsResumableManager = new RPCRequestsResumableManager();
+        RPCRequestsResumableManager rpcRequestsResumableManager = new RPCRequestsResumableManager(
+                APP_ID
+        );
         RPCRequest notification;
         int count = 10;
         for (int i = 0; i < count; i++) {

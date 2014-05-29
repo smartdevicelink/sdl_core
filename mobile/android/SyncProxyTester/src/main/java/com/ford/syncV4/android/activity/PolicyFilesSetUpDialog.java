@@ -30,16 +30,11 @@ import com.lamerman.SelectionMode;
  * Date: 2/13/14
  * Time: 12:14 PM
  */
-public class PolicyFilesSetUpDialog extends DialogFragment {
+public class PolicyFilesSetUpDialog extends BaseDialogFragment {
 
     private static final String CLASS_NAME = PolicyFilesSetUpDialog.class.getSimpleName();
 
     private EditText mSelectedPolicyUpdateFileNameView;
-
-    public static PolicyFilesSetUpDialog newInstance() {
-        PolicyFilesSetUpDialog dialog = new PolicyFilesSetUpDialog();
-        return dialog;
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -127,7 +122,8 @@ public class PolicyFilesSetUpDialog extends DialogFragment {
                     }
                 }
 
-                ((SyncProxyTester) getActivity()).onPolicyFilesSetUpDialogResult_SendUpdate(fileType,
+                ((SyncProxyTester) getActivity()).onPolicyFilesSetUpDialogResult_SendUpdate(
+                        getArguments().getString(APP_ID_KEY), fileType,
                         requestType);
             }
         });

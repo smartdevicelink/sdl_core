@@ -122,7 +122,7 @@ T* Singleton<T, Deleter>::instance() {
   memory_barrier();
 
   if (!local_instance) {
-    lock.Ackquire();
+    lock.Acquire();
     local_instance = *instance_pointer();
     if (!local_instance) {
       local_instance = new T();
@@ -145,7 +145,7 @@ void Singleton<T, Deleter>::destroy() {
   memory_barrier();
 
   if (local_instance) {
-    lock.Ackquire();
+    lock.Acquire();
     local_instance = *instance_pointer();
     if (local_instance) {
       atomic_pointer_assign(*instance_pointer(), 0);

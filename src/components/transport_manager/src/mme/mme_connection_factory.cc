@@ -36,6 +36,8 @@
 #include "transport_manager/mme/iap_connection.h"
 #include "transport_manager/mme/iap2_connection.h"
 #include "transport_manager/mme/mme_device.h"
+#include "transport_manager/mme/iap_device.h"
+#include "transport_manager/mme/iap2_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
@@ -62,24 +64,19 @@ TransportAdapter::Error MmeConnectionFactory::CreateConnection(
   MmeDevicePtr mme_device = DeviceSptr::static_pointer_cast<MmeDevice>(device);
   switch (mme_device->protocol()) {
     case MmeDevice::IAP: {
-      std::string mount_point = mme_device->mount_point();
-      IAPConnection* iap_connection = new IAPConnection(device_uid, app_handle, controller_, mount_point);
+      utils::SharedPtr<IAPDevice> iap_device = MmeDevicePtr::static_pointer_cast<IAPDevice>(mme_device);
+      IAPConnection* iap_connection = new IAPConnection(device_uid, app_handle, controller_, iap_device.get());
       ConnectionSptr connection(iap_connection);
 
       controller_->ConnectionCreated(connection, device_uid, app_handle);
 
-      if (iap_connection->Init()) {
-        LOG4CXX_INFO(logger_, "iAP connection initialised");
-        return TransportAdapter::OK;
-      }
-      else {
-        LOG4CXX_WARN(logger_, "Could not initialise iAP connection");
-        return TransportAdapter::FAIL;
-      }
+      iap_connection->Init();
+      LOG4CXX_INFO(logger_, "iAP connection initialised");
+      return TransportAdapter::OK;
     }
     case MmeDevice::IAP2: {
-      std::string mount_point = mme_device->mount_point();
-      IAP2Connection* iap2_connection = new IAP2Connection(device_uid, app_handle, controller_, mount_point);
+      utils::SharedPtr<IAP2Device> iap2_device = MmeDevicePtr::static_pointer_cast<IAP2Device>(mme_device);
+      IAP2Connection* iap2_connection = new IAP2Connection(device_uid, app_handle, controller_, iap2_device.get());
       ConnectionSptr connection(iap2_connection);
 
       controller_->ConnectionCreated(connection, device_uid, app_handle);

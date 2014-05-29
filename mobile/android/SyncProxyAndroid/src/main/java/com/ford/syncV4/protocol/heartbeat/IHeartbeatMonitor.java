@@ -59,4 +59,10 @@ public interface IHeartbeatMonitor {
     public void heartbeatACKReceived();
 
     public void heartbeatReceived();
+
+    /**
+     * Return associated Session Identifier
+     * @return session id
+     */
+    public byte getSessionId();
 }

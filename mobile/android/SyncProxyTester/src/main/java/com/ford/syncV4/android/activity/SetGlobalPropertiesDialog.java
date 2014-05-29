@@ -3,7 +3,6 @@ package com.ford.syncV4.android.activity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -41,7 +40,7 @@ import java.util.Vector;
  * Date: 2/24/14
  * Time: 11:44 AM
  */
-public class SetGlobalPropertiesDialog extends DialogFragment {
+public class SetGlobalPropertiesDialog extends BaseDialogFragment {
 
     private static final String LOG_TAG = "setGlobalPropertiesDialogDialog";
 
@@ -50,11 +49,6 @@ public class SetGlobalPropertiesDialog extends DialogFragment {
      * this activity.
      */
     private KeyboardProperties mCurrentKbdProperties;
-
-    public static SetGlobalPropertiesDialog newInstance() {
-        SetGlobalPropertiesDialog setGlobalPropertiesDialog = new SetGlobalPropertiesDialog();
-        return setGlobalPropertiesDialog;
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -207,9 +201,12 @@ public class SetGlobalPropertiesDialog extends DialogFragment {
 
                         if (numberOfChoices > 0) {
                             setGlobalProperties.setCorrelationID(((SyncProxyTester) getActivity())
-                                    .getCorrelationid());
+                                    .getNextCorrelationIdForCurrentFragment());
 
-                            ((SyncProxyTester) getActivity()).onSetGlobalPropertiesDialogResult(setGlobalProperties);
+                            ((SyncProxyTester) getActivity())
+                                    .onSetGlobalPropertiesDialogResult(
+                                            getArguments().getString(APP_ID_KEY),
+                                            setGlobalProperties);
 
                             mCurrentKbdProperties = null;
                         } else {

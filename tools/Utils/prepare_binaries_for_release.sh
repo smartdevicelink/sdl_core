@@ -5,12 +5,12 @@
 #
 RELEASE_NAME=SDL_RB_B3.2
 
-DEST=~/development/release/$RELEASE_NAME
-PROJ_DIR=~/development/applink
+DEST=/media/Media/development/release/CM/$RELEASE_NAME
+PROJ_DIR=/media/Media/development/applink
 
-WEB_BUILD_DIR=~/development2/applink-build
-QT_BUILD_DIR=~/development2/qtcreator-build
-WEB_BUILD_DIR_QNX=~/development2/applink-build-qnx
+WEB_BUILD_DIR=/media/Media/development/CM/applink-build
+QT_BUILD_DIR=/media/Media/development/CM/qtcreator-build
+WEB_BUILD_DIR_QNX=/media/Media/development/CM/applink-build-qnx
 
 
 
@@ -33,11 +33,11 @@ cmake -DCMAKE_BUILD_TYPE=Release $PROJ_DIR
 make 
 make install
 
-chapter "Building under linux qtHMI"
-mkcd $QT_BUILD_DIR
-cmake -DCMAKE_BUILD_TYPE=Release -DHMI2=ON $PROJ_DIR 
-make 
-make install
+#chapter "Building under linux qtHMI"
+#mkcd $QT_BUILD_DIR
+#cmake -DCMAKE_BUILD_TYPE=Release -DHMI2=ON $PROJ_DIR 
+#make 
+#make install
 
 chapter "Building under qnx webHMI"
 mkcd $WEB_BUILD_DIR_QNX
@@ -57,25 +57,19 @@ cp ./HMI.tar.gz $DEST/binaries/qnx650/webHMI/
 rm $DEST/HMI.tar.gz HMI
 
 chapter "copy binaries LinuxWEB"
-cp -v $WEB_BUILD_DIR/bin/smartDeviceLinkCore $DEST/binaries/ubuntu1204/webHMI/smartDeviceLinkCore
-cp -v $WEB_BUILD_DIR/bin/smartDeviceLink.ini  $DEST/binaries/ubuntu1204/webHMI/smartDeviceLink.ini 
-cp -v $WEB_BUILD_DIR/bin/policy_table.json $DEST/binaries/ubuntu1204/webHMI/policy_table.json
-cp -v $WEB_BUILD_DIR/bin/wp1_policy_table.json $DEST/binaries/ubuntu1204/webHMI/wp1_policy_table.json
+cp -v $WEB_BUILD_DIR/bin/* $DEST/binaries/ubuntu1204/webHMI/
 echo "HMI/index.html" >  $DEST/binaries/ubuntu1204/webHMI/hmi_link 
 
 chapter "copy binaries LinuxQt"
-cp -v $WEB_BUILD_DIR_QNX/bin/smartDeviceLinkCore $DEST/binaries/qnx650/webHMI/smartDeviceLinkCore
-cp -v $WEB_BUILD_DIR_QNX/bin/smartDeviceLink.ini  $DEST/binaries/qnx650/webHMI/smartDeviceLink.ini 
-cp -v $WEB_BUILD_DIR_QNX/bin/policy_table.json $DEST/binaries/qnx650/webHMI/policy_table.json
-cp -v $WEB_BUILD_DIR_QNX/bin/wp1_policy_table.json $DEST/binaries/qnx650/webHMI/wp1_policy_table.json
+cp -v $WEB_BUILD_DIR_QNX/bin/* $DEST/binaries/qnx650/webHMI/*
 echo "HMI/index.html" > $DEST/binaries/qnx650/webHMI/hmi_link 
 
-chapter "copy binaries QnxWeb"
-cp -v $QT_BUILD_DIR/bin/smartDeviceLinkCore $DEST/binaries/ubuntu1204/qtHMI/smartDeviceLinkCore
-cp -v $QT_BUILD_DIR/bin/smartDeviceLink.ini  $DEST/binaries/ubuntu1204/qtHMI/smartDeviceLink.ini 
-cp -v $QT_BUILD_DIR/bin/policy_table.json $DEST/binaries/ubuntu1204/qtHMI/policy_table.json
-cp -v $QT_BUILD_DIR/bin/start_hmi.sh $DEST/binaries/ubuntu1204/qtHMI/start_hmi.sh
-cp -r -v $QT_BUILD_DIR/bin/hmi $DEST/binaries/ubuntu1204/qtHMI/hmi
+#chapter "copy binaries QnxWeb"
+#cp -v $QT_BUILD_DIR/bin/smartDeviceLinkCore $DEST/binaries/ubuntu1204/qtHMI/smartDeviceLinkCore
+#cp -v $QT_BUILD_DIR/bin/smartDeviceLink.ini  $DEST/binaries/ubuntu1204/qtHMI/smartDeviceLink.ini 
+#cp -v $QT_BUILD_DIR/bin/policy_table.json $DEST/binaries/ubuntu1204/qtHMI/policy_table.json
+#cp -v $QT_BUILD_DIR/bin/start_hmi.sh $DEST/binaries/ubuntu1204/qtHMI/start_hmi.sh
+#cp -r -v $QT_BUILD_DIR/bin/hmi $DEST/binaries/ubuntu1204/qtHMI/hmi
 
 
 

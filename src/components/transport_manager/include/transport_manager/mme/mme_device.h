@@ -33,7 +33,6 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_DEVICE_H_
 
-#include "utils/shared_ptr.h"
 #include "transport_manager/transport_adapter/device.h"
 
 namespace transport_manager {
@@ -43,23 +42,23 @@ class MmeDevice : public Device {
  public:
   typedef enum {UnknownProtocol, IAP, IAP2} Protocol;
 
-  MmeDevice(const std::string& mount_point, Protocol protocol, const std::string& name, const DeviceUID& unique_device_id);
+  MmeDevice(const std::string& mount_point,
+            const std::string& name,
+            const DeviceUID& unique_device_id);
 
   const std::string& mount_point() const {
     return mount_point_;
   }
 
-  Protocol protocol() const {
-    return protocol_;
-  }
+  virtual bool Init() = 0;
+
+  virtual Protocol protocol() const = 0;
 
  protected:
   virtual bool IsSameAs(const Device* other_device) const;
-  virtual ApplicationList GetApplicationList() const;
 
  private:
   std::string mount_point_;
-  Protocol protocol_;
 };
 
 typedef utils::SharedPtr<MmeDevice> MmeDevicePtr;

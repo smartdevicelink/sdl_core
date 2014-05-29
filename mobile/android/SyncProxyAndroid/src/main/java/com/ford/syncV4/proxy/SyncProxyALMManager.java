@@ -277,37 +277,32 @@ public class SyncProxyALMManager {
 			}
 		}
 		
-		public void speakFromQueue() {
+		public void speakFromQueue(String appId) {
 			if (_speakQueue == null || _speakQueue.size() < 1) {
 				return;
 			}
-
 			try {
 				String textToSpeak = _speakQueue.poll();
-				
-				speak(textToSpeak, _mainTag, this);
+				speak(appId, textToSpeak, _mainTag, this);
 			} catch (SyncException e) {
                 Logger.e("smartSpeak failed to speak!", e);
-				return;
 			}
 		}
 		
 		@Override
-		public void onSpeakResponse(SpeakResponse response, Object tag) {
+		public void onSpeakResponse(String appId, SpeakResponse response, Object tag) {
 			if (!response.getSuccess()) {
 				// There was an error, notify main listener and return
 				if (_mainSpeakListener != null) {
-					_mainSpeakListener.onSpeakResponse(response, tag);
+					_mainSpeakListener.onSpeakResponse(appId, response, tag);
 				}
-				
-				return;
-			} else {			
+			} else {
 				if (_speakQueue.size() > 0) {
-					speakFromQueue();
+					speakFromQueue(appId);
 				} else {
 					// All strings have been spoken, notify main listener and return
 					if (_mainSpeakListener != null) {
-						_mainSpeakListener.onSpeakResponse(response, tag);
+						_mainSpeakListener.onSpeakResponse(appId, response, tag);
 					}
 				}
 			}
@@ -853,7 +848,7 @@ public class SyncProxyALMManager {
 	 *@param vrCommands
 	 *@throws SyncException
 	 */
-	public SyncCommand addSyncCommand(String menuText, SyncSubMenu parentSubMenu, Integer position,
+	public SyncCommand addSyncCommand(String appId, String menuText, SyncSubMenu parentSubMenu, Integer position,
 			Vector<String> vrCommands, Object tag, ISyncCommandListener listener) 
 			throws SyncException {
 		
@@ -882,9 +877,9 @@ public class SyncProxyALMManager {
 		
 		// Call base addCommand
 		if (parentSubMenu != null) {
-			syncProxy.addCommand(commandID, menuText, parentSubMenu.getMenuID(), position, vrCommands, correlationID);
+			syncProxy.addCommand(appId, commandID, menuText, parentSubMenu.getMenuID(), position, vrCommands, correlationID);
 		} else {
-			syncProxy.addCommand(commandID, menuText, null, position, vrCommands, correlationID);
+			syncProxy.addCommand(appId, commandID, menuText, null, position, vrCommands, correlationID);
 		}
 		return thisSyncCommand;
 	}
@@ -897,10 +892,10 @@ public class SyncProxyALMManager {
 	 * @return
 	 * @throws SyncException
 	 */
-	public SyncCommand addSyncCommand(String menuText, Vector<String> vrCommands, Object tag, ISyncCommandListener listener) 
+	public SyncCommand addSyncCommand(String appId, String menuText, Vector<String> vrCommands, Object tag, ISyncCommandListener listener)
 			throws SyncException {
 		
-		return addSyncCommand(menuText, null, null, vrCommands, tag, listener);
+		return addSyncCommand(appId, menuText, null, null, vrCommands, tag, listener);
 	}
 	
 	/**
@@ -910,10 +905,10 @@ public class SyncProxyALMManager {
 	 * @return
 	 * @throws SyncException
 	 */
-	public SyncCommand addSyncCommand(Vector<String> vrCommands, Object tag, ISyncCommandListener listener) 
+	public SyncCommand addSyncCommand(String appId, Vector<String> vrCommands, Object tag, ISyncCommandListener listener)
 			throws SyncException {
 		
-		return addSyncCommand(null, null, null, vrCommands, tag, listener);
+		return addSyncCommand(appId, null, null, null, vrCommands, tag, listener);
 	}
 	
 	/**
@@ -924,11 +919,11 @@ public class SyncProxyALMManager {
 	 * @return
 	 *@throws SyncException
 	 */
-	public SyncCommand addSyncCommand(String menuText, Integer position, Object tag,
+	public SyncCommand addSyncCommand(String appId, String menuText, Integer position, Object tag,
 			ISyncCommandListener listener) 
 			throws SyncException {
 		
-		return addSyncCommand(menuText, null, position, null, tag, listener);
+		return addSyncCommand(appId, menuText, null, position, null, tag, listener);
 	}
 	
 	/**
@@ -938,10 +933,10 @@ public class SyncProxyALMManager {
 	 * @return
 	 *@throws SyncException
 	 */
-	public SyncCommand addSyncCommand(String menuText, Object tag, ISyncCommandListener listener) 
+	public SyncCommand addSyncCommand(String appId, String menuText, Object tag, ISyncCommandListener listener)
 			throws SyncException {
 		
-		return addSyncCommand(menuText, null, null, null, tag, listener);
+		return addSyncCommand(appId, menuText, null, null, null, tag, listener);
 	}
 	
 	/**
@@ -951,7 +946,7 @@ public class SyncProxyALMManager {
 	 * @param position
 	 * @throws SyncException
 	 */
-	public void addSyncSubMenu(String menuName, Integer position, Object tag,
+	public void addSyncSubMenu(String appId, String menuName, Integer position, Object tag,
 			ISyncAddSubMenuResponseListener listener) 
 			throws SyncException {
 		
@@ -975,7 +970,7 @@ public class SyncProxyALMManager {
 		}
 
 		// Base addSubMenu
-		syncProxy.addSubMenu(menuID, menuName, position, correlationID);
+		syncProxy.addSubMenu(appId, menuID, menuName, position, correlationID);
 	}
 	
 	/**
@@ -984,10 +979,10 @@ public class SyncProxyALMManager {
 	 * @param menuName
 	 * @throws SyncException
 	 */
-	public void addSyncSubMenu(String menuName, Object tag, ISyncAddSubMenuResponseListener listener) 
+	public void addSyncSubMenu(String appId, String menuName, Object tag, ISyncAddSubMenuResponseListener listener)
 			throws SyncException {
 		
-		addSyncSubMenu(menuName, null, tag, listener);
+		addSyncSubMenu(appId, menuName, null, tag, listener);
 	}
 	
 	/**
@@ -996,7 +991,7 @@ public class SyncProxyALMManager {
 	 * @param data
 	 * @throws SyncException
 	 */
-	public void encodedSyncPData(Vector<String> data, Object tag, 
+	public void encodedSyncPData(String appId, Vector<String> data, Object tag,
 			ISyncEncodedSyncPDataResponseListener listener) 
 			throws SyncException {
 		
@@ -1013,7 +1008,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base encodedSyncPData
-		syncProxy.encodedSyncPData(data, correlationID);
+		syncProxy.encodedSyncPData(appId, data, correlationID);
 	}
 	
 	/**
@@ -1026,7 +1021,7 @@ public class SyncProxyALMManager {
 	 * @param duration
 	 * @throws SyncException
 	 */
-	public void alert(String ttsText, String alertText1,
+	public void alert(String appId, String ttsText, String alertText1,
 			String alertText2, Boolean playTone, Integer duration,
 			Object tag, ISyncAlertResponseListener listener) throws SyncException {
 
@@ -1043,7 +1038,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base alert
-		syncProxy.alert(ttsText, alertText1, alertText2, playTone, duration, correlationID);
+		syncProxy.alert(appId, ttsText, alertText1, alertText2, playTone, duration, correlationID);
 	}
 	
 	/**
@@ -1056,7 +1051,7 @@ public class SyncProxyALMManager {
 	 * @param duration
 	 * @throws SyncException
 	 */
-	public void alert(Vector<TTSChunk> ttsChunks,
+	public void alert(String appId, Vector<TTSChunk> ttsChunks,
 			String alertText1, String alertText2, Boolean playTone,
 			Integer duration,  Object tag, ISyncAlertResponseListener listener) 
 			throws SyncException {
@@ -1073,7 +1068,7 @@ public class SyncProxyALMManager {
 			addGenericObjectTagByCorrelationID(tag, correlationID);
 		}
 		
-		syncProxy.alert(ttsChunks, alertText1, alertText2, playTone, duration, correlationID);
+		syncProxy.alert(appId, ttsChunks, alertText1, alertText2, playTone, duration, correlationID);
 	}
 	
 	/**
@@ -1083,10 +1078,10 @@ public class SyncProxyALMManager {
 	 * @param playTone
 	 * @throws SyncException
 	 */
-	public void alert(String ttsText, Boolean playTone, Object tag,
+	public void alert(String appId, String ttsText, Boolean playTone, Object tag,
 			ISyncAlertResponseListener listener) throws SyncException {
 		
-		alert(ttsText, null, null, playTone, null, tag, listener);
+		alert(appId, ttsText, null, null, playTone, null, tag, listener);
 	}
 	
 	/**
@@ -1097,11 +1092,11 @@ public class SyncProxyALMManager {
 	 * @param duration
 	 * @throws SyncException
 	 */
-	public void alert(String alertText1, String alertText2, Boolean playTone,
+	public void alert(String appId, String alertText1, String alertText2, Boolean playTone,
 			Integer duration, Object tag, ISyncAlertResponseListener listener) 
 			throws SyncException {
 		
-		alert((Vector<TTSChunk>)null, alertText1, alertText2, playTone, duration, tag, listener);
+		alert(appId, (Vector<TTSChunk>)null, alertText1, alertText2, playTone, duration, tag, listener);
 	}
 	
 	/**
@@ -1111,10 +1106,10 @@ public class SyncProxyALMManager {
 	 * @param playTone
 	 * @throws SyncException
 	 */
-	public void alert(Vector<TTSChunk> chunks, Boolean playTone, Object tag,
+	public void alert(String appId, Vector<TTSChunk> chunks, Boolean playTone, Object tag,
 			ISyncAlertResponseListener listener) throws SyncException {
 		
-		alert(chunks, null, null, playTone, null, tag, listener);
+		alert(appId, chunks, null, null, playTone, null, tag, listener);
 	}
 	
 	/**
@@ -1123,7 +1118,7 @@ public class SyncProxyALMManager {
 	 * @param syncChoiceSet
 	 * @throws SyncException
 	 */
-	public SyncChoiceSet createInteractionChoiceSet(Vector<SyncChoice> syncChoiceSet, Object tag, 
+	public SyncChoiceSet createInteractionChoiceSet(String appId, Vector<SyncChoice> syncChoiceSet, Object tag,
 			ISyncCreateInteractionChoiceSetResponseListener listener) 
 			throws SyncException {
 		
@@ -1171,7 +1166,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base createInteractionChoiceSet
-		syncProxy.createInteractionChoiceSet(choiceSet, interactionChoiceSetID, correlationID);
+		syncProxy.createInteractionChoiceSet(appId, choiceSet, interactionChoiceSetID, correlationID);
 		return syncInteractionChoiceSet;
 	}
 	
@@ -1180,7 +1175,7 @@ public class SyncProxyALMManager {
 	 * 
 	 * @throws SyncException
 	 */
-	public void deleteSyncChoiceSet(SyncChoiceSet syncChoiceSetToDelete, 
+	public void deleteSyncChoiceSet(String appId, SyncChoiceSet syncChoiceSetToDelete,
 			Object tag, ISyncDeleteInteractionChoiceSetResponseListener listener) 
 			throws SyncException {
 		
@@ -1207,7 +1202,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base deleteInteracationChoiceSet
-		syncProxy.deleteInteractionChoiceSet(syncChoiceSetToDelete.getChoiceSetID(), correlationID);
+		syncProxy.deleteInteractionChoiceSet(appId, syncChoiceSetToDelete.getChoiceSetID(), correlationID);
 	}
 	
 
@@ -1219,7 +1214,7 @@ public class SyncProxyALMManager {
 	 * @param listener - Interface to return the response to the deleteCommand request.
 	 * @throws SyncException
 	 */
-	public void deleteSyncCommand(SyncCommand syncCommandToDelete, Object tag,
+	public void deleteSyncCommand(String appId, SyncCommand syncCommandToDelete, Object tag,
 			ISyncDeleteCommandResponseListener listener) throws SyncException{
 		
 		// Do not allow syncCommandToDelete to be null
@@ -1246,7 +1241,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base deleteCommand (from SYNC)
-		syncProxy.deleteCommand(syncCommandToDelete.getCommandID(), correlationID);
+		syncProxy.deleteCommand(appId, syncCommandToDelete.getCommandID(), correlationID);
 		
 		// Remove SyncCommand from list of SyncCommands
 		removeSyncCommand(syncCommandToDelete);
@@ -1257,7 +1252,7 @@ public class SyncProxyALMManager {
 	 * 
 	 * @throws SyncException
 	 */
-	public void deleteSyncSubMenu(SyncSubMenu syncSubMenuToDelete, Object tag,
+	public void deleteSyncSubMenu(String appId, SyncSubMenu syncSubMenuToDelete, Object tag,
 			ISyncDeleteSubMenuResponseListener listener) throws SyncException {
 		
 		if (syncSubMenuToDelete == null) {
@@ -1277,7 +1272,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base deleteSubMenu
-		syncProxy.deleteSubMenu(syncSubMenuToDelete.getMenuID(), correlationID);
+		syncProxy.deleteSubMenu(appId, syncSubMenuToDelete.getMenuID(), correlationID);
 	}
 	
 	/**
@@ -1288,7 +1283,7 @@ public class SyncProxyALMManager {
 	 * @param syncChoiceSet
 	 * @throws SyncException
 	 */
-	public void performInteraction(String initPrompt, String displayText, 
+	public void performInteraction(String appId, String initPrompt, String displayText,
 			SyncChoiceSet syncChoiceSet, Object tag,
 			ISyncPerformInteractionResponseListener listener) 
 			throws SyncException {
@@ -1310,7 +1305,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base performInteraction
-		syncProxy.performInteraction(initPrompt, displayText, syncChoiceSet.getChoiceSetID(), correlationID);
+		syncProxy.performInteraction(appId, initPrompt, displayText, syncChoiceSet.getChoiceSetID(), correlationID);
 	}
 	
 	/**
@@ -1321,7 +1316,7 @@ public class SyncProxyALMManager {
 	 * @param syncChoiceSet
 	 * @throws SyncException
 	 */
-	public void performInteraction(String initPrompt,
+	public void performInteraction(String appId, String initPrompt,
 			String displayText, SyncChoiceSet syncChoiceSet,
 			String helpPrompt, String timeoutPrompt, InteractionMode interactionMode,
 			Integer timeout, Object tag, 
@@ -1345,7 +1340,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base performInteraction
-		syncProxy.performInteraction(initPrompt, displayText, syncChoiceSet.getChoiceSetID(), helpPrompt, timeoutPrompt, interactionMode, timeout, correlationID);
+		syncProxy.performInteraction(appId, initPrompt, displayText, syncChoiceSet.getChoiceSetID(), helpPrompt, timeoutPrompt, interactionMode, timeout, correlationID);
 	}
 	
 	/**
@@ -1360,7 +1355,7 @@ public class SyncProxyALMManager {
 	 * @param timeout
 	 * @throws SyncException
 	 */
-	public void performInteraction(String initPrompt,
+	public void performInteraction(String appId, String initPrompt,
 			String displayText, Vector<SyncChoiceSet> syncChoiceSetList,
 			String helpPrompt, String timeoutPrompt,
 			InteractionMode interactionMode, Integer timeout, Object tag,
@@ -1395,7 +1390,7 @@ public class SyncProxyALMManager {
 		}
 
 		// Base performInteraction
-		syncProxy.performInteraction(initPrompt, displayText, interactionChoiceSetIDList, helpPrompt, 
+		syncProxy.performInteraction(appId, initPrompt, displayText, interactionChoiceSetIDList, helpPrompt,
 				timeoutPrompt, interactionMode, timeout, correlationID);
 	}
 	
@@ -1411,8 +1406,8 @@ public class SyncProxyALMManager {
 	 * @param timeout
 	 * @throws SyncException
 	 */
-	public void performInteraction(
-			Vector<TTSChunk> initChunks, String displayText,
+	public void performInteraction(String appId,
+                                   Vector<TTSChunk> initChunks, String displayText,
 			Vector<SyncChoiceSet> syncChoiceSetList,
 			Vector<TTSChunk> helpChunks, Vector<TTSChunk> timeoutChunks,
 			InteractionMode interactionMode, Integer timeout, Object tag,
@@ -1447,7 +1442,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base performInteracation
-		syncProxy.performInteraction(initChunks, displayText, interactionChoiceSetIDList, 
+		syncProxy.performInteraction(appId, initChunks, displayText, interactionChoiceSetIDList,
 				helpChunks, timeoutChunks, interactionMode, timeout, correlationID);
 	}
 	
@@ -1458,7 +1453,7 @@ public class SyncProxyALMManager {
 	 * @param timeoutPrompt
 	 * @throws SyncException
 	 */
-	public void setGlobalProperties(String helpPrompt, String timeoutPrompt, 
+	public void setGlobalProperties(String appId, String helpPrompt, String timeoutPrompt,
 			Object tag, ISyncSetGlobalPropertiesResponseListener listener) 
 		throws SyncException {
 		
@@ -1475,7 +1470,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base setGlobalProperties
-		syncProxy.setGlobalProperties(helpPrompt, timeoutPrompt, correlationID);
+		syncProxy.setGlobalProperties(appId, helpPrompt, timeoutPrompt, correlationID);
 	}
 	
 	/**
@@ -1485,8 +1480,8 @@ public class SyncProxyALMManager {
 	 * @param timeoutChunks
 	 * @throws SyncException
 	 */
-	public void setGlobalProperties(
-			Vector<TTSChunk> helpChunks, Vector<TTSChunk> timeoutChunks,
+	public void setGlobalProperties(String appId,
+                                    Vector<TTSChunk> helpChunks, Vector<TTSChunk> timeoutChunks,
 			Object tag, ISyncSetGlobalPropertiesResponseListener listener) 
 			throws SyncException {
 		
@@ -1503,10 +1498,10 @@ public class SyncProxyALMManager {
 		}
 
 		// Base setGlobalProperties
-		syncProxy.setGlobalProperties(helpChunks, timeoutChunks, correlationID);
+		syncProxy.setGlobalProperties(appId, helpChunks, timeoutChunks, correlationID);
 	}
 	
-	public void resetGlobalProperties(Vector<GlobalProperty> properties, 
+	public void resetGlobalProperties(String appId, Vector<GlobalProperty> properties,
 			Object tag, ISyncResetGlobalPropertiesListener listener) 
 			throws SyncException{
 		
@@ -1523,7 +1518,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base resetGlobalProperties
-		syncProxy.resetGlobalProperties(properties, correlationID);
+		syncProxy.resetGlobalProperties(appId, properties, correlationID);
 	}
 	
 	/**
@@ -1535,7 +1530,7 @@ public class SyncProxyALMManager {
 	 * @param updateMode
 	 * @throws SyncException
 	 */
-	public void setMediaClockTimer(Integer hours,
+	public void setMediaClockTimer(String appId, Integer hours,
 			Integer minutes, Integer seconds, UpdateMode updateMode,
 			Object tag, ISyncSetMediaClockTimerResponseListener listener) 
 			throws SyncException {
@@ -1553,7 +1548,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base setMediaClockTimer
-		syncProxy.setMediaClockTimer(hours, minutes, seconds, updateMode, correlationID);
+		syncProxy.setMediaClockTimer(appId, hours, minutes, seconds, updateMode, correlationID);
 	}
 	
 	/**
@@ -1561,7 +1556,7 @@ public class SyncProxyALMManager {
 	 * 
 	 * @throws SyncException
 	 */
-	public void pauseMediaClockTimer(Object tag, ISyncSetMediaClockTimerResponseListener listener) 
+	public void pauseMediaClockTimer(String appId, Object tag, ISyncSetMediaClockTimerResponseListener listener)
 			throws SyncException {
 		
 		Integer correlationID = getNextAlmCorrelationId();
@@ -1577,7 +1572,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base pauseMediaClockTimer
-		syncProxy.pauseMediaClockTimer(correlationID);
+		syncProxy.pauseMediaClockTimer(appId, correlationID);
 	}
 	
 	/**
@@ -1586,7 +1581,7 @@ public class SyncProxyALMManager {
 	 * @param listener
 	 * @throws SyncException
 	 */
-	public void resumeMediaClockTimer(Object tag, ISyncSetMediaClockTimerResponseListener listener) 
+	public void resumeMediaClockTimer(String appId, Object tag, ISyncSetMediaClockTimerResponseListener listener)
 			throws SyncException {
 
 		Integer correlationID = getNextAlmCorrelationId();
@@ -1602,7 +1597,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base pauseMediaClockTimer
-		syncProxy.resumeMediaClockTimer(correlationID);
+		syncProxy.resumeMediaClockTimer(appId, correlationID);
 	}
 	
 	/**
@@ -1611,7 +1606,7 @@ public class SyncProxyALMManager {
 	 * @param listener
 	 * @throws SyncException
 	 */
-	public void clearMediaClockTimer(Object tag, ISyncShowResponseListener listener) throws SyncException{
+	public void clearMediaClockTimer(String appId, Object tag, ISyncShowResponseListener listener) throws SyncException{
 		
 		Integer correlationID = getNextAlmCorrelationId();
 		
@@ -1625,7 +1620,7 @@ public class SyncProxyALMManager {
 			addGenericObjectTagByCorrelationID(tag, correlationID);
 		}
 		
-		syncProxy.clearMediaClockTimer(correlationID);
+		syncProxy.clearMediaClockTimer(appId, correlationID);
 	}
 	
 	/**
@@ -1639,7 +1634,7 @@ public class SyncProxyALMManager {
 	 * @param alignment
 	 * @throws SyncException
 	 */
-	public void show(String mainText1, String mainText2,
+	public void show(String appId, String mainText1, String mainText2,
 			String statusBar, String mediaClock, String mediaTrack,
 			TextAlignment alignment, Object tag, 
 			ISyncShowResponseListener listener) 
@@ -1658,7 +1653,7 @@ public class SyncProxyALMManager {
 		}
 
 		// Base show
-		syncProxy.show(mainText1, mainText2, statusBar, mediaClock, mediaTrack, alignment, correlationID);
+		syncProxy.show(appId, mainText1, mainText2, statusBar, mediaClock, mediaTrack, alignment, correlationID);
 	}
 	
 	/**
@@ -1669,12 +1664,12 @@ public class SyncProxyALMManager {
 	 * @param alignment
 	 * @throws SyncException
 	 */
-	public void show(String mainText1, String mainText2,
+	public void show(String appId, String mainText1, String mainText2,
 			TextAlignment alignment, Object tag,
 			ISyncShowResponseListener listener) 
 			throws SyncException {
 		
-		show(mainText1, mainText2, null, null, null, alignment, tag, listener);
+		show(appId, mainText1, mainText2, null, null, null, alignment, tag, listener);
 	}
 	
 	/**
@@ -1683,7 +1678,7 @@ public class SyncProxyALMManager {
 	 * @param ttsText
 	 * @throws SyncException
 	 */
-	public void speak(String ttsText, Object tag, 
+	public void speak(String appId, String ttsText, Object tag,
 			ISyncSpeakResponseListener listener) 
 			throws SyncException {
 		
@@ -1700,7 +1695,7 @@ public class SyncProxyALMManager {
 		}
 
 		// Base speak
-		syncProxy.speak(ttsText, correlationID);
+		syncProxy.speak(appId, ttsText, correlationID);
 	}
 	
 	/**
@@ -1709,7 +1704,7 @@ public class SyncProxyALMManager {
 	 * @param ttsChunks
 	 * @throws SyncException
 	 */
-	public void speak(Vector<TTSChunk> ttsChunks, Object tag,
+	public void speak(String appId, Vector<TTSChunk> ttsChunks, Object tag,
 			ISyncSpeakResponseListener listener) throws SyncException {
 
 		Integer correlationID = getNextAlmCorrelationId();
@@ -1725,13 +1720,13 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base speak
-		syncProxy.speak(ttsChunks, correlationID);
+		syncProxy.speak(appId, ttsChunks, correlationID);
 	}
 	
-	public void longSpeak(String ttsText, Object tag, ISyncSpeakResponseListener listener) throws SyncException{
+	public void longSpeak(String appId, String ttsText, Object tag, ISyncSpeakResponseListener listener) throws SyncException{
 		
 		SpeakTextParser speakParser = new SpeakTextParser(ttsText, tag, listener);
-		speakParser.speakFromQueue();
+		speakParser.speakFromQueue(appId);
 	}
 	
 	// TODO create a longSpeak using TTSChunks
@@ -1742,7 +1737,7 @@ public class SyncProxyALMManager {
 	 * @param buttonName
 	 * @throws SyncException
 	 */
-	public void subscribeButton(ButtonName buttonName, Object tag,
+	public void subscribeButton(String appId, ButtonName buttonName, Object tag,
 			ISyncButtonListener listener) throws SyncException {
 
 		Integer correlationID = getNextAlmCorrelationId();
@@ -1760,7 +1755,7 @@ public class SyncProxyALMManager {
 		}
 
 		// Base subscribeButton
-		syncProxy.subscribeButton(buttonName, correlationID);
+		syncProxy.subscribeButton(appId, buttonName, correlationID);
 	}
 	
 	/**
@@ -1769,7 +1764,7 @@ public class SyncProxyALMManager {
 	 * @param buttonName
 	 * @throws SyncException
 	 */
-	public void unsubscribeButton(ButtonName buttonName, Object tag,
+	public void unsubscribeButton(String appId, ButtonName buttonName, Object tag,
 			ISyncUnsubscribeButtonResponseListener listener) 
 			throws SyncException {
 		
@@ -1788,7 +1783,7 @@ public class SyncProxyALMManager {
 		}
 		
 		// Base unsubscribeButton
-		syncProxy.unsubscribeButton(buttonName, correlationID);
+		syncProxy.unsubscribeButton(appId, buttonName, correlationID);
 	}
 	
 	/**
@@ -1957,7 +1952,7 @@ public class SyncProxyALMManager {
 	private class ALMInterfaceBroker implements IProxyListenerALM {
 		
 		@Override
-		public void onAddSubMenuResponse(AddSubMenuResponse response) {
+		public void onAddSubMenuResponse(String appId, AddSubMenuResponse response) {
 			final ISyncAddSubMenuResponseListener listener = _addSubMenuResponseListeners.get(response.getCorrelationID());
 			SyncSubMenu syncSubMenuToReturn = null;
 			Object tagToReturn = null;
@@ -1984,7 +1979,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onAlertResponse(AlertResponse response) {
+		public void onAlertResponse(String appId, AlertResponse response) {
 			final ISyncAlertResponseListener listener = _alertResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2004,8 +1999,8 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onCreateInteractionChoiceSetResponse(
-				CreateInteractionChoiceSetResponse response) {
+		public void onCreateInteractionChoiceSetResponse(String appId,
+                                                         CreateInteractionChoiceSetResponse response) {
 			final ISyncCreateInteractionChoiceSetResponseListener listener = _createInteractionChoiceSetResponseListeners.get(response.getCorrelationID());
 			SyncChoiceSet syncChoiceSetToReturn = null;
 			Object tagToReturn = null;
@@ -2033,7 +2028,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onDeleteCommandResponse(DeleteCommandResponse response) {
+		public void onDeleteCommandResponse(String appId, DeleteCommandResponse response) {
 			final ISyncDeleteCommandResponseListener listener = _createDeleteCommandResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2053,8 +2048,8 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onDeleteInteractionChoiceSetResponse(
-				DeleteInteractionChoiceSetResponse response) {
+		public void onDeleteInteractionChoiceSetResponse(String appId,
+                                                         DeleteInteractionChoiceSetResponse response) {
 			final ISyncDeleteInteractionChoiceSetResponseListener listener = _deleteInteractionchoiceSetResponseListeners.get(response.getCorrelationID());		
 			Object tagToReturn = null;
 			
@@ -2073,7 +2068,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onDeleteSubMenuResponse(DeleteSubMenuResponse response) {
+		public void onDeleteSubMenuResponse(String appId, DeleteSubMenuResponse response) {
 			final ISyncDeleteSubMenuResponseListener listener = _deleteSubMenuResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2120,7 +2115,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onEncodedSyncPDataResponse(EncodedSyncPDataResponse response) {
+		public void onEncodedSyncPDataResponse(String appId, EncodedSyncPDataResponse response) {
 			final ISyncEncodedSyncPDataResponseListener listener = _encodedSyncPDataResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2140,7 +2135,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onSyncPDataResponse(SyncPDataResponse response) {
+		public void onSyncPDataResponse(String appId, SyncPDataResponse response) {
 			final ISyncSyncPDataResponseListener listener = _syncPDataResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2165,7 +2160,7 @@ public class SyncProxyALMManager {
 		}
 		
 		@Override
-		public void onPerformInteractionResponse(PerformInteractionResponse response) {
+		public void onPerformInteractionResponse(String appId, PerformInteractionResponse response) {
 			final ISyncPerformInteractionResponseListener listener = _performInteractionResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2207,8 +2202,8 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onResetGlobalPropertiesResponse(
-				ResetGlobalPropertiesResponse response) {
+		public void onResetGlobalPropertiesResponse(String appId,
+                                                    ResetGlobalPropertiesResponse response) {
 			final ISyncResetGlobalPropertiesListener listener = _resetGlobalPropertiesResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2228,8 +2223,8 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onSetGlobalPropertiesResponse(
-				SetGlobalPropertiesResponse response) {
+		public void onSetGlobalPropertiesResponse(String appId,
+                                                  SetGlobalPropertiesResponse response) {
 			final ISyncSetGlobalPropertiesResponseListener listener = _setGlobalPropertiesResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2249,7 +2244,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onSetMediaClockTimerResponse(SetMediaClockTimerResponse response) {
+		public void onSetMediaClockTimerResponse(String appId, SetMediaClockTimerResponse response) {
 			final ISyncSetMediaClockTimerResponseListener listener = _setMediaClockTimerResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2269,7 +2264,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onShowResponse(ShowResponse response) {
+		public void onShowResponse(String appId, ShowResponse response) {
 			final ISyncShowResponseListener listener = _showResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2289,7 +2284,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onSpeakResponse(SpeakResponse response) {
+		public void onSpeakResponse(String appId, SpeakResponse response) {
 			final ISyncSpeakResponseListener listener = _speakResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2303,13 +2298,13 @@ public class SyncProxyALMManager {
 			// Remove any tag tied to this correlationID
 			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
 			
-			listener.onSpeakResponse(response, tagToReturn);
+			listener.onSpeakResponse(appId, response, tagToReturn);
 			
 			removeIProxySpeakResponseListener(response.getCorrelationID());
 		}
 	
 		@Override
-		public void onOnButtonEvent(OnButtonEvent notification) {
+		public void onOnButtonEvent(String appId, OnButtonEvent notification) {
 			final ISyncButtonListener listener = _buttonListeners.get(notification.getButtonName());
 			
 			// Return if listener is null
@@ -2321,7 +2316,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onOnButtonPress(OnButtonPress notification) {
+		public void onOnButtonPress(String appId, OnButtonPress notification) {
 			final ISyncButtonListener listener = _buttonListeners.get(notification.getButtonName());
 			
 			// Return if listener is null
@@ -2333,7 +2328,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onSubscribeButtonResponse(SubscribeButtonResponse response) {
+		public void onSubscribeButtonResponse(String appId, SubscribeButtonResponse response) {
 			final ISyncButtonListener listener = _buttonResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2353,7 +2348,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onOnCommand(OnCommand notification) {
+		public void onOnCommand(String appId, OnCommand notification) {
 			final ISyncCommandListener listener = _commandListeners.get(notification.getCmdID());
 			final SyncCommand syncCommand = _syncCommandsByCommandID.get(notification.getCmdID());
 			Object tagToReturn = null;
@@ -2368,7 +2363,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onAddCommandResponse(AddCommandResponse response) {
+		public void onAddCommandResponse(String appId, AddCommandResponse response) {
 			final ISyncCommandListener listener = _commandResponseListeners.get(response.getCorrelationID());
 			SyncCommand syncCommandToReturn = null;
 			Object tagToReturn = null;
@@ -2404,7 +2399,7 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onUnsubscribeButtonResponse(UnsubscribeButtonResponse response) {
+		public void onUnsubscribeButtonResponse(String appId, UnsubscribeButtonResponse response) {
 			final ISyncUnsubscribeButtonResponseListener listener = _unsubscribeButtonResponseListeners.get(response.getCorrelationID());
 			Object tagToReturn = null;
 			
@@ -2429,13 +2424,13 @@ public class SyncProxyALMManager {
 		}
 		
 		@Override
-		public void onOnPermissionsChange(OnPermissionsChange notification) {
+		public void onOnPermissionsChange(String appId, OnPermissionsChange notification) {
 			_lifecycleListener.onOnPermissionsChange(notification);
 		}
 
 		@Override
-		public void onOnHMIStatus(OnHMIStatus notification) {
-			_lifecycleListener.onOnHMIStatus(notification);
+		public void onOnHMIStatus(String appId, OnHMIStatus notification) {
+			_lifecycleListener.onOnHMIStatus(appId, notification);
 		}
 
 		@Override
@@ -2451,87 +2446,87 @@ public class SyncProxyALMManager {
 		}
 
 		@Override
-		public void onSubscribeVehicleDataResponse(SubscribeVehicleDataResponse response) {
+		public void onSubscribeVehicleDataResponse(String appId, SubscribeVehicleDataResponse response) {
 			_lifecycleListener.onSubscribeVehicleDataResponse(response);
 		}
 
 		@Override
-		public void onUnsubscribeVehicleDataResponse(UnsubscribeVehicleDataResponse response) {
+		public void onUnsubscribeVehicleDataResponse(String appId, UnsubscribeVehicleDataResponse response) {
 			_lifecycleListener.onUnsubscribeVehicleDataResponse(response);
 		}
 
 		@Override
-		public void onGetVehicleDataResponse(GetVehicleDataResponse response) {
+		public void onGetVehicleDataResponse(String appId, GetVehicleDataResponse response) {
 			_lifecycleListener.onGetVehicleDataResponse(response);
 		}
 
 		@Override
-		public void onReadDIDResponse(ReadDIDResponse response) {
+		public void onReadDIDResponse(String appId, ReadDIDResponse response) {
 			_lifecycleListener.onReadDIDResponse(response);
 		}
 
 		@Override
-		public void onGetDTCsResponse(GetDTCsResponse response) {
+		public void onGetDTCsResponse(String appId, GetDTCsResponse response) {
 			_lifecycleListener.onGetDTCsResponse(response);
 		}
 
 		@Override
-		public void onOnVehicleData(OnVehicleData notification) {
+		public void onOnVehicleData(String appId, OnVehicleData notification) {
 			_lifecycleListener.onOnVehicleData(notification);
 		}
 		
 		@Override
-		public void onPerformAudioPassThruResponse(PerformAudioPassThruResponse response) {
+		public void onPerformAudioPassThruResponse(String appId, PerformAudioPassThruResponse response) {
 			_lifecycleListener.onPerformAudioPassThruResponse(response);
 		}
 
 		@Override
-		public void onEndAudioPassThruResponse(EndAudioPassThruResponse response) {
+		public void onEndAudioPassThruResponse(String appId, EndAudioPassThruResponse response) {
 			_lifecycleListener.onEndAudioPassThruResponse(response);
 		}
 
 		@Override
-		public void onOnAudioPassThru(OnAudioPassThru notification) {
+		public void onOnAudioPassThru(String appId, OnAudioPassThru notification) {
 			_lifecycleListener.onOnAudioPassThru(notification);
 		}
 
 		@Override
-		public void onPutFileResponse(PutFileResponse response) {
+		public void onPutFileResponse(String appId, PutFileResponse response) {
 			_lifecycleListener.onPutFileResponse(response);
 		}
 
 		@Override
-		public void onDeleteFileResponse(DeleteFileResponse response) {
+		public void onDeleteFileResponse(String appId, DeleteFileResponse response) {
 			_lifecycleListener.onDeleteFileResponse(response);
 		}
 
 		@Override
-		public void onListFilesResponse(ListFilesResponse response) {
+		public void onListFilesResponse(String appId, ListFilesResponse response) {
 			_lifecycleListener.onListFilesResponse(response);
 		}
 
 		@Override
-		public void onSetAppIconResponse(SetAppIconResponse response) {
+		public void onSetAppIconResponse(String appId, SetAppIconResponse response) {
 			_lifecycleListener.onSetAppIconResponse(response);
 		}
 
 		@Override
-		public void onScrollableMessageResponse(ScrollableMessageResponse response) {
+		public void onScrollableMessageResponse(String appId, ScrollableMessageResponse response) {
 			_lifecycleListener.onScrollableMessageResponse(response);
 		}
 
 		@Override
-		public void onChangeRegistrationResponse(ChangeRegistrationResponse response) {
+		public void onChangeRegistrationResponse(String appId, ChangeRegistrationResponse response) {
 			_lifecycleListener.onChangeRegistrationResponse(response);
 		}
 
 		@Override
-		public void onSetDisplayLayoutResponse(SetDisplayLayoutResponse response) {
+		public void onSetDisplayLayoutResponse(String appId, SetDisplayLayoutResponse response) {
 			_lifecycleListener.onSetDisplayLayoutResponse(response);
 		}
 
 		@Override
-		public void onOnLanguageChange(OnLanguageChange notification) {
+		public void onOnLanguageChange(String appId, OnLanguageChange notification) {
 			_lifecycleListener.onOnLanguageChange(notification);
 		}
 		public void onSliderResponse(SliderResponse response) {
@@ -2539,76 +2534,81 @@ public class SyncProxyALMManager {
 		}
 
 		@Override
-		public void onAlertManeuverResponse(AlertManeuverResponse response) {
+		public void onAlertManeuverResponse(String appId, AlertManeuverResponse response) {
 			_lifecycleListener.onAlertManeuverResponse(response);
 		}
 
 		@Override
-		public void onShowConstantTBTResponse(ShowConstantTBTResponse response) {
+		public void onShowConstantTBTResponse(String appId, ShowConstantTBTResponse response) {
 			_lifecycleListener.onShowConstantTBTResponse(response);
 		}
 
 		@Override
-		public void onUpdateTurnListResponse(UpdateTurnListResponse response) {
+		public void onUpdateTurnListResponse(String appId, UpdateTurnListResponse response) {
 			_lifecycleListener.onUpdateTurnListResponse(response);
 		}
 
         @Override
-        public void onSystemRequestResponse(SystemRequestResponse response) {
+        public void onSystemRequestResponse(String appId, SystemRequestResponse response) {
 
         }
 
         @Override
-        public void onMobileNaviStart() {
+        public void onMobileNaviStart(String appId) {
 
         }
 
         @Override
-        public void onMobileNavAckReceived(int frameReceivedNumber) {
+        public void onMobileNavAckReceived(String appId, int frameReceivedNumber) {
 
         }
 
         @Override
-        public void onOnTouchEvent(OnTouchEvent notification) {
+        public void onOnTouchEvent(String appId, OnTouchEvent notification) {
 
         }
 
         @Override
-        public void onKeyboardInput(OnKeyboardInput msg) {
+        public void onKeyboardInput(String appId, OnKeyboardInput msg) {
 
         }
 
         @Override
-        public void onOnSystemRequest(OnSystemRequest notification) {
+        public void onOnSystemRequest(String appId, OnSystemRequest notification) {
         }
 
         @Override
-        public void onRegisterAppRequest(RegisterAppInterface msg) {
-
-        }
-
-        @Override
-        public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg) {
+        public void onRegisterAppRequest(String appId, RegisterAppInterface msg) {
 
         }
 
         @Override
-        public void onAppUnregisteredReason(AppInterfaceUnregisteredReason reason) {
+        public void onAppUnregisteredAfterLanguageChange(String appId, OnLanguageChange msg) {
 
         }
 
         @Override
-        public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID) {
+        public void onAppUnregisteredReason(String appId, AppInterfaceUnregisteredReason reason) {
 
         }
 
         @Override
-        public void onSessionStarted(byte sessionID, String correlationID) {
+        public void onProtocolServiceEnded(ServiceType serviceType, String appId) {
 
         }
 
         @Override
-        public void onAudioServiceStart() {
+        public void onProtocolServiceEndedAck(ServiceType serviceType, String appId) {
+
+        }
+
+        @Override
+        public void onSessionStarted(String appId) {
+
+        }
+
+        @Override
+        public void onAudioServiceStart(String appId) {
 
         }
 
@@ -2618,27 +2618,33 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onDiagnosticMessageResponse(DiagnosticMessageResponse diagnosticMessageResponse) {
+        public void onDiagnosticMessageResponse(String appId,
+                                                DiagnosticMessageResponse diagnosticMessageResponse) {
 
         }
 
         @Override
-        public void onStartServiceNackReceived(ServiceType serviceType) {
+        public void onStartServiceNackReceived(String appId, ServiceType serviceType) {
 
         }
 
         @Override
-        public void onHashChange(OnHashChange onHashChange) {
+        public void onHashChange(String appId, OnHashChange onHashChange) {
 
         }
 
         @Override
-        public void onStartSession(byte sessionID) {
+        public void onStartSession(String appId) {
 
         }
 
         @Override
-        public void onPutFileRequest(PutFile putFile) {
+        public void onPutFileRequest(String appId, PutFile putFile) {
+
+        }
+
+        @Override
+        public void onSliderResponse(String appId, SliderResponse response) {
 
         }
     }
