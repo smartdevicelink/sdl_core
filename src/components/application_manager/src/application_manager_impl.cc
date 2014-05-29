@@ -1939,7 +1939,8 @@ void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
       }
       if ((!(vr_session_started())) &&
           ((*it)->audio_streaming_state() !=
-           mobile_apis::AudioStreamingState::AUDIBLE)) {
+           mobile_apis::AudioStreamingState::AUDIBLE) &&
+           (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level())) {
         (*it)->set_audio_streaming_state(
           mobile_apis::AudioStreamingState::AUDIBLE);
         MessageHelper::SendHMIStatusNotification(*(*it));
