@@ -5,14 +5,16 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
+        classpath 'com.android.tools.build:gradle:0.10.+'
     }
 }
 
 int[] sdksAvailable() {
+    def androidPath = androidSdkPath() +'/tools/android'
     def sdks = new ByteArrayOutputStream()
+
     exec {
-        commandLine 'android', 'list'
+        commandLine   androidPath, 'list'
         standardOutput = sdks
     }
     sdks = sdks
@@ -49,21 +51,23 @@ int highestSdkAvailable(int defaultSdk) {
 }
 
 String androidSDKDir() {
-    def androidExecPath = new ByteArrayOutputStream()
-    exec {
-        commandLine 'which', 'android'
-        standardOutput = androidExecPath
-    }
+    String androidExecPath = androidSdkPath()  + '/tools/android'
     file(androidExecPath.toString().trim()).getParentFile().getParentFile()
+}
+
+String androidSdkPath() {
+    Properties properties = new Properties()
+    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+    def androidExecPath = properties.getProperty('sdk.dir')
+    androidExecPath
 }
 
 String[] buildToolsAvailable() {
     // the Android SDK directory structure that the function relies upon is:
     // android-sdk/tools/android      // <- the android executable
     //            /build-tools/       // <- different build tools versions here
-
     def buildToolsDir = new File(androidSDKDir(), "build-tools")
-    buildToolsDir.list().sort { a, b -> b <=> a }
+    buildToolsDir.list().findAll{ it =~ /^\d+/ }.sort { a, b -> b <=> a }
 }
 
 String latestBuildToolsAvailable(String defaultBuildTools) {

@@ -120,25 +120,27 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     @Override
-    public void SendMessage(final ProtocolMessage protocolMessage) {
+    public void SendMessage(ProtocolMessage protocolMessage) {
         protocolMessage.setRPCType(ProtocolMessage.RPCTYPE_REQUEST); //always sending a request
         final byte sessionId = protocolMessage.getSessionID();
-        final byte protocolVersionToSend = getProtocolVersion();
-
-        ProtocolMessageConverter protocolMessageConverter = new ProtocolMessageConverter(
-                protocolMessage, protocolVersionToSend).generate();
-        final byte[] data = protocolMessageConverter.getData();
-        final ServiceType serviceType = protocolMessageConverter.getServiceType();
 
         // Get the message lock for this protocol syncSession
-        Object messageLock = _messageLocks.get(sessionId);
+        final Object messageLock = _messageLocks.get(sessionId);
         if (messageLock == null) {
+            Logger.w(CLASS_NAME + " SendMessage error, sesId:" + sessionId);
             handleProtocolError("Error sending protocol message to SYNC.",
                     new SyncException("Attempt to send protocol message prior to startSession ACK.",
                             SyncExceptionCause.SYNC_UNAVAILALBE)
             );
             return;
         }
+
+        final byte protocolVersionToSend = getProtocolVersion();
+
+        ProtocolMessageConverter protocolMessageConverter = new ProtocolMessageConverter(
+                protocolMessage, protocolVersionToSend).generate();
+        final byte[] data = protocolMessageConverter.getData();
+        final ServiceType serviceType = protocolMessageConverter.getServiceType();
 
         sendProtocolMessageProcessor.process(serviceType, protocolVersionToSend, data,
                 MAX_DATA_SIZE, sessionId, getNextMessageId());

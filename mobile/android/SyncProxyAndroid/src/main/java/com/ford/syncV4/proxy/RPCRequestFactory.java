@@ -1,8 +1,5 @@
 package com.ford.syncV4.proxy;
 
-import android.util.Log;
-
-import java.util.Hashtable;
 import java.util.Vector;
 
 import com.ford.syncV4.proxy.rpc.AddCommand;
@@ -491,7 +488,7 @@ public class RPCRequestFactory {
 
 		msg.setAppType(appHMIType);
 		
-		msg.setAppID(appID);
+		msg.setAppId(appID);
 
         if (hashId != null) {
             msg.setHashID(hashId);

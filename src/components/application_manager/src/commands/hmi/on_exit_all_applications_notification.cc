@@ -75,14 +75,15 @@ void OnExitAllApplicationsNotification::Run() {
     }
   }
 
+  ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
+  app_manager->SetUnregisterAllApplicationsReason(mob_reason);
+  app_manager->UnregisterAllApplications();
+
   if (mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET == mob_reason
       ||
       mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS == mob_reason) {
-    ApplicationManagerImpl::instance()->HeadUnitReset(mob_reason);
+    app_manager->HeadUnitReset(mob_reason);
   }
-
-  ApplicationManagerImpl::instance()->SetUnregisterAllApplicationsReason(
-      mob_reason);
 
   // notify life cycle to stop SDL
   utils::ForwardSignal();
