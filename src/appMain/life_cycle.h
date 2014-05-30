@@ -53,7 +53,9 @@
 #include "transport_manager/transport_manager_default.h"
 #include "media_manager/media_manager_impl.h"
 #include "utils/singleton.h"
-
+#ifdef TIME_TESTER
+#include "time_tester/time_manager.h"
+#endif
 
 //#if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
 #ifdef MESSAGEBROKER_HMIADAPTER
