@@ -137,6 +137,19 @@ bool RegisterAppInterfaceRequest::Init() {
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run " << connection_key());
 
+#ifndef CUSTOMER_PASA
+  if (true == profile::Profile::instance()->launch_hmi()) {
+    // wait till HMI started
+    while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
+      sleep(1);
+      // TODO(DK): timer_->StartWait(1);
+      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+                                                               correlation_id(),
+                                                               default_timeout());
+    }
+  }
+#endif
+
   ApplicationSharedPtr application =
     ApplicationManagerImpl::instance()->application(connection_key());
 
