@@ -109,7 +109,7 @@ OBJECTS = \
 HEADERS = \
 	$(wildcard ../include/$(COMPONENT_NAME)/*.h*) \
 	$(wildcard ../../transport_manager/include/transport_manager/*.h*) \
-	$(wildcard ../../transport_manager/include/transport_manager/bluetooth/*.h*) \
+	$(wildcard ../../transport_manager/include/transport_manager/pasa_bt/*.h*) \
 	$(wildcard ../../transport_manager/include/transport_manager/device_adapter/*.h*) \
 	$(wildcard ../../transport_manager/include/transport_manager/tcp/*.h*) \
 	$(wildcard ../../connection_handler/include/connection_handler/*.h*) \
