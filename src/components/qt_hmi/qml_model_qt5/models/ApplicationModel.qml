@@ -62,7 +62,7 @@ QtObject {
     property ListModel vrHelpItems: ListModel { }
     property ListModel vrHelpItemsDefault: VrHelpItemsDefault { }
     property ListModel vrHelpItemsPerformInteraction: ListModel {  }
-    property ListModel options: ListModel {}
+    property ListModel options: ListModel { }
     property ListModel currentSubMenu: options
     property ListModel turnList
     property ListModel softButtons
