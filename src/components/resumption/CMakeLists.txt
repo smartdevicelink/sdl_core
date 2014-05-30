@@ -3,6 +3,7 @@ include_directories (
   ../utils/include/
   ../config_profile/include/
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES

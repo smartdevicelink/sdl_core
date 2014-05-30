@@ -13,6 +13,7 @@ include_directories (
   ../config_profile/include/
   ../../thirdPartyLibs/jsoncpp/include/
   ${CMAKE_BINARY_DIR}/src/components/
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES

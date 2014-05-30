@@ -23,6 +23,7 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES

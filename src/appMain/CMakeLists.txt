@@ -46,8 +46,6 @@ set(LIBRARIES
   RequestWatchdog
   MediaManager
   Resumption
-  apr-1
-  aprutil-1
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -91,6 +89,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
   ${CMAKE_SOURCE_DIR}
   ${default_media_inc}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES

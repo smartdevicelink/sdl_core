@@ -3,6 +3,7 @@ include_directories (
   ../config_profile/include
   ../media_manager/include/
   ../protocol_handler/include/
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES
@@ -32,12 +33,6 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
 endif()
 
 add_library("Utils" ${SOURCES})
-
-IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
-  target_link_libraries("Utils" apr-1 aprutil-1)
-else()
-  target_link_libraries("Utils" apr-1 aprutil-1 rt)
-endif()
 
 if(ENABLE_LOG)
   add_dependencies("Utils" liblog4cxx)

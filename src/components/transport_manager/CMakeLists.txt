@@ -10,6 +10,7 @@ include_directories (
   ../resumption/include
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/libusbx-1.0.16
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 if (BUILD_BT_SUPPORT)
   include_directories(

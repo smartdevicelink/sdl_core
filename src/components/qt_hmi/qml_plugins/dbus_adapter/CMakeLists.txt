@@ -84,7 +84,7 @@ elseif (${qt_version} MATCHES "5.1.0")
   set(copy_destination ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt5/${destination})
 endif ()
 
-target_link_libraries(${target} apr-1 aprutil-1 log4cxx)
+target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 
 add_custom_target(copy_library_${target} ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different

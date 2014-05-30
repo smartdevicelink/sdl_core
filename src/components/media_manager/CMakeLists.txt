@@ -63,6 +63,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
   ${default_includes}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES
