@@ -285,7 +285,7 @@ QtObject {
     }
 
     function removeApplication(appId) {
-        console.log("enter");
+        console.log("enter removeApplication");
         for (var j = 0; j < musicSourceModel.count; ++j) {
             if (musicSourceModel.get(j).appId === appId) {
                 musicSourceModel.remove(j);
@@ -298,7 +298,7 @@ QtObject {
                 break;
             }
         }
-        console.log("exit");
+        console.log("exit removeApplication");
     }
 
     function stashApplication(appId) {
