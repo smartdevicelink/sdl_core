@@ -5,9 +5,8 @@ GenerateInterface("test_JSONHandler_v4_protocol_v1_2_no_extra.xml" "Gen::test::c
 
 
 include_directories (
-  ${CMAKE_SOURCE_DIR}/src//thirdPartyLibs/jsoncpp/include/
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.7.0/include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.7.0/gtest/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${GMOCK_INCLUDE_DIRECTORY}
 
   ${CMAKE_SOURCE_DIR}/src/components/utils/include
   ${CMAKE_SOURCE_DIR}/src/components/smart_objects/include
@@ -29,8 +28,6 @@ set(LIBRARIES
     jsoncpp
     formatters
     SmartObjects
-    apr-1
-    aprutil-1
 )
 
 create_test("test_JSONHandler_JSONRPCFullScenario" "./src/test_json_rpc_full_scenario.cpp" "${LIBRARIES}")

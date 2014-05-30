@@ -319,7 +319,10 @@ if (HMIADAPTER STREQUAL "mqueue")
     add_definitions(-DHMI_JSON_API)
 endif()
 
-# --- ThirdPartyLibs
+# --- 3rd party libs (static)
+add_subdirectory(./src/3rd_party-static)
+
+# --- 3rd party libs
 add_subdirectory(./src/thirdPartyLibs)
 
 # --- Tools
@@ -340,7 +343,8 @@ if(BUILD_TESTS)
     include(Dart)
     # Framework GoogleTest is also integrated together gmock
     # and must not be added separately
-    add_subdirectory(./src/thirdPartyLibs/gmock-1.7.0)
+    add_subdirectory(./src/3rd_party-static/gmock-1.7.0)
+    set(GMOCK_INCLUDE_DIRECTORY ${GMOCK_INCLUDE_DIRECTORY} PARENT_SCOPE)
     add_subdirectory(./test)
 endif()
 

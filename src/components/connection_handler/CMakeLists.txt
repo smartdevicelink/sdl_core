@@ -4,7 +4,7 @@ include_directories (
   ../protocol_handler/include/
   ../config_profile/include/
   ../utils/include/
-  ../../thirdPartyLibs/encryption/include
+  ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 

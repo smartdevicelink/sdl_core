@@ -1,6 +1,5 @@
 include_directories (
-  ../../../src/thirdPartyLibs/gmock-1.7.0/include
-  ../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
+  ${GMOCK_INCLUDE_DIRECTORY}
   ../../../src/components/media_manager/include
   ../../../src/components/utils/include/
   ../../../src/components/protocol_handler/include/

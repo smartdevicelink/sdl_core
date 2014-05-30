@@ -1,10 +1,9 @@
 include_directories (
   ../../../../src/components/utils/include
-  ../../../../src/thirdPartyLibs/gmock-1.7.0/include
-  ../../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
+  ${GMOCK_INCLUDE_DIRECTORY}
   ../../../../src/components/smart_objects/include
   ../../../../src/components/formatters/include/
-  ../../../../src//thirdPartyLibs/jsoncpp/include/
+  ${JSONCPP_INCLUDE_DIRECTORY}
   ../../../../src/components/formatters/include/
 )
 
@@ -17,8 +16,6 @@ set (LIBRARIES
     SmartObjects
     formatters
     jsoncpp
-    apr-1
-    aprutil-1
 )
 
 create_test("test_SmartObject_BoolSchemaItemTest"           "./test_BoolSchemaItemTest.cpp"   "${LIBRARIES}")

@@ -5,6 +5,9 @@
 # ctest.  You can select which tests to run using 'ctest -R regex'.
 # For more options, run 'ctest --help'.
 
+set(GMOCK_INCLUDE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/gtest/include)
+set(GMOCK_INCLUDE_DIRECTORY ${GMOCK_INCLUDE_DIRECTORY} PARENT_SCOPE)
+
 # BUILD_SHARED_LIBS is a standard CMake variable, but we declare it here to
 # make it prominent in the GUI.
 option(BUILD_SHARED_LIBS "Build shared libraries (DLLs)." OFF)

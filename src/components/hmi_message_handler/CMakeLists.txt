@@ -7,8 +7,8 @@ include_directories (
   ../config_profile/include/
   ../media_manager/include/
   ../protocol_handler/include
-  ../../thirdPartyLibs/jsoncpp/include/
-  ../../thirdPartyLibs/MessageBroker/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ../config_profile/include
   ${CMAKE_SOURCE_DIR}/src/components/
   ${CMAKE_BINARY_DIR}/src/components/

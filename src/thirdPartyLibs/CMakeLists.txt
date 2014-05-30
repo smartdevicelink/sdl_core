@@ -28,21 +28,6 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# --- jsoncpp
-add_subdirectory(./jsoncpp)
-
-# --- MessageBroker
-add_subdirectory(./MessageBroker)
-
-# --- encryption
-add_subdirectory(./encryption)
-
-if (BUILD_USB_SUPPORT)
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-add_subdirectory(./libusbx-1.0.16)
-endif()
-endif()
-
 set(3RD_PARTY_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/3rd_party")
 
 if(ENABLE_LOG OR HMI_DBUS_API)
