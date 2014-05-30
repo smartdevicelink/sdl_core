@@ -63,7 +63,7 @@ String[] buildToolsAvailable() {
     //            /build-tools/       // <- different build tools versions here
 
     def buildToolsDir = new File(androidSDKDir(), "build-tools")
-    buildToolsDir.list().sort { a, b -> b <=> a }
+    buildToolsDir.list().findAll{ it =~ /^\d+/ }.sort { a, b -> b <=> a }
 }
 
 String latestBuildToolsAvailable(String defaultBuildTools) {
