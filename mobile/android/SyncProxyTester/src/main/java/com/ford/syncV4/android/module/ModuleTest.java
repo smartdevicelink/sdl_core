@@ -180,6 +180,8 @@ public class ModuleTest {
 
     private ProxyService mProxyService;
 
+    private String mAppId;
+
     // TODO : Reconsider!
 	public ModuleTest(String appId, ProxyService proxyService, LogAdapter logAdapter) {
         mProxyService = proxyService;
@@ -188,6 +190,7 @@ public class ModuleTest {
 		
 		// Set this's instance
 		sInstance = this;
+        mAppId = appId;
 		mActivityInstance.setTesterMain(sInstance);
 		
 		mainThread = makeThread(appId);
@@ -929,7 +932,7 @@ public class ModuleTest {
 
                 mProxyService.waiting(true);
 
-                mProxyService.testInitializeSessionRPCOnly();
+                mProxyService.testInitializeSessionRPCOnly(mAppId);
 
                 long pause = testActionItem.getDelay();
                 if (pause > 0) {
@@ -937,7 +940,7 @@ public class ModuleTest {
                     try {
                         // delay after the test
                         synchronized (this) {
-                            this.wait(pause);
+                            ((Object) this).wait(pause);
                         }
                     } catch (InterruptedException e) {
                         mLogAdapter.logMessage("InterruptedException", true);
@@ -949,7 +952,7 @@ public class ModuleTest {
                 // wait for incoming messages
                 try {
                     synchronized (this) {
-                        this.wait(100);
+                        ((Object) this).wait(100);
                     }
                 } catch (InterruptedException e) {
                     mLogAdapter.logMessage("InterruptedException", true);
@@ -1070,7 +1073,7 @@ public class ModuleTest {
                         try {
                             // delay between requests of one test
                             synchronized (this) {
-                                this.wait(pause);
+                                ((Object) this).wait(pause);
                             }
                         } catch (InterruptedException e) {
                             mLogAdapter.logMessage("InterruptedException", true);
@@ -1087,7 +1090,7 @@ public class ModuleTest {
                     try {
                         // delay after the test
                         synchronized (this) {
-                            this.wait(pause);
+                            ((Object) this).wait(pause);
                         }
                     } catch (InterruptedException e) {
                         mLogAdapter.logMessage("InterruptedException", true);
@@ -1099,7 +1102,7 @@ public class ModuleTest {
                 // wait for incoming messages
                 try {
                     synchronized (this) {
-                        this.wait(100);
+                        ((Object) this).wait(100);
                     }
                 } catch (InterruptedException e) {
                     mLogAdapter.logMessage("InterruptedException", true);
@@ -1151,7 +1154,7 @@ public class ModuleTest {
 
                 try {
                     synchronized (this) {
-                        this.wait();
+                        ((Object) this).wait();
                     }
                 } catch (InterruptedException e) {
                     mLogAdapter.logMessage("InterruptedException", true);

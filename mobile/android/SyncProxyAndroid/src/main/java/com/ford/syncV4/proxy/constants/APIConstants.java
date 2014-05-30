@@ -8,4 +8,5 @@ package com.ford.syncV4.proxy.constants;
  */
 public class APIConstants {
 
+    public static final String APP_ID_EMPTY = "";
 }

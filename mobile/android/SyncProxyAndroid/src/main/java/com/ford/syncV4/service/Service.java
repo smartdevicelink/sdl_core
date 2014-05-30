@@ -1,6 +1,7 @@
 package com.ford.syncV4.service;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.constants.APIConstants;
 import com.ford.syncV4.session.Session;
 
 /**
@@ -11,18 +12,21 @@ public class Service {
 
     private static final String CLASS_NAME = Service.class.getSimpleName();
 
-    private byte sessionId = Session.UNDEFINED_SESSION_ID;
+    private String appId = APIConstants.APP_ID_EMPTY;
     /**
      * By default a Service is RPC type
      */
     private ServiceType serviceType = ServiceType.RPC;
 
-    public void setSessionId(byte value) {
-        sessionId = value;
+    public void setAppId(String value) {
+        if (value == null) {
+            return;
+        }
+        appId = value;
     }
 
-    public byte getSessionId() {
-        return sessionId;
+    public String getAppId() {
+        return appId;
     }
 
     public void setServiceType(ServiceType value) {
@@ -38,7 +42,7 @@ public class Service {
 
     @Override
     public String toString() {
-        return "Service {sessionId:" + sessionId + ", serviceType:" + serviceType + "}";
+        return "Service {appId:" + appId + ", serviceType:" + serviceType + "}";
     }
 
     @Override
@@ -48,7 +52,7 @@ public class Service {
 
         if (o instanceof Service) {
             Service service = (Service) o;
-            if (sessionId == service.sessionId && serviceType.equals(service.serviceType))
+            if (appId.equals(service.appId) && serviceType.equals(service.serviceType))
                 return true;
         }
 

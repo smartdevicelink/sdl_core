@@ -5,8 +5,6 @@ import android.test.AndroidTestCase;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.service.Service;
 
-import java.util.List;
-
 /**
  * Created by Andrew Batutin on 1/21/14
  */
@@ -44,7 +42,7 @@ public class SessionTest extends AndroidTestCase {
         service.setSessionId(SessionTest.SESSION_ID);
         session.addService(service);
 
-        Service rpcService = session.getServiceBySessionId(SessionTest.SESSION_ID, ServiceType.RPC);
+        Service rpcService = session.getServiceByAppId(SessionTest.SESSION_ID, ServiceType.RPC);
         assertNotNull(rpcService);
         assertEquals(SessionTest.SESSION_ID, rpcService.getSessionId());
         assertEquals(ServiceType.RPC, rpcService.getServiceType());

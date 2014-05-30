@@ -52,7 +52,6 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
                         2, null, connection, new TestConfig());
         assertNotNull(syncProxy);
 
-        syncProxy.setActiveAppId(SessionTest.APP_ID);
         syncProxy.getInterfaceBroker().onTransportConnected();
 
         syncProxy.resetProxy();
@@ -82,7 +81,7 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
                         2, null, connection, new TestConfig());
         assertNotNull(syncProxy);
 
-        syncProxy.closeSession(APP_ID, true);
+        syncProxy.closeSession(APP_ID);
 
         //verify(connection).closeConnection(anyByte(), eq(true));
         verify(transportMock, never()).disconnect();
@@ -103,7 +102,6 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
                         2, null, connection, new TestConfig());
         assertNotNull(syncProxy);
 
-        syncProxy.setActiveAppId(SessionTest.APP_ID);
         syncProxy.getInterfaceBroker().onTransportConnected();
 
         //syncProxy.closeSession(APP_ID, false);

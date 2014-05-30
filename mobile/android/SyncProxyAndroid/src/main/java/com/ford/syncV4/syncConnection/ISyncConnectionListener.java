@@ -14,7 +14,7 @@ public interface ISyncConnectionListener {
 	
 	public void onTransportError(String info, Exception e);
 
-    public void onHeartbeatTimedOut();
+    public void onHeartbeatTimedOut(byte sessionId);
 	
 	public void onProtocolMessageReceived(ProtocolMessage msg);
 	

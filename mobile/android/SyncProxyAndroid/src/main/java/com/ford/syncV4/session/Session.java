@@ -1,6 +1,7 @@
 package com.ford.syncV4.session;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.constants.APIConstants;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.util.logger.Logger;
 
@@ -97,7 +98,7 @@ public class Session {
             if (sessionIds.get(key) == null) {
                 continue;
             }
-            if (sessionIds.get(key).equals(sessionId)) {
+            if (sessionIds.get(key) == sessionId) {
                 return key;
             }
         }
@@ -146,34 +147,20 @@ public class Session {
     /**
      * Get {@link com.ford.syncV4.service.Service} by provided Session Id
      *
-     * @param sessionId   Session Id
+     * @param appId   Session Id
      * @param serviceType {@link com.ford.syncV4.protocol.enums.ServiceType}
      *
      * @return {@link com.ford.syncV4.service.Service}
      */
-    public Service getServiceBySessionId(byte sessionId, ServiceType serviceType) {
+    public Service getServiceByAppId(String appId, ServiceType serviceType) {
         for (Service service : servicesList) {
-            if (service.getSessionId() == sessionId && service.getServiceType() == serviceType) {
-                Logger.i(CLASS_NAME + " GetService '" + serviceType + " ' BySessionId:" + sessionId);
+            if (service.getAppId().equals(appId) && service.getServiceType() == serviceType) {
+                Logger.i(CLASS_NAME + " GetService '" + serviceType + " ' BySessionId:" + appId);
                 return service;
             }
         }
-        Logger.w(CLASS_NAME + " getServiceBySessionId return null");
+        Logger.w(CLASS_NAME + " getServiceByAppId return null");
         return null;
-    }
-
-    /**
-     * Check whether {@link com.ford.syncV4.service.Service} with provided
-     * {@link com.ford.syncV4.protocol.enums.ServiceType} and AppId exists in the collection
-     *
-     * @param appId       Application Id
-     * @param serviceType {@link com.ford.syncV4.protocol.enums.ServiceType}
-     *
-     * @return true if {@link com.ford.syncV4.service.Service} exists, false - otherwise
-     */
-    public boolean hasService(String appId, ServiceType serviceType) {
-        byte sessionId = getSessionIdByAppId(appId);
-        return hasService(sessionId, serviceType);
     }
 
     /**
@@ -191,17 +178,17 @@ public class Session {
      * Check whether {@link com.ford.syncV4.service.Service} with provided
      * {@link com.ford.syncV4.protocol.enums.ServiceType} and Session Id exists in the collection
      *
-     * @param sessionId   Session Id
+     * @param appId       Application Id
      * @param serviceType {@link com.ford.syncV4.protocol.enums.ServiceType}
      *
      * @return true if {@link com.ford.syncV4.service.Service} exists, false - otherwise
      */
-    public boolean hasService(byte sessionId, ServiceType serviceType) {
+    public boolean hasService(String appId, ServiceType serviceType) {
         if (servicesList.isEmpty()) {
             return false;
         }
         for (Service service : servicesList) {
-            if (service.getSessionId() == sessionId && service.getServiceType() == serviceType) {
+            if (service.getAppId().equals(appId) && service.getServiceType() == serviceType) {
                 return true;
             }
         }
@@ -226,14 +213,14 @@ public class Session {
      * Removes a {@link com.ford.syncV4.service.Service} from collection by provided Session Id
      * and {@link com.ford.syncV4.protocol.enums.ServiceType}
      *
-     * @param sessionId   Session Id
+     * @param appId       Application Id
      * @param serviceType {@link com.ford.syncV4.protocol.enums.ServiceType}
      *
      * @return true in case of success, false - otherwise
      */
-    public boolean removeService(byte sessionId, ServiceType serviceType) {
+    public boolean removeService(String appId, ServiceType serviceType) {
         for (Service aService : servicesList) {
-            if ((aService.getSessionId() == sessionId) &&
+            if ((aService.getAppId().equals(appId)) &&
                     (aService.getServiceType() == serviceType)) {
                 return removeService(aService);
             }
@@ -262,10 +249,11 @@ public class Session {
      *
      * @return created {@link com.ford.syncV4.service.Service}
      */
-    public Service createService(ServiceType serviceType) {
-        Logger.i(CLASS_NAME + " Create " + serviceType);
+    public Service createService(String appId, ServiceType serviceType) {
+        Logger.i(CLASS_NAME + " Create " + serviceType + " for appId:" + appId);
         Service service = new Service();
         service.setServiceType(serviceType);
+        service.setAppId(appId);
         return service;
     }
 
@@ -277,22 +265,35 @@ public class Session {
      * @param appId Application Id
      */
     public void stopSession(String appId) {
-        byte sessionId = getSessionIdByAppId(appId);
         List<Service> tobeRemoved = new ArrayList<Service>();
         for (Service service : servicesList) {
-            Logger.i(CLASS_NAME + " Stop session sesId:" + service.getSessionId() + " " + sessionId);
-            if (service.getSessionId() == sessionId) {
+            //Logger.i(CLASS_NAME + " Stop session appId:" + service.getAppId() + " - " + appId);
+            if (service.getAppId().equals(appId)) {
                 tobeRemoved.add(service);
             }
         }
         for (Service service: tobeRemoved) {
-            Logger.i(CLASS_NAME + " Stop session remove:" + service);
-            servicesList.remove(service);
+            boolean result =  servicesList.remove(service);
+            Logger.i(CLASS_NAME + " Stop session remove:" + service + " result:" + result);
         }
         tobeRemoved.clear();
-        sessionIds.remove(appId);
+        int result = sessionIds.remove(appId);
 
-        Logger.i(CLASS_NAME + " Stop appId:" + appId);
+        Logger.i(CLASS_NAME + " Stop appId:" + appId + " res:" + result);
+    }
+
+    /**
+     * Invalidates provided Application Id, clear all Services associated and remove it from the list
+     *
+     * @param appId Application Id
+     *
+     * @return true in case of success, false - otherwise
+     */
+    public boolean invalidateAppId(String appId) {
+
+        // TODO : Implement
+
+        return true;
     }
 
     @Override

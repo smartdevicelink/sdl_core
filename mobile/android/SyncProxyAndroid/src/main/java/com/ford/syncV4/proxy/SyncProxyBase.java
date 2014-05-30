@@ -339,18 +339,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     // UI Handler
     private Handler _mainUIHandler = null;
-    // Parameters passed to the constructor from the app to register an app interface
-    private Object _applicationName = null;
-    private Vector<TTSChunk> _ttsName = null;
-    private Object _ngnMediaScreenAppName = null;
-    private Object _isMediaApp = null;
-    private Language _syncLanguageDesired = null;
-    private Language _hmiDisplayLanguageDesired = null;
-    private Vector<AppHMIType> _appHMIType = null;
-    private Object _appID = null;
-    private String _autoActivateIdDesired = null;
-    private SyncMsgVersion _syncMsgVersionRequest = null;
-    private Vector<String> _vrSynonyms = null;
+
+    private final HashSet<String> appIds = new HashSet<String>();
+    private final Hashtable<String, RegisterAppInterface> raiTable =
+            new Hashtable<String, RegisterAppInterface>();
 
     // Updated hashID which can be used over connection cycles
     // (i.e. loss of connection, ignition cycles, etc.)
@@ -373,11 +365,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * This is a callback interface for the SDK test cases usage
      */
     private ITestConfigCallback mTestConfigCallback;
-
-    /**
-     * Currently active SPT represented by AppId
-     */
-    private String mActiveAppId = "";
 
     /**
      * Set hashID which can be used over connection cycles
@@ -419,11 +406,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             return;
         }
         hashIdsTable.put(appId, value);
-    }
-
-    public void setActiveAppId(String value) {
-        Logger.i("Set active AppId:" + value);
-        mActiveAppId = value;
     }
 
     protected DeviceInfo getDeviceInfo() {
@@ -619,22 +601,37 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public void updateRegisterAppInterfaceParameters(RegisterAppInterface registerAppInterface) {
-        _syncMsgVersionRequest = registerAppInterface.getSyncMsgVersion();
-        _applicationName = registerAppInterface.getAppName();
-        _ttsName = registerAppInterface.getTtsName();
-        _ngnMediaScreenAppName = registerAppInterface.getNgnMediaScreenAppName();
-        _vrSynonyms = registerAppInterface.getVrSynonyms();
-        _isMediaApp = registerAppInterface.getIsMediaApplication();
-        _syncLanguageDesired = registerAppInterface.getLanguageDesired();
-        _hmiDisplayLanguageDesired = registerAppInterface.getHmiDisplayLanguageDesired();
-        _appHMIType = registerAppInterface.getAppType();
-        _appID = registerAppInterface.getAppID();
         if (registerAppInterface.getCorrelationID() != null) {
             setRegisterAppInterfaceCorrelationId(registerAppInterface.getCorrelationID());
         }
         if (registerAppInterface.getDeviceInfo() != null) {
             setDeviceInfo(registerAppInterface.getDeviceInfo());
             DeviceInfoManager.copyDeviceInfo(getDeviceInfo(), registerAppInterface.getDeviceInfo());
+        }
+
+        RegisterAppInterface registerAppInterfaceToUpdate = raiTable.get(registerAppInterface.getAppID());
+        if (registerAppInterfaceToUpdate == null) {
+            registerAppInterfaceToUpdate = RPCRequestFactory.buildRegisterAppInterface();
+            raiTable.put((String) registerAppInterface.getAppID(), registerAppInterface);
+        }
+        if (registerAppInterfaceToUpdate != null) {
+            registerAppInterfaceToUpdate.setTtsName(registerAppInterface.getTtsName());
+            registerAppInterfaceToUpdate.setNgnMediaScreenAppName(registerAppInterface.getNgnMediaScreenAppName());
+            registerAppInterfaceToUpdate.setIsMediaApplication(registerAppInterface.getIsMediaApplication());
+            registerAppInterfaceToUpdate.setVrSynonyms(registerAppInterface.getVrSynonyms());
+            registerAppInterfaceToUpdate.setSyncMsgVersion(registerAppInterface.getSyncMsgVersion());
+            registerAppInterfaceToUpdate.setLanguageDesired(registerAppInterface.getLanguageDesired());
+            registerAppInterfaceToUpdate.setHmiDisplayLanguageDesired(registerAppInterface.getHmiDisplayLanguageDesired());
+            registerAppInterfaceToUpdate.setAppName(registerAppInterface.getAppName());
+            registerAppInterfaceToUpdate.setAppId(registerAppInterface.getAppID());
+
+            if (registerAppInterfaceToUpdate.getCorrelationID() != null) {
+                setRegisterAppInterfaceCorrelationId(registerAppInterfaceToUpdate.getCorrelationID());
+            }
+            if (registerAppInterfaceToUpdate.getDeviceInfo() != null) {
+                setDeviceInfo(registerAppInterfaceToUpdate.getDeviceInfo());
+                DeviceInfoManager.copyDeviceInfo(getDeviceInfo(), registerAppInterfaceToUpdate.getDeviceInfo());
+            }
         }
     }
 
@@ -644,19 +641,27 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                                                       SyncMsgVersion syncMsgVersion,
                                                       Language languageDesired,
                                                       Language hmiDisplayLanguageDesired,
-                                                      Vector<AppHMIType> appHMIType, String appID,
+                                                      Vector<AppHMIType> appHMIType, String appId,
                                                       String autoActivateID) {
-        _applicationName = appName;
-        _ttsName = ttsName;
-        _ngnMediaScreenAppName = ngnMediaScreenAppName;
-        _isMediaApp = isMediaApp;
-        _syncMsgVersionRequest = syncMsgVersion;
-        _vrSynonyms = vrSynonyms;
-        _syncLanguageDesired = languageDesired;
-        _hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
-        _appHMIType = appHMIType;
-        _appID = appID;
-        _autoActivateIdDesired = autoActivateID;
+        appIds.add(appId);
+
+        RegisterAppInterface registerAppInterface = raiTable.get(appId);
+        if (registerAppInterface == null) {
+            registerAppInterface = RPCRequestFactory.buildRegisterAppInterface();
+            raiTable.put(appId, registerAppInterface);
+        }
+        if (registerAppInterface != null) {
+            registerAppInterface.setAppName(appName);
+            registerAppInterface.setTtsName(ttsName);
+            registerAppInterface.setNgnMediaScreenAppName(ngnMediaScreenAppName);
+            registerAppInterface.setIsMediaApplication(isMediaApp);
+            registerAppInterface.setVrSynonyms(vrSynonyms);
+            registerAppInterface.setSyncMsgVersion(syncMsgVersion);
+            registerAppInterface.setLanguageDesired(languageDesired);
+            registerAppInterface.setHmiDisplayLanguageDesired(hmiDisplayLanguageDesired);
+            registerAppInterface.setAppType(appHMIType);
+            registerAppInterface.setAppId(appId);
+        }
     }
 
     private void setupMessageDispatchers() {
@@ -702,21 +707,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void checkConditionsInvalidateProxy(proxyListenerType listener) {
-        // Test conditions to invalidate the proxy
-        if (listener == null) {
-            throw new IllegalArgumentException("IProxyListener listener must be provided to instantiate SyncProxy object.");
-        }
-        if (_advancedLifecycleManagementEnabled) {
-            if (_applicationName == null) {
-                throw new IllegalArgumentException("To use SyncProxyALM, an application name, appName, must be provided");
-            }
-            //if (_applicationName.length() < 1 || _applicationName.length() > 100) {
-            //    throw new IllegalArgumentException("A provided application name, appName, must be between 1 and 100 characters in length.");
-            //}
-            if (_isMediaApp == null) {
-                throw new IllegalArgumentException("isMediaApp must not be null when using SyncProxyALM.");
-            }
-        }
+        // TODO : Maybe ...
     }
 
     private void setupOutgoingMessageDispatcher() {
@@ -1035,13 +1026,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    private synchronized void closeSyncConnection(byte sessionId, boolean keepConnection) {
+    private synchronized void closeSyncConnection(boolean keepConnection) {
         if (mSyncConnection != null) {
 
             //Logger.d("Close Sync connection:" + syncSession.getSessionId() + ", " +
             //        "N:" + syncSession.getServicesNumber() + ", keep:" + keepConnection);
+            //        "N:" + syncSession.getServicesNumber() + ", keep:" + keepConnection);
 
-            mSyncConnection.closeConnection(sessionId, keepConnection);
+            mSyncConnection.closeConnection(keepConnection);
 
             if (!keepConnection) {
                 setSyncConnection(null);
@@ -1059,7 +1051,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void cleanProxy(SyncDisconnectedReason disconnectedReason,
-                            boolean keepConnection, boolean keepServices) throws SyncException {
+                            boolean keepConnection) throws SyncException {
         try {
             // ALM Specific Cleanup
             if (_advancedLifecycleManagementEnabled) {
@@ -1071,11 +1063,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 int counter = appIdToBeRemoved.size();
                 Logger.d("Keys to remove number:" + counter);
                 for (String appId: appIdToBeRemoved) {
-                    closeSession(appId, keepServices);
-                    if (--counter == 0) {
-                        closeSyncConnection(syncSession.getSessionIdByAppId(appId), keepConnection);
-                    }
+                    closeSession(appId);
                 }
+                closeSyncConnection(keepConnection);
             }
         } finally {
             Logger.i("SyncProxy cleaned.");
@@ -1088,20 +1078,22 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * Terminates the App's Interface Registration, closes the transport connection, ends the protocol syncSession, and frees any resources used by the proxy.
+     * Terminates the App's Interface Registration, closes the transport connection, ends the
+     * protocol syncSession, and frees any resources used by the proxy.
      */
     public void dispose() throws SyncException {
         if (_proxyDisposed) {
-            throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
+            throw new SyncException("This object has been disposed, it is no long capable of " +
+                    "executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
         }
 
         _proxyDisposed = true;
 
-        Logger.i("Application called dispose() method.");
+        Logger.i("SyncProxy start Dispose");
 
         try {
             // Clean the proxy
-            cleanProxy(SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, false, false);
+            cleanProxy(SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, false);
 
             clearReconnectTimer();
 
@@ -1131,15 +1123,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             mTraceDeviceInterrogator = null;
         } finally {
-            Logger.i("SyncProxy disposed.");
+            Logger.i("SyncProxy Disposed");
         }
-    } // end-method
+    }
 
     // Method to cycle the proxy, only called in ALM
     protected void cycleProxy(SyncDisconnectedReason disconnectedReason) {
         Logger.d("CycleProxy, disconnectedReason:" + disconnectedReason);
         try {
-            cleanProxy(disconnectedReason, true, true);
+            cleanProxy(disconnectedReason, true);
             scheduleInitializeProxy();
             notifyProxyClosed("Sync Proxy Cycled", new SyncException("Sync Proxy Cycled",
                     SyncExceptionCause.SYNC_PROXY_CYCLED));
@@ -1150,7 +1142,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    public void closeSession(String appId, boolean keepServices) throws SyncException {
+    public void closeSession(String appId) throws SyncException {
         Logger.d("Close appId:" + appId);
 
         final byte sessionId = syncSession.getSessionIdByAppId(appId);
@@ -1182,11 +1174,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     }
                 }
             }
-            if (!keepServices) {
-                stopAllServicesByAppId(appId);
-                stopSession(appId);
-            }
-            //Logger.d("Close appId:" + appId + " complete");
         }
     }
 
@@ -1428,8 +1415,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     // FIXME: return to private?
     void sendRPCRequestPrivate(byte sessionId, RPCRequest request) throws SyncException {
 
-        Logger.d(LOG_TAG + " Send RPC sesId:" + sessionId + " active appId:" + mActiveAppId +
-                " _appId:" + _appID + " name:" + request.getFunctionName());
+        Logger.d(LOG_TAG + " Send RPC sesId:" + sessionId + " name:" + request.getFunctionName());
 
         try {
             final IRPCRequestConverter converter =
@@ -1648,6 +1634,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void onUnregisterAppInterfaceResponse(final byte sessionId, Hashtable hash) {
+        final String appId = syncSession.getAppIdBySessionId(sessionId);
+
         endSession(sessionId);
 
         // UnregisterAppInterface
@@ -1655,7 +1643,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         synchronized (APP_INTERFACE_REGISTERED_LOCK) {
             APP_INTERFACE_REGISTERED_LOCK.notify();
         }
-        final String appId = syncSession.getAppIdBySessionId(sessionId);
         final UnregisterAppInterfaceResponse msg = new UnregisterAppInterfaceResponse(hash);
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -1679,6 +1666,16 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
         }
         //notifyProxyClosed("UnregisterAppInterfaceResponse", null);
+    }
+
+    /**
+     * Invalidates provided Application Id, clear all Services associated and remove it from the list
+     *
+     * @param appId Application identifier
+     */
+    public void invalidateAppId(String appId) {
+        syncSession.stopSession(appId);
+        //syncSession.invalidateAppId(appId);
     }
 
     /**
@@ -1716,7 +1713,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         // Throw exception if RPCRequest is sent when SYNC is unavailable
-        Boolean isAppInterfaceRegistered = mAppInterfaceRegistered.get(mActiveAppId);
+        Boolean isAppInterfaceRegistered = mAppInterfaceRegistered.get(appId);
         if (isAppInterfaceRegistered == null) {
             isAppInterfaceRegistered = false;
         }
@@ -1783,12 +1780,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void startProtocolSession(final byte sessionId) {
         final String associatedAppId = syncSession.updateSessionId(sessionId);
-        Logger.d("Start Protocol session appId:" + associatedAppId + " " + sessionId + " " +
-                syncSession.hasService(sessionId, ServiceType.RPC));
-        if (!syncSession.hasService(sessionId, ServiceType.RPC)) {
+        Logger.d("Start Protocol session appId:" + associatedAppId + " sesId:" + sessionId +
+                " exists:" + syncSession.hasService(associatedAppId, ServiceType.RPC));
+        if (!syncSession.hasService(associatedAppId, ServiceType.RPC)) {
             Service service = new Service();
             service.setServiceType(ServiceType.RPC);
-            service.setSessionId(sessionId);
+            service.setAppId(associatedAppId);
             syncSession.addService(service);
         }
 
@@ -1812,7 +1809,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         if (_advancedLifecycleManagementEnabled) {
 
             // For the Test Cases
-            Logger.d("RestartRPCProtocolSession config: " + mTestConfig);
             if (mTestConfig != null) {
                 Logger.d("RestartRPCProtocolSession DoCallRegisterAppInterface: " +
                         mTestConfig.isDoCallRegisterAppInterface());
@@ -1833,20 +1829,27 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             DeviceInfoManager.dumpDeviceInfo(getDeviceInfo());
             String appId = syncSession.getAppIdBySessionId(sessionId);
 
+            Logger.d("RestartRPCProtocolSession sesId:" + sessionId + " appId:" + appId);
+
+            RegisterAppInterface registerAppInterface = raiTable.get(appId);
+            if (registerAppInterface == null) {
+                return;
+            }
+
             try {
                 registerAppInterfacePrivate(
-                        _syncMsgVersionRequest,
-                        _applicationName,
-                        _ttsName,
-                        _ngnMediaScreenAppName,
-                        _vrSynonyms,
-                        _isMediaApp,
-                        _syncLanguageDesired,
-                        _hmiDisplayLanguageDesired, _appHMIType,
-                        _appID,
-                        _autoActivateIdDesired,
+                        registerAppInterface.getSyncMsgVersion(),
+                        registerAppInterface.getAppName(),
+                        registerAppInterface.getTtsName(),
+                        registerAppInterface.getNgnMediaScreenAppName(),
+                        registerAppInterface.getVrSynonyms(),
+                        registerAppInterface.getIsMediaApplication(),
+                        registerAppInterface.getLanguageDesired(),
+                        registerAppInterface.getHmiDisplayLanguageDesired(),
+                        registerAppInterface.getAppType(),
+                        registerAppInterface.getAppID(),
                         getRegisterAppInterfaceCorrelationId(),
-                        getHashId(appId), getDeviceInfo(), sessionId);
+                        getHashId(appId), getDeviceInfo());
 
             } catch (Exception e) {
                 notifyProxyClosed("Failed to register application interface with SYNC. " +
@@ -1859,10 +1862,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void handleEndService(final ServiceType serviceType, final byte sessionId) {
+        final String appId = syncSession.getAppIdBySessionId(sessionId);
 
         endSession(sessionId);
 
-        final String appId = syncSession.getAppIdBySessionId(sessionId);
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -1942,7 +1945,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     protected void onProtocolServiceStarted_Audio(final byte sessionId) {
-        Logger.i("Mobile Audio service started  " + sessionId);
+        Logger.i("Mobile Audio service started, sesId:" + sessionId);
         createService(sessionId, ServiceType.Audio_Service);
         final String appId = syncSession.getAppIdBySessionId(sessionId);
         if (_callbackToUIThread) {
@@ -1960,10 +1963,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void createService(byte sessionId, ServiceType serviceType) {
         if (!syncSession.hasSessionId(sessionId)) {
-            throw new IllegalArgumentException("can't create service with sessionId " + sessionId);
+            throw new IllegalArgumentException("can't create service with sesId:" + sessionId);
         }
-        Service service = syncSession.createService(serviceType);
-        service.setSessionId(sessionId);
+        String appId = syncSession.getAppIdBySessionId(sessionId);
+        Service service = syncSession.createService(appId, serviceType);
         syncSession.addService(service);
     }
 
@@ -1986,31 +1989,31 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     public void stopMobileNaviService(String appId) {
-        byte sessionId = syncSession.getSessionIdByAppId(appId);
-        if (removeServiceFromSession(sessionId, ServiceType.Mobile_Nav)) {
-            Logger.i("Mobile Navi Service is going to stop, sessionId:" + sessionId);
+        final byte sessionId = syncSession.getSessionIdByAppId(appId);
+        if (removeServiceFromSession(appId, ServiceType.Mobile_Nav)) {
+            Logger.i("Mobile Navi Service is going to stop, sesId:" + sessionId + " appId:" + appId);
             if (getSyncConnection() != null) {
                 getSyncConnection().closeMobileNaviService(sessionId);
             }
         } else {
-            Logger.w("Mobile Navi service not found at sessionId:" + sessionId);
+            Logger.w("Mobile Navi service not found at sesId:" + sessionId + " appId:" + appId);
         }
     }
 
     public void stopAudioService(String appId) {
-        byte sessionId = syncSession.getSessionIdByAppId(appId);
-        if (removeServiceFromSession(sessionId, ServiceType.Audio_Service)) {
-            Logger.i("Mobile Audio service is going to stop, sessionId:" + sessionId);
+        final byte sessionId = syncSession.getSessionIdByAppId(appId);
+        if (removeServiceFromSession(appId, ServiceType.Audio_Service)) {
+            Logger.i("Mobile Audio service is going to stop, sesId:" + sessionId + " appId:" + appId);
             if (getSyncConnection() != null) {
                 getSyncConnection().closeAudioService(sessionId);
             }
         } else {
-            Logger.w("Audio service not found at sessionId:" + sessionId);
+            Logger.w("Audio service not found at sesId:" + sessionId + " appId:" + appId);
         }
     }
 
-    private boolean removeServiceFromSession(byte sessionId, ServiceType serviceType) {
-        return syncSession.removeService(sessionId, serviceType);
+    private boolean removeServiceFromSession(String appId, ServiceType serviceType) {
+        return syncSession.removeService(appId, serviceType);
     }
 
     /**
@@ -2527,26 +2530,29 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             SyncMsgVersion syncMsgVersion, Object appName, Vector<TTSChunk> ttsName,
             Object ngnMediaScreenAppName, Vector<String> vrSynonyms, Object isMediaApp,
             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
-            final Object appId, String autoActivateID, Integer correlationID, String hashId,
-            DeviceInfo deviceInfo, final byte sessionId) throws SyncException {
+            final Object appId, Integer correlationID, String hashId,
+            DeviceInfo deviceInfo) throws SyncException {
 
-        final RegisterAppInterface msg = RPCRequestFactory.buildRegisterAppInterface(
+        final RegisterAppInterface registerAppInterface = RPCRequestFactory.buildRegisterAppInterface(
                 syncMsgVersion, appName, ttsName, ngnMediaScreenAppName, vrSynonyms, isMediaApp,
                 languageDesired, hmiDisplayLanguageDesired, appHMIType, appId, correlationID, hashId,
                 deviceInfo);
 
-        sendRPCRequestPrivate((String) appId, msg);
+        appIds.add((String) appId);
+        raiTable.put((String) appId, registerAppInterface);
+
+        sendRPCRequestPrivate((String) appId, registerAppInterface);
 
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onRegisterAppRequest((String) appId, msg);
+                    _proxyListener.onRegisterAppRequest((String) appId, registerAppInterface);
                 }
             });
         } else {
-            _proxyListener.onRegisterAppRequest((String) appId, msg);
+            _proxyListener.onRegisterAppRequest((String) appId, registerAppInterface);
         }
     }
 
@@ -2869,8 +2875,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     public void resetLanguagesDesired(String appId, Language syncLanguageDesired,
                                       Language hmiDisplayLanguageDesired) {
-        this._syncLanguageDesired = syncLanguageDesired;
-        this._hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
+        // TODO : Update RAI
 
         restartRPCProtocolSession(syncSession.getSessionIdByAppId(appId));
     }
@@ -2896,86 +2901,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         return syncSession.getAppIdBySessionId(sessionId);
     }
 
-    public void setSyncMsgVersionRequest(SyncMsgVersion syncMsgVersionRequest) {
-        _syncMsgVersionRequest = syncMsgVersionRequest;
-    }
-
-    public SyncMsgVersion getSyncMsgVersionRequest() {
-        return _syncMsgVersionRequest;
-    }
-
-    public void setApplicationName(String applicationName) {
-        _applicationName = applicationName;
-    }
-
-    public Object getApplicationName() {
-        return _applicationName;
-    }
-
-    public void setTTSName(Vector<TTSChunk> TTSName) {
-        this._ttsName = TTSName;
-    }
-
-    public Vector<TTSChunk> getTTSName() {
-        return _ttsName;
-    }
-
-    public void setNgnMediaScreenAppName(String ngnMediaScreenAppName) {
-        this._ngnMediaScreenAppName = ngnMediaScreenAppName;
-    }
-
-    public Object getNgnMediaScreenAppName() {
-        return _ngnMediaScreenAppName;
-    }
-
-    public void setVrSynonyms(Vector<String> vrSynonyms) {
-        this._vrSynonyms = vrSynonyms;
-    }
-
-    public Vector<String> getVrSynonyms() {
-        return _vrSynonyms;
-    }
-
-    public void setIsMediApp(Boolean isMediApp) {
-        this._isMediaApp = isMediApp;
-    }
-
-    public Object getIsMediaApp() {
-        return _isMediaApp;
-    }
-
-    public void setSyncLanguageDesired(Language syncLanguageDesired) {
-        this._syncLanguageDesired = syncLanguageDesired;
-    }
-
-    public Language getSyncLanguageDesired() {
-        return _syncLanguageDesired;
-    }
-
-    public void setHmiDisplayLanguageDesired(Language hmiDisplayLanguageDesired) {
-        this._hmiDisplayLanguageDesired = hmiDisplayLanguageDesired;
-    }
-
-    public Language getHmiDisplayLanguageDesired() {
-        return _hmiDisplayLanguageDesired;
-    }
-
-    public void setAppHMIType(Vector<AppHMIType> appHMIType) {
-        this._appHMIType = appHMIType;
-    }
-
-    public Vector<AppHMIType> getAppHMIType() {
-        return _appHMIType;
-    }
-
-    public void setAppID(String appID) {
-        this._appID = appID;
-    }
-
-    public Object getAppID() {
-        return _appID;
-    }
-
     public void setAutoActivateIdReturned(String autoActivateIdDesired) {
         this._autoActivateIdReturned = autoActivateIdDesired;
     }
@@ -2994,25 +2919,30 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void endSession(byte sessionId) {
         String appId = syncSession.getAppIdBySessionId(sessionId);
+
+        // In case End Service message received from SDL without UnregisterAppInterface response
+        appIds.remove(appId);
+        raiTable.remove(appId);
+
         stopAllServicesByAppId(appId);
-        Logger.d(LOG_TAG + " End Session, sesId'sN:" + syncSession.getSessionIdsNumber());
-        if (syncSession.getSessionIdsNumber() == 1) {
-            closeSyncConnection(sessionId, true);
-        } else {
-            if (mSyncConnection != null) {
-                mSyncConnection.closeSession(sessionId, true);
-            }
+        if (mSyncConnection != null) {
+            mSyncConnection.closeSession(sessionId);
         }
         stopSession(appId);
+
+        Logger.d(LOG_TAG + " End Session, sesId'sN:" + syncSession.getSessionIdsNumber());
+        if (syncSession.getSessionIdsNumber() == 0) {
+            closeSyncConnection(false);
+        }
     }
 
     // TODO : Hide this method from public when no Test Cases are need
     /**
      * Initialize new Session. <b>In production this method MUST be private</b>
      */
-    public void initializeSession() {
+    public void initializeSession(final String appId) {
         // Initialize a start session procedure
-        Logger.d(LOG_TAG, "Init session, id:" + mActiveAppId);
+        Logger.d(LOG_TAG + " Init session, id:" + appId);
 
         final int sessionIdsNumber = syncSession.getSessionIdsNumber();
         if (_callbackToUIThread) {
@@ -3021,17 +2951,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 @Override
                 public void run() {
                     for (int i = 0; i < sessionIdsNumber; i++) {
-                        _proxyListener.onStartSession(mActiveAppId);
+                        _proxyListener.onStartSession(appId);
                     }
                 }
             });
         } else {
             for (int i = 0; i < sessionIdsNumber; i++) {
-                _proxyListener.onStartSession(mActiveAppId);
+                _proxyListener.onStartSession(appId);
             }
         }
 
-        syncSession.addAppId(mActiveAppId);
+        syncSession.addAppId(appId);
         mSyncConnection.initialiseSession(Session.DEFAULT_SESSION_ID);
     }
 
@@ -3044,7 +2974,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         @Override
         public void onTransportConnected() {
-            initializeSession();
+            for (String appId: appIds) {
+                initializeSession(appId);
+            }
         }
 
         @Override
@@ -3099,9 +3031,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void onHeartbeatTimedOut() {
+        public void onHeartbeatTimedOut(byte sessionId) {
+            String appId = syncSession.getAppIdBySessionId(sessionId);
+            try {
+                closeSession(appId);
+            } catch (SyncException e) {
+                Logger.e(LOG_TAG + " On HB Timeout:" + e.getMessage());
+            }
+
             final String msg = "Heartbeat timeout";
-            Logger.e(msg);
             notifyProxyClosed(msg, new SyncException(msg, SyncExceptionCause.HEARTBEAT_PAST_DUE));
         }
 
@@ -3158,12 +3096,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
 
         @Override
-        public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version) {
+        public void onProtocolServiceStarted(ServiceType serviceType, byte sessionId, byte version) {
             if (mSyncConnection.getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
                 if (serviceType.equals(ServiceType.Mobile_Nav)) {
-                    onProtocolServiceStarted_MobileNavi(sessionID);
+                    onProtocolServiceStarted_MobileNavi(sessionId);
                 } else if (serviceType.equals(ServiceType.Audio_Service)) {
-                    onProtocolServiceStarted_Audio(sessionID);
+                    onProtocolServiceStarted_Audio(sessionId);
                 }
             }
         }
@@ -3224,12 +3162,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * Restore interrupted Services
      */
     public void restoreServices(String appId) {
-        byte sessionId = syncSession.getSessionIdByAppId(appId);
+        Logger.d(LOG_TAG + " Restore Services for appId:" + appId + " " + syncSession);
         if (!syncSession.isServicesEmpty() && mSyncConnection.getIsConnected()) {
-            if (syncSession.hasService(sessionId, ServiceType.Mobile_Nav)) {
+            byte sessionId = syncSession.getSessionIdByAppId(appId);
+            //Logger.d(LOG_TAG + " Restore Services for appId:" + appId);
+            if (syncSession.hasService(appId, ServiceType.Mobile_Nav)) {
                 mSyncConnection.startMobileNavService(sessionId);
             }
-            if (syncSession.hasService(sessionId, ServiceType.Audio_Service)) {
+            if (syncSession.hasService(appId, ServiceType.Audio_Service)) {
                 mSyncConnection.startAudioService(sessionId);
             }
         }

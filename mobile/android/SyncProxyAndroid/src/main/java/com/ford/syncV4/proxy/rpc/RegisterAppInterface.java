@@ -224,7 +224,7 @@ public class RegisterAppInterface extends RPCRequest {
         return parameters.get(Names.appID);
     }
 
-    public void setAppID(Object appID) {
+    public void setAppId(Object appID) {
         if (appID != null) {
             parameters.put(Names.appID, appID);
         } else {
