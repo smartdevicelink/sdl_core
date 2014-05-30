@@ -797,7 +797,8 @@ with_oracle_include
 with_oracle
 with_freetds
 with_odbc
-with_expat
+with_expat_source
+with_expat_build
 with_iconv
 enable_util_dso
 '
@@ -1465,7 +1466,8 @@ Optional Packages:
   --with-oracle=DIR       enable Oracle DBD driver; giving ORACLE_HOME as DIR
   --with-freetds=DIR      specify FreeTDS location
   --with-odbc=DIR         specify ODBC location
-  --with-expat=DIR        specify Expat location, or 'builtin'
+  --with-expat-source=DIR specify Expat source location, or 'builtin'
+  --with-expat-build=DIR  specify Expat build location, or 'builtin'
   --with-iconv=DIR        path to iconv installation
 
 Some influential environment variables:
@@ -22766,11 +22768,11 @@ apu_try_external_expat=1
 apu_try_builtin_expat=1
 
 
-# Check whether --with-expat was given.
-if test "${with_expat+set}" = set; then :
-  withval=$with_expat;
+# Check whether --with-expat-source was given.
+if test "${with_expat_source+set}" = set; then :
+  withval=$with_expat_source;
   if test "$withval" = "yes"; then
-    as_fn_error $? "a directory must be specified for --with-expat" "$LINENO" 5
+    as_fn_error $? "a directory must be specified for --with-expat-source" "$LINENO" 5
   elif test "$withval" = "no"; then
     as_fn_error $? "Expat cannot be disabled (at this time)" "$LINENO" 5
   elif test "$withval" = "builtin"; then
@@ -22779,32 +22781,11 @@ if test "${with_expat+set}" = set; then :
     # Add given path to standard search paths if appropriate:
     if test "$withval" != "/usr"; then
 
-  if test "x$LDFLAGS" = "x"; then
-    test "x$silent" != "xyes" && echo "  setting LDFLAGS to \"-L$withval\""
-    LDFLAGS="-L$withval"
-  else
-    apr_addto_bugger="-L$withval"
-    for i in $apr_addto_bugger; do
-      apr_addto_duplicate="0"
-      for j in $LDFLAGS; do
-        if test "x$i" = "x$j"; then
-          apr_addto_duplicate="1"
-          break
-        fi
-      done
-      if test $apr_addto_duplicate = "0"; then
-        test "x$silent" != "xyes" && echo "  adding \"$i\" to LDFLAGS"
-        LDFLAGS="$LDFLAGS $i"
-      fi
-    done
-  fi
-
-
   if test "x$CPPFLAGS" = "x"; then
-    test "x$silent" != "xyes" && echo "  setting CPPFLAGS to \"-I$withval/include\""
-    CPPFLAGS="-I$withval/include"
+    test "x$silent" != "xyes" && echo "  setting CPPFLAGS to \"-I$withval/lib\""
+    CPPFLAGS="-I$withval/lib"
   else
-    apr_addto_bugger="-I$withval/include"
+    apr_addto_bugger="-I$withval/lib"
     for i in $apr_addto_bugger; do
       apr_addto_duplicate="0"
       for j in $CPPFLAGS; do
@@ -22822,10 +22803,10 @@ if test "${with_expat+set}" = set; then :
 
 
   if test "x$APRUTIL_INCLUDES" = "x"; then
-    test "x$silent" != "xyes" && echo "  setting APRUTIL_INCLUDES to \"-I$withval/include\""
-    APRUTIL_INCLUDES="-I$withval/include"
+    test "x$silent" != "xyes" && echo "  setting APRUTIL_INCLUDES to \"-I$withval/lib\""
+    APRUTIL_INCLUDES="-I$withval/lib"
   else
-    apr_addto_bugger="-I$withval/include"
+    apr_addto_bugger="-I$withval/lib"
     for i in $apr_addto_bugger; do
       apr_addto_duplicate="0"
       for j in $APRUTIL_INCLUDES; do
@@ -22841,12 +22822,52 @@ if test "${with_expat+set}" = set; then :
     done
   fi
 
+    fi
+    # ...and refuse to fall back on the builtin expat.
+    apu_try_builtin_expat=0
+  fi
+
+fi
+
+# Check whether --with-expat-build was given.
+if test "${with_expat_build+set}" = set; then :
+  withval=$with_expat_build;
+  if test "$withval" = "yes"; then
+    as_fn_error $? "a directory must be specified for --with-expat-build" "$LINENO" 5
+  elif test "$withval" = "no"; then
+    as_fn_error $? "Expat cannot be disabled (at this time)" "$LINENO" 5
+  elif test "$withval" = "builtin"; then
+    apu_try_external_expat=0
+  else
+    # Add given path to standard search paths if appropriate:
+    if test "$withval" != "/usr"; then
+
+  if test "x$LDFLAGS" = "x"; then
+    test "x$silent" != "xyes" && echo "  setting LDFLAGS to \"-L$withval -lexpat -Wl,-rpath=$withval\""
+    LDFLAGS="-L$withval -lexpat -Wl,-rpath=$withval"
+  else
+    apr_addto_bugger="-L$withval -lexpat -Wl,-rpath=$withval"
+    for i in $apr_addto_bugger; do
+      apr_addto_duplicate="0"
+      for j in $LDFLAGS; do
+        if test "x$i" = "x$j"; then
+          apr_addto_duplicate="1"
+          break
+        fi
+      done
+      if test $apr_addto_duplicate = "0"; then
+        test "x$silent" != "xyes" && echo "  adding \"$i\" to LDFLAGS"
+        LDFLAGS="$LDFLAGS $i"
+      fi
+    done
+  fi
+
 
   if test "x$APRUTIL_LDFLAGS" = "x"; then
-    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$withval\""
-    APRUTIL_LDFLAGS="-L$withval"
+    test "x$silent" != "xyes" && echo "  setting APRUTIL_LDFLAGS to \"-L$withval -lexpat -Wl,-rpath=$withval\""
+    APRUTIL_LDFLAGS="-L$withval -lexpat -Wl,-rpath=$withval"
   else
-    apr_addto_bugger="-L$withval"
+    apr_addto_bugger="-L$withval -lexpat -Wl,-rpath=$withval"
     for i in $apr_addto_bugger; do
       apr_addto_duplicate="0"
       for j in $APRUTIL_LDFLAGS; do

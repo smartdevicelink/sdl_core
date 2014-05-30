@@ -323,7 +323,7 @@ endif()
 add_subdirectory(./src/3rd_party-static)
 
 # --- 3rd party libs
-add_subdirectory(./src/thirdPartyLibs)
+add_subdirectory(./src/3rd_party)
 
 # --- Tools
 add_subdirectory(./tools)
