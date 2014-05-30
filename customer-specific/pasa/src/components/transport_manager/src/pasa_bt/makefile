@@ -3,7 +3,7 @@
 #
 
 # Name of the componet (team/domain prefix '_' component name)
-COMPONENT_NAME = transport_manager/bluetooth
+COMPONENT_NAME = transport_manager/pasa_bt
 
 ifndef PRJ_ROOT
 export PRJ_ROOT = $(CURDIR)/../../../../../

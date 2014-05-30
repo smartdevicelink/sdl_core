@@ -81,7 +81,7 @@ COMPONENT_SRCS = \
 NON_LOCAL_SRCS = \
 	$(wildcard transport_adapter/*.c*) \
 	$(wildcard tcp/*.c*) \
-	$(wildcard bluetooth/*.c*) \
+	$(wildcard pasa_bt/*.c*) \
 	$(wildcard mme/*.c*) \
 	#$(wildcard usb/*.c*) \
  
@@ -122,7 +122,7 @@ ALL_OBJECTS = \
 #  So this is not a huge deal when building on a component level.
 HEADERS = \
 	$(wildcard ../include/$(COMPONENT_NAME)/*.h*) \
-	$(wildcard ../include/$(COMPONENT_NAME)/bluetooth/*.h*) \
+	$(wildcard ../include/$(COMPONENT_NAME)/pasa_bt/*.h*) \
 	$(wildcard ../include/$(COMPONENT_NAME)/tcp/*.h*) \
 	$(wildcard ../include/$(COMPONENT_NAME)/transport_adapter/*.h*) \
 	$(wildcard ../include/$(COMPONENT_NAME)/usb/*.h*) \
