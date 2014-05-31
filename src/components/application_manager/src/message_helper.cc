@@ -2069,6 +2069,15 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
 
 mobile_apis::Result::eType MessageHelper::VerifyImage(
   smart_objects::SmartObject& image, ApplicationConstSharedPtr app) {
+  // Checking image type first: if STATIC - skip existence check, since it is
+  // HMI related file and it should know it location
+  const uint32_t image_type = image[strings::image_type].asUInt();
+  mobile_apis::ImageType::eType type =
+      static_cast<mobile_apis::ImageType::eType>(image_type);
+  if (mobile_apis::ImageType::STATIC == type) {
+    return mobile_apis::Result::SUCCESS;
+  }
+
   const std::string& file_name = image[strings::value].asString();
 
   std::string str = file_name;
