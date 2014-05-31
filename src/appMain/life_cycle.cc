@@ -35,6 +35,9 @@
 #include "./life_cycle.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
+#ifdef CUSTOMER_PASA
+#include "SmartDeviceLinkMainApp.h"
+#endif
 #include "resumption/last_state.h"
 
 using threads::Thread;
