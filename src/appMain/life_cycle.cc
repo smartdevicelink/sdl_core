@@ -131,16 +131,18 @@ bool LifeCycle::StartComponents() {
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
+#ifndef CUSTOMER_PASA
   //start transport manager
   transport_manager_->Visibility(true);
+#endif
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
   return true;
 }
 
-#ifdef MESSAGEBROKER_HMIADAPTER
 bool LifeCycle::InitMessageSystem() {
+#ifdef MESSAGEBROKER_HMIADAPTER
   message_broker_ =
     NsMessageBroker::CMessageBroker::getInstance();
   if (!message_broker_) {

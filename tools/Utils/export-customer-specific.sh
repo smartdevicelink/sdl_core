@@ -2,7 +2,8 @@
 
 shopt -s extglob
 
-customer=$1
+srcdir=$1
+customer=$2
 
 function is_excluded() {
   for entry in $exclude; do
@@ -30,17 +31,19 @@ function is_to_filter() {
 testme="*.sh \
         PrepareCodeForCustomer"
 
-if [ -z $customer ]; then
-  echo "Usage: $0 <customer name>" >&2
+if [ -z $srcdir ] ||  [ -z $customer ]; then
+  echo "Usage: $0 <source dir> <customer name>" >&2
   exit 1
 fi
 
 case $customer in
   "PASA")
-    source ./customer-specific/pasa.conf
+    source $srcdir/customer-specific/pasa.conf
+    specificdir=$srcdir/customer-specific/pasa
   ;;
   "FORD")
-    source ./customer-specific/ford.conf
+    source $srcdir/customer-specific/ford.conf
+    specificdir=$srcdir/customer-specific/ford
   ;;
 esac
 
@@ -52,20 +55,21 @@ fi
 mkdir $export_dir
 
 function integrate() {
-  if is_excluded $1; then 
+  relfn=${1##$srcdir/}
+  if is_excluded $relfn; then 
     return
   fi
-  echo "$1"
+  echo "$relfn"
   if [ -d $1 ]; then
-    mkdir -p $export_dir/$1
+    mkdir -p $export_dir/$relfn
     for l in $1/*; do
       integrate $l;
     done
   elif [ -f $1 ]; then
-    if is_to_filter $1; then
-      $filter_command $1  > $export_dir/$1
+    if is_to_filter $relfn; then
+      $srcdir/$filter_command $1  > $export_dir/$relfn
     else
-      cp $1 $export_dir/$1
+      cp $1 $export_dir/$relfn
     fi
   fi
 }
@@ -73,7 +77,9 @@ function integrate() {
 set -f
 for entry in $include; do
   set +f
-  for p in $entry; do
+  for p in $srcdir/$entry; do
     integrate $p
   done
 done
+
+cp -r $specificdir/* $export_dir

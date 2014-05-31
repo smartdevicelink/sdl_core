@@ -33,6 +33,7 @@ INCLUDES = \
 	$(CC_IFLAG)../../../protocol_handler/include \
 	$(CC_IFLAG)../../../connection_handler/include \
 	$(CC_IFLAG)../../../utils/include \
+	$(CC_IFLAG)../../../config_profile/include \
 	$(CC_IFLAG)../../../../thirdPartyLibs/log4cxx/include \
 	$(DEPENDS_INCLUDES)
 
