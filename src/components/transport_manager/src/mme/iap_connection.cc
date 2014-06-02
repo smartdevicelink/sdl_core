@@ -76,7 +76,7 @@ TransportAdapter::Error IAPConnection::SendData(RawMessageSptr message) {
     return TransportAdapter::OK;
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP: error occured while sending data");
+    LOG4CXX_WARN(logger_, "iAP: error occurred while sending data");
     controller_->DataSendFailed(device_uid_, app_handle_, message, DataSendError());
     return TransportAdapter::FAIL;
   }
@@ -97,7 +97,7 @@ void IAPConnection::ReceiveData(int session_id) {
     controller_->DataReceiveDone(device_uid_, app_handle_, message);
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP: error occured while receiving data");
+    LOG4CXX_WARN(logger_, "iAP: error occurred while receiving data");
     controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
   }
 }

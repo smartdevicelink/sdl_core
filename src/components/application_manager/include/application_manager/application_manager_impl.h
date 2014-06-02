@@ -578,7 +578,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /**
      * \brief Performs check using PoliciesManager of availability
-     * of the message for the application. If error occured it is sent
+     * of the message for the application. If error occurred it is sent
      * as response to initiator of request.
      * \param message Message received for application
      * \param application Application that recieved message to be checked by policies
@@ -591,7 +591,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * \brief Using HMIMatrix checks which messages sent to HMI are of higher priority
      * and acts accordingly (closes message with lower priority,
      * rejects message in case message with higher priority is operating on HMI).
-     * If error occured it is sent as response to initiator of request.
+     * If error occurred it is sent as response to initiator of request.
      * \param message Message received for application
      * \return bool Indicates whether message is allowed for application
      */

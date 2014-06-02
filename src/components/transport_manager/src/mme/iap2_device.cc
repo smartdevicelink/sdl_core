@@ -225,7 +225,7 @@ void IAP2Device::OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* ha
     LOG4CXX_DEBUG(logger_, "iAP2: data on hub protocol " << protocol_name << " sent successfully");
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP2: error occured while sending data on hub protocol " << protocol_name);
+    LOG4CXX_WARN(logger_, "iAP2: error occurred while sending data on hub protocol " << protocol_name);
   }
   LOG4CXX_TRACE(logger_, "iAP2: closing connection on hub protocol " << protocol_name);
   if (iap2_eap_close(handle) != -1) {

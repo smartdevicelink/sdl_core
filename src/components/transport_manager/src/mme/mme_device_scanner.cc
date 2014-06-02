@@ -328,7 +328,7 @@ bool MmeDeviceScanner::GetMmeInfo(
   qdb_result_t* res = qdb_query(qdb_hdl_, 0, query, msid);
   if (res != 0) {
     LOG4CXX_DEBUG(logger_, "Parsing result");
-    bool errors_occured = false;
+    bool errors_occurred = false;
     char* data = (char*) qdb_cell(res, 0, 0); // mountpath
     if (data != 0) {
       mount_point = std::string(data);
@@ -336,7 +336,7 @@ bool MmeDeviceScanner::GetMmeInfo(
     }
     else {
       LOG4CXX_ERROR(logger_, "Error parsing column mountpath");
-      errors_occured = true;
+      errors_occurred = true;
     }
     data = (char*) qdb_cell(res, 0, 1); // fs_type
     if (data != 0) {
@@ -355,7 +355,7 @@ bool MmeDeviceScanner::GetMmeInfo(
     }
     else {
       LOG4CXX_ERROR(logger_, "Error parsing column fs_type");
-      errors_occured = true;
+      errors_occurred = true;
     }
     data = (char*) qdb_cell(res, 0, 2); // serial
     if (data != 0) {
@@ -364,7 +364,7 @@ bool MmeDeviceScanner::GetMmeInfo(
     }
     else {
       LOG4CXX_ERROR(logger_, "Error parsing column serial");
-      errors_occured = true;
+      errors_occurred = true;
     }
     data = (char*) qdb_cell(res, 0, 3); // manufacturer
     if (data != 0) {
@@ -373,7 +373,7 @@ bool MmeDeviceScanner::GetMmeInfo(
     }
     else {
       LOG4CXX_ERROR(logger_, "Error parsing column manufacturer");
-      errors_occured = true;
+      errors_occurred = true;
     }
     data = (char*) qdb_cell(res, 0, 4); // device_name
     if (data != 0) {
@@ -382,7 +382,7 @@ bool MmeDeviceScanner::GetMmeInfo(
     }
     else {
       LOG4CXX_ERROR(logger_, "Error parsing column device_name");
-      errors_occured = true;
+      errors_occurred = true;
     }
     qdb_int* attached_data = (qdb_int*) qdb_cell(res, 0, 5); // attached
     if (attached_data != 0) {
@@ -397,10 +397,10 @@ bool MmeDeviceScanner::GetMmeInfo(
     }
     else {
       LOG4CXX_ERROR(logger_, "Error parsing column attached");
-      errors_occured = true;
+      errors_occurred = true;
     }
     qdb_freeresult(res);
-    return !errors_occured;
+    return !errors_occurred;
   }
   else {
     LOG4CXX_ERROR(logger_, "Error querying " << mme_db_name);
@@ -437,7 +437,7 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
             LOG4CXX_DEBUG(logger_, "Message sent to " << ack_mq_name);
           }
           else {
-            LOG4CXX_WARN(logger_, "Error occured while sending message to " << ack_mq_name << ", errno = " << errno);
+            LOG4CXX_WARN(logger_, "Error occurred while sending message to " << ack_mq_name << ", errno = " << errno);
           }
           break;
         }
@@ -456,14 +456,14 @@ void MmeDeviceScanner::NotifyThreadDelegate::threadMain() {
             LOG4CXX_DEBUG(logger_, "Message sent to " << ack_mq_name);
           }
           else {
-            LOG4CXX_WARN(logger_, "Error occured while sending message to " << ack_mq_name << ", errno = " << errno);
+            LOG4CXX_WARN(logger_, "Error occurred while sending message to " << ack_mq_name << ", errno = " << errno);
           }
           break;
         }
       }
     }
     else {
-      LOG4CXX_WARN(logger_, "Error occured while receiving message from " << event_mq_name << ", errno = " << errno);
+      LOG4CXX_WARN(logger_, "Error occurred while receiving message from " << event_mq_name << ", errno = " << errno);
     }
   }
 }
