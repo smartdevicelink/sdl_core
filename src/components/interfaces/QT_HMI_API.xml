@@ -1178,6 +1178,7 @@
   </param>
 </struct>
 
+
 <struct name="ButtonCapabilities">
     <description>Contains the information about capabilities of a button.</description>
     <param name="name" type="Common.ButtonName" mandatory="true">
@@ -3084,7 +3085,7 @@
   <!--Qt HMI version of GetVehicleData-->
   <function name="GetGpsData" messagetype="request">
     <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
+      <description>ID of application that requested this RPC.</description>
     </param>
   </function>
   <function name="GetGpsData" messagetype="response">

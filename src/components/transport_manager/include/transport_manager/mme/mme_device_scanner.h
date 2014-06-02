@@ -35,19 +35,11 @@
 
 #include <map>
 
-#ifdef MME_MQ
 #include <mqueue.h>
-#else
-#include <mme/mme.h>
-#endif
 #include <qdb/qdb.h>
 
 #include "utils/threads/thread.h"
-#ifdef MME_MQ
 #include "utils/threads/thread_delegate.h"
-#else
-#include "utils/threads/pulse_thread_delegate.h"
-#endif
 #include "utils/lock.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -74,8 +66,8 @@ private:
   typedef std::vector<msid_t> MsidContainer;
   typedef std::map<msid_t, MmeDevicePtr> DeviceContainer;
 
-  void OnDeviceArrived(msid_t msid);
-  void OnDeviceLeft(msid_t msid);
+  void OnDeviceArrived(const MmeDeviceInfo* mme_device_info);
+  void OnDeviceLeft(const MmeDeviceInfo* mme_device_info);
   void NotifyDevicesUpdated();
   bool GetMmeList(MsidContainer& msids);
   bool GetMmeInfo(
@@ -88,27 +80,18 @@ private:
     bool& attached
   );
 
-  static const char* qdb_name;
-#ifdef MME_MQ
   static const char* event_mq_name;
   static const char* ack_mq_name;
-#else
-  static const char* mme_name;
-#endif
 
   TransportAdapterController* controller_;
   bool initialised_;
-#ifdef MME_MQ
   mqd_t event_mqd_;
   mqd_t ack_mqd_;
-#else
-  mme_hdl_t* mme_hdl_;
-#endif
   qdb_hdl_t* qdb_hdl_;
   utils::SharedPtr<threads::Thread> notify_thread_;
   DeviceContainer devices_;
   sync_primitives::Lock devices_lock_;
-#ifdef MME_MQ
+
   class NotifyThreadDelegate : public threads::ThreadDelegate {
    public:
     NotifyThreadDelegate(mqd_t event_mqd, mqd_t ack_mqd, MmeDeviceScanner* parent);
@@ -125,20 +108,6 @@ private:
     char buffer_[kBufferSize];
     char ack_buffer_[kAckBufferSize];
   };
-#else
-  class NotifyThreadDelegate : public threads::PulseThreadDelegate {
-   public:
-    NotifyThreadDelegate(mme_hdl_t* mme_hdl, MmeDeviceScanner* parent);
-
-   protected:
-    virtual bool ArmEvent(sigevent* event);
-    virtual void OnPulse();
-
-   private:
-    MmeDeviceScanner* parent_;
-    mme_hdl_t* mme_hdl_;
-  };
-#endif
 };
 
 }  // namespace transport_adapter

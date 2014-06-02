@@ -62,16 +62,22 @@ void OnExitApplicationNotification::Run() {
   reason = static_cast<hmi_apis::Common_ApplicationToNONEReason::eType>
                        ((*message_)[strings::msg_params][strings::reason].asInt());
   switch (reason) {
+#ifdef CUSTOMER_FORD
     case hmi_apis::Common_ApplicationToNONEReason::DRIVER_DISTRACTION_VIOLATION : {
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app_impl->app_id(),
           mobile_api::AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION);
       break;
     }
+#endif
     case hmi_apis::Common_ApplicationToNONEReason::USER_EXIT : {
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app_impl->app_id(),
           mobile_api::AppInterfaceUnregisteredReason::USER_EXIT);
+      break;
+    }
+    default : {
+      LOG4CXX_WARN(logger_, "Bad reason");
       break;
     }
   }

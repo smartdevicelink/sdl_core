@@ -78,16 +78,23 @@ ConnectionHandlerImpl::~ConnectionHandlerImpl() {
 void ConnectionHandlerImpl::set_connection_handler_observer(
   ConnectionHandlerObserver* observer) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::set_connection_handler_observer()");
-  if (!observer) {
-    LOG4CXX_ERROR(logger_, "Null pointer to observer.");
-    return;
-  }
   connection_handler_observer_ = observer;
 }
 
 void ConnectionHandlerImpl::OnDeviceListUpdated(
   const std::vector<transport_manager::DeviceInfo>& device_info_list) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceListUpdated()");
+  if (connection_handler_observer_) {
+    connection_handler_observer_->OnDeviceListUpdated(device_list_);
+  }
+}
+
+void ConnectionHandlerImpl::OnApplicationListUpdated(DeviceHandle device_handle) {
+  LOG4CXX_DEBUG(logger_,"ConnectionHandlerImpl::OnApplicationListUpdated() device_handle "
+               << device_handle);
+  if (connection_handler_observer_) {
+    connection_handler_observer_->OnApplicationListUpdated(device_handle);
+  }
 }
 
 void ConnectionHandlerImpl::OnDeviceFound(
@@ -399,7 +406,10 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
         const SessionMap& session_map = (itr->second)->session_map();
         for (SessionMapConstIterator session_it = session_map.begin(),
              end = session_map.end(); session_it != end; ++session_it) {
-          applications_list->push_back(it->first);
+          const transport_manager::ConnectionUID& connection_handle = itr->first;
+          const uint32_t session_id = session_it->first;
+          uint32_t session_key = KeyFromPair(connection_handle, session_id); //application_id
+          applications_list->push_back(session_key);
         }
       }
     }
@@ -519,7 +529,9 @@ void ConnectionHandlerImpl::CloseSession(uint32_t key) {
 
 void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
                                          uint8_t session_id) {
-  protocol_handler_->SendEndSession(connection_handle, session_id);
+  if (protocol_handler_) {
+    protocol_handler_->SendEndSession(connection_handle, session_id);
+  }
 
   transport_manager::ConnectionUID connection_id =
         ConnectionUIDFromHandle(connection_handle);
@@ -531,12 +543,13 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
     if (0 != connection_handler_observer_) {
       SessionMap session_map = itr->second->session_map();
       SessionMapIterator session_it = session_map.find(session_id);
-      if (session_it == session_map.end()) {
+      if (session_it != session_map.end()) {
         ServiceList service_list = session_it->second;
         ServiceListConstIterator it = service_list.begin();
         for (;it != service_list.end(); ++it) {
+          uint32_t session_key = KeyFromPair(connection_id, session_id);
           connection_handler_observer_->OnServiceEndedCallback(
-              session_id, static_cast<protocol_handler::ServiceType>(*it));
+              session_key, static_cast<protocol_handler::ServiceType>(*it));
         }
       }
     }
@@ -567,20 +580,19 @@ void ConnectionHandlerImpl::SendHeartBeat(ConnectionHandle connection_handle,
 
   transport_manager::ConnectionUID connection_uid =
       ConnectionUIDFromHandle(connection_handle);
-  protocol_handler_->SendHeartBeat(connection_uid, session_id);
+  if (protocol_handler_) {
+    protocol_handler_->SendHeartBeat(connection_uid, session_id);
+  }
 }
 
+//TODO(VSemenyuk): connection_key -> connection_id
 void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key,
                                                 uint8_t session_id) {
-  uint32_t connection_handle = 0;
-  uint8_t session = 0;
-  PairFromKey(connection_key, &connection_handle, &session);
-
   LOG4CXX_INFO(logger_, "Keep alive for session: " <<
                static_cast<int32_t>(session_id));
 
   sync_primitives::AutoLock lock(connection_list_lock_);
-  ConnectionListIterator it = connection_list_.find(connection_handle);
+  ConnectionListIterator it = connection_list_.find(connection_key);
   if (connection_list_.end() != it) {
     it->second->KeepAlive(session_id);
   }

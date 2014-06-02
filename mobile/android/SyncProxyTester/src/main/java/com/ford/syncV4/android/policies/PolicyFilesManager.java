@@ -54,7 +54,7 @@ public class PolicyFilesManager {
      * @param fileType type of the file
      * @param logAdapter Log Adapter (TO BE REMOVED)
      */
-    public static void sendPolicyTableUpdate(ISystemRequestProxy proxy, FileType fileType,
+    public static void sendPolicyTableUpdate(String appId, ISystemRequestProxy proxy, FileType fileType,
                                              RequestType requestType, LogAdapter logAdapter) {
         String mPolicyTableUpdatePath = AppPreferencesManager.getPolicyTableUpdateFilePath();
         //Environment.getExternalStorageDirectory() +
@@ -90,7 +90,7 @@ public class PolicyFilesManager {
 
         try {
             String mPolicyTableUpdateFileName = "PolicyTableUpdate";
-            proxy.putPolicyTableUpdateFile(mPolicyTableUpdateFileName, data, fileType, requestType);
+            proxy.putPolicyTableUpdateFile(appId, mPolicyTableUpdateFileName, data, fileType, requestType);
             SafeToast.showToastAnyThread("Policy Update sent");
             if (logAdapter != null) {
                 logAdapter.logMessage("Policy Update sent", Log.DEBUG, true);

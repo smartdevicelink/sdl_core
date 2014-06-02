@@ -137,6 +137,22 @@ bool RegisterAppInterfaceRequest::Init() {
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run " << connection_key());
 
+//Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
+//Flag conditional compilation "CUSTOMER_PASA" is used in order to exclude hit code
+//to RTC
+#ifndef CUSTOMER_PASA
+  if (true == profile::Profile::instance()->launch_hmi()) {
+    // wait till HMI started
+    while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
+      sleep(1);
+      // TODO(DK): timer_->StartWait(1);
+      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+                                                               correlation_id(),
+                                                               default_timeout());
+    }
+  }
+#endif
+
   ApplicationSharedPtr application =
     ApplicationManagerImpl::instance()->application(connection_key());
 
@@ -604,6 +620,12 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
     policy::PolicyHandler::instance()->policy_manager();
   if (!policy_manager) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    // TODO(AOleynik): Check is necessary to allow register application in case
+    // of disabled policy
+    // Remove this check, when HMI will support policy
+    if (profile::Profile::instance()->policy_turn_off()) {
+    return mobile_apis::Result::WARNINGS;
+  }
     return mobile_apis::Result::DISALLOWED;
   }
   const bool init_result = policy_manager->GetInitialAppData(

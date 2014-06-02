@@ -44,12 +44,14 @@
 namespace transport_manager {
 namespace transport_adapter {
 
+class IAP2Device;
+
 class IAP2Connection : public Connection {
  public:
   IAP2Connection(const DeviceUID& device_uid,
     const ApplicationHandle& app_handle,
     TransportAdapterController* controller,
-    const std::string& device_path);
+    IAP2Device* parent);
 
   bool Init();
 
@@ -58,23 +60,19 @@ class IAP2Connection : public Connection {
   virtual TransportAdapter::Error Disconnect();
 
  private:
-  void OnDataReceived(RawMessageSptr message);
-  void OnReceiveFailed();
+  static const size_t kBufferSize = 1024;
+
+  void ReceiveData();
 
   DeviceUID device_uid_;
   ApplicationHandle app_handle_;
   TransportAdapterController* controller_;
-  std::string device_path_;
-
-#define IAP2_CONNECT 1
-#if IAP2_CONNECT
-  iap2_hdl_t* iap2_hdl_;
-#endif
+  IAP2Device* parent_;
   iap2ea_hdl_t* iap2ea_hdl_;
+  std::string protocol_name_; // for logging purposes only
+  uint8_t buffer_[kBufferSize];
 
   utils::SharedPtr<threads::Thread> receiver_thread_;
-
-  static const char* protocol;
 
   class ReceiverThreadDelegate : public threads::PulseThreadDelegate {
    public:
@@ -85,13 +83,8 @@ class IAP2Connection : public Connection {
     virtual void OnPulse();
 
    private:
-    static const size_t kBufferSize = 1024;
-
-    void ReceiveData();
-
     IAP2Connection* parent_;
     iap2ea_hdl_t* iap2ea_hdl_;
-    uint8_t buffer_[kBufferSize];
   };
 };
 

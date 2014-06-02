@@ -70,6 +70,14 @@ bool AlertRequest::Init() {
     default_timeout_ = def_value;
   }
 
+  // If soft buttons are present, SDL will not use watchdog for response
+  // timeout tracking.
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    LOG4CXX_INFO(logger_, "Request contains soft buttons - request timeout "
+                 "will be set to 0.");
+    default_timeout_ = 0;
+  }
+
   return true;
 }
 
@@ -102,8 +110,10 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event " << awaiting_tts_speak_response_ << " "
-                   << awaiting_tts_stop_speaking_response_ << " " << awaiting_ui_alert_response_);
+      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event "
+                   << awaiting_tts_speak_response_ << " "
+                   << awaiting_tts_stop_speaking_response_ << " "
+                   << awaiting_ui_alert_response_);
       ApplicationManagerImpl::instance()->updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
@@ -172,6 +182,15 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       response_result_ = mobile_apis::Result::SUCCESS;
       response_success_ = true;
     }
+
+    // If timeout is not set, watchdog will not track request timeout and
+    // HMI is responsible for response returning. In this case, if ABORTED will
+    // be rerurned from HMI, success should be sent to mobile.
+    if (mobile_apis::Result::ABORTED == response_result_ &&
+        0 == default_timeout_) {
+      response_success_ = true;
+    }
+
     SendResponse(response_success_, response_result_,
                  response_info.empty() ? NULL : response_info.c_str(),
                  &response_params_);

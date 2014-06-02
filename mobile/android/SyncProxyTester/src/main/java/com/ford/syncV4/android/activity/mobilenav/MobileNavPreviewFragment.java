@@ -24,7 +24,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_mobile_nav_preview, container, true);
+        return inflater.inflate(R.layout.activity_mobile_nav_preview, container, false);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
                     onMobileNaviCheckBoxAction(view);
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
@@ -86,11 +86,11 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.startMobileNaviService();
+            tester.startMobileNaviService(getAppId());
         } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             mFileStreamingLogic.resetStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.stopMobileNavService();
+            tester.stopMobileNavService(getAppId());
             mSessionCheckBoxState.setStateOff();
             Button button = (Button) getView().findViewById(R.id.videobutton);
             button.setEnabled(false);

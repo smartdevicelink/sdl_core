@@ -35,7 +35,10 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-MmeDevice::MmeDevice(const std::string& mount_point, Protocol protocol, const std::string& name, const DeviceUID& unique_device_id) : Device(name, unique_device_id), mount_point_(mount_point), protocol_(protocol) {
+MmeDevice::MmeDevice(const std::string& mount_point,
+                     const std::string& name,
+                     const DeviceUID& unique_device_id) :
+    Device(name, unique_device_id), mount_point_(mount_point) {
 }
 
 bool MmeDevice::IsSameAs(const Device* other_device) const {
@@ -46,12 +49,6 @@ bool MmeDevice::IsSameAs(const Device* other_device) const {
   else {
     return false;
   }
-}
-
-ApplicationList MmeDevice::GetApplicationList() const {
-  ApplicationList app_list;
-  app_list.push_back(1);
-  return app_list;
 }
 
 }  // namespace transport_adapter

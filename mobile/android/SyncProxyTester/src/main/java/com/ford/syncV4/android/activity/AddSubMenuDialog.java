@@ -24,16 +24,11 @@ import com.ford.syncV4.proxy.rpc.AddSubMenu;
  * Date: 2/24/14
  * Time: 10:35 AM
  */
-public class AddSubMenuDialog extends DialogFragment {
+public class AddSubMenuDialog extends BaseDialogFragment {
 
     private static final String LOG_TAG = "AddSubMenuDialog";
 
     private static int sSubMenuCmdID = 1000;
-
-    public static AddSubMenuDialog newInstance() {
-        AddSubMenuDialog addSubMenuDialog = new AddSubMenuDialog();
-        return addSubMenuDialog;
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -78,7 +73,7 @@ public class AddSubMenuDialog extends DialogFragment {
 
                         AddSubMenu addSubMenu = RPCRequestFactory.buildAddSubMenu();
                         addSubMenu.setCorrelationID(((SyncProxyTester) getActivity())
-                                .getCorrelationid());
+                                .getNextCorrelationIdForCurrentFragment());
 
                         SyncSubMenu subMenu = new SyncSubMenu();
                         subMenu.setName(editMenuName.getText().toString());
@@ -88,8 +83,9 @@ public class AddSubMenuDialog extends DialogFragment {
                         if (chkUseMenuPos.isChecked()) {
                             addSubMenu.setPosition(pos);
                         }
-                        ((SyncProxyTester) getActivity()).onAddSubMenuDialogResult(addSubMenu,
-                                subMenu);
+                        ((SyncProxyTester) getActivity()).onAddSubMenuDialogResult(
+                                getArguments().getString(APP_ID_KEY),
+                                addSubMenu, subMenu);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
