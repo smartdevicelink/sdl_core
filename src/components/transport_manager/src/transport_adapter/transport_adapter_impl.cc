@@ -676,6 +676,15 @@ void TransportAdapterImpl::RemoveDevice(const DeviceUID& device_handle) {
   pthread_mutex_unlock(&devices_mutex_);
 }
 
+#ifdef CUSTOMER_PASA
+TransportAdapter::Error TransportAdapterImpl::AbortConnection(
+    const DeviceUID& device_handle, const ApplicationHandle& app_handle) {
+	ConnectionSptr connection = FindEstablishedConnection(device_handle, app_handle);
+	if (connection) return connection->Disconnect();
+	return BAD_PARAM;
+}
+#endif  // CUSTOMER_PASA
+
 }  // namespace transport_adapter
 
 }  // namespace transport_manager

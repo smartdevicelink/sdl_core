@@ -200,6 +200,13 @@ class TransportAdapterController {
   virtual void DataSendFailed(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle,
                               RawMessageSptr message, const DataSendError&) = 0;
+#ifdef CUSTOMER_PASA
+  virtual TransportAdapter::Error DisconnectDevice(
+      const DeviceUID& device_handle) = 0;
+
+  virtual TransportAdapter::Error AbortConnection(
+      const DeviceUID& device_handle, const ApplicationHandle& app_handle) = 0;
+#endif  // CUSTOMER_PASA
 };
 
 }  // namespace transport_adapter

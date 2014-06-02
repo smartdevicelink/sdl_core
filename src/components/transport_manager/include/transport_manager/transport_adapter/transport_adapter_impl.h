@@ -405,6 +405,11 @@ class TransportAdapterImpl : public TransportAdapter,
   virtual TMMetricObserver* GetTimeMetricObserver();
 #endif  // TIME_TESTER
 
+#ifdef CUSTOMER_PASA
+  virtual TransportAdapter::Error AbortConnection(
+      const DeviceUID& device_handle, const ApplicationHandle& app_handle);
+#endif  // CUSTOMER_PASA
+
  protected:
 
   /**
