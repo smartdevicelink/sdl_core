@@ -68,16 +68,24 @@ class IAP2Device : public MmeDevice {
 
  private:
   typedef std::list<std::string> ProtocolNameContainer;
+  typedef std::map<int, std::string> ProtocolNamePool;
   typedef std::pair<std::string, iap2ea_hdl_t*> AppRecord;
   typedef std::map<ApplicationHandle, AppRecord> AppContainer;
   typedef std::map<std::string, utils::SharedPtr<threads::Thread> > ThreadContainer;
 
   static const ProtocolNameContainer& ProtocolNames();
   static const ProtocolNameContainer ReadProtocolNames();
+  static const ProtocolNameContainer& LegacyProtocolNames();
+  static const ProtocolNameContainer ReadLegacyProtocolNames();
+  static const ProtocolNameContainer& HubProtocolNames();
+  static const ProtocolNameContainer ReadHubProtocolNames();
+  static const ProtocolNameContainer& PoolProtocolNames();
+  static const ProtocolNameContainer ReadPoolProtocolNames();
 
   bool RecordByAppId(ApplicationHandle app_id, AppRecord& record) const;
 
-  void OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handler);
+  void OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* handle);
+  void OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handle);
   void OnDisconnect(ApplicationHandle app_id);
 
   static const char* system_config_file_name;
@@ -88,7 +96,23 @@ class IAP2Device : public MmeDevice {
   AppContainer apps_;
   mutable sync_primitives::Lock apps_lock_;
 
-  ThreadContainer connection_threads_;
+  ProtocolNamePool free_protocol_name_pool_;
+  ProtocolNamePool protocol_in_use_name_pool_;
+  sync_primitives::Lock protocol_name_pool_lock_;
+
+  ThreadContainer legacy_connection_threads_;
+  ThreadContainer hub_connection_threads_;
+  ThreadContainer pool_connection_threads_;
+  sync_primitives::Lock pool_connection_threads_lock_;
+
+  class IAP2HubConnectThreadDelegate : public threads::ThreadDelegate {
+    public:
+      IAP2HubConnectThreadDelegate(IAP2Device* parent, const std::string& protocol_name);
+      void threadMain();
+    private:
+      IAP2Device* parent_;
+      std::string protocol_name_;
+  };
 
   class IAP2ConnectThreadDelegate : public threads::ThreadDelegate {
     public:
@@ -96,7 +120,6 @@ class IAP2Device : public MmeDevice {
       void threadMain();
     private:
       IAP2Device* parent_;
-      std::string mount_point_;
       std::string protocol_name_;
   };
 
