@@ -30,7 +30,7 @@ my $token_re = qr/
   (?<ifdef>(^|\n)[ \t]*\#[ \t]*ifdef\s+)(?<sym>[A-Za-z_][A-Za-z0-9_]*) |
   (?<ifndef>(^|\n)[ \t]*\#[ \t]*ifndef\s+)(?<sym>[A-Za-z_][A-Za-z0-9_]*) |
   (?<if>(^|\n)[ \t]*\#\s*if\s+)(?<condition>[^\n]*) |
-  (?<endif>(^|\n)[ \t]*\#[ \t]*endif)\b |
+  (?<endif>(^|\n)[ \t]*\#[ \t]*endif\b(\h*\/\/[^\n]*)?) |
   (?<else>(^|\n)[ \t]*\#[ \t]*else)\b |
   (?<print>\n) |
   (?<print>[^\n]*)
