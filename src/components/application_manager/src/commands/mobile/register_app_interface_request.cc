@@ -627,12 +627,14 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
     policy::PolicyHandler::instance()->policy_manager();
   if (!policy_manager) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+#ifdef CUSTOMER_PASA
     // TODO(AOleynik): Check is necessary to allow register application in case
     // of disabled policy
     // Remove this check, when HMI will support policy
     if (profile::Profile::instance()->policy_turn_off()) {
-    return mobile_apis::Result::WARNINGS;
-  }
+    	return mobile_apis::Result::WARNINGS;
+    }
+#endif // CUSTOMER_PASA
     return mobile_apis::Result::DISALLOWED;
   }
   const bool init_result = policy_manager->GetInitialAppData(

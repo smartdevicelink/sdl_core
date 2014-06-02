@@ -220,13 +220,13 @@ class LexicalParcer:
                 customer_name = ifdef_match.groups()[0]
                 return LexicalParcer.parceCustomerIfdef(tokens, customer_name)
             else:
-                raise SystemError("Can't get customer name WTF?")
+                raise SystemError("Can't get customer name?")
         if (ifndef_match != None):
             if(len(ifndef_match.groups()) > 0):
                 customer_name = ifndef_match.groups()[0]
                 return LexicalParcer.parceCustomerIfdef(tokens, customer_name, ifdef = False)
             else:
-                raise SystemError("Can't get customer name WTF?")
+                raise SystemError("Can't get customer name?")
         result = IfStatement()
         code_line = CodeLine(tokens.pop())
         result.addSubBlock(code_line)
@@ -255,7 +255,7 @@ class LexicalParcer:
                 result.addSubBlock(code_line)
                 return result
             else:
-                raise SystemError("Invalid TokenType WTF?")
+                raise SystemError("Invalid TokenType?")
         raise ParceError("If without else statement?")
 
 
@@ -295,5 +295,5 @@ class LexicalParcer:
                 return result
 
             else:
-                raise SystemError("Invalid TokenType WTF?")
+                raise SystemError("Invalid TokenType?")
         raise ParceError("If without else statement?")
