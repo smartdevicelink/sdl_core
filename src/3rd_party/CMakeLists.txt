@@ -41,9 +41,11 @@ if(ENABLE_LOG)
 
 # --- libapr-1
   add_subdirectory(apr-cmake)
+  set(APR_LIBS_DIRECTORY ${APR_LIBS_DIRECTORY} PARENT_SCOPE)
 
 # --- apr-util
   add_subdirectory(apr-util-cmake)
+  set(APR_UTIL_LIBS_DIRECTORY ${APR_UTIL_LIBS_DIRECTORY} PARENT_SCOPE)
 
 # --- log4cxx
   add_subdirectory(apache-log4cxx-cmake)
