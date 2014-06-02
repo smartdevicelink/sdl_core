@@ -70,8 +70,12 @@ void GetDTCsRequest::Run() {
 
   msg_params[strings::ecu_name] =
       (*message_)[strings::msg_params][strings::ecu_name];
-  msg_params[strings::dtc_mask] =
-      (*message_)[strings::msg_params][strings::dtc_mask];
+
+  if ((*message_)[strings::msg_params].keyExists(strings::dtc_mask)) {
+    msg_params[strings::dtc_mask] =
+        (*message_)[strings::msg_params][strings::dtc_mask];
+  }
+
   msg_params[strings::app_id] = app->app_id();
 
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetDTCs, &msg_params, true);
