@@ -1178,7 +1178,6 @@
   </param>
 </struct>
 
-
 <struct name="ButtonCapabilities">
     <description>Contains the information about capabilities of a button.</description>
     <param name="name" type="Common.ButtonName" mandatory="true">

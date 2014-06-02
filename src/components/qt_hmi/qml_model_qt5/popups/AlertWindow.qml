@@ -210,7 +210,7 @@ Rectangle {
         }
     }
 
-    function alert (alertStrings, duration, showIndicator, sButtons, applicationId) {
+    function alert (alertStrings, duration, sButtons, showIndicator, alertType, applicationId) {
         if (timer.running) { // we have alert already
             var currentTime = new Date()
             var timeFromLastAlert = currentTime - lastAlertTime
