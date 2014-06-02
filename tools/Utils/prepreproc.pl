@@ -30,7 +30,7 @@ my $token_re = qr/
   (?<ifdef>(^|\n)[ \t]*\#[ \t]*ifdef\s+)(?<sym>[A-Za-z_][A-Za-z0-9_]*) |
   (?<ifndef>(^|\n)[ \t]*\#[ \t]*ifndef\s+)(?<sym>[A-Za-z_][A-Za-z0-9_]*) |
   (?<if>(^|\n)[ \t]*\#\s*if\s+)(?<condition>[^\n]*) |
-  (?<endif>(^|\n)[ \t]*\#[ \t]*endif\b(\h*\/\/[^\n]*)?) |
+  (?<endif>(^|\n)[ \t]*\#[ \t]*endif(\h*\/\/[^\n]*)?)\b |
   (?<else>(^|\n)[ \t]*\#[ \t]*else)\b |
   (?<print>\n) |
   (?<print>[^\n]*)
@@ -51,7 +51,7 @@ my $token_re = qr/
       }
       else
       {
-        push (@levels, ($levels[-1] & 2) | 8);
+        push (@levels, ($levels[-1] & 2) | 4);
         print "$+{ifdef}$+{sym}" unless $levels[-1] & 2;
       }
     }
@@ -63,18 +63,18 @@ my $token_re = qr/
       }
       else
       {
-        push (@levels, ($levels[-1] & 2) | 8);
+        push (@levels, ($levels[-1] & 2) | 4);
         print "$+{ifndef}$+{sym}" unless $levels[-1] & 2;
       }
     }
     elsif (defined($+{if}))
     {
-      push @levels, ($levels[-1] & 2) | 8;
+      push @levels, ($levels[-1] & 2) | 4;
       print "$+{if}$+{condition}" unless $levels[-1] & 3;
     }
-    if (defined($+{else}))
+    elsif (defined($+{else}))
     {
-      if (not (@levels[-1] & 8))
+      if (not @levels[-1] & 4)
       {
         $skip = (pop @levels) ^ 2;
         push @levels, $skip;
