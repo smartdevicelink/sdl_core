@@ -981,5 +981,15 @@ void PolicyHandler::RemoveDevice(const std::string& device_id) {
 #endif  // EXTENDED_POLICY
 }
 
+bool PolicyHandler::IsApplicationRevoked(const std::string& app_id) {
+  LOG4CXX_TRACE(logger_, "PolicyHandler::IsApplicationRevoked");
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return false;
+  }
+
+  return policy_manager_->IsApplicationRevoked(app_id);
+}
+
 }  //  namespace policy
 

@@ -153,6 +153,13 @@ void RegisterAppInterfaceRequest::Run() {
   }
 #endif
 
+  std::string mobile_app_id = (*message_)[strings::msg_params][strings::app_id]
+                                                               .asString();
+  if (policy::PolicyHandler::instance()->IsApplicationRevoked(mobile_app_id)) {
+    SendResponse(false, mobile_apis::Result::DISALLOWED);
+    return;
+  }
+
   ApplicationSharedPtr application =
     ApplicationManagerImpl::instance()->application(connection_key());
 

@@ -229,6 +229,13 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    */
   BinaryMessageSptr AddHttpHeader(const BinaryMessageSptr& pt_string);
 
+  /**
+   * Checks whether application is revoked
+   * @param app_id id application
+   * @return true if application is revoked
+   */
+  bool IsApplicationRevoked(const std::string& app_id);
+
  protected:
   /**
    * Starts next retry exchange policy table
