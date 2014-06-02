@@ -137,6 +137,9 @@ bool RegisterAppInterfaceRequest::Init() {
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run " << connection_key());
 
+//Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
+//Flag conditional compilation "CUSTOMER_PASA" is used in order to exclude hit code
+//to RTC
 #ifndef CUSTOMER_PASA
   if (true == profile::Profile::instance()->launch_hmi()) {
     // wait till HMI started
