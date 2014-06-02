@@ -1,4 +1,4 @@
-# !/usr/bin/env python
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 #
@@ -13,33 +13,6 @@ import getopt
 import ifdeflexer as core
 
 LOG_FILE_NAME = "Parce_log.txt"
-
-def is_diff(lines1, lines2):
-    # @brief Checks if line arrays are different
-    # @param lines1 array of strings containes first lines
-    #  @param lines2 array of strings containes second lines
-    #  @return True if line arrays are different otherwise return False
-    length1 = len(lines1)
-    length2 = len(lines2)
-    if (length1 != length2):
-        return True
-    for i in range(length1):
-        l1 = lines1[i]
-        l2 = lines2[i]
-        if (l1 != l2):
-            return True
-    return False
-
-
-def save_lines(f_name, lines):
-    # @brief Save linearray to files
-    #  @param f_name array of strings containes first lines
-    #  @param lines2 array of strings containes second lines
-    #  @return True if line arrays are different otherwise return False
-    f = open(f_name, "w+")
-    for l in lines:
-        f.write(l)
-    f.close()
 
 def help():
     print '''
@@ -91,7 +64,7 @@ def main():
         result = core.LexicalParcer.parceSyntaxBlock(tokens)
         data = result.Code(customer)
     finally:
-        print data
+        print data,
 
 
 if __name__ == '__main__':
