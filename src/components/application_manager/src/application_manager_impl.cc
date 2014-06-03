@@ -1097,6 +1097,17 @@ void ApplicationManagerImpl::SendMessageToMobile(
       msg_to_mobile[strings::params][strings::correlation_id].asUInt());
   }
 
+  mobile_apis::FunctionID::eType function_id =
+      static_cast<mobile_apis::FunctionID::eType>(
+      (*message)[strings::params][strings::function_id].asUInt());
+  mobile_apis::Result::eType check_result = CheckPolicyPermissions(
+                                              app->mobile_app_id()->asString(),
+                                              app->hmi_level(),
+                                              function_id);
+  if (mobile_apis::Result::SUCCESS != check_result) {
+    return;
+  }
+
   messages_to_mobile_.PostMessage(impl::MessageToMobile(message_to_send,
                                   final_message));
 }
@@ -1161,57 +1172,18 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     // Message for "CheckPermission" must be with attached schema
     mobile_so_factory().attachSchema(*message);
 
-    if (policy_manager_) {
-      const std::string stringified_functionID =
-          MessageHelper::StringifiedFunctionID(function_id);
-      LOG4CXX_INFO(
-        logger_,
-        "Checking permissions for  " << app->mobile_app_id()->asString()  <<
-        " in " << MessageHelper::StringifiedHMILevel(app->hmi_level()) <<
-        " rpc " << stringified_functionID);
-      policy::CheckPermissionResult result = policy_manager_->CheckPermissions(
-          app->mobile_app_id()->asString(),
-          MessageHelper::StringifiedHMILevel(app->hmi_level()),
-          stringified_functionID);
+    // Check RPC permissions
+    mobile_apis::Result::eType check_result = CheckPolicyPermissions(
+                                               app->mobile_app_id()->asString(),
+                                               app->hmi_level(),
+                                               function_id);
+    if (mobile_apis::Result::SUCCESS != check_result) {
+      smart_objects::SmartObject* response =
+        MessageHelper::CreateBlockedByPoliciesResponse(function_id,
+            check_result, correlation_id, connection_key);
 
-      if (app->hmi_level() == mobile_apis::HMILevel::HMI_NONE
-          && function_id != mobile_apis::FunctionID::UnregisterAppInterfaceID) {
-        app->usage_report().RecordRpcSentInHMINone();
-      }
-
-      if (result.hmi_level_permitted != policy::kRpcAllowed) {
-        LOG4CXX_WARN(logger_, "Request blocked by policies. "
-                     << "Function: "
-                     << stringified_functionID
-                     << ", FunctionID: "
-                     << static_cast<int32_t>(function_id)
-                     << " Application HMI status: "
-                     << static_cast<int32_t>(app->hmi_level()));
-
-        app->usage_report().RecordPolicyRejectedRpcCall();
-
-        mobile_apis::Result::eType check_result =
-          mobile_apis::Result::DISALLOWED;
-
-        switch (result.hmi_level_permitted) {
-          case policy::kRpcDisallowed:
-            check_result = mobile_apis::Result::DISALLOWED;
-            break;
-          case policy::kRpcUserDisallowed:
-            check_result = mobile_apis::Result::USER_DISALLOWED;
-            break;
-          default:
-            check_result = mobile_apis::Result::INVALID_ENUM;
-            break;
-        }
-
-        smart_objects::SmartObject* response =
-          MessageHelper::CreateBlockedByPoliciesResponse(function_id,
-              check_result, correlation_id, connection_key);
-
-        ApplicationManagerImpl::instance()->SendMessageToMobile(response);
-        return true;
-      }
+      ApplicationManagerImpl::instance()->SendMessageToMobile(response);
+      return true;
     }
   }
 
@@ -1911,6 +1883,59 @@ void ApplicationManagerImpl::Handle(const impl::MessageToHmi& message) {
 
   hmi_handler_->SendMessageToHMI(message);
   LOG4CXX_INFO(logger_, "Message from hmi given away.");
+}
+
+mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
+    const std::string& policy_app_id,
+    mobile_apis::HMILevel::eType hmi_level,
+    mobile_apis::FunctionID::eType function_id) {
+  LOG4CXX_INFO(logger_, "CheckPolicyPermissions");
+  mobile_apis::Result::eType check_result = mobile_apis::Result::DISALLOWED;
+  if (!policy_manager_) {
+    LOG4CXX_WARN(logger_, "Policy library is not loaded.");
+    return check_result;
+  }
+  const std::string stringified_functionID =
+      MessageHelper::StringifiedFunctionID(function_id);
+  const std::string stringified_hmi_level =
+      MessageHelper::StringifiedHMILevel(hmi_level);
+  LOG4CXX_INFO(
+    logger_,
+    "Checking permissions for  " << policy_app_id  <<
+    " in " << stringified_hmi_level <<
+    " rpc " << stringified_functionID);
+  policy::CheckPermissionResult result = policy_manager_->CheckPermissions(
+      policy_app_id,
+      stringified_hmi_level,
+      stringified_functionID);
+
+  if (hmi_level == mobile_apis::HMILevel::HMI_NONE
+      && function_id != mobile_apis::FunctionID::UnregisterAppInterfaceID) {
+    application_by_policy_id(policy_app_id)->
+        usage_report().RecordRpcSentInHMINone();
+  }
+
+  const std::string log_msg = "Application: "+ policy_app_id+
+                              ", RPC: "+stringified_functionID+
+                              ", HMI status: "+stringified_hmi_level;
+
+  if (result.hmi_level_permitted != policy::kRpcAllowed) {
+    LOG4CXX_WARN(logger_, "Request is blocked by policies. " << log_msg );
+
+    application_by_policy_id(policy_app_id)->
+        usage_report().RecordPolicyRejectedRpcCall();
+
+    switch (result.hmi_level_permitted) {
+      case policy::kRpcDisallowed:
+        return check_result = mobile_apis::Result::DISALLOWED;
+      case policy::kRpcUserDisallowed:
+        return check_result = mobile_apis::Result::USER_DISALLOWED;
+      default:
+        return check_result = mobile_apis::Result::INVALID_ENUM;
+    }
+  }
+  LOG4CXX_INFO(logger_, "Request is allowed by policies. "+log_msg);
+  return mobile_api::Result::SUCCESS;
 }
 
 void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {

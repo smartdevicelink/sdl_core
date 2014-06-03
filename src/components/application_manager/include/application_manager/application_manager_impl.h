@@ -624,6 +624,19 @@ class ApplicationManagerImpl : public ApplicationManager,
     // CALLED ON messages_to_hmi_ thread!
     virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;    
 
+    /**
+     * @brief Checks, if given RPC is allowed at current HMI level for specific
+     * application in policy table
+     * @param policy_app_id Application id
+     * @param hmi_level Current HMI level of application
+     * @param function_id FunctionID of RPC
+     * @return SUCCESS, if allowed, otherwise result code of check
+     */
+    mobile_apis::Result::eType CheckPolicyPermissions(
+        const std::string& policy_app_id,
+        mobile_apis::HMILevel::eType hmi_level,
+        mobile_apis::FunctionID::eType function_id);
+
   private:
 
     // members
