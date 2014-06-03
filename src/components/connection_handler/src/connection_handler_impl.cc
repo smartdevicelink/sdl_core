@@ -259,7 +259,6 @@ void ConnectionHandlerImpl::RemoveConnection(
       new_session_id = -1;
     }
   }
-
   return new_session_id;
 }
 
@@ -418,11 +417,12 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   }
 
   if (device_name) {
-    *device_name = (*it).second.user_friendly_name();
+    *device_name = it->second.user_friendly_name();
   }
 
   if (applications_list) {
     applications_list->clear();
+    sync_primitives::AutoLock connection_list_lock(connection_list_lock_);
     for (ConnectionListIterator itr = connection_list_.begin();
          itr != connection_list_.end(); ++itr) {
       if (device_handle == (*itr).second->connection_device_handle()) {
@@ -431,7 +431,7 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
              end = session_map.end(); session_it != end; ++session_it) {
           const transport_manager::ConnectionUID& connection_handle = itr->first;
           const uint32_t session_id = session_it->first;
-          uint32_t session_key = KeyFromPair(connection_handle, session_id); //application_id
+          const uint32_t session_key = KeyFromPair(connection_handle, session_id); //application_id
           applications_list->push_back(session_key);
         }
       }

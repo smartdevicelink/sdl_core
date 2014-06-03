@@ -756,19 +756,20 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
 
 void ApplicationManagerImpl::OnApplicationListUpdated(
     const connection_handler::DeviceHandle& device_handle) {
-  LOG4CXX_INFO(logger_, "OnApplicationListUpdated. device_handle" << device_handle);
-  DCHECK(connection_handler_ != 0);
+  LOG4CXX_TRACE(logger_, "OnApplicationListUpdated device_handle " << device_handle);
 
-  std::string device_name = "";
   std::list<uint32_t> applications_ids;
+  DCHECK(connection_handler_);
   connection_handler::ConnectionHandlerImpl* con_handler_impl =
     static_cast<connection_handler::ConnectionHandlerImpl*>(
       connection_handler_);
-  if (con_handler_impl->GetDataOnDeviceID(device_handle, &device_name,
+  if (con_handler_impl->GetDataOnDeviceID(device_handle, NULL,
                                           &applications_ids) == -1) {
     LOG4CXX_ERROR(logger_, "Failed to extract device list for id " << device_handle);
     return;
   }
+  LOG4CXX_DEBUG(logger_, "Device " << device_handle << " has " <<
+               applications_ids.size() << " applications.");
 
   smart_objects::SmartObject* request = MessageHelper::CreateModuleInfoSO(
                                           hmi_apis::FunctionID::BasicCommunication_UpdateAppList);
@@ -784,22 +785,21 @@ void ApplicationManagerImpl::OnApplicationListUpdated(
     ApplicationSharedPtr app = application(*it);
 
     if (!app.valid()) {
-      LOG4CXX_ERROR(logger_, "application not foud , id = " << *it);
+      LOG4CXX_ERROR(logger_, "Application not found , id = " << *it);
       continue;
     }
 
     smart_objects::SmartObject hmi_application(smart_objects::SmartType_Map);;
-    if (false == MessageHelper::CreateHMIApplicationStruct(app, hmi_application)) {
-      LOG4CXX_ERROR(logger_, "can't CreateHMIApplicationStruct ', id = " << *it);
+    if (!MessageHelper::CreateHMIApplicationStruct(app, hmi_application)) {
+      LOG4CXX_ERROR(logger_, "Can't CreateHMIApplicationStruct ', id = " << *it);
       continue;
     }
     applications[app_count++] = hmi_application;
   }
-  if (app_count > 0) {
-    ManageHMICommand(request);
-  } else {
+  if (app_count <= 0) {
     LOG4CXX_WARN(logger_, "Empty applications list");
   }
+  ManageHMICommand(request);
 }
 
 void ApplicationManagerImpl::RemoveDevice(
