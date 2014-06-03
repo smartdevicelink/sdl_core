@@ -1032,6 +1032,10 @@ void ApplicationManagerImpl::set_connection_handler(
   connection_handler_ = handler;
 }
 
+connection_handler::ConnectionHandler* ApplicationManagerImpl::connection_handler() {
+  return connection_handler_;
+}
+
 void ApplicationManagerImpl::set_protocol_handler(
   protocol_handler::ProtocolHandler* handler) {
   protocol_handler_ = handler;

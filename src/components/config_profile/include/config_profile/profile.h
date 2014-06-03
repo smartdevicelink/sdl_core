@@ -38,6 +38,9 @@
 #include <stdint.h>
 #include "utils/macro.h"
 #include "utils/singleton.h"
+#ifdef CUSTOMER_PASA
+#define SDL_INIFILE_PATH     "/fs/mp/etc/AppLink/smartDeviceLink.ini"
+#endif
 
 namespace profile {
 
@@ -207,7 +210,12 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns path to testing file to which redirects audio stream
       */
     const std::string& audio_stream_file() const;
-
+#ifdef CUSTOMER_PASA
+    /**
+      * @brief Returns path to log4cxx configuration file
+      */
+    const std::string& log4cxx_config_file() const;
+#endif
     /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none

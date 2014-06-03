@@ -6,18 +6,43 @@ srcdir=$1
 bdldir=$2
 customer=$3
 
+function find_in_excludes() {
+	text=$1
+	upper=$(echo ${#excludes[@]})
+	buttom=0
+	while [ $buttom -le $upper ]
+	do
+		pivot=$(($buttom+($upper-$buttom)/2))
+		cur=${excludes[$pivot]}
+		if [[ $text < $cur ]]
+		then
+			upper=$(($pivot-1))
+		elif [[ $text > $cur ]]
+		then
+			buttom=$(($pivot+1))
+		else
+			result=$pivot
+			return 0
+		fi
+	done	
+	result="error"
+	return 1
+}
+
+
 function is_excluded() {
-  for entry in $exclude; do
-    if [[ $1 == ${entry%%/} ]]; then
-      return 0
-    fi
-  done
+  find_in_excludes $1
+  if [[ $result -eq "error" ]]
+  then 
+	return 1
+  fi
+  
   for entry in $exclude_filenames; do
     if [[ ${1##*/} == $entry ]]; then
-      return 0
+      return 1
     fi
   done
-  return 1
+  return 0
 }
 
 function is_to_filter() {
@@ -47,6 +72,7 @@ case $customer in
     specificdir=$srcdir/customer-specific/ford
   ;;
 esac
+readarray -t excludes < <(for entry in $exclude; do echo $entry; done | sort)
 
 if [ -a $export_dir ]; then
   echo "$export_dir already exists" > /dev/stderr
