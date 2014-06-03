@@ -1097,15 +1097,17 @@ void ApplicationManagerImpl::SendMessageToMobile(
       msg_to_mobile[strings::params][strings::correlation_id].asUInt());
   }
 
-  mobile_apis::FunctionID::eType function_id =
-      static_cast<mobile_apis::FunctionID::eType>(
-      (*message)[strings::params][strings::function_id].asUInt());
-  mobile_apis::Result::eType check_result = CheckPolicyPermissions(
-                                              app->mobile_app_id()->asString(),
-                                              app->hmi_level(),
-                                              function_id);
-  if (mobile_apis::Result::SUCCESS != check_result) {
-    return;
+  if (app) {
+    mobile_apis::FunctionID::eType function_id =
+        static_cast<mobile_apis::FunctionID::eType>(
+        (*message)[strings::params][strings::function_id].asUInt());
+    mobile_apis::Result::eType check_result = CheckPolicyPermissions(
+                                                app->mobile_app_id()->asString(),
+                                                app->hmi_level(),
+                                                function_id);
+    if (mobile_apis::Result::SUCCESS != check_result) {
+      return;
+    }
   }
 
   messages_to_mobile_.PostMessage(impl::MessageToMobile(message_to_send,
