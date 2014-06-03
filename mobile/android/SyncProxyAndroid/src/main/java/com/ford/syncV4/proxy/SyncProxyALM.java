@@ -74,7 +74,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
 			String autoActivateID, TestConfig testConfig) throws SyncException {
 		super(	listener, 
@@ -116,7 +116,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, 
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, 
 			Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, 
 			Language hmiDisplayLanguageDesired, String appID, String autoActivateID, TestConfig testConfig) throws SyncException {
 		super(	listener, 
@@ -159,7 +159,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
 			String autoActivateID, boolean callbackToUIThread, TestConfig testConfig) throws SyncException {
 		super(	listener, 
@@ -203,7 +203,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp, 
 			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
 			String appID, String autoActivateID, boolean callbackToUIThread, TestConfig testConfig) throws SyncException {
 		super(	listener, 
@@ -229,7 +229,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	}
 	
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, Vector<AppHMIType> appHMIType,
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp, Vector<AppHMIType> appHMIType,
 			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
 			String appID, String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
             TestConfig testConfig) throws SyncException {
@@ -313,7 +313,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
 			String autoActivateID, TransportType transportType, BaseTransportConfig transportConfig,
             TestConfig testConfig) throws SyncException {
@@ -357,7 +357,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, 
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, 
 			Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, 
 			Language hmiDisplayLanguageDesired, String appID, String autoActivateID,
 			BaseTransportConfig transportConfig, TestConfig testConfig) throws SyncException {
@@ -402,7 +402,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
 			String autoActivateID, boolean callbackToUIThread, 
 			BaseTransportConfig transportConfig, TestConfig testConfig) throws SyncException {
@@ -448,7 +448,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp, 
 			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
 			String appID, String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig,
             TestConfig testConfig) throws SyncException {
@@ -499,7 +499,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, Vector<AppHMIType> appHMIType,
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp, Vector<AppHMIType> appHMIType,
 			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
 			String appID, String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
 			BaseTransportConfig transportConfig, TestConfig testConfig) throws SyncException {
@@ -532,7 +532,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     public SyncProxyALM(IProxyListenerALM listener,
                         SyncProxyConfigurationResources syncProxyConfigurationResources,
                         String appName, String ngnMediaScreenAppName,
-                        Vector<String> vrSynonyms, Boolean isMediaApp,
+                        Vector<Object> vrSynonyms, Boolean isMediaApp,
                         Vector<AppHMIType> appHMIType,
                         SyncMsgVersion syncMsgVersion, Language languageDesired,
                         Language hmiDisplayLanguageDesired, String appID,

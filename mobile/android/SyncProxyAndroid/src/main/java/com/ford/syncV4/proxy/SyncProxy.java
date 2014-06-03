@@ -263,7 +263,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	 */
 	public void registerAppInterface(
 			SyncMsgVersion syncMsgVersion, String appName, String ngnMediaScreenAppName,
-			Vector<String> vrSynonyms, Boolean isMediaApp, Language languageDesired,
+			Vector<Object> vrSynonyms, Boolean isMediaApp, Language languageDesired,
             Integer correlationID) throws SyncException {
 		
 		// Test if proxy has been disposed

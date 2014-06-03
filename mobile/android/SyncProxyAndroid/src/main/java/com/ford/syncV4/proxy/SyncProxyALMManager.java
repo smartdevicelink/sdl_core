@@ -403,7 +403,7 @@ public class SyncProxyALMManager {
 	 * @throws SyncException
 	 */
 	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
 			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
 			String autoActivateID) throws SyncException{
 		
@@ -430,7 +430,7 @@ public class SyncProxyALMManager {
 	 * @throws SyncException
 	 */
 	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, 
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms,
 			Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, 
 			Language hmiDisplayLanguageDesired, String appID, String autoActivateID) throws SyncException {
 		
@@ -459,7 +459,7 @@ public class SyncProxyALMManager {
 	 * @throws SyncException
 	 */
 	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
 			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
 			String autoActivateID, boolean callbackToUIThread) throws SyncException {
 		
@@ -489,7 +489,7 @@ public class SyncProxyALMManager {
 	 * @throws SyncException
 	 */
 	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp,
 			SyncMsgVersion syncMsgVersion, Language languageDesired, 
 			Language hmiDisplayLanguageDesired, String appID, String autoActivateID, 
 			boolean callbackToUIThread) throws SyncException {

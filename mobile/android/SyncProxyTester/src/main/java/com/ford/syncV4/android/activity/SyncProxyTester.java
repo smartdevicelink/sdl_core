@@ -110,7 +110,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * Autoincrementing id for new softbuttons.
      */
     private static int autoIncSoftButtonId = 5500;
-    private ModuleTest mTesterMain;
     /**
      * The output stream to write audioPassThru data.
      */
@@ -774,13 +773,14 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     public void xmlTestContinue(String appId, String filePath) {
-        if (mTesterMain != null) {
-            SafeToast.showToastAnyThread("start your engines");
+        ModuleTest moduleTest = mBoundProxyService.getModuleTest();
+        if (moduleTest != null) {
+            SafeToast.showToastAnyThread("Start Test Module");
+            mBoundProxyService.restartModuleTest(appId, filePath);
         } else {
             mBoundProxyService.startModuleTest(appId);
-            SafeToast.showToastAnyThread("Start the app on SYNC first");
+            SafeToast.showToastAnyThread("Start the App on SYNC first");
         }
-        mTesterMain.restart(appId, filePath);
     }
 
     public int getFragmentsCount() {
@@ -1060,7 +1060,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         if (mBoundProxyService == null) {
             return;
         }
-        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(appId, performAudioPassThru);
+        mBoundProxyService.sendRPCRequestWithPreprocess(appId, performAudioPassThru);
     }
 
     /**
@@ -1093,7 +1093,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             return;
         }
         if (createNewSession) {
-            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(appId, registerAppInterface);
+            mBoundProxyService.sendRPCRequestWithPreprocess(appId, registerAppInterface);
         } else {
             mBoundProxyService.syncProxySendRPCRequest(appId, registerAppInterface);
         }
@@ -1121,7 +1121,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         if (getCurrentActiveFragment() == null) {
             return;
         }
-        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(
+        mBoundProxyService.sendRPCRequestWithPreprocess(
                 getCurrentActiveFragment().getAppId(), rpcRequest);
     }
 
@@ -1143,10 +1143,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             }
         }
     }*/
-
-    public void setTesterMain(ModuleTest _instance) {
-        this.mTesterMain = _instance;
-    }
 
     /**
      * Return a clone of the {@code isVehicleDataSubscribed}
@@ -1350,7 +1346,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             if (getCurrentActiveFragment() == null) {
                 return;
             }
-            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(
+            mBoundProxyService.sendRPCRequestWithPreprocess(
                     getCurrentActiveFragment().getAppId(), latestPerformAudioPassThruMsg);
         }
     }
@@ -1779,6 +1775,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         if (mBoundProxyService == null) {
             return;
         }
-        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(appId, systemRequest);
+        mBoundProxyService.sendRPCRequestWithPreprocess(appId, systemRequest);
     }
 }

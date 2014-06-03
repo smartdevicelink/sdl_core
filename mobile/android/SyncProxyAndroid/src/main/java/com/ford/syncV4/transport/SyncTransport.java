@@ -92,8 +92,8 @@ public abstract class SyncTransport {
 			_transportListener.onTransportDisconnected(info);
 		} catch (Exception excp) {
 			Logger.e(FailurePropagating_Msg + "onTransportDisconnected: " + excp.toString(), excp);
-		} // end-catch
-	} // end-method
+		}
+	}
 	
 	// This method is called by the subclass to indicate a transport error has occurred.
 	protected void handleTransportError(final String message, final Exception ex) {

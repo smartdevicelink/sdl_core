@@ -234,7 +234,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         waitForRpcEndServiceACK();
     }
 
-    private void stopHeartbeatMonitor(byte sessionId) {
+    public void stopHeartbeatMonitor(byte sessionId) {
         IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
         Logger.d(CLASS_NAME + " Stop HeartBeat, sesId:" + sessionId + " " + heartbeatMonitor);
         if (heartbeatMonitor != null) {
@@ -447,10 +447,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         if (heartbeatMonitor != null) {
             heartbeatMonitor.start();
         }
-
-        /*if (mHeartbeatMonitor != null) {
-            mHeartbeatMonitor.start();
-        }*/
     }
 
     private void startProtocolSession(byte sessionId) {
@@ -468,6 +464,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 try {
                     START_PROTOCOL_SESSION_LOCK.wait(1000);
                 } catch (InterruptedException e) {
+
                 }
             }
         }
@@ -589,10 +586,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         if (heartbeatMonitor != null) {
             heartbeatMonitor.heartbeatACKReceived();
         }
-
-        /*if (mHeartbeatMonitor != null) {
-            mHeartbeatMonitor.heartbeatACKReceived();
-        }*/
     }
 
     @Override
@@ -601,10 +594,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         if (heartbeatMonitor != null) {
             heartbeatMonitor.heartbeatReceived();
         }
-
-        /*if (mHeartbeatMonitor != null) {
-            mHeartbeatMonitor.heartbeatReceived();
-        }*/
     }
 
     @Override
@@ -677,8 +666,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void heartbeatTimedOut(IHeartbeatMonitor monitor) {
         Logger.d(CLASS_NAME + " Heartbeat timeout, sesId:" + monitor.getSessionId());
-        //FIXME
-        //closeConnection(monitor.getSessionId(), false);
         mConnectionListener.onHeartbeatTimedOut(monitor.getSessionId());
     }
 

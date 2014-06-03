@@ -2743,7 +2743,7 @@ public class PlaceholderFragment extends Fragment {
                     }
                     if (((SyncProxyTester) getActivity()).mBoundProxyService != null) {
                         ((SyncProxyTester) getActivity()).mBoundProxyService
-                                .syncProxySendRPCRequestWithPreprocess(getAppId(), msg);
+                                .sendRPCRequestWithPreprocess(getAppId(), msg);
                     }
                 } catch (NumberFormatException e) {
                     SafeToast.showToastAnyThread("Couldn't parse number");
@@ -2833,6 +2833,6 @@ public class PlaceholderFragment extends Fragment {
         if (boundProxyService == null) {
             return;
         }
-        boundProxyService.syncProxySendRPCRequestWithPreprocess(getAppId(), rpcRequest);
+        boundProxyService.sendRPCRequestWithPreprocess(getAppId(), rpcRequest);
     }
 }

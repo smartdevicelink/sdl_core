@@ -144,7 +144,7 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
                             registerAppInterface.setNgnMediaScreenAppName(ngnAppName.getText().toString());
                         }
                         if (useVRSynonyms.isChecked()) {
-                            registerAppInterface.setVrSynonyms(new Vector<String>(Arrays.asList(
+                            registerAppInterface.setVrSynonyms(new Vector<Object>(Arrays.asList(
                                     vrSynonyms.getText().toString().split(SyncProxyTester.JOIN_STRING))));
                         }
                         registerAppInterface.setIsMediaApplication(isMediaApp.isChecked());
