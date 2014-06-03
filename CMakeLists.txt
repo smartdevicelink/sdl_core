@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Ford Motor Company
+# Copyright (c) 2014, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -127,7 +127,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Please do not change compiler/linker flags if You do not know how particular
 # flag is handled by CMake
-set(CMAKE_INSTALL_PREFIX .)
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 set(CMAKE_CXX_FLAGS "-fPIC -g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized")
 if (ENABLE_GCOV)
@@ -319,11 +319,22 @@ if (HMIADAPTER STREQUAL "mqueue")
     add_definitions(-DHMI_JSON_API)
 endif()
 
+# --- 3rd party libs
+set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party)
+set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/3rd_party)
+add_subdirectory(${3RD_PARTY_SOURCE_DIRECTORY} ${3RD_PARTY_BINARY_DIRECTORY} EXCLUDE_FROM_ALL)
+add_custom_target(3rd_party
+  make
+  WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+)
+add_custom_target(install-3rd_party
+  make install
+  DEPENDS 3rd_party
+  WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+)
+
 # --- 3rd party libs (static)
 add_subdirectory(./src/3rd_party-static)
-
-# --- 3rd party libs
-add_subdirectory(./src/3rd_party)
 
 # --- Tools
 add_subdirectory(./tools)

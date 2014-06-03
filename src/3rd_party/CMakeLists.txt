@@ -28,35 +28,34 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-set(3RD_PARTY_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/3rd_party")
-
-if(ENABLE_LOG OR HMI_DBUS_API)
+if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  set(3RD_PARTY_INSTALL_PREFIX "$ENV{QNX_TARGET}/usr")
+  if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7")
+    set(QNX_ARCH "armle-v7")
+  else()
+    set(QNX_ARCH ${CMAKE_SYSTEM_PROCESSOR})
+  endif()
+  set(3RD_PARTY_INSTALL_PREFIX_ARCH "$ENV{QNX_TARGET}/${QNX_ARCH}/usr")
+else()
+  set(3RD_PARTY_INSTALL_PREFIX "/usr/local")
+  set(3RD_PARTY_INSTALL_PREFIX_ARCH ${3RD_PARTY_INSTALL_PREFIX})
+endif()
 
 # --- libexpat
-  add_subdirectory(expat-2.1.0)
-
-endif()
-
-if(ENABLE_LOG)
+add_subdirectory(expat-2.1.0)
 
 # --- libapr-1
-  add_subdirectory(apr-cmake)
-  set(APR_LIBS_DIRECTORY ${APR_LIBS_DIRECTORY} PARENT_SCOPE)
+add_subdirectory(apr-cmake)
+set(APR_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
 
 # --- apr-util
-  add_subdirectory(apr-util-cmake)
-  set(APR_UTIL_LIBS_DIRECTORY ${APR_UTIL_LIBS_DIRECTORY} PARENT_SCOPE)
+add_subdirectory(apr-util-cmake)
+set(APR_UTIL_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
 
 # --- log4cxx
-  add_subdirectory(apache-log4cxx-cmake)
-  set(LOG4CXX_INCLUDE_DIRECTORY ${LOG4CXX_INCLUDE_DIRECTORY} PARENT_SCOPE)
-  set(LOG4CXX_LIBS_DIRECTORY ${LOG4CXX_LIBS_DIRECTORY} PARENT_SCOPE)
+add_subdirectory(apache-log4cxx-cmake)
+set(LOG4CXX_INCLUDE_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX}/include PARENT_SCOPE)
+set(LOG4CXX_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
 
-endif()
-
-if(HMI_DBUS_API)
-
-# D-Bus
-  add_subdirectory(dbus-cmake)
-
-endif()
+# --- D-Bus
+add_subdirectory(dbus-cmake)
