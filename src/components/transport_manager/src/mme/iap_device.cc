@@ -151,7 +151,9 @@ void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
   for (AppContainer::iterator prv = apps_.begin(), i = prv; i != apps_.end();) {
     if (i->second == app_id) {
       uint32_t protocol_id = i->first;
-      LOG4CXX_DEBUG(logger_, "iAP: dropping protocol " << protocol_id << " for application " << app_id);
+      char protocol_name[kProtocolNameSize];
+      ipod_eaf_getprotocol(ipod_hdl_, protocol_id, protocol_name, kProtocolNameSize);
+      LOG4CXX_DEBUG(logger_, "iAP: dropping protocol " << protocol_name << " for application " << app_id);
 // The next lines
 // are just a substitution for
 // i = erase(i);
@@ -182,6 +184,12 @@ void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
 }
 
 void IAPDevice::OnSessionOpened(uint32_t protocol_id, int session_id) {
+  char protocol_name[kProtocolNameSize];
+  ipod_eaf_getprotocol(ipod_hdl_, protocol_id, protocol_name, kProtocolNameSize);
+  OnSessionOpened(protocol_id, protocol_name, session_id);
+}
+
+void IAPDevice::OnSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id) {
   bool inserted = false;
   ApplicationHandle app_id;
   apps_lock_.Acquire();
@@ -191,7 +199,7 @@ void IAPDevice::OnSessionOpened(uint32_t protocol_id, int session_id) {
   }
   else {
     app_id = ++last_app_id_;
-    LOG4CXX_DEBUG(logger_, "iAP: adding new application " << app_id << " on protocol " << protocol_id);
+    LOG4CXX_DEBUG(logger_, "iAP: adding new application " << app_id << " on protocol " << protocol_name);
     apps_.insert(std::make_pair(protocol_id, app_id));
     inserted = true;
   }
@@ -353,7 +361,7 @@ void IAPDevice::IAPEventThreadDelegate::OpenSession(uint32_t protocol_id, const 
   int session_id = ipod_eaf_session_open(ipod_hdl_, protocol_id);
   if (session_id != -1) {
     LOG4CXX_DEBUG(logger_, "iAP: opened session " << session_id << " on protocol " << protocol_name);
-    parent_->OnSessionOpened(protocol_id, session_id);
+    parent_->OnSessionOpened(protocol_id, protocol_name, session_id);
   }
   else {
     LOG4CXX_ERROR(logger_, "iAP: failed to open session on protocol " << protocol_name);
