@@ -831,7 +831,7 @@ void PolicyHandler::PTExchangeAtUserRequest(uint32_t correlation_id) {
     return;
   }
   policy::PolicyTableStatus status = policy_manager_->GetPolicyTableStatus();
-  if (status == policy::StatusUpdateRequired) {
+  if (status != policy::StatusUpdatePending) {
     OnPTExchangeNeeded();
     status = policy::StatusUpdatePending;
   }
