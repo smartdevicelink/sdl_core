@@ -566,6 +566,8 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     ApplicationSharedPtr application_by_hmi_app(int32_t hmi_app_id) const;
 
+    // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
+    connection_handler::ConnectionHandler* connection_handler();
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
