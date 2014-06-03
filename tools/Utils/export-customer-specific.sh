@@ -3,7 +3,8 @@
 shopt -s extglob
 
 srcdir=$1
-customer=$2
+bdldir=$2
+customer=$3
 
 function is_excluded() {
   for entry in $exclude; do
@@ -32,7 +33,7 @@ testme="*.sh \
         PrepareCodeForCustomer"
 
 if [ -z $srcdir ] ||  [ -z $customer ]; then
-  echo "Usage: $0 <source dir> <customer name>" >&2
+  echo "Usage: $0 <source dir> <build dir> <customer name>" >&2
   exit 1
 fi
 
@@ -55,7 +56,7 @@ fi
 mkdir $export_dir
 
 function integrate() {
-  relfn=${1##$srcdir/}
+  relfn=${1##$2/}
   if is_excluded $relfn; then 
     return
   fi
@@ -63,11 +64,11 @@ function integrate() {
   if [ -d $1 ]; then
     mkdir -p $export_dir/$relfn
     for l in $1/*; do
-      integrate $l;
+      integrate $l $2;
     done
   elif [ -f $1 ]; then
     if is_to_filter $relfn; then
-      $srcdir/$filter_command $1  > $export_dir/$relfn
+      $2/$filter_command $1  > $export_dir/$relfn
     else
       cp $1 $export_dir/$relfn
     fi
@@ -75,10 +76,19 @@ function integrate() {
 }
 
 set -f
-for entry in $include; do
+for entry in $include_src; do
   set +f
   for p in $srcdir/$entry; do
-    integrate $p
+    integrate $p $srcdir
+  done
+done
+
+
+set -f
+for entry in $include_bld; do
+  set +f
+  for p in $bdldir/$entry; do
+    integrate $p $bdldir
   done
 done
 

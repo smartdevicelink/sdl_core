@@ -662,9 +662,10 @@ public class ModuleTest {
                                         }
                                     }
                                 } else if (name.equalsIgnoreCase(TEST_TAG_NAME_ACTION)) {
-                                    if (testActionItem != null) {
+                                    // Deprecated
+                                    /*if (testActionItem != null) {
                                         testAction(testActionItem);
-                                    }
+                                    }*/
                                 }
                                 break;
                             case XmlPullParser.TEXT:

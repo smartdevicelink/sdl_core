@@ -2090,7 +2090,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     profile::Profile::instance()->app_storage_folder() + "/";
 
   if (file_name.size() > 0 && file_name[0] == '/') {
-    full_file_path += file_name;
+    full_file_path = file_name;
   } else {
 
     full_file_path += app->folder_name();
