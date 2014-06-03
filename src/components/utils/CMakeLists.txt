@@ -35,7 +35,6 @@ endif()
 add_library("Utils" ${SOURCES})
 
 if(ENABLE_LOG)
-  add_dependencies("Utils" liblog4cxx)
   target_link_libraries("Utils" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 

@@ -26,7 +26,6 @@ create_test("test_mobile_message_handler"
 	"${LIBRARIES}")
 
 if(ENABLE_LOG)
-  add_dependencies("test_mobile_message_handler" liblog4cxx)
   target_link_libraries("test_mobile_message_handler" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 

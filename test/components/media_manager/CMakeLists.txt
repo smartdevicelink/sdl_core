@@ -46,7 +46,6 @@ endif()
 create_test("test_MediaManager" "${SOURCES}" "${LIBRARIES}")
 
 if(ENABLE_LOG)
-  add_dependencies("test_MediaManager" liblog4cxx)
   target_link_libraries("test_MediaManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 # vim: set ts=2 sw=2 et:
