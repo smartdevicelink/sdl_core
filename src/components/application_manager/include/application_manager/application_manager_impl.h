@@ -375,7 +375,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     void set_hmi_message_handler(hmi_message_handler::HMIMessageHandler* handler);
     void set_connection_handler(connection_handler::ConnectionHandler* handler);
-    connection_handler::ConnectionHandler* connection_handler();
     void set_protocol_handler(protocol_handler::ProtocolHandler* handler);
 
     ///////////////////////////////////////////////////////

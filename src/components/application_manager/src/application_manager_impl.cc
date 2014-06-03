@@ -1027,11 +1027,6 @@ void ApplicationManagerImpl::set_connection_handler(
   connection_handler_ = handler;
 }
 
-connection_handler::ConnectionHandler*
-ApplicationManagerImpl::connection_handler() {
-  return connection_handler_;
-}
-
 void ApplicationManagerImpl::set_protocol_handler(
   protocol_handler::ProtocolHandler* handler) {
   protocol_handler_ = handler;
@@ -1858,9 +1853,22 @@ void ApplicationManagerImpl::Handle(const impl::MessageToMobile& message) {
     return;
   }
 
-  protocol_handler_->SendMessageToMobileApp(rawMessage, message.is_final);
 
+  bool is_final = message.is_final;
+  bool close_session = false;
+  if (is_final) {
+    if (1 < connection_handler_->GetConnectionSessionsCount(message->connection_key())) {
+      is_final = false;
+      close_session = true;
+    }
+  }
+
+  protocol_handler_->SendMessageToMobileApp(rawMessage, is_final);
   LOG4CXX_INFO(logger_, "Message for mobile given away.");
+
+  if (close_session) {
+    connection_handler_->CloseSession(message->connection_key());
+  }
 }
 
 void ApplicationManagerImpl::Handle(const impl::MessageFromHmi& message) {
