@@ -135,6 +135,19 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   virtual uint32_t nextHash();
   virtual uint32_t curHash() const;
+  /**
+      * @brief returns attribute alert_in_background_
+      * @return TRUE if application runs alert request from background level
+      * otherwise returns FALSE
+      */
+     virtual bool alert_in_background()const;
+     /**
+      * @brief if application activates alert in background level method sets
+      * TRUE
+      * @param state_of_alert contains TRUE if alert is activated otherwise
+      * contains FALSE
+      */
+     virtual void set_alert_in_background(const bool& state_of_alert);
 
   /**
    * @brief Change Hash for current application
@@ -180,6 +193,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   std::set<uint32_t>                       subscribed_vehicle_info_;
   UsageStatistics                          usage_report_;
+  bool                                     alert_in_background_;
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };

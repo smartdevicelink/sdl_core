@@ -53,7 +53,7 @@ void OnSystemContextNotification::Run() {
   ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
   const std::set<ApplicationSharedPtr>& app_list = app_mgr->applications();
   std::set<ApplicationSharedPtr>::const_iterator it = app_list.begin();
-
+  bool flag_alert_in_background = false;
   mobile_api::SystemContext::eType system_context =
     static_cast<mobile_api::SystemContext::eType>(
     (*message_)[strings::msg_params][hmi_notification::system_context].asInt());
@@ -69,12 +69,21 @@ void OnSystemContextNotification::Run() {
       if ((mobile_api::SystemContext::SYSCTXT_ALERT == system_context) &&
           (mobile_api::HMILevel::HMI_BACKGROUND == (*it)->hmi_level())) {
           if (system_context != (*it)->system_context()) {
+            flag_alert_in_background = true;
             (*it)->set_system_context(system_context);
+            (*it)->set_alert_in_background(true);
             MessageHelper::SendHMIStatusNotification((*(*it)));
           }
           // change system context for full app
           system_context = mobile_api::SystemContext::SYSCTXT_HMI_OBSCURED;
       }
+    }
+
+    if ((mobile_api::HMILevel::HMI_BACKGROUND == (*it)->hmi_level()) &&
+        (true == (*it)->alert_in_background()) && !flag_alert_in_background) {
+      (*it)->set_alert_in_background(false);
+      (*it)->set_system_context(system_context);
+      MessageHelper::SendHMIStatusNotification((*(*it)));
     }
 
     if (mobile_api::HMILevel::HMI_FULL == (*it)->hmi_level() ||
