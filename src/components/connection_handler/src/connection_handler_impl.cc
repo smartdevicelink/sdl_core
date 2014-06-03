@@ -611,10 +611,8 @@ void ConnectionHandlerImpl::SendHeartBeat(ConnectionHandle connection_handle,
 //TODO(VSemenyuk): connection_key -> connection_id
 void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key,
                                                 uint8_t session_id) {
-  LOG4CXX_INFO(logger_, "Keep alive for session: " <<
-               static_cast<int32_t>(session_id));
-
   sync_primitives::AutoLock lock(connection_list_lock_);
+
   ConnectionListIterator it = connection_list_.find(connection_key);
   if (connection_list_.end() != it) {
     it->second->KeepAlive(session_id);
