@@ -166,11 +166,6 @@ ApplicationSharedPtr ApplicationManagerImpl::application_by_hmi_app(
   return ApplicationSharedPtr();
 }
 
-connection_handler::ConnectionHandler*
-   ApplicationManagerImpl::connection_handler() {
-  return connection_handler_;
-}
-
 ApplicationSharedPtr ApplicationManagerImpl::application_by_policy_id(
   const std::string& policy_app_id) const {
   sync_primitives::AutoLock lock(applications_list_lock_);

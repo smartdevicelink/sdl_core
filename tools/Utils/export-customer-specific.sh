@@ -94,7 +94,7 @@ function integrate() {
     done
   elif [ -f $1 ]; then
     if is_to_filter $relfn; then
-      $2/$filter_command $1  > $export_dir/$relfn
+      $srcdir/$filter_command $1  > $export_dir/$relfn
     else
       cp $1 $export_dir/$relfn
     fi
