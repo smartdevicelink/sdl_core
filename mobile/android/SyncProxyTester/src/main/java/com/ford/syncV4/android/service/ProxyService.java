@@ -547,7 +547,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         msg.setCorrelationID(getNextCorrelationID());
         msg.setMainField1(mainField1);
         msg.setMainField2(mainField2);
-        createMessageForAdapter(msg, Log.DEBUG);
         mSyncProxy.sendRPCRequest(appId, msg);
     }
 
@@ -2094,7 +2093,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     public void syncProxyCloseSession(String appId) throws SyncException {
         if (mSyncProxy != null) {
-            mSyncProxy.closeSession(appId);
+            mSyncProxy.doUnregisterAppInterface(appId);
         }
     }
 

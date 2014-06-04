@@ -8,4 +8,13 @@ package com.ford.syncV4.session;
  */
 public enum EndServiceInitiator {
 
+    /**
+     * Mobile SDK is the one who instantiate End Service
+     */
+    SDK,
+
+    /**
+     * SDL is the one who instantiate End Service
+     */
+    SDL
 }

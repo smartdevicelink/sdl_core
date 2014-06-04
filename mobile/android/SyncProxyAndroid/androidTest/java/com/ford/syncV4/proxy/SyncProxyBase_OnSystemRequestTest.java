@@ -81,7 +81,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         when(connectionMock.getProtocolVersion()).thenReturn(ProtocolConstants.PROTOCOL_VERSION_MAX);
 
         proxy = new SyncProxyALM(proxyListenerMock, null, "a", null, null,
-                false, null, null, null, null, null, null, false, false,
+                false, null, null, null, null, SessionTest.APP_ID, null, false, false,
                 ProtocolConstants.PROTOCOL_VERSION_TWO, null, connectionMock, new TestConfig());
         marshaller = proxy.getJsonRPCMarshaller();
 

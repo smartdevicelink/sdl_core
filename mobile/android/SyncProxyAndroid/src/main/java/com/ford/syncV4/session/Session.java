@@ -273,7 +273,7 @@ public class Session {
             }
         }
         for (Service service: tobeRemoved) {
-            boolean result =  servicesList.remove(service);
+            boolean result = removeService(service);
             Logger.i(CLASS_NAME + " Stop session remove:" + service + " result:" + result);
         }
         tobeRemoved.clear();

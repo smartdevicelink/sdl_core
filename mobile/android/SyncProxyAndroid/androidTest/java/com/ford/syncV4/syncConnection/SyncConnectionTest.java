@@ -11,14 +11,20 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatBuilder;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
+import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
+import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
+import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.session.SessionTest;
 import com.ford.syncV4.streaming.H264Packetizer;
+import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.transport.usb.USBTransportConfig;
 import com.ford.syncV4.util.BitConverter;
+import com.ford.syncV4.util.logger.Logger;
 
 import org.mockito.ArgumentCaptor;
 
@@ -326,7 +332,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         connection._transport = mock(SyncTransport.class);
         connection.mAudioPacketizer = mock(H264Packetizer.class);
         when(connection._transport.getIsConnected()).thenReturn(true);
-        connection.closeConnection(SessionTest.SESSION_ID, false);
+        connection.closeConnection(false);
         verify(connection.mAudioPacketizer, times(1)).stop();
     }
 
@@ -336,15 +342,23 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                 SessionTest.SESSION_ID, 5000, true);
         IHeartbeatMonitor heartbeatMonitorSpy = spy(heartbeatMonitor);
         Session session = SessionTest.getInitializedSession();
-        SyncConnection connection = new SyncConnection(session,
-                mock(ISyncConnectionListener.class));
-        connection._protocol = mock(AbstractProtocol.class);
-        connection._transport = mock(SyncTransport.class);
-        when(connection._transport.getIsConnected()).thenReturn(true);
-        when(connection.getIsConnected()).thenReturn(true);
+        ISyncConnectionListener listener = mock(ISyncConnectionListener.class);
+        SyncConnection connection = new SyncConnection(session, listener);
+        connection.init(new USBTransportConfig(getInstrumentation().getTargetContext()));
+
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        SyncProxyALM syncProxyALM = new SyncProxyALM(proxyListenerMock, null, "!", null, null, true,
+                null, null, null, null, SessionTest.APP_ID, null, false, false,
+                ProtocolConstants.PROTOCOL_VERSION_TWO, null, connection, new TestConfig());
+
+        syncProxyALM.initializeSession(SessionTest.APP_ID);
+        syncProxyALM.getInterfaceBroker().onProtocolSessionStarted(SessionTest.SESSION_ID,
+                ProtocolConstants.PROTOCOL_VERSION_TWO);
+
         connection.setHeartbeatMonitor(heartbeatMonitorSpy);
         assertNotNull(connection.getHeartbeatMonitor(heartbeatMonitor.getSessionId()));
-        connection.closeConnection(SessionTest.SESSION_ID, false, true);
+
+        syncProxyALM.getInterfaceBroker().onTransportDisconnected("");
         verify(heartbeatMonitorSpy, times(1)).stop();
     }
 
@@ -354,7 +368,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         IHeartbeatMonitor heartbeatMonitor = mock(HeartbeatMonitor.class);
         connection.setHeartbeatMonitor(heartbeatMonitor);
         assertNotNull(connection.getHeartbeatMonitor(heartbeatMonitor.getSessionId()));
-        connection.closeConnection((byte) 0, true, true);
+        connection.closeConnection(true);
         verify(connection.getHeartbeatMonitor(heartbeatMonitor.getSessionId()), never()).stop();
         assertNotNull("HB monitor should not be null",connection.getHeartbeatMonitor(heartbeatMonitor.getSessionId()));
     }

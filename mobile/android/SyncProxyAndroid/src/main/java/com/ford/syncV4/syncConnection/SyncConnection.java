@@ -221,7 +221,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             return;
         }
         synchronized (PROTOCOL_REFERENCE_LOCK) {
-            stopHeartbeatMonitor(sessionId);
             if (_protocol == null) {
                 return;
             }

@@ -87,6 +87,7 @@ import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.service.Service;
+import com.ford.syncV4.session.EndServiceInitiator;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
@@ -1096,7 +1097,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 int counter = appIdToBeRemoved.size();
                 Logger.d("Keys to remove number:" + counter);
                 for (String appId: appIdToBeRemoved) {
-                    closeSession(appId);
+                    doUnregisterAppInterface(appId);
                 }
                 closeSyncConnection(keepConnection);
             }
@@ -1175,8 +1176,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
-    public void closeSession(String appId) throws SyncException {
-        Logger.d("Close appId:" + appId);
+    public void doUnregisterAppInterface(String appId) throws SyncException {
+        Logger.d("UnregisterAppInterface appId:" + appId);
 
         final byte sessionId = syncSession.getSessionIdByAppId(appId);
 
@@ -1680,7 +1681,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void onUnregisterAppInterfaceResponse(final byte sessionId, Hashtable hash) {
         final String appId = syncSession.getAppIdBySessionId(sessionId);
 
-        endSession(sessionId);
+        endSession(sessionId, EndServiceInitiator.SDK);
 
         // UnregisterAppInterface
         mAppInterfaceRegistered.put(syncSession.getAppIdBySessionId(sessionId), false);
@@ -1836,7 +1837,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private void startProtocolSession(final byte sessionId) {
         final String associatedAppId = syncSession.updateSessionId(sessionId);
         Logger.d("Start Protocol session appId:" + associatedAppId + " sesId:" + sessionId +
-                " exists:" + syncSession.hasService(associatedAppId, ServiceType.RPC));
+                " exists:" + syncSession.hasService(associatedAppId, ServiceType.RPC) + " " + syncSession.hashCode());
         if (!syncSession.hasService(associatedAppId, ServiceType.RPC)) {
             Service service = new Service();
             service.setServiceType(ServiceType.RPC);
@@ -1919,7 +1920,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void handleEndService(final ServiceType serviceType, final byte sessionId) {
         final String appId = syncSession.getAppIdBySessionId(sessionId);
 
-        endSession(sessionId);
+        endSession(sessionId, EndServiceInitiator.SDL);
 
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -2977,22 +2978,27 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         this.rpcMessageHandler = RPCMessageHandler;
     }
 
-    private void endSession(byte sessionId) {
+    protected void endSession(byte sessionId, EndServiceInitiator initiator) {
         String appId = syncSession.getAppIdBySessionId(sessionId);
 
         // In case End Service message received from SDL without UnregisterAppInterface response
         appIds.remove(appId);
         raiTable.remove(appId);
 
-        stopAllServicesByAppId(appId);
+        if (initiator == EndServiceInitiator.SDK) {
+            stopAllServicesByAppId(appId);
+        }
         if (mSyncConnection != null) {
-            mSyncConnection.closeSession(sessionId);
+            mSyncConnection.stopHeartbeatMonitor(sessionId);
+            if (initiator == EndServiceInitiator.SDK) {
+                mSyncConnection.closeSession(sessionId);
+            }
         }
         stopSession(appId);
 
         Logger.d(LOG_TAG + " End Session, sesId'sN:" + syncSession.getSessionIdsNumber());
         if (syncSession.getSessionIdsNumber() == 0) {
-            closeSyncConnection(false);
+            //closeSyncConnection(false);
         }
     }
 
@@ -3100,11 +3106,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onHeartbeatTimedOut(byte sessionId) {
             String appId = syncSession.getAppIdBySessionId(sessionId);
-            try {
-                closeSession(appId);
-            } catch (SyncException e) {
-                Logger.e(LOG_TAG + " On HB Timeout:" + e.getMessage());
-            }
+            stopSession(appId);
 
             final String msg = "Heartbeat timeout";
             notifyProxyClosed(msg, new SyncException(msg, SyncExceptionCause.HEARTBEAT_PAST_DUE));
