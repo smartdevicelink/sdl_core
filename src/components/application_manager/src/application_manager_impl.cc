@@ -1091,12 +1091,12 @@ void ApplicationManagerImpl::SendMessageToMobile(
   }
 
   smart_objects::SmartObject& msg_to_mobile = *message;
+  // If correlation_id is not present, it is from-HMI message which should be
+  // checked against policy permissions
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
     request_ctrl_.terminateRequest(
       msg_to_mobile[strings::params][strings::correlation_id].asUInt());
-  }
-
-  if (app) {
+  } else if (app) {
     mobile_apis::FunctionID::eType function_id =
         static_cast<mobile_apis::FunctionID::eType>(
         (*message)[strings::params][strings::function_id].asUInt());
