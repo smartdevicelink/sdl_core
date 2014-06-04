@@ -994,7 +994,7 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
       UnregisterApplication(session_key, mobile_apis::Result::INVALID_ENUM,
-                            false);
+                            true);
       break;
     }
     case protocol_handler::kMobileNav: {
