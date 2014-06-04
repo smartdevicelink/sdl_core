@@ -41,7 +41,11 @@ file(MAKE_DIRECTORY
   ${LOG4CXX_BUILD_DIRECTORY}
 )
 
-set(COMMON_CONFIGURE_FLAGS "--with-apr=../apr-build" "--with-apr-util=../apr-util-build")
+set(COMMON_CONFIGURE_FLAGS
+  "--with-apr=../apr-build"
+  "--with-apr-util=../apr-util-build"
+  "LDFLAGS=-L${EXPAT_LIBS_DIRECTORY}"
+)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   if (CMAKE_SYSTEM_PROCESSOR MATCHES arm*)
