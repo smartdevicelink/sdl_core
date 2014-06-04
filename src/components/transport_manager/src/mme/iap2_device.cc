@@ -255,12 +255,12 @@ void IAP2Device::OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handl
 
   controller_->ApplicationListUpdated(unique_device_id());
 
-  pool_connection_threads_lock_.Acquire();
-  ThreadContainer::iterator i = pool_connection_threads_.find(protocol_name);
-  if (i != pool_connection_threads_.end()) {
-    pool_connection_threads_.erase(i);
-  }
-  pool_connection_threads_lock_.Release();
+  RemoveConnectionThread(protocol_name);
+}
+
+void IAP2Device::OnConnectFailed(const std::string& protocol_name) {
+  RemoveConnectionThread(protocol_name);
+  ReturnToPool(protocol_name);
 }
 
 void IAP2Device::OnDisconnect(ApplicationHandle app_id) {
@@ -280,19 +280,7 @@ void IAP2Device::OnDisconnect(ApplicationHandle app_id) {
       thread->start();
     }
     else {
-      bool returned = false;
-      protocol_name_pool_lock_.Acquire();
-      for (ProtocolNamePool::iterator k = protocol_in_use_name_pool_.begin(); k != protocol_in_use_name_pool_.end(); ++k) {
-        if (k->second == protocol_name) {
-          LOG4CXX_INFO(logger_, "iAP2: returning protocol " << protocol_name << " back to pool");
-          free_protocol_name_pool_.insert(*k);
-          protocol_in_use_name_pool_.erase(k);
-          returned = true;
-          break;
-        }
-      }
-      protocol_name_pool_lock_.Release();
-      if (!returned) {
+      if (!ReturnToPool(protocol_name)) {
         LOG4CXX_WARN(logger_, "iAP2: protocol " << protocol_name << " is neither legacy protocol nor pool protocol in use");
       }
     }
@@ -305,6 +293,31 @@ void IAP2Device::OnDisconnect(ApplicationHandle app_id) {
   if (removed) {
     controller_->ApplicationListUpdated(unique_device_id());
   }
+}
+
+bool IAP2Device::RemoveConnectionThread(const std::string& protocol_name) {
+  sync_primitives::AutoLock auto_lock(pool_connection_threads_lock_);
+  ThreadContainer::iterator i = pool_connection_threads_.find(protocol_name);
+  if (i != pool_connection_threads_.end()) {
+    pool_connection_threads_.erase(i);
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+bool IAP2Device::ReturnToPool(const std::string& protocol_name) {
+  sync_primitives::AutoLock auto_lock(protocol_name_pool_lock_);
+  for (ProtocolNamePool::iterator i = protocol_in_use_name_pool_.begin(); i != protocol_in_use_name_pool_.end(); ++i) {
+    if (i->second == protocol_name) {
+      LOG4CXX_INFO(logger_, "iAP2: returning protocol " << protocol_name << " back to pool");
+      free_protocol_name_pool_.insert(*i);
+      protocol_in_use_name_pool_.erase(i);
+      return true;
+    }
+  }
+  return false;
 }
 
 IAP2Device::IAP2HubConnectThreadDelegate::IAP2HubConnectThreadDelegate(
@@ -342,6 +355,7 @@ void IAP2Device::IAP2ConnectThreadDelegate::threadMain() {
   }
   else {
     LOG4CXX_WARN(logger_, "iAP2: could not connect to " << mount_point << " on protocol " << protocol_name_);
+    parent_->OnConnectFailed(protocol_name_);
   }
 }
 

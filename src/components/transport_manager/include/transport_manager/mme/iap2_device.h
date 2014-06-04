@@ -86,7 +86,11 @@ class IAP2Device : public MmeDevice {
 
   void OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* handle);
   void OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handle);
+  void OnConnectFailed(const std::string& protocol_name);
   void OnDisconnect(ApplicationHandle app_id);
+
+  bool RemoveConnectionThread(const std::string& protocol_name);
+  bool ReturnToPool(const std::string& protocol_name);
 
   static const char* system_config_file_name;
 
