@@ -1096,7 +1096,9 @@ void ApplicationManagerImpl::SendMessageToMobile(
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
     request_ctrl_.terminateRequest(
       msg_to_mobile[strings::params][strings::correlation_id].asUInt());
-  } else if (app) {
+  } else if (app && !profile::Profile::instance()->policy_turn_off()) {
+    // TODO(AOleynik): Remove check of policy_turn_off, when this flag will be
+    // unused in config file
     mobile_apis::FunctionID::eType function_id =
         static_cast<mobile_apis::FunctionID::eType>(
         (*message)[strings::params][strings::function_id].asUInt());
