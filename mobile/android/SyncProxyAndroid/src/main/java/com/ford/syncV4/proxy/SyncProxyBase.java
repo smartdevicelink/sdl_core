@@ -165,7 +165,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     //protected SyncInterfaceAvailability _syncIntefaceAvailablity = null;
     //Boolean _haveReceivedFirstNonNoneHMILevel = false;
 
-    protected Boolean _proxyDisposed = false;
+    protected Boolean mIsProxyDisposed = false;
 
     public SyncConnectionState getSyncConnectionState() {
         return _syncConnectionState;
@@ -1116,12 +1116,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * protocol syncSession, and frees any resources used by the proxy.
      */
     public void dispose() throws SyncException {
-        if (_proxyDisposed) {
+        if (mIsProxyDisposed) {
             throw new SyncException("This object has been disposed, it is no long capable of " +
                     "executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
         }
 
-        _proxyDisposed = true;
+        mIsProxyDisposed = true;
 
         Logger.i("SyncProxy start Dispose");
 
@@ -1743,7 +1743,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     public void sendRPCRequest(String appId, RPCRequest request,
                                IJsonRPCMarshaller jsonRPCMarshaller) throws SyncException {
-        if (_proxyDisposed) {
+        if (mIsProxyDisposed) {
             throw new SyncException("This object has been disposed, it is no long capable of " +
                     "executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
         }
@@ -2997,8 +2997,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         stopSession(appId);
 
         Logger.d(LOG_TAG + " End Session, sesId'sN:" + syncSession.getSessionIdsNumber());
-        if (syncSession.getSessionIdsNumber() == 0) {
-            //closeSyncConnection(false);
+        if (mIsProxyDisposed && syncSession.getSessionIdsNumber() == 0) {
+            closeSyncConnection(false);
         }
     }
 

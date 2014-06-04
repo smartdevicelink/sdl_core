@@ -588,7 +588,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Vector<ButtonCapabilities> getButtonCapabilities() throws SyncException{
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -608,7 +608,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Vector<SoftButtonCapabilities> getSoftButtonCapabilities() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -628,7 +628,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public PresetBankCapabilities getPresetBankCapabilities() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -648,7 +648,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public DisplayCapabilities getDisplayCapabilities() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -668,7 +668,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Vector<HmiZoneCapabilities> getHmiZoneCapabilities() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -688,7 +688,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Vector<SpeechCapabilities> getSpeechCapabilities() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -708,7 +708,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Language getSyncLanguage() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -728,7 +728,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Language getHmiDisplayLanguage() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -748,7 +748,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public SyncMsgVersion getSyncMsgVersion() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -768,7 +768,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Vector<VrCapabilities> getVrCapabilities() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -788,7 +788,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public VehicleType getVehicleType() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		

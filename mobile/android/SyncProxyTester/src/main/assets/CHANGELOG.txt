@@ -1,4 +1,5 @@
 [CW23]
+* SyncProxyAndroid SDK: Heartbeat timeout after EndService
 * SyncProxyTester: Data in RegisterAppInterface request, which SPT sends, do not match to data in autotest
 
 [CW21]

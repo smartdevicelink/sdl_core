@@ -545,7 +545,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     @Override
     public void onProtocolServiceEnded(ServiceType serviceType, byte sessionId) {
         mConnectionListener.onProtocolServiceEnded(serviceType, sessionId);
-        processEndService(serviceType);
     }
 
     @Override
