@@ -203,7 +203,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         };
         connection.init(mTransportConfig);
         connection.getIsConnected();
-        connection.onProtocolServiceEnded(ServiceType.RPC, SessionTest.SESSION_ID);
+        connection.onProtocolServiceEndedAck(ServiceType.RPC, SessionTest.SESSION_ID);
         verify(connection._transport, times(1)).stopReading();
     }
 
