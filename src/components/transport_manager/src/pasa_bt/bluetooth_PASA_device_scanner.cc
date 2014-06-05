@@ -152,6 +152,7 @@ void BluetoothPASADeviceScanner::UpdateTotalApplicationList() {
   sync_primitives::AutoLock lock(devices_lock_);
   for (DeviceVector::iterator it = found_devices_with_sdl_.begin();
       it != found_devices_with_sdl_.end(); ++it) {
+    controller_->AddDevice(*it);
     controller_->SearchApplicationsDone(*it);
   }
   LOG4CXX_TRACE_EXIT(logger_);
@@ -166,7 +167,7 @@ void BluetoothPASADeviceScanner::connectBTDevice(void *data) {
        i != found_devices_with_sdl_.end(); ++i) {
     BluetoothPASADevice* existing_device = static_cast<BluetoothPASADevice*>(i->get());
     if (0 == memcmp(existing_device->mac(), pDeviceInfo->mac, sizeof(pDeviceInfo->mac))) {
-      LOG4CXX_INFO(logger_, "Bluetooth device exists: " << pDeviceInfo->cDeviceName);
+      LOG4CXX_DEBUG(logger_, "Bluetooth device exists: " << pDeviceInfo->cDeviceName);
       BluetoothPASADevice::SCOMMChannel tChannel(pDeviceInfo->cSppQueName);
       existing_device->AddChannel(tChannel);
       LOG4CXX_INFO(logger_, "Bluetooth channel " << pDeviceInfo->cSppQueName

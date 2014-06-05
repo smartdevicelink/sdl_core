@@ -53,7 +53,6 @@ BluetoothPASADevice::SCOMMChannel::SCOMMChannel(const char *sppQue):
 
 BluetoothPASADevice::BluetoothPASADevice(const char* name, const UI_8 (&mac)[6])
   : Device(name, MacToString(mac)),
-    applications_(),
     last_app_handle_(0) {
   memcpy(mac_, mac, sizeof(mac));
 }
@@ -81,12 +80,16 @@ std::string BluetoothPASADevice::GetSppQName(ApplicationHandle app_handle) const
 }
 
 void BluetoothPASADevice::AddChannel(const SCOMMChannel& channel) {
+  bool channel_exists = false;
   sync_primitives::AutoLock lock(applications_lock_);
   for (Applications::const_iterator i = applications_.begin(); i != applications_.end(); ++i) {
     if (i->second == channel) {
-      applications_.push_back(std::make_pair(++last_app_handle_, channel));
+      channel_exists = true;
       break;
     }
+  }
+  if(!channel_exists) {
+    applications_.push_back(std::make_pair(++last_app_handle_, channel));
   }
 }
 

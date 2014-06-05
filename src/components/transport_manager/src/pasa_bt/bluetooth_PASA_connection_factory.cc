@@ -57,7 +57,7 @@ TransportAdapter::Error BluetoothPASAConnectionFactory::CreateConnection(
       new BluetoothPASAConnection(device_uid, app_handle, controller_));
   const TransportAdapter::Error error = connection->Start();
   if (error != TransportAdapter::OK) {
-    LOG4CXX_INFO(logger_, "connection::Start() failed");
+    LOG4CXX_ERROR(logger_, "connection::Start() failed");
     delete connection;
   }
   LOG4CXX_TRACE_EXIT(logger_);

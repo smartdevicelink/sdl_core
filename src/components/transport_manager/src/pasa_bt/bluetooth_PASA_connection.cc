@@ -380,21 +380,22 @@ bool BluetoothPASAConnection::Establish(ConnectError** error) {
   LOG4CXX_INFO(logger_, "enter (#" << pthread_self() << ")");
   DeviceSptr device = controller()->FindDevice(device_handle());
 
-  unsigned char retry_count = 3;
+  unsigned char retry_count = 10;
 
   BluetoothPASADevice* bluetooth_device =
       static_cast<BluetoothPASADevice*>(device.get());
 
-  if (bluetooth_device != 0) {
+  if (bluetooth_device) {
     sPPQ = bluetooth_device->GetSppQName(application_handle());
 
     //Open SPP device
     while (retry_count > 0) {
       sppDeviceFd = open(sPPQ.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
       //on error open
-      if (-1 == sppDeviceFd){
+      if (-1 == sppDeviceFd) {
         LOG4CXX_ERROR_WITH_ERRNO( logger_,
-                                  "Failed to open message queue " << device_handle());
+                                  "Failed to open message queue " << sPPQ <<
+                                  " for device " << device_handle());
         if(retry_count-- == 0) {
           if(error) {
             *error = new ConnectError();

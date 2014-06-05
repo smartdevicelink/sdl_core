@@ -118,6 +118,7 @@ class BluetoothPASADevice : public Device {
    */
   virtual ApplicationList GetApplicationList() const;
  private:
+  //TODO (EZamakhov): change to map
   typedef std::vector<std::pair<ApplicationHandle, SCOMMChannel> > Applications;
   Applications applications_;
   mutable sync_primitives::Lock applications_lock_;

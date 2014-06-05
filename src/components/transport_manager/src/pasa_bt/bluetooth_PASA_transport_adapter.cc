@@ -61,8 +61,8 @@ DeviceType BluetoothPASATransportAdapter::GetDeviceType() const {
 
 bool BluetoothPASATransportAdapter::ToBeAutoConnected(DeviceSptr device) const {
   return true;
-
 }
+
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
