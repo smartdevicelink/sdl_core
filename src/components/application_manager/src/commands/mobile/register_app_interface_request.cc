@@ -168,6 +168,13 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
+  mobile_apis::Result::eType policy_result = CheckWithPolicyData();
+  if (mobile_apis::Result::SUCCESS != policy_result
+      && mobile_apis::Result::WARNINGS != policy_result) {
+    SendResponse(false, policy_result);
+    return;
+  }
+
   if (IsApplicationWithSameAppIdRegistered()) {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
@@ -186,13 +193,6 @@ void RegisterAppInterfaceRequest::Run() {
   if (mobile_apis::Result::SUCCESS != coincidence_result) {
     LOG4CXX_ERROR_EXT(logger_, "Coincidence check failed.");
     SendResponse(false, coincidence_result);
-    return;
-  }
-
-  mobile_apis::Result::eType policy_result = CheckWithPolicyData();
-  if (mobile_apis::Result::SUCCESS != policy_result
-      && mobile_apis::Result::WARNINGS != policy_result) {
-    SendResponse(false, policy_result);
     return;
   }
 
@@ -654,7 +654,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
       LOG4CXX_WARN(logger_,
                    "Application name was not found in nicknames list.");
       //App should be unregistered, if its name is not present in nicknames list
-      return mobile_apis::Result::INVALID_DATA;
+      return mobile_apis::Result::DISALLOWED;
     }
   }
 
