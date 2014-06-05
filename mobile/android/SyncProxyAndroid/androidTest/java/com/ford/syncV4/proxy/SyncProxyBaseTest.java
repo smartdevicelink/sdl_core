@@ -28,7 +28,6 @@ import java.io.OutputStream;
 import java.io.PipedOutputStream;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.TimerTask;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyByte;
@@ -357,14 +356,6 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         TimerTask timerTask = proxy.getCurrentReconnectTimerTask();
         assertNull("timerTask should be null", timerTask);
     }*/
-
-    public void testScheduleInitializeProxyCalledIfServiceListIsNotEmpty() throws Exception {
-        assertNotNull(proxy);
-        addSessionToServicesList();
-        proxy.scheduleInitializeProxy();
-        TimerTask timerTask = proxy.getCurrentReconnectTimerTask();
-        assertNotNull("timerTask should not be null", timerTask);
-    }
 
     public void testInCaseSessionRestartedRpcServiceShouldBeRecreated() throws Exception {
         assertNotNull(proxy);

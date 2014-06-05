@@ -233,6 +233,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         waitForRpcEndServiceACK();
     }
 
+    public void stopAllHeartbeatMonitors() {
+        for (Byte sessionId: heartbeatMonitors.keySet()) {
+            if (sessionId == null) {
+                continue;
+            }
+            stopHeartbeatMonitor(sessionId);
+        }
+    }
+
     public void stopHeartbeatMonitor(byte sessionId) {
         IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
         Logger.d(CLASS_NAME + " Stop HeartBeat, sesId:" + sessionId + " " + heartbeatMonitor);

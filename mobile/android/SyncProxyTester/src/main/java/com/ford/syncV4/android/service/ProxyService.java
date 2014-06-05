@@ -132,7 +132,9 @@ import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
+import com.ford.syncV4.util.BTHelper;
 import com.ford.syncV4.util.Base64;
+import com.ford.syncV4.util.StringUtils;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
@@ -289,11 +291,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         boolean doStartProxy = false;
         if (transportType == Const.Transport.KEY_BLUETOOTH) {
             Logger.i(TAG, " Transport = Bluetooth.");
-            BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (mBtAdapter != null) {
-                if (mBtAdapter.isEnabled()) {
-                    doStartProxy = true;
-                }
+            if (BTHelper.isBTAdapterAvailable()) {
+                doStartProxy = true;
             }
         } else {
             Logger.i(TAG, " Transport = Default.");
@@ -420,6 +419,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 Logger.e("SYNC Proxy start error:" + e.toString());
                 //error creating proxy, returned proxy = null
                 if (mSyncProxy == null) {
+
+                    if (mProxyServiceEvent != null) {
+                        mProxyServiceEvent.onProxyInitError(e.getMessage());
+                    }
+
                     stopServiceBySelf();
                     return false;
                 }
@@ -485,7 +489,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     private void disposeSyncProxy() {
-        createInfoMessageForAdapter("Dispose SyncProxy");
+        createInfoMessageForAdapter(" Dispose SYNC Proxy");
 
         MainApp.getInstance().getLastUsedHashIdsManager().save();
 
@@ -805,11 +809,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     @Override
     public void onProxyClosed(final String info, Exception e) {
-        if (e != null) {
-            createErrorMessageForAdapter("SYNC proxy cosed:'" + info + "', msg:" + e.getMessage());
-        } else {
-            createErrorMessageForAdapter("SYNC proxy cosed:'" + info + "'");
+        String message = info;
+        if (StringUtils.isEmpty(message)) {
+            if (e != null) {
+                message = e.getMessage();
+            } else {
+                message = "<no message>";
+            }
         }
+        createErrorMessageForAdapter("SYNC Proxy closed:" + message);
         boolean wasConnected = !firstHMIStatusChange;
         firstHMIStatusChange = true;
         prevHMILevel = HMILevel.HMI_NONE;
