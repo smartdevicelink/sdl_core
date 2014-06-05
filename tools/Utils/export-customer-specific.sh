@@ -1,7 +1,8 @@
 #! /usr/bin/env bash
 
 shopt -s extglob
-
+shopt -s dotglob
+ 
 srcdir=$1
 bindir=$2
 customer=$3
