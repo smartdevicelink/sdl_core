@@ -754,8 +754,13 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   ManageHMICommand(update_list);
 }
 
-void ApplicationManagerImpl::OnApplicationListUpdated(
-    const connection_handler::DeviceHandle& device_handle) {
+void ApplicationManagerImpl::OnApplicationListUpdated(const connection_handler::DeviceHandle& device_handle) {
+  connection_handler::DeviceHandle* closure = new connection_handler::DeviceHandle(device_handle);
+  ApplicationListUpdateTimer* timer = new ApplicationListUpdateTimer(this, closure);
+  timer->start(1);
+}
+
+void ApplicationManagerImpl::SendApplicationListUpdated(const connection_handler::DeviceHandle& device_handle) {
   LOG4CXX_TRACE(logger_, "OnApplicationListUpdated device_handle " << device_handle);
 
   std::list<uint32_t> applications_ids;
@@ -2068,6 +2073,12 @@ uint32_t ApplicationManagerImpl::GetAvailableSpaceForApp(
 
 bool ApplicationManagerImpl::IsHMICooperating() const {
   return hmi_cooperating_;
+}
+
+void ApplicationManagerImpl::OnApplicationListUpdateTimer(void* closure) {
+  connection_handler::DeviceHandle* closure_casted = static_cast<connection_handler::DeviceHandle*>(closure);
+  SendApplicationListUpdated(*closure_casted);
+  delete closure_casted;
 }
 
 }  // namespace application_manager

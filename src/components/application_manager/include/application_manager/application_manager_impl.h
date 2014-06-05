@@ -177,9 +177,11 @@ class ApplicationManagerImpl : public ApplicationManager,
     public impl::FromMobileQueue::Handler, public impl::ToMobileQueue::Handler,
     public impl::FromHmiQueue::Handler, public impl::ToHmiQueue::Handler,
   public utils::Singleton<ApplicationManagerImpl> {
+
     friend class ResumeCtrl;
     friend class CommandImpl;
-  public:
+
+ public:
     ~ApplicationManagerImpl();
 
     /**
@@ -623,7 +625,10 @@ class ApplicationManagerImpl : public ApplicationManager,
     virtual void Handle(const impl::MessageFromHmi& message) OVERRIDE;
 
     // CALLED ON messages_to_hmi_ thread!
-    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;    
+    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
+
+    void SendApplicationListUpdated(const connection_handler::DeviceHandle& device_handle);
+    void OnApplicationListUpdateTimer(void* closure);
 
     /**
      * @brief Checks, if given RPC is allowed at current HMI level for specific
@@ -705,6 +710,12 @@ class ApplicationManagerImpl : public ApplicationManager,
     impl::FromHmiQueue messages_from_hmi_;
     // Thread that pumps messages being passed to HMI.
     impl::ToHmiQueue messages_to_hmi_;
+
+    class ApplicationListUpdateTimer : public timer::TimerThread<ApplicationManagerImpl> {
+     public:
+      ApplicationListUpdateTimer(ApplicationManagerImpl* callee, void* closure) : timer::TimerThread<ApplicationManagerImpl>(callee, &ApplicationManagerImpl::OnApplicationListUpdateTimer, closure) {
+      }
+    };
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 
