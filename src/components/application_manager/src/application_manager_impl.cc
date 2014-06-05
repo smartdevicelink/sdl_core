@@ -1175,18 +1175,21 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     // Message for "CheckPermission" must be with attached schema
     mobile_so_factory().attachSchema(*message);
 
-    // Check RPC permissions
-    mobile_apis::Result::eType check_result = CheckPolicyPermissions(
-                                               app->mobile_app_id()->asString(),
-                                               app->hmi_level(),
-                                               function_id);
-    if (mobile_apis::Result::SUCCESS != check_result) {
-      smart_objects::SmartObject* response =
-        MessageHelper::CreateBlockedByPoliciesResponse(function_id,
-            check_result, correlation_id, connection_key);
+    // TODO(AOleynik): Remove check of policy_turn_off, when it will be unused
+    if (!profile::Profile::instance()->policy_turn_off()) {
+      // Check RPC permissions
+      mobile_apis::Result::eType check_result = CheckPolicyPermissions(
+                                                 app->mobile_app_id()->asString(),
+                                                 app->hmi_level(),
+                                                 function_id);
+      if (mobile_apis::Result::SUCCESS != check_result) {
+        smart_objects::SmartObject* response =
+          MessageHelper::CreateBlockedByPoliciesResponse(function_id,
+              check_result, correlation_id, connection_key);
 
-      ApplicationManagerImpl::instance()->SendMessageToMobile(response);
-      return true;
+        ApplicationManagerImpl::instance()->SendMessageToMobile(response);
+        return true;
+      }
     }
   }
 
