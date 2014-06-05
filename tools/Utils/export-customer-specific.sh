@@ -7,12 +7,12 @@ bindir=$2
 customer=$3
 
 function find_in_excludes_src() {
-	upper=$(echo ${#excludes_src[@]})
+	upper=${#excludes_src[@]}
 	lower=0
 	text=$1
 	while [ $lower -le $upper ]
 	do
-		pivot=$(($lower+($upper-$lower)/2))
+		pivot=$((($upper+$lower)/2))
 		cur=${excludes_src[$pivot]}
 		if [[ $text < $cur ]]
 		then
@@ -31,12 +31,12 @@ function find_in_excludes_src() {
 
 
 function find_in_excludes_bin() {
-	upper=$(echo ${#excludes_bin[@]})
+	upper=${#excludes_bin[@]}
 	lower=0
 	text=$1
 	while [ $lower -le $upper ]
 	do
-		pivot=$(($lower+($upper-$lower)/2))
+		pivot=$((($upper+$lower)/2))
 		cur=${excludes_bin[$pivot]}
 		if [[ $text < $cur ]]
 		then
