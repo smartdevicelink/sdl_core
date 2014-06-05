@@ -85,6 +85,11 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
             'naviChoises'
         ],
 
+        click: function() {
+            SDL.InteractionChoicesView.timerUpdate();
+            SDL.SDLController.onResetTimeout(SDL.SDLAppController.model.appID, "UI.PerformInteraction");
+        },
+
         naviChoises: Em.ContainerView.extend({
             classNames: 'naviChoises',
             childViews: [
@@ -112,7 +117,11 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
         classNameBindings: ['this.parentView.list::hide'],
         elementId: 'perform_interaction_view_list',
         itemsOnPage: 5,
-        items: []
+        items: [],
+        click: function() {
+            SDL.InteractionChoicesView.timerUpdate();
+            SDL.SDLController.onResetTimeout(SDL.SDLAppController.model.appID, "UI.PerformInteraction");
+        }
     }),
 
     timer: null,
