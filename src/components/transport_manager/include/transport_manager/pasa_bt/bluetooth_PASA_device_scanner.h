@@ -33,25 +33,13 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
 
-//#include <bluetooth/bluetooth.h>
-//#include <bluetooth/hci.h>
-//#include <bluetooth/hci_lib.h>
-//#include <bluetooth/sdp.h>
-//#include <bluetooth/sdp_lib.h>
-//#include <bluetooth/rfcomm.h>
-
-#include <mqueue.h>
 #include <applink_types.h>
 
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
 
-#include "transport_manager/pasa_bt/bluetooth_device.h"
-#define MAX_QUEUE_NAME_SIZE     24
-#define MAX_QUEUE_MSG_SIZE 		4095
-#define MSGQ_MAX_MESSAGES		128
-#define MSGQ_MESSAGE_SIZE 		MAX_QUEUE_MSG_SIZE
+#include "transport_manager/pasa_bt/bluetooth_PASA_device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -61,8 +49,8 @@ class TransportAdapterController;
 /**
  * @brief Scan for devices using bluetooth.
  */
-class BluetoothDeviceScanner : public DeviceScanner {
-  public:
+class BluetoothPASADeviceScanner : public DeviceScanner {
+ public:
 
   /**
    * @brief Constructor.
@@ -70,30 +58,19 @@ class BluetoothDeviceScanner : public DeviceScanner {
    * @param auto_repeat_search true - autorepeated or continous device search, false - search on demand
    * @param repeat_search_pause_sec - pause between device searches, 0 means continous search
    */
-  BluetoothDeviceScanner(TransportAdapterController* controller,
+  BluetoothPASADeviceScanner(TransportAdapterController* controller,
                          bool auto_repeat_search, int repeat_search_pause_sec);
-
-    /**
-     * @brief Destructor.
-     */
-    ~BluetoothDeviceScanner();
-
   /**
-   * @brief Main thread initialization.
+   * @brief Main thread
    */
   void Thread();
-
-// Todd: BT Support
-  mqd_t openMsgQ(const char *queue_name, bool sender, bool block);
-
- protected:
-
-    /**
-     * @brief Start device scanner.
-     *
-     * @return Error information about reason of initialization failure.
-     */
-    virtual TransportAdapter::Error Init();
+protected:
+  /**
+    * @brief Start device scanner.
+    *
+    * @return Error information about reason of initialization failure.
+    */
+  virtual TransportAdapter::Error Init();
 
   /**
    * @brief Terminates device scanner thread
@@ -115,103 +92,63 @@ class BluetoothDeviceScanner : public DeviceScanner {
      */
     virtual bool IsInitialised() const;
   private:
-
-    typedef std::vector<uint8_t> RfcommChannelVector;
-
   /**
    * @brief Waits for external scan request or time out for repeated search or terminate request
    */
   void TimedWaitForDeviceScanRequest();
 
-
-// Todd: BT Support
-#if 0
   /**
-   * @brief Finds RFCOMM-channels of SDL enabled applications for set of devices
-   * @param device_addresses Bluetooth addresses to search on
-   * @return List of RFCOMM-channels lists
+   * @brief Recieve PASA framework mq messages and convert it to SDL BT messages
    */
-  std::vector<RfcommChannelVector> DiscoverSmartDeviceLinkRFCOMMChannels(
-      const std::vector<bdaddr_t>& device_addresses);
-#endif
+  static void* handlePASAFrameworkIncomingMessages(void *data);
 
-   static void* handlePASAFrameworkIncomingMessages(void *data);
-   void connectBTDevice(void *data);
-   void disconnectBTDevice(void *data);
-   void disconnectBTDeviceSPP(void *data);
-   int sendMsg(mqd_t q_fd, uint8_t msgType, uint32_t length, const void *data);
-
-// Todd: BT Support
-#if 0
   /**
-   * @brief Finds RFCOMM-channels of SDL enabled applications for given device
-   * @param[out] discovered List of RFCOMM-channels to fill
-   * @return true - if search was OK, false if it failed
+   * @brief Connect BT device
+   * Called on PASA FW BT SPP Connect Message
    */
-  bool DiscoverSmartDeviceLinkRFCOMMChannels(const bdaddr_t& device_address,
-                                             RfcommChannelVector* discovered);
-#endif
+  void connectBTDevice(void *data);
+
+  /**
+   * @brief Disconnect BT device
+   * Called on PASA FW BT Disconnect Message
+   */
+  void disconnectBTDevice(void *data);
+  /**
+   * @brief Disconnect SPP (close connection)
+   * Called on PPASA FW BT SPP Disconnect Message
+   */
+  void disconnectBTDeviceSPP(void *data);
 
   /**
    * @brief Summarizes the total list of devices (paired and scanned) and notifies controller
+   * Called on PASA FW BT SPP END Message
    */
   void UpdateTotalDeviceList();
 
   /**
    * @brief Summarizes the total list of applications and notifies controller
+   * Called on PASA FW BT SPP END Message
    */
   void UpdateTotalApplicationList();
-
-  /**
-   * @brief Performs search of SDL-enabled devices
-   */
-  void DoInquiry();
-
-  /**
-   * @brief Checks if given devices have SDL service and creates appropriate BluetoothDevice objects
-   * @param bd_address List of bluetooth addresses to check
-   * @param device_handle HCI handle
-   * @param[out] discovered_devices List of created BluetoothDevice objects to fill
-   */
-// Todd: BT Support
-#if 0
-  void CheckSDLServiceOnDevices(const std::vector<bdaddr_t>& bd_address,
-                                int device_handle,
-                                DeviceVector* discovered_devices);
-#endif
 
   TransportAdapterController* controller_;
   pthread_t thread_;
 
-// Todd: BT support
   pthread_t mPASAFWMsgHandlerThread;
   bool thread_started_;
   bool shutdown_requested_;
   bool device_scan_requested_;
-  bool ready_;
-  sync_primitives::Lock device_scan_requested_lock_;
+  mutable sync_primitives::Lock device_scan_requested_lock_;
   sync_primitives::ConditionalVariable device_scan_requested_cv_;
 
-//  std::vector<bdaddr_t> paired_devices_;
-
-  DeviceVector paired_devices_with_sdl_;
   DeviceVector found_devices_with_sdl_;
-  pthread_mutex_t devices_mutex_;
-
-  /**
-   * @brief UUID of SmartDeviceLink service.
-   **/
-//  uuid_t smart_device_link_service_uuid_;
+  mutable sync_primitives::Lock devices_lock_;
 
   const bool auto_repeat_search_;
   const int auto_repeat_pause_sec_;
 
-// Todd: BT Support
-  BluetoothDevice* mIncomingDevice;
   mqd_t mPASAFWSendHandle;
   mqd_t mq_ToSDL;
-
-
 };
 
 }  // namespace transport_adapter

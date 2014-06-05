@@ -1,8 +1,5 @@
-/**
- * \file bluetooth_connection_factory.cc
- * \brief BluetoothConnectionFactory class source file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/pasa_bt/bluetooth_connection_factory.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "transport_manager/pasa_bt/bluetooth_PASA_connection.h"
+#include <errno.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
+#include <iomanip>
+#include <set>
+
+#include "transport_manager/pasa_bt/bluetooth_PASA_transport_adapter.h"
+#include "transport_manager/pasa_bt/bluetooth_PASA_device_scanner.h"
+#include "transport_manager/pasa_bt/bluetooth_PASA_connection_factory.h"
+#include "transport_manager/pasa_bt/bluetooth_PASA_device.h"
+#include "resumption/last_state.h"
 #include "utils/logger.h"
 
 namespace transport_manager {
@@ -44,38 +50,19 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-BluetoothConnectionFactory::BluetoothConnectionFactory(
-    TransportAdapterController* controller)
-    : controller_(controller) {
+BluetoothPASATransportAdapter::BluetoothPASATransportAdapter()
+    : TransportAdapterImpl(new BluetoothPASADeviceScanner(this, false, 0),
+                           new BluetoothPASAConnectionFactory(this), 0) {
 }
 
-TransportAdapter::Error BluetoothConnectionFactory::Init() {
-  return TransportAdapter::OK;
+DeviceType BluetoothPASATransportAdapter::GetDeviceType() const {
+  return "sdl-bluetooth";
 }
 
-TransportAdapter::Error BluetoothConnectionFactory::CreateConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  LOG4CXX_INFO(logger_, "enter");
-  BluetoothPASAConnection* connection(
-      new BluetoothPASAConnection(device_uid, app_handle, controller_));
-  TransportAdapter::Error error = connection->Start();
-  if (error != TransportAdapter::OK) {
-    LOG4CXX_INFO(logger_, "connection::Start() failed");
-    delete connection;
-  }
-  LOG4CXX_INFO(logger_, "exit");
-  return error;
-}
-
-void BluetoothConnectionFactory::Terminate() {
-}
-
-bool BluetoothConnectionFactory::IsInitialised() const {
+bool BluetoothPASATransportAdapter::ToBeAutoConnected(DeviceSptr device) const {
   return true;
-}
 
-BluetoothConnectionFactory::~BluetoothConnectionFactory() {
 }
-
 }  // namespace transport_adapter
 }  // namespace transport_manager
+

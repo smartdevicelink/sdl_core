@@ -1,8 +1,5 @@
-/**
- * \file bluetooth_device.h
- * \brief BluetoothDevice class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,18 +33,12 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_H_
 
-// Todd: BT Support
-//#include <bluetooth/bluetooth.h>
-//#include <bluetooth/hci.h>
-//#include <bluetooth/hci_lib.h>
-//#include <bluetooth/sdp.h>
-//#include <bluetooth/sdp_lib.h>
-//#include <bluetooth/rfcomm.h>
-
 #include <vector>
 #include <applink_types.h>
 #include <mqueue.h>
 #include <pthread.h>
+
+#include "utils/lock.h"
 
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/device.h"
@@ -63,55 +54,29 @@ typedef std::vector<uint8_t> RfcommChannelVector;
 /**
  * @brief Information about device that use bluetooth transport.
  */
-class BluetoothDevice : public Device {
+class BluetoothPASADevice : public Device {
  public:
-
-  /**
-   * @brief Return device unique identifier.
-   *
-   * @return string with device unique identifier.
-   */
-
-// Todd: BT Support
-//  static std::string GetUniqueDeviceId(const bdaddr_t& device_address);
-
   /**
    * @brief Constructor.
    *
-   * @param address Bluetooth address.
    * @param name Human-readable device name.
-   * @param rfcomm_channels List of RFCOMM channels where SmartDeviceLink service has been discovered.
+   * @param mac Bluetooth mac address.
    **/
+  BluetoothPASADevice(const char* Name, const UI_8 (&mac)[6]);
 
-// Todd: BT Support
-//  BluetoothDevice(const bdaddr_t& address, const char* name,
-//                  const RfcommChannelVector& rfcomm_channels);
-
-
-// Todd: BT support
-
-  struct SCOMMChannel
-  {
-      SCOMMChannel();
-      SCOMMChannel(const char *sppQue);
-
-//      bool empty() {return (mSendQueueName.empty() && mRcvQueueName.empty());}
-
-      bool operator==(const SCOMMChannel& other) const {
-    	  return mSppQueueName == other.mSppQueueName;
-      }
-
-      std::string mSppQueueName;
-
+  struct SCOMMChannel {
+    SCOMMChannel();
+    explicit SCOMMChannel(const char *sppQue);
+    bool operator==(const SCOMMChannel& other) const {
+      return mSppQueueName == other.mSppQueueName;
+    }
+    std::string mSppQueueName;
   };
-
-  BluetoothDevice(const char* Name, const UI_8 (&mac)[6]);
-  virtual ~BluetoothDevice();
 
   /**
    * @brief Compare devices.
    *
-   * This method checks whether two SBluetoothDevice structures
+   * This method checks whether two BluetoothDevice structures
    * refer to the same device.
    *
    * @param other Device to compare with.
@@ -120,56 +85,48 @@ class BluetoothDevice : public Device {
    **/
   virtual bool IsSameAs(const Device* other) const;
 
-// Todd: BT Support - multiple SPP support will be in the future.
-//  bool GetRfcommChannel(const ApplicationHandle app_handle,
-//                        uint8_t* channel_out);
-   std::string GetSppQName(ApplicationHandle app_handle) const;
-
-   void AddChannel(const SCOMMChannel& channel);
-   bool RemoveChannel(const SCOMMChannel& channel, ApplicationHandle* app_handle);
-   const UI_8* mac() const {return mac_;}
+  /**
+   * @brief Return device unique identifier.
+   *
+   * @return string with device unique identifier.
+   */
+  std::string GetSppQName(ApplicationHandle app_handle) const;
 
   /**
-   * @brief Update list of applications available on device.
+   * @brief Add channel by channel name
+   *
+   * @param channel channel name by SCOMMChannel struct
+   */
+  void AddChannel(const SCOMMChannel& channel);
+
+  /**
+   * @brief Remove channel by channel name
+   *
+   * @param channel channel name by SCOMMChannel struct
+   * @param app_handle application handle of removed channel
+   *
+   * @return true on erase channel, false otherwise.
+   */
+  bool RemoveChannel(const SCOMMChannel& channel, ApplicationHandle* app_handle);
+
+  const UI_8* mac() const {return mac_;}
+
+  /**
+   * @brief Return list of applications available on device.
    *
    * @return Container with list of applications.
    */
   virtual ApplicationList GetApplicationList() const;
-
-  /**
-   * @brief Return device bluetooth address.
-   *
-   * @return Device bluetooth address.
-   */
-
-// Todd: BT Support
-//  const bdaddr_t& address() const {
-//    return address_;
-//  }
-
-  bool GetApplicationHandle(const SCOMMChannel& scomm_channel, ApplicationHandle* app_handle) const;
-
  private:
-  /**
-   * @brief Device bluetooth address.
-   **/
-// Todd: BT Support
-//  bdaddr_t address_;
-
-  /**
-   * @brief List of RFCOMM channels where SmartDeviceLink service has been discovered.
-   **/
-// Todd: BT Support
-//  RfcommChannelVector rfcomm_channels_;
-
-  // Todd: BT Support
   typedef std::vector<std::pair<ApplicationHandle, SCOMMChannel> > Applications;
   Applications applications_;
-  mutable pthread_mutex_t applications_mutex_;
+  mutable sync_primitives::Lock applications_lock_;
   ApplicationHandle last_app_handle_;
   UI_8 mac_[6];
 };
-
+/**
+ * @brief Convert Mac to std::string
+ */
 std::string MacToString(const UI_8 (&mac)[6]);
 
 }  // namespace transport_adapter

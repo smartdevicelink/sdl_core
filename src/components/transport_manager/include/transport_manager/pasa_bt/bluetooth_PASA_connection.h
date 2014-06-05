@@ -1,8 +1,5 @@
-/**
- * \file bluetooth_socket_connection.h
- * \brief BluetoothPASAConnection class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,37 +33,14 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_SOCKET_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_SOCKET_CONNECTION_H_
 
-// Todd: BT Support
-//#include <bluetooth/bluetooth.h>
-//#include <bluetooth/hci.h>
-//#include <bluetooth/hci_lib.h>
-//#include <bluetooth/sdp.h>
-//#include <bluetooth/sdp_lib.h>
-//#include <bluetooth/rfcomm.h>
-
 #include <poll.h>
 
 #include <queue>
 #include <mqueue.h>
 
-#include "utils/logger.h"
 #include "transport_manager/transport_adapter/connection.h"
-
-#define MAX_QUEUE_NAME_SIZE     24
-#define MAX_QUEUE_MSG_SIZE 		4095
-#define MSGQ_MAX_MESSAGES		128
-#define MSGQ_MESSAGE_SIZE 		MAX_QUEUE_MSG_SIZE
-
-#define APPLINK_PACKET_MINSIZE	8
-#define MAX_SPP_PACKET_SIZE		2047
-
-#define GET_DATASIZE(X) ((X[4]<<24) | (X[5]<<16) | (X[6]<<8) | X[7])
-
-typedef struct _SPPframe {
-	uint16_t length;
-	uint8_t  data[MAX_SPP_PACKET_SIZE];
-}SPPframe;
-
+#include "utils/logger.h"
+#include "utils/lock.h"
 
 using ::transport_manager::transport_adapter::Connection;
 
@@ -80,7 +54,6 @@ class TransportAdapterController;
  */
 class BluetoothPASAConnection : public Connection {
  public:
-
   /**
    * @brief Constructor.
    *
@@ -89,10 +62,8 @@ class BluetoothPASAConnection : public Connection {
    * @param controller Pointer to the device adapter controller.
    */
   BluetoothPASAConnection(const DeviceUID& device_uid,
-                            const ApplicationHandle& app_handle,
-                            TransportAdapterController* controller);
-
-
+                          const ApplicationHandle& app_handle,
+                          TransportAdapterController* controller);
   /**
    * @brief Send data frame.
    *
@@ -116,13 +87,11 @@ class BluetoothPASAConnection : public Connection {
    */
   TransportAdapter::Error Start();
 
-
   /**
    * @brief Destructor.
    */
   virtual ~BluetoothPASAConnection();
  protected:
-
   /**
    * @brief Establish connection.
    *
@@ -133,30 +102,22 @@ class BluetoothPASAConnection : public Connection {
    */
   virtual bool Establish(ConnectError** error);
 
-
   /**
    * @brief Return pointer to the device adapter controller.
    */
-  TransportAdapterController* controller() {
-    return controller_;
-  }
+  TransportAdapterController* controller();
 
   /**
    * @brief Return device unique identifier.
    */
-  DeviceUID device_handle() const {
-    return device_uid_;
-  }
+  DeviceUID device_handle() const;
 
   /**
    * @brief Return handle of application.
    */
-  ApplicationHandle application_handle() const {
-    return app_handle_;
-  }
+  ApplicationHandle application_handle() const;
 
  private:
-
   int read_fd_;
   int write_fd_;
   void Thread();
@@ -166,8 +127,6 @@ class BluetoothPASAConnection : public Connection {
   bool Receive();
   bool Send();
   void Abort();
-  void printBufferInHex(uint8_t *buf, int len);
-  mqd_t openMsgQ(const char *queue_name, bool sender, bool block);
 
   friend void* StartBluetoothPASAConnection(void*);
 
@@ -177,7 +136,7 @@ class BluetoothPASAConnection : public Connection {
    **/
   typedef std::queue<RawMessageSptr> FrameQueue;
   FrameQueue frames_to_send_;
-  mutable pthread_mutex_t frames_to_send_mutex_;
+  mutable sync_primitives::Lock frames_to_send_lock_;
 
   pthread_t thread_;
 
@@ -188,9 +147,7 @@ class BluetoothPASAConnection : public Connection {
 
   std::string sPPQ;
   int sppDeviceFd;
-
 };
-
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
