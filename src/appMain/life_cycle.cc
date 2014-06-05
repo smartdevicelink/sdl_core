@@ -141,8 +141,8 @@ bool LifeCycle::StartComponents() {
   return true;
 }
 
-bool LifeCycle::InitMessageSystem() {
 #ifdef MESSAGEBROKER_HMIADAPTER
+bool LifeCycle::InitMessageSystem() {
   message_broker_ =
     NsMessageBroker::CMessageBroker::getInstance();
   if (!message_broker_) {
@@ -191,7 +191,6 @@ bool LifeCycle::InitMessageSystem() {
       LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
       return false;
     }
-#endif  // MESSAGEBROKER_HMIADAPTER
 
 #ifdef CUSTOMER_PASA
 #ifdef PASA_HMI
@@ -209,7 +208,6 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // PASA_HMI
 #endif  // CUSTOMER_PASA
 
-#ifdef MESSAGEBROKER_HMIADAPTER
   LOG4CXX_INFO(logger_, "Start CMessageBroker thread!");
   mb_thread_ = new System::Thread(
     new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(
@@ -236,7 +234,6 @@ bool LifeCycle::InitMessageSystem() {
       NULL));
   mb_adapter_thread_->Start(false);
   NameMessageBrokerThread(*mb_adapter_thread_, "MessageBrokerAdapterThread");
-#endif  // MESSAGEBROKER_HMIADAPTER
 
 #ifdef CUSTOMER_PASA
 #ifdef PASA_HMI
@@ -251,9 +248,9 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // PASA_HMI
 #endif  // CUSTOMER_PASA
 
-
   return true;
 }
+#endif  // MESSAGEBROKER_HMIADAPTER
 
 #ifdef DBUS_HMIADAPTER
 /**
