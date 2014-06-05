@@ -618,23 +618,22 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
 
 mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   LOG4CXX_INFO(logger_, "CheckWithPolicyData");
+  // TODO(AOleynik): Check is necessary to allow register application in case
+  // of disabled policy
+  // Remove this check, when HMI will support policy
+  if (profile::Profile::instance()->policy_turn_off()) {
+    return mobile_apis::Result::WARNINGS;
+  }
+
   smart_objects::SmartObject& message = *message_;
   policy::StringArray app_nicknames;
-  policy::StringArray app_hmi_types;
+  policy::StringArray app_hmi_types; 
 
   // TODO(KKolodiy): need remove method policy_manager
   policy::PolicyManager* policy_manager =
     policy::PolicyHandler::instance()->policy_manager();
   if (!policy_manager) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-#ifdef CUSTOMER_PASA
-    // TODO(AOleynik): Check is necessary to allow register application in case
-    // of disabled policy
-    // Remove this check, when HMI will support policy
-    if (profile::Profile::instance()->policy_turn_off()) {
-    	return mobile_apis::Result::WARNINGS;
-    }
-#endif // CUSTOMER_PASA
     return mobile_apis::Result::DISALLOWED;
   }
   const bool init_result = policy_manager->GetInitialAppData(
