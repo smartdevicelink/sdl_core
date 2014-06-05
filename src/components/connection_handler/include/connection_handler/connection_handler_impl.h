@@ -229,6 +229,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
                                   std::list<uint32_t>* applications_list = NULL,
                                   std::string* mac_address = NULL);
 
+    virtual bool GetDeviceID(const std::string& mac_address,
+                             DeviceHandle* device_handle);
 
     /**
      * \brief Method which should start devices discovering

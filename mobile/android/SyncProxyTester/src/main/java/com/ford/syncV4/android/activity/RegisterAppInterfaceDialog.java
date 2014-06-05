@@ -82,7 +82,7 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
                 .findViewById(R.id.registerappinterface_appHMITypeSpinner);
         final CheckBox useAppID = (CheckBox) layout
                 .findViewById(R.id.registerappinterface_useAppID);
-        final EditText appID =
+        final EditText appIdView =
                 (EditText) layout.findViewById(R.id.registerappinterface_appID);
 
         updateDeviceInfoView(layout);
@@ -144,7 +144,7 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
                             registerAppInterface.setNgnMediaScreenAppName(ngnAppName.getText().toString());
                         }
                         if (useVRSynonyms.isChecked()) {
-                            registerAppInterface.setVrSynonyms(new Vector<String>(Arrays.asList(
+                            registerAppInterface.setVrSynonyms(new Vector<Object>(Arrays.asList(
                                     vrSynonyms.getText().toString().split(SyncProxyTester.JOIN_STRING))));
                         }
                         registerAppInterface.setIsMediaApplication(isMediaApp.isChecked());
@@ -160,7 +160,7 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
                             registerAppInterface.setAppType(new Vector<AppHMIType>(appHMITypeSpinner.getSelectedItems()));
                         }
                         if (useAppID.isChecked()) {
-                            registerAppInterface.setAppID(appID.getText().toString());
+                            registerAppInterface.setAppId(appIdView.getText().toString());
                         }
 
                         registerAppInterface.setDeviceInfo(getDeviceInfoFromView(layout));
@@ -170,7 +170,7 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
 
                         ((SyncProxyTester) getActivity())
                                 .onRegisterAppInterfaceDialogResult(
-                                        getArguments().getString(APP_ID_KEY),
+                                        appIdView.getText().toString().trim(),
                                         registerAppInterface,
                                         createNewSessionView.isChecked());
                     }

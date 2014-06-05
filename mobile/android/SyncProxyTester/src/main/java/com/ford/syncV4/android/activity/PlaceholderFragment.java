@@ -46,6 +46,7 @@ import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
@@ -1562,7 +1563,7 @@ public class PlaceholderFragment extends Fragment {
                      * Sends UnregisterAppInterface message.
                      */
                     private void sendUnregisterAppInterface() {
-                        UnregisterAppInterface unregisterAppInterface = new UnregisterAppInterface();
+                        UnregisterAppInterface unregisterAppInterface = RPCRequestFactory.buildUnregisterAppInterface();
                         unregisterAppInterface.setCorrelationID(getCorrelationId());
 
                         SendSingleRPCRequestDialog sendSingleRPCRequestDialog = SendSingleRPCRequestDialog.newInstance();
@@ -2743,7 +2744,7 @@ public class PlaceholderFragment extends Fragment {
                     }
                     if (((SyncProxyTester) getActivity()).mBoundProxyService != null) {
                         ((SyncProxyTester) getActivity()).mBoundProxyService
-                                .syncProxySendRPCRequestWithPreprocess(getAppId(), msg);
+                                .sendRPCRequestWithPreprocess(getAppId(), msg);
                     }
                 } catch (NumberFormatException e) {
                     SafeToast.showToastAnyThread("Couldn't parse number");
@@ -2833,6 +2834,6 @@ public class PlaceholderFragment extends Fragment {
         if (boundProxyService == null) {
             return;
         }
-        boundProxyService.syncProxySendRPCRequestWithPreprocess(getAppId(), rpcRequest);
+        boundProxyService.sendRPCRequestWithPreprocess(getAppId(), rpcRequest);
     }
 }

@@ -84,6 +84,14 @@ class ConnectionHandler {
    */
   virtual uint32_t GetConnectionSessionsCount(uint32_t connection_key) = 0;
 
+  /**
+   * Gets device id by mac address
+   * @param mac_address
+   * @return true if successfully
+   */
+  virtual bool GetDeviceID(const std::string& mac_address,
+                           DeviceHandle* device_handle) = 0;
+
   /*
    * Close session associated with the key
    */

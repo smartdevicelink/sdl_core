@@ -74,7 +74,6 @@ import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.rpc.enums.SpeechCapabilities;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.logger.Logger;
-import com.lamerman.FileDialog;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -111,7 +110,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * Autoincrementing id for new softbuttons.
      */
     private static int autoIncSoftButtonId = 5500;
-    private ModuleTest mTesterMain;
     /**
      * The output stream to write audioPassThru data.
      */
@@ -217,17 +215,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         // When the given tab is selected, switch to the corresponding page in
         // the ViewPager.
         mViewPager.setCurrentItem(tab.getPosition());
-
-        PlaceholderFragment fragment = getCurrentActiveFragment();
-        if (fragment == null) {
-            Logger.w("Current active fragment is NULL");
-            return;
-        }
-        Logger.d("Current active fragment hash:" + fragment.hashCode());
-        if (mBoundProxyService == null) {
-            return;
-        }
-        mBoundProxyService.setActiveAppId(fragment.getAppId());
     }
 
     @Override
@@ -295,22 +282,14 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     public void onSetUpDialogResult(final String syncAppId) {
 
-        final PlaceholderFragment fragment = getCurrentActiveFragment();
+        final PlaceholderFragment fragment = updateActiveTabView(syncAppId);
         if (fragment == null) {
-            Logger.e("Current active Fragment is NULL");
             return;
         }
-
-        Logger.d("Current active Fragment '" + syncAppId + "'");
-
-        fragment.setAppId(syncAppId);
-
-        mActionBar.getSelectedTab().setText(syncAppId);
 
         setUpReceiver();
         showProtocolPropertiesInTitle();
         if (mBoundProxyService != null) {
-            mBoundProxyService.setActiveAppId(syncAppId);
             initProxyService(fragment.getLogAdapter());
             try {
                 mBoundProxyService.syncProxyOpenSession(syncAppId);
@@ -324,12 +303,22 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     Logger.i("Service Bind Complete");
                     getProxyService();
                     initProxyService(fragment.getLogAdapter());
-
-                    mBoundProxyService.setActiveAppId(syncAppId);
                     mBoundProxyService.startProxyIfNetworkConnected();
                 }
             });
         }
+    }
+
+    private PlaceholderFragment updateActiveTabView(String syncAppId) {
+        final PlaceholderFragment fragment = getCurrentActiveFragment();
+        if (fragment == null) {
+            Logger.e("Current active Fragment is NULL");
+            return fragment;
+        }
+        Logger.d("Current active Fragment '" + syncAppId + "'");
+        fragment.setAppId(syncAppId);
+        mActionBar.getSelectedTab().setText(syncAppId);
+        return fragment;
     }
 
     private void setUpReceiver() {
@@ -506,10 +495,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }
 
         Logger.d(LOG_TAG + " Fragment '" + fragment + "' appId:" + appId);
-
-        if (fragment == getCurrentActiveFragment()) {
-            mBoundProxyService.setActiveAppId(appId);
-        }
 
         fragment.getLogAdapter().logMessage("Service '" + serviceType + "' started, " +
                 "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion(), true);
@@ -788,13 +773,14 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     public void xmlTestContinue(String appId, String filePath) {
-        if (mTesterMain != null) {
-            SafeToast.showToastAnyThread("start your engines");
+        ModuleTest moduleTest = mBoundProxyService.getModuleTest();
+        if (moduleTest != null) {
+            SafeToast.showToastAnyThread("Start Test Module");
+            mBoundProxyService.restartModuleTest(appId, filePath);
         } else {
             mBoundProxyService.startModuleTest(appId);
-            SafeToast.showToastAnyThread("Start the app on SYNC first");
+            SafeToast.showToastAnyThread("Start the App on SYNC first");
         }
-        mTesterMain.restart(appId, filePath);
     }
 
     public int getFragmentsCount() {
@@ -1074,7 +1060,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         if (mBoundProxyService == null) {
             return;
         }
-        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(appId, performAudioPassThru);
+        mBoundProxyService.sendRPCRequestWithPreprocess(appId, performAudioPassThru);
     }
 
     /**
@@ -1088,6 +1074,9 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     public void onRegisterAppInterfaceDialogResult(String appId,
                                                    RegisterAppInterface registerAppInterface,
                                                    boolean createNewSession) {
+
+        updateActiveTabView(appId);
+
         if (mBoundProxyService == null) {
             Logger.w("OnRegisterAppInterfaceDialogResult -> mBoundProxyService is NULL");
             return;
@@ -1104,8 +1093,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             return;
         }
         if (createNewSession) {
-            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(
-                    appId, registerAppInterface);
+            mBoundProxyService.sendRPCRequestWithPreprocess(appId, registerAppInterface);
         } else {
             mBoundProxyService.syncProxySendRPCRequest(appId, registerAppInterface);
         }
@@ -1133,7 +1121,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         if (getCurrentActiveFragment() == null) {
             return;
         }
-        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(
+        mBoundProxyService.sendRPCRequestWithPreprocess(
                 getCurrentActiveFragment().getAppId(), rpcRequest);
     }
 
@@ -1155,10 +1143,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             }
         }
     }*/
-
-    public void setTesterMain(ModuleTest _instance) {
-        this.mTesterMain = _instance;
-    }
 
     /**
      * Return a clone of the {@code isVehicleDataSubscribed}
@@ -1362,7 +1346,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             if (getCurrentActiveFragment() == null) {
                 return;
             }
-            mBoundProxyService.syncProxySendRPCRequestWithPreprocess(
+            mBoundProxyService.sendRPCRequestWithPreprocess(
                     getCurrentActiveFragment().getAppId(), latestPerformAudioPassThruMsg);
         }
     }
@@ -1457,7 +1441,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (!isProxyReadyForWork(appId)) {
                     return;
                 }
-                // TODO : Need to transfer AppId into SDK
                 PlaceholderFragment fragment = getFragmentByAppId(appId);
                 if (fragment == null) {
                     Logger.w("Start Mobile Navi service, Fragment NULL");
@@ -1468,7 +1451,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-                mBoundProxyService.syncProxyStartMobileNavService(fragment.getAppId());
+                mBoundProxyService.syncProxyStartMobileNavService(appId);
             }
         });
     }
@@ -1507,7 +1490,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (!isProxyReadyForWork(appId)) {
                     return;
                 }
-                // TODO : Need to transfer AppId into SDK
                 final PlaceholderFragment fragment = getFragmentByAppId(appId);
                 if (fragment == null) {
                     Logger.w("Stop Audio Service, Fragment NULL");
@@ -1518,7 +1500,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-                mBoundProxyService.syncProxyStopMobileNaviService(fragment.getAppId());
+                mBoundProxyService.syncProxyStopMobileNaviService(appId);
                 closeMobileNaviOutputStream();
             }
         });
@@ -1551,7 +1533,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (!isProxyReadyForWork(appId)) {
                     return;
                 }
-                // TODO : Need to transfer AppId into SDK
                 PlaceholderFragment fragment = getFragmentByAppId(appId);
                 if (fragment == null) {
                     Logger.w("Start Audio Service, Fragment NULL");
@@ -1562,7 +1543,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-                mBoundProxyService.syncProxyStartAudioService(fragment.getAppId());
+                mBoundProxyService.syncProxyStartAudioService(appId);
             }
         });
     }
@@ -1575,7 +1556,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (!isProxyReadyForWork(appId)) {
                     return;
                 }
-                // TODO : Need to transfer AppId into SDK
                 final PlaceholderFragment fragment = getFragmentByAppId(appId);
                 if (fragment == null) {
                     Logger.w("Stop Audio Service, Fragment NULL");
@@ -1586,7 +1566,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-                mBoundProxyService.syncProxyStopAudioService(fragment.getAppId());
+                mBoundProxyService.syncProxyStopAudioService(appId);
                 closeAudioOutputStream();
             }
         });
@@ -1710,14 +1690,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
         mStopServicesTimeOutHandler.postDelayed(mEndServicesPostDelayedCallback, EXIT_TIMEOUT);
 
-        /*for (int i = 0; i < getFragmentsCount(); i++) {
-            PlaceholderFragment fragment = getFragmentAt(i);
-            if (fragment != null) {
-                stopAudioService(fragment.getAppId());
-                stopMobileNavService(fragment.getAppId());
-            }
-        }*/
-
         executeDestroyService();
     }
 
@@ -1732,7 +1704,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             @Override
             public void run() {
 
-                Logger.d("Start Destroy Service");
                 mStopProxyServiceTimeOutHandler.postDelayed(mExitPostDelayedCallback, EXIT_TIMEOUT);
 
                 mBoundProxyService.destroyService();
@@ -1804,6 +1775,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         if (mBoundProxyService == null) {
             return;
         }
-        mBoundProxyService.syncProxySendRPCRequestWithPreprocess(appId, systemRequest);
+        mBoundProxyService.sendRPCRequestWithPreprocess(appId, systemRequest);
     }
 }

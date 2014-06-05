@@ -5,8 +5,6 @@ import android.test.AndroidTestCase;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.service.Service;
 
-import java.util.List;
-
 /**
  * Created by Andrew Batutin on 1/21/14
  */
@@ -41,19 +39,19 @@ public class SessionTest extends AndroidTestCase {
         Session session = SessionTest.getInitializedSession();
         Service service = new Service();
         service.setServiceType(ServiceType.RPC);
-        service.setSessionId(SessionTest.SESSION_ID);
+        service.setAppId(SessionTest.APP_ID);
         session.addService(service);
 
-        Service rpcService = session.getServiceBySessionId(SessionTest.SESSION_ID, ServiceType.RPC);
+        Service rpcService = session.getServiceByAppId(SessionTest.APP_ID, ServiceType.RPC);
         assertNotNull(rpcService);
-        assertEquals(SessionTest.SESSION_ID, rpcService.getSessionId());
+        assertEquals(SessionTest.APP_ID, rpcService.getAppId());
         assertEquals(ServiceType.RPC, rpcService.getServiceType());
     }
 
     public void testRemoveServiceRemovesService() throws Exception {
         Session session = SessionTest.getInitializedSession();
         Service service = new Service();
-        service.setSessionId(SessionTest.SESSION_ID);
+        service.setAppId(SessionTest.APP_ID);
         service.setServiceType(ServiceType.RPC);
         session.addService(service);
         assertTrue("service should be removed", session.removeService(service));
@@ -73,29 +71,29 @@ public class SessionTest extends AndroidTestCase {
 
     public void testEmptyServicesListWithNonEmptyList() {
         Session session = getInitializedSession();
-        session.addService(session.createService(ServiceType.Audio_Service));
+        session.addService(session.createService(SessionTest.APP_ID, ServiceType.Audio_Service));
         assertFalse(session.isServicesEmpty());
     }
 
     public void testHasServiceByCorrectType() {
         Session session = getInitializedSession();
-        Service service = session.createService(ServiceType.Audio_Service);
-        service.setSessionId(SessionTest.SESSION_ID);
+        Service service = session.createService(SessionTest.APP_ID, ServiceType.Audio_Service);
+        service.setAppId(SessionTest.APP_ID);
         session.addService(service);
         assertTrue(session.hasService(APP_ID, ServiceType.Audio_Service));
     }
 
     public void testHasServiceByIncorrectType() {
         Session session = getInitializedSession();
-        session.createService(ServiceType.Audio_Service);
+        session.createService(SessionTest.APP_ID, ServiceType.Audio_Service);
         assertFalse(session.hasService(APP_ID, ServiceType.Mobile_Nav));
     }
 
     public void testPreventAddServiceWithSameType() {
         Session session = new Session();
-        Service service_A = session.createService(ServiceType.Audio_Service);
-        Service service_B = session.createService(ServiceType.Audio_Service);
-        Service service_C = session.createService(ServiceType.Audio_Service);
+        Service service_A = session.createService(SessionTest.APP_ID, ServiceType.Audio_Service);
+        Service service_B = session.createService(SessionTest.APP_ID, ServiceType.Audio_Service);
+        Service service_C = session.createService(SessionTest.APP_ID, ServiceType.Audio_Service);
         session.addService(service_A);
         session.addService(service_B);
         session.addService(service_C);

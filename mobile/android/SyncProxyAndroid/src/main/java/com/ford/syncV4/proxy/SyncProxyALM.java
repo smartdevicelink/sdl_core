@@ -74,7 +74,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
 			String autoActivateID, TestConfig testConfig) throws SyncException {
 		super(	listener, 
@@ -116,7 +116,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, 
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, 
 			Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, 
 			Language hmiDisplayLanguageDesired, String appID, String autoActivateID, TestConfig testConfig) throws SyncException {
 		super(	listener, 
@@ -159,7 +159,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
 			String autoActivateID, boolean callbackToUIThread, TestConfig testConfig) throws SyncException {
 		super(	listener, 
@@ -203,7 +203,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp, 
 			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
 			String appID, String autoActivateID, boolean callbackToUIThread, TestConfig testConfig) throws SyncException {
 		super(	listener, 
@@ -229,7 +229,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	}
 	
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, Vector<AppHMIType> appHMIType,
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp, Vector<AppHMIType> appHMIType,
 			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
 			String appID, String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
             TestConfig testConfig) throws SyncException {
@@ -313,7 +313,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
 			String autoActivateID, TransportType transportType, BaseTransportConfig transportConfig,
             TestConfig testConfig) throws SyncException {
@@ -357,7 +357,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, 
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, 
 			Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, 
 			Language hmiDisplayLanguageDesired, String appID, String autoActivateID,
 			BaseTransportConfig transportConfig, TestConfig testConfig) throws SyncException {
@@ -402,7 +402,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
 			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
 			String autoActivateID, boolean callbackToUIThread, 
 			BaseTransportConfig transportConfig, TestConfig testConfig) throws SyncException {
@@ -448,7 +448,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp, 
 			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
 			String appID, String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig,
             TestConfig testConfig) throws SyncException {
@@ -499,7 +499,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
 	 * @throws SyncException
 	 */
 	public SyncProxyALM(IProxyListenerALM listener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, Vector<AppHMIType> appHMIType,
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp, Vector<AppHMIType> appHMIType,
 			SyncMsgVersion syncMsgVersion, Language languageDesired, Language hmiDisplayLanguageDesired, 
 			String appID, String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
 			BaseTransportConfig transportConfig, TestConfig testConfig) throws SyncException {
@@ -532,7 +532,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     public SyncProxyALM(IProxyListenerALM listener,
                         SyncProxyConfigurationResources syncProxyConfigurationResources,
                         String appName, String ngnMediaScreenAppName,
-                        Vector<String> vrSynonyms, Boolean isMediaApp,
+                        Vector<Object> vrSynonyms, Boolean isMediaApp,
                         Vector<AppHMIType> appHMIType,
                         SyncMsgVersion syncMsgVersion, Language languageDesired,
                         Language hmiDisplayLanguageDesired, String appID,
@@ -588,7 +588,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Vector<ButtonCapabilities> getButtonCapabilities() throws SyncException{
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -608,7 +608,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Vector<SoftButtonCapabilities> getSoftButtonCapabilities() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -628,7 +628,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public PresetBankCapabilities getPresetBankCapabilities() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -648,7 +648,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public DisplayCapabilities getDisplayCapabilities() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -668,7 +668,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Vector<HmiZoneCapabilities> getHmiZoneCapabilities() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -688,7 +688,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Vector<SpeechCapabilities> getSpeechCapabilities() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -708,7 +708,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Language getSyncLanguage() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -728,7 +728,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Language getHmiDisplayLanguage() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -748,7 +748,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public SyncMsgVersion getSyncMsgVersion() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -768,7 +768,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public Vector<VrCapabilities> getVrCapabilities() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		
@@ -788,7 +788,7 @@ public class SyncProxyALM extends SyncProxyBase<IProxyListenerALM> {
     @Override
 	public VehicleType getVehicleType() throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This object has been disposed, it is no long capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
 		

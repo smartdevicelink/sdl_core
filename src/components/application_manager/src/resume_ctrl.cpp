@@ -125,7 +125,22 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
       } else if (saved_hmi_level == mobile_apis::HMILevel::HMI_LIMITED) {
         restored_hmi_level = app_mngr_->PutApplicationInLimited(application);
         if (audio_streaming_state == mobile_apis::AudioStreamingState::AUDIBLE) {
-          MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
+          //implemented SDLAQ-CRS-839
+          bool application_exist_with_audible_state = false;
+          const std::set<ApplicationSharedPtr>& app_list = app_mngr_->applications();
+          std::set<ApplicationSharedPtr>::const_iterator app_list_it = app_list.begin();
+          uint32_t app_id = application->app_id();
+          for (; app_list.end() != app_list_it; ++app_list_it) {
+            if (((*app_list_it)->audio_streaming_state() ==
+                mobile_apis::AudioStreamingState::AUDIBLE) &&
+                ((*app_list_it))->app_id() != app_id) {
+              application_exist_with_audible_state = true;
+              break;
+            }
+          }
+          if (!application_exist_with_audible_state) {
+            MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
+          }
         }
       } else {
         restored_hmi_level = saved_hmi_level;

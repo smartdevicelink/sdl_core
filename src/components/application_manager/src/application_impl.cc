@@ -64,7 +64,8 @@ ApplicationImpl::ApplicationImpl(
       device_(0),
       grammar_id_(0),
       usage_report_(global_app_id, statistics_manager),
-      protocol_version_(ProtocolVersion::kV3) {
+      protocol_version_(ProtocolVersion::kV3),
+      alert_in_background_(false){
 
   // subscribe application to custom button by default
   SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
@@ -274,6 +275,14 @@ uint32_t ApplicationImpl::get_grammar_id() const {
 
 void ApplicationImpl::set_grammar_id(uint32_t value) {
   grammar_id_ = value;
+}
+
+bool ApplicationImpl::alert_in_background()const {
+  return alert_in_background_;
+}
+
+void ApplicationImpl::set_alert_in_background(const bool& state_of_alert) {
+  alert_in_background_ = state_of_alert;
 }
 
 bool ApplicationImpl::has_been_activated() const {

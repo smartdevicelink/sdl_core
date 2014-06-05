@@ -61,7 +61,7 @@ Item {
         return fieldSubstrings
     }
 
-    function alert (alertStrings, duration, softButtons, progressIndicator, appID) {
+    function alert (alertStrings, duration, softButtons, progressIndicator, alertType, appID) {
         var softButtonsLog = "",
             alertStringsLog = "";
         if (alertStrings) {
@@ -92,7 +92,7 @@ Item {
 	    .sort(function(a, b) { return a.fieldName - b.fieldName }) // sorting by fieldName
 	    .map(function(val) { return val.fieldText });              // mapping to array of strings
 
-        var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, progressIndicator, softButtons, appID)
+        var tryAgainTime = alertWindow.alert(fieldSubstrings, duration, softButtons, progressIndicator, alertType, appID)
         if (tryAgainTime === undefined) {
             alertWindow.async = new Async.AsyncCall();
             return alertWindow.async;
@@ -105,11 +105,12 @@ Item {
         }
     }
 
-    function show (showStrings, alignment, graphic, softButtons, customPresets, appID) {
+    function show (showStrings, alignment, graphic, secondaryGraphic, softButtons, customPresets, appID) {
         var softButtonsLog = "",
             showStringsLog = "",
             customPresetsLog = "",
-            graphiLog = "";
+            graphiLog = "",
+            secondaryGraphicLog = "";
         if (showStrings) {
             for (var i = 0; i < showStrings.length; i++) {
                 showStringsLog += "{fieldName: '" + showStrings[i].fieldName + "', " +
@@ -135,11 +136,15 @@ Item {
         if (graphic) {
             graphiLog = "{value: '" + graphic.value + "', imageType: " + graphic.imageType + "}";
         }
+        if (secondaryGraphic) {
+            secondaryGraphicLog = "{value: '" + secondaryGraphic.value + "', imageType: " + secondaryGraphic.imageType + "}";
+        }
 
         console.log("Message Received - {method: 'UI.Show', params:{ " +
                     "showStrings: [" + showStringsLog + "], " +
                     "alignment: " + alignment + "', " +
                     "graphic: " + graphiLog + ", " +
+                    "secondaryGraphic: " + secondaryGraphicLog+ ", " +
                     "softButtons: [" + softButtonsLog + "], " +
                     "customPresets: [" + customPresetsLog + "], " +
                     "appID: " + appID +
@@ -191,6 +196,7 @@ Item {
         if (fieldSubstrings[Common.TextFieldName.statusBar] !== undefined) { showData.hmiUIText.statusBar = fieldSubstrings[Common.TextFieldName.statusBar]; }
         if (fieldSubstrings[Common.TextFieldName.mediaTrack] !== undefined) { showData.hmiUIText.mediaTrack = fieldSubstrings[Common.TextFieldName.mediaTrack]; }
         if (graphic) { showData.hmiUIText.image = graphic.value; }
+        if (secondaryGraphic) { showData.hmiUIText.secondaryImage = secondaryGraphic.value; }
         if (textAlignment) { showData.hmiUITextAlignment = textAlignment; }
         if (fieldSubstrings[Common.TextFieldName.mediaClock]) {
             showData.mediaClock = {

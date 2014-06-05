@@ -89,12 +89,12 @@ QtObject {
         timeoutPrompt = ""
         options.clear()
         currentSubMenu = options
-        turnList = null
-        softButtons = null
-        navigationSoftButtons = null
-        alertManeuverSoftButtons = null
-        turnListSoftButtons = null
-        customPresets = null
+        turnList.clear()
+        softButtons.clear()
+        navigationSoftButtons.clear()
+        alertManeuverSoftButtons.clear()
+        turnListSoftButtons.clear()
+        customPresets.clear()
         languageTTSVR = -1
         hmiUITextAlignment = -1
         appType = 0

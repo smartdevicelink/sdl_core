@@ -59,6 +59,12 @@ set(MEDIA_MODE_OPTION 	"$ENV{MEDIA_MODE}")
 set(HMI_ADAPTER_OPTION 	"$ENV{HMI_ADAPTER}")
 set(ENABLE_LOG_OPTION 	"$ENV{ENABLE_LOG}")
 
+add_custom_target(pasa-tarball
+  COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} PASA
+  DEPENDS HMI_API v4_protocol_v1_2_no_extra
+# tar -czv -C ${CMAKE_SOURCE_DIR} src/appMain -f ${CMAKE_BINARY_DIR}/pasa.tar.gz;
+)
+
 if (OS_TYPE_OPTION)
   if (${OS_TYPE_OPTION} STREQUAL "QNX")
     message(STATUS "Jenkins integration: set build process for QNX")

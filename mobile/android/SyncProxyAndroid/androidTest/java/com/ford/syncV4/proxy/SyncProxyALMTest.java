@@ -92,8 +92,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(
-                                syncSession.getSessionIdByAppId(SessionTest.APP_ID), false);
+                        mSyncConnection.closeConnection(false);
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -151,8 +150,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(
-                                syncSession.getSessionIdByAppId(SessionTest.APP_ID), false);
+                        mSyncConnection.closeConnection(false);
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -212,8 +210,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(
-                                syncSession.getSessionIdByAppId(SessionTest.APP_ID), false);
+                        mSyncConnection.closeConnection(false);
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -277,8 +274,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(
-                                syncSession.getSessionIdByAppId(SessionTest.APP_ID), false);
+                        mSyncConnection.closeConnection(false);
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -336,8 +332,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(
-                                syncSession.getSessionIdByAppId(SessionTest.APP_ID), false);
+                        mSyncConnection.closeConnection(false);
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -393,8 +388,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(
-                                syncSession.getSessionIdByAppId(SessionTest.APP_ID), false);
+                        mSyncConnection.closeConnection(false);
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -422,7 +416,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         IProxyListenerALMTesting proxyListenerMock = mock(IProxyListenerALMTesting.class);
         SyncProxyALM proxy =
                 new SyncProxyALM(proxyListenerMock, null, "a", null, null,
-                        false, null, null, null, null, null, null, false, false,
+                        false, null, null, null, null, SessionTest.APP_ID, null, false, false,
                         ProtocolConstants.PROTOCOL_VERSION_TWO, null, syncConnectionMock,
                         new TestConfig());
         SyncConnection connection = new SyncConnection(new Session(), proxy.getInterfaceBroker());

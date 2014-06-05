@@ -182,6 +182,7 @@ void Connection::CloseSession(uint8_t session_id) {
 
   //Close connection if it is last session
   if (1 == size) {
+    heartbeat_monitor_->RemoveSession(session_id);
     connection_handler_->CloseConnection(connection_handle_);
   } else {
     connection_handler_->CloseSession(connection_handle_, session_id);

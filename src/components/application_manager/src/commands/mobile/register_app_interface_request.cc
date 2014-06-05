@@ -137,11 +137,41 @@ bool RegisterAppInterfaceRequest::Init() {
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run " << connection_key());
 
+//Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
+//Flag conditional compilation "CUSTOMER_PASA" is used in order to exclude hit code
+//to RTC
+#ifndef CUSTOMER_PASA
+  if (true == profile::Profile::instance()->launch_hmi()) {
+    // wait till HMI started
+    while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
+      sleep(1);
+      // TODO(DK): timer_->StartWait(1);
+      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+                                                               correlation_id(),
+                                                               default_timeout());
+    }
+  }
+#endif
+
+  std::string mobile_app_id = (*message_)[strings::msg_params][strings::app_id]
+                                                               .asString();
+  if (policy::PolicyHandler::instance()->IsApplicationRevoked(mobile_app_id)) {
+    SendResponse(false, mobile_apis::Result::DISALLOWED);
+    return;
+  }
+
   ApplicationSharedPtr application =
     ApplicationManagerImpl::instance()->application(connection_key());
 
   if (application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
+    return;
+  }
+
+  mobile_apis::Result::eType policy_result = CheckWithPolicyData();
+  if (mobile_apis::Result::SUCCESS != policy_result
+      && mobile_apis::Result::WARNINGS != policy_result) {
+    SendResponse(false, policy_result);
     return;
   }
 
@@ -163,13 +193,6 @@ void RegisterAppInterfaceRequest::Run() {
   if (mobile_apis::Result::SUCCESS != coincidence_result) {
     LOG4CXX_ERROR_EXT(logger_, "Coincidence check failed.");
     SendResponse(false, coincidence_result);
-    return;
-  }
-
-  mobile_apis::Result::eType policy_result = CheckWithPolicyData();
-  if (mobile_apis::Result::SUCCESS != policy_result
-      && mobile_apis::Result::WARNINGS != policy_result) {
-    SendResponse(false, policy_result);
     return;
   }
 
@@ -604,12 +627,14 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
     policy::PolicyHandler::instance()->policy_manager();
   if (!policy_manager) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+#ifdef CUSTOMER_PASA
     // TODO(AOleynik): Check is necessary to allow register application in case
     // of disabled policy
     // Remove this check, when HMI will support policy
     if (profile::Profile::instance()->policy_turn_off()) {
-    return mobile_apis::Result::WARNINGS;
-  }
+    	return mobile_apis::Result::WARNINGS;
+    }
+#endif // CUSTOMER_PASA
     return mobile_apis::Result::DISALLOWED;
   }
   const bool init_result = policy_manager->GetInitialAppData(
@@ -629,7 +654,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
       LOG4CXX_WARN(logger_,
                    "Application name was not found in nicknames list.");
       //App should be unregistered, if its name is not present in nicknames list
-      return mobile_apis::Result::INVALID_DATA;
+      return mobile_apis::Result::DISALLOWED;
     }
   }
 

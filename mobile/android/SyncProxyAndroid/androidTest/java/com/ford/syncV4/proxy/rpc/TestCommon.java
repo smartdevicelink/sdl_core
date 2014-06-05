@@ -11,6 +11,7 @@ import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
+import com.ford.syncV4.session.SessionTest;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
 
@@ -60,7 +61,7 @@ public class TestCommon {
         when(connectionMock.getWiProProtocol()).thenReturn(protocolMock);
 
         return new SyncProxyALM(proxyListener, null, "!", null, null, true,
-                null, null, null, null, null, null, false, false,
+                null, null, null, null, SessionTest.APP_ID, null, false, false,
                 protocolVersion, null, connectionMock, new TestConfig());
     }
 

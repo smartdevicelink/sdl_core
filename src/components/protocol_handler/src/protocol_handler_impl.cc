@@ -191,6 +191,11 @@ void ProtocolHandlerImpl::RemoveProtocolObserver(ProtocolObserver* observer) {
 }
 
 void ProtocolHandlerImpl::set_session_observer(SessionObserver* observer) {
+  if (!observer) {
+    LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to ISessionObserver.");
+    return;
+  }
+
   session_observer_ = observer;
 }
 
@@ -916,7 +921,7 @@ void ProtocolHandlerImpl::Handle(
       LOG4CXX_INFO_EXT(logger_, "Packet: dataSize " << message->data_size());
       HandleMessage(message->connection_key(), message);
   } else {
-    LOG4CXX_WARN(logger_,
+    LOG4CXX_INFO_EXT(logger_,
                  "handleMessagesFromMobileApp() - incorrect or NULL data");
   }
   LOG4CXX_TRACE_EXIT(logger_);

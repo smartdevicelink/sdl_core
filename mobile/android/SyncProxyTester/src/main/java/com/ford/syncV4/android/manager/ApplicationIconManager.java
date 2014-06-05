@@ -69,7 +69,7 @@ public class ApplicationIconManager {
         setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
         setAppIcon.setCorrelationID(proxyService.getNextCorrelationID());
 
-        proxyService.syncProxySendRPCRequestWithPreprocess(mAppId, setAppIcon);
+        proxyService.sendRPCRequestWithPreprocess(mAppId, setAppIcon);
 
         Logger.i(TAG + " Application Icon set up complete");
 

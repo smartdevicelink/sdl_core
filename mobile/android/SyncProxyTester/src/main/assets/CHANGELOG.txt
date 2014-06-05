@@ -1,3 +1,7 @@
+[CW23]
+* SyncProxyAndroid SDK: Heartbeat timeout after EndService
+* SyncProxyTester: Data in RegisterAppInterface request, which SPT sends, do not match to data in autotest
+
 [CW21]
 * SyncProxyTester | SyncProxyAndroid SDK: Restore Services in case of multi-session connection
 + SyncProxyTester | SyncProxyAndroid SDK: Hide SessionId inside mobile SyncSDK, AppId - is a key for the each application

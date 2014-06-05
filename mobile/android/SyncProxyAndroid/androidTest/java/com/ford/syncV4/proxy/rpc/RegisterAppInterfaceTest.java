@@ -170,7 +170,7 @@ public class RegisterAppInterfaceTest extends TestCase {
                 JsonRPCMarshaller.deserializeJSONObject(
                         TestCommon.paramsToRequestObject(jsonObject)));
 
-        assertEquals(mIllegalStringAsDouble, registerAppInterface.getAppID());
+        assertEquals(mIllegalStringAsDouble, registerAppInterface.getAppId());
     }
 
     public void testSetAppIdIntegerCastToInteger() throws JSONException {
@@ -181,7 +181,7 @@ public class RegisterAppInterfaceTest extends TestCase {
                 JsonRPCMarshaller.deserializeJSONObject(
                         TestCommon.paramsToRequestObject(jsonObject)));
 
-        assertEquals(mIllegalStringAsInteger, registerAppInterface.getAppID());
+        assertEquals(mIllegalStringAsInteger, registerAppInterface.getAppId());
     }
 
     public void testSetAppIdBooleanCastToBoolean() throws JSONException {
@@ -192,7 +192,7 @@ public class RegisterAppInterfaceTest extends TestCase {
                 JsonRPCMarshaller.deserializeJSONObject(
                         TestCommon.paramsToRequestObject(jsonObject)));
 
-        assertEquals(mIllegalStringAsBoolean, registerAppInterface.getAppID());
+        assertEquals(mIllegalStringAsBoolean, registerAppInterface.getAppId());
     }
 
     public void testSetAppNameDoubleCastToDouble() throws JSONException {

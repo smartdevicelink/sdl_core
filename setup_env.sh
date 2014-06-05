@@ -304,6 +304,10 @@ echo "Installing Libudev-dev library"
 apt-install ${LIB_UDEV}
 echo $OK
 
+echo "Installing dos2unix"
+apt-install dos2unix
+echo $OK
+
 echo "Setting up USB permissions..."
 if [ ! -f "/etc/udev/rules.d/90-usbpermission.rules" ]; then
     echo "Create permission file"

@@ -91,8 +91,8 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * @param Device id or 0, if concern to all SDL functionality
    * @param User consent from response
    */
-  void OnAllowSDLFunctionalityNotification(bool is_allowed, uint32_t device_id =
-                                               0);
+  void OnAllowSDLFunctionalityNotification(bool is_allowed,
+                                           uint32_t device_id = 0);
 
   /**
    * @brief Increment counter for ignition cycles
@@ -229,6 +229,13 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    */
   BinaryMessageSptr AddHttpHeader(const BinaryMessageSptr& pt_string);
 
+  /**
+   * Checks whether application is revoked
+   * @param app_id id application
+   * @return true if application is revoked
+   */
+  bool IsApplicationRevoked(const std::string& app_id);
+
  protected:
   /**
    * Starts next retry exchange policy table
@@ -274,6 +281,7 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   PTExchangeHandler* exchange_handler_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
   bool on_ignition_check_done_;
+  uint32_t last_activated_app_;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI

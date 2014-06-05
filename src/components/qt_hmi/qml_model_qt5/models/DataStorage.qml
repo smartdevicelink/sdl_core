@@ -147,6 +147,9 @@ QtObject {
                 if (application.hmiUIText.image !== undefined) {
                     currentApplication.hmiUIText.image = application.hmiUIText.image
                 }
+                if (application.hmiUIText.secondaryImage!== undefined) {
+                    currentApplication.hmiUIText.secondaryImage= application.hmiUIText.secondaryImage
+                }
                 if (application.hmiUITextAlignment !== undefined) {
                     currentApplication.hmiUITextAlignment = application.hmiUITextAlignment
                 }
@@ -282,7 +285,7 @@ QtObject {
     }
 
     function removeApplication(appId) {
-        console.log("enter");
+        console.log("enter removeApplication");
         for (var j = 0; j < musicSourceModel.count; ++j) {
             if (musicSourceModel.get(j).appId === appId) {
                 musicSourceModel.remove(j);
@@ -295,7 +298,7 @@ QtObject {
                 break;
             }
         }
-        console.log("exit");
+        console.log("exit removeApplication");
     }
 
     function stashApplication(appId) {

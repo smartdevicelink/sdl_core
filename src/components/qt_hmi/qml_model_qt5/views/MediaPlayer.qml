@@ -256,13 +256,13 @@ Item {
                 sdlButtons.onButtonEvent(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonEventMode.BUTTONUP, undefined)
             }
 
-	    onPresetButtonClicked: {
-	        sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.SHORT, undefined)
-	    }
+            onPresetButtonClicked: {
+                sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.SHORT, undefined)
+            }
 
-	    onPresetButtonHold: {
-	        sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.LONG, undefined)
-	    }
+            onPresetButtonHold: {
+                sdlButtons.onButtonPress(Common.ButtonName.PRESET_0 + selectedIndex, Common.ButtonPressMode.LONG, undefined)
+            }
         }
     }
 

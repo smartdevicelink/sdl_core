@@ -163,21 +163,25 @@ class Connection {
 
   /*
    * \brief Close session
+   * \param  session_id session id
    */
   void CloseSession(uint8_t session_id);
 
   /*
    * \brief Prevent session from being closed by heartbeat timeout
+   * \param  session_id session id
    */
   void KeepAlive(uint8_t session_id);
 
   /*
    * \brief Start heartbeat for specified session
+   * \param  session_id session id
    */
   void StartHeartBeat(uint8_t session_id);
 
   /*
    * \brief Send heartbeat to  mobile app
+   * \param  session_id session id
    */
   void SendHeartBeat(uint8_t session_id);
 
