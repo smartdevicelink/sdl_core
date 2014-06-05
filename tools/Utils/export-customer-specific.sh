@@ -180,5 +180,5 @@ done
 cp -r $specificdir/* $export_dir
 
 find $export_dir \
-  -regex '.*\.\(cc\|json\|h\|cpp\|ini\|hpp\|txt\|html\|properties\|cfg\|sql\|sh\|py\|pl\)' \
+  -regex '.*\.\(cc\|h\|cpp\|hpp\)' \
   -exec unix2dos {} \;

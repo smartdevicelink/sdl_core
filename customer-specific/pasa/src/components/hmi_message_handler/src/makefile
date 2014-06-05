@@ -37,9 +37,9 @@ INCLUDES = \
 	$(CC_IFLAG)../../smart_objects/include \
 	$(CC_IFLAG)../../utils/include \
 	$(CC_IFLAG)../../interfaces \
-	$(CC_IFLAG)../../../thirdPartyLibs/jsoncpp/include \
-	$(CC_IFLAG)../../../thirdPartyLibs/MessageBroker/include \
-	$(CC_IFLAG)../../../thirdPartyLibs/log4cxx/include \
+	$(CC_IFLAG)../../../3rd_party-static/jsoncpp/include \
+	$(CC_IFLAG)../../../3rd_party-static/MessageBroker/include \
+	$(CC_IFLAG)../../../3rd_party/log4cxx/include \
 	$(DEPENDS_INCLUDES)
 
 

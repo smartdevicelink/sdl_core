@@ -141,6 +141,32 @@ bool LifeCycle::StartComponents() {
   return true;
 }
 
+#ifdef CUSTOMER_PASA
+bool LifeCycle::InitMessageSystem() {
+  mb_pasa_adapter_ =
+    new hmi_message_handler::MessageBrokerAdapter(
+    hmi_message_handler::HMIMessageHandlerImpl::instance(),
+    std::string(PREFIX_STR_FROMSDL_QUEUE),
+    std::string(PREFIX_STR_TOSDL_QUEUE));
+    hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
+    mb_pasa_adapter_);
+  if (!mb_pasa_adapter_->MqOpen()) {
+    LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
+    return false;
+  }
+
+  LOG4CXX_INFO(logger_, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
+  mb_pasa_adapter_thread_  = new System::Thread(
+    new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
+      *mb_pasa_adapter_,
+      &hmi_message_handler::MessageBrokerAdapter::SubscribeAndBeginReceiverThread,
+      NULL));
+  mb_pasa_adapter_thread_->Start(false);
+  NameMessageBrokerThread(*mb_pasa_adapter_thread_, "MessageBrokerAdapterThread");
+
+  return true;
+}
+#else
 #ifdef MESSAGEBROKER_HMIADAPTER
 bool LifeCycle::InitMessageSystem() {
   message_broker_ =
@@ -192,22 +218,6 @@ bool LifeCycle::InitMessageSystem() {
       return false;
     }
 
-#ifdef CUSTOMER_PASA
-#ifdef PASA_HMI
-  mb_pasa_adapter_ =
-    new hmi_message_handler::MessageBrokerAdapter(
-    hmi_message_handler::HMIMessageHandlerImpl::instance(),
-    std::string(PREFIX_STR_FROMSDL_QUEUE),
-    std::string(PREFIX_STR_TOSDL_QUEUE));
-    hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
-    mb_pasa_adapter_);
-  if (!mb_pasa_adapter_->MqOpen()) {
-    LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
-    return false;
-  }
-#endif  // PASA_HMI
-#endif  // CUSTOMER_PASA
-
   LOG4CXX_INFO(logger_, "Start CMessageBroker thread!");
   mb_thread_ = new System::Thread(
     new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(
@@ -234,19 +244,6 @@ bool LifeCycle::InitMessageSystem() {
       NULL));
   mb_adapter_thread_->Start(false);
   NameMessageBrokerThread(*mb_adapter_thread_, "MessageBrokerAdapterThread");
-
-#ifdef CUSTOMER_PASA
-#ifdef PASA_HMI
-  LOG4CXX_INFO(logger_, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
-  mb_pasa_adapter_thread_  = new System::Thread(
-    new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
-      *mb_pasa_adapter_,
-      &hmi_message_handler::MessageBrokerAdapter::SubscribeAndBeginReceiverThread,
-      NULL));
-  mb_pasa_adapter_thread_->Start(false);
-  NameMessageBrokerThread(*mb_pasa_adapter_thread_, "MessageBrokerAdapterThread");
-#endif  // PASA_HMI
-#endif  // CUSTOMER_PASA
 
   return true;
 }
@@ -292,6 +289,8 @@ bool LifeCycle::InitMessageSystem() {
   return true;
 }
 #endif  // MQUEUE_HMIADAPTER
+
+#endif  // CUSTOMER_PASA
 
 void LifeCycle::StopComponents() {
   hmi_handler_->set_message_observer(NULL);

@@ -36,8 +36,8 @@ INCLUDES = \
 	$(CC_IFLAG)../policy_table/table_struct_ext \
 	$(CC_IFLAG)../../../../rpc_base/include \
 	$(CC_IFLAG)../../../../utils/include \
-	$(CC_IFLAG)../../../../../thirdPartyLibs/jsoncpp/include \
-	$(CC_IFLAG)../../../../../thirdPartyLibs/log4cxx/include \
+	$(CC_IFLAG)../../../../../3rd_party-static/jsoncpp/include \
+	$(CC_IFLAG)../../../../../3rd_party/log4cxx/include \
 	$(DEPENDS_INCLUDES)          
  
 # Do the same if you need to include library paths as well
