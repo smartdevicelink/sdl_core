@@ -117,11 +117,20 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
     LOG4CXX_INFO(logger_, "Unloading policy library.");
     policy::PolicyHandler::instance()->UnloadPolicyLibrary();
   }
+
+  SendOnSDLClose();
+
   policy_manager_ = NULL;
   media_manager_ = NULL;
   hmi_handler_ = NULL;
   connection_handler_ = NULL;
+  if (hmi_so_factory_) {
+    delete hmi_so_factory_;
+  }
   hmi_so_factory_ = NULL;
+  if (mobile_so_factory_) {
+    delete mobile_so_factory_;
+  }
   mobile_so_factory_ = NULL;
   protocol_handler_ = NULL;
   media_manager_ = NULL;
@@ -135,7 +144,7 @@ bool ApplicationManagerImpl::Stop() {
     LOG4CXX_ERROR(logger_,
                   "An error occured during unregistering applications.");
   }
-  MessageHelper::SendOnSdlCloseNotificationToHMI();
+
   return true;
 }
 
@@ -1752,6 +1761,56 @@ void ApplicationManagerImpl::HeadUnitReset(
       policy::PolicyHandler::instance()->ClearUserConsent();
       break;
   }
+}
+
+void ApplicationManagerImpl::SendOnSDLClose() {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendOnSDLClose");
+
+  // must be sent to PASA HMI on shutdown synchronously
+  smart_objects::SmartObject* msg = new smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+
+  (*msg)[strings::params][strings::function_id] =
+    hmi_apis::FunctionID::BasicCommunication_OnSDLClose;
+  (*msg)[strings::params][strings::message_type] =
+      MessageType::kNotification;
+  (*msg)[strings::params][strings::protocol_type] =
+      commands::CommandImpl::hmi_protocol_type_;
+  (*msg)[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+
+  if (!msg) {
+    LOG4CXX_WARN(logger_, "Null-pointer message received.");
+    NOTREACHED();
+    return;
+  }
+
+  // SmartObject |message| has no way to declare priority for now
+  utils::SharedPtr<Message> message_to_send(
+    new Message(protocol_handler::MessagePriority::kDefault));
+
+  hmi_so_factory().attachSchema(*msg);
+  LOG4CXX_INFO(
+    logger_,
+    "Attached schema to message, result if valid: " << msg->isValid());
+
+
+#ifdef HMI_DBUS_API
+  message_to_send->set_smart_object(*msg);
+#else
+  if (!ConvertSOtoMessage(*msg, *message_to_send)) {
+    LOG4CXX_WARN(logger_,
+                 "Cannot send message to HMI: failed to create string");
+    return;
+  }
+#endif  // HMI_DBUS_API
+
+  if (!hmi_handler_) {
+    LOG4CXX_WARN(logger_, "No HMI Handler set");
+    return;
+  }
+
+  hmi_handler_->SendMessageToHMI(message_to_send);
 }
 
 void ApplicationManagerImpl::UnregisterAllApplications() {

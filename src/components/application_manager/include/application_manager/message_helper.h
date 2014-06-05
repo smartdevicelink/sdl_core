@@ -210,7 +210,6 @@ class MessageHelper {
     static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
     static SmartObjectList CreateAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
 
-    static void SendOnSdlCloseNotificationToHMI();
     static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app);
     static void ResetGlobalproperties(ApplicationSharedPtr app);
 

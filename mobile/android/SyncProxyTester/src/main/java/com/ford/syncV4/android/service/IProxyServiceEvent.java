@@ -14,6 +14,8 @@ import com.ford.syncV4.protocol.enums.ServiceType;
  */
 public interface IProxyServiceEvent {
 
+    public void onProxyInitError(String message);
+
     /**
      * Dispatch when receive RPC service end message
      */

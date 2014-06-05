@@ -307,9 +307,6 @@ void LifeCycle::StopComponents() {
   media_manager_->SetProtocolHandler(NULL);
   media_manager::MediaManagerImpl::destroy();
 
-  LOG4CXX_INFO(logger_, "Destroying Application Manager.");
-  application_manager::ApplicationManagerImpl::destroy();
-
   LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
   transport_manager_->Stop();
   transport_manager::TransportManagerDefault::destroy();
@@ -320,6 +317,12 @@ void LifeCycle::StopComponents() {
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete protocol_handler_;
+
+  LOG4CXX_INFO(logger_, "Destroying Last State");
+  resumption::LastState::destroy();
+
+  LOG4CXX_INFO(logger_, "Destroying Application Manager.");
+  application_manager::ApplicationManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 #ifdef DBUS_HMIADAPTER
@@ -383,9 +386,6 @@ void LifeCycle::StopComponents() {
 
   delete hmi_message_adapter_;
   hmi_message_adapter_ = NULL;
-
-  LOG4CXX_INFO(logger_, "Destroying Last State");
-  resumption::LastState::destroy();
 
 #ifdef TIME_TESTER
   // It's important to delete tester Obcervers after TM adapters destruction

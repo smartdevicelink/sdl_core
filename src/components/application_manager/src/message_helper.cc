@@ -1169,20 +1169,6 @@ MessageHelper::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
   return requsets;
 }
 
-void MessageHelper::SendOnSdlCloseNotificationToHMI() {
-  smart_objects::SmartObject* notification = new smart_objects::SmartObject(
-    smart_objects::SmartType_Map);
-  if (!notification) {
-    return;
-  }
-  smart_objects::SmartObject& message = *notification;
-  message[strings::params][strings::function_id] =
-    hmi_apis::FunctionID::BasicCommunication_OnSDLClose;
-  message[strings::params][strings::message_type] = MessageType::kNotification;
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
-}
-
 void MessageHelper::SendOnAppUnregNotificationToHMI(
   ApplicationConstSharedPtr app) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
