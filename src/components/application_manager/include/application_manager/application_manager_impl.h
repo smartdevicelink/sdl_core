@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -716,6 +716,9 @@ class ApplicationManagerImpl : public ApplicationManager,
       ApplicationListUpdateTimer(ApplicationManagerImpl* callee, void* closure) : timer::TimerThread<ApplicationManagerImpl>(callee, &ApplicationManagerImpl::OnApplicationListUpdateTimer, closure) {
       }
     };
+    typedef utils::SharedPtr<ApplicationListUpdateTimer> ApplicationListUpdateTimerSptr;
+    typedef std::map<connection_handler::DeviceHandle, ApplicationListUpdateTimerSptr> ApplicationListUpdateTimerContainer;
+    ApplicationListUpdateTimerContainer application_list_update_timers_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 

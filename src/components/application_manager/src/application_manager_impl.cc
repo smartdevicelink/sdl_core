@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -246,6 +246,18 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   smart_objects::SmartObject& message = *request_for_registration;
   uint32_t connection_key =
     message[strings::params][strings::connection_key].asInt();
+
+  ApplicationSharedPtr app = application(connection_key);
+  connection_handler::DeviceHandle device_handle = app->device();
+  ApplicationListUpdateTimerContainer::iterator i = application_list_update_timers_.find(device_handle);
+  if (i != application_list_update_timers_.end()) {
+    LOG4CXX_DEBUG(logger_, "Restarting imer for device " << device_handle);
+    ApplicationListUpdateTimerSptr timer = i->second;
+    timer->start(1);
+  }
+  else {
+    LOG4CXX_WARN(logger_, "No timer corresponding to device " << device_handle);
+  }
 
   if (false == is_all_apps_allowed_) {
     LOG4CXX_INFO(logger_,
@@ -755,8 +767,11 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
 }
 
 void ApplicationManagerImpl::OnApplicationListUpdated(const connection_handler::DeviceHandle& device_handle) {
+  connection_handler_->ConnectToDevice(device_handle);
   connection_handler::DeviceHandle* closure = new connection_handler::DeviceHandle(device_handle);
-  ApplicationListUpdateTimer* timer = new ApplicationListUpdateTimer(this, closure);
+  ApplicationListUpdateTimerSptr timer(new ApplicationListUpdateTimer(this, closure));
+  application_list_update_timers_.insert(std::make_pair(device_handle, timer));
+  LOG4CXX_DEBUG(logger_, "Starting timer for device " << device_handle);
   timer->start(1);
 }
 
@@ -2077,7 +2092,16 @@ bool ApplicationManagerImpl::IsHMICooperating() const {
 
 void ApplicationManagerImpl::OnApplicationListUpdateTimer(void* closure) {
   connection_handler::DeviceHandle* closure_casted = static_cast<connection_handler::DeviceHandle*>(closure);
-  SendApplicationListUpdated(*closure_casted);
+  connection_handler::DeviceHandle device_handle = *closure_casted;
+  ApplicationListUpdateTimerContainer::iterator i = application_list_update_timers_.find(device_handle);
+  if (i != application_list_update_timers_.end()) {
+    LOG4CXX_DEBUG(logger_, "Timer for device " << device_handle << " finished, deleting");
+    application_list_update_timers_.erase(i);
+  }
+  else {
+    LOG4CXX_WARN(logger_, "No timer corresponding to device " << device_handle);
+  }
+  SendApplicationListUpdated(device_handle);
   delete closure_casted;
 }
 
