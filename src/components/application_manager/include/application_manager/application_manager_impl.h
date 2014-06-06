@@ -60,7 +60,9 @@
 
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
+#ifdef TIME_TESTER
 #include "time_metric_observer.h"
+#endif  // TIME_TESTER
 #include "protocol_handler/service_type.h"
 
 #include "utils/macro.h"
@@ -212,12 +214,14 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     HMICapabilities& hmi_capabilities();
 
+#ifdef TIME_TESTER
     /**
      * @brief Setup observer for time metric.
      *
      * @param observer - pointer to observer
      */
     void SetTimeMetricObserver(AMMetricObserver* observer);
+#endif  // TIME_TESTER
 
     ApplicationSharedPtr RegisterApplication(
       const utils::SharedPtr<smart_objects::SmartObject>& request_for_registration);
@@ -407,6 +411,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
+    //TODO (EZamakhov): fix all indentations in this file
+    void OnApplicationListUpdated(const connection_handler::DeviceHandle& device_handle);
     void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
     bool OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
@@ -454,7 +460,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param correlation_id Correlation ID of the HMI request
      * @param app_id Application ID
      */
-  void set_application_id(const int32_t correlation_id, const uint32_t app_id);
+    void set_application_id(const int32_t correlation_id, const uint32_t app_id);
 
     /*
      * @brief Change AudioStreamingState for all application according to
@@ -560,6 +566,8 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     ApplicationSharedPtr application_by_hmi_app(int32_t hmi_app_id) const;
 
+    // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
+    connection_handler::ConnectionHandler* connection_handler();
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
@@ -617,6 +625,25 @@ class ApplicationManagerImpl : public ApplicationManager,
     // CALLED ON messages_to_hmi_ thread!
     virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;    
 
+    /**
+     * @brief Checks, if given RPC is allowed at current HMI level for specific
+     * application in policy table
+     * @param policy_app_id Application id
+     * @param hmi_level Current HMI level of application
+     * @param function_id FunctionID of RPC
+     * @return SUCCESS, if allowed, otherwise result code of check
+     */
+    mobile_apis::Result::eType CheckPolicyPermissions(
+        const std::string& policy_app_id,
+        mobile_apis::HMILevel::eType hmi_level,
+        mobile_apis::FunctionID::eType function_id);
+
+    /*
+     * @brief Function is called on IGN_OFF, Master_reset or Factory_defaults
+     * to notify HMI that SDL is shutting down.
+     */
+    void SendOnSDLClose();
+
   private:
 
     // members
@@ -665,7 +692,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;
 
+#ifdef TIME_TESTER
     AMMetricObserver* metric_observer_;
+#endif  // TIME_TESTER
     static uint32_t corelation_id_;
     static const uint32_t max_corelation_id_;
 

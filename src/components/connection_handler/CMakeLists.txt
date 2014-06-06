@@ -5,7 +5,8 @@ include_directories (
   ../config_profile/include/
   ../security_manager/include/
   ../utils/include/
-  ../../thirdPartyLibs/encryption/include
+  ${ENCRYPTION_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES

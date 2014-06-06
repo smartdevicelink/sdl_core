@@ -42,7 +42,9 @@
 #include "utils/shared_ptr.h"
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"
+#ifdef TIME_TESTER
 #include "transport_manager/time_metric_observer.h"
+#endif  // TIME_TESTER
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -245,13 +247,14 @@ class TransportAdapter {
    */
   virtual std::string DeviceName(const DeviceUID& device_id) const = 0;
 
+#ifdef TIME_TESTER
   /**
    * @brief Return Time metric observer
    *
    * @param return pointer to Time metric observer
    */
   virtual TMMetricObserver* GetTimeMetricObserver() = 0;
-
+#endif  // TIME_TESTER
 
 };
 

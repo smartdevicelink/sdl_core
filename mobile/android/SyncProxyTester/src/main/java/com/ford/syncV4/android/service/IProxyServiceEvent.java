@@ -14,6 +14,8 @@ import com.ford.syncV4.protocol.enums.ServiceType;
  */
 public interface IProxyServiceEvent {
 
+    public void onProxyInitError(String message);
+
     /**
      * Dispatch when receive RPC service end message
      */
@@ -33,11 +35,18 @@ public interface IProxyServiceEvent {
 
     /**
      * Dispatch when receive service start message (in case of RPC Service)
+<<<<<<< HEAD
      *  @param serviceType a type of the service
      * @param sessionId   Id of the session
      * @param encrypted
      */
     public void onServiceStart(ServiceType serviceType, byte sessionId, boolean encrypted);
+=======
+     *
+     * @param serviceType a type of the service
+     */
+    public void onServiceStart(ServiceType serviceType, String appId);
+>>>>>>> develop
 
     /**
      * Dispatch when receive Ack message
@@ -45,12 +54,12 @@ public interface IProxyServiceEvent {
      * @param frameReceived frame received number
      * @param serviceType   a type of the service
      */
-    public void onAckReceived(int frameReceived, ServiceType serviceType);
+    public void onAckReceived(String appId, int frameReceived, ServiceType serviceType);
 
     /**
      * Dispatch when Service Nack received
      *
      * @param serviceType a type of the service
      */
-    public void onStartServiceNackReceived(ServiceType serviceType);
+    public void onStartServiceNackReceived(String appId, ServiceType serviceType);
 }

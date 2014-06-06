@@ -25,7 +25,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_mobile_nav_preview, container, true);
+        return inflater.inflate(R.layout.activity_mobile_nav_preview, container, false);
     }
 
     @Override
@@ -70,6 +70,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+<<<<<<< HEAD
                 if (hasServiceInServicesPool(ServiceType.RPC)) {
                     changeCheckBoxState();
                 } else {
@@ -83,6 +84,10 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
             public void onClick(View v) {
                 if (hasServiceInServicesPool(ServiceType.RPC)) {
                     sendStartEncryptedService();
+=======
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
+                    onMobileNaviCheckBoxAction(view);
+>>>>>>> develop
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
                 }
@@ -118,11 +123,15 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
+<<<<<<< HEAD
             tester.startMobileNaviService(false);
+=======
+            tester.startMobileNaviService(getAppId());
+>>>>>>> develop
         } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             mFileStreamingLogic.resetStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.stopMobileNavService();
+            tester.stopMobileNavService(getAppId());
             mSessionCheckBoxState.setStateOff();
         }
     }

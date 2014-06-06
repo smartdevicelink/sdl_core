@@ -572,9 +572,6 @@ smart_objects::SmartObject* MessageHelper::CreateModuleInfoSO(
   uint32_t function_id) {
   smart_objects::SmartObject* module_info = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
-  if (NULL == module_info) {
-    return NULL;
-  }
   smart_objects::SmartObject& object = *module_info;
   object[strings::params][strings::message_type] = static_cast<int>(kRequest);
   object[strings::params][strings::function_id] = static_cast<int>(function_id);
@@ -1095,6 +1092,35 @@ smart_objects::SmartObject* MessageHelper::CreateAddVRCommandToHMI(
   return vr_command;
 }
 
+bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
+                                               smart_objects::SmartObject& output) {
+
+  if (false == app.valid()) {
+    return false;
+  }
+
+  const smart_objects::SmartObject* app_types = app->app_types();
+  const smart_objects::SmartObject* ngn_media_screen_name = app->ngn_media_screen_name();
+  const connection_handler::DeviceHandle handle = app->device();
+  std::string device_name = ApplicationManagerImpl::instance()->GetDeviceName(handle);
+
+  output = smart_objects::SmartObject(smart_objects::SmartType_Map);
+  output[strings::app_name] = app->name();
+  output[strings::icon] = app->app_icon_path();
+  output[strings::device_name] = device_name;
+  output[strings::app_id] = app->app_id();
+  output[strings::hmi_display_language_desired] = app->ui_language();
+  output[strings::is_media_application] = app->is_media_application();
+
+  if (NULL != ngn_media_screen_name) {
+    output[strings::ngn_media_screen_app_name] = ngn_media_screen_name;
+  }
+  if (NULL != app_types) {
+    output[strings::app_type] = *app_types;
+  }
+  return true;
+}
+
 void MessageHelper::SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app) {
   DCHECK(app.get());
   SmartObjectList requests = CreateAddSubMenuRequestToHMI(app);
@@ -1143,20 +1169,6 @@ MessageHelper::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
   return requsets;
 }
 
-void MessageHelper::SendOnSdlCloseNotificationToHMI() {
-  smart_objects::SmartObject* notification = new smart_objects::SmartObject(
-    smart_objects::SmartType_Map);
-  if (!notification) {
-    return;
-  }
-  smart_objects::SmartObject& message = *notification;
-  message[strings::params][strings::function_id] =
-    hmi_apis::FunctionID::BasicCommunication_OnSDLClose;
-  message[strings::params][strings::message_type] = MessageType::kNotification;
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
-}
-
 void MessageHelper::SendOnAppUnregNotificationToHMI(
   ApplicationConstSharedPtr app) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
@@ -1177,7 +1189,8 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
 
-void MessageHelper::SendActivateAppToHMI(uint32_t const app_id) {
+void MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
+    hmi_apis::Common_HMILevel::eType level) {
   smart_objects::SmartObject* message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
 
@@ -1207,6 +1220,11 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id) {
   }
   if (!priority.empty()) {
     (*message)[strings::msg_params]["priority"] = GetPriorityCode(priority);
+  }
+
+  if (hmi_apis::Common_HMILevel::FULL != level &&
+      hmi_apis::Common_HMILevel::INVALID_ENUM != level) {
+    (*message)[strings::msg_params]["level"] = level;
   }
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
@@ -1323,7 +1341,7 @@ void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 
   // If application is revoked it should not be activated
-  if (permissions.appRevoked) {
+  if (permissions.appRevoked || !permissions.isSDLAllowed) {
     return;
   }
 
@@ -2037,6 +2055,15 @@ mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
 
 mobile_apis::Result::eType MessageHelper::VerifyImage(
   smart_objects::SmartObject& image, ApplicationConstSharedPtr app) {
+  // Checking image type first: if STATIC - skip existence check, since it is
+  // HMI related file and it should know it location
+  const uint32_t image_type = image[strings::image_type].asUInt();
+  mobile_apis::ImageType::eType type =
+      static_cast<mobile_apis::ImageType::eType>(image_type);
+  if (mobile_apis::ImageType::STATIC == type) {
+    return mobile_apis::Result::SUCCESS;
+  }
+
   const std::string& file_name = image[strings::value].asString();
 
   std::string str = file_name;
@@ -2049,7 +2076,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     profile::Profile::instance()->app_storage_folder() + "/";
 
   if (file_name.size() > 0 && file_name[0] == '/') {
-    full_file_path += file_name;
+    full_file_path = file_name;
   } else {
 
     full_file_path += app->folder_name();

@@ -51,17 +51,16 @@ namespace security_manager_test {
                  security_manager::SSLContext* (
                    const uint32_t& key,
                    const protocol_handler::ServiceType& service_type));
-    MOCK_METHOD5(OnSessionStartedCallback,
+    MOCK_METHOD4(OnSessionStartedCallback,
                  int32_t(
                    const transport_manager::ConnectionUID& connection_handle,
-                   const uint8_t& session_id,
+                   const uint8_t session_id,
                    const protocol_handler::ServiceType& service_type,
-                   const uint8_t& protocol_version,
                    const bool is_protected));
     MOCK_METHOD4(OnSessionEndedCallback,
                  uint32_t(
                    const transport_manager::ConnectionUID& connection_handle,
-                   const uint8_t& sessionId,
+                   const uint8_t sessionId,
                    const uint32_t& hashCode,
                    const protocol_handler::ServiceType& service_type));
     MOCK_METHOD2(KeyFromPair,
@@ -100,6 +99,8 @@ namespace security_manager_test {
     MOCK_METHOD2(SendFramesNumber,
                  void(uint32_t connection_key, int32_t number_of_frames));
     MOCK_METHOD2(SendHeartBeat,
+                 void(int32_t connection_id, uint8_t session_id));
+    MOCK_METHOD2(SendEndSession,
                  void(int32_t connection_id, uint8_t session_id));
   };
   /*

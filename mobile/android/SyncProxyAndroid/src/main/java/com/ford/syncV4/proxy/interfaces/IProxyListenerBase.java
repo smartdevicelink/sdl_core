@@ -55,8 +55,8 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 
-
 public interface IProxyListenerBase extends ISyncDriverDistractionListener,
+<<<<<<< HEAD
         ISyncEncodedSyncPDataListener,
         ISyncSyncPDataListener,
         ISyncTBTClientStateListener {
@@ -86,6 +86,37 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     /**
      * onProxyError() being called indicates that the SYNC Proxy experenced an error.
      *
+=======
+											ISyncEncodedSyncPDataListener,
+											ISyncSyncPDataListener,
+											ISyncTBTClientStateListener {
+
+	/**
+	 * onOnHMIStatus being called indicates that there has been an HMI Level change,
+	 * system context change or audio streaming state change.
+	 * 
+	 * @param notification - Contains information about the HMI Level,
+	 * system context and audio streaming state.
+	 */
+	public void onOnHMIStatus(String appId, OnHMIStatus notification);
+
+	/**
+	 * onProxyClosed has different functionality for the different models.
+	 * In the non-ALM model this indicates that the proxy has experienced an unrecoverable error.
+	 * A new proxy object must be initiated to reestablish connection with SYNC.
+	 * In the ALM model this indicates that the app is no longer registered with SYNC
+	 * All resources on SYNC (addCommands and ChoiceSets) have been deleted and will have to be
+	 * recreated upon the next onReadyForInitialization() call-back. 
+	 * 
+	 * @param info - Includes information about the reason the proxy has been closed.
+	 * @param e - The exception that occurred. 
+	 */
+	public void onProxyClosed(String info, Exception e);
+	
+	/**
+	 * onProxyError() being called indicates that the SYNC Proxy experenced an error.
+	 *
+>>>>>>> develop
      * @param info - Includes information about the Exception that occurred.
      * @param e    - The exception that occurred.
      */
@@ -188,6 +219,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
      *
      * @param response - Contains information about the response sent from SYNC.
      */
+<<<<<<< HEAD
     public void onResetGlobalPropertiesResponse(ResetGlobalPropertiesResponse response);
 
     /**
@@ -303,38 +335,266 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onShowConstantTBTResponse(ShowConstantTBTResponse response);
 
     public void onUpdateTurnListResponse(UpdateTurnListResponse response);
+=======
+	public void onError(String info, Throwable e);
+	
+	
+	/**
+	 * onGenericResponse() being called indicates that SYNC could not determine the
+	 * type of request it is responding to. This is usually result of an unknown RPC Request
+	 * being sent.
+	 * 
+	 * @param response - Includes detailed information about the response.
+	 */
+	public void onGenericResponse(GenericResponse response);
+	
+	/**
+	 * onOnCommand() being called indicates that the user selected a command on SYNC.
+	 * 
+	 * @param notification - Contains information about the command chosen.
+	 */
+	public void onOnCommand(String appId, OnCommand notification);
+	
+	/**
+	 * onAddCommandResponse() being called indicates that SYNC has responded to
+	 * a request to add a command.
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onAddCommandResponse(String appId, AddCommandResponse response);
+	
+	/**
+	 * onAddSubMenuResponse() being called indicates that SYNC has responded to
+	 * a request to add a command.
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onAddSubMenuResponse(String appId, AddSubMenuResponse response);
+	
+	/**
+	 * onCreateInteractionChoiceSetResponse() being called indicates that SYNC has
+	 * responded to a request to add an interactionChoiceSet.
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onCreateInteractionChoiceSetResponse(String appId,
+                                                     CreateInteractionChoiceSetResponse response);
+	
+	/**
+	 * onAlertResponse being called indicates that SYNC has
+	 * responded to a request to alert the user. 
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onAlertResponse(String appId, AlertResponse response);
+	
+	/**
+	 * onDeleteCommandResponse being called indicates that SYNC has
+	 * responded to a request to delete a command. 
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onDeleteCommandResponse(String appId, DeleteCommandResponse response);
+	
+	/**
+	 * onDeleteCommandResponse being called indicates that SYNC has
+	 * responded to a request to delete an interaction choice set. 
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onDeleteInteractionChoiceSetResponse(String appId,
+                                                     DeleteInteractionChoiceSetResponse response);
+	
+	/**
+	 * onDeleteCommandResponse being called indicates that SYNC has
+	 * responded to a request to delete a submenu. 
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onDeleteSubMenuResponse(String appId, DeleteSubMenuResponse response);
+	
+	/**
+	 * onEncodedSyncPDataResponse being called indicates that SYNC has
+	 * responded to a request containing encodedSyncPData. 
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onEncodedSyncPDataResponse(String appId, EncodedSyncPDataResponse response);
 
-    public void onSystemRequestResponse(SystemRequestResponse response);
+	public void onSyncPDataResponse(String appId, SyncPDataResponse response);
+	
+	/**
+	 * onPerformInteractionResponse being called indicates that SYNC has
+	 * responded to a request to perform an interaction. 
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onPerformInteractionResponse(String appId, PerformInteractionResponse response);
+	
+	/**
+	 * onResetGlobalPropertiesResponse being called indicates that SYNC has
+	 * responded to a request to reset global properties. 
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onResetGlobalPropertiesResponse(String appId,
+                                                ResetGlobalPropertiesResponse response);
+	
+	/**
+	 * onSetGlobalPropertiesResponse being called indicates that SYNC has
+	 * responded to a request to set global properties. 
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onSetGlobalPropertiesResponse(String appId, SetGlobalPropertiesResponse response);
+	
+	/**
+	 * onSetMediaClockTimerResponse being called indicates that SYNC has
+	 * responded to a request to set the media clock timer. 
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onSetMediaClockTimerResponse(String appId, SetMediaClockTimerResponse response);
+	
+	/**
+	 * onShowResponse being called indicates that SYNC has
+	 * responded to a request to display information to the user. 
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onShowResponse(String appId, ShowResponse response);
+	
+	/**
+	 * onSpeakResponse being called indicates that SYNC has
+	 * responded to a request to speak information to the user. 
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onSpeakResponse(String appId, SpeakResponse response);
+	
+	/**
+	 * onButtonEvent being called indicates that a button event has occurred. 
+	 * 
+	 * @param notification - Contains information about the notification sent from SYNC.
+	 */
+	public void onOnButtonEvent(String appId, OnButtonEvent notification);
 
+	/**
+	 * onButtonPress being called indicates that SYNC has a button has 
+	 * been pressed by the user. 
+	 * 
+	 * @param notification - Contains information about the notification sent from SYNC.
+	 */
+	public void onOnButtonPress(String appId, OnButtonPress notification);
+	
+	/**
+	 * onSubscribeButtonResponse being called indicates that SYNC has
+	 * responded to a request to subscribe to button events and button presses. 
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onSubscribeButtonResponse(String appId, SubscribeButtonResponse response);
+	
+	/**
+	 * onUnsubscribeButtonResponse being called indicates that SYNC has
+	 * responded to a request to unsubscribe from button events and button presses. 
+	 * 
+	 * @param response - Contains information about the response sent from SYNC.
+	 */
+	public void onUnsubscribeButtonResponse(String appId, UnsubscribeButtonResponse response);
+
+	/**
+	 * onOnPermissionsChange being called indicates that your app permissions have 
+	 * changed due to a policy table change. This can mean your app has received additional
+	 * permissions OR lost permissions.
+	 * 
+	 * @param notification - Contains information about the changed permissions.
+	 */
+	public void onOnPermissionsChange(String appId, OnPermissionsChange notification);
+	
+	public void onSubscribeVehicleDataResponse(String appId, SubscribeVehicleDataResponse response);
+	
+	public void onUnsubscribeVehicleDataResponse(String appId, UnsubscribeVehicleDataResponse response);
+	
+	public void onGetVehicleDataResponse(String appId, GetVehicleDataResponse response);
+	
+	public void onReadDIDResponse(String appId, ReadDIDResponse response);
+	
+	public void onGetDTCsResponse(String appId, GetDTCsResponse response);
+	
+	public void onOnVehicleData(String appId, OnVehicleData notification);
+	
+	public void onPerformAudioPassThruResponse(String appId, PerformAudioPassThruResponse response);
+	
+	public void onEndAudioPassThruResponse(String appId, EndAudioPassThruResponse response);
+	
+	public void onOnAudioPassThru(String appId, OnAudioPassThru notification);
+
+	public void onPutFileResponse(String appId, PutFileResponse response);
+	
+	public void onDeleteFileResponse(String appId, DeleteFileResponse response);
+	
+	public void onListFilesResponse(String appId, ListFilesResponse response);
+
+	public void onSetAppIconResponse(String appId, SetAppIconResponse response);
+	
+	public void onScrollableMessageResponse(String appId, ScrollableMessageResponse response);
+
+	public void onChangeRegistrationResponse(String appId, ChangeRegistrationResponse response);
+
+	public void onSetDisplayLayoutResponse(String appId, SetDisplayLayoutResponse response);
+	
+	public void onOnLanguageChange(String appId, OnLanguageChange notification);
+	
+	public void onSliderResponse(String appId, SliderResponse response);
+
+	public void onAlertManeuverResponse(String appId, AlertManeuverResponse response);
+	
+	public void onShowConstantTBTResponse(String appId, ShowConstantTBTResponse response);
+	
+	public void onUpdateTurnListResponse(String appId, UpdateTurnListResponse response);
+
+    public void onSystemRequestResponse(String appId, SystemRequestResponse response);
+>>>>>>> develop
+
+    public void onMobileNaviStart(String appId);
+
+<<<<<<< HEAD
     public void onMobileNaviStart(boolean encrypted, byte sessionId);
+=======
+    public void onMobileNavAckReceived(String appId, int frameReceivedNumber);
+>>>>>>> develop
 
-    public void onMobileNavAckReceived(int frameReceivedNumber);
+    public void onOnTouchEvent(String appId, OnTouchEvent notification);
 
-    public void onOnTouchEvent(OnTouchEvent notification);
+    public void onKeyboardInput(String appId, OnKeyboardInput msg);
 
-    public void onKeyboardInput(OnKeyboardInput msg);
+    public void onOnSystemRequest(String appId, OnSystemRequest notification);
 
-    public void onOnSystemRequest(OnSystemRequest notification);
+    public void onRegisterAppRequest(String appId, RegisterAppInterface msg);
 
-    void onRegisterAppRequest(RegisterAppInterface msg);
+    public void onAppUnregisteredAfterLanguageChange(String appId, OnLanguageChange msg);
 
-    public void onAppUnregisteredAfterLanguageChange(OnLanguageChange msg);
+    public void onAppUnregisteredReason(String appId, AppInterfaceUnregisteredReason reason);
 
-    public void onAppUnregisteredReason(AppInterfaceUnregisteredReason reason);
+    public void onProtocolServiceEnded(ServiceType serviceType, String appId);
 
-    public void onProtocolServiceEnded(ServiceType serviceType, Byte version, String correlationID);
+    public void onProtocolServiceEndedAck(ServiceType serviceType, String appId);
 
     /**
-     * This callback is to inform SPT that session i going to be started
-     * @param sessionID Id of the session to start with
+     * This callback is to inform SPT that session is going to be started
      */
-    public void onStartSession(byte sessionID);
+    public void onStartSession(String appId);
 
-    public void onSessionStarted(byte sessionID, String correlationID);
+    public void onSessionStarted(String appId);
 
+<<<<<<< HEAD
     public void onAudioServiceStart(boolean encrypted, byte sessionId);
+=======
+    public void onAudioServiceStart(String appId);
+>>>>>>> develop
 
-    public void onStartServiceNackReceived(ServiceType serviceType);
+    public void onStartServiceNackReceived(String appId, ServiceType serviceType);
 
     /**
      * Notification containing an updated hashID which can be used over connection cycles
@@ -342,9 +602,10 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
      * Sent after initial registration and subsequently after any change in the calculated hash
      * of all persisted app data.
      *
+     * @param appId Id of the Application for the particular Notification
      * @param onHashChange {@link com.ford.syncV4.proxy.rpc.OnHashChange} notification
      */
-    public void onHashChange(OnHashChange onHashChange);
+    public void onHashChange(String appId, OnHashChange onHashChange);
 
     /**
      * Notify that {@link com.ford.syncV4.protocol.enums.ServiceType#Secure_Service} has been
@@ -358,7 +619,8 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
      */
     public void onUSBNoSuchDeviceException();
 
-    public void onDiagnosticMessageResponse(DiagnosticMessageResponse diagnosticMessageResponse);
+    public void onDiagnosticMessageResponse(String appId,
+                                            DiagnosticMessageResponse diagnosticMessageResponse);
 
     public void onRPCServiceStart(boolean encrypted, byte sessionId);
     /**
@@ -367,5 +629,10 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
      *
      * @param putFile {@link com.ford.syncV4.proxy.rpc.PutFile}
      */
+<<<<<<< HEAD
     public void onPutFileRequest(PutFile putFile);
 }
+=======
+    public void onPutFileRequest(String appId, PutFile putFile);
+}
+>>>>>>> develop

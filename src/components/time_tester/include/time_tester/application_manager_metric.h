@@ -30,12 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_H_
-#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_H_
+#ifndef SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_WRAPPER_H_
+#define SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_WRAPPER_H_
 
 #include <string>
 
-#include "metric.h"
+#include "metric_wrapper.h"
 #include "application_manager_observer.h"
 
 
@@ -43,12 +43,14 @@ namespace time_tester {
 
 class ApplicationManagerObserver;
 
-class ApplicationManagerMetric: public Metric {
+class ApplicationManagerMetricWrapper: public MetricWrapper {
 
   public:
     utils::SharedPtr<application_manager::AMMetricObserver::MessageMetric> message_metric;
-    std::string GetStyledString();
+
+  protected:
+    virtual Json::Value GetJsonMetric();
 };
 
 }
-#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_H_
+#endif  // SRC_COMPONENTS_TIME_TESTER_INCLUDE_TIME_TESTER_APPLICATION_MANAGER_MECTRIC_WRAPPER_H_

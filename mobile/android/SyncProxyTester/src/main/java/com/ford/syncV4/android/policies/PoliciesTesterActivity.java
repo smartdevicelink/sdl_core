@@ -2,9 +2,9 @@ package com.ford.syncV4.android.policies;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Base64;
@@ -18,18 +18,15 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.ScrollView;
 import android.widget.Spinner;
-import android.widget.TextView;
 
 import com.ford.syncV4.android.R;
-import com.ford.syncV4.android.adapters.LogAdapter;
+import com.ford.syncV4.android.activity.PlaceholderFragment;
 import com.ford.syncV4.android.service.EncodedSyncPDataHeader;
 import com.ford.syncV4.android.service.IProxyServiceConnection;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.android.service.ProxyServiceBinder;
 import com.ford.syncV4.android.service.ProxyServiceConnectionProxy;
-import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.rpc.EncodedSyncPData;
 import com.ford.syncV4.util.logger.Logger;
 
@@ -58,33 +55,21 @@ import java.util.Scanner;
 import java.util.Vector;
 
 @SuppressLint("NewApi")
-public class PoliciesTesterActivity extends Activity implements OnClickListener, IProxyServiceConnection {
-
-    private static final int SOCKET_TIMEOUT = 3;
-    /**
-     * Called when the activity is first created.
-     */
+public class PoliciesTesterActivity extends Activity implements OnClickListener,
+        IProxyServiceConnection {
 
     protected static UIMessageAdapter _UImsgAdapter1 = null;
     private static final String LOG_TAG = "PoliciesTestApp";
-    boolean isSYNCPaired = false;
-    boolean fullUIDebug = false;
-    boolean startAdWithAlert = false;
-    boolean useSYNCTTS = false;
-    boolean endWithSurvey = false;
-    private static LogAdapter _msgAdapter;
-    private static SyncProxyALM _syncProxy;
     private int requestCounter = 1;
 
+    // TODO : Refactor it
     protected static byte[] _ESN;
+    private static String sAppId = PlaceholderFragment.EMPTY_APP_ID;
+
     static EncodedSyncPDataHeader _encodedSyncPDataHeader;
 
-    private static BluetoothAdapter _btAdapter = null;
     protected static PoliciesTesterActivity _instance = null;
-    //protected PostThreadActivity _postThreadActivity;
 
-    private TextView _console = null;
-    private ScrollView _scroller = null;
     private ListView _listview = null;
     private Spinner spinner2;
     private Spinner spinner3;
@@ -109,8 +94,11 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
     }
 
     public static void setHeader(EncodedSyncPDataHeader encodedSyncPDataHeader) {
-        Logger.i("syncp", "_encodedSyncPDataHeader = encodedSyncPDataHeader");
         _encodedSyncPDataHeader = encodedSyncPDataHeader;
+    }
+
+    public static void setAppId(String value) {
+        sAppId = value;
     }
 
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -173,10 +161,8 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
 
         setContentView(R.layout.policiesmain);
 
-        setRequestedOrientation(1);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
-        _console = (TextView) findViewById(R.id.console);
-        _scroller = (ScrollView) findViewById(R.id.scrollConsole);
         _listview = (ListView) findViewById(R.id.messageList);
         _UImsgAdapter1 = new UIMessageAdapter(this, R.layout.policiesrow);
         _listview.setClickable(true);
@@ -186,13 +172,13 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
 
         _listview.setOnItemClickListener(new OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Object listObj = parent.getItemAtPosition(position);
+                //Object listObj = parent.getItemAtPosition(position);
             }
         });
         addItemsOnSpinner2();
         addItemsOnSpinner3();
         addItemsOnSpinner4();
-        requestGPStoGetESN();
+        requestGPStoGetESN(sAppId);
         // Create and Start the AppLink Service
         //startAppLinkService();
 
@@ -258,7 +244,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
         return this;
     }
 
-    public void requestGPStoGetESN() {
+    public void requestGPStoGetESN(final String appId) {
         //EncodedSyncPData
         EncodedSyncPData msg = new EncodedSyncPData();
         Vector<String> syncPData = new Vector<String>();
@@ -267,7 +253,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
         msg.setCorrelationID(6000);
 
         if (mBoundProxyService != null) {
-            mBoundProxyService.syncProxySendRPCRequest(msg);
+            mBoundProxyService.sendRPCRequestWithPreprocess(appId, msg);
         }
     }
 
@@ -317,13 +303,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
     }
 
     public void onClick(View v) {
-        // TODO Auto-generated method stub
         if (v == findViewById(R.id.btnSend)) {
-            //logMessage("starting");
-            //runOnUiThread(new Runnable() {
-            //	public void run() { _UImsgAdapter1.add("starting"); }
-            //});
-
             //get timeout value
             EditText editText = (EditText) findViewById(R.id.timeoutInput);
             String editTextStr = editText.getText().toString();
@@ -527,7 +507,8 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                             Logger.i("syncp", "msg: " + msg);
 
                             if (mBoundProxyService != null) {
-                                mBoundProxyService.syncProxySendRPCRequest(msg);
+                                mBoundProxyService.sendRPCRequestWithPreprocess(sAppId,
+                                        msg);
                             }
                         } catch (UnsupportedEncodingException e) {
                             Logger.e("SyncProxyTester", e.toString());

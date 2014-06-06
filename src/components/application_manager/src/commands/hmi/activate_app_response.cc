@@ -57,6 +57,7 @@ void ActivateAppResponse::Run() {
       LOG4CXX_ERROR(logger_, "Error hmi_app_id = "<< hmi_app_id);
       return;
     }
+    // Need to use here application by hmi app ID
     ApplicationSharedPtr application = ApplicationManagerImpl::instance()->
                                        application_by_hmi_app(hmi_app_id);
     if (application) {

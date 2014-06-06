@@ -49,8 +49,6 @@
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
-#include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "config_profile/profile.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
@@ -76,8 +74,11 @@ TransportManagerImpl::TransportManagerImpl()
       event_queue_thread_(),
       device_listener_thread_wakeup_(),
       is_initialized_(false),
-      connection_id_counter_(0),
-      metric_observer_(NULL) {
+      connection_id_counter_(0)
+#ifdef TIME_TESTER
+      , metric_observer_(NULL)
+#endif  // TIME_TESTER
+{
   LOG4CXX_INFO(logger_, "==============================================");
 #ifdef USE_RWLOCK
   pthread_rwlock_init(&message_queue_rwlock_, NULL);
@@ -622,7 +623,14 @@ void TransportManagerImpl::EventListenerThread(void) {
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED
             : {
+          LOG4CXX_INFO(logger_, "Event ON_DEVICE_LIST_UPDATED");
           OnDeviceListUpdated(ta);
+          break;
+        }
+        case TransportAdapterListenerImpl::EventTypeEnum::ON_APPLICATION_LIST_UPDATED: {
+          LOG4CXX_INFO(logger_, "Event ON_APPLICATION_LIST_UPDATED");
+          device_handle = converter_.UidToHandle(device_id);
+          RaiseEvent(&TransportManagerListener::OnApplicationListUpdated, device_handle);
           break;
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE: {
@@ -713,9 +721,11 @@ void TransportManagerImpl::EventListenerThread(void) {
             break;
           }
           data->set_connection_key(connection->id);
+#ifdef TIME_TESTER
           if (metric_observer_) {
             metric_observer_->StopRawMsg(data.get());
           }
+#endif  // TIME_TESTER
           RaiseEvent(&TransportManagerListener::OnTMMessageReceived, data);
           break;
         }
@@ -744,6 +754,7 @@ void TransportManagerImpl::EventListenerThread(void) {
             RaiseEvent(&TransportManagerListener::OnUnexpectedDisconnect,
                        connection->id,
                        *static_cast<CommunicationError*>(error));
+            RemoveConnection(connection->id);
           } else {
             LOG4CXX_ERROR(logger_, "Connection ('" << device_id << ", "
                                                    << app_handle
@@ -769,9 +780,12 @@ void TransportManagerImpl::EventListenerThread(void) {
   LOG4CXX_INFO(logger_, "Event listener thread finished");
 }
 
+#ifdef TIME_TESTER
 void TransportManagerImpl::SetTimeMetricObserver(TMMetricObserver* observer) {
   metric_observer_ = observer;
 }
+#endif  // TIME_TESTER
+
 void* TransportManagerImpl::MessageQueueStartThread(void* data) {
   if (NULL != data) {
     static_cast<TransportManagerImpl*>(data)->MessageQueueThread();

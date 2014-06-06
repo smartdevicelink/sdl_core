@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Ford Motor Company
+# Copyright (c) 2014, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,7 +41,6 @@ option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OF
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
 option(BUILD_MME_SUPPORT "Apple devices support" OFF)
-option(MME_MQ "PASA mqueue event system for Apple devices" ON)
 option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
 option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
@@ -60,9 +59,17 @@ set(MEDIA_MODE_OPTION 	"$ENV{MEDIA_MODE}")
 set(HMI_ADAPTER_OPTION 	"$ENV{HMI_ADAPTER}")
 set(ENABLE_LOG_OPTION 	"$ENV{ENABLE_LOG}")
 
+add_custom_target(pasa-tarball
+  COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} PASA
+  COMMAND tar -czv -C /tmp/PASA -f ${CMAKE_BINARY_DIR}/pasa.tar.gz .
+  DEPENDS HMI_API MOBILE_API v4_protocol_v1_2_no_extra
+)
+
 if (OS_TYPE_OPTION)
   if (${OS_TYPE_OPTION} STREQUAL "QNX")
     message(STATUS "Jenkins integration: set build process for QNX")
+    #do not use include after project() command. 
+    #Such usecase results in infinite cycle of reinitialization of compiler and other variables
     INCLUDE("./qnx_6.5.0_linux_x86.cmake")
     #tests are not supported yet for QNX build
     set (BUILD_TESTS OFF)
@@ -92,7 +99,7 @@ endif()
 if (DEBUG_OPTION)
   if (${DEBUG_OPTION} STREQUAL "DBG_OFF")
     message(STATUS "Jenkins integration: build release version")
-    set (CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
   endif()
 endif()
 
@@ -118,7 +125,6 @@ endif()
 
 #Jenkins integration section end
 
-# This command must be here after Jenkins integration section
 project (${PROJECT})
 
 #ADD_DEPENDENCIES(${PROJECT} Policy)
@@ -127,7 +133,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Please do not change compiler/linker flags if You do not know how particular
 # flag is handled by CMake
-set(CMAKE_INSTALL_PREFIX .)
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
 set(CMAKE_CXX_FLAGS "-fPIC -g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized")
 if (ENABLE_GCOV)
@@ -156,9 +162,6 @@ endif()
 
 if (BUILD_MME_SUPPORT)
   add_definitions(-DMME_SUPPORT)
-  if (MME_MQ)
-    add_definitions(-DMME_MQ)
-  endif(MME_MQ)
 endif(BUILD_MME_SUPPORT)
 
 if (BUILD_AVAHI_SUPPORT)
@@ -322,12 +325,26 @@ if (HMIADAPTER STREQUAL "mqueue")
     add_definitions(-DHMI_JSON_API)
 endif()
 
+# --- 3rd party libs
+set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party)
+set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/3rd_party)
+add_subdirectory(${3RD_PARTY_SOURCE_DIRECTORY} ${3RD_PARTY_BINARY_DIRECTORY} EXCLUDE_FROM_ALL)
+add_custom_target(3rd_party
+  make
+  WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+)
+add_custom_target(install-3rd_party
+  make install
+  DEPENDS 3rd_party
+  WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+)
+
 if(BUILD_TESTS)
-    add_definitions(-DBUILD_TESTS)
+  add_definitions(-DBUILD_TESTS)
 endif()
 
-# --- ThirdPartyLibs
-add_subdirectory(./src/thirdPartyLibs)
+# --- 3rd party libs (static)
+add_subdirectory(./src/3rd_party-static)
 
 # --- Tools
 add_subdirectory(./tools)
@@ -347,7 +364,7 @@ if(BUILD_TESTS)
     include(Dart)
     # Framework GoogleTest is also integrated together gmock
     # and must not be added separately
-    add_subdirectory(./src/thirdPartyLibs/gmock-1.7.0)
+    add_subdirectory(./src/3rd_party-static/gmock-1.7.0)
     add_subdirectory(./test)
 endif()
 
@@ -374,5 +391,4 @@ FIND_PACKAGE(Doxygen)
     MESSAGE(STATUS "To enable processing of MscGen comments please install mscgen")
     MESSAGE(STATUS "sudo apt-get install mscgen")
 ENDIF(DOXYGEN_FOUND)
-
 

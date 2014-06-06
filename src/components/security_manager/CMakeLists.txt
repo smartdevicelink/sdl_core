@@ -4,6 +4,7 @@ include_directories(
   ../transport_manager/include/
   ../connection_handler/include
   ../utils/include/
+  ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
 )
 

@@ -11,8 +11,17 @@
         android:layout_height="wrap_content"
         android:text="Play/Pause" />
 
+<<<<<<< HEAD
     <Button
         android:id="@+id/btnServices"
+=======
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"/>
+    </TableLayout>
+
+    <TableLayout
+>>>>>>> develop
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:text="Services: Open / Close" />
@@ -24,10 +33,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+<<<<<<< HEAD
         <LinearLayout
 
             xmlns:tools="http://schemas.android.com/tools"
             android:orientation="vertical"
+=======
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:id="@+id/btnPlayPause"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Play/Pause"/>
+        </TableRow>
+>>>>>>> develop
 
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
@@ -41,6 +64,7 @@
             <RelativeLayout
                 android:layout_marginBottom="10dp"
                 android:layout_width="wrap_content"
+<<<<<<< HEAD
                 android:layout_height="wrap_content">
 
                 <CheckBox
@@ -98,6 +122,18 @@
                 android:textSize="18sp"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
+=======
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:enabled="true"
+                android:text="Send Message"/>
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/LinearLayout05"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+>>>>>>> develop
 
             <fragment
                 android:id="@+id/videoFragment"
@@ -107,11 +143,19 @@
                 android:layout_marginBottom="10dp"
                 tools:layout="@layout/activity_mobile_nav_preview" />
 
+<<<<<<< HEAD
             <TextView
                 android:text="Audio Service"
                 android:textSize="18sp"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
+=======
+        <TableRow
+            android:id="@+id/LinearLayout06"
+            android:layout_width="fill_parent"
+            android:paddingTop="5dip"
+            android:layout_height="wrap_content">
+>>>>>>> develop
 
             <fragment
                 android:id="@+id/audioFragment"
@@ -120,6 +164,7 @@
                 android:layout_height="wrap_content"
                 tools:layout="@layout/activity_audio_service_preview" />
 
+<<<<<<< HEAD
         </LinearLayout>
     </ScrollView>
 
@@ -133,5 +178,16 @@
         android:id="@+id/messageList"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent" />
+=======
+        </TableRow>
+
+    </TableLayout>
+
+    <ListView
+        android:id="@+id/messageList"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:visibility="visible"/>
+>>>>>>> develop
 
 </LinearLayout>

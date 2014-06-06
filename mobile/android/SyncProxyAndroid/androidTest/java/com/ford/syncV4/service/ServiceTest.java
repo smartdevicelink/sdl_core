@@ -4,9 +4,10 @@ import android.test.AndroidTestCase;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.session.Session;
+import com.ford.syncV4.session.SessionTest;
 
 /**
- * Created by Andrew Batutin on 1/21/14.
+ * Created by Andrew Batutin on 1/21/14
  */
 public class ServiceTest extends AndroidTestCase {
 
@@ -16,10 +17,11 @@ public class ServiceTest extends AndroidTestCase {
     }
 
     public void testServiceIdIsSet() throws Exception {
+        Session session = SessionTest.getInitializedSession();
         Service service = new Service();
-        Session session = new Session();
-        service.setSession(session);
-        assertEquals("service id should be 1", session, service.getSession());
+        service.setAppId(SessionTest.APP_ID);
+        assertEquals("service id should be 1", session.getAppIdBySessionId(SessionTest.SESSION_ID),
+                service.getAppId());
     }
 
     public void testServiceTypeIsSet() throws Exception {

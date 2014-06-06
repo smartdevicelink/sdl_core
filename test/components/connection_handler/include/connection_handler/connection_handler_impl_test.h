@@ -73,7 +73,7 @@ class ConnectionHandlerTest: public ::testing::Test {
     start_session_id =
         connection_handler_->OnSessionStartedCallback(uid, 0,
                                                       protocol_handler::kRpc,
-                                                      PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                      PROTECTION_OFF);
     EXPECT_NE(start_session_id, -1);
     connection_key = connection_handler_->KeyFromPair(uid,
                                                       start_session_id);
@@ -141,7 +141,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Fial_NoConnection) {
   const int32_t result_fail =
       connection_handler_->OnSessionStartedCallback(uid, sessionID,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_ON);
+                                                    PROTECTION_ON);
   //Unknown connection error is '-1'
   EXPECT_EQ(result_fail, -1);
   EXPECT_TRUE(connection_handler_->getConnectionList().empty());
@@ -155,7 +155,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_RPC) {
   const int32_t session_id_on_rpc_secure =
       connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_NE(session_id_on_rpc_secure, -1);
   const ConnectionList& connection_list = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list.empty());
@@ -178,7 +178,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Audio) {
   const int32_t session_id =
       connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_NE(session_id, -1);
   const ConnectionList& connection_list = connection_handler_->getConnectionList();
   EXPECT_EQ(connection_list.size(), 1);
@@ -188,7 +188,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Audio) {
   const int32_t session_id_on_start_secure =
       connection_handler_->OnSessionStartedCallback(uid, session_id,
                                                     protocol_handler::kAudio,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_EQ(session_id_on_start_secure, session_id);
   ConnectionList& connection_list_new = connection_handler_->getConnectionList();
   EXPECT_EQ(connection_list.size(), 1);
@@ -203,7 +203,7 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
   const int32_t session_id =
       connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_NE(session_id, -1);
   const ConnectionList& connection_list = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list.empty());
@@ -213,7 +213,7 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
   const int32_t session_id_on_start_secure =
       connection_handler_->OnSessionStartedCallback(uid, session_id,
                                                     protocol_handler::kAudio,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_EQ(session_id_on_start_secure, session_id);
   ConnectionList& connection_list_start_secure = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list_start_secure.empty());
@@ -239,7 +239,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Unprote
   const int32_t session_id_fail =
       connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_EQ(session_id_fail, -1);
 
   //Allow start kRPC without encryption
@@ -248,7 +248,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Unprote
   const int32_t session_id =
       connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_NE(session_id, -1);
   CheckService(uid, session_id, protocol_handler::kRpc, NULL, PROTECTION_OFF);
 }
@@ -262,7 +262,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Protect
   const int32_t session_id_fail =
       connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_ON);
+                                                    PROTECTION_ON);
   EXPECT_EQ(session_id_fail, -1);
 
   //Allow start kRPC with encryption
@@ -271,7 +271,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Protect
   const int32_t session_id =
       connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_ON);
+                                                    PROTECTION_ON);
   EXPECT_NE(session_id, -1);
 
   //Protection steal FALSE because of APPlink Protocol implementation
@@ -285,7 +285,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Unprote
   const int32_t session_id =
       connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_NE(session_id, -1);
   CheckService(uid, session_id, protocol_handler::kRpc, NULL, PROTECTION_OFF);
 
@@ -298,7 +298,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Unprote
   const int32_t session_id2 =
       connection_handler_->OnSessionStartedCallback(uid, session_id,
                                                     protocol_handler::kAudio,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_EQ(session_id2, -1);
 
   //Allow start kAudio without encryption
@@ -306,7 +306,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Unprote
   const int32_t session_id3 =
       connection_handler_->OnSessionStartedCallback(uid, session_id,
                                                     protocol_handler::kAudio,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_NE(session_id3, -1);
   EXPECT_EQ(session_id3, session_id);
   CheckService(uid, session_id3, protocol_handler::kRpc, NULL, PROTECTION_OFF);
@@ -318,7 +318,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Protect
   const int32_t session_id =
       connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_NE(session_id, -1);
   CheckService(uid, session_id, protocol_handler::kRpc, NULL, PROTECTION_OFF);
 
@@ -331,7 +331,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Protect
   const int32_t session_id2 =
       connection_handler_->OnSessionStartedCallback(uid, session_id,
                                                     protocol_handler::kAudio,
-                                                    PROTOCOL_VERSION_3, PROTECTION_ON);
+                                                    PROTECTION_ON);
   EXPECT_EQ(session_id2, -1);
 
   //Allow start kAudio without encryption
@@ -339,7 +339,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_StartService_SecureSpecific_Protect
   const int32_t session_id3 =
       connection_handler_->OnSessionStartedCallback( uid, session_id,
                                                      protocol_handler::kAudio,
-                                                     PROTOCOL_VERSION_3, PROTECTION_ON);
+                                                     PROTECTION_ON);
   EXPECT_NE(session_id3, -1);
   EXPECT_EQ(session_id3, session_id);
   CheckService(uid, session_id3, protocol_handler::kAudio, NULL, PROTECTION_ON);
@@ -351,7 +351,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
   const int32_t session_id =
       connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_NE(session_id, -1);
   CheckService(uid, session_id, protocol_handler::kRpc, NULL, PROTECTION_OFF);
 
@@ -359,7 +359,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
   const int32_t session_id_new =
       connection_handler_->OnSessionStartedCallback(uid, session_id,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_ON);
+                                                    PROTECTION_ON);
   EXPECT_EQ(session_id_new, session_id);
   CheckService(uid, session_id, protocol_handler::kRpc, NULL, PROTECTION_ON);
 
@@ -367,7 +367,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
   const int32_t session_id2 =
       connection_handler_->OnSessionStartedCallback(uid, session_id,
                                                     protocol_handler::kAudio,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_EQ(session_id2, session_id);
   CheckService(uid, session_id, protocol_handler::kAudio, NULL, PROTECTION_OFF);
 
@@ -375,7 +375,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtect) {
   const int32_t session_id3 =
       connection_handler_->OnSessionStartedCallback(uid, session_id,
                                                     protocol_handler::kAudio,
-                                                    PROTOCOL_VERSION_3, PROTECTION_ON);
+                                                    PROTECTION_ON);
   EXPECT_EQ(session_id3, session_id);
   CheckService(uid, session_id, protocol_handler::kAudio, NULL, PROTECTION_ON);
 }
@@ -385,14 +385,14 @@ TEST_F(ConnectionHandlerTest, SessionStarted_DealyProtectBulk) {
   const int32_t session_id =
       connection_handler_->OnSessionStartedCallback(uid, 0,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_OFF);
+                                                    PROTECTION_OFF);
   EXPECT_NE(session_id, -1);
   CheckService(uid, session_id, protocol_handler::kRpc, NULL, PROTECTION_OFF);
 
   const int32_t session_id_new =
       connection_handler_->OnSessionStartedCallback(uid, session_id,
                                                     protocol_handler::kBulk,
-                                                    PROTOCOL_VERSION_3, PROTECTION_ON);
+                                                    PROTECTION_ON);
   EXPECT_EQ(session_id_new, session_id);
   CheckService(uid, session_id, protocol_handler::kRpc, NULL, PROTECTION_ON);
 }
@@ -493,7 +493,7 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByProtectedService) {
   const int32_t session_id =
       connection_handler_->OnSessionStartedCallback(uid, start_session_id,
                                                     protocol_handler::kAudio,
-                                                    PROTOCOL_VERSION_3, PROTECTION_ON);
+                                                    PROTECTION_ON);
   EXPECT_EQ(session_id, start_session_id);
   CheckService(uid, start_session_id, protocol_handler::kAudio, &mock_ssl_context, true);
 
@@ -521,7 +521,7 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtecteRPC) {
   const int32_t session_id =
       connection_handler_->OnSessionStartedCallback(uid, start_session_id,
                                                     protocol_handler::kRpc,
-                                                    PROTOCOL_VERSION_3, PROTECTION_ON);
+                                                    PROTECTION_ON);
   EXPECT_EQ(session_id, start_session_id);
   CheckService(uid, start_session_id, protocol_handler::kRpc, &mock_ssl_context, true);
 
@@ -553,7 +553,7 @@ TEST_F(ConnectionHandlerTest, GetSSLContext_ByDealyProtecteBulk) {
   const int32_t session_id =
       connection_handler_->OnSessionStartedCallback(uid, start_session_id,
                                                     protocol_handler::kBulk,
-                                                    PROTOCOL_VERSION_3, PROTECTION_ON);
+                                                    PROTECTION_ON);
   EXPECT_EQ(session_id, start_session_id);
   CheckService(uid, start_session_id, protocol_handler::kRpc, &mock_ssl_context, true);
 

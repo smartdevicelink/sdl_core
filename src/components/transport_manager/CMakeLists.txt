@@ -8,8 +8,9 @@ include_directories (
   ../connection_handler/include
   ../config_profile/include
   ../resumption/include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/libusbx-1.0.16
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${LIBUSB_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 if (BUILD_BT_SUPPORT)
   include_directories(
@@ -71,6 +72,8 @@ if (BUILD_MME_SUPPORT)
   list (APPEND SOURCES
     src/mme/mme_transport_adapter.cc
     src/mme/mme_device.cc
+    src/mme/iap_device.cc
+    src/mme/iap2_device.cc
     src/mme/mme_device_scanner.cc
     src/mme/mme_connection_factory.cc
     src/mme/iap_connection.cc
@@ -89,9 +92,6 @@ endif(BUILD_USB_SUPPORT)
 if (BUILD_MME_SUPPORT)
   target_link_libraries (${target} ipod)
   target_link_libraries (${target} iap2client)
-  if(NOT MME_MQ)
-    target_link_libraries (${target} mme)
-  endif()
   target_link_libraries (${target} qdb)
 endif(BUILD_MME_SUPPORT)
 
@@ -100,7 +100,7 @@ if (BUILD_AVAHI_SUPPORT)
 endif()
 
 if(ENABLE_LOG)
-  target_link_libraries(${target} log4cxx)
+  target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
 if (BUILD_BT_SUPPORT)

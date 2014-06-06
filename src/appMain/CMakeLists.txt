@@ -9,7 +9,7 @@ cmake_policy(PUSH)
 # make link_directories() treat paths relative to the source dir
 # info: cmake --help-policy CMP0015
 cmake_policy(SET CMP0015 NEW)
-link_directories(../thirdPartyLibs/libusbx)
+link_directories(${LIBUSB_LIBS_DIRECTORY})
 cmake_policy(POP)
 
 if (EXTENDED_MEDIA_MODE)
@@ -47,8 +47,6 @@ set(LIBRARIES
   RequestWatchdog
   MediaManager
   Resumption
-  apr-1
-  aprutil-1
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -68,10 +66,16 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 endif()
 
+if(ENABLE_LOG)
+  list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
+endif()
+
 include_directories (
   ./
   ../components/protocol_handler/include/
-  ../thirdPartyLibs/jsoncpp/include/
+  ${JSONCPP_INCLUDE_DIRECTORY}
   ../components/application_manager/include
   ../components/formatters/include
   ../components/transport_manager/include
@@ -86,14 +90,15 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/time_tester/include
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
   ../components/resumption/include/
-  ../thirdPartyLibs/MessageBroker/include
-  ../thirdPartyLibs/encryption/include
+  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
+  ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/components/
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
   ${CMAKE_BINARY_DIR}/src/components/policy/src/policy
   ${CMAKE_SOURCE_DIR}
   ${default_media_inc}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES

@@ -36,10 +36,10 @@ public class SyncProxyTesterTest extends ActivityInstrumentationTestCase2<SyncPr
 
     // Preconditions
 
-    public void testShowVideoPreviewButtonInflated() {
+    /*public void testShowVideoPreviewButtonInflated() {
         View view = sut.findViewById(R.id.videoFragment);
         assertNotNull("Button should be inflated", view);
-    }
+    }*/
 
 
     public void testStaticFileReader() throws Exception {

@@ -178,6 +178,7 @@ void MediaManagerImpl::StartMicrophoneRecording(
       LOG4CXX_WARN(logger_, "Could not remove file " << output_file);
     }
   }
+#ifndef CUSTOMER_PASA
   const std::string record_file_source =
       profile::Profile::instance()->app_resourse_folder() + "/" +
       profile::Profile::instance()->recording_file_source();
@@ -194,6 +195,7 @@ void MediaManagerImpl::StartMicrophoneRecording(
   else {
     LOG4CXX_WARN(logger_, "Could not read file " << record_file_source);
   }
+#endif
 #endif
   from_mic_listener_->OnActivityStarted(application_key);
 }

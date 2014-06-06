@@ -46,6 +46,10 @@ class MmeTransportAdapter : public TransportAdapterImpl {
   virtual DeviceType GetDeviceType() const;
   virtual bool IsInitialised() const;
   virtual TransportAdapter::Error Init();
+// this method is reimplemented
+// to avoid ON_APPLICATION_LIST_UPDATED event throw
+// and to connect to new applications on MME device
+  virtual void ApplicationListUpdated(const DeviceUID& device_handle);
   virtual bool ToBeAutoConnected(DeviceSptr device) const;
 
  private:

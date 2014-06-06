@@ -1,14 +1,13 @@
 include_directories (
-  ./include/
-  ../../../src/thirdPartyLibs/gmock-1.7.0/include
-  ../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
+  ${GMOCK_INCLUDE_DIRECTORY}
+  ./include
   ../../../src/components/transport_manager/include
   ../../../src/components/utils/include
   ../../../src/components/protocol_handler/include
   ../../../src/components/connection_handler/include
   ../../../src/components/security_manager/include
-  ../security_manager/include
   ../../../src/components/config_profile/include
+  ../security_manager/include
   ${CMAKE_BINARY_DIR}/src/components/
 )
 

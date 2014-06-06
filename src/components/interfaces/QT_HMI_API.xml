@@ -955,10 +955,10 @@
 
 <enum name="RequestType">
     <description>Enumeration listing possible asynchronous requests.</description>
-    <element name="HTTP" />   
+    <element name="HTTP" />
     <element name="FILE_RESUME" />
-    <element name="AUTH_REQUEST" />       
-    <element name="AUTH_CHALLENGE" />       
+    <element name="AUTH_REQUEST" />
+    <element name="AUTH_CHALLENGE" />
     <element name="AUTH_ACK" />
     <element name="PROPRIETARY" />
 </enum>
@@ -1095,11 +1095,23 @@
 </enum>
 
 <enum name="SpeakType">
-  <description>Defines the type of the request which causes text-to-speech prompt</description> 
-  <element name="ALERT" /> 
-  <element name="SPEAK" /> 
+  <description>Defines the type of the request which causes text-to-speech prompt</description>
+  <element name="ALERT" />
+  <element name="SPEAK" />
 </enum>
 
+<enum name="AlertType">
+<description>Defines the type of the request which causes text-to-speech prompt</description>
+<element name="UI" />
+<element name="BOTH" />
+</enum>
+
+<enum name="HMILevel">
+  <element name="FULL"/>
+  <element name="LIMITED" />
+  <element name="BACKGROUND"/>
+  <element name="NONE"/>
+</enum>
 
 <!-- Policies -->
 <enum name="UpdateResult">
@@ -1118,13 +1130,12 @@
     <element name="GUI"/>
     <element name="VUI" />
   </enum>
-
   <enum name="DeviceState">
     <element name="UNKNOWN"/>
     <element name="UNPAIRED"/>
   </enum>
-
   <struct name="UserFriendlyMessage" scope="internal">
+    <param name="messageCode" type="String" mandatory="true"/>
     <param name="ttsString" type="String" mandatory="false"/>
     <param name="label" type="String" mandatory="false" />
     <param name="line1" type="String" mandatory="false"/>
@@ -1489,7 +1500,7 @@
     	Desired keypress mode.
     	If omitted, this value will be set to RESEND_CURRENT_ENTRY.
     </description>
-  </param> 
+  </param>
   <param name="limitedCharacterList" type="String" maxlength="1" minsize="1" maxsize="100" array="true" mandatory="false">
     <description>Array of keyboard characters to enable.</description>
     <description>All omitted characters will be greyed out (disabled) on the keyboard.</description>
@@ -1942,6 +1953,9 @@
       </param>
       <param name="priority" type="Common.AppPriority" mandatory="false">
         <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
+      </param>
+      <param name="level" type="Common.HMILevel" mandatory="false">
+        <description>If level for application is to be changed to something else then FULL then this parameter should be used.</description>
       </param>
     </function>
     <function name="ActivateApp" messagetype="response">
@@ -2417,6 +2431,9 @@
     </param>
     <param name="progressIndicator" type="Boolean" mandatory="false">
       <description>If supported on the given platform, the alert GUI will include some sort of animation indicating that loading of a feature is progressing.  e.g. a spinning wheel or hourglass, etc.</description>
+    </param>
+    <param name="alertType" type="Common.AlertType" mandatory="true">
+      <description>Defines if only UI or BOTH portions of the Alert request are being sent to HMI Side</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application requested this RPC.</description>
@@ -3067,7 +3084,7 @@
   <!--Qt HMI version of GetVehicleData-->
   <function name="GetGpsData" messagetype="request">
     <param name="appID" type="Integer" mandatory="true">
-      <description>ID of application requested this RPC.</description>
+      <description>ID of application that requested this RPC.</description>
     </param>
   </function>
   <function name="GetGpsData" messagetype="response">

@@ -99,6 +99,7 @@ public class ProtocolFrameHeader {
 	}
 	
 	public String toString() {
+<<<<<<< HEAD
 		String ret = "";
 		ret += "version " + version + ", " + (isEncrypted ? "encrypted" : "unencrypted") + "\n";
 		ret += "frameType " + frameType.getName() + ", serviceType " + serviceType.getName();
@@ -107,6 +108,20 @@ public class ProtocolFrameHeader {
 		ret += ", dataSize " + dataSize;
 		ret += ", messageID " + messageID;
 		return ret;
+=======
+        StringBuilder stringBuilder = new StringBuilder(ProtocolFrameHeader.class.getSimpleName());
+        stringBuilder.append(" {");
+        stringBuilder.append("sesId:").append(sessionID).append(", ");
+        stringBuilder.append("ver:").append(version).append(", ");
+        stringBuilder.append((compressed ? "compr" : "uncompr")).append(", ");
+        stringBuilder.append("frType:").append(frameType.getName()).append(", ");
+        stringBuilder.append("serType:").append(serviceType.getName()).append(", ");
+        stringBuilder.append("frData:").append(frameData).append(", ");
+        stringBuilder.append("dataSize:").append(dataSize).append(", ");
+        stringBuilder.append("msgId:").append(messageID);
+        stringBuilder.append("}");
+		return stringBuilder.toString();
+>>>>>>> develop
 	}
 	
 	public byte getVersion() {

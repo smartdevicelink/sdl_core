@@ -95,6 +95,9 @@ class TransportAdapterImpl : public TransportAdapter,
    **/
   virtual TransportAdapter::Error Init();
 
+  //!!!!!!!!1
+  virtual void ApplicationListUpdated(const DeviceUID& device_handle);
+
   /**
    * @brief Add listener to the container(list) of device adapter listeners.
    *
@@ -238,6 +241,13 @@ class TransportAdapterImpl : public TransportAdapter,
   virtual void SearchDeviceDone(const DeviceVector& devices);
 
   /**
+   * @brief Search for application in device done, if it is not there - adds it.
+   *
+   * @param device Smart pointers to devices.
+   */
+  virtual void SearchApplicationsDone(const DeviceSptr& device);
+
+  /**
    * @brief Launch OnSearchDeviceFailed event in device adapter listener.
    *
    * @param error Error class that contains details of this error situation.
@@ -379,6 +389,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual std::string DeviceName(const DeviceUID& device_id) const;
 
+#ifdef TIME_TESTER
   /**
    * @brief Setup observer for time metric.
    *
@@ -392,6 +403,12 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param return pointer to Time metric observer
    */
   virtual TMMetricObserver* GetTimeMetricObserver();
+#endif  // TIME_TESTER
+
+#ifdef CUSTOMER_PASA
+  virtual TransportAdapter::Error AbortConnection(
+      const DeviceUID& device_handle, const ApplicationHandle& app_handle);
+#endif  // CUSTOMER_PASA
 
  protected:
 
@@ -514,10 +531,12 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   ClientConnectionListener* client_connection_listener_;
 
+#ifdef TIME_TESTER
   /**
    * @brief Pointer to time metric observer
    */
   TMMetricObserver* metric_observer_;
+#endif  // TIME_TESTER
 };
 }  // namespace transport_adapter
 }  // namespace transport_manager

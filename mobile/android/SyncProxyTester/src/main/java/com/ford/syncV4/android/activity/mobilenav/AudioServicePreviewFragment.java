@@ -20,12 +20,15 @@ import java.io.OutputStream;
  */
 public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
 
+<<<<<<< HEAD
     private static final String LOG_TAG = "AudioServicePreviewFragment";
 
+=======
+>>>>>>> develop
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_audio_service_preview, container, true);
+        return inflater.inflate(R.layout.activity_audio_service_preview, container, false);
     }
 
     @Override
@@ -46,7 +49,11 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+<<<<<<< HEAD
                 if (hasServiceInServicesPool(ServiceType.RPC)) {
+=======
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
+>>>>>>> develop
                     changeCheckBoxState();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
@@ -80,6 +87,7 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         mSessionCheckBoxState = new AudioServiceCheckboxState(checkBox, getActivity());
     }
 
+<<<<<<< HEAD
     private void startNotSecureAudioService() {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
         syncProxyTester.startNotSecureAudioService();
@@ -90,15 +98,21 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         syncProxyTester.startAudioServiceEncryption();
     }
 
+=======
+>>>>>>> develop
     private void changeCheckBoxState() {
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
+<<<<<<< HEAD
             tester.startAudioService(false);
+=======
+            tester.startAudioService(getAppId());
+>>>>>>> develop
         } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             mFileStreamingLogic.resetStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.stopAudioService();
+            tester.stopAudioService(getAppId());
             mSessionCheckBoxState.setStateOff();
             //mDataStreamingButton.setEnabled(false);
         }

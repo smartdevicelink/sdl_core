@@ -68,7 +68,7 @@ class ConnectionTest: public ::testing::Test {
   }
   void StartSession() {
     using namespace protocol_handler;
-    session_id = connection_->AddNewSession(PROTOCOL_VERSION_3);
+    session_id = connection_->AddNewSession();
     EXPECT_NE(session_id, -1);
     const SessionMap sessionMap = connection_->session_map();
     EXPECT_FALSE(sessionMap.empty());

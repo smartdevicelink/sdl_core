@@ -137,11 +137,41 @@ bool RegisterAppInterfaceRequest::Init() {
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run " << connection_key());
 
+//Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
+//Flag conditional compilation "CUSTOMER_PASA" is used in order to exclude hit code
+//to RTC
+#ifndef CUSTOMER_PASA
+  if (true == profile::Profile::instance()->launch_hmi()) {
+    // wait till HMI started
+    while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
+      sleep(1);
+      // TODO(DK): timer_->StartWait(1);
+      ApplicationManagerImpl::instance()->updateRequestTimeout(connection_key(),
+                                                               correlation_id(),
+                                                               default_timeout());
+    }
+  }
+#endif
+
+  std::string mobile_app_id = (*message_)[strings::msg_params][strings::app_id]
+                                                               .asString();
+  if (policy::PolicyHandler::instance()->IsApplicationRevoked(mobile_app_id)) {
+    SendResponse(false, mobile_apis::Result::DISALLOWED);
+    return;
+  }
+
   ApplicationSharedPtr application =
     ApplicationManagerImpl::instance()->application(connection_key());
 
   if (application) {
     SendResponse(false, mobile_apis::Result::APPLICATION_REGISTERED_ALREADY);
+    return;
+  }
+
+  mobile_apis::Result::eType policy_result = CheckWithPolicyData();
+  if (mobile_apis::Result::SUCCESS != policy_result
+      && mobile_apis::Result::WARNINGS != policy_result) {
+    SendResponse(false, policy_result);
     return;
   }
 
@@ -163,13 +193,6 @@ void RegisterAppInterfaceRequest::Run() {
   if (mobile_apis::Result::SUCCESS != coincidence_result) {
     LOG4CXX_ERROR_EXT(logger_, "Coincidence check failed.");
     SendResponse(false, coincidence_result);
-    return;
-  }
-
-  mobile_apis::Result::eType policy_result = CheckWithPolicyData();
-  if (mobile_apis::Result::SUCCESS != policy_result
-      && mobile_apis::Result::WARNINGS != policy_result) {
-    SendResponse(false, policy_result);
     return;
   }
 
@@ -491,18 +514,6 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
       return mobile_apis::Result::DUPLICATE_NAME;
     }
 
-    const smart_objects::SmartObject* tts = (*it)->tts_name();
-    std::vector<smart_objects::SmartObject>* curr_tts = NULL;
-    if (NULL != tts) {
-      curr_tts = tts->asArray();
-      CoincidencePredicateTTS t(app_name);
-
-      if (0 != std::count_if((*curr_tts).begin(), (*curr_tts).end(), t)) {
-        LOG4CXX_ERROR(logger_, "Application name is known already.");
-        return mobile_apis::Result::DUPLICATE_NAME;
-      }
-    }
-
     const smart_objects::SmartObject* vr = (*it)->vr_synonyms();
     const std::vector<smart_objects::SmartObject>* curr_vr = NULL;
     if (NULL != vr) {
@@ -515,79 +526,6 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
       }
     }
 
-
-    // tts check
-    if (msg_params.keyExists(strings::tts_name)) {
-
-      const std::vector<smart_objects::SmartObject>* new_tts =
-        msg_params[strings::tts_name].asArray();
-
-      std::vector<smart_objects::SmartObject>::const_iterator it_tts =
-        new_tts->begin();
-
-      std::vector<smart_objects::SmartObject>::const_iterator it_tts_End =
-        new_tts->end();
-
-      for (; it_tts != it_tts_End; ++it_tts) {
-        std::string text = (*it_tts)[strings::text].asString();
-        if (!strcasecmp(cur_name.c_str(), text.c_str())) {
-          LOG4CXX_ERROR(logger_,
-                        "Some TTS parameters names are known already.");
-          return mobile_apis::Result::DUPLICATE_NAME;
-        }
-
-        CoincidencePredicateTTS t((*it_tts)[strings::text].asString());
-        if (NULL != curr_tts
-            &&  0 != std::count_if(curr_tts->begin(), curr_tts->end(), t)) {
-          LOG4CXX_ERROR(logger_,
-                        "Some TTS parameters names are known already.");
-          return mobile_apis::Result::DUPLICATE_NAME;
-        }
-
-        CoincidencePredicateVR v((*it_tts)[strings::text].asString());
-        if (NULL != curr_vr
-            &&  0 != std::count_if(curr_vr->begin(), curr_vr->end(), v)) {
-          LOG4CXX_ERROR(logger_,
-                        "Some TTS parameters names are known already.");
-          return mobile_apis::Result::DUPLICATE_NAME;
-        }
-      }
-    }  // end tts check
-
-    if (msg_params.keyExists(strings::vr_synonyms)) {
-
-      const std::vector<smart_objects::SmartObject>* new_vr =
-        msg_params[strings::vr_synonyms].asArray();
-
-      std::vector<smart_objects::SmartObject>::const_iterator it_vr =
-        new_vr->begin();
-
-      std::vector<smart_objects::SmartObject>::const_iterator it_vr_End =
-        new_vr->end();
-
-      for (; it_vr != it_vr_End; ++it_vr) {
-        std::string vr_synonym = it_vr->asString();
-        if (!strcasecmp(cur_name.c_str(), vr_synonym.c_str())) {
-          LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
-          return mobile_apis::Result::DUPLICATE_NAME;
-        }
-
-        CoincidencePredicateTTS t(it_vr->asString());
-        if (NULL != curr_tts
-            &&  0 != std::count_if(curr_tts->begin(), curr_tts->end(), t)) {
-          LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
-          return mobile_apis::Result::DUPLICATE_NAME;
-        }
-
-        CoincidencePredicateVR v(it_vr->asString());
-        if (NULL != curr_vr
-            &&  0 != std::count_if(curr_vr->begin(), curr_vr->end(), v)) {
-          LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
-          return mobile_apis::Result::DUPLICATE_NAME;
-        }
-      }
-    }  // end vr check
-
   }  // application for end
 
   return mobile_apis::Result::SUCCESS;
@@ -595,9 +533,16 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
 
 mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   LOG4CXX_INFO(logger_, "CheckWithPolicyData");
+  // TODO(AOleynik): Check is necessary to allow register application in case
+  // of disabled policy
+  // Remove this check, when HMI will support policy
+  if (profile::Profile::instance()->policy_turn_off()) {
+    return mobile_apis::Result::WARNINGS;
+  }
+
   smart_objects::SmartObject& message = *message_;
   policy::StringArray app_nicknames;
-  policy::StringArray app_hmi_types;
+  policy::StringArray app_hmi_types; 
 
   // TODO(KKolodiy): need remove method policy_manager
   policy::PolicyManager* policy_manager =
@@ -623,7 +568,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
       LOG4CXX_WARN(logger_,
                    "Application name was not found in nicknames list.");
       //App should be unregistered, if its name is not present in nicknames list
-      return mobile_apis::Result::INVALID_DATA;
+      return mobile_apis::Result::DISALLOWED;
     }
   }
 

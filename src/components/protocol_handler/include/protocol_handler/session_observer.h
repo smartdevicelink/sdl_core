@@ -73,11 +73,9 @@ public:
      */
     virtual int32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
-      const uint8_t& session_id,
+      const uint8_t session_id,
       const protocol_handler::ServiceType& service_type,
-      const uint8_t& protocol_version,
       const bool is_protected) = 0;
-
     /**
      * \brief Callback function used by ProtocolHandler
      * when Mobile Application initiates session ending.
@@ -90,7 +88,7 @@ public:
      */
     virtual uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID& connection_handle,
-      const uint8_t& sessionId,
+      const uint8_t sessionId,
       const uint32_t& hashCode,
       const ServiceType& service_type) = 0;
 

@@ -43,6 +43,7 @@
 
 #include "transport_manager/transport_manager_default.h"
 #include "config_profile/profile.h"
+#include "utils/resource_usage.h"
 
 namespace time_tester {
 
@@ -54,7 +55,8 @@ TimeManager::TimeManager():
   thread_(NULL),
   app_observer(this),
   tm_observer(this),
-  ph_observer(this) {
+  ph_observer(this),
+  streamer_(NULL) {
     ip_ = profile::Profile::instance()->server_address();
     port_ = profile::Profile::instance()->time_testing_port();
 }
@@ -67,7 +69,8 @@ TimeManager::~TimeManager() {
 void TimeManager::Init(protocol_handler::ProtocolHandlerImpl* ph) {
   DCHECK(ph);
   if (!thread_) {
-    thread_ = new threads::Thread("SocketAdapter", new Streamer(this));
+    streamer_ = new Streamer(this);
+    thread_ = new threads::Thread("SocketAdapter", streamer_ );
     application_manager::ApplicationManagerImpl::instance()->SetTimeMetricObserver(&app_observer);
     transport_manager::TransportManagerDefault::instance()->SetTimeMetricObserver(&tm_observer);
     ph->SetTimeMetricObserver(&ph_observer);
@@ -89,8 +92,10 @@ void TimeManager::Stop() {
   LOG4CXX_INFO(logger_, "TimeManager stopped");
 }
 
-void TimeManager::SendMetric(utils::SharedPtr<Metric> metric) {
-  messages_.push(metric);
+void TimeManager::SendMetric(utils::SharedPtr<MetricWrapper> metric) {
+  if ((NULL != streamer_ )&& streamer_->is_client_connected_) {
+    messages_.push(metric);
+  }
 }
 
 TimeManager::Streamer::Streamer(
@@ -121,7 +126,7 @@ void TimeManager::Streamer::threadMain() {
     is_client_connected_ = true;
     while (is_client_connected_) {
       while (!server_->messages_.empty()) {
-        utils::SharedPtr<Metric> metric = server_->messages_.pop();
+        utils::SharedPtr<MetricWrapper> metric = server_->messages_.pop();
         is_client_connected_ = Send(metric->GetStyledString());
       }
 

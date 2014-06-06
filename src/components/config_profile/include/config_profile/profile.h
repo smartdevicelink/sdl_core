@@ -39,6 +39,9 @@
 #include <list>
 #include "utils/macro.h"
 #include "utils/singleton.h"
+#ifdef CUSTOMER_PASA
+#define SDL_INIFILE_PATH     "/fs/mp/etc/AppLink/smartDeviceLink.ini"
+#endif
 
 namespace profile {
 
@@ -208,7 +211,12 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns path to testing file to which redirects audio stream
       */
     const std::string& audio_stream_file() const;
-
+#ifdef CUSTOMER_PASA
+    /**
+      * @brief Returns path to log4cxx configuration file
+      */
+    const std::string& log4cxx_config_file() const;
+#endif
     /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none
@@ -396,6 +404,12 @@ class Profile : public utils::Singleton<Profile> {
      */
     const std::string& recording_file_name() const;
 
+    const std::string& mme_db_name() const;
+
+    const std::string& event_mq_name() const;
+
+    const std::string& ack_mq_name() const;
+
   private:
     /**
      * Default constructor
@@ -521,6 +535,9 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
+    std::string                     mme_db_name_;
+    std::string                     event_mq_name_;
+    std::string                     ack_mq_name_;
     std::string                     recording_file_source_;
     std::string                     recording_file_name_;
 

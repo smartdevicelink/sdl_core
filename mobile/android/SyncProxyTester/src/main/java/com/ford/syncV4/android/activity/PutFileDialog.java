@@ -3,7 +3,6 @@ package com.ford.syncV4.android.activity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -32,24 +31,15 @@ import java.io.File;
  * Date: 1/30/14
  * Time: 2:16 PM
  */
-public class PutFileDialog extends DialogFragment {
+public class PutFileDialog extends BaseDialogFragment {
 
     public interface PutFileDialogListener {
         public void onPutFileSelected(String fileName);
     }
 
-    private static final String LOG_TAG = "PutFileDialog";
-    private static final String CORRELATION_ID_KEY = "CorrelationId";
+    private static final String LOG_TAG = PutFileDialog.class.getSimpleName();
     private static final int PUTFILE_MAXFILESIZE = 4 * 1024 * 1024; // 4MB
     private EditText mSelectedFileNameView;
-
-    public static PutFileDialog newInstance(int commandCorrelationId) {
-        PutFileDialog putFileDialog = new PutFileDialog();
-        Bundle bundle = new Bundle();
-        bundle.putInt(CORRELATION_ID_KEY, commandCorrelationId);
-        putFileDialog.setArguments(bundle);
-        return putFileDialog;
-    }
 
     // Use this instance of the interface to deliver action events
     PutFileDialogListener mListener;
@@ -73,9 +63,6 @@ public class PutFileDialog extends DialogFragment {
         final Context mContext = getActivity();
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View layout = inflater.inflate(R.layout.putfile, null);
-
-        // Just for the tests we assume that getArguments have CORRELATION_ID_KEY
-        final int mCorrelationid = getArguments().getInt(CORRELATION_ID_KEY);
 
         final Button btnSelectLocalFile = (Button) layout.findViewById(R.id.putfile_selectFileButton);
         btnSelectLocalFile.setOnClickListener(new View.OnClickListener() {
@@ -143,10 +130,19 @@ public class PutFileDialog extends DialogFragment {
                                 }
                             }
 
+                            int correlationId = (((SyncProxyTester) getActivity())
+                                    .getNextCorrelationIdForCurrentFragment());
+
                             MainApp.getInstance().getBoundProxyService().commandPutFile(
+                                    getArguments().getString(APP_ID_KEY),
                                     (FileType) spnFileType.getSelectedItem(), syncFileName, data,
+<<<<<<< HEAD
                                     mCorrelationid, chkPersistentFile.isChecked(),
                                     chkSystemFile.isChecked(), length, offset, null, doEncrypt.isChecked());
+=======
+                                    correlationId, chkPersistentFile.isChecked(),
+                                    chkSystemFile.isChecked(), length, offset, null);
+>>>>>>> develop
                         }
                     } else {
                         SafeToast.showToastAnyThread("Can't read data from file");

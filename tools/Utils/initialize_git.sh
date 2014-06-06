@@ -36,14 +36,14 @@ echo "Correct? [yes or no] "
 read ans
 while [[ ! $ans =~ (YES|Yes|yes|Y|y|NO|No|no|N|n) ]]
 do
-	echo "You have entered an invalid response. Please try again"
-	read ans
+  echo "You have entered an invalid response. Please try again"
+  read ans
 done
 
 if [[ $ans =~ (NO|No|no|N|n) ]]
-then	
-	echo "Enter your email: ";
-	read EMAIL
+then  
+  echo "Enter your email: ";
+  read EMAIL
 fi
 
 echo "Your git name: " $FIRST_NAME" "$LAST_NAME

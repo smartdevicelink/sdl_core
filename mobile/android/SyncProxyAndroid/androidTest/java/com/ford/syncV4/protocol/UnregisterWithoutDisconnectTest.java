@@ -3,45 +3,51 @@ package com.ford.syncV4.protocol;
 import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.SyncProxyALM;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.rpc.TestCommon;
+import com.ford.syncV4.session.Session;
+import com.ford.syncV4.session.SessionTest;
+import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
-import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.transport.SyncTransport;
 
-import static org.mockito.Matchers.anyByte;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
- * Tests for the case when the app wants to unregister itself without closing
- * its connection.
+ * Tests for the case when the app wants to unregister itself.
+ *
+ * According to https://adc.luxoft.com/contour/perspective.req?projectId=65&docId=206179
+ * UnregisterAppInterface disconnects the application from SDL. Connection is NOT closed.
  *
  * Created by enikolsky on 2013-11-15.
  */
 public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
+
     @Override
     public void setUp() throws Exception {
         super.setUp();
         TestCommon.setupMocking(this);
     }
 
-    public void testResetProxyShouldDisconnectTransport() throws Exception {
+    public void testResetProxyShouldNotDisconnectTransport() throws Exception {
         SyncTransport transportMock = mock(SyncTransport.class);
-        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
-
-        SyncConnection connection = spy(new SyncConnection(null));
+        SyncConnection connection = spy(new SyncConnection(SessionTest.getInitializedSession(),
+                null));
         connection.init(null, transportMock);
 
-        SyncProxyALM syncProxy =
-                new SyncProxyALM(proxyListenerMock, null, "test", null, null,
-                        false, null, null, null, null, null, null, false, false,
-                        2, null, connection, new TestConfig());
+        SyncProxyALM syncProxy = getSyncProxy(connection);
         assertNotNull(syncProxy);
+
+        syncProxy.getInterfaceBroker().onTransportConnected();
 
         syncProxy.resetProxy();
 
@@ -50,47 +56,31 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         // protected. And I couldn't add the PowerMock library to the project
         // due to errors during 'dexTest' step
 
-        verify(connection).closeConnection(anyByte(), eq(false));
-        verify(transportMock).disconnect();
-    }
-
-    public void testCloseSessionWithKeepingConnectionShouldNotDisconnectTransport()
-            throws SyncException {
-        SyncTransport transportMock = mock(SyncTransport.class);
-        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
-
-        SyncConnection connection = spy(new SyncConnection(null));
-        connection.init(null, transportMock);
-
-        SyncProxyALM syncProxy =
-                new SyncProxyALM(proxyListenerMock, null, "test", null, null,
-                        false, null, null, null, null, null, null, false, false,
-                        2, null, connection, new TestConfig());
-        assertNotNull(syncProxy);
-
-        syncProxy.closeSession(true);
-
-        verify(connection).closeConnection(anyByte(), eq(true));
+        verify(connection).closeConnection(eq(true));
         verify(transportMock, never()).disconnect();
     }
 
-    public void testCloseSessionWithoutKeepingConnectionShouldDisconnectTransport()
-            throws SyncException {
+    public void testUnregisterAppInterfaceShouldNotDisconnectTransport() throws SyncException {
         SyncTransport transportMock = mock(SyncTransport.class);
-        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        ISyncConnectionListener syncConnectionListenerMock = mock(ISyncConnectionListener.class);
+        Session session = SessionTest.getInitializedSession();
 
-        SyncConnection connection = spy(new SyncConnection(null));
+        SyncConnection connection = spy(new SyncConnection(session, syncConnectionListenerMock));
         connection.init(null, transportMock);
 
-        SyncProxyALM syncProxy =
-                new SyncProxyALM(proxyListenerMock, null, "test", null, null,
-                        false, null, null, null, null, null, null, false, false,
-                        2, null, connection, new TestConfig());
+        SyncProxyALM syncProxy = getSyncProxy(connection);
         assertNotNull(syncProxy);
 
-        syncProxy.closeSession(false);
+        syncProxy.doUnregisterAppInterface(SessionTest.APP_ID);
 
-        verify(connection).closeConnection(anyByte(), eq(false));
-        verify(transportMock).disconnect();
+        verify(connection, never()).closeConnection(eq(true));
+        verify(transportMock, never()).disconnect();
+    }
+
+    private SyncProxyALM getSyncProxy(SyncConnection connection) throws SyncException {
+        IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
+        return new SyncProxyALM(proxyListenerMock, null, "test", null, null,
+                false, null, null, null, null, SessionTest.APP_ID, null, false, false,
+                ProtocolConstants.PROTOCOL_VERSION_TWO, null, connection, new TestConfig());
     }
 }

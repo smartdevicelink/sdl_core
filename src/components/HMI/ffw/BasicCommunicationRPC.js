@@ -265,7 +265,9 @@ FFW.BasicCommunication = FFW.RPCObserver
                             SDL.SDLModel.stateLimited = null;
                         }
 
-                        SDL.SDLController.getApplicationModel(appID).turnOnSDL(appID);
+                        if (response.result.isSDLAllowed) {
+                            SDL.SDLController.getApplicationModel(appID).turnOnSDL(appID);
+                        }
                     }
 
                     delete SDL.SDLModel.activateAppRequestsList[response.id];
@@ -403,9 +405,13 @@ FFW.BasicCommunication = FFW.RPCObserver
                         request.method);
                 }
                 if (request.method == "BasicCommunication.UpdateAppList") {
-                    if (SDL.States.info.active) {
-                        SDL.SDLController.onGetAppList(request.params.applications);
-                    }
+
+                    var message = "Was found " + request.params.applications.length + " apps";
+
+                    SDL.PopUp.popupActivate(message);
+//                    if (SDL.States.info.active) {
+//                        SDL.SDLController.onGetAppList(request.params.applications);
+//                    }
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
                         request.method);
@@ -422,7 +428,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
                 if (request.method == "BasicCommunication.ActivateApp") {
 
-                    if ( SDL.SDLAppController.model && SDL.SDLAppController.model.appID != request.params.appID) {
+                    if ((SDL.SDLAppController.model && SDL.SDLAppController.model.appID != request.params.appID) || (request.params.level == "NONE" || request.params.level == "BACKGROUND")) {
                         SDL.States.goToStates('info.apps');
                     }
 

@@ -52,7 +52,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   /**
    * @Destructor.
    */
-  virtual ~TransportManagerListenerEmpty(){};
+  virtual ~TransportManagerListenerEmpty(){}
 
   /**
    * @brief Reaction to the event, when the list of devices is updated.
@@ -60,6 +60,15 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
    * @param Container that holds information about devices.
    */
   virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) {
+  }
+
+  /**
+  * @brief Reaction on event, when new applications are started on device
+  * and SDL found this application
+  *
+  * @param device_handle Unique ID of device with new application list
+  */
+  virtual void OnApplicationListUpdated(DeviceHandle device_handle){
   }
 
   /**

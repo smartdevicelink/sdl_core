@@ -1,4 +1,5 @@
-include_directories (
+include_directories(
+  ${GMOCK_INCLUDE_DIRECTORY}
   ./include/
   ../../../src/thirdPartyLibs/gmock-1.7.0/include
   ../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
@@ -10,14 +11,14 @@ include_directories (
   ../../../src/components/utils/include
 )
 
-set (SOURCES
+set(SOURCES
   ./src/crypto_manager_impl_test.cc
   ./src/security_manager_test.cc
   ./src/security_query_test.cc
   ./src/security_manager_mock.cc
 )
 
-set (LIBRARIES
+set(LIBRARIES
   gtest
   gtest_main
   gmock

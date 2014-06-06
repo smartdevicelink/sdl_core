@@ -42,7 +42,7 @@ SdlProxy::SdlProxy(Item *parent)
               "OnAppRegistered", this, SLOT(OnAppRegistered(Common_HMIApplication)));
   QDBusConnection::sessionBus().connect(
               "com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
-              "OnAppUnregistered", this, SLOT(OnAppUnregistered(int, OptionalArgument<bool>)));
+              "OnAppUnregistered", this, SLOT(OnAppUnregistered(int)));
   QDBusConnection::sessionBus().connect(
               "com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
               "PlayTone", this, SIGNAL(playTone()));
@@ -99,12 +99,6 @@ void SdlProxy::OnShowNotification(Common_TextFieldStruct text,
   emit showNotification(QVariant(txtMap), img, timeout);
 }
 
-void SdlProxy::OnAppUnregistered(int appId, OptionalArgument<bool> resume) {
-  QVariant resume_arg;
-
-  if (resume.presence) {
-    resume_arg = QVariant::fromValue(resume.val);
-  }
-
-  emit appUnregistered(appId, resume_arg);
+void SdlProxy::OnAppUnregistered(int appId) {
+  emit appUnregistered(appId);
 }

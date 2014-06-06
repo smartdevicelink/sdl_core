@@ -89,6 +89,17 @@ void TransportAdapterListenerImpl::OnDeviceListUpdated(
   }
 }
 
+void TransportAdapterListenerImpl::OnApplicationListUpdated(const TransportAdapter* adapter,
+                                                            const DeviceUID& device_handle) {
+  TransportAdapterEvent event(TransportAdapterListenerImpl::EventTypeEnum::ON_APPLICATION_LIST_UPDATED,
+                              transport_adapter_, device_handle, 0, RawMessageSptr(), NULL);
+
+  if (transport_manager::E_SUCCESS !=
+      transport_manager_impl_->ReceiveEventFromDevice(event)) {
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
+  }
+}
+
 void TransportAdapterListenerImpl::OnConnectDone(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& application_id) {

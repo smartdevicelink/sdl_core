@@ -1,6 +1,6 @@
 include_directories(
   include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES

@@ -2,7 +2,6 @@ package com.ford.syncV4.android.activity.mobilenav;
 
 import android.os.AsyncTask;
 
-import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
@@ -10,7 +9,7 @@ import java.io.OutputStream;
 
 public class FileStreamingLogic {
 
-    private static final String TAG = "FileStreamingLogic";
+    private static final String TAG = FileStreamingLogic.class.getSimpleName();
 
     private StaticFileReader staticFileReader;
     private OutputStream outputStream;
@@ -22,6 +21,7 @@ public class FileStreamingLogic {
     private boolean mIsStreamingInProgress;
 
     public FileStreamingLogic(ServicePreviewFragmentInterface mobileNavPreviewFragment) {
+        Logger.d(TAG + " Constructor, hashCode:" + hashCode());
         context = mobileNavPreviewFragment;
     }
 
@@ -85,9 +85,12 @@ public class FileStreamingLogic {
                     } catch (IOException e) {
                         Logger.e(TAG + " FIle streamer error", e);
                        cancelStreaming();
+<<<<<<< HEAD
                        SyncProxyTester tester = (SyncProxyTester) context.getActivity();
 
                         tester.logError(e);
+=======
+>>>>>>> develop
                     }
                 }
             }

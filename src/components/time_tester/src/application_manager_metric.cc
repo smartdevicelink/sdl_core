@@ -36,8 +36,8 @@
 
 namespace time_tester {
 
-std::string ApplicationManagerMetric::GetStyledString() {
-  Json::Value result;
+Json::Value ApplicationManagerMetricWrapper::GetJsonMetric() {
+  Json::Value result = MetricWrapper::GetJsonMetric();
   result[strings::logger] = "ApplicationManager";
   result[strings::begin] =
       Json::Int64(date_time::DateTime::getuSecs(message_metric->begin));
@@ -49,6 +49,6 @@ std::string ApplicationManagerMetric::GetStyledString() {
       params[application_manager::strings::correlation_id].asInt();
   result[strings::connection_key] =
       params[application_manager::strings::connection_key].asInt();
-  return result.toStyledString();
+  return result;
 }
 }  // namespace time_tester

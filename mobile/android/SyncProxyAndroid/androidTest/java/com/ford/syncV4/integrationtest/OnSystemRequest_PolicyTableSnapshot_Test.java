@@ -42,6 +42,7 @@ import java.util.Arrays;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyByte;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.doAnswer;
@@ -136,7 +137,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
                 return null;
             }
         }).when(handlerMock)
-          .onPolicyTableSnapshotRequest(notNull(ISystemRequestProxy.class), eq(dataSnapshot),
+          .onPolicyTableSnapshotRequest(anyByte(), notNull(ISystemRequestProxy.class), eq(dataSnapshot),
                   eq(fileType), eq(requestType));
         proxy.setOnSystemRequestHandler(handlerMock);
 
@@ -184,8 +185,8 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         Thread.sleep(WAIT_TIMEOUT);
 
         // the listener should not be called for PutFile or OnSystemRequest
-        verify(proxyListenerMock, never()).onPutFileResponse(any(PutFileResponse.class));
-        verify(proxyListenerMock, never()).onOnSystemRequest(any(OnSystemRequest.class));
+        verify(proxyListenerMock, never()).onPutFileResponse(anyByte(), any(PutFileResponse.class));
+        verify(proxyListenerMock, never()).onOnSystemRequest(anyByte(), any(OnSystemRequest.class));
     }
 
     // TODO check the rest is not sent after reconnect

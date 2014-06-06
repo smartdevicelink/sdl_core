@@ -2,7 +2,7 @@
 <resources>
 
     <string name="type_here">Type here:</string>
-    <string name="tester_app_name">SyncProxyTester</string>
+    <string name="tester_app_name">SyncProxy Tester</string>
     <string name="connect">Connect</string>
     <string name="speak">Speak</string>
     <string name="slider_footer">Slider Footer</string>
@@ -230,7 +230,12 @@
     <string name="registerappinterface_useAppHMITypes">App HMI Types</string>
     <string name="registerappinterface_useAppID">App ID</string>
     <string name="registerappinterface_appIDDefault">8675309</string>
+<<<<<<< HEAD
     <string name="register_app_interface_is_rooted">Rooted Device</string>
+=======
+    <string name="registerappinterface_new_session">Create new Session</string>
+    <string name="registerappinterface_new_session_desc">When selected, a new Session will be open, otherwise, request will be sent to existing one</string>
+>>>>>>> develop
     <string name="menuName">Menu Name</string>
     <string name="menuIcon">Menu Icon</string>
 
@@ -295,6 +300,13 @@
 
     <string name="system_request_use_file_name">Use file name</string>
     <string name="system_request_file_name_label">System Request file name:</string>
+<<<<<<< HEAD
     <string name="secure_error_button">Send Secure Error</string>
+=======
+    <string name="main_menu_add_session_label">Add Session</string>
+    <string name="main_menu_app_version">App version</string>
+
+    <string name="exit_app_warning">Use \'Exit App\' menu option</string>
+>>>>>>> develop
 
 </resources>

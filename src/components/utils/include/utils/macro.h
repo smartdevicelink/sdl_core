@@ -36,6 +36,16 @@
 #include <assert.h>
 #include <stdio.h>
 
+#ifdef CUSTOMER_PASA
+// Todd: PASA support
+#define PASA_HMI
+#define BLUETOOTH_SUPPORT
+//#define IPOD_SUPPORT
+#define MME_SUPPORT
+#define MME_MQ
+#endif  // CUSTOMER_PASA
+
+
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \

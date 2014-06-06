@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@color/main_bg_color"
     android:layout_width="fill_parent"
     android:layout_height="match_parent">
 
@@ -9,7 +10,14 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
+<<<<<<< HEAD
         android:text="@string/service_check_view_on"
+=======
+        android:textColor="@color/app_regular_text_color"
+        android:checked="false"
+        android:enabled="false"
+        android:hint="@string/mobile_navi_hint"
+>>>>>>> develop
         />
 
     <Button
@@ -41,8 +49,14 @@
         android:layout_height="wrap_content"
         android:text="Start File Streaming"
         android:id="@+id/file_streaming"
+<<<<<<< HEAD
         android:layout_below="@+id/service_status_text_view"
         android:enabled="true"
+=======
+        android:textColor="@color/app_regular_text_color"
+        android:layout_below="@+id/videobutton"
+        android:enabled="false"
+>>>>>>> develop
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>

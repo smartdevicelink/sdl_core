@@ -36,6 +36,9 @@
 #include "utils/signals.h"
 #include "config_profile/profile.h"
 #include "security_manager/crypto_manager_impl.h"
+#ifdef CUSTOMER_PASA
+#include "SmartDeviceLinkMainApp.h"
+#endif
 #include "resumption/last_state.h"
 
 using threads::Thread;
@@ -77,8 +80,14 @@ LifeCycle::LifeCycle()
   , mb_server_thread_(NULL)
   , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
-{
-}
+#ifdef CUSTOMER_PASA
+// Todd: PASA support
+#ifdef PASA_HMI
+  , mb_pasa_adapter_(NULL)
+  , mb_pasa_adapter_thread_(NULL)
+#endif  // PASA_HMI
+#endif  // CUSTOMER_PASA
+{ }
 
 bool LifeCycle::StartComponents() {
   LOG4CXX_INFO(logger_, "LifeCycle::StartComponents()");
@@ -97,6 +106,7 @@ bool LifeCycle::StartComponents() {
   app_manager_ =
     application_manager::ApplicationManagerImpl::instance();
   DCHECK(app_manager_ != NULL);
+
   hmi_handler_ =
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_ != NULL)
@@ -183,14 +193,42 @@ bool LifeCycle::StartComponents() {
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
+#ifndef CUSTOMER_PASA
   //start transport manager
   transport_manager_->Visibility(true);
+#endif
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
   return true;
 }
 
+#ifdef CUSTOMER_PASA
+bool LifeCycle::InitMessageSystem() {
+  mb_pasa_adapter_ =
+    new hmi_message_handler::MessageBrokerAdapter(
+    hmi_message_handler::HMIMessageHandlerImpl::instance(),
+    std::string(PREFIX_STR_FROMSDL_QUEUE),
+    std::string(PREFIX_STR_TOSDL_QUEUE));
+    hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
+    mb_pasa_adapter_);
+  if (!mb_pasa_adapter_->MqOpen()) {
+    LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
+    return false;
+  }
+
+  LOG4CXX_INFO(logger_, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
+  mb_pasa_adapter_thread_  = new System::Thread(
+    new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
+      *mb_pasa_adapter_,
+      &hmi_message_handler::MessageBrokerAdapter::SubscribeAndBeginReceiverThread,
+      NULL));
+  mb_pasa_adapter_thread_->Start(false);
+  NameMessageBrokerThread(*mb_pasa_adapter_thread_, "MessageBrokerAdapterThread");
+
+  return true;
+}
+#else
 #ifdef MESSAGEBROKER_HMIADAPTER
 bool LifeCycle::InitMessageSystem() {
   message_broker_ =
@@ -235,12 +273,12 @@ bool LifeCycle::InitMessageSystem() {
     profile::Profile::instance()->server_address(),
     profile::Profile::instance()->server_port());
 
-  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
+    hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     mb_adapter_);
-  if (!mb_adapter_->Connect()) {
-    LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
-    return false;
-  }
+    if (!mb_adapter_->Connect()) {
+      LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
+      return false;
+    }
 
   LOG4CXX_INFO(logger_, "Start CMessageBroker thread!");
   mb_thread_ = new System::Thread(
@@ -314,23 +352,22 @@ bool LifeCycle::InitMessageSystem() {
 }
 #endif  // MQUEUE_HMIADAPTER
 
+#endif  // CUSTOMER_PASA
+
 void LifeCycle::StopComponents() {
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
-
-  LOG4CXX_INFO(logger_, "Destroying Application Manager.");
   app_manager_->Stop();
-  application_manager::ApplicationManagerImpl::destroy();
-
-  LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
-  transport_manager_->Stop();
-  transport_manager::TransportManagerDefault::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
   protocol_handler_->RemoveProtocolObserver(media_manager_);
   media_manager_->SetProtocolHandler(NULL);
   media_manager::MediaManagerImpl::destroy();
+
+  LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
+  transport_manager_->Stop();
+  transport_manager::TransportManagerDefault::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
   // TODO(EZamakhov): set_session_observer(NULL) do nothing
@@ -340,12 +377,18 @@ void LifeCycle::StopComponents() {
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete protocol_handler_;
 
-  LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
+  LOG4CXX_INFO(logger_, "Destroying Crypto Manager");
   crypto_manager_->Finish();
   delete crypto_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying Security Manager");
   delete security_manager_;
+  
+  LOG4CXX_INFO(logger_, "Destroying Last State");
+  resumption::LastState::destroy();
+
+  LOG4CXX_INFO(logger_, "Destroying Application Manager.");
+  application_manager::ApplicationManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 #ifdef DBUS_HMIADAPTER
@@ -378,6 +421,16 @@ void LifeCycle::StopComponents() {
 
 #endif  // MESSAGEBROKER_HMIADAPTER
 
+#ifdef CUSTOMER_PASA
+#ifdef PASA_HMI
+  hmi_handler_->RemoveHMIMessageAdapter(instance()->mb_pasa_adapter_);
+  mb_pasa_adapter_thread_->Stop();
+  mb_pasa_adapter_thread_->Join();
+  delete instance()->mb_pasa_adapter_;
+  hmi_handler_->~HMIMessageHandlerImpl();
+#endif  // PASA_HMI
+#endif  // CUSTOMER_PASA
+
 #ifdef MESSAGEBROKER_HMIADAPTER
   LOG4CXX_INFO(logger_, "Destroying Message Broker");
   if (mb_server_thread_) {
@@ -399,9 +452,6 @@ void LifeCycle::StopComponents() {
 
   delete hmi_message_adapter_;
   hmi_message_adapter_ = NULL;
-
-  LOG4CXX_INFO(logger_, "Destroying Last State");
-  resumption::LastState::destroy();
 
 #ifdef TIME_TESTER
   // It's important to delete tester Obcervers after TM adapters destruction

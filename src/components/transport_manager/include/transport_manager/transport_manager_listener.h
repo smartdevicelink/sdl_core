@@ -58,6 +58,14 @@ class TransportManagerListener {
   virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) = 0;
 
   /**
+  * @brief Reaction on event, when new applications are started on device
+  * and SDL found this application
+  *
+  * @param device_handle Unique ID of connected device
+  */
+  virtual void OnApplicationListUpdated(DeviceHandle device_handle) = 0;
+
+  /**
    * @brief Reaction to the event, when the device is found.
    *
    * @param device_info Variable that hold information about device.

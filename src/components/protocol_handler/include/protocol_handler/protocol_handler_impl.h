@@ -53,7 +53,9 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
+#ifdef TIME_TESTER
 #include "time_metric_observer.h"
+#endif  // TIME_TESTER
 
 /**
  *\namespace NsProtocolHandler
@@ -183,17 +185,28 @@ class ProtocolHandlerImpl
      */
     void SendFramesNumber(uint32_t connection_key, int32_t number_of_frames);
 
+#ifdef TIME_TESTER
     /**
      * @brief Setup observer for time metric.
      *
      * @param observer - pointer to observer
      */
     void SetTimeMetricObserver(PHMetricObserver* observer);
+#endif  // TIME_TESTER
+
 
     /*
      * Prepare and send heartbeat message to mobile
      */
     void SendHeartBeat(int32_t connection_id, uint8_t session_id);
+
+    /**
+      * \brief Sends ending session to mobile application
+      * \param connection_id Identifier of connection within which
+      * session exists
+      * \param session_id ID of session to be ended
+      */
+    void SendEndSession(int32_t connection_id, uint8_t session_id);
 
   protected:
     /**
@@ -446,7 +459,10 @@ class ProtocolHandlerImpl
      *\brief (JSON Handler)
      */
     ProtocolObservers protocol_observers_;
+#ifdef TIME_TESTER
     PHMetricObserver* metric_observer_;
+#endif  // TIME_TESTER
+
     /**
      *\brief Pointer on instance of class implementing ISessionObserver
      *\brief (Connection Handler)

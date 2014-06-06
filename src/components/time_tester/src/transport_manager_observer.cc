@@ -50,11 +50,12 @@ void TransportManagerObserver::StopRawMsg(const protocol_handler::RawMessage* pt
     std::map<const protocol_handler::RawMessage*, TimevalStruct>::const_iterator it;
     it = time_starts.find(ptr);
     if (it != time_starts.end()) {
-      TransportManagerMectic* m = new TransportManagerMectic();
+      TransportManagerMecticWrapper* m = new TransportManagerMecticWrapper();
       m->message_metric = new transport_manager::TMMetricObserver::MessageMetric();
       m->message_metric->begin = it->second;
       m->message_metric->end = date_time::DateTime::getCurrentTime();
       m->message_metric->data_size = ptr->data_size();
+      m->grabResources();
       time_manager_->SendMetric(m);
     }
 }

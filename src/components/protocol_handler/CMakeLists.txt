@@ -5,6 +5,7 @@ include_directories (
   ../connection_handler/include/
   ../security_manager/include/
   ../config_profile/include/
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES

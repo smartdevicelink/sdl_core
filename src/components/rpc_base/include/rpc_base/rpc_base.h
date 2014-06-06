@@ -120,7 +120,7 @@ class CompositeType {
     static InitializationState InitHelper(const Json::Value* value,
                                           bool (Json::Value::*type_check)() const);
   protected:
-    InitializationState initialization_state__;
+    mutable InitializationState initialization_state__;
 };
 
 /*

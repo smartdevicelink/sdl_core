@@ -2,7 +2,6 @@ package com.ford.syncV4.android.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -34,14 +33,9 @@ import java.util.Vector;
  * Date: 2/25/14
  * Time: 3:19 PM
  */
-public class RegisterAppInterfaceDialog extends DialogFragment {
+public class RegisterAppInterfaceDialog extends BaseDialogFragment {
 
     private static final String LOG_TAG = "RegisterAppInterfaceDialog";
-
-    public static RegisterAppInterfaceDialog newInstance() {
-        RegisterAppInterfaceDialog registerAppInterfaceDialog = new RegisterAppInterfaceDialog();
-        return registerAppInterfaceDialog;
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -86,8 +80,15 @@ public class RegisterAppInterfaceDialog extends DialogFragment {
                 .findViewById(R.id.registerappinterface_useAppHMITypes);
         final MultiSpinner<AppHMIType> appHMITypeSpinner = (MultiSpinner) layout
                 .findViewById(R.id.registerappinterface_appHMITypeSpinner);
+<<<<<<< HEAD
         final CheckBox useAppID = (CheckBox) layout.findViewById(R.id.registerappinterface_useAppID);
         final EditText appID = (EditText) layout.findViewById(R.id.registerappinterface_appID);
+=======
+        final CheckBox useAppID = (CheckBox) layout
+                .findViewById(R.id.registerappinterface_useAppID);
+        final EditText appIdView =
+                (EditText) layout.findViewById(R.id.registerappinterface_appID);
+>>>>>>> develop
 
         updateDeviceInfoView(layout);
 
@@ -112,7 +113,7 @@ public class RegisterAppInterfaceDialog extends DialogFragment {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         RegisterAppInterface registerAppInterface = new RegisterAppInterface();
-                        registerAppInterface.setCorrelationID(((SyncProxyTester) getActivity()).getCorrelationid());
+                        registerAppInterface.setCorrelationID(((SyncProxyTester) getActivity()).getNextCorrelationIdForCurrentFragment());
 
                         if (useSyncMsgVersion.isChecked()) {
                             SyncMsgVersion version = new SyncMsgVersion();
@@ -148,7 +149,7 @@ public class RegisterAppInterfaceDialog extends DialogFragment {
                             registerAppInterface.setNgnMediaScreenAppName(ngnAppName.getText().toString());
                         }
                         if (useVRSynonyms.isChecked()) {
-                            registerAppInterface.setVrSynonyms(new Vector<String>(Arrays.asList(
+                            registerAppInterface.setVrSynonyms(new Vector<Object>(Arrays.asList(
                                     vrSynonyms.getText().toString().split(SyncProxyTester.JOIN_STRING))));
                         }
                         registerAppInterface.setIsMediaApplication(isMediaApp.isChecked());
@@ -164,13 +165,19 @@ public class RegisterAppInterfaceDialog extends DialogFragment {
                             registerAppInterface.setAppType(new Vector<AppHMIType>(appHMITypeSpinner.getSelectedItems()));
                         }
                         if (useAppID.isChecked()) {
-                            registerAppInterface.setAppID(appID.getText().toString());
+                            registerAppInterface.setAppId(appIdView.getText().toString());
                         }
 
                         registerAppInterface.setDeviceInfo(getDeviceInfoFromView(layout));
 
+                        CheckBox createNewSessionView =
+                                (CheckBox) layout.findViewById(R.id.registerappinterface_new_session);
+
                         ((SyncProxyTester) getActivity())
-                                .onRegisterAppInterfaceDialogResult(registerAppInterface);
+                                .onRegisterAppInterfaceDialogResult(
+                                        appIdView.getText().toString().trim(),
+                                        registerAppInterface,
+                                        createNewSessionView.isChecked());
                     }
                 })
                 .setNegativeButton("Cancel",

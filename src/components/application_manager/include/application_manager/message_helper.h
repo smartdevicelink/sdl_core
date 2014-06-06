@@ -198,19 +198,29 @@ class MessageHelper {
       uint32_t cmd_id, const smart_objects::SmartObject& vr_commands,
       uint32_t app_id);
 
+    /*
+     * @brief Create Common.HMIApplication struct application instance
+     * @param app : applicaton instace
+     * @param output smart object to store Common.HMIApplication struct
+     * @return true on succes, otherwise return false;
+     */
+    static bool CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
+                                      smart_objects::SmartObject& output);
+
     static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
     static SmartObjectList CreateAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
 
-    static void SendOnSdlCloseNotificationToHMI();
     static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app);
     static void ResetGlobalproperties(ApplicationSharedPtr app);
 
-    static void SendActivateAppToHMI(uint32_t const app_id);
+    static void SendActivateAppToHMI(
+      uint32_t const app_id,
+      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL);
 
     static void SendOnResumeAudioSourceToHMI(const uint32_t app_id);
 
     static std::string GetDeviceMacAddressForHandle(
-        const uint32_t device_handle);
+      const uint32_t device_handle);
 
     static void GetDeviceInfoForHandle(const uint32_t device_handle,
                                        policy::DeviceParams* device_info);
@@ -387,10 +397,10 @@ class MessageHelper {
      *
      */
     static mobile_apis::Result::eType VerifyImageFiles(
-        smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
+      smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
 
     static mobile_apis::Result::eType VerifyImageVrHelpItems(
-        smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
+      smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
 
     static bool VerifySoftButtonText(smart_objects::SmartObject& soft_button);
 

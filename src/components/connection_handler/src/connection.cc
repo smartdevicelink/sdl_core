@@ -83,34 +83,15 @@ int32_t findGap(const std::map<unsigned char, T>& map) {
 }
 }  // namespace
 
-
-int32_t Connection::AddNewSession(const uint8_t& protocol_version) {
+int32_t Connection::AddNewSession() {
   sync_primitives::AutoLock lock(session_map_lock_);
-
-  int32_t result = -1;
 
   const int32_t session_id = findGap(session_map_);
   if (session_id > 0) {
-
-    /* whenever new session created RPC and Bulk services are
-    established automatically */
-    // TODO: Dmitriy Trunov + Klimenko
     session_map_[session_id].service_list.push_back(protocol_handler::kRpc);
     session_map_[session_id].service_list.push_back(protocol_handler::kBulk);
-
-    if (protocol_handler::PROTOCOL_VERSION_3 == protocol_version) {
-      heartbeat_monitor_->AddSession(session_id);
-
-      // start monitoring thread when first session with heartbeat added
-      if (session_map_.size() == 1) {
-        heart_beat_monitor_thread_->start();
-      }
-    }
-
-    result = session_id;
   }
-
-  return result;
+  return session_id;
 }
 
 int32_t Connection::RemoveSession(uint8_t session) {
@@ -262,28 +243,31 @@ const SessionMap Connection::session_map() const {
 }
 
 void Connection::CloseSession(uint8_t session_id) {
-  size_t size;
-  ServiceList service_list;
+  sync_primitives::AutoLock lock(session_map_lock_);
 
-  {
-    sync_primitives::AutoLock lock(session_map_lock_);
-
-    SessionMapIterator session_it = session_map_.find(session_id);
-    if (session_it == session_map_.end()) {
-      return;
-    }
-
-    size = session_map_.size();
-    service_list = session_map_[session_id].service_list;
+  SessionMapIterator session_it = session_map_.find(session_id);
+  if (session_it == session_map_.end()) {
+    return;
   }
+
+  const size_t size = session_map_.size();
 
   //Close connection if it is last session
   if (1 == size) {
+    heartbeat_monitor_->RemoveSession(session_id);
     connection_handler_->CloseConnection(connection_handle_);
   } else {
-    connection_handler_->CloseSession(connection_handle_, session_id,
-                                      service_list);
+    connection_handler_->CloseSession(connection_handle_, session_id);
   }
+}
+
+void Connection::StartHeartBeat(uint8_t session_id) {
+    bool is_first_session = heartbeat_monitor_->AddSession(session_id);
+
+    // start monitoring thread when first session with heartbeat added
+    if (is_first_session) {
+      heart_beat_monitor_thread_->start();
+    }
 }
 
 void Connection::SendHeartBeat(uint8_t session_id) {

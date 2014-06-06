@@ -20,7 +20,7 @@ public interface ISystemRequestProxy {
      * @throws SyncException if there is an error during preparations to send
      *                       the request
      */
-    public void putSystemFile(String filename, byte[] data, FileType fileType)
+    public void putSystemFile(String appId, String filename, byte[] data, FileType fileType)
             throws SyncException;
 
     /**
@@ -34,7 +34,7 @@ public interface ISystemRequestProxy {
      * @throws SyncException if there is an error during preparations to send
      *                       the request
      */
-    public void putSystemFile(String filename, byte[] data, Integer offset,
+    public void putSystemFile(String appId, String filename, byte[] data, Integer offset,
                               FileType fileType) throws SyncException;
 
     /**
@@ -46,7 +46,7 @@ public interface ISystemRequestProxy {
      * @param requestType type of the request
      * @throws SyncException if there is an error during preparations to send the request
      */
-    public void putPolicyTableUpdateFile(String filename, byte[] data, FileType fileType,
+    public void putPolicyTableUpdateFile(String appId, String filename, byte[] data, FileType fileType,
                                          RequestType requestType)
             throws SyncException;
 }

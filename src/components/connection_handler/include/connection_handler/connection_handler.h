@@ -80,12 +80,36 @@ class ConnectionHandler {
   virtual void CloseConnection(ConnectionHandle connection_handle) = 0;
 
   /*
-   * //TODO(EZ):add brief
+   * \brief Return count of session for specified connection
+   * \param connection_key pair of connection handle and session id
+   */
+  virtual uint32_t GetConnectionSessionsCount(uint32_t connection_key) = 0;
+
+  /**
+   * Gets device id by mac address
+   * @param mac_address
+   * @return true if successfully
+   */
+  virtual bool GetDeviceID(const std::string& mac_address,
+                           DeviceHandle* device_handle) = 0;
+
+  /*
+   * Close session associated with the key
+   */
+  virtual void CloseSession(uint32_t key) = 0;
+
+  /*
    * Close session
    */
   virtual void CloseSession(ConnectionHandle connection_handle,
-                            uint8_t session_id,
-                            const ServiceList& service_list) = 0;
+                            uint8_t session_id) = 0;
+
+  /*
+   * \brief Start heartbeat for specified session
+   *
+   * \param connection_key pair of connection and session id
+   */
+  virtual void StartSessionHeartBeat(uint32_t connection_key) = 0;
 
   /*
    * //TODO(EZ):add brief

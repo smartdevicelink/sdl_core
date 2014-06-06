@@ -1095,11 +1095,23 @@
 </enum>
 
 <enum name="SpeakType">
-  <description>Defines the type of the request which causes text-to-speech prompt</description> 
-  <element name="ALERT" /> 
-  <element name="SPEAK" /> 
+  <description>Defines the type of the request which causes text-to-speech prompt</description>
+  <element name="ALERT" />
+  <element name="SPEAK" />
 </enum>
 
+<enum name="AlertType">
+<description>Defines the type of the request which causes text-to-speech prompt</description>
+<element name="UI" />
+<element name="BOTH" />
+</enum>
+
+<enum name="HMILevel">
+  <element name="FULL"/>
+  <element name="LIMITED" />
+  <element name="BACKGROUND"/>
+  <element name="NONE"/>
+</enum>
 
 <!-- Policies -->
 <enum name="UpdateResult">
@@ -1165,7 +1177,6 @@
     <description>The number of rows of this field.</description>
   </param>
 </struct>
-
 
 <struct name="ButtonCapabilities">
     <description>Contains the information about capabilities of a button.</description>
@@ -1943,6 +1954,9 @@
       <param name="priority" type="Common.AppPriority" mandatory="false">
         <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
       </param>
+      <param name="level" type="Common.HMILevel" mandatory="false">
+        <description>If level for application is to be changed to something else then FULL then this parameter should be used.</description>
+      </param>
     </function>
     <function name="ActivateApp" messagetype="response">
     </function>
@@ -2417,6 +2431,9 @@
     </param>
     <param name="progressIndicator" type="Boolean" mandatory="false">
       <description>If supported on the given platform, the alert GUI will include some sort of animation indicating that loading of a feature is progressing.  e.g. a spinning wheel or hourglass, etc.</description>
+    </param>
+    <param name="alertType" type="Common.AlertType" mandatory="true">
+      <description>Defines if only UI or BOTH portions of the Alert request are being sent to HMI Side</description>
     </param>
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application requested this RPC.</description>
@@ -3055,6 +3072,9 @@
       <description>
       	Array of bytes comprising CAN message.
       </description>
+    </param>
+    <param name="appID" type="Integer" mandatory="true">
+      <description>ID of application that requested this RPC.</description>
     </param>
   </function>
   <function name="DiagnosticMessage" messagetype="response">

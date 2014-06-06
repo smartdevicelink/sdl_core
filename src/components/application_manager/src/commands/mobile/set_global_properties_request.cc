@@ -204,13 +204,15 @@ void SetGlobalPropertiesRequest::Run() {
     }
 
     app->set_vr_help_title(smart_objects::SmartObject(app->name()));
-    app->set_vr_help(vr_help_items);
 
     smart_objects::SmartObject params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     params[strings::vr_help_title] = (*app->vr_help_title());
-    params[strings::vr_help] = (*app->vr_help());
+    if (vr_help_items.length() > 0) {
+      app->set_vr_help(vr_help_items);
+      params[strings::vr_help] = (*app->vr_help());
+    }
     params[strings::app_id] = app->app_id();
     if (is_menu_title_present) {
 

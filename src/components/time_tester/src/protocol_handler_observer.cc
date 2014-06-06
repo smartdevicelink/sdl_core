@@ -64,8 +64,9 @@ void ProtocolHandlerObserver::EndMessageProcess(utils::SharedPtr<MessageMetric> 
   }
   m->begin= time_starts[message_id];
   m->end = date_time::DateTime::getCurrentTime();
-  ProtocolHandlerMectic* metric = new ProtocolHandlerMectic();
+  ProtocolHandlerMecticWrapper* metric = new ProtocolHandlerMecticWrapper();
   metric->message_metric = m;
+  metric->grabResources();
   time_manager_->SendMetric(metric);
 }
 }  //namespace time_tester
