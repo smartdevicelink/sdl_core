@@ -1,8 +1,5 @@
-/**
- * \file bluetooth_connection_factory.h
- * \brief BluetoothConnectionFactory class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,66 +30,37 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_CONNECTION_FACTORY_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_CONNECTION_FACTORY_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
 
-#include "transport_manager/transport_adapter/server_connection_factory.h"
+#include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class TransportAdapterController;
-
 /**
- * @brief Create connections.
+ * @brief Transport adapter that use bluetooth transport.
  */
-class BluetoothConnectionFactory : public ServerConnectionFactory {
+class BluetoothPASATransportAdapter : public TransportAdapterImpl {
  public:
-
   /**
    * @brief Constructor.
-   *
-   * @param controller Pointer to the device adapter controller.
    */
-  BluetoothConnectionFactory(TransportAdapterController* controller);
+  BluetoothPASATransportAdapter();
+
  protected:
+  /**
+   * @brief Return type of device.
+   */
+  virtual DeviceType GetDeviceType() const;
 
   /**
-   * @brief Start BT connection factory.
+   * @brief Returns true if \a device is to be connected automatically
    */
-  virtual TransportAdapter::Error Init();
-
-  /**
-   * @brief Create bluetooth socket connection.
-   *
-   * @param device_uid Device unique identifier.
-   * @param ap_handle Handle of application.
-   */
-  virtual TransportAdapter::Error CreateConnection(const DeviceUID& device_uid,
-                                                const ApplicationHandle& app_handle);
-
-  /**
-   * @brief
-   */
-  virtual void Terminate();
-
-  /**
-   * @brief Check for initialization.
-   *
-   * @return true - initialized.
-   * false - not initialized.
-   */
-  virtual bool IsInitialised() const;
-
-  /**
-   * @brief Destructor.
-   */
-  virtual ~BluetoothConnectionFactory();
- private:
-  TransportAdapterController* controller_;
+  virtual bool ToBeAutoConnected(DeviceSptr device) const;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_CONNECTION_FACTORY_H_
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
