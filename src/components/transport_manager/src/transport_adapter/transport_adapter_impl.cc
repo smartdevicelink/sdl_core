@@ -636,7 +636,8 @@ ConnectionSptr TransportAdapterImpl::FindEstablishedConnection(
 TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
   DeviceUID device_id = device->unique_device_id();
   ApplicationList app_list = device->GetApplicationList();
-  LOG4CXX_DEBUG(logger_, "Device " << device->name() << " has " << app_list.size() << "applications.")
+  LOG4CXX_DEBUG(logger_, "Device " << device->name() << " has "
+                << app_list.size() << " applications.")
   bool errors_occured = false;
   for (ApplicationList::iterator it = app_list.begin(); it != app_list.end(); ++it) {
     const ApplicationHandle app_handle = *it;

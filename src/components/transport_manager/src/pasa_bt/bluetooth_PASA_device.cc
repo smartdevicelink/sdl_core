@@ -107,6 +107,10 @@ bool BluetoothPASADevice::RemoveChannel(const SCOMMChannel& channel, Application
   return false;
 }
 
+const UI_8* BluetoothPASADevice::mac() const {
+  return mac_;
+}
+
 ApplicationList BluetoothPASADevice::GetApplicationList() const {
   ApplicationList result;
   sync_primitives::AutoLock lock(applications_lock_);

@@ -161,27 +161,26 @@ void BluetoothPASADeviceScanner::UpdateTotalApplicationList() {
 void BluetoothPASADeviceScanner::connectBTDevice(void *data) {
   const PBTDeviceConnectInfo pDeviceInfo =
       static_cast<PBTDeviceConnectInfo>(data);
-  bool device_found = false;
+  BluetoothPASADevice* device = NULL;
   sync_primitives::AutoLock lock(devices_lock_);
   for (DeviceVector::const_iterator i = found_devices_with_sdl_.begin();
        i != found_devices_with_sdl_.end(); ++i) {
     BluetoothPASADevice* existing_device = static_cast<BluetoothPASADevice*>(i->get());
     if (0 == memcmp(existing_device->mac(), pDeviceInfo->mac, sizeof(pDeviceInfo->mac))) {
       LOG4CXX_DEBUG(logger_, "Bluetooth device exists: " << pDeviceInfo->cDeviceName);
-      BluetoothPASADevice::SCOMMChannel tChannel(pDeviceInfo->cSppQueName);
-      existing_device->AddChannel(tChannel);
       LOG4CXX_INFO(logger_, "Bluetooth channel " << pDeviceInfo->cSppQueName
                    << " added to "<< pDeviceInfo->cDeviceName << " " << existing_device);
-      device_found = true;
+      device = existing_device;
       break;
     }
   }
-  if (!device_found) {
-    BluetoothPASADevice* device =
-        new BluetoothPASADevice(pDeviceInfo->cDeviceName, pDeviceInfo->mac);
-    LOG4CXX_INFO(logger_, "Bluetooth device created successfully: " << pDeviceInfo->cDeviceName);
+  if (!device) {
+    device = new BluetoothPASADevice(pDeviceInfo->cDeviceName, pDeviceInfo->mac);
+    LOG4CXX_INFO(logger_, "Bluetooth device created successfully: "<< pDeviceInfo->cDeviceName);
     found_devices_with_sdl_.push_back(device);
   }
+  const BluetoothPASADevice::SCOMMChannel tChannel(pDeviceInfo->cSppQueName);
+  device->AddChannel(tChannel);
   SendMsgQ(mPASAFWSendHandle, SDL_MSG_BT_DEVICE_CONNECT_ACK, 0, NULL);
 }
 
@@ -194,7 +193,7 @@ void BluetoothPASADeviceScanner::disconnectBTDevice(void *data) {
 }
 
 void BluetoothPASADeviceScanner::disconnectBTDeviceSPP(void *data) {
-  PBTDeviceDisConnectSPPInfo pDeviceInfo =
+  const PBTDeviceDisConnectSPPInfo pDeviceInfo =
       static_cast<PBTDeviceDisConnectSPPInfo>(data);
   sync_primitives::AutoLock lock(devices_lock_);
   for (DeviceVector::iterator i = found_devices_with_sdl_.begin();

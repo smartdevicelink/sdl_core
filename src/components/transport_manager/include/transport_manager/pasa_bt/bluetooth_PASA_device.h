@@ -109,7 +109,7 @@ class BluetoothPASADevice : public Device {
    */
   bool RemoveChannel(const SCOMMChannel& channel, ApplicationHandle* app_handle);
 
-  const UI_8* mac() const {return mac_;}
+  const UI_8* mac() const;
 
   /**
    * @brief Return list of applications available on device.

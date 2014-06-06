@@ -47,10 +47,10 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 #define MAX_SPP_PACKET_SIZE    2047
 
-typedef struct _SPPframe {
+struct SPPframe {
   uint16_t length;
   uint8_t  data[MAX_SPP_PACKET_SIZE];
-} SPPframe;
+};
 
 BluetoothPASAConnection::BluetoothPASAConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle,
@@ -263,7 +263,7 @@ void BluetoothPASAConnection::Transmit() {
     }
   } else {
     // Todd: CPU logging fix - when poll_fds[1].events is set but frame is empty, then clear notification
-    if( (frames_to_send_.empty()) && (poll_fds[1].revents == 1)) {
+    if( (frames_to_send_.empty()) && (poll_fds[1].revents & (POLLIN | POLLPRI)) ) {
       // clear notifications
       char buffer[256];
       ssize_t bytes_read = -1;
@@ -379,39 +379,53 @@ bool BluetoothPASAConnection::Send() {
 bool BluetoothPASAConnection::Establish(ConnectError** error) {
   LOG4CXX_INFO(logger_, "enter (#" << pthread_self() << ")");
   DeviceSptr device = controller()->FindDevice(device_handle());
-
-  unsigned char retry_count = 10;
+  if (!device) {
+    LOG4CXX_ERROR_WITH_ERRNO( logger_,
+                              "Device not found by device handle " << device_handle());
+    LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
+    return false;
+  }
 
   BluetoothPASADevice* bluetooth_device =
       static_cast<BluetoothPASADevice*>(device.get());
 
-  if (bluetooth_device) {
-    sPPQ = bluetooth_device->GetSppQName(application_handle());
+  sPPQ = bluetooth_device->GetSppQName(application_handle());
 
+  sppDeviceFd = -1;
+  //TODO(EZamakhov): why we need retry?
+  for (int i = 0; i < 5 && -1 == sppDeviceFd ; ++i) {
     //Open SPP device
-    while (retry_count > 0) {
-      sppDeviceFd = open(sPPQ.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
-      //on error open
-      if (-1 == sppDeviceFd) {
-        LOG4CXX_ERROR_WITH_ERRNO( logger_,
-                                  "Failed to open message queue " << sPPQ <<
-                                  " for device " << device_handle());
-        if(retry_count-- == 0) {
-          if(error) {
-            *error = new ConnectError();
-          }
-          LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
-          return false;
-        }
-        delay(500);
-      }
+    sppDeviceFd = open(sPPQ.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
+    //on open error
+    if (-1 == sppDeviceFd) {
+      LOG4CXX_WARN_WITH_ERRNO( logger_,
+                               "Failed to open SPP device " << sPPQ <<
+                               " for device handle " << device_handle() <<
+                               ", retry in 500 msec");
+      delay(500);
     }
   }
+  //on error open after all attempts
+  if (-1 == sppDeviceFd) {
+    if(error) {
+      *error = new ConnectError();
+    }
+    LOG4CXX_ERROR_WITH_ERRNO( logger_,
+                              "SPP device " << sPPQ <<
+                              " for device handle " << device_handle() <<
+                              " not opened.");
+    LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
+    return false;
+  }
+  LOG4CXX_DEBUG( logger_,
+                 "SPP device " << sPPQ <<
+                 " for device handle " << device_handle() <<
+                 " opened.");
   LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
   return true;
 }
 
-TransportAdapterController* BluetoothPASAConnection::controller() {
+TransportAdapterController* BluetoothPASAConnection::controller() const {
   return controller_;
 }
 

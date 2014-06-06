@@ -105,7 +105,7 @@ class BluetoothPASAConnection : public Connection {
   /**
    * @brief Return pointer to the device adapter controller.
    */
-  TransportAdapterController* controller();
+  TransportAdapterController* controller() const;
 
   /**
    * @brief Return device unique identifier.
