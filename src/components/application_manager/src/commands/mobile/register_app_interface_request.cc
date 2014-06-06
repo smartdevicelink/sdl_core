@@ -514,18 +514,6 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
       return mobile_apis::Result::DUPLICATE_NAME;
     }
 
-    const smart_objects::SmartObject* tts = (*it)->tts_name();
-    std::vector<smart_objects::SmartObject>* curr_tts = NULL;
-    if (NULL != tts) {
-      curr_tts = tts->asArray();
-      CoincidencePredicateTTS t(app_name);
-
-      if (0 != std::count_if((*curr_tts).begin(), (*curr_tts).end(), t)) {
-        LOG4CXX_ERROR(logger_, "Application name is known already.");
-        return mobile_apis::Result::DUPLICATE_NAME;
-      }
-    }
-
     const smart_objects::SmartObject* vr = (*it)->vr_synonyms();
     const std::vector<smart_objects::SmartObject>* curr_vr = NULL;
     if (NULL != vr) {
@@ -537,79 +525,6 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
         return mobile_apis::Result::DUPLICATE_NAME;
       }
     }
-
-
-    // tts check
-    if (msg_params.keyExists(strings::tts_name)) {
-
-      const std::vector<smart_objects::SmartObject>* new_tts =
-        msg_params[strings::tts_name].asArray();
-
-      std::vector<smart_objects::SmartObject>::const_iterator it_tts =
-        new_tts->begin();
-
-      std::vector<smart_objects::SmartObject>::const_iterator it_tts_End =
-        new_tts->end();
-
-      for (; it_tts != it_tts_End; ++it_tts) {
-        std::string text = (*it_tts)[strings::text].asString();
-        if (!strcasecmp(cur_name.c_str(), text.c_str())) {
-          LOG4CXX_ERROR(logger_,
-                        "Some TTS parameters names are known already.");
-          return mobile_apis::Result::DUPLICATE_NAME;
-        }
-
-        CoincidencePredicateTTS t((*it_tts)[strings::text].asString());
-        if (NULL != curr_tts
-            &&  0 != std::count_if(curr_tts->begin(), curr_tts->end(), t)) {
-          LOG4CXX_ERROR(logger_,
-                        "Some TTS parameters names are known already.");
-          return mobile_apis::Result::DUPLICATE_NAME;
-        }
-
-        CoincidencePredicateVR v((*it_tts)[strings::text].asString());
-        if (NULL != curr_vr
-            &&  0 != std::count_if(curr_vr->begin(), curr_vr->end(), v)) {
-          LOG4CXX_ERROR(logger_,
-                        "Some TTS parameters names are known already.");
-          return mobile_apis::Result::DUPLICATE_NAME;
-        }
-      }
-    }  // end tts check
-
-    if (msg_params.keyExists(strings::vr_synonyms)) {
-
-      const std::vector<smart_objects::SmartObject>* new_vr =
-        msg_params[strings::vr_synonyms].asArray();
-
-      std::vector<smart_objects::SmartObject>::const_iterator it_vr =
-        new_vr->begin();
-
-      std::vector<smart_objects::SmartObject>::const_iterator it_vr_End =
-        new_vr->end();
-
-      for (; it_vr != it_vr_End; ++it_vr) {
-        std::string vr_synonym = it_vr->asString();
-        if (!strcasecmp(cur_name.c_str(), vr_synonym.c_str())) {
-          LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
-          return mobile_apis::Result::DUPLICATE_NAME;
-        }
-
-        CoincidencePredicateTTS t(it_vr->asString());
-        if (NULL != curr_tts
-            &&  0 != std::count_if(curr_tts->begin(), curr_tts->end(), t)) {
-          LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
-          return mobile_apis::Result::DUPLICATE_NAME;
-        }
-
-        CoincidencePredicateVR v(it_vr->asString());
-        if (NULL != curr_vr
-            &&  0 != std::count_if(curr_vr->begin(), curr_vr->end(), v)) {
-          LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
-          return mobile_apis::Result::DUPLICATE_NAME;
-        }
-      }
-    }  // end vr check
 
   }  // application for end
 
