@@ -1,8 +1,5 @@
-/**
- * \file bluetooth_transport_adapter.h
- * \brief BluetoothAdapter class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,49 +30,60 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_ADAPTER_H
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_CONNECTION_FACTORY_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_CONNECTION_FACTORY_H_
 
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "transport_manager/transport_adapter/server_connection_factory.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
+class TransportAdapterController;
+
 /**
- * @brief Transport adapter that use bluetooth transport.
+ * @brief Create connections.
  */
-class BluetoothTransportAdapter : public TransportAdapterImpl {
+class BluetoothPASAConnectionFactory : public ServerConnectionFactory {
  public:
   /**
    * @brief Constructor.
+   *
+   * @param controller Pointer to the device adapter controller.
    */
-  BluetoothTransportAdapter();
-
-  /**
-   * @brief Destructor.
-   */
-  virtual ~BluetoothTransportAdapter();
+  BluetoothPASAConnectionFactory(TransportAdapterController* controller);
  protected:
 
   /**
-   * @brief Return type of device.
+   * @brief BT initialization
    */
-  virtual DeviceType GetDeviceType() const;
+  virtual TransportAdapter::Error Init();
 
   /**
-   * @brief Store adapter state in last state singleton
-   */
-  virtual void Store() const;
-
-  /**
-   * @brief Restore adapter state from last state singleton
+   * @brief Create bluetooth socket connection.
    *
-   * @return True on success false otherwise
+   * @param device_uid Device unique identifier.
+   * @param ap_handle Handle of application.
    */
-  virtual bool Restore();
+  virtual TransportAdapter::Error CreateConnection(const DeviceUID& device_uid,
+                                                   const ApplicationHandle& app_handle);
+
+  /**
+   * @brief
+   */
+  virtual void Terminate();
+
+  /**
+   * @brief Check for initialization.
+   *
+   * @return true - initialized.
+   * false - not initialized.
+   */
+  virtual bool IsInitialised() const;
+ private:
+  TransportAdapterController* controller_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_ADAPTER
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_CONNECTION_FACTORY_H_
