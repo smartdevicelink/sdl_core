@@ -2099,12 +2099,22 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         }
     }
 
+    /**
+     * // TODO : For Tests Only
+     * @param appId
+     * @throws SyncException
+     */
     public void syncProxyCloseSession(String appId) throws SyncException {
         if (mSyncProxy != null) {
             mSyncProxy.doUnregisterAppInterface(appId);
         }
     }
 
+    /**
+     * // TODO : For Tests Only
+     * @param syncAppId
+     * @throws SyncException
+     */
     public void syncProxyOpenSession(String syncAppId) throws SyncException {
         if (mSyncProxy != null) {
             if (mSyncProxy.getIsConnected()) {
