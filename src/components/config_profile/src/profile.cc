@@ -64,6 +64,7 @@ const char* kMediaManagerSection = "MEDIA MANAGER";
 const char* kGlobalPropertiesSection = "GLOBAL PROPERTIES";
 const char* kVrCommandsSection = "VR COMMANDS";
 const char* kTransportManagerSection = "TransportManager";
+const char* kApplicationManagerSection = "ApplicationManager";
 const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
 
 const char* kHmiCapabilitiesKey = "HMICapabilities";
@@ -128,6 +129,7 @@ const char* kPolicyOffKey = "PolicySwitchOff";
 const char* kMmeDatabaseNameKey = "MMEDatabase";
 const char* kEventMQKey = "EventMQ";
 const char* kAckMQKey = "AckMQ";
+const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -165,6 +167,7 @@ const uint32_t kDefaultAppHmiLevelNoneTimeScaleMaxRequests = 100;
 const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 10;
 const uint32_t kDefaultPendingRequestsAmount = 1000;
 const uint32_t kDefaultTransportManagerDisconnectTimeout = 0;
+const uint32_t kDefaultApplicationListUpdateTimeout = 1;
 
 }  // namespace
 
@@ -221,7 +224,8 @@ Profile::Profile()
 	recording_file_name_(kDefaultRecordingFileName),
 	mme_db_name_(kDefaultMmeDatabaseName),
 	event_mq_name_(kDefaultEventMQ),
-	ack_mq_name_(kDefaultAckMQ) {
+    ack_mq_name_(kDefaultAckMQ),
+    application_list_update_timeout_(kDefaultApplicationListUpdateTimeout) {
 }
 
 Profile::~Profile() {
@@ -448,6 +452,10 @@ const std::string& Profile::event_mq_name() const {
 
 const std::string& Profile::ack_mq_name() const {
   return ack_mq_name_;
+}
+
+uint32_t Profile::application_list_update_timeout() const {
+  return application_list_update_timeout_;
 }
 
 void Profile::UpdateValues() {
@@ -958,6 +966,14 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
   }
 
   LOG_UPDATED_BOOL_VALUE(policy_turn_off_, kPolicyOffKey, kPolicySection);
+
+  ReadUIntValue(&application_list_update_timeout_,
+      kDefaultApplicationListUpdateTimeout,
+      kApplicationManagerSection,
+      kApplicationListUpdateTimeoutKey);
+
+  LOG_UPDATED_VALUE(application_list_update_timeout_,
+      kApplicationListUpdateTimeoutKey, kApplicationManagerSection);
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,

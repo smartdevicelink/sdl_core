@@ -247,7 +247,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   request_for_registration) {
 
   LOG4CXX_DEBUG(logger_, "Restarting application list update timer");
-  application_list_update_timer_->start(1);
+  uint32_t timeout = profile::Profile::instance()->application_list_update_timeout();
+  application_list_update_timer_->start(timeout);
 
   smart_objects::SmartObject& message = *request_for_registration;
   uint32_t connection_key =
@@ -763,7 +764,8 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
 void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
   connection_handler_->ConnectToAllDevices();
   LOG4CXX_DEBUG(logger_, "Starting application list update timer");
-  application_list_update_timer_->start(1);
+  uint32_t timeout = profile::Profile::instance()->application_list_update_timeout();
+  application_list_update_timer_->start(timeout);
 }
 
 void ApplicationManagerImpl::SendUpdateAppList(const std::list<uint32_t>& applications_ids) {
