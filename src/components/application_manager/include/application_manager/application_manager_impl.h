@@ -414,7 +414,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
     //TODO (EZamakhov): fix all indentations in this file
-    void OnApplicationListUpdated(const connection_handler::DeviceHandle& device_handle);
+  virtual void OnFindNewApplicationsRequest();
     void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
   bool OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
@@ -627,8 +627,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     // CALLED ON messages_to_hmi_ thread!
     virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
 
-    void SendApplicationListUpdated(const connection_handler::DeviceHandle& device_handle);
-    void OnApplicationListUpdateTimer(void* closure);
+    void SendUpdateAppList(const std::list<uint32_t>& applications_ids);
+    void OnApplicationListUpdateTimer();
 
     /**
      * @brief Checks, if given RPC is allowed at current HMI level for specific
@@ -713,12 +713,15 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     class ApplicationListUpdateTimer : public timer::TimerThread<ApplicationManagerImpl> {
      public:
-      ApplicationListUpdateTimer(ApplicationManagerImpl* callee, void* closure) : timer::TimerThread<ApplicationManagerImpl>(callee, &ApplicationManagerImpl::OnApplicationListUpdateTimer, closure) {
+      ApplicationListUpdateTimer(ApplicationManagerImpl* callee) :
+          timer::TimerThread<ApplicationManagerImpl>(
+              callee,
+              &ApplicationManagerImpl::OnApplicationListUpdateTimer
+          ) {
       }
     };
     typedef utils::SharedPtr<ApplicationListUpdateTimer> ApplicationListUpdateTimerSptr;
-    typedef std::map<connection_handler::DeviceHandle, ApplicationListUpdateTimerSptr> ApplicationListUpdateTimerContainer;
-    ApplicationListUpdateTimerContainer application_list_update_timers_;
+    ApplicationListUpdateTimerSptr application_list_update_timer_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 

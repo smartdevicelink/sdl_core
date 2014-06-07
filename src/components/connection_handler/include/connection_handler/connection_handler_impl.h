@@ -1,10 +1,5 @@
-/**
- * \file connection_handlerImpl.hpp
- * \brief Connection handler class.
- * Observes TransportManager and ProtocolHandler, stores information regarding connections
- * and sessions and provides it to AppManager.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +39,6 @@
 
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "protocol_handler/session_observer.h"
-#include "transport_manager/transport_manager_listener_empty.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
@@ -96,18 +90,14 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     virtual void ConnectToDevice(connection_handler::DeviceHandle device_handle);
 
+    virtual void ConnectToAllDevices();
+
     virtual void StartTransportManager();
 
     virtual void OnDeviceListUpdated(
       const std::vector<transport_manager::DeviceInfo>&);
 
-    /**
-    * @brief Reaction on event, when new applications are started on device
-    * and SDL found this application
-    *
-    * @param device_handle Unique ID of device with new application list
-    */
-    virtual void OnApplicationListUpdated(DeviceHandle device_handle);
+    virtual void OnFindNewApplicationsRequest();
 
     /**
      * \brief Available devices list updated.

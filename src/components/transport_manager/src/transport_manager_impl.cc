@@ -1,8 +1,5 @@
-/**
- * \file transport_manager_impl.cc
- * \brief TransportManagerImpl class source file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -627,10 +624,9 @@ void TransportManagerImpl::EventListenerThread(void) {
           OnDeviceListUpdated(ta);
           break;
         }
-        case TransportAdapterListenerImpl::EventTypeEnum::ON_APPLICATION_LIST_UPDATED: {
-          LOG4CXX_INFO(logger_, "Event ON_APPLICATION_LIST_UPDATED");
-          device_handle = converter_.UidToHandle(device_id);
-          RaiseEvent(&TransportManagerListener::OnApplicationListUpdated, device_handle);
+        case TransportAdapterListenerImpl::ON_FIND_NEW_APPLICATIONS_REQUEST: {
+          LOG4CXX_DEBUG(logger_, "Event ON_FIND_NEW_APPLICATIONS_REQUEST");
+          RaiseEvent(&TransportManagerListener::OnFindNewApplicationsRequest);
           break;
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE: {

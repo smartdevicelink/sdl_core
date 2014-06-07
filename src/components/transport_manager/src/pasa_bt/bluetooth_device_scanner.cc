@@ -240,12 +240,7 @@ void BluetoothDeviceScanner::UpdateTotalDeviceList() {
 
 void BluetoothDeviceScanner::UpdateTotalApplicationList() {
   LOG4CXX_TRACE_ENTER(logger_);
-  pthread_mutex_lock(&devices_mutex_);
-  for (DeviceVector::iterator it = found_devices_with_sdl_.begin();
-      it != found_devices_with_sdl_.end(); ++it) {
-    controller_->SearchApplicationsDone(*it);
-  }
-  pthread_mutex_unlock(&devices_mutex_);
+  controller_->FindNewApplicationsRequest();
   LOG4CXX_TRACE_EXIT(logger_);
 }
 

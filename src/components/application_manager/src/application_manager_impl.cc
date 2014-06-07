@@ -88,6 +88,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
 {
   LOG4CXX_INFO(logger_, "Creating ApplicationManager");
   media_manager_ = media_manager::MediaManagerImpl::instance();
+  application_list_update_timer_ = new ApplicationListUpdateTimer(this);
   CreatePoliciesManager();
 }
 
@@ -129,6 +130,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
 bool ApplicationManagerImpl::Stop() {
   LOG4CXX_INFO(logger_, "Stop ApplicationManager.");
+  application_list_update_timer_->stop();
   try {
     UnregisterAllApplications();
   } catch (...) {
@@ -243,21 +245,13 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_with_navi
 ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   const utils::SharedPtr<smart_objects::SmartObject>&
   request_for_registration) {
+
+  LOG4CXX_DEBUG(logger_, "Restarting application list update timer");
+  application_list_update_timer_->start(1);
+
   smart_objects::SmartObject& message = *request_for_registration;
   uint32_t connection_key =
     message[strings::params][strings::connection_key].asInt();
-
-  ApplicationSharedPtr app = application(connection_key);
-  connection_handler::DeviceHandle device_handle = app->device();
-  ApplicationListUpdateTimerContainer::iterator i = application_list_update_timers_.find(device_handle);
-  if (i != application_list_update_timers_.end()) {
-    LOG4CXX_DEBUG(logger_, "Restarting imer for device " << device_handle);
-    ApplicationListUpdateTimerSptr timer = i->second;
-    timer->start(1);
-  }
-  else {
-    LOG4CXX_WARN(logger_, "No timer corresponding to device " << device_handle);
-  }
 
   if (false == is_all_apps_allowed_) {
     LOG4CXX_INFO(logger_,
@@ -766,30 +760,16 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   ManageHMICommand(update_list);
 }
 
-void ApplicationManagerImpl::OnApplicationListUpdated(const connection_handler::DeviceHandle& device_handle) {
-  connection_handler_->ConnectToDevice(device_handle);
-  connection_handler::DeviceHandle* closure = new connection_handler::DeviceHandle(device_handle);
-  ApplicationListUpdateTimerSptr timer(new ApplicationListUpdateTimer(this, closure));
-  application_list_update_timers_.insert(std::make_pair(device_handle, timer));
-  LOG4CXX_DEBUG(logger_, "Starting timer for device " << device_handle);
-  timer->start(1);
+void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
+  connection_handler_->ConnectToAllDevices();
+  LOG4CXX_DEBUG(logger_, "Starting application list update timer");
+  application_list_update_timer_->start(1);
 }
 
-void ApplicationManagerImpl::SendApplicationListUpdated(const connection_handler::DeviceHandle& device_handle) {
-  LOG4CXX_TRACE(logger_, "OnApplicationListUpdated device_handle " << device_handle);
+void ApplicationManagerImpl::SendUpdateAppList(const std::list<uint32_t>& applications_ids) {
+  LOG4CXX_TRACE(logger_, "SendUpdateAppList");
 
-  std::list<uint32_t> applications_ids;
-  DCHECK(connection_handler_);
-  connection_handler::ConnectionHandlerImpl* con_handler_impl =
-    static_cast<connection_handler::ConnectionHandlerImpl*>(
-      connection_handler_);
-  if (con_handler_impl->GetDataOnDeviceID(device_handle, NULL,
-                                          &applications_ids) == -1) {
-    LOG4CXX_ERROR(logger_, "Failed to extract device list for id " << device_handle);
-    return;
-  }
-  LOG4CXX_DEBUG(logger_, "Device " << device_handle << " has " <<
-               applications_ids.size() << " applications.");
+  LOG4CXX_DEBUG(logger_, applications_ids.size() << " applications.");
 
   smart_objects::SmartObject* request = MessageHelper::CreateModuleInfoSO(
                                           hmi_apis::FunctionID::BasicCommunication_UpdateAppList);
@@ -800,7 +780,7 @@ void ApplicationManagerImpl::SendApplicationListUpdated(const connection_handler
       (*request)[strings::msg_params][strings::applications];
 
   uint32_t app_count = 0;
-  for (std::list<uint32_t>::iterator it = applications_ids.begin();
+  for (std::list<uint32_t>::const_iterator it = applications_ids.begin();
        it != applications_ids.end(); ++it) {
     ApplicationSharedPtr app = application(*it);
 
@@ -2090,19 +2070,21 @@ bool ApplicationManagerImpl::IsHMICooperating() const {
   return hmi_cooperating_;
 }
 
-void ApplicationManagerImpl::OnApplicationListUpdateTimer(void* closure) {
-  connection_handler::DeviceHandle* closure_casted = static_cast<connection_handler::DeviceHandle*>(closure);
-  connection_handler::DeviceHandle device_handle = *closure_casted;
-  ApplicationListUpdateTimerContainer::iterator i = application_list_update_timers_.find(device_handle);
-  if (i != application_list_update_timers_.end()) {
-    LOG4CXX_DEBUG(logger_, "Timer for device " << device_handle << " finished, deleting");
-    application_list_update_timers_.erase(i);
+void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
+  LOG4CXX_DEBUG(logger_, "Application list update timer finished");
+
+  std::list <uint32_t> applications_ids;
+
+  applications_list_lock_.Acquire();
+  for (std::set<ApplicationSharedPtr>::const_iterator i = application_list_.begin();
+       i != application_list_.end(); ++i) {
+    ApplicationSharedPtr application = *i;
+    uint32_t app_id = application->app_id();
+    applications_ids.push_back(app_id);
   }
-  else {
-    LOG4CXX_WARN(logger_, "No timer corresponding to device " << device_handle);
-  }
-  SendApplicationListUpdated(device_handle);
-  delete closure_casted;
+  applications_list_lock_.Release();
+
+  SendUpdateAppList(applications_ids);
 }
 
 }  // namespace application_manager
