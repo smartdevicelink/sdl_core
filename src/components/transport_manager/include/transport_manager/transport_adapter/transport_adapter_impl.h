@@ -237,6 +237,8 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual void SearchDeviceDone(const DeviceVector& devices);
 
+  virtual void ApplicationListUpdated(const DeviceUID& device_handle);
+
   virtual void FindNewApplicationsRequest();
 
   /**

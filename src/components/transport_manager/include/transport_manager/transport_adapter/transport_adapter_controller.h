@@ -64,6 +64,12 @@ class TransportAdapterController {
   virtual void SearchDeviceDone(const DeviceVector& devices) = 0;
 
   /**
+   * @brief application list update notification from device
+   * @param device_handle device id
+   */
+  virtual void ApplicationListUpdated(const DeviceUID& device_handle) = 0;
+
+  /**
    * @brief "Find new applications" request
    */
   virtual void FindNewApplicationsRequest() = 0;

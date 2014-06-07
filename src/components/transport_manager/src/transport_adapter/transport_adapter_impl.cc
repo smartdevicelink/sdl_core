@@ -351,6 +351,11 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
   }
 }
 
+void TransportAdapterImpl::ApplicationListUpdated(const DeviceUID& device_handle) {
+// default implementation does nothing
+// and is reimplemented in MME transport adapter only
+}
+
 void TransportAdapterImpl::FindNewApplicationsRequest() {
   for (TransportAdapterListenerList::iterator i = listeners_.begin(); i != listeners_.end(); ++i) {
     TransportAdapterListener* listener = *i;
