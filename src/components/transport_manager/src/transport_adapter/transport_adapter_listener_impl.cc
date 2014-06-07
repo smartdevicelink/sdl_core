@@ -90,7 +90,7 @@ void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(const TransportA
   TransportAdapterEvent event(
     TransportAdapterListenerImpl::ON_FIND_NEW_APPLICATIONS_REQUEST,
     transport_adapter_,
-    0,
+    "",
     0,
     RawMessageSptr(),
     NULL
