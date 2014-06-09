@@ -56,6 +56,9 @@
 #define FRIEND_BASE_SINGLETON_CLASS(TypeName) \
   friend class utils::Singleton<TypeName>
 
+#define FRIEND_BASE_SINGLETON_CLASS_WITH_DELETER(TypeName, TypeDeleter) \
+  friend class utils::Singleton<TypeName, TypeDeleter>
+
 // A macro to allow utils::deleters::Deleter::~Deleter() call class destructor
 #define FRIEND_DELETER_DESTRUCTOR(TypeName) \
   friend utils::deleters::Deleter<TypeName>::~Deleter()
