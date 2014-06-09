@@ -13,8 +13,8 @@ set (TEST_HMI_INTERFACES
   basic_communication
   tts
   ui
-  vehicle_info
-  vr
+#  vehicle_info
+#  vr
 )
 
 if (${HMI_DBUS_API})

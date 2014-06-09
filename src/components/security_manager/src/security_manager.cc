@@ -195,6 +195,7 @@ void SecurityManager::StartHandshake(uint32_t connection_key) {
     const uint8_t *data;
     security_manager::SSLContext::HandshakeResult result =
         ssl_context->StartHandshake(&data, &data_size);
+    //TODO(EZamakhov): fix DCHECK
     DCHECK(result == security_manager::SSLContext::Handshake_Result_Success);
     SendHandshakeBinData(connection_key, data, data_size);
   } else {
@@ -225,7 +226,7 @@ void SecurityManager::NotifyListenersOnHandshakeDone(const uint32_t &connection_
       it = listeners_.erase(it);
     } else {
       ++it;
-      }
+    }
   }
 }
 

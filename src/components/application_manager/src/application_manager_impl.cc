@@ -1004,6 +1004,10 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
                             true);
       break;
     }
+    case protocol_handler::kBulk: {
+      LOG4CXX_INFO(logger_, "Remove application bulk data service.");
+      break;
+    }
     case protocol_handler::kMobileNav: {
       LOG4CXX_INFO(logger_, "Stop video streaming.");
       if (media_manager_) {

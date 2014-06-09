@@ -114,8 +114,10 @@ bool Connection::AddNewService(uint8_t session,
                                const bool is_protected) {
   // Ignore wrong services
   if (protocol_handler::kControl == service_type ||
-     protocol_handler::kInvalidServiceType == service_type )
+     protocol_handler::kInvalidServiceType == service_type ) {
+    LOG4CXX_WARN(logger_, "Wrong service " << static_cast<int>(service_type));
     return false;
+  }
 
   sync_primitives::AutoLock lock(session_map_lock_);
 
@@ -149,8 +151,9 @@ bool Connection::AddNewService(uint8_t session,
         service_Rpc_it->is_protected_ = true;
       }
     } else {
-      LOG4CXX_WARN(logger_, "Session " << static_cast<int>(session) <<
-                    " already established service " << service_type);
+      LOG4CXX_WARN(logger_,
+                   "Session " << static_cast<int>(session) <<
+                   " already established service " << static_cast<int>(service_type));
       return false;
     }
   } else {

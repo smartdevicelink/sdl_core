@@ -955,15 +955,15 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
         connection_id, packet.session_id(), service_type,
         packet.protection_flag());
 
-  const uint32_t connection_key =
-      session_observer_->KeyFromPair(connection_id, session_id);
-
   if (-1 == session_id) {
     LOG4CXX_INFO_EXT(logger_, "Refused to create service " << service_type << " type.");
     SendStartSessionNAck(connection_id, packet.session_id(),
                          packet.protocol_version(), packet.service_type());
     return RESULT_OK;
   }
+
+  const uint32_t connection_key =
+      session_observer_->KeyFromPair(connection_id, session_id);
 
   // for not protected service or no security plugin
   if (!packet.protection_flag() || !security_manager_) {

@@ -64,7 +64,7 @@ void HeartBeatMonitor::threadMain() {
     while (it != sessions_.end()) {
       if (it->second.heartbeat_expiration_.tv_sec < date_time::DateTime::getCurrentTime().tv_sec) {
         if (it->second.is_heartbeat_sent_) {
-          LOG4CXX_INFO(logger_, "Session with id " << static_cast<int32_t>(it->first) <<" timed out, closing");
+          LOG4CXX_WARN(logger_, "Session with id " << static_cast<int32_t>(it->first) <<" timed out, closing");
           uint8_t session_id = it->first;
 
           // Unlock sessions_list_lock_ to avoid deadlock during session and session heartbeat removing

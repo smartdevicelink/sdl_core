@@ -58,7 +58,6 @@ set(LIBRARIES
     jsoncpp
     bluetooth
     pthread
-    rt
     ConfigProfile
     RequestWatchdog
     MediaManager

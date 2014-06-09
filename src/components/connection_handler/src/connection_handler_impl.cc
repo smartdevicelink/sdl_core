@@ -266,8 +266,9 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     }
   } else {
     if (!connection->AddNewService(session_id, service_type, is_protected)) {
-      LOG4CXX_ERROR(logger_, "Not possible to establish service "
-                    << static_cast<int>(service_type) << "!");
+      LOG4CXX_ERROR(logger_, "Not possible to establish "
+                    << (is_protected ? "prootected" : "nonprotected")
+                    << " service " << static_cast<int>(service_type) << "!");
       return -1;
     }
     new_session_id = session_id;
@@ -276,14 +277,15 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   if (connection_handler_observer_) {
     int32_t session_key = KeyFromPair(connection_handle, new_session_id);
 
-    bool success = connection_handler_observer_->OnServiceStartedCallback(
+    const bool success = connection_handler_observer_->OnServiceStartedCallback(
         connection->connection_device_handle(), session_key, service_type);
 
-    if (!success && (protocol_handler::kRpc == service_type)) {
-      connection->RemoveSession(new_session_id);
-      new_session_id = -1;
-    } else if (!success) {
-      connection->RemoveService(session_id, service_type);
+    if (!success) {
+      if(protocol_handler::kRpc == service_type) {
+        connection->RemoveSession(new_session_id);
+      } else {
+        connection->RemoveService(session_id, service_type);
+      }
       new_session_id = -1;
     }
   }

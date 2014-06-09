@@ -29,12 +29,11 @@ set (INCLUDE_DIR
   ../src/components/policy/src/policy/include
   ../src/components/policy/src/policy/usage_statistics/include
   ../src/components/protocol_handler/include
-  ../src/components/security_manager/include
   ../src/components/transport_manager/include
   ../src/components/connection_handler/include
+  ../src/components/security_manager/include
   ../src/components/formatters/include
   ../src/components/smart_objects/include
-  ../src/components/security_manager/include
   ../src/components/formatters/include
   ../src/components/utils/include/
   ../src/components/resumption/include/
@@ -43,11 +42,11 @@ set (INCLUDE_DIR
   ../test/components/media_manager/include
   ../test/components/protocol_handler/include/
   ../test/components/utils/include
-  ../test/components/security_manager/include
   ../test/components/json_handler/include
   ../test/components/smart_objects
   ../test/components/transport_manager
   ../test/components/connection_handler/include
+  ../test/components/security_manager/include
   ../test/components/
   ../test/thirdPartyLibs/jsoncpp/include
   ../test/components/application_manager
