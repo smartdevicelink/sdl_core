@@ -83,13 +83,18 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_key, uint8_t* data_param,
 }
 
 ProtocolPacket::~ProtocolPacket() {
+  if (packet_) {
+    delete[] packet_;
+  }
+
+  if (packet_data_.data) {
+    delete packet_data_.data;
+  }
+  packet_data_.data = 0;
+
   packet_ = 0;
   total_packet_size_ = 0;
   packet_id_ = 0;
-  if (packet_data_.data) {
-    delete packet_data_.data;
-    packet_data_.data = 0;
-  }
 }
 
 // Serialization

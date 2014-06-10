@@ -1,10 +1,9 @@
 include_directories (
-  ../../../src/thirdPartyLibs/gmock-1.7.0/include
-  ../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
+  ${GMOCK_INCLUDE_DIRECTORY}
   ../../../src/components/smart_objects/include
   ../../../src/components/formatters/include
   ../../../src/components/utils/include
-  ../../../src//thirdPartyLibs/jsoncpp/include/
+  ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}
 )
 

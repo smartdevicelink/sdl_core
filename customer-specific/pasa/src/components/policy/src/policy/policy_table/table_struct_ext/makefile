@@ -30,7 +30,7 @@ DEFS += \
 #  these are found in the depends include file and captured in the (DEPENDS_INCLUDES) variable
 INCLUDES = \
 	$(CFG_INCS) \
-	$(CC_IFLAG)../../../../../../thirdPartyLibs/jsoncpp/include \
+	$(CC_IFLAG)../../../../../../3rd_party-static/jsoncpp/include \
 	$(CC_IFLAG)../../../../../rpc_base/include \
 	$(DEPENDS_INCLUDES)
 

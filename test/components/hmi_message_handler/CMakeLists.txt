@@ -1,8 +1,7 @@
 include_directories (
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.7.0/include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.7.0/gtest/include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include/
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/logger/include/
+  ${GMOCK_INCLUDE_DIRECTORY}
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
   ${CMAKE_SOURCE_DIR}/src/components/application_manager/include/
   ${CMAKE_SOURCE_DIR}/src/components/hmi_message_handler/include/
@@ -11,6 +10,11 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/test/components/hmi_message_handler/include/
   ${CMAKE_BINARY_DIR}/src/components/
 )
+
+set(RTLIB rt)
+if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+set(RTLIB )
+endif()
 
 set (LIBRARIES
     gtest
@@ -23,6 +27,7 @@ set (LIBRARIES
     SmartObjects
     jsoncpp
     HMIMessageHandler
+    ${RTLIB}
 )
 
 set (SOURCES

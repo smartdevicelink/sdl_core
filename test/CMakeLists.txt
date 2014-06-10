@@ -16,10 +16,10 @@ add_subdirectory(./tools)
 
 
 set (INCLUDE_DIR
-  ../src/thirdPartyLibs/gmock-1.7.0/include
-  ../src/thirdPartyLibs/jsoncpp/include/
-  ../src/thirdPartyLibs/gmock-1.7.0/gtest/include
-  ../src/thirdPartyLibs/MessageBroker/include
+  ${GMOCK_INCLUDE_DIRECTORY}
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
   ../src/appMain
   ../src/components/application_manager/include
   ../src/components/hmi_message_handler/include

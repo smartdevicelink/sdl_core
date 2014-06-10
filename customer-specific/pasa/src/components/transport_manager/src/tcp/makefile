@@ -34,8 +34,8 @@ INCLUDES = \
 	$(CC_IFLAG)../../../connection_handler/include \
 	$(CC_IFLAG)../../../utils/include \
 	$(CC_IFLAG)../../../resumption/include \
-	$(CC_IFLAG)../../../../thirdPartyLibs/jsoncpp/include/ \
-	$(CC_IFLAG)../../../../thirdPartyLibs/log4cxx/include \
+	$(CC_IFLAG)../../../../3rd_party-static/jsoncpp/include/ \
+	$(CC_IFLAG)../../../../3rd_party/log4cxx/include \
 	$(DEPENDS_INCLUDES)
 
 
@@ -115,7 +115,7 @@ HEADERS = \
 	$(wildcard ../../../resumption/include/utils/*.h*) \
 	$(wildcard ../../../utils/include/utils/*.h*) \
 	$(wildcard ../../../utils/include/utils/threads/*.h*) \
-	$(wildcard ../../../../thirdPartyLibs/jsoncpp/include/json/*.h*) \
+	$(wildcard ../../../../3rd_party-static/jsoncpp/include/json/*.h*) \
 	
 LIBRARIES = \
 	$(COMPONENT_LIB) \

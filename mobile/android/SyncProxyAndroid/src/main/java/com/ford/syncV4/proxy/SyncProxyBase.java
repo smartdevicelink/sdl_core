@@ -96,6 +96,7 @@ import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.trace.TraceDeviceInfo;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.util.BTHelper;
 import com.ford.syncV4.util.CommonUtils;
 import com.ford.syncV4.util.DeviceInfoManager;
 import com.ford.syncV4.util.logger.Logger;
@@ -105,8 +106,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.Vector;
 
 public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase> implements
@@ -151,11 +150,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private int mPoliciesCorrelationId = POLICIES_CORRELATION_ID;
 
     public Boolean getAdvancedLifecycleManagementEnabled() {
-        return _advancedLifecycleManagementEnabled;
+        return mAdvancedLifecycleManagementEnabled;
     }
 
     // SyncProxy Advanced Lifecycle Management
-    protected Boolean _advancedLifecycleManagementEnabled = false;
+    protected Boolean mAdvancedLifecycleManagementEnabled = false;
 
     protected Hashtable<String, Boolean> mAppInterfaceRegistered = new Hashtable<String, Boolean>();
 
@@ -168,14 +167,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected Boolean mIsProxyDisposed = false;
 
     public SyncConnectionState getSyncConnectionState() {
-        return _syncConnectionState;
+        return mSyncConnectionState;
     }
 
     public void setSyncConnectionState(SyncConnectionState syncConnectionState) {
-        this._syncConnectionState = syncConnectionState;
+        this.mSyncConnectionState = syncConnectionState;
     }
 
-    protected SyncConnectionState _syncConnectionState = null;
+    protected SyncConnectionState mSyncConnectionState = null;
 
     public SyncMsgVersion getSyncMsgVersion() throws SyncException {
         return _syncMsgVersion;
@@ -432,7 +431,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * Contains current configuration for the transport that was selected during
      * construction of this object
      */
-    private BaseTransportConfig _transportConfig = null;
+    private BaseTransportConfig mTransportConfig = null;
 
     public HMILevel getPriorHmiLevel() {
         return _priorHmiLevel;
@@ -456,13 +455,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     // Interface broker
     private SyncInterfaceBroker _interfaceBroker = null;
     /**
-     * Timer that is used to schedule proxy reconnect tasks.
+     * Handler that is used to schedule SYNC Proxy reconnect tasks.
      */
-    private Timer _reconnectTimer = null;
-    /**
-     * Currently scheduled proxy reconnect task, if any.
-     */
-    private TimerTask _currentReconnectTimerTask = null;
+    private final Handler reconnectHandler = new Handler();
     private static int heartBeatInterval = HEARTBEAT_INTERVAL;
     private static boolean heartBeatAck = true;
     private IRPCRequestConverterFactory rpcRequestConverterFactory =
@@ -570,7 +565,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             String autoActivateID, boolean callbackToUIThread, boolean preRegister, int version,
                             BaseTransportConfig transportConfig, SyncConnection connection, TestConfig testConfig)
             throws SyncException {
-        Logger.i(LOG_TAG + " Constructor");
+
         mTestConfig = testConfig;
 
         setAppInterfacePreRegistered(appId, preRegister);
@@ -703,11 +698,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     }
 
     private void setTransportConfig(BaseTransportConfig transportConfig) {
-        _transportConfig = transportConfig;
+        mTransportConfig = transportConfig;
     }
 
     private void setAdvancedLifecycleManagementEnabled(boolean enableAdvancedLifecycleManagement) {
-        _advancedLifecycleManagementEnabled = enableAdvancedLifecycleManagement;
+        mAdvancedLifecycleManagementEnabled = enableAdvancedLifecycleManagement;
     }
 
     private void setProxyListener(proxyListenerType listener) {
@@ -1028,9 +1023,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         //_syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
     }*/
 
-    // Function to initialize new proxy connection
+    /**
+     * Initialize SYNC Proxy
+     *
+     * @throws SyncException {@link com.ford.syncV4.exception.SyncException}
+     */
     public void initializeProxy() throws SyncException {
-        //initState();
 
         internalRequestCorrelationIDs = new HashSet<Integer>();
 
@@ -1045,7 +1043,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                  */
                 mSyncConnection.setTestConfig(mTestConfig);
 
-                mSyncConnection.init(_transportConfig);
+                mSyncConnection.init(mTransportConfig);
             }
 
             /**
@@ -1084,12 +1082,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         dispose();
     }
 
-    private void cleanProxy(SyncDisconnectedReason disconnectedReason,
-                            boolean keepConnection) throws SyncException {
+    private void cleanProxy(boolean keepConnection) throws SyncException {
         try {
             // ALM Specific Cleanup
-            if (_advancedLifecycleManagementEnabled) {
-                _syncConnectionState = SyncConnectionState.SYNC_DISCONNECTED;
+            if (mAdvancedLifecycleManagementEnabled) {
+                mSyncConnectionState = SyncConnectionState.SYNC_DISCONNECTED;
 
                 firstTimeFull = true;
 
@@ -1127,9 +1124,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         try {
             // Clean the proxy
-            cleanProxy(SyncDisconnectedReason.APPLICATION_REQUESTED_DISCONNECT, false);
+            cleanProxy(false);
 
-            clearReconnectTimer();
+            reconnectHandler.removeCallbacks(reconnectRunnableTask);
 
             // Close IncomingProxyMessageDispatcher thread
             synchronized (INCOMING_MESSAGE_QUEUE_THREAD_LOCK) {
@@ -1163,11 +1160,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     // Method to cycle the proxy, only called in ALM
     protected void cycleProxy(SyncDisconnectedReason disconnectedReason) {
-        Logger.d("CycleProxy, disconnectedReason:" + disconnectedReason);
+        Logger.d("Cycle SYNC Proxy, reason:" + disconnectedReason);
         try {
-            cleanProxy(disconnectedReason, true);
+            cleanProxy(true);
             scheduleInitializeProxy();
-            notifyProxyClosed("Sync Proxy Cycled", new SyncException("Sync Proxy Cycled",
+            notifyProxyClosed("SYNC Proxy cycled", new SyncException("SYNC Proxy cycled",
                     SyncExceptionCause.SYNC_PROXY_CYCLED));
         } catch (SyncException e) {
             handleCyclingSyncException(e);
@@ -1214,15 +1211,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private void handleCyclingSyncException(SyncException e) {
         switch (e.getSyncExceptionCause()) {
             case BLUETOOTH_DISABLED:
-                notifyProxyClosed("Bluetooth is disabled. Bluetooth must be enabled to connect to SYNC. Reattempt a connection once Bluetooth is enabled.",
-                        new SyncException("Bluetooth is disabled. Bluetooth must be enabled to connect to SYNC. Reattempt a connection once Bluetooth is enabled.", SyncExceptionCause.BLUETOOTH_DISABLED));
+                notifyProxyClosed("Bluetooth is disabled",
+                        new SyncException("Bluetooth is disabled",
+                                SyncExceptionCause.BLUETOOTH_DISABLED));
                 break;
             case BLUETOOTH_ADAPTER_NULL:
-                notifyProxyClosed("Cannot locate a Bluetooth adapater. A SYNC connection is impossible on this device until a Bluetooth adapter is added.",
-                        new SyncException("Cannot locate a Bluetooth adapater. A SYNC connection is impossible on this device until a Bluetooth adapter is added.", SyncExceptionCause.HEARTBEAT_PAST_DUE));
+                notifyProxyClosed("Bluetooth is not available",
+                        new SyncException("Bluetooth is not available",
+                                SyncExceptionCause.HEARTBEAT_PAST_DUE));
                 break;
             default:
-                notifyProxyClosed("Cycling the proxy failed.", e);
+                notifyProxyClosed("SYNC Proxy cycling fail", e);
                 break;
         }
     }
@@ -1230,30 +1229,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     protected void scheduleInitializeProxy() {
         Logger.d("Scheduling proxy init, services count:" + syncSession.getServicesNumber());
 
-        if (getCurrentReconnectTimerTask() != null) {
-            Logger.d("Current reconnect task is already scheduled, canceling it first");
-            clearCurrentReconnectTimerTask();
-        }
-
-        TimerTask reconnectTask = new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    Logger.d("Reconnect task is running, clearing reference");
-                    setCurrentReconnectTimerTask(null);
-                    initializeProxy();
-                } catch (SyncException e) {
-                    Logger.e("Cycling the proxy failed with SyncException.", e);
-                    handleCyclingSyncException(e);
-                } catch (Exception e) {
-                    notifyProxyClosed("Cycling the proxy failed with Exception.", e);
-                }
-            }
-        };
-        setCurrentReconnectTimerTask(reconnectTask);
-
-        Timer timer = getReconnectTimer();
-        timer.schedule(reconnectTask, PROXY_RECONNECT_DELAY);
+        reconnectHandler.removeCallbacks(reconnectRunnableTask);
+        reconnectHandler.postDelayed(reconnectRunnableTask, PROXY_RECONNECT_DELAY);
     }
 
     /**
@@ -1785,7 +1762,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             }
         }
 
-        if (_advancedLifecycleManagementEnabled) {
+        if (mAdvancedLifecycleManagementEnabled) {
             if (request.getFunctionName().equals(Names.RegisterAppInterface)
                     || request.getFunctionName().equals(Names.UnregisterAppInterface)) {
                 if (!allowExtraTesting()) {
@@ -1862,7 +1839,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     private void restartRPCProtocolSession(byte sessionId) {
         // Set Proxy Lifecycle Available
-        if (_advancedLifecycleManagementEnabled) {
+        if (mAdvancedLifecycleManagementEnabled) {
 
             // For the Test Cases
             if (mTestConfig != null) {
@@ -2879,56 +2856,29 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         Logger.d("Set JSON Marshaller:" + value);
     }
 
-    protected TimerTask getCurrentReconnectTimerTask() {
-        TimerTask task;
-        synchronized (RECONNECT_TIMER_TASK_LOCK) {
-            task = _currentReconnectTimerTask;
-        }
-        return task;
-    }
+    private Runnable reconnectRunnableTask = new Runnable() {
 
-    private void setCurrentReconnectTimerTask(TimerTask currentReconnectTimerTask) {
-        synchronized (RECONNECT_TIMER_TASK_LOCK) {
-            if (currentReconnectTimerTask == null) {
-                _currentReconnectTimerTask.cancel();
+        @Override
+        public void run() {
+            Logger.d("Reconnect task is running ...");
+
+            try {
+
+                initializeProxy();
+
+                reconnectHandler.removeCallbacks(reconnectRunnableTask);
+                return;
+
+            } catch (SyncException e) {
+                Logger.e("Cycling the proxy failed with SyncException.", e);
+                handleCyclingSyncException(e);
+            } catch (Exception e) {
+                notifyProxyClosed("Cycling the proxy failed with Exception.", e);
             }
-            _currentReconnectTimerTask = currentReconnectTimerTask;
+
+            reconnectHandler.postDelayed(this, PROXY_RECONNECT_DELAY);
         }
-    }
-
-    private boolean clearCurrentReconnectTimerTask() {
-        TimerTask task = getCurrentReconnectTimerTask();
-        if (task != null) {
-            Logger.d("Clearing reconnect timer task");
-            boolean success = task.cancel();
-            setCurrentReconnectTimerTask(null);
-            if (!success) {
-                Logger.i("Can't cancel scheduled reconnect task");
-            }
-            return success;
-        }
-
-        return true;
-    }
-
-    private Timer getReconnectTimer() {
-        if (_reconnectTimer == null) {
-            Logger.d("Reconnect timer is null, creating a new one");
-            _reconnectTimer = new Timer("ReconnectTimer", true);
-        }
-
-        return _reconnectTimer;
-    }
-
-    private void clearReconnectTimer() {
-        if (_reconnectTimer != null) {
-            Logger.d("Clearing reconnect timer");
-            _reconnectTimer.cancel();
-            _reconnectTimer = null;
-        } else {
-            Logger.d("Reconnect timer is already null");
-        }
-    }
+    };
 
     /**
      * Sets the desired SYNC and HMI display languages, and re-registers the
@@ -3041,6 +2991,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         @Override
         public void onTransportConnected() {
             Logger.d(LOG_TAG + " Transport Connected, appIds:" + appIds);
+
+            reconnectHandler.removeCallbacks(reconnectRunnableTask);
+
             for (String appId: appIds) {
                 initializeSession(appId);
             }
@@ -3051,13 +3004,14 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             // proxyOnTransportDisconnect is called to alert the proxy that a requested
             // disconnect has completed
 
+            Logger.d(LOG_TAG + " Transport Disconnected, appIds:" + appIds);
             for (String appId: appIds) {
                 if (getSyncConnection() != null) {
                     getSyncConnection().stopHeartbeatMonitor(syncSession.getSessionIdByAppId(appId));
                 }
             }
 
-//			if (_advancedLifecycleManagementEnabled) {
+//			if (mAdvancedLifecycleManagementEnabled) {
 //				// If ALM, nothing is required to be done here
 //			} else {
             // If original model, notify app the proxy is closed so it will delete and reinstanciate
@@ -3069,8 +3023,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         public void onTransportError(String info, Exception e) {
             Logger.e("Transport failure: " + info, e);
 
-            if (_transportConfig != null &&
-                    _transportConfig.getTransportType() ==  TransportType.USB) {
+            if (mTransportConfig != null &&
+                    mTransportConfig.getTransportType() ==  TransportType.USB) {
                 if (CommonUtils.isUSBNoSuchDeviceError(e.toString())) {
 
                     if (_callbackToUIThread) {
@@ -3095,7 +3049,9 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 }
             }
 
-            if (_advancedLifecycleManagementEnabled) {
+            getSyncConnection().stopAllHeartbeatMonitors();
+
+            if (mAdvancedLifecycleManagementEnabled) {
                 // Cycle the proxy
                 cycleProxy(SyncDisconnectedReason.TRANSPORT_ERROR);
             } else {

@@ -143,6 +143,14 @@
 		          "LIMITED"
 		        ]
 		      },
+                      "OnHashChange": {
+                        "hmi_levels": [
+                          "BACKGROUND",
+                          "FULL",
+                          "LIMITED",
+                          "NONE"
+                        ]
+                      },
 		      "UnregisterAppInterface": {
 		        "hmi_levels": [
 		          "BACKGROUND",
@@ -322,6 +330,14 @@
             ]
           },
           "OnLanguageChange": {
+            "hmi_levels": [
+              "BACKGROUND",
+              "FULL",
+              "LIMITED",
+              "NONE"
+            ]
+          },
+          "OnHashChange": {
             "hmi_levels": [
               "BACKGROUND",
               "FULL",

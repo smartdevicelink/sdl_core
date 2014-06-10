@@ -44,9 +44,9 @@ INCLUDES = \
 	$(CC_IFLAG)../../../media_manager/include \
 	$(CC_IFLAG)../../../policy/src/policy/usage_statistics/include \
 	$(CC_IFLAG)../../../ \
-	$(CC_IFLAG)../../../../thirdPartyLibs/jsoncpp/include \
-	$(CC_IFLAG)../../../../thirdPartyLibs/encryption/include \
-	$(CC_IFLAG)../../../../thirdPartyLibs/log4cxx/include \
+	$(CC_IFLAG)../../../../3rd_party-static/jsoncpp/include \
+	$(CC_IFLAG)../../../../3rd_party-static/encryption/include \
+	$(CC_IFLAG)../../../../3rd_party/log4cxx/include \
 	$(DEPENDS_INCLUDES)
 
 

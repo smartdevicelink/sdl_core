@@ -4,6 +4,7 @@ include_directories (
   ../transport_manager/include/
   ../connection_handler/include/
   ../config_profile/include/
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES

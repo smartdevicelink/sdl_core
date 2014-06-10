@@ -1,6 +1,7 @@
 include_directories (
   ./include
   ../utils/include/
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES
