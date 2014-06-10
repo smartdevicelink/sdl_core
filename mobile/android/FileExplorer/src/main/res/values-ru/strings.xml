@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
-    <string name="app_name_fe">File dialog</string>
+    <string name="app_name">File dialog</string>
     <string name="location">Путь</string>
     <string name="cant_read_folder">нельзя открыть директорию!</string>
     <string name="nnew">Новый</string>
