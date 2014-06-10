@@ -51,9 +51,8 @@ SecurityManager::SecurityManager():
 
 void SecurityManager::OnMessageReceived(
     const protocol_handler::RawMessagePtr message) {
-  LOG4CXX_INFO(logger_, "OnMessageReceived");
   if (message->service_type() != protocol_handler::kControl) {
-    LOG4CXX_INFO(logger_, "Skipping message; not the under SM handling");
+    LOG4CXX_DEBUG(logger_, "Skipping message; not the under SM handling");
     return;
   }
 
@@ -266,7 +265,7 @@ bool SecurityManager::ProccessHandshakeData(const SecurityMessage &inMessage) {
                                   &out_data, &out_data_size);
   if (handshake_result == SSLContext::Handshake_Result_AbnormalFail) {
     // Do not return handshake data on AbnormalFail or null returned values
-    const std::string erorr_text(LastError());
+    const std::string erorr_text(sslContext->LastError());
     LOG4CXX_ERROR(logger_, "SendHandshakeData: Handshake failed: " << erorr_text);
     SendInternalError(connection_key,
                       SecurityQuery::ERROR_SSL_INVALID_DATA, erorr_text, seqNumber);
@@ -370,4 +369,5 @@ void SecurityManager::SendBinaryData(const uint32_t connection_key,
 const char *SecurityManager::ConfigSection() {
   return "Security Manager";
 }
+
 }  // namespace security_manager

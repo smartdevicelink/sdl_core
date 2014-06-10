@@ -44,8 +44,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CryptoManagerImpl")
 int CryptoManagerImpl::instance_count_ = 0;
 
 CryptoManagerImpl::CryptoManagerImpl()
-    : context_(NULL),
-      mode_(CLIENT) {
+    : context_(NULL), mode_(CLIENT) {
 }
 
 bool CryptoManagerImpl::Init(Mode mode,
@@ -54,7 +53,6 @@ bool CryptoManagerImpl::Init(Mode mode,
                              const std::string& key_filename,
                              const std::string& ciphers_list,
                              bool verify_peer) {
-
   if (instance_count_ == 0) {
     SSL_load_error_strings();
     ERR_load_BIO_strings();
@@ -70,70 +68,87 @@ bool CryptoManagerImpl::Init(Mode mode,
 #else
   const SSL_METHOD *method;
 #endif
-  // TODO (EZamakhov) : add TLS1.0 protocol
   switch (protocol) {
     case SSLv3:
       method = is_server ?
           SSLv3_server_method() :
           SSLv3_client_method();
       break;
-    // FIXME (EZamakhov) : fix build for QNX 6.5.0
+    case TLSv1:
+      method = is_server ?
+          TLSv1_server_method() :
+          TLSv1_client_method();
     case TLSv1_1:
 #if OPENSSL_VERSION_NUMBER < 0x1000100f
-      LOG4CXX_FATAL(logger_, "OpenSSL has no TLSv1_1 with version lower 1.0.1");
-      return false;
+      LOG4CXX_WARN(logger_,
+                   "OpenSSL has no TLSv1.1 with version lower 1.0.1, set TLSv1.0");
+      method = is_server ?
+          TLSv1_server_method() :
+          TLSv1_client_method();
 #else
       method = is_server ?
           TLSv1_1_server_method() :
           TLSv1_1_client_method();
-      break;
 #endif
+      break;
     case TLSv1_2:
 #if OPENSSL_VERSION_NUMBER < 0x1000100f
-      LOG4CXX_FATAL(logger_, "OpenSSL has no TLSv1_2 with version lower 1.0.1");
-      return false;
+      LOG4CXX_WARN(logger_,
+                   "OpenSSL has no TLSv1.2 with version lower 1.0.1, set TLSv1.0");
+      method = is_server ?
+          TLSv1_server_method() :
+          TLSv1_client_method();
 #else
       method = is_server ?
           TLSv1_2_server_method() :
           TLSv1_2_client_method();
-      break;
 #endif
+      break;
     default:
       LOG4CXX_ERROR(logger_, "Unknown protocol: " << protocol);
       return false;
   }
   context_ = SSL_CTX_new(method);
-  if (protocol == SSLv3) {
-    SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
-  }
 
-  if (!cert_filename.empty()) {
+  // Disable SSL2 as deprecated
+  SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
+
+  if (cert_filename.empty()) {
+    LOG4CXX_WARN(logger_, "Empty certificate path");
+  } else {
     LOG4CXX_INFO(logger_, "Certificate path: " << cert_filename);
     if (!SSL_CTX_use_certificate_file(context_, cert_filename.c_str(), SSL_FILETYPE_PEM)) {
       LOG4CXX_ERROR(logger_, "Could not use certificate " << cert_filename);
       return false;
     }
+  }
 
-    if (!key_filename.empty()) {
-      LOG4CXX_INFO(logger_, "Key path: " << key_filename);
-      if (!SSL_CTX_use_PrivateKey_file(context_, key_filename.c_str(), SSL_FILETYPE_PEM)) {
-        LOG4CXX_ERROR(logger_, "Could not use key " << key_filename);
-        return false;
-      }
-      if (!SSL_CTX_check_private_key(context_)) {
-        LOG4CXX_ERROR(logger_, "Could not use certificate " << cert_filename);
-        return false;
-      }
+  if (key_filename.empty()) {
+    LOG4CXX_WARN(logger_, "Empty key path");
+  } else {
+    LOG4CXX_INFO(logger_, "Key path: " << key_filename);
+    if (!SSL_CTX_use_PrivateKey_file(context_, key_filename.c_str(), SSL_FILETYPE_PEM)) {
+      LOG4CXX_ERROR(logger_, "Could not use key " << key_filename);
+      return false;
+    }
+    if (!SSL_CTX_check_private_key(context_)) {
+      LOG4CXX_ERROR(logger_, "Could not use certificate " << cert_filename);
+      return false;
     }
   }
 
-  LOG4CXX_INFO(logger_, "Cipher list: " << ciphers_list);
-  if (!SSL_CTX_set_cipher_list(context_, ciphers_list.c_str())) {
-    LOG4CXX_ERROR(logger_, "Could not set cipher list: " << ciphers_list);
-    return false;
+  if (ciphers_list.empty()) {
+    LOG4CXX_WARN(logger_, "Empty ciphers list");
+  } else {
+    LOG4CXX_INFO(logger_, "Cipher list: " << ciphers_list);
+    if (!SSL_CTX_set_cipher_list(context_, ciphers_list.c_str())) {
+      LOG4CXX_ERROR(logger_, "Could not set cipher list: " << ciphers_list);
+      return false;
+    }
   }
 
-  SSL_CTX_set_verify(context_, verify_peer ? SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT : SSL_VERIFY_NONE, NULL);
+  const int verify_mode = verify_peer ? SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT : SSL_VERIFY_NONE;
+  SSL_CTX_set_verify(context_, verify_mode, NULL);
 
   return true;
 }
@@ -166,6 +181,16 @@ SSLContext * CryptoManagerImpl::CreateSSLContext() {
 
 void CryptoManagerImpl::ReleaseSSLContext(SSLContext* context) {
   delete context;
+}
+
+std::string CryptoManagerImpl::LastError() const {
+  if(!context_) {
+    return std::string("Initialization is not completed");
+  }
+  // TODO (DChmerev): add error on no key files
+  const unsigned long error = ERR_get_error();
+  const char * reason = ERR_reason_error_string(error);
+  return std::string(reason ? reason : "");
 }
 
 } // namespace security_manager

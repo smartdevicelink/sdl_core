@@ -73,7 +73,8 @@ namespace security_manager_test {
                     const uint8_t * const binary_data,
                     const size_t bin_data_size) {
       //convert to Big-Endian (network) order
-      header.query_id  = LE_TO_BE32(header.query_id << 8);
+      const uint32_t query_id = header.query_id << 8;
+      header.query_id  = LE_TO_BE32(query_id);
       header.json_size = LE_TO_BE32(header.json_size);
       std::vector<uint8_t> vector;
       vector.reserve(header_size + bin_data_size);

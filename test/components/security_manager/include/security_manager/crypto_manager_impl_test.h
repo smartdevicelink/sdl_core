@@ -113,7 +113,6 @@ TEST(CryptoManagerTest, ReleaseNull) {
 }
 
 TEST_F(SSLTest, Positive) {
-  using security_manager::LastError;
 
   const uint8_t *server_buf;
   const uint8_t *client_buf;

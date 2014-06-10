@@ -657,18 +657,20 @@ RESULT_CODE ProtocolHandlerImpl::HandleMessage(ConnectionID connection_id,
   LOG4CXX_TRACE_ENTER(logger_);
   switch (packet->frame_type()) {
     case FRAME_TYPE_CONTROL:
-      LOG4CXX_INFO(logger_, "handleMessage() - case FRAME_TYPE_CONTROL");
+      LOG4CXX_TRACE(logger_, "handleMessage() - case FRAME_TYPE_CONTROL");
       LOG4CXX_TRACE_EXIT(logger_);
       return HandleControlMessage(connection_id, packet);
     case FRAME_TYPE_SINGLE:
+      LOG4CXX_TRACE_EXIT(logger_);
       return HandleSingleFrameMessage(connection_id, packet);
     case FRAME_TYPE_FIRST:
     case FRAME_TYPE_CONSECUTIVE:
-      LOG4CXX_INFO(logger_, "handleMessage() - case FRAME_TYPE_CONSECUTIVE");
+      LOG4CXX_TRACE(logger_, "handleMessage() - case FRAME_TYPE_CONSECUTIVE");
       LOG4CXX_TRACE_EXIT(logger_);
       return HandleMultiFrameMessage(connection_id, packet);
     default: {
       LOG4CXX_WARN(logger_, "handleMessage() - case default!!!");
+      LOG4CXX_TRACE_EXIT(logger_);
       return RESULT_FAIL;
     }
   }
@@ -835,6 +837,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
       LOG4CXX_INFO(logger_, "Received heart beat ack from mobile app"
           " for connection " << connection_id);
     }
+    break;
     default:
       LOG4CXX_WARN(
           logger_,
@@ -1081,7 +1084,7 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
   size_t out_data_size;
   if (!context->Encrypt(packet->data(), packet->data_size(),
                        &out_data, &out_data_size)) {
-    const std::string error_text(security_manager::LastError());
+    const std::string error_text(context->LastError());
     LOG4CXX_ERROR(logger_, "Enryption failed: " << error_text);
     security_manager_->SendInternalError(connection_key,
           security_manager::SecurityQuery::ERROR_ENCRYPTION_FAILED, error_text);
@@ -1126,7 +1129,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
   size_t out_data_size;
   if (!context->Decrypt(packet->data(), packet->data_size(),
                        &out_data, &out_data_size)) {
-    const std::string error_text(security_manager::LastError());
+    const std::string error_text(context->LastError());
     LOG4CXX_ERROR(logger_, "Decryption failed: " << error_text);
     security_manager_->SendInternalError(connection_key,
           security_manager::SecurityQuery::ERROR_DECRYPTION_FAILED, error_text);

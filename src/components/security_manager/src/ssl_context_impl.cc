@@ -53,15 +53,14 @@ CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn, Mode mode)
   SSL_set_bio(connection_, bioIn_, bioOut_);
 }
 
-std::string LastError() {
+std::string CryptoManagerImpl::SSLContextImpl::LastError() const {
+  if(!IsInitCompleted()) {
+    return std::string("Initialization is not completed");
+  }
   // TODO (DChmerev): add error on no key files
   const unsigned long error = ERR_get_error();
   const char * reason = ERR_reason_error_string(error);
-  if (reason) {
-    return reason;
-  } else {
-    return std::string();
-  }
+  return std::string(reason ? reason : "");
 }
 
 bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() const {
@@ -172,9 +171,9 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
   return SSLContext::Handshake_Result_Success;
 }
 
-bool CryptoManagerImpl::SSLContextImpl::
-Encrypt(const uint8_t *  const in_data,  size_t in_data_size,
-        const uint8_t ** const out_data, size_t* out_data_size) {
+bool CryptoManagerImpl::SSLContextImpl::Encrypt(
+    const uint8_t *  const in_data,  size_t in_data_size,
+    const uint8_t ** const out_data, size_t* out_data_size) {
 
   if (!SSL_is_init_finished(connection_) ||
       !in_data ||
@@ -197,9 +196,9 @@ Encrypt(const uint8_t *  const in_data,  size_t in_data_size,
   return true;
 }
 
-bool CryptoManagerImpl::SSLContextImpl::
-Decrypt(const uint8_t *  const in_data,  size_t in_data_size,
-        const uint8_t ** const out_data, size_t* out_data_size) {
+bool CryptoManagerImpl::SSLContextImpl::Decrypt(
+    const uint8_t *  const in_data,  size_t in_data_size,
+    const uint8_t ** const out_data, size_t* out_data_size) {
 
   if (!SSL_is_init_finished(connection_)) {
     return false;
@@ -226,8 +225,7 @@ Decrypt(const uint8_t *  const in_data,  size_t in_data_size,
   return true;
 }
 
-size_t CryptoManagerImpl::SSLContextImpl::
-get_max_block_size(size_t mtu) const {
+size_t CryptoManagerImpl::SSLContextImpl::get_max_block_size(size_t mtu) const {
   // FIXME(EZamakhov): add correct logics for TLS1/1.2/SSL3
   // For SSL3.0 set temporary value 90, old TLS1.2 value is 29
   if (!max_block_size_) {
@@ -237,8 +235,7 @@ get_max_block_size(size_t mtu) const {
 }
 
 
-CryptoManagerImpl::SSLContextImpl::
-~SSLContextImpl() {
+CryptoManagerImpl::SSLContextImpl::~SSLContextImpl() {
   // TODO(EZamakhov): return destruction logics
   // SSL_shutdown(connection_);
   // SSL_free(connection_);
