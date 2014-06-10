@@ -429,14 +429,15 @@ class Application : public virtual InitialApplicationData,
      * @return TRUE if application runs alert request from background level
      * otherwise returns FALSE
      */
-    virtual bool alert_in_background()const = 0;
+    virtual bool alert_in_background() const = 0;
+
     /**
      * @brief if application activates alert in background level method sets
      * TRUE
      * @param state_of_alert contains TRUE if alert is activated otherwise
      * contains FALSE
      */
-    virtual void set_alert_in_background(const bool& state_of_alert) = 0;
+    virtual void set_alert_in_background(const bool state_of_alert) = 0;
     virtual void set_protocol_version(
         const ProtocolVersion& protocol_version) = 0;
     virtual ProtocolVersion protocol_version() const = 0;

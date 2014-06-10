@@ -34,11 +34,13 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SYSTEM_CONTEXT_NOTIFICATION_H_
 
 #include "application_manager/commands/hmi/notification_from_hmi.h"
+#include "application_manager/application.h"
 
 namespace application_manager {
 
 namespace commands {
 
+namespace mobile_api = mobile_apis;
 /**
  * @brief OnSystemContextNotification command class
  **/
@@ -62,6 +64,9 @@ class OnSystemContextNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
+  void SendSystemContextNotification(ApplicationSharedPtr app,
+                                     mobile_api::SystemContext::eType system_context);
+
   DISALLOW_COPY_AND_ASSIGN(OnSystemContextNotification);
 };
 
