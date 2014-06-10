@@ -444,7 +444,7 @@ class TransportManagerImpl : public TransportManager {
       DeviceList;
   DeviceList device_list_;
   void AddConnection(const ConnectionInternal& c);
-  void RemoveConnection(int id);
+  void RemoveConnection(uint32_t id);
   ConnectionInternal* GetConnection(const ConnectionUID& id);
   ConnectionInternal* GetConnection(const DeviceUID& device,
                                     const ApplicationHandle& application);

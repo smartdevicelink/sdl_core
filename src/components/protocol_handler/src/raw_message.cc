@@ -43,11 +43,11 @@ RawMessage::RawMessage(int32_t connectionKey, uint32_t protocolVersion,
                        uint8_t* data_param, uint32_t data_sz,
                        uint8_t type)
   : connection_key_(connectionKey),
+    data_size_(data_sz),
     protocol_version_(protocolVersion),
     service_type_(ServiceTypeFromByte(type)),
     waiting_(false),
-    fully_binary_(false),
-    data_size_(data_sz) {
+    fully_binary_(false) {
   if (data_sz > 0) {
     data_ = new uint8_t[data_sz];
     for (uint32_t i = 0; i < data_sz; ++i) {

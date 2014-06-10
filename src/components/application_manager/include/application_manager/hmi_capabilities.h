@@ -36,6 +36,7 @@
 #include "interfaces/HMI_API.h"
 #include "interfaces/MOBILE_API.h"
 #include "json/json.h"
+#include "utils/macro.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {

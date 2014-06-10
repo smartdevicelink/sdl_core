@@ -67,20 +67,20 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     is_vr_session_strated_(false),
     hmi_cooperating_(false),
     is_all_apps_allowed_(true),
+    media_manager_(NULL),
     hmi_handler_(NULL),
     connection_handler_(NULL),
     policy_manager_(NULL),
+    protocol_handler_(NULL),
+    request_ctrl_(),
+    hmi_capabilities_(this),
     hmi_so_factory_(NULL),
     mobile_so_factory_(NULL),
-    protocol_handler_(NULL),
+    unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF),
     messages_from_mobile_("application_manager::FromMobileThreadImpl", this),
     messages_to_mobile_("application_manager::ToMobileThreadImpl", this),
     messages_from_hmi_("application_manager::FromHMHThreadImpl", this),
     messages_to_hmi_("application_manager::ToHMHThreadImpl", this),
-    request_ctrl_(),
-    hmi_capabilities_(this),
-    unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF),
-    media_manager_(NULL),
     resume_ctrl_(this)
 #ifdef TIME_TESTER
     , metric_observer_(NULL)
@@ -150,7 +150,7 @@ bool ApplicationManagerImpl::Stop() {
   return true;
 }
 
-ApplicationSharedPtr ApplicationManagerImpl::application(int32_t app_id) const {
+ApplicationSharedPtr ApplicationManagerImpl::application(uint32_t app_id) const {
   sync_primitives::AutoLock lock(applications_list_lock_);
 
   std::set<ApplicationSharedPtr>::const_iterator it =
@@ -164,7 +164,7 @@ ApplicationSharedPtr ApplicationManagerImpl::application(int32_t app_id) const {
 }
 
 ApplicationSharedPtr ApplicationManagerImpl::application_by_hmi_app(
-  int32_t hmi_app_id) const {
+  uint32_t hmi_app_id) const {
   sync_primitives::AutoLock lock(applications_list_lock_);
 
   std::set<ApplicationSharedPtr>::const_iterator it =
@@ -450,7 +450,6 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::PutApplicationInLimited(
   ApplicationSharedPtr app) {
   DCHECK(app.get())
 
-  bool is_new_app_media = app->is_media_application();
   mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_LIMITED;
 
   for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
@@ -1161,7 +1160,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   uint32_t connection_key =
     (*message)[strings::params][strings::connection_key].asUInt();
 
-  uint32_t protocol_type =
+  int32_t protocol_type =
     (*message)[strings::params][strings::protocol_type].asUInt();
 
   ApplicationSharedPtr app;
@@ -1754,14 +1753,20 @@ void ApplicationManagerImpl::SetUnregisterAllApplicationsReason(
 }
 
 void ApplicationManagerImpl::HeadUnitReset(
-  mobile_api::AppInterfaceUnregisteredReason::eType reason) {
+    mobile_api::AppInterfaceUnregisteredReason::eType reason) {
   switch (reason) {
-    case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET:
+    case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET: {
       policy::PolicyHandler::instance()->ResetPolicyTable();
       break;
-    case mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS:
+    }
+    case mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS: {
       policy::PolicyHandler::instance()->ClearUserConsent();
       break;
+    }
+    default: {
+      LOG4CXX_WARN(logger_, "Bad AppInterfaceUnregisteredReason");
+      break;
+    }
   }
 }
 
@@ -1846,12 +1851,16 @@ void ApplicationManagerImpl::UnregisterApplication(
                "ApplicationManagerImpl::UnregisterApplication " << app_id);
 
   switch (reason) {
-    case mobile_apis::Result::DISALLOWED:
-    case mobile_apis::Result::USER_DISALLOWED:
-    case mobile_apis::Result::INVALID_CERT:
-    case mobile_apis::Result::EXPIRED_CERT:
+    case mobile_apis::Result::DISALLOWED: break;
+    case mobile_apis::Result::USER_DISALLOWED:break;
+    case mobile_apis::Result::INVALID_CERT: break;
+    case mobile_apis::Result::EXPIRED_CERT: break;
     case mobile_apis::Result::TOO_MANY_PENDING_REQUESTS: {
       application(app_id)->usage_report().RecordRemovalsForBadBehavior();
+      break;
+    }
+    default: {
+      LOG4CXX_INFO(logger_, "Unnown Unrregister reason");
       break;
     }
   }

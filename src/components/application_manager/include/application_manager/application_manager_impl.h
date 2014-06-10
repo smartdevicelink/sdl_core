@@ -193,7 +193,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /////////////////////////////////////////////////////
 
-    ApplicationSharedPtr application(int32_t app_id) const;
+    ApplicationSharedPtr application(uint32_t app_id) const;
     ApplicationSharedPtr application_by_policy_id(
         const std::string& policy_app_id) const;
     inline const std::set<ApplicationSharedPtr>& applications() const;
@@ -566,7 +566,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * to change HMI app id to Mobile app id and vice versa.
      * Dot use it inside Core
      */
-    ApplicationSharedPtr application_by_hmi_app(int32_t hmi_app_id) const;
+    ApplicationSharedPtr application_by_hmi_app(uint32_t hmi_app_id) const;
 
     // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
     connection_handler::ConnectionHandler* connection_handler();
@@ -652,12 +652,6 @@ class ApplicationManagerImpl : public ApplicationManager,
   private:
 
     // members
-    /**
-     * @brief Resume controler is responcible for save and load information
-     * about persistent application data on disk, and save session ID for resuming
-     * application in case INGITION_OFF or MASTER_RESSET
-     */
-    ResumeCtrl resume_ctrl_;
 
 
 
@@ -689,13 +683,20 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
     connection_handler::ConnectionHandler*  connection_handler_;
+    policy::PolicyManager*                  policy_manager_;
     protocol_handler::ProtocolHandler*      protocol_handler_;
     request_controller::RequestController   request_ctrl_;
     HMICapabilities                         hmi_capabilities_;
-    policy::PolicyManager*                  policy_manager_;
 
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;
+
+    /**
+     * @brief Resume controler is responcible for save and load information
+     * about persistent application data on disk, and save session ID for resuming
+     * application in case INGITION_OFF or MASTER_RESSET
+     */
+    ResumeCtrl resume_ctrl_;
 
 #ifdef TIME_TESTER
     AMMetricObserver* metric_observer_;

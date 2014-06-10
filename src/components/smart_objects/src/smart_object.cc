@@ -542,7 +542,7 @@ std::string SmartObject::convert_string(void) const {
       NOTREACHED();
 #endif
 */
-      retval = invalid_cstr_value;
+      retval = NsSmartDeviceLink::NsSmartObjects::invalid_cstr_value;
       break;
   }
   return retval;
