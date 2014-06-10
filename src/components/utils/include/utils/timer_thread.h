@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2014, Ford Motor Company
+/**
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,13 +64,10 @@ class TimerDelegate;
  */
 template <class T>
 class TimerThread {
-  friend class TimerDelegate;
-  friend class TimerLooperDelegate;
+  public:
 
- public:
-  typedef void (T::*Callback)();
-  typedef void (T::*CallbackWithClosure)(void*);
-
+    friend class TimerDelegate;
+    friend class TimerLooperDelegate;
 
     /*
      * @brief Default constructor
@@ -83,9 +80,7 @@ class TimerThread {
      *  if true, TimerThread will call "f()" function every time out
      *  until stop()
      */
-    TimerThread(T* callee , Callback f, bool is_looper = false);
-
-    TimerThread(T* callee , CallbackWithClosure f, void* closure, bool is_looper = false);
+    TimerThread(T* callee , void (T::*f)(),bool is_looper = false);
 
     /*
      * @brief Destructor
@@ -122,7 +117,6 @@ class TimerThread {
     void onTimeOut() const;
 
   private:
-    void Init(bool is_looper);
 
     /**
      * @brief Delegate release timer, will call callback function one time
@@ -195,12 +189,7 @@ class TimerThread {
       private:
         DISALLOW_COPY_AND_ASSIGN(TimerLooperDelegate);
     };
-
-    Callback                                           callback_;
-    CallbackWithClosure                                callback_with_closure_;
-    void*                                              closure_;
-    bool                                               need_closure_;
-
+    void (T::*callback_)();
     T*                                                 callee_;
     TimerDelegate*                                     delegate_;
     threads::Thread*                                   thread_;
@@ -210,33 +199,12 @@ class TimerThread {
 };
 
 template <class T>
-TimerThread<T>::TimerThread(T* callee, Callback f, bool is_looper)
+TimerThread<T>::TimerThread(T* callee, void (T::*f)(), bool is_looper)
   : callback_(f),
-    callback_with_closure_(NULL),
-    closure_(NULL),
-    need_closure_(false),
     callee_(callee),
     delegate_(NULL),
     thread_(NULL),
     is_running_(false) {
-  Init(is_looper);
-}
-
-template <class T>
-TimerThread<T>::TimerThread(T* callee , CallbackWithClosure f, void* closure, bool is_looper)
-  : callback_(NULL),
-    callback_with_closure_(f),
-    closure_(closure),
-    need_closure_(true),
-    callee_(callee),
-    delegate_(NULL),
-    thread_(NULL),
-    is_running_(false) {
-  Init(is_looper);
-}
-
-template <class T>
-void TimerThread<T>::Init(bool is_looper) {
   if (is_looper) {
     delegate_ = new TimerLooperDelegate(this);
   } else {
@@ -254,7 +222,6 @@ TimerThread<T>::~TimerThread() {
     stop();
   }
   callback_ = NULL;
-  callback_with_closure_ = NULL;
   callee_ = NULL;
   delete thread_;
   // delegate_ will be deleted by thread_
@@ -291,19 +258,9 @@ bool TimerThread<T>::isRunning() {
 
 template <class T>
 void TimerThread<T>::onTimeOut() const {
-  if (callee_) {
-    if (need_closure_) {
-      if (callback_with_closure_) {
-        (callee_->*callback_with_closure_)(closure_);
-        is_running_ = false;
-      }
-    }
-    else {
-      if (callback_) {
-        (callee_->*callback_)();
-        is_running_ = false;
-      }
-    }
+  if (callee_ && callback_) {
+    (callee_->*callback_)();
+    is_running_ = false;
   }
 }
 
