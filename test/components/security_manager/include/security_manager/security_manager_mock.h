@@ -33,8 +33,10 @@
 #ifndef SECURITY_MANAGER_MOCK_H
 #define SECURITY_MANAGER_MOCK_H
 #include <gmock/gmock.h>
-#include "security_manager/security_manager.h"
 #include "utils/byte_order.h"
+#include "security_manager/security_manager.h"
+#include "security_manager/ssl_context.h"
+#include "security_manager/security_query.h"
 
 namespace test  {
 namespace components  {

@@ -309,7 +309,7 @@ bool ThreadedSocketConnection::Receive() {
         return false;
       }
     } else {
-      LOG4CXX_INFO(logger_, "Connection " << this << " closed by remote peer");
+      LOG4CXX_WARN(logger_, "Connection " << this << " closed by remote peer");
       LOG4CXX_TRACE_EXIT(logger_);
       return false;
     }

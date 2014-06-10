@@ -31,7 +31,7 @@ set (INCLUDE_DIR
   ../src/components/protocol_handler/include
   ../src/components/transport_manager/include
   ../src/components/connection_handler/include
-  ../src/components/security_manager/include
+  ${SecurityManagerIncludeDir}
   ../src/components/formatters/include
   ../src/components/smart_objects/include
   ../src/components/formatters/include
@@ -100,7 +100,7 @@ set(LIBRARIES
     # ${GSTREAMER_gstreamer_LIBRARY}
     Resumption
     Policy
-    SecurityManager
+    ${SecurityManagerLibrary}
     test_SecurityManager
 )
 

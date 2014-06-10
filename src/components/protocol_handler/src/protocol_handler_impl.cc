@@ -36,6 +36,10 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
 
+#ifdef ENABLE_SECURITY
+#include "security_manager/ssl_context.h"
+#endif  // ENABLE_SECURITY
+
 namespace protocol_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
@@ -100,6 +104,7 @@ class ProtocolHandlerImpl::IncomingDataHandler {
   }
 
   void AddConnection(ConnectionID connection_id) {
+    // Add empty list of session to new connection
     connections_data_[connection_id] = std::vector<uint8_t>();
   }
 
@@ -148,7 +153,9 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       transport_manager_(transport_manager_param),
       kPeriodForNaviAck(5),
       incoming_data_handler_(new IncomingDataHandler),
+#ifdef TIME_TESTER
       security_manager_(NULL),
+#endif  // TIME_TESTER
       raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
                                      threads::ThreadOptions(kStackSize)),
       raw_ford_messages_to_mobile_("MessagesToMobileAppHandler", this,
@@ -198,7 +205,7 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
                                               uint8_t protocol_version,
                                               uint32_t hash_code,
                                               uint8_t service_type,
-                                              bool encrypted) {
+                                              bool protection) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   uint8_t protocolVersion;
@@ -212,19 +219,18 @@ void ProtocolHandlerImpl::SendStartSessionAck(ConnectionID connection_id,
   }
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-    protocolVersion, encrypted, FRAME_TYPE_CONTROL,
+    protocolVersion, protection, FRAME_TYPE_CONTROL,
     service_type, FRAME_DATA_START_SERVICE_ACK, session_id,
     0, hash_code));
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
-  LOG4CXX_DEBUG(logger_,
-                "SendStartSessionAck() for connection " << connection_id
-                << " for service_type " << static_cast<int32_t>(service_type)
-                << " session_id " << static_cast<int32_t>(session_id)
-                << " protection " << (encrypted ? "ON" : "OFF"));
-
+  LOG4CXX_INFO(logger_,
+               "SendStartSessionAck() for connection " << connection_id
+               << " for service_type " << static_cast<int32_t>(service_type)
+               << " session_id " << static_cast<int32_t>(session_id)
+               << " protection " << (protection ? "ON" : "OFF"));
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
@@ -242,11 +248,10 @@ void ProtocolHandlerImpl::SendStartSessionNAck(ConnectionID connection_id,
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
-  LOG4CXX_DEBUG(logger_,
-                "sendStartSessionNAck() for connection " << connection_id
-                << " for service_type " << static_cast<int32_t>(service_type)
-                << " session_id " << static_cast<int32_t>(session_id));
-
+  LOG4CXX_INFO(logger_,
+               "SendStartSessionNAck() for connection " << connection_id
+               << " for service_type " << static_cast<int32_t>(service_type)
+               << " session_id " << static_cast<int32_t>(session_id));
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
@@ -264,10 +269,9 @@ void ProtocolHandlerImpl::SendEndSessionNAck(ConnectionID connection_id,
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
-  LOG4CXX_DEBUG(logger_, "SendEndSessionNAck() for connection " << connection_id
-                << " for service_type " << static_cast<int32_t>(service_type)
-                << " session_id " << static_cast<int32_t>(session_id));
-
+  LOG4CXX_INFO(logger_, "SendEndSessionNAck() for connection " << connection_id
+               << " for service_type " << static_cast<int32_t>(service_type)
+               << " session_id " << static_cast<int32_t>(session_id));
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
@@ -286,11 +290,10 @@ void ProtocolHandlerImpl::SendEndSessionAck(ConnectionID connection_id,
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(ptr, false));
 
-  LOG4CXX_DEBUG(logger_,
-                "SendEndSessionAck() for connection " << connection_id
-                << " for service_type " << static_cast<int32_t>(service_type)
-                << " session_id " << static_cast<int32_t>(session_id));
-
+  LOG4CXX_INFO(logger_,
+               "SendEndSessionAck() for connection " << connection_id
+               << " for service_type " << static_cast<int32_t>(service_type)
+               << " session_id " << static_cast<int32_t>(session_id));
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
@@ -309,7 +312,6 @@ void ProtocolHandlerImpl::SendEndSession(int32_t connection_id,
   LOG4CXX_INFO(logger_, "SendEndSession() for connection " << connection_id
                << " for service_type " << static_cast<int32_t>(SERVICE_TYPE_RPC)
                << " session_id " << static_cast<int32_t>(session_id));
-
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
@@ -435,7 +437,9 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
 
   for (std::vector<ProtocolFramePtr>::const_iterator it =
        protocol_frames.begin(); it != protocol_frames.end(); ++it) {
+#ifdef TIME_TESTER
     const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
+#endif  // TIME_TESTER
     ProtocolFramePtr frame = *it;
     const RESULT_CODE result = DecryptFrame(frame);
     if (result != RESULT_OK) {
@@ -525,7 +529,6 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
     LOG4CXX_TRACE_EXIT(logger_);
     return RESULT_FAIL;
   }
-  // TODO(EZamakhov): move Encryption as part of serialization process
   // and return protect flag to Packet constructor for makeing design by Policy
   const RESULT_CODE result = EncryptFrame(packet);
   if (result != RESULT_OK) {
@@ -836,8 +839,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     case FRAME_DATA_HEART_BEAT_ACK: {
       LOG4CXX_INFO(logger_, "Received heart beat ack from mobile app"
           " for connection " << connection_id);
+      return RESULT_OK;
     }
-    break;
     default:
       LOG4CXX_WARN(
           logger_,
@@ -846,6 +849,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
       LOG4CXX_TRACE_EXIT(logger_);
       return RESULT_OK;
   }
+  return RESULT_OK;
 }
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(

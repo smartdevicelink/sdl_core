@@ -38,7 +38,10 @@
 #include "connection_handler/connection_handler_impl.h"
 #include "transport_manager/info.h"
 #include "config_profile/profile.h"
-#include "security_manager/security_manager.h"
+
+#ifdef ENABLE_SECURITY
+#include "security_manager/security_query.h"
+#endif  // ENABLE_SECURITY
 
 namespace {
 int32_t HeartBeatTimeout() {
@@ -71,33 +74,50 @@ ConnectionHandlerImpl::ConnectionHandlerImpl()
 }
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
-  LOG4CXX_INFO(logger_, "Destructing ConnectionHandlerImpl.");
+  LOG4CXX_TRACE(logger_, "Destructing ConnectionHandlerImpl.");
 }
 
 void ConnectionHandlerImpl::set_connection_handler_observer(
     ConnectionHandlerObserver* observer) {
-  LOG4CXX_DEBUG(logger_, "ConnectionHandlerImpl::set_connection_handler_observer()");
+  LOG4CXX_DEBUG(logger_, "ConnectionHandlerImpl::set_connection_handler_observer() "
+                << observer);
   if (!observer) {
     LOG4CXX_WARN(logger_, "Set Null pointer to observer.");
   }
   connection_handler_observer_ = observer;
 }
 
+void ConnectionHandlerImpl::set_transport_manager(
+    transport_manager::TransportManager* transport_mngr) {
+  LOG4CXX_DEBUG(logger_, "ConnectionHandlerImpl::set_transport_manager() "
+                << transport_mngr);
+  if (!transport_mngr) {
+    LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
+    return;
+  }
+  transport_manager_ = transport_mngr;
+}
+
 void ConnectionHandlerImpl::set_protocol_handler(
-    protocol_handler::ProtocolHandler*protocol_handler) {
+    protocol_handler::ProtocolHandler* protocol_handler) {
+  LOG4CXX_DEBUG(logger_, "ConnectionHandlerImpl::set_protocol_handler()"
+                << protocol_handler);
+  if (!protocol_handler) {
+    LOG4CXX_WARN(logger_, "Set Null pointer to protocol handler.");
+  }
   protocol_handler_ = protocol_handler;
 }
 
 void ConnectionHandlerImpl::OnDeviceListUpdated(
     const std::vector<transport_manager::DeviceInfo>&) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceListUpdated()");
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnDeviceListUpdated()");
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
 }
 
 void ConnectionHandlerImpl::OnApplicationListUpdated(DeviceHandle device_handle) {
-  LOG4CXX_DEBUG(logger_,"ConnectionHandlerImpl::OnApplicationListUpdated() device_handle "
+  LOG4CXX_TRACE(logger_,"ConnectionHandlerImpl::OnApplicationListUpdated() device_handle "
                << device_handle);
   if (connection_handler_observer_) {
     connection_handler_observer_->OnApplicationListUpdated(device_handle);
@@ -106,14 +126,14 @@ void ConnectionHandlerImpl::OnApplicationListUpdated(DeviceHandle device_handle)
 
 void ConnectionHandlerImpl::OnDeviceFound(
     const transport_manager::DeviceInfo&) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceFound()");
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnDeviceFound()");
 }
 
 void ConnectionHandlerImpl::OnDeviceAdded(
     const transport_manager::DeviceInfo& device_info) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceAdded()");
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnDeviceAdded()");
   device_list_.insert(
-      DeviceList::value_type(
+        DeviceList::value_type(
           device_info.device_handle(),
           Device(device_info.device_handle(), device_info.name(),
                  device_info.mac_address())));
@@ -124,15 +144,14 @@ void ConnectionHandlerImpl::OnDeviceAdded(
 
 void ConnectionHandlerImpl::OnDeviceRemoved(
     const transport_manager::DeviceInfo& device_info) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnDeviceRemoved()");
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnDeviceRemoved()");
   // Device has been removed. Perform all needed actions.
   // 1. Delete all the connections and sessions of this device
   // 2. Delete device from a list
   // 3. Let observer know that device has been deleted.
   for (ConnectionListIterator it = connection_list_.begin();
       it != connection_list_.end(); ++it) {
-    if (device_info.device_handle()
-        == (*it).second->connection_device_handle()) {
+    if (device_info.device_handle() == (*it).second->connection_device_handle()) {
       RemoveConnection((*it).first);
     }
   }
@@ -144,7 +163,7 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
 }
 
 void ConnectionHandlerImpl::OnScanDevicesFinished() {
-  LOG4CXX_INFO(logger_, "Scan devices finished successfully.");
+  LOG4CXX_TRACE(logger_, "Scan devices finished successfully.");
 }
 
 void ConnectionHandlerImpl::OnScanDevicesFailed(
@@ -155,7 +174,7 @@ void ConnectionHandlerImpl::OnScanDevicesFailed(
 void ConnectionHandlerImpl::OnConnectionEstablished(
     const transport_manager::DeviceInfo& device_info,
     const transport_manager::ConnectionUID& connection_id) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnConnectionEstablished()");
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnConnectionEstablished()");
 
   DeviceListIterator it = device_list_.find(device_info.device_handle());
   if (device_list_.end() == it) {
@@ -223,9 +242,7 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const transport_manager::ConnectionUID& connection_handle,
     const uint8_t session_id, const protocol_handler::ServiceType& service_type,
     const bool is_protected) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
-
-  int32_t new_session_id = -1;
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
 
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
@@ -233,6 +250,7 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     LOG4CXX_ERROR(logger_, "Unknown connection!");
     return -1;
   }
+#ifdef ENABLE_SECURITY
   if (is_protected) {
     // Check deliver-specific services (which shall not be protected)
     const std::list<int> protectedSpecific =
@@ -241,7 +259,7 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     if (std::find(protectedSpecific.begin(), protectedSpecific.end(), service_type) !=
         protectedSpecific.end()) {
       LOG4CXX_ERROR(logger_, "Service " << static_cast<int>(service_type)
-                     << " is forbidden to be protected");
+                    << " is forbidden to be protected");
       return -1;
     }
   } else {
@@ -252,10 +270,13 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     if (std::find(protectedSpecific.begin(), protectedSpecific.end(), service_type) !=
         protectedSpecific.end()) {
       LOG4CXX_ERROR(logger_, "Service " << static_cast<int>(service_type)
-                     << " shall be protected");
+                    << " shall be protected");
       return -1;
     }
   }
+#endif //  ENABLE_SECURITY
+
+  int32_t new_session_id = -1;
 
   Connection* connection = it->second;
   if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
@@ -296,7 +317,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     const uint32_t& connection_handle, const uint8_t sessionId,
     const uint32_t& hashCode,
     const protocol_handler::ServiceType& service_type) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
 
   int32_t result = -1;
   sync_primitives::AutoLock lock(connection_list_lock_);
@@ -335,10 +356,10 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
 uint32_t ConnectionHandlerImpl::KeyFromPair(
     transport_manager::ConnectionUID connection_handle, uint8_t sessionId) {
   int32_t key = connection_handle | (sessionId << 16);
-  LOG4CXX_INFO(logger_, "Key for ConnectionHandle:"
-               << static_cast<int32_t>(connection_handle)
-               << " Session:" << static_cast<int32_t>(sessionId)
-               << " is: " << static_cast<int32_t>(key));
+  LOG4CXX_TRACE(logger_, "Key for ConnectionHandle:"
+                << static_cast<int32_t>(connection_handle)
+                << " Session:" << static_cast<int32_t>(sessionId)
+                << " is: " << static_cast<int32_t>(key));
   return key;
 }
 
@@ -347,16 +368,16 @@ void ConnectionHandlerImpl::PairFromKey(uint32_t key,
                                         uint8_t* sessionId) {
   *connection_handle = key & 0xFF00FFFF;
   *sessionId = key >> 16;
-  LOG4CXX_INFO(logger_, "ConnectionHandle:"
-               << static_cast<int32_t>(*connection_handle)
-               << " Session:" << static_cast<int32_t>(*sessionId)
-               << " for key:" << static_cast<int32_t>(key));
+  LOG4CXX_TRACE(logger_, "ConnectionHandle:"
+                << static_cast<int32_t>(*connection_handle)
+                << " Session:" << static_cast<int32_t>(*sessionId)
+                << " for key:" << static_cast<int32_t>(key));
 }
 
 int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
     uint32_t key, uint32_t* app_id, std::list<int32_t>* sessions_list,
     uint32_t* device_id) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::GetDataOnSessionKey");
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::GetDataOnSessionKey");
 
   int32_t result = -1;
   transport_manager::ConnectionUID conn_handle = 0;
@@ -419,12 +440,14 @@ struct CompareMAC {
 };
 
 bool ConnectionHandlerImpl::GetDeviceID(const std::string& mac_address,
-                         DeviceHandle* device_handle) {
+                                        DeviceHandle* device_handle) {
   DeviceList::const_iterator it = std::find_if(device_list_.begin(),
                                                device_list_.end(),
                                                CompareMAC(mac_address));
   if (it != device_list_.end()) {
-    *device_handle = it->first;
+    if(device_handle) {
+      *device_handle = it->first;
+    }
     return true;
   }
   return false;
@@ -433,7 +456,7 @@ bool ConnectionHandlerImpl::GetDeviceID(const std::string& mac_address,
 int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
     DeviceHandle device_handle, std::string* device_name,
     std::list<uint32_t>* applications_list, std::string* mac_address) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::GetDataOnDeviceID");
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::GetDataOnDeviceID");
 
   int32_t result = -1;
   DeviceListIterator it = device_list_.find(device_handle);
@@ -472,10 +495,10 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
 
   return result;
 }
-
+#ifdef ENABLE_SECURITY
 int ConnectionHandlerImpl::SetSSLContext(
     const uint32_t &key, security_manager::SSLContext *context) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::SetSSLContext");
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::SetSSLContext");
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(key, &connection_handle, &session_id);
@@ -506,19 +529,10 @@ security_manager::SSLContext *ConnectionHandlerImpl::GetSSLContext(
   Connection& connection = *it->second;
   return connection.GetSSLContext(session_id, service_type);
 }
-
-void ConnectionHandlerImpl::set_transport_manager(
-    transport_manager::TransportManager* transport_mngr) {
-  LOG4CXX_DEBUG(logger_, transport_mngr);
-  if (!transport_mngr) {
-    LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
-    return;
-  }
-  transport_manager_ = transport_mngr;
-}
+#endif  // ENABLE_SECURITY
 
 void ConnectionHandlerImpl::StartDevicesDiscovery() {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::StartDevicesDiscovery()");
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::StartDevicesDiscovery()");
 
   if (NULL == transport_manager_) {
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
@@ -562,7 +576,7 @@ void ConnectionHandlerImpl::StartTransportManager() {
 }
 
 void ConnectionHandlerImpl::CloseConnection(uint32_t key) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::CloseConnection by HB");
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::CloseConnection by HB");
 
   uint32_t connection_handle = 0;
   uint8_t session_id = 0;
@@ -573,7 +587,7 @@ void ConnectionHandlerImpl::CloseConnection(uint32_t key) {
 
 void ConnectionHandlerImpl::CloseConnection(
     ConnectionHandle connection_handle) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::CloseConnection");
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::CloseConnection");
   if (!transport_manager_) {
     LOG4CXX_ERROR(logger_, "Null pointer to TransportManager.");
     return;
@@ -600,7 +614,7 @@ uint32_t ConnectionHandlerImpl::GetConnectionSessionsCount(
 }
 
 void ConnectionHandlerImpl::CloseSession(uint32_t key) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::CloseSession");
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::CloseSession");
 
   uint32_t connection_handle = 0;
   uint8_t session_id = 0;
@@ -728,4 +742,4 @@ void ConnectionHandlerImpl::addDeviceConnection(
 }
 #endif
 
-}/* namespace connection_handler */
+}  // namespace connection_handler

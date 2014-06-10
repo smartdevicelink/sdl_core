@@ -1,7 +1,4 @@
-/**
- * \file ProtocolPacket.h
- * \brief ProtocolPacket class header file.
- *
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -213,7 +210,6 @@ struct ProtocolHeader {
       dataSize(0x00),
       messageId(0x00) {
   }
-
   /**
    *\brief Version of protocol
    */
@@ -275,191 +271,190 @@ struct ProtocolData {
  * handling multiple frames of the message.
  */
 class ProtocolPacket {
-  public:
-    /**
-     * \brief Default constructor
-     */
-    ProtocolPacket();
+ public:
+  /**
+   * \brief Default constructor
+   */
+  ProtocolPacket();
 
-    /**
-     * \brief Constructor
-     *
-     * \param connectionKey Identifier of connection within wich message
-     * is transferred
-     * \param connection_id - Connection Identifier
-     * \param data Message string
-     * \param dataSize Message size
-     */
-    ProtocolPacket(uint8_t connection_id, uint8_t* data_param,
-                   uint32_t data_size);
+  /**
+   * \brief Constructor
+   *
+   * \param connectionKey Identifier of connection within wich message
+   * is transferred
+   * \param connection_id - Connection Identifier
+   * \param data Message string
+   * \param dataSize Message size
+   */
+  ProtocolPacket(uint8_t connection_id, uint8_t* data_param,
+                 uint32_t data_size);
 
-    /**
-     * \brief Constructor
-     * \param connection_id - Connection Identifier
-     * \param version Version of protocol
-     * \param protection Protection flag
-     * \param frameType Type of frame (Single/First/Consecutive)
-     * \param serviceType Type of session (RPC/Bulk data)
-     * \param frameData Information about frame: start/end session, number of
-     * frame, etc
-     * \param sessionID Number of frame within connection
-     * \param dataSize Size of message string
-     * \param messageID ID of message or hash code - only for second protocol
-     * \param data Message string if provided
-     */
-    ProtocolPacket(uint8_t connection_id,
-                   uint8_t version, bool protection, uint8_t frameType,
-                   uint8_t serviceType, uint8_t frameData,
-                   uint8_t sessionId, uint32_t dataSize,
-                   uint32_t messageID, const uint8_t* data = 0,
-                   uint32_t packet_id = 0);
-    /**
-     * \brief Destructor
-     */
-    ~ProtocolPacket();
+  /**
+   * \brief Constructor
+   * \param connection_id - Connection Identifier
+   * \param version Version of protocol
+   * \param protection Protection flag
+   * \param frameType Type of frame (Single/First/Consecutive)
+   * \param serviceType Type of session (RPC/Bulk data)
+   * \param frameData Information about frame: start/end session, number of
+   * frame, etc
+   * \param sessionID Number of frame within connection
+   * \param dataSize Size of message string
+   * \param messageID ID of message or hash code - only for second protocol
+   * \param data Message string if provided
+   */
+  ProtocolPacket(uint8_t connection_id,
+                 uint8_t version, bool protection, uint8_t frameType,
+                 uint8_t serviceType, uint8_t frameData,
+                 uint8_t sessionId, uint32_t dataSize,
+                 uint32_t messageID, const uint8_t* data = 0,
+                 uint32_t packet_id = 0);
+  /**
+   * \brief Destructor
+   */
+  ~ProtocolPacket();
 
-    /*Serialization*/
-    /**
-     * \brief Serializes info about message into protocol header.
-     * \return RawMessagePtr with all data (header and message)
-     */
-    RawMessagePtr serializePacket();
-    /**
-     * \brief Appends message frame to existing message in
-     * recieving multiframe messages.
-     * \param chunkData Current frame's message string
-     * \param chunkDataSize Size of current message string
-     * \return \saRESULT_CODE Status of serialization
-     */
-    RESULT_CODE appendData(uint8_t* chunkData, uint32_t chunkDataSize);
+  /*Serialization*/
+  /**
+   * \brief Serializes info about message into protocol header.
+   * \return RawMessagePtr with all data (header and message)
+   */
+  RawMessagePtr serializePacket();
+  /**
+   * \brief Appends message frame to existing message in
+   * recieving multiframe messages.
+   * \param chunkData Current frame's message string
+   * \param chunkDataSize Size of current message string
+   * \return \saRESULT_CODE Status of serialization
+   */
+  RESULT_CODE appendData(uint8_t* chunkData, uint32_t chunkDataSize);
 
-    /**
-     * \brief Getter of message ID
-     * \return uint32_t size of message string
-     */
-    uint32_t packet_size() const;
+  /**
+   * \brief Getter of message size including protocol header
+   * \return uint32_t size of message string
+   */
+  uint32_t packet_size() const;
 
-    /**
-     * \brief Getter of message size including protocol header
-     * \return uint32_t size of message string
-     */
-    uint32_t packet_id() const;
+  /**
+   * \brief Getter of message ID
+   * \return uint32_t message ID
+   */
+  uint32_t packet_id() const;
 
-    /*End of Serialization*/
+  /*End of Serialization*/
 
-    /*Deserialization*/
+  /*Deserialization*/
 
-    /**
-     * \brief Parses protocol header
-     * \param message Incoming message string containing both header and
-     * message body
-     * \param messageSize Incoming message size
-     * \return \saRESULT_CODE Status of serialization
-     */
-    RESULT_CODE deserializePacket(const uint8_t* message,
-                                  uint32_t messageSize);
+  /**
+   * \brief Parses protocol header
+   * \param message Incoming message string containing both header and
+   * message body
+   * \param messageSize Incoming message size
+   * \return \saRESULT_CODE Status of serialization
+   */
+  RESULT_CODE deserializePacket(const uint8_t* message,
+                                uint32_t messageSize);
 
-    /**
-     * \brief Getter of protocol version.
-     */
-    uint8_t protocol_version() const;
+  /**
+   * \brief Getter of protocol version.
+   */
+  uint8_t protocol_version() const;
 
-    /**
-     * \brief Getter of protection flag
-     */
-    bool protection_flag() const;
+  /**
+   * \brief Getter of protection flag
+   */
+  bool protection_flag() const;
 
-    /**
-     * \brief Setter of protection flag
-     */
-    void set_protection_flag(const bool protection);
+  /**
+   * \brief Setter of protection flag
+   */
+  void set_protection_flag(const bool protection);
 
-    /**
-     * \brief Getter of frame type (single/first/etc)
-     */
-    uint8_t frame_type() const;
+  /**
+   * \brief Getter of frame type (single/first/etc)
+   */
+  uint8_t frame_type() const;
 
-    /**
-     *\brief Getter of service type (RPC/Bulk data)
-     */
-    uint8_t service_type() const;
+  /**
+   *\brief Getter of service type (RPC/Bulk data)
+   */
+  uint8_t service_type() const;
 
-    /**
-     *\brief Getter of frame data (start/end session, number of frame etc)
-     */
-    uint8_t frame_data() const;
+  /**
+   *\brief Getter of frame data (start/end session, number of frame etc)
+   */
+  uint8_t frame_data() const;
 
-    /**
-     *\brief Getter of session number
-     */
-    uint8_t session_id() const;
+  /**
+   *\brief Getter of session number
+   */
+  uint8_t session_id() const;
 
-    /**
-     *\brief Getter of size of message body
-     */
-    uint32_t data_size() const;
+  /**
+   *\brief Getter of size of message body
+   */
+  uint32_t data_size() const;
 
-    /**
-     *\brief Getter of message id for second version of protocol
-     */
-    uint32_t message_id() const;
+  /**
+   *\brief Getter of message id for second version of protocol
+   */
+  uint32_t message_id() const;
 
-    /**
-     *\brief Getter of message string
-     */
-    uint8_t* data() const;
+  /**
+   *\brief Getter of message string
+   */
+  uint8_t* data() const;
 
-    /**
-     *\brief Setter for size of multiframe message
-     */
-    void set_total_data_bytes(uint32_t dataBytes);
+  /**
+   *\brief Setter for size of multiframe message
+   */
+  void set_total_data_bytes(uint32_t dataBytes);
 
-    /**
-     *\brief Setter for new data
-     */
-    void set_data(const uint8_t* const  new_data,
-                        const size_t new_data_size);
+  /**
+   *\brief Setter for new data
+   */
+  void set_data(const uint8_t* const  new_data,
+                const size_t new_data_size);
 
-    /**
-     *\brief Getter for size of multiframe message
-     */
-    uint32_t total_data_bytes() const;
-    /*End of Deserialization*/
+  /**
+   *\brief Getter for size of multiframe message
+   */
+  uint32_t total_data_bytes() const;
+  /*End of Deserialization*/
 
-    /**
+  /**
     * \brief Getter for Connection Identifier
     */
-    uint8_t connection_id() const;
+  uint8_t connection_id() const;
 
-  private:
+ private:
+  /**
+   *\brief Protocol header
+   */
+  ProtocolHeader packet_header_;
 
-    /**
-     *\brief Protocol header
-     */
-    ProtocolHeader packet_header_;
+  /**
+   *\brief Message body (without header)
+   */
+  ProtocolData packet_data_;
 
-    /**
-     *\brief Message body (without header)
-     */
-    ProtocolData packet_data_;
+  /**
+   *\brief Offset for multiframe messages
+   */
+  uint32_t data_offset_;
 
-    /**
-     *\brief Offset for multiframe messages
-     */
-    uint32_t data_offset_;
+  /**
+   *\brief ID for multiframe messages
+   */
+  uint32_t packet_id_;
 
-    /**
-     *\brief ID for multiframe messages
-     */
-    uint32_t packet_id_;
-
-    /**
+  /**
     * \brief Connection Identifier
     * Obtained from connection_handler
     */
-    uint8_t connection_id_;
+  uint8_t connection_id_;
 
-    DISALLOW_COPY_AND_ASSIGN(ProtocolPacket);
+  DISALLOW_COPY_AND_ASSIGN(ProtocolPacket);
 };
 }  // namespace protocol_handler
 

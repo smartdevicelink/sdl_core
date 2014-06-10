@@ -1,6 +1,4 @@
-/**
-* \file signals.cc
-* \brief Signal (i.e. SIGINT) handling.
+/*
 * Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
@@ -60,8 +58,10 @@ LifeCycle::LifeCycle()
   , protocol_handler_(NULL)
   , connection_handler_(NULL)
   , app_manager_(NULL)
+#ifdef ENABLE_SECURITY
   , crypto_manager_(NULL)
   , security_manager_(NULL)
+#endif //ENABLE_SECURITY
   , hmi_handler_(NULL)
   , hmi_message_adapter_(NULL)
   , media_manager_(NULL)
@@ -111,6 +111,7 @@ bool LifeCycle::StartComponents() {
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_ != NULL)
 
+#ifdef ENABLE_SECURITY
   security_manager_ = new security_manager::SecurityManager();
 
   std::string cert_filename;
@@ -160,7 +161,9 @@ bool LifeCycle::StartComponents() {
           ciphers_list,
           verify_peer)) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
+    return false;
   }
+#endif //ENABLE_SECURITY
 
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
@@ -173,17 +176,21 @@ bool LifeCycle::StartComponents() {
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
+#ifdef ENABLE_SECURITY
   protocol_handler_->AddProtocolObserver(security_manager_);
   protocol_handler_->set_security_manager(security_manager_);
+#endif //ENABLE_SECURITY
   media_manager_->SetProtocolHandler(protocol_handler_);
 
   connection_handler_->set_transport_manager(transport_manager_);
   connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
 
+#ifdef ENABLE_SECURITY
   security_manager_->set_session_observer(connection_handler_);
   security_manager_->set_protocol_handler(protocol_handler_);
   security_manager_->set_crypto_manager(crypto_manager_);
+#endif //ENABLE_SECURITY
 
   // it is important to initialise TimeTester before TM to listen TM Adapters
 #ifdef TIME_TESTER

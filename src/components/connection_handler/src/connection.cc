@@ -39,7 +39,11 @@
 #include "protocol_handler/protocol_packet.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
+
+#ifdef ENABLE_SECURITY
+#include "security_manager/ssl_context.h"
 #include "security_manager/security_query.h"
+#endif  // ENABLE_SECURITY
 
 /**
  * \namespace connection_handler
@@ -191,6 +195,7 @@ bool Connection::RemoveService(
   return true;
 }
 
+#ifdef ENABLE_SECURITY
 int Connection::SetSSLContext(uint8_t sessionId,
                               security_manager::SSLContext *context) {
   sync_primitives::AutoLock lock(session_map_lock_);
@@ -231,6 +236,7 @@ security_manager::SSLContext* Connection::GetSSLContext(
   LOG4CXX_TRACE(logger_, "SSLContext is " << session.ssl_context);
   return session.ssl_context;
 }
+#endif // ENABLE_SECURITY
 
 ConnectionHandle Connection::connection_handle() const {
   return connection_handle_;

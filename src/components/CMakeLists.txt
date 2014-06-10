@@ -50,7 +50,9 @@ add_subdirectory(./connection_handler)
 add_subdirectory(./utils)
 
 # --- Security manager
-add_subdirectory(./security_manager)
+if(ENABLE_SECURITY)
+  add_subdirectory(./security_manager)
+endif()
 #
 # --- Policy_impl
 add_subdirectory(./policy)

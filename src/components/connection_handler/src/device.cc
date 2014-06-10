@@ -54,9 +54,6 @@ Device::Device(DeviceHandle device_handle,
     mac_address_ = encryption::MakeHash(mac_address);
 }
 
-Device::~Device() {
-}
-
 DeviceHandle Device::device_handle() const {
     return device_handle_;
 }
@@ -68,4 +65,4 @@ std::string Device::user_friendly_name() const {
 std::string Device::mac_address() const {
     return mac_address_;
 }
-}/* namespace connection_handler */
+}  // namespace connection_handler

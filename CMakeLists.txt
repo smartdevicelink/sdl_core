@@ -49,6 +49,7 @@ option(TIME_TESTER "Enable profiling time test util" ON)
 option(BUILD_TESTS_WITH_HMI "Possibility to build and run HMI tests" OFF)
 option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
+option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(EXTENDED_POLICY_FLAG "Build with specific features and extended functionality" OFF)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
@@ -341,6 +342,12 @@ add_custom_target(install-3rd_party
 
 if(BUILD_TESTS)
   add_definitions(-DBUILD_TESTS)
+endif()
+
+if(ENABLE_SECURITY)
+  add_definitions(-DENABLE_SECURITY)
+  set(SecurityManagerLibrary SecurityManager)
+  set(SecurityManagerIncludeDir ${CMAKE_SOURCE_DIR}/src/components/security_manager/include)
 endif()
 
 # --- 3rd party libs (static)

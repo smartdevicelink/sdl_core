@@ -32,6 +32,7 @@
 #include <climits>
 #include <string>
 #include <fstream>
+#include <time.h>
 
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
@@ -49,7 +50,9 @@
 #include "utils/file_system.h"
 #include "application_manager/application_impl.h"
 #include "usage_statistics/counter.h"
-#include <time.h>
+#include "hmi_message_handler/hmi_message_handler.h"
+#include "connection_handler/connection_handler.h"
+#include "protocol_handler/protocol_handler.h"
 
 namespace application_manager {
 
@@ -98,7 +101,8 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
   }
   LOG4CXX_INFO(
       logger_,
-      "Starting thread with stack size " << profile::Profile::instance()->thread_min_stack_size());
+      "Starting thread with stack size "
+      << profile::Profile::instance()->thread_min_stack_size());
   if (!thread->start()) {
     /*startWithOptions(
      threads::ThreadOptions(
@@ -558,9 +562,9 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 #ifdef CUSTOMER_PASA
   //Line start of transportManager component was left for panasonic
   if (!connection_handler_) {
-	  LOG4CXX_WARN(logger_, "Connection handler is not set.");
+    LOG4CXX_WARN(logger_, "Connection handler is not set.");
   } else {
-	  connection_handler_->StartTransportManager();
+    connection_handler_->StartTransportManager();
   }
 #endif // CUSTOMER_PASA
 }
@@ -614,7 +618,7 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
                                                       int32_t bits_per_sample,
                                                       int32_t audio_type) {
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
-  if (NULL != media_manager_) {    
+  if (NULL != media_manager_) {
     media_manager_->StartMicrophoneRecording(
       session_key,
       profile::Profile::instance()->recording_file_name(),
@@ -658,8 +662,8 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
   LOG4CXX_INFO_EXT(logger_, "After fill binary data");
 
   LOG4CXX_INFO_EXT(logger_, "Send data");
-  CommandSharedPtr command = MobileCommandFactory::CreateCommand(
-      &(*on_audio_pass));
+  CommandSharedPtr command =
+      MobileCommandFactory::CreateCommand(&(*on_audio_pass));
   command->Init();
   command->Run();
   command->CleanUp();
@@ -693,13 +697,13 @@ std::string ApplicationManagerImpl::GetDeviceName(
 
 void ApplicationManagerImpl::OnMessageReceived(
     const protocol_handler::RawMessagePtr message) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMessageReceived");
+  LOG4CXX_TRACE(logger_, "ApplicationManagerImpl::OnMessageReceived");
   DCHECK(message);
 
   if (message->service_type() != protocol_handler::kRpc
       && message->service_type() != protocol_handler::kBulk) {
     // skip this message, not under handling of ApplicationManager
-    LOG4CXX_INFO(logger_, "Skipping message; not the under AM handling.");
+    LOG4CXX_DEBUG(logger_, "Skipping message; not the under AM handling.");
     return;
   }
   //Return empty SharedPtr on not kRpc or kBulk service
@@ -831,8 +835,7 @@ bool ApplicationManagerImpl::IsAudioStreamingAllowed(uint32_t connection_key) co
   return false;
 }
 
-bool ApplicationManagerImpl::IsVideoStreamingAllowed(
-    uint32_t connection_key) const {
+bool ApplicationManagerImpl::IsVideoStreamingAllowed( uint32_t connection_key) const {
   ApplicationSharedPtr app = application(connection_key);
 
   if (!app) {
@@ -1466,8 +1469,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       //  removed NOTREACHED() because some app can still have vesion 1.
       LOG4CXX_WARN(
           logger_,
-          "Application used unsupported protocol :" << message.protocol_version() << ".")
-      ;
+          "Application used unsupported protocol :" << message.protocol_version() << ".");
       return false;
   }
 
@@ -1487,7 +1489,8 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 
   LOG4CXX_INFO(
       logger_,
-      "Message with protocol: " << message.getElement(jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_TYPE) .asInt());
+      "Message with protocol: " << message.getElement(jhs::S_PARAMS).
+        getElement(jhs::S_PROTOCOL_TYPE).asInt());
 
   std::string output_string;
   switch (message.getElement(jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_TYPE)
@@ -1523,8 +1526,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
       break;
     }
     default:
-      NOTREACHED()
-      ;
+      NOTREACHED();
       return false;
   }
 
@@ -1820,7 +1822,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
     UnregisterApplication((*it)->app_id(), mobile_apis::Result::INVALID_ENUM,
                           is_ignition_off);
-    it = application_list_.begin();    
+    it = application_list_.begin();
   }
   if (is_ignition_off) {
    resume_controller().IgnitionOff();
@@ -2013,8 +2015,7 @@ void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
     : mobile_apis::AudioStreamingState::NOT_AUDIBLE;
 
   std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd =
-      application_list_.end();
+  std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
       if (kTTSSessionChanging == changing_state) {
@@ -2030,8 +2031,7 @@ void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
 
 void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
   std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd =
-      application_list_.end();
+  std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
       if (kTTSSessionChanging == changing_state) {

@@ -1,8 +1,5 @@
-/**
- * \file IProtocolObserver.h
- * \brief IProtocolObserver class header.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -53,23 +50,21 @@ typedef  utils::SharedPtr<RawMessage> RawMessagePtr;
  * ProtocolHandler and JSONHandler components.
  */
 class ProtocolObserver {
-  public:
-    /**
-     * \brief Callback function which is used by ProtocolHandler
-     * when new message is received from Mobile Application.
-     * \param message Message with supporting params received
-     */
-    virtual void OnMessageReceived(const RawMessagePtr message) = 0;
+ public:
+  /**
+   * \brief Callback function which is used by ProtocolHandler
+   * when new message is received from Mobile Application.
+   * \param message Message with supporting params received
+   */
+  virtual void OnMessageReceived(const RawMessagePtr message) = 0;
 
-    virtual void OnMobileMessageSent(const RawMessagePtr message)  = 0;
-
-
-  protected:
-    /**
-     * \brief Destructor
-     */
-    virtual ~ProtocolObserver() {
-    }
+  virtual void OnMobileMessageSent(const RawMessagePtr message)  = 0;
+ protected:
+  /**
+   * \brief Destructor
+   */
+  virtual ~ProtocolObserver() {
+  }
 };
 }  // namespace protocol_handler
 

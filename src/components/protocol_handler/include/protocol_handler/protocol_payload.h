@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -48,8 +48,8 @@ namespace protocol_handler {
 // Applink Protocolv5 4.1.2 Protocol Payload Binary header
 struct ProtocolPayloadHeaderV2 {
   ProtocolPayloadHeaderV2()
-      : rpc_type(kRpcTypeReserved),
-        rpc_function_id(0), corellation_id(0), json_size(0) {}
+    : rpc_type(kRpcTypeReserved),
+      rpc_function_id(0), corellation_id(0), json_size(0) {}
   RpcType  rpc_type;
   uint32_t rpc_function_id;
   uint32_t corellation_id;

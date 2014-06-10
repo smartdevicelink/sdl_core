@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,10 +33,16 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APPLICATION_MANAGER_H_
 
-#include <set>
-#include "hmi_message_handler/hmi_message_handler.h"
-#include "connection_handler/connection_handler.h"
-#include "protocol_handler/protocol_handler.h"
+// Other compomnents class declaration
+namespace hmi_message_handler {
+  class HMIMessageHandler;
+}
+namespace protocol_handler {
+  class ProtocolHandler;
+}
+namespace connection_handler {
+  class ConnectionHandler;
+}
 
 namespace application_manager {
 

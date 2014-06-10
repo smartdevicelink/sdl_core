@@ -3,11 +3,10 @@ include_directories(
   ./include/
   ../../../src/thirdPartyLibs/gmock-1.7.0/include
   ../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
-  ../../../src/components/security_manager/include
+  ${SecurityManagerIncludeDir}
   ../../../src/components/transport_manager/include
   ../../../src/components/protocol_handler/include
   ../../../src/components/connection_handler/include
-  ../../../src/components/security_manager/include
   ../../../src/components/utils/include
 )
 
@@ -28,7 +27,7 @@ set(LIBRARIES
   gtest_main
   gmock
   gmock_main
-  SecurityManager
+  ${SecurityManagerLibrary}
   crypto
   ssl
   ProtocolHandler

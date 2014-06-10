@@ -4,7 +4,7 @@ include_directories (
   ../../../src/components/utils/include
   ../../../src/components/protocol_handler/include
   ../../../src/components/connection_handler/include
-  ../../../src/components/security_manager/include
+  ${SecurityManagerIncludeDir}
   ../../../test/components/protocol_handler/include
   ${CMAKE_BINARY_DIR}/src/components/
   ${LOG4CXX_INCLUDE_DIRECTORY}

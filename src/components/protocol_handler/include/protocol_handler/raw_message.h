@@ -1,7 +1,4 @@
-/**
- * \file SmartDeviceLinkRawMessage.h
- * \brief SmartDeviceLinkRawMessage class header file.
- *
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -53,103 +50,101 @@ namespace protocol_handler {
  * between components.
  */
 class RawMessage {
-  public:
-    /**
-     * \brief Constructor
-     * \param connection_key Identifier of connection within which message
-     * is transferred
-     * \param protocolVersion Version of protocol of the message
-     * \param data Message string
-     * \param dataSize Message size
-     */
-    RawMessage(uint32_t connection_key, uint32_t protocolVersion,
-               const uint8_t * const data_param, uint32_t dataSize,
-               uint8_t type = ServiceType::kRpc);
+public:
+  /**
+   * \brief Constructor
+   * \param connection_key Identifier of connection within which message
+   * is transferred
+   * \param protocolVersion Version of protocol of the message
+   * \param data Message string
+   * \param dataSize Message size
+   */
+  RawMessage(uint32_t connection_key, uint32_t protocolVersion,
+             const uint8_t * const data_param, uint32_t dataSize,
+             uint8_t type = ServiceType::kRpc);
 
-    /**
-     * \brief Destructor
-     */
-    ~RawMessage();
+  /**
+   * \brief Destructor
+   */
+  ~RawMessage();
 
-    /**
-     * \brief Getter for connection identifier
-     */
-    uint32_t connection_key() const;
+  /**
+   * \brief Getter for connection identifier
+   */
+  uint32_t connection_key() const;
 
-    void set_connection_key(uint32_t);
+  /**
+   * \brief Setter for connection identifier
+   */
+  void set_connection_key(uint32_t);
 
-    /**
-     * \brief Getter for message string
-     */
-    uint8_t* data() const;
+  /**
+   * \brief Getter for message string
+   */
+  uint8_t* data() const;
 
-    /**
-     * \brief Getter for message size
-     */
-    size_t data_size() const;
+  /**
+   * \brief Getter for message size
+   */
+  size_t data_size() const;
 
-    /**
-     * \brief Getter for protocol version
-     */
-    uint32_t protocol_version() const;
+  /**
+   * \brief Getter for protocol version
+   */
+  uint32_t protocol_version() const;
 
-    /**
-     * \brief Getter for service type
-     */
-    ServiceType service_type() const {
-      return service_type_;
-    }
+  /**
+   * \brief Getter for service type
+   */
+  ServiceType service_type() const {
+    return service_type_;
+  }
 
-    bool IsWaiting() const;
+  bool IsWaiting() const;
 
-    void set_waiting(bool v);
+  void set_waiting(bool v);
 
-    /*
-     * \brief Priority of this message based on it's service type
-     */
-    MessagePriority Priority() const;
+  /**
+   * \brief Priority of this message based on it's service type
+   */
+  MessagePriority Priority() const;
 
-  private:
-    /**
-     * \brief Connection Identifier
-     * Obtained from \saCconnection_handler
-     */
-    uint32_t connection_key_;
+private:
+  /**
+   * \brief Connection Identifier
+   * Obtained from \saCconnection_handler
+   */
+  uint32_t connection_key_;
 
-    /**
-     * \brief Message string
-     */
-    uint8_t* data_;
+  /**
+   * \brief Message string
+   */
+  uint8_t* data_;
 
-    /**
-     * \brief Size of message
-     */
-    size_t data_size_;
+  /**
+   * \brief Size of message
+   */
+  size_t data_size_;
 
-    /**
-     * \brief Version of SmartDeviceLink protocol (currently 1,2)
-     * used for transferring message.
-     */
-    uint32_t protocol_version_;
+  /**
+   * \brief Version of SmartDeviceLink protocol (currently 1,2)
+   * used for transferring message.
+   */
+  uint32_t protocol_version_;
 
-    /**
-     * \brief Type of service message belongs to
-     */
-    ServiceType service_type_;
+  /**
+   * \brief Type of service message belongs to
+   */
+  ServiceType service_type_;
 
-    /**
-     * specifies current state of message in queue. if false message is "ready to be processed"
-     * otherwise it is "waiting for response"
-     *
-     */
-    bool waiting_;
+  /**
+   * specifies current state of message in queue. if false message is "ready to be processed"
+   * otherwise it is "waiting for response"
+   *
+   */
+  bool waiting_;
 
-    /**
-     * \brief Id of connection (for service messages like start/end session)
-     *
-     */
-
-    DISALLOW_COPY_AND_ASSIGN(RawMessage);
+  DISALLOW_COPY_AND_ASSIGN(RawMessage);
 };
 
 typedef  utils::SharedPtr<RawMessage> RawMessagePtr;

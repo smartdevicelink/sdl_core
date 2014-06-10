@@ -579,6 +579,11 @@ namespace security_manager_test {
                          Return(security_manager::SSLContext::
                                 Handshake_Result_AbnormalFail)));
 
+
+    // On each wrong handshake will be asked error
+    EXPECT_CALL(mock_ssl_context_exists,
+                LastError()).Times(handshake_emulates);
+
     // Emulate handshare #handshake_emulates times for 5 cases
     EmulateMobileMessageHandShake(handshake_data, handshake_data_size, handshake_emulates);
   }

@@ -46,6 +46,7 @@
 #include "application_manager/vehicle_info_data.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
+#include "hmi_message_handler/hmi_message_sender.h"
 
 #include "media_manager/media_manager_impl.h"
 
@@ -83,7 +84,6 @@ namespace NsSmartObjects {
 class SmartObject;
 }
 }
-
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace threads {
@@ -398,14 +398,14 @@ class ApplicationManagerImpl : public ApplicationManager,
     /*
      * @brief Overriden ProtocolObserver method
      */
-    virtual void OnMessageReceived(const protocol_handler::
-                                   RawMessagePtr message);
+    virtual void OnMessageReceived(
+        const protocol_handler::RawMessagePtr message);
 
     /*
      * @brief Overriden ProtocolObserver method
      */
-    virtual void OnMobileMessageSent(const protocol_handler::
-                                     RawMessagePtr message);
+    virtual void OnMobileMessageSent(
+        const protocol_handler::RawMessagePtr message);
 
     void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
@@ -623,7 +623,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     virtual void Handle(const impl::MessageFromHmi& message) OVERRIDE;
 
     // CALLED ON messages_to_hmi_ thread!
-    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;    
+    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
 
     /**
      * @brief Checks, if given RPC is allowed at current HMI level for specific

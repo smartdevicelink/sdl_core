@@ -17,7 +17,7 @@ include_directories (
   ../../../../src/components/protocol_handler/include
   ../../../../src/components/hmi_message_handler/include
   #../../../../src/components/mobile_message_handler/include/
-  ../../../../src/components/security_manager/include
+  ${SecurityManagerIncludeDir}
   ../../../../src/components/transport_manager/include
   ../../../../src/components/connection_handler/include
   ../../../../src/components/utils/include
@@ -69,16 +69,17 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/SyncProxyTester/ DESTINATION ${CMAKE_BINAR
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/SyncProxyTester/icon.png DESTINATION ${CMAKE_BINARY_DIR}/test/AppManagerImplTest/)
 
 add_library("test_App_Manager"
-						"./src/admin_app_test.cc"
-						"./src/gmock_class_container.cc"
-						"./src/gtest_ford.cc"
-						"./src/itest_argument.cc"
-						"./src/init_hmi.cc"
-						"./src/hmi_message_handler_tester.cc"
-						"./src/xml_parser.cc"
-						"./src/smoke_test_exp_media.cc"
-						"./src/protocol_handler_mockup.cc"
-						"./src/init_start_data.cc"
-						"./src/test_hmi.cc"
-                                                "./src/application_manager_impl_test.cc")
-						
+            "./src/admin_app_test.cc"
+            "./src/gmock_class_container.cc"
+            "./src/gtest_ford.cc"
+            "./src/itest_argument.cc"
+            "./src/init_hmi.cc"
+            "./src/hmi_message_handler_tester.cc"
+            "./src/xml_parser.cc"
+            "./src/smoke_test_exp_media.cc"
+            "./src/protocol_handler_mockup.cc"
+            "./src/init_start_data.cc"
+            "./src/test_hmi.cc"
+            "./src/application_manager_impl_test.cc"
+)
+

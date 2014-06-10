@@ -48,10 +48,7 @@ class PHMetricObserver {
     TimevalStruct begin;
     TimevalStruct end;
   };
-  /**
-   */
   virtual void StartMessageProcess(uint32_t message_id, const TimevalStruct& start_time) = 0;
-
   virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m) = 0;
   virtual ~PHMetricObserver(){}
 };

@@ -42,6 +42,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
 #include "policy/policy_manager_impl.h"
+#include "connection_handler/connection_handler.h"
 #include "utils/macro.h"
 #include "utils/date_time.h"
 #include "json/value.h"
