@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ford.syncV4.android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:versionCode="80"
     android:versionName="2.0.10 (CW23)" >
 
@@ -21,11 +22,11 @@
     <uses-feature android:name="android.hardware.usb.accessory"/>
 
     <application
-        android:debuggable="true"
         android:icon="@drawable/main_logo"
         android:name=".MainApp"
         android:theme="@style/AppTheme"
-        android:label="@string/tester_app_name" >
+        android:label="@string/tester_app_name"
+        >
 
         <activity
             android:name=".activity.SyncProxyTester"
@@ -66,7 +67,7 @@
                 android:label="@string/title_activity_choice_edit"
                 android:theme="@android:style/Theme.Dialog"/>
 
-        <activity android:label="@string/app_name"
+        <activity android:label="@string/app_name_fe"
             android:name="com.lamerman.FileDialog"/>
 
         <activity android:name="com.ford.syncV4.transport.usb.USBAccessoryAttachmentActivity">
