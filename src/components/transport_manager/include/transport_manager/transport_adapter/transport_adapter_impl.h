@@ -534,5 +534,5 @@ class TransportAdapterImpl : public TransportAdapter,
 };
 }  // namespace transport_adapter
 }  // namespace transport_manager
-#endif  // #ifndef \
-        // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_IMPL_H_
+
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_

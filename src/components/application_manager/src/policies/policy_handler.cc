@@ -82,10 +82,13 @@ PolicyHandler::PolicyHandler()
     dl_handle_(0),
     exchange_handler_(NULL),
     on_ignition_check_done_(false),
-    retry_sequence_("RetrySequence", new RetrySequence(this)) {
+    retry_sequence_("RetrySequence", new RetrySequence(this)),
+    last_activated_app_(0) {
 }
 
 PolicyHandler::~PolicyHandler() {
+  sync_primitives::AutoLock locker(retry_sequence_lock_);
+  retry_sequence_.stop();
   UnloadPolicyLibrary();
 }
 

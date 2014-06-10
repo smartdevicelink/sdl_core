@@ -61,8 +61,8 @@ set(ENABLE_LOG_OPTION 	"$ENV{ENABLE_LOG}")
 
 add_custom_target(pasa-tarball
   COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} PASA
-  DEPENDS HMI_API v4_protocol_v1_2_no_extra
-# tar -czv -C ${CMAKE_SOURCE_DIR} src/appMain -f ${CMAKE_BINARY_DIR}/pasa.tar.gz;
+  COMMAND tar -czv -C /tmp/PASA -f ${CMAKE_BINARY_DIR}/pasa.tar.gz .
+  DEPENDS HMI_API MOBILE_API v4_protocol_v1_2_no_extra
 )
 
 if (OS_TYPE_OPTION)

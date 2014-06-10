@@ -462,7 +462,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param correlation_id Correlation ID of the HMI request
      * @param app_id Application ID
      */
-  void set_application_id(const int32_t correlation_id, const uint32_t app_id);
+    void set_application_id(const int32_t correlation_id, const uint32_t app_id);
 
     /*
      * @brief Change AudioStreamingState for all application according to
@@ -642,6 +642,12 @@ class ApplicationManagerImpl : public ApplicationManager,
         const std::string& policy_app_id,
         mobile_apis::HMILevel::eType hmi_level,
         mobile_apis::FunctionID::eType function_id);
+
+    /*
+     * @brief Function is called on IGN_OFF, Master_reset or Factory_defaults
+     * to notify HMI that SDL is shutting down.
+     */
+    void SendOnSDLClose();
 
   private:
 

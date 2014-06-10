@@ -57,7 +57,7 @@ endif
 # Compiler Options
 CC_OFLAG = -o 
 CC_IFLAG = -I
-CC_FLAGS = $(TARGET_FLG) -w9 -Wc,-Wall -shared $(CC_OPT_FLG) $(CC_PROFILING_FLG) $(CC_DEBUG_FLG) -DOS_POSIX 
+CC_FLAGS = $(TARGET_FLG) -w9 -Wc,-Wall -shared $(CC_OPT_FLG) $(CC_PROFILING_FLG) $(CC_DEBUG_FLG) -DOS_POSIX -DEXTENDED_POLICY
 CC_TARGET = $(@)
 CC_CMD = $(CC) $(CC_FLAGS) $(DEFS) $(INCLUDES) $(@F:.$(OBJ_EXT)=.c) -o $(@) 
 CPP_CMD = $(CPP) $(CC_FLAGS) $(DEFS) $(INCLUDES) $(@F:.$(OBJ_EXT)=.cpp) -o $(@) 

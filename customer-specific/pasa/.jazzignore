@@ -36,7 +36,8 @@ core.ignore.recursive= \
 	{*.a} \
 	{*.ar} \
 	{*.arc} \
-	{*.o} 
+	{*.o} \
+  {.objs.txt}
 
 core.ignore= \
 	{.project} \
@@ -48,4 +49,3 @@ core.ignore= \
 	{bld} \
 	{lib} \
 	{dll}
-	

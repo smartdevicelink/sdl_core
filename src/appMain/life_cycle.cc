@@ -141,8 +141,34 @@ bool LifeCycle::StartComponents() {
   return true;
 }
 
+#ifdef CUSTOMER_PASA
 bool LifeCycle::InitMessageSystem() {
+  mb_pasa_adapter_ =
+    new hmi_message_handler::MessageBrokerAdapter(
+    hmi_message_handler::HMIMessageHandlerImpl::instance(),
+    std::string(PREFIX_STR_FROMSDL_QUEUE),
+    std::string(PREFIX_STR_TOSDL_QUEUE));
+    hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
+    mb_pasa_adapter_);
+  if (!mb_pasa_adapter_->MqOpen()) {
+    LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
+    return false;
+  }
+
+  LOG4CXX_INFO(logger_, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
+  mb_pasa_adapter_thread_  = new System::Thread(
+    new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
+      *mb_pasa_adapter_,
+      &hmi_message_handler::MessageBrokerAdapter::SubscribeAndBeginReceiverThread,
+      NULL));
+  mb_pasa_adapter_thread_->Start(false);
+  NameMessageBrokerThread(*mb_pasa_adapter_thread_, "MessageBrokerAdapterThread");
+
+  return true;
+}
+#else
 #ifdef MESSAGEBROKER_HMIADAPTER
+bool LifeCycle::InitMessageSystem() {
   message_broker_ =
     NsMessageBroker::CMessageBroker::getInstance();
   if (!message_broker_) {
@@ -191,25 +217,7 @@ bool LifeCycle::InitMessageSystem() {
       LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
       return false;
     }
-#endif  // MESSAGEBROKER_HMIADAPTER
 
-#ifdef CUSTOMER_PASA
-#ifdef PASA_HMI
-  mb_pasa_adapter_ =
-    new hmi_message_handler::MessageBrokerAdapter(
-    hmi_message_handler::HMIMessageHandlerImpl::instance(),
-    std::string(PREFIX_STR_FROMSDL_QUEUE),
-    std::string(PREFIX_STR_TOSDL_QUEUE));
-    hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
-    mb_pasa_adapter_);
-  if (!mb_pasa_adapter_->MqOpen()) {
-    LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
-    return false;
-  }
-#endif  // PASA_HMI
-#endif  // CUSTOMER_PASA
-
-#ifdef MESSAGEBROKER_HMIADAPTER
   LOG4CXX_INFO(logger_, "Start CMessageBroker thread!");
   mb_thread_ = new System::Thread(
     new System::ThreadArgImpl<NsMessageBroker::CMessageBroker>(
@@ -236,24 +244,10 @@ bool LifeCycle::InitMessageSystem() {
       NULL));
   mb_adapter_thread_->Start(false);
   NameMessageBrokerThread(*mb_adapter_thread_, "MessageBrokerAdapterThread");
-#endif  // MESSAGEBROKER_HMIADAPTER
-
-#ifdef CUSTOMER_PASA
-#ifdef PASA_HMI
-  LOG4CXX_INFO(logger_, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
-  mb_pasa_adapter_thread_  = new System::Thread(
-    new System::ThreadArgImpl<hmi_message_handler::MessageBrokerAdapter>(
-      *mb_pasa_adapter_,
-      &hmi_message_handler::MessageBrokerAdapter::SubscribeAndBeginReceiverThread,
-      NULL));
-  mb_pasa_adapter_thread_->Start(false);
-  NameMessageBrokerThread(*mb_pasa_adapter_thread_, "MessageBrokerAdapterThread");
-#endif  // PASA_HMI
-#endif  // CUSTOMER_PASA
-
 
   return true;
 }
+#endif  // MESSAGEBROKER_HMIADAPTER
 
 #ifdef DBUS_HMIADAPTER
 /**
@@ -296,6 +290,8 @@ bool LifeCycle::InitMessageSystem() {
 }
 #endif  // MQUEUE_HMIADAPTER
 
+#endif  // CUSTOMER_PASA
+
 void LifeCycle::StopComponents() {
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
@@ -307,9 +303,6 @@ void LifeCycle::StopComponents() {
   media_manager_->SetProtocolHandler(NULL);
   media_manager::MediaManagerImpl::destroy();
 
-  LOG4CXX_INFO(logger_, "Destroying Application Manager.");
-  application_manager::ApplicationManagerImpl::destroy();
-
   LOG4CXX_INFO(logger_, "Destroying Transport Manager.");
   transport_manager_->Stop();
   transport_manager::TransportManagerDefault::destroy();
@@ -320,6 +313,12 @@ void LifeCycle::StopComponents() {
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete protocol_handler_;
+
+  LOG4CXX_INFO(logger_, "Destroying Last State");
+  resumption::LastState::destroy();
+
+  LOG4CXX_INFO(logger_, "Destroying Application Manager.");
+  application_manager::ApplicationManagerImpl::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying HMI Message Handler and MB adapter.");
 #ifdef DBUS_HMIADAPTER
@@ -383,9 +382,6 @@ void LifeCycle::StopComponents() {
 
   delete hmi_message_adapter_;
   hmi_message_adapter_ = NULL;
-
-  LOG4CXX_INFO(logger_, "Destroying Last State");
-  resumption::LastState::destroy();
 
 #ifdef TIME_TESTER
   // It's important to delete tester Obcervers after TM adapters destruction

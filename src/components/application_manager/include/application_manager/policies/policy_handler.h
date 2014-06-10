@@ -54,7 +54,8 @@ namespace policy {
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
 
-class PolicyHandler : public utils::Singleton<PolicyHandler>,
+class PolicyHandler :
+    public utils::Singleton<PolicyHandler, utils::deleters::Deleter<PolicyHandler> >,
     public PolicyListener {
  public:
   virtual ~PolicyHandler();
@@ -290,7 +291,10 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
 
   inline PolicyManager* CreateManager();
 
-  DISALLOW_COPY_AND_ASSIGN(PolicyHandler);FRIEND_BASE_SINGLETON_CLASS(PolicyHandler);
+  DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
+  FRIEND_BASE_SINGLETON_CLASS_WITH_DELETER(PolicyHandler,
+                                           utils::deleters::Deleter<PolicyHandler>);
+  FRIEND_DELETER_DESTRUCTOR(PolicyHandler);
   friend class RetrySequence;
 };
 

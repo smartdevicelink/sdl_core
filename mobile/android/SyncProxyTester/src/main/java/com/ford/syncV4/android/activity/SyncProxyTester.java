@@ -370,23 +370,22 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
     @Override
     public void onBluetoothDeviceTurningOff() {
-        Logger.i("Bluetooth turning off");
         if (AppPreferencesManager.getTransportType() != TransportType.BLUETOOTH) {
             return;
         }
 
-        if (mBluetoothStopProxyServiceTimeOutHandler == null) {
+        /*if (mBluetoothStopProxyServiceTimeOutHandler == null) {
             mBluetoothStopProxyServiceTimeOutHandler = new Handler();
         } else {
             mBluetoothStopProxyServiceTimeOutHandler.removeCallbacks(
                     mBluetoothStopServicePostDelayedCallback);
         }
         mBluetoothStopProxyServiceTimeOutHandler.postDelayed(
-                mBluetoothStopServicePostDelayedCallback, EXIT_TIMEOUT);
+                mBluetoothStopServicePostDelayedCallback, EXIT_TIMEOUT);*/
 
-        if (mBoundProxyService != null) {
+        /*if (mBoundProxyService != null) {
             mBoundProxyService.destroyService();
-        }
+        }*/
     }
 
     @Override
@@ -462,6 +461,15 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             mBluetoothStopProxyServiceTimeOutHandler.removeCallbacks(
                     mBluetoothStopServicePostDelayedCallback);
         }
+    }
+
+    @Override
+    public void onProxyInitError(String message) {
+        PlaceholderFragment fragment = getCurrentActiveFragment();
+        if (fragment == null) {
+            return;
+        }
+        fragment.getLogAdapter().logMessage(" " + message, true);
     }
 
     @Override

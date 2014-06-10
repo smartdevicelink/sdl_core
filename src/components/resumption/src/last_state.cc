@@ -40,11 +40,17 @@ namespace resumption {
 CREATE_LOGGERPTR_GLOBAL(logger_, "LastState");
 
 void LastState::SaveToFileSystem() {
+  LOG4CXX_INFO(logger_, "LastState::SaveToFileSystem");
   const std::string file =
       profile::Profile::instance()->app_info_storage();
   const std::string& str = dictionary.toStyledString();
   const std::vector<uint8_t> char_vector_pdata(
     str.begin(), str.end());
+
+  DCHECK(file_system::CreateDirectoryRecursively(
+        profile::Profile::instance()->app_storage_folder()));
+
+  LOG4CXX_INFO(logger_, "LastState::SaveToFileSystem " << file);
   DCHECK(file_system::Write(file, char_vector_pdata));
 }
 

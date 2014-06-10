@@ -31,8 +31,8 @@ INCLUDES = \
 	$(CC_IFLAG)./ \
 	$(CC_IFLAG)../include \
 	$(CC_IFLAG)../../utils/include \
-	$(CC_IFLAG)../../../thirdPartyLibs/MessageBroker/include \
-	$(CC_IFLAG)../../../thirdPartyLibs/log4cxx/include \
+	$(CC_IFLAG)../../../3rd_party-static/MessageBroker/include \
+	$(CC_IFLAG)../../../3rd_party/log4cxx/include \
 	$(DEPENDS_INCLUDES)
 
 
@@ -108,7 +108,7 @@ HEADERS = \
 	$(wildcard ../include/$(COMPONENT_NAME)/*.h*) \
 	$(wildcard ../../utils/include/utils/*.h*) \
 	$(wildcard ../../utils/include/utils/threads/*.h*) \
-	$(wildcard ../../../thirdPartyLibs/MessageBroker/include/*.h*) \
+	$(wildcard ../../../3rd_party-static/MessageBroker/include/*.h*) \
 
 	
 LIBRARIES = \
