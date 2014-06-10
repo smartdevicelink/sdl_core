@@ -1113,7 +1113,7 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
   output[strings::is_media_application] = app->is_media_application();
 
   if (NULL != ngn_media_screen_name) {
-    output[strings::ngn_media_screen_app_name] = *ngn_media_screen_name;
+    output[strings::ngn_media_screen_app_name] = ngn_media_screen_name->asString();
   }
   if (NULL != app_types) {
     output[strings::app_type] = *app_types;
