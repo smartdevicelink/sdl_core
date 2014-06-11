@@ -14,6 +14,7 @@ set (SOURCES
     ./src/threads/thread_manager.cc
     ./src/threads/thread_validator.cc
     ./src/lock_posix.cc
+    ./src/rwlock_posix.cc
     ./src/date_time.cc
     ./src/signals_linux.cc
     ./src/system.cc
