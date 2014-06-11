@@ -67,9 +67,10 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     is_vr_session_strated_(false),
     hmi_cooperating_(false),
     is_all_apps_allowed_(true),
+    media_manager_(media_manager::MediaManagerImpl::instance()),
     hmi_handler_(NULL),
     connection_handler_(NULL),
-    policy_manager_(NULL),
+    policy_manager_(policy::PolicyHandler::instance()->LoadPolicyLibrary()),
     hmi_so_factory_(NULL),
     mobile_so_factory_(NULL),
     protocol_handler_(NULL),
@@ -80,16 +81,12 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     request_ctrl_(),
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF),
-    media_manager_(NULL),
-    resume_ctrl_(this)
+    resume_ctrl_(this),
 #ifdef TIME_TESTER
-    , metric_observer_(NULL)
+    metric_observer_(NULL),
 #endif  // TIME_TESTER
+    application_list_update_timer_(new ApplicationListUpdateTimer(this))
 {
-  LOG4CXX_INFO(logger_, "Creating ApplicationManager");
-  media_manager_ = media_manager::MediaManagerImpl::instance();
-  application_list_update_timer_ = new ApplicationListUpdateTimer(this);
-  CreatePoliciesManager();
 }
 
 bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
@@ -1347,9 +1344,8 @@ bool ApplicationManagerImpl::ManageHMICommand(
 void ApplicationManagerImpl::CreateHMIMatrix(HMIMatrix* matrix) {
 }
 
-void ApplicationManagerImpl::CreatePoliciesManager() {
-  LOG4CXX_INFO(logger_, "CreatePoliciesManager");
-  policy_manager_ = policy::PolicyHandler::instance()->LoadPolicyLibrary();
+void ApplicationManagerImpl::Init() {
+  LOG4CXX_TRACE(logger_, "Init application manager");
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
     policy::PolicyHandler::instance()->InitPolicyTable();

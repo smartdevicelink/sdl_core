@@ -185,6 +185,11 @@ class ApplicationManagerImpl : public ApplicationManager,
     ~ApplicationManagerImpl();
 
     /**
+     * Inits application manager
+     */
+    virtual void Init();
+
+    /**
      * @brief Stop work.
      *
      * @return TRUE on success otherwise FALSE.
@@ -577,7 +582,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     mobile_apis::MOBILE_API& mobile_so_factory();
 
     void CreateHMIMatrix(HMIMatrix* matrix);
-    void CreatePoliciesManager();
 
     /**
      * \brief Performs check using PoliciesManager of availability
