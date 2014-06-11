@@ -28,6 +28,7 @@ import com.ford.syncV4.android.manager.ApplicationIconManager;
 import com.ford.syncV4.android.manager.LastUsedHashIdsManager;
 import com.ford.syncV4.android.manager.PutFileTransferManager;
 import com.ford.syncV4.android.manager.RPCRequestsResumableManager;
+import com.ford.syncV4.android.manager.RestoreConnectionManager;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
@@ -185,6 +186,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     private final IBinder mBinder = new ProxyServiceBinder(this);
 
     /**
+     * Semaphore object to wait for the connection to be restored up to
+     * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} notifiaction receive
+     */
+    private final RestoreConnectionManager restoreConnectionToRAI = new RestoreConnectionManager();
+
+    /**
      * Table of the {@link com.ford.syncV4.android.manager.RPCRequestsResumableManager}'s
      * Each manager provide functionality to process RPC requests which are involved in app
      * resumption
@@ -324,6 +331,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      */
     public TestConfig getTestConfig() {
         return mTestConfig;
+    }
+
+    public RestoreConnectionManager getRestoreConnectionToRAI() {
+        return restoreConnectionToRAI;
     }
 
     /**
@@ -1617,6 +1628,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     @Override
     public void onSessionStarted(String appId) {
         Logger.d(TAG, " Session started AppId:" + appId);
+
+        /*if (mReentrantRestoreConnectionLock.getHoldCount() > 0) {
+            mReentrantRestoreConnectionLock.unlock();
+        }*/
+
         mSessionsCounter.add(appId);
         if (mProxyServiceEvent != null) {
             mProxyServiceEvent.onServiceStart(ServiceType.RPC, appId);
@@ -1760,8 +1776,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     public void onRegisterAppInterfaceResponse(String appId, RegisterAppInterfaceResponse response) {
         createDebugMessageForAdapter(appId, response);
 
+        restoreConnectionToRAI.releaseLock();
+
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+                    response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
             }
@@ -2614,7 +2633,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     @Override
     public void onRPCServiceComplete() {
-        if (isModuleTesting() && !mTestConfig.isDoCallRegisterAppInterface()) {
+        if (isModuleTesting() && mModuleTest.getTestActionThreadContext() != null &&
+                !mTestConfig.isDoCallRegisterAppInterface()) {
             synchronized (mModuleTest.getTestActionThreadContext()) {
                 mModuleTest.getTestActionThreadContext().notify();
             }

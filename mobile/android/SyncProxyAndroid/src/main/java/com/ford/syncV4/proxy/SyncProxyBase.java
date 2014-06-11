@@ -457,7 +457,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Handler that is used to schedule SYNC Proxy reconnect tasks.
      */
-    private final Handler reconnectHandler = new Handler();
+    private final Handler reconnectHandler = new Handler(Looper.getMainLooper());
     private static int heartBeatInterval = HEARTBEAT_INTERVAL;
     private static boolean heartBeatAck = true;
     private IRPCRequestConverterFactory rpcRequestConverterFactory =

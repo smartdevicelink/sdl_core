@@ -1049,6 +1049,15 @@ public class ModuleTest {
                 CustomJsonRPCMarshaller customMarshaller = null;
 
                 for (RPCRequestWrapper wrapper : currentTest.getRequests()) {
+
+                    if (!mProxyService.isSyncProxyConnected()) {
+
+                        //mProxyService.getTestConfig().setDoCallRegisterAppInterface(false);
+                        mProxyService.startProxyIfNetworkConnected();
+
+                        mProxyService.getRestoreConnectionToRAI().acquireLock();
+                    }
+
                     RPCRequest rpc = wrapper.getRequest();
                     boolean generateInvalidJSON = wrapper.isGenerateInvalidJSON();
                     String customJSON = wrapper.getCustomJSON();
