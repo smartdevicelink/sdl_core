@@ -589,12 +589,16 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   LOG4CXX_INFO_EXT(
       logger_, " data size " << data_size << " maxdata_size " << maxdata_size);
 
-  // size of last (not full fill) frame
-  const size_t lastframe_size = data_size % maxdata_size;
+  // remainder of last frame
+  const size_t lastframe_remainder = data_size % maxdata_size;
+
+  // size of last frame (full fill or not)
+  const size_t lastframe_size =
+      lastframe_remainder > 0 ? lastframe_remainder : maxdata_size;
 
   const size_t frames_count = data_size / maxdata_size +
       //add last frame if not empty
-      (lastframe_size > 0 ? 1 : 0);
+      (lastframe_remainder > 0 ? 1 : 0);
 
   LOG4CXX_INFO_EXT(
       logger_,
@@ -624,7 +628,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   LOG4CXX_INFO_EXT(logger_, "First frame is sent.");
 
   for (uint32_t i = 0; i < frames_count; ++i) {
-    const bool is_last_frame = (i != (frames_count - 1));
+    const bool is_last_frame = (i == (frames_count - 1));
     const size_t frame_size = is_last_frame ? lastframe_size : maxdata_size;
     const uint8_t data_type = is_last_frame ? 0 : (i % FRAME_DATA_MAX_VALUE + 1);
 
