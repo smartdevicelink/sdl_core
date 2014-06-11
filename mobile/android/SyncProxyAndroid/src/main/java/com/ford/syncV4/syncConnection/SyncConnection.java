@@ -38,6 +38,7 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class is responsible for the transport connection (Bluetooth, USB, WiFi), provide Services
@@ -61,8 +62,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     /**
      * Table of the Heart Beat monitors (each one associated with a concrete session)
      */
-    private final Hashtable<Byte, IHeartbeatMonitor> heartbeatMonitors =
-            new Hashtable<Byte, IHeartbeatMonitor>();
+    private final ConcurrentHashMap<Byte, IHeartbeatMonitor> heartbeatMonitors =
+            new ConcurrentHashMap<Byte, IHeartbeatMonitor>();
     private NSDHelper mNSDHelper;
 
     static final Object END_PROTOCOL_SERVICE_AUDIO_LOCK = new Object();
@@ -153,18 +154,27 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         return _protocol;
     }
 
-    public void setHeartbeatMonitor(IHeartbeatMonitor heartbeatMonitor) {
-        if (heartbeatMonitors.containsKey(heartbeatMonitor.getSessionId())) {
-            heartbeatMonitors.remove(heartbeatMonitor.getSessionId());
+    public void setHeartbeatMonitor(final IHeartbeatMonitor heartbeatMonitor) {
+        final byte sessionId = heartbeatMonitor.getSessionId();
+        if (heartbeatMonitors.containsKey(sessionId)) {
+            //IHeartbeatMonitor monitor = heartbeatMonitors.get(sessionId);
+
+            heartbeatMonitors.remove(sessionId);
+
+            //monitor = null;
         }
         heartbeatMonitor.setListener(this);
 
-        Logger.d(CLASS_NAME + " Set HB monitor, sesId:" + heartbeatMonitor.getSessionId());
-        heartbeatMonitors.put(heartbeatMonitor.getSessionId(), heartbeatMonitor);
+        Logger.d(CLASS_NAME + " Set HBM, sesId:" + sessionId + " contains-pre:" + heartbeatMonitors.containsKey(sessionId));
+        heartbeatMonitors.put(sessionId, heartbeatMonitor);
+        Logger.d(CLASS_NAME + " Set HBM, sesId:" + sessionId + " contains-post:" + heartbeatMonitors.containsKey(sessionId) +
+             " thread:" + Thread.currentThread());
     }
 
     protected IHeartbeatMonitor getHeartbeatMonitor(byte sessionId) {
-        return heartbeatMonitors.get(sessionId);
+        final IHeartbeatMonitor returnValue = heartbeatMonitors.get(sessionId);
+        Logger.d(CLASS_NAME + " Get HBM:" + returnValue + ", sesId:" + sessionId + " thread:" + Thread.currentThread());
+        return returnValue;
     }
 
     public void closeConnection(boolean keepConnection) {
@@ -220,11 +230,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void stopHeartbeatMonitor(byte sessionId) {
-        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
-        Logger.d(CLASS_NAME + " Stop HeartBeat, sesId:" + sessionId + " " + heartbeatMonitor);
+        IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId);
+        Logger.d(CLASS_NAME + " Stop HBM, sesId:" + sessionId + " " + heartbeatMonitor);
         if (heartbeatMonitor != null) {
-            Logger.d(CLASS_NAME + " Stop HeartBeat, sesId:" + sessionId);
+            Logger.d(CLASS_NAME + " Stop HBM, sesId:" + sessionId);
             heartbeatMonitor.stop();
+
+            heartbeatMonitors.remove(sessionId);
+
+            //heartbeatMonitor = null;
         }
     }
 
@@ -428,7 +442,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void startHeartbeatTimer(byte sessionId) {
-        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId);
         if (heartbeatMonitor != null) {
             heartbeatMonitor.start();
         }
@@ -566,35 +580,44 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onProtocolHeartbeatACK(byte sessionId) {
-        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId);
+        Logger.d(CLASS_NAME + " OnProtocolHeartbeatACK, sesId:" + sessionId + ", HBM:" + heartbeatMonitor);
         if (heartbeatMonitor != null) {
             heartbeatMonitor.heartbeatACKReceived();
+        } else {
+            Logger.w(CLASS_NAME + " OnProtocolHeartbeatACK HBM null");
         }
     }
 
     @Override
     public void onProtocolHeartbeat(byte sessionId) {
-        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId);
         if (heartbeatMonitor != null) {
             heartbeatMonitor.heartbeatReceived();
+        } else {
+            Logger.w(CLASS_NAME + " OnProtocolHeartbeat HBM null");
         }
     }
 
     @Override
     public void onResetHeartbeatAck(byte sessionId) {
-        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId);
         Logger.d(CLASS_NAME + " Reset HM at sesId:" + sessionId + " HB's number:" +
                 heartbeatMonitors.size() + " current:" + heartbeatMonitor);
         if (heartbeatMonitor != null) {
             heartbeatMonitor.notifyTransportOutputActivity();
+        } else {
+            Logger.w(CLASS_NAME + " OnResetHeartbeatAck HBM null");
         }
     }
 
     @Override
     public void onResetHeartbeat(byte sessionId) {
-        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId);
         if (heartbeatMonitor != null) {
             heartbeatMonitor.notifyTransportInputActivity();
+        } else {
+            Logger.w(CLASS_NAME + " OnResetHeartbeat HBM null");
         }
     }
 

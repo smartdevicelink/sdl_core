@@ -34,7 +34,6 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     public HeartbeatMonitor(byte mSessionId) {
         this.mSessionId = mSessionId;
-        Logger.d(CLASS_NAME + " Constructor, lock obj hash:" + HeartbeatThreadHandler_Lock.hashCode());
     }
 
     private Runnable heartbeatTimeoutRunnable = new Runnable() {
@@ -73,11 +72,11 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                         }
                     } else {
                         Logger.i(CLASS_NAME,
-                                "The thread is interrupted; not scheduling heartbeat");
+                                " Thread is interrupted; not scheduling heartbeat");
                     }
                 } else {
                     Logger.e(CLASS_NAME,
-                            "Strange, HeartbeatThread's handler is not set; not scheduling heartbeat");
+                            "Strange, Thread's handler is not set; not scheduling heartbeat");
                     HeartbeatMonitor.this.stop();
                 }
             }
@@ -89,7 +88,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
         @Override
         public void run() {
             synchronized (Listener_Lock) {
-                Logger.d(CLASS_NAME + " run()");
+                Logger.d(CLASS_NAME + " run(), ackReceived:" + ackReceived + " hash:" + HeartbeatMonitor.this.hashCode());
                 if (ackReceived) {
                     Logger.d(CLASS_NAME, " ACK has been received, sending and scheduling heartbeat");
                     if (listener != null) {
@@ -98,6 +97,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                         Logger.w(CLASS_NAME, " Delegate is not set, scheduling heartbeat anyway");
                     }
                     ackReceived = false;
+                    Logger.d(CLASS_NAME + " set ackReceived:" + ackReceived + " hash:" + HeartbeatMonitor.this.hashCode());
                 } else {
                     Logger.d(CLASS_NAME + " ACK has not been received");
                     if (listener != null) {
@@ -122,7 +122,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                     }
                 } else {
                     Logger.e(CLASS_NAME,
-                            " Strange, HeartbeatThread's handler is not set; not scheduling heartbeat");
+                            " Strange, Thread's handler is not set; not scheduling heartbeat");
                     HeartbeatMonitor.this.stop();
                 }
             }
@@ -131,6 +131,7 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     @Override
     public void start() {
+        Logger.d(CLASS_NAME + " Start");
         synchronized (HeartbeatThreadHandler_Lock) {
             if (heartbeatThread == null) {
                 heartbeatThread = new Thread(new Runnable() {
@@ -154,20 +155,21 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                             Logger.d(CLASS_NAME + " Looper stopped, exiting thread");
                         } else {
                             Logger.i(CLASS_NAME,
-                                    " HeartbeatThread is run, but already interrupted");
+                                    " Thread is run, but already interrupted");
                         }
                     }
                 }, "HeartbeatThread");
                 heartbeatThread.setPriority(Thread.MAX_PRIORITY);
                 heartbeatThread.start();
             } else {
-                Logger.d(CLASS_NAME + " HeartbeatThread is already started; doing nothing");
+                Logger.d(CLASS_NAME + " Thread is already started; doing nothing");
             }
         }
     }
 
     @Override
     public void stop() {
+        Logger.d(CLASS_NAME + " Stop");
         synchronized (HeartbeatThreadHandler_Lock) {
             if (heartbeatThread != null) {
                 heartbeatThread.interrupt();
@@ -180,17 +182,17 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                             heartbeatTimeoutRunnable);
                     heartbeatThreadHandler = null;
                 } else {
-                    Logger.e(CLASS_NAME + " HeartbeatThread's handler is null");
+                    Logger.e(CLASS_NAME + " Handler is null");
                 }
 
                 if (heartbeatThreadLooper != null) {
                     heartbeatThreadLooper.quit();
                     heartbeatThreadLooper = null;
                 } else {
-                    Logger.e(CLASS_NAME + " HeartbeatThread's looper is null");
+                    Logger.e(CLASS_NAME + " Looper is null");
                 }
             } else {
-                Logger.d(CLASS_NAME + " HeartbeatThread is not started");
+                Logger.d(CLASS_NAME + " is not started");
                 // just in case
                 heartbeatThreadHandler = null;
                 heartbeatThreadLooper = null;
@@ -246,18 +248,20 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     @Override
     public void heartbeatACKReceived() {
+        Logger.d(CLASS_NAME + " ACK received pre lock");
         synchronized (Listener_Lock) {
-            Logger.d(CLASS_NAME + " ACK received");
+            Logger.d(CLASS_NAME + " ACK received post lock");
             ackReceived = true;
+            Logger.d(CLASS_NAME + " set received:" + ackReceived + " hash:" + hashCode());
         }
     }
 
     @Override
     public void heartbeatReceived() {
-        Logger.d(CLASS_NAME + " Heartbeat received, isHeartbeatAck:" + isHeartbeatAck);
+        Logger.d(CLASS_NAME + " received, isHeartbeatAck:" + isHeartbeatAck);
         synchronized (Listener_Lock) {
             if (isHeartbeatAck) {
-                Logger.d(CLASS_NAME + " Heartbeat start do post");
+                Logger.d(CLASS_NAME + " start do post");
                 heartbeatReceived = true;
                 if (!heartbeatThreadHandler.post(heartbeatTimeoutRunnable)) {
                     Logger.e(CLASS_NAME + " Couldn't schedule run()");
