@@ -75,7 +75,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 public class ModuleTest {
@@ -537,7 +539,7 @@ public class ModuleTest {
                                     String customJSON = parser.getAttributeValue(null, CUSTOM_JSON_ATTR);
 
                                     //TODO: Set rpc parameters
-                                    Hashtable hash = setParams(name, parser);
+                                    Map hash = setParams(name, parser);
                                     logParserDebugInfo("" + hash);
                                     //TODO: Iterate through hash table and add it to parameters
                                     for (Object key : hash.keySet()) {
@@ -723,11 +725,11 @@ public class ModuleTest {
 		});
 	}
 	
-	private Hashtable setParams(String name, XmlPullParser parser) {
+	private Map setParams(String name, XmlPullParser parser) {
 
 		logParserDebugInfo("setParams start name: " + name);
 		
-		Hashtable hash = new Hashtable();
+		Map hash = new ConcurrentHashMap();
 		
 		int eventType = 0;
 		Boolean done = false;

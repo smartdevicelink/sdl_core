@@ -43,7 +43,21 @@ SDL.SDLModel = Em.Object.create({
         'vrHelp': null
     },
 
-/**
+    /**
+     * Structure specified for PoliceUpdate retry sequence
+     * contains timeout seconds param, array of retry seconds and counter of number of retries
+     *
+     * @type {Objetc}
+     */
+    policyUpdateRetry:{
+        timeout: null,
+        retry: [],
+        try: null,
+        timer: null,
+        oldTimer: 0
+    },
+
+    /**
      * List of callback functions for request SDL.GetUserFriendlyMessage
      * where key is requestId
      * and parameter is a function that will handle data came in respone from SDL

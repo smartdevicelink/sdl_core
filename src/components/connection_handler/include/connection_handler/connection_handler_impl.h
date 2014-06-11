@@ -103,18 +103,14 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    */
   virtual void ConnectToDevice(connection_handler::DeviceHandle device_handle);
 
+  virtual void ConnectToAllDevices();
+
   virtual void StartTransportManager();
 
   virtual void OnDeviceListUpdated(
       const std::vector<transport_manager::DeviceInfo>&);
 
-  /**
-    * @brief Reaction on event, when new applications are started on device
-    * and SDL found this application
-    *
-    * @param device_handle Unique ID of device with new application list
-    */
-  virtual void OnApplicationListUpdated(DeviceHandle device_handle);
+  virtual void OnFindNewApplicationsRequest();
 
   /**
    * \brief Available devices list updated.

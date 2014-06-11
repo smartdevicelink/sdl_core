@@ -1,8 +1,5 @@
-/**
- * \file transport_adapter_listener_impl.h
- * \brief TransportAdapterListenerImpl class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,7 +56,7 @@ class TransportAdapterListenerImpl
     ON_SEARCH_DONE = 0,
     ON_SEARCH_FAIL,
     ON_DEVICE_LIST_UPDATED,
-    ON_APPLICATION_LIST_UPDATED,
+    ON_FIND_NEW_APPLICATIONS_REQUEST,
     ON_CONNECT_DONE,
     ON_CONNECT_FAIL,
     ON_DISCONNECT_DONE,
@@ -114,17 +111,7 @@ class TransportAdapterListenerImpl
    */
   virtual void OnDeviceListUpdated(const TransportAdapter* adapter);
 
-
-  /**
-   * @brief Reaction on event, when new applications are started on device
-   * and SDL found this application
-   *
-   * @param adapter Current transport adapter
-   * @param device_handle Unique ID of device with new application list
-   */
-
-  virtual void OnApplicationListUpdated(const TransportAdapter* adapter,
-                                        const DeviceUID& device_handle);
+  virtual void OnFindNewApplicationsRequest(const TransportAdapter* adapter);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers

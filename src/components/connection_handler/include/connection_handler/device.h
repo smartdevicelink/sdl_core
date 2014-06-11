@@ -106,7 +106,7 @@ typedef std::map<int32_t, Device> DeviceList;
  * \brief Type for Devices map iterator
  * Key is DeviceHandle which is uniq
  */
-typedef std::map<int32_t, Device>::iterator DeviceListIterator;
+typedef DeviceList::iterator DeviceListIterator;
 
 }  // namespace connection_handler
 

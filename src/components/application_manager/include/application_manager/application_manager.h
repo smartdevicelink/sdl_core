@@ -55,6 +55,11 @@ class ApplicationManager {
     }
 
     /**
+     * Inits application manager
+     */
+    virtual void Init() = 0;
+
+    /**
      * @brief Stop work.
      *
      * @return TRUE on success otherwise FALSE.
@@ -70,7 +75,6 @@ class ApplicationManager {
 
   protected:
     virtual void CreateHMIMatrix(HMIMatrix* matrix) = 0;
-    virtual void CreatePoliciesManager() = 0;
 };
 
 }  // namespace application_manager

@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.telephony.TelephonyManager;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import android.widget.Spinner;
 
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
+import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.proxy.rpc.DeviceInfo;
 import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
@@ -53,7 +55,7 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
                 .findViewById(R.id.registerappinterface_syncMsgVersionMinor);
         final CheckBox useAppName = (CheckBox) layout
                 .findViewById(R.id.registerappinterface_useAppName);
-        final EditText appName = (EditText) layout.findViewById(R.id.registerappinterface_appName);
+        final EditText appNameView = (EditText) layout.findViewById(R.id.registerappinterface_appName);
         final CheckBox useTTSName = (CheckBox) layout
                 .findViewById(R.id.registerappinterface_useTTSName);
         final EditText ttsName = (EditText) layout.findViewById(R.id.registerappinterface_ttsName);
@@ -113,7 +115,10 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         RegisterAppInterface registerAppInterface = new RegisterAppInterface();
-                        registerAppInterface.setCorrelationID(((SyncProxyTester) getActivity()).getNextCorrelationIdForCurrentFragment());
+                        registerAppInterface.setCorrelationID(((SyncProxyTester) getActivity())
+                                .getNextCorrelationIdForCurrentFragment());
+
+                        String appName = appNameView.getText().toString();
 
                         if (useSyncMsgVersion.isChecked()) {
                             SyncMsgVersion version = new SyncMsgVersion();
@@ -139,7 +144,7 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
                         }
 
                         if (useAppName.isChecked()) {
-                            registerAppInterface.setAppName(appName.getText().toString());
+                            registerAppInterface.setAppName(appName);
                         }
                         if (useTTSName.isChecked()) {
                             registerAppInterface.setTtsName(((SyncProxyTester) getActivity())
@@ -167,6 +172,13 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
                         if (useAppID.isChecked()) {
                             registerAppInterface.setAppId(appIdView.getText().toString());
                         }
+
+                        final SharedPreferences prefs = getActivity()
+                                .getSharedPreferences(Const.PREFS_NAME, 0);
+                        boolean success = prefs.edit()
+                                .putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMediaApp.isChecked())
+                                .putString(Const.PREFS_KEY_APPNAME, appName)
+                                .commit();
 
                         registerAppInterface.setDeviceInfo(getDeviceInfoFromView(layout));
 

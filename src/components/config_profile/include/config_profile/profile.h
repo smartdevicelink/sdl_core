@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -410,6 +410,8 @@ class Profile : public utils::Singleton<Profile> {
 
     const std::string& ack_mq_name() const;
 
+    uint32_t application_list_update_timeout() const;
+
   private:
     /**
      * Default constructor
@@ -540,6 +542,7 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     ack_mq_name_;
     std::string                     recording_file_source_;
     std::string                     recording_file_name_;
+    uint32_t                        application_list_update_timeout_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

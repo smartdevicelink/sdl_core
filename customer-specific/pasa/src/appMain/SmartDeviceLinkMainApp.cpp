@@ -25,6 +25,8 @@
 #include "system.h"      // cpplint: Include the directory when naming .h files
 // ----------------------------------------------------------------------------
 
+#include <log4cxx/fileappender.h>
+
 bool g_bTerminate = false;
 
 namespace {
@@ -37,18 +39,53 @@ namespace {
 
 CREATE_LOGGERPTR_GLOBAL(logger, "SmartDeviceLinkMainApp")
 
+bool remoteLoggingFlagFileExists(const std::string& name) {
+	LOG4CXX_INFO(logger, "Check path: " << name);
+
+	struct stat buffer;
+	return (stat (name.c_str(), &buffer) == 0);
+}
+
+bool remoteLoggingFlagFileValid() {
+	return true;
+}
+
 void startSmartDeviceLink()
 {
     // --------------------------------------------------------------------------
     // Logger initialization
 
-    INIT_LOGGER(profile::Profile::instance()->log4cxx_config_file());
+	INIT_LOGGER(profile::Profile::instance()->log4cxx_config_file());
 
     LOG4CXX_INFO(logger, " Application started!");
 
     // --------------------------------------------------------------------------
     // Components initialization
     profile::Profile::instance()->config_file_name(SDL_INIFILE_PATH);
+
+    if (remoteLoggingFlagFileExists(
+            profile::Profile::instance()->remote_logging_flag_file_path() +
+            profile::Profile::instance()->remote_logging_flag_file()) &&
+            remoteLoggingFlagFileValid()) {
+
+      LOG4CXX_INFO(logger, "Enable logging to USB");
+
+      log4cxx::helpers::Pool p;
+
+      std::string paramAppender = "LogFile";
+      std::string paramFileName = profile::Profile::instance()->remote_logging_flag_file_path() + "smartdevicelink.log";
+
+      LOG4CXX_DECODE_CHAR(logAppender, paramAppender);
+      LOG4CXX_DECODE_CHAR(logFileName, paramFileName );
+
+      log4cxx::FileAppenderPtr fileAppender = logger->getLoggerRepository()->getRootLogger()->getAppender(logAppender);
+
+      if(fileAppender != NULL) {
+        LOG4CXX_INFO(logger, "fileAppender != NULL");
+        fileAppender->setFile(logFileName);
+        fileAppender->activateOptions(p);
+      }
+    }
 
 
     main_namespace::LifeCycle::instance()->StartComponents();

@@ -1,8 +1,5 @@
-/**
- * \file transport_manager_listener_empty.h
- * \brief TransportManagerListenerEmpty class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -62,13 +59,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) {
   }
 
-  /**
-  * @brief Reaction on event, when new applications are started on device
-  * and SDL found this application
-  *
-  * @param device_handle Unique ID of device with new application list
-  */
-  virtual void OnApplicationListUpdated(DeviceHandle device_handle){
+  virtual void OnFindNewApplicationsRequest() {
   }
 
   /**

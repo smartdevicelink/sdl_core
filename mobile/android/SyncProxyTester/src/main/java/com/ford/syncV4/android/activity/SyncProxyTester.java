@@ -3362,8 +3362,9 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
             Logger.w("OnRegisterAppInterfaceDialogResult -> SyncProxy not connected");
 
-            // TODO : Seems like this case is out of date
-            //onSetUpDialogResult();
+            mBoundProxyService.updateRegisterAppInterface(registerAppInterface);
+
+            onSetUpDialogResult(appId);
             return;
         }
         if (createNewSession) {

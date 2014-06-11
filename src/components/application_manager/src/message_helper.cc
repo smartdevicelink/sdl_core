@@ -1093,7 +1093,7 @@ smart_objects::SmartObject* MessageHelper::CreateAddVRCommandToHMI(
 }
 
 bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
-                                               smart_objects::SmartObject& output) {
+    smart_objects::SmartObject& output) {
 
   if (false == app.valid()) {
     return false;
@@ -1113,7 +1113,7 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
   output[strings::is_media_application] = app->is_media_application();
 
   if (NULL != ngn_media_screen_name) {
-    output[strings::ngn_media_screen_app_name] = ngn_media_screen_name;
+    output[strings::ngn_media_screen_app_name] = ngn_media_screen_name->asString();
   }
   if (NULL != app_types) {
     output[strings::app_type] = *app_types;
@@ -2059,7 +2059,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
   // HMI related file and it should know it location
   const uint32_t image_type = image[strings::image_type].asUInt();
   mobile_apis::ImageType::eType type =
-      static_cast<mobile_apis::ImageType::eType>(image_type);
+    static_cast<mobile_apis::ImageType::eType>(image_type);
   if (mobile_apis::ImageType::STATIC == type) {
     return mobile_apis::Result::SUCCESS;
   }

@@ -70,6 +70,8 @@ class ConnectionHandler {
   virtual void ConnectToDevice(
       connection_handler::DeviceHandle device_handle) = 0;
 
+  virtual void ConnectToAllDevices() = 0;
+
   /**
    * \brief Close all associated sessions and close the connection pointed by handle
    */
