@@ -1,7 +1,5 @@
-/**
-* \file signals.cc
-* \brief Signal (i.e. SIGINT) handling.
-* Copyright (c) 2013, Ford Motor Company
+/*
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -76,7 +74,6 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     */
     bool InitMessageSystem();
     void StopComponents();
-    static void StopComponentsOnSignal(int32_t params);
 
   private:
     LifeCycle();
