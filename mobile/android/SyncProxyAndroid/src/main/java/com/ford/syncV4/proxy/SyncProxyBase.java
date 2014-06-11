@@ -844,6 +844,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             raiTable.put(appId, registerAppInterface);
             appIds.add(appId);
         }
+        Logger.d(LOG_TAG + " Update RAI (private), appId:" + appId + ", RAI:" + registerAppInterface);
         if (registerAppInterface != null) {
             registerAppInterface.setAppName(appName);
             registerAppInterface.setTtsName(ttsName);
@@ -1201,21 +1202,24 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     public void initializeProxy() throws SyncException {
 
-        internalRequestCorrelationIDs = new HashSet<Integer>();
+        Logger.d(LOG_TAG + " Initialize proxy, connection 1:" + mSyncConnection);
+        if (mSyncConnection != null) {
+            return;
+        }
 
-        Logger.d(LOG_TAG + " Initialize proxy");
         // Setup SyncConnection
         synchronized (CONNECTION_REFERENCE_LOCK) {
-            if (mSyncConnection == null) {
-                mSyncConnection = new SyncConnection(syncSession, _interfaceBroker);
 
-                /**
-                 * TODO : Set TestConfig for the Connection
-                 */
-                mSyncConnection.setTestConfig(mTestConfig);
-
-                mSyncConnection.init(mTransportConfig);
+            Logger.d(LOG_TAG + " Initialize proxy, connection 2:" + mSyncConnection);
+            if (mSyncConnection != null) {
+                return;
             }
+
+            internalRequestCorrelationIDs = new HashSet<Integer>();
+
+            mSyncConnection = new SyncConnection(syncSession, mTransportConfig, _interfaceBroker);
+
+            mSyncConnection.init();
 
             /**
              * TODO : Set TestConfig for the Connection in case we need to update it.
@@ -1384,9 +1388,15 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     private void handleCyclingSyncException(SyncException e) {
         switch (e.getSyncExceptionCause()) {
             case BLUETOOTH_DISABLED:
+
+                // This case works when user s
+
                 notifyProxyClosed("Bluetooth is disabled",
                         new SyncException("Bluetooth is disabled",
                                 SyncExceptionCause.BLUETOOTH_DISABLED));
+
+                setSyncConnection(null);
+
                 break;
             case BLUETOOTH_ADAPTER_NULL:
                 notifyProxyClosed("Bluetooth is not available",
@@ -3281,9 +3291,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     public void initializeSession(final String appId) {
         // Initialize a start session procedure
-        Logger.d(LOG_TAG + " Init session, id:" + appId);
 
         final int sessionIdsNumber = syncSession.getSessionIdsNumber();
+        Logger.d(LOG_TAG + " Init session, id:" + appId + " sessions N:" + sessionIdsNumber);
+
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -3385,6 +3396,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             } else {
                 notifyProxyClosed(info, e);
             }
+
+            setSyncConnection(null);
         }
 
         @Override

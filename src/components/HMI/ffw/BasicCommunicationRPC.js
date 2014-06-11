@@ -298,6 +298,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                     this.OnSystemRequest("PROPRIETARY");
                 }
 
+                SDL.SettingsController.policyUpdateRetry();
+
             }
         },
 
@@ -418,6 +420,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
                 if (request.method == "BasicCommunication.SystemRequest") {
 
+                    SDL.SettingsController.policyUpdateRetry(true);
+
                     this.OnReceivedPolicyUpdate(request.params.fileName);
 
                     SDL.SettingsController.policyUpdateFile = null;
@@ -463,10 +467,15 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
                 if (request.method == "BasicCommunication.PolicyUpdate") {
                     SDL.SettingsController.policyUpdateFile = request.params.file;
+
+                    SDL.SDLModel.policyUpdateRetry.timeout = request.params.timeout;
+                    SDL.SDLModel.policyUpdateRetry.retry = request.params.retry;
+                    SDL.SDLModel.policyUpdateRetry.try = 0;
+
                     this.GetURLS(7); //Service type for policies
 
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
-            }
+                }
             }
         },
 

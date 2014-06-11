@@ -116,11 +116,9 @@ void ConnectionHandlerImpl::OnDeviceListUpdated(
   }
 }
 
-void ConnectionHandlerImpl::OnApplicationListUpdated(DeviceHandle device_handle) {
-  LOG4CXX_TRACE(logger_,"ConnectionHandlerImpl::OnApplicationListUpdated() device_handle "
-               << device_handle);
+void ConnectionHandlerImpl::OnFindNewApplicationsRequest() {
   if (connection_handler_observer_) {
-    connection_handler_observer_->OnApplicationListUpdated(device_handle);
+    connection_handler_observer_->OnFindNewApplicationsRequest();
   }
 }
 
@@ -562,6 +560,13 @@ void ConnectionHandlerImpl::ConnectToDevice(
   } else {
     LOG4CXX_ERROR(
         logger_, "Application Manager wanted to connect to non-existing device");
+  }
+}
+
+void ConnectionHandlerImpl::ConnectToAllDevices() {
+  for (DeviceListIterator i = device_list_.begin(); i != device_list_.end(); ++i) {
+    connection_handler::DeviceHandle device_handle = i->first;
+    ConnectToDevice(device_handle);
   }
 }
 

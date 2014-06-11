@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -70,9 +70,10 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     is_vr_session_strated_(false),
     hmi_cooperating_(false),
     is_all_apps_allowed_(true),
+    media_manager_(media_manager::MediaManagerImpl::instance()),
     hmi_handler_(NULL),
     connection_handler_(NULL),
-    policy_manager_(NULL),
+    policy_manager_(policy::PolicyHandler::instance()->LoadPolicyLibrary()),
     hmi_so_factory_(NULL),
     mobile_so_factory_(NULL),
     protocol_handler_(NULL),
@@ -83,15 +84,12 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     request_ctrl_(),
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF),
-    media_manager_(NULL),
-    resume_ctrl_(this)
+    resume_ctrl_(this),
 #ifdef TIME_TESTER
-    , metric_observer_(NULL)
+    metric_observer_(NULL),
 #endif  // TIME_TESTER
+    application_list_update_timer_(new ApplicationListUpdateTimer(this))
 {
-  LOG4CXX_INFO(logger_, "Creating ApplicationManager");
-  media_manager_ = media_manager::MediaManagerImpl::instance();
-  CreatePoliciesManager();
 }
 
 bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
@@ -141,6 +139,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
 bool ApplicationManagerImpl::Stop() {
   LOG4CXX_INFO(logger_, "Stop ApplicationManager.");
+  application_list_update_timer_->stop();
   try {
     UnregisterAllApplications();
   } catch (...) {
@@ -251,7 +250,13 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_with_navi
 }
 
 ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
-    const utils::SharedPtr<smart_objects::SmartObject>& request_for_registration) {
+  const utils::SharedPtr<smart_objects::SmartObject>&
+  request_for_registration) {
+
+  LOG4CXX_DEBUG(logger_, "Restarting application list update timer");
+  uint32_t timeout = profile::Profile::instance()->application_list_update_timeout();
+  application_list_update_timer_->start(timeout);
+
   smart_objects::SmartObject& message = *request_for_registration;
   uint32_t connection_key = message[strings::params][strings::connection_key]
       .asInt();
@@ -764,22 +769,17 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   ManageHMICommand(update_list);
 }
 
-void ApplicationManagerImpl::OnApplicationListUpdated(
-    const connection_handler::DeviceHandle& device_handle) {
-  LOG4CXX_TRACE(logger_, "OnApplicationListUpdated device_handle " << device_handle);
+void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
+  connection_handler_->ConnectToAllDevices();
+  LOG4CXX_DEBUG(logger_, "Starting application list update timer");
+  uint32_t timeout = profile::Profile::instance()->application_list_update_timeout();
+  application_list_update_timer_->start(timeout);
+}
 
-  std::list<uint32_t> applications_ids;
-  DCHECK(connection_handler_);
-  connection_handler::ConnectionHandlerImpl* con_handler_impl =
-    static_cast<connection_handler::ConnectionHandlerImpl*>(
-      connection_handler_);
-  if (con_handler_impl->GetDataOnDeviceID(device_handle, NULL,
-                                          &applications_ids) == -1) {
-    LOG4CXX_ERROR(logger_, "Failed to extract device list for id " << device_handle);
-    return;
-  }
-  LOG4CXX_DEBUG(logger_, "Device " << device_handle << " has " <<
-               applications_ids.size() << " applications.");
+void ApplicationManagerImpl::SendUpdateAppList(const std::list<uint32_t>& applications_ids) {
+  LOG4CXX_TRACE(logger_, "SendUpdateAppList");
+
+  LOG4CXX_DEBUG(logger_, applications_ids.size() << " applications.");
 
   smart_objects::SmartObject* request = MessageHelper::CreateModuleInfoSO(
                                           hmi_apis::FunctionID::BasicCommunication_UpdateAppList);
@@ -790,7 +790,7 @@ void ApplicationManagerImpl::OnApplicationListUpdated(
       (*request)[strings::msg_params][strings::applications];
 
   uint32_t app_count = 0;
-  for (std::list<uint32_t>::iterator it = applications_ids.begin();
+  for (std::list<uint32_t>::const_iterator it = applications_ids.begin();
        it != applications_ids.end(); ++it) {
     ApplicationSharedPtr app = application(*it);
 
@@ -1346,9 +1346,8 @@ bool ApplicationManagerImpl::ManageHMICommand(
 void ApplicationManagerImpl::CreateHMIMatrix(HMIMatrix* matrix) {
 }
 
-void ApplicationManagerImpl::CreatePoliciesManager() {
-  LOG4CXX_INFO(logger_, "CreatePoliciesManager");
-  policy_manager_ = policy::PolicyHandler::instance()->LoadPolicyLibrary();
+void ApplicationManagerImpl::Init() {
+  LOG4CXX_TRACE(logger_, "Init application manager");
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
     policy::PolicyHandler::instance()->InitPolicyTable();
@@ -2122,6 +2121,23 @@ uint32_t ApplicationManagerImpl::GetAvailableSpaceForApp(
 
 bool ApplicationManagerImpl::IsHMICooperating() const {
   return hmi_cooperating_;
+}
+
+void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
+  LOG4CXX_DEBUG(logger_, "Application list update timer finished");
+
+  std::list <uint32_t> applications_ids;
+
+  applications_list_lock_.Acquire();
+  for (std::set<ApplicationSharedPtr>::const_iterator i = application_list_.begin();
+       i != application_list_.end(); ++i) {
+    ApplicationSharedPtr application = *i;
+    uint32_t app_id = application->app_id();
+    applications_ids.push_back(app_id);
+  }
+  applications_list_lock_.Release();
+
+  SendUpdateAppList(applications_ids);
 }
 
 }  // namespace application_manager
