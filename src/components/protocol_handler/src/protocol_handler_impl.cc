@@ -373,7 +373,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
   if (ssl_context && ssl_context->IsInitCompleted()) {
     maxDataSize = ssl_context->get_max_block_size(maxDataSize);
   }
-  LOG4CXX_DEBUG(logger_, "Optimal packet size is." << maxDataSize);
+  LOG4CXX_DEBUG(logger_, "Optimal packet size is " << maxDataSize);
   DCHECK(MAXIMUM_FRAME_DATA_SIZE > maxDataSize);
 
   uint32_t connection_handle = 0;
@@ -589,68 +589,54 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   LOG4CXX_INFO_EXT(
       logger_, " data size " << data_size << " maxdata_size " << maxdata_size);
 
-  int32_t numOfFrames = 0;
-  int32_t lastdata_size = 0;
-  // Send data
-  if (data_size % maxdata_size) {
-    numOfFrames = (data_size / maxdata_size) + 1;
-    lastdata_size = data_size % maxdata_size;
-  } else {
-    numOfFrames = data_size / maxdata_size;
-    lastdata_size = maxdata_size;
-  }
+  // size of last (not full fill) frame
+  const size_t lastframe_size = data_size % maxdata_size;
+
+  const size_t frames_count = data_size / maxdata_size +
+      //add last frame if not empty
+      (lastframe_size > 0 ? 1 : 0);
 
   LOG4CXX_INFO_EXT(
       logger_,
-      "Data size " << data_size << " of " << numOfFrames <<
-      " frames with last frame " << lastdata_size);
+      "Data size " << data_size << " of " << frames_count <<
+      " frames with last frame " << lastframe_size);
 
-  uint8_t* outDataFirstFrame = new uint8_t[FIRST_FRAME_DATA_SIZE];
-  outDataFirstFrame[0] = data_size >> 24;
-  outDataFirstFrame[1] = data_size >> 16;
-  outDataFirstFrame[2] = data_size >> 8;
-  outDataFirstFrame[3] = data_size;
+  DCHECK(maxdata_size >= FIRST_FRAME_DATA_SIZE);
+  DCHECK(FIRST_FRAME_DATA_SIZE >= 8);
+  uint8_t* out_data = new uint8_t[maxdata_size];
+  out_data[0] = data_size >> 24;
+  out_data[1] = data_size >> 16;
+  out_data[2] = data_size >> 8;
+  out_data[3] = data_size;
 
-  outDataFirstFrame[4] = numOfFrames >> 24;
-  outDataFirstFrame[5] = numOfFrames >> 16;
-  outDataFirstFrame[6] = numOfFrames >> 8;
-  outDataFirstFrame[7] = numOfFrames;
+  out_data[4] = frames_count >> 24;
+  out_data[5] = frames_count >> 16;
+  out_data[6] = frames_count >> 8;
+  out_data[7] = frames_count;
 
-  ProtocolFramePtr firstPacket(new protocol_handler::ProtocolPacket(connection_id,
+  const uint8_t message_id = ++message_counters_[session_id];
+  const ProtocolFramePtr firstPacket(new protocol_handler::ProtocolPacket(connection_id,
       protocol_version, PROTECTION_OFF, FRAME_TYPE_FIRST, service_type, 0,
-      session_id, FIRST_FRAME_DATA_SIZE, ++message_counters_[session_id],
-      outDataFirstFrame));
+      session_id, FIRST_FRAME_DATA_SIZE, message_id, out_data));
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(firstPacket, false));
   LOG4CXX_INFO_EXT(logger_, "First frame is sent.");
 
-  uint8_t* outDataFrame = new uint8_t[maxdata_size];
-  for (uint32_t i = 0; i < numOfFrames; i++) {
-    if (i != (numOfFrames - 1)) {
-      memcpy(outDataFrame, data + (maxdata_size * i), maxdata_size);
+  for (uint32_t i = 0; i < frames_count; ++i) {
+    const bool is_last_frame = (i != (frames_count - 1));
+    const size_t frame_size = is_last_frame ? lastframe_size : maxdata_size;
+    const uint8_t data_type = is_last_frame ? 0 : (i % FRAME_DATA_MAX_VALUE + 1);
 
-      ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-          protocol_version, PROTECTION_OFF, FRAME_TYPE_CONSECUTIVE,
-          service_type, ((i % FRAME_DATA_MAX_VALUE) + 1), session_id,
-          maxdata_size, message_counters_[session_id], outDataFrame));
+    memcpy(out_data, data + maxdata_size * i, frame_size);
 
-      raw_ford_messages_to_mobile_.PostMessage(
-          impl::RawFordMessageToMobile(ptr, false));
+    const ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
+        protocol_version, PROTECTION_OFF, FRAME_TYPE_CONSECUTIVE,
+        service_type, data_type, session_id, frame_size, message_id, out_data));
 
-    } else {
-      memcpy(outDataFrame, data + (maxdata_size * i), lastdata_size);
-
-      ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-          protocol_version, PROTECTION_OFF, FRAME_TYPE_CONSECUTIVE,
-          service_type, 0x0, session_id, lastdata_size,
-          message_counters_[session_id], outDataFrame));
-
-      raw_ford_messages_to_mobile_.PostMessage(
-          impl::RawFordMessageToMobile(ptr, is_final_message));
-    }
+    raw_ford_messages_to_mobile_.PostMessage(impl::RawFordMessageToMobile(ptr, false));
   }
-
+  delete[] out_data;
   LOG4CXX_TRACE_EXIT(logger_);
   return RESULT_OK;
 }
