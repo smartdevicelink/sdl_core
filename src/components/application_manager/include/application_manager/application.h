@@ -437,7 +437,7 @@ class Application : public virtual InitialApplicationData,
      * @param state_of_alert contains TRUE if alert is activated otherwise
      * contains FALSE
      */
-    virtual void set_alert_in_background(const bool state_of_alert) = 0;
+    virtual void set_alert_in_background(bool state_of_alert) = 0;
     virtual void set_protocol_version(
         const ProtocolVersion& protocol_version) = 0;
     virtual ProtocolVersion protocol_version() const = 0;
