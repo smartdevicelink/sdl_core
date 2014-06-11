@@ -73,6 +73,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     private boolean mIsInit = false;
     private Session mSyncSession;
+    private BaseTransportConfig mTransportConfig;
 
     /**
      * Test Cases fields
@@ -85,11 +86,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     /**
      * Constructor.
      *
-     * @param listener Sync connection listener.
+     * @param transportConfig configuration of the transport to be used, refer to
+     *                        {@link com.ford.syncV4.transport.BaseTransportConfig}
+     * @param listener Sync connection listener
      */
-    public SyncConnection(Session session, ISyncConnectionListener listener) {
+    public SyncConnection(Session session, BaseTransportConfig transportConfig,
+                          ISyncConnectionListener listener) {
         mConnectionListener = listener;
         mIsInit = false;
+        mTransportConfig = transportConfig;
         mSyncSession = session;
     }
 
@@ -103,54 +108,26 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     /**
-     * Initialize transport with provided configuration
-     *
-     * @param transportConfig configuration of the transport to be used, refer to
-     *                        {@link com.ford.syncV4.transport.BaseTransportConfig}
-     */
-    public void init(BaseTransportConfig transportConfig) {
-        init(transportConfig, null);
-    }
-
-    /**
      * Initialize transport with provided configuration and transport instance
-     *
-     * @param transportConfig configuration of the transport to be used, refer to
-     *                        {@link com.ford.syncV4.transport.BaseTransportConfig}
-     * @param transport       an instance of transport (Bluetooth, USB, WiFi)
      */
-    public void init(BaseTransportConfig transportConfig, SyncTransport transport) {
+    public void init() {
         // Initialize the transport
         synchronized (TRANSPORT_REFERENCE_LOCK) {
-            // Ensure transport is null
-            if (_transport != null) {
-                if (_transport.getIsConnected()) {
-                    _transport.disconnect();
-                }
-                _transport = null;
-            }
-
-            if (transport != null) {
-                _transport = transport;
-            } else {
-                switch (transportConfig.getTransportType()) {
-                    case BLUETOOTH:
-                        _transport = new BTTransport(this);
-                        break;
-
-                    case TCP:
-                        TCPTransportConfig tcpTransportConfig = (TCPTransportConfig) transportConfig;
-                        _transport = new TCPTransport(tcpTransportConfig, this);
-                        if (tcpTransportConfig.getIsNSD()) {
-                            mNSDHelper = new NSDHelper(tcpTransportConfig.getApplicationContext());
-                            mNSDHelper.initializeNsd();
-                        }
-                        break;
-
-                    case USB:
-                        _transport = new USBTransport((USBTransportConfig) transportConfig, this);
-                        break;
-                }
+            switch (mTransportConfig.getTransportType()) {
+                case BLUETOOTH:
+                    _transport = new BTTransport(this);
+                    break;
+                case TCP:
+                    TCPTransportConfig tcpTransportConfig = (TCPTransportConfig) mTransportConfig;
+                    _transport = new TCPTransport(tcpTransportConfig, this);
+                    if (tcpTransportConfig.getIsNSD()) {
+                        mNSDHelper = new NSDHelper(tcpTransportConfig.getApplicationContext());
+                        mNSDHelper.initializeNsd();
+                    }
+                    break;
+                case USB:
+                    _transport = new USBTransport((USBTransportConfig) mTransportConfig, this);
+                    break;
             }
         }
 
