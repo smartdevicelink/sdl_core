@@ -533,9 +533,6 @@ SDL.SDLModel = Em.Object.create({
     setAppPermissions: function(oldPermissions){
         var temp = this.appPermissions.filter(function(item, i) {
             var ok = oldPermissions.indexOf(item) === -1;
-//            if (ok) {
-//                array5.push(i + 1);
-//            }
             return ok;
         });
 
