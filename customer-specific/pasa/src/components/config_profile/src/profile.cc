@@ -83,6 +83,8 @@ const char* kNamedAudioPipePathKey = "NamedAudioPipePath";
 const char* kVideoStreamFileKey = "VideoStreamFile";
 const char* kAudioStreamFileKey = "AudioStreamFile";
 const char* kLoggerConfigFileKey = "LoggerConfigFileKey";
+const char* kRemoteLoggingFlagFileKey = "RemoteLoggingFlagFile";
+const char* kRemoteLoggingFlagFilePathKey = "RemoteLoggingFlagFilePath";
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";
 const char* kHelpPromptKey = "HelpPromt";
 const char* kTimeoutPromptKey = "TimeOutPromt";
@@ -130,6 +132,7 @@ const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
 const char* kDefaultLog4cxxConfig = "/fs/mp/etc/AppLink/log4cxx.properties";
+const char* kDefaultRemoteLoggingFlagFile = "";
 const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
 const char* kDefaultRecordingFileName = "record.wav";
 const char* kDefaultMmeDatabaseName = "/dev/qdb/mediaservice_db";
@@ -203,6 +206,7 @@ Profile::Profile()
       transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort),
       tts_delimiter_(kDefaultTtsDelimiter),
       log4cxx_config_file_(kDefaultLog4cxxConfig),
+      remote_logging_flag_file_(kDefaultRemoteLoggingFlagFile),
       recording_file_source_(kDefaultRecordingFileSourceName),
       recording_file_name_(kDefaultRecordingFileName),
       mme_db_name_(kDefaultMmeDatabaseName),
@@ -340,6 +344,14 @@ const std::string& Profile::audio_stream_file() const {
 
 const std::string& Profile::log4cxx_config_file() const {
   return log4cxx_config_file_;
+}
+
+const std::string& Profile::remote_logging_flag_file() const {
+  return remote_logging_flag_file_;
+}
+
+const std::string& Profile::remote_logging_flag_file_path() const {
+	return remote_logging_flag_file_path_;
 }
 
 const uint32_t& Profile::app_time_scale() const {
@@ -585,6 +597,20 @@ void Profile::UpdateValues() {
                     kLoggerConfigFileKey);
 
     LOG_UPDATED_VALUE(log4cxx_config_file_, kLoggerConfigFileKey,
+                      kMainSection);
+
+    // Remote logging flag file
+    ReadStringValue(&remote_logging_flag_file_, "", kMainSection,
+    		        kRemoteLoggingFlagFileKey);
+
+    LOG_UPDATED_VALUE(remote_logging_flag_file_, kRemoteLoggingFlagFileKey,
+                      kMainSection);
+
+    // Remote logging flag file
+    ReadStringValue(&remote_logging_flag_file_path_, "", kMainSection,
+        		    kRemoteLoggingFlagFilePathKey);
+
+    LOG_UPDATED_VALUE(remote_logging_flag_file_path_, kRemoteLoggingFlagFilePathKey,
                       kMainSection);
 
     // Mixing audio parameter

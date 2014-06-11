@@ -210,6 +210,20 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& log4cxx_config_file() const;
 
     /**
+      * @brief Returns remote logging flag file name
+      * if this path exists in the system log file will be
+      * saved to the USb drive
+      */
+    const std::string& remote_logging_flag_file() const;
+
+    /**
+      * @brief Returns path to remote logging flag file
+      * if this path exists in the system log file will be
+      * saved to the USb drive
+      */
+    const std::string& remote_logging_flag_file_path() const;
+
+    /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none
      *
@@ -440,6 +454,8 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     video_stream_file_;
     std::string                     audio_stream_file_;
     std::string                     log4cxx_config_file_;
+    std::string                     remote_logging_flag_file_;
+    std::string                     remote_logging_flag_file_path_;
     uint32_t                        app_time_scale_max_requests_;
     uint32_t                        app_requests_time_scale_;
     uint32_t                        pending_requests_amount_;
