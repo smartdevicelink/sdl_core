@@ -154,9 +154,9 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
       transport_manager_(transport_manager_param),
       kPeriodForNaviAck(5),
       incoming_data_handler_(new IncomingDataHandler),
-#ifdef TIME_TESTER
+#ifdef ENABLE_SECURITY
       security_manager_(NULL),
-#endif  // TIME_TESTER
+#endif  // ENABLE_SECURITY
       raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
                                      threads::ThreadOptions(kStackSize)),
       raw_ford_messages_to_mobile_("MessagesToMobileAppHandler", this,
@@ -369,6 +369,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
   const uint32_t header_size = (PROTOCOL_VERSION_1 == message->protocol_version())
       ? PROTOCOL_HEADER_V1_SIZE : PROTOCOL_HEADER_V2_SIZE;
   uint32_t maxDataSize = MAXIMUM_FRAME_DATA_SIZE - header_size;
+#ifdef ENABLE_SECURITY
   const security_manager::SSLContext* ssl_context = session_observer_->
       GetSSLContext(message->connection_key(), message->service_type());
   if (ssl_context && ssl_context->IsInitCompleted()) {
@@ -376,6 +377,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
     DCHECK(maxDataSize);
   }
   LOG4CXX_DEBUG(logger_, "Optimal packet size is " << maxDataSize);
+#endif  // ENABLE_SECURITY
   DCHECK(MAXIMUM_FRAME_DATA_SIZE > maxDataSize);
 
   uint32_t connection_handle = 0;
@@ -443,12 +445,14 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
     const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
 #endif  // TIME_TESTER
     ProtocolFramePtr frame = *it;
+#ifdef ENABLE_SECURITY
     const RESULT_CODE result = DecryptFrame(frame);
     if (result != RESULT_OK) {
       LOG4CXX_WARN(logger_, "Error frame decryption. Frame skipped.");
       continue;
     }
-    impl::RawFordMessageFromMobile msg(*it);
+#endif  // ENABLE_SECURITY
+    impl::RawFordMessageFromMobile msg(frame);
 #ifdef TIME_TESTER
     if (metric_observer_) {
       metric_observer_->StartMessageProcess(msg->message_id(), start_time);
@@ -531,6 +535,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
     LOG4CXX_TRACE_EXIT(logger_);
     return RESULT_FAIL;
   }
+#ifdef ENABLE_SECURITY
   // and return protect flag to Packet constructor for makeing design by Policy
   const RESULT_CODE result = EncryptFrame(packet);
   if (result != RESULT_OK) {
@@ -538,6 +543,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
     LOG4CXX_TRACE_EXIT(logger_);
     return RESULT_FAIL;
   }
+#endif  // ENABLE_SECURITY
 
   LOG4CXX_INFO_EXT(logger_, "Packet to be sent: " <<
                    ConvertPacketDataToString(packet->data(), packet->data_size()) <<
@@ -884,6 +890,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   }
   return RESULT_OK;
 }
+#ifdef ENABLE_SECURITY
 namespace {
 /**
  * \brief SecurityManagerListener for send Ask/NAsk on success or fail
@@ -935,6 +942,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
   impl::ToMobileQueue* queue_;
 };
 }  // namespace
+#endif  // ENABLE_SECURITY
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     ConnectionID connection_id, const ProtocolPacket& packet) {

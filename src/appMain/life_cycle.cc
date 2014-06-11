@@ -33,7 +33,6 @@
 #include "./life_cycle.h"
 #include "utils/signals.h"
 #include "config_profile/profile.h"
-#include "security_manager/crypto_manager_impl.h"
 #ifdef CUSTOMER_PASA
 #include "SmartDeviceLinkMainApp.h"
 #endif
@@ -390,12 +389,14 @@ void LifeCycle::StopComponents() {
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete protocol_handler_;
 
+#ifdef ENABLE_SECURITY
   LOG4CXX_INFO(logger_, "Destroying Crypto Manager");
   crypto_manager_->Finish();
   delete crypto_manager_;
 
   LOG4CXX_INFO(logger_, "Destroying Security Manager");
   delete security_manager_;
+#endif //ENABLE_SECURITY
 
   LOG4CXX_INFO(logger_, "Destroying Last State");
   resumption::LastState::destroy();

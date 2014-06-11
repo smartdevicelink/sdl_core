@@ -508,7 +508,9 @@ protected:
 
   class IncomingDataHandler;
   std::auto_ptr<IncomingDataHandler> incoming_data_handler_;
+#ifdef ENABLE_SECURITY
   security_manager::SecurityManager *security_manager_;
+#endif  // ENABLE_SECURITY
 
   // Thread that pumps non-parsed messages coming from mobile side.
   impl::FromMobileQueue raw_ford_messages_from_mobile_;

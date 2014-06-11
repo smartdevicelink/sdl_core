@@ -108,14 +108,21 @@ typedef ServiceList::const_iterator ServiceListConstIterator;
 
 struct Session {
   ServiceList service_list;
+#ifdef ENABLE_SECURITY
   security_manager::SSLContext* ssl_context;
+#endif  // ENABLE_SECURITY
   Session()
-    : service_list(), ssl_context(NULL) {
-  }
+    : service_list()
+#ifdef ENABLE_SECURITY
+    , ssl_context(NULL)
+#endif  // ENABLE_SECURITY
+  {}
   explicit Session(const ServiceList& services)
-    : service_list(services),
-      ssl_context(NULL) {
-  }
+    : service_list(services)
+#ifdef ENABLE_SECURITY
+      , ssl_context(NULL)
+#endif  // ENABLE_SECURITY
+  {}
 };
 
 /**

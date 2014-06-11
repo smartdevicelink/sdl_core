@@ -101,8 +101,10 @@ set(LIBRARIES
     Resumption
     Policy
     ${SecurityManagerLibrary}
-    test_SecurityManager
 )
+if(ENABLE_SECURITY)
+  LIST(APPEND LIBRARIES test_SecurityManager)
+endif()
 
 if(BUILD_TESTS_WITH_HMI)
   LIST(APPEND LIBRARIES test_App_Manager  ${LibXML2_LIBRARIES} -lxml2)
@@ -124,9 +126,9 @@ file(COPY ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem DESTINATI
 
 if(BUILD_TESTS_WITH_HMI)
 include_directories(${INCLUDE_DIR} ${LibXML2_INCLUDE_DIR})
-target_link_libraries("test_suit" 
-  test_App_Manager 
-  ${LIBRARIES} 
+target_link_libraries("test_suit"
+  test_App_Manager
+  ${LIBRARIES}
   ${LibXML2_LIBRARIES} -lxml2
   avahi-client
   )
