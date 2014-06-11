@@ -39,6 +39,11 @@
 #endif
 #include "resumption/last_state.h"
 
+#ifdef ENABLE_SECURITY
+#include "security_manager/security_manager.h"
+#include "security_manager/crypto_manager_impl.h"
+#endif //ENABLE_SECURITY
+
 using threads::Thread;
 
 namespace main_namespace {
@@ -391,7 +396,7 @@ void LifeCycle::StopComponents() {
 
   LOG4CXX_INFO(logger_, "Destroying Security Manager");
   delete security_manager_;
-  
+
   LOG4CXX_INFO(logger_, "Destroying Last State");
   resumption::LastState::destroy();
 

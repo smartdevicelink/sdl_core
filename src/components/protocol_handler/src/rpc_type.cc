@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -55,7 +55,7 @@ RpcType RpcTypeFromByte(uint8_t byte) {
   RpcType type = RpcType(byte);
   bool supported_type = IsSupported(type);
   if (!supported_type) {
-    LOG4CXX_INFO(logger_, "Invalid service type: "<<int32_t(byte));
+    LOG4CXX_INFO(logger_, "Invalid service type: "<< int32_t(byte));
   }
 
   return supported_type ? type : kRpcTypeReserved;

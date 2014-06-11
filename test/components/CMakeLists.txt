@@ -13,16 +13,18 @@ add_subdirectory(./smart_objects)
 # --- AppMgr
 add_subdirectory(./application_manager)
 
-
 # --- ProtocolHandler
 add_subdirectory(./protocol_handler)
 
-# --- ProtocolHandler
+# --- ConnectionHandler
 add_subdirectory(./connection_handler)
 
-add_subdirectory(./hmi_message_handler)
-
+# --- SecurityManager
+if(ENABLE_SECURITY)
 add_subdirectory(./security_manager)
+endif()
+
+add_subdirectory(./hmi_message_handler)
 
 # --- Utils
 add_subdirectory(./utils)

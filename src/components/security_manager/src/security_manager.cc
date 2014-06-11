@@ -52,7 +52,6 @@ SecurityManager::SecurityManager():
 void SecurityManager::OnMessageReceived(
     const protocol_handler::RawMessagePtr message) {
   if (message->service_type() != protocol_handler::kControl) {
-    LOG4CXX_DEBUG(logger_, "Skipping message; not the under SM handling");
     return;
   }
 

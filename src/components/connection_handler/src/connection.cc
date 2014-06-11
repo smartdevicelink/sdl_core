@@ -160,7 +160,7 @@ bool Connection::AddNewService(uint8_t session,
                    " already established service " << static_cast<int>(service_type));
       return false;
     }
-  } else {
+  } else { // service is not exists
     service_list.push_back(Service(service_type, is_protected));
   }
 

@@ -11,7 +11,6 @@ endif()
 include_directories (
   ${GMOCK_INCLUDE_DIRECTORY}
   ../../../src/components/application_manager/include
-  ${SecurityManagerIncludeDir}
   ../../../src/components/smart_objects/include
   ../../../src/components/formatters/include/
   ../../../src/components/utils/include/

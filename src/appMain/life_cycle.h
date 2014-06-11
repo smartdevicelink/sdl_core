@@ -63,6 +63,13 @@
 #endif  // MESSAGEBROKER_HMIADAPTER
 #include "system.h"      // cpplint: Include the directory when naming .h files
 
+#ifdef ENABLE_SECURITY
+namespace security_manager {
+class CryptoManager;
+class SecurityManager;
+}
+#endif //ENABLE_SECURITY
+
 namespace main_namespace {
 class LifeCycle : public utils::Singleton<LifeCycle> {
   public:

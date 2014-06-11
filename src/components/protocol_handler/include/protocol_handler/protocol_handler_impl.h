@@ -46,15 +46,18 @@
 #include "protocol_handler/protocol_packet.h"
 #include "protocol_handler/session_observer.h"
 #include "protocol_handler/protocol_observer.h"
-#ifdef ENABLE_SECURITY
-#include "security_manager/security_manager.h"
-#endif  // ENABLE_SECURITY
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 #ifdef TIME_TESTER
 #include "time_metric_observer.h"
 #endif  // TIME_TESTER
+
+#ifdef ENABLE_SECURITY
+namespace security_manager {
+class SecurityManager;
+}
+#endif  // ENABLE_SECURITY
 
 /**
  *\namespace NsProtocolHandler
@@ -162,12 +165,13 @@ class ProtocolHandlerImpl
    */
   void set_session_observer(SessionObserver* observer);
 
+#ifdef ENABLE_SECURITY
   /**
    * \brief Sets pointer for SecurityManager layer for managing protection routine
-   * \param security_manager Pointer to object of the class implementing
-   * ISessionObserver
+   * \param security_manager Pointer to SecurityManager object
    */
   void set_security_manager(security_manager::SecurityManager *security_manager);
+#endif  // ENABLE_SECURITY
 
   /**
    * \brief Method for sending message to Mobile Application
@@ -445,12 +449,14 @@ protected:
   // CALLED ON raw_ford_messages_to_mobile_ thread!
   void Handle(const impl::RawFordMessageToMobile& message);
 
+#ifdef ENABLE_SECURITY
   /**
    * \brief Encryption/Decryption methodes for SecureSecvice check
    * \param packet frame of message to encrypted/decrypted
    */
   RESULT_CODE EncryptFrame(ProtocolFramePtr packet);
   RESULT_CODE DecryptFrame(ProtocolFramePtr packet);
+#endif  // ENABLE_SECURITY
  private:
   /**
    *\brief Pointer on instance of class implementing IProtocolObserver
