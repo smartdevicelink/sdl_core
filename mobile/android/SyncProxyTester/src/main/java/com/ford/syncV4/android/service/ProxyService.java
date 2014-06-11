@@ -1,7 +1,6 @@
 package com.ford.syncV4.android.service;
 
 import android.app.Service;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -142,8 +141,9 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ProxyService extends Service implements IProxyListenerALMTesting, ITestConfigCallback {
 
@@ -178,9 +178,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      * each {@link com.ford.syncV4.android.manager.PutFileTransferManager} is associated with
      * concrete AppId
      */
-    private Hashtable<String, PutFileTransferManager> mPutFileTransferManagers;
-    private Hashtable<String, ApplicationIconManager> mApplicationIconManagerHashtable =
-            new Hashtable<String, ApplicationIconManager>();
+    private Map<String, PutFileTransferManager> mPutFileTransferManagers;
+    private Map<String, ApplicationIconManager> mApplicationIconManagerHashtable =
+            new ConcurrentHashMap<String, ApplicationIconManager>();
     private ConnectionListenersManager mConnectionListenersManager;
     private final IBinder mBinder = new ProxyServiceBinder(this);
 
@@ -189,8 +189,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      * Each manager provide functionality to process RPC requests which are involved in app
      * resumption
      */
-    private Hashtable<String, RPCRequestsResumableManager> mRpcRequestsResumableManager =
-            new Hashtable<String, RPCRequestsResumableManager>();
+    private ConcurrentHashMap<String, RPCRequestsResumableManager> mRpcRequestsResumableManager =
+            new ConcurrentHashMap<String, RPCRequestsResumableManager>();
 
     /**
      * Map of the existed syncProxyTester applications, mobile application Id is a Key
@@ -221,7 +221,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
         //startProxyIfNetworkConnected();
 
-        mPutFileTransferManagers = new Hashtable<String, PutFileTransferManager>();
+        mPutFileTransferManagers = new ConcurrentHashMap<String, PutFileTransferManager>();
 
         MainApp.getInstance().getLastUsedHashIdsManager().init();
     }
@@ -1778,6 +1778,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     public void onUnregisterAppInterfaceResponse(String appId,
                                                  UnregisterAppInterfaceResponse response) {
         createDebugMessageForAdapter(appId, response);
+
+        ApplicationIconManager applicationIconManager =
+                mApplicationIconManagerHashtable.get(appId);
+        if (applicationIconManager != null) {
+            applicationIconManager.reset();
+        }
 
         if (isModuleTesting()) {
             ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),

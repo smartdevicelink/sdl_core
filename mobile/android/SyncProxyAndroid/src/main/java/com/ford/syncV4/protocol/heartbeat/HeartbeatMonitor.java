@@ -88,7 +88,6 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
         @Override
         public void run() {
             synchronized (Listener_Lock) {
-                Logger.d(CLASS_NAME + " run(), ackReceived:" + ackReceived + " hash:" + HeartbeatMonitor.this.hashCode());
                 if (ackReceived) {
                     Logger.d(CLASS_NAME, " ACK has been received, sending and scheduling heartbeat");
                     if (listener != null) {
@@ -97,7 +96,6 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
                         Logger.w(CLASS_NAME, " Delegate is not set, scheduling heartbeat anyway");
                     }
                     ackReceived = false;
-                    Logger.d(CLASS_NAME + " set ackReceived:" + ackReceived + " hash:" + HeartbeatMonitor.this.hashCode());
                 } else {
                     Logger.d(CLASS_NAME + " ACK has not been received");
                     if (listener != null) {
@@ -248,20 +246,15 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     @Override
     public void heartbeatACKReceived() {
-        Logger.d(CLASS_NAME + " ACK received pre lock");
         synchronized (Listener_Lock) {
-            Logger.d(CLASS_NAME + " ACK received post lock");
             ackReceived = true;
-            Logger.d(CLASS_NAME + " set received:" + ackReceived + " hash:" + hashCode());
         }
     }
 
     @Override
     public void heartbeatReceived() {
-        Logger.d(CLASS_NAME + " received, isHeartbeatAck:" + isHeartbeatAck);
         synchronized (Listener_Lock) {
             if (isHeartbeatAck) {
-                Logger.d(CLASS_NAME + " start do post");
                 heartbeatReceived = true;
                 if (!heartbeatThreadHandler.post(heartbeatTimeoutRunnable)) {
                     Logger.e(CLASS_NAME + " Couldn't schedule run()");

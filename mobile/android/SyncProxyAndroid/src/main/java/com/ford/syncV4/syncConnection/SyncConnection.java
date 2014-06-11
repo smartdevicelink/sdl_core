@@ -165,15 +165,20 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
         heartbeatMonitor.setListener(this);
 
-        Logger.d(CLASS_NAME + " Set HBM, sesId:" + sessionId + " contains-pre:" + heartbeatMonitors.containsKey(sessionId));
+        //Logger.d(CLASS_NAME + " Set HBM, sesId:" + sessionId + " contains-pre:" + heartbeatMonitors.containsKey(sessionId));
         heartbeatMonitors.put(sessionId, heartbeatMonitor);
-        Logger.d(CLASS_NAME + " Set HBM, sesId:" + sessionId + " contains-post:" + heartbeatMonitors.containsKey(sessionId) +
-             " thread:" + Thread.currentThread());
+        //Logger.d(CLASS_NAME + " Set HBM, sesId:" + sessionId + " contains-post:" + heartbeatMonitors.containsKey(sessionId) +
+        //     " thread:" + Thread.currentThread());
     }
 
     protected IHeartbeatMonitor getHeartbeatMonitor(byte sessionId) {
+        return getHeartbeatMonitor(sessionId, "protected");
+    }
+
+    private IHeartbeatMonitor getHeartbeatMonitor(byte sessionId, String source) {
         final IHeartbeatMonitor returnValue = heartbeatMonitors.get(sessionId);
-        Logger.d(CLASS_NAME + " Get HBM:" + returnValue + ", sesId:" + sessionId + " thread:" + Thread.currentThread());
+        Logger.d(CLASS_NAME + " Get HBM:" + returnValue + " sesId:" + sessionId +
+                " thread:" + Thread.currentThread() + " source:" + source);
         return returnValue;
     }
 
@@ -230,10 +235,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void stopHeartbeatMonitor(byte sessionId) {
-        IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId);
+        IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId, "stop HBM");
         Logger.d(CLASS_NAME + " Stop HBM, sesId:" + sessionId + " " + heartbeatMonitor);
         if (heartbeatMonitor != null) {
-            Logger.d(CLASS_NAME + " Stop HBM, sesId:" + sessionId);
+            //Logger.d(CLASS_NAME + " Stop HBM, sesId:" + sessionId);
             heartbeatMonitor.stop();
 
             heartbeatMonitors.remove(sessionId);
@@ -442,7 +447,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void startHeartbeatTimer(byte sessionId) {
-        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId, "start HBM timer");
         if (heartbeatMonitor != null) {
             heartbeatMonitor.start();
         }
@@ -580,7 +585,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onProtocolHeartbeatACK(byte sessionId) {
-        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId, "onProtocolHeartbeatACK");
         Logger.d(CLASS_NAME + " OnProtocolHeartbeatACK, sesId:" + sessionId + ", HBM:" + heartbeatMonitor);
         if (heartbeatMonitor != null) {
             heartbeatMonitor.heartbeatACKReceived();
@@ -591,7 +596,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onProtocolHeartbeat(byte sessionId) {
-        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId, "onProtocolHeartbeat");
         if (heartbeatMonitor != null) {
             heartbeatMonitor.heartbeatReceived();
         } else {
@@ -601,7 +606,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onResetHeartbeatAck(byte sessionId) {
-        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId, "onResetHeartbeatAck");
         Logger.d(CLASS_NAME + " Reset HM at sesId:" + sessionId + " HB's number:" +
                 heartbeatMonitors.size() + " current:" + heartbeatMonitor);
         if (heartbeatMonitor != null) {
@@ -613,7 +618,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onResetHeartbeat(byte sessionId) {
-        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId, "onResetHeartbeat");
         if (heartbeatMonitor != null) {
             heartbeatMonitor.notifyTransportInputActivity();
         } else {
