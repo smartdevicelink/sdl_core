@@ -35,18 +35,10 @@ public interface IProxyServiceEvent {
 
     /**
      * Dispatch when receive service start message (in case of RPC Service)
-<<<<<<< HEAD
-     *  @param serviceType a type of the service
-     * @param sessionId   Id of the session
-     * @param encrypted
-     */
-    public void onServiceStart(ServiceType serviceType, byte sessionId, boolean encrypted);
-=======
      *
      * @param serviceType a type of the service
      */
-    public void onServiceStart(ServiceType serviceType, String appId);
->>>>>>> develop
+    public void onServiceStart(ServiceType serviceType, String appId, boolean encrypted);
 
     /**
      * Dispatch when receive Ack message

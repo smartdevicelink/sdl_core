@@ -136,13 +136,8 @@ public class PutFileDialog extends BaseDialogFragment {
                             MainApp.getInstance().getBoundProxyService().commandPutFile(
                                     getArguments().getString(APP_ID_KEY),
                                     (FileType) spnFileType.getSelectedItem(), syncFileName, data,
-<<<<<<< HEAD
-                                    mCorrelationid, chkPersistentFile.isChecked(),
-                                    chkSystemFile.isChecked(), length, offset, null, doEncrypt.isChecked());
-=======
                                     correlationId, chkPersistentFile.isChecked(),
-                                    chkSystemFile.isChecked(), length, offset, null);
->>>>>>> develop
+                                    chkSystemFile.isChecked(), length, offset, null, doEncrypt.isChecked());
                         }
                     } else {
                         SafeToast.showToastAnyThread("Can't read data from file");

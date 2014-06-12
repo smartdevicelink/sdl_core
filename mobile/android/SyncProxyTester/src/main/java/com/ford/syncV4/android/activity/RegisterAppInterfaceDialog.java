@@ -80,15 +80,9 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
                 .findViewById(R.id.registerappinterface_useAppHMITypes);
         final MultiSpinner<AppHMIType> appHMITypeSpinner = (MultiSpinner) layout
                 .findViewById(R.id.registerappinterface_appHMITypeSpinner);
-<<<<<<< HEAD
+
         final CheckBox useAppID = (CheckBox) layout.findViewById(R.id.registerappinterface_useAppID);
         final EditText appID = (EditText) layout.findViewById(R.id.registerappinterface_appID);
-=======
-        final CheckBox useAppID = (CheckBox) layout
-                .findViewById(R.id.registerappinterface_useAppID);
-        final EditText appIdView =
-                (EditText) layout.findViewById(R.id.registerappinterface_appID);
->>>>>>> develop
 
         updateDeviceInfoView(layout);
 

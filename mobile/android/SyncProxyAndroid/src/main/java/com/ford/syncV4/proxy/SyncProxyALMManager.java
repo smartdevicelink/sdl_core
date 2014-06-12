@@ -2628,7 +2628,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onRPCServiceStart(boolean encrypted, byte sessionID) {
+        public void onRPCServiceStart(String appId, boolean encrypted) {
 
         }
 

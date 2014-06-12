@@ -85,12 +85,6 @@ public class FileStreamingLogic {
                     } catch (IOException e) {
                         Logger.e(TAG + " FIle streamer error", e);
                        cancelStreaming();
-<<<<<<< HEAD
-                       SyncProxyTester tester = (SyncProxyTester) context.getActivity();
-
-                        tester.logError(e);
-=======
->>>>>>> develop
                     }
                 }
             }

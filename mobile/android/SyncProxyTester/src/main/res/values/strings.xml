@@ -186,6 +186,12 @@
     <string name="not_secure_service_send_rpc">Send Start Not Secure RPC</string>
     <string name="secure_service_check_view_off">Turn Secure Off</string>
     <string name="mobileNavi">MobileNavi (video source:)</string>
+    <string name="video_streaming_hint">Turn On Video Streaming</string>
+    <string name="mobile_navi_hint">Turn On Mobile Service</string>
+    <string name="audio_service_hint">Turn On Audio Service</string>
+    <string name="mobile_navi_check_box_on">Mobile Service Running</string>
+    <string name="audio_service_on">Audio Service Running</string>
+    <string name="video_check_box_on">Video Streaming running</string>
 
     <string name="title_activity_keyboard_properties">KeyboardProperties</string>
     <string name="keyboardproperties_useLanguage">Language</string>
@@ -230,12 +236,12 @@
     <string name="registerappinterface_useAppHMITypes">App HMI Types</string>
     <string name="registerappinterface_useAppID">App ID</string>
     <string name="registerappinterface_appIDDefault">8675309</string>
-<<<<<<< HEAD
+
     <string name="register_app_interface_is_rooted">Rooted Device</string>
-=======
+
     <string name="registerappinterface_new_session">Create new Session</string>
     <string name="registerappinterface_new_session_desc">When selected, a new Session will be open, otherwise, request will be sent to existing one</string>
->>>>>>> develop
+
     <string name="menuName">Menu Name</string>
     <string name="menuIcon">Menu Icon</string>
 
@@ -300,13 +306,13 @@
 
     <string name="system_request_use_file_name">Use file name</string>
     <string name="system_request_file_name_label">System Request file name:</string>
-<<<<<<< HEAD
+
     <string name="secure_error_button">Send Secure Error</string>
-=======
+
     <string name="main_menu_add_session_label">Add Session</string>
     <string name="main_menu_app_version">App version</string>
 
     <string name="exit_app_warning">Use \'Exit App\' menu option</string>
->>>>>>> develop
+
 
 </resources>

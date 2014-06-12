@@ -125,11 +125,11 @@ import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
-<<<<<<< HEAD
+
 import com.ford.syncV4.session.Session;
-=======
+
 import com.ford.syncV4.test.ITestConfigCallback;
->>>>>>> develop
+
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
@@ -423,22 +423,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         /*callbackToUIThre1ad*/ false,
                         /*preRegister*/ false,
                         versionNumber,
-<<<<<<< HEAD
-                        config, mTestConfig);
-
-            } catch (SyncException e) {
-                Log.e(TAG, e.toString());
-
-                if (e.getSyncExceptionCause() == SyncExceptionCause.SYNC_ROOTED_DEVICE_DETECTED) {
-                    sendBroadcast(new Intent(ROOTED_DEVICE_INTENT));
-                }
-
-                Logger.e(TAG, e.toString());
-=======
                         transportConfig, mTestConfig);
             } catch (SyncException e) {
                 Logger.e("SYNC Proxy start error:" + e.toString());
->>>>>>> develop
                 //error creating proxy, returned proxy = null
                 if (mSyncProxy == null) {
 
@@ -663,15 +650,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             return;
         }
 
-<<<<<<< HEAD
-        mSyncProxy.initializeSession();
-=======
         TestConfig testConfig = mSyncProxy.getTestConfig();
         // It is important to set this value back to TRUE when concrete Test Case is complete.
         testConfig.setDoCallRegisterAppInterface(false);
 
         mSyncProxy.initializeSession(appId);
->>>>>>> develop
     }
 
     @Override
@@ -1529,34 +1512,22 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-<<<<<<< HEAD
-    public void onMobileNaviStart(boolean encrypted, byte sessionId) {
+    public void onMobileNaviStart(String appId, boolean encrypted) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.Mobile_Nav, sessionId, encrypted);
-=======
-    public void onMobileNaviStart(String appId) {
-        if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.Mobile_Nav, appId);
->>>>>>> develop
+            mProxyServiceEvent.onServiceStart(ServiceType.Mobile_Nav, appId, encrypted);
         }
     }
 
     @Override
-<<<<<<< HEAD
-    public void onAudioServiceStart(boolean encrypted,byte sessionId) {
+    public void onRPCServiceStart(String appId, boolean encrypted) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, sessionId, encrypted);
+            mProxyServiceEvent.onServiceStart(ServiceType.RPC, appId, encrypted);
         }
     }
-
-    public void onRPCServiceStart(boolean encrypted,byte sessionId){
+    @Override
+    public void onAudioServiceStart(String appId, boolean encrypted) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.RPC, sessionId, encrypted);
-=======
-    public void onAudioServiceStart(String appId) {
-        if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, appId);
->>>>>>> develop
+            mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, appId, encrypted);
         }
     }
 
@@ -1631,18 +1602,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 ", appId:" + appId;
         createDebugMessageForAdapter(appId, response);
 
-<<<<<<< HEAD
-        if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceEnd(serviceType);
-        }
-        if (serviceType == ServiceType.RPC) {
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("RPC service stopped", true);
-            }
-=======
         endProtocolService(appId, serviceType);
     }
->>>>>>> develop
 
     @Override
     public void onProtocolServiceEndedAck(ServiceType serviceType, String appId) {
@@ -1658,11 +1619,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         Logger.d(TAG, " Session started AppId:" + appId);
         mSessionsCounter.add(appId);
         if (mProxyServiceEvent != null) {
-<<<<<<< HEAD
-            mProxyServiceEvent.onServiceStart(ServiceType.RPC, sessionID, false);
-=======
-            mProxyServiceEvent.onServiceStart(ServiceType.RPC, appId);
->>>>>>> develop
+            mProxyServiceEvent.onServiceStart(ServiceType.RPC, appId, false);
         }
     }
 
@@ -1672,18 +1629,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-<<<<<<< HEAD
-    public void onStartSession(byte sessionID) {
-        if (mLogAdapter == null) {
-            return;
-        }
-        mLogAdapter.logMessage("Session going to start, " +
-                "protocol version: " + syncProxyGetWiProVersion(), true);
-=======
     public void onStartSession(String appId) {
         createDebugMessageForAdapter(appId, " Session going to start, " +
                 "protocol version: " + syncProxyGetWiProVersion());
->>>>>>> develop
     }
 
     /**
@@ -1858,16 +1806,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createDebugMessageForAdapter(notification);
     }
 
-<<<<<<< HEAD
     @Override
     public void onSecureServiceStart() {
         createDebugMessageForAdapter("Secure Service started");
     }
 
-    private void resendUnsentPutFiles() {
-        SparseArray<PutFile> unsentPutFiles = mPutFileTransferManager.getCopy();
-        mPutFileTransferManager.clear();
-=======
     private void resendUnsentPutFiles(String appId) {
         PutFileTransferManager putFileTransferManager = mPutFileTransferManagers.get(appId);
         if (putFileTransferManager == null) {
@@ -1875,7 +1818,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
         SparseArray<PutFile> unsentPutFiles = putFileTransferManager.getCopy();
         putFileTransferManager.clear();
->>>>>>> develop
         for (int i = 0; i < unsentPutFiles.size(); i++) {
             commandPutFile(appId, unsentPutFiles.valueAt(i));
         }
@@ -1904,13 +1846,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             mSyncProxy.listFiles(appId, getNextCorrelationID());
             createDebugMessageForAdapter(appId, "ListFiles sent");
         } catch (SyncException e) {
-<<<<<<< HEAD
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("ListFiles send error: " + e, Log.ERROR, e);
-            }
-=======
             createErrorMessageForAdapter(appId, "ListFiles send error: " + e);
->>>>>>> develop
         }
     }
 
@@ -1974,13 +1910,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void commandPutFile(String appId, FileType fileType, String syncFileName,
                                byte[] bulkData, int correlationId,
                                Boolean doSetPersistent, PutFile putFile) {
-<<<<<<< HEAD
-        commandPutFile(fileType, syncFileName, bulkData, correlationId,
-                doSetPersistent, null, null, null, putFile, false);
-=======
         commandPutFile(appId, fileType, syncFileName, bulkData, correlationId,
-                doSetPersistent, null, null, null, putFile);
->>>>>>> develop
+                doSetPersistent, null, null, null, putFile, false);
+
     }
 
     /**
@@ -1999,12 +1931,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void commandPutFile(String appId, FileType fileType, String syncFileName,
                                byte[] bulkData, int correlationId,
                                Boolean doSetPersistent, Boolean isSystemFile,
-<<<<<<< HEAD
                                Integer length, Integer offset,
                                PutFile putFile, boolean cypher) {
-=======
-                               Integer length, Integer offset, PutFile putFile) {
->>>>>>> develop
         int mCorrelationId = correlationId;
         if (correlationId == -1) {
             mCorrelationId = getNextCorrelationID();
@@ -2279,31 +2207,25 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
     }
 
-<<<<<<< HEAD
-    public void syncProxyStartRPCService(Session session, boolean encrypted) {
+    public void syncProxyStartRPCService(String appId, boolean encrypted) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
             if (encrypted) {
                 if (mSyncProxy.getProtocolSecureManager() != null) {
                     mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.RPC);
                 }
             }
-            mSyncProxy.startRpcService(session, encrypted);
+            mSyncProxy.startRpcService(appId, encrypted);
         }
     }
 
-    public void syncProxyStartAudioService(Session session, boolean encrypted) {
+    public void syncProxyStartAudioService(String appId, boolean encrypted) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
             if (encrypted) {
                 if (mSyncProxy.getProtocolSecureManager() != null) {
                     mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.Audio_Service);
                 }
             }
-            mSyncProxy.startAudioService(session, encrypted);
-=======
-    public void syncProxyStartAudioService(String appId) {
-        if (mSyncProxy != null) {
-            mSyncProxy.startAudioService(appId);
->>>>>>> develop
+            mSyncProxy.startAudioService(appId, encrypted);
         }
     }
 
@@ -2506,32 +2428,25 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         return ProtocolConstants.PROTOCOL_VERSION_UNDEFINED;
     }
 
-<<<<<<< HEAD
-    public void syncProxyStartMobileNavService(Session session, boolean encrypted) {
+
+    public void syncProxyStartMobileNavService(String appId, boolean encrypted) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
             if (encrypted) {
                 if (mSyncProxy.getProtocolSecureManager() != null) {
                     mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.Mobile_Nav);
                 }
             }
-            mSyncProxy.startMobileNavService(session, encrypted);
+            mSyncProxy.startMobileNavService(appId, encrypted);
         }
     }
 
-    public OutputStream syncProxyStartH264() {
-=======
-    public void syncProxyStopMobileNaviService(String appId) {
->>>>>>> develop
-        if (mSyncProxy != null) {
-            mSyncProxy.stopMobileNaviService(appId);
-        }
-    }
 
-    public void syncProxyStartMobileNavService(String appId) {
-        if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
-            mSyncProxy.startMobileNavService(appId);
-        }
-    }
+            public void syncProxyStopMobileNaviService(String appId) {
+                if (mSyncProxy != null) {
+                    mSyncProxy.stopMobileNaviService(appId);
+                }
+            }
+
 
     public OutputStream syncProxyStartH264(String appId) {
         if (mSyncProxy != null) {
@@ -2735,14 +2650,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             }
         }
     }
-<<<<<<< HEAD
-}
-=======
 
     /**
      * Test Section
      */
-
     @Override
     public void onRPCServiceComplete() {
         if (isModuleTesting() && !mTestConfig.isDoCallRegisterAppInterface()) {
@@ -2752,4 +2663,4 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
     }
 }
->>>>>>> develop
+

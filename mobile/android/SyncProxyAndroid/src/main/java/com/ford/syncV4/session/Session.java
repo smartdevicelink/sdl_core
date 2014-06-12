@@ -1,7 +1,6 @@
 package com.ford.syncV4.session;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.proxy.constants.APIConstants;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.util.logger.Logger;
 
@@ -27,17 +26,6 @@ public class Session {
 
     private static final String CLASS_NAME = Session.class.getSimpleName();
 
-    public static Session createSession(ServiceType serviceType,
-                                        byte sessionID, boolean encrypted) {
-        Session session = new Session();
-        session.setSessionId(sessionID);
-        Service service = new Service();
-        service.setSession(session);
-        service.setServiceType(serviceType);
-        service.setEncrypted(encrypted);
-        session.addService(service);
-        return session;
-    }
     /**
      * Collection of the Session Id's mapped to App Id
      */
@@ -208,10 +196,10 @@ public class Session {
 
 
     public Service getService(ServiceType serviceType) {
-        if (serviceList == null || serviceList.isEmpty()) {
+        if (servicesList == null || servicesList.isEmpty()) {
             return null;
         }
-        for (Service service : serviceList) {
+        for (Service service : servicesList) {
             if (service.getServiceType() == serviceType) {
                 return service;
             }

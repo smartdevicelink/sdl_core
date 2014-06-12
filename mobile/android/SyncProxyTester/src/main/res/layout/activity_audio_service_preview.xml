@@ -10,8 +10,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-<<<<<<< HEAD
-        android:text="@string/service_check_view_on"
+        android:textColor="@color/app_regular_text_color"
+        android:hint="Turn On Audio Service"
         />
 
     <Button
@@ -36,10 +36,6 @@
         android:text="Service State:"
         android:layout_height="wrap_content"
         android:layout_below="@+id/audio_service_not_service_secure_button_view"
-=======
-        android:textColor="@color/app_regular_text_color"
-        android:hint="Turn On Audio Service"
->>>>>>> develop
         />
 
     <Button

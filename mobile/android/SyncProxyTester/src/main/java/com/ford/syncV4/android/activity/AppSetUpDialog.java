@@ -310,12 +310,8 @@ public class AppSetUpDialog extends BaseDialogFragment {
                         }
 
                         setupHeartbeat(view);
-<<<<<<< HEAD
-
-                        ((SyncProxyTester) getActivity()).onSetUpDialogResult();
-=======
                         ((SyncProxyTester) getActivity()).onSetUpDialogResult(appId);
->>>>>>> develop
+
                     }
                 }).setView(view).show();
     }

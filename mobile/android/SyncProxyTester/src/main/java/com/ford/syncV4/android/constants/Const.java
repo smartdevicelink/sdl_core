@@ -6,16 +6,6 @@ import com.ford.syncV4.proxy.rpc.enums.Language;
  * Stores application-wide constants.
  */
 public class Const {
-<<<<<<< HEAD
-    // Shared preference name for protocol properties
-    public static final String PREFS_NAME = "SyncProxyTesterPrefs";
-
-    // Protocol properties
-    public static final String PREFS_KEY_PROTOCOL_MIN_VERSION = "protocolMinVersion";
-    public static final String PREFS_KEY_PROTOCOL_MAX_VERSION = "protocolMaxVersion";
-    public static final String PREFS_KEY_ISMEDIAAPP = "isMediaApp";
-=======
-
 	// Shared preference name for protocol properties
 	public static final String PREFS_NAME = "SyncProxyTesterPrefs";
 
@@ -28,7 +18,6 @@ public class Const {
 	public static final String PREFS_KEY_PROTOCOL_MIN_VERSION = "protocolMinVersion";
 	public static final String PREFS_KEY_PROTOCOL_MAX_VERSION = "protocolMaxVersion";
 	public static final String PREFS_KEY_ISMEDIAAPP = "isMediaApp";
->>>>>>> develop
     public static final String PREFS_KEY_ISNAVIAPP = "isNaviApp";
     public static final String PREFS_KEY_NAVI_VIDEOSOURCE = "videoSrc";
     public static final String PREFS_KEY_APPNAME = "appName";

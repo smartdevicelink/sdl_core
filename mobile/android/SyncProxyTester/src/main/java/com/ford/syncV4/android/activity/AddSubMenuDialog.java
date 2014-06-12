@@ -84,16 +84,14 @@ public class AddSubMenuDialog extends BaseDialogFragment {
                         if (chkUseMenuPos.isChecked()) {
                             addSubMenu.setPosition(pos);
                         }
-<<<<<<< HEAD
+
                         addSubMenu.setDoEncryption(doEncryptView.isChecked());
 
-                        ((SyncProxyTester) getActivity()).onAddSubMenuDialogResult(addSubMenu,
-                                subMenu);
-=======
+
                         ((SyncProxyTester) getActivity()).onAddSubMenuDialogResult(
                                 getArguments().getString(APP_ID_KEY),
                                 addSubMenu, subMenu);
->>>>>>> develop
+
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

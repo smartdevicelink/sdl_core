@@ -98,7 +98,8 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                 alert.setCorrelationID(1);
 
                 try {
-                    syncProxyBase.sendRPCRequest(alert);
+                    //TODO not claer what app id use
+                    syncProxyBase.sendRPCRequest("0", alert);
                 } catch (SyncException e) {
                     Logger.e(LOG_TAG, "Alert error:" + e);
                 }

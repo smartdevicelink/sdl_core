@@ -70,8 +70,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-<<<<<<< HEAD
-                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
                     changeCheckBoxState();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
@@ -82,12 +81,8 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         sendSecureServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (hasServiceInServicesPool(ServiceType.RPC)) {
-                    sendStartEncryptedService();
-=======
                 if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
-                    onMobileNaviCheckBoxAction(view);
->>>>>>> develop
+                    sendStartEncryptedService();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
                 }
@@ -98,7 +93,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         sendNotSecureServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
                     sendStartNotEncryptedService();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
@@ -123,11 +118,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-<<<<<<< HEAD
-            tester.startMobileNaviService(false);
-=======
-            tester.startMobileNaviService(getAppId());
->>>>>>> develop
+            tester.startMobileNaviService(getAppId(), false);
         } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             mFileStreamingLogic.resetStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
