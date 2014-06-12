@@ -96,7 +96,6 @@ import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.trace.TraceDeviceInfo;
 import com.ford.syncV4.transport.BaseTransportConfig;
 import com.ford.syncV4.transport.TransportType;
-import com.ford.syncV4.util.BTHelper;
 import com.ford.syncV4.util.CommonUtils;
 import com.ford.syncV4.util.DeviceInfoManager;
 import com.ford.syncV4.util.logger.Logger;
@@ -1861,9 +1860,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 if (!mTestConfig.isDoCallRegisterAppInterface()) {
 
                     Logger.d("RestartRPCProtocolSession TestConfigCallback: " + mTestConfigCallback);
-                    if (mTestConfigCallback != null) {
-                        mTestConfigCallback.onRPCServiceComplete();
-                    }
 
                     // Revert back a value which has been set for concrete Test Case
                     mTestConfig.setDoCallRegisterAppInterface(true);

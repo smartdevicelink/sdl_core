@@ -187,9 +187,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     /**
      * Semaphore object to wait for the connection to be restored up to
-     * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} notifiaction receive
+     * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} notification receive
      */
     private final RestoreConnectionManager restoreConnectionToRAI = new RestoreConnectionManager();
+
+    /**
+     * Semaphore object to wait for the connection to be restored up to RPC Service
+     */
+    private final RestoreConnectionManager restoreConnectionToRPCService =
+            new RestoreConnectionManager();
 
     /**
      * Table of the {@link com.ford.syncV4.android.manager.RPCRequestsResumableManager}'s
@@ -333,8 +339,20 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         return mTestConfig;
     }
 
+    /**
+     * @return reference to the {@link com.ford.syncV4.android.manager.RestoreConnectionManager}
+     * when restore connection up to {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} is needed
+     */
     public RestoreConnectionManager getRestoreConnectionToRAI() {
         return restoreConnectionToRAI;
+    }
+
+    /**
+     * @return reference to the {@link com.ford.syncV4.android.manager.RestoreConnectionManager}
+     * when restore connection up to RPC service is needed
+     */
+    public RestoreConnectionManager getRestoreConnectionToRPCService() {
+        return restoreConnectionToRPCService;
     }
 
     /**
@@ -661,24 +679,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     public int getNextCorrelationID() {
         return autoIncCorrId++;
-    }
-
-    /**
-     * Initialize new Session with RPC service only, this is a method for the Test Cases only,
-     * for example: when {@link com.ford.syncV4.proxy.rpc.UnregisterAppInterface} is performed, for
-     * the next Test it is necessary to restore RPC session
-     */
-    public void testInitializeSessionRPCOnly(String appId) {
-        if (mSyncProxy == null) {
-            Logger.e(TAG, "Sync Proxy is null when try to initialize test session");
-            return;
-        }
-
-        TestConfig testConfig = mSyncProxy.getTestConfig();
-        // It is important to set this value back to TRUE when concrete Test Case is complete.
-        testConfig.setDoCallRegisterAppInterface(false);
-
-        mSyncProxy.initializeSession(appId);
     }
 
     @Override
@@ -1634,11 +1634,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     @Override
     public void onSessionStarted(String appId) {
-        Logger.d(TAG, " Session started AppId:" + appId);
+        Logger.d(TAG, " Session started, appId:" + appId);
 
-        /*if (mReentrantRestoreConnectionLock.getHoldCount() > 0) {
-            mReentrantRestoreConnectionLock.unlock();
-        }*/
+        restoreConnectionToRPCService.releaseLock();
 
         mSessionsCounter.add(appId);
         if (mProxyServiceEvent != null) {
@@ -2630,20 +2628,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                     diagnosticMessageResponse.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
-            }
-        }
-    }
-
-    /**
-     * Test Section
-     */
-
-    @Override
-    public void onRPCServiceComplete() {
-        if (isModuleTesting() && mModuleTest.getTestActionThreadContext() != null &&
-                !mTestConfig.isDoCallRegisterAppInterface()) {
-            synchronized (mModuleTest.getTestActionThreadContext()) {
-                mModuleTest.getTestActionThreadContext().notify();
             }
         }
     }
