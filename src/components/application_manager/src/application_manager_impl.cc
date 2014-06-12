@@ -1808,6 +1808,7 @@ void ApplicationManagerImpl::SendOnSDLClose() {
     return;
   }
 
+  delete msg;
   hmi_handler_->SendMessageToHMI(message_to_send);
 }
 
