@@ -153,7 +153,7 @@ SDL.SettingsController = Em.Object.create( {
     onAppPermissionChanged: function(params) {
 
         if (params.isAppPermissionsRevoked) {
-            FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message)});
+            //FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message)});
 
             //deleted array
             SDL.SDLModel.setAppPermissions(params.appRevokedPermissions);
@@ -174,7 +174,7 @@ SDL.SettingsController = Em.Object.create( {
             FFW.BasicCommunication.GetListOfPermissions(params.appID);
 
             //returns allowedFunctions
-            FFW.BasicCommunication.GetUserFriendlyMessage(function(allowedFunctions, appID){FFW.BasicCommunication.OnAppPermissionConsent(allowedFunctions, "GUI", appID)}, params.appID);
+            //FFW.BasicCommunication.GetUserFriendlyMessage(function(allowedFunctions, appID){FFW.BasicCommunication.OnAppPermissionConsent(allowedFunctions, "GUI", appID)}, params.appID);
         }
 
         if (params.appUnauthorized) {
@@ -219,8 +219,6 @@ SDL.SettingsController = Em.Object.create( {
 
             FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.permissionsFriendlyMessageUpdate, appID, messageCodes);
 
-            SDL.SettingsController.userFriendlyMessagePopUp();
-
             delete SDL.SDLModel.getListOfPermissionsPull[message.id];
         }
     },
@@ -262,7 +260,7 @@ SDL.SettingsController = Em.Object.create( {
     onSDLConsentNeededHandler: function(params) {
         this.currentDeviceAllowance = params.device;
 
-        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message, this.OnAllowSDLFunctionality)});
+        //FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message, this.OnAllowSDLFunctionality)});
     },
 
     userFriendlyMessagePopUp: function(appId, messageCode) {
