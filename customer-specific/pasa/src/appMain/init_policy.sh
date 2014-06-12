@@ -1,7 +1,7 @@
 # This script prepare policy database for QDB on QNX
 # !!! DON'T INSERT EMPTY LINES TO THIS FILE !!!
 #
-mkdir -p /fs/rwdata/storage/policy/
+#mkdir -p /fs/rwdata/storage/policy/
 #
 #
 # Uncomment line below if you don't have policy.* at /fs/mp/sql/. Copy policy.cfg and policy.sql to /fs/mp/etc/AppLink
