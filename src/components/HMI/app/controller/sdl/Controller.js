@@ -595,7 +595,9 @@ SDL.SDLController = Em.Object
         unregisterApplication: function(appID) {
 
             this.getApplicationModel(appID).VRCommands = [];
+
             this.getApplicationModel(appID).onDeleteApplication(appID);
+
             var len = SDL.SDLModel.VRCommands.length;
             for (var i = len - 1; i >= 0; i--) {
                 if (SDL.SDLModel.VRCommands[i].appID == appID) {
@@ -607,7 +609,6 @@ SDL.SDLController = Em.Object
             if (SDL.SDLModel.stateLimited == appID) {
                 SDL.SDLModel.set('stateLimited', null);
             }
-            SDL.SDLAppController.set('model', null);
         },
         /**
          * SDL Driver Distraction ON/OFF switcher
