@@ -81,8 +81,8 @@ PolicyHandler::PolicyHandler()
   : policy_manager_(0),
     dl_handle_(0),
     exchange_handler_(NULL),
-    on_ignition_check_done_(false),
     retry_sequence_("RetrySequence", new RetrySequence(this)),
+    on_ignition_check_done_(false),
     last_activated_app_(0) {
 }
 
@@ -274,8 +274,10 @@ const std::string PolicyHandler::ConvertUpdateStatus(PolicyTableStatus status) {
       return "UPDATE_NEEDED";
     case policy::StatusUpToDate:
       return "UP_TO_DATE";
+    default: {
+      return "UNKNOWN";
+    }
   }
-  return "UNKNOWN";
 }
 
 void PolicyHandler::SetDeviceInfo(std::string& device_id,

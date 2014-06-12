@@ -1105,7 +1105,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
   // checked against policy permissions
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
     request_ctrl_.terminateRequest(
-      msg_to_mobile[strings::params][strings::correlation_id].asUInt());
+      msg_to_mobile[strings::params][strings::correlation_id].asInt());
   } else if (app && !profile::Profile::instance()->policy_turn_off()) {
     // TODO(AOleynik): Remove check of policy_turn_off, when this flag will be
     // unused in config file
@@ -1764,8 +1764,8 @@ void ApplicationManagerImpl::HeadUnitReset(
       break;
     }
     default: {
-      LOG4CXX_WARN(logger_, "Bad AppInterfaceUnregisteredReason");
-      break;
+      LOG4CXX_ERROR(logger_, "Bad AppInterfaceUnregisteredReason");
+      return;
     }
   }
 }
@@ -1860,8 +1860,8 @@ void ApplicationManagerImpl::UnregisterApplication(
       break;
     }
     default: {
-      LOG4CXX_INFO(logger_, "Unnown Unrregister reason");
-      break;
+      LOG4CXX_ERROR(logger_, "Unknown unrregister reason");
+      return;
     }
   }
   ApplicationSharedPtr app_to_remove;

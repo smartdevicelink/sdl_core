@@ -609,7 +609,7 @@ bool HMICapabilities::load_capabilities_from_file() {
         }
 
         if (display_capabilities_so.keyExists(hmi_response::text_fields)) {
-          int32_t len =
+          uint32_t len =
               display_capabilities_so[hmi_response::text_fields].length();
 
           for (uint32_t i = 0; i < len; ++i) {
@@ -661,7 +661,7 @@ bool HMICapabilities::load_capabilities_from_file() {
                   array_image_fields[i][strings::image_type_supported];
               smart_objects::SmartObject image_type_supported_enum(
                   smart_objects::SmartType_Array);
-              for (int32_t k = 0, j = 0; k < image_type_supported_array.length(); ++k) {
+              for (uint32_t k = 0, j = 0; k < image_type_supported_array.length(); ++k) {
                 std::map<std::string, hmi_apis::Common_FileType::eType>
                 ::const_iterator it = file_type_enum.find(
                     (image_type_supported_array[k]).asString());

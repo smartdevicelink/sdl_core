@@ -260,6 +260,10 @@ void PerformInteractionRequest::onTimeOut() {
       CommandRequestImpl::onTimeOut();
       break;
     }
+    default: {
+      LOG4CXX_ERROR(logger_, "INVALID ENUM");
+      return;
+    }
   };
 }
 

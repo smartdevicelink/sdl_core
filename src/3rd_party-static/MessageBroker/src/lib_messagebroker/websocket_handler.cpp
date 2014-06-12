@@ -83,18 +83,18 @@ namespace NsMessageBroker
      while (0 < size) {
 
        bool fin = ((recBuffer[0] & 0x80) | (recBuffer[0] & 0x01)) == 0x81;
-//       bool rsv1 = (recBuffer[0] & 0x40) == 0x40;
-//       bool rsv2 = (recBuffer[0] & 0x20) == 0x20;
-//       bool rsv3 = (recBuffer[0] & 0x10) == 0x10;
-//       unsigned char opCode = ((recBuffer[0] & 0x08) | (recBuffer[0] & 0x04) |
-//           (recBuffer[0] & 0x02) | (recBuffer[0] & 0x01));
+       bool rsv1 = (recBuffer[0] & 0x40) == 0x40;
+       bool rsv2 = (recBuffer[0] & 0x20) == 0x20;
+       bool rsv3 = (recBuffer[0] & 0x10) == 0x10;
+       unsigned char opCode = ((recBuffer[0] & 0x08) | (recBuffer[0] & 0x04) |
+           (recBuffer[0] & 0x02) | (recBuffer[0] & 0x01));
        bool mask = (recBuffer[1] & 0x80) == 0x80;
 
        DBG_MSG(("CWebSocketHandler::fin = %d recBuffer[0] = 0x%02X\n"
-           " parsedlength = %d b_size= %d parsedBufferPosition = %d\n",
+                " parsedlength = %d b_size= %d parsedBufferPosition = %d\n"
+                "rsv1 = %d, rsv2 = %d, rsv3 = %d, opCode = %u\n",
            fin, recBuffer[0], parsedBufferPosition + position,
-           size, parsedBufferPosition));
-
+           size, parsedBufferPosition, rsv1, rsv2, rsv3, opCode));
 
        if (false == fin) {
           break;

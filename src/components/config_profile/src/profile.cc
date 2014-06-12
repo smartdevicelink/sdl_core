@@ -119,9 +119,6 @@ const char* kAppHmiLevelNoneRequestsTimeScaleKey =
 const char* kPendingRequestsAmoundKey = "PendingRequestsAmount";
 const char* kSupportedDiagModesKey = "SupportedDiagModes";
 const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
-#ifdef CUSTOMER_PASA
-const char* kTtsDelimiterKey = "TtsDelimiter";
-#endif
 const char* kTTSDelimiterKey = "TTSDelimiter";
 const char* kRecordingFileNameKey = "RecordingFileName";
 const char* kRecordingFileSourceKey = "RecordingFileSource";
@@ -140,8 +137,6 @@ const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
 #ifdef CUSTOMER_PASA
 const char* kDefaultLog4cxxConfig = "/fs/mp/etc/AppLink/log4cxx.properties";
-const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
-const char* kDefaultRecordingFileName = "record.wav";
 #endif
 const char* kDefaultMmeDatabaseName = "/dev/qdb/mediaservice_db";
 const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
@@ -181,12 +176,12 @@ Profile::Profile()
     app_storage_folder_(),
     app_resourse_folder_(),
     config_file_name_(kDefaultConfigFileName),
-    hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName),
     server_address_(kDefaultServerAddress),
     server_port_(kDefaultServerPort),
     video_streaming_port_(kDefaultVideoStreamingPort),
     audio_streaming_port_(kDefaultAudioStreamingPort),
     time_testing_port_(kDefaultTimeTestingPort),
+    hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName),
     help_prompt_(),
     time_out_promt_(),
     min_tread_stack_size_(threads::Thread::kMinStackSize),
@@ -220,11 +215,11 @@ Profile::Profile()
 #ifdef CUSTOMER_PASA
     log4cxx_config_file_(kDefaultLog4cxxConfig),
 #endif
-	recording_file_source_(kDefaultRecordingFileSourceName),
-	recording_file_name_(kDefaultRecordingFileName),
-	mme_db_name_(kDefaultMmeDatabaseName),
-	event_mq_name_(kDefaultEventMQ),
+    recording_file_source_(kDefaultRecordingFileSourceName),
+    mme_db_name_(kDefaultMmeDatabaseName),
+    event_mq_name_(kDefaultEventMQ),
     ack_mq_name_(kDefaultAckMQ),
+    recording_file_name_(kDefaultRecordingFileName),
     application_list_update_timeout_(kDefaultApplicationListUpdateTimeout) {
 }
 

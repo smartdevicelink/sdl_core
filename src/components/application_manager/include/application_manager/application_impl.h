@@ -175,9 +175,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   uint32_t                                 app_id_;
   smart_objects::SmartObject*              active_message_;
   bool                                     is_media_;
+  bool                                     hmi_supports_navi_streaming_;
   bool                                     allowed_support_navigation_;
   bool                                     is_app_allowed_;
-  bool                                     hmi_supports_navi_streaming_;
   bool                                     has_been_activated_;
   bool                                     tts_speak_state_;
 

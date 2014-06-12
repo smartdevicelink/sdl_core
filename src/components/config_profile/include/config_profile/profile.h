@@ -466,6 +466,9 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
+#ifdef CUSTOMER_PASA
+    std::string                     log4cxx_config_file_;
+#endif
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;
     std::string                     ack_mq_name_;

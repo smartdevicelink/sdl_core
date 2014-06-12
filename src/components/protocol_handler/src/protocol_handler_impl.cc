@@ -587,8 +587,8 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   LOG4CXX_INFO_EXT(
       logger_, " data size " << data_size << " maxdata_size " << maxdata_size);
 
-  int32_t numOfFrames = 0;
-  int32_t lastdata_size = 0;
+  uint32_t numOfFrames = 0;
+  uint32_t lastdata_size = 0;
 
   if (data_size % maxdata_size) {
     numOfFrames = (data_size / maxdata_size) + 1;

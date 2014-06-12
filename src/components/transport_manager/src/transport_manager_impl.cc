@@ -354,7 +354,7 @@ int TransportManagerImpl::SearchDevices(void) {
         }
         default: {
           LOG4CXX_ERROR(logger_, "Invalid scan result");
-          break;
+          return E_ADAPTERS_FAIL;
         }
       }
     }

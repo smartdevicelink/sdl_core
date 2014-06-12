@@ -84,12 +84,12 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
+    hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
     hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
     media_manager::MediaManagerImpl* media_manager_;
 #ifdef TIME_TESTER
     time_tester::TimeManager* time_tester_;
 #endif //TIME_TESTER
-    hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
 #ifdef DBUS_HMIADAPTER
     hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
     System::Thread* dbus_adapter_thread_;

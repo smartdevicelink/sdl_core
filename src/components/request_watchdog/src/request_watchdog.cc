@@ -205,7 +205,7 @@ bool RequestWatchdog::checkTimeScaleMaxRequest(
     start.tv_sec = end.tv_sec - app_time_scale;
 
     TimeScale scale(start, end, connection_key);
-    int32_t count = 0;
+    uint32_t count = 0;
 
     count = count_if (requests_.begin(), requests_.end(), scale);
 
@@ -235,7 +235,7 @@ bool RequestWatchdog::checkHMILevelTimeScaleMaxRequest(
     start.tv_sec = end.tv_sec - app_time_scale;
 
     HMILevelTimeScale scale(start, end, connection_key, hmi_level);
-    int32_t count = 0;
+    uint32_t count = 0;
 
     count = count_if (requests_.begin(), requests_.end(), scale);
 

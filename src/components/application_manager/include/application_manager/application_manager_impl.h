@@ -691,12 +691,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;
 
-    /**
-     * @brief Resume controler is responcible for save and load information
-     * about persistent application data on disk, and save session ID for resuming
-     * application in case INGITION_OFF or MASTER_RESSET
-     */
-    ResumeCtrl resume_ctrl_;
 
 #ifdef TIME_TESTER
     AMMetricObserver* metric_observer_;
@@ -717,6 +711,13 @@ class ApplicationManagerImpl : public ApplicationManager,
     impl::FromHmiQueue messages_from_hmi_;
     // Thread that pumps messages being passed to HMI.
     impl::ToHmiQueue messages_to_hmi_;
+
+    /**
+     * @brief Resume controler is responcible for save and load information
+     * about persistent application data on disk, and save session ID for resuming
+     * application in case INGITION_OFF or MASTER_RESSET
+     */
+    ResumeCtrl resume_ctrl_;
 
     class ApplicationListUpdateTimer : public timer::TimerThread<ApplicationManagerImpl> {
      public:
