@@ -376,14 +376,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         // For the Test Cases
         if (mTestConfig != null) {
             if (!mTestConfig.isUseHashId()) {
+                Logger.d(LOG_TAG + " get Hash Id:null");
                 return null;
             }
             if (mTestConfig.isUseCustomHashId()) {
+                Logger.d(LOG_TAG + " get Hash Id:" + mTestConfig.getCustomHashId());
                 return mTestConfig.getCustomHashId();
             }
         }
-
-        return hashIdsTable.get(appId);
+        final String returnValue = hashIdsTable.get(appId);
+        Logger.d(LOG_TAG + " get Hash Id:" + returnValue);
+        return returnValue;
     }
 
     public void setHashId(byte sessionId, String value) {

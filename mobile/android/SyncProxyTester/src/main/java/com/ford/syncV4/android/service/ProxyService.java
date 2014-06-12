@@ -362,6 +362,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 int versionNumber = getCurrentProtocolVersion();
                 String appName = settings.getString(Const.PREFS_KEY_APPNAME,
                         Const.PREFS_DEFAULT_APPNAME);
+                String vrSynonymsString = settings.getString(Const.PREFS_KEY_VR_SYNONYMS, "");
+                Vector<Object> vrSynonyms = null;
+                if (!vrSynonymsString.equals("")) {
+                    vrSynonyms = new Vector<Object>(Arrays.asList(
+                            vrSynonymsString.split(SyncProxyTester.JOIN_STRING)));
+                }
                 Language lang = Language.valueOf(settings.getString(
                         Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
                 Language hmiLang = Language.valueOf(settings.getString(
@@ -409,23 +415,24 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 mTestConfig.setProtocolMinVersion((byte) AppPreferencesManager.getProtocolMinVersion());
                 mTestConfig.setProtocolMaxVersion((byte) AppPreferencesManager.getProtocolMaxVersion());
 
-                Logger.d("Start proxy's instance");
+                Logger.i("Start SYNC Proxy's instance, vrSynonyms:" + vrSynonyms);
                 mSyncProxy = new SyncProxyALM(this,
-                        syncProxyConfigurationResources/*sync proxy configuration resources*/,
-                        /*enable advanced lifecycle management true,*/
+                        syncProxyConfigurationResources /*sync proxy configuration resources*/,
                         appName,
-                        /*ngn media app*/null,
-                        /*vr synonyms*/null,
-                        /*is media app*/isMediaApp, appHMITypes,
+                        null,                           /*ngn media app*/
+                        vrSynonyms,
+                        isMediaApp,                     /*is media app*/
+                        appHMITypes,
                         syncMsgVersion,
-                        /*language desired*/lang,
-                        /*HMI Display Language Desired*/hmiLang,
+                        lang,                           /*language desired*/
+                        hmiLang,                        /*HMI Display Language Desired*/
                         appId,
-                        /*autoActivateID*/null,
-                        /*callbackToUIThre1ad*/ false,
-                        /*preRegister*/ false,
+                        null,                           /*autoActivateID*/
+                        false,                          /*callbackToUIThread*/
+                        false,                          /*preRegister*/
                         versionNumber,
-                        transportConfig, mTestConfig);
+                        transportConfig,
+                        mTestConfig);
             } catch (SyncException e) {
                 Logger.e("SYNC Proxy start error:" + e.toString());
                 //error creating proxy, returned proxy = null
