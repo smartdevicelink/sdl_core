@@ -98,31 +98,18 @@ public abstract class SyncTransport {
 
         try {
             Logger.d(CLASS_NAME + " Disconnected");
-<<<<<<< HEAD
             _transportListener.onTransportDisconnected(info);
         } catch (Exception excp) {
             Logger.e(FailurePropagating_Msg + "onTransportDisconnected: " + excp.toString(), excp);
         } // end-catch
     } // end-method
 
-    // This method is called by the subclass to indicate a transport error has occurred.
-    protected void handleTransportError(final String message, final Exception ex) {
-        isConnected = false;
-        _transportListener.onTransportError(message, ex);
-    }
-=======
-			_transportListener.onTransportDisconnected(info);
-		} catch (Exception excp) {
-			Logger.e(FailurePropagating_Msg + "onTransportDisconnected: " + excp.toString(), excp);
-		}
-	}
-	
+
 	// This method is called by the subclass to indicate a transport error has occurred.
 	protected void handleTransportError(final String message, final Exception ex) {
 		isConnected = false;
 		_transportListener.onTransportError(message, ex);
 	}
->>>>>>> develop
 
     protected void handleOnServerSocketInit(int serverSocketPort) {
         _transportListener.onServerSocketInit(serverSocketPort);

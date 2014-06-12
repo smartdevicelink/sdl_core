@@ -97,34 +97,22 @@ public class ProtocolFrameHeader {
             return null;
         }
 	}
-	
-	public String toString() {
-<<<<<<< HEAD
-		String ret = "";
-		ret += "version " + version + ", " + (isEncrypted ? "encrypted" : "unencrypted") + "\n";
-		ret += "frameType " + frameType.getName() + ", serviceType " + serviceType.getName();
-		ret += "\nframeData " + frameData;
-		ret += ", sessionID " + sessionID;
-		ret += ", dataSize " + dataSize;
-		ret += ", messageID " + messageID;
-		return ret;
-=======
-        StringBuilder stringBuilder = new StringBuilder(ProtocolFrameHeader.class.getSimpleName());
-        stringBuilder.append(" {");
-        stringBuilder.append("sesId:").append(sessionID).append(", ");
-        stringBuilder.append("ver:").append(version).append(", ");
-        stringBuilder.append((compressed ? "compr" : "uncompr")).append(", ");
-        stringBuilder.append("frType:").append(frameType.getName()).append(", ");
-        stringBuilder.append("serType:").append(serviceType.getName()).append(", ");
-        stringBuilder.append("frData:").append(frameData).append(", ");
-        stringBuilder.append("dataSize:").append(dataSize).append(", ");
-        stringBuilder.append("msgId:").append(messageID);
-        stringBuilder.append("}");
-		return stringBuilder.toString();
->>>>>>> develop
-	}
-	
-	public byte getVersion() {
+
+    @Override
+    public String toString() {
+        return "ProtocolFrameHeader{" +
+                "isEncrypted=" + isEncrypted +
+                ", version=" + version +
+                ", frameType=" + frameType +
+                ", serviceType=" + serviceType +
+                ", frameData=" + frameData +
+                ", sessionID=" + sessionID +
+                ", dataSize=" + dataSize +
+                ", messageID=" + messageID +
+                '}';
+    }
+
+    public byte getVersion() {
 		return version;
 	}
 

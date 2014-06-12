@@ -27,7 +27,6 @@ public class Session {
 
     private static final String CLASS_NAME = Session.class.getSimpleName();
 
-<<<<<<< HEAD
     public static Session createSession(ServiceType serviceType,
                                         byte sessionID, boolean encrypted) {
         Session session = new Session();
@@ -38,7 +37,7 @@ public class Session {
         service.setEncrypted(encrypted);
         session.addService(service);
         return session;
-=======
+    }
     /**
      * Collection of the Session Id's mapped to App Id
      */
@@ -68,7 +67,6 @@ public class Session {
         }
         Logger.w("No Session Id assignments has been done!, sessionId:" + value);
         return "";
->>>>>>> develop
     }
 
     /**
@@ -208,7 +206,7 @@ public class Session {
         return false;
     }
 
-<<<<<<< HEAD
+
     public Service getService(ServiceType serviceType) {
         if (serviceList == null || serviceList.isEmpty()) {
             return null;
@@ -221,11 +219,9 @@ public class Session {
         return null;
     }
 
-=======
     /**
      * @return number of the services in the collection
      */
->>>>>>> develop
     public int getServicesNumber() {
         return servicesList.size();
     }

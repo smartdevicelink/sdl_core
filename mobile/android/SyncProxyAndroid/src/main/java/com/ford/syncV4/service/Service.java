@@ -2,7 +2,6 @@ package com.ford.syncV4.service;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.APIConstants;
-import com.ford.syncV4.session.Session;
 
 /**
  * Created by Andrew Batutin on 1/21/14
@@ -10,14 +9,8 @@ import com.ford.syncV4.session.Session;
  */
 public class Service {
 
-<<<<<<< HEAD
-    // TODO: Reconsider this field, probably, as alternative, create 'sessionId' field here
-    private Session session;
-    private ServiceType serviceType;
     private boolean encrypted;
-=======
     private static final String CLASS_NAME = Service.class.getSimpleName();
->>>>>>> develop
 
     private String appId = APIConstants.APP_ID_EMPTY;
     /**
@@ -49,15 +42,10 @@ public class Service {
 
     @Override
     public String toString() {
-<<<<<<< HEAD
         return "Service{" +
-                "currentSession=" + session +
                 ", serviceType=" + serviceType +
                 ", encrypted=" + encrypted +
                 '}';
-=======
-        return "Service {appId:" + appId + ", serviceType:" + serviceType + "}";
->>>>>>> develop
     }
 
     @Override
@@ -74,14 +62,6 @@ public class Service {
         return false;
     }
 
-    /*@Override
-    public int hashCode() {
-        int result = sessionId != null ? sessionId.hashCode() : 0;
-        result = 31 * result + (serviceType != null ? serviceType.hashCode() : 0);
-        return result;
-<<<<<<< HEAD
-    }
-
     public void setEncrypted(boolean encrypted) {
         this.encrypted = encrypted;
     }
@@ -90,7 +70,3 @@ public class Service {
         return encrypted;
     }
 }
-=======
-    }*/
-}
->>>>>>> develop

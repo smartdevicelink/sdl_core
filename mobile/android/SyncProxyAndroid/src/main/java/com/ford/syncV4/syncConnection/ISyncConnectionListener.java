@@ -18,28 +18,17 @@ public interface ISyncConnectionListener {
 	
 	public void onProtocolMessageReceived(ProtocolMessage msg);
 	
-<<<<<<< HEAD
-	public void onProtocolSessionStarted(Session session, byte version, String correlationID);
-
-	public void onProtocolServiceEnded(ServiceType serviceType,
-                                       byte sessionID, String correlationID);
-=======
 	public void onProtocolSessionStarted(byte sessionId, byte version);
 	
 	public void onProtocolServiceEnded(ServiceType serviceType, byte sessionId);
 
     public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId);
->>>>>>> develop
 	
 	public void onProtocolError(String info, Throwable e);
 
     public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber);
 
-<<<<<<< HEAD
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID);
-=======
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version);
->>>>>>> develop
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted,byte version);
 
     public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType);
 

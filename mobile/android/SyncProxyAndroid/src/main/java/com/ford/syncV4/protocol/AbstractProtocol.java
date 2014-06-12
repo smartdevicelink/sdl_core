@@ -2,10 +2,6 @@ package com.ford.syncV4.protocol;
 
 import android.os.Environment;
 
-<<<<<<< HEAD
-=======
-import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
->>>>>>> develop
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
@@ -131,11 +127,7 @@ public abstract class AbstractProtocol {
      */
     public abstract void StartProtocolSession(byte sessionId);
 
-<<<<<<< HEAD
-    public abstract void StartProtocolService(ServiceType serviceType, Session session, boolean isCyphered);
-=======
-    public abstract void StartProtocolService(ServiceType serviceType, byte sessionId);
->>>>>>> develop
+    public abstract void StartProtocolService(ServiceType serviceType, byte sessionId, boolean isCyphered);
 
     // This method ends a protocol syncSession.  A corresponding call to the protocol
     // listener onProtocolServiceEnded() method will be made when the protocol
@@ -213,7 +205,7 @@ public abstract class AbstractProtocol {
         }
     }
 
-<<<<<<< HEAD
+
     private void sendMessage(ProtocolFrameHeader header, byte[] dataChunk) {
         byte[] frameHeader = header.assembleHeaderBytes();
         byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
@@ -222,10 +214,7 @@ public abstract class AbstractProtocol {
         handleProtocolMessageBytesToSend(commonArray, 0, commonArray.length);
     }
 
-    private synchronized void resetHeartbeatAck() {
-=======
     private synchronized void resetHeartbeatAck(byte sessionId) {
->>>>>>> develop
         if (_protocolListener != null) {
             _protocolListener.onResetHeartbeatAck(sessionId);
         }
@@ -344,33 +333,16 @@ public abstract class AbstractProtocol {
      * @param version
      */
     protected void handleProtocolSessionStarted(ServiceType serviceType,
-<<<<<<< HEAD
-                                                byte sessionID, boolean encrypted, byte version, String correlationID) {
-        Session session = Session.createSession(serviceType, sessionID, encrypted);
-        _protocolListener.onProtocolSessionStarted(session, version, correlationID);
-    }
-
-    protected void handleProtocolServiceStarted(ServiceType serviceType,
-                                                byte sessionID, boolean encrypted, byte version, String correlationID) {
-        if (sessionID == 0) {
-            throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
-        }
-        _protocolListener.onProtocolServiceStarted(serviceType, sessionID, encrypted, version, correlationID);
-=======
-                                                byte sessionId, byte version) {
+                                                byte sessionId, boolean encrypted, byte version) {
         _protocolListener.onProtocolSessionStarted(sessionId, version);
     }
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,
-                                                byte sessionID, byte version) {
-        if (serviceType.equals(ServiceType.RPC)) {
-            throw new IllegalArgumentException("Can't create RPC service without creating syncSession. serviceType" + serviceType + ";sessionID " + sessionID);
-        }
+                                                byte sessionID, boolean encrypted, byte version) {
         if (sessionID == 0) {
             throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
         }
-        _protocolListener.onProtocolServiceStarted(serviceType, sessionID, version);
->>>>>>> develop
+        _protocolListener.onProtocolServiceStarted(serviceType, sessionID,encrypted, version);
     }
 
     // This method handles protocol errors. A callback is sent to the protocol

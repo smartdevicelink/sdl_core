@@ -9,9 +9,7 @@ dependencies {
     compile project(':SyncProxyAndroid')
     compile project(':FileExplorer')
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
-<<<<<<< HEAD
     compile files('libs/RootTools.jar')
-=======
     compile 'com.android.support:appcompat-v7:19.+'
 }
 
@@ -19,7 +17,6 @@ dependencies {
 // It should exclude the support library from being exported via other project dependencies
 configurations {
     all*.exclude group: 'com.android.support', module: 'support-v4'
->>>>>>> develop
 }
 
 def isReleaseSigningSetup = false

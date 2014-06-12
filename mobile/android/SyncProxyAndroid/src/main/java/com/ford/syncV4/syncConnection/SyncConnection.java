@@ -398,19 +398,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         _protocol.SendMessage(msg);
     }
 
-<<<<<<< HEAD
-    public void startMobileNavService(Session session, boolean isCyphered) {
-        synchronized (PROTOCOL_REFERENCE_LOCK) {
-            if (_protocol != null) {
-                _protocol.StartProtocolService(ServiceType.Mobile_Nav, session, isCyphered);
-            }
-        }
-    }
-
-    public void startAudioService(Session session, boolean isCyphered) {
-=======
-    public void startMobileNavService(byte sessionId) {
->>>>>>> develop
+    public void startMobileNavService(byte sessionId,  boolean isCyphered) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!getIsConnected()) {
                 return;
@@ -418,14 +406,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (_protocol == null) {
                 return;
             }
-<<<<<<< HEAD
-            _protocol.StartProtocolService(ServiceType.Audio_Service, session, isCyphered);
-        }
-    }
-
-    public void startRpcService(Session session, boolean isCyphered) {
-=======
-            _protocol.StartProtocolService(ServiceType.Mobile_Nav, sessionId);
+            _protocol.StartProtocolService(ServiceType.Mobile_Nav, sessionId, isCyphered);
             synchronized (START_SERVICE_LOCK){
                 try {
                     START_SERVICE_LOCK.wait(1000);
@@ -436,8 +417,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void startAudioService(byte sessionId) {
->>>>>>> develop
+    public void startAudioService(byte sessionId,boolean isCyphered) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!getIsConnected()) {
                 return;
@@ -445,10 +425,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (_protocol == null) {
                 return;
             }
-<<<<<<< HEAD
-            _protocol.StartProtocolService(ServiceType.RPC, session, isCyphered);
-=======
-            _protocol.StartProtocolService(ServiceType.Audio_Service, sessionId);
+            _protocol.StartProtocolService(ServiceType.Audio_Service, sessionId, isCyphered);
             synchronized (START_SERVICE_LOCK){
                 try {
                     START_SERVICE_LOCK.wait(1000);
@@ -456,7 +433,25 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                     e.printStackTrace();
                 }
             }
->>>>>>> develop
+        }
+    }
+
+    public void startRpcService(byte sessionId, boolean isCyphered) {
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (!getIsConnected()) {
+                return;
+            }
+            if (_protocol == null) {
+                return;
+            }
+            _protocol.StartProtocolService(ServiceType.RPC, sessionId, isCyphered);
+            synchronized (START_SERVICE_LOCK){
+                try {
+                    START_SERVICE_LOCK.wait(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -640,18 +635,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-<<<<<<< HEAD
-    
-    public void onProtocolHeartbeat() {
-        if (mHeartbeatMonitor != null) {
-            mHeartbeatMonitor.heartbeatReceived();
-=======
     @Override
     public void onProtocolHeartbeat(byte sessionId) {
         IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
         if (heartbeatMonitor != null) {
             heartbeatMonitor.heartbeatReceived();
->>>>>>> develop
         }
     }
 
@@ -684,17 +672,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-<<<<<<< HEAD
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version,
-                                         String correlationID) {
-        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID, encrypted, version, correlationID);
-=======
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version){
-        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID, version);
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version){
+        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID, encrypted,version);
         synchronized (START_SERVICE_LOCK){
             START_SERVICE_LOCK.notify();
         }
->>>>>>> develop
     }
 
     @Override
@@ -703,17 +685,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-<<<<<<< HEAD
-    public void onStartServiceNackReceived(ServiceType serviceType) {
-        mConnectionListener.onStartServiceNackReceived(serviceType);
-
-        /*if (serviceType == ServiceType.Secure_Service) {
-            startProtocolSession();
-        }*/
-=======
     public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType) {
         mConnectionListener.onStartServiceNackReceived(sessionId, serviceType);
->>>>>>> develop
     }
 
     /**

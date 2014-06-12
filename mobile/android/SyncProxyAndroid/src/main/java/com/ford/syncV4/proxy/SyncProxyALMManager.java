@@ -2554,12 +2554,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-<<<<<<< HEAD
-        public void onMobileNaviStart(boolean encrypted, byte sessionId) {
-=======
-        public void onMobileNaviStart(String appId) {
->>>>>>> develop
-
+        public void onMobileNaviStart(String appId, boolean encrypted) {
         }
 
         @Override
@@ -2612,11 +2607,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-<<<<<<< HEAD
-        public void onAudioServiceStart(boolean encrypted, byte sessionID) {
-=======
-        public void onAudioServiceStart(String appId) {
->>>>>>> develop
+        public void onAudioServiceStart(String appId, boolean encrypted) {
 
         }
 
@@ -2637,16 +2628,13 @@ public class SyncProxyALMManager {
         }
 
         @Override
-<<<<<<< HEAD
         public void onRPCServiceStart(boolean encrypted, byte sessionID) {
 
         }
 
         @Override
-        public void onStartServiceNackReceived(ServiceType serviceType) {
-=======
         public void onHashChange(String appId, OnHashChange onHashChange) {
->>>>>>> develop
+
 
         }
 
@@ -2656,16 +2644,13 @@ public class SyncProxyALMManager {
         }
 
         @Override
-<<<<<<< HEAD
         public void onSecureServiceStart() {
 
         }
 
         @Override
-        public void onStartSession(byte sessionID) {
-=======
         public void onPutFileRequest(String appId, PutFile putFile) {
->>>>>>> develop
+
 
         }
 

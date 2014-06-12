@@ -1,7 +1,6 @@
 package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.session.Session;
 
 public interface IProtocolListener {
 
@@ -48,11 +47,7 @@ public interface IProtocolListener {
 
     void onProtocolAppUnregistered();
 
-<<<<<<< HEAD
-    void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID);
-=======
-    void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version);
->>>>>>> develop
+    void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version);
 
     void onStartServiceNackReceived(byte sessionId, ServiceType serviceType);
 
