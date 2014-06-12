@@ -55,8 +55,8 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         startCypheredServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (hasServiceInServicesPool(ServiceType.RPC)) {
-                    startSecureAudioService();
+                if (hasServiceInServicesPool(getAppId(),ServiceType.RPC)) {
+                    startSecureAudioService(getAppId());
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
                 }
@@ -67,8 +67,8 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         startNotCypheredServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (hasServiceInServicesPool(ServiceType.RPC)) {
-                    startNotSecureAudioService();
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
+                    startNotSecureAudioService(getAppId());
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
                 }
@@ -79,14 +79,14 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
     }
 
 
-    private void startNotSecureAudioService() {
+    private void startNotSecureAudioService(String appId) {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
-        syncProxyTester.startNotSecureAudioService();
+        syncProxyTester.startNotSecureAudioService(appId);
     }
 
-    private void startSecureAudioService() {
+    private void startSecureAudioService(String appId) {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
-        syncProxyTester.startAudioServiceEncryption();
+        syncProxyTester.startAudioServiceEncryption(appId);
     }
 
     private void changeCheckBoxState() {

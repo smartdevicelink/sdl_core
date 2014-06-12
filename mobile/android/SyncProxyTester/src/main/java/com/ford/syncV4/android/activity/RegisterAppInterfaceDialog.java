@@ -82,7 +82,7 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
                 .findViewById(R.id.registerappinterface_appHMITypeSpinner);
 
         final CheckBox useAppID = (CheckBox) layout.findViewById(R.id.registerappinterface_useAppID);
-        final EditText appID = (EditText) layout.findViewById(R.id.registerappinterface_appID);
+        final EditText appIdView = (EditText) layout.findViewById(R.id.registerappinterface_appID);
 
         updateDeviceInfoView(layout);
 

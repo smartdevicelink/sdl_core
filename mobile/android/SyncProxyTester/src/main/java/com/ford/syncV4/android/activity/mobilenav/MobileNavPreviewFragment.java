@@ -106,12 +106,12 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
 
     private void sendStartEncryptedService() {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
-        syncProxyTester.startMobileNaviServiceEncryption();
+        syncProxyTester.startMobileNaviServiceEncryption(getAppId());
     }
 
     private void sendStartNotEncryptedService() {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
-        syncProxyTester.startMobileNaviNotEncryptedService();
+        syncProxyTester.startMobileNaviNotEncryptedService(getAppId());
     }
 
     private void changeCheckBoxState() {

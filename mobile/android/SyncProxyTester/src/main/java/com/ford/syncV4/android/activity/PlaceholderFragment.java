@@ -663,15 +663,15 @@ public class PlaceholderFragment extends Fragment {
         return mAutoIncCorrId++;
     }
 
-    public void setAudioServiceStateOn(OutputStream outputStream) {
+    public void setAudioServiceStateOn(OutputStream outputStream, boolean encoded) {
         if (mAudioServicePreviewFragment != null) {
-            mAudioServicePreviewFragment.setAudioServiceStateOn(outputStream);
+            mAudioServicePreviewFragment.setAudioServiceStateOn(outputStream, encoded);
         }
     }
 
-    public void setMobileNaviStateOn(OutputStream outputStream) {
+    public void setMobileNaviStateOn(OutputStream outputStream, boolean encoded) {
         if (mMobileNavPreviewFragment != null) {
-            mMobileNavPreviewFragment.setMobileNaviStateOn(outputStream);
+            mMobileNavPreviewFragment.setMobileNaviStateOn(outputStream, encoded);
         }
     }
 
