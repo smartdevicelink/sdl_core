@@ -190,7 +190,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
-        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
+        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(String.class), any(OnSystemRequest.class));
     }
 
     public void testOnSystemRequestWithRequestTypeHTTPWithoutParametersShouldNotCallProxyListener()
@@ -205,7 +205,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
-        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
+        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(String.class) ,any(OnSystemRequest.class));
     }
 
     public void testOnSystemRequestWithRequestTypeHTTPShouldNotCrashWhenHandlerNotSet()
@@ -380,7 +380,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
-        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
+        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(String.class),any(OnSystemRequest.class));
     }
 
     public void testOnSystemRequestWithRequestTypeFileResumeWithoutParametersShouldCallProxyListener()
@@ -395,7 +395,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         emulateIncomingMessage(proxy, pm);
 
         Thread.sleep(WAIT_TIMEOUT);
-        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(OnSystemRequest.class));
+        verify(proxyListenerMock, times(1)).onOnSystemRequest(any(String.class),any(OnSystemRequest.class));
     }
 
     public void testOnSystemRequestWithRequestTypeFileResumeShouldNotCrashWhenHandlerNotSet()

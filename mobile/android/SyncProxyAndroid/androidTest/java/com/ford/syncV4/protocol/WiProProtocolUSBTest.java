@@ -61,11 +61,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-<<<<<<< HEAD
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
-=======
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version) {
->>>>>>> develop
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version) {
 
             }
 
@@ -164,16 +160,12 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-<<<<<<< HEAD
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
-=======
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted,byte version) {
 
             }
 
             @Override
             public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType) {
->>>>>>> develop
 
             }
 
