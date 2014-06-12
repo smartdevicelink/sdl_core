@@ -474,7 +474,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * A set of internal requests' correlation IDs that are currently in
      * progress.
      */
-    private Set<Integer> internalRequestCorrelationIDs;
+    private final Set<Integer> internalRequestCorrelationIDs = new HashSet<Integer>();
 
     /**
      * Correlation ID that was last used for messages created internally.
@@ -1044,7 +1044,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 return;
             }
 
-            internalRequestCorrelationIDs = new HashSet<Integer>();
+            internalRequestCorrelationIDs.clear();
 
             mSyncConnection = new SyncConnection(syncSession, mTransportConfig, _interfaceBroker);
 
