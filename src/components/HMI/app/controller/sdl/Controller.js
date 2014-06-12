@@ -384,6 +384,12 @@ SDL.SDLController = Em.Object
          */
         exitAppViewSelected: function(state) {
 
+            //if ignition off if executed than OnIgnitionCycleOver must be sent
+            if (state == SDL.SDLModel.exitAppState[0].name) {
+
+                FFW.BasicCommunication.OnIgnitionCycleOver();
+            }
+
             FFW.BasicCommunication.ExitAllApplications(state);
         },
         /**
