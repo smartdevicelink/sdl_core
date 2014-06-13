@@ -149,7 +149,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @param state_of_alert contains TRUE if alert is activated otherwise
    * contains FALSE
    */
-  virtual void set_alert_in_background(const bool state_of_alert);
+  virtual void set_alert_in_background(bool state_of_alert);
 
   /**
    * @brief Change Hash for current application

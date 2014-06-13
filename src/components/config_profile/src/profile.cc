@@ -87,6 +87,8 @@ const char* kAudioStreamFileKey = "AudioStreamFile";
 
 #ifdef CUSTOMER_PASA
 const char* kLoggerConfigFileKey = "LoggerConfigFileKey";
+const char* kRemoteLoggingFlagFileKey = "RemoteLoggingFlagFile";
+const char* kRemoteLoggingFlagFilePathKey = "RemoteLoggingFlagFilePath";
 #endif
 
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";
@@ -137,6 +139,7 @@ const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
 #ifdef CUSTOMER_PASA
 const char* kDefaultLog4cxxConfig = "/fs/mp/etc/AppLink/log4cxx.properties";
+const char* kDefaultRemoteLoggingFlagFile = "";
 #endif
 const char* kDefaultMmeDatabaseName = "/dev/qdb/mediaservice_db";
 const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
@@ -214,6 +217,7 @@ Profile::Profile()
     tts_delimiter_(kDefaultTtsDelimiter),
 #ifdef CUSTOMER_PASA
     log4cxx_config_file_(kDefaultLog4cxxConfig),
+    remote_logging_flag_file_(kDefaultRemoteLoggingFlagFile),
 #endif
     mme_db_name_(kDefaultMmeDatabaseName),
     event_mq_name_(kDefaultEventMQ),
@@ -359,6 +363,13 @@ const std::string& Profile::audio_stream_file() const {
 const std::string& Profile::log4cxx_config_file() const {
   return log4cxx_config_file_;
 }
+const std::string& Profile::remote_logging_flag_file() const {
+  return remote_logging_flag_file_;
+}
+
+const std::string& Profile::remote_logging_flag_file_path() const {
+	return remote_logging_flag_file_path_;
+}
 #endif
 
 const uint32_t& Profile::app_time_scale() const {
@@ -498,6 +509,9 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
                   kAppInfoSection,
                   kAppInfoStorageKey);
 
+#ifdef CUSTOMER_PASA
+ app_info_storage_ = app_storage_folder_ + "/" + app_info_storage_;
+#endif
  LOG_UPDATED_VALUE(app_info_storage_, kAppInfoStorageKey,
                     kAppInfoSection);
 
@@ -621,7 +635,21 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
 
     LOG_UPDATED_VALUE(log4cxx_config_file_, kLoggerConfigFileKey,
                       kMainSection);
+    // Remote logging flag file
+    ReadStringValue(&remote_logging_flag_file_, "", kMainSection,
+    		        kRemoteLoggingFlagFileKey);
+
+    LOG_UPDATED_VALUE(remote_logging_flag_file_, kRemoteLoggingFlagFileKey,
+                      kMainSection);
+
+    // Remote logging flag file
+    ReadStringValue(&remote_logging_flag_file_path_, "", kMainSection,
+        		    kRemoteLoggingFlagFilePathKey);
+
+    LOG_UPDATED_VALUE(remote_logging_flag_file_path_, kRemoteLoggingFlagFilePathKey,
+                      kMainSection);
 #endif
+
   // Mixing audio parameter
   std::string mixing_audio_value;
   if (ReadValue(&mixing_audio_value, kMainSection, kMixingAudioSupportedKey)

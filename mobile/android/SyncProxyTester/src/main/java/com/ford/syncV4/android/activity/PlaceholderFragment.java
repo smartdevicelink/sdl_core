@@ -108,11 +108,11 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -180,7 +180,7 @@ public class PlaceholderFragment extends Fragment {
     private ArrayAdapter<String> mPutFileAdapter = null;
 
     private final Map<Integer, Integer> mCommandIdToParentSubmenuMap =
-            new Hashtable<Integer, Integer>();
+            new ConcurrentHashMap<Integer, Integer>();
 
     private MobileNavPreviewFragment mMobileNavPreviewFragment;
     private AudioServicePreviewFragment mAudioServicePreviewFragment;
@@ -2774,7 +2774,7 @@ public class PlaceholderFragment extends Fragment {
 
     private void loadMessageSelectCount() {
         SharedPreferences prefs = getActivity().getSharedPreferences(Const.PREFS_NAME, 0);
-        messageSelectCount = new Hashtable<String, Integer>();
+        messageSelectCount = new ConcurrentHashMap<String, Integer>();
         for (Map.Entry<String, ?> entry : prefs.getAll().entrySet()) {
             if (entry.getKey().startsWith(MSC_PREFIX)) {
                 messageSelectCount.put(entry.getKey().substring(MSC_PREFIX.length()),
@@ -2795,7 +2795,7 @@ public class PlaceholderFragment extends Fragment {
     }
 
     private void clearMessageSelectCount() {
-        messageSelectCount = new Hashtable<String, Integer>();
+        messageSelectCount = new ConcurrentHashMap<String, Integer>();
         SharedPreferences prefs = getActivity().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = prefs.edit();
         for (Map.Entry<String, ?> entry : prefs.getAll().entrySet()) {

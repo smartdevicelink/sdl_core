@@ -281,7 +281,7 @@ bool ApplicationImpl::alert_in_background() const {
   return alert_in_background_;
 }
 
-void ApplicationImpl::set_alert_in_background(const bool state_of_alert) {
+void ApplicationImpl::set_alert_in_background(bool state_of_alert) {
   alert_in_background_ = state_of_alert;
 }
 
