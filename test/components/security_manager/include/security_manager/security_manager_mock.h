@@ -33,8 +33,10 @@
 #ifndef SECURITY_MANAGER_MOCK_H
 #define SECURITY_MANAGER_MOCK_H
 #include <gmock/gmock.h>
-#include "security_manager/security_manager.h"
 #include "utils/byte_order.h"
+#include "security_manager/security_manager.h"
+#include "security_manager/ssl_context.h"
+#include "security_manager/security_query.h"
 
 namespace test  {
 namespace components  {
@@ -121,6 +123,8 @@ namespace security_manager_test {
                  security_manager::SSLContext* ());
     MOCK_METHOD1(ReleaseSSLContext,
                  void(security_manager::SSLContext*));
+    MOCK_CONST_METHOD0(LastError,
+                       std::string());
   };
   /*
    * MOCK implementation of security_manager::SSLContext interface
@@ -143,6 +147,8 @@ namespace security_manager_test {
                        const uint8_t** const, size_t*));
     MOCK_CONST_METHOD1(get_max_block_size, size_t (size_t));
     MOCK_CONST_METHOD0(IsInitCompleted, bool());
+    MOCK_CONST_METHOD0(LastError,
+                       std::string());
   };
   /*
    * MOCK implementation of security_manager::SecurityManagerListener

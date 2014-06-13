@@ -18,7 +18,6 @@ set(LIBRARIES
     ProtocolHandler
     ApplicationManager
     Utils
-    rt
 )
 
 create_test("test_mobile_message_handler"

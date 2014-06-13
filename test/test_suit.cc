@@ -42,12 +42,14 @@
 #include "protocol_handler/protocol_handler_tm_test.h"
 #include "application_manager/formatters_commands.h"
 
+#ifdef ENABLE_SECURITY
 #include "connection_handler/connection_test.h"
 //#include "connection_handler/heart_beat_monitor_test.h"
 #include "connection_handler/connection_handler_impl_test.h"
 #include "security_manager/crypto_manager_impl_test.h"
 #include "security_manager/security_manager_test.h"
 #include "security_manager/security_query_test.h"
+#endif  // ENABLE_SECURITY
 
 #include "media_manager/media_manager_impl_test.h"
 #include "SmartObjectDraftTest.h"

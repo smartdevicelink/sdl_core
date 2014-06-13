@@ -4,9 +4,9 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include/
   ${CMAKE_SOURCE_DIR}/src/components/protocol_handler/include/
-  ${CMAKE_SOURCE_DIR}/src/components/security_manager/include
   ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include/
   ${CMAKE_SOURCE_DIR}/test/components/transport_manager/include/
+  ${SecurityManagerIncludeDir}
   ${LIBUSB_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )

@@ -95,9 +95,6 @@ class TransportAdapterImpl : public TransportAdapter,
    **/
   virtual TransportAdapter::Error Init();
 
-  //!!!!!!!!1
-  virtual void ApplicationListUpdated(const DeviceUID& device_handle);
-
   /**
    * @brief Add listener to the container(list) of device adapter listeners.
    *
@@ -240,12 +237,9 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual void SearchDeviceDone(const DeviceVector& devices);
 
-  /**
-   * @brief Search for application in device done, if it is not there - adds it.
-   *
-   * @param device Smart pointers to devices.
-   */
-  virtual void SearchApplicationsDone(const DeviceSptr& device);
+  virtual void ApplicationListUpdated(const DeviceUID& device_handle);
+
+  virtual void FindNewApplicationsRequest();
 
   /**
    * @brief Launch OnSearchDeviceFailed event in device adapter listener.
@@ -540,5 +534,5 @@ class TransportAdapterImpl : public TransportAdapter,
 };
 }  // namespace transport_adapter
 }  // namespace transport_manager
-#endif  // #ifndef \
-        // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_IMPL_H_
+
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_

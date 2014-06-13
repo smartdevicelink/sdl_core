@@ -38,6 +38,7 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * This class is responsible for the transport connection (Bluetooth, USB, WiFi), provide Services
@@ -67,8 +68,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     /**
      * Table of the Heart Beat monitors (each one associated with a concrete session)
      */
-    private final Hashtable<Byte, IHeartbeatMonitor> heartbeatMonitors =
-            new Hashtable<Byte, IHeartbeatMonitor>();
+    private final ConcurrentHashMap<Byte, IHeartbeatMonitor> heartbeatMonitors =
+            new ConcurrentHashMap<Byte, IHeartbeatMonitor>();
     private NSDHelper mNSDHelper;
 
     static final Object END_PROTOCOL_SERVICE_AUDIO_LOCK = new Object();
@@ -79,6 +80,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     private boolean mIsInit = false;
     private Session mSyncSession;
+    private BaseTransportConfig mTransportConfig;
 
     /**
      * Test Cases fields
@@ -91,11 +93,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     /**
      * Constructor.
      *
-     * @param listener Sync connection listener.
+     * @param transportConfig configuration of the transport to be used, refer to
+     *                        {@link com.ford.syncV4.transport.BaseTransportConfig}
+     * @param listener Sync connection listener
      */
-    public SyncConnection(Session session, ISyncConnectionListener listener) {
+    public SyncConnection(Session session, BaseTransportConfig transportConfig,
+                          ISyncConnectionListener listener) {
         mConnectionListener = listener;
         mIsInit = false;
+        mTransportConfig = transportConfig;
         mSyncSession = session;
     }
 
@@ -109,22 +115,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     /**
-     * Initialize transport with provided configuration
-     *
-     * @param transportConfig configuration of the transport to be used, refer to
-     *                        {@link com.ford.syncV4.transport.BaseTransportConfig}
-     */
-    public void init(BaseTransportConfig transportConfig) {
-        init(transportConfig, null);
-    }
-
-    /**
      * Initialize transport with provided configuration and transport instance
-     *
-     * @param transportConfig configuration of the transport to be used, refer to
-     *                        {@link com.ford.syncV4.transport.BaseTransportConfig}
-     * @param transport       an instance of transport (Bluetooth, USB, WiFi)
      */
+<<<<<<< HEAD
     public void init(BaseTransportConfig transportConfig, SyncTransport transport) {
         init(transportConfig, transport, null);
     }
@@ -140,37 +133,26 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      */
     public void init(BaseTransportConfig transportConfig, SyncTransport transport,
                      AbstractProtocol protocol) {
+=======
+    public void init() {
+>>>>>>> develop
         // Initialize the transport
         synchronized (TRANSPORT_REFERENCE_LOCK) {
-            // Ensure transport is null
-            if (_transport != null) {
-                if (_transport.getIsConnected()) {
-                    _transport.disconnect();
-                }
-                _transport = null;
-            }
-
-            if (transport != null) {
-                _transport = transport;
-            } else {
-                switch (transportConfig.getTransportType()) {
-                    case BLUETOOTH:
-                        _transport = new BTTransport(this);
-                        break;
-
-                    case TCP:
-                        TCPTransportConfig tcpTransportConfig = (TCPTransportConfig) transportConfig;
-                        _transport = new TCPTransport(tcpTransportConfig, this);
-                        if (tcpTransportConfig.getIsNSD()) {
-                            mNSDHelper = new NSDHelper(tcpTransportConfig.getApplicationContext());
-                            mNSDHelper.initializeNsd();
-                        }
-                        break;
-
-                    case USB:
-                        _transport = new USBTransport((USBTransportConfig) transportConfig, this);
-                        break;
-                }
+            switch (mTransportConfig.getTransportType()) {
+                case BLUETOOTH:
+                    _transport = new BTTransport(this);
+                    break;
+                case TCP:
+                    TCPTransportConfig tcpTransportConfig = (TCPTransportConfig) mTransportConfig;
+                    _transport = new TCPTransport(tcpTransportConfig, this);
+                    if (tcpTransportConfig.getIsNSD()) {
+                        mNSDHelper = new NSDHelper(tcpTransportConfig.getApplicationContext());
+                        mNSDHelper.initializeNsd();
+                    }
+                    break;
+                case USB:
+                    _transport = new USBTransport((USBTransportConfig) mTransportConfig, this);
+                    break;
             }
         }
 
@@ -196,18 +178,32 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         return _protocol;
     }
 
-    public void setHeartbeatMonitor(IHeartbeatMonitor heartbeatMonitor) {
-        if (heartbeatMonitors.containsKey(heartbeatMonitor.getSessionId())) {
-            heartbeatMonitors.remove(heartbeatMonitor.getSessionId());
+    public void setHeartbeatMonitor(final IHeartbeatMonitor heartbeatMonitor) {
+        final byte sessionId = heartbeatMonitor.getSessionId();
+        if (heartbeatMonitors.containsKey(sessionId)) {
+            //IHeartbeatMonitor monitor = heartbeatMonitors.get(sessionId);
+
+            heartbeatMonitors.remove(sessionId);
+
+            //monitor = null;
         }
         heartbeatMonitor.setListener(this);
 
-        Logger.d(CLASS_NAME + " Set HB monitor, sesId:" + heartbeatMonitor.getSessionId());
-        heartbeatMonitors.put(heartbeatMonitor.getSessionId(), heartbeatMonitor);
+        //Logger.d(CLASS_NAME + " Set HBM, sesId:" + sessionId + " contains-pre:" + heartbeatMonitors.containsKey(sessionId));
+        heartbeatMonitors.put(sessionId, heartbeatMonitor);
+        //Logger.d(CLASS_NAME + " Set HBM, sesId:" + sessionId + " contains-post:" + heartbeatMonitors.containsKey(sessionId) +
+        //     " thread:" + Thread.currentThread());
     }
 
     protected IHeartbeatMonitor getHeartbeatMonitor(byte sessionId) {
-        return heartbeatMonitors.get(sessionId);
+        return getHeartbeatMonitor(sessionId, "protected");
+    }
+
+    private IHeartbeatMonitor getHeartbeatMonitor(byte sessionId, String source) {
+        final IHeartbeatMonitor returnValue = heartbeatMonitors.get(sessionId);
+        Logger.d(CLASS_NAME + " Get HBM:" + returnValue + " sesId:" + sessionId +
+                " thread:" + Thread.currentThread() + " source:" + source);
+        return returnValue;
     }
 
     public void closeConnection(boolean keepConnection) {
@@ -263,11 +259,15 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void stopHeartbeatMonitor(byte sessionId) {
-        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
-        Logger.d(CLASS_NAME + " Stop HeartBeat, sesId:" + sessionId + " " + heartbeatMonitor);
+        IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId, "stop HBM");
+        Logger.d(CLASS_NAME + " Stop HBM, sesId:" + sessionId + " " + heartbeatMonitor);
         if (heartbeatMonitor != null) {
-            Logger.d(CLASS_NAME + " Stop HeartBeat, sesId:" + sessionId);
+            //Logger.d(CLASS_NAME + " Stop HBM, sesId:" + sessionId);
             heartbeatMonitor.stop();
+
+            heartbeatMonitors.remove(sessionId);
+
+            //heartbeatMonitor = null;
         }
     }
 
@@ -398,7 +398,19 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         _protocol.SendMessage(msg);
     }
 
-    public void startMobileNavService(byte sessionId,  boolean isCyphered) {
+<<<<<<< HEAD
+    public void startMobileNavService(Session session, boolean isCyphered) {
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (_protocol != null) {
+                _protocol.StartProtocolService(ServiceType.Mobile_Nav, session, isCyphered);
+            }
+        }
+    }
+
+    public void startAudioService(Session session, boolean isCyphered) {
+=======
+    public void startMobileNavService(byte sessionId) {
+>>>>>>> develop
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!getIsConnected()) {
                 return;
@@ -406,7 +418,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (_protocol == null) {
                 return;
             }
-            _protocol.StartProtocolService(ServiceType.Mobile_Nav, sessionId, isCyphered);
+<<<<<<< HEAD
+            _protocol.StartProtocolService(ServiceType.Audio_Service, session, isCyphered);
+        }
+    }
+
+    public void startRpcService(Session session, boolean isCyphered) {
+=======
+            _protocol.StartProtocolService(ServiceType.Mobile_Nav, sessionId);
             synchronized (START_SERVICE_LOCK){
                 try {
                     START_SERVICE_LOCK.wait(1000);
@@ -417,7 +436,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void startAudioService(byte sessionId,boolean isCyphered) {
+    public void startAudioService(byte sessionId) {
+>>>>>>> develop
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!getIsConnected()) {
                 return;
@@ -425,7 +445,10 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (_protocol == null) {
                 return;
             }
-            _protocol.StartProtocolService(ServiceType.Audio_Service, sessionId, isCyphered);
+<<<<<<< HEAD
+            _protocol.StartProtocolService(ServiceType.RPC, session, isCyphered);
+=======
+            _protocol.StartProtocolService(ServiceType.Audio_Service, sessionId);
             synchronized (START_SERVICE_LOCK){
                 try {
                     START_SERVICE_LOCK.wait(1000);
@@ -433,25 +456,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                     e.printStackTrace();
                 }
             }
-        }
-    }
-
-    public void startRpcService(byte sessionId, boolean isCyphered) {
-        synchronized (PROTOCOL_REFERENCE_LOCK) {
-            if (!getIsConnected()) {
-                return;
-            }
-            if (_protocol == null) {
-                return;
-            }
-            _protocol.StartProtocolService(ServiceType.RPC, sessionId, isCyphered);
-            synchronized (START_SERVICE_LOCK){
-                try {
-                    START_SERVICE_LOCK.wait(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+>>>>>>> develop
         }
     }
 
@@ -490,7 +495,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void startHeartbeatTimer(byte sessionId) {
-        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId, "start HBM timer");
         if (heartbeatMonitor != null) {
             heartbeatMonitor.start();
         }
@@ -629,35 +634,54 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onProtocolHeartbeatACK(byte sessionId) {
-        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId, "onProtocolHeartbeatACK");
+        Logger.d(CLASS_NAME + " OnProtocolHeartbeatACK, sesId:" + sessionId + ", HBM:" + heartbeatMonitor);
         if (heartbeatMonitor != null) {
             heartbeatMonitor.heartbeatACKReceived();
+        } else {
+            Logger.w(CLASS_NAME + " OnProtocolHeartbeatACK HBM null");
         }
     }
 
+<<<<<<< HEAD
+    
+    public void onProtocolHeartbeat() {
+        if (mHeartbeatMonitor != null) {
+            mHeartbeatMonitor.heartbeatReceived();
+=======
     @Override
     public void onProtocolHeartbeat(byte sessionId) {
-        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId, "onProtocolHeartbeat");
         if (heartbeatMonitor != null) {
             heartbeatMonitor.heartbeatReceived();
+<<<<<<< HEAD
+>>>>>>> develop
+=======
+        } else {
+            Logger.w(CLASS_NAME + " OnProtocolHeartbeat HBM null");
+>>>>>>> develop
         }
     }
 
     @Override
     public void onResetHeartbeatAck(byte sessionId) {
-        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId, "onResetHeartbeatAck");
         Logger.d(CLASS_NAME + " Reset HM at sesId:" + sessionId + " HB's number:" +
                 heartbeatMonitors.size() + " current:" + heartbeatMonitor);
         if (heartbeatMonitor != null) {
             heartbeatMonitor.notifyTransportOutputActivity();
+        } else {
+            Logger.w(CLASS_NAME + " OnResetHeartbeatAck HBM null");
         }
     }
 
     @Override
     public void onResetHeartbeat(byte sessionId) {
-        IHeartbeatMonitor heartbeatMonitor = heartbeatMonitors.get(sessionId);
+        final IHeartbeatMonitor heartbeatMonitor = getHeartbeatMonitor(sessionId, "onResetHeartbeat");
         if (heartbeatMonitor != null) {
             heartbeatMonitor.notifyTransportInputActivity();
+        } else {
+            Logger.w(CLASS_NAME + " OnResetHeartbeat HBM null");
         }
     }
 
@@ -672,11 +696,17 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version){
-        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID, encrypted,version);
+<<<<<<< HEAD
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version,
+                                         String correlationID) {
+        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID, encrypted, version, correlationID);
+=======
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version){
+        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID, version);
         synchronized (START_SERVICE_LOCK){
             START_SERVICE_LOCK.notify();
         }
+>>>>>>> develop
     }
 
     @Override
@@ -685,8 +715,17 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
+<<<<<<< HEAD
+    public void onStartServiceNackReceived(ServiceType serviceType) {
+        mConnectionListener.onStartServiceNackReceived(serviceType);
+
+        /*if (serviceType == ServiceType.Secure_Service) {
+            startProtocolSession();
+        }*/
+=======
     public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType) {
         mConnectionListener.onStartServiceNackReceived(sessionId, serviceType);
+>>>>>>> develop
     }
 
     /**

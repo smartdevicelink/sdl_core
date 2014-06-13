@@ -3,7 +3,7 @@ include_directories (
   ../transport_manager/include/
   ../protocol_handler/include/
   ../config_profile/include/
-  ../security_manager/include/
+  ${SecurityManagerIncludeDir}/
   ../utils/include/
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}

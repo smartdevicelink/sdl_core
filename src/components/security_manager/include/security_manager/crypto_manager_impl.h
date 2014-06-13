@@ -58,13 +58,13 @@ namespace security_manager {
                             const uint8_t ** const out_data, size_t* out_data_size);
       virtual bool Decrypt(const uint8_t * const in_data,  size_t in_data_size,
                             const uint8_t ** const out_data, size_t* out_data_size);
-      virtual bool  IsInitCompleted() const;
+      virtual bool IsInitCompleted() const;
       virtual size_t get_max_block_size(size_t mtu) const;
+      virtual std::string LastError() const;
       virtual ~SSLContextImpl();
 
      private:
       typedef size_t(*BlockSizeGetter)(size_t);
-      DISALLOW_COPY_AND_ASSIGN(SSLContextImpl);
       void EnsureBufferSizeEnough(size_t size);
       SSL *connection_;
       BIO *bioIn_;
@@ -76,6 +76,7 @@ namespace security_manager {
       Mode mode_;
       static std::map<std::string, BlockSizeGetter> max_block_sizes;
       static std::map<std::string, BlockSizeGetter> create_max_block_sizes();
+      DISALLOW_COPY_AND_ASSIGN(SSLContextImpl);
     };
 
    public:
@@ -89,11 +90,12 @@ namespace security_manager {
     virtual void Finish();
     virtual SSLContext *CreateSSLContext();
     virtual void ReleaseSSLContext(SSLContext* context);
+    virtual std::string LastError() const;
    private:
-    DISALLOW_COPY_AND_ASSIGN(CryptoManagerImpl);
     SSL_CTX *context_;
     Mode mode_;
     static int instance_count_;
+    DISALLOW_COPY_AND_ASSIGN(CryptoManagerImpl);
   };
 } // namespace security_manager
 

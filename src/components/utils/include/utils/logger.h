@@ -79,7 +79,11 @@ namespace log4cxx {
     #define LOG4CXX_TRACE_ENTER(logger) LOG4CXX_TRACE(logger, "ENTER: " << __PRETTY_FUNCTION__ )
     #define LOG4CXX_TRACE_EXIT(logger) LOG4CXX_TRACE(logger, "EXIT: " << __PRETTY_FUNCTION__ )
 
-    #define LOG4CXX_ERROR_WITH_ERRNO(logger, message) LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
+    #define LOG4CXX_ERROR_WITH_ERRNO(logger, message) \
+      LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
+
+     #define LOG4CXX_WARN_WITH_ERRNO(logger, message) \
+       LOG4CXX_WARN(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
 
 #else // ENABLE_LOG is OFF
 
@@ -104,6 +108,9 @@ namespace log4cxx {
 
     #undef LOG4CXX_ERROR_WITH_ERRNO
     #define LOG4CXX_ERROR_WITH_ERRNO(x,y)
+
+    #undef LOG4CXX_WARN_WITH_ERRNO
+    #define LOG4CXX_WARN_WITH_ERRNO(x,y)
 
     #undef LOG4CXX_TRACE
     #define LOG4CXX_TRACE(x,y)

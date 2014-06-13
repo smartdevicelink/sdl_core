@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@
 #include "application_manager/vehicle_info_data.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
+#include "hmi_message_handler/hmi_message_sender.h"
 
 #include "media_manager/media_manager_impl.h"
 
@@ -83,7 +84,6 @@ namespace NsSmartObjects {
 class SmartObject;
 }
 }
-
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace threads {
@@ -177,10 +177,17 @@ class ApplicationManagerImpl : public ApplicationManager,
     public impl::FromMobileQueue::Handler, public impl::ToMobileQueue::Handler,
     public impl::FromHmiQueue::Handler, public impl::ToHmiQueue::Handler,
   public utils::Singleton<ApplicationManagerImpl> {
+
     friend class ResumeCtrl;
     friend class CommandImpl;
-  public:
+
+ public:
     ~ApplicationManagerImpl();
+
+    /**
+     * Inits application manager
+     */
+    virtual void Init();
 
     /**
      * @brief Stop work.
@@ -398,21 +405,21 @@ class ApplicationManagerImpl : public ApplicationManager,
     /*
      * @brief Overriden ProtocolObserver method
      */
-    virtual void OnMessageReceived(const protocol_handler::
-                                   RawMessagePtr message);
+    virtual void OnMessageReceived(
+        const protocol_handler::RawMessagePtr message);
 
     /*
      * @brief Overriden ProtocolObserver method
      */
-    virtual void OnMobileMessageSent(const protocol_handler::
-                                     RawMessagePtr message);
+    virtual void OnMobileMessageSent(
+        const protocol_handler::RawMessagePtr message);
 
     void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
     //TODO (EZamakhov): fix all indentations in this file
-    void OnApplicationListUpdated(const connection_handler::DeviceHandle& device_handle);
+  virtual void OnFindNewApplicationsRequest();
     void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
     bool OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
@@ -575,7 +582,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     mobile_apis::MOBILE_API& mobile_so_factory();
 
     void CreateHMIMatrix(HMIMatrix* matrix);
-    void CreatePoliciesManager();
 
     /**
      * \brief Performs check using PoliciesManager of availability
@@ -623,7 +629,10 @@ class ApplicationManagerImpl : public ApplicationManager,
     virtual void Handle(const impl::MessageFromHmi& message) OVERRIDE;
 
     // CALLED ON messages_to_hmi_ thread!
-    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;    
+    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
+
+    void SendUpdateAppList(const std::list<uint32_t>& applications_ids);
+    void OnApplicationListUpdateTimer();
 
     /**
      * @brief Checks, if given RPC is allowed at current HMI level for specific
@@ -711,6 +720,18 @@ class ApplicationManagerImpl : public ApplicationManager,
     impl::FromHmiQueue messages_from_hmi_;
     // Thread that pumps messages being passed to HMI.
     impl::ToHmiQueue messages_to_hmi_;
+
+    class ApplicationListUpdateTimer : public timer::TimerThread<ApplicationManagerImpl> {
+     public:
+      ApplicationListUpdateTimer(ApplicationManagerImpl* callee) :
+          timer::TimerThread<ApplicationManagerImpl>(
+              callee,
+              &ApplicationManagerImpl::OnApplicationListUpdateTimer
+          ) {
+      }
+    };
+    typedef utils::SharedPtr<ApplicationListUpdateTimer> ApplicationListUpdateTimerSptr;
+    ApplicationListUpdateTimerSptr application_list_update_timer_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 

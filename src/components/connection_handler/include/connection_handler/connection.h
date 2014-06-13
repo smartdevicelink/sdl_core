@@ -40,7 +40,12 @@
 #include "connection_handler/device.h"
 #include "connection_handler/heartbeat_monitor.h"
 #include "protocol_handler/service_type.h"
-#include "security_manager/ssl_context.h"
+
+#ifdef ENABLE_SECURITY
+namespace security_manager {
+ class SSLContext;
+}
+#endif  // ENABLE_SECURITY
 
 /**
  * \namespace connection_handler
@@ -103,14 +108,21 @@ typedef ServiceList::const_iterator ServiceListConstIterator;
 
 struct Session {
   ServiceList service_list;
+#ifdef ENABLE_SECURITY
   security_manager::SSLContext* ssl_context;
+#endif  // ENABLE_SECURITY
   Session()
-    : service_list(), ssl_context(NULL) {
-  }
+    : service_list()
+#ifdef ENABLE_SECURITY
+    , ssl_context(NULL)
+#endif  // ENABLE_SECURITY
+  {}
   explicit Session(const ServiceList& services)
-    : service_list(services),
-      ssl_context(NULL) {
-  }
+    : service_list(services)
+#ifdef ENABLE_SECURITY
+      , ssl_context(NULL)
+#endif  // ENABLE_SECURITY
+  {}
 };
 
 /**
@@ -192,6 +204,7 @@ class Connection {
   bool RemoveService(uint8_t session,
                      protocol_handler::ServiceType service_type);
 
+#ifdef ENABLE_SECURITY
   /**
    * \brief Sets crypto context of service
    * \param sessionId Identifier of the session
@@ -211,7 +224,7 @@ class Connection {
   security_manager::SSLContext* GetSSLContext(
       uint8_t sessionId,
       const protocol_handler::ServiceType& service_type) const;
-
+#endif // ENABLE_SECURITY
   /**
    * \brief Returns map of sessions which have been opened in
    *  current connection.
@@ -230,13 +243,13 @@ class Connection {
    */
   void KeepAlive(uint8_t session_id);
 
-  /*
+  /**
    * \brief Start heartbeat for specified session
    * \param  session_id session id
    */
   void StartHeartBeat(uint8_t session_id);
 
-  /*
+  /**
    * \brief Send heartbeat to  mobile app
    * \param  session_id session id
    */
@@ -274,6 +287,6 @@ class Connection {
   DISALLOW_COPY_AND_ASSIGN(Connection);
 };
 
-}/* namespace connection_handler */
+}  // namespace connection_handler
 
 #endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_H_

@@ -36,12 +36,11 @@ set(LIBRARIES
   ProtocolHandler
   connectionHandler
   TransportManager
-  SecurityManager
+  ${SecurityManagerLibrary}
   HMIMessageHandler
-  MessageBroker  
+  MessageBroker
   ${BROKER_LIBRARIES}
   Utils
-  encryption
   jsoncpp
   ConfigProfile
   RequestWatchdog
@@ -55,10 +54,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 if (BUILD_BT_SUPPORT)
-	list(APPEND LIBRARIES bluetooth)
+  list(APPEND LIBRARIES bluetooth)
 endif()
 if (BUILD_AVAHI_SUPPORT)
-	list(APPEND LIBRARIES avahi-client avahi-common)
+  list(APPEND LIBRARIES avahi-client avahi-common)
 endif()
 if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -79,7 +78,7 @@ include_directories (
   ../components/application_manager/include
   ../components/formatters/include
   ../components/transport_manager/include
-  ../components/security_manager/include
+  ${SecurityManagerIncludeDir}
   ../components/config_profile/include
   ../components/utils/include/
   ../components/connection_handler/include/

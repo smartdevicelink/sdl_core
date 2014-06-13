@@ -1,7 +1,6 @@
 package com.ford.syncV4.android.service;
 
 import android.app.Service;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -146,8 +145,9 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ProxyService extends Service implements IProxyListenerALMTesting {
 
@@ -184,9 +184,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * each {@link com.ford.syncV4.android.manager.PutFileTransferManager} is associated with
      * concrete AppId
      */
-    private Hashtable<String, PutFileTransferManager> mPutFileTransferManagers;
-    private Hashtable<String, ApplicationIconManager> mApplicationIconManagerHashtable =
-            new Hashtable<String, ApplicationIconManager>();
+    private Map<String, PutFileTransferManager> mPutFileTransferManagers;
+    private Map<String, ApplicationIconManager> mApplicationIconManagerHashtable =
+            new ConcurrentHashMap<String, ApplicationIconManager>();
     private ConnectionListenersManager mConnectionListenersManager;
     private final IBinder mBinder = new ProxyServiceBinder(this);
 
@@ -195,8 +195,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * Each manager provide functionality to process RPC requests which are involved in app
      * resumption
      */
-    private Hashtable<String, RPCRequestsResumableManager> mRpcRequestsResumableManager =
-            new Hashtable<String, RPCRequestsResumableManager>();
+    private ConcurrentHashMap<String, RPCRequestsResumableManager> mRpcRequestsResumableManager =
+            new ConcurrentHashMap<String, RPCRequestsResumableManager>();
 
     /**
      * Map of the existed syncProxyTester applications, mobile application Id is a Key
@@ -227,7 +227,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
         //startProxyIfNetworkConnected();
 
-        mPutFileTransferManagers = new Hashtable<String, PutFileTransferManager>();
+        mPutFileTransferManagers = new ConcurrentHashMap<String, PutFileTransferManager>();
 
         MainApp.getInstance().getLastUsedHashIdsManager().init();
     }
@@ -450,6 +450,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         return mSyncProxy != null && mSyncProxy.getIsConnected();
     }
 
+    /**
+     * Updates {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} object, use for the Tests only
+     *
+     * @param registerAppInterface {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} request
+     */
+    public void updateRegisterAppInterface(RegisterAppInterface registerAppInterface) {
+        mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);
+    }
+
     private Vector<AppHMIType> createAppTypeVector(boolean naviApp) {
         if (naviApp) {
             Vector<AppHMIType> vector = new Vector<AppHMIType>();
@@ -632,6 +641,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * @param logAdapter {@link com.ford.syncV4.android.adapters.LogAdapter}
      */
     public void addLogAdapter(LogAdapter logAdapter) {
+        if (logAdapter == null) {
+            return;
+        }
+        if (mLogAdapters.contains(logAdapter)) {
+            return;
+        }
         mLogAdapters.add(logAdapter);
     }
 
@@ -1779,6 +1794,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                                                  UnregisterAppInterfaceResponse response) {
         createDebugMessageForAdapter(appId, response);
 
+        ApplicationIconManager applicationIconManager =
+                mApplicationIconManagerHashtable.get(appId);
+        if (applicationIconManager != null) {
+            applicationIconManager.reset();
+        }
+
         if (isModuleTesting()) {
             ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
                     response.getResultCode()));
@@ -2139,66 +2160,48 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      */
     public void syncProxyOpenSession(String syncAppId) throws SyncException {
         if (mSyncProxy != null) {
+
+            SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
+            String appName = settings.getString(Const.PREFS_KEY_APPNAME,
+                    Const.PREFS_DEFAULT_APPNAME);
+            boolean isMediaApp = settings.getBoolean(
+                    Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
+            boolean isNaviApp = settings.getBoolean(
+                    Const.PREFS_KEY_ISNAVIAPP, Const.PREFS_DEFAULT_ISNAVIAPP);
+            Language lang = Language.valueOf(settings.getString(
+                    Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
+            Language hmiLang = Language.valueOf(settings.getString(
+                    Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
+            // Apply custom AppId in case of such possibility selected
+            TransportType transportType = AppPreferencesManager.getTransportType();
+            String appId = AppIdManager.getAppIdByTransport(transportType);
+            if (AppPreferencesManager.getIsCustomAppId()) {
+                appId = AppPreferencesManager.getCustomAppId();
+            }
+            Vector<AppHMIType> appHMITypes = createAppTypeVector(isNaviApp);
+
+            RegisterAppInterface registerAppInterface = registerAppInterfaceHashMap.get(syncAppId);
+            Logger.d(TAG + " Open Session, appId:" + syncAppId + " RAI:" + registerAppInterface);
+            if (registerAppInterface == null) {
+                registerAppInterface = RPCRequestFactory.buildRegisterAppInterface();
+                registerAppInterfaceHashMap.put(syncAppId, registerAppInterface);
+            }
+            registerAppInterface.setAppName(appName);
+            registerAppInterface.setLanguageDesired(lang);
+            registerAppInterface.setHmiDisplayLanguageDesired(hmiLang);
+            registerAppInterface.setAppId(appId);
+            registerAppInterface.setIsMediaApplication(isMediaApp);
+            registerAppInterface.setAppType(appHMITypes);
+
+            SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
+            syncMsgVersion.setMajorVersion(2);
+            syncMsgVersion.setMinorVersion(2);
+            registerAppInterface.setSyncMsgVersion(syncMsgVersion);
+
+            mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);
+
             if (mSyncProxy.getIsConnected()) {
-
-                SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
-                String appName = settings.getString(Const.PREFS_KEY_APPNAME,
-                        Const.PREFS_DEFAULT_APPNAME);
-                boolean isMediaApp = settings.getBoolean(
-                        Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
-                boolean isNaviApp = settings.getBoolean(
-                        Const.PREFS_KEY_ISNAVIAPP, Const.PREFS_DEFAULT_ISNAVIAPP);
-                Language lang = Language.valueOf(settings.getString(
-                        Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
-                Language hmiLang = Language.valueOf(settings.getString(
-                        Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
-                // Apply custom AppId in case of such possibility selected
-                TransportType transportType = AppPreferencesManager.getTransportType();
-                String appId = AppIdManager.getAppIdByTransport(transportType);
-                if (AppPreferencesManager.getIsCustomAppId()) {
-                    appId = AppPreferencesManager.getCustomAppId();
-                }
-                Vector<AppHMIType> appHMITypes = createAppTypeVector(isNaviApp);
-
-                RegisterAppInterface registerAppInterface = registerAppInterfaceHashMap.get(syncAppId);
-                Logger.d(TAG + " Open Session, appId:" + syncAppId + " RAI:" + registerAppInterface);
-                if (registerAppInterface == null) {
-
-                    registerAppInterface = RPCRequestFactory.buildRegisterAppInterface();
-                    registerAppInterface.setAppName(appName);
-                    registerAppInterface.setLanguageDesired(lang);
-                    registerAppInterface.setHmiDisplayLanguageDesired(hmiLang);
-                    registerAppInterface.setAppId(appId);
-                    registerAppInterface.setIsMediaApplication(isMediaApp);
-                    registerAppInterface.setAppType(appHMITypes);
-
-                    SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
-                    syncMsgVersion.setMajorVersion(2);
-                    syncMsgVersion.setMinorVersion(2);
-                    registerAppInterface.setSyncMsgVersion(syncMsgVersion);
-
-                    registerAppInterfaceHashMap.put(syncAppId, registerAppInterface);
-
-                    mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);
-                    mSyncProxy.initializeSession(syncAppId);
-                } else {
-
-                    registerAppInterface.setAppName(appName);
-                    registerAppInterface.setLanguageDesired(lang);
-                    registerAppInterface.setHmiDisplayLanguageDesired(hmiLang);
-                    registerAppInterface.setAppId(appId);
-                    registerAppInterface.setIsMediaApplication(isMediaApp);
-                    registerAppInterface.setAppType(appHMITypes);
-                    mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);
-                }
-
-                // TODO : Implement when reconnect
-                /*for (String key : registerAppInterfaceHashMap.keySet()) {
-                    registerAppInterface = registerAppInterfaceHashMap.get(key);
-                    mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);
-                    mSyncProxy.openSession();
-                }*/
-
+                mSyncProxy.initializeSession(syncAppId);
             } else {
                 mSyncProxy.initializeProxy();
             }

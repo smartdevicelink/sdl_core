@@ -107,7 +107,8 @@ namespace security_manager_test {
     void EmulateMobileMessage(SecurityQuery::QueryHeader header,
                               const uint8_t* const data, const uint32_t data_size) {
       // convert to Big-Endian (network) order
-      header.query_id  = LE_TO_BE32(header.query_id << 8);
+      const uint32_t query_id = header.query_id << 8;
+      header.query_id  = LE_TO_BE32(query_id);
       header.json_size = LE_TO_BE32(header.json_size);
 
       const size_t data_sending_size = sizeof(header) + data_size;
@@ -577,6 +578,11 @@ namespace security_manager_test {
                          SetArgPointee<3>(0),
                          Return(security_manager::SSLContext::
                                 Handshake_Result_AbnormalFail)));
+
+
+    // On each wrong handshake will be asked error
+    EXPECT_CALL(mock_ssl_context_exists,
+                LastError()).Times(handshake_emulates);
 
     // Emulate handshare #handshake_emulates times for 5 cases
     EmulateMobileMessageHandShake(handshake_data, handshake_data_size, handshake_emulates);

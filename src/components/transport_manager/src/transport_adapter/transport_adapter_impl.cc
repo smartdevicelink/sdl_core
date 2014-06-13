@@ -119,14 +119,6 @@ TransportAdapter::Error TransportAdapterImpl::Init() {
   return error;
 }
 
-void TransportAdapterImpl::ApplicationListUpdated(const DeviceUID& device_handle) {
-  for (TransportAdapterListenerList::iterator it = listeners_.begin();
-    it != listeners_.end(); ++it) {
-
-    (*it)->OnApplicationListUpdated(this, device_handle);
-  }
-}
-
 TransportAdapter::Error TransportAdapterImpl::SearchDevices() {
   LOG4CXX_INFO(logger_, "enter");
   if (device_scanner_ == NULL) {
@@ -165,7 +157,7 @@ TransportAdapter::Error TransportAdapterImpl::Connect(
   }
   pthread_mutex_unlock(&connections_mutex_);
   if (already_exists) {
-    LOG4CXX_ERROR(logger_, "Connection for device " << device_id << ", channel "
+    LOG4CXX_WARN(logger_, "Connection for device " << device_id << ", channel "
                                                     << app_handle
                                                     << " already exists");
     return ALREADY_EXISTS;
@@ -359,10 +351,16 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
   }
 }
 
-void TransportAdapterImpl::SearchApplicationsDone(const DeviceSptr& device) {
-  for (TransportAdapterListenerList::iterator it = listeners_.begin();
-       it != listeners_.end(); ++it)
-    (*it)->OnApplicationListUpdated(this, device->unique_device_id());
+void TransportAdapterImpl::ApplicationListUpdated(const DeviceUID& device_handle) {
+// default implementation does nothing
+// and is reimplemented in MME transport adapter only
+}
+
+void TransportAdapterImpl::FindNewApplicationsRequest() {
+  for (TransportAdapterListenerList::iterator i = listeners_.begin(); i != listeners_.end(); ++i) {
+    TransportAdapterListener* listener = *i;
+    listener->OnFindNewApplicationsRequest(this);
+  }
 }
 
 void TransportAdapterImpl::SearchDeviceFailed(const SearchDeviceError& error) {
@@ -492,17 +490,17 @@ void TransportAdapterImpl::DataSendFailed(const DeviceUID& device_id,
 
 DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) const {
   DeviceSptr ret;
-  pthread_mutex_lock(&devices_mutex_);
-  LOG4CXX_INFO(logger_,
-               "DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& "
-               "device_id) enter");
-  DeviceMap::const_iterator it = devices_.find(device_id);
+  LOG4CXX_TRACE_ENTER(logger_);
   LOG4CXX_INFO(logger_, "devices_.size() = " << devices_.size());
-  if (it != devices_.end()) ret = it->second;
+  pthread_mutex_lock(&devices_mutex_);
+  DeviceMap::const_iterator it = devices_.find(device_id);
+  if (it != devices_.end()) {
+    ret = it->second;
+  } else {
+    LOG4CXX_WARN(logger_, "Device " << device_id << " not found.")
+  }
   pthread_mutex_unlock(&devices_mutex_);
-  LOG4CXX_INFO(logger_,
-               "DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& "
-               "device_id) exit");
+  LOG4CXX_TRACE_EXIT(logger_);
   return ret;
 }
 
@@ -636,18 +634,20 @@ ConnectionSptr TransportAdapterImpl::FindEstablishedConnection(
 TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
   DeviceUID device_id = device->unique_device_id();
   ApplicationList app_list = device->GetApplicationList();
+  LOG4CXX_DEBUG(logger_, "Device " << device->name() << " has "
+                << app_list.size() << " applications.")
   bool errors_occured = false;
   for (ApplicationList::iterator it = app_list.begin(); it != app_list.end(); ++it) {
-    ApplicationHandle app_handle = *it;
+    const ApplicationHandle app_handle = *it;
     LOG4CXX_INFO(logger_, "Attempt to connect device " << device_id <<
                           ", channel " << app_handle);
-    Error error = Connect(device_id, app_handle);
+    const Error error = Connect(device_id, app_handle);
     switch (error) {
       case OK:
         LOG4CXX_DEBUG(logger_, "OK");
         break;
       case ALREADY_EXISTS:
-        LOG4CXX_INFO(logger_, "Already connected");
+        LOG4CXX_WARN(logger_, "Already connected");
         break;
       default:
         LOG4CXX_ERROR(logger_, "Connect to device " << device_id <<
@@ -679,9 +679,9 @@ void TransportAdapterImpl::RemoveDevice(const DeviceUID& device_handle) {
 #ifdef CUSTOMER_PASA
 TransportAdapter::Error TransportAdapterImpl::AbortConnection(
     const DeviceUID& device_handle, const ApplicationHandle& app_handle) {
-	ConnectionSptr connection = FindEstablishedConnection(device_handle, app_handle);
-	if (connection) return connection->Disconnect();
-	return BAD_PARAM;
+  ConnectionSptr connection = FindEstablishedConnection(device_handle, app_handle);
+  if (connection) return connection->Disconnect();
+  return BAD_PARAM;
 }
 #endif  // CUSTOMER_PASA
 

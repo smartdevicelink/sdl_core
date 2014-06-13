@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 #include <climits>
 #include <string>
 #include <fstream>
+#include <time.h>
 
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
@@ -49,7 +50,9 @@
 #include "utils/file_system.h"
 #include "application_manager/application_impl.h"
 #include "usage_statistics/counter.h"
-#include <time.h>
+#include "hmi_message_handler/hmi_message_handler.h"
+#include "connection_handler/connection_handler.h"
+#include "protocol_handler/protocol_handler.h"
 
 namespace application_manager {
 
@@ -67,9 +70,10 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     is_vr_session_strated_(false),
     hmi_cooperating_(false),
     is_all_apps_allowed_(true),
+    media_manager_(media_manager::MediaManagerImpl::instance()),
     hmi_handler_(NULL),
     connection_handler_(NULL),
-    policy_manager_(NULL),
+    policy_manager_(policy::PolicyHandler::instance()->LoadPolicyLibrary()),
     hmi_so_factory_(NULL),
     mobile_so_factory_(NULL),
     protocol_handler_(NULL),
@@ -80,15 +84,12 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     request_ctrl_(),
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF),
-    media_manager_(NULL),
-    resume_ctrl_(this)
+    resume_ctrl_(this),
 #ifdef TIME_TESTER
-    , metric_observer_(NULL)
+    metric_observer_(NULL),
 #endif  // TIME_TESTER
+    application_list_update_timer_(new ApplicationListUpdateTimer(this))
 {
-  LOG4CXX_INFO(logger_, "Creating ApplicationManager");
-  media_manager_ = media_manager::MediaManagerImpl::instance();
-  CreatePoliciesManager();
 }
 
 bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
@@ -98,7 +99,8 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
   }
   LOG4CXX_INFO(
       logger_,
-      "Starting thread with stack size " << profile::Profile::instance()->thread_min_stack_size());
+      "Starting thread with stack size "
+      << profile::Profile::instance()->thread_min_stack_size());
   if (!thread->start()) {
     /*startWithOptions(
      threads::ThreadOptions(
@@ -137,6 +139,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
 bool ApplicationManagerImpl::Stop() {
   LOG4CXX_INFO(logger_, "Stop ApplicationManager.");
+  application_list_update_timer_->stop();
   try {
     UnregisterAllApplications();
   } catch (...) {
@@ -247,7 +250,13 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::applications_with_navi
 }
 
 ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
-    const utils::SharedPtr<smart_objects::SmartObject>& request_for_registration) {
+  const utils::SharedPtr<smart_objects::SmartObject>&
+  request_for_registration) {
+
+  LOG4CXX_DEBUG(logger_, "Restarting application list update timer");
+  uint32_t timeout = profile::Profile::instance()->application_list_update_timeout();
+  application_list_update_timer_->start(timeout);
+
   smart_objects::SmartObject& message = *request_for_registration;
   uint32_t connection_key = message[strings::params][strings::connection_key]
       .asInt();
@@ -558,9 +567,9 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 #ifdef CUSTOMER_PASA
   //Line start of transportManager component was left for panasonic
   if (!connection_handler_) {
-	  LOG4CXX_WARN(logger_, "Connection handler is not set.");
+    LOG4CXX_WARN(logger_, "Connection handler is not set.");
   } else {
-	  connection_handler_->StartTransportManager();
+    connection_handler_->StartTransportManager();
   }
 #endif // CUSTOMER_PASA
 }
@@ -614,7 +623,7 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
                                                       int32_t bits_per_sample,
                                                       int32_t audio_type) {
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
-  if (NULL != media_manager_) {    
+  if (NULL != media_manager_) {
     media_manager_->StartMicrophoneRecording(
       session_key,
       profile::Profile::instance()->recording_file_name(),
@@ -658,8 +667,8 @@ void ApplicationManagerImpl::SendAudioPassThroughNotification(
   LOG4CXX_INFO_EXT(logger_, "After fill binary data");
 
   LOG4CXX_INFO_EXT(logger_, "Send data");
-  CommandSharedPtr command = MobileCommandFactory::CreateCommand(
-      &(*on_audio_pass));
+  CommandSharedPtr command =
+      MobileCommandFactory::CreateCommand(&(*on_audio_pass));
   command->Init();
   command->Run();
   command->CleanUp();
@@ -693,13 +702,13 @@ std::string ApplicationManagerImpl::GetDeviceName(
 
 void ApplicationManagerImpl::OnMessageReceived(
     const protocol_handler::RawMessagePtr message) {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMessageReceived");
+  LOG4CXX_TRACE(logger_, "ApplicationManagerImpl::OnMessageReceived");
   DCHECK(message);
 
   if (message->service_type() != protocol_handler::kRpc
       && message->service_type() != protocol_handler::kBulk) {
     // skip this message, not under handling of ApplicationManager
-    LOG4CXX_INFO(logger_, "Skipping message; not the under AM handling.");
+    LOG4CXX_DEBUG(logger_, "Skipping message; not the under AM handling.");
     return;
   }
   //Return empty SharedPtr on not kRpc or kBulk service
@@ -760,22 +769,17 @@ void ApplicationManagerImpl::OnDeviceListUpdated(
   ManageHMICommand(update_list);
 }
 
-void ApplicationManagerImpl::OnApplicationListUpdated(
-    const connection_handler::DeviceHandle& device_handle) {
-  LOG4CXX_TRACE(logger_, "OnApplicationListUpdated device_handle " << device_handle);
+void ApplicationManagerImpl::OnFindNewApplicationsRequest() {
+  connection_handler_->ConnectToAllDevices();
+  LOG4CXX_DEBUG(logger_, "Starting application list update timer");
+  uint32_t timeout = profile::Profile::instance()->application_list_update_timeout();
+  application_list_update_timer_->start(timeout);
+}
 
-  std::list<uint32_t> applications_ids;
-  DCHECK(connection_handler_);
-  connection_handler::ConnectionHandlerImpl* con_handler_impl =
-    static_cast<connection_handler::ConnectionHandlerImpl*>(
-      connection_handler_);
-  if (con_handler_impl->GetDataOnDeviceID(device_handle, NULL,
-                                          &applications_ids) == -1) {
-    LOG4CXX_ERROR(logger_, "Failed to extract device list for id " << device_handle);
-    return;
-  }
-  LOG4CXX_DEBUG(logger_, "Device " << device_handle << " has " <<
-               applications_ids.size() << " applications.");
+void ApplicationManagerImpl::SendUpdateAppList(const std::list<uint32_t>& applications_ids) {
+  LOG4CXX_TRACE(logger_, "SendUpdateAppList");
+
+  LOG4CXX_DEBUG(logger_, applications_ids.size() << " applications.");
 
   smart_objects::SmartObject* request = MessageHelper::CreateModuleInfoSO(
                                           hmi_apis::FunctionID::BasicCommunication_UpdateAppList);
@@ -786,7 +790,7 @@ void ApplicationManagerImpl::OnApplicationListUpdated(
       (*request)[strings::msg_params][strings::applications];
 
   uint32_t app_count = 0;
-  for (std::list<uint32_t>::iterator it = applications_ids.begin();
+  for (std::list<uint32_t>::const_iterator it = applications_ids.begin();
        it != applications_ids.end(); ++it) {
     ApplicationSharedPtr app = application(*it);
 
@@ -831,8 +835,7 @@ bool ApplicationManagerImpl::IsAudioStreamingAllowed(uint32_t connection_key) co
   return false;
 }
 
-bool ApplicationManagerImpl::IsVideoStreamingAllowed(
-    uint32_t connection_key) const {
+bool ApplicationManagerImpl::IsVideoStreamingAllowed( uint32_t connection_key) const {
   ApplicationSharedPtr app = application(connection_key);
 
   if (!app) {
@@ -1002,6 +1005,10 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
       LOG4CXX_INFO(logger_, "Remove application.");
       UnregisterApplication(session_key, mobile_apis::Result::INVALID_ENUM,
                             true);
+      break;
+    }
+    case protocol_handler::kBulk: {
+      LOG4CXX_INFO(logger_, "Remove application bulk data service.");
       break;
     }
     case protocol_handler::kMobileNav: {
@@ -1339,9 +1346,8 @@ bool ApplicationManagerImpl::ManageHMICommand(
 void ApplicationManagerImpl::CreateHMIMatrix(HMIMatrix* matrix) {
 }
 
-void ApplicationManagerImpl::CreatePoliciesManager() {
-  LOG4CXX_INFO(logger_, "CreatePoliciesManager");
-  policy_manager_ = policy::PolicyHandler::instance()->LoadPolicyLibrary();
+void ApplicationManagerImpl::Init() {
+  LOG4CXX_TRACE(logger_, "Init application manager");
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
     policy::PolicyHandler::instance()->InitPolicyTable();
@@ -1462,8 +1468,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       //  removed NOTREACHED() because some app can still have vesion 1.
       LOG4CXX_WARN(
           logger_,
-          "Application used unsupported protocol :" << message.protocol_version() << ".")
-      ;
+          "Application used unsupported protocol :" << message.protocol_version() << ".");
       return false;
   }
 
@@ -1483,7 +1488,8 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 
   LOG4CXX_INFO(
       logger_,
-      "Message with protocol: " << message.getElement(jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_TYPE) .asInt());
+      "Message with protocol: " << message.getElement(jhs::S_PARAMS).
+        getElement(jhs::S_PROTOCOL_TYPE).asInt());
 
   std::string output_string;
   switch (message.getElement(jhs::S_PARAMS).getElement(jhs::S_PROTOCOL_TYPE)
@@ -1519,8 +1525,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
       break;
     }
     default:
-      NOTREACHED()
-      ;
+      NOTREACHED();
       return false;
   }
 
@@ -1816,7 +1821,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
     UnregisterApplication((*it)->app_id(), mobile_apis::Result::INVALID_ENUM,
                           is_ignition_off);
-    it = application_list_.begin();    
+    it = application_list_.begin();
   }
   if (is_ignition_off) {
    resume_controller().IgnitionOff();
@@ -2009,8 +2014,7 @@ void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
     : mobile_apis::AudioStreamingState::NOT_AUDIBLE;
 
   std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd =
-      application_list_.end();
+  std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
       if (kTTSSessionChanging == changing_state) {
@@ -2026,8 +2030,7 @@ void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
 
 void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
   std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd =
-      application_list_.end();
+  std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
       if (kTTSSessionChanging == changing_state) {
@@ -2118,6 +2121,23 @@ uint32_t ApplicationManagerImpl::GetAvailableSpaceForApp(
 
 bool ApplicationManagerImpl::IsHMICooperating() const {
   return hmi_cooperating_;
+}
+
+void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
+  LOG4CXX_DEBUG(logger_, "Application list update timer finished");
+
+  std::list <uint32_t> applications_ids;
+
+  applications_list_lock_.Acquire();
+  for (std::set<ApplicationSharedPtr>::const_iterator i = application_list_.begin();
+       i != application_list_.end(); ++i) {
+    ApplicationSharedPtr application = *i;
+    uint32_t app_id = application->app_id();
+    applications_ids.push_back(app_id);
+  }
+  applications_list_lock_.Release();
+
+  SendUpdateAppList(applications_ids);
 }
 
 }  // namespace application_manager

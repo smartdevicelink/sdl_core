@@ -1,8 +1,5 @@
 /*
- * \file byte_order.h
- * \brief
- *
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -45,10 +42,5 @@
 #define BE_TO_LE32(x) bswap_32(x)
 #define LE_TO_BE32(x) bswap_32(x)
 #endif
-
-namespace utils
-{
-}  // namespace utils
-
 
 #endif /* BYTE_ORDER_H_ */

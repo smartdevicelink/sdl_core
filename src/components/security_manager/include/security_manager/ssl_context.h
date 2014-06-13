@@ -64,15 +64,16 @@ class SSLContext {
     Handshake_Result_Fail         = 0x1,
     Handshake_Result_AbnormalFail = 0x2
   };
-  virtual HandshakeResult StartHandshake(const uint8_t** const out_data, size_t* out_data_size)=0;
+  virtual HandshakeResult StartHandshake(const uint8_t** const out_data, size_t* out_data_size) = 0;
   virtual HandshakeResult DoHandshakeStep(const uint8_t* const in_data,  size_t in_data_size,
-                                          const uint8_t** const out_data, size_t* out_data_size)=0;
+                                          const uint8_t** const out_data, size_t* out_data_size) = 0;
   virtual bool Encrypt(const uint8_t * const in_data,  size_t in_data_size,
-                        const uint8_t ** const out_data, size_t* out_data_size)=0;
+                       const uint8_t ** const out_data, size_t* out_data_size) = 0;
   virtual bool Decrypt(const uint8_t * const in_data,  size_t in_data_size,
-                        const uint8_t ** const out_data, size_t* out_data_size)=0;
+                       const uint8_t ** const out_data, size_t* out_data_size) = 0;
   virtual bool  IsInitCompleted() const = 0;
-  virtual size_t get_max_block_size(size_t mtu) const =0;
+  virtual size_t get_max_block_size(size_t mtu) const = 0;
+  virtual std::string LastError() const = 0;
   virtual ~SSLContext() { }
 };
 } // namespace security_manager

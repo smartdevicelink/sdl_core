@@ -39,7 +39,11 @@
 #include "protocol_handler/protocol_packet.h"
 #include "utils/logger.h"
 #include "utils/macro.h"
+
+#ifdef ENABLE_SECURITY
+#include "security_manager/ssl_context.h"
 #include "security_manager/security_query.h"
+#endif  // ENABLE_SECURITY
 
 /**
  * \namespace connection_handler
@@ -114,8 +118,10 @@ bool Connection::AddNewService(uint8_t session,
                                const bool is_protected) {
   // Ignore wrong services
   if (protocol_handler::kControl == service_type ||
-     protocol_handler::kInvalidServiceType == service_type )
+     protocol_handler::kInvalidServiceType == service_type ) {
+    LOG4CXX_WARN(logger_, "Wrong service " << static_cast<int>(service_type));
     return false;
+  }
 
   sync_primitives::AutoLock lock(session_map_lock_);
 
@@ -149,11 +155,12 @@ bool Connection::AddNewService(uint8_t session,
         service_Rpc_it->is_protected_ = true;
       }
     } else {
-      LOG4CXX_WARN(logger_, "Session " << static_cast<int>(session) <<
-                    " already established service " << service_type);
+      LOG4CXX_WARN(logger_,
+                   "Session " << static_cast<int>(session) <<
+                   " already established service " << static_cast<int>(service_type));
       return false;
     }
-  } else {
+  } else { // service is not exists
     service_list.push_back(Service(service_type, is_protected));
   }
 
@@ -188,6 +195,7 @@ bool Connection::RemoveService(
   return true;
 }
 
+#ifdef ENABLE_SECURITY
 int Connection::SetSSLContext(uint8_t sessionId,
                               security_manager::SSLContext *context) {
   sync_primitives::AutoLock lock(session_map_lock_);
@@ -228,6 +236,7 @@ security_manager::SSLContext* Connection::GetSSLContext(
   LOG4CXX_TRACE(logger_, "SSLContext is " << session.ssl_context);
   return session.ssl_context;
 }
+#endif // ENABLE_SECURITY
 
 ConnectionHandle Connection::connection_handle() const {
   return connection_handle_;

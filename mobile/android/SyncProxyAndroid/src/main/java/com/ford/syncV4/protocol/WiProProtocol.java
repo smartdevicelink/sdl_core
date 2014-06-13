@@ -19,6 +19,7 @@ import java.util.Hashtable;
 
 public class WiProProtocol extends AbstractProtocol {
 
+<<<<<<< HEAD
     private final static String FailurePropagating_Msg = "Failure propagating ";
     boolean _haveHeader = false;
     int _headerBufWritePos = 0;
@@ -27,6 +28,8 @@ public class WiProProtocol extends AbstractProtocol {
     int _dataBufWritePos = 0;
     int hashID = 0;
 
+=======
+>>>>>>> develop
     protected Hashtable<Byte, Object> _messageLocks = new Hashtable<Byte, Object>();
 
     private static final String CLASS_NAME = WiProProtocol.class.getSimpleName();
@@ -110,30 +113,47 @@ public class WiProProtocol extends AbstractProtocol {
         sendProtocolMessageProcessor.processStartSession(getProtocolVersion(), sessionId);
     }
 
-        @Override
-        public void handleProtocolSessionStarted(ServiceType serviceType, byte sessionId,boolean encrypted, byte version) {
-            super.handleProtocolSessionStarted(serviceType, sessionId, encrypted, version);
+<<<<<<< HEAD
+=======
+    @Override
+    public void handleProtocolSessionStarted(ServiceType serviceType, byte sessionId, byte version) {
+        super.handleProtocolSessionStarted(serviceType, sessionId, version);
+>>>>>>> develop
 
-            Logger.d(CLASS_NAME + " Protocol Session Started, protocol ver:" + version);
-            setProtocolVersion(version);
-        }
+    @Override
+    protected void handleProtocolSessionStarted(ServiceType serviceType,
+                                                byte sessionID, boolean encrypted, byte version, String correlationID) {
+        super.handleProtocolSessionStarted(serviceType, sessionID, encrypted, version, correlationID);
+        Logger.d(CLASS_NAME + " Protocol Session Started, protocol ver:" + version);
+        setProtocolVersion(version);
+    }
 
-        @Override
-        public void StartProtocolService(ServiceType serviceType, byte sessionId, boolean isCyphered)
-        throws IllegalArgumentException {
-            if (sessionId == Session.DEFAULT_SESSION_ID) {
-                throw new IllegalArgumentException("syncSession id 0 should be used to start " +
-                        "syncSession only, provided id:" + sessionId + ", Service:" + serviceType);
-            }
-            sendProtocolMessageProcessor.processStartService(serviceType, getProtocolVersion(),
-                    sessionId);
-            //TODO  ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, sessionId, getProtocolVersion(), isCyphered);
-            //handleProtocolFrameToSend(header, null, 0, 0);
+
+    @Override
+<<<<<<< HEAD
+    public void StartProtocolService(ServiceType serviceType, Session session, boolean isCyphered) throws IllegalArgumentException {
+        byte sessionId = session.getSessionId();
+        if (sessionId == 0) {
+            throw new IllegalArgumentException("currentSession id 0 should be used to start " +
+                    "currentSession only, provided id:" + sessionId + ", Service:" + serviceType);
         }
+        ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, sessionId, getProtocolVersion(), isCyphered);
+        handleProtocolFrameToSend(header, null, 0, 0);
+    } // end-method
 
 
     private void sendStartProtocolSessionACK(ServiceType serviceType, byte sessionID) {
         sendProtocolMessageProcessor.processStartService(serviceType, getProtocolVersion(), sessionID);
+=======
+    public void StartProtocolService(ServiceType serviceType, byte sessionId)
+            throws IllegalArgumentException {
+        if (sessionId == Session.DEFAULT_SESSION_ID) {
+            throw new IllegalArgumentException("syncSession id 0 should be used to start " +
+                    "syncSession only, provided id:" + sessionId + ", Service:" + serviceType);
+        }
+        sendProtocolMessageProcessor.processStartService(serviceType, getProtocolVersion(),
+                sessionId);
+>>>>>>> develop
     }
 
     @Override
@@ -219,11 +239,22 @@ public class WiProProtocol extends AbstractProtocol {
         sendProtocolMessageProcessor.processHeartbeatAck(getProtocolVersion(), sessionId);
     }
 
+<<<<<<< HEAD
     private void processFrameToSend(ServiceType serviceType, byte sessionID, boolean encrypted, byte[] data) {
 
         // Get the message lock for this protocol currentSession
         Object messageLock = _messageLocks.get(sessionID);
+=======
+    @Override
+    public void SendMessage(ProtocolMessage protocolMessage) {
+        protocolMessage.setRPCType(ProtocolMessage.RPCTYPE_REQUEST); //always sending a request
+        final byte sessionId = protocolMessage.getSessionID();
+
+        // Get the message lock for this protocol syncSession
+        final Object messageLock = _messageLocks.get(sessionId);
+>>>>>>> develop
         if (messageLock == null) {
+            Logger.w(CLASS_NAME + " SendMessage error, sesId:" + sessionId);
             handleProtocolError("Error sending protocol message to SYNC.",
                     new SyncException("Attempt to send protocol message prior to startSession ACK.",
                             SyncExceptionCause.SYNC_UNAVAILALBE)
@@ -231,6 +262,7 @@ public class WiProProtocol extends AbstractProtocol {
             return;
         }
 
+<<<<<<< HEAD
         processProtocolMessage(serviceType, getProtocolVersion(), encrypted, data, sessionID);
     }
 
@@ -257,6 +289,15 @@ public class WiProProtocol extends AbstractProtocol {
                 }
             }
         });
+=======
+        final byte protocolVersionToSend = getProtocolVersion();
+
+        ProtocolMessageConverter protocolMessageConverter = new ProtocolMessageConverter(
+                protocolMessage, protocolVersionToSend).generate();
+        final byte[] data = protocolMessageConverter.getData();
+        final ServiceType serviceType = protocolMessageConverter.getServiceType();
+
+>>>>>>> develop
         sendProtocolMessageProcessor.process(serviceType, protocolVersionToSend, data,
                 MAX_DATA_SIZE, sessionID, getNextMessageId());
     }
@@ -506,43 +547,43 @@ public class WiProProtocol extends AbstractProtocol {
                     }
                 }
             } // end-if
+<<<<<<< HEAD
         }
     }
 
     private void handleControlFrame(ProtocolFrameHeader header) {
         byte frameData = header.getFrameData();
-        byte sessionId = header.getSessionID();
-        Logger.d(CLASS_NAME + " incoming control frame:" + header.toString());
+        //Logger.d(CLASS_NAME + " ControlFrame:" + frameData);
         if (frameData == FrameDataControlFrameType.HeartbeatACK.getValue()) {
-            WiProProtocol.this.handleProtocolHeartbeatACK(sessionId);
+            handleProtocolHeartbeatACK();
         } else if (frameData == FrameDataControlFrameType.Heartbeat.getValue()) {
-            WiProProtocol.this.handleProtocolHeartbeat(sessionId);
+            handleProtocolHeartbeat();
         } else if (frameData == FrameDataControlFrameType.StartService.getValue()) {
             sendProtocolMessageProcessor.processStartSessionAck(header.getServiceType(),
-                    getProtocolVersion(), sessionId);
+                    getProtocolVersion(), header.getSessionID());
         } else if (frameData == FrameDataControlFrameType.StartServiceACK.getValue()) {
             // Use this sessionID to create a message lock
-            Object messageLock = _messageLocks.get(sessionId);
+            Object messageLock = _messageLocks.get(header.getSessionID());
             if (messageLock == null) {
                 messageLock = new Object();
-                _messageLocks.put(sessionId, messageLock);
+                _messageLocks.put(header.getSessionID(), messageLock);
             }
-            //sessionsHashIds = BitConverter.intFromByteArray(data, 0);
+            //hashID = BitConverter.intFromByteArray(data, 0);
             if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-                sessionsHashIds.put(sessionId, header.getMessageID());
+                hashID = header.getMessageID();
             }
             inspectStartServiceACKHeader(header);
         } else if (frameData == FrameDataControlFrameType.StartServiceNACK.getValue()) {
-            handleStartServiceNackFrame(sessionId, header.getServiceType());
+            handleStartServiceNackFrame(header.getServiceType());
         } else if (frameData == FrameDataControlFrameType.EndService.getValue()) {
-            handleEndServiceFrame(sessionId, header);
+            handleEndSessionFrame(header);
         } else if (frameData == FrameDataControlFrameType.EndServiceNACK.getValue()) {
             //Logger.d(CLASS_NAME + " End Service NACK");
         } else if (header.getServiceType().getValue() == ServiceType.Mobile_Nav.getValue() &&
                 frameData == FrameDataControlFrameType.MobileNaviACK.getValue()) {
-            handleMobileNavAckReceived(sessionId, header.getMessageID());
+            handleMobileNavAckReceived(header);
         } else if (frameData == FrameDataControlFrameType.EndServiceACK.getValue()) {
-            handleEndServiceAckFrame(sessionId, header);
+            handleEndSessionFrame(header);
         } else {
             Logger.w(CLASS_NAME + " Unknown frame data:" + frameData + ", service type:" +
                     header.getServiceType());
@@ -553,26 +594,76 @@ public class WiProProtocol extends AbstractProtocol {
     private void inspectStartServiceACKHeader(ProtocolFrameHeader header) {
         if (header.getServiceType().equals(ServiceType.RPC)) {
             if (!hasRPCStarted) {
-                handleProtocolSessionStarted(header.getServiceType(), header.getSessionID(), header.isEncrypted(), getProtocolVersion());
+                handleProtocolSessionStarted(header.getServiceType(),
+                        header.getSessionID(), header.isEncrypted(), getProtocolVersion(), "");
                 hasRPCStarted = true;
             } else {
                 handleProtocolServiceStarted(header.getServiceType(),
-                        header.getSessionID(), header.isEncrypted(), getProtocolVersion());
+                        header.getSessionID(), header.isEncrypted(), getProtocolVersion(), "");
+=======
+        } // end-method
+
+        private void handleControlFrame(ProtocolFrameHeader header) {
+            byte frameData = header.getFrameData();
+            byte sessionId = header.getSessionID();
+            Logger.d(CLASS_NAME + " incoming control frame:" + header.toString());
+            if (frameData == FrameDataControlFrameType.HeartbeatACK.getValue()) {
+                handleProtocolHeartbeatACK(sessionId);
+            } else if (frameData == FrameDataControlFrameType.Heartbeat.getValue()) {
+                handleProtocolHeartbeat(sessionId);
+            } else if (frameData == FrameDataControlFrameType.StartService.getValue()) {
+                sendProtocolMessageProcessor.processStartSessionAck(header.getServiceType(),
+                        getProtocolVersion(), sessionId);
+            } else if (frameData == FrameDataControlFrameType.StartServiceACK.getValue()) {
+                // Use this sessionID to create a message lock
+                Object messageLock = _messageLocks.get(sessionId);
+                if (messageLock == null) {
+                    messageLock = new Object();
+                    _messageLocks.put(sessionId, messageLock);
+                }
+                //sessionsHashIds = BitConverter.intFromByteArray(data, 0);
+                if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
+                    sessionsHashIds.put(sessionId, header.getMessageID());
+                }
+                inspectStartServiceACKHeader(header);
+            } else if (frameData == FrameDataControlFrameType.StartServiceNACK.getValue()) {
+                handleStartServiceNackFrame(sessionId, header.getServiceType());
+            } else if (frameData == FrameDataControlFrameType.EndService.getValue()) {
+                handleEndServiceFrame(sessionId, header);
+            } else if (frameData == FrameDataControlFrameType.EndServiceNACK.getValue()) {
+                //Logger.d(CLASS_NAME + " End Service NACK");
+            } else if (header.getServiceType().getValue() == ServiceType.Mobile_Nav.getValue() &&
+                    frameData == FrameDataControlFrameType.MobileNaviACK.getValue()) {
+                handleMobileNavAckReceived(sessionId, header.getMessageID());
+            } else if (frameData == FrameDataControlFrameType.EndServiceACK.getValue()) {
+                handleEndServiceAckFrame(sessionId, header);
+            }
+        }
+
+        private void inspectStartServiceACKHeader(ProtocolFrameHeader header) {
+            if (header.getServiceType().equals(ServiceType.RPC)) {
+                handleProtocolSessionStarted(header.getServiceType(), header.getSessionID(),
+                        getProtocolVersion());
+            } else {
+                handleProtocolServiceStarted(header.getServiceType(), header.getSessionID(),
+                        getProtocolVersion());
+>>>>>>> develop
             }
         } else {
             handleProtocolServiceStarted(header.getServiceType(),
-                    header.getSessionID(), header.isEncrypted(), getProtocolVersion());
+                    header.getSessionID(), header.isEncrypted(), getProtocolVersion(), "");
 
+<<<<<<< HEAD
+=======
+        private void handleMobileNavAckReceived(byte sessionId, int messageId) {
+            _protocolListener.onMobileNavAckReceived(sessionId, messageId);
+>>>>>>> develop
         }
     }
 
-
-        private void handleMobileNavAckReceived(byte sessionId, int messageId) {
-            _protocolListener.onMobileNavAckReceived(sessionId, messageId);
-        }
-
-
-
+    private void handleMobileNavAckReceived(ProtocolFrameHeader header) {
+        _protocolListener.onMobileNavAckReceived(header.getMessageID());
+    }
 
     private void handleSingleFrameMessageFrame(ProtocolFrameHeader header, byte[] data) {
         //Log.d(TAG, "SingleFrameMessageFrame:" + header.getDataSize() + ", data size:" + data.length);
@@ -617,8 +708,9 @@ public class WiProProtocol extends AbstractProtocol {
             Logger.i("App is unregistered");
             handleAppUnregistered();
         }
+    }
 
-
+<<<<<<< HEAD
         try {
             handleProtocolMessageReceived(message);
         } catch (Exception ex) {
@@ -633,6 +725,7 @@ public class WiProProtocol extends AbstractProtocol {
                         .getFunctionID(Names.UnregisterAppInterface));
     }
 
+=======
     private void handleEndServiceFrame(byte sessionId, ProtocolFrameHeader header) {
         if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
             if (getHashIdBySessionId(sessionId) == header.getMessageID()) {
@@ -642,6 +735,7 @@ public class WiProProtocol extends AbstractProtocol {
             handleProtocolServiceEnded(header.getServiceType(), header.getSessionID());
         }
     }
+>>>>>>> develop
 
     private void handleEndServiceAckFrame(byte sessionId, ProtocolFrameHeader header) {
         if (getProtocolVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {

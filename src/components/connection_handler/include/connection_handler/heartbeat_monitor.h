@@ -1,4 +1,5 @@
-/* Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -59,20 +60,20 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
   virtual void threadMain();
 
   /**
-    * \brief add new session
-    *
-    * \return true if first session with heartbeat added
-    */
+   * \brief add new session
+   *
+   * \return true if first session with heartbeat added
+   */
   bool AddSession(uint8_t session_id);
   void RemoveSession(uint8_t session_id);
 
-  /*
-   * Resets timer preventing session from being killed
+  /**
+  * \brief Resets timer preventing session from being killed
    */
   void KeepAlive(uint8_t session_id);
 
-  /*
-   * Thread exit procedure.
+  /**
+   * \brief Thread exit procedure.
    */
   virtual bool exitThreadMain();
 

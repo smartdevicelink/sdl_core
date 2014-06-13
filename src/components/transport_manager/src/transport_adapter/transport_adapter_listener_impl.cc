@@ -1,8 +1,5 @@
-/**
- * \file transport_adapter_listener_impl.cc
- * \brief TransportAdapterListenerImpl class source file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -89,10 +86,15 @@ void TransportAdapterListenerImpl::OnDeviceListUpdated(
   }
 }
 
-void TransportAdapterListenerImpl::OnApplicationListUpdated(const TransportAdapter* adapter,
-                                                            const DeviceUID& device_handle) {
-  TransportAdapterEvent event(TransportAdapterListenerImpl::EventTypeEnum::ON_APPLICATION_LIST_UPDATED,
-                              transport_adapter_, device_handle, 0, RawMessageSptr(), NULL);
+void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(const TransportAdapter* adapter) {
+  TransportAdapterEvent event(
+    TransportAdapterListenerImpl::ON_FIND_NEW_APPLICATIONS_REQUEST,
+    transport_adapter_,
+    "",
+    0,
+    RawMessageSptr(),
+    NULL
+  );
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {

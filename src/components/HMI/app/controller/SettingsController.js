@@ -292,5 +292,50 @@ SDL.SettingsController = Em.Object.create( {
         SDL.SDLModel.connectedDevices[SDL.SettingsController.currentDeviceAllowance.id].sdlFunctionality.popUpId = null;
 
         SDL.SettingsController.currentDeviceAllowance = null;
+    },
+
+    /**
+     * Method responsible for PolicyUpdate retry sequence
+     * abort parameter if set to true means that retry sequence if finished
+     *
+     * @param {Boolean} abort
+     */
+    policyUpdateRetry: function(abort) {
+
+        clearTimeout(SDL.SDLModel.policyUpdateRetry.timer);
+        SDL.SDLModel.policyUpdateRetry.timer = null;
+
+        if (!abort || (SDL.SDLModel.policyUpdateRetry.try < SDL.SDLModel.policyUpdateRetry.retry.length)) {
+
+            SDL.SDLModel.policyUpdateRetry.oldTimer = SDL.SDLModel.policyUpdateRetry.oldTimer +
+                SDL.SDLModel.policyUpdateRetry.timeout * 1000 +
+                SDL.SDLModel.policyUpdateRetry.retry[SDL.SDLModel.policyUpdateRetry.try] * 1000;
+
+            SDL.SDLModel.policyUpdateRetry.timer = setTimeout(
+                function(){
+                    if (SDL.SDLModel.policyURLs.length > SDL.SDLModel.policyUpdateRetry.try) {
+                        FFW.BasicCommunication.OnSystemRequest(
+                            "PROPRIETARY",
+                            SDL.SDLModel.policyURLs[SDL.SDLModel.policyUpdateRetry.try].policyAppId,
+                            SDL.SettingsController.policyUpdateFile,
+                            SDL.SDLModel.policyURLs[SDL.SDLModel.policyUpdateRetry.try].url
+                        );
+                    } else {
+                        FFW.BasicCommunication.OnSystemRequest("PROPRIETARY");
+                    }
+                    SDL.SettingsController.policyUpdateRetry();
+                }, SDL.SDLModel.policyUpdateRetry.oldTimer
+            );
+
+            SDL.SDLModel.policyUpdateRetry.try++;
+        } else {
+            SDL.SDLModel.policyUpdateRetry = {
+                timeout: null,
+                retry: [],
+                try: null,
+                timer: null,
+                oldTimer: 0
+            };
+        }
     }
 });

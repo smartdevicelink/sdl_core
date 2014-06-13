@@ -1,6 +1,4 @@
-/**
-* \file signals.cc
-* \brief Signal (i.e. SIGINT) handling.
+/*
 * Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
@@ -65,6 +63,13 @@
 #endif  // MESSAGEBROKER_HMIADAPTER
 #include "system.h"      // cpplint: Include the directory when naming .h files
 
+#ifdef ENABLE_SECURITY
+namespace security_manager {
+class CryptoManager;
+class SecurityManager;
+}
+#endif //ENABLE_SECURITY
+
 namespace main_namespace {
 class LifeCycle : public utils::Singleton<LifeCycle> {
   public:
@@ -84,8 +89,10 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
+#ifdef ENABLE_SECURITY
     security_manager::CryptoManager* crypto_manager_;
     security_manager::SecurityManager* security_manager_;
+#endif //ENABLE_SECURITY
 #ifdef TIME_TESTER
     time_tester::TimeManager* time_tester_;
 #endif //TIME_TESTER
