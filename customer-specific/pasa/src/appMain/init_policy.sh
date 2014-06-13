@@ -13,3 +13,10 @@
 #
 #
 cat /fs/mp/sql/policy.cfg > /pps/qnx/qdb/config/policy.db
+
+if [ -f "/fs/usb0/policy" ];
+then
+   cat /fs/mp/sql/policy_usb.cfg > /pps/qnx/qdb/config/policy.db
+else
+   cat /fs/mp/sql/policy.cfg > /pps/qnx/qdb/config/policy.db
+fi
