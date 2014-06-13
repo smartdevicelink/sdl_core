@@ -1,5 +1,5 @@
 [CW24]
-* 
+* SyncProxyTester: Restore connection during autotest
 * SyncProxyTester: 2nd session is not registered if during BT scan both session already started
 
 [CW23]
