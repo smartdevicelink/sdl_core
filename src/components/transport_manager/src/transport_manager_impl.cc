@@ -71,10 +71,10 @@ TransportManagerImpl::TransportManagerImpl()
       event_queue_thread_(),
       device_listener_thread_wakeup_(),
       is_initialized_(false),
+      #ifdef TIME_TESTER
+            metric_observer_(NULL),
+      #endif  // TIME_TESTER
       connection_id_counter_(0)
-#ifdef TIME_TESTER
-      , metric_observer_(NULL)
-#endif  // TIME_TESTER
 {
   LOG4CXX_INFO(logger_, "==============================================");
 #ifdef USE_RWLOCK

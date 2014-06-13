@@ -386,9 +386,11 @@ class TransportManagerImpl : public TransportManager {
    * @brief Flag that TM is initialized
    */
   bool is_initialized_;
+
 #ifdef TIME_TESTER
   TMMetricObserver* metric_observer_;
 #endif  // TIME_TESTER
+
  private:
   /**
    * @brief Structure that contains conversion functions (Device ID -> Device
@@ -443,6 +445,8 @@ class TransportManagerImpl : public TransportManager {
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
       DeviceList;
   DeviceList device_list_;
+
+
   void AddConnection(const ConnectionInternal& c);
   void RemoveConnection(uint32_t id);
   ConnectionInternal* GetConnection(const ConnectionUID& id);

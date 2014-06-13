@@ -70,7 +70,7 @@ const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
 const char* kPathToSnapshotKey = "PathToSnapshot";
 const char* kPreloadedPTKey = "PreloadedPT";
-const char* kPoliciesTableKey = "PoliciesTable";
+//const char* kPoliciesTableKey = "PoliciesTable";
 const char* kServerAddressKey = "ServerAddress";
 const char* kAppInfoStorageKey = "AppInfoStorage";
 const char* kAppStorageFolderKey = "AppStorageFolder";
@@ -215,10 +215,10 @@ Profile::Profile()
 #ifdef CUSTOMER_PASA
     log4cxx_config_file_(kDefaultLog4cxxConfig),
 #endif
-    recording_file_source_(kDefaultRecordingFileSourceName),
     mme_db_name_(kDefaultMmeDatabaseName),
     event_mq_name_(kDefaultEventMQ),
     ack_mq_name_(kDefaultAckMQ),
+    recording_file_source_(kDefaultRecordingFileSourceName),
     recording_file_name_(kDefaultRecordingFileName),
     application_list_update_timeout_(kDefaultApplicationListUpdateTimeout) {
 }

@@ -691,10 +691,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;
 
-
-#ifdef TIME_TESTER
-    AMMetricObserver* metric_observer_;
-#endif  // TIME_TESTER
     static uint32_t corelation_id_;
     static const uint32_t max_corelation_id_;
 
@@ -718,6 +714,10 @@ class ApplicationManagerImpl : public ApplicationManager,
      * application in case INGITION_OFF or MASTER_RESSET
      */
     ResumeCtrl resume_ctrl_;
+
+#ifdef TIME_TESTER
+    AMMetricObserver* metric_observer_;
+#endif  // TIME_TESTER
 
     class ApplicationListUpdateTimer : public timer::TimerThread<ApplicationManagerImpl> {
      public:

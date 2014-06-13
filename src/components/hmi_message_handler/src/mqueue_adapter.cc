@@ -36,8 +36,8 @@
 
 namespace hmi_message_handler {
 
-const int kMqueueSize = 100;
-const int kMqueueMessageSize = 65536;
+const uint32_t kMqueueSize = 100;
+const uint32_t kMqueueMessageSize = 65536;
 const char* kSdlToHmiQueue = "/sdl_to_hmi";
 const char* kHmiToSdlQueue = "/hmi_to_sdl";
 

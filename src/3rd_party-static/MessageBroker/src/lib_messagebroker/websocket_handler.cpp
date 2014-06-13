@@ -88,6 +88,7 @@ namespace NsMessageBroker
        bool rsv3 = (recBuffer[0] & 0x10) == 0x10;
        unsigned char opCode = ((recBuffer[0] & 0x08) | (recBuffer[0] & 0x04) |
            (recBuffer[0] & 0x02) | (recBuffer[0] & 0x01));
+
        bool mask = (recBuffer[1] & 0x80) == 0x80;
 
        DBG_MSG(("CWebSocketHandler::fin = %d recBuffer[0] = 0x%02X\n"
@@ -95,6 +96,21 @@ namespace NsMessageBroker
                 "rsv1 = %d, rsv2 = %d, rsv3 = %d, opCode = %u\n",
            fin, recBuffer[0], parsedBufferPosition + position,
            size, parsedBufferPosition, rsv1, rsv2, rsv3, opCode));
+
+       if ((!rsv1)|(!rsv2)|(!rsv3)) {
+         DBG_MSG(("rsv1 or rsv2 or rsv3 is not 0 \n"));
+         break;
+       }
+
+       switch(opCode) {
+         case 0x0: break; //Continuation frame
+         case 0x1: break; //Text Frame
+         case 0x2: break; //Binary Frame
+         case 0x8: break; //Connection close Frame
+         case 0x9: break; //ping Frame
+         case 0xA: break; //Pong Frame
+         default: break; //Unknown frame
+       }
 
        if (false == fin) {
           break;
@@ -148,7 +164,7 @@ namespace NsMessageBroker
        DBG_MSG(("CWebSocketHandler::parseWebSocketData()length:%d; size:%d;"
                 " position:%d\n", (int)length, size, position));
 
-       for (unsigned long i = position; i < size, i < position+length; i++)
+       for (unsigned long i = position; (i < size && i < position+length); i++)
        {
           Buffer[parsedBufferPosition++] = recBuffer[i];
        }

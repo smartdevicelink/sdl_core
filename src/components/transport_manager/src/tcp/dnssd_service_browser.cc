@@ -109,6 +109,9 @@ void AvahiClientCallback(AvahiClient *avahi_client,
     case AVAHI_CLIENT_FAILURE:
       dnssd_service_browser->OnClientFailure();
       break;
+    default: {
+      LOG4CXX_ERROR(logger_, "Unknown avahi_client_state: " << avahi_client_state)
+    }
   }
 }
 
