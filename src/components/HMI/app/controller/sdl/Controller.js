@@ -658,8 +658,7 @@ SDL.SDLController = Em.Object
          */
         getApplicationModel: function(applicationId) {
 
-            return SDL.SDLModel.registeredApps.filterProperty('appID',
-                applicationId)[0];
+            return SDL.SDLModel.registeredApps.filterProperty('appID', applicationId)[0];
         },
         /**
          * Function returns ChangeDeviceView back to previous state
