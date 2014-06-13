@@ -165,24 +165,14 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
             @Override
-<<<<<<< HEAD
-            protected void startMobileNaviService(byte sessionID, String correlationID, boolean encrypted) {
-                super.startMobileNaviService(sessionID, correlationID, encrypted);
-                assertEquals("Session ID should be equal", currentSession.getSessionId(), (byte) 48);
-=======
-            protected void onProtocolServiceStarted_MobileNavi(byte sessionId) {
-                super.onProtocolServiceStarted_MobileNavi(sessionId);
+            protected void onProtocolServiceStarted_MobileNavi(byte sessionId, boolean encrypted) {
+                super.onProtocolServiceStarted_MobileNavi(sessionId, encrypted);
                 assertEquals("Session ID should be equal",
                         syncSession.getSessionIdByAppId(SessionTest.APP_ID), SESSION_ID);
->>>>>>> develop
             }
 
         };
-<<<<<<< HEAD
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, SESSION_ID, false), VERSION, "");
-=======
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION);
->>>>>>> develop
     }
 
     public void testReceivedMobileNavSessionIncomingMessage() throws Exception {
@@ -358,21 +348,10 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
         };
-<<<<<<< HEAD
-        ArgumentCaptor<ServiceType> sessionTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
-        ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
-        ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
-        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, SESSION_ID, false), VERSION, "correlationID");
-        verify(listenerALM).onSessionStarted(sessionIdCaptor.capture(), correlationIdCaptor.capture());
-        assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
-        assertEquals("correlationID", correlationIdCaptor.getValue());
-=======
         ArgumentCaptor<String> appIdCaptor = ArgumentCaptor.forClass(String.class);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION);
         verify(listenerALM).onSessionStarted(appIdCaptor.capture());
         assertEquals(SessionTest.APP_ID_DEFAULT, appIdCaptor.getValue());
->>>>>>> develop
     }
 
     public void testHeartBeatIsSet() throws Exception {

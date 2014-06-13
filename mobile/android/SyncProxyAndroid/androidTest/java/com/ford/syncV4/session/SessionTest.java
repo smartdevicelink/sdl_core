@@ -35,18 +35,6 @@ public class SessionTest extends AndroidTestCase {
         assertFalse("service list should be empty", session.hasService(service));
     }
 
-<<<<<<< HEAD
-    public void testInitialSessionCreationCreatesRPCService() throws Exception {
-        Session session = Session.createSession(ServiceType.RPC, (byte) 0, false);
-        Service service = session.getServiceList().get(0);
-        assertEquals("currentSession id should be SESSION_ID", (byte) 0, session.getSessionId());
-        assertEquals("should be RPC service", ServiceType.RPC, service.getServiceType());
-        assertEquals("service should belong to the currentSession", session, service.getSession());
-    }
-
-    public void testRemoveServiceRemovesService() throws Exception {
-        Session session = Session.createSession(ServiceType.RPC, (byte) 0, false);
-=======
     public void testSessionAddRPCService() throws Exception {
         Session session = SessionTest.getInitializedSession();
         Service service = new Service();
@@ -62,7 +50,6 @@ public class SessionTest extends AndroidTestCase {
 
     public void testRemoveServiceRemovesService() throws Exception {
         Session session = SessionTest.getInitializedSession();
->>>>>>> develop
         Service service = new Service();
         service.setAppId(SessionTest.APP_ID);
         service.setServiceType(ServiceType.RPC);
@@ -71,17 +58,10 @@ public class SessionTest extends AndroidTestCase {
     }
 
     public void testStopSessionClearsServiceList() throws Exception {
-<<<<<<< HEAD
-        Session session = Session.createSession(ServiceType.RPC, (byte) 10, false);
-        session.stopSession();
-        assertEquals("service list should be 0",  0, session.getServiceList().size());
-        assertEquals("session id should be 0",0, session.getSessionId());
-=======
         Session session = getInitializedSession();
         session.stopSession(APP_ID);
         assertEquals("service list should be 0", 0, session.getServicesNumber());
         assertEquals("session id should be 0", 0, session.getSessionIdByAppId(APP_ID));
->>>>>>> develop
     }
 
     public void testEmptyServicesList() {

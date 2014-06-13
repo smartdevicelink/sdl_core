@@ -148,14 +148,15 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     private Handler mBluetoothStopProxyServiceTimeOutHandler;
     /**
-     * progress dialog of the Application
+     * progress dialog of the Exit Application
      */
-    private ProgressDialog mProgressDialog;
+    private ProgressDialog mExitProgressDialog;
     /**
      * UI Handler to perform actions in UI Thread
      */
     private final Handler mUIHandler = new Handler(Looper.getMainLooper());
 
+    private final static String ROOTED_DEVICE_ALERT_DIALOG_TAG = "RootedDeviceDialogTag";
     public static final String ButtonSubscriptions = "ButtonSubscriptions";
     public static final String VehicleDataSubscriptions = "VehicleDataSubscriptions";
     private SyncReceiver mSyncReceiver;
@@ -494,7 +495,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     @Override
-    public void onServiceStart(ServiceType serviceType, String appId) {
+    public void onServiceStart(ServiceType serviceType, String appId, final boolean encoded) {
 
         final PlaceholderFragment fragment = getFragmentByAppId(appId);
         if (fragment == null) {
@@ -524,7 +525,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     if (outputStream == null) {
                         return;
                     }
-                    fragment.setAudioServiceStateOn(outputStream);
+                    fragment.setAudioServiceStateOn(outputStream, encoded);
                 }
             });
         } else if (serviceType == ServiceType.Mobile_Nav) {
@@ -536,7 +537,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     if (outputStream == null) {
                         return;
                     }
-                    fragment.setMobileNaviStateOn(outputStream);
+                    fragment.setMobileNaviStateOn(outputStream, encoded);
                 }
             });
         } else if (serviceType == ServiceType.RPC) {
@@ -1450,7 +1451,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }
     }
 
-    public void startMobileNaviService(final String appId, boolean encrypted) {
+    public void startMobileNaviService(final String appId, final boolean encrypted) {
 
         mStreamCommandsExecutorService.submit(new Runnable() {
             @Override
@@ -1468,7 +1469,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-                mBoundProxyService.syncProxyStartMobileNavService(appId);
+                mBoundProxyService.syncProxyStartMobileNavService(appId, encrypted);
             }
         });
     }
@@ -1542,7 +1543,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         return true;
     }
 
-    public void startAudioService(final String appId) {
+    public void startAudioService(final String appId, final boolean encrypted) {
 
         mStreamCommandsExecutorService.submit(new Runnable() {
             @Override
@@ -1560,7 +1561,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-                mBoundProxyService.syncProxyStartAudioService(appId);
+                mBoundProxyService.syncProxyStartAudioService(appId, encrypted);
             }
         });
     }
@@ -1674,7 +1675,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     /**
      * Exit from Activity
      */
-    public void exitApp() {
+    void exitApp() {
         Logger.i("Exit " + SyncProxyTester.class.getSimpleName() + "\n\n");
         super.finish();
 
@@ -1728,13 +1729,14 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         });
     }
 
-    private ProgressDialog getProgressDialog(String title) {
-        if (mProgressDialog == null) {
-            mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setProgressStyle(mProgressDialog.STYLE_SPINNER);
-            mProgressDialog.setIndeterminate(true);
+    private ProgressDialog getExitDialog() {
+        if (mExitProgressDialog == null) {
+            mExitProgressDialog = new ProgressDialog(this);
+            mExitProgressDialog.setTitle(R.string.exit_dialog_title);
+            mExitProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            mExitProgressDialog.setIndeterminate(true);
         }
-        return mProgressDialog;
+        return mExitProgressDialog;
     }
 
     /**
@@ -1745,7 +1747,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         public void run() {
             Logger.w("Exit App timer callback");
             mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
-            getProgressDialog(getString(R.string.exit_dialog_title)).dismiss();
+            getExitDialog().dismiss();
             exitApp();
             android.os.Process.killProcess(android.os.Process.myPid());
         }
@@ -1792,5 +1794,38 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             return;
         }
         mBoundProxyService.sendRPCRequestWithPreprocess(appId, systemRequest);
+    }
+
+    /**
+     * Starts to encrypt Audio Service
+     * @param appId
+     */
+    public void startAudioServiceEncryption(String appId) {
+        Logger.d("Audio Service start encrypt");
+        startAudioService(appId,true);
+    }
+
+    /**
+     * Stops to encrypt Audio Service
+     */
+    public void startNotSecureAudioService(String appId) {
+        Logger.d("Audio Service start not encrypt");
+        startAudioService(appId,false);
+    }
+
+    /**
+     * Starts to encrypt Mobile Navi Service
+     */
+    public void startMobileNaviServiceEncryption(String appId) {
+        Logger.d("Mobile Navi Service start encrypt");
+        startMobileNaviService(appId,true);
+    }
+
+    /**
+     * Stops to encrypt Mobile Navi Service
+     */
+    public void startMobileNaviNotEncryptedService(String appId) {
+        Logger.d("Mobile Navi Service start not encrypt");
+        startMobileNaviService(appId,false);
     }
 }

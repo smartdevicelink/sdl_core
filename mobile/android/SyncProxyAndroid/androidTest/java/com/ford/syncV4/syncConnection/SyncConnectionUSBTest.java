@@ -88,17 +88,11 @@ public class SyncConnectionUSBTest extends TestCase {
                     }
                 };
 
-<<<<<<< HEAD
-        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
-        connection.init(new BTTransportConfig(), fakeTransport);
-        connection.onProtocolServiceEnded(ServiceType.RPC, (byte) 0, "");
-=======
         final SyncConnection connection = new SyncConnection(SessionTest.getInitializedSession(),
                 mock(ISyncConnectionListener.class));
         connection.init(new BTTransportConfig());
         connection._transport = fakeTransport;
         connection.onProtocolServiceEndedAck(ServiceType.RPC, SessionTest.SESSION_ID);
->>>>>>> develop
         assertTrue("stopReading() isn't called", requiredMethodCalled);
     }
 }
