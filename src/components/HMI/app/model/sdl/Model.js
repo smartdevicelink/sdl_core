@@ -1191,8 +1191,10 @@ SDL.SDLModel = Em.Object.create({
 
         if (!SDL.SliderView.active) {
             SDL.SDLController.getApplicationModel(message.params.appID).onSlider(message);
+            return true;
         } else {
-            FFW.UI.sendSliderResult(this.resultCode["ABORTED"], message.id);
+            FFW.UI.sendSliderResult(this.resultCode["REJECTED"], message.id);
+            return false;
         }
     },
 
