@@ -745,9 +745,14 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   std::string policy_app_id = app->mobile_app_id()->asString();
 
   AppPermissions permissions(policy_app_id);
+  application_manager::MessageHelper::GetDeviceInfoForApp(connection_key,
+      &permissions.deviceInfo);
 
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    if (profile::Profile::instance()->policy_turn_off()) {
+      permissions.isSDLAllowed = true;
+    }
   } else {
     permissions = policy_manager_->GetAppPermissionsChanges(
                     policy_app_id);
@@ -756,8 +761,6 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
 
     usage.RecordAppUserSelection();
 
-    application_manager::MessageHelper::GetDeviceInfoForApp(connection_key,
-        &permissions.deviceInfo);
     DeviceConsent consent = policy_manager_->GetUserConsentForDevice(
                               permissions.deviceInfo.device_mac_address);
     permissions.isSDLAllowed = kDeviceAllowed == consent ? true : false;
@@ -775,7 +778,8 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
 #endif
 
     if (permissions.isSDLAllowed &&
-        PolicyTableStatus::StatusUpdateRequired == policy_manager_->GetPolicyTableStatus()) {
+        PolicyTableStatus::StatusUpdateRequired ==
+        policy_manager_->GetPolicyTableStatus()) {
       StartPTExchange();
     }
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
