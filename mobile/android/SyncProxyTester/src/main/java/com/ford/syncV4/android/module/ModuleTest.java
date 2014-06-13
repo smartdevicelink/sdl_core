@@ -987,10 +987,10 @@ public class ModuleTest {
 
                     if (!mProxyService.isSyncProxyConnected()) {
 
-                        //mProxyService.getTestConfig().setDoCallRegisterAppInterface(false);
+                        mProxyService.getTestConfig().setDoCallRegisterAppInterface(false);
                         mProxyService.startProxyIfNetworkConnected();
 
-                        mProxyService.getRestoreConnectionToRAI().acquireLock();
+                        mProxyService.getRestoreConnectionToRPCService().acquireLock();
                     }
 
                     RPCRequest rpc = wrapper.getRequest();

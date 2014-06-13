@@ -1347,11 +1347,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         createDebugMessageForAdapter(appId, notification);
     }
 
-    @Override
-    public void onPutFileRequest(String appId, PutFile putFile) {
-        createDebugMessageForAdapter(appId, putFile);
-    }
-
     /**
      * *****************************************
      *  SYNC AppLink Audio Pass Thru Callbacks *
@@ -1596,16 +1591,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onOnSystemRequest(String appId, OnSystemRequest notification) {
-        createDebugMessageForAdapter(appId, notification);
-    }
-
-    @Override
-    public void onRegisterAppRequest(String appId, RegisterAppInterface msg) {
-        createDebugMessageForAdapter(appId, msg);
-    }
-
-    @Override
     public void onAppUnregisteredAfterLanguageChange(String appId, OnLanguageChange msg) {
         String message =
                 String.format("OnAppInterfaceUnregistered (LANGUAGE_CHANGE) from %s to %s",
@@ -1658,6 +1643,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     public void onStartSession(String appId) {
         createDebugMessageForAdapter(appId, " Session going to start, " +
                 "protocol version: " + syncProxyGetWiProVersion());
+    }
+
+    @Override
+    public void onRPCRequest(String appId, RPCRequest rpcRequest) {
+        createDebugMessageForAdapter(rpcRequest);
+    }
+
+    @Override
+    public void onOnSystemRequest(String appId, OnSystemRequest notification) {
+        createDebugMessageForAdapter(appId, notification);
     }
 
     /**
@@ -1874,7 +1869,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     public void commandListFiles(String appId) {
         try {
             mSyncProxy.listFiles(appId, getNextCorrelationID());
-            createDebugMessageForAdapter(appId, "ListFiles sent");
         } catch (SyncException e) {
             createErrorMessageForAdapter(appId, "ListFiles send error: " + e);
         }
@@ -2283,7 +2277,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             if (request.getFunctionName().equals(Names.RegisterAppInterface)) {
                 sendRegisterRequest((RegisterAppInterface) request, jsonRPCMarshaller, sendAsItIs);
             } else {
-                createDebugMessageForAdapter(appId, request);
                 mSyncProxy.sendRPCRequest(appId, request, jsonRPCMarshaller);
             }
         } catch (SyncException e) {
@@ -2304,7 +2297,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             return;
         }
         try {
-            createDebugMessageForAdapter(request);
             mSyncProxy.sendRPCRequest(appId, request);
         } catch (SyncException e) {
             createErrorMessageForAdapter("RPC request '" + request.getFunctionName() + "'" +

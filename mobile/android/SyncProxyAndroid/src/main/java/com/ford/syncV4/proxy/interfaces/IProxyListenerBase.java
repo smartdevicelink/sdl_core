@@ -1,6 +1,7 @@
 package com.ford.syncV4.proxy.interfaces;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
@@ -316,10 +317,6 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onKeyboardInput(String appId, OnKeyboardInput msg);
 
-    public void onOnSystemRequest(String appId, OnSystemRequest notification);
-
-    public void onRegisterAppRequest(String appId, RegisterAppInterface msg);
-
     public void onAppUnregisteredAfterLanguageChange(String appId, OnLanguageChange msg);
 
     public void onAppUnregisteredReason(String appId, AppInterfaceUnregisteredReason reason);
@@ -360,10 +357,13 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
                                             DiagnosticMessageResponse diagnosticMessageResponse);
 
     /**
-     * Provide a callback (in most cases for the test purposes) when
-     * {@link com.ford.syncV4.proxy.rpc.PutFile} request is going to be performed
+     * Provides a callback when {@link com.ford.syncV4.proxy.RPCRequest} is going to be sent over
+     * transport
      *
-     * @param putFile {@link com.ford.syncV4.proxy.rpc.PutFile}
+     * @param appId      Application identifier
+     * @param rpcRequest Instance of the {@link com.ford.syncV4.proxy.RPCRequest} object
      */
-    public void onPutFileRequest(String appId, PutFile putFile);
+    public void onRPCRequest(String appId, RPCRequest rpcRequest);
+
+    public void onOnSystemRequest(String appId, OnSystemRequest notification);
 }
