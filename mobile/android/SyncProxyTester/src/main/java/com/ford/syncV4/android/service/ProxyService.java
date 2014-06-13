@@ -125,6 +125,7 @@ import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
+import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.ITestConfigCallback;
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
@@ -353,6 +354,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      */
     public RestoreConnectionManager getRestoreConnectionToRPCService() {
         return restoreConnectionToRPCService;
+    }
+
+    public void closeConnection() {
+        mSyncProxy.closeConnection();
     }
 
     /**

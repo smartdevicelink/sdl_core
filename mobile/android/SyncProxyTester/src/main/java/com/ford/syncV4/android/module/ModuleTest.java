@@ -920,7 +920,7 @@ public class ModuleTest {
         }
         if (testActionItem.getActionName().equals(TestActionItem.START_RPC_SERVICE)) {
             mProxyService.getTestConfig().setDoCallRegisterAppInterface(false);
-            mProxyService.startProxyIfNetworkConnected();
+            mProxyService.restart();
             mProxyService.getRestoreConnectionToRPCService().acquireLock();
         }
     }

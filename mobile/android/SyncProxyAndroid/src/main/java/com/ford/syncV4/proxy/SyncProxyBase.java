@@ -1064,6 +1064,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         }
     }
 
+    public void closeConnection() {
+        closeSyncConnection(false);
+    }
+
     private synchronized void closeSyncConnection(boolean keepConnection) {
         if (mSyncConnection != null) {
 
