@@ -58,6 +58,15 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
+     * Application's container for current processed requests on VR component of HMI
+     *
+     * @type {Object}
+     */
+    vrActiveRequests: {
+        vrPerformInteraction: null
+    },
+
+    /**
      * List of callback functions for request SDL.GetUserFriendlyMessage
      * where key is requestId
      * and parameter is a function that will handle data came in respone from SDL
@@ -1141,15 +1150,15 @@ SDL.SDLModel = Em.Object.create({
      */
     vrPerformInteraction: function (message) {
 
-        if (!SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
-            SDL.SDLAppController.model.activeRequests.vrPerformInteraction = message.id;
+        if (!SDL.SDLModel.vrActiveRequests.vrPerformInteraction) {
+            SDL.SDLModel.vrActiveRequests.vrPerformInteraction = message.id;
         } else {
             SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['REJECTED']);
             return;
         }
 
         setTimeout(function(){
-            if (SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+            if (SDL.SDLModel.vrActiveRequests.vrPerformInteraction) {
                 SDL.SDLModel.onPrompt(message.params.timeoutPrompt);
                 SDL.SDLModel.interactionData.helpPrompt = null;
             }
@@ -1166,7 +1175,7 @@ SDL.SDLModel = Em.Object.create({
 
             setTimeout(function(){
                 if (SDL.SDLModel.VRActive) {
-                    if (SDL.SDLAppController.model && SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+                    if (SDL.SDLAppController.model && SDL.SDLModel.vrActiveRequests.vrPerformInteraction) {
                         SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['TIMED_OUT']);
                     }
 

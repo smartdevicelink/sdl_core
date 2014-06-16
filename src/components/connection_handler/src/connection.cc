@@ -77,8 +77,8 @@ Connection::~Connection() {
 // Returns 0 if that key not found
 namespace {
 template <class T>
-int32_t findGap(const std::map<unsigned char, T>& map) {
-  for (int32_t i = 1; i <= UCHAR_MAX; ++i) {
+uint32_t findGap(const std::map<unsigned char, T>& map) {
+  for (uint32_t i = 1; i <= UCHAR_MAX; ++i) {
     if (map.find(i) == map.end()) {
       return i;
     }
@@ -87,10 +87,9 @@ int32_t findGap(const std::map<unsigned char, T>& map) {
 }
 }  // namespace
 
-int32_t Connection::AddNewSession() {
+uint32_t Connection::AddNewSession() {
   sync_primitives::AutoLock lock(session_map_lock_);
-
-  const int32_t session_id = findGap(session_map_);
+  const uint32_t session_id = findGap(session_map_);
   if (session_id > 0) {
     session_map_[session_id].service_list.push_back(protocol_handler::kRpc);
     session_map_[session_id].service_list.push_back(protocol_handler::kBulk);

@@ -952,16 +952,16 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   LOG4CXX_INFO_EXT(logger_,
                    "Protocol version: " <<
                    static_cast<int>(packet.protocol_version()));
-
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
 
   DCHECK(session_observer_);
-  const int32_t session_id = session_observer_->OnSessionStartedCallback(
+  const uint32_t session_id = session_observer_->OnSessionStartedCallback(
         connection_id, packet.session_id(), service_type,
         packet.protection_flag());
 
-  if (-1 == session_id) {
-    LOG4CXX_INFO_EXT(logger_, "Refused to create service " << service_type << " type.");
+  if (0 == session_id) {
+    LOG4CXX_WARN_EXT(logger_, "Refused to create service " <<
+                     static_cast<int32_t>(service_type) << " type.");
     SendStartSessionNAck(connection_id, packet.session_id(),
                          packet.protocol_version(), packet.service_type());
     return RESULT_OK;

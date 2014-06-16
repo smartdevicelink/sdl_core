@@ -2219,6 +2219,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 
 // TODO(AK): change printf to logger
 bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
+  return true;
 #ifdef ENABLE_LOG
   static uint32_t tab = 0;
   std::string tab_buffer;

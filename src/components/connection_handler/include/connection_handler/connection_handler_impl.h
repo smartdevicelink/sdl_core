@@ -167,9 +167,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param service_type Type of service
    * \param is_protected would be service protected
    * \param protocol_version Version of protocol
-   * \return int32_t Id (number) of new session if successful otherwise -1.
+   * \return int32_t Id (number) of new session if successful otherwise 0.
    */
-  virtual int32_t OnSessionStartedCallback(
+  virtual uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type,

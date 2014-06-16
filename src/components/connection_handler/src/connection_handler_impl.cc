@@ -236,7 +236,7 @@ void ConnectionHandlerImpl::RemoveConnection(
   OnConnectionEnded(connection_handle);
 }
 
-int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
+uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const transport_manager::ConnectionUID& connection_handle,
     const uint8_t session_id, const protocol_handler::ServiceType& service_type,
     const bool is_protected) {
@@ -246,7 +246,7 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
-    return -1;
+    return 0;
   }
 #ifdef ENABLE_SECURITY
   if (is_protected) {
@@ -258,7 +258,7 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
         protectedSpecific.end()) {
       LOG4CXX_ERROR(logger_, "Service " << static_cast<int>(service_type)
                     << " is forbidden to be protected");
-      return -1;
+      return 0;
     }
   } else {
     // Check deliver-specific services (which shall be protected)
@@ -269,12 +269,12 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
         protectedSpecific.end()) {
       LOG4CXX_ERROR(logger_, "Service " << static_cast<int>(service_type)
                     << " shall be protected");
-      return -1;
+      return 0;
     }
   }
 #endif //  ENABLE_SECURITY
 
-  int32_t new_session_id = -1;
+  int32_t new_session_id = 0;
 
   Connection* connection = it->second;
   if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
@@ -294,6 +294,7 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   }
 
   if (connection_handler_observer_) {
+    // TODO(Ezamakhov) change all session_keys as uint32_t
     int32_t session_key = KeyFromPair(connection_handle, new_session_id);
 
     const bool success = connection_handler_observer_->OnServiceStartedCallback(
@@ -305,7 +306,7 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
       } else {
         connection->RemoveService(session_id, service_type);
       }
-      new_session_id = -1;
+      new_session_id = 0;
     }
   }
   return new_session_id;
@@ -355,11 +356,11 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
 
 uint32_t ConnectionHandlerImpl::KeyFromPair(
     transport_manager::ConnectionUID connection_handle, uint8_t sessionId) {
-  int32_t key = connection_handle | (sessionId << 16);
+  const uint32_t key = connection_handle | (sessionId << 16);
   LOG4CXX_TRACE(logger_, "Key for ConnectionHandle:"
-                << static_cast<int32_t>(connection_handle)
-                << " Session:" << static_cast<int32_t>(sessionId)
-                << " is: " << static_cast<int32_t>(key));
+                << static_cast<uint32_t>(connection_handle)
+                << " Session:" << static_cast<uint32_t>(sessionId)
+                << " is: " << static_cast<uint32_t>(key));
   return key;
 }
 

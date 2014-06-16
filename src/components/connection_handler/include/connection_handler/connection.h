@@ -175,7 +175,7 @@ class Connection {
    * \brief Adds session to connection
    * \return sessionID or -1 in case of issues
    */
-  int32_t AddNewSession();
+  uint32_t AddNewSession();
 
   /**
    * \brief Removes session from connection
