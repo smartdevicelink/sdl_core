@@ -225,7 +225,7 @@ bool LifeCycle::InitMessageSystem() {
     hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     mb_pasa_adapter_);
   if (!mb_pasa_adapter_->MqOpen()) {
-    LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
+    LOG4CXX_FATAL(logger_, "Cannot connect to remote peer!");
     return false;
   }
 
@@ -246,7 +246,7 @@ bool LifeCycle::InitMessageSystem() {
   message_broker_ =
     NsMessageBroker::CMessageBroker::getInstance();
   if (!message_broker_) {
-    LOG4CXX_INFO(logger_, " Wrong pMessageBroker pointer!");
+    LOG4CXX_FATAL(logger_, " Wrong pMessageBroker pointer!");
     return false;
   }
 
@@ -256,12 +256,12 @@ bool LifeCycle::InitMessageSystem() {
     profile::Profile::instance()->server_port(),
     message_broker_);
   if (!message_broker_server_) {
-    LOG4CXX_INFO(logger_, " Wrong pJSONRPC20Server pointer!");
+    LOG4CXX_FATAL(logger_, " Wrong pJSONRPC20Server pointer!");
     return false;
   }
   message_broker_->startMessageBroker(message_broker_server_);
   if (!networking::init()) {
-    LOG4CXX_INFO(logger_, " Networking initialization failed!");
+    LOG4CXX_FATAL(logger_, " Networking initialization failed!");
     return false;
   }
 
@@ -288,7 +288,7 @@ bool LifeCycle::InitMessageSystem() {
     hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     mb_adapter_);
     if (!mb_adapter_->Connect()) {
-      LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
+      LOG4CXX_FATAL(logger_, "Cannot connect to remote peer!");
       return false;
     }
 
@@ -336,7 +336,7 @@ bool LifeCycle::InitMessageSystem() {
   hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     dbus_adapter_);
   if (!dbus_adapter_->Init()) {
-    LOG4CXX_INFO(logger_, "Cannot init DBus service!");
+    LOG4CXX_FATAL(logger_, "Cannot init DBus service!");
     return false;
   }
 

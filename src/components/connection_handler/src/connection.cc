@@ -98,19 +98,16 @@ int32_t Connection::AddNewSession() {
   return session_id;
 }
 
-int32_t Connection::RemoveSession(uint8_t session) {
+uint32_t Connection::RemoveSession(uint8_t session) {
   sync_primitives::AutoLock lock(session_map_lock_);
-  int32_t result = -1;
   SessionMapIterator it = session_map_.find(session);
   if (session_map_.end() == it) {
     LOG4CXX_WARN(logger_, "Session not found in this connection!");
-  } else {
-    heartbeat_monitor_->RemoveSession(session);
-    session_map_.erase(session);
-    result = session;
+    return 0;
   }
-
-  return result;
+  heartbeat_monitor_->RemoveSession(session);
+  session_map_.erase(session);
+  return session;
 }
 
 bool Connection::AddNewService(uint8_t session,

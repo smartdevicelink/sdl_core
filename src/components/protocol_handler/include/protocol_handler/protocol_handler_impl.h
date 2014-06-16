@@ -443,7 +443,6 @@ protected:
       ConnectionID connection_id ,
       int32_t connection_key);
 
-<<<<<<< HEAD
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON raw_ford_messages_from_mobile_ thread!
   void Handle(const impl::RawFordMessageFromMobile& message);
@@ -464,9 +463,6 @@ protected:
    *\brief (JSON Handler)
    */
   ProtocolObservers protocol_observers_;
-#ifdef TIME_TESTER
-  PHMetricObserver* metric_observer_;
-#endif  // TIME_TESTER
 
   /**
    *\brief Pointer on instance of class implementing ISessionObserver
@@ -517,70 +513,9 @@ protected:
   impl::FromMobileQueue raw_ford_messages_from_mobile_;
   // Thread that pumps messages prepared to being sent to mobile side.
   impl::ToMobileQueue raw_ford_messages_to_mobile_;
-=======
-    // threads::MessageLoopThread<*>::Handler implementations
-    // CALLED ON raw_ford_messages_from_mobile_ thread!
-    void Handle(const impl::RawFordMessageFromMobile& message);
-    // CALLED ON raw_ford_messages_to_mobile_ thread!
-    void Handle(const impl::RawFordMessageToMobile& message);
-  private:
-    /**
-     *\brief Pointer on instance of class implementing IProtocolObserver
-     *\brief (JSON Handler)
-     */
-    ProtocolObservers protocol_observers_;
-
-    /**
-     *\brief Pointer on instance of class implementing ISessionObserver
-     *\brief (Connection Handler)
-     */
-    SessionObserver* session_observer_;
-
-    /**
-     *\brief Pointer on instance of Transport layer handler for message exchange.
-     */
-    transport_manager::TransportManager* transport_manager_;
-
-    /**
-     *\brief Map of frames for messages received in multiple frames.
-     */
-    std::map<int32_t, ProtocolFramePtr> incomplete_multi_frame_messages_;
-
-    /**
-     * \brief Map of messages (frames) recieved over mobile nave session
-     * for map streaming.
-     */
-    MessagesOverNaviMap message_over_navi_session_;
-
-    /**
-     * \brief Untill specified otherwise, amount of message recievied
-     * over streaming session to send Ack
-     */
-    const uint32_t kPeriodForNaviAck;
-
-    /**
-     *\brief Counter of messages sent in each session.
-     */
-    std::map<uint8_t, uint32_t> message_counters_;
-
-    /**
-     *\brief map for session last message.
-     */
-    std::map<uint8_t, uint32_t> sessions_last_message_id_;
-
-
-    class IncomingDataHandler;
-    std::auto_ptr<IncomingDataHandler> incoming_data_handler_;
-
-    // Thread that pumps non-parsed messages coming from mobile side.
-    impl::FromMobileQueue raw_ford_messages_from_mobile_;
-    // Thread that pumps messages prepared to being sent to mobile side.
-    impl::ToMobileQueue raw_ford_messages_to_mobile_;
-
 #ifdef TIME_TESTER
-    PHMetricObserver* metric_observer_;
+  PHMetricObserver* metric_observer_;
 #endif  // TIME_TESTER
->>>>>>> 729f6e6f090ce54c801d63299d20ebc68da4c96d
 };
 }  // namespace protocol_handler
 

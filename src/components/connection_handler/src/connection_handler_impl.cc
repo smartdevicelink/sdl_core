@@ -317,24 +317,26 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     const protocol_handler::ServiceType& service_type) {
   LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
 
-  int32_t result = 0;
+  // null is wrong session id
+  uint32_t result = 0;
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
     return result;
   }
+  Connection* connection = it->second;
 
   if (protocol_handler::kRpc == service_type) {
     LOG4CXX_INFO(logger_, "Session to be removed");
 
-    result = (it->second)->RemoveSession(sessionId);
+    result = connection->RemoveSession(sessionId);
     if (0 > result) {
       LOG4CXX_ERROR(logger_, "Not possible to remove session!");
       return result;
     }
   } else {
-    if (!(it->second)->RemoveService(sessionId, service_type)) {
+    if (!connection->RemoveService(sessionId, service_type)) {
       LOG4CXX_ERROR(logger_, "Not possible to remove service!");
       return result;
     }
