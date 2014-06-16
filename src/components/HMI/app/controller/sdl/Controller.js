@@ -48,7 +48,8 @@ SDL.SDLController = Em.Object
             if ( SDL.SliderView.active
                 || SDL.InteractionChoicesView.active
                 || SDL.ScrollableMessage.active
-                || SDL.SDLModel.AudioPassThruState) {
+                || SDL.SDLModel.AudioPassThruState
+                || SDL.Keyboard.active) {
 
                 return 'HMI_OBSCURED';
             }
@@ -73,7 +74,8 @@ SDL.SDLController = Em.Object
             'SDL.States.navigationApp.baseNavigation.active',
             'SDL.ScrollableMessage.active',
             'SDL.InteractionChoicesView.active',
-            'SDL.VRHelpListView.active'),
+            'SDL.VRHelpListView.active',
+            'SDL.Keyboard.active'),
 
         /**
          * List of SDL application models
