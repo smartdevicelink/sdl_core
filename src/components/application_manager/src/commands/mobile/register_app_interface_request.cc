@@ -265,16 +265,6 @@ void RegisterAppInterfaceRequest::Run() {
     // Check policy update on ignition on, if it was not done before
     policy::PolicyHandler::instance()->PTExchangeAtIgnition();
 
-    // Check necessity of policy update for current application
-    // TODO(KKolodiy): need remove policy_manager
-    policy::PolicyManager* policy_manager =
-      policy::PolicyHandler::instance()->policy_manager();
-    if (!policy_manager) {
-      LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    } else {
-      policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
-    }
-
     SendRegisterAppInterfaceResponseToMobile();
   }
 }
@@ -482,6 +472,16 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   MessageHelper::SendOnAppRegisteredNotificationToHMI(
     *(application.get()), resumption);
+
+  // Check necessity of policy update for current application
+  // TODO(KKolodiy): need remove policy_manager
+  policy::PolicyManager* policy_manager =
+      policy::PolicyHandler::instance()->policy_manager();
+  if (!policy_manager) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+  } else {
+    policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
+  }
 
   SendResponse(true, result, add_info, params);
   if (result != mobile_apis::Result::RESUME_FAILED) {

@@ -144,7 +144,7 @@ FFW.UI = FFW.RPCObserver.create({
         this._super();
 
         if (notification.method == this.onRecordStartNotification) {
-            // to do
+            SDL.AudioPassThruPopUp.StartAudioPassThruTimer();
         }
     },
 
