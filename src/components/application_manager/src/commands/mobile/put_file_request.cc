@@ -148,10 +148,6 @@ void PutFileRequest::Run() {
     response_params[strings::space_available] = 0;
     file_path = profile::Profile::instance()->system_files_path();
   } else {
-
-    response_params[strings::space_available] = static_cast<int32_t>(
-        ApplicationManagerImpl::instance()->GetAvailableSpaceForApp(application->name()));
-
     file_path = profile::Profile::instance()->app_storage_folder();
     file_path += "/" + application->folder_name();
 
@@ -176,6 +172,9 @@ void PutFileRequest::Run() {
   mobile_apis::Result::eType save_result =
       ApplicationManagerImpl::instance()->SaveBinary(binary_data, file_path,
                                                      sync_file_name_, offset_);
+
+  response_params[strings::space_available] = static_cast<int32_t>(
+      ApplicationManagerImpl::instance()->GetAvailableSpaceForApp(application->folder_name()));
 
   sync_file_name_ = file_path + "/" + sync_file_name_;
   switch (save_result) {

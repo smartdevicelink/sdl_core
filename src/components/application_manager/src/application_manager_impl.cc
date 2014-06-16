@@ -2099,13 +2099,13 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
 }
 
 uint32_t ApplicationManagerImpl::GetAvailableSpaceForApp(
-  const std::string& app_name) {
+  const std::string& folder_name) {
   const uint32_t app_quota = profile::Profile::instance()->app_dir_quota();
   std::string app_storage_path =
     profile::Profile::instance()->app_storage_folder();
 
   app_storage_path += "/";
-  app_storage_path += app_name;
+  app_storage_path += folder_name;
 
   if (file_system::DirectoryExists(app_storage_path)) {
     uint32_t size_of_directory = file_system::DirectorySize(app_storage_path);
