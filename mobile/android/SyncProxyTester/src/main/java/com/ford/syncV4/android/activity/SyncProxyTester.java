@@ -800,51 +800,11 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     public int getFragmentsCount() {
-        return mSectionsPagerAdapter.getCount();
+        if (mSectionsPagerAdapter != null) {
+            return mSectionsPagerAdapter.getCount();
+        }
+        return 0;
     }
-
-/*	public void startSyncProxyService() {
-        // Get the local Bluetooth adapter
-        BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        //BT Adapter exists, is enabled, and there are paired devices with the name SYNC
-		//Ideally start service and start proxy if already connected to sync
-		//but, there is no way to tell if a device is currently connected (pre OS 4.0)
-        
-        if (mBtAdapter != null)
-		{
-			if ((mBtAdapter.isEnabled() && mBtAdapter.getBondedDevices().isEmpty() != true)) 
-			{
-				// Get a set of currently paired devices
-				Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
-		
-				boolean isSYNCpaired = false;
-				// Check if there is a paired device with the name "SYNC"
-		        if (pairedDevices.size() > 0) {
-		            for (BluetoothDevice device : pairedDevices) {
-		               if (device.getName().toString().equals("SYNC")) {
-		            	   isSYNCpaired  = true;
-		            	   break;
-		               }
-		            }
-		        } else {
-		        	Logger.i("CLASS_NAME", "A No Paired devices with the name sync");
-		        }
-		        
-		        if (isSYNCpaired == true) { 		        	
-		        	_applinkService = new ProxyService();
-		    		if (ProxyService.getInstance() == null) {
-		    			Intent startIntent = new Intent(this, ProxyService.class);
-		    			startService(startIntent);
-		    			//bindService(startIntent, this, Context.BIND_AUTO_CREATE);
-		    		} else {
-		    			// need to get the instance and add myself as a listener
-		    			ProxyService.getInstance().addLogAdapter(this);
-		    		}
-		        }
-			}
-		}
-	}*/
 
     /**
      * Adds the function name to the adapter.

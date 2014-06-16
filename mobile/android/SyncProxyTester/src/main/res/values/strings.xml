@@ -313,6 +313,8 @@
     <string name="main_menu_app_version">App version</string>
 
     <string name="exit_app_warning">Use \'Exit App\' menu option</string>
+    <string name="set_up_dialog_hash_id">Hash Id</string>
+    <string name="set_up_dialog_fake_hash_id">123456789</string>
 
 
 </resources>

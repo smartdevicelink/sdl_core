@@ -63,6 +63,7 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
 
             this.set('constantTBTParams', null);
 
+            this.set('VRCommands', []);
             this.set('tbtActivate', false);
             this.set('globalProperties.helpPrompt', []);
             this.set('globalProperties.timeoutPrompt', []);

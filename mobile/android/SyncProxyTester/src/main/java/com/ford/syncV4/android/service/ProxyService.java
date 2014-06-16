@@ -28,6 +28,7 @@ import com.ford.syncV4.android.manager.ApplicationIconManager;
 import com.ford.syncV4.android.manager.LastUsedHashIdsManager;
 import com.ford.syncV4.android.manager.PutFileTransferManager;
 import com.ford.syncV4.android.manager.RPCRequestsResumableManager;
+import com.ford.syncV4.android.manager.RestoreConnectionManager;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
@@ -186,6 +187,18 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private final IBinder mBinder = new ProxyServiceBinder(this);
 
     /**
+     * Semaphore object to wait for the connection to be restored up to
+     * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} notification receive
+     */
+    private final RestoreConnectionManager restoreConnectionToRAI = new RestoreConnectionManager();
+
+    /**
+     * Semaphore object to wait for the connection to be restored up to RPC Service
+     */
+    private final RestoreConnectionManager restoreConnectionToRPCService =
+            new RestoreConnectionManager();
+
+    /**
      * Table of the {@link com.ford.syncV4.android.manager.RPCRequestsResumableManager}'s
      * Each manager provide functionality to process RPC requests which are involved in app
      * resumption
@@ -328,6 +341,26 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
+     * @return reference to the {@link com.ford.syncV4.android.manager.RestoreConnectionManager}
+     * when restore connection up to {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} is needed
+     */
+    public RestoreConnectionManager getRestoreConnectionToRAI() {
+        return restoreConnectionToRAI;
+    }
+
+    /**
+     * @return reference to the {@link com.ford.syncV4.android.manager.RestoreConnectionManager}
+     * when restore connection up to RPC service is needed
+     */
+    public RestoreConnectionManager getRestoreConnectionToRPCService() {
+        return restoreConnectionToRPCService;
+    }
+
+    public void closeConnection() {
+        mSyncProxy.closeConnection();
+    }
+
+    /**
      * Prepare all necessary parameters to be passed to Sync proxy
      */
     private void prepareTestConfig() {
@@ -352,7 +385,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 int versionNumber = getCurrentProtocolVersion();
                 String appName = settings.getString(Const.PREFS_KEY_APPNAME,
                         Const.PREFS_DEFAULT_APPNAME);
-
+                String vrSynonymsString = settings.getString(Const.PREFS_KEY_VR_SYNONYMS, "");
+                Vector<Object> vrSynonyms = null;
+                if (!vrSynonymsString.equals("")) {
+                    vrSynonyms = new Vector<Object>(Arrays.asList(
+                            vrSynonymsString.split(SyncProxyTester.JOIN_STRING)));
+                }
                 Language lang = Language.valueOf(settings.getString(
                         Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
                 Language hmiLang = Language.valueOf(settings.getString(
@@ -402,23 +440,24 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 mTestConfig.setProtocolMinVersion((byte) AppPreferencesManager.getProtocolMinVersion());
                 mTestConfig.setProtocolMaxVersion((byte) AppPreferencesManager.getProtocolMaxVersion());
 
-                Logger.d("Start proxy's instance");
+                Logger.i("Start SYNC Proxy's instance, vrSynonyms:" + vrSynonyms);
                 mSyncProxy = new SyncProxyALM(this,
-                        syncProxyConfigurationResources/*sync proxy configuration resources*/,
-                        /*enable advanced lifecycle management true,*/
+                        syncProxyConfigurationResources /*sync proxy configuration resources*/,
                         appName,
-                        /*ngn media app*/null,
-                        /*vr synonyms*/null,
-                        /*is media app*/isMediaApp, appHMITypes,
+                        null,                           /*ngn media app*/
+                        vrSynonyms,
+                        isMediaApp,                     /*is media app*/
+                        appHMITypes,
                         syncMsgVersion,
-                        /*language desired*/lang,
-                        /*HMI Display Language Desired*/hmiLang,
+                        lang,                           /*language desired*/
+                        hmiLang,                        /*HMI Display Language Desired*/
                         appId,
-                        /*autoActivateID*/null,
-                        /*callbackToUIThre1ad*/ false,
-                        /*preRegister*/ false,
+                        null,                           /*autoActivateID*/
+                        false,                          /*callbackToUIThread*/
+                        false,                          /*preRegister*/
                         versionNumber,
-                        transportConfig, mTestConfig);
+                        transportConfig,
+                        mTestConfig);
             } catch (SyncException e) {
                 Logger.e("SYNC Proxy start error:" + e.toString());
                 //error creating proxy, returned proxy = null
@@ -648,24 +687,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     public int getNextCorrelationID() {
         return autoIncCorrId++;
-    }
-
-    /**
-     * Initialize new Session with RPC service only, this is a method for the Test Cases only,
-     * for example: when {@link com.ford.syncV4.proxy.rpc.UnregisterAppInterface} is performed, for
-     * the next Test it is necessary to restore RPC session
-     */
-    public void testInitializeSessionRPCOnly(String appId) {
-        if (mSyncProxy == null) {
-            Logger.e(TAG, "Sync Proxy is null when try to initialize test session");
-            return;
-        }
-
-        TestConfig testConfig = mSyncProxy.getTestConfig();
-        // It is important to set this value back to TRUE when concrete Test Case is complete.
-        testConfig.setDoCallRegisterAppInterface(false);
-
-        mSyncProxy.initializeSession(appId);
     }
 
     @Override
@@ -1329,11 +1350,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createDebugMessageForAdapter(appId, notification);
     }
 
-    @Override
-    public void onPutFileRequest(String appId, PutFile putFile) {
-        createDebugMessageForAdapter(appId, putFile);
-    }
-
     /**
      * *****************************************
      * SYNC AppLink Audio Pass Thru Callbacks *
@@ -1537,6 +1553,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
+    public void onPutFileRequest(String appId, PutFile putFile) {
+
+    }
+
+    @Override
     public void onAudioServiceStart(String appId, boolean encrypted) {
         if (mProxyServiceEvent != null) {
             mProxyServiceEvent.onServiceStart(ServiceType.Audio_Service, appId, encrypted);
@@ -1585,16 +1606,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onOnSystemRequest(String appId, OnSystemRequest notification) {
-        createDebugMessageForAdapter(appId, notification);
-    }
-
-    @Override
-    public void onRegisterAppRequest(String appId, RegisterAppInterface msg) {
-        createDebugMessageForAdapter(appId, msg);
-    }
-
-    @Override
     public void onAppUnregisteredAfterLanguageChange(String appId, OnLanguageChange msg) {
         String message =
                 String.format("OnAppInterfaceUnregistered (LANGUAGE_CHANGE) from %s to %s",
@@ -1628,7 +1639,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onSessionStarted(String appId) {
-        Logger.d(TAG, " Session started AppId:" + appId);
+        Logger.d(TAG, " Session started, appId:" + appId);
+
+        restoreConnectionToRPCService.releaseLock();
+
         mSessionsCounter.add(appId);
         if (mProxyServiceEvent != null) {
             mProxyServiceEvent.onServiceStart(ServiceType.RPC, appId, false);
@@ -1644,6 +1658,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onStartSession(String appId) {
         createDebugMessageForAdapter(appId, " Session going to start, " +
                 "protocol version: " + syncProxyGetWiProVersion());
+    }
+
+    @Override
+    public void onRPCRequest(String appId, RPCRequest rpcRequest) {
+        createDebugMessageForAdapter(rpcRequest);
+    }
+
+    @Override
+    public void onOnSystemRequest(String appId, OnSystemRequest notification) {
+        createDebugMessageForAdapter(appId, notification);
     }
 
     /**
@@ -1772,8 +1796,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onRegisterAppInterfaceResponse(String appId, RegisterAppInterfaceResponse response) {
         createDebugMessageForAdapter(appId, response);
 
+        restoreConnectionToRAI.releaseLock();
+
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+                    response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
             }
@@ -1862,7 +1889,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void commandListFiles(String appId) {
         try {
             mSyncProxy.listFiles(appId, getNextCorrelationID());
-            createDebugMessageForAdapter(appId, "ListFiles sent");
         } catch (SyncException e) {
             createErrorMessageForAdapter(appId, "ListFiles send error: " + e);
         }
@@ -2291,7 +2317,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             if (request.getFunctionName().equals(Names.RegisterAppInterface)) {
                 sendRegisterRequest((RegisterAppInterface) request, jsonRPCMarshaller, sendAsItIs);
             } else {
-                createDebugMessageForAdapter(appId, request);
                 mSyncProxy.sendRPCRequest(appId, request, jsonRPCMarshaller);
             }
         } catch (SyncException e) {
@@ -2312,7 +2337,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             return;
         }
         try {
-            createDebugMessageForAdapter(request);
             mSyncProxy.sendRPCRequest(appId, request);
         } catch (SyncException e) {
             createErrorMessageForAdapter("RPC request '" + request.getFunctionName() + "'" +
@@ -2648,18 +2672,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     diagnosticMessageResponse.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
-            }
-        }
-    }
-
-    /**
-     * Test Section
-     */
-    //TODO @Override
-    public void onRPCServiceComplete() {
-        if (isModuleTesting() && !mTestConfig.isDoCallRegisterAppInterface()) {
-            synchronized (mModuleTest.getTestActionThreadContext()) {
-                mModuleTest.getTestActionThreadContext().notify();
             }
         }
     }

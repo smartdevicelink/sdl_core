@@ -317,7 +317,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     const protocol_handler::ServiceType& service_type) {
   LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
 
-  int32_t result = -1;
+  int32_t result = 0;
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {

@@ -44,8 +44,8 @@ CREATE_LOGGERPTR_GLOBAL(logger, "PipeStreamerAdapter")
 
 PipeStreamerAdapter::PipeStreamerAdapter()
   : is_ready_(false),
-    messages_(),
-    thread_(NULL){
+    thread_(NULL),
+    messages_() {
   LOG4CXX_INFO(logger, "PipeStreamerAdapter::PipeStreamerAdapter");
 }
 
@@ -163,7 +163,7 @@ void PipeStreamerAdapter::Streamer::threadMain() {
         for (;server_->media_listeners_.end() != it; ++it) {
           (*it)->OnErrorReceived(server_->current_application_, -1);
         }
-      } else if (ret != msg.get()->data_size()) {
+      } else if (static_cast<uint32_t>(ret) != msg.get()->data_size()) {
         LOG4CXX_WARN(logger, "Couldn't write all the data to pipe "
                      << server_->named_pipe_path_);
       }

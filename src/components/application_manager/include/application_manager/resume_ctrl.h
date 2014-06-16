@@ -254,8 +254,8 @@ class ResumeCtrl: public event_engine::EventObserver {
     */
     std::multiset<application_timestamp, TimeStampComparator> waiting_for_timer_;
     mutable sync_primitives::Lock   queue_lock_;
-    timer::TimerThread<ResumeCtrl>  timer_;
     ApplicationManagerImpl*         app_mngr_;
+    timer::TimerThread<ResumeCtrl>  timer_;
 };
 
 }  // namespace application_manager

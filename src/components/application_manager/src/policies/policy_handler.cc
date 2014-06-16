@@ -82,8 +82,8 @@ PolicyHandler::PolicyHandler()
   : policy_manager_(0),
     dl_handle_(0),
     exchange_handler_(NULL),
-    on_ignition_check_done_(false),
     retry_sequence_("RetrySequence", new RetrySequence(this)),
+    on_ignition_check_done_(false),
     last_activated_app_(0) {
 }
 
@@ -275,8 +275,10 @@ const std::string PolicyHandler::ConvertUpdateStatus(PolicyTableStatus status) {
       return "UPDATE_NEEDED";
     case policy::StatusUpToDate:
       return "UP_TO_DATE";
+    default: {
+      return "UNKNOWN";
+    }
   }
-  return "UNKNOWN";
 }
 
 void PolicyHandler::SetDeviceInfo(std::string& device_id,
@@ -749,6 +751,9 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
 
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    if (profile::Profile::instance()->policy_turn_off()) {
+      permissions.isSDLAllowed = true;
+    }
   } else {
     permissions = policy_manager_->GetAppPermissionsChanges(
                     policy_app_id);
@@ -759,6 +764,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
 
     application_manager::MessageHelper::GetDeviceInfoForApp(connection_key,
         &permissions.deviceInfo);
+
     DeviceConsent consent = policy_manager_->GetUserConsentForDevice(
                               permissions.deviceInfo.device_mac_address);
     permissions.isSDLAllowed = kDeviceAllowed == consent ? true : false;
@@ -776,7 +782,8 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
 #endif
 
     if (permissions.isSDLAllowed &&
-        PolicyTableStatus::StatusUpdateRequired == policy_manager_->GetPolicyTableStatus()) {
+        PolicyTableStatus::StatusUpdateRequired ==
+        policy_manager_->GetPolicyTableStatus()) {
       StartPTExchange();
     }
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);

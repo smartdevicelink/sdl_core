@@ -2,6 +2,8 @@
 * SyncProxyTester | SyncProxyAndroid SDK: major develop to WP2 branch merge
 
 [CW24]
++ SyncProxyTester | SyncProxyAndroid SDK: Log messages formed in SDK
+* SyncProxyTester: Restore connection during autotest
 * SyncProxyTester: 2nd session is not registered if during BT scan both session already started
 
 [CW23]

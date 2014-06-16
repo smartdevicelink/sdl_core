@@ -19,7 +19,6 @@ import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
-import com.ford.syncV4.session.Session;
 import com.ford.syncV4.session.SessionTest;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
@@ -461,6 +460,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         final String filename = "file";
         final FileType fileType = FileType.GRAPHIC_JPEG;
+
         proxy.putSystemFile(SessionTest.APP_ID_DEFAULT, filename, data, fileType);
 
         Thread.sleep(WAIT_TIMEOUT);

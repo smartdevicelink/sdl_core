@@ -32,6 +32,7 @@
 
 #include <stdint.h>
 #include <memory.h>
+#include <new>
 #include "protocol_handler/protocol_packet.h"
 #include "utils/macro.h"
 
@@ -60,10 +61,18 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_id,
   packet_header_.serviceType = serviceType;
   packet_header_.frameData = frameData;
   packet_header_.sessionId = sessionID;
+<<<<<<< HEAD
   packet_header_.dataSize = dataSize;
   packet_header_.messageId = messageID;
   set_data(data, dataSize);
   DCHECK(MAXIMUM_FRAME_DATA_SIZE >= dataSize);
+=======
+  RESULT_CODE result = serializePacket(version, compress, frameType, serviceType, frameData,
+                  sessionID, dataSize, messageID, data);
+  if (result != RESULT_OK) {
+    //NOTREACHED();
+  }
+>>>>>>> 729f6e6f090ce54c801d63299d20ebc68da4c96d
 }
 
 ProtocolPacket::ProtocolPacket(uint8_t connection_id, uint8_t* data_param,
@@ -73,7 +82,7 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_id, uint8_t* data_param,
     connection_id_(connection_id) {
     RESULT_CODE result = deserializePacket(data_param, data_size);
     if (result != RESULT_OK) {
-      NOTREACHED();
+      //NOTREACHED();
     }
 }
 
@@ -93,11 +102,42 @@ RawMessagePtr ProtocolPacket::serializePacket() {
       (packet_header_.frameType & 0x07);
 
   uint8_t offset = 0;
+<<<<<<< HEAD
   uint8_t packet[MAXIMUM_FRAME_DATA_SIZE];
   packet[offset++] = firstByte;
   packet[offset++] = packet_header_.serviceType;
   packet[offset++] = packet_header_.frameData;
   packet[offset++] = packet_header_.sessionId;
+=======
+  uint8_t compressF = 0x0;
+  packet_ = new (std::nothrow) uint8_t[MAXIMUM_FRAME_DATA_SIZE];
+  if (0 == packet_) {
+    return RESULT_FAIL;
+  }
+
+  if (compress) {
+    compressF = 0x1;
+  }
+  uint8_t firstByte = ((version << 4) & 0xF0) | ((compressF << 3) & 0x08)
+      | (frameType & 0x07);
+
+  packet_[offset++] = firstByte;
+  packet_[offset++] = serviceType;
+  packet_[offset++] = frameData;
+  packet_[offset++] = sessionID;
+
+  packet_[offset++] = dataSize >> 24;
+  packet_[offset++] = dataSize >> 16;
+  packet_[offset++] = dataSize >> 8;
+  packet_[offset++] = dataSize;
+
+  if (version != PROTOCOL_VERSION_1) {
+    packet_[offset++] = messageID >> 24;
+    packet_[offset++] = messageID >> 16;
+    packet_[offset++] = messageID >> 8;
+    packet_[offset++] = messageID;
+  }
+>>>>>>> 729f6e6f090ce54c801d63299d20ebc68da4c96d
 
   packet[offset++] = packet_header_.dataSize >> 24;
   packet[offset++] = packet_header_.dataSize >> 16;
@@ -190,7 +230,7 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
 
   uint8_t * data = 0;
   if (dataPayloadSize) {
-    data = new uint8_t[dataPayloadSize];
+    data = new (std::nothrow) uint8_t[dataPayloadSize];
     if (data) {
       memcpy(data, message + offset, dataPayloadSize);
       data_offset_ = dataPayloadSize;
@@ -207,6 +247,9 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
     total_data_bytes |= data[2] << 8;
     total_data_bytes |= data[3];
     set_total_data_bytes(total_data_bytes);
+    if (0 == packet_data_.data) {
+      return RESULT_FAIL;
+    }
   } else {
     packet_data_.data = data;
   }
@@ -260,8 +303,10 @@ void ProtocolPacket::set_total_data_bytes(uint32_t dataBytes) {
       delete[] packet_data_.data;
       packet_data_.data = 0;
     }
-    packet_data_.data = new uint8_t[dataBytes];
-    packet_data_.totalDataBytes = dataBytes;
+    packet_data_.data = new (std::nothrow) uint8_t[dataBytes];
+    if (packet_data_.data) {
+      packet_data_.totalDataBytes = dataBytes;
+    }
   }
 }
 

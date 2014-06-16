@@ -272,20 +272,20 @@ class DynamicApplicationDataImpl : public virtual Application {
     smart_objects::SmartObject* vr_help_;
     mobile_api::TBTState::eType tbt_state_;
     smart_objects::SmartObject* show_command_;
-    smart_objects::SmartObject* tbt_show_command_;
     smart_objects::SmartObject* keyboard_props_;
     smart_objects::SmartObject* menu_title_;
     smart_objects::SmartObject* menu_icon_;
+    smart_objects::SmartObject* tbt_show_command_;
 
 
     CommandsMap commands_;
     SubMenuMap sub_menu_;
     ChoiceSetMap choice_set_map_;
     PerformChoiceSetMap performinteraction_choice_set_map_;
-    int32_t perform_interaction_mode_;
     uint32_t is_perform_interaction_active_;
     uint32_t perform_interaction_ui_corrid_;
     bool is_reset_global_properties_active_;
+    int32_t perform_interaction_mode_;
   private:
     DISALLOW_COPY_AND_ASSIGN(DynamicApplicationDataImpl);
 };

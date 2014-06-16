@@ -51,12 +51,12 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TimeManager")
 
 TimeManager::TimeManager():
   socket_fd_(0),
-  messages_(),
   thread_(NULL),
+  messages_(),
+  streamer_(NULL),
   app_observer(this),
   tm_observer(this),
-  ph_observer(this),
-  streamer_(NULL) {
+  ph_observer(this) {
     ip_ = profile::Profile::instance()->server_address();
     port_ = profile::Profile::instance()->time_testing_port();
 }
@@ -100,9 +100,9 @@ void TimeManager::SendMetric(utils::SharedPtr<MetricWrapper> metric) {
 
 TimeManager::Streamer::Streamer(
   TimeManager* const server)
-  : server_(server),
+  : is_client_connected_(false),
+    server_(server),
     new_socket_fd_(0),
-    is_client_connected_(false),
     stop_flag_(false) {
 }
 

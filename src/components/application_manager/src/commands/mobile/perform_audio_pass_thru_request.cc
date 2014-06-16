@@ -145,7 +145,7 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
 
   if ((*message_)[str::msg_params].keyExists(str::initial_prompt) &&
       (0 < (*message_)[str::msg_params][str::initial_prompt].length())) {
-    for (int32_t i = 0;
+    for (uint32_t i = 0;
         i < (*message_)[str::msg_params][str::initial_prompt].length();
         ++i) {
       msg_params[hmi_request::tts_chunks][i][str::text] =

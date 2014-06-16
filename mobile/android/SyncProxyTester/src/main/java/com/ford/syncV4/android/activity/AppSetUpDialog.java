@@ -83,6 +83,24 @@ public class AppSetUpDialog extends BaseDialogFragment {
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkMobileNavi);
+        final CheckBox useVRSynonyms = (CheckBox) view.findViewById(
+                R.id.set_up_dialog_use_VRSynonyms);
+        useVRSynonyms.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processUseVRSynonymsClick(view, useVRSynonyms.isChecked());
+            }
+        });
+        processUseVRSynonymsClick(view, useVRSynonyms.isChecked());
+        final CheckBox useHashId = (CheckBox) view.findViewById(
+                R.id.set_up_dialog_use_hash_id);
+        useHashId.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processUseHashIdClick(view, useHashId.isChecked());
+            }
+        });
+        processUseHashIdClick(view, useHashId.isChecked());
         final RadioGroup videoSourceGroup = (RadioGroup) view.findViewById(
                 R.id.selectprotocol_radioGroupVideoSource);
         final EditText appNameEditText = (EditText) view.findViewById(R.id.selectprotocol_appName);
@@ -93,6 +111,8 @@ public class AppSetUpDialog extends BaseDialogFragment {
                 R.id.selectprotocol_radioGroupTransport);
         final EditText ipAddressEditText = (EditText) view.findViewById(R.id.select_protocol_ip_address_edit_view);
         final EditText tcpPortEditText = (EditText) view.findViewById(R.id.selectprotocol_tcpPort);
+        final EditText hashIdView = (EditText) view.findViewById(R.id.set_up_dialog_hash_id);
+        hashIdView.setText(AppPreferencesManager.getCustomHashId());
         final LinearLayout nsdUseLayout = (LinearLayout) view.findViewById(R.id.nsd_use_layout);
         final LinearLayout ipAddressLayout = (LinearLayout) view.findViewById(R.id.ip_address_layout);
         final LinearLayout portLayout = (LinearLayout) view.findViewById(R.id.port_layout);
@@ -301,6 +321,7 @@ public class AppSetUpDialog extends BaseDialogFragment {
                                 .putString(Const.PREFS_KEY_LANG, lang)
                                 .putString(Const.PREFS_KEY_HMILANG, hmiLang)
                                 .putString(Const.Transport.PREFS_KEY_TRANSPORT_IP, ipAddress)
+                                .putString(Const.PREFS_KEY_VR_SYNONYMS, getVRSynonyms(view))
                                 .putInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT, tcpPort)
                                 .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON, autoSetAppIcon)
                                 .putBoolean(Const.PREFS_KEY_HEARTBEAT, isHearBeat.isChecked())
@@ -310,6 +331,9 @@ public class AppSetUpDialog extends BaseDialogFragment {
                         }
 
                         setupHeartbeat(view);
+
+                        processUseHashIdClick(view, useHashId.isChecked());
+
                         ((SyncProxyTester) getActivity()).onSetUpDialogResult(appId);
 
                     }
@@ -382,5 +406,32 @@ public class AppSetUpDialog extends BaseDialogFragment {
         final LinearLayout transportLayout = (LinearLayout) view.findViewById(
                 R.id.app_set_up_dialog_transport_view);
         transportLayout.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+    }
+
+    private void processUseVRSynonymsClick(View view, boolean isChecked) {
+        final EditText vrSynonymsView = (EditText) view.findViewById(R.id.set_up_dialog_vrSynonyms);
+        vrSynonymsView.setEnabled(isChecked);
+    }
+
+    private String getVRSynonyms(View view) {
+        final EditText vrSynonymsView = (EditText) view.findViewById(R.id.set_up_dialog_vrSynonyms);
+        final CheckBox useVRSynonyms = (CheckBox) view.findViewById(
+                R.id.set_up_dialog_use_VRSynonyms);
+        if (useVRSynonyms.isChecked()) {
+            return vrSynonymsView.getText().toString();
+        } else {
+            return "";
+        }
+    }
+
+    private void processUseHashIdClick(View view, boolean isChecked) {
+        final EditText hashIdView = (EditText) view.findViewById(R.id.set_up_dialog_hash_id);
+        hashIdView.setEnabled(isChecked);
+        if (isChecked) {
+            AppPreferencesManager.setCustomHashId(hashIdView.getText().toString());
+            AppPreferencesManager.setUseCustomHashId(true);
+        } else {
+            AppPreferencesManager.setUseCustomHashId(false);
+        }
     }
 }

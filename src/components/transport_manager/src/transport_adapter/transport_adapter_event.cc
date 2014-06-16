@@ -43,8 +43,8 @@ TransportAdapterEvent::TransportAdapterEvent(
     RawMessageSptr data, BaseError *error)
     : event_type_(type),
       application_id_(application_id),
-      transport_adapter_(transport_adapter),
       device_uid_(device_handle),
+      transport_adapter_(transport_adapter),
       event_data_(data) {
   set_error(error);
 }

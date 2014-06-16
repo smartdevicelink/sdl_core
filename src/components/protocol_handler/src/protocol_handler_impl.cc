@@ -597,8 +597,13 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   LOG4CXX_INFO_EXT(
       logger_, " data size " << data_size << " maxdata_size " << maxdata_size);
 
+<<<<<<< HEAD
   // remainder of last frame
   const size_t lastframe_remainder = data_size % maxdata_size;
+=======
+  uint32_t numOfFrames = 0;
+  uint32_t lastdata_size = 0;
+>>>>>>> 729f6e6f090ce54c801d63299d20ebc68da4c96d
 
   // size of last frame (full fill or not)
   const size_t lastframe_size =
@@ -862,10 +867,16 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
 
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
   bool success = true;
+<<<<<<< HEAD
   const uint32_t session_hash_code = session_observer_->OnSessionEndedCallback(
       connection_id, current_session_id, hash_code, service_type);
+=======
+  uint32_t session_hash_code = session_observer_->OnSessionEndedCallback(
+      connection_id, current_session_id, hash_code,
+      ServiceTypeFromByte(packet.service_type()));
+>>>>>>> 729f6e6f090ce54c801d63299d20ebc68da4c96d
 
-  if (-1 != session_hash_code) {
+  if (0 != session_hash_code) {
     if (1 != packet.protocol_version()) {
       if (packet.message_id() != session_hash_code) {
         success = false;
@@ -1171,7 +1182,11 @@ std::string ConvertPacketDataToString(const uint8_t* data,
   std::locale loc;
   const char* text = reinterpret_cast<const char*>(data);
   // Check data for printability
+<<<<<<< HEAD
   for (size_t i = 0; i < data_size; ++i) {
+=======
+  for (uint32_t i = 0; i < data_size; ++i) {
+>>>>>>> 729f6e6f090ce54c801d63299d20ebc68da4c96d
     if (!std::isprint(text[i], loc)) {
       is_printable_array = false;
       break;

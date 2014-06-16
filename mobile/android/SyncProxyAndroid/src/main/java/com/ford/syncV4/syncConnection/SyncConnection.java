@@ -441,9 +441,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     public void onTransportBytesReceived(byte[] receivedBytes, int receivedBytesLength) {
         // Send bytes to protocol to be interpreted
         synchronized (PROTOCOL_REFERENCE_LOCK) {
-            if (!getIsConnected()) {
-                return;
-            }
             if (_protocol == null) {
                 return;
             }

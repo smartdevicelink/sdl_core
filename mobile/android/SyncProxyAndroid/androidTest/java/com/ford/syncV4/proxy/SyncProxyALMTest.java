@@ -16,7 +16,7 @@ import com.ford.syncV4.session.Session;
 import com.ford.syncV4.session.SessionTest;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
-import com.ford.syncV4.transport.SyncTransport;
+import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 
@@ -421,10 +421,11 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                         false, null, null, null, null, SessionTest.APP_ID, null, false, false,
                         ProtocolConstants.PROTOCOL_VERSION_TWO, null, syncConnectionMock,
                         new TestConfig());
-        SyncConnection connection = new SyncConnection(new Session(), proxy.getInterfaceBroker());
-        connection.init(null, mock(SyncTransport.class));
+        SyncConnection connection = new SyncConnection(new Session(),
+                new BTTransportConfig(),
+                proxy.getInterfaceBroker());
+        connection.init();
         proxy.setSyncConnection(connection);
-        when(connection.getIsConnected()).thenReturn(true);
 
         final byte maxByte = (byte) 0xFF;
         final byte[] bytes =

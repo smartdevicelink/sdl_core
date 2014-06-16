@@ -533,9 +533,6 @@ SDL.SDLModel = Em.Object.create({
     setAppPermissions: function(oldPermissions){
         var temp = this.appPermissions.filter(function(item, i) {
             var ok = oldPermissions.indexOf(item) === -1;
-//            if (ok) {
-//                array5.push(i + 1);
-//            }
             return ok;
         });
 
@@ -1194,8 +1191,10 @@ SDL.SDLModel = Em.Object.create({
 
         if (!SDL.SliderView.active) {
             SDL.SDLController.getApplicationModel(message.params.appID).onSlider(message);
+            return true;
         } else {
-            FFW.UI.sendSliderResult(this.resultCode["ABORTED"], message.id);
+            FFW.UI.sendSliderResult(this.resultCode["REJECTED"], message.id);
+            return false;
         }
     },
 
@@ -1265,8 +1264,8 @@ SDL.SDLModel = Em.Object.create({
      */
     TTSStopSpeaking: function () {
         //true parameter makes send error response ABORTED
-        SDL.TTSPopUp.DeactivateTTS();
         FFW.TTS.set('aborted', true);
+        SDL.TTSPopUp.DeactivateTTS();
     },
 
     /**

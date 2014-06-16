@@ -46,8 +46,8 @@ ChangeRegistrationRequest::ChangeRegistrationRequest(
     const MessageSharedPtr& message)
     : CommandRequestImpl(message),
       ui_result_(hmi_apis::Common_Result::INVALID_ENUM),
-      tts_result_(hmi_apis::Common_Result::INVALID_ENUM),
-      vr_result_(hmi_apis::Common_Result::INVALID_ENUM) {
+      vr_result_(hmi_apis::Common_Result::INVALID_ENUM),
+      tts_result_(hmi_apis::Common_Result::INVALID_ENUM) {
 }
 
 ChangeRegistrationRequest::~ChangeRegistrationRequest() {

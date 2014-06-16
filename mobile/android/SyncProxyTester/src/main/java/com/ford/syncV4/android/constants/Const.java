@@ -20,12 +20,13 @@ public class Const {
 	public static final String PREFS_KEY_ISMEDIAAPP = "isMediaApp";
     public static final String PREFS_KEY_ISNAVIAPP = "isNaviApp";
     public static final String PREFS_KEY_NAVI_VIDEOSOURCE = "videoSrc";
-    public static final String PREFS_KEY_APPNAME = "appName";
-    public static final String PREFS_KEY_LANG = "desiredLang";
+	public static final String PREFS_KEY_APPNAME = "appName";
+	public static final String PREFS_KEY_LANG = "desiredLang";
     public static final String PREFS_KEY_HEARTBEAT = "heartbeat";
-    public static final String PREFS_KEY_HMILANG = "desiredHMILang";
-    public static final String PREFS_KEY_AUTOSETAPPICON = "autoSetAppIcon";
-    public static final String PREFS_KEY_DISABLE_LOCK_WHEN_TESTING = "disableLockWhenTesting";
+	public static final String PREFS_KEY_HMILANG = "desiredHMILang";
+	public static final String PREFS_KEY_AUTOSETAPPICON = "autoSetAppIcon";
+	public static final String PREFS_KEY_DISABLE_LOCK_WHEN_TESTING = "disableLockWhenTesting";
+	public static final String PREFS_KEY_VR_SYNONYMS = "vrSynonyms";
 
     public static final int KEY_VIDEOSOURCE_MP4 = 0;
     public static final int KEY_VIDEOSOURCE_H264 = 1;

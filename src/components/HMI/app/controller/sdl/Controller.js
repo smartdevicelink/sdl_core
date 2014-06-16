@@ -384,6 +384,12 @@ SDL.SDLController = Em.Object
          */
         exitAppViewSelected: function(state) {
 
+            //if ignition off if executed than OnIgnitionCycleOver must be sent
+            if (state == SDL.SDLModel.exitAppState[0].name) {
+
+                FFW.BasicCommunication.OnIgnitionCycleOver();
+            }
+
             FFW.BasicCommunication.ExitAllApplications(state);
         },
         /**
@@ -589,7 +595,9 @@ SDL.SDLController = Em.Object
         unregisterApplication: function(appID) {
 
             this.getApplicationModel(appID).VRCommands = [];
+
             this.getApplicationModel(appID).onDeleteApplication(appID);
+
             var len = SDL.SDLModel.VRCommands.length;
             for (var i = len - 1; i >= 0; i--) {
                 if (SDL.SDLModel.VRCommands[i].appID == appID) {
@@ -601,7 +609,6 @@ SDL.SDLController = Em.Object
             if (SDL.SDLModel.stateLimited == appID) {
                 SDL.SDLModel.set('stateLimited', null);
             }
-            SDL.SDLAppController.set('model', null);
         },
         /**
          * SDL Driver Distraction ON/OFF switcher
@@ -651,8 +658,7 @@ SDL.SDLController = Em.Object
          */
         getApplicationModel: function(applicationId) {
 
-            return SDL.SDLModel.registeredApps.filterProperty('appID',
-                applicationId)[0];
+            return SDL.SDLModel.registeredApps.filterProperty('appID', applicationId)[0];
         },
         /**
          * Function returns ChangeDeviceView back to previous state

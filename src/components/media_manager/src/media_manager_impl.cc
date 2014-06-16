@@ -231,8 +231,10 @@ void MediaManagerImpl::StartVideoStreaming(int32_t application_key) {
         snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
                  profile::Profile::instance()->named_video_pipe_path().c_str());
       } else {
-        DCHECK(snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
-            profile::Profile::instance()->video_stream_file().c_str()));
+        int snprintf_result;
+        snprintf_result = snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
+            profile::Profile::instance()->video_stream_file().c_str());
+        DCHECK(snprintf_result);
       }
       application_manager::MessageHelper::SendNaviStartStream(url,
                                                               application_key);
@@ -267,8 +269,10 @@ void MediaManagerImpl::StartAudioStreaming(int32_t application_key) {
         snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
                  profile::Profile::instance()->named_audio_pipe_path().c_str());
       } else {
-        DCHECK(snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
-             profile::Profile::instance()->audio_stream_file().c_str()));
+        int snprintf_result;
+        snprintf_result = snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
+             profile::Profile::instance()->audio_stream_file().c_str());
+        DCHECK(snprintf_result);
       }
 
       application_manager::MessageHelper::SendAudioStartStream(url,

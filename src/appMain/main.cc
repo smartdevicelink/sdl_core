@@ -89,7 +89,6 @@ if (!file_str.is_open()) {
 }
 
 file_str.seekg(0, std::ios::end);
-int32_t length = file_str.tellg();
 file_str.seekg(0, std::ios::beg);
 
 std::string hmi_link;

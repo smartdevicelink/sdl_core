@@ -117,7 +117,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase> implements
+public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase> implements
         ISystemRequestProxy {
 
     @SuppressWarnings("unused")
@@ -315,11 +315,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      */
     protected final Session syncSession = new Session();
 
-    public proxyListenerType getProxyListener() {
-        return _proxyListener;
+    public ProxyListenerType getProxyListener() {
+        return mProxyListener;
     }
 
-    private proxyListenerType _proxyListener = null;
+    private ProxyListenerType mProxyListener = null;
     // Device Info for logging
     private TraceDeviceInfo mTraceDeviceInterrogator = null;
     // Declare Queuing Threads
@@ -385,14 +385,17 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         // For the Test Cases
         if (mTestConfig != null) {
             if (!mTestConfig.isUseHashId()) {
+                Logger.d(LOG_TAG + " get Hash Id:null");
                 return null;
             }
             if (mTestConfig.isUseCustomHashId()) {
+                Logger.d(LOG_TAG + " get Hash Id:" + mTestConfig.getCustomHashId());
                 return mTestConfig.getCustomHashId();
             }
         }
-
-        return hashIdsTable.get(appId);
+        final String returnValue = hashIdsTable.get(appId);
+        Logger.d(LOG_TAG + " get Hash Id:" + returnValue);
+        return returnValue;
     }
 
     public void setHashId(byte sessionId, String value) {
@@ -466,7 +469,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     /**
      * Handler that is used to schedule SYNC Proxy reconnect tasks.
      */
-    private final Handler reconnectHandler = new Handler();
+    private final Handler reconnectHandler = new Handler(Looper.getMainLooper());
     private static int heartBeatInterval = HEARTBEAT_INTERVAL;
     private static boolean heartBeatAck = true;
     private IRPCRequestConverterFactory rpcRequestConverterFactory =
@@ -483,7 +486,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * A set of internal requests' correlation IDs that are currently in
      * progress.
      */
-    private Set<Integer> internalRequestCorrelationIDs;
+    private final Set<Integer> internalRequestCorrelationIDs = new HashSet<Integer>();
 
     /**
      * Correlation ID that was last used for messages created internally.
@@ -595,7 +598,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param transportConfig                   Configuration of transport to be used by underlying connection.
      * @throws SyncException
      */
-    protected SyncProxyBase(proxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources,
+    protected SyncProxyBase(ProxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources,
                             boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName,
                             String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
                             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
@@ -656,7 +659,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
      * @param transportConfig                   Configuration of transport to be used by underlying connection.
      * @throws SyncException
      */
-    protected SyncProxyBase(proxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources,
+    protected SyncProxyBase(ProxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources,
                             boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName,
                             String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
                             Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appId,
@@ -812,8 +815,8 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         mAdvancedLifecycleManagementEnabled = enableAdvancedLifecycleManagement;
     }
 
-    private void setProxyListener(proxyListenerType listener) {
-        _proxyListener = listener;
+    private void setProxyListener(ProxyListenerType listener) {
+        mProxyListener = listener;
     }
 
     protected void setAppInterfacePreRegistered(String appId, boolean preRegister) {
@@ -840,7 +843,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     }
 
-    private void checkConditionsInvalidateProxy(proxyListenerType listener) {
+    private void checkConditionsInvalidateProxy(ProxyListenerType listener) {
         // TODO : Maybe ...
     }
 
@@ -1154,7 +1157,7 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 return;
             }
 
-            internalRequestCorrelationIDs = new HashSet<Integer>();
+            internalRequestCorrelationIDs.clear();
 
             mSyncConnection = new SyncConnection(syncSession, mTransportConfig, _interfaceBroker);
 
@@ -1172,6 +1175,10 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
             setupSecureProxy();
         }
+    }
+
+    public void closeConnection() {
+        closeSyncConnection(false);
     }
 
     private synchronized void closeSyncConnection(boolean keepConnection) {
@@ -1462,12 +1469,12 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     _mainUIHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            _proxyListener.onError(msg.getInfo(), msg.getThrowable());
+                            mProxyListener.onError(msg.getInfo(), msg.getThrowable());
                         }
                     });
                 } else {
                     Logger.d("Error info:" + msg.getThrowable().toString());
-                    _proxyListener.onError(msg.getInfo(), msg.getThrowable());
+                    mProxyListener.onError(msg.getInfo(), msg.getThrowable());
                 }
                 /**************Start Legacy Specific Call-backs************/
             } else if (message.getFunctionName().equals(Names.OnProxyOpened)) {
@@ -1476,11 +1483,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     _mainUIHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            ((IProxyListener) _proxyListener).onProxyOpened();
+                            ((IProxyListener) mProxyListener).onProxyOpened();
                         }
                     });
                 } else {
-                    ((IProxyListener) _proxyListener).onProxyOpened();
+                    ((IProxyListener) mProxyListener).onProxyOpened();
                 }
             } else if (message.getFunctionName().equals(Names.OnProxyClosed)) {
                 final OnProxyClosed msg = (OnProxyClosed) message;
@@ -1489,11 +1496,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                     _mainUIHandler.post(new Runnable() {
                         @Override
                         public void run() {
-                            _proxyListener.onProxyClosed(msg.getInfo(), msg.getException());
+                            mProxyListener.onProxyClosed(msg.getInfo(), msg.getException());
                         }
                     });
                 } else {
-                    _proxyListener.onProxyClosed(msg.getInfo(), msg.getException());
+                    mProxyListener.onProxyClosed(msg.getInfo(), msg.getException());
                 }
                 /****************End Legacy Specific Call-backs************/
             } else {
@@ -1511,11 +1518,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 _mainUIHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        _proxyListener.onError("Error handing proxy event.", e);
+                        mProxyListener.onError("Error handing proxy event.", e);
                     }
                 });
             } else {
-                _proxyListener.onError("Error handing proxy event.", e);
+                mProxyListener.onError("Error handing proxy event.", e);
             }
         }
     }
@@ -1526,11 +1533,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
         Logger.e("InternalMessageDispatcher failed.", e);
 
-        // Note, this is the only place where the _proxyListener should be referenced asynchronously,
+        // Note, this is the only place where the mProxyListener should be referenced asynchronously,
         // with an error on the internalMessageDispatcher, we have no other reliable way of
         // communicating with the application.
         notifyProxyClosed("Proxy callback dispatcher is down. Proxy instance is invalid.", e);
-        _proxyListener.onError(
+        mProxyListener.onError(
                 "Proxy callback dispatcher is down. Proxy instance is invalid.",
                 e);
     }
@@ -1542,11 +1549,23 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
     // Private sendPRCRequest method. All RPCRequests are funneled through this method after
     // error checking.
     // FIXME: return to private?
-    void sendRPCRequestPrivate(byte sessionId, RPCRequest request,
+    void sendRPCRequestPrivate(final byte sessionId, final RPCRequest request,
                                IJsonRPCMarshaller jsonRPCMarshaller) throws SyncException {
 
         Logger.d(LOG_TAG + " Send RPC sesId:" + sessionId + " name:" + request.getFunctionName());
-        //Logger.d(LOG_TAG + " RPC Marshaller:" + jsonRPCMarshaller);
+
+        final String appId = syncSession.getAppIdBySessionId(sessionId);
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mProxyListener.onRPCRequest(appId, request);
+                }
+            });
+        } else {
+            mProxyListener.onRPCRequest(appId, request);
+        }
 
         try {
             final IRPCRequestConverter converter =
@@ -1629,11 +1648,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                             _mainUIHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
-                                    _proxyListener.onPutFileResponse(appId, putFile);
+                                    mProxyListener.onPutFileResponse(appId, putFile);
                                 }
                             });
                         } else {
-                            _proxyListener.onPutFileResponse(appId, putFile);
+                            mProxyListener.onPutFileResponse(appId, putFile);
                         }
                     }
 
@@ -1674,11 +1693,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onOnSystemRequest(appId, msg);
+                    mProxyListener.onOnSystemRequest(appId, msg);
                 }
             });
         } else {
-            _proxyListener.onOnSystemRequest(appId, msg);
+            mProxyListener.onOnSystemRequest(appId, msg);
         }
 
         final FileType fileType = msg.getFileType();
@@ -1745,11 +1764,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    ((IProxyListener) _proxyListener).onOnAppInterfaceUnregistered(msg);
+                    ((IProxyListener) mProxyListener).onOnAppInterfaceUnregistered(msg);
                 }
             });
         } else {
-            ((IProxyListener) _proxyListener).onOnAppInterfaceUnregistered(msg);
+            ((IProxyListener) mProxyListener).onOnAppInterfaceUnregistered(msg);
         }
     }
 
@@ -1790,19 +1809,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (_proxyListener instanceof IProxyListener) {
-                        ((IProxyListener) _proxyListener).onUnregisterAppInterfaceResponse(msg);
-                    } else if (_proxyListener instanceof IProxyListenerALMTesting) {
-                        ((IProxyListenerALMTesting) _proxyListener)
+                    if (mProxyListener instanceof IProxyListener) {
+                        ((IProxyListener) mProxyListener).onUnregisterAppInterfaceResponse(msg);
+                    } else if (mProxyListener instanceof IProxyListenerALMTesting) {
+                        ((IProxyListenerALMTesting) mProxyListener)
                                 .onUnregisterAppInterfaceResponse(appId, msg);
                     }
                 }
             });
         } else {
-            if (_proxyListener instanceof IProxyListener) {
-                ((IProxyListener) _proxyListener).onUnregisterAppInterfaceResponse(msg);
-            } else if (_proxyListener instanceof IProxyListenerALMTesting) {
-                ((IProxyListenerALMTesting) _proxyListener)
+            if (mProxyListener instanceof IProxyListener) {
+                ((IProxyListener) mProxyListener).onUnregisterAppInterfaceResponse(msg);
+            } else if (mProxyListener instanceof IProxyListenerALMTesting) {
+                ((IProxyListenerALMTesting) mProxyListener)
                         .onUnregisterAppInterfaceResponse(appId, msg);
             }
         }
@@ -1913,13 +1932,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
 
     /**
      * Returns whether the class allows some extra testing features. For this,
-     * the _proxyListener must be an instance of the IProxyListenerALMTesting
+     * the mProxyListener must be an instance of the IProxyListenerALMTesting
      * class.
      *
      * @return true if the extra testing features are enabled
      */
     private boolean allowExtraTesting() {
-        return _proxyListener instanceof IProxyListenerALMTesting;
+        return mProxyListener instanceof IProxyListenerALMTesting;
     }
 
     protected void notifyProxyClosed(final String info, final Exception e) {
@@ -1949,11 +1968,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onSessionStarted(associatedAppId);
+                    mProxyListener.onSessionStarted(associatedAppId);
                 }
             });
         } else {
-            _proxyListener.onSessionStarted(associatedAppId);
+            mProxyListener.onSessionStarted(associatedAppId);
         }
         restartRPCProtocolSession(sessionId);
     }
@@ -1975,9 +1994,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 if (!mTestConfig.isDoCallRegisterAppInterface()) {
 
                     Logger.d("RestartRPCProtocolSession TestConfigCallback: " + mTestConfigCallback);
-                    if (mTestConfigCallback != null) {
-                        mTestConfigCallback.onRPCServiceComplete();
-                    }
 
                     // Revert back a value which has been set for concrete Test Case
                     mTestConfig.setDoCallRegisterAppInterface(true);
@@ -2031,11 +2047,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onProtocolServiceEnded(serviceType, appId);
+                    mProxyListener.onProtocolServiceEnded(serviceType, appId);
                 }
             });
         } else {
-            _proxyListener.onProtocolServiceEnded(serviceType, appId);
+            mProxyListener.onProtocolServiceEnded(serviceType, appId);
         }
     }
 
@@ -2046,11 +2062,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onProtocolServiceEndedAck(serviceType, appId);
+                    mProxyListener.onProtocolServiceEndedAck(serviceType, appId);
                 }
             });
         } else {
-            _proxyListener.onProtocolServiceEndedAck(serviceType, appId);
+            mProxyListener.onProtocolServiceEndedAck(serviceType, appId);
         }
     }
 
@@ -2063,11 +2079,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onMobileNavAckReceived(appId, fNumber);
+                    mProxyListener.onMobileNavAckReceived(appId, fNumber);
                 }
             });
         } else {
-            _proxyListener.onMobileNavAckReceived(appId, fNumber);
+            mProxyListener.onMobileNavAckReceived(appId, fNumber);
         }
     }
 
@@ -2079,11 +2095,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onStartServiceNackReceived(appId, serviceType);
+                    mProxyListener.onStartServiceNackReceived(appId, serviceType);
                 }
             });
         } else {
-            _proxyListener.onStartServiceNackReceived(appId, serviceType);
+            mProxyListener.onStartServiceNackReceived(appId, serviceType);
         }
     }
 
@@ -2101,11 +2117,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onMobileNaviStart(appId, encrypted);
+                    mProxyListener.onMobileNaviStart(appId, encrypted);
                 }
             });
         } else {
-            _proxyListener.onMobileNaviStart(appId, encrypted);
+            mProxyListener.onMobileNaviStart(appId, encrypted);
         }
     }
 
@@ -2124,11 +2140,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    _proxyListener.onAudioServiceStart(appId, encrypted);
+                    mProxyListener.onAudioServiceStart(appId, encrypted);
                 }
             });
         } else {
-            _proxyListener.onAudioServiceStart(appId, encrypted);
+            mProxyListener.onAudioServiceStart(appId, encrypted);
         }
     }
 
@@ -2704,19 +2720,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
         raiTable.put((String) appId, registerAppInterface);
 
         sendRPCRequestPrivate((String) appId, registerAppInterface);
-
-
-        if (_callbackToUIThread) {
-            // Run in UI thread
-            _mainUIHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    _proxyListener.onRegisterAppRequest((String) appId, registerAppInterface);
-                }
-            });
-        } else {
-            _proxyListener.onRegisterAppRequest((String) appId, registerAppInterface);
-        }
     }
 
     /**
@@ -3116,13 +3119,13 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                 @Override
                 public void run() {
                     for (int i = 0; i < sessionIdsNumber; i++) {
-                        _proxyListener.onStartSession(appId);
+                        mProxyListener.onStartSession(appId);
                     }
                 }
             });
         } else {
             for (int i = 0; i < sessionIdsNumber; i++) {
-                _proxyListener.onStartSession(appId);
+                mProxyListener.onStartSession(appId);
             }
         }
 
@@ -3181,11 +3184,11 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
                         _mainUIHandler.post(new Runnable() {
                             @Override
                             public void run() {
-                                _proxyListener.onUSBNoSuchDeviceException();
+                                mProxyListener.onUSBNoSuchDeviceException();
                             }
                         });
                     } else {
-                        _proxyListener.onUSBNoSuchDeviceException();
+                        mProxyListener.onUSBNoSuchDeviceException();
                     }
 
                     try {
@@ -3325,19 +3328,19 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             _mainUIHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    if (_proxyListener instanceof IProxyListener) {
-                        ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(response);
-                    } else if (_proxyListener instanceof IProxyListenerALMTesting) {
-                        ((IProxyListenerALMTesting) _proxyListener)
+                    if (mProxyListener instanceof IProxyListener) {
+                        ((IProxyListener) mProxyListener).onRegisterAppInterfaceResponse(response);
+                    } else if (mProxyListener instanceof IProxyListenerALMTesting) {
+                        ((IProxyListenerALMTesting) mProxyListener)
                                 .onRegisterAppInterfaceResponse(appId, response);
                     }
                 }
             });
         } else {
-            if (_proxyListener instanceof IProxyListener) {
-                ((IProxyListener) _proxyListener).onRegisterAppInterfaceResponse(response);
-            } else if (_proxyListener instanceof IProxyListenerALMTesting) {
-                ((IProxyListenerALMTesting) _proxyListener)
+            if (mProxyListener instanceof IProxyListener) {
+                ((IProxyListener) mProxyListener).onRegisterAppInterfaceResponse(response);
+            } else if (mProxyListener instanceof IProxyListenerALMTesting) {
+                ((IProxyListenerALMTesting) mProxyListener)
                         .onRegisterAppInterfaceResponse(appId, response);
             }
         }
@@ -3402,19 +3405,6 @@ public abstract class SyncProxyBase<proxyListenerType extends IProxyListenerBase
             putFile.setOffset(offset);
             putFile.setLength(data.length);
         }
-
-        if (_callbackToUIThread) {
-            // Run in UI thread
-            _mainUIHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    _proxyListener.onPutFileRequest(appId, putFile);
-                }
-            });
-        } else {
-            _proxyListener.onPutFileRequest(appId, putFile);
-        }
-
         sendRPCRequest(appId, putFile);
         internalRequestCorrelationIDs.add(correlationID);
     }
