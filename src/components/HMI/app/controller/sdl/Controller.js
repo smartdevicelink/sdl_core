@@ -424,9 +424,9 @@ SDL.SDLController = Em.Object
          */
         vrInteractionResponse: function(result, choiceID) {
 
-            FFW.VR.interactionResponse(SDL.SDLAppController.model.activeRequests.vrPerformInteraction, result, choiceID);
+            FFW.VR.interactionResponse(SDL.SDLModel.vrActiveRequests.vrPerformInteraction, result, choiceID);
 
-            SDL.SDLAppController.model.activeRequests.vrPerformInteraction = null;
+            SDL.SDLModel.vrActiveRequests.vrPerformInteraction = null;
 
             SDL.SDLModel.set('VRActive', false);
 
