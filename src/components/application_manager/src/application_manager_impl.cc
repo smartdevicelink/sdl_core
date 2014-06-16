@@ -1848,6 +1848,7 @@ void ApplicationManagerImpl::UnregisterApplication(
                "ApplicationManagerImpl::UnregisterApplication " << app_id);
 
   switch (reason) {
+    case mobile_apis::Result::SUCCESS:break;
     case mobile_apis::Result::DISALLOWED: break;
     case mobile_apis::Result::USER_DISALLOWED:break;
     case mobile_apis::Result::INVALID_CERT: break;
@@ -1856,9 +1857,10 @@ void ApplicationManagerImpl::UnregisterApplication(
       application(app_id)->usage_report().RecordRemovalsForBadBehavior();
       break;
     }
+
     default: {
       LOG4CXX_ERROR(logger_, "Unknown unrregister reason");
-      return;
+      break;
     }
   }
   ApplicationSharedPtr app_to_remove;
