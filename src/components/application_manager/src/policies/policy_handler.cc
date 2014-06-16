@@ -745,8 +745,6 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   std::string policy_app_id = app->mobile_app_id()->asString();
 
   AppPermissions permissions(policy_app_id);
-  application_manager::MessageHelper::GetDeviceInfoForApp(connection_key,
-      &permissions.deviceInfo);
 
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
@@ -760,6 +758,9 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
     application_manager::UsageStatistics& usage = app->usage_report();
 
     usage.RecordAppUserSelection();
+
+    application_manager::MessageHelper::GetDeviceInfoForApp(connection_key,
+        &permissions.deviceInfo);
 
     DeviceConsent consent = policy_manager_->GetUserConsentForDevice(
                               permissions.deviceInfo.device_mac_address);
