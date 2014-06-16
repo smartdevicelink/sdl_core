@@ -1,15 +1,15 @@
 package com.ford.syncV4.proxy;
 
-import java.util.Vector;
-
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
-import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.util.logger.Logger;
+
+import java.util.Vector;
 
 public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	
@@ -20,7 +20,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	 * @throws SyncException
 	 */
 	public SyncProxy(IProxyListener listener) throws SyncException {
-		super(	listener, 
+		super(listener,
 				/*application context*/null, 
 				/*enable advanced lifecycle management*/false, 
 				/*app name*/ null,

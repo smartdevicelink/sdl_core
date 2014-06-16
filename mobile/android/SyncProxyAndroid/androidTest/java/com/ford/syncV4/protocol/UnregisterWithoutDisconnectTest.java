@@ -40,8 +40,7 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
 
     public void testResetProxyShouldNotDisconnectTransport() throws Exception {
         SyncTransport transportMock = mock(SyncTransport.class);
-        SyncConnection connection = spy(new SyncConnection(SessionTest.getInitializedSession(),
-                null));
+        SyncConnection connection = spy(new SyncConnection(SessionTest.getInitializedSession(), null));
         connection.init(null, transportMock);
 
         SyncProxyALM syncProxy = getSyncProxy(connection);

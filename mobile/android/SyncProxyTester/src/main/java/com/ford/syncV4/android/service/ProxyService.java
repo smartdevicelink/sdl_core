@@ -124,11 +124,6 @@ import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
-
-import com.ford.syncV4.session.Session;
-
-import com.ford.syncV4.test.ITestConfigCallback;
-
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
@@ -638,6 +633,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     /**
      * Add {@link com.ford.syncV4.android.adapters.LogAdapter} instance
+     *
      * @param logAdapter {@link com.ford.syncV4.android.adapters.LogAdapter}
      */
     public void addLogAdapter(LogAdapter logAdapter) {
@@ -845,7 +841,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         boolean wasConnected = !firstHMIStatusChange;
         firstHMIStatusChange = true;
         prevHMILevel = HMILevel.HMI_NONE;
-        for (String appId: mApplicationIconManagerHashtable.keySet()) {
+        for (String appId : mApplicationIconManagerHashtable.keySet()) {
             mApplicationIconManagerHashtable.get(appId).reset();
         }
 
@@ -908,7 +904,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     /**
      * ******************************
-     *  SYNC AppLink Base Callbacks *
+     * SYNC AppLink Base Callbacks *
      * ******************************
      */
     @Override
@@ -1111,7 +1107,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     /**
      * *******************************************
-     *  SYNC AppLink Soft Button Image Callbacks *
+     * SYNC AppLink Soft Button Image Callbacks *
      * *******************************************
      */
     @Override
@@ -1203,7 +1199,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     /**
      * *********************************
-     *  SYNC AppLink Updated Callbacks *
+     * SYNC AppLink Updated Callbacks *
      * *********************************
      */
     @Override
@@ -1277,7 +1273,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     /**
      * *****************************
-     *  SYNC AppLink New Callbacks *
+     * SYNC AppLink New Callbacks *
      * *****************************
      */
     @Override
@@ -1340,7 +1336,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     /**
      * *****************************************
-     *  SYNC AppLink Audio Pass Thru Callbacks *
+     * SYNC AppLink Audio Pass Thru Callbacks *
      * *****************************************
      */
     @Override
@@ -1400,7 +1396,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     /**
      * **************************************
-     *  SYNC AppLink Vehicle Data Callbacks *
+     * SYNC AppLink Vehicle Data Callbacks *
      * **************************************
      */
     @Override
@@ -1472,7 +1468,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     /**
      * *******************************
-     *  SYNC AppLink TBT Callbacks   *
+     * SYNC AppLink TBT Callbacks   *
      * *******************************
      */
     @Override
@@ -1539,6 +1535,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             mProxyServiceEvent.onServiceStart(ServiceType.RPC, appId, encrypted);
         }
     }
+
     @Override
     public void onAudioServiceStart(String appId, boolean encrypted) {
         if (mProxyServiceEvent != null) {
@@ -2144,6 +2141,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     /**
      * // TODO : For Tests Only
+     *
      * @param appId
      * @throws SyncException
      */
@@ -2155,6 +2153,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     /**
      * // TODO : For Tests Only
+     *
      * @param syncAppId
      * @throws SyncException
      */
@@ -2304,8 +2303,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     /**
      * This method is send RPC Request to the Sync Proxy
      *
-     * @param appId      Application id
-     * @param request    Object of {@link com.ford.syncV4.proxy.RPCRequest} type
+     * @param appId   Application id
+     * @param request Object of {@link com.ford.syncV4.proxy.RPCRequest} type
      */
     public void syncProxySendRPCRequest(String appId, RPCRequest request) {
         if (request == null) {
@@ -2339,11 +2338,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             rpcRequestsResumableManager = new RPCRequestsResumableManager(appId);
             rpcRequestsResumableManager.setCallback(
                     new RPCRequestsResumableManager.RPCRequestsResumableManagerCallback() {
-                @Override
-                public void onSendRequest(String appId, RPCRequest request) {
-                    sendRPCRequestWithPreprocess(appId, request);
-                }
-            });
+                        @Override
+                        public void onSendRequest(String appId, RPCRequest request) {
+                            sendRPCRequestWithPreprocess(appId, request);
+                        }
+                    }
+            );
             mRpcRequestsResumableManager.put(appId, rpcRequestsResumableManager);
         }
 
@@ -2374,7 +2374,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      * Sends {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} request to the SYNC proxy
      *
      * @param registerAppInterface {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} request
-     *
      * @throws SyncException
      */
     private void sendRegisterRequest(RegisterAppInterface registerAppInterface) throws SyncException {
@@ -2390,7 +2389,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
      *                             indicates that {@link com.ford.syncV4.proxy.RPCRequest} should be
      *                             send as it is, without further modification
      *                             (as it were formed in XML test)
-     *
      * @throws SyncException
      */
     private void sendRegisterRequest(RegisterAppInterface registerAppInterface,
@@ -2444,11 +2442,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
 
-            public void syncProxyStopMobileNaviService(String appId) {
-                if (mSyncProxy != null) {
-                    mSyncProxy.stopMobileNaviService(appId);
-                }
-            }
+    public void syncProxyStopMobileNaviService(String appId) {
+        if (mSyncProxy != null) {
+            mSyncProxy.stopMobileNaviService(appId);
+        }
+    }
 
 
     public OutputStream syncProxyStartH264(String appId) {

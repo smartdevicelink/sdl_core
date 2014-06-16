@@ -300,23 +300,37 @@ public class SendProtocolMessageProcessor {
     /**
      * Process Start service message to send
      *
+     * @param serviceType           type of the service
      * @param protocolVersionToSend protocol version
      * @param sessionId             id of the session
+     * @param isCyphered            encrypt or not encrypt
      */
     public void processStartService(final ServiceType serviceType, final byte protocolVersionToSend,
-                                    final byte sessionId) {
+                                    final byte sessionId,  final boolean isCyphered) {
         Logger.d(LOG_TAG + " Start Service:" + serviceType);
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 if (callback != null) {
                     ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(
-                            serviceType, sessionId, protocolVersionToSend, false);
+                            serviceType, sessionId, protocolVersionToSend, isCyphered);
                     callback.onProtocolFrameToSend(header, null, 0, 0);
                 }
             }
         };
         singleMessageExecutor.submit(runnable);
+    }
+
+    /**
+     * Process Start service message to send
+     *
+     * @param serviceType           type of the service
+     * @param protocolVersionToSend protocol version
+     * @param sessionId             id of the session
+     */
+    public void processStartService(final ServiceType serviceType, final byte protocolVersionToSend,
+                                    final byte sessionId ) {
+       processStartService(serviceType, protocolVersionToSend, sessionId, false);
     }
 
     /**

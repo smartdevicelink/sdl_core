@@ -126,9 +126,7 @@ public class WiProProtocol extends AbstractProtocol {
                         "syncSession only, provided id:" + sessionId + ", Service:" + serviceType);
             }
             sendProtocolMessageProcessor.processStartService(serviceType, getProtocolVersion(),
-                    sessionId);
-            //TODO  ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(serviceType, sessionId, getProtocolVersion(), isCyphered);
-            //handleProtocolFrameToSend(header, null, 0, 0);
+                    sessionId, isCyphered);
         }
 
 

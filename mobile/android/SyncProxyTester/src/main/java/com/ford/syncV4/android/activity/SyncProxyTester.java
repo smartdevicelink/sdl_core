@@ -232,7 +232,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * Action Tab section - end
      */
 
-            @Override
+    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -278,7 +278,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     /**
-     *
      * @param syncAppId Id of the SyncProxyTester application instance
      */
     public void onSetUpDialogResult(final String syncAppId) {
@@ -306,8 +305,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     initProxyService(fragment.getLogAdapter());
                     mBoundProxyService.startProxyIfNetworkConnected();
                 }
-                });
-            }
+            });
+        }
     }
 
     private PlaceholderFragment updateActiveTabView(String syncAppId) {
@@ -507,7 +506,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             //mLogAdapter.logMessage(SyncProxyTester.class.getSimpleName() + " '" + serviceType +
             //        "' service can not " + "start with NULL Proxy Service", Log.WARN);
             Logger.w(SyncProxyTester.class.getSimpleName() + " '" + serviceType +
-                            "' service can not " + "start with NULL Proxy Service");
+                    "' service can not " + "start with NULL Proxy Service");
             return;
         }
 
@@ -548,7 +547,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         //mServicesCounter.incrementAndGet();
     }
 
-            @Override
+    @Override
     public void onAckReceived(String appId, int frameReceived, ServiceType serviceType) {
         PlaceholderFragment fragment = getFragmentByAppId(appId);
         if (fragment == null) {
@@ -1289,7 +1288,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     "Output file "
                             + (outFile != null ? outFile.toString()
                             : "'unknown'")
-                            + " can't be opened for writing", e);
+                            + " can't be opened for writing", e
+            );
         } catch (IOException e) {
             logToConsoleAndUI("Can't write to output file", e);
         }
@@ -1474,6 +1474,30 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         });
     }
 
+    public void startRPCService(final String appId, final boolean encrypted) {
+
+        mStreamCommandsExecutorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                if (!isProxyReadyForWork(appId)) {
+                    return;
+                }
+                PlaceholderFragment fragment = getFragmentByAppId(appId);
+                if (fragment == null) {
+                    Logger.w("Start RPC service, Fragment NULL");
+                    return;
+                }
+                fragment.getLogAdapter().logMessage("Should start RPC service", true);
+
+                if (mBoundProxyService == null) {
+                    return;
+                }
+                mBoundProxyService.syncProxyStartRPCService(appId, encrypted);
+            }
+        });
+    }
+
+
     public void onSyncServiceError(String appId, String message) {
 
         PlaceholderFragment fragment = getFragmentByAppId(appId);
@@ -1649,6 +1673,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
     /**
      * Return Fragment instance associated with the provided Application Id
+     *
      * @param appId Application Id
      * @return {@link com.ford.syncV4.android.activity.PlaceholderFragment}
      */
@@ -1798,11 +1823,12 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
     /**
      * Starts to encrypt Audio Service
+     *
      * @param appId
      */
     public void startAudioServiceEncryption(String appId) {
         Logger.d("Audio Service start encrypt");
-        startAudioService(appId,true);
+        startAudioService(appId, true);
     }
 
     /**
@@ -1810,7 +1836,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     public void startNotSecureAudioService(String appId) {
         Logger.d("Audio Service start not encrypt");
-        startAudioService(appId,false);
+        startAudioService(appId, false);
     }
 
     /**
@@ -1818,7 +1844,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     public void startMobileNaviServiceEncryption(String appId) {
         Logger.d("Mobile Navi Service start encrypt");
-        startMobileNaviService(appId,true);
+        startMobileNaviService(appId, true);
     }
 
     /**
@@ -1826,6 +1852,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     public void startMobileNaviNotEncryptedService(String appId) {
         Logger.d("Mobile Navi Service start not encrypt");
-        startMobileNaviService(appId,false);
+        startMobileNaviService(appId, false);
     }
 }

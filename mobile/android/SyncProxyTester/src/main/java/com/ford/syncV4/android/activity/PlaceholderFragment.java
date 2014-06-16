@@ -98,6 +98,7 @@ import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
+import com.ford.syncV4.service.secure.SecurityInternalError;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.logger.Logger;
@@ -350,8 +351,71 @@ public class PlaceholderFragment extends Fragment {
         transaction.replace(R.id.audio_fragment_holder, mAudioServicePreviewFragment,
                 AUDIO_FRAGMENT_TAG);
         transaction.commit();*/
-
+        setupSecureServices(rootView);
         return rootView;
+    }
+
+    private void setupSecureServices( View rootView ){
+
+        CheckBox checkBoxRpcEncode = (CheckBox) rootView.findViewById(R.id.rpc_secure_checkbox);
+        checkBoxRpcEncode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                MessageFilter.setEncrypt(isChecked);
+            }
+        });
+
+        final Spinner spinner = (Spinner) rootView.findViewById(R.id.secure_error_spinner);
+        ArrayAdapter<SecurityInternalError> securityErrorAdapter = new ArrayAdapter<SecurityInternalError>(getActivity(),
+                android.R.layout.simple_spinner_item, SecurityInternalError.values());
+        securityErrorAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(securityErrorAdapter);
+        spinner.setSelection(0);
+
+        Button sendSecureError = (Button) rootView.findViewById(R.id.secure_error_msg_button);
+        sendSecureError.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        // RPC Service Secure check box processing
+        Button rpcSecureCheckBoxView = (Button) rootView.findViewById(R.id.rpc_service_secure_button_view);
+        rpcSecureCheckBoxView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processRPCSecureCheckBox();
+            }
+        });
+
+        // RPC Service Secure check box processing
+        Button rpcNotSecureCheckBoxView = (Button) rootView.findViewById(R.id.rpc_non_secure_button_view);
+        rpcNotSecureCheckBoxView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processRPCNotSecureCheckBox();
+            }
+        });
+    }
+
+    /**
+     * Process a state of the "Start Secure RPC Service" checkbox
+     */
+    private void processRPCSecureCheckBox() {
+        Logger.d("Start Secure RPC service");
+        startRPCService(true);
+    }
+
+    private void processRPCNotSecureCheckBox() {
+        Logger.d("Start Not Secure RPC service");
+        startRPCService(false);
+    }
+
+    public void startRPCService(final boolean encrypted) {
+        SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        syncProxyTester.startRPCService(getAppId(), encrypted);
     }
 
     @Override
