@@ -206,13 +206,13 @@ void ConnectionHandlerImpl::RemoveConnection(
   OnConnectionEnded(connection_handle);
 }
 
- int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
+ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   const transport_manager::ConnectionUID& connection_handle,
   const uint8_t sessionId,
   const protocol_handler::ServiceType& service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
 
-  int32_t new_session_id = -1;
+  uint32_t new_session_id = 0;
 
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
@@ -261,7 +261,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   const protocol_handler::ServiceType& service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
 
-  int32_t result = 0;
+  uint32_t result = 0;
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {

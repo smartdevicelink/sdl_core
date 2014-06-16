@@ -875,11 +875,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                    "Protocol version: " <<
                    static_cast<int>(packet.protocol_version()));
 
-  int32_t session_id = session_observer_->OnSessionStartedCallback(
+  uint32_t session_id = session_observer_->OnSessionStartedCallback(
       connection_id, packet.session_id(),
       ServiceTypeFromByte(packet.service_type()));
 
-  if (-1 != session_id) {
+  if (0 != session_id) {
     SendStartSessionAck(
         connection_id, session_id, packet.protocol_version(),
         session_observer_->KeyFromPair(connection_id, session_id),
