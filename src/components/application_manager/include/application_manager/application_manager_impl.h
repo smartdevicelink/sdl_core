@@ -690,7 +690,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     policy::PolicyManager*                  policy_manager_;
     protocol_handler::ProtocolHandler*      protocol_handler_;
     request_controller::RequestController   request_ctrl_;
-    HMICapabilities                         hmi_capabilities_;
 
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;
@@ -698,8 +697,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     static uint32_t corelation_id_;
     static const uint32_t max_corelation_id_;
 
-    // The reason of HU shutdown
-    mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
 
     // Construct message threads when everything is already created
 
@@ -711,6 +708,11 @@ class ApplicationManagerImpl : public ApplicationManager,
     impl::FromHmiQueue messages_from_hmi_;
     // Thread that pumps messages being passed to HMI.
     impl::ToHmiQueue messages_to_hmi_;
+
+
+    HMICapabilities                         hmi_capabilities_;
+    // The reason of HU shutdown
+    mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
 
     /**
      * @brief Resume controler is responcible for save and load information
