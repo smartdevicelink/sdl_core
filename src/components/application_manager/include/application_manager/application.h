@@ -80,9 +80,9 @@ struct AppFile {
     }
     AppFile(const std::string& name, bool persistent, bool download_complete,
           mobile_apis::FileType::eType type)
-      : is_persistent(persistent),
+      : file_name(name),
+        is_persistent(persistent),
         is_download_complete(download_complete),
-        file_name(name),
         file_type(type){
   }
   std::string file_name;

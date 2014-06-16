@@ -165,7 +165,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param sessionId Identifier of the session to be ended
      * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
      * If not equal to hash assigned to session on start then operation fails.
-     * \return int32_t -1 if operation fails session key otherwise
+     * \return int32_t 0 if operation fails session key otherwise
      */
     virtual uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID& connection_handle,

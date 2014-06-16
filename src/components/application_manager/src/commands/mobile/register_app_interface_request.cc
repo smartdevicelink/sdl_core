@@ -73,8 +73,8 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
 
 struct AppHMITypeInserter {
     AppHMITypeInserter(smart_objects::SmartObject& so_array)
-      : so_array_(so_array),
-        index_(0) {
+      : index_(0),
+        so_array_(so_array) {
     }
 
     bool operator()(const std::string& app_hmi_type) {

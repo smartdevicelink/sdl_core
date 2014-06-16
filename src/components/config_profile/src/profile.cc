@@ -70,7 +70,7 @@ const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
 const char* kPathToSnapshotKey = "PathToSnapshot";
 const char* kPreloadedPTKey = "PreloadedPT";
-const char* kPoliciesTableKey = "PoliciesTable";
+//const char* kPoliciesTableKey = "PoliciesTable";
 const char* kServerAddressKey = "ServerAddress";
 const char* kAppInfoStorageKey = "AppInfoStorage";
 const char* kAppStorageFolderKey = "AppStorageFolder";
@@ -121,9 +121,6 @@ const char* kAppHmiLevelNoneRequestsTimeScaleKey =
 const char* kPendingRequestsAmoundKey = "PendingRequestsAmount";
 const char* kSupportedDiagModesKey = "SupportedDiagModes";
 const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
-#ifdef CUSTOMER_PASA
-const char* kTtsDelimiterKey = "TtsDelimiter";
-#endif
 const char* kTTSDelimiterKey = "TTSDelimiter";
 const char* kRecordingFileNameKey = "RecordingFileName";
 const char* kRecordingFileSourceKey = "RecordingFileSource";
@@ -182,12 +179,12 @@ Profile::Profile()
     app_storage_folder_(),
     app_resourse_folder_(),
     config_file_name_(kDefaultConfigFileName),
-    hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName),
     server_address_(kDefaultServerAddress),
     server_port_(kDefaultServerPort),
     video_streaming_port_(kDefaultVideoStreamingPort),
     audio_streaming_port_(kDefaultAudioStreamingPort),
     time_testing_port_(kDefaultTimeTestingPort),
+    hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName),
     help_prompt_(),
     time_out_promt_(),
     min_tread_stack_size_(threads::Thread::kMinStackSize),
@@ -222,11 +219,11 @@ Profile::Profile()
     log4cxx_config_file_(kDefaultLog4cxxConfig),
     remote_logging_flag_file_(kDefaultRemoteLoggingFlagFile),
 #endif
-	recording_file_source_(kDefaultRecordingFileSourceName),
-	recording_file_name_(kDefaultRecordingFileName),
-	mme_db_name_(kDefaultMmeDatabaseName),
-	event_mq_name_(kDefaultEventMQ),
+    mme_db_name_(kDefaultMmeDatabaseName),
+    event_mq_name_(kDefaultEventMQ),
     ack_mq_name_(kDefaultAckMQ),
+    recording_file_source_(kDefaultRecordingFileSourceName),
+    recording_file_name_(kDefaultRecordingFileName),
     application_list_update_timeout_(kDefaultApplicationListUpdateTimeout) {
 }
 

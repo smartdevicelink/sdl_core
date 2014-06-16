@@ -45,6 +45,50 @@
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
+
+  /**
+   * @brief Value that is used as invalid value for bool type
+   **/
+  static const bool invalid_bool_value = false;
+
+  /**
+   * @brief Value that is used as invalid value for int32_t type
+   **/
+  static const int32_t invalid_int_value = -1;
+  static const int32_t invalid_unsigned_int_value = 0;
+
+  /**
+   * @brief Value that is used as invalid value for char type
+   **/
+  static const char invalid_char_value = 0;
+
+  /**
+   * @brief Value that is used as invalid value for string type
+   **/
+  static const std::string invalid_string_value = "";
+
+  /**
+   * @brief Value that is used as invalid value for double type
+   **/
+  static const double invalid_double_value = -1;
+
+  /**
+   * @brief Value that is used as invalid value for string type
+   **/
+  static const char* invalid_cstr_value = "";
+
+  /**
+   * @brief Value that is used as invalid value for object type
+   **/
+  static SmartObject invalid_object_value(SmartType_Invalid);
+
+  /**
+   * @brief Value that is used as invalid value for object type
+   **/
+  static const SmartBinary invalid_binary_value;
+
+
+
 SmartObject::SmartObject()
     : m_type(SmartType_Null),
       m_schema() {
@@ -250,7 +294,7 @@ bool SmartObject::operator==(uint32_t Value) const {
   if (comp == invalid_int_value) {
     return false;
   } else {
-    return comp == Value;
+    return static_cast<uint32_t>(comp) == Value;
   }
 }
 
@@ -542,7 +586,7 @@ std::string SmartObject::convert_string(void) const {
       NOTREACHED();
 #endif
 */
-      retval = invalid_cstr_value;
+      retval = NsSmartDeviceLink::NsSmartObjects::invalid_cstr_value;
       break;
   }
   return retval;
