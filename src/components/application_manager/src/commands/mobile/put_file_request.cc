@@ -163,8 +163,7 @@ void PutFileRequest::Run() {
   if (!file_system::CreateDirectoryRecursively(file_path)) {
     LOG4CXX_ERROR(logger_, "Cann't create folder");
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR,
-                 "Cann't create folder.",
-                 &response_params);
+                 "Cann't create folder.", &response_params);
     return;
   }
 

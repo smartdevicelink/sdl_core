@@ -75,7 +75,7 @@ void ListFilesRequest::Run() {
 
   (*message_)[strings::msg_params][strings::space_available] =
         static_cast<int32_t>(ApplicationManagerImpl::instance()->
-                             GetAvailableSpaceForApp(application->name()));
+                             GetAvailableSpaceForApp(application->folder_name()));
   int32_t i = 0;
   const AppFilesMap& app_files = application->getAppFiles();
   for (AppFilesMap::const_iterator it = app_files.begin();
