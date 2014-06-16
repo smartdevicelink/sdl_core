@@ -4,12 +4,22 @@
     android:layout_width="fill_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textColor="#FFFFFF"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Audio Service"
+        android:id="@+id/title"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true" />
+
     <CheckBox
         android:id="@+id/audioServiceCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/title"
         android:textColor="@color/app_regular_text_color"
         android:hint="Turn On Audio Service"
         />
@@ -18,7 +28,7 @@
         android:id="@+id/audio_service_secure_checkbox_view"
         android:text="@string/start_secure_service"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
+        android:layout_below="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
