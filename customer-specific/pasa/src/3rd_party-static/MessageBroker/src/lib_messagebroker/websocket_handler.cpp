@@ -162,7 +162,7 @@ namespace NsMessageBroker
        DBG_MSG(("CWebSocketHandler::parseWebSocketData()length:%d; size:%d;"
                 " position:%d\n", (int)length, size, position));
 
-       for (unsigned long i = position; i < size, i < position+length; i++)
+       for (unsigned long i = position; (i < size && i < position+length); i++)
        {
           Buffer[parsedBufferPosition++] = recBuffer[i];
        }

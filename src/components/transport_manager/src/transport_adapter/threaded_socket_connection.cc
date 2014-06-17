@@ -234,7 +234,7 @@ void ThreadedSocketConnection::Transmit() {
     return;
   }
 
-  if (0 != (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))) {
+  if (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
     LOG4CXX_INFO(logger_, "Connection " << this << " terminated");
     Abort();
     LOG4CXX_INFO(logger_, "exit");

@@ -462,10 +462,6 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t                        app_hmi_level_none_requests_time_scale_;
     std::string                     video_stream_file_;
     std::string                     audio_stream_file_;
-#ifdef CUSTOMER_PASA
-    std::string                     remote_logging_flag_file_;
-    std::string                     remote_logging_flag_file_path_;
-#endif
     uint32_t                        app_time_scale_max_requests_;
     uint32_t                        app_requests_time_scale_;
     uint32_t                        pending_requests_amount_;
@@ -485,6 +481,8 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     tts_delimiter_;
 #ifdef CUSTOMER_PASA
     std::string                     log4cxx_config_file_;
+    std::string                     remote_logging_flag_file_;
+    std::string                     remote_logging_flag_file_path_;
 #endif
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;

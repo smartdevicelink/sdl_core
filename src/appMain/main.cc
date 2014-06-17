@@ -90,9 +90,6 @@ if (!file_str.is_open()) {
   return false;
 }
 
-file_str.seekg(0, std::ios::end);
-file_str.seekg(0, std::ios::beg);
-
 std::string hmi_link;
 std::getline(file_str, hmi_link);
 
