@@ -137,7 +137,6 @@ void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
         i = prv;
         ++i;
       }
-      break;
     }
     else {
       prv = i;
@@ -148,38 +147,25 @@ void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
 
   bool removed = false;
   apps_lock_.Acquire();
-  for (AppContainer::iterator prv = apps_.begin(), i = prv; i != apps_.end();) {
+  for (AppContainer::iterator i = apps_.begin(); i != apps_.end(); ++i) {
     if (i->second == app_id) {
       uint32_t protocol_id = i->first;
       char protocol_name[kProtocolNameSize];
       ipod_eaf_getprotocol(ipod_hdl_, protocol_id, protocol_name, kProtocolNameSize);
       LOG4CXX_DEBUG(logger_, "iAP: dropping protocol " << protocol_name << " for application " << app_id);
-// The next lines
-// are just a substitution for
-// i = erase(i);
-// which isn't yet implemented
-      bool head_removed = (apps_.begin() == i);
       apps_.erase(i);
       removed = true;
-      if (head_removed) {
-        prv = apps_.begin();
-        i = prv;
-      }
-      else {
-        i = prv;
-        ++i;
-      }
+// each application id can appear only once that's why we break the loop
       break;
-    }
-    else {
-      prv = i;
-      ++i;
     }
   }
   apps_lock_.Release();
 
   if (removed) {
     controller_->ApplicationListUpdated(unique_device_id());
+  }
+  else {
+    LOG4CXX_WARN(logger_, "iAP: cannot remove application " << app_id);
   }
 }
 
