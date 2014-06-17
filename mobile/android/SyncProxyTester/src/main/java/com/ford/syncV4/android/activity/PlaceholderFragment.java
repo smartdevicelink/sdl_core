@@ -2899,6 +2899,7 @@ public class PlaceholderFragment extends Fragment {
         if (boundProxyService == null) {
             return;
         }
+        MessageFilter.filter(rpcRequest);
         boundProxyService.sendRPCRequestWithPreprocess(getAppId(), rpcRequest);
     }
 }
