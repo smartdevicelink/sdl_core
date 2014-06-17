@@ -73,18 +73,18 @@ public class SendProtocolMessageProcessor {
 
     /**
      * Process data into {@link com.ford.syncV4.protocol.ProtocolMessage}
-     *
-     * @param serviceType           type of the service
+     *  @param serviceType           type of the service
      * @param protocolVersionToSend protocol version
+     * @param encrypted
      * @param data                  byte array
      * @param maxDataSize           maximum size of the data
      * @param sessionID             id of the session
      * @param messageId             id of the message
      */
     public void process(final ServiceType serviceType, final byte protocolVersionToSend,
-                        final byte[] data, final int maxDataSize,
+                        final boolean encrypted, final byte[] data, final int maxDataSize,
                         final byte sessionID, final int messageId
-                        ) {
+    ) {
 
         if (data == null) {
             callback.onProtocolFrameToSendError(ERROR_TYPE.DATA_NPE, "Data is NULL");
@@ -104,7 +104,7 @@ public class SendProtocolMessageProcessor {
                             new ConsecutiveFrameProcessor();
 
                     consecutiveFrameProcessor.process(data, sessionID, messageId,
-                            serviceType, protocolVersionToSend, maxDataSize,
+                            serviceType, protocolVersionToSend,encrypted, maxDataSize,
                             new ConsecutiveFrameProcessor.IConsecutiveFrameProcessor() {
 
                                 @Override
@@ -126,6 +126,7 @@ public class SendProtocolMessageProcessor {
             final ProtocolFrameHeader header =
                     ProtocolFrameHeaderFactory.createSingleSendData(serviceType,
                             sessionID, data.length, messageId, protocolVersionToSend);
+            header.setEncrypted(encrypted);
 
             if (serviceType == ServiceType.Audio_Service) {
                 //Logger.d(LOG_TAG + " AUDIO");

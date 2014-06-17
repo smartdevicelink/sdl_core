@@ -18,7 +18,7 @@ public class SecureServiceMessageCallback implements ISecureServiceMessageCallba
     private IProtectServiceListener protectServiceListener;
     private byte mSessionId = 0;
 
-    public void setSyncConnection(IProtectServiceListener protectServiceListener) {
+    public void setProtectServiceListener(IProtectServiceListener protectServiceListener) {
         this.protectServiceListener = protectServiceListener;
     }
 

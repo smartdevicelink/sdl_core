@@ -1447,7 +1447,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     Logger.w("Start RPC service, Fragment NULL");
                     return;
                 }
-                fragment.getLogAdapter().logMessage("Should start RPC service", true);
+                fragment.getLogAdapter().logMessage("Should start RPC service encrypted " + encrypted, true);
 
                 if (mBoundProxyService == null) {
                     return;

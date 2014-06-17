@@ -15,11 +15,11 @@ public class SecureServiceMessageFactory {
     private static final String TAG = "SecureServiceMessageFactory";
 
 
-    public static ProtocolMessage buildHandshakeRequest(byte sessionId, byte[] payloadData) {
+    public static ProtocolMessage buildHandshakeRequest(byte sessionId, byte[] payloadData, byte version) {
 
         ProtocolMessage protocolMessage = new ProtocolMessage();
         protocolMessage.setSessionID(sessionId);
-        protocolMessage.setVersion((byte) 2);
+        protocolMessage.setVersion(version);
         protocolMessage.setRPCType(ProtocolMessage.RPCTYPE_NOTIFICATION);
         protocolMessage.setSessionType(ServiceType.Heartbeat);
         protocolMessage.setFunctionID(ProtocolConst.SEND_HANDSHAKE_ID);
