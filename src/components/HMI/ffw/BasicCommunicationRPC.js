@@ -465,15 +465,17 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
                 if (request.method == "BasicCommunication.ActivateApp") {
 
-                    if ((SDL.SDLAppController.model && SDL.SDLAppController.model.appID != request.params.appID) || (request.params.level == "NONE" || request.params.level == "BACKGROUND")) {
-                        SDL.States.goToStates('info.apps');
-                    }
+                    if (!request.params.level || request.params.level == "FULL") {
+                        if ((SDL.SDLAppController.model && SDL.SDLAppController.model.appID != request.params.appID) || (request.params.level == "NONE" || request.params.level == "BACKGROUND")) {
+                            SDL.States.goToStates('info.apps');
+                        }
 
-                    if (SDL.SDLModel.stateLimited == request.params.appID) {
-                        SDL.SDLModel.stateLimited = null;
-                    }
+                        if (SDL.SDLModel.stateLimited == request.params.appID) {
+                            SDL.SDLModel.stateLimited = null;
+                        }
 
-                    SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
+                        SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
+                    }
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
                 }
                 if (request.method == "BasicCommunication.GetSystemInfo") {
