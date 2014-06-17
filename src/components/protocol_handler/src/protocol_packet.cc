@@ -143,7 +143,7 @@ RESULT_CODE ProtocolPacket::appendData(uint8_t* chunkData,
   if (data_offset_ + chunkDataSize <= packet_data_.totalDataBytes) {
     if (chunkData) {
       if (packet_data_.data) {
-        // TODO (EZamakhov): reallocation?!
+        // TODO(EZamakhov): reallocation?!
         memcpy(packet_data_.data + data_offset_, chunkData, chunkDataSize);
         data_offset_ += chunkDataSize;
         return RESULT_OK;

@@ -735,8 +735,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     return RESULT_FAIL;
   }
 
-  int32_t key = session_observer_->KeyFromPair(connection_id,
-                                               packet->session_id());
+  const uint32_t key = session_observer_->KeyFromPair(connection_id,
+                                                      packet->session_id());
   LOG4CXX_INFO_EXT(
       logger_,
       "Packet " << packet << "; session id " << static_cast<int32_t>(key));

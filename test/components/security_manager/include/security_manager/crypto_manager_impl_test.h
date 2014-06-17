@@ -122,7 +122,7 @@ TEST_F(SSLTest, Positive) {
                                        &client_buf_len),
             security_manager::SSLContext::Handshake_Result_Success);
   ASSERT_FALSE(client_buf == NULL);
-  ASSERT_GT(client_buf_len, 0);
+  ASSERT_GT(client_buf_len, 0u);
 
   for (;;) {
     ASSERT_EQ(server_ctx->DoHandshakeStep(client_buf,
@@ -131,7 +131,7 @@ TEST_F(SSLTest, Positive) {
                                           &server_buf_len),
                 security_manager::SSLContext::Handshake_Result_Success);
     ASSERT_FALSE(server_buf == NULL);
-    ASSERT_GT(server_buf_len, 0);
+    ASSERT_GT(server_buf_len, 0u);
 
     ASSERT_EQ(client_ctx->DoHandshakeStep(server_buf,
                                           server_buf_len,
@@ -143,7 +143,7 @@ TEST_F(SSLTest, Positive) {
     }
 
     ASSERT_FALSE(client_buf == NULL);
-    ASSERT_GT(client_buf_len, 0);
+    ASSERT_GT(client_buf_len, 0u);
   }
 
   EXPECT_TRUE(client_ctx->IsInitCompleted());
@@ -157,12 +157,12 @@ TEST_F(SSLTest, Positive) {
   EXPECT_TRUE(client_ctx->Encrypt(text, text_len, &encrypted_text, &encrypted_text_len));
 
   ASSERT_NE(encrypted_text, (void*)NULL);
-  ASSERT_GT(encrypted_text_len, 0);
+  ASSERT_GT(encrypted_text_len, 0u);
 
   // Decrypt text on server side
   EXPECT_TRUE(server_ctx->Decrypt(encrypted_text, encrypted_text_len, &text, &text_len));
   ASSERT_NE(text, (void*)NULL);
-  ASSERT_GT(text_len, 0);
+  ASSERT_GT(text_len, 0u);
 
   ASSERT_EQ(strncmp(reinterpret_cast<const char*>(text),
                     "abra",
@@ -226,7 +226,7 @@ TEST_F(SSLTest, DISABLED_BadData) {
   delete[] encryptedText;
 
   EXPECT_FALSE(decryptedText == NULL);
-  EXPECT_GT(LastError().length(), 0);
+  EXPECT_GT(LastError().length(), 0u);
   delete[] encryptedText;
 }
 
@@ -265,7 +265,7 @@ TEST_F(SSLTest, Positive2) {
 
   EXPECT_EQ(res, 1);
 
-  EXPECT_NE(SSL_is_init_finished(connection), 0);
+  EXPECT_NE(SSL_is_init_finished(connection), 0u);
 
   BIO *bioF = BIO_new(BIO_f_ssl());
   BIO_set_ssl(bioF, connection, BIO_NOCLOSE);
@@ -303,7 +303,7 @@ TEST_F(SSLTest, Positive2) {
     const_cast<uint8_t*>(decryptedText)[text_len] = 0;
 
     EXPECT_TRUE(decryptedText != NULL);
-    EXPECT_EQ(strcmp(reinterpret_cast<const char*>(decryptedText), text), 0);
+    EXPECT_EQ(strcmp(reinterpret_cast<const char*>(decryptedText), text), 0u);
     delete[] text;
   }
   std::cout << " min = " << min_oh << ", max = " << max_oh << std::endl;

@@ -274,28 +274,27 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   }
 #endif //  ENABLE_SECURITY
 
-  int32_t new_session_id = 0;
+  uint32_t new_session_id = 0;
 
   Connection* connection = it->second;
   if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
     new_session_id = connection->AddNewSession();
-    if (0 > new_session_id) {
+    if (0 == new_session_id) {
       LOG4CXX_ERROR(logger_, "Not possible to start session!");
-      return -1;
+      return 0;
     }
   } else {
     if (!connection->AddNewService(session_id, service_type, is_protected)) {
       LOG4CXX_ERROR(logger_, "Not possible to establish "
                     << (is_protected ? "prootected" : "nonprotected")
                     << " service " << static_cast<int>(service_type) << "!");
-      return -1;
+      return 0;
     }
     new_session_id = session_id;
   }
 
   if (connection_handler_observer_) {
-    // TODO(Ezamakhov) change all session_keys as uint32_t
-    int32_t session_key = KeyFromPair(connection_handle, new_session_id);
+    const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
 
     const bool success = connection_handler_observer_->OnServiceStartedCallback(
         connection->connection_device_handle(), session_key, service_type);
@@ -344,8 +343,8 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     result = sessionId;
   }
 
-  if (0 != connection_handler_observer_) {
-    int32_t session_key = KeyFromPair(connection_handle, sessionId);
+  if (connection_handler_observer_) {
+    const uint32_t session_key = KeyFromPair(connection_handle, sessionId);
     connection_handler_observer_->OnServiceEndedCallback(session_key,
                                                          service_type);
     result = session_key;
@@ -401,7 +400,7 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
   }
 
   if (0 == session_id) {
-    LOG4CXX_INFO(
+    LOG4CXX_WARN(
         logger_,
         "No sessions in connection " << static_cast<int32_t>(conn_handle));
     if (app_id) {
@@ -643,9 +642,8 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
   sync_primitives::AutoLock connection_list_lock(connection_list_lock_);
    ConnectionListIterator itr = connection_list_.find(connection_id);
 
-  //TODO(EZamakhov): fix connection_handler_observer_ check to DCHECK
   if (connection_list_.end() != itr) {
-    if (0 != connection_handler_observer_) {
+    if (connection_handler_observer_) {
       SessionMap session_map = itr->second->session_map();
       SessionMapIterator session_it = session_map.find(session_id);
       if (session_it != session_map.end()) {
@@ -714,15 +712,14 @@ void ConnectionHandlerImpl::OnConnectionEnded(
     return;
   }
 
-  if (0 != connection_handler_observer_) {
+  if (connection_handler_observer_) {
     const Connection* connection = itr->second;
     const SessionMap session_map = connection->session_map();
 
     for (SessionMapConstIterator session_it = session_map.begin(), end =
         session_map.end(); session_it != end; ++session_it) {
-      uint32_t session_key = KeyFromPair(connection_id, session_it->first);
+      const uint32_t session_key = KeyFromPair(connection_id, session_it->first);
       const ServiceList& service_list = session_it->second.service_list;
-
       for (ServiceListConstIterator service_it = service_list.begin(), end =
           service_list.end(); service_it != end; ++service_it) {
         connection_handler_observer_->OnServiceEndedCallback(

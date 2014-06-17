@@ -173,7 +173,7 @@ class Connection {
 
   /**
    * \brief Adds session to connection
-   * \return sessionID or -1 in case of issues
+   * \return sessionID or 0 in case of issues
    */
   uint32_t AddNewSession();
 

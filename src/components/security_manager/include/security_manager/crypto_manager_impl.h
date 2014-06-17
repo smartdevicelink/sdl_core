@@ -71,9 +71,9 @@ namespace security_manager {
       BIO *bioOut_;
       BIO *bioFilter_;
       size_t buffer_size_;
-      BlockSizeGetter max_block_size_;
       uint8_t *buffer_;
       Mode mode_;
+      BlockSizeGetter max_block_size_;
       static std::map<std::string, BlockSizeGetter> max_block_sizes;
       static std::map<std::string, BlockSizeGetter> create_max_block_sizes();
       DISALLOW_COPY_AND_ASSIGN(SSLContextImpl);

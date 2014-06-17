@@ -69,7 +69,7 @@ class ConnectionTest: public ::testing::Test {
   void StartSession() {
     using namespace protocol_handler;
     session_id = connection_->AddNewSession();
-    EXPECT_NE(session_id, -1);
+    EXPECT_NE(session_id, 0u);
     const SessionMap sessionMap = connection_->session_map();
     EXPECT_FALSE(sessionMap.empty());
     const ServiceList serviceList = sessionMap.begin()->second.service_list;
@@ -119,7 +119,7 @@ class ConnectionTest: public ::testing::Test {
 
   ::utils::SharedPtr<Connection> connection_;
   ConnectionHandlerImpl* connection_handler_;
-  int32_t session_id;
+  uint32_t session_id;
 };
 
 // Try to add service without session

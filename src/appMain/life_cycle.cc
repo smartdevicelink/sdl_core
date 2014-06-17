@@ -146,7 +146,6 @@ bool LifeCycle::StartComponents() {
       &protocol_name, "TLSv1.2", security_manager::SecurityManager::ConfigSection(), "Protocol");
 
   security_manager::Protocol protocol;
-  // TODO (EZamakhov): use SSL_TXT_SSLV2 from ssl.h
   if (protocol_name == "TLSv1.1") {
     protocol = security_manager::TLSv1_1;
   } else if (protocol_name == "TLSv1.2") {
@@ -382,7 +381,6 @@ void LifeCycle::StopComponents() {
   transport_manager::TransportManagerDefault::destroy();
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
-  // TODO(EZamakhov): set_session_observer(NULL) do nothing
   protocol_handler_->set_session_observer(NULL);
   connection_handler::ConnectionHandlerImpl::destroy();
 
