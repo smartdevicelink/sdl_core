@@ -274,9 +274,6 @@ class Parser(object):
         for attribute in attributes:
             if attribute == "scope":
                 scope = attributes[attribute]
-            else:
-                raise ParseError("Unexpected attribute '" + attribute +
-                                 "' in function '" + params["name"] + "'")
 
         params["function_id"] = function_id
         params["message_type"] = message_type
@@ -455,9 +452,6 @@ class Parser(object):
                 except:
                     raise ParseError("Invalid value for enum element: '" +
                                      attributes[attribute] + "'")
-            else:
-                raise ParseError("Unexpected attribute '" +
-                                 attribute + "' in enum element")
         params["internal_name"] = internal_name
         params["value"] = value
 
