@@ -78,6 +78,10 @@ SDL.SDLAppController = Em.Object.create({
                     console.log("Unknown command with ID: " + element.commandID);
                 }
             }
+
+            SDL.OptionsView.deactivate();
+            SDL.States.goToStates('info.apps');
+
         } else if (element.menuID >= 0) {
 
             // if subMenu

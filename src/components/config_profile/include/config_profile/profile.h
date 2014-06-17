@@ -215,7 +215,20 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns path to log4cxx configuration file
       */
     const std::string& log4cxx_config_file() const;
+    /**
+      * @brief Returns remote logging flag file name
+      * if this path exists in the system log file will be
+      * saved to the USb drive
+      */
+    const std::string& remote_logging_flag_file() const;
+
+    /**
+      * @brief Returns path to remote logging flag file
+      * if this path exists in the system log file will be
+      * saved to the USb drive
+      */
 #endif
+    const std::string& remote_logging_flag_file_path() const;
     /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none
@@ -449,6 +462,11 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t                        app_hmi_level_none_requests_time_scale_;
     std::string                     video_stream_file_;
     std::string                     audio_stream_file_;
+#ifdef CUSTOMER_PASA
+    std::string                     log4cxx_config_file_;
+    std::string                     remote_logging_flag_file_;
+    std::string                     remote_logging_flag_file_path_;
+#endif
     uint32_t                        app_time_scale_max_requests_;
     uint32_t                        app_requests_time_scale_;
     uint32_t                        pending_requests_amount_;
@@ -466,6 +484,9 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
+#ifdef CUSTOMER_PASA
+    std::string                     log4cxx_config_file_;
+#endif
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;
     std::string                     ack_mq_name_;

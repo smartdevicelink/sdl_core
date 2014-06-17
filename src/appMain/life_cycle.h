@@ -81,25 +81,19 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
+    hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
+    hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
+    media_manager::MediaManagerImpl* media_manager_;
 #ifdef TIME_TESTER
     time_tester::TimeManager* time_tester_;
 #endif //TIME_TESTER
-    hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
 #ifdef DBUS_HMIADAPTER
     hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
+    System::Thread* dbus_adapter_thread_;
 #endif  // DBUS_HMIADAPTER
-#ifdef MESSAGEBROKER_HMIADAPTER
-    hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
-#endif  // MESSAGEBROKER_HMIADAPTER
-#ifdef CUSTOMER_PASA
-#ifdef PASA_HMI
-    hmi_message_handler::MessageBrokerAdapter* mb_pasa_adapter_;
-#endif  // PASA_HMI
-#endif  // CUSTOMER_PASA
-    hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
-    media_manager::MediaManagerImpl* media_manager_;
 
 #ifdef MESSAGEBROKER_HMIADAPTER
+    hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
     NsMessageBroker::CMessageBroker* message_broker_;
     NsMessageBroker::TcpServer* message_broker_server_;
     System::Thread* mb_thread_;
@@ -109,13 +103,10 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
 
 #ifdef CUSTOMER_PASA
 #ifdef PASA_HMI
+    hmi_message_handler::MessageBrokerAdapter* mb_pasa_adapter_;
     System::Thread* mb_pasa_adapter_thread_;
 #endif  // PASA_HMI
 #endif  // CUSTOMER_PASA
-
-#ifdef DBUS_HMIADAPTER
-    System::Thread* dbus_adapter_thread_;
-#endif  // DBUS_HMIADAPTER
 
     DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 

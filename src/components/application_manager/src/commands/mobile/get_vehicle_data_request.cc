@@ -235,7 +235,7 @@ void GetVehicleDataRequest::Run() {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
             smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app->app_id();
-  const int32_t min_length_msg_params = 1;
+  const uint32_t min_length_msg_params = 1;
   for (; vehicle_data.end() != it; ++it) {
     if (true == (*message_)[str::msg_params].keyExists(it->first)
         && true == (*message_)[str::msg_params][it->first].asBool()) {

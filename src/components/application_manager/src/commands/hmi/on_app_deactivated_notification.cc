@@ -58,7 +58,7 @@ void OnAppDeactivatedNotification::Run() {
     return;
   }
 
-  if ((*message_)[strings::msg_params][strings::app_id].asInt()
+  if ((*message_)[strings::msg_params][strings::app_id].asUInt()
       != app->app_id()) {
     LOG4CXX_ERROR_EXT(logger_, "Wrong application id!");
     return;

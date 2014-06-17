@@ -80,9 +80,9 @@ struct AppFile {
     }
     AppFile(const std::string& name, bool persistent, bool download_complete,
           mobile_apis::FileType::eType type)
-      : is_persistent(persistent),
+      : file_name(name),
+        is_persistent(persistent),
         is_download_complete(download_complete),
-        file_name(name),
         file_type(type){
   }
   std::string file_name;
@@ -437,7 +437,7 @@ class Application : public virtual InitialApplicationData,
      * @param state_of_alert contains TRUE if alert is activated otherwise
      * contains FALSE
      */
-    virtual void set_alert_in_background(const bool state_of_alert) = 0;
+    virtual void set_alert_in_background(bool state_of_alert) = 0;
     virtual void set_protocol_version(
         const ProtocolVersion& protocol_version) = 0;
     virtual ProtocolVersion protocol_version() const = 0;

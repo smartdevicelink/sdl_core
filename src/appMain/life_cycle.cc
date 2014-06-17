@@ -100,6 +100,7 @@ bool LifeCycle::StartComponents() {
   app_manager_ =
     application_manager::ApplicationManagerImpl::instance();
   DCHECK(app_manager_ != NULL);
+  app_manager_->Init();
 
   hmi_handler_ =
     hmi_message_handler::HMIMessageHandlerImpl::instance();

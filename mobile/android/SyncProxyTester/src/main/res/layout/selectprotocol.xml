@@ -363,6 +363,31 @@
             android:checked="true"
             android:text="@string/policy_file_update_auto_replay_label" />
 
+        <CheckBox
+            android:id="@+id/set_up_dialog_use_VRSynonyms"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/registerappinterface_useVRSynonyms" />
+
+        <EditText
+            android:id="@+id/set_up_dialog_vrSynonyms"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textCapSentences"
+            android:text="@string/registerappinterface_vrSynonymsDefault" />
+
+        <CheckBox
+            android:id="@+id/set_up_dialog_use_hash_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/set_up_dialog_hash_id" />
+
+        <EditText
+            android:id="@+id/set_up_dialog_hash_id"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/set_up_dialog_fake_hash_id"/>
+
     </LinearLayout>
 
 </ScrollView>

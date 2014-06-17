@@ -1942,16 +1942,22 @@ public class SyncProxyALMManager {
 		return syncChoice;
 	}
 	/********************* End Public Helper Methods ******************/
-	
-	
-	
-	
-	
+
 	/************************ Callbacks ************************/
 	// A class which handles all IProxyListenerALM callbacks for the manager
 	private class ALMInterfaceBroker implements IProxyListenerALM {
-		
-		@Override
+
+        @Override
+        public void onRPCRequest(String appId, RPCRequest rpcRequest) {
+
+        }
+
+        @Override
+        public void onOnSystemRequest(String appId, OnSystemRequest notification) {
+
+        }
+
+        @Override
 		public void onAddSubMenuResponse(String appId, AddSubMenuResponse response) {
 			final ISyncAddSubMenuResponseListener listener = _addSubMenuResponseListeners.get(response.getCorrelationID());
 			SyncSubMenu syncSubMenuToReturn = null;
@@ -2574,15 +2580,6 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onOnSystemRequest(String appId, OnSystemRequest notification) {
-        }
-
-        @Override
-        public void onRegisterAppRequest(String appId, RegisterAppInterface msg) {
-
-        }
-
-        @Override
         public void onAppUnregisteredAfterLanguageChange(String appId, OnLanguageChange msg) {
 
         }
@@ -2635,11 +2632,6 @@ public class SyncProxyALMManager {
 
         @Override
         public void onStartSession(String appId) {
-
-        }
-
-        @Override
-        public void onPutFileRequest(String appId, PutFile putFile) {
 
         }
 

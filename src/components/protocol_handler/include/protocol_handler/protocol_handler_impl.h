@@ -443,9 +443,6 @@ class ProtocolHandlerImpl
      *\brief (JSON Handler)
      */
     ProtocolObservers protocol_observers_;
-#ifdef TIME_TESTER
-    PHMetricObserver* metric_observer_;
-#endif  // TIME_TESTER
 
     /**
      *\brief Pointer on instance of class implementing ISessionObserver
@@ -493,6 +490,10 @@ class ProtocolHandlerImpl
     impl::FromMobileQueue raw_ford_messages_from_mobile_;
     // Thread that pumps messages prepared to being sent to mobile side.
     impl::ToMobileQueue raw_ford_messages_to_mobile_;
+
+#ifdef TIME_TESTER
+    PHMetricObserver* metric_observer_;
+#endif  // TIME_TESTER
 };
 }  // namespace protocol_handler
 

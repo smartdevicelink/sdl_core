@@ -60,8 +60,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "AudioPassThruThread")
 AudioStreamSenderThread::AudioStreamSenderThread(
   const std::string fileName, uint32_t session_key)
   : session_key_(session_key),
-    shouldBeStoped_(false),
-    fileName_(fileName) {
+    fileName_(fileName),
+    shouldBeStoped_(false) {
   LOG4CXX_TRACE_ENTER(logger_);
 }
 

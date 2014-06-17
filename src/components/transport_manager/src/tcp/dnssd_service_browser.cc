@@ -109,6 +109,9 @@ void AvahiClientCallback(AvahiClient *avahi_client,
     case AVAHI_CLIENT_FAILURE:
       dnssd_service_browser->OnClientFailure();
       break;
+    default: {
+      LOG4CXX_ERROR(logger_, "Unknown avahi_client_state: " << avahi_client_state)
+    }
   }
 }
 
@@ -273,10 +276,10 @@ void DnssdServiceBrowser::AddService(AvahiIfIndex interface,
   if (service_records_.end()
       == std::find(service_records_.begin(), service_records_.end(), record)) {
     service_records_.push_back(record);
-    AvahiServiceResolver* avahi_service_resolver = avahi_service_resolver_new(
-        avahi_client_, interface, protocol, name, type, domain,
-        AVAHI_PROTO_INET, static_cast<AvahiLookupFlags>(0),
-        AvahiServiceResolverCallback, this);
+//    AvahiServiceResolver* avahi_service_resolver = avahi_service_resolver_new(
+//        avahi_client_, interface, protocol, name, type, domain,
+//        AVAHI_PROTO_INET, static_cast<AvahiLookupFlags>(0),
+//        AvahiServiceResolverCallback, this);
   }
   pthread_mutex_unlock(&mutex_);
 }

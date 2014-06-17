@@ -1,7 +1,6 @@
 package com.ford.syncV4.android.service;
 
 import android.app.Service;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -29,6 +28,7 @@ import com.ford.syncV4.android.manager.ApplicationIconManager;
 import com.ford.syncV4.android.manager.LastUsedHashIdsManager;
 import com.ford.syncV4.android.manager.PutFileTransferManager;
 import com.ford.syncV4.android.manager.RPCRequestsResumableManager;
+import com.ford.syncV4.android.manager.RestoreConnectionManager;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
@@ -125,6 +125,7 @@ import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
+import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.ITestConfigCallback;
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
@@ -142,8 +143,9 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ProxyService extends Service implements IProxyListenerALMTesting, ITestConfigCallback {
 
@@ -178,19 +180,31 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      * each {@link com.ford.syncV4.android.manager.PutFileTransferManager} is associated with
      * concrete AppId
      */
-    private Hashtable<String, PutFileTransferManager> mPutFileTransferManagers;
-    private Hashtable<String, ApplicationIconManager> mApplicationIconManagerHashtable =
-            new Hashtable<String, ApplicationIconManager>();
+    private Map<String, PutFileTransferManager> mPutFileTransferManagers;
+    private Map<String, ApplicationIconManager> mApplicationIconManagerHashtable =
+            new ConcurrentHashMap<String, ApplicationIconManager>();
     private ConnectionListenersManager mConnectionListenersManager;
     private final IBinder mBinder = new ProxyServiceBinder(this);
+
+    /**
+     * Semaphore object to wait for the connection to be restored up to
+     * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} notification receive
+     */
+    private final RestoreConnectionManager restoreConnectionToRAI = new RestoreConnectionManager();
+
+    /**
+     * Semaphore object to wait for the connection to be restored up to RPC Service
+     */
+    private final RestoreConnectionManager restoreConnectionToRPCService =
+            new RestoreConnectionManager();
 
     /**
      * Table of the {@link com.ford.syncV4.android.manager.RPCRequestsResumableManager}'s
      * Each manager provide functionality to process RPC requests which are involved in app
      * resumption
      */
-    private Hashtable<String, RPCRequestsResumableManager> mRpcRequestsResumableManager =
-            new Hashtable<String, RPCRequestsResumableManager>();
+    private ConcurrentHashMap<String, RPCRequestsResumableManager> mRpcRequestsResumableManager =
+            new ConcurrentHashMap<String, RPCRequestsResumableManager>();
 
     /**
      * Map of the existed syncProxyTester applications, mobile application Id is a Key
@@ -221,7 +235,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
         //startProxyIfNetworkConnected();
 
-        mPutFileTransferManagers = new Hashtable<String, PutFileTransferManager>();
+        mPutFileTransferManagers = new ConcurrentHashMap<String, PutFileTransferManager>();
 
         MainApp.getInstance().getLastUsedHashIdsManager().init();
     }
@@ -327,6 +341,26 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     /**
+     * @return reference to the {@link com.ford.syncV4.android.manager.RestoreConnectionManager}
+     * when restore connection up to {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} is needed
+     */
+    public RestoreConnectionManager getRestoreConnectionToRAI() {
+        return restoreConnectionToRAI;
+    }
+
+    /**
+     * @return reference to the {@link com.ford.syncV4.android.manager.RestoreConnectionManager}
+     * when restore connection up to RPC service is needed
+     */
+    public RestoreConnectionManager getRestoreConnectionToRPCService() {
+        return restoreConnectionToRPCService;
+    }
+
+    public void closeConnection() {
+        mSyncProxy.closeConnection();
+    }
+
+    /**
      * Prepare all necessary parameters to be passed to Sync proxy
      */
     private void prepareTestConfig() {
@@ -351,6 +385,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 int versionNumber = getCurrentProtocolVersion();
                 String appName = settings.getString(Const.PREFS_KEY_APPNAME,
                         Const.PREFS_DEFAULT_APPNAME);
+                String vrSynonymsString = settings.getString(Const.PREFS_KEY_VR_SYNONYMS, "");
+                Vector<Object> vrSynonyms = null;
+                if (!vrSynonymsString.equals("")) {
+                    vrSynonyms = new Vector<Object>(Arrays.asList(
+                            vrSynonymsString.split(SyncProxyTester.JOIN_STRING)));
+                }
                 Language lang = Language.valueOf(settings.getString(
                         Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
                 Language hmiLang = Language.valueOf(settings.getString(
@@ -398,23 +438,24 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 mTestConfig.setProtocolMinVersion((byte) AppPreferencesManager.getProtocolMinVersion());
                 mTestConfig.setProtocolMaxVersion((byte) AppPreferencesManager.getProtocolMaxVersion());
 
-                Logger.d("Start proxy's instance");
+                Logger.i("Start SYNC Proxy's instance, vrSynonyms:" + vrSynonyms);
                 mSyncProxy = new SyncProxyALM(this,
-                        syncProxyConfigurationResources/*sync proxy configuration resources*/,
-                        /*enable advanced lifecycle management true,*/
+                        syncProxyConfigurationResources /*sync proxy configuration resources*/,
                         appName,
-                        /*ngn media app*/null,
-                        /*vr synonyms*/null,
-                        /*is media app*/isMediaApp, appHMITypes,
+                        null,                           /*ngn media app*/
+                        vrSynonyms,
+                        isMediaApp,                     /*is media app*/
+                        appHMITypes,
                         syncMsgVersion,
-                        /*language desired*/lang,
-                        /*HMI Display Language Desired*/hmiLang,
+                        lang,                           /*language desired*/
+                        hmiLang,                        /*HMI Display Language Desired*/
                         appId,
-                        /*autoActivateID*/null,
-                        /*callbackToUIThre1ad*/ false,
-                        /*preRegister*/ false,
+                        null,                           /*autoActivateID*/
+                        false,                          /*callbackToUIThread*/
+                        false,                          /*preRegister*/
                         versionNumber,
-                        transportConfig, mTestConfig);
+                        transportConfig,
+                        mTestConfig);
             } catch (SyncException e) {
                 Logger.e("SYNC Proxy start error:" + e.toString());
                 //error creating proxy, returned proxy = null
@@ -439,6 +480,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         createInfoMessageForAdapter(" SYNC Proxy started");
 
         return mSyncProxy != null && mSyncProxy.getIsConnected();
+    }
+
+    /**
+     * Updates {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} object, use for the Tests only
+     *
+     * @param registerAppInterface {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} request
+     */
+    public void updateRegisterAppInterface(RegisterAppInterface registerAppInterface) {
+        mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);
     }
 
     private Vector<AppHMIType> createAppTypeVector(boolean naviApp) {
@@ -623,29 +673,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      * @param logAdapter {@link com.ford.syncV4.android.adapters.LogAdapter}
      */
     public void addLogAdapter(LogAdapter logAdapter) {
+        if (logAdapter == null) {
+            return;
+        }
+        if (mLogAdapters.contains(logAdapter)) {
+            return;
+        }
         mLogAdapters.add(logAdapter);
     }
 
     public int getNextCorrelationID() {
         return autoIncCorrId++;
-    }
-
-    /**
-     * Initialize new Session with RPC service only, this is a method for the Test Cases only,
-     * for example: when {@link com.ford.syncV4.proxy.rpc.UnregisterAppInterface} is performed, for
-     * the next Test it is necessary to restore RPC session
-     */
-    public void testInitializeSessionRPCOnly(String appId) {
-        if (mSyncProxy == null) {
-            Logger.e(TAG, "Sync Proxy is null when try to initialize test session");
-            return;
-        }
-
-        TestConfig testConfig = mSyncProxy.getTestConfig();
-        // It is important to set this value back to TRUE when concrete Test Case is complete.
-        testConfig.setDoCallRegisterAppInterface(false);
-
-        mSyncProxy.initializeSession(appId);
     }
 
     @Override
@@ -1309,11 +1347,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         createDebugMessageForAdapter(appId, notification);
     }
 
-    @Override
-    public void onPutFileRequest(String appId, PutFile putFile) {
-        createDebugMessageForAdapter(appId, putFile);
-    }
-
     /**
      * *****************************************
      *  SYNC AppLink Audio Pass Thru Callbacks *
@@ -1558,16 +1591,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onOnSystemRequest(String appId, OnSystemRequest notification) {
-        createDebugMessageForAdapter(appId, notification);
-    }
-
-    @Override
-    public void onRegisterAppRequest(String appId, RegisterAppInterface msg) {
-        createDebugMessageForAdapter(appId, msg);
-    }
-
-    @Override
     public void onAppUnregisteredAfterLanguageChange(String appId, OnLanguageChange msg) {
         String message =
                 String.format("OnAppInterfaceUnregistered (LANGUAGE_CHANGE) from %s to %s",
@@ -1601,7 +1624,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     @Override
     public void onSessionStarted(String appId) {
-        Logger.d(TAG, " Session started AppId:" + appId);
+        Logger.d(TAG, " Session started, appId:" + appId);
+
+        restoreConnectionToRPCService.releaseLock();
+
         mSessionsCounter.add(appId);
         if (mProxyServiceEvent != null) {
             mProxyServiceEvent.onServiceStart(ServiceType.RPC, appId);
@@ -1617,6 +1643,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     public void onStartSession(String appId) {
         createDebugMessageForAdapter(appId, " Session going to start, " +
                 "protocol version: " + syncProxyGetWiProVersion());
+    }
+
+    @Override
+    public void onRPCRequest(String appId, RPCRequest rpcRequest) {
+        createDebugMessageForAdapter(rpcRequest);
+    }
+
+    @Override
+    public void onOnSystemRequest(String appId, OnSystemRequest notification) {
+        createDebugMessageForAdapter(appId, notification);
     }
 
     /**
@@ -1745,8 +1781,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     public void onRegisterAppInterfaceResponse(String appId, RegisterAppInterfaceResponse response) {
         createDebugMessageForAdapter(appId, response);
 
+        restoreConnectionToRAI.releaseLock();
+
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+                    response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
             }
@@ -1763,6 +1802,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     public void onUnregisterAppInterfaceResponse(String appId,
                                                  UnregisterAppInterfaceResponse response) {
         createDebugMessageForAdapter(appId, response);
+
+        ApplicationIconManager applicationIconManager =
+                mApplicationIconManagerHashtable.get(appId);
+        if (applicationIconManager != null) {
+            applicationIconManager.reset();
+        }
 
         if (isModuleTesting()) {
             ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
@@ -1824,7 +1869,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     public void commandListFiles(String appId) {
         try {
             mSyncProxy.listFiles(appId, getNextCorrelationID());
-            createDebugMessageForAdapter(appId, "ListFiles sent");
         } catch (SyncException e) {
             createErrorMessageForAdapter(appId, "ListFiles send error: " + e);
         }
@@ -2117,66 +2161,48 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      */
     public void syncProxyOpenSession(String syncAppId) throws SyncException {
         if (mSyncProxy != null) {
+
+            SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
+            String appName = settings.getString(Const.PREFS_KEY_APPNAME,
+                    Const.PREFS_DEFAULT_APPNAME);
+            boolean isMediaApp = settings.getBoolean(
+                    Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
+            boolean isNaviApp = settings.getBoolean(
+                    Const.PREFS_KEY_ISNAVIAPP, Const.PREFS_DEFAULT_ISNAVIAPP);
+            Language lang = Language.valueOf(settings.getString(
+                    Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
+            Language hmiLang = Language.valueOf(settings.getString(
+                    Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
+            // Apply custom AppId in case of such possibility selected
+            TransportType transportType = AppPreferencesManager.getTransportType();
+            String appId = AppIdManager.getAppIdByTransport(transportType);
+            if (AppPreferencesManager.getIsCustomAppId()) {
+                appId = AppPreferencesManager.getCustomAppId();
+            }
+            Vector<AppHMIType> appHMITypes = createAppTypeVector(isNaviApp);
+
+            RegisterAppInterface registerAppInterface = registerAppInterfaceHashMap.get(syncAppId);
+            Logger.d(TAG + " Open Session, appId:" + syncAppId + " RAI:" + registerAppInterface);
+            if (registerAppInterface == null) {
+                registerAppInterface = RPCRequestFactory.buildRegisterAppInterface();
+                registerAppInterfaceHashMap.put(syncAppId, registerAppInterface);
+            }
+            registerAppInterface.setAppName(appName);
+            registerAppInterface.setLanguageDesired(lang);
+            registerAppInterface.setHmiDisplayLanguageDesired(hmiLang);
+            registerAppInterface.setAppId(appId);
+            registerAppInterface.setIsMediaApplication(isMediaApp);
+            registerAppInterface.setAppType(appHMITypes);
+
+            SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
+            syncMsgVersion.setMajorVersion(2);
+            syncMsgVersion.setMinorVersion(2);
+            registerAppInterface.setSyncMsgVersion(syncMsgVersion);
+
+            mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);
+
             if (mSyncProxy.getIsConnected()) {
-
-                SharedPreferences settings = getSharedPreferences(Const.PREFS_NAME, 0);
-                String appName = settings.getString(Const.PREFS_KEY_APPNAME,
-                        Const.PREFS_DEFAULT_APPNAME);
-                boolean isMediaApp = settings.getBoolean(
-                        Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
-                boolean isNaviApp = settings.getBoolean(
-                        Const.PREFS_KEY_ISNAVIAPP, Const.PREFS_DEFAULT_ISNAVIAPP);
-                Language lang = Language.valueOf(settings.getString(
-                        Const.PREFS_KEY_LANG, Const.PREFS_DEFAULT_LANG));
-                Language hmiLang = Language.valueOf(settings.getString(
-                        Const.PREFS_KEY_HMILANG, Const.PREFS_DEFAULT_HMILANG));
-                // Apply custom AppId in case of such possibility selected
-                TransportType transportType = AppPreferencesManager.getTransportType();
-                String appId = AppIdManager.getAppIdByTransport(transportType);
-                if (AppPreferencesManager.getIsCustomAppId()) {
-                    appId = AppPreferencesManager.getCustomAppId();
-                }
-                Vector<AppHMIType> appHMITypes = createAppTypeVector(isNaviApp);
-
-                RegisterAppInterface registerAppInterface = registerAppInterfaceHashMap.get(syncAppId);
-                Logger.d(TAG + " Open Session, appId:" + syncAppId + " RAI:" + registerAppInterface);
-                if (registerAppInterface == null) {
-
-                    registerAppInterface = RPCRequestFactory.buildRegisterAppInterface();
-                    registerAppInterface.setAppName(appName);
-                    registerAppInterface.setLanguageDesired(lang);
-                    registerAppInterface.setHmiDisplayLanguageDesired(hmiLang);
-                    registerAppInterface.setAppId(appId);
-                    registerAppInterface.setIsMediaApplication(isMediaApp);
-                    registerAppInterface.setAppType(appHMITypes);
-
-                    SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
-                    syncMsgVersion.setMajorVersion(2);
-                    syncMsgVersion.setMinorVersion(2);
-                    registerAppInterface.setSyncMsgVersion(syncMsgVersion);
-
-                    registerAppInterfaceHashMap.put(syncAppId, registerAppInterface);
-
-                    mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);
-                    mSyncProxy.initializeSession(syncAppId);
-                } else {
-
-                    registerAppInterface.setAppName(appName);
-                    registerAppInterface.setLanguageDesired(lang);
-                    registerAppInterface.setHmiDisplayLanguageDesired(hmiLang);
-                    registerAppInterface.setAppId(appId);
-                    registerAppInterface.setIsMediaApplication(isMediaApp);
-                    registerAppInterface.setAppType(appHMITypes);
-                    mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);
-                }
-
-                // TODO : Implement when reconnect
-                /*for (String key : registerAppInterfaceHashMap.keySet()) {
-                    registerAppInterface = registerAppInterfaceHashMap.get(key);
-                    mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);
-                    mSyncProxy.openSession();
-                }*/
-
+                mSyncProxy.initializeSession(syncAppId);
             } else {
                 mSyncProxy.initializeProxy();
             }
@@ -2251,7 +2277,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             if (request.getFunctionName().equals(Names.RegisterAppInterface)) {
                 sendRegisterRequest((RegisterAppInterface) request, jsonRPCMarshaller, sendAsItIs);
             } else {
-                createDebugMessageForAdapter(appId, request);
                 mSyncProxy.sendRPCRequest(appId, request, jsonRPCMarshaller);
             }
         } catch (SyncException e) {
@@ -2272,7 +2297,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             return;
         }
         try {
-            createDebugMessageForAdapter(request);
             mSyncProxy.sendRPCRequest(appId, request);
         } catch (SyncException e) {
             createErrorMessageForAdapter("RPC request '" + request.getFunctionName() + "'" +
@@ -2601,19 +2625,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                     diagnosticMessageResponse.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
-            }
-        }
-    }
-
-    /**
-     * Test Section
-     */
-
-    @Override
-    public void onRPCServiceComplete() {
-        if (isModuleTesting() && !mTestConfig.isDoCallRegisterAppInterface()) {
-            synchronized (mModuleTest.getTestActionThreadContext()) {
-                mModuleTest.getTestActionThreadContext().notify();
             }
         }
     }

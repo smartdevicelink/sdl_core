@@ -66,10 +66,10 @@ Connection::~Connection() {
   delete heart_beat_monitor_thread_;
 }
 
-int32_t Connection::AddNewSession() {
+uint32_t Connection::AddNewSession() {
   sync_primitives::AutoLock lock(session_map_lock_);
 
-  int32_t result = -1;
+  int32_t result = 0;
 
   const uint8_t max_connections = 255;
   int32_t size = session_map_.size();
@@ -90,9 +90,9 @@ int32_t Connection::AddNewSession() {
   return result;
 }
 
-int32_t Connection::RemoveSession(uint8_t session) {
+uint32_t Connection::RemoveSession(uint8_t session) {
   sync_primitives::AutoLock lock(session_map_lock_);
-  int32_t result = -1;
+  uint32_t result = 0;
   SessionMapIterator it = session_map_.find(session);
   if (session_map_.end() == it) {
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");

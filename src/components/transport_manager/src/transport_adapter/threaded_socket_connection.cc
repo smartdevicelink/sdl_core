@@ -209,8 +209,6 @@ void ThreadedSocketConnection::Thread() {
 
 void ThreadedSocketConnection::Transmit() {
   LOG4CXX_TRACE_ENTER(logger_);
-  bool pipe_notified = false;
-  bool pipe_terminated = false;
 
   const nfds_t poll_fds_size = 2;
   pollfd poll_fds[poll_fds_size];
@@ -272,7 +270,7 @@ void ThreadedSocketConnection::Transmit() {
   }
 
   // receive data
-  if (0 != poll_fds[0].revents & (POLLIN | POLLPRI)) {
+  if ((0 != poll_fds[0].revents) & (POLLIN | POLLPRI)) {
     const bool receive_ok = Receive();
     if (!receive_ok) {
       LOG4CXX_INFO(logger_, "Receive() failed  (#" << pthread_self() << ")");
@@ -325,7 +323,6 @@ bool ThreadedSocketConnection::Send() {
   std::swap(frames_to_send, frames_to_send_);
   pthread_mutex_unlock(&frames_to_send_mutex_);
 
-  bool frame_sent = false;
   size_t offset = 0;
   while (!frames_to_send.empty()) {
     LOG4CXX_INFO(logger_, "frames_to_send is not empty" << pthread_self() << ")");

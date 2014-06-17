@@ -57,9 +57,9 @@ MessageType MessageTypeFromRpcType(protocol_handler::RpcType rpc_type) {
 
 Message::Message(protocol_handler::MessagePriority priority)
     : function_id_(0),
+      correlation_id_(0),
       type_(kUnknownType),
       priority_(priority),
-      correlation_id_(0),
       connection_key_(0),
       binary_data_(NULL),
       version_(kUnknownProtocol) {

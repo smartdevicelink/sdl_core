@@ -67,29 +67,26 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     is_vr_session_strated_(false),
     hmi_cooperating_(false),
     is_all_apps_allowed_(true),
+    media_manager_(media_manager::MediaManagerImpl::instance()),
     hmi_handler_(NULL),
     connection_handler_(NULL),
-    policy_manager_(NULL),
+    policy_manager_(policy::PolicyHandler::instance()->LoadPolicyLibrary()),
+    protocol_handler_(NULL),
+    request_ctrl_(),
     hmi_so_factory_(NULL),
     mobile_so_factory_(NULL),
-    protocol_handler_(NULL),
     messages_from_mobile_("application_manager::FromMobileThreadImpl", this),
     messages_to_mobile_("application_manager::ToMobileThreadImpl", this),
     messages_from_hmi_("application_manager::FromHMHThreadImpl", this),
     messages_to_hmi_("application_manager::ToHMHThreadImpl", this),
-    request_ctrl_(),
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF),
-    media_manager_(NULL),
-    resume_ctrl_(this)
+    resume_ctrl_(this),
 #ifdef TIME_TESTER
-    , metric_observer_(NULL)
+    metric_observer_(NULL),
 #endif  // TIME_TESTER
+    application_list_update_timer_(new ApplicationListUpdateTimer(this))
 {
-  LOG4CXX_INFO(logger_, "Creating ApplicationManager");
-  media_manager_ = media_manager::MediaManagerImpl::instance();
-  application_list_update_timer_ = new ApplicationListUpdateTimer(this);
-  CreatePoliciesManager();
 }
 
 bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
@@ -150,7 +147,7 @@ bool ApplicationManagerImpl::Stop() {
   return true;
 }
 
-ApplicationSharedPtr ApplicationManagerImpl::application(int32_t app_id) const {
+ApplicationSharedPtr ApplicationManagerImpl::application(uint32_t app_id) const {
   sync_primitives::AutoLock lock(applications_list_lock_);
 
   std::set<ApplicationSharedPtr>::const_iterator it =
@@ -164,7 +161,7 @@ ApplicationSharedPtr ApplicationManagerImpl::application(int32_t app_id) const {
 }
 
 ApplicationSharedPtr ApplicationManagerImpl::application_by_hmi_app(
-  int32_t hmi_app_id) const {
+  uint32_t hmi_app_id) const {
   sync_primitives::AutoLock lock(applications_list_lock_);
 
   std::set<ApplicationSharedPtr>::const_iterator it =
@@ -450,7 +447,6 @@ mobile_apis::HMILevel::eType ApplicationManagerImpl::PutApplicationInLimited(
   ApplicationSharedPtr app) {
   DCHECK(app.get())
 
-  bool is_new_app_media = app->is_media_application();
   mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_LIMITED;
 
   for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
@@ -1106,7 +1102,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
   // checked against policy permissions
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
     request_ctrl_.terminateRequest(
-      msg_to_mobile[strings::params][strings::correlation_id].asUInt());
+      msg_to_mobile[strings::params][strings::correlation_id].asInt());
   } else if (app && !profile::Profile::instance()->policy_turn_off()) {
     // TODO(AOleynik): Remove check of policy_turn_off, when this flag will be
     // unused in config file
@@ -1161,7 +1157,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   uint32_t connection_key =
     (*message)[strings::params][strings::connection_key].asUInt();
 
-  uint32_t protocol_type =
+  int32_t protocol_type =
     (*message)[strings::params][strings::protocol_type].asUInt();
 
   ApplicationSharedPtr app;
@@ -1347,9 +1343,8 @@ bool ApplicationManagerImpl::ManageHMICommand(
 void ApplicationManagerImpl::CreateHMIMatrix(HMIMatrix* matrix) {
 }
 
-void ApplicationManagerImpl::CreatePoliciesManager() {
-  LOG4CXX_INFO(logger_, "CreatePoliciesManager");
-  policy_manager_ = policy::PolicyHandler::instance()->LoadPolicyLibrary();
+void ApplicationManagerImpl::Init() {
+  LOG4CXX_TRACE(logger_, "Init application manager");
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
     policy::PolicyHandler::instance()->InitPolicyTable();
@@ -1754,14 +1749,20 @@ void ApplicationManagerImpl::SetUnregisterAllApplicationsReason(
 }
 
 void ApplicationManagerImpl::HeadUnitReset(
-  mobile_api::AppInterfaceUnregisteredReason::eType reason) {
+    mobile_api::AppInterfaceUnregisteredReason::eType reason) {
   switch (reason) {
-    case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET:
+    case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET: {
       policy::PolicyHandler::instance()->ResetPolicyTable();
       break;
-    case mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS:
+    }
+    case mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS: {
       policy::PolicyHandler::instance()->ClearUserConsent();
       break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Bad AppInterfaceUnregisteredReason");
+      return;
+    }
   }
 }
 
@@ -1812,6 +1813,7 @@ void ApplicationManagerImpl::SendOnSDLClose() {
     return;
   }
 
+  delete msg;
   hmi_handler_->SendMessageToHMI(message_to_send);
 }
 
@@ -1846,12 +1848,18 @@ void ApplicationManagerImpl::UnregisterApplication(
                "ApplicationManagerImpl::UnregisterApplication " << app_id);
 
   switch (reason) {
-    case mobile_apis::Result::DISALLOWED:
-    case mobile_apis::Result::USER_DISALLOWED:
-    case mobile_apis::Result::INVALID_CERT:
-    case mobile_apis::Result::EXPIRED_CERT:
+    case mobile_apis::Result::SUCCESS:break;
+    case mobile_apis::Result::DISALLOWED: break;
+    case mobile_apis::Result::USER_DISALLOWED:break;
+    case mobile_apis::Result::INVALID_CERT: break;
+    case mobile_apis::Result::EXPIRED_CERT: break;
     case mobile_apis::Result::TOO_MANY_PENDING_REQUESTS: {
       application(app_id)->usage_report().RecordRemovalsForBadBehavior();
+      break;
+    }
+
+    default: {
+      LOG4CXX_ERROR(logger_, "Unknown unrregister reason");
       break;
     }
   }
@@ -2102,13 +2110,13 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
 }
 
 uint32_t ApplicationManagerImpl::GetAvailableSpaceForApp(
-  const std::string& app_name) {
+  const std::string& folder_name) {
   const uint32_t app_quota = profile::Profile::instance()->app_dir_quota();
   std::string app_storage_path =
     profile::Profile::instance()->app_storage_folder();
 
   app_storage_path += "/";
-  app_storage_path += app_name;
+  app_storage_path += folder_name;
 
   if (file_system::DirectoryExists(app_storage_path)) {
     uint32_t size_of_directory = file_system::DirectorySize(app_storage_path);

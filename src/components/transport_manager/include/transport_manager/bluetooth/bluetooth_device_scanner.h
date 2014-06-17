@@ -153,8 +153,8 @@ class BluetoothDeviceScanner : public DeviceScanner {
   pthread_t thread_;
   bool thread_started_;
   bool shutdown_requested_;
-  bool device_scan_requested_;
   bool ready_;
+  bool device_scan_requested_;
   sync_primitives::Lock device_scan_requested_lock_;
   sync_primitives::ConditionalVariable device_scan_requested_cv_;
 
