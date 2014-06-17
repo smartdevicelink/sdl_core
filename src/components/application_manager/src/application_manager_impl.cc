@@ -1162,13 +1162,8 @@ bool ApplicationManagerImpl::ManageMobileCommand(
   uint32_t connection_key = (*message)[strings::params][strings::connection_key]
       .asUInt();
 
-<<<<<<< HEAD
-  uint32_t protocol_type = (*message)[strings::params][strings::protocol_type]
-      .asUInt();
-=======
   int32_t protocol_type =
     (*message)[strings::params][strings::protocol_type].asUInt();
->>>>>>> 729f6e6f090ce54c801d63299d20ebc68da4c96d
 
   ApplicationSharedPtr app;
 

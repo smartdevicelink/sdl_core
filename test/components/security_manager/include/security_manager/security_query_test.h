@@ -63,7 +63,7 @@ namespace security_manager_test {
 
       invalide_header = SecurityQuery::QueryHeader(
             SecurityQuery::INVALID_QUERY_TYPE,
-            SecurityQuery::INVALID_QUERY_ID, 0);
+            SecurityQuery::INVALID_QUERY_ID, 0u);
     }
     /*
     * Wrapper for fast call SecurityQuery::ParseQuery
@@ -106,7 +106,6 @@ namespace security_manager_test {
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, new_header, invalide_header);
   }
   /*
-  /*
    * Security QueryHeader shall construct with correct fields
    */
   TEST_F(SecurityQueryTest, QueryHeaderConstructor2) {
@@ -120,8 +119,8 @@ namespace security_manager_test {
   TEST_F(SecurityQueryTest, QueryConstructor) {
     SecurityQuery query;
 
-    ASSERT_EQ(query.get_connection_key(), 0);
-    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_connection_key(), 0u);
+    ASSERT_EQ(query.get_data_size(), 0u);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     ASSERT_TRUE(query.get_json_message().empty());
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_header);
@@ -133,7 +132,7 @@ namespace security_manager_test {
     SecurityQuery query(init_header, connection_key);
 
     ASSERT_EQ(query.get_connection_key(), connection_key);
-    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data_size(), 0u);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     ASSERT_TRUE(query.get_json_message().empty());
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), init_header);
@@ -157,7 +156,7 @@ namespace security_manager_test {
     ASSERT_EQ(query.get_connection_key(), connection_key);
     ASSERT_EQ(query.get_data_size(), raw_data_size);
     ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
-    for (int i = 0; i < raw_data_size; ++i) {
+    for (size_t i = 0; i < raw_data_size; ++i) {
       ASSERT_EQ(query.get_data()[i], raw_data[i]);
       }
     ASSERT_EQ(query.get_json_message(), str);
@@ -168,12 +167,12 @@ namespace security_manager_test {
    */
   TEST_F(SecurityQueryTest, Parse_NullData) {
     SecurityQuery query;
-    const bool result_parse = query.ParseQuery(NULL, 0);
+    const bool result_parse = query.ParseQuery(NULL, 0u);
 
     ASSERT_FALSE(result_parse);
     //check side-effects
-    ASSERT_EQ(query.get_connection_key(), 0);
-    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_connection_key(), 0u);
+    ASSERT_EQ(query.get_data_size(), 0u);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     ASSERT_TRUE(query.get_json_message().empty());
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_header);
@@ -182,15 +181,15 @@ namespace security_manager_test {
    * Security QueryHeader Parse few (less header size) data
    */
   TEST_F(SecurityQueryTest, Parse_LessHeaderData) {
-    std::vector<uint8_t> vector(header_size - 1, 0);
+    std::vector<uint8_t> vector(header_size - 1, 0 );
 
     SecurityQuery query;
     const bool result_parse = query.ParseQuery(&vector[0], vector.size());
 
     ASSERT_FALSE(result_parse);
     //check side-effects
-    ASSERT_EQ(query.get_connection_key(), 0);
-    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_connection_key(), 0u);
+    ASSERT_EQ(query.get_data_size(), 0u);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     ASSERT_TRUE(query.get_json_message().empty());
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_header);
@@ -201,12 +200,12 @@ namespace security_manager_test {
   TEST_F(SecurityQueryTest, Parse_HeaderData) {
     SecurityQuery query;
     const bool result_parse =
-        ParseQuery(query, init_header, NULL, 0);
+        ParseQuery(query, init_header, NULL, 0u);
 
     ASSERT_TRUE(result_parse);
     //check side-effects
-    ASSERT_EQ(query.get_connection_key(), 0);
-    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_connection_key(), 0u);
+    ASSERT_EQ(query.get_data_size(), 0u);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     ASSERT_TRUE(query.get_json_message().empty());
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), init_header);
@@ -220,12 +219,12 @@ namespace security_manager_test {
     SecurityQuery query;
 
     const bool result_parse =
-        ParseQuery(query, init_header, NULL, 0);
+        ParseQuery(query, init_header, NULL, 0u);
 
     ASSERT_FALSE(result_parse);
     //check side-effects
-    ASSERT_EQ(query.get_connection_key(), 0);
-    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_connection_key(), 0u);
+    ASSERT_EQ(query.get_data_size(), 0u);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     ASSERT_TRUE(query.get_json_message().empty());
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), init_header);
@@ -251,11 +250,11 @@ namespace security_manager_test {
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_query_header);
     ASSERT_EQ(query.get_data_size(), raw_data_size);
     ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
-    for (int i = 0; i < raw_data_size; ++i) {
+    for (size_t i = 0; i < raw_data_size; ++i) {
       ASSERT_EQ(query.get_data()[i], raw_data[+ i]);
       }
     //check side-effects
-    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_connection_key(), 0u);
     ASSERT_TRUE(query.get_json_message().empty());
   }
   /*
@@ -270,16 +269,16 @@ namespace security_manager_test {
 
     SecurityQuery query;
     const bool result_parse =
-        ParseQuery(query, invalide_type_id_header, NULL, 0);
+        ParseQuery(query, invalide_type_id_header, NULL, 0u);
     ASSERT_TRUE(result_parse);
     //Parse set all unknow types and ids to INVALID_QUERY_ID
     invalide_type_id_header.query_type = SecurityQuery::INVALID_QUERY_TYPE;
     invalide_type_id_header.query_id = SecurityQuery::INVALID_QUERY_ID;
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_type_id_header);
     //check side-effects
-    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data_size(), 0u);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
-    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_connection_key(), 0u);
     ASSERT_TRUE(query.get_json_message().empty());
   }
   /*
@@ -294,15 +293,15 @@ namespace security_manager_test {
 
     SecurityQuery query;
     const bool result_parse =
-        ParseQuery(query, invalide_id_header, NULL, 0);
+        ParseQuery(query, invalide_id_header, NULL, 0u);
     ASSERT_TRUE(result_parse);
     //Parse set all unknow types and ids to INVALID_QUERY_ID
     invalide_id_header.query_id = SecurityQuery::INVALID_QUERY_ID;
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalide_id_header);
     //check side-effects
-    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data_size(), 0u);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
-    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_connection_key(), 0u);
     ASSERT_TRUE(query.get_json_message().empty());
   }
   /*
@@ -325,11 +324,11 @@ namespace security_manager_test {
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), handshake_header);
     ASSERT_EQ(query.get_data_size(), raw_data_size);
     ASSERT_NE(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
-    for (int i = 0; i < raw_data_size; ++i) {
+    for (size_t i = 0; i < raw_data_size; ++i) {
       ASSERT_EQ(query.get_data()[i], raw_data[+ i]);
       }
     //check side-effects
-    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_connection_key(), 0u);
     ASSERT_TRUE(query.get_json_message().empty());
   }
   /*
@@ -351,9 +350,9 @@ namespace security_manager_test {
     ASSERT_TRUE(result_parse);
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), internal_error_header);
     //check side-effects
-    ASSERT_EQ(query.get_data_size(), 0);
+    ASSERT_EQ(query.get_data_size(), 0u);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
-    ASSERT_EQ(query.get_connection_key(), 0);
+    ASSERT_EQ(query.get_connection_key(), 0u);
     ASSERT_EQ(query.get_json_message(), error_str);
   }
 } // security_manager_test

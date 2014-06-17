@@ -147,6 +147,7 @@ bool CryptoManagerImpl::Init(Mode mode,
     }
   }
 
+  // TODO(EZamakhov): add loading SSL_VERIFY_FAIL_IF_NO_PEER_CERT from INI
   const int verify_mode = verify_peer ? SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT : SSL_VERIFY_NONE;
   SSL_CTX_set_verify(context_, verify_mode, NULL);
 
@@ -175,7 +176,6 @@ SSLContext * CryptoManagerImpl::CreateSSLContext() {
   } else {
     SSL_set_connect_state(conn);
   }
-  // TODO(EZamakhov): add return NULL pointer on no keys
   return new SSLContextImpl(conn, mode_);
 }
 
@@ -187,7 +187,6 @@ std::string CryptoManagerImpl::LastError() const {
   if(!context_) {
     return std::string("Initialization is not completed");
   }
-  // TODO (DChmerev): add error on no key files
   const unsigned long error = ERR_get_error();
   const char * reason = ERR_reason_error_string(error);
   return std::string(reason ? reason : "");

@@ -98,37 +98,39 @@ TEST_F(MediaManagerTest, AddAndPlayStream) {
 
   device = device_two;
 
+  const __useconds_t sleeptime = 1 * date_time::DateTime::MICROSECONDS_IN_MILLISECONDS;
+
   mediaManager->PlayA2DPSource(1);
   // mediaManager->playA2DPSource(1);
   LOG4CXX_INFO(logger_, ".Playing stream");
   //LOG4CXX_TRACE(logger, );
   //while (true) {
-    usleep(10000000);
+    usleep(sleeptime);
    // LOG4CXX_TRACE(logger, ".");
   //}
 
-  usleep(10000000);
+  usleep(sleeptime);
 
   mediaManager->StopA2DPSource(1);
 
-  usleep(10000000);
+  usleep(sleeptime);
 
   mediaManager->PlayA2DPSource(1);
   // mediaManager->playA2DPSource(1);
 
-  usleep(10000000);
+  usleep(sleeptime);
 
   mediaManager->StopA2DPSource(1);
 
-  usleep(10000000);
+  usleep(sleeptime);
 
   mediaManager->PlayA2DPSource(1);
 
-  usleep(10000000);
+  usleep(sleeptime);
 
   mediaManager->StopA2DPSource(1);
 
-  usleep(10000000);
+  usleep(sleeptime);
 
   mediaManager->StopA2DPSource(1);
 }

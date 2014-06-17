@@ -236,7 +236,7 @@ void ConnectionHandlerImpl::RemoveConnection(
   OnConnectionEnded(connection_handle);
 }
 
-int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
+uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const transport_manager::ConnectionUID& connection_handle,
     const uint8_t session_id, const protocol_handler::ServiceType& service_type,
     const bool is_protected) {
@@ -246,7 +246,7 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
-    return -1;
+    return 0;
   }
 #ifdef ENABLE_SECURITY
   if (is_protected) {
@@ -258,7 +258,7 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
         protectedSpecific.end()) {
       LOG4CXX_ERROR(logger_, "Service " << static_cast<int>(service_type)
                     << " is forbidden to be protected");
-      return -1;
+      return 0;
     }
   } else {
     // Check deliver-specific services (which shall be protected)
@@ -269,32 +269,32 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
         protectedSpecific.end()) {
       LOG4CXX_ERROR(logger_, "Service " << static_cast<int>(service_type)
                     << " shall be protected");
-      return -1;
+      return 0;
     }
   }
 #endif //  ENABLE_SECURITY
 
-  int32_t new_session_id = -1;
+  uint32_t new_session_id = 0;
 
   Connection* connection = it->second;
   if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
     new_session_id = connection->AddNewSession();
-    if (0 > new_session_id) {
+    if (0 == new_session_id) {
       LOG4CXX_ERROR(logger_, "Not possible to start session!");
-      return -1;
+      return 0;
     }
   } else {
     if (!connection->AddNewService(session_id, service_type, is_protected)) {
       LOG4CXX_ERROR(logger_, "Not possible to establish "
                     << (is_protected ? "prootected" : "nonprotected")
                     << " service " << static_cast<int>(service_type) << "!");
-      return -1;
+      return 0;
     }
     new_session_id = session_id;
   }
 
   if (connection_handler_observer_) {
-    int32_t session_key = KeyFromPair(connection_handle, new_session_id);
+    const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
 
     const bool success = connection_handler_observer_->OnServiceStartedCallback(
         connection->connection_device_handle(), session_key, service_type);
@@ -305,7 +305,7 @@ int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
       } else {
         connection->RemoveService(session_id, service_type);
       }
-      new_session_id = -1;
+      new_session_id = 0;
     }
   }
   return new_session_id;
@@ -317,32 +317,34 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     const protocol_handler::ServiceType& service_type) {
   LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
 
-  int32_t result = 0;
+  // null is wrong session id
+  uint32_t result = 0;
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
     return result;
   }
+  Connection* connection = it->second;
 
   if (protocol_handler::kRpc == service_type) {
     LOG4CXX_INFO(logger_, "Session to be removed");
 
-    result = (it->second)->RemoveSession(sessionId);
+    result = connection->RemoveSession(sessionId);
     if (0 > result) {
       LOG4CXX_ERROR(logger_, "Not possible to remove session!");
       return result;
     }
   } else {
-    if (!(it->second)->RemoveService(sessionId, service_type)) {
+    if (!connection->RemoveService(sessionId, service_type)) {
       LOG4CXX_ERROR(logger_, "Not possible to remove service!");
       return result;
     }
     result = sessionId;
   }
 
-  if (0 != connection_handler_observer_) {
-    int32_t session_key = KeyFromPair(connection_handle, sessionId);
+  if (connection_handler_observer_) {
+    const uint32_t session_key = KeyFromPair(connection_handle, sessionId);
     connection_handler_observer_->OnServiceEndedCallback(session_key,
                                                          service_type);
     result = session_key;
@@ -353,11 +355,11 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
 
 uint32_t ConnectionHandlerImpl::KeyFromPair(
     transport_manager::ConnectionUID connection_handle, uint8_t sessionId) {
-  int32_t key = connection_handle | (sessionId << 16);
+  const uint32_t key = connection_handle | (sessionId << 16);
   LOG4CXX_TRACE(logger_, "Key for ConnectionHandle:"
-                << static_cast<int32_t>(connection_handle)
-                << " Session:" << static_cast<int32_t>(sessionId)
-                << " is: " << static_cast<int32_t>(key));
+                << static_cast<uint32_t>(connection_handle)
+                << " Session:" << static_cast<uint32_t>(sessionId)
+                << " is: " << static_cast<uint32_t>(key));
   return key;
 }
 
@@ -398,7 +400,7 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
   }
 
   if (0 == session_id) {
-    LOG4CXX_INFO(
+    LOG4CXX_WARN(
         logger_,
         "No sessions in connection " << static_cast<int32_t>(conn_handle));
     if (app_id) {
@@ -640,9 +642,8 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
   sync_primitives::AutoLock connection_list_lock(connection_list_lock_);
    ConnectionListIterator itr = connection_list_.find(connection_id);
 
-  //TODO(EZamakhov): fix connection_handler_observer_ check to DCHECK
   if (connection_list_.end() != itr) {
-    if (0 != connection_handler_observer_) {
+    if (connection_handler_observer_) {
       SessionMap session_map = itr->second->session_map();
       SessionMapIterator session_it = session_map.find(session_id);
       if (session_it != session_map.end()) {
@@ -711,15 +712,14 @@ void ConnectionHandlerImpl::OnConnectionEnded(
     return;
   }
 
-  if (0 != connection_handler_observer_) {
+  if (connection_handler_observer_) {
     const Connection* connection = itr->second;
     const SessionMap session_map = connection->session_map();
 
     for (SessionMapConstIterator session_it = session_map.begin(), end =
         session_map.end(); session_it != end; ++session_it) {
-      uint32_t session_key = KeyFromPair(connection_id, session_it->first);
+      const uint32_t session_key = KeyFromPair(connection_id, session_it->first);
       const ServiceList& service_list = session_it->second.service_list;
-
       for (ServiceListConstIterator service_it = service_list.begin(), end =
           service_list.end(); service_it != end; ++service_it) {
         connection_handler_observer_->OnServiceEndedCallback(

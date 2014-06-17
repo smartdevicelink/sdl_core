@@ -54,7 +54,7 @@ namespace security_manager_test {
                    const uint32_t& key,
                    const protocol_handler::ServiceType& service_type));
     MOCK_METHOD4(OnSessionStartedCallback,
-                 int32_t(
+                 uint32_t(
                    const transport_manager::ConnectionUID& connection_handle,
                    const uint8_t session_id,
                    const protocol_handler::ServiceType& service_type,

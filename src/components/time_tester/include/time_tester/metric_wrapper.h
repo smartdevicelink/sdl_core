@@ -48,7 +48,7 @@ class MetricWrapper {
      */
     bool grabResources();
     virtual std::string GetStyledString();
-    ~MetricWrapper();
+    virtual ~MetricWrapper();
   protected:
     virtual Json::Value GetJsonMetric();
     void Clear();

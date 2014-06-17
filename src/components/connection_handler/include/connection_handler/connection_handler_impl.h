@@ -167,12 +167,11 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param service_type Type of service
    * \param is_protected would be service protected
    * \param protocol_version Version of protocol
-   * \return int32_t Id (number) of new session if successful otherwise -1.
+   * \return int32_t Id (number) of new session if successful otherwise 0.
    */
-  virtual int32_t OnSessionStartedCallback(
+  virtual uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
       const uint8_t session_id,
-<<<<<<< HEAD
       const protocol_handler::ServiceType& service_type,
       const bool is_protected);
 
@@ -183,23 +182,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param sessionId Identifier of the session to be ended
    * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
    * If not equal to hash assigned to session on start then operation fails.
-   * \return int32_t -1 if operation fails session key otherwise
+   * \return int32_t 0 if operation fails session key otherwise
    */
   virtual uint32_t OnSessionEndedCallback(
-=======
-      const protocol_handler::ServiceType& service_type);
-
-    /**
-     * \brief Callback function used by ProtocolHandler
-     * when Mobile Application initiates session ending.
-     * \param connection_handle Connection identifier within which session exists
-     * \param sessionId Identifier of the session to be ended
-     * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
-     * If not equal to hash assigned to session on start then operation fails.
-     * \return int32_t 0 if operation fails session key otherwise
-     */
-    virtual uint32_t OnSessionEndedCallback(
->>>>>>> 729f6e6f090ce54c801d63299d20ebc68da4c96d
       const transport_manager::ConnectionUID& connection_handle,
       const uint8_t session_id, const uint32_t& hashCode,
       const protocol_handler::ServiceType& service_type);

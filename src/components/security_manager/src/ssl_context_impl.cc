@@ -57,7 +57,6 @@ std::string CryptoManagerImpl::SSLContextImpl::LastError() const {
   if(!IsInitCompleted()) {
     return std::string("Initialization is not completed");
   }
-  // TODO (DChmerev): add error on no key files
   const unsigned long error = ERR_get_error();
   const char * reason = ERR_reason_error_string(error);
   return std::string(reason ? reason : "");
@@ -245,8 +244,10 @@ CryptoManagerImpl::SSLContextImpl::~SSLContextImpl() {
 void CryptoManagerImpl::SSLContextImpl::EnsureBufferSizeEnough(size_t size) {
   if (buffer_size_ < size) {
     delete[] buffer_;
-    buffer_ = new uint8_t[size];
-    buffer_size_ = size;
+    buffer_ = new (std::nothrow) uint8_t[size];
+    if(buffer_) {
+      buffer_size_ = size;
+    }
   }
 }
 

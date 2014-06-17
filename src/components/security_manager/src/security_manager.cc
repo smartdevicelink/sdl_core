@@ -188,16 +188,24 @@ void SecurityManager::StartHandshake(uint32_t connection_key) {
     return;
   }
 
-  if (!ssl_context->IsInitCompleted()) {
-    size_t data_size;
-    const uint8_t *data;
-    security_manager::SSLContext::HandshakeResult result =
-        ssl_context->StartHandshake(&data, &data_size);
-    //TODO(EZamakhov): fix DCHECK
-    DCHECK(result == security_manager::SSLContext::Handshake_Result_Success);
-    SendHandshakeBinData(connection_key, data, data_size);
-  } else {
+  if (ssl_context->IsInitCompleted()) {
     NotifyListenersOnHandshakeDone(connection_key, true);
+    return;
+  }
+  size_t data_size = 0;
+  const uint8_t *data = NULL;
+  const security_manager::SSLContext::HandshakeResult result =
+      ssl_context->StartHandshake(&data, &data_size);
+  if(security_manager::SSLContext::Handshake_Result_Success != result) {
+    const std::string error_text("StartHandshake failed, handshake step fail");
+    LOG4CXX_ERROR(logger_, error_text);
+    SendInternalError(connection_key, SecurityQuery::ERROR_INTERNAL, error_text);
+    NotifyListenersOnHandshakeDone(connection_key, false);
+    return;
+  }
+  //for client mode will be generated output data
+  if(data != NULL && data_size != 0) {
+    SendHandshakeBinData(connection_key, data, data_size);
   }
 }
 void SecurityManager::AddListener(SecurityManagerListener * const listener) {
@@ -338,7 +346,7 @@ void SecurityManager::SendData(
     const uint32_t connection_key,
     SecurityQuery::QueryHeader header,
     const uint8_t * const data, const size_t data_size) {
-  // FIXME(EZ): move to SecurityQuery class
+  // FIXME(EZamakhov): move to SecurityQuery class
   const uint32_t tmp = header.query_id << 8;
   header.query_id  = LE_TO_BE32(tmp);
   header.json_size = LE_TO_BE32(header.json_size);
@@ -346,7 +354,7 @@ void SecurityManager::SendData(
   const size_t header_size = sizeof(header);
   std::vector<uint8_t> data_sending(header_size + data_size);
   memcpy(&data_sending[0], &header, header_size);
-  // TODO(EZamakhov): Fix invalid read (by Valgrind)
+  // FIXME(EZamakhov): Fix invalid read (by Valgrind)
   memcpy(&data_sending[header_size], data, data_size);
 
   SendBinaryData(connection_key, &data_sending[0], data_sending.size());

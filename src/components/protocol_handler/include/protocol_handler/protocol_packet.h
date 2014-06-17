@@ -408,7 +408,7 @@ class ProtocolPacket {
   /**
    *\brief Setter for size of multiframe message
    */
-  void set_total_data_bytes(uint32_t dataBytes);
+  void set_total_data_bytes(size_t dataBytes);
 
   /**
    *\brief Setter for new data

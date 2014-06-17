@@ -549,6 +549,10 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
                    ConvertPacketDataToString(packet->data(), packet->data_size()) <<
                    " of size: " << packet->data_size());
   const RawMessagePtr message_to_send = packet->serializePacket();
+  if(!message_to_send) {
+    LOG4CXX_ERROR(logger_, "Serialization error")
+        return RESULT_FAIL;
+  };
   LOG4CXX_INFO(logger_,
                "Message to send with connection id " <<
                static_cast<int>(packet->connection_id()));
@@ -597,14 +601,8 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   LOG4CXX_INFO_EXT(
       logger_, " data size " << data_size << " maxdata_size " << maxdata_size);
 
-<<<<<<< HEAD
   // remainder of last frame
   const size_t lastframe_remainder = data_size % maxdata_size;
-=======
-  uint32_t numOfFrames = 0;
-  uint32_t lastdata_size = 0;
->>>>>>> 729f6e6f090ce54c801d63299d20ebc68da4c96d
-
   // size of last frame (full fill or not)
   const size_t lastframe_size =
       lastframe_remainder > 0 ? lastframe_remainder : maxdata_size;
@@ -737,8 +735,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     return RESULT_FAIL;
   }
 
-  int32_t key = session_observer_->KeyFromPair(connection_id,
-                                               packet->session_id());
+  const uint32_t key = session_observer_->KeyFromPair(connection_id,
+                                                      packet->session_id());
   LOG4CXX_INFO_EXT(
       logger_,
       "Packet " << packet << "; session id " << static_cast<int32_t>(key));
@@ -867,14 +865,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
 
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
   bool success = true;
-<<<<<<< HEAD
   const uint32_t session_hash_code = session_observer_->OnSessionEndedCallback(
       connection_id, current_session_id, hash_code, service_type);
-=======
-  uint32_t session_hash_code = session_observer_->OnSessionEndedCallback(
-      connection_id, current_session_id, hash_code,
-      ServiceTypeFromByte(packet.service_type()));
->>>>>>> 729f6e6f090ce54c801d63299d20ebc68da4c96d
 
   if (0 != session_hash_code) {
     if (1 != packet.protocol_version()) {
@@ -960,16 +952,16 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   LOG4CXX_INFO_EXT(logger_,
                    "Protocol version: " <<
                    static_cast<int>(packet.protocol_version()));
-
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
 
   DCHECK(session_observer_);
-  const int32_t session_id = session_observer_->OnSessionStartedCallback(
+  const uint32_t session_id = session_observer_->OnSessionStartedCallback(
         connection_id, packet.session_id(), service_type,
         packet.protection_flag());
 
-  if (-1 == session_id) {
-    LOG4CXX_INFO_EXT(logger_, "Refused to create service " << service_type << " type.");
+  if (0 == session_id) {
+    LOG4CXX_WARN_EXT(logger_, "Refused to create service " <<
+                     static_cast<int32_t>(service_type) << " type.");
     SendStartSessionNAck(connection_id, packet.session_id(),
                          packet.protocol_version(), packet.service_type());
     return RESULT_OK;
@@ -1182,11 +1174,7 @@ std::string ConvertPacketDataToString(const uint8_t* data,
   std::locale loc;
   const char* text = reinterpret_cast<const char*>(data);
   // Check data for printability
-<<<<<<< HEAD
   for (size_t i = 0; i < data_size; ++i) {
-=======
-  for (uint32_t i = 0; i < data_size; ++i) {
->>>>>>> 729f6e6f090ce54c801d63299d20ebc68da4c96d
     if (!std::isprint(text[i], loc)) {
       is_printable_array = false;
       break;

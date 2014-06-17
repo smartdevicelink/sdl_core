@@ -58,6 +58,7 @@ namespace protocol_handler {
 //TODO:(EZamakhov) change brief info (callback, spaces)
 //TODO:(EZamakhov) rename KeyFromPair and PairFromKey
 //TODO:(EZamakhov) Add const modifiers to const methods
+//TODO:(EZamakhov) Unificate return uint32_t/int32_t and it's brief
 class SessionObserver {
 public:
   /**
@@ -71,7 +72,7 @@ public:
    * \param is_protected would be service protected
    * \return int32_t Id (number) of new session if successful otherwise -1.
    */
-  virtual int32_t OnSessionStartedCallback(
+  virtual uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type,
