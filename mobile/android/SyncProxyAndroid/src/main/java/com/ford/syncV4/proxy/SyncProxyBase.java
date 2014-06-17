@@ -2139,6 +2139,28 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }
     }
 
+    protected void onProtocolServiceStarted_RPC(final byte sessionId, final boolean encrypted) {
+        Logger.i("RPC service started, sesId:" + sessionId);
+        createService(sessionId, ServiceType.RPC, encrypted);
+        if (protocolSecureManager != null &&
+                protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC) &&
+                encrypted) {
+            protocolSecureManager.setHandshakeFinished(true);
+        }
+        final String appId = syncSession.getAppIdBySessionId(sessionId);
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mProxyListener.onRPCServiceStart(appId, encrypted);
+                }
+            });
+        } else {
+            mProxyListener.onRPCServiceStart(appId, encrypted);
+        }
+    }
+
     private void createService(byte sessionId, ServiceType serviceType, boolean encrypted) {
         if (!syncSession.hasSessionId(sessionId)) {
             throw new IllegalArgumentException("can't create service with sesId:" + sessionId);
@@ -3286,6 +3308,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                     onProtocolServiceStarted_MobileNavi(sessionId, encrypted);
                 } else if (serviceType.equals(ServiceType.Audio_Service)) {
                     onProtocolServiceStarted_Audio(sessionId, encrypted);
+                }else if ( serviceType.equals(ServiceType.RPC) ){
+                    onProtocolServiceStarted_RPC(sessionId,encrypted);
                 }
             }
         }

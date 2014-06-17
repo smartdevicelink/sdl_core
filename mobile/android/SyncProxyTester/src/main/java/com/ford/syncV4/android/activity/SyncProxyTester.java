@@ -513,7 +513,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         Logger.d(LOG_TAG + " Fragment '" + fragment + "' appId:" + appId);
 
         fragment.getLogAdapter().logMessage("Service '" + serviceType + "' started, " +
-                "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion(), true);
+                "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion() + "encrypted " + encoded, true);
 
         if (serviceType == ServiceType.Audio_Service) {
             MainApp.getInstance().runInUIThread(new Runnable() {

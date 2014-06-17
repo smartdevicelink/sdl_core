@@ -120,8 +120,13 @@ public class SendProtocolMessageProcessor {
                 }
             });
         } else if (serviceType == ServiceType.Heartbeat) {
-            // Move logic to separate methods
-            // processHeartbeat, processHeartbeatAck
+            final ProtocolFrameHeader header =
+                    ProtocolFrameHeaderFactory.createSingleSendData(serviceType,
+                            sessionID, data.length, messageId, protocolVersionToSend);
+            if (callback != null) {
+                callback.onProtocolFrameToSend(header, data, 0, data.length);
+            }
+
         } else {
             final ProtocolFrameHeader header =
                     ProtocolFrameHeaderFactory.createSingleSendData(serviceType,
