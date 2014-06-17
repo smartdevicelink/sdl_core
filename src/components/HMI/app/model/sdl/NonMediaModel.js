@@ -180,6 +180,9 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
                         break;
                     }
                 }
+            } else {
+
+                this.appInfo.set('alignment', "text-align:center");
             }
 
             if (params.graphic) {
