@@ -119,27 +119,13 @@ void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
   connections_lock_.Release();
 
   app_table_lock_.Acquire();
-  for (AppTable::iterator prv = app_table_.begin(), i = prv; i != app_table_.end();) {
+  for (AppTable::iterator i = app_table_.begin(); i != app_table_.end();) {
     if (i->second == app_id) {
       int session_id = i->first;
       LOG4CXX_DEBUG(logger_, "iAP: dropping session " << session_id << " for application " << app_id);
-// The next lines
-// are just a substitution for
-// i = erase(i);
-// which isn't yet implemented
-      bool head_removed = (app_table_.begin() == i);
-      app_table_.erase(i);
-      if (head_removed) {
-        prv = app_table_.begin();
-        i = prv;
-      }
-      else {
-        i = prv;
-        ++i;
-      }
+      app_table_.erase(i++);
     }
     else {
-      prv = i;
       ++i;
     }
   }
