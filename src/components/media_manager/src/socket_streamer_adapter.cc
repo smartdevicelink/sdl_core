@@ -50,9 +50,9 @@ CREATE_LOGGERPTR_GLOBAL(logger, "SocketStreamerAdapter")
 SocketStreamerAdapter::SocketStreamerAdapter()
   : socket_fd_(0),
     is_ready_(false),
-    messages_(),
     thread_(NULL),
-    streamer_(NULL) {
+    streamer_(NULL),
+    messages_() {
 }
 
 SocketStreamerAdapter::~SocketStreamerAdapter() {

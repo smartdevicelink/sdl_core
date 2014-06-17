@@ -587,8 +587,8 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   LOG4CXX_INFO_EXT(
       logger_, " data size " << data_size << " maxdata_size " << maxdata_size);
 
-  int32_t numOfFrames = 0;
-  int32_t lastdata_size = 0;
+  uint32_t numOfFrames = 0;
+  uint32_t lastdata_size = 0;
 
   if (data_size % maxdata_size) {
     numOfFrames = (data_size / maxdata_size) + 1;
@@ -839,11 +839,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   }
 
   bool success = true;
-  int32_t session_hash_code = session_observer_->OnSessionEndedCallback(
+  uint32_t session_hash_code = session_observer_->OnSessionEndedCallback(
       connection_id, current_session_id, hash_code,
       ServiceTypeFromByte(packet.service_type()));
 
-  if (-1 != session_hash_code) {
+  if (0 != session_hash_code) {
     if (1 != packet.protocol_version()) {
       if (packet.message_id() != session_hash_code) {
         success = false;
@@ -875,11 +875,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                    "Protocol version: " <<
                    static_cast<int>(packet.protocol_version()));
 
-  int32_t session_id = session_observer_->OnSessionStartedCallback(
+  uint32_t session_id = session_observer_->OnSessionStartedCallback(
       connection_id, packet.session_id(),
       ServiceTypeFromByte(packet.service_type()));
 
-  if (-1 != session_id) {
+  if (0 != session_id) {
     SendStartSessionAck(
         connection_id, session_id, packet.protocol_version(),
         session_observer_->KeyFromPair(connection_id, session_id),
@@ -975,7 +975,7 @@ std::string ConvertPacketDataToString(const uint8_t* data,
   std::locale loc;
   const char* text = reinterpret_cast<const char*>(data);
   // Check data for printability
-  for (int i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     if (!std::isprint(text[i], loc)) {
       is_printable_array = false;
       break;

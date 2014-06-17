@@ -1,7 +1,5 @@
-/**
- * \file appMain.cc
- * \brief SmartDeviceLink main application sources
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +32,7 @@
 
 #include <sys/stat.h>
 #include <unistd.h>
+#include <signal.h>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
@@ -44,6 +43,7 @@
 // ----------------------------------------------------------------------------
 
 #include "./life_cycle.h"
+#include "signal_handlers.h"
 
 #include "utils/signals.h"
 #include "utils/system.h"
@@ -91,7 +91,6 @@ if (!file_str.is_open()) {
 }
 
 file_str.seekg(0, std::ios::end);
-int32_t length = file_str.tellg();
 file_str.seekg(0, std::ios::beg);
 
 std::string hmi_link;
@@ -137,6 +136,7 @@ bool InitHmi() {
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int32_t main(int32_t argc, char** argv) {
+  threads::Thread::MaskSignals();
 
   // --------------------------------------------------------------------------
   // Logger initialization
@@ -198,8 +198,14 @@ int32_t main(int32_t argc, char** argv) {
   }
   // --------------------------------------------------------------------------
 
-  utils::SubscribeToTerminateSignal(
-    &main_namespace::LifeCycle::StopComponentsOnSignal);
+  utils::SubscribeToTerminateSignal(main_namespace::dummy_signal_handler);
+  threads::Thread::UnmaskSignals();
 
   pause();
+  LOG4CXX_INFO(logger, "Stopping application due to signal caught");
+
+  main_namespace::LifeCycle::instance()->StopComponents();
+  DEINIT_LOGGER();
+
+  return EXIT_SUCCESS;
 }

@@ -48,7 +48,8 @@ SDL.SDLController = Em.Object
             if ( SDL.SliderView.active
                 || SDL.InteractionChoicesView.active
                 || SDL.ScrollableMessage.active
-                || SDL.SDLModel.AudioPassThruState) {
+                || SDL.SDLModel.AudioPassThruState
+                || SDL.Keyboard.active) {
 
                 return 'HMI_OBSCURED';
             }
@@ -73,7 +74,8 @@ SDL.SDLController = Em.Object
             'SDL.States.navigationApp.baseNavigation.active',
             'SDL.ScrollableMessage.active',
             'SDL.InteractionChoicesView.active',
-            'SDL.VRHelpListView.active'),
+            'SDL.VRHelpListView.active',
+            'SDL.Keyboard.active'),
 
         /**
          * List of SDL application models
@@ -384,6 +386,12 @@ SDL.SDLController = Em.Object
          */
         exitAppViewSelected: function(state) {
 
+            //if ignition off if executed than OnIgnitionCycleOver must be sent
+            if (state == SDL.SDLModel.exitAppState[0].name) {
+
+                FFW.BasicCommunication.OnIgnitionCycleOver();
+            }
+
             FFW.BasicCommunication.ExitAllApplications(state);
         },
         /**
@@ -416,9 +424,9 @@ SDL.SDLController = Em.Object
          */
         vrInteractionResponse: function(result, choiceID) {
 
-            FFW.VR.interactionResponse(SDL.SDLAppController.model.activeRequests.vrPerformInteraction, result, choiceID);
+            FFW.VR.interactionResponse(SDL.SDLModel.vrActiveRequests.vrPerformInteraction, result, choiceID);
 
-            SDL.SDLAppController.model.activeRequests.vrPerformInteraction = null;
+            SDL.SDLModel.vrActiveRequests.vrPerformInteraction = null;
 
             SDL.SDLModel.set('VRActive', false);
 
@@ -589,7 +597,9 @@ SDL.SDLController = Em.Object
         unregisterApplication: function(appID) {
 
             this.getApplicationModel(appID).VRCommands = [];
+
             this.getApplicationModel(appID).onDeleteApplication(appID);
+
             var len = SDL.SDLModel.VRCommands.length;
             for (var i = len - 1; i >= 0; i--) {
                 if (SDL.SDLModel.VRCommands[i].appID == appID) {
@@ -601,7 +611,6 @@ SDL.SDLController = Em.Object
             if (SDL.SDLModel.stateLimited == appID) {
                 SDL.SDLModel.set('stateLimited', null);
             }
-            SDL.SDLAppController.set('model', null);
         },
         /**
          * SDL Driver Distraction ON/OFF switcher
@@ -651,8 +660,7 @@ SDL.SDLController = Em.Object
          */
         getApplicationModel: function(applicationId) {
 
-            return SDL.SDLModel.registeredApps.filterProperty('appID',
-                applicationId)[0];
+            return SDL.SDLModel.registeredApps.filterProperty('appID', applicationId)[0];
         },
         /**
          * Function returns ChangeDeviceView back to previous state

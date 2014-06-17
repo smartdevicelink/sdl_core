@@ -1,5 +1,5 @@
-/**
-* Copyright (c) 2013, Ford Motor Company
+/*
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -30,36 +30,11 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_RECORDER_ADAPTER_H_
-#define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_RECORDER_ADAPTER_H_
+#include "signal_handlers.h"
 
-#include <string>
-#include "media_manager/media_adapter_impl.h"
+namespace main_namespace {
 
-namespace threads {
-class Thread;
+void dummy_signal_handler(int32_t signal) {
 }
 
-namespace media_manager {
-
-class FromMicRecorderAdapter : public MediaAdapterImpl {
-  public:
-    FromMicRecorderAdapter();
-    ~FromMicRecorderAdapter();
-    void SendData(int32_t application_key,
-                  const protocol_handler::RawMessagePtr& message) {}
-    void StartActivity(int32_t application_key);
-    void StopActivity(int32_t application_key);
-    bool is_app_performing_activity(int32_t application_key);
-    void set_output_file(const std::string& output_file);
-    void set_duration(int32_t duration);
-  private:
-    threads::Thread* recorder_thread_;
-    std::string output_file_;
-    const int32_t kDefaultDuration;
-    int32_t duration_;
-    DISALLOW_COPY_AND_ASSIGN(FromMicRecorderAdapter);
-};
-}  // namespace media_manager
-
-#endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_FROM_MIC_RECORDER_ADAPTER_H_
+}  // namespace main_namespace

@@ -134,8 +134,8 @@ void RequestWatchdog::addRequest(RequestInfo* requestInfo) {
   }
 }
 
-void RequestWatchdog::removeRequest(int32_t connection_key,
-                                    int32_t correlation_id) {
+void RequestWatchdog::removeRequest(uint32_t connection_key,
+                                    uint32_t correlation_id) {
   LOG4CXX_TRACE_ENTER(logger_);
   {
     AutoLock auto_lock(requestsLock_);
@@ -161,9 +161,9 @@ void RequestWatchdog::removeRequest(int32_t connection_key,
   }
 }
 
-void RequestWatchdog::updateRequestTimeout(int32_t connection_key,
-                                           int32_t correlation_id,
-                                           int32_t new_timeout_value) {
+void RequestWatchdog::updateRequestTimeout(uint32_t connection_key,
+                                           uint32_t correlation_id,
+                                           uint32_t new_timeout_value) {
   LOG4CXX_TRACE_ENTER(logger_);
 
   {
@@ -192,7 +192,7 @@ void RequestWatchdog::updateRequestTimeout(int32_t connection_key,
 }
 
 bool RequestWatchdog::checkTimeScaleMaxRequest(
-                              const int32_t& connection_key,
+                              const uint32_t& connection_key,
                               const uint32_t& app_time_scale,
                               const uint32_t& max_request_per_time_scale) {
   LOG4CXX_TRACE_ENTER(logger_);
@@ -205,7 +205,7 @@ bool RequestWatchdog::checkTimeScaleMaxRequest(
     start.tv_sec = end.tv_sec - app_time_scale;
 
     TimeScale scale(start, end, connection_key);
-    int32_t count = 0;
+    uint32_t count = 0;
 
     count = count_if (requests_.begin(), requests_.end(), scale);
 
@@ -222,7 +222,7 @@ bool RequestWatchdog::checkTimeScaleMaxRequest(
 
 bool RequestWatchdog::checkHMILevelTimeScaleMaxRequest(
                               const int32_t& hmi_level,
-                              const int32_t& connection_key,
+                              const uint32_t& connection_key,
                               const uint32_t& app_time_scale,
                               const uint32_t& max_request_per_time_scale) {
   LOG4CXX_TRACE_ENTER(logger_);
@@ -235,7 +235,7 @@ bool RequestWatchdog::checkHMILevelTimeScaleMaxRequest(
     start.tv_sec = end.tv_sec - app_time_scale;
 
     HMILevelTimeScale scale(start, end, connection_key, hmi_level);
-    int32_t count = 0;
+    uint32_t count = 0;
 
     count = count_if (requests_.begin(), requests_.end(), scale);
 
@@ -265,7 +265,7 @@ void RequestWatchdog::removeAllRequests() {
   queueDispatcherThread.stop();
 }
 
-int32_t RequestWatchdog::getRegesteredRequestsNumber() {
+uint32_t RequestWatchdog::getRegesteredRequestsNumber() {
   LOG4CXX_TRACE_ENTER(logger_);
   {
     AutoLock auto_lock(requestsLock_);

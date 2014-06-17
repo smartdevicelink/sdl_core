@@ -71,10 +71,10 @@ TransportManagerImpl::TransportManagerImpl()
       event_queue_thread_(),
       device_listener_thread_wakeup_(),
       is_initialized_(false),
+      #ifdef TIME_TESTER
+            metric_observer_(NULL),
+      #endif  // TIME_TESTER
       connection_id_counter_(0)
-#ifdef TIME_TESTER
-      , metric_observer_(NULL)
-#endif  // TIME_TESTER
 {
   LOG4CXX_INFO(logger_, "==============================================");
   pthread_mutex_init(&message_queue_mutex_, NULL);
@@ -164,7 +164,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
   for (EventQueue::const_iterator it = event_queue_.begin();
     it != event_queue_.end();
     ++it) {
-    if (it->application_id() == cid) {
+    if (it->application_id() == static_cast<ApplicationHandle>(cid)) {
       ++messages_count;
     }
   }
@@ -195,7 +195,7 @@ int TransportManagerImpl::DisconnectForce(const ConnectionUID& cid) {
   // or there is a problem here. One more point versus typedefs-everywhere
   MessageQueue::iterator e = message_queue_.begin();
   while (e != message_queue_.end()) {
-    if ((*e)->connection_key() == cid) {
+    if (static_cast<ConnectionUID>((*e)->connection_key()) == cid) {
       RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
                  DataSendTimeoutError(), *e);
       e = message_queue_.erase(e);
@@ -348,6 +348,10 @@ int TransportManagerImpl::SearchDevices(void) {
                                      << "]");
           break;
         }
+        default: {
+          LOG4CXX_ERROR(logger_, "Invalid scan result");
+          return E_ADAPTERS_FAIL;
+        }
       }
     }
   }
@@ -499,7 +503,7 @@ void TransportManagerImpl::AddConnection(const ConnectionInternal& c) {
   connections_.push_back(c);
 }
 
-void TransportManagerImpl::RemoveConnection(int id) {
+void TransportManagerImpl::RemoveConnection(uint32_t id) {
   for (std::vector<ConnectionInternal>::iterator it = connections_.begin();
        it != connections_.end(); ++it) {
     if (it->id == id) {

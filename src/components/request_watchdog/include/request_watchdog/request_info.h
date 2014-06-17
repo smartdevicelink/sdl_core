@@ -46,9 +46,9 @@ struct RequestInfo {
               const int32_t& app_hmi_level);
 
   int32_t functionID_;
-  int32_t connectionID_;
-  int32_t correlationID_;
-  int32_t customTimeout_;
+  uint32_t connectionID_;
+  uint32_t correlationID_;
+  uint32_t customTimeout_;
   int32_t app_hmi_level_;
   bool delayed_delete_;
 

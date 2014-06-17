@@ -1,7 +1,5 @@
-/**
-* \file signals.cc
-* \brief Signal (i.e. SIGINT) handling.
-* Copyright (c) 2013, Ford Motor Company
+/*
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -102,6 +100,7 @@ bool LifeCycle::StartComponents() {
   app_manager_ =
     application_manager::ApplicationManagerImpl::instance();
   DCHECK(app_manager_ != NULL);
+  app_manager_->Init();
 
   hmi_handler_ =
     hmi_message_handler::HMIMessageHandlerImpl::instance();
@@ -391,12 +390,6 @@ void LifeCycle::StopComponents() {
     time_tester_ = NULL;
   }
 #endif //TIME_TESTER
-}
-
-void LifeCycle::StopComponentsOnSignal(int32_t params) {
-  utils::ResetSubscribeToTerminateSignal();
-  instance()->StopComponents();
-  utils::ForwardSignal();
 }
 
 }  //  namespace main_namespace

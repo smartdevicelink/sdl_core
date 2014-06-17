@@ -1006,11 +1006,6 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(ApplicationConstSharedPtr
   if (!app.valid()) {
     return;
   }
-
-  hmi_apis::Common_Language::eType app_common_language =
-    ToCommonLanguage(app->language());
-  const HMICapabilities& hmi_capabilities =
-    ApplicationManagerImpl::instance()->hmi_capabilities();
   if (mobile_apis::Language::INVALID_ENUM != app->language()) {
     smart_objects::SmartObject* vr_command = CreateChangeRegistration(
           hmi_apis::FunctionID::VR_ChangeRegistration, app->language(),
@@ -1113,7 +1108,7 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
   output[strings::is_media_application] = app->is_media_application();
 
   if (NULL != ngn_media_screen_name) {
-    output[strings::ngn_media_screen_app_name] = *ngn_media_screen_name;
+    output[strings::ngn_media_screen_app_name] = ngn_media_screen_name->asString();
   }
   if (NULL != app_types) {
     output[strings::app_type] = *app_types;
@@ -2020,7 +2015,7 @@ void MessageHelper::SendGetSystemInfoRequest() {
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   smart_objects::SmartObject& message, ApplicationConstSharedPtr app) {
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == message.getType()) {
-    for (int32_t i = 0; i < message.length(); ++i) {
+    for (uint32_t i = 0; i < message.length(); ++i) {
       mobile_apis::Result::eType res = VerifyImageFiles(message[i], app);
       if (mobile_apis::Result::SUCCESS != res) {
         return res;
@@ -2149,8 +2144,8 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
   smart_objects::SmartObject soft_buttons = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
 
-  int32_t j = 0;
-  for (int32_t i = 0; i < request_soft_buttons.length(); ++i) {
+  uint32_t j = 0;
+  for (uint32_t i = 0; i < request_soft_buttons.length(); ++i) {
     switch (request_soft_buttons[i][strings::type].asInt()) {
       case mobile_apis::SoftButtonType::SBT_IMAGE: {
         if (!image_supported) {

@@ -151,9 +151,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * when Mobile Application initiates start of new session.
      * \param connection_handle Connection identifier within which session has to be started.
      * \param sessionId Identifier of the session to be started
-     * \return int32_t Id (number) of new session if successful otherwise -1.
+     * \return int32_t Id (number) of new session if successful otherwise 0;
      */
-    virtual int32_t OnSessionStartedCallback(
+    virtual uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type);
@@ -165,7 +165,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param sessionId Identifier of the session to be ended
      * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
      * If not equal to hash assigned to session on start then operation fails.
-     * \return int32_t -1 if operation fails session key otherwise
+     * \return uint32_t 0 if operation fails session key otherwise
      */
     virtual uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID& connection_handle,

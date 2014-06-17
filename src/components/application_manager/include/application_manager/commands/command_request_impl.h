@@ -92,17 +92,17 @@ class CommandRequestImpl : public CommandImpl,
   /*
    * @brief Retrieves request ID
    */
-  inline int function_id() const;
+  inline int32_t function_id() const;
 
   /*
    * @brief Retrieves correlation ID
    */
-  inline int correlation_id() const;
+  inline uint32_t correlation_id() const;
 
   /*
    * @brief Retrieves connection key
    */
-  inline int connection_key() const;
+  inline uint32_t connection_key() const;
 
   /*
    * @brief Creates Mobile response
@@ -156,7 +156,7 @@ class CommandRequestImpl : public CommandImpl,
       const hmi_apis::Common_Result::eType& hmi_code) const;
 
  protected:
-  unsigned int                default_timeout_;
+  uint32_t                default_timeout_;
   RequestState                current_state_;
   sync_primitives::Lock       state_lock_;
 
@@ -164,20 +164,20 @@ class CommandRequestImpl : public CommandImpl,
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
 };
 
-unsigned int CommandRequestImpl::default_timeout() const {
+uint32_t CommandRequestImpl::default_timeout() const {
   return default_timeout_;
 }
 
-int CommandRequestImpl::function_id() const {
+int32_t CommandRequestImpl::function_id() const {
   return (*message_)[strings::params][strings::function_id].asInt();
 }
 
-int CommandRequestImpl::correlation_id() const {
-  return (*message_)[strings::params][strings::correlation_id].asInt();
+uint32_t CommandRequestImpl::correlation_id() const {
+  return (*message_)[strings::params][strings::correlation_id].asUInt();
 }
 
-int CommandRequestImpl::connection_key() const {
-  return (*message_)[strings::params][strings::connection_key].asInt();
+uint32_t CommandRequestImpl::connection_key() const {
+  return (*message_)[strings::params][strings::connection_key].asUInt();
 }
 
 }  // namespace commands

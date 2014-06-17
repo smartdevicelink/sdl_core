@@ -133,14 +133,14 @@ class Connection {
    * \brief Adds session to connection
    * \return sessionID or -1 in case of issues
    */
-  int32_t AddNewSession();
+  uint32_t AddNewSession();
 
   /**
    * \brief Removes session from connection
    * \param aSession session ID
    * \return sessionID or -1 in case of issues
    */
-  int32_t RemoveSession(uint8_t session);
+  uint32_t RemoveSession(uint8_t session);
 
   /**
    * \brief Adds service to session

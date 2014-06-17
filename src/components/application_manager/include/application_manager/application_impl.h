@@ -149,7 +149,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @param state_of_alert contains TRUE if alert is activated otherwise
    * contains FALSE
    */
-  virtual void set_alert_in_background(const bool state_of_alert);
+  virtual void set_alert_in_background(bool state_of_alert);
 
   /**
    * @brief Change Hash for current application
@@ -168,18 +168,18 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   uint32_t                                 hash_val_;
   uint32_t                                 grammar_id_;
 
-  smart_objects::SmartObject*              active_message_;
 
   Version version_;
+  std::string                              app_name_;
   uint32_t                                 hmi_app_id_;
   uint32_t                                 app_id_;
-  std::string                              app_name_;
+  smart_objects::SmartObject*              active_message_;
   bool                                     is_media_;
+  bool                                     hmi_supports_navi_streaming_;
   bool                                     allowed_support_navigation_;
   bool                                     is_app_allowed_;
   bool                                     has_been_activated_;
   bool                                     tts_speak_state_;
-  bool                                     hmi_supports_navi_streaming_;
 
   mobile_api::HMILevel::eType              hmi_level_;
   uint32_t                                 put_file_in_none_count_;
@@ -190,11 +190,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   std::string                              app_icon_path_;
   connection_handler::DeviceHandle         device_;
 
-  ProtocolVersion                          protocol_version_;
   AppFilesMap                              app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
   std::set<uint32_t>                       subscribed_vehicle_info_;
   UsageStatistics                          usage_report_;
+  ProtocolVersion                          protocol_version_;
   bool                                     alert_in_background_;
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);

@@ -110,12 +110,12 @@ class Message {
   protocol_handler::MessagePriority priority_;
 
   int32_t connection_key_;
-  ProtocolVersion version_;
   std::string json_message_;
   smart_objects::SmartObject smart_object_;
 
   // TODO(akandul): replace with shared_ptr
   BinaryData* binary_data_;
+  ProtocolVersion version_;
 };
 }  // namespace application_manager
 

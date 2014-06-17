@@ -895,6 +895,8 @@ class SmartObject {
   CSmartSchema m_schema;
 };
 
+
+
 /**
  * @brief Value that is used as invalid value for bool type
  **/
@@ -922,11 +924,6 @@ static const std::string invalid_string_value = "";
 static const double invalid_double_value = -1;
 
 /**
- * @brief Value that is used as invalid value for string type
- **/
-static const char* invalid_cstr_value = "";
-
-/**
  * @brief Value that is used as invalid value for object type
  **/
 static SmartObject invalid_object_value(SmartType_Invalid);
@@ -935,6 +932,9 @@ static SmartObject invalid_object_value(SmartType_Invalid);
  * @brief Value that is used as invalid value for object type
  **/
 static const SmartBinary invalid_binary_value;
+
+
+
 
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 
 #include <limits.h>
 #include <stddef.h>
+#include <signal.h>
 
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_manager.h"
@@ -76,6 +77,19 @@ void Thread::SetNameForId(Id thread_id, const std::string& name) {
   ThreadManager::instance()->RegisterName(thread_id.id_, name);
 }
 
+//static
+void Thread::MaskSignals() {
+  sigset_t sigset;
+  sigfillset(&sigset);
+  pthread_sigmask(SIG_SETMASK, &sigset, 0);
+}
+
+//static
+void Thread::UnmaskSignals() {
+  sigset_t sigset;
+  sigemptyset(&sigset);
+  pthread_sigmask(SIG_SETMASK, &sigset, 0);
+}
 
 Thread::Thread(const char* name, ThreadDelegate* delegate)
   : name_("undefined"),

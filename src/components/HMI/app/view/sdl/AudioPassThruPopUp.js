@@ -139,6 +139,16 @@ SDL.AudioPassThruPopUp = Em.ContainerView.create( {
     } ),
 
     /**
+     * Method to start AudioPassThru timer to deactivate popUp and send response to SDL
+     */
+    StartAudioPassThruTimer: function() {
+        clearTimeout( this.timer );
+        this.timer = setTimeout( function() {
+            SDL.SDLController.performAudioPassThruResponse( SDL.SDLModel.resultCode["SUCCESS"] );
+        }, SDL.SDLModel.AudioPassThruData.maxDuration );
+    },
+
+    /**
      * Method clears PopUp's timer when activity flag become false, and show
      * PopUp with data come from SDLCorel when activity flag become true
      */
@@ -162,14 +172,10 @@ SDL.AudioPassThruPopUp = Em.ContainerView.create( {
                     }
                 }
             }
-
-            clearTimeout( this.timer );
-            this.timer = setTimeout( function() {
-                SDL.SDLController.performAudioPassThruResponse( SDL.SDLModel.resultCode["SUCCESS"] );
-            }, data.maxDuration );
         }else{
             if( this.timer ){
                 clearTimeout( this.timer );
+                this.timer = null;
             }
 
             SDL.SDLController.onSystemContextChange();

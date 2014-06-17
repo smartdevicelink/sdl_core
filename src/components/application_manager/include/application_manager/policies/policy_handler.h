@@ -277,12 +277,12 @@ class PolicyHandler :
   PolicyManager* policy_manager_;
   void* dl_handle_;
   AppIds last_used_app_ids_;
+  PTExchangeHandler* exchange_handler_;
   threads::Thread retry_sequence_;
   sync_primitives::Lock retry_sequence_lock_;
-  PTExchangeHandler* exchange_handler_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
   bool on_ignition_check_done_;
-  uint32_t last_activated_app_;
+  uint32_t last_activated_app_id_;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI
