@@ -282,7 +282,7 @@ class PolicyHandler :
   sync_primitives::Lock retry_sequence_lock_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
   bool on_ignition_check_done_;
-  uint32_t last_activated_app_;
+  uint32_t last_activated_app_id_;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI

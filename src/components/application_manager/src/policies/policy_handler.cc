@@ -83,7 +83,7 @@ PolicyHandler::PolicyHandler()
     exchange_handler_(NULL),
     retry_sequence_("RetrySequence", new RetrySequence(this)),
     on_ignition_check_done_(false),
-    last_activated_app_(0) {
+    last_activated_app_id_(0) {
 }
 
 PolicyHandler::~PolicyHandler() {
@@ -690,7 +690,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     application_manager::ApplicationManagerImpl* app_manager =
       application_manager::ApplicationManagerImpl::instance();
     application_manager::ApplicationSharedPtr app =
-      app_manager->application(last_activated_app_);
+      app_manager->application(last_activated_app_id_);
 
     if (is_allowed) {
       if (app) {
@@ -788,7 +788,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
   }
 
-  last_activated_app_ = connection_key;
+  last_activated_app_id_ = connection_key;
   application_manager::MessageHelper::SendActivateAppResponse(permissions,
       correlation_id);
 }
