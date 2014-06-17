@@ -36,7 +36,6 @@
 #include <vector>
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/policies/policy_handler.h"
-#include "application_manager/policies/policy_retry_sequence.h"
 #include "application_manager/policies/pt_exchange_handler_impl.h"
 #include "application_manager/policies/pt_exchange_handler_ext.h"
 #include "application_manager/application_manager_impl.h"
@@ -80,15 +79,17 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 PolicyHandler::PolicyHandler()
   : policy_manager_(0),
     dl_handle_(0),
-    exchange_handler_(NULL),
-    retry_sequence_("RetrySequence", new RetrySequence(this)),
+#ifdef EXTENDED_POLICY
+    exchange_handler_(new PTExchangeHandlerExt(this)),
+#else  // EXTENDED_POLICY
+    exchange_handler_(new PTExchangeHandlerImpl(this)),
+#endif  // EXTENDED_POLICY
     on_ignition_check_done_(false),
     last_activated_app_id_(0) {
 }
 
 PolicyHandler::~PolicyHandler() {
-  sync_primitives::AutoLock locker(retry_sequence_lock_);
-  retry_sequence_.stop();
+  exchange_handler_->Stop();
   UnloadPolicyLibrary();
 }
 
@@ -104,11 +105,6 @@ PolicyManager* PolicyHandler::LoadPolicyLibrary() {
   if (error_string == NULL) {
     policy_manager_ = CreateManager();
     policy_manager_->set_listener(this);
-#if defined (EXTENDED_POLICY)
-    exchange_handler_ = new PTExchangeHandlerExt(this);
-#else
-    exchange_handler_ = new PTExchangeHandlerImpl(this);
-#endif
   } else {
     LOG4CXX_ERROR(logger_, error_string);
   }
@@ -555,9 +551,7 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
   LOG4CXX_INFO(logger_, "Policy table is saved: " << std::boolalpha << ret);
   if (ret) {
     LOG4CXX_INFO(logger_, "PTU was successful.");
-    retry_sequence_lock_.Acquire();
-    retry_sequence_.stop();
-    retry_sequence_lock_.Release();
+    exchange_handler_->Stop();
     policy_manager_->CleanupUnpairedDevices();
     int32_t correlation_id =
       application_manager::ApplicationManagerImpl::instance()
@@ -624,20 +618,7 @@ void PolicyHandler::StartPTExchange(bool skip_device_selection) {
     }
   }
 
-  retry_sequence_lock_.Acquire();
-  retry_sequence_.stop();
-  policy_manager_->ResetRetrySequence();
-  retry_sequence_.start();
-  retry_sequence_lock_.Release();
-}
-
-void PolicyHandler::StartNextRetry() {
-  DCHECK(exchange_handler_);
-  if (!policy_manager_) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    return;
-  }
-  exchange_handler_->StartExchange();
+  exchange_handler_->Start();
 }
 
 void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
