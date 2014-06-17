@@ -218,24 +218,24 @@ void ConnectionHandlerImpl::RemoveConnection(
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
-    return -1;
+    return 0;
   }
 
   if ((0 == sessionId) && (protocol_handler::kRpc == service_type)) {
     new_session_id = (it->second)->AddNewSession();
     if (0 > new_session_id) {
       LOG4CXX_ERROR(logger_, "Not possible to start session!");
-      return -1;
+      return 0;
     }
   } else if ((0 != sessionId) && (protocol_handler::kRpc != service_type)) {
     if (!(it->second)->AddNewService(sessionId, service_type)) {
       LOG4CXX_ERROR(logger_, "Not possible to establish service!");
-      return -1;
+      return 0;
     }
     new_session_id = sessionId;
   } else {
     LOG4CXX_ERROR(logger_, "Not possible to establish service!");
-    return -1;
+    return 0;
   }
 
   if (connection_handler_observer_) {
@@ -246,10 +246,10 @@ void ConnectionHandlerImpl::RemoveConnection(
 
     if (!success && (protocol_handler::kRpc == service_type)) {
       (it->second)->RemoveSession(new_session_id);
-      new_session_id = -1;
+      new_session_id = 0;
     } else if (!success) {
       (it->second)->RemoveService(sessionId, service_type);
-      new_session_id = -1;
+      new_session_id = 0;
     }
   }
   return new_session_id;

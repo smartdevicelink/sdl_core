@@ -463,7 +463,6 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     video_stream_file_;
     std::string                     audio_stream_file_;
 #ifdef CUSTOMER_PASA
-    std::string                     log4cxx_config_file_;
     std::string                     remote_logging_flag_file_;
     std::string                     remote_logging_flag_file_path_;
 #endif
