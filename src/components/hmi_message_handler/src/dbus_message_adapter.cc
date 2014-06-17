@@ -183,8 +183,11 @@ void DBusMessageAdapter::Notification(const smart_objects::SmartObject &obj) {
 
 void DBusMessageAdapter::Response(const smart_objects::SmartObject& obj) {
   LOG4CXX_DEBUG(logger_, "Response");
+  dbus::MessageId func_id = static_cast<dbus::MessageId>(
+        obj[sos::S_PARAMS][sos::S_FUNCTION_ID].asInt());
+  dbus::MessageName name = get_schema().getMessageName(func_id);
   uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();
-  MethodReturn(id, obj[sos::S_MSG_PARAMS]);
+  MethodReturn(id, func_id, name, obj[sos::S_MSG_PARAMS]);
 }
 
 void DBusMessageAdapter::ErrorResponse(const smart_objects::SmartObject &obj) {
