@@ -89,7 +89,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         pm.setFunctionID(0);
         pm.setCorrID(getNextCorrelationId());
         pm.setData(frameData, frameData.length);
-
+        pm.setEncrypted(encrypt);
         mStreamListener.sendH264(pm);
         return pm;
     }
