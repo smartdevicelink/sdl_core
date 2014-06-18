@@ -31,13 +31,44 @@
  */
 
 #include <string>
+#include <strings.h>
 #include <stdlib.h>
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "config_profile/profile.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
 
+namespace {
+
+mobile_apis::FileType::eType StringToFileType(const char* str) {
+  if (0 == strcasecmp(str, "json")) {
+    return mobile_apis::FileType::JSON;
+  } else if (0 == strcasecmp(str, "bmp")) {
+    return mobile_apis::FileType::GRAPHIC_BMP;
+  } else if (0 == strcasecmp(str, "jpeg")) {
+    return mobile_apis::FileType::GRAPHIC_JPEG;
+  } else if (0 == strcasecmp(str, "png")) {
+    return mobile_apis::FileType::GRAPHIC_PNG;
+  } else if (0 == strcasecmp(str, "wave")) {
+    return mobile_apis::FileType::AUDIO_WAVE;
+  } else if ((0 == strcasecmp(str, "m4a")) ||
+             (0 == strcasecmp(str, "m4b")) ||
+             (0 == strcasecmp(str, "m4p")) ||
+             (0 == strcasecmp(str, "m4v")) ||
+             (0 == strcasecmp(str, "m4r")) ||
+             (0 == strcasecmp(str, "3gp")) ||
+             (0 == strcasecmp(str, "mp4")) ||
+             (0 == strcasecmp(str, "aac"))) {
+    return mobile_apis::FileType::AUDIO_AAC;
+  } else if (0 == strcasecmp(str, "mp3")) {
+    return mobile_apis::FileType::AUDIO_MP3;
+  } else {
+    return mobile_apis::FileType::BINARY;
+  }
+}
+}
 
 namespace application_manager {
 
@@ -45,7 +76,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 ApplicationImpl::ApplicationImpl(
     uint32_t application_id,
-    const std::string& global_app_id,
+    const std::string& mobile_app_id,
+    const std::string& app_name,
     usage_statistics::StatisticsManager* statistics_manager)
     : grammar_id_(0),
       app_id_(application_id),
@@ -63,12 +95,18 @@ ApplicationImpl::ApplicationImpl(
       system_context_(mobile_api::SystemContext::SYSCTXT_MAIN),
       audio_streaming_state_(mobile_api::AudioStreamingState::NOT_AUDIBLE),
       device_(0),
-      usage_report_(global_app_id, statistics_manager),
+      usage_report_(mobile_app_id, statistics_manager),
       protocol_version_(ProtocolVersion::kV3),
       alert_in_background_(false) {
 
+  set_mobile_app_id(smart_objects::SmartObject(mobile_app_id));
+  set_name(app_name);
+
   // subscribe application to custom button by default
   SubscribeToButton(mobile_apis::ButtonName::CUSTOM_BUTTON);
+
+  // load persistent files
+  LoadPersistentFiles();
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -300,6 +338,8 @@ ProtocolVersion ApplicationImpl::protocol_version() const {
 
 bool ApplicationImpl::AddFile(AppFile& file) {
   if (app_files_.count(file.file_name) == 0) {
+    LOG4CXX_INFO(logger_, "AddFile file " << file.file_name
+                           << " File type is " << file.file_type);
     app_files_[file.file_name] = file;
     return true;
   }
@@ -308,6 +348,8 @@ bool ApplicationImpl::AddFile(AppFile& file) {
 
 bool ApplicationImpl::UpdateFile(AppFile& file) {
   if (app_files_.count(file.file_name) != 0) {
+    LOG4CXX_INFO(logger_, "UpdateFile file " << file.file_name
+                           << " File type is " << file.file_type);
     app_files_[file.file_name] = file;
     return true;
   }
@@ -317,6 +359,8 @@ bool ApplicationImpl::UpdateFile(AppFile& file) {
 bool ApplicationImpl::DeleteFile(const std::string& file_name) {
   AppFilesMap::iterator it = app_files_.find(file_name);
   if (it != app_files_.end()) {
+    LOG4CXX_INFO(logger_, "DeleteFile file " << it->second.file_name
+                           << " File type is " << it->second.file_type);
     app_files_.erase(it);
     return true;
   }
@@ -344,6 +388,7 @@ bool ApplicationImpl::IsSubscribedToButton(mobile_apis::ButtonName::eType btn_na
   std::set<mobile_apis::ButtonName::eType>::iterator it = subscribed_buttons_.find(btn_name);
   return (subscribed_buttons_.end() != it);
 }
+
 bool ApplicationImpl::UnsubscribeFromButton(mobile_apis::ButtonName::eType btn_name) {
   size_t old_size = subscribed_buttons_.size();
   subscribed_buttons_.erase(btn_name);
@@ -405,14 +450,15 @@ void ApplicationImpl::CleanupFiles() {
             directory_name);
     AppFilesMap::const_iterator app_files_it;
 
-    for (std::vector<std::string>::const_iterator it = files.begin();
-         it != files.end(); ++it) {
+    std::vector<std::string>::const_iterator it = files.begin();
+    for (; it != files.end(); ++it) {
       std::string file_name = directory_name;
       file_name += "/";
       file_name += *it;
       app_files_it = app_files_.find(file_name);
       if ((app_files_it == app_files_.end()) ||
           (!app_files_it->second.is_persistent)) {
+        LOG4CXX_INFO(logger_, "DeleteFile file " << file_name);
           file_system::DeleteFile(file_name);
       }
     }
@@ -421,5 +467,39 @@ void ApplicationImpl::CleanupFiles() {
   }
   app_files_.clear();
 }
+
+void ApplicationImpl::LoadPersistentFiles() {
+  std::string directory_name =
+      profile::Profile::instance()->app_storage_folder();
+  directory_name += "/" + folder_name();
+
+  if (file_system::DirectoryExists(directory_name)) {
+    std::vector<std::string> persistent_files =
+        file_system::ListFiles(directory_name);
+
+    std::vector<std::string>::const_iterator it = persistent_files.begin();
+    for (; it != persistent_files.end(); ++it) {
+      AppFile file;
+      file.is_persistent = true;
+      file.is_download_complete = true;
+      file.file_name = directory_name;
+      file.file_name += "/";
+      file.file_name += *it;
+      file.file_type = mobile_apis::FileType::BINARY;
+      // Search file extension and convert it to the type
+      std::size_t index = it->find_last_of('.');
+      if (index != std::string::npos) {
+        std::string file_type = it->substr(++index);
+        file.file_type = StringToFileType(file_type.c_str());
+      }
+
+      LOG4CXX_INFO(logger_, "Loaded persistent file " << file.file_name
+                             << " File type is " << file.file_type);
+      AddFile(file);
+    }
+  }
+}
+
+
 
 }  // namespace application_manager

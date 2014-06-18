@@ -53,7 +53,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
     public virtual DynamicApplicationDataImpl {
  public:
   ApplicationImpl(uint32_t application_id,
-                  const std::string& global_app_id,
+                  const std::string& mobile_app_id,
+                  const std::string& app_name,
                   usage_statistics::StatisticsManager* statistics_manager);
 
   ~ApplicationImpl();
@@ -161,7 +162,16 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   UsageStatistics& usage_report();
 
  protected:
+
+  /**
+   * @brief Clean up application folder. Persistent files will stay
+   */
   void CleanupFiles();
+
+  /**
+   * @brief Load persistent files from application folder.
+   */
+  void LoadPersistentFiles();
 
  private:
 
