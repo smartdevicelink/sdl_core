@@ -105,6 +105,17 @@ class Thread {
   static void SetNameForId(Id thread_id, const std::string& name);
 
   /**
+   * @brief Set current thread as main
+   */
+  static void SetMainThread();
+
+  /**
+   * @brief Send SIGINT to main thread
+   * @return \a true on success and \a false otherwise
+   */
+  static bool InterruptMainThread();
+
+  /**
    * @brief Mask all POSIX signals for current thread
    */
   static void MaskSignals();

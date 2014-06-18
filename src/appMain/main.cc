@@ -134,6 +134,7 @@ bool InitHmi() {
  */
 int32_t main(int32_t argc, char** argv) {
   threads::Thread::MaskSignals();
+  threads::Thread::SetMainThread();
 
   // --------------------------------------------------------------------------
   // Logger initialization

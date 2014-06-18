@@ -44,12 +44,17 @@ using namespace std;
 using namespace threads::impl;
 
 namespace {
+
 static void* threadFunc(void* closure) {
   threads::ThreadDelegate* delegate =
     static_cast<threads::ThreadDelegate*>(closure);
   delegate->threadMain();
   return NULL;
 }
+
+static pthread_t main_thread_id;
+static bool main_thread_id_set = false;
+
 }
 
 namespace threads {
@@ -75,6 +80,24 @@ std::string Thread::NameFromId(Id thread_id) {
 //static
 void Thread::SetNameForId(Id thread_id, const std::string& name) {
   ThreadManager::instance()->RegisterName(thread_id.id_, name);
+}
+
+//static
+void Thread::SetMainThread() {
+  main_thread_id = pthread_self();
+  main_thread_id_set = true;
+}
+
+//static
+bool Thread::InterruptMainThread() {
+  if (main_thread_id_set) {
+    pthread_kill(main_thread_id, SIGINT);
+    return true;
+  }
+  else {
+    LOG4CXX_WARN(logger_, "Cannot interrupt main thread: not specified");
+    return false;
+  }
 }
 
 //static
