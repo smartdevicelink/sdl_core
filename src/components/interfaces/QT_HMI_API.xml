@@ -1787,7 +1787,7 @@
     <function name="OnUpdateDeviceList" messagetype="notification" provider="hmi">
       <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
     </function>
-    <function name="OnResumeAudioSource" messagetype="notification" provider="hmi">
+    <function name="OnResumeAudioSource" messagetype="notification" provider="sdl">
       <description>This method must be invoked by SDL to update audio state.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>The ID of app to be resumed audio source.</description>
@@ -1807,7 +1807,7 @@
     </function>
     <function name="UpdateDeviceList" messagetype="response">
     </function>
-    <function name="OnFileRemoved" messagetype="notification" provider="hmi">
+    <function name="OnFileRemoved" messagetype="notification" provider="sdl">
       <description>Notifies HMI in case some application file has been removed</description>
       <param name="fileName" type="String" minlength="1" maxlength="30" mandatory="true">
         <description>The name of the removed file</description>
@@ -1867,7 +1867,7 @@
         <description>Specifies the functionality the user has switched to.</description>
       </param>
     </function>
-    <function name="OnAppRegistered" messagetype="notification" provider="hmi">
+    <function name="OnAppRegistered" messagetype="notification" provider="sdl">
       <description>Issued by SDL to notify HMI about new application registered.</description>
       <param name="application" type="Common.HMIApplication" mandatory="true">
         <description>The information about application registered. See HMIApplication. </description>
@@ -1893,7 +1893,7 @@
         <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
       </param>
     </function>
-    <function name="OnAppUnregistered" messagetype="notification" provider="hmi">
+    <function name="OnAppUnregistered" messagetype="notification" provider="sdl">
       <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of the application unregistered</description>
@@ -1923,7 +1923,7 @@
         <description>Must be true if supported</description>
       </param>
     </function>
-    <function name="PlayTone" messagetype="notification" provider="hmi">
+    <function name="PlayTone" messagetype="notification" provider="sdl">
       <description>Sent by SDL to HMI to notify that the tone should be played.</description>
     </function>
     <!-- Policies -->
@@ -1996,10 +1996,10 @@
     <function name="PolicyUpdate" messagetype="response">
     </function>
     <!-- End of SyncP RPC-->
-    <function name="OnSDLClose" messagetype="notification" provider="hmi">
+    <function name="OnSDLClose" messagetype="notification" provider="sdl">
       <description>SDL must notify HMI about finish working application</description>
     </function>
-    <function name="OnPutFile" messagetype="notification" provider="hmi">
+    <function name="OnPutFile" messagetype="notification" provider="sdl">
       <description>
       Notification, that comes to HMI when mobile sents file with systemFile flag
     </description>
@@ -2761,7 +2761,7 @@
         <description>Currently used method name on which was triggered action</description>
       </param>
     </function>
-    <function name="OnRecordStart" messagetype="notification" provider="hmi">
+    <function name="OnRecordStart" messagetype="notification" provider="sdl">
       <description>Issued by SDL to notify HMI about capturing mic data should be started</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application related to this RPC.</description>
@@ -3821,7 +3821,7 @@
   </interface>
   <!-- Policies -->
   <interface name="SDL" version="1.0" date="2014-03-12">
-    <function name="ActivateApp" messagetype="request" provider="hmi">
+    <function name="ActivateApp" messagetype="request" provider="sdl">
       <param name="appID" type="Integer" mandatory="true">
     </param>
     </function>
@@ -3840,7 +3840,7 @@
         <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
       </param>
     </function>
-    <function name="GetUserFriendlyMessage" messagetype="request" scope="internal" provider="hmi">
+    <function name="GetUserFriendlyMessage" messagetype="request" scope="internal" provider="sdl">
       <description>Request from HMI to SDL to get user friendly messages for UI/TTS info boxes/texts (i.e. for help/dialogs etc) from Policy Table.</description>
       <param name="messageCodes" type="String" array="true" minsize="1" maxsize="100" maxlength="500" mandatory="true">
         <description>Id of message to be received according to Policy Table i.e. StatusNeeded, Notifications, DrivingCharacteristics etc.</description>
@@ -3883,7 +3883,7 @@
       </description>
     </function>
     <!-- End of SyncP RPC-->
-    <function name="GetListOfPermissions" messagetype="request" provider="hmi">
+    <function name="GetListOfPermissions" messagetype="request" provider="sdl">
       <description>Request from HMI to SDL to get list of permissions for app. If no app specified - list of permissions for all apps.</description>
       <param name="appID" type="Integer" mandatory="false"/>
     </function>
@@ -3901,7 +3901,7 @@
       </param>
       <param name="source" type="Common.ConsentSource" mandatory="true"/>
     </function>
-    <function name="OnAppPermissionChanged" messagetype="notification" provider="hmi">
+    <function name="OnAppPermissionChanged" messagetype="notification" provider="sdl">
       <description>Notification from SDL to HMI. Occurs when app permissions were reduced. If no permission specified means that app was dissallowed and has to be unregitstered.</description>
       <param name="appID" type="Integer" mandatory="true"/>
       <param name="isAppPermissionsRevoked" type="Boolean" mandatory="false"/>
@@ -3921,24 +3921,24 @@
         <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
       </param>
     </function>
-    <function name="OnSDLConsentNeeded" messagetype="notification" provider="hmi">
+    <function name="OnSDLConsentNeeded" messagetype="notification" provider="sdl">
       <description>Send from SDL to HMI to notify that data consent is needed for device either because PT update or Retry strategy.</description>
       <param name="device" type="Common.DeviceInfo" mandatory="true"/>
     </function>
-    <function name="UpdateSDL" messagetype="request" provider="hmi">
+    <function name="UpdateSDL" messagetype="request" provider="sdl">
       <description>Request from HMI to SDL to start update of Policy Table.</description>
     </function>
     <function name="UpdateSDL" messagetype="response">
       <description>Specify result: no update needed, update was successful/unsuccessful etc</description>
       <param name="result" type="Common.UpdateResult" mandatory="true"/>
     </function>
-    <function name="GetStatusUpdate" messagetype="request" provider="hmi">
+    <function name="GetStatusUpdate" messagetype="request" provider="sdl">
       <description>Request from HMI to SDL to find out current status of PT exchange process.</description>
     </function>
     <function name="GetStatusUpdate" messagetype="response">
       <param name="status" type="Common.UpdateResult" mandatory="true"/>
     </function>
-    <function name="OnStatusUpdate" messagetype="notification" provider="hmi">
+    <function name="OnStatusUpdate" messagetype="notification" provider="sdl">
       <description>Notification from SDL to HMI when current status of PT exchange changed (i.e. it Succeded or Failed etc)</description>
       <param name="status" type="Common.UpdateResult" mandatory="true"/>
     </function>
@@ -3949,7 +3949,7 @@
       <description>Sent by system to record statiscs and error counts. Increases statistics specified by statisticType by one.</description>
       <param name="statisticType" type="Common.StatisticsType" mandatory="true"/>
     </function>
-    <function name="GetURLS" messagetype="request" scope="internal" provider="hmi">
+    <function name="GetURLS" messagetype="request" scope="internal" provider="sdl">
       <description>Sent by system to SDL to get list of URL for specified service type and optionally policy's application id.</description>
       <param name="service" type="Integer" minvalue="0" maxvalue="100" mandatory="true"/>
     </function>
