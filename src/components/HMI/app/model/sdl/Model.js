@@ -1383,6 +1383,11 @@ SDL.SDLModel = Em.Object.create({
                     reason = 'SYNCSETTINGS';
                     break;
                 }
+                case "call":
+                {
+                    reason = 'PHONECALL';
+                    break;
+                }
                 default:
                 {
                     reason = 'GENERAL';
@@ -1392,9 +1397,7 @@ SDL.SDLModel = Em.Object.create({
 
             SDL.TurnByTurnView.deactivate();
 
-            //if (!SDL.SDLController.getApplicationModel(appID).unregistered) {
-                FFW.BasicCommunication.OnAppDeactivated(reason, appID);
-            //}
+            FFW.BasicCommunication.OnAppDeactivated(reason, appID);
         }
     }
 });

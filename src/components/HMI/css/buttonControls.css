@@ -386,6 +386,9 @@
 	top: 55px !important;
 }
 
+#app_controlButtons{
+    z-index: 2;
+}
 #app_controlButtons .systemRequest {
 	top: 252px !important;
 	left: 1059px !important;
@@ -523,4 +526,21 @@
 	top: 151px;
 	left: 1028px;
 	width: 160px;
+}
+
+#app_controlButtons .phone_call_button{
+    height: 40px;
+    width: 163px;
+    font-size: 20px;
+    line-height: 41px;
+    border: 1px solid #FFFF30;
+    top: 2px;
+    color: #FFFF30;
+    padding-left: 10px;
+    left: 244px;
+    transition: left 2s;
+}
+
+#app_controlButtons .phone_call_button.expand{
+    left: 156px;
 }

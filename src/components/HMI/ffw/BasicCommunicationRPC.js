@@ -103,6 +103,7 @@ FFW.BasicCommunication = FFW.RPCObserver
          */
         disconnect: function() {
 
+            this.onRPCUnregistered();
             this.client.disconnect();
         },
 
@@ -165,7 +166,7 @@ FFW.BasicCommunication = FFW.RPCObserver
             this.onAppUnregisteredUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onAppUnregisteredNotification);
             this.onPlayToneUnsubscribeRequestID = this.client
-                .unsubscribeFromNotification(this.onPlayToneUpdatedNotification);
+                .unsubscribeFromNotification(this.onPlayToneNotification);
             this.onSDLCloseUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onSDLCloseNotification);
             this.onSDLConsentNeededUnsubscribeRequestID = this.client

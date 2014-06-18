@@ -105,8 +105,8 @@ FFW.RPCClient = Em.Object
          */
         disconnect: function() {
 
-            SDL.SDLController.unregisterComponentStatus(this.observer.client.componentName);
             this.unregisterRPCComponent();
+            SDL.SDLController.unregisterComponentStatus(this.observer.client.componentName);
         },
 
         /*
@@ -244,7 +244,7 @@ FFW.RPCClient = Em.Object
          */
         unsubscribeFromNotification: function(notification) {
 
-            var msgId = this.client.generateId();
+            var msgId = this.generateId();
             var JSONMessage = {
                 "jsonrpc": "2.0",
                 "id": msgId,

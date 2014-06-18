@@ -66,6 +66,7 @@ FFW.Navigation = FFW.RPCObserver.create( {
      */
     disconnect: function() {
 
+        this.onRPCUnregistered();
         this.client.disconnect();
     },
 

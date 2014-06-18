@@ -63,6 +63,13 @@ SDL.SettingsController = Em.Object.create( {
         FFW.BasicCommunication.GetStatusUpdate();
     },
 
+    phoneCall: function() {
+        if (SDL.SDLAppController.model) {
+            SDL.SDLModel.onDeactivateApp('call', SDL.SDLAppController.model.appID);
+            SDL.States.goToStates('phone.dialpad');
+        }
+    },
+
     allDeviceAccess: function(){
 
         var allowedValue, allowedText;
