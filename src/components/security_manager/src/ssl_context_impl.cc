@@ -235,9 +235,9 @@ size_t CryptoManagerImpl::SSLContextImpl::get_max_block_size(size_t mtu) const {
 
 CryptoManagerImpl::SSLContextImpl::~SSLContextImpl() {
   // TODO(EZamakhov): return destruction logics
-  // SSL_shutdown(connection_);
-  // SSL_free(connection_);
-  // delete[] buffer_;
+  SSL_shutdown(connection_);
+  SSL_free(connection_);
+  delete[] buffer_;
 }
 
 void CryptoManagerImpl::SSLContextImpl::EnsureBufferSizeEnough(size_t size) {
