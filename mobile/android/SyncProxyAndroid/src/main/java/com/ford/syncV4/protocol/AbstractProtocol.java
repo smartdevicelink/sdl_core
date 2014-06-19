@@ -1,27 +1,13 @@
 package com.ford.syncV4.protocol;
 
-<<<<<<< HEAD
-import android.os.Environment;
 
-import com.ford.syncV4.protocol.enums.FrameType;
-=======
->>>>>>> develop
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
-<<<<<<< HEAD
-import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.util.logger.Logger;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-=======
-import com.ford.syncV4.util.logger.Logger;
-
->>>>>>> develop
 import java.util.Arrays;
 
 public abstract class AbstractProtocol {
@@ -29,23 +15,14 @@ public abstract class AbstractProtocol {
     protected static final String CLASS_NAME = AbstractProtocol.class.getSimpleName();
     public static final int SSL_OVERHEAD = 64;
     public static final int MTU_SIZE = 1500;
-<<<<<<< HEAD
+
     public static int PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_DEFAULT;
     public static int MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE - SSL_OVERHEAD;
-=======
-    private static int PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_DEFAULT;
-    public static int MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE;
->>>>>>> develop
 
     private volatile IProtocolListener mProtocolListener;
     protected byte[] mHeaderBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
     protected int mHeaderBufWritePos = 0;
 
-<<<<<<< HEAD
-    private static File audioFile;
-    private static File videoFile;
-    private static FileOutputStream audioOutputFileStream;
-    private static FileOutputStream videoOutputFileStream;
 
     protected boolean hasRPCStarted;
 
@@ -58,16 +35,12 @@ public abstract class AbstractProtocol {
     }
 
     private ProtocolSecureManager protocolSecureManager;
-
-    protected ProtocolVersion mProtocolVersion = new ProtocolVersion();
-
-=======
     //private static File audioFile;
     //private static File videoFile;
     //private static FileOutputStream audioOutputFileStream;
     //private static FileOutputStream videoOutputFileStream;
     private ProtocolVersion mProtocolVersion = new ProtocolVersion();
->>>>>>> develop
+
 
     // Caller must provide a non-null IProtocolListener interface reference.
     public AbstractProtocol(IProtocolListener protocolListener) {
@@ -159,22 +132,9 @@ public abstract class AbstractProtocol {
     // syncSession has ended.
     public abstract void EndProtocolService(ServiceType serviceType, byte sessionID);
 
-<<<<<<< HEAD
-
-    // TODO REMOVE
-    // This method sets the interval at which heartbeat protocol messages will be
-    // sent to SYNC.
-    public abstract void SetHeartbeatSendInterval(int heartbeatSendInterval_ms);
-
-    // This method sets the interval at which heartbeat protocol messages are
-    // expected to be received from SYNC.
-    public abstract void SetHeartbeatReceiveInterval(int heartbeatReceiveInterval_ms);
-
-=======
->>>>>>> develop
     // This method is called whenever the protocol receives a complete frame
     protected void handleProtocolFrameReceived(ProtocolFrameHeader header, byte[] data,
-                                               WiProProtocol.MessageFrameAssembler assembler) {
+                                               MessageFrameAssembler assembler) {
         if (data != null) {
             Logger.d(CLASS_NAME + " receive " + data.length + " bytes");
         } else {
@@ -362,9 +322,8 @@ public abstract class AbstractProtocol {
      * @param version
      */
     protected void handleProtocolSessionStarted(ServiceType serviceType,
-<<<<<<< HEAD
                                                 byte sessionId, boolean encrypted, byte version) {
-        _protocolListener.onProtocolSessionStarted(sessionId, version);
+        mProtocolListener.onProtocolSessionStarted(sessionId, version);
     }
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,
@@ -372,24 +331,7 @@ public abstract class AbstractProtocol {
         if (sessionID == 0) {
             throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
         }
-        _protocolListener.onProtocolServiceStarted(serviceType, sessionID,encrypted, version);
-=======
-                                                byte sessionId, byte version) {
-        mProtocolListener.onProtocolSessionStarted(sessionId, version);
-    }
-
-    protected void handleProtocolServiceStarted(ServiceType serviceType,
-                                                byte sessionId, byte version) {
-        if (serviceType.equals(ServiceType.RPC)) {
-            throw new IllegalArgumentException("Can't create RPC service without creating " +
-                    "syncSession. serviceType" + serviceType + ";sessionId " + sessionId);
-        }
-        if (sessionId == 0) {
-            throw new IllegalArgumentException("Can't create service with id 0. serviceType:" +
-                    serviceType + ";sessionId " + sessionId);
-        }
-        mProtocolListener.onProtocolServiceStarted(serviceType, sessionId, version);
->>>>>>> develop
+        mProtocolListener.onProtocolServiceStarted(serviceType, sessionID,encrypted, version);
     }
 
     // This method handles protocol errors. A callback is sent to the protocol
