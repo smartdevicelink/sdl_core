@@ -49,9 +49,9 @@ CryptoManagerImpl::CryptoManagerImpl()
 
 bool CryptoManagerImpl::Init(Mode mode,
                              Protocol protocol,
-                             const std::string& cert_filename,
-                             const std::string& key_filename,
-                             const std::string& ciphers_list,
+                             const std::string &cert_filename,
+                             const std::string &key_filename,
+                             const std::string &ciphers_list,
                              bool verify_peer) {
   if (instance_count_ == 0) {
     SSL_load_error_strings();
@@ -117,7 +117,8 @@ bool CryptoManagerImpl::Init(Mode mode,
     LOG4CXX_WARN(logger_, "Empty certificate path");
   } else {
     LOG4CXX_INFO(logger_, "Certificate path: " << cert_filename);
-    if (!SSL_CTX_use_certificate_file(context_, cert_filename.c_str(), SSL_FILETYPE_PEM)) {
+    if (!SSL_CTX_use_certificate_file(context_, cert_filename.c_str(),
+                                      SSL_FILETYPE_PEM)) {
       LOG4CXX_ERROR(logger_, "Could not use certificate " << cert_filename);
       return false;
     }
@@ -127,7 +128,8 @@ bool CryptoManagerImpl::Init(Mode mode,
     LOG4CXX_WARN(logger_, "Empty key path");
   } else {
     LOG4CXX_INFO(logger_, "Key path: " << key_filename);
-    if (!SSL_CTX_use_PrivateKey_file(context_, key_filename.c_str(), SSL_FILETYPE_PEM)) {
+    if (!SSL_CTX_use_PrivateKey_file(context_, key_filename.c_str(),
+                                     SSL_FILETYPE_PEM)) {
       LOG4CXX_ERROR(logger_, "Could not use key " << key_filename);
       return false;
     }
@@ -148,7 +150,9 @@ bool CryptoManagerImpl::Init(Mode mode,
   }
 
   // TODO(EZamakhov): add loading SSL_VERIFY_FAIL_IF_NO_PEER_CERT from INI
-  const int verify_mode = verify_peer ? SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT : SSL_VERIFY_NONE;
+  const int verify_mode = verify_peer
+      ? SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT
+      : SSL_VERIFY_NONE;
   SSL_CTX_set_verify(context_, verify_mode, NULL);
 
   return true;
@@ -162,12 +166,12 @@ void CryptoManagerImpl::Finish() {
   }
 }
 
-SSLContext * CryptoManagerImpl::CreateSSLContext() {
+SSLContext* CryptoManagerImpl::CreateSSLContext() {
   if (context_ == NULL) {
     return NULL;
   }
 
-  SSL* conn = SSL_new(context_);
+  SSL *conn = SSL_new(context_);
   if (conn == NULL)
     return NULL;
 
@@ -179,17 +183,16 @@ SSLContext * CryptoManagerImpl::CreateSSLContext() {
   return new SSLContextImpl(conn, mode_);
 }
 
-void CryptoManagerImpl::ReleaseSSLContext(SSLContext* context) {
+void CryptoManagerImpl::ReleaseSSLContext(SSLContext *context) {
   delete context;
 }
 
 std::string CryptoManagerImpl::LastError() const {
-  if(!context_) {
+  if (!context_) {
     return std::string("Initialization is not completed");
   }
-  const unsigned long error = ERR_get_error();
-  const char * reason = ERR_reason_error_string(error);
+  const char *reason = ERR_reason_error_string(ERR_get_error());
   return std::string(reason ? reason : "");
 }
 
-} // namespace security_manager
+}  // namespace security_manager

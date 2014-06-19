@@ -40,8 +40,8 @@
 
 #ifdef ENABLE_SECURITY
 namespace security_manager {
- class SSLContext;
-}
+class SSLContext;
+}  // namespace security_manager
 #endif  // ENABLE_SECURITY
 /**
  *\namespace NsProtocolHandler
@@ -53,29 +53,25 @@ namespace protocol_handler {
  * \brief Interface for making a bridge between ProtocolHandler and
  * ConnectionHandler components.
  */
-//TODO:(EZamakhov) Rename SessionObserver to SessionManager
-//TODO:(EZamakhov) Unificate interface (references)
-//TODO:(EZamakhov) change brief info (callback, spaces)
-//TODO:(EZamakhov) rename KeyFromPair and PairFromKey
-//TODO:(EZamakhov) Add const modifiers to const methods
-//TODO:(EZamakhov) Unificate return uint32_t/int32_t and it's brief
+// TODO(EZamakhov): Reconsider rename callbacks and SessionObserver to SessionManager
+// TODO(EZamakhov): Reconsider rename KeyFromPair and PairFromKey
 class SessionObserver {
-public:
+ public:
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates start of new session.
    * \param connection_handle Connection identifier within which session
    * has to be started.
-   * \param sessionId Identifier of the session to be ended
+   * \param sessionId Identifier of the session to be start
    * \param service_type Type of service
    * \param protocol_version Version of protocol
    * \param is_protected would be service protected
-   * \return int32_t Id (number) of new session if successful otherwise -1.
+   * \return uint32_t Id (number) of new session if successful, otherwise 0.
    */
   virtual uint32_t OnSessionStartedCallback(
-      const transport_manager::ConnectionUID& connection_handle,
-      const uint8_t session_id,
-      const protocol_handler::ServiceType& service_type,
+      const transport_manager::ConnectionUID &connection_handle,
+      const uint8_t sessionId,
+      const protocol_handler::ServiceType &service_type,
       const bool is_protected) = 0;
   /**
    * \brief Callback function used by ProtocolHandler
@@ -85,13 +81,13 @@ public:
    * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
    * If not equal to hash assigned to session on start then operation fails.
    * \param service_type Type of service
-   * \return uint32_t 0 if operation fails session key otherwise
+   * \return uint32_t 0 if operation fails, session key otherwise
    */
   virtual uint32_t OnSessionEndedCallback(
-      const transport_manager::ConnectionUID& connection_handle,
+      const transport_manager::ConnectionUID &connection_handle,
       const uint8_t sessionId,
-      const uint32_t& hashCode,
-      const ServiceType& service_type) = 0;
+      const uint32_t &hashCode,
+      const ServiceType &service_type) = 0;
 
   /**
    * \brief Creates unique identifier of session (can be used as hash)
@@ -109,14 +105,13 @@ public:
    * \brief Returns connection identifier and session number from given
    * session key
    * \param key Unique key used by other components as session identifier
-   * \param connection_handle Returned: Connection identifier within which
-   * session exists
+   * \param connection_handle Connection identifier within which session exists
    * \param sessionId Returned: Number of session
    */
   virtual void PairFromKey(
       uint32_t key,
-      transport_manager::ConnectionUID* connection_handle,
-      uint8_t* sessionId) = 0;
+      transport_manager::ConnectionUID *connection_handle,
+      uint8_t *sessionId) = 0;
 
   /**
    * \brief information about given Connection Key.
@@ -127,23 +122,22 @@ public:
    * \return int32_t -1 in case of error or 0 in case of success
    */
   virtual int32_t GetDataOnSessionKey(uint32_t key,
-                                      uint32_t* app_id,
-                                      std::list<int32_t>* sessions_list,
-                                      uint32_t* device_id) = 0;
+                                      uint32_t *app_id,
+                                      std::list<int32_t> *sessions_list,
+                                      uint32_t *device_id) = 0;
 
   /**
-   * \brief information about given Connection Key.
-   * \param key Unique key used by other components as session identifier
-   * \param app_id Returned: ApplicationID
-   * \param sessions_list Returned: List of session keys
-   * \param device_id Returned: DeviceID
+   * \brief information about device
+   * \param device_handle
+   * \param device_name Returned: name of device
+   * \param applications_list Returned: applications on device
+   * \param mac_address Returned: List of session keys
    * \return int32_t -1 in case of error or 0 in case of success
    */
-  virtual int32_t GetDataOnDeviceID(
-      uint32_t device_handle,
-      std::string* device_name,
-      std::list<uint32_t>* applications_list,
-      std::string* mac_address) = 0;
+  virtual int32_t GetDataOnDeviceID(uint32_t device_handle,
+                                    std::string *device_name,
+                                    std::list<uint32_t> *applications_list,
+                                    std::string *mac_address) = 0;
 
 #ifdef ENABLE_SECURITY
   /**
@@ -153,8 +147,8 @@ public:
    * \return \c SecurityQuery::ProtectSessionResult value
    */
   virtual int SetSSLContext(
-      const uint32_t& key,
-      security_manager::SSLContext* context) = 0;
+      const uint32_t &key,
+      security_manager::SSLContext *context) = 0;
   /**
    * \brief Gets crypto context of connection, use service_type to get NULL
    * SSLContex for not protected services or ControlService (0x0)
@@ -164,9 +158,10 @@ public:
    * \return \ref SSLContext of connection
    */
   virtual security_manager::SSLContext* GetSSLContext(
-      const uint32_t& key,
-      const protocol_handler::ServiceType& service_type) = 0;
+      const uint32_t &key,
+      const protocol_handler::ServiceType &service_type) = 0;
 #endif  // ENABLE_SECURITY
+
  protected:
   /**
    * \brief Destructor
@@ -175,5 +170,4 @@ public:
   }
 };
 }  // namespace protocol_handler
-
 #endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_SESSION_OBSERVER_H_

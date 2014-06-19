@@ -369,7 +369,7 @@ const std::string& Profile::remote_logging_flag_file() const {
 }
 
 const std::string& Profile::remote_logging_flag_file_path() const {
-	return remote_logging_flag_file_path_;
+  return remote_logging_flag_file_path_;
 }
 #endif
 
@@ -638,14 +638,14 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
                       kMainSection);
     // Remote logging flag file
     ReadStringValue(&remote_logging_flag_file_, "", kMainSection,
-    		        kRemoteLoggingFlagFileKey);
+                kRemoteLoggingFlagFileKey);
 
     LOG_UPDATED_VALUE(remote_logging_flag_file_, kRemoteLoggingFlagFileKey,
                       kMainSection);
 
     // Remote logging flag file
     ReadStringValue(&remote_logging_flag_file_path_, "", kMainSection,
-        		    kRemoteLoggingFlagFilePathKey);
+                kRemoteLoggingFlagFilePathKey);
 
     LOG_UPDATED_VALUE(remote_logging_flag_file_path_, kRemoteLoggingFlagFilePathKey,
                       kMainSection);

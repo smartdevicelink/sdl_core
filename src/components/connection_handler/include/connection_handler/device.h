@@ -58,8 +58,8 @@ class Device {
   /**
    * \brief Class constructor
    */
-  Device(DeviceHandle device_handle, const std::string& user_friendly_name,
-         const std::string& mac_address = "");
+  Device(DeviceHandle device_handle, const std::string &user_friendly_name,
+         const std::string &mac_address = "");
 
   /**
    * \brief Returns device handle

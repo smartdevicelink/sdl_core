@@ -66,11 +66,11 @@ struct ProtocolPayloadV2 {
 // Procedures that extract and validate defined protocol structures from
 // a bit stream.
 // If error during parsing is detected, bit stream is marked as invalid
-void Extract(utils::BitStream* bs, ProtocolPayloadHeaderV2* headerv2);
-void Extract(utils::BitStream* bs, ProtocolPayloadV2* payload, size_t payload_size);
+void Extract(utils::BitStream *bs, ProtocolPayloadHeaderV2 *headerv2);
+void Extract(utils::BitStream *bs, ProtocolPayloadV2 *payload, size_t payload_size);
 
-std::ostream& operator<<(std::ostream& os, const ProtocolPayloadHeaderV2& payload_header);
-std::ostream& operator<<(std::ostream& os, const ProtocolPayloadV2& payload);
+std::ostream &operator<<(std::ostream &os, const ProtocolPayloadHeaderV2 &payload_header);
+std::ostream &operator<<(std::ostream &os, const ProtocolPayloadV2 &payload);
 
 //Add for tests
 size_t ProtocolPayloadV2SizeBits();

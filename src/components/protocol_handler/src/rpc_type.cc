@@ -79,7 +79,7 @@ const char* RpcTypeToString(RpcType type) {
   }
 }
 
-std::ostream& operator<<(std::ostream& os, RpcType rpc_type) {
+std::ostream &operator<<(std::ostream &os, RpcType rpc_type) {
   return os<<RpcTypeToString(rpc_type);
 }
 

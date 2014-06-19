@@ -500,7 +500,7 @@ namespace security_manager_test {
         WillRepeatedly(Return(false));
 
     // Emulate SSLContext::StartHandshake with different parameters
-    // Only on both correct - data and size shall be send message to mobiel app
+    // Only on both correct - data and size shall be send message to mobile app
     EXPECT_CALL(mock_ssl_context_exists,
                 StartHandshake(_, _)).
         WillOnce(DoAll(SetArgPointee<0>(handshake_data_out_pointer),

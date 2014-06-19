@@ -41,7 +41,7 @@ using namespace sync_primitives;
 CREATE_LOGGERPTR_GLOBAL(logger_, "HeartBeatMonitor")
 
 HeartBeatMonitor::HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
-                                   Connection* connection)
+                                   Connection *connection)
     : heartbeat_timeout_seconds_(heartbeat_timeout_seconds),
       connection_(connection),
       stop_flag_(false) {
@@ -62,7 +62,7 @@ void HeartBeatMonitor::threadMain() {
 
     it = sessions_.begin();
     while (it != sessions_.end()) {
-      SessionState& state = it->second;
+      SessionState &state = it->second;
       if (state.heartbeat_expiration_.tv_sec < date_time::DateTime::getCurrentTime().tv_sec) {
         if (state.is_heartbeat_sent_) {
           LOG4CXX_WARN(logger_, "Session with id " << static_cast<int32_t>(it->first) <<" timed out, closing");

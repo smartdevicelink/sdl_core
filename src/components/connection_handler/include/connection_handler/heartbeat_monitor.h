@@ -51,7 +51,7 @@ class Connection;
 class HeartBeatMonitor: public threads::ThreadDelegate {
  public:
   HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
-                   Connection* connection);
+                   Connection *connection);
   ~HeartBeatMonitor();
 
   /**
@@ -81,7 +81,7 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
   // \brief Heartbeat timeout, should be read from profile
   const int32_t heartbeat_timeout_seconds_;
   // \brief Connection that must be closed when timeout elapsed
-  Connection* connection_;
+  Connection *connection_;
 
   static const int32_t kdefault_cycle_timeout = 1000000;
 

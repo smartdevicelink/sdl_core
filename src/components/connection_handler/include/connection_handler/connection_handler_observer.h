@@ -58,7 +58,7 @@ class ConnectionHandlerObserver {
    * \param DeviceList New list of available devices.
    **/
   virtual void OnDeviceListUpdated(
-      const connection_handler::DeviceList& device_list) = 0;
+      const connection_handler::DeviceList &device_list) = 0;
 
   /**
    * @brief Reaction to "Find new applications" request
@@ -73,7 +73,7 @@ class ConnectionHandlerObserver {
    * \param DeviceHandle Handle of removed device.
    **/
   virtual void RemoveDevice(
-      const connection_handler::DeviceHandle& device_handle) = 0;
+      const connection_handler::DeviceHandle &device_handle) = 0;
 
   /**
    * \brief Callback function used by connection_handler
@@ -83,9 +83,9 @@ class ConnectionHandlerObserver {
    * \param type Established service type
    */
   virtual bool OnServiceStartedCallback(
-      const connection_handler::DeviceHandle& device_handle,
-      const int32_t& session_key,
-      const protocol_handler::ServiceType& type) = 0;
+      const connection_handler::DeviceHandle &device_handle,
+      const int32_t &session_key,
+      const protocol_handler::ServiceType &type) = 0;
 
   /**
    * \brief Callback function used by connection_handler
@@ -93,8 +93,8 @@ class ConnectionHandlerObserver {
    * \param sessionKey Key of session which should be ended
    */
   virtual void OnServiceEndedCallback(
-      const int32_t& session_key,
-      const protocol_handler::ServiceType& type) = 0;
+      const int32_t &session_key,
+      const protocol_handler::ServiceType &type) = 0;
 
  protected:
   /**

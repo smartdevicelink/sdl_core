@@ -56,14 +56,14 @@ class ConnectionHandler {
    * \param observer Pointer to observer object.
    **/
   virtual void set_connection_handler_observer(
-      ConnectionHandlerObserver* observer) = 0;
+      ConnectionHandlerObserver *observer) = 0;
 
   /**
    * \brief Sets pointer to TransportManager.
    * \param transportManager Pointer to TransportManager object.
    **/
   virtual void set_transport_manager(
-      transport_manager::TransportManager* transport_manager) = 0;
+      transport_manager::TransportManager *transport_manager) = 0;
 
   virtual void StartTransportManager() = 0;
 
@@ -88,8 +88,8 @@ class ConnectionHandler {
    * @param mac_address
    * @return true if successfully
    */
-  virtual bool GetDeviceID(const std::string& mac_address,
-                           DeviceHandle* device_handle) = 0;
+  virtual bool GetDeviceID(const std::string &mac_address,
+                           DeviceHandle *device_handle) = 0;
 
   /**
    * Close session associated with the key

@@ -43,8 +43,8 @@
 
 #ifdef ENABLE_SECURITY
 namespace security_manager {
- class SSLContext;
-}
+class SSLContext;
+}  // namespace security_manager
 #endif  // ENABLE_SECURITY
 
 /**
@@ -78,8 +78,7 @@ struct Service {
   protocol_handler::ServiceType service_type;
   bool is_protected_;
   Service()
-    : service_type(protocol_handler::kInvalidServiceType),
-      is_protected_(false) {
+    : service_type(protocol_handler::kInvalidServiceType), is_protected_(false) {
   }
   Service(protocol_handler::ServiceType service_type,
           const bool is_protected = false)
@@ -109,7 +108,7 @@ typedef ServiceList::const_iterator ServiceListConstIterator;
 struct Session {
   ServiceList service_list;
 #ifdef ENABLE_SECURITY
-  security_manager::SSLContext* ssl_context;
+  security_manager::SSLContext *ssl_context;
 #endif  // ENABLE_SECURITY
   Session()
     : service_list()
@@ -117,7 +116,7 @@ struct Session {
     , ssl_context(NULL)
 #endif  // ENABLE_SECURITY
   {}
-  explicit Session(const ServiceList& services)
+  explicit Session(const ServiceList &services)
     : service_list(services)
 #ifdef ENABLE_SECURITY
       , ssl_context(NULL)
@@ -151,7 +150,7 @@ class Connection {
    */
   Connection(ConnectionHandle connection_handle,
              DeviceHandle connection_device_handle,
-             ConnectionHandler* connection_handler,
+             ConnectionHandler *connection_handler,
              int32_t heartbeat_timeout);
 
   /**
@@ -173,58 +172,57 @@ class Connection {
 
   /**
    * \brief Adds session to connection
-   * \return sessionID or 0 in case of issues
+   * \return new session id or 0 in case of issues
    */
   uint32_t AddNewSession();
 
   /**
    * \brief Removes session from connection
    * \param session session ID
-   * \return sessionID or 0 in case of issues
+   * \return session_id or 0 in case of issues
    */
-  uint32_t RemoveSession(uint8_t session);
+  uint32_t RemoveSession(uint8_t session_id);
 
   /**
    * \brief Adds service to session oradd protection to service been started before
-   * \param session session ID
+   * \param session_id session ID
    * \param service_type Type of service
    * \param is_protected protection state
    * \return TRUE on success, otherwise FALSE
    */
-  bool AddNewService(uint8_t session,
+  bool AddNewService(uint8_t session_id,
                      protocol_handler::ServiceType service_type,
                      const bool is_protected);
 
   /**
    * \brief Removes service from session
-   * \param session session ID
+   * \param session_id session ID
    * \param service_type Type of service
    * \return TRUE on success, otherwise FALSE
    */
-  bool RemoveService(uint8_t session,
+  bool RemoveService(uint8_t session_id,
                      protocol_handler::ServiceType service_type);
 
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets crypto context of service
-   * \param sessionId Identifier of the session
+   * \param session_id Identifier of the session
    * \param context SSL for connection
    * \return \c true in case of service is protected or \c false otherwise
    */
-  int SetSSLContext(uint8_t sessionId,
-                    security_manager::SSLContext* context);
+  int SetSSLContext(uint8_t session_id,
+                    security_manager::SSLContext *context);
   /**
    * \brief Gets crypto context of session, use service_type to get NULL
    * SSLContex for not protected services or ControlService (0x0)
    * to get current SSLContext of connection
-   * \param key Unique key used by other components as session identifier
+   * \param session_id Identifier of the session
    * \param service_type Type of service
    * \return \ref SSLContext of connection
    */
-  security_manager::SSLContext* GetSSLContext(
-      uint8_t sessionId,
-      const protocol_handler::ServiceType& service_type) const;
-#endif // ENABLE_SECURITY
+  security_manager::SSLContext* GetSSLContext(uint8_t session_id,
+      const protocol_handler::ServiceType &service_type) const;
+#endif  // ENABLE_SECURITY
   /**
    * \brief Returns map of sessions which have been opened in
    *  current connection.
@@ -259,7 +257,7 @@ class Connection {
   /**
    * \brief Current connection handler.
    */
-  ConnectionHandler* connection_handler_;
+  ConnectionHandler *connection_handler_;
 
   /**
    * \brief Current connection handle.
@@ -281,12 +279,11 @@ class Connection {
   /**
    * \brief monitor that closes connection if there is no traffic over it
    */
-  HeartBeatMonitor* heartbeat_monitor_;
-  threads::Thread* heart_beat_monitor_thread_;
+  HeartBeatMonitor *heartbeat_monitor_;
+  threads::Thread *heart_beat_monitor_thread_;
 
   DISALLOW_COPY_AND_ASSIGN(Connection);
 };
 
 }  // namespace connection_handler
-
 #endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_H_

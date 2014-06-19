@@ -52,7 +52,7 @@ uint8_t RpcTypeToByte(RpcType type);
 
 const char* RpcTypeToString(RpcType type);
 
-std::ostream& operator<<(std::ostream& os, RpcType rpc_type);
+std::ostream &operator<<(std::ostream &os, RpcType rpc_type);
 
 } // namespace protocol_handler
 

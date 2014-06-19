@@ -190,67 +190,6 @@ enum RESULT_CODE {
   RESULT_ENCRYPTION_FAILED = 16,
   RESULT_UNKNOWN = 255
 };
-
-/**
- * \struct ProtocolHeader
- * \brief Used for storing protocol header of a message.
- */
-// TODO(AK): Can we move this to cc file?
-struct ProtocolHeader {
-  /**
-   * \brief Constructor
-   */
-  ProtocolHeader()
-    : version(0x00),
-      protection_flag(PROTECTION_OFF),
-      frameType(0x00),
-      serviceType(0x00),
-      frameData(0x00),
-      sessionId(0x00),
-      dataSize(0x00),
-      messageId(0x00) {
-  }
-  /**
-   *\brief Version of protocol
-   */
-  uint8_t version;
-
-  /**
-   *\brief protection flag
-   */
-  bool protection_flag;
-
-  /**
-   *\brief Type of frame (Single/First/Consecutive)
-   */
-  uint8_t frameType;
-
-  /**
-   *\brief Type of service (RPC/Buld data)
-   */
-  uint8_t serviceType;
-
-  /**
-   *\brief Data about frame (Start/End session etc)
-   */
-  uint8_t frameData;
-
-  /**
-   *\brief Session number withing connection
-   */
-  uint8_t sessionId;
-
-  /**
-   *\brief Size of message itself, excluding size of header
-   */
-  uint32_t dataSize;
-
-  /**
-   *\brief Used only in second versin of protocol: Message ID
-   */
-  uint32_t messageId;
-};
-
 /**
  * \struct ProtocolData
  * \brief Used for storing message and its size.
@@ -271,6 +210,63 @@ struct ProtocolData {
  * handling multiple frames of the message.
  */
 class ProtocolPacket {
+ private:
+  /**
+   * \struct ProtocolData
+   * \brief Used for storing message and its size.
+   */
+  struct ProtocolData {
+    ProtocolData()
+      : data(0), totalDataBytes(0x00) {
+    }
+    uint8_t *data;
+    uint32_t totalDataBytes;
+  };
+
+  /**
+   * \struct ProtocolHeader
+   * \brief Used for storing protocol header of a message.
+   */
+  struct ProtocolHeader {
+    /**
+     * \brief Constructor
+     */
+    ProtocolHeader()
+      : version(0x00),
+        protection_flag(PROTECTION_OFF),
+        frameType(0x00),
+        serviceType(0x00),
+        frameData(0x00),
+        sessionId(0x00),
+        dataSize(0x00),
+        messageId(0x00) {
+    }
+    /**
+     * \brief Constructor
+     */
+    ProtocolHeader(uint8_t version, bool protection,
+                   uint8_t frameType,
+                   uint8_t serviceType,
+                   uint8_t frameData, uint8_t sessionID,
+                   uint32_t dataSize, uint32_t messageID)
+      : version(version),
+        protection_flag(protection),
+        frameType(frameType),
+        serviceType(serviceType),
+        frameData(frameData),
+        sessionId(sessionID),
+        dataSize(dataSize),
+        messageId(messageID) {
+    }
+    uint8_t version;
+    bool protection_flag;
+    uint8_t frameType;
+    uint8_t serviceType;
+    uint8_t frameData;
+    uint8_t sessionId;
+    uint32_t dataSize;
+    uint32_t messageId;
+  };
  public:
   /**
    * \brief Default constructor
@@ -286,8 +282,8 @@ class ProtocolPacket {
    * \param data Message string
    * \param dataSize Message size
    */
-  ProtocolPacket(uint8_t connection_id, uint8_t* data_param,
-                 uint32_t data_size);
+  ProtocolPacket(uint8_t connection_id, uint8_t *data,
+                 uint32_t dataSize);
 
   /**
    * \brief Constructor
@@ -307,7 +303,7 @@ class ProtocolPacket {
                  uint8_t version, bool protection, uint8_t frameType,
                  uint8_t serviceType, uint8_t frameData,
                  uint8_t sessionId, uint32_t dataSize,
-                 uint32_t messageID, const uint8_t* data = 0,
+                 uint32_t messageID, const uint8_t *data = 0,
                  uint32_t packet_id = 0);
   /**
    * \brief Destructor
@@ -327,7 +323,7 @@ class ProtocolPacket {
    * \param chunkDataSize Size of current message string
    * \return \saRESULT_CODE Status of serialization
    */
-  RESULT_CODE appendData(uint8_t* chunkData, uint32_t chunkDataSize);
+  RESULT_CODE appendData(uint8_t *chunkData, uint32_t chunkDataSize);
 
   /**
    * \brief Getter of message size including protocol header
@@ -352,7 +348,7 @@ class ProtocolPacket {
    * \param messageSize Incoming message size
    * \return \saRESULT_CODE Status of serialization
    */
-  RESULT_CODE deserializePacket(const uint8_t* message,
+  RESULT_CODE deserializePacket(const uint8_t *message,
                                 uint32_t messageSize);
 
   /**
@@ -403,7 +399,7 @@ class ProtocolPacket {
   /**
    *\brief Getter of message string
    */
-  uint8_t* data() const;
+  uint8_t *data() const;
 
   /**
    *\brief Setter for size of multiframe message
@@ -413,7 +409,7 @@ class ProtocolPacket {
   /**
    *\brief Setter for new data
    */
-  void set_data(const uint8_t* const  new_data,
+  void set_data(const uint8_t *const  new_data,
                 const size_t new_data_size);
 
   /**

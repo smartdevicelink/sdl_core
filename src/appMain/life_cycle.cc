@@ -41,7 +41,7 @@
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager.h"
 #include "security_manager/crypto_manager_impl.h"
-#endif //ENABLE_SECURITY
+#endif  // ENABLE_SECURITY
 
 using threads::Thread;
 
@@ -54,8 +54,7 @@ void NameMessageBrokerThread(const System::Thread& thread,
                              const std::string& name) {
   Thread::SetNameForId(Thread::Id(thread.GetId()), name);
 }
-
-} // namespace
+}  // namespace
 
 LifeCycle::LifeCycle()
   : transport_manager_(NULL)
@@ -65,13 +64,13 @@ LifeCycle::LifeCycle()
 #ifdef ENABLE_SECURITY
   , crypto_manager_(NULL)
   , security_manager_(NULL)
-#endif //ENABLE_SECURITY
+#endif  // ENABLE_SECURITY
   , hmi_handler_(NULL)
   , hmi_message_adapter_(NULL)
   , media_manager_(NULL)
 #ifdef TIME_TESTER
   , time_tester_(NULL)
-#endif //TIME_TESTER
+#endif  // TIME_TESTER
 #ifdef DBUS_HMIADAPTER
   , dbus_adapter_(NULL)
   , dbus_adapter_thread_(NULL)
@@ -167,7 +166,7 @@ bool LifeCycle::StartComponents() {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;
   }
-#endif //ENABLE_SECURITY
+#endif  // ENABLE_SECURITY
 
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
@@ -183,7 +182,7 @@ bool LifeCycle::StartComponents() {
 #ifdef ENABLE_SECURITY
   protocol_handler_->AddProtocolObserver(security_manager_);
   protocol_handler_->set_security_manager(security_manager_);
-#endif //ENABLE_SECURITY
+#endif  // ENABLE_SECURITY
   media_manager_->SetProtocolHandler(protocol_handler_);
 
   connection_handler_->set_transport_manager(transport_manager_);
@@ -194,18 +193,18 @@ bool LifeCycle::StartComponents() {
   security_manager_->set_session_observer(connection_handler_);
   security_manager_->set_protocol_handler(protocol_handler_);
   security_manager_->set_crypto_manager(crypto_manager_);
-#endif //ENABLE_SECURITY
+#endif  // ENABLE_SECURITY
 
   // it is important to initialise TimeTester before TM to listen TM Adapters
 #ifdef TIME_TESTER
   time_tester_ = new time_tester::TimeManager();
   time_tester_->Init(protocol_handler_);
-#endif //TIME_TESTER
+#endif  // TIME_TESTER
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
 #ifndef CUSTOMER_PASA
-  //start transport manager
+  // start transport manager
   transport_manager_->Visibility(true);
 #endif
   app_manager_->set_protocol_handler(protocol_handler_);
@@ -328,7 +327,6 @@ bool LifeCycle::InitMessageSystem() {
  * @return true if success otherwise false.
  */
 bool LifeCycle::InitMessageSystem() {
-
   dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(
     hmi_message_handler::HMIMessageHandlerImpl::instance());
 
@@ -394,7 +392,7 @@ void LifeCycle::StopComponents() {
 
   LOG4CXX_INFO(logger_, "Destroying Security Manager");
   delete security_manager_;
-#endif //ENABLE_SECURITY
+#endif  // ENABLE_SECURITY
 
   LOG4CXX_INFO(logger_, "Destroying Last State");
   resumption::LastState::destroy();
@@ -472,7 +470,7 @@ void LifeCycle::StopComponents() {
     delete time_tester_;
     time_tester_ = NULL;
   }
-#endif //TIME_TESTER
+#endif  // TIME_TESTER
 }
 
 void LifeCycle::StopComponentsOnSignal(int32_t params) {

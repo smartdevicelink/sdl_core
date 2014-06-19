@@ -31,12 +31,12 @@
  */
 #include "security_manager/crypto_manager_impl.h"
 
-#include <map>
 #include <assert.h>
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <memory.h>
+#include <map>
 
 #include "utils/macro.h"
 
@@ -54,11 +54,10 @@ CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn, Mode mode)
 }
 
 std::string CryptoManagerImpl::SSLContextImpl::LastError() const {
-  if(!IsInitCompleted()) {
+  if (!IsInitCompleted()) {
     return std::string("Initialization is not completed");
   }
-  const unsigned long error = ERR_get_error();
-  const char * reason = ERR_reason_error_string(error);
+  const char *reason = ERR_reason_error_string(ERR_get_error());
   return std::string(reason ? reason : "");
 }
 
@@ -67,7 +66,7 @@ bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() const {
 }
 
 SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::
-StartHandshake(const uint8_t** const out_data, size_t* out_data_size) {
+StartHandshake(const uint8_t** const out_data, size_t *out_data_size) {
   return DoHandshakeStep(NULL, 0, out_data, out_data_size);
 }
 
@@ -102,7 +101,7 @@ namespace {
       return 0;
     return ((mtu - 29) & 0xfffffff8) - 5;
   }
-}
+}  // namespace
 
 std::map<std::string, CryptoManagerImpl::SSLContextImpl::BlockSizeGetter>
 CryptoManagerImpl::SSLContextImpl::create_max_block_sizes() {
@@ -129,7 +128,7 @@ CryptoManagerImpl::SSLContextImpl::max_block_sizes =
 
 SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::
 DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
-                const uint8_t** const out_data, size_t* out_data_size) {
+                const uint8_t** const out_data, size_t *out_data_size) {
   *out_data = NULL;
   if (IsInitCompleted()) {
     return SSLContext::Handshake_Result_Success;
@@ -160,7 +159,7 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
 
     const int read_count = BIO_read(bioOut_, buffer_, pend);
     if (read_count  == pend) {
-      *out_data_size = read_count ;
+      *out_data_size = read_count;
       *out_data =  buffer_;
     } else {
       return SSLContext::Handshake_Result_AbnormalFail;
@@ -172,7 +171,7 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
 
 bool CryptoManagerImpl::SSLContextImpl::Encrypt(
     const uint8_t *  const in_data,  size_t in_data_size,
-    const uint8_t ** const out_data, size_t* out_data_size) {
+    const uint8_t ** const out_data, size_t *out_data_size) {
 
   if (!SSL_is_init_finished(connection_) ||
       !in_data ||
@@ -197,7 +196,7 @@ bool CryptoManagerImpl::SSLContextImpl::Encrypt(
 
 bool CryptoManagerImpl::SSLContextImpl::Decrypt(
     const uint8_t *  const in_data,  size_t in_data_size,
-    const uint8_t ** const out_data, size_t* out_data_size) {
+    const uint8_t ** const out_data, size_t *out_data_size) {
 
   if (!SSL_is_init_finished(connection_)) {
     return false;
@@ -244,8 +243,8 @@ CryptoManagerImpl::SSLContextImpl::~SSLContextImpl() {
 void CryptoManagerImpl::SSLContextImpl::EnsureBufferSizeEnough(size_t size) {
   if (buffer_size_ < size) {
     delete[] buffer_;
-    buffer_ = new (std::nothrow) uint8_t[size];
-    if(buffer_) {
+    buffer_ = new(std::nothrow) uint8_t[size];
+    if (buffer_) {
       buffer_size_ = size;
     }
   }

@@ -46,8 +46,8 @@ namespace connection_handler {
 CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
 
 Device::Device(DeviceHandle device_handle,
-               const std::string& user_friendly_name,
-               const std::string& mac_address)
+               const std::string &user_friendly_name,
+               const std::string &mac_address)
     : device_handle_(device_handle),
       user_friendly_name_(user_friendly_name),
       mac_address_(mac_address) {

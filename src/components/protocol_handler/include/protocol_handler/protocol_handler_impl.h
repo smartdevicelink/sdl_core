@@ -56,7 +56,7 @@
 #ifdef ENABLE_SECURITY
 namespace security_manager {
 class SecurityManager;
-}
+}  // namespace security_manager
 #endif  // ENABLE_SECURITY
 
 /**
@@ -137,7 +137,7 @@ class ProtocolHandlerImpl
    * message exchange.
    */
   explicit ProtocolHandlerImpl(
-      transport_manager::TransportManager* transport_manager_param);
+      transport_manager::TransportManager *transport_manager_param);
 
   /**
    * \brief Destructor
@@ -149,21 +149,21 @@ class ProtocolHandlerImpl
    * \param observer Pointer to object of the class implementing
    * IProtocolObserver
    */
-  void AddProtocolObserver(ProtocolObserver* observer);
+  void AddProtocolObserver(ProtocolObserver *observer);
 
   /**
    * \brief Removes pointer to higher layer handler for message exchange
    * \param observer Pointer to object of the class implementing
    * IProtocolObserver.
    */
-  void RemoveProtocolObserver(ProtocolObserver* observer);
+  void RemoveProtocolObserver(ProtocolObserver *observer);
 
   /**
    * \brief Sets pointer for Connection Handler layer for managing sessions
    * \param observer Pointer to object of the class implementing
    * ISessionObserver
    */
-  void set_session_observer(SessionObserver* observer);
+  void set_session_observer(SessionObserver *observer);
 
 #ifdef ENABLE_SECURITY
   /**
@@ -194,7 +194,7 @@ class ProtocolHandlerImpl
    *
    * @param observer - pointer to observer
    */
-  void SetTimeMetricObserver(PHMetricObserver* observer);
+  void SetTimeMetricObserver(PHMetricObserver *observer);
 #endif  // TIME_TESTER
 
   /*
@@ -210,7 +210,7 @@ class ProtocolHandlerImpl
     */
   void SendEndSession(int32_t connection_id, uint8_t session_id);
 
-protected:
+ protected:
   /**
    * \brief Sends acknowledgement of starting session to mobile application
    * with session number and hash code for second version of protocol
@@ -257,11 +257,11 @@ protected:
    * mobile app for using when ending session.
    * \param service_type Type of session: RPC or BULK Data. RPC by default
    */
-  void SendEndSessionAck( ConnectionID connection_id ,
-                          uint8_t session_id,
-                          uint8_t protocol_version,
-                          uint32_t hash_code,
-                          uint8_t service_type);
+  void SendEndSessionAck(ConnectionID connection_id ,
+                         uint8_t session_id,
+                         uint8_t protocol_version,
+                         uint32_t hash_code,
+                         uint8_t service_type);
 
   /**
    * \brief Sends fail of ending session to mobile application
@@ -271,10 +271,10 @@ protected:
    * \param protocol_version Version of protocol used for communication
    * \param service_type Type of session: RPC or BULK Data. RPC by default
    */
-  void SendEndSessionNAck( ConnectionID connection_id ,
-                           uint32_t session_id,
-                           uint8_t protocol_version,
-                           uint8_t service_type);
+  void SendEndSessionNAck(ConnectionID connection_id ,
+                          uint32_t session_id,
+                          uint8_t protocol_version,
+                          uint8_t service_type);
 
  private:
   /*
@@ -298,7 +298,7 @@ protected:
    * @param error Occurred error
    **/
   virtual void OnTMMessageReceiveFailed(
-      const transport_manager::DataReceiveError& error);
+      const transport_manager::DataReceiveError &error);
 
   /**
    * @brief Notifies about successfully sending message.
@@ -314,15 +314,15 @@ protected:
    * @param message Message during sending which error occurred.
    **/
   virtual void OnTMMessageSendFailed(
-      const transport_manager::DataSendError& error,
+      const transport_manager::DataSendError &error,
       const RawMessagePtr message);
 
   virtual void OnConnectionEstablished(
-      const transport_manager::DeviceInfo& device_info,
-      const transport_manager::ConnectionUID& connection_id);
+      const transport_manager::DeviceInfo &device_info,
+      const transport_manager::ConnectionUID &connection_id);
 
   virtual void OnConnectionClosed(
-      const transport_manager::ConnectionUID& connection_id);
+      const transport_manager::ConnectionUID &connection_id);
 
   /**
    * @brief Notifies subscribers about message
@@ -348,7 +348,7 @@ protected:
                                      uint32_t protocol_version,
                                      const uint8_t service_type,
                                      size_t data_size,
-                                     const uint8_t* data,
+                                     const uint8_t *data,
                                      const bool is_final_message);
 
   /**
@@ -369,7 +369,7 @@ protected:
                                     uint32_t protocol_version,
                                     const uint8_t service_type,
                                     size_t data_size,
-                                    const uint8_t* data,
+                                    const uint8_t *data,
                                     const size_t max_data_size,
                                     const bool is_final_message);
 
@@ -426,15 +426,15 @@ protected:
 
   RESULT_CODE HandleControlMessageEndSession(
       ConnectionID connection_id ,
-      const ProtocolPacket& packet);
+      const ProtocolPacket &packet);
 
   RESULT_CODE HandleControlMessageStartSession(
       ConnectionID connection_id ,
-      const ProtocolPacket& packet);
+      const ProtocolPacket &packet);
 
   RESULT_CODE HandleControlMessageHeartBeat(
       ConnectionID connection_id ,
-      const ProtocolPacket& packet);
+      const ProtocolPacket &packet);
 
   /**
    * \brief Sends Mobile Navi Ack message
@@ -445,9 +445,9 @@ protected:
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON raw_ford_messages_from_mobile_ thread!
-  void Handle(const impl::RawFordMessageFromMobile& message);
+  void Handle(const impl::RawFordMessageFromMobile &message);
   // CALLED ON raw_ford_messages_to_mobile_ thread!
-  void Handle(const impl::RawFordMessageToMobile& message);
+  void Handle(const impl::RawFordMessageToMobile &message);
 
 #ifdef ENABLE_SECURITY
   /**
@@ -468,12 +468,12 @@ protected:
    *\brief Pointer on instance of class implementing ISessionObserver
    *\brief (Connection Handler)
    */
-  SessionObserver* session_observer_;
+  SessionObserver *session_observer_;
 
   /**
    *\brief Pointer on instance of Transport layer handler for message exchange.
    */
-  transport_manager::TransportManager* transport_manager_;
+  transport_manager::TransportManager *transport_manager_;
 
   /**
    *\brief Map of frames for messages received in multiple frames.
@@ -514,7 +514,7 @@ protected:
   // Thread that pumps messages prepared to being sent to mobile side.
   impl::ToMobileQueue raw_ford_messages_to_mobile_;
 #ifdef TIME_TESTER
-  PHMetricObserver* metric_observer_;
+  PHMetricObserver *metric_observer_;
 #endif  // TIME_TESTER
 };
 }  // namespace protocol_handler

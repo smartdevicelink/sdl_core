@@ -60,7 +60,7 @@ public:
    * \param dataSize Message size
    */
   RawMessage(uint32_t connection_key, uint32_t protocolVersion,
-             const uint8_t * const data_param, uint32_t dataSize,
+             const uint8_t *const data_param, uint32_t dataSize,
              uint8_t type = ServiceType::kRpc);
 
   /**
@@ -81,7 +81,7 @@ public:
   /**
    * \brief Getter for message string
    */
-  uint8_t* data() const;
+  uint8_t *data() const;
 
   /**
    * \brief Getter for message size
@@ -119,7 +119,7 @@ private:
   /**
    * \brief Message string
    */
-  uint8_t* data_;
+  uint8_t *data_;
 
   /**
    * \brief Size of message

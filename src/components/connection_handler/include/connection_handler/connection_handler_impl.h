@@ -41,7 +41,6 @@
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "protocol_handler/session_observer.h"
 #include "protocol_handler/protocol_handler.h"
-#include "transport_manager/transport_manager_listener_empty.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
@@ -81,21 +80,21 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param observer Pointer to observer object.
    */
   virtual void set_connection_handler_observer(
-      ConnectionHandlerObserver* observer);
+      ConnectionHandlerObserver *observer);
 
   /**
     * \brief Sets pointer to TransportManager.
     * \param transport_mngr Pointer to TransportManager object.
     **/
   virtual void set_transport_manager(
-      transport_manager::TransportManager* transport_mngr);
+      transport_manager::TransportManager *transport_mngr);
 
   /**
    * \brief Sets pointer to ProtocolHandler.
    * \param protocol_handler Pointer to ProtocolHandler object.
    **/
   void set_protocol_handler(
-      protocol_handler::ProtocolHandler* protocol_handler);
+      protocol_handler::ProtocolHandler *protocol_handler);
 
   /**
    * \brief Connects to all services of device
@@ -120,13 +119,13 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    *
    * \param DeviceList New list of available devices.
    **/
-  virtual void OnDeviceFound(const transport_manager::DeviceInfo& device_info);
-  virtual void OnDeviceAdded(const transport_manager::DeviceInfo& device_info);
-  virtual void OnDeviceRemoved(const transport_manager::DeviceInfo& device_info);
+  virtual void OnDeviceFound(const transport_manager::DeviceInfo &device_info);
+  virtual void OnDeviceAdded(const transport_manager::DeviceInfo &device_info);
+  virtual void OnDeviceRemoved(const transport_manager::DeviceInfo &device_info);
 
   virtual void OnScanDevicesFinished();
   virtual void OnScanDevicesFailed(
-      const transport_manager::SearchDeviceError& error);
+      const transport_manager::SearchDeviceError &error);
 
   /**
    * \brief Notifies about established connection.
@@ -134,30 +133,30 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param connection_id ID of new connection.
    **/
   virtual void OnConnectionEstablished(
-      const transport_manager::DeviceInfo& device_info,
-      const transport_manager::ConnectionUID& connection_id);
+      const transport_manager::DeviceInfo &device_info,
+      const transport_manager::ConnectionUID &connection_id);
   virtual void OnConnectionFailed(
-      const transport_manager::DeviceInfo& device_info,
-      const transport_manager::ConnectError& error);
+      const transport_manager::DeviceInfo &device_info,
+      const transport_manager::ConnectError &error);
   virtual void OnConnectionClosed(
       transport_manager::ConnectionUID connection_id);
   virtual void OnConnectionClosedFailure(
       transport_manager::ConnectionUID connection_id,
-      const transport_manager::DisconnectError& error);
+      const transport_manager::DisconnectError &error);
   virtual void OnUnexpectedDisconnect(
       transport_manager::ConnectionUID connection_id,
-      const transport_manager::CommunicationError& error);
+      const transport_manager::CommunicationError &error);
   virtual void OnDeviceConnectionLost(
-      const connection_handler::DeviceHandle& device,
-      const transport_manager::DisconnectDeviceError& error);
+      const connection_handler::DeviceHandle &device,
+      const transport_manager::DisconnectDeviceError &error);
   /**
    * \brief Informs about failure during DisconnectDevice procedure of TM
    * \param device Information about disconnected device
    * \param error Information about possible reason of loosing connection
    */
   virtual void OnDisconnectFailed(
-      const connection_handler::DeviceHandle& device,
-      const transport_manager::DisconnectDeviceError& error);
+      const connection_handler::DeviceHandle &device,
+      const transport_manager::DisconnectDeviceError &error);
 
   /**
    * \brief Callback function used by ProtocolHandler
@@ -167,12 +166,12 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param service_type Type of service
    * \param is_protected would be service protected
    * \param protocol_version Version of protocol
-   * \return int32_t Id (number) of new session if successful otherwise 0.
+   * \return uint32_t Id (number) of new session if successful, otherwise 0.
    */
   virtual uint32_t OnSessionStartedCallback(
-      const transport_manager::ConnectionUID& connection_handle,
+      const transport_manager::ConnectionUID &connection_handle,
       const uint8_t session_id,
-      const protocol_handler::ServiceType& service_type,
+      const protocol_handler::ServiceType &service_type,
       const bool is_protected);
 
   /**
@@ -182,12 +181,12 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param sessionId Identifier of the session to be ended
    * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
    * If not equal to hash assigned to session on start then operation fails.
-   * \return int32_t 0 if operation fails session key otherwise
+   * \return uint32_t 0 if operation fails, session key otherwise
    */
   virtual uint32_t OnSessionEndedCallback(
-      const transport_manager::ConnectionUID& connection_handle,
-      const uint8_t session_id, const uint32_t& hashCode,
-      const protocol_handler::ServiceType& service_type);
+      const transport_manager::ConnectionUID &connection_handle,
+      const uint8_t session_id, const uint32_t &hashCode,
+      const protocol_handler::ServiceType &service_type);
 
   /**
    * \brief Creates unique identifier of session (can be used as hash)
@@ -208,8 +207,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param sessionId Returned: Number of session
    */
   virtual void PairFromKey(uint32_t key,
-                           transport_manager::ConnectionUID* connection_handle,
-                           uint8_t* session_id);
+                           transport_manager::ConnectionUID *connection_handle,
+                           uint8_t *session_id);
 
   /**
    * \brief information about given Connection Key.
@@ -219,22 +218,22 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param device_id Returned: DeviceID
    * \return int32_t -1 in case of error or 0 in case of success
    */
-  virtual int32_t GetDataOnSessionKey(uint32_t key, uint32_t* app_id = 0,
-                                      std::list<int32_t>* sessions_list = NULL,
-                                      uint32_t* device_id = 0);
+  virtual int32_t GetDataOnSessionKey(uint32_t key, uint32_t *app_id = 0,
+                                      std::list<int32_t> *sessions_list = NULL,
+                                      uint32_t *device_id = 0);
 
   /**
-   * \brief information about given Connection Key.
-   * \param key Unique key used by other components as session identifier
-   * \param app_id Returned: ApplicationID
-   * \param sessions_list Returned: List of session keys
-   * \param device_id Returned: DeviceID
+   * \brief information about device
+   * \param device_handle
+   * \param device_name Returned: name of device
+   * \param applications_list Returned: applications on device
+   * \param mac_address Returned: List of session keys
    * \return int32_t -1 in case of error or 0 in case of success
    */
   virtual int32_t GetDataOnDeviceID(connection_handler::DeviceHandle device_handle,
-                                    std::string* device_name = NULL,
-                                    std::list<uint32_t>* applications_list = NULL,
-                                    std::string* mac_address = NULL);
+                                    std::string *device_name = NULL,
+                                    std::list<uint32_t> *applications_list = NULL,
+                                    std::string *mac_address = NULL);
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets crypto context of connection
@@ -243,8 +242,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \return \c SecurityQuery::ProtectSessionResult value
    */
   int SetSSLContext(
-      const uint32_t& key,
-      security_manager::SSLContext* context) OVERRIDE;
+      const uint32_t &key,
+      security_manager::SSLContext *context) OVERRIDE;
 
   /**
    * \brief Gets crypto context of connection, use service_type to get NULL
@@ -255,8 +254,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \return \ref SSLContext of connection
    */
   security_manager::SSLContext* GetSSLContext(
-      const uint32_t& key,
-      const protocol_handler::ServiceType& service_type) OVERRIDE;
+      const uint32_t &key,
+      const protocol_handler::ServiceType &service_type) OVERRIDE;
 #endif  // ENABLE_SECURITY
 
   /**
@@ -265,8 +264,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param device_handle
    * \return true on sucess otherwise false.
    */
-  virtual bool GetDeviceID(const std::string& mac_address,
-                           DeviceHandle* device_handle);
+  virtual bool GetDeviceID(const std::string &mac_address,
+                           DeviceHandle *device_handle);
 
   /**
    * \brief Method which should start devices discovering
@@ -326,7 +325,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \brief Keep connection associated with the key from being closed by heartbeat monitor
    */
   void KeepConnectionAlive(uint32_t connection_key, uint8_t session_id);
-private:
+ private:
   /**
    * \brief Default class constructor
    */
@@ -341,19 +340,19 @@ private:
   void RemoveConnection(const ConnectionHandle connection_handle);
 
   void OnConnectionEnded(
-      const transport_manager::ConnectionUID& connection_id);
+      const transport_manager::ConnectionUID &connection_id);
 
   /**
    * \brief Pointer to observer
    */
-  ConnectionHandlerObserver* connection_handler_observer_;
+  ConnectionHandlerObserver *connection_handler_observer_;
 
   /**
    * \brief Pointer to TransportManager
    */
-  transport_manager::TransportManager* transport_manager_;
+  transport_manager::TransportManager *transport_manager_;
 
-  protocol_handler::ProtocolHandler* protocol_handler_;
+  protocol_handler::ProtocolHandler *protocol_handler_;
 
   /**
    * \brief List of devices
@@ -378,10 +377,10 @@ private:
 #ifdef BUILD_TESTS
   // Methods for test usage
  public:
-  ConnectionList& getConnectionList();
+  ConnectionList &getConnectionList();
   void addDeviceConnection(
-      const transport_manager::DeviceInfo& device_info,
-      const transport_manager::ConnectionUID& connection_id);
+      const transport_manager::DeviceInfo &device_info,
+      const transport_manager::ConnectionUID &connection_id);
 #endif
  private:
   FRIEND_BASE_SINGLETON_CLASS(ConnectionHandlerImpl);

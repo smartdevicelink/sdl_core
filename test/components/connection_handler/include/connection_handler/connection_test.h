@@ -169,7 +169,7 @@ TEST_F(ConnectionTest, Session_AddControlService) {
 }
 
 // Invalid Services couldnot be started anyway
-TEST_F(ConnectionTest, Session_AddInvalideService) {
+TEST_F(ConnectionTest, Session_AddInvalidService) {
   StartSession();
 
   AddNewService(protocol_handler::kInvalidServiceType, PROTECTION_OFF,
