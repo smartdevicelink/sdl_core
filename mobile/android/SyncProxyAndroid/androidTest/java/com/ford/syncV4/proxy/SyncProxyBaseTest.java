@@ -51,7 +51,8 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         super.setUp();
         TestCommon.setupMocking(this);
         proxyListenerMock = mock(IProxyListenerALM.class);
-        proxy = TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        proxy = TestCommon.getSyncProxyALMNoTransport(getInstrumentation().getTargetContext(),
+                proxyListenerMock);
 
         when(proxy.mSyncConnection.getProtocolVersion())
                 .thenReturn(ProtocolConstants.PROTOCOL_VERSION_THREE);
@@ -175,7 +176,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(false);
+                        mSyncConnection.closeConnection();
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);

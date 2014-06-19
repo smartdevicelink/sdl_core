@@ -301,9 +301,12 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   smart_objects::SmartObject& params = message[strings::msg_params];
 
-  const std::string mobile_app_id = params[strings::app_id].asString();
+  const std::string& mobile_app_id = params[strings::app_id].asString();
+  const std::string& app_name =
+    message[strings::msg_params][strings::app_name].asString();
+
   ApplicationSharedPtr application(
-    new ApplicationImpl(app_id, mobile_app_id, policy_manager_));
+    new ApplicationImpl(app_id, mobile_app_id, app_name, policy_manager_));
   if (!application) {
     usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
       policy_manager_, mobile_app_id,
@@ -375,7 +378,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   version.max_supported_api_version = static_cast<APIVersion>(max_version);
   application->set_version(version);
 
-  application->set_mobile_app_id(message[strings::msg_params][strings::app_id]);
   ProtocolVersion protocol_version = static_cast<ProtocolVersion>(
       message[strings::params][strings::protocol_version].asInt());
   application->set_protocol_version(protocol_version);

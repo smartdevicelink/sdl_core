@@ -204,6 +204,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
       file.file_name = file_data[strings::sync_file_name].asString();
       file.file_type = static_cast<mobile_apis::FileType::eType> (
                          file_data[strings::file_type].asInt());
+      LOG4CXX_INFO(logger_, "RestoreApplicationData file " << file.file_name);
       application->AddFile(file);
     }
   }
@@ -512,7 +513,7 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
 }
 
 bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr application) {
-  LOG4CXX_INFO(logger_, "RestoreApplicationData");
+  LOG4CXX_INFO(logger_, "CheckPersistenceFilesForResumption");
   DCHECK(application.get());
 
   Json::Value::iterator it = GetSavedApplications().begin();

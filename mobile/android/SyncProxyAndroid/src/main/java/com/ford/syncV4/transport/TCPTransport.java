@@ -221,6 +221,9 @@ public class TCPTransport extends SyncTransport {
             if (mThread != null) {
                 mThread.halt();
                 mThread.interrupt();
+                //mThread.join();
+
+                mThread = null;
             }
 
             if (mSocket != null) {
@@ -233,8 +236,10 @@ public class TCPTransport extends SyncTransport {
             }
             mServerSocket = null;
         } catch (IOException e) {
-            Logger.i("TCPTransport.disconnect: Exception during disconnect: " + e.getMessage());
-        }
+            Logger.i("TCPTransport.disconnect: IOException: " + e.getMessage());
+        } /*catch (InterruptedException e) {
+            Logger.i("TCPTransport.disconnect: Join Exception: " + e.getMessage());
+        }*/
 
         if (exception == null) {
             // This disconnect was not caused by an error, notify the proxy that
@@ -269,7 +274,7 @@ public class TCPTransport extends SyncTransport {
          * Represents current thread state - halted or not. This flag is used to change internal behavior depending
          * on current state.
          */
-        private Boolean isHalted = false;
+        private volatile Boolean isHalted = false;
 
         /**
          * Method that marks thread as halted.
@@ -333,6 +338,12 @@ public class TCPTransport extends SyncTransport {
             return bConnected;
         }
 
+        @Override
+        protected void finalize() throws Throwable {
+            super.finalize();
+            Logger.i("TCPTransport finalize thread");
+        }
+
         /**
          * Performs actual thread work
          */
@@ -354,7 +365,6 @@ public class TCPTransport extends SyncTransport {
 
                 setCurrentState(TCPTransportState.CONNECTED);
                 handleTransportConnected();
-
 
                 byte[] buffer = new byte[READ_BUFFER_SIZE];
 

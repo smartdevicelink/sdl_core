@@ -46,7 +46,7 @@ SDL.StatusPhoneView = Em.ContainerView.extend( {
 
     /** Climate components */
     childViews: [
-        'statusHome',
+        'statusHome'
     ],
 
     /** Label for Home screen */

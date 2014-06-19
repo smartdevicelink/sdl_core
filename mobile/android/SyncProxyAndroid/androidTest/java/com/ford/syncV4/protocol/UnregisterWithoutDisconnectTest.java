@@ -15,7 +15,6 @@ import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -56,7 +55,7 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         // protected. And I couldn't add the PowerMock library to the project
         // due to errors during 'dexTest' step
 
-        verify(connection).closeConnection(eq(true));
+        verify(connection, never()).closeConnection();
         verify(transportMock, never()).disconnect();
     }
 
@@ -75,7 +74,7 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
 
         syncProxy.doUnregisterAppInterface(SessionTest.APP_ID);
 
-        verify(connection, never()).closeConnection(eq(true));
+        verify(connection, never()).closeConnection();
         verify(transportMock, never()).disconnect();
     }
 
@@ -83,6 +82,8 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         return new SyncProxyALM(proxyListenerMock, null, "test", null, null,
                 false, null, null, null, null, SessionTest.APP_ID, null, false, false,
-                ProtocolConstants.PROTOCOL_VERSION_TWO, null, connection, new TestConfig());
+                ProtocolConstants.PROTOCOL_VERSION_TWO,
+                new USBTransportConfig(getInstrumentation().getTargetContext()), connection,
+                new TestConfig());
     }
 }

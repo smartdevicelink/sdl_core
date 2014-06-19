@@ -1,6 +1,7 @@
 package com.ford.syncV4.streaming;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,7 +10,7 @@ abstract public class AbstractPacketizer {
 
     protected IStreamListener mStreamListener = null;
 
-    protected byte _rpcSessionID = 0;
+    protected byte _rpcSessionID = Session.DEFAULT_SESSION_ID;
 
     protected ServiceType _serviceType = ServiceType.Mobile_Nav;
 
@@ -29,10 +30,15 @@ abstract public class AbstractPacketizer {
         return _rpcSessionID;
     }
 
-    public AbstractPacketizer(IStreamListener streamListener, InputStream is, byte rpcSessionID) throws IOException {
-        this.mStreamListener = streamListener;
-        this.is = is;
+    public AbstractPacketizer(IStreamListener streamListener, InputStream inputStream,
+                              byte rpcSessionID) throws IOException {
+        mStreamListener = streamListener;
+        is = inputStream;
         _rpcSessionID = rpcSessionID;
+    }
+
+    public void removeListener() {
+        mStreamListener = null;
     }
 
     public abstract void start() throws IOException;

@@ -19,6 +19,7 @@ import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.transport.usb.USBTransportConfig;
 
 import org.mockito.ArgumentCaptor;
 
@@ -93,7 +94,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(false);
+                        mSyncConnection.closeConnection();
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -151,7 +152,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(false);
+                        mSyncConnection.closeConnection();
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -212,7 +213,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(false);
+                        mSyncConnection.closeConnection();
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -276,7 +277,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(false);
+                        mSyncConnection.closeConnection();
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -334,7 +335,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(false);
+                        mSyncConnection.closeConnection();
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -363,20 +364,20 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         SyncProxyALM proxyALM = new SyncProxyALM(listenerALM,
                                 /*sync proxy configuration resources*/null,
                                 /*enable advanced lifecycle management true,*/
-                "appName",
+                                "appName",
                                 /*ngn media app*/null,
                                 /*vr synonyms*/null,
                                 /*is media app*/true,
                                 /*app type*/null,
-                syncMsgVersion,
+                                syncMsgVersion,
                                 /*language desired*/Language.EN_US,
                                 /*HMI Display Language Desired*/Language.EN_US,
                                 /*App ID*/"8675308",
                                 /*autoActivateID*/null,
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
-                2,
-                conf, new TestConfig()) {
+                                2,
+                                conf, new TestConfig()) {
 
 
             @Override
@@ -390,7 +391,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(false);
+                        mSyncConnection.closeConnection();
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -419,8 +420,9 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         SyncProxyALM proxy =
                 new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                         false, null, null, null, null, SessionTest.APP_ID, null, false, false,
-                        ProtocolConstants.PROTOCOL_VERSION_TWO, null, syncConnectionMock,
-                        new TestConfig());
+                        ProtocolConstants.PROTOCOL_VERSION_TWO,
+                        new USBTransportConfig(getInstrumentation().getTargetContext()),
+                        syncConnectionMock, new TestConfig());
         SyncConnection connection = new SyncConnection(new Session(),
                 new BTTransportConfig(),
                 proxy.getInterfaceBroker());

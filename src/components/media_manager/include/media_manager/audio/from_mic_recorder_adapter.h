@@ -56,8 +56,8 @@ class FromMicRecorderAdapter : public MediaAdapterImpl {
   private:
     threads::Thread* recorder_thread_;
     std::string output_file_;
-    int32_t duration_;
     const int32_t kDefaultDuration;
+    int32_t duration_;
     DISALLOW_COPY_AND_ASSIGN(FromMicRecorderAdapter);
 };
 }  // namespace media_manager

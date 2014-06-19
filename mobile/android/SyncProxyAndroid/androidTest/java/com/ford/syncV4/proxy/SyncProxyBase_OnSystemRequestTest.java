@@ -22,6 +22,8 @@ import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.session.SessionTest;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.transport.BTTransportConfig;
+import com.ford.syncV4.transport.usb.USBTransportConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -79,10 +81,13 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         // Set correct version of the Protocol when creates RPC requests at SyncProxyBase
         when(connectionMock.getProtocolVersion()).thenReturn(ProtocolConstants.PROTOCOL_VERSION_MAX);
+        when(connectionMock.getIsConnected()).thenReturn(true);
 
         proxy = new SyncProxyALM(proxyListenerMock, null, "a", null, null,
                 false, null, null, null, null, SessionTest.APP_ID, null, false, false,
-                ProtocolConstants.PROTOCOL_VERSION_TWO, null, connectionMock, new TestConfig());
+                ProtocolConstants.PROTOCOL_VERSION_TWO,
+                new USBTransportConfig(getInstrumentation().getTargetContext()), connectionMock,
+                new TestConfig());
         marshaller = proxy.getJsonRPCMarshaller();
 
         handlerMock = mock(IOnSystemRequestHandler.class);
@@ -453,6 +458,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
     public void testPutSystemFileShouldSendCorrectFirstProtocolMessage()
             throws InterruptedException, JSONException, SyncException {
+
         // fake data for PutFile
         final int extraDataSize = 10;
         final int dataSize = maxDataSize + extraDataSize;

@@ -28,12 +28,25 @@ public abstract class SyncTransport {
 
     //protected SyncTransport(String endpointName, String param2, ITransportListener transportListener)
     protected SyncTransport(ITransportListener transportListener) {
+<<<<<<< HEAD
         if (transportListener == null) {
             throw new IllegalArgumentException("Provided transport listener interface reference is null");
         } // end-if
         _transportListener = transportListener;
     } // end-method
 
+=======
+    	if (transportListener == null) {
+    		throw new IllegalArgumentException("Provided transport listener interface reference is null");
+    	} // end-if
+    	mTransportListener = transportListener;
+    } // end-method
+
+    public void removeListener() {
+        mTransportListener = null;
+    }
+    
+>>>>>>> develop
     // This method is called by the subclass to indicate that data has arrived from
     // the transport.
     protected void handleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
@@ -43,6 +56,7 @@ public abstract class SyncTransport {
                 // Send transport data to the siphon server
                 //SiphonServer.sendBytesFromSYNC(receivedBytes, 0, receivedBytesLength);
                 Logger.d(CLASS_NAME + " Receive Bytes");
+<<<<<<< HEAD
 
                 _transportListener.onTransportBytesReceived(receivedBytes, receivedBytesLength);
             } // end-if
@@ -50,6 +64,15 @@ public abstract class SyncTransport {
             Logger.e(FailurePropagating_Msg + "handleBytesFromTransport: " + excp.toString(), excp);
             handleTransportError(FailurePropagating_Msg, excp);
         } // end-catch
+=======
+				
+				mTransportListener.onTransportBytesReceived(receivedBytes, receivedBytesLength);
+			} // end-if
+		} catch (Exception excp) {
+			Logger.e(FailurePropagating_Msg + "handleBytesFromTransport: " + excp.toString(), excp);
+			handleTransportError(FailurePropagating_Msg, excp);
+		} // end-catch
+>>>>>>> develop
     } // end-method
 
     // This method must be implemented by transport subclass, and is called by this
@@ -76,7 +99,7 @@ public abstract class SyncTransport {
         return bytesWereSent;
     } // end-method
 
-    private ITransportListener _transportListener = null;
+    private ITransportListener mTransportListener = null;
 
     // This method is called by the subclass to indicate that transport connection
     // has been established.
@@ -84,6 +107,7 @@ public abstract class SyncTransport {
         isConnected = true;
         try {
             Logger.d(CLASS_NAME + " Connected");
+<<<<<<< HEAD
             _transportListener.onTransportConnected();
         } catch (Exception excp) {
             Logger.e(FailurePropagating_Msg + "onTransportConnected: " + excp.toString(), excp);
@@ -91,6 +115,15 @@ public abstract class SyncTransport {
         } // end-catch
     } // end-method
 
+=======
+			mTransportListener.onTransportConnected();
+		} catch (Exception excp) {
+			Logger.e(FailurePropagating_Msg + "onTransportConnected: " + excp.toString(), excp);
+			handleTransportError(FailurePropagating_Msg + "onTransportConnected", excp);
+		} // end-catch
+	} // end-method
+	
+>>>>>>> develop
     // This method is called by the subclass to indicate that transport disconnection
     // has occurred.
     protected void handleTransportDisconnected(final String info) {
@@ -98,6 +131,7 @@ public abstract class SyncTransport {
 
         try {
             Logger.d(CLASS_NAME + " Disconnected");
+<<<<<<< HEAD
             _transportListener.onTransportDisconnected(info);
         } catch (Exception excp) {
             Logger.e(FailurePropagating_Msg + "onTransportDisconnected: " + excp.toString(), excp);
@@ -105,14 +139,22 @@ public abstract class SyncTransport {
     } // end-method
 
 
+=======
+			mTransportListener.onTransportDisconnected(info);
+		} catch (Exception excp) {
+			Logger.e(FailurePropagating_Msg + "onTransportDisconnected: " + excp.toString(), excp);
+		}
+	}
+	
+>>>>>>> develop
 	// This method is called by the subclass to indicate a transport error has occurred.
 	protected void handleTransportError(final String message, final Exception ex) {
 		isConnected = false;
-		_transportListener.onTransportError(message, ex);
+		mTransportListener.onTransportError(message, ex);
 	}
 
     protected void handleOnServerSocketInit(int serverSocketPort) {
-        _transportListener.onServerSocketInit(serverSocketPort);
+        mTransportListener.onServerSocketInit(serverSocketPort);
     }
 
     public abstract void openConnection() throws SyncException;

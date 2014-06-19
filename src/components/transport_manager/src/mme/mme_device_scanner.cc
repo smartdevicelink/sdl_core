@@ -160,7 +160,20 @@ TransportAdapter::Error MmeDeviceScanner::Scan() {
     devices_lock_.Acquire();
     devices_.swap(devices);
     devices_lock_.Release();
+
     NotifyDevicesUpdated();
+
+// new device must be initialized
+// after ON_SEARCH_DEVICE_DONE notification
+// because ON_APPLICATION_LIST_UPDATED event can occur immediately
+// which doesn't make sense until device list is updated
+    devices_lock_.Acquire();
+    for (DeviceContainer::const_iterator i = devices_.begin(); i != devices_.end(); ++i) {
+      MmeDevicePtr mme_device = i->second;
+      mme_device->Init();
+    }
+    devices_lock_.Release();
+
     return TransportAdapter::OK;
   }
   else {

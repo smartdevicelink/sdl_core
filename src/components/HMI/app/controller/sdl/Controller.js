@@ -56,14 +56,9 @@ SDL.SDLController = Em.Object
             if (SDL.OptionsView.active) {
                 return 'MENU';
             }
-            if (SDL.States.info.nonMedia.active
-                || SDL.States.media.sdlmedia.active
-                || SDL.States.navigationApp.baseNavigation.active) {
 
-                return 'MAIN';
-            } else {
-                return 'MENU';
-            }
+            return 'MAIN';
+
         }.property('SDL.OptionsView.active',
             'SDL.SliderView.active',
             'SDL.SDLModel.AudioPassThruState',

@@ -234,7 +234,7 @@ void ThreadedSocketConnection::Transmit() {
     return;
   }
 
-  if (0 != (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL))) {
+  if (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
     LOG4CXX_WARN(logger_, "Connection " << this << " terminated");
     Abort();
     LOG4CXX_INFO(logger_, "exit");
@@ -270,7 +270,7 @@ void ThreadedSocketConnection::Transmit() {
   }
 
   // receive data
-  if ((0 != poll_fds[0].revents) & (POLLIN | POLLPRI)) {
+  if (poll_fds[0].revents & (POLLIN | POLLPRI)) {
     const bool receive_ok = Receive();
     if (!receive_ok) {
       LOG4CXX_ERROR(logger_, "Receive() failed  (#" << pthread_self() << ")");

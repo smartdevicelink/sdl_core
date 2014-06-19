@@ -136,7 +136,7 @@ public class ProtocolFrameHeader {
 		this.frameData = frameData;
 	}
 
-	public byte getSessionID() {
+	public byte getSessionId() {
 		return sessionID;
 	}
 

@@ -89,7 +89,7 @@ public class SyncConnectionUSBTest extends InstrumentationTestCase {
                 new USBTransportConfig(getInstrumentation().getTargetContext()),
                 mock(ISyncConnectionListener.class));
         connection.init();
-        connection._transport = fakeTransport;
+        connection.mTransport = fakeTransport;
         connection.onProtocolServiceEndedAck(ServiceType.RPC, SessionTest.SESSION_ID);
         assertTrue("stopReading() isn't called", requiredMethodCalled);
     }

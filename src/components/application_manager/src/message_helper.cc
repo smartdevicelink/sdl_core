@@ -1276,12 +1276,6 @@ void MessageHelper::GetDeviceInfoForApp(uint32_t connection_key,
 
   device_info->device_handle = ApplicationManagerImpl::instance()->application(
                                  connection_key)->device();
-  /*for (; it != it_end; ++it) {
-   if ((*it)->app_id() == atoi(connection_key.c_str())) {
-   device_info->device_handle = (*it)->device();
-   break;
-   }
-   }*/
 
   GetDeviceInfoForHandle(device_info->device_handle, device_info);
 }

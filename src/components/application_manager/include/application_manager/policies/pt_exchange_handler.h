@@ -38,8 +38,9 @@
 namespace policy {
 class PTExchangeHandler {
   public:
-    virtual ~PTExchangeHandler();
-    virtual bool StartExchange() = 0;
+    virtual ~PTExchangeHandler() {};
+    virtual void Start() = 0;
+    virtual void Stop() = 0;
 };
 }  //  namespace policy
 

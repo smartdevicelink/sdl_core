@@ -30,12 +30,18 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+#ifndef SRC_APPMAIN_SIGNAL_HANDLERS_H_
+#define SRC_APPMAIN_SIGNAL_HANDLERS_H_
 
-namespace utils {
-bool SubscribeToTerminateSignal(void (*func)(int32_t p));
-bool ResetSubscribeToTerminateSignal();
-}  //  namespace utils
+#include <stdint.h>
 
-#endif  //  SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+namespace main_namespace {
+
+// This is dummy signal handler
+// which returns immediately
+// to unblock pause()
+void dummy_signal_handler(int32_t signal);
+
+}  // namespace main_namespace
+
+#endif  // SRC_APPMAIN_SIGNAL_HANDLERS_H_

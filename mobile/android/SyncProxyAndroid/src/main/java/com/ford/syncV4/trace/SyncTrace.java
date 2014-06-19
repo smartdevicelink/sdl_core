@@ -292,7 +292,7 @@ public class SyncTrace {
 		sb.append("</ft><st>");
 		sb.append(getProtocolSessionType(hdr.getServiceType()));
 		sb.append("</st><sid>");
-		sb.append(hdr.getSessionID());
+		sb.append(hdr.getSessionId());
 		sb.append("</sid><sz>");
 		sb.append(hdr.getDataSize());
 		sb.append("</sz>");

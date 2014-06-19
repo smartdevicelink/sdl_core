@@ -81,7 +81,6 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     */
     bool InitMessageSystem();
     void StopComponents();
-    static void StopComponentsOnSignal(int32_t params);
 
   private:
     LifeCycle();

@@ -46,6 +46,7 @@ class RetrySequence : public threads::ThreadDelegate {
 
  private:
   PolicyHandler* const policy_handler_;
+  void StartNextRetry();
 };
 
 }  // namespace policy

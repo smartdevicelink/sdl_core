@@ -356,8 +356,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         return restoreConnectionToRPCService;
     }
 
-    public void closeConnection() {
-        mSyncProxy.closeConnection();
+    public boolean hasRPCRunning(String appId) {
+        return mSessionsCounter.contains(appId);
     }
 
     /**

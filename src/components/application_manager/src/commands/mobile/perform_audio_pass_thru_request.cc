@@ -50,6 +50,14 @@ PerformAudioPassThruRequest::PerformAudioPassThruRequest(
 PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {
 }
 
+void PerformAudioPassThruRequest::onTimeOut() {
+  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::onTimeOut");
+
+  ApplicationManagerImpl::instance()->StopAudioPassThru(connection_key());
+
+  CommandRequestImpl::onTimeOut();
+}
+
 bool PerformAudioPassThruRequest::Init() {
   default_timeout_ += (*message_)[str::msg_params][str::max_duration].asInt();
   return true;

@@ -281,14 +281,15 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   if ((0 == session_id) && (protocol_handler::kRpc == service_type)) {
     new_session_id = connection->AddNewSession();
     if (0 == new_session_id) {
-      LOG4CXX_ERROR(logger_, "Not possible to start session!");
+      LOG4CXX_ERROR(logger_, "Not possible to start new session!");
       return 0;
     }
-  } else {
+  } else {  // Could be create new service or protected exists one
     if (!connection->AddNewService(session_id, service_type, is_protected)) {
       LOG4CXX_ERROR(logger_, "Not possible to establish "
-                    << (is_protected ? "prootected" : "nonprotected")
-                    << " service " << static_cast<int>(service_type) << "!");
+                    << (is_protected ? "protected" : "nonprotected")
+                    << " service " << static_cast<int>(service_type)
+                    << " for session " << static_cast<int>(session_id));
       return 0;
     }
     new_session_id = session_id;
@@ -296,17 +297,16 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
 
   if (connection_handler_observer_) {
     const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
-
+    // TODO(EZamakhov): update info in ApplicationManagerImpl::OnServiceStartedCallback
     const bool success = connection_handler_observer_->OnServiceStartedCallback(
         connection->connection_device_handle(), session_key, service_type);
-
     if (!success) {
       if (protocol_handler::kRpc == service_type) {
         connection->RemoveSession(new_session_id);
       } else {
         connection->RemoveService(session_id, service_type);
       }
-      new_session_id = 0;
+      return 0;
     }
   }
   return new_session_id;

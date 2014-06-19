@@ -30,12 +30,11 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+#include "signal_handlers.h"
 
-namespace utils {
-bool SubscribeToTerminateSignal(void (*func)(int32_t p));
-bool ResetSubscribeToTerminateSignal();
-}  //  namespace utils
+namespace main_namespace {
 
-#endif  //  SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_
+void dummy_signal_handler(int32_t signal) {
+}
+
+}  // namespace main_namespace

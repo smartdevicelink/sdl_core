@@ -44,8 +44,6 @@ set (SOURCES
 set (POLICIES_MANAGER
 ./src/policies/policy_handler.cc
 ./src/policies/policy_event_observer.cc
-./src/policies/policy_retry_sequence.cc
-./src/policies/pt_exchange_handler.cc
 )
 
 if (EXTENDED_POLICY_FLAG)
@@ -54,7 +52,6 @@ if (EXTENDED_POLICY_FLAG)
   )
   list(APPEND POLICIES_MANAGER
     ./src/policies/pt_exchange_handler_ext.cc
-    ./src/policies/pt_exchange_handler_impl.cc
   )
 else ()
   include_directories(
@@ -62,6 +59,7 @@ else ()
   )
   list(APPEND POLICIES_MANAGER
     ./src/policies/pt_exchange_handler_impl.cc
+    ./src/policies/policy_retry_sequence.cc
   )
 endif ()
 

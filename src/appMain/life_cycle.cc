@@ -473,10 +473,4 @@ void LifeCycle::StopComponents() {
 #endif  // TIME_TESTER
 }
 
-void LifeCycle::StopComponentsOnSignal(int32_t params) {
-  utils::ResetSubscribeToTerminateSignal();
-  instance()->StopComponents();
-  utils::ForwardSignal();
-}
-
 }  //  namespace main_namespace
