@@ -143,6 +143,9 @@ public class MessageFrameAssembler {
         int messageId = header.getMessageID();
         ServiceType serviceType = header.getServiceType();
         Logger.d(CLASS_NAME + " incoming control frame:" + header.toString());
+
+        // TODO : Implement getServiceType check point for Heartbeat and other non RPC's
+
         if (frameData == FrameDataControlFrameType.HeartbeatACK.getValue()) {
             mMessageFrameAssemblerListener.onHeartbeatACK(sessionId);
         } else if (frameData == FrameDataControlFrameType.Heartbeat.getValue()) {
