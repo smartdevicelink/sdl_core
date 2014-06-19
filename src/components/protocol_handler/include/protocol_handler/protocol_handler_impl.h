@@ -368,7 +368,7 @@ class ProtocolHandlerImpl
                                     const uint8_t session_id,
                                     uint32_t protocol_version,
                                     const uint8_t service_type,
-                                    size_t data_size,
+                                    const size_t data_size,
                                     const uint8_t *data,
                                     const size_t max_data_size,
                                     const bool is_final_message);
