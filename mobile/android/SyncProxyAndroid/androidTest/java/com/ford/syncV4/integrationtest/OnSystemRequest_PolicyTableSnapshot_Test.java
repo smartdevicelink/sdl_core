@@ -160,7 +160,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
         // set another connection mock to be able to verify the second time below
         //final SyncConnection connectionMock2 = createNewSyncConnectionMock();
-        //setSyncConnection(proxy, connectionMock2);
+        //setProtectServiceListener(proxy, connectionMock2);
 
         final ProtocolMessage protocolMessage = argumentCaptor.getValue();
         assertThat(protocolMessage.getFunctionID(), is(PUTFILE_FUNCTIONID));

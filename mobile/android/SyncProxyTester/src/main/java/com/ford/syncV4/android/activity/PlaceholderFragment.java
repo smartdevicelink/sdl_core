@@ -1545,7 +1545,7 @@ public class PlaceholderFragment extends Fragment {
                         final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
                         final CheckBox useProgressIndicator = (CheckBox) layout.findViewById(R.id.alert_useProgressIndicator);
                         final CheckBox useDuration = (CheckBox) layout.findViewById(R.id.alert_useDuration);
-
+                        final CheckBox doEncryptView = (CheckBox) layout.findViewById(R.id.alert_do_encrypt_view);
                         chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 
                         SoftButton sb1 = new SoftButton();
@@ -1599,6 +1599,7 @@ public class PlaceholderFragment extends Fragment {
                                                 .createSimpleTTSChunks(toSpeak);
                                         msg.setTtsChunks(ttsChunks);
                                     }
+                                    msg.setDoEncryption(doEncryptView.isChecked());
                                     if (chkIncludeSoftButtons.isChecked() &&
                                             (currentSoftButtons != null) &&
                                             (currentSoftButtons.size() > 0)) {
@@ -2898,6 +2899,7 @@ public class PlaceholderFragment extends Fragment {
         if (boundProxyService == null) {
             return;
         }
+        MessageFilter.filter(rpcRequest);
         boundProxyService.sendRPCRequestWithPreprocess(getAppId(), rpcRequest);
     }
 }

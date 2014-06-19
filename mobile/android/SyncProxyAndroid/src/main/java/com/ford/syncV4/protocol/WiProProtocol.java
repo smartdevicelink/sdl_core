@@ -239,7 +239,6 @@ public class WiProProtocol extends AbstractProtocol {
             @Override
             public void onProtocolFrameToSend(ProtocolFrameHeader header, byte[] data,
                                               int offset, int length) {
-                header.setEncrypted(encrypted);
                 handleProtocolFrameToSend(header, data, offset, length);
             }
 
@@ -255,7 +254,7 @@ public class WiProProtocol extends AbstractProtocol {
                 }
             }
         });
-        sendProtocolMessageProcessor.process(serviceType, protocolVersionToSend, data,
+        sendProtocolMessageProcessor.process(serviceType, protocolVersionToSend, encrypted, data,
                 MAX_DATA_SIZE, sessionID, getNextMessageId());
     }
 

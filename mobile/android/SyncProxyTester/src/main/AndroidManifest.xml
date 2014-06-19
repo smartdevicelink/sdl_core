@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.ford.syncV4.android"
-    android:versionCode="83"
+    android:versionCode="85"
     android:versionName="2.0.13 (CW25)" >
 
     <!-- Version 12 is minimum to support the USB Accessory mode -->
@@ -21,7 +21,6 @@
     <uses-feature android:name="android.hardware.usb.accessory"/>
 
     <application
-        android:debuggable="true"
         android:icon="@drawable/main_logo"
         android:name=".MainApp"
         android:theme="@style/AppTheme"

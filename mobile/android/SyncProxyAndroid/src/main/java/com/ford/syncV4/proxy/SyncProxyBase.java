@@ -515,11 +515,13 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
     IHandshakeDataListener secureProxyServerListener = new IHandshakeDataListener() {
 
+        private byte sessionID = Session.DEFAULT_SESSION_ID;
+        private byte version = 2;
+
         @Override
         public void onHandshakeDataReceived(byte[] data) {
-            //TODO get session id
             ProtocolMessage protocolMessage =
-                    SecureServiceMessageFactory.buildHandshakeRequest(syncSession.getSessionIdByAppId(""), data);
+                    SecureServiceMessageFactory.buildHandshakeRequest(sessionID, data, version);
             dispatchOutgoingMessage(protocolMessage);
         }
 
@@ -536,6 +538,16 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             }
             InternalProxyMessage proxyMessage = new OnError(errorMsg, e);
             dispatchInternalMessage(proxyMessage);
+        }
+
+        @Override
+        public synchronized void setSessionID(byte sessionId) {
+            this.sessionID = sessionId;
+        }
+
+        @Override
+        public synchronized void setVersion(byte version) {
+            this.version = version;
         }
     };
 
@@ -554,27 +566,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         if (mSecureServiceMessageCallback == null) {
             return;
         }
-        mSecureServiceMessageCallback.setSyncConnection(new IProtectServiceListener() {
-
-            @Override
-            public void onHandshakeResponse(byte[] data) {
-                try {
-                    protocolSecureManager.writeDataToProxyServer(data, new IRPCodedDataListener() {
-                        @Override
-                        public void onRPCPayloadCoded(byte[] bytes) {
-                        }
-                    });
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onHandshakeError(SecurityInternalError error) {
-                InternalProxyMessage proxyMessage = new OnError("Handshake Error " + error, new Exception("Handshake Error " + error));
-                dispatchInternalMessage(proxyMessage);
-            }
-        });
     }
 
     /**
@@ -2148,6 +2139,28 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }
     }
 
+    protected void onProtocolServiceStarted_RPC(final byte sessionId, final boolean encrypted) {
+        Logger.i("RPC service started, sesId:" + sessionId);
+        createService(sessionId, ServiceType.RPC, encrypted);
+        if (protocolSecureManager != null &&
+                protocolSecureManager.containsServiceTypeToEncrypt(ServiceType.RPC) &&
+                encrypted) {
+            protocolSecureManager.setHandshakeFinished(true);
+        }
+        final String appId = syncSession.getAppIdBySessionId(sessionId);
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mProxyListener.onRPCServiceStart(appId, encrypted);
+                }
+            });
+        } else {
+            mProxyListener.onRPCServiceStart(appId, encrypted);
+        }
+    }
+
     private void createService(byte sessionId, ServiceType serviceType, boolean encrypted) {
         if (!syncSession.hasSessionId(sessionId)) {
             throw new IllegalArgumentException("can't create service with sesId:" + sessionId);
@@ -3063,18 +3076,24 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
     public void startMobileNavService(String appId, boolean cyphered) {
         if (mSyncConnection != null) {
+            secureProxyServerListener.setSessionID(syncSession.getSessionIdByAppId(appId));
+            secureProxyServerListener.setVersion(getSyncConnection().getProtocolVersion());
             mSyncConnection.startMobileNavService(syncSession.getSessionIdByAppId(appId), cyphered);
         }
     }
 
     public void startAudioService(String appId, boolean cyphered) {
         if (mSyncConnection != null) {
+            secureProxyServerListener.setSessionID(syncSession.getSessionIdByAppId(appId));
+            secureProxyServerListener.setVersion(getSyncConnection().getProtocolVersion());
             mSyncConnection.startAudioService(syncSession.getSessionIdByAppId(appId), cyphered);
         }
     }
 
     public void startRpcService(String appId, boolean encrypted) {
         if (mSyncConnection != null) {
+            secureProxyServerListener.setSessionID(syncSession.getSessionIdByAppId(appId));
+            secureProxyServerListener.setVersion(getSyncConnection().getProtocolVersion());
             mSyncConnection.startRpcService(syncSession.getSessionIdByAppId(appId), encrypted);
         }
     }
@@ -3289,6 +3308,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                     onProtocolServiceStarted_MobileNavi(sessionId, encrypted);
                 } else if (serviceType.equals(ServiceType.Audio_Service)) {
                     onProtocolServiceStarted_Audio(sessionId, encrypted);
+                }else if ( serviceType.equals(ServiceType.RPC) ){
+                    onProtocolServiceStarted_RPC(sessionId,encrypted);
                 }
             }
         }
@@ -3434,9 +3455,32 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         mSecureServiceMessageManager = new SecureServiceMessageManager();
         mSecureServiceMessageCallback = new SecureServiceMessageCallback();
         mSecureServiceMessageManager.setMessageCallback(mSecureServiceMessageCallback);
+        setupProtectServiceListener();
     }
 
+    private void setupProtectServiceListener() {
+        mSecureServiceMessageCallback.setProtectServiceListener(new IProtectServiceListener() {
 
+            @Override
+            public void onHandshakeResponse(byte[] data) {
+                try {
+                    protocolSecureManager.writeDataToProxyServer(data, new IRPCodedDataListener() {
+                        @Override
+                        public void onRPCPayloadCoded(byte[] bytes) {
+                        }
+                    });
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onHandshakeError(SecurityInternalError error) {
+                InternalProxyMessage proxyMessage = new OnError("Handshake Error " + error, new Exception("Handshake Error " + error));
+                dispatchInternalMessage(proxyMessage);
+            }
+        });
+    }
     /**
      * Process policy file snapshot request
      *

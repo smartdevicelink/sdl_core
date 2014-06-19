@@ -384,7 +384,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertNotNull(proxy);
         proxy.currentSession = Session.createSession(ServiceType.RPC, sessionID, false);
         proxy.closeSession(false);
-        proxy.setSyncConnection(mock(SyncConnection.class));
+        proxy.setProtectServiceListener(mock(SyncConnection.class));
         proxy.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, sessionID, false), ProtocolConstants.PROTOCOL_VERSION_THREE, "");
         assertFalse(proxy.currentSession.isServicesEmpty());
         assertTrue(proxy.currentSession.hasService(ServiceType.RPC));
@@ -412,7 +412,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertNotNull(proxy);
         proxy.initializeSession(SessionTest.APP_ID);
         addSessionToServicesList();
-        //proxy.setSyncConnection(mock(SyncConnection.class));
+        //proxy.setProtectServiceListener(mock(SyncConnection.class));
         proxy.getInterfaceBroker().onProtocolSessionStarted(SessionTest.SESSION_ID,
                 ProtocolConstants.PROTOCOL_VERSION_THREE);
         proxy.initializeSession(SessionTest.APP_ID);

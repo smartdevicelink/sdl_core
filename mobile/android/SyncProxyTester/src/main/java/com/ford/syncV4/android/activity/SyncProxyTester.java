@@ -513,7 +513,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         Logger.d(LOG_TAG + " Fragment '" + fragment + "' appId:" + appId);
 
         fragment.getLogAdapter().logMessage("Service '" + serviceType + "' started, " +
-                "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion(), true);
+                "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion() + "encrypted " + encoded, true);
 
         if (serviceType == ServiceType.Audio_Service) {
             MainApp.getInstance().runInUIThread(new Runnable() {
@@ -1447,7 +1447,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     Logger.w("Start RPC service, Fragment NULL");
                     return;
                 }
-                fragment.getLogAdapter().logMessage("Should start RPC service", true);
+                fragment.getLogAdapter().logMessage("Should start RPC service encrypted " + encrypted, true);
 
                 if (mBoundProxyService == null) {
                     return;
