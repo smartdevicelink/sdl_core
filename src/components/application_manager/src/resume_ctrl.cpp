@@ -149,7 +149,11 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
         restored_hmi_level = saved_hmi_level;
       }
       application->set_hmi_level(restored_hmi_level);
-      MessageHelper::SendHMIStatusNotification(*(application.get()));
+      if (restored_hmi_level != mobile_apis::HMILevel::HMI_FULL) {
+        //APPLINK-7244
+        MessageHelper::SendHMIStatusNotification(*(application.get()));
+      }
+
       LOG4CXX_INFO(logger_, "Restore Application "
                    << saved_m_app_id
                    << " to HMILevel " << restored_hmi_level);

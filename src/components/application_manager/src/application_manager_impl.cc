@@ -425,12 +425,10 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
       if (!curr_app->MakeFullscreen()) {
         return false;
       }
-      MessageHelper::SendHMIStatusNotification(*curr_app);
     } else {
       if (is_new_app_media) {
         if (curr_app->IsAudible()) {
           curr_app->MakeNotAudible();
-          MessageHelper::SendHMIStatusNotification(*curr_app);
         }
       }
       if (curr_app->IsFullscreen()) {

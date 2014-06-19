@@ -757,6 +757,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   last_activated_app_id_ = connection_key;
   application_manager::MessageHelper::SendActivateAppResponse(permissions,
       correlation_id);
+  application_manager::MessageHelper::SendHMIStatusNotification(*app.get());
 }
 
 void PolicyHandler::PTExchangeAtIgnition() {
