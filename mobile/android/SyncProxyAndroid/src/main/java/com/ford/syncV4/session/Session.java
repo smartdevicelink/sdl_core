@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Andrew Batutin on 1/21/14
@@ -30,7 +31,7 @@ public class Session {
     /**
      * Collection of the Session Id's mapped to App Id
      */
-    private final Hashtable<String, Byte> sessionIds = new Hashtable<String, Byte>();
+    private final ConcurrentHashMap<String, Byte> sessionIds = new ConcurrentHashMap<String, Byte>();
 
     /**
      * Collection of the non Sync Services (RPC, Navi, Audio, etc ...)

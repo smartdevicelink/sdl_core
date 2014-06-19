@@ -535,8 +535,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             // Assign Application Id to the associated Fragment
             fragment.setAppId(appId);
         }
-
-        //mServicesCounter.incrementAndGet();
     }
 
     @Override

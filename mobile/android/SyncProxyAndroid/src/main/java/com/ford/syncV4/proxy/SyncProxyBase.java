@@ -17,7 +17,6 @@ import com.ford.syncV4.net.SyncPDataSender;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.protocol.heartbeat.HeartbeatBuilder;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
 import com.ford.syncV4.proxy.callbacks.OnProxyClosed;
@@ -130,10 +129,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      * reconnect attempt.
      */
     private static final int PROXY_RECONNECT_DELAY = 5000;
-    /**
-     * Lock to access the _currentReconnectTimerTask member.
-     */
-    private static final Object RECONNECT_TIMER_TASK_LOCK = new Object();
 
     final int HEARTBEAT_CORRELATION_ID = 65531; // TODO: remove
 
@@ -484,7 +479,11 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     private int lastCorrelationId = 40000;
 
     public void setSyncConnection(SyncConnection syncConnection) {
-        this.mSyncConnection = syncConnection;
+        // Comment NPE check point in order to allow mock testing
+        /*if (syncConnection == null) {
+            throw new NullPointerException("SYNCConnection can not be set to null");
+        }*/
+        mSyncConnection = syncConnection;
     }
 
     /**
@@ -1033,22 +1032,21 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      */
     public void initializeProxy() throws SyncException {
 
-        Logger.d(LOG_TAG + " Initialize proxy, connection 1:" + mSyncConnection);
         if (mSyncConnection != null) {
-            return;
+            Logger.w(LOG_TAG + " init SYNC Proxy, connection must be null");
+        } else {
+            Logger.i(LOG_TAG + " init SYNC Proxy");
         }
-
         // Setup SyncConnection
         synchronized (CONNECTION_REFERENCE_LOCK) {
 
-            Logger.d(LOG_TAG + " Initialize proxy, connection 2:" + mSyncConnection);
             if (mSyncConnection != null) {
-                return;
+                Logger.w(LOG_TAG + " init SYNC Proxy, connection must be null");
+            } else {
+                mSyncConnection = new SyncConnection(syncSession, mTransportConfig, _interfaceBroker);
             }
 
             internalRequestCorrelationIDs.clear();
-
-            mSyncConnection = new SyncConnection(syncSession, mTransportConfig, _interfaceBroker);
 
             mSyncConnection.init();
 
@@ -1064,22 +1062,14 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }
     }
 
-    public void closeConnection() {
-        closeSyncConnection(false);
-    }
-
-    private synchronized void closeSyncConnection(boolean keepConnection) {
+    public synchronized void closeSyncConnection() {
         if (mSyncConnection != null) {
 
-            //Logger.d("Close Sync connection:" + syncSession.getSessionId() + ", " +
-            //        "N:" + syncSession.getServicesNumber() + ", keep:" + keepConnection);
-            //        "N:" + syncSession.getServicesNumber() + ", keep:" + keepConnection);
+            //Logger.d("Close Sync connection:" + syncSession.getSessionId());
 
-            mSyncConnection.closeConnection(keepConnection);
+            mSyncConnection.closeConnection();
 
-            if (!keepConnection) {
-                setSyncConnection(null);
-            }
+            //mSyncConnection = null;
         }
     }
 
@@ -1092,7 +1082,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         dispose();
     }
 
-    private void cleanProxy(boolean keepConnection) throws SyncException {
+    private void cleanProxy() throws SyncException {
         try {
             // ALM Specific Cleanup
             if (mAdvancedLifecycleManagementEnabled) {
@@ -1106,7 +1096,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 for (String appId: appIdToBeRemoved) {
                     doUnregisterAppInterface(appId);
                 }
-                closeSyncConnection(keepConnection);
+                //closeSyncConnection();
             }
         } finally {
             Logger.i("SyncProxy cleaned.");
@@ -1134,7 +1124,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
         try {
             // Clean the proxy
-            cleanProxy(false);
+            cleanProxy();
 
             reconnectHandler.removeCallbacks(reconnectRunnableTask);
 
@@ -1172,7 +1162,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     protected void cycleProxy(SyncDisconnectedReason disconnectedReason) {
         Logger.d("Cycle SYNC Proxy, reason:" + disconnectedReason);
         try {
-            cleanProxy(true);
+            cleanProxy();
             scheduleInitializeProxy();
             notifyProxyClosed("SYNC Proxy cycled", new SyncException("SYNC Proxy cycled",
                     SyncExceptionCause.SYNC_PROXY_CYCLED));
@@ -1228,7 +1218,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                         new SyncException("Bluetooth is disabled",
                                 SyncExceptionCause.BLUETOOTH_DISABLED));
 
-                setSyncConnection(null);
+                //setSyncConnection(null);
 
                 break;
             case BLUETOOTH_ADAPTER_NULL:
@@ -1271,7 +1261,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     protected void dispatchIncomingMessage(ProtocolMessage message) {
         try {
 
-            //if (message.getSessionID() != syncSession.getSessionId()) {
+            //if (message.getSessionId() != syncSession.getSessionId()) {
             //    Logger.w("Message is not from current session");
             //    return;
             //}
@@ -1809,11 +1799,17 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     private void checkSyncConnection() throws SyncException {
         // Test if SyncConnection is null
         synchronized (CONNECTION_REFERENCE_LOCK) {
-            if (mSyncConnection == null || !mSyncConnection.getIsConnected()) {
-                Logger.i("Application attempted to send and RPCRequest without a connected transport.");
-                throw new SyncException("There is no valid connection to SYNC. sendRPCRequest " +
-                        "cannot be called until SYNC has been connected.",
-                        SyncExceptionCause.SYNC_UNAVAILALBE);
+            if (mSyncConnection == null) {
+                final String message = "Application attempted to send RPCRequest without a " +
+                        "created transport.";
+                Logger.e(message);
+                throw new SyncException(message, SyncExceptionCause.SYNC_UNAVAILALBE);
+            }
+            if (!mSyncConnection.getIsConnected()) {
+                final String message = "Application attempted to send RPCRequest without a " +
+                        "connected transport.";
+                Logger.e(message);
+                throw new SyncException(message, SyncExceptionCause.SYNC_UNAVAILALBE);
             }
         }
     }
@@ -2960,9 +2956,9 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         stopSession(appId);
 
         Logger.d(LOG_TAG + " End Session, sesId'sN:" + syncSession.getSessionIdsNumber());
-        if (mIsProxyDisposed && syncSession.getSessionIdsNumber() == 0) {
-            closeSyncConnection(false);
-        }
+        /*if (mIsProxyDisposed && syncSession.getSessionIdsNumber() == 0) {
+            closeSyncConnection();
+        }*/
     }
 
     // TODO : Hide this method from public when no Test Cases are need
@@ -3072,7 +3068,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 notifyProxyClosed(info, e);
             }
 
-            setSyncConnection(null);
+            //setSyncConnection(null);
         }
 
         @Override
@@ -3103,10 +3099,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
             startProtocolSession(sessionId);
 
-            mSyncConnection.setHeartbeatMonitor(
-                    HeartbeatBuilder.buildHeartbeatMonitor(sessionId, heartBeatInterval,
-                            heartBeatAck));
-            mSyncConnection.startHeartbeatTimer(sessionId);
+            mSyncConnection.addHeartbeatMonitor(sessionId, heartBeatInterval, heartBeatAck);
+            mSyncConnection.startHeartbeatMonitor(sessionId);
         }
 
         @Override

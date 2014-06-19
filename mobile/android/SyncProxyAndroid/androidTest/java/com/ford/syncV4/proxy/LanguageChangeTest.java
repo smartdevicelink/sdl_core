@@ -39,7 +39,8 @@ public class LanguageChangeTest extends InstrumentationTestCase {
     public void testCorrectLanguageChange()
             throws SyncException, JSONException {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
-        SyncProxyALM proxy = TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        SyncProxyALM proxy = TestCommon.getSyncProxyALMNoTransport(
+                getInstrumentation().getTargetContext(), proxyListenerMock);
         assertNotNull(proxy);
 
         // send OnLanguageChange first
@@ -76,7 +77,8 @@ public class LanguageChangeTest extends InstrumentationTestCase {
             throws SyncException, JSONException {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         SyncProxyALM proxy =
-                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+                TestCommon.getSyncProxyALMNoTransport(getInstrumentation().getTargetContext(),
+                        proxyListenerMock);
         assertNotNull(proxy);
 
         // send OnLanguageChange first
@@ -106,7 +108,8 @@ public class LanguageChangeTest extends InstrumentationTestCase {
 
     public void testAppUnregisteredWithoutLanguageChange() throws SyncException, JSONException {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
-        SyncProxyALM proxy = TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        SyncProxyALM proxy = TestCommon.getSyncProxyALMNoTransport(
+                getInstrumentation().getTargetContext(), proxyListenerMock);
         assertNotNull(proxy);
 
         // send OnAppInterfaceUnregistered
@@ -128,7 +131,8 @@ public class LanguageChangeTest extends InstrumentationTestCase {
             throws JSONException, SyncException {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         SyncProxyALM proxy =
-                TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+                TestCommon.getSyncProxyALMNoTransport(getInstrumentation().getTargetContext(),
+                        proxyListenerMock);
         assertNotNull(proxy);
         //proxy.mWiproVersion = 2;
 

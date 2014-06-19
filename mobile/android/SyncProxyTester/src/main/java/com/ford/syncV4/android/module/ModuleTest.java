@@ -919,6 +919,12 @@ public class ModuleTest {
             return;
         }
         if (testActionItem.getActionName().equals(TestActionItem.START_RPC_SERVICE)) {
+
+            Logger.d("Has RPC Service:" + mProxyService.hasRPCRunning(mAppId));
+            if (mProxyService.hasRPCRunning(mAppId)) {
+                return;
+            }
+
             mProxyService.getTestConfig().setDoCallRegisterAppInterface(false);
             mProxyService.restart();
             mProxyService.getRestoreConnectionToRPCService().acquireLock();
@@ -985,13 +991,13 @@ public class ModuleTest {
 
                 for (RPCRequestWrapper wrapper : currentTest.getRequests()) {
 
-                    if (!mProxyService.isSyncProxyConnected()) {
+                    /*if (!mProxyService.isSyncProxyConnected()) {
 
                         mProxyService.getTestConfig().setDoCallRegisterAppInterface(false);
                         mProxyService.startProxyIfNetworkConnected();
 
                         mProxyService.getRestoreConnectionToRPCService().acquireLock();
-                    }
+                    }*/
 
                     RPCRequest rpc = wrapper.getRequest();
                     boolean generateInvalidJSON = wrapper.isGenerateInvalidJSON();
