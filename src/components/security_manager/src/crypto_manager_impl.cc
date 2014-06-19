@@ -37,6 +37,8 @@
 #include "security_manager/security_manager.h"
 #include "utils/logger.h"
 
+#define TLS1_1_MINIMAL_VERSION 0x1000100f
+
 namespace security_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "CryptoManagerImpl")
@@ -59,11 +61,12 @@ bool CryptoManagerImpl::Init(Mode mode,
     OpenSSL_add_all_algorithms();
     SSL_library_init();
   }
-  instance_count_++;
+  // TODO(EZamakhov): add thread safe
+  ++instance_count_;
 
   mode_ = mode;
   const bool is_server = (mode == SERVER);
-#if OPENSSL_VERSION_NUMBER < 0x1000100f
+#if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
   SSL_METHOD *method;
 #else
   const SSL_METHOD *method;
@@ -78,8 +81,9 @@ bool CryptoManagerImpl::Init(Mode mode,
       method = is_server ?
           TLSv1_server_method() :
           TLSv1_client_method();
+      break;
     case TLSv1_1:
-#if OPENSSL_VERSION_NUMBER < 0x1000100f
+#if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
       LOG4CXX_WARN(logger_,
                    "OpenSSL has no TLSv1.1 with version lower 1.0.1, set TLSv1.0");
       method = is_server ?
@@ -92,7 +96,7 @@ bool CryptoManagerImpl::Init(Mode mode,
 #endif
       break;
     case TLSv1_2:
-#if OPENSSL_VERSION_NUMBER < 0x1000100f
+#if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
       LOG4CXX_WARN(logger_,
                    "OpenSSL has no TLSv1.2 with version lower 1.0.1, set TLSv1.0");
       method = is_server ?

@@ -36,6 +36,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <sstream>
+#include <algorithm>
 
 #include "config_profile/ini_file.h"
 #include "utils/logger.h"
@@ -1070,6 +1071,9 @@ bool Profile::ReadBoolValue(bool* value, const bool default_value,
   *value = result ? read_value : default_value;
   return result;
 }
+long int hex_to_int(const std::string& value) {
+  return strtol(value.c_str(), NULL, 16);
+}
 
 std::list<int> Profile::ReadIntContainer(
     const char * const pSection, const char * const pKey,
@@ -1077,10 +1081,9 @@ std::list<int> Profile::ReadIntContainer(
   const std::list<std::string> string_list =
       ReadStringContainer(pSection, pKey, out_result);
   std::list<int> value_list;
-  for (std::list<std::string>::const_iterator it = string_list.begin();
-       string_list.end() != it; ++it) {
-    value_list.push_back(strtol(it->c_str(), NULL, 16));
-    }
+  value_list.resize(string_list.size());
+  std::transform(string_list.begin(), string_list.end(),
+                 value_list.begin(), hex_to_int);
   return value_list;
 }
 

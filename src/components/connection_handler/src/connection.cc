@@ -162,18 +162,30 @@ bool Connection::AddNewService(uint8_t session_id,
   return true;
 }
 
+inline bool is_incorrect_for_remove_service(
+    const protocol_handler::ServiceType service_type) {
+  return
+      // Control type is internal part of session
+      protocol_handler::kControl == service_type ||
+      // RPC and bulk service is necessary part of session
+      protocol_handler::kRpc  == service_type ||
+      protocol_handler::kBulk == service_type ||
+      // Invalid service is not part of session
+      protocol_handler::kInvalidServiceType == service_type;
+}
+
 bool Connection::RemoveService(
-    uint8_t session, protocol_handler::ServiceType service_type) {
+    uint8_t session_id, protocol_handler::ServiceType service_type) {
   // Ignore wrong and required for Session services
-  if (protocol_handler::kControl == service_type ||
-     protocol_handler::kInvalidServiceType == service_type ||
-     protocol_handler::kRpc  == service_type ||
-     protocol_handler::kBulk == service_type )
+  if (is_incorrect_for_remove_service(service_type)) {
+    LOG4CXX_WARN(logger_, "Could not remove service "
+                 << static_cast<int>(service_type));
     return false;
+  }
   sync_primitives::AutoLock lock(session_map_lock_);
 
-  SessionMapIterator session_it = session_map_.find(session);
-  if (session_it == session_map_.end()) {
+  SessionMapIterator session_it = session_map_.find(session_id);
+  if (session_map_.end() == session_it) {
     LOG4CXX_WARN(logger_, "Session not found in this connection!");
     return false;
   }
@@ -181,8 +193,8 @@ bool Connection::RemoveService(
   ServiceList &service_list = session_it->second.service_list;
   ServiceListIterator service_it = find(service_list.begin(),
                                         service_list.end(), service_type);
-  if (service_it == service_list.end()) {
-    LOG4CXX_WARN(logger_, "Session " << session << " didn't established"
+  if (service_list.end() == service_it) {
+    LOG4CXX_WARN(logger_, "Session " << session_id << " didn't established"
                   " service " << service_type);
     return false;
   }

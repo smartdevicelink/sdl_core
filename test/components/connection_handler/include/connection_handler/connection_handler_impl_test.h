@@ -220,9 +220,13 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
   EXPECT_EQ(connection_list_start_secure.begin()->first, uid);
 
   //start new session with RPC service
-  const uint32_t session_id_on_end_secure =
+  const uint32_t session_key_on_end_secure =
       connection_handler_->OnSessionEndedCallback(uid, session_id, 0,
                                                   protocol_handler::kAudio);
+  transport_manager::ConnectionUID connection_id_on_end_secure;
+  uint8_t session_id_on_end_secure = 0;
+  connection_handler_->PairFromKey(session_key_on_end_secure,
+                                   &connection_id_on_end_secure, &session_id_on_end_secure);
   EXPECT_EQ(session_id_on_end_secure, session_id);
   ConnectionList& connection_list_on_end_secure = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list_on_end_secure.empty());

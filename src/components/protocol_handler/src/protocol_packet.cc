@@ -52,17 +52,11 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_id,
                                uint32_t dataSize, uint32_t messageID,
                                const uint8_t *data,
                                uint32_t packet_id)
-    : data_offset_(0),
-      packet_id_(packet_id),
-      connection_id_(connection_id) {
-  packet_header_.version = version;
-  packet_header_.protection_flag = protection;
-  packet_header_.frameType = frameType;
-  packet_header_.serviceType = serviceType;
-  packet_header_.frameData = frameData;
-  packet_header_.sessionId = sessionID;
-  packet_header_.dataSize = dataSize;
-  packet_header_.messageId = messageID;
+  : packet_header_(version, protection, frameType, serviceType,
+                   frameData, sessionID, dataSize, messageID),
+    data_offset_(0),
+    packet_id_(packet_id),
+    connection_id_(connection_id) {
   set_data(data, dataSize);
   DCHECK(MAXIMUM_FRAME_DATA_SIZE >= dataSize);
 }
@@ -72,17 +66,14 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_id, uint8_t *data_param,
   : data_offset_(0),
     packet_id_(0),
     connection_id_(connection_id) {
-    RESULT_CODE result = deserializePacket(data_param, data_size);
-    if (result != RESULT_OK) {
-      //NOTREACHED();
-    }
+  RESULT_CODE result = deserializePacket(data_param, data_size);
+  if (result != RESULT_OK) {
+    //NOTREACHED();
+  }
 }
 
 ProtocolPacket::~ProtocolPacket() {
   delete[] packet_data_.data;
-  packet_data_.data = NULL;
-  packet_data_.totalDataBytes = 0;
-  packet_id_ = 0;
 }
 
 // Serialization
@@ -91,9 +82,15 @@ RawMessagePtr ProtocolPacket::serializePacket() {
   if (!packet) {
     return RawMessagePtr();
   }
+  // version is low byte
+  const uint8_t version_byte = packet_header_.version << 4;
+  // protection is first bit of second byte
+  const uint8_t protection_byte = packet_header_.protection_flag ? (0x8) : 0x0;
+  // frame type is last 3 bits of second byte
+  const uint8_t frame_type_byte = packet_header_.frameType & 0x07;
 
   uint8_t offset = 0;
-  packet[offset++] = firstByte;
+  packet[offset++] = version_byte | protection_byte | frame_type_byte;
   packet[offset++] = packet_header_.serviceType;
   packet[offset++] = packet_header_.frameData;
   packet[offset++] = packet_header_.sessionId;
@@ -136,7 +133,6 @@ RESULT_CODE ProtocolPacket::appendData(uint8_t *chunkData,
   if (data_offset_ + chunkDataSize <= packet_data_.totalDataBytes) {
     if (chunkData) {
       if (packet_data_.data) {
-        // TODO(EZamakhov): reallocation?!
         memcpy(packet_data_.data + data_offset_, chunkData, chunkDataSize);
         data_offset_ += chunkDataSize;
         return RESULT_OK;
@@ -276,7 +272,7 @@ void ProtocolPacket::set_data(
     packet_header_.dataSize = packet_data_.totalDataBytes = new_data_size;
     delete[] packet_data_.data;
     packet_data_.data = new (std::nothrow) uint8_t[packet_data_.totalDataBytes];
-    if(packet_data_.data) {
+    if (packet_data_.data) {
       memcpy(packet_data_.data, new_data, packet_data_.totalDataBytes);
     }
   }

@@ -318,40 +318,36 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     const protocol_handler::ServiceType &service_type) {
   LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
 
-  // null is wrong session id
-  uint32_t result = 0;
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
-    return result;
+    return 0;
   }
   Connection *connection = it->second;
 
   if (protocol_handler::kRpc == service_type) {
-    LOG4CXX_INFO(logger_, "Session to be removed");
-
-    result = connection->RemoveSession(session_id);
-    if (0 > result) {
+    LOG4CXX_INFO(logger_, "Session "  << static_cast<uint32_t>(session_id)
+                 << " to be removed");
+    if (!connection->RemoveSession(session_id)) {
       LOG4CXX_ERROR(logger_, "Not possible to remove session!");
-      return result;
+      return 0;
     }
   } else {
+    LOG4CXX_INFO(logger_, "Service "  << static_cast<uint32_t>(service_type)
+                 << " to be removed");
     if (!connection->RemoveService(session_id, service_type)) {
       LOG4CXX_ERROR(logger_, "Not possible to remove service!");
-      return result;
+      return 0;
     }
-    result = session_id;
   }
 
+  const uint32_t session_key = KeyFromPair(connection_handle, session_id);
   if (connection_handler_observer_) {
-    const uint32_t session_key = KeyFromPair(connection_handle, session_id);
     connection_handler_observer_->OnServiceEndedCallback(session_key,
                                                          service_type);
-    result = session_key;
   }
-
-  return result;
+  return session_key;
 }
 
 uint32_t ConnectionHandlerImpl::KeyFromPair(
@@ -481,8 +477,8 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
              end = session_map.end(); session_it != end; ++session_it) {
           const transport_manager::ConnectionUID &connection_handle = itr->first;
           const uint32_t session_id = session_it->first;
-          const uint32_t session_key = KeyFromPair(connection_handle, session_id); //application_id
-          applications_list->push_back(session_key);
+          const uint32_t application_id = KeyFromPair(connection_handle, session_id);
+          applications_list->push_back(application_id);
         }
       }
     }
@@ -661,11 +657,6 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
     }
     itr->second->RemoveSession(session_id);
   }
-}
-
-void ConnectionHandlerImpl::SetProtocolHandler(
-    protocol_handler::ProtocolHandler* handler) {
-  protocol_handler_ = handler;
 }
 
 void ConnectionHandlerImpl::StartSessionHeartBeat(uint32_t connection_key) {

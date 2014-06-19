@@ -55,7 +55,6 @@ RawMessage::RawMessage(uint32_t connection_key, uint32_t protocolVersion,
 
 RawMessage::~RawMessage() {
   delete[] data_;
-  data_ = NULL;
 }
 
 uint32_t RawMessage::connection_key() const {

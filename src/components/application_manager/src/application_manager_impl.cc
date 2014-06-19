@@ -707,7 +707,7 @@ void ApplicationManagerImpl::OnMessageReceived(
   if (message->service_type() != protocol_handler::kRpc
       && message->service_type() != protocol_handler::kBulk) {
     // skip this message, not under handling of ApplicationManager
-    LOG4CXX_DEBUG(logger_, "Skipping message; not the under AM handling.");
+    LOG4CXX_TRACE(logger_, "Skipping message; not the under AM handling.");
     return;
   }
   //Return empty SharedPtr on not kRpc or kBulk service
@@ -1578,7 +1578,7 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
   if (message->service_type() != protocol_handler::kRpc
       && message->service_type() != protocol_handler::kBulk) {
     // skip this message, not under handling of ApplicationManager
-    LOG4CXX_INFO(logger_, "Skipping message; not the under AM handling.");
+    LOG4CXX_TRACE(logger_, "Skipping message; not the under AM handling.");
     return outgoing_message;
   }
 

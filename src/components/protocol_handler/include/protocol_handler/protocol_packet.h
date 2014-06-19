@@ -190,19 +190,6 @@ enum RESULT_CODE {
   RESULT_ENCRYPTION_FAILED = 16,
   RESULT_UNKNOWN = 255
 };
-/**
- * \struct ProtocolData
- * \brief Used for storing message and its size.
- */
-struct ProtocolData {
-  ProtocolData()
-    : data(0),
-      totalDataBytes(0x00) {
-  }
-
-  uint8_t* data;
-  uint32_t totalDataBytes;
-};
 
 /**
  * \class ProtocolPacket
@@ -267,6 +254,7 @@ class ProtocolPacket {
     uint32_t dataSize;
     uint32_t messageId;
   };
+
  public:
   /**
    * \brief Default constructor
@@ -298,6 +286,7 @@ class ProtocolPacket {
    * \param dataSize Size of message string
    * \param messageID ID of message or hash code - only for second protocol
    * \param data Message string if provided
+   * \param packet_id - ID for multiframe messages
    */
   ProtocolPacket(uint8_t connection_id,
                  uint8_t version, bool protection, uint8_t frameType,

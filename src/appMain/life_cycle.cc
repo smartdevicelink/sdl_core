@@ -118,9 +118,10 @@ bool LifeCycle::StartComponents() {
 #ifdef ENABLE_SECURITY
   security_manager_ = new security_manager::SecurityManager();
 
+  // Fixme(EZamakhov): move to Config or in Sm initialization method
   std::string cert_filename;
   profile::Profile::instance()->ReadStringValue(
-        &cert_filename, "mycert.pem",
+        &cert_filename, "",
         security_manager::SecurityManager::ConfigSection(), "CertificatePath");
 
   std::string ssl_mode;
@@ -130,7 +131,7 @@ bool LifeCycle::StartComponents() {
 
   std::string key_filename;
   profile::Profile::instance()->ReadStringValue(
-        &key_filename, "mykey.pem", security_manager::SecurityManager::ConfigSection(), "KeyPath");
+        &key_filename, "", security_manager::SecurityManager::ConfigSection(), "KeyPath");
 
   std::string ciphers_list;
   profile::Profile::instance()->ReadStringValue(
@@ -175,7 +176,6 @@ bool LifeCycle::StartComponents() {
 
   media_manager_ = media_manager::MediaManagerImpl::instance();
 
-  connection_handler_->SetProtocolHandler(protocol_handler_);
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
@@ -264,17 +264,17 @@ bool LifeCycle::InitMessageSystem() {
   }
 
   if (!message_broker_server_->Bind()) {
-    LOG4CXX_FATAL(logger_, "Bind failed!");
+    LOG4CXX_FATAL(logger_, "Message broker server bind failed!");
     return false;
   } else {
-    LOG4CXX_INFO(logger_, "Bind successful!");
+    LOG4CXX_INFO(logger_, "Message broker server bind successful!");
   }
 
   if (!message_broker_server_->Listen()) {
-    LOG4CXX_FATAL(logger_, "Listen failed!");
+    LOG4CXX_FATAL(logger_, "Message broker server listen failed!");
     return false;
   } else {
-    LOG4CXX_INFO(logger_, " Listen successful!");
+    LOG4CXX_INFO(logger_, " Message broker server listen successful!");
   }
 
   mb_adapter_ =

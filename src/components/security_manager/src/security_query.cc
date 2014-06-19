@@ -53,11 +53,19 @@ SecurityQuery::SecurityQuery()
 }
 
 SecurityQuery::SecurityQuery(const SecurityQuery::QueryHeader &header,
+                             const uint32_t connection_key,
+                             const uint8_t *const raw_data,
+                             const size_t raw_data_size)
+  : header_(header), connection_key_(connection_key),
+    data_(raw_data, raw_data + raw_data_size) {
+}
+
+SecurityQuery::SecurityQuery(const SecurityQuery::QueryHeader &header,
                              const uint32_t connection_key)
   : header_(header), connection_key_(connection_key) {
 }
 
-bool SecurityQuery::ParseQuery(const uint8_t *const raw_data,
+bool SecurityQuery::SerializeQuery(const uint8_t *const raw_data,
                                const size_t raw_data_size) {
   const size_t header_size = sizeof(QueryHeader);
   if (raw_data_size < header_size || !raw_data) {
@@ -92,9 +100,8 @@ bool SecurityQuery::ParseQuery(const uint8_t *const raw_data,
       header_.query_id = INVALID_QUERY_ID;
       break;
   }
-  header_.seq_number = *reinterpret_cast<const uint32_t*>(raw_data + 4);
-  header_.json_size =
-      BE_TO_LE32(*reinterpret_cast<const uint32_t*>(raw_data + 8));
+  header_.seq_number = BE_TO_LE32(*reinterpret_cast<const uint32_t*>(raw_data + 4));
+  header_.json_size  = BE_TO_LE32(*reinterpret_cast<const uint32_t*>(raw_data + 8));
 
   if (header_.json_size > raw_data_size - header_size)
     return false;
@@ -114,9 +121,27 @@ bool SecurityQuery::ParseQuery(const uint8_t *const raw_data,
   return true;
 }
 
+std::vector<uint8_t> SecurityQuery::DeserializeQuery() const {
+  SecurityQuery::QueryHeader deserialize_header(header_);
+  const uint32_t tmp = deserialize_header.query_id << 8;
+  deserialize_header.query_id   = LE_TO_BE32(tmp);
+  deserialize_header.seq_number = LE_TO_BE32(deserialize_header.seq_number);
+  deserialize_header.json_size  = LE_TO_BE32(deserialize_header.json_size);
+
+  const size_t header_size = sizeof(deserialize_header);
+  // vector of header and raw_data
+  std::vector<uint8_t> data_sending(header_size + get_data_size());
+  // copy header
+  memcpy(&data_sending[0], &deserialize_header, header_size);
+  // copy binary data
+  std::copy(data_.begin(), data_.end(), data_sending.begin() + header_size);
+  return data_sending;
+}
+
 void SecurityQuery::set_data(const uint8_t *const binary_data,
                                  const size_t bin_data_size) {
-    DCHECK(binary_data); DCHECK(bin_data_size);
+    DCHECK(binary_data);
+    DCHECK(bin_data_size);
     data_.assign(binary_data, binary_data + bin_data_size);
 }
 

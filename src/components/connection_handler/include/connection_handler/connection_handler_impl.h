@@ -299,9 +299,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   virtual void CloseSession(ConnectionHandle connection_handle,
                             uint8_t session_id);
 
-  void SetProtocolHandler(protocol_handler::ProtocolHandler* handler);
-
-
   /**
    * \brief Return count of session for specified connection
    * \param connection_key pair of connection handle and session id

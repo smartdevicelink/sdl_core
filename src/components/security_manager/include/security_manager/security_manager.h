@@ -177,27 +177,12 @@ typedef threads::MessageLoopThread<SecurityMessageQueue> SecurityMessageLoop;
     bool ProccessInternalError(const SecurityMessage &inMessage);
 
     /**
-     * \brief Sends binary data answer with QueryHeader
+     * \brief Sends security query
      * Create new array as concatenation of header and binary data
+     * \param query SecurityQuery for sending via Control service
      * \param connection_key Unique key used by other components as session identifier
-     * \param header QueryHeader (equal RPC header format)
-     * \param data pointer to binary data array
-     * \param data_size size of binary data array
      */
-    void SendData(const uint32_t connection_key,
-                  SecurityQuery::QueryHeader header,
-                  const uint8_t *const data,
-                  const size_t data_size);
-    /**
-     * \brief Sends binary data answer
-     * \param connection_key Unique key used by other components as session identifier
-     * \param data pointer to binary data array
-     * \param data_size size of binary data array
-     */
-    // post income array as park of RawMessage
-    void SendBinaryData(const uint32_t connection_key,
-                        const uint8_t *const data,
-                        size_t data_size);
+    void SendQuery(const SecurityQuery& query, const uint32_t connection_key);
 
     // Thread that pumps handshake data
     SecurityMessageLoop security_messages_;

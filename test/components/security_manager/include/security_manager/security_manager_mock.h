@@ -30,9 +30,11 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SECURITY_MANAGER_MOCK_H
-#define SECURITY_MANAGER_MOCK_H
+#ifndef TEST_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_MOCK_H_
+#define TEST_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_MOCK_H_
 #include <gmock/gmock.h>
+#include <string>
+#include <list>
 #include "utils/byte_order.h"
 #include "security_manager/security_manager.h"
 #include "security_manager/ssl_context.h"
@@ -172,7 +174,7 @@ namespace security_manager_test {
                       << " expected " << exp_data_size << " bytes";
       return false;
     }
-    const uint8_t * arg_data = arg->data();
+    const uint8_t *arg_data = arg->data();
     for (int i = 0; i < arg_data_size; ++i) {
       if (arg_data[i] != exp_data[i]) {
         *result_listener << "Fail in " << i << " byte";
@@ -196,46 +198,49 @@ namespace security_manager_test {
                        << header_size;
       return false;
     }
-    const uint8_t query_type = arg->data()[0];
+    const uint8_t *data = arg->data();
+    const uint8_t query_type = data[0];
     if (security_manager::SecurityQuery::NOTIFICATION != query_type) {
-      *result_listener << "RawMessage is not notification";
+      *result_listener << "RawMessage is not notification, type=0x"
+                       << std::hex << static_cast<int>(query_type);
       return false;
     }
-    //Read Big-Endian number
-    const uint32_t query_id = arg->data()[1] << 16 |
-                              arg->data()[2] <<  8 |
-                              arg->data()[3];
+    // Read Big-Endian number
+    const uint32_t query_id = data[1] << 16 |
+                              data[2] <<  8 |
+                              data[3];
     if (security_manager::SecurityQuery::SEND_INTERNAL_ERROR != query_id) {
-      *result_listener << "Notification is not InternalError";
+      *result_listener << "Notification is not InternalError, id=0x"
+                       << std::hex << query_id;
       return false;
     }
-    const uint32_t json_size = arg->data()[8] << 24 |
-                               arg->data()[9]  << 16 |
-                               arg->data()[10] <<  8 |
-                               arg->data()[11];
-    if (header_size + json_size >= arg->data_size()){
+    const uint32_t json_size = data[8]  << 24 |
+                               data[9]  << 16 |
+                               data[10] <<  8 |
+                               data[11];
+    if (header_size + json_size >= arg->data_size()) {
       *result_listener << "InternalError contains only JSON data.";
       return false;
     }
-    //Read err_id as bin data number
+    // Read err_id as bin data number
     const uint8_t* err_id =
-        reinterpret_cast<uint8_t*>(arg->data() + header_size + json_size);
+        reinterpret_cast<const uint8_t*>(data + header_size + json_size);
     if (expectedErrorId != *err_id) {
-      *result_listener << "InternalError id " << int(*err_id)
+      *result_listener << "InternalError id " << static_cast<int>(*err_id)
                        << " and not equal error " << expectedErrorId;
       return false;
     }
     return true;
   }
-} // security_manager_test
-} // namespace components
-} // namespace test
+}  // namespace security_manager_test
+}  // namespace components
+}  // namespace test
 /*
  * Matcher for checking QueryHeader equal in GTests
  */
 ::testing::AssertionResult QueryHeader_EQ(
     const char* m_expr, const char* n_expr,
     const ::security_manager::SecurityQuery::QueryHeader& q1,
-    const ::security_manager::SecurityQuery::QueryHeader& q2 );
+    const ::security_manager::SecurityQuery::QueryHeader& q2);
 
-#endif  // SECURITY_MANAGER_MOCK_H
+#endif  // TEST_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_MOCK_H_

@@ -41,8 +41,8 @@ namespace security_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SecurityManager")
 
-static const char* err_id ="id";
-static const char* err_text ="text";
+static const char* kErrId = "id";
+static const char* kErrText = "text";
 
 SecurityManager::SecurityManager()
   : security_messages_("SecurityManager::security_messages_", this),
@@ -56,7 +56,7 @@ void SecurityManager::OnMessageReceived(
   }
 
   SecurityMessage securityMessagePtr(new SecurityQuery());
-  const bool result = securityMessagePtr->ParseQuery(
+  const bool result = securityMessagePtr->SerializeQuery(
         message->data(), message->data_size());
   if (!result) {
     // result will be false only if data less then query header
@@ -155,7 +155,8 @@ bool SecurityManager::ProtectConnection(const uint32_t &connection_key) {
     const std::string error_text("CryptoManager could not create SSL context.");
     LOG4CXX_ERROR(logger_, error_text);
     // Generate response query and post to security_messages_
-    SendInternalError(connection_key, SecurityQuery::ERROR_CREATE_SLL, error_text);
+    SendInternalError(connection_key, SecurityQuery::ERROR_CREATE_SSLCONTEXT,
+                      error_text);
     NotifyListenersOnHandshakeDone(connection_key, false);
     return false;
   }
@@ -308,18 +309,18 @@ bool SecurityManager::ProccessInternalError(const SecurityMessage &inMessage) {
       reader.parse(inMessage->get_json_message(), root);
   if (!parsingSuccessful)
     return false;
-  LOG4CXX_DEBUG(logger_, "Recieved InternalError id " << root[err_id].asString()
-                << ", text: " << root[err_text].asString());
+  LOG4CXX_DEBUG(logger_, "Recieved InternalError id " << root[kErrId].asString()
+                << ", text: " << root[kErrText].asString());
   return true;
 }
-
 void SecurityManager::SendHandshakeBinData(
     const uint32_t connection_key, const uint8_t *const data,
     const size_t data_size, const uint32_t seq_number) {
   const SecurityQuery::QueryHeader header(
         SecurityQuery::NOTIFICATION,
         SecurityQuery::SEND_HANDSHAKE_DATA, seq_number);
-  SendData(connection_key, header, data, data_size);
+  const SecurityQuery query = SecurityQuery(header, connection_key, data, data_size);
+  SendQuery(query, connection_key);
   LOG4CXX_DEBUG(logger_, "Sent " << data_size << " bytes handshake data ")
 }
 
@@ -328,48 +329,36 @@ void SecurityManager::SendInternalError(const uint32_t connection_key,
                                         const std::string &erorr_text,
                                         const uint32_t seq_number) {
   Json::Value value;
-  value[err_id]   = error_id;
-  value[err_text] = erorr_text;
+  value[kErrId]   = error_id;
+  value[kErrText] = erorr_text;
   const std::string error_str = value.toStyledString();
   SecurityQuery::QueryHeader header(SecurityQuery::NOTIFICATION,
                                     SecurityQuery::SEND_INTERNAL_ERROR,
+                                    // header save json size only (exclude last byte)
                                     seq_number, error_str.size());
+
+  // Raw data is json string and error id at last byte
   std::vector<uint8_t> data_sending(error_str.size() + 1);
   memcpy(&data_sending[0], error_str.c_str(), error_str.size());
   data_sending[data_sending.size()-1] = error_id;
 
-  SendData(connection_key, header, &data_sending[0], data_sending.size());
+  const SecurityQuery query(header, connection_key,
+                            &data_sending[0], data_sending.size());
+  SendQuery(query, connection_key);
   LOG4CXX_DEBUG(logger_, "Sent Internal error id " << static_cast<int>(error_id)
                 << " : \"" << erorr_text << "\".");
 }
 
-void SecurityManager::SendData(
-    const uint32_t connection_key,
-    SecurityQuery::QueryHeader header,
-    const uint8_t *const data, const size_t data_size) {
-  // FIXME(EZamakhov): move to SecurityQuery class
-  const uint32_t tmp = header.query_id << 8;
-  header.query_id  = LE_TO_BE32(tmp);
-  header.json_size = LE_TO_BE32(header.json_size);
+void SecurityManager::SendQuery(const SecurityQuery& query,
+                                const uint32_t connection_key) {
+  const std::vector<uint8_t> data_sending = query.DeserializeQuery();
 
-  const size_t header_size = sizeof(header);
-  std::vector<uint8_t> data_sending(header_size + data_size);
-  memcpy(&data_sending[0], &header, header_size);
-  // FIXME(EZamakhov): Fix invalid read (by Valgrind)
-  memcpy(&data_sending[header_size], data, data_size);
-
-  SendBinaryData(connection_key, &data_sending[0], data_sending.size());
-}
-
-void SecurityManager::SendBinaryData(const uint32_t connection_key,
-                                     const uint8_t *const data,
-                                     size_t data_size) {
-  DCHECK(protocol_handler_);
   const protocol_handler::RawMessagePtr rawMessagePtr(
         new protocol_handler::RawMessage(connection_key,
                                          protocol_handler::PROTOCOL_VERSION_2,
-                                         data, data_size,
+                                         &data_sending[0], data_sending.size(),
                                          protocol_handler::kControl));
+  DCHECK(protocol_handler_);
   // Add RawMessage to ProtocolHandler message query
   protocol_handler_->SendMessageToMobileApp(rawMessagePtr, false);
 }

@@ -47,7 +47,7 @@ CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn, Mode mode)
     bioIn_(BIO_new(BIO_s_mem())),
     bioOut_(BIO_new(BIO_s_mem())),
     bioFilter_(NULL),
-    buffer_size_(1024), // TODO(DChmerev): Collect some statistics, determine the most appropriate value
+    buffer_size_(1024),
     buffer_(new uint8_t[buffer_size_]),
     mode_(mode) {
   SSL_set_bio(connection_, bioIn_, bioOut_);

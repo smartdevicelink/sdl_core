@@ -110,6 +110,7 @@ namespace security_manager_test {
       const uint32_t query_id = header.query_id << 8;
       header.query_id  = LE_TO_BE32(query_id);
       header.json_size = LE_TO_BE32(header.json_size);
+      header.seq_number = LE_TO_BE32(header.seq_number);
 
       const size_t data_sending_size = sizeof(header) + data_size;
       uint8_t* data_sending = new uint8_t[data_sending_size];
@@ -345,7 +346,7 @@ namespace security_manager_test {
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_CREATE_SLL), is_final)).
+                    SecurityQuery::ERROR_CREATE_SSLCONTEXT), is_final)).
         Times(1);
     // Expect notifying listeners (unsuccess)
     EXPECT_CALL(mock_sm_listener,
@@ -634,7 +635,8 @@ namespace security_manager_test {
                 LastError()).Times(handshake_emulates);
 
     // Emulate handshare #handshake_emulates times for 5 cases
-    EmulateMobileMessageHandShake(handshake_data, handshake_data_size, handshake_emulates);
+    EmulateMobileMessageHandShake(handshake_data, handshake_data_size,
+                                  handshake_emulates);
   }
   /*
    * Shall send HandshakeData on getting SEND_HANDSHAKE_DATA from mobile side
@@ -678,7 +680,8 @@ namespace security_manager_test {
                         Return(security_manager::SSLContext::
                                Handshake_Result_Fail)));
 
-    EmulateMobileMessageHandShake(handshake_data, handshake_data_size, handshake_emulates);
+    EmulateMobileMessageHandShake(handshake_data, handshake_data_size,
+                                  handshake_emulates);
   }
   /*
    * Shall call all listeners on success end handshake
@@ -741,7 +744,8 @@ namespace security_manager_test {
         Times(2);
 
     // Expect NO InternalError with ERROR_ID
-    EmulateMobileMessageHandShake(handshake_data, handshake_data_size, handshake_emulates);
+    EmulateMobileMessageHandShake(handshake_data, handshake_data_size,
+                                  handshake_emulates);
   }
   /*
    * Shall not any query on getting empty SEND_INTERNAL_ERROR
