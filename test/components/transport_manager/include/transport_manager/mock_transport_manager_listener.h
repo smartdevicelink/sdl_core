@@ -65,7 +65,7 @@ class MockTransportManagerListener :
     public ::transport_manager::TransportManagerListener {
  public:
   MOCK_METHOD1(OnDeviceListUpdated, void(const std::vector<DeviceInfo>&));
-  MOCK_METHOD1(OnApplicationListUpdated, void(DeviceHandle device_handle));
+  MOCK_METHOD0(OnFindNewApplicationsRequest, void());
   MOCK_METHOD1(OnDeviceFound, void(const DeviceInfo &device_info));
   MOCK_METHOD1(OnDeviceAdded, void(const DeviceInfo &device_info));
   MOCK_METHOD1(OnDeviceRemoved, void(const DeviceInfo &device_info));

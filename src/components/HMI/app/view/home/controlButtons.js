@@ -52,8 +52,36 @@ SDL.ControlButtons = Em.ContainerView
             'appUILanguagesLabel',
             'appTTSVRLanguagesLabel',
             'appUILang',
-            'appTTSVRLang'
+            'appTTSVRLang',
+            'phoneCall'
         ],
+
+        /**
+         * Button to initiate phone call emulation on HMI
+         */
+        phoneCall: SDL.Button.extend( {
+            elementId: 'phone_call_button',
+
+            classNames: ['phone_call_button', 'button'],
+
+            expand: false,
+
+            classNameBindings: ['this.expand:expand'],
+
+            mouseEnter: function(){
+                this.set('expand', true);
+            },
+
+            mouseLeave: function(){
+                this.set('expand', false);
+            },
+
+            action: 'phoneCall',
+
+            target: 'SDL.SettingsController',
+
+            text: 'Incoming call!'
+        }),
 
         /*
          * Label with name of UILanguages select

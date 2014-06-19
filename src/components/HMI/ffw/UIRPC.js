@@ -79,6 +79,7 @@ FFW.UI = FFW.RPCObserver.create({
      */
     disconnect: function () {
 
+        this.onRPCUnregistered();
         this.client.disconnect();
     },
 
@@ -144,7 +145,7 @@ FFW.UI = FFW.RPCObserver.create({
         this._super();
 
         if (notification.method == this.onRecordStartNotification) {
-            // to do
+            SDL.AudioPassThruPopUp.StartAudioPassThruTimer();
         }
     },
 
@@ -244,9 +245,9 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.Slider":
                 {
 
-                    SDL.SDLModel.uiSlider(request);
-
-                    SDL.SDLController.onSystemContextChange();
+                    if (SDL.SDLModel.uiSlider(request)) {
+                        SDL.SDLController.onSystemContextChange();
+                    }
 
                     break;
                 }

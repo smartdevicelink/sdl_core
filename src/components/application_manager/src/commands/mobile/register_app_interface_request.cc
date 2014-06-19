@@ -73,8 +73,8 @@ mobile_apis::AppHMIType::eType StringToAppHMIType(const std::string& str) {
 
 struct AppHMITypeInserter {
     AppHMITypeInserter(smart_objects::SmartObject& so_array)
-      : so_array_(so_array),
-        index_(0) {
+      : index_(0),
+        so_array_(so_array) {
     }
 
     bool operator()(const std::string& app_hmi_type) {
@@ -136,11 +136,17 @@ bool RegisterAppInterfaceRequest::Init() {
 
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run " << connection_key());
+  //Checking if appname contains \t \n \\t \\n
+  if (!CheckSyntax((*message_)[strings::msg_params][strings::app_name].asString(),
+                   true)) {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
 
-//Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
-//Flag conditional compilation "CUSTOMER_PASA" is used in order to exclude hit code
-//to RTC
-#ifndef CUSTOMER_PASA
+  #ifndef CUSTOMER_PASA
+  //Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
+  //Flag conditional compilation "CUSTOMER_PASA" is used in order to exclude hit code
+  //to RTC
   if (true == profile::Profile::instance()->launch_hmi()) {
     // wait till HMI started
     while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
@@ -151,7 +157,7 @@ void RegisterAppInterfaceRequest::Run() {
                                                                default_timeout());
     }
   }
-#endif
+  #endif
 
   std::string mobile_app_id = (*message_)[strings::msg_params][strings::app_id]
                                                                .asString();
@@ -264,16 +270,6 @@ void RegisterAppInterfaceRequest::Run() {
 
     // Check policy update on ignition on, if it was not done before
     policy::PolicyHandler::instance()->PTExchangeAtIgnition();
-
-    // Check necessity of policy update for current application
-    // TODO(KKolodiy): need remove policy_manager
-    policy::PolicyManager* policy_manager =
-      policy::PolicyHandler::instance()->policy_manager();
-    if (!policy_manager) {
-      LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    } else {
-      policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
-    }
 
     SendRegisterAppInterfaceResponseToMobile();
   }
@@ -482,6 +478,16 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   MessageHelper::SendOnAppRegisteredNotificationToHMI(
     *(application.get()), resumption);
+
+  // Check necessity of policy update for current application
+  // TODO(KKolodiy): need remove policy_manager
+  policy::PolicyManager* policy_manager =
+      policy::PolicyHandler::instance()->policy_manager();
+  if (!policy_manager) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+  } else {
+    policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
+  }
 
   SendResponse(true, result, add_info, params);
   if (result != mobile_apis::Result::RESUME_FAILED) {

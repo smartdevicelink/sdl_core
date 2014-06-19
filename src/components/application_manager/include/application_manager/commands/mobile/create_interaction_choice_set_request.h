@@ -93,11 +93,11 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
   struct CoincidencePredicateChoiceID {
     explicit CoincidencePredicateChoiceID(const uint32_t newItem)
     :newItem_(newItem)
-    {};
+    {}
 
     bool operator()(smart_objects::SmartObject obj) {
-      return obj[strings::choice_id].asInt() == newItem_;
-    };
+      return obj[strings::choice_id].asUInt() == newItem_;
+    }
 
     const uint32_t newItem_;
   };

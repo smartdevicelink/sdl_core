@@ -149,9 +149,9 @@ class TransportAdapterEvent {
   BaseError *event_error(void) const;
 
  private:
-  DeviceUID device_uid_;             /**< Device unique identifier. */
   int event_type_;                   /**< Value that describe event type. */
   ApplicationHandle application_id_; /**< Handle of application. */
+  DeviceUID device_uid_;             /**< Device unique identifier. */
   transport_adapter::TransportAdapter *transport_adapter_;
   RawMessageSptr event_data_; /**< Smart pointer to the raw message. */
   BaseError *event_error_;    /** Pointer to the class that contain details of

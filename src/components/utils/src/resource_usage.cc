@@ -140,7 +140,7 @@ bool Resources::GetMemInfo(Resources::MemInfo &output) {
     LOG4CXX_ERROR(logger_, "Failed to get proc info");
     result = false;
   } else {
-    output = pid_stat.rss;
+    output = pid_stat.vsize;
     result = true;
   }
 

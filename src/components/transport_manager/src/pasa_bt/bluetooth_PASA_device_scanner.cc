@@ -149,12 +149,7 @@ void BluetoothPASADeviceScanner::UpdateTotalDeviceList() {
 
 void BluetoothPASADeviceScanner::UpdateTotalApplicationList() {
   LOG4CXX_TRACE_ENTER(logger_);
-  sync_primitives::AutoLock lock(devices_lock_);
-  for (DeviceVector::iterator it = found_devices_with_sdl_.begin();
-      it != found_devices_with_sdl_.end(); ++it) {
-    controller_->AddDevice(*it);
-    controller_->SearchApplicationsDone(*it);
-  }
+  controller_->FindNewApplicationsRequest();
   LOG4CXX_TRACE_EXIT(logger_);
 }
 

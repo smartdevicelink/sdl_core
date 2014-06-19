@@ -75,7 +75,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 public class ModuleTest {
@@ -154,11 +156,8 @@ public class ModuleTest {
      * Context of the XML Test thread
      */
 	private static Runnable sXMLTestThreadContext;
-    /**
-     * Context of the XML Test Action thread
-     */
-	private static Runnable sTestActionThreadContext;
-	private Thread mainThread;
+
+    private Thread mainThread;
 	
 	private boolean integration;
 	private String userPrompt;
@@ -537,7 +536,7 @@ public class ModuleTest {
                                     String customJSON = parser.getAttributeValue(null, CUSTOM_JSON_ATTR);
 
                                     //TODO: Set rpc parameters
-                                    Hashtable hash = setParams(name, parser);
+                                    Map hash = setParams(name, parser);
                                     logParserDebugInfo("" + hash);
                                     //TODO: Iterate through hash table and add it to parameters
                                     for (Object key : hash.keySet()) {
@@ -663,9 +662,9 @@ public class ModuleTest {
                                     }
                                 } else if (name.equalsIgnoreCase(TEST_TAG_NAME_ACTION)) {
                                     // Deprecated
-                                    /*if (testActionItem != null) {
+                                    if (testActionItem != null) {
                                         testAction(testActionItem);
-                                    }*/
+                                    }
                                 }
                                 break;
                             case XmlPullParser.TEXT:
@@ -723,11 +722,11 @@ public class ModuleTest {
 		});
 	}
 	
-	private Hashtable setParams(String name, XmlPullParser parser) {
+	private Map setParams(String name, XmlPullParser parser) {
 
 		logParserDebugInfo("setParams start name: " + name);
 		
-		Hashtable hash = new Hashtable();
+		Map hash = new ConcurrentHashMap();
 		
 		int eventType = 0;
 		Boolean done = false;
@@ -916,76 +915,20 @@ public class ModuleTest {
      * @param testActionItem test action item which describes an action to be performed
      */
     private void testAction(final TestActionItem testActionItem) {
-
-        Thread newThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                sTestActionThreadContext = this;
-
-                if (mProxyService == null && testActionItem == null) {
-                    Logger.e(TAG + " Test Action is null");
-                    interruptThread();
-                    return;
-                }
-
-                if (!mProxyService.isSyncProxyConnected()) {
-                    Logger.e(TAG + " Test Action - connection - is null");
-                    interruptThread();
-                    return;
-                }
-
-                mProxyService.waiting(true);
-
-                mProxyService.testInitializeSessionRPCOnly(mAppId);
-
-                long pause = testActionItem.getDelay();
-                if (pause > 0) {
-                    Logger.d(TAG + " Pause for " + pause + " ms for " + testActionItem.getActionName());
-                    try {
-                        // delay after the test
-                        synchronized (this) {
-                            ((Object) this).wait(pause);
-                        }
-                    } catch (InterruptedException e) {
-                        mLogAdapter.logMessage("InterruptedException", true);
-                    }
-                } else {
-                    Logger.i(TAG + " No pause for " + pause + " ms for " + testActionItem.getActionName());
-                }
-
-                // wait for incoming messages
-                try {
-                    synchronized (this) {
-                        ((Object) this).wait(100);
-                    }
-                } catch (InterruptedException e) {
-                    mLogAdapter.logMessage("InterruptedException", true);
-                }
-
-                mProxyService.waiting(false);
-
-                interruptThread();
-            }
-
-            private void interruptThread() {
-                synchronized (sInstance) {
-                    sInstance.notify();
-                }
-                Thread.currentThread().interrupt();
-            }
-        });
-
-        newThread.start();
-
-        try {
-            synchronized (this) {
-                this.wait();
-            }
-        } catch (InterruptedException e) {
-            mLogAdapter.logMessage("InterruptedException", true);
+        if (testActionItem.getActionName() == null) {
+            return;
         }
+        if (testActionItem.getActionName().equals(TestActionItem.START_RPC_SERVICE)) {
 
-        newThread.interrupt();
+            Logger.d("Has RPC Service:" + mProxyService.hasRPCRunning(mAppId));
+            if (mProxyService.hasRPCRunning(mAppId)) {
+                return;
+            }
+
+            mProxyService.getTestConfig().setDoCallRegisterAppInterface(false);
+            mProxyService.restart();
+            mProxyService.getRestoreConnectionToRPCService().acquireLock();
+        }
     }
 	
 	private TestResult xmlTest(final String appId) {
@@ -1047,6 +990,15 @@ public class ModuleTest {
                 CustomJsonRPCMarshaller customMarshaller = null;
 
                 for (RPCRequestWrapper wrapper : currentTest.getRequests()) {
+
+                    /*if (!mProxyService.isSyncProxyConnected()) {
+
+                        mProxyService.getTestConfig().setDoCallRegisterAppInterface(false);
+                        mProxyService.startProxyIfNetworkConnected();
+
+                        mProxyService.getRestoreConnectionToRPCService().acquireLock();
+                    }*/
+
                     RPCRequest rpc = wrapper.getRequest();
                     boolean generateInvalidJSON = wrapper.isGenerateInvalidJSON();
                     String customJSON = wrapper.getCustomJSON();
@@ -1258,13 +1210,6 @@ public class ModuleTest {
 		return sXMLTestThreadContext;
 	}
 
-    /**
-     * @return context of the XML Test Action thread
-     */
-    public Runnable getTestActionThreadContext() {
-        return sTestActionThreadContext;
-    }
-	
 	/**
 	 * Logs debug information during the XML parsing process. Can be turned
 	 * on/off with the DISPLAY_PARSER_DEBUG_INFO constant.
@@ -1309,17 +1254,3 @@ public class ModuleTest {
 		}
 	}
 }
-
-/*
-	public void setParameters(String functionName, Object value) {
-		if (value != null) {
-			parameters.put(functionName, value);
-		} else {
-			parameters.remove(functionName);
-		}
-	}
-	
-	public Object getParameters(String functionName) {
-		return parameters.get(functionName);
-	}
-*/

@@ -3,7 +3,6 @@ package com.ford.syncV4.protocol;
 import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.exception.SyncException;
-import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
@@ -14,13 +13,12 @@ import com.ford.syncV4.syncConnection.ISyncConnectionListener;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.SyncTransport;
+import com.ford.syncV4.transport.usb.USBTransportConfig;
 
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Tests for the case when the app wants to unregister itself.
@@ -41,8 +39,9 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
     public void testResetProxyShouldNotDisconnectTransport() throws Exception {
         SyncTransport transportMock = mock(SyncTransport.class);
         SyncConnection connection = spy(new SyncConnection(SessionTest.getInitializedSession(),
+                new USBTransportConfig(getInstrumentation().getTargetContext()),
                 null));
-        connection.init(null, transportMock);
+        connection.init();
 
         SyncProxyALM syncProxy = getSyncProxy(connection);
         assertNotNull(syncProxy);
@@ -56,7 +55,7 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         // protected. And I couldn't add the PowerMock library to the project
         // due to errors during 'dexTest' step
 
-        verify(connection).closeConnection(eq(true));
+        verify(connection, never()).closeConnection();
         verify(transportMock, never()).disconnect();
     }
 
@@ -65,15 +64,17 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         ISyncConnectionListener syncConnectionListenerMock = mock(ISyncConnectionListener.class);
         Session session = SessionTest.getInitializedSession();
 
-        SyncConnection connection = spy(new SyncConnection(session, syncConnectionListenerMock));
-        connection.init(null, transportMock);
+        SyncConnection connection = spy(new SyncConnection(session,
+                new USBTransportConfig(getInstrumentation().getTargetContext()),
+                syncConnectionListenerMock));
+        connection.init();
 
         SyncProxyALM syncProxy = getSyncProxy(connection);
         assertNotNull(syncProxy);
 
         syncProxy.doUnregisterAppInterface(SessionTest.APP_ID);
 
-        verify(connection, never()).closeConnection(eq(true));
+        verify(connection, never()).closeConnection();
         verify(transportMock, never()).disconnect();
     }
 
@@ -81,6 +82,8 @@ public class UnregisterWithoutDisconnectTest extends InstrumentationTestCase {
         IProxyListenerALM proxyListenerMock = mock(IProxyListenerALM.class);
         return new SyncProxyALM(proxyListenerMock, null, "test", null, null,
                 false, null, null, null, null, SessionTest.APP_ID, null, false, false,
-                ProtocolConstants.PROTOCOL_VERSION_TWO, null, connection, new TestConfig());
+                ProtocolConstants.PROTOCOL_VERSION_TWO,
+                new USBTransportConfig(getInstrumentation().getTargetContext()), connection,
+                new TestConfig());
     }
 }

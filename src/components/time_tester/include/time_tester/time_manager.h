@@ -58,9 +58,6 @@ class TimeManager {
   void Stop();
   void SendMetric(utils::SharedPtr<MetricWrapper> metric);
  private:
-  ApplicationManagerObserver app_observer;
-  TransportManagerObserver tm_observer;
-  ProtocolHandlerObserver ph_observer;
 
   class Streamer : public threads::ThreadDelegate {
    public:
@@ -87,6 +84,9 @@ class TimeManager {
   threads::Thread* thread_;
   MessageQueue<utils::SharedPtr<MetricWrapper> > messages_;
   Streamer* streamer_;
+  ApplicationManagerObserver app_observer;
+  TransportManagerObserver tm_observer;
+  ProtocolHandlerObserver ph_observer;
 
   DISALLOW_COPY_AND_ASSIGN(TimeManager);
 };

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -64,12 +64,13 @@ const char* kMediaManagerSection = "MEDIA MANAGER";
 const char* kGlobalPropertiesSection = "GLOBAL PROPERTIES";
 const char* kVrCommandsSection = "VR COMMANDS";
 const char* kTransportManagerSection = "TransportManager";
+const char* kApplicationManagerSection = "ApplicationManager";
 const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
 
 const char* kHmiCapabilitiesKey = "HMICapabilities";
 const char* kPathToSnapshotKey = "PathToSnapshot";
 const char* kPreloadedPTKey = "PreloadedPT";
-const char* kPoliciesTableKey = "PoliciesTable";
+//const char* kPoliciesTableKey = "PoliciesTable";
 const char* kServerAddressKey = "ServerAddress";
 const char* kAppInfoStorageKey = "AppInfoStorage";
 const char* kAppStorageFolderKey = "AppStorageFolder";
@@ -86,6 +87,8 @@ const char* kAudioStreamFileKey = "AudioStreamFile";
 
 #ifdef CUSTOMER_PASA
 const char* kLoggerConfigFileKey = "LoggerConfigFileKey";
+const char* kRemoteLoggingFlagFileKey = "RemoteLoggingFlagFile";
+const char* kRemoteLoggingFlagFilePathKey = "RemoteLoggingFlagFilePath";
 #endif
 
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";
@@ -118,9 +121,6 @@ const char* kAppHmiLevelNoneRequestsTimeScaleKey =
 const char* kPendingRequestsAmoundKey = "PendingRequestsAmount";
 const char* kSupportedDiagModesKey = "SupportedDiagModes";
 const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
-#ifdef CUSTOMER_PASA
-const char* kTtsDelimiterKey = "TtsDelimiter";
-#endif
 const char* kTTSDelimiterKey = "TTSDelimiter";
 const char* kRecordingFileNameKey = "RecordingFileName";
 const char* kRecordingFileSourceKey = "RecordingFileSource";
@@ -128,6 +128,7 @@ const char* kPolicyOffKey = "PolicySwitchOff";
 const char* kMmeDatabaseNameKey = "MMEDatabase";
 const char* kEventMQKey = "EventMQ";
 const char* kAckMQKey = "AckMQ";
+const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -138,8 +139,7 @@ const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
 #ifdef CUSTOMER_PASA
 const char* kDefaultLog4cxxConfig = "/fs/mp/etc/AppLink/log4cxx.properties";
-const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
-const char* kDefaultRecordingFileName = "record.wav";
+const char* kDefaultRemoteLoggingFlagFile = "";
 #endif
 const char* kDefaultMmeDatabaseName = "/dev/qdb/mediaservice_db";
 const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
@@ -165,6 +165,7 @@ const uint32_t kDefaultAppHmiLevelNoneTimeScaleMaxRequests = 100;
 const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 10;
 const uint32_t kDefaultPendingRequestsAmount = 1000;
 const uint32_t kDefaultTransportManagerDisconnectTimeout = 0;
+const uint32_t kDefaultApplicationListUpdateTimeout = 1;
 
 }  // namespace
 
@@ -178,12 +179,12 @@ Profile::Profile()
     app_storage_folder_(),
     app_resourse_folder_(),
     config_file_name_(kDefaultConfigFileName),
-    hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName),
     server_address_(kDefaultServerAddress),
     server_port_(kDefaultServerPort),
     video_streaming_port_(kDefaultVideoStreamingPort),
     audio_streaming_port_(kDefaultAudioStreamingPort),
     time_testing_port_(kDefaultTimeTestingPort),
+    hmi_capabilities_file_name_(kDefaultHmiCapabilitiesFileName),
     help_prompt_(),
     time_out_promt_(),
     min_tread_stack_size_(threads::Thread::kMinStackSize),
@@ -216,12 +217,14 @@ Profile::Profile()
     tts_delimiter_(kDefaultTtsDelimiter),
 #ifdef CUSTOMER_PASA
     log4cxx_config_file_(kDefaultLog4cxxConfig),
+    remote_logging_flag_file_(kDefaultRemoteLoggingFlagFile),
 #endif
-	recording_file_source_(kDefaultRecordingFileSourceName),
-	recording_file_name_(kDefaultRecordingFileName),
-	mme_db_name_(kDefaultMmeDatabaseName),
-	event_mq_name_(kDefaultEventMQ),
-	ack_mq_name_(kDefaultAckMQ) {
+    mme_db_name_(kDefaultMmeDatabaseName),
+    event_mq_name_(kDefaultEventMQ),
+    ack_mq_name_(kDefaultAckMQ),
+    recording_file_source_(kDefaultRecordingFileSourceName),
+    recording_file_name_(kDefaultRecordingFileName),
+    application_list_update_timeout_(kDefaultApplicationListUpdateTimeout) {
 }
 
 Profile::~Profile() {
@@ -360,6 +363,13 @@ const std::string& Profile::audio_stream_file() const {
 const std::string& Profile::log4cxx_config_file() const {
   return log4cxx_config_file_;
 }
+const std::string& Profile::remote_logging_flag_file() const {
+  return remote_logging_flag_file_;
+}
+
+const std::string& Profile::remote_logging_flag_file_path() const {
+	return remote_logging_flag_file_path_;
+}
 #endif
 
 const uint32_t& Profile::app_time_scale() const {
@@ -450,6 +460,10 @@ const std::string& Profile::ack_mq_name() const {
   return ack_mq_name_;
 }
 
+uint32_t Profile::application_list_update_timeout() const {
+  return application_list_update_timeout_;
+}
+
 void Profile::UpdateValues() {
   LOG4CXX_INFO(logger_, "Profile::UpdateValues");
 
@@ -495,6 +509,9 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
                   kAppInfoSection,
                   kAppInfoStorageKey);
 
+#ifdef CUSTOMER_PASA
+ app_info_storage_ = app_storage_folder_ + "/" + app_info_storage_;
+#endif
  LOG_UPDATED_VALUE(app_info_storage_, kAppInfoStorageKey,
                     kAppInfoSection);
 
@@ -618,7 +635,21 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
 
     LOG_UPDATED_VALUE(log4cxx_config_file_, kLoggerConfigFileKey,
                       kMainSection);
+    // Remote logging flag file
+    ReadStringValue(&remote_logging_flag_file_, "", kMainSection,
+    		        kRemoteLoggingFlagFileKey);
+
+    LOG_UPDATED_VALUE(remote_logging_flag_file_, kRemoteLoggingFlagFileKey,
+                      kMainSection);
+
+    // Remote logging flag file
+    ReadStringValue(&remote_logging_flag_file_path_, "", kMainSection,
+        		    kRemoteLoggingFlagFilePathKey);
+
+    LOG_UPDATED_VALUE(remote_logging_flag_file_path_, kRemoteLoggingFlagFilePathKey,
+                      kMainSection);
 #endif
+
   // Mixing audio parameter
   std::string mixing_audio_value;
   if (ReadValue(&mixing_audio_value, kMainSection, kMixingAudioSupportedKey)
@@ -958,6 +989,14 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
   }
 
   LOG_UPDATED_BOOL_VALUE(policy_turn_off_, kPolicyOffKey, kPolicySection);
+
+  ReadUIntValue(&application_list_update_timeout_,
+      kDefaultApplicationListUpdateTimeout,
+      kApplicationManagerSection,
+      kApplicationListUpdateTimeoutKey);
+
+  LOG_UPDATED_VALUE(application_list_update_timeout_,
+      kApplicationListUpdateTimeoutKey, kApplicationManagerSection);
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,

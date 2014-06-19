@@ -52,7 +52,7 @@ SDL.VRHelpListView = SDL.SDLAbstractView.create( {
 
         this._super();
 
-        if (SDL.SDLAppController.model && SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+        if (SDL.SDLAppController.model && SDL.SDLModel.vrActiveRequests.vrPerformInteraction) {
             SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['ABORTED']);
         }
 

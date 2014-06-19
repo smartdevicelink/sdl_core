@@ -37,13 +37,6 @@
 
 #include <pthread.h>
 
-#ifdef RWLOCK_SUPPORT
-#  if (defined(OS_LINUX) && (defined(__USE_UNIX98) || defined(__USE_XOPEN2K))) || \
-      (defined(OS_QNX)   && (defined(__EXT_POSIX1_200112)))
-#  define USE_RWLOCK
-#  endif
-#endif
-
 #include <queue>
 #include <map>
 #include <list>
@@ -57,6 +50,7 @@
 #ifdef TIME_TESTER
 #include "transport_manager/time_metric_observer.h"
 #endif  // TIME_TESTER
+#include "utils/rwlock.h"
 
 using ::transport_manager::transport_adapter::TransportAdapterListener;
 
@@ -333,9 +327,8 @@ class TransportManagerImpl : public TransportManager {
   /**
    * @brief Mutex restricting access to messages.
    **/
-#ifdef USE_RWLOCK
-  mutable pthread_rwlock_t message_queue_rwlock_;
-#endif
+
+  mutable sync_primitives::RWLock message_queue_rwlock_;
   mutable pthread_mutex_t message_queue_mutex_;
 
   pthread_cond_t message_queue_cond_;
@@ -377,18 +370,20 @@ class TransportManagerImpl : public TransportManager {
   /**
    * @brief Mutex restricting access to events.
    **/
-#ifdef USE_RWLOCK
-  mutable pthread_rwlock_t event_queue_rwlock_;
-#endif
+
+  mutable sync_primitives::RWLock event_queue_rwlock_;
+
   mutable pthread_mutex_t event_queue_mutex_;
 
   /**
    * @brief Flag that TM is initialized
    */
   bool is_initialized_;
+
 #ifdef TIME_TESTER
   TMMetricObserver* metric_observer_;
 #endif  // TIME_TESTER
+
  private:
   /**
    * @brief Structure that contains conversion functions (Device ID -> Device
@@ -443,8 +438,10 @@ class TransportManagerImpl : public TransportManager {
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
       DeviceList;
   DeviceList device_list_;
+
+
   void AddConnection(const ConnectionInternal& c);
-  void RemoveConnection(int id);
+  void RemoveConnection(uint32_t id);
   ConnectionInternal* GetConnection(const ConnectionUID& id);
   ConnectionInternal* GetConnection(const DeviceUID& device,
                                     const ApplicationHandle& application);

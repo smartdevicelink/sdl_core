@@ -126,6 +126,9 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
         restored_hmi_level = app_mngr_->PutApplicationInLimited(application);
         if (audio_streaming_state == mobile_apis::AudioStreamingState::AUDIBLE) {
           //implemented SDLAQ-CRS-839
+          //checking the existence of application with AudioStreamingState=AUDIBLE
+          //notification resumeAudioSource is sent if only resumed application has
+          //AudioStreamingState=AUDIBLE
           bool application_exist_with_audible_state = false;
           const std::set<ApplicationSharedPtr>& app_list = app_mngr_->applications();
           std::set<ApplicationSharedPtr>::const_iterator app_list_it = app_list.begin();
@@ -201,6 +204,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
       file.file_name = file_data[strings::sync_file_name].asString();
       file.file_type = static_cast<mobile_apis::FileType::eType> (
                          file_data[strings::file_type].asInt());
+      LOG4CXX_INFO(logger_, "RestoreApplicationData file " << file.file_name);
       application->AddFile(file);
     }
   }
@@ -509,7 +513,7 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
 }
 
 bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr application) {
-  LOG4CXX_INFO(logger_, "RestoreApplicationData");
+  LOG4CXX_INFO(logger_, "CheckPersistenceFilesForResumption");
   DCHECK(application.get());
 
   Json::Value::iterator it = GetSavedApplications().begin();

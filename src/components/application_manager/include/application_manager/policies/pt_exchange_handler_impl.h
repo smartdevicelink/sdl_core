@@ -33,18 +33,29 @@
 #ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_EXCHANGE_IMPL_H_
 #define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_EXCHANGE_IMPL_H_
 
-#include "application_manager/policies/policy_handler.h"
 #include "application_manager/policies/pt_exchange_handler.h"
+#include "utils/lock.h"
+#include "utils/threads/thread.h"
 
 namespace policy {
+
+class PolicyHandler;
+
 class PTExchangeHandlerImpl : public PTExchangeHandler {
  public:
   PTExchangeHandlerImpl(PolicyHandler* handler);
   virtual ~PTExchangeHandlerImpl();
-  virtual bool StartExchange();
+  virtual void Start();
+  virtual void Stop();
+
  protected:
   PolicyHandler* policy_handler_;
+  threads::Thread retry_sequence_;
+  sync_primitives::Lock retry_sequence_lock_;
+
+  friend class RetrySequence;
 };
-}  //  namespace policy
+
+}  // namespace policy
 
 #endif  //  SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_EXCHANGE_IMPL_H_

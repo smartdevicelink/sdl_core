@@ -12,10 +12,5 @@ package com.ford.syncV4.test;
  */
 public interface ITestConfigCallback {
 
-    /**
-     * Indicated that RPC Service has been started and
-     * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} is ready to be created. This callback
-     * need to STOP call {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
-     */
-    public void onRPCServiceComplete();
+
 }

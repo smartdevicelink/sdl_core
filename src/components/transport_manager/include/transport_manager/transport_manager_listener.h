@@ -1,8 +1,5 @@
-/**
- * \file transport_manager_listener.h
- * \brief TransportManagerListener class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -58,12 +55,9 @@ class TransportManagerListener {
   virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) = 0;
 
   /**
-  * @brief Reaction on event, when new applications are started on device
-  * and SDL found this application
-  *
-  * @param device_handle Unique ID of connected device
+  * @brief Reaction to "Find new applications" request
   */
-  virtual void OnApplicationListUpdated(DeviceHandle device_handle) = 0;
+  virtual void OnFindNewApplicationsRequest() = 0;
 
   /**
    * @brief Reaction to the event, when the device is found.

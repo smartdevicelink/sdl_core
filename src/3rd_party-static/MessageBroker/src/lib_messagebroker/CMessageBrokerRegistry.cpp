@@ -52,7 +52,15 @@ namespace NsMessageBroker
       it = mControllersList.find(name);
       if (it != mControllersList.end())
       {
+         int fd = it->second;
          mControllersList.erase(it);
+         std::multimap <std::string, int>::iterator it_s = mSubscribersList.begin();
+         for (; it_s !=mSubscribersList.end(); ++it_s) {
+           if (it_s->second == fd) {
+             mSubscribersList.erase(it_s);
+           }
+         }
+
       } else
       {
          DBG_MSG(("No such controller in the list!\n"));

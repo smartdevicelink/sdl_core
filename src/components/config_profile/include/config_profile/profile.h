@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -215,7 +215,20 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns path to log4cxx configuration file
       */
     const std::string& log4cxx_config_file() const;
+    /**
+      * @brief Returns remote logging flag file name
+      * if this path exists in the system log file will be
+      * saved to the USb drive
+      */
+    const std::string& remote_logging_flag_file() const;
+
+    /**
+      * @brief Returns path to remote logging flag file
+      * if this path exists in the system log file will be
+      * saved to the USb drive
+      */
 #endif
+    const std::string& remote_logging_flag_file_path() const;
     /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none
@@ -330,6 +343,8 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& event_mq_name() const;
 
     const std::string& ack_mq_name() const;
+
+    uint32_t application_list_update_timeout() const;
 
   private:
     /**
@@ -464,11 +479,17 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
+#ifdef CUSTOMER_PASA
+    std::string                     log4cxx_config_file_;
+    std::string                     remote_logging_flag_file_;
+    std::string                     remote_logging_flag_file_path_;
+#endif
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;
     std::string                     ack_mq_name_;
     std::string                     recording_file_source_;
     std::string                     recording_file_name_;
+    uint32_t                        application_list_update_timeout_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 

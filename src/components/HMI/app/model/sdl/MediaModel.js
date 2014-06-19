@@ -69,6 +69,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 uiPerformInteraction: null
             }));
 
+            this.set('VRCommands', []);
             this.set('tbtActivate', false);
             this.set('isPlaying', true);
             this.set('globalProperties.helpPrompt', []);
@@ -326,6 +327,9 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                         break;
                     }
                 }
+            } else {
+
+                this.appInfo.set('alignment', "text-align:center");
             }
 
             if (params.graphic) {

@@ -1,7 +1,5 @@
-/**
-* \file signals.h
-* \brief Signal (i.e. SIGINT) handling.
-* Copyright (c) 2013, Ford Motor Company
+/*
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -38,7 +36,6 @@
 namespace utils {
 bool SubscribeToTerminateSignal(void (*func)(int32_t p));
 bool ResetSubscribeToTerminateSignal();
-void ForwardSignal();
 }  //  namespace utils
 
 #endif  //  SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SIGNALS_H_

@@ -1,10 +1,5 @@
-/**
- * \file ConnectionHandlerImpl.cpp
- * \brief Connection handler class.
- * \Observes TransportManager and ProtocolHandler, stores information regarding connections
- * \and sessions and provides it to AppManager.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -91,11 +86,9 @@ void ConnectionHandlerImpl::OnDeviceListUpdated(
   }
 }
 
-void ConnectionHandlerImpl::OnApplicationListUpdated(DeviceHandle device_handle) {
-  LOG4CXX_DEBUG(logger_,"ConnectionHandlerImpl::OnApplicationListUpdated() device_handle "
-               << device_handle);
+void ConnectionHandlerImpl::OnFindNewApplicationsRequest() {
   if (connection_handler_observer_) {
-    connection_handler_observer_->OnApplicationListUpdated(device_handle);
+    connection_handler_observer_->OnFindNewApplicationsRequest();
   }
 }
 
@@ -213,36 +206,36 @@ void ConnectionHandlerImpl::RemoveConnection(
   OnConnectionEnded(connection_handle);
 }
 
- int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
+ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   const transport_manager::ConnectionUID& connection_handle,
   const uint8_t sessionId,
   const protocol_handler::ServiceType& service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
 
-  int32_t new_session_id = -1;
+  uint32_t new_session_id = 0;
 
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
-    return -1;
+    return 0;
   }
 
   if ((0 == sessionId) && (protocol_handler::kRpc == service_type)) {
     new_session_id = (it->second)->AddNewSession();
     if (0 > new_session_id) {
       LOG4CXX_ERROR(logger_, "Not possible to start session!");
-      return -1;
+      return 0;
     }
   } else if ((0 != sessionId) && (protocol_handler::kRpc != service_type)) {
     if (!(it->second)->AddNewService(sessionId, service_type)) {
       LOG4CXX_ERROR(logger_, "Not possible to establish service!");
-      return -1;
+      return 0;
     }
     new_session_id = sessionId;
   } else {
     LOG4CXX_ERROR(logger_, "Not possible to establish service!");
-    return -1;
+    return 0;
   }
 
   if (connection_handler_observer_) {
@@ -253,10 +246,10 @@ void ConnectionHandlerImpl::RemoveConnection(
 
     if (!success && (protocol_handler::kRpc == service_type)) {
       (it->second)->RemoveSession(new_session_id);
-      new_session_id = -1;
+      new_session_id = 0;
     } else if (!success) {
       (it->second)->RemoveService(sessionId, service_type);
-      new_session_id = -1;
+      new_session_id = 0;
     }
   }
   return new_session_id;
@@ -268,7 +261,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   const protocol_handler::ServiceType& service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
 
-  int32_t result = -1;
+  uint32_t result = 0;
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
@@ -490,6 +483,13 @@ void ConnectionHandlerImpl::ConnectToDevice(
     LOG4CXX_ERROR(
       logger_,
       "Application Manager wanted to connect to non-existing device");
+  }
+}
+
+void ConnectionHandlerImpl::ConnectToAllDevices() {
+  for (DeviceListIterator i = device_list_.begin(); i != device_list_.end(); ++i) {
+    connection_handler::DeviceHandle device_handle = i->first;
+    ConnectToDevice(device_handle);
   }
 }
 

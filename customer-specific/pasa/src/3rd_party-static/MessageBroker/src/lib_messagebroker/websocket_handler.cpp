@@ -95,6 +95,20 @@ namespace NsMessageBroker
            fin, recBuffer[0], parsedBufferPosition + position,
            size, parsedBufferPosition));
 
+       if ((!rsv1)|(!rsv2)|(!rsv3)) {
+         DBG_MSG(("rsv1 or rsv2 or rsv3 is not 0 \n"));
+         break;
+       }
+
+       switch(opCode) {
+         case 0x0: break; //Continuation frame
+         case 0x1: break; //Text Frame
+         case 0x2: break; //Binary Frame
+         case 0x8: break; //Connection close Frame
+         case 0x9: break; //ping Frame
+         case 0xA: break; //Pong Frame
+         default: break; //Unknown frame
+       }
 
        if (false == fin) {
           break;
@@ -148,7 +162,7 @@ namespace NsMessageBroker
        DBG_MSG(("CWebSocketHandler::parseWebSocketData()length:%d; size:%d;"
                 " position:%d\n", (int)length, size, position));
 
-       for (unsigned long i = position; i < size, i < position+length; i++)
+       for (unsigned long i = position; (i < size && i < position+length); i++)
        {
           Buffer[parsedBufferPosition++] = recBuffer[i];
        }
