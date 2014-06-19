@@ -255,6 +255,9 @@ public class HeartbeatMonitor implements IHeartbeatMonitor {
 
     @Override
     public void heartbeatReceived() {
+        if (heartbeatThreadHandler == null) {
+            return;
+        }
         synchronized (Listener_Lock) {
             if (isHeartbeatAck) {
                 heartbeatReceived = true;

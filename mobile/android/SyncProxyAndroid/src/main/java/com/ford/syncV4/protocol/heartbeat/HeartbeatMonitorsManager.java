@@ -18,13 +18,16 @@ public class HeartbeatMonitorsManager {
     private volatile List<IHeartbeatMonitor> heartbeatMonitors = new ArrayList<IHeartbeatMonitor>();
 
     public HeartbeatMonitorsManager() {
-        Logger.d(CLASS_NAME + " Constructor" + " hash:" + hashCode());
+        Logger.d(CLASS_NAME + " Constructor");
+    }
+
+    public synchronized void addMonitor(IHeartbeatMonitor monitor) {
+        addMonitor(monitor, "private");
     }
 
     public synchronized void addMonitor(IHeartbeatMonitor monitor, String source) {
         heartbeatMonitors.add(monitor);
-        Logger.d(CLASS_NAME + " add monitor:" + monitor + ", size:" + heartbeatMonitors.size() +
-                " source:" + source + " this hash:" + hashCode());
+        Logger.d(CLASS_NAME + " add monitor:" + monitor + ", size:" + heartbeatMonitors.size());
     }
 
     public synchronized void addMonitor(byte sessionId, int heartBeatInterval, boolean heartBeatAck) {
@@ -74,7 +77,7 @@ public class HeartbeatMonitorsManager {
             if (monitor.getSessionId() == sessionId) {
                 monitor.setListener(null);
                 monitor.stop();
-                Logger.d(CLASS_NAME + " monitor stopped, sesId:" + sessionId + " monitor:" + monitor);
+                Logger.d(CLASS_NAME + " monitor stopped, sesId:" + sessionId);
                 return;
             }
         }
@@ -92,7 +95,7 @@ public class HeartbeatMonitorsManager {
     }
 
     public synchronized void heartbeatACKReceived(byte sessionId) {
-        Logger.d(CLASS_NAME + " heartbeatACKReceived for sesId:" + sessionId + " col len:" + heartbeatMonitors.size() + " hash:" + hashCode());
+        Logger.d(CLASS_NAME + " heartbeatACKReceived for sesId:" + sessionId);
         for (IHeartbeatMonitor monitor : heartbeatMonitors) {
             if (monitor == null) {
                 continue;
@@ -120,14 +123,14 @@ public class HeartbeatMonitorsManager {
     }
 
     public synchronized void notifyTransportOutputActivity(byte sessionId) {
-        Logger.d(CLASS_NAME + " notifyTransportOutputActivity for sesId:" + sessionId + " hash:" + hashCode());
+        Logger.d(CLASS_NAME + " notifyTransportOutputActivity for sesId:" + sessionId);
         for (IHeartbeatMonitor monitor : heartbeatMonitors) {
             if (monitor == null) {
                 continue;
             }
             if (monitor.getSessionId() == sessionId) {
                 monitor.notifyTransportOutputActivity();
-                Logger.d(CLASS_NAME + " notifyTransportOutputActivity done sesId:" + sessionId + " hash:" + hashCode());
+                Logger.d(CLASS_NAME + " notifyTransportOutputActivity done sesId:" + sessionId);
                 return;
             }
         }
