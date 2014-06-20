@@ -111,6 +111,13 @@ class AlertRequest : public CommandRequestImpl {
    */
   bool HasHmiResponsesToWait();
 
+  /*
+   * @brief Check if all strings have valid syntax in request
+   *
+   * @return TRUE on success, otherwise FALSE
+   */
+  bool CheckStringsOfAlertRequest();
+
   bool                        awaiting_ui_alert_response_;
   bool                        awaiting_tts_speak_response_;
   bool                        awaiting_tts_stop_speaking_response_;

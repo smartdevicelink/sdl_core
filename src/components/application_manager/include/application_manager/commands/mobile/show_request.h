@@ -72,11 +72,11 @@ class ShowRequest : public CommandRequestImpl {
  private:
 
   /*
-   * @brief Check if main fileds{1,2,3,4} have valid syntax
+   * @brief Check if all strings have valid syntax in request
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool CheckMenuFieldsNames();
+  bool CheckStringsOfShowRequest();
 
   DISALLOW_COPY_AND_ASSIGN(ShowRequest);
 };
