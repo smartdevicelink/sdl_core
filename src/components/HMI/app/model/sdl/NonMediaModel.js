@@ -201,8 +201,9 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
                 }
             }
 
-            this.updateSoftButtons(params.softButtons);
-
+            if ("softButtons" in params) {
+                this.updateSoftButtons(params.softButtons);
+            }
         },
 
         sdlSetMediaClockTimer: function () {
