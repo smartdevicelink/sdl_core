@@ -192,9 +192,8 @@ void DBusMessageAdapter::Response(const smart_objects::SmartObject& obj) {
 
 void DBusMessageAdapter::ErrorResponse(const smart_objects::SmartObject &obj) {
   LOG4CXX_DEBUG(logger_, "Error");
-  // TODO(KKolodiy): get error and description
-  std::string error = "";
-  std::string description = "";
+  std::string error = obj[sos::S_PARAMS][sos::kCode].asString();
+  std::string description = obj[sos::S_PARAMS][sos::kMessage].asString();
   uint id = obj[sos::S_PARAMS][sos::S_CORRELATION_ID].asInt();
   Error(id, error, description);
 }

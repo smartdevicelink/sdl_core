@@ -182,7 +182,36 @@ void DBusAdapter::MethodReturn(uint id, const MessageId func_id,
 
 void DBusAdapter::Error(uint id, const std::string& name,
                         const std::string& description) {
-  // TODO(KKolodiy): implement
+  LOG4CXX_DEBUG(logger_, "Error " << name << ": " << description);
+  if (conn_ == NULL) {
+    LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
+    return;
+  }
+
+  DBusMessage* msg = GetRequestFromHMI(id);
+  if (!msg) {
+    LOG4CXX_WARN(logger_, "DBus: request from HMI is not found");
+    return;
+  }
+
+  DBusMessage* error;
+  error = dbus_message_new_error(msg, name.c_str(), description.c_str());
+  if (NULL == error) {
+    LOG4CXX_WARN(logger_, "DBus: Failed call method (Message Null)");
+    return;
+  }
+
+  dbus_uint32_t serial;
+  if (!dbus_connection_send(conn_, error, &serial)) {
+    LOG4CXX_ERROR(logger_, "DBus: Failed call method (Can't send message)");
+    dbus_message_unref(error);
+    dbus_message_unref(msg);
+    return;
+  }
+  dbus_connection_flush(conn_);
+  dbus_message_unref(error);
+  dbus_message_unref(msg);
+  LOG4CXX_INFO(logger_, "DBus: Success error");
 }
 
 void DBusAdapter::MethodCall(uint id, const MessageId func_id,
@@ -368,9 +397,11 @@ bool DBusAdapter::ProcessError(DBusMessage* msg,
     return false;
   }
 
-  const char* name;
+  const char* name_error;
   bool ret = false;
-  if ((name = dbus_message_get_error_name(msg)) != NULL) {
+  if ((name_error = dbus_message_get_error_name(msg)) != NULL) {
+    smart_objects::SmartObject name(smart_objects::SmartType_String);
+    name = name_error;
     ford_message_descriptions::ParameterDescription rule = { "description",
         ford_message_descriptions::String, true };
     ListArgs args;
@@ -386,15 +417,17 @@ bool DBusAdapter::ProcessError(DBusMessage* msg,
 
     obj[sos::S_PARAMS][sos::S_CORRELATION_ID] = ids.first;
     obj[sos::S_PARAMS][sos::S_FUNCTION_ID] = ids.second;
-    obj[sos::S_PARAMS][sos::S_MESSAGE_TYPE] = hmi_apis::messageType::response;
-    obj[sos::S_PARAMS][sos::kCode] = description[rule.name].asInt();
+    obj[sos::S_PARAMS][sos::S_MESSAGE_TYPE] =
+        hmi_apis::messageType::error_response;
+    obj[sos::S_PARAMS][sos::kCode] = name.asInt();
+    obj[sos::S_PARAMS][sos::kMessage] = description[rule.name].asString();
     obj[sos::S_MSG_PARAMS] = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     obj[sos::S_PARAMS]["data"]["method"] = method.first + "." + method.second;
 
     LOG4CXX_WARN(
         logger_,
-        "DBus: Call of method " << method.first << "." << method.second << " returned error " << name << ": " << description[rule.name].asString());
+        "DBus: Call of method " << method.first << "." << method.second << " returned error " << name.asInt() << ": " << description[rule.name].asString());
   } else {
     LOG4CXX_ERROR(logger_, "DBus: Type message isn't error");
   }
