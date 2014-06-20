@@ -999,8 +999,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
               connection_id, session_id, packet.protocol_version(),
               connection_key, packet.service_type()));
       security_manager_->StartHandshake(connection_key);
-      LOG4CXX_DEBUG(logger_, "Protection established for connection " // FIXME (dchmerev): It's not established yet
-                    << connection_key);
+      LOG4CXX_DEBUG(logger_, "Protection establishing for connection "
+                    << connection_key << " is in progress");
       return RESULT_OK;
     }
     LOG4CXX_ERROR(logger_, "ProtectConnection failed");

@@ -297,7 +297,6 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
 
   if (connection_handler_observer_) {
     const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
-    // TODO(EZamakhov): update info in ApplicationManagerImpl::OnServiceStartedCallback
     const bool success = connection_handler_observer_->OnServiceStartedCallback(
         connection->connection_device_handle(), session_key, service_type);
     if (!success) {

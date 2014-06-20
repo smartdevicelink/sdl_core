@@ -118,7 +118,7 @@ bool LifeCycle::StartComponents() {
 #ifdef ENABLE_SECURITY
   security_manager_ = new security_manager::SecurityManager();
 
-  // Fixme(EZamakhov): move to Config or in Sm initialization method
+  // FIXME(EZamakhov): move to Config or in Sm initialization method
   std::string cert_filename;
   profile::Profile::instance()->ReadStringValue(
         &cert_filename, "",

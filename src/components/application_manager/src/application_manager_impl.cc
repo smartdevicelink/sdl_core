@@ -946,6 +946,7 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
   const connection_handler::DeviceHandle& device_handle,
   const int32_t& session_key,
   const protocol_handler::ServiceType& type) {
+  // FIXME(EZamakhov): Add checking protection flag
   LOG4CXX_INFO(logger_,
                "OnServiceStartedCallback " << type << " in session " << session_key);
   ApplicationSharedPtr app = application(session_key);
