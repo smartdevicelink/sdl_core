@@ -192,18 +192,30 @@ bool AddCommandRequest::CheckCommandName(ApplicationConstSharedPtr app) {
 
   const CommandsMap& commands = app->commands_map();
   CommandsMap::const_iterator i = commands.begin();
+  uint32_t parent_id_save_command = 0;
+  uint32_t parent_id = 0;
+  if ((*message_)[strings::msg_params]
+                  [strings::menu_params].keyExists(hmi_request::parent_id)) {
+    parent_id = (*message_)[strings::msg_params]
+                            [strings::menu_params][hmi_request::parent_id].asUInt();
+  }
 
   for (; commands.end() != i; ++i) {
 
-    if(!(*i->second).keyExists(strings::menu_params)) {
+    if (!(*i->second).keyExists(strings::menu_params)) {
       continue;
     }
 
-    if ((*i->second)[strings::menu_params][strings::menu_name].asString()
+    parent_id_save_command = 0;
+    if ((*i->second)[strings::menu_params].keyExists(hmi_request::parent_id)) {
+      parent_id_save_command = (*i->second)[strings::menu_params][hmi_request::parent_id].asUInt();
+    }
+    if (((*i->second)[strings::menu_params][strings::menu_name].asString()
         == (*message_)[strings::msg_params][strings::menu_params]
-                                            [strings::menu_name].asString()) {
+                                            [strings::menu_name].asString()) &&
+        (parent_id_save_command == parent_id)) {
       LOG4CXX_INFO(logger_, "AddCommandRequest::CheckCommandName received"
-                   " command name already exist");
+                   " command name already exist in same level menu");
       return false;
     }
   }
