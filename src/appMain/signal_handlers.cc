@@ -31,10 +31,15 @@
 */
 
 #include "signal_handlers.h"
+#include "life_cycle.h"
 
 namespace main_namespace {
 
 void dummy_signal_handler(int32_t signal) {
+}
+
+void legacy_signal_handler(int32_t signal) {
+  LifeCycle::instance()->StopComponents();
 }
 
 }  // namespace main_namespace
