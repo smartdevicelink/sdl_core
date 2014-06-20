@@ -130,7 +130,7 @@ class SecurityQuery {
    * \brief Deserialize query for sending to Mobile Application
    * \return \c vector of uint8_t data (serialized header data and send_data))
    */
-  std::vector<uint8_t> DeserializeQuery() const;
+  const std::vector<uint8_t> DeserializeQuery() const;
   /**
    * \brief Set binary data. (No header modification)
    * \param binary_data pointer to binary data array

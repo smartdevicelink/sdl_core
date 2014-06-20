@@ -646,7 +646,7 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     const ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
         protocol_version, PROTECTION_OFF, FRAME_TYPE_CONSECUTIVE,
         service_type, data_type, session_id, frame_size, message_id,
-        data + maxdata_size*i));
+        data + maxdata_size * i));
 
     raw_ford_messages_to_mobile_.PostMessage(
           impl::RawFordMessageToMobile(ptr, is_final_packet));
