@@ -976,11 +976,20 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     security_manager::SSLContext *ssl_context = session_observer_->
         GetSSLContext(connection_key, service_type);
     // if session already has initialized SSLContext
-    if (ssl_context && ssl_context->IsInitCompleted()) {
-      // Start service as protected with corrent SSLContext
-      SendStartSessionAck(connection_id, session_id, packet.protocol_version(),
-                          connection_key, packet.service_type(), PROTECTION_ON);
-      return RESULT_OK;
+    if (ssl_context) {
+      if (ssl_context->IsInitCompleted()) {
+        // Start service as protected with corrent SSLContext
+        SendStartSessionAck(connection_id, session_id, packet.protocol_version(),
+                            connection_key, packet.service_type(), PROTECTION_ON);
+        return RESULT_OK;
+      } else if (ssl_context->IsHandshakePending()) {
+        security_manager_->AddListener(
+              new StartSessionHandler(
+                connection_key, &raw_ford_messages_to_mobile_,
+                connection_id, session_id, packet.protocol_version(),
+                connection_key, packet.service_type()));
+        return RESULT_OK;
+      }
     }
     // start new SSL at this session
     if (security_manager_->ProtectConnection(connection_key)) {
@@ -990,7 +999,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
               connection_id, session_id, packet.protocol_version(),
               connection_key, packet.service_type()));
       security_manager_->StartHandshake(connection_key);
-      LOG4CXX_DEBUG(logger_, "Protection established for connection "
+      LOG4CXX_DEBUG(logger_, "Protection established for connection " // FIXME (dchmerev): It's not established yet
                     << connection_key);
       return RESULT_OK;
     }
