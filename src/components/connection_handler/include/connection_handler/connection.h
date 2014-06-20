@@ -67,22 +67,19 @@ typedef int32_t ConnectionHandle;
 typedef std::map<int32_t, Connection*> ConnectionList;
 
 /**
- * \brief Type for Connections map iterator
- */
-typedef ConnectionList::iterator ConnectionListIterator;
-
-/**
  * \brief ServiceType
  */
 struct Service {
   protocol_handler::ServiceType service_type;
   bool is_protected_;
   Service()
-    : service_type(protocol_handler::kInvalidServiceType), is_protected_(false) {
+    : service_type(protocol_handler::kInvalidServiceType),
+      is_protected_(false) {
   }
   Service(protocol_handler::ServiceType service_type,
           const bool is_protected = false)
-    : service_type(service_type), is_protected_(is_protected) {
+    : service_type(service_type),
+      is_protected_(is_protected) {
   }
   bool operator==(const protocol_handler::ServiceType service_type) const {
     return this->service_type == service_type;
@@ -93,17 +90,6 @@ struct Service {
  * \brief Type for Session Services
  */
 typedef std::vector<Service> ServiceList;
-
-/**
- * \brief Type for Services iterator
- */
-typedef ServiceList::iterator ServiceListIterator;
-
-/**
- * \brief Type for Services iterator
- */
-typedef ServiceList::const_iterator ServiceListConstIterator;
-
 
 struct Session {
   ServiceList service_list;
@@ -125,19 +111,9 @@ struct Session {
 };
 
 /**
- * \brief Type for Services iterator
+ * \brief Type for Session map
  */
 typedef std::map<uint8_t, Session> SessionMap;
-
-/**
- * \brief Type for Services iterator
- */
-typedef SessionMap::iterator SessionMapIterator;
-
-/**
- * \brief Type for Services const iterator
- */
-typedef SessionMap::const_iterator SessionMapConstIterator;
 
 /**
  * \class Connection

@@ -106,7 +106,7 @@ class DeviceInfo : public Info {
    * @brief Constructor.
    *
    * @param device_handle Handle of device.
-   * @param mac_adress MAC address of device.
+   * @param mac_address MAC address of device.
    * @param name Name of device.
    */
   DeviceInfo(DeviceHandle device_handle, std::string mac_address,
@@ -117,7 +117,7 @@ class DeviceInfo : public Info {
   }
 
   /**
-   * @brief Return mac_adress.
+   * @brief Return mac_address.
    */
   std::string mac_address() const {
     return mac_address_;
