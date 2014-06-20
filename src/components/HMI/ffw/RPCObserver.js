@@ -102,8 +102,7 @@ FFW.RPCObserver = Em.Object
                         return true;
                     }
                 } else {
-                    this
-                        .sendError(SDL.SDLModel.resultCode["UNSUPPORTED_REQUEST"],
+                    this.sendError(SDL.SDLModel.resultCode["UNSUPPORTED_REQUEST"],
                             request.id,
                             request.method,
                             'Unsupported incoming request! ' + parsedMethod[0]
