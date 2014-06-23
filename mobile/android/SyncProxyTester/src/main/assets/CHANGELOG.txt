@@ -1,3 +1,9 @@
+[CW26]
+* SyncProxyTester: Incorrect parsing integer value in structure of request in .xml tests
+
+[CW25]
+* SYNC Mobile SDK: Object reference leaks when restart SYNC Mobile SDK
+
 [CW24]
 + SyncProxyTester | SyncProxyAndroid SDK: Log messages formed in SDK
 * SyncProxyTester: Restore connection during autotest
