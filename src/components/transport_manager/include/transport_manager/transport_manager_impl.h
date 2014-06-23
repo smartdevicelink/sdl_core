@@ -37,6 +37,13 @@
 
 #include <pthread.h>
 
+#ifdef RWLOCK_SUPPORT
+#  if (defined(OS_LINUX) && (defined(__USE_UNIX98) || defined(__USE_XOPEN2K))) || \
+      (defined(OS_QNX)   && (defined(__EXT_POSIX1_200112)))
+#  define USE_RWLOCK
+#  endif
+#endif
+
 #include <queue>
 #include <map>
 #include <list>
@@ -328,7 +335,9 @@ class TransportManagerImpl : public TransportManager {
    * @brief Mutex restricting access to messages.
    **/
 
+#ifdef USE_RWLOCK
   mutable sync_primitives::RWLock message_queue_rwlock_;
+#endif
   mutable pthread_mutex_t message_queue_mutex_;
 
   pthread_cond_t message_queue_cond_;
@@ -371,8 +380,9 @@ class TransportManagerImpl : public TransportManager {
    * @brief Mutex restricting access to events.
    **/
 
+#ifdef USE_RWLOCK
   mutable sync_primitives::RWLock event_queue_rwlock_;
-
+#endif
   mutable pthread_mutex_t event_queue_mutex_;
 
   /**

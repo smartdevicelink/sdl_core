@@ -466,10 +466,18 @@ void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
 void TransportManagerImpl::PostMessage(const RawMessageSptr message) {
   LOG4CXX_INFO(logger_, "Post message called serial number " << message.get());
 
+#ifdef USE_RWLOCK
   message_queue_rwlock_.AcquireForWriting();
+#else
+  pthread_mutex_lock(&message_queue_mutex_);
+#endif
   message_queue_.push_back(message);
   pthread_cond_signal(&message_queue_cond_);
+#ifdef USE_RWLOCK
   message_queue_rwlock_.Release();
+#else
+  pthread_mutex_unlock(&message_queue_mutex_);
+#endif
   LOG4CXX_INFO(logger_, "Post message complete");
 }
 
@@ -478,18 +486,34 @@ void TransportManagerImpl::RemoveMessage(const RawMessageSptr message) {
   //       make to work otherwise.
   //       2013-08-21 dchmerev@luxoft.com
   LOG4CXX_INFO(logger_, "Remove message called " << message.get());
+#ifdef USE_RWLOCK
   message_queue_rwlock_.AcquireForWriting();
+#else
+  pthread_mutex_lock(&message_queue_mutex_);
+#endif
   std::remove(message_queue_.begin(), message_queue_.end(), message);
+#ifdef USE_RWLOCK
   message_queue_rwlock_.Release();
+#else
+  pthread_mutex_unlock(&message_queue_mutex_);
+#endif
   LOG4CXX_INFO(logger_, "Remove message from queue complete");
 }
 
 void TransportManagerImpl::PostEvent(const TransportAdapterEvent& event) {
+#ifdef USE_RWLOCK
   event_queue_rwlock_.AcquireForWriting();
+#else
+  pthread_mutex_lock(&event_queue_mutex_);
+#endif
   RawMessageSptr data = event.data();
   event_queue_.push_back(event);
   pthread_cond_signal(&device_listener_thread_wakeup_);
+#ifdef USE_RWLOCK
   event_queue_rwlock_.Release();
+#else
+  pthread_mutex_unlock(&event_queue_mutex_);
+#endif
 }
 
 void* TransportManagerImpl::EventListenerStartThread(void* data) {
@@ -553,10 +577,15 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
 }
 
 void TransportManagerImpl::EventListenerThread(void) {
+#ifndef USE_RWLOCK
+  pthread_mutex_lock(&event_queue_mutex_);
+#endif
   LOG4CXX_INFO(logger_, "Event listener thread started");
   while (true) {
     while (event_queue_.size() > 0) {
+#ifdef USE_RWLOCK
       event_queue_rwlock_.AcquireForReading();
+#endif
       LOG4CXX_INFO(logger_, "Event listener queue pushed to process events");
       EventQueue::iterator current = event_queue_.begin();
       TransportAdapter* ta = current->transport_adapter();
@@ -567,7 +596,11 @@ void TransportManagerImpl::EventListenerThread(void) {
       RawMessageSptr data = current->data();
       int event_type = current->event_type();
       event_queue_.erase(current);
+#ifdef USE_RWLOCK
       event_queue_rwlock_.Release();
+#else
+      pthread_mutex_unlock(&event_queue_mutex_);
+#endif
       transport_adapter::DeviceList dev_list;
       ConnectionInternal* connection = GetConnection(device_id, app_handle);
       std::vector<DeviceInfo>::iterator device_info_iterator;
@@ -727,6 +760,9 @@ void TransportManagerImpl::EventListenerThread(void) {
         }
       }  // switch
       delete error;
+#ifndef USE_RWLOCK
+      pthread_mutex_lock(&event_queue_mutex_);
+#endif
     }  // while (event_queue_.size() > 0)
 
     if (all_thread_active_)
@@ -756,21 +792,33 @@ void* TransportManagerImpl::MessageQueueStartThread(void* data) {
 void TransportManagerImpl::MessageQueueThread(void) {
   LOG4CXX_INFO(logger_, "Message queue thread started");
 
+#ifndef USE_RWLOCK
+  pthread_mutex_lock(&message_queue_mutex_);
+#endif
+
   while (all_thread_active_) {
     // TODO(YK): add priority processing
 
     while (message_queue_.size() > 0) {
+#ifdef USE_RWLOCK
       message_queue_rwlock_.AcquireForReading();
+#endif
       MessageQueue::iterator it = message_queue_.begin();
       while (it != message_queue_.end() && it->valid() && (*it)->IsWaiting()) {
         ++it;
       }
       if (it == message_queue_.end()) {
+#ifdef USE_RWLOCK
         message_queue_rwlock_.Release();
+#endif
         break;
       }
       RawMessageSptr active_msg = *it;
+#ifdef USE_RWLOCK
       message_queue_rwlock_.Release();
+#else
+      pthread_mutex_unlock(&message_queue_mutex_);
+#endif
       if (active_msg.valid() && !active_msg->IsWaiting()) {
         ConnectionInternal* connection =
             GetConnection(active_msg->connection_key());
@@ -812,6 +860,9 @@ void TransportManagerImpl::MessageQueueThread(void) {
           }
         }
       }
+#ifndef USE_RWLOCK
+      pthread_mutex_lock(&message_queue_mutex_);
+#endif
     }
     pthread_cond_wait(&message_queue_cond_, &message_queue_mutex_);
   }  //  while(true)
