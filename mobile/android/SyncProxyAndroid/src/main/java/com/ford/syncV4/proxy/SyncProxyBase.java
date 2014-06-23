@@ -1177,6 +1177,10 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         Logger.d("UnregisterAppInterface appId:" + appId);
 
         final byte sessionId = syncSession.getSessionIdByAppId(appId);
+        if (sessionId == Session.DEFAULT_SESSION_ID) {
+            Logger.w(LOG_TAG + " can not doUnregisterAppInterface with DEFAULT_SESSION_ID");
+            return;
+        }
 
         // Should we wait for the interface to be unregistered?
         boolean waitForInterfaceUnregistered = false;
@@ -1245,7 +1249,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      *
      * @throws SyncException if a transport connection is not opened
      */
-    public void openSession() throws SyncException {
+    /*public void openSession() throws SyncException {
         if (!getIsConnected()) {
             throw new SyncException("Transport connection must be opened",
                     SyncExceptionCause.SYNC_CONNECTION_FAILED);
@@ -1253,7 +1257,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
         //initState();
         mSyncConnection.onTransportConnected();
-    }
+    }*/
 
     /**
      * ********** Functions used by the Message Dispatching Queues ***************
@@ -1481,6 +1485,10 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     void sendRPCRequestPrivate(String appId, RPCRequest request,
                                IJsonRPCMarshaller jsonRPCMarshaller) throws SyncException {
         byte sessionId = syncSession.getSessionIdByAppId(appId);
+        if (sessionId == Session.DEFAULT_SESSION_ID) {
+            Logger.w(LOG_TAG + " can not send RPC with DEFAULT_SESSION_ID");
+            return;
+        }
         sendRPCRequestPrivate(sessionId, request, jsonRPCMarshaller);
     }
 
@@ -1750,13 +1758,15 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                     "request.");
         }
 
-        Logger.i("Application called sendRPCRequest method for RPCRequest: ." +
+        Logger.i("Application called sendRPCRequest method for RPCRequest:" +
                 request.getFunctionName());
 
         checkSyncConnection();
 
         // Test for illegal correlation ID
-        if (isCorrelationIDProtected(request.getCorrelationID())) {
+        if (!request.getFunctionName().equals(Names.RegisterAppInterface) &&
+                !request.getFunctionName().equals(Names.UnregisterAppInterface) &&
+                isCorrelationIDProtected(request.getCorrelationID())) {
 
             Logger.w("Application attempted to use the reserved correlation ID, " +
                     request.getCorrelationID());
@@ -2940,9 +2950,12 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     protected void endSession(byte sessionId, EndServiceInitiator initiator) {
         String appId = syncSession.getAppIdBySessionId(sessionId);
 
+        Logger.d(LOG_TAG + " end session, appId:" + appId + " initiator:" + initiator);
         // In case End Service message received from SDL without UnregisterAppInterface response
         appIds.remove(appId);
         raiTable.remove(appId);
+
+        Logger.d(LOG_TAG + " end session cleaned, appId:" + appIds.size());
 
         if (initiator == EndServiceInitiator.SDK) {
             stopAllServicesByAppId(appId);
