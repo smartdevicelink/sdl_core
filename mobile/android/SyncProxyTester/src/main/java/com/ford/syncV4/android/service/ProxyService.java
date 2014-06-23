@@ -125,7 +125,6 @@ import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
-import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.ITestConfigCallback;
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
@@ -357,6 +356,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     public boolean hasRPCRunning(String appId) {
+        for (String aMSessionsCounter : mSessionsCounter) {
+            Logger.d(TAG + " Available RPC: " + aMSessionsCounter);
+        }
         return mSessionsCounter.contains(appId);
     }
 
@@ -546,6 +548,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         if (mSyncProxy != null) {
             try {
                 mSyncProxy.dispose();
+                mSyncProxy.closeSyncConnection();
             } catch (SyncException e) {
                 Logger.e(TAG, e.toString());
                 if (mProxyServiceEvent != null) {
@@ -878,7 +881,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 if ((cause != SyncExceptionCause.SYNC_PROXY_CYCLED) &&
                         (cause != SyncExceptionCause.BLUETOOTH_DISABLED) &&
                         (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
-                    reset();
+                    //reset();
                 }
             }
         } else {
@@ -910,9 +913,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      * Restarting SyncProxyALM. For example after changing transport type
      */
     public void restart() {
-        Logger.i(TAG, "ProxyService.Restart SyncProxyALM.");
+        Logger.i(TAG, " Restart SYNC Proxy");
         disposeSyncProxy();
         startProxyIfNetworkConnected();
+    }
+
+    public void restart_withAppId_for_test(String appId) {
+        Logger.i(TAG, " Restart SYNC Proxy with AppId");
+        AppPreferencesManager.setCustomAppId(appId);
+
+
+        restart();
     }
 
     @Override
@@ -1626,12 +1637,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     public void onSessionStarted(String appId) {
         Logger.d(TAG, " Session started, appId:" + appId);
 
-        restoreConnectionToRPCService.releaseLock();
-
         mSessionsCounter.add(appId);
+
         if (mProxyServiceEvent != null) {
             mProxyServiceEvent.onServiceStart(ServiceType.RPC, appId);
         }
+
+        restoreConnectionToRPCService.releaseLock();
     }
 
     @Override
@@ -2270,7 +2282,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                                              IJsonRPCMarshaller jsonRPCMarshaller,
                                              boolean sendAsItIs) {
         if (request == null) {
-            createErrorMessageForAdapter(appId, "RPC request is NULL");
+            createErrorMessageForAdapter(appId, " RPC request is NULL");
             return;
         }
         try {
@@ -2280,7 +2292,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 mSyncProxy.sendRPCRequest(appId, request, jsonRPCMarshaller);
             }
         } catch (SyncException e) {
-            createErrorMessageForAdapter(appId, "RPC request '" + request.getFunctionName() + "'" +
+            e.printStackTrace();
+            createErrorMessageForAdapter(appId, " RPC request '" + request.getFunctionName() + "'" +
                     " send error");
         }
     }
@@ -2380,8 +2393,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                                      IJsonRPCMarshaller jsonRPCMarshaller, boolean sendAsItIs)
             throws SyncException {
 
-        boolean isSyncProxy = mSyncProxy == null;
-        if (isSyncProxy) {
+        String appId = String.valueOf(registerAppInterface.getAppId());
+        if (mModuleTest != null) {
+            mModuleTest.setAppId(appId);
+        }
+        AppPreferencesManager.setCustomAppId(appId);
+
+        boolean isSyncProxyNull = mSyncProxy == null;
+        if (isSyncProxyNull) {
             // Assume that Sync Poxy has been destroyed, initialize new one
 
             startProxyIfNetworkConnected();
@@ -2403,7 +2422,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             // TODO it's seems stupid in order to register send onTransportConnected
             mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface, sendAsItIs);
 
-            mSyncProxy.getSyncConnection().onTransportConnected();
+            boolean hasRPCRunning = hasRPCRunning(appId);
+            Logger.d("Send RegisterRequest, appId:" + appId + ", hasRPC:" + hasRPCRunning);
+            if (hasRPCRunning) {
+                // In case of XML Test is running and the next tag is in use:
+                // <action actionName="startRPCService" pause="2000"/>
+                // what is needed is only to run RPC Request
+                mSyncProxy.sendRPCRequest(appId, registerAppInterface);
+            } else {
+                //mSyncProxy.sendRPCRequest(appId, registerAppInterface);
+                mSyncProxy.getSyncConnection().onTransportConnected();
+            }
         }
     }
 

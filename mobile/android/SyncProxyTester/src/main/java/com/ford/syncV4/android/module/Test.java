@@ -12,6 +12,7 @@ import java.util.List;
 
 /** Represents a test as read from the test file. */
 class Test {
+
     private String name = null;
     private long pause = 0;
     private List<RPCRequestWrapper> requests = null;
@@ -54,6 +55,13 @@ class Test {
 
     public void setPause(long pause) {
         this.pause = pause;
+    }
+
+    public int getRequestsSize() {
+        if (requests == null) {
+            return 0;
+        }
+        return requests.size();
     }
 
     public List<RPCRequestWrapper> getRequests() {
