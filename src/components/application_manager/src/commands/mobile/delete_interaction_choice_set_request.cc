@@ -101,7 +101,7 @@ bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(ApplicationConstSharedPtr
     for (; choice_set_map.end() != it; ++it) {
       if (it->first
           == (*message_)[strings::msg_params]
-                         [strings::interaction_choice_set_id].asInt()) {
+                         [strings::interaction_choice_set_id].asUInt()) {
         LOG4CXX_ERROR_EXT(logger_,
                           "DeleteInteractionChoiceSetRequest::ChoiceSetInUse");
         return true;
@@ -123,6 +123,7 @@ void DeleteInteractionChoiceSetRequest::SendVrDeleteCommand(
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     msg_params[strings::app_id] = app->app_id();
+    msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
     msg_params[strings::grammar_id] = (*choice_set)[strings::grammar_id];
     choice_set = &((*choice_set)[strings::choice_set]);
     for (uint32_t i = 0; i < (*choice_set).length() ; ++i) {

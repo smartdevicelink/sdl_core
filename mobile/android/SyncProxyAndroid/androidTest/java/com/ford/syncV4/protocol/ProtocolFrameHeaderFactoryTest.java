@@ -30,7 +30,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertEquals(header.isEncrypted(), false);
         assertEquals(header.getDataSize(), 0x00);
         assertTrue(header.getMessageID() == 48);
-        assertTrue(header.getSessionID() == (byte) 48);
+        assertTrue(header.getSessionId() == (byte) 48);
     }
 
     public void testSessionStartACKFrameCreation() throws Exception {
@@ -61,7 +61,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertEquals(header.isEncrypted(), false);
         assertEquals(header.getDataSize(), 0x00);
         assertTrue(header.getMessageID() == 48);
-        assertTrue(header.getSessionID() == (byte) 48);
+        assertTrue(header.getSessionId() == (byte) 48);
     }
 
     public void testMobileNavEndSessionFrameCreation() throws Exception {
@@ -76,7 +76,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertEquals(header.isEncrypted(), false);
         assertEquals(header.getDataSize(), 0x00);
         assertTrue(header.getMessageID() == 48);
-        assertTrue(header.getSessionID() == (byte) 48);
+        assertTrue(header.getSessionId() == (byte) 48);
     }
 
     public void testMobileNavDataSessionFrameCreation() throws Exception {
@@ -90,7 +90,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertEquals(header.isEncrypted(), false);
         assertEquals(header.getDataSize(), 10);
         assertTrue(header.getMessageID() == 48);
-        assertTrue(header.getSessionID() == (byte) 48);
+        assertTrue(header.getSessionId() == (byte) 48);
     }
 
     public void testMobileNavAckFrameCreation() throws Exception {
@@ -105,7 +105,7 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertEquals(header.isEncrypted(), false);
         assertEquals(header.getDataSize(), 0);
         assertTrue(header.getMessageID() == 48);
-        assertTrue(header.getSessionID() == (byte) 48);
+        assertTrue(header.getSessionId() == (byte) 48);
     }
 
     public void testCreatedHeartbeatShouldHaveCorrectBytes() {
@@ -127,11 +127,11 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertThat("Wrong compression flag", header.isEncrypted(), is(false));
         assertThat("Wrong frame type", header.getFrameType(),
                 is(FrameType.Control));
-        assertThat("Wrong currentSession type", header.getServiceType(),
+        assertThat("Wrong syncSession type", header.getServiceType(),
                 is(ServiceType.Heartbeat));
         assertThat("Wrong frame data", header.getFrameData(),
                 is(FrameDataControlFrameType.Heartbeat.value()));
-        assertThat("Wrong currentSession id", header.getSessionID(), is((byte) 0));
+        assertThat("Wrong syncSession id", header.getSessionId(), is((byte) 0));
         assertThat("Wrong data size", header.getDataSize(), is(0));
         assertThat("Wrong message id", header.getMessageID(), is(0));
     }
@@ -159,11 +159,11 @@ public class ProtocolFrameHeaderFactoryTest extends AndroidTestCase {
         assertThat("Wrong compression flag", header.isEncrypted(), is(false));
         assertThat("Wrong frame type", header.getFrameType(),
                 is(FrameType.Control));
-        assertThat("Wrong currentSession type", header.getServiceType(),
+        assertThat("Wrong syncSession type", header.getServiceType(),
                 is(ServiceType.RPC));
         assertThat("Wrong frame data", header.getFrameData(),
                 is(FrameDataControlFrameType.HeartbeatACK.value()));
-        assertThat("Wrong currentSession id", header.getSessionID(), is((byte) 0));
+        assertThat("Wrong syncSession id", header.getSessionId(), is((byte) 0));
         assertThat("Wrong data size", header.getDataSize(), is(0));
         assertThat("Wrong message id", header.getMessageID(), is(0));
     }

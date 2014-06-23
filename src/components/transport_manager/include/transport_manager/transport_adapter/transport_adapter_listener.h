@@ -1,8 +1,5 @@
-/**
- * \file transport_adapter_listener.h
- * \brief TransportAdapterListener class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -84,6 +81,12 @@ class TransportAdapterListener {
    */
   virtual void OnDeviceListUpdated(
       const TransportAdapter* transport_adapter) = 0;
+
+  /**
+   * @brief Reaction to "Find new applications" request
+   * @param adapter Current transport adapter
+   */
+  virtual void OnFindNewApplicationsRequest(const TransportAdapter* adapter) = 0;
 
   /**
    * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available,

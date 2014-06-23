@@ -1,13 +1,14 @@
-include_directories (
+include_directories(
   ./include
   ../utils/include/
   ../transport_manager/include/
   ../connection_handler/include/
-  ../security_manager/include/
+  ${SecurityManagerIncludeDir}/
   ../config_profile/include/
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-set (SOURCES
+set(SOURCES
     ./src/rpc_type.cc
     ./src/raw_message.cc
     ./src/protocol_handler_impl.cc

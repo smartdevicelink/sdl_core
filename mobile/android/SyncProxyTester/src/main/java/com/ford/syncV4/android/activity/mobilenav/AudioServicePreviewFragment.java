@@ -20,12 +20,10 @@ import java.io.OutputStream;
  */
 public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
 
-    private static final String LOG_TAG = "AudioServicePreviewFragment";
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_audio_service_preview, container, true);
+        return inflater.inflate(R.layout.activity_audio_service_preview, container, false);
     }
 
     @Override
@@ -46,7 +44,7 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
                     changeCheckBoxState();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
@@ -57,8 +55,8 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         startCypheredServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (hasServiceInServicesPool(ServiceType.RPC)) {
-                    startSecureAudioService();
+                if (hasServiceInServicesPool(getAppId(),ServiceType.RPC)) {
+                    startSecureAudioService(getAppId());
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
                 }
@@ -69,8 +67,8 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         startNotCypheredServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (hasServiceInServicesPool(ServiceType.RPC)) {
-                    startNotSecureAudioService();
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
+                    startNotSecureAudioService(getAppId());
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
                 }
@@ -80,25 +78,26 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         mSessionCheckBoxState = new AudioServiceCheckboxState(checkBox, getActivity());
     }
 
-    private void startNotSecureAudioService() {
+
+    private void startNotSecureAudioService(String appId) {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
-        syncProxyTester.startNotSecureAudioService();
+        syncProxyTester.startNotSecureAudioService(appId);
     }
 
-    private void startSecureAudioService() {
+    private void startSecureAudioService(String appId) {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
-        syncProxyTester.startAudioServiceEncryption();
+        syncProxyTester.startAudioServiceEncryption(appId);
     }
 
     private void changeCheckBoxState() {
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.startAudioService(false);
+            tester.startAudioService(getAppId(), false);
         } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             mFileStreamingLogic.resetStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.stopAudioService();
+            tester.stopAudioService(getAppId());
             mSessionCheckBoxState.setStateOff();
             //mDataStreamingButton.setEnabled(false);
         }

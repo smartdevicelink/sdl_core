@@ -53,8 +53,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
     public virtual DynamicApplicationDataImpl {
  public:
   ApplicationImpl(uint32_t application_id,
-                  const std::string& global_app_id,
+                  const std::string& mobile_app_id,
+                  const std::string& app_name,
                   usage_statistics::StatisticsManager* statistics_manager);
+
   ~ApplicationImpl();
 
   /**
@@ -76,6 +78,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool has_been_activated() const;
 
   const Version& version() const;
+  void set_hmi_application_id(uint32_t hmi_app_id);
+  inline uint32_t hmi_app_id() const;
   inline uint32_t app_id() const;
   const std::string& name() const;
   const std::string folder_name() const;
@@ -108,8 +112,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
 
-  virtual void set_protocol_version(ProtocolVersion protocol_version);
-  virtual ProtocolVersion protocol_version();
+  virtual void set_protocol_version(const ProtocolVersion& protocol_version);
+  virtual ProtocolVersion protocol_version() const;
 
   bool AddFile(AppFile& file);
   bool UpdateFile(AppFile& file);
@@ -134,6 +138,21 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual uint32_t curHash() const;
 
   /**
+   * @brief returns attribute alert_in_background_
+   * @return TRUE if application runs alert request from background level
+   * otherwise returns FALSE
+   */
+  virtual bool alert_in_background() const;
+
+  /**
+   * @brief if application activates alert in background level method sets
+   * TRUE
+   * @param state_of_alert contains TRUE if alert is activated otherwise
+   * contains FALSE
+   */
+  virtual void set_alert_in_background(bool state_of_alert);
+
+  /**
    * @brief Change Hash for current application
    * and send notification to mobile
    * @return updated_hash
@@ -143,43 +162,57 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   UsageStatistics& usage_report();
 
  protected:
+
+  /**
+   * @brief Clean up application folder. Persistent files will stay
+   */
   void CleanupFiles();
+
+  /**
+   * @brief Load persistent files from application folder.
+   */
+  void LoadPersistentFiles();
 
  private:
 
-  uint32_t hash_val_;
-  uint32_t grammar_id_;
+  uint32_t                                 hash_val_;
+  uint32_t                                 grammar_id_;
 
-
-  smart_objects::SmartObject* active_message_;
 
   Version version_;
-  uint32_t app_id_;
-  std::string app_name_;
-  bool is_media_;
-  bool allowed_support_navigation_;
-  bool is_app_allowed_;
-  bool has_been_activated_;
-  bool tts_speak_state_;
-  bool hmi_supports_navi_streaming_;
+  std::string                              app_name_;
+  uint32_t                                 hmi_app_id_;
+  uint32_t                                 app_id_;
+  smart_objects::SmartObject*              active_message_;
+  bool                                     is_media_;
+  bool                                     hmi_supports_navi_streaming_;
+  bool                                     allowed_support_navigation_;
+  bool                                     is_app_allowed_;
+  bool                                     has_been_activated_;
+  bool                                     tts_speak_state_;
 
-  mobile_api::HMILevel::eType hmi_level_;
-  uint32_t put_file_in_none_count_;
-  uint32_t delete_file_in_none_count_;
-  uint32_t list_files_in_none_count_;
-  mobile_api::SystemContext::eType system_context_;
-  mobile_api::AudioStreamingState::eType audio_streaming_state_;
-  std::string app_icon_path_;
-  connection_handler::DeviceHandle device_;
+  mobile_api::HMILevel::eType              hmi_level_;
+  uint32_t                                 put_file_in_none_count_;
+  uint32_t                                 delete_file_in_none_count_;
+  uint32_t                                 list_files_in_none_count_;
+  mobile_api::SystemContext::eType         system_context_;
+  mobile_api::AudioStreamingState::eType   audio_streaming_state_;
+  std::string                              app_icon_path_;
+  connection_handler::DeviceHandle         device_;
 
-  ProtocolVersion protocol_version_;
-
-  AppFilesMap app_files_;
+  AppFilesMap                              app_files_;
   std::set<mobile_apis::ButtonName::eType> subscribed_buttons_;
-  std::set<uint32_t> subscribed_vehicle_info_;
-  UsageStatistics usage_report_;
+  std::set<uint32_t>                       subscribed_vehicle_info_;
+  UsageStatistics                          usage_report_;
+  ProtocolVersion                          protocol_version_;
+  bool                                     alert_in_background_;
+
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
+
+uint32_t ApplicationImpl::hmi_app_id() const {
+  return hmi_app_id_;
+}
 
 uint32_t ApplicationImpl::app_id() const {
   return app_id_;

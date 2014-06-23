@@ -1,14 +1,14 @@
 include_directories (
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.7.0/include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/gmock-1.7.0/gtest/include
+  ${GMOCK_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/components/transport_manager/include
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include/
   ${CMAKE_SOURCE_DIR}/src/components/protocol_handler/include/
-  ${CMAKE_SOURCE_DIR}/src/components/security_manager/include
   ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include/
   ${CMAKE_SOURCE_DIR}/test/components/transport_manager/include/
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/libusbx-1.0.16/libusb/
+  ${SecurityManagerIncludeDir}
+  ${LIBUSB_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set(RTLIB rt)

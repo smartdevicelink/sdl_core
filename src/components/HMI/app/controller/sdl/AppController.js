@@ -67,13 +67,21 @@ SDL.SDLAppController = Em.Object.create({
 
             switch (element.commandID) {
                 case -1: {
-                    FFW.BasicCommunication.ExitApplication(SDL.SDLAppController.model.appID);
+                    FFW.BasicCommunication.ExitApplication(SDL.SDLAppController.model.appID, "DRIVER_DISTRACTION_VIOLATION");
+                    break;
+                }
+                case -2: {
+                    FFW.BasicCommunication.ExitApplication(SDL.SDLAppController.model.appID, "USER_EXIT");
                     break;
                 }
                 default: {
                     console.log("Unknown command with ID: " + element.commandID);
                 }
             }
+
+            SDL.OptionsView.deactivate();
+            SDL.States.goToStates('info.apps');
+
         } else if (element.menuID >= 0) {
 
             // if subMenu
@@ -85,10 +93,11 @@ SDL.SDLAppController = Em.Object.create({
             }
 
             return;
-        }
+        } else {
 
-        FFW.UI.onCommand(element.commandID, this.model.appID);
-        SDL.OptionsView.deactivate();
+            FFW.UI.onCommand(element.commandID, this.model.appID);
+            SDL.OptionsView.deactivate();
+        }
     },
 
     /**

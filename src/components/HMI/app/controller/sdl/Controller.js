@@ -48,23 +48,20 @@ SDL.SDLController = Em.Object
             if ( SDL.SliderView.active
                 || SDL.InteractionChoicesView.active
                 || SDL.ScrollableMessage.active
-                || SDL.AudioPassThruPopUp.activate) {
+                || SDL.SDLModel.AudioPassThruState
+                || SDL.Keyboard.active) {
 
                 return 'HMI_OBSCURED';
             }
             if (SDL.OptionsView.active) {
                 return 'MENU';
             }
-            if (SDL.States.info.nonMedia.active
-                || SDL.States.media.sdlmedia.active
-                || SDL.States.navigationApp.baseNavigation.active) {
 
-                return 'MAIN';
-            } else {
-                return 'MENU';
-            }
+            return 'MAIN';
+
         }.property('SDL.OptionsView.active',
             'SDL.SliderView.active',
+            'SDL.SDLModel.AudioPassThruState',
             'SDL.VRPopUp.VRActive',
             'SDL.AlertPopUp.active',
             'SDL.States.info.nonMedia.active',
@@ -73,7 +70,7 @@ SDL.SDLController = Em.Object
             'SDL.ScrollableMessage.active',
             'SDL.InteractionChoicesView.active',
             'SDL.VRHelpListView.active',
-            'SDL.AudioPassThruPopUp.activate'),
+            'SDL.Keyboard.active'),
 
         /**
          * List of SDL application models
@@ -179,9 +176,6 @@ SDL.SDLController = Em.Object
                         SDL.VRHelpListView.deactivate();
                     }
                 }
-            }
-            if (SDL.SDLAppController.model && !SDL.SDLModel.VRActive && SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
-                SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['ABORTED']);
             }
         }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
 
@@ -323,27 +317,27 @@ SDL.SDLController = Em.Object
          * Action for ClosePopUp request that triggers deactivate function from
          * opened popUp
          */
-        closePopUp: function() {
+        closePopUp: function(methodName) {
 
-            if (SDL.AlertPopUp.active) {
+            if (methodName == "UI.Alert") {
                 SDL.AlertPopUp.deactivate();
             }
-            if (SDL.AudioPassThruPopUp.active) {
+            if (methodName == "UI.PerformAudioPassThru") {
                 SDL.AudioPassThruPopUp.deactivate();
                 this.performAudioPassThruResponse(SDL.SDLModel.resultCode["SUCCESS"]);
             }
-            if (SDL.InteractionChoicesView.active) {
+            if (methodName == "UI.PerformInteraction") {
                 SDL.InteractionChoicesView.deactivate("ABORTED");
             }
-            if (SDL.ScrollableMessage.active) {
+            if (methodName == "UI.ScrollableMessage") {
                 SDL.ScrollableMessage.deactivate(true);
             }
-            if (SDL.SliderView.active) {
+            if (methodName == "UI.Slider") {
                 SDL.SliderView.deactivate(true);
             }
-            if (SDL.VRHelpListView.active) {
-                SDL.VRHelpListView.deactivate();
-            }
+//            if (SDL.VRHelpListView.active) {
+//                SDL.VRHelpListView.deactivate();
+//            }
         },
 
         /**
@@ -387,6 +381,12 @@ SDL.SDLController = Em.Object
          */
         exitAppViewSelected: function(state) {
 
+            //if ignition off if executed than OnIgnitionCycleOver must be sent
+            if (state == SDL.SDLModel.exitAppState[0].name) {
+
+                FFW.BasicCommunication.OnIgnitionCycleOver();
+            }
+
             FFW.BasicCommunication.ExitAllApplications(state);
         },
         /**
@@ -396,8 +396,10 @@ SDL.SDLController = Em.Object
          */
         systemRequestViewSelected: function(state) {
 
-            if (SDL.SDLModel.policyURLs) {
-                this.OnSystemRequest("PROPRIETARY", SDL.SDLModel.policyURLs[0].policyAppId, null, SDL.SDLModel.policyURLs[0].url);
+            if (SDL.SDLModel.policyURLs.length) {
+                FFW.BasicCommunication.OnSystemRequest(state, SDL.SDLModel.policyURLs[0].policyAppId, null, SDL.SDLModel.policyURLs[0].url);
+            } else {
+                FFW.BasicCommunication.OnSystemRequest(state);
             }
 
         },
@@ -417,11 +419,13 @@ SDL.SDLController = Em.Object
          */
         vrInteractionResponse: function(result, choiceID) {
 
-            FFW.VR.interactionResponse(SDL.SDLAppController.model.activeRequests.vrPerformInteraction, result, choiceID);
+            FFW.VR.interactionResponse(SDL.SDLModel.vrActiveRequests.vrPerformInteraction, result, choiceID);
 
-            SDL.SDLAppController.model.activeRequests.vrPerformInteraction = null;
+            SDL.SDLModel.vrActiveRequests.vrPerformInteraction = null;
 
             SDL.SDLModel.set('VRActive', false);
+
+            SDL.InteractionChoicesView.timerUpdate();
         },
         /**
          * Method to sent notification for Alert
@@ -544,23 +548,36 @@ SDL.SDLController = Em.Object
          */
         registerApplication: function(params, applicationType) {
 
-            SDL.SDLModel.get('registeredApps')
-                .pushObject(this.applicationModels[applicationType].create( {
-                    appID: params.appID,
-                    appName: params.appName,
-                    deviceName: params.deviceName,
-                    appType: params.appType
-                }));
+            SDL.SDLModel.get('registeredApps').pushObject(this.applicationModels[applicationType].create( {
+                appID: params.appID,
+                appName: params.appName,
+                deviceName: params.deviceName,
+                appType: params.appType
+            }));
 
             var exitCommand = {
                 "id": -10,
                 "params": {
                     "menuParams":{
                         "parentID": 0,
-                        "menuName": "Exit",
+                        "menuName": "Exit 'DRIVER_DISTRACTION_VIOLATION'",
                         "position": 0
                     },
                     cmdID: -1
+                }
+            };
+
+            SDL.SDLController.getApplicationModel(params.appID).addCommand(exitCommand);
+
+            exitCommand = {
+                "id": -10,
+                "params": {
+                    "menuParams":{
+                        "parentID": 0,
+                        "menuName": "Exit 'USER_EXIT'",
+                        "position": 0
+                    },
+                    cmdID: -2
                 }
             };
 
@@ -575,7 +592,9 @@ SDL.SDLController = Em.Object
         unregisterApplication: function(appID) {
 
             this.getApplicationModel(appID).VRCommands = [];
+
             this.getApplicationModel(appID).onDeleteApplication(appID);
+
             var len = SDL.SDLModel.VRCommands.length;
             for (var i = len - 1; i >= 0; i--) {
                 if (SDL.SDLModel.VRCommands[i].appID == appID) {
@@ -587,7 +606,6 @@ SDL.SDLController = Em.Object
             if (SDL.SDLModel.stateLimited == appID) {
                 SDL.SDLModel.set('stateLimited', null);
             }
-            SDL.SDLAppController.set('model', null);
         },
         /**
          * SDL Driver Distraction ON/OFF switcher
@@ -637,8 +655,7 @@ SDL.SDLController = Em.Object
          */
         getApplicationModel: function(applicationId) {
 
-            return SDL.SDLModel.registeredApps.filterProperty('appID',
-                applicationId)[0];
+            return SDL.SDLModel.registeredApps.filterProperty('appID', applicationId)[0];
         },
         /**
          * Function returns ChangeDeviceView back to previous state
@@ -668,16 +685,6 @@ SDL.SDLController = Em.Object
             FFW.BasicCommunication.OnDeviceChosen(element.deviceName,
                 element.id);
             this.turnChangeDeviceViewBack();
-        },
-        /**
-         * Method creates list of Application ID's Then call HMI method for
-         * display a list of Applications
-         * 
-         * @param {Object}
-         */
-        onGetAppList: function(appList) {
-
-            SDL.SDLModel.onGetAppList(appList);
         },
         /**
          * Method call's request to get list of applications
@@ -795,8 +802,8 @@ SDL.SDLController = Em.Object
         /**
          * Send system context
          */
-        onSystemContextChange: function() {
+        onSystemContextChange: function(appID) {
 
-            FFW.UI.OnSystemContext(this.get('sysContext'));
+            FFW.UI.OnSystemContext(this.get('sysContext'), appID);
         }
     });

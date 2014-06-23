@@ -37,35 +37,42 @@
 
 namespace security_manager {
 
-SecurityQuery::QueryHeader::QueryHeader():
-  query_type(INVALID_QUERY_TYPE), query_id(INVALID_QUERY_ID),
-  seq_number(0), json_size(0) {
+SecurityQuery::QueryHeader::QueryHeader()
+  : query_type(INVALID_QUERY_TYPE), query_id(INVALID_QUERY_ID),
+    seq_number(0), json_size(0) {
 }
 
 SecurityQuery::QueryHeader::QueryHeader(uint8_t queryType, uint32_t queryId,
-                                        uint32_t seqNumber, uint32_t jsonSize) :
-  query_type(queryType), query_id(queryId),
-  seq_number(seqNumber), json_size(jsonSize) {
+                                        uint32_t seqNumber, uint32_t jsonSize)
+  : query_type(queryType), query_id(queryId),
+    seq_number(seqNumber), json_size(jsonSize) {
 }
 
-SecurityQuery::SecurityQuery():
-  header_(INVALID_QUERY_TYPE, INVALID_QUERY_ID, 0), connection_key_(0) {
+SecurityQuery::SecurityQuery()
+  : header_(INVALID_QUERY_TYPE, INVALID_QUERY_ID, 0), connection_key_(0) {
 }
 
-SecurityQuery::SecurityQuery(
-    const SecurityQuery::QueryHeader &header,
-    const uint32_t connection_key) :
-  header_(header), connection_key_(connection_key) {
+SecurityQuery::SecurityQuery(const SecurityQuery::QueryHeader &header,
+                             const uint32_t connection_key,
+                             const uint8_t *const raw_data,
+                             const size_t raw_data_size)
+  : header_(header), connection_key_(connection_key),
+    data_(raw_data, raw_data + raw_data_size) {
 }
 
-bool SecurityQuery::ParseQuery(const uint8_t * const raw_data,
+SecurityQuery::SecurityQuery(const SecurityQuery::QueryHeader &header,
+                             const uint32_t connection_key)
+  : header_(header), connection_key_(connection_key) {
+}
+
+bool SecurityQuery::SerializeQuery(const uint8_t *const raw_data,
                                const size_t raw_data_size) {
   const size_t header_size = sizeof(QueryHeader);
   if (raw_data_size < header_size || !raw_data) {
     return false;
   }
-  const uint8_t guery_type = raw_data[0];
-  switch (guery_type) {
+  const uint8_t query_type = raw_data[0];
+  switch (query_type) {
     case REQUEST:
         header_.query_type = REQUEST;
       break;
@@ -93,31 +100,48 @@ bool SecurityQuery::ParseQuery(const uint8_t * const raw_data,
       header_.query_id = INVALID_QUERY_ID;
       break;
   }
-  header_.seq_number = *reinterpret_cast<const uint32_t*>(raw_data + 4);
-  header_.json_size =
-      BE_TO_LE32(*reinterpret_cast<const uint32_t*>(raw_data + 8));
+  header_.seq_number = BE_TO_LE32(*reinterpret_cast<const uint32_t*>(raw_data + 4));
+  header_.json_size  = BE_TO_LE32(*reinterpret_cast<const uint32_t*>(raw_data + 8));
 
   if (header_.json_size > raw_data_size - header_size)
     return false;
 
   if (header_.json_size > 0) {
-    const char* const json_data =
+    const char *const json_data =
         reinterpret_cast<const char*>(raw_data + header_size);
     json_message_.assign(json_data, json_data + header_.json_size);
   }
 
   const uint32_t bin_data_size = raw_data_size - (header_size + header_.json_size);
   if (bin_data_size > 0) {
-    const char* const bin_data =
+    const char *const bin_data =
         reinterpret_cast<const char*>(raw_data + header_size + header_.json_size);
     data_.assign(bin_data, bin_data + bin_data_size);
   }
   return true;
 }
 
-void SecurityQuery::set_data(const uint8_t * const binary_data,
+const std::vector<uint8_t> SecurityQuery::DeserializeQuery() const {
+  SecurityQuery::QueryHeader deserialize_header(header_);
+  const uint32_t tmp = deserialize_header.query_id << 8;
+  deserialize_header.query_id   = LE_TO_BE32(tmp);
+  deserialize_header.seq_number = LE_TO_BE32(deserialize_header.seq_number);
+  deserialize_header.json_size  = LE_TO_BE32(deserialize_header.json_size);
+
+  const size_t header_size = sizeof(deserialize_header);
+  // vector of header and raw_data
+  std::vector<uint8_t> data_sending(header_size + get_data_size());
+  // copy header
+  memcpy(&data_sending[0], &deserialize_header, header_size);
+  // copy binary data
+  std::copy(data_.begin(), data_.end(), data_sending.begin() + header_size);
+  return data_sending;
+}
+
+void SecurityQuery::set_data(const uint8_t *const binary_data,
                                  const size_t bin_data_size) {
-    DCHECK(binary_data); DCHECK(bin_data_size);
+    DCHECK(binary_data);
+    DCHECK(bin_data_size);
     data_.assign(binary_data, binary_data + bin_data_size);
 }
 
@@ -137,7 +161,7 @@ const SecurityQuery::QueryHeader &SecurityQuery::get_header() const {
   return header_;
 }
 
-const uint8_t * SecurityQuery::get_data() const {
+const uint8_t* SecurityQuery::get_data() const {
   return &data_[0];
 }
 

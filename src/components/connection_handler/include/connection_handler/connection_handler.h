@@ -1,7 +1,4 @@
-/**
- * \file connection_handler.hpp
- * \brief Connection handler interface class.
- *
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -59,25 +56,64 @@ class ConnectionHandler {
    * \param observer Pointer to observer object.
    **/
   virtual void set_connection_handler_observer(
-      ConnectionHandlerObserver* observer) = 0;
+      ConnectionHandlerObserver *observer) = 0;
 
   /**
    * \brief Sets pointer to TransportManager.
    * \param transportManager Pointer to TransportManager object.
    **/
   virtual void set_transport_manager(
-      transport_manager::TransportManager* transport_manager) = 0;
+      transport_manager::TransportManager *transport_manager) = 0;
 
   virtual void StartTransportManager() = 0;
 
   virtual void ConnectToDevice(
       connection_handler::DeviceHandle device_handle) = 0;
 
-  /*
-   * Close all associated sessions and close the connection pointed by handle
+  virtual void ConnectToAllDevices() = 0;
+
+  /**
+   * \brief Close all associated sessions and close the connection pointed by handle
    */
   virtual void CloseConnection(ConnectionHandle connection_handle) = 0;
 
+  /**
+   * \brief Return count of session for specified connection
+   * \param connection_key pair of connection handle and session id
+   */
+  virtual uint32_t GetConnectionSessionsCount(uint32_t connection_key) = 0;
+
+  /**
+   * Gets device id by mac address
+   * @param mac_address
+   * @return true if successfully
+   */
+  virtual bool GetDeviceID(const std::string &mac_address,
+                           DeviceHandle *device_handle) = 0;
+
+  /**
+   * Close session associated with the key
+   */
+  virtual void CloseSession(uint32_t key) = 0;
+
+  /**
+   * Close session
+   */
+  virtual void CloseSession(ConnectionHandle connection_handle,
+                            uint8_t session_id) = 0;
+
+  /**
+   * \brief Start heartbeat for specified session
+   *
+   * \param connection_key pair of connection and session id
+   */
+  virtual void StartSessionHeartBeat(uint32_t connection_key) = 0;
+
+  /**
+   * \brief Send heartbeat to mobile app
+   */
+  virtual void SendHeartBeat(ConnectionHandle connection_handle,
+                            uint8_t session_id) = 0;
 
  protected:
   /**
@@ -86,6 +122,6 @@ class ConnectionHandler {
   virtual ~ConnectionHandler() {
   }
 };
-}/* namespace connection_handler */
+}  // namespace connection_handler
 
 #endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_H_

@@ -1,6 +1,5 @@
 include_directories (
-  ../../../src/thirdPartyLibs/gmock-1.7.0/include
-  ../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
+  ${GMOCK_INCLUDE_DIRECTORY}
   ../../../src/components/media_manager/include
   ../../../src/components/utils/include/
   ../../../src/components/protocol_handler/include/
@@ -37,7 +36,6 @@ set (LIBRARIES
     ConfigProfile
     formatters
     jsoncpp
-    log4cxx
 )
 
 if (EXTENDED_MEDIA_MODE)
@@ -47,4 +45,7 @@ endif()
 
 create_test("test_MediaManager" "${SOURCES}" "${LIBRARIES}")
 
+if(ENABLE_LOG)
+  target_link_libraries("test_MediaManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
 # vim: set ts=2 sw=2 et:

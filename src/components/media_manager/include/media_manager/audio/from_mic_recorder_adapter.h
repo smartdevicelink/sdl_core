@@ -35,7 +35,6 @@
 
 #include <string>
 #include "media_manager/media_adapter_impl.h"
-#include "utils/logger.h"
 
 namespace threads {
 class Thread;
@@ -57,11 +56,8 @@ class FromMicRecorderAdapter : public MediaAdapterImpl {
   private:
     threads::Thread* recorder_thread_;
     std::string output_file_;
-    int32_t duration_;
     const int32_t kDefaultDuration;
-#ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
+    int32_t duration_;
     DISALLOW_COPY_AND_ASSIGN(FromMicRecorderAdapter);
 };
 }  // namespace media_manager

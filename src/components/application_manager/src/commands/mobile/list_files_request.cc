@@ -75,13 +75,16 @@ void ListFilesRequest::Run() {
 
   (*message_)[strings::msg_params][strings::space_available] =
         static_cast<int32_t>(ApplicationManagerImpl::instance()->
-                             GetAvailableSpaceForApp(application->name()));
+                             GetAvailableSpaceForApp(application->folder_name()));
   int32_t i = 0;
   const AppFilesMap& app_files = application->getAppFiles();
   for (AppFilesMap::const_iterator it = app_files.begin();
        it != app_files.end(); ++it) {
+      //In AppFile to application stored full path to file. In message required
+      //to write only name file.
+      //Plus one required for move to next letter after '/'.
       (*message_)[strings::msg_params][strings::filenames][i++] =
-          it->second.file_name;
+        it->first.substr(it->first.find_last_of('/') + 1);
   }
   (*message_)[strings::params][strings::message_type] =
       application_manager::MessageType::kResponse;

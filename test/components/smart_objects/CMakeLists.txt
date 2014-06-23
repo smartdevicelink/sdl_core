@@ -5,11 +5,10 @@ add_subdirectory(./SchemaItem)
 
 include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/utils/include
-  ../../../src/thirdPartyLibs/gmock-1.7.0/include
-  ../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
+  ${GMOCK_INCLUDE_DIRECTORY}
   ../../../src/components/smart_objects/include
   ../../../src/components/formatters/include/
-  ../../../src//thirdPartyLibs/jsoncpp/include/
+  ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
 # Libraries are the same for all SmartObject test
@@ -26,8 +25,6 @@ set (LIBRARIES
     SmartObjects
     formatters
     jsoncpp
-    apr-1
-    aprutil-1
     ${RTLIB}
 )
 

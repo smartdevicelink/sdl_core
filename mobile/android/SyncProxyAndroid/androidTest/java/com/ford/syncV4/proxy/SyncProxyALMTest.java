@@ -7,17 +7,19 @@ import com.ford.syncV4.protocol.IProtocolListener;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.enums.Language;
-import com.ford.syncV4.proxy.rpc.enums.SyncInterfaceAvailability;
 import com.ford.syncV4.session.Session;
+import com.ford.syncV4.session.SessionTest;
 import com.ford.syncV4.syncConnection.SyncConnection;
-import com.ford.syncV4.transport.SyncTransport;
+import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
-import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.transport.usb.USBTransportConfig;
 
 import org.mockito.ArgumentCaptor;
 
@@ -31,22 +33,22 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Created by Andrew Batutin on 8/22/13.
+ * Created by Andrew Batutin on 8/22/13
  */
 public class SyncProxyALMTest extends InstrumentationTestCase {
 
-    public static final byte SESSION_ID = (byte) 48;
-    public static final byte VERSION = (byte) 2;
-    private SyncProxyALM sut;
+    private static final byte SESSION_ID = (byte) 48;
+    private static final byte VERSION = ProtocolConstants.PROTOCOL_VERSION_TWO;
 
     public SyncProxyALMTest() {
+
     }
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
-        System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext().getCacheDir().getPath());
-        sut = getSyncProxyALM();
+        System.setProperty("dexmaker.dexcache", getInstrumentation().getTargetContext()
+                .getCacheDir().getPath());
     }
 
     private SyncProxyALM getSyncProxyALM() throws SyncException {
@@ -56,11 +58,12 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         TCPTransportConfig conf = mock(TCPTransportConfig.class);
         when(conf.getTransportType()).thenReturn(TransportType.TCP);
         final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
-        SyncProxyALM proxyALM = getSyncProxyALM(syncMsgVersion, conf, listenerALM);
-        return proxyALM;
+        return getSyncProxyALM(syncMsgVersion, conf, listenerALM);
     }
 
-    private SyncProxyALM getSyncProxyALM(final SyncMsgVersion syncMsgVersion, final TCPTransportConfig conf, final IProxyListenerALM listenerALM) throws SyncException {
+    private SyncProxyALM getSyncProxyALM(final SyncMsgVersion syncMsgVersion,
+                                         final TCPTransportConfig conf,
+                                         final IProxyListenerALM listenerALM) throws SyncException {
         return new SyncProxyALM(listenerALM,
                                 /*sync proxy configuration resources*/null,
                                 /*enable advanced lifecycle management true,*/
@@ -83,15 +86,15 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             @Override
             public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
-                _haveReceivedFirstNonNoneHMILevel = false;
-                _haveReceivedFirstFocusLevel = false;
-                _haveReceivedFirstFocusLevelFull = false;
-                _syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
+                //_haveReceivedFirstNonNoneHMILevel = false;
+                //_haveReceivedFirstFocusLevel = false;
+                //_haveReceivedFirstFocusLevelFull = false;
+                //_syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection.closeConnection();
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -141,15 +144,15 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             @Override
             public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
-                _haveReceivedFirstNonNoneHMILevel = false;
-                _haveReceivedFirstFocusLevel = false;
-                _haveReceivedFirstFocusLevelFull = false;
-                _syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
+                //_haveReceivedFirstNonNoneHMILevel = false;
+                //_haveReceivedFirstFocusLevel = false;
+                //_haveReceivedFirstFocusLevelFull = false;
+                //_syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection.closeConnection();
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -163,13 +166,14 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
             @Override
-            protected void startMobileNaviService(byte sessionID, String correlationID, boolean encrypted) {
-                super.startMobileNaviService(sessionID, correlationID, encrypted);
-                assertEquals("Session ID should be equal", currentSession.getSessionId(), (byte) 48);
+            protected void onProtocolServiceStarted_MobileNavi(byte sessionId, boolean encrypted) {
+                super.onProtocolServiceStarted_MobileNavi(sessionId, encrypted);
+                assertEquals("Session ID should be equal",
+                        syncSession.getSessionIdByAppId(SessionTest.APP_ID), SESSION_ID);
             }
 
         };
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, SESSION_ID, false), VERSION, "");
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION);
     }
 
     public void testReceivedMobileNavSessionIncomingMessage() throws Exception {
@@ -201,15 +205,15 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             @Override
             public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
-                _haveReceivedFirstNonNoneHMILevel = false;
-                _haveReceivedFirstFocusLevel = false;
-                _haveReceivedFirstFocusLevelFull = false;
-                _syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
+                //_haveReceivedFirstNonNoneHMILevel = false;
+                //_haveReceivedFirstFocusLevel = false;
+                //_haveReceivedFirstFocusLevelFull = false;
+                //_syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection.closeConnection();
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -226,14 +230,14 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             protected void handleMobileNavMessage(ProtocolMessage message) {
                 super.handleMobileNavMessage(message);
                 assertEquals(message.getServiceType(), ServiceType.Mobile_Nav);
-                assertEquals(message.getVersion(), (byte) 2);
-                assertTrue(message.getSessionID() == (byte) 48);
+                assertEquals(message.getVersion(), ProtocolConstants.PROTOCOL_VERSION_TWO);
+                assertTrue(message.getSessionID() == SESSION_ID);
             }
         };
         ProtocolMessage message = new ProtocolMessage();
-        message.setVersion((byte) 2);
-        message.setSessionID((byte) 48);
-        message.setSessionType(ServiceType.Mobile_Nav);
+        message.setVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
+        message.setSessionID(SESSION_ID);
+        message.setServiceType(ServiceType.Mobile_Nav);
         proxyALM.dispatchIncomingMessage(message);
     }
 
@@ -265,15 +269,15 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             @Override
             public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
-                _haveReceivedFirstNonNoneHMILevel = false;
-                _haveReceivedFirstFocusLevel = false;
-                _haveReceivedFirstFocusLevelFull = false;
-                _syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
+                //_haveReceivedFirstNonNoneHMILevel = false;
+                //_haveReceivedFirstFocusLevel = false;
+                //_haveReceivedFirstFocusLevelFull = false;
+                //_syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection.closeConnection();
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -285,18 +289,15 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                     }
                 }
             }
-
         };
         ArgumentCaptor<ServiceType> sessionTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
-        ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
-        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
-        proxyALM.handleEndServiceAck(ServiceType.RPC, SESSION_ID, "correlationID");
-        verify(listenerALM).onProtocolServiceEnded(sessionTypeCaptor.capture(), sessionIdCaptor.capture(), correlationIdCaptor.capture());
+        ArgumentCaptor<String> appIdCaptor = ArgumentCaptor.forClass(String.class);
+        proxyALM.handleEndServiceAck(ServiceType.RPC, SESSION_ID);
+        verify(listenerALM).onProtocolServiceEndedAck(sessionTypeCaptor.capture(),
+                appIdCaptor.capture());
         assertEquals(ServiceType.RPC, sessionTypeCaptor.getValue());
-        assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
-        assertEquals("correlationID", correlationIdCaptor.getValue());
+        assertEquals(SessionTest.APP_ID_DEFAULT, appIdCaptor.getValue());
     }
-
 
     public void testSyncProxyBaseStartSessionCallbackTest() throws Exception {
         SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
@@ -326,15 +327,15 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             @Override
             public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
-                _haveReceivedFirstNonNoneHMILevel = false;
-                _haveReceivedFirstFocusLevel = false;
-                _haveReceivedFirstFocusLevelFull = false;
-                _syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
+                //_haveReceivedFirstNonNoneHMILevel = false;
+                //_haveReceivedFirstFocusLevel = false;
+                //_haveReceivedFirstFocusLevelFull = false;
+                //_syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection.closeConnection();
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -348,14 +349,10 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
         };
-        ArgumentCaptor<ServiceType> sessionTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
-        ArgumentCaptor<Byte> sessionIdCaptor = ArgumentCaptor.forClass(byte.class);
-        ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
-        ArgumentCaptor<String> correlationIdCaptor = ArgumentCaptor.forClass(String.class);
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(Session.createSession(ServiceType.RPC, SESSION_ID, false), VERSION, "correlationID");
-        verify(listenerALM).onSessionStarted(sessionIdCaptor.capture(), correlationIdCaptor.capture());
-        assertEquals(SESSION_ID, sessionIdCaptor.getValue().byteValue());
-        assertEquals("correlationID", correlationIdCaptor.getValue());
+        ArgumentCaptor<String> appIdCaptor = ArgumentCaptor.forClass(String.class);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION);
+        verify(listenerALM).onSessionStarted(appIdCaptor.capture());
+        assertEquals(SessionTest.APP_ID_DEFAULT, appIdCaptor.getValue());
     }
 
     public void testHeartBeatIsSet() throws Exception {
@@ -367,34 +364,34 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         SyncProxyALM proxyALM = new SyncProxyALM(listenerALM,
                                 /*sync proxy configuration resources*/null,
                                 /*enable advanced lifecycle management true,*/
-                "appName",
+                                "appName",
                                 /*ngn media app*/null,
                                 /*vr synonyms*/null,
                                 /*is media app*/true,
                                 /*app type*/null,
-                syncMsgVersion,
+                                syncMsgVersion,
                                 /*language desired*/Language.EN_US,
                                 /*HMI Display Language Desired*/Language.EN_US,
                                 /*App ID*/"8675308",
                                 /*autoActivateID*/null,
                                 /*callbackToUIThre1ad*/ false,
                                 /*preRegister*/ false,
-                2,
-                conf, new TestConfig()) {
+                                2,
+                                conf, new TestConfig()) {
 
 
             @Override
             public void initializeProxy() throws SyncException {
                 // Reset all of the flags and state variables
-                _haveReceivedFirstNonNoneHMILevel = false;
-                _haveReceivedFirstFocusLevel = false;
-                _haveReceivedFirstFocusLevelFull = false;
-                _syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
+                //_haveReceivedFirstNonNoneHMILevel = false;
+                //_haveReceivedFirstFocusLevel = false;
+                //_haveReceivedFirstFocusLevelFull = false;
+                //_syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
 
                 // Setup SyncConnection
                 synchronized (CONNECTION_REFERENCE_LOCK) {
                     if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection(currentSession.getSessionId(), false);
+                        mSyncConnection.closeConnection();
                         mSyncConnection = null;
                     }
                     mSyncConnection = mock(SyncConnection.class);
@@ -413,23 +410,23 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
     }
 
 
-    public void testMaxJsonSizeInIncomingMessageShouldCallOnError()
-            throws SyncException, NoSuchFieldException, IllegalAccessException {
-        final WiProProtocol protocol =
-                new WiProProtocol(mock(IProtocolListener.class));
-        protocol.setProtocolVersion((byte) 0x02);
+    public void testMaxJsonSizeInIncomingMessageShouldCallOnError() throws SyncException {
+        final WiProProtocol protocol = new WiProProtocol(mock(IProtocolListener.class));
+        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
         final SyncConnection syncConnectionMock = mock(SyncConnection.class);
         when(syncConnectionMock.getWiProProtocol()).thenReturn(protocol);
 
-        IProxyListenerALMTesting proxyListenerMock =
-                mock(IProxyListenerALMTesting.class);
+        IProxyListenerALMTesting proxyListenerMock = mock(IProxyListenerALMTesting.class);
         SyncProxyALM proxy =
                 new SyncProxyALM(proxyListenerMock, null, "a", null, null,
-                        false, null, null, null, null, null, null, false, false,
-                        2, null, syncConnectionMock, new TestConfig());
-        SyncConnection connection =
-                new SyncConnection(proxy.getInterfaceBroker());
-        connection.init(null, mock(SyncTransport.class));
+                        false, null, null, null, null, SessionTest.APP_ID, null, false, false,
+                        ProtocolConstants.PROTOCOL_VERSION_TWO,
+                        new USBTransportConfig(getInstrumentation().getTargetContext()),
+                        syncConnectionMock, new TestConfig());
+        SyncConnection connection = new SyncConnection(new Session(),
+                new BTTransportConfig(),
+                proxy.getInterfaceBroker());
+        connection.init();
         proxy.setSyncConnection(connection);
 
         final byte maxByte = (byte) 0xFF;

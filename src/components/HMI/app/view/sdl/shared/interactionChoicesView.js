@@ -85,6 +85,11 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
             'naviChoises'
         ],
 
+        click: function() {
+            SDL.InteractionChoicesView.timerUpdate();
+            SDL.SDLController.onResetTimeout(SDL.SDLAppController.model.appID, "UI.PerformInteraction");
+        },
+
         naviChoises: Em.ContainerView.extend({
             classNames: 'naviChoises',
             childViews: [
@@ -112,7 +117,11 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
         classNameBindings: ['this.parentView.list::hide'],
         elementId: 'perform_interaction_view_list',
         itemsOnPage: 5,
-        items: []
+        items: [],
+        click: function() {
+            SDL.InteractionChoicesView.timerUpdate();
+            SDL.SDLController.onResetTimeout(SDL.SDLAppController.model.appID, "UI.PerformInteraction");
+        }
     }),
 
     timer: null,
@@ -171,7 +180,6 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
                     this.set('list', false);
                     this.set('icon', true);
                     this.set('active', true);
-                    SDL.SDLController.onSystemContextChange();
                     break;
                 }
                 case "ICON_WITH_SEARCH" : {
@@ -182,7 +190,6 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
                     this.set('search', true);
                     this.set('list', false);
                     this.set('active', true);
-                    SDL.SDLController.onSystemContextChange();
                     break;
                 }
                 case "LIST_ONLY" : {
@@ -193,7 +200,6 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
                     this.set('icon', false);
                     this.set('search', false);
                     this.set('active', true);
-                    SDL.SDLController.onSystemContextChange();
                     break;
                 }
                 case "LIST_WITH_SEARCH" : {
@@ -232,7 +238,6 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
                 this.set('icon', false);
                 this.set('search', false);
                 this.set('active', true);
-                SDL.SDLController.onSystemContextChange();
             } else {
 
                 this.timer = setTimeout(function () {
@@ -248,36 +253,41 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
      */
     deactivate: function (result, choiceID) {
 
-        clearTimeout(this.timer);
-        this.set('active', false);
-        SDL.SDLController.VRMove();
-        SDL.Keyboard.deactivate();
+        if (SDL.SDLModel.performInteractionSession.length > 0 && result != "ABORTED") {
+            this.timerUpdate();
+        } else {
 
-        switch (result) {
-            case "ABORTED":
-            {
-                SDL.SDLController.interactionChoiseCloseResponse(this.appID, SDL.SDLModel.resultCode["ABORTED"]);
-                break;
+            clearTimeout(this.timer);
+            this.set('active', false);
+            SDL.SDLController.VRMove();
+            SDL.Keyboard.deactivate();
+
+            switch (result) {
+                case "ABORTED":
+                {
+                    SDL.SDLController.interactionChoiseCloseResponse(this.appID, SDL.SDLModel.resultCode["ABORTED"]);
+                    break;
+                }
+                case "TIMED_OUT":
+                {
+                    SDL.SDLController.interactionChoiseCloseResponse(this.appID, SDL.SDLModel.resultCode["TIMED_OUT"]);
+                    break;
+                }
+                case "SUCCESS":
+                {
+                    SDL.SDLController.interactionChoiseCloseResponse(this.appID, SDL.SDLModel.resultCode["SUCCESS"], choiceID, this.input.value);
+                    break;
+                }
+                default:
+                {
+                    // default action
+                }
             }
-            case "TIMED_OUT":
-            {
-                SDL.SDLController.interactionChoiseCloseResponse(this.appID, SDL.SDLModel.resultCode["TIMED_OUT"]);
-                break;
-            }
-            case "SUCCESS":
-            {
-                SDL.SDLController.interactionChoiseCloseResponse(this.appID, SDL.SDLModel.resultCode["SUCCESS"], choiceID, this.input.value);
-                break;
-            }
-            default:
-            {
-                // default action
-            }
+
+            this.appID = null;
+
+            SDL.SDLController.onSystemContextChange();
         }
-
-        this.appID = null;
-
-        SDL.SDLController.onSystemContextChange();
     },
 
     /**

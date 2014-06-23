@@ -2,6 +2,11 @@ package com.ford.syncV4.protocol.enums;
 
 import android.test.AndroidTestCase;
 
+import com.ford.syncV4.protocol.ProtocolMessage;
+import com.ford.syncV4.util.logger.Logger;
+
+import java.util.Vector;
+
 /**
  * Created by Andrew Batutin on 8/20/13
  */

@@ -1,14 +1,13 @@
 include_directories (
-  ./include/
-  ../../../src/thirdPartyLibs/gmock-1.7.0/include
-  ../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
+  ${GMOCK_INCLUDE_DIRECTORY}
+  ./include
   ../../../src/components/transport_manager/include
   ../../../src/components/utils/include
   ../../../src/components/protocol_handler/include
   ../../../src/components/connection_handler/include
-  ../../../src/components/security_manager/include
-  ../security_manager/include
+  ${SecurityManagerIncludeDir}
   ../../../src/components/config_profile/include
+  ../security_manager/include
   ${CMAKE_BINARY_DIR}/src/components/
 )
 
@@ -27,7 +26,7 @@ set (LIBRARIES
 set (SOURCES
   ./src/connection_handler_impl_test.cc
   ./src/connection_test.cc
-  ./src/heart_beat_monitor_test.cc
+#  ./src/heart_beat_monitor_test.cc
 )
 
 create_test("test_ConnectionHandler" "${SOURCES}" "${LIBRARIES}")

@@ -32,14 +32,13 @@
 #include "utils/threads/thread_validator.h"
 
 #include "utils/logger.h"
+#ifndef CUSTOMER_PASA
 #include "utils/back_trace.h"
+#endif
 
 namespace threads {
 
-namespace {
-log4cxx::LoggerPtr g_logger =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
-}
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 SingleThreadSimpleValidator::SingleThreadSimpleValidator()
     : creation_thread_id_(Thread::CurrentId()) {
@@ -51,7 +50,7 @@ SingleThreadSimpleValidator::~SingleThreadSimpleValidator() {
 void SingleThreadSimpleValidator::AssertRunningOnCreationThread() const {
   Thread::Id current_id = Thread::CurrentId();
   if (creation_thread_id_ != current_id) {
-    LOG4CXX_ERROR(g_logger, "Single-threaded object created at thread "
+    LOG4CXX_ERROR(logger_, "Single-threaded object created at thread "
                           << creation_thread_id_
                           <<" is accessed from thread "
                           << current_id
@@ -78,7 +77,7 @@ void SingleThreadValidator::PassToThread(Thread::Id thread_id) const {
 void SingleThreadValidator::AssertRunningOnValidThread() const {
   Thread::Id current_id = Thread::CurrentId();
   if (owning_thread_id_ != current_id) {
-    LOG4CXX_ERROR(g_logger, "Single-threaded object owned by thread "
+    LOG4CXX_ERROR(logger_, "Single-threaded object owned by thread "
                          << owning_thread_id_
                          << " is accessed from thread "
                          << current_id << "\n"

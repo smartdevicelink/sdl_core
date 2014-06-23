@@ -90,12 +90,6 @@ class TypeNameGenerator: public TypeCodeGenerator {
 class RpcTypeNameGenerator: public TypeCodeGenerator {
  public:
   // Types
-  // Availability class to wrap type into
-  enum Availability {
-    kUnspecified,
-    kMandatory,
-    kOptional
-  };
  public:
   // Generates name of type that is able to validate given primitive value
   // |interface| specifies the interface where code is currently
@@ -106,7 +100,7 @@ class RpcTypeNameGenerator: public TypeCodeGenerator {
   RpcTypeNameGenerator(const Interface* interface,
                        const TypePreferences* preferences,
                        const Type* type,
-                       Availability availability);
+                       bool optional);
   ~RpcTypeNameGenerator();
   // Generated type name
   std::string result() const;

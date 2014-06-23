@@ -73,10 +73,11 @@ class SecurityQuery {
     ERROR_SUCCESS                    = 0x00,
     ERROR_INVALID_QUERY_SIZE         = 0x01,  // wrong size of query data
     ERROR_INVALID_QUERY_ID           = 0x02,  // unknown query id
-    ERROR_NOT_SUPPORTED              = 0x03,  // No CryptoManager
+    ERROR_NOT_SUPPORTED              = 0x03,  // SDL does not support encryption
     ERROR_SERVICE_ALREADY_PROTECTED  = 0x04,
-    ERROR_CREATE_SLL                 = 0x05,
-    ERROR_SERVICE_NOT_PROTECTED      = 0x06,  // got handshake for not protected service
+    ERROR_CREATE_SSLCONTEXT          = 0x05,  // could not create new SSLContext
+    ERROR_SERVICE_NOT_PROTECTED      = 0x06,  // got handshake or encrypted data
+                                              // for not protected service ???
     ERROR_DECRYPTION_FAILED          = 0x07,
     ERROR_ENCRYPTION_FAILED          = 0x08,
     ERROR_SSL_INVALID_DATA           = 0xF0,
@@ -91,6 +92,7 @@ class SecurityQuery {
     QueryHeader();
     QueryHeader(uint8_t queryType, uint32_t queryId,
                 uint32_t seqNumber = 0, uint32_t jsonSize= 0);
+    // TODO(EZamakhov): check bitfield correctness on other endianness platform
     uint32_t query_type:8;
     uint32_t query_id:24;  // API function identifier
     uint32_t seq_number;   // request sequential number
@@ -106,26 +108,40 @@ class SecurityQuery {
    * \param connection_key Unique key used by other components as session identifier
    * \param header QueryHeader
    */
-  SecurityQuery(const QueryHeader& header, const uint32_t connection_key);
+  SecurityQuery(const QueryHeader &header, const uint32_t connection_key);
   /**
-   * \brief Parse income from Mobile Application data
+   * \brief Constructor with header, connection_key and query binary data
+   * \param connection_key Unique key used by other components as session identifier
+   * \param raw_data pointer to binary data array
+   * \param raw_data_size size of binary data array
+   * \param header QueryHeader
+   */
+  SecurityQuery(const QueryHeader &header, const uint32_t connection_key,
+                const uint8_t *const raw_data, const size_t raw_data_size);
+  /**
+   * \brief Serialize income from Mobile Application data
    * as query with header and binary data or json message
    * \param raw_data pointer to binary data array
    * \param raw_data_size size of binary data array
    * \return \c true on correct parse and \c false on wrong size of data
    */
-  bool ParseQuery(const uint8_t * const raw_data, const size_t raw_data_size);
+  bool SerializeQuery(const uint8_t *const raw_data, const size_t raw_data_size);
+  /**
+   * \brief Deserialize query for sending to Mobile Application
+   * \return \c vector of uint8_t data (serialized header data and send_data))
+   */
+  const std::vector<uint8_t> DeserializeQuery() const;
   /**
    * \brief Set binary data. (No header modification)
    * \param binary_data pointer to binary data array
    * \param bin_data_size size of binary data array
    */
-  void set_data(const uint8_t * const binary_data, const size_t bin_data_size);
+  void set_data(const uint8_t *const binary_data, const size_t bin_data_size);
   /**
    * \brief Set json data. (No header modification)
    * \param json_message string with json error
    */
-  void set_json_message(const std::string& json_message);
+  void set_json_message(const std::string &json_message);
   /**
    * \brief Set connection key
    * \param connection_key Unique key used by other components as session identifier
@@ -135,12 +151,12 @@ class SecurityQuery {
    * \brief Set query header
    * \param header of query
    */
-  void set_header(const QueryHeader& header);
+  void set_header(const QueryHeader &header);
   /**
    * \brief Get query header
    * \return header of query
    */
-  const QueryHeader& get_header() const;
+  const QueryHeader &get_header() const;
   /**
    * \brief Get query binary data (without header data)
    * \return const pointer to const binary data
@@ -155,7 +171,7 @@ class SecurityQuery {
    * \brief Get json string data (without header data)
    * \return const pointer to const binary data
    */
-  const std::string& get_json_message() const;
+  const std::string &get_json_message() const;
   /**
    * \brief Get connection key
    * \return Unique key used by other components as session identifier

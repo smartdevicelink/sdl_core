@@ -11,4 +11,7 @@ public interface IHandshakeDataListener {
 
     public void onError(Exception e);
 
+    public void setSessionID(byte sessionId);
+
+    void setVersion(byte version);
 }

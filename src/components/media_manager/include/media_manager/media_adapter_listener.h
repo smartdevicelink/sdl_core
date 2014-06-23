@@ -49,6 +49,7 @@ class MediaAdapterListener {
       const DataForListener& data) = 0;
     virtual void OnActivityStarted(int32_t application_key) = 0;
     virtual void OnActivityEnded(int32_t application_key) = 0;
+  virtual ~MediaAdapterListener() {}
 };
 }  //  namespace media_manager
 

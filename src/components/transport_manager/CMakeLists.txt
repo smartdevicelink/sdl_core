@@ -1,3 +1,6 @@
+
+set(target TransportManager)
+
 include_directories (
   ./include
   ../utils/include/
@@ -5,8 +8,9 @@ include_directories (
   ../connection_handler/include
   ../config_profile/include
   ../resumption/include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/libusbx-1.0.16
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${LIBUSB_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 if (BUILD_BT_SUPPORT)
   include_directories(
@@ -45,7 +49,7 @@ endif()
 
 if (BUILD_USB_SUPPORT)
   list (APPEND SOURCES
-    ./src/usb/usb_adapter.cc
+    ./src/usb/usb_aoa_adapter.cc
     ./src/usb/usb_connection_factory.cc
     ./src/usb/usb_device_scanner.cc
   )
@@ -61,31 +65,44 @@ if (BUILD_USB_SUPPORT)
     ./src/usb/qnx/usb_connection.cc
     ./src/usb/qnx/platform_usb_device.cc
     )
-    if (CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7")
-      list(APPEND SOURCES
-      ./src/usb/qnx/usb_iap_connection.cc
-      ./src/usb/qnx/usb_iap2_connection.cc
-      )
-    endif()
   endif()
 endif(BUILD_USB_SUPPORT)
 
-add_library("TransportManager" ${SOURCES})
+if (BUILD_MME_SUPPORT)
+  list (APPEND SOURCES
+    src/mme/mme_transport_adapter.cc
+    src/mme/mme_device.cc
+    src/mme/iap_device.cc
+    src/mme/iap2_device.cc
+    src/mme/mme_device_scanner.cc
+    src/mme/mme_connection_factory.cc
+    src/mme/iap_connection.cc
+    src/mme/iap2_connection.cc
+  )
+endif(BUILD_MME_SUPPORT)
+
+add_library(${target} ${SOURCES})
 
 if (BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-    target_link_libraries ("TransportManager" usbdi)
-    if (CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7")
-      target_link_libraries ("TransportManager" ipod)
-      target_link_libraries ("TransportManager" iap2client)
-    endif()
+    target_link_libraries(${target} usbdi)
   endif()
 endif(BUILD_USB_SUPPORT)
 
+if (BUILD_MME_SUPPORT)
+  target_link_libraries (${target} ipod)
+  target_link_libraries (${target} iap2client)
+  target_link_libraries (${target} qdb)
+endif(BUILD_MME_SUPPORT)
+
 if (BUILD_AVAHI_SUPPORT)
-  target_link_libraries ("TransportManager" avahi-common)
+  target_link_libraries(${target} avahi-common)
 endif()
-target_link_libraries ("TransportManager" log4cxx)
+
+if(ENABLE_LOG)
+  target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()
+
 if (BUILD_BT_SUPPORT)
-  target_link_libraries("TransportManager" bluetooth)
+  target_link_libraries(${target} bluetooth)
 endif()

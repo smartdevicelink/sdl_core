@@ -662,11 +662,14 @@
     	<description> Time to destination</description>
     </element>
     
-  	<element name="turnText">
-  		<description> Turn text</description>
-  	</element>
+    <element name="turnText">
+        <description> Turn text</description>
+    </element>
 
-  </enum>
+    <element name="menuTitle">
+      <description> Optional text to label an app menu button (for certain touchscreen platforms).</description>
+    </element>
+</enum>
   
   <enum name="ImageFieldName">
     <element name="softButtonImage">
@@ -853,7 +856,6 @@
     <element name="CID2SET">
       <description>See [@TODO: create file ref]</description>
     </element>
-	<issue creator="rs">Real sets have not been defined yet?</issue>
   </enum>
 
   <enum name="TextAlignment">
@@ -1440,6 +1442,30 @@
     <element name="CALL_COMPLETE_DTMF_TIMEOUT" internal_name="ECCS_CALL_COMPLETE_DTMF_TIMEOUT">
     </element>
   </enum>
+
+  <struct name="DeviceInfo">
+    <description>Various information abount connecting device.</description>
+
+    <param name="hardware" type="String" minlength="0" maxlength="500" mandatory="false">
+      <description>Device model</description>
+    </param>
+    <param name="firmwareRev" type="String" minlength="0" maxlength="500" mandatory="false">
+      <description>Device firmware revision</description>
+    </param>
+    <param name="os" type="String" minlength="0" maxlength="500" mandatory="false">
+      <description>Device OS</description>
+    </param>
+    <param name="osVersion" type="String" minlength="0" maxlength="500" mandatory="false">
+      <description>Device OS version</description>
+    </param>
+    <param name="carrier" type="String" minlength="0" maxlength="500" mandatory="false">
+      <description>Device mobile carrier (if applicable)</description>
+    </param>
+    <param name="maxNumberRFCOMMPorts" type="Integer" minvalue="0" maxvalue="100" mandatory="false">
+      <description>Omitted if connected not via BT.</description>
+    </param>
+
+  </struct>
 
   <enum name="FileType">
     <description>Enumeration listing possible file types.</description>
@@ -2264,6 +2290,11 @@
         ID used to uniquely identify current state of all app data that can persist through connection cycles (e.g. ignition cycles).
         This registered data (commands, submenus, choice sets, etc.) can be reestablished without needing to explicitly reregister each piece.
         If omitted, then the previous state of an app's commands, etc. will not be restored. 
+      </description>
+    </param>
+    <param name="deviceInfo" type="DeviceInfo" mandatory="false">
+      <description>
+        See DeviceInfo.
       </description>
     </param>
     <param name="appID" type="String" maxlength="100" mandatory="true">

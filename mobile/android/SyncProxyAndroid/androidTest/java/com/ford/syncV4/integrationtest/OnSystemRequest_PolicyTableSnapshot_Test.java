@@ -42,6 +42,7 @@ import java.util.Arrays;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyByte;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.doAnswer;
@@ -136,8 +137,8 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
                 return null;
             }
         }).when(handlerMock)
-          .onPolicyTableSnapshotRequest(notNull(ISystemRequestProxy.class), eq(dataSnapshot),
-                  eq(fileType));
+          .onPolicyTableSnapshotRequest(anyByte(), notNull(ISystemRequestProxy.class), eq(dataSnapshot),
+                  eq(fileType), eq(requestType));
         proxy.setOnSystemRequestHandler(handlerMock);
 
         // emulate incoming OnSystemRequest notification with HTTP
@@ -159,7 +160,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
         // set another connection mock to be able to verify the second time below
         //final SyncConnection connectionMock2 = createNewSyncConnectionMock();
-        //setSyncConnection(proxy, connectionMock2);
+        //setProtectServiceListener(proxy, connectionMock2);
 
         final ProtocolMessage protocolMessage = argumentCaptor.getValue();
         assertThat(protocolMessage.getFunctionID(), is(PUTFILE_FUNCTIONID));
@@ -184,8 +185,8 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         Thread.sleep(WAIT_TIMEOUT);
 
         // the listener should not be called for PutFile or OnSystemRequest
-        verify(proxyListenerMock, never()).onPutFileResponse(any(PutFileResponse.class));
-        verify(proxyListenerMock, never()).onOnSystemRequest(any(OnSystemRequest.class));
+        verify(proxyListenerMock, never()).onPutFileResponse(anyByte(), any(PutFileResponse.class));
+        verify(proxyListenerMock, never()).onOnSystemRequest(anyByte(), any(OnSystemRequest.class));
     }
 
     // TODO check the rest is not sent after reconnect
@@ -206,7 +207,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         incomingPM0.setData(msgBytes);
         incomingPM0.setJsonSize(msgBytes.length);
         incomingPM0.setMessageType(MessageType.RPC);
-        incomingPM0.setSessionType(ServiceType.RPC);
+        incomingPM0.setServiceType(ServiceType.RPC);
         incomingPM0.setFunctionID(functionID);
         incomingPM0.setRPCType(ProtocolMessage.RPCTYPE_RESPONSE);
         incomingPM0.setCorrID(correlationID);
@@ -222,7 +223,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         incomingPM0.setData(msgBytes);
         incomingPM0.setBulkData(notification.getBulkData());
         incomingPM0.setMessageType(MessageType.RPC);
-        incomingPM0.setSessionType(ServiceType.RPC);
+        incomingPM0.setServiceType(ServiceType.RPC);
         incomingPM0.setFunctionID(functionID);
         incomingPM0.setRPCType(ProtocolMessage.RPCTYPE_NOTIFICATION);
         return incomingPM0;

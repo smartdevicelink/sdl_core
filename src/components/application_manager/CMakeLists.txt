@@ -8,7 +8,6 @@ include_directories (
   ../utils/include/
   ../formatters/include/
   ../protocol_handler/include/
-  ../security_manager/include/
   ../smart_objects/include/
   ../hmi_message_handler/include
   ../media_manager/include/
@@ -18,13 +17,13 @@ include_directories (
   ../transport_manager/include/
   ../resumption/include/
   ../rpc_base/include/
-  ../../thirdPartyLibs/jsoncpp/include/
-  ../../thirdPartyLibs/encryption/include/
-  ../../thirdPartyLibs/MessageBroker/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${ENCRYPTION_INCLUDE_DIRECTORY}
+  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
-  ${CMAKE_BINARY_DIR}/src/components/policy/src/policy/
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES
@@ -45,18 +44,22 @@ set (SOURCES
 set (POLICIES_MANAGER
 ./src/policies/policy_handler.cc
 ./src/policies/policy_event_observer.cc
-./src/policies/policy_retry_sequence.cc
-./src/policies/pt_exchange_handler.cc
 )
 
 if (EXTENDED_POLICY_FLAG)
+  include_directories(
+    ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/policy_table/table_struct_ext
+  )
   list(APPEND POLICIES_MANAGER
     ./src/policies/pt_exchange_handler_ext.cc
-    ./src/policies/pt_exchange_handler_impl.cc
   )
 else ()
+  include_directories(
+    ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/policy_table/table_struct
+  )
   list(APPEND POLICIES_MANAGER
     ./src/policies/pt_exchange_handler_impl.cc
+    ./src/policies/policy_retry_sequence.cc
   )
 endif ()
 
@@ -306,7 +309,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_ready_notification.cc
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc
-./src/commands/hmi/on_update_device_list.cc
 ./src/commands/hmi/on_allow_sdl_functionality_notification.cc
 ./src/commands/hmi/on_app_permission_consent_notification.cc
 ./src/commands/hmi/on_app_registered_notification.cc
@@ -330,7 +332,6 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_ui_language_change_notification.cc
 ./src/commands/hmi/on_button_event_notification.cc
 ./src/commands/hmi/on_button_press_notification.cc
-./src/commands/hmi/on_show_notification.cc
 ./src/commands/hmi/on_find_applications.cc
 ./src/commands/hmi/on_ui_keyboard_input_notification.cc
 ./src/commands/hmi/on_ui_touch_event_notification.cc
@@ -345,6 +346,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/audio_stop_stream_response.cc
 ./src/commands/hmi/on_system_request_notification.cc
 ./src/commands/hmi/on_put_file_notification.cc
+./src/commands/hmi/on_resume_audio_source_notification.cc
 ./src/commands/hmi/on_sdl_close_notification.cc
 ./src/commands/hmi/ui_set_display_layout_request.cc
 ./src/commands/hmi/ui_set_display_layout_response.cc
@@ -359,6 +361,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/on_policy_update.cc
 ./src/commands/hmi/get_urls.cc
 ./src/commands/hmi/get_urls_response.cc
+./src/commands/hmi/on_device_state_changed_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON
@@ -404,7 +407,6 @@ endif (${HMI_DBUS_API})
 
 SET (LIBRARIES
   UsageStatistics
-  log4cxx
   dl
 )
 
@@ -413,4 +415,8 @@ IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
 endif()
 
 add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COMMANDS_SOURCES} ${POLICIES_MANAGER} ${EVENT_ENGINE})
-target_link_libraries ("ApplicationManager" ${LIBRARIES})
+target_link_libraries("ApplicationManager" ${LIBRARIES})
+
+if(ENABLE_LOG)
+  target_link_libraries("ApplicationManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+endif()

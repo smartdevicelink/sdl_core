@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
-#define SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
+#ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
+#define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_
 
 #include <string>
 
@@ -39,10 +39,10 @@
  * \class security_manager::CryptoManager
  * \brief Class factory, producing instances of \ref SSLContext
  *
- * \fn security_manager::SSLContext* security_manager::CryptoManager::CreateSSLContext()
+ * \fn security_manager::SSLContext *security_manager::CryptoManager::CreateSSLContext()
  * \brief Creates an instance of \ref SSLContext class
  *
-  * \fn void security_manager::CryptoManager::ReleaseSSLContext(security_manager::SSLContext* context)
+  * \fn void security_manager::CryptoManager::ReleaseSSLContext(security_manager::SSLContext *context)
  * \brief Frees \ref SSLContext instance
  */
 
@@ -50,23 +50,22 @@ namespace security_manager {
 class SSLContext;
 
 enum Mode { CLIENT, SERVER };
-enum Protocol { SSLv3, TLSv1_1, TLSv1_2 };
+enum Protocol { SSLv3, TLSv1, TLSv1_1, TLSv1_2 };
 
-std::string LastError();
 class CryptoManager {
  public:
   virtual bool Init(Mode mode,
                     Protocol protocol,
-                    const std::string& cert_filename,
-                    const std::string& key_filename,
-                    const std::string& ciphers_list,
-                    bool verify_peer)=0;
-  virtual void Finish()=0;
-  virtual SSLContext *CreateSSLContext()=0;
-  virtual void ReleaseSSLContext(SSLContext* context)=0;
+                    const std::string &cert_filename,
+                    const std::string &key_filename,
+                    const std::string &ciphers_list,
+                    bool verify_peer) = 0;
+  virtual void Finish() = 0;
+  virtual SSLContext *CreateSSLContext() = 0;
+  virtual void ReleaseSSLContext(SSLContext *context) = 0;
+  virtual std::string LastError() const = 0;
   virtual ~CryptoManager() { }
 };
 
-} // namespace security_manager
-
-#endif  // SRC_COMPONENTS_CRYPTO_MANAGER_INCLUDE_CRYPTO_MANAGER_CRYPTO_MANAGER_H
+}  // namespace security_manager
+#endif  // SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_H_

@@ -1,7 +1,5 @@
-/**
-* \file signals.cc
-* \brief Signal (i.e. SIGINT) handling.
-* Copyright (c) 2013, Ford Motor Company
+/*
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -47,11 +45,6 @@ bool ResetSubscribeToTerminateSignal() {
   void (*prev_func)(int32_t p);
   prev_func = signal(SIGINT, SIG_DFL);
   return (SIG_ERR != prev_func);
-}
-
-void ForwardSignal() {
-  int32_t signal_id = SIGINT;
-  raise(signal_id);
 }
 
 }  //  namespace utils

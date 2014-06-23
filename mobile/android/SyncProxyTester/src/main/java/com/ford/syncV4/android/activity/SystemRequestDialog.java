@@ -31,18 +31,13 @@ import com.lamerman.SelectionMode;
 /**
  * Created by Andrew Batutin on 3/6/14
  */
-public class SystemRequestDialog extends DialogFragment {
+public class SystemRequestDialog extends BaseDialogFragment {
 
     private EditText mSelectedFileNameView;
     private String mSelectedFilePath = "";
 
     @SuppressWarnings("unused")
     private static final String LOG_TAG = "SystemRequestDialogTag";
-
-    public static SystemRequestDialog newInstance() {
-        SystemRequestDialog systemRequestDialog = new SystemRequestDialog();
-        return systemRequestDialog;
-    }
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -111,7 +106,8 @@ public class SystemRequestDialog extends DialogFragment {
                                 Logger.d(LOG_TAG + " SystemRequest data null");
                             }
                         }
-                        ((SyncProxyTester) getActivity()).onSystemRequestDialogResult(systemRequest);
+                        ((SyncProxyTester) getActivity()).onSystemRequestDialogResult(
+                                getArguments().getString(APP_ID_KEY), systemRequest);
                     }
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {

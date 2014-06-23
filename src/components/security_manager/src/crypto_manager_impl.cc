@@ -35,88 +35,129 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include "security_manager/security_manager.h"
+#include "utils/logger.h"
+
+#define TLS1_1_MINIMAL_VERSION 0x1000100f
 
 namespace security_manager {
 
-log4cxx::LoggerPtr CryptoManagerImpl::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("CryptoManagerImpl"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "CryptoManagerImpl")
 
 int CryptoManagerImpl::instance_count_ = 0;
 
 CryptoManagerImpl::CryptoManagerImpl()
-    : context_(NULL),
-      mode_(CLIENT) {
+    : context_(NULL), mode_(CLIENT) {
 }
 
 bool CryptoManagerImpl::Init(Mode mode,
                              Protocol protocol,
-                             const std::string& cert_filename,
-                             const std::string& key_filename,
-                             const std::string& ciphers_list,
+                             const std::string &cert_filename,
+                             const std::string &key_filename,
+                             const std::string &ciphers_list,
                              bool verify_peer) {
-
   if (instance_count_ == 0) {
     SSL_load_error_strings();
     ERR_load_BIO_strings();
     OpenSSL_add_all_algorithms();
     SSL_library_init();
   }
-  instance_count_++;
+  // FIXME(EZamakhov): add thread safe
+  ++instance_count_;
 
   mode_ = mode;
+  const bool is_server = (mode == SERVER);
+#if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
+  SSL_METHOD *method;
+#else
   const SSL_METHOD *method;
+#endif
   switch (protocol) {
     case SSLv3:
-      method = mode == SERVER ?
+      method = is_server ?
           SSLv3_server_method() :
           SSLv3_client_method();
       break;
+    case TLSv1:
+      method = is_server ?
+          TLSv1_server_method() :
+          TLSv1_client_method();
+      break;
     case TLSv1_1:
-      method = mode == SERVER ?
+#if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
+      LOG4CXX_WARN(logger_,
+                   "OpenSSL has no TLSv1.1 with version lower 1.0.1, set TLSv1.0");
+      method = is_server ?
+          TLSv1_server_method() :
+          TLSv1_client_method();
+#else
+      method = is_server ?
           TLSv1_1_server_method() :
           TLSv1_1_client_method();
+#endif
       break;
     case TLSv1_2:
-      method = mode == SERVER ?
+#if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
+      LOG4CXX_WARN(logger_,
+                   "OpenSSL has no TLSv1.2 with version lower 1.0.1, set TLSv1.0");
+      method = is_server ?
+          TLSv1_server_method() :
+          TLSv1_client_method();
+#else
+      method = is_server ?
           TLSv1_2_server_method() :
           TLSv1_2_client_method();
+#endif
       break;
     default:
       LOG4CXX_ERROR(logger_, "Unknown protocol: " << protocol);
       return false;
   }
   context_ = SSL_CTX_new(method);
-  if (protocol == SSLv3) {
-    SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
-  }
 
-  if (!cert_filename.empty()) {
+  // Disable SSL2 as deprecated
+  SSL_CTX_set_options(context_, SSL_OP_NO_SSLv2);
+
+  if (cert_filename.empty()) {
+    LOG4CXX_WARN(logger_, "Empty certificate path");
+  } else {
     LOG4CXX_INFO(logger_, "Certificate path: " << cert_filename);
-    if (!SSL_CTX_use_certificate_file(context_, cert_filename.c_str(), SSL_FILETYPE_PEM)) {
+    if (!SSL_CTX_use_certificate_file(context_, cert_filename.c_str(),
+                                      SSL_FILETYPE_PEM)) {
       LOG4CXX_ERROR(logger_, "Could not use certificate " << cert_filename);
       return false;
     }
+  }
 
-    if (!key_filename.empty()) {
-      LOG4CXX_INFO(logger_, "Key path: " << key_filename);
-      if (!SSL_CTX_use_PrivateKey_file(context_, key_filename.c_str(), SSL_FILETYPE_PEM)) {
-        LOG4CXX_ERROR(logger_, "Could not use key " << key_filename);
-        return false;
-      }
-      if (!SSL_CTX_check_private_key(context_)) {
-        LOG4CXX_ERROR(logger_, "Could not use certificate " << cert_filename);
-        return false;
-      }
+  if (key_filename.empty()) {
+    LOG4CXX_WARN(logger_, "Empty key path");
+  } else {
+    LOG4CXX_INFO(logger_, "Key path: " << key_filename);
+    if (!SSL_CTX_use_PrivateKey_file(context_, key_filename.c_str(),
+                                     SSL_FILETYPE_PEM)) {
+      LOG4CXX_ERROR(logger_, "Could not use key " << key_filename);
+      return false;
+    }
+    if (!SSL_CTX_check_private_key(context_)) {
+      LOG4CXX_ERROR(logger_, "Could not use certificate " << cert_filename);
+      return false;
     }
   }
 
-  LOG4CXX_INFO(logger_, "Cipher list: " << ciphers_list);
-  if (!SSL_CTX_set_cipher_list(context_, ciphers_list.c_str())) {
-    LOG4CXX_ERROR(logger_, "Could not set cipher list: " << ciphers_list);
-    return false;
+  if (ciphers_list.empty()) {
+    LOG4CXX_WARN(logger_, "Empty ciphers list");
+  } else {
+    LOG4CXX_INFO(logger_, "Cipher list: " << ciphers_list);
+    if (!SSL_CTX_set_cipher_list(context_, ciphers_list.c_str())) {
+      LOG4CXX_ERROR(logger_, "Could not set cipher list: " << ciphers_list);
+      return false;
+    }
   }
 
-  SSL_CTX_set_verify(context_, verify_peer ? SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT : SSL_VERIFY_NONE, NULL);
+  // TODO(EZamakhov): add loading SSL_VERIFY_FAIL_IF_NO_PEER_CERT from INI
+  const int verify_mode = verify_peer
+      ? SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT
+      : SSL_VERIFY_NONE;
+  SSL_CTX_set_verify(context_, verify_mode, NULL);
 
   return true;
 }
@@ -129,12 +170,12 @@ void CryptoManagerImpl::Finish() {
   }
 }
 
-SSLContext * CryptoManagerImpl::CreateSSLContext() {
+SSLContext* CryptoManagerImpl::CreateSSLContext() {
   if (context_ == NULL) {
     return NULL;
   }
 
-  SSL* conn = SSL_new(context_);
+  SSL *conn = SSL_new(context_);
   if (conn == NULL)
     return NULL;
 
@@ -143,12 +184,19 @@ SSLContext * CryptoManagerImpl::CreateSSLContext() {
   } else {
     SSL_set_connect_state(conn);
   }
-  // TODO(EZamakhov): add return NULL pointer on no keys
   return new SSLContextImpl(conn, mode_);
 }
 
-void CryptoManagerImpl::ReleaseSSLContext(SSLContext* context) {
+void CryptoManagerImpl::ReleaseSSLContext(SSLContext *context) {
   delete context;
 }
 
-} // namespace security_manager
+std::string CryptoManagerImpl::LastError() const {
+  if (!context_) {
+    return std::string("Initialization is not completed");
+  }
+  const char *reason = ERR_reason_error_string(ERR_get_error());
+  return std::string(reason ? reason : "");
+}
+
+}  // namespace security_manager

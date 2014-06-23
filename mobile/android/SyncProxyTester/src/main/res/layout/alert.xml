@@ -138,6 +138,7 @@
             android:id="@+id/alert_do_encrypt_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:text="@string/do_encrypt"/>
 
     </LinearLayout>

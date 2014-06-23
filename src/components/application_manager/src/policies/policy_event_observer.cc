@@ -32,8 +32,9 @@
 
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/smart_object_keys.h"
-#include "smart_objects/smart_object.h"
 #include "utils/date_time.h"
+#include "policy/policy_manager.h"
+#include "smart_objects/smart_object.h"
 
 namespace policy {
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
@@ -50,28 +51,43 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
-    case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
-      if (hmi_apis::Common_Result::SUCCESS
-          == static_cast<hmi_apis::Common_Result::eType>(message[strings::params][hmi_response::code]
-              .asInt())) {
-        if (message[strings::msg_params].keyExists(strings::odometer)) {
-
-          TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-          const int kSecondsInDay = 60 * 60 * 24;
-          int days_after_epoch = current_time.tv_sec / kSecondsInDay;
-
-          policy_manager_->PTUpdatedAt(
-              message[strings::msg_params][strings::odometer].asInt(),
-              days_after_epoch);
-        }
-      }
+#ifdef HMI_DBUS_API
+    case hmi_apis::FunctionID::VehicleInfo_GetOdometer: {
+      ProcessOdometerEvent(message);
       break;
     }
     default: {
       break;
     }
-  }
+  unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetOdometer);
+#else
+    case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
+      ProcessOdometerEvent(message);
+      break;
+    }
+    default: {
+      break;
+    }
   unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
+#endif
+  }
+}
+
+void PolicyEventObserver::ProcessOdometerEvent(const smart_objects::SmartObject& message) {
+  if (hmi_apis::Common_Result::SUCCESS
+      == static_cast<hmi_apis::Common_Result::eType>(message[strings::params][hmi_response::code]
+        .asInt())) {
+
+    if (message[strings::msg_params].keyExists(strings::odometer)) {
+      TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+      const int kSecondsInDay = 60 * 60 * 24;
+      int days_after_epoch = current_time.tv_sec / kSecondsInDay;
+
+      policy_manager_->PTUpdatedAt(
+        message[strings::msg_params][strings::odometer].asInt(),
+        days_after_epoch);
+    }
+  }
 }
 
 void PolicyEventObserver::subscribe_on_event(

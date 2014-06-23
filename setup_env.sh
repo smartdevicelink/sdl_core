@@ -79,7 +79,6 @@ GIT="git"
 GDEBI="gdebi"
 GNU_CPP_COMPILER="g++"
 BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
-LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
 CHROMIUM_BROWSER="chromium-browser"
 CHROMIUM_CODEC_FFMPEG="chromium-codecs-ffmpeg-extra"
 PULSEAUDIO_DEV="libpulse-dev"
@@ -101,6 +100,7 @@ LIB_UDEV="libudev-dev"
 USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
 LIBXML2="libxml2-dev"
+AUTOMAKE1_11="automake1.11"
 
 GSTREAMER_REPO_LINK="deb http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
 GSTREAMER_SRC_REPO_LINK="deb-src http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
@@ -284,10 +284,6 @@ echo "Installing bluez tools"
 apt-install ${BLUEZ_TOOLS}
 echo $OK
 
-echo "Installing log4cxx library"
-apt-install ${LOG4CXX_LIBRARY}
-echo $OK
-
 echo "Installing Chromium browser"
 apt-install ${CHROMIUM_BROWSER}
 echo $OK
@@ -308,6 +304,10 @@ echo "Installing Libudev-dev library"
 apt-install ${LIB_UDEV}
 echo $OK
 
+echo "Installing dos2unix"
+apt-install dos2unix
+echo $OK
+
 echo "Setting up USB permissions..."
 if [ ! -f "/etc/udev/rules.d/90-usbpermission.rules" ]; then
     echo "Create permission file"
@@ -319,6 +319,10 @@ if ! grep --quiet "$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules; t
     echo "Adding permissions..."
     sed -i "\$i$USB_PERMISSIONS" /etc/udev/rules.d/90-usbpermission.rules
 fi
+
+echo "Installing Automake 1.11"
+apt-install ${AUTOMAKE1_11}
+echo $OK
 
 if $INSTALL_QNX_TOOLS || $INSTALL_ALL; then
     echo "Checking for installed QNX SDP 6.5.0"

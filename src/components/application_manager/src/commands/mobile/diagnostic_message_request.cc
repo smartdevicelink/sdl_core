@@ -50,8 +50,21 @@ DiagnosticMessageRequest::~DiagnosticMessageRequest() {
 void DiagnosticMessageRequest::Run() {
   LOG4CXX_INFO(logger_, "DiagnosticMessageRequest::Run");
 
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+                               connection_key());
+
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_, "An application is not registered.");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  // Add app_id for HMI request
+  (*message_)[strings::msg_params][strings::app_id] = app->app_id();
+
   SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_DiagnosticMessage,
-                 &(*message_), true);
+                 &(*message_)[strings::msg_params], true);
+
 }
 
 void DiagnosticMessageRequest::on_event(const event_engine::Event& event) {

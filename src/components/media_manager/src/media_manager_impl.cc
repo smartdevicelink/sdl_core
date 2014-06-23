@@ -39,6 +39,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
 #if defined(EXTENDED_MEDIA_MODE)
 #include "media_manager/audio/a2dp_source_player_adapter.h"
 #include "media_manager/audio/from_mic_recorder_adapter.h"
@@ -52,10 +53,7 @@
 
 namespace media_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr MediaManagerImpl::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("MediaManagerImpl"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManagerImpl")
 
 MediaManagerImpl::MediaManagerImpl()
   : protocol_handler_(NULL)
@@ -159,10 +157,6 @@ void MediaManagerImpl::StartMicrophoneRecording(
       application(application_key);
   std::string file_path = profile::Profile::instance()->app_storage_folder();
   file_path += "/";
-  file_path += app->folder_name();
-  file_system::CreateDirectory(file_path);
-
-  file_path += "/";
   file_path += output_file;
   from_mic_listener_ = new FromMicRecorderListener(file_path);
 #if defined(EXTENDED_MEDIA_MODE)
@@ -184,21 +178,24 @@ void MediaManagerImpl::StartMicrophoneRecording(
       LOG4CXX_WARN(logger_, "Could not remove file " << output_file);
     }
   }
-  const std::string predefined_rec_file =
-      profile::Profile::instance()->app_storage_folder() + "/audio.8bit.wav";
+#ifndef CUSTOMER_PASA
+  const std::string record_file_source =
+      profile::Profile::instance()->app_resourse_folder() + "/" +
+      profile::Profile::instance()->recording_file_source();
   std::vector<uint8_t> buf;
-  if (file_system::ReadBinaryFile(predefined_rec_file, buf)) {
+  if (file_system::ReadBinaryFile(record_file_source, buf)) {
     if (file_system::Write(file_path, buf)) {
       LOG4CXX_INFO(logger_,
-        "File " << predefined_rec_file << " copied to " << output_file);
+        "File " << record_file_source << " copied to " << output_file);
     }
     else {
       LOG4CXX_WARN(logger_, "Could not write to file " << output_file);
     }
   }
   else {
-    LOG4CXX_WARN(logger_, "Could not read file " << predefined_rec_file);
+    LOG4CXX_WARN(logger_, "Could not read file " << record_file_source);
   }
+#endif
 #endif
   from_mic_listener_->OnActivityStarted(application_key);
 }
@@ -234,8 +231,10 @@ void MediaManagerImpl::StartVideoStreaming(int32_t application_key) {
         snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
                  profile::Profile::instance()->named_video_pipe_path().c_str());
       } else {
-        DCHECK(snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
-            profile::Profile::instance()->video_stream_file().c_str()));
+        int snprintf_result;
+        snprintf_result = snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
+            profile::Profile::instance()->video_stream_file().c_str());
+        DCHECK(snprintf_result);
       }
       application_manager::MessageHelper::SendNaviStartStream(url,
                                                               application_key);
@@ -270,8 +269,10 @@ void MediaManagerImpl::StartAudioStreaming(int32_t application_key) {
         snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
                  profile::Profile::instance()->named_audio_pipe_path().c_str());
       } else {
-        DCHECK(snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
-             profile::Profile::instance()->audio_stream_file().c_str()));
+        int snprintf_result;
+        snprintf_result = snprintf(url, sizeof(url) / sizeof(url[0]), "%s",
+             profile::Profile::instance()->audio_stream_file().c_str());
+        DCHECK(snprintf_result);
       }
 
       application_manager::MessageHelper::SendAudioStartStream(url,

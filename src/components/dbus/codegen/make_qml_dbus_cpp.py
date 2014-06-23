@@ -726,8 +726,7 @@ source_out.write("""/**
 
 """)
 source_out.write("#include \"" + header_name + "\"\n\n");
-source_out.write("#include <log4cxx/logger.h>\n")
-source_out.write("#include <log4cxx/propertyconfigurator.h>\n\n")
+source_out.write("#include \"utils/logger.h\"\n")
 source_out.write("#ifdef ENABLE_LOG\n")
 source_out.write("extern log4cxx::LoggerPtr logger_;\n")
 source_out.write("#endif // ENABLE_LOG\n\n")

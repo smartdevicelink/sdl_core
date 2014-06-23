@@ -49,10 +49,20 @@ public interface IHeartbeatMonitor {
     /**
      * Notifies the monitor about sent/received messages.
      */
-    public void notifyTransportActivity();
+    public void notifyTransportOutputActivity();
+
+    void notifyTransportInputActivity();
 
     /**
      * Notifies the monitor about a received heartbeat ACK message.
      */
     public void heartbeatACKReceived();
+
+    public void heartbeatReceived();
+
+    /**
+     * Return associated Session Identifier
+     * @return session id
+     */
+    public byte getSessionId();
 }

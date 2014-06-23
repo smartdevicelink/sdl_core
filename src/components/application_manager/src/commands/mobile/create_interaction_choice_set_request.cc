@@ -63,20 +63,30 @@ void CreateInteractionChoiceSetRequest::Run() {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return;
   }
-
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
-
-  mobile_apis::Result::eType  result_ = mobile_apis::Result::SUCCESS;
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    if (mobile_apis::Result::INVALID_DATA == verification_result) {
-      LOG4CXX_ERROR(logger_, "VerifyImageFiles INVALID_DATA!");
-      SendResponse(false, verification_result);
-      return;
+  for (uint32_t i = 0;
+      i < (*message_)[strings::msg_params][strings::choice_set].length();
+      ++i) {
+    mobile_apis::Result::eType verification_result_image =
+        mobile_apis::Result::SUCCESS;
+    mobile_apis::Result::eType verification_result_secondary_image =
+        mobile_apis::Result::SUCCESS;
+    if ((*message_)[strings::msg_params]
+                    [strings::choice_set][i].keyExists(strings::image)) {
+      verification_result_image = MessageHelper::VerifyImage(
+          (*message_)[strings::msg_params][strings::choice_set]
+                                           [i][strings::image], app);
     }
-    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == verification_result) {
-      LOG4CXX_ERROR(logger_, "VerifyImageFiles UNSUPPORTED_RESOURCE!");
-      result_ = verification_result;
+    if ((*message_)[strings::msg_params]
+                    [strings::choice_set][i].keyExists(strings::secondary_image)) {
+      verification_result_secondary_image = MessageHelper::VerifyImage(
+          (*message_)[strings::msg_params][strings::choice_set]
+                                           [i][strings::secondary_image], app);
+    }
+    if (verification_result_image == mobile_apis::Result::INVALID_DATA ||
+        verification_result_secondary_image == mobile_apis::Result::INVALID_DATA) {
+      LOG4CXX_ERROR(logger_, "VerifyImage INVALID_DATA!");
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
     }
   }
 
@@ -98,7 +108,7 @@ void CreateInteractionChoiceSetRequest::Run() {
   (*message_)[strings::msg_params][strings::grammar_id] = grammar_id;
   app->AddChoiceSet(choice_set_id, (*message_)[strings::msg_params]);
   SendVRAddCommandRequest(app);
-  SendResponse(true, result_);
+  SendResponse(true, mobile_apis::Result::SUCCESS);
   app->UpdateHash();
 }
 

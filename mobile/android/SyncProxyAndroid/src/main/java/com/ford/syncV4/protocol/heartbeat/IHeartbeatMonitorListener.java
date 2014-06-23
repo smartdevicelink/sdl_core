@@ -18,4 +18,6 @@ public interface IHeartbeatMonitorListener {
      * @param monitor the caller
      */
     public void heartbeatTimedOut(IHeartbeatMonitor monitor);
+
+    public void sendHeartbeatACK(IHeartbeatMonitor heartbeatMonitor);
 }

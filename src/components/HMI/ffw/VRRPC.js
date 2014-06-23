@@ -62,6 +62,7 @@ FFW.VR = FFW.RPCObserver.create( {
      */
     disconnect: function() {
 
+        this.onRPCUnregistered();
         this.client.disconnect();
     },
 
@@ -341,7 +342,7 @@ FFW.VR = FFW.RPCObserver.create( {
             };
         }
 
-        SDL.SDLModel.set('performInteractionSession', null);
+        SDL.SDLModel.set('performInteractionSession', []);
 
         this.client.send(JSONMessage);
     },

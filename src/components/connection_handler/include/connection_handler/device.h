@@ -1,8 +1,4 @@
-/**
- * \file Device.hpp
- * \brief Device class.
- * Stores device information
- *
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -40,7 +36,6 @@
 #include <string>
 #include <map>
 #include <vector>
-#include "utils/logger.h"
 
 /**
  * \namespace connection_handler
@@ -59,54 +54,47 @@ typedef std::vector<int32_t> AppList;
  * \brief Connection class
  */
 class Device {
-  public:
-    /**
-     * \brief Class constructor
-     */
-    Device(DeviceHandle device_handle, const std::string& user_friendly_name,
-           const std::string& mac_address = "");
+ public:
+  /**
+   * \brief Class constructor
+   */
+  Device(DeviceHandle device_handle, const std::string &user_friendly_name,
+         const std::string &mac_address = "");
 
-    /**
-     * \brief Destructor
-     */
-    ~Device();
+  /**
+   * \brief Returns device handle
+   * \return DeviceHandle
+   */
+  DeviceHandle device_handle() const;
 
-    /**
-     * \brief Returns device handle
-     * \return DeviceHandle
-     */
-    DeviceHandle device_handle() const;
+  /**
+   * \brief Returns user frendly device name
+   * \return UserFriendlyName
+   */
+  std::string user_friendly_name() const;
 
-    /**
-     * \brief Returns user frendly device name
-     * \return UserFriendlyName
-     */
-    std::string user_friendly_name() const;
+  /**
+      *\brief Also should be used for iOS USB connections
+      *(better not know why this same method)
+      */
+  std::string mac_address() const;
 
-    std::string mac_address() const;
+ private:
+  /**
+   * \brief Uniq device handle.
+   */
+  DeviceHandle device_handle_;
 
-  private:
-    /**
-     * \brief Uniq device handle.
-     */
-    DeviceHandle device_handle_;
+  /**
+   * \brief User-friendly device name.
+   */
+  std::string user_friendly_name_;
 
-    /**
-     * \brief User-friendly device name.
-     */
-    std::string user_friendly_name_;
+  /**
+   * \brief Mac address of device if available
+   */
+  std::string mac_address_;
 
-    /**
-     * \brief Mac address of device if available
-     */
-    std::string mac_address_;
-
-    /**
-     * \brief For logging.
-     */
-#ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#endif  // ENABLE_LOG
 };
 
 /**
@@ -118,8 +106,8 @@ typedef std::map<int32_t, Device> DeviceList;
  * \brief Type for Devices map iterator
  * Key is DeviceHandle which is uniq
  */
-typedef std::map<int32_t, Device>::iterator DeviceListIterator;
+typedef DeviceList::iterator DeviceListIterator;
 
-}/* namespace connection_handler */
+}  // namespace connection_handler
 
 #endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_DEVICE_H_

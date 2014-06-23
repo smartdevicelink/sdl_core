@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_H_
 
-#include <cstdint>
+#include <stdint.h>
 #include <vector>
 #include <map>
 #include <set>
@@ -46,6 +46,7 @@
 #include "application_manager/vehicle_info_data.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
+#include "hmi_message_handler/hmi_message_sender.h"
 
 #include "media_manager/media_manager_impl.h"
 
@@ -60,11 +61,12 @@
 
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
-
+#ifdef TIME_TESTER
+#include "time_metric_observer.h"
+#endif  // TIME_TESTER
 #include "protocol_handler/service_type.h"
 
 #include "utils/macro.h"
-#include "utils/logger.h"
 #include "utils/shared_ptr.h"
 #include "utils/message_queue.h"
 #include "utils/prioritized_queue.h"
@@ -82,7 +84,6 @@ namespace NsSmartObjects {
 class SmartObject;
 }
 }
-
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace threads {
@@ -162,7 +163,7 @@ struct MessageToHmi: public utils::SharedPtr<Message> {
   }
 };
 
-// Short type names for proiritized message queues
+// Short type names for prioritized message queues
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromMobile> > FromMobileQueue;
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToMobile> > ToMobileQueue;
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi> > FromHmiQueue;
@@ -176,9 +177,17 @@ class ApplicationManagerImpl : public ApplicationManager,
     public impl::FromMobileQueue::Handler, public impl::ToMobileQueue::Handler,
     public impl::FromHmiQueue::Handler, public impl::ToHmiQueue::Handler,
   public utils::Singleton<ApplicationManagerImpl> {
+
     friend class ResumeCtrl;
-  public:
+    friend class CommandImpl;
+
+ public:
     ~ApplicationManagerImpl();
+
+    /**
+     * Inits application manager
+     */
+    virtual void Init();
 
     /**
      * @brief Stop work.
@@ -189,27 +198,37 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /////////////////////////////////////////////////////
 
-    ApplicationSharedPtr application(int32_t app_id) const;
+    ApplicationSharedPtr application(uint32_t app_id) const;
+    ApplicationSharedPtr application_by_policy_id(
+        const std::string& policy_app_id) const;
     inline const std::set<ApplicationSharedPtr>& applications() const;
     ApplicationSharedPtr active_application() const;
     std::vector<ApplicationSharedPtr> applications_by_button(uint32_t button);
     std::vector<ApplicationSharedPtr> applications_by_ivi(uint32_t vehicle_info);
     std::vector<ApplicationSharedPtr> applications_with_navi();
-  ApplicationSharedPtr application_by_policy_id(
-      const std::string& policy_app_id) const;
+
     /**
-          * @brief Notifies all components interested in Vehicle Data update
-          * i.e. new value of odometer etc and returns list of applications
-          * subscribed for event.
-          * @param vehicle_info Enum value of type of vehicle data
-          * @param new value (for integer values currently) of vehicle data
-          */
+     * @brief Notifies all components interested in Vehicle Data update
+     * i.e. new value of odometer etc and returns list of applications
+     * subscribed for event.
+     * @param vehicle_info Enum value of type of vehicle data
+     * @param new value (for integer values currently) of vehicle data
+     */
     std::vector<utils::SharedPtr<Application>> IviInfoUpdated(
       VehicleDataType vehicle_info, int value);
 
     /////////////////////////////////////////////////////
 
     HMICapabilities& hmi_capabilities();
+
+#ifdef TIME_TESTER
+    /**
+     * @brief Setup observer for time metric.
+     *
+     * @param observer - pointer to observer
+     */
+    void SetTimeMetricObserver(AMMetricObserver* observer);
+#endif  // TIME_TESTER
 
     ApplicationSharedPtr RegisterApplication(
       const utils::SharedPtr<smart_objects::SmartObject>& request_for_registration);
@@ -386,19 +405,21 @@ class ApplicationManagerImpl : public ApplicationManager,
     /*
      * @brief Overriden ProtocolObserver method
      */
-    virtual void OnMessageReceived(const protocol_handler::
-                                   RawMessagePtr message);
+    virtual void OnMessageReceived(
+        const protocol_handler::RawMessagePtr message);
 
     /*
      * @brief Overriden ProtocolObserver method
      */
-    virtual void OnMobileMessageSent(const protocol_handler::
-                                     RawMessagePtr message);
+    virtual void OnMobileMessageSent(
+        const protocol_handler::RawMessagePtr message);
 
     void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
+    //TODO (EZamakhov): fix all indentations in this file
+  virtual void OnFindNewApplicationsRequest();
     void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
     bool OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
@@ -446,7 +467,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param correlation_id Correlation ID of the HMI request
      * @param app_id Application ID
      */
-  void set_application_id(const int32_t correlation_id, const uint32_t app_id);
+    void set_application_id(const int32_t correlation_id, const uint32_t app_id);
 
     /*
      * @brief Change AudioStreamingState for all application according to
@@ -492,6 +513,29 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     uint32_t GenerateGrammarID();
 
+    /**
+     * Generate new HMI application ID
+     *
+     * @return New HMI application ID
+     */
+    uint32_t GenerateNewHMIAppID();
+
+    /**
+     * @brief Parse smartObject and replace mobile app Id by HMI app ID
+     *
+     * @param message Smartobject to be parsed
+     */
+    void ReplaceMobileByHMIAppId(
+        smart_objects::SmartObject& message);
+
+    /**
+     * @brief Parse smartObject and replace HMI app ID by mobile app Id
+     *
+     * @param message Smartobject to be parsed
+     */
+    void ReplaceHMIByMobileAppId(
+        smart_objects::SmartObject& message);
+
     /*
      * @brief Save binary data to specified directory
      *
@@ -512,16 +556,25 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /**
      * @brief Get available app space
-     * @param name of app
+     * @param name of the app folder(make + mobile app id)
      * @return free app space.
      */
-    uint32_t GetAvailableSpaceForApp(const std::string& name);
+    uint32_t GetAvailableSpaceForApp(const std::string& folder_name);
 
     /*
      * @brief returns true if HMI is cooperating
      */
     bool IsHMICooperating() const;
 
+    /**
+     * Function used only by HMI request/response/notification base classes
+     * to change HMI app id to Mobile app id and vice versa.
+     * Dot use it inside Core
+     */
+    ApplicationSharedPtr application_by_hmi_app(uint32_t hmi_app_id) const;
+
+    // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
+    connection_handler::ConnectionHandler* connection_handler();
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
@@ -529,7 +582,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     mobile_apis::MOBILE_API& mobile_so_factory();
 
     void CreateHMIMatrix(HMIMatrix* matrix);
-    void CreatePoliciesManager();
 
     /**
      * \brief Performs check using PoliciesManager of availability
@@ -579,15 +631,31 @@ class ApplicationManagerImpl : public ApplicationManager,
     // CALLED ON messages_to_hmi_ thread!
     virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
 
+    void SendUpdateAppList(const std::list<uint32_t>& applications_ids);
+    void OnApplicationListUpdateTimer();
+
+    /**
+     * @brief Checks, if given RPC is allowed at current HMI level for specific
+     * application in policy table
+     * @param policy_app_id Application id
+     * @param hmi_level Current HMI level of application
+     * @param function_id FunctionID of RPC
+     * @return SUCCESS, if allowed, otherwise result code of check
+     */
+    mobile_apis::Result::eType CheckPolicyPermissions(
+        const std::string& policy_app_id,
+        mobile_apis::HMILevel::eType hmi_level,
+        mobile_apis::FunctionID::eType function_id);
+
+    /*
+     * @brief Function is called on IGN_OFF, Master_reset or Factory_defaults
+     * to notify HMI that SDL is shutting down.
+     */
+    void SendOnSDLClose();
+
   private:
 
     // members
-    /**
-     * @brief Resume controler is responcible for save and load information
-     * about persistent application data on disk, and save session ID for resuming
-     * application in case INGITION_OFF or MASTER_RESSET
-     */
-    ResumeCtrl resume_ctrl_;
 
 
 
@@ -619,22 +687,16 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
     connection_handler::ConnectionHandler*  connection_handler_;
+    policy::PolicyManager*                  policy_manager_;
     protocol_handler::ProtocolHandler*      protocol_handler_;
     request_controller::RequestController   request_ctrl_;
-    HMICapabilities                         hmi_capabilities_;
-    policy::PolicyManager*                  policy_manager_;
 
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;
 
-#   ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#   endif // ENABLE_LOG
     static uint32_t corelation_id_;
     static const uint32_t max_corelation_id_;
 
-    // The reason of HU shutdown
-    mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
 
     // Construct message threads when everything is already created
 
@@ -646,6 +708,34 @@ class ApplicationManagerImpl : public ApplicationManager,
     impl::FromHmiQueue messages_from_hmi_;
     // Thread that pumps messages being passed to HMI.
     impl::ToHmiQueue messages_to_hmi_;
+
+
+    HMICapabilities                         hmi_capabilities_;
+    // The reason of HU shutdown
+    mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
+
+    /**
+     * @brief Resume controler is responcible for save and load information
+     * about persistent application data on disk, and save session ID for resuming
+     * application in case INGITION_OFF or MASTER_RESSET
+     */
+    ResumeCtrl resume_ctrl_;
+
+#ifdef TIME_TESTER
+    AMMetricObserver* metric_observer_;
+#endif  // TIME_TESTER
+
+    class ApplicationListUpdateTimer : public timer::TimerThread<ApplicationManagerImpl> {
+     public:
+      ApplicationListUpdateTimer(ApplicationManagerImpl* callee) :
+          timer::TimerThread<ApplicationManagerImpl>(
+              callee,
+              &ApplicationManagerImpl::OnApplicationListUpdateTimer
+          ) {
+      }
+    };
+    typedef utils::SharedPtr<ApplicationListUpdateTimer> ApplicationListUpdateTimerSptr;
+    ApplicationListUpdateTimerSptr application_list_update_timer_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 

@@ -2,7 +2,6 @@ package com.ford.syncV4.syncConnection;
 
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.session.Session;
 
 public interface ISyncConnectionListener {
 
@@ -15,22 +14,29 @@ public interface ISyncConnectionListener {
 	
 	public void onTransportError(String info, Exception e);
 
-    public void onHeartbeatTimedOut();
+    public void onHeartbeatTimedOut(byte sessionId);
 	
 	public void onProtocolMessageReceived(ProtocolMessage msg);
 	
-	public void onProtocolSessionStarted(Session session, byte version, String correlationID);
+	public void onProtocolSessionStarted(byte sessionId, byte version);
+	
+	public void onProtocolServiceEnded(ServiceType serviceType, byte sessionId);
 
-	public void onProtocolServiceEnded(ServiceType serviceType,
-                                       byte sessionID, String correlationID);
+    public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId);
 	
 	public void onProtocolError(String info, Throwable e);
 
-    public void onMobileNavAckReceived(int frameReceivedNumber);
+    public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber);
 
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID);
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted,byte version);
 
-    public void onStartServiceNackReceived(ServiceType serviceType);
+    public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType);
 
-
+    /**
+     * Sends {@link com.ford.syncV4.protocol.ProtocolMessage} to the
+     * {@link com.ford.syncV4.messageDispatcher.ProxyMessageDispatcher} queue
+     *
+     * @param protocolMessage {@link com.ford.syncV4.protocol.ProtocolMessage}
+     */
+    public void sendOutgoingMessage(ProtocolMessage protocolMessage);
 }

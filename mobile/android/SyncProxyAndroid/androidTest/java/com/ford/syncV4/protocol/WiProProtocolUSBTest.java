@@ -24,23 +24,26 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(Session session,
-                                                 byte version,
-                                                 String correlationID) {
+            public void onProtocolSessionStarted(byte sessionId,
+                                                 byte version) {
             }
 
             @Override
             public void onProtocolServiceEnded(ServiceType sessionType,
-                                               byte sessionID,
-                                               String correlationID) {
+                                               byte sessionID) {
             }
 
             @Override
-            public void onProtocolHeartbeatACK() {
+            public void onProtocolHeartbeatACK(byte sessionId) {
             }
 
             @Override
-            public void onResetHeartbeat() {
+            public void onProtocolHeartbeat(byte sessionId) {
+
+            }
+
+            @Override
+            public void onResetHeartbeatAck(byte sessionId) {
 
             }
 
@@ -49,7 +52,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onMobileNavAckReceived(int frameReceivedNumber) {
+            public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber) {
             }
 
             @Override
@@ -58,15 +61,24 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version) {
 
             }
 
             @Override
-            public void onStartServiceNackReceived(ServiceType serviceType) {
+            public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType) {
 
             }
 
+            @Override
+            public void onResetHeartbeat(byte sessionId) {
+
+            }
+
+            @Override
+            public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId) {
+
+            }
 
         };
 
@@ -109,23 +121,26 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(Session session,
-                                                 byte version,
-                                                 String correlationID) {
+            public void onProtocolSessionStarted(byte sessionId,
+                                                 byte version) {
             }
 
             @Override
             public void onProtocolServiceEnded(ServiceType sessionType,
-                                               byte sessionID,
-                                               String correlationID) {
+                                               byte sessionID) {
             }
 
             @Override
-            public void onProtocolHeartbeatACK() {
+            public void onProtocolHeartbeatACK(byte sessionId) {
             }
 
             @Override
-            public void onResetHeartbeat() {
+            public void onProtocolHeartbeat(byte sessionId) {
+
+            }
+
+            @Override
+            public void onResetHeartbeatAck(byte sessionId) {
 
             }
 
@@ -134,7 +149,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onMobileNavAckReceived(int frameReceivedNumber) {
+            public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber) {
             }
 
             @Override
@@ -145,15 +160,24 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version, String correlationID) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted,byte version) {
 
             }
 
             @Override
-            public void onStartServiceNackReceived(ServiceType serviceType) {
+            public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType) {
 
             }
 
+            @Override
+            public void onResetHeartbeat(byte sessionId) {
+
+            }
+
+            @Override
+            public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId) {
+
+            }
 
         };
 

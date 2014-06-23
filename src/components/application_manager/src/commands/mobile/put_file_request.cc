@@ -104,7 +104,6 @@ void PutFileRequest::Run() {
                  &response_params);
     return;
   }
-
   sync_file_name_ =
     (*message_)[strings::msg_params][strings::sync_file_name].asString();
   file_type_ =
@@ -116,7 +115,7 @@ void PutFileRequest::Run() {
   // Policy table update in json format is currently to be received via PutFile
   // TODO(PV): after latest discussion has to be changed
   if (mobile_apis::FileType::JSON == file_type_) {
-    policy::PolicyHandler::instance()->ReceiveMessageFromSDK(binary_data);
+    policy::PolicyHandler::instance()->ReceiveMessageFromSDK(sync_file_name_, binary_data);
   }
 
   offset_ = 0;
@@ -148,10 +147,6 @@ void PutFileRequest::Run() {
     response_params[strings::space_available] = 0;
     file_path = profile::Profile::instance()->system_files_path();
   } else {
-
-    response_params[strings::space_available] = static_cast<int32_t>(
-        ApplicationManagerImpl::instance()->GetAvailableSpaceForApp(application->name()));
-
     file_path = profile::Profile::instance()->app_storage_folder();
     file_path += "/" + application->folder_name();
 
@@ -168,14 +163,16 @@ void PutFileRequest::Run() {
   if (!file_system::CreateDirectoryRecursively(file_path)) {
     LOG4CXX_ERROR(logger_, "Cann't create folder");
     SendResponse(false, mobile_apis::Result::GENERIC_ERROR,
-                 "Cann't create folder.",
-                 &response_params);
+                 "Cann't create folder.", &response_params);
     return;
   }
 
   mobile_apis::Result::eType save_result =
       ApplicationManagerImpl::instance()->SaveBinary(binary_data, file_path,
                                                      sync_file_name_, offset_);
+
+  response_params[strings::space_available] = static_cast<int32_t>(
+      ApplicationManagerImpl::instance()->GetAvailableSpaceForApp(application->folder_name()));
 
   sync_file_name_ = file_path + "/" + sync_file_name_;
   switch (save_result) {

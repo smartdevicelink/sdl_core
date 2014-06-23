@@ -2,7 +2,6 @@ package com.ford.syncV4.android.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -45,14 +44,9 @@ import com.ford.syncV4.util.logger.Logger;
  * HMI language, transport settings, etc ...).
  * Starts the proxy after selecting.
  */
-public class AppSetUpDialog extends DialogFragment {
+public class AppSetUpDialog extends BaseDialogFragment {
 
-    private static final String LOG_TAG = "AppSetUpDialog";
-
-    public static AppSetUpDialog newInstance() {
-        AppSetUpDialog appSetupDialog = new AppSetUpDialog();
-        return appSetupDialog;
-    }
+    private static final String LOG_TAG = AppSetUpDialog.class.getSimpleName();
 
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -66,6 +60,8 @@ public class AppSetUpDialog extends DialogFragment {
                 android.R.layout.simple_spinner_item, services);
         cypherProtocolAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
+        manageConnectionSettingsView(view, getArguments().getBoolean(ARG_KEY_IS_TRANSPORT_VISIBLE));
+
         ArrayAdapter<Language> langAdapter = new ArrayAdapter<Language>(getActivity(),
                 android.R.layout.simple_spinner_item, Language.values());
         langAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -78,11 +74,33 @@ public class AppSetUpDialog extends DialogFragment {
                 AppPreferencesManager.setPolicyTableUpdateAutoReplay(isChecked);
             }
         });
-        final CheckBox isHeartBeatBox = (CheckBox) view.findViewById(R.id.heartbeat);
+
+        final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
+        final CheckBox isHearBeatAck = (CheckBox) view.findViewById(R.id.heartbeatAck);
         final CheckBox doDeviceRootCheckView = (CheckBox) view.findViewById(R.id.root_detection_view);
+
+
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkMobileNavi);
+        final CheckBox useVRSynonyms = (CheckBox) view.findViewById(
+                R.id.set_up_dialog_use_VRSynonyms);
+        useVRSynonyms.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processUseVRSynonymsClick(view, useVRSynonyms.isChecked());
+            }
+        });
+        processUseVRSynonymsClick(view, useVRSynonyms.isChecked());
+        final CheckBox useHashId = (CheckBox) view.findViewById(
+                R.id.set_up_dialog_use_hash_id);
+        useHashId.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processUseHashIdClick(view, useHashId.isChecked());
+            }
+        });
+        processUseHashIdClick(view, useHashId.isChecked());
         final RadioGroup videoSourceGroup = (RadioGroup) view.findViewById(
                 R.id.selectprotocol_radioGroupVideoSource);
         final EditText appNameEditText = (EditText) view.findViewById(R.id.selectprotocol_appName);
@@ -93,6 +111,8 @@ public class AppSetUpDialog extends DialogFragment {
                 R.id.selectprotocol_radioGroupTransport);
         final EditText ipAddressEditText = (EditText) view.findViewById(R.id.select_protocol_ip_address_edit_view);
         final EditText tcpPortEditText = (EditText) view.findViewById(R.id.selectprotocol_tcpPort);
+        final EditText hashIdView = (EditText) view.findViewById(R.id.set_up_dialog_hash_id);
+        hashIdView.setText(AppPreferencesManager.getCustomHashId());
         final LinearLayout nsdUseLayout = (LinearLayout) view.findViewById(R.id.nsd_use_layout);
         final LinearLayout ipAddressLayout = (LinearLayout) view.findViewById(R.id.ip_address_layout);
         final LinearLayout portLayout = (LinearLayout) view.findViewById(R.id.port_layout);
@@ -138,7 +158,11 @@ public class AppSetUpDialog extends DialogFragment {
         customAppIdView.setChecked(AppPreferencesManager.getIsCustomAppId());
 
         final EditText customAppIdEditView = (EditText) view.findViewById(R.id.selectprotocol_appId);
-        customAppIdEditView.setText(AppPreferencesManager.getCustomAppId());
+        if (!AppPreferencesManager.getIsCustomAppId()) {
+            processCustomAppIdCheck(view, customAppIdView.isChecked());
+        } else {
+            customAppIdEditView.setText(AppPreferencesManager.getCustomAppId());
+        }
         /*customAppIdEditView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -220,7 +244,9 @@ public class AppSetUpDialog extends DialogFragment {
                 Const.PREFS_KEY_HEARTBEAT,
                 Const.PREFS_DEFAULT_HEARTBEAT);
 
-        isHeartBeatBox.setChecked(isHeartbeat);
+
+        isHearBeat.setChecked(isHeartbeat);
+
         mediaCheckBox.setChecked(isMedia);
         naviCheckBox.setChecked(isNavi);
         appNameEditText.setText(appName);
@@ -255,11 +281,6 @@ public class AppSetUpDialog extends DialogFragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
 
-                        if (AppPreferencesManager.getIsCustomAppId()) {
-                            AppPreferencesManager.setCustomAppId(
-                                    customAppIdEditView.getText().toString().trim());
-                        }
-
                         saveProtocolVersion(view);
 
                         boolean isMedia = mediaCheckBox.isChecked();
@@ -284,9 +305,14 @@ public class AppSetUpDialog extends DialogFragment {
                         int tcpPort = Integer.parseInt(tcpPortEditText.getText().toString());
                         boolean autoSetAppIcon = autoSetAppIconCheckBox.isChecked();
                         boolean mNSDPrefValue = mIsNSDSupported && nsdToggle.isChecked();
+
                         // save the configs
-                        boolean success = prefs
-                                .edit()
+
+                        String appId = customAppIdEditView.getText().toString().trim();
+                        if (AppPreferencesManager.getIsCustomAppId()) {
+                            AppPreferencesManager.setCustomAppId(appId);
+                        }
+                        boolean success = prefs.edit()
                                 .putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
                                 .putBoolean(Const.PREFS_KEY_ISNAVIAPP, isNavi)
                                 .putBoolean(Const.Transport.PREFS_KEY_IS_NSD, mNSDPrefValue)
@@ -295,26 +321,34 @@ public class AppSetUpDialog extends DialogFragment {
                                 .putString(Const.PREFS_KEY_LANG, lang)
                                 .putString(Const.PREFS_KEY_HMILANG, hmiLang)
                                 .putString(Const.Transport.PREFS_KEY_TRANSPORT_IP, ipAddress)
+                                .putString(Const.PREFS_KEY_VR_SYNONYMS, getVRSynonyms(view))
                                 .putInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT, tcpPort)
                                 .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON, autoSetAppIcon)
-                                .putBoolean(Const.PREFS_KEY_HEARTBEAT, isHeartBeatBox.isChecked())
+                                .putBoolean(Const.PREFS_KEY_HEARTBEAT, isHearBeat.isChecked())
                                 .commit();
                         if (!success) {
                             Logger.w(LOG_TAG + "Can't save selected protocol properties");
                         }
 
-                        setupHeartbeat(isHeartBeatBox);
-                        ((SyncProxyTester) getActivity()).onSetUpDialogResult();
+                        setupHeartbeat(view);
+
+                        processUseHashIdClick(view, useHashId.isChecked());
+
+                        ((SyncProxyTester) getActivity()).onSetUpDialogResult(appId);
+
                     }
                 }).setView(view).show();
     }
 
-    private void setupHeartbeat(CheckBox isHearBeat) {
+    private void setupHeartbeat(View view) {
+        CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
+        CheckBox isHearBeatAck = (CheckBox) view.findViewById(R.id.heartbeatAck);
         if (isHearBeat.isChecked()) {
             SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL);
         } else {
             SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL_MAX);
         }
+        SyncProxyBase.isHeartbeatAck(isHearBeatAck.isChecked());
     }
 
     private void showNSDUnsupportedView(View view) {
@@ -366,5 +400,38 @@ public class AppSetUpDialog extends DialogFragment {
 
         AppPreferencesManager.setProtocolMinVersion(protocolMinVersion);
         AppPreferencesManager.setProtocolMaxVersion(protocolMaxVersion);
+    }
+
+    private void manageConnectionSettingsView(View view, boolean isVisible) {
+        final LinearLayout transportLayout = (LinearLayout) view.findViewById(
+                R.id.app_set_up_dialog_transport_view);
+        transportLayout.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+    }
+
+    private void processUseVRSynonymsClick(View view, boolean isChecked) {
+        final EditText vrSynonymsView = (EditText) view.findViewById(R.id.set_up_dialog_vrSynonyms);
+        vrSynonymsView.setEnabled(isChecked);
+    }
+
+    private String getVRSynonyms(View view) {
+        final EditText vrSynonymsView = (EditText) view.findViewById(R.id.set_up_dialog_vrSynonyms);
+        final CheckBox useVRSynonyms = (CheckBox) view.findViewById(
+                R.id.set_up_dialog_use_VRSynonyms);
+        if (useVRSynonyms.isChecked()) {
+            return vrSynonymsView.getText().toString();
+        } else {
+            return "";
+        }
+    }
+
+    private void processUseHashIdClick(View view, boolean isChecked) {
+        final EditText hashIdView = (EditText) view.findViewById(R.id.set_up_dialog_hash_id);
+        hashIdView.setEnabled(isChecked);
+        if (isChecked) {
+            AppPreferencesManager.setCustomHashId(hashIdView.getText().toString());
+            AppPreferencesManager.setUseCustomHashId(true);
+        } else {
+            AppPreferencesManager.setUseCustomHashId(false);
+        }
     }
 }

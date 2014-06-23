@@ -33,7 +33,6 @@
 #define SRC_COMPONENTS_DBUS_INCLUDE_DBUS_DBUS_ADAPTER_H_
 
 #include <string>
-#include "utils/logger.h"
 #include "smart_objects/smart_object.h"
 #include "dbus/schema.h"
 
@@ -79,10 +78,6 @@ class DBusAdapter {
   const DBusSchema& get_schema() const;
 
  protected:
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
-
   /**
    * \brief calls method on HMI
    * \param id id message

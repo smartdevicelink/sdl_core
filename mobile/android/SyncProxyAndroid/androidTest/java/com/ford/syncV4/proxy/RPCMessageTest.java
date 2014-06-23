@@ -1,6 +1,7 @@
 package com.ford.syncV4.proxy;
 
 import com.ford.syncV4.proxy.constants.Names;
+import com.ford.syncV4.util.CommonUtils;
 
 import junit.framework.TestCase;
 
@@ -8,7 +9,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.Hashtable;
-import java.util.Random;
 
 /**
  * Created with Android Studio.
@@ -113,7 +113,7 @@ public class RPCMessageTest extends TestCase {
 
     private Hashtable<Object, Object> getRandomData() {
         // The 3-rd one is empty
-        switch (randInt(0, 3)) {
+        switch (CommonUtils.randInt(0, 3)) {
             case 0:
                 getData();
                 break;
@@ -133,24 +133,6 @@ public class RPCMessageTest extends TestCase {
         dataHashTable.put(Names.parameters, parametersHashTable);
         dataHashTable.put(Names.function_name, FUNCTION_NAME);
         return dataHashTable;
-    }
-
-    /**
-     * Returns a psuedo-random number between min and max, inclusive.
-     * The difference between min and max can be at most
-     * <code>Integer.MAX_VALUE - 1</code>.
-     *
-     * @param min Minimim value
-     * @param max Maximim value.  Must be greater than min.
-     * @return Integer between min and max, inclusive.
-     * @see java.util.Random#nextInt(int)
-     */
-    public static int randInt(int min, int max) {
-        // Usually this can be a field rather than a method variable
-        Random rand = new Random();
-        // nextInt is normally exclusive of the top value,
-        // so add 1 to make it inclusive
-        return rand.nextInt((max - min) + 1) + min;
     }
 
     public void testRECMessageCopyConstructor() throws Exception {

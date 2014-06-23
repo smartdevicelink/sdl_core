@@ -51,7 +51,7 @@ AlertRequest::AlertRequest(const MessageSharedPtr& message)
       awaiting_tts_stop_speaking_response_(false),
       response_success_(false),
       flag_other_component_sent_(false),
-      response_result_(mobile_apis::Result::SUCCESS),
+      response_result_(mobile_apis::Result::INVALID_ENUM),
       tts_speak_response_(mobile_apis::Result::INVALID_ENUM) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
@@ -60,7 +60,6 @@ AlertRequest::~AlertRequest() {
 }
 
 bool AlertRequest::Init() {
-
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
   if ((*message_)[strings::msg_params].keyExists(strings::duration)) {
@@ -69,6 +68,14 @@ bool AlertRequest::Init() {
   } else {
     const int32_t def_value = 5000;
     default_timeout_ = def_value;
+  }
+
+  // If soft buttons are present, SDL will not use watchdog for response
+  // timeout tracking.
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    LOG4CXX_INFO(logger_, "Request contains soft buttons - request timeout "
+                 "will be set to 0.");
+    default_timeout_ = 0;
   }
 
   return true;
@@ -85,7 +92,6 @@ void AlertRequest::Run() {
     return;
   }
 
-  awaiting_ui_alert_response_ = true;
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
     if (0 < (*message_)[strings::msg_params][strings::tts_chunks].length()) {
       awaiting_tts_speak_response_ = true;
@@ -104,8 +110,10 @@ void AlertRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
-      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event " << awaiting_tts_speak_response_ << " "
-                   << awaiting_tts_stop_speaking_response_ << " " << awaiting_ui_alert_response_);
+      LOG4CXX_INFO(logger_, "Received UI_OnResetTimeout event "
+                   << awaiting_tts_speak_response_ << " "
+                   << awaiting_tts_stop_speaking_response_ << " "
+                   << awaiting_ui_alert_response_);
       ApplicationManagerImpl::instance()->updateRequestTimeout(
           connection_key(), correlation_id(), default_timeout());
       break;
@@ -124,10 +132,9 @@ void AlertRequest::on_event(const event_engine::Event& event) {
           static_cast<mobile_apis::Result::eType>(
               message[strings::params][hmi_response::code].asInt());
       // Mobile Alert request is successful when UI_Alert is successful
-      response_success_ = mobile_apis::Result::SUCCESS == result_code;
-      if (!response_success_) {
-        response_result_ = result_code;
-      }
+      response_success_ = (mobile_apis::Result::SUCCESS == result_code ||
+          mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code);
+      response_result_ = result_code;
       response_params_ = message[strings::msg_params];
       break;
     }
@@ -153,21 +160,37 @@ void AlertRequest::on_event(const event_engine::Event& event) {
   if (!HasHmiResponsesToWait()) {
     std::string response_info("");
     if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == tts_speak_response_) &&
-        (!flag_other_component_sent_) && response_success_) {
+        (!flag_other_component_sent_) && (mobile_apis::Result::SUCCESS ==
+            response_result_)) {
       response_success_ = false;
       response_result_ = mobile_apis::Result::WARNINGS;
       response_info = "Unsupported phoneme type sent in a prompt";
     } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE ==
         tts_speak_response_) && (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
-            response_result_) && response_success_) {
+            response_result_)) {
       response_result_ = mobile_apis::Result::WARNINGS;
       response_info = "Unsupported phoneme type sent in a prompt and "
           "unsupported image sent in soft buttons";
     } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE ==
-        tts_speak_response_) && response_success_) {
+        tts_speak_response_) && (mobile_apis::Result::SUCCESS ==
+            response_result_)) {
       response_result_ = mobile_apis::Result::WARNINGS;
       response_info = "Unsupported phoneme type sent in a prompt";
+    } else if ((mobile_apis::Result::SUCCESS == tts_speak_response_) &&
+              ((mobile_apis::Result::INVALID_ENUM == response_result_) &&
+              (!flag_other_component_sent_))) {
+      response_result_ = mobile_apis::Result::SUCCESS;
+      response_success_ = true;
     }
+
+    // If timeout is not set, watchdog will not track request timeout and
+    // HMI is responsible for response returning. In this case, if ABORTED will
+    // be rerurned from HMI, success should be sent to mobile.
+    if (mobile_apis::Result::ABORTED == response_result_ &&
+        0 == default_timeout_) {
+      response_success_ = true;
+    }
+
     SendResponse(response_success_, response_result_,
                  response_info.empty() ? NULL : response_info.c_str(),
                  &response_params_);
@@ -187,15 +210,9 @@ bool AlertRequest::Validate(uint32_t app_id) {
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
-    if (mobile_apis::Result::INVALID_DATA == processing_result) {
-      LOG4CXX_ERROR(logger_, "INVALID_DATA!");
-      SendResponse(false, processing_result);
-      return false;
-    }
-    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == processing_result) {
-      LOG4CXX_ERROR(logger_, "UNSUPPORTED_RESOURCE!");
-      response_result_ = processing_result;
-    }
+    LOG4CXX_ERROR(logger_, "INVALID_DATA!");
+    SendResponse(false, processing_result);
+    return false;
   }
 
   // check if mandatory params(alertText1 and TTSChunk) specified
@@ -223,21 +240,21 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   int32_t index = 0;
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
-         TextFieldName::ALERT_TEXT1;
+        hmi_apis::Common_TextFieldName::alertText1;
      msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
          (*message_)[strings::msg_params][strings::alert_text1];
      index++;
   }
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
-        TextFieldName::ALERT_TEXT2;
+        hmi_apis::Common_TextFieldName::alertText2;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
         (*message_)[strings::msg_params][strings::alert_text2];
     index++;
   }
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
     msg_params[hmi_request::alert_strings][index][hmi_request::field_name] =
-         TextFieldName::ALERT_TEXT3;
+        hmi_apis::Common_TextFieldName::alertText3;
     msg_params[hmi_request::alert_strings][index][hmi_request::field_text] =
          (*message_)[strings::msg_params][strings::alert_text3];
   }
@@ -256,11 +273,21 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
     msg_params[strings::progress_indicator] =
       (*message_)[strings::msg_params][strings::progress_indicator];
   }
+
+  // PASA Alert type
+  msg_params[strings::alert_type] = hmi_apis::Common_AlertType::UI;
+  if (awaiting_tts_speak_response_) {
+    msg_params[strings::alert_type] = hmi_apis::Common_AlertType::BOTH;
+  }
+
+  // check out if there are alert strings or soft buttons
   if (msg_params[hmi_request::alert_strings].length() > 0 ||
       msg_params.keyExists(hmi_request::soft_buttons)) {
+
+    awaiting_ui_alert_response_ = true;
     flag_other_component_sent_ = true;
+    SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
   }
-  SendHMIRequest(hmi_apis::FunctionID::UI_Alert, &msg_params, true);
 }
 
 void AlertRequest::SendSpeakRequest(int32_t app_id) {
@@ -274,6 +301,8 @@ void AlertRequest::SendSpeakRequest(int32_t app_id) {
   msg_params[hmi_request::tts_chunks] =
     (*message_)[strings::msg_params][strings::tts_chunks];
   msg_params[strings::app_id] = app_id;
+  msg_params[hmi_request::speak_type] =
+      hmi_apis::Common_SpeakType::ALERT;
   SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
 }
 

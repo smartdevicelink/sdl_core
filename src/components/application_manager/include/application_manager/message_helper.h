@@ -54,33 +54,6 @@ namespace mobile_api = mobile_apis;
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 /*
- * @brief Typedef for HMI TextFieldName type
- */
-typedef enum {
-  MAIN_FILED1 = 0,
-  MAIN_FILED2,
-  MAIN_FILED3,
-  MAIN_FILED4,
-  STATUS_BAR,
-  MEDIA_CLOCK,
-  MEDIA_TRACK,
-  ALERT_TEXT1,
-  ALERT_TEXT2,
-  ALERT_TEXT3,
-  SCROLLABLE_MSG_BODY,
-  INITIAL_INTERACTION_TEXT,
-  NAVI_TEXT1,
-  NAVI_TEXT2,
-  ETA,
-  TOTAL_DISTANCE,
-  NAVI_TEXT,
-  AUDIO_DISPLAY_TEXT1,
-  AUDIO_DISPLAY_TEXT2,
-  SLIDER_HADER,
-  SLIDER_FOOTEER
-} TextFieldName;
-
-/*
  * @brief Typedef for VehicleData
  *
  * @param const char* Name of the parameter in mobile request
@@ -95,6 +68,13 @@ class MessageHelper {
   public:
 
     typedef std::vector<smart_objects::SmartObject*> SmartObjectList;
+
+    /**
+     * @brief Creates request for different interfaces(JSON, DBUS)
+     * @param correlation_id unique ID
+     * @param params Vector of arguments that we need in GetVehicleData request (e.g. gps, odometer, fuel_level)
+     */
+    static void CreateGetVehicleDataRequest(uint32_t correlation_id, const std::vector<std::string>& params);
 
     /**
      * @brief Sends HMI status notification to mobile
@@ -142,12 +122,21 @@ class MessageHelper {
      */
     static const VehicleData& vehicle_data();
 
+    /**
+     * @brief Convert string to HMI level, if possible
+     * @param hmi_level Stringified HMI level
+     * @return Appropriate enum from HMI level, or INVALID_ENUM, if conversiion
+     * is not possible
+     */
+    static mobile_api::HMILevel::eType StringToHMILevel(
+      const std::string& hmi_level);
+
     /*
     * @brief Used to obtain string representation of app's
     * HMI Level.
     * @param hmi_level Desired HMI Level
     */
-    static const char* StringifiedHMILevel(
+    static std::string StringifiedHMILevel(
       mobile_apis::HMILevel::eType hmi_level);
 
     /*
@@ -156,8 +145,6 @@ class MessageHelper {
     */
     static std::string StringifiedFunctionID(
       mobile_apis::FunctionID::eType function_id);
-
-    static void CreateGetDeviceData(int32_t correlation_id);
 
     static smart_objects::SmartObject* CreateBlockedByPoliciesResponse(
       mobile_apis::FunctionID::eType function_id,
@@ -211,14 +198,30 @@ class MessageHelper {
       uint32_t cmd_id, const smart_objects::SmartObject& vr_commands,
       uint32_t app_id);
 
+    /*
+     * @brief Create Common.HMIApplication struct application instance
+     * @param app : applicaton instace
+     * @param output smart object to store Common.HMIApplication struct
+     * @return true on succes, otherwise return false;
+     */
+    static bool CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
+                                      smart_objects::SmartObject& output);
+
     static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
     static SmartObjectList CreateAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
 
-    static void SendOnSdlCloseNotificationToHMI();
     static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app);
     static void ResetGlobalproperties(ApplicationSharedPtr app);
 
-    static void SendActivateAppToHMI(uint32_t const app_id);
+    static void SendActivateAppToHMI(
+      uint32_t const app_id,
+      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL);
+
+    static void SendOnResumeAudioSourceToHMI(const uint32_t app_id);
+
+    static std::string GetDeviceMacAddressForHandle(
+      const uint32_t device_handle);
+
     static void GetDeviceInfoForHandle(const uint32_t device_handle,
                                        policy::DeviceParams* device_info);
     static void GetDeviceInfoForApp(uint32_t connection_key,
@@ -326,7 +329,7 @@ class MessageHelper {
      * @param correlation_id Correlation id from request
      */
     static void SendUpdateSDLResponse(const std::string& result,
-                                            uint32_t correlation_id);
+                                      uint32_t correlation_id);
 
     /**
      * @brief Send OnStatusUpdate to HMI on policy update status change
@@ -396,6 +399,9 @@ class MessageHelper {
     static mobile_apis::Result::eType VerifyImageFiles(
       smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
 
+    static mobile_apis::Result::eType VerifyImageVrHelpItems(
+      smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
+
     static bool VerifySoftButtonText(smart_objects::SmartObject& soft_button);
 
     static mobile_apis::Result::eType ProcessSoftButtons(
@@ -415,8 +421,8 @@ class MessageHelper {
      * @return Common language string representation
      */
     static std::string CommonLanguageToString(
-        hmi_apis::Common_Language::eType language);
-private:
+      hmi_apis::Common_Language::eType language);
+  private:
     static smart_objects::SmartObject* CreateChangeRegistration(
       int32_t function_id, int32_t language, uint32_t app_id);
 

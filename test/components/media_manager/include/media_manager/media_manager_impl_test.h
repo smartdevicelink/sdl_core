@@ -34,19 +34,18 @@
 #ifndef SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_IMPL_TEST_H_
 #define SRC_COMPONENTS_AUDIO_MANAGER_INCLUDE_AUDIO_MANAGER_AUDIO_MANAGER_IMPL_TEST_H_
 
-#include <pulse/simple.h>
-#include <pulse/error.h>
 #include <net/if.h>
 #include "gmock/gmock.h"
 #include "media_manager/media_manager_impl.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
+#include "utils/logger.h"
 
 namespace test {
 namespace components {
 namespace media_manager_test {
 
-log4cxx::LoggerPtr logger(log4cxx::Logger::getLogger("media_manager_impl"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManagerImplTest")
 
 class MediaManagerTest : public ::testing::Test {
   protected:
@@ -99,37 +98,39 @@ TEST_F(MediaManagerTest, AddAndPlayStream) {
 
   device = device_two;
 
+  const __useconds_t sleeptime = 1 * date_time::DateTime::MICROSECONDS_IN_MILLISECONDS;
+
   mediaManager->PlayA2DPSource(1);
   // mediaManager->playA2DPSource(1);
-  LOG4CXX_INFO(logger, ".Playing stream");
+  LOG4CXX_INFO(logger_, ".Playing stream");
   //LOG4CXX_TRACE(logger, );
   //while (true) {
-    usleep(10000000);
+    usleep(sleeptime);
    // LOG4CXX_TRACE(logger, ".");
   //}
 
-  usleep(10000000);
+  usleep(sleeptime);
 
   mediaManager->StopA2DPSource(1);
 
-  usleep(10000000);
+  usleep(sleeptime);
 
   mediaManager->PlayA2DPSource(1);
   // mediaManager->playA2DPSource(1);
 
-  usleep(10000000);
+  usleep(sleeptime);
 
   mediaManager->StopA2DPSource(1);
 
-  usleep(10000000);
+  usleep(sleeptime);
 
   mediaManager->PlayA2DPSource(1);
 
-  usleep(10000000);
+  usleep(sleeptime);
 
   mediaManager->StopA2DPSource(1);
 
-  usleep(10000000);
+  usleep(sleeptime);
 
   mediaManager->StopA2DPSource(1);
 }

@@ -64,7 +64,7 @@ void OnSystemRequestNotification::Run() {
 
   if (strings::default_app_id == app_id) {
     PolicyHandler* policy_handler = PolicyHandler::instance();
-    int32_t selected_app_id = policy_handler->GetAppIdForSending();
+    uint32_t selected_app_id = policy_handler->GetAppIdForSending();
     if (0 == selected_app_id) {
       LOG4CXX_WARN(logger_,
                    "Can't select application to forward OnSystemRequestNotification");

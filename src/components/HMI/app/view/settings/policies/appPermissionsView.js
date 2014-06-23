@@ -64,13 +64,13 @@ SDL.AppPermissionsView = Em.ContainerView.create( {
             [
                 'backButton'
             ],
-        action: function(){
+        action: function(element){
 
-            SDL.SettingsController.onState(this);
+            SDL.SettingsController.onState(element);
 
-            FFW.BasicCommunication.OnAppPermissionConsent(SDL.SDLController.getApplicationModel(this.currentAppId).allowedFunctions, "GUI", this.currentAppId.appID);
+            FFW.BasicCommunication.OnAppPermissionConsent(SDL.SDLController.getApplicationModel(SDL.AppPermissionsView.currentAppId).allowedFunctions, "GUI", SDL.AppPermissionsView.currentAppId);
 
-            this.currentAppId = null;
+            SDL.AppPermissionsView.currentAppId = null;
         },
         goToState: 'policies',
         icon: 'images/media/ico_back.png',

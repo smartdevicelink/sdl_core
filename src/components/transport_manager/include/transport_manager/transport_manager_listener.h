@@ -1,8 +1,5 @@
-/**
- * \file transport_manager_listener.h
- * \brief TransportManagerListener class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -56,6 +53,11 @@ class TransportManagerListener {
    * @param Container that holds information about devices.
    */
   virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) = 0;
+
+  /**
+  * @brief Reaction to "Find new applications" request
+  */
+  virtual void OnFindNewApplicationsRequest() = 0;
 
   /**
    * @brief Reaction to the event, when the device is found.

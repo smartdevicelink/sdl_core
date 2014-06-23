@@ -37,12 +37,7 @@
 
 namespace threads {
 
-namespace {
-
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("threads::PulseThreadDelegate"));
-
-}  // anonimous namespace
+CREATE_LOGGERPTR_GLOBAL(logger_, "threads::PulseThreadDelegate")
 
 PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
   LOG4CXX_TRACE(logger_, "Creating QNX channel");
@@ -71,20 +66,25 @@ PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
 void PulseThreadDelegate::threadMain() {
   while (run_) {
     struct sigevent event;
-    SIGEV_PULSE_INIT(&event, coid_, SIGEV_PULSE_PRIO_INHERIT, PULSE_CODE_EAP, 0);
+    SIGEV_PULSE_INIT(&event, coid_, SIGEV_PULSE_PRIO_INHERIT, PULSE_CODE, 0);
     if (ArmEvent(&event)) {
       struct _pulse pulse;
       LOG4CXX_INFO(logger_, "Waiting for pulse on QNX channel " << chid_);
       if (MsgReceivePulse(chid_, &pulse, sizeof(pulse), 0) != -1) {
         LOG4CXX_INFO(logger_, "Received pulse on QNX channel " << chid_);
         switch (pulse.code) {
-          case PULSE_CODE_EAP:
+          case PULSE_CODE:
             OnPulse();
             break;
         }
       }
       else {
-        LOG4CXX_WARN(logger_, "Error occured while waiting for pulse on QNX channel " << chid_);
+        if (run_) {
+          LOG4CXX_WARN(logger_, "Error occured while waiting for pulse on QNX channel " << chid_);
+        }
+        else {
+          LOG4CXX_INFO(logger_, "QNX channel " << chid_ << " is apparently destroyed");
+        }
       }
     }
   }
@@ -93,7 +93,7 @@ void PulseThreadDelegate::threadMain() {
 bool PulseThreadDelegate::exitThreadMain() {
   run_ = false;
 
-  LOG4CXX_TRACE(logger_, "Disconnecting from QNX channel" << chid_);
+  LOG4CXX_TRACE(logger_, "Disconnecting from QNX channel " << chid_);
   if (ConnectDetach(coid_) != -1) {
     LOG4CXX_DEBUG(logger_, "Disconnected from QNX channel " << chid_);
   }

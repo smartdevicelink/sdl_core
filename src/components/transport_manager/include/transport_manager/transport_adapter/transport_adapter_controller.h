@@ -1,7 +1,5 @@
-/**
- * \file transport_adapter_controller.h
- * \brief TransportAdapterController class header file.
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -66,6 +64,17 @@ class TransportAdapterController {
   virtual void SearchDeviceDone(const DeviceVector& devices) = 0;
 
   /**
+   * @brief application list update notification from device
+   * @param device_handle device id
+   */
+  virtual void ApplicationListUpdated(const DeviceUID& device_handle) = 0;
+
+  /**
+   * @brief "Find new applications" request
+   */
+  virtual void FindNewApplicationsRequest() = 0;
+
+  /**
    * @brief Launch OnSearchDeviceFailed event in device adapter listener.
    *
    * @param error Error class that contains details of this error situation.
@@ -121,7 +130,7 @@ class TransportAdapterController {
                                   const ApplicationHandle& app_handle) = 0;
 
   /**
-   * @brief Set specified connection state to FINILIZING and launch OnUnexpectedDisconnect event in the device adapter listener.
+   * @brief Set specified connection state to FINALISING and launch OnUnexpectedDisconnect event in the device adapter listener.
    *
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
@@ -130,6 +139,14 @@ class TransportAdapterController {
   virtual void ConnectionAborted(const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle,
                                  const CommunicationError& error) = 0;
+
+  /**
+   * @brief Remove specified device and all its connections
+   * @param device_handle Device unique identifier.
+   * @param error Error class that contains details of this error situation.
+   */
+  virtual void DeviceDisconnected(const DeviceUID& device_handle,
+                                  const DisconnectDeviceError& error) = 0;
 
   /**
    * @brief Delete specified connection from the container(map) of connections and launch event in the device adapter listener.
@@ -184,6 +201,13 @@ class TransportAdapterController {
   virtual void DataSendFailed(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle,
                               RawMessageSptr message, const DataSendError&) = 0;
+#ifdef CUSTOMER_PASA
+  virtual TransportAdapter::Error DisconnectDevice(
+      const DeviceUID& device_handle) = 0;
+
+  virtual TransportAdapter::Error AbortConnection(
+      const DeviceUID& device_handle, const ApplicationHandle& app_handle) = 0;
+#endif  // CUSTOMER_PASA
 };
 
 }  // namespace transport_adapter

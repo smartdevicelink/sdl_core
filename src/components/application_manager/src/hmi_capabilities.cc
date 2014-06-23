@@ -30,7 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/hmi_capabilities.h"
+
 #include <map>
+
 #include "json/json.h"
 #include "utils/file_system.h"
 #include "interfaces/HMI_API.h"
@@ -38,7 +41,6 @@
 #include "smart_objects/smart_object.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/message_helper.h"
-#include "application_manager/hmi_capabilities.h"
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/message_helper.h"
@@ -47,10 +49,8 @@
 namespace application_manager {
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr HMICapabilities::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("HMICapabilities"));
-#endif
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMICapabilities")
+
 std::map<std::string, hmi_apis::Common_Language::eType> languages_enum_values =
 {
     {"EN_US", hmi_apis::Common_Language::EN_US},
@@ -133,7 +133,8 @@ std::map<std::string, hmi_apis::Common_TextFieldName::eType> text_fields_enum_na
     {"secondaryText"    , hmi_apis::Common_TextFieldName::secondaryText},
     {"tertiaryText"     , hmi_apis::Common_TextFieldName::tertiaryText},
     {"timeToDestination", hmi_apis::Common_TextFieldName::timeToDestination},
-    {"turnText"         , hmi_apis::Common_TextFieldName::turnText}
+    {"turnText"         , hmi_apis::Common_TextFieldName::turnText},
+    {"menuTitle"        , hmi_apis::Common_TextFieldName::menuTitle},
 };
 
 std::map<std::string, hmi_apis::Common_MediaClockFormat::eType> media_clock_enum_name =
@@ -221,6 +222,14 @@ const std::map<std::string, hmi_apis::Common_DisplayType::eType> display_type_en
     {"GEN3_8_INCH", hmi_apis::Common_DisplayType::GEN3_8_INCH}
 };
 
+const std::map<std::string, hmi_apis::Common_CharacterSet::eType> character_set_enum =
+{
+    {"TYPE2SET" , hmi_apis::Common_CharacterSet::TYPE2SET},
+    {"TYPE5SET" , hmi_apis::Common_CharacterSet::TYPE5SET},
+    {"CID1SET" ,  hmi_apis::Common_CharacterSet::CID1SET},
+    {"CID2SET" ,  hmi_apis::Common_CharacterSet::CID2SET}
+};
+
 HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
   : is_vr_cooperating_(false),
     is_tts_cooperating_(false),
@@ -232,11 +241,11 @@ HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
     is_ui_ready_response_recieved_(false),
     is_navi_ready_response_recieved_(false),
     is_ivi_ready_response_recieved_(false),
+    attenuated_supported_(false),
     ui_language_(hmi_apis::Common_Language::INVALID_ENUM),
     vr_language_(hmi_apis::Common_Language::INVALID_ENUM),
     tts_language_(hmi_apis::Common_Language::INVALID_ENUM),
     vehicle_type_(NULL),
-    attenuated_supported_(false),
     ui_supported_languages_(NULL),
     tts_supported_languages_(NULL),
     vr_supported_languages_(NULL),
@@ -248,8 +257,8 @@ HMICapabilities::HMICapabilities(ApplicationManagerImpl* const app_mngr)
     vr_capabilities_(NULL),
     speech_capabilities_(NULL),
     audio_pass_thru_capabilities_(NULL),
-    app_mngr_(app_mngr),
-    prerecorded_speech_(NULL) {
+    prerecorded_speech_(NULL),
+    app_mngr_(app_mngr) {
 
   if (false == load_capabilities_from_file()) {
     LOG4CXX_ERROR(logger_, "file hmi_capabilities.json was not loaded");
@@ -335,7 +344,7 @@ bool HMICapabilities::VerifyImageType(int32_t image_type) const {
   if (display_capabilities_->keyExists(hmi_response::image_capabilities)) {
     const smart_objects::SmartObject& image_caps = display_capabilities_
         ->getElement(hmi_response::image_capabilities);
-    for (int32_t i = 0; i < image_caps.length(); ++i) {
+    for (uint32_t i = 0; i < image_caps.length(); ++i) {
       if (image_caps.getElement(i).asInt() == image_type) {
         return true;
       }
@@ -600,28 +609,44 @@ bool HMICapabilities::load_capabilities_from_file() {
         }
 
         if (display_capabilities_so.keyExists(hmi_response::text_fields)) {
-          smart_objects::SmartObject text_fields_enum(
-              smart_objects::SmartType_Array);
-          smart_objects::SmartObject& text_fields_string =
-              display_capabilities_so[hmi_response::text_fields];
+          uint32_t len =
+              display_capabilities_so[hmi_response::text_fields].length();
 
-          for (int32_t i = 0, j = 0; i < text_fields_string.length(); ++i) {
-            std::map<std::string, hmi_apis::Common_TextFieldName::eType>
-            ::const_iterator it = text_fields_enum_name.find(
-                (text_fields_string[i]).asString());
+          for (uint32_t i = 0; i < len; ++i) {
 
-            if (text_fields_enum_name.end() != it) {
-              text_fields_enum[j++] =  it->second;
+            if ((display_capabilities_so
+                [hmi_response::text_fields][i]).keyExists(strings::name)) {
+              std::map<std::string, hmi_apis::Common_TextFieldName::eType>
+              ::const_iterator it_text_field_name = text_fields_enum_name.find(
+                  display_capabilities_so[hmi_response::text_fields]
+                                          [i][strings::name].asString());
+              display_capabilities_so[hmi_response::text_fields][i].erase(strings::name);
+              if (text_fields_enum_name.end() != it_text_field_name) {
+                display_capabilities_so[hmi_response::text_fields]
+                        [i][strings::name] =  it_text_field_name->second;
+              }
+            }
+            if ((display_capabilities_so
+                [hmi_response::text_fields][i]).keyExists(strings::character_set)) {
+              std::map<std::string, hmi_apis::Common_CharacterSet::eType>
+              ::const_iterator it_characte_set = character_set_enum.find(
+                  display_capabilities_so[hmi_response::text_fields]
+                                          [i][strings::character_set].asString());
+              display_capabilities_so
+              [hmi_response::text_fields][i].erase(strings::character_set);
+              if (character_set_enum.end() != it_characte_set) {
+                display_capabilities_so
+                [hmi_response::text_fields][i][strings::character_set] =
+                    it_characte_set->second;
+              }
             }
           }
-          display_capabilities_so.erase(hmi_response::text_fields);
-          display_capabilities_so[hmi_response::text_fields] = text_fields_enum;
         }
 
         if (display_capabilities_so.keyExists(hmi_response::image_fields)) {
           smart_objects::SmartObject& array_image_fields =
               display_capabilities_so[hmi_response::image_fields];
-          for (int32_t i = 0; i < array_image_fields.length(); ++i) {
+          for (uint32_t i = 0; i < array_image_fields.length(); ++i) {
             if (array_image_fields[i].keyExists(strings::name)) {
               std::map<std::string, hmi_apis::Common_ImageFieldName::eType>
               ::const_iterator it = image_field_name_enum.find(
@@ -636,7 +661,7 @@ bool HMICapabilities::load_capabilities_from_file() {
                   array_image_fields[i][strings::image_type_supported];
               smart_objects::SmartObject image_type_supported_enum(
                   smart_objects::SmartType_Array);
-              for (int32_t k = 0, j = 0; k < image_type_supported_array.length(); ++k) {
+              for (uint32_t k = 0, j = 0; k < image_type_supported_array.length(); ++k) {
                 std::map<std::string, hmi_apis::Common_FileType::eType>
                 ::const_iterator it = file_type_enum.find(
                     (image_type_supported_array[k]).asString());
@@ -655,7 +680,7 @@ bool HMICapabilities::load_capabilities_from_file() {
               display_capabilities_so[hmi_response::media_clock_formats];
           smart_objects::SmartObject media_clock_formats_enum(
               smart_objects::SmartType_Array);
-          for (int32_t i = 0, j = 0; i < media_clock_formats_array.length(); ++i) {
+          for (uint32_t i = 0, j = 0; i < media_clock_formats_array.length(); ++i) {
             std::map<std::string, hmi_apis::Common_MediaClockFormat::eType>
             ::const_iterator it = media_clock_enum_name.find(
                 (media_clock_formats_array[i]).asString());
@@ -673,7 +698,7 @@ bool HMICapabilities::load_capabilities_from_file() {
               display_capabilities_so[hmi_response::image_capabilities];
           smart_objects::SmartObject image_capabilities_enum(
               smart_objects::SmartType_Array);
-          for (int32_t i = 0, j = 0; i < image_capabilities_array.length(); ++i) {
+          for (uint32_t i = 0, j = 0; i < image_capabilities_array.length(); ++i) {
             std::map<std::string, hmi_apis::Common_ImageType::eType>
             ::const_iterator it = image_type_enum.find(
                 (image_capabilities_array[i]).asString());
@@ -752,7 +777,7 @@ bool HMICapabilities::load_capabilities_from_file() {
         Json::Value capabilities = vr.get("capabilities", "");
         smart_objects::SmartObject vr_capabilities_so =
             smart_objects::SmartObject(smart_objects::SmartType_Array);
-        for (int32_t i = 0; i < capabilities.size(); ++i) {
+        for (uint32_t i = 0; i < capabilities.size(); ++i) {
           vr_capabilities_so[i] =
               vr_enum_capabilities.find(capabilities[i].asString())->second;
         }
@@ -792,7 +817,7 @@ bool HMICapabilities::load_capabilities_from_file() {
         Formatters::CFormatterJsonBase::jsonValueToObj(
             bt_capabilities, buttons_capabilities_so);
 
-        for (int32_t i = 0; i < buttons_capabilities_so.length(); ++i) {
+        for (uint32_t i = 0; i < buttons_capabilities_so.length(); ++i) {
           if ((buttons_capabilities_so[i]).keyExists(strings::name)) {
             std::map<std::string, hmi_apis::Common_ButtonName::eType>
             ::const_iterator it = button_enum_name.find(
@@ -837,7 +862,7 @@ bool HMICapabilities::check_existing_json_member(
 
 void HMICapabilities::convert_json_languages_to_obj(Json::Value& json_languages,
                                      smart_objects::SmartObject& languages) {
-  for (int32_t i = 0, j = 0; i < json_languages.size(); ++i) {
+  for (uint32_t i = 0, j = 0; i < json_languages.size(); ++i) {
     std::map<std::string, hmi_apis::Common_Language::eType>::const_iterator it =
         languages_enum_values.find(json_languages[i].asString());
     if (languages_enum_values.end() != it) {

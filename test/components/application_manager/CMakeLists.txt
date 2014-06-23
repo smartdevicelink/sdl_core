@@ -9,15 +9,13 @@ endif()
 ###############################################################################
 
 include_directories (
-  ../../../src/thirdPartyLibs/gmock-1.7.0/include
-  ../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
+  ${GMOCK_INCLUDE_DIRECTORY}
   ../../../src/components/application_manager/include
-  ../../../src/components/security_manager/include
   ../../../src/components/smart_objects/include
   ../../../src/components/formatters/include/
   ../../../src/components/utils/include/
-  ../../../src//thirdPartyLibs/jsoncpp/include/
-    ${CMAKE_BINARY_DIR}/src/components/
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set(LIBRARIES
@@ -31,8 +29,6 @@ set(LIBRARIES
     MOBILE_API
     HMI_API
     SmartObjects
-    apr-1
-    aprutil-1
 )
 
 #create_test("test_APIVersionConverterV1Test" "./api_converter_v1_test.cpp" "${LIBRARIES}")

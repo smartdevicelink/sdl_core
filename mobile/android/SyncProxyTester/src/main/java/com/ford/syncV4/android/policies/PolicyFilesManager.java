@@ -10,9 +10,9 @@ package com.ford.syncV4.android.policies;
 import android.os.Environment;
 import android.util.Log;
 
-import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SafeToast;
 import com.ford.syncV4.android.adapters.LogAdapter;
+import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.exception.SyncException;
@@ -35,14 +35,15 @@ public class PolicyFilesManager {
      */
     public static void savePolicyTableSnapshot(byte[] data) {
         //final byte[] fileData = AppUtils.contentsOfResource(R.raw.policy_table_shanpshot);
-        String mTMPFilePath = Environment.getExternalStorageDirectory() +
-                "/policyTableSnapshot.json";
 
-        boolean result = AppUtils.saveDataToFile(data, mTMPFilePath);
+        boolean result = AppUtils.saveDataToFile(data, Environment.getExternalStorageDirectory() + "/" +
+                Const.TEST_DATA_DIR_NAME, "policyTableSnapshot.json");
         if (result) {
-            SafeToast.showToastAnyThread("File '" + mTMPFilePath + "' successfully saved");
+            SafeToast.showToastAnyThread("File '" + Environment.getExternalStorageDirectory() + "/" +
+                    Const.TEST_DATA_DIR_NAME + "/policyTableSnapshot.json" + "' successfully saved");
         } else {
-            SafeToast.showToastAnyThread("File '" + mTMPFilePath + "' could not be save");
+            SafeToast.showToastAnyThread("File '" + Environment.getExternalStorageDirectory() + "/" +
+                    Const.TEST_DATA_DIR_NAME + "/policyTableSnapshot.json" + "' could not be save");
         }
     }
 
@@ -53,7 +54,7 @@ public class PolicyFilesManager {
      * @param fileType type of the file
      * @param logAdapter Log Adapter (TO BE REMOVED)
      */
-    public static void sendPolicyTableUpdate(ISystemRequestProxy proxy, FileType fileType,
+    public static void sendPolicyTableUpdate(String appId, ISystemRequestProxy proxy, FileType fileType,
                                              RequestType requestType, LogAdapter logAdapter) {
         String mPolicyTableUpdatePath = AppPreferencesManager.getPolicyTableUpdateFilePath();
         //Environment.getExternalStorageDirectory() +
@@ -61,7 +62,9 @@ public class PolicyFilesManager {
 
         byte[] data = null;
         if (mPolicyTableUpdatePath.equals("")) {
-            data = AppUtils.contentsOfResource(R.raw.policy_table_update);
+            //data = AppUtils.contentsOfResource(R.raw.policy_table_update);
+            data = AppUtils.contentsOfResource(Environment.getExternalStorageDirectory() + "/" +
+                    Const.TEST_DATA_DIR_NAME + "/policyTableUpdate.json");
         } else {
             File mPolicyUpdateFile = new File(mPolicyTableUpdatePath);
             if (mPolicyUpdateFile.exists()) {
@@ -87,7 +90,7 @@ public class PolicyFilesManager {
 
         try {
             String mPolicyTableUpdateFileName = "PolicyTableUpdate";
-            proxy.putPolicyTableUpdateFile(mPolicyTableUpdateFileName, data, fileType, requestType);
+            proxy.putPolicyTableUpdateFile(appId, mPolicyTableUpdateFileName, data, fileType, requestType);
             SafeToast.showToastAnyThread("Policy Update sent");
             if (logAdapter != null) {
                 logAdapter.logMessage("Policy Update sent", Log.DEBUG, true);

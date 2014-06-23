@@ -35,7 +35,7 @@ public class SecureStartServiceTest  extends AndroidTestCase {
         assertEquals( FrameType.Control, protocolMessage.getFrameType());
         assertEquals( ServiceType.RPC, protocolMessage.getServiceType());
         assertEquals(FrameDataControlFrameType.StartService.getValue(), protocolMessage.getFrameData());
-        assertEquals(SESSION_ID, protocolMessage.getSessionID());
+        assertEquals(SESSION_ID, protocolMessage.getSessionId());
         assertEquals(0, protocolMessage.getDataSize());
     }
 

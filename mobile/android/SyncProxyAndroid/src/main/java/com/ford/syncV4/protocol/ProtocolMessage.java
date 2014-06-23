@@ -174,4 +174,8 @@ public class ProtocolMessage {
                 ", _bulkData=" + BitConverter.bytesToHex(_bulkData) +
                 '}';
     }
+
+    public void setServiceType(ServiceType serviceType) {
+        this._serviceType = serviceType;
+    }
 } // end-class

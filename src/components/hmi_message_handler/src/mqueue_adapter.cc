@@ -32,16 +32,16 @@
 
 #include "hmi_message_handler/mqueue_adapter.h"
 #include "hmi_message_handler/hmi_message_handler.h"
+#include "utils/logger.h"
 
 namespace hmi_message_handler {
 
-const int kMqueueSize = 100;
-const int kMqueueMessageSize = 65536;
+const uint32_t kMqueueSize = 100;
+const uint32_t kMqueueMessageSize = 65536;
 const char* kSdlToHmiQueue = "/sdl_to_hmi";
 const char* kHmiToSdlQueue = "/hmi_to_sdl";
 
-log4cxx::LoggerPtr logger =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("HMIMessageHandler"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
 class ReceiverThreadDelegate : public threads::ThreadDelegate {
  public:
@@ -57,11 +57,11 @@ class ReceiverThreadDelegate : public threads::ThreadDelegate {
       const ssize_t size =
           mq_receive(mqueue_descriptor_, buffer, kMqueueMessageSize, NULL);
       if (-1 == size) {
-        LOG4CXX_ERROR(logger, "Message queue receive failed, error " << errno);
+        LOG4CXX_ERROR(logger_, "Message queue receive failed, error " << errno);
         continue;
       }
       const std::string message_string(buffer, buffer + size);
-      LOG4CXX_INFO(logger, "Message: " << message_string);
+      LOG4CXX_INFO(logger_, "Message: " << message_string);
       MessageSharedPointer message(new application_manager::Message(
           protocol_handler::MessagePriority::kDefault));
       message->set_json_message(message_string);
@@ -85,14 +85,14 @@ MqueueAdapter::MqueueAdapter(HMIMessageHandler* hmi_message_handler)
   sdl_to_hmi_mqueue_ =
       mq_open(kSdlToHmiQueue, O_CREAT | O_RDWR, S_IRWXU, &mq_attributes);
   if (-1 == sdl_to_hmi_mqueue_) {
-    LOG4CXX_ERROR(logger, "Could not open message queue "
+    LOG4CXX_ERROR(logger_, "Could not open message queue "
                               << kSdlToHmiQueue << ", error " << errno);
     return;
   }
   hmi_to_sdl_mqueue_ =
       mq_open(kHmiToSdlQueue, O_CREAT | O_RDWR, S_IRWXU, &mq_attributes);
   if (-1 == hmi_to_sdl_mqueue_) {
-    LOG4CXX_ERROR(logger, "Could not open message queue "
+    LOG4CXX_ERROR(logger_, "Could not open message queue "
                               << kHmiToSdlQueue << ", error " << errno);
     return;
   }
@@ -112,24 +112,24 @@ MqueueAdapter::~MqueueAdapter() {
 }
 
 void MqueueAdapter::SendMessageToHMI(const MessageSharedPointer message) {
-  LOG4CXX_TRACE_ENTER(logger);
+  LOG4CXX_TRACE_ENTER(logger_);
 
   if (-1 == sdl_to_hmi_mqueue_) {
-    LOG4CXX_ERROR(logger, "Message queue is not opened");
+    LOG4CXX_ERROR(logger_, "Message queue is not opened");
     return;
   }
   const std::string& json = message->json_message();
   if (json.size() > kMqueueMessageSize) {
-    LOG4CXX_ERROR(logger, "Message size " << json.size() << " is too big");
+    LOG4CXX_ERROR(logger_, "Message size " << json.size() << " is too big");
     return;
   }
   const int rc = mq_send(sdl_to_hmi_mqueue_, json.c_str(), json.size(), 0);
   if (0 != rc) {
-    LOG4CXX_ERROR(logger, "Could not send message, error " << errno);
+    LOG4CXX_ERROR(logger_, "Could not send message, error " << errno);
     return;
   }
 
-  LOG4CXX_TRACE_EXIT(logger);
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void MqueueAdapter::SubscribeTo() {

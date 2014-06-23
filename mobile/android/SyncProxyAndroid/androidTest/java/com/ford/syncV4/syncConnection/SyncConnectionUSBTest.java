@@ -1,13 +1,14 @@
 package com.ford.syncV4.syncConnection;
 
+import android.test.InstrumentationTestCase;
+
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.transport.BTTransportConfig;
+import com.ford.syncV4.session.SessionTest;
 import com.ford.syncV4.transport.ITransportListener;
 import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TransportType;
-
-import junit.framework.TestCase;
+import com.ford.syncV4.transport.usb.USBTransportConfig;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -17,8 +18,7 @@ import static org.mockito.Mockito.mock;
 /**
  * Created by u on 2013-09-30
  */
-public class SyncConnectionUSBTest extends TestCase {
-
+public class SyncConnectionUSBTest extends InstrumentationTestCase {
     private boolean requiredMethodCalled;
 
     public void testOnProtocolAppUnregisteredStopsTransport() {
@@ -86,9 +86,12 @@ public class SyncConnectionUSBTest extends TestCase {
                     }
                 };
 
-        final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
-        connection.init(new BTTransportConfig(), fakeTransport);
-        connection.onProtocolServiceEnded(ServiceType.RPC, (byte) 0, "");
+        final SyncConnection connection = new SyncConnection(SessionTest.getInitializedSession(),
+                new USBTransportConfig(getInstrumentation().getTargetContext()),
+                mock(ISyncConnectionListener.class));
+        connection.init();
+        connection.mTransport = fakeTransport;
+        connection.onProtocolServiceEndedAck(ServiceType.RPC, SessionTest.SESSION_ID);
         assertTrue("stopReading() isn't called", requiredMethodCalled);
     }
 }

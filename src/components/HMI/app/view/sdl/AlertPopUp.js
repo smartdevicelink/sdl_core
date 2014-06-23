@@ -132,7 +132,7 @@ SDL.AlertPopUp = Em.ContainerView.create({
     /**
      * Deactivate PopUp
      */
-    deactivate: function() {
+    deactivate: function(reason) {
         this.set('active', false);
         clearTimeout(this.timer);
 
@@ -140,7 +140,11 @@ SDL.AlertPopUp = Em.ContainerView.create({
         this.set('content2', '');
         this.set('content3', '');
 
-        SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);
+        if (reason == 'timeout' && this.softbuttons.buttons._childViews.length > 0) {
+            SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['ABORTED'], this.alertRequestId);
+        } else {
+            SDL.SDLController.alertResponse(SDL.SDLModel.resultCode['SUCCESS'], this.alertRequestId);
+        }
 
         SDL.SDLController.onSystemContextChange();
     },
@@ -237,12 +241,11 @@ SDL.AlertPopUp = Em.ContainerView.create({
         }
         
         this.set('active', true);
-        this.set('timeout', message.duration);
-        SDL.SDLController.onSystemContextChange();
+        this.set('timeout', message.duration ? message.duration : 30000); //default timeout defined for Alert popUp
 
         clearTimeout(this.timer);
         this.timer = setTimeout(function() {
-            self.deactivate();
-        }, message.duration);
+            self.deactivate('timeout');
+        }, this.timeout);
     }
 });

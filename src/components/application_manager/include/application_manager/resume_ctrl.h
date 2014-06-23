@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_RESUME_CTRL_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_RESUME_CTRL_H
 
-#include <cstdint>
+#include <stdint.h>
 #include <vector>
 #include <map>
 #include <set>
@@ -48,9 +48,9 @@
 #include "application_manager/event_engine/event_observer.h"
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
+#include "utils/timer_thread.h"
 
 namespace application_manager {
-
 
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
@@ -80,7 +80,6 @@ class ResumeCtrl: public event_engine::EventObserver {
     /**
      * @brief Save application persistent info for future resuming
      * @param application is application witch need to be saved
-     * In case of IGN_OFF or Ctl-C or MEATER_RESSET this info will save to to file system
      */
     void SaveApplication(ApplicationConstSharedPtr application);
 
@@ -113,7 +112,7 @@ class ResumeCtrl: public event_engine::EventObserver {
     bool RemoveApplicationFromSaved(ApplicationConstSharedPtr application);
 
     /**
-     * @brief Save application info to FileSystem
+     * @brief Increments ignition counter for all registered applications
      */
     void IgnitionOff();
 
@@ -145,7 +144,31 @@ class ResumeCtrl: public event_engine::EventObserver {
      * @param application that is need to be restored
      * @return true if it was saved, otherwise return false
      */
-    bool CheckApplicationHash(std::string mobile_app_id, uint32_t hash);
+    bool CheckApplicationHash(ApplicationSharedPtr application, uint32_t hash);
+
+    /**
+     * @brief Check if Resume controller have saved application with hmi app id
+     * @param hmi_app_id - hmi application id
+     * @return true if exist, false otherwise
+     */
+    bool IsHMIApplicationIdExist(uint32_t hmi_app_id);
+
+    /**
+     * @brief Check if Resume controller have saved instance of application
+     * @param mobile_app_id - mobile application id
+     * @return true if exist, false otherwise
+     */
+    bool IsApplicationSaved(const std::string& mobile_app_id);
+
+    /**
+     * @brief Function is used for application resume. HMI app ID must be
+     * the same(PASA VCA module use it for stored app info).
+     * Retrieves HMI app ID for the given mobile app ID from stored information.
+     *
+     * @param mobile_app_id - mobile application id
+     * @return HMI app ID
+     */
+    uint32_t GetHMIApplicationID(const std::string& mobile_app_id);
 
     /**
      * @brief Timer callback function
@@ -155,9 +178,8 @@ class ResumeCtrl: public event_engine::EventObserver {
 
   private:
 
-    mutable sync_primitives::Lock queue_lock_;
+    typedef std::pair<uint32_t, uint32_t> application_timestamp;
 
-    timer::TimerThread<ResumeCtrl> timer_;
     /**
      * @brief This struct need to map
      * timestamp and application from correlationID
@@ -167,20 +189,6 @@ class ResumeCtrl: public event_engine::EventObserver {
       ApplicationSharedPtr app;
     };
 
-#ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
-
-    /**
-     * @brief Time step to check resumption TIME_OUT
-     */
-    static const uint32_t kTimeStep = 3;
-
-    Json::Value& GetSavedApplications();
-
-    void SetSavedApplication(Json::Value& apps_json);
-
-    typedef std::pair<uint32_t, uint32_t> application_timestamp;
     struct TimeStampComparator {
         bool operator() (const application_timestamp& lhs,
                          const application_timestamp& rhs) const{
@@ -189,37 +197,37 @@ class ResumeCtrl: public event_engine::EventObserver {
     };
 
     /**
-    *@brief Mapping applications to time_stamps
-    *       wait for timer to resume HMI Level
-    *
-    */
-    std::multiset<application_timestamp, TimeStampComparator> waiting_for_timer_;
-
-
-    ApplicationManagerImpl* app_mngr_;
-
-    /**
-     *  @brief times of IGN_OFF that zombie application have to be saved.
+     * @brief Check device MAC address
+     *
+     * @param application that is need to be restored
+     * @param saved_device_mac Saved device MAC address
+     *
+     * @return TRUE on success, otherwise FALSE
      */
-    static const uint32_t kApplicationLifes = 3;
+    bool IsDeviceMacAddressEqual(ApplicationSharedPtr application,
+                                 const std::string& saved_device_mac);
 
+    Json::Value& GetSavedApplications();
 
-    /**
-     * @brief Check if Resume controller have saved instance of application
-     * @param app_id - application id witch is the same as session_key or connection_key
-     * @return true if exist, false otherwise
-     */
-    bool ApplicationIsSaved(const uint32_t app_id);
+    void SetSavedApplication(Json::Value& apps_json);
 
-    Json::Value GetApplicationCommands(ApplicationConstSharedPtr application);
-    Json::Value GetApplicationSubMenus(ApplicationConstSharedPtr application);
-    Json::Value GetApplicationInteractionChoiseSets(ApplicationConstSharedPtr application);
-    Json::Value GetApplicationGlobalProperties(ApplicationConstSharedPtr application);
-    Json::Value GetApplicationSubscriptions(ApplicationConstSharedPtr application);
-    Json::Value GetApplicationFiles(ApplicationConstSharedPtr application);
-    Json::Value GetApplicationShow(ApplicationConstSharedPtr application);
+    Json::Value GetApplicationCommands(
+        ApplicationConstSharedPtr application);
+    Json::Value GetApplicationSubMenus(
+        ApplicationConstSharedPtr application);
+    Json::Value GetApplicationInteractionChoiseSets(
+        ApplicationConstSharedPtr application);
+    Json::Value GetApplicationGlobalProperties(
+        ApplicationConstSharedPtr application);
+    Json::Value GetApplicationSubscriptions(
+        ApplicationConstSharedPtr application);
+    Json::Value GetApplicationFiles(
+        ApplicationConstSharedPtr application);
+    Json::Value GetApplicationShow(
+        ApplicationConstSharedPtr application);
 
-    Json::Value JsonFromSO(const NsSmartDeviceLink::NsSmartObjects::SmartObject *so);
+    Json::Value JsonFromSO(
+        const NsSmartDeviceLink::NsSmartObjects::SmartObject *so);
 
     void SendHMIRequest(const hmi_apis::FunctionID::eType& function_id,
                         const smart_objects::SmartObject* msg_params = NULL,
@@ -228,6 +236,26 @@ class ResumeCtrl: public event_engine::EventObserver {
     bool ProcessHMIRequest(
         NsSmartDeviceLink::NsSmartObjects::SmartObject* request = NULL,
         bool use_events = false);
+
+    /**
+     * @brief Time step to check resumption TIME_OUT
+     */
+    static const uint32_t kTimeStep = 3;
+
+    /**
+     *  @brief times of IGN_OFF that zombie application have to be saved.
+     */
+    static const uint32_t kApplicationLifes = 3;
+
+    /**
+    *@brief Mapping applications to time_stamps
+    *       wait for timer to resume HMI Level
+    *
+    */
+    std::multiset<application_timestamp, TimeStampComparator> waiting_for_timer_;
+    mutable sync_primitives::Lock   queue_lock_;
+    ApplicationManagerImpl*         app_mngr_;
+    timer::TimerThread<ResumeCtrl>  timer_;
 };
 
 }  // namespace application_manager

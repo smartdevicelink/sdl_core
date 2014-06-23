@@ -52,12 +52,16 @@
 #  include <netinet/tcp_var.h>
 #endif  // __linux__
 
+#include "utils/logger.h"
+
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/tcp/tcp_device.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
                                      const uint16_t port,
@@ -102,8 +106,8 @@ void SetKeepaliveOptions(const int fd) {
   int keepidle = 3;  // 3 seconds to disconnection detecting
   int keepcnt = 5;
   int keepintvl = 1;
-  int user_timeout = 7000;  // milliseconds
 #ifdef __linux__
+  int user_timeout = 7000;  // milliseconds
   setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt));

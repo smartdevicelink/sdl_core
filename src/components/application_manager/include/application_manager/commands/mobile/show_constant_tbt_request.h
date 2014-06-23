@@ -73,9 +73,6 @@ class ShowConstantTBTRequest : public CommandRequestImpl {
 
  private:
 
-  // members
-  mobile_apis::Result::eType  result_;
-
   DISALLOW_COPY_AND_ASSIGN(ShowConstantTBTRequest);
 };
 

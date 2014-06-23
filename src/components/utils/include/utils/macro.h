@@ -36,6 +36,16 @@
 #include <assert.h>
 #include <stdio.h>
 
+#ifdef CUSTOMER_PASA
+// Todd: PASA support
+#define PASA_HMI
+#define BLUETOOTH_SUPPORT
+//#define IPOD_SUPPORT
+#define MME_SUPPORT
+#define MME_MQ
+#endif  // CUSTOMER_PASA
+
+
 // A macro to disallow the copy constructor and operator= functions
 // This should be used in the private: declarations for a class
 #define DISALLOW_COPY_AND_ASSIGN(TypeName) \
@@ -45,6 +55,9 @@
 // A macro to allow utils::Singleton call derivative constructor and destructor
 #define FRIEND_BASE_SINGLETON_CLASS(TypeName) \
   friend class utils::Singleton<TypeName>
+
+#define FRIEND_BASE_SINGLETON_CLASS_WITH_DELETER(TypeName, TypeDeleter) \
+  friend class utils::Singleton<TypeName, TypeDeleter>
 
 // A macro to allow utils::deleters::Deleter::~Deleter() call class destructor
 #define FRIEND_DELETER_DESTRUCTOR(TypeName) \

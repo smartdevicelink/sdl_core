@@ -1,4 +1,32 @@
+[CW25]
+* SyncProxyTester | SyncProxyAndroid SDK: major develop to WP2 branch merge
+
+[CW24]
++ SyncProxyTester | SyncProxyAndroid SDK: Log messages formed in SDK
+* SyncProxyTester: Restore connection during autotest
+* SyncProxyTester: 2nd session is not registered if during BT scan both session already started
+
+[CW23]
+* SyncProxyAndroid SDK: Heartbeat timeout after EndService
+* SyncProxyTester: Data in RegisterAppInterface request, which SPT sends, do not match to data in autotest
+
+[CW21]
+* SyncProxyTester | SyncProxyAndroid SDK: Restore Services in case of multi-session connection
++ SyncProxyTester | SyncProxyAndroid SDK: Hide SessionId inside mobile SyncSDK, AppId - is a key for the each application
++ SyncProxyAndroid SDK: start/stop service are sync now
++ SyncProxyTester | SyncProxyAndroid SDK: Multiple Sessions support, general look and feel update
+
+[CW19]
+* SyncProxyAndroid SDK: End of Stream reached after connection to SDL established
++ SyncProxyAndroid SDK: Prioritize / paralleling message queues
+
+[CW18]
++ SyncProxyAndroid SDK: added heartbeat handling from SDL side
+
 [CW16]
+* SyncProxyTester: Crashes when executing RegisterAppInterface auto-tests with wrong type of parameters
++ SyncProxyTester: Use 'test_data' folder of mobile device to storing and reading PTU / PTS
+* SyncProxyAndroid SDK: Audio and video streaming doesn't work if mobile App use protocol v2
 + SyncProxyTester: Do not auto-scroll logs when user scrolling log view
 
 [CW15]
@@ -27,8 +55,8 @@
 * SyncProxyAndroid SDK: PerformAudioPassThru: no OnAudioPassThru notifications
 * SyncProxyAndroid SDK: Connection closes after UnregisterAppInterface
 * SyncProxyTester | SyncProxyAndroid SDK: Add possibility to restart RPC service for the specific Test Cases
-* SyncProxyTester: Check open session (by Session Id) when executing automatic tests DISABLED
-+ SyncProxyTester: Check connection and open session when executing automatic tests
+* SyncProxyTester: Check open sessionId (by Session Id) when executing automatic tests DISABLED
++ SyncProxyTester: Check connection and open sessionId when executing automatic tests
 + SyncProxyTester: Set AppId parameter at Application SetUp dialog
 
 [CW11]
@@ -40,7 +68,7 @@
 * SyncProxyTester: Fix "log request of PerformAudioPassThru on mobile twice"
 * SyncProxyTester: Fix bug with "Impossible to register app after unregistering while smoke test execution"
 * SyncProxyTester: Fix bug with "Two requests RegisterAppInterface with and without hashID after UnregisterAppInterface"
-* SyncProxyAndroid SDK: Eliminate EndService request with session ID = 0
+* SyncProxyAndroid SDK: Eliminate EndService request with sessionId ID = 0
 * SyncProxyAndroid SDK: DiagnosticMessageResponse handling added
 + SyncProxyTester: Add AlertManeuver UI.
 
@@ -97,7 +125,7 @@
 + SyncProxyAndroid SDK: changed sync logic at transports
 + SyncProxyAndroid SDK: Add WarningLightStatus enum (replaces TirePressureTellTale enum). Update TireStatus struct.
 * SyncProxyAndroid SDK: Update PRNDL enum's values from the spec.
-* SyncProxyAndroid SDK: Fix session id at application resumption.
+* SyncProxyAndroid SDK: Fix sessionId id at application resumption.
 + SyncProxyAndroid SDK: Allow to send requests with unknown function names.
 + SyncProxyAndroid SDK: Implement integration of OnSystemRequest notification and system PutFile request.
 + SyncProxyAndroid SDK: changed reconnection scheduling logic
@@ -107,7 +135,7 @@
 - SyncProxyAndroid SDK: Revert "Modify how PutFile request is sent. If it's a big request, it's split into multiple small protocol messages and each one is sent after a previous confirmation."
 + SyncProxyAndroid SDK: Add SystemRequest-related RPC classes.
 * SyncProxyAndroid SDK: Fix sending (Un)SubscribeVehicleData with steeringWheelAngle parameter.
-+ SyncProxyAndroid SDK: Application resumption, restore session and all service.
++ SyncProxyAndroid SDK: Application resumption, restore sessionId and all service.
 + Streaming resumption (Navi Service / Audio Service / PutFile)
 
 [CW4]
@@ -151,7 +179,7 @@
 * SyncProxyTester uploads and sets the icon after it's received a first OnHMIStatus.
 * SyncProxyAndroid SDK: Bluetooth transport: Attempt to fix a bug when sending a lot of data for a while on Android prior to 4.2. The transport artificially drops the speed after sent packet.
 + Use "Close Session" menu item to unregister app w/o disconnecting. When the app is started again, it reregisters itself automagically.
-+ SyncProxyAndroid SDK: Add SyncProxyBase.closeSession() method that allows to close session w/o disconnecting.
++ SyncProxyAndroid SDK: Add SyncProxyBase.closeSession() method that allows to close sessionId w/o disconnecting.
 + SyncProxyAndroid SDK: a few changes to simplify testing.
 
 [CW46]
@@ -183,14 +211,14 @@
 + SyncProxyAndroid SDK: Extend PerformInteraction request and response objects.
 
 [CW35.3]
-*Fixed crashes on end session/disconnect.
+*Fixed crashes on end sessionId/disconnect.
 
 [CW35.2]
 *OnKeyboard event support added
 
 [CW35.1]
 *Added MobileNavi AppType registration button
-*Added Mobile Navi session support
+*Added Mobile Navi sessionId support
 *Added USB Support
 
 [CW37]

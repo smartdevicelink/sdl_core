@@ -41,9 +41,10 @@ class PTExchangeHandlerExt : public PTExchangeHandler {
  public:
   PTExchangeHandlerExt(PolicyHandler* policy_handler);
   ~PTExchangeHandlerExt();
-  virtual bool StartExchange();
+  virtual void Start();
+  virtual void Stop();
+
  private:
-  static log4cxx::LoggerPtr logger_;
   PolicyHandler* policy_handler_;
 };
 }  //  namespace policy

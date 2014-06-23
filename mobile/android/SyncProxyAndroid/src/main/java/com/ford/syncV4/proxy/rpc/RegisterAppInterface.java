@@ -40,11 +40,11 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
-    public String getAppName() {
-        return (String) parameters.get(Names.appName);
+    public Object getAppName() {
+        return parameters.get(Names.appName);
     }
 
-    public void setAppName(String appName) {
+    public void setAppName(Object appName) {
         if (appName != null) {
             parameters.put(Names.appName, appName);
         } else {
@@ -83,11 +83,11 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
-    public String getNgnMediaScreenAppName() {
-        return (String) parameters.get(Names.ngnMediaScreenAppName);
+    public Object getNgnMediaScreenAppName() {
+        return parameters.get(Names.ngnMediaScreenAppName);
     }
 
-    public void setNgnMediaScreenAppName(String ngnMediaScreenAppName) {
+    public void setNgnMediaScreenAppName(Object ngnMediaScreenAppName) {
         if (ngnMediaScreenAppName != null) {
             parameters.put(Names.ngnMediaScreenAppName, ngnMediaScreenAppName);
         } else {
@@ -95,24 +95,24 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
-    public Vector<String> getVrSynonyms() {
+    public Vector<Object> getVrSynonyms() {
         if (parameters.get(Names.vrSynonyms) instanceof Vector<?>) {
             Vector<?> list = (Vector<?>) parameters.get(Names.vrSynonyms);
             if (list == null) {
                 return null;
             }
             if (list.size() == 0) {
-                return (Vector<String>) list;
+                return (Vector<Object>) list;
             }
             Object obj = list.get(0);
-            if (obj instanceof String) {
-                return (Vector<String>) list;
+            if (obj instanceof Object) {
+                return (Vector<Object>) list;
             }
         }
         return null;
     }
 
-    public void setVrSynonyms(Vector<String> vrSynonyms) {
+    public void setVrSynonyms(Vector<Object> vrSynonyms) {
         if (vrSynonyms != null) {
             parameters.put(Names.vrSynonyms, vrSynonyms);
         } else {
@@ -120,11 +120,11 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
-    public Boolean getIsMediaApplication() {
-        return (Boolean) parameters.get(Names.isMediaApplication);
+    public Object getIsMediaApplication() {
+        return parameters.get(Names.isMediaApplication);
     }
 
-    public void setIsMediaApplication(Boolean isMediaApplication) {
+    public void setIsMediaApplication(Object isMediaApplication) {
         if (isMediaApplication != null) {
             parameters.put(Names.isMediaApplication, isMediaApplication);
         } else {
@@ -220,11 +220,11 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
-    public String getAppID() {
-        return (String) parameters.get(Names.appID);
+    public Object getAppId() {
+        return parameters.get(Names.appID);
     }
 
-    public void setAppID(String appID) {
+    public void setAppId(Object appID) {
         if (appID != null) {
             parameters.put(Names.appID, appID);
         } else {

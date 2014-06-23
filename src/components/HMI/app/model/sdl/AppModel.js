@@ -79,6 +79,13 @@ SDL.SDLAppModel = Em.Object.extend({
         deviceName: '',
 
         /**
+         * Chosen device id
+         *
+         * @type {String}
+         */
+        deviceID: null,
+
+        /**
          * Global properties for current application
          *
          * @type {Object}
@@ -124,6 +131,13 @@ SDL.SDLAppModel = Em.Object.extend({
          * @type {Array}
          */
         softButtons: [],
+
+        /**
+         * Array of Soft Buttons
+         *
+         * @type {Array}
+         */
+        turnListSoftButtons: [],
 
         /**
          * Array of Objects for TBTTurnList

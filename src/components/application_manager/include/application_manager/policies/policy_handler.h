@@ -41,8 +41,6 @@
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/pt_exchange_handler.h"
 #include "utils/logger.h"
-#include "utils/lock.h"
-#include "utils/threads/thread.h"
 #include "utils/singleton.h"
 
 namespace Json {
@@ -54,27 +52,26 @@ namespace policy {
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
 
-class PolicyHandler : public utils::Singleton<PolicyHandler>,
+class PolicyHandler :
+    public utils::Singleton<PolicyHandler, utils::deleters::Deleter<PolicyHandler> >,
     public PolicyListener {
  public:
   virtual ~PolicyHandler();
   PolicyManager* LoadPolicyLibrary();
-  PolicyManager* LoadPolicyLibrary(const std::string& path);
   PolicyManager* policy_manager() const {
     return policy_manager_;
   }
   bool InitPolicyTable();
-  bool RevertPolicyTable();
+  bool ResetPolicyTable();
+  bool ClearUserConsent();
   bool SendMessageToSDK(const BinaryMessage& pt_string);
-  bool ReceiveMessageFromSDK(const BinaryMessage& pt_string);
+  bool ReceiveMessageFromSDK(const std::string& file,
+                             const BinaryMessage& pt_string);
   bool UnloadPolicyLibrary();
   void OnPTExchangeNeeded();
   void OnPermissionsUpdated(const std::string& policy_app_id,
-                            const Permissions& permissions);
-  /**
-   * @brief Checks, if policy update is necessary for application
-   */
-  void CheckAppPolicyState(const std::string& application_id);
+                            const Permissions& permissions,
+                            const HMILevel& default_hmi);
 
   /**
    * Lets client to notify PolicyHandler that more kilometers expired
@@ -93,8 +90,8 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * @param Device id or 0, if concern to all SDL functionality
    * @param User consent from response
    */
-  void OnAllowSDLFunctionalityNotification(bool is_allowed, uint32_t device_id =
-                                               0);
+  void OnAllowSDLFunctionalityNotification(bool is_allowed,
+                                           uint32_t device_id = 0);
 
   /**
    * @brief Increment counter for ignition cycles
@@ -176,7 +173,7 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * application
    * @param policy_app_id Application id
    */
-  void OnCurrentDeviceIdUpdateRequired(const std::string& policy_app_id);
+    std::string OnCurrentDeviceIdUpdateRequired(const std::string& policy_app_id);
 
   /**
    * @brief Set parameters from OnSystemInfoChanged to policy table
@@ -200,6 +197,12 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   virtual void OnSystemInfoUpdateRequired();
 
   /**
+   * Removes device
+   * @param device_id id of device
+   */
+  void RemoveDevice(const std::string& device_id);
+
+  /**
    * Adds statistics info
    * @param type type of info
    */
@@ -217,7 +220,23 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    */
   uint32_t GetAppIdForSending();
 
+  std::string GetAppName(const std::string& policy_app_id);
+
+  /**
+   * Adds http header (temporary method)
+   * @param pt_string string without htt header
+   */
+  BinaryMessageSptr AddHttpHeader(const BinaryMessageSptr& pt_string);
+
+  /**
+   * Checks whether application is revoked
+   * @param app_id id application
+   * @return true if application is revoked
+   */
+  bool IsApplicationRevoked(const std::string& app_id);
+
  protected:
+
   /**
    * Starts next retry exchange policy table
    */
@@ -257,28 +276,22 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
   PolicyManager* policy_manager_;
   void* dl_handle_;
   AppIds last_used_app_ids_;
-  static log4cxx::LoggerPtr logger_;
-  threads::Thread retry_sequence_;
-  sync_primitives::Lock retry_sequence_lock_;
-  PTExchangeHandler* exchange_handler_;
+  utils::SharedPtr<PTExchangeHandler> exchange_handler_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
+  bool on_ignition_check_done_;
+  uint32_t last_activated_app_id_;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI
    */
   DeviceHandles pending_device_handles_;
 
-  /**
-   * @brief True, if PTS was sent, but PTU was not reseived yet,
-   * otherwise - false
-   * Used for limiting device consent request per PTS/PTU session
-   */
-  bool is_exchange_in_progress_;
-
   inline PolicyManager* CreateManager();
 
-  DISALLOW_COPY_AND_ASSIGN(PolicyHandler);FRIEND_BASE_SINGLETON_CLASS(PolicyHandler);
-  friend class RetrySequence;
+  DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
+  FRIEND_BASE_SINGLETON_CLASS_WITH_DELETER(PolicyHandler,
+                                           utils::deleters::Deleter<PolicyHandler>);
+  FRIEND_DELETER_DESTRUCTOR(PolicyHandler);
 };
 
 }  //  namespace policy

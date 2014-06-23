@@ -44,6 +44,7 @@
 #include "smart_objects/smart_object.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
 
 #include "media_manager/audio/audio_stream_sender_thread.h"
 #include "application_manager/smart_object_keys.h"
@@ -53,16 +54,14 @@ namespace media_manager {
 using sync_primitives::AutoLock;
 
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr AudioStreamSenderThread::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("AudioPassThruThread"));
-#endif // ENABLE_LOG
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "AudioPassThruThread")
 
 AudioStreamSenderThread::AudioStreamSenderThread(
   const std::string fileName, uint32_t session_key)
   : session_key_(session_key),
-    shouldBeStoped_(false),
-    fileName_(fileName) {
+    fileName_(fileName),
+    shouldBeStoped_(false) {
   LOG4CXX_TRACE_ENTER(logger_);
 }
 

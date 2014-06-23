@@ -40,8 +40,7 @@ namespace application_manager {
 namespace request_controller {
 using namespace sync_primitives;
 
-log4cxx::LoggerPtr logger_ =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("RequestController"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 
 RequestController::RequestController()
   : watchdog_(NULL) {
@@ -106,6 +105,14 @@ RequestController::TResult RequestController::addRequest(
     } else {
 
       request_list_.push_back(request);
+      LOG4CXX_INFO(logger_, "RequestController size is " <<
+                   request_list_.size());
+
+      if (0 == request_impl->default_timeout()) {
+        LOG4CXX_INFO(logger_, "Default timeout was set to 0. Watchdog will not "
+                     "track this request.");
+        return result;
+      }
 
       LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
                    << request_impl->default_timeout());
@@ -117,8 +124,7 @@ RequestController::TResult RequestController::addRequest(
                               request_impl->default_timeout(),
                               hmi_level));
 
-      LOG4CXX_INFO(logger_, "Added request to watchdog.");
-      LOG4CXX_INFO(logger_, "RequestController size is " << request_list_.size());
+      LOG4CXX_INFO(logger_, "Added request to watchdog.");      
     }
   }
 

@@ -85,7 +85,7 @@ public class SystemPutFileRPCRequestConverter implements IRPCRequestConverter {
         pm.setData(msgBytes);
         pm.setSessionID(sessionID);
         pm.setMessageType(MessageType.RPC);
-        pm.setSessionType(ServiceType.RPC);
+        pm.setServiceType(ServiceType.RPC);
         pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
         pm.setCorrID(request.getCorrelationID());
         if (null != bulkData) {

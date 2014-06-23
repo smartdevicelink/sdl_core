@@ -39,7 +39,6 @@
 #include <list>
 #include <map>
 #include "request_watchdog/watchdog.h"
-#include "utils/logger.h"
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/date_time.h"
@@ -70,8 +69,8 @@ class RequestWatchdog : public Watchdog {
      * @brief connection_key    Application connection key
      * @brief correlation_id    Mobile request correlation ID
      */
-    virtual void removeRequest(int32_t connection_key,
-                               int32_t correlation_id);
+    virtual void removeRequest(uint32_t connection_key,
+                               uint32_t correlation_id);
 
     /*
      * @brief Update request watchdog timeout
@@ -80,9 +79,9 @@ class RequestWatchdog : public Watchdog {
      * @brief correlation_id    Mobile request correlation ID
      * @brief new_timeout_value New value of request watchdog timeout
      */
-    virtual void updateRequestTimeout(int32_t connection_key,
-                                      int32_t correlation_id,
-                                      int32_t new_timeout_value);
+    virtual void updateRequestTimeout(uint32_t connection_key,
+                                      uint32_t correlation_id,
+                                      uint32_t new_timeout_value);
 
     /*
      * @brief Check if amount of requests during time scale for application
@@ -96,7 +95,7 @@ class RequestWatchdog : public Watchdog {
      * @return TRUE if amount of request doesn't exceed limit, otherwise FALSE
      */
     virtual bool checkTimeScaleMaxRequest(
-                                const int32_t& connection_key,
+                                const uint32_t& connection_key,
                                 const uint32_t& app_time_scale,
                                 const uint32_t& max_request_per_time_scale);
 
@@ -114,7 +113,7 @@ class RequestWatchdog : public Watchdog {
      */
     virtual bool checkHMILevelTimeScaleMaxRequest(
                                 const int32_t& hmi_level,
-                                const int32_t& connection_key,
+                                const uint32_t& connection_key,
                                 const uint32_t& app_time_scale,
                                 const uint32_t& max_request_per_time_scale);
 
@@ -123,7 +122,7 @@ class RequestWatchdog : public Watchdog {
      */
     virtual void removeAllRequests();
 
-    virtual int32_t getRegesteredRequestsNumber();
+    virtual uint32_t getRegesteredRequestsNumber();
 
     ~RequestWatchdog();
 		
@@ -177,7 +176,7 @@ class RequestWatchdog : public Watchdog {
 
       TimevalStruct start_;
       TimevalStruct end_;
-      int32_t connection_key_;
+      uint32_t connection_key_;
     };
 
     /*
@@ -187,7 +186,7 @@ class RequestWatchdog : public Watchdog {
     struct HMILevelTimeScale {
       explicit HMILevelTimeScale(
                           const TimevalStruct& start, const TimevalStruct& end,
-                          const int32_t& connection_key, const int32_t& hmi_level)
+                          const uint32_t& connection_key, const int32_t& hmi_level)
       : start_(start),
         end_(end),
         connection_key_(connection_key),
@@ -207,12 +206,11 @@ class RequestWatchdog : public Watchdog {
 
       TimevalStruct start_;
       TimevalStruct end_;
-      int32_t connection_key_;
+      uint32_t connection_key_;
       int32_t hmi_level_;
     };
 
     static const int32_t                  DEFAULT_CYCLE_TIMEOUT = 250000;
-    static log4cxx::LoggerPtr             logger_;
     std::list<WatchdogSubscriber*>        subscribers_;
     sync_primitives::Lock                 subscribersLock_;
     std::map<RequestInfo*, TimevalStruct> requests_;

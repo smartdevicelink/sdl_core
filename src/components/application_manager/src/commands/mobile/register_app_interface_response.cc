@@ -32,10 +32,10 @@
  */
 
 #include "application_manager/commands/mobile/register_app_interface_response.h"
-#include "interfaces/MOBILE_API.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -44,19 +44,19 @@ namespace commands {
 void RegisterAppInterfaceResponse::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceResponse::Run");
 
+  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   bool success = (*message_)[strings::msg_params][strings::success].asBool();
-
   bool last_message = !success;
   // Do not close connection in case of APPLICATION_NOT_REGISTERED despite it is an error
   if (!success && (*message_)[strings::msg_params].keyExists(strings::result_code)) {
-    mobile_apis::Result::eType result_code =
-        mobile_apis::Result::eType((*message_)[strings::msg_params][strings::result_code].asInt());
+    result_code = static_cast<mobile_apis::Result::eType>(
+        (*message_)[strings::msg_params][strings::result_code].asInt());
     if (result_code ==  mobile_apis::Result::APPLICATION_REGISTERED_ALREADY) {
       last_message = false;
     }
   }
 
-  SendResponse(success, mobile_apis::Result::INVALID_ENUM, last_message);
+  SendResponse(success, result_code, last_message);
 
   if (success) {
     ApplicationSharedPtr application =

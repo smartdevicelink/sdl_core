@@ -1,8 +1,5 @@
-/**
- * \file transport_adapter_listener_impl.cc
- * \brief TransportAdapterListenerImpl class source file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,19 +30,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
-
 #include <algorithm>
 
+#include "utils/logger.h"
+
+#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 namespace transport_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr TransportAdapterListenerImpl::logger_ =
-    log4cxx::LoggerPtr(log4cxx::Logger::getLogger("TransportManager"));
-#endif  // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 TransportAdapterListenerImpl::~TransportAdapterListenerImpl() {}
 
@@ -84,6 +79,22 @@ void TransportAdapterListenerImpl::OnDeviceListUpdated(
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED,
       transport_adapter_, "", 0, RawMessageSptr(), NULL);
+
+  if (transport_manager::E_SUCCESS !=
+      transport_manager_impl_->ReceiveEventFromDevice(event)) {
+    LOG4CXX_WARN(logger_, "Failed to receive event from device");
+  }
+}
+
+void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(const TransportAdapter* adapter) {
+  TransportAdapterEvent event(
+    TransportAdapterListenerImpl::ON_FIND_NEW_APPLICATIONS_REQUEST,
+    transport_adapter_,
+    "",
+    0,
+    RawMessageSptr(),
+    NULL
+  );
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {

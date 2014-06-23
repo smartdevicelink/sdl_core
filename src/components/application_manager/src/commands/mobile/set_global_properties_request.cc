@@ -81,18 +81,30 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
-  // Check for image file(s) in vrHelpItem
-  mobile_apis::Result::eType verification_result =
-      MessageHelper::VerifyImageFiles((*message_)[strings::msg_params], app);
+  mobile_apis::Result::eType verification_result = mobile_apis::Result::SUCCESS;
 
-  if (mobile_apis::Result::SUCCESS != verification_result) {
-    LOG4CXX_ERROR_EXT(
-        logger_,
-        "MessageHelper::VerifyImageFiles return " << verification_result);
-    SendResponse(false, verification_result);
-    return;
+  if ((*message_)[strings::msg_params].keyExists(strings::menu_icon)) {
+    verification_result = MessageHelper::VerifyImage(
+        (*message_)[strings::msg_params][strings::menu_icon], app);
+    if (mobile_apis::Result::SUCCESS != verification_result) {
+      LOG4CXX_ERROR_EXT(
+          logger_,
+          "MessageHelper::VerifyImage return " << verification_result);
+      SendResponse(false, verification_result);
+      return;
+    }
   }
-
+  // Check for image file(s) in vrHelpItem
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+    if (mobile_apis::Result::SUCCESS != MessageHelper::VerifyImageVrHelpItems(
+        (*message_)[strings::msg_params][strings::vr_help], app)) {
+      LOG4CXX_ERROR_EXT(
+          logger_,
+          "MessageHelper::VerifyImage return INVALID_DATA!" );
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
+  }
 
   bool is_help_prompt_present = msg_params.keyExists(strings::help_prompt);
   bool is_timeout_prompt_present = msg_params.keyExists(
@@ -192,13 +204,15 @@ void SetGlobalPropertiesRequest::Run() {
     }
 
     app->set_vr_help_title(smart_objects::SmartObject(app->name()));
-    app->set_vr_help(vr_help_items);
 
     smart_objects::SmartObject params =
         smart_objects::SmartObject(smart_objects::SmartType_Map);
 
     params[strings::vr_help_title] = (*app->vr_help_title());
-    params[strings::vr_help] = (*app->vr_help());
+    if (vr_help_items.length() > 0) {
+      app->set_vr_help(vr_help_items);
+      params[strings::vr_help] = (*app->vr_help());
+    }
     params[strings::app_id] = app->app_id();
     if (is_menu_title_present) {
 
@@ -308,9 +322,11 @@ void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
     bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_)
           && (hmi_apis::Common_Result::SUCCESS == tts_result_ ||
               hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == tts_result_))
-          || ((hmi_apis::Common_Result::SUCCESS == ui_result_)
+          || ((hmi_apis::Common_Result::SUCCESS == ui_result_ ||
+              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
               && (hmi_apis::Common_Result::INVALID_ENUM == tts_result_))
-          || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_)
+          || ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_ ||
+              hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_)
               && (hmi_apis::Common_Result::SUCCESS == tts_result_));
 
     mobile_apis::Result::eType result_code;

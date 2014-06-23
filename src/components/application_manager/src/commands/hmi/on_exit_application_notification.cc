@@ -35,6 +35,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
+#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
@@ -51,18 +52,41 @@ void OnExitApplicationNotification::Run() {
   LOG4CXX_INFO(logger_, "OnExitApplicationNotification::Run");
 
   ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  ApplicationSharedPtr app_impl = app_mgr->application(
+  ApplicationSharedPtr app_impl = app_mgr->application_by_hmi_app(
       (*message_)[strings::msg_params][strings::app_id].asUInt());
   if (!(app_impl.valid())) {
     LOG4CXX_ERROR(logger_, "Application does not exist");
     return;
   }
+  hmi_apis::Common_ApplicationToNONEReason::eType reason;
+  reason = static_cast<hmi_apis::Common_ApplicationToNONEReason::eType>
+                       ((*message_)[strings::msg_params][strings::reason].asInt());
+  switch (reason) {
+#ifdef CUSTOMER_FORD
+    case hmi_apis::Common_ApplicationToNONEReason::DRIVER_DISTRACTION_VIOLATION : {
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          app_impl->app_id(),
+          mobile_api::AppInterfaceUnregisteredReason::DRIVER_DISTRACTION_VIOLATION);
+      break;
+    }
+#endif
+    case hmi_apis::Common_ApplicationToNONEReason::USER_EXIT : {
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+          app_impl->app_id(),
+          mobile_api::AppInterfaceUnregisteredReason::USER_EXIT);
+      break;
+    }
+    default : {
+      LOG4CXX_WARN(logger_, "Bad reason");
+      break;
+    }
+  }
   app_impl->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
   app_impl->set_audio_streaming_state(mobile_apis::AudioStreamingState::NOT_AUDIBLE);
+  app_impl->set_system_context(mobile_api::SystemContext::SYSCTXT_MAIN);
   MessageHelper::SendHMIStatusNotification(*app_impl);
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-

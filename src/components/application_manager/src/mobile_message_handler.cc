@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -38,6 +38,7 @@
 #include "protocol_handler/protocol_payload.h"
 #include "protocol_handler/protocol_packet.h"
 #include "utils/bitstream.h"
+#include "utils/logger.h"
 
 #include <stdint.h>
 #include <memory>
@@ -51,10 +52,8 @@ const uint8_t kUnknown = 0xF;
 
 namespace application_manager {
 
-#ifdef ENABLE_LOG
-log4cxx::LoggerPtr MobileMessageHandler::logger_ = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("MobileMessageHandler"));
-#endif // ENABLE_LOG
+CREATE_LOGGERPTR_GLOBAL(logger_, "MobileMessageHandler")
+
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV1(

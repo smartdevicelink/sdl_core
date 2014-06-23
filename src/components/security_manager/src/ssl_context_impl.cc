@@ -36,6 +36,7 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <memory.h>
+#include <map>
 
 #include "utils/macro.h"
 
@@ -46,21 +47,21 @@ CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn, Mode mode)
     bioIn_(BIO_new(BIO_s_mem())),
     bioOut_(BIO_new(BIO_s_mem())),
     bioFilter_(NULL),
-    buffer_size_(1024), // TODO(DChmerev): Collect some statistics, determine the most appropriate value
+    // TODO(EZamakhov): get MTU by parameter (from transport)
+    // default buffer size is TCP MTU
+    buffer_size_(1500),
     buffer_(new uint8_t[buffer_size_]),
+    is_handshake_pending_(false),
     mode_(mode) {
   SSL_set_bio(connection_, bioIn_, bioOut_);
 }
 
-std::string LastError() {
-  // TODO (DChmerev): add error on no key files
-  const unsigned long error = ERR_get_error();
-  const char * reason = ERR_reason_error_string(error);
-  if (reason) {
-    return reason;
-  } else {
-    return std::string();
+std::string CryptoManagerImpl::SSLContextImpl::LastError() const {
+  if (!IsInitCompleted()) {
+    return std::string("Initialization is not completed");
   }
+  const char *reason = ERR_reason_error_string(ERR_get_error());
+  return std::string(reason ? reason : "");
 }
 
 bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() const {
@@ -68,21 +69,80 @@ bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() const {
 }
 
 SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::
-StartHandshake(const uint8_t** const out_data, size_t* out_data_size) {
+StartHandshake(const uint8_t** const out_data, size_t *out_data_size) {
+  is_handshake_pending_ = true;
   return DoHandshakeStep(NULL, 0, out_data, out_data_size);
 }
 
+namespace {
+  size_t aes128_gcm_sha256_max_block_size(size_t mtu) {
+    if (mtu < 29)
+      return 0;
+    return mtu - 29;
+  }
+  size_t rc4_md5_max_block_size(size_t mtu) {
+    if (mtu < 21)
+      return 0;
+    return mtu - 21;
+  }
+  size_t rc4_sha_max_block_size(size_t mtu) {
+    if (mtu < 25)
+      return 0;
+    return mtu - 25;
+  }
+  size_t seed_sha_max_block_size(size_t mtu) {
+    if (mtu < 53)
+      return 0;
+    return ((mtu - 37) & 0xfffffff0) - 5;
+  }
+  size_t aes128_sha256_max_block_size(size_t mtu) {
+    if (mtu < 69)
+      return 0;
+    return ((mtu - 53) & 0xfffffff0) - 1;
+  }
+  size_t des_cbc3_sha_max_block_size(size_t mtu) {
+    if (mtu < 37)
+      return 0;
+    return ((mtu - 29) & 0xfffffff8) - 5;
+  }
+}  // namespace
+
+std::map<std::string, CryptoManagerImpl::SSLContextImpl::BlockSizeGetter>
+CryptoManagerImpl::SSLContextImpl::create_max_block_sizes() {
+  std::map<std::string, CryptoManagerImpl::SSLContextImpl::BlockSizeGetter> rc;
+  rc.insert(std::make_pair("AES128-GCM-SHA256", aes128_gcm_sha256_max_block_size));
+  rc.insert(std::make_pair("AES128-SHA256",     aes128_sha256_max_block_size));
+  rc.insert(std::make_pair("AES128-SHA",        seed_sha_max_block_size));
+  rc.insert(std::make_pair("AES256-GCM-SHA384", aes128_gcm_sha256_max_block_size));
+  rc.insert(std::make_pair("AES256-SHA256",     aes128_sha256_max_block_size));
+  rc.insert(std::make_pair("AES256-SHA",        seed_sha_max_block_size));
+  rc.insert(std::make_pair("CAMELLIA128-SHA",   seed_sha_max_block_size));
+  rc.insert(std::make_pair("CAMELLIA256-SHA",   seed_sha_max_block_size));
+  rc.insert(std::make_pair("DES-CBC3-SHA",      des_cbc3_sha_max_block_size));
+  rc.insert(std::make_pair("DES-CBC-SHA",       des_cbc3_sha_max_block_size));
+  rc.insert(std::make_pair("RC4-MD5",           rc4_md5_max_block_size));
+  rc.insert(std::make_pair("RC4-SHA",           rc4_sha_max_block_size));
+  rc.insert(std::make_pair("SEED-SHA",          seed_sha_max_block_size));
+  return rc;
+}
+
+std::map<std::string, CryptoManagerImpl::SSLContextImpl::BlockSizeGetter>
+CryptoManagerImpl::SSLContextImpl::max_block_sizes =
+    CryptoManagerImpl::SSLContextImpl::create_max_block_sizes();
+
 SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::
 DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
-                const uint8_t** const out_data, size_t* out_data_size) {
+                const uint8_t** const out_data, size_t *out_data_size) {
   *out_data = NULL;
   if (IsInitCompleted()) {
+    is_handshake_pending_ = false;
     return SSLContext::Handshake_Result_Success;
   }
 
   if (in_data && in_data_size) {
     int ret = BIO_write(bioIn_, in_data, in_data_size);
     if (ret <= 0) {
+      is_handshake_pending_ = false;
       return SSLContext::Handshake_Result_AbnormalFail;
     }
   }
@@ -91,7 +151,12 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
   if (handshake_result == 1) {
     bioFilter_ = BIO_new(BIO_f_ssl());
     BIO_set_ssl(bioFilter_, connection_, BIO_NOCLOSE);
+
+    const SSL_CIPHER *cipher = SSL_get_current_cipher(connection_);
+    max_block_size_ = max_block_sizes[SSL_CIPHER_get_name(cipher)];
+    is_handshake_pending_ = false;
   } else if (handshake_result == 0) {
+    is_handshake_pending_ = false;
     return SSLContext::Handshake_Result_Fail;
   }
 
@@ -102,9 +167,10 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
 
     const int read_count = BIO_read(bioOut_, buffer_, pend);
     if (read_count  == pend) {
-      *out_data_size = read_count ;
+      *out_data_size = read_count;
       *out_data =  buffer_;
     } else {
+      is_handshake_pending_ = false;
       return SSLContext::Handshake_Result_AbnormalFail;
     }
   }
@@ -112,9 +178,9 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
   return SSLContext::Handshake_Result_Success;
 }
 
-bool CryptoManagerImpl::SSLContextImpl::
-Encrypt(const uint8_t *  const in_data,  size_t in_data_size,
-        const uint8_t ** const out_data, size_t* out_data_size) {
+bool CryptoManagerImpl::SSLContextImpl::Encrypt(
+    const uint8_t *  const in_data,  size_t in_data_size,
+    const uint8_t ** const out_data, size_t *out_data_size) {
 
   if (!SSL_is_init_finished(connection_) ||
       !in_data ||
@@ -137,9 +203,9 @@ Encrypt(const uint8_t *  const in_data,  size_t in_data_size,
   return true;
 }
 
-bool CryptoManagerImpl::SSLContextImpl::
-Decrypt(const uint8_t *  const in_data,  size_t in_data_size,
-        const uint8_t ** const out_data, size_t* out_data_size) {
+bool CryptoManagerImpl::SSLContextImpl::Decrypt(
+    const uint8_t *  const in_data,  size_t in_data_size,
+    const uint8_t ** const out_data, size_t *out_data_size) {
 
   if (!SSL_is_init_finished(connection_)) {
     return false;
@@ -166,27 +232,33 @@ Decrypt(const uint8_t *  const in_data,  size_t in_data_size,
   return true;
 }
 
-size_t CryptoManagerImpl::SSLContextImpl::
-get_max_block_size(size_t mtu) const {
-  return mtu - 29;
-/*
-  const SSL_CIPHER *cipher = SSL_get_current_cipher(connection_);
-*/
+size_t CryptoManagerImpl::SSLContextImpl::get_max_block_size(size_t mtu) const {
+  if (!max_block_size_) {
+    // FIXME(EZamakhov): add correct logics for TLS1/1.2/SSL3
+    // For SSL3.0 set temporary value 90, old TLS1.2 value is 29
+    assert(mtu > 90);
+    return mtu - 90;
+  }
+  return max_block_size_(mtu);
 }
 
-CryptoManagerImpl::SSLContextImpl::
-~SSLContextImpl() {
-  // TODO(EZamakhov): return destruction logics
-  // SSL_shutdown(connection_);
-  // SSL_free(connection_);
-  // delete[] buffer_;
+bool CryptoManagerImpl::SSLContextImpl::IsHandshakePending() const {
+  return is_handshake_pending_;
+}
+
+CryptoManagerImpl::SSLContextImpl::~SSLContextImpl() {
+  SSL_shutdown(connection_);
+  SSL_free(connection_);
+  delete[] buffer_;
 }
 
 void CryptoManagerImpl::SSLContextImpl::EnsureBufferSizeEnough(size_t size) {
   if (buffer_size_ < size) {
     delete[] buffer_;
-    buffer_ = new uint8_t[size];
-    buffer_size_ = size;
+    buffer_ = new(std::nothrow) uint8_t[size];
+    if (buffer_) {
+      buffer_size_ = size;
+    }
   }
 }
 

@@ -1,8 +1,5 @@
-/**
- * \file thread.h
- * \brief
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +41,6 @@
 #include <string>
 
 #include "utils/macro.h"
-#include "utils/logger.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/threads/thread_options.h"
 
@@ -107,6 +103,27 @@ class Thread {
 
   // Give thread thread_id a name, helpful for debugging
   static void SetNameForId(Id thread_id, const std::string& name);
+
+  /**
+   * @brief Set current thread as main
+   */
+  static void SetMainThread();
+
+  /**
+   * @brief Send SIGINT to main thread
+   * @return \a true on success and \a false otherwise
+   */
+  static bool InterruptMainThread();
+
+  /**
+   * @brief Mask all POSIX signals for current thread
+   */
+  static void MaskSignals();
+
+  /**
+   * @brief Unmask all POSIX signals for current thread
+   */
+  static void UnmaskSignals();
 
   /**
    * Ctor.
@@ -222,10 +239,6 @@ class Thread {
   impl::PlatformThreadHandle thread_handle_;
   ThreadOptions thread_options_;
   bool isThreadRunning_;
-
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
 
  private:
   DISALLOW_COPY_AND_ASSIGN(Thread);

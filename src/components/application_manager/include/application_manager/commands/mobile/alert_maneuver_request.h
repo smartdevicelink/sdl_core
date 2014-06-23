@@ -73,7 +73,6 @@ class AlertManeuverRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event);
 
  private:
-  mobile_apis::Result::eType  result_;
   mobile_apis::Result::eType  tts_speak_result_code_;
   mobile_apis::Result::eType  navi_alert_maneuver_result_code_;
   Pending pending_requests_;

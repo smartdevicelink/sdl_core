@@ -1,7 +1,4 @@
-/**
- * \file connection_handlerObserver.hpp
- * \brief connection_handlerObserver class.
- *
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -52,55 +49,60 @@ namespace connection_handler {
  */
 class ConnectionHandlerObserver {
   public:
-    /**
-     * \brief Available devices list updated.
-     *
-     * Called when device scanning initiated with scanForNewDevices
-     * is completed.
-     *
-     * \param DeviceList New list of available devices.
-     **/
-    virtual void OnDeviceListUpdated(
-      const connection_handler::DeviceList& device_list) = 0;
+  /**
+   * \brief Available devices list updated.
+   *
+   * Called when device scanning initiated with scanForNewDevices
+   * is completed.
+   *
+   * \param DeviceList New list of available devices.
+   **/
+  virtual void OnDeviceListUpdated(
+      const connection_handler::DeviceList &device_list) = 0;
 
-    /**
-     * \brief Removes device.
-     *
-     * Called when device has been removed from a list.
-     *
-     * \param DeviceHandle Handle of removed device.
-     **/
-    virtual void RemoveDevice(
-      const connection_handler::DeviceHandle& device_handle) = 0;
+  /**
+   * @brief Reaction to "Find new applications" request
+   */
+  virtual void OnFindNewApplicationsRequest() = 0;
 
-    /**
-     * \brief Callback function used by connection_handler
-     * when Mobile Application initiates start of new service.
-     * \param deviceHandle Device identifier within which session has to be started.
-     * \param sessionKey Key of started session.
-     * \param type Established service type
-     */
-    virtual bool OnServiceStartedCallback(
-        const connection_handler::DeviceHandle& device_handle,
-        const int32_t& session_key,
-        const protocol_handler::ServiceType& type) = 0;
+  /**
+   * \brief Removes device.
+   *
+   * Called when device has been removed from a list.
+   *
+   * \param DeviceHandle Handle of removed device.
+   **/
+  virtual void RemoveDevice(
+      const connection_handler::DeviceHandle &device_handle) = 0;
 
-    /**
-     * \brief Callback function used by connection_handler
-     * when Mobile Application initiates service ending.
-     * \param sessionKey Key of session which should be ended
-     */
-    virtual void OnServiceEndedCallback(
-      const int32_t& session_key,
-      const protocol_handler::ServiceType& type) = 0;
+  /**
+   * \brief Callback function used by connection_handler
+   * when Mobile Application initiates start of new service.
+   * \param deviceHandle Device identifier within which session has to be started.
+   * \param sessionKey Key of started session.
+   * \param type Established service type
+   */
+  virtual bool OnServiceStartedCallback(
+      const connection_handler::DeviceHandle &device_handle,
+      const int32_t &session_key,
+      const protocol_handler::ServiceType &type) = 0;
 
-  protected:
-    /**
-     * \brief Destructor
-     */
-    virtual ~ConnectionHandlerObserver() {
-    }
+  /**
+   * \brief Callback function used by connection_handler
+   * when Mobile Application initiates service ending.
+   * \param sessionKey Key of session which should be ended
+   */
+  virtual void OnServiceEndedCallback(
+      const int32_t &session_key,
+      const protocol_handler::ServiceType &type) = 0;
+
+ protected:
+  /**
+   * \brief Destructor
+   */
+  virtual ~ConnectionHandlerObserver() {
+  }
 };
-}/* namespace connection_handler */
+}  // namespace connection_handler
 
 #endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_OBSERVER_H_

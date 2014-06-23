@@ -82,11 +82,7 @@ class MediaManagerImpl : public MediaManager,
     bool                               audio_stream_active_;
 
   private:
-#ifdef ENABLE_LOG
-    static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
     DISALLOW_COPY_AND_ASSIGN(MediaManagerImpl);
-
     FRIEND_BASE_SINGLETON_CLASS(MediaManagerImpl);
 };
 

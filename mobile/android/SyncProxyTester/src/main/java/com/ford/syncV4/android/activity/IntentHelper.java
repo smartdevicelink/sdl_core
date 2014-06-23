@@ -1,7 +1,7 @@
 package com.ford.syncV4.android.activity;
 
-import java.util.Hashtable;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Used to pass custom objects (not implementing Serializable/Parcelable
@@ -18,7 +18,7 @@ public class IntentHelper {
 	private Map<String, Object> mMap;
 
 	private IntentHelper() {
-		mMap = new Hashtable<String, Object>();
+		mMap = new ConcurrentHashMap<String, Object>();
 	}
 
 	private static IntentHelper getInstance() {

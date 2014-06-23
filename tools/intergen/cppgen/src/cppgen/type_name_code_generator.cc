@@ -179,22 +179,14 @@ void TypeNameGenerator::GenerateCodeForTypedef(const Typedef* tdef) {
 RpcTypeNameGenerator::RpcTypeNameGenerator(const Interface* interface,
                                            const TypePreferences* preferences,
                                            const Type* type,
-                                           Availability availability)
+                                           bool optional)
     : interface_(interface),
       preferences_(preferences) {
-  bool wrap_with_availability = availability != kUnspecified;
-  // Arrays, map and typedefs of arrays and maps doesn't need to be marked as
-  // optional or mandatory because their minimal size indicates whether
-  // container contents is optional
-  if (TypeProperties(type).is_container()) {
-    wrap_with_availability = false;
-  }
-
-  if (wrap_with_availability && (availability == kOptional)) {
+  if (optional) {
     os_ << "Optional< ";
   }
   type->Apply(this);
-  if (wrap_with_availability && (availability == kOptional)) {
+  if (optional) {
     os_ << " >";
   }
 }
@@ -239,13 +231,17 @@ void RpcTypeNameGenerator::GenerateCodeForEnum(const Enum* enm) {
 void RpcTypeNameGenerator::GenerateCodeForArray(const Array* array) {
   os_ << "Array< ";
   array->type()->Apply(this);
-  strmfmt(os_, ", {0}, {1} >", array->range().min(), array->range().max());
+  strmfmt(os_, ", {0}, {1} >",
+          array->range().min(),
+          array->range().max());
 }
 
 void RpcTypeNameGenerator::GenerateCodeForMap(const Map* map) {
   os_ << "Map< ";
   map->type()->Apply(this);
-  strmfmt(os_, ", {0}, {1} >", map->range().min(), map->range().max());
+  strmfmt(os_, ", {0}, {1} >",
+          map->range().min(),
+          map->range().max());
 }
 
 void RpcTypeNameGenerator::GenerateCodeForNullable(

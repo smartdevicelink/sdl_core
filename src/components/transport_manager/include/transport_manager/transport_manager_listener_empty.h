@@ -1,8 +1,5 @@
-/**
- * \file transport_manager_listener_empty.h
- * \brief TransportManagerListenerEmpty class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,7 +49,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   /**
    * @Destructor.
    */
-  virtual ~TransportManagerListenerEmpty(){};
+  virtual ~TransportManagerListenerEmpty(){}
 
   /**
    * @brief Reaction to the event, when the list of devices is updated.
@@ -60,6 +57,9 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
    * @param Container that holds information about devices.
    */
   virtual void OnDeviceListUpdated(const std::vector<DeviceInfo>&) {
+  }
+
+  virtual void OnFindNewApplicationsRequest() {
   }
 
   /**

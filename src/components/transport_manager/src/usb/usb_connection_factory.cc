@@ -36,16 +36,16 @@
 
 #if defined(__QNXNTO__)
 #include "transport_manager/usb/qnx/usb_connection.h"
-#if defined(__arm__)
-#include "transport_manager/usb/qnx/usb_iap_connection.h"
-#include "transport_manager/usb/qnx/usb_iap2_connection.h"
-#endif
 #else
 #include "transport_manager/usb/libusb/usb_connection.h"
 #endif
 
+#include "utils/logger.h"
+
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 UsbConnectionFactory::UsbConnectionFactory(
     TransportAdapterController* controller)
@@ -68,36 +68,14 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
   }
 
   UsbDevice* usb_device = static_cast<UsbDevice*>(device.get());
-  PlatformUsbDevice* platform_device = usb_device->usb_device();
-  bool initialized = false;
-  if (IsAppleIAPDevice(platform_device)) {
-#if defined(__QNXNTO__) && defined(__arm__)
-    UsbIAPConnection* usb_connection =
-      new UsbIAPConnection(device_uid, app_handle, controller_, "/fs/ipod0");
-    ConnectionSptr connection(usb_connection);
-    controller_->ConnectionCreated(connection, device_uid, app_handle);
-    initialized = usb_connection->Init();
-#endif
-  }
-  else if (IsAppleIAP2Device(platform_device)) {
-#if defined(__QNXNTO__) && defined(__arm__)
-    UsbIAP2Connection* usb_connection =
-      new UsbIAP2Connection(device_uid, app_handle, controller_, "/dev/ipod0");
-    ConnectionSptr connection(usb_connection);
-    controller_->ConnectionCreated(connection, device_uid, app_handle);
-    initialized = usb_connection->Init();
-#endif
-  }
-  else {
-    UsbConnection* usb_connection =
-      new UsbConnection(device_uid, app_handle, controller_, usb_handler_,
-        usb_device->usb_device());
-    ConnectionSptr connection(usb_connection);
-    controller_->ConnectionCreated(connection, device_uid, app_handle);
-    initialized = usb_connection->Init();
-  }
+  UsbConnection* usb_connection =
+    new UsbConnection(device_uid, app_handle, controller_, usb_handler_,
+      usb_device->usb_device());
+  ConnectionSptr connection(usb_connection);
 
-  if (initialized) {
+  controller_->ConnectionCreated(connection, device_uid, app_handle);
+
+  if (usb_connection->Init()) {
     LOG4CXX_INFO(logger_, "USB connection initialised");
     return TransportAdapter::OK;
   }

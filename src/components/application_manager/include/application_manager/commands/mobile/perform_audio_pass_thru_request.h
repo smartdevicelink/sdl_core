@@ -59,6 +59,13 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   virtual ~PerformAudioPassThruRequest();
 
   /**
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   *
+   */
+  virtual void onTimeOut();
+
+  /**
    * @brief Init required by command resources
    **/
   bool Init();

@@ -25,7 +25,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_mobile_nav_preview, container, true);
+        return inflater.inflate(R.layout.activity_mobile_nav_preview, container, false);
     }
 
     @Override
@@ -70,7 +70,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         checkBox.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
                     changeCheckBoxState();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
@@ -81,7 +81,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         sendSecureServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
                     sendStartEncryptedService();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
@@ -93,7 +93,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         sendNotSecureServiceButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (hasServiceInServicesPool(ServiceType.RPC)) {
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
                     sendStartNotEncryptedService();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
@@ -106,23 +106,23 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
 
     private void sendStartEncryptedService() {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
-        syncProxyTester.startMobileNaviServiceEncryption();
+        syncProxyTester.startMobileNaviServiceEncryption(getAppId());
     }
 
     private void sendStartNotEncryptedService() {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
-        syncProxyTester.startMobileNaviNotEncryptedService();
+        syncProxyTester.startMobileNaviNotEncryptedService(getAppId());
     }
 
     private void changeCheckBoxState() {
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.startMobileNaviService(false);
+            tester.startMobileNaviService(getAppId(), false);
         } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             mFileStreamingLogic.resetStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.stopMobileNavService();
+            tester.stopMobileNavService(getAppId());
             mSessionCheckBoxState.setStateOff();
         }
     }

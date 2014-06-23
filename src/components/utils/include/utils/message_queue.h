@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -127,9 +127,8 @@ template<typename T, class Q> MessageQueue<T, Q>::MessageQueue()
 
 template<typename T, class Q> MessageQueue<T, Q>::~MessageQueue() {
   if (!queue_.empty()) {
-    log4cxx::LoggerPtr logger =
-        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
-    LOG4CXX_ERROR(logger, "Destruction of non-drained queue");
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
+    LOG4CXX_ERROR(logger_, "Destruction of non-drained queue");
   }
 }
 
@@ -158,9 +157,8 @@ template<typename T, class Q> bool MessageQueue<T, Q>::IsShuttingDown() const {
 template<typename T, class Q> void MessageQueue<T, Q>::push(const T& element) {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (shutting_down_) {
-    log4cxx::LoggerPtr logger =
-        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
-    LOG4CXX_ERROR(logger, "Runtime error, pushing into queue"
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
+    LOG4CXX_ERROR(logger_, "Runtime error, pushing into queue"
                          " that is being shut down");
   }
   queue_.push(element);
@@ -170,9 +168,8 @@ template<typename T, class Q> void MessageQueue<T, Q>::push(const T& element) {
 template<typename T, class Q> T MessageQueue<T, Q>::pop() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (queue_.empty()) {
-    log4cxx::LoggerPtr logger =
-        log4cxx::LoggerPtr(log4cxx::Logger::getLogger("Utils"));
-    LOG4CXX_ERROR(logger, "Runtime error, popping out of empty que");
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
+    LOG4CXX_ERROR(logger_, "Runtime error, popping out of empty que");
   }
   T result = queue_.front();
   queue_.pop();

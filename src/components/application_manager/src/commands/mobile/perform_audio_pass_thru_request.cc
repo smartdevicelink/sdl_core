@@ -50,6 +50,14 @@ PerformAudioPassThruRequest::PerformAudioPassThruRequest(
 PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {
 }
 
+void PerformAudioPassThruRequest::onTimeOut() {
+  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::onTimeOut");
+
+  ApplicationManagerImpl::instance()->StopAudioPassThru(connection_key());
+
+  CommandRequestImpl::onTimeOut();
+}
+
 bool PerformAudioPassThruRequest::Init() {
   default_timeout_ += (*message_)[str::msg_params][str::max_duration].asInt();
   return true;
@@ -145,11 +153,13 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
 
   if ((*message_)[str::msg_params].keyExists(str::initial_prompt) &&
       (0 < (*message_)[str::msg_params][str::initial_prompt].length())) {
-    for (int32_t i = 0;
+    for (uint32_t i = 0;
         i < (*message_)[str::msg_params][str::initial_prompt].length();
         ++i) {
       msg_params[hmi_request::tts_chunks][i][str::text] =
           (*message_)[str::msg_params][str::initial_prompt][i][str::text];
+      msg_params[hmi_request::tts_chunks][i][str::type] =
+          hmi_apis::Common_SpeechCapabilities::SC_TEXT;
     }
     // app_id
     msg_params[strings::app_id] = connection_key();
@@ -174,7 +184,7 @@ void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text1)) {
     msg_params[hmi_request::audio_pass_display_texts]
                [0][hmi_request::field_name] = static_cast<int32_t>
-    (application_manager::TextFieldName::AUDIO_DISPLAY_TEXT1);
+    (hmi_apis::Common_TextFieldName::audioPassThruDisplayText1);
     msg_params[hmi_request::audio_pass_display_texts]
                [0][hmi_request::field_text] =
         (*message_)[str::msg_params][str::audio_pass_display_text1];
@@ -183,10 +193,18 @@ void PerformAudioPassThruRequest::SendPerformAudioPassThruRequest() {
   if ((*message_)[str::msg_params].keyExists(str::audio_pass_display_text2)) {
     msg_params[hmi_request::audio_pass_display_texts]
                [1][hmi_request::field_name] = static_cast<int32_t>
-    (application_manager::TextFieldName::AUDIO_DISPLAY_TEXT2);
+    (hmi_apis::Common_TextFieldName::audioPassThruDisplayText2);
     msg_params[hmi_request::audio_pass_display_texts]
                [1][hmi_request::field_text] =
         (*message_)[str::msg_params][str::audio_pass_display_text2];
+  }
+
+  if ((*message_)[str::msg_params].keyExists(str::mute_audio)) {
+    msg_params[str::mute_audio] =
+        (*message_)[str::msg_params][str::mute_audio].asBool();
+  } else {
+    // If omitted, the value is set to true
+    msg_params[str::mute_audio] = true;
   }
 
   SendHMIRequest(hmi_apis::FunctionID::UI_PerformAudioPassThru,

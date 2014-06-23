@@ -37,7 +37,6 @@
 
 #include "mb_controller.hpp"
 #include "hmi_message_handler/hmi_message_adapter.h"
-#include "utils/logger.h"
 #include "utils/threads/thread_validator.h"
 
 namespace hmi_message_handler {
@@ -48,7 +47,15 @@ class MessageBrokerAdapter : public HMIMessageAdapter,
  public:
   MessageBrokerAdapter(HMIMessageHandler* handler_param, const std::string&
                                 server_address, uint16_t port);
-  ~MessageBrokerAdapter();
+#ifdef CUSTOMER_PASA
+// Todd: PASA support
+#ifdef PASA_HMI
+  explicit MessageBrokerAdapter(HMIMessageHandler* handler,
+		  	  	  	  	  	    const std::string& mqsend,
+		  	  	  	  	  	    const std::string& mqrecv);
+#endif  // PASA_HMI
+#endif  // CUSTOMER_PASA
+    ~MessageBrokerAdapter();
   void SendMessageToHMI(MessageSharedPointer message);
 
   /*Methods from CMessageBrokerController*/
@@ -82,9 +89,6 @@ class MessageBrokerAdapter : public HMIMessageAdapter,
   static const std::string ADDRESS;
   static const uint16_t PORT;
 
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
   DISALLOW_COPY_AND_ASSIGN(MessageBrokerAdapter);
 };
 }  //  namespace hmi_message_handler

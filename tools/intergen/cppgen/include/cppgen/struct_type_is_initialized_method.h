@@ -49,6 +49,25 @@ class StructTypeIsInitializedMethod : public CppFunction {
  private:
   // CppFunction pure virtual methods implementation
   virtual void DefineBody(std::ostream* os) const;
+ private:
+  // Fields
+  const Struct* strct_;
+};
+
+/**
+ * @brief Generates bool empty() method for struct types
+ * this method has no is_ prefix to support stl style
+ * that is dictated by maps and arrays
+ */
+class StructTypeStructEmptyMethod : public CppFunction {
+ public:
+  StructTypeStructEmptyMethod(const Struct* strct);
+  ~StructTypeStructEmptyMethod();
+ private:
+  // CppFunction pure virtual methods implementation
+  virtual void DefineBody(std::ostream* os) const;
+ private:
+  // Fields
   const Struct* strct_;
 };
 

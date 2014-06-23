@@ -50,17 +50,20 @@ void ActivateAppResponse::Run() {
           (*message_)[strings::params][hmi_response::code].asInt());
   if (hmi_apis::Common_Result::SUCCESS == code) {
     int32_t correlation_id = ResponseFromHMI::correlation_id();
-    const uint32_t app_id = ApplicationManagerImpl::instance()->
+    // Mobile id is converted to HMI id for HMI requests
+    const uint32_t hmi_app_id = ApplicationManagerImpl::instance()->
         application_id(correlation_id);
-    if (!app_id) {
-      LOG4CXX_ERROR(logger_, "Error app_id = "<<app_id);
+    if (!hmi_app_id) {
+      LOG4CXX_ERROR(logger_, "Error hmi_app_id = "<< hmi_app_id);
       return;
     }
-    ApplicationSharedPtr application = ApplicationManagerImpl::instance()->application(app_id);
+    // Need to use here application by hmi app ID
+    ApplicationSharedPtr application = ApplicationManagerImpl::instance()->
+                                       application_by_hmi_app(hmi_app_id);
     if (application) {
       ApplicationManagerImpl::instance()->ActivateApplication(application);
     } else {
-      LOG4CXX_ERROR(logger_, "Application cannot activate");
+      LOG4CXX_ERROR(logger_, "Application can't be activated.");
     }
   } else {
     LOG4CXX_ERROR(logger_, "Error result code"<<code);

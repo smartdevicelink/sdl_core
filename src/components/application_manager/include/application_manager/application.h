@@ -80,9 +80,9 @@ struct AppFile {
     }
     AppFile(const std::string& name, bool persistent, bool download_complete,
           mobile_apis::FileType::eType type)
-      : is_persistent(persistent),
+      : file_name(name),
+        is_persistent(persistent),
         is_download_complete(download_complete),
-        file_name(name),
         file_type(type){
   }
   std::string file_name;
@@ -390,6 +390,8 @@ class Application : public virtual InitialApplicationData,
     virtual bool has_been_activated() const = 0;
 
     virtual const Version& version() const = 0;
+    virtual void set_hmi_application_id(uint32_t hmi_app_id) = 0;
+    virtual uint32_t hmi_app_id() const = 0;
     virtual uint32_t app_id() const = 0;
     virtual const std::string& name() const = 0;
     virtual const std::string folder_name() const = 0;
@@ -422,8 +424,23 @@ class Application : public virtual InitialApplicationData,
     virtual uint32_t get_grammar_id() const = 0 ;
     virtual void set_grammar_id(uint32_t value) = 0;
 
-    virtual void set_protocol_version(ProtocolVersion protocol_version) = 0;
-    virtual ProtocolVersion protocol_version() = 0;
+    /**
+     * @brief returns attribute alert_in_background_
+     * @return TRUE if application runs alert request from background level
+     * otherwise returns FALSE
+     */
+    virtual bool alert_in_background() const = 0;
+
+    /**
+     * @brief if application activates alert in background level method sets
+     * TRUE
+     * @param state_of_alert contains TRUE if alert is activated otherwise
+     * contains FALSE
+     */
+    virtual void set_alert_in_background(bool state_of_alert) = 0;
+    virtual void set_protocol_version(
+        const ProtocolVersion& protocol_version) = 0;
+    virtual ProtocolVersion protocol_version() const = 0;
 
     virtual bool AddFile(AppFile& file) = 0;
     virtual const AppFilesMap& getAppFiles() const = 0;

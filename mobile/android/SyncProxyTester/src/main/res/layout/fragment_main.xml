@@ -1,0 +1,122 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:background="@color/main_bg_color"
+    android:weightSum="2"
+    tools:context="yuriy.chernyshov.appexample.app.MainActivity$PlaceholderFragment">
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1"
+        android:scrollbars="none">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical">
+
+            <Button
+                android:id="@+id/btnPlayPause"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/app_regular_text_color"
+                android:text="Play/Pause" />
+
+            <Button
+                android:id="@+id/btnSendMessage"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textColor="@color/app_regular_text_color"
+                android:text="Send Message" />
+
+            <TextView
+                android:text="RPC Service"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:textColor="#FFFFFF"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <RelativeLayout
+                android:layout_marginBottom="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/rpc_secure_checkbox"
+                    android:text="Encrypt RPC"
+                    android:checked="false"
+                    android:layout_below="@+id/rpc_service_state"
+                    android:layout_alignParentLeft="true" />
+
+                <Spinner
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/secure_error_spinner"
+                    android:layout_below="@+id/rpc_secure_checkbox"
+                    android:layout_alignParentLeft="true" />
+
+                <Button
+                    android:id="@+id/secure_error_msg_button"
+                    android:text="@string/secure_error_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/secure_error_spinner"
+                    android:layout_alignParentLeft="true" />
+
+                <Button
+                    android:id="@+id/rpc_service_secure_button_view"
+                    android:text="@string/secure_service_send_rpc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/secure_error_msg_button"
+                    android:layout_alignParentLeft="true" />
+
+                <Button
+                    android:id="@+id/rpc_non_secure_button_view"
+                    android:text="@string/not_secure_service_send_rpc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/rpc_service_secure_button_view"
+                    android:layout_alignParentLeft="true" />
+
+                <TextView
+                    android:id="@+id/rpc_service_state"
+
+                    android:layout_width="wrap_content"
+                    android:text="@string/rpc_service_state"
+                    android:layout_height="wrap_content" />
+
+
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/video_fragment_holder"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <LinearLayout
+                android:id="@+id/audio_fragment_holder"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+
+    </ScrollView>
+
+    <ListView
+        android:id="@+id/messageList"
+        android:layout_weight="1"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+</LinearLayout>

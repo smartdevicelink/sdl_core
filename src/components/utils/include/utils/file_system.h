@@ -38,7 +38,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "utils/logger.h"
 
 namespace file_system {
 

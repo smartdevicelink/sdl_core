@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,8 @@ uint8_t RpcTypeToByte(RpcType type);
 
 const char* RpcTypeToString(RpcType type);
 
-std::ostream& operator<<(std::ostream& os, RpcType rpc_type);
+std::ostream &operator<<(std::ostream &os, RpcType rpc_type);
 
 } // namespace protocol_handler
-
 
 #endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RPC_TYPE_H_

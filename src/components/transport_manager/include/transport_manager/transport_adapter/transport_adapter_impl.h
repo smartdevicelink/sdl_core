@@ -1,7 +1,5 @@
-/**
- * \file transport_adapter_impl.h
- * \brief TransportAdapterImpl class header file.
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,10 +35,9 @@
 
 #include <queue>
 #include <set>
+#include <map>
 #include <memory>
 #include <string>
-
-#include "utils/logger.h"
 
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -240,6 +237,10 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual void SearchDeviceDone(const DeviceVector& devices);
 
+  virtual void ApplicationListUpdated(const DeviceUID& device_handle);
+
+  virtual void FindNewApplicationsRequest();
+
   /**
    * @brief Launch OnSearchDeviceFailed event in device adapter listener.
    *
@@ -310,6 +311,14 @@ class TransportAdapterImpl : public TransportAdapter,
                              const ConnectError& error);
 
   /**
+   * @brief Remove specified device and all its connections
+   * @param device_handle Device unique identifier.
+   * @param error Error class that contains details of this error situation.
+   */
+  virtual void DeviceDisconnected(const DeviceUID& device_handle,
+                                  const DisconnectDeviceError& error);
+
+  /**
    * @brief Delete specified connection from the container(map) of connections
    *and launch event in the device adapter listener.
    *
@@ -374,6 +383,27 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual std::string DeviceName(const DeviceUID& device_id) const;
 
+#ifdef TIME_TESTER
+  /**
+   * @brief Setup observer for time metric.
+   *
+   * @param observer - pointer to observer
+   */
+  void SetTimeMetricObserver(TMMetricObserver* observer);
+
+  /**
+   * @brief Return Time metric observer
+   *
+   * @param return pointer to Time metric observer
+   */
+  virtual TMMetricObserver* GetTimeMetricObserver();
+#endif  // TIME_TESTER
+
+#ifdef CUSTOMER_PASA
+  virtual TransportAdapter::Error AbortConnection(
+      const DeviceUID& device_handle, const ApplicationHandle& app_handle);
+#endif  // CUSTOMER_PASA
+
  protected:
 
   /**
@@ -411,6 +441,12 @@ class TransportAdapterImpl : public TransportAdapter,
    * @return Error information about connecting applications on device
    */
   TransportAdapter::Error ConnectDevice(DeviceSptr device);
+
+  /**
+   * @brief Remove specified device
+   * @param device_handle Device unique identifier.
+   */
+  void RemoveDevice(const DeviceUID& device_handle);
 
   /**
    * @brief Listener for device adapter notifications.
@@ -488,14 +524,15 @@ class TransportAdapterImpl : public TransportAdapter,
    * @brief Pointer to the factory of connections initiated from client.
    */
   ClientConnectionListener* client_connection_listener_;
+
+#ifdef TIME_TESTER
+  /**
+   * @brief Pointer to time metric observer
+   */
+  TMMetricObserver* metric_observer_;
+#endif  // TIME_TESTER
 };
-
-#ifdef ENABLE_LOG
-extern log4cxx::LoggerPtr logger_;
-#endif  // ENABLE_LOG
-
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // #ifndef \
-        // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_IMPL_H_
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_IMPL_H_

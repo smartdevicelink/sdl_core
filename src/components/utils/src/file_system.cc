@@ -35,6 +35,7 @@
 #include <sys/statvfs.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sstream>
 
 #include <dirent.h>
 #include <unistd.h>
@@ -166,7 +167,7 @@ bool file_system::Write(
   std::ios_base::openmode mode) {
   std::ofstream file(file_name.c_str(), std::ios_base::binary | mode);
   if (file.is_open()) {
-    for (int32_t i = 0; i < data.size(); ++i) {
+    for (uint32_t i = 0; i < data.size(); ++i) {
       file << data[i];
     }
     file.close();

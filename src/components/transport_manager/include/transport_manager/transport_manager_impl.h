@@ -37,24 +37,20 @@
 
 #include <pthread.h>
 
-#ifdef RWLOCK_SUPPORT
-#  if (defined(OS_LINUX) && (defined(__USE_UNIX98) || defined(__USE_XOPEN2K))) || \
-      (defined(OS_QNX)   && (defined(__EXT_POSIX1_200112)))
-#  define USE_RWLOCK
-#  endif
-#endif
-
 #include <queue>
 #include <map>
 #include <list>
 #include <algorithm>
 
-#include "utils/logger.h"
 #include "utils/timer_thread.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
+#ifdef TIME_TESTER
+#include "transport_manager/time_metric_observer.h"
+#endif  // TIME_TESTER
+#include "utils/rwlock.h"
 
 using ::transport_manager::transport_adapter::TransportAdapterListener;
 
@@ -99,31 +95,15 @@ class TransportManagerImpl : public TransportManager {
     typedef utils::SharedPtr<TimerInternal> TimerInternalSharedPointer;
     TimerInternalSharedPointer timer;
     bool shutDown;
+    DeviceHandle device_handle_;
     int messages_count;
 
     ConnectionInternal(TransportManagerImpl* transport_manager,
                        TransportAdapter* transport_adapter,
                        const ConnectionUID& id, const DeviceUID& dev_id,
-                       const ApplicationHandle& app_id)
-        : transport_manager(transport_manager),
-          transport_adapter(transport_adapter),
-          timer(new TimerInternal(this, &ConnectionInternal::DisconnectFailedRoutine)),
-          shutDown(false),
-          messages_count(0) {
-            Connection::id = id;
-            Connection::device = dev_id;
-            Connection::application = app_id;
-    }
-
-    void DisconnectFailedRoutine() {
-      LOG4CXX_INFO(logger_, "Disconnection failed");
-      transport_manager->RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
-                                    transport_manager->converter_.UidToHandle(device),
-                                    DisconnectDeviceError());
-      shutDown = false;
-      timer->stop();
-    }
-
+                       const ApplicationHandle& app_id,
+                       const DeviceHandle& device_handle);
+    void DisconnectFailedRoutine();
   };
  public:
 
@@ -243,6 +223,16 @@ class TransportManagerImpl : public TransportManager {
    */
   void UpdateDeviceList(TransportAdapter* ta);
 
+#ifdef TIME_TESTER
+  /**
+   * @brief Setup observer for time metric.
+   *
+   * @param observer - pointer to observer
+   */
+  void SetTimeMetricObserver(TMMetricObserver* observer);
+#endif  // TIME_TESTER
+
+
   /**
    * @brief Constructor.
    **/
@@ -328,16 +318,7 @@ class TransportManagerImpl : public TransportManager {
   void EventListenerThread(void);
 
   /**
-   * \brief For logging.
-   */
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif  // ENABLE_LOG
-
-  /**
    * @brief store messages
-   *
-   * @param
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
@@ -346,17 +327,14 @@ class TransportManagerImpl : public TransportManager {
   /**
    * @brief Mutex restricting access to messages.
    **/
-#ifdef USE_RWLOCK
-  mutable pthread_rwlock_t message_queue_rwlock_;
-#endif
+
+  mutable sync_primitives::RWLock message_queue_rwlock_;
   mutable pthread_mutex_t message_queue_mutex_;
 
   pthread_cond_t message_queue_cond_;
 
   /**
    * @brief store events from comming device
-   *
-   * @param
    *
    * @see @ref components_transportmanager_client_connection_management
    **/
@@ -392,15 +370,19 @@ class TransportManagerImpl : public TransportManager {
   /**
    * @brief Mutex restricting access to events.
    **/
-#ifdef USE_RWLOCK
-  mutable pthread_rwlock_t event_queue_rwlock_;
-#endif
+
+  mutable sync_primitives::RWLock event_queue_rwlock_;
+
   mutable pthread_mutex_t event_queue_mutex_;
 
   /**
    * @brief Flag that TM is initialized
    */
   bool is_initialized_;
+
+#ifdef TIME_TESTER
+  TMMetricObserver* metric_observer_;
+#endif  // TIME_TESTER
 
  private:
   /**
@@ -457,8 +439,9 @@ class TransportManagerImpl : public TransportManager {
       DeviceList;
   DeviceList device_list_;
 
+
   void AddConnection(const ConnectionInternal& c);
-  void RemoveConnection(int id);
+  void RemoveConnection(uint32_t id);
   ConnectionInternal* GetConnection(const ConnectionUID& id);
   ConnectionInternal* GetConnection(const DeviceUID& device,
                                     const ApplicationHandle& application);

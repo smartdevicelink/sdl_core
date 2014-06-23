@@ -50,7 +50,9 @@ add_subdirectory(./connection_handler)
 add_subdirectory(./utils)
 
 # --- Security manager
-add_subdirectory(./security_manager)
+if(ENABLE_SECURITY)
+  add_subdirectory(./security_manager)
+endif()
 #
 # --- Policy_impl
 add_subdirectory(./policy)
@@ -75,6 +77,10 @@ add_subdirectory(./config_profile)
 
 # --- AudioManager
 add_subdirectory(./media_manager)
+
+if (TIME_TESTER)
+    add_subdirectory(./time_tester)
+endif()
 
 
 if (${HMI_DBUS_API})

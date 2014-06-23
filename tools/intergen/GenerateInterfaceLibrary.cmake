@@ -1,11 +1,8 @@
-find_package(DBus)
-
 set(INTERGEN_CMD ${CMAKE_BINARY_DIR}/tools/intergen/bin/intergen)
 set(GENERATED_LIB_DEPENDENCIES jsoncpp)
 set(GENERATED_LIB_HEADER_DEPENDENCIES
   ${CMAKE_SOURCE_DIR}/src/components/rpc_base/include
   ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
-  ${DBUS_INCLUDE_DIRS}
 )
 
 # Generates interface library from given xml file and builds it
@@ -26,6 +23,8 @@ function (GenerateInterfaceLibrary xml_file_name generated_interface_names)
   endif()
   if (GenerateInterfaceLibrary_DBUS_SUPPORT)
     set(NEED_DBUS "-d")
+    find_package(DBus)
+    list(APPEND GENERATED_LIB_HEADER_DEPENDENCIES ${DBUS_INCLUDE_DIRS})
   endif()
 
   foreach(interface_name ${generated_interface_names})

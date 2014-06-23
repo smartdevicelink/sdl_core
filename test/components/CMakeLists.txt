@@ -13,16 +13,18 @@ add_subdirectory(./smart_objects)
 # --- AppMgr
 add_subdirectory(./application_manager)
 
-
 # --- ProtocolHandler
 add_subdirectory(./protocol_handler)
 
-# --- ProtocolHandler
+if(ENABLE_SECURITY)
+# --- SecurityManager
+add_subdirectory(./security_manager)
+# TODO(EZamakhov): split connection tests and security
+# --- ConnectionHandler
 add_subdirectory(./connection_handler)
+endif()
 
 add_subdirectory(./hmi_message_handler)
-
-add_subdirectory(./security_manager)
 
 # --- Utils
 add_subdirectory(./utils)
@@ -37,7 +39,7 @@ add_subdirectory(./utils)
 add_subdirectory(./rpc_base)
 
 # --- DBus
-IF (${QT_HMI})
+if(${QT_HMI})
     add_subdirectory(./dbus)
     add_subdirectory(./qt_hmi)
-ENDIF (${QT_HMI})
+endif(${QT_HMI})

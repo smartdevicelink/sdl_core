@@ -63,6 +63,7 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
 
             this.set('constantTBTParams', null);
 
+            this.set('VRCommands', []);
             this.set('tbtActivate', false);
             this.set('globalProperties.helpPrompt', []);
             this.set('globalProperties.timeoutPrompt', []);
@@ -179,6 +180,9 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
                         break;
                     }
                 }
+            } else {
+
+                this.appInfo.set('alignment', "text-align:center");
             }
 
             if (params.graphic) {
@@ -187,15 +191,13 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
                 this.appInfo.set('mainImage', 'images/sdl/audio_icon.jpg');
             }
 
-            // Magic number is a count of Preset Buttons on HMI = 6
-            if (params.customPresets) {
-                this.appInfo.set('customPresets', []);
-                for (var i = 0; i < 8; i++) {
-                    if (params.customPresets[i] != '' || params.customPresets[i] != null) {
-                        this.appInfo.get('customPresets').pushObject(params.customPresets[i]);
-                    } else {
-                        this.appInfo.get('customPresets').pushObject('Preset' + i);
-                    }
+            // Magic number is a count of Preset Buttons on HMI = 8
+            this.appInfo.set('customPresets', []);
+            for (var i = 0; i < 8; i++) {
+                if (!params.customPresets || (params.customPresets[i] == '' || params.customPresets[i] == null)) {
+                    this.appInfo.get('customPresets').pushObject('PRESET_' + i);
+                } else {
+                    this.appInfo.get('customPresets').pushObject(params.customPresets[i]);
                 }
             }
 

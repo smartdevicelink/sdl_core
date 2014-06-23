@@ -1,6 +1,4 @@
-/**
- * \file appMain.cc
- * \brief SmartDeviceLink main application sources
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -33,9 +31,8 @@
  */
 
 #include <sys/stat.h>
-#include <signal.h>
-#include <fcntl.h>
 #include <unistd.h>
+#include <signal.h>
 #include <cstdio>
 #include <cstdlib>
 #include <vector>
@@ -46,8 +43,10 @@
 // ----------------------------------------------------------------------------
 
 #include "./life_cycle.h"
+#include "signal_handlers.h"
 
 #include "utils/signals.h"
+#include "utils/system.h"
 #include "config_profile/profile.h"
 
 #if defined(EXTENDED_MEDIA_MODE)
@@ -61,67 +60,14 @@
 
 // ----------------------------------------------------------------------------
 
+CREATE_LOGGERPTR_GLOBAL(logger, "appMain")
 namespace {
 
-const char kBrowser[] = "/usr/bin/chromium-browser";
-const char kBrowserName[] = "chromium-browser";
-const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
-const char kLocalHostAddress[] = "127.0.0.1";
-const char kApplicationVersion[] = "SDL_RB_3.3";
-
-#ifdef __QNX__
-bool Execute(std::string command, const char * const *) {
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("appMain"));
-  if (system(command.c_str()) == -1) {
-    LOG4CXX_INFO(logger, "Can't start HMI!");
-    return false;
-  }
-  return true;
-}
-#else
-bool Execute(std::string file, const char * const * argv) {
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("appMain"));
-  // Create a child process.
-  pid_t pid_hmi = fork();
-
-  switch (pid_hmi) {
-    case -1: {  // Error
-      LOG4CXX_INFO(logger, "fork() failed!");
-      return false;
-    }
-    case 0: {  // Child process
-      int32_t fd_dev0 = open("/dev/null", O_RDWR, S_IWRITE);
-      if (0 > fd_dev0) {
-        LOG4CXX_WARN(logger, "Open dev0 failed!");
-        return false;
-      }
-      // close input/output file descriptors.
-      close(STDIN_FILENO);
-      close(STDOUT_FILENO);
-      close(STDERR_FILENO);
-
-      // move input/output to /dev/null.
-      dup2(fd_dev0, STDIN_FILENO);
-      dup2(fd_dev0, STDOUT_FILENO);
-      dup2(fd_dev0, STDERR_FILENO);
-
-      // Execute the program.
-      if (execvp(file.c_str(), const_cast<char* const *>(argv)) == -1) {
-        LOG4CXX_ERROR_WITH_ERRNO(logger, "execvp() failed! Can't start HMI!");
-        _exit(EXIT_FAILURE);
-      }
-
-      return true;
-    }
-    default: { /* Parent process */
-      LOG4CXX_INFO(logger, "Process created with pid " << pid_hmi);
-      return true;
-    }
-  }
-}
-#endif
+const std::string kBrowser = "/usr/bin/chromium-browser";
+const std::string kBrowserName = "chromium-browser";
+const std::string kBrowserParams = "--auth-schemes=basic,digest,ntlm";
+const std::string kLocalHostAddress = "127.0.0.1";
+const std::string kApplicationVersion = "Develop";
 
 #ifdef WEB_HMI
 /**
@@ -129,12 +75,10 @@ bool Execute(std::string file, const char * const * argv) {
  * @return true if success otherwise false.
  */
 bool InitHmi() {
-log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                              log4cxx::Logger::getLogger("appMain"));
 
 struct stat sb;
 if (stat("hmi_link", &sb) == -1) {
-  LOG4CXX_INFO(logger, "File with HMI link doesn't exist!");
+  LOG4CXX_FATAL(logger, "File with HMI link doesn't exist!");
   return false;
 }
 
@@ -142,13 +86,9 @@ std::ifstream file_str;
 file_str.open("hmi_link");
 
 if (!file_str.is_open()) {
-  LOG4CXX_INFO(logger, "File with HMI link was not opened!");
+  LOG4CXX_FATAL(logger, "File with HMI link was not opened!");
   return false;
 }
-
-file_str.seekg(0, std::ios::end);
-int32_t length = file_str.tellg();
-file_str.seekg(0, std::ios::beg);
 
 std::string hmi_link;
 std::getline(file_str, hmi_link);
@@ -159,15 +99,11 @@ LOG4CXX_INFO(logger,
 file_str.close();
 
 if (stat(hmi_link.c_str(), &sb) == -1) {
-  LOG4CXX_INFO(logger, "HMI index.html doesn't exist!");
+  LOG4CXX_FATAL(logger, "HMI index.html doesn't exist!");
   return false;
 }
-
-  std::string kBin = kBrowser;
-  const char* const kParams[4] = {kBrowserName, kBrowserParams,
-      hmi_link.c_str(), NULL};
-
-  return Execute(kBin, kParams);
+  return utils::System(kBrowser, kBrowserName).Add(kBrowserParams).Add(hmi_link)
+      .Execute();
 }
 #endif  // WEB_HMI
 
@@ -177,16 +113,14 @@ if (stat(hmi_link.c_str(), &sb) == -1) {
  * @return true if success otherwise false.
  */
 bool InitHmi() {
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-      log4cxx::Logger::getLogger("appMain"));
   std::string kStartHmi = "./start_hmi.sh";
   struct stat sb;
   if (stat(kStartHmi.c_str(), &sb) == -1) {
-    LOG4CXX_INFO(logger, "HMI start script doesn't exist!");
+    LOG4CXX_FATAL(logger, "HMI start script doesn't exist!");
     return false;
   }
 
-  return Execute(kStartHmi, NULL);
+  return utils::System(kStartHmi).Execute();
 }
 #endif  // QT_HMI
 
@@ -199,13 +133,12 @@ bool InitHmi() {
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int32_t main(int32_t argc, char** argv) {
+  threads::Thread::MaskSignals();
+  threads::Thread::SetMainThread();
 
   // --------------------------------------------------------------------------
   // Logger initialization
-
-  log4cxx::LoggerPtr logger = log4cxx::LoggerPtr(
-                                log4cxx::Logger::getLogger("appMain"));
-  log4cxx::PropertyConfigurator::configure("log4cxx.properties");
+  INIT_LOGGER("log4cxx.properties");
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
@@ -225,8 +158,18 @@ int32_t main(int32_t argc, char** argv) {
       profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   }
 
+#ifdef __QNX__
+  if (!profile::Profile::instance()->policy_turn_off()) {
+    if (!utils::System("./init_policy.sh").Execute(true)) {
+      LOG4CXX_ERROR(logger, "Failed initialization of policy database");
+      DEINIT_LOGGER();
+      exit(EXIT_FAILURE);
+    }
+  }
+#endif  // __QNX__
+
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
-    return 1;
+    exit(EXIT_FAILURE);
   }
 
   // --------------------------------------------------------------------------
@@ -234,22 +177,19 @@ int32_t main(int32_t argc, char** argv) {
 
   if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
     main_namespace::LifeCycle::instance()->StopComponents();
-// without this line log4cxx threads continue using some instances destroyed by exit()
-    log4cxx::Logger::getRootLogger()->closeNestedAppenders();
+    DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
   LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
   if (profile::Profile::instance()->launch_hmi()) {
-    if (profile::Profile::instance()->server_address() ==
-        std::string(kLocalHostAddress)) {
+    if (profile::Profile::instance()->server_address() == kLocalHostAddress) {
       LOG4CXX_INFO(logger, "Start HMI on localhost");
 
 #ifndef NO_HMI
       if (!InitHmi()) {
         main_namespace::LifeCycle::instance()->StopComponents();
-// without this line log4cxx threads continue using some instances destroyed by exit()
-        log4cxx::Logger::getRootLogger()->closeNestedAppenders();
+        DEINIT_LOGGER();
         exit(EXIT_FAILURE);
       }
       LOG4CXX_INFO(logger, "InitHmi successful");
@@ -258,8 +198,14 @@ int32_t main(int32_t argc, char** argv) {
   }
   // --------------------------------------------------------------------------
 
-  utils::SubscribeToTerminateSignal(
-    &main_namespace::LifeCycle::StopComponentsOnSignal);
+  utils::SubscribeToTerminateSignal(main_namespace::dummy_signal_handler);
+  threads::Thread::UnmaskSignals();
 
   pause();
+  LOG4CXX_INFO(logger, "Stopping application due to signal caught");
+
+  main_namespace::LifeCycle::instance()->StopComponents();
+  DEINIT_LOGGER();
+
+  return EXIT_SUCCESS;
 }

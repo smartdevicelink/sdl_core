@@ -16,12 +16,18 @@ import org.json.JSONObject;
  */
 public class RegisterAppInterfaceTest extends TestCase {
 
-    private static final String TAG = "RegisterAppInterfaceTest";
+    @SuppressWarnings("unused")
+    private static final String TAG = RegisterAppInterfaceTest.class.getSimpleName();
 
     private String mLegalHashId_Empty = "";
     private String mLegalHashId_Digits = "1234567890";
     private String mLegalHashId_Letters = "qwertyuiop";
     private String mLegalHashId_Symbols = "!@#$%^&*(){}><?/|_";
+
+    private double mIllegalStringAsDouble = 2.0;
+    private int mIllegalStringAsInteger = 2;
+    private boolean mIllegalStringAsBoolean = true;
+    private String mIllegalIsMediaAppString = "true";
     private String mIllegalHashId = "dG8f5887951261W2a578o4L65X484eVl38tWr1n5474727m9iF6n2p" +
             "620335PM18z322B28Q3XG38257kY5Pn8n3584596rU7J8ldG8f5887951261W2a578o4L65X484eVl" +
             "38tWr1n5474727m9iF6n2p620335PM18z322B28Q3XG38257kY5Pn8n3584596rU7J8l";
@@ -154,5 +160,115 @@ public class RegisterAppInterfaceTest extends TestCase {
                         TestCommon.paramsToRequestObject(jsonObject)));
 
         assertNull(registerAppInterface.getDeviceInfo());
+    }
+
+    public void testSetAppIdDoubleCastToDouble() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Names.appID, mIllegalStringAsDouble);
+
+        RegisterAppInterface registerAppInterface = new RegisterAppInterface(
+                JsonRPCMarshaller.deserializeJSONObject(
+                        TestCommon.paramsToRequestObject(jsonObject)));
+
+        assertEquals(mIllegalStringAsDouble, registerAppInterface.getAppId());
+    }
+
+    public void testSetAppIdIntegerCastToInteger() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Names.appID, mIllegalStringAsInteger);
+
+        RegisterAppInterface registerAppInterface = new RegisterAppInterface(
+                JsonRPCMarshaller.deserializeJSONObject(
+                        TestCommon.paramsToRequestObject(jsonObject)));
+
+        assertEquals(mIllegalStringAsInteger, registerAppInterface.getAppId());
+    }
+
+    public void testSetAppIdBooleanCastToBoolean() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Names.appID, mIllegalStringAsBoolean);
+
+        RegisterAppInterface registerAppInterface = new RegisterAppInterface(
+                JsonRPCMarshaller.deserializeJSONObject(
+                        TestCommon.paramsToRequestObject(jsonObject)));
+
+        assertEquals(mIllegalStringAsBoolean, registerAppInterface.getAppId());
+    }
+
+    public void testSetAppNameDoubleCastToDouble() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Names.appName, mIllegalStringAsDouble);
+
+        RegisterAppInterface registerAppInterface = new RegisterAppInterface(
+                JsonRPCMarshaller.deserializeJSONObject(
+                        TestCommon.paramsToRequestObject(jsonObject)));
+
+        assertEquals(mIllegalStringAsDouble, registerAppInterface.getAppName());
+    }
+
+    public void testSetAppNameIntegerCastToInteger() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Names.appName, mIllegalStringAsInteger);
+
+        RegisterAppInterface registerAppInterface = new RegisterAppInterface(
+                JsonRPCMarshaller.deserializeJSONObject(
+                        TestCommon.paramsToRequestObject(jsonObject)));
+
+        assertEquals(mIllegalStringAsInteger, registerAppInterface.getAppName());
+    }
+
+    public void testSetAppNameBooleanCastToBoolean() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Names.appName, mIllegalStringAsBoolean);
+
+        RegisterAppInterface registerAppInterface = new RegisterAppInterface(
+                JsonRPCMarshaller.deserializeJSONObject(
+                        TestCommon.paramsToRequestObject(jsonObject)));
+
+        assertEquals(mIllegalStringAsBoolean, registerAppInterface.getAppName());
+    }
+
+    public void testSetIsMediaStringCastToString() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Names.isMediaApplication, mIllegalIsMediaAppString);
+
+        RegisterAppInterface registerAppInterface = new RegisterAppInterface(
+                JsonRPCMarshaller.deserializeJSONObject(
+                        TestCommon.paramsToRequestObject(jsonObject)));
+
+        assertEquals(mIllegalIsMediaAppString, registerAppInterface.getIsMediaApplication());
+    }
+
+    public void testSetNgnScreenAppNameDoubleCastToDouble() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Names.ngnMediaScreenAppName, mIllegalStringAsDouble);
+
+        RegisterAppInterface registerAppInterface = new RegisterAppInterface(
+                JsonRPCMarshaller.deserializeJSONObject(
+                        TestCommon.paramsToRequestObject(jsonObject)));
+
+        assertEquals(mIllegalStringAsDouble, registerAppInterface.getNgnMediaScreenAppName());
+    }
+
+    public void testSetNgnScreenAppNameIntegerCastToInteger() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Names.ngnMediaScreenAppName, mIllegalStringAsInteger);
+
+        RegisterAppInterface registerAppInterface = new RegisterAppInterface(
+                JsonRPCMarshaller.deserializeJSONObject(
+                        TestCommon.paramsToRequestObject(jsonObject)));
+
+        assertEquals(mIllegalStringAsInteger, registerAppInterface.getNgnMediaScreenAppName());
+    }
+
+    public void testSetNgnScreenAppNameBooleanCastToBoolean() throws JSONException {
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put(Names.ngnMediaScreenAppName, mIllegalStringAsBoolean);
+
+        RegisterAppInterface registerAppInterface = new RegisterAppInterface(
+                JsonRPCMarshaller.deserializeJSONObject(
+                        TestCommon.paramsToRequestObject(jsonObject)));
+
+        assertEquals(mIllegalStringAsBoolean, registerAppInterface.getNgnMediaScreenAppName());
     }
 }

@@ -97,19 +97,22 @@ public class ProtocolFrameHeader {
             return null;
         }
 	}
-	
-	public String toString() {
-		String ret = "";
-		ret += "version " + version + ", " + (isEncrypted ? "encrypted" : "unencrypted") + "\n";
-		ret += "frameType " + frameType.getName() + ", serviceType " + serviceType.getName();
-		ret += "\nframeData " + frameData;
-		ret += ", sessionID " + sessionID;
-		ret += ", dataSize " + dataSize;
-		ret += ", messageID " + messageID;
-		return ret;
-	}
-	
-	public byte getVersion() {
+
+    @Override
+    public String toString() {
+        return "ProtocolFrameHeader{" +
+                "isEncrypted=" + isEncrypted +
+                ", version=" + version +
+                ", frameType=" + frameType +
+                ", serviceType=" + serviceType +
+                ", frameData=" + frameData +
+                ", sessionID=" + sessionID +
+                ", dataSize=" + dataSize +
+                ", messageID=" + messageID +
+                '}';
+    }
+
+    public byte getVersion() {
 		return version;
 	}
 
@@ -133,7 +136,7 @@ public class ProtocolFrameHeader {
 		this.frameData = frameData;
 	}
 
-	public byte getSessionID() {
+	public byte getSessionId() {
 		return sessionID;
 	}
 

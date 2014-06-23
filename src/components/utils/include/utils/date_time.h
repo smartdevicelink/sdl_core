@@ -1,8 +1,5 @@
-/**
-* \file request_watchdog.h
-* \brief DateTime class header file.
-*
-* Copyright (c) 2013, Ford Motor Company
+/*
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -48,7 +45,18 @@ class DateTime {
     static const int32_t MICROSECONDS_IN_MILLISECONDS = 1000;
 
     static TimevalStruct getCurrentTime();
-    static int32_t calculateTimeSpan(TimevalStruct sinceTime);
+
+    // return MILLISECONDS count
+    static int64_t getmSecs(const TimevalStruct& time);
+    // return MICROSECONDS count
+    static int64_t getuSecs(const TimevalStruct& time);
+
+    // return MILLISECONDS count between sinceTime value and current time
+    static int64_t calculateTimeSpan(const TimevalStruct& sinceTime);
+
+    // return MILLISECONDS count between time1 and time2
+    static int64_t calculateTimeDiff(const TimevalStruct& time1,
+                                     const TimevalStruct& time2);
 };
 
 }  // namespace date_time

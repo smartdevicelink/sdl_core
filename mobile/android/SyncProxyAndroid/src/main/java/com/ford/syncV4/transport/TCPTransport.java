@@ -114,19 +114,19 @@ public class TCPTransport extends SyncTransport {
     @Override
     protected boolean sendBytesOverTransport(byte[] msgBytes, int offset, int length) {
         TCPTransportState currentState = getCurrentState();
-        Logger.i(String.format("TCPTransport: sendBytesOverTransport requested. Size: %d, Offset: %d, Length: %d, Current state is: %s"
-                , msgBytes.length, offset, length, currentState.name()));
+        //Logger.i(String.format("TCPTransport: sendBytesOverTransport requested. Size: %d, Offset: %d, Length: %d, Current state is: %s"
+        //        , msgBytes.length, offset, length, currentState.name()));
 
         boolean bResult = false;
 
         if (currentState == TCPTransportState.CONNECTED) {
             synchronized (this) {
                 if (mOutputStream != null) {
-                    Logger.i("TCPTransport: sendBytesOverTransport request accepted. Trying to send data");
+                    //Logger.i("TCPTransport: sendBytesOverTransport request accepted. Trying to send data");
                     try {
                         mOutputStream.write(msgBytes, offset, length);
                         bResult = true;
-                        Logger.i("TCPTransport.sendBytesOverTransport: successfully send data");
+                        //Logger.i("TCPTransport.sendBytesOverTransport: successfully send data:" + msgBytes.length);
                     } catch (IOException e) {
                         Logger.w("TCPTransport.sendBytesOverTransport: error during sending data: " + e.getMessage());
                         bResult = false;
@@ -221,6 +221,9 @@ public class TCPTransport extends SyncTransport {
             if (mThread != null) {
                 mThread.halt();
                 mThread.interrupt();
+                //mThread.join();
+
+                mThread = null;
             }
 
             if (mSocket != null) {
@@ -233,8 +236,10 @@ public class TCPTransport extends SyncTransport {
             }
             mServerSocket = null;
         } catch (IOException e) {
-            Logger.i("TCPTransport.disconnect: Exception during disconnect: " + e.getMessage());
-        }
+            Logger.i("TCPTransport.disconnect: IOException: " + e.getMessage());
+        } /*catch (InterruptedException e) {
+            Logger.i("TCPTransport.disconnect: Join Exception: " + e.getMessage());
+        }*/
 
         if (exception == null) {
             // This disconnect was not caused by an error, notify the proxy that
@@ -269,7 +274,7 @@ public class TCPTransport extends SyncTransport {
          * Represents current thread state - halted or not. This flag is used to change internal behavior depending
          * on current state.
          */
-        private Boolean isHalted = false;
+        private volatile Boolean isHalted = false;
 
         /**
          * Method that marks thread as halted.
@@ -333,6 +338,12 @@ public class TCPTransport extends SyncTransport {
             return bConnected;
         }
 
+        @Override
+        protected void finalize() throws Throwable {
+            super.finalize();
+            Logger.i("TCPTransport finalize thread");
+        }
+
         /**
          * Performs actual thread work
          */
@@ -354,7 +365,6 @@ public class TCPTransport extends SyncTransport {
 
                 setCurrentState(TCPTransportState.CONNECTED);
                 handleTransportConnected();
-
 
                 byte[] buffer = new byte[READ_BUFFER_SIZE];
 

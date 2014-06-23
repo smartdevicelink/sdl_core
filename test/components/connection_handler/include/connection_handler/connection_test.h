@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,15 +36,21 @@
 #include <gtest/gtest.h>
 #include <algorithm>
 #include "connection_handler/connection.h"
+#include "protocol_handler/protocol_packet.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/service_type.h"
 #include "utils/shared_ptr.h"
 
-using namespace connection_handler;
+#define EXPECT_RETURN_TRUE true
+#define EXPECT_RETURN_FALSE false
+#define EXPECT_SERVICE_EXISTS true
+#define EXPECT_SERVICE_NOT_EXISTS false
 
 namespace test {
 namespace components {
 namespace connection_handle {
+  using namespace connection_handler;
+  using namespace protocol_handler;
 
 class ConnectionTest: public ::testing::Test {
  protected:
@@ -61,8 +67,9 @@ class ConnectionTest: public ::testing::Test {
     ConnectionHandlerImpl::destroy();
   }
   void StartSession() {
+    using namespace protocol_handler;
     session_id = connection_->AddNewSession();
-    EXPECT_NE(session_id, -1);
+    EXPECT_NE(session_id, 0u);
     const SessionMap sessionMap = connection_->session_map();
     EXPECT_FALSE(sessionMap.empty());
     const ServiceList serviceList = sessionMap.begin()->second.service_list;
@@ -90,7 +97,7 @@ class ConnectionTest: public ::testing::Test {
     if (found_result) {
       const Service& service = *it;
       EXPECT_EQ(service.is_protected_, protection);
-      }
+    }
   }
 
   void RemoveService(const protocol_handler::ServiceType service_type,
@@ -112,152 +119,146 @@ class ConnectionTest: public ::testing::Test {
 
   ::utils::SharedPtr<Connection> connection_;
   ConnectionHandlerImpl* connection_handler_;
-  int32_t session_id;
-  const bool encrypted = true;
-  const bool unencrypted = false;
-  const bool return_result_true = true;
-  const bool return_result_false = false;
-  const bool expect_service_exist = true;
-  const bool expect_service_not_exist = false;
+  uint32_t session_id;
 };
 
 // Try to add service without session
 TEST_F(ConnectionTest, Session_AddNewServiceWithoySession) {
   EXPECT_EQ(connection_->
             AddNewService(session_id, protocol_handler::kAudio, true),
-            return_result_false);
+            EXPECT_RETURN_FALSE);
   EXPECT_EQ(connection_->
             AddNewService(session_id, protocol_handler::kAudio, false),
-            return_result_false);
+            EXPECT_RETURN_FALSE);
   EXPECT_EQ(connection_->
             AddNewService(session_id, protocol_handler::kMobileNav, true),
-            return_result_false);
+            EXPECT_RETURN_FALSE);
   EXPECT_EQ(connection_->
             AddNewService(session_id, protocol_handler::kMobileNav, false),
-            return_result_false);
+            EXPECT_RETURN_FALSE);
 }
 // Try to remove service without session
 TEST_F(ConnectionTest, Session_RemoveServiceWithoutSession) {
   EXPECT_EQ(connection_->
             RemoveService(session_id, protocol_handler::kAudio),
-            return_result_false);
+            EXPECT_RETURN_FALSE);
   EXPECT_EQ(connection_->
             RemoveService(session_id, protocol_handler::kMobileNav),
-            return_result_false);
+            EXPECT_RETURN_FALSE);
 }
 // Try to remove RPC
 TEST_F(ConnectionTest, Session_RemoveRPCBulk) {
   StartSession();
   EXPECT_EQ(connection_->
             RemoveService(session_id, protocol_handler::kRpc),
-            return_result_false);
+            EXPECT_RETURN_FALSE);
   EXPECT_EQ(connection_->
             RemoveService(session_id, protocol_handler::kBulk),
-            return_result_false);
+            EXPECT_RETURN_FALSE);
 }
 // Control Service couldnot be started anyway
 TEST_F(ConnectionTest, Session_AddControlService) {
   StartSession();
 
-  AddNewService(protocol_handler::kControl, unencrypted,
-               return_result_false,
-               expect_service_not_exist);
-  AddNewService(protocol_handler::kControl, encrypted,
-               return_result_false,
-               expect_service_not_exist);
+  AddNewService(protocol_handler::kControl, PROTECTION_OFF,
+               EXPECT_RETURN_FALSE,
+               EXPECT_SERVICE_NOT_EXISTS);
+  AddNewService(protocol_handler::kControl, PROTECTION_ON,
+               EXPECT_RETURN_FALSE,
+               EXPECT_SERVICE_NOT_EXISTS);
 }
 
 // Invalid Services couldnot be started anyway
-TEST_F(ConnectionTest, Session_AddInvalideService) {
+TEST_F(ConnectionTest, Session_AddInvalidService) {
   StartSession();
 
-  AddNewService(protocol_handler::kInvalidServiceType, unencrypted,
-               return_result_false,
-               expect_service_not_exist);
-  AddNewService(protocol_handler::kInvalidServiceType, encrypted,
-               return_result_false,
-               expect_service_not_exist);
+  AddNewService(protocol_handler::kInvalidServiceType, PROTECTION_OFF,
+               EXPECT_RETURN_FALSE,
+               EXPECT_SERVICE_NOT_EXISTS);
+  AddNewService(protocol_handler::kInvalidServiceType, PROTECTION_ON,
+               EXPECT_RETURN_FALSE,
+               EXPECT_SERVICE_NOT_EXISTS);
 }
 
 // RPC and Bulk Services could be only delay protected
 TEST_F(ConnectionTest, Session_AddRPCBulkServices) {
   StartSession();
 
-  AddNewService(protocol_handler::kRpc, unencrypted,
-               return_result_false,
-               expect_service_exist);
+  AddNewService(protocol_handler::kRpc, PROTECTION_OFF,
+               EXPECT_RETURN_FALSE,
+               EXPECT_SERVICE_EXISTS);
 
-  //Bulk shall not be added and shall be unencrypted
-  AddNewService(protocol_handler::kBulk, unencrypted,
-               return_result_false,
-               expect_service_exist);
+  //Bulk shall not be added and shall be PROTECTION_OFF
+  AddNewService(protocol_handler::kBulk, PROTECTION_OFF,
+               EXPECT_RETURN_FALSE,
+               EXPECT_SERVICE_EXISTS);
 
-  AddNewService(protocol_handler::kRpc, encrypted,
-               return_result_true,
-               expect_service_exist);
+  AddNewService(protocol_handler::kRpc, PROTECTION_ON,
+               EXPECT_RETURN_TRUE,
+               EXPECT_SERVICE_EXISTS);
 
-  //Bulk shall not be added and shall be encrypted
-  AddNewService(protocol_handler::kBulk, encrypted,
-               return_result_false,
-               expect_service_exist);
+  //Bulk shall not be added and shall be PROTECTION_ON
+  AddNewService(protocol_handler::kBulk, PROTECTION_ON,
+               EXPECT_RETURN_FALSE,
+               EXPECT_SERVICE_EXISTS);
 }
 TEST_F(ConnectionTest, Session_AddAllOtherService_Unprotected) {
   StartSession();
 
-  AddNewService(protocol_handler::kAudio, unencrypted,
-               return_result_true,
-               expect_service_exist);
-  AddNewService(protocol_handler::kMobileNav, unencrypted,
-               return_result_true,
-               expect_service_exist);
+  AddNewService(protocol_handler::kAudio, PROTECTION_OFF,
+               EXPECT_RETURN_TRUE,
+               EXPECT_SERVICE_EXISTS);
+  AddNewService(protocol_handler::kMobileNav, PROTECTION_OFF,
+               EXPECT_RETURN_TRUE,
+               EXPECT_SERVICE_EXISTS);
 }
 
 TEST_F(ConnectionTest, Session_AddAllOtherService_Protected) {
   StartSession();
 
-  AddNewService(protocol_handler::kAudio, encrypted,
-               return_result_true,
-               expect_service_exist);
-  AddNewService(protocol_handler::kMobileNav, encrypted,
-               return_result_true,
-               expect_service_exist);
+  AddNewService(protocol_handler::kAudio, PROTECTION_ON,
+               EXPECT_RETURN_TRUE,
+               EXPECT_SERVICE_EXISTS);
+  AddNewService(protocol_handler::kMobileNav, PROTECTION_ON,
+               EXPECT_RETURN_TRUE,
+               EXPECT_SERVICE_EXISTS);
 }
 
 TEST_F(ConnectionTest, Session_AddAllOtherService_DelayProtected1) {
   StartSession();
 
-  AddNewService(protocol_handler::kAudio, unencrypted,
-               return_result_true,
-               expect_service_exist);
-  AddNewService(protocol_handler::kMobileNav, unencrypted,
-               return_result_true,
-               expect_service_exist);
+  AddNewService(protocol_handler::kAudio, PROTECTION_OFF,
+               EXPECT_RETURN_TRUE,
+               EXPECT_SERVICE_EXISTS);
+  AddNewService(protocol_handler::kMobileNav, PROTECTION_OFF,
+               EXPECT_RETURN_TRUE,
+               EXPECT_SERVICE_EXISTS);
 
 
-  AddNewService(protocol_handler::kAudio, encrypted,
-               return_result_true,
-               expect_service_exist);
-  AddNewService(protocol_handler::kMobileNav, encrypted,
-               return_result_true,
-               expect_service_exist);
+  AddNewService(protocol_handler::kAudio, PROTECTION_ON,
+               EXPECT_RETURN_TRUE,
+               EXPECT_SERVICE_EXISTS);
+  AddNewService(protocol_handler::kMobileNav, PROTECTION_ON,
+               EXPECT_RETURN_TRUE,
+               EXPECT_SERVICE_EXISTS);
 }
 //Use other order
 TEST_F(ConnectionTest, Session_AddAllOtherService_DelayProtected2) {
   StartSession();
 
-  AddNewService(protocol_handler::kAudio, unencrypted,
-               return_result_true,
-               expect_service_exist);
-  AddNewService(protocol_handler::kAudio, encrypted,
-               return_result_true,
-               expect_service_exist);
+  AddNewService(protocol_handler::kAudio, PROTECTION_OFF,
+               EXPECT_RETURN_TRUE,
+               EXPECT_SERVICE_EXISTS);
+  AddNewService(protocol_handler::kAudio, PROTECTION_ON,
+               EXPECT_RETURN_TRUE,
+               EXPECT_SERVICE_EXISTS);
 
-  AddNewService(protocol_handler::kMobileNav, unencrypted,
-               return_result_true,
-               expect_service_exist);
-  AddNewService(protocol_handler::kMobileNav, encrypted,
-               return_result_true,
-               expect_service_exist);
+  AddNewService(protocol_handler::kMobileNav, PROTECTION_OFF,
+               EXPECT_RETURN_TRUE,
+               EXPECT_SERVICE_EXISTS);
+  AddNewService(protocol_handler::kMobileNav, PROTECTION_ON,
+               EXPECT_RETURN_TRUE,
+               EXPECT_SERVICE_EXISTS);
 }
 
 } // connection_handle

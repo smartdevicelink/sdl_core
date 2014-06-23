@@ -34,7 +34,6 @@
 #include "application_manager/commands/mobile/encoded_sync_pdata_response.h"
 
 namespace application_manager {
-
 namespace commands {
 
 EncodedSyncPDataResponse::EncodedSyncPDataResponse(
@@ -59,7 +58,5 @@ void EncodedSyncPDataResponse::Run() {
 
   SendResponse(true);
 }
-
 }  // namespace commands
-
 }  // namespace application_manager

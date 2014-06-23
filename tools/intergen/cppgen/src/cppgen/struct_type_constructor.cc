@@ -35,6 +35,7 @@
 #include <string>
 
 #include "cppgen/literal_generator.h"
+#include "cppgen/naming_convention.h"
 #include "cppgen/type_name_code_generator.h"
 #include "model/composite_type.h"
 #include "model/constant.h"
@@ -43,8 +44,13 @@ using std::string;
 
 namespace codegen {
 
-StructTypeDefaultConstructor::StructTypeDefaultConstructor(const Struct* strct)
+StructTypeDefaultConstructor::StructTypeDefaultConstructor(
+    const Struct* strct,
+    const std::string& base_class_name)
     : CppStructConstructor(strct->name()) {
+  if (!strct->frankenstruct()) {
+    Add(Initializer(base_class_name, "kUninitialized"));
+  }
 }
 
 StructTypeDefaultConstructor::~StructTypeDefaultConstructor() {
@@ -52,19 +58,26 @@ StructTypeDefaultConstructor::~StructTypeDefaultConstructor() {
 
 StructTypeMandatoryConstructor::StructTypeMandatoryConstructor(
     const TypePreferences* preferences,
-    const Struct* strct)
+    const Struct* strct,
+    const std::string& base_class_name)
     : CppStructConstructor(strct->name()) {
+  // Pass kUnitialized to CompositeType constructor
+  // there is no actual difference which value to pick
+  if (!strct->frankenstruct()) {
+    Add(Initializer(base_class_name, "kUninitialized"));
+  }
   const Struct::FieldsList& fields = strct->fields();
   for (Struct::FieldsList::const_iterator i = fields.begin(), end =
       fields.end(); i != end; ++i) {
     const Struct::Field& field = *i;
     if (field.default_value() || field.is_mandatory()) {
-      Add(Parameter(field.name(),
+      Add(Parameter(AvoidKeywords(field.name()),
                     TypeNameGenerator(
                       &strct->interface(),
                       preferences,
                       field.type()).result()));
-      Add(Initializer(field.name(), field.name()));
+      Add(Initializer(AvoidKeywords(field.name()),
+                      AvoidKeywords(field.name())));
     }
   }
 }

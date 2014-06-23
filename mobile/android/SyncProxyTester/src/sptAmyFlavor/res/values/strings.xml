@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="tester_app_name">SPTAmy</string>
+    <string name="tester_app_name">Amy SPT</string>
     <string name="selectprotocol_appNameDefault">SPTAmy</string>
 
 </resources>

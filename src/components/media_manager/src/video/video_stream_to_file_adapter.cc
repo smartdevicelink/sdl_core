@@ -32,13 +32,11 @@
 
 #include "media_manager/video/video_stream_to_file_adapter.h"
 #include "utils/file_system.h"
+#include "utils/logger.h"
 
 namespace media_manager {
 
-namespace {
-log4cxx::LoggerPtr logger =
-  log4cxx::LoggerPtr(log4cxx::Logger::getLogger("VideoStreamToFileAdapter"));
-}
+CREATE_LOGGERPTR_GLOBAL(logger, "VideoStreamToFileAdapter")
 
 VideoStreamToFileAdapter::VideoStreamToFileAdapter(const std::string& file_name)
   : file_name_(file_name),

@@ -30,11 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_security_manager_INCLUDE_security_manager_SSL_CONTEXT_H
-#define SRC_COMPONENTS_security_manager_INCLUDE_security_manager_SSL_CONTEXT_H
+#ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SSL_CONTEXT_H_
+#define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SSL_CONTEXT_H_
 
-#include <cstddef> // for size_t typedef
-
+#include <cstddef>  // for size_t typedef
 #include <string>
 
 /**
@@ -42,7 +41,7 @@
  * \brief Class responsible for SSL connection establishing
  *        and data encryption and decryption within this connection
  *
- * \fn security_manager::SSLContext::DoHandshakeStep(const uint8_t*  in_data,  size_t in_data_size, const uint8_t** out_data, size_t* out_data_size)
+ * \fn security_manager::SSLContext::DoHandshakeStep(const uint8_t*  in_data,  size_t in_data_size, const uint8_t** out_data, size_t *out_data_size)
  * \brief Performs SSL handshake
  * In order to establish an SSL connection it's
  * necessary to perform handshake process. During this process
@@ -64,16 +63,21 @@ class SSLContext {
     Handshake_Result_Fail         = 0x1,
     Handshake_Result_AbnormalFail = 0x2
   };
-  virtual HandshakeResult StartHandshake(const uint8_t** const out_data, size_t* out_data_size)=0;
-  virtual HandshakeResult DoHandshakeStep(const uint8_t* const in_data,  size_t in_data_size,
-                                          const uint8_t** const out_data, size_t* out_data_size)=0;
-  virtual bool Encrypt(const uint8_t * const in_data,  size_t in_data_size,
-                        const uint8_t ** const out_data, size_t* out_data_size)=0;
-  virtual bool Decrypt(const uint8_t * const in_data,  size_t in_data_size,
-                        const uint8_t ** const out_data, size_t* out_data_size)=0;
+  virtual HandshakeResult StartHandshake(const uint8_t** const out_data,
+                                         size_t *out_data_size) = 0;
+  virtual HandshakeResult DoHandshakeStep(const uint8_t *const in_data,
+                                          size_t in_data_size,
+                                          const uint8_t** const out_data,
+                                          size_t *out_data_size) = 0;
+  virtual bool Encrypt(const uint8_t *const in_data,    size_t in_data_size,
+                       const uint8_t ** const out_data, size_t *out_data_size) = 0;
+  virtual bool Decrypt(const uint8_t *const in_data,    size_t in_data_size,
+                       const uint8_t ** const out_data, size_t *out_data_size) = 0;
   virtual bool  IsInitCompleted() const = 0;
-  virtual size_t get_max_block_size(size_t mtu) const =0;
+  virtual bool  IsHandshakePending() const = 0;
+  virtual size_t get_max_block_size(size_t mtu) const = 0;
+  virtual std::string LastError() const = 0;
   virtual ~SSLContext() { }
 };
-} // namespace security_manager
-#endif  // SRC_COMPONENTS_security_manager_INCLUDE_security_manager_SSL_CONTEXT_H
+}  // namespace security_manager
+#endif  // SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SSL_CONTEXT_H_

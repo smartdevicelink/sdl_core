@@ -31,51 +31,38 @@
  */
 
 #include "application_manager/policies/pt_exchange_handler_impl.h"
-#include <unistd.h>
+
+#include "utils/logger.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/policies/policy_retry_sequence.h"
 
 namespace policy {
 
-log4cxx::LoggerPtr PTExchangeHandlerImpl::logger_ = log4cxx::LoggerPtr(
-    log4cxx::Logger::getLogger("PTExchangeHandlerImpl"));
+CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 PTExchangeHandlerImpl::PTExchangeHandlerImpl(PolicyHandler* handler)
-    : policy_handler_(handler) {
+    : policy_handler_(handler),
+      retry_sequence_("RetrySequence", new RetrySequence(handler)) {
   DCHECK(policy_handler_);
 }
 
 PTExchangeHandlerImpl::~PTExchangeHandlerImpl() {
+  Stop();
   policy_handler_ = NULL;
 }
 
-bool PTExchangeHandlerImpl::StartExchange() {
-  LOG4CXX_INFO(logger_, "PolicyHandler::StartNextRetry");
-  DCHECK(policy_handler_);
-  if (!policy_handler_->policy_manager()) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    return false;
+void PTExchangeHandlerImpl::Start() {
+  sync_primitives::AutoLock locker(retry_sequence_lock_);
+  retry_sequence_.stop();
+  if (policy_handler_->policy_manager()) {
+    policy_handler_->policy_manager()->ResetRetrySequence();
   }
+  retry_sequence_.start();
+}
 
-  BinaryMessageSptr pt_snapshot = policy_handler_->policy_manager()
-      ->RequestPTUpdate();
-  if (pt_snapshot) {
-    policy_handler_->SendMessageToSDK(*pt_snapshot);
-
-    int timeout = policy_handler_->policy_manager()->TimeoutExchange();
-    int seconds = policy_handler_->policy_manager()->NextRetryTimeout();
-    LOG4CXX_DEBUG(logger_,
-                  "Timeout response: " << timeout << " Next try: " << seconds);
-    if (timeout > 0) {
-      sleep(timeout);
-      policy_handler_->policy_manager()->OnExceededTimeout();
-    }
-    if (seconds > 0) {
-      sleep(seconds);
-      StartExchange();
-    } else {
-      LOG4CXX_INFO(logger_, "End retry sequence. Update PT was not received");
-    }
-  }
-  return true;
+void PTExchangeHandlerImpl::Stop() {
+  sync_primitives::AutoLock locker(retry_sequence_lock_);
+  retry_sequence_.stop();
 }
 
 }  //  namespace policy

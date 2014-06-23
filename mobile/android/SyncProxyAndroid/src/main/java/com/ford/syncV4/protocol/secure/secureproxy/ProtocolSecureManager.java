@@ -21,7 +21,7 @@ import javax.net.ssl.HandshakeCompletedListener;
 /**
  * Created by Andrew Batutin on 3/12/14.
  */
-public class ProtocolSecureManager {
+public class ProtocolSecureManager implements IProtocolSecureManager {
 
     private IHandshakeDataListener handshakeDataListener;
     private ISecureProxyServer listener;
@@ -168,6 +168,7 @@ public class ProtocolSecureManager {
         }
     }
 
+    @Override
     public byte[] sendDataToProxyServerByChunk(boolean isEncrypted, byte[] data) throws IOException, InterruptedException {
         if (isEncrypted) {
             RPCCodedDataListener listenerOFCodedData = new RPCCodedDataListener();
@@ -181,6 +182,7 @@ public class ProtocolSecureManager {
         }
     }
 
+    @Override
     public byte[] sendDataToProxyServerByteByByte(boolean isEncrypted, byte[] data) throws IOException, InterruptedException {
         if (isEncrypted) {
             IRPCodedDataListener listenerOfDeCodedData = new RPCDeCodedDataListener();

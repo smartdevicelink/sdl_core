@@ -1,8 +1,5 @@
-/**
- * \file transport_adapter_listener_impl.h
- * \brief TransportAdapterListenerImpl class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,7 +36,6 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
-#include "utils/logger.h"
 
 using transport_manager::transport_adapter::TransportAdapter;
 
@@ -60,6 +56,7 @@ class TransportAdapterListenerImpl
     ON_SEARCH_DONE = 0,
     ON_SEARCH_FAIL,
     ON_DEVICE_LIST_UPDATED,
+    ON_FIND_NEW_APPLICATIONS_REQUEST,
     ON_CONNECT_DONE,
     ON_CONNECT_FAIL,
     ON_DISCONNECT_DONE,
@@ -113,6 +110,8 @@ class TransportAdapterListenerImpl
    * @param adapter Transport adapter that sent notification
    */
   virtual void OnDeviceListUpdated(const TransportAdapter* adapter);
+
+  virtual void OnFindNewApplicationsRequest(const TransportAdapter* adapter);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -291,12 +290,6 @@ class TransportAdapterListenerImpl
                                     const ApplicationHandle& app_id);
 
  private:
-  /**
-   * \brief For logging.
-   */
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif  // ENABLE_LOG
   TransportManagerImpl* transport_manager_impl_;
   TransportAdapter* transport_adapter_;
 };

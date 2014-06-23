@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -39,6 +39,9 @@
 #include <list>
 #include "utils/macro.h"
 #include "utils/singleton.h"
+#ifdef CUSTOMER_PASA
+#define SDL_INIFILE_PATH     "/fs/mp/etc/AppLink/smartDeviceLink.ini"
+#endif
 
 namespace profile {
 
@@ -73,6 +76,11 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& app_storage_folder() const;
 
     /**
+     * @brief Return application resourse folder
+     */
+    const std::string& app_resourse_folder() const;
+
+    /**
      * @brief Returns the path to the config file
      */
     const std::string& config_file_name() const;
@@ -103,9 +111,9 @@ class Profile : public utils::Singleton<Profile> {
     const uint16_t& audio_streaming_port() const;
 
     /**
-     * @brief Returns policies file name
-     */
-    const std::string& policies_file_name() const;
+      * @brief Returns port for time reports
+      */
+    const uint16_t& time_testing_port() const;
 
     /**
      * @brief Returns hmi capabilities file name
@@ -183,10 +191,10 @@ class Profile : public utils::Singleton<Profile> {
       */
     const std::string& named_video_pipe_path() const;
 
-     /**
-      * @brief Returns the audio pipe path
-      */
-     const std::string& named_audio_pipe_path() const;
+    /**
+     * @brief Returns the audio pipe path
+     */
+    const std::string& named_audio_pipe_path() const;
 
     /**
      * @brief Returns time scale for max amount of requests for application
@@ -203,7 +211,25 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns path to testing file to which redirects audio stream
       */
     const std::string& audio_stream_file() const;
+#ifdef CUSTOMER_PASA
+    /**
+      * @brief Returns path to log4cxx configuration file
+      */
+    const std::string& log4cxx_config_file() const;
+    /**
+      * @brief Returns remote logging flag file name
+      * if this path exists in the system log file will be
+      * saved to the USb drive
+      */
+    const std::string& remote_logging_flag_file() const;
 
+    /**
+      * @brief Returns path to remote logging flag file
+      * if this path exists in the system log file will be
+      * saved to the USb drive
+      */
+#endif
+    const std::string& remote_logging_flag_file_path() const;
     /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none
@@ -266,9 +292,15 @@ class Profile : public utils::Singleton<Profile> {
      */
     const std::string& policies_snapshot_file_name() const;
 
-     /*
-      * @brief Timeout in transport manager before disconnect
+    /**
+     * @brief Should Policy be turned off? (Library not loaded)
+     * @return Flag
      */
+    bool policy_turn_off() const;
+
+    /*
+     * @brief Timeout in transport manager before disconnect
+    */
     uint32_t transport_manager_disconnect_timeout() const;
 
     /*
@@ -285,6 +317,11 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns system files folder path
       */
     const std::string& system_files_path() const;
+
+    /**
+     * @brief Returns port for TCP transport adapter
+     */
+    uint16_t transport_manager_tcp_adapter_port() const;
 
     /**
      * @brief Reads a string value from the profile
@@ -364,7 +401,31 @@ class Profile : public utils::Singleton<Profile> {
                                     const char * const pKey,
                                     bool* out_result) const;
 
- private:
+    /**
+     * @brief Returns delimiter for SDL-generated TTS chunks
+     * @return TTS delimiter
+     */
+    const std::string& tts_delimiter() const;
+
+    /**
+     * @brief Returns recording file source name
+     */
+    const std::string& recording_file_source() const;
+
+    /**
+     * @brief Returns recording file name
+     */
+    const std::string& recording_file_name() const;
+
+    const std::string& mme_db_name() const;
+
+    const std::string& event_mq_name() const;
+
+    const std::string& ack_mq_name() const;
+
+    uint32_t application_list_update_timeout() const;
+
+  private:
     /**
      * Default constructor
      *
@@ -407,16 +468,51 @@ class Profile : public utils::Singleton<Profile> {
                    const char* const pSection,
                    const char* const pKey) const;
 
+    /**
+     * @brief Reads an uint16/32/64_t value from the profile
+     *
+     * @param value         Result value
+     * @param default_value Value to use key wasn't found
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     *
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is changed to default)
+     */
+    bool ReadUIntValue(uint16_t* value,
+                       uint16_t default_value,
+                       const char* const pSection,
+                       const char* const pKey) const;
+
+    bool ReadUIntValue(uint32_t* value,
+                       uint32_t default_value,
+                       const char* const pSection,
+                       const char* const pKey) const;
+
+    bool ReadUIntValue(uint64_t* value,
+                       uint64_t default_value,
+                       const char* const pSection,
+                       const char* const pKey) const;
+
+    /**
+     * @brief Write to log content of container
+     * @param array Source array
+     * @param log Log string
+     */
+    void LogContainer(const std::vector<std::string>& container,
+                      std::string* log);
+
     // Members section
     bool                            launch_hmi_;
     std::string                     app_config_folder_;
     std::string                     app_storage_folder_;
+    std::string                     app_resourse_folder_;
     std::string                     config_file_name_;
     std::string                     server_address_;
     uint16_t                        server_port_;
     uint16_t                        video_streaming_port_;
     uint16_t                        audio_streaming_port_;
-    std::string                     policies_file_name_;
+    uint16_t                        time_testing_port_;
     std::string                     hmi_capabilities_file_name_;
     std::vector<std::string>        help_prompt_;
     std::vector<std::string>        time_out_promt_;
@@ -444,13 +540,27 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t                        delete_file_in_none_;
     uint32_t                        list_files_in_none_;
     std::string                     app_info_storage_;
-    int32_t                         heart_beat_timeout_;
+    uint32_t                        heart_beat_timeout_;
     std::string                     preloaded_pt_file_;
     std::string                     policy_snapshot_file_name_;
+    bool                            policy_turn_off_;
     uint32_t                        transport_manager_disconnect_timeout_;
     bool                            use_last_state_;
     std::vector<uint32_t>           supported_diag_modes_;
     std::string                     system_files_path_;
+    uint16_t                        transport_manager_tcp_adapter_port_;
+    std::string                     tts_delimiter_;
+#ifdef CUSTOMER_PASA
+    std::string                     log4cxx_config_file_;
+    std::string                     remote_logging_flag_file_;
+    std::string                     remote_logging_flag_file_path_;
+#endif
+    std::string                     mme_db_name_;
+    std::string                     event_mq_name_;
+    std::string                     ack_mq_name_;
+    std::string                     recording_file_source_;
+    std::string                     recording_file_name_;
+    uint32_t                        application_list_update_timeout_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

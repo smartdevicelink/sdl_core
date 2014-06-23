@@ -2,7 +2,8 @@ include_directories (
   ./include
   ../utils/include/
   ../config_profile/include/
-  ../../thirdPartyLibs/MessageBroker/include/
+  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES
@@ -12,4 +13,4 @@ set (SOURCES
 )
 
 add_library("RequestWatchdog" ${SOURCES})
-target_link_libraries ("RequestWatchdog" Utils)
+target_link_libraries("RequestWatchdog" Utils)
