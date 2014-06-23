@@ -572,55 +572,8 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         assertTrue("test should pass", passed[0]);
     }
 
-<<<<<<< HEAD
-    public void testStartServiceACK_RPC_FrameReceived() throws Exception {
-        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
-        frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
-        frameHeader.setFrameType(FrameType.Control);
-        frameHeader.setSessionID((byte) 0);
-        frameHeader.setServiceType(ServiceType.RPC);
-        frameHeader.setDataSize(0);
-        IProtocolListener mock = mock(IProtocolListener.class);
-        WiProProtocol.MessageFrameAssembler messageFrameAssembler =
-                new WiProProtocol(mock).new MessageFrameAssembler();
-        ArgumentCaptor<Byte> sessionId = ArgumentCaptor.forClass(byte.class);
-        ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
-        messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolSessionStarted(sessionId.capture(), versionCaptor.capture());
-        assertEquals((byte)0x00, (byte)sessionId.getValue());
-    }
-
-    public void testStartServiceACK_Mobile_Nav_FrameReceived() throws Exception {
-        ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
-        frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
-        frameHeader.setFrameType(FrameType.Control);
-        frameHeader.setSessionID(SESSION_ID);
-        frameHeader.setVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
-        frameHeader.setServiceType(ServiceType.Mobile_Nav);
-        frameHeader.setDataSize(0);
-        IProtocolListener mock = mock(IProtocolListener.class);
-        WiProProtocol protocol = new WiProProtocol(mock);
-        protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
-        WiProProtocol.MessageFrameAssembler messageFrameAssembler =
-                protocol.new MessageFrameAssembler();
-        ArgumentCaptor<ServiceType> serviceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
-        ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
-        ArgumentCaptor<Boolean> encryptionCaptor = ArgumentCaptor.forClass(Boolean.class);
-        ArgumentCaptor<Byte> versionCaptor = ArgumentCaptor.forClass(byte.class);
-        messageFrameAssembler.handleFrame(frameHeader, new byte[0]);
-        Mockito.verify(mock).onProtocolServiceStarted(serviceTypeCaptor.capture(),
-                sessionIDCaptor.capture(), encryptionCaptor.capture(), versionCaptor.capture());
-        assertEquals(ServiceType.Mobile_Nav, serviceTypeCaptor.getValue());
-        assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
-        assertEquals(false, encryptionCaptor.getValue().booleanValue());
-        assertEquals(ProtocolConstants.PROTOCOL_VERSION_THREE, versionCaptor.getValue().byteValue());
-    }
-
-    public void testStartServiceACK_RPC_SessionID0_NotthorwExp() throws Exception {
-=======
     // TODO : Reconsider because of new MessageFrameAssembler class
     /*public void testStartServiceACK_RPC_SessionID0_NotthorwExp() throws Exception {
->>>>>>> develop
         ProtocolFrameHeader frameHeader = new ProtocolFrameHeader();
         frameHeader.setFrameData(FrameDataControlFrameType.StartServiceACK.getValue());
         frameHeader.setFrameType(FrameType.Control);
@@ -657,7 +610,6 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         } catch (IllegalArgumentException exp) {
             assertNotNull(exp);
         }
-<<<<<<< HEAD
     }
 
     public void testStartServiceACK_AudioService_FrameReceived() throws Exception {
@@ -683,9 +635,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
         assertEquals(SESSION_ID, sessionIDCaptor.getValue().byteValue());
         assertEquals(ProtocolConstants.PROTOCOL_VERSION_THREE, versionCaptor.getValue().byteValue());
     }
-=======
     }*/
->>>>>>> develop
 
     public void testHeartBeatMonitorResetOnMessageSent() throws Exception {
         IProtocolListener protocolListener = mock(IProtocolListener.class);

@@ -126,20 +126,12 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                 mock(ISyncConnectionListener.class)) {
 
             @Override
-<<<<<<< HEAD
             public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted,
                                                  byte version) {
                 super.onProtocolServiceStarted(serviceType,sessionID,encrypted, version);
-=======
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionId,
-                                                 byte version) {
-                super.onProtocolServiceStarted(serviceType, sessionId, version);
-
                 passed[0] = true;
-
->>>>>>> develop
                 assertEquals("ServiceType should be equal.", header.getServiceType(), serviceType);
-                assertEquals("Frame headers should be equal.", header.getSessionId(), sessionId);
+                assertEquals("Frame headers should be equal.", header.getSessionId(), sessionID);
                 assertEquals("Version should be equal.", header.getVersion(), version);
 
                 countDownLatch.countDown();
@@ -283,7 +275,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                 mTransportConfig,
                 mock(ISyncConnectionListener.class));
         connection.init();
-        OutputStream stream = connection.startAudioDataTransfer(SessionTest.SESSION_ID);
+        OutputStream stream = connection.startAudioDataTransfer(SessionTest.SESSION_ID, false);
         assertNotNull("output stream should be created", stream);
     }
 
@@ -292,7 +284,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                 mTransportConfig,
                 mock(ISyncConnectionListener.class));
         connection.init();
-        OutputStream stream = connection.startAudioDataTransfer(SessionTest.SESSION_ID);
+        OutputStream stream = connection.startAudioDataTransfer(SessionTest.SESSION_ID, false);
         assertNotNull("audio pacetizer should not be null", connection.mAudioPacketizer);
     }
 
@@ -313,7 +305,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                 mTransportConfig,
                 mock(ISyncConnectionListener.class));
         connection.init();
-        OutputStream stream = connection.startAudioDataTransfer(SessionTest.SESSION_ID);
+        OutputStream stream = connection.startAudioDataTransfer(SessionTest.SESSION_ID, false);
         H264Packetizer packetizer = (H264Packetizer) connection.mAudioPacketizer;
         assertEquals("session id should be equal SESSION_ID", SessionTest.SESSION_ID,
                 packetizer.getSessionID());

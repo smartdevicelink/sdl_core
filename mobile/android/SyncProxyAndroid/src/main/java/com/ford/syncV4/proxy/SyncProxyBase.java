@@ -17,14 +17,10 @@ import com.ford.syncV4.net.SyncPDataSender;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
-<<<<<<< HEAD
-import com.ford.syncV4.protocol.heartbeat.HeartbeatBuilder;
 import com.ford.syncV4.protocol.secure.secureproxy.IHandshakeDataListener;
 import com.ford.syncV4.protocol.secure.secureproxy.IProtectServiceListener;
 import com.ford.syncV4.protocol.secure.secureproxy.IRPCodedDataListener;
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
-=======
->>>>>>> develop
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
 import com.ford.syncV4.proxy.callbacks.OnProxyClosed;
@@ -492,7 +488,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      */
     private int lastCorrelationId = 40000;
 
-<<<<<<< HEAD
     /**
      * An object which process Secure Service messages
      */
@@ -559,21 +554,13 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      */
     public void setSyncConnection(SyncConnection value) {
         mSyncConnection = value;
-
-        if (mSyncConnection == null) {
-            return;
-        }
-        if (mSecureServiceMessageCallback == null) {
-            return;
-        }
-=======
-    public void setSyncConnection(SyncConnection syncConnection) {
         // Comment NPE check point in order to allow mock testing
         /*if (syncConnection == null) {
             throw new NullPointerException("SYNCConnection can not be set to null");
         }*/
-        mSyncConnection = syncConnection;
->>>>>>> develop
+        if (mSecureServiceMessageCallback == null) {
+            return;
+        }
     }
 
     /**
@@ -1326,15 +1313,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             case BLUETOOTH_DISABLED:
                 notifyProxyClosed("Bluetooth is disabled",
                         new SyncException("Bluetooth is disabled",
-<<<<<<< HEAD
-                                SyncExceptionCause.BLUETOOTH_DISABLED)
-                );
-=======
                                 SyncExceptionCause.BLUETOOTH_DISABLED));
-
                 //setSyncConnection(null);
-
->>>>>>> develop
                 break;
             case BLUETOOTH_ADAPTER_NULL:
                 notifyProxyClosed("Bluetooth is not available",
@@ -1917,14 +1897,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     private void checkSyncConnection() throws SyncException {
         // Test if SyncConnection is null
         synchronized (CONNECTION_REFERENCE_LOCK) {
-<<<<<<< HEAD
-            if (mSyncConnection == null || !mSyncConnection.getIsConnected()) {
-                Logger.i("Application attempted to send and RPCRequest without a connected transport.");
-                throw new SyncException("There is no valid connection to SYNC. sendRPCRequest " +
-                        "cannot be called until SYNC has been connected.",
-                        SyncExceptionCause.SYNC_UNAVAILALBE
-                );
-=======
             if (mSyncConnection == null) {
                 final String message = "Application attempted to send RPCRequest without a " +
                         "created transport.";
@@ -1936,7 +1908,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                         "connected transport.";
                 Logger.e(message);
                 throw new SyncException(message, SyncExceptionCause.SYNC_UNAVAILALBE);
->>>>>>> develop
             }
         }
     }
@@ -3248,11 +3219,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             } else {
                 notifyProxyClosed(info, e);
             }
-<<<<<<< HEAD
-=======
-
             //setSyncConnection(null);
->>>>>>> develop
         }
 
         @Override
@@ -3291,16 +3258,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
             startProtocolSession(sessionId);
 
-<<<<<<< HEAD
-            mSyncConnection.setHeartbeatMonitor(
-                    HeartbeatBuilder.buildHeartbeatMonitor(sessionId, heartBeatInterval,
-                            heartBeatAck)
-            );
-            mSyncConnection.startHeartbeatTimer(sessionId);
-=======
             mSyncConnection.addHeartbeatMonitor(sessionId, heartBeatInterval, heartBeatAck);
             mSyncConnection.startHeartbeatMonitor(sessionId);
->>>>>>> develop
         }
 
         @Override
