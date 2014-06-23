@@ -136,7 +136,7 @@ bool RegisterAppInterfaceRequest::Init() {
 
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run " << connection_key());
-  //Checking if appname contains \t \n \\t \\n
+  // Checking if appname contains \t \n \\t \\n
   if (!CheckSyntax((*message_)[strings::msg_params][strings::app_name].asString(),
                    true)) {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -144,9 +144,9 @@ void RegisterAppInterfaceRequest::Run() {
   }
 
   #ifndef CUSTOMER_PASA
-  //Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
-  //Flag conditional compilation "CUSTOMER_PASA" is used in order to exclude hit code
-  //to RTC
+  // Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
+  // Flag conditional compilation "CUSTOMER_PASA" is used in order to exclude hit code
+  // to RTC
   if (true == profile::Profile::instance()->launch_hmi()) {
     // wait till HMI started
     while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {

@@ -77,13 +77,17 @@ void DBusController::sendReply(QVariant data) {
   }
 }
 
-void DBusController::sendError(QVariant asyncObject, QVariant data) {
+void DBusController::sendError(QVariant asyncObject, QVariant code, QVariant message) {
   int uid = asyncObject.toMap()["__async_uid"].toInt();
   std::map<int, delayedReply>::iterator it = replies_.find(uid);
   if (it != replies_.end()) {
-    QDBusMessage msg = it->second.message.createErrorReply(QDBusError::InternalError,
-                                                           data.toString());
+    QDBusMessage msg = it->second.message.createErrorReply(code.toString(),
+                                                           message.toString());
     QDBusConnection::sessionBus().send(msg);
     replies_.erase(it);
   }
+}
+
+void DBusController::sendError(QVariant asyncObject, QVariant code) {
+  sendError(asyncObject, code, QVariant(""));
 }

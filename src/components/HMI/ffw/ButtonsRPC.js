@@ -39,6 +39,12 @@ FFW.Buttons = FFW.RPCObserver.create( {
         componentName: "Buttons"
     }),
 
+    /**
+     * Contains response codes for request that should be processed but there were some kind of errors
+     * Error codes will be injected into response.
+     */
+    errorResponsePull: {},
+
     /*
      * connect to RPC bus
      */

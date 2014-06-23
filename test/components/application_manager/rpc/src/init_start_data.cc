@@ -89,7 +89,7 @@ void InitStartData() {
       } LOG4CXX_INFO(logger_, "InitHmi successful");
     }
   }
-  utils::SubscribeToTerminateSignal(main_namespace::dummy_signal_handler);
+  utils::SubscribeToTerminateSignal(main_namespace::legacy_signal_handler);
 }
 
 void RegApp() {

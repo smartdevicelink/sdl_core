@@ -360,7 +360,7 @@ class Impl(FordXmlParser):
         out.write("  Q_OBJECT\n");
         out.write("  Q_CLASSINFO(\"D-Bus Interface\", \"" + self.interface_path + '.' + ifacename + "\")\n");
         out.write("  Q_CLASSINFO(\"D-Bus Introspection\",\n");
-        introspection_el = self.create_introspection_iface_el(interface_el)
+        introspection_el = self.create_introspection_iface_el(interface_el, 'hmi')
         introspection = glue_strings(ElementTree.tostringlist(introspection_el))
         for str in introspection: 
             str = str.replace('"', '\\"')

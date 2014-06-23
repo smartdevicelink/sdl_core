@@ -48,7 +48,6 @@ class Value;
 }
 
 namespace policy {
-
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
 
@@ -222,6 +221,8 @@ class PolicyHandler :
 
   std::string GetAppName(const std::string& policy_app_id);
 
+  virtual void OnUserRequestedUpdateCheckRequired();
+
   /**
    * Adds http header (temporary method)
    * @param pt_string string without htt header
@@ -287,6 +288,8 @@ class PolicyHandler :
   DeviceHandles pending_device_handles_;
 
   inline PolicyManager* CreateManager();
+
+  bool is_user_requested_policy_table_update_;
 
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
   FRIEND_BASE_SINGLETON_CLASS_WITH_DELETER(PolicyHandler,

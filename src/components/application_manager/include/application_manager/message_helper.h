@@ -61,6 +61,12 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
  */
 typedef std::map<const char*, VehicleDataType> VehicleData;
 
+enum ResultVerifySoftButtonText {
+  kIncorrectCharacter = 0,
+  kStringContainsCharacter = 1,
+  kStringEmpty = 2
+};
+
 /**
  * @brief MessageHelper class
  **/
@@ -402,7 +408,8 @@ class MessageHelper {
     static mobile_apis::Result::eType VerifyImageVrHelpItems(
       smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
 
-    static bool VerifySoftButtonText(smart_objects::SmartObject& soft_button);
+    static ResultVerifySoftButtonText VerifySoftButtonText(
+        smart_objects::SmartObject& soft_button);
 
     static mobile_apis::Result::eType ProcessSoftButtons(
       smart_objects::SmartObject& message_params,

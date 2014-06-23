@@ -67,12 +67,16 @@ enum ErrorCode {
   UserDisallowed
 };
 
-inline void RaiseDbusError(QObject* adaptor, int code) {
+inline void RaiseDbusError(QObject* adaptor, int code, const QString& message) {
   QDBusContext* context = dynamic_cast<QDBusContext*>(adaptor->parent());
   if (context) {
-    context->sendErrorReply(QDBusError::InternalError,
-                            QString::number(static_cast<int>(code)));
+    context->sendErrorReply(QString::number(static_cast<int>(code)),
+                            message);
   }
+}
+
+inline void RaiseDbusError(QObject* adaptor, int code) {
+  RaiseDbusError(adaptor, code, "");
 }
 
 template<typename T>
