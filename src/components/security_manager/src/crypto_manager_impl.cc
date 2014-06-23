@@ -36,6 +36,7 @@
 #include <openssl/err.h>
 #include "security_manager/security_manager.h"
 #include "utils/logger.h"
+#include "utils/atomic.h"
 
 #define TLS1_1_MINIMAL_VERSION 0x1000100f
 
@@ -55,14 +56,12 @@ bool CryptoManagerImpl::Init(Mode mode,
                              const std::string &key_filename,
                              const std::string &ciphers_list,
                              bool verify_peer) {
-  if (instance_count_ == 0) {
+  if (atomic_post_inc(&instance_count_) == 0) {
     SSL_load_error_strings();
     ERR_load_BIO_strings();
     OpenSSL_add_all_algorithms();
     SSL_library_init();
   }
-  // FIXME(EZamakhov): add thread safe
-  ++instance_count_;
 
   mode_ = mode;
   const bool is_server = (mode == SERVER);
@@ -164,7 +163,7 @@ bool CryptoManagerImpl::Init(Mode mode,
 
 void CryptoManagerImpl::Finish() {
   SSL_CTX_free(context_);
-  if (--instance_count_== 0) {
+  if (atomic_post_dec(&instance_count_) == 1) {
     EVP_cleanup();
     ERR_free_strings();
   }
