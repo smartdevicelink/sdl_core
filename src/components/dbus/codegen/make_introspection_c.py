@@ -46,7 +46,7 @@ from sys import argv
 class Impl(FordXmlParser):
     def convert_to_introspection(self, out_el_tree):
         for interface_el in self.el_tree.findall('interface'):
-            el = self.create_introspection_iface_el(interface_el)
+            el = self.create_introspection_iface_el(interface_el, 'sdl')
             if el is not None:
                 out_el_tree.append(el)
 

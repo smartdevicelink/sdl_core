@@ -80,7 +80,7 @@
 
   4.1. Use this step if Web HMI and SDL are running on separate computers (virtualized QNX is also considered to be running on a separate computer):
     4.1.1. LinHost: update SDL config file “<Project_Root_Src>/src/appMain/smartDeviceLink.ini”: find  “ServerAddress = ” there and replace the value with <SDL server address>.
-    4.1.2. LinHost: update Web HMI network parameters: in file “<Project_Root_Src>/src/components/HMI/ffw/RPCClient.js” find “url: ” and replace the value ("ws://localhost:8087" or FLAGS.WEBSOCKET_URL) with <SDL server address>. (e.g. "url: "ws://192.168.177.128:8087"")
+    4.1.2. LinHost: update Web HMI network parameters: in file “<Project_Root_Src>/src/components/HMI/app/Flags.js” find “WEBSOCKET_URL: ” and replace the value ("ws://localhost:8087") with <SDL server address>. (e.g. "url: "ws://192.168.177.128:8087"")
       Note: <SDL server address> is the IP of the computer where SDL is running.
 
   4.2. Use this step if QML HMI and SDL are running on separate computers (virtualized QNX is also considered to be running on a separate computer):

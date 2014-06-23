@@ -2097,18 +2097,21 @@ mobile_apis::Result::eType MessageHelper::VerifyImageVrHelpItems(
   return mobile_apis::Result::SUCCESS;
 }
 
-bool MessageHelper::VerifySoftButtonText(
+ResultVerifySoftButtonText MessageHelper::VerifySoftButtonText(
   smart_objects::SmartObject& soft_button) {
   std::string text = soft_button[strings::text].asString();
+  if ((std::string::npos != text.find_first_of("\t\n")) ||
+      (std::string::npos != text.find("\\n")) ||
+      (std::string::npos != text.find("\\t"))) {
+    return kIncorrectCharacter;
+  }
   text.erase(remove(text.begin(), text.end(), ' '), text.end());
-  text.erase(remove(text.begin(), text.end(), '\n'), text.end());
   if (text.size()) {
-    return true;
+    return kStringContainsCharacter;
   } else {
     soft_button.erase(strings::text);
   }
-
-  return false;
+  return kStringEmpty;
 }
 
 mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
@@ -2161,16 +2164,22 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         if (!request_soft_buttons[i].keyExists(strings::text)) {
           return mobile_apis::Result::INVALID_DATA;
         }
-
-        if (!VerifySoftButtonText(request_soft_buttons[i])) {
+        ResultVerifySoftButtonText result =
+            VerifySoftButtonText(request_soft_buttons[i]);
+        if (kStringEmpty == result) {
           continue;
+        } else if (kIncorrectCharacter == result) {
+          return mobile_apis::Result::INVALID_DATA;
         }
         break;
       }
       case mobile_apis::SoftButtonType::SBT_BOTH: {
 
         if (request_soft_buttons[i].keyExists(strings::text)) {
-          VerifySoftButtonText(request_soft_buttons[i]);
+          if (kIncorrectCharacter == VerifySoftButtonText(
+              request_soft_buttons[i])) {
+            return mobile_apis::Result::INVALID_DATA;
+          }
         } else {
           return mobile_apis::Result::INVALID_DATA;
         }

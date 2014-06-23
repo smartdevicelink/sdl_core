@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2013-2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -85,7 +85,7 @@ class DBusAdapter {
    * \param name pair interface and name of method for call
    * \param obj params for call
    */
-  void MethodCall(uint id, const MessageId func_id, const MessageName name,
+  void MethodCall(uint id, const MessageId func_id, const MessageName& name,
                   const smart_objects::SmartObject& obj);
 
   /**
@@ -95,7 +95,7 @@ class DBusAdapter {
    * \param name pair interface and name of signal for call
    * \param obj params for signal
    */
-  void Signal(const MessageId func_id, const MessageName name,
+  void Signal(const MessageId func_id, const MessageName& name,
               const smart_objects::SmartObject& obj);
 
   /**
@@ -103,7 +103,8 @@ class DBusAdapter {
    * \param id id message
    * \param obj params for return
    */
-  void MethodReturn(uint id, const smart_objects::SmartObject& obj);
+  void MethodReturn(uint id, const MessageId func_id, const MessageName& name,
+                    const smart_objects::SmartObject& obj);
 
   /**
    * \brief sends error on message from HMI
@@ -129,18 +130,33 @@ class DBusAdapter {
   bool Process(smart_objects::SmartObject& obj);
 
   /**
-   * \brief push Ford message id to map by serial
-   * \param serial DBus message serial
+   * \brief saves link D-Bus serial to Ford message id
+   * \param serial D-Bus message serial
    * \param ids pair correlation id and Ford message id
    */
-  inline void PushMessageId(uint32_t serial, std::pair<uint, MessageId> ids);
+  inline void SaveRequestToHMI(uint32_t serial,
+                               const std::pair<uint, MessageId>& ids);
 
   /**
-   * \brief pop Ford message id from map by serial
-   * \param serial DBus message serial
+   * \brief gets Ford message id by serial
+   * \param serial D-Bus message serial
    * \return pair correlation id and Ford message id
    */
-  inline std::pair<uint, MessageId> PopMessageId(uint32_t serial);
+  inline std::pair<uint, MessageId> GetRequestToHMI(uint32_t serial);
+
+  /**
+   * \brief saves link D-Bus serial to Ford message id
+   * \param serial D-Bus message serial
+   * \param request D-Bus message from HMI
+   */
+  inline void SaveRequestFromHMI(uint32_t serial, DBusMessage* request);
+
+  /**
+   * \brief gets D-Bus message id by serial
+   * \param serial DBus message serial
+   * \return D-Bus message from HMI
+   */
+  inline DBusMessage* GetRequestFromHMI(uint32_t serial);
 
   std::string sdl_service_name_;
   std::string sdl_object_path_;
@@ -157,7 +173,12 @@ class DBusAdapter {
   /**
    * \brief mapping serial message DBus on message id Ford protocol
    */
-  std::map<uint32_t, std::pair<uint, MessageId> > map_messages_;
+  std::map<uint32_t, std::pair<uint, MessageId> > requests_to_hmi_;
+
+  /**
+   * \brief mapping message id Ford protocol on message DBus
+   */
+  std::map<uint32_t, DBusMessage*> requests_from_hmi_;
 
   /**
    * \brief processes incoming call of method and fill obj
