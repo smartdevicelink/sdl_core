@@ -844,11 +844,10 @@ public class ModuleTest {
                                         break;
                                     case XmlPullParser.START_TAG:
                                         if (tempName.equalsIgnoreCase(INTEGER_TAG_NAME)) {
-                                            logParserDebugInfo("In Nested Vector Integer");
+                                            logParserDebugInfo("In Nested Vector " + INTEGER_TAG_NAME);
                                             if (parser.getAttributeName(0) != null) {
-                                                //try {vector.add(Integer.parseInt(parser.getAttributeValue(0)));}
                                                 try {
-                                                    vector.add(Double.parseDouble(parser.getAttributeValue(0)));
+                                                    vector.add(Integer.parseInt(parser.getAttributeValue(0)));
                                                 } catch (Exception e) {
                                                     Logger.e(TAG + " Unable to parse " + INTEGER_TAG_NAME);
                                                 }
@@ -900,9 +899,8 @@ public class ModuleTest {
                         } else if (tempName.equalsIgnoreCase(INTEGER_TAG_NAME)) {
                             logParserDebugInfo("In " + INTEGER_TAG_NAME);
                             if (parser.getAttributeName(0) != null) {
-                                //try {hash.put(parser.getAttributeName(0), Integer.parseInt(parser.getAttributeValue(0)));}
                                 try {
-                                    hash.put(parser.getAttributeName(0), Double.parseDouble(parser.getAttributeValue(0)));
+                                    hash.put(parser.getAttributeName(0), Integer.parseInt(parser.getAttributeValue(0)));
                                 } catch (Exception e) {
                                     Logger.e(TAG + " Unable to parse " + INTEGER_TAG_NAME);
                                 }

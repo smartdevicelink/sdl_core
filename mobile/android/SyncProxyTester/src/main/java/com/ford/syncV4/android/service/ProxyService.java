@@ -372,7 +372,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     private boolean startProxy() {
-        createInfoMessageForAdapter(" Start SYNC Proxy:" + mSyncProxy);
+        createInfoMessageForAdapter(" Start SYNC Proxy");
 
         String appId = "";
         if (mSyncProxy == null) {
@@ -2430,8 +2430,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 // what is needed is only to run RPC Request
                 mSyncProxy.sendRPCRequest(appId, registerAppInterface);
             } else {
-                mSyncProxy.sendRPCRequest(appId, registerAppInterface);
-                //mSyncProxy.getSyncConnection().onTransportConnected();
+                //mSyncProxy.sendRPCRequest(appId, registerAppInterface);
+                mSyncProxy.getSyncConnection().onTransportConnected();
             }
         }
     }
