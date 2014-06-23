@@ -5,11 +5,14 @@ import android.test.InstrumentationTestCase;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.protocol.secure.secureproxy.IProtocolSecureManager;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.session.SessionTest;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+
+import static org.mockito.Mockito.mock;
 
 /**
  * Created with Android Studio.
@@ -35,8 +38,8 @@ public class MessageFrameAssemblerTest extends InstrumentationTestCase {
         System.setProperty("dexmaker.dexcache",
                 getInstrumentation().getTargetContext().getCacheDir().getPath());
 
-        mListener = Mockito.mock(MessageFrameAssemblerListener.class);
-        mAssembler = new MessageFrameAssembler(mListener);
+        mListener = mock(MessageFrameAssemblerListener.class);
+        mAssembler = new MessageFrameAssembler(mListener, mock(IProtocolSecureManager.class));
 
         mSessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         mProtocolVersionCaptor = ArgumentCaptor.forClass(byte.class);
@@ -46,7 +49,7 @@ public class MessageFrameAssemblerTest extends InstrumentationTestCase {
 
     public void testConstructorWitNullListenerFail() {
         try {
-            MessageFrameAssembler assembler = new MessageFrameAssembler(null);
+            MessageFrameAssembler assembler = new MessageFrameAssembler(null, mock(IProtocolSecureManager.class));
             fail("Expected NullPointerException to be thrown");
         } catch (NullPointerException e) {
             assertTrue(true);
@@ -144,7 +147,7 @@ public class MessageFrameAssemblerTest extends InstrumentationTestCase {
 
         Mockito.verify(mListener, Mockito.times(1)).onStartServiceACK(mSessionIdCaptor.capture(),
                 mMessageIdCaptor.capture(), mServiceTypeCaptor.capture(),
-                mProtocolVersionCaptor.capture());
+                mProtocolVersionCaptor.capture(), false);
 
         assertEquals(SessionTest.SESSION_ID, mSessionIdCaptor.getValue().byteValue());
         assertEquals(MSG_ID, mMessageIdCaptor.getValue().intValue());

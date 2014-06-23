@@ -10,7 +10,8 @@ import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 
-import junit.framework.TestCase;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import static org.mockito.Mockito.mock;
 
