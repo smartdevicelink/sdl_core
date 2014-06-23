@@ -1071,8 +1071,10 @@ bool Profile::ReadBoolValue(bool* value, const bool default_value,
   *value = result ? read_value : default_value;
   return result;
 }
-long int hex_to_int(const std::string& value) {
-  return strtol(value.c_str(), NULL, 16);
+namespace {
+int32_t hex_to_int(const std::string& value) {
+  return static_cast<int32_t>(strtol(value.c_str(), NULL, 16));
+}
 }
 
 std::list<int> Profile::ReadIntContainer(

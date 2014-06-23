@@ -165,7 +165,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param session_id Identifier of the session to be started
    * \param service_type Type of service
    * \param is_protected would be service protected
-   * \param protocol_version Version of protocol
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
    */
   virtual uint32_t OnSessionStartedCallback(

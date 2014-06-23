@@ -58,7 +58,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         std::string to_string(const int value) const
         {
             std::ostringstream oss;
-	    oss << value;
+      oss << value;
             return oss.str();
         }
 
@@ -210,7 +210,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
             obj_tokens = split(path, ' ');
 
-            for (int i = 0; i < obj_tokens.size(); i++)
+            for (size_t i = 0; i < obj_tokens.size(); i++)
             {
                 if (obj_tokens[i][0] == 'A')            // array
                 {
