@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013-2014, Ford Motor Company
  * All rights reserved.
  *
@@ -46,7 +46,7 @@ namespace dbus {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "HMIMessageHandler")
 
-std::vector<std::string> &split(const std::string &s, char delim,
+std::vector<std::string> &split(const std::string& s, char delim,
                                 std::vector<std::string> &elems) {
   std::stringstream ss(s);
   std::string item;
@@ -108,7 +108,7 @@ bool DBusAdapter::Init() {
 
 bool DBusAdapter::Process(smart_objects::SmartObject& obj) {
   if (conn_ == NULL) {
-    LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
+    LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't initialized");
     return false;
   }
   DBusMessage* msg = dbus_connection_pop_message(conn_);
@@ -132,8 +132,8 @@ bool DBusAdapter::Process(smart_objects::SmartObject& obj) {
 }
 
 void DBusAdapter::MethodReturn(uint id, const MessageId func_id,
-                               const MessageName name,
-                               const smart_objects::SmartObject &obj) {
+                               const MessageName& name,
+                               const smart_objects::SmartObject& obj) {
   LOG4CXX_DEBUG(logger_, "Method return " << name.first << "." << name.second);
   if (conn_ == NULL) {
     LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
@@ -215,8 +215,8 @@ void DBusAdapter::Error(uint id, const std::string& name,
 }
 
 void DBusAdapter::MethodCall(uint id, const MessageId func_id,
-                             const MessageName name,
-                             const smart_objects::SmartObject &obj) {
+                             const MessageName& name,
+                             const smart_objects::SmartObject& obj) {
   LOG4CXX_DEBUG(logger_, "Method call " << name.first << "." << name.second);
   if (conn_ == NULL) {
     LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
@@ -256,8 +256,8 @@ void DBusAdapter::MethodCall(uint id, const MessageId func_id,
   LOG4CXX_INFO(logger_, "DBus: Success call method");
 }
 
-void DBusAdapter::Signal(const MessageId func_id, const MessageName name,
-                         const smart_objects::SmartObject &obj) {
+void DBusAdapter::Signal(const MessageId func_id, const MessageName& name,
+                         const smart_objects::SmartObject& obj) {
   LOG4CXX_DEBUG(logger_, "Signal " << name.first << "." << name.second);
   if (conn_ == NULL) {
     LOG4CXX_ERROR(logger_, "DBus: DBusAdaptor isn't init");
@@ -397,11 +397,11 @@ bool DBusAdapter::ProcessError(DBusMessage* msg,
     return false;
   }
 
-  const char* name_error;
+  const char* error_name;
   bool ret = false;
-  if ((name_error = dbus_message_get_error_name(msg)) != NULL) {
+  if ((error_name = dbus_message_get_error_name(msg)) != NULL) {
     smart_objects::SmartObject name(smart_objects::SmartType_String);
-    name = name_error;
+    name = error_name;
     ford_message_descriptions::ParameterDescription rule = { "description",
         ford_message_descriptions::String, true };
     ListArgs args;
@@ -868,7 +868,7 @@ std::pair<uint, MessageId> DBusAdapter::GetRequestToHMI(uint32_t serial) {
 }
 
 void DBusAdapter::SaveRequestToHMI(uint32_t serial,
-                                   std::pair<uint, MessageId> ids) {
+                                   const std::pair<uint, MessageId>& ids) {
   requests_to_hmi_.insert(std::make_pair(serial, ids));
 }
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013-2014, Ford Motor Company
  * All rights reserved.
  *
@@ -85,7 +85,7 @@ class DBusAdapter {
    * \param name pair interface and name of method for call
    * \param obj params for call
    */
-  void MethodCall(uint id, const MessageId func_id, const MessageName name,
+  void MethodCall(uint id, const MessageId func_id, const MessageName& name,
                   const smart_objects::SmartObject& obj);
 
   /**
@@ -95,7 +95,7 @@ class DBusAdapter {
    * \param name pair interface and name of signal for call
    * \param obj params for signal
    */
-  void Signal(const MessageId func_id, const MessageName name,
+  void Signal(const MessageId func_id, const MessageName& name,
               const smart_objects::SmartObject& obj);
 
   /**
@@ -103,7 +103,7 @@ class DBusAdapter {
    * \param id id message
    * \param obj params for return
    */
-  void MethodReturn(uint id, const MessageId func_id, const MessageName name,
+  void MethodReturn(uint id, const MessageId func_id, const MessageName& name,
                     const smart_objects::SmartObject& obj);
 
   /**
@@ -134,7 +134,8 @@ class DBusAdapter {
    * \param serial D-Bus message serial
    * \param ids pair correlation id and Ford message id
    */
-  inline void SaveRequestToHMI(uint32_t serial, std::pair<uint, MessageId> ids);
+  inline void SaveRequestToHMI(uint32_t serial,
+                               const std::pair<uint, MessageId>& ids);
 
   /**
    * \brief gets Ford message id by serial
