@@ -592,7 +592,7 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     ConnectionID connection_id, const uint8_t session_id,
     uint32_t protocol_version, const uint8_t service_type,
-    size_t data_size, const uint8_t *data,
+    const size_t data_size, const uint8_t *data,
     const size_t maxdata_size, const bool is_final_message) {
   LOG4CXX_TRACE_ENTER(logger_);
 
@@ -611,12 +611,12 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
 
   LOG4CXX_INFO_EXT(
       logger_,
-      "Data size " << data_size << " of " << frames_count <<
-      " frames with last frame " << lastframe_size);
+      "Data " << data_size << " bytes in " << frames_count <<
+      " frames with last frame size " << lastframe_size);
 
   DCHECK(maxdata_size >= FIRST_FRAME_DATA_SIZE);
   DCHECK(FIRST_FRAME_DATA_SIZE >= 8);
-  uint8_t *out_data = new uint8_t[maxdata_size];
+  uint8_t out_data[FIRST_FRAME_DATA_SIZE];
   out_data[0] = data_size >> 24;
   out_data[1] = data_size >> 16;
   out_data[2] = data_size >> 8;
@@ -643,16 +643,14 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
     const uint8_t data_type = is_last_frame ? 0 : (i % FRAME_DATA_MAX_VALUE + 1);
     const bool is_final_packet = is_last_frame ? is_final_message : false;
 
-    memcpy(out_data, data + maxdata_size*i, frame_size);
-
     const ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
         protocol_version, PROTECTION_OFF, FRAME_TYPE_CONSECUTIVE,
-        service_type, data_type, session_id, frame_size, message_id, out_data));
+        service_type, data_type, session_id, frame_size, message_id,
+        data + maxdata_size * i));
 
     raw_ford_messages_to_mobile_.PostMessage(
           impl::RawFordMessageToMobile(ptr, is_final_packet));
   }
-  delete[] out_data;
   LOG4CXX_TRACE_EXIT(logger_);
   return RESULT_OK;
 }
@@ -978,11 +976,20 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     security_manager::SSLContext *ssl_context = session_observer_->
         GetSSLContext(connection_key, service_type);
     // if session already has initialized SSLContext
-    if (ssl_context && ssl_context->IsInitCompleted()) {
-      // Start service as protected with corrent SSLContext
-      SendStartSessionAck(connection_id, session_id, packet.protocol_version(),
-                          connection_key, packet.service_type(), PROTECTION_ON);
-      return RESULT_OK;
+    if (ssl_context) {
+      if (ssl_context->IsInitCompleted()) {
+        // Start service as protected with corrent SSLContext
+        SendStartSessionAck(connection_id, session_id, packet.protocol_version(),
+                            connection_key, packet.service_type(), PROTECTION_ON);
+        return RESULT_OK;
+      } else if (ssl_context->IsHandshakePending()) {
+        security_manager_->AddListener(
+              new StartSessionHandler(
+                connection_key, &raw_ford_messages_to_mobile_,
+                connection_id, session_id, packet.protocol_version(),
+                connection_key, packet.service_type()));
+        return RESULT_OK;
+      }
     }
     // start new SSL at this session
     if (security_manager_->ProtectConnection(connection_key)) {
@@ -992,8 +999,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
               connection_id, session_id, packet.protocol_version(),
               connection_key, packet.service_type()));
       security_manager_->StartHandshake(connection_key);
-      LOG4CXX_DEBUG(logger_, "Protection established for connection "
-                    << connection_key);
+      LOG4CXX_DEBUG(logger_, "Protection establishing for connection "
+                    << connection_key << " is in progress");
       return RESULT_OK;
     }
     LOG4CXX_ERROR(logger_, "ProtectConnection failed");
@@ -1095,7 +1102,8 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
   };
   LOG4CXX_DEBUG(logger_, "Encrypted " << packet->data_size() << " bytes to "
                 << out_data_size << " bytes");
-  DCHECK(out_data); DCHECK(out_data_size);
+  DCHECK(out_data);
+  DCHECK(out_data_size);
   packet->set_protection_flag(true);
   packet->set_data(out_data, out_data_size);
   return RESULT_OK;
@@ -1140,7 +1148,8 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
   };
   LOG4CXX_DEBUG(logger_, "Decrypted " << packet->data_size() << " bytes to "
                 << out_data_size << " bytes");
-  DCHECK(out_data); DCHECK(out_data_size);
+  DCHECK(out_data);
+  DCHECK(out_data_size);
   packet->set_data(out_data, out_data_size);
   return RESULT_OK;
 }

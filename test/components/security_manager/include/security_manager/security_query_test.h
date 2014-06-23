@@ -42,8 +42,8 @@
 #include "security_manager/security_manager_mock.h"
 
 // Test values for compare after serialization and byteorder convertion
-#define SEQ_NUMBER    0x12345678
-#define CONNECTION_KEY 0xABCDEF0
+#define SEQ_NUMBER    0x12345678u
+#define CONNECTION_KEY 0xABCDEF0u
 
 namespace test  {
 namespace components  {

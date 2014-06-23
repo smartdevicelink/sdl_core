@@ -274,6 +274,9 @@ void ProtocolPacket::set_data(
     packet_data_.data = new (std::nothrow) uint8_t[packet_data_.totalDataBytes];
     if (packet_data_.data) {
       memcpy(packet_data_.data, new_data, packet_data_.totalDataBytes);
+    } else {
+      // TODO(EZamakhov): add log info about memory problem
+      packet_header_.dataSize = packet_data_.totalDataBytes = 0;
     }
   }
 }

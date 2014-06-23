@@ -99,7 +99,7 @@ uint32_t Connection::AddNewSession() {
 
 uint32_t Connection::RemoveSession(uint8_t session_id) {
   sync_primitives::AutoLock lock(session_map_lock_);
-  SessionMapIterator it = session_map_.find(session_id);
+  SessionMap::iterator it = session_map_.find(session_id);
   if (session_map_.end() == it) {
     LOG4CXX_WARN(logger_, "Session not found in this connection!");
     return 0;
@@ -121,15 +121,15 @@ bool Connection::AddNewService(uint8_t session_id,
 
   sync_primitives::AutoLock lock(session_map_lock_);
 
-  SessionMapIterator session_it = session_map_.find(session_id);
+  SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
     LOG4CXX_WARN(logger_, "Session not found in this connection!");
     return false;
   }
 
   ServiceList &service_list = session_it->second.service_list;
-  ServiceListIterator service_it = std::find(service_list.begin(),
-                                             service_list.end(), service_type);
+  ServiceList::iterator service_it =
+      std::find(service_list.begin(), service_list.end(), service_type);
   // if service already exists
   if (service_it != service_list.end()) {
     Service &service = *service_it;
@@ -138,13 +138,13 @@ bool Connection::AddNewService(uint8_t session_id,
       service.is_protected_ = true;
       // Rpc and bulk shall be protected as one service
       if (service.service_type == protocol_handler::kRpc) {
-        ServiceListIterator service_Bulk_it =
+        ServiceList::iterator service_Bulk_it =
             std::find(service_list.begin(), service_list.end(),
                       protocol_handler::kBulk);
         DCHECK(service_Bulk_it != service_list.end());
         service_Bulk_it->is_protected_ = true;
       } else if (service.service_type == protocol_handler::kBulk) {
-        ServiceListIterator service_Rpc_it =
+        ServiceList::iterator service_Rpc_it =
             std::find(service_list.begin(), service_list.end(),
                       protocol_handler::kRpc);
         DCHECK(service_Rpc_it != service_list.end());
@@ -184,15 +184,15 @@ bool Connection::RemoveService(
   }
   sync_primitives::AutoLock lock(session_map_lock_);
 
-  SessionMapIterator session_it = session_map_.find(session_id);
+  SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_map_.end() == session_it) {
     LOG4CXX_WARN(logger_, "Session not found in this connection!");
     return false;
   }
 
   ServiceList &service_list = session_it->second.service_list;
-  ServiceListIterator service_it = find(service_list.begin(),
-                                        service_list.end(), service_type);
+  ServiceList::iterator service_it =
+      find(service_list.begin(), service_list.end(), service_type);
   if (service_list.end() == service_it) {
     LOG4CXX_WARN(logger_, "Session " << session_id << " didn't established"
                   " service " << service_type);
@@ -261,7 +261,7 @@ const SessionMap Connection::session_map() const {
 void Connection::CloseSession(uint8_t session_id) {
   sync_primitives::AutoLock lock(session_map_lock_);
 
-  SessionMapIterator session_it = session_map_.find(session_id);
+  SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
     return;
   }

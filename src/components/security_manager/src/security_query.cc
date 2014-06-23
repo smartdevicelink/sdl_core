@@ -121,7 +121,7 @@ bool SecurityQuery::SerializeQuery(const uint8_t *const raw_data,
   return true;
 }
 
-std::vector<uint8_t> SecurityQuery::DeserializeQuery() const {
+const std::vector<uint8_t> SecurityQuery::DeserializeQuery() const {
   SecurityQuery::QueryHeader deserialize_header(header_);
   const uint32_t tmp = deserialize_header.query_id << 8;
   deserialize_header.query_id   = LE_TO_BE32(tmp);

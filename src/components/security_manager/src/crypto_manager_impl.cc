@@ -61,7 +61,7 @@ bool CryptoManagerImpl::Init(Mode mode,
     OpenSSL_add_all_algorithms();
     SSL_library_init();
   }
-  // TODO(EZamakhov): add thread safe
+  // FIXME(EZamakhov): add thread safe
   ++instance_count_;
 
   mode_ = mode;

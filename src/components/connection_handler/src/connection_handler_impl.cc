@@ -147,7 +147,7 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   // 1. Delete all the connections and sessions of this device
   // 2. Delete device from a list
   // 3. Let observer know that device has been deleted.
-  for (ConnectionListIterator it = connection_list_.begin();
+  for (ConnectionList::iterator it = connection_list_.begin();
       it != connection_list_.end(); ++it) {
     if (device_info.device_handle() == (*it).second->connection_device_handle()) {
       RemoveConnection((*it).first);
@@ -243,7 +243,7 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
 
   sync_primitives::AutoLock lock(connection_list_lock_);
-  ConnectionListIterator it = connection_list_.find(connection_handle);
+  ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
     return 0;
@@ -252,22 +252,22 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   // FIXME(EZamakhov): refactoring (move to other module)
   if (is_protected) {
     // Check deliver-specific services (which shall not be protected)
-    const std::list<int> protecteSpecific =
+    const std::list<int> force_unprotected_list =
         profile::Profile::instance()->ReadIntContainer(
           "Security Manager", "ForceUnprotectedService", NULL);
-    if (std::find(protecteSpecific.begin(), protecteSpecific.end(), service_type) !=
-        protecteSpecific.end()) {
+    if (std::find(force_unprotected_list.begin(), force_unprotected_list.end(), service_type) !=
+        force_unprotected_list.end()) {
       LOG4CXX_ERROR(logger_, "Service " << static_cast<int>(service_type)
                     << " is forbidden to be protected");
       return 0;
     }
   } else {
     // Check deliver-specific services (which shall be protected)
-    const std::list<int> protecteSpecific =
+    const std::list<int> force_protected_list =
         profile::Profile::instance()->ReadIntContainer(
           "Security Manager", "ForceProtectedService", NULL);
-    if (std::find(protecteSpecific.begin(), protecteSpecific.end(), service_type) !=
-        protecteSpecific.end()) {
+    if (std::find(force_protected_list.begin(), force_protected_list.end(), service_type) !=
+        force_protected_list.end()) {
       LOG4CXX_ERROR(logger_, "Service " << static_cast<int>(service_type)
                     << " shall be protected");
       return 0;
@@ -297,7 +297,6 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
 
   if (connection_handler_observer_) {
     const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
-    // TODO(EZamakhov): update info in ApplicationManagerImpl::OnServiceStartedCallback
     const bool success = connection_handler_observer_->OnServiceStartedCallback(
         connection->connection_device_handle(), session_key, service_type);
     if (!success) {
@@ -319,7 +318,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
 
   sync_primitives::AutoLock lock(connection_list_lock_);
-  ConnectionListIterator it = connection_list_.find(connection_handle);
+  ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
     return 0;
@@ -380,7 +379,7 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
   transport_manager::ConnectionUID conn_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(key, &conn_handle, &session_id);
-  ConnectionListIterator it = connection_list_.find(conn_handle);
+  ConnectionList::iterator it = connection_list_.find(conn_handle);
 
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
@@ -415,8 +414,8 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
 
     if (sessions_list) {
       const SessionMap &session_map = connection.session_map();
-      for (SessionMapConstIterator session_it = session_map.begin(), end =
-          session_map.end(); session_it != end; ++session_it) {
+      for (SessionMap::const_iterator session_it = session_map.begin();
+           session_map.end() != session_it; ++session_it) {
         sessions_list->push_back(KeyFromPair(conn_handle, it->first));
       }
     }
@@ -469,12 +468,12 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   if (applications_list) {
     applications_list->clear();
     sync_primitives::AutoLock connection_list_lock(connection_list_lock_);
-    for (ConnectionListIterator itr = connection_list_.begin();
+    for (ConnectionList::iterator itr = connection_list_.begin();
         itr != connection_list_.end(); ++itr) {
       if (device_handle == (*itr).second->connection_device_handle()) {
         const SessionMap &session_map = (itr->second)->session_map();
-        for (SessionMapConstIterator session_it = session_map.begin(),
-             end = session_map.end(); session_it != end; ++session_it) {
+        for (SessionMap::const_iterator session_it = session_map.begin();
+             session_map.end() != session_it; ++session_it) {
           const transport_manager::ConnectionUID &connection_handle = itr->first;
           const uint32_t session_id = session_it->first;
           const uint32_t application_id = KeyFromPair(connection_handle, session_id);
@@ -501,7 +500,7 @@ int ConnectionHandlerImpl::SetSSLContext(
   PairFromKey(key, &connection_handle, &session_id);
 
   sync_primitives::AutoLock lock(connection_list_lock_);
-  ConnectionListIterator it = connection_list_.find(connection_handle);
+  ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
     return security_manager::SecurityQuery::ERROR_INTERNAL;
@@ -518,7 +517,7 @@ security_manager::SSLContext *ConnectionHandlerImpl::GetSSLContext(
   PairFromKey(key, &connection_handle, &session_id);
 
   sync_primitives::AutoLock lock(connection_list_lock_);
-  ConnectionListIterator it = connection_list_.find(connection_handle);
+  ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
     return NULL;
@@ -608,7 +607,7 @@ uint32_t ConnectionHandlerImpl::GetConnectionSessionsCount(
   PairFromKey(connection_key, &connection_handle, &session_id);
 
   sync_primitives::AutoLock lock(connection_list_lock_);
-  ConnectionListIterator itr = connection_list_.find(connection_handle);
+  ConnectionList::iterator itr = connection_list_.find(connection_handle);
 
   if (connection_list_.end() != itr) {
     return itr->second->session_map().size();
@@ -637,16 +636,16 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
         ConnectionUIDFromHandle(connection_handle);
 
   sync_primitives::AutoLock connection_list_lock(connection_list_lock_);
-  ConnectionListIterator itr = connection_list_.find(connection_id);
+  ConnectionList::iterator itr = connection_list_.find(connection_id);
 
   if (connection_list_.end() != itr) {
     if (connection_handler_observer_) {
       SessionMap session_map = itr->second->session_map();
-      SessionMapIterator session_it = session_map.find(session_id);
+      SessionMap::iterator session_it = session_map.find(session_id);
       if (session_it != session_map.end()) {
         const Session &session = session_it->second;
         const ServiceList &service_list = session.service_list;
-        ServiceListConstIterator it = service_list.begin();
+        ServiceList::const_iterator it = service_list.begin();
         for (;it != service_list.end(); ++it) {
           const uint32_t session_key = KeyFromPair(connection_id, session_id);
           const protocol_handler::ServiceType service_type = it->service_type;
@@ -665,7 +664,7 @@ void ConnectionHandlerImpl::StartSessionHeartBeat(uint32_t connection_key) {
   PairFromKey(connection_key, &connection_handle, &session_id);
 
   sync_primitives::AutoLock lock(connection_list_lock_);
-  ConnectionListIterator it = connection_list_.find(connection_handle);
+  ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() != it) {
     it->second->StartHeartBeat(session_id);
   }
@@ -685,7 +684,7 @@ void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key,
                                                 uint8_t session_id) {
   sync_primitives::AutoLock lock(connection_list_lock_);
 
-  ConnectionListIterator it = connection_list_.find(connection_key);
+  ConnectionList::iterator it = connection_list_.find(connection_key);
   if (connection_list_.end() != it) {
     it->second->KeepAlive(session_id);
   }
@@ -697,7 +696,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
                << " from the list.");
 
   sync_primitives::AutoLock lock(connection_list_lock_);
-  ConnectionListIterator itr = connection_list_.find(connection_id);
+  ConnectionList::iterator itr = connection_list_.find(connection_id);
   if (connection_list_.end() == itr) {
     LOG4CXX_ERROR(logger_, "Connection not found!");
     return;
@@ -707,11 +706,11 @@ void ConnectionHandlerImpl::OnConnectionEnded(
     const Connection *connection = itr->second;
     const SessionMap session_map = connection->session_map();
 
-    for (SessionMapConstIterator session_it = session_map.begin(), end =
-        session_map.end(); session_it != end; ++session_it) {
+    for (SessionMap::const_iterator session_it = session_map.begin();
+         session_map.end() != session_it; ++session_it) {
       const uint32_t session_key = KeyFromPair(connection_id, session_it->first);
       const ServiceList &service_list = session_it->second.service_list;
-      for (ServiceListConstIterator service_it = service_list.begin(), end =
+      for (ServiceList::const_iterator service_it = service_list.begin(), end =
           service_list.end(); service_it != end; ++service_it) {
         connection_handler_observer_->OnServiceEndedCallback(
             session_key, service_it->service_type);

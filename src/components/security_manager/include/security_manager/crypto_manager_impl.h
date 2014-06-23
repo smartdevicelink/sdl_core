@@ -61,6 +61,7 @@ class CryptoManagerImpl : public CryptoManager {
     virtual bool Decrypt(const uint8_t *const in_data,    size_t in_data_size,
                          const uint8_t ** const out_data, size_t *out_data_size);
     virtual bool IsInitCompleted() const;
+    virtual bool IsHandshakePending() const;
     virtual size_t get_max_block_size(size_t mtu) const;
     virtual std::string LastError() const;
     virtual ~SSLContextImpl();
@@ -74,6 +75,7 @@ class CryptoManagerImpl : public CryptoManager {
     BIO *bioFilter_;
     size_t buffer_size_;
     uint8_t *buffer_;
+    bool is_handshake_pending_;
     Mode mode_;
     BlockSizeGetter max_block_size_;
     static std::map<std::string, BlockSizeGetter> max_block_sizes;

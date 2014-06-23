@@ -47,8 +47,11 @@ CryptoManagerImpl::SSLContextImpl::SSLContextImpl(SSL *conn, Mode mode)
     bioIn_(BIO_new(BIO_s_mem())),
     bioOut_(BIO_new(BIO_s_mem())),
     bioFilter_(NULL),
-    buffer_size_(1024),
+    // TODO(EZamakhov): get MTU by parameter (from transport)
+    // default buffer size is TCP MTU
+    buffer_size_(1500),
     buffer_(new uint8_t[buffer_size_]),
+    is_handshake_pending_(false),
     mode_(mode) {
   SSL_set_bio(connection_, bioIn_, bioOut_);
 }
@@ -67,6 +70,7 @@ bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() const {
 
 SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::
 StartHandshake(const uint8_t** const out_data, size_t *out_data_size) {
+  is_handshake_pending_ = true;
   return DoHandshakeStep(NULL, 0, out_data, out_data_size);
 }
 
@@ -131,12 +135,14 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
                 const uint8_t** const out_data, size_t *out_data_size) {
   *out_data = NULL;
   if (IsInitCompleted()) {
+    is_handshake_pending_ = false;
     return SSLContext::Handshake_Result_Success;
   }
 
   if (in_data && in_data_size) {
     int ret = BIO_write(bioIn_, in_data, in_data_size);
     if (ret <= 0) {
+      is_handshake_pending_ = false;
       return SSLContext::Handshake_Result_AbnormalFail;
     }
   }
@@ -148,7 +154,9 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
 
     const SSL_CIPHER *cipher = SSL_get_current_cipher(connection_);
     max_block_size_ = max_block_sizes[SSL_CIPHER_get_name(cipher)];
+    is_handshake_pending_ = false;
   } else if (handshake_result == 0) {
+    is_handshake_pending_ = false;
     return SSLContext::Handshake_Result_Fail;
   }
 
@@ -162,6 +170,7 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
       *out_data_size = read_count;
       *out_data =  buffer_;
     } else {
+      is_handshake_pending_ = false;
       return SSLContext::Handshake_Result_AbnormalFail;
     }
   }
@@ -227,17 +236,20 @@ size_t CryptoManagerImpl::SSLContextImpl::get_max_block_size(size_t mtu) const {
   if (!max_block_size_) {
     // FIXME(EZamakhov): add correct logics for TLS1/1.2/SSL3
     // For SSL3.0 set temporary value 90, old TLS1.2 value is 29
+    assert(mtu > 90);
     return mtu - 90;
   }
   return max_block_size_(mtu);
 }
 
+bool CryptoManagerImpl::SSLContextImpl::IsHandshakePending() const {
+  return is_handshake_pending_;
+}
 
 CryptoManagerImpl::SSLContextImpl::~SSLContextImpl() {
-  // TODO(EZamakhov): return destruction logics
-  // SSL_shutdown(connection_);
-  // SSL_free(connection_);
-  // delete[] buffer_;
+  SSL_shutdown(connection_);
+  SSL_free(connection_);
+  delete[] buffer_;
 }
 
 void CryptoManagerImpl::SSLContextImpl::EnsureBufferSizeEnough(size_t size) {
