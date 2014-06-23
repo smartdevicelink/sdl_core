@@ -338,7 +338,9 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 this.appInfo.set('trackIcon', 'images/sdl/audio_icon.jpg');
             }
 
-            this.updateSoftButtons(params.softButtons);
+            if ("softButtons" in params) {
+                this.updateSoftButtons(params.softButtons);
+            }
 
             // Magic number is a count of Preset Buttons on HMI = 8
             for (var i = 0; i < 8; i++) {
