@@ -1,7 +1,7 @@
 /**
- * @file MainMenuListModel.qml
- * @brief Main menu list of elements.
- * Copyright (c) 2013, Ford Motor Company
+ * @file SettingsSourceModel.qml
+ * @brief Settings source menu list of elements.
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,44 +36,45 @@ import QtQuick 2.0
 ListModel
 {
     ListElement {
-        name: "Climate"
-        icon: "../res/snow.png"
-        qml: "./views/ClimateControlView.qml"
+        title: "Allow SDL Functionality"
+        qml: ""
+        appId: 0
+        action: ""
     }
-
     ListElement {
-        name: "Navigation"
-        icon: "../res/arrow.png"
-        qml: "./views/NavigationNoRouteGridView.qml"
+        title: "Update SDL"
+        qml: ""
+        appId: 0
+        action: "update_sdl"
     }
-
     ListElement {
-        name: "Media"
-        icon: "../res/notes.png"
-        qml: "./views/MusicSourceView.qml"
+        title: "Policy table update status"
+        qml: ""
+        appId: 0
+        action: ""
     }
-
     ListElement {
-        name: "Settings"
-        icon: "../res/gear.png"
-        qml: "./views/SettingsSourceView.qml"
+        title: "Send request GetURLS"
+        qml: ""
+        appId: 0
+        action: ""
     }
-
     ListElement {
-        name: "Apps"
-        icon: "../res/apps.png"
-        qml: "./views/ApplicationListView.qml"
+        title: "Statistics info settings"
+        qml: ""
+        appId: 0
+        action: ""
     }
-
     ListElement {
-        name: "Phone"
-        icon: "../res/phone/phone.png"
-        qml: "./views/PhoneMenuGridView.qml"
+        title: "App permissions"
+        qml: ""
+        appId: 0
+        action: ""
     }
-
     ListElement {
-        name: "Car"
-        icon: "../res/car.png"
-        qml: "./views/CarMenuGridView.qml"
+        title: "Device state change"
+        qml: ""
+        appId: 0
+        action: ""
     }
 }
