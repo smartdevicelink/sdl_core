@@ -477,4 +477,6 @@ public class Names {
      * v4_protocol_v3_0_revQ
      */
     public static final String fileName = "fileName";
+    public static final String errorId = "errorId";
+    public static final String errorMessage = "errorMessage";
 }

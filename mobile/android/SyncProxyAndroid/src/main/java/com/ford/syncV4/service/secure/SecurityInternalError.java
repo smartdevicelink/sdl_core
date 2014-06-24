@@ -12,17 +12,19 @@ package com.ford.syncV4.service.secure;
  */
 public enum SecurityInternalError {
 
-    ERROR_SUCCESS,                //= 0x0,
-    ERROR_INVALID_QUERY_SIZE,     //= 0x1, //low size of message or wrong json_size
-    ERROR_INVALID_QUERY_ID,       //= 0x2, //unknown query id
-    ERROR_NOT_SUPPORTED,          //= 0x3, //No CryptoManager
-    ERROR_SERVICE_ALREADY_PROTECTED, //= 0x4,
-    ERROR_CREATE_SLL,             //= 0x5,
-    ERROR_CONNECTION_NOT_FOUND,   //= 0x6,
-    ERROR_SESSION_NOT_FOUND,      //= 0x7,
-    ERROR_SERVICE_NOT_PROTECTED,  //= 0x8, //got handshake for not protected service
-    ERROR_SSL_INVALID_DATA,       //= 0xF0,
-    ERROR_UNKWOWN_INTERNAL_ERROR, //= 0xFF
+    ERROR_SUCCESS,                    // = 0x00,
+    ERROR_INVALID_QUERY_SIZE,         //= 0x01,  // wrong size of query data
+    ERROR_INVALID_QUERY_ID,           // = 0x02,  // unknown query id
+    ERROR_NOT_SUPPORTED,              //= 0x03,  // SDL does not support encryption
+    ERROR_SERVICE_ALREADY_PROTECTED,  //= 0x04,
+    ERROR_CREATE_SSLCONTEXT,          //= 0x05,  // could not create new SSLContext
+    ERROR_SERVICE_NOT_PROTECTED,      //= 0x06,  // got handshake or encrypted data
+                                                // for not protected service ???
+    ERROR_DECRYPTION_FAILED,          //= 0x07,
+    ERROR_ENCRYPTION_FAILED,          //= 0x08,
+    ERROR_SSL_INVALID_DATA,           //= 0xF0,
+    ERROR_INTERNAL,                   //= 0xF1,
+    ERROR_UNKWOWN_INTERNAL_ERROR,     //= 0xFF
     UNKNOWN
 
 }
