@@ -362,6 +362,16 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         return mSessionsCounter.contains(appId);
     }
 
+    public String[] getAllAppIds() {
+        String[] result = new String[mSessionsCounter.size()];
+        int counter = 0;
+        for (String appId: mSessionsCounter) {
+            // return a copy of the AppId
+            result[counter] = new String(appId);
+        }
+        return result;
+    }
+
     /**
      * Prepare all necessary parameters to be passed to Sync proxy
      */

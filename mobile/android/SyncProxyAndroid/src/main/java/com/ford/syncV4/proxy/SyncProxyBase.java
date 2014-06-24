@@ -1085,6 +1085,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     private void cleanProxy() throws SyncException {
         try {
             // ALM Specific Cleanup
+            Logger.d("Start clean SYNC Proxy, isALM:" + mAdvancedLifecycleManagementEnabled);
             if (mAdvancedLifecycleManagementEnabled) {
                 mSyncConnectionState = SyncConnectionState.SYNC_DISCONNECTED;
 
@@ -1120,7 +1121,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
         mIsProxyDisposed = true;
 
-        Logger.i("SyncProxy start Dispose");
+        Logger.i("SYNC Proxy start Dispose");
 
         try {
             // Clean the proxy

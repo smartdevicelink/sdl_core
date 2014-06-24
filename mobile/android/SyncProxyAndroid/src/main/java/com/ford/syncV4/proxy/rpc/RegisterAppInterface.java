@@ -24,15 +24,10 @@ public class RegisterAppInterface extends RPCRequest {
 
     public SyncMsgVersion getSyncMsgVersion() {
         Object obj = parameters.get(Names.syncMsgVersion);
-        Logger.d("TRACE RAI:" + obj);
         if (obj instanceof SyncMsgVersion) {
-            Logger.d("TRACE RAI SyncMsgVersion:" + obj);
             return (SyncMsgVersion) obj;
         } else if (obj instanceof Hashtable) {
-            Logger.d("TRACE RAI Hashtable:" + obj);
             return new SyncMsgVersion((Hashtable) obj);
-        } else if (obj instanceof Vector<?>) {
-            Logger.d("TRACE RAI Vector:" + obj);
         }
         return null;
     }
