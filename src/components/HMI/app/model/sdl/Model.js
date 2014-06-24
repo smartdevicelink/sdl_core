@@ -149,6 +149,23 @@ SDL.SDLModel = Em.Object.create({
     ],
 
     /**
+     * Policy Settings Info state value
+     *
+     * @type {String}
+     */
+    systemErrorListState: 'SYNC_REBOOTED',
+
+    /**
+     * Policy Settings Info list
+     *
+     * @type {Object}
+     */
+    systemErrorList: [
+        'SYNC_REBOOTED',
+        'SYNC_OUT_OF_MEMMORY'
+    ],
+
+    /**
      * Flag to indicate AudioPassThruPopUp activity
      *
      * @type {Boolean}
@@ -555,6 +572,14 @@ SDL.SDLModel = Em.Object.create({
 
         FFW.BasicCommunication.AddStatisticsInfo(this.settingsInfoListState);
     }.observes('this.settingsInfoListState'),
+
+    /**
+     * Method to set selected state of settings Info List
+     */
+    systemErrorListStateChange: function() {
+
+        FFW.BasicCommunication.OnSystemError(this.systemErrorListState);
+    }.observes('this.systemErrorListState'),
 
     /**
      * Method to open Phone view and dial phone number

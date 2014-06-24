@@ -48,7 +48,8 @@ SDL.SettingsView = Em.ContainerView.create( {
             SDL.AppPermissionsListView,
             SDL.AppPermissionsView,
             SDL.DeviceConfigView,
-            SDL.StatisticsInfoView
+            SDL.StatisticsInfoView,
+            SDL.SystemErrorView
         ],
 
     /** Left menu */
