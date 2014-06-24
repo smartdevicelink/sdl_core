@@ -76,6 +76,7 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         });
 
         mSessionCheckBoxState = new AudioServiceCheckboxState(checkBox, getActivity());
+        mSessionCheckBoxState.setStateOff();
     }
 
 
@@ -93,12 +94,7 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         final SyncProxyTester tester = (SyncProxyTester) getActivity();
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
-<<<<<<< HEAD
-            SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.startAudioService(getAppId(), false);
-=======
-            tester.startAudioService(getAppId());
->>>>>>> develop
         } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             mFileStreamingLogic.resetStreaming();
             tester.stopAudioService(getAppId());
