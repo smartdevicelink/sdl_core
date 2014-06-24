@@ -18,7 +18,7 @@ public class SecureInternalErrorMessage extends RPCRequest {
     }
 
     public int getErrorId() {
-        return (int) parameters.get(Names.errorId);
+        return (Integer) parameters.get(Names.errorId);
     }
 
     public void setMessage(String message) {
