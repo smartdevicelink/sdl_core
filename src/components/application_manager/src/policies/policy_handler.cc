@@ -123,6 +123,7 @@ PolicyManager* PolicyHandler::LoadPolicyLibrary() {
   if (error_string == NULL) {
     policy_manager_ = CreateManager();
     policy_manager_->set_listener(this);
+    event_observer_= new PolicyEventObserver(policy_manager_);
   } else {
     LOG4CXX_ERROR(logger_, error_string);
   }
@@ -146,6 +147,14 @@ PolicyManager* PolicyHandler::CreateManager() {
 bool PolicyHandler::InitPolicyTable() {
   LOG4CXX_TRACE(logger_, "Init policy table.");
   POLICY_LIB_CHECK(false);
+  // Subscribing to notification for system readiness to be able to get system
+  // info necessary for policy table
+  int32_t correlation_id =
+    application_manager::ApplicationManagerImpl::instance()
+    ->GetNextHMICorrelationID();
+  event_observer_.get()->subscribe_on_event(
+        hmi_apis::FunctionID::BasicCommunication_OnReady,
+        correlation_id);
   std::string preloaded_file =
     profile::Profile::instance()->preloaded_pt_file();
   return policy_manager_->InitPT(preloaded_file);
@@ -153,7 +162,7 @@ bool PolicyHandler::InitPolicyTable() {
 
 bool PolicyHandler::ResetPolicyTable() {
   LOG4CXX_TRACE(logger_, "Reset policy table.");
-  POLICY_LIB_CHECK(false);
+  POLICY_LIB_CHECK(false);  
   std::string preloaded_file =
     profile::Profile::instance()->preloaded_pt_file();
   return policy_manager_->ResetPT(preloaded_file);
@@ -543,7 +552,6 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     int32_t correlation_id =
       application_manager::ApplicationManagerImpl::instance()
       ->GetNextHMICorrelationID();
-    event_observer_ = new PolicyEventObserver(policy_manager_);
 
     event_observer_.get()->subscribe_on_event(
 #ifdef HMI_DBUS_API

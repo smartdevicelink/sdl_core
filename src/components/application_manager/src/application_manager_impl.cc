@@ -1345,7 +1345,7 @@ void ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
-    policy::PolicyHandler::instance()->InitPolicyTable();
+    DCHECK(policy::PolicyHandler::instance()->InitPolicyTable());
   }
 }
 
