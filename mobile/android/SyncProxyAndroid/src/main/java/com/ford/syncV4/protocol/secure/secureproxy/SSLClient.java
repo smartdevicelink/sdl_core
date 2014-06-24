@@ -28,6 +28,7 @@ public class SSLClient implements ISSLComponent {
     ITransportListener transportListener;
     private SSLClientReader sslClientReader;
     private IRPCodedDataListener RPCPacketListener;
+    private int port;
 
 
     public SSLClient(ITransportListener transportListener, HandshakeCompletedListener handshakeCompletedListener) {
@@ -36,7 +37,8 @@ public class SSLClient implements ISSLComponent {
     }
 
     @Override
-    public void setupClient() throws IOException {
+    public void setupClient(int localPort) throws IOException {
+        port = localPort;
         sslClientReader = new SSLClientReader();
         sslClientReader.start();
     }
@@ -47,7 +49,7 @@ public class SSLClient implements ISSLComponent {
         sc.init(null, trustAllCerts, new java.security.SecureRandom());
         SocketFactory sf = sc.getSocketFactory();
         InetAddress addr = InetAddress.getByName("127.0.0.1");
-        socket = (SSLSocket) sf.createSocket(addr, 8090);
+        socket = (SSLSocket) sf.createSocket(addr, port);
         socket.addHandshakeCompletedListener(handshakeCompletedListener);
         socket.getSession();
         transportListener.onTransportConnected();
@@ -106,6 +108,7 @@ public class SSLClient implements ISSLComponent {
     }
 
     public class SSLClientReader extends Thread {
+
 
         public synchronized boolean isConnected() {
             return isConnected;

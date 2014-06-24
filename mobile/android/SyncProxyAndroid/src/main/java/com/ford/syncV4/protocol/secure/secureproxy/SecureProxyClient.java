@@ -21,6 +21,7 @@ public class SecureProxyClient implements ISSLComponent {
     private InputStream inputStream;
     private OutputStream outputStream;
     private Socket socket;
+    private int port;
 
     public SecureProxyClient(ISecureProxyServer sourceListener, ITransportListener listener) {
         sourceStream = sourceListener;
@@ -28,7 +29,8 @@ public class SecureProxyClient implements ISSLComponent {
     }
 
     @Override
-    public void setupClient() throws IOException {
+    public void setupClient(int localPort) throws IOException {
+        port = localPort;
         SecureProxyClientReader secureProxyServerReader = new SecureProxyClientReader();
         secureProxyServerReader.start();
     }
@@ -73,7 +75,7 @@ public class SecureProxyClient implements ISSLComponent {
         }
 
         private void startClient() throws IOException {
-            socket = new Socket("127.0.0.1", 8090);
+            socket = new Socket("127.0.0.1", port);
             inputStream = socket.getInputStream();
             outputStream = socket.getOutputStream();
 
