@@ -77,6 +77,8 @@ class CObjectSchemaItem : public ISchemaItem {
     bool mIsMandatory;
   };
 
+  typedef std::map<std::string, SMember> Members;
+
   /**
    * @brief Create a new schema item.
    *
@@ -85,8 +87,7 @@ class CObjectSchemaItem : public ISchemaItem {
    *
    * @return Shared pointer to a new schema item.
    **/
-  static utils::SharedPtr<CObjectSchemaItem> create(
-      const std::map<std::string, SMember>& Members);
+  static utils::SharedPtr<CObjectSchemaItem> create(const Members& Members);
 
   /**
    * @brief Validate smart object.
@@ -138,7 +139,7 @@ class CObjectSchemaItem : public ISchemaItem {
    * @param Members Map of member name to SMember structure
    *                describing the object member.
    **/
-  CObjectSchemaItem(const std::map<std::string, SMember>& Members);
+  CObjectSchemaItem(const Members& Members);
 
   /**
    * @brief Copy constructor.
@@ -163,7 +164,7 @@ class CObjectSchemaItem : public ISchemaItem {
   /**
    * @brief Map of member name to SMember structure describing the object member.
    **/
-  const std::map<std::string, SMember> mMembers;
+  const Members mMembers;
 };
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink

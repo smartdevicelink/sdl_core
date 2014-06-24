@@ -31,6 +31,8 @@
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ENUM_SCHEMA_ITEM_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ENUM_SCHEMA_ITEM_H_
 
+#include <string.h>
+
 #include <map>
 #include <set>
 #include <string>
@@ -44,6 +46,9 @@
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
+
+template <typename EnumType> class EnumConversionHelper;
+
 /**
  * @brief Enumeration schema item.
  *
@@ -99,7 +104,7 @@ class TEnumSchemaItem : public ISchemaItem {
    *
    * This implementation checks if enumeration is represented as string
    * and tries to convert it to integer according to element-to-string
-   * map provided by getEnumElementsStringRepresentation().
+   * map.
    *
    * @param Object Object to apply schema.
    **/
@@ -125,26 +130,6 @@ class TEnumSchemaItem : public ISchemaItem {
    */
   virtual void BuildObjectBySchema(const SmartObject& pattern_object,
                                    SmartObject& result_object);
-
-  /**
-   * @brief The method converts a string into the value of enum EnumType
-   *
-   * @param str String to convert
-   * @param value the resulting enum value
-   * @return true if the string is converted successfully
-   */
-  static bool stringToEnum(const std::string& str, EnumType &value);
-
-  /**
-   * @brief Get string representation of enumeration elements.
-   *
-   * @return Map of enum element to its string representation.
-   **/
-  static const std::map<EnumType, std::string>&
-    getEnumElementsStringRepresentation();
-
-  virtual ~TEnumSchemaItem() {
-  }
 
  private:
   /**
@@ -185,7 +170,82 @@ class TEnumSchemaItem : public ISchemaItem {
    * @brief Default value.
    **/
   const TSchemaItemParameter<EnumType> mDefaultValue;
+
+  typedef EnumConversionHelper<EnumType> ConversionHelper;
 };
+
+struct CStringComparator {
+  bool operator()(const char* a, const char* b) const {return strcmp(a, b) < 0;}
+};
+
+template <typename EnumType>
+class EnumConversionHelper {
+ public:
+  typedef std::map<EnumType, const char*> EnumToCStringMap;
+  typedef std::map<const char*, EnumType, CStringComparator> CStringToEnumMap;
+
+  static const EnumToCStringMap& enum_to_cstring_map() {
+    return enum_to_cstring_map_;
+  }
+
+  static const CStringToEnumMap& cstring_to_enum_map() {
+    return cstring_to_enum_map_;
+  }
+
+  static bool CStringToEnum(const char* str, EnumType* value) {
+    typename CStringToEnumMap::const_iterator i =
+      cstring_to_enum_map().find(str);
+    if (i == cstring_to_enum_map().end())
+      return false;
+    if (value)
+      *value = i->second;
+    return true;
+  }
+
+  static bool EnumToCString(EnumType value, const char** str) {
+    typename EnumToCStringMap::const_iterator i =
+      enum_to_cstring_map().find(value);
+    if (i == enum_to_cstring_map().end())
+      return false;
+    if (str)
+      *str = i->second;
+    return true;
+  }
+
+  static bool StringToEnum(const std::string& str, EnumType* value) {
+    return CStringToEnum(str.c_str(), value);
+  }
+
+  static bool EnumToString(EnumType value, std::string* str) {
+    const char* cstr;
+    bool result = EnumToCString(value, &cstr);
+    if (result && str != NULL) *str = cstr;
+    return result;
+  }
+
+ private:
+  static EnumToCStringMap InitEnumToCStringMap(
+      const char* const cstring_values_[], const EnumType enum_values_[]) {
+    EnumToCStringMap result;
+    const int size = sizeof(cstring_values_) / sizeof(cstring_values_[0]);
+    for (int i = 0; i < size; ++i) result[enum_values_[i]] = cstring_values_[i];
+    return result;
+  }
+
+  static CStringToEnumMap InitCStringToEnumMap(
+      const char* const cstring_values_[], const EnumType enum_values_[]) {
+    CStringToEnumMap result;
+    const int size = sizeof(cstring_values_) / sizeof(cstring_values_[0]);
+    for (int i = 0; i < size; ++i) result[cstring_values_[i]] = enum_values_[i];
+    return result;
+  }
+
+  static const char* const cstring_values_[];
+  static const EnumType enum_values_[];
+  static const EnumToCStringMap enum_to_cstring_map_;
+  static const CStringToEnumMap cstring_to_enum_map_;
+};
+
 
 template<typename EnumType>
 utils::SharedPtr<TEnumSchemaItem<EnumType> > TEnumSchemaItem<EnumType>::create(
@@ -245,17 +305,9 @@ bool TEnumSchemaItem<EnumType>::hasDefaultValue(SmartObject& Object) {
 template<typename EnumType>
 void TEnumSchemaItem<EnumType>::applySchema(SmartObject& Object) {
   if (SmartType_String == Object.getType()) {
-    std::string stringValue = Object.asString();
-    const std::map<EnumType, std::string> elementsStringRepresentation =
-        getEnumElementsStringRepresentation();
-
-    for (typename std::map<EnumType, std::string>::const_iterator i =
-        elementsStringRepresentation.begin();
-        i != elementsStringRepresentation.end(); ++i) {
-      if (i->second == stringValue) {
-        Object = static_cast<int32_t>(i->first);
-        break;
-      }
+    EnumType enum_val = static_cast<EnumType>(-1);
+    if (ConversionHelper::CStringToEnum(Object.asString().c_str(), &enum_val)) {
+      Object = enum_val;
     }
   }
 }
@@ -265,14 +317,9 @@ void TEnumSchemaItem<EnumType>::applySchema(SmartObject& Object) {
 template<typename EnumType>
 void TEnumSchemaItem<EnumType>::unapplySchema(SmartObject& Object) {
   if (SmartType_Integer == Object.getType()) {
-    int32_t integerValue = Object.asInt();
-    const std::map<EnumType, std::string> elementsStringRepresentation =
-        getEnumElementsStringRepresentation();
-    typename std::map<EnumType, std::string>::const_iterator i =
-        elementsStringRepresentation.find(static_cast<EnumType>(integerValue));
-
-    if (i != elementsStringRepresentation.end()) {
-      Object = i->second;
+    const char* str;
+    if (ConversionHelper::EnumToCString(static_cast<EnumType>(Object.asInt()), &str)) {
+      Object = str;
     }
   }
 }
@@ -297,25 +344,6 @@ TEnumSchemaItem<EnumType>::TEnumSchemaItem(
     const TSchemaItemParameter<EnumType> & DefaultValue)
     : mAllowedElements(AllowedElements),
       mDefaultValue(DefaultValue) {
-}
-
-template<typename EnumType>
-bool TEnumSchemaItem<EnumType>::stringToEnum(const std::string& str,
-                                             EnumType& value) {
-  bool result = false;
-  std::map<EnumType, std::string> enumMap =
-      TEnumSchemaItem<EnumType>::getEnumElementsStringRepresentation();
-
-  for (typename std::map<EnumType, std::string>::const_iterator it = enumMap
-      .begin(); it != enumMap.end(); ++it) {
-    if (str == it->second) {
-      value = it->first;
-      result = true;
-      break;
-    }
-  }
-
-  return result;
 }
 
 }  // namespace NsSmartObjects

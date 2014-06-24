@@ -382,8 +382,8 @@ int32_t FormatterJsonRpc::FromString(const std::string& str,
     if (0 == (result & kUnknownMessageType)) {
       MessageType message_type;
 
-      if (false == NsSmartObjects::TEnumSchemaItem<MessageType>::stringToEnum(
-            message_type_string, message_type)) {
+      if (!NsSmartObjects::EnumConversionHelper<MessageType>::StringToEnum(
+            message_type_string, &message_type)) {
         result |= kUnknownMessageType;
       } else {
         out[strings::S_PARAMS][strings::S_MESSAGE_TYPE] = message_type;
@@ -477,8 +477,8 @@ int32_t FormatterJsonRpc::ParseFunctionId(const Json::Value& method_value,
   } else {
     FunctionId function_id;
 
-    if (false == NsSmartObjects::TEnumSchemaItem<FunctionId>::stringToEnum(
-          method_value.asString(), function_id)) {
+    if (!NsSmartObjects::EnumConversionHelper<FunctionId>::CStringToEnum(
+          method_value.asCString(), &function_id)) {
       result |= kUnknownMethod;
     } else {
       namespace strings = NsSmartDeviceLink::NsJSONHandler::strings;
