@@ -120,7 +120,7 @@ public class SSLServer implements ISSLComponent {
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(keyalg);
             kmf.init(keyStore, "android".toCharArray());
 
-            SSLContext context = SSLContext.getInstance("TLS");
+            SSLContext context = SSLContext.getInstance("TLSv1.2");
             context.init(kmf.getKeyManagers(), null, null);
             serverSocket = (SSLServerSocket) context.getServerSocketFactory().createServerSocket(0);
             transportListener.onTransportConnected();
