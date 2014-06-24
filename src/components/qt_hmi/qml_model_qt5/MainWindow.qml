@@ -362,6 +362,10 @@ Rectangle {
             beep.play()
         }
 
+        OnStatusUpdate: {
+            text = {UP_TO_DATE: "UP_TO_DATE", UPDATING: "UPDATING", UPDATE_NEEDED: "UPDATE_NEEDED"}
+            ttsPopUp.activate(text[status])
+        }
     }
 
     Component.onCompleted: {

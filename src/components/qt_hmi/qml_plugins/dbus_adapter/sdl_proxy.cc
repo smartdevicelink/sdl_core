@@ -47,9 +47,8 @@ SdlProxy::SdlProxy(Item *parent)
               "com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
               "PlayTone", this, SIGNAL(playTone()));
   QDBusConnection::sessionBus().connect(
-              "com.ford.sdl.core", "/", "com.ford.sdl.core.UI", "ShowNotification",
-              this, SLOT(OnShowNotification(Common_TextFieldStruct,
-                                            OptionalArgument<Common_Image>, int)));
+              "com.ford.sdl.core", "/", "com.ford.sdl.core.SDL", "OnStatusUpdate",
+              this, SLOT(OnStatusUpdate(int)));
 }
 
 void SdlProxy::OnAppRegistered(Common_HMIApplication app) {
@@ -80,23 +79,8 @@ void SdlProxy::OnAppRegistered(Common_HMIApplication app) {
   emit appRegistered(QVariant(appMap));
 }
 
-void SdlProxy::OnShowNotification(Common_TextFieldStruct text,
-                                  OptionalArgument<Common_Image> image,
-                                  int timeout) {
-  QVariantMap txtMap;
-  QVariant img;
-
-  txtMap["fieldName"] = text.fieldName;
-  txtMap["fieldText"] = text.fieldText;
-
-  if (image.presence) {
-    QVariantMap imgMap;
-    imgMap["imageType"] = image.val.imageType;
-    imgMap["value"] = image.val.value;
-    img = QVariant(imgMap);
-  }
-
-  emit showNotification(QVariant(txtMap), img, timeout);
+void SdlProxy::OnStatusUpdate(int status) {
+  emit OnStatusUpdate(status);
 }
 
 void SdlProxy::OnAppUnregistered(int appId) {

@@ -136,4 +136,8 @@ Item {
                     "}}")
         contentLoader.go("views/SDLPlayerView.qml", appID);
     }
+
+    function policyUpdate(file, timeout, retry) {
+
+    }
 }

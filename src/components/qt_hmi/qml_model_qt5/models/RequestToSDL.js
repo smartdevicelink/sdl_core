@@ -9,3 +9,5 @@ function SDL_UpdateSDL(callback) {
     callback(Common.UpdateResult.UP_TO_DATE);
     console.log("exit");
 }
+
+
