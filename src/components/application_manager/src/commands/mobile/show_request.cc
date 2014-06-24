@@ -73,8 +73,12 @@ void ShowRequest::Run() {
      return;
    }
 
-  mobile_apis::Result::eType processing_result =
-      MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+  mobile_apis::Result::eType processing_result = mobile_apis::Result::SUCCESS;
+  if(((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) &&
+      ((*message_)[strings::msg_params][strings::soft_buttons].length() > 0)) {
+    processing_result =
+        MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
+  }
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA!");
