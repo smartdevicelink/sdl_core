@@ -586,8 +586,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     private void showProtocolPropertiesInTitle() {
         final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
-        int protocolVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
-        boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
         String transportType = null;
         switch (prefs.getInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
                 Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE)) {
@@ -601,9 +599,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 transportType = "USB";
                 break;
         }
-        setTitle(getResources().getString(R.string.tester_app_name) + " (Start protocol v:"
-                + protocolVersion + ", " + (isMedia ? "" : "non-") + "media, "
-                + transportType + ")");
+        setTitle(getResources().getString(R.string.tester_app_name) + " " + transportType);
     }
 
     @Override
@@ -1449,10 +1445,10 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             public void run() {
                 final PlaceholderFragment fragment = getFragmentByAppId(appId);
                 if (fragment == null) {
-                    Logger.w("Stop Audio Service, Fragment NULL");
+                    Logger.w("Stop Mobile Navi, Fragment NULL");
                     return;
                 }
-                fragment.getLogAdapter().logMessage("Should stop Audio service", true);
+                fragment.getLogAdapter().logMessage("Should stop Mobile Navi", true);
 
                 if (mBoundProxyService == null) {
                     return;
@@ -1484,6 +1480,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     public void stopAudioService(final String appId) {
+        //Logger.d("TRACE 0 Stop Audio Service");
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new Runnable() {
             @Override
@@ -1498,6 +1495,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
+                //Logger.d("TRACE 1 Stop Audio Service");
                 closeAudioOutputStream();
                 mBoundProxyService.syncProxyStopAudioService(appId);
             }
