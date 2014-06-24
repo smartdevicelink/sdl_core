@@ -1069,7 +1069,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
             mSyncConnection.closeConnection();
 
-            //mSyncConnection = null;
+            mSyncConnection = null;
         }
     }
 
@@ -1663,8 +1663,13 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     protected void onAppUnregisteredReason(final byte sessionId,
                                            final AppInterfaceUnregisteredReason reason) {
         if (reason == AppInterfaceUnregisteredReason.IGNITION_OFF ||
-                reason == AppInterfaceUnregisteredReason.MASTER_RESET) {
+                reason == AppInterfaceUnregisteredReason.MASTER_RESET ||
+                reason == AppInterfaceUnregisteredReason.FACTORY_DEFAULTS) {
             cycleProxy(SyncDisconnectedReason.convertAppInterfaceUnregisteredReason(reason));
+
+            if (getSyncConnection().getCurrentTransportType() == TransportType.USB) {
+                closeSyncConnection();
+            }
         }
 
         final String appId = syncSession.getAppIdBySessionId(sessionId);
