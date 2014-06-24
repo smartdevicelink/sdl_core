@@ -19,6 +19,10 @@ public class RestoreConnectionManager {
     private final Condition condition = reentrantLock.newCondition();
     private volatile boolean mConditionState = false;
 
+    public int getHoldCount() {
+        return reentrantLock.getHoldCount();
+    }
+
     public void acquireLock() {
         reentrantLock.lock();
         try {
@@ -38,7 +42,7 @@ public class RestoreConnectionManager {
         try {
             if (reentrantLock.getHoldCount() > 0) {
                 mConditionState = true;
-                condition.signal();
+                condition.signalAll();
             }
         } finally {
             reentrantLock.unlock();

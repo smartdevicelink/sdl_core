@@ -46,6 +46,14 @@ GetSystemInfoResponse::~GetSystemInfoResponse() {
 
 void GetSystemInfoResponse::Run() {
   LOG4CXX_INFO(logger_, "GetSystemInfoResponse::Run");
+  const hmi_apis::Common_Result::eType code =
+      static_cast<hmi_apis::Common_Result::eType>(
+          (*message_)[strings::params][hmi_response::code].asInt());
+
+  if (hmi_apis::Common_Result::SUCCESS != code) {
+    LOG4CXX_WARN(logger_, "GetSystemError returns an error code " << code);
+    return;
+  }
   const std::string ccpu_version =
       (*message_)[strings::msg_params]["ccpu_version"].asString();
   const std::string wers_country_code =

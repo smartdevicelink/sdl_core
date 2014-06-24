@@ -31,14 +31,14 @@
  * @version 1.0
  */
 
-SDL.StatisticsInfoView = Em.ContainerView.create( {
+SDL.SystemErrorView = Em.ContainerView.create( {
 
-    elementId: 'policies_settings_status_info',
+    elementId: 'policies_settings_system_error',
 
     classNames: 'in_settings_separate_view',
 
     classNameBindings: [
-        'SDL.States.settings.policies.statisticsInfo.active:active_state:inactive_state'
+        'SDL.States.settings.policies.systemError.active:active_state:inactive_state'
     ],
 
     childViews: [
@@ -53,13 +53,13 @@ SDL.StatisticsInfoView = Em.ContainerView.create( {
      */
     listSelect: Em.Select.extend( {
 
-        elementId: 'listSelect',
+        elementId: 'systemErrorListSelect',
 
         classNames: 'listSelect',
 
-        contentBinding: 'SDL.SDLModel.settingsInfoList',
+        contentBinding: 'SDL.SDLModel.systemErrorList',
 
-        valueBinding: 'SDL.SDLModel.settingsInfoListState'
+        valueBinding: 'SDL.SDLModel.systemErrorListState'
     } ),
 
     /**
@@ -71,7 +71,7 @@ SDL.StatisticsInfoView = Em.ContainerView.create( {
 
         classNames: 'label',
 
-        content: 'Choose devices to be allowed for SDL functionality:'
+        content: 'Send OnSystemError notification:'
     }),
 
     backButton: SDL.Button.extend( {

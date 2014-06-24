@@ -1,5 +1,7 @@
 /**
- * Copyright (c) 2013, Ford Motor Company
+ * @file SettingsSourceModel.qml
+ * @brief Settings source menu list of elements.
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,31 +31,50 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+import QtQuick 2.0
 
-#include "application_manager/commands/hmi/on_ready_notification.h"
-#include "application_manager/application_manager_impl.h"
-
-namespace application_manager {
-
-namespace commands {
-
-OnReadyNotification::OnReadyNotification(const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+ListModel
+{
+    ListElement {
+        title: "Allow SDL Functionality"
+        qml: ""
+        appId: 0
+        action: ""
+    }
+    ListElement {
+        title: "Update SDL"
+        qml: ""
+        appId: 0
+        action: "update_sdl"
+    }
+    ListElement {
+        title: "Policy table update status"
+        qml: ""
+        appId: 0
+        action: ""
+    }
+    ListElement {
+        title: "Send request GetURLS"
+        qml: ""
+        appId: 0
+        action: ""
+    }
+    ListElement {
+        title: "Statistics info settings"
+        qml: ""
+        appId: 0
+        action: ""
+    }
+    ListElement {
+        title: "App permissions"
+        qml: ""
+        appId: 0
+        action: ""
+    }
+    ListElement {
+        title: "Device state change"
+        qml: ""
+        appId: 0
+        action: ""
+    }
 }
-
-OnReadyNotification::~OnReadyNotification() {
-}
-
-void OnReadyNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnReadyNotification::Run");
-
-  ApplicationManagerImpl::instance()->OnHMIStartedCooperation();
-  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnReady);
-  event.set_smart_object(*message_);
-  event.raise();
-}
-
-}  // namespace commands
-
-}  // namespace application_manager
-

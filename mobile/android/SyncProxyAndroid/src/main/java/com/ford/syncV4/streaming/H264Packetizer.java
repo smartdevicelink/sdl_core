@@ -44,11 +44,8 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         try {
             is.close();
             thread.interrupt();
-            thread.join();
         } catch (IOException ignore) {
             Logger.e(CLASS_NAME + " Stop() IOException");
-        } catch (InterruptedException e) {
-            Logger.e(CLASS_NAME + " Stop() InterruptedException");
         } finally {
             thread = null;
         }

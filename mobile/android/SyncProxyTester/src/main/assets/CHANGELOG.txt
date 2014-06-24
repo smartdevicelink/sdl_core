@@ -1,8 +1,17 @@
 [CW26]
+<<<<<<< HEAD
 + SyncProxyTester | SyncProxyAndroid SDK: Added test handshake error sending to SDL.
 
 [CW25]
 * SyncProxyTester | SyncProxyAndroid SDK: major develop to WP2 branch merge
+=======
+* SyncProxyTester: Show request, add empty SoftButtons array in the request
++ SYNC Mobile SDK: SyncMsgVersion update
+* SyncProxyTester: Incorrect parsing integer value in structure of request in .xml tests
+
+[CW25]
+* SYNC Mobile SDK: Object reference leaks when restart SYNC Mobile SDK
+>>>>>>> develop
 
 [CW24]
 + SyncProxyTester | SyncProxyAndroid SDK: Log messages formed in SDK

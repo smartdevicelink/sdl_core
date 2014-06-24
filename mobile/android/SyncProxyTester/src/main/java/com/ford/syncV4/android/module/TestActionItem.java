@@ -19,6 +19,7 @@ public class TestActionItem {
 
     private long mDelay;
     private String mActionName;
+    private String mNextAppId;
 
     public TestActionItem(String mActionName) {
         this.mActionName = mActionName;
@@ -44,6 +45,14 @@ public class TestActionItem {
      */
     public String getActionName() {
         return mActionName;
+    }
+
+    public String getNextAppId() {
+        return mNextAppId;
+    }
+
+    public void setNextAppId(String value) {
+        mNextAppId = value;
     }
 
     @Override

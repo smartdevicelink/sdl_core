@@ -49,12 +49,16 @@ namespace test {
 namespace components {
 namespace security_manager_test {
 
+namespace {
 bool isErrorFatal(SSL *connection, int res) {
-  int error = SSL_get_error(connection, res);
+  const int error = SSL_get_error(connection, res);
   return (error != SSL_ERROR_WANT_READ &&
-      error != SSL_ERROR_WANT_WRITE);
+          error != SSL_ERROR_WANT_WRITE);
 }
-
+}
+// TODO(EZamakhov): replace ciphers by useing ssl.h constants
+// TODO(EZamakhov): May be split to SSLContext and Cyptomanager tests (separate files)
+// TODO(EZamakhov): add test for EnsureBufferSizeEnough
 class SSLTest : public testing::Test {
  protected:
   static void SetUpTestCase() {
@@ -62,10 +66,12 @@ class SSLTest : public testing::Test {
     // TODO(EZamakhov): add ASSERT_TRUE check of cert/key exist (for this test correct)
     // TODO(EZamakhov): add covarage for SSLv3, TLSv1_1 + check wrong Protocol value
     // TODO(EZamakhov): add covarage for wrong cert, key file names and ciphers
-    crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2, "mycert.pem", "mykey.pem", "AES128-GCM-SHA256", false);
+    crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2, "mycert.pem",
+                         "mykey.pem", "AES128-GCM-SHA256", false);
 
     client_manager = new security_manager::CryptoManagerImpl();
-    client_manager->Init(security_manager::CLIENT, security_manager::TLSv1_2, "", "", "AES128-GCM-SHA256", false);
+    client_manager->Init(security_manager::CLIENT, security_manager::TLSv1_2, "", "",
+                         "AES128-GCM-SHA256", false);
   }
 
   static void TearDownTestCase() {
@@ -97,9 +103,47 @@ security_manager::CryptoManager* SSLTest::client_manager;
 
 TEST(CryptoManagerTest, UsingBeforeInit) {
   security_manager::CryptoManager *crypto_manager = new security_manager::CryptoManagerImpl();
-  security_manager::SSLContext* ctx = crypto_manager->CreateSSLContext();
+  EXPECT_TRUE(crypto_manager->CreateSSLContext() == NULL);
+  EXPECT_EQ(crypto_manager->LastError(), std::string ("Initialization is not completed"));
+  delete crypto_manager;
+}
 
-  EXPECT_TRUE(ctx == NULL);
+TEST(CryptoManagerTest, WrongInit) {
+  security_manager::CryptoManager *crypto_manager = new security_manager::CryptoManagerImpl();
+  // TODO(EZamakhov): Unkown protocol version
+//  EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER, security_manager::UNKNOWN,
+//                                    "mycert.pem", "mykey.pem", "AES128-GCM-SHA256", false));
+//  EXPECT_FALSE(crypto_manager->LastError().empty());
+  // Unexists cert file
+  EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2,
+                                    "unexists_file.pem", "mykey.pem", "AES128-GCM-SHA256", false));
+  EXPECT_FALSE(crypto_manager->LastError().empty());
+  // Unexists key file
+  EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2,
+                                    "mycert.pem", "unexists_file.pem", "AES128-GCM-SHA256", false));
+  EXPECT_FALSE(crypto_manager->LastError().empty());
+  // Unexists cipher value
+  EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2,
+                                    "mycert.pem", "mykey.pem", "INVALID_CIPHER", false));
+  EXPECT_FALSE(crypto_manager->LastError().empty());
+  delete crypto_manager;
+}
+
+TEST(CryptoManagerTest, CorrectInit) {
+  security_manager::CryptoManager *crypto_manager = new security_manager::CryptoManagerImpl();
+  // Empty cert and key values for SERVER
+  EXPECT_TRUE(crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2,
+                                   "", "", "AES128-GCM-SHA256", false));
+  EXPECT_TRUE(crypto_manager->LastError().empty());
+  // Empty cert and key values for CLIENT
+  EXPECT_TRUE(crypto_manager->Init(security_manager::CLIENT, security_manager::TLSv1_2,
+                                   "", "", "AES128-GCM-SHA256", false));
+  EXPECT_TRUE(crypto_manager->LastError().empty());
+
+  // Cipher value
+  EXPECT_TRUE(crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2,
+                                   "mycert.pem", "mykey.pem", "ALL", false));
+  EXPECT_TRUE(crypto_manager->LastError().empty());
   delete crypto_manager;
 }
 
@@ -111,7 +155,7 @@ TEST(CryptoManagerTest, ReleaseNull) {
   EXPECT_NO_THROW(cm->ReleaseSSLContext(NULL));
   delete cm;
 }
-
+// TODO(EZamakhov): split to SSL/TLS1/1.1/1.2 tests
 TEST_F(SSLTest, Positive) {
 
   const uint8_t *server_buf;
@@ -168,7 +212,6 @@ TEST_F(SSLTest, Positive) {
                     "abra",
                     4), 0);
 }
-// TODO(EZamakhov): add test for EnsureBufferSizeEnough
 
 /*
 TEST_F(SSLTest, DISABLED_BadData) {

@@ -2165,8 +2165,7 @@ public class PlaceholderFragment extends Fragment {
                                     msg.setSecondaryGraphic(image);
                                 }
                                 if (chkIncludeSoftButtons.isChecked() &&
-                                        (currentSoftButtons != null) &&
-                                        (currentSoftButtons.size() > 0)) {
+                                        (currentSoftButtons != null)) {
                                     msg.setSoftButtons(currentSoftButtons);
                                 }
                                 currentSoftButtons = null;
