@@ -54,19 +54,23 @@ namespace security_manager_test {
   class SecurityQueryTest: public ::testing::Test {
    protected:
     void SetUp() OVERRIDE {
+      // init_header used for SecurityQuery initialization
       init_header.query_type = SecurityQuery::NOTIFICATION;
       init_header.query_id = SecurityQuery::SEND_HANDSHAKE_DATA;
       init_header.seq_number = SEQ_NUMBER;
+      init_header.json_size = 0u;
 
-      init_header.query_type = SecurityQuery::INVALID_QUERY_TYPE;
-      init_header.query_id = SecurityQuery::INVALID_QUERY_ID;
-      init_header.seq_number = 0u;
+      // invalid_header is default (not initialized) QueryHeader
+      invalid_header.query_type = SecurityQuery::INVALID_QUERY_TYPE;
+      invalid_header.query_id = SecurityQuery::INVALID_QUERY_ID;
+      invalid_header.seq_number = 0u;
+      invalid_header.json_size = 0u;
     }
     /*
      * Wrapper for fast call SecurityQuery::SerializeQuery
      * Used for handling header and data array to byte array for serialization
      */
-    std::vector<uint8_t> DeserializeData(
+    std::vector<uint8_t>DeserializeData(
         SecurityQuery::QueryHeader header,
         const uint8_t *const binary_data,
         const size_t bin_data_size) const {
@@ -95,10 +99,10 @@ namespace security_manager_test {
               ::protocol_handler::ProtocolPayloadV2SizeBits());
   }
   /*
-   * Security QueryHeader shall construct with Invalid fields
+   * Security QueryHeader default construction
    */
   TEST_F(SecurityQueryTest, QueryHeaderConstructor) {
-    SecurityQuery::QueryHeader new_header;
+    const SecurityQuery::QueryHeader new_header;
 
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, new_header, invalid_header);
   }
@@ -113,30 +117,56 @@ namespace security_manager_test {
     ASSERT_EQ(new_header.query_id,   SecurityQuery::SEND_HANDSHAKE_DATA);
     ASSERT_EQ(new_header.seq_number, SEQ_NUMBER);
     ASSERT_EQ(new_header.json_size,  0u);
+
+    SecurityQuery::QueryHeader new_header2(SecurityQuery::RESPONSE,
+                                           SecurityQuery::SEND_INTERNAL_ERROR,
+                                           SEQ_NUMBER + 1);
+    ASSERT_EQ(new_header2.query_type, SecurityQuery::RESPONSE);
+    ASSERT_EQ(new_header2.query_id,   SecurityQuery::SEND_INTERNAL_ERROR);
+    ASSERT_EQ(new_header2.seq_number, SEQ_NUMBER + 1);
+    ASSERT_EQ(new_header2.json_size,  0u);
+  }
+  /*
+   * Security QueryHeader shall copy of all filed on construction from copy
+   */
+  TEST_F(SecurityQueryTest, QueryHeaderCopyConstructor) {
+    SecurityQuery::QueryHeader new_header(init_header);
+
+    EXPECT_PRED_FORMAT2(QueryHeader_EQ, new_header, init_header);
   }
   /*
    * Security QueryHeader shall construct with NULL fields
    */
   TEST_F(SecurityQueryTest, QueryConstructor) {
-    SecurityQuery query;
+    const SecurityQuery query;
 
     ASSERT_EQ(query.get_connection_key(), 0u);
     ASSERT_EQ(query.get_data_size(), 0u);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     ASSERT_TRUE(query.get_json_message().empty());
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), invalid_header);
+
+    // Deserialization shall return invalid header as vector
+    const std::vector<uint8_t> vector = DeserializeData(invalid_header, NULL, 0);
+    const std::vector<uint8_t> deserialize_vector = query.DeserializeQuery();
+    ASSERT_EQ(deserialize_vector, vector);
   }
   /*
    * Security QueryHeader shall construct with specified fields
    */
   TEST_F(SecurityQueryTest, QueryConstructor2) {
-    SecurityQuery query(init_header, CONNECTION_KEY);
+    const SecurityQuery query(init_header, CONNECTION_KEY);
 
     ASSERT_EQ(query.get_connection_key(), CONNECTION_KEY);
     ASSERT_EQ(query.get_data_size(), 0u);
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     ASSERT_TRUE(query.get_json_message().empty());
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), init_header);
+
+    // Deserialization shall return init header as vector
+    const std::vector<uint8_t> vector = DeserializeData(init_header, NULL, 0);
+    const std::vector<uint8_t> deserialize_vector = query.DeserializeQuery();
+    ASSERT_EQ(deserialize_vector, vector);
   }
   /*
    * Security QueryHeader shall construct with specified fields
@@ -159,6 +189,12 @@ namespace security_manager_test {
     }
     ASSERT_TRUE(query.get_json_message().empty());
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), init_header);
+
+    // Deserialization shall return vector equal header + data array
+    const std::vector<uint8_t> vector =
+        DeserializeData(init_header, raw_data, raw_data_size);
+    const std::vector<uint8_t> deserialize_vector = query.DeserializeQuery();
+    ASSERT_EQ(deserialize_vector, vector);
   }
   /*
    * Security Query setters
@@ -234,6 +270,10 @@ namespace security_manager_test {
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     ASSERT_TRUE(query.get_json_message().empty());
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), init_header);
+
+    // Deserialization shall return vector equal serialization vector
+    const std::vector<uint8_t> deserialize_vector = query.DeserializeQuery();
+    ASSERT_EQ(deserialize_vector, vector);
   }
   /*
    * SecurityQuery serializes wrong header
@@ -254,6 +294,10 @@ namespace security_manager_test {
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     ASSERT_TRUE(query.get_json_message().empty());
     EXPECT_PRED_FORMAT2(QueryHeader_EQ, query.get_header(), init_header);
+
+    // Deserialization shall return vector equal serialization vector
+    const std::vector<uint8_t> deserialize_vector = query.DeserializeQuery();
+    ASSERT_EQ(deserialize_vector, vector);
   }
   /*
    * SecurityQuery serializes data contains header and binary data
@@ -287,6 +331,10 @@ namespace security_manager_test {
     // check side-effects
     ASSERT_EQ(query.get_connection_key(), 0u);
     ASSERT_TRUE(query.get_json_message().empty());
+
+    // Deserialization shall return vector equal serialization vector
+    const std::vector<uint8_t> deserialize_vector = query.DeserializeQuery();
+    ASSERT_EQ(deserialize_vector, vector);
   }
   /*
    * SecurityQuery serializes data contains header and binary data
@@ -370,6 +418,10 @@ namespace security_manager_test {
     // check side-effects
     ASSERT_EQ(query.get_connection_key(), 0u);
     ASSERT_TRUE(query.get_json_message().empty());
+
+    // Deserialization shall return vector equal serialization vector
+    const std::vector<uint8_t> deserialize_vector = query.DeserializeQuery();
+    ASSERT_EQ(deserialize_vector, vector);
   }
   /*
    * SecurityQuery serializes data contains header and binary data
@@ -397,8 +449,11 @@ namespace security_manager_test {
     ASSERT_EQ(query.get_data(), reinterpret_cast<uint8_t *>(NULL));
     ASSERT_EQ(query.get_connection_key(), 0u);
     ASSERT_EQ(query.get_json_message(), error_str);
+
+    // Deserialization shall return vector equal serialization vector
+    const std::vector<uint8_t> deserialize_vector = query.DeserializeQuery();
+    ASSERT_EQ(deserialize_vector, vector);
   }
-  // TODO(EZamakhov): add test for checking deserialize
 }  // namespace security_manager_test
 }  // namespace components
 }  // namespace test

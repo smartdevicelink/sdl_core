@@ -130,11 +130,14 @@ const std::vector<uint8_t> SecurityQuery::DeserializeQuery() const {
 
   const size_t header_size = sizeof(deserialize_header);
   // vector of header and raw_data
-  std::vector<uint8_t> data_sending(header_size + get_data_size());
+  std::vector<uint8_t> data_sending(header_size + data_.size() + json_message_.size());
   // copy header
   memcpy(&data_sending[0], &deserialize_header, header_size);
   // copy binary data
   std::copy(data_.begin(), data_.end(), data_sending.begin() + header_size);
+  // copy text (json) data
+  std::copy(json_message_.begin(), json_message_.end(),
+            data_sending.begin() + header_size + data_.size());
   return data_sending;
 }
 
