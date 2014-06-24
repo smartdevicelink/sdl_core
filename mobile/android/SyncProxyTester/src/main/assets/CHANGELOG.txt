@@ -1,3 +1,6 @@
+[CW26]
++ SyncProxyTester | SyncProxyAndroid SDK: Added test handshake error sending to SDL.
+
 [CW25]
 * SyncProxyTester | SyncProxyAndroid SDK: major develop to WP2 branch merge
 
