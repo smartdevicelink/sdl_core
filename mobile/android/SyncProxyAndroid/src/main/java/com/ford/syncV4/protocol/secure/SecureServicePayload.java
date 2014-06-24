@@ -92,18 +92,19 @@ public class SecureServicePayload {
                 case 0x4:
                     return SecurityInternalError.ERROR_SERVICE_ALREADY_PROTECTED;
                 case 0x5:
-                    return SecurityInternalError.ERROR_CREATE_SLL;
+                    return SecurityInternalError.ERROR_CREATE_SSLCONTEXT;
                 case 0x6:
-                    return SecurityInternalError.ERROR_CONNECTION_NOT_FOUND;
-                case 0x7:
-                    return SecurityInternalError.ERROR_SESSION_NOT_FOUND;
-                case 0x8:
                     return SecurityInternalError.ERROR_SERVICE_NOT_PROTECTED;
+                case 0x7:
+                    return SecurityInternalError.ERROR_DECRYPTION_FAILED;
+                case 0x8:
+                    return SecurityInternalError.ERROR_ENCRYPTION_FAILED;
                 case 0xF0:
                     return SecurityInternalError.ERROR_SSL_INVALID_DATA;
+                case 0xF1:
+                    return SecurityInternalError.ERROR_INTERNAL;
                 case 0xFF:
                     return SecurityInternalError.ERROR_UNKWOWN_INTERNAL_ERROR;
-
             }
         }
         return SecurityInternalError.UNKNOWN;

@@ -26,6 +26,8 @@ public class SyncRPCRequestConverterFactory
             if ((isSystemFile != null) && isSystemFile) {
                 converter = getSystemPutFileConverter();
             }
+        }else if ( Names.internalError.equals(functionName)){
+            converter = getSecureErrorRPCRequestConverter();
         }
 
         return converter;
@@ -46,4 +48,9 @@ public class SyncRPCRequestConverterFactory
 
         return systemPutFileConverter;
     }
+
+    private IRPCRequestConverter getSecureErrorRPCRequestConverter() {
+        return new SecureErrorRPCRequestConverter();
+    }
+
 }

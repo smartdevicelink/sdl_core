@@ -44,6 +44,7 @@ import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.protocol.secure.secureproxy.SecureInternalErrorMessage;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCRequestFactory;
@@ -377,7 +378,9 @@ public class PlaceholderFragment extends Fragment {
         sendSecureError.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                 SecurityInternalError securityInternalError = (SecurityInternalError) spinner.getSelectedItem();
+                SecureInternalErrorMessage secureInternalErrorMessage = buildSecureInternalErrorMessage(securityInternalError);
+                sendRPCRequestToProxy(secureInternalErrorMessage);
             }
         });
 
@@ -398,6 +401,15 @@ public class PlaceholderFragment extends Fragment {
                 processRPCNotSecureCheckBox();
             }
         });
+    }
+
+    private SecureInternalErrorMessage buildSecureInternalErrorMessage(SecurityInternalError securityInternalError) {
+        SecureInternalErrorMessage msg = new SecureInternalErrorMessage();
+        msg.setErrorId(SecurityInternalError.getErrorCode(securityInternalError));
+        msg.setMessage("Test Handshake Error");
+        msg.setMessageType(Names.notification);
+        msg.setCorrelationID(getCorrelationId());
+        return msg;
     }
 
     /**

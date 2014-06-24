@@ -5,6 +5,7 @@ import android.os.Environment;
 
 import java.io.File;
 import java.util.Random;
+import java.util.Arrays;
 
 /**
  * Created with Android Studio.
@@ -74,5 +75,11 @@ public class CommonUtils {
         // nextInt is normally exclusive of the top value,
         // so add 1 to make it inclusive
         return rand.nextInt((max - min) + 1) + min;
+    }
+
+    public static <T> T[] concat(T[] first, T[] second) {
+        T[] result = Arrays.copyOf(first, first.length + second.length);
+        System.arraycopy(second, 0, result, first.length, second.length);
+        return result;
     }
 }
