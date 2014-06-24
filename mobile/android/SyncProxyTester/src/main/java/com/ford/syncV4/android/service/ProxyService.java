@@ -43,6 +43,7 @@ import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCRequestFactory;
+import com.ford.syncV4.proxy.RPCStructFactory;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.SyncProxyConfigurationResources;
 import com.ford.syncV4.proxy.constants.Names;
@@ -416,9 +417,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                         Const.Transport.PREFS_DEFAULT_TRANSPORT_PORT);
                 boolean mIsNSD = settings.getBoolean(Const.Transport.PREFS_KEY_IS_NSD, false);
 
-                SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
-                syncMsgVersion.setMajorVersion(2);
-                syncMsgVersion.setMinorVersion(2);
+                SyncMsgVersion syncMsgVersion = RPCStructFactory.createSyncMsgVersion();
                 Vector<AppHMIType> appHMITypes = createAppTypeVector(isNaviApp);
                 BaseTransportConfig transportConfig = null;
                 TransportType transportType = AppPreferencesManager.getTransportType();
@@ -2216,9 +2215,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             registerAppInterface.setIsMediaApplication(isMediaApp);
             registerAppInterface.setAppType(appHMITypes);
 
-            SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
-            syncMsgVersion.setMajorVersion(2);
-            syncMsgVersion.setMinorVersion(2);
+            SyncMsgVersion syncMsgVersion = RPCStructFactory.createSyncMsgVersion();
             registerAppInterface.setSyncMsgVersion(syncMsgVersion);
 
             mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface);

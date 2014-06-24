@@ -51,9 +51,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
     }
 
     private SyncProxyALM getSyncProxyALM() throws SyncException {
-        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
-        syncMsgVersion.setMajorVersion(2);
-        syncMsgVersion.setMinorVersion(2);
+        SyncMsgVersion syncMsgVersion = RPCStructFactory.createSyncMsgVersion();
         TCPTransportConfig conf = mock(TCPTransportConfig.class);
         when(conf.getTransportType()).thenReturn(TransportType.TCP);
         final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
@@ -114,9 +112,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
     }
 
     public void testOnMobileNavSessionStarted() throws Exception {
-        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
-        syncMsgVersion.setMajorVersion(2);
-        syncMsgVersion.setMinorVersion(2);
+        SyncMsgVersion syncMsgVersion = RPCStructFactory.createSyncMsgVersion();
         TCPTransportConfig conf = mock(TCPTransportConfig.class);
         when(conf.getTransportType()).thenReturn(TransportType.TCP);
         final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
@@ -175,9 +171,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
     }
 
     public void testReceivedMobileNavSessionIncomingMessage() throws Exception {
-        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
-        syncMsgVersion.setMajorVersion(2);
-        syncMsgVersion.setMinorVersion(2);
+        SyncMsgVersion syncMsgVersion = RPCStructFactory.createSyncMsgVersion();
         TCPTransportConfig conf = mock(TCPTransportConfig.class);
         when(conf.getTransportType()).thenReturn(TransportType.TCP);
         final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
@@ -240,9 +234,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
     }
 
     public void testSyncProxyBaseEndSessionCallbackTest() throws Exception {
-        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
-        syncMsgVersion.setMajorVersion(2);
-        syncMsgVersion.setMinorVersion(2);
+        SyncMsgVersion syncMsgVersion = RPCStructFactory.createSyncMsgVersion();
         TCPTransportConfig conf = mock(TCPTransportConfig.class);
         final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
         SyncProxyALM proxyALM = new SyncProxyALM(listenerALM,
@@ -298,9 +290,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
     }
 
     public void testSyncProxyBaseStartSessionCallbackTest() throws Exception {
-        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
-        syncMsgVersion.setMajorVersion(2);
-        syncMsgVersion.setMinorVersion(2);
+        SyncMsgVersion syncMsgVersion = RPCStructFactory.createSyncMsgVersion();
         TCPTransportConfig conf = mock(TCPTransportConfig.class);
         final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
         SyncProxyALM proxyALM = new SyncProxyALM(listenerALM,
@@ -354,9 +344,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
     }
 
     public void testHeartBeatIsSet() throws Exception {
-        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
-        syncMsgVersion.setMajorVersion(2);
-        syncMsgVersion.setMinorVersion(2);
+        SyncMsgVersion syncMsgVersion = RPCStructFactory.createSyncMsgVersion();
         TCPTransportConfig conf = mock(TCPTransportConfig.class);
         final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
         SyncProxyALM proxyALM = new SyncProxyALM(listenerALM,

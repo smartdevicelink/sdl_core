@@ -1,4 +1,5 @@
 [CW26]
++ SYNC Mobile SDK: SyncMsgVersion update
 * SyncProxyTester: Incorrect parsing integer value in structure of request in .xml tests
 
 [CW25]

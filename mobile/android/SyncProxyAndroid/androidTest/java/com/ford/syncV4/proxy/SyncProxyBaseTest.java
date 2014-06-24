@@ -136,9 +136,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     }
 
     private SyncProxyBase getSyncProxyBase() throws SyncException {
-        SyncMsgVersion syncMsgVersion = new SyncMsgVersion();
-        syncMsgVersion.setMajorVersion(2);
-        syncMsgVersion.setMinorVersion(2);
+        SyncMsgVersion syncMsgVersion = RPCStructFactory.createSyncMsgVersion();
         TCPTransportConfig conf = mock(TCPTransportConfig.class);
 
         return new SyncProxyALM(proxyListenerMock,
