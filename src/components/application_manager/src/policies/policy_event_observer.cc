@@ -63,12 +63,17 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
 #else
     case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
       ProcessOdometerEvent(message);
+      unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnReady: {
+      policy_manager_->OnSystemReady();
+      unsubscribe_from_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
       break;
     }
     default: {
       break;
-    }
-  unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
+    }  
 #endif
   }
 }

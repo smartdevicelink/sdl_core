@@ -125,6 +125,17 @@ SDL.PoliciesView = Em.ContainerView.create( {
                     goToState: 'policies.deviceStateChange',
                     onDown: false
                 }
+            },
+            {
+                type: SDL.Button,
+                params: {
+                    text: 'System Error',
+                    action: 'onState',
+                    target: 'SDL.SettingsController',
+                    templateName: 'arrow',
+                    goToState: 'policies.systemError',
+                    onDown: false
+                }
             }
         ]
     })

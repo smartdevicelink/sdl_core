@@ -22,7 +22,6 @@ import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.session.SessionTest;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
-import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
 
 import org.json.JSONException;
@@ -92,15 +91,13 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         handlerMock = mock(IOnSystemRequestHandler.class);
 
-        final SystemPutFileRPCRequestConverter converter =
-                new SystemPutFileRPCRequestConverter();
+        final SystemPutFileRPCRequestConverter converter = new SystemPutFileRPCRequestConverter();
         maxDataSize = 32;
         converter.setMaxDataSize(maxDataSize);
-        IRPCRequestConverterFactory factoryMock =
-                mock(IRPCRequestConverterFactory.class);
-        when(factoryMock.getConverterForRequest(
-                notNull(RPCRequest.class))).thenReturn(converter);
+        IRPCRequestConverterFactory factoryMock = mock(IRPCRequestConverterFactory.class);
+        when(factoryMock.getConverterForRequest(notNull(RPCRequest.class))).thenReturn(converter);
         proxy.setRpcRequestConverterFactory(factoryMock);
+
     }
 
     public void testDefaultSystemRequestHandlerShouldBeNull() {
@@ -467,7 +464,11 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         final String filename = "file";
         final FileType fileType = FileType.GRAPHIC_JPEG;
 
-        proxy.putSystemFile(SessionTest.APP_ID_DEFAULT, filename, data, fileType);
+        proxy.initializeSession(SessionTest.APP_ID);
+        proxy.getInterfaceBroker().onProtocolSessionStarted(SessionTest.SESSION_ID,
+                ProtocolConstants.PROTOCOL_VERSION_TWO);
+
+        proxy.putSystemFile(SessionTest.APP_ID, filename, data, fileType);
 
         Thread.sleep(WAIT_TIMEOUT);
 
@@ -492,7 +493,11 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         final String filename = "file";
         final FileType fileType = FileType.GRAPHIC_JPEG;
         final int offset = 4000;
-        proxy.putSystemFile(SessionTest.APP_ID_DEFAULT, filename, data, offset, fileType);
+
+        proxy.initializeSession(SessionTest.APP_ID);
+        proxy.getInterfaceBroker().onProtocolSessionStarted(SessionTest.SESSION_ID,
+                ProtocolConstants.PROTOCOL_VERSION_TWO);
+        proxy.putSystemFile(SessionTest.APP_ID, filename, data, offset, fileType);
 
         Thread.sleep(WAIT_TIMEOUT);
 

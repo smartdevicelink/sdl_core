@@ -428,12 +428,10 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
       if (!curr_app->MakeFullscreen()) {
         return false;
       }
-      MessageHelper::SendHMIStatusNotification(*curr_app);
     } else {
       if (is_new_app_media) {
         if (curr_app->IsAudible()) {
           curr_app->MakeNotAudible();
-          MessageHelper::SendHMIStatusNotification(*curr_app);
         }
       }
       if (curr_app->IsFullscreen()) {
@@ -1351,7 +1349,7 @@ void ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
-    policy::PolicyHandler::instance()->InitPolicyTable();
+    DCHECK(policy::PolicyHandler::instance()->InitPolicyTable());
   }
 }
 

@@ -5,7 +5,6 @@ import com.ford.syncV4.service.Service;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -77,6 +76,7 @@ public class Session {
      * @return Session Id
      */
     public byte getSessionIdByAppId(String appId) {
+        Logger.d(CLASS_NAME + " get sesId by appId:" + appId);
         if (sessionIds.containsKey(appId)) {
             return sessionIds.get(appId);
         }
