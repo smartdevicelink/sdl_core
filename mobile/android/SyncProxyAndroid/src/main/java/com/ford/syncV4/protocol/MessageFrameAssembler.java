@@ -230,16 +230,21 @@ public class MessageFrameAssembler {
         }
         message.setServiceType(header.getServiceType());
         message.setSessionID(header.getSessionId());
+        message.setEncrypted(header.isEncrypted());
         //If it is WiPro 2.0 it must have binary header
         if (header.getVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-            BinaryFrameHeader binFrameHeader = BinaryFrameHeader.parseBinaryHeader(data);
-            message.setVersion(header.getVersion());
-            message.setRPCType(binFrameHeader.getRPCType());
-            message.setFunctionID(binFrameHeader.getFunctionID());
-            message.setCorrID(binFrameHeader.getCorrID());
-            if (binFrameHeader.getJsonSize() > 0) message.setData(binFrameHeader.getJsonData());
-            if (binFrameHeader.getBulkData() != null) {
-                message.setBulkData(binFrameHeader.getBulkData());
+            if (message.getServiceType().equals(ServiceType.Heartbeat)) {
+                message.setData(data);
+            } else {
+                BinaryFrameHeader binFrameHeader = BinaryFrameHeader.parseBinaryHeader(data);
+                message.setVersion(header.getVersion());
+                message.setRPCType(binFrameHeader.getRPCType());
+                message.setFunctionID(binFrameHeader.getFunctionID());
+                message.setCorrID(binFrameHeader.getCorrID());
+                if (binFrameHeader.getJsonSize() > 0) message.setData(binFrameHeader.getJsonData());
+                if (binFrameHeader.getBulkData() != null) {
+                    message.setBulkData(binFrameHeader.getBulkData());
+                }
             }
         } else {
             message.setData(data);
