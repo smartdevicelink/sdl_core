@@ -346,11 +346,12 @@
       <element name="STATIC"/>
       <element name="DYNAMIC"/>
     </enum>
-    <enum name="ApplicationToNONEReason">
-      <description>Describes the reasons of moving the app to NONE.</description>
-      <element name="DRIVER_DISTRACTION_VIOLATION"/>
-      <element name="USER_EXIT"/>
-    </enum>
+<enum name="ApplicationToNONEReason">
+  <description>Describes the reasons of moving the app to NONE.</description>
+  <element name="DRIVER_DISTRACTION_VIOLATION" />
+  <element name="USER_EXIT" />
+</enum>
+
     <enum name="TextFieldName">
       <element name="mainField1">
         <description>The first line of first set of main fields of the persistent display; applies to "Show"</description>
@@ -1028,22 +1029,25 @@
       <element name="NORMAL"/>
       <element name="NONE"/>
     </enum>
-    <enum name="SpeakType">
-      <description>Defines the type of the request which causes text-to-speech prompt</description>
-      <element name="ALERT"/>
-      <element name="SPEAK"/>
-    </enum>
-    <enum name="AlertType">
-      <description>Defines the type of the request which causes text-to-speech prompt</description>
-      <element name="UI"/>
-      <element name="BOTH"/>
-    </enum>
-    <enum name="HMILevel">
-      <element name="FULL"/>
-      <element name="LIMITED"/>
-      <element name="BACKGROUND"/>
-      <element name="NONE"/>
-    </enum>
+<enum name="SpeakType">
+  <description>Defines the type of the request which causes text-to-speech prompt</description>
+  <element name="ALERT" />
+  <element name="SPEAK" />
+</enum>
+
+<enum name="AlertType">
+<description>Defines the type of the request which causes text-to-speech prompt</description>
+<element name="UI" />
+<element name="BOTH" />
+</enum>
+
+<enum name="HMILevel">
+  <element name="FULL"/>
+  <element name="LIMITED" />
+  <element name="BACKGROUND"/>
+  <element name="NONE"/>
+</enum>
+
     <!-- Policies -->
     <enum name="UpdateResult">
       <element name="UP_TO_DATE"/>
@@ -1066,7 +1070,7 @@
       <element name="UNPAIRED"/>
     </enum>
     <struct name="UserFriendlyMessage" scope="internal">
-      <param name="messageCode" type="String" mandatory="true"/>
+    <param name="messageCode" type="String" mandatory="true"/>
       <param name="ttsString" type="String" mandatory="false"/>
       <param name="label" type="String" mandatory="false"/>
       <param name="line1" type="String" mandatory="false"/>
@@ -1783,7 +1787,7 @@
     <function name="OnUpdateDeviceList" messagetype="notification" provider="hmi">
       <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
     </function>
-    <function name="OnResumeAudioSource" messagetype="notification" provider="hmi">
+    <function name="OnResumeAudioSource" messagetype="notification" provider="sdl">
       <description>This method must be invoked by SDL to update audio state.</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>The ID of app to be resumed audio source.</description>
@@ -1803,7 +1807,7 @@
     </function>
     <function name="UpdateDeviceList" messagetype="response">
     </function>
-    <function name="OnFileRemoved" messagetype="notification" provider="hmi">
+    <function name="OnFileRemoved" messagetype="notification" provider="sdl">
       <description>Notifies HMI in case some application file has been removed</description>
       <param name="fileName" type="String" minlength="1" maxlength="30" mandatory="true">
         <description>The name of the removed file</description>
@@ -1992,10 +1996,10 @@
     <function name="PolicyUpdate" messagetype="response">
     </function>
     <!-- End of SyncP RPC-->
-    <function name="OnSDLClose" messagetype="notification" provider="hmi">
+    <function name="OnSDLClose" messagetype="notification" provider="sdl">
       <description>SDL must notify HMI about finish working application</description>
     </function>
-    <function name="OnPutFile" messagetype="notification" provider="hmi">
+    <function name="OnPutFile" messagetype="notification" provider="sdl">
       <description>
       Notification, that comes to HMI when mobile sents file with systemFile flag
     </description>
@@ -2226,9 +2230,9 @@
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application that requested this RPC.</description>
       </param>
-      <param name="speakType" type="Common.SpeakType" mandatory="false">
-        <description>Defines the type of the request which causes text-to-speech</description>
-      </param>
+    <param name="speakType" type="Common.SpeakType" mandatory="false">
+      <description>Defines the type of the request which causes text-to-speech</description>
+    </param>
     </function>
     <function name="Speak" messagetype="response">
       <description>Provides information about success of operation.</description>
@@ -2307,9 +2311,9 @@
       <param name="progressIndicator" type="Boolean" mandatory="false">
         <description>If supported on the given platform, the alert GUI will include some sort of animation indicating that loading of a feature is progressing.  e.g. a spinning wheel or hourglass, etc.</description>
       </param>
-      <param name="alertType" type="Common.AlertType" mandatory="true">
-        <description>Defines if only UI or BOTH portions of the Alert request are being sent to HMI Side</description>
-      </param>
+    <param name="alertType" type="Common.AlertType" mandatory="true">
+      <description>Defines if only UI or BOTH portions of the Alert request are being sent to HMI Side</description>
+    </param>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application requested this RPC.</description>
       </param>
@@ -2757,7 +2761,7 @@
         <description>Currently used method name on which was triggered action</description>
       </param>
     </function>
-    <function name="OnRecordStart" messagetype="notification" provider="hmi">
+    <function name="OnRecordStart" messagetype="notification" provider="sdl">
       <description>Issued by SDL to notify HMI about capturing mic data should be started</description>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of application related to this RPC.</description>
@@ -2956,7 +2960,7 @@
     <!--Qt HMI version of GetVehicleData-->
     <function name="GetGpsData" messagetype="request" provider="hmi">
       <param name="appID" type="Integer" mandatory="true">
-        <description>ID of application that requested this RPC.</description>
+        <description>ID of application requested this RPC.</description>
       </param>
     </function>
     <function name="GetGpsData" messagetype="response">
@@ -3850,7 +3854,7 @@
         <description>If no message was found in PT for specified message code and for HMI current or specified language, this parameter will be omitted.</description>
       </param>
     </function>
-    <function name="OnAllowSDLFunctionality" messagetype="notification" provider="sdl">
+    <function name="OnAllowSDLFunctionality" messagetype="notification" provider="hmi">
       <description>Initiated by HMI. Notifies about user/HMI allowing SDL functionality or disallowing access to all mobile apps. Needed if HMI has additional ways of asking user about this (i.e. Settings etc)</description>
       <param name="device" type="Common.DeviceInfo" mandatory="false">
         <description>If no device is specified permission counts for SDL functionality in general.</description>
@@ -3861,7 +3865,7 @@
       <param name="source" type="Common.ConsentSource" mandatory="true"/>
     </function>
     <!-- SyncP RPC-->
-    <function name="OnReceivedPolicyUpdate" messagetype="notification" provider="sdl">
+    <function name="OnReceivedPolicyUpdate" messagetype="notification" provider="hmi">
       <description>
         From: SYNCP Manager
         To: SDL
@@ -3871,7 +3875,7 @@
         <description>Location of decrypted policy table Json file on target</description>
       </param>
     </function>
-    <function name="OnPolicyUpdate" messagetype="notification" provider="sdl">
+    <function name="OnPolicyUpdate" messagetype="notification" provider="hmi">
       <description>
         From: SYNCP Manager
         To: SDL
@@ -3888,7 +3892,7 @@
         <description>If no permissions were specified for application the array will come empty.</description>
       </param>
     </function>
-    <function name="OnAppPermissionConsent" messagetype="notification" provider="sdl">
+    <function name="OnAppPermissionConsent" messagetype="notification" provider="hmi">
       <description>Initiated by HMI for specifying the allowance for the application to perform some functionality. Duplicates functionality of the request, needed if HMI has specific ways to allow/disallow functionality (i.e.Setting Menu)</description>
       <param name="appID" type="Integer" mandatory="false">
         <description>Information about the application. See HMIApplication. If omitted - allow/disallow all applications </description>
@@ -3938,10 +3942,10 @@
       <description>Notification from SDL to HMI when current status of PT exchange changed (i.e. it Succeded or Failed etc)</description>
       <param name="status" type="Common.UpdateResult" mandatory="true"/>
     </function>
-    <function name="OnSystemError" messagetype="notification" provider="sdl">
+    <function name="OnSystemError" messagetype="notification" provider="hmi">
       <param name="error" type="Common.SystemError" mandatory="true"/>
     </function>
-    <function name="AddStatisticsInfo" messagetype="notification" provider="sdl">
+    <function name="AddStatisticsInfo" messagetype="notification" provider="hmi">
       <description>Sent by system to record statiscs and error counts. Increases statistics specified by statisticType by one.</description>
       <param name="statisticType" type="Common.StatisticsType" mandatory="true"/>
     </function>
@@ -3952,7 +3956,7 @@
     <function name="GetURLS" messagetype="response" scope="internal">
       <param name="urls" type="Common.ServiceInfo" array="true" mandatory="false" minsize="1" maxsize="100"/>
     </function>
-    <function name="OnDeviceStateChanged" messagetype="notification" scope="internal" provider="sdl">
+    <function name="OnDeviceStateChanged" messagetype="notification" scope="internal" provider="hmi">
       <param name="deviceState" type="Common.DeviceState" mandatory="true"/>
       <param name="deviceInternalId" type="String" mandatory="true"/>
     </function>

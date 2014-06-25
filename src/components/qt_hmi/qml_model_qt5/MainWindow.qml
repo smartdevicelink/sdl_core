@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
-import com.ford.sdl.hmi.log4cxx 1.0
+//import com.ford.sdl.hmi.log4cxx 1.0
 import com.ford.sdl.hmi.named_pipe_notifier 1.0
 import "./controls"
 import "./views"
@@ -364,7 +364,28 @@ Rectangle {
 
     }
 
+    property string string : "ZaQ"
+    property int number : 1127
+    property bool flag : true
+
+    function function1(a, b, c) {
+        console.log('--------------------------Func 1', a, b, c)
+    }
+    function function2(a) {
+        console.log('--------------------------Func 2')
+        for(var i = 0; i < a.length; i++) {
+            //console.log(a[i])
+        }
+    }
+    function function3(a) {
+        console.log('----------------Func 3', a[0].url, a[0].policyAppId)
+    }
+
     Component.onCompleted: {
+        RequestToSDL.Request1('GetInfo', function1)
+        RequestToSDL.Request2('ListNames', function2)
+        RequestToSDL.Request3('GetURLS', function3)
+
         dataContainer.hmiVRAvailable = true
         dataContainer.hmiTTSAvailable = true
         dataContainer.hmiNavigationAvailable = true

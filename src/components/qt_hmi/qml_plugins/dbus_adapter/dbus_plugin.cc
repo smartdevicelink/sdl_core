@@ -39,6 +39,7 @@
 #include "optional_argument.h"
 #include "qml_dbus.h"
 #include "dbus_controller.h"
+#include "request_to_sdl.h"
 
 #include <log4cxx/logger.h>
 #include <log4cxx/propertyconfigurator.h>
@@ -81,11 +82,16 @@ void DbusPlugin::registerTypes(const char *uri) {
   QDBusConnection::sessionBus().registerService("com.ford.sdl.hmi");
 
   dbusController_ = new DBusController();
+  requestToSDL_ = new RequestToSDL();
+
+
   HmiProxy::api_adaptors_.SetDBusController(dbusController_);
 }
 
 void DbusPlugin::initializeEngine(Engine *engine, const char *uri) {
     engine->rootContext()->setContextProperty("DBus", dbusController_);
+    engine->rootContext()->setContextProperty("RequestToSDL", requestToSDL_);
+   // requestToSDL_->setEngine(engine);
 }
 
 #if QT_4
