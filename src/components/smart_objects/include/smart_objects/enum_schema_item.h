@@ -224,24 +224,26 @@ class EnumConversionHelper {
   }
 
  private:
+  static const char* const cstring_values_[];
+  static const EnumType enum_values_[];
+  static const EnumToCStringMap enum_to_cstring_map_;
+  static const CStringToEnumMap cstring_to_enum_map_;
+
+  struct Size {
+    enum {value = sizeof(cstring_values_) / sizeof(cstring_values_[0])};
+  };
+
   static EnumToCStringMap InitEnumToCStringMap() {
     EnumToCStringMap result;
-    const int size = sizeof(cstring_values_) / sizeof(cstring_values_[0]);
-    for (int i = 0; i < size; ++i) result[enum_values_[i]] = cstring_values_[i];
+    for (int i = 0; i < Size::value; ++i) result[enum_values_[i]] = cstring_values_[i];
     return result;
   }
 
   static CStringToEnumMap InitCStringToEnumMap() {
     CStringToEnumMap result;
-    const int size = sizeof(cstring_values_) / sizeof(cstring_values_[0]);
-    for (int i = 0; i < size; ++i) result[cstring_values_[i]] = enum_values_[i];
+    for (int i = 0; i < Size::value; ++i) result[cstring_values_[i]] = enum_values_[i];
     return result;
   }
-
-  static const char* const cstring_values_[];
-  static const EnumType enum_values_[];
-  static const EnumToCStringMap enum_to_cstring_map_;
-  static const CStringToEnumMap cstring_to_enum_map_;
 };
 
 
