@@ -275,7 +275,7 @@ Rectangle {
         HardwareButtonsView { id: hardwarePanel }
     }
 
-    HMIProxy {
+    HMIAdapter {
         HmiApi.ButtonsProxy {
             id: sdlButtons
             objectName: "Buttons"
@@ -304,10 +304,23 @@ Rectangle {
             id: sdlUI
             objectName: "UI"
         }
+
+        HmiApi.SDLProxy {
+            id: sdlSDL
+            objectName: "SDL"
+        }
     }
 
-    SDLProxy {
+    SDLAdapter {
         id: sdlProxy
+
+        onResumeAudioSource: {
+
+        }
+
+        onFileRemoved: {
+
+        }
 
         onAppRegistered: {
             console.debug("enter onAppRegistered")
@@ -362,6 +375,34 @@ Rectangle {
             beep.play()
         }
 
+        onSdlClose: {
+
+        }
+
+        onPutFile: {
+
+        }
+
+        onRecordStart: {
+
+        }
+
+        onAppPermissionChanged: {
+
+        }
+
+        onSdlConsentNeeded: {
+
+        }
+
+        onStatusUpdate: {
+            console.log("enter onStatusUpdate")
+            var text = {}
+            text[Common.UpdateResult.UP_TO_DATE] = "UP_TO_DATE";
+            text[Common.UpdateResult.UPDATING] = "UPDATING";
+            text[Common.UpdateResult.UPDATE_NEEDED] = "UPDATE_NEEDED";
+            ttsPopUp.activate(text[status])
+        }
     }
 
     property string string : "ZaQ"

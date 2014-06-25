@@ -40,15 +40,9 @@ import "../models/RequestToSDL.js" as RequestToSDL
 GeneralView {
     signal itemActivated(string item)
 
-    function updateSDL() {
-        RequestToSDL.SDL_UpdateSDL(function (result) {
-            console.debug("Result update SDL:", result);
-        });
-    }
-
     onItemActivated: {
         switch (item) {
-            case "update_sdl": updateSDL();
+            case "update_sdl": RequestToSDL.SDL_UpdateSDL(settingsContainer.update);
         }
     }
 

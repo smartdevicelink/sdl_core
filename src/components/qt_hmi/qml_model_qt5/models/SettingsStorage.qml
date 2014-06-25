@@ -122,4 +122,8 @@ Item
     }
 
     property var buttonCapabilities: []
+
+    function update(result) {
+        console.debug("Result update SDL:", result);
+    }
 }
