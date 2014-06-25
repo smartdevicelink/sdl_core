@@ -314,33 +314,23 @@ namespace security_manager_test {
   }
   /*
    * Shall send Internall Error on call
-   * ProtectConnection for already protected connections
+   * CreateSSLContext for already protected connections
    */
-  TEST_F(SecurityManagerTest, ProtectConnection_ServiceAlreadyProtected) {
+  TEST_F(SecurityManagerTest, CreateSSLContext_ServiceAlreadyProtected) {
     SetMockCryptoManger();
-    // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
-                SendMessageToMobileApp(
-                  InternalErrorWithErrId(
-                    SecurityQuery::ERROR_SERVICE_ALREADY_PROTECTED), is_final)).
-        Times(1);
-    // Expect notifying listeners (unsuccess)
-    EXPECT_CALL(mock_sm_listener,
-                OnHandshakeDone(key, false)).
-        WillOnce(Return(true));
 
     // Return mock SSLContext
     EXPECT_CALL(mock_session_observer,
                 GetSSLContext(key, protocol_handler::kControl)).
         WillOnce(Return(&mock_ssl_context_new));
 
-    const bool rezult = security_manager_->ProtectConnection(key);
-    EXPECT_FALSE(rezult);
+    const security_manager::SSLContext* rezult = security_manager_->CreateSSLContext(key);
+    EXPECT_EQ(rezult, &mock_ssl_context_new);
   }
   /*
    * Shall send Internall Error on error create SSL
    */
-  TEST_F(SecurityManagerTest, ProtectConnection_ErrorCreateSSL) {
+  TEST_F(SecurityManagerTest, CreateSSLContext_ErrorCreateSSL) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
@@ -348,10 +338,6 @@ namespace security_manager_test {
                   InternalErrorWithErrId(
                     SecurityQuery::ERROR_INTERNAL), is_final)).
         Times(1);
-    // Expect notifying listeners (unsuccess)
-    EXPECT_CALL(mock_sm_listener,
-                OnHandshakeDone(key, false)).
-        WillOnce(Return(true));
 
     // Emulate SessionObserver and CryptoManager result
     EXPECT_CALL(mock_session_observer,
@@ -361,14 +347,14 @@ namespace security_manager_test {
                 CreateSSLContext()).
         WillOnce(ReturnNull());
 
-    const bool rezult = security_manager_->ProtectConnection(key);
+    const bool rezult = security_manager_->CreateSSLContext(key);
     EXPECT_FALSE(rezult);
   }
   /*
    * Shall send InternalError with SERVICE_NOT_FOUND
    * on getting any Error with call SetSSLContext
    */
-  TEST_F(SecurityManagerTest, ProtectConnection_SetSSLContextError) {
+  TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
     EXPECT_CALL(mock_protocol_observer,
@@ -376,10 +362,6 @@ namespace security_manager_test {
                   InternalErrorWithErrId(
                     SecurityQuery::ERROR_UNKWOWN_INTERNAL_ERROR), is_final)).
         Times(1);
-    // Expect notifying listeners (unsuccess)
-    EXPECT_CALL(mock_sm_listener,
-                OnHandshakeDone(key, false)).
-        WillOnce(Return(true));
 
     // Emulate SessionObserver and CryptoManager result
     EXPECT_CALL(mock_session_observer,
@@ -395,13 +377,13 @@ namespace security_manager_test {
                 SetSSLContext(key, &mock_ssl_context_new)).
         WillOnce(Return(SecurityQuery::ERROR_UNKWOWN_INTERNAL_ERROR));
 
-    const bool rezult = security_manager_->ProtectConnection(key);
+    const bool rezult = security_manager_->CreateSSLContext(key);
     EXPECT_FALSE(rezult);
   }
   /*
-   * Shall protect connection on correct call ProtectConnection
+   * Shall protect connection on correct call CreateSSLContext
    */
-  TEST_F(SecurityManagerTest, ProtectConnection_Success) {
+  TEST_F(SecurityManagerTest, CreateSSLContext_Success) {
     SetMockCryptoManger();
     // Expect no Errors
     // Expect no notifying listeners - it will be done after handshake
@@ -419,7 +401,7 @@ namespace security_manager_test {
                 SetSSLContext(key, &mock_ssl_context_new)).
         WillOnce(Return(SecurityQuery::ERROR_SUCCESS));
 
-    const bool rezult = security_manager_->ProtectConnection(key);
+    const bool rezult = security_manager_->CreateSSLContext(key);
     EXPECT_TRUE(rezult);
   }
   /*
@@ -711,32 +693,32 @@ namespace security_manager_test {
     EXPECT_CALL(mock_ssl_context_exists,
                 DoHandshakeStep(_, handshake_data_size, _, _)).
         // two states with correct out data
-         WillOnce(DoAll(SetArgPointee<2>(handshake_data_out_pointer),
-                         SetArgPointee<3>(handshake_data_out_size),
-                         Return(security_manager::SSLContext::
-                                Handshake_Result_Success))).
-         WillOnce(DoAll(SetArgPointee<2>(handshake_data_out_pointer),
-                         SetArgPointee<3>(handshake_data_out_size),
-                         Return(security_manager::SSLContext::
-                                Handshake_Result_Fail))).
+        WillOnce(DoAll(SetArgPointee<2>(handshake_data_out_pointer),
+                       SetArgPointee<3>(handshake_data_out_size),
+                       Return(security_manager::SSLContext::
+                              Handshake_Result_Success))).
+        WillOnce(DoAll(SetArgPointee<2>(handshake_data_out_pointer),
+                       SetArgPointee<3>(handshake_data_out_size),
+                       Return(security_manager::SSLContext::
+                              Handshake_Result_Fail))).
         // two states with with null pointer data
-         WillOnce(DoAll(SetArgPointee<2>((uint8_t*)NULL),
-                         SetArgPointee<3>(handshake_data_out_size),
-                         Return(security_manager::SSLContext::
-                                Handshake_Result_Success))).
-         WillOnce(DoAll(SetArgPointee<2>((uint8_t*)NULL),
-                         SetArgPointee<3>(handshake_data_out_size),
-                         Return(security_manager::SSLContext::
-                                Handshake_Result_Fail))).
+        WillOnce(DoAll(SetArgPointee<2>((uint8_t*)NULL),
+                       SetArgPointee<3>(handshake_data_out_size),
+                       Return(security_manager::SSLContext::
+                              Handshake_Result_Success))).
+        WillOnce(DoAll(SetArgPointee<2>((uint8_t*)NULL),
+                       SetArgPointee<3>(handshake_data_out_size),
+                       Return(security_manager::SSLContext::
+                              Handshake_Result_Fail))).
         // two states with with null data size
-         WillOnce(DoAll(SetArgPointee<2>(handshake_data_out_pointer),
-                         SetArgPointee<3>(0),
-                         Return(security_manager::SSLContext::
-                                Handshake_Result_Success))).
-         WillOnce(DoAll(SetArgPointee<2>(handshake_data_out_pointer),
-                         SetArgPointee<3>(0),
-                         Return(security_manager::SSLContext::
-                                Handshake_Result_Success)));
+        WillOnce(DoAll(SetArgPointee<2>(handshake_data_out_pointer),
+                       SetArgPointee<3>(0),
+                       Return(security_manager::SSLContext::
+                              Handshake_Result_Success))).
+        WillOnce(DoAll(SetArgPointee<2>(handshake_data_out_pointer),
+                       SetArgPointee<3>(0),
+                       Return(security_manager::SSLContext::
+                              Handshake_Result_Success)));
 
     // Expect send two message (with correct pointer and size data)
     EXPECT_CALL(mock_protocol_observer,

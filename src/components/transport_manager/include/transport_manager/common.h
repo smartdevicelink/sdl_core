@@ -1,6 +1,4 @@
-/**
- * \file common.h
- * \brief Common definitions.
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -81,6 +79,5 @@ typedef int ApplicationHandle;
  */
 typedef std::vector<ApplicationHandle> ApplicationList;
 
-}  //  namespace transport_manager
-
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON.H
+}  // namespace transport_manager
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_COMMON_H_

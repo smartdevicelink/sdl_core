@@ -246,13 +246,22 @@ class ConnectionHandlerImpl : public ConnectionHandler,
 
   /**
    * \brief Gets crypto context of connection, use service_type to get NULL
-   * SSLContex for not protected services or ControlService (0x0)
+   * SSLContext for not protected services or ControlService (0x0)
    * to get current SSLContext of connection
    * \param key Unique key used by other components as session identifier
    * \param service_type Type of service
    * \return \ref SSLContext of connection
    */
   security_manager::SSLContext* GetSSLContext(
+      const uint32_t &key,
+      const protocol_handler::ServiceType &service_type) OVERRIDE;
+  /**
+   * \brief Set protection flag to service in session by key
+   * to get current SSLContext of connection
+   * \param key Unique key used by other components as session identifier
+   * \param service_type Type of service
+   */
+  void SetProtectionFlag(
       const uint32_t &key,
       const protocol_handler::ServiceType &service_type) OVERRIDE;
 #endif  // ENABLE_SECURITY

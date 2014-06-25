@@ -76,10 +76,9 @@ struct Service {
     : service_type(protocol_handler::kInvalidServiceType),
       is_protected_(false) {
   }
-  Service(protocol_handler::ServiceType service_type,
-          const bool is_protected = false)
+  explicit Service(protocol_handler::ServiceType service_type)
     : service_type(service_type),
-      is_protected_(is_protected) {
+      is_protected_(false) {
   }
   bool operator==(const protocol_handler::ServiceType service_type) const {
     return this->service_type == service_type;
@@ -108,6 +107,10 @@ struct Session {
       , ssl_context(NULL)
 #endif  // ENABLE_SECURITY
   {}
+  Service* find_service(
+      const protocol_handler::ServiceType& service_type);
+  const Service* find_service(
+      const protocol_handler::ServiceType& service_type) const;
 };
 
 /**
@@ -160,7 +163,8 @@ class Connection {
   uint32_t RemoveSession(uint8_t session_id);
 
   /**
-   * \brief Adds service to session oradd protection to service been started before
+   * \brief Adds uprotected service to session or
+   * check protection to service has been started before
    * \param session_id session ID
    * \param service_type Type of service
    * \param is_protected protection state
@@ -169,7 +173,6 @@ class Connection {
   bool AddNewService(uint8_t session_id,
                      protocol_handler::ServiceType service_type,
                      const bool is_protected);
-
   /**
    * \brief Removes service from session
    * \param session_id session ID
@@ -178,7 +181,6 @@ class Connection {
    */
   bool RemoveService(uint8_t session_id,
                      protocol_handler::ServiceType service_type);
-
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets crypto context of service
@@ -190,14 +192,24 @@ class Connection {
                     security_manager::SSLContext *context);
   /**
    * \brief Gets crypto context of session, use service_type to get NULL
-   * SSLContex for not protected services or ControlService (0x0)
+   * SSLContext for not protected services or ControlService (0x0)
    * to get current SSLContext of connection
    * \param session_id Identifier of the session
    * \param service_type Type of service
    * \return \ref SSLContext of connection
    */
-  security_manager::SSLContext* GetSSLContext(uint8_t session_id,
+  security_manager::SSLContext* GetSSLContext(
+      const uint8_t session_id,
       const protocol_handler::ServiceType &service_type) const;
+  /**
+   * \brief Set protection flag to service in session by key
+   * to get current SSLContext of connection
+   * \param session_id Identifier of the session
+   * \param service_type Type of service
+   */
+  void SetProtectionFlag(
+      const uint8_t session_id,
+      const protocol_handler::ServiceType &service_type);
 #endif  // ENABLE_SECURITY
   /**
    * \brief Returns map of sessions which have been opened in

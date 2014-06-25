@@ -69,7 +69,7 @@ add_custom_target(pasa-tarball
 if (OS_TYPE_OPTION)
   if (${OS_TYPE_OPTION} STREQUAL "QNX")
     message(STATUS "Jenkins integration: set build process for QNX")
-    #do not use include after project() command. 
+    #do not use include after project() command.
     #Such usecase results in infinite cycle of reinitialization of compiler and other variables
     INCLUDE("./qnx_6.5.0_linux_x86.cmake")
     #tests are not supported yet for QNX build
@@ -348,6 +348,12 @@ if(ENABLE_SECURITY)
   add_definitions(-DENABLE_SECURITY)
   set(SecurityManagerLibrary SecurityManager)
   set(SecurityManagerIncludeDir ${CMAKE_SOURCE_DIR}/src/components/security_manager/include)
+  set(SecurityManagerTestIncludeDir ${CMAKE_SOURCE_DIR}/test/components/security_manager/include)
+endif()
+
+set(RTLIB rt)
+if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+set(RTLIB )
 endif()
 
 # --- 3rd party libs (static)

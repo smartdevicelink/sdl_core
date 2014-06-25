@@ -133,6 +133,7 @@ CryptoManagerImpl::SSLContextImpl::max_block_sizes =
 SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::
 DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
                 const uint8_t** const out_data, size_t *out_data_size) {
+  // TODO(Ezamakhov): add test - hanshake fail -> restart StartHandshake
   *out_data = NULL;
   if (IsInitCompleted()) {
     is_handshake_pending_ = false;
@@ -143,12 +144,14 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
     int ret = BIO_write(bioIn_, in_data, in_data_size);
     if (ret <= 0) {
       is_handshake_pending_ = false;
+      SSL_clear(connection_);
       return SSLContext::Handshake_Result_AbnormalFail;
     }
   }
 
   const int handshake_result = SSL_do_handshake(connection_);
   if (handshake_result == 1) {
+    // Handshake is successful
     bioFilter_ = BIO_new(BIO_f_ssl());
     BIO_set_ssl(bioFilter_, connection_, BIO_NOCLOSE);
 
@@ -156,9 +159,12 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
     max_block_size_ = max_block_sizes[SSL_CIPHER_get_name(cipher)];
     is_handshake_pending_ = false;
   } else if (handshake_result == 0) {
+    SSL_clear(connection_);
     is_handshake_pending_ = false;
     return SSLContext::Handshake_Result_Fail;
   } else if (SSL_get_error(connection_, handshake_result) != SSL_ERROR_WANT_READ) {
+    SSL_clear(connection_);
+    is_handshake_pending_ = false;
     return SSLContext::Handshake_Result_AbnormalFail;
   }
 
@@ -173,9 +179,10 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
       *out_data =  buffer_;
     } else {
       is_handshake_pending_ = false;
+      SSL_clear(connection_);
       return SSLContext::Handshake_Result_AbnormalFail;
     }
-  } 
+  }
 
   return SSLContext::Handshake_Result_Success;
 }

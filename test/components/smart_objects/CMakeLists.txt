@@ -11,12 +11,6 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
-# Libraries are the same for all SmartObject test
-set(RTLIB rt)
-if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-set(RTLIB )
-endif()
-
 set (LIBRARIES
     gtest
     gtest_main

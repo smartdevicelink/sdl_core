@@ -86,9 +86,13 @@ class ConnectionTest: public ::testing::Test {
         AddNewService(session_id, service_type, protection);
     EXPECT_EQ(result, expect_add_new_service_call_result);
 
-    const SessionMap newSessionMap = connection_->session_map();
-    EXPECT_FALSE(newSessionMap.empty());
-    const ServiceList newServiceList = newSessionMap.begin()->second.service_list;
+    if (protection) {
+      connection_->SetProtectionFlag(session_id, service_type);
+    }
+
+    const SessionMap session_map = connection_->session_map();
+    EXPECT_FALSE(session_map.empty());
+    const ServiceList newServiceList = session_map.begin()->second.service_list;
     EXPECT_FALSE(newServiceList.empty());
     const ServiceList::const_iterator it =
         std::find(newServiceList.begin(), newServiceList.end(), service_type);

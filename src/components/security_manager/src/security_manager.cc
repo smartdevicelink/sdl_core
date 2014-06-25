@@ -135,45 +135,40 @@ void SecurityManager::Handle(const SecurityMessage &message) {
     }
 }
 
-bool SecurityManager::ProtectConnection(const uint32_t &connection_key) {
+security_manager::SSLContext * SecurityManager::CreateSSLContext(
+    const uint32_t &connection_key) {
   LOG4CXX_INFO(logger_, "ProtectService processing");
   DCHECK(session_observer_);
   DCHECK(crypto_manager_);
 
-  if (session_observer_->GetSSLContext(connection_key,
-                                      protocol_handler::kControl)) {
-    const std::string error_text("Connection is already protected");
-    LOG4CXX_WARN(logger_, error_text << ", key " << connection_key);
-    // TODO(EZamakhov): move to PH -send with Ack/NAck
-    SendInternalError(connection_key,
-                      SecurityQuery::ERROR_SERVICE_ALREADY_PROTECTED, error_text);
-    NotifyListenersOnHandshakeDone(connection_key, false);
-    return false;
+  security_manager::SSLContext *ssl_context =
+      session_observer_->GetSSLContext(connection_key, protocol_handler::kControl);
+  // return exists SSLCOntext for current connection/session
+  if (ssl_context) {
+    return ssl_context;
   }
 
-  security_manager::SSLContext *newSSLContext = crypto_manager_->CreateSSLContext();
-  if (!newSSLContext) {
+  ssl_context = crypto_manager_->CreateSSLContext();
+  if (!ssl_context) {
     const std::string error_text("CryptoManager could not create SSL context.");
     LOG4CXX_ERROR(logger_, error_text);
     // Generate response query and post to security_messages_
     SendInternalError(connection_key, SecurityQuery::ERROR_INTERNAL,
                       error_text);
-    NotifyListenersOnHandshakeDone(connection_key, false);
-    return false;
+    return NULL;
   }
 
-  const int result = session_observer_->SetSSLContext(connection_key, newSSLContext);
+  const int result = session_observer_->SetSSLContext(connection_key, ssl_context);
   if (SecurityQuery::ERROR_SUCCESS != result) {
-    // delete SSLContex on any error
-    crypto_manager_->ReleaseSSLContext(newSSLContext);
+    // delete SSLContext on any error
+    crypto_manager_->ReleaseSSLContext(ssl_context);
     SendInternalError(connection_key, result, "");
-    NotifyListenersOnHandshakeDone(connection_key, false);
-    return false;
+    return NULL;
   }
   DCHECK(session_observer_->GetSSLContext(connection_key,
                                           protocol_handler::kControl));
   LOG4CXX_DEBUG(logger_, "Set SSL context to connection_key " << connection_key);
-  return true;
+  return ssl_context;
 }
 
 void SecurityManager::StartHandshake(uint32_t connection_key) {
@@ -356,7 +351,7 @@ void SecurityManager::SendQuery(const SecurityQuery& query,
 
   const protocol_handler::RawMessagePtr rawMessagePtr(
         new protocol_handler::RawMessage(connection_key,
-                                         protocol_handler::PROTOCOL_VERSION_2,
+                                         protocol_handler::PROTOCOL_VERSION_3,
                                          &data_sending[0], data_sending.size(),
                                          protocol_handler::kControl));
   DCHECK(protocol_handler_);

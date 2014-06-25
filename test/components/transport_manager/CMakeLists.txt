@@ -11,11 +11,6 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
-set(RTLIB rt)
-if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-set(RTLIB )
-endif()
-
 set (LIBRARIES
     gtest
     gtest_main
@@ -27,7 +22,7 @@ set (LIBRARIES
     Utils
     ConfigProfile
     jsoncpp
-    
+
     ${RTLIB}
 )
 

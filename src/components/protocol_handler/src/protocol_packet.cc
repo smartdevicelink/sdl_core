@@ -77,7 +77,7 @@ ProtocolPacket::~ProtocolPacket() {
 }
 
 // Serialization
-RawMessagePtr ProtocolPacket::serializePacket() {
+RawMessagePtr ProtocolPacket::serializePacket() const {
   uint8_t *packet = new (std::nothrow) uint8_t[MAXIMUM_FRAME_DATA_SIZE];
   if (!packet) {
     return RawMessagePtr();

@@ -5,8 +5,8 @@ include_directories (
   ../../../src/components/utils/include
   ../../../src/components/protocol_handler/include
   ../../../src/components/connection_handler/include
-  ${SecurityManagerIncludeDir}
   ../../../src/components/config_profile/include
+  ${SecurityManagerIncludeDir}
   ../security_manager/include
   ${CMAKE_BINARY_DIR}/src/components/
 )

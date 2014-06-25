@@ -111,10 +111,10 @@ typedef threads::MessageLoopThread<SecurityMessageQueue> SecurityMessageLoop;
      * \param data_size size of binary data array
      * \param seq_number received from Mobile Application
      */
-    void SendHandshakeBinData(const uint32_t connection_key,
-                              const uint8_t *const data,
-                              const size_t data_size,
-                              const uint32_t seq_number = 0);
+    virtual void SendHandshakeBinData(const uint32_t connection_key,
+                                      const uint8_t *const data,
+                                      const size_t data_size,
+                                      const uint32_t seq_number = 0);
     /**
      * \brief Sends InternallError with text message to mobile application
      * \param connection_key Unique key used by other components as session identifier
@@ -122,10 +122,10 @@ typedef threads::MessageLoopThread<SecurityMessageQueue> SecurityMessageLoop;
      * \param erorr_text SSL impelmentation error text
      * \param seq_number received from Mobile Application
      */
-    void SendInternalError(const uint32_t connection_key,
-                           const uint8_t &error_id,
-                           const std::string &erorr_text,
-                           const uint32_t seq_number = 0);
+    virtual void SendInternalError(const uint32_t connection_key,
+                                   const uint8_t &error_id,
+                                   const std::string &erorr_text,
+                                   const uint32_t seq_number = 0);
 
     /**
      * \brief Handle SecurityMessage from mobile for processing
@@ -135,22 +135,23 @@ typedef threads::MessageLoopThread<SecurityMessageQueue> SecurityMessageLoop;
     void Handle(const SecurityMessage &message) OVERRIDE;
 
     /**
-     * \brief Start protection connection
+     * \brief Create new SSLContext for connection or return exists
+     * Do not notify listeners, send security error on occure
      * \param connection_key Unique key used by other components as session identifier
-     * @return \c true on success or \c false on any error
+     * @return new \c  SSLContext or \c NULL on any error
      */
-    bool ProtectConnection(const uint32_t &connection_key);
+    virtual SSLContext* CreateSSLContext(const uint32_t &connection_key);
 
     /**
      * \brief Start handshake as SSL client
      */
-    void StartHandshake(uint32_t session_key);
+    virtual void StartHandshake(uint32_t connection_key);
 
     /**
      * \brief Add/Remove for SecurityManagerListener
      */
-    void AddListener(SecurityManagerListener *const listener);
-    void RemoveListener(SecurityManagerListener *const listener);
+    virtual void AddListener(SecurityManagerListener *const listener);
+    virtual void RemoveListener(SecurityManagerListener *const listener);
     /**
      * \brief Notifiers for listeners
      * \param connection_key Unique key used by other components as session identifier
@@ -158,7 +159,6 @@ typedef threads::MessageLoopThread<SecurityMessageQueue> SecurityMessageLoop;
      */
     void NotifyListenersOnHandshakeDone(const uint32_t &connection_key,
                                         const bool success);
-
     /**
      * @brief SecurityConfigSection
      * @return Session name in config file

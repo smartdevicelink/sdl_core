@@ -151,7 +151,7 @@ class SessionObserver {
       security_manager::SSLContext *context) = 0;
   /**
    * \brief Gets crypto context of connection, use service_type to get NULL
-   * SSLContex for not protected services or ControlService (0x0)
+   * SSLContext for not protected services or ControlService (0x0)
    * to get current SSLContext of connection
    * \param key Unique key used by other components as session identifier
    * \param service_type Type of service
@@ -160,8 +160,16 @@ class SessionObserver {
   virtual security_manager::SSLContext* GetSSLContext(
       const uint32_t &key,
       const protocol_handler::ServiceType &service_type) = 0;
+  /**
+   * \brief Set protection flag to service in session by key
+   * to get current SSLContext of connection
+   * \param key Unique key used by other components as session identifier
+   * \param service_type Type of service
+   */
+  virtual void SetProtectionFlag(
+      const uint32_t &key,
+      const protocol_handler::ServiceType &service_type) = 0;
 #endif  // ENABLE_SECURITY
-
  protected:
   /**
    * \brief Destructor

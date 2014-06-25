@@ -210,7 +210,7 @@ class ProtocolHandlerImpl
     */
   void SendEndSession(int32_t connection_id, uint8_t session_id);
 
- protected:
+  // TODO(Ezamakhov): move Ack/Nack as interface for StartSessionHandler
   /**
    * \brief Sends acknowledgement of starting session to mobile application
    * with session number and hash code for second version of protocol

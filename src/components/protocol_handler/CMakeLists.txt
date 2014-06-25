@@ -3,7 +3,7 @@ include_directories(
   ../utils/include/
   ../transport_manager/include/
   ../connection_handler/include/
-  ${SecurityManagerIncludeDir}/
+  ${SecurityManagerIncludeDir}
   ../config_profile/include/
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
@@ -18,4 +18,9 @@ set(SOURCES
     ./src/service_type.cc
 )
 
-add_library("ProtocolHandler" ${SOURCES})
+set(LIBRARIES
+  ${SecurityManagerLibrary}
+)
+
+add_library(ProtocolHandler ${SOURCES})
+target_link_libraries(ProtocolHandler ${LIBRARIES})

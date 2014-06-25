@@ -70,7 +70,7 @@ namespace security_manager_test {
      * Wrapper for fast call SecurityQuery::SerializeQuery
      * Used for handling header and data array to byte array for serialization
      */
-    std::vector<uint8_t>DeserializeData(
+    std::vector<uint8_t> DeserializeData(
         SecurityQuery::QueryHeader header,
         const uint8_t *const binary_data,
         const size_t bin_data_size) const {

@@ -11,11 +11,6 @@ include_directories (
   ${CMAKE_BINARY_DIR}/src/components/
 )
 
-set(RTLIB rt)
-if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-set(RTLIB )
-endif()
-
 set (LIBRARIES
     gtest
     gtest_main

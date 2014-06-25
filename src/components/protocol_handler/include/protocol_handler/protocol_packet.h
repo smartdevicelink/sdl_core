@@ -304,7 +304,7 @@ class ProtocolPacket {
    * \brief Serializes info about message into protocol header.
    * \return RawMessagePtr with all data (header and message)
    */
-  RawMessagePtr serializePacket();
+  RawMessagePtr serializePacket() const;
   /**
    * \brief Appends message frame to existing message in
    * recieving multiframe messages.

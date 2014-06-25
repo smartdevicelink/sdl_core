@@ -413,7 +413,7 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
                  << " sessions.");
 
     if (sessions_list) {
-      const SessionMap &session_map = connection.session_map();
+      const SessionMap session_map = connection.session_map();
       for (SessionMap::const_iterator session_it = session_map.begin();
            session_map.end() != session_it; ++session_it) {
         sessions_list->push_back(KeyFromPair(conn_handle, it->first));
@@ -524,6 +524,23 @@ security_manager::SSLContext *ConnectionHandlerImpl::GetSSLContext(
   }
   Connection &connection = *it->second;
   return connection.GetSSLContext(session_id, service_type);
+}
+
+void ConnectionHandlerImpl::SetProtectionFlag(
+    const uint32_t& key, const protocol_handler::ServiceType& service_type) {
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::SetProtectionFlag");
+  transport_manager::ConnectionUID connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(key, &connection_handle, &session_id);
+
+  sync_primitives::AutoLock lock(connection_list_lock_);
+  ConnectionList::iterator it = connection_list_.find(connection_handle);
+  if (connection_list_.end() == it) {
+    LOG4CXX_ERROR(logger_, "Unknown connection!");
+    return;
+  }
+  Connection &connection = *it->second;
+  connection.SetProtectionFlag(session_id, service_type);
 }
 #endif  // ENABLE_SECURITY
 
