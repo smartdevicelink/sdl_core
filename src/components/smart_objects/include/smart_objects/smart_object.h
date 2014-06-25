@@ -405,7 +405,7 @@ class SmartObject {
    * @param  Value Value to compare object with
    * @return bool
    **/
-  bool operator==(std::string Value) const;
+  bool operator==(const std::string& Value) const;
 
   /**
    * @brief Comparison operator for comparing object with string value
@@ -503,7 +503,7 @@ class SmartObject {
    * @param  Key Key of element to return
    * @return SmartObject&
    **/
-  SmartObject& operator[](const std::string Key);
+  SmartObject& operator[](const std::string& Key);
   const SmartObject& operator[](const std::string Key) const;
 
   /**
@@ -806,7 +806,7 @@ class SmartObject {
    * @param Key Key of element to retrieve
    * @return SmartObject&
    **/
-  inline SmartObject& handle_map_access(std::string Key);
+  inline SmartObject& handle_map_access(const std::string& Key);
   /** @} */
 
   /**

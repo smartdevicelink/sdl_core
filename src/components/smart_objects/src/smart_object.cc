@@ -509,7 +509,7 @@ SmartObject& SmartObject::operator=(const std::string& NewValue) {
   return *this;
 }
 
-bool SmartObject::operator==(std::string Value) const {
+bool SmartObject::operator==(const std::string& Value) const {
   std::string comp = convert_string();
   if (comp == invalid_string_value) {
     return false;
@@ -702,7 +702,7 @@ inline SmartObject& SmartObject::handle_array_access(int32_t Index) {
 // MAP INTERFACE SUPPORT
 // =============================================================
 
-SmartObject& SmartObject::operator[](const std::string Key) {
+SmartObject& SmartObject::operator[](const std::string& Key) {
   return handle_map_access(Key);
 }
 
@@ -761,7 +761,7 @@ const SmartObject& SmartObject::getElement(const std::string & Key) const {
   return invalid_object_value;
 }
 
-SmartObject& SmartObject::handle_map_access(const std::string Key) {
+SmartObject& SmartObject::handle_map_access(const std::string& Key) {
   if (m_type == SmartType_Invalid) {
     return *this;
   }
