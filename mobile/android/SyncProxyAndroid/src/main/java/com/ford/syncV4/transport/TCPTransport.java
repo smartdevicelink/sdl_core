@@ -42,6 +42,8 @@ import java.net.Socket;
  */
 public class TCPTransport extends SyncTransport {
 
+    private static final String CLASS_NAME = TCPTransport.class.getSimpleName();
+
     /**
      * Size of the read buffer.
      */
@@ -119,15 +121,15 @@ public class TCPTransport extends SyncTransport {
                         bResult = true;
                         //Logger.i("TCPTransport.sendBytesOverTransport: successfully send data:" + msgBytes.length);
                     } catch (IOException e) {
-                        Logger.w("TCPTransport.sendBytesOverTransport: error during sending data: " + e.getMessage());
+                        Logger.e(CLASS_NAME + " SendBytesOverTransport: error during sending data: " + e.getMessage());
                         bResult = false;
                     }
                 } else {
-                    Logger.e("TCPTransport: sendBytesOverTransport request accepted, but output stream is null");
+                    Logger.e(CLASS_NAME + " SendBytesOverTransport request accepted, but output stream is null");
                 }
             }
         } else {
-            Logger.i("TCPTransport: sendBytesOverTransport request rejected. Transport is not connected");
+            Logger.i(CLASS_NAME + " SendBytesOverTransport request rejected. Transport is not connected");
             bResult = false;
         }
 

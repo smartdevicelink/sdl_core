@@ -55,6 +55,14 @@ public class WiProProtocol extends AbstractProtocol {
         });
     }
 
+    public void shutDownAudioStreamExecutor() throws InterruptedException {
+        sendProtocolMessageProcessor.shutdownAudioExecutors();
+    }
+
+    public void shutDownMobileNaviStreamExecutor() throws InterruptedException {
+        sendProtocolMessageProcessor.shutdownNaviExecutors();
+    }
+
     @Override
     public void StartProtocolSession(byte sessionId) {
         sendProtocolMessageProcessor.processStartSession(getProtocolVersion(), sessionId);

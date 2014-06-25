@@ -1480,7 +1480,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     public void stopAudioService(final String appId) {
-        //Logger.d("TRACE 0 Stop Audio Service");
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new Runnable() {
             @Override
@@ -1495,7 +1494,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-                //Logger.d("TRACE 1 Stop Audio Service");
                 closeAudioOutputStream();
                 mBoundProxyService.syncProxyStopAudioService(appId);
             }

@@ -19,6 +19,8 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     private byte[] dataBuffer = new byte[MobileNaviDataFrame.MOBILE_NAVI_DATA_SIZE];
     private int mCorrelationId = 0;
 
+    private volatile boolean mIsRun = false;
+
     public Thread getThread() {
         return thread;
     }
@@ -29,14 +31,22 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         _serviceType = serviceType;
     }
 
+    @Override
     public void start() throws IOException {
+
+        mIsRun = true;
+
         if (thread == null) {
             thread = new Thread(this);
             thread.start();
         }
     }
 
+    @Override
     public void stop() {
+
+        mIsRun = false;
+
         if (is == null || thread == null) {
             return;
         }
@@ -55,7 +65,6 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
             while (!Thread.interrupted()) {
                 try {
                     doDataReading();
-
                 } catch (IllegalArgumentException e) {
                     Logger.e(CLASS_NAME, e.toString());
                     break;
@@ -74,7 +83,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     public synchronized void doDataReading() throws IOException, IllegalArgumentException {
         byte[] frameData = readFrameData(byteBuffer, dataBuffer);
         if (frameData != null && frameData.length > 0) {
-            createProtocolMessage(frameData);
+            sendMessage(createProtocolMessage(frameData));
         }
     }
 
@@ -85,8 +94,6 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         pm.setFunctionID(0);
         pm.setCorrID(getNextCorrelationId());
         pm.setData(frameData, frameData.length);
-
-        mStreamListener.sendH264(pm);
         return pm;
     }
 
@@ -96,6 +103,9 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
             buffer.put(tail);
         }
         do {
+            if (!mIsRun) {
+                break;
+            }
             MobileNaviDataFrame frame = createFramePayload(data);
             if (frame.getType() == MobileNaviDataFrameType.END_OS_SESSION_TYPE) {
                 byte[] result = Arrays.copyOf(buffer.array(), buffer.position());

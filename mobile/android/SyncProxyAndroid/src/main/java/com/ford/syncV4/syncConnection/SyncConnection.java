@@ -274,6 +274,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void stopH264() {
+        try {
+            ((WiProProtocol)mProtocol).shutDownMobileNaviStreamExecutor();
+        } catch (InterruptedException e) {
+            Logger.e(CLASS_NAME + " Stop Mobile Navi exception:" + e.getMessage());
+        }
         if (mVideoPacketizer != null) {
             mVideoPacketizer.removeListener();
             mVideoPacketizer.stop();
@@ -294,6 +299,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void stopAudioDataTransfer() {
+        try {
+            ((WiProProtocol)mProtocol).shutDownAudioStreamExecutor();
+        } catch (InterruptedException e) {
+            Logger.e(CLASS_NAME + " Stop Audio exception:" + e.getMessage());
+        }
         if (mAudioPacketizer != null) {
             mAudioPacketizer.removeListener();
             mAudioPacketizer.stop();
