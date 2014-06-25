@@ -1,10 +1,5 @@
-/**
- * \file ConnectionHandlerImpl.cpp
- * \brief Connection handler class.
- * \Observes TransportManager and ProtocolHandler, stores information regarding connections
- * \and sessions and provides it to AppManager.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include <strings.h>
+
 #include <string>
 #include <list>
 #include <algorithm>
@@ -89,11 +86,9 @@ void ConnectionHandlerImpl::OnDeviceListUpdated(
   }
 }
 
-void ConnectionHandlerImpl::OnApplicationListUpdated(DeviceHandle device_handle) {
-  LOG4CXX_DEBUG(logger_,"ConnectionHandlerImpl::OnApplicationListUpdated() device_handle "
-               << device_handle);
+void ConnectionHandlerImpl::OnFindNewApplicationsRequest() {
   if (connection_handler_observer_) {
-    connection_handler_observer_->OnApplicationListUpdated(device_handle);
+    connection_handler_observer_->OnFindNewApplicationsRequest();
   }
 }
 
@@ -121,13 +116,21 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   // 1. Delete all the connections and sessions of this device
   // 2. Delete device from a list
   // 3. Let observer know that device has been deleted.
-  for (ConnectionListIterator it = connection_list_.begin();
-       it != connection_list_.end(); ++it) {
-    if (device_info.device_handle() ==
-        (*it).second->connection_device_handle()) {
-      RemoveConnection((*it).first);
+
+  {
+    sync_primitives::AutoLock lock(connection_list_lock_);
+    for (ConnectionListIterator it = connection_list_.begin();
+         it != connection_list_.end(); ++it) {
+      if (device_info.device_handle() ==
+          (*it).second->connection_device_handle()) {
+        ConnectionHandle connection_handle = (*it).first;
+        // Unlock connection_list to avoid deadlock during connection removing
+        sync_primitives::AutoUnlock auto_unlock(lock);
+        RemoveConnection(connection_handle);
+      }
     }
   }
+
   device_list_.erase(device_info.device_handle());
   if (connection_handler_observer_) {
     connection_handler_observer_->RemoveDevice(device_info.device_handle());
@@ -211,36 +214,36 @@ void ConnectionHandlerImpl::RemoveConnection(
   OnConnectionEnded(connection_handle);
 }
 
- int32_t ConnectionHandlerImpl::OnSessionStartedCallback(
+ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   const transport_manager::ConnectionUID& connection_handle,
   const uint8_t sessionId,
   const protocol_handler::ServiceType& service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
 
-  int32_t new_session_id = -1;
+  uint32_t new_session_id = 0;
 
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
-    return -1;
+    return 0;
   }
 
   if ((0 == sessionId) && (protocol_handler::kRpc == service_type)) {
     new_session_id = (it->second)->AddNewSession();
     if (0 > new_session_id) {
       LOG4CXX_ERROR(logger_, "Not possible to start session!");
-      return -1;
+      return 0;
     }
   } else if ((0 != sessionId) && (protocol_handler::kRpc != service_type)) {
     if (!(it->second)->AddNewService(sessionId, service_type)) {
       LOG4CXX_ERROR(logger_, "Not possible to establish service!");
-      return -1;
+      return 0;
     }
     new_session_id = sessionId;
   } else {
     LOG4CXX_ERROR(logger_, "Not possible to establish service!");
-    return -1;
+    return 0;
   }
 
   if (connection_handler_observer_) {
@@ -251,13 +254,12 @@ void ConnectionHandlerImpl::RemoveConnection(
 
     if (!success && (protocol_handler::kRpc == service_type)) {
       (it->second)->RemoveSession(new_session_id);
-      new_session_id = -1;
+      new_session_id = 0;
     } else if (!success) {
       (it->second)->RemoveService(sessionId, service_type);
-      new_session_id = -1;
+      new_session_id = 0;
     }
   }
-
   return new_session_id;
 }
 
@@ -267,7 +269,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   const protocol_handler::ServiceType& service_type) {
   LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnSessionEndedCallback()");
 
-  int32_t result = -1;
+  uint32_t result = 0;
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionListIterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
@@ -416,11 +418,12 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   }
 
   if (device_name) {
-    *device_name = (*it).second.user_friendly_name();
+    *device_name = it->second.user_friendly_name();
   }
 
   if (applications_list) {
     applications_list->clear();
+    sync_primitives::AutoLock connection_list_lock(connection_list_lock_);
     for (ConnectionListIterator itr = connection_list_.begin();
          itr != connection_list_.end(); ++itr) {
       if (device_handle == (*itr).second->connection_device_handle()) {
@@ -429,7 +432,7 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
              end = session_map.end(); session_it != end; ++session_it) {
           const transport_manager::ConnectionUID& connection_handle = itr->first;
           const uint32_t session_id = session_it->first;
-          uint32_t session_key = KeyFromPair(connection_handle, session_id); //application_id
+          const uint32_t session_key = KeyFromPair(connection_handle, session_id); //application_id
           applications_list->push_back(session_key);
         }
       }
@@ -488,6 +491,13 @@ void ConnectionHandlerImpl::ConnectToDevice(
     LOG4CXX_ERROR(
       logger_,
       "Application Manager wanted to connect to non-existing device");
+  }
+}
+
+void ConnectionHandlerImpl::ConnectToAllDevices() {
+  for (DeviceListIterator i = device_list_.begin(); i != device_list_.end(); ++i) {
+    connection_handler::DeviceHandle device_handle = i->first;
+    ConnectToDevice(device_handle);
   }
 }
 
@@ -558,7 +568,7 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
         ConnectionUIDFromHandle(connection_handle);
 
   sync_primitives::AutoLock connection_list_lock(connection_list_lock_);
-   ConnectionListIterator itr = connection_list_.find(connection_id);
+  ConnectionListIterator itr = connection_list_.find(connection_id);
 
   if (connection_list_.end() != itr) {
     if (0 != connection_handler_observer_) {
@@ -609,10 +619,8 @@ void ConnectionHandlerImpl::SendHeartBeat(ConnectionHandle connection_handle,
 //TODO(VSemenyuk): connection_key -> connection_id
 void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key,
                                                 uint8_t session_id) {
-  LOG4CXX_INFO(logger_, "Keep alive for session: " <<
-               static_cast<int32_t>(session_id));
-
   sync_primitives::AutoLock lock(connection_list_lock_);
+
   ConnectionListIterator it = connection_list_.find(connection_key);
   if (connection_list_.end() != it) {
     it->second->KeepAlive(session_id);
@@ -640,8 +648,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
       uint32_t session_key = KeyFromPair(connection_id, session_it->first);
       for (ServiceListConstIterator service_it = session_it->second.begin(),
           end = session_it->second.end(); service_it != end; ++service_it) {
-
-      connection_handler_observer_->OnServiceEndedCallback(
+        connection_handler_observer_->OnServiceEndedCallback(
           session_key, static_cast<protocol_handler::ServiceType>(*service_it));
       }
     }

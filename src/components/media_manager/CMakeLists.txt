@@ -58,11 +58,12 @@ include_directories (
   ../request_watchdog/include/
   ../formatters/include
   ../config_profile/include/
-  ../../thirdPartyLibs/jsoncpp/include/
+  ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
   ${default_includes}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES

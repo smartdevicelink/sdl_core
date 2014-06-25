@@ -101,7 +101,7 @@ bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(ApplicationConstSharedPtr
     for (; choice_set_map.end() != it; ++it) {
       if (it->first
           == (*message_)[strings::msg_params]
-                         [strings::interaction_choice_set_id].asInt()) {
+                         [strings::interaction_choice_set_id].asUInt()) {
         LOG4CXX_ERROR_EXT(logger_,
                           "DeleteInteractionChoiceSetRequest::ChoiceSetInUse");
         return true;

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,6 +32,7 @@
 
 #include "rpc/init_start_data.h"
 #include "life_cycle.h"
+#include "signal_handlers.h"
 #include "application_manager/commands/command_impl.h"
 
 namespace test {
@@ -88,8 +89,7 @@ void InitStartData() {
       } LOG4CXX_INFO(logger_, "InitHmi successful");
     }
   }
-  utils::SubscribeToTerminateSignal(
-      &main_namespace::LifeCycle::StopComponentsOnSignal);
+  utils::SubscribeToTerminateSignal(main_namespace::legacy_signal_handler);
 }
 
 void RegApp() {

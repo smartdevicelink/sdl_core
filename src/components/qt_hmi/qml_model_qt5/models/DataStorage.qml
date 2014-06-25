@@ -651,4 +651,7 @@ QtObject {
     }
     property MusicSourceModel musicSourceModel: MusicSourceModel {
     }
+
+    property SettingsSourceModel settingsSourceModel: SettingsSourceModel {
+    }
 }

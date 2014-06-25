@@ -7,7 +7,7 @@ import com.ford.syncV4.session.Session;
 import com.ford.syncV4.session.SessionTest;
 
 /**
- * Created by Andrew Batutin on 1/21/14.
+ * Created by Andrew Batutin on 1/21/14
  */
 public class ServiceTest extends AndroidTestCase {
 
@@ -19,9 +19,9 @@ public class ServiceTest extends AndroidTestCase {
     public void testServiceIdIsSet() throws Exception {
         Session session = SessionTest.getInitializedSession();
         Service service = new Service();
-        service.setSessionId(SessionTest.SESSION_ID);
-        assertEquals("service id should be 1", session.getSessionIdByAppId(SessionTest.APP_ID),
-                service.getSessionId());
+        service.setAppId(SessionTest.APP_ID);
+        assertEquals("service id should be 1", session.getAppIdBySessionId(SessionTest.SESSION_ID),
+                service.getAppId());
     }
 
     public void testServiceTypeIsSet() throws Exception {

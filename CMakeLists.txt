@@ -1,4 +1,4 @@
-# Copyright (c) 2013, Ford Motor Company
+# Copyright (c) 2014, Ford Motor Company
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,12 @@ set(TARGET_OPTION 	"$ENV{TARGET}")
 set(MEDIA_MODE_OPTION 	"$ENV{MEDIA_MODE}")
 set(HMI_ADAPTER_OPTION 	"$ENV{HMI_ADAPTER}")
 set(ENABLE_LOG_OPTION 	"$ENV{ENABLE_LOG}")
+
+add_custom_target(pasa-tarball
+  COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} PASA
+  COMMAND tar -czv -C /tmp/PASA -f ${CMAKE_BINARY_DIR}/pasa.tar.gz .
+  DEPENDS HMI_API MOBILE_API v4_protocol_v1_2_no_extra
+)
 
 if (OS_TYPE_OPTION)
   if (${OS_TYPE_OPTION} STREQUAL "QNX")
@@ -127,9 +133,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 # Please do not change compiler/linker flags if You do not know how particular
 # flag is handled by CMake
-set(CMAKE_INSTALL_PREFIX .)
+set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-set(CMAKE_CXX_FLAGS "-fPIC -g3 -ggdb3 -std=gnu++0x -Werror=return-type -Wuninitialized")
+set(CMAKE_CXX_FLAGS "-fPIC -g3 -ggdb3 -std=gnu++0x -Wall -Werror=return-type -Wuninitialized")
 if (ENABLE_GCOV)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
   add_definitions(-DGCOV_ENABLED)
@@ -319,8 +325,22 @@ if (HMIADAPTER STREQUAL "mqueue")
     add_definitions(-DHMI_JSON_API)
 endif()
 
-# --- ThirdPartyLibs
-add_subdirectory(./src/thirdPartyLibs)
+# --- 3rd party libs
+set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party)
+set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/3rd_party)
+add_subdirectory(${3RD_PARTY_SOURCE_DIRECTORY} ${3RD_PARTY_BINARY_DIRECTORY} EXCLUDE_FROM_ALL)
+add_custom_target(3rd_party
+  make
+  WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+)
+add_custom_target(install-3rd_party
+  make install
+  DEPENDS 3rd_party
+  WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
+)
+
+# --- 3rd party libs (static)
+add_subdirectory(./src/3rd_party-static)
 
 # --- Tools
 add_subdirectory(./tools)
@@ -340,7 +360,8 @@ if(BUILD_TESTS)
     include(Dart)
     # Framework GoogleTest is also integrated together gmock
     # and must not be added separately
-    add_subdirectory(./src/thirdPartyLibs/gmock-1.7.0)
+    add_subdirectory(./src/3rd_party-static/gmock-1.7.0)
+    set(GMOCK_INCLUDE_DIRECTORY ${GMOCK_INCLUDE_DIRECTORY} PARENT_SCOPE)
     add_subdirectory(./test)
 endif()
 

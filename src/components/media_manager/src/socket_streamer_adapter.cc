@@ -50,9 +50,9 @@ CREATE_LOGGERPTR_GLOBAL(logger, "SocketStreamerAdapter")
 SocketStreamerAdapter::SocketStreamerAdapter()
   : socket_fd_(0),
     is_ready_(false),
-    messages_(),
     thread_(NULL),
-    streamer_(NULL) {
+    streamer_(NULL),
+    messages_() {
 }
 
 SocketStreamerAdapter::~SocketStreamerAdapter() {
@@ -161,7 +161,7 @@ void SocketStreamerAdapter::Streamer::threadMain() {
     new_socket_fd_ = accept(server_->socket_fd_, NULL, NULL);
 
     if (0 > new_socket_fd_) {
-      LOG4CXX_ERROR(logger, "Socket is closed");
+      LOG4CXX_ERROR(logger, "Socket is closed " << strerror(errno));
       sleep(1);
       continue;
     }

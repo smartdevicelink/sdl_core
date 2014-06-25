@@ -34,6 +34,7 @@
  */
 #include <stdint.h>
 #include <memory.h>
+#include <new>
 #include "protocol_handler/protocol_packet.h"
 #include "utils/macro.h"
 
@@ -65,7 +66,7 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_key,
   RESULT_CODE result = serializePacket(version, compress, frameType, serviceType, frameData,
                   sessionID, dataSize, messageID, data);
   if (result != RESULT_OK) {
-    NOTREACHED();
+    //NOTREACHED();
   }
 }
 
@@ -78,18 +79,23 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_key, uint8_t* data_param,
     connection_key_(connection_key) {
     RESULT_CODE result = deserializePacket(data_param, data_size);
     if (result != RESULT_OK) {
-      NOTREACHED();
+      //NOTREACHED();
     }
 }
 
 ProtocolPacket::~ProtocolPacket() {
+  if (packet_) {
+    delete[] packet_;
+  }
+
+  if (packet_data_.data) {
+    delete packet_data_.data;
+  }
+  packet_data_.data = 0;
+
   packet_ = 0;
   total_packet_size_ = 0;
   packet_id_ = 0;
-  if (packet_data_.data) {
-    delete packet_data_.data;
-    packet_data_.data = 0;
-  }
 }
 
 // Serialization
@@ -111,7 +117,11 @@ RESULT_CODE ProtocolPacket::serializePacket(uint8_t version,
 
   uint8_t offset = 0;
   uint8_t compressF = 0x0;
-  packet_ = new uint8_t[MAXIMUM_FRAME_DATA_SIZE];
+  packet_ = new (std::nothrow) uint8_t[MAXIMUM_FRAME_DATA_SIZE];
+  if (0 == packet_) {
+    return RESULT_FAIL;
+  }
+
   if (compress) {
     compressF = 0x1;
   }
@@ -223,7 +233,7 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
 
   uint8_t * data = 0;
   if (dataPayloadSize) {
-    data = new uint8_t[dataPayloadSize];
+    data = new (std::nothrow) uint8_t[dataPayloadSize];
     if (data) {
       memcpy(data, message + offset, dataPayloadSize);
       data_offset_ = dataPayloadSize;
@@ -240,6 +250,9 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t* message,
     total_data_bytes |= data[2] << 8;
     total_data_bytes |= data[3];
     set_total_data_bytes(total_data_bytes);
+    if (0 == packet_data_.data) {
+      return RESULT_FAIL;
+    }
   } else {
     packet_data_.data = data;
   }
@@ -289,8 +302,10 @@ void ProtocolPacket::set_total_data_bytes(uint32_t dataBytes) {
       delete[] packet_data_.data;
       packet_data_.data = 0;
     }
-    packet_data_.data = new uint8_t[dataBytes];
-    packet_data_.totalDataBytes = dataBytes;
+    packet_data_.data = new (std::nothrow) uint8_t[dataBytes];
+    if (packet_data_.data) {
+      packet_data_.totalDataBytes = dataBytes;
+    }
   }
 }
 

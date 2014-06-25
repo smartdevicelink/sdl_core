@@ -1,8 +1,5 @@
-/**
- * \file transport_manager_impl.cc
- * \brief TransportManagerImpl class source file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,8 +46,6 @@
 #include "transport_manager/transport_manager_impl.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
-#include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
-#include "transport_manager/tcp/tcp_transport_adapter.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 #include "config_profile/profile.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
@@ -76,16 +71,12 @@ TransportManagerImpl::TransportManagerImpl()
       event_queue_thread_(),
       device_listener_thread_wakeup_(),
       is_initialized_(false),
+      #ifdef TIME_TESTER
+            metric_observer_(NULL),
+      #endif  // TIME_TESTER
       connection_id_counter_(0)
-#ifdef TIME_TESTER
-      , metric_observer_(NULL)
-#endif  // TIME_TESTER
 {
   LOG4CXX_INFO(logger_, "==============================================");
-#ifdef USE_RWLOCK
-  pthread_rwlock_init(&message_queue_rwlock_, NULL);
-  pthread_rwlock_init(&event_queue_rwlock_, NULL);
-#endif
   pthread_mutex_init(&message_queue_mutex_, NULL);
   pthread_cond_init(&message_queue_cond_, NULL);
   pthread_mutex_init(&event_queue_mutex_, 0);
@@ -173,7 +164,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
   for (EventQueue::const_iterator it = event_queue_.begin();
     it != event_queue_.end();
     ++it) {
-    if (it->application_id() == cid) {
+    if (it->application_id() == static_cast<ApplicationHandle>(cid)) {
       ++messages_count;
     }
   }
@@ -204,7 +195,7 @@ int TransportManagerImpl::DisconnectForce(const ConnectionUID& cid) {
   // or there is a problem here. One more point versus typedefs-everywhere
   MessageQueue::iterator e = message_queue_.begin();
   while (e != message_queue_.end()) {
-    if ((*e)->connection_key() == cid) {
+    if (static_cast<ConnectionUID>((*e)->connection_key()) == cid) {
       RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
                  DataSendTimeoutError(), *e);
       e = message_queue_.erase(e);
@@ -357,6 +348,10 @@ int TransportManagerImpl::SearchDevices(void) {
                                      << "]");
           break;
         }
+        default: {
+          LOG4CXX_ERROR(logger_, "Invalid scan result");
+          return E_ADAPTERS_FAIL;
+        }
       }
     }
   }
@@ -472,14 +467,14 @@ void TransportManagerImpl::PostMessage(const RawMessageSptr message) {
   LOG4CXX_INFO(logger_, "Post message called serial number " << message.get());
 
 #ifdef USE_RWLOCK
-  pthread_rwlock_wrlock(&message_queue_rwlock_);
+  message_queue_rwlock_.AcquireForWriting();
 #else
   pthread_mutex_lock(&message_queue_mutex_);
 #endif
   message_queue_.push_back(message);
   pthread_cond_signal(&message_queue_cond_);
 #ifdef USE_RWLOCK
-  pthread_rwlock_unlock(&message_queue_rwlock_);
+  message_queue_rwlock_.Release();
 #else
   pthread_mutex_unlock(&message_queue_mutex_);
 #endif
@@ -492,13 +487,13 @@ void TransportManagerImpl::RemoveMessage(const RawMessageSptr message) {
   //       2013-08-21 dchmerev@luxoft.com
   LOG4CXX_INFO(logger_, "Remove message called " << message.get());
 #ifdef USE_RWLOCK
-  pthread_rwlock_wrlock(&message_queue_rwlock_);
+  message_queue_rwlock_.AcquireForWriting();
 #else
   pthread_mutex_lock(&message_queue_mutex_);
 #endif
   std::remove(message_queue_.begin(), message_queue_.end(), message);
 #ifdef USE_RWLOCK
-  pthread_rwlock_unlock(&message_queue_rwlock_);
+  message_queue_rwlock_.Release();
 #else
   pthread_mutex_unlock(&message_queue_mutex_);
 #endif
@@ -507,7 +502,7 @@ void TransportManagerImpl::RemoveMessage(const RawMessageSptr message) {
 
 void TransportManagerImpl::PostEvent(const TransportAdapterEvent& event) {
 #ifdef USE_RWLOCK
-  pthread_rwlock_wrlock(&event_queue_rwlock_);
+  event_queue_rwlock_.AcquireForWriting();
 #else
   pthread_mutex_lock(&event_queue_mutex_);
 #endif
@@ -515,7 +510,7 @@ void TransportManagerImpl::PostEvent(const TransportAdapterEvent& event) {
   event_queue_.push_back(event);
   pthread_cond_signal(&device_listener_thread_wakeup_);
 #ifdef USE_RWLOCK
-  pthread_rwlock_unlock(&event_queue_rwlock_);
+  event_queue_rwlock_.Release();
 #else
   pthread_mutex_unlock(&event_queue_mutex_);
 #endif
@@ -532,7 +527,7 @@ void TransportManagerImpl::AddConnection(const ConnectionInternal& c) {
   connections_.push_back(c);
 }
 
-void TransportManagerImpl::RemoveConnection(int id) {
+void TransportManagerImpl::RemoveConnection(uint32_t id) {
   for (std::vector<ConnectionInternal>::iterator it = connections_.begin();
        it != connections_.end(); ++it) {
     if (it->id == id) {
@@ -589,7 +584,7 @@ void TransportManagerImpl::EventListenerThread(void) {
   while (true) {
     while (event_queue_.size() > 0) {
 #ifdef USE_RWLOCK
-      pthread_rwlock_rdlock(&event_queue_rwlock_);
+      event_queue_rwlock_.AcquireForReading();
 #endif
       LOG4CXX_INFO(logger_, "Event listener queue pushed to process events");
       EventQueue::iterator current = event_queue_.begin();
@@ -602,7 +597,7 @@ void TransportManagerImpl::EventListenerThread(void) {
       int event_type = current->event_type();
       event_queue_.erase(current);
 #ifdef USE_RWLOCK
-      pthread_rwlock_unlock(&event_queue_rwlock_);
+      event_queue_rwlock_.Release();
 #else
       pthread_mutex_unlock(&event_queue_mutex_);
 #endif
@@ -629,10 +624,9 @@ void TransportManagerImpl::EventListenerThread(void) {
           OnDeviceListUpdated(ta);
           break;
         }
-        case TransportAdapterListenerImpl::EventTypeEnum::ON_APPLICATION_LIST_UPDATED: {
-          LOG4CXX_INFO(logger_, "Event ON_APPLICATION_LIST_UPDATED");
-          device_handle = converter_.UidToHandle(device_id);
-          RaiseEvent(&TransportManagerListener::OnApplicationListUpdated, device_handle);
+        case TransportAdapterListenerImpl::ON_FIND_NEW_APPLICATIONS_REQUEST: {
+          LOG4CXX_DEBUG(logger_, "Event ON_FIND_NEW_APPLICATIONS_REQUEST");
+          RaiseEvent(&TransportManagerListener::OnFindNewApplicationsRequest);
           break;
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE: {
@@ -807,7 +801,7 @@ void TransportManagerImpl::MessageQueueThread(void) {
 
     while (message_queue_.size() > 0) {
 #ifdef USE_RWLOCK
-      pthread_rwlock_rdlock(&message_queue_rwlock_);
+      message_queue_rwlock_.AcquireForReading();
 #endif
       MessageQueue::iterator it = message_queue_.begin();
       while (it != message_queue_.end() && it->valid() && (*it)->IsWaiting()) {
@@ -815,13 +809,13 @@ void TransportManagerImpl::MessageQueueThread(void) {
       }
       if (it == message_queue_.end()) {
 #ifdef USE_RWLOCK
-        pthread_rwlock_unlock(&message_queue_rwlock_);
+        message_queue_rwlock_.Release();
 #endif
         break;
       }
       RawMessageSptr active_msg = *it;
 #ifdef USE_RWLOCK
-      pthread_rwlock_unlock(&message_queue_rwlock_);
+      message_queue_rwlock_.Release();
 #else
       pthread_mutex_unlock(&message_queue_mutex_);
 #endif

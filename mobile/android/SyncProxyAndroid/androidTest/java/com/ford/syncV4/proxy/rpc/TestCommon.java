@@ -1,5 +1,6 @@
 package com.ford.syncV4.proxy.rpc;
 
+import android.content.Context;
 import android.test.InstrumentationTestCase;
 
 import com.ford.syncV4.exception.SyncException;
@@ -11,8 +12,10 @@ import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
+import com.ford.syncV4.session.SessionTest;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
+import com.ford.syncV4.transport.usb.USBTransportConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,12 +49,14 @@ public class TestCommon {
                                                         .getPath());
     }
 
-    public static SyncProxyALM getSyncProxyALMNoTransport(IProxyListenerALM proxyListener)
+    public static SyncProxyALM getSyncProxyALMNoTransport(Context context,
+                                                          IProxyListenerALM proxyListener)
             throws SyncException {
-        return getSyncProxyALMNoTransport(ProtocolConstants.PROTOCOL_VERSION_TWO, proxyListener);
+        return getSyncProxyALMNoTransport(context, ProtocolConstants.PROTOCOL_VERSION_TWO,
+                proxyListener);
     }
 
-    public static SyncProxyALM getSyncProxyALMNoTransport(byte protocolVersion,
+    public static SyncProxyALM getSyncProxyALMNoTransport(Context context, byte protocolVersion,
                                                           IProxyListenerALM proxyListener)
             throws SyncException {
         SyncConnection connectionMock = mock(SyncConnection.class);
@@ -60,8 +65,8 @@ public class TestCommon {
         when(connectionMock.getWiProProtocol()).thenReturn(protocolMock);
 
         return new SyncProxyALM(proxyListener, null, "!", null, null, true,
-                null, null, null, null, null, null, false, false,
-                protocolVersion, null, connectionMock, new TestConfig());
+                null, null, null, null, SessionTest.APP_ID, null, false, false,
+                protocolVersion, new USBTransportConfig(context), connectionMock, new TestConfig());
     }
 
     public static byte[] getRandomBytes(int dataSize) {

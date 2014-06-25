@@ -2,7 +2,6 @@ package com.ford.syncV4.android.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -102,7 +101,7 @@ public class HashIdSetUpDialog extends BaseDialogFragment {
                     public void onClick(DialogInterface dialog, int which) {
                         final EditText customHashIdView = (EditText) layout.findViewById(
                                 R.id.hash_id_set_up_custom_id_view);
-                       Logger.d(LOG_TAG + " SetSelectedHashId on click, hashId:" +
+                        Logger.d(LOG_TAG + " SetSelectedHashId on click, hashId:" +
                                 customHashIdView.getText().toString().trim());
                         AppPreferencesManager.setCustomHashId(
                                 customHashIdView.getText().toString().trim());
@@ -112,7 +111,7 @@ public class HashIdSetUpDialog extends BaseDialogFragment {
     }
 
     private void processUseHashIdCheckBoxEvent(View layout, boolean isChecked) {
-       Logger.d(LOG_TAG + " ProcessUseHashIdCheckBoxEvent, checked:" + isChecked);
+        Logger.d(LOG_TAG + " ProcessUseHashIdCheckBoxEvent, checked:" + isChecked);
 
         final TextView customHashIdLabelView = (TextView) layout.findViewById(R.id.hash_id_set_up_custom_id_label_view);
         final TextView lastHashIdsLabelView = (TextView) layout.findViewById(R.id.hash_id_set_up_last_ids_label_view);
@@ -134,7 +133,7 @@ public class HashIdSetUpDialog extends BaseDialogFragment {
     }
 
     private void processUseCustomHashIdCheckBoxEvent(View layout, boolean isChecked) {
-       Logger.d(LOG_TAG + " ProcessUseCustomHashIdCheckBoxEvent, checked:" + isChecked);
+        Logger.d(LOG_TAG + " ProcessUseCustomHashIdCheckBoxEvent, checked:" + isChecked);
 
         final TextView customHashIdLabelView = (TextView) layout.findViewById(R.id.hash_id_set_up_custom_id_label_view);
         final TextView lastHashIdsLabelView = (TextView) layout.findViewById(R.id.hash_id_set_up_last_ids_label_view);
@@ -153,7 +152,7 @@ public class HashIdSetUpDialog extends BaseDialogFragment {
         final EditText customHashIdView = (EditText) layout.findViewById(R.id.hash_id_set_up_custom_id_view);
         customHashIdView.setText(hashId);
 
-       Logger.d(LOG_TAG + " SetSelectedHashId, hashId:" + hashId);
+        Logger.d(LOG_TAG + " SetSelectedHashId, hashId:" + hashId);
         AppPreferencesManager.setCustomHashId(hashId);
     }
 }

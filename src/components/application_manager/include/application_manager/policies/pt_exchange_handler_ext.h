@@ -41,7 +41,9 @@ class PTExchangeHandlerExt : public PTExchangeHandler {
  public:
   PTExchangeHandlerExt(PolicyHandler* policy_handler);
   ~PTExchangeHandlerExt();
-  virtual bool StartExchange();
+  virtual void Start();
+  virtual void Stop();
+
  private:
   PolicyHandler* policy_handler_;
 };

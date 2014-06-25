@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -177,10 +177,17 @@ class ApplicationManagerImpl : public ApplicationManager,
     public impl::FromMobileQueue::Handler, public impl::ToMobileQueue::Handler,
     public impl::FromHmiQueue::Handler, public impl::ToHmiQueue::Handler,
   public utils::Singleton<ApplicationManagerImpl> {
+
     friend class ResumeCtrl;
     friend class CommandImpl;
-  public:
+
+ public:
     ~ApplicationManagerImpl();
+
+    /**
+     * Inits application manager
+     */
+    virtual void Init();
 
     /**
      * @brief Stop work.
@@ -191,7 +198,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /////////////////////////////////////////////////////
 
-    ApplicationSharedPtr application(int32_t app_id) const;
+    ApplicationSharedPtr application(uint32_t app_id) const;
     ApplicationSharedPtr application_by_policy_id(
         const std::string& policy_app_id) const;
     inline const std::set<ApplicationSharedPtr>& applications() const;
@@ -375,7 +382,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     void set_hmi_message_handler(hmi_message_handler::HMIMessageHandler* handler);
     void set_connection_handler(connection_handler::ConnectionHandler* handler);
-    connection_handler::ConnectionHandler* connection_handler();
     void set_protocol_handler(protocol_handler::ProtocolHandler* handler);
 
     ///////////////////////////////////////////////////////
@@ -413,7 +419,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
     //TODO (EZamakhov): fix all indentations in this file
-    void OnApplicationListUpdated(const connection_handler::DeviceHandle& device_handle);
+  virtual void OnFindNewApplicationsRequest();
     void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
   bool OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
@@ -461,7 +467,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param correlation_id Correlation ID of the HMI request
      * @param app_id Application ID
      */
-  void set_application_id(const int32_t correlation_id, const uint32_t app_id);
+    void set_application_id(const int32_t correlation_id, const uint32_t app_id);
 
     /*
      * @brief Change AudioStreamingState for all application according to
@@ -550,10 +556,10 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /**
      * @brief Get available app space
-     * @param name of app
+     * @param name of the app folder(make + mobile app id)
      * @return free app space.
      */
-    uint32_t GetAvailableSpaceForApp(const std::string& name);
+    uint32_t GetAvailableSpaceForApp(const std::string& folder_name);
 
     /*
      * @brief returns true if HMI is cooperating
@@ -565,8 +571,10 @@ class ApplicationManagerImpl : public ApplicationManager,
      * to change HMI app id to Mobile app id and vice versa.
      * Dot use it inside Core
      */
-    ApplicationSharedPtr application_by_hmi_app(int32_t hmi_app_id) const;
+    ApplicationSharedPtr application_by_hmi_app(uint32_t hmi_app_id) const;
 
+    // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
+    connection_handler::ConnectionHandler* connection_handler();
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
@@ -574,7 +582,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     mobile_apis::MOBILE_API& mobile_so_factory();
 
     void CreateHMIMatrix(HMIMatrix* matrix);
-    void CreatePoliciesManager();
 
     /**
      * \brief Performs check using PoliciesManager of availability
@@ -622,17 +629,33 @@ class ApplicationManagerImpl : public ApplicationManager,
     virtual void Handle(const impl::MessageFromHmi& message) OVERRIDE;
 
     // CALLED ON messages_to_hmi_ thread!
-    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;    
+    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
+
+    void SendUpdateAppList(const std::list<uint32_t>& applications_ids);
+    void OnApplicationListUpdateTimer();
+
+    /**
+     * @brief Checks, if given RPC is allowed at current HMI level for specific
+     * application in policy table
+     * @param policy_app_id Application id
+     * @param hmi_level Current HMI level of application
+     * @param function_id FunctionID of RPC
+     * @return SUCCESS, if allowed, otherwise result code of check
+     */
+    mobile_apis::Result::eType CheckPolicyPermissions(
+        const std::string& policy_app_id,
+        mobile_apis::HMILevel::eType hmi_level,
+        mobile_apis::FunctionID::eType function_id);
+
+    /*
+     * @brief Function is called on IGN_OFF, Master_reset or Factory_defaults
+     * to notify HMI that SDL is shutting down.
+     */
+    void SendOnSDLClose();
 
   private:
 
     // members
-    /**
-     * @brief Resume controler is responcible for save and load information
-     * about persistent application data on disk, and save session ID for resuming
-     * application in case INGITION_OFF or MASTER_RESSET
-     */
-    ResumeCtrl resume_ctrl_;
 
 
 
@@ -664,22 +687,16 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
     connection_handler::ConnectionHandler*  connection_handler_;
+    policy::PolicyManager*                  policy_manager_;
     protocol_handler::ProtocolHandler*      protocol_handler_;
     request_controller::RequestController   request_ctrl_;
-    HMICapabilities                         hmi_capabilities_;
-    policy::PolicyManager*                  policy_manager_;
 
     hmi_apis::HMI_API*                      hmi_so_factory_;
     mobile_apis::MOBILE_API*                mobile_so_factory_;
 
-#ifdef TIME_TESTER
-    AMMetricObserver* metric_observer_;
-#endif  // TIME_TESTER
     static uint32_t corelation_id_;
     static const uint32_t max_corelation_id_;
 
-    // The reason of HU shutdown
-    mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
 
     // Construct message threads when everything is already created
 
@@ -691,6 +708,34 @@ class ApplicationManagerImpl : public ApplicationManager,
     impl::FromHmiQueue messages_from_hmi_;
     // Thread that pumps messages being passed to HMI.
     impl::ToHmiQueue messages_to_hmi_;
+
+
+    HMICapabilities                         hmi_capabilities_;
+    // The reason of HU shutdown
+    mobile_api::AppInterfaceUnregisteredReason::eType unregister_reason_;
+
+    /**
+     * @brief Resume controler is responcible for save and load information
+     * about persistent application data on disk, and save session ID for resuming
+     * application in case INGITION_OFF or MASTER_RESSET
+     */
+    ResumeCtrl resume_ctrl_;
+
+#ifdef TIME_TESTER
+    AMMetricObserver* metric_observer_;
+#endif  // TIME_TESTER
+
+    class ApplicationListUpdateTimer : public timer::TimerThread<ApplicationManagerImpl> {
+     public:
+      ApplicationListUpdateTimer(ApplicationManagerImpl* callee) :
+          timer::TimerThread<ApplicationManagerImpl>(
+              callee,
+              &ApplicationManagerImpl::OnApplicationListUpdateTimer
+          ) {
+      }
+    };
+    typedef utils::SharedPtr<ApplicationListUpdateTimer> ApplicationListUpdateTimerSptr;
+    ApplicationListUpdateTimerSptr application_list_update_timer_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 

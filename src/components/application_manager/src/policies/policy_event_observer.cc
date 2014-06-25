@@ -51,16 +51,6 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
-#ifdef HMI_JSON_API
-    case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
-      ProcessOdometerEvent(message);
-      break;
-    }
-    default: {
-      break;
-    }
-  unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
-#endif
 #ifdef HMI_DBUS_API
     case hmi_apis::FunctionID::VehicleInfo_GetOdometer: {
       ProcessOdometerEvent(message);
@@ -70,6 +60,20 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
       break;
     }
   unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetOdometer);
+#else
+    case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
+      ProcessOdometerEvent(message);
+      unsubscribe_from_event(hmi_apis::FunctionID::VehicleInfo_GetVehicleData);
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnReady: {
+      policy_manager_->OnSystemReady();
+      unsubscribe_from_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
+      break;
+    }
+    default: {
+      break;
+    }  
 #endif
   }
 }

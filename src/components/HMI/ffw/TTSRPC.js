@@ -40,6 +40,12 @@ FFW.TTS = FFW.RPCObserver.create( {
     isReady: true,
 
     /**
+     * Contains response codes for request that should be processed but there were some kind of errors
+     * Error codes will be injected into response.
+     */
+    errorResponsePull: {},
+
+    /**
      * Request id of current running Speak request
      *
      * @type {Boolean}
@@ -74,6 +80,7 @@ FFW.TTS = FFW.RPCObserver.create( {
      */
     disconnect: function() {
 
+        this.onRPCUnregistered();
         this.client.disconnect();
     },
 

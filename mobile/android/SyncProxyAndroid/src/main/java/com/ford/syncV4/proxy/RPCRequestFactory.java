@@ -1,7 +1,5 @@
 package com.ford.syncV4.proxy;
 
-import java.util.Vector;
-
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.Alert;
@@ -40,6 +38,8 @@ import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
+
+import java.util.Vector;
 
 public class RPCRequestFactory {
 
@@ -428,7 +428,7 @@ public class RPCRequestFactory {
 
 	public static RegisterAppInterface buildRegisterAppInterface(
 			SyncMsgVersion syncMsgVersion, Object appName, Vector<TTSChunk> ttsName,
-            Object ngnMediaScreenAppName, Vector<String> vrSynonyms, Object isMediaApp,
+            Object ngnMediaScreenAppName, Vector<Object> vrSynonyms, Object isMediaApp,
 			Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType,
             Object appID, Integer correlationID, String hashId, DeviceInfo deviceInfo) {
 		RegisterAppInterface msg = buildRegisterAppInterface();
@@ -485,18 +485,21 @@ public class RPCRequestFactory {
         /*if (appHMIType == null) {
             appHMIType = new Vector<AppHMIType>();
         }*/
-
 		msg.setAppType(appHMIType);
 		
 		msg.setAppId(appID);
 
-        if (hashId != null) {
+        // TODO : For the TEST CASES only
+        /*if (hashId != null) {
             msg.setHashID(hashId);
-        }
+        }*/
+        msg.setHashID(hashId);
 
-        if (deviceInfo != null) {
+        // TODO : For the TEST CASES only
+        /*if (deviceInfo != null) {
             msg.setDeviceInfo(deviceInfo);
-        }
+        }*/
+        msg.setDeviceInfo(deviceInfo);
 
 		return msg;
 	}
@@ -691,22 +694,36 @@ public class RPCRequestFactory {
     public static SubscribeVehicleData buildSubscribeVehicleData() {
         return new SubscribeVehicleData();
     }
-	
-	public static UnregisterAppInterface buildUnregisterAppInterface(
-			Integer correlationID) {
-		UnregisterAppInterface msg = new UnregisterAppInterface();
-		msg.setCorrelationID(correlationID);
 
+    /**
+     * Build an empty {@link com.ford.syncV4.proxy.rpc.UnregisterAppInterface} request
+     *
+     * @return instance of the {@link com.ford.syncV4.proxy.rpc.UnregisterAppInterface}
+     */
+    public static UnregisterAppInterface buildUnregisterAppInterface() {
+        return new UnregisterAppInterface();
+    }
+
+    /**
+     * Build {@link com.ford.syncV4.proxy.rpc.UnregisterAppInterface} request with provided
+     * Correlation Id
+     *
+     * @param correlationId Correlation id
+     *
+     * @return instance of the {@link com.ford.syncV4.proxy.rpc.UnregisterAppInterface}
+     */
+	public static UnregisterAppInterface buildUnregisterAppInterface(Integer correlationId) {
+		UnregisterAppInterface msg = buildUnregisterAppInterface();
+		msg.setCorrelationID(correlationId);
 		return msg;
 	}
 	
-	public static UnsubscribeButton buildUnsubscribeButton(
-			ButtonName buttonName, Integer correlationID) {
+	public static UnsubscribeButton buildUnsubscribeButton(ButtonName buttonName,
+                                                           Integer correlationID) {
 
 		UnsubscribeButton msg = new UnsubscribeButton();
 		msg.setCorrelationID(correlationID);
 		msg.setButtonName(buttonName);
-
 		return msg;
 	}
 }

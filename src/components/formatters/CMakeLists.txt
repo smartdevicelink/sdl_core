@@ -2,8 +2,8 @@ include_directories (
   ./include/
   ../protocol_handler/include/
   ../utils/include/
-  ../../thirdPartyLibs/jsoncpp/include/
-  ../../thirdPartyLibs/MessageBroker/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ../../../src/components/smart_objects/include
 )
 

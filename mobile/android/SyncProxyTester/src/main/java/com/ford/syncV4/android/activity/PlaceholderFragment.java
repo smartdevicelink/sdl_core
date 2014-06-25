@@ -46,6 +46,7 @@ import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
+import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
@@ -107,11 +108,11 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -179,7 +180,7 @@ public class PlaceholderFragment extends Fragment {
     private ArrayAdapter<String> mPutFileAdapter = null;
 
     private final Map<Integer, Integer> mCommandIdToParentSubmenuMap =
-            new Hashtable<Integer, Integer>();
+            new ConcurrentHashMap<Integer, Integer>();
 
     private MobileNavPreviewFragment mMobileNavPreviewFragment;
     private AudioServicePreviewFragment mAudioServicePreviewFragment;
@@ -1562,7 +1563,7 @@ public class PlaceholderFragment extends Fragment {
                      * Sends UnregisterAppInterface message.
                      */
                     private void sendUnregisterAppInterface() {
-                        UnregisterAppInterface unregisterAppInterface = new UnregisterAppInterface();
+                        UnregisterAppInterface unregisterAppInterface = RPCRequestFactory.buildUnregisterAppInterface();
                         unregisterAppInterface.setCorrelationID(getCorrelationId());
 
                         SendSingleRPCRequestDialog sendSingleRPCRequestDialog = SendSingleRPCRequestDialog.newInstance();
@@ -2087,8 +2088,7 @@ public class PlaceholderFragment extends Fragment {
                                     msg.setSecondaryGraphic(image);
                                 }
                                 if (chkIncludeSoftButtons.isChecked() &&
-                                        (currentSoftButtons != null) &&
-                                        (currentSoftButtons.size() > 0)) {
+                                        (currentSoftButtons != null)) {
                                     msg.setSoftButtons(currentSoftButtons);
                                 }
                                 currentSoftButtons = null;
@@ -2743,7 +2743,7 @@ public class PlaceholderFragment extends Fragment {
                     }
                     if (((SyncProxyTester) getActivity()).mBoundProxyService != null) {
                         ((SyncProxyTester) getActivity()).mBoundProxyService
-                                .syncProxySendRPCRequestWithPreprocess(getAppId(), msg);
+                                .sendRPCRequestWithPreprocess(getAppId(), msg);
                     }
                 } catch (NumberFormatException e) {
                     SafeToast.showToastAnyThread("Couldn't parse number");
@@ -2773,7 +2773,7 @@ public class PlaceholderFragment extends Fragment {
 
     private void loadMessageSelectCount() {
         SharedPreferences prefs = getActivity().getSharedPreferences(Const.PREFS_NAME, 0);
-        messageSelectCount = new Hashtable<String, Integer>();
+        messageSelectCount = new ConcurrentHashMap<String, Integer>();
         for (Map.Entry<String, ?> entry : prefs.getAll().entrySet()) {
             if (entry.getKey().startsWith(MSC_PREFIX)) {
                 messageSelectCount.put(entry.getKey().substring(MSC_PREFIX.length()),
@@ -2794,7 +2794,7 @@ public class PlaceholderFragment extends Fragment {
     }
 
     private void clearMessageSelectCount() {
-        messageSelectCount = new Hashtable<String, Integer>();
+        messageSelectCount = new ConcurrentHashMap<String, Integer>();
         SharedPreferences prefs = getActivity().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = prefs.edit();
         for (Map.Entry<String, ?> entry : prefs.getAll().entrySet()) {
@@ -2833,6 +2833,6 @@ public class PlaceholderFragment extends Fragment {
         if (boundProxyService == null) {
             return;
         }
-        boundProxyService.syncProxySendRPCRequestWithPreprocess(getAppId(), rpcRequest);
+        boundProxyService.sendRPCRequestWithPreprocess(getAppId(), rpcRequest);
     }
 }

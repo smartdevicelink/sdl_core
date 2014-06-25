@@ -1,17 +1,9 @@
 package com.ford.syncV4.protocol;
 
-import android.os.Environment;
-
-import com.ford.syncV4.protocol.WiProProtocol.MessageFrameAssembler;
-import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
-import com.ford.syncV4.streaming.AbstractPacketizer;
 import com.ford.syncV4.util.logger.Logger;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.Arrays;
 
 public abstract class AbstractProtocol {
@@ -19,27 +11,31 @@ public abstract class AbstractProtocol {
     protected static final String CLASS_NAME = AbstractProtocol.class.getSimpleName();
 
     public static final int MTU_SIZE = 1500;
-    public static int PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_DEFAULT;
+    private static int PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_DEFAULT;
     public static int MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE;
 
-    protected IProtocolListener _protocolListener = null;
+    private volatile IProtocolListener mProtocolListener;
     protected byte[] mHeaderBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
     protected int mHeaderBufWritePos = 0;
 
-    private static File audioFile;
-    private static File videoFile;
-    private static FileOutputStream audioOutputFileStream;
-    private static FileOutputStream videoOutputFileStream;
+    //private static File audioFile;
+    //private static File videoFile;
+    //private static FileOutputStream audioOutputFileStream;
+    //private static FileOutputStream videoOutputFileStream;
     private ProtocolVersion mProtocolVersion = new ProtocolVersion();
 
     // Caller must provide a non-null IProtocolListener interface reference.
     public AbstractProtocol(IProtocolListener protocolListener) {
         if (protocolListener == null) {
             throw new IllegalArgumentException("Provided protocol listener interface reference is null");
-        } // end-if
-        _protocolListener = protocolListener;
+        }
+        mProtocolListener = protocolListener;
         setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MIN);
-    }// end-ctor
+    }
+
+    public void removeListener() {
+        //mProtocolListener = null;
+    }
 
     // This method receives raw bytes as they arrive from transport.  Those bytes
     // are then collected by the protocol and assembled into complete messages and
@@ -116,15 +112,6 @@ public abstract class AbstractProtocol {
     // syncSession has ended.
     public abstract void EndProtocolService(ServiceType serviceType, byte sessionID);
 
-    // TODO REMOVE
-    // This method sets the interval at which heartbeat protocol messages will be
-    // sent to SYNC.
-    public abstract void SetHeartbeatSendInterval(int heartbeatSendInterval_ms);
-
-    // This method sets the interval at which heartbeat protocol messages are
-    // expected to be received from SYNC.
-    public abstract void SetHeartbeatReceiveInterval(int heartbeatReceiveInterval_ms);
-
     // This method is called whenever the protocol receives a complete frame
     protected void handleProtocolFrameReceived(ProtocolFrameHeader header, byte[] data,
                                                MessageFrameAssembler assembler) {
@@ -133,8 +120,8 @@ public abstract class AbstractProtocol {
         } else {
             Logger.w(CLASS_NAME + " receive null bytes");
         }
-        resetHeartbeat(header.getSessionID());
-        assembler.handleFrame(header, data);
+        resetHeartbeat(header.getSessionId());
+        assembler.handleFrame(header, data, PROTOCOL_FRAME_HEADER_SIZE);
     }
 
     // This method is called whenever a protocol has an entire frame to send
@@ -148,7 +135,7 @@ public abstract class AbstractProtocol {
 
         Logger.d(CLASS_NAME + " transmit ProtocolFrameHeader:" + header.toString());
 
-        resetHeartbeatAck(header.getSessionID());
+        resetHeartbeatAck(header.getSessionId());
         composeMessage(header, data, offset, length);
     }
 
@@ -175,27 +162,28 @@ public abstract class AbstractProtocol {
     }
 
     private synchronized void resetHeartbeatAck(byte sessionId) {
-        if (_protocolListener != null) {
-            _protocolListener.onResetHeartbeatAck(sessionId);
+        if (mProtocolListener != null) {
+            mProtocolListener.onResetHeartbeatAck(sessionId);
         }
     }
 
     private synchronized void resetHeartbeat(byte sessionId) {
-        if (_protocolListener != null) {
-            _protocolListener.onResetHeartbeat(sessionId);
+        if (mProtocolListener != null) {
+            mProtocolListener.onResetHeartbeat(sessionId);
         }
     }
 
-    private void logMobileNaviMessages(ProtocolFrameHeader header, byte[] data) {
+    /*private void logMobileNaviMessages(ProtocolFrameHeader header, byte[] data) {
         if (header.getServiceType().equals(ServiceType.Audio_Service)) {
             Logger.d("AUDIO SERVICE - ProtocolFrameHeader: " + header.toString());
             if (data != null && data.length > 0) {
-                Logger.d("AUDIO SERVICE - Hex Data frame: " + AbstractPacketizer.printBuffer(data, 0, data.length));
+                Logger.d("AUDIO SERVICE - Hex Data frame: " + AbstractPacketizer.printBuffer(data,
+                    0, data.length));
             }
         }
-    }
+    }*/
 
-    private void initVideoDumpStream() {
+    /*private void initVideoDumpStream() {
         String filename = "ford_video.txt";
         if (videoFile == null) {
             videoFile = new File(Environment.getExternalStorageDirectory(), filename);
@@ -207,9 +195,9 @@ public abstract class AbstractProtocol {
                 // handle exception
             }
         }
-    }
+    }*/
 
-    private void initAudioDumpStream() {
+    /*private void initAudioDumpStream() {
         String filename = "ford_audio.txt";
         if (audioFile == null) {
             audioFile = new File(Environment.getExternalStorageDirectory(), filename);
@@ -221,51 +209,51 @@ public abstract class AbstractProtocol {
                 // handle exception
             }
         }
-    }
+    }*/
 
-    private void writeToSdCardAudioFile(ProtocolFrameHeader header, byte[] data) {
+    /*private void writeToSdCardAudioFile(ProtocolFrameHeader header, byte[] data) {
         if (header.getServiceType().equals(ServiceType.Audio_Service)) {
             if (header.getFrameType().equals(FrameType.Single)) {
-               /* try {
+               *//* try {
                     if (audioOutputFileStream != null) {
                         audioOutputFileStream.write(data);
                     }
                 } catch (IOException e) {
                     Log.w("SyncProxyTester", e.toString());
-                }*/
+                }*//*
                 // Log.d("ford_audio.txt","audio: " + new String(data));
             } else {
                 Logger.w(CLASS_NAME + " wrong frame type for video streaming");
             }
         }
-    }
+    }*/
 
-    private void writeToSdCardVideoFile(ProtocolFrameHeader header, byte[] data) {
+    /*private void writeToSdCardVideoFile(ProtocolFrameHeader header, byte[] data) {
         if (header.getServiceType().equals(ServiceType.Mobile_Nav)) {
             if (header.getFrameType().equals(FrameType.Single)) {
-               /* try {
+               *//* try {
                     if (videoOutputFileStream != null) {
                         videoOutputFileStream.write(data);
                     }
                 } catch (IOException e) {
                     Log.w("SyncProxyTester", e.toString());
-                }*/
+                }*//*
                 // Log.d("ford_video.txt","video: " + new String(data));
             } else {
                 Logger.w(CLASS_NAME + " wrong frame type for video streaming");
             }
         }
-    }
+    }*/
 
     // This method handles protocol message bytes that are ready to send.
     // A callback is sent to the protocol listener.
     protected void handleProtocolMessageBytesToSend(byte[] bytesToSend, int offset, int length) {
-        _protocolListener.onProtocolMessageBytesToSend(bytesToSend, offset, length);
+        mProtocolListener.onProtocolMessageBytesToSend(bytesToSend, offset, length);
     }
 
     // This method handles received protocol messages.
     protected void handleProtocolMessageReceived(ProtocolMessage message) {
-        _protocolListener.onProtocolMessageReceived(message);
+        mProtocolListener.onProtocolMessageReceived(message);
     }
 
     /**
@@ -273,7 +261,7 @@ public abstract class AbstractProtocol {
      * A callback is sent to the protocol listener.
      */
     protected void handleProtocolServiceEnded(ServiceType serviceType, byte sessionId) {
-        _protocolListener.onProtocolServiceEnded(serviceType, sessionId);
+        mProtocolListener.onProtocolServiceEnded(serviceType, sessionId);
     }
 
     /**
@@ -281,7 +269,7 @@ public abstract class AbstractProtocol {
      * A callback is sent to the protocol listener.
      */
     protected void handleProtocolServiceEndedAck(ServiceType serviceType, byte sessionId) {
-        _protocolListener.onProtocolServiceEndedAck(serviceType, sessionId);
+        mProtocolListener.onProtocolServiceEndedAck(serviceType, sessionId);
     }
 
     /**
@@ -294,36 +282,46 @@ public abstract class AbstractProtocol {
      */
     protected void handleProtocolSessionStarted(ServiceType serviceType,
                                                 byte sessionId, byte version) {
-        _protocolListener.onProtocolSessionStarted(sessionId, version);
+        mProtocolListener.onProtocolSessionStarted(sessionId, version);
     }
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,
-                                                byte sessionID, byte version) {
+                                                byte sessionId, byte version) {
         if (serviceType.equals(ServiceType.RPC)) {
-            throw new IllegalArgumentException("Can't create RPC service without creating syncSession. serviceType" + serviceType + ";sessionID " + sessionID);
+            throw new IllegalArgumentException("Can't create RPC service without creating " +
+                    "syncSession. serviceType" + serviceType + ";sessionId " + sessionId);
         }
-        if (sessionID == 0) {
-            throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
+        if (sessionId == 0) {
+            throw new IllegalArgumentException("Can't create service with id 0. serviceType:" +
+                    serviceType + ";sessionId " + sessionId);
         }
-        _protocolListener.onProtocolServiceStarted(serviceType, sessionID, version);
+        mProtocolListener.onProtocolServiceStarted(serviceType, sessionId, version);
     }
 
     // This method handles protocol errors. A callback is sent to the protocol
     // listener.
     protected void handleProtocolError(String string, Exception ex) {
-        _protocolListener.onProtocolError(string, ex);
+        mProtocolListener.onProtocolError(string, ex);
     }
 
     protected void handleAppUnregistered() {
-        _protocolListener.onProtocolAppUnregistered();
+        mProtocolListener.onProtocolAppUnregistered();
     }
 
     protected void handleProtocolHeartbeatACK(byte sessionId) {
-        _protocolListener.onProtocolHeartbeatACK(sessionId);
+        mProtocolListener.onProtocolHeartbeatACK(sessionId);
     }
 
     protected void handleProtocolHeartbeat(byte sessionId) {
-        _protocolListener.onProtocolHeartbeat(sessionId);
+        mProtocolListener.onProtocolHeartbeat(sessionId);
+    }
+
+    protected void handleMobileNavAckReceived(byte sessionId, int messageId) {
+        mProtocolListener.onMobileNavAckReceived(sessionId, messageId);
+    }
+
+    protected void handleStartServiceNackFrame(byte sessionId, ServiceType serviceType) {
+        mProtocolListener.onStartServiceNackReceived(sessionId, serviceType);
     }
 
     protected void updateDataStructureToProtocolVersion(byte version) {

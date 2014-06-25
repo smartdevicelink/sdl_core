@@ -84,5 +84,5 @@ SDL.StatisticsInfoView = Em.ContainerView.create( {
         goToState: 'policies',
         icon: 'images/media/ico_back.png',
         onDown: false
-    } ),
+    } )
 });

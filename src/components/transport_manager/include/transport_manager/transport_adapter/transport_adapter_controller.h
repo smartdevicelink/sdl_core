@@ -56,9 +56,6 @@ class TransportAdapterController {
    */
   virtual DeviceSptr AddDevice(DeviceSptr device) = 0;
 
-    //!!!!!!!!!!!!!
-  virtual void ApplicationListUpdated(const DeviceUID& device_handle) = 0;
-
   /**
    * @brief Search for device in container of devices, if it is not there - adds it.
    *
@@ -67,11 +64,15 @@ class TransportAdapterController {
   virtual void SearchDeviceDone(const DeviceVector& devices) = 0;
 
   /**
-   * @brief Search for application in device done, if it is not there - adds it.
-   *
-   * @param device Smart pointers to devices.
+   * @brief application list update notification from device
+   * @param device_handle device id
    */
-  virtual void SearchApplicationsDone(const DeviceSptr& device) = 0;
+  virtual void ApplicationListUpdated(const DeviceUID& device_handle) = 0;
+
+  /**
+   * @brief "Find new applications" request
+   */
+  virtual void FindNewApplicationsRequest() = 0;
 
   /**
    * @brief Launch OnSearchDeviceFailed event in device adapter listener.
@@ -200,6 +201,13 @@ class TransportAdapterController {
   virtual void DataSendFailed(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle,
                               RawMessageSptr message, const DataSendError&) = 0;
+#ifdef CUSTOMER_PASA
+  virtual TransportAdapter::Error DisconnectDevice(
+      const DeviceUID& device_handle) = 0;
+
+  virtual TransportAdapter::Error AbortConnection(
+      const DeviceUID& device_handle, const ApplicationHandle& app_handle) = 0;
+#endif  // CUSTOMER_PASA
 };
 
 }  // namespace transport_adapter

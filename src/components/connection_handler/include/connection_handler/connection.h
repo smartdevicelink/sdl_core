@@ -133,14 +133,14 @@ class Connection {
    * \brief Adds session to connection
    * \return sessionID or -1 in case of issues
    */
-  int32_t AddNewSession();
+  uint32_t AddNewSession();
 
   /**
    * \brief Removes session from connection
    * \param aSession session ID
    * \return sessionID or -1 in case of issues
    */
-  int32_t RemoveSession(uint8_t session);
+  uint32_t RemoveSession(uint8_t session);
 
   /**
    * \brief Adds service to session
@@ -163,21 +163,25 @@ class Connection {
 
   /*
    * \brief Close session
+   * \param  session_id session id
    */
   void CloseSession(uint8_t session_id);
 
   /*
    * \brief Prevent session from being closed by heartbeat timeout
+   * \param  session_id session id
    */
   void KeepAlive(uint8_t session_id);
 
   /*
    * \brief Start heartbeat for specified session
+   * \param  session_id session id
    */
   void StartHeartBeat(uint8_t session_id);
 
   /*
    * \brief Send heartbeat to  mobile app
+   * \param  session_id session id
    */
   void SendHeartBeat(uint8_t session_id);
 

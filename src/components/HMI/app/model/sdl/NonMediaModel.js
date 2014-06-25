@@ -63,6 +63,7 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
 
             this.set('constantTBTParams', null);
 
+            this.set('VRCommands', []);
             this.set('tbtActivate', false);
             this.set('globalProperties.helpPrompt', []);
             this.set('globalProperties.timeoutPrompt', []);
@@ -179,6 +180,9 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
                         break;
                     }
                 }
+            } else {
+
+                this.appInfo.set('alignment', "text-align:center");
             }
 
             if (params.graphic) {
@@ -197,8 +201,9 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
                 }
             }
 
-            this.updateSoftButtons(params.softButtons);
-
+            if ("softButtons" in params) {
+                this.updateSoftButtons(params.softButtons);
+            }
         },
 
         sdlSetMediaClockTimer: function () {

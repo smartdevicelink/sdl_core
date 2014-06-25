@@ -1,15 +1,21 @@
 package com.ford.syncV4.streaming;
 
+import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.session.Session;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
 
 abstract public class AbstractPacketizer {
 
-    protected IStreamListener mStreamListener = null;
+    @SuppressWarnings("unused")
+    private static final String CLASS_NAME = AbstractPacketizer.class.getSimpleName();
 
-    protected byte _rpcSessionID = 0;
+    private IStreamListener mStreamListener = null;
+
+    protected byte _rpcSessionID = Session.DEFAULT_SESSION_ID;
 
     protected ServiceType _serviceType = ServiceType.Mobile_Nav;
 
@@ -29,10 +35,22 @@ abstract public class AbstractPacketizer {
         return _rpcSessionID;
     }
 
-    public AbstractPacketizer(IStreamListener streamListener, InputStream is, byte rpcSessionID) throws IOException {
-        this.mStreamListener = streamListener;
-        this.is = is;
+    public AbstractPacketizer(IStreamListener streamListener, InputStream inputStream,
+                              byte rpcSessionID) throws IOException {
+        mStreamListener = streamListener;
+        is = inputStream;
         _rpcSessionID = rpcSessionID;
+    }
+
+    public void removeListener() {
+        mStreamListener = null;
+    }
+
+    public void sendMessage(ProtocolMessage protocolMessage) {
+        if (protocolMessage == null) {
+            return;
+        }
+        mStreamListener.sendH264(protocolMessage);
     }
 
     public abstract void start() throws IOException;

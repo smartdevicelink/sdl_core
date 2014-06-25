@@ -33,7 +33,9 @@
 #include <string>
 #include "utils/threads/thread.h"
 #include "utils/logger.h"
+#ifndef CUSTOMER_PASA
 #include "media_manager/audio/from_mic_to_file_recorder_thread.h"
+#endif
 #include "media_manager/audio/from_mic_recorder_adapter.h"
 
 namespace media_manager {
@@ -61,6 +63,9 @@ void FromMicRecorderAdapter::StartActivity(int32_t application_key) {
                  << current_application_);
     return;
   }
+
+#ifndef CUSTOMER_PASA
+// Todd: No gstreamer recorder thread
   if (!recorder_thread_) {
     FromMicToFileRecorderThread* thread_delegate =
       new FromMicToFileRecorderThread(
@@ -68,10 +73,12 @@ void FromMicRecorderAdapter::StartActivity(int32_t application_key) {
     recorder_thread_ = new threads::Thread("MicrophoneRecorder",
                                            thread_delegate);
   }
+
   if (NULL != recorder_thread_) {
     recorder_thread_->start();
     current_application_ = application_key;
   }
+#endif
 }
 
 void FromMicRecorderAdapter::StopActivity(int32_t application_key) {

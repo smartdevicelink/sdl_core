@@ -39,7 +39,12 @@ namespace transport_manager {
 namespace transport_adapter {
 
 TcpDevice::TcpDevice(const in_addr_t& in_addr, const std::string& name)
-    : Device(name, name),
+#ifdef CUSTOMER_PASA
+// Todd: put "IP" infront for dev name
+: Device("IP" + name, "IP" + name),
+#else
+: Device(name, name),
+#endif
       in_addr_(in_addr),
       last_handle_(0) {
   pthread_mutex_init(&applications_mutex_, 0);

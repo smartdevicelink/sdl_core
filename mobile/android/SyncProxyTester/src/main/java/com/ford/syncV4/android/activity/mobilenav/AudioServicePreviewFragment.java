@@ -55,13 +55,12 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
     }
 
     private void changeCheckBoxState() {
+        final SyncProxyTester tester = (SyncProxyTester) getActivity();
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
-            SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.startAudioService(getAppId());
         } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             mFileStreamingLogic.resetStreaming();
-            SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.stopAudioService(getAppId());
             mSessionCheckBoxState.setStateOff();
             mDataStreamingButton.setEnabled(false);

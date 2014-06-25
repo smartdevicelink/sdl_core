@@ -54,9 +54,9 @@ ListModel
     }
 
     ListElement {
-        name: "Preferences"
+        name: "Settings"
         icon: "../res/gear.png"
-        qml: ""
+        qml: "./views/SettingsSourceView.qml"
     }
 
     ListElement {

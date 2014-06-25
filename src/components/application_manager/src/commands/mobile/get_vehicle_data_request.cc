@@ -45,90 +45,6 @@ namespace commands {
 
 namespace str = strings;
 
-#ifdef HMI_JSON_API
-GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
-}
-
-GetVehicleDataRequest::~GetVehicleDataRequest() {
-}
-
-void GetVehicleDataRequest::Run() {
-  LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
-
-  int32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
-
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "NULL pointer");
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
-
-  if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
-    LOG4CXX_ERROR(logger_, "app in HMI level HMI_NONE");
-    SendResponse(false, mobile_apis::Result::REJECTED);
-    return;
-  }
-
-  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
-  VehicleData::const_iterator it = vehicle_data.begin();
-  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-            smart_objects::SmartType_Map);
-  msg_params[strings::app_id] = app->app_id();
-  const int32_t min_length_msg_params = 1;
-  for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[str::msg_params].keyExists(it->first)
-        && true == (*message_)[str::msg_params][it->first].asBool()) {
-      msg_params[it->first] = (*message_)[strings::msg_params][it->first];
-    }
-  }
-  if (msg_params.length() > min_length_msg_params) {
-    SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
-                   &msg_params, true);
-  return;
-  }
-  SendResponse(false, mobile_apis::Result::INVALID_DATA);
-}
-
-void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "GetVehicleDataRequest::on_event");
-  smart_objects::SmartObject message = event.smart_object();
-
-  switch (event.id()) {
-    case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
-      bool result = false;
-      if (mobile_apis::Result::SUCCESS == result_code ||
-          (hmi_apis::Common_Result::DATA_NOT_AVAILABLE ==
-              static_cast<hmi_apis::Common_Result::eType>(result_code)
-                    && message[strings::msg_params].length() > 1)) {
-        result = true;
-      }
-      const char *info = NULL;
-      std::string error_message;
-      if (true ==
-          message[strings::msg_params].keyExists(hmi_response::method)) {
-        message[strings::msg_params].erase(hmi_response::method);
-      }
-      if (true == message[strings::params].keyExists(strings::error_msg)) {
-        error_message = message[strings::params][strings::error_msg].asString();
-        info = error_message.c_str();
-      }
-      SendResponse(result, result_code, info, &(message[strings::msg_params]));
-      break;
-    }
-    default: {
-      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
-      return;
-    }
-  }
-}
-
-#endif // HMI_JSON_API
-
 #ifdef HMI_DBUS_API
 GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
@@ -288,6 +204,88 @@ void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
     SendResponse( any_arg_success, status, info, &response_params);
   }
 }
+#else
+GetVehicleDataRequest::GetVehicleDataRequest(const MessageSharedPtr& message)
+    : CommandRequestImpl(message) {
+}
+
+GetVehicleDataRequest::~GetVehicleDataRequest() {
+}
+
+void GetVehicleDataRequest::Run() {
+  LOG4CXX_INFO(logger_, "GetVehicleDataRequest::Run");
+
+  int32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
+    LOG4CXX_ERROR(logger_, "app in HMI level HMI_NONE");
+    SendResponse(false, mobile_apis::Result::REJECTED);
+    return;
+  }
+
+  const VehicleData& vehicle_data = MessageHelper::vehicle_data();
+  VehicleData::const_iterator it = vehicle_data.begin();
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+            smart_objects::SmartType_Map);
+  msg_params[strings::app_id] = app->app_id();
+  const uint32_t min_length_msg_params = 1;
+  for (; vehicle_data.end() != it; ++it) {
+    if (true == (*message_)[str::msg_params].keyExists(it->first)
+        && true == (*message_)[str::msg_params][it->first].asBool()) {
+      msg_params[it->first] = (*message_)[strings::msg_params][it->first];
+    }
+  }
+  if (msg_params.length() > min_length_msg_params) {
+    SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
+                   &msg_params, true);
+  return;
+  }
+  SendResponse(false, mobile_apis::Result::INVALID_DATA);
+}
+
+void GetVehicleDataRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "GetVehicleDataRequest::on_event");
+  smart_objects::SmartObject message = event.smart_object();
+
+  switch (event.id()) {
+    case hmi_apis::FunctionID::VehicleInfo_GetVehicleData: {
+      mobile_apis::Result::eType result_code =
+          static_cast<mobile_apis::Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+      bool result = false;
+      if (mobile_apis::Result::SUCCESS == result_code ||
+          (hmi_apis::Common_Result::DATA_NOT_AVAILABLE ==
+              static_cast<hmi_apis::Common_Result::eType>(result_code)
+                    && message[strings::msg_params].length() > 1)) {
+        result = true;
+      }
+      const char *info = NULL;
+      std::string error_message;
+      if (true ==
+          message[strings::msg_params].keyExists(hmi_response::method)) {
+        message[strings::msg_params].erase(hmi_response::method);
+      }
+      if (true == message[strings::params].keyExists(strings::error_msg)) {
+        error_message = message[strings::params][strings::error_msg].asString();
+        info = error_message.c_str();
+      }
+      SendResponse(result, result_code, info, &(message[strings::msg_params]));
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Received unknown event" << event.id());
+      return;
+    }
+  }
+}
+
 #endif // #ifdef HMI_DBUS_API
 
 } // namespace commands

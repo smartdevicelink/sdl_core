@@ -1006,11 +1006,6 @@ void MessageHelper::SendChangeRegistrationRequestToHMI(ApplicationConstSharedPtr
   if (!app.valid()) {
     return;
   }
-
-  hmi_apis::Common_Language::eType app_common_language =
-    ToCommonLanguage(app->language());
-  const HMICapabilities& hmi_capabilities =
-    ApplicationManagerImpl::instance()->hmi_capabilities();
   if (mobile_apis::Language::INVALID_ENUM != app->language()) {
     smart_objects::SmartObject* vr_command = CreateChangeRegistration(
           hmi_apis::FunctionID::VR_ChangeRegistration, app->language(),
@@ -1093,7 +1088,7 @@ smart_objects::SmartObject* MessageHelper::CreateAddVRCommandToHMI(
 }
 
 bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
-                                               smart_objects::SmartObject& output) {
+    smart_objects::SmartObject& output) {
 
   if (false == app.valid()) {
     return false;
@@ -1113,7 +1108,7 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
   output[strings::is_media_application] = app->is_media_application();
 
   if (NULL != ngn_media_screen_name) {
-    output[strings::ngn_media_screen_app_name] = ngn_media_screen_name;
+    output[strings::ngn_media_screen_app_name] = ngn_media_screen_name->asString();
   }
   if (NULL != app_types) {
     output[strings::app_type] = *app_types;
@@ -1167,20 +1162,6 @@ MessageHelper::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
     requsets.push_back(ui_sub_menu);
   }
   return requsets;
-}
-
-void MessageHelper::SendOnSdlCloseNotificationToHMI() {
-  smart_objects::SmartObject* notification = new smart_objects::SmartObject(
-    smart_objects::SmartType_Map);
-  if (!notification) {
-    return;
-  }
-  smart_objects::SmartObject& message = *notification;
-  message[strings::params][strings::function_id] =
-    hmi_apis::FunctionID::BasicCommunication_OnSDLClose;
-  message[strings::params][strings::message_type] = MessageType::kNotification;
-
-  ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
 
 void MessageHelper::SendOnAppUnregNotificationToHMI(
@@ -1295,12 +1276,6 @@ void MessageHelper::GetDeviceInfoForApp(uint32_t connection_key,
 
   device_info->device_handle = ApplicationManagerImpl::instance()->application(
                                  connection_key)->device();
-  /*for (; it != it_end; ++it) {
-   if ((*it)->app_id() == atoi(connection_key.c_str())) {
-   device_info->device_handle = (*it)->device();
-   break;
-   }
-   }*/
 
   GetDeviceInfoForHandle(device_info->device_handle, device_info);
 }
@@ -2034,7 +2009,7 @@ void MessageHelper::SendGetSystemInfoRequest() {
 mobile_apis::Result::eType MessageHelper::VerifyImageFiles(
   smart_objects::SmartObject& message, ApplicationConstSharedPtr app) {
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == message.getType()) {
-    for (int32_t i = 0; i < message.length(); ++i) {
+    for (uint32_t i = 0; i < message.length(); ++i) {
       mobile_apis::Result::eType res = VerifyImageFiles(message[i], app);
       if (mobile_apis::Result::SUCCESS != res) {
         return res;
@@ -2073,7 +2048,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
   // HMI related file and it should know it location
   const uint32_t image_type = image[strings::image_type].asUInt();
   mobile_apis::ImageType::eType type =
-      static_cast<mobile_apis::ImageType::eType>(image_type);
+    static_cast<mobile_apis::ImageType::eType>(image_type);
   if (mobile_apis::ImageType::STATIC == type) {
     return mobile_apis::Result::SUCCESS;
   }
@@ -2090,7 +2065,7 @@ mobile_apis::Result::eType MessageHelper::VerifyImage(
     profile::Profile::instance()->app_storage_folder() + "/";
 
   if (file_name.size() > 0 && file_name[0] == '/') {
-    full_file_path += file_name;
+    full_file_path = file_name;
   } else {
 
     full_file_path += app->folder_name();
@@ -2122,18 +2097,21 @@ mobile_apis::Result::eType MessageHelper::VerifyImageVrHelpItems(
   return mobile_apis::Result::SUCCESS;
 }
 
-bool MessageHelper::VerifySoftButtonText(
+ResultVerifySoftButtonText MessageHelper::VerifySoftButtonText(
   smart_objects::SmartObject& soft_button) {
   std::string text = soft_button[strings::text].asString();
+  if ((std::string::npos != text.find_first_of("\t\n")) ||
+      (std::string::npos != text.find("\\n")) ||
+      (std::string::npos != text.find("\\t"))) {
+    return kIncorrectCharacter;
+  }
   text.erase(remove(text.begin(), text.end(), ' '), text.end());
-  text.erase(remove(text.begin(), text.end(), '\n'), text.end());
   if (text.size()) {
-    return true;
+    return kStringContainsCharacter;
   } else {
     soft_button.erase(strings::text);
   }
-
-  return false;
+  return kStringEmpty;
 }
 
 mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
@@ -2163,8 +2141,8 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
   smart_objects::SmartObject soft_buttons = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
 
-  int32_t j = 0;
-  for (int32_t i = 0; i < request_soft_buttons.length(); ++i) {
+  uint32_t j = 0;
+  for (uint32_t i = 0; i < request_soft_buttons.length(); ++i) {
     switch (request_soft_buttons[i][strings::type].asInt()) {
       case mobile_apis::SoftButtonType::SBT_IMAGE: {
         if (!image_supported) {
@@ -2186,16 +2164,22 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         if (!request_soft_buttons[i].keyExists(strings::text)) {
           return mobile_apis::Result::INVALID_DATA;
         }
-
-        if (!VerifySoftButtonText(request_soft_buttons[i])) {
+        ResultVerifySoftButtonText result =
+            VerifySoftButtonText(request_soft_buttons[i]);
+        if (kStringEmpty == result) {
           continue;
+        } else if (kIncorrectCharacter == result) {
+          return mobile_apis::Result::INVALID_DATA;
         }
         break;
       }
       case mobile_apis::SoftButtonType::SBT_BOTH: {
 
         if (request_soft_buttons[i].keyExists(strings::text)) {
-          VerifySoftButtonText(request_soft_buttons[i]);
+          if (kIncorrectCharacter == VerifySoftButtonText(
+              request_soft_buttons[i])) {
+            return mobile_apis::Result::INVALID_DATA;
+          }
         } else {
           return mobile_apis::Result::INVALID_DATA;
         }

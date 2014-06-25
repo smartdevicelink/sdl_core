@@ -43,6 +43,12 @@ FFW.UI = FFW.RPCObserver.create({
     isReady: true,
 
     /**
+     * Contains response codes for request that should be processed but there were some kind of errors
+     * Error codes will be injected into response.
+     */
+    errorResponsePull: {},
+
+    /**
      * access to basic RPC functionality
      */
     client: FFW.RPCClient.create({
@@ -79,6 +85,7 @@ FFW.UI = FFW.RPCObserver.create({
      */
     disconnect: function () {
 
+        this.onRPCUnregistered();
         this.client.disconnect();
     },
 
@@ -144,7 +151,7 @@ FFW.UI = FFW.RPCObserver.create({
         this._super();
 
         if (notification.method == this.onRecordStartNotification) {
-            // to do
+            SDL.AudioPassThruPopUp.StartAudioPassThruTimer();
         }
     },
 
@@ -244,9 +251,9 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.Slider":
                 {
 
-                    SDL.SDLModel.uiSlider(request);
-
-                    SDL.SDLController.onSystemContextChange();
+                    if (SDL.SDLModel.uiSlider(request)) {
+                        SDL.SDLController.onSystemContextChange();
+                    }
 
                     break;
                 }

@@ -1,14 +1,13 @@
 package com.ford.syncV4.session;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.proxy.constants.APIConstants;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Created by Andrew Batutin on 1/21/14
@@ -30,7 +29,7 @@ public class Session {
     /**
      * Collection of the Session Id's mapped to App Id
      */
-    private final Hashtable<String, Byte> sessionIds = new Hashtable<String, Byte>();
+    private final ConcurrentHashMap<String, Byte> sessionIds = new ConcurrentHashMap<String, Byte>();
 
     /**
      * Collection of the non Sync Services (RPC, Navi, Audio, etc ...)
@@ -77,6 +76,7 @@ public class Session {
      * @return Session Id
      */
     public byte getSessionIdByAppId(String appId) {
+        Logger.d(CLASS_NAME + " get sesId by appId:" + appId);
         if (sessionIds.containsKey(appId)) {
             return sessionIds.get(appId);
         }
@@ -273,7 +273,7 @@ public class Session {
             }
         }
         for (Service service: tobeRemoved) {
-            boolean result =  servicesList.remove(service);
+            boolean result = removeService(service);
             Logger.i(CLASS_NAME + " Stop session remove:" + service + " result:" + result);
         }
         tobeRemoved.clear();

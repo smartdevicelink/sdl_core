@@ -80,7 +80,7 @@
 
   4.1. Use this step if Web HMI and SDL are running on separate computers (virtualized QNX is also considered to be running on a separate computer):
     4.1.1. LinHost: update SDL config file “<Project_Root_Src>/src/appMain/smartDeviceLink.ini”: find  “ServerAddress = ” there and replace the value with <SDL server address>.
-    4.1.2. LinHost: update Web HMI network parameters: in file “<Project_Root_Src>/src/components/HMI/ffw/RPCClient.js” find “url: ” and replace the value ("ws://localhost:8087" or FLAGS.WEBSOCKET_URL) with <SDL server address>. (e.g. "url: "ws://192.168.177.128:8087"")
+    4.1.2. LinHost: update Web HMI network parameters: in file “<Project_Root_Src>/src/components/HMI/app/Flags.js” find “WEBSOCKET_URL: ” and replace the value ("ws://localhost:8087") with <SDL server address>. (e.g. "url: "ws://192.168.177.128:8087"")
       Note: <SDL server address> is the IP of the computer where SDL is running.
 
   4.2. Use this step if QML HMI and SDL are running on separate computers (virtualized QNX is also considered to be running on a separate computer):
@@ -105,7 +105,11 @@
   5.4. For Linux with QML HMI run command
     "mkdir <Project_Linux_Build_Qt>  && cd <Project_Linux_Build_Qt>
     "cmake <Project_Root_Src> -DEXTENDED_MEDIA_MODE=ON -DHMI=qt".
-  5.5. Run build process “make install” in previous directory.
+  5.5. To build and install 3rd party libs run
+    "make 3rd_party"
+    "sudo make install-3rd_party"
+    Note: this step has to be done just once for each combination of target system (Linux/QNX) and CPU architecture (x86/armv7).
+  5.6. Run build process “make install” in previous directory.
 
 ==========================================================================================================
 6. Common run on Linux host (SDL + HMI).

@@ -59,9 +59,9 @@ class SessionObserver {
      * \param connection_handle Connection identifier whithin which session
      * has to be started.
      * \param sessionId Identifier of the session to be ended
-     * \return int32_t Id (number) of new session if successful otherwise -1.
+     * \return int32_t Id (number) of new session if successful otherwise 0.
      */
-    virtual int32_t OnSessionStartedCallback(
+    virtual uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
       const uint8_t sessionId,
       const ServiceType& service_type) = 0;

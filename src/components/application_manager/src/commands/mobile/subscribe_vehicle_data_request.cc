@@ -135,10 +135,6 @@ void SubscribeVehicleDataRequest::Run() {
                  "Already subscribed on provided VehicleData");
     return;
   }
-#ifdef HMI_JSON_API
-  SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
-                 &msg_params, true);
-#endif // #ifdef HMI_JSON_API
 
 #ifdef HMI_DBUS_API
   //Generate list of subrequests
@@ -158,6 +154,9 @@ void SubscribeVehicleDataRequest::Run() {
   //Send subrequests
   for (HmiRequests::const_iterator it = hmi_requests_.begin(); it != hmi_requests_.end(); ++it)
     SendHMIRequest(it->func_id, &msg_params, true);
+#else
+  SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData,
+                 &msg_params, true);
 #endif // #ifdef HMI_DBUS_API
 }
 
@@ -169,35 +168,6 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       CommandRequestImpl::connection_key());
 
-#ifdef HMI_JSON_API
-  hmi_apis::Common_Result::eType hmi_result =
-      static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
-
-  bool result =
-      hmi_result == hmi_apis::Common_Result::SUCCESS;
-
-  mobile_apis::Result::eType result_code =
-      hmi_result == hmi_apis::Common_Result::SUCCESS
-      ? mobile_apis::Result::SUCCESS
-      : static_cast<mobile_apis::Result::eType>(
-          message[strings::params][hmi_response::code].asInt());
-
-  const char* return_info = NULL;
-  if (result) {
-    if (IsAnythingAlreadySubscribed()) {
-      result_code = mobile_apis::Result::WARNINGS;
-      return_info =
-          std::string("Unsupported phoneme type sent in a prompt").c_str();
-    }
-  }
-
-  SendResponse(result,
-               result_code,
-               return_info,
-               &(message[strings::msg_params]));
-  app->UpdateHash();
-#endif // #ifdef HMI_JSON_API
 #ifdef HMI_DBUS_API
   for (HmiRequests::iterator it = hmi_requests_.begin();
       it != hmi_requests_.end(); ++it) {
@@ -247,6 +217,34 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     SendResponse(any_arg_success, status, NULL, &response_params);
     app->UpdateHash();
   }
+#else
+  hmi_apis::Common_Result::eType hmi_result =
+      static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
+  bool result =
+      hmi_result == hmi_apis::Common_Result::SUCCESS;
+
+  mobile_apis::Result::eType result_code =
+      hmi_result == hmi_apis::Common_Result::SUCCESS
+      ? mobile_apis::Result::SUCCESS
+      : static_cast<mobile_apis::Result::eType>(
+          message[strings::params][hmi_response::code].asInt());
+
+  const char* return_info = NULL;
+  if (result) {
+    if (IsAnythingAlreadySubscribed()) {
+      result_code = mobile_apis::Result::WARNINGS;
+      return_info =
+          std::string("Unsupported phoneme type sent in a prompt").c_str();
+    }
+  }
+
+  SendResponse(result,
+               result_code,
+               return_info,
+               &(message[strings::msg_params]));
+  app->UpdateHash();
 #endif // #ifdef HMI_DBUS_API
 }
 

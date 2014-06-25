@@ -8,8 +8,9 @@ include_directories (
   ../connection_handler/include
   ../config_profile/include
   ../resumption/include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/jsoncpp/include
-  ${CMAKE_SOURCE_DIR}/src/thirdPartyLibs/libusbx-1.0.16
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${LIBUSB_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 if (BUILD_BT_SUPPORT)
   include_directories(
@@ -99,7 +100,6 @@ if (BUILD_AVAHI_SUPPORT)
 endif()
 
 if(ENABLE_LOG)
-  add_dependencies(${target} liblog4cxx)
   target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 

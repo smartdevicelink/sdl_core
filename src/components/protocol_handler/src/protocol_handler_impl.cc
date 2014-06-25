@@ -191,6 +191,11 @@ void ProtocolHandlerImpl::RemoveProtocolObserver(ProtocolObserver* observer) {
 }
 
 void ProtocolHandlerImpl::set_session_observer(SessionObserver* observer) {
+  if (!observer) {
+    LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to ISessionObserver.");
+    return;
+  }
+
   session_observer_ = observer;
 }
 
@@ -466,6 +471,20 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
                                     message->data(),
                                     message->data_size());
 
+  session_observer_->PairFromKey(message->connection_key(),
+                                 &connection_handle,
+                                 &sessionID);
+
+  std::list<uint32_t>::iterator connection_it =
+      std::find(ready_to_close_connections_.begin(),
+                ready_to_close_connections_.end(), connection_handle);
+
+  if (ready_to_close_connections_.end() != connection_it) {
+    ready_to_close_connections_.erase(connection_it);
+    transport_manager_->Disconnect(connection_handle);
+    return;
+  }
+
   std::map<uint8_t, uint32_t>::iterator it =
       sessions_last_message_id_.find(sent_message.session_id());
 
@@ -477,10 +496,8 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
         ((FRAME_TYPE_CONSECUTIVE == sent_message.frame_type()) &&
          (0 == sent_message.frame_data())))) {
 
-      session_observer_->PairFromKey(message->connection_key(),
-                                       &connection_handle,
-                                       &sessionID);
-      transport_manager_->Disconnect(connection_handle);
+      ready_to_close_connections_.push_back(connection_handle);
+      SendEndSession(connection_handle, sent_message.session_id());
     }
   }
 
@@ -582,8 +599,8 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   LOG4CXX_INFO_EXT(
       logger_, " data size " << data_size << " maxdata_size " << maxdata_size);
 
-  int32_t numOfFrames = 0;
-  int32_t lastdata_size = 0;
+  uint32_t numOfFrames = 0;
+  uint32_t lastdata_size = 0;
 
   if (data_size % maxdata_size) {
     numOfFrames = (data_size / maxdata_size) + 1;
@@ -834,11 +851,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageEndSession(
   }
 
   bool success = true;
-  int32_t session_hash_code = session_observer_->OnSessionEndedCallback(
+  uint32_t session_hash_code = session_observer_->OnSessionEndedCallback(
       connection_id, current_session_id, hash_code,
       ServiceTypeFromByte(packet.service_type()));
 
-  if (-1 != session_hash_code) {
+  if (0 != session_hash_code) {
     if (1 != packet.protocol_version()) {
       if (packet.message_id() != session_hash_code) {
         success = false;
@@ -870,11 +887,11 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                    "Protocol version: " <<
                    static_cast<int>(packet.protocol_version()));
 
-  int32_t session_id = session_observer_->OnSessionStartedCallback(
+  uint32_t session_id = session_observer_->OnSessionStartedCallback(
       connection_id, packet.session_id(),
       ServiceTypeFromByte(packet.service_type()));
 
-  if (-1 != session_id) {
+  if (0 != session_id) {
     SendStartSessionAck(
         connection_id, session_id, packet.protocol_version(),
         session_observer_->KeyFromPair(connection_id, session_id),
@@ -970,7 +987,7 @@ std::string ConvertPacketDataToString(const uint8_t* data,
   std::locale loc;
   const char* text = reinterpret_cast<const char*>(data);
   // Check data for printability
-  for (int i = 0; i < data_size; ++i) {
+  for (uint32_t i = 0; i < data_size; ++i) {
     if (!std::isprint(text[i], loc)) {
       is_printable_array = false;
       break;

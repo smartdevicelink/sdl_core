@@ -43,7 +43,30 @@ SDL.SDLModel = Em.Object.create({
         'vrHelp': null
     },
 
-/**
+    /**
+     * Structure specified for PoliceUpdate retry sequence
+     * contains timeout seconds param, array of retry seconds and counter of number of retries
+     *
+     * @type {Objetc}
+     */
+    policyUpdateRetry:{
+        timeout: null,
+        retry: [],
+        try: null,
+        timer: null,
+        oldTimer: 0
+    },
+
+    /**
+     * Application's container for current processed requests on VR component of HMI
+     *
+     * @type {Object}
+     */
+    vrActiveRequests: {
+        vrPerformInteraction: null
+    },
+
+    /**
      * List of callback functions for request SDL.GetUserFriendlyMessage
      * where key is requestId
      * and parameter is a function that will handle data came in respone from SDL
@@ -123,6 +146,23 @@ SDL.SDLModel = Em.Object.create({
     settingsInfoList: [
         'iAPP_BUFFER_FULL',
         'blah'
+    ],
+
+    /**
+     * Policy Settings Info state value
+     *
+     * @type {String}
+     */
+    systemErrorListState: 'SYNC_REBOOTED',
+
+    /**
+     * Policy Settings Info list
+     *
+     * @type {Object}
+     */
+    systemErrorList: [
+        'SYNC_REBOOTED',
+        'SYNC_OUT_OF_MEMMORY'
     ],
 
     /**
@@ -519,9 +559,6 @@ SDL.SDLModel = Em.Object.create({
     setAppPermissions: function(oldPermissions){
         var temp = this.appPermissions.filter(function(item, i) {
             var ok = oldPermissions.indexOf(item) === -1;
-//            if (ok) {
-//                array5.push(i + 1);
-//            }
             return ok;
         });
 
@@ -535,6 +572,14 @@ SDL.SDLModel = Em.Object.create({
 
         FFW.BasicCommunication.AddStatisticsInfo(this.settingsInfoListState);
     }.observes('this.settingsInfoListState'),
+
+    /**
+     * Method to set selected state of settings Info List
+     */
+    systemErrorListStateChange: function() {
+
+        FFW.BasicCommunication.OnSystemError(this.systemErrorListState);
+    }.observes('this.systemErrorListState'),
 
     /**
      * Method to open Phone view and dial phone number
@@ -1130,15 +1175,15 @@ SDL.SDLModel = Em.Object.create({
      */
     vrPerformInteraction: function (message) {
 
-        if (!SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
-            SDL.SDLAppController.model.activeRequests.vrPerformInteraction = message.id;
+        if (!SDL.SDLModel.vrActiveRequests.vrPerformInteraction) {
+            SDL.SDLModel.vrActiveRequests.vrPerformInteraction = message.id;
         } else {
             SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['REJECTED']);
             return;
         }
 
         setTimeout(function(){
-            if (SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+            if (SDL.SDLModel.vrActiveRequests.vrPerformInteraction) {
                 SDL.SDLModel.onPrompt(message.params.timeoutPrompt);
                 SDL.SDLModel.interactionData.helpPrompt = null;
             }
@@ -1155,7 +1200,7 @@ SDL.SDLModel = Em.Object.create({
 
             setTimeout(function(){
                 if (SDL.SDLModel.VRActive) {
-                    if (SDL.SDLAppController.model && SDL.SDLAppController.model.activeRequests.vrPerformInteraction) {
+                    if (SDL.SDLAppController.model && SDL.SDLModel.vrActiveRequests.vrPerformInteraction) {
                         SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['TIMED_OUT']);
                     }
 
@@ -1180,8 +1225,10 @@ SDL.SDLModel = Em.Object.create({
 
         if (!SDL.SliderView.active) {
             SDL.SDLController.getApplicationModel(message.params.appID).onSlider(message);
+            return true;
         } else {
-            FFW.UI.sendSliderResult(this.resultCode["ABORTED"], message.id);
+            FFW.UI.sendSliderResult(this.resultCode["REJECTED"], message.id);
+            return false;
         }
     },
 
@@ -1251,8 +1298,8 @@ SDL.SDLModel = Em.Object.create({
      */
     TTSStopSpeaking: function () {
         //true parameter makes send error response ABORTED
-        SDL.TTSPopUp.DeactivateTTS();
         FFW.TTS.set('aborted', true);
+        SDL.TTSPopUp.DeactivateTTS();
     },
 
     /**
@@ -1361,6 +1408,11 @@ SDL.SDLModel = Em.Object.create({
                     reason = 'SYNCSETTINGS';
                     break;
                 }
+                case "call":
+                {
+                    reason = 'PHONECALL';
+                    break;
+                }
                 default:
                 {
                     reason = 'GENERAL';
@@ -1370,9 +1422,7 @@ SDL.SDLModel = Em.Object.create({
 
             SDL.TurnByTurnView.deactivate();
 
-            //if (!SDL.SDLController.getApplicationModel(appID).unregistered) {
-                FFW.BasicCommunication.OnAppDeactivated(reason, appID);
-            //}
+            FFW.BasicCommunication.OnAppDeactivated(reason, appID);
         }
     }
 });

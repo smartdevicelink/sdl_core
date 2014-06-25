@@ -53,7 +53,8 @@ class DBusController: public QObject {
   void addMessage(const QDBusMessage& message, fillRoutine fill, int async_uid);
   Q_INVOKABLE void sendReply(QVariant asyncObject, QVariant data);
   Q_INVOKABLE void sendReply(QVariant data);
-  Q_INVOKABLE void sendError(QVariant asyncObject, QVariant data);
+  Q_INVOKABLE void sendError(QVariant asyncObject, QVariant code);
+  Q_INVOKABLE void sendError(QVariant asyncObject, QVariant code, QVariant message);
   const QDBusMessage* message;
   fillRoutine fill;
 

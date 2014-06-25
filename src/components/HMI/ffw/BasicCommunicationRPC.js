@@ -40,12 +40,17 @@ FFW.BasicCommunication = FFW.RPCObserver
             componentName: "BasicCommunication"
         }),
 
+        /**
+         * Contains response codes for request that should be processed but there were some kind of errors
+         * Error codes will be injected into response.
+         */
+        errorResponsePull: {},
+
 
         //OnPutFile
 
 
         onPutFileSubscribeRequestID: -1,
-        onSystemErrorSubscribeRequestID: -1,
         onStatusUpdateSubscribeRequestID: -1,
         onAppPermissionChangedSubscribeRequestID: -1,
         onFileRemovedSubscribeRequestID: -1,
@@ -57,7 +62,6 @@ FFW.BasicCommunication = FFW.RPCObserver
         onResumeAudioSourceSubscribeRequestID: -1,
 
         onPutFileUnsubscribeRequestID: -1,
-        onSystemErrorUnsubscribeRequestID: -1,
         onStatusUpdateUnsubscribeRequestID: -1,
         onAppPermissionChangedUnsubscribeRequestID: -1,
         onFileRemovedUnsubscribeRequestID: -1,
@@ -69,7 +73,6 @@ FFW.BasicCommunication = FFW.RPCObserver
         onResumeAudioSourceUnsubscribeRequestID: -1,
 
         // const
-        onSystemErrorNotification: "SDL.OnSystemError",
         onStatusUpdateNotification: "SDL.OnStatusUpdate",
         onAppPermissionChangedNotification: "SDL.OnAppPermissionChanged",
         onPutFileNotification: "BasicCommunication.OnPutFile",
@@ -103,6 +106,7 @@ FFW.BasicCommunication = FFW.RPCObserver
          */
         disconnect: function() {
 
+            this.onRPCUnregistered();
             this.client.disconnect();
         },
 
@@ -118,8 +122,6 @@ FFW.BasicCommunication = FFW.RPCObserver
             // subscribe to notifications
             this.onPutFileSubscribeRequestID = this.client
                 .subscribeToNotification(this.onPutFileNotification);
-            this.onSystemErrorSubscribeRequestID = this.client
-                .subscribeToNotification(this.onSystemErrorNotification);
             this.onStatusUpdateSubscribeRequestID = this.client
                 .subscribeToNotification(this.onStatusUpdateNotification);
             this.onAppPermissionChangedSubscribeRequestID = this.client
@@ -152,8 +154,6 @@ FFW.BasicCommunication = FFW.RPCObserver
 
             this.onPutFileUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onPutFileNotification);
-            this.onSystemErrorUnsubscribeRequestID = this.client
-                .unsubscribeFromNotification(this.onSystemErrorNotification);
             this.onStatusUpdateUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onStatusUpdateNotification);
             this.onAppPermissionChangedUnsubscribeRequestID = this.client
@@ -165,7 +165,7 @@ FFW.BasicCommunication = FFW.RPCObserver
             this.onAppUnregisteredUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onAppUnregisteredNotification);
             this.onPlayToneUnsubscribeRequestID = this.client
-                .unsubscribeFromNotification(this.onPlayToneUpdatedNotification);
+                .unsubscribeFromNotification(this.onPlayToneNotification);
             this.onSDLCloseUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onSDLCloseNotification);
             this.onSDLConsentNeededUnsubscribeRequestID = this.client
@@ -298,6 +298,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                     this.OnSystemRequest("PROPRIETARY");
                 }
 
+                SDL.SettingsController.policyUpdateRetry();
+
             }
         },
 
@@ -322,19 +324,6 @@ FFW.BasicCommunication = FFW.RPCObserver
                 SDL.SDLModel.onFileRemoved(notification.params);
             }
 
-            if (notification.method == this.onSystemErrorNotification) {
-
-                var message = "Undefined";
-
-                if (notification.error === "SYNC_REBOOTED") {
-                    message = "SDL Core reboot.";
-                } else if (notification.error === "SYNC_OUT_OF_MEMMORY") {
-                    message = "SDL Core error: out of memory.";
-                }
-
-                SDL.PopUp.popupActivate(message);
-            }
-
             if (notification.method == this.onStatusUpdateNotification) {
 
                 //SDL.PopUp.popupActivate(notification.status);
@@ -342,9 +331,42 @@ FFW.BasicCommunication = FFW.RPCObserver
             }
 
             if (notification.method == this.onAppPermissionChangedNotification) {
-                SDL.PopUp.popupActivate(response.result);
-            }
 
+                if (notification.params.appPermissionsConsentNeeded) {
+
+                    this.GetListOfPermissions(notification.params.appID);
+                }
+
+                if (notification.params.isAppPermissionsRevoked) {
+
+                    SDL.SettingsController.userFriendlyMessagePopUp(notification.params.appID, notification.params.appRevokedPermissions);
+
+                    //deleted array
+                    SDL.SDLModel.setAppPermissions(notification.params.appRevokedPermissions);
+                }
+
+                if (notification.params.appRevoked) {
+
+                    SDL.PopUp.popupActivate("Current version of app is no longer supported!");
+                    
+//                  TO DO
+//                    Remove comments if this functionality will be needed
+//                    if (notification.params.appID == SDL.SDLAppController.model.appID) {
+//                        SDL.SDLAppController.deactivateApp();
+//                    }
+                }
+
+                if (notification.params.appUnauthorized) {
+
+                    SDL.PopUp.popupActivate("Current version of app is Unauthorized!");
+
+//                  TO DO
+//                    Remove comments if this functionality will be needed
+//                    if (notification.params.appID == SDL.SDLAppController.model.appID) {
+//                        SDL.SDLAppController.deactivateApp();
+//                    }
+                }
+            }
 
             if (notification.method == this.onAppRegisteredNotification) {
                 SDL.SDLModel.onAppRegistered(notification.params);
@@ -418,6 +440,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
                 if (request.method == "BasicCommunication.SystemRequest") {
 
+                    SDL.SettingsController.policyUpdateRetry(true);
+
                     this.OnReceivedPolicyUpdate(request.params.fileName);
 
                     SDL.SettingsController.policyUpdateFile = null;
@@ -428,15 +452,17 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
                 if (request.method == "BasicCommunication.ActivateApp") {
 
-                    if ((SDL.SDLAppController.model && SDL.SDLAppController.model.appID != request.params.appID) || (request.params.level == "NONE" || request.params.level == "BACKGROUND")) {
-                        SDL.States.goToStates('info.apps');
-                    }
+                    if (!request.params.level || request.params.level == "FULL") {
+                        if ((SDL.SDLAppController.model && SDL.SDLAppController.model.appID != request.params.appID) || (request.params.level == "NONE" || request.params.level == "BACKGROUND")) {
+                            SDL.States.goToStates('info.apps');
+                        }
 
-                    if (SDL.SDLModel.stateLimited == request.params.appID) {
-                        SDL.SDLModel.stateLimited = null;
-                    }
+                        if (SDL.SDLModel.stateLimited == request.params.appID) {
+                            SDL.SDLModel.stateLimited = null;
+                        }
 
-                    SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
+                        SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
+                    }
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
                 }
                 if (request.method == "BasicCommunication.GetSystemInfo") {
@@ -463,10 +489,15 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
                 if (request.method == "BasicCommunication.PolicyUpdate") {
                     SDL.SettingsController.policyUpdateFile = request.params.file;
+
+                    SDL.SDLModel.policyUpdateRetry.timeout = request.params.timeout;
+                    SDL.SDLModel.policyUpdateRetry.retry = request.params.retry;
+                    SDL.SDLModel.policyUpdateRetry.try = 0;
+
                     this.GetURLS(7); //Service type for policies
 
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
-            }
+                }
             }
         },
 
@@ -869,6 +900,24 @@ FFW.BasicCommunication = FFW.RPCObserver
                     "deviceInfo": SDL.SDLModel.CurrDeviceInfo
                 };
             }
+
+            this.client.send(JSONMessage);
+        },
+
+        /**
+         * Send notification to SDL Core about system errors
+         */
+        OnSystemError: function(error) {
+
+            Em.Logger.log("FFW.SDL.OnSystemError");
+
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "SDL.OnSystemError",
+                "params": {
+                    "error": error
+                }
+            };
 
             this.client.send(JSONMessage);
         },

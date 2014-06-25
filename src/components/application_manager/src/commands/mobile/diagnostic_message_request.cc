@@ -50,10 +50,8 @@ DiagnosticMessageRequest::~DiagnosticMessageRequest() {
 void DiagnosticMessageRequest::Run() {
   LOG4CXX_INFO(logger_, "DiagnosticMessageRequest::Run");
 
-  uint32_t app_id = (*message_)[strings::params][strings::connection_key]
-      .asUInt();
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-                               app_id);
+                               connection_key());
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "An application is not registered.");

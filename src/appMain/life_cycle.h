@@ -1,7 +1,5 @@
-/**
-* \file signals.cc
-* \brief Signal (i.e. SIGINT) handling.
-* Copyright (c) 2013, Ford Motor Company
+/*
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -34,14 +32,15 @@
 
 #ifndef SRC_APPMAIN_LIFE_CYCLE_H_
 #define SRC_APPMAIN_LIFE_CYCLE_H_
+#include "utils/macro.h"
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #ifdef DBUS_HMIADAPTER
 #  include "hmi_message_handler/dbus_message_adapter.h"
 #endif  // DBUS_HMIADAPTER
-#ifdef MESSAGEBROKER_HMIADAPTER
-#  include "hmi_message_handler/messagebroker_adapter.h"
-#endif  // MESSAGEBROKER_HMIADAPTER
+#if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
+#include "hmi_message_handler/messagebroker_adapter.h"
+#endif  // #if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
 #ifdef MQUEUE_HMIADAPTER
 #  include "hmi_message_handler/mqueue_adapter.h"
 #endif  // MQUEUE_HMIADAPTER
@@ -55,13 +54,14 @@
 #ifdef TIME_TESTER
 #include "time_tester/time_manager.h"
 #endif
+
+//#if ( defined (MESSAGEBROKER_HMIADAPTER) || defined(PASA_HMI)  )
 #ifdef MESSAGEBROKER_HMIADAPTER
-#  include "CMessageBroker.hpp"
-#  include "mb_tcpserver.hpp"
+#include "CMessageBroker.hpp"
+#include "mb_tcpserver.hpp"
 #  include "networking.h"  // cpplint: Include the directory when naming .h files
 #endif  // MESSAGEBROKER_HMIADAPTER
 #include "system.h"      // cpplint: Include the directory when naming .h files
-
 
 namespace main_namespace {
 class LifeCycle : public utils::Singleton<LifeCycle> {
@@ -74,7 +74,6 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     */
     bool InitMessageSystem();
     void StopComponents();
-    static void StopComponentsOnSignal(int32_t params);
 
   private:
     LifeCycle();
@@ -82,29 +81,32 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
+    hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
+    hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
+    media_manager::MediaManagerImpl* media_manager_;
 #ifdef TIME_TESTER
     time_tester::TimeManager* time_tester_;
 #endif //TIME_TESTER
-    hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
 #ifdef DBUS_HMIADAPTER
     hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
+    System::Thread* dbus_adapter_thread_;
 #endif  // DBUS_HMIADAPTER
-#ifdef MESSAGEBROKER_HMIADAPTER
-    hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
-#endif  // MESSAGEBROKER_HMIADAPTER
-    hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
-    media_manager::MediaManagerImpl* media_manager_;
 
 #ifdef MESSAGEBROKER_HMIADAPTER
+    hmi_message_handler::MessageBrokerAdapter* mb_adapter_;
     NsMessageBroker::CMessageBroker* message_broker_;
     NsMessageBroker::TcpServer* message_broker_server_;
     System::Thread* mb_thread_;
     System::Thread* mb_server_thread_;
     System::Thread* mb_adapter_thread_;
 #endif  // MESSAGEBROKER_HMIADAPTER
-#ifdef DBUS_HMIADAPTER
-    System::Thread* dbus_adapter_thread_;
-#endif  // DBUS_HMIADAPTER
+
+#ifdef CUSTOMER_PASA
+#ifdef PASA_HMI
+    hmi_message_handler::MessageBrokerAdapter* mb_pasa_adapter_;
+    System::Thread* mb_pasa_adapter_thread_;
+#endif  // PASA_HMI
+#endif  // CUSTOMER_PASA
 
     DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 

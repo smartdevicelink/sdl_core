@@ -42,8 +42,7 @@ FFW.RPCClient = Em.Object
         /*
          * url for message broker
          */
-        url: "ws://localhost:8087",
-//      url: FLAGS.WEBSOCKET_URL,
+        url: FLAGS.WEBSOCKET_URL,
 
         /*
          * Component name in RPC system It is unique.
@@ -105,8 +104,8 @@ FFW.RPCClient = Em.Object
          */
         disconnect: function() {
 
-            SDL.SDLController.unregisterComponentStatus(this.observer.client.componentName);
             this.unregisterRPCComponent();
+            SDL.SDLController.unregisterComponentStatus(this.observer.client.componentName);
         },
 
         /*
@@ -131,6 +130,21 @@ FFW.RPCClient = Em.Object
             Em.Logger.log("Message received: " + evt.data);
 
             var jsonObj = JSON.parse(evt.data);
+
+            JSON.parse(evt.data, SDL.RPCController.capabilitiesCheck);
+
+            switch (SDL.RPCController.capabilityCheckResult) {
+                case 'UNSUPPORTED_RESOURCE': {
+
+                    this.observer.errorResponsePull[jsonObj.id] = SDL.SDLModel.resultCode["UNSUPPORTED_RESOURCE"];
+
+                    Em.Logger.error('Unsupported incoming resource! In method ' + jsonObj.method);
+
+                    SDL.RPCController.capabilityCheckResult = null;
+
+                    break;
+                }
+            }
 
             // handle component registration
             if (jsonObj.id == this.registerRequestId && jsonObj.method == null && typeof jsonObj.result == 'number') {
@@ -244,7 +258,7 @@ FFW.RPCClient = Em.Object
          */
         unsubscribeFromNotification: function(notification) {
 
-            var msgId = this.client.generateId();
+            var msgId = this.generateId();
             var JSONMessage = {
                 "jsonrpc": "2.0",
                 "id": msgId,
@@ -263,6 +277,23 @@ FFW.RPCClient = Em.Object
         send: function(obj) {
 
             if (this.socket.readyState == this.socket.OPEN) {
+
+                if (this.observer.errorResponsePull[obj.id] && this.observer.errorResponsePull[obj.id] !== 0 && obj.result) {
+                    var method = obj.result.method;
+
+                    delete obj.result;
+
+                    obj.error = {
+                        "code": this.observer.errorResponsePull[obj.id],
+                        "message": "Unsupported incoming resource!",
+                        "data": {
+                            "method": method
+                        }
+                    }
+
+                    delete this.observer.errorResponsePull[obj.id];
+                }
+
                 var strJson = JSON.stringify(obj);
                 Em.Logger.log(strJson);
 

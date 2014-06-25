@@ -71,7 +71,7 @@ class DBusSchema {
    * \param name name message
    * \return id message
    */
-  MessageId getMessageId(MessageName name) const;
+  MessageId getMessageId(const MessageName& name) const;
 
   /**
    * \brief gets list rules for arguments
@@ -87,7 +87,7 @@ class DBusSchema {
    * @param type type message
    * @return list rules
    */
-  ListArgs getListArgs(MessageName name, MessageType type) const;
+  ListArgs getListArgs(const MessageName& name, MessageType type) const;
 
  private:
   Messages msgs_;

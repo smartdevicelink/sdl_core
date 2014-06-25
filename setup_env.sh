@@ -79,7 +79,6 @@ GIT="git"
 GDEBI="gdebi"
 GNU_CPP_COMPILER="g++"
 BLUEZ_PROTOCOL_STACK="libbluetooth3 libbluetooth-dev"
-LOG4CXX_LIBRARY="liblog4cxx10 liblog4cxx10-dev"
 CHROMIUM_BROWSER="chromium-browser"
 CHROMIUM_CODEC_FFMPEG="chromium-codecs-ffmpeg-extra"
 PULSEAUDIO_DEV="libpulse-dev"
@@ -102,10 +101,12 @@ USB_PERMISSIONS="SUBSYSTEM==\"usb\", GROUP=\"users\", MODE=\"0666\""
 DISTRIB_CODENAME=$(grep -oP 'CODENAME=(.+)' -m 1 /etc/lsb-release | awk -F= '{ print $NF }')
 LIBXML2="libxml2-dev"
 AUTOMAKE1_11="automake1.11"
+LIB_SQLITE="libsqlite3-dev"
+LIB_SSL="libssl-dev"
 
 GSTREAMER_REPO_LINK="deb http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
 GSTREAMER_SRC_REPO_LINK="deb-src http://ppa.launchpad.net/gstreamer-developers/ppa/ubuntu"
-
+GSTREAMER_PPA="ppa:mc3man/trusty-media" # for ubuntu 14.04 
 FULL_GSTREAMER_REPO_LINK="$GSTREAMER_REPO_LINK $DISTRIB_CODENAME main"
 FULL_GSTREAMER_SRC_REPO_LINK="$GSTREAMER_SRC_REPO_LINK $DISTRIB_CODENAME main"
 
@@ -211,13 +212,13 @@ if $UPDATE_SOURCES; then
     echo $OK
 fi
 
-#Check Ubuntu version
-UBUNTU_VERSION=$(lsb_release -r | sed 's/[^0-9\.]//g')
-UBUNTU_VERSION_COMPARE_RESULT=$(./compare_versions.py "13.00" ${UBUNTU_VERSION} )
-UBUNTU_VERSION_13_HIGHER=false
-if [[ ${UBUNTU_VERSION_COMPARE_RESULT} == "2 > 1" ]]; then
-    UBUNTU_VERSION_13_HIGHER=true
-fi
+function ubuntu_version() {
+	if [[ $1 == '-m' ]]; then 
+		lsb_release -r | sed -r 's/([^[0-9])|(\.[0-9][0-9])//g'
+	else 
+		lsb_release -r | sed 's/[^0-9\.]//g'
+	fi	
+}
 
 #INSTALL_CMAKE_2_8_11_2 becomes "true" if no cmake  at all or lower version "2.8.11.2" is present
 INSTALL_CMAKE_2_8_11_2=false
@@ -235,7 +236,7 @@ if dpkg -s cmake | grep installed > /dev/null; then
     esac
 else 
     #For Ubuntu 13.0 and higher install cmake from repository
-    if ${UBUNTU_VERSION_13_HIGHER} ; then
+    if (( $(ubuntu_version -m ) >= 13 )); then
         apt-install ${CMAKE_BUILD_SYSTEM}
     else
         INSTALL_CMAKE_2_8_11_2=true
@@ -266,6 +267,10 @@ if ${INSTALL_CMAKE_2_8_11_2}; then
 fi
 
 echo "Installing gstreamer..."
+if (( $(ubuntu_version -m) >= "13" )) ; then 
+	add-apt-repository $GSTREAMER_PPA
+	apt-get update
+fi
 apt-install ${GSTREAMER}
 echo $OK
 
@@ -283,10 +288,6 @@ echo $OK
 
 echo "Installing bluez tools"
 apt-install ${BLUEZ_TOOLS}
-echo $OK
-
-echo "Installing log4cxx library"
-apt-install ${LOG4CXX_LIBRARY}
 echo $OK
 
 echo "Installing Chromium browser"
@@ -307,6 +308,18 @@ echo $OK
 
 echo "Installing Libudev-dev library"
 apt-install ${LIB_UDEV}
+echo $OK
+
+echo "Installing ${LIB_SSL}"
+apt-install ${LIB_SSL}
+echo $OK
+
+echo "Installing ${LIB_SQLITE}"
+apt-install ${LIB_SQLITE}
+echo $OK
+
+echo "Installing dos2unix"
+apt-install dos2unix
 echo $OK
 
 echo "Setting up USB permissions..."
@@ -334,7 +347,7 @@ if $INSTALL_QNX_TOOLS || $INSTALL_ALL; then
         if [ ${ARCH} == "x64" ]; then
             echo "Installing 32-bit libraries for 64-bit OS"
             #For Ubuntu 13.0 and higher install ia32-libs from archive
-            if ${UBUNTU_VERSION_13_HIGHER} ; then
+            if (( $(ubuntu_version -m) >= 13 )); then
                 QNXSDP_TOOL_REQS="lib32z1 lib32ncurses5 lib32bz2-1.0"
             else
                 QNXSDP_TOOL_REQS="ia32-libs"

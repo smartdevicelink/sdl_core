@@ -29,6 +29,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         _serviceType = serviceType;
     }
 
+    @Override
     public void start() throws IOException {
         if (thread == null) {
             thread = new Thread(this);
@@ -36,6 +37,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         }
     }
 
+    @Override
     public void stop() {
         if (is == null || thread == null) {
             return;
@@ -43,11 +45,8 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         try {
             is.close();
             thread.interrupt();
-            thread.join();
         } catch (IOException ignore) {
             Logger.e(CLASS_NAME + " Stop() IOException");
-        } catch (InterruptedException e) {
-            Logger.e(CLASS_NAME + " Stop() InterruptedException");
         } finally {
             thread = null;
         }
@@ -58,7 +57,6 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
             while (!Thread.interrupted()) {
                 try {
                     doDataReading();
-
                 } catch (IllegalArgumentException e) {
                     Logger.e(CLASS_NAME, e.toString());
                     break;
@@ -77,7 +75,7 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
     public synchronized void doDataReading() throws IOException, IllegalArgumentException {
         byte[] frameData = readFrameData(byteBuffer, dataBuffer);
         if (frameData != null && frameData.length > 0) {
-            createProtocolMessage(frameData);
+            sendMessage(createProtocolMessage(frameData));
         }
     }
 
@@ -88,8 +86,6 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         pm.setFunctionID(0);
         pm.setCorrID(getNextCorrelationId());
         pm.setData(frameData, frameData.length);
-
-        mStreamListener.sendH264(pm);
         return pm;
     }
 

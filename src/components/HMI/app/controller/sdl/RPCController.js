@@ -34,6 +34,8 @@
 SDL.RPCController = Em.Object
     .create( {
 
+        capabilityCheckResult: null,
+
         /**
          * Start register RPC components on controller init
          */
@@ -46,6 +48,24 @@ SDL.RPCController = Em.Object
             FFW.UI.connect();
             FFW.VehicleInfo.connect();
             FFW.Navigation.connect();
+        },
+
+        capabilitiesCheck: function(key, value) {
+            if (key == "imageType" && value == "STATIC") {
+                SDL.RPCController.capabilityCheckResult = 'UNSUPPORTED_RESOURCE';
+            }
+            if (key == "type" && value == "PRE_RECORDED") {
+                SDL.RPCController.capabilityCheckResult = 'UNSUPPORTED_RESOURCE';
+            }
+            if (key == "type" && value == "SAPI_PHONEMES") {
+                SDL.RPCController.capabilityCheckResult = 'UNSUPPORTED_RESOURCE';
+            }
+            if (key == "type" && value == "LHPLUS_PHONEMES") {
+                SDL.RPCController.capabilityCheckResult = 'UNSUPPORTED_RESOURCE';
+            }
+            if (key == "type" && value == "SILENCE") {
+                SDL.RPCController.capabilityCheckResult = 'UNSUPPORTED_RESOURCE';
+            }
         },
 
         /**

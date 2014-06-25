@@ -263,11 +263,11 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	 */
 	public void registerAppInterface(
 			SyncMsgVersion syncMsgVersion, String appName, String ngnMediaScreenAppName,
-			Vector<String> vrSynonyms, Boolean isMediaApp, Language languageDesired,
+			Vector<Object> vrSynonyms, Boolean isMediaApp, Language languageDesired,
             Integer correlationID) throws SyncException {
 		
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This SyncProxy object has been disposed, it is no long " +
                     "capable of sending requests.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}
@@ -328,7 +328,7 @@ public class SyncProxy extends SyncProxyBase<IProxyListener> {
 	 */
 	/*public void unregisterAppInterface(Integer correlationID) throws SyncException {
 		// Test if proxy has been disposed
-		if (_proxyDisposed) {
+		if (mIsProxyDisposed) {
 			throw new SyncException("This SyncProxy object has been disposed, it is no long " +
                     "capable of executing methods.", SyncExceptionCause.SYNC_PROXY_DISPOSED);
 		}		

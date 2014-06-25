@@ -43,7 +43,8 @@ public class SyncProxyALMProxyListenerTest extends InstrumentationTestCase {
         TestCommon.setupMocking(this);
 
         proxyListenerMock = mock(IProxyListenerALM.class);
-        proxy = TestCommon.getSyncProxyALMNoTransport(proxyListenerMock);
+        proxy = TestCommon.getSyncProxyALMNoTransport(getInstrumentation().getTargetContext(),
+                proxyListenerMock);
     }
 
     public void testOnSystemRequestResponseShouldBeCalledOnResponse()

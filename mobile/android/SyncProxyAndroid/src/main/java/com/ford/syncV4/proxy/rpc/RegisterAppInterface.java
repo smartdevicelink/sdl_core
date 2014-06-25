@@ -95,24 +95,24 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
-    public Vector<String> getVrSynonyms() {
+    public Vector<Object> getVrSynonyms() {
         if (parameters.get(Names.vrSynonyms) instanceof Vector<?>) {
             Vector<?> list = (Vector<?>) parameters.get(Names.vrSynonyms);
             if (list == null) {
                 return null;
             }
             if (list.size() == 0) {
-                return (Vector<String>) list;
+                return (Vector<Object>) list;
             }
             Object obj = list.get(0);
-            if (obj instanceof String) {
-                return (Vector<String>) list;
+            if (obj instanceof Object) {
+                return (Vector<Object>) list;
             }
         }
         return null;
     }
 
-    public void setVrSynonyms(Vector<String> vrSynonyms) {
+    public void setVrSynonyms(Vector<Object> vrSynonyms) {
         if (vrSynonyms != null) {
             parameters.put(Names.vrSynonyms, vrSynonyms);
         } else {
@@ -220,7 +220,7 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
-    public Object getAppID() {
+    public Object getAppId() {
         return parameters.get(Names.appID);
     }
 
