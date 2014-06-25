@@ -224,16 +224,14 @@ class EnumConversionHelper {
   }
 
  private:
-  static EnumToCStringMap InitEnumToCStringMap(
-      const char* const cstring_values_[], const EnumType enum_values_[]) {
+  static EnumToCStringMap InitEnumToCStringMap() {
     EnumToCStringMap result;
     const int size = sizeof(cstring_values_) / sizeof(cstring_values_[0]);
     for (int i = 0; i < size; ++i) result[enum_values_[i]] = cstring_values_[i];
     return result;
   }
 
-  static CStringToEnumMap InitCStringToEnumMap(
-      const char* const cstring_values_[], const EnumType enum_values_[]) {
+  static CStringToEnumMap InitCStringToEnumMap() {
     CStringToEnumMap result;
     const int size = sizeof(cstring_values_) / sizeof(cstring_values_[0]);
     for (int i = 0; i < size; ++i) result[cstring_values_[i]] = enum_values_[i];

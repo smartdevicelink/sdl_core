@@ -195,7 +195,7 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
     }
 
     if (kSuccess == result) {
-      if (!NsSmartObjects::EnumConversionHelper<FunctionId>::CStringToEnum(root[type][S_NAME].asCString(),
+      if (!NsSmartObjects::EnumConversionHelper<FunctionId>::StringToEnum(root[type][S_NAME].asString(),
                                           &functionId)) {
         result = kFunctionIdNotFound;
         functionId = FunctionId::INVALID_ENUM;

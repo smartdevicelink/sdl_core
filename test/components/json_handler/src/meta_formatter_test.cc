@@ -442,52 +442,58 @@ TEST_F(CMetaFormatterTestHelper, testEmptyArrayAndEmptyMapWithOtherParameters) {
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-template <>
-const std::map<testhelper_ns::function_id::EType, std::string> &
-smartobjects_ns::TEnumSchemaItem<testhelper_ns::function_id::EType>
-  ::getEnumElementsStringRepresentation(void)  {
-  static bool isInitialized = false;
-  static std::map<testhelper_ns::function_id::EType, std::string>
-      enumStringRepresentationMap;
+template<>
+const EnumConversionHelper<testhelper_ns::function_id::EType>::EnumToCStringMap
+EnumConversionHelper<testhelper_ns::function_id::EType>::enum_to_cstring_map_ =
+  EnumConversionHelper<testhelper_ns::function_id::EType>::InitEnumToCStringMap();
 
-  if (false == isInitialized)  {
-    enumStringRepresentationMap.insert(std::make_pair(
-      testhelper_ns::function_id::kRegisterAppInterfaceID,
-        "RegisterAppInterface"));
-    enumStringRepresentationMap.insert(std::make_pair(
-      testhelper_ns::function_id::kUnregisterAppInterfaceID,
-        "UnregisterAppInterface"));
-    enumStringRepresentationMap.insert(std::make_pair(
-      testhelper_ns::function_id::kSetGlobalPropertiesID,
-        "SetGlobalProperties"));
+template<>
+const EnumConversionHelper<testhelper_ns::function_id::EType>::CStringToEnumMap
+EnumConversionHelper<testhelper_ns::function_id::EType>::cstring_to_enum_map_ =
+  EnumConversionHelper<testhelper_ns::function_id::EType>::InitCStringToEnumMap();
 
-    isInitialized = true;
-  }
+template<>
+const char* const
+EnumConversionHelper<testhelper_ns::function_id::EType>::cstring_values_[] = {
+    "RegisterAppInterface",
+    "UnregisterAppInterface",
+    "SetGlobalProperties"
+};
 
-  return enumStringRepresentationMap;
-}
+template<>
+const testhelper_ns::function_id::EType
+EnumConversionHelper<testhelper_ns::function_id::EType>::enum_values_[] = {
+    testhelper_ns::function_id::kRegisterAppInterfaceID,
+    testhelper_ns::function_id::kUnregisterAppInterfaceID,
+    testhelper_ns::function_id::kSetGlobalPropertiesID
+};
 
-template <>
-const std::map<testhelper_ns::message_type::EType, std::string> &
-smartobjects_ns::TEnumSchemaItem<testhelper_ns::message_type::EType>
-  ::getEnumElementsStringRepresentation(void) {
-  static bool isInitialized = false;
-  static std::map<testhelper_ns::message_type::EType, std::string>
-    enumStringRepresentationMap;
+template<>
+const EnumConversionHelper<testhelper_ns::message_type::EType>::EnumToCStringMap
+EnumConversionHelper<testhelper_ns::message_type::EType>::enum_to_cstring_map_ =
+  EnumConversionHelper<testhelper_ns::message_type::EType>::InitEnumToCStringMap();
 
-  if (false == isInitialized)  {
-    enumStringRepresentationMap.insert(std::make_pair(
-      testhelper_ns::message_type::kRequest, "request"));
-    enumStringRepresentationMap.insert(std::make_pair(
-      testhelper_ns::message_type::kResponse, "response"));
-    enumStringRepresentationMap.insert(std::make_pair(
-      testhelper_ns::message_type::kNotification, "notification"));
+template<>
+const EnumConversionHelper<testhelper_ns::message_type::EType>::CStringToEnumMap
+EnumConversionHelper<testhelper_ns::message_type::EType>::cstring_to_enum_map_ =
+  EnumConversionHelper<testhelper_ns::message_type::EType>::InitCStringToEnumMap();
 
-    isInitialized = true;
-  }
+template<>
+const char* const
+EnumConversionHelper<testhelper_ns::message_type::EType>::cstring_values_[] = {
+    "request",
+    "response",
+    "notification"
+};
 
-  return enumStringRepresentationMap;
-}
+template<>
+const testhelper_ns::message_type::EType
+EnumConversionHelper<testhelper_ns::message_type::EType>::enum_values_[] = {
+    testhelper_ns::message_type::kRequest,
+    testhelper_ns::message_type::kResponse,
+    testhelper_ns::message_type::kNotification
+};
+
 }}
 
 int main(int argc, char **argv) {

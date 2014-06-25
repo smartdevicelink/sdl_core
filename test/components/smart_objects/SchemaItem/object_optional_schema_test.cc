@@ -618,70 +618,78 @@ namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
 template<>
-const std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string>&  // NOLINT
-  TEnumSchemaItem<test::components::SmartObjects::SchemaItem::TestType::eType>::getEnumElementsStringRepresentation(void) {  // NOLINT
-  // NOLINT
-  static bool isInitialized = false;
-  static std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string> enumStringRepresentationMap;  // NOLINT
+const EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::EnumToCStringMap
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::enum_to_cstring_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::InitEnumToCStringMap();
 
-  if (false == isInitialized) {
-    enumStringRepresentationMap.insert(std::make_pair(
-      test::components::SmartObjects::SchemaItem::TestType::APPLICATION_NOT_REGISTERED, "APPLICATION_NOT_REGISTERED"));  // NOLINT
-    enumStringRepresentationMap.insert(std::make_pair(
-      test::components::SmartObjects::SchemaItem::TestType::SUCCESS, "SUCCESS"));  // NOLINT
-    enumStringRepresentationMap.insert(std::make_pair(
-      test::components::SmartObjects::SchemaItem::TestType::TOO_MANY_PENDING_REQUESTS, "TOO_MANY_PENDING_REQUESTS"));  // NOLINT
-    enumStringRepresentationMap.insert(std::make_pair(
-      test::components::SmartObjects::SchemaItem::TestType::REJECTED, "REJECTED"));  // NOLINT
-    enumStringRepresentationMap.insert(std::make_pair(
-      test::components::SmartObjects::SchemaItem::TestType::INVALID_DATA, "INVALID_DATA"));  // NOLINT
-    enumStringRepresentationMap.insert(std::make_pair(
-      test::components::SmartObjects::SchemaItem::TestType::OUT_OF_MEMORY, "OUT_OF_MEMORY"));  // NOLINT
-    enumStringRepresentationMap.insert(std::make_pair(
-      test::components::SmartObjects::SchemaItem::TestType::ABORTED, "ABORTED"));  // NOLINT
-    enumStringRepresentationMap.insert(std::make_pair(
-      test::components::SmartObjects::SchemaItem::TestType::USER_DISALLOWED, "USER_DISALLOWED"));  // NOLINT
-    enumStringRepresentationMap.insert(std::make_pair(
-      test::components::SmartObjects::SchemaItem::TestType::GENERIC_ERROR, "GENERIC_ERROR"));  // NOLINT
-    enumStringRepresentationMap.insert(std::make_pair(
-      test::components::SmartObjects::SchemaItem::TestType::DISALLOWED, "DISALLOWED"));  // NOLINT
+template<>
+const EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::CStringToEnumMap
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::cstring_to_enum_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::InitCStringToEnumMap();
 
-    isInitialized = true;
-  }
-  return enumStringRepresentationMap;
-}
+template<>
+const char* const
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::cstring_values_[] = {
+    "APPLICATION_NOT_REGISTERED",
+    "SUCCESS",
+    "TOO_MANY_PENDING_REQUESTS",
+    "REJECTED",
+    "INVALID_DATA",
+    "OUT_OF_MEMORY",
+    "ABORTED",
+    "USER_DISALLOWED",
+    "GENERIC_ERROR",
+    "DISALLOWED"
+};
+
+template<>
+const test::components::SmartObjects::SchemaItem::TestType::eType
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::enum_values_[] = {
+    test::components::SmartObjects::SchemaItem::TestType::APPLICATION_NOT_REGISTERED,
+    test::components::SmartObjects::SchemaItem::TestType::SUCCESS,
+    test::components::SmartObjects::SchemaItem::TestType::TOO_MANY_PENDING_REQUESTS,
+    test::components::SmartObjects::SchemaItem::TestType::REJECTED,
+    test::components::SmartObjects::SchemaItem::TestType::INVALID_DATA,
+    test::components::SmartObjects::SchemaItem::TestType::OUT_OF_MEMORY,
+    test::components::SmartObjects::SchemaItem::TestType::ABORTED,
+    test::components::SmartObjects::SchemaItem::TestType::USER_DISALLOWED,
+    test::components::SmartObjects::SchemaItem::TestType::GENERIC_ERROR,
+    test::components::SmartObjects::SchemaItem::TestType::DISALLOWED
+};
 
 // ----------------------------------------------------------------------------
 
 namespace TestPriority = test::components::SmartObjects::SchemaItem::Priority;
 
-template <>
-const std::map<TestPriority::eType, std::string>&
-  TEnumSchemaItem<TestPriority::eType>::
-    getEnumElementsStringRepresentation() {
-  // NOLINT
-  static bool is_initialized = false;
-  static std::map<TestPriority::eType, std::string>
-    enum_string_representation;
+template<>
+const EnumConversionHelper<test::components::SmartObjects::SchemaItem::Priority::eType>::EnumToCStringMap
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::Priority::eType>::enum_to_cstring_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SchemaItem::Priority::eType>::InitEnumToCStringMap();
 
-  if (false == is_initialized) {
-    enum_string_representation.insert(
-      std::make_pair(TestPriority::PRIORITY_NONE, "NONE"));
-    enum_string_representation.insert(
-      std::make_pair(TestPriority::PRIORITY_NORMAL, "NORMAL"));
-    enum_string_representation.insert(
-      std::make_pair(TestPriority::PRIORITY_COMMUNICATION,
-                     "COMMUNICATION"));
-    enum_string_representation.insert(
-      std::make_pair(TestPriority::PRIORITY_NAVIGATION, "NAVIGATION"));
-    enum_string_representation.insert(
-      std::make_pair(TestPriority::PRIORITY_EMERGENCY, "EMERGENCY"));
+template<>
+const EnumConversionHelper<test::components::SmartObjects::SchemaItem::Priority::eType>::CStringToEnumMap
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::Priority::eType>::cstring_to_enum_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SchemaItem::Priority::eType>::InitCStringToEnumMap();
 
-    is_initialized = true;
-  }
+template<>
+const char* const
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::Priority::eType>::cstring_values_[] = {
+    "NONE",
+    "NORMAL",
+    "COMMUNICATION",
+    "NAVIGATION",
+    "EMERGENCY"
+};
 
-  return enum_string_representation;
-}
+template<>
+const test::components::SmartObjects::SchemaItem::Priority::eType
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::Priority::eType>::enum_values_[] = {
+    test::components::SmartObjects::SchemaItem::Priority::PRIORITY_NONE,
+    test::components::SmartObjects::SchemaItem::Priority::PRIORITY_NORMAL,
+    test::components::SmartObjects::SchemaItem::Priority::PRIORITY_COMMUNICATION,
+    test::components::SmartObjects::SchemaItem::Priority::PRIORITY_NAVIGATION,
+    test::components::SmartObjects::SchemaItem::Priority::PRIORITY_EMERGENCY
+};
 
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink
