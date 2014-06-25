@@ -6,7 +6,7 @@ import java.io.IOException;
  * Created by Andrew Batutin on 3/20/14.
  */
 public interface ISSLComponent {
-    void setupClient() throws IOException;
+    void setupClient(int localPort) throws IOException;
 
     void writeData(byte[] data) throws IOException;
 

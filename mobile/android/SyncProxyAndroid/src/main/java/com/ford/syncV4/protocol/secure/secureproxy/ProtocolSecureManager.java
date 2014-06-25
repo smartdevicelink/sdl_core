@@ -79,7 +79,7 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
         startSSLComponent();
     }
 
-    private void startProxy() {
+    private void startProxy(int port) {
         secureProxy = new SecureProxyClient(new ISecureProxyServer() {
             @Override
             public void onDataReceived(byte[] data) {
@@ -116,7 +116,7 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
                 }
         );
         try {
-            secureProxy.setupClient();
+            secureProxy.setupClient(port);
         } catch (IOException e) {
             DebugTool.logError("Failed to setup secureProxy", e);
         }
@@ -131,7 +131,9 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
 
             @Override
             public void onTransportConnected() {
-                startProxy();
+                SSLServer server = (SSLServer) sslClient;
+                int port =  server.getServerSocket().getLocalPort();
+                startProxy(port);
             }
 
             @Override
@@ -162,7 +164,7 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
             }
         });
         try {
-            sslClient.setupClient();
+            sslClient.setupClient(0);
         } catch (IOException e) {
             DebugTool.logError("Failed to setup sslClient", e);
         }

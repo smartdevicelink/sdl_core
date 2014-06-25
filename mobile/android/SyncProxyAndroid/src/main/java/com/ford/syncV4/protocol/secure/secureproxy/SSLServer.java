@@ -34,6 +34,13 @@ public class SSLServer implements ISSLComponent {
     private SSLServerReader sslServerReader;
     private Socket socket;
 
+    public synchronized SSLServerSocket getServerSocket() {
+        return serverSocket;
+    }
+
+
+    private SSLServerSocket serverSocket;
+
 
     public SSLServer(ITransportListener transportListener, HandshakeCompletedListener handshakeCompletedListener) {
         this.transportListener = transportListener;
@@ -41,7 +48,7 @@ public class SSLServer implements ISSLComponent {
     }
 
     @Override
-    public void setupClient() throws IOException {
+    public void setupClient(int localPort) throws IOException {
         sslServerReader = new SSLServerReader();
         sslServerReader.start();
     }
@@ -113,11 +120,11 @@ public class SSLServer implements ISSLComponent {
             KeyManagerFactory kmf = KeyManagerFactory.getInstance(keyalg);
             kmf.init(keyStore, "android".toCharArray());
 
-            SSLContext context = SSLContext.getInstance("TLS");
+            SSLContext context = SSLContext.getInstance("TLSv1.2");
             context.init(kmf.getKeyManagers(), null, null);
-            SSLServerSocket ss = (SSLServerSocket) context.getServerSocketFactory().createServerSocket(8090);
+            serverSocket = (SSLServerSocket) context.getServerSocketFactory().createServerSocket(0);
             transportListener.onTransportConnected();
-            socket = ss.accept();
+            socket = serverSocket.accept();
             handshakeCompletedListener.handshakeCompleted(null);
         }
 

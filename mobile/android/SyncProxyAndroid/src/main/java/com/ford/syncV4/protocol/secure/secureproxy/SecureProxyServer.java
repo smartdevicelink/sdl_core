@@ -36,7 +36,7 @@ public class SecureProxyServer implements ISSLComponent {
     }
 
     @Override
-    public void setupClient() throws IOException {
+    public void setupClient(int localPort) throws IOException {
         SecureProxyServerReader secureProxyServerReader = new SecureProxyServerReader();
         secureProxyServerReader.start();
     }
