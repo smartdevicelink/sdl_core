@@ -53,6 +53,7 @@ Connection::Connection(ConnectionHandle connection_handle,
     : connection_handler_(connection_handler),
       connection_handle_(connection_handle),
       connection_device_handle_(connection_device_handle) {
+  LOG4CXX_TRACE_ENTER(logger_);
   DCHECK(connection_handler_);
 
   heartbeat_monitor_ = new HeartBeatMonitor(heartbeat_timeout, this);
@@ -61,12 +62,16 @@ Connection::Connection(ConnectionHandle connection_handle,
 }
 
 Connection::~Connection() {
+  LOG4CXX_TRACE_ENTER(logger_);
+  sync_primitives::AutoLock lock(session_map_lock_);
   session_map_.clear();
   heart_beat_monitor_thread_->stop();
   delete heart_beat_monitor_thread_;
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 uint32_t Connection::AddNewSession() {
+  LOG4CXX_TRACE_ENTER(logger_);
   sync_primitives::AutoLock lock(session_map_lock_);
 
   int32_t result = 0;
@@ -180,12 +185,11 @@ void Connection::CloseSession(uint8_t session_id) {
     size = session_map_.size();
   }
 
+  connection_handler_->CloseSession(connection_handle_, session_id);
+
   //Close connection if it is last session
   if (1 == size) {
-    heartbeat_monitor_->RemoveSession(session_id);
     connection_handler_->CloseConnection(connection_handle_);
-  } else {
-    connection_handler_->CloseSession(connection_handle_, session_id);
   }
 }
 

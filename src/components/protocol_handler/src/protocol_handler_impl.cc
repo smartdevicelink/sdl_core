@@ -471,6 +471,20 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
                                     message->data(),
                                     message->data_size());
 
+  session_observer_->PairFromKey(message->connection_key(),
+                                 &connection_handle,
+                                 &sessionID);
+
+  std::list<uint32_t>::iterator connection_it =
+      std::find(ready_to_close_connections_.begin(),
+                ready_to_close_connections_.end(), connection_handle);
+
+  if (ready_to_close_connections_.end() != connection_it) {
+    ready_to_close_connections_.erase(connection_it);
+    transport_manager_->Disconnect(connection_handle);
+    return;
+  }
+
   std::map<uint8_t, uint32_t>::iterator it =
       sessions_last_message_id_.find(sent_message.session_id());
 
@@ -482,10 +496,8 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
         ((FRAME_TYPE_CONSECUTIVE == sent_message.frame_type()) &&
          (0 == sent_message.frame_data())))) {
 
-      session_observer_->PairFromKey(message->connection_key(),
-                                       &connection_handle,
-                                       &sessionID);
-      transport_manager_->Disconnect(connection_handle);
+      ready_to_close_connections_.push_back(connection_handle);
+      SendEndSession(connection_handle, sent_message.session_id());
     }
   }
 
@@ -921,7 +933,7 @@ void ProtocolHandlerImpl::Handle(
       LOG4CXX_INFO_EXT(logger_, "Packet: dataSize " << message->data_size());
       HandleMessage(message->connection_key(), message);
   } else {
-    LOG4CXX_INFO_EXT(logger_,
+    LOG4CXX_WARN(logger_,
                  "handleMessagesFromMobileApp() - incorrect or NULL data");
   }
   LOG4CXX_TRACE_EXIT(logger_);

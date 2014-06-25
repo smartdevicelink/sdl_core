@@ -116,13 +116,21 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   // 1. Delete all the connections and sessions of this device
   // 2. Delete device from a list
   // 3. Let observer know that device has been deleted.
-  for (ConnectionListIterator it = connection_list_.begin();
-       it != connection_list_.end(); ++it) {
-    if (device_info.device_handle() ==
-        (*it).second->connection_device_handle()) {
-      RemoveConnection((*it).first);
+
+  {
+    sync_primitives::AutoLock lock(connection_list_lock_);
+    for (ConnectionListIterator it = connection_list_.begin();
+         it != connection_list_.end(); ++it) {
+      if (device_info.device_handle() ==
+          (*it).second->connection_device_handle()) {
+        ConnectionHandle connection_handle = (*it).first;
+        // Unlock connection_list to avoid deadlock during connection removing
+        sync_primitives::AutoUnlock auto_unlock(lock);
+        RemoveConnection(connection_handle);
+      }
     }
   }
+
   device_list_.erase(device_info.device_handle());
   if (connection_handler_observer_) {
     connection_handler_observer_->RemoveDevice(device_info.device_handle());
@@ -560,7 +568,7 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
         ConnectionUIDFromHandle(connection_handle);
 
   sync_primitives::AutoLock connection_list_lock(connection_list_lock_);
-   ConnectionListIterator itr = connection_list_.find(connection_id);
+  ConnectionListIterator itr = connection_list_.find(connection_id);
 
   if (connection_list_.end() != itr) {
     if (0 != connection_handler_observer_) {
@@ -640,8 +648,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
       uint32_t session_key = KeyFromPair(connection_id, session_it->first);
       for (ServiceListConstIterator service_it = session_it->second.begin(),
           end = session_it->second.end(); service_it != end; ++service_it) {
-
-      connection_handler_observer_->OnServiceEndedCallback(
+        connection_handler_observer_->OnServiceEndedCallback(
           session_key, static_cast<protocol_handler::ServiceType>(*service_it));
       }
     }
