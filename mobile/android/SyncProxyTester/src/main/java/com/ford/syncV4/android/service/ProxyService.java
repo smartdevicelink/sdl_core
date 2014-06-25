@@ -130,6 +130,7 @@ import com.ford.syncV4.test.ITestConfigCallback;
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
+import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
@@ -867,7 +868,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 message = "<no message>";
             }
         }
-        createErrorMessageForAdapter("SYNC Proxy closed:" + message);
+        createErrorMessageForAdapter(" SYNC Proxy closed:" + message);
         boolean wasConnected = !firstHMIStatusChange;
         firstHMIStatusChange = true;
         prevHMILevel = HMILevel.HMI_NONE;
@@ -891,6 +892,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                         (cause != SyncExceptionCause.BLUETOOTH_DISABLED) &&
                         (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
                     //reset();
+                } else if (info.equals(SyncTransport.DISCONNECT_REASON_END_OF_STREAM_REACHED)) {
+                    reset();
                 }
             }
         } else {

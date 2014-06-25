@@ -5,13 +5,14 @@ import com.ford.syncV4.util.logger.Logger;
 
 public abstract class SyncTransport {
 
-    private final static String CLASS_NAME = SyncTransport.class.getSimpleName();
+    public static final String DISCONNECT_REASON_END_OF_STREAM_REACHED = "EndOfStreamReached";
 
+    private final static String CLASS_NAME = SyncTransport.class.getSimpleName();
     private final static String FailurePropagating_Msg = "Failure propagating ";
+    private static final String SEND_LOCK_OBJ = "lock";
+
 	private Boolean isConnected = false;
-	
-	private static final String SEND_LOCK_OBJ = "lock";
-	
+
 	// Get status of transport connection
 	public Boolean getIsConnected() {
 		return isConnected;

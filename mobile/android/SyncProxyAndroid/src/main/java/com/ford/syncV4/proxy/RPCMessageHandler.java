@@ -1062,8 +1062,8 @@ public class RPCMessageHandler implements IRPCMessageHandler {
             } else if (functionName.equals(Names.OnAppInterfaceUnregistered)) {
                 // OnAppInterfaceUnregistered
                 syncProxyBase.setAppInterfaceRegistered(sessionId, false);
-                synchronized (syncProxyBase.APP_INTERFACE_REGISTERED_LOCK) {
-                    syncProxyBase.APP_INTERFACE_REGISTERED_LOCK.notify();
+                synchronized (syncProxyBase.APP_INTERFACE_LOCK) {
+                    syncProxyBase.APP_INTERFACE_LOCK.notify();
                 }
 
                 final OnAppInterfaceUnregistered msg = new OnAppInterfaceUnregistered(hash);

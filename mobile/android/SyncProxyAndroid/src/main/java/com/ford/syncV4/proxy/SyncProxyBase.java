@@ -117,13 +117,18 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             INCOMING_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
             OUTGOING_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
             INTERNAL_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
-            APP_INTERFACE_REGISTERED_LOCK = new Object();
+            APP_INTERFACE_LOCK = new Object();
     /**
      * Interval between heartbeat messages, in milliseconds.
      * NOTE: this value is not specified in the protocol, and thus must be
      * negotiated with the Sync.
      */
     static final int HEARTBEAT_INTERVAL = 5000;
+
+    /**
+     * Waiting time for the End Service ACK, in milliseconds
+     */
+    private static final int WAIT_APP_INTERFACE_TIMEOUT = 1000;
 
     /** Delay between proxy disconnect (e.g., transport error) and another proxy
      * reconnect attempt.
@@ -1202,9 +1207,9 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             }
             // Wait for the app interface to be unregistered
             if (waitForInterfaceUnregistered) {
-                synchronized (APP_INTERFACE_REGISTERED_LOCK) {
+                synchronized (APP_INTERFACE_LOCK) {
                     try {
-                        APP_INTERFACE_REGISTERED_LOCK.wait(1000);
+                        APP_INTERFACE_LOCK.wait(WAIT_APP_INTERFACE_TIMEOUT);
                     } catch (InterruptedException e) {
                         // Do nothing
                     }
@@ -1694,8 +1699,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
         // UnregisterAppInterface
         mAppInterfaceRegistered.put(syncSession.getAppIdBySessionId(sessionId), false);
-        synchronized (APP_INTERFACE_REGISTERED_LOCK) {
-            APP_INTERFACE_REGISTERED_LOCK.notify();
+        synchronized (APP_INTERFACE_LOCK) {
+            APP_INTERFACE_LOCK.notify();
         }
         final UnregisterAppInterfaceResponse msg = new UnregisterAppInterfaceResponse(hash);
         if (_callbackToUIThread) {
@@ -2889,6 +2894,11 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
             try {
 
+                /*if (getSyncConnection().getIsConnected()) {
+                    getSyncConnection().startTransport();
+                } else {
+                    initializeProxy();
+                }*/
                 initializeProxy();
 
                 reconnectHandler.removeCallbacks(reconnectRunnableTask);

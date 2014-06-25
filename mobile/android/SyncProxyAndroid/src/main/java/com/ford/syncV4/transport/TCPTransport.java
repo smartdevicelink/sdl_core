@@ -199,7 +199,7 @@ public class TCPTransport extends SyncTransport {
     private void disconnect(String message, Exception exception) {
 
         if (getCurrentState() == TCPTransportState.DISCONNECTING) {
-            Logger.i("TCPTransport: disconnecting already in progress");
+            Logger.i(CLASS_NAME + " disconnecting already in progress");
             return;
         }
 
@@ -400,10 +400,12 @@ public class TCPTransport extends SyncTransport {
          */
         private void internalHandleTCPDisconnect() {
             if (isHalted) {
-                Logger.i("TCPTransport.run: TCP disconnect received, but thread already halted");
+                Logger.i(CLASS_NAME + " run: TCP disconnect received, but thread already halted");
             } else {
-                Logger.i("TCPTransport.run: TCP disconnect received");
-                disconnect("TCPTransport.run: End of stream reached", null);
+                Logger.w(CLASS_NAME + " run:" + DISCONNECT_REASON_END_OF_STREAM_REACHED);
+                disconnect(DISCONNECT_REASON_END_OF_STREAM_REACHED,
+                        new SyncException(DISCONNECT_REASON_END_OF_STREAM_REACHED,
+                                SyncExceptionCause.SYNC_CONNECTION_FAILED));
             }
         }
 
