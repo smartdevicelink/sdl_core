@@ -62,6 +62,8 @@ set(SOURCES
   stream_qvariant.cc
   moc_qml_dbus.cpp
   dbus_controller.cc
+  request_to_sdl.cc
+  hmi_requests.cc
 )
 include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
