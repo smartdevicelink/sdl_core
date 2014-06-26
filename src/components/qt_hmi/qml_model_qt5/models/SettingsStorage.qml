@@ -34,6 +34,8 @@
 
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
+import "../models/RequestToSDL.js" as RequestToSDL
+import "../models/Internal.js" as Internal
 
 Item
 {
@@ -125,5 +127,58 @@ Item
 
     function update(result) {
         console.debug("Result update SDL:", result);
+    }
+
+    function activateApp (appId) {
+
+        console.debug("SDL.ActivateApp Request enter", appId);
+
+        RequestToSDL.SDL_ActivateApp(appId, function(params){
+            settingsContainer.activateApp_Response(appId, params)
+        })
+
+        console.debug("SDL.ActivateApp Request exit");
+    }
+
+    function activateApp_Response (appId, params) {
+
+        console.debug("activateApp_Response enter", appId);
+
+        if (!params.isSDLAllowed) {
+
+            userActionPopUp.activate("Allow SDL Functionality request",
+                                        "Would you like to allow SDL functionality for device '" + params.device.name + "'?",
+                                        function(result){
+                                            allowSDLFunctionality(result, params.device)
+                                        }
+                                    )
+        }
+
+        if (params.isPermissionsConsentNeeded) {
+            //GetListOfPermissions
+        }
+
+        if (params.isAppPermissionsRevoked) {
+            //setAppPermissions remove revoked permissions
+        }
+
+        if (params.isAppRevoked) {
+            //popupActivate("Current version of app is no longer supported!");
+            //? unregister app or set to level NONE
+        } else if (params.isSDLAllowed) {
+            dataContainer.setCurrentApplication(appId)
+            contentLoader.go(
+                Internal.chooseAppStartScreen(
+                    dataContainer.currentApplication.appType,
+                    dataContainer.currentApplication.isMediaApplication
+                ),
+                appId
+            )
+        }
+    }
+
+    function allowSDLFunctionality (result, device) {
+        console.log("allowSDLFunctionality enter");
+        sdlSDL.onAllowSDLFunctionality(device, result, Common.ConsentSource.GUI)
     }
 }

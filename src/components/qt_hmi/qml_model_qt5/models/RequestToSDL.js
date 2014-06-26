@@ -10,4 +10,17 @@ function SDL_UpdateSDL(callback) {
     console.log("exit");
 }
 
-
+function SDL_ActivateApp(appId, callback) {
+    console.log("SDL_ActivateApp enter");
+    callback({
+                 "isAppPermissionsRevoked":false,
+                 "isAppRevoked":false,
+                 "isPermissionsConsentNeeded":false,
+                 "isSDLAllowed":false,
+                 "device":{
+                     "name":"10.10.0.1",
+                     "id":'1'
+                 }
+             });
+    console.log("SDL_ActivateApp exit");
+}
