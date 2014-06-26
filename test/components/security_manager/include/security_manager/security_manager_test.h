@@ -346,7 +346,7 @@ namespace security_manager_test {
     EXPECT_CALL(mock_protocol_observer,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_CREATE_SSLCONTEXT), is_final)).
+                    SecurityQuery::ERROR_INTERNAL), is_final)).
         Times(1);
     // Expect notifying listeners (unsuccess)
     EXPECT_CALL(mock_sm_listener,

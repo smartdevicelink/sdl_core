@@ -978,7 +978,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     // if session already has initialized SSLContext
     if (ssl_context) {
       if (ssl_context->IsInitCompleted()) {
-        // Start service as protected with corrent SSLContext
+        // Start service as protected with current SSLContext
         SendStartSessionAck(connection_id, session_id, packet.protocol_version(),
                             connection_key, packet.service_type(), PROTECTION_ON);
         return RESULT_OK;

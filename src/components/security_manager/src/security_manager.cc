@@ -144,6 +144,7 @@ bool SecurityManager::ProtectConnection(const uint32_t &connection_key) {
                                       protocol_handler::kControl)) {
     const std::string error_text("Connection is already protected");
     LOG4CXX_WARN(logger_, error_text << ", key " << connection_key);
+    // TODO(EZamakhov): move to PH -send with Ack/NAck
     SendInternalError(connection_key,
                       SecurityQuery::ERROR_SERVICE_ALREADY_PROTECTED, error_text);
     NotifyListenersOnHandshakeDone(connection_key, false);
@@ -155,7 +156,7 @@ bool SecurityManager::ProtectConnection(const uint32_t &connection_key) {
     const std::string error_text("CryptoManager could not create SSL context.");
     LOG4CXX_ERROR(logger_, error_text);
     // Generate response query and post to security_messages_
-    SendInternalError(connection_key, SecurityQuery::ERROR_CREATE_SSLCONTEXT,
+    SendInternalError(connection_key, SecurityQuery::ERROR_INTERNAL,
                       error_text);
     NotifyListenersOnHandshakeDone(connection_key, false);
     return false;
