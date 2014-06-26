@@ -405,11 +405,7 @@ Rectangle {
 
         onStatusUpdate: {
             console.log("enter onStatusUpdate")
-            var text = {}
-            text[Common.UpdateResult.UP_TO_DATE] = "UP_TO_DATE";
-            text[Common.UpdateResult.UPDATING] = "UPDATING";
-            text[Common.UpdateResult.UPDATE_NEEDED] = "UPDATE_NEEDED";
-            ttsPopUp.activate(text[status])
+            settingsContainer.updateStatus(status);
         }
     }
 

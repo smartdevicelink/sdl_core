@@ -5,9 +5,11 @@
 .import "../hmi_api/Common.js" as Common
 
 function SDL_UpdateSDL(callback) {
-    console.log("enter");
     callback(Common.UpdateResult.UP_TO_DATE);
-    console.log("exit");
+}
+
+function SDL_GetURLS(service, callback) {
+    callback([{url: "http://policies.telematics.ford.com/api/policies"}])
 }
 
 function SDL_ActivateApp(appId, callback) {

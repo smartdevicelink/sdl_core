@@ -125,8 +125,82 @@ Item
 
     property var buttonCapabilities: []
 
-    function update(result) {
+    property string filePTSnapshot: "IVSU/PROPRIETARY_REQUEST"
+
+    property int timeoutPTExchange: 500
+
+    property int retriesPTExchange: []
+
+    property var urlsPTExchange: []
+
+    property int currentRetry: 0
+
+    property int currentUrl: 0
+
+    function updateStatus(result) {
         console.debug("Result update SDL:", result);
+        var text = {}
+        text[Common.UpdateResult.UP_TO_DATE] = "UP_TO_DATE";
+        text[Common.UpdateResult.UPDATING] = "UPDATING";
+        text[Common.UpdateResult.UPDATE_NEEDED] = "UPDATE_NEEDED";
+        ttsPopUp.activate(text[result])
+    }
+
+    function startPTExchange(urls) {
+        urlsPTExchange = urls;
+        currentRetry = 0;
+        currentUrl = 0;
+        sendSystemRequest();
+    }
+
+    function getUrl() {
+        if (currentUrl >= 0 && currentUrl < urlsPTExchange.length) {
+          var url = urlsPTExchange[currentUrl];
+          currentUrl = (currentUrl + 1) / urlsPTExchange.length;
+          return url;
+        } else {
+          return {url: ""}
+        }
+    }
+
+    function getInterval() {
+        if (currentRetry >= 0 && currentRetry < retriesPTExchange.length) {
+            var interval = (timeoutPTExchange + retriesPTExchange[currentRetry]) * 1000;
+            currentRetry++;
+            return interval;
+        } else {
+            return 0;
+        }
+    }
+
+    function sendSystemRequest() {
+        var url = getUrl();
+        var offset = 1000;
+        var length = 10000;
+        var appId = url.policyAppId ? url.policyAppId : "default";
+
+        sdlBasicCommunication.onSystemRequest(Common.RequestType.PROPRIETARY,
+                                              url.url, Common.FileType.JSON,
+                                              offset, length,
+                                              timeoutPTExchange,
+                                              filePTSnapshot,
+                                              appId);
+
+        retriesTimer.interval = getInterval();
+        if (retriesTimer.interval > 0) {
+            retriesTimer.start();
+        }
+    }
+
+    function stopPTExchange(fileName) {
+        retriesTimer.stop();
+        sdlSDL.onReceivedPolicyUpdate(fileName);
+    }
+
+    Timer {
+        id: retriesTimer
+        interval: timeoutPTExchange; running: false; repeat: false
+        onTriggered: sendSystemRequest()
     }
 
     function activateApp (appId) {
