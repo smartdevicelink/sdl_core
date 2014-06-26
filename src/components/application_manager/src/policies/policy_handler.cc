@@ -469,21 +469,36 @@ void PolicyHandler::OnPendingPermissionChange(
   }
   switch (app->hmi_level()) {
     case mobile_apis::HMILevel::HMI_FULL:
-    case mobile_apis::HMILevel::HMI_LIMITED:
+    case mobile_apis::HMILevel::HMI_LIMITED: {
       if (permissions.appPermissionsConsentNeeded) {
         application_manager::MessageHelper::
             SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
         policy_manager_->RemovePendingPermissionChanges(policy_app_id);
         break;
       }
+      break;
+    }
     case mobile_apis::HMILevel::HMI_BACKGROUND: {
       if (permissions.isAppPermissionsRevoked
           || permissions.appUnauthorized) {
         application_manager::MessageHelper::
             SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
+
+        application_manager::ApplicationManagerImpl::instance()
+            ->DeactivateApplication(app);
+        application_manager::MessageHelper::
+            SendOnAppInterfaceUnregisteredNotificationToMobile(
+              app->app_id(),
+              mobile_apis::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
+
+        application_manager::ApplicationManagerImpl::instance()->
+        UnregisterApplication(app->app_id(), mobile_apis::Result::INVALID_ENUM,
+                              false);
+
         policy_manager_->RemovePendingPermissionChanges(policy_app_id);
         break;
       }
+      break;
     }
     case mobile_apis::HMILevel::HMI_NONE:
     default:

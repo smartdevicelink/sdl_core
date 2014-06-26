@@ -1857,7 +1857,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     }
 
     default: {
-      LOG4CXX_ERROR(logger_, "Unknown unrregister reason");
+      LOG4CXX_ERROR(logger_, "Unknown unregister reason");
       break;
     }
   }
