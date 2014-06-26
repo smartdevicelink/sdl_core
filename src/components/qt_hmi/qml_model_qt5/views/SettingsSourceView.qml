@@ -42,7 +42,7 @@ GeneralView {
 
     onItemActivated: {
         switch (item) {
-            case "update_sdl": RequestToSDL.SDL_UpdateSDL(settingsContainer.update);
+            case "update_sdl": RequestToSDL.SDL_UpdateSDL(settingsContainer.updateStatus);
         }
     }
 
