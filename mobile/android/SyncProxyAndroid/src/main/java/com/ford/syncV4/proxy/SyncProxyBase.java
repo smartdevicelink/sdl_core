@@ -2887,7 +2887,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             try {
 
                 if (mSyncConnection == null) {
-                    initializeProxy();
+                    //TODO : Consider what to do here
                 } else if (!mSyncConnection.getIsConnected()) {
                     mSyncConnection.startTransport();
                 }

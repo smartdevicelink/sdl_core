@@ -171,13 +171,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
             if (mTransport != null) {
                 mTransport.disconnect();
-                mTransport.removeListener();
+                //mTransport.removeListener();
             }
             //mTransport = null;
 
-            if (mProtocol != null) {
+            /*if (mProtocol != null) {
                 mProtocol.removeListener();
-            }
+            }*/
             //mProtocol = null;
         }
     }
