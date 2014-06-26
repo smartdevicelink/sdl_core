@@ -280,7 +280,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     public void stopH264() {
         try {
-            ((WiProProtocol)mProtocol).shutDownMobileNaviStreamExecutor();
+            if (mProtocol != null) {
+                ((WiProProtocol)mProtocol).shutDownMobileNaviStreamExecutor();
+            }
         } catch (InterruptedException e) {
             Logger.e(CLASS_NAME + " Stop Mobile Navi exception:" + e.getMessage());
         }
@@ -305,7 +307,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     public void stopAudioDataTransfer() {
         try {
-            ((WiProProtocol)mProtocol).shutDownAudioStreamExecutor();
+            if (mProtocol != null) {
+                ((WiProProtocol)mProtocol).shutDownAudioStreamExecutor();
+            }
         } catch (InterruptedException e) {
             Logger.e(CLASS_NAME + " Stop Audio exception:" + e.getMessage());
         }
