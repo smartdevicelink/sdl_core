@@ -90,7 +90,7 @@ class SdlProxy: public Item {
   void OnFileRemoved(QString fileName, int fileType, int appId);
   void OnAppRegistered(Common_HMIApplication application,
                        OptionalArgument<QList<Common_TTSChunk> > ttsName,
-                       OptionalArgument<QList<QString> > vrSynonyms,
+                       OptionalArgument<QStringList> vrSynonyms,
                        OptionalArgument<bool> resumeVrGrammars,
                        OptionalArgument<int> priority);
   void OnAppUnregistered(int appId);
