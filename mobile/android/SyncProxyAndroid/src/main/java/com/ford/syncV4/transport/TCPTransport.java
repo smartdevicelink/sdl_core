@@ -243,8 +243,7 @@ public class TCPTransport extends SyncTransport {
             // This disconnect was caused by an error, notify the proxy
             // that there was a transport error.
             Logger.e("Disconnect is incorrect. Handling it as error");
-            final String finalDisconnectMsg = disconnectMsg;
-            handleTransportError(finalDisconnectMsg, exception);
+            handleTransportError(disconnectMsg, exception);
         }
     }
 

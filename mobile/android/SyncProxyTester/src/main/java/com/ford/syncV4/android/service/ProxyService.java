@@ -1624,7 +1624,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     @Override
     public void onAppUnregisteredReason(String appId, AppInterfaceUnregisteredReason reason) {
-        createDebugMessageForAdapter("onAppUnregisteredReason:" + reason + ", appId:" + appId);
+        createDebugMessageForAdapter(appId, " OnAppUnregisteredReason:" + reason + ", appId:" + appId);
     }
 
     @Override
@@ -1671,7 +1671,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     @Override
     public void onRPCRequest(String appId, RPCRequest rpcRequest) {
-        createDebugMessageForAdapter(rpcRequest);
+        createDebugMessageForAdapter(appId, rpcRequest);
     }
 
     @Override
@@ -2250,15 +2250,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             return mSyncProxy.startAudioDataTransfer(appId);
         }
         return null;
-    }
-
-    /**
-     * Invalidates provided Application Id, clear all Services associated and remove it from the list
-     *
-     * @param appId Application id
-     */
-    public void invalidateAppId(String appId) {
-        mSyncProxy.invalidateAppId(appId);
     }
 
     /**

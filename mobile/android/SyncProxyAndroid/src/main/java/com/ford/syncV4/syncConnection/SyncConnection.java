@@ -113,6 +113,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      */
     public void init() {
         // Initialize the transport
+        Logger.d(CLASS_NAME + " Init");
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             switch (mTransportConfig.getTransportType()) {
                 case BLUETOOTH:
@@ -171,9 +172,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (mTransport != null) {
                 mTransport.disconnect();
                 mTransport.removeListener();
-
-                // TODO : Add here 'shutdownAllExecutors' of the 'SendProtocolMessageProcessor'
-                // TODO : method call
             }
             //mTransport = null;
 
@@ -333,9 +331,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public Boolean getIsConnected() {
+        Logger.d(CLASS_NAME + " get is connected, tr:" + mTransport);
         if (mTransport == null) {
             return false;
         }
+        Logger.d(CLASS_NAME + " get is connected, tr con:" + mTransport.getIsConnected());
         return mTransport.getIsConnected();
     }
 
