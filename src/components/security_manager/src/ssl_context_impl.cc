@@ -158,6 +158,8 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
   } else if (handshake_result == 0) {
     is_handshake_pending_ = false;
     return SSLContext::Handshake_Result_Fail;
+  } else if (SSL_get_error(connection_, handshake_result) != SSL_ERROR_WANT_READ) {
+    return SSLContext::Handshake_Result_AbnormalFail;
   }
 
   const size_t pend = BIO_ctrl_pending(bioOut_);
@@ -173,7 +175,7 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
       is_handshake_pending_ = false;
       return SSLContext::Handshake_Result_AbnormalFail;
     }
-  }
+  } 
 
   return SSLContext::Handshake_Result_Success;
 }

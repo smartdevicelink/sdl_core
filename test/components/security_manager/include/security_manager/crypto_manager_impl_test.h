@@ -114,17 +114,17 @@ TEST(CryptoManagerTest, WrongInit) {
 //  EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER, security_manager::UNKNOWN,
 //                                    "mycert.pem", "mykey.pem", "AES128-GCM-SHA256", false));
 //  EXPECT_FALSE(crypto_manager->LastError().empty());
-  // Unexists cert file
+  // Unexistent cert file
   EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2,
                                     "unexists_file.pem", "mykey.pem", "AES128-GCM-SHA256", false));
   EXPECT_FALSE(crypto_manager->LastError().empty());
-  // Unexists key file
+  // Unexistent key file
   EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2,
                                     "mycert.pem", "unexists_file.pem", "AES128-GCM-SHA256", false));
   EXPECT_FALSE(crypto_manager->LastError().empty());
-  // Unexists cipher value
+  // Unexistent cipher value
   EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2,
-                                    "mycert.pem", "mykey.pem", "INVALID_CIPHER", false));
+                                    "mycert.pem", "mykey.pem", "INVALIDCIPHER", false));
   EXPECT_FALSE(crypto_manager->LastError().empty());
   delete crypto_manager;
 }
@@ -155,6 +155,25 @@ TEST(CryptoManagerTest, ReleaseNull) {
   EXPECT_NO_THROW(cm->ReleaseSSLContext(NULL));
   delete cm;
 }
+
+TEST_F(SSLTest, BrokenHandshake) {
+  const uint8_t *server_buf;
+  const uint8_t *client_buf;
+  size_t server_buf_len;
+  size_t client_buf_len;
+  ASSERT_EQ(client_ctx->StartHandshake(&client_buf,
+                                       &client_buf_len),
+            security_manager::SSLContext::Handshake_Result_Success);
+  ASSERT_FALSE(client_buf == NULL);
+  ASSERT_GT(client_buf_len, 0u);
+  const_cast<uint8_t*>(client_buf)[client_buf_len / 2] ^= 0xFF;
+  ASSERT_EQ(security_manager::SSLContext::Handshake_Result_AbnormalFail,
+      server_ctx->DoHandshakeStep(client_buf,
+                                  client_buf_len,
+                                  &server_buf,
+                                  &server_buf_len));
+}
+
 // TODO(EZamakhov): split to SSL/TLS1/1.1/1.2 tests
 TEST_F(SSLTest, Positive) {
 
