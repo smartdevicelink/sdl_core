@@ -35,7 +35,7 @@
 import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
-//import com.ford.sdl.hmi.log4cxx 1.0
+import com.ford.sdl.hmi.log4cxx 1.0
 import com.ford.sdl.hmi.named_pipe_notifier 1.0
 import "./controls"
 import "./views"
@@ -45,8 +45,6 @@ import "./popups"
 import "hmi_api/Common.js" as Common
 import "./models/Constants.js" as Constants
 import "models/Internal.js" as Internal
-
-
 
 Rectangle {
     width: 1280
