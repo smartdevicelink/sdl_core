@@ -11,18 +11,16 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 public class KeyboardProperties extends RPCStruct {
+
     private static final KeypressMode KEYPRESS_MODE_DEFAULT =
             KeypressMode.RESEND_CURRENT_ENTRY;
 
     public KeyboardProperties() {
-        store.put(Names.keypressMode, KEYPRESS_MODE_DEFAULT);
+
     }
 
     public KeyboardProperties(Hashtable hash) {
         super(hash);
-        if (!store.containsKey(Names.keypressMode)) {
-            store.put(Names.keypressMode, KEYPRESS_MODE_DEFAULT);
-        }
     }
 
     public Language getLanguage() {
@@ -36,7 +34,8 @@ public class KeyboardProperties extends RPCStruct {
             } catch (Exception e) {
                 Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
-                                Names.language, e);
+                                Names.language, e
+                );
             }
             return theCode;
         }
@@ -89,7 +88,8 @@ public class KeyboardProperties extends RPCStruct {
             } catch (Exception e) {
                 Logger.e(
                         "Failed to parse " + getClass().getSimpleName() + "." +
-                                Names.keypressMode, e);
+                                Names.keypressMode, e
+                );
             }
             return theCode;
         }

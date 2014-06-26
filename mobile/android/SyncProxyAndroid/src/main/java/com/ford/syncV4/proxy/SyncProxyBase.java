@@ -1670,7 +1670,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     }
 
     protected void onAppUnregisteredReason(final String appId,
-                                           final AppInterfaceUnregisteredReason reason) {
+                                           final OnAppInterfaceUnregistered notification) {
+        AppInterfaceUnregisteredReason reason = notification.getReason();
         if (reason == AppInterfaceUnregisteredReason.IGNITION_OFF ||
                 reason == AppInterfaceUnregisteredReason.MASTER_RESET ||
                 reason == AppInterfaceUnregisteredReason.FACTORY_DEFAULTS) {
@@ -1686,11 +1687,11 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             getMainUIHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    getProxyListener().onAppUnregisteredReason(appId, reason);
+                    getProxyListener().onAppUnregisteredReason(appId, notification);
                 }
             });
         } else {
-            getProxyListener().onAppUnregisteredReason(appId, reason);
+            getProxyListener().onAppUnregisteredReason(appId, notification);
         }
     }
 

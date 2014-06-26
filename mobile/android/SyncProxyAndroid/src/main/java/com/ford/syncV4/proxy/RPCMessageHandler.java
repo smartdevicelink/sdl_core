@@ -1084,7 +1084,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                                     syncProxyBase.getLastLanguageChange());
                         }
                     } else if (msg.getReason() != null) {
-                        syncProxyBase.onAppUnregisteredReason(appId, msg.getReason());
+                        syncProxyBase.onAppUnregisteredReason(appId, msg);
                     } else {
                         // This requires the proxy to be cycled
                         if (syncProxyBase.getCurrentTransportType() == TransportType.BLUETOOTH) {

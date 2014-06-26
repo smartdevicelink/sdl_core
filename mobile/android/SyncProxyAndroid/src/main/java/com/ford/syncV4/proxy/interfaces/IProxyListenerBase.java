@@ -19,6 +19,7 @@ import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
+import com.ford.syncV4.proxy.rpc.OnAppInterfaceUnregistered;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
@@ -319,7 +320,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onAppUnregisteredAfterLanguageChange(String appId, OnLanguageChange msg);
 
-    public void onAppUnregisteredReason(String appId, AppInterfaceUnregisteredReason reason);
+    public void onAppUnregisteredReason(String appId, OnAppInterfaceUnregistered notification);
 
     public void onProtocolServiceEnded(ServiceType serviceType, String appId);
 
