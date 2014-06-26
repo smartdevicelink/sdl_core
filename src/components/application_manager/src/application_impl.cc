@@ -97,7 +97,9 @@ ApplicationImpl::ApplicationImpl(
       device_(0),
       usage_report_(mobile_app_id, statistics_manager),
       protocol_version_(ProtocolVersion::kV3),
-      alert_in_background_(false) {
+      alert_in_background_(false),
+      get_vehice_data_frequency_({date_time::DateTime::getCurrentTime(), 1}),
+      read_did_frequency_({date_time::DateTime::getCurrentTime(), 1}) {
 
   set_mobile_app_id(smart_objects::SmartObject(mobile_app_id));
   set_name(app_name);
@@ -415,6 +417,44 @@ bool ApplicationImpl::UnsubscribeFromIVI(uint32_t vehicle_info_type_) {
 
 UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
+}
+
+bool ApplicationImpl::IsReadDIDAllowed() {
+  std::pair<uint32_t, int32_t> frequency_restrictions;
+  frequency_restrictions = profile::Profile::instance()->read_did_frequency();
+  TimevalStruct current = date_time::DateTime::getCurrentTime();
+
+  if (current.tv_sec - read_did_frequency_.first.tv_sec > frequency_restrictions.second) {
+    read_did_frequency_.first = current;
+    read_did_frequency_.second = 1;
+    return true;
+  }
+
+  if (read_did_frequency_.second <= frequency_restrictions.first) {
+    read_did_frequency_.second++;
+    return true;
+  }
+
+  return false;
+}
+
+bool ApplicationImpl::IsGetVehicleDataAllowed() {
+  std::pair<uint32_t, int32_t> frequency_restrictions;
+  frequency_restrictions = profile::Profile::instance()->get_vehicle_data_frequency();
+  TimevalStruct current = date_time::DateTime::getCurrentTime();
+
+  if (current.tv_sec - get_vehice_data_frequency_.first.tv_sec > frequency_restrictions.second) {
+    get_vehice_data_frequency_.first = current;
+    get_vehice_data_frequency_.second = 0;
+    return true;
+  }
+
+  if (get_vehice_data_frequency_.second <= frequency_restrictions.first) {
+    get_vehice_data_frequency_.second++;
+    return true;
+  }
+
+  return false;
 }
 
 const std::set<mobile_apis::ButtonName::eType>& ApplicationImpl::SubscribedButtons() const {

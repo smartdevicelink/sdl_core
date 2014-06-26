@@ -129,6 +129,8 @@ const char* kMmeDatabaseNameKey = "MMEDatabase";
 const char* kEventMQKey = "EventMQ";
 const char* kAckMQKey = "AckMQ";
 const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
+const char* kReadDIDFrequencykey = "ReadDIDRequest";
+const char* kGetVehicleDataFrequencyKey = "GetVehicleDataRequest";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -166,7 +168,8 @@ const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 10;
 const uint32_t kDefaultPendingRequestsAmount = 1000;
 const uint32_t kDefaultTransportManagerDisconnectTimeout = 0;
 const uint32_t kDefaultApplicationListUpdateTimeout = 1;
-
+const std::pair<uint32_t, uint32_t> kReadDIDFrequency = {5 , 1};
+const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = {5 , 1};
 }  // namespace
 
 namespace profile {
@@ -462,6 +465,14 @@ const std::string& Profile::ack_mq_name() const {
 
 uint32_t Profile::application_list_update_timeout() const {
   return application_list_update_timeout_;
+}
+
+const std::pair<uint32_t, int32_t>& Profile::read_did_frequency() const  {
+  return read_did_frequency_;
+}
+
+const std::pair<uint32_t, int32_t>& Profile::get_vehicle_data_frequency() const  {
+  return get_vehicle_data_frequency_;
 }
 
 void Profile::UpdateValues() {
@@ -996,7 +1007,14 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
       kApplicationListUpdateTimeoutKey);
 
   LOG_UPDATED_VALUE(application_list_update_timeout_,
-      kApplicationListUpdateTimeoutKey, kApplicationManagerSection);
+      kApplicationListUpdateTimeoutKey, kMainSection);
+
+  ReadUintIntPairValue(&read_did_frequency_, kReadDIDFrequency,
+                   kMainSection, kReadDIDFrequencykey);
+
+  ReadUintIntPairValue(&get_vehicle_data_frequency_, kGetVehicleDataFrequency,
+                   kMainSection, kGetVehicleDataFrequencyKey);
+
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,
@@ -1043,6 +1061,24 @@ bool Profile::ReadStringValue(std::string* value, const char* default_value,
     return false;
   }
   return true;
+}
+
+bool Profile::ReadUintIntPairValue(std::pair<uint32_t, int32_t>* value,
+                               const  std::pair<uint32_t, uint32_t>& default_value,
+                               const char *const pSection,
+                               const char *const pKey) const {
+  std::string string_value;
+  if (!ReadValue(&string_value, pSection, pKey)) {
+    *value = default_value;
+    return false;
+  } else {
+    std::string first_str = string_value.substr(0, string_value.find(","));
+    std::string second_str = string_value.substr(string_value.find(",") + 1,
+                                                 string_value.size() - first_str.size());
+    (*value).first = strtoul(first_str.c_str(), NULL, 10);
+    (*value).second = strtoul(second_str.c_str(), NULL, 10);
+    return true;
+  }
 }
 
 bool Profile::ReadUIntValue(uint16_t* value, uint16_t default_value,
