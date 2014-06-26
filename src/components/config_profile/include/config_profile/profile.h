@@ -346,6 +346,9 @@ class Profile : public utils::Singleton<Profile> {
 
     uint32_t application_list_update_timeout() const;
 
+    const std::pair<uint32_t, int32_t>& read_did_frequency() const;
+
+    const  std::pair<uint32_t, int32_t>& get_vehicle_data_frequency() const;
   private:
     /**
      * Default constructor
@@ -402,6 +405,23 @@ class Profile : public utils::Singleton<Profile> {
      */
     bool ReadStringValue(std::string* value,
                          const char* default_value,
+                         const char* const pSection,
+                         const char* const pKey) const;
+
+
+    /**
+     * @brief Reads a pair of ints value from the profile
+     *
+     * @param value         Result value
+     * @param default_value Value to use key wasn't found
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     *
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is not changed)
+     */
+    bool ReadUintIntPairValue(std::pair<uint32_t, int32_t>* value,
+                         const std::pair<uint32_t, uint32_t>& default_value,
                          const char* const pSection,
                          const char* const pKey) const;
 
@@ -490,6 +510,17 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     recording_file_source_;
     std::string                     recording_file_name_;
     uint32_t                        application_list_update_timeout_;
+    /*
+     * first value is count of request
+     * second is time scale
+     */
+    std::pair<uint32_t, int32_t>   read_did_frequency_;
+
+    /*
+     * first value is count of request
+     * second is time scale
+     */
+    std::pair<uint32_t, int32_t>   get_vehicle_data_frequency_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 

@@ -464,6 +464,16 @@ class Application : public virtual InitialApplicationData,
     virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type_) = 0;
     virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type_) = 0;
 
+    /*
+     * @breaf Check frequency of readDID requests
+     */
+    virtual bool IsReadDIDAllowed() = 0;
+
+    /*
+     * @breaf Check frequency of GetVehicleData requests
+     */
+    virtual bool IsGetVehicleDataAllowed() = 0;
+
     /**
      * Returns object for recording statistics
      * @return object for recording statistics

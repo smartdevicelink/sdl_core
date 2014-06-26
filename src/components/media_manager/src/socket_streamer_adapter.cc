@@ -39,6 +39,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include "config_profile/profile.h"
 #include "media_manager/video/socket_video_streamer_adapter.h"
 #include "utils/logger.h"

@@ -36,6 +36,7 @@
 #include <sys/time.h>
 typedef struct timeval TimevalStruct;
 #endif
+#include <stdint.h>
 
 namespace date_time {
 
