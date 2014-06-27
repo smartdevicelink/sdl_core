@@ -706,7 +706,7 @@ SmartObject& SmartObject::operator[](const std::string& Key) {
   return handle_map_access(Key);
 }
 
-const SmartObject& SmartObject::operator[] (const std::string Key) const {
+const SmartObject& SmartObject::operator[] (const std::string& Key) const {
   return getElement(Key);
 }
 

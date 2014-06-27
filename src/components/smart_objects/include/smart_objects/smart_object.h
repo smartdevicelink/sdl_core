@@ -504,7 +504,7 @@ class SmartObject {
    * @return SmartObject&
    **/
   SmartObject& operator[](const std::string& Key);
-  const SmartObject& operator[](const std::string Key) const;
+  const SmartObject& operator[](const std::string& Key) const;
 
   /**
    * @brief Support of map-like access
@@ -550,6 +550,9 @@ class SmartObject {
    * @return Set of map keys or empty set if object has type other than map
    **/
   std::set<std::string> enumerate() const;
+
+  SmartMap::iterator map_begin() const {return m_data.map_value->begin();}
+  SmartMap::iterator map_end() const {return m_data.map_value->end();}
 
   /**
    * @brief Checks for key presense when object is behaves like a map

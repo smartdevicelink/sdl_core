@@ -52,8 +52,8 @@ CObjectSchemaItem::SMember::SMember(
 }
 
 utils::SharedPtr<CObjectSchemaItem> CObjectSchemaItem::create(
-    const std::map<std::string, CObjectSchemaItem::SMember>& Members) {
-  return new CObjectSchemaItem(Members);
+    const Members& members) {
+  return new CObjectSchemaItem(members);
 }
 
 Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
@@ -62,11 +62,10 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
 
   if (SmartType_Map == Object.getType()) {
     result = Errors::OK;
-    const std::set<std::string> objectKeys = Object.enumerate();
 
-    for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
-        mMembers.begin(); i != mMembers.end(); ++i) {
-      if (objectKeys.end() != objectKeys.find(i->first)) {
+    for (Members::const_iterator i = mMembers.begin(); i != mMembers.end();
+         ++i) {
+      if (Object.keyExists(i->first)) {
         if (kMsgParams == i->first) {
           is_valid = false;
         }
@@ -91,9 +90,9 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
     }
 
     if (Errors::OK == result) {
-      for (std::set<std::string>::const_iterator k = objectKeys.begin();
-          k != objectKeys.end(); ++k) {
-        if (mMembers.end() == mMembers.find(*k)) {
+      for (SmartMap::const_iterator k = Object.map_begin();
+           k != Object.map_end(); ++k) {
+        if (mMembers.end() == mMembers.find(k->first)) {
           result = Errors::UNEXPECTED_PARAMETER;
         } else {
           is_valid = true;
@@ -114,14 +113,10 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
 
 void CObjectSchemaItem::applySchema(SmartObject& Object) {
   if (SmartType_Map == Object.getType()) {
-
     SmartObject def_value;
-    const std::set<std::string> objectKeys = Object.enumerate();
-    for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
-        mMembers.begin(); i != mMembers.end(); ++i) {
-      if ((objectKeys.end() == objectKeys.find(i->first)) &&
-          (true == i->second.mSchemaItem->hasDefaultValue(def_value))) {
-        // create default value
+    for (Members::const_iterator i = mMembers.end(); i != mMembers.end(); ++i) {
+      if (i->second.mSchemaItem->hasDefaultValue(def_value) &&
+          !Object.keyExists(i->first)) {
         Object[i->first] = SmartObject(def_value.getType());
         if (SmartType_Boolean == def_value.getType()) {
           Object[i->first] = def_value.asBool();
@@ -133,8 +128,8 @@ void CObjectSchemaItem::applySchema(SmartObject& Object) {
       }
     }
 
-    for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
-        mMembers.begin(); i != mMembers.end(); ++i) {
+    for (Members::const_iterator i = mMembers.begin(); i != mMembers.end();
+         ++i) {
       if (Object.keyExists(i->first)) {
         i->second.mSchemaItem->applySchema(Object[i->first]);
       }
@@ -144,17 +139,16 @@ void CObjectSchemaItem::applySchema(SmartObject& Object) {
 
 void CObjectSchemaItem::unapplySchema(SmartObject& Object) {
   if (SmartType_Map == Object.getType()) {
-    const std::set<std::string> objectKeys = Object.enumerate();
-    for (std::set<std::string>::const_iterator k = objectKeys.begin();
-         k != objectKeys.end(); ++k) {
-        if (mMembers.end() == mMembers.find(*k)) {
+    for (SmartMap::const_iterator k = Object.map_begin(); k != Object.map_end();
+         ++k) {
+      if (mMembers.end() == mMembers.find(k->first)) {
             // remove fake params
-            Object.erase(*k);
+        Object.erase(k->first);
         }
     }
 
-    for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
-        mMembers.begin(); i != mMembers.end(); ++i) {
+    for (Members::const_iterator i = mMembers.begin(); i != mMembers.end();
+         ++i) {
       if (Object.keyExists(i->first)) {
         i->second.mSchemaItem->unapplySchema(Object[i->first]);
       }
@@ -167,8 +161,8 @@ void CObjectSchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
   result_object = SmartObject(SmartType_Map);
 
   if (SmartType_Map == pattern_object.getType()) {
-    for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
-        mMembers.begin(); i != mMembers.end(); ++i) {  // for
+    for (Members::const_iterator i = mMembers.begin(); i != mMembers.end();
+         ++i) {  // for
       if (pattern_object.keyExists(i->first)) {
         i->second.mSchemaItem->BuildObjectBySchema(
             pattern_object.getElement(i->first), result_object[i->first]);
@@ -179,8 +173,8 @@ void CObjectSchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
     }  // for
   } else {
     bool is_any_mandatory_field = false;
-    for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
-        mMembers.begin(); i != mMembers.end(); ++i) {  // for
+    for (Members::const_iterator i = mMembers.begin(); i != mMembers.end();
+         ++i) {  // for
       if (i->second.mIsMandatory) {
         is_any_mandatory_field = true;
         i->second.mSchemaItem->BuildObjectBySchema(SmartObject(),
@@ -194,10 +188,8 @@ uint32_t CObjectSchemaItem::GetMemberSize() {
   return mMembers.size();
 }
 
-CObjectSchemaItem::CObjectSchemaItem(
-    const std::map<std::string, CObjectSchemaItem::SMember>& Members)
-    : mMembers(Members) {
-}
+CObjectSchemaItem::CObjectSchemaItem(const Members& members)
+    : mMembers(members) {}
 
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink
