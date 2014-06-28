@@ -922,8 +922,14 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
   LOG4CXX_INFO(
       logger_,
       "Sending heart beat acknowledgment for connection " << connection_id);
-  return SendHeartBeatAck(connection_id, packet.session_id(),
-                          packet.message_id());
+  if (session_observer_->CheckSupportHeartBeat(
+      connection_id, packet.session_id())) {
+    return SendHeartBeatAck(connection_id, packet.session_id(),
+                              packet.message_id());
+  } else {
+    return RESULT_HEARTBEAT_IS_NOT_SUPPORTED;
+  }
+
 }
 
 void ProtocolHandlerImpl::Handle(

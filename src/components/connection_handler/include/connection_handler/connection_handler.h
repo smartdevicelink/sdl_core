@@ -115,6 +115,16 @@ class ConnectionHandler {
   virtual void SendHeartBeat(ConnectionHandle connection_handle,
                             uint8_t session_id) = 0;
 
+  /*
+   * \brief binds protocol version with session
+   *
+   * \param connection_key pair of connection and session id
+   * \param protocol_version contains protocol version of
+   * \registered application.
+   */
+  virtual void BindProtocolVersionWithSession(uint32_t connection_key,
+                                              uint8_t protocol_version) = 0;
+
 
  protected:
   /**

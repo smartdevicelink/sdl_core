@@ -133,6 +133,16 @@ class SessionObserver {
       std::list<uint32_t>* applications_list,
       std::string* mac_address) = 0;
 
+    /**
+     * \brief returns TRUE if session supports sending HEARTBEAT ACK to mobile side
+     * \param  connection_handle Connection identifier whithin which session exists
+     * \param sessionId Identifier of the session
+     * \return TRUE if session has protocol version which supports heartbeat otherwise returns FALSE
+     */
+    virtual bool CheckSupportHeartBeat(
+        transport_manager::ConnectionUID connection_handle,
+        uint8_t session_id) = 0;
+
   protected:
     /**
      * \brief Destructor

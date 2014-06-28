@@ -78,6 +78,7 @@ uint32_t Connection::AddNewSession() {
   int32_t result = 0;
 
   const uint8_t max_connections = 255;
+  const uint8_t protocol_version = 2;
   int32_t size = session_map_.size();
   if (max_connections > size) {
 
@@ -85,14 +86,14 @@ uint32_t Connection::AddNewSession() {
      if (session_map_.end() == session_map_.find(session_id)) {
        /* whenever new session created RPC and Bulk services are
        established automatically */
-       session_map_[session_id].push_back(protocol_handler::kRpc);
-       session_map_[session_id].push_back(protocol_handler::kBulk);
+       session_map_[session_id].protocol_version = protocol_version;
+       session_map_[session_id].services.push_back(protocol_handler::kRpc);
+       session_map_[session_id].services.push_back(protocol_handler::kBulk);
        result = session_id;
        break;
      }
    }
   }
-
   return result;
 }
 
@@ -121,14 +122,15 @@ bool Connection::AddNewService(uint8_t session, uint8_t service) {
     return result;
   }
 
-  ServiceListIterator service_it = find(session_it->second.begin(),
-                                        session_it->second.end(), service);
-  if (service_it != session_it->second.end()) {
+  ServiceListIterator service_it = find(session_it->second.services.begin(),
+                                        session_it->second.services.end(),
+                                        service);
+  if (service_it != session_it->second.services.end()) {
     LOG4CXX_ERROR(logger_, "Session " << static_cast<int32_t>(session) <<
                   " already established"
                   " service " << service);
   } else {
-    session_it->second.push_back(service);
+    session_it->second.services.push_back(service);
     result = true;
   }
 
@@ -145,10 +147,10 @@ bool Connection::RemoveService(uint8_t session, uint8_t service) {
     return result;
   }
 
-  ServiceListIterator service_it = find(session_it->second.begin(),
-                                        session_it->second.end(), service);
-  if (service_it != session_it->second.end()) {
-    session_it->second.erase(service_it);
+  ServiceListIterator service_it = find(session_it->second.services.begin(),
+                                        session_it->second.services.end(), service);
+  if (service_it != session_it->second.services.end()) {
+    session_it->second.services.erase(service_it);
     result = true;
   } else {
     LOG4CXX_ERROR(logger_, "Session " << static_cast<int32_t>(session) <<
@@ -192,6 +194,27 @@ void Connection::CloseSession(uint8_t session_id) {
   if (1 == size) {
     connection_handler_->CloseConnection(connection_handle_);
   }
+}
+
+void Connection::UpdateProtocolVersionSession(
+    uint8_t session_id, uint8_t protocol_version) {
+  sync_primitives::AutoLock lock(session_map_lock_);
+  SessionMapIterator session_it = session_map_.find(session_id);
+  if (session_it == session_map_.end()) {
+    return;
+  }
+  session_it->second.protocol_version = protocol_version;
+}
+
+bool Connection::SupportHeartBeat(uint8_t session_id) {
+  sync_primitives::AutoLock lock(session_map_lock_);
+  //version of the protocol for which is supported heartbeat
+  uint8_t pv_support_heartbeat = 3;
+  SessionMapIterator session_it = session_map_.find(session_id);
+  if (session_it == session_map_.end()) {
+    return false;
+  }
+  return pv_support_heartbeat == session_it->second.protocol_version;
 }
 
 void Connection::StartHeartBeat(uint8_t session_id) {

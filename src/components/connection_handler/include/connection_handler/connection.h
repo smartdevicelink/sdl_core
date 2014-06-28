@@ -51,6 +51,7 @@
 namespace connection_handler {
 
 class ConnectionHandler;
+struct Session;
 
 /**
  * \brief Type for ConnectionHandle
@@ -86,17 +87,26 @@ typedef std::vector<uint8_t>::const_iterator ServiceListConstIterator;
 /**
  * \brief Type for Services iterator
  */
-typedef std::map<uint8_t, ServiceList> SessionMap;
+typedef std::map<uint8_t, Session> SessionMap;
 
 /**
  * \brief Type for Services iterator
  */
-typedef std::map<uint8_t, ServiceList>::iterator SessionMapIterator;
+typedef std::map<uint8_t, Session>::iterator SessionMapIterator;
 
 /**
  * \brief Type for Services const iterator
  */
-typedef std::map<uint8_t, ServiceList>::const_iterator SessionMapConstIterator;
+typedef std::map<uint8_t, Session>::const_iterator SessionMapConstIterator;
+
+/**
+ * \structure Session
+ * \brief structure Session contains information about session
+ */
+struct Session {
+  uint8_t protocol_version;
+  ServiceList services;
+};
 
 /**
  * \class Connection
@@ -184,6 +194,21 @@ class Connection {
    * \param  session_id session id
    */
   void SendHeartBeat(uint8_t session_id);
+
+  /*
+   * \brief changes protocol version in session
+   * \param  session_id session id
+   * \param  protocol_version protocol version registered application
+   */
+  void UpdateProtocolVersionSession(uint8_t session_id, uint8_t protocol_version);
+
+  /*
+   * \brief checks if session supports heartbeat
+   * \param  session_id session id
+   * \return TRUE on success, otherwise FALSE
+   */
+  bool SupportHeartBeat(uint8_t session_id);
+
 
  private:
   ConnectionHandler* connection_handler_;

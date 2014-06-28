@@ -378,7 +378,7 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(uint32_t key,
       const SessionMap& session_map = connection.session_map();
       for (SessionMapConstIterator session_it = session_map.begin(),
            end = session_map.end(); session_it != end; ++session_it) {
-        sessions_list->push_back(KeyFromPair(conn_handle, it->first));
+        sessions_list->push_back(KeyFromPair(conn_handle, session_it->first));
       }
     }
 
@@ -580,7 +580,7 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
       SessionMap session_map = itr->second->session_map();
       SessionMapIterator session_it = session_map.find(session_id);
       if (session_it != session_map.end()) {
-        ServiceList service_list = session_it->second;
+        ServiceList service_list = session_it->second.services;
         ServiceListConstIterator it = service_list.begin();
         for (;it != service_list.end(); ++it) {
           uint32_t session_key = KeyFromPair(connection_id, session_id);
@@ -651,8 +651,9 @@ void ConnectionHandlerImpl::OnConnectionEnded(
          end = session_map.end(); session_it != end; ++session_it) {
 
       uint32_t session_key = KeyFromPair(connection_id, session_it->first);
-      for (ServiceListConstIterator service_it = session_it->second.begin(),
-          end = session_it->second.end(); service_it != end; ++service_it) {
+      for (ServiceListConstIterator service_it =
+          session_it->second.services.begin(),
+          end = session_it->second.services.end(); service_it != end; ++service_it) {
         connection_handler_observer_->OnServiceEndedCallback(
           session_key, static_cast<protocol_handler::ServiceType>(*service_it));
       }
@@ -663,4 +664,27 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   connection_list_.erase(itr);
 }
 
+void ConnectionHandlerImpl::BindProtocolVersionWithSession(
+    uint32_t connection_key, uint8_t protocol_version) {
+  uint32_t connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(connection_key, &connection_handle, &session_id);
+
+  sync_primitives::AutoLock lock(connection_list_lock_);
+  ConnectionListIterator it = connection_list_.find(connection_handle);
+  if (connection_list_.end() != it) {
+    it->second->UpdateProtocolVersionSession(session_id, protocol_version);
+  }
+}
+
+bool ConnectionHandlerImpl::CheckSupportHeartBeat(
+    transport_manager::ConnectionUID connection_handle,uint8_t session_id) {
+  sync_primitives::AutoLock lock(connection_list_lock_);
+  uint32_t connection = static_cast<uint32_t>(connection_handle);
+  ConnectionListIterator it = connection_list_.find(connection);
+  if (connection_list_.end() == it) {
+    return false;
+  }
+  return it->second->SupportHeartBeat(session_id);
+}
 }/* namespace connection_handler */

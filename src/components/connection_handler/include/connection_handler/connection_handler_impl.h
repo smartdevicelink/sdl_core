@@ -276,6 +276,27 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * Keep connection associated with the key from being closed by heartbeat monitor
      */
     void KeepConnectionAlive(uint32_t connection_key, uint8_t session_id);
+
+    /*
+     * \brief binds protocol version with session
+     *
+     * \param connection_key pair of connection and session id
+     * \param protocol_version contains protocol version of
+     * \registered application.
+     */
+    virtual void BindProtocolVersionWithSession(uint32_t connection_key,
+                                                uint8_t protocol_version);
+
+    /**
+     * \brief returns TRUE if session supports sending HEART BEAT ACK to mobile side
+     * \param  connection_handle Connection identifier whithin which session exists
+     * \param sessionId Identifier of the session
+     * \return TRUE if session has protocol version which supports heartbeat otherwise returns FALSE
+     */
+    virtual bool CheckSupportHeartBeat(
+        transport_manager::ConnectionUID connection_handle,
+        uint8_t session_id);
+
   private:
     /**
      * \brief Default class constructor
