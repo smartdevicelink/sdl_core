@@ -135,7 +135,7 @@ void SecurityManager::Handle(const SecurityMessage &message) {
     }
 }
 
-security_manager::SSLContext * SecurityManager::CreateSSLContext(
+security_manager::SSLContext *SecurityManager::CreateSSLContext(
     const uint32_t &connection_key) {
   LOG4CXX_INFO(logger_, "ProtectService processing");
   DCHECK(session_observer_);

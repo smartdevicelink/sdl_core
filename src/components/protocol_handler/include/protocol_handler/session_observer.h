@@ -157,7 +157,7 @@ class SessionObserver {
    * \param service_type Type of service
    * \return \ref SSLContext of connection
    */
-  virtual security_manager::SSLContext* GetSSLContext(
+  virtual security_manager::SSLContext *GetSSLContext(
       const uint32_t &key,
       const protocol_handler::ServiceType &service_type) = 0;
   /**

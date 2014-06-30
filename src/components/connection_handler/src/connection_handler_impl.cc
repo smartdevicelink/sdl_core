@@ -527,7 +527,7 @@ security_manager::SSLContext *ConnectionHandlerImpl::GetSSLContext(
 }
 
 void ConnectionHandlerImpl::SetProtectionFlag(
-    const uint32_t& key, const protocol_handler::ServiceType& service_type) {
+    const uint32_t &key, const protocol_handler::ServiceType &service_type) {
   LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::SetProtectionFlag");
   transport_manager::ConnectionUID connection_handle = 0;
   uint8_t session_id = 0;

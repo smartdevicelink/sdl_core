@@ -66,7 +66,7 @@ uint8_t RpcTypeToByte(RpcType type) {
   return uint8_t(type);
 }
 
-const char* RpcTypeToString(RpcType type) {
+const char *RpcTypeToString(RpcType type) {
   switch (type) {
     case kRpcTypeRequest:
       return "kRpcTypeRequest";

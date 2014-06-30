@@ -65,7 +65,7 @@ void RawMessage::set_connection_key(uint32_t key) {
   connection_key_ = key;
 }
 
-uint8_t* RawMessage::data() const {
+uint8_t *RawMessage::data() const {
   return data_;
 }
 

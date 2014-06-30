@@ -253,7 +253,7 @@ uint32_t ProtocolPacket::message_id() const {
   return packet_header_.messageId;
 }
 
-uint8_t* ProtocolPacket::data() const {
+uint8_t *ProtocolPacket::data() const {
   return packet_data_.data;
 }
 

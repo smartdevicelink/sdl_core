@@ -107,10 +107,10 @@ struct Session {
       , ssl_context(NULL)
 #endif  // ENABLE_SECURITY
   {}
-  Service* find_service(
-      const protocol_handler::ServiceType& service_type);
-  const Service* find_service(
-      const protocol_handler::ServiceType& service_type) const;
+  Service *FindService(
+      const protocol_handler::ServiceType &service_type);
+  const Service *FindService(
+      const protocol_handler::ServiceType &service_type) const;
 };
 
 /**
@@ -198,7 +198,7 @@ class Connection {
    * \param service_type Type of service
    * \return \ref SSLContext of connection
    */
-  security_manager::SSLContext* GetSSLContext(
+  security_manager::SSLContext *GetSSLContext(
       const uint8_t session_id,
       const protocol_handler::ServiceType &service_type) const;
   /**

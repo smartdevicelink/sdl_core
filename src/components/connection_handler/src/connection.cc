@@ -53,7 +53,7 @@ namespace connection_handler {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
 
-Service* Session::find_service(const protocol_handler::ServiceType& service_type) {
+Service *Session::FindService(const protocol_handler::ServiceType &service_type) {
   ServiceList::iterator service_it =
       std::find(service_list.begin(), service_list.end(), service_type);
   if(service_it != service_list.end()){
@@ -62,7 +62,7 @@ Service* Session::find_service(const protocol_handler::ServiceType& service_type
   return NULL;
 }
 
-const Service* Session::find_service(const protocol_handler::ServiceType& service_type) const {
+const Service *Session::FindService(const protocol_handler::ServiceType &service_type) const {
   ServiceList::const_iterator service_it =
       std::find(service_list.begin(), service_list.end(), service_type);
   if(service_it != service_list.end()){
@@ -144,18 +144,17 @@ bool Connection::AddNewService(uint8_t session_id,
     return false;
   }
   Session &session = session_it->second;
-  Service *service = session.find_service(service_type);
+  Service *service = session.FindService(service_type);
   // if service already exists
   if (service) {
     if(!request_protection) {
       LOG4CXX_WARN(logger_, "Session " << static_cast<int>(session_id) <<
-                   " already unprotected service "<< static_cast<int>(service_type));
+                   " already has unprotected service "<< static_cast<int>(service_type));
       return false;
     }
-    // if service already protected
     if (service->is_protected_) {
       LOG4CXX_WARN(logger_, "Session " << static_cast<int>(session_id) <<
-                   " already protected service "<< static_cast<int>(service_type));
+                   " already has protected service "<< static_cast<int>(service_type));
       return false;
     }
     //For unproteced service could be start protection
@@ -220,7 +219,7 @@ int Connection::SetSSLContext(uint8_t session_id,
   return security_manager::SecurityQuery::ERROR_SUCCESS;
 }
 
-security_manager::SSLContext* Connection::GetSSLContext(
+security_manager::SSLContext *Connection::GetSSLContext(
     const uint8_t session_id, const protocol_handler::ServiceType &service_type) const {
   LOG4CXX_TRACE(logger_, "Connection::GetSSLContext");
   sync_primitives::AutoLock lock(session_map_lock_);
@@ -233,7 +232,7 @@ security_manager::SSLContext* Connection::GetSSLContext(
   // for control services return current SSLContext value
   if (protocol_handler::kControl == service_type)
     return session.ssl_context;
-  const Service *service = session.find_service(service_type);
+  const Service *service = session.FindService(service_type);
   if (!service) {
     LOG4CXX_WARN(logger_, "Service not found in this session!");
     return NULL;
@@ -245,7 +244,7 @@ security_manager::SSLContext* Connection::GetSSLContext(
 }
 
 void Connection::SetProtectionFlag(
-    const uint8_t session_id, const protocol_handler::ServiceType& service_type) {
+    const uint8_t session_id, const protocol_handler::ServiceType &service_type) {
   LOG4CXX_TRACE(logger_, "Connection::SetProtectionFlag");
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(session_id);
@@ -254,7 +253,7 @@ void Connection::SetProtectionFlag(
     return;
   }
   Session &session = session_it->second;
-  Service *service = session.find_service(service_type);
+  Service *service = session.FindService(service_type);
   if (!service) {
     LOG4CXX_WARN(logger_, "Service not found in this session!");
     return;
@@ -262,11 +261,11 @@ void Connection::SetProtectionFlag(
   service->is_protected_ = true;
   // Rpc and bulk shall be protected as one service
   if (service->service_type == protocol_handler::kRpc) {
-    Service* service_bulk = session.find_service(protocol_handler::kBulk);
+    Service *service_bulk = session.FindService(protocol_handler::kBulk);
     DCHECK(service_bulk);
     service_bulk->is_protected_ = true;
   } else if (service->service_type == protocol_handler::kBulk) {
-    Service* service_rpc = session.find_service(protocol_handler::kRpc);
+    Service *service_rpc = session.FindService(protocol_handler::kRpc);
     DCHECK(service_rpc);
     service_rpc->is_protected_ = true;
   }

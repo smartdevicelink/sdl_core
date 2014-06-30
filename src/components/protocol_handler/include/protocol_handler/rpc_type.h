@@ -50,7 +50,7 @@ RpcType RpcTypeFromByte(uint8_t byte);
 // Check and convert RpcType to byte value ready to be transmitted
 uint8_t RpcTypeToByte(RpcType type);
 
-const char* RpcTypeToString(RpcType type);
+const char *RpcTypeToString(RpcType type);
 
 std::ostream &operator<<(std::ostream &os, RpcType rpc_type);
 

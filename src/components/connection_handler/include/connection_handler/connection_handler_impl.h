@@ -252,12 +252,11 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param service_type Type of service
    * \return \ref SSLContext of connection
    */
-  security_manager::SSLContext* GetSSLContext(
+  security_manager::SSLContext *GetSSLContext(
       const uint32_t &key,
       const protocol_handler::ServiceType &service_type) OVERRIDE;
   /**
    * \brief Set protection flag to service in session by key
-   * to get current SSLContext of connection
    * \param key Unique key used by other components as session identifier
    * \param service_type Type of service
    */
