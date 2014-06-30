@@ -50,31 +50,25 @@ GeneralView {
 
     Item {
         anchors.fill: parent
-        GridMenu {
+        ScrollableListView {
             id: menu
             model: dataContainer.settingsSourceModel
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.bottom: bottomPanel.top
-            columnsOnPage: 1
-            rows: 7
-            delegate: GridItem {
-                width: menu.width / menu.columnsOnPage
-                height: menu.height / menu.rows
-                OvalButton {
-                    text: title
-                    onReleased: {
-                        if (qml) {
-                            contentLoader.go(qml, appId);
-                        } else {
-                            itemActivated(action);
-                        }
+            delegate: OvalButton {
+                text: title
+                onReleased: {
+                    if (qml) {
+                        contentLoader.go(qml, appId);
+                    } else {
+                        itemActivated(action);
                     }
-                    anchors.centerIn: parent
-                    fontSize: Constants.fontSize
-                    width: parent.width * 2 / 3
                 }
+                anchors.left: parent.left
+                anchors.right: parent.right
+                fontSize: Constants.fontSize
             }
         }
 

@@ -1,6 +1,4 @@
 /**
- * @file SettingsSourceModel.qml
- * @brief Settings source menu list of elements.
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -32,55 +30,60 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 import QtQuick 2.0
+import "../models"
+import "../controls"
+import "../hmi_api/Common.js" as Common
+import "../models/Constants.js" as Constants
 
-ListModel
-{
-    ListElement {
-        title: "Allow SDL Functionality"
-        qml: "./views/SDLFunctionalityView.qml"
-        appId: 0
-        action: ""
-    }
-    ListElement {
-        title: "Update SDL"
-        qml: ""
-        appId: 0
-        action: "update_sdl"
-    }
-    ListElement {
-        title: "Policy table update status"
-        qml: ""
-        appId: 0
-        action: "get_status_update"
-    }
-    ListElement {
-        title: "Send request GetURLS"
-        qml: ""
-        appId: 0
-        action: "get_urls"
-    }
-    ListElement {
-        title: "Statistics info settings"
-        qml: "./views/StatisticsInfoView.qml"
-        appId: 0
-        action: ""
-    }
-    ListElement {
-        title: "App permissions"
-        qml: ""
-        appId: 0
-        action: ""
-    }
-    ListElement {
-        title: "Device state change"
-        qml: ""
-        appId: 0
-        action: ""
-    }
-    ListElement {
-        title: "System Error"
-        qml: "./views/SystemErrorView.qml"
-        appId: 0
-        action: ""
+GeneralView {
+    Item {
+        anchors.fill: parent
+        Text {
+            id: title
+            text: "System Error:"
+            anchors.top: parent.top
+            anchors.left: parent.left
+            anchors.right: parent.right
+            font.pixelSize: Constants.fontSize
+            color: Constants.primaryColor
+            height: Constants.fontSize + Constants.panelPadding
+        }
+
+        ScrollableListView {
+            id: menu
+            model: systemErrorList
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: title.bottom
+            anchors.bottom: bottomPanel.top
+            delegate: OvalButton {
+                text: name
+                onClicked: sdlSDL.onSystemError(Common.SystemError[name]);
+                anchors.left: parent.left
+                anchors.right: parent.right
+                fontSize: Constants.fontSize
+            }
+        }
+
+        ListModel {
+            id: systemErrorList
+
+            Component.onCompleted: {
+                for (var name in Common.SystemError) {
+                    append({name: name});
+                }
+            }
+        }
+
+        Item {
+            id: bottomPanel
+            // 1/4 bottom screen
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            height: 1/4 * parent.height
+            width: parent.width
+
+            BackButton { anchors.centerIn: parent }
+        }
     }
 }
