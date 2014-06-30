@@ -9,7 +9,10 @@ function SDL_UpdateSDL(callback) {
 }
 
 function SDL_GetURLS(service, callback) {
-    callback([{url: "http://policies.telematics.ford.com/api/policies"}])
+    var urls = service === 7 ?
+                [{url: "http://policies.telematics.ford.com/api/policies"}] :
+                [];
+    callback(urls);
 }
 
 function SDL_ActivateApp(appId, callback) {
@@ -25,4 +28,8 @@ function SDL_ActivateApp(appId, callback) {
                  }
              });
     console.log("SDL_ActivateApp exit");
+}
+
+function SDL_GetStatusUpdate(callback) {
+    callback(Common.UpdateResult.UPDATE_NEEDED);
 }

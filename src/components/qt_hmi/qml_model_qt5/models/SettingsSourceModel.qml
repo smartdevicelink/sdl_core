@@ -51,17 +51,17 @@ ListModel
         title: "Policy table update status"
         qml: ""
         appId: 0
-        action: ""
+        action: "get_status_update"
     }
     ListElement {
         title: "Send request GetURLS"
         qml: ""
         appId: 0
-        action: ""
+        action: "get_urls"
     }
     ListElement {
         title: "Statistics info settings"
-        qml: ""
+        qml: "./views/StatisticsInfoView.qml"
         appId: 0
         action: ""
     }

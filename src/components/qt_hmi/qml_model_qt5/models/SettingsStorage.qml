@@ -125,7 +125,9 @@ Item
 
     property var buttonCapabilities: []
 
-    property string filePTSnapshot: "IVSU/PROPRIETARY_REQUEST"
+    readonly property string fileIVSU: "hmi/res/IVSU/PROPRIETARY_REQUEST"
+
+    property string filePTSnapshot: ""
 
     property int timeoutPTExchange: 500
 
@@ -178,13 +180,12 @@ Item
         var offset = 1000;
         var length = 10000;
         var appId = url.policyAppId ? url.policyAppId : "default";
+        var file = (url.url) ? filePTSnapshot : fileIVSU;
 
         sdlBasicCommunication.onSystemRequest(Common.RequestType.PROPRIETARY,
                                               url.url, Common.FileType.JSON,
                                               offset, length,
-                                              timeoutPTExchange,
-                                              filePTSnapshot,
-                                              appId);
+                                              timeoutPTExchange, file, appId);
 
         retriesTimer.interval = getInterval();
         if (retriesTimer.interval > 0) {
