@@ -37,7 +37,7 @@ ListModel
 {
     ListElement {
         title: "Allow SDL Functionality"
-        qml: ""
+        qml: "./views/SDLFunctionalityView.qml"
         appId: 0
         action: ""
     }

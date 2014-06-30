@@ -129,7 +129,7 @@ Item
 
     property int timeoutPTExchange: 500
 
-    property int retriesPTExchange: []
+    property var retriesPTExchange: []
 
     property var urlsPTExchange: []
 

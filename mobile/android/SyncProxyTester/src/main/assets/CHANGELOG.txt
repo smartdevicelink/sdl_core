@@ -1,5 +1,7 @@
 [CW26]
-* syncProxyTester: AppInterfaceUnregisteredReason is displayed as service message
+* SYNC Mobile SDK | SyncProxyTester: RPC Request "UnregisterAppInterface" send error
+* SYNC Mobile SDK | SyncProxyTester: Resumption: Heartbeat timeout after IgnitionOff on mobile
+* SyncProxyTester: AppInterfaceUnregisteredReason is displayed as service message
 * SyncProxyTester: SetGlobalProperties: if uncheck all checkboxes of KeyboardProperties structure, anyway request will be sent with parameter keypressMode
 * SYNC Mobile SDK: ProtocolMessageProcessor still send media messages when service is stopped
 * SyncProxyTester: Show request, add empty SoftButtons array in the request
