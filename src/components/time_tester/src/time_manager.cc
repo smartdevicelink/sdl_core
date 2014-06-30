@@ -118,9 +118,9 @@ void TimeManager::Streamer::threadMain() {
   while (!stop_flag_) {
     new_socket_fd_ = accept(server_->socket_fd_, NULL, NULL);
     if (0 > new_socket_fd_) {
-      LOG4CXX_ERROR(logger_, "Socket is closed");
-      sleep(1);
-      continue;
+      LOG4CXX_ERROR(logger_, "Cant open socket . Socket is busy ");
+      Stop();
+      break;
     }
 
     is_client_connected_ = true;

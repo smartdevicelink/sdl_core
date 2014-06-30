@@ -70,6 +70,7 @@ import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
+import com.ford.syncV4.proxy.rpc.OnAppInterfaceUnregistered;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
@@ -130,6 +131,7 @@ import com.ford.syncV4.test.ITestConfigCallback;
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
+import com.ford.syncV4.transport.SyncTransport;
 import com.ford.syncV4.transport.TCPTransportConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
@@ -867,7 +869,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 message = "<no message>";
             }
         }
-        createErrorMessageForAdapter("SYNC Proxy closed:" + message);
+        createErrorMessageForAdapter(" SYNC Proxy closed:" + message);
         boolean wasConnected = !firstHMIStatusChange;
         firstHMIStatusChange = true;
         prevHMILevel = HMILevel.HMI_NONE;
@@ -891,6 +893,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                         (cause != SyncExceptionCause.BLUETOOTH_DISABLED) &&
                         (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
                     //reset();
+                } else if (info.equals(SyncTransport.DISCONNECT_REASON_END_OF_STREAM_REACHED)) {
+                    reset();
                 }
             }
         } else {
@@ -1620,8 +1624,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onAppUnregisteredReason(String appId, AppInterfaceUnregisteredReason reason) {
-        createDebugMessageForAdapter("onAppUnregisteredReason:" + reason + ", appId:" + appId);
+    public void onAppUnregisteredReason(String appId, OnAppInterfaceUnregistered notification) {
+        createDebugMessageForAdapter(appId, notification);
     }
 
     @Override
@@ -1668,7 +1672,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     @Override
     public void onRPCRequest(String appId, RPCRequest rpcRequest) {
-        createDebugMessageForAdapter(rpcRequest);
+        createDebugMessageForAdapter(appId, rpcRequest);
     }
 
     @Override
@@ -2247,15 +2251,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             return mSyncProxy.startAudioDataTransfer(appId);
         }
         return null;
-    }
-
-    /**
-     * Invalidates provided Application Id, clear all Services associated and remove it from the list
-     *
-     * @param appId Application id
-     */
-    public void invalidateAppId(String appId) {
-        mSyncProxy.invalidateAppId(appId);
     }
 
     /**

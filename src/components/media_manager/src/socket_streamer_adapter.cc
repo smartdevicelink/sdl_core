@@ -39,6 +39,7 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 #include "config_profile/profile.h"
 #include "media_manager/video/socket_video_streamer_adapter.h"
 #include "utils/logger.h"
@@ -161,7 +162,7 @@ void SocketStreamerAdapter::Streamer::threadMain() {
     new_socket_fd_ = accept(server_->socket_fd_, NULL, NULL);
 
     if (0 > new_socket_fd_) {
-      LOG4CXX_ERROR(logger, "Socket is closed");
+      LOG4CXX_ERROR(logger, "Socket is closed " << strerror(errno));
       sleep(1);
       continue;
     }

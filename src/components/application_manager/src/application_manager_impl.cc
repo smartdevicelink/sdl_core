@@ -425,12 +425,10 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
       if (!curr_app->MakeFullscreen()) {
         return false;
       }
-      MessageHelper::SendHMIStatusNotification(*curr_app);
     } else {
       if (is_new_app_media) {
         if (curr_app->IsAudible()) {
           curr_app->MakeNotAudible();
-          MessageHelper::SendHMIStatusNotification(*curr_app);
         }
       }
       if (curr_app->IsFullscreen()) {
@@ -1830,8 +1828,10 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
       (*it)->app_id(), unregister_reason_);
 
-    UnregisterApplication((*it)->app_id(), mobile_apis::Result::INVALID_ENUM,
+    uint32_t app_id = (*it)->app_id();
+    UnregisterApplication(app_id, mobile_apis::Result::INVALID_ENUM,
                           is_ignition_off);
+    connection_handler_->CloseSession(app_id);
     it = application_list_.begin();    
   }
   if (is_ignition_off) {
@@ -1857,7 +1857,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     }
 
     default: {
-      LOG4CXX_ERROR(logger_, "Unknown unrregister reason");
+      LOG4CXX_ERROR(logger_, "Unknown unregister reason");
       break;
     }
   }
@@ -1942,7 +1942,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageToMobile& message) {
   }
 
   protocol_handler_->SendMessageToMobileApp(rawMessage, is_final);
-  LOG4CXX_INFO(logger_, "Message for mobile given away.");
+  LOG4CXX_INFO(logger_, "Message for mobile given away");
 
   if (close_session) {
     connection_handler_->CloseSession(message->connection_key());

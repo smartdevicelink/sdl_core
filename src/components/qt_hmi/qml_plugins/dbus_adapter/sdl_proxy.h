@@ -58,17 +58,64 @@ class SdlProxy: public Item {
   QDBusInterface *sdlBasicCommunicationInterface;
 
  signals:
-  void appRegistered(QVariant application);
+//! BasicCommunication
+  void resumeAudioSource(int appId);
+  void fileRemoved(QString fileName, int fileType, int appId);
+  void appRegistered(QVariant application, QVariant ttsName, QVariant vrSynonyms,
+                     QVariant resumeVrGrammars, QVariant priority);
   void appUnregistered(int appId);
   void playTone();
-  void showNotification(QVariant text, QVariant icon, int timeout);
+  void sdlClose();
+  void putFile(QVariant offset, QVariant length, QVariant fileSize,
+               QString fileName, QString syncFileName, int fileType,
+               QVariant persistentFile);
+//! BasicCommunication
+
+//! UI
+  void recordStart(int appId);
+//! UI
+
+//! SDL
+  void appPermissionChanged(int appId, QVariant isAppPermissionsRevoked,
+                            QVariant appRevokedPermissions, QVariant appRevoked,
+                            QVariant appPermissionsConsentNeeded,
+                            QVariant appUnauthorized, QVariant priority);
+  void sdlConsentNeeded(QVariant device);
+  void statusUpdate(int status);
+//! SDL
 
  private slots:
-  void OnAppRegistered(Common_HMIApplication);
+//! BasicCommunication
+  void OnResumeAudioSource(int appId);
+  void OnFileRemoved(QString fileName, int fileType, int appId);
+  void OnAppRegistered(Common_HMIApplication application,
+                       OptionalArgument<QList<Common_TTSChunk> > ttsName,
+                       OptionalArgument<QStringList> vrSynonyms,
+                       OptionalArgument<bool> resumeVrGrammars,
+                       OptionalArgument<int> priority);
   void OnAppUnregistered(int appId);
-  void OnShowNotification(Common_TextFieldStruct text,
-                          OptionalArgument<Common_Image> image,
-                          int timeout);
+  void OnPlayTone();
+  void OnSDLClose();
+  void OnPutFile(OptionalArgument<int> offset, OptionalArgument<int> length,
+                 OptionalArgument<int> fileSize,
+                 QString fileName, QString syncFileName, int fileType,
+                 OptionalArgument<bool> persistentFile);
+//! BasicCommunication
+
+//! UI
+  void OnRecordStart(int appId);
+//! UI
+
+//! SDL
+  void OnAppPermissionChanged(int appId, OptionalArgument<bool> isAppPermissionsRevoked,
+                              OptionalArgument<QList<Common_PermissionItem> > appRevokedPermissions,
+                              OptionalArgument<bool> appRevoked,
+                              OptionalArgument<bool> appPermissionsConsentNeeded,
+                              OptionalArgument<bool> appUnauthorized,
+                              OptionalArgument<int> priority);
+  void OnSDLConsentNeeded(Common_DeviceInfo device);
+  void OnStatusUpdate(int status);
+//! SDL
 };
 
 QML_DECLARE_TYPE(SdlProxy)

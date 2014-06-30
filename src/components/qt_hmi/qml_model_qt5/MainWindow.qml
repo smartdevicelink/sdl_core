@@ -238,6 +238,14 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
+
+        UserActionPopUp {
+            id: userActionPopUp
+            popUpName: "ActionPopUp"
+            objectName: "ActionPopUp"
+            anchors.fill: parent
+            visible: false
+        }
     }
 
     Item {
@@ -275,7 +283,7 @@ Rectangle {
         HardwareButtonsView { id: hardwarePanel }
     }
 
-    HMIProxy {
+    HMIAdapter {
         HmiApi.ButtonsProxy {
             id: sdlButtons
             objectName: "Buttons"
@@ -304,10 +312,23 @@ Rectangle {
             id: sdlUI
             objectName: "UI"
         }
+
+        HmiApi.SDLProxy {
+            id: sdlSDL
+            objectName: "SDL"
+        }
     }
 
-    SDLProxy {
+    SDLAdapter {
         id: sdlProxy
+
+        onResumeAudioSource: {
+
+        }
+
+        onFileRemoved: {
+
+        }
 
         onAppRegistered: {
             console.debug("enter onAppRegistered")
@@ -362,6 +383,30 @@ Rectangle {
             beep.play()
         }
 
+        onSdlClose: {
+
+        }
+
+        onPutFile: {
+
+        }
+
+        onRecordStart: {
+
+        }
+
+        onAppPermissionChanged: {
+
+        }
+
+        onSdlConsentNeeded: {
+
+        }
+
+        onStatusUpdate: {
+            console.log("enter onStatusUpdate")
+            settingsContainer.updateStatus(status);
+        }
     }
 
     Component.onCompleted: {

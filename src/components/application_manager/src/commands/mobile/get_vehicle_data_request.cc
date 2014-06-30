@@ -229,7 +229,11 @@ void GetVehicleDataRequest::Run() {
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
-
+  if (!app->IsGetVehicleDataAllowed()) {
+    SendResponse(false, mobile_apis::Result::REJECTED);
+    LOG4CXX_ERROR(logger_, "Rejected. GetVehicleData frequency is to large");
+    return;
+  }
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(

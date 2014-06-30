@@ -541,16 +541,16 @@ class Impl(FordXmlParser):
 
     def make_dbus_adaptor_declarations(self, out):
         for interface_el in self.el_tree.findall('interface'):
-            notifications = self.find_notifications(interface_el)
-            request_responses = self.find_request_response_pairs(interface_el)
+            notifications = self.find_notifications_by_provider(interface_el, "hmi")
+            request_responses = self.find_request_response_pairs_by_provider(interface_el, "hmi")
             if len(notifications) > 0 or len(request_responses) > 0:
                 self.write_adaptor_declaration(interface_el, notifications, request_responses, out)
 
 
     def make_dbus_adaptor_definitions(self, out):
         for interface_el in self.el_tree.findall('interface'):
-            notifications = self.find_notifications(interface_el)
-            request_responses = self.find_request_response_pairs(interface_el)
+            notifications = self.find_notifications_by_provider(interface_el, "hmi")
+            request_responses = self.find_request_response_pairs_by_provider(interface_el, "hmi")
             if len(notifications) > 0 or len(request_responses) > 0:
                 self.write_adaptor_definition(interface_el, notifications, request_responses, out)
 
@@ -575,7 +575,7 @@ class Impl(FordXmlParser):
         out.write("struct ApiAdaptors {\n")
         interfaces = self.el_tree.findall('interface')
         def filt(iface):
-            return self.find_notifications(iface) or self.find_request_response_pairs(iface)
+            return self.find_notifications_by_provider(iface, "hmi") or self.find_request_response_pairs_by_provider(iface, "hmi")
         interfaces = filter(filt, interfaces) 
         for interface_el in interfaces:
             name = interface_el.get('name') + 'Adaptor'

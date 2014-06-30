@@ -1,6 +1,7 @@
 package com.ford.syncV4.android.activity;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -16,11 +17,15 @@ import com.ford.syncV4.proxy.rpc.KeyboardProperties;
 import com.ford.syncV4.proxy.rpc.enums.KeyboardLayout;
 import com.ford.syncV4.proxy.rpc.enums.KeypressMode;
 import com.ford.syncV4.proxy.rpc.enums.Language;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Arrays;
 import java.util.Vector;
 
 public class KeyboardPropertiesActivity extends Activity {
+
+    private static final String LOG_TAG = KeyboardPropertiesActivity.class.getSimpleName();
+
     //
     private KeyboardProperties kbdProp;
     //
@@ -193,5 +198,12 @@ public class KeyboardPropertiesActivity extends Activity {
         }
 
         return keyboardProperties;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        Logger.i(LOG_TAG + " OnActivityResult, request:" + requestCode + ", result:" + resultCode +
+                ", data:" + data);
     }
 }

@@ -478,9 +478,14 @@ class ProtocolHandlerImpl
     std::map<uint8_t, uint32_t> message_counters_;
 
     /**
-     *\brief map for session last message.
+     *\brief map for connection last message.
      */
     std::map<uint8_t, uint32_t> sessions_last_message_id_;
+
+    /**
+     *\brief Connections that must be closed after their last messages were sent
+     */
+    std::list<uint32_t> ready_to_close_connections_;
 
 
     class IncomingDataHandler;

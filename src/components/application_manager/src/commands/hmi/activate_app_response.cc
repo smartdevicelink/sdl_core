@@ -31,6 +31,7 @@
  */
 #include "application_manager/commands/hmi/activate_app_response.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
@@ -62,6 +63,7 @@ void ActivateAppResponse::Run() {
                                        application_by_hmi_app(hmi_app_id);
     if (application) {
       ApplicationManagerImpl::instance()->ActivateApplication(application);
+      MessageHelper::SendHMIStatusNotification(*(application.get()));
     } else {
       LOG4CXX_ERROR(logger_, "Application can't be activated.");
     }

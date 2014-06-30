@@ -19,6 +19,6 @@ public class RPCMessageHandlerTest extends AndroidTestCase {
 
     public void testHandleRPCMessageWIthNullHashTableDoNotThrowNPE() throws Exception {
         RPCMessageHandler rpcMessageHandler = new RPCMessageHandler(mock(SyncProxyBase.class));
-        rpcMessageHandler.handleRPCMessage(Session.DEFAULT_SESSION_ID, null);
+        rpcMessageHandler.handleRPCMessage(Session.DEFAULT_SESSION_ID, "", null);
     }
 }

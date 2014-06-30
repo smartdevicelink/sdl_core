@@ -131,7 +131,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * Time out in milliseconds for exit from application. If application is not correctly
      * destroyed within specified timeout - then we force destroy procedure
      */
-    private static final int EXIT_TIMEOUT = 3000;
+    private static final int EXIT_TIMEOUT = 7000;
     /**
      * Handler object to monitor exit procedure. If exit procedure fails, then this object will
      * manage application to destroy
@@ -586,8 +586,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     private void showProtocolPropertiesInTitle() {
         final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
-        int protocolVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
-        boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
         String transportType = null;
         switch (prefs.getInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
                 Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE)) {
@@ -601,9 +599,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 transportType = "USB";
                 break;
         }
-        setTitle(getResources().getString(R.string.tester_app_name) + " (Start protocol v:"
-                + protocolVersion + ", " + (isMedia ? "" : "non-") + "media, "
-                + transportType + ")");
+        setTitle(getResources().getString(R.string.tester_app_name) + " " + transportType);
     }
 
     @Override
@@ -1449,10 +1445,10 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             public void run() {
                 final PlaceholderFragment fragment = getFragmentByAppId(appId);
                 if (fragment == null) {
-                    Logger.w("Stop Audio Service, Fragment NULL");
+                    Logger.w("Stop Mobile Navi, Fragment NULL");
                     return;
                 }
-                fragment.getLogAdapter().logMessage("Should stop Audio service", true);
+                fragment.getLogAdapter().logMessage("Should stop Mobile Navi", true);
 
                 if (mBoundProxyService == null) {
                     return;

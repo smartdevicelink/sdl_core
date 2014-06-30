@@ -5,13 +5,14 @@ import com.ford.syncV4.util.logger.Logger;
 
 public abstract class SyncTransport {
 
-    private final static String CLASS_NAME = SyncTransport.class.getSimpleName();
+    public static final String DISCONNECT_REASON_END_OF_STREAM_REACHED = "EndOfStreamReached";
 
+    private final static String CLASS_NAME = SyncTransport.class.getSimpleName();
     private final static String FailurePropagating_Msg = "Failure propagating ";
-	private Boolean isConnected = false;
-	
-	private static final String SEND_LOCK_OBJ = "lock";
-	
+    private static final String SEND_LOCK_OBJ = "lock";
+
+	private volatile Boolean isConnected = false;
+
 	// Get status of transport connection
 	public Boolean getIsConnected() {
 		return isConnected;
@@ -83,14 +84,13 @@ public abstract class SyncTransport {
 		} catch (Exception excp) {
 			Logger.e(FailurePropagating_Msg + "onTransportConnected: " + excp.toString(), excp);
 			handleTransportError(FailurePropagating_Msg + "onTransportConnected", excp);
-		} // end-catch
-	} // end-method
+		}
+	}
 	
     // This method is called by the subclass to indicate that transport disconnection
     // has occurred.
 	protected void handleTransportDisconnected(final String info) {
 		isConnected = false;
-
 		try {
             Logger.d(CLASS_NAME + " Disconnected");
 			mTransportListener.onTransportDisconnected(info);

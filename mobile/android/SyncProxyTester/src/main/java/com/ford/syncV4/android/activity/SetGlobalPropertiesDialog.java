@@ -42,7 +42,7 @@ import java.util.Vector;
  */
 public class SetGlobalPropertiesDialog extends BaseDialogFragment {
 
-    private static final String LOG_TAG = "setGlobalPropertiesDialogDialog";
+    private static final String LOG_TAG = SetGlobalPropertiesDialog.class.getSimpleName();
 
     /**
      * KeyboardProperties object passed between KeyboardPropertiesActivity and
@@ -83,10 +83,8 @@ public class SetGlobalPropertiesDialog extends BaseDialogFragment {
 
         mCurrentKbdProperties = new KeyboardProperties();
         mCurrentKbdProperties.setLanguage(Language.EN_US);
-        mCurrentKbdProperties.setKeyboardLayout(
-                KeyboardLayout.QWERTY);
-        mCurrentKbdProperties.setKeypressMode(
-                KeypressMode.SINGLE_KEYPRESS);
+        mCurrentKbdProperties.setKeyboardLayout(KeyboardLayout.QWERTY);
+        mCurrentKbdProperties.setKeypressMode(KeypressMode.SINGLE_KEYPRESS);
         mCurrentKbdProperties.setAutoCompleteText(getString(
                 R.string.keyboardproperties_autoCompleteTextDefault));
         mCurrentKbdProperties.setLimitedCharacterList(new Vector<String>() {{
@@ -227,6 +225,9 @@ public class SetGlobalPropertiesDialog extends BaseDialogFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        Logger.i(LOG_TAG + " OnActivityResult, request:" + requestCode + ", result:" + resultCode +
+                ", data:" + data);
+
         if (resultCode != Activity.RESULT_OK) {
             return;
         }
@@ -239,8 +240,9 @@ public class SetGlobalPropertiesDialog extends BaseDialogFragment {
                     Logger.w(LOG_TAG + " Returned kbdProperties is null");
                 }
                 IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES);
-            } else if (IntentHelper.containsKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES_EMPTY)) {
-                mCurrentKbdProperties = null;
+            }
+            if (IntentHelper.containsKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES_EMPTY)) {
+                mCurrentKbdProperties = new KeyboardProperties();
                 Logger.w(LOG_TAG + " Returned kbdProperties is null, probably none of the properties " +
                         "were selected");
                 IntentHelper.removeObjectForKey(Const.INTENTHELPER_KEY_KEYBOARDPROPERTIES_EMPTY);

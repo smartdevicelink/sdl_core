@@ -104,6 +104,9 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    */
   void StartMicrophoneRecording();
 
+  //flag display state of speak during perform audio pass thru
+  bool is_active_tts_speak_;
+
   DISALLOW_COPY_AND_ASSIGN(PerformAudioPassThruRequest);
 };
 
