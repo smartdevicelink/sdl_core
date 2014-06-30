@@ -43,6 +43,8 @@ import java.net.Socket;
  */
 public class TCPTransport extends SyncTransport {
 
+    private static final String CLASS_NAME = TCPTransport.class.getSimpleName();
+
     /**
      * Size of the read buffer.
      */
@@ -128,15 +130,15 @@ public class TCPTransport extends SyncTransport {
                         bResult = true;
                         //Logger.i("TCPTransport.sendBytesOverTransport: successfully send data:" + msgBytes.length);
                     } catch (IOException e) {
-                        Logger.w("TCPTransport.sendBytesOverTransport: error during sending data: " + e.getMessage());
+                        Logger.e(CLASS_NAME + " SendBytesOverTransport: error during sending data: " + e.getMessage());
                         bResult = false;
                     }
                 } else {
-                    Logger.e("TCPTransport: sendBytesOverTransport request accepted, but output stream is null");
+                    Logger.e(CLASS_NAME + " SendBytesOverTransport request accepted, but output stream is null");
                 }
             }
         } else {
-            Logger.i("TCPTransport: sendBytesOverTransport request rejected. Transport is not connected");
+            Logger.i(CLASS_NAME + " SendBytesOverTransport request rejected. Transport is not connected");
             bResult = false;
         }
 
@@ -206,7 +208,7 @@ public class TCPTransport extends SyncTransport {
     private void disconnect(String message, Exception exception) {
 
         if (getCurrentState() == TCPTransportState.DISCONNECTING) {
-            Logger.i("TCPTransport: disconnecting already in progress");
+            Logger.i(CLASS_NAME + " disconnecting already in progress");
             return;
         }
 
@@ -250,8 +252,7 @@ public class TCPTransport extends SyncTransport {
             // This disconnect was caused by an error, notify the proxy
             // that there was a transport error.
             Logger.e("Disconnect is incorrect. Handling it as error");
-            final String finalDisconnectMsg = disconnectMsg;
-            handleTransportError(finalDisconnectMsg, exception);
+            handleTransportError(disconnectMsg, exception);
         }
     }
 
@@ -407,10 +408,12 @@ public class TCPTransport extends SyncTransport {
          */
         private void internalHandleTCPDisconnect() {
             if (isHalted) {
-                Logger.i("TCPTransport.run: TCP disconnect received, but thread already halted");
+                Logger.i(CLASS_NAME + " run: TCP disconnect received, but thread already halted");
             } else {
-                Logger.i("TCPTransport.run: TCP disconnect received");
-                disconnect("TCPTransport.run: End of stream reached", null);
+                Logger.w(CLASS_NAME + " run:" + DISCONNECT_REASON_END_OF_STREAM_REACHED);
+                disconnect(DISCONNECT_REASON_END_OF_STREAM_REACHED,
+                        new SyncException(DISCONNECT_REASON_END_OF_STREAM_REACHED,
+                                SyncExceptionCause.SYNC_CONNECTION_FAILED));
             }
         }
 

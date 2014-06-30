@@ -34,6 +34,8 @@
 
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
+import "../models/RequestToSDL.js" as RequestToSDL
+import "../models/Internal.js" as Internal
 
 Item
 {
@@ -122,4 +124,135 @@ Item
     }
 
     property var buttonCapabilities: []
+
+    property string filePTSnapshot: "IVSU/PROPRIETARY_REQUEST"
+
+    property int timeoutPTExchange: 500
+
+    property var retriesPTExchange: []
+
+    property var urlsPTExchange: []
+
+    property int currentRetry: 0
+
+    property int currentUrl: 0
+
+    function updateStatus(result) {
+        console.debug("Result update SDL:", result);
+        var text = {}
+        text[Common.UpdateResult.UP_TO_DATE] = "UP_TO_DATE";
+        text[Common.UpdateResult.UPDATING] = "UPDATING";
+        text[Common.UpdateResult.UPDATE_NEEDED] = "UPDATE_NEEDED";
+        ttsPopUp.activate(text[result])
+    }
+
+    function startPTExchange(urls) {
+        urlsPTExchange = urls;
+        currentRetry = 0;
+        currentUrl = 0;
+        sendSystemRequest();
+    }
+
+    function getUrl() {
+        if (currentUrl >= 0 && currentUrl < urlsPTExchange.length) {
+          var url = urlsPTExchange[currentUrl];
+          currentUrl = (currentUrl + 1) / urlsPTExchange.length;
+          return url;
+        } else {
+          return {url: ""}
+        }
+    }
+
+    function getInterval() {
+        if (currentRetry >= 0 && currentRetry < retriesPTExchange.length) {
+            var interval = (timeoutPTExchange + retriesPTExchange[currentRetry]) * 1000;
+            currentRetry++;
+            return interval;
+        } else {
+            return 0;
+        }
+    }
+
+    function sendSystemRequest() {
+        var url = getUrl();
+        var offset = 1000;
+        var length = 10000;
+        var appId = url.policyAppId ? url.policyAppId : "default";
+
+        sdlBasicCommunication.onSystemRequest(Common.RequestType.PROPRIETARY,
+                                              url.url, Common.FileType.JSON,
+                                              offset, length,
+                                              timeoutPTExchange,
+                                              filePTSnapshot,
+                                              appId);
+
+        retriesTimer.interval = getInterval();
+        if (retriesTimer.interval > 0) {
+            retriesTimer.start();
+        }
+    }
+
+    function stopPTExchange(fileName) {
+        retriesTimer.stop();
+        sdlSDL.onReceivedPolicyUpdate(fileName);
+    }
+
+    Timer {
+        id: retriesTimer
+        interval: timeoutPTExchange; running: false; repeat: false
+        onTriggered: sendSystemRequest()
+    }
+
+    function activateApp (appId) {
+
+        console.debug("SDL.ActivateApp Request enter", appId);
+
+        RequestToSDL.SDL_ActivateApp(appId, function(params){
+            settingsContainer.activateApp_Response(appId, params)
+        })
+
+        console.debug("SDL.ActivateApp Request exit");
+    }
+
+    function activateApp_Response (appId, params) {
+
+        console.debug("activateApp_Response enter", appId);
+
+        if (!params.isSDLAllowed) {
+
+            userActionPopUp.activate("Allow SDL Functionality request",
+                                        "Would you like to allow SDL functionality for device '" + params.device.name + "'?",
+                                        function(result){
+                                            allowSDLFunctionality(result, params.device)
+                                        }
+                                    )
+        }
+
+        if (params.isPermissionsConsentNeeded) {
+            //GetListOfPermissions
+        }
+
+        if (params.isAppPermissionsRevoked) {
+            //setAppPermissions remove revoked permissions
+        }
+
+        if (params.isAppRevoked) {
+            //popupActivate("Current version of app is no longer supported!");
+            //? unregister app or set to level NONE
+        } else if (params.isSDLAllowed) {
+            dataContainer.setCurrentApplication(appId)
+            contentLoader.go(
+                Internal.chooseAppStartScreen(
+                    dataContainer.currentApplication.appType,
+                    dataContainer.currentApplication.isMediaApplication
+                ),
+                appId
+            )
+        }
+    }
+
+    function allowSDLFunctionality (result, device) {
+        console.log("allowSDLFunctionality enter");
+        sdlSDL.onAllowSDLFunctionality(device, result, Common.ConsentSource.GUI)
+    }
 }

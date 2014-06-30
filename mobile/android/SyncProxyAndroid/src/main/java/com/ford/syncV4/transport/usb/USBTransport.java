@@ -650,7 +650,7 @@ public class USBTransport extends SyncTransport {
                 Logger.d(CLASS_NAME + " Read " + bytesRead + " bytes");
 
                 if (isInterrupted()) {
-                    Logger.i(CLASS_NAME + " Read some data, but thread is interrupted");
+                    Logger.w(CLASS_NAME + " Read some data, but thread is interrupted");
                     return;
                 }
 
@@ -658,6 +658,8 @@ public class USBTransport extends SyncTransport {
                     handleReceivedBytes(buffer, bytesRead);
                 }
             }
+
+            Logger.d(CLASS_NAME + " Quit Read loop");
         }
     }
 }

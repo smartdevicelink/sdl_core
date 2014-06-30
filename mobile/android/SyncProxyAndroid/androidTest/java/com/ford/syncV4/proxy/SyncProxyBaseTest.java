@@ -8,6 +8,7 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALM;
+import com.ford.syncV4.proxy.rpc.OnAppInterfaceUnregistered;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
@@ -31,6 +32,7 @@ import java.util.List;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyByte;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.times;
@@ -100,14 +102,14 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         assertEquals("pool should has RPC service", 1, proxyALM.getServicePool().size());
     }
 
-    public void testRPCServiceEndedOnDispose() throws Exception {
+    public void testRPCServiceOnEndSessionStayInCollection() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         proxyALM.initializeSession(SessionTest.APP_ID);
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(SessionTest.SESSION_ID,
                 ProtocolConstants.PROTOCOL_VERSION_THREE);
 
         proxyALM.endSession(SessionTest.SESSION_ID, EndServiceInitiator.SDK);
-        assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
+        assertEquals("pool should not be empty", 1, proxyALM.getServicePool().size());
     }
 
     // TODO : reconsider this case because 'dispose' does not clean Session directly, but via it's
@@ -314,6 +316,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
         // send OnAppInterfaceUnregistered
         Hashtable<String, Object> params = new Hashtable<String, Object>();
+
         final AppInterfaceUnregisteredReason reason =
                 AppInterfaceUnregisteredReason.IGNITION_OFF;
         params.put(Names.reason, reason);
@@ -321,9 +324,15 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 Names.OnAppInterfaceUnregistered, params,
                 ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
 
+        ArgumentCaptor<OnAppInterfaceUnregistered> argumentCaptor =
+                ArgumentCaptor.forClass(OnAppInterfaceUnregistered.class);
+
         verify(proxyListenerMock,
-                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(SessionTest.APP_ID_DEFAULT,
-                reason);
+                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(anyString(),
+                argumentCaptor.capture());
+
+        assertEquals(AppInterfaceUnregisteredReason.IGNITION_OFF,
+                argumentCaptor.getValue().getReason());
     }
 
     public void testAppUnregisteredWithMasterReset() throws Exception {
@@ -338,9 +347,15 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 Names.OnAppInterfaceUnregistered, params,
                 ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
 
+        ArgumentCaptor<OnAppInterfaceUnregistered> argumentCaptor =
+                ArgumentCaptor.forClass(OnAppInterfaceUnregistered.class);
+
         verify(proxyListenerMock,
-                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(SessionTest.APP_ID_DEFAULT,
-                reason);
+                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(anyString(),
+                argumentCaptor.capture());
+
+        assertEquals(AppInterfaceUnregisteredReason.MASTER_RESET,
+                argumentCaptor.getValue().getReason());
     }
 
     public void testAppUnregisteredWithFactoryDefaults() throws Exception {
@@ -355,9 +370,15 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 Names.OnAppInterfaceUnregistered, params,
                 ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
 
+        ArgumentCaptor<OnAppInterfaceUnregistered> argumentCaptor =
+                ArgumentCaptor.forClass(OnAppInterfaceUnregistered.class);
+
         verify(proxyListenerMock,
-                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(SessionTest.APP_ID_DEFAULT,
-                reason);
+                timeout(CALLBACK_WAIT_TIMEOUT)).onAppUnregisteredReason(anyString(),
+                argumentCaptor.capture());
+
+        assertEquals(AppInterfaceUnregisteredReason.FACTORY_DEFAULTS,
+                argumentCaptor.getValue().getReason());
     }
 
     // Obsolete case
@@ -445,8 +466,8 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         verify(proxy.getSyncConnection(), times(1)).closeMobileNaviService(SessionTest.SESSION_ID);
         verify(proxy.getSyncConnection(), times(1)).closeAudioService(SessionTest.SESSION_ID);
         assertNotNull(proxy.getSyncConnection());
-        assertEquals("Service pool should be empty", 0, proxy.getServicePool().size());
-        assertEquals("Session id should be 0", Session.DEFAULT_SESSION_ID,
+        assertEquals("Service pool should not be empty", 1, proxy.getServicePool().size());
+        assertEquals("Session id should be 0", SessionTest.SESSION_ID,
                 proxy.syncSession.getSessionIdByAppId(SessionTest.APP_ID));
     }
 
@@ -480,7 +501,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         proxy.dispatchIncomingMessage(TestCommon.createProtocolMessage(
                 Names.OnAppInterfaceUnregistered, params,
                 ProtocolMessage.RPCTYPE_NOTIFICATION, 1));
-        verify(proxy.getRPCMessageHandler(), times(1)).handleRPCMessage(anyByte(),
+        verify(proxy.getRPCMessageHandler(), times(1)).handleRPCMessage(anyByte(), anyString(),
                 any(Hashtable.class));
     }
 

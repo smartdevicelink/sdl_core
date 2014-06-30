@@ -44,13 +44,13 @@ HeartBeatMonitor::HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
                                    Connection *connection)
     : heartbeat_timeout_seconds_(heartbeat_timeout_seconds),
       connection_(connection),
-      stop_flag_(false) {
+      stop_flag_(false),
+      is_active(true) {
 }
 
 HeartBeatMonitor::~HeartBeatMonitor() {
   LOG4CXX_TRACE_ENTER(logger_);
 }
-
 
 void HeartBeatMonitor::threadMain() {
    std::map<uint8_t, SessionState>::iterator it;
@@ -68,8 +68,8 @@ void HeartBeatMonitor::threadMain() {
           LOG4CXX_WARN(logger_, "Session with id " << static_cast<int32_t>(it->first) <<" timed out, closing");
           const uint8_t session_id = it->first;
 
-          // Unlock sessions_list_lock_ to avoid deadlock during session and session heartbeat removing
           {
+            // Unlock sessions_list_lock_ to avoid deadlock during session and session heartbeat removing
             AutoUnlock auto_unlock(auto_lock);
             connection_->CloseSession(session_id);
           }
@@ -94,34 +94,27 @@ void HeartBeatMonitor::threadMain() {
       }
     }
   }
+
+  is_active = false;
 }
 
-bool HeartBeatMonitor::AddSession(uint8_t session_id) {
+void HeartBeatMonitor::AddSession(uint8_t session_id) {
   LOG4CXX_INFO(logger_, "Add session with id " <<
                static_cast<int32_t>(session_id));
-
   AutoLock auto_lock(sessions_list_lock_);
-
   if (sessions_.end() != sessions_.find(session_id)) {
-    return false;
+    LOG4CXX_WARN(logger_, "Session with id " << static_cast<int32_t>(session_id)
+                 << "already exists");
+    return;
   }
-
   SessionState session_state;
   session_state.heartbeat_expiration_ = date_time::DateTime::getCurrentTime();
   session_state.heartbeat_expiration_.tv_sec +=  heartbeat_timeout_seconds_;
   session_state.is_heartbeat_sent_ = false;
-
   sessions_[session_id] = session_state;
 
   LOG4CXX_INFO(logger_, "Start heartbeat for session: " <<
                static_cast<int32_t>(session_id));
-
-  //first session added, so we need to start monitoring thread
-  if (1 == sessions_.size()) {
-    return true;
-  }
-
-  return false;
 }
 
 void HeartBeatMonitor::RemoveSession(uint8_t session_id) {
@@ -151,6 +144,9 @@ void HeartBeatMonitor::KeepAlive(uint8_t session_id) {
 
 bool HeartBeatMonitor::exitThreadMain() {
   stop_flag_ = true;
+  while (is_active) {
+    usleep(10000);
+  }
   LOG4CXX_INFO(logger_, "exitThreadMain");
   return true;
 }

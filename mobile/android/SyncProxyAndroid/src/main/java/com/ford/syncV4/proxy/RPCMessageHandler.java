@@ -108,14 +108,13 @@ public class RPCMessageHandler implements IRPCMessageHandler {
     }
 
     @Override
-    public void handleRPCMessage(byte sessionId, Hashtable hash) {
+    public void handleRPCMessage(byte sessionId, String appId, Hashtable hash) {
         if (hash != null) {
-            handleRPCMessageInt(sessionId, hash);
+            handleRPCMessageInt(sessionId, appId, hash);
         }
     }
 
-    private void handleRPCMessageInt(final byte sessionId, Hashtable hash) {
-        final String appId = syncProxyBase.getAppIdBySessionId(sessionId);
+    private void handleRPCMessageInt(final byte sessionId, final String appId, Hashtable hash) {
         RPCMessage rpcMsg = new RPCMessage(hash);
         String functionName = rpcMsg.getFunctionName();
         String messageType = rpcMsg.getMessageType();
@@ -1094,8 +1093,8 @@ public class RPCMessageHandler implements IRPCMessageHandler {
             } else if (functionName.equals(Names.OnAppInterfaceUnregistered)) {
                 // OnAppInterfaceUnregistered
                 syncProxyBase.setAppInterfaceRegistered(sessionId, false);
-                synchronized (syncProxyBase.APP_INTERFACE_REGISTERED_LOCK) {
-                    syncProxyBase.APP_INTERFACE_REGISTERED_LOCK.notify();
+                synchronized (syncProxyBase.APP_INTERFACE_LOCK) {
+                    syncProxyBase.APP_INTERFACE_LOCK.notify();
                 }
 
                 final OnAppInterfaceUnregistered msg = new OnAppInterfaceUnregistered(hash);
@@ -1117,7 +1116,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                                     syncProxyBase.getLastLanguageChange());
                         }
                     } else if (msg.getReason() != null) {
-                        syncProxyBase.onAppUnregisteredReason(sessionId, msg.getReason());
+                        syncProxyBase.onAppUnregisteredReason(appId, msg);
                     } else {
                         // This requires the proxy to be cycled
                         if (syncProxyBase.getCurrentTransportType() == TransportType.BLUETOOTH) {

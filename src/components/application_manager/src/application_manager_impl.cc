@@ -1820,9 +1820,11 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
       (*it)->app_id(), unregister_reason_);
 
-    UnregisterApplication((*it)->app_id(), mobile_apis::Result::INVALID_ENUM,
+    uint32_t app_id = (*it)->app_id();
+    UnregisterApplication(app_id, mobile_apis::Result::INVALID_ENUM,
                           is_ignition_off);
-    it = application_list_.begin();
+    connection_handler_->CloseSession(app_id);
+    it = application_list_.begin();    
   }
   if (is_ignition_off) {
    resume_controller().IgnitionOff();
@@ -1847,7 +1849,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     }
 
     default: {
-      LOG4CXX_ERROR(logger_, "Unknown unrregister reason");
+      LOG4CXX_ERROR(logger_, "Unknown unregister reason");
       break;
     }
   }
@@ -1932,7 +1934,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageToMobile& message) {
   }
 
   protocol_handler_->SendMessageToMobileApp(rawMessage, is_final);
-  LOG4CXX_INFO(logger_, "Message for mobile given away.");
+  LOG4CXX_INFO(logger_, "Message for mobile given away");
 
   if (close_session) {
     connection_handler_->CloseSession(message->connection_key());

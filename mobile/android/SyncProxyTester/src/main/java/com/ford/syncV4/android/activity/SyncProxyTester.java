@@ -132,7 +132,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * Time out in milliseconds for exit from application. If application is not correctly
      * destroyed within specified timeout - then we force destroy procedure
      */
-    private static final int EXIT_TIMEOUT = 3000;
+    private static final int EXIT_TIMEOUT = 7000;
     /**
      * Handler object to monitor exit procedure. If exit procedure fails, then this object will
      * manage application to destroy
@@ -1548,8 +1548,13 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     public void stopAudioService(final String appId) {
+<<<<<<< HEAD
 
         mStreamCommandsExecutorService.submit(new Runnable() {
+=======
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.submit(new Runnable() {
+>>>>>>> develop
             @Override
             public void run() {
                 if (!isProxyReadyForWork(appId)) {
@@ -1565,6 +1570,10 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
+<<<<<<< HEAD
+=======
+                closeAudioOutputStream();
+>>>>>>> develop
                 mBoundProxyService.syncProxyStopAudioService(appId);
                 closeAudioOutputStream();
             }

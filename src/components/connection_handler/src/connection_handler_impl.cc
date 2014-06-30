@@ -147,12 +147,21 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   // 1. Delete all the connections and sessions of this device
   // 2. Delete device from a list
   // 3. Let observer know that device has been deleted.
-  for (ConnectionList::iterator it = connection_list_.begin();
-      it != connection_list_.end(); ++it) {
-    if (device_info.device_handle() == (*it).second->connection_device_handle()) {
-      RemoveConnection((*it).first);
+  {
+    sync_primitives::AutoLock lock(connection_list_lock_);
+    for (ConnectionList::iterator it = connection_list_.begin();
+         it != connection_list_.end(); ++it) {
+      if (device_info.device_handle() ==
+          (*it).second->connection_device_handle()) {
+        ConnectionHandle connection_handle = (*it).first;
+        // Unlock connection_list to avoid deadlock during connection removing
+        sync_primitives::AutoUnlock auto_unlock(lock);
+        // FIXME(EZamakhov): It could be wrong after return from Remove
+        RemoveConnection(connection_handle);
+      }
     }
   }
+
   device_list_.erase(device_info.device_handle());
   if (connection_handler_observer_) {
     connection_handler_observer_->RemoveDevice(device_info.device_handle());
@@ -213,6 +222,8 @@ void ConnectionHandlerImpl::OnUnexpectedDisconnect(
     transport_manager::ConnectionUID connection_id,
     const transport_manager::CommunicationError &error) {
   LOG4CXX_ERROR(logger_, "ConnectionHandlerImpl::OnUnexpectedDisconnect");
+
+  OnConnectionEnded(connection_id);
 }
 
 void ConnectionHandlerImpl::OnDeviceConnectionLost(
@@ -728,13 +739,12 @@ void ConnectionHandlerImpl::OnConnectionEnded(
       const uint32_t session_key = KeyFromPair(connection_id, session_it->first);
       const ServiceList &service_list = session_it->second.service_list;
       for (ServiceList::const_iterator service_it = service_list.begin(), end =
-          service_list.end(); service_it != end; ++service_it) {
+           service_list.end(); service_it != end; ++service_it) {
         connection_handler_observer_->OnServiceEndedCallback(
-            session_key, service_it->service_type);
+              session_key, service_it->service_type);
       }
     }
   }
-
   delete itr->second;
   connection_list_.erase(itr);
 }

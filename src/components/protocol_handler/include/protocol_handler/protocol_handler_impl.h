@@ -502,9 +502,15 @@ class ProtocolHandlerImpl
    */
   std::map<uint8_t, uint32_t> sessions_last_message_id_;
 
+  /**
+   *\brief Connections that must be closed after their last messages were sent
+   */
+  std::list<uint32_t> ready_to_close_connections_;
+
 
   class IncomingDataHandler;
   std::auto_ptr<IncomingDataHandler> incoming_data_handler_;
+
 #ifdef ENABLE_SECURITY
   security_manager::SecurityManager *security_manager_;
 #endif  // ENABLE_SECURITY
@@ -513,6 +519,7 @@ class ProtocolHandlerImpl
   impl::FromMobileQueue raw_ford_messages_from_mobile_;
   // Thread that pumps messages prepared to being sent to mobile side.
   impl::ToMobileQueue raw_ford_messages_to_mobile_;
+
 #ifdef TIME_TESTER
   PHMetricObserver *metric_observer_;
 #endif  // TIME_TESTER

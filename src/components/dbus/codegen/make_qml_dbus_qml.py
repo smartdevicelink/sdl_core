@@ -106,8 +106,8 @@ class Impl(FordXmlParser):
         out.write("    id: sdl" + name + "\n")
         out.write("  }\n")
 
-        notifications = impl.find_notifications(interface_el)
-        request_responses = impl.find_request_response_pairs(interface_el)
+        notifications = impl.find_notifications_by_provider(interface_el, "hmi")
+        request_responses = impl.find_request_response_pairs_by_provider(interface_el, "hmi")
         for request, response in request_responses:
             self.write_function(name, request, response, out)
         for n in notifications:
@@ -194,8 +194,8 @@ in_tree_root = in_tree.getroot()
 impl = Impl(in_tree_root)
 
 for interface_el in in_tree_root.findall('interface'):
-    notifications = impl.find_notifications(interface_el)
-    request_responses = impl.find_request_response_pairs(interface_el)
+    notifications = impl.find_notifications_by_provider(interface_el, "hmi")
+    request_responses = impl.find_request_response_pairs_by_provider(interface_el, "hmi")
     if notifications or request_responses:
         filename = interface_el.get('name')+'Proxy.qml'
         outfile = open(args.outdir + '/' + filename, 'w')

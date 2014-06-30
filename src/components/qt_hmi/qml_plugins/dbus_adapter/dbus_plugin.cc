@@ -62,8 +62,8 @@ void DbusPlugin::registerTypes(const char *uri) {
   log4cxx::PropertyConfigurator::configure("log4cxx.properties");
 
   // @uri sdl.core.api
-  qmlRegisterType<HmiProxy>(uri, 1, 0, "HMIProxy");
-  qmlRegisterType<SdlProxy>(uri, 1, 0, "SDLProxy");
+  qmlRegisterType<HmiProxy>(uri, 1, 0, "HMIAdapter");
+  qmlRegisterType<SdlProxy>(uri, 1, 0, "SDLAdapter");
 
   RegisterDbusMetatypes();
   qDBusRegisterMetaType<OptionalArgument<int> >();

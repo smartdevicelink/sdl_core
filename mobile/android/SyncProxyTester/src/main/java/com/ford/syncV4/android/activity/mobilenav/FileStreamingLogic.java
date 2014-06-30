@@ -21,7 +21,6 @@ public class FileStreamingLogic {
     private boolean mIsStreamingInProgress;
 
     public FileStreamingLogic(ServicePreviewFragmentInterface mobileNavPreviewFragment) {
-        Logger.d(TAG + " Constructor, hashCode:" + hashCode());
         context = mobileNavPreviewFragment;
     }
 

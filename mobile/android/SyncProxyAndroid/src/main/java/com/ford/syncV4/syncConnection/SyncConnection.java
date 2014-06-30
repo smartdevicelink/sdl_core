@@ -67,6 +67,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     static final Object START_PROTOCOL_SESSION_LOCK = new Object();
     static final Object START_SERVICE_LOCK = new Object();
 
+    /**
+     * Waiting time for the End Service ACK, in milliseconds
+     */
+    private static final int WAIT_END_TIMEOUT = 1000;
+
     private boolean mIsInit = false;
     private Session mSyncSession;
     private BaseTransportConfig mTransportConfig;
@@ -108,6 +113,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      */
     public void init() {
         // Initialize the transport
+        Logger.d(CLASS_NAME + " Init");
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             switch (mTransportConfig.getTransportType()) {
                 case BLUETOOTH:
@@ -165,16 +171,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
             if (mTransport != null) {
                 mTransport.disconnect();
-                mTransport.removeListener();
-
-                // TODO : Add here 'shutdownAllExecutors' of the 'SendProtocolMessageProcessor'
-                // TODO : method call
+                //mTransport.removeListener();
             }
             //mTransport = null;
 
-            if (mProtocol != null) {
+            /*if (mProtocol != null) {
                 mProtocol.removeListener();
-            }
+            }*/
             //mProtocol = null;
         }
     }
@@ -207,7 +210,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     private void waitForRpcEndServiceACK() {
         synchronized (END_PROTOCOL_SERVICE_RPC_LOCK) {
             try {
-                END_PROTOCOL_SERVICE_RPC_LOCK.wait(1000);
+                END_PROTOCOL_SERVICE_RPC_LOCK.wait(WAIT_END_TIMEOUT);
             } catch (InterruptedException e) {
                 // Do nothing
             }
@@ -230,7 +233,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     private void waitForVideoEndServiceACK() {
         synchronized (END_PROTOCOL_SERVICE_VIDEO_LOCK) {
             try {
-                END_PROTOCOL_SERVICE_VIDEO_LOCK.wait(1000);
+                END_PROTOCOL_SERVICE_VIDEO_LOCK.wait(WAIT_END_TIMEOUT);
             } catch (InterruptedException e) {
                 // Do nothing
             }
@@ -253,7 +256,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     private void waitForAudioEndServiceACK() {
         synchronized (END_PROTOCOL_SERVICE_AUDIO_LOCK) {
             try {
-                END_PROTOCOL_SERVICE_AUDIO_LOCK.wait(1000);
+                END_PROTOCOL_SERVICE_AUDIO_LOCK.wait(WAIT_END_TIMEOUT);
             } catch (InterruptedException e) {
                 // Do nothing
             }
@@ -274,6 +277,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void stopH264() {
+        try {
+            if (mProtocol != null) {
+                ((WiProProtocol)mProtocol).shutDownMobileNaviStreamExecutor();
+            }
+        } catch (InterruptedException e) {
+            Logger.e(CLASS_NAME + " Stop Mobile Navi exception:" + e.getMessage());
+        }
         if (mVideoPacketizer != null) {
             mVideoPacketizer.removeListener();
             mVideoPacketizer.stop();
@@ -294,6 +304,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public void stopAudioDataTransfer() {
+        try {
+            if (mProtocol != null) {
+                ((WiProProtocol)mProtocol).shutDownAudioStreamExecutor();
+            }
+        } catch (InterruptedException e) {
+            Logger.e(CLASS_NAME + " Stop Audio exception:" + e.getMessage());
+        }
         if (mAudioPacketizer != null) {
             mAudioPacketizer.removeListener();
             mAudioPacketizer.stop();
@@ -314,9 +331,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public Boolean getIsConnected() {
+        Logger.d(CLASS_NAME + " get is connected, tr:" + mTransport);
         if (mTransport == null) {
             return false;
         }
+        Logger.d(CLASS_NAME + " get is connected, tr con:" + mTransport.getIsConnected());
         return mTransport.getIsConnected();
     }
 

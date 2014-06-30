@@ -134,7 +134,12 @@ public class SendProtocolMessageProcessor {
             header.setEncrypted(encrypted);
 
             if (serviceType == ServiceType.Audio_Service) {
-                //Logger.d(LOG_TAG + " AUDIO");
+                if (audioExecutor.isTerminated()) {
+                    return;
+                }
+                if (audioExecutor.isShutdown()) {
+                    return;
+                }
                 audioExecutor.submit(new Runnable() {
 
                                          @Override
@@ -147,7 +152,12 @@ public class SendProtocolMessageProcessor {
                                      }
                 );
             } else if (serviceType == ServiceType.Mobile_Nav) {
-                //Logger.d(LOG_TAG + " MOBILE_NAVI");
+                if (mobileNaviExecutor.isTerminated()) {
+                    return;
+                }
+                if (mobileNaviExecutor.isShutdown()) {
+                    return;
+                }
                 mobileNaviExecutor.submit(new Runnable() {
 
                                               @Override
@@ -328,6 +338,7 @@ public class SendProtocolMessageProcessor {
     }
 
     /**
+<<<<<<< HEAD
      * Process Start service message to send
      *
      * @param serviceType           type of the service
@@ -337,6 +348,23 @@ public class SendProtocolMessageProcessor {
     public void processStartService(final ServiceType serviceType, final byte protocolVersionToSend,
                                     final byte sessionId ) {
        processStartService(serviceType, protocolVersionToSend, sessionId, false);
+=======
+     * Shut down audio executor
+     * @throws InterruptedException
+     */
+    public void shutdownAudioExecutors() throws InterruptedException {
+        audioExecutor.shutdownNow();
+        audioExecutor.awaitTermination(1, TimeUnit.SECONDS);
+    }
+
+    /**
+     * Shut down Navi executor
+     * @throws InterruptedException
+     */
+    public void shutdownNaviExecutors() throws InterruptedException {
+        mobileNaviExecutor.shutdownNow();
+        mobileNaviExecutor.awaitTermination(1, TimeUnit.SECONDS);
+>>>>>>> develop
     }
 
     /**
@@ -347,18 +375,15 @@ public class SendProtocolMessageProcessor {
     public void shutdownAllExecutors() throws InterruptedException {
         // This will make the executor accept no new threads
         // and finish all existing threads in the queue
+
+        shutdownAudioExecutors();
+
+        shutdownNaviExecutors();
+
         bulkDataDataExecutor.shutdown();
-        //heartbeatExecutor.shutdown();
-        //heartbeatAckExecutor.shutdown();
-        audioExecutor.shutdown();
-        mobileNaviExecutor.shutdown();
         singleMessageExecutor.shutdown();
         // Wait until all threads are finish
         bulkDataDataExecutor.awaitTermination(1, TimeUnit.SECONDS);
-        //heartbeatExecutor.awaitTermination(1, TimeUnit.SECONDS);
-        //heartbeatAckExecutor.awaitTermination(1, TimeUnit.SECONDS);
-        audioExecutor.awaitTermination(1, TimeUnit.SECONDS);
-        mobileNaviExecutor.awaitTermination(1, TimeUnit.SECONDS);
         singleMessageExecutor.awaitTermination(1, TimeUnit.SECONDS);
     }
 }
