@@ -3959,6 +3959,7 @@
     <function name="OnDeviceStateChanged" messagetype="notification" scope="internal" provider="hmi">
       <param name="deviceState" type="Common.DeviceState" mandatory="true"/>
       <param name="deviceInternalId" type="String" mandatory="true"/>
+      <param name="deviceId" type="Common.DeviceInfo" mandatory="false"/>
     </function>
   </interface>
 </interfaces>
