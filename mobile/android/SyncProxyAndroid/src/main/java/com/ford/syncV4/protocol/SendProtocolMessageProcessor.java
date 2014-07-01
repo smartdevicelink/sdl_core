@@ -337,18 +337,19 @@ public class SendProtocolMessageProcessor {
         singleMessageExecutor.submit(runnable);
     }
 
-    /**
-<<<<<<< HEAD
-     * Process Start service message to send
-     *
-     * @param serviceType           type of the service
-     * @param protocolVersionToSend protocol version
-     * @param sessionId             id of the session
-     */
+    /*
+    * Process Start service message to send
+    *
+            * @param serviceType           type of the service
+    * @param protocolVersionToSend protocol version
+    * @param sessionId             id of the session
+    */
     public void processStartService(final ServiceType serviceType, final byte protocolVersionToSend,
                                     final byte sessionId ) {
-       processStartService(serviceType, protocolVersionToSend, sessionId, false);
-=======
+        processStartService(serviceType, protocolVersionToSend, sessionId, false);
+    }
+
+/*
      * Shut down audio executor
      * @throws InterruptedException
      */
@@ -364,7 +365,6 @@ public class SendProtocolMessageProcessor {
     public void shutdownNaviExecutors() throws InterruptedException {
         mobileNaviExecutor.shutdownNow();
         mobileNaviExecutor.awaitTermination(1, TimeUnit.SECONDS);
->>>>>>> develop
     }
 
     /**

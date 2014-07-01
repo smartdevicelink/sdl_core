@@ -8,18 +8,11 @@ import java.io.OutputStream;
 
 public abstract class SyncTransport {
 
-<<<<<<< HEAD
     private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
-    private final static String CLASS_NAME = SyncTransport.class.getSimpleName();
-    private static final String SEND_LOCK_OBJ = "lock";
-=======
     public static final String DISCONNECT_REASON_END_OF_STREAM_REACHED = "EndOfStreamReached";
->>>>>>> develop
 
     private final static String CLASS_NAME = SyncTransport.class.getSimpleName();
     private final static String FailurePropagating_Msg = "Failure propagating ";
-<<<<<<< HEAD
-    private Boolean isConnected = false;
 
     private String _sendLockObj = "lock";
 
@@ -31,16 +24,9 @@ public abstract class SyncTransport {
     public Boolean getIsConnected() {
         return isConnected;
     }
-=======
     private static final String SEND_LOCK_OBJ = "lock";
 
 	private volatile Boolean isConnected = false;
-
-	// Get status of transport connection
-	public Boolean getIsConnected() {
-		return isConnected;
-	}
->>>>>>> develop
 
     //protected SyncTransport(String endpointName, String param2, ITransportListener transportListener)
     protected SyncTransport(ITransportListener transportListener) {
@@ -107,7 +93,6 @@ public abstract class SyncTransport {
 		} catch (Exception excp) {
 			Logger.e(FailurePropagating_Msg + "onTransportConnected: " + excp.toString(), excp);
 			handleTransportError(FailurePropagating_Msg + "onTransportConnected", excp);
-<<<<<<< HEAD
 		} // end-catch
 	} // end-method
 
@@ -117,16 +102,6 @@ public abstract class SyncTransport {
         isConnected = false;
 
         try {
-=======
-		}
-	}
-	
-    // This method is called by the subclass to indicate that transport disconnection
-    // has occurred.
-	protected void handleTransportDisconnected(final String info) {
-		isConnected = false;
-		try {
->>>>>>> develop
             Logger.d(CLASS_NAME + " Disconnected");
 			mTransportListener.onTransportDisconnected(info);
 		} catch (Exception excp) {

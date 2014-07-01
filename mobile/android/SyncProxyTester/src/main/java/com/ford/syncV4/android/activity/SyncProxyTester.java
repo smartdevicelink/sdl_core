@@ -1526,7 +1526,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
     public void startAudioService(final String appId, final boolean encrypted) {
 
-        mStreamCommandsExecutorService.submit(new Runnable() {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        executorService.submit(new Runnable() {
             @Override
             public void run() {
                 if (!isProxyReadyForWork(appId)) {
@@ -1548,13 +1549,9 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     public void stopAudioService(final String appId) {
-<<<<<<< HEAD
-
-        mStreamCommandsExecutorService.submit(new Runnable() {
-=======
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new Runnable() {
->>>>>>> develop
+
             @Override
             public void run() {
                 if (!isProxyReadyForWork(appId)) {
@@ -1570,10 +1567,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-<<<<<<< HEAD
-=======
                 closeAudioOutputStream();
->>>>>>> develop
                 mBoundProxyService.syncProxyStopAudioService(appId);
                 closeAudioOutputStream();
             }

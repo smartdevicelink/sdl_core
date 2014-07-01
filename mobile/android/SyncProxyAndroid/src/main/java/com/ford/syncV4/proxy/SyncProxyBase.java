@@ -779,11 +779,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             registerAppInterface = RPCRequestFactory.buildRegisterAppInterface();
             raiTable.put(appId, registerAppInterface);
         }
-<<<<<<< HEAD
-=======
         appIds.add(appId);
         Logger.d(LOG_TAG + " Update RAI (private), appId:" + appId + ", RAI:" + registerAppInterface);
->>>>>>> develop
         if (registerAppInterface != null) {
             registerAppInterface.setAppName(appName);
             registerAppInterface.setTtsName(ttsName);
@@ -2183,27 +2180,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         syncSession.addService(service);
     }
 
-<<<<<<< HEAD
-=======
-    public void startAudioService(String appId) {
-        if (mSyncConnection == null) {
-            // TODO : Msg here
-            return;
-        }
-        byte sessionId = syncSession.getSessionIdByAppId(appId);
-        mSyncConnection.startAudioService(sessionId);
-    }
-
-    public void startMobileNavService(String appId) {
-        if (mSyncConnection == null) {
-            // TODO : Msg here
-            return;
-        }
-        byte sessionId = syncSession.getSessionIdByAppId(appId);
-        mSyncConnection.startMobileNavService(sessionId);
-    }
-
->>>>>>> develop
     public void stopMobileNaviService(String appId) {
         final byte sessionId = syncSession.getSessionIdByAppId(appId);
         if (removeServiceFromSession(appId, ServiceType.Mobile_Nav)) {
@@ -3173,15 +3149,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      * Initialize new Session. <b>In production this method MUST be private</b>
      */
     public void initializeSession(final String appId) {
-        // Initialize a start session procedure
-        Logger.d(LOG_TAG + " Init session, id:" + appId);
-
-<<<<<<< HEAD
         final int sessionIdsNumber = syncSession.getSessionIdsNumber();
-=======
         Logger.d(LOG_TAG + " Init session, id:" + appId);
-
->>>>>>> develop
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -3222,15 +3191,9 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             // disconnect has completed
 
             Logger.d(LOG_TAG + " Transport Disconnected, appIds:" + appIds);
-<<<<<<< HEAD
-            for (String appId : appIds) {
-                if (getSyncConnection() != null) {
-                    getSyncConnection().stopHeartbeatMonitor(syncSession.getSessionIdByAppId(appId));
-=======
             for (String appId: appIds) {
                 if (mSyncConnection != null) {
                     mSyncConnection.stopHeartbeatMonitor(syncSession.getSessionIdByAppId(appId));
->>>>>>> develop
                 }
             }
 
