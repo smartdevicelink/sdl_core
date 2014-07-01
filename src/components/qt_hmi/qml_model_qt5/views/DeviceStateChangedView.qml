@@ -1,6 +1,4 @@
 /**
- * @file SettingsSourceView.qml
- * @brief Settings source screen view.
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -34,37 +32,35 @@
 import QtQuick 2.0
 import "../models"
 import "../controls"
+import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
-import "../models/RequestToSDL.js" as RequestToSDL
 
 GeneralView {
-    signal itemActivated(string item)
-
-    onItemActivated: {
-        switch (item) {
-            case "update_sdl": RequestToSDL.SDL_UpdateSDL(settingsContainer.updateStatus); break;
-            case "get_status_update": RequestToSDL.SDL_GetStatusUpdate(settingsContainer.updateStatus); break;
-            case "get_urls": RequestToSDL.SDL_GetURLS(0, settingsContainer.startPTExchange); break;
-        }
-    }
-
     Item {
         anchors.fill: parent
-        ScrollableListView {
-            id: menu
-            model: dataContainer.settingsSourceModel
+        Text {
+            id: title
+            text: "Choose devices to be Unpaired:"
+            anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top: parent.top
+            font.pixelSize: Constants.fontSize
+            color: Constants.primaryColor
+            height: Constants.fontSize + Constants.panelPadding
+        }
+
+        ScrollableListView {
+            id: menu
+            model: dataContainer.deviceList
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: title.bottom
             anchors.bottom: bottomPanel.top
             delegate: OvalButton {
-                text: title
-                onReleased: {
-                    if (qml) {
-                        contentLoader.go(qml, appId);
-                    } else {
-                        itemActivated(action);
-                    }
+                text: name
+                onClicked: {
+                    sdlSDL.onDeviceStateChanged(Common.DeviceState.UNPAIRED,
+                                                "", {id: devid, name: name});
                 }
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -84,6 +80,3 @@ GeneralView {
         }
     }
 }
-
-
-

@@ -191,6 +191,8 @@ void ConnectionHandlerImpl::OnUnexpectedDisconnect(
     transport_manager::ConnectionUID connection_id,
     const transport_manager::CommunicationError& error) {
   LOG4CXX_ERROR(logger_, "ConnectionHandlerImpl::OnUnexpectedDisconnect");
+
+  OnConnectionEnded(connection_id);
 }
 
 void ConnectionHandlerImpl::OnDeviceConnectionLost(

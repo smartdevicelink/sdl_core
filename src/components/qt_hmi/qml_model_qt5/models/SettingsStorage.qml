@@ -125,7 +125,9 @@ Item
 
     property var buttonCapabilities: []
 
-    property string filePTSnapshot: "IVSU/PROPRIETARY_REQUEST"
+    readonly property string fileIVSU: "hmi/res/IVSU/PROPRIETARY_REQUEST"
+
+    property string filePTSnapshot: ""
 
     property int timeoutPTExchange: 500
 
@@ -150,7 +152,7 @@ Item
         urlsPTExchange = urls;
         currentRetry = 0;
         currentUrl = 0;
-        sendSystemRequest();
+        tryUpdatePolicy();
     }
 
     function getUrl() {
@@ -173,22 +175,36 @@ Item
         }
     }
 
-    function sendSystemRequest() {
-        var url = getUrl();
+    function sendSystemRequest(type, url, fileName, applicationId) {
         var offset = 1000;
         var length = 10000;
-        var appId = url.policyAppId ? url.policyAppId : "default";
+        var appId = applicationId ? applicationId : "default";
+        var file = fileName ? fileName : fileIVSU;
 
-        sdlBasicCommunication.onSystemRequest(Common.RequestType.PROPRIETARY,
-                                              url.url, Common.FileType.JSON,
-                                              offset, length,
-                                              timeoutPTExchange,
-                                              filePTSnapshot,
-                                              appId);
+        sdlBasicCommunication.onSystemRequest(type, url, Common.FileType.JSON,
+                                              offset, length, timeoutPTExchange,
+                                              file, appId);
+    }
+
+    function tryUpdatePolicy() {
+        if (urlsPTExchange.length) {
+            var url = getUrl();
+            sendSystemRequest(Common.RequestType.PROPRIETARY, url.url, filePTSnapshot, url.policyAppId);
+        } else {
+            sendSystemRequest(Common.RequestType.PROPRIETARY);
+        }
 
         retriesTimer.interval = getInterval();
         if (retriesTimer.interval > 0) {
             retriesTimer.start();
+        }
+    }
+
+    function systemRequest(type) {
+        if (urlsPTExchange.length) {
+            sendSystemRequest(type, urlsPTExchange[0].url, null, urlsPTExchange[0].policyAppId);
+        } else {
+            sendSystemRequest(type);
         }
     }
 
