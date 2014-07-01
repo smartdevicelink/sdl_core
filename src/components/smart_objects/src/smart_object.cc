@@ -1,40 +1,39 @@
-/**
- * @file SmartObject.cpp
- * @brief SmartObject source file.
+/*
+ * Copyright (c) 2014, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
  */
-// Copyright (c) 2013, Ford Motor Company
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//
-// Redistributions of source code must retain the above copyright notice, this
-// list of conditions and the following disclaimer.
-//
-// Redistributions in binary form must reproduce the above copyright notice,
-// this list of conditions and the following
-// disclaimer in the documentation and/or other materials provided with the
-// distribution.
-//
-// Neither the name of the Ford Motor Company nor the names of its contributors
-// may be used to endorse or promote products derived from this software
-// without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 'A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
 
 #include "smart_objects/smart_object.h"
 
 #include <errno.h>
+#include <inttypes.h>
 #include <stdlib.h>
 #include <cstdio>
 #include <algorithm>
@@ -68,7 +67,7 @@ SmartObject::SmartObject(SmartType Type)
       m_schema() {
   switch (Type) {
     case SmartType_Integer:
-      set_value_unsigned_int(0);
+      set_value_integer(0);
       break;
     case SmartType_Double:
       set_value_double(0);
@@ -175,7 +174,13 @@ SmartObject::SmartObject(int32_t InitialValue)
 }
 
 int32_t SmartObject::asInt() const {
-  return convert_int();
+  int64_t convert = convert_int();
+  if ((convert & 0xFFFF0000) == 0) {
+    return static_cast<int32_t>(convert);
+  }
+  else {
+    return invalid_int_value;
+  }
 }
 
 SmartObject& SmartObject::operator=(int32_t NewValue) {
@@ -186,7 +191,7 @@ SmartObject& SmartObject::operator=(int32_t NewValue) {
 }
 
 bool SmartObject::operator==(int32_t Value) const {
-  int32_t comp = convert_int();
+  int64_t comp = convert_int();
   if (comp == invalid_int_value) {
     return false;
   } else {
@@ -194,17 +199,17 @@ bool SmartObject::operator==(int32_t Value) const {
   }
 }
 
-void SmartObject::set_value_integer(int32_t NewValue) {
+void SmartObject::set_value_integer(int64_t NewValue) {
   set_new_type(SmartType_Integer);
   m_data.int_value = NewValue;
 }
 
-int32_t SmartObject::convert_int() const {
-  int32_t retval;
+int64_t SmartObject::convert_int() const {
+  int64_t retval;
 
   switch (m_type) {
     case SmartType_String:
-      retval = convert_string_to_unsigned_int(m_data.str_value);
+      retval = convert_string_to_integer(m_data.str_value);
       break;
     case SmartType_Boolean:
       retval = (m_data.bool_value == true) ? 1 : 0;
@@ -213,7 +218,7 @@ int32_t SmartObject::convert_int() const {
       retval = m_data.int_value;
       break;
     case SmartType_Double:
-      retval = static_cast<uint32_t>(m_data.double_value);
+      retval = static_cast<int64_t>(m_data.double_value);
       break;
     default: {
 /*
@@ -236,22 +241,28 @@ SmartObject::SmartObject(uint32_t InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
-  set_value_unsigned_int(InitialValue);
+  set_value_integer(InitialValue);
 }
 
 uint32_t SmartObject::asUInt() const {
-  return convert_unsigned_int();
+  int64_t convert = convert_int();
+  if ((convert & 0xFFFF0000) == 0) {
+    return static_cast<uint32_t>(convert);
+  }
+  else {
+    return invalid_unsigned_int_value;
+  }
 }
 
 SmartObject& SmartObject::operator=(uint32_t NewValue) {
   if (m_type != SmartType_Invalid) {
-    set_value_unsigned_int(NewValue);
+    set_value_integer(NewValue);
   }
   return *this;
 }
 
 bool SmartObject::operator==(uint32_t Value) const {
-  int32_t comp = convert_unsigned_int();
+  int64_t comp = convert_int();
   if (comp == invalid_int_value) {
     return false;
   } else {
@@ -259,37 +270,34 @@ bool SmartObject::operator==(uint32_t Value) const {
   }
 }
 
-void SmartObject::set_value_unsigned_int(uint32_t NewValue) {
-  set_new_type(SmartType_Integer);
-  m_data.int_value = NewValue;
+// =============================================================
+// int64_t TYPE SUPPORT
+// =============================================================
+SmartObject::SmartObject(int64_t InitialValue)
+    : m_type(SmartType_Null),
+      m_schema() {
+  m_data.str_value = NULL;
+  set_value_integer(InitialValue);
 }
 
-uint32_t SmartObject::convert_unsigned_int() const {
-  uint32_t retval;
+int64_t SmartObject::asInt64() const {
+  return convert_int();
+}
 
-  switch (m_type) {
-    case SmartType_String:
-      retval = convert_string_to_unsigned_int(m_data.str_value);
-      break;
-    case SmartType_Boolean:
-      return (m_data.bool_value == true) ? 1 : 0;
-    case SmartType_Integer:
-      retval = m_data.int_value;
-      break;
-    case SmartType_Double:
-      retval = static_cast<uint32_t>(m_data.double_value);
-      break;
-    default: {
-/*
-#if !defined UNIT_TESTS
-      NOTREACHED();
-#endif
-*/
-      return invalid_int_value;
-    }
+SmartObject& SmartObject::operator=(int64_t NewValue) {
+  if (m_type != SmartType_Invalid) {
+    set_value_integer(NewValue);
   }
+  return *this;
+}
 
-  return retval;
+bool SmartObject::operator==(int64_t Value) const {
+  int64_t comp = convert_int();
+  if (comp == invalid_int_value) {
+    return false;
+  } else {
+    return comp == Value;
+  }
 }
 
 // =============================================================
@@ -532,7 +540,7 @@ std::string SmartObject::convert_string(void) const {
       break;
     case SmartType_Integer:
       char val[20];
-      sprintf(val, "%d", m_data.int_value);
+      sprintf(val, "%" PRId64, m_data.int_value);
       retval = std::string(val);
       break;
     case SmartType_Character:
@@ -925,29 +933,13 @@ std::string SmartObject::convert_double_to_string(const double& Value) {
   return s;
 }
 
-uint32_t SmartObject::convert_string_to_unsigned_int(
-    const std::string* Value) {
+uint64_t SmartObject::convert_string_to_integer(const std::string* Value) {
   if (0 == Value->size()) {
-/*
-#if !defined UNIT_TESTS
-    NOTREACHED();
-#endif
-*/
-    return invalid_int_value;
+    return invalid_int64_value;
   }
-
-  char* ptr;
-  errno = 0;
-  uint32_t result = strtol(Value->c_str(), &ptr, 10);
-  if (errno || (ptr != (Value->c_str() + Value->length()))) {
-/*
-#if !defined UNIT_TESTS
-    NOTREACHED();
-#endif
-*/
-    return invalid_int_value;
-  }
-
+  const char* str = Value->c_str();
+  int64_t result;
+  sscanf(str, "%" SCNd64, &result);
   return result;
 }
 
