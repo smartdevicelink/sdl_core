@@ -7,7 +7,7 @@ dependencies {
 android {
 
     compileSdkVersion rootProject.compileSdkVersion
-    buildToolsVersion rootProject.buildToolsVersion
+    buildToolsVersion '19.1.0'
 
     sourceSets {
 

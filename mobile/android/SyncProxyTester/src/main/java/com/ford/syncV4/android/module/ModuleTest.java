@@ -74,13 +74,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
 
+/**
+ * This is a class that provide functionality to process XML tests (load from file, parse, execute,
+ * return a result of the execution, etc ...)
+ * <br></br><b>Pay attention to the logging functionality, for example, when perform a test with a
+ * upper bound parameter value then system slowing down may have place (as it prints to the log
+ * a huge String value)</b>
+ */
 public class ModuleTest {
 
     /**
@@ -594,16 +599,15 @@ public class ModuleTest {
 
                                     boolean generateInvalidJSON = (parser.getAttributeValue(null,
                                             INVALID_JSON_ATTR) != null);
-                                    Logger.d("Generate Invalid JSON:" + generateInvalidJSON);
 
                                     String customJSON = parser.getAttributeValue(null, CUSTOM_JSON_ATTR);
 
                                     //TODO: Set rpc parameters
-                                    Map hash = setParams(name, parser);
-                                    logParserDebugInfo("" + hash);
+                                    Hashtable hash = setParams(name, parser);
                                     //TODO: Iterate through hash table and add it to parameters
+                                    Object value;
                                     for (Object key : hash.keySet()) {
-                                        final Object value = hash.get(key);
+                                        value = hash.get(key);
                                         if (key.equals(BULK_DATA_ATTR)) {
                                             if (value instanceof byte[]) {
                                                 rpc.setBulkData((byte[]) value);
@@ -611,15 +615,15 @@ public class ModuleTest {
                                                 rpc.setBulkData(new byte[]{});
                                             }
                                         } else {
-                                            Logger.d(TAG + " RPC name:" + rpc.getFunctionName() + ", key:" + key + ", val:" + value);
+                                            //Logger.d(TAG + " RPC name:" + rpc.getFunctionName() + ", key:" + key + ", val:" + value);
                                             rpc.setParameters((String) key, value);
                                         }
                                     }
 
-                                    for (Object o : hash.entrySet()) {
+                                    /*for (Object o : hash.entrySet()) {
                                         Hashtable.Entry pairs = (Hashtable.Entry) o;
                                         logParserDebugInfo(pairs.getKey() + " = " + pairs.getValue());
-                                    }
+                                    }*/
 
                                     if (currentTest != null) {
                                         RPCRequestWrapper wrapper = new RPCRequestWrapper(rpc, pause,
@@ -787,16 +791,14 @@ public class ModuleTest {
         });
     }
 
-    private Map setParams(String name, XmlPullParser parser) {
+    private Hashtable setParams(String name, XmlPullParser parser) {
 
-        logParserDebugInfo("setParams start name: " + name);
-
-        Map hash = new HashMap();
+        Hashtable hash = new Hashtable();
 
         int eventType = 0;
-        Boolean done = false;
+        boolean done = false;
         String tempName;
-        String vectorName = null;
+        String vectorName;
 
         try {
             while (eventType != XmlPullParser.END_DOCUMENT && !done) {
@@ -814,10 +816,9 @@ public class ModuleTest {
                             logParserDebugInfo("In " + VECTOR_TAG_NAME);
                             Vector<Object> vector = new Vector<Object>();
 
-                            if (parser.getAttributeName(0) != null)
-                                vectorName = parser.getAttributeValue(0);
+                            vectorName = parser.getAttributeValue(0);
 
-                            Boolean nestedWhileDone = false;
+                            boolean nestedWhileDone = false;
 
                             eventType = parser.next();
                             while (eventType != XmlPullParser.START_TAG && !nestedWhileDone) {
@@ -845,18 +846,10 @@ public class ModuleTest {
                                     case XmlPullParser.START_TAG:
                                         if (tempName.equalsIgnoreCase(INTEGER_TAG_NAME)) {
                                             logParserDebugInfo("In Nested Vector " + INTEGER_TAG_NAME);
-                                            if (parser.getAttributeName(0) != null) {
-                                                try {
-                                                    vector.add(Integer.parseInt(parser.getAttributeValue(0)));
-                                                } catch (Exception e) {
-                                                    Logger.e(TAG + " Unable to parse " + INTEGER_TAG_NAME);
-                                                }
-                                            }
+                                            vector.add(Integer.parseInt(parser.getAttributeValue(0)));
                                         } else if (tempName.equalsIgnoreCase(STRING_TAG_NAME)) {
-                                            logParserDebugInfo("In Nested Vector String");
-                                            if (parser.getAttributeName(0) != null) {
-                                                vector.add(parser.getAttributeValue(0));
-                                            }
+                                            logParserDebugInfo("In Nested Vector " + STRING_TAG_NAME);
+                                            vector.add(parser.getAttributeValue(0));
                                         } else {
                                             vector.add(setParams(tempName, parser));
                                         }
@@ -898,35 +891,19 @@ public class ModuleTest {
                             hash.put(vectorName, vector);
                         } else if (tempName.equalsIgnoreCase(INTEGER_TAG_NAME)) {
                             logParserDebugInfo("In " + INTEGER_TAG_NAME);
-                            if (parser.getAttributeName(0) != null) {
-                                try {
-                                    hash.put(parser.getAttributeName(0), Integer.parseInt(parser.getAttributeValue(0)));
-                                } catch (Exception e) {
-                                    Logger.e(TAG + " Unable to parse " + INTEGER_TAG_NAME);
-                                }
-                            }
+                            hash.put(parser.getAttributeName(0), Integer.parseInt(parser.getAttributeValue(0)));
                         } else if (tempName.equalsIgnoreCase(FLOAT_TAG_NAME)) {
                             logParserDebugInfo("In " + FLOAT_TAG_NAME);
-                            if (parser.getAttributeName(0) != null) {
-                                try {
-                                    hash.put(parser.getAttributeName(0), Double.parseDouble(parser.getAttributeValue(0)));
-                                } catch (Exception e) {
-                                    Logger.e(TAG + " Unable to parse " + FLOAT_TAG_NAME);
-                                }
-                            }
+                            hash.put(parser.getAttributeName(0), Double.parseDouble(parser.getAttributeValue(0)));
                         } else if (tempName.equalsIgnoreCase(BOOLEAN_TAG_NAME)) {
                             logParserDebugInfo("In " + BOOLEAN_TAG_NAME);
-                            if (parser.getAttributeName(0) != null) {
-                                if (parser.getAttributeValue(0).equalsIgnoreCase("true"))
-                                    hash.put(parser.getAttributeName(0), true);
-                                else if (parser.getAttributeValue(0).equalsIgnoreCase("false"))
-                                    hash.put(parser.getAttributeName(0), false);
-                            }
+                            if (parser.getAttributeValue(0).equalsIgnoreCase("true"))
+                                hash.put(parser.getAttributeName(0), true);
+                            else if (parser.getAttributeValue(0).equalsIgnoreCase("false"))
+                                hash.put(parser.getAttributeName(0), false);
                         } else if (tempName.equalsIgnoreCase(STRING_TAG_NAME)) {
                             logParserDebugInfo("In " + STRING_TAG_NAME);
-                            if (parser.getAttributeName(0) != null) {
-                                hash.put(parser.getAttributeName(0), parser.getAttributeValue(0));
-                            }
+                            hash.put(parser.getAttributeName(0), parser.getAttributeValue(0));
                         } else if (tempName.equalsIgnoreCase(BINARY_TAG_NAME)) {
                             logParserDebugInfo("In " + BINARY_TAG_NAME);
                             String srcData = parser.getAttributeValue(0);
@@ -960,17 +937,11 @@ public class ModuleTest {
                                     case XmlPullParser.START_TAG:
                                         if (tempName.equalsIgnoreCase(INTEGER_TAG_NAME)) {
                                             logParserDebugInfo("In Nested " + SYNC_MSG_VERSION_TAG_NAME + " " + INTEGER_TAG_NAME);
-                                            if (parser.getAttributeCount() != 0) {
-                                                try {
-                                                    logParserDebugInfo(">>" + parser.getAttributeName(0) + " " + parser.getAttributeValue(0));
-                                                    if (parser.getAttributeName(0).equalsIgnoreCase(MAJOR_VERSION_TAG_NAME)) {
-                                                        syncMsgVersion.setMajorVersion(Integer.parseInt(parser.getAttributeValue(0)));
-                                                    } else if (parser.getAttributeName(0).equalsIgnoreCase(MINOR_VERSION_TAG_NAME)) {
-                                                        syncMsgVersion.setMinorVersion(Integer.parseInt(parser.getAttributeValue(0)));
-                                                    }
-                                                } catch (Exception e) {
-                                                    Logger.e(TAG + " Unable to parse " + INTEGER_TAG_NAME);
-                                                }
+                                            logParserDebugInfo(">>" + parser.getAttributeName(0) + " " + parser.getAttributeValue(0));
+                                            if (parser.getAttributeName(0).equalsIgnoreCase(MAJOR_VERSION_TAG_NAME)) {
+                                                syncMsgVersion.setMajorVersion(Integer.parseInt(parser.getAttributeValue(0)));
+                                            } else if (parser.getAttributeName(0).equalsIgnoreCase(MINOR_VERSION_TAG_NAME)) {
+                                                syncMsgVersion.setMinorVersion(Integer.parseInt(parser.getAttributeValue(0)));
                                             }
                                         }
                                         break;
@@ -1026,6 +997,7 @@ public class ModuleTest {
                 eventType = parser.next();
             }
         } catch (Exception e) {
+            Logger.e(TAG + " set params:" + e.getMessage());
             mLogAdapter.logMessage("Parser Failed!!", Log.ERROR, e);
         }
 
@@ -1159,19 +1131,19 @@ public class ModuleTest {
                     }
                     //currentMarshaller = (customJSON != null) ? customMarshaller :
                     //                (generateInvalidJSON ? invalidMarshaller : defaultMarshaller);
-                    Logger.d("Current Marshaller:" + currentMarshaller);
+                    //Logger.d("Current Marshaller:" + currentMarshaller);
 
-                    Logger.d(TAG + " Send RPC:" + rpc + " appId:" + mAppId);
+                    //Logger.d(TAG + " Send RPC:" + rpc + " appId:" + mAppId);
                     mProxyService.sendRPCRequestWithPreprocess(mAppId, rpc, currentMarshaller, true);
 
                     long pause = wrapper.getPause();
                     if (pause > 0) {
-                        Logger.d(TAG + " Pause for " + pause + " ms. after " +
+                        Logger.d(TAG + " Pause for single test " + pause + " ms. after " +
                                 currentTest.getName() + "." + rpc.getFunctionName());
                         try {
                             // delay between requests of one test
                             synchronized (this) {
-                                ((Object) this).wait(pause);
+                                this.wait(pause);
                             }
                         } catch (InterruptedException e) {
                             mLogAdapter.logMessage("InterruptedException", true);
@@ -1194,11 +1166,11 @@ public class ModuleTest {
 
                 long pause = currentTest.getPause();
                 if (pause > 0) {
-                    Logger.d(TAG + " Pause for " + pause + " ms. after " + currentTest.getName());
+                    Logger.d(TAG + " Pause for tests set " + pause + " ms. after " + currentTest.getName());
                     try {
                         // delay after the test
                         synchronized (this) {
-                            ((Object) this).wait(pause);
+                            this.wait(pause);
                         }
                     } catch (InterruptedException e) {
                         mLogAdapter.logMessage("InterruptedException", true);
@@ -1210,7 +1182,7 @@ public class ModuleTest {
                 // wait for incoming messages
                 try {
                     synchronized (this) {
-                        ((Object) this).wait(100);
+                        this.wait(100);
                     }
                 } catch (InterruptedException e) {
                     mLogAdapter.logMessage("InterruptedException", true);
@@ -1264,7 +1236,7 @@ public class ModuleTest {
 
                 try {
                     synchronized (this) {
-                        ((Object) this).wait();
+                        this.wait();
                     }
                 } catch (InterruptedException e) {
                     mLogAdapter.logMessage("InterruptedException", true);

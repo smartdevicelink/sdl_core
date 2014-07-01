@@ -26,7 +26,7 @@ public class JsonRPCMarshaller implements IJsonRPCMarshaller {
             JSONObject jsonObject = msg.serializeJSON(version);
             jsonBytes = jsonObject.toString().getBytes();
 
-            Logger.d(CLASS_NAME + " transmit " + jsonObject);
+            //Logger.d(CLASS_NAME + " transmit " + jsonObject);
         } catch (JSONException e) {
             Logger.e("Failed to encode messages to JSON.", e);
         }
