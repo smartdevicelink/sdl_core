@@ -2059,7 +2059,7 @@ void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
 
 mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
   const std::vector<uint8_t>& binary_data, const std::string& file_path,
-  const std::string& file_name, const uint32_t offset) {
+  const std::string& file_name, const int64_t offset) {
   LOG4CXX_INFO(logger_,
                "SaveBinaryWithOffset  binary_size = " << binary_data.size()
                << " offset = " << offset);
@@ -2070,7 +2070,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
   }
 
   const std::string full_file_path = file_path + "/" + file_name;
-  uint32_t file_size = file_system::FileSize(full_file_path);
+  int64_t file_size = file_system::FileSize(full_file_path);
   std::ofstream* file_stream;
   if (offset != 0) {
     if (file_size != offset) {

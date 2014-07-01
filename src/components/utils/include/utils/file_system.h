@@ -63,7 +63,7 @@ uint32_t DirectorySize(const std::string& path);
  * @param path to file
  * @return size of file, return 0 if file not exist
  */
-uint32_t FileSize(const std::string& path);
+int64_t FileSize(const std::string& path);
 
 /**
  * @brief Creates directory
