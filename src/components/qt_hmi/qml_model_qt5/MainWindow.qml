@@ -388,7 +388,8 @@ Rectangle {
         }
 
         onPutFile: {
-
+            console.log("OnPutFile: ", offset, length, fileSize, FileName,
+                        syncFileName, fileType, persistentFile);
         }
 
         onRecordStart: {

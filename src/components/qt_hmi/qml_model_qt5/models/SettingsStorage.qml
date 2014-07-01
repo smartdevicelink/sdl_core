@@ -139,6 +139,10 @@ Item
 
     property int currentUrl: 0
 
+    property string appIdIVSU: 0
+
+    property var urlsIVSU: []
+
     function updateStatus(result) {
         console.debug("Result update SDL:", result);
         var text = {}
@@ -153,6 +157,12 @@ Item
         currentRetry = 0;
         currentUrl = 0;
         tryUpdatePolicy();
+    }
+
+    function startIVSU(urls) {
+        urlsIVSU = urls;
+        sendSystemRequest(Common.RequestType.PROPRIETARY, urlsIVSU[0].url,
+                          fileIVSU, appIdIVSU);
     }
 
     function getUrl() {
@@ -270,5 +280,16 @@ Item
     function allowSDLFunctionality (result, device) {
         console.log("allowSDLFunctionality enter");
         sdlSDL.onAllowSDLFunctionality(device, result, Common.ConsentSource.GUI)
+    }
+
+    function decrypt(file, appId) {
+        sendSystemRequest(Common.RequestType.FILE_RESUME, urlsIVSU[0].url, file,
+                          appId);
+    }
+
+    function updateIVSU(appId) {
+        appIdIVSU = appId;
+        var service = 4; // service type for IVSU
+        RequestToSDL.SDL_GetURLS(service, startIVSU);
     }
 }
