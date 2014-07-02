@@ -34,6 +34,7 @@
 
 #include <errno.h>
 #include <inttypes.h>
+#include <limits.h>
 #include <stdlib.h>
 #include <cstdio>
 #include <algorithm>
@@ -175,12 +176,9 @@ SmartObject::SmartObject(int32_t InitialValue)
 
 int32_t SmartObject::asInt() const {
   int64_t convert = convert_int();
-  if ((convert & 0xFFFF0000) == 0) {
-    return static_cast<int32_t>(convert);
-  }
-  else {
-    return invalid_int_value;
-  }
+  DCHECK(convert >= INT_MIN);
+  DCHECK(convert <= INT_MAX);
+  return static_cast<int32_t>(convert);
 }
 
 SmartObject& SmartObject::operator=(int32_t NewValue) {
@@ -246,12 +244,9 @@ SmartObject::SmartObject(uint32_t InitialValue)
 
 uint32_t SmartObject::asUInt() const {
   int64_t convert = convert_int();
-  if ((convert & 0xFFFF0000) == 0) {
-    return static_cast<uint32_t>(convert);
-  }
-  else {
-    return invalid_unsigned_int_value;
-  }
+  DCHECK(convert >= 0);
+  DCHECK(convert <= UINT_MAX);
+  return static_cast<uint32_t>(convert);
 }
 
 SmartObject& SmartObject::operator=(uint32_t NewValue) {
