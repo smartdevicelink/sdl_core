@@ -23,7 +23,10 @@ public abstract class AbstractProtocol {
     protected byte[] mHeaderBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
     protected int mHeaderBufWritePos = 0;
 
-
+    /**
+     * Indicates whether RPC Session has been started or not. This is a simple check condition to
+     * separate start ordinary RPC Service from start or start failure od the secured RPC Service
+     */
     protected boolean hasRPCStarted;
 
     public synchronized ProtocolSecureManager getProtocolSecureManager() {
@@ -327,11 +330,16 @@ public abstract class AbstractProtocol {
     }
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,
-                                                byte sessionID, boolean encrypted, byte version) {
-        if (sessionID == 0) {
-            throw new IllegalArgumentException("Can't create service with id 0. serviceType" + serviceType + ";sessionID " + sessionID);
+                                                byte sessionId, boolean encrypted, byte version) {
+        if (serviceType.equals(ServiceType.RPC)) {
+            throw new IllegalArgumentException("Can't create RPC service without creating " +
+                    "syncSession. serviceType" + serviceType + ";sessionId " + sessionId);
         }
-        mProtocolListener.onProtocolServiceStarted(serviceType, sessionID,encrypted, version);
+        if (sessionId == 0) {
+            throw new IllegalArgumentException("Can't create service with id 0. serviceType:" +
+                    serviceType + ";sessionId " + sessionId);
+        }
+        mProtocolListener.onProtocolServiceStarted(serviceType, sessionId, encrypted, version);
     }
 
     // This method handles protocol errors. A callback is sent to the protocol
