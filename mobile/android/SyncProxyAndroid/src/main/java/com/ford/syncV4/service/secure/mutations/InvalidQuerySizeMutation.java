@@ -9,7 +9,7 @@ public class InvalidQuerySizeMutation extends AbstractMutation {
 
     @Override
     protected ProtocolMessage mutateMessage(ProtocolMessage protocolMessage) {
-        protocolMessage.setJsonSize(protocolMessage.getJsonSize() + MUTATION_SIZE_FACTOR);
+        protocolMessage.setData(new byte[0]);
         return protocolMessage;
     }
 }

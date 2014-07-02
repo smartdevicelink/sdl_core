@@ -7,7 +7,6 @@ import com.ford.syncV4.protocol.ProtocolMessage;
  */
 public abstract class AbstractMutation implements ISecureServiceMutation {
 
-    protected static final int MUTATION_SIZE_FACTOR = 13;
     private AbstractMutation nextMutation;
 
     public AbstractMutation getNextMutation() {

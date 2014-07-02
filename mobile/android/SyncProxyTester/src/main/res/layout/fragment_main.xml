@@ -65,19 +65,11 @@
                     android:layout_alignParentLeft="true" />
 
                 <Button
-                    android:id="@+id/secure_error_msg_button"
-                    android:text="@string/secure_error_button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/secure_error_spinner"
-                    android:layout_alignParentLeft="true" />
-
-                <Button
                     android:id="@+id/rpc_service_secure_button_view"
                     android:text="@string/secure_service_send_rpc"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@+id/secure_error_msg_button"
+                    android:layout_below="@+id/secure_error_spinner"
                     android:layout_alignParentLeft="true" />
 
                 <Button

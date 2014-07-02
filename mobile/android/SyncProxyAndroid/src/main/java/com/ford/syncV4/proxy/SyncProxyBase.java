@@ -3012,27 +3012,27 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
     public void startMobileNavService(String appId, boolean cyphered) {
         if (mSyncConnection != null) {
-            secureProxyServerListener.setSessionID(syncSession.getSessionIdByAppId(appId));
-            secureProxyServerListener.setVersion(getSyncConnection().getProtocolVersion());
-            ((HandshakeDataListener) secureProxyServerListener).setMutationManager(getTestConfig().getHandshakeMutationManager());
+            updateSecureProxyState(appId);
             mSyncConnection.startMobileNavService(syncSession.getSessionIdByAppId(appId), cyphered);
         }
     }
 
     public void startAudioService(String appId, boolean cyphered) {
         if (mSyncConnection != null) {
-            secureProxyServerListener.setSessionID(syncSession.getSessionIdByAppId(appId));
-            secureProxyServerListener.setVersion(getSyncConnection().getProtocolVersion());
-            ((HandshakeDataListener) secureProxyServerListener).setMutationManager(getTestConfig().getHandshakeMutationManager());
+            updateSecureProxyState(appId);
             mSyncConnection.startAudioService(syncSession.getSessionIdByAppId(appId), cyphered);
         }
     }
 
+    private void updateSecureProxyState(String appId) {
+        secureProxyServerListener.setSessionID(syncSession.getSessionIdByAppId(appId));
+        secureProxyServerListener.setVersion(getSyncConnection().getProtocolVersion());
+        ((HandshakeDataListener) secureProxyServerListener).setMutationManager(getTestConfig().getHandshakeMutationManager());
+    }
+
     public void startRpcService(String appId, boolean encrypted) {
         if (mSyncConnection != null) {
-            secureProxyServerListener.setSessionID(syncSession.getSessionIdByAppId(appId));
-            secureProxyServerListener.setVersion(getSyncConnection().getProtocolVersion());
-            ((HandshakeDataListener) secureProxyServerListener).setMutationManager(getTestConfig().getHandshakeMutationManager());
+            updateSecureProxyState(appId);
             mSyncConnection.startRpcService(syncSession.getSessionIdByAppId(appId), encrypted);
         }
     }

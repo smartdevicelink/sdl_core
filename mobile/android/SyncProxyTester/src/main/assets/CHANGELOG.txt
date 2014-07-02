@@ -1,25 +1,22 @@
+[CW72]
+* SyncProxyTester | SyncProxyAndroid SDK: Changed SSL error testing
+
 [CW26]
-<<<<<<< HEAD
-<<<<<<< HEAD
 + SyncProxyTester | SyncProxyAndroid SDK: Added test handshake error sending to SDL.
 
 [CW25]
 * SyncProxyTester | SyncProxyAndroid SDK: major develop to WP2 branch merge
-=======
-=======
 * SYNC Mobile SDK | SyncProxyTester: RPC Request "UnregisterAppInterface" send error
 * SYNC Mobile SDK | SyncProxyTester: Resumption: Heartbeat timeout after IgnitionOff on mobile
 * SyncProxyTester: AppInterfaceUnregisteredReason is displayed as service message
 * SyncProxyTester: SetGlobalProperties: if uncheck all checkboxes of KeyboardProperties structure, anyway request will be sent with parameter keypressMode
 * SYNC Mobile SDK: ProtocolMessageProcessor still send media messages when service is stopped
->>>>>>> develop
 * SyncProxyTester: Show request, add empty SoftButtons array in the request
 + SYNC Mobile SDK: SyncMsgVersion update
 * SyncProxyTester: Incorrect parsing integer value in structure of request in .xml tests
 
 [CW25]
 * SYNC Mobile SDK: Object reference leaks when restart SYNC Mobile SDK
->>>>>>> develop
 
 [CW24]
 + SyncProxyTester | SyncProxyAndroid SDK: Log messages formed in SDK

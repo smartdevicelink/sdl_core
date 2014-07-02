@@ -44,7 +44,6 @@ import com.ford.syncV4.android.policies.PoliciesTesterActivity;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.exception.SyncException;
-import com.ford.syncV4.protocol.secure.secureproxy.SecureInternalErrorMessage;
 import com.ford.syncV4.proxy.RPCMessage;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCRequestFactory;
@@ -360,16 +359,21 @@ public class PlaceholderFragment extends Fragment {
 
         final Spinner spinner = (Spinner) rootView.findViewById(R.id.secure_error_spinner);
         final ArrayAdapter<SecurityInternalError> securityErrorAdapter = new ArrayAdapter<SecurityInternalError>(getActivity(),
-                android.R.layout.simple_spinner_item, SecurityInternalError.values());
+                android.R.layout.simple_spinner_item, new SecurityInternalError[]{SecurityInternalError.UNKNOWN, SecurityInternalError.ERROR_INVALID_QUERY_ID, SecurityInternalError.ERROR_INVALID_QUERY_SIZE, SecurityInternalError.ERROR_SSL_INVALID_DATA});
         securityErrorAdapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(securityErrorAdapter);
         spinner.setSelection(0);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
 
-        Button sendSecureError = (Button) rootView.findViewById(R.id.secure_error_msg_button);
-        sendSecureError.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                SecurityInternalError securityInternalError = (SecurityInternalError) spinner.getSelectedItem();
+                updateHandshakeConfigError(securityInternalError);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
                 SecurityInternalError securityInternalError = (SecurityInternalError) spinner.getSelectedItem();
                 updateHandshakeConfigError(securityInternalError);
             }
@@ -412,15 +416,6 @@ public class PlaceholderFragment extends Fragment {
             return null;
         }
         return boundProxyService;
-    }
-
-    private SecureInternalErrorMessage buildSecureInternalErrorMessage(SecurityInternalError securityInternalError) {
-        SecureInternalErrorMessage msg = new SecureInternalErrorMessage();
-        msg.setErrorId(SecurityInternalError.getErrorCode(securityInternalError));
-        msg.setMessage("Test Handshake Error");
-        msg.setMessageType(Names.notification);
-        msg.setCorrelationID(getCorrelationId());
-        return msg;
     }
 
     /**
