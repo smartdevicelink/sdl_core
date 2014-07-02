@@ -1,3 +1,7 @@
+[CW27]
+* SyncProxyTester: Incorrect representation of the "key - value" pair in the RPC Request at the XML test
+* SyncProxyTester: Crashes while executing cics_UpperBound_big.xml
+
 [CW26]
 <<<<<<< HEAD
 <<<<<<< HEAD

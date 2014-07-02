@@ -125,7 +125,9 @@ Item
 
     property var buttonCapabilities: []
 
-    property string filePTSnapshot: "IVSU/PROPRIETARY_REQUEST"
+    readonly property string fileIVSU: "hmi/res/IVSU/PROPRIETARY_REQUEST"
+
+    property string filePTSnapshot: ""
 
     property int timeoutPTExchange: 500
 
@@ -136,6 +138,10 @@ Item
     property int currentRetry: 0
 
     property int currentUrl: 0
+
+    property string appIdIVSU: ""
+
+    property var urlsIVSU: []
 
     function updateStatus(result) {
         console.debug("Result update SDL:", result);
@@ -150,7 +156,13 @@ Item
         urlsPTExchange = urls;
         currentRetry = 0;
         currentUrl = 0;
-        sendSystemRequest();
+        tryUpdatePolicy();
+    }
+
+    function startIVSU(urls) {
+        urlsIVSU = urls;
+        sendSystemRequest(Common.RequestType.PROPRIETARY, urlsIVSU[0].url,
+                          fileIVSU, appIdIVSU);
     }
 
     function getUrl() {
@@ -173,22 +185,36 @@ Item
         }
     }
 
-    function sendSystemRequest() {
-        var url = getUrl();
+    function sendSystemRequest(type, url, fileName, applicationId) {
         var offset = 1000;
         var length = 10000;
-        var appId = url.policyAppId ? url.policyAppId : "default";
+        var appId = applicationId ? applicationId : "default";
+        var file = fileName ? fileName : fileIVSU;
 
-        sdlBasicCommunication.onSystemRequest(Common.RequestType.PROPRIETARY,
-                                              url.url, Common.FileType.JSON,
-                                              offset, length,
-                                              timeoutPTExchange,
-                                              filePTSnapshot,
-                                              appId);
+        sdlBasicCommunication.onSystemRequest(type, url, Common.FileType.JSON,
+                                              offset, length, timeoutPTExchange,
+                                              file, appId);
+    }
+
+    function tryUpdatePolicy() {
+        if (urlsPTExchange.length) {
+            var url = getUrl();
+            sendSystemRequest(Common.RequestType.PROPRIETARY, url.url, filePTSnapshot, url.policyAppId);
+        } else {
+            sendSystemRequest(Common.RequestType.PROPRIETARY);
+        }
 
         retriesTimer.interval = getInterval();
         if (retriesTimer.interval > 0) {
             retriesTimer.start();
+        }
+    }
+
+    function systemRequest(type) {
+        if (urlsPTExchange.length) {
+            sendSystemRequest(type, urlsPTExchange[0].url, null, urlsPTExchange[0].policyAppId);
+        } else {
+            sendSystemRequest(type);
         }
     }
 
@@ -229,7 +255,9 @@ Item
         }
 
         if (params.isPermissionsConsentNeeded) {
-            //GetListOfPermissions
+            RequestToSDL.SDL_GetListOfPermissions(appId, function(params){
+                settingsContainer.getListOfPermissions_Response(appId, params)
+            })
         }
 
         if (params.isAppPermissionsRevoked) {
@@ -239,7 +267,7 @@ Item
         if (params.isAppRevoked) {
             //popupActivate("Current version of app is no longer supported!");
             //? unregister app or set to level NONE
-        } else if (params.isSDLAllowed) {
+        } else if (params.isSDLAllowed && !params.isPermissionsConsentNeeded) {
             dataContainer.setCurrentApplication(appId)
             contentLoader.go(
                 Internal.chooseAppStartScreen(
@@ -253,6 +281,46 @@ Item
 
     function allowSDLFunctionality (result, device) {
         console.log("allowSDLFunctionality enter");
+
         sdlSDL.onAllowSDLFunctionality(device, result, Common.ConsentSource.GUI)
+
+        console.log("allowSDLFunctionality exit");
+    }
+
+    function getListOfPermissions_Response (appId, allowedFunctions) {
+        console.log("getListOfPermissions_Response enter");
+
+        var app = dataContainer.getApplication(appId),
+                messageCodes = [];
+        app.allowedFunctions = allowedFunctions
+
+        for (var i = 0; i < allowedFunctions.length; i++) {
+            messageCodes.push(allowedFunctions[i].name);
+        }
+
+        RequestToSDL.SDL_GetUserFriendlyMessage(messageCodes, dataContainer.hmiUILanguage, function(params){
+            settingsContainer.onAppPermissionConsent_Notification(appId, params)
+        });
+
+        console.log("getListOfPermissions_Response exit");
+    }
+
+    function onAppPermissionConsent_Notification (appId, params) {
+        console.log("onAppPermissionConsent_Notification enter");
+
+        onAppPermissionConsentPopUp.activate(params, appId)
+
+        console.log("onAppPermissionConsent_Notification enter");
+    }
+
+    function decrypt(file, appId) {
+        sendSystemRequest(Common.RequestType.FILE_RESUME, urlsIVSU[0].url, file,
+                          appId);
+    }
+
+    function updateIVSU(appId) {
+        appIdIVSU = appId;
+        var service = 4; // service type for IVSU
+        RequestToSDL.SDL_GetURLS(service, startIVSU);
     }
 }

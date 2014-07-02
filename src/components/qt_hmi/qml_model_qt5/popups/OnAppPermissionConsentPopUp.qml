@@ -1,5 +1,5 @@
 /**
- * @file SettingsSourceView.qml
+ * @file OnAppPermissionConsent.qml
  * @brief Settings source screen view.
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
@@ -32,45 +32,62 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 import QtQuick 2.0
+import QtQuick.Controls 1.0
 import "../models"
 import "../controls"
 import "../models/Constants.js" as Constants
 import "../models/RequestToSDL.js" as RequestToSDL
 
-GeneralView {
+Item {
+
+    property string popUpName
     signal itemActivated(string item)
 
     onItemActivated: {
-        switch (item) {
-            case "update_sdl": RequestToSDL.SDL_UpdateSDL(settingsContainer.updateStatus); break;
-            case "get_status_update": RequestToSDL.SDL_GetStatusUpdate(settingsContainer.updateStatus); break;
-            case "get_urls": RequestToSDL.SDL_GetURLS(0, settingsContainer.startPTExchange); break;
-        }
+        this
+    }
+    function activate(madel, appId) {
+        console.log("userActionPopUp activate enter");
+        //title.text = title;
+        //message.text = text;
+        //callbackFunc = callback;
+        visible = true;
+        console.debug("userActionPopUp activate exit");
+    }
+
+    function deactivate(result) {
+        console.log("userActionPopUp deactivate enter");
+        visible = false;
+        //callbackFunc(result)
+        console.debug("userActionPopUp deactivate exit");
     }
 
     Item {
         anchors.fill: parent
-        ScrollableListView {
-            id: menu
-            model: dataContainer.settingsSourceModel
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.bottom: bottomPanel.top
-            delegate: OvalButton {
-                text: title
-                onReleased: {
-                    if (qml) {
-                        contentLoader.go(qml, appId);
-                    } else {
-                        itemActivated(action);
-                    }
-                }
-                anchors.left: parent.left
-                anchors.right: parent.right
-                fontSize: Constants.fontSize
-            }
-        }
+//        GridMenu {
+//            id: menu
+//            model: dataContainer.settingsSourceModel
+//            anchors.left: parent.left
+//            anchors.right: parent.right
+//            anchors.top: parent.top
+//            anchors.bottom: bottomPanel.top
+//            columnsOnPage: 1
+//            rows: 7
+//            delegate: GridItem {
+//                width: menu.width / menu.columnsOnPage
+//                height: menu.height / menu.rows
+//                ComboBox {
+//                    width: table.width / table.columns - table.spacing
+//                    model: languagesList
+//                    onCurrentIndexChanged: {
+//                        dataContainer.hmiTTSVRLanguage = settingsContainer.sdlLanguagesList[currentIndex];
+//                        sdlTTS.onLanguageChange(dataContainer.hmiTTSVRLanguage);
+//                        sdlVR.onLanguageChange(dataContainer.hmiTTSVRLanguage);
+//                    }
+//                    z: 1000
+//                }
+//            }
+//        }
 
         Item {
             id: bottomPanel

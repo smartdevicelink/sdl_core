@@ -75,9 +75,6 @@ void HeartBeatMonitor::threadMain() {
           }
 
           it = sessions_.begin();
-          if (sessions_.empty()) {
-            stop_flag_ = true;
-          }
         } else {
           state.heartbeat_expiration_ =
               date_time::DateTime::getCurrentTime();
