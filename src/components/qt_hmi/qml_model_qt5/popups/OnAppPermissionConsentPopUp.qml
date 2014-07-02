@@ -33,6 +33,7 @@
  */
 import QtQuick 2.0
 import QtQuick.Controls 1.0
+import QtQuick.Controls.Styles 1.0
 import "../models"
 import "../controls"
 import "../models/Constants.js" as Constants
@@ -41,53 +42,89 @@ import "../models/RequestToSDL.js" as RequestToSDL
 Item {
 
     property string popUpName
+    property int appId
+    property ListModel permissionItems: ListModel{}
+
     signal itemActivated(string item)
 
     onItemActivated: {
         this
     }
-    function activate(madel, appId) {
-        console.log("userActionPopUp activate enter");
-        //title.text = title;
-        //message.text = text;
-        //callbackFunc = callback;
+
+    function activate(appId) {
+        console.debug("onAppPermissionConsentPopUp activate enter");
+        appId = appId
         visible = true;
-        console.debug("userActionPopUp activate exit");
+        console.debug("onAppPermissionConsentPopUp activate exit");
     }
 
-    function deactivate(result) {
-        console.log("userActionPopUp deactivate enter");
+    function deactivate() {
+        console.debug("onAppPermissionConsentPopUp deactivate enter");
         visible = false;
-        //callbackFunc(result)
-        console.debug("userActionPopUp deactivate exit");
+        //OnAppPermissionConsent
+        sdlSDL.onAppPermissionConsent()
+        console.debug("onAppPermissionConsentPopUp deactivate exit");
     }
 
-    Item {
-        anchors.fill: parent
-//        GridMenu {
-//            id: menu
-//            model: dataContainer.settingsSourceModel
-//            anchors.left: parent.left
-//            anchors.right: parent.right
-//            anchors.top: parent.top
-//            anchors.bottom: bottomPanel.top
-//            columnsOnPage: 1
-//            rows: 7
-//            delegate: GridItem {
-//                width: menu.width / menu.columnsOnPage
-//                height: menu.height / menu.rows
-//                ComboBox {
-//                    width: table.width / table.columns - table.spacing
-//                    model: languagesList
-//                    onCurrentIndexChanged: {
-//                        dataContainer.hmiTTSVRLanguage = settingsContainer.sdlLanguagesList[currentIndex];
-//                        sdlTTS.onLanguageChange(dataContainer.hmiTTSVRLanguage);
-//                        sdlVR.onLanguageChange(dataContainer.hmiTTSVRLanguage);
-//                    }
-//                    z: 1000
-//                }
-//            }
-//        }
+    Rectangle {
+        width: parent.width -200
+        height: parent.height - 100
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.horizontalCenter: parent.horizontalCenter
+        color: Constants.secondaryColor
+        border.width: 1
+        border.color: Constants.popUpBorderColor
+        radius: padding
+        z: 1000
+
+        Component {
+            id: listDelegate
+
+            Item {
+                height: 70
+                width: parent.width
+
+                Row {
+                    Row {
+                        height: 20
+                        CheckBox {
+                            style: CheckBoxStyle {
+                                label: Text {
+                                    color: Constants.panelTextColor
+                                    text: label
+                                }
+                            }
+                            onClicked: {
+                                permissionItems.setProperty(index, "allowed", !allowed)
+                            }
+                        }
+                    }
+                    Row {
+                        height: 50
+                        Text {
+                            id: label
+                            color: Constants.primaryColor
+                            //anchors.centerIn: parent
+                            //verticalAlignment: Text.AlignVCenter
+                            //horizontalAlignment: Text.AlignHCenter
+                            font.pixelSize: 0
+                            elide: Text.ElideRight
+                            text: textBody
+                            wrapMode: TextEdit.Wrap
+                            width: parent.width
+                        }
+                    }
+                }
+            }
+        }
+
+        ScrollableListView {
+            id: onAppPermissonList
+            anchors.fill: parent;
+            anchors.margins: 5
+            model: permissionItems
+            delegate: listDelegate
+        }
 
         Item {
             id: bottomPanel
@@ -97,10 +134,13 @@ Item {
             height: 1/4 * parent.height
             width: parent.width
 
-            BackButton { anchors.centerIn: parent }
+            OvalButton {
+                anchors.centerIn: parent
+                text: "Done"
+                onClicked: {
+                    deactivate()
+                }
+            }
         }
     }
 }
-
-
-

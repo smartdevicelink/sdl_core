@@ -50,6 +50,7 @@ QtObject {
     property string vrHelpTitlePerformInteraction
     property string menuTitle
     property Icon menuIcon: Icon { }
+    property var allowedFunctions: []
 
     // media player
     property string playPauseState
@@ -84,6 +85,7 @@ QtObject {
         isMediaApplication = false
         playPauseState = ""
         hmiUIText.reset()
+        allowedFunctions = []
 // no need to reset mediaClock
         helpPrompt = ""
         timeoutPrompt = ""

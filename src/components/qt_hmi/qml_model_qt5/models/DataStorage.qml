@@ -218,6 +218,7 @@ QtObject {
             hmiUITextAlignment: app.hmiUITextAlignment,
             options: [],
             turnList: [],
+            allowedFunctions: [],
             turnListSoftButtons: [],
             mediaClock: app.mediaClock,
             languageTTSVR: Common.Language.EN_US,
