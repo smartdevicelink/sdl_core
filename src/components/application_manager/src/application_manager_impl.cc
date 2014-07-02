@@ -1196,69 +1196,72 @@ bool ApplicationManagerImpl::ManageMobileCommand(
     }
   }
 
-  if (command->Init()) {
-    if ((*message)[strings::params][strings::message_type].asInt() ==
-        mobile_apis::messageType::request) {
-      // get application hmi level
-      mobile_api::HMILevel::eType app_hmi_level =
-        mobile_api::HMILevel::INVALID_ENUM;
-      if (app) {
-        app_hmi_level = app->hmi_level();
-      }
-
-      request_controller::RequestController::TResult result =
-        request_ctrl_.addRequest(command, app_hmi_level);
-
-      if (result == request_controller::RequestController::SUCCESS) {
-        LOG4CXX_INFO(logger_, "Perform request");
-      } else if (result ==
-                 request_controller::RequestController::
-                 TOO_MANY_PENDING_REQUESTS) {
-        LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: " <<
-                          "TOO_MANY_PENDING_REQUESTS");
-
-        smart_objects::SmartObject* response =
-          MessageHelper::CreateNegativeResponse(
-            connection_key,
-            static_cast<int32_t>(function_id),
-            correlation_id,
-            static_cast<int32_t>(mobile_apis::Result::TOO_MANY_PENDING_REQUESTS));
-
-        SendMessageToMobile(response);
-        return false;
-      } else if (result ==
-                 request_controller::RequestController::TOO_MANY_REQUESTS) {
-        LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: " <<
-                          "TOO_MANY_REQUESTS");
-
-        MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-          connection_key,
-          mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
-
-        UnregisterApplication(connection_key,
-                              mobile_apis::Result::TOO_MANY_PENDING_REQUESTS,
-                              false);
-        return false;
-      } else if (result ==
-                 request_controller::RequestController::
-                 NONE_HMI_LEVEL_MANY_REQUESTS) {
-        LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: " <<
-                          "REQUEST_WHILE_IN_NONE_HMI_LEVEL");
-
-        MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-          connection_key, mobile_api::AppInterfaceUnregisteredReason::
-          REQUEST_WHILE_IN_NONE_HMI_LEVEL);
-
-        UnregisterApplication(connection_key, mobile_apis::Result::INVALID_ENUM,
-                              false);
-        return false;
-      } else {
-        LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: Unknown case");
-        return false;
-      }
+  if ((*message)[strings::params][strings::message_type].asInt() ==
+      mobile_apis::messageType::request) {
+    // get application hmi level
+    mobile_api::HMILevel::eType app_hmi_level =
+      mobile_api::HMILevel::INVALID_ENUM;
+    if (app) {
+      app_hmi_level = app->hmi_level();
     }
 
-    command->Run();
+    // commands will be launched from requesr_ctrl
+    request_controller::RequestController::TResult result =
+      request_ctrl_.addRequest(command, app_hmi_level);
+
+    if (result == request_controller::RequestController::SUCCESS) {
+      LOG4CXX_INFO(logger_, "Perform request");
+    } else if (result ==
+               request_controller::RequestController::
+               TOO_MANY_PENDING_REQUESTS) {
+      LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: " <<
+                        "TOO_MANY_PENDING_REQUESTS");
+
+      smart_objects::SmartObject* response =
+        MessageHelper::CreateNegativeResponse(
+          connection_key,
+          static_cast<int32_t>(function_id),
+          correlation_id,
+          static_cast<int32_t>(mobile_apis::Result::TOO_MANY_PENDING_REQUESTS));
+
+      SendMessageToMobile(response);
+      return false;
+    } else if (result ==
+               request_controller::RequestController::TOO_MANY_REQUESTS) {
+      LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: " <<
+                        "TOO_MANY_REQUESTS");
+
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+        connection_key,
+        mobile_api::AppInterfaceUnregisteredReason::TOO_MANY_REQUESTS);
+
+      UnregisterApplication(connection_key,
+                            mobile_apis::Result::TOO_MANY_PENDING_REQUESTS,
+                            false);
+      return false;
+    } else if (result ==
+               request_controller::RequestController::
+               NONE_HMI_LEVEL_MANY_REQUESTS) {
+      LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: " <<
+                        "REQUEST_WHILE_IN_NONE_HMI_LEVEL");
+
+      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
+        connection_key, mobile_api::AppInterfaceUnregisteredReason::
+        REQUEST_WHILE_IN_NONE_HMI_LEVEL);
+
+      UnregisterApplication(connection_key, mobile_apis::Result::INVALID_ENUM,
+                            false);
+      return false;
+    } else {
+      LOG4CXX_ERROR_EXT(logger_, "Unable to perform request: Unknown case");
+      return false;
+    }
+  } else {
+    // run all other types of command
+    if (command->Init()) {
+      command->Run();
+      command->CleanUp();
+    }
   }
 
   return true;

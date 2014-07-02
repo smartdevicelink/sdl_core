@@ -349,6 +349,13 @@ class Profile : public utils::Singleton<Profile> {
     const std::pair<uint32_t, int32_t>& read_did_frequency() const;
 
     const  std::pair<uint32_t, int32_t>& get_vehicle_data_frequency() const;
+
+    /**
+     * @brief Returns max allowed threads number for handling mobile requests
+     */
+    uint32_t thread_pool_size() const;
+
+
   private:
     /**
      * Default constructor
@@ -510,6 +517,7 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     recording_file_source_;
     std::string                     recording_file_name_;
     uint32_t                        application_list_update_timeout_;
+    uint32_t                        max_thread_pool_size_;
     /*
      * first value is count of request
      * second is time scale
