@@ -125,13 +125,35 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
       } else if (saved_hmi_level == mobile_apis::HMILevel::HMI_LIMITED) {
         restored_hmi_level = app_mngr_->PutApplicationInLimited(application);
         if (audio_streaming_state == mobile_apis::AudioStreamingState::AUDIBLE) {
-          MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
+          //implemented SDLAQ-CRS-839
+          //checking the existence of application with AudioStreamingState=AUDIBLE
+          //notification resumeAudioSource is sent if only resumed application has
+          //AudioStreamingState=AUDIBLE
+          bool application_exist_with_audible_state = false;
+          const std::set<ApplicationSharedPtr>& app_list = app_mngr_->applications();
+          std::set<ApplicationSharedPtr>::const_iterator app_list_it = app_list.begin();
+          uint32_t app_id = application->app_id();
+          for (; app_list.end() != app_list_it; ++app_list_it) {
+            if (((*app_list_it)->audio_streaming_state() ==
+                mobile_apis::AudioStreamingState::AUDIBLE) &&
+                ((*app_list_it))->app_id() != app_id) {
+              application_exist_with_audible_state = true;
+              break;
+            }
+          }
+          if (!application_exist_with_audible_state) {
+            MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
+          }
         }
       } else {
         restored_hmi_level = saved_hmi_level;
       }
       application->set_hmi_level(restored_hmi_level);
-      MessageHelper::SendHMIStatusNotification(*(application.get()));
+      if (restored_hmi_level != mobile_apis::HMILevel::HMI_FULL) {
+        //APPLINK-7244
+        MessageHelper::SendHMIStatusNotification(*(application.get()));
+      }
+
       LOG4CXX_INFO(logger_, "Restore Application "
                    << saved_m_app_id
                    << " to HMILevel " << restored_hmi_level);
@@ -186,6 +208,7 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
       file.file_name = file_data[strings::sync_file_name].asString();
       file.file_type = static_cast<mobile_apis::FileType::eType> (
                          file_data[strings::file_type].asInt());
+      LOG4CXX_INFO(logger_, "RestoreApplicationData file " << file.file_name);
       application->AddFile(file);
     }
   }
@@ -494,7 +517,7 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
 }
 
 bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr application) {
-  LOG4CXX_INFO(logger_, "RestoreApplicationData");
+  LOG4CXX_INFO(logger_, "CheckPersistenceFilesForResumption");
   DCHECK(application.get());
 
   Json::Value::iterator it = GetSavedApplications().begin();

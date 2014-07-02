@@ -39,7 +39,11 @@
 #include "transport_manager/tcp/tcp_transport_adapter.h"
 
 #ifdef BLUETOOTH_SUPPORT
+#ifdef CUSTOMER_PASA
+#include "transport_manager/pasa_bt/bluetooth_PASA_transport_adapter.h"
+#else
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
+#endif
 #endif
 
 #ifdef USB_SUPPORT
@@ -59,7 +63,13 @@ int TransportManagerDefault::Init() {
   }
   transport_adapter::TransportAdapterImpl* ta;
 #ifdef BLUETOOTH_SUPPORT
+
+#ifdef CUSTOMER_PASA
+  ta = new transport_adapter::BluetoothPASATransportAdapter;
+#else
   ta = new transport_adapter::BluetoothTransportAdapter;
+#endif
+
 #ifdef TIME_TESTER
   if (metric_observer_) {
     ta->SetTimeMetricObserver(metric_observer_);

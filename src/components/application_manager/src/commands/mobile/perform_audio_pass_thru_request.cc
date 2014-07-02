@@ -44,10 +44,19 @@ namespace str = strings;
 
 PerformAudioPassThruRequest::PerformAudioPassThruRequest(
     const MessageSharedPtr& message)
-    : CommandRequestImpl(message) {
+    : CommandRequestImpl(message),
+      is_active_tts_speak_(false) {
 }
 
 PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {
+}
+
+void PerformAudioPassThruRequest::onTimeOut() {
+  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::onTimeOut");
+
+  ApplicationManagerImpl::instance()->StopAudioPassThru(connection_key());
+
+  CommandRequestImpl::onTimeOut();
 }
 
 bool PerformAudioPassThruRequest::Init() {
@@ -84,7 +93,6 @@ void PerformAudioPassThruRequest::Run() {
   if ((*message_)[str::msg_params].keyExists(str::initial_prompt) &&
       (0 < (*message_)[str::msg_params][str::initial_prompt].length())) {
     // In case TTS Speak, subscribe on notification
-    subscribe_on_event(hmi_apis::FunctionID::TTS_Stopped);
     SendSpeakRequest();
     SendPerformAudioPassThruRequest();
   } else {
@@ -114,6 +122,10 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
         ApplicationManagerImpl::instance()->StopAudioPassThru(connection_key());
       }
+      if (is_active_tts_speak_) {
+        is_active_tts_speak_ = false;
+        SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL);
+      }
 
       bool result = mobile_apis::Result::SUCCESS == mobile_code ||
                     mobile_apis::Result::RETRY == mobile_code;
@@ -122,7 +134,9 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
                    &(message[strings::msg_params]));
       break;
     }
-    case hmi_apis::FunctionID::TTS_Stopped:{
+    case hmi_apis::FunctionID::TTS_Speak: {
+      LOG4CXX_INFO(logger_, "Received TTS_Speak event");
+      is_active_tts_speak_ = false;
       SendRecordStartNotification();
       StartMicrophoneRecording();
       ApplicationManagerImpl::instance()->
@@ -145,7 +159,7 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
 
   if ((*message_)[str::msg_params].keyExists(str::initial_prompt) &&
       (0 < (*message_)[str::msg_params][str::initial_prompt].length())) {
-    for (int32_t i = 0;
+    for (uint32_t i = 0;
         i < (*message_)[str::msg_params][str::initial_prompt].length();
         ++i) {
       msg_params[hmi_request::tts_chunks][i][str::text] =
@@ -155,7 +169,7 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
     }
     // app_id
     msg_params[strings::app_id] = connection_key();
-
+    is_active_tts_speak_ = true;
     SendHMIRequest(hmi_apis::FunctionID::TTS_Speak, &msg_params, true);
   }
 }

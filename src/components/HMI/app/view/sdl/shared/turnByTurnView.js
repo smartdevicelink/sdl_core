@@ -101,9 +101,7 @@ SDL.TurnByTurnView = SDL.SDLAbstractView.create( {
                 }
             }
 
-            if (naviParams.softButtons) {
-                this.softButtons.addItems(naviParams.softButtons);
-            }
+            this.softButtons.addItems(naviParams.softButtons);
 
             if (naviParams.maneuverComplete) {
                 this.set('maneuverComplete', naviParams.maneuverComplete);

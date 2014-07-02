@@ -53,23 +53,29 @@ Connection::Connection(ConnectionHandle connection_handle,
     : connection_handler_(connection_handler),
       connection_handle_(connection_handle),
       connection_device_handle_(connection_device_handle) {
+  LOG4CXX_TRACE_ENTER(logger_);
   DCHECK(connection_handler_);
 
   heartbeat_monitor_ = new HeartBeatMonitor(heartbeat_timeout, this);
   heart_beat_monitor_thread_ = new threads::Thread("HeartBeatMonitorThread",
                                                    heartbeat_monitor_);
+  heart_beat_monitor_thread_->start();
 }
 
 Connection::~Connection() {
-  session_map_.clear();
+  LOG4CXX_TRACE_ENTER(logger_);
   heart_beat_monitor_thread_->stop();
   delete heart_beat_monitor_thread_;
+  sync_primitives::AutoLock lock(session_map_lock_);
+  session_map_.clear();
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
-int32_t Connection::AddNewSession() {
+uint32_t Connection::AddNewSession() {
+  LOG4CXX_TRACE_ENTER(logger_);
   sync_primitives::AutoLock lock(session_map_lock_);
 
-  int32_t result = -1;
+  int32_t result = 0;
 
   const uint8_t max_connections = 255;
   int32_t size = session_map_.size();
@@ -90,9 +96,9 @@ int32_t Connection::AddNewSession() {
   return result;
 }
 
-int32_t Connection::RemoveSession(uint8_t session) {
+uint32_t Connection::RemoveSession(uint8_t session) {
   sync_primitives::AutoLock lock(session_map_lock_);
-  int32_t result = -1;
+  uint32_t result = 0;
   SessionMapIterator it = session_map_.find(session);
   if (session_map_.end() == it) {
     LOG4CXX_ERROR(logger_, "Session not found in this connection!");
@@ -180,21 +186,16 @@ void Connection::CloseSession(uint8_t session_id) {
     size = session_map_.size();
   }
 
+  connection_handler_->CloseSession(connection_handle_, session_id);
+
   //Close connection if it is last session
   if (1 == size) {
     connection_handler_->CloseConnection(connection_handle_);
-  } else {
-    connection_handler_->CloseSession(connection_handle_, session_id);
   }
 }
 
 void Connection::StartHeartBeat(uint8_t session_id) {
-    bool is_first_session = heartbeat_monitor_->AddSession(session_id);
-
-    // start monitoring thread when first session with heartbeat added
-    if (is_first_session) {
-      heart_beat_monitor_thread_->start();
-    }
+  heartbeat_monitor_->AddSession(session_id);
 }
 
 void Connection::SendHeartBeat(uint8_t session_id) {

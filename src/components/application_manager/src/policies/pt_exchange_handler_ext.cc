@@ -46,7 +46,7 @@ using std::string;
 
 namespace policy {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PTExchangeHandlerExt")
+CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 PTExchangeHandlerExt::PTExchangeHandlerExt(PolicyHandler* policy_handler)
   : PTExchangeHandler(),
@@ -57,12 +57,12 @@ PTExchangeHandlerExt::PTExchangeHandlerExt(PolicyHandler* policy_handler)
 PTExchangeHandlerExt::~PTExchangeHandlerExt() {
 }
 
-bool PTExchangeHandlerExt::StartExchange() {
-  LOG4CXX_INFO(logger_, "PolicyHandler::StartExchangeExtended");
+void PTExchangeHandlerExt::Start() {
+  LOG4CXX_TRACE(logger_, "Start exchange PT");
   PolicyManager* policy_manager = policy_handler_->policy_manager();
   if (!policy_manager) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    return false;
+    return;
   }
   string policy_snapshot_file_name =
     Profile::instance()->policies_snapshot_file_name();
@@ -73,14 +73,16 @@ bool PTExchangeHandlerExt::StartExchange() {
       MessageHelper::SendPolicyUpdate(policy_snapshot_file_name,
                                       policy_manager->TimeoutExchange(),
                                       policy_manager->RetrySequenceDelaysSeconds());
-      return true;
     } else {
       LOG4CXX_ERROR(logger_, "Failed to write snapshot file to " << policy_snapshot_file_name);
     }
   } else {
     LOG4CXX_ERROR(logger_, "Failed to obtain policy table snapshot");
   }
-  return false;
 }
 
-}  //  namespace policy
+void PTExchangeHandlerExt::Stop() {
+  // Nothing doing
+}
+
+}  // namespace policy

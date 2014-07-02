@@ -117,6 +117,7 @@
     position: relative;
 }
 
+#policies_settings_system_error .listSelect,
 #policies_settings_status_info .listSelect{
     top: 125px;
     position: absolute;

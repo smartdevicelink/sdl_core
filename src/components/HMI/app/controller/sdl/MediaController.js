@@ -124,7 +124,7 @@ SDL.SDLMediaController = Em.Object.create( {
             if (SDL.States.media.sdlmedia.active
                 || SDL.SDLAppController.model) {
 
-                SDL.SDLAppController.model.set('active', false);
+                SDL.SDLController.getApplicationModel(appID).set('active', false);
 
                 SDL.States.goToStates('info.apps');
 

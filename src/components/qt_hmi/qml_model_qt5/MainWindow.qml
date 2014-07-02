@@ -58,7 +58,7 @@ Rectangle {
         id: dataContainer
 
         onSystemContextChanged: {
-            sdlUI.onSystemContext(systemContext)
+            sdlUI.onSystemContext(systemContext, currentApplication.appId)
         }
 
         // Please note that applicationContext is changed only after setting currentApplication
@@ -238,6 +238,22 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
+
+        UserActionPopUp {
+            id: userActionPopUp
+            popUpName: "ActionPopUp"
+            objectName: "ActionPopUp"
+            anchors.fill: parent
+            visible: false
+        }
+
+        OnAppPermissionConsentPopUp {
+            id: onAppPermissionConsentPopUp
+            popUpName: "onAppPermissionConsent"
+            objectName: "onAppPermissionConsent"
+            anchors.fill: parent
+            visible: false
+        }
     }
 
     Item {
@@ -275,7 +291,7 @@ Rectangle {
         HardwareButtonsView { id: hardwarePanel }
     }
 
-    HMIProxy {
+    HMIAdapter {
         HmiApi.ButtonsProxy {
             id: sdlButtons
             objectName: "Buttons"
@@ -304,12 +320,26 @@ Rectangle {
             id: sdlUI
             objectName: "UI"
         }
+
+        HmiApi.SDLProxy {
+            id: sdlSDL
+            objectName: "SDL"
+        }
     }
 
-    SDLProxy {
+    SDLAdapter {
         id: sdlProxy
 
+        onResumeAudioSource: {
+
+        }
+
+        onFileRemoved: {
+
+        }
+
         onAppRegistered: {
+            console.debug("enter onAppRegistered")
             var appTypeToAdd = 0
             if (application.appType !== undefined) {
                 for (var index in application.appType) {
@@ -339,15 +369,11 @@ Rectangle {
                     "startTimeForProgress": -1
                 }
              });
+            console.debug("exit onAppRegistered")
         }
 
         onAppUnregistered: {
-            console.debug("enter")
-            console.debug("Resume unregister:", resume)
-            if (resume) {
-                dataContainer.stashApplication(appId);
-            }
-            dataContainer.removeApplication(appId);
+            console.debug("enter onAppUnregistered")            
             if ((dataContainer.currentApplication.appId === appId)) {
                 if (dataContainer.applicationContext) {
                     contentLoader.go("views/ApplicationListView.qml");
@@ -357,13 +383,39 @@ Rectangle {
                 }
                 dataContainer.currentApplication.reset()
             }
-            console.debug("exit")
+            dataContainer.removeApplication(appId);
+            console.debug("exit onAppUnregistered")
         }
 
         onPlayTone: {
             beep.play()
         }
 
+        onSdlClose: {
+
+        }
+
+        onPutFile: {
+            console.log("OnPutFile: ", offset, length, fileSize, FileName,
+                        syncFileName, fileType, persistentFile);
+        }
+
+        onRecordStart: {
+
+        }
+
+        onAppPermissionChanged: {
+
+        }
+
+        onSdlConsentNeeded: {
+
+        }
+
+        onStatusUpdate: {
+            console.log("enter onStatusUpdate")
+            settingsContainer.updateStatus(status);
+        }
     }
 
     Component.onCompleted: {

@@ -17,12 +17,13 @@ include_directories (
   ../transport_manager/include/
   ../resumption/include/
   ../rpc_base/include/
-  ../../thirdPartyLibs/jsoncpp/include/
-  ../../thirdPartyLibs/encryption/include/
-  ../../thirdPartyLibs/MessageBroker/include
+  ${JSONCPP_INCLUDE_DIRECTORY}
+  ${ENCRYPTION_INCLUDE_DIRECTORY}
+  ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (SOURCES
@@ -43,8 +44,6 @@ set (SOURCES
 set (POLICIES_MANAGER
 ./src/policies/policy_handler.cc
 ./src/policies/policy_event_observer.cc
-./src/policies/policy_retry_sequence.cc
-./src/policies/pt_exchange_handler.cc
 )
 
 if (EXTENDED_POLICY_FLAG)
@@ -53,7 +52,6 @@ if (EXTENDED_POLICY_FLAG)
   )
   list(APPEND POLICIES_MANAGER
     ./src/policies/pt_exchange_handler_ext.cc
-    ./src/policies/pt_exchange_handler_impl.cc
   )
 else ()
   include_directories(
@@ -61,6 +59,7 @@ else ()
   )
   list(APPEND POLICIES_MANAGER
     ./src/policies/pt_exchange_handler_impl.cc
+    ./src/policies/policy_retry_sequence.cc
   )
 endif ()
 
@@ -419,6 +418,5 @@ add_library("ApplicationManager" ${SOURCES} ${MOBILE_COMMANDS_SOURCES} ${HMI_COM
 target_link_libraries("ApplicationManager" ${LIBRARIES})
 
 if(ENABLE_LOG)
-  add_dependencies("ApplicationManager" liblog4cxx)
   target_link_libraries("ApplicationManager" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()

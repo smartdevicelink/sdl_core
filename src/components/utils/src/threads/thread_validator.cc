@@ -32,7 +32,9 @@
 #include "utils/threads/thread_validator.h"
 
 #include "utils/logger.h"
+#ifndef CUSTOMER_PASA
 #include "utils/back_trace.h"
+#endif
 
 namespace threads {
 

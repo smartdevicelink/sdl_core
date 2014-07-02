@@ -195,6 +195,10 @@ var StateManager = Em.StateManager.extend({
 
             }),
 
+            systemError: Em.State.create({
+
+            }),
+
             deviceStateChange: Em.State.create({
 
                 enter: function () {

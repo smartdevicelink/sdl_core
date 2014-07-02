@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,6 +34,7 @@
 
 #include <limits.h>
 #include <stddef.h>
+#include <signal.h>
 
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_manager.h"
@@ -43,12 +44,17 @@ using namespace std;
 using namespace threads::impl;
 
 namespace {
+
 static void* threadFunc(void* closure) {
   threads::ThreadDelegate* delegate =
     static_cast<threads::ThreadDelegate*>(closure);
   delegate->threadMain();
   return NULL;
 }
+
+static pthread_t main_thread_id;
+static bool main_thread_id_set = false;
+
 }
 
 namespace threads {
@@ -76,6 +82,37 @@ void Thread::SetNameForId(Id thread_id, const std::string& name) {
   ThreadManager::instance()->RegisterName(thread_id.id_, name);
 }
 
+//static
+void Thread::SetMainThread() {
+  main_thread_id = pthread_self();
+  main_thread_id_set = true;
+}
+
+//static
+bool Thread::InterruptMainThread() {
+  if (main_thread_id_set) {
+    pthread_kill(main_thread_id, SIGINT);
+    return true;
+  }
+  else {
+    LOG4CXX_WARN(logger_, "Cannot interrupt main thread: not specified");
+    return false;
+  }
+}
+
+//static
+void Thread::MaskSignals() {
+  sigset_t sigset;
+  sigfillset(&sigset);
+  pthread_sigmask(SIG_SETMASK, &sigset, 0);
+}
+
+//static
+void Thread::UnmaskSignals() {
+  sigset_t sigset;
+  sigemptyset(&sigset);
+  pthread_sigmask(SIG_SETMASK, &sigset, 0);
+}
 
 Thread::Thread(const char* name, ThreadDelegate* delegate)
   : name_("undefined"),

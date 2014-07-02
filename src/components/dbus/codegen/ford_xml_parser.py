@@ -147,9 +147,29 @@ class FordXmlParser:
         return notifications
 
 
+    def find_notifications_by_provider(self, interface_el, provider):
+        notifications = list()
+        condition = 'function[@messagetype="notification"][@provider="%s"]' % provider
+        for function_el in interface_el.findall(condition):
+            notifications.append(function_el)
+        return notifications
+
+
     def find_request_response_pairs(self, interface_el):
         result = list()
         request_els = interface_el.findall('function[@messagetype="request"]')
+        response_els = interface_el.findall('function[@messagetype="response"]')
+        for request_el in request_els:
+            name = request_el.get('name')
+            response_el = next(r for r in response_els if r.get('name') == name)
+            result.append((request_el, response_el))
+        return result
+
+
+    def find_request_response_pairs_by_provider(self, interface_el, provider):
+        result = list()
+        condition = 'function[@messagetype="request"][@provider="%s"]' % provider
+        request_els = interface_el.findall(condition)
         response_els = interface_el.findall('function[@messagetype="response"]')
         for request_el in request_els:
             name = request_el.get('name')
@@ -191,14 +211,14 @@ class FordXmlParser:
         return arg_el
 
 
-    def create_introspection_iface_el(self, interface_el):
+    def create_introspection_iface_el(self, interface_el, provider):
         interface = interface_el.get('name')
         interface_name = self.interface_path + '.' + interface
 
-        notifications = self.find_notifications(interface_el)
+        notifications = self.find_notifications_by_provider(interface_el, provider)
         signals = [self.convert_to_signal(n, interface) for n in notifications]
 
-        request_responses = self.find_request_response_pairs(interface_el)
+        request_responses = self.find_request_response_pairs_by_provider(interface_el, provider)
         methods = [self.convert_to_method(r, interface) for r in request_responses]
 
         if signals or methods:

@@ -63,6 +63,7 @@ class IAP2Connection : public Connection {
   static const size_t kBufferSize = 1024;
 
   void ReceiveData();
+  bool Close();
 
   DeviceUID device_uid_;
   ApplicationHandle app_handle_;
@@ -73,6 +74,7 @@ class IAP2Connection : public Connection {
   uint8_t buffer_[kBufferSize];
 
   utils::SharedPtr<threads::Thread> receiver_thread_;
+  threads::ThreadDelegate* receiver_thread_delegate_;
 
   class ReceiverThreadDelegate : public threads::PulseThreadDelegate {
    public:

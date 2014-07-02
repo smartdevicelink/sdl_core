@@ -241,11 +241,11 @@ SDL.AlertPopUp = Em.ContainerView.create({
         }
         
         this.set('active', true);
-        this.set('timeout', message.duration);
+        this.set('timeout', message.duration ? message.duration : 30000); //default timeout defined for Alert popUp
 
         clearTimeout(this.timer);
         this.timer = setTimeout(function() {
             self.deactivate('timeout');
-        }, message.duration ? message.duration : 30000); //default timeout defined for Alert popUp
+        }, this.timeout);
     }
 });

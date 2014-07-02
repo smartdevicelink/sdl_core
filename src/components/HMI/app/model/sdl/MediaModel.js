@@ -69,6 +69,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 uiPerformInteraction: null
             }));
 
+            this.set('VRCommands', []);
             this.set('tbtActivate', false);
             this.set('isPlaying', true);
             this.set('globalProperties.helpPrompt', []);
@@ -326,6 +327,9 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                         break;
                     }
                 }
+            } else {
+
+                this.appInfo.set('alignment', "text-align:center");
             }
 
             if (params.graphic) {
@@ -334,7 +338,9 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 this.appInfo.set('trackIcon', 'images/sdl/audio_icon.jpg');
             }
 
-            this.updateSoftButtons(params.softButtons);
+            if ("softButtons" in params) {
+                this.updateSoftButtons(params.softButtons);
+            }
 
             // Magic number is a count of Preset Buttons on HMI = 8
             for (var i = 0; i < 8; i++) {

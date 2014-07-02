@@ -1,11 +1,11 @@
 include_directories (
-  ../../../src/thirdPartyLibs/gmock-1.7.0/include
-  ../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
+  ${GMOCK_INCLUDE_DIRECTORY}
   ../../../src/components/transport_manager/include
   ../../../src/components/utils/include
   ../../../src/components/protocol_handler/include
   ../../../src/components/connection_handler/include
   ../../../test/components/protocol_handler/include
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
 set (LIBRARIES

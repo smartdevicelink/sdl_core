@@ -60,10 +60,8 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
 
   /**
     * \brief add new session
-    *
-    * \return true if first session with heartbeat added
     */
-  bool AddSession(uint8_t session_id);
+  void AddSession(uint8_t session_id);
   void RemoveSession(uint8_t session_id);
 
   /*
@@ -95,6 +93,7 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
   sync_primitives::Lock sessions_list_lock_;
 
   volatile bool stop_flag_;
+  volatile bool is_active;
 
   DISALLOW_COPY_AND_ASSIGN(HeartBeatMonitor);
 };

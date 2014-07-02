@@ -1,8 +1,5 @@
-/**
- * \file connection_handler.hpp
- * \brief Connection handler interface class.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -49,7 +46,7 @@
  */
 namespace connection_handler {
 /**
- * \class ConnectionHandler
+ * \class ConnectionHandler
  * \brief SmartDeviceLink ConnectionHandler interface class
  */
 class ConnectionHandler {
@@ -73,6 +70,8 @@ class ConnectionHandler {
   virtual void ConnectToDevice(
       connection_handler::DeviceHandle device_handle) = 0;
 
+  virtual void ConnectToAllDevices() = 0;
+
   /*
    * Close all associated sessions and close the connection pointed by handle
    */
@@ -83,6 +82,14 @@ class ConnectionHandler {
    * \param connection_key pair of connection handle and session id
    */
   virtual uint32_t GetConnectionSessionsCount(uint32_t connection_key) = 0;
+
+  /**
+   * Gets device id by mac address
+   * @param mac_address
+   * @return true if successfully
+   */
+  virtual bool GetDeviceID(const std::string& mac_address,
+                           DeviceHandle* device_handle) = 0;
 
   /*
    * Close session associated with the key

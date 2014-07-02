@@ -41,7 +41,7 @@ utils::SharedPtr<CBoolSchemaItem> CBoolSchemaItem::create(
 
 Errors::eType CBoolSchemaItem::validate(const SmartObject& Object) {
   return
-      (true == SmartType_Boolean == Object.getType()) ?
+      (SmartType_Boolean == Object.getType()) ?
           Errors::OK : Errors::INVALID_VALUE;
 }
 

@@ -31,16 +31,51 @@
  */
 
 #include "application_manager/policies/policy_retry_sequence.h"
+
+#include <unistd.h>
+
 #include "application_manager/policies/policy_handler.h"
 
 namespace policy {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 RetrySequence::RetrySequence(PolicyHandler* const policy_handler)
     : policy_handler_(policy_handler) {
 }
 
 void RetrySequence::threadMain() {
-  policy_handler_->StartNextRetry();
+  StartNextRetry();
+}
+
+void RetrySequence::StartNextRetry() {
+  LOG4CXX_TRACE(logger_, "Start next retry of exchanging PT");
+  DCHECK(policy_handler_);
+  if (!policy_handler_->policy_manager()) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return;
+  }
+
+  BinaryMessageSptr pt_snapshot = policy_handler_->policy_manager()
+      ->RequestPTUpdate();
+  if (pt_snapshot) {
+    policy_handler_->SendMessageToSDK(*pt_snapshot);
+
+    int timeout = policy_handler_->policy_manager()->TimeoutExchange();
+    int seconds = policy_handler_->policy_manager()->NextRetryTimeout();
+    LOG4CXX_DEBUG(logger_,
+                  "Timeout response: " << timeout << " Next try: " << seconds);
+    if (timeout > 0) {
+      sleep(timeout);
+      policy_handler_->policy_manager()->OnExceededTimeout();
+    }
+    if (seconds > 0) {
+      sleep(seconds);
+      StartNextRetry();
+    } else {
+      LOG4CXX_INFO(logger_, "End retry sequence. Update PT was not received");
+    }
+  }
 }
 
 }  // namespace policy

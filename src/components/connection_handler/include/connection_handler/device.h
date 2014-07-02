@@ -1,9 +1,5 @@
-/**
- * \file Device.hpp
- * \brief Device class.
- * Stores device information
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -115,7 +111,7 @@ typedef std::map<int32_t, Device> DeviceList;
  * \brief Type for Devices map iterator
  * Key is DeviceHandle which is uniq
  */
-typedef std::map<int32_t, Device>::iterator DeviceListIterator;
+typedef DeviceList::iterator DeviceListIterator;
 
 }/* namespace connection_handler */
 

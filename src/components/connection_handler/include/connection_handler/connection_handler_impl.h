@@ -1,10 +1,5 @@
-/**
- * \file connection_handlerImpl.hpp
- * \brief Connection handler class.
- * Observes TransportManager and ProtocolHandler, stores information regarding connections
- * and sessions and provides it to AppManager.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +39,6 @@
 
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "protocol_handler/session_observer.h"
-#include "transport_manager/transport_manager_listener_empty.h"
 #include "connection_handler/connection_handler_observer.h"
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
@@ -96,18 +90,14 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      */
     virtual void ConnectToDevice(connection_handler::DeviceHandle device_handle);
 
+    virtual void ConnectToAllDevices();
+
     virtual void StartTransportManager();
 
     virtual void OnDeviceListUpdated(
       const std::vector<transport_manager::DeviceInfo>&);
 
-    /**
-    * @brief Reaction on event, when new applications are started on device
-    * and SDL found this application
-    *
-    * @param device_handle Unique ID of device with new application list
-    */
-    virtual void OnApplicationListUpdated(DeviceHandle device_handle);
+    virtual void OnFindNewApplicationsRequest();
 
     /**
      * \brief Available devices list updated.
@@ -161,9 +151,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * when Mobile Application initiates start of new session.
      * \param connection_handle Connection identifier within which session has to be started.
      * \param sessionId Identifier of the session to be started
-     * \return int32_t Id (number) of new session if successful otherwise -1.
+     * \return int32_t Id (number) of new session if successful otherwise 0;
      */
-    virtual int32_t OnSessionStartedCallback(
+    virtual uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
       const uint8_t session_id,
       const protocol_handler::ServiceType& service_type);
@@ -175,7 +165,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
      * \param sessionId Identifier of the session to be ended
      * \param hashCode Hash used only in second version of SmartDeviceLink protocol.
      * If not equal to hash assigned to session on start then operation fails.
-     * \return int32_t -1 if operation fails session key otherwise
+     * \return uint32_t 0 if operation fails session key otherwise
      */
     virtual uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID& connection_handle,
@@ -229,6 +219,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
                                   std::list<uint32_t>* applications_list = NULL,
                                   std::string* mac_address = NULL);
 
+    virtual bool GetDeviceID(const std::string& mac_address,
+                             DeviceHandle* device_handle);
 
     /**
      * \brief Method which should start devices discovering

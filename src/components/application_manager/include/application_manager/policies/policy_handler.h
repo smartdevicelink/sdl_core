@@ -41,8 +41,6 @@
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/pt_exchange_handler.h"
 #include "utils/logger.h"
-#include "utils/lock.h"
-#include "utils/threads/thread.h"
 #include "utils/singleton.h"
 
 namespace Json {
@@ -50,11 +48,11 @@ class Value;
 }
 
 namespace policy {
-
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
 
-class PolicyHandler : public utils::Singleton<PolicyHandler>,
+class PolicyHandler :
+    public utils::Singleton<PolicyHandler, utils::deleters::Deleter<PolicyHandler> >,
     public PolicyListener {
  public:
   virtual ~PolicyHandler();
@@ -91,8 +89,8 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    * @param Device id or 0, if concern to all SDL functionality
    * @param User consent from response
    */
-  void OnAllowSDLFunctionalityNotification(bool is_allowed, uint32_t device_id =
-                                               0);
+  void OnAllowSDLFunctionalityNotification(bool is_allowed,
+                                           uint32_t device_id = 0);
 
   /**
    * @brief Increment counter for ignition cycles
@@ -223,13 +221,26 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
 
   std::string GetAppName(const std::string& policy_app_id);
 
+  virtual void OnUserRequestedUpdateCheckRequired();
+
+  virtual void OnDeviceConsentChanged(const std::string& device_id,
+                                      bool is_allowed);
+
   /**
    * Adds http header (temporary method)
    * @param pt_string string without htt header
    */
   BinaryMessageSptr AddHttpHeader(const BinaryMessageSptr& pt_string);
 
- protected:
+  /**
+   * Checks whether application is revoked
+   * @param app_id id application
+   * @return true if application is revoked
+   */
+  bool IsApplicationRevoked(const std::string& app_id);
+
+protected:
+
   /**
    * Starts next retry exchange policy table
    */
@@ -262,18 +273,17 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
    */
   const std::string ConvertUpdateStatus(policy::PolicyTableStatus status);
 
- private:
+private:
   PolicyHandler();
   static PolicyHandler* instance_;
   static const std::string kLibrary;
   PolicyManager* policy_manager_;
   void* dl_handle_;
   AppIds last_used_app_ids_;
-  threads::Thread retry_sequence_;
-  sync_primitives::Lock retry_sequence_lock_;
-  PTExchangeHandler* exchange_handler_;
+  utils::SharedPtr<PTExchangeHandler> exchange_handler_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
   bool on_ignition_check_done_;
+  uint32_t last_activated_app_id_;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI
@@ -282,8 +292,12 @@ class PolicyHandler : public utils::Singleton<PolicyHandler>,
 
   inline PolicyManager* CreateManager();
 
-  DISALLOW_COPY_AND_ASSIGN(PolicyHandler);FRIEND_BASE_SINGLETON_CLASS(PolicyHandler);
-  friend class RetrySequence;
+  bool is_user_requested_policy_table_update_;
+
+  DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
+  FRIEND_BASE_SINGLETON_CLASS_WITH_DELETER(PolicyHandler,
+                                           utils::deleters::Deleter<PolicyHandler>);
+  FRIEND_DELETER_DESTRUCTOR(PolicyHandler);
 };
 
 }  //  namespace policy

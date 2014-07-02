@@ -11,29 +11,31 @@ import com.ford.syncV4.proxy.RPCMessage;
  * (for that case, it throws a RuntimeException).
  */
 public class CustomJsonRPCMarshaller implements IJsonRPCMarshaller {
-	/** The string that the marshaller will return for any incoming message. */
-	private String stubbedValue = null;
+    /**
+     * The string that the marshaller will return for any incoming message.
+     */
+    private String stubbedValue = null;
 
-	public CustomJsonRPCMarshaller(String stubbedValue) {
-		this.stubbedValue = stubbedValue;
-	}
+    public CustomJsonRPCMarshaller(String stubbedValue) {
+        this.stubbedValue = stubbedValue;
+    }
 
-	@Override
-	public byte[] marshall(RPCMessage msg, byte version) {
-		return stubbedValue.getBytes();
-	}
+    @Override
+    public byte[] marshall(RPCMessage msg, byte version) {
+        return stubbedValue.getBytes();
+    }
 
-	@Override
-	public Hashtable<String, Object> unmarshall(byte[] message) {
-		throw new RuntimeException(
-				"Custom JSON marshaller should only be used to marshall messages");
-	}
+    @Override
+    public Hashtable<String, Object> unmarshall(byte[] message) {
+        throw new RuntimeException(
+                "Custom JSON marshaller should only be used to marshall messages");
+    }
 
-	public String getStubbedValue() {
-		return stubbedValue;
-	}
+    public String getStubbedValue() {
+        return stubbedValue;
+    }
 
-	public void setStubbedValue(String stubbedValue) {
-		this.stubbedValue = stubbedValue;
-	}
+    public void setStubbedValue(String stubbedValue) {
+        this.stubbedValue = stubbedValue;
+    }
 }

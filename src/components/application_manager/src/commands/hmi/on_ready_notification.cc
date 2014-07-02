@@ -48,6 +48,9 @@ void OnReadyNotification::Run() {
   LOG4CXX_INFO(logger_, "OnReadyNotification::Run");
 
   ApplicationManagerImpl::instance()->OnHMIStartedCooperation();
+  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnReady);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -38,6 +38,9 @@
 #include <stdint.h>
 #include "utils/macro.h"
 #include "utils/singleton.h"
+#ifdef CUSTOMER_PASA
+#define SDL_INIFILE_PATH     "/fs/mp/etc/AppLink/smartDeviceLink.ini"
+#endif
 
 namespace profile {
 
@@ -207,7 +210,25 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns path to testing file to which redirects audio stream
       */
     const std::string& audio_stream_file() const;
+#ifdef CUSTOMER_PASA
+    /**
+      * @brief Returns path to log4cxx configuration file
+      */
+    const std::string& log4cxx_config_file() const;
+    /**
+      * @brief Returns remote logging flag file name
+      * if this path exists in the system log file will be
+      * saved to the USb drive
+      */
+    const std::string& remote_logging_flag_file() const;
 
+    /**
+      * @brief Returns path to remote logging flag file
+      * if this path exists in the system log file will be
+      * saved to the USb drive
+      */
+#endif
+    const std::string& remote_logging_flag_file_path() const;
     /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none
@@ -323,6 +344,11 @@ class Profile : public utils::Singleton<Profile> {
 
     const std::string& ack_mq_name() const;
 
+    uint32_t application_list_update_timeout() const;
+
+    const std::pair<uint32_t, int32_t>& read_did_frequency() const;
+
+    const  std::pair<uint32_t, int32_t>& get_vehicle_data_frequency() const;
   private:
     /**
      * Default constructor
@@ -379,6 +405,23 @@ class Profile : public utils::Singleton<Profile> {
      */
     bool ReadStringValue(std::string* value,
                          const char* default_value,
+                         const char* const pSection,
+                         const char* const pKey) const;
+
+
+    /**
+     * @brief Reads a pair of ints value from the profile
+     *
+     * @param value         Result value
+     * @param default_value Value to use key wasn't found
+     * @param pSection      The section to read the value in
+     * @param pKey          The key whose value needs to be read out
+     *
+     * @return FALSE if could not read the value out of the profile
+     * (then the value is not changed)
+     */
+    bool ReadUintIntPairValue(std::pair<uint32_t, int32_t>* value,
+                         const std::pair<uint32_t, uint32_t>& default_value,
                          const char* const pSection,
                          const char* const pKey) const;
 
@@ -456,11 +499,28 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
+#ifdef CUSTOMER_PASA
+    std::string                     log4cxx_config_file_;
+    std::string                     remote_logging_flag_file_;
+    std::string                     remote_logging_flag_file_path_;
+#endif
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;
     std::string                     ack_mq_name_;
     std::string                     recording_file_source_;
     std::string                     recording_file_name_;
+    uint32_t                        application_list_update_timeout_;
+    /*
+     * first value is count of request
+     * second is time scale
+     */
+    std::pair<uint32_t, int32_t>   read_did_frequency_;
+
+    /*
+     * first value is count of request
+     * second is time scale
+     */
+    std::pair<uint32_t, int32_t>   get_vehicle_data_frequency_;
 
     DISALLOW_COPY_AND_ASSIGN(Profile);
 

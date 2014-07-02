@@ -206,6 +206,11 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
+  if (!CheckStringsOfAlertRequest()) {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return false;
+  }
+
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
@@ -320,6 +325,46 @@ void AlertRequest::SendPlayToneNotification(int32_t app_id) {
                             msg_params);
     }
   }
+}
+
+bool AlertRequest::CheckStringsOfAlertRequest() {
+  if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
+    const std::string& str = (*message_)[strings::msg_params]
+                                         [strings::alert_text1].asString();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_INFO(logger_, "alert_text_1 syntax check failed");
+      return  false;
+    }
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
+      const std::string& str = (*message_)[strings::msg_params]
+                                           [strings::alert_text2].asString();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_INFO(logger_, "alert_text_2 syntax check failed");
+        return  false;
+      }
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
+        const std::string& str = (*message_)[strings::msg_params]
+                                             [strings::alert_text3].asString();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_INFO(logger_, "alert_text_3 syntax check failed");
+          return  false;
+        }
+  }
+  if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
+    std::string str;
+    smart_objects::SmartObject& tts_chunks_array =
+        (*message_)[strings::msg_params][strings::tts_chunks];
+    for (size_t i = 0; i < tts_chunks_array.length(); ++i) {
+      str = tts_chunks_array[i][strings::text].asString();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_INFO(logger_, "tts_chunks syntax check failed");
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 bool AlertRequest::HasHmiResponsesToWait() {

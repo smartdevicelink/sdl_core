@@ -59,6 +59,13 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
   virtual ~PerformAudioPassThruRequest();
 
   /**
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   *
+   */
+  virtual void onTimeOut();
+
+  /**
    * @brief Init required by command resources
    **/
   bool Init();
@@ -96,6 +103,9 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    * @brief Starts microphone recording
    */
   void StartMicrophoneRecording();
+
+  //flag display state of speak during perform audio pass thru
+  bool is_active_tts_speak_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformAudioPassThruRequest);
 };

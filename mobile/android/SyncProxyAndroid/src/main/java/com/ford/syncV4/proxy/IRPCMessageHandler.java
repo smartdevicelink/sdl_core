@@ -7,5 +7,5 @@ import java.util.Hashtable;
  */
 public interface IRPCMessageHandler {
 
-    public void handleRPCMessage(byte sessionId, Hashtable hash);
+    public void handleRPCMessage(byte sessionId, String appId, Hashtable hash);
 }

@@ -15,10 +15,11 @@ public class TestActionItem {
     /**
      * This is a value of the {@link ModuleTest#ACTION_NAME_ATTR} attribute
      */
-    private final static String START_RPC_SERVICE = "startRPCService";
+    public final static String START_RPC_SERVICE = "startRPCService";
 
     private long mDelay;
     private String mActionName;
+    private String mNextAppId;
 
     public TestActionItem(String mActionName) {
         this.mActionName = mActionName;
@@ -44,6 +45,14 @@ public class TestActionItem {
      */
     public String getActionName() {
         return mActionName;
+    }
+
+    public String getNextAppId() {
+        return mNextAppId;
+    }
+
+    public void setNextAppId(String value) {
+        mNextAppId = value;
     }
 
     @Override

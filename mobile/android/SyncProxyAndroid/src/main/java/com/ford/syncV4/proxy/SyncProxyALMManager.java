@@ -45,6 +45,7 @@ import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
+import com.ford.syncV4.proxy.rpc.OnAppInterfaceUnregistered;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
@@ -403,7 +404,7 @@ public class SyncProxyALMManager {
 	 * @throws SyncException
 	 */
 	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
 			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
 			String autoActivateID) throws SyncException{
 		
@@ -430,7 +431,7 @@ public class SyncProxyALMManager {
 	 * @throws SyncException
 	 */
 	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, 
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms,
 			Boolean isMediaApp, SyncMsgVersion syncMsgVersion, Language languageDesired, 
 			Language hmiDisplayLanguageDesired, String appID, String autoActivateID) throws SyncException {
 		
@@ -459,7 +460,7 @@ public class SyncProxyALMManager {
 	 * @throws SyncException
 	 */
 	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, String appName, String ngnMediaScreenAppName, 
-			Vector<String> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion, 
+			Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
 			Language languageDesired, Language hmiDisplayLanguageDesired, String appID, 
 			String autoActivateID, boolean callbackToUIThread) throws SyncException {
 		
@@ -489,7 +490,7 @@ public class SyncProxyALMManager {
 	 * @throws SyncException
 	 */
 	public SyncProxyALMManager(ISyncALMLifeCycleListener lifeCycleListener, SyncProxyConfigurationResources syncProxyConfigurationResources, 
-			String appName, String ngnMediaScreenAppName, Vector<String> vrSynonyms, Boolean isMediaApp, 
+			String appName, String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp,
 			SyncMsgVersion syncMsgVersion, Language languageDesired, 
 			Language hmiDisplayLanguageDesired, String appID, String autoActivateID, 
 			boolean callbackToUIThread) throws SyncException {
@@ -1942,16 +1943,22 @@ public class SyncProxyALMManager {
 		return syncChoice;
 	}
 	/********************* End Public Helper Methods ******************/
-	
-	
-	
-	
-	
+
 	/************************ Callbacks ************************/
 	// A class which handles all IProxyListenerALM callbacks for the manager
 	private class ALMInterfaceBroker implements IProxyListenerALM {
-		
-		@Override
+
+        @Override
+        public void onRPCRequest(String appId, RPCRequest rpcRequest) {
+
+        }
+
+        @Override
+        public void onOnSystemRequest(String appId, OnSystemRequest notification) {
+
+        }
+
+        @Override
 		public void onAddSubMenuResponse(String appId, AddSubMenuResponse response) {
 			final ISyncAddSubMenuResponseListener listener = _addSubMenuResponseListeners.get(response.getCorrelationID());
 			SyncSubMenu syncSubMenuToReturn = null;
@@ -2574,21 +2581,12 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onOnSystemRequest(String appId, OnSystemRequest notification) {
-        }
-
-        @Override
-        public void onRegisterAppRequest(String appId, RegisterAppInterface msg) {
-
-        }
-
-        @Override
         public void onAppUnregisteredAfterLanguageChange(String appId, OnLanguageChange msg) {
 
         }
 
         @Override
-        public void onAppUnregisteredReason(String appId, AppInterfaceUnregisteredReason reason) {
+        public void onAppUnregisteredReason(String appId, OnAppInterfaceUnregistered notification) {
 
         }
 
@@ -2635,11 +2633,6 @@ public class SyncProxyALMManager {
 
         @Override
         public void onStartSession(String appId) {
-
-        }
-
-        @Override
-        public void onPutFileRequest(String appId, PutFile putFile) {
 
         }
 

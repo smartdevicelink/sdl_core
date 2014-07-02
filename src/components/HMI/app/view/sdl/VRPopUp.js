@@ -135,7 +135,8 @@ SDL.VRPopUp = Em.ContainerView.create( {
                 this.AddCommand(SDL.SDLAppController.model.VRCommands[i].cmdID,
                     SDL.SDLAppController.model.VRCommands[i].vrCommands,
                     SDL.SDLAppController.model.VRCommands[i].appID,
-                    SDL.SDLAppController.model.VRCommands[i].type);
+                    SDL.SDLAppController.model.VRCommands[i].type,
+                    SDL.SDLAppController.model.VRCommands[i].grammarID);
             }
         }
 
@@ -145,7 +146,8 @@ SDL.VRPopUp = Em.ContainerView.create( {
                 this.AddCommand(SDL.SDLController.getApplicationModel(SDL.SDLModel.stateLimited).VRCommands[i].cmdID,
                     SDL.SDLController.getApplicationModel(SDL.SDLModel.stateLimited).VRCommands[i].vrCommands,
                     SDL.SDLController.getApplicationModel(SDL.SDLModel.stateLimited).VRCommands[i].appID,
-                    SDL.SDLController.getApplicationModel(SDL.SDLModel.stateLimited).VRCommands[i].type);
+                    SDL.SDLController.getApplicationModel(SDL.SDLModel.stateLimited).VRCommands[i].type,
+                    SDL.SDLController.getApplicationModel(SDL.SDLModel.stateLimited).VRCommands[i].grammarID);
             }
         }
 
