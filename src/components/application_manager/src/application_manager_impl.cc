@@ -1099,9 +1099,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
   if (msg_to_mobile[strings::params].keyExists(strings::correlation_id)) {
     request_ctrl_.terminateRequest(
       msg_to_mobile[strings::params][strings::correlation_id].asInt());
-  } else if (app && !profile::Profile::instance()->policy_turn_off()) {
-    // TODO(AOleynik): Remove check of policy_turn_off, when this flag will be
-    // unused in config file
+  } else if (app) {
     mobile_apis::FunctionID::eType function_id =
         static_cast<mobile_apis::FunctionID::eType>(
         (*message)[strings::params][strings::function_id].asUInt());
@@ -1177,23 +1175,6 @@ bool ApplicationManagerImpl::ManageMobileCommand(
 
     // Message for "CheckPermission" must be with attached schema
     mobile_so_factory().attachSchema(*message);
-
-    // TODO(AOleynik): Remove check of policy_turn_off, when it will be unused
-    if (!profile::Profile::instance()->policy_turn_off()) {
-      // Check RPC permissions
-      mobile_apis::Result::eType check_result = CheckPolicyPermissions(
-                                                 app->mobile_app_id()->asString(),
-                                                 app->hmi_level(),
-                                                 function_id);
-      if (mobile_apis::Result::SUCCESS != check_result) {
-        smart_objects::SmartObject* response =
-          MessageHelper::CreateBlockedByPoliciesResponse(function_id,
-              check_result, correlation_id, connection_key);
-
-        ApplicationManagerImpl::instance()->SendMessageToMobile(response);
-        return true;
-      }
-    }
   }
 
   if ((*message)[strings::params][strings::message_type].asInt() ==
@@ -1339,25 +1320,12 @@ bool ApplicationManagerImpl::ManageHMICommand(
   return false;
 }
 
-void ApplicationManagerImpl::CreateHMIMatrix(HMIMatrix* matrix) {
-}
-
 void ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
     DCHECK(policy::PolicyHandler::instance()->InitPolicyTable());
   }
-}
-
-bool ApplicationManagerImpl::CheckPolicies(smart_objects::SmartObject* message,
-    ApplicationSharedPtr app) {
-  return true;
-}
-
-bool ApplicationManagerImpl::CheckHMIMatrix(
-  smart_objects::SmartObject* message) {
-  return true;
 }
 
 bool ApplicationManagerImpl::ConvertMessageToSO(
@@ -1977,8 +1945,14 @@ void ApplicationManagerImpl::Handle(const impl::MessageToHmi& message) {
 mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     const std::string& policy_app_id,
     mobile_apis::HMILevel::eType hmi_level,
-    mobile_apis::FunctionID::eType function_id) {
+    mobile_apis::FunctionID::eType function_id,
+    CommandParametersPermissions* params_permissions) {
   LOG4CXX_INFO(logger_, "CheckPolicyPermissions");
+  // TODO(AOleynik): Remove check of policy_turn_off, when this flag will be
+  // unused in config file
+  if (profile::Profile::instance()->policy_turn_off()) {
+    return mobile_apis::Result::SUCCESS;
+  }
   mobile_apis::Result::eType check_result = mobile_apis::Result::DISALLOWED;
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "Policy library is not loaded.");
@@ -1997,6 +1971,21 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
       policy_app_id,
       stringified_hmi_level,
       stringified_functionID);
+
+  if (NULL != params_permissions) {
+    if (result.list_of_allowed_params.valid()) {
+      params_permissions->allowed_params =
+            *(result.list_of_allowed_params.get());
+    }
+    if (result.list_of_disallowed_params.valid()) {
+      params_permissions->disallowed_params =
+          *(result.list_of_disallowed_params.get());
+    }
+    if (result.list_of_undefined_params.valid()) {
+      params_permissions->undefined_params =
+          *(result.list_of_undefined_params.get());
+    }
+  }
 
   if (hmi_level == mobile_apis::HMILevel::HMI_NONE
       && function_id != mobile_apis::FunctionID::UnregisterAppInterfaceID) {

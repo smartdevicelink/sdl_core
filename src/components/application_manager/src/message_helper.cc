@@ -114,7 +114,7 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
 }  // namespace
 
 }
-std::pair<const char*, VehicleDataType> kVehicleDataInitializer[] = {
+std::pair<std::string, VehicleDataType> kVehicleDataInitializer[] = {
   std::make_pair(strings::gps, VehicleDataType::GPS), std::make_pair(
     strings::speed, VehicleDataType::SPEED), std::make_pair(
       strings::rpm, VehicleDataType::RPM), std::make_pair(

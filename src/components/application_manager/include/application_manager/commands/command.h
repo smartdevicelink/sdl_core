@@ -38,7 +38,6 @@
 #include "application_manager/smart_object_keys.h"
 
 namespace application_manager {
-
 /**
  * @brief SmartObject type
  **/

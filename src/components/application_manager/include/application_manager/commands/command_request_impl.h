@@ -46,7 +46,6 @@ class SmartObject;
 }
 
 namespace application_manager {
-
 namespace commands {
 
 namespace NsSmart = NsSmartDeviceLink::NsSmartObjects;
@@ -155,10 +154,34 @@ class CommandRequestImpl : public CommandImpl,
   mobile_apis::Result::eType GetMobileResultCode(
       const hmi_apis::Common_Result::eType& hmi_code) const;
 
+protected:
+
+  /**
+   * @brief Checks message permissions and parameters according to policy table
+   * permissions
+   */
+  bool CheckAllowedParameters();
+
+  /**
+   * @brief Remove from current message parameters disallowed by policy table
+   * @param params_permissions Parameters permissions from policy table
+   */
+  void RemoveDisallowedParameters(
+      const CommandParametersPermissions& params_permissions);
+
+  /**
+   * @brief Adds disallowed parameters back to response with appropriate
+   * reasons
+   * @param response Response message, which should be extended with blocked
+   * parameters reasons
+   */
+  void AddDisallowedParameters(smart_objects::SmartObject& response);
+
  protected:
-  uint32_t                default_timeout_;
-  RequestState                current_state_;
-  sync_primitives::Lock       state_lock_;
+  uint32_t                      default_timeout_;
+  RequestState                  current_state_;
+  sync_primitives::Lock         state_lock_;
+  CommandParametersPermissions  parameters_permissions_;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
