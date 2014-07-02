@@ -36,13 +36,12 @@
 #include "utils/logger.h"
 
 #include "transport_manager/mme/iap2_device.h"
+#include "transport_manager/mme/protocol_config.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
-
-const char* IAP2Device::system_config_file_name = "/fs/mp/etc/mm/iap2.cfg";
 
 IAP2Device::IAP2Device(const std::string& mount_point,
                        const std::string& name,
@@ -69,7 +68,7 @@ IAP2Device::~IAP2Device() {
 }
 
 bool IAP2Device::Init() {
-  const ProtocolNameContainer& legacy_protocol_names = LegacyProtocolNames();
+  const ProtocolNameContainer& legacy_protocol_names = ProtocolConfig::LegacyProtocolNames();
   for (IAP2Device::ProtocolNameContainer::const_iterator i = legacy_protocol_names.begin(); i != legacy_protocol_names.end(); ++i) {
     std::string protocol_name = *i;
     ::std::string thread_name = "iAP2 connect notifier (" + protocol_name + ")";
@@ -81,13 +80,13 @@ bool IAP2Device::Init() {
   }
 
   int pool_index = 0;
-  const ProtocolNameContainer& pool_protocol_names = PoolProtocolNames();
+  const ProtocolNameContainer& pool_protocol_names = ProtocolConfig::PoolProtocolNames();
   for (IAP2Device::ProtocolNameContainer::const_iterator i = pool_protocol_names.begin(); i != pool_protocol_names.end(); ++i) {
     std::string protocol_name = *i;
     free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
   }
 
-  const ProtocolNameContainer& hub_protocol_names = HubProtocolNames();
+  const ProtocolNameContainer& hub_protocol_names = ProtocolConfig::HubProtocolNames();
   for (IAP2Device::ProtocolNameContainer::const_iterator i = hub_protocol_names.begin(); i != hub_protocol_names.end(); ++i) {
     std::string protocol_name = *i;
     ::std::string thread_name = "iAP2 hub connect notifier (" + protocol_name + ")";
@@ -123,77 +122,6 @@ bool IAP2Device::RecordByAppId(ApplicationHandle app_id, AppRecord& record) cons
     LOG4CXX_WARN(logger_, "iAP2: no record corresponding to application " << app_id);
     return false;
   }
-}
-
-const IAP2Device::ProtocolNameContainer& IAP2Device::ProtocolNames() {
-  static ProtocolNameContainer protocol_names = ReadProtocolNames();
-  return protocol_names;
-}
-
-const IAP2Device::ProtocolNameContainer IAP2Device::ReadProtocolNames() {
-  ProtocolNameContainer protocol_names;
-
-  LOG4CXX_TRACE(logger_, "iAP2: parsing system config file " << system_config_file_name);
-  std::ifstream system_config_file(system_config_file_name);
-  std::string line;
-  while (std::getline(system_config_file, line)) {
-    const size_t header_len = 5;
-    std::string head = line.substr(0, header_len); // drop comments in the end
-    if ("[eap]" == head) { // start of EAP section
-      while (std::getline(system_config_file, line)) {
-        if (line.empty()) { // end of EAP section
-          break;
-        }
-        const size_t name_pos = 9; // protocol name start position
-        if ("protocol=" == line.substr(0, name_pos)) {
-          std::string tail = line.substr(name_pos);
-          size_t comma_pos = tail.find_first_of(','); // comma position, can be std::string::npos
-          std::string protocol_name = tail.substr(0, comma_pos);
-          LOG4CXX_DEBUG(logger_, "iAP2: adding protocol " << protocol_name);
-          protocol_names.push_back(protocol_name);
-        }
-      }
-      break; // nothing matters after EAP section
-    }
-  }
-  system_config_file.close();
-  LOG4CXX_TRACE(logger_, "iAP2: system config file " << system_config_file_name << " parsed");
-
-  return protocol_names;
-}
-
-const IAP2Device::ProtocolNameContainer& IAP2Device::LegacyProtocolNames() {
-  static ProtocolNameContainer protocol_names = ReadLegacyProtocolNames();
-  return protocol_names;
-}
-
-const IAP2Device::ProtocolNameContainer IAP2Device::ReadLegacyProtocolNames() {
-  ProtocolNameContainer protocol_names;
-  protocol_names.push_back("com.ford.sync.prot0");
-  protocol_names.push_back("com.smartdevicelink.prot1");
-  protocol_names.push_back("com.smartdevicelink.prot2");
-  return protocol_names;
-}
-
-const IAP2Device::ProtocolNameContainer& IAP2Device::HubProtocolNames() {
-  static ProtocolNameContainer protocol_names = ReadHubProtocolNames();
-  return protocol_names;
-}
-
-const IAP2Device::ProtocolNameContainer IAP2Device::ReadHubProtocolNames() {
-  ProtocolNameContainer protocol_names;
-  protocol_names.push_back("com.smartdevicelink.prot0");
-  return protocol_names;
-}
-
-const IAP2Device::ProtocolNameContainer& IAP2Device::PoolProtocolNames() {
-  static ProtocolNameContainer protocol_names = ReadPoolProtocolNames();
-  return protocol_names;
-}
-
-const IAP2Device::ProtocolNameContainer IAP2Device::ReadPoolProtocolNames() {
-  ProtocolNameContainer protocol_names;
-  return protocol_names;
 }
 
 void IAP2Device::OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* handle) {

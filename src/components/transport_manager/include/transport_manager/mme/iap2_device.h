@@ -73,15 +73,6 @@ class IAP2Device : public MmeDevice {
   typedef std::map<ApplicationHandle, AppRecord> AppContainer;
   typedef std::map<std::string, utils::SharedPtr<threads::Thread> > ThreadContainer;
 
-  static const ProtocolNameContainer& ProtocolNames();
-  static const ProtocolNameContainer ReadProtocolNames();
-  static const ProtocolNameContainer& LegacyProtocolNames();
-  static const ProtocolNameContainer ReadLegacyProtocolNames();
-  static const ProtocolNameContainer& HubProtocolNames();
-  static const ProtocolNameContainer ReadHubProtocolNames();
-  static const ProtocolNameContainer& PoolProtocolNames();
-  static const ProtocolNameContainer ReadPoolProtocolNames();
-
   bool RecordByAppId(ApplicationHandle app_id, AppRecord& record) const;
 
   void OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* handle);
@@ -91,8 +82,6 @@ class IAP2Device : public MmeDevice {
 
   bool RemoveConnectionThread(const std::string& protocol_name);
   bool ReturnToPool(const std::string& protocol_name);
-
-  static const char* system_config_file_name;
 
   TransportAdapterController* controller_;
   int last_app_id_;
