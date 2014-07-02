@@ -50,7 +50,6 @@ QtObject {
     property string vrHelpTitlePerformInteraction
     property string menuTitle
     property Icon menuIcon: Icon { }
-    property var allowedFunctions: []
 
     // media player
     property string playPauseState
@@ -72,6 +71,7 @@ QtObject {
     property ListModel alertManeuverSoftButtons
     property ListModel customPresets
     property int languageTTSVR
+    property ListModel allowedFunctions: ListModel {}
     // This place is for adding new properties
 
     function reset () {
@@ -85,7 +85,6 @@ QtObject {
         isMediaApplication = false
         playPauseState = ""
         hmiUIText.reset()
-        allowedFunctions = []
 // no need to reset mediaClock
         helpPrompt = ""
         timeoutPrompt = ""
@@ -100,6 +99,7 @@ QtObject {
         languageTTSVR = -1
         hmiUITextAlignment = -1
         appType = 0
+        allowedFunctions.clear()
         console.debug("exit")
     }
 }

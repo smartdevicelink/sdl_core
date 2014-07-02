@@ -38,33 +38,49 @@ import "../models/Constants.js" as Constants
 import "../models/RequestToSDL.js" as RequestToSDL
 
 GeneralView {
-
     Item {
         anchors.fill: parent
-        GridMenu {
-            id: menu
-            model: dataContainer.applicationList
+        Text {
+            id: title
+            text: "Permissions (choose application):"
+            anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.bottom: bottomPanel.top
-            columnsOnPage: 1
-            rows: 7
-            delegate: GridItem {
-                width: menu.width / menu.columnsOnPage
-                height: menu.height / menu.rows
-                OvalButton {
-                    text: title
-                    onReleased: {
-                        if (qml) {
-                            contentLoader.go(qml, appId);
-                        } else {
-                            itemActivated(action);
-                        }
+            font.pixelSize: Constants.fontSize
+            color: Constants.primaryColor
+            height: Constants.fontSize + Constants.panelPadding
+        }
+        ScrollableListView {
+            id: applicationList
+            anchors.top: title.bottom
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            model: dataContainer.applicationList
+
+            delegate: Item {
+                width: parent.width
+                height: Math.max(applicationName.height, appIcon.height)
+                Image {
+                    id: appIcon
+                    source: icon
+                    height: Constants.appListIconSize
+                    width: height
+                }
+                ClickableText {
+                    id: applicationName
+                    text: appName
+                    defaultColor: Constants.primaryColor
+                    pressedColor: Constants.primaryColorPressed
+                    font.pixelSize: Constants.appListFontSize
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: appIcon.right
+                    anchors.leftMargin: Constants.margin
+                    onClicked: {
+                        RequestToSDL.SDL_GetListOfPermissions(appId, function(params){
+                            settingsContainer.getListOfPermissions_Response(appId, params)
+                        });
                     }
-                    anchors.centerIn: parent
-                    fontSize: Constants.fontSize
-                    width: parent.width * 2 / 3
                 }
             }
         }

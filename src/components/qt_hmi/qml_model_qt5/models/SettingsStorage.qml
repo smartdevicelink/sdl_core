@@ -290,13 +290,12 @@ Item
     function getListOfPermissions_Response (appId, allowedFunctions) {
         console.log("getListOfPermissions_Response enter");
 
-        var app = dataContainer.getApplication(appId),
-                messageCodes = [];
-        app.allowedFunctions = allowedFunctions
-
-        for (var i = 0; i < allowedFunctions.length; i++) {
-            messageCodes.push(allowedFunctions[i].name);
-        }
+        var app = dataContainer.getApplication(appId);
+        var messageCodes = [];
+        allowedFunctions.forEach(function (x) {
+            app.allowedFunctions.append({name: x.name, id: x.id, allowed: x.allowed});
+            messageCodes.push(x.name);
+        });
 
         RequestToSDL.SDL_GetUserFriendlyMessage(messageCodes, dataContainer.hmiUILanguage, function(params){
             settingsContainer.onAppPermissionConsent_Notification(appId, params)
