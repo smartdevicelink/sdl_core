@@ -139,7 +139,7 @@ Item
 
     property int currentUrl: 0
 
-    property string appIdIVSU: 0
+    property string appIdIVSU: ""
 
     property var urlsIVSU: []
 
