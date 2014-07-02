@@ -8,11 +8,29 @@ package com.ford.syncV4.test;
  */
 
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
+import com.ford.syncV4.service.secure.SecurityInternalError;
+import com.ford.syncV4.service.secure.mutations.MutationManager;
+
+import java.util.List;
 
 /**
  * This class stores all the necessary data for SDK testing
  */
 public class TestConfig {
+
+    /**
+     * Allow to skip Root Device check in case of, for example, Android emulator
+     */
+    public boolean mDoRootDeviceCheck;
+
+    /*
+     * Mutation manager for handshake procedure
+     */
+    private MutationManager handshakeMutationManager = new MutationManager();
+
+    {
+        handshakeMutationManager.addMutationForError(SecurityInternalError.UNKNOWN);
+    }
 
     /**
      * Indicates whether or not to use parameter
@@ -34,19 +52,12 @@ public class TestConfig {
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} instance
      */
     private String mCustomHashId;
-
-    /**
-     * Allow to skip Root Device check in case of, for example, Android emulator
-     */
-    public boolean mDoRootDeviceCheck;
-
     /**
      * Indicates whether or not it is necessary to call
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} just right after RPC Session is
      * established
      */
     private boolean mDoCallRegisterAppInterface = true;
-
     /**
      * Indicates whether to keep USB reader thread open when perform session close procedure.
      * This feature is for the such Test Case as: call
@@ -54,16 +65,18 @@ public class TestConfig {
      * reader)
      */
     private boolean mDoKeepUSBTransportConnected = false;
-
     /**
      * Min version of the protocol
      */
     private byte mProtocolMinVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
-
     /**
      * Max version of the protocol
      */
     private byte mProtocolMaxVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
+
+    public MutationManager getHandshakeMutationManager() {
+        return handshakeMutationManager;
+    }
 
     /**
      * @return a value of the functionality: whether or not to use parameter
@@ -156,6 +169,7 @@ public class TestConfig {
 
     /**
      * Set whether or not to process Root Device check procedure
+     *
      * @param mDoRootDeviceCheck boolean value
      */
     public void setDoRootDeviceCheck(boolean mDoRootDeviceCheck) {
@@ -189,6 +203,7 @@ public class TestConfig {
 
     /**
      * Set a minimum version of the protocol
+     *
      * @param mProtocolVersion protocol version int value
      */
     public void setProtocolMinVersion(byte mProtocolVersion) {
@@ -204,9 +219,23 @@ public class TestConfig {
 
     /**
      * Set a maximum version of the protocol
+     *
      * @param mProtocolVersion protocol version int value
      */
     public void setProtocolMaxVersion(byte mProtocolVersion) {
         this.mProtocolMaxVersion = mProtocolVersion;
+    }
+
+    public void setHandshakeErrorList(List<SecurityInternalError> errorList) {
+        if (errorList == null){
+            return;
+        }
+        if (errorList.isEmpty()) {
+            errorList.add(SecurityInternalError.UNKNOWN);
+        }
+        handshakeMutationManager = new MutationManager();
+        for (SecurityInternalError securityInternalError : errorList) {
+            handshakeMutationManager.addMutationForError(securityInternalError);
+        }
     }
 }

@@ -26,7 +26,7 @@ public class SyncRPCRequestConverterFactory
             if ((isSystemFile != null) && isSystemFile) {
                 converter = getSystemPutFileConverter();
             }
-        }else if ( Names.internalError.equals(functionName)){
+        }else if ( Names.internalTestSecurityError.equals(functionName)){
             converter = getSecureErrorRPCRequestConverter();
         }
 

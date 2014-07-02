@@ -10,7 +10,7 @@ public class SecureInternalErrorMessage extends RPCRequest {
 
 
     public SecureInternalErrorMessage() {
-        super(Names.internalError);
+        super(Names.internalTestSecurityError);
     }
 
     public void setErrorId(int id){

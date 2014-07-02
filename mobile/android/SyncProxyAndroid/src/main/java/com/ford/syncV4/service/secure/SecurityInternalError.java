@@ -59,4 +59,37 @@ public enum SecurityInternalError {
                 return -1;
         }
     }
+
+    public static SecurityInternalError getError(int errorCode) {
+        switch (errorCode) {
+            case 0:
+                return ERROR_SUCCESS;
+            case 0x01:
+                return ERROR_INVALID_QUERY_SIZE;
+            case 0x02:
+                return ERROR_INVALID_QUERY_ID;
+            case 0x03:
+                return ERROR_NOT_SUPPORTED;
+            case 0x04:
+                return ERROR_SERVICE_ALREADY_PROTECTED;
+            case 0x05:
+                return ERROR_CREATE_SSLCONTEXT;
+            case 0x06:
+                return ERROR_SERVICE_NOT_PROTECTED;
+            case 0x07:
+                return ERROR_DECRYPTION_FAILED;
+            case 0x08:
+                return ERROR_ENCRYPTION_FAILED;
+            case 0xF0:
+                return ERROR_SSL_INVALID_DATA;
+            case 0xF1:
+                return ERROR_INTERNAL;
+            case 0xFF:
+                return ERROR_UNKWOWN_INTERNAL_ERROR;
+            case -1:
+                return UNKNOWN;
+            default:
+                return UNKNOWN;
+        }
+    }
 }

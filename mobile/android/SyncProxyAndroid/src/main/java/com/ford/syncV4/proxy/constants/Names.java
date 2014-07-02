@@ -479,5 +479,5 @@ public class Names {
     public static final String fileName = "fileName";
     public static final String errorId = "errorId";
     public static final String errorMessage = "errorMessage";
-    public static final String internalError = "InternalError";
+    public static final String internalTestSecurityError = "InternalError";
 }

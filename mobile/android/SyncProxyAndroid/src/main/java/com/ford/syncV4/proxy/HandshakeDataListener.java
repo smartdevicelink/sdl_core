@@ -5,7 +5,7 @@ import com.ford.syncV4.protocol.secure.secureproxy.IHandshakeDataListener;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
 import com.ford.syncV4.service.secure.SecureServiceMessageFactory;
-import com.ford.syncV4.service.secure.SecurityInternalError;
+import com.ford.syncV4.service.secure.mutations.AbstractMutation;
 import com.ford.syncV4.service.secure.mutations.MutationManager;
 import com.ford.syncV4.session.Session;
 
@@ -14,13 +14,7 @@ import com.ford.syncV4.session.Session;
  */
 public class HandshakeDataListener implements IHandshakeDataListener {
 
-    public MutationManager mutationManager = new MutationManager();
-
-    {
-        mutationManager.addMutationForError(SecurityInternalError.ERROR_INVALID_QUERY_ID);
-        mutationManager.addMutationForError(SecurityInternalError.ERROR_INVALID_QUERY_SIZE);
-    }
-
+    private MutationManager mutationManager;
     private SyncProxyBase syncProxyBase;
     private byte sessionID = Session.DEFAULT_SESSION_ID;
     private byte version = 2;
@@ -29,15 +23,29 @@ public class HandshakeDataListener implements IHandshakeDataListener {
         this.syncProxyBase = syncProxyBase;
     }
 
+    public MutationManager getMutationManager() {
+        return mutationManager;
+    }
+
+    public void setMutationManager(MutationManager mutationManager) {
+        this.mutationManager = mutationManager;
+    }
+
     @Override
     public void onHandshakeDataReceived(byte[] data) {
         ProtocolMessage protocolMessage =
                 SecureServiceMessageFactory.buildHandshakeRequest(sessionID, data, version);
-        syncProxyBase.dispatchOutgoingMessage(mutateHandshakeMessage(protocolMessage));
+        ProtocolMessage message = mutateHandshakeMessage(protocolMessage);
+        syncProxyBase.dispatchOutgoingMessage(message);
     }
 
     private ProtocolMessage mutateHandshakeMessage(ProtocolMessage protocolMessage) {
-        return mutationManager.getHeadMutation().mutate(protocolMessage);
+        AbstractMutation mutation = mutationManager.getHeadMutation();
+        if (mutation == null) {
+            return protocolMessage;
+        }
+        ProtocolMessage result = mutation.mutate(protocolMessage);
+        return result;
     }
 
     @Override

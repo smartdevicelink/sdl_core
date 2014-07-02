@@ -133,7 +133,8 @@ public class PlaceholderFragment extends Fragment {
      * Placeholder for the Application Id field
      */
     public static final String EMPTY_APP_ID = "";
-
+    // Request id for ChoiceListActivity
+    public static final int REQUEST_LIST_CHOICES = 45;
     private static final String LOG_TAG = PlaceholderFragment.class.getSimpleName();
     private static final String MOBILE_NAV_FRAGMENT_TAG = "MOBILE_NAV_FRAGMENT_TAG";
     private static final String AUDIO_FRAGMENT_TAG = "AUDIO_FRAGMENT_TAG";
@@ -151,7 +152,6 @@ public class PlaceholderFragment extends Fragment {
     private final static String HASH_ID_SET_UP_DIALOG_TAG = "HashIdSetUpDialogTag";
     private final static String FEEDBACK_DIALOG_TAG = "FeedbackDialogTag";
     private static final String MSC_PREFIX = "msc_";
-
     private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
     private static final int ALERT_MAXSOFTBUTTONS = 4;
     private static final int SCROLLABLEMESSAGE_MAXSOFTBUTTONS = 8;
@@ -160,19 +160,32 @@ public class PlaceholderFragment extends Fragment {
     private static final int CREATECHOICESET_MAXCHOICES = 100;
     private static final int SHOW_MAXSOFTBUTTONS = 8;
     private static final int CHOICESETID_UNSET = -1;
-
+    /**
+     * Latest choiceSetId, required to add it to the adapter when a successful
+     * CreateInteractionChoiceSetResponse comes.
+     */
+    private int mLatestCreateChoiceSetId = CHOICESETID_UNSET;
+    /**
+     * Latest choiceSetId, required to delete it from the adapter when a
+     * successful DeleteInteractionChoiceSetResponse comes.
+     */
+    private int _latestDeleteChoiceSetId = CHOICESETID_UNSET;
     // Request id for SoftButtonsListActivity
     private static final int REQUEST_LIST_SOFTBUTTONS = 43;
-    // Request id for ChoiceListActivity
-    public static final int REQUEST_LIST_CHOICES = 45;
-
     /**
      * Autoincrementing id for new choices.
      */
     private static int autoIncChoiceId = 9000;
-
+    private final Map<Integer, Integer> mCommandIdToParentSubmenuMap =
+            new ConcurrentHashMap<Integer, Integer>();
+    /**
+     * Stores the number of selections of each message to sort them by
+     * most-popular usage.
+     * <p/>
+     * Make it temporary public to access from the Fragment
+     */
+    public Map<String, Integer> messageSelectCount;
     private boolean isFirstActivityRun = true;
-
     private ArrayAdapter<VehicleDataType> mVehicleDataType = null;
     private LogAdapter mLogAdapter;
     private ArrayAdapter<ButtonName> mButtonAdapter = null;
@@ -180,13 +193,8 @@ public class PlaceholderFragment extends Fragment {
     private ArrayAdapter<Integer> mCommandAdapter = null;
     private ArrayAdapter<Integer> mChoiceSetAdapter = null;
     private ArrayAdapter<String> mPutFileAdapter = null;
-
-    private final Map<Integer, Integer> mCommandIdToParentSubmenuMap =
-            new ConcurrentHashMap<Integer, Integer>();
-
     private MobileNavPreviewFragment mMobileNavPreviewFragment;
     private AudioServicePreviewFragment mAudioServicePreviewFragment;
-
     private boolean[] isButtonSubscribed = null;
     private boolean[] isVehicleDataSubscribed = null;
     private int mAutoIncCorrId = 0;
@@ -202,29 +210,11 @@ public class PlaceholderFragment extends Fragment {
      * filename is set after choosing.
      */
     private EditText txtLocalFileName;
-
     /**
      * Latest SyncSubMenu, required to delete the submenu from the adapter
      * when a successful DeleteSubMenuResponse comes.
      */
     private SyncSubMenu _latestDeleteSubmenu = null;
-    /**
-     * Stores the number of selections of each message to sort them by
-     * most-popular usage.
-     *
-     * Make it temporary public to access from the Fragment
-     */
-    public Map<String, Integer> messageSelectCount;
-    /**
-     * Latest choiceSetId, required to add it to the adapter when a successful
-     * CreateInteractionChoiceSetResponse comes.
-     */
-    private int mLatestCreateChoiceSetId = CHOICESETID_UNSET;
-    /**
-     * Latest choiceSetId, required to delete it from the adapter when a
-     * successful DeleteInteractionChoiceSetResponse comes.
-     */
-    private int _latestDeleteChoiceSetId = CHOICESETID_UNSET;
     /**
      * The Include Soft Buttons checkbox in the current dialog. Kept here to
      * check it when the user has explicitly set the soft buttons.
@@ -242,6 +232,13 @@ public class PlaceholderFragment extends Fragment {
     private SyncSubMenu mLatestAddSubmenu = null;
     private Pair<Integer, Integer> mLatestAddCommand = null;
 
+    public PlaceholderFragment() {
+        mMobileNavPreviewFragment = new MobileNavPreviewFragment();
+        mAudioServicePreviewFragment = new AudioServicePreviewFragment();
+
+        Logger.d(LOG_TAG + " Constructor");
+    }
+
     /**
      * Returns a new instance of this fragment for the given section number.
      */
@@ -253,19 +250,13 @@ public class PlaceholderFragment extends Fragment {
         return fragment;
     }
 
-    public PlaceholderFragment() {
-        mMobileNavPreviewFragment = new MobileNavPreviewFragment();
-        mAudioServicePreviewFragment = new AudioServicePreviewFragment();
-
-        Logger.d(LOG_TAG + " Constructor");
-    }
-
     public static int getNewChoiceId() {
         return autoIncChoiceId++;
     }
 
     /**
      * Return Application Id associated with the specific Fragment
+     *
      * @return Application Id
      */
     public String getAppId() {
@@ -274,6 +265,7 @@ public class PlaceholderFragment extends Fragment {
 
     /**
      * Set Application Id for the specific Fragment
+     *
      * @param value Application Id
      */
     public void setAppId(String value) {
@@ -303,7 +295,7 @@ public class PlaceholderFragment extends Fragment {
             int fragmentsCounter = ((SyncProxyTester) getActivity()).getFragmentsCount();
             BaseDialogFragment appSetupDialogFragment =
                     BaseDialogFragment.newInstance(AppSetUpDialog.class.getName(), getAppId(),
-                                                   fragmentsCounter <= 1);
+                            fragmentsCounter <= 1);
             appSetupDialogFragment.show(getActivity().getFragmentManager(), APP_SETUP_DIALOG_TAG);
             //appSetupDialogFragment.setCancelable(false);
         } else {
@@ -356,7 +348,7 @@ public class PlaceholderFragment extends Fragment {
         return rootView;
     }
 
-    private void setupSecureServices( View rootView ){
+    private void setupSecureServices(View rootView) {
 
         CheckBox checkBoxRpcEncode = (CheckBox) rootView.findViewById(R.id.rpc_secure_checkbox);
         checkBoxRpcEncode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -367,7 +359,7 @@ public class PlaceholderFragment extends Fragment {
         });
 
         final Spinner spinner = (Spinner) rootView.findViewById(R.id.secure_error_spinner);
-        ArrayAdapter<SecurityInternalError> securityErrorAdapter = new ArrayAdapter<SecurityInternalError>(getActivity(),
+        final ArrayAdapter<SecurityInternalError> securityErrorAdapter = new ArrayAdapter<SecurityInternalError>(getActivity(),
                 android.R.layout.simple_spinner_item, SecurityInternalError.values());
         securityErrorAdapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item);
@@ -378,9 +370,8 @@ public class PlaceholderFragment extends Fragment {
         sendSecureError.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                 SecurityInternalError securityInternalError = (SecurityInternalError) spinner.getSelectedItem();
-                SecureInternalErrorMessage secureInternalErrorMessage = buildSecureInternalErrorMessage(securityInternalError);
-                sendRPCRequestToProxy(secureInternalErrorMessage);
+                SecurityInternalError securityInternalError = (SecurityInternalError) spinner.getSelectedItem();
+                updateHandshakeConfigError(securityInternalError);
             }
         });
 
@@ -401,6 +392,26 @@ public class PlaceholderFragment extends Fragment {
                 processRPCNotSecureCheckBox();
             }
         });
+    }
+
+    private void updateHandshakeConfigError(SecurityInternalError securityInternalError) {
+        final ProxyService boundProxyService = getProxyService();
+        if (boundProxyService == null) return;
+        List<SecurityInternalError> securityInternalErrorArrayList = new ArrayList<SecurityInternalError>();
+        securityInternalErrorArrayList.add(securityInternalError);
+        boundProxyService.getTestConfig().setHandshakeErrorList(securityInternalErrorArrayList);
+    }
+
+    private ProxyService getProxyService() {
+        final SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        if (syncProxyTester == null) {
+            return null;
+        }
+        final ProxyService boundProxyService = syncProxyTester.mBoundProxyService;
+        if (boundProxyService == null) {
+            return null;
+        }
+        return boundProxyService;
     }
 
     private SecureInternalErrorMessage buildSecureInternalErrorMessage(SecurityInternalError securityInternalError) {
@@ -490,7 +501,7 @@ public class PlaceholderFragment extends Fragment {
         menu.add(0, MenuConstants.MENU_TOGGLE_CONSOLE, nextMenuItemOrder++, "Toggle Console");
         menu.add(0, MenuConstants.MENU_CLEAR, nextMenuItemOrder++, "Clear Messages");
         //if (tabsCount == 1) {
-            menu.add(0, MenuConstants.MENU_EXIT, nextMenuItemOrder++, "Exit");
+        menu.add(0, MenuConstants.MENU_EXIT, nextMenuItemOrder++, "Exit");
         //}
         menu.add(0, MenuConstants.MENU_CLOSE_SESSION, nextMenuItemOrder++, "Close Session");
         //menu.add(0, MENU_TOGGLE_MEDIA, nextMenuItemOrder++, "Toggle Media");
@@ -1670,7 +1681,8 @@ public class PlaceholderFragment extends Fragment {
                                         }
                                         _latestDeleteSubmenu = menu;
                                     }
-                                });
+                                }
+                        );
                         builder.show();
                     }
 
@@ -1765,7 +1777,7 @@ public class PlaceholderFragment extends Fragment {
                                 ADD_SUB_MENU_DIALOG_TAG);
                     }
 
-                    private void sendSystemRequest(){
+                    private void sendSystemRequest() {
                         BaseDialogFragment fragment = BaseDialogFragment.newInstance(
                                 SystemRequestDialog.class.getName(), getAppId());
                         fragment.show(getActivity().getFragmentManager(), SYSTEM_REQST_DIALOG_TAG);
@@ -2286,7 +2298,8 @@ public class PlaceholderFragment extends Fragment {
                                 msg.setInitialPrompt(((SyncProxyTester) getActivity()).ttsChunksFromString(initialPrompt.getText().toString()));
                                 msg.setInteractionMode(
                                         interactionModeAdapter.getItem(
-                                                interactionModeSpinner.getSelectedItemPosition()));
+                                                interactionModeSpinner.getSelectedItemPosition())
+                                );
                                 msg.setInteractionChoiceSetIDList(choiceSetIDs);
 
                                 if (helpPromptCheck.isChecked()) {
@@ -2768,7 +2781,8 @@ public class PlaceholderFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
                     }
-                });
+                }
+        );
         builder.setView(layout);
         builder.show();
     }
@@ -2832,7 +2846,8 @@ public class PlaceholderFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
                     }
-                });
+                }
+        );
         builder.setView(layout);
         builder.show();
     }
