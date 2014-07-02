@@ -82,38 +82,31 @@ Item {
 
             Item {
                 height: 70
-                width: parent.width
+                width: 500
 
-                Row {
-                    Row {
-                        height: 20
-                        CheckBox {
-                            style: CheckBoxStyle {
-                                label: Text {
-                                    color: Constants.panelTextColor
-                                    text: label
-                                }
-                            }
-                            onClicked: {
-                                permissionItems.setProperty(index, "allowed", !allowed)
-                            }
+                CheckBox {
+                    id: checkBox
+
+                    style: CheckBoxStyle {
+                        label: Text {
+                            color: Constants.panelTextColor
+                            text: permissionItems.get(index).label
                         }
                     }
-                    Row {
-                        height: 50
-                        Text {
-                            id: label
-                            color: Constants.primaryColor
-                            //anchors.centerIn: parent
-                            //verticalAlignment: Text.AlignVCenter
-                            //horizontalAlignment: Text.AlignHCenter
-                            font.pixelSize: 0
-                            elide: Text.ElideRight
-                            text: textBody
-                            wrapMode: TextEdit.Wrap
-                            width: parent.width
-                        }
+                    onClicked: {
+                        permissionItems.setProperty(index, "allowed", !allowed)
                     }
+                }
+
+                Text {
+                    id: label
+                    color: Constants.primaryColor
+                    font.pixelSize: 0
+                    text: textBody
+                    wrapMode: TextEdit.Wrap
+                    width: 500
+                    anchors.top: checkBox.bottom
+                    anchors.left: CheckBox.left
                 }
             }
         }
