@@ -137,6 +137,10 @@ void IAP2Device::OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* ha
     LOG4CXX_INFO(logger_, "iAP2: starting connection thread for protocol " << protocol_name);
     thread->start();
     pool_connection_threads_lock_.Acquire();
+    ThreadContainer::iterator j = pool_connection_threads_.find(protocol_name);
+    if (j != pool_connection_threads_.end()) {
+      pool_connection_threads_.erase(j);
+    }
     pool_connection_threads_.insert(std::make_pair(protocol_name, thread));
     pool_connection_threads_lock_.Release();
     protocol_in_use_name_pool_.insert(*i);
@@ -162,16 +166,6 @@ void IAP2Device::OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* ha
   else {
     LOG4CXX_WARN(logger_, "iAP2: could not close connection on hub protocol " << protocol_name);
   }
-
-  ThreadContainer::const_iterator i = hub_connection_threads_.find(protocol_name);
-  if (i != hub_connection_threads_.end()) {
-    utils::SharedPtr<threads::Thread> thread = i->second;
-    LOG4CXX_INFO(logger_, "iAP2: restarting connection thread for hub protocol " << protocol_name);
-    thread->start();
-  }
-  else {
-    LOG4CXX_WARN(logger_, "iAP2: no connection thread corresponding to hub protocol " << protocol_name);
-  }
 }
 
 void IAP2Device::OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handle) {
@@ -182,12 +176,9 @@ void IAP2Device::OnConnect(const std::string& protocol_name, iap2ea_hdl_t* handl
   apps_lock_.Release();
 
   controller_->ApplicationListUpdated(unique_device_id());
-
-  RemoveConnectionThread(protocol_name);
 }
 
 void IAP2Device::OnConnectFailed(const std::string& protocol_name) {
-  RemoveConnectionThread(protocol_name);
   ReturnToPool(protocol_name);
 }
 
@@ -223,18 +214,6 @@ void IAP2Device::OnDisconnect(ApplicationHandle app_id) {
   }
 }
 
-bool IAP2Device::RemoveConnectionThread(const std::string& protocol_name) {
-  sync_primitives::AutoLock auto_lock(pool_connection_threads_lock_);
-  ThreadContainer::iterator i = pool_connection_threads_.find(protocol_name);
-  if (i != pool_connection_threads_.end()) {
-    pool_connection_threads_.erase(i);
-    return true;
-  }
-  else {
-    return false;
-  }
-}
-
 bool IAP2Device::ReturnToPool(const std::string& protocol_name) {
   sync_primitives::AutoLock auto_lock(protocol_name_pool_lock_);
   for (ProtocolNamePool::iterator i = protocol_in_use_name_pool_.begin(); i != protocol_in_use_name_pool_.end(); ++i) {
@@ -256,14 +235,16 @@ IAP2Device::IAP2HubConnectThreadDelegate::IAP2HubConnectThreadDelegate(
 
 void IAP2Device::IAP2HubConnectThreadDelegate::threadMain() {
   std::string mount_point = parent_->mount_point();
-  LOG4CXX_TRACE(logger_, "iAP2: connecting to " << mount_point << " on hub protocol " << protocol_name_);
-  iap2ea_hdl_t* handle = iap2_eap_open(mount_point.c_str(), protocol_name_.c_str(), 0);
-  if (handle != 0){
-    LOG4CXX_DEBUG(logger_, "iAP2: connected to " << mount_point << " on hub protocol " << protocol_name_);
-    parent_->OnHubConnect(protocol_name_, handle);
-  }
-  else {
-    LOG4CXX_WARN(logger_, "iAP2: could not connect to " << mount_point << " on hub protocol " << protocol_name_);
+  while (true) {
+    LOG4CXX_TRACE(logger_, "iAP2: connecting to " << mount_point << " on hub protocol " << protocol_name_);
+    iap2ea_hdl_t* handle = iap2_eap_open(mount_point.c_str(), protocol_name_.c_str(), 0);
+    if (handle != 0){
+      LOG4CXX_DEBUG(logger_, "iAP2: connected to " << mount_point << " on hub protocol " << protocol_name_);
+      parent_->OnHubConnect(protocol_name_, handle);
+    }
+    else {
+      LOG4CXX_WARN(logger_, "iAP2: could not connect to " << mount_point << " on hub protocol " << protocol_name_);
+    }
   }
 }
 

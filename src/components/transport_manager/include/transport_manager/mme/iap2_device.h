@@ -80,7 +80,6 @@ class IAP2Device : public MmeDevice {
   void OnConnectFailed(const std::string& protocol_name);
   void OnDisconnect(ApplicationHandle app_id);
 
-  bool RemoveConnectionThread(const std::string& protocol_name);
   bool ReturnToPool(const std::string& protocol_name);
 
   TransportAdapterController* controller_;
