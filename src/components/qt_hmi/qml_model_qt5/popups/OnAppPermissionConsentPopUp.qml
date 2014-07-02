@@ -36,56 +36,56 @@ import QtQuick.Controls 1.0
 import QtQuick.Controls.Styles 1.0
 import "../models"
 import "../controls"
+import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 import "../models/RequestToSDL.js" as RequestToSDL
 
-Item {
+PopUp {
 
-    property string popUpName
+    width: Constants.popupWidth - 200
+    height: Constants.popupHeigth - 200
+
     property int appId
     property ListModel permissionItems: ListModel{}
-
-    signal itemActivated(string item)
-
-    onItemActivated: {
-        this
-    }
 
     function activate(appId) {
         console.debug("onAppPermissionConsentPopUp activate enter");
         appId = appId
-        visible = true;
+        show()
         console.debug("onAppPermissionConsentPopUp activate exit");
     }
 
     function deactivate() {
         console.debug("onAppPermissionConsentPopUp deactivate enter");
-        visible = false;
-        //OnAppPermissionConsent
-        sdlSDL.onAppPermissionConsent()
+        hide()
+
+        var consentedFunctions = [];
+
+        for (var i = 0; i < permissionItems.count; i++) {
+            consentedFunctions.push({
+                                        "name": permissionItems.get(i).messageCode,
+                                        "id": i,
+                                        "allowed": permissionItems.get(i).allowed
+                                    })
+        }
+
+        sdlSDL.onAppPermissionConsent(appId, consentedFunctions, Common.ConsentSource.GUI)
         console.debug("onAppPermissionConsentPopUp deactivate exit");
     }
 
-    Rectangle {
-        width: parent.width -200
-        height: parent.height - 100
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.horizontalCenter: parent.horizontalCenter
-        color: Constants.secondaryColor
-        border.width: 1
-        border.color: Constants.popUpBorderColor
-        radius: padding
-        z: 1000
+     Column {
+        anchors.fill: parent
 
         Component {
             id: listDelegate
 
             Item {
                 height: 70
-                width: 500
+                width: parent.width
 
                 CheckBox {
                     id: checkBox
+                    height: 20
 
                     style: CheckBoxStyle {
                         label: Text {
@@ -104,9 +104,8 @@ Item {
                     font.pixelSize: 0
                     text: textBody
                     wrapMode: TextEdit.Wrap
-                    width: 500
+                    width: parent.width
                     anchors.top: checkBox.bottom
-                    anchors.left: CheckBox.left
                 }
             }
         }
@@ -115,16 +114,16 @@ Item {
             id: onAppPermissonList
             anchors.fill: parent;
             anchors.margins: 5
+            anchors.bottomMargin: 100
             model: permissionItems
             delegate: listDelegate
         }
 
         Item {
             id: bottomPanel
-            // 1/4 bottom screen
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            height: 1/4 * parent.height
+            height: 100
             width: parent.width
 
             OvalButton {
