@@ -27,17 +27,4 @@ public class SecureServiceMessageFactory {
         return protocolMessage;
     }
 
-    public static ProtocolMessage buildErrorRequest(byte sessionId, byte errorCode, byte[] payloadData, byte version) {
-    
-
-        ProtocolMessage protocolMessage = new ProtocolMessage();
-        protocolMessage.setSessionID(sessionId);
-        protocolMessage.setVersion(version);
-        protocolMessage.setRPCType(ProtocolMessage.RPCTYPE_NOTIFICATION);
-        protocolMessage.setSessionType(ServiceType.Heartbeat);
-        protocolMessage.setFunctionID(ProtocolConst.SECURE_ERROR);
-        protocolMessage.setBulkData(payloadData);
-        return protocolMessage;
-    }
-
 }

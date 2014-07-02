@@ -91,7 +91,6 @@ import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.service.secure.SecureServiceMessageCallback;
-import com.ford.syncV4.service.secure.SecureServiceMessageFactory;
 import com.ford.syncV4.service.secure.SecureServiceMessageManager;
 import com.ford.syncV4.service.secure.SecurityInternalError;
 import com.ford.syncV4.session.EndServiceInitiator;
@@ -136,15 +135,12 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     static final int HEARTBEAT_INTERVAL = 5000;
 
     /**
-<<<<<<< HEAD
      * Delay between proxy disconnect (e.g., transport error) and another proxy
-=======
      * Waiting time for the End Service ACK, in milliseconds
      */
     private static final int WAIT_APP_INTERFACE_TIMEOUT = 1000;
 
     /** Delay between proxy disconnect (e.g., transport error) and another proxy
->>>>>>> develop
      * reconnect attempt.
      */
     private static final int PROXY_RECONNECT_DELAY = 5000;
@@ -516,43 +512,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         this.protocolSecureManager = protocolSecureManager;
     }
 
-    IHandshakeDataListener secureProxyServerListener = new IHandshakeDataListener() {
-
-        private byte sessionID = Session.DEFAULT_SESSION_ID;
-        private byte version = 2;
-
-        @Override
-        public void onHandshakeDataReceived(byte[] data) {
-            ProtocolMessage protocolMessage =
-                    SecureServiceMessageFactory.buildHandshakeRequest(sessionID, data, version);
-            dispatchOutgoingMessage(protocolMessage);
-        }
-
-        @Override
-        public void onHandShakeCompleted() {
-
-        }
-
-        @Override
-        public void onError(Exception e) {
-            String errorMsg = "Secure Connection Error ";
-            if (e.getMessage() != null) {
-                errorMsg = e.getMessage();
-            }
-            InternalProxyMessage proxyMessage = new OnError(errorMsg, e);
-            dispatchInternalMessage(proxyMessage);
-        }
-
-        @Override
-        public synchronized void setSessionID(byte sessionId) {
-            this.sessionID = sessionId;
-        }
-
-        @Override
-        public synchronized void setVersion(byte version) {
-            this.version = version;
-        }
-    };
+    IHandshakeDataListener secureProxyServerListener = new HandshakeDataListener(this);
 
 
     /**
@@ -1441,7 +1401,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         passErrorToProxyListener(info, e);
     }
 
-    private void dispatchOutgoingMessage(ProtocolMessage message) {
+    void dispatchOutgoingMessage(ProtocolMessage message) {
         Logger.i(LOG_TAG + " Sending Protocol Msg, name:" +
                 FunctionID.getFunctionName(message.getFunctionID()) +
                 " type:" + message.getRPCType());
@@ -3539,4 +3499,5 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     public void setTestConfigCallback(ITestConfigCallback mTestConfigCallback) {
         this.mTestConfigCallback = mTestConfigCallback;
     }
+
 }
