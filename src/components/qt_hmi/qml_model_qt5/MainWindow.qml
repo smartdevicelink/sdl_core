@@ -246,6 +246,14 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
+
+        OnAppPermissionConsentPopUp {
+            id: onAppPermissionConsentPopUp
+            popUpName: "onAppPermissionConsent"
+            objectName: "onAppPermissionConsent"
+            anchors.fill: parent
+            visible: false
+        }
     }
 
     Item {

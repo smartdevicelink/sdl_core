@@ -255,7 +255,9 @@ Item
         }
 
         if (params.isPermissionsConsentNeeded) {
-            //GetListOfPermissions
+            RequestToSDL.SDL_GetListOfPermissions(appId, function(params){
+                settingsContainer.getListOfPermissions_Response(appId, params)
+            })
         }
 
         if (params.isAppPermissionsRevoked) {
@@ -265,7 +267,7 @@ Item
         if (params.isAppRevoked) {
             //popupActivate("Current version of app is no longer supported!");
             //? unregister app or set to level NONE
-        } else if (params.isSDLAllowed) {
+        } else if (params.isSDLAllowed && !params.isPermissionsConsentNeeded) {
             dataContainer.setCurrentApplication(appId)
             contentLoader.go(
                 Internal.chooseAppStartScreen(
@@ -279,7 +281,36 @@ Item
 
     function allowSDLFunctionality (result, device) {
         console.log("allowSDLFunctionality enter");
+
         sdlSDL.onAllowSDLFunctionality(device, result, Common.ConsentSource.GUI)
+
+        console.log("allowSDLFunctionality exit");
+    }
+
+    function getListOfPermissions_Response (appId, allowedFunctions) {
+        console.log("getListOfPermissions_Response enter");
+
+        var app = dataContainer.getApplication(appId),
+                messageCodes = [];
+        app.allowedFunctions = allowedFunctions
+
+        for (var i = 0; i < allowedFunctions.length; i++) {
+            messageCodes.push(allowedFunctions[i].name);
+        }
+
+        RequestToSDL.SDL_GetUserFriendlyMessage(messageCodes, dataContainer.hmiUILanguage, function(params){
+            settingsContainer.onAppPermissionConsent_Notification(appId, params)
+        });
+
+        console.log("getListOfPermissions_Response exit");
+    }
+
+    function onAppPermissionConsent_Notification (appId, params) {
+        console.log("onAppPermissionConsent_Notification enter");
+
+        onAppPermissionConsentPopUp.activate(params, appId)
+
+        console.log("onAppPermissionConsent_Notification enter");
     }
 
     function decrypt(file, appId) {

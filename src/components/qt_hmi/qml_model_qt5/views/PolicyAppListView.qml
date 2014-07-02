@@ -1,6 +1,6 @@
 /**
- * @file SettingsSourceModel.qml
- * @brief Settings source menu list of elements.
+ * @file SettingsSourceView.qml
+ * @brief Settings source screen view.
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -32,61 +32,52 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 import QtQuick 2.0
+import "../models"
+import "../controls"
+import "../models/Constants.js" as Constants
+import "../models/RequestToSDL.js" as RequestToSDL
 
-ListModel
-{
-    ListElement {
-        title: "Allow SDL Functionality"
-        qml: "./views/SDLFunctionalityView.qml"
-        appId: 0
-        action: ""
-    }
-    ListElement {
-        title: "Update SDL"
-        qml: ""
-        appId: 0
-        action: "update_sdl"
-    }
-    ListElement {
-        title: "Policy table update status"
-        qml: ""
-        appId: 0
-        action: "get_status_update"
-    }
-    ListElement {
-        title: "Send request GetURLS"
-        qml: ""
-        appId: 0
-        action: "get_urls"
-    }
-    ListElement {
-        title: "Statistics info settings"
-        qml: "./views/StatisticsInfoView.qml"
-        appId: 0
-        action: ""
-    }
-    ListElement {
-        title: "App permissions"
-        qml: "./views/PolicyAppListView.qml"
-        appId: 0
-        action: ""
-    }
-    ListElement {
-        title: "Device state change"
-        qml: "./views/DeviceStateChangedView.qml"
-        appId: 0
-        action: ""
-    }
-    ListElement {
-        title: "System Error"
-        qml: "./views/SystemErrorView.qml"
-        appId: 0
-        action: ""
-    }
-    ListElement {
-        title: "System Request"
-        qml: "./views/SystemRequestView.qml"
-        appId: 0
-        action: ""
+GeneralView {
+
+    Item {
+        anchors.fill: parent
+        GridMenu {
+            id: menu
+            model: dataContainer.applicationList
+            anchors.left: parent.left
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.bottom: bottomPanel.top
+            columnsOnPage: 1
+            rows: 7
+            delegate: GridItem {
+                width: menu.width / menu.columnsOnPage
+                height: menu.height / menu.rows
+                OvalButton {
+                    text: title
+                    onReleased: {
+                        if (qml) {
+                            contentLoader.go(qml, appId);
+                        } else {
+                            itemActivated(action);
+                        }
+                    }
+                    anchors.centerIn: parent
+                    fontSize: Constants.fontSize
+                    width: parent.width * 2 / 3
+                }
+            }
+        }
+
+        Item {
+            id: bottomPanel
+            // 1/4 bottom screen
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            height: 1/4 * parent.height
+            width: parent.width
+
+            BackButton { anchors.centerIn: parent }
+        }
     }
 }
