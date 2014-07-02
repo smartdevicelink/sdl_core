@@ -210,7 +210,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
             obj_tokens = split(path, ' ');
 
-            for (int i = 0; i < obj_tokens.size(); i++)
+            for (size_t i = 0; i < obj_tokens.size(); i++)
             {
                 if (obj_tokens[i][0] == 'A')            // array
                 {

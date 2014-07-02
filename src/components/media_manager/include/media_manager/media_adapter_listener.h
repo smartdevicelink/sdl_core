@@ -41,6 +41,8 @@ typedef int32_t DataForListener;
 
 class MediaAdapterListener {
   public:
+    virtual ~MediaAdapterListener() {
+    }
     virtual void OnDataReceived(
       int32_t application_key,
       const DataForListener& data) = 0;

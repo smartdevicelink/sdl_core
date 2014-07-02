@@ -118,8 +118,8 @@ namespace transport_manager {
 MockApplication::MockApplication(const MockDevice *device, ApplicationHandle id)
     : device(device),
       handle(id),
-      sockfd(-1),
       workerThread(0),
+      sockfd(-1),
       active(false) {
   std::ostringstream oss;
   oss << "mockDevice" << device->unique_device_id() << "-" << id;

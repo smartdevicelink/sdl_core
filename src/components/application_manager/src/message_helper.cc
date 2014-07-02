@@ -2239,7 +2239,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
       for (size_t i = 0; i < object.length(); i++) {
         ++tab;
 
-        printf("\n%s%d: ", tab_buffer.c_str(), i);
+        printf("\n%s%zu: ", tab_buffer.c_str(), i);
         if (!PrintSmartObject(object.getElement(i))) {
           printf("\n");
           return false;
