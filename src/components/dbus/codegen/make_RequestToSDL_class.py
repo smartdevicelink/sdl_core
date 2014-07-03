@@ -85,6 +85,7 @@ class Impl(FordXmlParser):
     def make_header_file(self, out):
         out.write("class RequestToSDL : public QObject\n")
         out.write("{\n") 
+        out.write('  Q_OBJECT\n')
         out.write(" public:\n")     
         with CodeBlock(out) as output:  
             output.write("explicit RequestToSDL(QObject *parent = 0);\n")
@@ -95,6 +96,7 @@ class Impl(FordXmlParser):
             for interface_el in self.el_tree.findall('interface'):
                 output.write('QDBusInterface *' + interface_el.get('name') + ';\n')
         out.write("};\n")
+        out.write('#endif SRC_COMPONENTS_QTHMI_QMLMODELQT5_REQUESTTOSDL_')           
 
 
     def make_requests_for_source(self, out):

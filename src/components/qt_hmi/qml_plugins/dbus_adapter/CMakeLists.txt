@@ -34,6 +34,8 @@ set(components_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 set(dbus_dir ${components_dir}/dbus)
 set(codegen_dir ${dbus_dir}/codegen)
 set(codegen ${codegen_dir}/make_qml_dbus_cpp.py)
+set(codegen2 ${codegen_dir}/make_RequestToSDL_class.py)
+set(codegen3 ${codegen_dir}/make_HMIRequests_class.py)
 set(parser ${codegen_dir}/ford_xml_parser.py)
 set(interfaces_dir ${components_dir}/interfaces)
 set(api_xml ${interfaces_dir}/QT_HMI_API.xml)
@@ -44,6 +46,26 @@ add_custom_command(
   COMMENT "Generating files:
     ${CMAKE_CURRENT_BINARY_DIR}/qml_dbus.cc
     ${CMAKE_CURRENT_BINARY_DIR}/qml_dbus.h
+    from:
+    ${api_xml} ..."
+)
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.cc ${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.h
+  COMMAND python ${codegen2} --infile ${api_xml} --version ${qt_version} --outdir ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS ${api_xml} ${codegen} ${parser}
+  COMMENT "Generating files:
+    ${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.cc
+    ${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.h
+    from:
+    ${api_xml} ..."
+)
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.cc ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.h
+  COMMAND python ${codegen3} --infile ${api_xml} --version ${qt_version} --outdir ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS ${api_xml} ${codegen} ${parser}
+  COMMENT "Generating files:
+    ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.cc
+    ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.h
     from:
     ${api_xml} ..."
 )
@@ -80,6 +102,8 @@ if (${qt_version} MATCHES "4.8.5")
    set(model_dir ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt4/)
    set(copy_destination ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt4/${destination})
 elseif (${qt_version} MATCHES "5.1.0")
+  qt5_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.h moc_hmi_requests.cpp)
+  qt5_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.h moc_request_to_sdl.cpp)
   qt5_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/qml_dbus.h moc_qml_dbus.cpp)
   qt5_use_modules(${target} Core DBus Qml)
   set(model_dir ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt5/)
