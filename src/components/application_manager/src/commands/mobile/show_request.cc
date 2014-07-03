@@ -304,6 +304,22 @@ bool ShowRequest::CheckStringsOfShowRequest() {
         }
       }
   }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    std::string str;
+    const smart_objects::SmartArray* sb_array =
+        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
+
+    smart_objects::SmartArray::const_iterator it_sb = sb_array->begin();
+    smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
+
+    for (; it_sb != it_sb_end; ++it_sb) {
+      str = (*it_sb)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        return false;
+      }
+    }
+  }
   return true;
 }
 

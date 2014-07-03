@@ -36,7 +36,9 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <utility>
 
+#include "utils/date_time.h"
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
 #include "connection_handler/device.h"
@@ -161,6 +163,17 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   UsageStatistics& usage_report();
 
+  /*
+   * @breaf Check frequency of readDID requests
+   */
+  bool IsReadDIDAllowed();
+
+  /*
+   * @breaf Check frequency of GetVehicleData requests
+   */
+  bool IsGetVehicleDataAllowed();
+
+
  protected:
 
   /**
@@ -206,6 +219,18 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
   bool                                     alert_in_background_;
+
+  /*
+   * first is timestamp
+   * second is count of requests since first
+   */
+  std::pair<TimevalStruct, uint32_t>       get_vehice_data_frequency_;
+
+  /*
+   * first is timestamp
+   * second is count of requests since first
+   */
+  std::pair<TimevalStruct, uint32_t>       read_did_frequency_;
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };

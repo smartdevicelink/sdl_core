@@ -34,6 +34,8 @@
 
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
+import "../models/RequestToSDL.js" as RequestToSDL
+import "../models/Internal.js" as Internal
 
 Item
 {
@@ -123,7 +125,212 @@ Item
 
     property var buttonCapabilities: []
 
-    function update(result) {
+    readonly property string fileIVSU: "hmi/res/IVSU/PROPRIETARY_REQUEST"
+
+    property string filePTSnapshot: ""
+
+    property int timeoutPTExchange: 500
+
+    property var retriesPTExchange: []
+
+    property var urlsPTExchange: []
+
+    property int currentRetry: 0
+
+    property int currentUrl: 0
+
+    property string appIdIVSU: ""
+
+    property var urlsIVSU: []
+
+    function updateStatus(result) {
         console.debug("Result update SDL:", result);
+        var text = {}
+        text[Common.UpdateResult.UP_TO_DATE] = "UP_TO_DATE";
+        text[Common.UpdateResult.UPDATING] = "UPDATING";
+        text[Common.UpdateResult.UPDATE_NEEDED] = "UPDATE_NEEDED";
+        ttsPopUp.activate(text[result])
+    }
+
+    function startPTExchange(urls) {
+        urlsPTExchange = urls;
+        currentRetry = 0;
+        currentUrl = 0;
+        tryUpdatePolicy();
+    }
+
+    function startIVSU(urls) {
+        urlsIVSU = urls;
+        sendSystemRequest(Common.RequestType.PROPRIETARY, urlsIVSU[0].url,
+                          fileIVSU, appIdIVSU);
+    }
+
+    function getUrl() {
+        if (currentUrl >= 0 && currentUrl < urlsPTExchange.length) {
+          var url = urlsPTExchange[currentUrl];
+          currentUrl = (currentUrl + 1) / urlsPTExchange.length;
+          return url;
+        } else {
+          return {url: ""}
+        }
+    }
+
+    function getInterval() {
+        if (currentRetry >= 0 && currentRetry < retriesPTExchange.length) {
+            var interval = (timeoutPTExchange + retriesPTExchange[currentRetry]) * 1000;
+            currentRetry++;
+            return interval;
+        } else {
+            return 0;
+        }
+    }
+
+    function sendSystemRequest(type, url, fileName, applicationId) {
+        var offset = 1000;
+        var length = 10000;
+        var appId = applicationId ? applicationId : "default";
+        var file = fileName ? fileName : fileIVSU;
+
+        sdlBasicCommunication.onSystemRequest(type, url, Common.FileType.JSON,
+                                              offset, length, timeoutPTExchange,
+                                              file, appId);
+    }
+
+    function tryUpdatePolicy() {
+        if (urlsPTExchange.length) {
+            var url = getUrl();
+            sendSystemRequest(Common.RequestType.PROPRIETARY, url.url, filePTSnapshot, url.policyAppId);
+        } else {
+            sendSystemRequest(Common.RequestType.PROPRIETARY);
+        }
+
+        retriesTimer.interval = getInterval();
+        if (retriesTimer.interval > 0) {
+            retriesTimer.start();
+        }
+    }
+
+    function systemRequest(type) {
+        if (urlsPTExchange.length) {
+            sendSystemRequest(type, urlsPTExchange[0].url, null, urlsPTExchange[0].policyAppId);
+        } else {
+            sendSystemRequest(type);
+        }
+    }
+
+    function stopPTExchange(fileName) {
+        retriesTimer.stop();
+        sdlSDL.onReceivedPolicyUpdate(fileName);
+    }
+
+    Timer {
+        id: retriesTimer
+        interval: timeoutPTExchange; running: false; repeat: false
+        onTriggered: sendSystemRequest()
+    }
+
+    function activateApp (appId) {
+
+        console.debug("SDL.ActivateApp Request enter", appId);
+
+        RequestToSDL.SDL_ActivateApp(appId, function(params){
+            settingsContainer.activateApp_Response(appId, params)
+        })
+
+        console.debug("SDL.ActivateApp Request exit");
+    }
+
+    function activateApp_Response (appId, params) {
+
+        console.debug("activateApp_Response enter", appId);
+
+        if (!params.isSDLAllowed) {
+
+            userActionPopUp.activate("Allow SDL Functionality request",
+                                        "Would you like to allow SDL functionality for device '" + params.device.name + "'?",
+                                        function(result){
+                                            allowSDLFunctionality(result, params.device)
+                                        }
+                                    )
+        }
+
+        if (params.isPermissionsConsentNeeded) {
+            RequestToSDL.SDL_GetListOfPermissions(appId, function(params){
+                settingsContainer.getListOfPermissions_Response(appId, params)
+            })
+        }
+
+        if (params.isAppPermissionsRevoked) {
+            //setAppPermissions remove revoked permissions
+        }
+
+        if (params.isAppRevoked) {
+            //popupActivate("Current version of app is no longer supported!");
+            //? unregister app or set to level NONE
+        } else if (params.isSDLAllowed && !params.isPermissionsConsentNeeded) {
+            dataContainer.setCurrentApplication(appId)
+            contentLoader.go(
+                Internal.chooseAppStartScreen(
+                    dataContainer.currentApplication.appType,
+                    dataContainer.currentApplication.isMediaApplication
+                ),
+                appId
+            )
+        }
+    }
+
+    function allowSDLFunctionality (result, device) {
+        console.log("allowSDLFunctionality enter");
+
+        sdlSDL.onAllowSDLFunctionality(device, result, Common.ConsentSource.GUI)
+
+        console.log("allowSDLFunctionality exit");
+    }
+
+    function getListOfPermissions_Response (appId, allowedFunctions) {
+        console.log("getListOfPermissions_Response enter");
+
+        var app = dataContainer.getApplication(appId);
+        var messageCodes = [];
+        allowedFunctions.forEach(function (x) {
+            app.allowedFunctions.append({name: x.name, id: x.id, allowed: x.allowed});
+            messageCodes.push(x.name);
+        });
+
+        RequestToSDL.SDL_GetUserFriendlyMessage(messageCodes, dataContainer.hmiUILanguage, function(params){
+            settingsContainer.onAppPermissionConsent_Notification(appId, params)
+        });
+
+        console.log("getListOfPermissions_Response exit");
+    }
+
+    function onAppPermissionConsent_Notification (appId, params) {
+        console.log("onAppPermissionConsent_Notification enter");
+
+        onAppPermissionConsentPopUp.permissionItems.clear()
+
+        for (var i = 0; i < params.length; i++) {
+            onAppPermissionConsentPopUp.permissionItems.append({
+                                 "messageCode": params[i].messageCode,
+                                 "label": params[i].label,
+                                 "textBody": params[i].textBody,
+                                 "allowed": false
+                             })
+        }
+
+        onAppPermissionConsentPopUp.activate(appId)
+
+        console.log("onAppPermissionConsent_Notification enter");
+    }
+
+    function decrypt(file, appId) {
+        sendSystemRequest(Common.RequestType.FILE_RESUME, urlsIVSU[0].url, file,
+                          appId);
+    }
+
+    function updateIVSU(appId) {
+        appIdIVSU = appId;
+        var service = 4; // service type for IVSU
+        RequestToSDL.SDL_GetURLS(service, startIVSU);
     }
 }

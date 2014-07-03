@@ -70,6 +70,7 @@ import com.ford.syncV4.proxy.rpc.GenericResponse;
 import com.ford.syncV4.proxy.rpc.GetDTCsResponse;
 import com.ford.syncV4.proxy.rpc.GetVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.ListFilesResponse;
+import com.ford.syncV4.proxy.rpc.OnAppInterfaceUnregistered;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnButtonEvent;
 import com.ford.syncV4.proxy.rpc.OnButtonPress;
@@ -1623,8 +1624,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
     }
 
     @Override
-    public void onAppUnregisteredReason(String appId, AppInterfaceUnregisteredReason reason) {
-        createDebugMessageForAdapter("onAppUnregisteredReason:" + reason + ", appId:" + appId);
+    public void onAppUnregisteredReason(String appId, OnAppInterfaceUnregistered notification) {
+        createDebugMessageForAdapter(appId, notification);
     }
 
     @Override
@@ -1671,7 +1672,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
     @Override
     public void onRPCRequest(String appId, RPCRequest rpcRequest) {
-        createDebugMessageForAdapter(rpcRequest);
+        createDebugMessageForAdapter(appId, rpcRequest);
     }
 
     @Override
@@ -2250,15 +2251,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             return mSyncProxy.startAudioDataTransfer(appId);
         }
         return null;
-    }
-
-    /**
-     * Invalidates provided Application Id, clear all Services associated and remove it from the list
-     *
-     * @param appId Application id
-     */
-    public void invalidateAppId(String appId) {
-        mSyncProxy.invalidateAppId(appId);
     }
 
     /**

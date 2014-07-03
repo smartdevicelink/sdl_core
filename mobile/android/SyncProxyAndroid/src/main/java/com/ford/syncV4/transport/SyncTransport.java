@@ -11,7 +11,7 @@ public abstract class SyncTransport {
     private final static String FailurePropagating_Msg = "Failure propagating ";
     private static final String SEND_LOCK_OBJ = "lock";
 
-	private Boolean isConnected = false;
+	private volatile Boolean isConnected = false;
 
 	// Get status of transport connection
 	public Boolean getIsConnected() {
@@ -84,14 +84,13 @@ public abstract class SyncTransport {
 		} catch (Exception excp) {
 			Logger.e(FailurePropagating_Msg + "onTransportConnected: " + excp.toString(), excp);
 			handleTransportError(FailurePropagating_Msg + "onTransportConnected", excp);
-		} // end-catch
-	} // end-method
+		}
+	}
 	
     // This method is called by the subclass to indicate that transport disconnection
     // has occurred.
 	protected void handleTransportDisconnected(final String info) {
 		isConnected = false;
-
 		try {
             Logger.d(CLASS_NAME + " Disconnected");
 			mTransportListener.onTransportDisconnected(info);

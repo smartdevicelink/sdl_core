@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <errno.h>
+
 #include "utils/logger.h"
 
 #include "transport_manager/mme/iap2_connection.h"
@@ -56,8 +58,8 @@ bool IAP2Connection::Init() {
     protocol_name_ = record.first;
     iap2ea_hdl_ = record.second;
     std::string thread_name = "iAP2 receiver (" + protocol_name_ + ")";
-    receiver_thread_ = new threads::Thread(thread_name.c_str(),
-      new ReceiverThreadDelegate(iap2ea_hdl_, this));
+    receiver_thread_delegate_ = new ReceiverThreadDelegate(iap2ea_hdl_, this);
+    receiver_thread_ = new threads::Thread(thread_name.c_str(), receiver_thread_delegate_);
     receiver_thread_->start();
 
     controller_->ConnectDone(device_uid_, app_handle_);
@@ -83,19 +85,8 @@ TransportAdapter::Error IAP2Connection::SendData(RawMessageSptr message) {
 }
 
 TransportAdapter::Error IAP2Connection::Disconnect() {
-  TransportAdapter::Error error = TransportAdapter::OK;
-
   receiver_thread_->stop();
-
-  LOG4CXX_TRACE(logger_, "iAP2: closing connection on protocol " << protocol_name_);
-  if (iap2_eap_close(iap2ea_hdl_) != -1) {
-    LOG4CXX_DEBUG(logger_, "iAP2: connection on protocol " << protocol_name_ << " closed");
-  }
-  else {
-    LOG4CXX_WARN(logger_, "iAP2: could not close connection on protocol " << protocol_name_);
-    error = TransportAdapter::FAIL;
-  }
-  parent_->OnDisconnect(app_handle_);
+  TransportAdapter::Error error = Close() ? TransportAdapter::OK : TransportAdapter::FAIL;
   controller_->DisconnectDone(device_uid_, app_handle_);
   return error;
 }
@@ -109,9 +100,40 @@ void IAP2Connection::ReceiveData() {
     controller_->DataReceiveDone(device_uid_, app_handle_, message);
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP2: error occured while receiving data on protocol " << protocol_name_);
-    controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
+    switch (errno) {
+      case ECONNRESET:
+        LOG4CXX_INFO(logger_, "iAP2: protocol " << protocol_name_ << " disconnected");
+// receiver_thread_->stop() cannot be invoked here
+// because this method is called from receiver_thread_
+// anyway delegate can be stopped directly
+        receiver_thread_delegate_->exitThreadMain();
+        Close();
+        controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
+        break;
+      default:
+        LOG4CXX_WARN(logger_, "iAP2: error occured while receiving data on protocol " << protocol_name_);
+        controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
+        break;
+    }
   }
+}
+
+bool IAP2Connection::Close() {
+  bool result;
+
+  LOG4CXX_TRACE(logger_, "iAP2: closing connection on protocol " << protocol_name_);
+  if (iap2_eap_close(iap2ea_hdl_) != -1) {
+    LOG4CXX_DEBUG(logger_, "iAP2: connection on protocol " << protocol_name_ << " closed");
+    result = true;
+  }
+  else {
+    LOG4CXX_WARN(logger_, "iAP2: could not close connection on protocol " << protocol_name_);
+    result = false;
+  }
+
+  parent_->OnDisconnect(app_handle_);
+
+  return result;
 }
 
 IAP2Connection::ReceiverThreadDelegate::ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl,

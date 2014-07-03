@@ -38,20 +38,30 @@
 namespace application_manager {
 
 namespace request_controller {
+
 using namespace sync_primitives;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 
 RequestController::RequestController()
-  : watchdog_(NULL) {
+  : pool_state_(UNDEFINED)
+  , pool_size_(profile::Profile::instance()->thread_pool_size())
+  , watchdog_(NULL) {
   LOG4CXX_INFO(logger_, "RequestController::RequestController()");
   watchdog_ = new request_watchdog::RequestWatchdog;
   watchdog_->AddListener(this);
+  InitializeThreadpool();
 }
 
 RequestController::~RequestController() {
   LOG4CXX_INFO(logger_, "RequestController::~RequestController()");
+  if (pool_state_ != TPoolState::STOPPED) {
+    DestroyThreadpool();
+  }
+
+  pool_.clear();
   request_list_.clear();
+  pending_request_list_.clear();
 
   if (watchdog_) {
     watchdog_->RemoveListener(this);
@@ -60,14 +70,42 @@ RequestController::~RequestController() {
   }
 }
 
+void RequestController::InitializeThreadpool()
+{
+  LOG4CXX_INFO(logger_, "RequestController::InitializeThreadpool()");
+  // TODO: Consider lazy loading threads instead of creating all at once
+  pool_state_ = TPoolState::STARTED;
+  for (uint32_t i = 0; i < pool_size_; i++) {
+    char name [50];
+    snprintf(name, sizeof(name)/sizeof(name[0]),
+             "Request thread %d", i);
+    pool_.push_back(ThreadSharedPtr(new Thread(name, new Worker(this))));
+    pool_[i]->start();
+    LOG4CXX_INFO(logger_, "RequestController::InitializeThreadpool() " << name);
+  }
+}
+
+void RequestController::DestroyThreadpool() {
+  LOG4CXX_INFO(logger_, "RequestController::DestroyThreadpool()");
+  request_list_lock_.Acquire();
+  pool_state_ = TPoolState::STOPPED;
+  request_list_lock_.Release();
+
+  LOG4CXX_INFO(logger_, "Broadcasting STOP signal to all threads...");
+  cond_var_.Broadcast(); // notify all threads we are shutting down
+  for (uint32_t i = 0; i < pool_size_; i++) {
+    pool_[i]->stop();
+  }
+
+  LOG4CXX_INFO(logger_, "Threads exited from the thread pool " << pool_size_);
+}
+
 RequestController::TResult RequestController::addRequest(
     const Request& request, const mobile_apis::HMILevel::eType& hmi_level) {
   LOG4CXX_INFO(logger_, "RequestController::addRequest()");
 
   RequestController::TResult result = RequestController::SUCCESS;
   {
-    AutoLock auto_lock(request_list_lock_);
-
     const commands::CommandRequestImpl* request_impl =
       static_cast<commands::CommandRequestImpl*>(request.get());
 
@@ -86,10 +124,10 @@ RequestController::TResult RequestController::addRequest(
     const uint32_t& pending_requests_amount =
         profile::Profile::instance()->pending_requests_amount();
 
-    const mobile_apis::HMILevel::eType hmi_level =
+    const mobile_apis::HMILevel::eType hmi_level_none =
         mobile_apis::HMILevel::HMI_NONE;
 
-    if (false == watchdog_->checkHMILevelTimeScaleMaxRequest(hmi_level,
+    if (false == watchdog_->checkHMILevelTimeScaleMaxRequest(hmi_level_none,
                   request_impl->connection_key(), app_hmi_level_none_time_scale,
                   app_hmi_level_none_max_request_per_time_scale)) {
       LOG4CXX_ERROR(logger_, "Too many application requests in hmi level NONE");
@@ -104,27 +142,35 @@ RequestController::TResult RequestController::addRequest(
       result = RequestController::TOO_MANY_PENDING_REQUESTS;
     } else {
 
-      request_list_.push_back(request);
-      LOG4CXX_INFO(logger_, "RequestController size is " <<
-                   request_list_.size());
+      {
+        AutoLock auto_lock(request_list_lock_);
 
-      if (0 == request_impl->default_timeout()) {
-        LOG4CXX_INFO(logger_, "Default timeout was set to 0. Watchdog will not "
-                     "track this request.");
-        return result;
+
+        if (0 == request_impl->default_timeout()) {
+          LOG4CXX_INFO(logger_, "Default timeout was set to 0."
+                                "Watchdog will not track this request.");
+        } else {
+          watchdog_->addRequest(new request_watchdog::RequestInfo(
+                                  request_impl->function_id(),
+                                  request_impl->connection_key(),
+                                  request_impl->correlation_id(),
+                                  request_impl->default_timeout(),
+                                  hmi_level));
+
+          LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
+                       << request_impl->default_timeout());
+        }
+
+        request_list_.push_back(request);
+        LOG4CXX_INFO(logger_, "RequestController size is "
+                     << request_list_.size()
+                     << " Pending request size is "
+                     << pending_request_list_.size()
+                   );
       }
 
-      LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
-                   << request_impl->default_timeout());
-
-      watchdog_->addRequest(new request_watchdog::RequestInfo(
-                              request_impl->function_id(),
-                              request_impl->connection_key(),
-                              request_impl->correlation_id(),
-                              request_impl->default_timeout(),
-                              hmi_level));
-
-      LOG4CXX_INFO(logger_, "Added request to watchdog.");      
+      // wake up one thread that is waiting for a task to be available
+      cond_var_.NotifyOne();
     }
   }
 
@@ -136,15 +182,15 @@ void RequestController::terminateRequest(
   LOG4CXX_INFO(logger_, "RequestController::terminateRequest()");
 
   {
-    AutoLock auto_lock(request_list_lock_);
-    std::list<Request>::iterator it = request_list_.begin();
-    for (; request_list_.end() != it; ++it) {
+    AutoLock auto_lock(pending_request_list_lock_);
+    std::list<Request>::iterator it = pending_request_list_.begin();
+    for (; pending_request_list_.end() != it; ++it) {
       const commands::CommandRequestImpl* request_impl =
         static_cast<commands::CommandRequestImpl*>(it->get());
       if (request_impl->correlation_id() == mobile_correlation_id) {
         watchdog_->removeRequest(
           request_impl->connection_key(), request_impl->correlation_id());
-        request_list_.erase(it);
+        pending_request_list_.erase(it);
         break;
       }
     }
@@ -156,15 +202,16 @@ void RequestController::terminateAppRequests(
   LOG4CXX_INFO(logger_, "RequestController::terminateAppRequests()");
 
   {
-    AutoLock auto_lock(request_list_lock_);
-    std::list<Request>::iterator it = request_list_.begin();
-    while (request_list_.end() != it) {
-      const commands::CommandRequestImpl* request_impl =
+    AutoLock auto_lock(pending_request_list_lock_);
+    std::list<Request>::iterator it = pending_request_list_.begin();
+    while (pending_request_list_.end() != it) {
+      commands::CommandRequestImpl* request_impl =
           static_cast<commands::CommandRequestImpl*>(it->get());
       if (request_impl->connection_key() == app_id) {
+        request_impl->CleanUp();
         watchdog_->removeRequest(
           request_impl->connection_key(), request_impl->correlation_id());
-        it = request_list_.erase(it);
+        it = pending_request_list_.erase(it);
       } else {
         ++it;
       }
@@ -189,9 +236,9 @@ void RequestController::onTimeoutExpired(
 
   commands::CommandRequestImpl* request_impl = NULL;
   {
-    AutoLock auto_lock(request_list_lock_);
-    std::list<Request>::iterator it = request_list_.begin();
-    for (; request_list_.end() != it; ++it) {
+    AutoLock auto_lock(pending_request_list_lock_);
+    std::list<Request>::iterator it = pending_request_list_.begin();
+    for (; pending_request_list_.end() != it; ++it) {
       request_impl = static_cast<commands::CommandRequestImpl*>(it->get());
       if (request_impl->correlation_id() == info.correlationID_ &&
           request_impl->connection_key() == info.connectionID_) {
@@ -205,6 +252,61 @@ void RequestController::onTimeoutExpired(
   if (request_impl) {
     request_impl->onTimeOut();
   }
+}
+
+RequestController::Worker::Worker(RequestController* requestController)
+  : request_controller_(requestController)
+  , stop_flag_(false)
+  , is_active_(true) {
+}
+
+RequestController::Worker::~Worker() {
+}
+
+void RequestController::Worker::threadMain() {
+  LOG4CXX_INFO(logger_, "RequestController::Worker::threadMain");
+  while (!stop_flag_) {
+    // Try to pick a request
+    sync_primitives::AutoLock auto_lock(request_controller_->request_list_lock_);
+
+    while ((request_controller_->pool_state_ != TPoolState::STOPPED) &&
+           (request_controller_->request_list_.empty())) {
+      // Wait until there is a task in the queue
+      // Unlock mutex while wait, then lock it back when signaled
+      LOG4CXX_INFO(logger_, "Unlocking and waiting");
+      request_controller_->cond_var_.Wait(auto_lock);
+      LOG4CXX_INFO(logger_, "Signaled and locking");
+    }
+
+    // If the thread was shutdown, return from here
+    if (request_controller_->pool_state_ == TPoolState::STOPPED) {
+      break;
+    }
+
+    Request request(request_controller_->request_list_.front());
+    commands::CommandRequestImpl* request_impl = NULL;
+    request_impl = static_cast<commands::CommandRequestImpl*>(request.get());
+    request_controller_->request_list_.pop_front();
+
+    //pending_request_list_.Acquire();
+    request_controller_->pending_request_list_lock_.Acquire();
+    request_controller_->pending_request_list_.push_back(request);
+    request_controller_->pending_request_list_lock_.Release();
+
+    AutoUnlock unlock(auto_lock);
+
+    // execute
+    request_impl->Init();
+    request_impl->Run();
+  }
+
+  // for correct thread termination
+  is_active_ = false;
+}
+
+bool RequestController::Worker::exitThreadMain() {
+  stop_flag_ = true;
+  return true;
 }
 
 }  //  namespace request_controller

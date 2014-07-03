@@ -121,15 +121,16 @@ public class TCPTransport extends SyncTransport {
                         bResult = true;
                         //Logger.i("TCPTransport.sendBytesOverTransport: successfully send data:" + msgBytes.length);
                     } catch (IOException e) {
-                        Logger.e(CLASS_NAME + " SendBytesOverTransport: error during sending data: " + e.getMessage());
+                        e.printStackTrace();
+                        Logger.e(CLASS_NAME + " error during sending data: " + e.getMessage());
                         bResult = false;
                     }
                 } else {
-                    Logger.e(CLASS_NAME + " SendBytesOverTransport request accepted, but output stream is null");
+                    Logger.e(CLASS_NAME + " request accepted, but output stream is null");
                 }
             }
         } else {
-            Logger.i(CLASS_NAME + " SendBytesOverTransport request rejected. Transport is not connected");
+            Logger.i(CLASS_NAME + " request rejected. Transport is not connected");
             bResult = false;
         }
 
@@ -243,8 +244,7 @@ public class TCPTransport extends SyncTransport {
             // This disconnect was caused by an error, notify the proxy
             // that there was a transport error.
             Logger.e("Disconnect is incorrect. Handling it as error");
-            final String finalDisconnectMsg = disconnectMsg;
-            handleTransportError(finalDisconnectMsg, exception);
+            handleTransportError(disconnectMsg, exception);
         }
     }
 

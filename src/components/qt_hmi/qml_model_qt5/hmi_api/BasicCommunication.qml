@@ -33,22 +33,38 @@
  */
 
 import QtQuick 2.0
+import "../models/RequestToSDL.js" as RequestToSDL
 
 Item {
     function updateDeviceList (deviceList) {
         var deviceListLog = "";
-        if (deviceList) {
-            for (var i = 0; i < deviceList.length; i++) {
-                deviceListLog += "{name: '" + deviceList[i].name + "', " +
-                        "id: '" + deviceList[i].id + "'},";
-            }
-        }
+        deviceList.forEach(function (device) {
+            deviceListLog += "{name: '" + device.name + "', " +
+                    "id: '" + device.id + "'},";
+        });
         console.log("Message Received - {method: 'BasicCommunication.UpdateDeviceList', params:{ " +
                     "deviceList: [" + deviceListLog + "]" +
                     "}}")
-        dataContainer.deviceList.clear();
-        for(var i = 0; i < deviceList.length; i++) {
-            dataContainer.deviceList.append({ name: deviceList[i].name, devid: deviceList[i].id })
+
+        deviceList.forEach(function (device) {
+            var exist = false;
+            for (var i = 0; i < dataContainer.deviceList.count; ++i) {
+                exist = device.id === dataContainer.deviceList[i].devid;
+            }
+            if (!exist) {
+                dataContainer.deviceList.append({ name: device.name,
+                                                  devid: device.id,
+                                                  allowed: false})
+            }
+        });
+
+        for (var i = 0; i < dataContainer.deviceList.count; ++i) {
+            deviceList.forEach(function (device) {
+                var exist = dataContainer.deviceList[i].id === device.id;
+                if (!exist) {
+                    dataContainer.deviceList.remove(i);
+                }
+            });
         }
     }
 
@@ -138,6 +154,29 @@ Item {
     }
 
     function policyUpdate(file, timeout, retry) {
+        console.log("enter policyUpdate");
+        settingsContainer.filePSnapshot = file;
+        settingsContainer.timeoutPTExchange = timeout;
+        settingsContainer.retriesPTExchange = retry;
+        var service = 7; // service type for Ford specific policy
+        RequestToSDL.SDL_GetURLS(service, settingsContainer.startPTExchange);
+    }
 
+    function systemRequest(requestType, fileName, appID) {
+        console.log("enter systemRequest");
+        switch (requestType) {
+            case Common.RequestType.PROPRIETARY: {
+                settingsContainer.stopPTExchange(fileName);
+                break;
+            }
+            case Common.RequestType.HTTP: {
+                if (fileName === "IVSU") {
+                    settingsContainer.updateIVSU(appID);
+                } else {
+                    settingsContainer.decrypt(fileName, appID);
+                }
+                break;
+            }
+        }
     }
 }

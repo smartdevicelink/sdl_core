@@ -238,6 +238,22 @@ Rectangle {
             anchors.fill: parent
             visible: false
         }
+
+        UserActionPopUp {
+            id: userActionPopUp
+            popUpName: "ActionPopUp"
+            objectName: "ActionPopUp"
+            anchors.fill: parent
+            visible: false
+        }
+
+        OnAppPermissionConsentPopUp {
+            id: onAppPermissionConsentPopUp
+            popUpName: "onAppPermissionConsent"
+            objectName: "onAppPermissionConsent"
+            anchors.fill: parent
+            visible: false
+        }
     }
 
     Item {
@@ -380,7 +396,8 @@ Rectangle {
         }
 
         onPutFile: {
-
+            console.log("OnPutFile: ", offset, length, fileSize, FileName,
+                        syncFileName, fileType, persistentFile);
         }
 
         onRecordStart: {
@@ -397,11 +414,7 @@ Rectangle {
 
         onStatusUpdate: {
             console.log("enter onStatusUpdate")
-            var text = {}
-            text[Common.UpdateResult.UP_TO_DATE] = "UP_TO_DATE";
-            text[Common.UpdateResult.UPDATING] = "UPDATING";
-            text[Common.UpdateResult.UPDATE_NEEDED] = "UPDATE_NEEDED";
-            ttsPopUp.activate(text[status])
+            settingsContainer.updateStatus(status);
         }
     }
 

@@ -2,6 +2,7 @@
 
 #include "./life_cycle.h"
 #include "SmartDeviceLinkMainApp.h"
+#include "signal_handlers.h"
 
 #include "utils/macro.h"
 #include "utils/logger.h"
@@ -112,14 +113,44 @@ void stopSmartDeviceLink()
 	g_bTerminate = true;
 }
 
-void stopSmartDeviceLinkOnSignal(int32_t params)
-{
-	LOG4CXX_INFO(logger, " Application stopped by signal!");
-        main_namespace::LifeCycle::instance()->StopComponents();
+class ApplinkNotificationThreadDelegate : public threads::ThreadDelegate {
+ public:
+  virtual void threadMain();
+};
 
-	g_bTerminate = true;
+void ApplinkNotificationThreadDelegate::threadMain() {
+  struct mq_attr attributes;
+  attributes.mq_maxmsg = MSGQ_MAX_MESSAGES;
+  attributes.mq_msgsize = MAX_QUEUE_MSG_SIZE;
+  attributes.mq_flags = 0;
+
+  mqd_t mq = mq_open(PREFIX_STR_SDL_PROXY_QUEUE, O_RDONLY | O_CREAT, 0666, &attributes);
+
+  char buffer[MAX_QUEUE_MSG_SIZE];
+  ssize_t length=0;
+
+#if defined __QNX__
+  // Policy initialization
+  utils::System policy_init(kShellInterpreter);
+  policy_init.Add(kPolicyInitializationScript);
+  if (!policy_init.Execute(true)) {
+      LOG4CXX_ERROR(logger, "QDB initialization failed.");
+  }
+#endif
+
+  while (!g_bTerminate)
+  {
+      if ( (length = mq_receive(mq, buffer, sizeof(buffer), 0)) != -1)
+      {
+          switch (buffer[0])
+          {
+              case SDL_MSG_SDL_START:			 startSmartDeviceLink(); 	break;
+              case SDL_MSG_SDL_STOP:			 stopSmartDeviceLink(); 	exit(0);
+              default: break;
+          }
+      }
+  } //while-end
 }
-
 
 /**
  * \brief Entry point of the program.
@@ -128,47 +159,24 @@ void stopSmartDeviceLinkOnSignal(int32_t params)
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int main(int argc, char** argv) {
-    struct mq_attr attributes;
-    attributes.mq_maxmsg = MSGQ_MAX_MESSAGES;
-    attributes.mq_msgsize = MAX_QUEUE_MSG_SIZE;
-    attributes.mq_flags = 0;
+  threads::Thread::MaskSignals();
+  threads::Thread::SetMainThread();
 
-    INIT_LOGGER(profile::Profile::instance()->log4cxx_config_file());
+  INIT_LOGGER(profile::Profile::instance()->log4cxx_config_file());
 
-    LOG4CXX_INFO(logger, " Application main()");
+  LOG4CXX_INFO(logger, " Application main()");
 
-    mqd_t mq = mq_open(PREFIX_STR_SDL_PROXY_QUEUE, O_RDONLY | O_CREAT, 0666, &attributes);
+  utils::SharedPtr<threads::Thread> applink_notification_thread = new threads::Thread("Applink notification thread", new ApplinkNotificationThreadDelegate());
+  applink_notification_thread->start();
 
-	char buffer[MAX_QUEUE_MSG_SIZE];
-	ssize_t length=0;
+  utils::SubscribeToTerminateSignal(main_namespace::dummy_signal_handler);
+  threads::Thread::UnmaskSignals();
+  pause();
 
-#if defined __QNX__
-	// Policy initialization
-	utils::System policy_init(kShellInterpreter);
-	policy_init.Add(kPolicyInitializationScript);
-	if (!policy_init.Execute(true)) {
-        LOG4CXX_ERROR(logger, "QDB initialization failed.");
-	}
-#endif
+  LOG4CXX_INFO(logger, "Stopping application due to signal caught");
+  stopSmartDeviceLink();
 
-	utils::SubscribeToTerminateSignal(&stopSmartDeviceLinkOnSignal);
-
-	while (!g_bTerminate)
-	{
-		if ( (length = mq_receive(mq, buffer, sizeof(buffer), 0)) != -1)
-		{
-			switch (buffer[0])
-			{
-				case SDL_MSG_SDL_START:			 startSmartDeviceLink(); 	break;
-				case SDL_MSG_SDL_STOP:			 stopSmartDeviceLink(); 	break;
-				break;
-				default:
-				break;
-			}
-		}
-	} //while-end
-
-	return 0;
+  return 0;
 }
 
 

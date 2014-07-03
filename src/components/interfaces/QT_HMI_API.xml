@@ -2645,7 +2645,7 @@
       <param name="event" type="Common.KeyboardEvent" mandatory="true">
         <description>On-screen keyboard input data.</description>
       </param>
-      <param name="data" type="String" maxlength="500" mandatory="false">
+      <param name="data" type="String" minlength="0" maxlength="500" mandatory="false">
         <description>On-screen keyboard input data.</description>
         <description>For dynamic keypress events, this will be the current compounded string of entry text.</description>
         <description>For entry submission events, this will be the full text entry (this will always return regardless of the mode).</description>
@@ -2948,6 +2948,9 @@
         <description>
       	Array of bytes comprising CAN message.
       </description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="DiagnosticMessage" messagetype="response">
@@ -3958,7 +3961,8 @@
     </function>
     <function name="OnDeviceStateChanged" messagetype="notification" scope="internal" provider="hmi">
       <param name="deviceState" type="Common.DeviceState" mandatory="true"/>
-      <param name="deviceInternalId" type="String" mandatory="true"/>
+      <param name="deviceInternalId" type="String" mandatory="true" minlength="0" maxlength="500" />
+      <param name="deviceId" type="Common.DeviceInfo" mandatory="false"/>
     </function>
   </interface>
 </interfaces>

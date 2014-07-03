@@ -52,7 +52,7 @@ SdlProxy::SdlProxy(Item *parent)
               "com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
               "OnAppRegistered", this, SLOT(OnAppRegistered(Common_HMIApplication,
                 OptionalArgument<QList<Common_TTSChunk> >,
-                OptionalArgument<QList<QString> >,
+                OptionalArgument<QStringList>,
                 OptionalArgument<bool>, OptionalArgument<int>)));
   QDBusConnection::sessionBus().connect(
               "com.ford.sdl.core", "/", "com.ford.sdl.core.BasicCommunication",
@@ -94,34 +94,34 @@ void SdlProxy::OnFileRemoved(QString fileName, int fileType, int appId) {
     emit fileRemoved(fileName, fileType, appId);
 }
 
-void SdlProxy::OnAppRegistered(Common_HMIApplication app,
+void SdlProxy::OnAppRegistered(Common_HMIApplication application,
                                OptionalArgument<QList<Common_TTSChunk> > ttsName,
-                               OptionalArgument<QList<QString> > vrSynonyms,
+                               OptionalArgument<QStringList> vrSynonyms,
                                OptionalArgument<bool> resumeVrGrammars,
                                OptionalArgument<int> priority) {
   LOG4CXX_TRACE(logger_, "SIGNAL from SDL");
   QVariantMap appMap;
-  appMap["appId"] = QVariant::fromValue(app.appID);
-  appMap["appName"] = QVariant::fromValue(app.appName);
-  appMap["deviceName"] = QVariant::fromValue(app.deviceName);
-  appMap["hmiDisplayLanguageDesired"] = QVariant::fromValue(app.hmiDisplayLanguageDesired);
-  appMap["isMediaApplication"] = QVariant::fromValue(app.isMediaApplication);
+  appMap["appId"] = QVariant::fromValue(application.appID);
+  appMap["appName"] = QVariant::fromValue(application.appName);
+  appMap["deviceName"] = QVariant::fromValue(application.deviceName);
+  appMap["hmiDisplayLanguageDesired"] = QVariant::fromValue(application.hmiDisplayLanguageDesired);
+  appMap["isMediaApplication"] = QVariant::fromValue(application.isMediaApplication);
 
-  if (app.appType.presence) {
+  if (application.appType.presence) {
     QList<QVariant> appType;
-    for (QList<int>::const_iterator it = app.appType.val.begin();
-      it != app.appType.val.end(); ++it) {
+    for (QList<int>::const_iterator it = application.appType.val.begin();
+      it != application.appType.val.end(); ++it) {
       appType.append(QVariant::fromValue(*it));
     }
     appMap["appType"] = appType;
   }
 
-  if (app.ngnMediaScreenAppName.presence) {
-    appMap["ngnMediaScreenAppName"] = QVariant::fromValue(app.ngnMediaScreenAppName.val);
+  if (application.ngnMediaScreenAppName.presence) {
+    appMap["ngnMediaScreenAppName"] = QVariant::fromValue(application.ngnMediaScreenAppName.val);
   }
 
-  if (app.icon.presence) {
-    appMap["icon"] = QVariant::fromValue(app.icon.val);
+  if (application.icon.presence) {
+    appMap["icon"] = QVariant::fromValue(application.icon.val);
   }
 
   QVariant ttsNameArray;
@@ -140,7 +140,7 @@ void SdlProxy::OnAppRegistered(Common_HMIApplication app,
   QVariant vrSynonymsArray;
   if (ttsName.presence) {
     QList<QVariant> names;
-    for (QList<QString>::const_iterator it = vrSynonyms.val.begin();
+    for (QStringList::const_iterator it = vrSynonyms.val.begin();
       it != vrSynonyms.val.end(); ++it) {
       names.append(QVariant::fromValue(*it));
     }

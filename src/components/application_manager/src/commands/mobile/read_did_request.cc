@@ -67,6 +67,12 @@ void ReadDIDRequest::Run() {
     return;
   }
 
+  if (!app->IsReadDIDAllowed()) {
+    SendResponse(false, mobile_apis::Result::REJECTED);
+    LOG4CXX_ERROR(logger_, "Rejected. ReadDID frequency is to large");
+    return;
+  }
+
   if (0 == (*message_)[strings::msg_params][strings::did_location].length()) {
     LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);

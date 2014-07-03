@@ -223,6 +223,9 @@ class PolicyHandler :
 
   virtual void OnUserRequestedUpdateCheckRequired();
 
+  virtual void OnDeviceConsentChanged(const std::string& device_id,
+                                      bool is_allowed);
+
   /**
    * Adds http header (temporary method)
    * @param pt_string string without htt header
@@ -236,7 +239,7 @@ class PolicyHandler :
    */
   bool IsApplicationRevoked(const std::string& app_id);
 
- protected:
+protected:
 
   /**
    * Starts next retry exchange policy table
@@ -270,7 +273,7 @@ class PolicyHandler :
    */
   const std::string ConvertUpdateStatus(policy::PolicyTableStatus status);
 
- private:
+private:
   PolicyHandler();
   static PolicyHandler* instance_;
   static const std::string kLibrary;

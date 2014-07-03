@@ -291,6 +291,32 @@ const std::string PolicyHandler::ConvertUpdateStatus(PolicyTableStatus status) {
   }
 }
 
+void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
+                                           bool is_allowed) {
+  connection_handler::DeviceHandle device_handle;
+  application_manager::ApplicationManagerImpl::instance()->connection_handler()
+      ->GetDeviceID(device_id, &device_handle);
+  // In case of changed consent for device, related applications will be
+  // limited to pre_DataConsent permissions, if device disallowed, or switch
+  // back to their own permissions, if device allowed again, and must be
+  // notified about these changes
+  ApplicationList app_list =
+    application_manager::ApplicationManagerImpl::instance()->applications();
+  ApplicationList::const_iterator it_app_list = app_list.begin();
+  ApplicationList::const_iterator it_app_list_end = app_list.end();
+  for (; it_app_list != it_app_list_end; ++it_app_list) {
+    if (device_handle == (*it_app_list).get()->device()) {
+
+      policy_manager_->ReactOnUserDevConsentForApp(
+        it_app_list->get()->mobile_app_id()->asString(),
+        is_allowed);
+
+      policy_manager_->SendNotificationOnPermissionsUpdated(
+        (*it_app_list).get()->mobile_app_id()->asString());
+    }
+  }
+}
+
 void PolicyHandler::SetDeviceInfo(std::string& device_id,
                                   const DeviceInfo& device_info) {
   LOG4CXX_INFO(logger_, "SetDeviceInfo");
@@ -443,21 +469,35 @@ void PolicyHandler::OnPendingPermissionChange(
   }
   switch (app->hmi_level()) {
     case mobile_apis::HMILevel::HMI_FULL:
-    case mobile_apis::HMILevel::HMI_LIMITED:
+    case mobile_apis::HMILevel::HMI_LIMITED: {
       if (permissions.appPermissionsConsentNeeded) {
         application_manager::MessageHelper::
             SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
         policy_manager_->RemovePendingPermissionChanges(policy_app_id);
         break;
       }
+    }
     case mobile_apis::HMILevel::HMI_BACKGROUND: {
       if (permissions.isAppPermissionsRevoked
           || permissions.appUnauthorized) {
         application_manager::MessageHelper::
             SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
+
+        application_manager::ApplicationManagerImpl::instance()
+            ->DeactivateApplication(app);
+        application_manager::MessageHelper::
+            SendOnAppInterfaceUnregisteredNotificationToMobile(
+              app->app_id(),
+              mobile_apis::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
+
+        application_manager::ApplicationManagerImpl::instance()->
+        UnregisterApplication(app->app_id(), mobile_apis::Result::INVALID_ENUM,
+                              false);
+
         policy_manager_->RemovePendingPermissionChanges(policy_app_id);
         break;
       }
+      break;
     }
     case mobile_apis::HMILevel::HMI_NONE:
     default:
@@ -630,24 +670,6 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     policy_manager_->SetUserConsentForDevice(device_params.device_mac_address,
         is_allowed);
 
-    // In case of changed consent for device, related applications will be
-    // limited to pre_DataConsent permissions, if device disallowed, or switch
-    // back to their own permissions, if device allowed again, and must be
-    // notified about these changes
-    ApplicationList app_list =
-      application_manager::ApplicationManagerImpl::instance()->applications();
-    ApplicationList::const_iterator it_app_list = app_list.begin();
-    ApplicationList::const_iterator it_app_list_end = app_list.end();
-    for (; it_app_list != it_app_list_end; ++it_app_list) {
-      if (device_id == (*it_app_list).get()->device()) {
-        policy_manager_->ReactOnUserDevConsentForApp(
-          it_app_list->get()->mobile_app_id()->asString(),
-          is_allowed);
-        policy_manager_->SendNotificationOnPermissionsUpdated(
-          (*it_app_list).get()->mobile_app_id()->asString());
-      }
-    }
-
     DeviceHandles::iterator it = std::find(pending_device_handles_.begin(),
                                            pending_device_handles_.end(),
                                            device_id);
@@ -816,7 +838,8 @@ void PolicyHandler::OnPTExchangeNeeded() {
 }
 
 void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
-    const Permissions& permissions, const HMILevel& default_hmi) {
+                                         const Permissions& permissions,
+                                         const HMILevel& default_hmi) {
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
@@ -868,8 +891,8 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
 
       // Send notification to mobile
       application_manager::MessageHelper::SendHMIStatusNotification(*app.get());
-    }
-    break;
+      }
+      break;
     default:
       LOG4CXX_WARN(logger_, "Application " << policy_app_id << " is running."
                    "HMI level won't be changed.");

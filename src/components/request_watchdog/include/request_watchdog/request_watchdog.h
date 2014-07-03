@@ -190,7 +190,7 @@ class RequestWatchdog : public Watchdog {
       : start_(start),
         end_(end),
         connection_key_(connection_key),
-        hmi_level_(hmi_level) {};
+        hmi_level_(hmi_level) {}
 
       bool operator()(std::pair<RequestInfo*, TimevalStruct> mapEntry) {
         bool result = false;
