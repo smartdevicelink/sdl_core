@@ -40,6 +40,7 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/mobile_message_handler.h"
 #include "application_manager/policies/policy_handler.h"
+#include "hmi_message_handler/hmi_message_handler.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "formatters/formatter_json_rpc.h"
 #include "formatters/CFormatterJsonSDLRPCv2.hpp"
@@ -564,9 +565,9 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
 #ifdef CUSTOMER_PASA
   //Line start of transportManager component was left for panasonic
   if (!connection_handler_) {
-	  LOG4CXX_WARN(logger_, "Connection handler is not set.");
+    LOG4CXX_WARN(logger_, "Connection handler is not set.");
   } else {
-	  connection_handler_->StartTransportManager();
+    connection_handler_->StartTransportManager();
   }
 #endif // CUSTOMER_PASA
 }
@@ -617,7 +618,7 @@ void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
     int32_t correlation_id, int32_t max_duration, int32_t sampling_rate,
     int32_t bits_per_sample, int32_t audio_type) {
   LOG4CXX_INFO(logger_, "START MICROPHONE RECORDER");
-  if (NULL != media_manager_) {    
+  if (NULL != media_manager_) {
     media_manager_->StartMicrophoneRecording(
       session_key,
       profile::Profile::instance()->recording_file_name(),
@@ -696,7 +697,7 @@ std::string ApplicationManagerImpl::GetDeviceName(
 }
 
 void ApplicationManagerImpl::OnMessageReceived(
-  const protocol_handler::RawMessagePtr& message) {
+  const protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMessageReceived");
 
   if (!message) {
@@ -716,7 +717,7 @@ void ApplicationManagerImpl::OnMessageReceived(
 }
 
 void ApplicationManagerImpl::OnMobileMessageSent(
-  const protocol_handler::RawMessagePtr& message) {
+  const protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMobileMessageSent");
 }
 
@@ -1542,7 +1543,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 }
 
 utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
-  const protocol_handler::RawMessagePtr& message) {
+  const protocol_handler::RawMessagePtr message) {
   DCHECK(message);
   utils::SharedPtr<Message> outgoing_message;
 
@@ -1803,7 +1804,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     UnregisterApplication(app_id, mobile_apis::Result::INVALID_ENUM,
                           is_ignition_off);
     connection_handler_->CloseSession(app_id);
-    it = application_list_.begin();    
+    it = application_list_.begin();
   }
   if (is_ignition_off) {
    resume_controller().IgnitionOff();

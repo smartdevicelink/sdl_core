@@ -179,7 +179,7 @@ class ProtocolHandlerInterceptor : public protocol_handler::ProtocolHandlerImpl 
 
   ~ProtocolHandlerInterceptor();
 
-  void SendMessageToMobileApp(const protocol_handler::RawMessagePtr& message,
+  void SendMessageToMobileApp(const protocol_handler::RawMessagePtr message,
                               bool final_message) OVERRIDE;
 
   std::list<protocol_handler::RawMessagePtr>* GetMasRawMessage();
