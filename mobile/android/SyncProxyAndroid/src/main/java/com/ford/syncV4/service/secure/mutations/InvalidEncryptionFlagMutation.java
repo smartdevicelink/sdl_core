@@ -4,18 +4,16 @@ import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.ProtocolMessage;
 
 /**
- * Created by admin on 7/2/14.
+ * Created by admin on 7/3/14.
  */
-public class InvalidQuerySizeMutation extends AbstractMutation {
-
+public class InvalidEncryptionFlagMutation extends AbstractMutation {
     @Override
     protected void mutateMessage(ProtocolFrameHeader header, byte[] dataChunk) {
-
+        header.setEncrypted(true);
     }
 
     @Override
     protected ProtocolMessage mutateMessage(ProtocolMessage protocolMessage) {
-        protocolMessage.setData(new byte[0]);
         return protocolMessage;
     }
 }

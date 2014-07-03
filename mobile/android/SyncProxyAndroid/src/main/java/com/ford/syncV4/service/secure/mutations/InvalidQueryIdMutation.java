@@ -1,5 +1,6 @@
 package com.ford.syncV4.service.secure.mutations;
 
+import com.ford.syncV4.protocol.ProtocolFrameHeader;
 import com.ford.syncV4.protocol.ProtocolMessage;
 
 /**
@@ -7,6 +8,11 @@ import com.ford.syncV4.protocol.ProtocolMessage;
  */
 public class InvalidQueryIdMutation  extends AbstractMutation{
     private static final int INVALID_FUNCTION_ID = 0xDEAD;
+
+    @Override
+    protected void mutateMessage(ProtocolFrameHeader header, byte[] dataChunk) {
+
+    }
 
     @Override
     protected ProtocolMessage mutateMessage(ProtocolMessage protocolMessage) {

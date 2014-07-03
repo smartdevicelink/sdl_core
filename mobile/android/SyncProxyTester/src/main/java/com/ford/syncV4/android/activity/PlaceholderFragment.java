@@ -357,6 +357,61 @@ public class PlaceholderFragment extends Fragment {
             }
         });
 
+        setupHandshakeErrorSpinner(rootView);
+        setupSecureServiceSpinner(rootView);
+
+        // RPC Service Secure check box processing
+        Button rpcSecureCheckBoxView = (Button) rootView.findViewById(R.id.rpc_service_secure_button_view);
+        rpcSecureCheckBoxView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processRPCSecureCheckBox();
+            }
+        });
+
+        // RPC Service Secure check box processing
+        Button rpcNotSecureCheckBoxView = (Button) rootView.findViewById(R.id.rpc_non_secure_button_view);
+        rpcNotSecureCheckBoxView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processRPCNotSecureCheckBox();
+            }
+        });
+    }
+
+    private void setupSecureServiceSpinner(View rootView) {
+        final Spinner spinner = (Spinner) rootView.findViewById(R.id.secure_service_error_spinner);
+        final ArrayAdapter<SecurityInternalError> securityErrorAdapter = new ArrayAdapter<SecurityInternalError>(getActivity(),
+                android.R.layout.simple_spinner_item, new SecurityInternalError[]{SecurityInternalError.UNKNOWN, SecurityInternalError.ERROR_DECRYPTION_FAILED, SecurityInternalError.ERROR_SERVICE_NOT_PROTECTED});
+        securityErrorAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(securityErrorAdapter);
+        spinner.setSelection(0);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                SecurityInternalError securityInternalError = (SecurityInternalError) spinner.getSelectedItem();
+                updateSecureServiceError(securityInternalError);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                SecurityInternalError securityInternalError = (SecurityInternalError) spinner.getSelectedItem();
+                updateSecureServiceError(securityInternalError);
+            }
+        });
+    }
+
+    private void updateSecureServiceError(SecurityInternalError securityInternalError) {
+        final ProxyService boundProxyService = getProxyService();
+        if (boundProxyService == null) return;
+        List<SecurityInternalError> securityInternalErrorArrayList = new ArrayList<SecurityInternalError>();
+        securityInternalErrorArrayList.add(securityInternalError);
+        boundProxyService.getTestConfig().setSecureServiceErrorList(securityInternalErrorArrayList);
+    }
+
+    private void setupHandshakeErrorSpinner(View rootView) {
         final Spinner spinner = (Spinner) rootView.findViewById(R.id.secure_error_spinner);
         final ArrayAdapter<SecurityInternalError> securityErrorAdapter = new ArrayAdapter<SecurityInternalError>(getActivity(),
                 android.R.layout.simple_spinner_item, new SecurityInternalError[]{SecurityInternalError.UNKNOWN, SecurityInternalError.ERROR_INVALID_QUERY_ID, SecurityInternalError.ERROR_INVALID_QUERY_SIZE, SecurityInternalError.ERROR_SSL_INVALID_DATA});
@@ -376,24 +431,6 @@ public class PlaceholderFragment extends Fragment {
             public void onNothingSelected(AdapterView<?> parent) {
                 SecurityInternalError securityInternalError = (SecurityInternalError) spinner.getSelectedItem();
                 updateHandshakeConfigError(securityInternalError);
-            }
-        });
-
-        // RPC Service Secure check box processing
-        Button rpcSecureCheckBoxView = (Button) rootView.findViewById(R.id.rpc_service_secure_button_view);
-        rpcSecureCheckBoxView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                processRPCSecureCheckBox();
-            }
-        });
-
-        // RPC Service Secure check box processing
-        Button rpcNotSecureCheckBoxView = (Button) rootView.findViewById(R.id.rpc_non_secure_button_view);
-        rpcNotSecureCheckBoxView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                processRPCNotSecureCheckBox();
             }
         });
     }

@@ -4,6 +4,8 @@ package com.ford.syncV4.protocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
+import com.ford.syncV4.service.secure.mutations.AbstractMutation;
+import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.util.logger.Logger;
 
@@ -25,6 +27,7 @@ public abstract class AbstractProtocol {
 
 
     protected boolean hasRPCStarted;
+    private TestConfig testConfig;
 
     public synchronized ProtocolSecureManager getProtocolSecureManager() {
         return protocolSecureManager;
@@ -195,6 +198,14 @@ public abstract class AbstractProtocol {
 
 
     private void sendMessage(ProtocolFrameHeader header, byte[] dataChunk) {
+
+        if (getTestConfig()!=null){
+            AbstractMutation mutation = getTestConfig().getSecureServiceMutationManager().getHeadMutation();
+            if (mutation != null) {
+                mutation.mutate(header, dataChunk);
+            }
+        }
+
         byte[] frameHeader = header.assembleHeaderBytes();
         byte[] commonArray = new byte[frameHeader.length + dataChunk.length];
         System.arraycopy(frameHeader, 0, commonArray, 0, frameHeader.length);
@@ -381,5 +392,13 @@ public abstract class AbstractProtocol {
     protected void resetDataStructureToProtocolVersion() {
         mHeaderBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
         mHeaderBufWritePos = 0;
+    }
+
+    public void setTestConfig(TestConfig testConfig) {
+        this.testConfig = testConfig;
+    }
+
+    public TestConfig getTestConfig() {
+        return testConfig;
     }
 }

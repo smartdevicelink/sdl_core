@@ -16,6 +16,9 @@ public class MutationManager {
         mutationMap.put(SecurityInternalError.ERROR_INVALID_QUERY_ID, InvalidQueryIdMutation.class);
         mutationMap.put(SecurityInternalError.ERROR_INVALID_QUERY_SIZE, InvalidQuerySizeMutation.class);
         mutationMap.put(SecurityInternalError.ERROR_SSL_INVALID_DATA, InvalidSslDataMutation.class);
+        mutationMap.put(SecurityInternalError.ERROR_SERVICE_NOT_PROTECTED, InvalidEncryptionFlagMutation.class);
+        mutationMap.put(SecurityInternalError.ERROR_DECRYPTION_FAILED, InvalidPayloadMutation.class);
+        mutationMap.put(SecurityInternalError.ERROR_INVALID_QUERY_SIZE, InvalidQuerySizeMutation.class);
         mutationMap.put(SecurityInternalError.UNKNOWN, NeutralMutation.class);
     }
 

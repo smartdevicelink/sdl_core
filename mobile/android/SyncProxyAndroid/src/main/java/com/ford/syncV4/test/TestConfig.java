@@ -32,20 +32,27 @@ public class TestConfig {
         handshakeMutationManager.addMutationForError(SecurityInternalError.UNKNOWN);
     }
 
+    /*
+     * Mutation manager for secure service
+     */
+    private MutationManager secureServiceMutationManager = new MutationManager();
+
+    {
+        secureServiceMutationManager.addMutationForError(SecurityInternalError.UNKNOWN);
+    }
+
     /**
      * Indicates whether or not to use parameter
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface#getHashID()} when initiating
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} instance
      */
     private boolean mUseHashId;
-
     /**
      * Indicates whether or not to use custom parameter
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface#getHashID()} when initiating
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface} instance
      */
     private boolean mUseCustomHashId;
-
     /**
      * Holds a custom value of the
      * {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface#getHashID()} when initiating
@@ -73,6 +80,10 @@ public class TestConfig {
      * Max version of the protocol
      */
     private byte mProtocolMaxVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
+
+    public MutationManager getSecureServiceMutationManager() {
+        return secureServiceMutationManager;
+    }
 
     public MutationManager getHandshakeMutationManager() {
         return handshakeMutationManager;
@@ -227,7 +238,7 @@ public class TestConfig {
     }
 
     public void setHandshakeErrorList(List<SecurityInternalError> errorList) {
-        if (errorList == null){
+        if (errorList == null) {
             return;
         }
         if (errorList.isEmpty()) {
@@ -236,6 +247,19 @@ public class TestConfig {
         handshakeMutationManager = new MutationManager();
         for (SecurityInternalError securityInternalError : errorList) {
             handshakeMutationManager.addMutationForError(securityInternalError);
+        }
+    }
+
+    public void setSecureServiceErrorList(List<SecurityInternalError> securityInternalErrorArrayList) {
+        if (securityInternalErrorArrayList == null) {
+            return;
+        }
+        if (securityInternalErrorArrayList.isEmpty()) {
+            securityInternalErrorArrayList.add(SecurityInternalError.UNKNOWN);
+        }
+        secureServiceMutationManager = new MutationManager();
+        for (SecurityInternalError securityInternalError : securityInternalErrorArrayList) {
+            secureServiceMutationManager.addMutationForError(securityInternalError);
         }
     }
 }

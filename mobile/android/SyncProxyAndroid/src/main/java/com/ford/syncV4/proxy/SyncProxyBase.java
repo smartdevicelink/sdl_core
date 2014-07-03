@@ -1905,6 +1905,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         protocolSecureManager = new ProtocolSecureManager(secureProxyServerListener);
         protocolSecureManager.setupSecureEnvironment();
         mSyncConnection.getWiProProtocol().setProtocolSecureManager(protocolSecureManager);
+        mSyncConnection.getWiProProtocol().setTestConfig(getTestConfig());
     }
 
     private void restartRPCProtocolSession(byte sessionId) {
