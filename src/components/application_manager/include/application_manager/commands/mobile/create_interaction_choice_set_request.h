@@ -166,9 +166,9 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    * @brief Checks choice set params(menuName, tertiaryText, ...) when type is
    * String, on contained \t\n \\t \\n
    * @param choice_set which must check
-   * @return if choice_set contains \t\n \\t \\n return TRUE, FASE otherwise
+   * @return if choice_set contains \t\n \\t \\n return TRUE, FALSE otherwise
    */
-  bool IsContainsWhitespace(const smart_objects::SmartObject& choice_set);
+  bool IsWhitepaceExist(const smart_objects::SmartObject& choice_set);
 
   DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetRequest);
 };

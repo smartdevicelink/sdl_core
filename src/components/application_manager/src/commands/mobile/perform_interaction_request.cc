@@ -37,7 +37,6 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
-//#include "application_manager/smart_object_keys.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -124,13 +123,13 @@ void PerformInteractionRequest::Run() {
   for (size_t i = 0; i < choice_list.length(); ++i) {
     if (!app->FindChoiceSet(choice_list[i].asInt())) {
       LOG4CXX_ERROR(logger_, "Invalid ID");
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      SendResponse(false, mobile_apis::Result::INVALID_ID);
       return;
     }
   }
 
   // Checking perform interaction on contained \t\n \\t \\n
-  if (IsContainsWhitespace()) {
+  if (IsWhitepaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming perform interaction has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -738,7 +737,7 @@ void PerformInteractionRequest::DisablePerformInteraction() {
   }
 }
 
-bool PerformInteractionRequest::IsContainsWhitespace() {
+bool PerformInteractionRequest::IsWhitepaceExist() {
   //if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
   bool return_value = false;
   std::string str;
@@ -758,7 +757,7 @@ bool PerformInteractionRequest::IsContainsWhitespace() {
     smart_objects::SmartArray::const_iterator it_ip_end = ip_array->end();
 
     for (; it_ip != it_ip_end; ++it_ip) {
-      str = (*it_ip)[strings::text].asString();
+      str = (*it_ip)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
         return_value = true;
         break;
@@ -774,7 +773,7 @@ bool PerformInteractionRequest::IsContainsWhitespace() {
     smart_objects::SmartArray::const_iterator it_hp_end = hp_array->end();
 
     for (; it_hp != it_hp_end; ++it_hp) {
-      str = (*it_hp)[strings::text].asString();
+      str = (*it_hp)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
         return_value = true;
         break;
@@ -790,7 +789,7 @@ bool PerformInteractionRequest::IsContainsWhitespace() {
     smart_objects::SmartArray::const_iterator it_tp_end = tp_array->end();
 
     for (; it_tp != it_tp_end; ++it_tp) {
-      str = (*it_tp)[strings::text].asString();
+      str = (*it_tp)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
         return_value = true;
         break;
@@ -806,7 +805,7 @@ bool PerformInteractionRequest::IsContainsWhitespace() {
     smart_objects::SmartArray::const_iterator it_vh_end = vh_array->end();
 
     for (; it_vh != it_vh_end; ++it_vh) {
-      str = (*it_vh)[strings::text].asString();
+      str = (*it_vh)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
         return_value = true;
         break;

@@ -213,7 +213,7 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
     }
 
     // Checking choice set on contained \t\n \\t \\n
-    if (IsContainsWhitespace((*it_array))) {
+    if (IsWhitepaceExist((*it_array))) {
       LOG4CXX_ERROR(logger_,
                     "Incoming choice set has contains \t\n \\t \\n");
       return mobile_apis::Result::INVALID_DATA;
@@ -256,21 +256,21 @@ bool CreateInteractionChoiceSetRequest::compareStr(
   return 0 == strcasecmp(str1.asCharArray(), str2.asCharArray());
 }
 
-bool CreateInteractionChoiceSetRequest::IsContainsWhitespace(
+bool CreateInteractionChoiceSetRequest::IsWhitepaceExist(
     const smart_objects::SmartObject& choice_set) {
   bool return_value = false;
 
-  std::string str = choice_set[strings::menu_name].asString();
+  std::string str = choice_set[strings::menu_name].asCharArray();
   if (!CheckSyntax(str, true)) {
     return_value = true;
   }
 
-  str = choice_set[strings::secondary_text].asString();
+  str = choice_set[strings::secondary_text].asCharArray();
   if (!CheckSyntax(str, true)) {
     return_value = true;
   }
 
-  str = choice_set[strings::tertiary_text].asString();
+  str = choice_set[strings::tertiary_text].asCharArray();
   if (!CheckSyntax(str, true)) {
     return_value = true;
   }
@@ -282,7 +282,8 @@ bool CreateInteractionChoiceSetRequest::IsContainsWhitespace(
   smart_objects::SmartArray::const_iterator it_vr_end = vr_array->end();
 
   for (; it_vr != it_vr_end; ++it_vr) {
-    if (!CheckSyntax((*it_vr).asString(), true)) {
+    str = (*it_vr).asCharArray();
+    if (!CheckSyntax(str, true)) {
       return_value = true;
       break;
     }
