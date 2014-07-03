@@ -60,7 +60,7 @@ def defaultValue(param):
 class Impl(FordXmlParser):
     def make_requests_classes_header(self, out):
         for interface_el in self.el_tree.findall('interface'):
-            request_responses = self.find_request_response_pairs_by_provider(interface_el, "sdl")            
+            request_responses = self.find_request_response_pairs_by_provider(interface_el, "sdl")
             for (request, response) in request_responses:
                 request_full_name = interface_el.get('name') + '_' +request.get('name')
                 out.write('class ' + request_full_name + ': public HMIRequest {\n')
@@ -72,10 +72,11 @@ class Impl(FordXmlParser):
                     output.write('  HMIRequest(interface, name, args, hmi_callback) {}\n')
                 out.write(' private:\n')
                 with CodeBlock(out) as output:
-                    output.write('void fillArgsList();\n};\n\n')
+                    output.write('QJSValueList fillArgsList();\n};\n\n')
                          
 
     def make_header_file(self, out):
+        out.write("namespace requests {\n")
         out.write("class HMIRequest: public QObject {\n")
         with CodeBlock(out) as output:
             output.write('Q_OBJECT\n')
@@ -84,7 +85,7 @@ class Impl(FordXmlParser):
             output.write('HMIRequest(QDBusInterface *interface, QString name, QList<QVariant> args, QJSValue hmi_callback);\n')
         out.write('protected:\n')
         with CodeBlock(out) as output:
-            output.write('virtual void fillArgsList() = 0;\n')
+            output.write('virtual QJSValueList fillArgsList() = 0;\n')
             output.write('QDBusPendingCallWatcher *watcher_;\n')
             output.write('QJSValue hmi_callback_;\n\n')
             output.write('template<typename T>\n')
@@ -102,67 +103,85 @@ class Impl(FordXmlParser):
                 output.write('  ++i;\n')
                 output.write('}\n')
                 output.write('return array;\n')
-            output.write('}\n')                             
+            output.write('}\n')
         out.write('private:\n')
         with CodeBlock(out) as output:
             output.write('QDBusInterface *interface_;\n')
-            output.write('QString name_;\n')
             output.write('QList<QVariant> args_;\n')
         out.write('public slots:\n')
         with CodeBlock(out) as output:
             output.write('void invokeCallback();\n')
         out.write('};\n\n')
+        output.write('template<>\n')
+        output.write('QJSValue HMIRequest::CreateQJSValue(QStringList value);\n')
         for (interface_name, struct_name) in self.structs:
             out.write('template<>\n')
             out.write('QJSValue HMIRequest::CreateQJSValue(Common_' + struct_name + ' value);\n\n')
         impl.make_requests_classes_header(out)
+        out.write("}  // namespace requests\n")
+
+
+    def qt_param_type(self, param):
+        if not param.mandatory:
+            param_copy = copy(param)
+            param_copy.mandatory = True
+            return "OptionalArgument< " + self.qt_param_type(param_copy) + " >"
+        if param.array:
+            param_copy = copy(param)
+            param_copy.array = False
+            if param.type == 'String':
+                return "QStringList"
+            return "QList< " + self.qt_param_type(param_copy) + " >"
+        if param.type == 'Integer' or param.enum:
+            return 'int'
+        elif param.type == 'String':
+            return 'QString'
+        elif param.type == 'Boolean':
+            return 'bool'
+        elif param.type == 'Float':
+            return 'double'
+        elif param.struct:
+            return "_".join(param.fulltype)
+        return "xxx"
 
 
     def make_requests_methods_source(self, out):
         for interface_el in self.el_tree.findall('interface'):
-            request_responses = self.find_request_response_pairs_by_provider(interface_el, "sdl")            
+            request_responses = self.find_request_response_pairs_by_provider(interface_el, "sdl")
             for (request, response) in request_responses:
-                request_full_name = interface_el.get('name') + '_' +request.get('name')
-                out.write('void ' + request_full_name + '::fillArgsList() {\n')
+                iface_name = interface_el.get('name')
+                request_full_name = iface_name + '_' +request.get('name')
+                out.write('QJSValueList ' + request_full_name + '::fillArgsList() {\n')
                 out.write('  QDBusPendingReply< ')
                 count = 0
                 for param_el in response.findall('param'):
-                    opt_arg_flag = True
-                    array_flag = False
-                    if param_el.get('mandatory') == 'false':
-                        opt_arg_flag = False
-                        out.write('OptionalArgument<')
-                    if param_el.get('array') == 'true':
-                        array_flag = True
-                        out.write('QList<')
-                    out.write(param_el.get('type').replace(".", "_"))
-                    if opt_arg_flag == False:
-                        out.write('>')
-                    if array_flag == True:
-                        out.write('>')
+                    param = self.make_param_desc(param_el, iface_name)
+                    out.write(self.qt_param_type(param))
                     count += 1
                     if count < len(response.findall('param')):
                         out.write(',')
-                out.write(' > reply = *watcher_;\n')                                             
+                out.write(' > reply = *watcher_;\n')
 
                 with CodeBlock(out) as out:
                     out.write('QJSValueList qjsValueList;\n\n')
+                    out.write('QJSValue param;\n\n')
                     count = 0
                     for param_el in response.findall('param'):
-                        if param_el.get('mandatory') == 'false':                        
+                        if param_el.get('mandatory') == 'false':
                             out.write('if (reply.argumentAt<' + str(count) + '>().presence) {\n')
-                            out.write('  QJSValue param = CreateQJSValue(reply.argumentAt<' + str(count) + '>().val);\n')
+                            out.write('  param = CreateQJSValue(reply.argumentAt<' + str(count) + '>().val);\n')
                             out.write('  qjsValueList.append(param);\n')
                             out.write('}\n')
                         else:
-                            out.write('QJSValue param = CreateQJSValue(reply.argumentAt<' + str(count) + '>();\n')
-                            out.write('qjsValueList.append(param);\n')                            
-                        count += 1    
-                    out.write('return qjsValueList;\n')                
-                out.write('}\n\n')                        
+                            out.write('param = CreateQJSValue(reply.argumentAt<' + str(count) + '>());\n')
+                            out.write('qjsValueList.append(param);\n')
+                        count += 1
+                    out.write('return qjsValueList;\n')
+                out.write('}\n\n')
 
 
     def make_source_file(self, out):
+        out.write("namespace requests {\n")
         for interface_el in self.el_tree.findall('interface'):
             for struct_el in interface_el.findall('struct'):
                 out.write('template<>\n')
@@ -176,12 +195,13 @@ class Impl(FordXmlParser):
                             output.write('object.setProperty("' + param_name + '", CreateQJSValue(value.' + param_name + '));\n')
                     elif param_el.get('mandatory') == 'false':
                         with CodeBlock(out) as output:
-                            output.write('bject.setProperty("' + param_name + '", value.' + param_name + '.presence ? CreateQJSValue(value.' + param_name + '.val) : QJSValue());\n') 
-                out.write('}\n\n')                  
+                            output.write('object.setProperty("' + param_name + '", value.' + param_name + '.presence ? CreateQJSValue(value.' + param_name + '.val) : QJSValue());\n')
+                out.write('return object;\n')
+                out.write('}\n\n')
              
         
         out.write('HMIRequest::HMIRequest(QDBusInterface *interface, QString name, QList<QVariant> args, QJSValue hmi_callback):\n')
-        out.write('      interface_(interface), name_(name), args_(args), hmi_callback_(hmi_callback) {\n')
+        out.write('      interface_(interface), args_(args), hmi_callback_(hmi_callback) {\n')
         with CodeBlock(out) as output:
             output.write('QDBusPendingCall pcall = interface->asyncCallWithArgumentList(name, args);\n')
             output.write('watcher_ = new QDBusPendingCallWatcher(pcall);\n')
@@ -197,6 +217,7 @@ class Impl(FordXmlParser):
             output.write('watcher_->deleteLater();\n')
             output.write('this->deleteLater();\n}\n\n')
         impl.make_requests_methods_source(out)
+        out.write("}  // namespace requests\n")
 
 
 arg_parser = ArgumentParser(description="Generator of Qt to QDbus C++ part")
@@ -276,7 +297,7 @@ header_out.write('#include "qml_dbus.h"\n\n');
 
 impl.make_header_file(header_out)
 
-header_out.write("#endif SRC_COMPONENTS_QTHMI_QMLMODELQT5_HMIREQUESTS_\n");
+header_out.write("#endif  // SRC_COMPONENTS_QTHMI_QMLMODELQT5_HMIREQUESTS_\n");
 
 source_out.write("// Warning! This file is generated by '%s'. Edit at your own risk.\n" % argv[0])
 source_out.write("""/**

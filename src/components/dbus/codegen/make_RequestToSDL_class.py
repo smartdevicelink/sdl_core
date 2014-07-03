@@ -77,12 +77,13 @@ class Impl(FordXmlParser):
                 for param_el in request.findall('param'):
                     all_params.append(param_el)                    
                 with CodeBlock(out) as output:
-                    output.write("Q_INVOLABKE void " + interface_el.get('name') + "_" +request.get('name') + "(")
+                    output.write("Q_INVOKABLE void " + interface_el.get('name') + "_" +request.get('name') + "(")
                 impl.args_for_function_definition(all_params, out)
                 output.write(");\n")
                  
 
     def make_header_file(self, out):
+        out.write("class QDBusInterface;\n")
         out.write("class RequestToSDL : public QObject\n")
         out.write("{\n") 
         out.write('  Q_OBJECT\n')
@@ -96,28 +97,28 @@ class Impl(FordXmlParser):
             for interface_el in self.el_tree.findall('interface'):
                 output.write('QDBusInterface *' + interface_el.get('name') + ';\n')
         out.write("};\n")
-        out.write('#endif SRC_COMPONENTS_QTHMI_QMLMODELQT5_REQUESTTOSDL_')           
+        out.write('#endif  // SRC_COMPONENTS_QTHMI_QMLMODELQT5_REQUESTTOSDL_')
 
 
     def make_requests_for_source(self, out):
         for interface_el in self.el_tree.findall('interface'):
-            request_responses = self.find_request_response_pairs_by_provider(interface_el, "sdl")            
+            request_responses = self.find_request_response_pairs_by_provider(interface_el, "sdl")
             for (request, response) in request_responses:
-                request_full_name = interface_el.get('name') + '_' +request.get('name')
-                out.write('void RequestToSDL::' + request_full_name + '(QString name, ')         
+                request_name = request.get('name')
+                request_full_name = interface_el.get('name') + '_' + request_name
+                out.write('void RequestToSDL::' + request_full_name + '(')
                 for param_el in request.findall('param'):
-                    out.write('QVariant ' + param_el.get('name') + ', ')                    
+                    out.write('QVariant ' + param_el.get('name') + ', ')
                 out.write('QJSValue hmi_callback) {\n')
                 with CodeBlock(out) as output:
                     output.write('QList<QVariant> args;\n')
                     for param_el in request.findall('param'):
                         output.write('args << ' + param_el.get('name') + ';\n')
-                    output.write('new ' + request_full_name + '(' + interface_el.get('name') + ', name, args, hmi_callback);\n}\n')                
+                    output.write('new requests::' + request_full_name + '(' + interface_el.get('name') + 
+                                 ', "' + request_name + '", args, hmi_callback);\n}\n')
         
 
     def make_source_file(self, out):
-        out.write('#include "request_to_sdl.h"\n')
-        out.write('\n')
         out.write('RequestToSDL::RequestToSDL(QObject *parent) {\n')
         with CodeBlock(out) as output:
             output.write('QDBusConnection bus = QDBusConnection::sessionBus();\n')
@@ -128,7 +129,7 @@ class Impl(FordXmlParser):
         out.write('RequestToSDL::~RequestToSDL() {\n')
         with CodeBlock(out) as output:
             for interface_el in self.el_tree.findall('interface'):
-                iface_name = interface_el.get('name')                    
+                iface_name = interface_el.get('name')
                 output.write(iface_name + '->deleteLater();\n')
             output.write('this->deleteLater();\n')
         out.write('}\n\n')
@@ -200,14 +201,12 @@ header_out.write("""/**
 // POSSIBILITY OF SUCH DAMAGE.
 
 """)
-header_out.write("#ifndef SRC_COMPONENTS_QTHMI_QMLMODELQT5_REQUESTTOSDL_\n");
-header_out.write("#define SRC_COMPONENTS_QTHMI_QMLMODELQT5_REQUESTTOSDL_\n\n");
-header_out.write("#include <QDBusConnection>\n");
-header_out.write("#include <QJSValue>\n");
-header_out.write("#include <QObject>\n");
-header_out.write("#include <QDBusInterface>\n");
-header_out.write('#include "hmi_requests.h"\n');
+header_out.write("#ifndef SRC_COMPONENTS_QTHMI_QMLMODELQT5_REQUESTTOSDL_\n")
+header_out.write("#define SRC_COMPONENTS_QTHMI_QMLMODELQT5_REQUESTTOSDL_\n\n")
 
+header_out.write("#include <QJSValue>\n")
+header_out.write("#include <QObject>\n")
+header_out.write("#include <QVariant>\n")
 
 impl.make_header_file(header_out)
 
@@ -250,5 +249,12 @@ source_out.write("""/**
 // POSSIBILITY OF SUCH DAMAGE.
 
 """)
+
+source_out.write('#include "request_to_sdl.h"\n')
+source_out.write("#include <QtDBus/QDBusConnection>\n")
+source_out.write("#include <QtDBus/QDBusInterface>\n")
+source_out.write('#include "hmi_requests.h"\n')
+
+
 
 impl.make_source_file(source_out)
