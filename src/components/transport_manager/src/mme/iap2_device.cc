@@ -68,8 +68,8 @@ IAP2Device::~IAP2Device() {
 }
 
 bool IAP2Device::Init() {
-  const ProtocolNameContainer& legacy_protocol_names = ProtocolConfig::LegacyProtocolNames();
-  for (IAP2Device::ProtocolNameContainer::const_iterator i = legacy_protocol_names.begin(); i != legacy_protocol_names.end(); ++i) {
+  const ProtocolConfig::ProtocolNameContainer& legacy_protocol_names = ProtocolConfig::LegacyProtocolNames();
+  for (ProtocolConfig::ProtocolNameContainer::const_iterator i = legacy_protocol_names.begin(); i != legacy_protocol_names.end(); ++i) {
     std::string protocol_name = *i;
     ::std::string thread_name = "iAP2 connect notifier (" + protocol_name + ")";
     utils::SharedPtr<threads::Thread> thread = new threads::Thread(thread_name.c_str(),
@@ -80,14 +80,14 @@ bool IAP2Device::Init() {
   }
 
   int pool_index = 0;
-  const ProtocolNameContainer& pool_protocol_names = ProtocolConfig::PoolProtocolNames();
-  for (IAP2Device::ProtocolNameContainer::const_iterator i = pool_protocol_names.begin(); i != pool_protocol_names.end(); ++i) {
+  const ProtocolConfig::ProtocolNameContainer& pool_protocol_names = ProtocolConfig::PoolProtocolNames();
+  for (ProtocolConfig::ProtocolNameContainer::const_iterator i = pool_protocol_names.begin(); i != pool_protocol_names.end(); ++i) {
     std::string protocol_name = *i;
-    free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
+    free_protocol_name_pool_.insert(std::make_pair(protocol_name, ++pool_index));
   }
 
-  const ProtocolNameContainer& hub_protocol_names = ProtocolConfig::HubProtocolNames();
-  for (IAP2Device::ProtocolNameContainer::const_iterator i = hub_protocol_names.begin(); i != hub_protocol_names.end(); ++i) {
+  const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::HubProtocolNames();
+  for (ProtocolConfig::ProtocolNameContainer::const_iterator i = hub_protocol_names.begin(); i != hub_protocol_names.end(); ++i) {
     std::string protocol_name = *i;
     ::std::string thread_name = "iAP2 hub connect notifier (" + protocol_name + ")";
     utils::SharedPtr<threads::Thread> thread = new threads::Thread(thread_name.c_str(),
@@ -129,20 +129,20 @@ void IAP2Device::OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* ha
   protocol_name_pool_lock_.Acquire();
   if (!free_protocol_name_pool_.empty()) {
     ProtocolNamePool::iterator i = free_protocol_name_pool_.begin();
-    protocol_index = i->first;
-    std::string protocol_name = i->second;
-    std::string thread_name = "iAP2 connect notifier (" + protocol_name + ")";
+    std::string pool_protocol_name = i->first;
+    std::string thread_name = "iAP2 connect notifier (" + pool_protocol_name + ")";
     utils::SharedPtr<threads::Thread> thread = new threads::Thread(thread_name.c_str(),
-      new IAP2ConnectThreadDelegate(this, protocol_name));
-    LOG4CXX_INFO(logger_, "iAP2: starting connection thread for protocol " << protocol_name);
+      new IAP2ConnectThreadDelegate(this, pool_protocol_name));
+    LOG4CXX_INFO(logger_, "iAP2: starting connection thread for protocol " << pool_protocol_name);
     thread->start();
     pool_connection_threads_lock_.Acquire();
-    ThreadContainer::iterator j = pool_connection_threads_.find(protocol_name);
+    ThreadContainer::iterator j = pool_connection_threads_.find(pool_protocol_name);
     if (j != pool_connection_threads_.end()) {
       pool_connection_threads_.erase(j);
     }
-    pool_connection_threads_.insert(std::make_pair(protocol_name, thread));
+    pool_connection_threads_.insert(std::make_pair(pool_protocol_name, thread));
     pool_connection_threads_lock_.Release();
+    protocol_index = i->second;
     protocol_in_use_name_pool_.insert(*i);
     free_protocol_name_pool_.erase(i);
   }
@@ -216,15 +216,16 @@ void IAP2Device::OnDisconnect(ApplicationHandle app_id) {
 
 bool IAP2Device::ReturnToPool(const std::string& protocol_name) {
   sync_primitives::AutoLock auto_lock(protocol_name_pool_lock_);
-  for (ProtocolNamePool::iterator i = protocol_in_use_name_pool_.begin(); i != protocol_in_use_name_pool_.end(); ++i) {
-    if (i->second == protocol_name) {
-      LOG4CXX_INFO(logger_, "iAP2: returning protocol " << protocol_name << " back to pool");
-      free_protocol_name_pool_.insert(*i);
-      protocol_in_use_name_pool_.erase(i);
-      return true;
-    }
+  ProtocolNamePool::iterator i = protocol_in_use_name_pool_.find(protocol_name);
+  if (i != protocol_in_use_name_pool_.end()) {
+    LOG4CXX_INFO(logger_, "iAP2: returning protocol " << protocol_name << " back to pool");
+    free_protocol_name_pool_.insert(*i);
+    protocol_in_use_name_pool_.erase(i);
+    return true;
   }
-  return false;
+  else {
+    return false;
+  }
 }
 
 IAP2Device::IAP2HubConnectThreadDelegate::IAP2HubConnectThreadDelegate(

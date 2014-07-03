@@ -67,8 +67,7 @@ class IAP2Device : public MmeDevice {
   virtual ApplicationList GetApplicationList() const;
 
  private:
-  typedef std::list<std::string> ProtocolNameContainer;
-  typedef std::map<int, std::string> ProtocolNamePool;
+  typedef std::map<std::string, int> ProtocolNamePool;
   typedef std::pair<std::string, iap2ea_hdl_t*> AppRecord;
   typedef std::map<ApplicationHandle, AppRecord> AppContainer;
   typedef std::map<std::string, utils::SharedPtr<threads::Thread> > ThreadContainer;

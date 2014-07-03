@@ -82,6 +82,9 @@ const ProtocolConfig::ProtocolNameContainer ProtocolConfig::ReadProtocolNames(co
         if (line.empty()) { // end of specified section
           break;
         }
+        if ('#' == line[0]) { // commented line
+          continue;
+        }
         LOG4CXX_DEBUG(logger_, "adding protocol " << line);
         protocol_names.push_back(line);
       }
