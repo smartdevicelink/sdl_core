@@ -189,6 +189,14 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    */
   void DisablePerformInteraction();
 
+  /**
+   * @brief Checks perform interaction params(initialText, initialPrompt, ...)
+   * when type is String, on contained \t\n \\t \\n
+   * @return if perform interaction contains \t\n \\t \\n return TRUE,
+   * FASE otherwise
+   */
+  bool IsContainsWhitespace();
+
   // members
   timer::TimerThread<PerformInteractionRequest> timer_;
 

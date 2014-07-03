@@ -37,6 +37,7 @@
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+//#include "application_manager/smart_object_keys.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
@@ -123,9 +124,17 @@ void PerformInteractionRequest::Run() {
   for (size_t i = 0; i < choice_list.length(); ++i) {
     if (!app->FindChoiceSet(choice_list[i].asInt())) {
       LOG4CXX_ERROR(logger_, "Invalid ID");
-      SendResponse(false, mobile_apis::Result::INVALID_ID);
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
       return;
     }
+  }
+
+  // Checking perform interaction on contained \t\n \\t \\n
+  if (IsContainsWhitespace()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming perform interaction has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
   }
 
   uint32_t correlation_id =
@@ -727,6 +736,85 @@ void PerformInteractionRequest::DisablePerformInteraction() {
     app->set_perform_interaction_mode(-1);
     app->DeletePerformInteractionChoiceSetMap();
   }
+}
+
+bool PerformInteractionRequest::IsContainsWhitespace() {
+  //if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+  bool return_value = false;
+  std::string str;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::initial_text)) {
+    str = (*message_)[strings::msg_params][strings::initial_text].asString();
+    if (!CheckSyntax(str, true)) {
+      return_value = true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
+    const smart_objects::SmartArray* ip_array =
+        (*message_)[strings::msg_params][strings::initial_prompt].asArray();
+
+    smart_objects::SmartArray::const_iterator it_ip = ip_array->begin();
+    smart_objects::SmartArray::const_iterator it_ip_end = ip_array->end();
+
+    for (; it_ip != it_ip_end; ++it_ip) {
+      str = (*it_ip)[strings::text].asString();
+      if (!CheckSyntax(str, true)) {
+        return_value = true;
+        break;
+      }
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::help_prompt)) {
+    const smart_objects::SmartArray* hp_array =
+        (*message_)[strings::msg_params][strings::help_prompt].asArray();
+
+    smart_objects::SmartArray::const_iterator it_hp = hp_array->begin();
+    smart_objects::SmartArray::const_iterator it_hp_end = hp_array->end();
+
+    for (; it_hp != it_hp_end; ++it_hp) {
+      str = (*it_hp)[strings::text].asString();
+      if (!CheckSyntax(str, true)) {
+        return_value = true;
+        break;
+      }
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
+    const smart_objects::SmartArray* tp_array =
+        (*message_)[strings::msg_params][strings::timeout_prompt].asArray();
+
+    smart_objects::SmartArray::const_iterator it_tp = tp_array->begin();
+    smart_objects::SmartArray::const_iterator it_tp_end = tp_array->end();
+
+    for (; it_tp != it_tp_end; ++it_tp) {
+      str = (*it_tp)[strings::text].asString();
+      if (!CheckSyntax(str, true)) {
+        return_value = true;
+        break;
+      }
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+    const smart_objects::SmartArray* vh_array =
+        (*message_)[strings::msg_params][strings::vr_help].asArray();
+
+    smart_objects::SmartArray::const_iterator it_vh = vh_array->begin();
+    smart_objects::SmartArray::const_iterator it_vh_end = vh_array->end();
+
+    for (; it_vh != it_vh_end; ++it_vh) {
+      str = (*it_vh)[strings::text].asString();
+      if (!CheckSyntax(str, true)) {
+        return_value = true;
+        break;
+      }
+    }
+  }
+
+  return return_value;
 }
 
 }  // namespace commands
