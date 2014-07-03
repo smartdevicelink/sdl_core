@@ -147,19 +147,22 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   // 1. Delete all the connections and sessions of this device
   // 2. Delete device from a list
   // 3. Let observer know that device has been deleted.
+
+  std::vector<ConnectionHandle> connections_to_remove;
   {
     sync_primitives::AutoLock lock(connection_list_lock_);
     for (ConnectionList::iterator it = connection_list_.begin();
          it != connection_list_.end(); ++it) {
       if (device_info.device_handle() ==
           (*it).second->connection_device_handle()) {
-        ConnectionHandle connection_handle = (*it).first;
-        // Unlock connection_list to avoid deadlock during connection removing
-        sync_primitives::AutoUnlock auto_unlock(lock);
-        // FIXME(EZamakhov): It could be wrong after return from Remove
-        RemoveConnection(connection_handle);
+        connections_to_remove.push_back((*it).first);
       }
     }
+  }
+
+  std::vector<ConnectionHandle>::iterator it = connections_to_remove.begin();
+  for (; it != connections_to_remove.end(); ++it) {
+    RemoveConnection(*it);
   }
 
   device_list_.erase(device_info.device_handle());

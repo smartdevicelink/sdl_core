@@ -39,6 +39,7 @@ public class WiProProtocol extends AbstractProtocol {
     private int mDataBufWritePos = 0;
     private int mMessageID = 0;
 
+    private boolean isVersionNegotiated = false;
 
     // Hide no-arg ctor
     private WiProProtocol() {
@@ -233,8 +234,11 @@ public class WiProProtocol extends AbstractProtocol {
 
         // TODO : Implement proper check point of the Protocol Version
         //Check for a version difference
-        if (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_ONE ||
-                getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO) {
+        if (!isVersionNegotiated && (getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_ONE ||
+                getProtocolVersion() == ProtocolConstants.PROTOCOL_VERSION_TWO)) {
+
+            isVersionNegotiated = true;
+
             byte parsedProtocolVersion = (byte) (receivedBytes[0] >>> 4);
             Logger.d(CLASS_NAME + " Parsed v:" + parsedProtocolVersion);
 
@@ -385,6 +389,7 @@ public class WiProProtocol extends AbstractProtocol {
 
                 @Override
                 public void onEndService(byte sessionId, int messageId, ServiceType serviceType) {
+                    hasRPCStarted = false;
                     handleEndServiceFrame(sessionId, messageId, serviceType);
                 }
 
@@ -401,6 +406,7 @@ public class WiProProtocol extends AbstractProtocol {
 
                 @Override
                 public void onEndServiceACK(byte sessionId, int messageId, ServiceType serviceType) {
+                    hasRPCStarted = false;
                     handleEndServiceAckFrame(sessionId, messageId, serviceType);
                 }
 

@@ -164,6 +164,19 @@ Item {
 
     function systemRequest(requestType, fileName, appID) {
         console.log("enter systemRequest");
-        settingsContainer.stopPTExchange(fileName);
+        switch (requestType) {
+            case Common.RequestType.PROPRIETARY: {
+                settingsContainer.stopPTExchange(fileName);
+                break;
+            }
+            case Common.RequestType.HTTP: {
+                if (fileName === "IVSU") {
+                    settingsContainer.updateIVSU(appID);
+                } else {
+                    settingsContainer.decrypt(fileName, appID);
+                }
+                break;
+            }
+        }
     }
 }
