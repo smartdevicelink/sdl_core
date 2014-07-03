@@ -34,7 +34,6 @@
 
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
-import "../models/RequestToSDL.js" as RequestToSDL
 import "../models/Internal.js" as Internal
 
 Item

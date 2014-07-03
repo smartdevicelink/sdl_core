@@ -52,7 +52,7 @@ add_custom_command(
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.cc ${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.h
   COMMAND python ${codegen2} --infile ${api_xml} --version ${qt_version} --outdir ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS ${api_xml} ${codegen} ${parser}
+  DEPENDS ${api_xml} ${codegen2} ${parser}
   COMMENT "Generating files:
     ${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.cc
     ${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.h
@@ -62,7 +62,7 @@ add_custom_command(
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.cc ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.h
   COMMAND python ${codegen3} --infile ${api_xml} --version ${qt_version} --outdir ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS ${api_xml} ${codegen} ${parser}
+  DEPENDS ${api_xml} ${codegen3} ${parser}
   COMMENT "Generating files:
     ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.cc
     ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.h
@@ -86,6 +86,8 @@ set(SOURCES
   dbus_controller.cc
   request_to_sdl.cc
   hmi_requests.cc
+  moc_request_to_sdl.cpp
+  moc_hmi_requests.cpp
 )
 include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
