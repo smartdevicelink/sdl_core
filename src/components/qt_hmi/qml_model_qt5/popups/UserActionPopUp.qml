@@ -78,6 +78,7 @@ Item {
             height: 20
             font.pixelSize: Constants.fontSize
             color: Constants.primaryColor
+            wrapMode: TextEdit.Wrap
         }
 
         Text {
@@ -91,9 +92,11 @@ Item {
             height: 100
             font.pixelSize: 0
             color: Constants.primaryColor
+            wrapMode: TextEdit.Wrap
         }
 
         OvalButton {
+            id: okButton
             text: "Ok"
             fontSize: Constants.fontSize
             property bool result: true
@@ -104,9 +107,11 @@ Item {
             onClicked: {
                 deactivate(result)
             }
+            visible: false
         }
 
         OvalButton {
+            id: cancelButton
             text: "Cancel"
             fontSize: Constants.fontSize
             property bool result: false
@@ -117,15 +122,38 @@ Item {
             onClicked: {
                 deactivate(result)
             }
+            visible: false
+        }
+
+        OvalButton {
+            id: closeButton
+            text: "Close"
+            fontSize: Constants.fontSize
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            anchors.leftMargin: 15
+            width: parent.width - 20
+            onClicked: {
+                deactivate()
+            }
+            visible: false
         }
 
     }
 
-    function activate(title, text, callback) {
+    function activate(titleText, textBoxText, callback, buttons) {
         console.log("userActionPopUp activate enter");
-        title.text = title;
-        message.text = text;
-        callbackFunc = callback;
+        title.text = titleText;
+        message.text = textBoxText;
+
+        if (buttons) {
+            callbackFunc = callback;
+            okButton.visible = true
+            cancelButton.visible = true
+        } else {
+            closeButton.visible = true
+        }
+
         visible = true;
         console.debug("userActionPopUp activate exit");
     }
@@ -133,7 +161,15 @@ Item {
     function deactivate(result) {
         console.log("userActionPopUp deactivate enter");
         visible = false;
-        callbackFunc(result)
+        title.text = "";
+        message.text = "";
+        if (callbackFunc) {
+            callbackFunc(result);
+            callbackFunc = null;
+        }
+        okButton.visible = fasle
+        cancelButton.visible = false
+        closeButton.visible = false
         console.debug("userActionPopUp deactivate exit");
     }
 }

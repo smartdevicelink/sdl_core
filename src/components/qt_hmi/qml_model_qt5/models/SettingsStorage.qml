@@ -249,7 +249,8 @@ Item
                                         "Would you like to allow SDL functionality for device '" + params.device.name + "'?",
                                         function(result){
                                             allowSDLFunctionality(result, params.device)
-                                        }
+                                        },
+                                        true
                                     )
         }
 
@@ -260,12 +261,16 @@ Item
         }
 
         if (params.isAppPermissionsRevoked) {
-            //setAppPermissions remove revoked permissions
+
+            appPermissionsRevoked(appId, params.appRevokedPermissions, "AppPermissionsRevoked")
         }
 
         if (params.isAppRevoked) {
-            //popupActivate("Current version of app is no longer supported!");
-            //? unregister app or set to level NONE
+
+
+            RequestToSDL.SDL_GetUserFriendlyMessage(["AppUnsupported"], dataContainer.hmiUILanguage, function(params){
+                settingsContainer.getUserFriendlyMessageAppPermissionsRevoked("AppUnsupported", params)
+            });
         } else if (params.isSDLAllowed && !params.isPermissionsConsentNeeded) {
             dataContainer.setCurrentApplication(appId)
             contentLoader.go(
@@ -303,10 +308,48 @@ Item
         console.log("getListOfPermissions_Response exit");
     }
 
+    function appPermissionsRevoked (appId, permissions, title) {
+
+        var messageCodes = [];
+
+        permissions.forEach(function (x) {
+            messageCodes.push(x.name);
+        });
+
+        messageCodes.push("AppPermissionsRevoked");
+
+        RequestToSDL.SDL_GetUserFriendlyMessage(messageCodes, dataContainer.hmiUILanguage, function(params){
+            settingsContainer.getUserFriendlyMessageAppPermissionsRevoked(title, params)
+        });
+    }
+
+    function getUserFriendlyMessageAppPermissionsRevoked (title, message) {
+        var tts = "",
+            text = "";
+
+        message.forEach(function (x) {
+            if (x.tts) {
+                tts += x.tts;
+            }
+            if (x.textBody) {
+                text += x.textBody;
+            }
+        });
+
+        if (tts) {
+            ttsPopUp.activate(tts)
+        }
+
+        userActionPopUp.activate(title, text, null, false)
+
+    }
+
     function onAppPermissionConsent_Notification (appId, params) {
         console.log("onAppPermissionConsent_Notification enter");
 
         onAppPermissionConsentPopUp.permissionItems.clear()
+
+        var tts = "";
 
         for (var i = 0; i < params.length; i++) {
             onAppPermissionConsentPopUp.permissionItems.append({
@@ -314,7 +357,15 @@ Item
                                  "label": params[i].label,
                                  "textBody": params[i].textBody,
                                  "allowed": false
-                             })
+                             });
+
+            if (params[i].tts) {
+                tts += x.tts;
+            }
+        }
+
+        if (tts) {
+            ttsPopUp.activate(tts)
         }
 
         onAppPermissionConsentPopUp.activate(appId)
