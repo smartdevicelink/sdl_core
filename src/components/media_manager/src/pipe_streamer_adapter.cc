@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "utils/logger.h"
+#include "utils/file_system.h"
 #include "config_profile/profile.h"
 #include "media_manager/pipe_streamer_adapter.h"
 
@@ -195,7 +196,10 @@ bool PipeStreamerAdapter::Streamer::exitThreadMain() {
 
 void PipeStreamerAdapter::Streamer::open() {
 
-  LOG4CXX_INFO(logger, "Streamer::open()" << server_->named_pipe_path_.c_str());
+  LOG4CXX_INFO(logger, "Streamer::open() " << server_->named_pipe_path_.c_str());
+
+  DCHECK(file_system::CreateDirectoryRecursively(
+      profile::Profile::instance()->app_storage_folder()));
 
   if ((mkfifo(server_->named_pipe_path_.c_str(),
               S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) < 0)

@@ -33,74 +33,106 @@
  */
 import QtQuick 2.0
 import QtQuick.Controls 1.0
+import QtQuick.Controls.Styles 1.0
 import "../models"
 import "../controls"
+import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
 import "../models/RequestToSDL.js" as RequestToSDL
 
-Item {
+PopUp {
 
-    property string popUpName
-    signal itemActivated(string item)
+    width: Constants.popupWidth - 200
+    height: Constants.popupHeigth - 200
 
-    onItemActivated: {
-        this
-    }
-    function activate(madel, appId) {
-        console.log("userActionPopUp activate enter");
-        //title.text = title;
-        //message.text = text;
-        //callbackFunc = callback;
-        visible = true;
-        console.debug("userActionPopUp activate exit");
+    property int appId
+    property ListModel permissionItems: ListModel{}
+
+    function activate(appId) {
+        console.debug("onAppPermissionConsentPopUp activate enter");
+        appId = appId
+        show()
+        console.debug("onAppPermissionConsentPopUp activate exit");
     }
 
-    function deactivate(result) {
-        console.log("userActionPopUp deactivate enter");
-        visible = false;
-        //callbackFunc(result)
-        console.debug("userActionPopUp deactivate exit");
+    function deactivate() {
+        console.debug("onAppPermissionConsentPopUp deactivate enter");
+        hide()
+
+        var consentedFunctions = [];
+
+        for (var i = 0; i < permissionItems.count; i++) {
+            consentedFunctions.push({
+                                        "name": permissionItems.get(i).messageCode,
+                                        "id": i,
+                                        "allowed": permissionItems.get(i).allowed
+                                    })
+        }
+
+        sdlSDL.onAppPermissionConsent(appId, consentedFunctions, Common.ConsentSource.GUI)
+        console.debug("onAppPermissionConsentPopUp deactivate exit");
     }
 
-    Item {
+     Column {
         anchors.fill: parent
-//        GridMenu {
-//            id: menu
-//            model: dataContainer.settingsSourceModel
-//            anchors.left: parent.left
-//            anchors.right: parent.right
-//            anchors.top: parent.top
-//            anchors.bottom: bottomPanel.top
-//            columnsOnPage: 1
-//            rows: 7
-//            delegate: GridItem {
-//                width: menu.width / menu.columnsOnPage
-//                height: menu.height / menu.rows
-//                ComboBox {
-//                    width: table.width / table.columns - table.spacing
-//                    model: languagesList
-//                    onCurrentIndexChanged: {
-//                        dataContainer.hmiTTSVRLanguage = settingsContainer.sdlLanguagesList[currentIndex];
-//                        sdlTTS.onLanguageChange(dataContainer.hmiTTSVRLanguage);
-//                        sdlVR.onLanguageChange(dataContainer.hmiTTSVRLanguage);
-//                    }
-//                    z: 1000
-//                }
-//            }
-//        }
+
+        Component {
+            id: listDelegate
+
+            Item {
+                height: 70
+                width: parent.width
+
+                CheckBox {
+                    id: checkBox
+                    height: 20
+
+                    style: CheckBoxStyle {
+                        label: Text {
+                            color: Constants.panelTextColor
+                            text: permissionItems.get(index).label
+                        }
+                    }
+                    onClicked: {
+                        permissionItems.setProperty(index, "allowed", !allowed)
+                    }
+                }
+
+                Text {
+                    id: label
+                    color: Constants.primaryColor
+                    font.pixelSize: 0
+                    text: textBody
+                    wrapMode: TextEdit.Wrap
+                    width: parent.width
+                    anchors.top: checkBox.bottom
+                }
+            }
+        }
+
+        ScrollableListView {
+            id: onAppPermissonList
+            anchors.fill: parent;
+            anchors.margins: 5
+            anchors.bottomMargin: 100
+            model: permissionItems
+            delegate: listDelegate
+        }
 
         Item {
             id: bottomPanel
-            // 1/4 bottom screen
             anchors.bottom: parent.bottom
             anchors.left: parent.left
-            height: 1/4 * parent.height
+            height: 100
             width: parent.width
 
-            BackButton { anchors.centerIn: parent }
+            OvalButton {
+                anchors.centerIn: parent
+                text: "Done"
+                onClicked: {
+                    deactivate()
+                }
+            }
         }
     }
 }
-
-
-

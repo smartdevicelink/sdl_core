@@ -37,6 +37,17 @@
 #include "utils/logger.h"
 
 namespace application_manager {
+
+/**
+ * @brief Contains command parameters permissions (if any) defined in policy
+ * table
+ */
+struct CommandParametersPermissions {
+  std::vector<std::string> allowed_params;
+  std::vector<std::string> disallowed_params;
+  std::vector<std::string> undefined_params;
+};
+
 namespace commands {
 
 /**

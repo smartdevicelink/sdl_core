@@ -72,9 +72,6 @@ class ApplicationManager {
       protocol_handler::ProtocolHandler* handler) = 0;
     virtual void set_connection_handler(
       connection_handler::ConnectionHandler* handler) = 0;
-
-  protected:
-    virtual void CreateHMIMatrix(HMIMatrix* matrix) = 0;
 };
 
 }  // namespace application_manager

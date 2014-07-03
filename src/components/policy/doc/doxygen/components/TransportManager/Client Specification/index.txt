@@ -1,0 +1,18 @@
+/*! \page components_transportmanager_client Transport Manager Client Specification
+
+This chapter describes details of correct use of Transport Manager on the client side. In other words this chapter can be called "How to create effective and safe client of Transport Manager".
+Transport Manager defines set of asynchronous requests (means that operations are non-blocking in the calling thread) and provides two different interfaces to monitor asynchronous responses and notifications about data update.
+
+Clients of Transport Manager should use NsSmartDeviceLink::NsTransportManager::ITransportManager interface to initiate any request to the component.
+Also Transport Manager provides two different interfaces:
+
+1) NsSmartDeviceLink::NsTransportManager::ITransportManagerDataListener. Client can implement this interface if it needs information about data frame send/receive.
+
+2) NsSmartDeviceLink::NsTransportManager::ITransportManagerDeviceListener. Client can implement this interface if it needs information about updates of devices available for communication and current client applications status.
+
+For more information about typical use of Transport Manager please read the following topics:
+    - \subpage components_transportmanager_client_device_management "Device Management"
+    - \subpage components_transportmanager_client_connection_management "Connection Management"
+    - \subpage components_transportmanager_client_data_transfer "Data Transfer"
+
+*/

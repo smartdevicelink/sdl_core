@@ -187,6 +187,7 @@ QtObject {
                 }
                 currentApplication.languageTTSVR = application.languageTTSVR
                 currentApplication.hmiDisplayLanguageDesired = application.hmiDisplayLanguageDesired
+                currentApplication.allowedFunctions = application.allowedFunctions
                 // This place is for adding new properties
             }
         }
@@ -254,7 +255,8 @@ QtObject {
                            distanceToManeuver: 0,
                            distanceToManeuverScale: 0,
                            maneuverComplete: null
-            }
+            },
+            allowedFunctions: []
             // This place is for adding new properties
         })
         if (app.isMediaApplication) {

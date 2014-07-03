@@ -211,6 +211,13 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
         return mobile_apis::Result::DUPLICATE_NAME;
       }
     }
+
+    // Checking choice set on contained \t\n \\t \\n
+    if (IsWhitepaceExist((*it_array))) {
+      LOG4CXX_ERROR(logger_,
+                    "Incoming choice set has contains \t\n \\t \\n");
+      return mobile_apis::Result::INVALID_DATA;
+    }
   }
 
   return mobile_apis::Result::SUCCESS;
@@ -247,6 +254,42 @@ bool CreateInteractionChoiceSetRequest::compareStr(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2) {
 
   return 0 == strcasecmp(str1.asCharArray(), str2.asCharArray());
+}
+
+bool CreateInteractionChoiceSetRequest::IsWhitepaceExist(
+    const smart_objects::SmartObject& choice_set) {
+  bool return_value = false;
+
+  std::string str = choice_set[strings::menu_name].asCharArray();
+  if (!CheckSyntax(str, true)) {
+    return_value = true;
+  }
+
+  str = choice_set[strings::secondary_text].asCharArray();
+  if (!CheckSyntax(str, true)) {
+    return_value = true;
+  }
+
+  str = choice_set[strings::tertiary_text].asCharArray();
+  if (!CheckSyntax(str, true)) {
+    return_value = true;
+  }
+
+  const smart_objects::SmartArray* vr_array =
+      choice_set[strings::vr_commands].asArray();
+
+  smart_objects::SmartArray::const_iterator it_vr = vr_array->begin();
+  smart_objects::SmartArray::const_iterator it_vr_end = vr_array->end();
+
+  for (; it_vr != it_vr_end; ++it_vr) {
+    str = (*it_vr).asCharArray();
+    if (!CheckSyntax(str, true)) {
+      return_value = true;
+      break;
+    }
+  }
+
+  return return_value;
 }
 
 void CreateInteractionChoiceSetRequest::SendVRAddCommandRequest(
