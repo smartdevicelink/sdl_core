@@ -38,7 +38,6 @@ import "../models"
 import "../controls"
 import "../hmi_api/Common.js" as Common
 import "../models/Constants.js" as Constants
-import "../models/RequestToSDL.js" as RequestToSDL
 
 PopUp {
 
