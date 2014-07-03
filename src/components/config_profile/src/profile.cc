@@ -619,12 +619,16 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
     ReadStringValue(&named_video_pipe_path_, "" , kMediaManagerSection,
                     kNamedVideoPipePathKey);
 
+    named_video_pipe_path_ = app_storage_folder_ + "/" + named_video_pipe_path_;
+
     LOG_UPDATED_VALUE(named_video_pipe_path_, kNamedVideoPipePathKey,
                       kMediaManagerSection);
 
     // Named audio pipe path
     ReadStringValue(&named_audio_pipe_path_, "" , kMediaManagerSection,
                     kNamedAudioPipePathKey);
+
+    named_audio_pipe_path_ = app_storage_folder_ + "/" + named_audio_pipe_path_;
 
     LOG_UPDATED_VALUE(named_audio_pipe_path_, kNamedAudioPipePathKey,
                       kMediaManagerSection);
