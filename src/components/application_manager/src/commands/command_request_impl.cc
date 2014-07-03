@@ -78,6 +78,10 @@ CommandRequestImpl::~CommandRequestImpl() {
 }
 
 bool CommandRequestImpl::Init() {  
+  return true;
+}
+
+bool CommandRequestImpl::CheckPermissions() {
   return CheckAllowedParameters();
 }
 

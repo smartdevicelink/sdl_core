@@ -49,6 +49,10 @@ CommandImpl::~CommandImpl() {
   CleanUp();
 }
 
+bool CommandImpl::CheckPermissions(){
+  return true;
+}
+
 bool CommandImpl::Init() {
   return true;
 }

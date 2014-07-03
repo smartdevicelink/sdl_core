@@ -69,6 +69,11 @@ class CommandImpl : public Command {
   virtual ~CommandImpl();
 
   /**
+   * @brief Checks command permissions according to policy table
+   */
+  virtual bool CheckPermissions();
+
+  /**
    * @brief Init required by command resources
    **/
   virtual bool Init();
