@@ -33,7 +33,7 @@ public class PutFileTransferManagerTest extends TestCase {
         PutFile newPutFile = RPCRequestFactory.buildPutFile();
         newPutFile.setFileType(FileType.AUDIO_MP3);
         newPutFile.setSyncFileName(mFileName);
-        newPutFile.setCorrelationID(mCorrelationId);
+        newPutFile.setCorrelationId(mCorrelationId);
 
         mPutFileTransferManager.addPutFileToAwaitArray(mCorrelationId, newPutFile);
 
@@ -44,7 +44,7 @@ public class PutFileTransferManagerTest extends TestCase {
         PutFile newPutFile = RPCRequestFactory.buildPutFile();
         newPutFile.setFileType(FileType.AUDIO_MP3);
         newPutFile.setSyncFileName(mFileName);
-        newPutFile.setCorrelationID(mCorrelationId);
+        newPutFile.setCorrelationId(mCorrelationId);
 
         mPutFileTransferManager.addPutFileToAwaitArray(mCorrelationId, newPutFile);
 
@@ -59,7 +59,7 @@ public class PutFileTransferManagerTest extends TestCase {
         PutFile newPutFile = RPCRequestFactory.buildPutFile();
         newPutFile.setFileType(FileType.AUDIO_MP3);
         newPutFile.setSyncFileName(mFileName);
-        newPutFile.setCorrelationID(mCorrelationId);
+        newPutFile.setCorrelationId(mCorrelationId);
 
         mPutFileTransferManager.addPutFileToAwaitArray(mCorrelationId, newPutFile);
 
@@ -77,7 +77,7 @@ public class PutFileTransferManagerTest extends TestCase {
             newPutFile = RPCRequestFactory.buildPutFile();
             newPutFile.setFileType(FileType.AUDIO_MP3);
             newPutFile.setSyncFileName(mFileName);
-            newPutFile.setCorrelationID(i);
+            newPutFile.setCorrelationId(i);
             mPutFileTransferManager.addPutFileToAwaitArray(i, newPutFile);
         }
 
@@ -96,7 +96,7 @@ public class PutFileTransferManagerTest extends TestCase {
             newPutFile = RPCRequestFactory.buildPutFile();
             newPutFile.setFileType(FileType.AUDIO_MP3);
             newPutFile.setSyncFileName(mFileName);
-            newPutFile.setCorrelationID(i);
+            newPutFile.setCorrelationId(i);
             mPutFileTransferManager.addPutFileToAwaitArray(i, newPutFile);
         }
 

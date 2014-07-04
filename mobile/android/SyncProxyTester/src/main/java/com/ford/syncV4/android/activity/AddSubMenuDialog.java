@@ -2,7 +2,6 @@ package com.ford.syncV4.android.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -72,7 +71,7 @@ public class AddSubMenuDialog extends BaseDialogFragment {
                         }
 
                         AddSubMenu addSubMenu = RPCRequestFactory.buildAddSubMenu();
-                        addSubMenu.setCorrelationID(((SyncProxyTester) getActivity())
+                        addSubMenu.setCorrelationId(((SyncProxyTester) getActivity())
                                 .getNextCorrelationIdForCurrentFragment());
 
                         SyncSubMenu subMenu = new SyncSubMenu();

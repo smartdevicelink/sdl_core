@@ -36,7 +36,6 @@ import com.ford.syncV4.proxy.rpc.ShowConstantTBT;
 import com.ford.syncV4.proxy.rpc.Slider;
 import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
-import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
@@ -160,7 +159,7 @@ public class TestRPC {
 			if (value.equalsIgnoreCase("true")) ((RPCMessage) rpc).setParameters(field, true);
 			else if (value.equalsIgnoreCase("false")) ((RPCMessage) rpc).setParameters(field, false);
 		} else if (field.equalsIgnoreCase(Names.correlationID)) {
-			try {((RPCRequest) rpc).setCorrelationID(Integer.parseInt(value));} 
+			try {((RPCRequest) rpc).setCorrelationId(Integer.parseInt(value));}
 			catch (Exception e) {Log.e("parser", "Unable to parse Integer");}
 		} else if (field.equalsIgnoreCase(Names.choiceID)
 				|| field.equalsIgnoreCase(Names.cmdID)

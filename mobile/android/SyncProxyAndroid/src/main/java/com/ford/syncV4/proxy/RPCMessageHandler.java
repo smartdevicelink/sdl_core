@@ -98,7 +98,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
             Logger.d(CLASS_NAME + " Response name:" + functionName);
 
             final RPCResponse response = new RPCResponse(hash);
-            final Integer responseCorrelationID = response.getCorrelationID();
+            final Integer responseCorrelationID = response.getCorrelationId();
 
             if (!syncProxyBase.handlePartialRPCResponse(sessionId, response, hash) &&
                     !syncProxyBase.handleLastInternalResponse(response)) {
@@ -1129,8 +1129,6 @@ public class RPCMessageHandler implements IRPCMessageHandler {
                 }
             }
         }
-
-        Logger.i("Proxy received RPC Message: " + functionName);
     }
 
     private Handler getMainUIHandler() {

@@ -183,7 +183,7 @@ public class SyncTrace {
 			correlationID = ((RPCRequest)rpcMsg).getCorrelationID();
 		} else if (rpcMsg instanceof RPCResponse) {
 			hasCorrelationID = true;
-			correlationID = ((RPCResponse)rpcMsg).getCorrelationID();
+			correlationID = ((RPCResponse)rpcMsg).getCorrelationId();
 		} // end-if
 		if (hasCorrelationID) {
 			rpcAsXml.append("<cid>");

@@ -582,7 +582,7 @@ public class ModuleTest {
                                     }
 
                                     try {
-                                        rpc.setCorrelationID(Integer.parseInt(parser.getAttributeValue(null, CORRELATION_ID_ATTR)));
+                                        rpc.setCorrelationId(Integer.parseInt(parser.getAttributeValue(null, CORRELATION_ID_ATTR)));
                                     } catch (NumberFormatException e) {
                                         Logger.e(TAG + " Unable to parse correlation ID");
                                     }

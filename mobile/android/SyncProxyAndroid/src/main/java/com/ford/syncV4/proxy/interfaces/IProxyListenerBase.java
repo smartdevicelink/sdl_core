@@ -2,6 +2,7 @@ package com.ford.syncV4.proxy.interfaces;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCRequest;
+import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
@@ -365,6 +366,15 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
      * @param rpcRequest Instance of the {@link com.ford.syncV4.proxy.RPCRequest} object
      */
     public void onRPCRequest(String appId, RPCRequest rpcRequest);
+
+    /**
+     * Provides a callback when {@link com.ford.syncV4.proxy.RPCResponse} is received over
+     * transport
+     *
+     * @param appId       Application identifier
+     * @param rpcResponse Instance of the {@link com.ford.syncV4.proxy.RPCResponse} object
+     */
+    public void onRPCResponse(String appId, RPCResponse rpcResponse);
 
     public void onOnSystemRequest(String appId, OnSystemRequest notification);
 }

@@ -464,8 +464,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     private static boolean heartBeatAck = true;
     private IRPCRequestConverterFactory rpcRequestConverterFactory =
             new SyncRPCRequestConverterFactory();
-    private IProtocolMessageHolder protocolMessageHolder =
-            new ProtocolMessageHolder();
+    private IProtocolMessageHolder protocolMessageHolder = new ProtocolMessageHolder();
 
     /**
      * Handler for OnSystemRequest notifications.
@@ -1291,7 +1290,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                     Hashtable hash = new Hashtable();
                     if (protocolVersion >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
                         Hashtable hashTemp = new Hashtable();
-                        hashTemp.put(Names.correlationID, message.getCorrID());
+                        hashTemp.put(Names.correlationID, message.getCorrId());
 
                         if (message.getJsonSize() > 0) {
                             final Hashtable<String, Object> mhash = mJsonRPCMarshaller.unmarshall(message.getData());
@@ -1525,14 +1524,21 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     protected boolean handlePartialRPCResponse(final byte sessionId, final RPCResponse response,
                                                Hashtable hash) {
         boolean success = false;
-        final Integer responseCorrelationID = response.getCorrelationID();
+        final Integer responseCorrelationId = response.getCorrelationId();
         final String appId = syncSession.getAppIdBySessionId(sessionId);
-        if (protocolMessageHolder.hasMessages(responseCorrelationID)) {
+        boolean doProcessResponse = true;
+
+        Logger.d(LOG_TAG + " > " + response.getFunctionName() + " " + response.getCorrelationId());
+
+        if (protocolMessageHolder.hasMessages(responseCorrelationId)) {
+
+            Logger.d(LOG_TAG + " >> " + response.getResultCode() + " " + response.getCorrelationId());
+
             if (Result.SUCCESS == response.getResultCode()) {
                 final ProtocolMessage pm = protocolMessageHolder.peekNextMessage(
-                        responseCorrelationID);
+                        responseCorrelationId);
                 if (pm.getFunctionID() == FunctionID.getFunctionID(response.getFunctionName())) {
-                    protocolMessageHolder.popNextMessage(responseCorrelationID);
+                    protocolMessageHolder.popNextMessage(responseCorrelationId);
 
                     //
                     // Send partial response message to the application
@@ -1540,6 +1546,9 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
                     if (response.getFunctionName() != null &&
                             response.getFunctionName().equals(Names.PutFile)) {
+
+                        doProcessResponse = false;
+
                         final PutFileResponse putFile = new PutFileResponse(hash);
                         if (_callbackToUIThread) {
                             // Run in UI thread
@@ -1558,7 +1567,22 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                     success = true;
                 }
             } else {
-                protocolMessageHolder.clearMessages(responseCorrelationID);
+                protocolMessageHolder.clearMessages(responseCorrelationId);
+            }
+        }
+
+        Logger.d(LOG_TAG + " >>> " + doProcessResponse + " " + response.getCorrelationId());
+        if (doProcessResponse) {
+            if (_callbackToUIThread) {
+                // Run in UI thread
+                _mainUIHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mProxyListener.onRPCResponse(appId, response);
+                    }
+                });
+            } else {
+                mProxyListener.onRPCResponse(appId, response);
             }
         }
 
@@ -1575,7 +1599,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      * corresponding request is not internal or in case of an error
      */
     protected boolean handleLastInternalResponse(RPCResponse response) {
-        final Integer correlationID = response.getCorrelationID();
+        final Integer correlationID = response.getCorrelationId();
         final boolean contains = internalRequestCorrelationIDs.contains(correlationID);
         if (contains) {
             internalRequestCorrelationIDs.remove(correlationID);
@@ -2282,7 +2306,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      */
     public void listFiles(String appId, Integer correlationID) throws SyncException {
         ListFiles listFiles = new ListFiles();
-        listFiles.setCorrelationID(correlationID);
+        listFiles.setCorrelationId(correlationID);
         sendRPCRequest(appId, listFiles);
     }
 
@@ -2296,7 +2320,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     public void setAppIcon(String appId, String fileName, Integer correlationID) throws SyncException {
         SetAppIcon setAppIcon = new SetAppIcon();
         setAppIcon.setSyncFileName(fileName);
-        setAppIcon.setCorrelationID(correlationID);
+        setAppIcon.setCorrelationId(correlationID);
         sendRPCRequest(appId, setAppIcon);
     }
 
@@ -2653,7 +2677,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
         ResetGlobalProperties req = new ResetGlobalProperties();
 
-        req.setCorrelationID(correlationID);
+        req.setCorrelationId(correlationID);
         req.setProperties(properties);
 
         sendRPCRequest(appId, req);
@@ -3272,24 +3296,25 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     }
 
     @Override
-    public void putPolicyTableUpdateFile(String appId, String filename, byte[] data, FileType fileType,
-                                         RequestType requestType)
-            throws SyncException {
-        final int correlationID = nextCorrelationId();
+    public void putPolicyTableUpdateFile(String appId, String filename, byte[] data,
+                                         FileType fileType, RequestType requestType)
+                                         throws SyncException {
+
+        final int correlationId = nextCorrelationId();
 
         if (fileType == FileType.BINARY) {
             PutFile putFile = RPCRequestFactory.buildPutFile(filename, FileType.JSON, null, data,
-                    correlationID);
-
+                    correlationId);
+            putFile.setSystemFile(true);
             sendRPCRequest(appId, putFile);
         } else if (fileType == FileType.JSON) {
             SystemRequest systemRequest = RPCRequestFactory.buildSystemRequest(filename, data,
-                    correlationID, requestType);
+                    correlationId, requestType);
 
             sendRPCRequest(appId, systemRequest);
         }
 
-        internalRequestCorrelationIDs.add(correlationID);
+        internalRequestCorrelationIDs.add(correlationId);
     }
 
     /**
