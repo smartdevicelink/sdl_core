@@ -61,10 +61,10 @@ class Impl(FordXmlParser):
 
 
     def args_for_function_definition(self, params, iface_name, out):
-        for param_el in params:
-	    param = self.make_param_desc(param_el, iface_name)
+        for param in params:
+            param = self.make_param_desc(param_el, iface_name)
             out.write('%s %s,' % (self.qt_param_type(param), param.name))
-        out.write('QJSValue hmi_callback')
+        out.write('Q%sValue hmi_callback' % prefix_class_item)
         
 
     def make_requests_for_header(self, out):
@@ -154,7 +154,7 @@ class Impl(FordXmlParser):
                     param = self.make_param_desc(param_el, iface_name)
                     out.write('%s %s,' % (self.qt_param_type(param), param.name))
 
-                out.write('QJSValue hmi_callback) {\n')
+                out.write('Q%sValue hmi_callback) {\n' % prefix_class_item)
                 with CodeBlock(out) as output:
                     output.write('QList<QVariant> args;\n')
                     for param_el in request.findall('param'):
@@ -195,10 +195,10 @@ arg_parser.add_argument('--outdir', required=True, help="path to directory where
 args = arg_parser.parse_args()
 
 if args.version == "4.8.5":
-    prefix_class_item = 'Declarative'
+    prefix_class_item = 'Script'
     invoke_type_connection = 'Direct'
 elif args.version == "5.1.0":
-    prefix_class_item = 'Quick'
+    prefix_class_item = 'JS'
     invoke_type_connection = 'BlockingQueued'
 
 header_name = 'request_to_sdl.h'
@@ -253,10 +253,12 @@ header_out.write("""/**
 header_out.write("#ifndef SRC_COMPONENTS_QTHMI_QMLMODELQT5_REQUESTTOSDL_\n")
 header_out.write("#define SRC_COMPONENTS_QTHMI_QMLMODELQT5_REQUESTTOSDL_\n\n")
 
-header_out.write("#include <QJSValue>\n")
-header_out.write("#include <QObject>\n")
-header_out.write("#include <QVariant>\n")
-header_out.write("#include <QStringList>\n")
+header_out.write("#include <QtCore/QObject>\n")
+header_out.write("#include <QtCore/QVariant>\n\n")
+if args.version == "4.8.5":
+    header_out.write("#include <QtScript/QScriptValue>\n")
+elif args.version == "5.1.0":
+    header_out.write("#include <QtQml/QJSValue>\n")
 
 impl.make_header_file(header_out)
 
@@ -303,7 +305,7 @@ source_out.write("""/**
 source_out.write('#include "request_to_sdl.h"\n')
 source_out.write("#include <QtDBus/QDBusConnection>\n")
 source_out.write("#include <QtDBus/QDBusInterface>\n")
-source_out.write('#include "hmi_requests.h"\n')
+source_out.write('#include "hmi_requests.h"\n\n')
 
 
 
