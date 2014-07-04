@@ -1,6 +1,6 @@
 /*
  * \file mock_transport_adapter_listener.h
- * \brief 
+ * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -49,6 +49,8 @@ namespace test {
 namespace components {
 namespace transport_manager {
 
+using ::protocol_handler::RawMessagePtr;
+
 class MockTransportAdapterListener : public TransportAdapterListener {
  public:
   MOCK_METHOD1(OnSearchDeviceDone,
@@ -74,11 +76,11 @@ class MockTransportAdapterListener : public TransportAdapterListener {
   MOCK_METHOD3(OnDisconnectDeviceFailed,
       void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const DisconnectDeviceError& error));
   MOCK_METHOD4(OnDataSendDone,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const RawMessageSptr data_container));
+      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const RawMessagePtr data_container));
   MOCK_METHOD5(OnDataSendFailed,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const RawMessageSptr data_container, const DataSendError& error));
+      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const RawMessagePtr data_container, const DataSendError& error));
   MOCK_METHOD4(OnDataReceiveDone,
-      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const RawMessageSptr data_container));
+      void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const RawMessagePtr data_container));
   MOCK_METHOD4(OnDataReceiveFailed,
       void(const TransportAdapter* transport_adapter, const DeviceUID& device_handle, const ApplicationHandle& app_handle, const DataReceiveError& error));
   MOCK_METHOD3(OnCommunicationError,

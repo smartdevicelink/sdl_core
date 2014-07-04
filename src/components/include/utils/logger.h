@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -37,7 +37,7 @@
   #include <string.h>
   #include <log4cxx/logger.h>
   #include <log4cxx/propertyconfigurator.h>
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 
 namespace log4cxx {
 #ifdef ENABLE_LOG
@@ -141,7 +141,7 @@ namespace log4cxx {
 
     #define LOG4CXX_TRACE_ENTER(logger)
     #define LOG4CXX_TRACE_EXIT(logger)
-#endif // ENABLE_LOG
+#endif  // ENABLE_LOG
 
 }  // namespace log4cxx
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_

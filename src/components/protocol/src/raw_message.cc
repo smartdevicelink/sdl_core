@@ -30,11 +30,9 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "protocol_handler/raw_message.h"
+#include "protocol/raw_message.h"
 
 #include <memory.h>
-
-#include "protocol_handler/message_priority.h"
 
 namespace protocol_handler {
 
@@ -83,10 +81,6 @@ bool RawMessage::IsWaiting() const {
 
 void RawMessage::set_waiting(bool v) {
   waiting_ = v;
-}
-
-MessagePriority RawMessage::Priority() const {
-  return MessagePriority::FromServiceType(this->service_type());
 }
 
 }  // namespace protocol_handler

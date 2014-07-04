@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "security_manager/security_manager_mock.h"
+#include "security_manager/security_query_matcher.h"
 
 ::testing::AssertionResult QueryHeader_EQ(
     const char* m_expr, const char* n_expr,

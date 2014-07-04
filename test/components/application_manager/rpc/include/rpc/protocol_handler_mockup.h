@@ -49,8 +49,7 @@
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "hmi_message_handler/messagebroker_adapter.h"
 #include "formatters/CFormatterJsonSDLRPCv2.hpp"
-#include "protocol_handler/message_priority.h"
-#include "protocol_handler/service_type.h"
+#include "protocol/raw_message.h"
 #include "json/reader.h"
 
 #include "rpc/init_start_data.h"

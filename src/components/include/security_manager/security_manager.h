@@ -73,7 +73,8 @@ class SecurityManager
    * \brief Sets pointer for Connection Handler layer for managing sessions
    * \param session_observer pointer to object of the class implementing
    */
-  virtual void set_session_observer(protocol_handler::SessionObserver *observer) = 0;
+  virtual void set_session_observer(
+    protocol_handler::SessionObserver *observer) = 0;
   /**
    * \brief Sets pointer for Protocol Handler layer for sending
    * \param protocol_handler pointer to object of the class implementing

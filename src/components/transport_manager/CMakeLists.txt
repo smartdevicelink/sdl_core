@@ -1,4 +1,3 @@
-
 set(target TransportManager)
 
 include_directories (
@@ -16,7 +15,6 @@ if (BUILD_BT_SUPPORT)
   include_directories(
   )
 endif()
-
 
 set (SOURCES
   ./src/transport_manager_impl.cc
@@ -82,6 +80,7 @@ if (BUILD_MME_SUPPORT)
 endif(BUILD_MME_SUPPORT)
 
 add_library(${target} ${SOURCES})
+target_link_libraries(${target} ProtocolLibrary)
 
 if (BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")

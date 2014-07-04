@@ -1,4 +1,4 @@
-/**
+/*
 * Copyright (c) 2013, Ford Motor Company
 * All rights reserved.
 *
@@ -37,7 +37,7 @@
 #include "utils/singleton.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
-#include "protocol_handler/service_type.h"
+#include "protocol/service_type.h"
 #include "media_manager/media_manager.h"
 #include "media_manager/media_adapter_impl.h"
 #include "media_manager/media_adapter_listener.h"

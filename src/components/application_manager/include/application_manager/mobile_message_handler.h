@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_MESSAGE_HANDLER_IMPL_H_
 
 #include "utils/macro.h"
-#include "protocol_handler/raw_message.h"
+#include "protocol/raw_message.h"
 #include "application_manager/message.h"
 
 namespace application_manager {

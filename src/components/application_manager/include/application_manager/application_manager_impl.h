@@ -64,7 +64,6 @@
 #ifdef TIME_TESTER
 #include "time_metric_observer.h"
 #endif  // TIME_TESTER
-#include "protocol_handler/service_type.h"
 
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
@@ -419,7 +418,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
-    void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
+    void OnDeviceListUpdated(const connection_handler::DeviceMap& device_list);
     //TODO (EZamakhov): fix all indentations in this file
   virtual void OnFindNewApplicationsRequest();
     void RemoveDevice(const connection_handler::DeviceHandle& device_handle);

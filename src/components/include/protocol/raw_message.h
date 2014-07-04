@@ -29,19 +29,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RAW_MESSAGE_H_
-#define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RAW_MESSAGE_H_
+#ifndef SRC_COMPONENTS_INCLUDE_PROTOCOL_RAW_MESSAGE_H_
+#define SRC_COMPONENTS_INCLUDE_PROTOCOL_RAW_MESSAGE_H_
 
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
-#include "protocol_handler/service_type.h"
-#include "protocol_handler/message_priority.h"
-
-/**
- *\namespace NsProtocolHandler
- *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
- */
+#include "protocol/service_type.h"
+#include "protocol/message_priority.h"
 
 namespace protocol_handler {
 /**
@@ -50,7 +44,7 @@ namespace protocol_handler {
  * between components.
  */
 class RawMessage {
-public:
+ public:
   /**
    * \brief Constructor
    * \param connection_key Identifier of connection within which message
@@ -62,92 +56,55 @@ public:
   RawMessage(uint32_t connection_key, uint32_t protocolVersion,
              const uint8_t *const data_param, uint32_t dataSize,
              uint8_t type = ServiceType::kRpc);
-
   /**
    * \brief Destructor
    */
   ~RawMessage();
-
   /**
-   * \brief Getter for connection identifier
+   * \brief Connection Identifier
+   * Obtained from \s ConnectionHandler
    */
   uint32_t connection_key() const;
-
   /**
    * \brief Setter for connection identifier
    */
   void set_connection_key(uint32_t);
-
   /**
-   * \brief Getter for message string
+   * \brief Getter for message string data
    */
   uint8_t *data() const;
-
   /**
    * \brief Getter for message size
    */
   size_t data_size() const;
-
   /**
-   * \brief Getter for protocol version
+   * \brief Version of SmartDeviceLink protocol
+   * used for transferring message.
    */
   uint32_t protocol_version() const;
-
   /**
-   * \brief Getter for service type
+   * \brief Type of service message belongs to
    */
   ServiceType service_type() const {
     return service_type_;
   }
-
+  /**
+   * \brief Specifies current state of message in queue.
+   * if false message is "ready to be processed"
+   * otherwise it is "waiting for response"
+   */
   bool IsWaiting() const;
-
   void set_waiting(bool v);
 
-  /**
-   * \brief Priority of this message based on it's service type
-   */
-  MessagePriority Priority() const;
-
-private:
-  /**
-   * \brief Connection Identifier
-   * Obtained from \saCconnection_handler
-   */
+ private:
   uint32_t connection_key_;
-
-  /**
-   * \brief Message string
-   */
   uint8_t *data_;
-
-  /**
-   * \brief Size of message
-   */
   size_t data_size_;
-
-  /**
-   * \brief Version of SmartDeviceLink protocol (currently 1,2)
-   * used for transferring message.
-   */
   uint32_t protocol_version_;
-
-  /**
-   * \brief Type of service message belongs to
-   */
   ServiceType service_type_;
-
-  /**
-   * specifies current state of message in queue. if false message is "ready to be processed"
-   * otherwise it is "waiting for response"
-   *
-   */
   bool waiting_;
-
   DISALLOW_COPY_AND_ASSIGN(RawMessage);
 };
-
 typedef  utils::SharedPtr<RawMessage> RawMessagePtr;
 }  // namespace protocol_handler
-
-#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RAW_MESSAGE_H_
+#endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_RAW_MESSAGE_H_

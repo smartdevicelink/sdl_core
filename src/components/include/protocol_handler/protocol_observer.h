@@ -30,19 +30,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_H_
-#define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_H_
+#define SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_H_
 
-#include "protocol_handler/raw_message.h"
+#include "protocol/raw_message.h"
 #include "utils/shared_ptr.h"
 
 /**
- *\namespace NsProtocolHandler
+ *\namespace protocol_handlerHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
 namespace protocol_handler {
-
-typedef  utils::SharedPtr<RawMessage> RawMessagePtr;
 
 /**
  * \class IProtocolObserver
@@ -68,4 +66,4 @@ class ProtocolObserver {
 };
 }  // namespace protocol_handler
 
-#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_OBSERVER_H_

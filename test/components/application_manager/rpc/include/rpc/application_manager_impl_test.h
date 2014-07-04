@@ -65,7 +65,7 @@
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
 
-#include "protocol_handler/service_type.h"
+#include "protocol/raw_message.h"
 
 #include "utils/macro.h"
 #include "utils/logger.h"

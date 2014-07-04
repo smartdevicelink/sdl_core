@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_MESSAGE_LOOP_THREAD_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_MESSAGE_LOOP_THREAD_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_THREADS_MESSAGE_LOOP_THREAD_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_THREADS_MESSAGE_LOOP_THREAD_H_
 
 #include <string>
 #include <queue>
@@ -65,7 +65,7 @@ class MessageLoopThread {
      */
     virtual void Handle(const Message& message) = 0;
 
-    virtual ~Handler(){}
+    virtual ~Handler() {}
   };
 
   /*
@@ -79,7 +79,6 @@ class MessageLoopThread {
   // Places a message to the therad's queue. Thread-safe.
   void PostMessage(const Message& message);
  private:
-
   /*
    * Implementation of ThreadDelegate that actually pumps the queue and is
    * able to correctly shut it down
@@ -163,7 +162,5 @@ void MessageLoopThread<Q>::LoopThreadDelegate::DrainQue() {
     handler_.Handle(message_queue_.pop());
   }
 }
-
-} // namespace utils
-
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_MESSAGE_LOOP_THREAD_H_
+}  // namespace threads
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_THREADS_MESSAGE_LOOP_THREAD_H_

@@ -40,7 +40,7 @@ namespace transport_manager {
 TransportAdapterEvent::TransportAdapterEvent(
     int type, transport_adapter::TransportAdapter *transport_adapter,
     const DeviceUID &device_handle, const ApplicationHandle &application_id,
-    RawMessageSptr data, BaseError *error)
+    RawMessagePtr data, BaseError *error)
     : event_type_(type),
       application_id_(application_id),
       device_uid_(device_handle),
@@ -61,7 +61,7 @@ void TransportAdapterEvent::set_transport_adapter(
     transport_adapter::TransportAdapter *transport_adapter) {
   transport_adapter_ = transport_adapter;
 }
-void TransportAdapterEvent::set_data(RawMessageSptr message) {
+void TransportAdapterEvent::set_data(RawMessagePtr message) {
   event_data_ = message;
 }
 
@@ -80,7 +80,7 @@ transport_adapter::TransportAdapter *TransportAdapterEvent::transport_adapter(
   return transport_adapter_;
 }
 
-RawMessageSptr TransportAdapterEvent::data(void) const { return event_data_; }
+RawMessagePtr TransportAdapterEvent::data(void) const { return event_data_; }
 
 const DeviceUID &TransportAdapterEvent::device_uid() const {
   return device_uid_;

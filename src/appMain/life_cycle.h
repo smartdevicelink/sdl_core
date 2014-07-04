@@ -66,7 +66,7 @@
 #ifdef ENABLE_SECURITY
 namespace security_manager {
 class CryptoManager;
-class SecurityManager;
+class SecurityManagerImpl;
 }  // namespace security_manager
 #endif  // ENABLE_SECURITY
 
@@ -90,7 +90,7 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     application_manager::ApplicationManagerImpl* app_manager_;
 #ifdef ENABLE_SECURITY
     security_manager::CryptoManager* crypto_manager_;
-    security_manager::SecurityManager* security_manager_;
+    security_manager::SecurityManagerImpl* security_manager_;
 #endif  // ENABLE_SECURITY
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
     hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;

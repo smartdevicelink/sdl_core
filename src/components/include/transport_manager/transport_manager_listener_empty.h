@@ -30,12 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_EMPTY_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_EMPTY_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_EMPTY_H_
+#define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_EMPTY_H_
 
-#include "transport_manager/info.h"
+#include <vector>
+
 #include "transport_manager/transport_manager_listener.h"
-#include "transport_manager/transport_manager_impl.h"
 
 namespace transport_manager {
 
@@ -43,13 +43,11 @@ namespace transport_manager {
  * @brief Empty implementation class for transport manager listener.
  */
 class TransportManagerListenerEmpty : public TransportManagerListener {
-  const TransportManagerImpl *transport_manager_;
  public:
-
   /**
    * @Destructor.
    */
-  virtual ~TransportManagerListenerEmpty(){}
+  virtual ~TransportManagerListenerEmpty() {}
 
   /**
    * @brief Reaction to the event, when the list of devices is updated.
@@ -94,8 +92,8 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
    * @param devcie_info Variable that hold information about device.
    * @param connection_id connection unique identifier.
    */
-  virtual void OnConnectionEstablished(const DeviceInfo &device_info,
-                                       const ConnectionUID &connection_id) {
+  virtual void OnConnectionEstablished(const DeviceInfo& device_info,
+                                       const ConnectionUID& connection_id) {
   }
 
   /**
@@ -104,7 +102,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
    * @param device_info Variable that hold information about device.
    * @param error Error information about possible reason of connect failure.
    */
-  virtual void OnConnectionFailed(const DeviceInfo &device_info,
+  virtual void OnConnectionFailed(const DeviceInfo& device_info,
                                   const ConnectError& error) {
   }
 
@@ -156,7 +154,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
    * @param message Smart pointer to the raw massage.
    * @param connection_id Connection unique identifier.
    */
-  virtual void OnTMMessageReceived(const RawMessageSptr message) {
+  virtual void OnTMMessageReceived(const RawMessagePtr message) {
   }
 
   /**
@@ -172,7 +170,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   /**
    * @brief Reaction to the event, when transport manager sent a massage.
    */
-  virtual void OnTMMessageSend(const RawMessageSptr message) {
+  virtual void OnTMMessageSend(const RawMessagePtr message) {
   }
 
   /**
@@ -182,8 +180,8 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
    * @param message Smart pointer to the raw massage.
    */
   virtual void OnTMMessageSendFailed(const DataSendError& error,
-                                     const RawMessageSptr message) {
+                                     const RawMessagePtr message) {
   }
 };
 }  // namespace transport_manager
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_EMPTY_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_EMPTY_H_

@@ -29,13 +29,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
-#define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
+#ifndef SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_H_
+#define SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_H_
 
-#include "protocol_handler/raw_message.h"
+#include "protocol/raw_message.h"
 
 /**
- *\namespace NsProtocolHandler
+ *\namespace protocol_handlerHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
 namespace protocol_handler {
@@ -78,7 +78,8 @@ class ProtocolHandler {
    * \param number_of_frames Number of frames processed by
    * streaming server and displayed to user.
    */
-  virtual void SendFramesNumber(uint32_t connection_key, int32_t number_of_frames) = 0;
+  virtual void SendFramesNumber(uint32_t connection_key,
+                                int32_t number_of_frames) = 0;
 
   /**
    * \brief Prepare and send heartbeat message to mobile app
@@ -95,6 +96,7 @@ class ProtocolHandler {
     * \param session_id ID of session to be ended
     */
   virtual void SendEndSession(int32_t connection_id, uint8_t session_id) = 0;
+
  protected:
   /**
    * \brief Destructor
@@ -103,5 +105,4 @@ class ProtocolHandler {
   }
 };
 }  //  namespace protocol_handler
-
-#endif  //  SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER
+#endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_H_

@@ -1,6 +1,4 @@
-/**
- * \file device.h
- * \brief Device class header file.
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -36,8 +34,10 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_DEVICE_H_
 
 #include <string>
+#include <vector>
 
 #include "transport_manager/common.h"
+#include "utils/shared_ptr.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -118,11 +118,8 @@ class Device {
    **/
   bool keep_on_disconnect_;
 };
-
 typedef utils::SharedPtr<Device> DeviceSptr;
 typedef std::vector<DeviceSptr> DeviceVector;
-
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif /* DEVICE_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_DEVICE_H_

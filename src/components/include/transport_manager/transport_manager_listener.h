@@ -30,14 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_
+#define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_
 
+#include <vector>
 #include "transport_manager/common.h"
 #include "transport_manager/info.h"
 #include "transport_manager/error.h"
+#include "protocol/raw_message.h"
 
 namespace transport_manager {
+
+using ::protocol_handler::RawMessagePtr;
 
 class TransportManagerListener {
  public:
@@ -64,9 +68,9 @@ class TransportManagerListener {
    *
    * @param device_info Variable that hold information about device.
    */
-  virtual void OnDeviceFound(const DeviceInfo &device_info) = 0;
-  virtual void OnDeviceAdded(const DeviceInfo &device_info) = 0;
-  virtual void OnDeviceRemoved(const DeviceInfo &device_info) = 0;
+  virtual void OnDeviceFound(const DeviceInfo& device_info) = 0;
+  virtual void OnDeviceAdded(const DeviceInfo& device_info) = 0;
+  virtual void OnDeviceRemoved(const DeviceInfo& device_info) = 0;
 
   /**
    * @brief Reaction to the event, when scanning of devices is finished.
@@ -86,8 +90,8 @@ class TransportManagerListener {
    * @param devcie_info Variable that hold information about device.
    * @param connection_id connection unique identifier.
    */
-  virtual void OnConnectionEstablished(const DeviceInfo &device_info,
-                                       const ConnectionUID &connection_id) = 0;
+  virtual void OnConnectionEstablished(const DeviceInfo& device_info,
+                                       const ConnectionUID& connection_id) = 0;
 
   /**
    * @brief Reaction to the event, when connection to the device is failed.
@@ -95,7 +99,7 @@ class TransportManagerListener {
    * @param device_info Variable that hold information about device.
    * @param error Error information about possible reason of connect failure.
    */
-  virtual void OnConnectionFailed(const DeviceInfo &device_info,
+  virtual void OnConnectionFailed(const DeviceInfo& device_info,
                                   const ConnectError& error) = 0;
 
   /**
@@ -143,7 +147,7 @@ class TransportManagerListener {
    *
    * @param message Recieved message
    **/
-  virtual void OnTMMessageReceived(const RawMessageSptr message) = 0;
+  virtual void OnTMMessageReceived(const RawMessagePtr message) = 0;
 
   /**
    * @brief Reaction to the event, when receiving of massage for transport manager is failed.
@@ -157,7 +161,7 @@ class TransportManagerListener {
   /**
    * @brief Reaction to the event, when transport manager sent a massage.
    */
-  virtual void OnTMMessageSend(const RawMessageSptr message) = 0;
+  virtual void OnTMMessageSend(const RawMessagePtr message) = 0;
 
   /**
    * @brief Reaction to the event, when sending of massage by transport manager is failed.
@@ -166,7 +170,7 @@ class TransportManagerListener {
    * @param message Smart pointer to the raw massage.
    */
   virtual void OnTMMessageSendFailed(const DataSendError& error,
-                                     const RawMessageSptr message) = 0;
+                                     const RawMessagePtr message) = 0;
 };
 }  //  namespace transport_manager
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER
+#endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_

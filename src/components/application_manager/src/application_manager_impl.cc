@@ -740,7 +740,7 @@ void ApplicationManagerImpl::OnErrorSending(
 }
 
 void ApplicationManagerImpl::OnDeviceListUpdated(
-  const connection_handler::DeviceList& device_list) {
+    const connection_handler::DeviceMap& device_list) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnDeviceListUpdated");
 
   smart_objects::SmartObject* update_list = new smart_objects::SmartObject;

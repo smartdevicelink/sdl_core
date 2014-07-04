@@ -29,7 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "protocol_handler/rpc_type.h"
+
+#include "protocol/rpc_type.h"
 
 #include "utils/logger.h"
 #include "utils/macro.h"
@@ -49,13 +50,13 @@ bool IsSupported(RpcType rpc_type) {
       return false;
   }
 }
-} // namespace
+}  // namespace
 
 RpcType RpcTypeFromByte(uint8_t byte) {
   RpcType type = RpcType(byte);
   bool supported_type = IsSupported(type);
   if (!supported_type) {
-    LOG4CXX_INFO(logger_, "Invalid service type: "<< int32_t(byte));
+    LOG4CXX_INFO(logger_, "Invalid service type: " << int32_t(byte));
   }
 
   return supported_type ? type : kRpcTypeReserved;
@@ -80,7 +81,6 @@ const char *RpcTypeToString(RpcType type) {
 }
 
 std::ostream &operator<<(std::ostream &os, RpcType rpc_type) {
-  return os<<RpcTypeToString(rpc_type);
+  return os << RpcTypeToString(rpc_type);
 }
-
-} // namespace protocol_handler
+}  // namespace protocol_handler

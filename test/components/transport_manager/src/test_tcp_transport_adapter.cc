@@ -15,6 +15,9 @@ using ::test::components::transport_manager::MockTransportAdapterListener;
 namespace transport_manager {
 namespace transport_adapter {
 
+using ::protocol_handler::RawMessage;
+using ::protocol_handler::RawMessagePtr;
+
 TEST(TcpAdapterBasicTest, Basic) {
   TransportAdapter* transport_adapter = new TcpTransportAdapter(12345);
 
@@ -191,7 +194,7 @@ struct SendHelper {
   explicit SendHelper(TransportAdapter::Error expected_error)
       : expected_error_(expected_error),
         message_(
-            new protocol_handler::RawMessage(
+            new RawMessage(
                 1,
                 1,
                 const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>("efgh")),
@@ -207,7 +210,7 @@ struct SendHelper {
                                                              message_));
   }
   TransportAdapter::Error expected_error_;
-  transport_manager::RawMessageSptr message_;
+  RawMessagePtr message_;
 };
 
 TEST_F(TcpAdapterTestWithListenerAutoStart, Send) {
@@ -264,7 +267,7 @@ TEST_F(TcpAdapterTestWithListenerAutoStart, SendToDisconnected) {
 TEST_F(TcpAdapterTestWithListenerAutoStart, SendFailed) {
   static unsigned char zzz[2000000];  //2000000 is much more than socket buffer
   SendHelper* helper = new SendHelper(TransportAdapter::OK);
-  helper->message_ = new protocol_handler::RawMessage(1, 1, zzz, sizeof(zzz));
+  helper->message_ = new RawMessage(1, 1, zzz, sizeof(zzz));
   {
     ::testing::InSequence seq;
     EXPECT_CALL(mock_dal_, OnConnectDone(transport_adapter_, _, _)).WillOnce(

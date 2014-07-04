@@ -1,7 +1,4 @@
 /*
- * \file transport_manager.cc
- * \brief
- *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -37,8 +34,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "protocol_handler/raw_message.h"
-#include "protocol_handler/protocol_handler_impl.h"
+#include "protocol/raw_message.h"
 #include "transport_manager/info.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager_impl.h"
@@ -159,7 +155,7 @@ class MyTransportListener
     pthread_mutex_unlock(&test->test_mutex);
   }
 
-  void OnTMMessageReceived(const RawMessageSptr message) {
+  void OnTMMessageReceived(const RawMessagePtr message) {
     static int count = 0;
     if (++count == 100) {
       pthread_mutex_lock(&test->test_mutex);
@@ -168,9 +164,9 @@ class MyTransportListener
     }
   }
 
-  void OnTMMessageSend(const RawMessageSptr message) {
+  void OnTMMessageSend(const RawMessagePtr message) {
   }
-  
+
  private:
   TransportManagerTest *test;
 };
@@ -261,7 +257,7 @@ TEST_F(TransportManagerTest, ConnectDisconnectSendReciveDone) {
   unsigned char data[kSize] = {0x20, 0x07, 0x01, 0x00, 0x00, 0x00,
                                0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
   for (int i = 0; i < kTimes; ++i) {
-    const RawMessageSptr kMessage =
+    const RawMessagePtr kMessage =
         new RawMessage(kConnection, kVersionProtocol, data, kSize);
     tm->SendMessageToDevice(kMessage);
     usleep(1000);

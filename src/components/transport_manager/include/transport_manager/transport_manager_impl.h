@@ -1,6 +1,4 @@
-/**
- * \file transport_manager_impl.h
- * \brief TransportManagerImpl class header file.
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -50,32 +48,18 @@
 #include <algorithm>
 
 #include "utils/timer_thread.h"
-#include "transport_manager/common.h"
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
+#include "protocol/raw_message.h"
+#include "utils/rwlock.h"
 #ifdef TIME_TESTER
 #include "transport_manager/time_metric_observer.h"
 #endif  // TIME_TESTER
-#include "utils/rwlock.h"
 
 using ::transport_manager::transport_adapter::TransportAdapterListener;
 
 namespace transport_manager {
-
-/**
- * @enum Transport manager states.
- */
-enum {
-  E_SUCCESS = 0,
-  E_TM_IS_NOT_INITIALIZED,
-  E_INVALID_HANDLE,
-  E_CONNECTION_IS_TO_SHUTDOWN,
-  E_CONNECTION_EXISTS,
-  E_ADAPTER_EXISTS,
-  E_ADAPTERS_FAIL,
-  E_INTERNAL_ERROR
-};
 
 /**
  * @brief Implementation of transport manager.
@@ -174,7 +158,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    **/
-  virtual int SendMessageToDevice(const RawMessageSptr message);
+  virtual int SendMessageToDevice(const RawMessagePtr message);
 
   /**
    * @brief Post event in the event queue.
@@ -261,7 +245,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @param message Smart pointer to the raw massage.
    **/
-  void PostMessage(const RawMessageSptr message);
+  void PostMessage(const RawMessagePtr message);
 
   /**
    * @brief update message in queue
@@ -271,7 +255,7 @@ class TransportManagerImpl : public TransportManager {
    * @see @ref components_transportmanager_client_connection_management
    **/
   /*not clear when this function shall be used
-   * void updateMessage(const RawMessageSptr old_message, const RawMessageSptr
+   * void updateMessage(const RawMessagePtr old_message, const RawMessagePtr
    * new_message);*/
 
   /**
@@ -279,7 +263,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @param message Smart pointer to the raw massage.
    **/
-  void RemoveMessage(const RawMessageSptr message);
+  void RemoveMessage(const RawMessagePtr message);
 
   /**
    * @brief Post event to the container of events.
@@ -292,7 +276,7 @@ class TransportManagerImpl : public TransportManager {
    * @brief Type definition of container that holds smart pointer to the raw
    *massages.
    **/
-  typedef std::list<RawMessageSptr> MessageQueue;
+  typedef std::list<RawMessagePtr> MessageQueue;
 
   /**
    * @brief Type definition of container that holds events of device adapters.
@@ -446,9 +430,8 @@ class TransportManagerImpl : public TransportManager {
       transport_adapter_listeners_;
 
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
-      DeviceList;
-  DeviceList device_list_;
-
+  DeviceInfoList;
+  DeviceInfoList device_list_;
 
   void AddConnection(const ConnectionInternal& c);
   void RemoveConnection(uint32_t id);
@@ -469,7 +452,7 @@ class TransportManagerImpl : public TransportManager {
                 unsigned char** frame);
 
   void OnDeviceListUpdated(TransportAdapter* ta);
-  static Connection convert(ConnectionInternal& p);
+  static Connection convert(const ConnectionInternal& p);
 };
 // class ;
 

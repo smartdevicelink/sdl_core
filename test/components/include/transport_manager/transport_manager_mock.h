@@ -36,14 +36,22 @@
 #include <gmock/gmock.h>
 #include <string>
 #include "transport_manager/transport_manager.h"
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 namespace test {
 namespace components {
-namespace transport_manager {
+namespace transport_manager_test {
+
+using ::transport_manager::DeviceHandle;
+using ::transport_manager::ConnectionUID;
+using ::transport_manager::transport_adapter::TransportAdapter;
+using ::transport_manager::TransportAdapterEvent;
+using ::transport_manager::TransportManagerListener;
+using ::protocol_handler::RawMessagePtr;
 /*
- * MOCK implementation of transport_manager::TransportManager interface
+ * MOCK implementation of ::transport_manager::TransportManager interface
  */
-class TransportManagerMock: public transport_manager::TransportManager {
+class TransportManagerMock: public ::transport_manager::TransportManager {
  public:
   MOCK_METHOD0(Init,
                int());
@@ -62,7 +70,7 @@ class TransportManagerMock: public transport_manager::TransportManager {
   MOCK_METHOD1(ReceiveEventFromDevice,
                int(const TransportAdapterEvent &));
   MOCK_METHOD1(AddTransportAdapter,
-               int(transport_adapter::TransportAdapter *));
+               int(TransportAdapter *));
   MOCK_METHOD1(AddEventListener,
                int(TransportManagerListener *));
   MOCK_METHOD0(Stop,
@@ -72,7 +80,7 @@ class TransportManagerMock: public transport_manager::TransportManager {
   MOCK_CONST_METHOD1(Visibility,
                      int(const bool &));
 };
-}  // namespace transport_manager
+}  // namespace transport_manager_test
 }  // namespace components
 }  // namespace test
 #endif  // TEST_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_MOCK_H_

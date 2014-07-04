@@ -30,15 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SHARED_PTR_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SHARED_PTR_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_SHARED_PTR_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_SHARED_PTR_H_
 
 #include <assert.h>
 #include <stddef.h>
 #include <stdint.h>
 
-#include "macro.h"
-#include "atomic.h"
+#include "utils/macro.h"
+#include "utils/atomic.h"
 
 namespace utils {
 /**
@@ -340,6 +340,6 @@ inline bool SharedPtr<ObjectType>::valid() const {
 
 }  // namespace utils
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SHARED_PTR_H_
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_SHARED_PTR_H_
 
 // vim: set ts=2 sw=2 et:

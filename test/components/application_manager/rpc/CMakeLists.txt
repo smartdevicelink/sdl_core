@@ -14,11 +14,7 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   ../../../../src/appMain
   ../../../../src/components/application_manager/include
-  ../../../../src/components/protocol_handler/include
   ../../../../src/components/hmi_message_handler/include
-  ../../../../src/components/transport_manager/include
-  ../../../../src/components/connection_handler/include
-  ../../../../src/components/utils/include
   ../../../../src/components/smart_objects/include
   ../../../../src/components/request_watchdog/include
   ../../../../src/components/media_manager/include
@@ -46,7 +42,6 @@ set(LIBRARIES
     formatters
     ProtocolHandler
     connectionHandler
-    TransportManager
     HMIMessageHandler
     MessageBroker
     MessageBrokerClient

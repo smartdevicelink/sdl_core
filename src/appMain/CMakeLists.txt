@@ -63,6 +63,7 @@ set(LIBRARIES
   SmartObjects
   ${TIME_TESTER_LIB}
   formatters
+  ProtocolLibrary
   ProtocolHandler
   connectionHandler
   TransportManager

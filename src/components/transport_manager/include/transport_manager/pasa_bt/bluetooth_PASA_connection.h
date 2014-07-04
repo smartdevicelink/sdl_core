@@ -71,7 +71,7 @@ class BluetoothPASAConnection : public Connection {
    *
    * @return Error Information about possible reason of sending data failure.
    */
-  TransportAdapter::Error SendData(RawMessageSptr message);
+  TransportAdapter::Error SendData(RawMessagePtr message);
 
   /**
    * @brief Disconnect the current connection.
@@ -134,7 +134,7 @@ class BluetoothPASAConnection : public Connection {
   /**
    * @brief Frames that must be sent to remote device.
    **/
-  typedef std::queue<RawMessageSptr> FrameQueue;
+  typedef std::queue<RawMessagePtr> FrameQueue;
   FrameQueue frames_to_send_;
   mutable sync_primitives::Lock frames_to_send_lock_;
 

@@ -1,7 +1,4 @@
-/**
- * \file thread_delegate.h
- * \brief
- *
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_DELEGATE_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_DELEGATE_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_THREADS_THREAD_DELEGATE_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_THREADS_THREAD_DELEGATE_H_
 
 #include <pthread.h>
 
@@ -67,5 +64,4 @@ class ThreadDelegate {
 };
 
 }  // namespace threads
-
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_DELEGATE_H_
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_THREADS_THREAD_DELEGATE_H_

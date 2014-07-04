@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BYTE_ORDER_H_
-#define BYTE_ORDER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_BYTE_ORDER_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_BYTE_ORDER_H_
 
 #ifdef __QNX__
 #include <gulliver.h>
@@ -43,4 +43,4 @@
 #define LE_TO_BE32(x) bswap_32(x)
 #endif
 
-#endif /* BYTE_ORDER_H_ */
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_BYTE_ORDER_H_

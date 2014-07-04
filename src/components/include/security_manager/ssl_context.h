@@ -30,18 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SSL_CONTEXT_H_
-#define SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SSL_CONTEXT_H_
+#ifndef SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SSL_CONTEXT_H_
+#define SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SSL_CONTEXT_H_
 
 #include <cstddef>  // for size_t typedef
 #include <string>
 
+// TODO(EZamakhov): update brief info
 /**
  * \class security_manager::SSLContext
  * \brief Class responsible for SSL connection establishing
  *        and data encryption and decryption within this connection
  *
- * \fn security_manager::SSLContext::DoHandshakeStep(const uint8_t*  in_data,  size_t in_data_size, const uint8_t** out_data, size_t *out_data_size)
+ * \fn security_manager::SSLContext::DoHandshakeStep(
+ *             const uint8_t*  in_data,  size_t in_data_size,
+ *             const uint8_t** out_data, size_t *out_data_size)
  * \brief Performs SSL handshake
  * In order to establish an SSL connection it's
  * necessary to perform handshake process. During this process
@@ -52,7 +55,6 @@
  * \param in_data_size   [in]   size of data in \ref in_data buffer
  * \param out_data       [out]  response of SSL context if there is one. If not, equals NULL
  * \param out_data_size  [out]  length of response
-  * \return
  */
 
 namespace security_manager {
@@ -80,4 +82,4 @@ class SSLContext {
   virtual ~SSLContext() { }
 };
 }  // namespace security_manager
-#endif  // SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_SSL_CONTEXT_H_
+#endif  // SRC_COMPONENTS_INCLUDE_SECURITY_MANAGER_SSL_CONTEXT_H_

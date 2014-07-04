@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_THREADS_THREAD_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_THREADS_THREAD_H_
 
 #if defined(OS_POSIX)
 #include <pthread.h>
@@ -77,7 +77,6 @@ typedef pthread_t PlatformThreadHandle;
  */
 class Thread {
  public:
-
   /*
    * Class that represents unique in-process thread identifier
    * due to restriction of pthread API it only allows checks
@@ -175,7 +174,7 @@ class Thread {
    * Get thread name.
    * @return thread name
    */
-  const std::string &thread_name() {
+  const std::string& thread_name() {
     return name_;
   }
 
@@ -244,9 +243,10 @@ class Thread {
   DISALLOW_COPY_AND_ASSIGN(Thread);
 };
 
-inline bool operator!= (Thread::Id left, Thread::Id right) {return !(left == right); }
+inline bool operator!= (Thread::Id left, Thread::Id right) {
+  return !(left == right);
+}
 std::ostream& operator<<(std::ostream& os, Thread::Id thread_id);
 
 }  // namespace threads
-
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_THREADS_THREAD_H_
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_THREADS_THREAD_H_

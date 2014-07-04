@@ -34,8 +34,8 @@
 #include <atomic.h>
 #endif
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_ATOMIC_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_ATOMIC_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_ATOMIC_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_ATOMIC_H_
 
 #if defined(__QNXNTO__)
 #define atomic_post_inc(ptr) atomic_add_value((ptr), 1)
@@ -66,4 +66,4 @@
 #define atomic_pointer_assign(dst, src) (dst) = (src)
 #endif
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_ATOMIC_H_
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_ATOMIC_H_

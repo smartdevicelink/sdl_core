@@ -40,13 +40,14 @@
 #include "protocol_handler/protocol_payload.h"
 #include "utils/byte_order.h"
 #include "security_manager/security_manager_mock.h"
+#include "security_manager/security_query_matcher.h"
 
 // Test values for compare after serialization and byteorder convertion
 #define SEQ_NUMBER    0x12345678u
 #define CONNECTION_KEY 0xABCDEF0u
 
-namespace test  {
-namespace components  {
+namespace test {
+namespace components {
 namespace security_manager_test {
 
   using ::security_manager::SecurityQuery;

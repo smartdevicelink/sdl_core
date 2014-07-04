@@ -29,10 +29,11 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RPC_TYPE_H_
-#define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RPC_TYPE_H_
+#ifndef SRC_COMPONENTS_INCLUDE_PROTOCOL_RPC_TYPE_H_
+#define SRC_COMPONENTS_INCLUDE_PROTOCOL_RPC_TYPE_H_
 
 #include <stdint.h>
+
 #include <ostream>
 
 namespace protocol_handler {
@@ -53,7 +54,5 @@ uint8_t RpcTypeToByte(RpcType type);
 const char *RpcTypeToString(RpcType type);
 
 std::ostream &operator<<(std::ostream &os, RpcType rpc_type);
-
-} // namespace protocol_handler
-
-#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_RPC_TYPE_H_
+}  // namespace protocol_handler
+#endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_RPC_TYPE_H_

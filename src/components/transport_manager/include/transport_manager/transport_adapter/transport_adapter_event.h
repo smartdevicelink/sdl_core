@@ -1,6 +1,4 @@
-/**
- * \file transport_adapter_event.h
- * \brief TransportAdapterEvent class header file.
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -37,8 +35,11 @@
 
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
+#include "protocol/raw_message.h"
 
 namespace transport_manager {
+
+using ::protocol_handler::RawMessagePtr;
 
 class TransportAdapterEvent {
  public:
@@ -56,7 +57,7 @@ class TransportAdapterEvent {
                         transport_adapter::TransportAdapter *transport_adapter,
                         const DeviceUID &device_handle,
                         const ApplicationHandle &application_id,
-                        RawMessageSptr data, BaseError *error);
+                        RawMessagePtr data, BaseError *error);
 
   /**
    * @brief Destructor.
@@ -90,7 +91,7 @@ class TransportAdapterEvent {
    *
    * @param message Smart pointer to the raw message.
    */
-  void set_data(RawMessageSptr message);
+  void set_data(RawMessagePtr message);
 
   /**
    * @brief Set field that responsible for the pointer to error.
@@ -139,7 +140,7 @@ class TransportAdapterEvent {
    *
    * @return Smart pointer to the raw message.
    */
-  RawMessageSptr data(void) const;
+  RawMessagePtr data(void) const;
 
   /**
    * @brief Return pointer to the class that contain details of error.
@@ -153,11 +154,9 @@ class TransportAdapterEvent {
   ApplicationHandle application_id_; /**< Handle of application. */
   DeviceUID device_uid_;             /**< Device unique identifier. */
   transport_adapter::TransportAdapter *transport_adapter_;
-  RawMessageSptr event_data_; /**< Smart pointer to the raw message. */
+  RawMessagePtr event_data_; /**< Smart pointer to the raw message. */
   BaseError *event_error_;    /** Pointer to the class that contain details of
                               error */
 };
-
-}  // namespace
-
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_EVENT
+}  // namespace transport_manager
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_

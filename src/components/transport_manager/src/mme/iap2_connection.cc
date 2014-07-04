@@ -70,7 +70,7 @@ bool IAP2Connection::Init() {
   }
 }
 
-TransportAdapter::Error IAP2Connection::SendData(RawMessageSptr message) {
+TransportAdapter::Error IAP2Connection::SendData(RawMessagePtr message) {
   LOG4CXX_TRACE(logger_, "iAP2: sending data on protocol " << protocol_name_);
   if (iap2_eap_send(iap2ea_hdl_, message->data(), message->data_size()) != -1) {
     LOG4CXX_INFO(logger_, "iAP2: data on protocol " << protocol_name_ << " sent successfully");
@@ -96,7 +96,7 @@ void IAP2Connection::ReceiveData() {
   int size = iap2_eap_recv(iap2ea_hdl_, buffer_, kBufferSize);
   if (size != -1) {
     LOG4CXX_INFO(logger_, "iAP2: received " << size << " bytes on protocol " << protocol_name_);
-    RawMessageSptr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
+    RawMessagePtr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
     controller_->DataReceiveDone(device_uid_, app_handle_, message);
   }
   else {

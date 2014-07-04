@@ -36,10 +36,12 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
-
-using transport_manager::transport_adapter::TransportAdapter;
+#include "protocol/raw_message.h"
 
 namespace transport_manager {
+
+using transport_manager::transport_adapter::TransportAdapter;
+using ::protocol_handler::RawMessagePtr;
 
 class TransportManagerImpl;
 
@@ -232,7 +234,7 @@ class TransportAdapterListenerImpl
   virtual void OnDataReceiveDone(const TransportAdapter* adapter,
                                  const DeviceUID& device,
                                  const ApplicationHandle& app_id,
-                                 const RawMessageSptr data_container);
+                                 const RawMessagePtr data_container);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -263,7 +265,7 @@ class TransportAdapterListenerImpl
   virtual void OnDataSendDone(const TransportAdapter* adapter,
                               const DeviceUID& device,
                               const ApplicationHandle& app_id,
-                              const RawMessageSptr data_container);
+                              const RawMessagePtr data_container);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -273,7 +275,7 @@ class TransportAdapterListenerImpl
   virtual void OnDataSendFailed(const TransportAdapter* adapter,
                                 const DeviceUID& device,
                                 const ApplicationHandle& app_id,
-                                const RawMessageSptr data_container,
+                                const RawMessagePtr data_container,
                                 const DataSendError& error);
 
   /**

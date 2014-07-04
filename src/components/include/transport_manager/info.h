@@ -33,8 +33,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_INFO_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_INFO_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_INFO_H_
+#define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_INFO_H_
 
 #include <string>
 #include "transport_manager/common.h"
@@ -49,14 +49,12 @@ namespace transport_manager {
  */
 class Info {
  protected:
-
   /**
    * @brief Variable that hold name.
    */
   std::string name_;
 
  public:
-
   /**
    * @brief Constructor.
    */
@@ -68,13 +66,13 @@ class Info {
    * @param name Info class object name.
    */
   explicit Info(std::string name)
-      : name_(name) {
+    : name_(name) {
   }
 
   /**
    * @brief Return string with name.
    */
-  std::string name() const{
+  std::string name() const {
     return name_;
   }
 
@@ -89,7 +87,6 @@ class Info {
  */
 class DeviceInfo : public Info {
  protected:
-
   /**
    * @brief Variable that hold MAC address of device.
    */
@@ -101,7 +98,6 @@ class DeviceInfo : public Info {
   DeviceHandle device_handle_;
 
  public:
-
   /**
    * @brief Constructor.
    *
@@ -111,9 +107,9 @@ class DeviceInfo : public Info {
    */
   DeviceInfo(DeviceHandle device_handle, std::string mac_address,
              std::string name)
-      : Info(name),
-        mac_address_(mac_address),
-        device_handle_(device_handle) {
+    : Info(name),
+      mac_address_(mac_address),
+      device_handle_(device_handle) {
   }
 
   /**
@@ -133,7 +129,7 @@ class DeviceInfo : public Info {
   /**
    * @brief Overloaded operator "==".
    */
-  friend bool operator ==(const DeviceInfo &first, const DeviceInfo &second);
+  friend bool operator ==(const DeviceInfo& first, const DeviceInfo& second);
 
   // Needed for std::set container
   bool operator <(const DeviceInfo& than) const {
@@ -144,18 +140,10 @@ class DeviceInfo : public Info {
 /**
  * @brief Assign fields of one DeviceInfo class to another.
  */
-inline bool operator ==(const DeviceInfo &first, const DeviceInfo &second) {
+inline bool operator ==(const DeviceInfo& first, const DeviceInfo& second) {
   return first.name_ == second.name_
-      && first.mac_address_ == second.mac_address_
-      && first.device_handle_ == second.device_handle_;
+         && first.mac_address_ == second.mac_address_
+         && first.device_handle_ == second.device_handle_;
 }
-
-/**
- * @brief AdapterInfo class
- */
-class AdapterInfo : public Info {
-
-};
-}
-
-#endif /* SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_INFO_H_ */
+}  // namespace transport_manager
+#endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_INFO_H_

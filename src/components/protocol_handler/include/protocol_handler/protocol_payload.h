@@ -37,7 +37,7 @@
 #include <string>
 #include <vector>
 
-#include "protocol_handler/rpc_type.h"
+#include "protocol/rpc_type.h"
 
 namespace utils {
 class BitStream;

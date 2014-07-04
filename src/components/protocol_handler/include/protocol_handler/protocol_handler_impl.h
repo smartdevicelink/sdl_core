@@ -38,7 +38,6 @@
 #include <set>
 #include "utils/prioritized_queue.h"
 #include "utils/message_queue.h"
-#include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/shared_ptr.h"
 
@@ -54,13 +53,11 @@
 #endif  // TIME_TESTER
 
 #ifdef ENABLE_SECURITY
-namespace security_manager {
-class SecurityManager;
-}  // namespace security_manager
+#include "security_manager/security_manager.h"
 #endif  // ENABLE_SECURITY
 
 /**
- *\namespace NsProtocolHandler
+ *\namespace protocol_handlerHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
 namespace protocol_handler {

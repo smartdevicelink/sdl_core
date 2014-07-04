@@ -86,4 +86,4 @@ class PrioritizedQueue {
 
 }
 
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_

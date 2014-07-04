@@ -30,67 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_RWLOCK_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_RWLOCK_H_
+#ifndef TEST_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_MOCK_H_
+#define TEST_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_MOCK_H_
 
-#if defined(OS_POSIX)
-#include <pthread.h>
-#endif
+#include <gmock/gmock.h>
+#include "security_manager/security_manager_listener.h"
 
-#include "utils/macro.h"
-
-namespace sync_primitives {
-
-namespace impl {
-#if defined(OS_POSIX)
-typedef pthread_rwlock_t PlatformRWLock;
-#else
-#error Please implement rwlock for your OS
-#endif
-}  // namespace impl
-
-class RWLock {
+namespace test {
+namespace components {
+namespace security_manager_test {
+/*
+ * MOCK implementation of ::security_manager::SecurityManagerListener
+ */
+class SMListenerMock: public ::security_manager::SecurityManagerListener {
  public:
-  RWLock();
-  ~RWLock();
-  void AcquireForReading();
-  void AcquireForWriting();
-  void Release();
-
- private:
-  impl::PlatformRWLock rwlock_;
+  MOCK_METHOD2(OnHandshakeDone,
+               bool(uint32_t connection_key,
+                    bool success));
 };
-
-class AutoReadLock {
- public:
-  explicit AutoReadLock(RWLock& rwlock) : rwlock_(rwlock) {
-    rwlock_.AcquireForReading();
-  }
-  ~AutoReadLock() {
-    rwlock_.Release();
-  }
-
- private:
-  RWLock& rwlock_;
-
-  DISALLOW_COPY_AND_ASSIGN(AutoReadLock);
-};
-
-class AutoWriteLock {
- public:
-  explicit AutoWriteLock(RWLock& rwlock) : rwlock_(rwlock) {
-    rwlock_.AcquireForWriting();
-  }
-  ~AutoWriteLock() {
-    rwlock_.Release();
-  }
-
- private:
-  RWLock& rwlock_;
-
-  DISALLOW_COPY_AND_ASSIGN(AutoWriteLock);
-};
-
-}  // namespace sync_primitives
-
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_RWLOCK_H_
+}  // namespace security_manager_test
+}  // namespace components
+}  // namespace test
+#endif  // TEST_COMPONENTS_INCLUDE_SECURITY_MANAGER_SECURITY_MANAGER_LISTENER_MOCK_H_

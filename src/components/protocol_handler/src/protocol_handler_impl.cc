@@ -32,6 +32,7 @@
 
 #include "protocol_handler/protocol_handler_impl.h"
 #include <memory.h>
+#include <algorithm>    // std::find
 
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
@@ -944,7 +945,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
 //        const std::string error_text("Connection is already protected");
 //        LOG4CXX_WARN(logger_, error_text << ", key " << connection_key);
 //        security_manager_->SendInternalError(
-//              connection_key, security_manager::SecurityQuery::ERROR_SERVICE_ALREADY_PROTECTED, error_text);
+//              connection_key, security_manager::SecurityManager::ERROR_SERVICE_ALREADY_PROTECTED, error_text);
         protocol_handler_->SendStartSessionNAck(connection_id_, session_id_,
                                                 protocol_version_, service_type_);
       } else {
@@ -1084,8 +1085,7 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile &message) {
 }
 
 #ifdef ENABLE_SECURITY
-void ProtocolHandlerImpl::set_security_manager(
-    security_manager::SecurityManager *security_manager) {
+void ProtocolHandlerImpl::set_security_manager(security_manager::SecurityManager* security_manager) {
   if (!security_manager) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to SecurityManager.");
     return;
@@ -1122,7 +1122,7 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
     const std::string error_text(context->LastError());
     LOG4CXX_ERROR(logger_, "Enryption failed: " << error_text);
     security_manager_->SendInternalError(connection_key,
-          security_manager::SecurityQuery::ERROR_ENCRYPTION_FAILED, error_text);
+          security_manager::SecurityManager::ERROR_ENCRYPTION_FAILED, error_text);
     return RESULT_OK;
   };
   LOG4CXX_DEBUG(logger_, "Encrypted " << packet->data_size() << " bytes to "
@@ -1158,7 +1158,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
     const std::string error_text("Fail decryption for unprotected service ");
     LOG4CXX_ERROR(logger_, error_text << static_cast<int>(packet->service_type()));
     security_manager_->SendInternalError(connection_key,
-          security_manager::SecurityQuery::ERROR_SERVICE_NOT_PROTECTED, error_text);
+          security_manager::SecurityManager::ERROR_SERVICE_NOT_PROTECTED, error_text);
     return RESULT_ENCRYPTION_FAILED;
   }
   const uint8_t *out_data;
@@ -1168,7 +1168,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
     const std::string error_text(context->LastError());
     LOG4CXX_ERROR(logger_, "Decryption failed: " << error_text);
     security_manager_->SendInternalError(connection_key,
-          security_manager::SecurityQuery::ERROR_DECRYPTION_FAILED, error_text);
+          security_manager::SecurityManager::ERROR_DECRYPTION_FAILED, error_text);
     return RESULT_ENCRYPTION_FAILED;
   };
   LOG4CXX_DEBUG(logger_, "Decrypted " << packet->data_size() << " bytes to "

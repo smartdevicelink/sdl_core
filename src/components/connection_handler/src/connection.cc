@@ -42,7 +42,7 @@
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/ssl_context.h"
-#include "security_manager/security_query.h"
+#include "security_manager/security_manager.h"
 #endif  // ENABLE_SECURITY
 
 /**
@@ -218,11 +218,11 @@ int Connection::SetSSLContext(uint8_t session_id,
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
     LOG4CXX_WARN(logger_, "Session not found in this connection!");
-    return security_manager::SecurityQuery::ERROR_INTERNAL;
+    return security_manager::SecurityManager::ERROR_INTERNAL;
   }
   Session &session = session_it->second;
   session.ssl_context = context;
-  return security_manager::SecurityQuery::ERROR_SUCCESS;
+  return security_manager::SecurityManager::ERROR_SUCCESS;
 }
 
 security_manager::SSLContext *Connection::GetSSLContext(

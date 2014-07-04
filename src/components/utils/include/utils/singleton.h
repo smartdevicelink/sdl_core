@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,9 +33,9 @@
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SINGLETON_H_
 
-#include "lock.h"
-#include "memory_barrier.h"
-#include "atomic.h"
+#include "utils/lock.h"
+#include "utils/memory_barrier.h"
+#include "utils/atomic.h"
 
 namespace utils {
 

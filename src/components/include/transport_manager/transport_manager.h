@@ -1,6 +1,4 @@
-/**
- * \file transport_manager.h
- * \brief TransportManager class header file.
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,17 +30,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
+#define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_
 
-#include "protocol_handler/protocol_handler.h"  //YK: temp solution until B1.0 release
 #include "transport_manager/common.h"
-#include "transport_manager/info.h"
+#include "transport_manager/transport_manager_listener.h"
+#include "protocol/raw_message.h"
 
 namespace transport_manager {
 
+// TODO(Ezamakhov): Move TransportAdapterEvent as interface
 class TransportAdapterEvent;
-class TransportManagerListener;
+
+using ::protocol_handler::RawMessagePtr;
 
 namespace transport_adapter {
 class TransportAdapter;
@@ -97,14 +97,14 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int Disconnect(const ConnectionUID &connection_id) = 0;
+  virtual int Disconnect(const ConnectionUID& connection_id) = 0;
 
   /**
    * @brief Disconnect and clear all unprocessed data.
    *
    * @param connection Connection unique identifier.
    */
-  virtual int DisconnectForce(const ConnectionUID &connection_id) = 0;
+  virtual int DisconnectForce(const ConnectionUID& connection_id) = 0;
 
   /**
    * @brief Post new message in queue for massages destined to device.
@@ -113,7 +113,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int SendMessageToDevice(const RawMessageSptr message) = 0;
+  virtual int SendMessageToDevice(const RawMessagePtr message) = 0;
 
   /**
    * @brief Post event in the event queue.
@@ -122,7 +122,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int ReceiveEventFromDevice(const TransportAdapterEvent &event) = 0;
+  virtual int ReceiveEventFromDevice(const TransportAdapterEvent& event) = 0;
 
   /**
    * @brief Add transport adapter.
@@ -132,7 +132,7 @@ class TransportManager {
    * @return Error code.
    **/
   virtual int AddTransportAdapter(
-      transport_adapter::TransportAdapter *transport_adapter) = 0;
+    transport_adapter::TransportAdapter* transport_adapter) = 0;
 
   /**
    * @brief Post listener to the container of transport manager listeners.
@@ -141,7 +141,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int AddEventListener(TransportManagerListener *listener) = 0;
+  virtual int AddEventListener(TransportManagerListener* listener) = 0;
 
   /**
    * @brief Stop work finally. No new events guaranteed after method finish.
@@ -166,8 +166,7 @@ class TransportManager {
    *
    * @return Code error.
    */
-  virtual int Visibility(const bool &on_off) const = 0;
+  virtual int Visibility(const bool& on_off) const = 0;
 };
-}
-
-#endif
+}  // namespace transport_manager
+#endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_H_

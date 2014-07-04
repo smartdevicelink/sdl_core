@@ -545,7 +545,7 @@ smart_objects::SmartObject* MessageHelper::CreateBlockedByPoliciesResponse(
 }
 
 smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
-  const connection_handler::DeviceList& devices) {
+  const connection_handler::DeviceMap& devices) {
   smart_objects::SmartObject* device_list_so = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
 
@@ -557,7 +557,7 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
         smart_objects::SmartType_Array);
   smart_objects::SmartObject& list_so = (*device_list_so)[strings::device_list];
   int32_t index = 0;
-  for (connection_handler::DeviceList::const_iterator it = devices.begin();
+  for (connection_handler::DeviceMap::const_iterator it = devices.begin();
        devices.end() != it; ++it) {
     const connection_handler::Device& d =
       static_cast<connection_handler::Device>(it->second);

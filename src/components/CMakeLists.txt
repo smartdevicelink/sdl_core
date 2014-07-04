@@ -28,8 +28,11 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-# --- Interfaces
+# --- HMI_API interfaces
 add_subdirectory(./interfaces)
+
+# --- ProtocolHandler
+add_subdirectory(./protocol)
 
 # --- TransportManager
 add_subdirectory(./transport_manager)

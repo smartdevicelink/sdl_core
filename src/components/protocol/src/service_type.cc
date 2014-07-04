@@ -29,8 +29,7 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "protocol_handler/service_type.h"
-#include "protocol_handler/protocol_packet.h"
+#include "protocol/service_type.h"
 
 #include "utils/logger.h"
 #include "utils/macro.h"

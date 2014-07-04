@@ -39,10 +39,7 @@
 #include <gmock/gmock.h>
 
 #include "transport_manager/common.h"
-#include "protocol_handler/raw_message.h"
-
-using ::protocol_handler::RawMessage;
-using ::transport_manager::RawMessageSptr;
+#include "protocol/raw_message.h"
 
 using ::testing::Matcher;
 using ::testing::MatcherInterface;
@@ -52,20 +49,23 @@ namespace test {
 namespace components {
 namespace transport_manager {
 
-class RawMessageMatcher : public MatcherInterface<RawMessageSptr> {
- public:
-  explicit RawMessageMatcher(RawMessageSptr ptr);
+using ::protocol_handler::RawMessage;
+using ::protocol_handler::RawMessagePtr;
 
-  virtual bool MatchAndExplain(const RawMessageSptr ptr,
+class RawMessageMatcher : public MatcherInterface<RawMessagePtr> {
+ public:
+  explicit RawMessageMatcher(RawMessagePtr ptr);
+
+  virtual bool MatchAndExplain(const RawMessagePtr ptr,
                                    MatchResultListener* listener) const;
   virtual void DescribeTo(::std::ostream* os) const;
   virtual void DescribeNegationTo(::std::ostream* os) const;
 
  private:
-  const RawMessageSptr ptr_;
+  const RawMessagePtr ptr_;
 };
 
-inline const Matcher<RawMessageSptr> RawMessageEq(RawMessageSptr msg) {
+inline const Matcher<RawMessagePtr> RawMessageEq(RawMessagePtr msg) {
   return MakeMatcher(new RawMessageMatcher(msg));
 }
 

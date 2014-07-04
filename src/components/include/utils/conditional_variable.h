@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_
 
 #if defined(OS_POSIX)
 #include <pthread.h>
@@ -48,7 +48,7 @@ namespace impl {
 #if defined(OS_POSIX)
 typedef pthread_cond_t PlatformConditionalVariable;
 #endif
-} // namespace impl
+}  // namespace impl
 
 /*
  * Conditional variable wrapper
@@ -81,7 +81,7 @@ class ConditionalVariable {
 
   // Wait forever or up to milliseconds time limit
   void Wait(AutoLock& auto_lock);
-  WaitStatus WaitFor(AutoLock& auto_lock, int32_t milliseconds );
+  WaitStatus WaitFor(AutoLock& auto_lock, int32_t milliseconds);
  private:
   impl::PlatformConditionalVariable cond_var_;
 
@@ -89,6 +89,5 @@ class ConditionalVariable {
   DISALLOW_COPY_AND_ASSIGN(ConditionalVariable);
 };
 
-} // namespace sync_primitives
-
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_
+}  // namespace sync_primitives
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_CONDITIONAL_VARIABLE_H_

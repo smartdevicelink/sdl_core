@@ -163,7 +163,7 @@ class TransportAdapterImpl : public TransportAdapter,
    **/
   virtual TransportAdapter::Error SendData(const DeviceUID& device_handle,
                                            const ApplicationHandle& app_handle,
-                                           const RawMessageSptr data);
+                                           const RawMessagePtr data);
 
   /**
    * @brief Start client listener.
@@ -337,7 +337,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual void DataReceiveDone(const DeviceUID& device_handle,
                                const ApplicationHandle& app_handle,
-                               RawMessageSptr message);
+                               RawMessagePtr message);
 
   /**
    * @brief Launch OnDataReceiveFailed event in the device adapter listener.
@@ -359,7 +359,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual void DataSendDone(const DeviceUID& device_handle,
                             const ApplicationHandle& app_handle,
-                            RawMessageSptr message);
+                            RawMessagePtr message);
 
   /**
    * @brief Launch OnDataSendFailed event in the device adapter listener.
@@ -371,7 +371,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual void DataSendFailed(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle,
-                              RawMessageSptr message,
+                              RawMessagePtr message,
                               const DataSendError& error);
 
   /**
@@ -457,12 +457,6 @@ class TransportAdapterImpl : public TransportAdapter,
    * @brief Flag variable that notify initialized device adapter or not.
    */
   bool initialised_;
-
-  /**
-   * @brief Type definition of container(map) that holds device unique
-   *identifier(key value) and smart pointer to the device(mapped value).
-   **/
-  typedef std::map<DeviceUID, DeviceSptr> DeviceMap;
 
   /**
    * @brief Structure that holds information about connection.

@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TIME_METRIC_OBSERVER_H_
 
 #include "transport_manager/common.h"
+#include "protocol/raw_message.h"
 #include "utils/date_time.h"
 
 namespace transport_manager {

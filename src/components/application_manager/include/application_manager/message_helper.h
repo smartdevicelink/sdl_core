@@ -165,7 +165,7 @@ class MessageHelper {
      *
      */
     static smart_objects::SmartObject* CreateDeviceListSO(
-      const connection_handler::DeviceList& devices);
+      const connection_handler::DeviceMap& devices);
 
     static smart_objects::SmartObject* CreateModuleInfoSO(
       uint32_t function_id);

@@ -326,6 +326,12 @@ if (HMIADAPTER STREQUAL "mqueue")
     add_definitions(-DHMI_JSON_API)
 endif()
 
+# --- Directory with SDL interfaces, global types and ProtocolLib component
+include_directories(
+  ${CMAKE_SOURCE_DIR}/src/components/include
+  ${CMAKE_SOURCE_DIR}/src/components/protocol/include
+)
+
 # --- 3rd party libs
 set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party)
 set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/3rd_party)

@@ -41,6 +41,7 @@ set(default_sources
   ./src/socket_streamer_adapter.cc
 )
 set(LIBRARIES
+  ProtocolLibrary
 )
 endif()
 

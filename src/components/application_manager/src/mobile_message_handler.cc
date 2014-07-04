@@ -34,7 +34,6 @@
 
 #include "utils/macro.h"
 #include "application_manager/mobile_message_handler.h"
-#include "protocol_handler/service_type.h"
 #include "protocol_handler/protocol_payload.h"
 #include "protocol_handler/protocol_packet.h"
 #include "utils/bitstream.h"

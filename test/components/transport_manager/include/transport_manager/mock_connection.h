@@ -1,6 +1,6 @@
 /*
  * \file mock_connection.h
- * \brief 
+ * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -40,15 +40,16 @@
 #include "transport_manager/error.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 #include "transport_manager/transport_adapter/threaded_socket_connection.h"
+#include "protocol/raw_message.h"
 
 using ::transport_manager::ApplicationHandle;
 using ::transport_manager::DeviceHandle;
 using ::transport_manager::transport_adapter::Connection;
 using ::transport_manager::transport_adapter::TransportAdapterController;
 using ::transport_manager::ConnectError;
-using ::transport_manager::RawMessageSptr;
 using ::transport_manager::transport_adapter::ThreadedSocketConnection;
 using ::transport_manager::transport_adapter::TransportAdapter;
+using ::protocol_handler::RawMessagePtr;
 namespace test {
 namespace components {
 namespace transport_manager {

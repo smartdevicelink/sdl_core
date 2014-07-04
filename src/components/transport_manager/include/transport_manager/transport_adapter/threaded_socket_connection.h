@@ -61,7 +61,7 @@ class ThreadedSocketConnection : public Connection {
    *
    * @return Error Information about possible reason of sending data failure.
    */
-  TransportAdapter::Error SendData(RawMessageSptr message);
+  TransportAdapter::Error SendData(RawMessagePtr message);
 
   /**
    * @brief Disconnect the current connection.
@@ -143,7 +143,7 @@ class ThreadedSocketConnection : public Connection {
   /**
    * @brief Frames that must be sent to remote device.
    **/
-  typedef std::queue<RawMessageSptr> FrameQueue;
+  typedef std::queue<RawMessagePtr> FrameQueue;
   FrameQueue frames_to_send_;
   mutable pthread_mutex_t frames_to_send_mutex_;
 

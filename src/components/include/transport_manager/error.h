@@ -1,6 +1,4 @@
-/**
- * \file error.h
- * \brief Error classes header file.
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -32,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_ERROR_H_
+#define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_ERROR_H_
 
 #include <string>
 
@@ -126,7 +124,7 @@ class DataSendError : public BaseError {
    *
    * @param Error description.
    */
-  explicit DataSendError(const std::string &desc) : BaseError(desc) {}
+  explicit DataSendError(const std::string& desc) : BaseError(desc) {}
 };
 
 /**
@@ -143,5 +141,4 @@ class CommunicationError : public BaseError {
 };
 
 }  // namespace transport_manager
-
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_ERROR_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_ERROR_H_

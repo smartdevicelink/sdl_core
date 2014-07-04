@@ -8,12 +8,14 @@ endif(BUILD_TESTS_WITH_HMI)
 # --- GoogleTest example
 #add_subdirectory(./gtest-example)
 
+include_directories(
+  ${CMAKE_SOURCE_DIR}/test/components/include)
+
 # --- components tests
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/policy/test/policy ./policy)
 add_subdirectory(./tools)
-
 
 set (INCLUDE_DIR
   ${GMOCK_INCLUDE_DIRECTORY}

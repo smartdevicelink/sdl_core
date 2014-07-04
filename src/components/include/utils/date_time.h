@@ -29,8 +29,8 @@
 * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_DATE_TIME_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_DATE_TIME_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_DATE_TIME_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_DATE_TIME_H_
 
 #if defined(OS_POSIX)
 #include <sys/time.h>
@@ -41,25 +41,25 @@ typedef struct timeval TimevalStruct;
 namespace date_time {
 
 class DateTime {
-  public:
-    static const int32_t MILLISECONDS_IN_SECOND = 1000;
-    static const int32_t MICROSECONDS_IN_MILLISECONDS = 1000;
+ public:
+  static const int32_t MILLISECONDS_IN_SECOND = 1000;
+  static const int32_t MICROSECONDS_IN_MILLISECONDS = 1000;
 
-    static TimevalStruct getCurrentTime();
+  static TimevalStruct getCurrentTime();
 
-    // return MILLISECONDS count
-    static int64_t getmSecs(const TimevalStruct& time);
-    // return MICROSECONDS count
-    static int64_t getuSecs(const TimevalStruct& time);
+  // return MILLISECONDS count
+  static int64_t getmSecs(const TimevalStruct& time);
+  // return MICROSECONDS count
+  static int64_t getuSecs(const TimevalStruct& time);
 
-    // return MILLISECONDS count between sinceTime value and current time
-    static int64_t calculateTimeSpan(const TimevalStruct& sinceTime);
+  // return MILLISECONDS count between sinceTime value and current time
+  static int64_t calculateTimeSpan(const TimevalStruct& sinceTime);
 
-    // return MILLISECONDS count between time1 and time2
-    static int64_t calculateTimeDiff(const TimevalStruct& time1,
-                                     const TimevalStruct& time2);
+  // return MILLISECONDS count between time1 and time2
+  static int64_t calculateTimeDiff(const TimevalStruct& time1,
+                                   const TimevalStruct& time2);
 };
 
 }  // namespace date_time
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_DATE_TIME_H_
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_DATE_TIME_H_

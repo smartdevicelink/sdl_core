@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -29,8 +29,8 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOCK_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOCK_H_
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_LOCK_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_LOCK_H_
 
 #if defined(OS_POSIX)
 #include <pthread.h>
@@ -126,7 +126,5 @@ class AutoUnlock {
  private:
   DISALLOW_COPY_AND_ASSIGN(AutoUnlock);
 };
-
-} // sync_primitives
-
-#endif // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOCK_H_
+}  // namespace sync_primitives
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_LOCK_H_

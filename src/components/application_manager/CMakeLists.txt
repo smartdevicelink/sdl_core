@@ -408,6 +408,7 @@ endif (${HMI_DBUS_API})
 SET (LIBRARIES
   UsageStatistics
   dl
+  ProtocolLibrary
 )
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")

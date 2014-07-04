@@ -30,21 +30,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_SESSION_OBSERVER_H_
-#define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_SESSION_OBSERVER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_SESSION_OBSERVER_H_
+#define SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_SESSION_OBSERVER_H_
 
 #include <list>
 #include <string>
 #include "transport_manager/transport_manager.h"
-#include "connection_handler/connection_handler.h"
-
 #ifdef ENABLE_SECURITY
-namespace security_manager {
-class SSLContext;
-}  // namespace security_manager
+#include "security_manager/ssl_context.h"
 #endif  // ENABLE_SECURITY
 /**
- *\namespace NsProtocolHandler
+ *\namespace protocol_handlerHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
 namespace protocol_handler {
@@ -87,7 +83,7 @@ class SessionObserver {
       const transport_manager::ConnectionUID &connection_handle,
       const uint8_t sessionId,
       const uint32_t &hashCode,
-      const ServiceType &service_type) = 0;
+      const protocol_handler::ServiceType &service_type) = 0;
 
   /**
    * \brief Creates unique identifier of session (can be used as hash)
@@ -170,6 +166,7 @@ class SessionObserver {
       const uint32_t &key,
       const protocol_handler::ServiceType &service_type) = 0;
 #endif  // ENABLE_SECURITY
+
  protected:
   /**
    * \brief Destructor
@@ -178,4 +175,4 @@ class SessionObserver {
   }
 };
 }  // namespace protocol_handler
-#endif  // SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_SESSION_OBSERVER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_SESSION_OBSERVER_H_

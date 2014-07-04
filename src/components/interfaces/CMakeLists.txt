@@ -22,7 +22,7 @@ IF (${HMI_DBUS_API})
     add_custom_command( OUTPUT ${hpp_file} ${cpp_file}
                         COMMAND ${INTEFRACE_GENERATOR_CMD} ${full_xml_name} hmi_apis ${CMAKE_CURRENT_BINARY_DIR} "--parser-type" "jsonrpc"
                         DEPENDS ${INTERFACE_GENERATOR_DEPENDENCIES} ${full_xml_name}
-			COMMENT "Generating files:\n   ${hpp_file}\n   ${cpp_file}\nfrom:\n   QT_HMI_API.xml ..."
+      COMMENT "Generating files:\n   ${hpp_file}\n   ${cpp_file}\nfrom:\n   QT_HMI_API.xml ..."
                         VERBATIM
                        )
 
@@ -33,18 +33,18 @@ IF (${HMI_DBUS_API})
         ${CMAKE_BINARY_DIR}
     )
 
-    add_custom_command( 
+    add_custom_command(
           OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/HMI_API.h"
-	  COMMAND sed "-e" "s/QT_HMI_API/HMI_API/g" "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API.h" > "${CMAKE_CURRENT_BINARY_DIR}/HMI_API.h"
-	  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API.h")
-    add_custom_command( 
+    COMMAND sed "-e" "s/QT_HMI_API/HMI_API/g" "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API.h" > "${CMAKE_CURRENT_BINARY_DIR}/HMI_API.h"
+    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API.h")
+    add_custom_command(
           OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.h"
-	  COMMAND sed "-e" "s/QT_HMI_API/HMI_API/g" "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.h" > "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.h"
-	  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.h")
-    add_custom_command( 
+    COMMAND sed "-e" "s/QT_HMI_API/HMI_API/g" "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.h" > "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.h"
+    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.h")
+    add_custom_command(
           OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc"
-	  COMMAND sed "-e" "s/QT_HMI_API/HMI_API/g" "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.cc" > "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc"
-	  DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.cc" "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.h" "${CMAKE_CURRENT_BINARY_DIR}/HMI_API.h")
+    COMMAND sed "-e" "s/QT_HMI_API/HMI_API/g" "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.cc" > "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc"
+    DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/QT_HMI_API_schema.cc" "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.h" "${CMAKE_CURRENT_BINARY_DIR}/HMI_API.h")
   add_library(HMI_API "${CMAKE_CURRENT_BINARY_DIR}/HMI_API_schema.cc")
 ENDIF (${HMI_DBUS_API})
 

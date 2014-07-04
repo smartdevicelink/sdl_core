@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_A2DP_SOURCE_PLAYER_ADAPTER_H_
 
 #include <map>
-#include "protocol_handler/raw_message.h"
+#include "protocol/raw_message.h"
 #include "media_manager/media_adapter_impl.h"
 
 namespace threads {

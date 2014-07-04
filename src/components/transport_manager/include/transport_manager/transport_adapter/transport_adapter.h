@@ -39,25 +39,31 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <map>
+
+#include "device.h"
 #include "utils/shared_ptr.h"
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"
 #ifdef TIME_TESTER
 #include "transport_manager/time_metric_observer.h"
 #endif  // TIME_TESTER
+#include "protocol/raw_message.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
+using ::protocol_handler::RawMessagePtr;
+
 class TransportAdapterListener;
+
+// TODO(EZamakhov): cahnge to DeviceUID
 typedef std::string DeviceType;
-typedef int ApplicationHandle;
-typedef std::vector<ApplicationHandle> ApplicationList;
 /**
- * @brief Type definition of container(vector) that holds device unique
- * identifiers.
- */
-typedef std::vector<DeviceUID> DeviceList;
+ * @brief Type definition of container(map) that holds device unique
+ *identifier(key value) and smart pointer to the device(mapped value).
+ **/
+typedef std::map<DeviceUID, DeviceSptr> DeviceMap;
 /**
  * @brief Type definition for container(list) that holds pointers to device
  * adapter listeners
@@ -218,7 +224,7 @@ class TransportAdapter {
    **/
   virtual Error SendData(const DeviceUID& device_handle,
                          const ApplicationHandle& app_handle,
-                         const RawMessageSptr data) = 0;
+                         const RawMessagePtr data) = 0;
 
   /**
    * @brief Create container(vector) of device unique identifiers.
@@ -255,10 +261,7 @@ class TransportAdapter {
    */
   virtual TMMetricObserver* GetTimeMetricObserver() = 0;
 #endif  // TIME_TESTER
-
 };
-
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif  //  SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_transport_adapter_transport_adapter
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_H_
