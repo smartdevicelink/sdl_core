@@ -474,8 +474,10 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     /**
      * A set of internal requests' correlation IDs that are currently in
      * progress.
+     *
+     * Comment usage of this technique in order to provide possibility to track all responses
      */
-    private final Set<Integer> internalRequestCorrelationIDs = new HashSet<Integer>();
+    //private final Set<Integer> internalRequestCorrelationIDs = new HashSet<Integer>();
 
     /**
      * Correlation ID that was last used for messages created internally.
@@ -1051,7 +1053,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 mSyncConnection = new SyncConnection(syncSession, mTransportConfig, _interfaceBroker);
             }
 
-            internalRequestCorrelationIDs.clear();
+            //internalRequestCorrelationIDs.clear();
 
             mSyncConnection.init();
 
@@ -1526,14 +1528,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         boolean success = false;
         final Integer responseCorrelationId = response.getCorrelationId();
         final String appId = syncSession.getAppIdBySessionId(sessionId);
-        boolean doProcessResponse = true;
-
-        Logger.d(LOG_TAG + " > " + response.getFunctionName() + " " + response.getCorrelationId());
-
         if (protocolMessageHolder.hasMessages(responseCorrelationId)) {
-
-            Logger.d(LOG_TAG + " >> " + response.getResultCode() + " " + response.getCorrelationId());
-
             if (Result.SUCCESS == response.getResultCode()) {
                 final ProtocolMessage pm = protocolMessageHolder.peekNextMessage(
                         responseCorrelationId);
@@ -1547,8 +1542,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                     if (response.getFunctionName() != null &&
                             response.getFunctionName().equals(Names.PutFile)) {
 
-                        doProcessResponse = false;
-
                         final PutFileResponse putFile = new PutFileResponse(hash);
                         if (_callbackToUIThread) {
                             // Run in UI thread
@@ -1561,6 +1554,18 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                         } else {
                             mProxyListener.onPutFileResponse(appId, putFile);
                         }
+                    } else {
+                        if (_callbackToUIThread) {
+                            // Run in UI thread
+                            _mainUIHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mProxyListener.onRPCResponse(appId, response);
+                                }
+                            });
+                        } else {
+                            mProxyListener.onRPCResponse(appId, response);
+                        }
                     }
 
                     queueOutgoingMessage(pm);
@@ -1570,22 +1575,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 protocolMessageHolder.clearMessages(responseCorrelationId);
             }
         }
-
-        Logger.d(LOG_TAG + " >>> " + doProcessResponse + " " + response.getCorrelationId());
-        if (doProcessResponse) {
-            if (_callbackToUIThread) {
-                // Run in UI thread
-                _mainUIHandler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        mProxyListener.onRPCResponse(appId, response);
-                    }
-                });
-            } else {
-                mProxyListener.onRPCResponse(appId, response);
-            }
-        }
-
         return success;
     }
 
@@ -1599,12 +1588,13 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      * corresponding request is not internal or in case of an error
      */
     protected boolean handleLastInternalResponse(RPCResponse response) {
-        final Integer correlationID = response.getCorrelationId();
+        /*final Integer correlationID = response.getCorrelationId();
         final boolean contains = internalRequestCorrelationIDs.contains(correlationID);
         if (contains) {
             internalRequestCorrelationIDs.remove(correlationID);
         }
-        return contains;
+        Logger.d(LOG_TAG + " LastInternalResponse:" + contains);*/
+        return /*contains*/false;
     }
 
     protected void handleOnSystemRequest(final String appId, Hashtable hash) {
@@ -3292,7 +3282,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             putFile.setLength(data.length);
         }
         sendRPCRequest(appId, putFile);
-        internalRequestCorrelationIDs.add(correlationID);
+        //internalRequestCorrelationIDs.add(correlationID);
     }
 
     @Override
@@ -3314,7 +3304,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             sendRPCRequest(appId, systemRequest);
         }
 
-        internalRequestCorrelationIDs.add(correlationId);
+        //internalRequestCorrelationIDs.add(correlationId);
     }
 
     /**

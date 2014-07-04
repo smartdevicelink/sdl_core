@@ -410,7 +410,7 @@ public class PlaceholderFragment extends Fragment {
         int menuSize = menu.size();
         int tabsCount = ((SyncProxyTester) getActivity()).getFragmentsCount();
         int nextMenuItemOrder = menu.getItem(menuSize - 1).getOrder() + 1;
-        menu.add(0, MenuConstants.MENU_PROXY_START, nextMenuItemOrder++, "Proxy Start");
+        //menu.add(0, MenuConstants.MENU_PROXY_START, nextMenuItemOrder++, "Proxy Start");
         menu.add(0, MenuConstants.MENU_TOGGLE_CONSOLE, nextMenuItemOrder++, "Toggle Console");
         menu.add(0, MenuConstants.MENU_CLEAR, nextMenuItemOrder++, "Clear Messages");
         //if (tabsCount == 1) {
@@ -435,7 +435,7 @@ public class PlaceholderFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-            case MenuConstants.MENU_PROXY_START:
+            /*case MenuConstants.MENU_PROXY_START:
                 if (AppPreferencesManager.getTransportType() == TransportType.BLUETOOTH) {
                     BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
                     if (!mBtAdapter.isEnabled()) {
@@ -462,7 +462,7 @@ public class PlaceholderFragment extends Fragment {
                 executorService.submit(new Runnable() {
                     @Override
                     public void run() {
-                        /*if (mBoundProxyService != null) {
+                        *//*if (mBoundProxyService != null) {
 
                             // We need to set listener to null and then re-init it, unless there will
                             // be another way to check it at 'reset()' method
@@ -477,10 +477,10 @@ public class PlaceholderFragment extends Fragment {
                             // Re-init listener
 
                             mBoundProxyService.setProxyServiceEvent(SyncProxyTester.this);
-                        }*/
+                        }*//*
                     }
                 });
-                return true;
+                return true;*/
             case MenuConstants.MENU_XML_TEST:
                 openXmlFilePathDialog();
                 break;
@@ -1059,7 +1059,6 @@ public class PlaceholderFragment extends Fragment {
                                         UnsubscribeButton msg = new UnsubscribeButton();
                                         msg.setCorrelationId(corrId);
                                         msg.setButtonName(buttonName);
-                                        mLogAdapter.logMessage(msg, true);
                                         sendRPCRequestToProxy(msg);
                                     }
                                     isButtonSubscribed[which] = !isButtonSubscribed[which];

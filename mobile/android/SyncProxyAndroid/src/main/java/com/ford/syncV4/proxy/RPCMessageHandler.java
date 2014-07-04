@@ -100,8 +100,8 @@ public class RPCMessageHandler implements IRPCMessageHandler {
             final RPCResponse response = new RPCResponse(hash);
             final Integer responseCorrelationID = response.getCorrelationId();
 
-            if (!syncProxyBase.handlePartialRPCResponse(sessionId, response, hash) &&
-                    !syncProxyBase.handleLastInternalResponse(response)) {
+            if (!syncProxyBase.handlePartialRPCResponse(sessionId, response, hash)/* &&
+                    !syncProxyBase.handleLastInternalResponse(response)*/) {
 
                 // Check to ensure response is not from an internal message (reserved correlation ID)
                 if (syncProxyBase.isCorrelationIDProtected(responseCorrelationID)) {
