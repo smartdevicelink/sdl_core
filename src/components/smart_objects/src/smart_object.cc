@@ -176,8 +176,8 @@ SmartObject::SmartObject(int32_t InitialValue)
 
 int32_t SmartObject::asInt() const {
   int64_t convert = convert_int();
-  DCHECK(convert >= INT_MIN);
-  DCHECK(convert <= INT_MAX);
+  DCHECK(convert >= std::numeric_limits<int32_t>::min());
+  DCHECK(convert <= std::numeric_limits<int32_t>::max());
   return static_cast<int32_t>(convert);
 }
 
@@ -244,8 +244,8 @@ SmartObject::SmartObject(uint32_t InitialValue)
 
 uint32_t SmartObject::asUInt() const {
   int64_t convert = convert_int();
-  DCHECK(convert >= 0);
-  DCHECK(convert <= UINT_MAX);
+  DCHECK(convert >= std::numeric_limits<uint32_t>::min());
+  DCHECK(convert <= std::numeric_limits<uint32_t>::max());
   return static_cast<uint32_t>(convert);
 }
 
