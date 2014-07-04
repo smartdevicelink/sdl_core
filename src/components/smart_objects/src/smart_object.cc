@@ -36,7 +36,6 @@
 #include <inttypes.h>
 #include <limits.h>
 #include <stdlib.h>
-#include <cstdio>
 #include <algorithm>
 #include <sstream>
 #include <iomanip>
@@ -534,15 +533,15 @@ void SmartObject::set_value_string(const std::string& NewValue) {
 
 std::string SmartObject::convert_string(void) const {
   std::string retval;
+  std::stringstream stream;
 
   switch (m_type) {
     case SmartType_String:
       retval = *(m_data.str_value);
       break;
     case SmartType_Integer:
-      char val[20];
-      sprintf(val, "%" PRId64, m_data.int_value);
-      retval = std::string(val);
+      stream << m_data.int_value;
+      retval = stream.str();
       break;
     case SmartType_Character:
       retval = std::string(1, m_data.char_value);
@@ -938,9 +937,9 @@ uint64_t SmartObject::convert_string_to_integer(const std::string* Value) {
   if (0 == Value->size()) {
     return invalid_int64_value;
   }
-  const char* str = Value->c_str();
   int64_t result;
-  sscanf(str, "%" SCNd64, &result);
+  std::stringstream stream(*Value);
+  stream >> result;
   return result;
 }
 
