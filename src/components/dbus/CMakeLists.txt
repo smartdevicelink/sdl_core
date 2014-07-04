@@ -1,4 +1,3 @@
-find_package(DBus)
 include_directories (
   ${DBUS_INCLUDE_DIRS}
   ${CMAKE_CURRENT_SOURCE_DIR}/include/

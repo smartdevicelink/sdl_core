@@ -801,6 +801,12 @@ bool DBusAdapter::GetArrayValue(
     const ford_message_descriptions::ArrayDescription* rules,
     smart_objects::SmartObject& param) {
   smart_objects::SmartObject array(smart_objects::SmartType_Array);
+
+  if (!dbus_message_iter_has_next(iter)) {
+    LOG4CXX_WARN(logger_, "D-Bus message isn't correct");
+    return false;
+  }
+
   int i = 0;
   DBusMessageIter sub_iter;
   dbus_message_iter_recurse(iter, &sub_iter);
@@ -819,6 +825,11 @@ bool DBusAdapter::GetStructValue(
     DBusMessageIter* iter,
     const ford_message_descriptions::StructDescription* rules,
     smart_objects::SmartObject& param) {
+  if (!dbus_message_iter_has_next(iter)) {
+    LOG4CXX_WARN(logger_, "D-Bus message isn't correct");
+    return false;
+  }
+
   DBusMessageIter sub_iter;
   dbus_message_iter_recurse(iter, &sub_iter);
   const ParameterDescription** entry;
@@ -839,9 +850,13 @@ bool DBusAdapter::GetOptionalValue(
     DBusMessageIter* iter,
     const ford_message_descriptions::ParameterDescription* rules,
     smart_objects::SmartObject& param) {
+  if (!dbus_message_iter_has_next(iter)) {
+    LOG4CXX_WARN(logger_, "D-Bus message isn't correct");
+    return false;
+  }
+
   DBusMessageIter sub_iter;
   dbus_message_iter_recurse(iter, &sub_iter);
-
   ford_message_descriptions::ParameterDescription flagRules = { "flag",
       ford_message_descriptions::Boolean, true };
   smart_objects::SmartObject flag;

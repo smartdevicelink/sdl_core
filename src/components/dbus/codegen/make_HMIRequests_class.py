@@ -173,7 +173,7 @@ class Impl(FordXmlParser):
                             out.write('if (reply.argumentAt<' + str(count) + '>().presence) {\n')
                             out.write('  param = CreateQJSValue(reply.argumentAt<' + str(count) + '>().val);\n')
                             out.write('} else {\n')
-                            out.write('  param = QJSValue();\n')
+                            out.write('  param =  Q%sValue(Q%sValue::UndefinedValue);\n' % (prefix_class_item , prefix_class_item))
                             out.write('}\n')
                             out.write('qjsValueList.append(param);\n')
                         else:
