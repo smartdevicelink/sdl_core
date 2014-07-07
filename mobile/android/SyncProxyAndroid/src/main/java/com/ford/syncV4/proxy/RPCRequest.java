@@ -26,9 +26,10 @@ public class RPCRequest extends RPCMessage {
     public RPCRequest(RPCRequest that) {
         // FIXME test this!
         super(that);
-        this.setCorrelationID(that.getCorrelationID());
+        this.setCorrelationId(that.getCorrelationID());
     }
 
+<<<<<<< HEAD
     public Integer getCorrelationID() {
         return (Integer) function.get(Names.correlationID);
     }
@@ -36,6 +37,15 @@ public class RPCRequest extends RPCMessage {
     public void setCorrelationID(Integer correlationID) {
         if (correlationID != null) {
             function.put(Names.correlationID, correlationID);
+=======
+	public Integer getCorrelationID() {
+		return (Integer)function.get(Names.correlationID);
+	}
+	
+	public void setCorrelationId(Integer correlationID) {
+		if (correlationID != null) {
+            function.put(Names.correlationID, correlationID );
+>>>>>>> develop
         } else if (parameters.contains(Names.correlationID)) {
             function.remove(Names.correlationID);
         }

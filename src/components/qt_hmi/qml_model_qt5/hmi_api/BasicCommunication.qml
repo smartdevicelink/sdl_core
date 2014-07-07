@@ -33,7 +33,6 @@
  */
 
 import QtQuick 2.0
-import "../models/RequestToSDL.js" as RequestToSDL
 
 Item {
     function updateDeviceList (deviceList) {

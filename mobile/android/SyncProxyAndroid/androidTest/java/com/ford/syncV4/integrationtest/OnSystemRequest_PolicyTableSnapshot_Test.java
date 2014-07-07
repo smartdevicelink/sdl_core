@@ -168,7 +168,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         checkPutFileJSON(protocolMessage.getData(), fileType);
         final byte[] data = Arrays.copyOfRange(dataSnapshot, 0, maxDataSize);
         assertThat(protocolMessage.getBulkData(), is(data));
-        final int putFileRequestCorrID = protocolMessage.getCorrID();
+        final int putFileRequestCorrID = protocolMessage.getCorrId();
 
         // the listener should not be called for OnSystemRequest
         verifyZeroInteractions(proxyListenerMock);

@@ -2,8 +2,11 @@ package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
+<<<<<<< HEAD
 import com.ford.syncV4.service.secure.SecureServiceRequestResponseSeqNumberHolder;
 
+=======
+>>>>>>> develop
 
 /**
  * Created by Andrew Batutin on 8/21/13
@@ -82,7 +85,7 @@ public class ProtocolMessageConverter {
             }
             BinaryFrameHeader binFrameHeader =
                     ProtocolFrameHeaderFactory.createBinaryFrameHeader(mProtocolMsg.getRPCType(),
-                            mProtocolMsg.getFunctionID(), mProtocolMsg.getCorrID(),
+                            mProtocolMsg.getFunctionID(), mProtocolMsg.getCorrId(),
                             mProtocolMsg.getJsonSize());
             System.arraycopy(binFrameHeader.assembleHeaderBytes(), 0, mData, 0,
                     ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_V_2);

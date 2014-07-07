@@ -529,7 +529,7 @@ public class PlaceholderFragment extends Fragment {
         int menuSize = menu.size();
         int tabsCount = ((SyncProxyTester) getActivity()).getFragmentsCount();
         int nextMenuItemOrder = menu.getItem(menuSize - 1).getOrder() + 1;
-        menu.add(0, MenuConstants.MENU_PROXY_START, nextMenuItemOrder++, "Proxy Start");
+        //menu.add(0, MenuConstants.MENU_PROXY_START, nextMenuItemOrder++, "Proxy Start");
         menu.add(0, MenuConstants.MENU_TOGGLE_CONSOLE, nextMenuItemOrder++, "Toggle Console");
         menu.add(0, MenuConstants.MENU_CLEAR, nextMenuItemOrder++, "Clear Messages");
         //if (tabsCount == 1) {
@@ -554,7 +554,7 @@ public class PlaceholderFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-            case MenuConstants.MENU_PROXY_START:
+            /*case MenuConstants.MENU_PROXY_START:
                 if (AppPreferencesManager.getTransportType() == TransportType.BLUETOOTH) {
                     BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
                     if (!mBtAdapter.isEnabled()) {
@@ -581,7 +581,7 @@ public class PlaceholderFragment extends Fragment {
                 executorService.submit(new Runnable() {
                     @Override
                     public void run() {
-                        /*if (mBoundProxyService != null) {
+                        *//*if (mBoundProxyService != null) {
 
                             // We need to set listener to null and then re-init it, unless there will
                             // be another way to check it at 'reset()' method
@@ -596,10 +596,10 @@ public class PlaceholderFragment extends Fragment {
                             // Re-init listener
 
                             mBoundProxyService.setProxyServiceEvent(SyncProxyTester.this);
-                        }*/
+                        }*//*
                     }
                 });
-                return true;
+                return true;*/
             case MenuConstants.MENU_XML_TEST:
                 openXmlFilePathDialog();
                 break;
@@ -868,7 +868,7 @@ public class PlaceholderFragment extends Fragment {
             if (listObj instanceof RPCRequest) {
                 corrId = ((RPCRequest) listObj).getCorrelationID();
             } else if (listObj instanceof RPCResponse) {
-                corrId = ((RPCResponse) listObj).getCorrelationID();
+                corrId = ((RPCResponse) listObj).getCorrelationId();
             }
 
             try {
@@ -1121,7 +1121,7 @@ public class PlaceholderFragment extends Fragment {
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     Speak msg = new Speak();
-                                    msg.setCorrelationID(getCorrelationId());
+                                    msg.setCorrelationId(getCorrelationId());
                                     String speak1 = txtSpeakText1.getText().toString();
                                     String speak2 = txtSpeakText2.getText().toString();
                                     String speak3 = txtSpeakText3.getText().toString();
@@ -1176,9 +1176,8 @@ public class PlaceholderFragment extends Fragment {
                                                 buttonName, corrId);
                                     } else {
                                         UnsubscribeButton msg = new UnsubscribeButton();
-                                        msg.setCorrelationID(corrId);
+                                        msg.setCorrelationId(corrId);
                                         msg.setButtonName(buttonName);
-                                        mLogAdapter.logMessage(msg, true);
                                         sendRPCRequestToProxy(msg);
                                     }
                                     isButtonSubscribed[which] = !isButtonSubscribed[which];
@@ -1211,7 +1210,7 @@ public class PlaceholderFragment extends Fragment {
 
                                 public void onClick(DialogInterface dialog, int which) {
                                     DeleteInteractionChoiceSet msg = new DeleteInteractionChoiceSet();
-                                    msg.setCorrelationID(getCorrelationId());
+                                    msg.setCorrelationId(getCorrelationId());
                                     int commandSetID = mChoiceSetAdapter.getItem(which);
                                     msg.setInteractionChoiceSetID(commandSetID);
                                     sendRPCRequestToProxy(msg);
@@ -1278,7 +1277,7 @@ public class PlaceholderFragment extends Fragment {
                             builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     ScrollableMessage msg = new ScrollableMessage();
-                                    msg.setCorrelationID(getCorrelationId());
+                                    msg.setCorrelationId(getCorrelationId());
                                     try {
                                         msg.setTimeout(Integer.parseInt(txtTimeout.getText().toString()));
                                     } catch (NumberFormatException e) {
@@ -1334,7 +1333,7 @@ public class PlaceholderFragment extends Fragment {
                                     ChangeRegistration msg = new ChangeRegistration();
                                     msg.setLanguage((Language) spnLanguage.getSelectedItem());
                                     msg.setHmiDisplayLanguage((Language) spnHmiDisplayLanguage.getSelectedItem());
-                                    msg.setCorrelationID(getCorrelationId());
+                                    msg.setCorrelationId(getCorrelationId());
                                     sendRPCRequestToProxy(msg);
                                 }
                             });
@@ -1359,7 +1358,7 @@ public class PlaceholderFragment extends Fragment {
                                     String syncFileName = mPutFileAdapter.getItem(which);
                                     DeleteFile msg = new DeleteFile();
                                     msg.setSyncFileName(syncFileName);
-                                    msg.setCorrelationID(getCorrelationId());
+                                    msg.setCorrelationId(getCorrelationId());
                                     sendRPCRequestToProxy(msg);
                                     mPutFileAdapter.remove(syncFileName);
                                 }
@@ -1387,7 +1386,7 @@ public class PlaceholderFragment extends Fragment {
                                     String syncFileName = txtSyncFileName.getText().toString();
                                     SetAppIcon msg = new SetAppIcon();
                                     msg.setSyncFileName(syncFileName);
-                                    msg.setCorrelationID(getCorrelationId());
+                                    msg.setCorrelationId(getCorrelationId());
                                     sendRPCRequestToProxy(msg);
                                 }
                             });
@@ -1408,7 +1407,7 @@ public class PlaceholderFragment extends Fragment {
                         } else if (adapter.getItem(which).equals(Names.EndAudioPassThru)) {
                             //EndAudioPassThru
                             EndAudioPassThru msg = new EndAudioPassThru();
-                            msg.setCorrelationID(getCorrelationId());
+                            msg.setCorrelationId(getCorrelationId());
                             sendRPCRequestToProxy(msg);
                         } else if (adapter.getItem(which).equals(SyncProxyTester.VehicleDataSubscriptions)) {
                             sendVehicleDataSubscriptions();
@@ -1436,7 +1435,7 @@ public class PlaceholderFragment extends Fragment {
                                         ReadDID msg = new ReadDID();
                                         msg.setEcuName(Integer.parseInt(txtECUNameDID.getText().toString()));
                                         msg.setDidLocation(didlocations);
-                                        msg.setCorrelationID(getCorrelationId());
+                                        msg.setCorrelationId(getCorrelationId());
                                         sendRPCRequestToProxy(msg);
                                     } catch (NumberFormatException e) {
                                         SafeToast.showToastAnyThread("Couldn't parse number");
@@ -1536,7 +1535,7 @@ public class PlaceholderFragment extends Fragment {
                                 if (!ttsChunks.isEmpty()) {
                                     AlertManeuver msg = new AlertManeuver();
                                     msg.setTtsChunks(ttsChunks);
-                                    msg.setCorrelationID(getCorrelationId());
+                                    msg.setCorrelationId(getCorrelationId());
                                     if (useSoftButtons.isChecked()) {
                                         if (currentSoftButtons != null) {
                                             msg.setSoftButtons(currentSoftButtons);
@@ -1570,7 +1569,7 @@ public class PlaceholderFragment extends Fragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 DeleteCommand msg = new DeleteCommand();
-                                msg.setCorrelationID(getCorrelationId());
+                                msg.setCorrelationId(getCorrelationId());
                                 int cmdID = mCommandAdapter.getItem(which);
                                 msg.setCmdID(cmdID);
                                 sendRPCRequestToProxy(msg);
@@ -1638,7 +1637,7 @@ public class PlaceholderFragment extends Fragment {
                             public void onClick(DialogInterface dialog, int id) {
                                 try {
                                     Alert msg = new Alert();
-                                    msg.setCorrelationID(getCorrelationId());
+                                    msg.setCorrelationId(getCorrelationId());
                                     msg.setAlertText1(txtAlertField1.getText().toString());
                                     msg.setAlertText2(txtAlertField2.getText().toString());
                                     msg.setAlertText3(txtAlertField3.getText().toString());
@@ -1684,7 +1683,7 @@ public class PlaceholderFragment extends Fragment {
                      */
                     private void sendUnregisterAppInterface() {
                         UnregisterAppInterface unregisterAppInterface = RPCRequestFactory.buildUnregisterAppInterface();
-                        unregisterAppInterface.setCorrelationID(getCorrelationId());
+                        unregisterAppInterface.setCorrelationId(getCorrelationId());
 
                         SendSingleRPCRequestDialog sendSingleRPCRequestDialog = SendSingleRPCRequestDialog.newInstance();
                         sendSingleRPCRequestDialog.setCommand(unregisterAppInterface);
@@ -1705,7 +1704,7 @@ public class PlaceholderFragment extends Fragment {
                                         SyncSubMenu menu =
                                                 mSubmenuAdapter.getItem(which);
                                         DeleteSubMenu msg = new DeleteSubMenu();
-                                        msg.setCorrelationID(getCorrelationId());
+                                        msg.setCorrelationId(getCorrelationId());
                                         msg.setMenuID(menu.getSubMenuId());
                                         sendRPCRequestToProxy(msg);
                                         if (_latestDeleteSubmenu != null) {
@@ -1756,7 +1755,7 @@ public class PlaceholderFragment extends Fragment {
                                 ((SyncProxyTester) getActivity()).setVehicleDataParam(msg,
                                         GetVehicleData.class, setterName);
 
-                                msg.setCorrelationID(getCorrelationId());
+                                msg.setCorrelationId(getCorrelationId());
                                 sendRPCRequestToProxy(msg);
                             }
                         });
@@ -1782,7 +1781,7 @@ public class PlaceholderFragment extends Fragment {
                                     GetDTCs msg = new GetDTCs();
                                     msg.setEcuName(Integer.parseInt(txtECUNameDTC.getText().toString()));
                                     msg.setDTCMask(Integer.parseInt(txtdtcMask.getText().toString()));
-                                    msg.setCorrelationID(getCorrelationId());
+                                    msg.setCorrelationId(getCorrelationId());
                                     sendRPCRequestToProxy(msg);
                                 } catch (NumberFormatException e) {
                                     SafeToast.showToastAnyThread("Couldn't parse number");
@@ -1864,11 +1863,11 @@ public class PlaceholderFragment extends Fragment {
                                         Vector<String> syncPData = new Vector<String>();
                                         syncPData.add(base64Data);
                                         msg.setData(syncPData);
-                                        msg.setCorrelationID(getCorrelationId());
+                                        msg.setCorrelationId(getCorrelationId());
                                         request = msg;
                                     } else {
                                         SyncPData msg = new SyncPData();
-                                        msg.setCorrelationID(getCorrelationId());
+                                        msg.setCorrelationId(getCorrelationId());
                                         msg.setBulkData(data);
                                         request = msg;
                                     }
@@ -2005,7 +2004,7 @@ public class PlaceholderFragment extends Fragment {
                                     if (useManeuverComplete.isChecked()) {
                                         msg.setManeuverComplete(chkManeuverComplete.isChecked());
                                     }
-                                    msg.setCorrelationID(getCorrelationId());
+                                    msg.setCorrelationId(getCorrelationId());
                                     if (useSoftButtons.isChecked()) {
                                         if (currentSoftButtons != null) {
                                             msg.setSoftButtons(currentSoftButtons);
@@ -2168,7 +2167,7 @@ public class PlaceholderFragment extends Fragment {
                         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 Show msg = new Show();
-                                msg.setCorrelationID(getCorrelationId());
+                                msg.setCorrelationId(getCorrelationId());
 
                                 if (mainField1Check.isChecked()) {
                                     msg.setMainField1(mainField1.getText().toString());
@@ -2325,7 +2324,7 @@ public class PlaceholderFragment extends Fragment {
                             private void sendPerformInteractionRequest(Vector<Integer> choiceSetIDs) {
 
                                 PerformInteraction msg = new PerformInteraction();
-                                msg.setCorrelationID(getCorrelationId());
+                                msg.setCorrelationId(getCorrelationId());
                                 msg.setInitialText(initialText.getText().toString());
                                 msg.setInitialPrompt(((SyncProxyTester) getActivity()).ttsChunksFromString(initialPrompt.getText().toString()));
                                 msg.setInteractionMode(
@@ -2473,7 +2472,7 @@ public class PlaceholderFragment extends Fragment {
                                         tarray.add(t);
                                     }
                                     UpdateTurnList msg = new UpdateTurnList();
-                                    msg.setCorrelationID(getCorrelationId());
+                                    msg.setCorrelationId(getCorrelationId());
                                     msg.setTurnList(tarray);
                                     if (useSoftButtons.isChecked()) {
                                         if (currentSoftButtons != null) {
@@ -2591,7 +2590,7 @@ public class PlaceholderFragment extends Fragment {
                                     }
 
                                     msg.setPosition(Integer.parseInt(txtPosititon.getText().toString()));
-                                    msg.setCorrelationID(getCorrelationId());
+                                    msg.setCorrelationId(getCorrelationId());
                                     sendRPCRequestToProxy(msg);
                                 } catch (NumberFormatException e) {
                                     SafeToast.showToastAnyThread("Couldn't parse number");
@@ -2676,7 +2675,7 @@ public class PlaceholderFragment extends Fragment {
 
                                 if (!properties.isEmpty()) {
                                     msg.setProperties(properties);
-                                    msg.setCorrelationID(getCorrelationId());
+                                    msg.setCorrelationId(getCorrelationId());
                                     sendRPCRequestToProxy(msg);
                                 } else {
                                     SafeToast.showToastAnyThread("No items selected");
@@ -2708,7 +2707,7 @@ public class PlaceholderFragment extends Fragment {
                         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 SetDisplayLayout msg = new SetDisplayLayout();
-                                msg.setCorrelationID(getCorrelationId());
+                                msg.setCorrelationId(getCorrelationId());
                                 msg.setDisplayLayout(editDisplayLayout.getText().toString());
                                 sendRPCRequestToProxy(msg);
                             }
@@ -2727,7 +2726,7 @@ public class PlaceholderFragment extends Fragment {
                      */
                     private void sendGenericRequest() {
                         GenericRequest msg = new GenericRequest();
-                        msg.setCorrelationID(getCorrelationId());
+                        msg.setCorrelationId(getCorrelationId());
                         sendRPCRequestToProxy(msg);
                     }
                 })
@@ -2769,7 +2768,7 @@ public class PlaceholderFragment extends Fragment {
         builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int id) {
                 SetMediaClockTimer msg = new SetMediaClockTimer();
-                msg.setCorrelationID(getCorrelationId());
+                msg.setCorrelationId(getCorrelationId());
                 UpdateMode updateMode =
                         (UpdateMode) spnUpdateMode.getSelectedItem();
                 msg.setUpdateMode(updateMode);
@@ -2842,7 +2841,7 @@ public class PlaceholderFragment extends Fragment {
             public void onClick(DialogInterface dialog, int id) {
                 try {
                     DiagnosticMessage msg = new DiagnosticMessage();
-                    msg.setCorrelationID(getCorrelationId());
+                    msg.setCorrelationId(getCorrelationId());
 
                     if (useTargetID.isChecked()) {
                         msg.setTargetID(Integer.valueOf(

@@ -111,8 +111,10 @@ struct FillNotificationData {
                           std::set<Parameter>& out_parameter);
   private:
     void ExcludeSame();
-    void ExcludeSameHMILevels(const std::set<HMILevel>& source, std::set<HMILevel>& target);
-    void ExcludeSameParameters(const std::set<Parameter>& source, std::set<Parameter>& target);
+    void ExcludeSameHMILevels(std::set<HMILevel>& source,
+                              const std::set<HMILevel>& target);
+    void ExcludeSameParameters(std::set<Parameter>& source,
+                               const std::set<Parameter>& target);
     std::string current_key_;
     Permissions& data_;
 };

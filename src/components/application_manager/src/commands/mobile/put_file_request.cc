@@ -127,7 +127,7 @@ void PutFileRequest::Run() {
       (*message_)[strings::msg_params].keyExists(strings::offset);
 
   if (offset_exist) {
-    offset_ = (*message_)[strings::msg_params][strings::offset].asInt();
+    offset_ = (*message_)[strings::msg_params][strings::offset].asInt64();
   }
 
   if ((*message_)[strings::msg_params].

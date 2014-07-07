@@ -296,8 +296,9 @@ void RequestController::Worker::threadMain() {
     AutoUnlock unlock(auto_lock);
 
     // execute
-    request_impl->Init();
-    request_impl->Run();
+    if (request_impl->CheckPermissions() && request_impl->Init()) {
+      request_impl->Run();
+    }
   }
 
   // for correct thread termination

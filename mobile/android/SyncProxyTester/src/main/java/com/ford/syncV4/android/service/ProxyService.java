@@ -43,6 +43,7 @@ import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.RPCRequestFactory;
+import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.RPCStructFactory;
 import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.SyncProxyConfigurationResources;
@@ -120,7 +121,6 @@ import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
 import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
-import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.HMILevel;
@@ -615,7 +615,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     private void show(String appId, String mainField1, String mainField2) throws SyncException {
         Show msg = new Show();
-        msg.setCorrelationID(getNextCorrelationID());
+        msg.setCorrelationId(getNextCorrelationID());
         msg.setMainField1(mainField1);
         msg.setMainField2(mainField2);
         mSyncProxy.sendRPCRequest(appId, msg);
@@ -966,7 +966,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         });
 
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -988,7 +988,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         });
 
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1009,7 +1009,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         });
 
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1031,7 +1031,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         });
 
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1052,7 +1052,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         });
 
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1066,7 +1066,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 response.getResultCode() + response.getSuccess());
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1079,7 +1079,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                                                 ResetGlobalPropertiesResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1091,7 +1091,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onSetMediaClockTimerResponse(String appId, SetMediaClockTimerResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1103,7 +1103,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onSpeakResponse(String appId, SpeakResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1115,7 +1115,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onSubscribeButtonResponse(String appId, SubscribeButtonResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1127,7 +1127,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onUnsubscribeButtonResponse(String appId, UnsubscribeButtonResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1144,7 +1144,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onGenericResponse(GenericResponse response) {
         createDebugMessageForAdapter(response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(), response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
             }
@@ -1159,7 +1159,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     @Override
     public void onPutFileResponse(String appId, PutFileResponse response) {
         createDebugMessageForAdapter(appId, response);
-        final int receivedCorrelationId = response.getCorrelationID();
+        final int receivedCorrelationId = response.getCorrelationId();
 
         if (AppPreferencesManager.getAutoSetAppIconFlag()) {
             ApplicationIconManager applicationIconManager =
@@ -1184,10 +1184,15 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
+    public void onRPCResponse(String appId, RPCResponse rpcResponse) {
+        createDebugMessageForAdapter(appId, rpcResponse);
+    }
+
+    @Override
     public void onDeleteFileResponse(String appId, DeleteFileResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(), response.getResultCode()));
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(), response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
             }
@@ -1198,7 +1203,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onListFilesResponse(String appId, ListFilesResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1210,7 +1215,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onSetAppIconResponse(String appId, SetAppIconResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1261,7 +1266,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         });
 
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1273,7 +1278,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onAlertResponse(String appId, AlertResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1285,7 +1290,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onPerformInteractionResponse(String appId, PerformInteractionResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1297,7 +1302,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onSetGlobalPropertiesResponse(String appId, SetGlobalPropertiesResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1309,7 +1314,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onShowResponse(String appId, ShowResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1326,7 +1331,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onSliderResponse(String appId, SliderResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1338,7 +1343,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onScrollableMessageResponse(String appId, ScrollableMessageResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1350,7 +1355,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onChangeRegistrationResponse(String appId, ChangeRegistrationResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1362,7 +1367,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onSetDisplayLayoutResponse(String appId, SetDisplayLayoutResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1384,7 +1389,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onPerformAudioPassThruResponse(String appId, PerformAudioPassThruResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1405,7 +1410,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onEndAudioPassThruResponse(String appId, EndAudioPassThruResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1445,7 +1450,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                                                SubscribeVehicleDataResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1458,7 +1463,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                                                  UnsubscribeVehicleDataResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1470,7 +1475,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onGetVehicleDataResponse(String appId, GetVehicleDataResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1482,7 +1487,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onReadDIDResponse(String appId, ReadDIDResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1494,7 +1499,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onGetDTCsResponse(String appId, GetDTCsResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1516,7 +1521,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onShowConstantTBTResponse(String appId, ShowConstantTBTResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1528,7 +1533,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onAlertManeuverResponse(String appId, AlertManeuverResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1540,7 +1545,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void onUpdateTurnListResponse(String appId, UpdateTurnListResponse response) {
         createDebugMessageForAdapter(appId, response);
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1554,7 +1559,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
         if (isModuleTesting()) {
             ModuleTest.sResponses.add(
-                    new Pair<Integer, Result>(response.getCorrelationID(),
+                    new Pair<Integer, Result>(response.getCorrelationId(),
                             response.getResultCode())
             );
             synchronized (mModuleTest.getXMLTestThreadContext()) {
@@ -1825,7 +1830,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         restoreConnectionToRAI.releaseLock();
 
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1851,7 +1856,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
 
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -1864,7 +1869,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createDebugMessageForAdapter(appId, response);
 
         if (isModuleTesting()) {
-            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationID(),
+            ModuleTest.sResponses.add(new Pair<Integer, Result>(response.getCorrelationId(),
                     response.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();
@@ -2034,7 +2039,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             newPutFile = putFile;
         }
 
-        newPutFile.setCorrelationID(mCorrelationId);
+        newPutFile.setCorrelationId(mCorrelationId);
 
         PutFileTransferManager putFileTransferManager = mPutFileTransferManagers.get(appId);
         if (putFileTransferManager == null) {
@@ -2054,7 +2059,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void commandSubscribeButtonPredefined(String appId, ButtonName buttonName,
                                                  int correlationId) {
         SubscribeButton subscribeButton = RPCRequestFactory.buildSubscribeButton();
-        subscribeButton.setCorrelationID(correlationId);
+        subscribeButton.setCorrelationId(correlationId);
         subscribeButton.setButtonName(buttonName);
 
         sendRPCRequestWithPreprocess(appId, subscribeButton);
@@ -2070,7 +2075,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void commandSubscribeButtonResumable(String appId, ButtonName buttonName,
                                                 int correlationId) {
         SubscribeButton subscribeButton = RPCRequestFactory.buildSubscribeButton();
-        subscribeButton.setCorrelationID(correlationId);
+        subscribeButton.setCorrelationId(correlationId);
         subscribeButton.setButtonName(buttonName);
 
         syncProxySendRPCRequestResumable(appId, subscribeButton);
@@ -2523,7 +2528,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     private void setAppIcon(String appId) {
         SetAppIcon setAppIcon = RPCRequestFactory.buildSetAppIcon();
         setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
-        setAppIcon.setCorrelationID(getNextCorrelationID());
+        setAppIcon.setCorrelationId(getNextCorrelationID());
 
         sendRPCRequestWithPreprocess(appId, setAppIcon);
     }
@@ -2700,7 +2705,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         createDebugMessageForAdapter(appId, diagnosticMessageResponse);
         if (isModuleTesting()) {
             ModuleTest.sResponses.add(new Pair<Integer, Result>(
-                    diagnosticMessageResponse.getCorrelationID(),
+                    diagnosticMessageResponse.getCorrelationId(),
                     diagnosticMessageResponse.getResultCode()));
             synchronized (mModuleTest.getXMLTestThreadContext()) {
                 mModuleTest.getXMLTestThreadContext().notify();

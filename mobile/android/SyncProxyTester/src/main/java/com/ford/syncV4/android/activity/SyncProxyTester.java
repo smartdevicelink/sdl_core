@@ -54,7 +54,6 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.TTSChunkFactory;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddSubMenu;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
@@ -1314,7 +1313,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             if (Result.RETRY != result) {
                 return;
             }
-            latestPerformAudioPassThruMsg.setCorrelationID(fragment.getCorrelationId());
+            latestPerformAudioPassThruMsg.setCorrelationId(fragment.getCorrelationId());
             if (mBoundProxyService == null) {
                 return;
             }
@@ -1774,7 +1773,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             return;
         }
         // TODO : Reconsider
-        systemRequest.setCorrelationID(fragment.getCorrelationId());
+        systemRequest.setCorrelationId(fragment.getCorrelationId());
         if (mBoundProxyService == null) {
             return;
         }

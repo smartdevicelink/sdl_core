@@ -554,7 +554,7 @@ class ApplicationManagerImpl : public ApplicationManager,
         const std::vector<uint8_t>& binary_data,
         const std::string& file_path,
         const std::string& file_name,
-        const uint32_t offset);
+        const int64_t offset);
 
     /**
      * @brief Get available app space

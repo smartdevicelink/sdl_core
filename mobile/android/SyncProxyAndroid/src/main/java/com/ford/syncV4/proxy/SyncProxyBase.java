@@ -618,8 +618,98 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         this._priorAudioStreamingState = priorAudioStreamingState;
     }
 
+<<<<<<< HEAD
     public ProtocolSecureManager getProtocolSecureManager() {
         return protocolSecureManager;
+=======
+    private AudioStreamingState _priorAudioStreamingState = null;
+    // Interface broker
+    private SyncInterfaceBroker _interfaceBroker = null;
+    /**
+     * Handler that is used to schedule SYNC Proxy reconnect tasks.
+     */
+    private final Handler reconnectHandler = new Handler(Looper.getMainLooper());
+    private static int heartBeatInterval = HEARTBEAT_INTERVAL;
+    private static boolean heartBeatAck = true;
+    private IRPCRequestConverterFactory rpcRequestConverterFactory =
+            new SyncRPCRequestConverterFactory();
+    private IProtocolMessageHolder protocolMessageHolder = new ProtocolMessageHolder();
+
+    /**
+     * Handler for OnSystemRequest notifications.
+     */
+    private IOnSystemRequestHandler onSystemRequestHandler;
+
+    /**
+     * A set of internal requests' correlation IDs that are currently in
+     * progress.
+     *
+     * Comment usage of this technique in order to provide possibility to track all responses
+     */
+    //private final Set<Integer> internalRequestCorrelationIDs = new HashSet<Integer>();
+
+    /**
+     * Correlation ID that was last used for messages created internally.
+     */
+    private int lastCorrelationId = 40000;
+
+    public void setSyncConnection(SyncConnection syncConnection) {
+        // Comment NPE check point in order to allow mock testing
+        /*if (syncConnection == null) {
+            throw new NullPointerException("SYNCConnection can not be set to null");
+        }*/
+        mSyncConnection = syncConnection;
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param listener                          Type of listener for this proxy base.
+     * @param syncProxyConfigurationResources   Configuration resources for this proxy.
+     * @param enableAdvancedLifecycleManagement Flag that ALM should be enabled or not.
+     * @param appName                           Client application name.
+     * @param ttsName                           TTS name.
+     * @param ngnMediaScreenAppName             Media Screen Application name.
+     * @param vrSynonyms                        List of synonyms.
+     * @param isMediaApp                        Flag that indicates that client application if media application or not.
+     * @param syncMsgVersion                    Version of Sync Message.
+     * @param languageDesired                   Desired language.
+     * @param hmiDisplayLanguageDesired         Desired language for HMI.
+     * @param appHMIType                        Type of application.
+     * @param appID                             Application identifier.
+     * @param autoActivateID                    Auto activation identifier.
+     * @param callbackToUIThread                Flag that indicates that this proxy should send callback to UI thread or not.
+     * @param transportConfig                   Configuration of transport to be used by underlying connection.
+     * @throws SyncException
+     */
+    protected SyncProxyBase(ProxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources,
+                            boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName,
+                            String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
+                            Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
+                            String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig, TestConfig testConfig)
+            throws SyncException {
+
+        mTestConfig = testConfig;
+
+        setupSyncProxyBaseComponents(callbackToUIThread);
+        // Set variables for Advanced Lifecycle Management
+        setAdvancedLifecycleManagementEnabled(enableAdvancedLifecycleManagement);
+        updateRegisterAppInterfaceParameters(appName, ttsName, ngnMediaScreenAppName, vrSynonyms,
+                isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appHMIType,
+                appID);
+        setTransportConfig(transportConfig);
+        checkConditionsInvalidateProxy(listener);
+        setProxyListener(listener);
+        // Get information from syncProxyConfigurationResources
+        setupTelephoneManager(syncProxyConfigurationResources);
+        setupMessageDispatchers();
+        tryInitialiseProxy();
+
+        mDeviceInfo = DeviceInfoManager.getDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
+
+        // Trace that ctor has fired
+        Logger.i("SyncProxy Created, instanceID=" + this.toString());
+>>>>>>> develop
     }
 
     public void setProtocolSecureManager(ProtocolSecureManager protocolSecureManager) {
@@ -1078,7 +1168,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 mSyncConnection = new SyncConnection(syncSession, mTransportConfig, _interfaceBroker);
             }
 
-            internalRequestCorrelationIDs.clear();
+            //internalRequestCorrelationIDs.clear();
 
             mSyncConnection.init();
 
@@ -1315,7 +1405,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                     Hashtable hash = new Hashtable();
                     if (protocolVersion >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
                         Hashtable hashTemp = new Hashtable();
-                        hashTemp.put(Names.correlationID, message.getCorrID());
+                        hashTemp.put(Names.correlationID, message.getCorrId());
 
                         if (message.getJsonSize() > 0) {
                             final Hashtable<String, Object> mhash = mJsonRPCMarshaller.unmarshall(message.getData());
@@ -1549,14 +1639,14 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     protected boolean handlePartialRPCResponse(final byte sessionId, final RPCResponse response,
                                                Hashtable hash) {
         boolean success = false;
-        final Integer responseCorrelationID = response.getCorrelationID();
+        final Integer responseCorrelationId = response.getCorrelationId();
         final String appId = syncSession.getAppIdBySessionId(sessionId);
-        if (protocolMessageHolder.hasMessages(responseCorrelationID)) {
+        if (protocolMessageHolder.hasMessages(responseCorrelationId)) {
             if (Result.SUCCESS == response.getResultCode()) {
                 final ProtocolMessage pm = protocolMessageHolder.peekNextMessage(
-                        responseCorrelationID);
+                        responseCorrelationId);
                 if (pm.getFunctionID() == FunctionID.getFunctionID(response.getFunctionName())) {
-                    protocolMessageHolder.popNextMessage(responseCorrelationID);
+                    protocolMessageHolder.popNextMessage(responseCorrelationId);
 
                     //
                     // Send partial response message to the application
@@ -1564,6 +1654,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
                     if (response.getFunctionName() != null &&
                             response.getFunctionName().equals(Names.PutFile)) {
+
                         final PutFileResponse putFile = new PutFileResponse(hash);
                         if (_callbackToUIThread) {
                             // Run in UI thread
@@ -1576,16 +1667,27 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                         } else {
                             mProxyListener.onPutFileResponse(appId, putFile);
                         }
+                    } else {
+                        if (_callbackToUIThread) {
+                            // Run in UI thread
+                            _mainUIHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mProxyListener.onRPCResponse(appId, response);
+                                }
+                            });
+                        } else {
+                            mProxyListener.onRPCResponse(appId, response);
+                        }
                     }
 
                     queueOutgoingMessage(pm);
                     success = true;
                 }
             } else {
-                protocolMessageHolder.clearMessages(responseCorrelationID);
+                protocolMessageHolder.clearMessages(responseCorrelationId);
             }
         }
-
         return success;
     }
 
@@ -1599,12 +1701,13 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      * corresponding request is not internal or in case of an error
      */
     protected boolean handleLastInternalResponse(RPCResponse response) {
-        final Integer correlationID = response.getCorrelationID();
+        /*final Integer correlationID = response.getCorrelationId();
         final boolean contains = internalRequestCorrelationIDs.contains(correlationID);
         if (contains) {
             internalRequestCorrelationIDs.remove(correlationID);
         }
-        return contains;
+        Logger.d(LOG_TAG + " LastInternalResponse:" + contains);*/
+        return /*contains*/false;
     }
 
     protected void handleOnSystemRequest(final String appId, Hashtable hash) {
@@ -2338,7 +2441,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      */
     public void listFiles(String appId, Integer correlationID) throws SyncException {
         ListFiles listFiles = new ListFiles();
-        listFiles.setCorrelationID(correlationID);
+        listFiles.setCorrelationId(correlationID);
         sendRPCRequest(appId, listFiles);
     }
 
@@ -2352,7 +2455,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     public void setAppIcon(String appId, String fileName, Integer correlationID) throws SyncException {
         SetAppIcon setAppIcon = new SetAppIcon();
         setAppIcon.setSyncFileName(fileName);
-        setAppIcon.setCorrelationID(correlationID);
+        setAppIcon.setCorrelationId(correlationID);
         sendRPCRequest(appId, setAppIcon);
     }
 
@@ -2709,7 +2812,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
         ResetGlobalProperties req = new ResetGlobalProperties();
 
-        req.setCorrelationID(correlationID);
+        req.setCorrelationId(correlationID);
         req.setProperties(properties);
 
         sendRPCRequest(appId, req);
@@ -3200,28 +3303,29 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             putFile.setLength(data.length);
         }
         sendRPCRequest(appId, putFile);
-        internalRequestCorrelationIDs.add(correlationID);
+        //internalRequestCorrelationIDs.add(correlationID);
     }
 
     @Override
-    public void putPolicyTableUpdateFile(String appId, String filename, byte[] data, FileType fileType,
-                                         RequestType requestType)
-            throws SyncException {
-        final int correlationID = nextCorrelationId();
+    public void putPolicyTableUpdateFile(String appId, String filename, byte[] data,
+                                         FileType fileType, RequestType requestType)
+                                         throws SyncException {
+
+        final int correlationId = nextCorrelationId();
 
         if (fileType == FileType.BINARY) {
             PutFile putFile = RPCRequestFactory.buildPutFile(filename, FileType.JSON, null, data,
-                    correlationID);
-
+                    correlationId);
+            putFile.setSystemFile(true);
             sendRPCRequest(appId, putFile);
         } else if (fileType == FileType.JSON) {
             SystemRequest systemRequest = RPCRequestFactory.buildSystemRequest(filename, data,
-                    correlationID, requestType);
+                    correlationId, requestType);
 
             sendRPCRequest(appId, systemRequest);
         }
 
-        internalRequestCorrelationIDs.add(correlationID);
+        //internalRequestCorrelationIDs.add(correlationId);
     }
 
     private void setUpSecureServiceManager() {

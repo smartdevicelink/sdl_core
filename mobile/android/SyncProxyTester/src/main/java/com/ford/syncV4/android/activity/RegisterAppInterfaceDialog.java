@@ -109,7 +109,7 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         RegisterAppInterface registerAppInterface = new RegisterAppInterface();
-                        registerAppInterface.setCorrelationID(((SyncProxyTester) getActivity())
+                        registerAppInterface.setCorrelationId(((SyncProxyTester) getActivity())
                                 .getNextCorrelationIdForCurrentFragment());
 
                         String appName = appNameView.getText().toString();

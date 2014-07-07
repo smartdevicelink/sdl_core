@@ -450,65 +450,65 @@ void FillNotificationData::ExcludeSame() {
     // First, remove disallowed from other types
     if (rpc_hmi_permissions.end() != it_hmi_user_disallowed) {
       if (rpc_hmi_permissions.end() != it_hmi_allowed) {
-        ExcludeSameHMILevels(rpc_hmi_permissions[kUserDisallowedKey],
-                    rpc_hmi_permissions[kAllowedKey]);
+        ExcludeSameHMILevels(rpc_hmi_permissions[kAllowedKey],
+                    rpc_hmi_permissions[kUserDisallowedKey]);
       }
       if (rpc_hmi_permissions.end() != it_hmi_undefined) {
-        ExcludeSameHMILevels(rpc_hmi_permissions[kUserDisallowedKey],
-                    rpc_hmi_permissions[kUndefinedKey]);
+        ExcludeSameHMILevels(rpc_hmi_permissions[kUndefinedKey],
+                    rpc_hmi_permissions[kUserDisallowedKey]);
       }
     }
 
     if (rpc_parameter_permissions.end() != it_parameter_user_disallowed) {
       if (rpc_parameter_permissions.end() != it_parameter_allowed) {
-        ExcludeSameParameters(rpc_parameter_permissions[kUserDisallowedKey],
-                              rpc_parameter_permissions[kAllowedKey]);
+        ExcludeSameParameters(rpc_parameter_permissions[kAllowedKey],
+                              rpc_parameter_permissions[kUserDisallowedKey]);
       }
       if (rpc_parameter_permissions.end() != it_parameter_undefined) {
-        ExcludeSameParameters(rpc_parameter_permissions[kUserDisallowedKey],
-                              rpc_parameter_permissions[kUndefinedKey]);
+        ExcludeSameParameters(rpc_parameter_permissions[kUndefinedKey],
+                              rpc_parameter_permissions[kUserDisallowedKey]);
       }
     }
 
     // Then, remove undefined from allowed
     if (rpc_hmi_permissions.end() != it_hmi_undefined) {
       if (rpc_hmi_permissions.end() != it_hmi_allowed) {
-        ExcludeSameHMILevels(rpc_hmi_permissions[kUndefinedKey],
-                    rpc_hmi_permissions[kAllowedKey]);
+        ExcludeSameHMILevels(rpc_hmi_permissions[kAllowedKey],
+                    rpc_hmi_permissions[kUndefinedKey]);
       }
     }
 
     if (rpc_parameter_permissions.end() != it_parameter_undefined) {
       if (rpc_parameter_permissions.end() != it_parameter_allowed) {
-        ExcludeSameParameters(rpc_parameter_permissions[kUndefinedKey],
-                              rpc_parameter_permissions[kAllowedKey]);
+        ExcludeSameParameters(rpc_parameter_permissions[kAllowedKey],
+                              rpc_parameter_permissions[kUndefinedKey]);
       }
     }
   }
 }
 
 void FillNotificationData::ExcludeSameHMILevels(
-        const std::set<HMILevel>& source,
-        std::set<HMILevel>& target) {
+    std::set<HMILevel>& source,
+    const std::set<HMILevel>& target) {
   std::set<HMILevel> diff_hmi;
 
   std::set_difference(source.begin(), source.end(),
                       target.begin(), target.end(),
                       std::inserter(diff_hmi, diff_hmi.begin()));
 
-  target = diff_hmi;
+  source = diff_hmi;
 }
 
 void FillNotificationData::ExcludeSameParameters(
-        const std::set<Parameter> &source,
-        std::set<Parameter> &target) {
+    std::set<Parameter>& source,
+    const std::set<Parameter>& target) {
   std::set<Parameter> diff_parameter;
 
   std::set_difference(source.begin(), source.end(),
                       target.begin(), target.end(),
                       std::inserter(diff_parameter, diff_parameter.begin()));
 
-  target = diff_parameter;
+  source = diff_parameter;
 }
 
 ProcessFunctionalGroup::ProcessFunctionalGroup(

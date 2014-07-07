@@ -62,7 +62,8 @@ class CommandRequestImpl : public CommandImpl,
 
   explicit CommandRequestImpl(const MessageSharedPtr& message);
   virtual ~CommandRequestImpl();
-  virtual bool Init();
+  virtual bool CheckPermissions();
+  virtual bool Init();  
   virtual bool CleanUp();
   virtual void Run();
 

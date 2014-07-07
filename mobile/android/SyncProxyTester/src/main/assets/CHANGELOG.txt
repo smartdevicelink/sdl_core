@@ -1,5 +1,13 @@
+<<<<<<< HEAD
 [CW72]
 * SyncProxyTester | SyncProxyAndroid SDK: Changed SSL error testing
+=======
+[CW27]
+* SyncProxyTester: Log two request of UnsubscribeButton on mobile
+* SyncProxyTester: Some RPC responses are not shown in the list view
+* SyncProxyTester: Incorrect representation of the "key - value" pair in the RPC Request at the XML test
+* SyncProxyTester: Crashes while executing cics_UpperBound_big.xml
+>>>>>>> develop
 
 [CW26]
 + SyncProxyTester | SyncProxyAndroid SDK: Added test handshake error sending to SDL.

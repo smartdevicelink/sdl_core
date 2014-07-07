@@ -53,9 +53,9 @@
 
 #include "media_manager/media_manager_impl_test.h"
 #include "SmartObjectDraftTest.h"
-#include "SmartObjectInvalidTest.h"
+//#include "SmartObjectInvalidTest.h"
 #include "SmartObjectStressTest.h"
-#include "SmartObjectUnitTest.h"
+//#include "SmartObjectUnitTest.h"
 #include "TSharedPtrTest.h"
 //#include "jsoncpp/json_reader_test.h"
 

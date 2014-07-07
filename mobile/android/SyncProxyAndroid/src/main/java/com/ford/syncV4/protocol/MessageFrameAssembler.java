@@ -188,7 +188,7 @@ public class MessageFrameAssembler {
         int messageId = header.getMessageID();
         boolean encrypted = header.isEncrypted();
         ServiceType serviceType = header.getServiceType();
-        Logger.d(CLASS_NAME + " incoming control frame:" + header.toString());
+        //Logger.d(CLASS_NAME + " incoming control frame:" + header.toString());
 
         // TODO : Implement getServiceType check point for Heartbeat and other non RPC's
 

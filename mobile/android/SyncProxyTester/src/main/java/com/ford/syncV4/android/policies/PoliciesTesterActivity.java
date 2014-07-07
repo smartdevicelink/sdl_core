@@ -250,7 +250,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
         Vector<String> syncPData = new Vector<String>();
         syncPData.add("AAM4AAkAAAAAAAAAAAA=");
         msg.setData(syncPData);
-        msg.setCorrelationID(6000);
+        msg.setCorrelationId(6000);
 
         if (mBoundProxyService != null) {
             mBoundProxyService.sendRPCRequestWithPreprocess(appId, msg);
@@ -503,7 +503,7 @@ public class PoliciesTesterActivity extends Activity implements OnClickListener,
                             Vector<String> syncPData = new Vector<String>();
                             syncPData.add(ptsyncPstring);
                             msg.setData(syncPData);
-                            msg.setCorrelationID(6001);
+                            msg.setCorrelationId(6001);
                             Logger.i("syncp", "msg: " + msg);
 
                             if (mBoundProxyService != null) {

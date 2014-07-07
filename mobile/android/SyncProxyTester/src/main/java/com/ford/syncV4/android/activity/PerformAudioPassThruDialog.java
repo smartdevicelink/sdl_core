@@ -95,7 +95,7 @@ public class PerformAudioPassThruDialog extends BaseDialogFragment {
                             performAudioPassThru.setBitsPerSample((BitsPerSample) spnBitsPerSample.getSelectedItem());
                             performAudioPassThru.setAudioType((AudioType) spnAudioType.getSelectedItem());
                             performAudioPassThru.setMuteAudio(chkMuteAudio.isChecked());
-                            performAudioPassThru.setCorrelationID(((SyncProxyTester) getActivity())
+                            performAudioPassThru.setCorrelationId(((SyncProxyTester) getActivity())
                                     .getNextCorrelationIdForCurrentFragment());
 
                             ((SyncProxyTester) getActivity())

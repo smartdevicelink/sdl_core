@@ -53,6 +53,10 @@ namespace commands {
 class Command {
  public:
   /**
+   * @brief Checks command permissions according to policy table
+   */
+  virtual bool CheckPermissions() = 0;
+  /**
    * @brief Command initialization function
    **/
   virtual bool Init() = 0;
