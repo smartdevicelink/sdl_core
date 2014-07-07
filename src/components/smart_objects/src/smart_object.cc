@@ -34,7 +34,7 @@
 
 #include <errno.h>
 #include <inttypes.h>
-#include <limits.h>
+#include <limits>
 #include <stdlib.h>
 #include <algorithm>
 #include <sstream>
