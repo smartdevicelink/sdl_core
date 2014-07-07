@@ -23,7 +23,7 @@ public class RPCResponse extends RPCMessage {
 		super(rpcMsg);
 	}
 
-	public Integer getCorrelationID() {
+	public Integer getCorrelationId() {
 		return (Integer)function.get(Names.correlationID);
 	}
 	

@@ -49,6 +49,7 @@ typedef QQmlEngine Engine;
 #include <QtDBus/QDBusContext>
 
 class DBusController;
+class RequestToSDL;
 
 class DbusPlugin : public ExtensionPlugin, public QDBusContext {
   Q_OBJECT
@@ -58,6 +59,7 @@ class DbusPlugin : public ExtensionPlugin, public QDBusContext {
 #endif  // QT_5
 
   DBusController *dbusController_;
+  RequestToSDL *requestToSDL_;
 
  public:
   void registerTypes(const char *uri);

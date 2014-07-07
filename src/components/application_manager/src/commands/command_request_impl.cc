@@ -30,6 +30,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
 #include <string>
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/application_manager_impl.h"
@@ -41,6 +42,32 @@ namespace application_manager {
 
 namespace commands {
 
+struct DisallowedParamsInserter {
+  DisallowedParamsInserter(smart_objects::SmartObject& response,
+                           mobile_apis::VehicleDataResultCode::eType code)
+    : response_(response),
+      code_(code) {
+  }
+
+  bool operator()(const std::string& param) {
+    const VehicleData& vehicle_data =
+        application_manager::MessageHelper::vehicle_data();
+    VehicleData::const_iterator it = vehicle_data.find(param);
+    if (vehicle_data.end() != it) {
+      smart_objects::SmartObject* disallowed_param =
+          new smart_objects::SmartObject(smart_objects::SmartType_Map);
+      (*disallowed_param)[strings::data_type] = (*it).second;
+      (*disallowed_param)[strings::result_code] = code_;
+     response_[strings::msg_params][param.c_str()] = *disallowed_param;
+     return true;
+    }
+    return false;
+  }
+private:
+  smart_objects::SmartObject& response_;
+  mobile_apis::VehicleDataResultCode::eType code_;
+};
+
 CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message)
  : CommandImpl(message),
    default_timeout_(profile::Profile::instance()->default_timeout()),
@@ -50,8 +77,12 @@ CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message)
 CommandRequestImpl::~CommandRequestImpl() {
 }
 
-bool CommandRequestImpl::Init() {
+bool CommandRequestImpl::Init() {  
   return true;
+}
+
+bool CommandRequestImpl::CheckPermissions() {
+  return CheckAllowedParameters();
 }
 
 bool CommandRequestImpl::CleanUp() {
@@ -119,6 +150,10 @@ void CommandRequestImpl::SendResponse(
   if (response_params) {
     response[strings::msg_params] = *response_params;
   }
+
+  // Add disallowed parameters from request back to response with appropriate
+  // reasons
+  AddDisallowedParameters(response);
 
   if (info) {
     response[strings::msg_params][strings::info] = std::string(info);
@@ -314,6 +349,133 @@ mobile_apis::Result::eType CommandRequestImpl::GetMobileResultCode(
   }
 
   return mobile_result;
+}
+
+bool CommandRequestImpl::CheckAllowedParameters() {
+  LOG4CXX_INFO(logger_, "CheckAllowedParameters");
+
+  // RegisterAppInterface should always be allowed
+  if (mobile_apis::FunctionID::RegisterAppInterfaceID ==
+      static_cast<mobile_apis::FunctionID::eType>(function_id())) {
+    return true;
+  }
+
+  typedef std::set<application_manager::ApplicationSharedPtr> ApplicationList;
+  ApplicationList app_list =
+      application_manager::ApplicationManagerImpl::instance()->applications();
+  ApplicationList::const_iterator it_app_list = app_list.begin();
+  ApplicationList::const_iterator it_app_list_end = app_list.end();
+  for (; it_app_list != it_app_list_end; ++it_app_list) {
+    if (connection_key() == (*it_app_list).get()->app_id()) {
+
+      CommandParametersPermissions params_permissions;
+      mobile_apis::Result::eType check_result =
+          application_manager::ApplicationManagerImpl::instance()->
+          CheckPolicyPermissions(
+            (*it_app_list).get()->mobile_app_id()->asString(),
+            (*it_app_list).get()->hmi_level(),
+            static_cast<mobile_api::FunctionID::eType>(function_id()),
+            &params_permissions);
+
+      // Check, if RPC is allowed by policy
+      if (mobile_apis::Result::SUCCESS != check_result) {
+        smart_objects::SmartObject* response =
+          MessageHelper::CreateBlockedByPoliciesResponse(
+              static_cast<mobile_api::FunctionID::eType>(function_id()),
+              check_result, correlation_id(), (*it_app_list).get()->app_id());
+
+        ApplicationManagerImpl::instance()->SendMessageToMobile(response);
+        return false;
+      }
+
+      // If no parameters specified in policy table, no restriction will be
+      // applied for parameters
+      if (!params_permissions.allowed_params.size() &&
+          !params_permissions.disallowed_params.size() &&
+          !params_permissions.undefined_params.size()) {
+        return true;
+      }
+
+      RemoveDisallowedParameters(params_permissions);
+    }
+  }
+  return true;
+}
+
+void CommandRequestImpl::RemoveDisallowedParameters(
+    const CommandParametersPermissions& params_permissions) {
+  LOG4CXX_INFO(logger_, "RemoveDisallowedParameters");
+
+  smart_objects::SmartObject& params = (*message_)[strings::msg_params];
+
+  // Remove from request all disallowed parameters
+  std::vector<std::string>::const_iterator it_disallowed =
+      params_permissions.disallowed_params.begin();
+  std::vector<std::string>::const_iterator it_disallowed_end =
+      params_permissions.disallowed_params.end();
+  for (;it_disallowed != it_disallowed_end; ++it_disallowed) {
+    if (params.keyExists(*it_disallowed)) {
+      params.erase(*it_disallowed);
+      parameters_permissions_.disallowed_params.push_back(
+            *it_disallowed);
+      LOG4CXX_INFO(logger_, "Following parameter is disallowed by user: "
+                   << *it_disallowed);
+    }
+  }
+
+  // Remove from request all undefined yet parameters
+  std::vector<std::string>::const_iterator it_undefined =
+      params_permissions.undefined_params.begin();
+  std::vector<std::string>::const_iterator it_undefined_end =
+      params_permissions.undefined_params.end();
+  for (;it_undefined != it_undefined_end; ++it_undefined) {
+    if (params.keyExists(*it_undefined)) {
+      params.erase(*it_undefined);
+      parameters_permissions_.undefined_params.push_back(
+            *it_undefined);
+      LOG4CXX_INFO(logger_, "Following parameter is disallowed by policy: "
+                   << *it_undefined);
+    }
+  }
+
+  // Remove from request all parameters missed in allowed
+  const VehicleData& vehicle_data =
+      application_manager::MessageHelper::vehicle_data();
+
+  VehicleData::const_iterator it_vehicle_data = vehicle_data.begin();
+  VehicleData::const_iterator it_vehicle_data_end = vehicle_data.end();
+  for (;it_vehicle_data != it_vehicle_data_end; ++it_vehicle_data) {
+    const std::string key = it_vehicle_data->first;
+    if (params.keyExists(key) &&
+        params_permissions.allowed_params.end() ==
+        std::find(params_permissions.allowed_params.begin(),
+                  params_permissions.allowed_params.end(),
+                  key)) {
+      params.erase(key);
+      parameters_permissions_.undefined_params.push_back(key);
+      LOG4CXX_INFO(logger_,
+                   "Following parameter is not found among allowed parameters '"
+                   << key
+                   << "' and will be treated as disallowed.");
+    }
+  }
+}
+
+void CommandRequestImpl::AddDisallowedParameters(
+    smart_objects::SmartObject& response) {
+  DisallowedParamsInserter disallowed_inserter(
+        response,
+        mobile_apis::VehicleDataResultCode::VDRC_USER_DISALLOWED);
+  std::for_each(parameters_permissions_.disallowed_params.begin(),
+                parameters_permissions_.disallowed_params.end(),
+                disallowed_inserter);
+
+  DisallowedParamsInserter undefined_inserter(
+        response,
+        mobile_apis::VehicleDataResultCode::VDRC_DISALLOWED);
+  std::for_each(parameters_permissions_.undefined_params.begin(),
+                parameters_permissions_.undefined_params.end(),
+                undefined_inserter);
 }
 
 }  // namespace commands

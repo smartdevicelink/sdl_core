@@ -440,7 +440,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
                 if (request.method == "BasicCommunication.SystemRequest") {
 
-                    SDL.SettingsController.policyUpdateRetry(true);
+                    SDL.SettingsController.policyUpdateRetry("ABORT");
 
                     this.OnReceivedPolicyUpdate(request.params.fileName);
 

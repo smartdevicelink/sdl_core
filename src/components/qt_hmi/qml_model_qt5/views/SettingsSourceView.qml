@@ -35,7 +35,6 @@ import QtQuick 2.0
 import "../models"
 import "../controls"
 import "../models/Constants.js" as Constants
-import "../models/RequestToSDL.js" as RequestToSDL
 
 GeneralView {
     signal itemActivated(string item)

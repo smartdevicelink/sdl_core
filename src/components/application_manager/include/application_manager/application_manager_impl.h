@@ -107,6 +107,8 @@ enum VRTTSSessionChanging {
   kTTSSessionChanging = 1
 };
 
+struct CommandParametersPermissions;
+
 namespace impl {
 using namespace threads;
 
@@ -552,7 +554,7 @@ class ApplicationManagerImpl : public ApplicationManager,
         const std::vector<uint8_t>& binary_data,
         const std::string& file_path,
         const std::string& file_name,
-        const uint32_t offset);
+        const int64_t offset);
 
     /**
      * @brief Get available app space
@@ -575,34 +577,28 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
     connection_handler::ConnectionHandler* connection_handler();
+
+    /**
+     * @brief Checks, if given RPC is allowed at current HMI level for specific
+     * application in policy table
+     * @param policy_app_id Application id
+     * @param hmi_level Current HMI level of application
+     * @param function_id FunctionID of RPC
+     * @param params_permissions Permissions for RPC parameters (e.g.
+     * SubscribeVehicleData) defined in policy table
+     * @return SUCCESS, if allowed, otherwise result code of check
+     */
+    mobile_apis::Result::eType CheckPolicyPermissions(
+        const std::string& policy_app_id,
+        mobile_apis::HMILevel::eType hmi_level,
+        mobile_apis::FunctionID::eType function_id,
+        CommandParametersPermissions* params_permissions = NULL);
+
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
     hmi_apis::HMI_API& hmi_so_factory();
     mobile_apis::MOBILE_API& mobile_so_factory();
-
-    void CreateHMIMatrix(HMIMatrix* matrix);
-
-    /**
-     * \brief Performs check using PoliciesManager of availability
-     * of the message for the application. If error occured it is sent
-     * as response to initiator of request.
-     * \param message Message received for application
-     * \param application Application that recieved message to be checked by policies
-     * \return bool Indicates whether message is allowed for application
-     */
-    bool CheckPolicies(smart_objects::SmartObject* message,
-                       ApplicationSharedPtr app);
-
-    /**
-     * \brief Using HMIMatrix checks which messages sent to HMI are of higher priority
-     * and acts accordingly (closes message with lower priority,
-     * rejects message in case message with higher priority is operating on HMI).
-     * If error occured it is sent as response to initiator of request.
-     * \param message Message received for application
-     * \return bool Indicates whether message is allowed for application
-     */
-    bool CheckHMIMatrix(smart_objects::SmartObject* message);
 
     bool ConvertMessageToSO(const Message& message,
                             smart_objects::SmartObject& output);
@@ -633,19 +629,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     void SendUpdateAppList(const std::list<uint32_t>& applications_ids);
     void OnApplicationListUpdateTimer();
-
-    /**
-     * @brief Checks, if given RPC is allowed at current HMI level for specific
-     * application in policy table
-     * @param policy_app_id Application id
-     * @param hmi_level Current HMI level of application
-     * @param function_id FunctionID of RPC
-     * @return SUCCESS, if allowed, otherwise result code of check
-     */
-    mobile_apis::Result::eType CheckPolicyPermissions(
-        const std::string& policy_app_id,
-        mobile_apis::HMILevel::eType hmi_level,
-        mobile_apis::FunctionID::eType function_id);
 
     /*
      * @brief Function is called on IGN_OFF, Master_reset or Factory_defaults

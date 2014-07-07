@@ -187,6 +187,8 @@ const char reason[] = "reason";
 const char available[] = "available";
 const char text[] = "text";
 const char character_set[] = "characterSet";
+const char secondary_text[] = "secondaryText";
+const char tertiary_text[] = "tertiaryText";
 
 // vehicle info
 const char gps[] = "gps";

@@ -99,7 +99,7 @@ public class SubscriptionsVehicleDataDialog extends BaseDialogFragment {
                                         .setVehicleDataParam(msg, SubscribeVehicleData.class,
                                         "set" + METHOD_NAMES_MAP.get(vdt));
                             }
-                            msg.setCorrelationID(((SyncProxyTester) getActivity()).getNextCorrelationIdForCurrentFragment());
+                            msg.setCorrelationId(((SyncProxyTester) getActivity()).getNextCorrelationIdForCurrentFragment());
 
                             ((SyncProxyTester) getActivity()).onSubscribeVehicleDialogResult(msg);
                         }
@@ -111,7 +111,7 @@ public class SubscriptionsVehicleDataDialog extends BaseDialogFragment {
                                         setVehicleDataParam(msg, UnsubscribeVehicleData.class,
                                         "set" + METHOD_NAMES_MAP.get(vdt));
                             }
-                            msg.setCorrelationID(((SyncProxyTester) getActivity()).getNextCorrelationIdForCurrentFragment());
+                            msg.setCorrelationId(((SyncProxyTester) getActivity()).getNextCorrelationIdForCurrentFragment());
 
                             ((SyncProxyTester) getActivity()).onUnsubscribeVehicleDialogResult(msg);
                         }

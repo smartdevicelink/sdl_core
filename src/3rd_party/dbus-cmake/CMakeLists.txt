@@ -59,16 +59,6 @@ add_custom_target(dbus ALL make
 )
 
 install(
-  PROGRAMS ${DBUS_BUILD_DIRECTORY}/bus/dbus-daemon
-  DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/bin
-)
-
-install(
-  FILES ${DBUS_BUILD_DIRECTORY}/bus/session.conf
-  DESTINATION ${3RD_PARTY_INSTALL_PREFIX}/etc/dbus-1
-)
-
-install(
   DIRECTORY ${DBUS_BUILD_DIRECTORY}/dbus/.libs/
   DESTINATION ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib
   USE_SOURCE_PERMISSIONS

@@ -10,6 +10,7 @@ package com.ford.syncV4.android.policies;
 import android.os.Environment;
 import android.util.Log;
 
+import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SafeToast;
 import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.Const;
@@ -79,6 +80,11 @@ public class PolicyFilesManager {
                 logAdapter.logMessage("Policy Snapshot could not be found", Log.ERROR, true);
             }
             return;
+        }
+
+        // Use dummy JSON update if real file do not provided
+        if (data.length == 0) {
+            data = AppUtils.contentsOfResource(R.raw.policy_table_update);
         }
 
         SafeToast.showToastAnyThread("Policy Update is found");

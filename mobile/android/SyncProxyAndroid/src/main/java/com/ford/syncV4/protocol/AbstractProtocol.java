@@ -115,11 +115,14 @@ public abstract class AbstractProtocol {
     // This method is called whenever the protocol receives a complete frame
     protected void handleProtocolFrameReceived(ProtocolFrameHeader header, byte[] data,
                                                MessageFrameAssembler assembler) {
-        if (data != null) {
+        /*if (data != null) {
             Logger.d(CLASS_NAME + " receive " + data.length + " bytes");
         } else {
             Logger.w(CLASS_NAME + " receive null bytes");
-        }
+        }*/
+
+        Logger.d(CLASS_NAME + " receive ProtocolFrameHeader:" + header.toString());
+
         resetHeartbeat(header.getSessionId());
         assembler.handleFrame(header, data, PROTOCOL_FRAME_HEADER_SIZE);
     }
@@ -127,11 +130,11 @@ public abstract class AbstractProtocol {
     // This method is called whenever a protocol has an entire frame to send
     protected void handleProtocolFrameToSend(ProtocolFrameHeader header, byte[] data, int offset,
                                              int length) {
-        if (data != null) {
+        /*if (data != null) {
             Logger.d(CLASS_NAME + " transmit " + data.length + " bytes");
         } else {
             Logger.w(CLASS_NAME + " transmit null bytes");
-        }
+        }*/
 
         Logger.d(CLASS_NAME + " transmit ProtocolFrameHeader:" + header.toString());
 

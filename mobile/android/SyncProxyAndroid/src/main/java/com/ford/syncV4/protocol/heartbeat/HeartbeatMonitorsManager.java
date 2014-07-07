@@ -95,42 +95,42 @@ public class HeartbeatMonitorsManager {
     }
 
     public synchronized void heartbeatACKReceived(byte sessionId) {
-        Logger.d(CLASS_NAME + " heartbeatACKReceived for sesId:" + sessionId);
+        //Logger.d(CLASS_NAME + " heartbeatACKReceived for sesId:" + sessionId);
         for (IHeartbeatMonitor monitor : heartbeatMonitors) {
             if (monitor == null) {
                 continue;
             }
             if (monitor.getSessionId() == sessionId) {
                 monitor.heartbeatACKReceived();
-                Logger.d(CLASS_NAME + " heartbeatACKReceived done sesId:" + sessionId);
+                //Logger.d(CLASS_NAME + " heartbeatACKReceived done sesId:" + sessionId);
                 return;
             }
         }
     }
 
     public synchronized void heartbeatReceived(byte sessionId) {
-        Logger.d(CLASS_NAME + " heartbeatReceived for sesId:" + sessionId);
+        //Logger.d(CLASS_NAME + " heartbeatReceived for sesId:" + sessionId);
         for (IHeartbeatMonitor monitor : heartbeatMonitors) {
             if (monitor == null) {
                 continue;
             }
             if (monitor.getSessionId() == sessionId) {
                 monitor.heartbeatReceived();
-                Logger.d(CLASS_NAME + " heartbeatReceived done sesId:" + sessionId);
+                //Logger.d(CLASS_NAME + " heartbeatReceived done sesId:" + sessionId);
                 return;
             }
         }
     }
 
     public synchronized void notifyTransportOutputActivity(byte sessionId) {
-        Logger.d(CLASS_NAME + " notifyTransportOutputActivity for sesId:" + sessionId);
+        //Logger.d(CLASS_NAME + " notifyTransportOutputActivity for sesId:" + sessionId);
         for (IHeartbeatMonitor monitor : heartbeatMonitors) {
             if (monitor == null) {
                 continue;
             }
             if (monitor.getSessionId() == sessionId) {
                 monitor.notifyTransportOutputActivity();
-                Logger.d(CLASS_NAME + " notifyTransportOutputActivity done sesId:" + sessionId);
+                //Logger.d(CLASS_NAME + " notifyTransportOutputActivity done sesId:" + sessionId);
                 return;
             }
         }

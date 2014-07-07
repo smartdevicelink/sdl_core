@@ -38,7 +38,6 @@
 #include "application_manager/smart_object_keys.h"
 
 namespace application_manager {
-
 /**
  * @brief SmartObject type
  **/
@@ -53,6 +52,10 @@ namespace commands {
  **/
 class Command {
  public:
+  /**
+   * @brief Checks command permissions according to policy table
+   */
+  virtual bool CheckPermissions() = 0;
   /**
    * @brief Command initialization function
    **/

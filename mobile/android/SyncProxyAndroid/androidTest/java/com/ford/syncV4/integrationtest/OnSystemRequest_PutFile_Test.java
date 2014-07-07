@@ -165,7 +165,7 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
                 fileType);
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm0.getBulkData(), is(data0));
-        final int putFileRequestCorrID = pm0.getCorrID();
+        final int putFileRequestCorrID = pm0.getCorrId();
 
         // the listener should not be called for OnSystemRequest
         verifyZeroInteractions(proxyListenerMock);
@@ -199,7 +199,7 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
         final byte[] data1 =
                 Arrays.copyOfRange(data, maxDataSize, maxDataSize * 2);
         assertThat(pm1.getBulkData(), is(data1));
-        assertThat(pm1.getCorrID(), is(putFileRequestCorrID));
+        assertThat(pm1.getCorrId(), is(putFileRequestCorrID));
 
         // the listener should not be called for PutFile
         verifyZeroInteractions(proxyListenerMock);
@@ -229,7 +229,7 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
         final byte[] data2 = Arrays.copyOfRange(data, maxDataSize * 2,
                 (maxDataSize * 2) + extraDataSize);
         assertThat(pm2.getBulkData(), is(data2));
-        assertThat(pm2.getCorrID(), is(putFileRequestCorrID));
+        assertThat(pm2.getCorrId(), is(putFileRequestCorrID));
 
         // the listener should not be called for PutFile
         verifyZeroInteractions(proxyListenerMock);
@@ -311,7 +311,7 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
                 fileType);
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm0.getBulkData(), is(data0));
-        final int putFileRequestCorrID = pm0.getCorrID();
+        final int putFileRequestCorrID = pm0.getCorrId();
 
         // the listener should not be called for OnSystemRequest
         verifyZeroInteractions(proxyListenerMock);
@@ -402,7 +402,7 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
                 fileType);
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm0.getBulkData(), is(data0));
-        final int putFileRequestCorrID = pm0.getCorrID();
+        final int putFileRequestCorrID = pm0.getCorrId();
 
         // the listener should not be called for OnSystemRequest
         verify(proxyListenerMock, never()).onOnSystemRequest(
@@ -438,7 +438,7 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
         final byte[] data1 =
                 Arrays.copyOfRange(data, maxDataSize, maxDataSize * 2);
         assertThat(pm1.getBulkData(), is(data1));
-        assertThat(pm1.getCorrID(), is(putFileRequestCorrID));
+        assertThat(pm1.getCorrId(), is(putFileRequestCorrID));
 
         // the listener should not be called for PutFile
         verifyZeroInteractions(proxyListenerMock);
@@ -468,7 +468,7 @@ public class OnSystemRequest_PutFile_Test extends InstrumentationTestCase {
         final byte[] data2 = Arrays.copyOfRange(data, maxDataSize * 2,
                 (maxDataSize * 2) + extraDataSize);
         assertThat(pm2.getBulkData(), is(data2));
-        assertThat(pm2.getCorrID(), is(putFileRequestCorrID));
+        assertThat(pm2.getCorrId(), is(putFileRequestCorrID));
 
         // the listener should not be called for PutFile
         verifyZeroInteractions(proxyListenerMock);

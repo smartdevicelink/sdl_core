@@ -126,7 +126,7 @@ public class ProtocolMessage {
 		this._functionID = _functionID;
 	}
 	
-	public int getCorrID() {
+	public int getCorrId() {
 		return _correlationID;
 	}
 	

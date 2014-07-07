@@ -89,7 +89,7 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
 
         PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
         proxy.sendRPCRequest(msg);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -126,7 +126,7 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
                 responseCaptor.capture());
         final PutFileResponse putFileResponse = responseCaptor.getValue();
         assertThat(putFileResponse.getResultCode(), is(Result.SUCCESS));
-        assertThat(putFileResponse.getCorrelationID(), is(correlationID));
+        assertThat(putFileResponse.getCorrelationId(), is(correlationID));
 
         // we expect no other PutFile to be sent
         verify(connectionMock2, never()).sendMessage(
@@ -142,7 +142,7 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
 
         PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
         proxy.sendRPCRequest(msg);
 
         Thread.sleep(WAIT_TIMEOUT);
@@ -180,7 +180,7 @@ public class PutFileRequestSendingTest extends InstrumentationTestCase {
                 responseCaptor.capture());
         final PutFileResponse putFileResponse = responseCaptor.getValue();
         assertThat(putFileResponse.getResultCode(), is(resultCode));
-        assertThat(putFileResponse.getCorrelationID(), is(correlationID));
+        assertThat(putFileResponse.getCorrelationId(), is(correlationID));
 
         // we expect no other PutFile to be sent
         verify(connectionMock2, never()).sendMessage(

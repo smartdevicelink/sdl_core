@@ -59,7 +59,7 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
  * @param const char* Name of the parameter in mobile request
  * @param VehicleDataType Enum for vehicle data
  */
-typedef std::map<const char*, VehicleDataType> VehicleData;
+typedef std::map<std::string, VehicleDataType> VehicleData;
 
 enum ResultVerifySoftButtonText {
   kIncorrectCharacter = 0,
