@@ -940,7 +940,12 @@ uint64_t SmartObject::convert_string_to_integer(const std::string* Value) {
   int64_t result;
   std::stringstream stream(*Value);
   stream >> result;
-  return result;
+  if (stream.eof()) {
+    return result;
+  }
+  else {
+    return invalid_int64_value;
+  }
 }
 
 SmartType SmartObject::getType() const {
