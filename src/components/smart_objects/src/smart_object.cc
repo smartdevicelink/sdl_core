@@ -40,6 +40,7 @@
 #include <sstream>
 #include <iomanip>
 #include <iterator>
+#include <limits>
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {

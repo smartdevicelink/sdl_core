@@ -108,6 +108,7 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
 #endif  // PASA_HMI
 #endif  // CUSTOMER_PASA
 
+    bool components_started;
     DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 
     FRIEND_BASE_SINGLETON_CLASS(LifeCycle);
