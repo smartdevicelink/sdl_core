@@ -3,7 +3,6 @@ include_directories(
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ./include
   ${CMAKE_SOURCE_DIR}/src/components/protocol_handler/include
-  ${CMAKE_SOURCE_DIR}/src/components/transport_manager/include
   ${SecurityManagerIncludeDir}
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
 )

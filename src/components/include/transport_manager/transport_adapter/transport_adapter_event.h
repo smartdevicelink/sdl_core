@@ -30,126 +30,108 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_
+#define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_
 
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
+#include "transport_manager/common.h"
+#include "transport_manager/transport_adapter/transport_adapter.h"
+#include "protocol/raw_message.h"
 
 namespace transport_manager {
 
 using ::protocol_handler::RawMessagePtr;
 
-class TransportAdapterEventImpl : public TransportAdapterEvent {
+class TransportAdapterEvent {
  public:
-  /**
-   * @brief Constructor.
-   *
-   * @param type Event type.
-   * @param transport_adapter Transport adapter
-   * @param device_handle Handle of device.
-   * @param application_id Handle of application.
-   * @param data Smart pointer to the raw message.
-   * @param error Error class that contains details of this error situation.
-   */
-  TransportAdapterEventImpl(int type,
-                            transport_adapter::TransportAdapter *transport_adapter,
-                            const DeviceUID &device_handle,
-                            const ApplicationHandle &application_id,
-                            RawMessagePtr data, BaseError *error);
-
   /**
    * @brief Set value that describe event type.
    *
    * @param type Type of the event.
    */
-  void set_event_type(int type);
+  virtual void set_event_type(int type) = 0;
 
   /**
    * @brief Set application unique identifier field.
    *
    * @param id Application unique identifier.
    */
-  void set_application_id(const ApplicationHandle id);
+  virtual void set_application_id(const ApplicationHandle id) = 0;
 
   /**
    * @brief Set device adapter field.
    *
    * @param transport_adapter Smart pointer to the device adapter.
    */
-  void set_transport_adapter(
-      transport_adapter::TransportAdapter *transport_adapter);
+  virtual void set_transport_adapter(
+      transport_adapter::TransportAdapter *transport_adapter) = 0;
 
   /**
    * @brief Set pointer to the data.
    *
    * @param message Smart pointer to the raw message.
    */
-  void set_data(RawMessagePtr message);
+  virtual void set_data(RawMessagePtr message) = 0;
 
   /**
    * @brief Set field that responsible for the pointer to error.
    *
    * @param error Error class that contains details of this error situation.
    */
-  void set_error(BaseError *error);
+  virtual void set_error(BaseError *error) = 0;
 
   /**
    * @brief Set device handle field.
    *
    * @param device_handle Device unique identifier.
    */
-  void set_device_handle(const DeviceUID &device_handle);
+  virtual void set_device_handle(const DeviceUID &device_handle) = 0;
 
   /**
    * @brief Return device unique identifier value.
    *
    * @return Device unique identifier.
    */
-  const DeviceUID &device_uid() const;
+  virtual const DeviceUID &device_uid() const = 0;
 
   /**
    * @brief Return value that describe event type.
    *
    * @return Value that describe event type.
    */
-  int event_type(void) const;
+  virtual int event_type(void) const = 0;
 
   /**
    * @brief Return handle of application value.
    *
    * @return Handle of application.
    */
-  ApplicationHandle application_id(void) const;
+  virtual ApplicationHandle application_id(void) const = 0;
 
   /**
    * @brief Return smart pointer to the device adapter.
    *
    * @return Transport adapter.
    */
-  transport_adapter::TransportAdapter *transport_adapter() const;
+  virtual transport_adapter::TransportAdapter *transport_adapter() const = 0;
 
   /**
    * @brief Return smart pointer to the raw message.
    *
    * @return Smart pointer to the raw message.
    */
-  RawMessagePtr data(void) const;
+  virtual RawMessagePtr data(void) const = 0;
 
   /**
    * @brief Return pointer to the class that contain details of error.
    *
    * @return Pointer to the class that contain details of error.
    */
-  BaseError *event_error(void) const;
-
- private:
-  int event_type_;                   /**< Value that describe event type. */
-  ApplicationHandle application_id_; /**< Handle of application. */
-  DeviceUID device_uid_;             /**< Device unique identifier. */
-  transport_adapter::TransportAdapter *transport_adapter_;
-  RawMessagePtr event_data_; /**< Smart pointer to the raw message. */
-  BaseError *event_error_;    /** Pointer to the class that contain details of
-                              error */
+  virtual BaseError *event_error(void) const = 0;
+  /**
+   * @brief Dectructor.
+   */
+  virtual ~TransportAdapterEvent() {}
 };
+typedef  utils::SharedPtr<TransportAdapterEvent> TransportAdapterEventPtr;
 }  // namespace transport_manager
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_

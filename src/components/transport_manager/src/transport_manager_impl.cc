@@ -166,7 +166,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
   for (EventQueue::const_iterator it = event_queue_.begin();
     it != event_queue_.end();
     ++it) {
-    if (it->application_id() == static_cast<ApplicationHandle>(cid)) {
+    if ((*it)->application_id() == static_cast<ApplicationHandle>(cid)) {
       ++messages_count;
     }
   }
@@ -273,7 +273,7 @@ int TransportManagerImpl::SendMessageToDevice(const RawMessagePtr message) {
 }
 
 int TransportManagerImpl::ReceiveEventFromDevice(
-    const TransportAdapterEvent& event) {
+    const TransportAdapterEventPtr event) {
   if (false == this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TM is not initialized.");
     return E_TM_IS_NOT_INITIALIZED;
@@ -501,13 +501,12 @@ void TransportManagerImpl::RemoveMessage(const RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "Remove message from queue complete");
 }
 
-void TransportManagerImpl::PostEvent(const TransportAdapterEvent& event) {
+void TransportManagerImpl::PostEvent(const TransportAdapterEventPtr event) {
 #ifdef USE_RWLOCK
   event_queue_rwlock_.AcquireForWriting();
 #else
   pthread_mutex_lock(&event_queue_mutex_);
 #endif
-  RawMessagePtr data = event.data();
   event_queue_.push_back(event);
   pthread_cond_signal(&device_listener_thread_wakeup_);
 #ifdef USE_RWLOCK
@@ -590,7 +589,8 @@ void TransportManagerImpl::EventListenerThread(void) {
       event_queue_rwlock_.AcquireForReading();
 #endif
       LOG4CXX_INFO(logger_, "Event listener queue pushed to process events");
-      EventQueue::iterator current = event_queue_.begin();
+      EventQueue::iterator current_it = event_queue_.begin();
+      TransportAdapterEventPtr current = *(current_it);
       TransportAdapter* ta = current->transport_adapter();
       ApplicationHandle app_handle = current->application_id();
       DeviceUID device_id = current->device_uid();
@@ -598,7 +598,7 @@ void TransportManagerImpl::EventListenerThread(void) {
       BaseError* error = current->event_error();
       RawMessagePtr data = current->data();
       int event_type = current->event_type();
-      event_queue_.erase(current);
+      event_queue_.erase(current_it);
 #ifdef USE_RWLOCK
       event_queue_rwlock_.Release();
 #else

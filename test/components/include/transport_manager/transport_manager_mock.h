@@ -45,7 +45,7 @@ namespace transport_manager_test {
 using ::transport_manager::DeviceHandle;
 using ::transport_manager::ConnectionUID;
 using ::transport_manager::transport_adapter::TransportAdapter;
-using ::transport_manager::TransportAdapterEvent;
+using ::transport_manager::TransportAdapterEventPtr;
 using ::transport_manager::TransportManagerListener;
 using ::protocol_handler::RawMessagePtr;
 /*
@@ -68,7 +68,7 @@ class TransportManagerMock: public ::transport_manager::TransportManager {
   MOCK_METHOD1(SendMessageToDevice,
                int(const RawMessagePtr));
   MOCK_METHOD1(ReceiveEventFromDevice,
-               int(const TransportAdapterEvent &));
+               int(const TransportAdapterEventPtr));
   MOCK_METHOD1(AddTransportAdapter,
                int(TransportAdapter *));
   MOCK_METHOD1(AddEventListener,

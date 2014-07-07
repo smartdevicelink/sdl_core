@@ -1,7 +1,6 @@
 include_directories(
   ./include/
   ../protocol_handler/include/
-  ../transport_manager/include/
   ../connection_handler/include
   ../utils/include/
   ${JSONCPP_INCLUDE_DIRECTORY}

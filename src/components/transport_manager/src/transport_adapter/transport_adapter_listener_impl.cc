@@ -36,13 +36,11 @@
 
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
 #include "transport_manager/transport_manager_impl.h"
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
+#include "transport_manager/transport_adapter/transport_adapter_event_impl.h"
 
 namespace transport_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
-
-TransportAdapterListenerImpl::~TransportAdapterListenerImpl() {}
 
 TransportAdapterListenerImpl::TransportAdapterListenerImpl(
     TransportManagerImpl* manager, TransportAdapter* adapter)
@@ -50,9 +48,9 @@ TransportAdapterListenerImpl::TransportAdapterListenerImpl(
 
 void TransportAdapterListenerImpl::OnSearchDeviceDone(
     const TransportAdapter* adapter) {
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE,
-      transport_adapter_, "", 0, RawMessagePtr(), new BaseError());
+      transport_adapter_, "", 0, RawMessagePtr(), new BaseError()));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -64,9 +62,9 @@ void TransportAdapterListenerImpl::OnSearchDeviceFailed(
     const TransportAdapter* adapter,
     const SearchDeviceError& error) {
   SearchDeviceError* err = new SearchDeviceError(error);
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL,
-      transport_adapter_, "", 0, RawMessagePtr(), err);
+      transport_adapter_, "", 0, RawMessagePtr(), err));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -76,9 +74,9 @@ void TransportAdapterListenerImpl::OnSearchDeviceFailed(
 
 void TransportAdapterListenerImpl::OnDeviceListUpdated(
     const TransportAdapter* adapter) {
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED,
-      transport_adapter_, "", 0, RawMessagePtr(), NULL);
+      transport_adapter_, "", 0, RawMessagePtr(), NULL));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -87,14 +85,14 @@ void TransportAdapterListenerImpl::OnDeviceListUpdated(
 }
 
 void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(const TransportAdapter* adapter) {
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
     TransportAdapterListenerImpl::ON_FIND_NEW_APPLICATIONS_REQUEST,
     transport_adapter_,
     "",
     0,
     RawMessagePtr(),
     NULL
-  );
+  ));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -105,10 +103,10 @@ void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(const TransportA
 void TransportAdapterListenerImpl::OnConnectDone(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& application_id) {
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
       TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE,
       transport_adapter_, device, application_id, RawMessagePtr(),
-      new BaseError());
+      new BaseError()));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -120,9 +118,9 @@ void TransportAdapterListenerImpl::OnConnectFailed(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const ConnectError& error) {
   ConnectError* err = new ConnectError(error);
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
       TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL,
-      transport_adapter_, device, app_id, RawMessagePtr(), err);
+      transport_adapter_, device, app_id, RawMessagePtr(), err));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -133,9 +131,9 @@ void TransportAdapterListenerImpl::OnConnectFailed(
 void TransportAdapterListenerImpl::OnDisconnectDone(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id) {
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE,
-      transport_adapter_, device, app_id, RawMessagePtr(), new BaseError());
+      transport_adapter_, device, app_id, RawMessagePtr(), new BaseError()));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -147,9 +145,9 @@ void TransportAdapterListenerImpl::OnDisconnectFailed(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const DisconnectError& error) {
   DisconnectError* err = new DisconnectError(error);
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL,
-      transport_adapter_, device, app_id, RawMessagePtr(), err);
+      transport_adapter_, device, app_id, RawMessagePtr(), err));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -167,9 +165,9 @@ void TransportAdapterListenerImpl::OnDisconnectDeviceFailed(
 void TransportAdapterListenerImpl::OnDataReceiveDone(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const RawMessagePtr data_container) {
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
       TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE,
-      transport_adapter_, device, app_id, data_container, new BaseError());
+      transport_adapter_, device, app_id, data_container, new BaseError()));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -181,9 +179,9 @@ void TransportAdapterListenerImpl::OnDataReceiveFailed(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const DataReceiveError& error) {
   DataReceiveError* err = new DataReceiveError(error);
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
       TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL,
-      transport_adapter_, device, app_id, RawMessagePtr(), err);
+      transport_adapter_, device, app_id, RawMessagePtr(), err));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -194,9 +192,9 @@ void TransportAdapterListenerImpl::OnDataReceiveFailed(
 void TransportAdapterListenerImpl::OnDataSendDone(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const RawMessagePtr data_container) {
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE,
-      transport_adapter_, device, app_id, data_container, new BaseError());
+      transport_adapter_, device, app_id, data_container, new BaseError()));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -209,9 +207,9 @@ void TransportAdapterListenerImpl::OnDataSendFailed(
     const ApplicationHandle& app_id, const RawMessagePtr data_container,
     const DataSendError& error) {
   DataSendError* err = new DataSendError(error);
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL,
-      transport_adapter_, device, app_id, data_container, err);
+      transport_adapter_, device, app_id, data_container, err));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -228,9 +226,9 @@ void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
     const DeviceUID& device, const ApplicationHandle& application,
     const CommunicationError& error) {
   CommunicationError* err = new CommunicationError(error);
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
       TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
-      transport_adapter_, device, application, RawMessagePtr(), err);
+      transport_adapter_, device, application, RawMessagePtr(), err));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -241,9 +239,9 @@ void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
 void TransportAdapterListenerImpl::OnCommunicationError(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id) {
-  TransportAdapterEvent event(
+  TransportAdapterEventPtr event(new TransportAdapterEventImpl(
       TransportAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR,
-      transport_adapter_, device, app_id, RawMessagePtr(), new BaseError());
+      transport_adapter_, device, app_id, RawMessagePtr(), new BaseError()));
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {

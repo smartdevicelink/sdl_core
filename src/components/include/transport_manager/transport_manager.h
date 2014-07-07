@@ -35,18 +35,14 @@
 
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager_listener.h"
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
 #include "protocol/raw_message.h"
 
 namespace transport_manager {
 
-// TODO(Ezamakhov): Move TransportAdapterEvent as interface
 class TransportAdapterEvent;
 
 using ::protocol_handler::RawMessagePtr;
-
-namespace transport_adapter {
-class TransportAdapter;
-}  // namespace transport_adapter
 
 /**
  * @brief Interface of transport manager.
@@ -122,7 +118,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int ReceiveEventFromDevice(const TransportAdapterEvent& event) = 0;
+  virtual int ReceiveEventFromDevice(const TransportAdapterEventPtr event) = 0;
 
   /**
    * @brief Add transport adapter.

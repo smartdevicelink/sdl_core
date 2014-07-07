@@ -167,7 +167,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    **/
-  virtual int ReceiveEventFromDevice(const TransportAdapterEvent& event);
+  virtual int ReceiveEventFromDevice(const TransportAdapterEventPtr event);
 
   /**
    * @brief Post listener to the container of transport manager listeners.
@@ -270,7 +270,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @param event Event of device adapter.
    **/
-  void PostEvent(const TransportAdapterEvent& event);
+  void PostEvent(const TransportAdapterEventPtr event);
 
   /**
    * @brief Type definition of container that holds smart pointer to the raw
@@ -281,7 +281,7 @@ class TransportManagerImpl : public TransportManager {
   /**
    * @brief Type definition of container that holds events of device adapters.
    **/
-  typedef std::vector<TransportAdapterEvent> EventQueue;
+  typedef std::vector<TransportAdapterEventPtr> EventQueue;
 
   static void* MessageQueueStartThread(void* data);
 

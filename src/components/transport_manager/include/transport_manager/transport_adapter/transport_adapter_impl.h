@@ -43,6 +43,10 @@
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
 
+#ifdef TIME_TESTER
+#include "transport_manager/time_metric_observer.h"
+#endif  // TIME_TESTER
+
 namespace transport_manager {
 
 namespace transport_adapter {

@@ -33,24 +33,24 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_H_
+#ifndef SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_H_
+#define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_H_
 
 #include <string>
 #include <vector>
 #include <list>
 #include <map>
 
-#include "device.h"
+#include "transport_manager/transport_adapter/device.h"
 #include "utils/shared_ptr.h"
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"
-#ifdef TIME_TESTER
-#include "transport_manager/time_metric_observer.h"
-#endif  // TIME_TESTER
 #include "protocol/raw_message.h"
 
 namespace transport_manager {
+
+class TMMetricObserver;
+
 namespace transport_adapter {
 
 using ::protocol_handler::RawMessagePtr;
@@ -264,4 +264,4 @@ class TransportAdapter {
 };
 }  // namespace transport_adapter
 }  // namespace transport_manager
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_H_
+#endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_H_

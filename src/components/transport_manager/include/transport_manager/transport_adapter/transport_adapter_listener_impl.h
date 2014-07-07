@@ -81,11 +81,6 @@ class TransportAdapterListenerImpl
                                TransportAdapter* adapter);
 
   /**
-   * @brief Dectructor.
-   */
-  virtual ~TransportAdapterListenerImpl();
-
-  /**
    * @brief Search specified device adapter in the container of shared pointers
    *to device adapters to be sure it is available,
    * launch event ON_SEARCH_DONE in transport manager.

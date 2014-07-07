@@ -52,7 +52,6 @@ include_directories (
   ../utils/include/
   ../protocol_handler/include/
   ../connection_handler/include/
-  ../transport_manager/include/
   ../application_manager/include/
   ../smart_objects/include/
   ../hmi_message_handler/include/
