@@ -58,9 +58,9 @@ class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread
     // The Sample format to use
     static const pa_sample_spec sSampleFormat_;
 
-    const int32_t BUFSIZE_;
     pa_simple* s_in, *s_out;
     std::string device_;
+    const int32_t BUFSIZE_;
     bool should_be_stopped_;
     sync_primitives::Lock should_be_stopped_lock_;
 
@@ -223,7 +223,6 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
 
   for (;;) {
     uint8_t buf[BUFSIZE_];
-    ssize_t r;
 
     pa_usec_t latency;
 

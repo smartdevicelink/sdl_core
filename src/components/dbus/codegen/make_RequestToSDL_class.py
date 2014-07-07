@@ -60,12 +60,10 @@ def defaultValue(param):
 class Impl(FordXmlParser):
 
 
-    def args_for_function_definition(self, params, out):
-        if len(params) == 0:
-            out.write('QJSValue hmi_callback')
-            return
-        for param in params:
-            out.write('QVariant ' + param.get('name') + ', ')
+    def args_for_function_definition(self, params, iface_name, out):
+        for param_el in params:
+	    param = self.make_param_desc(param_el, iface_name)
+            out.write('%s %s,' % (self.qt_param_type(param), param.name))
         out.write('QJSValue hmi_callback')
         
 
@@ -78,7 +76,7 @@ class Impl(FordXmlParser):
                     all_params.append(param_el)                    
                 with CodeBlock(out) as output:
                     output.write("Q_INVOKABLE void " + interface_el.get('name') + "_" +request.get('name') + "(")
-                impl.args_for_function_definition(all_params, out)
+                impl.args_for_function_definition(all_params, interface_el.get('name'), out)
                 output.write(");\n")
                  
 
@@ -100,20 +98,74 @@ class Impl(FordXmlParser):
         out.write('#endif  // SRC_COMPONENTS_QTHMI_QMLMODELQT5_REQUESTTOSDL_')
 
 
+    def qt_param_type(self, param):
+        if not param.mandatory:
+            param_copy = copy(param)
+            param_copy.mandatory = True
+            return "QVariant"
+        if param.array:
+            param_copy = copy(param)
+            param_copy.array = False
+            if param.type == 'String':
+                return "QStringList"
+            return "QList< " + self.qt_param_type(param_copy) + " >"
+        if param.type == 'Integer' or param.enum:
+            return 'int'
+        elif param.type == 'String':
+            return 'QString'
+        elif param.type == 'Boolean':
+            return 'bool'
+        elif param.type == 'Float':
+            return 'double'
+        elif param.struct:
+            return "_".join(param.fulltype)
+        return "xxx"
+
+
+    def optional_param_type(self, param):
+        if param.array:
+            param_copy = copy(param)
+            param_copy.array = False
+            if param.type == 'String':
+                return "QStringList"
+            return "QList< " + self.qt_param_type(param_copy) + " >"
+        if param.type == 'Integer' or param.enum:
+            return 'int'
+        elif param.type == 'String':
+            return 'QString'
+        elif param.type == 'Boolean':
+            return 'bool'
+        elif param.type == 'Float':
+            return 'double'
+        elif param.struct:
+            return "_".join(param.fulltype)
+        return "xxx"
+
+
     def make_requests_for_source(self, out):
         for interface_el in self.el_tree.findall('interface'):
             request_responses = self.find_request_response_pairs_by_provider(interface_el, "sdl")
             for (request, response) in request_responses:
                 request_name = request.get('name')
-                request_full_name = interface_el.get('name') + '_' + request_name
+                iface_name = interface_el.get('name')
+                request_full_name = iface_name + '_' + request_name
                 out.write('void RequestToSDL::' + request_full_name + '(')
                 for param_el in request.findall('param'):
-                    out.write('QVariant ' + param_el.get('name') + ', ')
+                    param = self.make_param_desc(param_el, iface_name)
+                    out.write('%s %s,' % (self.qt_param_type(param), param.name))
+
                 out.write('QJSValue hmi_callback) {\n')
                 with CodeBlock(out) as output:
                     output.write('QList<QVariant> args;\n')
                     for param_el in request.findall('param'):
-                        output.write('args << ' + param_el.get('name') + ';\n')
+                        param = self.make_param_desc(param_el, iface_name)
+                        if not param.mandatory:
+                            output.write("OptionalArgument<%s> o_%s;\n" % (self.optional_param_type(param), param.name))
+                            output.write("o_%s.presence = !%s.isNull();\n" % (param.name, param.name))
+                            output.write("o_%s.val = %s.value<%s>();\n" % (param.name, param.name, self.optional_param_type(param)))
+                            output.write('args << QVariant::fromValue(o_%s);\n' % param.name)
+                        else:
+                            output.write('args << ' + param.name + ';\n')
                     output.write('new requests::' + request_full_name + '(' + interface_el.get('name') + 
                                  ', "' + request_name + '", args, hmi_callback);\n}\n')
         
@@ -134,9 +186,6 @@ class Impl(FordXmlParser):
             output.write('this->deleteLater();\n')
         out.write('}\n\n')
         impl.make_requests_for_source(out)
-        
-            
-
 
 
 arg_parser = ArgumentParser(description="Generator of Qt to QDbus C++ part")
@@ -207,6 +256,7 @@ header_out.write("#define SRC_COMPONENTS_QTHMI_QMLMODELQT5_REQUESTTOSDL_\n\n")
 header_out.write("#include <QJSValue>\n")
 header_out.write("#include <QObject>\n")
 header_out.write("#include <QVariant>\n")
+header_out.write("#include <QStringList>\n")
 
 impl.make_header_file(header_out)
 
