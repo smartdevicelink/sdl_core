@@ -103,7 +103,6 @@ public class ProtocolMessage {
         if (bulkData == null) {
             return;
         }
-<<<<<<< HEAD
         if (this._bulkData != null)
             this._bulkData = null;
         this._bulkData = new byte[bulkData.length];
@@ -179,60 +178,4 @@ public class ProtocolMessage {
     public void setServiceType(ServiceType serviceType) {
         this._serviceType = serviceType;
     }
-=======
-		if (this._bulkData != null)
-			this._bulkData = null;
-		this._bulkData = new byte[bulkData.length];
-		System.arraycopy(bulkData, 0, this._bulkData, 0, bulkData.length);
-		//this._bulkData = bulkData;
-	}
-
-	public ServiceType getServiceType() {
-		return _serviceType;
-	}
-
-	public void setServiceType(ServiceType serviceType) {
-		this._serviceType = serviceType;
-	}
-
-	public MessageType getMessageType() {
-		return _messageType;
-	}
-
-	public void setMessageType(MessageType messageType) {
-		this._messageType = messageType;
-	}
-	
-	public byte getRPCType() {
-		return _rpcType;
-	}
-	
-	public void setRPCType(byte _rpcType) {
-		this._rpcType = _rpcType;
-	}
-	
-	public int getFunctionID() {
-		return _functionID;
-	}
-	
-	public void setFunctionID(int _functionID) {
-		this._functionID = _functionID;
-	}
-	
-	public int getCorrId() {
-		return _correlationID;
-	}
-	
-	public void setCorrID(int _correlationID) {
-		this._correlationID = _correlationID;
-	}
-
-	public int getJsonSize() {
-		return _jsonSize;
-	}
-
-	public void setJsonSize(int _jsonSize) {
-		this._jsonSize = _jsonSize;
-	}
->>>>>>> develop
 } // end-class

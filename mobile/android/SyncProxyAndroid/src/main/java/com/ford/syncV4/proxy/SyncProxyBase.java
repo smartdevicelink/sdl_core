@@ -618,98 +618,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         this._priorAudioStreamingState = priorAudioStreamingState;
     }
 
-<<<<<<< HEAD
     public ProtocolSecureManager getProtocolSecureManager() {
         return protocolSecureManager;
-=======
-    private AudioStreamingState _priorAudioStreamingState = null;
-    // Interface broker
-    private SyncInterfaceBroker _interfaceBroker = null;
-    /**
-     * Handler that is used to schedule SYNC Proxy reconnect tasks.
-     */
-    private final Handler reconnectHandler = new Handler(Looper.getMainLooper());
-    private static int heartBeatInterval = HEARTBEAT_INTERVAL;
-    private static boolean heartBeatAck = true;
-    private IRPCRequestConverterFactory rpcRequestConverterFactory =
-            new SyncRPCRequestConverterFactory();
-    private IProtocolMessageHolder protocolMessageHolder = new ProtocolMessageHolder();
-
-    /**
-     * Handler for OnSystemRequest notifications.
-     */
-    private IOnSystemRequestHandler onSystemRequestHandler;
-
-    /**
-     * A set of internal requests' correlation IDs that are currently in
-     * progress.
-     *
-     * Comment usage of this technique in order to provide possibility to track all responses
-     */
-    //private final Set<Integer> internalRequestCorrelationIDs = new HashSet<Integer>();
-
-    /**
-     * Correlation ID that was last used for messages created internally.
-     */
-    private int lastCorrelationId = 40000;
-
-    public void setSyncConnection(SyncConnection syncConnection) {
-        // Comment NPE check point in order to allow mock testing
-        /*if (syncConnection == null) {
-            throw new NullPointerException("SYNCConnection can not be set to null");
-        }*/
-        mSyncConnection = syncConnection;
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param listener                          Type of listener for this proxy base.
-     * @param syncProxyConfigurationResources   Configuration resources for this proxy.
-     * @param enableAdvancedLifecycleManagement Flag that ALM should be enabled or not.
-     * @param appName                           Client application name.
-     * @param ttsName                           TTS name.
-     * @param ngnMediaScreenAppName             Media Screen Application name.
-     * @param vrSynonyms                        List of synonyms.
-     * @param isMediaApp                        Flag that indicates that client application if media application or not.
-     * @param syncMsgVersion                    Version of Sync Message.
-     * @param languageDesired                   Desired language.
-     * @param hmiDisplayLanguageDesired         Desired language for HMI.
-     * @param appHMIType                        Type of application.
-     * @param appID                             Application identifier.
-     * @param autoActivateID                    Auto activation identifier.
-     * @param callbackToUIThread                Flag that indicates that this proxy should send callback to UI thread or not.
-     * @param transportConfig                   Configuration of transport to be used by underlying connection.
-     * @throws SyncException
-     */
-    protected SyncProxyBase(ProxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources,
-                            boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName,
-                            String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
-                            Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
-                            String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig, TestConfig testConfig)
-            throws SyncException {
-
-        mTestConfig = testConfig;
-
-        setupSyncProxyBaseComponents(callbackToUIThread);
-        // Set variables for Advanced Lifecycle Management
-        setAdvancedLifecycleManagementEnabled(enableAdvancedLifecycleManagement);
-        updateRegisterAppInterfaceParameters(appName, ttsName, ngnMediaScreenAppName, vrSynonyms,
-                isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appHMIType,
-                appID);
-        setTransportConfig(transportConfig);
-        checkConditionsInvalidateProxy(listener);
-        setProxyListener(listener);
-        // Get information from syncProxyConfigurationResources
-        setupTelephoneManager(syncProxyConfigurationResources);
-        setupMessageDispatchers();
-        tryInitialiseProxy();
-
-        mDeviceInfo = DeviceInfoManager.getDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
-
-        // Trace that ctor has fired
-        Logger.i("SyncProxy Created, instanceID=" + this.toString());
->>>>>>> develop
     }
 
     public void setProtocolSecureManager(ProtocolSecureManager protocolSecureManager) {
@@ -1405,7 +1315,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                     Hashtable hash = new Hashtable();
                     if (protocolVersion >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
                         Hashtable hashTemp = new Hashtable();
-                        hashTemp.put(Names.correlationID, message.getCorrId());
+                        hashTemp.put(Names.correlationID, message.getCorrID());
 
                         if (message.getJsonSize() > 0) {
                             final Hashtable<String, Object> mhash = mJsonRPCMarshaller.unmarshall(message.getData());

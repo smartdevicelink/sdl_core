@@ -25,7 +25,7 @@ public class ProtocolMessageHolder implements IProtocolMessageHolder {
 
     @Override
     public void saveMessages(List<ProtocolMessage> messages) {
-        final int corrId = messages.get(0).getCorrId();
+        final int corrId = messages.get(0).getCorrID();
         array.put(corrId, messages);
     }
 
