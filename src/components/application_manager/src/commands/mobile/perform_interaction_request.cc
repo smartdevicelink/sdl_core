@@ -309,6 +309,17 @@ void PerformInteractionRequest::ProcessVRResponse(
     }
   }
 
+  if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
+      vr_perform_interaction_code_) {
+    smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+    c_p_request_so[hmi_request::method_name] = "UI.PerformInteraction";
+    SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
+    DisablePerformInteraction();
+    SendResponse(true, mobile_apis::Result::WARNINGS);
+    return;
+  }
+
   int32_t choise_id = message[strings::msg_params][strings::choice_id].asInt();
   const PerformChoiceSetMap& choice_set_map = app
       ->performinteraction_choice_set_map();
