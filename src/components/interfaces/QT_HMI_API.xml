@@ -339,7 +339,7 @@
       <element name="MFD5">
         <description> 5 inch GEN1.1 display </description>
       </element>
-      <element name="GEN3_8-INCH" internal_name="GEN3_8_INCH"/>
+      <element name="GEN3_8_INCH"/>
     </enum>
     <enum name="ImageType">
       <description>Contains information about the type of image.</description>
