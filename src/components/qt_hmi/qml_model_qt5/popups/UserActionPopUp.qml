@@ -167,7 +167,7 @@ Item {
             callbackFunc(result);
             callbackFunc = null;
         }
-        okButton.visible = fasle
+        okButton.visible = false
         cancelButton.visible = false
         closeButton.visible = false
         console.debug("userActionPopUp deactivate exit");
