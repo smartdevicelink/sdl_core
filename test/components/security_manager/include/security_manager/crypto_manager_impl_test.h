@@ -45,6 +45,21 @@
 #include "security_manager/crypto_manager_impl.h"
 #include "security_manager/ssl_context.h"
 
+#ifdef __QNXNTO__
+#include <openssl/ssl3.h>
+#else
+#include <openssl/tls1.h>
+#endif
+
+#ifdef __QNXNTO__
+#define FORD_CIPHER   SSL3_TXT_RSA_DES_192_CBC3_SHA
+#else
+// Used cipehr from ford protocolo requirment
+#define FORD_CIPHER   TLS1_TXT_RSA_WITH_AES_256_GCM_SHA384
+#endif
+
+#define ALL_CIPHERS   "ALL"
+
 namespace test {
 namespace components {
 namespace security_manager_test {
@@ -56,22 +71,22 @@ bool isErrorFatal(SSL *connection, int res) {
           error != SSL_ERROR_WANT_WRITE);
 }
 }
-// TODO(EZamakhov): replace ciphers by useing ssl.h constants
 // TODO(EZamakhov): May be split to SSLContext and Cyptomanager tests (separate files)
 // TODO(EZamakhov): add test for EnsureBufferSizeEnough
 class SSLTest : public testing::Test {
  protected:
   static void SetUpTestCase() {
     crypto_manager = new security_manager::CryptoManagerImpl();
-    // TODO(EZamakhov): add ASSERT_TRUE check of cert/key exist (for this test correct)
-    // TODO(EZamakhov): add covarage for SSLv3, TLSv1_1 + check wrong Protocol value
-    // TODO(EZamakhov): add covarage for wrong cert, key file names and ciphers
-    crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2, "mycert.pem",
-                         "mykey.pem", "AES128-GCM-SHA256", false);
+    const bool crypto_manager_initialization =
+        crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2, "mycert.pem",
+                         "mykey.pem", FORD_CIPHER, false);
+    EXPECT_TRUE(crypto_manager_initialization);
 
     client_manager = new security_manager::CryptoManagerImpl();
-    client_manager->Init(security_manager::CLIENT, security_manager::TLSv1_2, "", "",
-                         "AES128-GCM-SHA256", false);
+    const bool client_manager_initialization =
+        client_manager->Init(security_manager::CLIENT, security_manager::TLSv1_2, "", "",
+                         FORD_CIPHER, false);
+    EXPECT_TRUE(client_manager_initialization);
   }
 
   static void TearDownTestCase() {
@@ -100,7 +115,6 @@ class SSLTest : public testing::Test {
 security_manager::CryptoManager* SSLTest::crypto_manager;
 security_manager::CryptoManager* SSLTest::client_manager;
 
-
 TEST(CryptoManagerTest, UsingBeforeInit) {
   security_manager::CryptoManager *crypto_manager = new security_manager::CryptoManagerImpl();
   EXPECT_TRUE(crypto_manager->CreateSSLContext() == NULL);
@@ -112,19 +126,19 @@ TEST(CryptoManagerTest, WrongInit) {
   security_manager::CryptoManager *crypto_manager = new security_manager::CryptoManagerImpl();
   // TODO(EZamakhov): Unkown protocol version
 //  EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER, security_manager::UNKNOWN,
-//                                    "mycert.pem", "mykey.pem", "AES128-GCM-SHA256", false));
+//                                    "mycert.pem", "mykey.pem", FORD_CIPHER, false));
 //  EXPECT_FALSE(crypto_manager->LastError().empty());
   // Unexistent cert file
   EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2,
-                                    "unexists_file.pem", "mykey.pem", "AES128-GCM-SHA256", false));
+                                    "unexists_file.pem", "mykey.pem", FORD_CIPHER, false));
   EXPECT_FALSE(crypto_manager->LastError().empty());
   // Unexistent key file
   EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2,
-                                    "mycert.pem", "unexists_file.pem", "AES128-GCM-SHA256", false));
+                                    "mycert.pem", "unexists_file.pem", FORD_CIPHER, false));
   EXPECT_FALSE(crypto_manager->LastError().empty());
   // Unexistent cipher value
   EXPECT_FALSE(crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2,
-                                    "mycert.pem", "mykey.pem", "INVALIDCIPHER", false));
+                                    "mycert.pem", "mykey.pem", "INVALID_UNKNOWN_CIPHER", false));
   EXPECT_FALSE(crypto_manager->LastError().empty());
   delete crypto_manager;
 }
@@ -133,16 +147,23 @@ TEST(CryptoManagerTest, CorrectInit) {
   security_manager::CryptoManager *crypto_manager = new security_manager::CryptoManagerImpl();
   // Empty cert and key values for SERVER
   EXPECT_TRUE(crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2,
-                                   "", "", "AES128-GCM-SHA256", false));
+                                   "", "", FORD_CIPHER, false));
   EXPECT_TRUE(crypto_manager->LastError().empty());
-  // Empty cert and key values for CLIENT
+  // Recall init
   EXPECT_TRUE(crypto_manager->Init(security_manager::CLIENT, security_manager::TLSv1_2,
-                                   "", "", "AES128-GCM-SHA256", false));
+                                   "", "", FORD_CIPHER, false));
+  EXPECT_TRUE(crypto_manager->LastError().empty());
+  // Recall init with other protocols
+  EXPECT_TRUE(crypto_manager->Init(security_manager::CLIENT, security_manager::TLSv1_1,
+                                   "", "", FORD_CIPHER, false));
+  EXPECT_TRUE(crypto_manager->LastError().empty());
+  EXPECT_TRUE(crypto_manager->Init(security_manager::CLIENT, security_manager::TLSv1,
+                                   "", "", FORD_CIPHER, false));
   EXPECT_TRUE(crypto_manager->LastError().empty());
 
   // Cipher value
   EXPECT_TRUE(crypto_manager->Init(security_manager::SERVER, security_manager::TLSv1_2,
-                                   "mycert.pem", "mykey.pem", "ALL", false));
+                                   "mycert.pem", "mykey.pem", ALL_CIPHERS, false));
   EXPECT_TRUE(crypto_manager->LastError().empty());
   delete crypto_manager;
 }
@@ -358,7 +379,6 @@ TEST_F(SSLTest, Positive2) {
       }
       std::cout << std::endl;
       last_max = len;
-    };
 
     // Decrypt text on server
     server_ctx->Decrypt(encryptedText, len, &decryptedText, &text_len);
