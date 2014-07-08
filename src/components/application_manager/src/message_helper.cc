@@ -651,7 +651,7 @@ MessageHelper::SmartObjectList MessageHelper::GetIVISubscribtionRequests(
 #endif // #ifdef HMI_JSON_API
 #ifdef HMI_DBUS_API
   //Generate list of ivi_subrequests
-  for (int i = 0; i < sizeof(ivi_subrequests) / sizeof(ivi_subrequests[0]); ++i) {
+  for (size_t i = 0; i < sizeof(ivi_subrequests) / sizeof(ivi_subrequests[0]); ++i) {
     const VehicleInfo_Requests& sr = ivi_subrequests[i];
     if (true == msg_params.keyExists(sr.str)
         && true == msg_params[sr.str].asBool()) {

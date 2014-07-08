@@ -138,7 +138,7 @@ void SubscribeVehicleDataRequest::Run() {
 
 #ifdef HMI_DBUS_API
   //Generate list of subrequests
-  for (int i = 0; i < sizeof(subrequests) / sizeof(subrequests[0]); ++i) {
+  for (size_t i = 0; i < sizeof(subrequests) / sizeof(subrequests[0]); ++i) {
     const Subrequest& sr = subrequests[i];
     if (true == (*message_)[strings::msg_params].keyExists(sr.str)
         && true == (*message_)[strings::msg_params][sr.str].asBool()) {

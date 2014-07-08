@@ -123,7 +123,7 @@ void GetVehicleDataRequest::SendRequestsToHmi(const int32_t app_id) {
   smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app_id;
 
-  for (int32_t i = 0; i < sizeof(subrequests) / sizeof(subrequests[0]); ++i) {
+  for (size_t i = 0; i < sizeof(subrequests) / sizeof(subrequests[0]); ++i) {
     const Subrequest& sr = subrequests[i];
     if (true == (*message_)[str::msg_params].keyExists(sr.str)
         && true == (*message_)[str::msg_params][sr.str].asBool()) {

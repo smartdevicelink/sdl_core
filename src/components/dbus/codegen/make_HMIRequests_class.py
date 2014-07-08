@@ -87,7 +87,6 @@ class Impl(FordXmlParser):
         with CodeBlock(out) as output:
             output.write('virtual QJSValueList fillArgsList() = 0;\n')
             output.write('QDBusPendingCallWatcher *watcher_;\n')
-            output.write('QJSValue hmi_callback_;\n\n')
             output.write('template<typename T>\n')
             output.write('QJSValue CreateQJSValue(T value) {\n')
             output.write('  return QJSValue(value);\n')
@@ -108,6 +107,7 @@ class Impl(FordXmlParser):
         with CodeBlock(out) as output:
             output.write('QDBusInterface *interface_;\n')
             output.write('QList<QVariant> args_;\n')
+            output.write('QJSValue hmi_callback_;\n\n')
         out.write('public slots:\n')
         with CodeBlock(out) as output:
             output.write('void invokeCallback();\n')

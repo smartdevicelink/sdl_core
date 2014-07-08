@@ -1471,13 +1471,6 @@
   <param name="audioType" type="Common.AudioType" mandatory="true"/>
 </struct>
 
-<struct name="Coordinate">
-  <param name="xCoord" type="Integer" mandatory="true">
-  </param>
-  <param name="yCoord" type="Integer" mandatory="true">
-  </param>
-</struct>
-
 <struct name="TextFieldStruct">
   <param name="fieldName" type="Common.TextFieldName" mandatory="true">
 	<description>The name of the field for displaying the text.</description>
