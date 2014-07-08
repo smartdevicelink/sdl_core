@@ -209,7 +209,6 @@ bool TNumberSchemaItem<NumberType>::isNumberType(SmartType type) {
   return false;
 }
 
-
 template<typename NumberType>
 Errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object) {
