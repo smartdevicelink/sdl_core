@@ -1,4 +1,8 @@
+[CW28]
+* SYNC Mobile SDK | SyncProxyTester: Add possibility to restore connection during autotest (exclude connection lost)
+
 [CW27]
+* SYNC Mobile SDK: SDL should always do a notification of the mobile app about closed session
 * SyncProxyTester: Log two request of UnsubscribeButton on mobile
 * SyncProxyTester: Some RPC responses are not shown in the list view
 * SyncProxyTester: Incorrect representation of the "key - value" pair in the RPC Request at the XML test

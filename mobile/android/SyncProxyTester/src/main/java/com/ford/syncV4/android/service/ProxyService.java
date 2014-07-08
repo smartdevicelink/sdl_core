@@ -706,6 +706,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
         createDebugMessageForAdapter(appId, notification);
 
+        if (mSyncProxy == null) {
+            Logger.w(TAG + " OnOnHMIStatus SYNC Proxy null");
+            return;
+        }
+
         switch (notification.getSystemContext()) {
             case SYSCTXT_MAIN:
                 break;
@@ -881,7 +886,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             mConnectionListenersManager.dispatch();
         }
 
-        Logger.d("Is Module testing:" + isModuleTesting());
+        Logger.d("OnProxyClosed is Module testing:" + isModuleTesting());
 
         if (!isModuleTesting()) {
             if (e == null) {
@@ -898,7 +903,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                 }
             }
         } else {
-            mSyncProxy = null;
+            // TODO : At the end of the XML Test the default workflow of the SDK is restoring
+            // Session, if the is no such needs then this is a place to cancel reconnect task
         }
     }
 
@@ -1821,6 +1827,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             }
         }
 
+        if (mSyncProxy == null) {
+            Logger.w(TAG + " OnRegisterAppInterfaceResponse SYNC Proxy null");
+            return;
+        }
         try {
             processRegisterAppInterfaceResponse(appId, response);
         } catch (SyncException e) {
@@ -2396,7 +2406,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      *
      * @throws SyncException
      */
-    private void sendRegisterRequest(RegisterAppInterface registerAppInterface,
+    private synchronized void sendRegisterRequest(RegisterAppInterface registerAppInterface,
                                      IJsonRPCMarshaller jsonRPCMarshaller, boolean sendAsItIs)
             throws SyncException {
 
@@ -2416,29 +2426,59 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
             mSyncProxy.setJsonRPCMarshaller(jsonRPCMarshaller);
 
             // Assume that at this point a new instance of the SyncProxy is created
-
-            // TODO it's seems stupid in order to register send onTransportConnected
             mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface, sendAsItIs);
         } else {
             if (mSyncProxy.getSyncConnection() == null) {
+                Logger.w("Send RAI, SyncConnection null");
                 return;
             }
 
             mSyncProxy.setJsonRPCMarshaller(jsonRPCMarshaller);
 
-            // TODO it's seems stupid in order to register send onTransportConnected
-            mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface, sendAsItIs);
-
             boolean hasRPCRunning = hasRPCRunning(appId);
-            Logger.d("Send RegisterRequest, appId:" + appId + ", hasRPC:" + hasRPCRunning);
+            Logger.d("Send RAI, appId:" + appId + ", hasRPC:" + hasRPCRunning);
             if (hasRPCRunning) {
                 // In case of XML Test is running and the next tag is in use:
                 // <action actionName="startRPCService" pause="2000"/>
                 // what is needed is only to run RPC Request
                 mSyncProxy.sendRPCRequest(appId, registerAppInterface);
             } else {
-                //mSyncProxy.sendRPCRequest(appId, registerAppInterface);
-                mSyncProxy.getSyncConnection().onTransportConnected();
+                Logger.d("Send RAI, isModuleTesting:" + isModuleTesting());
+                if (isModuleTesting()) {
+
+                    // Inter Test Module block
+
+                    mSyncProxy.invalidatePreviousSession(appId);
+
+                    if (mProxyServiceEvent != null) {
+                        mProxyServiceEvent.onInvalidateAppId(appId);
+                    }
+
+                    // Wait until onInvalidateAppId callback will be completed
+                    try {
+                        Thread.sleep(150);
+                    } catch (InterruptedException e) {
+                        // Ignore
+                    }
+
+                    mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface, sendAsItIs);
+
+                    if (mSessionsCounter.size() == 0) {
+                        // Indicates that there is no RPC service started
+                        // TODO : Should not call onTransportConnected in order to register App
+                        mSyncProxy.getSyncConnection().onTransportConnected();
+                    } else {
+                        // In case of XML testing we assume that there is only one Session
+                        mSessionsCounter.clear();
+                        mSessionsCounter.add(appId);
+
+                        mSyncProxy.sendRPCRequest(appId, registerAppInterface);
+                    }
+                } else {
+                    mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface, sendAsItIs);
+                    // TODO : Should not call onTransportConnected in order to register App
+                    mSyncProxy.getSyncConnection().onTransportConnected();
+                }
             }
         }
     }

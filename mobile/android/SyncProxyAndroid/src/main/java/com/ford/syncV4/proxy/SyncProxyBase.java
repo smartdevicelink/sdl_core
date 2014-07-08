@@ -100,6 +100,7 @@ import com.ford.syncV4.util.DeviceInfoManager;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.io.OutputStream;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -616,7 +617,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      */
     public void updateRegisterAppInterfaceParameters(RegisterAppInterface registerAppInterface,
                                                      boolean sendAsItIs) {
-        String appId = (String) registerAppInterface.getAppId();
+        String appId = String.valueOf(registerAppInterface.getAppId());
         if (registerAppInterface.getDeviceInfo() != null) {
             setDeviceInfo(registerAppInterface.getDeviceInfo());
             DeviceInfoManager.copyDeviceInfo(getDeviceInfo(), registerAppInterface.getDeviceInfo());
@@ -626,16 +627,11 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         if (registerAppInterface.getCorrelationID() != null) {
             setRegisterAppInterfaceCorrelationId(registerAppInterface.getCorrelationID());
         }
-        if (sendAsItIs) {
-            raiTable.put(appId, registerAppInterface);
-            appIds.add(appId);
-        } else {
+        if (!sendAsItIs) {
             RegisterAppInterface registerAppInterfaceToUpdate = raiTable.get(appId);
             Logger.d(LOG_TAG + " Update RAI (public), appId:" + appId + ", RAI:" + registerAppInterface);
             if (registerAppInterfaceToUpdate == null) {
                 registerAppInterfaceToUpdate = RPCRequestFactory.buildRegisterAppInterface();
-                raiTable.put(appId, registerAppInterface);
-                appIds.add(appId);
             }
             if (registerAppInterfaceToUpdate != null) {
                 registerAppInterfaceToUpdate.setTtsName(registerAppInterface.getTtsName());
@@ -658,6 +654,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 }
             }
         }
+        raiTable.put(appId, registerAppInterface);
+        appIds.add(appId);
     }
 
     /**
@@ -899,6 +897,35 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         return mSyncConnection;
     }
 
+    /**
+     * This method is for the TEST CASES ONLY, it used for example in XML testing, when RAI request
+     * has different AppId and (or) different AppName, so we need to adjust session
+     * (if it has been started) to the new RAI request
+     */
+    public void invalidatePreviousSession(String newAppId) {
+        // In XML test assume that we have only one session started, so get the enum of the
+        // session ids
+        Enumeration<Byte> lastSessionId = syncSession.getSessionIds();
+
+        // Invalidate all previous Session(s) RAI request(s)
+        invalidateAllRAIs();
+
+        // Invalidate all previous Session(s) data
+        syncSession.invalidate();
+
+        // Assign new AppId (according to XML test)
+        appIds.add(newAppId);
+
+        // Initialize new AppId key at the Session's holder collection
+        syncSession.addAppId(newAppId);
+
+        // Again, assume that we have only one Session in XML test, assign previous Session Id
+        // to the new AppId
+        if (lastSessionId.hasMoreElements()) {
+            syncSession.updateSessionId(lastSessionId.nextElement());
+        }
+    }
+
     public ProxyMessageDispatcher<ProtocolMessage> getIncomingProxyMessageDispatcher() {
         return _incomingProxyMessageDispatcher;
     }
@@ -1128,7 +1155,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
         mIsProxyDisposed = true;
 
-        Logger.i("SYNC Proxy start Dispose");
+        Logger.i("SYNC Proxy start dispose");
 
         try {
             // Clean the proxy
@@ -1162,7 +1189,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
             mTraceDeviceInterrogator = null;
         } finally {
-            Logger.i("SyncProxy Disposed");
+            Logger.i("SYNC Proxy disposed");
         }
     }
 
@@ -1911,9 +1938,11 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             DeviceInfoManager.dumpDeviceInfo(getDeviceInfo());
             String appId = syncSession.getAppIdBySessionId(sessionId);
 
-            Logger.d("RestartRPCProtocolSession sesId:" + sessionId + " appId:" + appId);
-
             RegisterAppInterface registerAppInterface = raiTable.get(appId);
+
+            Logger.d("RestartRPCProtocolSession sesId:" + sessionId + " appId:" + appId +
+                    " RAI:" + registerAppInterface);
+
             if (registerAppInterface == null) {
                 return;
             }
@@ -2620,10 +2649,11 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 languageDesired, hmiDisplayLanguageDesired, appHMIType, appId, correlationID, hashId,
                 deviceInfo);
 
-        appIds.add((String) appId);
-        raiTable.put((String) appId, registerAppInterface);
+        final String appIdString = String.valueOf(appId);
+        appIds.add(appIdString);
+        raiTable.put(appIdString, registerAppInterface);
 
-        sendRPCRequestPrivate((String) appId, registerAppInterface);
+        sendRPCRequestPrivate(appIdString, registerAppInterface);
     }
 
     /**

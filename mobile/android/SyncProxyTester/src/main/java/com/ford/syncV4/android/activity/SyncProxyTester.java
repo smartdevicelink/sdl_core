@@ -480,6 +480,26 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }*/
     }
 
+    /**
+     * A callback form the Test Module indicated that current AppId has been changed
+     *
+     * @param newAppId new AppId
+     */
+    @Override
+    public void onInvalidateAppId(final String newAppId) {
+        /*PlaceholderFragment currentFragment = getCurrentActiveFragment();
+        if (currentFragment == null) {
+            return;
+        }
+        currentFragment.setAppId(newAppId);*/
+        MainApp.getInstance().runInUIThread(new Runnable() {
+            @Override
+            public void run() {
+                updateActiveTabView(newAppId);
+            }
+        });
+    }
+
     @Override
     public void onServiceStart(ServiceType serviceType, String appId) {
 
