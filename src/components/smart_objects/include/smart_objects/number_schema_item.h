@@ -209,6 +209,7 @@ bool TNumberSchemaItem<NumberType>::isNumberType(SmartType type) {
   return false;
 }
 
+
 template<typename NumberType>
 Errors::eType TNumberSchemaItem<NumberType>::validate(
     const SmartObject& Object) {
@@ -224,6 +225,8 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
       value = Object.asUInt();
     } else if (std::string("d") == typeid(value).name()) {
       value = Object.asDouble();
+    } else if (std::string("l") == typeid(value).name()) {
+      value = Object.asInt64();
     } else {
       NOTREACHED();
     }
