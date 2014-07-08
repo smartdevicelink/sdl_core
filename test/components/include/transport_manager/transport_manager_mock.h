@@ -47,7 +47,6 @@ using ::transport_manager::ConnectionUID;
 using ::transport_manager::transport_adapter::TransportAdapter;
 using ::transport_manager::TransportAdapterEventPtr;
 using ::transport_manager::TransportManagerListener;
-using ::protocol_handler::RawMessagePtr;
 /*
  * MOCK implementation of ::transport_manager::TransportManager interface
  */

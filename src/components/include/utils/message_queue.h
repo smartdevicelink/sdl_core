@@ -62,7 +62,7 @@ template<typename T, class Q = std::queue<T> > class MessageQueue {
      * \brief Returns size of the queue.
      * \return Size of the queue.
      */
-    int32_t size() const;
+    size_t size() const;
 
     /**
      * \brief If queue is empty.
@@ -139,7 +139,7 @@ template<typename T, class Q> void MessageQueue<T, Q>::wait() {
   }
 }
 
-template<typename T, class Q> int32_t MessageQueue<T, Q>::size() const {
+template<typename T, class Q> size_t MessageQueue<T, Q>::size() const {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   return queue_.size();
 }

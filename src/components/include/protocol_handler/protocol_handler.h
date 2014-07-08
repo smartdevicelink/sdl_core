@@ -32,7 +32,7 @@
 #ifndef SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_H_
 #define SRC_COMPONENTS_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_H_
 
-#include "protocol/raw_message.h"
+#include "protocol/common.h"
 
 /**
  *\namespace protocol_handlerHandler

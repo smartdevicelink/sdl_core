@@ -32,7 +32,7 @@
 
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
-#include "protocol/raw_message.h"
+#include "protocol/common.h"
 
 #include <stdint.h>
 #include "utils/date_time.h"

@@ -71,11 +71,11 @@ void TransportAdapterEventImpl::set_device_handle(const DeviceUID& device_handle
   device_uid_ = device_handle;
 }
 
-int TransportAdapterEventImpl::event_type(void) const {
+int TransportAdapterEventImpl::event_type() const {
   return event_type_;
 }
 
-ApplicationHandle TransportAdapterEventImpl::application_id(void) const {
+ApplicationHandle TransportAdapterEventImpl::application_id() const {
   return application_id_;
 }
 
@@ -83,7 +83,7 @@ transport_adapter::TransportAdapter* TransportAdapterEventImpl::transport_adapte
   return transport_adapter_;
 }
 
-RawMessagePtr TransportAdapterEventImpl::data(void) const {
+RawMessagePtr TransportAdapterEventImpl::data() const {
   return event_data_;
 }
 
@@ -91,7 +91,7 @@ const DeviceUID& TransportAdapterEventImpl::device_uid() const {
   return device_uid_;
 }
 
-BaseError* TransportAdapterEventImpl::event_error(void) const {
+BaseError* TransportAdapterEventImpl::event_error() const {
   return event_error_;
 }
 

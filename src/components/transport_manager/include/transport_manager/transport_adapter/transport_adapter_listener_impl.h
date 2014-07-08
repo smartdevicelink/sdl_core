@@ -36,12 +36,10 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
-#include "protocol/raw_message.h"
 
 namespace transport_manager {
 
 using transport_manager::transport_adapter::TransportAdapter;
-using ::protocol_handler::RawMessagePtr;
 
 class TransportManagerImpl;
 

@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MOBILE_MESSAGE_HANDLER_IMPL_H_
 
 #include "utils/macro.h"
-#include "protocol/raw_message.h"
+#include "protocol/common.h"
 #include "application_manager/message.h"
 
 namespace application_manager {
@@ -42,10 +42,10 @@ typedef utils::SharedPtr<application_manager::Message> MobileMessage;
 class MobileMessageHandler {
   public:
     static application_manager::Message* HandleIncomingMessageProtocolV1(
-      const protocol_handler::RawMessagePtr message);
+      const RawMessagePtr message);
 
     static application_manager::Message* HandleIncomingMessageProtocolV2(
-      const protocol_handler::RawMessagePtr message);
+      const RawMessagePtr message);
 
     //! -------------------------------------------------------------
 

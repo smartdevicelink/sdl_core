@@ -43,124 +43,153 @@
 namespace protocol_handler {
 
 /**
- *\brief Size of protocol header for first version of protocol.
+ *\brief Size of protocol header version 1.
  */
 const uint8_t PROTOCOL_HEADER_V1_SIZE = 8;
 
 /**
- *\brief Size of protocol header for second version of protocol.
+ *\brief Size of protocol header version 2 and higher.
  */
 const uint8_t PROTOCOL_HEADER_V2_SIZE = 12;
 
 /**
- *\brief Constant: number of protocol version (1).
+ *\brief Protocol versions constants
+ * First 4-bit field of AppLink protocol packet
  */
-const uint8_t PROTOCOL_VERSION_1 = 0x01;
+enum {
+  /**
+   *\brief Constant: number of protocol version (1).
+   */
+  PROTOCOL_VERSION_1 = 0x01,
+  /**
+   *\brief Constant: number of protocol version (2).
+   * Has difference with v.1 in Mobile_API.xml and frame Header difference
+   * Support SSL with Encryption, Video and Audio services
+   */
+  PROTOCOL_VERSION_2 = 0x02,
+  /**
+   *\brief Constant: number of protocol version (3).
+   * Has no difference with v.2 in Mobile_API.xml and frame Header difference
+   * Support SSL with Encryption, Video and Audio services
+   * Suuport ControlFrame, End Service to/from mobile support, HeartBeat future
+   */
+  PROTOCOL_VERSION_3 = 0x03,
+  /**
+   *\brief Maximum value of packet version field (size 4-bit) specified AppLink Protocol v.7
+   */
+  PROTOCOL_VERSION_MAX = 0x0F
+};
 
 /**
- *\brief Constant: number of protocol version (2).
+ *\brief Flag of protection packet
+ * 1-bit field of AppLink protocol packet
  */
-const uint8_t PROTOCOL_VERSION_2 = 0x02;
-
-/**
- *\brief Constant: number of protocol version (3).
- */
-const uint8_t PROTOCOL_VERSION_3 = 0x03;
-
-/**
- *\brief Constant: flag of protection
- */
-const bool PROTECTION_ON = true;
-
-/**
- *\brief Constant: flag of no protection
- */
+const bool PROTECTION_ON  = true;
 const bool PROTECTION_OFF = false;
 
 /**
- *\brief Constant: Control type of frame used in protocol header.
+ *\brief Protocol frame type constants
+ * 3-bit field of AppLink protocol packet
  */
-const uint8_t FRAME_TYPE_CONTROL = 0x00;
+enum {
+  /**
+  *\brief Constant: Control type of frame
+  */
+  FRAME_TYPE_CONTROL = 0x00,
+  /**
+  *\brief Constant: Single type of frame.
+  */
+  FRAME_TYPE_SINGLE = 0x01,
+  /**
+  *\brief Constant: First frame for multiple frames
+  */
+  FRAME_TYPE_FIRST = 0x02,
+  /**
+  *\brief Constant: Consecutive type of frame for multiple frames
+  */
+  FRAME_TYPE_CONSECUTIVE = 0x03,
+  /**
+   *\brief Maximum value of frame type field (size 3-bit)
+   */
+  FRAME_TYPE_MAX_VALUE = 0x07
+};
 
 /**
- *\brief Constant: Single type of frame used in protocol header.
+ *\brief Protocol frame info
+ * 8-bit field of AppLink protocol packet
  */
-const uint8_t FRAME_TYPE_SINGLE = 0x01;
+enum {
+  // Frame type FRAME_TYPE_CONTROL (0x0)
+  /**
+   *\brief Hartbeat frame type
+   */
+  FRAME_DATA_HEART_BEAT = 0x00,
+  /**
+   *\brief Start service frame
+   */
+  FRAME_DATA_START_SERVICE = 0x01,
+  /**
+   *\brief Start service acknowledgement frame
+   */
+  FRAME_DATA_START_SERVICE_ACK = 0x02,
+  /**
+   *\brief Start service not acknowledgement frame
+   */
+  FRAME_DATA_START_SERVICE_NACK = 0x03,
+  /**
+   *\brief End service request frame
+   */
+  FRAME_DATA_END_SERVICE = 0x04,
+  /**
+   * \brief End service acknowledgement frame
+   */
+  FRAME_DATA_END_SERVICE_ACK = 0x05,
+  /**
+   *\briefEnd service not acknowledgement frame
+   */
+  FRAME_DATA_END_SERVICE_NACK = 0x06,
+  /**
+   *\brief Service data ACK frame
+   */
+  FRAME_DATA_SERVICE_DATA_ACK = 0xFE,
+  /**
+   *\brief Frame is for heart beat ack
+   */
+  FRAME_DATA_HEART_BEAT_ACK = 0xFF,
 
-/**
- *\brief Constant: First frame for multiple frames used in protocol header.
- */
-const uint8_t FRAME_TYPE_FIRST = 0x02;
+  // Frame type FRAME_TYPE_SINGLE (0x2)
+  /**
+   *\brief Single frame has reserver frame data value 0x0
+   */
+  FRAME_DATA_SINGLE = 0x00,
 
-/**
- *\brief Constant: Consecutive type of frame for multiple frames used in
- *\brief protocol header.
- */
-const uint8_t FRAME_TYPE_CONSECUTIVE = 0x03;
+  // Frame type FRAME_TYPE_FIRST (0x3)
+  /**
+   *\brief First frame has reserver frame data value 0x0
+   */
+  FRAME_DATA_FIRST = 0x00,
 
-/**
- *\brief Unused: If FRAME_TYPE_CONTROL: Constant: Frame is for heart beat.
- */
-const uint8_t FRAME_DATA_HEART_BEAT = 0x00;
+  // Frame type FRAME_TYPE_CONSECUTIVE (0x3)
+  /**
+   *\brief Marks last frame in mutliframe message
+   */
+  FRAME_DATA_LAST_CONSECUTIVE = 0x00,
+  /**
+   *\brief Maximum of consecutive frame numbers after which count has to roll over to 0x01
+   */
+  FRAME_DATA_MAX_CONSECUTIVE = 0xFF,
 
-/**
- *\brief If FRAME_TYPE_CONTROL: Constant: Start service frame
- */
-const uint8_t FRAME_DATA_START_SERVICE = 0x01;
-
-/**
- *\brief If FRAME_TYPE_CONTROL: Constant: Start service acknowledgement frame
- */
-const uint8_t FRAME_DATA_START_SERVICE_ACK = 0x02;
-
-/**
- *\brief If FRAME_TYPE_CONTROL: Constant: Start service not acknowledgement
- *\brief frame
- */
-const uint8_t FRAME_DATA_START_SERVICE_NACK = 0x03;
-
-/**
- *\brief If FRAME_TYPE_CONTROL: Constant: End service request frame
- */
-const uint8_t FRAME_DATA_END_SERVICE = 0x04;
-
-/**
- * \brief if FRAME_TYPE_CONTROL: Constant: End service acknowledgement frame
- */
-const uint8_t FRAME_DATA_END_SERVICE_ACK = 0x05;
-
-/**
- *\brief If FRAME_TYPE_CONTROL: Constant: End service not acknowledgement frame
- */
-const uint8_t FRAME_DATA_END_SERVICE_NACK = 0x06;
-
-/**
- *\brief If FRAME_TYPE_CONTROL: Constant: Service data ACK frame
- */
-const uint8_t FRAME_DATA_SERVICE_DATA_ACK = 0xFE;
-
-/**
- *\brief Unused: If FRAME_TYPE_CONTROL: Constant: Frame is for heart beat ack.
- */
-const uint8_t FRAME_DATA_HEART_BEAT_ACK = 0xFF;
-
-/**
- *\brief If FRAME_TYPE_CONTROL: Constant: Maximum of consecutive frame numbers
- * after which count has to roll over to 0x01
- */
-const uint8_t FRAME_DATA_MAX_VALUE = 0xFF;
+  /**
+   *\brief Maximum value of frame info field (size 8-bit)
+   */
+  FRAME_DATA_MAX_VALUE = 0xFF
+};
 
 /**
  *\brief If FRAME_TYPE_CONTROL: Constant: Maximum size of one frame excluding
  *\brief frame header (used Ethernet MTU as default target transport)
  */
 const uint32_t MAXIMUM_FRAME_DATA_SIZE = 1500;
-
-/**
- *\brief If FRAME_TYPE_CONSECUTIVE: Constant: Marks last frame in mutliframe
- *\brief message.
- */
-const uint8_t FRAME_DATA_LAST_FRAME = 0x00;
 
 /**
  *\brief If FRAME_TYPE_CONSECUTIVE: Constant: Size of first frame in
@@ -192,4 +221,6 @@ enum RESULT_CODE {
   RESULT_UNKNOWN = 255
 };
 }  // namespace protocol_handler
+typedef ::protocol_handler::RawMessage    RawMessage;
+typedef ::protocol_handler::RawMessagePtr RawMessagePtr;
 #endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_COMMON_H_

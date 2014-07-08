@@ -39,7 +39,7 @@
 #include <gmock/gmock.h>
 
 #include "transport_manager/common.h"
-#include "protocol/raw_message.h"
+#include "protocol/common.h"
 
 using ::testing::Matcher;
 using ::testing::MatcherInterface;
@@ -48,9 +48,6 @@ using ::testing::MatchResultListener;
 namespace test {
 namespace components {
 namespace transport_manager {
-
-using ::protocol_handler::RawMessage;
-using ::protocol_handler::RawMessagePtr;
 
 class RawMessageMatcher : public MatcherInterface<RawMessagePtr> {
  public:

@@ -34,7 +34,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "protocol/raw_message.h"
+#include "protocol/common.h"
 #include "transport_manager/info.h"
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager_impl.h"
@@ -47,8 +47,6 @@
 
 using ::testing::_;
 using ::testing::AtLeast;
-
-using ::protocol_handler::RawMessage;
 
 using ::transport_manager::ApplicationHandle;
 using ::transport_manager::DeviceHandle;

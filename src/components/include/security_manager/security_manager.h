@@ -97,7 +97,18 @@ class SecurityManager
   virtual void SendInternalError(const uint32_t connection_key,
                                  const uint8_t &error_id,
                                  const std::string &erorr_text,
-                                 const uint32_t seq_number = 0) = 0;
+                                 const uint32_t seq_number) = 0;
+  /**
+   * \brief Sends InternalError override methode for sending without seq_number
+   * \param connection_key Unique key used by other components as session identifier
+   * \param error_id  unique error identifier
+   * \param erorr_text SSL impelmentation error text
+   */
+  void SendInternalError(const uint32_t connection_key,
+                         const uint8_t &error_id,
+                         const std::string &erorr_text) {
+    SendInternalError(connection_key, error_id, erorr_text, 0);
+  }
 
   /**
    * \brief Create new SSLContext for connection or return exists

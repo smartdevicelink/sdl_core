@@ -593,7 +593,7 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      protocol_version, PROTECTION_OFF, FRAME_TYPE_SINGLE, service_type, 0,
+      protocol_version, PROTECTION_OFF, FRAME_TYPE_SINGLE, service_type, FRAME_DATA_SINGLE,
       session_id, data_size, message_counters_[session_id]++, data));
 
   raw_ford_messages_to_mobile_.PostMessage(
@@ -645,7 +645,8 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   const ProtocolFramePtr firstPacket(
         new protocol_handler::ProtocolPacket(
           connection_id, protocol_version, PROTECTION_OFF, FRAME_TYPE_FIRST,
-          service_type, 0, session_id, FIRST_FRAME_DATA_SIZE, message_id, out_data));
+          service_type, FRAME_DATA_FIRST, session_id, FIRST_FRAME_DATA_SIZE,
+          message_id, out_data));
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(firstPacket, false));
@@ -654,7 +655,10 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   for (uint32_t i = 0; i < frames_count; ++i) {
     const bool is_last_frame = (i == (frames_count - 1));
     const size_t frame_size = is_last_frame ? lastframe_size : maxdata_size;
-    const uint8_t data_type = is_last_frame ? 0 : (i % FRAME_DATA_MAX_VALUE + 1);
+    const uint8_t data_type =
+        is_last_frame
+        ? FRAME_DATA_LAST_CONSECUTIVE
+        : (i % FRAME_DATA_MAX_CONSECUTIVE + 1);
     const bool is_final_packet = is_last_frame ? is_final_message : false;
 
     const ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
@@ -781,7 +785,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
       return RESULT_FAIL;
     }
 
-    if (packet->frame_data() == FRAME_DATA_LAST_FRAME) {
+    if (packet->frame_data() == FRAME_DATA_LAST_CONSECUTIVE) {
       LOG4CXX_INFO(
           logger_,
           "Last frame of multiframe message size " << packet->data_size()

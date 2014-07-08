@@ -186,13 +186,13 @@ ProtocolHandlerInterceptor::~ProtocolHandlerInterceptor() {
 }
 
 void ProtocolHandlerInterceptor::SendMessageToMobileApp(
-    const protocol_handler::RawMessagePtr message,
+    const RawMessagePtr message,
     bool final_message) {
   printf("\n\n in SendMessageToMobileApp \n\n");
   mas_mess.push_back(message);
 }
 
-std::list<protocol_handler::RawMessagePtr>*
+std::list<RawMessagePtr>*
 ProtocolHandlerInterceptor::GetMasRawMessage() {
   return &mas_mess;
 }

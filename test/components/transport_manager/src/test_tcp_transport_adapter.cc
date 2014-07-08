@@ -10,13 +10,8 @@
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/mock_transport_adapter_listener.h"
 
-using ::test::components::transport_manager::MockTransportAdapterListener;
-
 namespace transport_manager {
 namespace transport_adapter {
-
-using ::protocol_handler::RawMessage;
-using ::protocol_handler::RawMessagePtr;
 
 TEST(TcpAdapterBasicTest, Basic) {
   TransportAdapter* transport_adapter = new TcpTransportAdapter(12345);
@@ -150,7 +145,7 @@ class TcpAdapterTest : public ::testing::Test {
 
   const uint16_t port_;
   TransportAdapter* transport_adapter_;
-  MockTransportAdapterListener mock_dal_;
+  ::test::components::transport_manager::MockTransportAdapterListener mock_dal_;
   ClientTcpSocket client_;
 
   pthread_cond_t suspend_cond_;

@@ -65,7 +65,7 @@
 #include "interfaces/v4_protocol_v1_2_no_extra.h"
 #include "interfaces/v4_protocol_v1_2_no_extra_schema.h"
 
-#include "protocol/raw_message.h"
+#include "protocol/common.h"
 
 #include "utils/macro.h"
 #include "utils/logger.h"
@@ -179,16 +179,16 @@ class ProtocolHandlerInterceptor : public protocol_handler::ProtocolHandlerImpl 
 
   ~ProtocolHandlerInterceptor();
 
-  void SendMessageToMobileApp(const protocol_handler::RawMessagePtr message,
+  void SendMessageToMobileApp(const RawMessagePtr message,
                               bool final_message) OVERRIDE;
 
-  std::list<protocol_handler::RawMessagePtr>* GetMasRawMessage();
+  std::list<RawMessagePtr>* GetMasRawMessage();
 
  private:
   ProtocolHandlerInterceptor* operator=(const ProtocolHandlerInterceptor&);
   ProtocolHandlerInterceptor(const ProtocolHandlerInterceptor&);
 
-  std::list<protocol_handler::RawMessagePtr> mas_mess;
+  std::list<RawMessagePtr> mas_mess;
 };
 
 void RegistrSO(utils::SharedPtr<smart::SmartObject> AppRegRequest);

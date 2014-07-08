@@ -36,13 +36,11 @@
 #include "transport_manager/common.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
-#include "protocol/raw_message.h"
+#include "protocol/common.h"
 
 namespace transport_manager {
 
 class TransportAdapterEvent;
-
-using ::protocol_handler::RawMessagePtr;
 
 /**
  * @brief Interface of transport manager.
@@ -65,7 +63,7 @@ class TransportManager {
     *
     * @return Code error.
     **/
-  virtual int SearchDevices(void) = 0;
+  virtual int SearchDevices() = 0;
 
   /**
    * @brief Connect to all applications discovered on device.

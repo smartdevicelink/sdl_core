@@ -35,15 +35,13 @@
 
 #include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/transport_adapter/connection.h"
+#include "protocol/common.h"
 
 namespace transport_manager {
-
 namespace transport_adapter {
-
 
 class TransportAdapterController {
  public:
-
   virtual ~TransportAdapterController() {
   }
 
@@ -212,5 +210,4 @@ class TransportAdapterController {
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif /* transport_adapter_CONTROLLER_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_CONTROLLER_H_

@@ -49,7 +49,7 @@
 #include "hmi_message_handler/hmi_message_handler_impl.h"
 #include "hmi_message_handler/messagebroker_adapter.h"
 #include "formatters/CFormatterJsonSDLRPCv2.hpp"
-#include "protocol/raw_message.h"
+#include "protocol/common.h"
 #include "json/reader.h"
 
 #include "rpc/init_start_data.h"
@@ -70,7 +70,7 @@ namespace test {
         utils::SharedPtr<smart::SmartObject> in_request,
         utils::SharedPtr<smart::SmartObject> in_responce);
 
-    void SendMessageToMobileApp(const protocol_handler::RawMessagePtr message,
+    void SendMessageToMobileApp(const RawMessagePtr message,
                                 bool final_message) OVERRIDE;
 
    private:

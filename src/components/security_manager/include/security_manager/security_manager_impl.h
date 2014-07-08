@@ -37,13 +37,13 @@
 #include <string>
 
 #include "utils/macro.h"
+#include "utils/message_queue.h"
+#include "utils/threads/message_loop_thread.h"
 
 #include "security_manager/security_manager.h"
 #include "security_manager/security_query.h"
 #include "protocol_handler/protocol_handler.h"
-#include "protocol/raw_message.h"
-#include "utils/message_queue.h"
-#include "utils/threads/message_loop_thread.h"
+#include "protocol/common.h"
 
 namespace security_manager {
 /**
@@ -61,8 +61,6 @@ struct SecurityMessage: public SecurityQueryPtr {
 };
 typedef utils::PrioritizedQueue<SecurityMessage> SecurityMessageQueue;
 typedef threads::MessageLoopThread<SecurityMessageQueue> SecurityMessageLoop;
-
-using protocol_handler::RawMessagePtr;
 
 /**
  * \brief SecurityManagerImpl class implements SecurityManager inteface
@@ -115,7 +113,9 @@ class SecurityManagerImpl
   void SendInternalError(const uint32_t connection_key,
                          const uint8_t &error_id,
                          const std::string &erorr_text,
-                         const uint32_t seq_number = 0) OVERRIDE;
+                         const uint32_t seq_number) OVERRIDE;
+
+  using SecurityManager::SendInternalError;
 
   /**
    * \brief Handle SecurityMessage from mobile for processing

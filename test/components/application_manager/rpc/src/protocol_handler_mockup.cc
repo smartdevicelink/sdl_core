@@ -71,7 +71,7 @@ namespace test {
   }
 
   void ProtocolHandlerMockup::SendMessageToMobileApp(
-      const protocol_handler::RawMessagePtr message, bool final_message) {
+      const RawMessagePtr message, bool final_message) {
     printf("\n\n\n SendMessageToMobileApp \n\n\n");
 
     utils::SharedPtr<application_manager::Message> shared_prt_mes;

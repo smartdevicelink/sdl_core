@@ -36,6 +36,7 @@
 #include <vector>
 
 #include "transport_manager/transport_manager_listener.h"
+#include "protocol/common.h"
 
 namespace transport_manager {
 

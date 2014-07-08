@@ -1234,7 +1234,7 @@ TEST(TestApplicationManager, OnMobileMessageSent) {
    */
   am::ApplicationManagerImpl* app_manager =
       am::ApplicationManagerImpl::instance();
-  protocol_handler::RawMessagePtr raw_message;
+  RawMessagePtr raw_message;
 
   app_manager->OnMobileMessageSent(raw_message);
 }
@@ -1701,7 +1701,7 @@ TEST(TestApplicationManager, SendMessageToMobile) {
   am::ApplicationManagerImpl* app_manager =
       am::ApplicationManagerImpl::instance();
 
-  std::list<protocol_handler::RawMessagePtr>* array_message;
+  std::list<RawMessagePtr>* array_message;
 
   transport_manager::TransportManager* transport_manager_;
   transport_manager_ = transport_manager::TransportManagerDefault::instance();

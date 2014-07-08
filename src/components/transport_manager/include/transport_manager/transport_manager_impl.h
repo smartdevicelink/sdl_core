@@ -48,21 +48,20 @@
 #include <algorithm>
 
 #include "utils/timer_thread.h"
+#include "utils/rwlock.h"
+
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
-#include "protocol/raw_message.h"
-#include "utils/rwlock.h"
+#include "protocol/common.h"
 #ifdef TIME_TESTER
 #include "transport_manager/time_metric_observer.h"
 #endif  // TIME_TESTER
 
-using ::transport_manager::transport_adapter::TransportAdapterListener;
-
 namespace transport_manager {
 
 /**
- * @brief Implementation of transport manager.
+ * @brief Implementation of transport manager.s
  */
 class TransportManagerImpl : public TransportManager {
  public:
@@ -101,7 +100,7 @@ class TransportManagerImpl : public TransportManager {
   /**
    * @brief Destructor.
    **/
-  virtual ~TransportManagerImpl(void);
+  virtual ~TransportManagerImpl();
 
   /**
    * @brief Initialize transport manager.
@@ -115,7 +114,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    **/
-  virtual int SearchDevices(void);
+  virtual int SearchDevices();
 
   /**
    * @brief Connect to all applications discovered on device.
@@ -293,10 +292,10 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    */
-  void MessageQueueThread(void);
+  void MessageQueueThread();
 
   /**
-   * @brief Launch EventListenerThread(void).
+   * @brief Launch EventListenerThread().
    */
   static void* EventListenerStartThread(void*);
   /**
@@ -306,7 +305,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @see @ref components_transportmanager_client_connection_management
    */
-  void EventListenerThread(void);
+  void EventListenerThread();
 
   /**
    * @brief store messages

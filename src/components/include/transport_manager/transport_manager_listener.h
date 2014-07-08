@@ -37,11 +37,9 @@
 #include "transport_manager/common.h"
 #include "transport_manager/info.h"
 #include "transport_manager/error.h"
-#include "protocol/raw_message.h"
+#include "protocol/common.h"
 
 namespace transport_manager {
-
-using ::protocol_handler::RawMessagePtr;
 
 class TransportManagerListener {
  public:

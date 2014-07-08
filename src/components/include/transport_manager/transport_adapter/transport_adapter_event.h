@@ -35,11 +35,9 @@
 
 #include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
-#include "protocol/raw_message.h"
+#include "protocol/common.h"
 
 namespace transport_manager {
-
-using ::protocol_handler::RawMessagePtr;
 
 class TransportAdapterEvent {
  public:
@@ -98,14 +96,14 @@ class TransportAdapterEvent {
    *
    * @return Value that describe event type.
    */
-  virtual int event_type(void) const = 0;
+  virtual int event_type() const = 0;
 
   /**
    * @brief Return handle of application value.
    *
    * @return Handle of application.
    */
-  virtual ApplicationHandle application_id(void) const = 0;
+  virtual ApplicationHandle application_id() const = 0;
 
   /**
    * @brief Return smart pointer to the device adapter.
@@ -119,14 +117,14 @@ class TransportAdapterEvent {
    *
    * @return Smart pointer to the raw message.
    */
-  virtual RawMessagePtr data(void) const = 0;
+  virtual RawMessagePtr data() const = 0;
 
   /**
    * @brief Return pointer to the class that contain details of error.
    *
    * @return Pointer to the class that contain details of error.
    */
-  virtual BaseError *event_error(void) const = 0;
+  virtual BaseError *event_error() const = 0;
   /**
    * @brief Dectructor.
    */

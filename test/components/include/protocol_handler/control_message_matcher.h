@@ -49,7 +49,7 @@ MATCHER_P2(ControlMessage, ExpectedFrameData, ExpectedEncryption,
   // Nack shall be always with flag protected off
   DCHECK(ExpectedFrameData  != 0x03 /*FRAME_DATA_START_SERVICE_NACK*/ ||
          !ExpectedEncryption);
-  const ::protocol_handler::RawMessagePtr message = arg;
+  const RawMessagePtr message = arg;
   const ::protocol_handler::ProtocolPacket packet(
         message->connection_key(), message->data(), message->data_size());
   if (::protocol_handler::FRAME_TYPE_CONTROL != packet.frame_type()) {

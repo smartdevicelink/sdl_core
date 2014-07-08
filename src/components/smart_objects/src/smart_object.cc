@@ -335,7 +335,7 @@ void SmartObject::set_value_double(double NewValue) {
   m_data.double_value = NewValue;
 }
 
-double SmartObject::convert_double(void) const {
+double SmartObject::convert_double() const {
   double retval;
 
   switch (m_type) {
@@ -531,7 +531,7 @@ void SmartObject::set_value_string(const std::string& NewValue) {
   m_data.str_value = new std::string(NewValue);
 }
 
-std::string SmartObject::convert_string(void) const {
+std::string SmartObject::convert_string() const {
   std::string retval;
   std::stringstream stream;
 
@@ -647,7 +647,7 @@ void SmartObject::set_value_binary(SmartBinary NewValue) {
   m_data.binary_value = new SmartBinary(NewValue);
 }
 
-SmartBinary SmartObject::convert_binary(void) const {
+SmartBinary SmartObject::convert_binary() const {
   switch (m_type) {
     case SmartType_Binary:
       return *(m_data.binary_value);

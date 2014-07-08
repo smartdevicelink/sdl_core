@@ -41,7 +41,6 @@ namespace test {
 namespace components {
 namespace protocol_handler_test {
 
-using ::protocol_handler::RawMessagePtr;
 /*
  * MOCK implementation of ::protocol_handler::ProtocolObserver interface
  */

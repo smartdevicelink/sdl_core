@@ -67,7 +67,7 @@ void VideoStreamToFileAdapter::Init() {
 
 void VideoStreamToFileAdapter::SendData(
   int32_t application_key,
-  const protocol_handler::RawMessagePtr message) {
+  const RawMessagePtr message) {
   LOG4CXX_INFO(logger, "VideoStreamToFileAdapter::SendData "
                << application_key);
 
@@ -143,7 +143,7 @@ void VideoStreamToFileAdapter::Streamer::threadMain() {
 
   while (!stop_flag_) {
     while (!server_->messages_.empty()) {
-      protocol_handler::RawMessagePtr msg = server_->messages_.pop();
+      RawMessagePtr msg = server_->messages_.pop();
       if (!msg) {
         LOG4CXX_ERROR(logger, "Null pointer message");
         continue;

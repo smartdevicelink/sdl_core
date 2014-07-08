@@ -54,7 +54,7 @@ class MessagePriority {
 
   // Ordering value which is used by queues to order messages
   // Higher value means higher prioirty
-  size_t OrderingValue();
+  size_t OrderingValue() const;
  private:
   // Constructor is private to prevent creation
   // of random priorities in the code please use static constructor if you

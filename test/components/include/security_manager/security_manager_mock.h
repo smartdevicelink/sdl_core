@@ -66,9 +66,9 @@ class SecurityManagerMock: public ::security_manager::SecurityManager {
                void(::security_manager::SecurityManagerListener *));
   // protocol_handler::ProtocolObserver part
   MOCK_METHOD1(OnMessageReceived,
-               void(const ::protocol_handler::RawMessagePtr));
+               void(const RawMessagePtr));
   MOCK_METHOD1(OnMobileMessageSent,
-               void(const ::protocol_handler::RawMessagePtr));
+               void(const RawMessagePtr));
 };
 }  // namespace security_manager_test
 }  // namespace components

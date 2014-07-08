@@ -30,19 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_SOCKET_CONNECTION_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_SOCKET_CONNECTION_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_PASA_BT_BLUETOOTH_PASA_CONNECTION_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_PASA_BT_BLUETOOTH_PASA_CONNECTION_H_
 
 #include <poll.h>
+#include <mqueue.h>
 
 #include <queue>
-#include <mqueue.h>
+#include <string>
 
 #include "transport_manager/transport_adapter/connection.h"
 #include "utils/logger.h"
 #include "utils/lock.h"
-
-using ::transport_manager::transport_adapter::Connection;
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -52,7 +51,8 @@ class TransportAdapterController;
 /**
  * @brief Class responsible for communication over bluetooth sockets.
  */
-class BluetoothPASAConnection : public Connection {
+class BluetoothPASAConnection
+    : public ::transport_manager::transport_adapter::Connection {
  public:
   /**
    * @brief Constructor.
@@ -91,6 +91,7 @@ class BluetoothPASAConnection : public Connection {
    * @brief Destructor.
    */
   virtual ~BluetoothPASAConnection();
+
  protected:
   /**
    * @brief Establish connection.
@@ -150,5 +151,4 @@ class BluetoothPASAConnection : public Connection {
 };
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif /* BLUETOOTH_SOCKET_CONNECTION_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_PASA_BT_BLUETOOTH_PASA_CONNECTION_H_

@@ -38,7 +38,6 @@
 
 #include <gmock/gmock.h>
 
-#include "transport_manager/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 
 using namespace transport_manager;
@@ -48,8 +47,6 @@ using transport_manager::transport_adapter::TransportAdapterListener;
 namespace test {
 namespace components {
 namespace transport_manager {
-
-using ::protocol_handler::RawMessagePtr;
 
 class MockTransportAdapterListener : public TransportAdapterListener {
  public:

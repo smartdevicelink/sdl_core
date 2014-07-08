@@ -315,7 +315,7 @@ int TransportManagerImpl::AddTransportAdapter(
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::SearchDevices(void) {
+int TransportManagerImpl::SearchDevices() {
   if (!this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TM is not initialized");
     return E_TM_IS_NOT_INITIALIZED;
@@ -364,7 +364,7 @@ int TransportManagerImpl::SearchDevices(void) {
     : E_ADAPTERS_FAIL;
 }
 
-int TransportManagerImpl::Init(void) {
+int TransportManagerImpl::Init() {
   LOG4CXX_INFO(logger_, "Init is called");
   all_thread_active_ = true;
 
@@ -578,7 +578,7 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
   RaiseEvent(&TransportManagerListener::OnDeviceListUpdated, device_infos);
 }
 
-void TransportManagerImpl::EventListenerThread(void) {
+void TransportManagerImpl::EventListenerThread() {
 #ifndef USE_RWLOCK
   pthread_mutex_lock(&event_queue_mutex_);
 #endif
@@ -791,7 +791,7 @@ void* TransportManagerImpl::MessageQueueStartThread(void* data) {
   return 0;
 }
 
-void TransportManagerImpl::MessageQueueThread(void) {
+void TransportManagerImpl::MessageQueueThread() {
   LOG4CXX_INFO(logger_, "Message queue thread started");
 
 #ifndef USE_RWLOCK

@@ -37,8 +37,6 @@
 
 namespace transport_manager {
 
-using ::protocol_handler::RawMessagePtr;
-
 class TransportAdapterEventImpl : public TransportAdapterEvent {
  public:
   /**
@@ -112,14 +110,14 @@ class TransportAdapterEventImpl : public TransportAdapterEvent {
    *
    * @return Value that describe event type.
    */
-  int event_type(void) const;
+  int event_type() const;
 
   /**
    * @brief Return handle of application value.
    *
    * @return Handle of application.
    */
-  ApplicationHandle application_id(void) const;
+  ApplicationHandle application_id() const;
 
   /**
    * @brief Return smart pointer to the device adapter.
@@ -133,14 +131,14 @@ class TransportAdapterEventImpl : public TransportAdapterEvent {
    *
    * @return Smart pointer to the raw message.
    */
-  RawMessagePtr data(void) const;
+  RawMessagePtr data() const;
 
   /**
    * @brief Return pointer to the class that contain details of error.
    *
    * @return Pointer to the class that contain details of error.
    */
-  BaseError *event_error(void) const;
+  BaseError *event_error() const;
 
  private:
   int event_type_;                   /**< Value that describe event type. */

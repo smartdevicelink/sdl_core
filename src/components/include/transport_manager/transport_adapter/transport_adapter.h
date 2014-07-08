@@ -41,19 +41,18 @@
 #include <list>
 #include <map>
 
-#include "transport_manager/transport_adapter/device.h"
 #include "utils/shared_ptr.h"
+
+#include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"
-#include "protocol/raw_message.h"
+#include "protocol/common.h"
 
 namespace transport_manager {
 
 class TMMetricObserver;
 
 namespace transport_adapter {
-
-using ::protocol_handler::RawMessagePtr;
 
 class TransportAdapterListener;
 

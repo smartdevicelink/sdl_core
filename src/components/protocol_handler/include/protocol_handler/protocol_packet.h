@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_PACKET_H_
 
 #include "utils/macro.h"
-#include "protocol/raw_message.h"
+#include "protocol/common.h"
 #include "protocol/common.h"
 
 /**
@@ -155,7 +155,7 @@ class ProtocolPacket {
    * \brief Serializes info about message into protocol header.
    * \return RawMessagePtr with all data (header and message)
    */
-  protocol_handler::RawMessagePtr serializePacket() const;
+  RawMessagePtr serializePacket() const;
   /**
    * \brief Appends message frame to existing message in
    * recieving multiframe messages.
@@ -169,7 +169,7 @@ class ProtocolPacket {
    * \brief Getter of message size including protocol header
    * \return uint32_t size of message string
    */
-  uint32_t packet_size() const;
+  size_t packet_size() const;
 
   /**
    * \brief Getter of message ID

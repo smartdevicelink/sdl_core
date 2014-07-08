@@ -103,7 +103,7 @@ class SharedPtr {
      * Decrement reference counter and destroy wrapped object
      * if reference counter reaches zero.
      **/
-    ~SharedPtr(void);
+    ~SharedPtr();
 
     /**
      * @brief Assignment operator.
@@ -154,7 +154,7 @@ class SharedPtr {
      *
      * @return Wrapped object.
      **/
-    ObjectType* operator->(void) const;
+    ObjectType* operator->() const;
 
     ObjectType& operator*() const;
     operator bool() const;
@@ -181,7 +181,7 @@ class SharedPtr {
      * If reference counter reaches zero object and its reference
      * counter will be deallocated.
      **/
-    void dropReference(void);
+    void dropReference();
 
     /**
      * @brief Wrapped object.
@@ -226,7 +226,7 @@ inline utils::SharedPtr<ObjectType>::SharedPtr(
 }
 
 template<typename ObjectType>
-inline utils::SharedPtr<ObjectType>::~SharedPtr(void) {
+inline utils::SharedPtr<ObjectType>::~SharedPtr() {
   dropReference();
 }
 
@@ -280,7 +280,7 @@ utils::SharedPtr<OtherObjectType> utils::SharedPtr<ObjectType>::static_pointer_c
 }
 
 template<typename ObjectType> ObjectType*
-utils::SharedPtr<ObjectType>::operator->(void) const {
+utils::SharedPtr<ObjectType>::operator->() const {
   DCHECK(mObject);
   return mObject;
 }
@@ -315,7 +315,7 @@ utils::SharedPtr<ObjectType>::reset_impl(ObjectType* other) {
 }
 
 template<typename ObjectType>
-inline void SharedPtr<ObjectType>::dropReference(void) {
+inline void SharedPtr<ObjectType>::dropReference() {
   if (0 != mReferenceCounter) {
     if (1 == atomic_post_dec(mReferenceCounter)) {
 

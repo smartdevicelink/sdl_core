@@ -36,10 +36,10 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_THREADED_SOCKET_CONNECTION_H_
 
 #include <poll.h>
-
 #include <queue>
 
 #include "transport_manager/transport_adapter/connection.h"
+#include "protocol/common.h"
 
 using ::transport_manager::transport_adapter::Connection;
 
