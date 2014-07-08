@@ -65,6 +65,12 @@ add_custom_target(pasa-tarball
   DEPENDS HMI_API MOBILE_API v4_protocol_v1_2_no_extra
 )
 
+add_custom_target(ford-tarball
+  COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} FORD
+  COMMAND tar -czv -C /tmp/FORD -f ${CMAKE_BINARY_DIR}/ford.tar.gz .
+  DEPENDS HMI_API MOBILE_API v4_protocol_v1_2_no_extra
+)
+
 if (OS_TYPE_OPTION)
   if (${OS_TYPE_OPTION} STREQUAL "QNX")
     message(STATUS "Jenkins integration: set build process for QNX")
