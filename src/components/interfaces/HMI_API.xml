@@ -1422,7 +1422,7 @@
   <param name="imageFields" type="Common.ImageField" minsize="1" maxsize="100" array="true" mandatory="false">
     <description>A set of all fields that support images. See ImageField</description>
   </param>
-  <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
+  <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="0" maxsize="100" array="true" mandatory="true">
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
   </param>
   <param name="imageCapabilities" type="Common.ImageType" array="true" minsize="0" maxsize="2" mandatory="false">
