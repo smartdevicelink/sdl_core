@@ -56,14 +56,26 @@ class ClientTcpSocket {
   }
 
   bool Send(const std::string& str) {
-    ssize_t written = write(socket_, str.c_str(), str.size());
-    return written == str.size();
+    size_t size = str.size();
+    ssize_t written = write(socket_, str.c_str(), size);
+    if (written != -1) {
+      size_t count = static_cast<size_t>(written);
+      return count == size;
+    }
+    else {
+      return false;
+    }
   }
 
   std::string receive(std::size_t size) {
     char* buf = new char[size];
     ssize_t read = recv(socket_, buf, size, MSG_WAITALL);
-    return std::string(buf, buf + size);
+    if (read != -1) {
+      return std::string(buf, buf + read);
+    }
+    else {
+      return std::string();
+    }
   }
 
   void Disconnect() {
@@ -122,7 +134,6 @@ class TcpAdapterTest : public ::testing::Test {
     abs_time.tv_sec = now.tv_sec + 1;
     abs_time.tv_nsec = now.tv_usec * 1000;
     while (suspended_) {
-      int i;
       if (ETIMEDOUT
           == pthread_cond_timedwait(&suspend_cond_, &suspend_mutex_,
                                     &abs_time)) {

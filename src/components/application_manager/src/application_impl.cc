@@ -424,7 +424,7 @@ bool ApplicationImpl::IsReadDIDAllowed() {
   frequency_restrictions = profile::Profile::instance()->read_did_frequency();
   TimevalStruct current = date_time::DateTime::getCurrentTime();
 
-  if (current.tv_sec - read_did_frequency_.first.tv_sec > frequency_restrictions.second) {
+  if (current.tv_sec > read_did_frequency_.first.tv_sec + frequency_restrictions.second) {
     read_did_frequency_.first = current;
     read_did_frequency_.second = 1;
     return true;
@@ -443,7 +443,7 @@ bool ApplicationImpl::IsGetVehicleDataAllowed() {
   frequency_restrictions = profile::Profile::instance()->get_vehicle_data_frequency();
   TimevalStruct current = date_time::DateTime::getCurrentTime();
 
-  if (current.tv_sec - get_vehice_data_frequency_.first.tv_sec > frequency_restrictions.second) {
+  if (current.tv_sec > get_vehice_data_frequency_.first.tv_sec + frequency_restrictions.second) {
     get_vehice_data_frequency_.first = current;
     get_vehice_data_frequency_.second = 0;
     return true;

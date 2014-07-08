@@ -176,7 +176,7 @@ void CMetaFormatterTestHelper::CompareObjects(
 
   if (NsSmartDeviceLink::NsSmartObjects::SmartType_Array == first.getType()) {
     ASSERT_EQ(NsSmartDeviceLink::NsSmartObjects::SmartType_Array, second.getType());
-    for (int i = 0; i < first.length(); i++) {
+    for (size_t i = 0; i < first.length(); i++) {
       CompareObjects(first.getElement(i), second.getElement(i));
     }
   }

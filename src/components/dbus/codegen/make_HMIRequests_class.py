@@ -170,8 +170,10 @@ class Impl(FordXmlParser):
                         if param_el.get('mandatory') == 'false':
                             out.write('if (reply.argumentAt<' + str(count) + '>().presence) {\n')
                             out.write('  param = CreateQJSValue(reply.argumentAt<' + str(count) + '>().val);\n')
-                            out.write('  qjsValueList.append(param);\n')
+                            out.write('} else {\n')
+                            out.write('  param = QJSValue();\n')
                             out.write('}\n')
+                            out.write('qjsValueList.append(param);\n')
                         else:
                             out.write('param = CreateQJSValue(reply.argumentAt<' + str(count) + '>());\n')
                             out.write('qjsValueList.append(param);\n')

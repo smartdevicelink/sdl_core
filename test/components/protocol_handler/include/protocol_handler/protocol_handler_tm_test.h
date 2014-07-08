@@ -325,6 +325,7 @@ TEST_F(ProtocolHandlerImplTest,SecurityEnable_StartSessionProtected_SSLInitializ
       WillOnce(Return(E_SUCCESS));
 
   SendControlMessage(PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
+
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_OFF on session handshhake fail

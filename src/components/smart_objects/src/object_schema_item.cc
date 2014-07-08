@@ -178,11 +178,9 @@ void CObjectSchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
       }
     }  // for
   } else {
-    bool is_any_mandatory_field = false;
     for (std::map<std::string, CObjectSchemaItem::SMember>::const_iterator i =
         mMembers.begin(); i != mMembers.end(); ++i) {  // for
       if (i->second.mIsMandatory) {
-        is_any_mandatory_field = true;
         i->second.mSchemaItem->BuildObjectBySchema(SmartObject(),
                                                    result_object[i->first]);
       }

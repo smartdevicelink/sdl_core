@@ -78,6 +78,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * This is a class that provide functionality to process XML tests (load from file, parse, execute,
@@ -310,8 +313,7 @@ public class ModuleTest {
                             if (filenames.length > 0) {
                                 List<String> paths = new ArrayList<String>();
                                 for (String filename : filenames) {
-                                    mLogAdapter.logMessage("Processing "
-                                            + filename, Log.INFO, true);
+                                    mLogAdapter.logMessage("Processing " + filename, Log.INFO, true);
                                     try {
                                         String fullPath = mFilePath + File.separator + filename;
                                         processTestFile(fullPath);
@@ -321,13 +323,10 @@ public class ModuleTest {
                                             paths.add(testErrorsFilename);
                                         }
                                     } catch (Exception e) {
-                                        mLogAdapter
-                                                .logMessage("Parser Failed!!",
-                                                        Log.ERROR, e);
+                                        mLogAdapter.logMessage("Parser Failed!!", Log.ERROR, e);
                                     }
                                 }
-                                mLogAdapter.logMessage("All tests finished",
-                                        Log.INFO, true);
+                                mLogAdapter.logMessage("All tests finished", Log.INFO, true);
 
                                 if (paths.size() > 0) {
                                     sendReportEmail(paths);
@@ -452,8 +451,9 @@ public class ModuleTest {
                                             Logger.e(TAG + " Couldn't parse pause number: " + pauseString);
                                         }
                                     }
-                                    currentTest = new Test(parser.getAttributeValue(null, TEST_NAME_ATTR),
-                                            pause, null);
+                                    String testName = parser.getAttributeValue(null, TEST_NAME_ATTR);
+                                    Logger.d(TAG + " Test '" + testName + "' started");
+                                    currentTest = new Test(testName, pause, null);
                                     expecting.clear();
                                     sResponses.clear();
                                     numIterations = 1;
@@ -1024,11 +1024,16 @@ public class ModuleTest {
 
             mProxyService.getTestConfig().setDoCallRegisterAppInterface(false);
 
-            if (StringUtils.isEmpty(testActionItem.getNextAppId())) {
-                mProxyService.restart();
-            } else {
-                mProxyService.restart_withAppId_for_test(testActionItem.getNextAppId());
-            }
+            // Launch restart in the new thread in order to get possibility for the lock Monitor
+            // to get lock
+            ExecutorService service = Executors.newSingleThreadExecutor();
+            service.submit(new Runnable() {
+                @Override
+                public void run() {
+                    mProxyService.restart();
+                }
+            });
+
             mProxyService.getRestoreConnectionToRPCService().acquireLock();
         }
     }
@@ -1133,7 +1138,7 @@ public class ModuleTest {
                     //                (generateInvalidJSON ? invalidMarshaller : defaultMarshaller);
                     //Logger.d("Current Marshaller:" + currentMarshaller);
 
-                    //Logger.d(TAG + " Send RPC:" + rpc + " appId:" + mAppId);
+                    //Logger.d(TAG + " Send Test RPC:" + rpc.getFunctionName() + " appId:" + mAppId);
                     mProxyService.sendRPCRequestWithPreprocess(mAppId, rpc, currentMarshaller, true);
 
                     long pause = wrapper.getPause();

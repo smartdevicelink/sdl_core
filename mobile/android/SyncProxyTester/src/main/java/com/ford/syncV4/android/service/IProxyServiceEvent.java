@@ -54,4 +54,12 @@ public interface IProxyServiceEvent {
      * @param serviceType a type of the service
      */
     public void onStartServiceNackReceived(String appId, ServiceType serviceType);
+
+    /**
+     * Dispatch when XML test need to send {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
+     * response with different AppId and(or) AppName parameters
+     *
+     * @param newAppId new AppId
+     */
+    public void onInvalidateAppId(String newAppId);
 }
