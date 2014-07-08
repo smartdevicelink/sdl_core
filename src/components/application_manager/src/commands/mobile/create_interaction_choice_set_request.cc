@@ -213,7 +213,7 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
     }
 
     // Checking choice set on contained \t\n \\t \\n
-    if (IsWhitepaceExist((*it_array))) {
+    if (IsWhitespaceExist((*it_array))) {
       LOG4CXX_ERROR(logger_,
                     "Incoming choice set has contains \t\n \\t \\n");
       return mobile_apis::Result::INVALID_DATA;
@@ -256,22 +256,25 @@ bool CreateInteractionChoiceSetRequest::compareStr(
   return 0 == strcasecmp(str1.asCharArray(), str2.asCharArray());
 }
 
-bool CreateInteractionChoiceSetRequest::IsWhitepaceExist(
+bool CreateInteractionChoiceSetRequest::IsWhitespaceExist(
     const smart_objects::SmartObject& choice_set) {
   bool return_value = false;
 
-  std::string str = choice_set[strings::menu_name].asCharArray();
+  const char* str = choice_set[strings::menu_name].asCharArray();
   if (!CheckSyntax(str, true)) {
+    LOG4CXX_INFO(logger_, "menu_name syntax check failed");
     return_value = true;
   }
 
   str = choice_set[strings::secondary_text].asCharArray();
   if (!CheckSyntax(str, true)) {
+    LOG4CXX_INFO(logger_, "secondary_text syntax check failed");
     return_value = true;
   }
 
   str = choice_set[strings::tertiary_text].asCharArray();
   if (!CheckSyntax(str, true)) {
+    LOG4CXX_INFO(logger_, "tertiary_text syntax check failed");
     return_value = true;
   }
 
@@ -284,6 +287,7 @@ bool CreateInteractionChoiceSetRequest::IsWhitepaceExist(
   for (; it_vr != it_vr_end; ++it_vr) {
     str = (*it_vr).asCharArray();
     if (!CheckSyntax(str, true)) {
+      LOG4CXX_INFO(logger_, "vr_commands syntax check failed");
       return_value = true;
       break;
     }
