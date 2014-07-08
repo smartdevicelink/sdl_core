@@ -78,6 +78,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * This is a class that provide functionality to process XML tests (load from file, parse, execute,
@@ -1021,11 +1024,16 @@ public class ModuleTest {
 
             mProxyService.getTestConfig().setDoCallRegisterAppInterface(false);
 
-            if (StringUtils.isEmpty(testActionItem.getNextAppId())) {
-                mProxyService.restart();
-            } else {
-                mProxyService.restart_withAppId_for_test(testActionItem.getNextAppId());
-            }
+            // Launch restart in the new thread in order to get possibility for the lock Monitor
+            // to get lock
+            ExecutorService service = Executors.newSingleThreadExecutor();
+            service.submit(new Runnable() {
+                @Override
+                public void run() {
+                    mProxyService.restart();
+                }
+            });
+
             mProxyService.getRestoreConnectionToRPCService().acquireLock();
         }
     }

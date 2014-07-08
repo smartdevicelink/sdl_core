@@ -1659,7 +1659,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     stopAudioService(appId);
                 }
 
-                mBoundProxyService.destroyService();
+                mBoundProxyService.disposeSyncProxy();
             }
         });
     }

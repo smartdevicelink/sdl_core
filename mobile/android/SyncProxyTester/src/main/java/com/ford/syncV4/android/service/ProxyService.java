@@ -482,6 +482,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                     return false;
                 }
             }
+        } else {
+            // In case of RPC Session lost but the connection is alive (for example while XML testing)
+            // then we call Session initialization
+            mSyncProxy.initializeSessions();
         }
 
         LogAdapter logAdapter = getLogAdapterByAppId(appId);
@@ -547,11 +551,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
         mProxyServiceEvent = proxyServiceEvent;
     }
 
-    public void destroyService() {
-        disposeSyncProxy();
-    }
-
-    private void disposeSyncProxy() {
+    public void disposeSyncProxy() {
         createInfoMessageForAdapter(" Dispose SYNC Proxy");
 
         MainApp.getInstance().getLastUsedHashIdsManager().save();
@@ -933,16 +933,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
      */
     public void restart() {
         Logger.i(TAG, " Restart SYNC Proxy");
-        disposeSyncProxy();
+        // If the is no connection - dispose a Proxy in order to initialize new connection
+        if (!mSyncProxy.getIsConnected()) {
+            disposeSyncProxy();
+        }
         startProxyIfNetworkConnected();
-    }
-
-    public void restart_withAppId_for_test(String appId) {
-        Logger.i(TAG, " Restart SYNC Proxy with AppId");
-        AppPreferencesManager.setCustomAppId(appId);
-
-
-        restart();
     }
 
     @Override
@@ -2465,8 +2460,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
 
                     if (mSessionsCounter.size() == 0) {
                         // Indicates that there is no RPC service started
-                        // TODO : Should not call onTransportConnected in order to register App
-                        mSyncProxy.getSyncConnection().onTransportConnected();
+                        mSyncProxy.initializeSessions();
                     } else {
                         // In case of XML testing we assume that there is only one Session
                         mSessionsCounter.clear();
@@ -2476,8 +2470,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting, I
                     }
                 } else {
                     mSyncProxy.updateRegisterAppInterfaceParameters(registerAppInterface, sendAsItIs);
-                    // TODO : Should not call onTransportConnected in order to register App
-                    mSyncProxy.getSyncConnection().onTransportConnected();
+                    mSyncProxy.initializeSessions();
                 }
             }
         }

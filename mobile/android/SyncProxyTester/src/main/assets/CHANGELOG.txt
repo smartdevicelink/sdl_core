@@ -1,5 +1,5 @@
 [CW28]
-* SYNC Mobile SDK | SyncProxyTester: Add possibility to restore connection during autotest (exclude connection lost)
+* SYNC Mobile SDK | SyncProxyTester: Add possibility to restore connection during autotest
 
 [CW27]
 * SYNC Mobile SDK: SDL should always do a notification of the mobile app about closed session

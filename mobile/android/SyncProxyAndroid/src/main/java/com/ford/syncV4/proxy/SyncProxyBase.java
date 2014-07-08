@@ -3032,6 +3032,16 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     }
 
     // TODO : Hide this method from public when no Test Cases are need
+
+    /**
+     * Initialize all available Sessions. <b>In production this method MUST be private</b>
+     */
+    public void initializeSessions() {
+        for (String appId: appIds) {
+            initializeSession(appId);
+        }
+    }
+
     /**
      * Initialize new Session. <b>In production this method MUST be private</b>
      */
@@ -3069,9 +3079,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
             reconnectHandler.removeCallbacks(reconnectRunnableTask);
 
-            for (String appId: appIds) {
-                initializeSession(appId);
-            }
+            initializeSessions();
         }
 
         @Override
