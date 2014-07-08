@@ -25,7 +25,6 @@ set (SOURCES
   ./src/transport_adapter/threaded_socket_connection.cc
   ./src/tcp/tcp_client_listener.cc
   ./src/tcp/tcp_device.cc
-  ./src/transport_adapter/transport_adapter_event_impl.cc
   ./src/tcp/tcp_socket_connection.cc
   ./src/tcp/tcp_connection_factory.cc
 )

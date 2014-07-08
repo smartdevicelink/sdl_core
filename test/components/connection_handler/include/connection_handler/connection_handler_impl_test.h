@@ -47,7 +47,6 @@ namespace components {
 namespace connection_handle_test {
 
 using namespace ::connection_handler;
-//using namespace ::security_manager;
 using ::protocol_handler::ServiceType;
 using namespace ::protocol_handler;  // For service types and PROTECTION_ON/OFF
 

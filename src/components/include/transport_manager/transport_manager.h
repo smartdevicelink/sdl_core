@@ -116,7 +116,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int ReceiveEventFromDevice(const TransportAdapterEventPtr event) = 0;
+  virtual int ReceiveEventFromDevice(const TransportAdapterEvent& event) = 0;
 
   /**
    * @brief Add transport adapter.
