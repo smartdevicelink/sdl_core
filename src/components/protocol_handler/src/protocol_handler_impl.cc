@@ -938,8 +938,11 @@ void ProtocolHandlerImpl::Handle(
 
   connection_handler::ConnectionHandlerImpl* connection_handler =
         connection_handler::ConnectionHandlerImpl::instance();
+  if (session_observer_->CheckSupportHeartBeat(
+      message->connection_key(), message->session_id())) {
     connection_handler->KeepConnectionAlive(message->connection_key(),
                                             message->session_id());
+  }
 
   if (((0 != message->data()) && (0 != message->data_size())) ||
       FRAME_TYPE_CONTROL == message->frame_type() ||

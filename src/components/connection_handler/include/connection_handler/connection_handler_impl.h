@@ -275,7 +275,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     /*
      * Keep connection associated with the key from being closed by heartbeat monitor
      */
-    void KeepConnectionAlive(uint32_t connection_key, uint8_t session_id);
+    void KeepConnectionAlive(uint32_t connection_id, uint8_t session_id);
 
     /*
      * \brief binds protocol version with session
