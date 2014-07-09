@@ -23,7 +23,6 @@ function (GenerateInterfaceLibrary xml_file_name generated_interface_names)
   endif()
   if (GenerateInterfaceLibrary_DBUS_SUPPORT)
     set(NEED_DBUS "-d")
-    find_package(DBus)
     list(APPEND GENERATED_LIB_HEADER_DEPENDENCIES ${DBUS_INCLUDE_DIRS})
   endif()
 
