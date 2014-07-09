@@ -349,7 +349,10 @@ bool ResumeCtrl::RestoreApplicationData(ApplicationSharedPtr application) {
       VehicleDataType ivi;
       ivi = static_cast<VehicleDataType>((*json_it).asInt());
       LOG4CXX_INFO(logger_, "VehicleDataType :" <<  ivi);
-      bool result = application->SubscribeToIVI(ivi);
+#ifdef ENABLE_LOG
+      bool result =
+#endif
+      application->SubscribeToIVI(ivi);
       LOG4CXX_INFO(logger_, "result = :" <<  result);
     }
     requests = MessageHelper::GetIVISubscribtionRequests(application->app_id());

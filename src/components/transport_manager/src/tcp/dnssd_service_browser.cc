@@ -123,14 +123,14 @@ void AvahiServiceBrowserCallback(AvahiServiceBrowser *avahi_service_browser,
   DnssdServiceBrowser* dnssd_service_browser =
       static_cast<DnssdServiceBrowser*>(data);
 
-  int avahi_errno;
   switch (event) {
     case AVAHI_BROWSER_FAILURE:
-      avahi_errno = avahi_client_errno(
-          avahi_service_browser_get_client(avahi_service_browser));
       LOG4CXX_ERROR(
           logger_,
-          "AvahiServiceBrowser failure: " << avahi_strerror(avahi_errno));
+          "AvahiServiceBrowser failure: " << avahi_strerror(
+                      avahi_client_errno(
+                          avahi_service_browser_get_client(
+                              avahi_service_browser))));
       break;
 
     case AVAHI_BROWSER_NEW:

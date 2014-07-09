@@ -215,7 +215,7 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
   }
   pthread_mutex_unlock(&connections_mutex_);
 
-  return OK;
+  return error;
 }
 
 TransportAdapter::Error TransportAdapterImpl::SendData(

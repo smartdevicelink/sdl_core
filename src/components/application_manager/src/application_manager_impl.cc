@@ -1372,7 +1372,10 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       break;
     }
     case ProtocolVersion::kHMI: {
-      int32_t result = formatters::FormatterJsonRpc::FromString <
+#ifdef ENABLE_LOG
+      int32_t result =
+#endif
+      formatters::FormatterJsonRpc::FromString <
                        hmi_apis::FunctionID::eType, hmi_apis::messageType::eType > (
                          message.json_message(), output);
       LOG4CXX_INFO(
