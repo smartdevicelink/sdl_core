@@ -95,12 +95,8 @@ import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
-<<<<<<< HEAD
 import com.ford.syncV4.service.secure.SecurityInternalError;
 import com.ford.syncV4.test.TestConfig;
-import com.ford.syncV4.transport.TransportType;
-=======
->>>>>>> develop
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.logger.Logger;
 import com.lamerman.FileDialog;
@@ -131,8 +127,6 @@ public class PlaceholderFragment extends Fragment {
      * Placeholder for the Application Id field
      */
     public static final String EMPTY_APP_ID = "";
-    // Request id for ChoiceListActivity
-    public static final int REQUEST_LIST_CHOICES = 45;
     private static final String LOG_TAG = PlaceholderFragment.class.getSimpleName();
     private static final String MOBILE_NAV_FRAGMENT_TAG = "MOBILE_NAV_FRAGMENT_TAG";
     private static final String AUDIO_FRAGMENT_TAG = "AUDIO_FRAGMENT_TAG";
@@ -151,11 +145,7 @@ public class PlaceholderFragment extends Fragment {
     private final static String HASH_ID_SET_UP_DIALOG_TAG = "HashIdSetUpDialogTag";
     private final static String FEEDBACK_DIALOG_TAG = "FeedbackDialogTag";
     private static final String MSC_PREFIX = "msc_";
-<<<<<<< HEAD
-    private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
-=======
 
->>>>>>> develop
     private static final int ALERT_MAXSOFTBUTTONS = 4;
     private static final int SCROLLABLEMESSAGE_MAXSOFTBUTTONS = 8;
     private static final int ALERTMANEUVER_MAXSOFTBUTTONS = 3;
@@ -174,14 +164,10 @@ public class PlaceholderFragment extends Fragment {
      */
     private int _latestDeleteChoiceSetId = CHOICESETID_UNSET;
     // Request id for SoftButtonsListActivity
-<<<<<<< HEAD
-    private static final int REQUEST_LIST_SOFTBUTTONS = 43;
-=======
     public static final int REQUEST_LIST_SOFTBUTTONS = 43;
     // Request id for ChoiceListActivity
     public static final int REQUEST_LIST_CHOICES = 45;
 
->>>>>>> develop
     /**
      * Autoincrementing id for new choices.
      */

@@ -43,14 +43,6 @@ public abstract class SyncTransport {
     // This method is called by the subclass to indicate that data has arrived from
     // the transport.
     protected void handleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
-<<<<<<< HEAD
-        try {
-            // Trace received data
-            if (receivedBytesLength > 0) {
-                // Send transport data to the siphon server
-                //SiphonServer.sendBytesFromSYNC(receivedBytes, 0, receivedBytesLength);
-                Logger.d(CLASS_NAME + " Receive Bytes");
-=======
 		try {
             Logger.d(CLASS_NAME + " -> receive " + receivedBytesLength + " bytes");
 			// Trace received data
@@ -58,7 +50,6 @@ public abstract class SyncTransport {
 				// Send transport data to the siphon server
 				//SiphonServer.sendBytesFromSYNC(receivedBytes, 0, receivedBytesLength);
 
->>>>>>> develop
 				mTransportListener.onTransportBytesReceived(receivedBytes, receivedBytesLength);
 			}
 		} catch (Exception excp) {
@@ -83,16 +74,12 @@ public abstract class SyncTransport {
     public boolean sendBytes(byte[] message, int offset, int length) {
         boolean bytesWereSent = false;
         synchronized (SEND_LOCK_OBJ) {
-<<<<<<< HEAD
-            bytesWereSent = sendBytesOverTransport(message, offset, length);
-=======
             Logger.i(CLASS_NAME + " <- sending " + length + " bytes");
-        	bytesWereSent = sendBytesOverTransport(message, offset, length);
->>>>>>> develop
+            bytesWereSent = sendBytesOverTransport(message, offset, length);
         } // end-lock
         // Send transport data to the siphon server
         //SiphonServer.sendBytesFromAPP(message, offset, length);
-        Logger.d(CLASS_NAME + " Send Bytes");
+        //Logger.d(CLASS_NAME + " Bytes sent");
         return bytesWereSent;
     } // end-method
 

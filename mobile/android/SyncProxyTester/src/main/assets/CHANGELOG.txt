@@ -1,21 +1,14 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-[CW72]
-* SyncProxyTester | SyncProxyAndroid SDK: Changed SSL error testing
-=======
-=======
 [CW28]
 * SyncProxyTester: SDL returns "INVALID_DATA" on UpdateTurnList request with empty navigationText or turnIcon of element
 * SYNC Mobile SDK | SyncProxyTester: Add possibility to restore connection during autotest
 
->>>>>>> develop
 [CW27]
+* SyncProxyTester | SyncProxyAndroid SDK: Changed SSL error testing
 * SYNC Mobile SDK: SDL should always do a notification of the mobile app about closed session
 * SyncProxyTester: Log two request of UnsubscribeButton on mobile
 * SyncProxyTester: Some RPC responses are not shown in the list view
 * SyncProxyTester: Incorrect representation of the "key - value" pair in the RPC Request at the XML test
 * SyncProxyTester: Crashes while executing cics_UpperBound_big.xml
->>>>>>> develop
 
 [CW26]
 + SyncProxyTester | SyncProxyAndroid SDK: Added test handshake error sending to SDL.
