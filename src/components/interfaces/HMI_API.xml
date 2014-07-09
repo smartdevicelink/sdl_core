@@ -1471,13 +1471,6 @@
   <param name="audioType" type="Common.AudioType" mandatory="true"/>
 </struct>
 
-<struct name="Coordinate">
-  <param name="xCoord" type="Integer" mandatory="true">
-  </param>
-  <param name="yCoord" type="Integer" mandatory="true">
-  </param>
-</struct>
-
 <struct name="TextFieldStruct">
   <param name="fieldName" type="Common.TextFieldName" mandatory="true">
 	<description>The name of the field for displaying the text.</description>
@@ -3151,7 +3144,6 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-	<!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -3167,7 +3159,6 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
   </function>
   <function name="SubscribeVehicleData" messagetype="response">
     <param name="gps" type="Common.VehicleDataResult" mandatory="false">
@@ -3227,7 +3218,6 @@
     <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-	<!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -3243,7 +3233,6 @@
     <param name="myKey" type="Common.VehicleDataResult" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
   </function>
   <function name="UnsubscribeVehicleData" messagetype="request">
     <description>
@@ -3309,7 +3298,6 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-	<!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -3325,7 +3313,6 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
   </function>
   <function name="UnsubscribeVehicleData" messagetype="response">
     <param name="gps" type="Common.VehicleDataResult" mandatory="false">
@@ -3385,7 +3372,6 @@
     <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-	<!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -3401,7 +3387,6 @@
     <param name="myKey" type="Common.VehicleDataResult" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
   </function>
   <function name="GetVehicleData" messagetype="request">
     <description>Non periodic vehicle data read request.</description>
