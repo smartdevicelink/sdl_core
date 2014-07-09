@@ -167,6 +167,11 @@ template<typename T, class Q> void MessageQueue<T, Q>::push(const T& element) {
 
 template<typename T, class Q> T MessageQueue<T, Q>::pop() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
+  if (shutting_down_) {
+    CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
+    LOG4CXX_ERROR(logger_, "Runtime error, pushing into queue"
+                         " that is being shut down");
+  }
   if (queue_.empty()) {
     CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
     LOG4CXX_ERROR(logger_, "Runtime error, popping out of empty que");

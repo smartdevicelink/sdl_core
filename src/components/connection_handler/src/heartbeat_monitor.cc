@@ -49,7 +49,7 @@ HeartBeatMonitor::HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
 }
 
 HeartBeatMonitor::~HeartBeatMonitor() {
-  LOG4CXX_TRACE_ENTER(logger_);
+
 }
 
 void HeartBeatMonitor::threadMain() {

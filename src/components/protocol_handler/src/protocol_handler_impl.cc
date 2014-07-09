@@ -182,18 +182,21 @@ void ProtocolHandlerImpl::AddProtocolObserver(ProtocolObserver* observer) {
 }
 
 void ProtocolHandlerImpl::RemoveProtocolObserver(ProtocolObserver* observer) {
+  LOG4CXX_TRACE_ENTER(logger_);
   if (!observer) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to IProtocolObserver.");
+    LOG4CXX_TRACE_EXIT(logger_);
     return;
   }
-
+  sync_primitives::AutoLock lock(protocol_observers_lock);
   protocol_observers_.erase(observer);
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void ProtocolHandlerImpl::set_session_observer(SessionObserver* observer) {
   if (!observer) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to ISessionObserver.");
-    return;
+	// Do not return from here! 
   }
 
   session_observer_ = observer;
@@ -422,6 +425,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
         logger_,
         "Invalid incoming message received in"
         << " ProtocolHandler from Transport Manager.");
+    LOG4CXX_TRACE_EXIT(logger_);
     return;
   }
 
@@ -456,6 +460,8 @@ void ProtocolHandlerImpl::OnTMMessageReceiveFailed(
 }
 
 void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {
+  LOG4CXX_ERROR(logger_, "ProtocolHandlerImpl::NotifySubscribers");
+  sync_primitives::AutoLock lock(protocol_observers_lock);
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
     (*it)->OnMessageReceived(message);
@@ -500,7 +506,7 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
       SendEndSession(connection_handle, sent_message.session_id());
     }
   }
-
+  sync_primitives::AutoLock lock(protocol_observers_lock);
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
     (*it)->OnMobileMessageSent(message);
@@ -774,14 +780,16 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
           logger_,
           "Last frame of multiframe message size " << packet->data_size()
               << "; connection key " << key);
+      {
+        sync_primitives::AutoLock lock(protocol_observers_lock);
+        if (protocol_observers_.empty()) {
+          LOG4CXX_ERROR(
+              logger_,
+              "Cannot handle multiframe message: no IProtocolObserver is set.");
 
-      if (protocol_observers_.empty()) {
-        LOG4CXX_ERROR(
-            logger_,
-            "Cannot handle multiframe message: no IProtocolObserver is set.");
-
-        LOG4CXX_TRACE_EXIT(logger_);
-        return RESULT_FAIL;
+          LOG4CXX_TRACE_EXIT(logger_);
+          return RESULT_FAIL;
+        }
       }
 
       ProtocolPacket* completePacket = it->second.get();
@@ -807,7 +815,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     ConnectionID connection_id, const ProtocolFramePtr& packet) {
-
+  LOG4CXX_INFO(logger_,
+               "ProtocolHandlerImpl::HandleControlMessage " << connection_id);
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "ISessionObserver is not set.");
 

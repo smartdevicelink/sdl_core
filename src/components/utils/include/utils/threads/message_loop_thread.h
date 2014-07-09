@@ -97,6 +97,7 @@ class MessageLoopThread {
     Handler& handler_;
     // Message queue that is actually owned by MessageLoopThread
     MessageQueue<Message, Queue>& message_queue_;
+    volatile bool is_active;
   };
  private:
   MessageQueue<Message, Queue> message_queue_;
@@ -133,25 +134,31 @@ template<class Q>
 MessageLoopThread<Q>::LoopThreadDelegate::LoopThreadDelegate(
     MessageQueue<Message, Queue>* message_queue, Handler* handler)
     : handler_(*handler),
-      message_queue_(*message_queue) {
+      message_queue_(*message_queue),
+      is_active(false) {
   DCHECK(handler != NULL);
   DCHECK(message_queue != NULL);
 }
 
 template<class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
+  is_active = true;
   while(!message_queue_.IsShuttingDown()){
     DrainQue();
     message_queue_.wait();
   }
   // Process leftover messages
   DrainQue();
+  is_active = false;
 }
 
 template<class Q>
 bool MessageLoopThread<Q>::LoopThreadDelegate::exitThreadMain() {
   message_queue_.Shutdown();
   // Prevent canceling thread until queue is drained
+  while (is_active) {
+    usleep(200);
+  }
   return true;
 }
 
