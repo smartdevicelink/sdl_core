@@ -92,9 +92,14 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         IBluetoothDeviceManager, ConnectionListener, PutFileDialog.PutFileDialogListener,
         IProxyServiceEvent {
 
+    /**
+     * String to join/split help, timeout, VR prompts, etc.
+     */
+    public static final String JOIN_STRING = ",";
+    public static final String ButtonSubscriptions = "ButtonSubscriptions";
+    public static final String VehicleDataSubscriptions = "VehicleDataSubscriptions";
     @SuppressWarnings("unused")
     private static final String LOG_TAG = SyncProxyTester.class.getSimpleName();
-
     /**
      * The name of the file where all the data coming with
      * {@link OnAudioPassThru} notifications is saved. The root directory is the
@@ -102,15 +107,24 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     private static final String AUDIOPASSTHRU_OUTPUT_FILE = "audiopassthru.wav";
     /**
-     * String to join/split help, timeout, VR prompts, etc.
+     * Time out in milliseconds for exit from application. If application is not correctly
+     * destroyed within specified timeout - then we force destroy procedure
      */
-    public static final String JOIN_STRING = ",";
+    private static final int EXIT_TIMEOUT = 7000;
+    private final static String ROOTED_DEVICE_ALERT_DIALOG_TAG = "RootedDeviceDialogTag";
     private static SyncProxyTester sActivityInstance;
     private static byte[] _ESN;
     /**
      * Autoincrementing id for new softbuttons.
      */
     private static int autoIncSoftButtonId = 5500;
+    /**
+     * UI Handler to perform actions in UI Thread
+     */
+    private final Handler mUIHandler = new Handler(Looper.getMainLooper());
+    // Get Bound Proxy Service from MainApp
+    // make it public to access from Fragments
+    public ProxyService mBoundProxyService;
     /**
      * The output stream to write audioPassThru data.
      */
@@ -129,11 +143,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     private ArrayAdapter<ImageType> imageTypeAdapter;
     /**
-     * Time out in milliseconds for exit from application. If application is not correctly
-     * destroyed within specified timeout - then we force destroy procedure
-     */
-    private static final int EXIT_TIMEOUT = 7000;
-    /**
      * Handler object to monitor exit procedure. If exit procedure fails, then this object will
      * manage application to destroy
      */
@@ -151,44 +160,10 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * progress dialog of the Exit Application
      */
     private ProgressDialog mExitProgressDialog;
-    /**
-     * UI Handler to perform actions in UI Thread
-     */
-    private final Handler mUIHandler = new Handler(Looper.getMainLooper());
-
-    private final static String ROOTED_DEVICE_ALERT_DIALOG_TAG = "RootedDeviceDialogTag";
-    public static final String ButtonSubscriptions = "ButtonSubscriptions";
-    public static final String VehicleDataSubscriptions = "VehicleDataSubscriptions";
     private SyncReceiver mSyncReceiver;
     private BluetoothDeviceManager mBluetoothDeviceManager;
-
-    // Get Bound Proxy Service from MainApp
-    // make it public to access from Fragments
-    public ProxyService mBoundProxyService;
-
     // Probably this is obsolete approch as there is Services Pool inside SDK
     private ExecutorService mStreamCommandsExecutorService;
-
-    public static SyncProxyTester getInstance() {
-        return sActivityInstance;
-    }
-
-    public static void setESN(byte[] ESN) {
-        _ESN = ESN;
-    }
-
-    public static byte[] getESN() {
-        return _ESN;
-    }
-
-    public static int getNewSoftButtonId() {
-        return autoIncSoftButtonId++;
-    }
-
-    public void runInUIThread(Runnable runnable) {
-        mUIHandler.post(runnable);
-    }
-
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -200,12 +175,43 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ArrayAdapter<String> adapter;
     private ActionBar mActionBar;
-
     /**
      * The {@link android.support.v4.view.ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
     private ImageView mImageView;
+
+    public static SyncProxyTester getInstance() {
+        return sActivityInstance;
+    }
+
+    public static byte[] getESN() {
+        return _ESN;
+    }
+
+    public static void setESN(byte[] ESN) {
+        _ESN = ESN;
+    }
+
+    public static int getNewSoftButtonId() {
+        return autoIncSoftButtonId++;
+    }
+
+    /**
+     * Splits the string with a comma and returns a vector of TTSChunks.
+     */
+    public static Vector<TTSChunk> ttsChunksFromString(String string) {
+        Vector<TTSChunk> chunks = new Vector<TTSChunk>();
+        for (String stringChunk : string.split(JOIN_STRING)) {
+            TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, stringChunk);
+            chunks.add(chunk);
+        }
+        return chunks;
+    }
+
+    public void runInUIThread(Runnable runnable) {
+        mUIHandler.post(runnable);
+    }
 
     /**
      * Action Tab section - start
@@ -526,7 +532,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             //mLogAdapter.logMessage(SyncProxyTester.class.getSimpleName() + " '" + serviceType +
             //        "' service can not " + "start with NULL Proxy Service", Log.WARN);
             Logger.w(SyncProxyTester.class.getSimpleName() + " '" + serviceType +
-                            "' service can not " + "start with NULL Proxy Service");
+                    "' service can not " + "start with NULL Proxy Service");
             return;
         }
 
@@ -893,18 +899,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     /**
-     * Splits the string with a comma and returns a vector of TTSChunks.
-     */
-    public static Vector<TTSChunk> ttsChunksFromString(String string) {
-        Vector<TTSChunk> chunks = new Vector<TTSChunk>();
-        for (String stringChunk : string.split(JOIN_STRING)) {
-            TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, stringChunk);
-            chunks.add(chunk);
-        }
-        return chunks;
-    }
-
-    /**
      * Calls the setter with setterName on the msg.
      */
     public void setVehicleDataParam(RPCRequest msg, Class msgClass, String setterName) {
@@ -1266,7 +1260,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     "Output file "
                             + (outFile != null ? outFile.toString()
                             : "'unknown'")
-                            + " can't be opened for writing", e);
+                            + " can't be opened for writing", e
+            );
         } catch (IOException e) {
             logToConsoleAndUI("Can't write to output file", e);
         }
@@ -1616,6 +1611,17 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         ConnectionListenersManager.removeConnectionListener(this);
     }
 
+    private PlaceholderFragment getFragmentAt(int index) {
+        Fragment fragment = getSupportFragmentManager()
+                .findFragmentByTag("android:switcher:" + R.id.pager + ":" + index);
+        // based on the current position you can then cast the fragment to the correct
+        // class and call the method:
+        if (fragment != null) {
+            return ((PlaceholderFragment) fragment);
+        }
+        return null;
+    }
+
     /**
      * Callback of the exit timer. If the correct destroy procedure fails we use Process.killProcess
      */
@@ -1627,17 +1633,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             stopService(new Intent(SyncProxyTester.this, ProxyService.class));
         }
     };
-
-    private PlaceholderFragment getFragmentAt(int index) {
-        Fragment fragment = getSupportFragmentManager()
-                .findFragmentByTag("android:switcher:" + R.id.pager + ":" + index);
-        // based on the current position you can then cast the fragment to the correct
-        // class and call the method:
-        if (fragment != null) {
-            return ((PlaceholderFragment) fragment);
-        }
-        return null;
-    }
 
     private PlaceholderFragment getCurrentActiveFragment() {
         Fragment fragment = getSupportFragmentManager()
@@ -1674,10 +1669,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     /**
-     * Exit Application section
-     */
-
-    /**
      * Exit from Activity
      */
     void exitApp() {
@@ -1687,7 +1678,9 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         MainApp.getInstance().exitApp();
     }
 
-    // TODO : Move this block to MainApp
+    /**
+     * Exit Application section
+     */
 
     /**
      * Stops the proxy service.
@@ -1716,6 +1709,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         executeDestroyService();
     }
 
+    // TODO : Move this block to MainApp
+
     private void executeDestroyService() {
 
         if (mStopServicesTimeOutHandler != null) {
@@ -1729,17 +1724,12 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
                 mStopProxyServiceTimeOutHandler.postDelayed(mExitPostDelayedCallback, EXIT_TIMEOUT);
 
-<<<<<<< HEAD
-                mBoundProxyService.destroyService();
-=======
                 String[] appIds = mBoundProxyService.getAllAppIds();
-                for (String appId: appIds) {
+                for (String appId : appIds) {
                     stopMobileNavService(appId);
                     stopAudioService(appId);
                 }
-
                 mBoundProxyService.disposeSyncProxy();
->>>>>>> develop
             }
         });
     }
@@ -1753,33 +1743,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }
         return mExitProgressDialog;
     }
-
-    /**
-     * Callback of the exit timer. If the correct destroy procedure fails we use Process.killProcess
-     */
-    private Runnable mExitPostDelayedCallback = new Runnable() {
-        @Override
-        public void run() {
-            Logger.w("Exit App timer callback");
-            mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
-            getExitDialog().dismiss();
-            exitApp();
-            android.os.Process.killProcess(android.os.Process.myPid());
-        }
-    };
-
-    /**
-     * Callback of the End Services timer.
-     */
-    private Runnable mEndServicesPostDelayedCallback = new Runnable() {
-        @Override
-        public void run() {
-            Logger.w("End Services callback");
-            mStopServicesTimeOutHandler.removeCallbacks(mEndServicesPostDelayedCallback);
-
-            executeDestroyService();
-        }
-    };
 
     public void onUSBNoSuchDeviceException() {
         MainApp.getInstance().runInUIThread(new Runnable() {
@@ -1812,6 +1775,20 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     /**
+     * Callback of the exit timer. If the correct destroy procedure fails we use Process.killProcess
+     */
+    private Runnable mExitPostDelayedCallback = new Runnable() {
+        @Override
+        public void run() {
+            Logger.w("Exit App timer callback");
+            mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
+            getExitDialog().dismiss();
+            exitApp();
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }
+    };
+
+    /**
      * Starts to encrypt Audio Service
      *
      * @param appId
@@ -1820,6 +1797,19 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         Logger.d("Audio Service start encrypt");
         startAudioService(appId, true);
     }
+
+    /**
+     * Callback of the End Services timer.
+     */
+    private Runnable mEndServicesPostDelayedCallback = new Runnable() {
+        @Override
+        public void run() {
+            Logger.w("End Services callback");
+            mStopServicesTimeOutHandler.removeCallbacks(mEndServicesPostDelayedCallback);
+
+            executeDestroyService();
+        }
+    };
 
     /**
      * Stops to encrypt Audio Service

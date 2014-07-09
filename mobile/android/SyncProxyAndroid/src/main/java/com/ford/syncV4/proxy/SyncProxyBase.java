@@ -919,7 +919,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }*/
         if (mSecureServiceMessageCallback == null) {
             return;
-=======
+        }}
+/*
      * This method is for the TEST CASES ONLY, it used for example in XML testing, when RAI request
      * has different AppId and (or) different AppName, so we need to adjust session
      * (if it has been started) to the new RAI request
@@ -945,7 +946,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         // to the new AppId
         if (lastSessionId.hasMoreElements()) {
             syncSession.updateSessionId(lastSessionId.nextElement());
->>>>>>> develop
         }
     }
 
@@ -3060,12 +3060,12 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }
     }
 
-<<<<<<< HEAD
     public void startAudioService(String appId, boolean cyphered) {
         if (mSyncConnection != null) {
             updateSecureProxyState(appId);
             mSyncConnection.startAudioService(syncSession.getSessionIdByAppId(appId), cyphered);
-=======
+        }
+    }
     // TODO : Hide this method from public when no Test Cases are need
 
     /**
@@ -3076,15 +3076,12 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             initializeSession(appId);
         }
     }
-
     /**
      * Initialize new Session. <b>In production this method MUST be private</b>
      */
     public void initializeSession(final String appId) {
-        // Initialize a start session procedure
-
+        final int sessionIdsNumber = syncSession.getSessionIdsNumber();
         Logger.d(LOG_TAG + " Init session, id:" + appId);
-
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -3095,8 +3092,10 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             });
         } else {
             mProxyListener.onStartSession(appId);
->>>>>>> develop
         }
+
+        syncSession.addAppId(appId);
+        mSyncConnection.initialiseSession(Session.DEFAULT_SESSION_ID);
     }
 
     private void updateSecureProxyState(String appId) {
@@ -3105,108 +3104,13 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         ((HandshakeDataListener) secureProxyServerListener).setMutationManager(getTestConfig().getHandshakeMutationManager());
     }
 
-<<<<<<< HEAD
+
     public void startRpcService(String appId, boolean encrypted) {
         if (mSyncConnection != null) {
             updateSecureProxyState(appId);
             mSyncConnection.startRpcService(syncSession.getSessionIdByAppId(appId), encrypted);
-=======
-    // Private Class to Interface with SyncConnection
-    public class SyncInterfaceBroker implements ISyncConnectionListener {
+        }}
 
-        @Override
-        public void onTransportConnected() {
-            Logger.d(LOG_TAG + " Transport Connected, appIds:" + appIds);
-
-            reconnectHandler.removeCallbacks(reconnectRunnableTask);
-
-            initializeSessions();
-        }
-
-        @Override
-        public void onTransportDisconnected(String info) {
-            // proxyOnTransportDisconnect is called to alert the proxy that a requested
-            // disconnect has completed
-
-            Logger.d(LOG_TAG + " Transport Disconnected, appIds:" + appIds);
-            for (String appId: appIds) {
-                if (mSyncConnection != null) {
-                    mSyncConnection.stopHeartbeatMonitor(syncSession.getSessionIdByAppId(appId));
-                }
-            }
-
-//			if (mAdvancedLifecycleManagementEnabled) {
-//				// If ALM, nothing is required to be done here
-//			} else {
-            // If original model, notify app the proxy is closed so it will delete and reinstanciate
-            notifyProxyClosed(info, new SyncException("Transport disconnected.", SyncExceptionCause.SYNC_UNAVAILALBE));
-//			}
-        }
-
-        @Override
-        public void onTransportError(String info, Exception e) {
-            Logger.e("Transport failure: " + info, e);
-
-            if (mTransportConfig != null &&
-                    mTransportConfig.getTransportType() ==  TransportType.USB) {
-                if (CommonUtils.isUSBNoSuchDeviceError(e.toString())) {
-
-                    if (_callbackToUIThread) {
-                        // Run in UI thread
-                        _mainUIHandler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                mProxyListener.onUSBNoSuchDeviceException();
-                            }
-                        });
-                    } else {
-                        mProxyListener.onUSBNoSuchDeviceException();
-                    }
-
-                    try {
-                        dispose();
-                    } catch (SyncException e1) {
-                        e1.printStackTrace();
-                    }
-
-                    return;
-                }
-            }
-
-            mSyncConnection.stopAllHeartbeatMonitors();
-
-            if (mAdvancedLifecycleManagementEnabled) {
-                // Cycle the proxy
-                cycleProxy(SyncDisconnectedReason.TRANSPORT_ERROR);
-            } else {
-                notifyProxyClosed(info, e);
-            }
-
-            //setSyncConnection(null);
-        }
-
-        @Override
-        public void onHeartbeatTimedOut(byte sessionId) {
-            // Do not remove appId from collection, we need to show all the rest messages at
-            // appropriate Tab View
-            //String appId = syncSession.getAppIdBySessionId(sessionId);
-            //stopSession(appId);
-
-            final String msg = "Heartbeat timeout";
-            notifyProxyClosed(msg, new SyncException(msg, SyncExceptionCause.HEARTBEAT_PAST_DUE));
-        }
-
-        @Override
-        public void onProtocolMessageReceived(ProtocolMessage msg) {
-            // AudioPathThrough is coming WITH BulkData but WITHOUT JSON Data
-            // Policy Snapshot is coming WITH BulkData and WITH JSON Data
-            if ((msg.getData() != null && msg.getData().length > 0) ||
-                    (msg.getBulkData() != null && msg.getBulkData().length > 0)) {
-                queueIncomingMessage(msg);
-            }
->>>>>>> develop
-        }
-    }
 
     protected void endSession(byte sessionId, EndServiceInitiator initiator) {
         String appId = syncSession.getAppIdBySessionId(sessionId);
@@ -3240,27 +3144,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }*/
     }
 
-    /**
-     * Initialize new Session. <b>In production this method MUST be private</b>
-     */
-    public void initializeSession(final String appId) {
-        final int sessionIdsNumber = syncSession.getSessionIdsNumber();
-        Logger.d(LOG_TAG + " Init session, id:" + appId);
-        if (_callbackToUIThread) {
-            // Run in UI thread
-            _mainUIHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mProxyListener.onStartSession(appId);
-                }
-            });
-        } else {
-            mProxyListener.onStartSession(appId);
-        }
 
-        syncSession.addAppId(appId);
-        mSyncConnection.initialiseSession(Session.DEFAULT_SESSION_ID);
-    }
 
     public IRPCRequestConverterFactory getRpcRequestConverterFactory() {
         return rpcRequestConverterFactory;
