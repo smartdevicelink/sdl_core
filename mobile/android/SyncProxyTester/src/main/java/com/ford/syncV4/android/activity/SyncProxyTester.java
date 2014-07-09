@@ -65,6 +65,7 @@ import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SystemRequest;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
@@ -1023,6 +1024,22 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }
         mBoundProxyService.commandAddCommandResumable(appId, addCommand);
         getCurrentActiveFragment().onAddCommandDialogResult(addCommand);
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.UpdateTurnListDialog}
+     *
+     * @param updateTurnList {@link com.ford.syncV4.proxy.rpc.UpdateTurnList}
+     */
+    public void onUpdateTurnListDialogResult(String appId, UpdateTurnList updateTurnList) {
+        if (mBoundProxyService == null) {
+            return;
+        }
+        if (getCurrentActiveFragment() == null) {
+            return;
+        }
+        mBoundProxyService.syncProxySendRPCRequest(appId, updateTurnList);
     }
 
     /**
