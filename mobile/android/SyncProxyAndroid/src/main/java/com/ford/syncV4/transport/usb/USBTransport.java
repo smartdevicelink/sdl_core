@@ -200,8 +200,7 @@ public class USBTransport extends SyncTransport {
      * @return true if the bytes are sent successfully
      */
     @Override
-    protected boolean sendBytesOverTransport(byte[] msgBytes, int offset,
-                                             int length) {
+    protected boolean sendBytesOverTransport(byte[] msgBytes, int offset, int length) {
         boolean result = false;
         final State state = getState();
         if (state != State.CONNECTED) {
@@ -212,8 +211,7 @@ public class USBTransport extends SyncTransport {
             try {
                 mOutputStream.write(msgBytes, offset, length);
                 result = true;
-
-                Logger.d(CLASS_NAME + ": " + msgBytes.length + " bytes sent");
+                //Logger.d(CLASS_NAME + ": " + msgBytes.length + " bytes sent");
             } catch (IOException e) {
                 final String msg = " Failed to send bytes over USB";
                 Logger.w(CLASS_NAME + msg, e);
@@ -637,16 +635,12 @@ public class USBTransport extends SyncTransport {
                     return;
                 }
 
-                Logger.d(CLASS_NAME + " Read " + bytesRead + " bytes");
-
                 if (isInterrupted()) {
                     Logger.w(CLASS_NAME + " Read some data, but thread is interrupted");
                     return;
                 }
 
-                if (bytesRead > 0) {
-                    handleReceivedBytes(buffer, bytesRead);
-                }
+                handleReceivedBytes(buffer, bytesRead);
             }
 
             Logger.d(CLASS_NAME + " Quit Read loop");

@@ -398,6 +398,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 return;
             }
             try {
+                //Logger.d(CLASS_NAME + " -> Bytes:" + receivedBytes.length);
                 mProtocol.HandleReceivedBytes(receivedBytes, receivedBytesLength);
             } catch (OutOfMemoryError e) {
                 final String info = " Out of memory while handling incoming message";
@@ -506,7 +507,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         // Protocol has packaged bytes to send, pass to transport for transmission
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (mTransport != null) {
-                Logger.d(CLASS_NAME + " <- Bytes:" + BitConverter.bytesToHex(msgBytes));
+                //Logger.d(CLASS_NAME + " <- Bytes:" + BitConverter.bytesToHex(msgBytes));
                 mTransport.sendBytes(msgBytes, offset, length);
             }
         }
