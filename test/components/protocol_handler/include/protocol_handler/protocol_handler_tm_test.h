@@ -86,10 +86,12 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     tm_listener->OnConnectionEstablished(
           DeviceInfo(DeviceHandle(1u), std::string("mac"), std::string("name")), connection_id);
   }
+#ifdef ENABLE_SECURITY
   // Emulate security manager initilization establish
   void AddSecurityManager() {
     protocol_handler_impl->set_security_manager(&security_manager_mock);
   }
+#endif  // ENABLE_SECURITY
   void SendTMMessage(uint8_t connection_id,
                      uint8_t version, bool protection, uint8_t frameType,
                      uint8_t serviceType, uint8_t frameData,
@@ -121,10 +123,13 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   uint32_t message_id;
   testing::StrictMock<TransportManagerMock> transport_manager_mock;
   testing::StrictMock<SessionObserverMock>  session_observer_mock;
+#ifdef ENABLE_SECURITY
   testing::NiceMock<SecurityManagerMock>    security_manager_mock;
   testing::NiceMock<SSLContextMock>         ssl_context_mock;
+#endif  // ENABLE_SECURITY
 };
 
+#ifdef ENABLE_SECURITY
 class OnHandshakeDoneFunctor {
 public:
   OnHandshakeDoneFunctor(const uint32_t connection_key, const bool result)
@@ -136,6 +141,7 @@ private:
   const uint32_t connection_key;
   const bool result;
 };
+#endif  // ENABLE_SECURITY
 
 /*
  * ProtocolHandler shall skip empty message
@@ -144,7 +150,7 @@ TEST_F(ProtocolHandlerImplTest, RecieveEmptyRawMessage) {
   tm_listener->OnTMMessageReceived(RawMessagePtr());
 }
 /*
- * ProtocolHandler shall skip message on not exists connection
+ * ProtocolHandler shall skip message on no connection
  */
 TEST_F(ProtocolHandlerImplTest, RecieveOnUnknownConenction) {
   // expect force dicsonnect on no connection for recieved data
@@ -157,7 +163,7 @@ TEST_F(ProtocolHandlerImplTest, RecieveOnUnknownConenction) {
 }
 /*
  * ProtocolHandler shall send NAck on session_observer rejection
- * check recieve protection OFF and services from kControl to kBulk
+ * Check protection flag OFF for all services from kControl to kBulk
  */
 TEST_F(ProtocolHandlerImplTest, StartSession_Unprotected_SessionObserverReject) {
   const int call_times = kBulk - kControl;
@@ -182,16 +188,21 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Unprotected_SessionObserverReject) 
 }
 /*
  * ProtocolHandler shall send NAck on session_observer rejection
- * check recieve protection ON and services from kControl to kBulk
+ * Emulate getting PROTECTION_ON and check protection flag OFF in NAck
+ * For ENABLE_SECURITY=OFF session_observer shall be called with protection flag OFF
  */
 TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
   const int call_times = kBulk - kControl;
   AddConnection();
   // expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
-              OnSessionStartedCallback(
-                connection_id, NEW_SESSION_ID, AllOf(Ge(kControl), Le(kBulk)), PROTECTION_ON)).
-      Times(call_times).
+              OnSessionStartedCallback(connection_id, NEW_SESSION_ID, AllOf(Ge(kControl), Le(kBulk)),
+#ifdef ENABLE_SECURITY
+                                       PROTECTION_ON
+#else
+                                       PROTECTION_OFF
+#endif  // ENABLE_SECURITY
+      )).Times(call_times).
       //return sessions start rejection
       WillRepeatedly(Return(SESSION_START_REJECT));
 
@@ -207,9 +218,9 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
 }
 /*
  * ProtocolHandler shall send Ack on session_observer accept
- * check recieve protection OFF
+ * Check protection flag OFF
  */
-TEST_F(ProtocolHandlerImplTest, StartSession_Unprotected_SessionObserverAssept) {
+TEST_F(ProtocolHandlerImplTest, StartSession_Unprotected_SessionObserverAccept) {
   AddConnection();
   const ServiceType start_service = kRpc;
   // expect ConnectionHandler check
@@ -227,16 +238,22 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Unprotected_SessionObserverAssept) 
 }
 /*
  * ProtocolHandler shall send Ack on session_observer accept
- * check recieve protection ON - ProtocolHandlerImpl shall send OFF without Security
+ * Emulate getting PROTECTION_ON and check protection flag OFF in Ack
+ * For ENABLE_SECURITY=OFF session_observer shall be called with protection flag OFF
  */
-TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverAssept) {
+TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverAccept) {
   AddConnection();
   const ServiceType start_service = kRpc;
   // expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
-              OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service, PROTECTION_ON)).
+              OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service,
+#ifdef ENABLE_SECURITY
+                                       PROTECTION_ON
+#else
+                                       PROTECTION_OFF
+#endif  // ENABLE_SECURITY
       //return sessions start success
-      WillOnce(Return(session_id));
+      )).WillOnce(Return(session_id));
 
   // expect send Ack with PROTECTION_OFF (on no Security Manager)
   EXPECT_CALL(transport_manager_mock,
@@ -247,6 +264,29 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverAssept) {
 }
 
 #ifdef ENABLE_SECURITY
+/*
+ * ProtocolHandler shall not call Security logics with Protocol version 1
+ * Check session_observer with PROTECTION_OFF and Ack with PROTECTION_OFF
+ */
+TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtocoloV1) {
+  AddConnection();
+  // Add security manager
+  AddSecurityManager();
+  const ServiceType start_service = kRpc;
+  // expect ConnectionHandler check
+  EXPECT_CALL(session_observer_mock,
+              OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service, PROTECTION_OFF)).
+      //return sessions start success
+      WillOnce(Return(session_id));
+
+  // expect send Ack with PROTECTION_OFF (on no Security Manager)
+  EXPECT_CALL(transport_manager_mock,
+              SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_OFF))).
+      WillOnce(Return(E_SUCCESS));
+
+  SendTMMessage(connection_id, PROTOCOL_VERSION_1, PROTECTION_ON, FRAME_TYPE_CONTROL,
+                start_service, FRAME_DATA_START_SERVICE, NEW_SESSION_ID, 0, message_id);
+}
 /*
  * ProtocolHandler shall not call Security logics on start session with PROTECTION_OFF
  */

@@ -13,10 +13,9 @@ add_subdirectory(./smart_objects)
 # --- AppMgr
 add_subdirectory(./application_manager)
 
+if(ENABLE_SECURITY)
 # --- ProtocolHandler
 add_subdirectory(./protocol_handler)
-
-if(ENABLE_SECURITY)
 # --- SecurityManager
 add_subdirectory(./security_manager)
 # TODO(EZamakhov): split connection tests and security

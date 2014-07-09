@@ -153,6 +153,7 @@ bool Connection::AddNewService(uint8_t session_id,
   Service *service = session.FindService(service_type);
   // if service already exists
   if (service) {
+#ifdef ENABLE_SECURITY
     if(!request_protection) {
       LOG4CXX_WARN(logger_, "Session " << static_cast<int>(session_id) <<
                    " already has unprotected service "<< static_cast<int>(service_type));
@@ -163,8 +164,12 @@ bool Connection::AddNewService(uint8_t session_id,
                    " already has protected service "<< static_cast<int>(service_type));
       return false;
     }
-    //For unproteced service could be start protection
+    // For unproteced service could be start protection
     return true;
+#else
+    // Service already exists
+    return false;
+#endif  // ENABLE_SECURITY
   }
   // id service is not exists
   session.service_list.push_back(Service(service_type));

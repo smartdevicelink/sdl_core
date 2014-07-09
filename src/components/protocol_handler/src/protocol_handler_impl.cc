@@ -994,11 +994,19 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                    "Protocol version: " <<
                    static_cast<int>(packet.protocol_version()));
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
+  const uint8_t protocol_version = packet.protocol_version();
+
+#ifdef ENABLE_SECURITY
+  const bool protection =
+      // Protocolo version 1 is not support protection
+      PROTOCOL_VERSION_1 == protocol_version ? false : packet.protection_flag();
+#else
+  const bool protection = false;
+#endif  // ENABLE_SECURITY
 
   DCHECK(session_observer_);
   const uint32_t session_id = session_observer_->OnSessionStartedCallback(
-        connection_id, packet.session_id(), service_type,
-        packet.protection_flag());
+        connection_id, packet.session_id(), service_type, protection);
 
   if (0 == session_id) {
     LOG4CXX_WARN_EXT(logger_, "Refused to create service " <<
@@ -1007,17 +1015,19 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                          packet.protocol_version(), packet.service_type());
     return RESULT_OK;
   }
-
   const uint32_t connection_key =
       session_observer_->KeyFromPair(connection_id, session_id);
 
 #ifdef ENABLE_SECURITY
   // for packet is encrypted and security plugin is enable
-  if (packet.protection_flag() && security_manager_) {
+  if (protection && security_manager_) {
     security_manager::SSLContext *ssl_context =
         security_manager_->CreateSSLContext(connection_key);
     if (!ssl_context) {
-      LOG4CXX_ERROR(logger_, "CreateSSLContext failed");
+      const std::string error("CreateSSLContext failed");
+      LOG4CXX_ERROR(logger_, error);
+      security_manager_->SendInternalError(
+          connection_key, security_manager::SecurityQuery::ERROR_INTERNAL, error);
       // Start service without protection
       SendStartSessionAck(connection_id, session_id, packet.protocol_version(),
                           connection_key, packet.service_type(), PROTECTION_OFF);
