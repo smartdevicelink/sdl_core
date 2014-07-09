@@ -126,13 +126,13 @@ void SdlProxy::OnAppRegistered(Common_HMIApplication application,
 
   QVariant ttsNameArray;
   if (ttsName.presence) {
-    QList<QVariantMap> ttsChunks;
+    QList<QVariant> ttsChunks;
     for (QList<Common_TTSChunk>::const_iterator it = ttsName.val.begin();
       it != ttsName.val.end(); ++it) {
       QVariantMap ttsChunkMap;
       ttsChunkMap["text"] = QVariant::fromValue(it->text);
       ttsChunkMap["type"] = QVariant::fromValue(it->type);
-      ttsChunks.append(ttsChunkMap);
+      ttsChunks.append(QVariant::fromValue(ttsChunkMap));
     }
     ttsNameArray = QVariant::fromValue(ttsChunks);
   }
@@ -226,7 +226,7 @@ void SdlProxy::OnAppPermissionChanged(int appId,
 
   QVariant appRevokedPermissionsArray;
   if (appRevokedPermissions.presence) {
-    QList<QVariantMap> permissions;
+    QList<QVariant> permissions;
     for (QList<Common_PermissionItem>::const_iterator it = appRevokedPermissions.val.begin();
       it != appRevokedPermissions.val.end(); ++it) {
       QVariantMap permissionMap;
@@ -235,7 +235,7 @@ void SdlProxy::OnAppPermissionChanged(int appId,
       if (it->allowed.presence) {
         permissionMap["allowed"] = QVariant::fromValue(it->allowed.val);
       }
-      permissions.append(permissionMap);
+      permissions.append(QVariant::fromValue(permissionMap));
     }
     appRevokedPermissionsArray = QVariant::fromValue(permissions);
   }

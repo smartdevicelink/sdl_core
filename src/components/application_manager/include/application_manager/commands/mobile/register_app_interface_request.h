@@ -172,6 +172,14 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    */
   void FillDeviceInfo(policy::DeviceInfo* device_info);
 
+  /**
+   * @brief Checks register app interface params(ttsName, ...).
+   * When type is String there is a check on the contents \t\n \\t \\n
+   * @return if register app interface contains \t\n \\t \\n return TRUE,
+   * FALSE otherwise
+   */
+  bool IsWhitespaceExist();
+
   std::string response_info_;
 
   DISALLOW_COPY_AND_ASSIGN(RegisterAppInterfaceRequest);

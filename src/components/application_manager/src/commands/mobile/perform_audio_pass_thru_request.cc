@@ -90,6 +90,14 @@ void PerformAudioPassThruRequest::Run() {
     return;
   }
 
+  // Checking perform audio pass thru on contained \t\n \\t \\n
+  if (IsWhitespaceExist()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming perform audio pass thru has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   if ((*message_)[str::msg_params].keyExists(str::initial_prompt) &&
       (0 < (*message_)[str::msg_params][str::initial_prompt].length())) {
     // In case TTS Speak, subscribe on notification
@@ -232,6 +240,30 @@ void PerformAudioPassThruRequest::StartMicrophoneRecording() {
       (*message_)[str::msg_params][str::sampling_rate].asInt(),
       (*message_)[str::msg_params][str::bits_per_sample].asInt(),
       (*message_)[str::msg_params][str::audio_type].asInt());
+}
+
+bool PerformAudioPassThruRequest::IsWhitespaceExist() {
+  bool return_value = false;
+  const char* str = NULL;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
+    const smart_objects::SmartArray* ip_array =
+        (*message_)[strings::msg_params][strings::initial_prompt].asArray();
+
+    smart_objects::SmartArray::const_iterator it_ip = ip_array->begin();
+    smart_objects::SmartArray::const_iterator it_ip_end = ip_array->end();
+
+    for (; it_ip != it_ip_end; ++it_ip) {
+      str = (*it_ip)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_INFO(logger_, "initial_prompt syntax check failed");
+        return_value = true;
+        break;
+      }
+    }
+  }
+
+  return return_value;
 }
 
 }  // namespace commands

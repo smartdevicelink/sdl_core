@@ -91,7 +91,6 @@ void DbusPlugin::registerTypes(const char *uri) {
 void DbusPlugin::initializeEngine(Engine *engine, const char *uri) {
     engine->rootContext()->setContextProperty("DBus", dbusController_);
     engine->rootContext()->setContextProperty("RequestToSDL", requestToSDL_);
-   // requestToSDL_->setEngine(engine);
 }
 
 #if QT_4

@@ -226,11 +226,7 @@ public class WiProProtocol extends AbstractProtocol {
     public void HandleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
         int receivedBytesReadPos = 0;
 
-        Logger.d(CLASS_NAME + " -> Bytes:" + BitConverter.bytesToHex(receivedBytes, 0, receivedBytesLength) +
-                ", protocol ver:" + getProtocolVersion());
-
-        Logger.d(CLASS_NAME + " -> current protocol ver:" + getProtocolVersion() +
-                " bytes length:" + receivedBytes.length);
+        //Logger.d(CLASS_NAME + " -> current protocol ver:" + getProtocolVersion());
 
         // TODO : Implement proper check point of the Protocol Version
         //Check for a version difference

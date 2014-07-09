@@ -737,12 +737,10 @@ void PerformInteractionRequest::DisablePerformInteraction() {
 }
 
 bool PerformInteractionRequest::IsWhitespaceExist() {
-  //if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
   bool return_value = false;
-  const char* str;
+  const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::initial_text)) {
-
     str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
     if (!CheckSyntax(str, true)) {
       LOG4CXX_INFO(logger_, "initial_text syntax check failed");

@@ -76,6 +76,13 @@ class SpeakRequest : public CommandRequestImpl {
    *
    */
   void ProcessTTSSpeakResponse(const smart_objects::SmartObject& message);
+
+  /**
+   * @brief Checks speak param ttsChunks on the contents \t\n \\t \\n
+   * @return if speak contains \t\n \\t \\n return TRUE, FALSE otherwise
+   */
+  bool IsWhitespaceExist();
+
   DISALLOW_COPY_AND_ASSIGN(SpeakRequest);
 };
 

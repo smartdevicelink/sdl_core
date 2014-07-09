@@ -5,6 +5,7 @@
 =======
 =======
 [CW28]
+* SyncProxyTester: SDL returns "INVALID_DATA" on UpdateTurnList request with empty navigationText or turnIcon of element
 * SYNC Mobile SDK | SyncProxyTester: Add possibility to restore connection during autotest
 
 >>>>>>> develop
