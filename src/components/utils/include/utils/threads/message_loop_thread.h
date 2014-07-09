@@ -40,6 +40,7 @@
 #include "utils/macro.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
+#include <unistd.h>
 
 namespace threads {
 
