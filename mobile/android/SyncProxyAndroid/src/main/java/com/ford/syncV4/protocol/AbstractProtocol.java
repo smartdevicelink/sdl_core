@@ -181,7 +181,7 @@ public abstract class AbstractProtocol {
                     dataChunkNotCyphered = Arrays.copyOfRange(data, offset, offset + length);
                 }
 
-                if (getProtocolSecureManager() != null) {
+                if (getProtocolSecureManager() != null && getProtocolSecureManager().isHandshakeFinished()) {
                     try {
                         byte[] dataChunk = getProtocolSecureManager().sendDataTOSSLClient(header.isEncrypted(), dataChunkNotCyphered);
                         header.setDataSize(dataChunk.length);
@@ -345,10 +345,6 @@ public abstract class AbstractProtocol {
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,
                                                 byte sessionId, boolean encrypted, byte version) {
-        if (serviceType.equals(ServiceType.RPC)) {
-            throw new IllegalArgumentException("Can't create RPC service without creating " +
-                    "syncSession. serviceType" + serviceType + ";sessionId " + sessionId);
-        }
         if (sessionId == 0) {
             throw new IllegalArgumentException("Can't create service with id 0. serviceType:" +
                     serviceType + ";sessionId " + sessionId);

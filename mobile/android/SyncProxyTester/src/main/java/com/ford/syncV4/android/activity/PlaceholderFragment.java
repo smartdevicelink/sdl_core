@@ -99,6 +99,7 @@ import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 import com.ford.syncV4.service.secure.SecurityInternalError;
+import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.logger.Logger;
@@ -353,7 +354,7 @@ public class PlaceholderFragment extends Fragment {
         checkBoxRpcEncode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                MessageFilter.setEncrypt(isChecked);
+                TestConfig.setEncrypt(isChecked);
             }
         });
 
@@ -2956,7 +2957,7 @@ public class PlaceholderFragment extends Fragment {
         if (boundProxyService == null) {
             return;
         }
-        MessageFilter.filter(rpcRequest);
+        rpcRequest = TestConfig.filter(rpcRequest);
         boundProxyService.sendRPCRequestWithPreprocess(getAppId(), rpcRequest);
     }
 }
