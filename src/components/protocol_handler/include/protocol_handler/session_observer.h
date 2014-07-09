@@ -63,7 +63,7 @@ class SessionObserver {
      */
     virtual uint32_t OnSessionStartedCallback(
       const transport_manager::ConnectionUID& connection_handle,
-      const uint8_t sessionId,
+      const uint8_t session_id,
       const ServiceType& service_type) = 0;
 
     /**
@@ -77,8 +77,8 @@ class SessionObserver {
      */
     virtual uint32_t OnSessionEndedCallback(
       const transport_manager::ConnectionUID& connection_handle,
-      const uint8_t sessionId,
-      const uint32_t& hashCode,
+      const uint8_t session_id,
+      const uint32_t& hash_code,
       const ServiceType& service_type) = 0;
 
     /**
@@ -91,7 +91,7 @@ class SessionObserver {
      */
     virtual uint32_t KeyFromPair(
       transport_manager::ConnectionUID connection_handle,
-      uint8_t sessionId) = 0;
+      uint8_t session_id) = 0;
 
     /**
      * \brief Returns connection identifier and session number from given
@@ -104,7 +104,7 @@ class SessionObserver {
     virtual void PairFromKey(
       uint32_t key,
       transport_manager::ConnectionUID* connection_handle,
-      uint8_t* sessionId) = 0;
+      uint8_t* session_id) = 0;
 
     /**
      * \brief information about given Connection Key.
