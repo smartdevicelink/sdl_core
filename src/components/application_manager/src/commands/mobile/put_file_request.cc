@@ -177,32 +177,35 @@ void PutFileRequest::Run() {
   sync_file_name_ = file_path + "/" + sync_file_name_;
   switch (save_result) {
     case mobile_apis::Result::SUCCESS: {
-      AppFile file(sync_file_name_, is_persistent_file_,
-                   is_download_compleate, file_type_);
 
-      if (0 == offset_) {
-        LOG4CXX_INFO(logger_, "New file downloading");
-        if (!application->AddFile(file)) {
+      if (!is_system_file) {
+        AppFile file(sync_file_name_, is_persistent_file_,
+                     is_download_compleate, file_type_);
 
-          LOG4CXX_INFO(logger_,
-                       "Couldn't add file to application (File already Exist"
-                       << " in application and was rewritten on FS)");
-          /* It can be first part of new big file, so we need to update
-             information about it's downloading status and persistence */
-          if (!application->UpdateFile(file)) {
-            LOG4CXX_INFO(logger_, "Couldn't update file");
-            /* If it is impossible to update file, application doesn't
-            know about existing this file */
-            SendResponse(false, mobile_apis::Result::INVALID_DATA,
-                         "Couldn't update file",
-                         &response_params);
-            return;
+        if (0 == offset_) {
+          LOG4CXX_INFO(logger_, "New file downloading");
+          if (!application->AddFile(file)) {
+
+            LOG4CXX_INFO(logger_,
+                         "Couldn't add file to application (File already Exist"
+                         << " in application and was rewritten on FS)");
+            /* It can be first part of new big file, so we need to update
+               information about it's downloading status and persistence */
+            if (!application->UpdateFile(file)) {
+              LOG4CXX_INFO(logger_, "Couldn't update file");
+              /* If it is impossible to update file, application doesn't
+              know about existing this file */
+              SendResponse(false, mobile_apis::Result::INVALID_DATA,
+                           "Couldn't update file",
+                           &response_params);
+              return;
+            }
+          } else {
+            /* if file added - increment it's count
+             ( may be application->AddFile have to incapsulate it? )
+              Any way now this method evals not only in "none"*/
+            application->increment_put_file_in_none_count();
           }
-        } else {
-          /* if file added - increment it's count
-           ( may be application->AddFile have to incapsulate it? )
-            Any way now this method evals not only in "none"*/
-          application->increment_put_file_in_none_count();
         }
       }
 
