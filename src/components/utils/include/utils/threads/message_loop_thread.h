@@ -40,7 +40,7 @@
 #include "utils/macro.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
-#include <unistd.h>
+#include "utils/lock.h"
 
 namespace threads {
 
@@ -98,7 +98,7 @@ class MessageLoopThread {
     Handler& handler_;
     // Message queue that is actually owned by MessageLoopThread
     MessageQueue<Message, Queue>& message_queue_;
-    volatile bool is_active;
+    sync_primitives::Lock active_lock;
   };
  private:
   MessageQueue<Message, Queue> message_queue_;
@@ -135,30 +135,28 @@ template<class Q>
 MessageLoopThread<Q>::LoopThreadDelegate::LoopThreadDelegate(
     MessageQueue<Message, Queue>* message_queue, Handler* handler)
     : handler_(*handler),
-      message_queue_(*message_queue),
-      is_active(false) {
+      message_queue_(*message_queue) {
   DCHECK(handler != NULL);
   DCHECK(message_queue != NULL);
 }
 
 template<class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
-  is_active = true;
+  sync_primitives::AutoLock auto_lock(active_lock);
   while(!message_queue_.IsShuttingDown()){
     DrainQue();
     message_queue_.wait();
   }
   // Process leftover messages
   DrainQue();
-  is_active = false;
 }
 
 template<class Q>
 bool MessageLoopThread<Q>::LoopThreadDelegate::exitThreadMain() {
   message_queue_.Shutdown();
-  // Prevent canceling thread until queue is drained
-  while (is_active) {
-    usleep(200);
+  {
+    sync_primitives::AutoLock auto_lock(active_lock);
+    // Prevent canceling thread until queue is drained
   }
   return true;
 }

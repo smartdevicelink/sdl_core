@@ -188,7 +188,7 @@ void ProtocolHandlerImpl::RemoveProtocolObserver(ProtocolObserver* observer) {
     LOG4CXX_TRACE_EXIT(logger_);
     return;
   }
-  sync_primitives::AutoLock lock(protocol_observers_lock);
+  sync_primitives::AutoLock lock(protocol_observers_lock_);
   protocol_observers_.erase(observer);
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -461,7 +461,7 @@ void ProtocolHandlerImpl::OnTMMessageReceiveFailed(
 
 void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr& message) {
   LOG4CXX_ERROR(logger_, "ProtocolHandlerImpl::NotifySubscribers");
-  sync_primitives::AutoLock lock(protocol_observers_lock);
+  sync_primitives::AutoLock lock(protocol_observers_lock_);
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
     (*it)->OnMessageReceived(message);
@@ -506,7 +506,7 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
       SendEndSession(connection_handle, sent_message.session_id());
     }
   }
-  sync_primitives::AutoLock lock(protocol_observers_lock);
+  sync_primitives::AutoLock lock(protocol_observers_lock_);
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
     (*it)->OnMobileMessageSent(message);
@@ -781,7 +781,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
           "Last frame of multiframe message size " << packet->data_size()
               << "; connection key " << key);
       {
-        sync_primitives::AutoLock lock(protocol_observers_lock);
+        sync_primitives::AutoLock lock(protocol_observers_lock_);
         if (protocol_observers_.empty()) {
           LOG4CXX_ERROR(
               logger_,
