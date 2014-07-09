@@ -44,7 +44,8 @@ namespace policy {
 class MockPTRepresentation : virtual public PTRepresentation {
   public:
     MOCK_METHOD3(CheckPermissions,
-                 CheckPermissionResult(const PTString& app_id, const PTString& hmi_level,
+                 CheckPermissionResult(const PTString& app_id,
+                                       const PTString& hmi_level,
                                        const PTString& rpc));
     MOCK_METHOD0(IsPTPreloaded,
                  bool());
@@ -72,7 +73,7 @@ class MockPTRepresentation : virtual public PTRepresentation {
     MOCK_METHOD1(GetUpdateUrls,
                  EndpointUrls(int service_type));
     MOCK_METHOD1(GetNotificationsNumber,
-                 int(policy_table::Priority priority));
+                 int(const std::string& priority));
     MOCK_METHOD0(Init,
                  InitResult());
     MOCK_METHOD0(Close,
