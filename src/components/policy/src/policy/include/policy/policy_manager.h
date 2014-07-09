@@ -349,6 +349,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * filled into policy table
      */
     virtual void OnSystemReady() = 0;
+
+    /**
+     * @brief GetNotificationNumber
+     * @param priority
+     * @return
+     */
+    virtual uint32_t GetNotificationsNumber(const std::string& priority) = 0;
 };
 
 }  // namespace policy

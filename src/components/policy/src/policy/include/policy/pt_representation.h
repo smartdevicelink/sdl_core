@@ -160,7 +160,7 @@ class PTRepresentation {
      * depending on application priority.
      * @param priority Priority of application
      */
-    virtual int GetNotificationsNumber(policy_table::Priority priority) = 0;
+    virtual int GetNotificationsNumber(const std::string& priority) = 0;
 
     /**
      * @brief Initialized Policy Table (load)
