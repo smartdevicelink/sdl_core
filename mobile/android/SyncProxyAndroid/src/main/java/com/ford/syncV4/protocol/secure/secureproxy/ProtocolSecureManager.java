@@ -161,7 +161,7 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
             Log.i("cypheredData.length < 1000", "data.length" + data.length);
             listenerOFCodedData.setOriginalLength(data.length - WiProProtocol.SSL_OVERHEAD);
             writeDataToProxyServer(data, listenerOFCodedData);
-            getCountDownLatchInput().await();
+            countDownLatch.await();
             return cypheredData;
         } else {
             return data;
