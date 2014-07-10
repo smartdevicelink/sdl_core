@@ -27,12 +27,10 @@ import java.io.IOException;
  */
 public class MessageFrameAssembler {
 
-    protected boolean hasFirstFrame = false;
-    protected boolean hasSecondFrame = false;
-    
     private static final String CLASS_NAME = MessageFrameAssembler.class.getSimpleName();
     private final IProtocolSecureManager mProtocolSecureManager;
-
+    protected boolean hasFirstFrame = false;
+    protected boolean hasSecondFrame = false;
     /**
      * Listener, to provide callbacks of the assemble message logic
      */
@@ -89,7 +87,7 @@ public class MessageFrameAssembler {
     /**
      * Handle first frame of the message
      *
-     * @param data   bytes array
+     * @param data bytes array
      */
     private void handleFirstDataFrame(byte[] data, int frameHeaderSize) {
         //The message is new, so let's figure out how big it is.
@@ -108,7 +106,7 @@ public class MessageFrameAssembler {
         notifyIfFinished(header);
     }
 
-    protected void notifyIfFinished (  ProtocolFrameHeader header){
+    protected void notifyIfFinished(ProtocolFrameHeader header) {
         //if (framesRemaining == 0) {
         if (header.getFrameType() == FrameType.Consecutive && header.getFrameData() == 0x0) {
 
@@ -158,13 +156,25 @@ public class MessageFrameAssembler {
      * @param data   bytes array
      */
     protected void handleMultiFrameMessageFrame(ProtocolFrameHeader header, byte[] data,
-                                              int frameHeaderSize) {
+                                                int frameHeaderSize) {
         if (header.getFrameType() == FrameType.First) {
-            handleFirstDataFrame( data, frameHeaderSize);
+            if (mProtocolSecureManager != null) {
+                try {
+                    byte[] decipheredData = mProtocolSecureManager.sendDataToProxyServerByChunk(header.isEncrypted(), data);
+                    handleFirstDataFrame(decipheredData, decipheredData.length);
+                } catch (IOException e) {
+                    Logger.i("Decipher error", e);
+                } catch (InterruptedException e) {
+                    Logger.i("Decipher error", e);
+                }
+            } else {
+                handleFirstDataFrame(data, frameHeaderSize);
+            }
         } else {
             if (mProtocolSecureManager != null) {
                 try {
                     byte[] decipheredData = mProtocolSecureManager.sendDataToProxyServerByChunk(header.isEncrypted(), data);
+                    header.setDataSize(decipheredData.length);
                     handleRemainingFrame(header, decipheredData);
                 } catch (IOException e) {
                     Logger.i("Decipher error", e);
