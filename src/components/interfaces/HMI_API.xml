@@ -3458,16 +3458,16 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-    <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
+    <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="Common.AirbagStatus" mandatory="false">
+    <param name="airbagStatus" type="Boolean" mandatory="false">
       <description>The status of the air bags</description>
     </param>
-    <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="false">
+    <param name="emergencyEvent" type="Boolean" mandatory="false">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
-    <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="false">
+    <param name="clusterModeStatus" type="Boolean" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
     <param name="myKey" type="Boolean" mandatory="false">
