@@ -194,15 +194,18 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Unprotected_SessionObserverReject) 
 TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverReject) {
   const int call_times = kBulk - kControl;
   AddConnection();
+#ifdef ENABLE_SECURITY
+  // For enabled protection callback shall use protection ON
+  const bool callback_protection_flag  = PROTECTION_ON;
+#else
+  // For disabled protection callback shall ignore protection income flad and use protection OFF
+  const bool callback_protection_flag  = PROTECTION_OFF;
+#endif  // ENABLE_SECURITY
   // expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id, NEW_SESSION_ID, AllOf(Ge(kControl), Le(kBulk)),
-#ifdef ENABLE_SECURITY
-                                       PROTECTION_ON
-#else
-                                       PROTECTION_OFF
-#endif  // ENABLE_SECURITY
-      )).Times(call_times).
+                                       callback_protection_flag)).
+      Times(call_times).
       //return sessions start rejection
       WillRepeatedly(Return(SESSION_START_REJECT));
 
@@ -244,16 +247,19 @@ TEST_F(ProtocolHandlerImplTest, StartSession_Unprotected_SessionObserverAccept) 
 TEST_F(ProtocolHandlerImplTest, StartSession_Protected_SessionObserverAccept) {
   AddConnection();
   const ServiceType start_service = kRpc;
+#ifdef ENABLE_SECURITY
+  // For enabled protection callback shall use protection ON
+  const bool callback_protection_flag = PROTECTION_ON;
+#else
+  // For disabled protection callback shall ignore protection income flad and use protection OFF
+  const bool callback_protection_flag  = PROTECTION_OFF;
+#endif  // ENABLE_SECURITY
   // expect ConnectionHandler check
   EXPECT_CALL(session_observer_mock,
               OnSessionStartedCallback(connection_id, NEW_SESSION_ID, start_service,
-#ifdef ENABLE_SECURITY
-                                       PROTECTION_ON
-#else
-                                       PROTECTION_OFF
-#endif  // ENABLE_SECURITY
+                                       callback_protection_flag)).
       //return sessions start success
-      )).WillOnce(Return(session_id));
+      WillOnce(Return(session_id));
 
   // expect send Ack with PROTECTION_OFF (on no Security Manager)
   EXPECT_CALL(transport_manager_mock,
