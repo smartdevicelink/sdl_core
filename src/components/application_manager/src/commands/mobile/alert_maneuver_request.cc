@@ -78,7 +78,7 @@ void AlertManeuverRequest::Run() {
   }
 
   // Checking alert maneuver on contained \t\n \\t \\n
-  if (IsWhitespaceExist()) {
+  if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming alert maneuver has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -192,7 +192,8 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-bool AlertManeuverRequest::IsWhitespaceExist() {
+bool AlertManeuverRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "AlertManeuverRequest::IsWhiteSpaceExist");
   bool return_value = false;
   const char* str = NULL;
 
@@ -206,9 +207,28 @@ bool AlertManeuverRequest::IsWhitespaceExist() {
     for (; it_tc != it_tc_end; ++it_tc) {
       str = (*it_tc)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
-        LOG4CXX_INFO(logger_, "tts_chunks syntax check failed");
+        LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
         return_value = true;
         break;
+      }
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    const smart_objects::SmartArray* sb_array =
+        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
+
+    smart_objects::SmartArray::const_iterator it_sb = sb_array->begin();
+    smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
+
+    for (; it_sb != it_sb_end; ++it_sb) {
+      if ((*it_sb).keyExists(strings::image)) {
+        str = (*it_sb)[strings::image][strings::value].asCharArray();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_ERROR(logger_,
+                       "Invalid soft_buttons image value syntax check failed");
+          return_value = true;
+        }
       }
     }
   }

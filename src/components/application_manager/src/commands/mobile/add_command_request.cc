@@ -122,10 +122,6 @@ void AddCommandRequest::Run() {
       return;
     }
 
-    if (!CheckVRCommandsNames()) {
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      return;
-    }
     data_exist = true;
   }
 
@@ -135,14 +131,17 @@ void AddCommandRequest::Run() {
     return;
   }
 
+  // Checking add command on contained \t\n \\t \\n
+  if (IsWhiteSpaceExist()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming add command has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   smart_objects::SmartObject ui_msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
-    if (!CheckMenuName()) {
-      LOG4CXX_ERROR_EXT(logger_, "MenuName is invalid");
-      SendResponse(false, mobile_apis::Result::INVALID_DATA);
-      return;
-    }
     ui_msg_params[strings::cmd_id] =
         (*message_)[strings::msg_params][strings::cmd_id];
     ui_msg_params[strings::menu_params] =
@@ -257,31 +256,6 @@ bool AddCommandRequest::CheckCommandVRSynonym(ApplicationConstSharedPtr app) {
   return true;
 }
 
-bool AddCommandRequest::CheckVRCommandsNames() {
-  for (size_t i = 0;
-       i < (*message_)[strings::msg_params][strings::vr_commands].length();
-       ++i) {
-    const std::string& str =
-        (*message_)[strings::msg_params][strings::vr_commands][i].asString();
-
-    if (!CheckSyntax(str)) {
-      LOG4CXX_INFO(logger_, "Invalid command name.");
-      return false;
-    }
-  }
-  return true;
-}
-
-bool AddCommandRequest::CheckMenuName() {
-    const std::string& str = (*message_)[strings::msg_params][strings::menu_params]
-                             [strings::menu_name].asString();
-    if (!CheckSyntax(str)) {
-      LOG4CXX_INFO(logger_, "Invalid menu name.");
-      return false;
-    }
-  return true;
-}
-
 bool AddCommandRequest::CheckCommandParentId(ApplicationConstSharedPtr app) {
   if (!app) {
     return false;
@@ -383,6 +357,48 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
 
 bool AddCommandRequest::IsPendingResponseExist() {
   return send_ui_ != is_ui_received_ || send_vr_ != is_vr_received_;
+}
+
+bool AddCommandRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "AddCommandRequest::IsWhiteSpaceExist");
+  bool return_value = false;
+  const char* str = NULL;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
+    str = (*message_)[strings::msg_params][strings::menu_params]
+                                   [strings::menu_name].asCharArray();
+    if (!CheckSyntax(str)) {
+      LOG4CXX_INFO(logger_, "Invalid menu name syntax check failed.");
+      return_value = true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
+    size_t len =
+        (*message_)[strings::msg_params][strings::vr_commands].length();
+
+    for (size_t i = 0; i < len; ++i) {
+      str = (*message_)[strings::msg_params]
+                        [strings::vr_commands][i].asCharArray();
+      if (!CheckSyntax(str)) {
+        LOG4CXX_INFO(logger_, "Invalid vr_commands syntax check failed");
+        return_value = true;
+        break;
+      }
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::cmd_icon)) {
+    str = (*message_)[strings::msg_params]
+                      [strings::cmd_icon][strings::value].asCharArray();
+
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_INFO(logger_, "Invalid cmd_icon value syntax check failed");
+      return_value = true;
+    }
+  }
+
+  return return_value;
 }
 
 }  // namespace commands

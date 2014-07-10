@@ -79,7 +79,7 @@ class AlertManeuverRequest : public CommandRequestImpl {
    * @return if alert maneuver contains \t\n \\t \\n return TRUE,
    * FALSE otherwise
    */
-  bool IsWhitespaceExist();
+  bool IsWhiteSpaceExist();
 
   mobile_apis::Result::eType  tts_speak_result_code_;
   mobile_apis::Result::eType  navi_alert_maneuver_result_code_;
