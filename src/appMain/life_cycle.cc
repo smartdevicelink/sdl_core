@@ -147,8 +147,10 @@ bool LifeCycle::StartComponents() {
       &protocol_name, "TLSv1.2", security_manager::SecurityManager::ConfigSection(), "Protocol");
 
   security_manager::Protocol protocol;
-  if (protocol_name == "TLSv1.1") {
-    protocol = security_manager::TLSv1_1;
+  if (protocol_name == "TLSv1.0") {
+    protocol = security_manager::TLSv1;
+  } else if (protocol_name == "TLSv1.1") {
+      protocol = security_manager::TLSv1_1;
   } else if (protocol_name == "TLSv1.2") {
     protocol = security_manager::TLSv1_2;
   } else if (protocol_name == "SSLv3") {

@@ -54,7 +54,6 @@ class SSLContext;
 namespace connection_handler {
 
 class ConnectionHandler;
-struct Session;
 
 /**
  * \brief Type for ConnectionHandle
@@ -105,15 +104,13 @@ struct Session {
   {}
   explicit Session(const ServiceList &services, uint8_t protocol_version)
     : service_list(services),
-    protocol_version(protocol_version)
+      protocol_version(protocol_version)
 #ifdef ENABLE_SECURITY
       , ssl_context(NULL)
 #endif  // ENABLE_SECURITY
   {}
-  Service *FindService(
-      const protocol_handler::ServiceType &service_type);
-  const Service *FindService(
-      const protocol_handler::ServiceType &service_type) const;
+  Service *FindService(const protocol_handler::ServiceType &service_type);
+  const Service *FindService(const protocol_handler::ServiceType &service_type) const;
 };
 
 /**
@@ -202,8 +199,8 @@ class Connection {
    * \return \ref SSLContext of connection
    */
   security_manager::SSLContext *GetSSLContext(
-      const uint8_t session_id,
-      const protocol_handler::ServiceType &service_type) const;
+    const uint8_t session_id,
+    const protocol_handler::ServiceType &service_type) const;
   /**
    * \brief Set protection flag to service in session by key
    * to get current SSLContext of connection
@@ -211,8 +208,8 @@ class Connection {
    * \param service_type Type of service
    */
   void SetProtectionFlag(
-      const uint8_t session_id,
-      const protocol_handler::ServiceType &service_type);
+    const uint8_t session_id,
+    const protocol_handler::ServiceType &service_type);
 #endif  // ENABLE_SECURITY
   /**
    * \brief Returns map of sessions which have been opened in
