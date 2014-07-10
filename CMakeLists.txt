@@ -74,7 +74,7 @@ add_custom_target(ford-tarball
 
 if (ARCH_TYPE_OPTION)
   if (NOT (${ARCH_TYPE_OPTION} STREQUAL "x86") AND NOT (${ARCH_TYPE_OPTION} STREQUAL "armv7"))
-    message(AUTHOR_WARNING "HW architecture is not defined using x86. Allowed values are x86/armv7")
+    message(AUTHOR_WARNING "HW architecture is not defined, using x86. Allowed values are x86/armv7 (case sensitive)")
     set(ARCH_TYPE_OPTION	"x86")
   endif ()
 else ()

@@ -23,7 +23,7 @@ IF(CMAKE_HOST_LINUX)
   FIND_PATH(QNX_CONFIGURATION
     NAME /etc/qnx/bin/qnxactivate
     PATHS $ENV{QNX_CONFIGURATION}
-    "$ENV{QNX_HOST}/linux/x86/usr/bin/qconfig"
+    "$ENV{QNX_HOST}/usr/bin/qconfig"
     NO_CMAKE_PATH
     NO_CMAKE_ENVIRONMENT_PATH
  )
