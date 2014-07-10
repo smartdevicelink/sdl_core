@@ -723,7 +723,6 @@ void ConnectionHandlerImpl::SendHeartBeat(ConnectionHandle connection_handle,
   }
 }
 
-//TODO(VSemenyuk): connection_key -> connection_id
 void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key,
                                                 uint8_t session_id) {
   sync_primitives::AutoLock lock(connection_list_lock_);
@@ -765,6 +764,30 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   connection_list_.erase(itr);
 }
 
+void ConnectionHandlerImpl::BindProtocolVersionWithSession(
+    uint32_t connection_key, uint8_t protocol_version) {
+  uint32_t connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(connection_key, &connection_handle, &session_id);
+
+  sync_primitives::AutoLock lock(connection_list_lock_);
+  ConnectionList::iterator it = connection_list_.find(connection_handle);
+  if (connection_list_.end() != it) {
+    it->second->UpdateProtocolVersionSession(session_id, protocol_version);
+  }
+}
+
+bool ConnectionHandlerImpl::CheckSupportHeartBeat(
+    transport_manager::ConnectionUID connection_handle,uint8_t session_id) {
+  sync_primitives::AutoLock lock(connection_list_lock_);
+  uint32_t connection = static_cast<uint32_t>(connection_handle);
+  ConnectionList::iterator it = connection_list_.find(connection);
+  if (connection_list_.end() == it) {
+    return false;
+  }
+  return it->second->SupportHeartBeat(session_id);
+}
+
 #ifdef BUILD_TESTS
 ConnectionList &ConnectionHandlerImpl::getConnectionList() {
   return connection_list_;
@@ -778,6 +801,5 @@ void ConnectionHandlerImpl::addDeviceConnection(
   // Add connection
   OnConnectionEstablished(device_info, connection_id);
 }
-#endif
-
+#endif  // BUILD_TESTS
 }  // namespace connection_handler

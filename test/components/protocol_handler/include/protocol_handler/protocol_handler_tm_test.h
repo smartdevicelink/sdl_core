@@ -70,11 +70,15 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     connection_key = 0xFF00AAu;
     message_id = 0xABCDEFu;
 
-    // expect convertion calls
+    // expect ConnectionHandler support methods call (convertion, check heartbeat)
     EXPECT_CALL(session_observer_mock,
                 KeyFromPair(connection_id, session_id)).
-        //return sessions start success
+        //return some connection_key
         WillRepeatedly(Return(connection_key));
+    EXPECT_CALL(session_observer_mock,
+                CheckSupportHeartBeat(connection_id, _)).
+        //return false to avoid call KeepConnectionAlive
+        WillRepeatedly(Return(false));
   }
   void TearDown() OVERRIDE {
     // Wait call methods in thread

@@ -69,10 +69,10 @@ class SessionObserver {
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
    */
   virtual uint32_t OnSessionStartedCallback(
-      const transport_manager::ConnectionUID &connection_handle,
-      const uint8_t sessionId,
-      const protocol_handler::ServiceType &service_type,
-      const bool is_protected) = 0;
+    const transport_manager::ConnectionUID &connection_handle,
+    const uint8_t sessionId,
+    const protocol_handler::ServiceType &service_type,
+    const bool is_protected) = 0;
   /**
    * \brief Callback function used by ProtocolHandler
    * when Mobile Application initiates session ending.
@@ -84,10 +84,10 @@ class SessionObserver {
    * \return uint32_t 0 if operation fails, session key otherwise
    */
   virtual uint32_t OnSessionEndedCallback(
-      const transport_manager::ConnectionUID &connection_handle,
-      const uint8_t sessionId,
-      const uint32_t &hashCode,
-      const ServiceType &service_type) = 0;
+    const transport_manager::ConnectionUID &connection_handle,
+    const uint8_t sessionId,
+    const uint32_t &hashCode,
+    const ServiceType &service_type) = 0;
 
   /**
    * \brief Creates unique identifier of session (can be used as hash)
@@ -98,8 +98,8 @@ class SessionObserver {
    * \return uint32_t Unique key for session
    */
   virtual uint32_t KeyFromPair(
-      transport_manager::ConnectionUID connection_handle,
-      uint8_t sessionId) = 0;
+    transport_manager::ConnectionUID connection_handle,
+    uint8_t session_id) = 0;
 
   /**
    * \brief Returns connection identifier and session number from given
@@ -109,9 +109,9 @@ class SessionObserver {
    * \param sessionId Returned: Number of session
    */
   virtual void PairFromKey(
-      uint32_t key,
-      transport_manager::ConnectionUID *connection_handle,
-      uint8_t *sessionId) = 0;
+    uint32_t key,
+    transport_manager::ConnectionUID *connection_handle,
+    uint8_t *sessionId) = 0;
 
   /**
    * \brief information about given Connection Key.
@@ -139,6 +139,16 @@ class SessionObserver {
                                     std::list<uint32_t> *applications_list,
                                     std::string *mac_address) = 0;
 
+  /**
+   * \brief returns TRUE if session supports sending HEARTBEAT ACK to mobile side
+   * \param connection_handle Connection identifier whithin which session exists
+   * \param session_id Identifier of the session
+   * \return TRUE if session has protocol version which supports heartbeat otherwise returns FALSE
+   */
+  virtual bool CheckSupportHeartBeat(
+    transport_manager::ConnectionUID connection_handle,
+    uint8_t session_id) = 0;
+
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets crypto context of connection
@@ -147,8 +157,8 @@ class SessionObserver {
    * \return \c SecurityQuery::ProtectSessionResult value
    */
   virtual int SetSSLContext(
-      const uint32_t &key,
-      security_manager::SSLContext *context) = 0;
+    const uint32_t &key,
+    security_manager::SSLContext *context) = 0;
   /**
    * \brief Gets crypto context of connection, use service_type to get NULL
    * SSLContext for not protected services or ControlService (0x0)
@@ -158,8 +168,8 @@ class SessionObserver {
    * \return \ref SSLContext of connection
    */
   virtual security_manager::SSLContext *GetSSLContext(
-      const uint32_t &key,
-      const protocol_handler::ServiceType &service_type) = 0;
+    const uint32_t &key,
+    const protocol_handler::ServiceType &service_type) = 0;
   /**
    * \brief Set protection flag to service in session by key
    * to get current SSLContext of connection
@@ -167,9 +177,10 @@ class SessionObserver {
    * \param service_type Type of service
    */
   virtual void SetProtectionFlag(
-      const uint32_t &key,
-      const protocol_handler::ServiceType &service_type) = 0;
+    const uint32_t &key,
+    const protocol_handler::ServiceType &service_type) = 0;
 #endif  // ENABLE_SECURITY
+
  protected:
   /**
    * \brief Destructor

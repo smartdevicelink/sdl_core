@@ -111,12 +111,12 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("BasicCommunication", "OnUpdateDeviceList");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnFindApplications");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnAppActivated");
-  DBusMessageController::SubscribeTo("BasicCommunication", "OnAppRegistered");
-  DBusMessageController::SubscribeTo("BasicCommunication", "OnAppUnregistered");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnExitApplication");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnExitAllApplications");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnDeviceChosen");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnIgnitionCycleOver");
+  DBusMessageController::SubscribeTo("BasicCommunication", "OnSystemRequest");
+  DBusMessageController::SubscribeTo("BasicCommunication", "OnSystemInfoChanged");
   DBusMessageController::SubscribeTo("TTS", "Started");
   DBusMessageController::SubscribeTo("TTS", "Stopped");
   DBusMessageController::SubscribeTo("TTS", "OnLanguageChange");

@@ -137,7 +137,7 @@ bool RegisterAppInterfaceRequest::Init() {
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run " << connection_key());
 
-  #ifndef CUSTOMER_PASA
+#ifndef CUSTOMER_PASA
   // Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
   // Flag conditional compilation "CUSTOMER_PASA" is used in order to exclude hit code
   // to RTC
@@ -151,7 +151,7 @@ void RegisterAppInterfaceRequest::Run() {
                                                                default_timeout());
     }
   }
-  #endif
+#endif
 
   std::string mobile_app_id = (*message_)[strings::msg_params][strings::app_id]
                                                                .asString();
@@ -755,7 +755,7 @@ bool RegisterAppInterfaceRequest::IsWhitespaceExist() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
     const smart_objects::SmartArray* tn_array =
-        (*message_)[strings::msg_params][strings::tts_chunks].asArray();
+        (*message_)[strings::msg_params][strings::tts_name].asArray();
 
     smart_objects::SmartArray::const_iterator it_tn = tn_array->begin();
     smart_objects::SmartArray::const_iterator it_tn_end = tn_array->end();

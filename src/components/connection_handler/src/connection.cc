@@ -115,8 +115,10 @@ uint32_t Connection::AddNewSession() {
   sync_primitives::AutoLock lock(session_map_lock_);
   const uint32_t session_id = findGap(session_map_);
   if (session_id > 0) {
-    session_map_[session_id].service_list.push_back(Service(protocol_handler::kRpc));
-    session_map_[session_id].service_list.push_back(Service(protocol_handler::kBulk));
+    Session& new_session = session_map_[session_id];
+    new_session.protocol_version = ::protocol_handler::PROTOCOL_VERSION_2;
+    new_session.service_list.push_back(Service(protocol_handler::kRpc));
+    new_session.service_list.push_back(Service(protocol_handler::kBulk));
   }
   return session_id;
 }
@@ -314,6 +316,29 @@ void Connection::CloseSession(uint8_t session_id) {
   if (1 == size) {
     connection_handler_->CloseConnection(connection_handle_);
   }
+}
+
+void Connection::UpdateProtocolVersionSession(
+    uint8_t session_id, uint8_t protocol_version) {
+  sync_primitives::AutoLock lock(session_map_lock_);
+  SessionMap::iterator session_it = session_map_.find(session_id);
+  if (session_it == session_map_.end()) {
+    return;
+  }
+  Session &session = session_it->second;
+  session.protocol_version = protocol_version;
+}
+
+bool Connection::SupportHeartBeat(uint8_t session_id) {
+  sync_primitives::AutoLock lock(session_map_lock_);
+  //version of the protocol for which is supported heartbeat
+  uint8_t pv_support_heartbeat = 3;
+  SessionMap::iterator session_it = session_map_.find(session_id);
+  if (session_it == session_map_.end()) {
+    return false;
+  }
+  Session &session = session_it->second;
+  return pv_support_heartbeat == session.protocol_version;
 }
 
 void Connection::StartHeartBeat(uint8_t session_id) {

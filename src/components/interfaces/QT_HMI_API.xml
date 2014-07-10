@@ -1384,12 +1384,6 @@
       <param name="bitsPerSample" type="Common.BitsPerSample" mandatory="true"/>
       <param name="audioType" type="Common.AudioType" mandatory="true"/>
     </struct>
-    <struct name="Coordinate">
-      <param name="xCoord" type="Integer" mandatory="true">
-  </param>
-      <param name="yCoord" type="Integer" mandatory="true">
-  </param>
-    </struct>
     <struct name="TextFieldStruct">
       <param name="fieldName" type="Common.TextFieldName" mandatory="true">
         <description>The name of the field for displaying the text.</description>
@@ -3310,6 +3304,26 @@
     </function>
     <function name="OnSteeringWheelAngle" messagetype="notification" provider="hmi">
       <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="true">
+        <description>Current angle of the steering wheel (in deg)</description>
+      </param>
+    </function>
+    <function name="OnECallInfo" messagetype="notification" provider="hmi">
+      <param name="eCallInfo" type="Common.ECallInfo" mandatory="true">
+        <description>Current angle of the steering wheel (in deg)</description>
+      </param>
+    </function>
+    <function name="OnAirbagStatus" messagetype="notification" provider="hmi">
+      <param name="airbagStatus" type="Common.AirbagStatus" mandatory="true">
+        <description>Current angle of the steering wheel (in deg)</description>
+      </param>
+    </function>
+    <function name="OnEmergencyEvent" messagetype="notification" provider="hmi">
+      <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="true">
+        <description>Current angle of the steering wheel (in deg)</description>
+      </param>
+    </function>
+    <function name="OnClusterModeStatus" messagetype="notification" provider="hmi">
+      <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="true">
         <description>Current angle of the steering wheel (in deg)</description>
       </param>
     </function>
