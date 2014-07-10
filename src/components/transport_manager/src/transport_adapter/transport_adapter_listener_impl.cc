@@ -50,6 +50,7 @@ TransportAdapterListenerImpl::TransportAdapterListenerImpl(
 
 void TransportAdapterListenerImpl::OnSearchDeviceDone(
     const TransportAdapter* adapter) {
+  LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE,
       transport_adapter_, "", 0, RawMessageSptr(), new BaseError());
@@ -58,11 +59,13 @@ void TransportAdapterListenerImpl::OnSearchDeviceDone(
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 void TransportAdapterListenerImpl::OnSearchDeviceFailed(
     const TransportAdapter* adapter,
     const SearchDeviceError& error) {
+  LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter);
   SearchDeviceError* err = new SearchDeviceError(error);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL,
@@ -72,10 +75,12 @@ void TransportAdapterListenerImpl::OnSearchDeviceFailed(
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 void TransportAdapterListenerImpl::OnDeviceListUpdated(
     const TransportAdapter* adapter) {
+  LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED,
       transport_adapter_, "", 0, RawMessageSptr(), NULL);
@@ -84,9 +89,11 @@ void TransportAdapterListenerImpl::OnDeviceListUpdated(
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(const TransportAdapter* adapter) {
+  LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter);
   TransportAdapterEvent event(
     TransportAdapterListenerImpl::ON_FIND_NEW_APPLICATIONS_REQUEST,
     transport_adapter_,
@@ -100,11 +107,13 @@ void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(const TransportA
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 void TransportAdapterListenerImpl::OnConnectDone(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& application_id) {
+    LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter<< ", device: "<< device << ", application_id: "<<application_id);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE,
       transport_adapter_, device, application_id, RawMessageSptr(),
@@ -114,11 +123,13 @@ void TransportAdapterListenerImpl::OnConnectDone(
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 void TransportAdapterListenerImpl::OnConnectFailed(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const ConnectError& error) {
+  LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter<< ", device: "<< device << ", application_id: "<<app_id);
   ConnectError* err = new ConnectError(error);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL,
@@ -128,11 +139,13 @@ void TransportAdapterListenerImpl::OnConnectFailed(
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 void TransportAdapterListenerImpl::OnDisconnectDone(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id) {
+  LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter<< ", device: "<< device << ", application_id: "<<app_id);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE,
       transport_adapter_, device, app_id, RawMessageSptr(), new BaseError());
@@ -141,11 +154,13 @@ void TransportAdapterListenerImpl::OnDisconnectDone(
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 void TransportAdapterListenerImpl::OnDisconnectFailed(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const DisconnectError& error) {
+  LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter<< ", device: "<< device << ", application_id: "<<app_id);
   DisconnectError* err = new DisconnectError(error);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL,
@@ -155,6 +170,7 @@ void TransportAdapterListenerImpl::OnDisconnectFailed(
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 void TransportAdapterListenerImpl::OnDisconnectDeviceDone(
@@ -167,6 +183,7 @@ void TransportAdapterListenerImpl::OnDisconnectDeviceFailed(
 void TransportAdapterListenerImpl::OnDataReceiveDone(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const RawMessageSptr data_container) {
+    LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter<< ", device: "<< device << ", application_id: "<<app_id<<", message: "<<data_container);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE,
       transport_adapter_, device, app_id, data_container, new BaseError());
@@ -175,11 +192,13 @@ void TransportAdapterListenerImpl::OnDataReceiveDone(
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 void TransportAdapterListenerImpl::OnDataReceiveFailed(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const DataReceiveError& error) {
+  LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter<< ", device: "<< device << ", application_id: "<<app_id);
   DataReceiveError* err = new DataReceiveError(error);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL,
@@ -189,11 +208,13 @@ void TransportAdapterListenerImpl::OnDataReceiveFailed(
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 void TransportAdapterListenerImpl::OnDataSendDone(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const RawMessageSptr data_container) {
+  LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter<< ", device: "<< device << ", application_id: "<<app_id<<", message: "<<data_container);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE,
       transport_adapter_, device, app_id, data_container, new BaseError());
@@ -202,12 +223,14 @@ void TransportAdapterListenerImpl::OnDataSendDone(
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 void TransportAdapterListenerImpl::OnDataSendFailed(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id, const RawMessageSptr data_container,
     const DataSendError& error) {
+  LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter<< ", device: "<< device << ", application_id: "<<app_id<<", message: "<<data_container);
   DataSendError* err = new DataSendError(error);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL,
@@ -217,6 +240,7 @@ void TransportAdapterListenerImpl::OnDataSendFailed(
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 void TransportAdapterListenerImpl::OnConnectRequested(
@@ -227,6 +251,7 @@ void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
     const TransportAdapter* adapter,
     const DeviceUID& device, const ApplicationHandle& application,
     const CommunicationError& error) {
+  LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter<< ", device: "<< device << ", application: "<<application);
   CommunicationError* err = new CommunicationError(error);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
@@ -236,11 +261,13 @@ void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 void TransportAdapterListenerImpl::OnCommunicationError(
     const TransportAdapter* adapter, const DeviceUID& device,
     const ApplicationHandle& app_id) {
+  LOG4CXX_TRACE(logger_,"enter. adapter: "<<adapter<< ", device: "<< device << ", application_id: "<<app_id);
   TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR,
       transport_adapter_, device, app_id, RawMessageSptr(), new BaseError());
@@ -249,6 +276,7 @@ void TransportAdapterListenerImpl::OnCommunicationError(
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
     LOG4CXX_WARN(logger_, "Failed to receive event from device");
   }
+  LOG4CXX_TRACE(logger_,"exit");
 }
 
 }  // namespace transport_manager

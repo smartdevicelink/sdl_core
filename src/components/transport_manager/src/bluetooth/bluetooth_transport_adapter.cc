@@ -54,7 +54,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager-bluetooth")
 
 BluetoothTransportAdapter::~BluetoothTransportAdapter() {
 }

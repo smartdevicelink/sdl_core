@@ -56,7 +56,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager-bluetooth")
 
 namespace {
 char* SplitToAddr(char* dev_list_entry) {
@@ -70,6 +70,7 @@ char* SplitToAddr(char* dev_list_entry) {
 }
 
 int FindPairedDevs(std::vector<bdaddr_t>* result) {
+  LOG4CXX_TRACE(logger_, "enter");
   DCHECK(result != NULL);
 
   const char* cmd = "bt-device -l";
@@ -93,6 +94,7 @@ int FindPairedDevs(std::vector<bdaddr_t>* result) {
     buffer = new char[1028];
   }
   pclose(pipe);
+  LOG4CXX_TRACE(logger_, "exit");
   return 0;
 }
 }  //  namespace

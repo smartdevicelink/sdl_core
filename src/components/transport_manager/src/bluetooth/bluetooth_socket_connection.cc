@@ -51,7 +51,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager-bluetooth")
 
 BluetoothSocketConnection::BluetoothSocketConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle,
@@ -76,6 +76,7 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
                   "Application " << application_handle() << " not found");
     *error = new ConnectError();
     LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
+    LOG4CXX_TRACE(logger_, "exit_1. Establish: false")
     return false;
   }
 
@@ -98,6 +99,7 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
           "Failed to create RFCOMM socket for device " << device_handle());
       *error = new ConnectError();
       LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
+      LOG4CXX_TRACE(logger_, "exit_1. Establish: false")
       return false;
     }
     connect_status = ::connect(rfcomm_socket,
@@ -123,11 +125,13 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
         "Failed to Connect to remote device " << BluetoothDevice::GetUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for session " << this);
     *error = new ConnectError();
     LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
+    LOG4CXX_TRACE(logger_, "exit_1. Establish: false");
     return false;
   }
 
   set_socket(rfcomm_socket);
   LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
+  LOG4CXX_TRACE(logger_, "exit_2. Establish: true")
   return true;
 }
 

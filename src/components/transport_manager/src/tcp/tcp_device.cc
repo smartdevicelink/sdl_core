@@ -35,27 +35,29 @@
 
 #include "transport_manager/tcp/tcp_device.h"
 
+#include "utils/logger.h"
+
 namespace transport_manager {
 namespace transport_adapter {
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapter")
+
 TcpDevice::TcpDevice(const in_addr_t& in_addr, const std::string& name)
-#ifdef CUSTOMER_PASA
-// Todd: put "IP" infront for dev name
-: Device("IP" + name, "IP" + name),
-#else
 : Device(name, name),
-#endif
       in_addr_(in_addr),
       last_handle_(0) {
   pthread_mutex_init(&applications_mutex_, 0);
 }
 
 bool TcpDevice::IsSameAs(const Device* other) const {
+  LOG4CXX_TRACE(logger_, "enter: " << other);
   const TcpDevice* other_tcp_device = static_cast<const TcpDevice*>(other);
+  LOG4CXX_TRACE(logger_, "exit");
   return other_tcp_device->in_addr_ == in_addr_;
 }
 
 ApplicationList TcpDevice::GetApplicationList() const {
+  LOG4CXX_TRACE(logger_, "enter");
   pthread_mutex_lock(&applications_mutex_);
   ApplicationList app_list;
   for (std::map<ApplicationHandle, Application>::const_iterator it =
@@ -63,10 +65,12 @@ ApplicationList TcpDevice::GetApplicationList() const {
     app_list.push_back(it->first);
   }
   pthread_mutex_unlock(&applications_mutex_);
+  LOG4CXX_TRACE(logger_, "exit");
   return app_list;
 }
 
 ApplicationHandle TcpDevice::AddIncomingApplication(int socket_fd) {
+  LOG4CXX_TRACE(logger_, "enter: " << socket_fd);
   Application app;
   app.incoming = true;
   app.socket = socket_fd;
@@ -74,10 +78,12 @@ ApplicationHandle TcpDevice::AddIncomingApplication(int socket_fd) {
   const ApplicationHandle app_handle = ++last_handle_;
   applications_[app_handle] = app;
   pthread_mutex_unlock(&applications_mutex_);
+  LOG4CXX_TRACE(logger_, "exit");
   return app_handle;
 }
 
 ApplicationHandle TcpDevice::AddDiscoveredApplication(int port) {
+  LOG4CXX_TRACE(logger_, "enter: " << port);
   Application app;
   app.incoming = false;
   app.port = port;
@@ -85,14 +91,17 @@ ApplicationHandle TcpDevice::AddDiscoveredApplication(int port) {
   const ApplicationHandle app_handle = ++last_handle_;
   applications_[app_handle] = app;
   pthread_mutex_unlock(&applications_mutex_);
+  LOG4CXX_TRACE(logger_, "exit");
   return app_handle;
 }
 
 
 void TcpDevice::RemoveApplication(const ApplicationHandle app_handle) {
+  LOG4CXX_TRACE(logger_, "enter: " << app_handle);
   pthread_mutex_lock(&applications_mutex_);
   applications_.erase(app_handle);
   pthread_mutex_unlock(&applications_mutex_);
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 TcpDevice::~TcpDevice() {
@@ -100,16 +109,32 @@ TcpDevice::~TcpDevice() {
 }
 
 int TcpDevice::GetApplicationSocket(const ApplicationHandle app_handle) const {
+  LOG4CXX_TRACE(logger_, "enter: " << app_handle);
   std::map<ApplicationHandle, Application>::const_iterator it = applications_.find(app_handle);
-  if(applications_.end() == it) return -1;
-  if(! it->second.incoming) return -1;
+  if(applications_.end() == it) {
+      LOG4CXX_TRACE(logger_, "exit");
+      return -1;
+  }
+  if(! it->second.incoming) {
+      LOG4CXX_TRACE(logger_, "exit");
+      return -1;
+  }
+  LOG4CXX_TRACE(logger_, "exit");
   return it->second.socket;
 }
 
 int TcpDevice::GetApplicationPort(const ApplicationHandle app_handle) const {
+  LOG4CXX_TRACE(logger_, "enter: " << app_handle);
   std::map<ApplicationHandle, Application>::const_iterator it = applications_.find(app_handle);
-  if(applications_.end() == it) return -1;
-  if(it->second.incoming) return -1;
+  if(applications_.end() == it) {
+      LOG4CXX_TRACE(logger_, "exit");
+      return -1;
+  }
+  if(it->second.incoming) {
+      LOG4CXX_TRACE(logger_, "exit");
+      return -1;
+  }
+  LOG4CXX_TRACE(logger_, "exit");
   return it->second.port;
 }
 

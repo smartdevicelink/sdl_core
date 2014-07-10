@@ -36,8 +36,12 @@
 #include "transport_manager/tcp/tcp_connection_factory.h"
 #include "transport_manager/tcp/tcp_socket_connection.h"
 
+#include "utils/logger.h"
+
 namespace transport_manager {
 namespace transport_adapter {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapter")
 
 TcpConnectionFactory::TcpConnectionFactory(TransportAdapterController* controller)
     : controller_(controller) {
@@ -49,12 +53,14 @@ TransportAdapter::Error TcpConnectionFactory::Init() {
 
 TransportAdapter::Error TcpConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
+  LOG4CXX_TRACE(logger_, "enter: " << device_uid << app_handle);
   TcpServerOiginatedSocketConnection* connection(
       new TcpServerOiginatedSocketConnection(device_uid, app_handle,
                                              controller_));
   TransportAdapter::Error error = connection->Start();
   if (error != TransportAdapter::OK)
     delete connection;
+  LOG4CXX_TRACE(logger_, "exit");
   return error;
 }
 

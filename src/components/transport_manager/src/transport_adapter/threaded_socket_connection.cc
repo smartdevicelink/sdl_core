@@ -64,7 +64,6 @@ ThreadedSocketConnection::ThreadedSocketConnection(
 }
 
 ThreadedSocketConnection::~ThreadedSocketConnection() {
-  LOG4CXX_TRACE_ENTER(logger_);
   terminate_flag_ = true;
   Notify();
   pthread_join(thread_, 0);
@@ -74,23 +73,21 @@ ThreadedSocketConnection::~ThreadedSocketConnection() {
     close(read_fd_);
   if (-1 != write_fd_)
     close(write_fd_);
-
-  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void ThreadedSocketConnection::Abort() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_TRACE(logger_, "enter");
   unexpected_disconnect_ = true;
   terminate_flag_ = true;
-  LOG4CXX_TRACE_EXIT(logger_);
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 void* StartThreadedSocketConnection(void* v) {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_TRACE(logger_, "enter");
   ThreadedSocketConnection* connection =
       static_cast<ThreadedSocketConnection*>(v);
   connection->Thread();
-  LOG4CXX_TRACE_EXIT(logger_);
+  LOG4CXX_TRACE(logger_, "exit");
   return 0;
 }
 
@@ -104,24 +101,24 @@ TransportAdapter::Error ThreadedSocketConnection::Start() {
     write_fd_ = fds[1];
   } else {
     LOG4CXX_INFO(logger_, "pipe creation failed (#" << pthread_self() << ")");
-    LOG4CXX_TRACE_EXIT(logger_);
+    LOG4CXX_TRACE(logger_,"exit_1. ThreadedSocketConnection: false");
     return TransportAdapter::FAIL;
   }
   const int fcntl_ret = fcntl(read_fd_, F_SETFL,
                               fcntl(read_fd_, F_GETFL) | O_NONBLOCK);
   if (0 != fcntl_ret) {
     LOG4CXX_INFO(logger_, "fcntl failed (#" << pthread_self() << ")");
-    LOG4CXX_TRACE_EXIT(logger_);
+    LOG4CXX_TRACE(logger_,"exit_1. ThreadedSocketConnection: false");
     return TransportAdapter::FAIL;
   }
 
   if (0 == pthread_create(&thread_, 0, &StartThreadedSocketConnection, this)) {
     LOG4CXX_INFO(logger_, "thread created (#" << pthread_self() << ")");
-    LOG4CXX_TRACE_EXIT(logger_);
+    LOG4CXX_TRACE(logger_,"exit_2. ThreadedSocketConnection: true");
     return TransportAdapter::OK;
   } else {
     LOG4CXX_INFO(logger_, "thread creation failed (#" << pthread_self() << ")");
-    LOG4CXX_TRACE_EXIT(logger_);
+    LOG4CXX_TRACE(logger_,"exit_1. ThreadedSocketConnection: false");
     return TransportAdapter::FAIL;
   }
 }
@@ -146,17 +143,17 @@ TransportAdapter::Error ThreadedSocketConnection::Notify() const {
   if (-1 == write_fd_) {
     LOG4CXX_ERROR_WITH_ERRNO(
             logger_, "Failed to wake up connection thread for connection " << this);
-    LOG4CXX_INFO(logger_, "exit");
+    LOG4CXX_TRACE(logger_,"exit_3. ThreadedSocketConnection.finalize: bad_state");
     return TransportAdapter::BAD_STATE;
   }
   uint8_t c = 0;
   if (1 == write(write_fd_, &c, 1)) {
-    LOG4CXX_INFO(logger_, "exit");
+    LOG4CXX_TRACE(logger_,"exit_2. ThreadedSocketConnection.finalize: true");
     return TransportAdapter::OK;
   } else {
     LOG4CXX_ERROR_WITH_ERRNO(
             logger_, "Failed to wake up connection thread for connection " << this);
-    LOG4CXX_TRACE_EXIT(logger_);
+    LOG4CXX_TRACE(logger_,"exit_1. ThreadedSocketConnection.finalize: false");
     return TransportAdapter::FAIL;
   }
 }
@@ -221,7 +218,7 @@ void ThreadedSocketConnection::Transmit() {
   if (-1 == poll(poll_fds, poll_fds_size, -1)) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
     Abort();
-    LOG4CXX_INFO(logger_, "exit");
+    LOG4CXX_TRACE(logger_, "exit");
     return;
   }
   LOG4CXX_INFO(logger_, "poll is ok (#" << pthread_self() << ") " << this << " revents0:" << std::hex << poll_fds[0].revents << " revents1:" << std::hex << poll_fds[1].revents);
@@ -230,14 +227,14 @@ void ThreadedSocketConnection::Transmit() {
     LOG4CXX_ERROR(logger_,
                   "Notification pipe for connection " << this << " terminated");
     Abort();
-    LOG4CXX_INFO(logger_, "exit");
+    LOG4CXX_TRACE(logger_, "exit");
     return;
   }
 
   if (poll_fds[0].revents & (POLLERR | POLLHUP | POLLNVAL)) {
     LOG4CXX_INFO(logger_, "Connection " << this << " terminated");
     Abort();
-    LOG4CXX_INFO(logger_, "exit");
+    LOG4CXX_TRACE(logger_, "exit");
     return;
   }
 
@@ -251,7 +248,7 @@ void ThreadedSocketConnection::Transmit() {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to clear notification pipe");
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "poll failed for connection " << this);
     Abort();
-    LOG4CXX_INFO(logger_, "exit");
+    LOG4CXX_TRACE(logger_, "exit");
     return;
   }
 
@@ -264,7 +261,7 @@ void ThreadedSocketConnection::Transmit() {
     if (!send_ok) {
       LOG4CXX_INFO(logger_, "Send() failed  (#" << pthread_self() << ")");
       Abort();
-      LOG4CXX_INFO(logger_, "exit");
+      LOG4CXX_TRACE(logger_, "exit");
       return;
     }
   }
@@ -275,7 +272,7 @@ void ThreadedSocketConnection::Transmit() {
     if (!receive_ok) {
       LOG4CXX_INFO(logger_, "Receive() failed  (#" << pthread_self() << ")");
       Abort();
-      LOG4CXX_INFO(logger_, "exit");
+      LOG4CXX_TRACE(logger_, "exit");
       return;
     }
   }
@@ -303,16 +300,16 @@ bool ThreadedSocketConnection::Receive() {
       if (EAGAIN != errno && EWOULDBLOCK != errno) {
         LOG4CXX_ERROR_WITH_ERRNO(logger_,
                                  "recv() failed for connection " << this);
-        LOG4CXX_TRACE_EXIT(logger_);
+        LOG4CXX_TRACE(logger_,"exit_1. ThreadedSocketConnection.receive: false");
         return false;
       }
     } else {
       LOG4CXX_INFO(logger_, "Connection " << this << " closed by remote peer");
-      LOG4CXX_TRACE_EXIT(logger_);
+      LOG4CXX_TRACE(logger_,"exit_1. ThreadedSocketConnection.receive: false");
       return false;
     }
   } while (bytes_read > 0);
-  LOG4CXX_TRACE_EXIT(logger_);
+  LOG4CXX_TRACE(logger_,"exit_2. ThreadedSocketConnection.receive: true");
   return true;
 }
 
@@ -348,7 +345,7 @@ bool ThreadedSocketConnection::Send() {
                                   DataSendError());
     }
   }
-  LOG4CXX_TRACE_EXIT(logger_);
+  LOG4CXX_TRACE(logger_,"exit. ThreadedSocketConnection.send: true");
   return true;
 }
 
