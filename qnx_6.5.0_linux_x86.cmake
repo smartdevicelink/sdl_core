@@ -7,7 +7,7 @@ ENDIF(CMAKE_HOST_LINUX)
 
 FIND_PATH(QNX_HOST
   NAME usr/bin/qcc${HOST_EXECUTABLE_SUFFIX}
-  PATHS $ENV{QNX_HOST} /opt/qnx650/host/linux/${ARCH_TYPE_OPTION}
+  PATHS $ENV{QNX_HOST} /opt/qnx650/host/linux/x86
   NO_CMAKE_PATH
   NO_CMAKE_ENVIRONMENT_PATH
 )
@@ -23,7 +23,7 @@ IF(CMAKE_HOST_LINUX)
   FIND_PATH(QNX_CONFIGURATION
     NAME /etc/qnx/bin/qnxactivate
     PATHS $ENV{QNX_CONFIGURATION}
-    "/opt/qnx650/host/linux/${ARCH_TYPE_OPTION}/usr/bin/qconfig"
+    "/opt/qnx650/host/linux/x86/usr/bin/qconfig"
     NO_CMAKE_PATH
     NO_CMAKE_ENVIRONMENT_PATH
  )
