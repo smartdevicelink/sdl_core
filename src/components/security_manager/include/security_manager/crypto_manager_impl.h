@@ -99,9 +99,8 @@ class CryptoManagerImpl : public CryptoManager {
  private:
   SSL_CTX *context_;
   Mode mode_;
-  static int instance_count_;
+  static uint32_t instance_count_;
   DISALLOW_COPY_AND_ASSIGN(CryptoManagerImpl);
 };
 }  // namespace security_manager
-
 #endif  // SRC_COMPONENTS_SECURITY_MANAGER_INCLUDE_SECURITY_MANAGER_CRYPTO_MANAGER_IMPL_H_
