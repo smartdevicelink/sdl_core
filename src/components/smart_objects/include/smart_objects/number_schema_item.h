@@ -216,7 +216,7 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
 
   if (isNumberType(Object.getType())) {
     result = Errors::OK;
-    NumberType value;
+    NumberType value = NumberType();
 
     if (std::string("i") == typeid(value).name()) {
       value = Object.asInt();
