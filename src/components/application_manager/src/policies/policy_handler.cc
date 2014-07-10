@@ -507,6 +507,11 @@ void PolicyHandler::OnPendingPermissionChange(
 
 BinaryMessageSptr PolicyHandler::AddHttpHeader(
     const BinaryMessageSptr& pt_string) {
+  // Creating new value to avoid backslashes with direct converting from string
+  Json::Value policy_table(Json::objectValue);
+  Json::Reader reader;
+  reader.parse(std::string(pt_string->begin(), pt_string->end()), policy_table);
+
   Json::Value packet(Json::objectValue);
   packet["HTTPRequest"] = Json::Value(Json::objectValue);
   packet["HTTPRequest"]["headers"] = Json::Value(Json::objectValue);
@@ -525,12 +530,10 @@ BinaryMessageSptr PolicyHandler::AddHttpHeader(
   packet["HTTPRequest"]["headers"]["Content_Length"] =
       Json::Value(static_cast<int>(pt_string->size()));
   packet["HTTPRequest"]["body"] = Json::Value(Json::objectValue);
-  packet["HTTPRequest"]["body"]["data"] = Json::Value(Json::arrayValue);
-  packet["HTTPRequest"]["body"]["data"][0] = Json::Value(
-                                               std::string(pt_string->begin(),
-                                                           pt_string->end()));
+  packet["HTTPRequest"]["body"]["data"] = Json::Value(Json::objectValue);
+  packet["HTTPRequest"]["body"]["data"] = policy_table;
 
-  Json::FastWriter writer;
+  Json::StyledWriter writer;
   std::string message = writer.write(packet);
   LOG4CXX_DEBUG(logger_, "Packet PT: " << message);
   return new BinaryMessage(message.begin(), message.end());
