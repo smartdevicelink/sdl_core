@@ -336,12 +336,13 @@ void AlertRequest::SendPlayToneNotification(int32_t app_id) {
 }
 
 bool AlertRequest::CheckStringsOfAlertRequest() {
+  LOG4CXX_INFO(logger_, "AlertRequest::CheckStringsOfAlertRequest");
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     str = (*message_)[strings::msg_params][strings::alert_text1].asCharArray();
     if (!CheckSyntax(str, true)) {
-      LOG4CXX_INFO(logger_, "alert_text_1 syntax check failed");
+      LOG4CXX_ERROR(logger_, "Invalid alert_text_1 syntax check failed");
       return  false;
     }
   }
@@ -349,7 +350,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
     str = (*message_)[strings::msg_params][strings::alert_text2].asCharArray();
     if (!CheckSyntax(str, true)) {
-      LOG4CXX_INFO(logger_, "alert_text_2 syntax check failed");
+      LOG4CXX_ERROR(logger_, "Invalid alert_text_2 syntax check failed");
       return  false;
     }
   }
@@ -357,7 +358,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
     str = (*message_)[strings::msg_params][strings::alert_text3].asCharArray();
     if (!CheckSyntax(str, true)) {
-      LOG4CXX_INFO(logger_, "alert_text_3 syntax check failed");
+      LOG4CXX_ERROR(logger_, "Invalid alert_text_3 syntax check failed");
       return  false;
     }
   }
@@ -368,7 +369,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
     for (size_t i = 0; i < tts_chunks_array.length(); ++i) {
       str = tts_chunks_array[i][strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
-        LOG4CXX_INFO(logger_, "tts_chunks syntax check failed");
+        LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
         return false;
       }
     }

@@ -101,7 +101,7 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
    * @return if set global properties contains \t\n \\t \\n return TRUE,
    * FALSE otherwise
    */
-  bool IsWhitespaceExist();
+  bool IsWhiteSpaceExist();
 
   DISALLOW_COPY_AND_ASSIGN(SetGlobalPropertiesRequest);
 

@@ -110,7 +110,7 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    * @return if perform audio pass thru contains \t\n \\t \\n return TRUE,
    * FALSE otherwise
    */
-  bool IsWhitespaceExist();
+  bool IsWhiteSpaceExist();
 
   //flag display state of speak during perform audio pass thru
   bool is_active_tts_speak_;

@@ -59,7 +59,7 @@ void SpeakRequest::Run() {
   }
 
   // Checking speak on contained \t\n \\t \\n
-  if (IsWhitespaceExist()) {
+  if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming speak has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -124,7 +124,8 @@ void SpeakRequest::ProcessTTSSpeakResponse(
                return_info, &(message[strings::msg_params]));
 }
 
-bool SpeakRequest::IsWhitespaceExist() {
+bool SpeakRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "SpeakRequest::IsWhiteSpaceExist");
   bool return_value = false;
   const char* str = NULL;
 
@@ -138,7 +139,7 @@ bool SpeakRequest::IsWhitespaceExist() {
     for (; it_tc != it_tc_end; ++it_tc) {
       str = (*it_tc)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
-        LOG4CXX_INFO(logger_, "tts_chunks syntax check failed");
+        LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
         return_value = true;
         break;
       }

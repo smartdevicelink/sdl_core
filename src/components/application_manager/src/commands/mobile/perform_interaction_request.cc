@@ -129,7 +129,7 @@ void PerformInteractionRequest::Run() {
   }
 
   // Checking perform interaction on contained \t\n \\t \\n
-  if (IsWhitespaceExist()) {
+  if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming perform interaction has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -736,14 +736,15 @@ void PerformInteractionRequest::DisablePerformInteraction() {
   }
 }
 
-bool PerformInteractionRequest::IsWhitespaceExist() {
+bool PerformInteractionRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::IsWhiteSpaceExist");
   bool return_value = false;
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::initial_text)) {
     str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
     if (!CheckSyntax(str, true)) {
-      LOG4CXX_INFO(logger_, "initial_text syntax check failed");
+      LOG4CXX_ERROR(logger_, "Invalid initial_text syntax check failed");
       return_value = true;
     }
   }
@@ -758,7 +759,7 @@ bool PerformInteractionRequest::IsWhitespaceExist() {
     for (; it_ip != it_ip_end; ++it_ip) {
       str = (*it_ip)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
-        LOG4CXX_INFO(logger_, "initial_prompt syntax check failed");
+        LOG4CXX_ERROR(logger_, "Invalid initial_prompt syntax check failed");
         return_value = true;
         break;
       }
@@ -775,7 +776,7 @@ bool PerformInteractionRequest::IsWhitespaceExist() {
     for (; it_hp != it_hp_end; ++it_hp) {
       str = (*it_hp)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
-        LOG4CXX_INFO(logger_, "help_prompt syntax check failed");
+        LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
         return_value = true;
         break;
       }
@@ -792,7 +793,7 @@ bool PerformInteractionRequest::IsWhitespaceExist() {
     for (; it_tp != it_tp_end; ++it_tp) {
       str = (*it_tp)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
-        LOG4CXX_INFO(logger_, "timeout_prompt syntax check failed");
+        LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
         return_value = true;
         break;
       }
@@ -809,7 +810,7 @@ bool PerformInteractionRequest::IsWhitespaceExist() {
     for (; it_vh != it_vh_end; ++it_vh) {
       str = (*it_vh)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
-        LOG4CXX_INFO(logger_, "vr_help syntax check failed");
+        LOG4CXX_ERROR(logger_, "Invalid vr_help syntax check failed");
         return_value = true;
         break;
       }

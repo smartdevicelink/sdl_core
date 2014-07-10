@@ -91,7 +91,7 @@ void PerformAudioPassThruRequest::Run() {
   }
 
   // Checking perform audio pass thru on contained \t\n \\t \\n
-  if (IsWhitespaceExist()) {
+  if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming perform audio pass thru has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -242,7 +242,8 @@ void PerformAudioPassThruRequest::StartMicrophoneRecording() {
       (*message_)[str::msg_params][str::audio_type].asInt());
 }
 
-bool PerformAudioPassThruRequest::IsWhitespaceExist() {
+bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::IsWhiteSpaceExist");
   bool return_value = false;
   const char* str = NULL;
 
@@ -256,7 +257,7 @@ bool PerformAudioPassThruRequest::IsWhitespaceExist() {
     for (; it_ip != it_ip_end; ++it_ip) {
       str = (*it_ip)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
-        LOG4CXX_INFO(logger_, "initial_prompt syntax check failed");
+        LOG4CXX_INFO(logger_, "Invalid initial_prompt syntax check failed");
         return_value = true;
         break;
       }

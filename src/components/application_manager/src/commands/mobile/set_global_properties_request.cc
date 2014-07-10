@@ -107,7 +107,7 @@ void SetGlobalPropertiesRequest::Run() {
   }
 
   // Checking set global properties on contained \t\n \\t \\n
-  if (IsWhitespaceExist()) {
+  if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming set global properties has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -378,7 +378,8 @@ bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(
       || params.keyExists(strings::keyboard_properties);
 }
 
-bool SetGlobalPropertiesRequest::IsWhitespaceExist() {
+bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::IsWhiteSpaceExist");
   bool return_value = false;
   const char* str;
 
@@ -395,7 +396,7 @@ bool SetGlobalPropertiesRequest::IsWhitespaceExist() {
     for (; it_hp != it_hp_end; ++it_hp) {
       str = (*it_hp)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
-        LOG4CXX_INFO(logger_, "help_prompt syntax check failed");
+        LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
         return_value = true;
         break;
       }
@@ -412,10 +413,41 @@ bool SetGlobalPropertiesRequest::IsWhitespaceExist() {
     for (; it_tp != it_tp_end; ++it_tp) {
       str = (*it_tp)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
-        LOG4CXX_INFO(logger_, "timeout_prompt syntax check failed");
+        LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
         return_value = true;
         break;
       }
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+    const smart_objects::SmartArray* vh_array =
+        (*message_)[strings::msg_params][strings::vr_help].asArray();
+
+    smart_objects::SmartArray::const_iterator it_vh = vh_array->begin();
+    smart_objects::SmartArray::const_iterator it_vh_end = vh_array->end();
+
+    for (; it_vh != it_vh_end; ++it_vh) {
+      if ((*it_vh).keyExists(strings::image)) {
+        str = (*it_vh)[strings::image][strings::value].asCharArray();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_ERROR(logger_,
+                       "Invalid vrHelp image value syntax check failed");
+          return_value = true;
+          break;
+        }
+      }
+    }
+  }
+
+
+  if ((*message_)[strings::msg_params].keyExists(strings::menu_icon)) {
+    str = (*message_)[strings::msg_params]
+                      [strings::menu_icon][strings::value].asCharArray();
+
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid menu_icon value syntax check failed");
+      return_value = true;
     }
   }
 

@@ -168,7 +168,7 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
    * @param choice_set which must check
    * @return if choice_set contains \t\n \\t \\n return TRUE, FALSE otherwise
    */
-  bool IsWhitespaceExist(const smart_objects::SmartObject& choice_set);
+  bool IsWhiteSpaceExist(const smart_objects::SmartObject& choice_set);
 
   DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetRequest);
 };

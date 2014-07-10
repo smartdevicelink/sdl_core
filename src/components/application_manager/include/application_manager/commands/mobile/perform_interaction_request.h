@@ -195,7 +195,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @return if perform interaction contains \t\n \\t \\n return TRUE,
    * FALSE otherwise
    */
-  bool IsWhitespaceExist();
+  bool IsWhiteSpaceExist();
 
   /**
    * @brief Send HMI close PopUp and call DisablePerformInteraction
