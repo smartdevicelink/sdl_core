@@ -82,7 +82,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   }
   void TearDown() OVERRIDE {
     // Wait call methods in thread
-    usleep(20000);
+    usleep(500000);
   }
 
   // Emulate connection establish

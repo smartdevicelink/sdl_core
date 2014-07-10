@@ -85,7 +85,7 @@ namespace security_manager_test {
     }
     void TearDown() OVERRIDE {
       // Wait call methods in thread
-      usleep(20000);
+      usleep(500000);
       // Strict mocks are the same as EXPECT_CALL(ALL).Times(0)
     }
 
