@@ -378,8 +378,12 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
       message[strings::params][strings::protocol_version].asInt());
   application->set_protocol_version(protocol_version);
 
-  if (ProtocolVersion::kV3 == protocol_version) {
-    if (connection_handler_) {
+  if (connection_handler_) {
+    if (ProtocolVersion::kUnknownProtocol != protocol_version) {
+      connection_handler_->BindProtocolVersionWithSession(
+          connection_key, static_cast<uint8_t>(protocol_version));
+    }
+    if (ProtocolVersion::kV3 == protocol_version) {
       connection_handler_->StartSessionHeartBeat(connection_key);
     }
   }

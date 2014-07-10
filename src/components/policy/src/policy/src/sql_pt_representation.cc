@@ -100,7 +100,8 @@ CheckPermissionResult SQLPTRepresentation::CheckPermissions(
   LOG4CXX_INFO(
     logger_,
     "Level is "
-    << (result.hmi_level_permitted == kRpcAllowed ? "permitted" : "not permitted"));
+    << (result.hmi_level_permitted == kRpcAllowed ? "permitted"
+                                                  : "not permitted"));
   std::string parameter;
   while (ret) {
     if (!query.IsNull(0)) {
@@ -231,7 +232,8 @@ std::vector<UserFriendlyMessage> SQLPTRepresentation::GetUserFriendlyMsg(
 }
 
 EndpointUrls SQLPTRepresentation::GetUpdateUrls(int service_type) {
-  LOG4CXX_INFO(logger_, "SQLPTRepresentation::GetUpdateUrls for " << service_type);
+  LOG4CXX_INFO(logger_, "SQLPTRepresentation::GetUpdateUrls for "
+               << service_type);
   dbms::SQLQuery query(db());
   EndpointUrls ret;
   if (query.Prepare(sql_pt::kSelectEndpoint)) {
@@ -251,8 +253,24 @@ EndpointUrls SQLPTRepresentation::GetUpdateUrls(int service_type) {
   return ret;
 }
 
-int SQLPTRepresentation::GetNotificationsNumber(
-  policy_table::Priority priority) {
+int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
+  LOG4CXX_INFO(logger_, "GetNotificationsNumber");
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectNotificationsPerPriority)) {
+    LOG4CXX_WARN(logger_, "Incorrect select statement for priority "
+                 "notification number.");
+    return 0;
+  }
+  query.Bind(0, priority);
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Incorrect select from notifications by priority.");
+    return 0;
+  }
+
+  if (!query.IsNull(0)) {
+    return query.GetInteger(0);
+  }
+
   return 0;
 }
 
@@ -275,8 +293,10 @@ InitResult SQLPTRepresentation::Init() {
         while (db_check.Next()) {
           if (db_check.GetString(0).compare("ok") == 0) {
             dbms::SQLQuery check_first_run(db());
-            if (check_first_run.Prepare(sql_pt::kIsFirstRun) && check_first_run.Next()) {
-              LOG4CXX_INFO(logger_, "Selecting is first run " << check_first_run.GetBoolean(0));
+            if (check_first_run.Prepare(sql_pt::kIsFirstRun) &&
+                check_first_run.Next()) {
+              LOG4CXX_INFO(logger_, "Selecting is first run "
+                           << check_first_run.GetBoolean(0));
               if (check_first_run.GetBoolean(0)) {
                 dbms::SQLQuery set_not_first_run(db());
                 set_not_first_run.Exec(sql_pt::kSetNotFirstRun);
@@ -347,7 +367,8 @@ bool SQLPTRepresentation::Clear() {
   return true;
 }
 
-utils::SharedPtr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot() const {
+utils::SharedPtr<policy_table::Table>
+SQLPTRepresentation::GenerateSnapshot() const {
   LOG4CXX_INFO(logger_, "GenerateSnapshot");
   utils::SharedPtr<policy_table::Table> table = new policy_table::Table();
   GatherModuleMeta(&*table->policy_table.module_meta);
@@ -1318,16 +1339,24 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
     return false;
   }
   query.Bind(0, destination);
-  source_app.IsNull(0) ? query.Bind(1) : query.Bind(1, source_app.GetBoolean(0));
-  source_app.IsNull(1) ? query.Bind(2) : query.Bind(2, source_app.GetBoolean(1));
-  source_app.IsNull(2) ? query.Bind(3) : query.Bind(3, source_app.GetString(2));
-  source_app.IsNull(3) ? query.Bind(4) : query.Bind(4, source_app.GetString(3));
-  source_app.IsNull(4) ? query.Bind(5) : query.Bind(5, source_app.GetBoolean(4));
-  source_app.IsNull(5) ? query.Bind(6) : query.Bind(6, source_app.GetBoolean(5));
-  source_app.IsNull(6) ? query.Bind(7) : query.Bind(7, source_app.GetBoolean(6));
+  source_app.IsNull(0) ? query.Bind(1)
+                       : query.Bind(1, source_app.GetBoolean(0));
+  source_app.IsNull(1) ? query.Bind(2)
+                       : query.Bind(2, source_app.GetBoolean(1));
+  source_app.IsNull(2) ? query.Bind(3)
+                       : query.Bind(3, source_app.GetString(2));
+  source_app.IsNull(3) ? query.Bind(4)
+                       : query.Bind(4, source_app.GetString(3));
+  source_app.IsNull(4) ? query.Bind(5)
+                       : query.Bind(5, source_app.GetBoolean(4));
+  source_app.IsNull(5) ? query.Bind(6)
+                       : query.Bind(6, source_app.GetBoolean(5));
+  source_app.IsNull(6) ? query.Bind(7)
+                       : query.Bind(7, source_app.GetBoolean(6));
   query.Bind(8, source_app.GetInteger(7));
   query.Bind(9, source_app.GetInteger(8));
-  source_app.IsNull(9) ? query.Bind(10) : query.Bind(10, source_app.GetString(9));
+  source_app.IsNull(9) ? query.Bind(10)
+                       : query.Bind(10, source_app.GetString(9));
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Failed inserting into application.");
     return false;

@@ -16,7 +16,6 @@ import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.session.EndServiceInitiator;
-import com.ford.syncV4.session.Session;
 import com.ford.syncV4.session.SessionTest;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
@@ -117,12 +116,6 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
 
     /*public void testAllServicesEndedOnDispose() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
-<<<<<<< HEAD
-        Session session = Session.createSession(ServiceType.RPC, sessionID, false);
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
-        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav, sessionID, false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
-        proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service, sessionID, false, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
-=======
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(SessionTest.SESSION_ID,
                 ProtocolConstants.PROTOCOL_VERSION_THREE);
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Mobile_Nav,
@@ -130,7 +123,6 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
         proxyALM.initializeSession(SessionTest.APP_ID);
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service,
                 SessionTest.SESSION_ID, ProtocolConstants.PROTOCOL_VERSION_THREE);
->>>>>>> develop
         proxyALM.dispose();
         assertEquals("pool should be empty", 0, proxyALM.getServicePool().size());
     }*/
@@ -291,17 +283,11 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
     /*public void testCloseSessionCalledWithRightSessionID() throws Exception {
         SyncProxyBase proxyALM = getSyncProxyBase();
         proxyALM.mSyncConnection = mock(SyncConnection.class);
-<<<<<<< HEAD
-        Session session = Session.createSession(ServiceType.RPC, sessionID, false);
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(session, ProtocolConstants.PROTOCOL_VERSION_THREE, "");
-        proxyALM.closeSession(false);
-=======
         proxyALM.setActiveAppId(SessionTest.APP_ID);
         proxyALM.getInterfaceBroker().onTransportConnected();
         proxyALM.getInterfaceBroker().onProtocolSessionStarted(SessionTest.SESSION_ID,
                 ProtocolConstants.PROTOCOL_VERSION_THREE);
         proxyALM.doUnregisterAppInterface(SessionTest.APP_ID, false);
->>>>>>> develop
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<Boolean> keepConnectionCaptor = ArgumentCaptor.forClass(Boolean.class);
         verify(proxyALM.mSyncConnection, times(1)).closeConnection(sessionIDCaptor.capture(),

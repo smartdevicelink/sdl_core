@@ -186,17 +186,22 @@ void ProtocolHandlerImpl::AddProtocolObserver(ProtocolObserver *observer) {
   protocol_observers_.insert(observer);
 }
 
-void ProtocolHandlerImpl::RemoveProtocolObserver(ProtocolObserver *observer) {
+void ProtocolHandlerImpl::RemoveProtocolObserver(ProtocolObserver* observer) {
+  LOG4CXX_TRACE_ENTER(logger_);
   if (!observer) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to IProtocolObserver.");
+    LOG4CXX_TRACE_EXIT(logger_);
     return;
   }
+  sync_primitives::AutoLock lock(protocol_observers_lock_);
   protocol_observers_.erase(observer);
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void ProtocolHandlerImpl::set_session_observer(SessionObserver *observer) {
   if (!observer) {
-    LOG4CXX_WARN(logger_, "Invalid (NULL) pointer to ISessionObserver.");
+    LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to ISessionObserver.");
+    // Do not return from here!
   }
   session_observer_ = observer;
 }
@@ -424,8 +429,11 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
       "Received data from TM  with connection id " << tm_message->connection_key() <<
       " msg data_size "      << tm_message->data_size());
   } else {
-    LOG4CXX_ERROR(logger_,
-      "Invalid incoming message received in ProtocolHandler from Transport Manager.");
+    LOG4CXX_ERROR(
+        logger_,
+        "Invalid incoming message received in"
+        << " ProtocolHandler from Transport Manager.");
+    LOG4CXX_TRACE_EXIT(logger_);
     return;
   }
 
@@ -470,6 +478,8 @@ void ProtocolHandlerImpl::OnTMMessageReceiveFailed(
 }
 
 void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr message) {
+  LOG4CXX_ERROR(logger_, "ProtocolHandlerImpl::NotifySubscribers");
+  sync_primitives::AutoLock lock(protocol_observers_lock_);
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
     (*it)->OnMessageReceived(message);
@@ -513,7 +523,7 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
       SendEndSession(connection_handle, sent_message.session_id());
     }
   }
-
+  sync_primitives::AutoLock lock(protocol_observers_lock_);
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
     (*it)->OnMobileMessageSent(message);
@@ -785,13 +795,16 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
           logger_,
           "Last frame of multiframe message size " << packet->data_size()
               << "; connection key " << key);
+      {
+        sync_primitives::AutoLock lock(protocol_observers_lock_);
+        if (protocol_observers_.empty()) {
+          LOG4CXX_ERROR(
+              logger_,
+              "Cannot handle multiframe message: no IProtocolObserver is set.");
 
-      if (protocol_observers_.empty()) {
-        LOG4CXX_ERROR(
-            logger_,
-            "Cannot handle multiframe message: no IProtocolObserver is set.");
-        LOG4CXX_TRACE_EXIT(logger_);
-        return RESULT_FAIL;
+          LOG4CXX_TRACE_EXIT(logger_);
+          return RESULT_FAIL;
+        }
       }
 
       ProtocolFramePtr completePacket = it->second;
@@ -981,11 +994,19 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                    "Protocol version: " <<
                    static_cast<int>(packet.protocol_version()));
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
+  const uint8_t protocol_version = packet.protocol_version();
+
+#ifdef ENABLE_SECURITY
+  const bool protection =
+      // Protocolo version 1 is not support protection
+      (protocol_version > PROTOCOL_VERSION_1) ? packet.protection_flag() : false;
+#else
+  const bool protection = false;
+#endif  // ENABLE_SECURITY
 
   DCHECK(session_observer_);
   const uint32_t session_id = session_observer_->OnSessionStartedCallback(
-        connection_id, packet.session_id(), service_type,
-        packet.protection_flag());
+        connection_id, packet.session_id(), service_type, protection);
 
   if (0 == session_id) {
     LOG4CXX_WARN_EXT(logger_, "Refused to create service " <<
@@ -994,17 +1015,19 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                          packet.protocol_version(), packet.service_type());
     return RESULT_OK;
   }
-
   const uint32_t connection_key =
       session_observer_->KeyFromPair(connection_id, session_id);
 
 #ifdef ENABLE_SECURITY
   // for packet is encrypted and security plugin is enable
-  if (packet.protection_flag() && security_manager_) {
+  if (protection && security_manager_) {
     security_manager::SSLContext *ssl_context =
         security_manager_->CreateSSLContext(connection_key);
     if (!ssl_context) {
-      LOG4CXX_ERROR(logger_, "CreateSSLContext failed");
+      const std::string error("CreateSSLContext failed");
+      LOG4CXX_ERROR(logger_, error);
+      security_manager_->SendInternalError(
+          connection_key, security_manager::SecurityQuery::ERROR_INTERNAL, error);
       // Start service without protection
       SendStartSessionAck(connection_id, session_id, packet.protocol_version(),
                           connection_key, packet.service_type(), PROTECTION_OFF);
@@ -1041,8 +1064,12 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
   LOG4CXX_INFO(
       logger_,
       "Sending heart beat acknowledgment for connection " << connection_id);
-  return SendHeartBeatAck(connection_id, packet.session_id(),
-                          packet.message_id());
+  if (session_observer_->CheckSupportHeartBeat(
+      connection_id, packet.session_id())) {
+    return SendHeartBeatAck(connection_id, packet.session_id(),
+                              packet.message_id());
+  }
+  return RESULT_HEARTBEAT_IS_NOT_SUPPORTED;
 }
 
 void ProtocolHandlerImpl::Handle(
@@ -1051,8 +1078,11 @@ void ProtocolHandlerImpl::Handle(
 
   connection_handler::ConnectionHandlerImpl *connection_handler =
         connection_handler::ConnectionHandlerImpl::instance();
+  if (session_observer_->CheckSupportHeartBeat(
+        message->connection_id(), message->session_id())) {
     connection_handler->KeepConnectionAlive(message->connection_id(),
                                             message->session_id());
+  }
 
   if (((0 != message->data()) && (0 != message->data_size())) ||
       FRAME_TYPE_CONTROL == message->frame_type() ||

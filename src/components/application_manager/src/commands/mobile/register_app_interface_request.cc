@@ -136,14 +136,8 @@ bool RegisterAppInterfaceRequest::Init() {
 
 void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run " << connection_key());
-  // Checking if appname contains \t \n \\t \\n
-  if (!CheckSyntax((*message_)[strings::msg_params][strings::app_name].asString(),
-                   true)) {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
-    return;
-  }
 
-  #ifndef CUSTOMER_PASA
+#ifndef CUSTOMER_PASA
   // Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
   // Flag conditional compilation "CUSTOMER_PASA" is used in order to exclude hit code
   // to RTC
@@ -157,7 +151,7 @@ void RegisterAppInterfaceRequest::Run() {
                                                                default_timeout());
     }
   }
-  #endif
+#endif
 
   std::string mobile_app_id = (*message_)[strings::msg_params][strings::app_id]
                                                                .asString();
@@ -199,6 +193,14 @@ void RegisterAppInterfaceRequest::Run() {
   if (mobile_apis::Result::SUCCESS != coincidence_result) {
     LOG4CXX_ERROR_EXT(logger_, "Coincidence check failed.");
     SendResponse(false, coincidence_result);
+    return;
+  }
+
+  // Checking register app interface on contained \t\n \\t \\n
+  if (IsWhitespaceExist()) {
+    LOG4CXX_INFO(logger_,
+                  "Incoming register app interface has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
@@ -737,6 +739,39 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   }
 
   return false;
+}
+
+bool RegisterAppInterfaceRequest::IsWhitespaceExist() {
+  bool return_value = false;
+  const char* str = NULL;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::app_name)) {
+    str = (*message_)[strings::msg_params][strings::app_name].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_INFO(logger_, "app_name syntax check failed");
+      return_value = true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
+    const smart_objects::SmartArray* tn_array =
+        (*message_)[strings::msg_params][strings::tts_name].asArray();
+
+    smart_objects::SmartArray::const_iterator it_tn = tn_array->begin();
+    smart_objects::SmartArray::const_iterator it_tn_end = tn_array->end();
+
+    for (; it_tn != it_tn_end; ++it_tn) {
+      str = (*it_tn)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_INFO(logger_, "tts_name syntax check failed");
+        return_value = true;
+        break;
+      }
+    }
+  }
+
+  return return_value;
+
 }
 
 }  // namespace commands

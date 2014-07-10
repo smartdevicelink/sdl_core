@@ -44,7 +44,7 @@ from copy import copy
 from ford_xml_parser import FordXmlParser, ParamDesc
 from code_formatter import CodeBlock
 
-prefix_class_item = 'Declarative'
+prefix_class_item = 'Script'
 invoke_type_connection = 'Direct'
 
 def defaultValue(param):
@@ -68,37 +68,38 @@ class Impl(FordXmlParser):
                     output.write('Q_OBJECT\n')
                 out.write(' public:\n')
                 with CodeBlock(out) as output:
-                    output.write(request_full_name + '(QDBusInterface *interface, QString name, QList<QVariant> args, QJSValue hmi_callback):\n')
+                    output.write(request_full_name + '(QDBusInterface *interface, QString name, QList<QVariant> args, Q%sValue hmi_callback):\n' % prefix_class_item)
                     output.write('  HMIRequest(interface, name, args, hmi_callback) {}\n')
                 out.write(' private:\n')
                 with CodeBlock(out) as output:
-                    output.write('QJSValueList fillArgsList();\n};\n\n')
+                    output.write('Q%sValueList fillArgsList();\n};\n\n' % prefix_class_item)
                          
 
     def make_header_file(self, out):
+        out.write("class QDBusInterface;\n")
+        out.write("class QDBusPendingCallWatcher;\n\n")
         out.write("namespace requests {\n")
         out.write("class HMIRequest: public QObject {\n")
         with CodeBlock(out) as output:
             output.write('Q_OBJECT\n')
         out.write('public:\n')
         with CodeBlock(out) as output:
-            output.write('HMIRequest(QDBusInterface *interface, QString name, QList<QVariant> args, QJSValue hmi_callback);\n')
+            output.write('HMIRequest(QDBusInterface *interface, QString name, QList<QVariant> args, Q%sValue hmi_callback);\n' % prefix_class_item)
         out.write('protected:\n')
         with CodeBlock(out) as output:
-            output.write('virtual QJSValueList fillArgsList() = 0;\n')
+            output.write('virtual Q%sValueList fillArgsList() = 0;\n' % prefix_class_item)
             output.write('QDBusPendingCallWatcher *watcher_;\n')
-            output.write('QJSValue hmi_callback_;\n\n')
             output.write('template<typename T>\n')
-            output.write('QJSValue CreateQJSValue(T value) {\n')
-            output.write('  return QJSValue(value);\n')
+            output.write('Q%sValue CreateQJSValue(T value) {\n' % prefix_class_item)
+            output.write('  return Q%sValue(value);\n' % prefix_class_item)
             output.write('}\n\n')
             output.write('template<typename T>\n')
-            output.write('QJSValue CreateQJSValue(QList<T> value) {\n')
+            output.write('Q%sValue CreateQJSValue(QList<T> value) {\n' % prefix_class_item)
             with CodeBlock(output) as output:
-                output.write('QJSValue array = hmi_callback_.engine()->newArray();\n')
+                output.write('Q%sValue array = hmi_callback_.engine()->newArray();\n' % prefix_class_item)
                 output.write('int i = 0;\n')
                 output.write('foreach (T item, value) {\n')
-                output.write('  QJSValue value = CreateQJSValue(item);\n')
+                output.write('  Q%sValue value = CreateQJSValue(item);\n' % prefix_class_item)
                 output.write('  array.setProperty(i, value);\n')
                 output.write('  ++i;\n')
                 output.write('}\n')
@@ -108,15 +109,16 @@ class Impl(FordXmlParser):
         with CodeBlock(out) as output:
             output.write('QDBusInterface *interface_;\n')
             output.write('QList<QVariant> args_;\n')
+            output.write('Q%sValue hmi_callback_;\n\n' % prefix_class_item)
         out.write('public slots:\n')
         with CodeBlock(out) as output:
             output.write('void invokeCallback();\n')
         out.write('};\n\n')
         output.write('template<>\n')
-        output.write('QJSValue HMIRequest::CreateQJSValue(QStringList value);\n')
+        output.write('Q%sValue HMIRequest::CreateQJSValue(QStringList value);\n' % prefix_class_item)
         for (interface_name, struct_name) in self.structs:
             out.write('template<>\n')
-            out.write('QJSValue HMIRequest::CreateQJSValue(Common_' + struct_name + ' value);\n\n')
+            out.write('Q%sValue HMIRequest::CreateQJSValue(Common_' % prefix_class_item + struct_name + ' value);\n\n')
         impl.make_requests_classes_header(out)
         out.write("}  // namespace requests\n")
 
@@ -151,7 +153,7 @@ class Impl(FordXmlParser):
             for (request, response) in request_responses:
                 iface_name = interface_el.get('name')
                 request_full_name = iface_name + '_' +request.get('name')
-                out.write('QJSValueList ' + request_full_name + '::fillArgsList() {\n')
+                out.write('Q%sValueList ' % prefix_class_item + request_full_name + '::fillArgsList() {\n')
                 out.write('  QDBusPendingReply< ')
                 count = 0
                 for param_el in response.findall('param'):
@@ -163,15 +165,15 @@ class Impl(FordXmlParser):
                 out.write(' > reply = *watcher_;\n')
 
                 with CodeBlock(out) as out:
-                    out.write('QJSValueList qjsValueList;\n\n')
-                    out.write('QJSValue param;\n\n')
+                    out.write('Q%sValueList qjsValueList;\n\n' % prefix_class_item)
+                    out.write('Q%sValue param;\n\n' % prefix_class_item)
                     count = 0
                     for param_el in response.findall('param'):
                         if param_el.get('mandatory') == 'false':
                             out.write('if (reply.argumentAt<' + str(count) + '>().presence) {\n')
                             out.write('  param = CreateQJSValue(reply.argumentAt<' + str(count) + '>().val);\n')
                             out.write('} else {\n')
-                            out.write('  param = QJSValue();\n')
+                            out.write('  param =  Q%sValue(Q%sValue::UndefinedValue);\n' % (prefix_class_item , prefix_class_item))
                             out.write('}\n')
                             out.write('qjsValueList.append(param);\n')
                         else:
@@ -187,9 +189,9 @@ class Impl(FordXmlParser):
         for interface_el in self.el_tree.findall('interface'):
             for struct_el in interface_el.findall('struct'):
                 out.write('template<>\n')
-                out.write('QJSValue HMIRequest::CreateQJSValue(Common_' + struct_el.get('name') + ' value){\n') 
+                out.write('Q%sValue HMIRequest::CreateQJSValue(Common_' % prefix_class_item + struct_el.get('name') + ' value){\n') 
                 with CodeBlock(out) as output:
-                    output.write('QJSValue object = hmi_callback_.engine()->newObject();\n')
+                    output.write('Q%sValue object = hmi_callback_.engine()->newObject();\n' % prefix_class_item)
                 for param_el in struct_el.findall('param'):
                     param_name = param_el.get('name')
                     if param_el.get('mandatory') == 'true':
@@ -197,12 +199,12 @@ class Impl(FordXmlParser):
                             output.write('object.setProperty("' + param_name + '", CreateQJSValue(value.' + param_name + '));\n')
                     elif param_el.get('mandatory') == 'false':
                         with CodeBlock(out) as output:
-                            output.write('object.setProperty("' + param_name + '", value.' + param_name + '.presence ? CreateQJSValue(value.' + param_name + '.val) : QJSValue());\n')
+                            output.write('object.setProperty("' + param_name + '", value.' + param_name + '.presence ? CreateQJSValue(value.' + param_name + '.val) : Q%sValue(Q%sValue::UndefinedValue));\n' % (prefix_class_item , prefix_class_item))
                 out.write('return object;\n')
                 out.write('}\n\n')
              
         
-        out.write('HMIRequest::HMIRequest(QDBusInterface *interface, QString name, QList<QVariant> args, QJSValue hmi_callback):\n')
+        out.write('HMIRequest::HMIRequest(QDBusInterface *interface, QString name, QList<QVariant> args, Q%sValue hmi_callback):\n' % prefix_class_item)
         out.write('      interface_(interface), args_(args), hmi_callback_(hmi_callback) {\n')
         with CodeBlock(out) as output:
             output.write('QDBusPendingCall pcall = interface->asyncCallWithArgumentList(name, args);\n')
@@ -212,9 +214,12 @@ class Impl(FordXmlParser):
         with CodeBlock(out) as output:
             output.write('if (!hmi_callback_.isUndefined()) {\n')
             with CodeBlock(output) as output:
-                output.write('QJSValueList qjsValueList;\n')
+                output.write('Q%sValueList qjsValueList;\n' % prefix_class_item)
                 output.write('qjsValueList = this->fillArgsList();\n')
-                output.write('hmi_callback_.call(qjsValueList);\n')
+                if args.version == "4.8.5":
+                    output.write('hmi_callback_.call(QScriptValue::NullValue,qjsValueList);\n')
+                elif args.version == "5.1.0":
+                    output.write('hmi_callback_.call(qjsValueList);\n')
             output.write('}\n')
             output.write('watcher_->deleteLater();\n')
             output.write('this->deleteLater();\n}\n\n')
@@ -229,10 +234,10 @@ arg_parser.add_argument('--outdir', required=True, help="path to directory where
 args = arg_parser.parse_args()
 
 if args.version == "4.8.5":
-    prefix_class_item = 'Declarative'
+    prefix_class_item = 'Script'
     invoke_type_connection = 'Direct'
 elif args.version == "5.1.0":
-    prefix_class_item = 'Quick'
+    prefix_class_item = 'JS'
     invoke_type_connection = 'BlockingQueued'
 
 header_name = 'hmi_requests.h'
@@ -286,15 +291,13 @@ header_out.write("""/**
 """)
 header_out.write("#ifndef SRC_COMPONENTS_QTHMI_QMLMODELQT5_HMIREQUESTS_\n");
 header_out.write("#define SRC_COMPONENTS_QTHMI_QMLMODELQT5_HMIREQUESTS_\n\n");
-header_out.write("#include <QObject>\n");
-header_out.write("#include <QJSValue>\n");
-header_out.write("#include <QDBusPendingCall>\n");
-header_out.write("#include <QDBusPendingCallWatcher>\n");
-header_out.write('#include <QDBusPendingReply>\n');
-header_out.write("#include <QDBusAbstractInterface>\n");
-header_out.write("#include <QDBusInterface>\n");
-header_out.write("#include <QJSEngine>\n");
-
+header_out.write("#include <QtCore/QObject>\n");
+if args.version == "4.8.5":
+    header_out.write("#include <QtScript/QScriptEngine>\n")
+    header_out.write("#include <QtScript/QScriptValue>\n")
+elif args.version == "5.1.0":
+    header_out.write("#include <QtQml/QJSEngine>\n")
+    header_out.write("#include <QtQml/QJSValue>\n")
 header_out.write('#include "qml_dbus.h"\n\n');
 
 impl.make_header_file(header_out)
@@ -339,5 +342,10 @@ source_out.write("""/**
 // POSSIBILITY OF SUCH DAMAGE.
 
 """)
-source_out.write('#include "hmi_requests.h"\n\n')
+source_out.write('#include "hmi_requests.h"\n')
+source_out.write("#include <QtDBus/QDBusPendingCall>\n");
+source_out.write("#include <QtDBus/QDBusPendingCallWatcher>\n");
+source_out.write('#include <QtDBus/QDBusPendingReply>\n');
+source_out.write("#include <QtDBus/QDBusInterface>\n\n");
+
 impl.make_source_file(source_out)

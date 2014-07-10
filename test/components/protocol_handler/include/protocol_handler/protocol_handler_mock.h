@@ -88,6 +88,7 @@ class TransportManagerMock: public TransportManager{
  */
 class SessionObserverMock: public protocol_handler::SessionObserver {
  public:
+#ifdef ENABLE_SECURITY
   MOCK_METHOD2(SetSSLContext,
                int (const uint32_t& key,
                     security_manager::SSLContext* context));
@@ -95,6 +96,7 @@ class SessionObserverMock: public protocol_handler::SessionObserver {
                security_manager::SSLContext* (
                  const uint32_t& key,
                  const protocol_handler::ServiceType& service_type));
+#endif  // ENABLE_SECURITY
   MOCK_METHOD2(SetProtectionFlag,
                void(
                  const uint32_t& key,
@@ -131,10 +133,13 @@ class SessionObserverMock: public protocol_handler::SessionObserver {
                  std::string* device_name,
                  std::list<uint32_t>* applications_list,
                  std::string* mac_address));
+  MOCK_METHOD2(CheckSupportHeartBeat,
+               bool( transport_manager::ConnectionUID connection_handle,
+                     uint8_t session_id));
 };
+
 #ifdef ENABLE_SECURITY
 using test::components::security_manager_test::SSLContextMock;
-
 /*
  * MOCK implementation of security_manager::SecurityManager
  */

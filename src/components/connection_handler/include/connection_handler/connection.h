@@ -54,6 +54,7 @@ class SSLContext;
 namespace connection_handler {
 
 class ConnectionHandler;
+struct Session;
 
 /**
  * \brief Type for ConnectionHandle
@@ -92,6 +93,7 @@ typedef std::vector<Service> ServiceList;
 
 struct Session {
   ServiceList service_list;
+  uint8_t protocol_version;
 #ifdef ENABLE_SECURITY
   security_manager::SSLContext *ssl_context;
 #endif  // ENABLE_SECURITY
@@ -101,8 +103,9 @@ struct Session {
     , ssl_context(NULL)
 #endif  // ENABLE_SECURITY
   {}
-  explicit Session(const ServiceList &services)
-    : service_list(services)
+  explicit Session(const ServiceList &services, uint8_t protocol_version)
+    : service_list(services),
+    protocol_version(protocol_version)
 #ifdef ENABLE_SECURITY
       , ssl_context(NULL)
 #endif  // ENABLE_SECURITY
@@ -240,6 +243,21 @@ class Connection {
    * \param  session_id session id
    */
   void SendHeartBeat(uint8_t session_id);
+
+  /*
+   * \brief changes protocol version in session
+   * \param  session_id session id
+   * \param  protocol_version protocol version registered application
+   */
+  void UpdateProtocolVersionSession(uint8_t session_id, uint8_t protocol_version);
+
+  /*
+   * \brief checks if session supports heartbeat
+   * \param  session_id session id
+   * \return TRUE on success, otherwise FALSE
+   */
+  bool SupportHeartBeat(uint8_t session_id);
+
 
  private:
   /**

@@ -529,6 +529,9 @@ const std::string kSelectEndpoints =
 const std::string kSelectNotificationsPerMin =
   "SELECT `priority_value`, `value` FROM notifications_by_priority";
 
+const std::string kSelectNotificationsPerPriority =
+    "SELECT `value` FROM notifications_by_priority WHERE `priority_value` = ? ";
+
 const std::string kSelectAppLevels = "SELECT `application_id` FROM `app_level`";
 
 const std::string kSelectDeviceData = "SELECT * FROM `device`";

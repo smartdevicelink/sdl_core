@@ -206,7 +206,7 @@ namespace security_manager_test {
         WillOnce(Return(false));
     EXPECT_CALL(mock_listener2,
                 OnHandshakeDone(key, first_call_value)).
-        // Emulate true (assept) result
+        // Emulate true (accept) result
         WillOnce(Return(true));
 
     const bool second_call_value = false;

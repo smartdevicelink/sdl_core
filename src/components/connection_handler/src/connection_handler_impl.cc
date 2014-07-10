@@ -250,20 +250,10 @@ void ConnectionHandlerImpl::RemoveConnection(
   OnConnectionEnded(connection_handle);
 }
 
-uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
-    const transport_manager::ConnectionUID &connection_handle,
-    const uint8_t session_id, const protocol_handler::ServiceType &service_type,
-    const bool is_protected) {
-  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
-
-  sync_primitives::AutoLock lock(connection_list_lock_);
-  ConnectionList::iterator it = connection_list_.find(connection_handle);
-  if (connection_list_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Unknown connection!");
-    return 0;
-  }
 #ifdef ENABLE_SECURITY
-  // FIXME(EZamakhov): refactoring (move to other module)
+namespace {
+bool AllowProtection(const protocol_handler::ServiceType &service_type,
+                          const bool is_protected) {
   if (is_protected) {
     // Check deliver-specific services (which shall not be protected)
     const std::list<int> force_unprotected_list =
@@ -273,7 +263,7 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
         force_unprotected_list.end()) {
       LOG4CXX_ERROR(logger_, "Service " << static_cast<int>(service_type)
                     << " is forbidden to be protected");
-      return 0;
+      return false;
     }
   } else {
     // Check deliver-specific services (which shall be protected)
@@ -284,11 +274,32 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
         force_protected_list.end()) {
       LOG4CXX_ERROR(logger_, "Service " << static_cast<int>(service_type)
                     << " shall be protected");
-      return 0;
+      return false;
     }
   }
-#endif  //  ENABLE_SECURITY
+  return true;
+}
+}  // namespace
+#endif  // ENABLE_SECURITY
 
+uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
+    const transport_manager::ConnectionUID &connection_handle,
+    const uint8_t session_id, const protocol_handler::ServiceType &service_type,
+    const bool is_protected) {
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnSessionStartedCallback()");
+
+#ifdef ENABLE_SECURITY
+  if(!AllowProtection(service_type, is_protected)) {
+    return 0;
+  }
+#endif  // ENABLE_SECURITY
+
+  sync_primitives::AutoLock lock(connection_list_lock_);
+  ConnectionList::iterator it = connection_list_.find(connection_handle);
+  if (connection_list_.end() == it) {
+    LOG4CXX_ERROR(logger_, "Unknown connection!");
+    return 0;
+  }
   uint32_t new_session_id = 0;
 
   Connection *connection = it->second;
@@ -301,7 +312,9 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
   } else {  // Could be create new service or protected exists one
     if (!connection->AddNewService(session_id, service_type, is_protected)) {
       LOG4CXX_ERROR(logger_, "Not possible to establish "
-                    << (is_protected ? "protected" : "nonprotected")
+#ifdef ENABLE_SECURITY
+                    << (is_protected ? "protected" : "non-protected")
+#endif  // ENABLE_SECURITY
                     << " service " << static_cast<int>(service_type)
                     << " for session " << static_cast<int>(session_id));
       return 0;
@@ -710,7 +723,6 @@ void ConnectionHandlerImpl::SendHeartBeat(ConnectionHandle connection_handle,
   }
 }
 
-//TODO(VSemenyuk): connection_key -> connection_id
 void ConnectionHandlerImpl::KeepConnectionAlive(uint32_t connection_key,
                                                 uint8_t session_id) {
   sync_primitives::AutoLock lock(connection_list_lock_);
@@ -752,6 +764,30 @@ void ConnectionHandlerImpl::OnConnectionEnded(
   connection_list_.erase(itr);
 }
 
+void ConnectionHandlerImpl::BindProtocolVersionWithSession(
+    uint32_t connection_key, uint8_t protocol_version) {
+  uint32_t connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(connection_key, &connection_handle, &session_id);
+
+  sync_primitives::AutoLock lock(connection_list_lock_);
+  ConnectionList::iterator it = connection_list_.find(connection_handle);
+  if (connection_list_.end() != it) {
+    it->second->UpdateProtocolVersionSession(session_id, protocol_version);
+  }
+}
+
+bool ConnectionHandlerImpl::CheckSupportHeartBeat(
+    transport_manager::ConnectionUID connection_handle,uint8_t session_id) {
+  sync_primitives::AutoLock lock(connection_list_lock_);
+  uint32_t connection = static_cast<uint32_t>(connection_handle);
+  ConnectionList::iterator it = connection_list_.find(connection);
+  if (connection_list_.end() == it) {
+    return false;
+  }
+  return it->second->SupportHeartBeat(session_id);
+}
+
 #ifdef BUILD_TESTS
 ConnectionList &ConnectionHandlerImpl::getConnectionList() {
   return connection_list_;
@@ -765,6 +801,5 @@ void ConnectionHandlerImpl::addDeviceConnection(
   // Add connection
   OnConnectionEstablished(device_info, connection_id);
 }
-#endif
-
+#endif  // BUILD_TESTS
 }  // namespace connection_handler

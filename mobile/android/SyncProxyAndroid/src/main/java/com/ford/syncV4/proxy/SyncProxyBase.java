@@ -2973,8 +2973,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }
 
         mJsonRPCMarshaller = value;
-
-        Logger.d("Set JSON Marshaller:" + value);
     }
 
     /**

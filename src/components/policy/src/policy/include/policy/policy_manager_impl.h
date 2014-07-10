@@ -123,6 +123,8 @@ class PolicyManagerImpl : public PolicyManager {
                                const std::string& language);
     virtual void OnSystemReady();
 
+    virtual uint32_t GetNotificationsNumber(const std::string& priority);
+
     // Interface StatisticsManager (begin)
     virtual void Increment(usage_statistics::GlobalCounterId type);
     virtual void Increment(const std::string& app_id,

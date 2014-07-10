@@ -1039,6 +1039,12 @@ void PolicyManagerImpl::OnSystemReady() {
 #endif
 }
 
+uint32_t PolicyManagerImpl::GetNotificationsNumber(
+    const std::string& priority) {
+  LOG4CXX_INFO(logger_, "GetNotificationsNumber");
+  return policy_table_.pt_data()->GetNotificationsNumber(priority);
+}
+
 bool PolicyManagerImpl::ExceededIgnitionCycles() {
   return policy_table_.pt_data()->IgnitionCyclesBeforeExchange() == 0;
 }

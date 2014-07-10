@@ -147,7 +147,7 @@ public abstract class AbstractProtocol {
             Logger.w(CLASS_NAME + " receive null bytes");
         }*/
 
-        Logger.d(CLASS_NAME + " receive ProtocolFrameHeader:" + header.toString());
+        //Logger.d(CLASS_NAME + " receive ProtocolFrameHeader:" + header.toString());
 
         resetHeartbeat(header.getSessionId());
         assembler.handleFrame(header, data, PROTOCOL_FRAME_HEADER_SIZE);
@@ -162,7 +162,7 @@ public abstract class AbstractProtocol {
             Logger.w(CLASS_NAME + " transmit null bytes");
         }*/
 
-        Logger.d(CLASS_NAME + " transmit ProtocolFrameHeader:" + header.toString());
+        //Logger.d(CLASS_NAME + " transmit ProtocolFrameHeader:" + header.toString());
 
         resetHeartbeatAck(header.getSessionId());
         composeMessage(header, data, offset, length);

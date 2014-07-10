@@ -1183,6 +1183,7 @@ public class ModuleTest {
                 } else {
                     Logger.i(TAG + " No pause after " + currentTest.getName());
                 }
+                Logger.d(TAG + " Pause for tests set after " + currentTest.getName() + " completed");
 
                 // wait for incoming messages
                 try {

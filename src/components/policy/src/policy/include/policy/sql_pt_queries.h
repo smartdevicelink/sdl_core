@@ -51,6 +51,7 @@ extern const std::string kSelectEndpoint;
 extern const std::string kSelectModuleConfig;
 extern const std::string kSelectEndpoints;
 extern const std::string kSelectNotificationsPerMin;
+extern const std::string kSelectNotificationsPerPriority;
 extern const std::string kSelectAppLevels;
 extern const std::string kSelectDeviceData;
 extern const std::string kSelectFunctionalGroups;

@@ -106,6 +106,14 @@ void SetGlobalPropertiesRequest::Run() {
     }
   }
 
+  // Checking set global properties on contained \t\n \\t \\n
+  if (IsWhitespaceExist()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming set global properties has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   bool is_help_prompt_present = msg_params.keyExists(strings::help_prompt);
   bool is_timeout_prompt_present = msg_params.keyExists(
       strings::timeout_prompt);
@@ -368,6 +376,50 @@ bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(
       || params.keyExists(strings::menu_title)
       || params.keyExists(strings::menu_icon)
       || params.keyExists(strings::keyboard_properties);
+}
+
+bool SetGlobalPropertiesRequest::IsWhitespaceExist() {
+  bool return_value = false;
+  const char* str;
+
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  if (msg_params.keyExists(strings::help_prompt)) {
+    const smart_objects::SmartArray* hp_array =
+        msg_params[strings::help_prompt].asArray();
+
+    smart_objects::SmartArray::const_iterator it_hp = hp_array->begin();
+    smart_objects::SmartArray::const_iterator it_hp_end = hp_array->end();
+
+    for (; it_hp != it_hp_end; ++it_hp) {
+      str = (*it_hp)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_INFO(logger_, "help_prompt syntax check failed");
+        return_value = true;
+        break;
+      }
+    }
+  }
+
+  if (msg_params.keyExists(strings::timeout_prompt)) {
+    const smart_objects::SmartArray* tp_array =
+        msg_params[strings::timeout_prompt].asArray();
+
+    smart_objects::SmartArray::const_iterator it_tp = tp_array->begin();
+    smart_objects::SmartArray::const_iterator it_tp_end = tp_array->end();
+
+    for (; it_tp != it_tp_end; ++it_tp) {
+      str = (*it_tp)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_INFO(logger_, "timeout_prompt syntax check failed");
+        return_value = true;
+        break;
+      }
+    }
+  }
+
+  return return_value;
 }
 
 }  // namespace commands

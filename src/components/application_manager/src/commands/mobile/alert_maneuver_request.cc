@@ -77,6 +77,14 @@ void AlertManeuverRequest::Run() {
     return;
   }
 
+  // Checking alert maneuver on contained \t\n \\t \\n
+  if (IsWhitespaceExist()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming alert maneuver has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   // Checking parameters and how many HMI requests should be sent
   bool tts_is_ok = false;
 
@@ -182,6 +190,30 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
                 "There are some pending responses from HMI."
                 "AlertManeuverRequest still waiting.");
   }
+}
+
+bool AlertManeuverRequest::IsWhitespaceExist() {
+  bool return_value = false;
+  const char* str = NULL;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
+    const smart_objects::SmartArray* tc_array =
+        (*message_)[strings::msg_params][strings::tts_chunks].asArray();
+
+    smart_objects::SmartArray::const_iterator it_tc = tc_array->begin();
+    smart_objects::SmartArray::const_iterator it_tc_end = tc_array->end();
+
+    for (; it_tc != it_tc_end; ++it_tc) {
+      str = (*it_tc)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_INFO(logger_, "tts_chunks syntax check failed");
+        return_value = true;
+        break;
+      }
+    }
+  }
+
+  return return_value;
 }
 
 }  // namespace commands

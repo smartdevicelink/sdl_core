@@ -40,6 +40,7 @@
 #include "utils/macro.h"
 #include "utils/message_queue.h"
 #include "utils/threads/thread.h"
+#include "utils/lock.h"
 
 namespace threads {
 
@@ -99,6 +100,7 @@ class MessageLoopThread {
     Handler& handler_;
     // Message queue that is actually owned by MessageLoopThread
     MessageQueue<Message, Queue>& message_queue_;
+    sync_primitives::Lock active_lock;
   };
  private:
   MessageQueue<Message, Queue> message_queue_;
@@ -142,6 +144,7 @@ MessageLoopThread<Q>::LoopThreadDelegate::LoopThreadDelegate(
 
 template<class Q>
 void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
+  sync_primitives::AutoLock auto_lock(active_lock);
   while(!message_queue_.IsShuttingDown()){
     DrainQue();
     message_queue_.wait();
@@ -153,7 +156,10 @@ void MessageLoopThread<Q>::LoopThreadDelegate::threadMain() {
 template<class Q>
 bool MessageLoopThread<Q>::LoopThreadDelegate::exitThreadMain() {
   message_queue_.Shutdown();
-  // Prevent canceling thread until queue is drained
+  {
+    sync_primitives::AutoLock auto_lock(active_lock);
+    // Prevent canceling thread until queue is drained
+  }
   return true;
 }
 
