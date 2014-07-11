@@ -58,14 +58,14 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 TcpTransportAdapter::TcpTransportAdapter(const uint16_t port)
-    : TransportAdapterImpl(
+  : TransportAdapterImpl(
 #ifdef AVAHI_SUPPORT
-          new DnssdServiceBrowser(this),
+    new DnssdServiceBrowser(this),
 #else
-          NULL,
+    NULL,
 #endif
-          new TcpConnectionFactory(this),
-          new TcpClientListener(this, port, false)) {
+    new TcpConnectionFactory(this),
+    new TcpClientListener(this, port, false)) {
 }
 
 TcpTransportAdapter::~TcpTransportAdapter() {
@@ -128,7 +128,7 @@ bool TcpTransportAdapter::Restore() {
     resumption::LastState::instance()->dictionary["TransportManager"]["TcpAdapter"];
   const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();
-    i != devices_dictionary.end(); ++i) {
+       i != devices_dictionary.end(); ++i) {
     const Json::Value device_dictionary = *i;
     std::string name = device_dictionary["name"].asString();
     std::string address_record = device_dictionary["address"].asString();
@@ -138,7 +138,7 @@ bool TcpTransportAdapter::Restore() {
     AddDevice(device);
     const Json::Value applications_dictionary = device_dictionary["applications"];
     for (Json::Value::const_iterator j = applications_dictionary.begin();
-      j != applications_dictionary.end(); ++j) {
+         j != applications_dictionary.end(); ++j) {
       const Json::Value application_dictionary = *j;
       std::string port_record = application_dictionary["port"].asString();
       int port = atoi(port_record.c_str());

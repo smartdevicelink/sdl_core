@@ -49,9 +49,9 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 
 TcpSocketConnection::TcpSocketConnection(const DeviceUID& device_uid,
-                                         const ApplicationHandle& app_handle,
-                                         TransportAdapterController* controller)
-    : ThreadedSocketConnection(device_uid, app_handle, controller) {
+    const ApplicationHandle& app_handle,
+    TransportAdapterController* controller)
+  : ThreadedSocketConnection(device_uid, app_handle, controller) {
 }
 
 TcpSocketConnection::~TcpSocketConnection() {
@@ -62,9 +62,9 @@ bool TcpSocketConnection::Establish(ConnectError** error) {
 }
 
 TcpServerOiginatedSocketConnection::TcpServerOiginatedSocketConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle,
-    TransportAdapterController* controller)
-    : ThreadedSocketConnection(device_uid, app_handle, controller) {
+  const DeviceUID& device_uid, const ApplicationHandle& app_handle,
+  TransportAdapterController* controller)
+  : ThreadedSocketConnection(device_uid, app_handle, controller) {
 }
 
 TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {
@@ -74,8 +74,8 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   DeviceSptr device = controller()->FindDevice(device_handle());
   if (!device.valid()) {
     LOG4CXX_ERROR(
-        logger_,
-        "Device " << device_handle() << " not found");
+      logger_,
+      "Device " << device_handle() << " not found");
     *error = new ConnectError();
     return false;
   }
@@ -84,8 +84,8 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   int port;
   if (-1 == (port = tcp_device->GetApplicationPort(application_handle()))) {
     LOG4CXX_ERROR(
-        logger_,
-        "Application port for " << application_handle() << " not found");
+      logger_,
+      "Application port for " << application_handle() << " not found");
     *error = new ConnectError();
     return false;
   }
@@ -104,10 +104,10 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   addr.sin_port = htons(port);
 
   LOG4CXX_INFO(logger_, "Connecting " << inet_ntoa(addr.sin_addr) << ":"
-                                      << port);
+               << port);
   if (::connect(socket, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
     LOG4CXX_ERROR(logger_, "Failed to connect for application "
-                               << application_handle() << ", error " << errno);
+                  << application_handle() << ", error " << errno);
     *error = new ConnectError();
     return false;
   }

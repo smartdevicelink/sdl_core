@@ -42,18 +42,20 @@ namespace transport_manager {
 namespace transport_adapter {
 
 UsbAoaAdapter::UsbAoaAdapter()
-    : TransportAdapterImpl(new UsbDeviceScanner(this),
-                           new UsbConnectionFactory(this), 0),
-      is_initialised_(false),
-      usb_handler_(new UsbHandler()) {
+  : TransportAdapterImpl(new UsbDeviceScanner(this),
+                         new UsbConnectionFactory(this), 0),
+  is_initialised_(false),
+  usb_handler_(new UsbHandler()) {
   static_cast<UsbDeviceScanner*>(device_scanner_)->SetUsbHandler(usb_handler_);
   static_cast<UsbConnectionFactory*>(server_connection_factory_)
-      ->SetUsbHandler(usb_handler_);
+  ->SetUsbHandler(usb_handler_);
 }
 
 UsbAoaAdapter::~UsbAoaAdapter() {}
 
-DeviceType UsbAoaAdapter::GetDeviceType() const { return "sdl-usb-aoa"; }
+DeviceType UsbAoaAdapter::GetDeviceType() const {
+  return "sdl-usb-aoa";
+}
 
 bool UsbAoaAdapter::IsInitialised() const {
   return is_initialised_ && TransportAdapterImpl::IsInitialised();

@@ -59,8 +59,8 @@ BluetoothTransportAdapter::~BluetoothTransportAdapter() {
 }
 
 BluetoothTransportAdapter::BluetoothTransportAdapter()
-    : TransportAdapterImpl(new BluetoothDeviceScanner(this, true, 0),
-                           new BluetoothConnectionFactory(this), 0) {
+  : TransportAdapterImpl(new BluetoothDeviceScanner(this, true, 0),
+                         new BluetoothConnectionFactory(this), 0) {
 }
 
 DeviceType BluetoothTransportAdapter::GetDeviceType() const {
@@ -117,7 +117,7 @@ bool BluetoothTransportAdapter::Restore() {
     resumption::LastState::instance()->dictionary["TransportManager"]["BluetoothAdapter"];
   const Json::Value devices_dictionary = bluetooth_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();
-    i != devices_dictionary.end(); ++i) {
+       i != devices_dictionary.end(); ++i) {
     const Json::Value device_dictionary = *i;
     std::string name = device_dictionary["name"].asString();
     std::string address_record = device_dictionary["address"].asString();
@@ -126,7 +126,7 @@ bool BluetoothTransportAdapter::Restore() {
     RfcommChannelVector rfcomm_channels;
     const Json::Value applications_dictionary = device_dictionary["applications"];
     for (Json::Value::const_iterator j = applications_dictionary.begin();
-      j != applications_dictionary.end(); ++j) {
+         j != applications_dictionary.end(); ++j) {
       const Json::Value application_dictionary = *j;
       std::string rfcomm_channel_record =
         application_dictionary["rfcomm_channel"].asString();
@@ -139,8 +139,9 @@ bool BluetoothTransportAdapter::Restore() {
     DeviceSptr device(bluetooth_device);
     AddDevice(device);
     for (RfcommChannelVector::const_iterator j =
-      rfcomm_channels.begin(); j != rfcomm_channels.end(); ++j) {
-      ApplicationHandle app_handle = *j; // for Bluetooth device app_handle is just RFCOMM channel
+           rfcomm_channels.begin(); j != rfcomm_channels.end(); ++j) {
+      ApplicationHandle app_handle =
+        *j; // for Bluetooth device app_handle is just RFCOMM channel
       if (Error::OK != Connect(device->unique_device_id(), app_handle)) {
         errors_occured = true;
       }

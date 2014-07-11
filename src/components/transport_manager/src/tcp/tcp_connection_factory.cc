@@ -44,7 +44,7 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapter")
 
 TcpConnectionFactory::TcpConnectionFactory(TransportAdapterController* controller)
-    : controller_(controller) {
+  : controller_(controller) {
 }
 
 TransportAdapter::Error TcpConnectionFactory::Init() {
@@ -52,14 +52,16 @@ TransportAdapter::Error TcpConnectionFactory::Init() {
 }
 
 TransportAdapter::Error TcpConnectionFactory::CreateConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-    LOG4CXX_TRACE(logger_, "enter DeviceUID: " << &device_uid << ", ApplicationHandle: " << &app_handle);
+  const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
+  LOG4CXX_TRACE(logger_, "enter DeviceUID: " << &device_uid << ", ApplicationHandle: " <<
+                &app_handle);
   TcpServerOiginatedSocketConnection* connection(
-      new TcpServerOiginatedSocketConnection(device_uid, app_handle,
-                                             controller_));
+    new TcpServerOiginatedSocketConnection(device_uid, app_handle,
+        controller_));
   TransportAdapter::Error error = connection->Start();
-  if (error != TransportAdapter::OK)
+  if (error != TransportAdapter::OK) {
     delete connection;
+  }
   LOG4CXX_TRACE(logger_, "exit");
   return error;
 }

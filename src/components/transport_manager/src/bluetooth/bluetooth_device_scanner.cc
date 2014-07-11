@@ -114,7 +114,7 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
     auto_repeat_search_(auto_repeat_search),
     auto_repeat_pause_sec_(auto_repeat_pause_sec) {
   uint8_t smart_device_link_service_uuid_data[] = { 0x93, 0x6D, 0xA0, 0x1F,
-      0x9A, 0xBD, 0x4D, 0x9D, 0x80, 0xC7, 0x02, 0xAF, 0x85, 0xC8, 0x22, 0xA8
+                                                    0x9A, 0xBD, 0x4D, 0x9D, 0x80, 0xC7, 0x02, 0xAF, 0x85, 0xC8, 0x22, 0xA8
                                                   };
   sdp_uuid128_create(&smart_device_link_service_uuid_,
                      smart_device_link_service_uuid_data);
@@ -218,7 +218,8 @@ void BluetoothDeviceScanner::DoInquiry() {
 void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
   const std::vector<bdaddr_t>& bd_addresses, int device_handle,
   DeviceVector* discovered_devices) {
-  LOG4CXX_TRACE(logger_, "enter bd_addresses: " << &bd_addresses << ", device_handle: " << device_handle << ", discovered_devices: " << discovered_devices);
+  LOG4CXX_TRACE(logger_, "enter bd_addresses: " << &bd_addresses << ", device_handle: " <<
+                device_handle << ", discovered_devices: " << discovered_devices);
   std::vector<RfcommChannelVector> sdl_rfcomm_channels =
     DiscoverSmartDeviceLinkRFCOMMChannels(bd_addresses);
 
@@ -252,7 +253,8 @@ void BluetoothDeviceScanner::CheckSDLServiceOnDevices(
   LOG4CXX_TRACE(logger_, "exit");
 }
 
-std::vector<BluetoothDeviceScanner::RfcommChannelVector> BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
+std::vector<BluetoothDeviceScanner::RfcommChannelVector>
+BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
   const std::vector<bdaddr_t>& device_addresses) {
   LOG4CXX_TRACE(logger_, "enter device_addresses: " << &device_addresses);
   const size_t size = device_addresses.size();
@@ -285,7 +287,8 @@ std::vector<BluetoothDeviceScanner::RfcommChannelVector> BluetoothDeviceScanner:
 
 bool BluetoothDeviceScanner::DiscoverSmartDeviceLinkRFCOMMChannels(
   const bdaddr_t& device_address, RfcommChannelVector* channels) {
-  LOG4CXX_TRACE(logger_, "enter device_address: " << &device_address << ", channels: " << channels);
+  LOG4CXX_TRACE(logger_, "enter device_address: " << &device_address << ", channels: " <<
+                channels);
   static bdaddr_t any_address = { { 0, 0, 0, 0, 0, 0 } };
 
   sdp_session_t* sdp_session = sdp_connect(
@@ -413,7 +416,7 @@ void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
     sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
     while (!(device_scan_requested_ || shutdown_requested_)) {
       const sync_primitives::ConditionalVariable::WaitStatus wait_status =
-          device_scan_requested_cv_.WaitFor(auto_lock, auto_repeat_pause_sec_ * 1000);
+        device_scan_requested_cv_.WaitFor(auto_lock, auto_repeat_pause_sec_ * 1000);
       if (wait_status == sync_primitives::ConditionalVariable::kTimeout) {
         LOG4CXX_INFO(logger_, "Bluetooth scanner timeout, performing scan");
         device_scan_requested_ = true;
@@ -421,7 +424,7 @@ void BluetoothDeviceScanner::TimedWaitForDeviceScanRequest() {
     }
   }
 
-  LOG4CXX_TRACE(logger_,"exit");
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 TransportAdapter::Error BluetoothDeviceScanner::Init() {
@@ -470,7 +473,7 @@ TransportAdapter::Error BluetoothDeviceScanner::Scan() {
     return TransportAdapter::BAD_STATE;
   }
   if (auto_repeat_pause_sec_ == 0) {
-   LOG4CXX_TRACE(logger_, "exit no search pause, scan forcing not needed");
+    LOG4CXX_TRACE(logger_, "exit no search pause, scan forcing not needed");
     return TransportAdapter::OK;
   }
   TransportAdapter::Error ret = TransportAdapter::OK;

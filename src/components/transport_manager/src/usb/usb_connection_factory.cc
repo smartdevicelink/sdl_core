@@ -48,8 +48,8 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager-usb")
 
 UsbConnectionFactory::UsbConnectionFactory(
-    TransportAdapterController* controller)
-    : controller_(controller), usb_handler_() {}
+  TransportAdapterController* controller)
+  : controller_(controller), usb_handler_() {}
 
 TransportAdapter::Error UsbConnectionFactory::Init() {
   return TransportAdapter::OK;
@@ -60,8 +60,9 @@ void UsbConnectionFactory::SetUsbHandler(const UsbHandlerSptr& usb_handler) {
 }
 
 TransportAdapter::Error UsbConnectionFactory::CreateConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  LOG4CXX_TRACE(logger_, "enter DeviceUID: " << &device_uid << ", ApplicationHandle: " << &app_handle);
+  const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
+  LOG4CXX_TRACE(logger_, "enter DeviceUID: " << &device_uid << ", ApplicationHandle: " <<
+                &app_handle);
   DeviceSptr device = controller_->FindDevice(device_uid);
   if (!device.valid()) {
     LOG4CXX_ERROR(logger_, "device " << device_uid << " not found");
@@ -72,7 +73,7 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
   UsbDevice* usb_device = static_cast<UsbDevice*>(device.get());
   UsbConnection* usb_connection =
     new UsbConnection(device_uid, app_handle, controller_, usb_handler_,
-      usb_device->usb_device());
+                      usb_device->usb_device());
   ConnectionSptr connection(usb_connection);
 
   controller_->ConnectionCreated(connection, device_uid, app_handle);
@@ -81,8 +82,7 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
     LOG4CXX_INFO(logger_, "USB connection initialised");
     LOG4CXX_TRACE(logger_, "exit");
     return TransportAdapter::OK;
-  }
-  else {
+  } else {
     LOG4CXX_TRACE(logger_, "exit");
     return TransportAdapter::FAIL;
   }
@@ -90,7 +90,9 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
 
 void UsbConnectionFactory::Terminate() {}
 
-bool UsbConnectionFactory::IsInitialised() const { return true; }
+bool UsbConnectionFactory::IsInitialised() const {
+  return true;
+}
 
 UsbConnectionFactory::~UsbConnectionFactory() {}
 

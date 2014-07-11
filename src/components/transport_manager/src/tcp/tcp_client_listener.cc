@@ -66,14 +66,14 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
                                      const uint16_t port,
                                      const bool enable_keepalive)
-    : port_(port),
-      enable_keepalive_(enable_keepalive),
-      controller_(controller),
-      thread_(),
-      socket_(-1),
-      thread_started_(false),
-      shutdown_requested_(false),
-      thread_stop_requested_(false) {}
+  : port_(port),
+    enable_keepalive_(enable_keepalive),
+    controller_(controller),
+    thread_(),
+    socket_(-1),
+    thread_started_(false),
+    shutdown_requested_(false),
+    thread_stop_requested_(false) {}
 
 void* tcpClientListenerThread(void* data) {
   LOG4CXX_TRACE(logger_, "enter Data: " << data);
@@ -158,7 +158,9 @@ void TcpClientListener::Thread() {
     socklen_t client_address_size = sizeof(client_address);
     const int connection_fd = accept(socket_, (struct sockaddr*)&client_address,
                                      &client_address_size);
-    if (thread_stop_requested_) break;
+    if (thread_stop_requested_) {
+      break;
+    }
 
     if (connection_fd < 0) {
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "accept() failed");
@@ -175,17 +177,19 @@ void TcpClientListener::Thread() {
             sizeof(device_name) / sizeof(device_name[0]));
     LOG4CXX_INFO(logger_, "Connected client " << device_name);
 
-    if (enable_keepalive_) SetKeepaliveOptions(connection_fd);
+    if (enable_keepalive_) {
+      SetKeepaliveOptions(connection_fd);
+    }
 
     TcpDevice* tcp_device = new TcpDevice(client_address.sin_addr.s_addr, device_name);
     DeviceSptr device = controller_->AddDevice(tcp_device);
     tcp_device = static_cast<TcpDevice*>(device.get());
     const ApplicationHandle app_handle = tcp_device->AddIncomingApplication(
-        connection_fd);
+                                           connection_fd);
 
     TcpSocketConnection* connection(
-        new TcpSocketConnection(device->unique_device_id(), app_handle,
-                                controller_));
+      new TcpSocketConnection(device->unique_device_id(), app_handle,
+                              controller_));
     connection->set_socket(connection_fd);
     const TransportAdapter::Error error = connection->Start();
     if (error != TransportAdapter::OK) {
@@ -232,15 +236,15 @@ TransportAdapter::Error TcpClientListener::StartListening() {
   }
 
   const int thread_start_error = pthread_create(&thread_, 0,
-                                                &tcpClientListenerThread, this);
+                                 &tcpClientListenerThread, this);
   if (0 == thread_start_error) {
     thread_started_ = true;
     LOG4CXX_INFO(logger_, "Tcp client listener thread started");
   } else {
     LOG4CXX_ERROR(
-        logger_,
-        "Tcp client listener thread start failed, error code "
-            << thread_start_error);
+      logger_,
+      "Tcp client listener thread start failed, error code "
+      << thread_start_error);
     LOG4CXX_TRACE(logger_, "exit");
     return TransportAdapter::FAIL;
   }
@@ -251,7 +255,7 @@ TransportAdapter::Error TcpClientListener::StartListening() {
 TransportAdapter::Error TcpClientListener::StopListening() {
   LOG4CXX_TRACE(logger_, "enter");
   if (!thread_started_) {
-     LOG4CXX_TRACE(logger_, "exit");
+    LOG4CXX_TRACE(logger_, "exit");
     return TransportAdapter::BAD_STATE;
   }
 

@@ -43,9 +43,9 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapter")
 
 TcpDevice::TcpDevice(const in_addr_t& in_addr, const std::string& name)
-: Device(name, name),
-      in_addr_(in_addr),
-      last_handle_(0) {
+  : Device(name, name),
+    in_addr_(in_addr),
+    last_handle_(0) {
   pthread_mutex_init(&applications_mutex_, 0);
 }
 
@@ -61,7 +61,7 @@ ApplicationList TcpDevice::GetApplicationList() const {
   pthread_mutex_lock(&applications_mutex_);
   ApplicationList app_list;
   for (std::map<ApplicationHandle, Application>::const_iterator it =
-      applications_.begin(); it != applications_.end(); ++it) {
+         applications_.begin(); it != applications_.end(); ++it) {
     app_list.push_back(it->first);
   }
   pthread_mutex_unlock(&applications_mutex_);
@@ -110,14 +110,15 @@ TcpDevice::~TcpDevice() {
 
 int TcpDevice::GetApplicationSocket(const ApplicationHandle app_handle) const {
   LOG4CXX_TRACE(logger_, "enter ApplicationHandle: " << app_handle);
-  std::map<ApplicationHandle, Application>::const_iterator it = applications_.find(app_handle);
-  if(applications_.end() == it) {
-      LOG4CXX_TRACE(logger_, "exit -1");
-      return -1;
+  std::map<ApplicationHandle, Application>::const_iterator it = applications_.find(
+        app_handle);
+  if (applications_.end() == it) {
+    LOG4CXX_TRACE(logger_, "exit -1");
+    return -1;
   }
-  if(! it->second.incoming) {
-      LOG4CXX_TRACE(logger_, "exit -1");
-      return -1;
+  if (! it->second.incoming) {
+    LOG4CXX_TRACE(logger_, "exit -1");
+    return -1;
   }
   LOG4CXX_TRACE(logger_, "exit");
   return it->second.socket;
@@ -125,14 +126,15 @@ int TcpDevice::GetApplicationSocket(const ApplicationHandle app_handle) const {
 
 int TcpDevice::GetApplicationPort(const ApplicationHandle app_handle) const {
   LOG4CXX_TRACE(logger_, "enter ApplicationHandle: " << app_handle);
-  std::map<ApplicationHandle, Application>::const_iterator it = applications_.find(app_handle);
-  if(applications_.end() == it) {
-      LOG4CXX_TRACE(logger_, "exit -1");
-      return -1;
+  std::map<ApplicationHandle, Application>::const_iterator it = applications_.find(
+        app_handle);
+  if (applications_.end() == it) {
+    LOG4CXX_TRACE(logger_, "exit -1");
+    return -1;
   }
-  if(it->second.incoming) {
-      LOG4CXX_TRACE(logger_, "exit -1");
-      return -1;
+  if (it->second.incoming) {
+    LOG4CXX_TRACE(logger_, "exit -1");
+    return -1;
   }
   LOG4CXX_TRACE(logger_, "exit -1");
   return it->second.port;

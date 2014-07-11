@@ -108,6 +108,6 @@ int TransportManagerDefault::Init() {
 TransportManagerDefault::~TransportManagerDefault() {}
 
 TransportManagerDefault::TransportManagerDefault()
-    : TransportManagerImpl() {}
+  : TransportManagerImpl() {}
 
 }  //  namespace transport_manager

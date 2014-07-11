@@ -56,11 +56,10 @@ class AoaInitSequence : public UsbControlTransferSequence {
 };
 
 void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
-  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice: "<< device);
+  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice: " << device);
   if (IsAppleDevice(device)) {
     SupportedDeviceFound(device);
-  }
-  else {
+  } else {
     if (IsGoogleAccessory(device)) {
       SupportedDeviceFound(device);
     } else {
@@ -71,7 +70,7 @@ void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
 }
 
 void UsbDeviceScanner::OnDeviceLeft(PlatformUsbDevice* device) {
-  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice "<< device);
+  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice " << device);
   bool list_changed = false;
   pthread_mutex_lock(&devices_mutex_);
   for (Devices::iterator it = devices_.begin(); it != devices_.end(); ++it) {
@@ -82,12 +81,14 @@ void UsbDeviceScanner::OnDeviceLeft(PlatformUsbDevice* device) {
     }
   }
   pthread_mutex_unlock(&devices_mutex_);
-  if (list_changed) UpdateList();
+  if (list_changed) {
+    UpdateList();
+  }
   LOG4CXX_TRACE(logger_, "exit");
 }
 
 UsbDeviceScanner::UsbDeviceScanner(TransportAdapterController* controller)
-    : controller_(controller) {
+  : controller_(controller) {
   pthread_mutex_init(&devices_mutex_, 0);
 }
 
@@ -97,11 +98,21 @@ UsbDeviceScanner::~UsbDeviceScanner() {
 
 class AoaInitSequence::AoaGetProtocolRequest : public UsbControlInTransfer {
   virtual ~AoaGetProtocolRequest() {}
-  virtual RequestType Type() const { return VENDOR; }
-  virtual uint8_t Request() const { return 51; }
-  virtual uint16_t Value() const { return 0; }
-  virtual uint16_t Index() const { return 0; }
-  virtual uint16_t Length() const { return 2; }
+  virtual RequestType Type() const {
+    return VENDOR;
+  }
+  virtual uint8_t Request() const {
+    return 51;
+  }
+  virtual uint16_t Value() const {
+    return 0;
+  }
+  virtual uint16_t Index() const {
+    return 0;
+  }
+  virtual uint16_t Length() const {
+    return 2;
+  }
   virtual bool OnCompleted(unsigned char* data) const {
     const int protocol_version = data[1] << 8 | data[0];
     LOG4CXX_INFO(logger_, "AOA protocol version " << protocol_version);
@@ -116,16 +127,28 @@ class AoaInitSequence::AoaGetProtocolRequest : public UsbControlInTransfer {
 class AoaInitSequence::AoaSendIdString : public UsbControlOutTransfer {
  public:
   AoaSendIdString(uint16_t index, const char* string, uint16_t length)
-      : index_(index), string_(string), length_(length) {}
+    : index_(index), string_(string), length_(length) {}
 
  private:
   virtual ~AoaSendIdString() {}
-  virtual RequestType Type() const { return VENDOR; }
-  virtual uint8_t Request() const { return 52; }
-  virtual uint16_t Value() const { return 0; }
-  virtual uint16_t Index() const { return index_; }
-  virtual uint16_t Length() const { return length_; }
-  virtual const char* Data() const { return string_; }
+  virtual RequestType Type() const {
+    return VENDOR;
+  }
+  virtual uint8_t Request() const {
+    return 52;
+  }
+  virtual uint16_t Value() const {
+    return 0;
+  }
+  virtual uint16_t Index() const {
+    return index_;
+  }
+  virtual uint16_t Length() const {
+    return length_;
+  }
+  virtual const char* Data() const {
+    return string_;
+  }
   uint16_t index_;
   const char* string_;
   uint16_t length_;
@@ -133,12 +156,24 @@ class AoaInitSequence::AoaSendIdString : public UsbControlOutTransfer {
 
 class AoaInitSequence::AoaTurnIntoAccessoryMode : public UsbControlOutTransfer {
   virtual ~AoaTurnIntoAccessoryMode() {}
-  virtual RequestType Type() const { return VENDOR; }
-  virtual uint8_t Request() const { return 53; }
-  virtual uint16_t Value() const { return 0; }
-  virtual uint16_t Index() const { return 0; }
-  virtual uint16_t Length() const { return 0; }
-  virtual const char* Data() const { return 0; }
+  virtual RequestType Type() const {
+    return VENDOR;
+  }
+  virtual uint8_t Request() const {
+    return 53;
+  }
+  virtual uint16_t Value() const {
+    return 0;
+  }
+  virtual uint16_t Index() const {
+    return 0;
+  }
+  virtual uint16_t Length() const {
+    return 0;
+  }
+  virtual const char* Data() const {
+    return 0;
+  }
 };
 
 static char manufacturer[] = "Ford";
@@ -166,17 +201,17 @@ void UsbDeviceScanner::TurnIntoAccessoryMode(PlatformUsbDevice* device) {
 }
 
 void UsbDeviceScanner::SupportedDeviceFound(PlatformUsbDevice* device) {
-  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice: "<< device);
+  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice: " << device);
 
   pthread_mutex_lock(&devices_mutex_);
   devices_.push_back(device);
   pthread_mutex_unlock(&devices_mutex_);
   LOG4CXX_INFO(logger_, "USB device (bus number "
-                            << static_cast<int>(device->bus_number())
-                            << ", address "
-                            << static_cast<int>(device->address())
-                            << ") identified as: " << device->GetManufacturer()
-                            << ", " << device->GetProductName());
+               << static_cast<int>(device->bus_number())
+               << ", address "
+               << static_cast<int>(device->address())
+               << ") identified as: " << device->GetManufacturer()
+               << ", " << device->GetProductName());
   UpdateList();
   LOG4CXX_TRACE(logger_, "exit");
 }
@@ -196,7 +231,7 @@ void UsbDeviceScanner::UpdateList() {
   for (Devices::const_iterator it = devices_.begin(); it != devices_.end();
        ++it) {
     const std::string device_name =
-        (*it)->GetManufacturer() + " " + (*it)->GetProductName();
+      (*it)->GetManufacturer() + " " + (*it)->GetProductName();
     std::ostringstream oss;
     oss << (*it)->GetManufacturer() << ":" << (*it)->GetProductName() << ":"
         << (*it)->GetSerialNumber() << ":"
@@ -215,7 +250,9 @@ void UsbDeviceScanner::UpdateList() {
 
 void UsbDeviceScanner::Terminate() {}
 
-bool UsbDeviceScanner::IsInitialised() const { return true; }
+bool UsbDeviceScanner::IsInitialised() const {
+  return true;
+}
 
 }  // namespace
 }  // namespace
