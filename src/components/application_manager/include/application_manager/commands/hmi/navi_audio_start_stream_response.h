@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,28 +29,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/audio_start_stream_request.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_RESPONSE_H_
+
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-AudioStartStreamRequest::AudioStartStreamRequest(
-    const MessageSharedPtr& message)
-    : RequestToHMI(message) {
-}
+/**
+ * @brief AudioStartStreamResponse command class
+ **/
+class AudioStartStreamResponse : public ResponseFromHMI {
+ public:
+  /**
+   * @brief AudioStartStreamResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit AudioStartStreamResponse(const MessageSharedPtr& message);
 
-AudioStartStreamRequest::~AudioStartStreamRequest() {
-}
+  /**
+   * @brief AudioStartStreamResponse class destructor
+   **/
+  virtual ~AudioStartStreamResponse();
 
-void AudioStartStreamRequest::Run() {
-  LOG4CXX_INFO(logger_, "AudioStartStreamRequest::Run");
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  SendRequest();
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(AudioStartStreamResponse);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_RESPONSE_H_

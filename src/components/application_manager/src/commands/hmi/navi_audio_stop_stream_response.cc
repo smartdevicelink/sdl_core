@@ -1,4 +1,5 @@
-/* Copyright (c) 2013, Ford Motor Company
+/**
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,44 +29,24 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_AUDIO_STOP_STREAM_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_AUDIO_STOP_STREAM_REQUEST_H_
-
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/hmi/navi_audio_stop_stream_response.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief AudioStopStreamRequest command class
- **/
-class AudioStopStreamRequest : public RequestToHMI {
- public:
-  /**
-   * @brief AudioStopStreamRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit AudioStopStreamRequest(const MessageSharedPtr& message);
+AudioStopStreamResponse::AudioStopStreamResponse(const MessageSharedPtr& message)
+    : ResponseFromHMI(message) {
+}
 
-  /**
-   * @brief NaviStopStreamRequest class destructor
-   **/
-  virtual ~AudioStopStreamRequest();
+AudioStopStreamResponse::~AudioStopStreamResponse() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void AudioStopStreamResponse::Run() {
+  LOG4CXX_INFO(logger_, "AudioStopStreamResponse::Run");
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(AudioStopStreamRequest);
-};
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_AUDIO_STOP_STREAM_REQUEST_H_

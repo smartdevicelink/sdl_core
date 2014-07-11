@@ -738,14 +738,13 @@ void PerformInteractionRequest::DisablePerformInteraction() {
 
 bool PerformInteractionRequest::IsWhiteSpaceExist() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::IsWhiteSpaceExist");
-  bool return_value = false;
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::initial_text)) {
     str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
     if (!CheckSyntax(str, true)) {
       LOG4CXX_ERROR(logger_, "Invalid initial_text syntax check failed");
-      return_value = true;
+      return true;
     }
   }
 
@@ -760,8 +759,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
       str = (*it_ip)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
         LOG4CXX_ERROR(logger_, "Invalid initial_prompt syntax check failed");
-        return_value = true;
-        break;
+        return true;
       }
     }
   }
@@ -777,8 +775,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
       str = (*it_hp)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
         LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
-        return_value = true;
-        break;
+        return true;
       }
     }
   }
@@ -794,8 +791,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
       str = (*it_tp)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
         LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
-        return_value = true;
-        break;
+        return true;
       }
     }
   }
@@ -811,13 +807,11 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
       str = (*it_vh)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
         LOG4CXX_ERROR(logger_, "Invalid vr_help syntax check failed");
-        return_value = true;
-        break;
+        return true;
       }
     }
   }
-
-  return return_value;
+  return false;
 }
 
 void PerformInteractionRequest::TerminatePerformInteraction() {

@@ -196,7 +196,6 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
-  // Checking register app interface on contained \t\n \\t \\n
   if (IsWhiteSpaceExist()) {
     LOG4CXX_INFO(logger_,
                   "Incoming register app interface has contains \t\n \\t \\n");
@@ -743,13 +742,12 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
 bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsWhiteSpaceExist");
-  bool return_value = false;
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::app_name].asCharArray();
   if (!CheckSyntax(str, true)) {
     LOG4CXX_ERROR(logger_, "Invalid app_name syntax check failed");
-    return_value = true;
+    return true;
   }
 
 
@@ -764,12 +762,11 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
       str = (*it_tn)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_name syntax check failed");
-        return_value = true;
-        break;
+        return true;
       }
     }
   }
-  return return_value;
+  return false;
 }
 
 }  // namespace commands

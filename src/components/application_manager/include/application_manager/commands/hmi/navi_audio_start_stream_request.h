@@ -29,24 +29,44 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/audio_stop_stream_response.h"
+
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_REQUEST_H_
+
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
-AudioStopStreamResponse::AudioStopStreamResponse(const MessageSharedPtr& message)
-    : ResponseFromHMI(message) {
-}
+/**
+ * @brief AudioStartStreamRequest command class
+ **/
+class AudioStartStreamRequest : public RequestToHMI {
+ public:
+  /**
+   * @brief AudioStartStreamRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit AudioStartStreamRequest(const MessageSharedPtr& message);
 
-AudioStopStreamResponse::~AudioStopStreamResponse() {
-}
+  /**
+   * @brief OnNaviStartStreamRequest class destructor
+   **/
+  virtual ~AudioStartStreamRequest();
 
-void AudioStopStreamResponse::Run() {
-  LOG4CXX_INFO(logger_, "AudioStopStreamResponse::Run");
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(AudioStartStreamRequest);
+};
 
 }  // namespace commands
 
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_REQUEST_H_

@@ -30,43 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_AUDIO_START_STREAM_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_AUDIO_START_STREAM_REQUEST_H_
-
-#include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/commands/hmi/navi_audio_start_stream_request.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief AudioStartStreamRequest command class
- **/
-class AudioStartStreamRequest : public RequestToHMI {
- public:
-  /**
-   * @brief AudioStartStreamRequest class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit AudioStartStreamRequest(const MessageSharedPtr& message);
+AudioStartStreamRequest::AudioStartStreamRequest(
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
+}
 
-  /**
-   * @brief OnNaviStartStreamRequest class destructor
-   **/
-  virtual ~AudioStartStreamRequest();
+AudioStartStreamRequest::~AudioStartStreamRequest() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+void AudioStartStreamRequest::Run() {
+  LOG4CXX_INFO(logger_, "AudioStartStreamRequest::Run");
 
- private:
-  DISALLOW_COPY_AND_ASSIGN(AudioStartStreamRequest);
-};
+  SendRequest();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_AUDIO_START_STREAM_REQUEST_H_
+

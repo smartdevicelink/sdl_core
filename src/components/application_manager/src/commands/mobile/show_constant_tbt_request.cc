@@ -104,7 +104,6 @@ void ShowConstantTBTRequest::Run() {
     }
   }
 
-  // Checking show constant TBT on contained \t\n \\t \\n
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming show constant TBT has contains \t\n \\t \\n");
@@ -202,7 +201,6 @@ void ShowConstantTBTRequest::on_event(const event_engine::Event& event) {
 
 bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
   LOG4CXX_INFO(logger_, "ShowConstantTBTRequest::IsWhiteSpaceExist");
-  bool return_value = false;
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
@@ -213,15 +211,25 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
 
     for (; it_sb != it_sb_end; ++it_sb) {
+
+      if ((*it_sb).keyExists(strings::text)) {
+        str = (*it_sb)[strings::text].asCharArray();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_ERROR(logger_,
+                       "Invalid soft_buttons text syntax check failed");
+          return true;
+        }
+      }
+
       if ((*it_sb).keyExists(strings::image)) {
         str = (*it_sb)[strings::image][strings::value].asCharArray();
         if (!CheckSyntax(str, true)) {
-          LOG4CXX_INFO(logger_,
+          LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons image value syntax check failed");
-          return_value = true;
-          break;
+          return true;
         }
       }
+
     }
   }
 
@@ -229,8 +237,8 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     str = (*message_)[strings::msg_params]
                       [strings::turn_icon][strings::value].asCharArray();
     if (!CheckSyntax(str, true)) {
-      LOG4CXX_INFO(logger_, "Invalid turn_icon value syntax check failed");
-      return_value = true;
+      LOG4CXX_ERROR(logger_, "Invalid turn_icon value syntax check failed");
+      return true;
     }
   }
 
@@ -238,12 +246,13 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     str = (*message_)[strings::msg_params]
                       [strings::next_turn_icon][strings::value].asCharArray();
     if (!CheckSyntax(str, true)) {
-      LOG4CXX_INFO(logger_, "Invalid next_turn_icon value syntax check failed");
-      return_value = true;
+      LOG4CXX_ERROR(logger_,
+                    "Invalid next_turn_icon value syntax check failed");
+      return true;
     }
   }
 
-  return return_value;
+  return false;
 }
 
 }  // namespace commands
