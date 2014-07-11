@@ -138,8 +138,10 @@ const std::string kCountUnconsentedGroups =
   " (SELECT NULL FROM `app_group` AS `def` WHERE "
   " (`def`.`application_id` = ? OR "
   " `def`.`application_id` = ?) "
-  " AND `def`.`functional_group_id` = `a`.`functional_group_id`)";
-
+  " AND `def`.`functional_group_id` = `a`.`functional_group_id`)"
+  " AND NOT EXISTS (SELECT NULL FROM `functional_group` AS `f` "
+  " WHERE (`a`.`functional_group_id` = `f`.`id`"
+  " AND`f`.`user_consent_prompt` IS NULL))";
 
 const std::string kSelectModuleMeta = "SELECT* FROM `module_meta`";
 

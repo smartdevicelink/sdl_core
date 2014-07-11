@@ -132,13 +132,13 @@ class PTExtRepresentation : public virtual PTRepresentation {
       StringArray* disallowed_groups = NULL) = 0;
 
     /**
-     * @brief GetUserPermissionsForApp
-     * @param device_id
-     * @param policy_app_id
-     * @param group_types
-     * @return
+     * @brief Gets list of groups permissions from policy table
+     * @param device_id Unique device id, which hosts specific application
+     * @param policy_app_id Unique application id
+     * @param group_types Group list sorted by permission status
+     * @return true, if query was successfull, otherwise - false
      */
-    virtual bool GetUserPermissionsForApp(
+    virtual bool GetPermissionsForApp(
       const std::string& device_id,
       const std::string& policy_app_id,
       FunctionalIdType* group_types) = 0;

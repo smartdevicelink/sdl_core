@@ -1495,7 +1495,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
                                        smart_objects::SmartType_Map);
 
     smart_objects::SmartObject& item = allowed_functions_array[index];
-    item[strings::name] = (*it).group_name;
+    item[strings::name] = (*it).group_alias;
     item[strings::id] = (*it).group_id;
     policy::GroupConsent permission_state = (*it).state;
     // If state undefined, 'allowed' parameter should be absent

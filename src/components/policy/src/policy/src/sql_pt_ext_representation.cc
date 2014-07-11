@@ -108,10 +108,10 @@ bool SQLPTExtRepresentation::GetUserPermissionsForDevice(
   return true;
 }
 
-bool SQLPTExtRepresentation::GetUserPermissionsForApp(
+bool SQLPTExtRepresentation::GetPermissionsForApp(
   const std::string& device_id, const std::string& policy_app_id,
   FunctionalIdType* group_types) {
-  LOG4CXX_INFO(logger_, "GetUserPermissionsForApp");
+  LOG4CXX_INFO(logger_, "GetPermissionsForApp");
   if (!group_types) {
     LOG4CXX_WARN(logger_, "Input parameter for group types is null.");
     return false;

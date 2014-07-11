@@ -54,7 +54,7 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
                                      StringArray* consented_groups = NULL,
                                      StringArray* disallowed_groups = NULL);
 
-    bool GetUserPermissionsForApp(
+    bool GetPermissionsForApp(
       const std::string& device_id, const std::string& policy_app_id,
       FunctionalIdType* group_types);
 
