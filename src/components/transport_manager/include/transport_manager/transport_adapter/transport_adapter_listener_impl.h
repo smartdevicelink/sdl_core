@@ -129,8 +129,7 @@ class TransportAdapterListenerImpl
    * @param adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
-   * @param error Error class with information about possible reason of connect
-   *failure.
+   * @param error Error class with information about possible reason of failure.
    */
   virtual void OnConnectFailed(const TransportAdapter* adapter,
                                const DeviceUID& device,

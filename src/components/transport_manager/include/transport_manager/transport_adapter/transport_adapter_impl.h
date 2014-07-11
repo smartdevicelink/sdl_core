@@ -94,8 +94,7 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * Called from transport manager to start device adapter.
    *
-   * @return Error information about possible reason of starting client listener
-   *failure.
+   * @return Error information about possible reason of failure.
    **/
   virtual TransportAdapter::Error Init();
 
@@ -121,8 +120,7 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param device_handle Device unique identifier to connect to.
    * @param app_handle Handle of application to connect to.
    *
-   * @return Error information about possible reason of connecting to device
-   *failure.
+   * @return Error information about possible reason of failure.
    **/
   virtual TransportAdapter::Error Connect(const DeviceUID& device_handle,
                                           const ApplicationHandle& app_handle);
@@ -172,16 +170,14 @@ class TransportAdapterImpl : public TransportAdapter,
   /**
    * @brief Start client listener.
    *
-   * @return Error information about possible reason of starting client listener
-   *failure.
+   * @return Error information about possible reason of failure.
    */
   virtual TransportAdapter::Error StartClientListening();
 
   /**
    * @brief Stop client listener.
    *
-   * @return Error information about possible reason of stopping client listener
-   *failure.
+   * @return Error information about possible reason of failure.
    */
   virtual TransportAdapter::Error StopClientListening();
 

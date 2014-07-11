@@ -76,21 +76,21 @@ class Device {
 
   virtual ApplicationList GetApplicationList() const = 0;
 
-  const DeviceUID& unique_device_id() const {
+  inline const DeviceUID& unique_device_id() const {
     return unique_device_id_;
   }
 
   /**
    * @brief Return name of device.
    */
-  const std::string& name() const {
+  inline const std::string& name() const {
     return name_;
   }
 
   /**
    * @brief Get @link keep_on_disconnect_ @endlink value
    */
-  bool keep_on_disconnect() const {
+  inline bool keep_on_disconnect() const {
     return keep_on_disconnect_;
   }
 
@@ -98,7 +98,7 @@ class Device {
    * @brief Set @link keep_on_disconnect_ @endlink value
    * @param keep_on_disconnect new value
    */
-  void set_keep_on_disconnect(bool keep_on_disconnect) {
+  inline void set_keep_on_disconnect(bool keep_on_disconnect) {
     keep_on_disconnect_ = keep_on_disconnect;
   }
 
@@ -119,7 +119,7 @@ class Device {
   bool keep_on_disconnect_;
 };
 typedef utils::SharedPtr<Device> DeviceSptr;
-typedef std::vector<DeviceSptr> DeviceVector;
+typedef std::vector<DeviceSptr>  DeviceVector;
 }  // namespace transport_adapter
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_DEVICE_H_

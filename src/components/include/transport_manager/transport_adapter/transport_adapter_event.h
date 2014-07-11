@@ -55,7 +55,7 @@ class TransportAdapterEvent {
                         transport_adapter::TransportAdapter* adapter,
                         const DeviceUID& device_handle,
                         const ApplicationHandle& application_id,
-                        RawMessagePtr data, utils::SharedPtr<BaseError> error)
+                        RawMessagePtr data, BaseErrorPtr error)
     : event_type(type),
       application_id(application_id),
       device_uid(device_handle),
@@ -86,7 +86,7 @@ class TransportAdapterEvent {
   /**
    * @brief Pointer to the class that contain details of error.
    */
-  utils::SharedPtr<BaseError> event_error;
+  BaseErrorPtr event_error;
 };
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_EVENT_H_

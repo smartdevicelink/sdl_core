@@ -112,8 +112,7 @@ class TransportAdapter {
    *
    * Called from transport manager to start device adapter.
    *
-   * @return Error information about possible reason of starting client listener
-   *failure.
+   * @return Error information about possible reason of failure.
    **/
   virtual Error Init() = 0;
 
@@ -136,8 +135,7 @@ class TransportAdapter {
    *
    * List of new devices will be supplied in onDeviceListUpdated callback.
    *
-   * @return Error information about possible reason of searching devices
-   *failure.
+   * @return Error information about possible reason of failure.
    **/
   virtual Error SearchDevices() = 0;
 
@@ -154,8 +152,7 @@ class TransportAdapter {
    * @param device_handle Handle of device to connect to.
    * @param app_handle Handle of application to connect to.
    *
-   * @return Error information about possible reason of connection to the device
-   *failure.
+   * @return Error information about possible reason of failure.
    **/
   virtual Error Connect(const DeviceUID& device_handle,
                         const ApplicationHandle& app_handle) = 0;
@@ -177,16 +174,14 @@ class TransportAdapter {
   /**
    * @brief Start client listener.
    *
-   * @return Error information about possible reason of starting client listener
-   *failure.
+   * @return Error information about possible reason of failure.
    */
   virtual Error StartClientListening() = 0;
 
   /**
    * @brief Stop client listener.
    *
-   * @return Error information about possible reason of stopping client listener
-   *failure.
+   * @return Error information about possible reason of failure.
    */
   virtual Error StopClientListening() = 0;
 

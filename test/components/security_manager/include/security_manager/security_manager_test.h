@@ -98,7 +98,7 @@ using namespace ::security_manager;
     void SetUp() OVERRIDE {
       security_manager_.reset(new SecurityManagerImpl());
       security_manager_->set_session_observer(&mock_session_observer);
-      security_manager_->set_protocol_handler(&mock_protocol_observer);
+      security_manager_->set_protocol_handler(&mock_protocol_handler);
       security_manager_->AddListener(&mock_sm_listener);
     }
     void TearDown() OVERRIDE {
@@ -155,7 +155,7 @@ using namespace ::security_manager;
     ::utils::SharedPtr<SecurityManagerImpl> security_manager_;
     // Strict mocks (same as all methods EXPECT_CALL().Times(0))
     testing::StrictMock<protocol_handler_test::SessionObserverMock>   mock_session_observer;
-    testing::StrictMock<protocol_handler_test::ProtocoloObserverMock> mock_protocol_observer;
+    testing::StrictMock<protocol_handler_test::ProtocolHandlerMock>   mock_protocol_handler;
     testing::StrictMock<security_manager_test::CryptoManagerMock>     mock_crypto_manager;
     testing::StrictMock<security_manager_test::SSLContextMock>        mock_ssl_context_new;
     testing::StrictMock<security_manager_test::SSLContextMock>        mock_ssl_context_exists;
@@ -250,7 +250,7 @@ using namespace ::security_manager;
    */
   TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
                     SecurityManager::ERROR_NOT_SUPPORTED), is_final)).
@@ -287,7 +287,7 @@ using namespace ::security_manager;
    * Shall send InternallError on null data recieved
    */
   TEST_F(SecurityManagerTest, GetEmptyQuery) {
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
                     SecurityManager::ERROR_INVALID_QUERY_SIZE), is_final)).
@@ -301,7 +301,7 @@ using namespace ::security_manager;
   TEST_F(SecurityManagerTest, GetWrongJSONSize) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
                     SecurityManager::ERROR_INVALID_QUERY_SIZE), is_final)).
@@ -318,7 +318,7 @@ using namespace ::security_manager;
   TEST_F(SecurityManagerTest, GetInvalidQueryId) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
                     SecurityManager::ERROR_INVALID_QUERY_ID), is_final)).
@@ -350,7 +350,7 @@ using namespace ::security_manager;
   TEST_F(SecurityManagerTest, CreateSSLContext_ErrorCreateSSL) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
                     SecurityManager::ERROR_INTERNAL), is_final)).
@@ -374,7 +374,7 @@ using namespace ::security_manager;
   TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
                     SecurityManager::ERROR_UNKWOWN_INTERNAL_ERROR), is_final)).
@@ -427,7 +427,7 @@ using namespace ::security_manager;
   TEST_F(SecurityManagerTest, StartHandshake_ServiceStillUnprotected) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_INTERNAL
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
                     SecurityManager::ERROR_INTERNAL), is_final)).
@@ -451,7 +451,7 @@ using namespace ::security_manager;
     SetMockCryptoManger();
 
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
                     SecurityManager::ERROR_INTERNAL), is_final)).
@@ -484,7 +484,7 @@ using namespace ::security_manager;
     SetMockCryptoManger();
 
     // Expect send one message (with correct pointer and size data)
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(_, is_final)).
         Times(1);
 
@@ -548,7 +548,7 @@ using namespace ::security_manager;
   TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
                     SecurityManager::ERROR_INVALID_QUERY_SIZE), is_final)).
@@ -563,7 +563,7 @@ using namespace ::security_manager;
   TEST_F(SecurityManagerTest, ProccessHandshakeData_ServiceNotProtected) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
                     SecurityManager::ERROR_SERVICE_NOT_PROTECTED), is_final)).
@@ -593,7 +593,7 @@ using namespace ::security_manager;
     const int handshake_emulates = 4;
 
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
                     SecurityManager::ERROR_SSL_INVALID_DATA), is_final)).
@@ -647,7 +647,7 @@ using namespace ::security_manager;
     const int handshake_emulates = 2;
 
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   // FIXME : !!!
                   _, is_final)).
@@ -738,7 +738,7 @@ using namespace ::security_manager;
                               Handshake_Result_Success)));
 
     // Expect send two message (with correct pointer and size data)
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(_, is_final)).
         Times(2);
 

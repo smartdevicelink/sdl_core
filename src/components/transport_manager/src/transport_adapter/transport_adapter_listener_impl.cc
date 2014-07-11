@@ -76,7 +76,7 @@ void TransportAdapterListenerImpl::OnDeviceListUpdated(
     const TransportAdapter* adapter) {
   const TransportAdapterEvent event(
       TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED,
-      transport_adapter_, "", 0, RawMessagePtr(), utils::SharedPtr<BaseError>());
+      transport_adapter_, "", 0, RawMessagePtr(), BaseErrorPtr());
 
   if (transport_manager::E_SUCCESS !=
       transport_manager_impl_->ReceiveEventFromDevice(event)) {
@@ -91,7 +91,7 @@ void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(const TransportA
     "",
     0,
     RawMessagePtr(),
-    utils::SharedPtr<BaseError>()
+    BaseErrorPtr()
   );
 
   if (transport_manager::E_SUCCESS !=

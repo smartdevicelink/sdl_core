@@ -42,7 +42,7 @@ namespace protocol_handler_test {
 /*
  * MOCK implementation of ::protocol_handler::ProtocolObserver interface
  */
-class ProtocoloObserverMock: public ::protocol_handler::ProtocolHandler {
+class ProtocolHandlerMock: public ::protocol_handler::ProtocolHandler {
  public:
   MOCK_METHOD2(SendMessageToMobileApp,
                void(const RawMessagePtr message,

@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_ERROR_H_
 
 #include <string>
+#include <utils/shared_ptr.h>
 
 namespace transport_manager {
 
@@ -78,6 +79,7 @@ class BaseError {
  private:
   std::string description_;
 };
+typedef utils::SharedPtr<BaseError> BaseErrorPtr;
 
 /**
  * @brief Error that originates during device search.
