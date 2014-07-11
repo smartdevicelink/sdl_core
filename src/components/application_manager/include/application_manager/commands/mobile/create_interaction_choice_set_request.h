@@ -163,12 +163,12 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
       const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2);
 
   /**
-   * @brief Checks choice set params(menuName, tertiaryText, ...) when type is
-   * String, on contained \t\n \\t \\n
+   * @brief Checks choice set params(menuName, tertiaryText, ...)
+   * When type is String there is a check on the contents \t\n \\t \\n
    * @param choice_set which must check
    * @return if choice_set contains \t\n \\t \\n return TRUE, FALSE otherwise
    */
-  bool IsWhitepaceExist(const smart_objects::SmartObject& choice_set);
+  bool IsWhiteSpaceExist(const smart_objects::SmartObject& choice_set);
 
   DISALLOW_COPY_AND_ASSIGN(CreateInteractionChoiceSetRequest);
 };

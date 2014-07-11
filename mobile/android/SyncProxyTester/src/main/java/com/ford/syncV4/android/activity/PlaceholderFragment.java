@@ -3,7 +3,6 @@ package com.ford.syncV4.android.activity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.DialogFragment;
-import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -81,10 +80,8 @@ import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.StartTime;
 import com.ford.syncV4.proxy.rpc.SyncPData;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
-import com.ford.syncV4.proxy.rpc.Turn;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButton;
-import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.VrHelpItem;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
@@ -99,7 +96,7 @@ import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
 import com.ford.syncV4.service.secure.SecurityInternalError;
-import com.ford.syncV4.transport.TransportType;
+import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.logger.Logger;
 import com.lamerman.FileDialog;
@@ -114,8 +111,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Created with Android Studio.
@@ -132,8 +127,6 @@ public class PlaceholderFragment extends Fragment {
      * Placeholder for the Application Id field
      */
     public static final String EMPTY_APP_ID = "";
-    // Request id for ChoiceListActivity
-    public static final int REQUEST_LIST_CHOICES = 45;
     private static final String LOG_TAG = PlaceholderFragment.class.getSimpleName();
     private static final String MOBILE_NAV_FRAGMENT_TAG = "MOBILE_NAV_FRAGMENT_TAG";
     private static final String AUDIO_FRAGMENT_TAG = "AUDIO_FRAGMENT_TAG";
@@ -141,6 +134,7 @@ public class PlaceholderFragment extends Fragment {
     private final static String POLICY_FILES_SETUP_DIALOG_TAG = "PolicyFilesSetupDialogTag";
     private final static String PUT_FILE_DIALOG_TAG = "PutFileDialogTag";
     private final static String ADD_COMMAND_DIALOG_TAG = "AddCommandDialogTag";
+    private final static String UPDATE_TURN_LIST_DIALOG_TAG = "UpdateTurnListDialogTag";
     private final static String SEND_SINGLE_RPC_COMMAND_DIALOG_TAG = "SendSingleRPCCommandDialogTag";
     private final static String PERFORM_AUDIO_PASS_THRU_DIALOG_TAG = "PerformAudioPassThruDialogTag";
     private final static String SYSTEM_REQST_DIALOG_TAG = "SystemRequestDialogTag";
@@ -151,7 +145,7 @@ public class PlaceholderFragment extends Fragment {
     private final static String HASH_ID_SET_UP_DIALOG_TAG = "HashIdSetUpDialogTag";
     private final static String FEEDBACK_DIALOG_TAG = "FeedbackDialogTag";
     private static final String MSC_PREFIX = "msc_";
-    private static final int UPDATETURNLIST_MAXSOFTBUTTONS = 1;
+
     private static final int ALERT_MAXSOFTBUTTONS = 4;
     private static final int SCROLLABLEMESSAGE_MAXSOFTBUTTONS = 8;
     private static final int ALERTMANEUVER_MAXSOFTBUTTONS = 3;
@@ -170,7 +164,10 @@ public class PlaceholderFragment extends Fragment {
      */
     private int _latestDeleteChoiceSetId = CHOICESETID_UNSET;
     // Request id for SoftButtonsListActivity
-    private static final int REQUEST_LIST_SOFTBUTTONS = 43;
+    public static final int REQUEST_LIST_SOFTBUTTONS = 43;
+    // Request id for ChoiceListActivity
+    public static final int REQUEST_LIST_CHOICES = 45;
+
     /**
      * Autoincrementing id for new choices.
      */
@@ -353,7 +350,7 @@ public class PlaceholderFragment extends Fragment {
         checkBoxRpcEncode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                MessageFilter.setEncrypt(isChecked);
+                TestConfig.setEncrypt(isChecked);
             }
         });
 
@@ -2404,101 +2401,12 @@ public class PlaceholderFragment extends Fragment {
                     }
 
                     private void sendUpdateTurnList() {
-                        AlertDialog.Builder builder;
 
-                        final Context mContext = adapter.getContext();
-                        LayoutInflater inflater = (LayoutInflater) mContext
-                                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                        View layout = inflater.inflate(R.layout.updateturnlist, null);
-                        final EditText txtTurnList = (EditText) layout.findViewById(R.id.updateturnlist_txtTurnList);
-                        final EditText txtIconList = (EditText) layout.findViewById(R.id.updateturnlist_txtIconList);
-                        final CheckBox useTurnList = (CheckBox) layout.findViewById(R.id.updateturnlist_useTurnList);
-                        final CheckBox useIconList = (CheckBox) layout.findViewById(R.id.updateturnlist_useIconList);
-                        final CheckBox useSoftButtons = (CheckBox) layout.findViewById(R.id.updateturnlist_chkIncludeSBs);
-
-                        SoftButton sb1 = new SoftButton();
-                        sb1.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-                        sb1.setText("Close");
-                        sb1.setType(SoftButtonType.SBT_TEXT);
-                        sb1.setIsHighlighted(false);
-                        sb1.setSystemAction(SystemAction.DEFAULT_ACTION);
-                        currentSoftButtons = new Vector<SoftButton>();
-                        currentSoftButtons.add(sb1);
-
-                        Button btnSoftButtons = (Button) layout.findViewById(R.id.updateturnlist_btnSoftButtons);
-                        btnSoftButtons.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                IntentHelper.addObjectForKey(currentSoftButtons,
-                                        Const.INTENTHELPER_KEY_OBJECTSLIST);
-                                Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER,
-                                        UPDATETURNLIST_MAXSOFTBUTTONS);
-                                startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
-                            }
-                        });
-
-                        builder = new AlertDialog.Builder(mContext);
-                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                /*
-                                 * the number of items to send is determined as max of turn items
-								 * and icon items. only when the both fields are empty, we
-								 * don't send anything.
-								 */
-                                boolean turnListEnabled = useTurnList.isChecked();
-                                boolean iconListEnabled = useIconList.isChecked();
-                                String turnListString = txtTurnList.getText().toString();
-                                String iconListString = txtIconList.getText().toString();
-                                if ((turnListString.length() > 0) || (iconListString.length() > 0)) {
-                                    Vector<Turn> tarray = new Vector<Turn>();
-
-                                    String[] iconNames = iconListString.split(SyncProxyTester.JOIN_STRING);
-                                    String[] turnNames = turnListString.split(SyncProxyTester.JOIN_STRING);
-                                    int turnCount = Math.max(iconNames.length, turnNames.length);
-
-                                    for (int i = 0; i < turnCount; ++i) {
-                                        Turn t = new Turn();
-                                        if (turnListEnabled) {
-                                            t.setNavigationText((i < turnNames.length) ? turnNames[i] : "");
-                                        }
-
-                                        if (iconListEnabled) {
-                                            Image ti = new Image();
-                                            ti.setValue((i < iconNames.length) ? iconNames[i] : "");
-                                            ti.setImageType(ImageType.DYNAMIC);
-                                            t.setTurnIcon(ti);
-                                        }
-                                        tarray.add(t);
-                                    }
-                                    UpdateTurnList msg = new UpdateTurnList();
-                                    msg.setCorrelationId(getCorrelationId());
-                                    msg.setTurnList(tarray);
-                                    if (useSoftButtons.isChecked()) {
-                                        if (currentSoftButtons != null) {
-                                            msg.setSoftButtons(
-                                                    currentSoftButtons);
-                                        } else {
-                                            msg.setSoftButtons(
-                                                    new Vector<SoftButton>());
-                                        }
-                                    }
-                                    currentSoftButtons = null;
-                                    sendRPCRequestToProxy(msg);
-                                } else {
-                                    SafeToast.showToastAnyThread("Both fields are empty, " +
-                                            "nothing to send");
-                                }
-                            }
-                        });
-                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                currentSoftButtons = null;
-                                dialog.cancel();
-                            }
-                        });
-                        builder.setView(layout);
-                        builder.show();
+                        BaseDialogFragment updateTurnListDialog =
+                                BaseDialogFragment.newInstance(UpdateTurnListDialog.class.getName(),
+                                        getAppId());
+                        updateTurnListDialog.show(getActivity().getFragmentManager(),
+                                UPDATE_TURN_LIST_DIALOG_TAG);
                     }
 
                     private void updateDynamicFooter(EditText txtNumTicks,
@@ -2956,7 +2864,7 @@ public class PlaceholderFragment extends Fragment {
         if (boundProxyService == null) {
             return;
         }
-        MessageFilter.filter(rpcRequest);
+        rpcRequest = TestConfig.filter(rpcRequest);
         boundProxyService.sendRPCRequestWithPreprocess(getAppId(), rpcRequest);
     }
 }

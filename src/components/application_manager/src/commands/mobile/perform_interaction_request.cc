@@ -129,7 +129,7 @@ void PerformInteractionRequest::Run() {
   }
 
   // Checking perform interaction on contained \t\n \\t \\n
-  if (IsWhitepaceExist()) {
+  if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming perform interaction has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -293,11 +293,7 @@ void PerformInteractionRequest::ProcessVRResponse(
     LOG4CXX_INFO(logger_, "VR response aborted");
     if (mobile_apis::InteractionMode::VR_ONLY == interaction_mode_) {
       LOG4CXX_INFO(logger_, "Abort send Close Popup");
-      smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-      c_p_request_so[hmi_request::method_name] = "UI.PerformInteraction";
-      SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
-      DisablePerformInteraction();
+      TerminatePerformInteraction();
       SendResponse(false, mobile_apis::Result::ABORTED);
       return;
     } else {
@@ -307,6 +303,14 @@ void PerformInteractionRequest::ProcessVRResponse(
                                                                default_timeout());
       return;
     }
+  }
+
+  if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
+      vr_perform_interaction_code_) {
+    LOG4CXX_INFO(logger_, "VR response WARNINGS");
+    TerminatePerformInteraction();
+    SendResponse(true, mobile_apis::Result::WARNINGS);
+    return;
   }
 
   int32_t choise_id = message[strings::msg_params][strings::choice_id].asInt();
@@ -328,12 +332,7 @@ void PerformInteractionRequest::ProcessVRResponse(
   }
   if (choice_id_chosen) {
     LOG4CXX_INFO(logger_, "Command was choice id!");
-    smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    c_p_request_so[hmi_request::method_name] = "UI.PerformInteraction";
-    SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
-    DisablePerformInteraction();
-
+    TerminatePerformInteraction();
     (*message_)[strings::params][strings::function_id] =
         static_cast<int32_t>(mobile_apis::FunctionID::PerformInteractionID);
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
@@ -737,14 +736,15 @@ void PerformInteractionRequest::DisablePerformInteraction() {
   }
 }
 
-bool PerformInteractionRequest::IsWhitepaceExist() {
-  //if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+bool PerformInteractionRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::IsWhiteSpaceExist");
   bool return_value = false;
-  std::string str;
+  const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::initial_text)) {
-    str = (*message_)[strings::msg_params][strings::initial_text].asString();
+    str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
     if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid initial_text syntax check failed");
       return_value = true;
     }
   }
@@ -759,6 +759,7 @@ bool PerformInteractionRequest::IsWhitepaceExist() {
     for (; it_ip != it_ip_end; ++it_ip) {
       str = (*it_ip)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid initial_prompt syntax check failed");
         return_value = true;
         break;
       }
@@ -775,6 +776,7 @@ bool PerformInteractionRequest::IsWhitepaceExist() {
     for (; it_hp != it_hp_end; ++it_hp) {
       str = (*it_hp)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
         return_value = true;
         break;
       }
@@ -791,6 +793,7 @@ bool PerformInteractionRequest::IsWhitepaceExist() {
     for (; it_tp != it_tp_end; ++it_tp) {
       str = (*it_tp)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
         return_value = true;
         break;
       }
@@ -807,6 +810,7 @@ bool PerformInteractionRequest::IsWhitepaceExist() {
     for (; it_vh != it_vh_end; ++it_vh) {
       str = (*it_vh)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid vr_help syntax check failed");
         return_value = true;
         break;
       }
@@ -814,6 +818,14 @@ bool PerformInteractionRequest::IsWhitepaceExist() {
   }
 
   return return_value;
+}
+
+void PerformInteractionRequest::TerminatePerformInteraction() {
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+  msg_params[hmi_request::method_name] = "UI.PerformInteraction";
+  SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &msg_params);
+  DisablePerformInteraction();
 }
 
 }  // namespace commands

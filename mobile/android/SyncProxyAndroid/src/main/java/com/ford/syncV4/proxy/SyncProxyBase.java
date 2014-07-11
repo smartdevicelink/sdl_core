@@ -109,6 +109,7 @@ import com.stericson.RootTools.RootTools;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -618,98 +619,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         this._priorAudioStreamingState = priorAudioStreamingState;
     }
 
-<<<<<<< HEAD
     public ProtocolSecureManager getProtocolSecureManager() {
         return protocolSecureManager;
-=======
-    private AudioStreamingState _priorAudioStreamingState = null;
-    // Interface broker
-    private SyncInterfaceBroker _interfaceBroker = null;
-    /**
-     * Handler that is used to schedule SYNC Proxy reconnect tasks.
-     */
-    private final Handler reconnectHandler = new Handler(Looper.getMainLooper());
-    private static int heartBeatInterval = HEARTBEAT_INTERVAL;
-    private static boolean heartBeatAck = true;
-    private IRPCRequestConverterFactory rpcRequestConverterFactory =
-            new SyncRPCRequestConverterFactory();
-    private IProtocolMessageHolder protocolMessageHolder = new ProtocolMessageHolder();
-
-    /**
-     * Handler for OnSystemRequest notifications.
-     */
-    private IOnSystemRequestHandler onSystemRequestHandler;
-
-    /**
-     * A set of internal requests' correlation IDs that are currently in
-     * progress.
-     *
-     * Comment usage of this technique in order to provide possibility to track all responses
-     */
-    //private final Set<Integer> internalRequestCorrelationIDs = new HashSet<Integer>();
-
-    /**
-     * Correlation ID that was last used for messages created internally.
-     */
-    private int lastCorrelationId = 40000;
-
-    public void setSyncConnection(SyncConnection syncConnection) {
-        // Comment NPE check point in order to allow mock testing
-        /*if (syncConnection == null) {
-            throw new NullPointerException("SYNCConnection can not be set to null");
-        }*/
-        mSyncConnection = syncConnection;
-    }
-
-    /**
-     * Constructor.
-     *
-     * @param listener                          Type of listener for this proxy base.
-     * @param syncProxyConfigurationResources   Configuration resources for this proxy.
-     * @param enableAdvancedLifecycleManagement Flag that ALM should be enabled or not.
-     * @param appName                           Client application name.
-     * @param ttsName                           TTS name.
-     * @param ngnMediaScreenAppName             Media Screen Application name.
-     * @param vrSynonyms                        List of synonyms.
-     * @param isMediaApp                        Flag that indicates that client application if media application or not.
-     * @param syncMsgVersion                    Version of Sync Message.
-     * @param languageDesired                   Desired language.
-     * @param hmiDisplayLanguageDesired         Desired language for HMI.
-     * @param appHMIType                        Type of application.
-     * @param appID                             Application identifier.
-     * @param autoActivateID                    Auto activation identifier.
-     * @param callbackToUIThread                Flag that indicates that this proxy should send callback to UI thread or not.
-     * @param transportConfig                   Configuration of transport to be used by underlying connection.
-     * @throws SyncException
-     */
-    protected SyncProxyBase(ProxyListenerType listener, SyncProxyConfigurationResources syncProxyConfigurationResources,
-                            boolean enableAdvancedLifecycleManagement, String appName, Vector<TTSChunk> ttsName,
-                            String ngnMediaScreenAppName, Vector<Object> vrSynonyms, Boolean isMediaApp, SyncMsgVersion syncMsgVersion,
-                            Language languageDesired, Language hmiDisplayLanguageDesired, Vector<AppHMIType> appHMIType, String appID,
-                            String autoActivateID, boolean callbackToUIThread, BaseTransportConfig transportConfig, TestConfig testConfig)
-            throws SyncException {
-
-        mTestConfig = testConfig;
-
-        setupSyncProxyBaseComponents(callbackToUIThread);
-        // Set variables for Advanced Lifecycle Management
-        setAdvancedLifecycleManagementEnabled(enableAdvancedLifecycleManagement);
-        updateRegisterAppInterfaceParameters(appName, ttsName, ngnMediaScreenAppName, vrSynonyms,
-                isMediaApp, syncMsgVersion, languageDesired, hmiDisplayLanguageDesired, appHMIType,
-                appID);
-        setTransportConfig(transportConfig);
-        checkConditionsInvalidateProxy(listener);
-        setProxyListener(listener);
-        // Get information from syncProxyConfigurationResources
-        setupTelephoneManager(syncProxyConfigurationResources);
-        setupMessageDispatchers();
-        tryInitialiseProxy();
-
-        mDeviceInfo = DeviceInfoManager.getDeviceInfo(syncProxyConfigurationResources.getTelephonyManager());
-
-        // Trace that ctor has fired
-        Logger.i("SyncProxy Created, instanceID=" + this.toString());
->>>>>>> develop
     }
 
     public void setProtocolSecureManager(ProtocolSecureManager protocolSecureManager) {
@@ -727,7 +638,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      */
     public void updateRegisterAppInterfaceParameters(RegisterAppInterface registerAppInterface,
                                                      boolean sendAsItIs) {
-        String appId = (String) registerAppInterface.getAppId();
+        String appId = String.valueOf(registerAppInterface.getAppId());
         if (registerAppInterface.getDeviceInfo() != null) {
             setDeviceInfo(registerAppInterface.getDeviceInfo());
             DeviceInfoManager.copyDeviceInfo(getDeviceInfo(), registerAppInterface.getDeviceInfo());
@@ -737,16 +648,11 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         if (registerAppInterface.getCorrelationID() != null) {
             setRegisterAppInterfaceCorrelationId(registerAppInterface.getCorrelationID());
         }
-        if (sendAsItIs) {
-            raiTable.put(appId, registerAppInterface);
-            appIds.add(appId);
-        } else {
+        if (!sendAsItIs) {
             RegisterAppInterface registerAppInterfaceToUpdate = raiTable.get(appId);
             Logger.d(LOG_TAG + " Update RAI (public), appId:" + appId + ", RAI:" + registerAppInterface);
             if (registerAppInterfaceToUpdate == null) {
                 registerAppInterfaceToUpdate = RPCRequestFactory.buildRegisterAppInterface();
-                raiTable.put(appId, registerAppInterface);
-                appIds.add(appId);
             }
             if (registerAppInterfaceToUpdate != null) {
                 registerAppInterfaceToUpdate.setTtsName(registerAppInterface.getTtsName());
@@ -769,6 +675,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 }
             }
         }
+        raiTable.put(appId, registerAppInterface);
+        appIds.add(appId);
     }
 
     /**
@@ -998,6 +906,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     }
 
     /**
+<<<<<<< HEAD
      * Set a value of the {@link com.ford.syncV4.syncConnection.SyncConnection} instance.
      *
      * @param value new {@link com.ford.syncV4.syncConnection.SyncConnection} reference
@@ -1010,6 +919,33 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }*/
         if (mSecureServiceMessageCallback == null) {
             return;
+        }}
+/*
+     * This method is for the TEST CASES ONLY, it used for example in XML testing, when RAI request
+     * has different AppId and (or) different AppName, so we need to adjust session
+     * (if it has been started) to the new RAI request
+     */
+    public void invalidatePreviousSession(String newAppId) {
+        // In XML test assume that we have only one session started, so get the enum of the
+        // session ids
+        Enumeration<Byte> lastSessionId = syncSession.getSessionIds();
+
+        // Invalidate all previous Session(s) RAI request(s)
+        invalidateAllRAIs();
+
+        // Invalidate all previous Session(s) data
+        syncSession.invalidate();
+
+        // Assign new AppId (according to XML test)
+        appIds.add(newAppId);
+
+        // Initialize new AppId key at the Session's holder collection
+        syncSession.addAppId(newAppId);
+
+        // Again, assume that we have only one Session in XML test, assign previous Session Id
+        // to the new AppId
+        if (lastSessionId.hasMoreElements()) {
+            syncSession.updateSessionId(lastSessionId.nextElement());
         }
     }
 
@@ -1245,7 +1181,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
         mIsProxyDisposed = true;
 
-        Logger.i("SYNC Proxy start Dispose");
+        Logger.i("SYNC Proxy start dispose");
 
         try {
             // Clean the proxy
@@ -1279,7 +1215,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
             mTraceDeviceInterrogator = null;
         } finally {
-            Logger.i("SyncProxy Disposed");
+            Logger.i("SYNC Proxy disposed");
         }
     }
 
@@ -1405,7 +1341,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                     Hashtable hash = new Hashtable();
                     if (protocolVersion >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
                         Hashtable hashTemp = new Hashtable();
-                        hashTemp.put(Names.correlationID, message.getCorrId());
+                        hashTemp.put(Names.correlationID, message.getCorrID());
 
                         if (message.getJsonSize() > 0) {
                             final Hashtable<String, Object> mhash = mJsonRPCMarshaller.unmarshall(message.getData());
@@ -2033,9 +1969,11 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             DeviceInfoManager.dumpDeviceInfo(getDeviceInfo());
             String appId = syncSession.getAppIdBySessionId(sessionId);
 
-            Logger.d("RestartRPCProtocolSession sesId:" + sessionId + " appId:" + appId);
-
             RegisterAppInterface registerAppInterface = raiTable.get(appId);
+
+            Logger.d("RestartRPCProtocolSession sesId:" + sessionId + " appId:" + appId +
+                    " RAI:" + registerAppInterface);
+
             if (registerAppInterface == null) {
                 return;
             }
@@ -2765,10 +2703,11 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 languageDesired, hmiDisplayLanguageDesired, appHMIType, appId, correlationID, hashId,
                 deviceInfo);
 
-        appIds.add((String) appId);
-        raiTable.put((String) appId, registerAppInterface);
+        final String appIdString = String.valueOf(appId);
+        appIds.add(appIdString);
+        raiTable.put(appIdString, registerAppInterface);
 
-        sendRPCRequestPrivate((String) appId, registerAppInterface);
+        sendRPCRequestPrivate(appIdString, registerAppInterface);
     }
 
     /**
@@ -3034,8 +2973,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }
 
         mJsonRPCMarshaller = value;
-
-        Logger.d("Set JSON Marshaller:" + value);
     }
 
     /**
@@ -3127,6 +3064,37 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             mSyncConnection.startAudioService(syncSession.getSessionIdByAppId(appId), cyphered);
         }
     }
+    // TODO : Hide this method from public when no Test Cases are need
+
+    /**
+     * Initialize all available Sessions. <b>In production this method MUST be private</b>
+     */
+    public void initializeSessions() {
+        for (String appId: appIds) {
+            initializeSession(appId);
+        }
+    }
+    /**
+     * Initialize new Session. <b>In production this method MUST be private</b>
+     */
+    public void initializeSession(final String appId) {
+        final int sessionIdsNumber = syncSession.getSessionIdsNumber();
+        Logger.d(LOG_TAG + " Init session, id:" + appId);
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mProxyListener.onStartSession(appId);
+                }
+            });
+        } else {
+            mProxyListener.onStartSession(appId);
+        }
+
+        syncSession.addAppId(appId);
+        mSyncConnection.initialiseSession(Session.DEFAULT_SESSION_ID);
+    }
 
     private void updateSecureProxyState(String appId) {
         secureProxyServerListener.setSessionID(syncSession.getSessionIdByAppId(appId));
@@ -3134,12 +3102,13 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         ((HandshakeDataListener) secureProxyServerListener).setMutationManager(getTestConfig().getHandshakeMutationManager());
     }
 
+
     public void startRpcService(String appId, boolean encrypted) {
         if (mSyncConnection != null) {
             updateSecureProxyState(appId);
             mSyncConnection.startRpcService(syncSession.getSessionIdByAppId(appId), encrypted);
-        }
-    }
+        }}
+
 
     protected void endSession(byte sessionId, EndServiceInitiator initiator) {
         String appId = syncSession.getAppIdBySessionId(sessionId);
@@ -3173,27 +3142,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }*/
     }
 
-    /**
-     * Initialize new Session. <b>In production this method MUST be private</b>
-     */
-    public void initializeSession(final String appId) {
-        final int sessionIdsNumber = syncSession.getSessionIdsNumber();
-        Logger.d(LOG_TAG + " Init session, id:" + appId);
-        if (_callbackToUIThread) {
-            // Run in UI thread
-            _mainUIHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mProxyListener.onStartSession(appId);
-                }
-            });
-        } else {
-            mProxyListener.onStartSession(appId);
-        }
 
-        syncSession.addAppId(appId);
-        mSyncConnection.initialiseSession(Session.DEFAULT_SESSION_ID);
-    }
 
     public IRPCRequestConverterFactory getRpcRequestConverterFactory() {
         return rpcRequestConverterFactory;

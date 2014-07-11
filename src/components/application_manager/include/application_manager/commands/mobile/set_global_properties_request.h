@@ -95,6 +95,14 @@ class SetGlobalPropertiesRequest : public CommandRequestImpl {
   static bool ValidateConditionalMandatoryParameters(
       const smart_objects::SmartObject& params);
 
+  /**
+   * @brief Checks set global properties params(helpPrompt, timeoutPrompt, ...).
+   * When type is String there is a check on the contents \t\n \\t \\n
+   * @return if set global properties contains \t\n \\t \\n return TRUE,
+   * FALSE otherwise
+   */
+  bool IsWhiteSpaceExist();
+
   DISALLOW_COPY_AND_ASSIGN(SetGlobalPropertiesRequest);
 
   bool is_ui_send_;

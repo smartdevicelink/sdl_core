@@ -38,6 +38,7 @@
 #include "qml_dbus.h"
 #include "qt_version.h"
 
+#include <QtCore/QVariant>
 #include <QtDBus/QDBusInterface>
 #if QT_4
 # include <QtDeclarative/QDeclarativeItem>

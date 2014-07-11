@@ -128,7 +128,6 @@ void UsbConnection::OnInTransfer(usbd_urb* urb) {
                                                    << len);
 
   if (!error) {
-    const uint32_t urb_status = status & USBD_URB_STATUS_MASK;
     switch (status) {
       case USBD_STATUS_CMP:
       case USBD_STATUS_CMP_ERR | USBD_STATUS_DATA_UNDERRUN:
@@ -202,7 +201,6 @@ void UsbConnection::OnOutTransfer(usbd_urb* urb) {
                                                     << len);
 
   if (!error) {
-    const uint32_t urb_status = status & USBD_URB_STATUS_MASK;
     switch (status) {
       case USBD_STATUS_CMP:
       case USBD_STATUS_CMP_ERR | USBD_STATUS_DATA_UNDERRUN:

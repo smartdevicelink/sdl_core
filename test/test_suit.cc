@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -42,6 +42,7 @@
 #include "protocol_handler/protocol_handler_tm_test.h"
 #include "application_manager/formatters_commands.h"
 
+// TODO(Ezamakhov): add skip tests
 #ifdef ENABLE_SECURITY
 #include "connection_handler/connection_test.h"
 //#include "connection_handler/heart_beat_monitor_test.h"
@@ -54,9 +55,9 @@
 // TODO(EZamakhov): add TM and other test
 #include "media_manager/media_manager_impl_test.h"
 #include "SmartObjectDraftTest.h"
-//#include "SmartObjectInvalidTest.h"
+#include "SmartObjectInvalidTest.h"
 #include "SmartObjectStressTest.h"
-//#include "SmartObjectUnitTest.h"
+#include "SmartObjectUnitTest.h"
 #include "TSharedPtrTest.h"
 //#include "jsoncpp/json_reader_test.h"
 

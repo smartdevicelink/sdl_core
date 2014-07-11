@@ -44,7 +44,7 @@ namespace security_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "CryptoManagerImpl")
 
-int CryptoManagerImpl::instance_count_ = 0;
+uint32_t CryptoManagerImpl::instance_count_ = 0;
 
 CryptoManagerImpl::CryptoManagerImpl()
     : context_(NULL), mode_(CLIENT) {

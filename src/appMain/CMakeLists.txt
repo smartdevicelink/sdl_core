@@ -186,14 +186,9 @@ endif ()
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
-  FILES log4cxx.properties
-        audio.8bit.wav
-        test.txt
-        smartDeviceLink.ini
-        hmi_capabilities.json
-        sdl_preloaded_pt.json
-        ${CMAKE_SOURCE_DIR}/mycert.pem
-        ${CMAKE_SOURCE_DIR}/mykey.pem
+  FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
+    hmi_capabilities.json sdl_preloaded_pt.json
+    ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
 )
 if (${WEB_HMI})

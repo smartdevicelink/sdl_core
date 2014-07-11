@@ -90,6 +90,7 @@ LifeCycle::LifeCycle()
   , mb_pasa_adapter_thread_(NULL)
 #endif  // PASA_HMI
 #endif  // CUSTOMER_PASA
+  , components_started(false)
 { }
 
 bool LifeCycle::StartComponents() {
@@ -146,8 +147,10 @@ bool LifeCycle::StartComponents() {
       &protocol_name, "TLSv1.2", security_manager::SecurityManagerImpl::ConfigSection(), "Protocol");
 
   security_manager::Protocol protocol;
-  if (protocol_name == "TLSv1.1") {
-    protocol = security_manager::TLSv1_1;
+  if (protocol_name == "TLSv1.0") {
+    protocol = security_manager::TLSv1;
+  } else if (protocol_name == "TLSv1.1") {
+      protocol = security_manager::TLSv1_1;
   } else if (protocol_name == "TLSv1.2") {
     protocol = security_manager::TLSv1_2;
   } else if (protocol_name == "SSLv3") {
@@ -210,6 +213,7 @@ bool LifeCycle::StartComponents() {
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
+  components_started = true;
   return true;
 }
 
@@ -364,6 +368,10 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // CUSTOMER_PASA
 
 void LifeCycle::StopComponents() {
+  if (components_started == false) {
+    LOG4CXX_ERROR(logger_, "Components wasn't started");
+    return;
+  }
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
@@ -471,6 +479,7 @@ void LifeCycle::StopComponents() {
     time_tester_ = NULL;
   }
 #endif  // TIME_TESTER
+  components_started =false;
 }
 
 }  //  namespace main_namespace

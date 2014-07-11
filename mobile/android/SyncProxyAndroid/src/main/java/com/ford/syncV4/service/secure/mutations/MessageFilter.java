@@ -1,4 +1,4 @@
-package com.ford.syncV4.android.activity;
+package com.ford.syncV4.service.secure.mutations;
 
 import com.ford.syncV4.proxy.RPCRequest;
 
@@ -16,7 +16,8 @@ public class MessageFilter {
         return encrypt;
     }
 
-    public static void filter(RPCRequest msg) {
+    public static RPCRequest filter(RPCRequest msg) {
         msg.setDoEncryption(encrypt);
+        return msg;
     }
 }

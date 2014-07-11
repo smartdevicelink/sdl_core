@@ -129,9 +129,9 @@ class MyTransportListener
      public:
   explicit MyTransportListener(TransportManagerTest *test)
       : TransportManagerListenerEmpty(),
-        test(test),
         connection(0),
-        device_handle(0) {}
+        device_handle(0),
+        test(test) {}
   ConnectionUID connection;
   DeviceHandle device_handle;
   void OnConnectionEstablished(const DeviceInfo &device,

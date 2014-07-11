@@ -87,6 +87,14 @@ void UpdateTurnListRequest::Run() {
     }
   }
 
+  // Checking update turn list on contained \t\n \\t \\n
+  if (IsWhiteSpaceExist()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming update turn list has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
@@ -171,6 +179,54 @@ bool UpdateTurnListRequest::CheckTurnListArray() {
     }
   }
   return true;
+}
+
+bool UpdateTurnListRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "UpdateTurnListRequest::IsWhiteSpaceExist");
+  bool return_value = false;
+  const char* str = NULL;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    const smart_objects::SmartArray* sb_array =
+        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
+
+    smart_objects::SmartArray::const_iterator it_sb = sb_array->begin();
+    smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
+
+    for (; it_sb != it_sb_end; ++it_sb) {
+      if ((*it_sb).keyExists(strings::image)) {
+        str = (*it_sb)[strings::image][strings::value].asCharArray();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_INFO(logger_,
+                       "Invalid soft_buttons image value syntax check failed");
+          return_value = true;
+          break;
+        }
+      }
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::turn_list)) {
+    const smart_objects::SmartArray* tl_array =
+        (*message_)[strings::msg_params][strings::turn_list].asArray();
+
+    smart_objects::SmartArray::const_iterator it_tl = tl_array->begin();
+    smart_objects::SmartArray::const_iterator it_tl_end = tl_array->end();
+
+    for (; it_tl != it_tl_end; ++it_tl) {
+      if ((*it_tl).keyExists(strings::turn_icon)) {
+        str = (*it_tl)[strings::turn_icon][strings::value].asCharArray();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_INFO(logger_,
+                       "Invalid turn_list turn_icon value syntax check failed");
+          return_value = true;
+          break;
+        }
+      }
+    }
+  }
+
+  return return_value;
 }
 
 }  // namespace commands

@@ -80,6 +80,14 @@ class UpdateTurnListRequest : public CommandRequestImpl {
    */
   bool CheckTurnListArray();
 
+  /**
+   * @brief Checks update turn list param
+   * When type is String there is a check on the contents \t\n \\t \\n
+   * @return if update turn list contains \t\n \\t \\n return TRUE,
+   * FALSE otherwise
+   */
+  bool IsWhiteSpaceExist();
+
   DISALLOW_COPY_AND_ASSIGN(UpdateTurnListRequest);
 };
 

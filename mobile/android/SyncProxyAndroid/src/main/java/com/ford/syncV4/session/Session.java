@@ -5,6 +5,7 @@ import com.ford.syncV4.service.Service;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -110,6 +111,13 @@ public class Session {
      */
     public Set<String> getSessionIdsKeys() {
         return sessionIds.keySet();
+    }
+
+    /**
+     * @return an enumeration of the Session Ids.
+     */
+    public Enumeration<Byte> getSessionIds() {
+        return sessionIds.elements();
     }
 
     /**
@@ -298,13 +306,12 @@ public class Session {
     /**
      * Invalidates provided Application Id, clear all Services associated and remove it from the list
      *
-     * @param appId Application Id
-     *
      * @return true in case of success, false - otherwise
      */
-    public boolean invalidateAppId(String appId) {
+    public boolean invalidate() {
 
-        // TODO : Implement
+        servicesList.clear();
+        sessionIds.clear();
 
         return true;
     }

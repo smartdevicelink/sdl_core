@@ -95,7 +95,7 @@ public class RPCMessageHandler implements IRPCMessageHandler {
 
                 Alert alert = new Alert();
                 alert.setAlertText1("Certificate Recall");
-                alert.setCorrelationID(1);
+                alert.setCorrelationId(1);
 
                 try {
                     //TODO not claer what app id use

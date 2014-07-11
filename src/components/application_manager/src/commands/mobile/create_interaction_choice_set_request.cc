@@ -213,7 +213,7 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
     }
 
     // Checking choice set on contained \t\n \\t \\n
-    if (IsWhitepaceExist((*it_array))) {
+    if (IsWhiteSpaceExist((*it_array))) {
       LOG4CXX_ERROR(logger_,
                     "Incoming choice set has contains \t\n \\t \\n");
       return mobile_apis::Result::INVALID_DATA;
@@ -256,36 +256,53 @@ bool CreateInteractionChoiceSetRequest::compareStr(
   return 0 == strcasecmp(str1.asCharArray(), str2.asCharArray());
 }
 
-bool CreateInteractionChoiceSetRequest::IsWhitepaceExist(
+bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
     const smart_objects::SmartObject& choice_set) {
+  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::IsWhiteSpaceExist");
   bool return_value = false;
+  const char* str = NULL;
 
-  std::string str = choice_set[strings::menu_name].asCharArray();
+  str = choice_set[strings::menu_name].asCharArray();
   if (!CheckSyntax(str, true)) {
+    LOG4CXX_ERROR(logger_, "Invalid menu_name syntax check failed");
     return_value = true;
   }
 
-  str = choice_set[strings::secondary_text].asCharArray();
-  if (!CheckSyntax(str, true)) {
-    return_value = true;
-  }
-
-  str = choice_set[strings::tertiary_text].asCharArray();
-  if (!CheckSyntax(str, true)) {
-    return_value = true;
-  }
-
-  const smart_objects::SmartArray* vr_array =
-      choice_set[strings::vr_commands].asArray();
-
-  smart_objects::SmartArray::const_iterator it_vr = vr_array->begin();
-  smart_objects::SmartArray::const_iterator it_vr_end = vr_array->end();
-
-  for (; it_vr != it_vr_end; ++it_vr) {
-    str = (*it_vr).asCharArray();
+  if (choice_set.keyExists(strings::secondary_text)) {
+    str = choice_set[strings::secondary_text].asCharArray();
     if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid secondary_text syntax check failed");
       return_value = true;
-      break;
+    }
+  }
+
+  if (choice_set.keyExists(strings::tertiary_text)) {
+    str = choice_set[strings::tertiary_text].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid tertiary_text syntax check failed");
+      return_value = true;
+    }
+  }
+
+  if (choice_set.keyExists(strings::vr_commands)) {
+    size_t len =
+        choice_set[strings::vr_commands].length();
+
+    for (size_t i = 0; i < len; ++i) {
+      str = choice_set[strings::vr_commands][i].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid vr_commands syntax check failed");
+        return_value = true;
+        break;
+      }
+    }
+  }
+
+  if (choice_set.keyExists(strings::image)) {
+    str = choice_set[strings::image][strings::value].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid image value syntax check failed");
+      return_value = true;
     }
   }
 

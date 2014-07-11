@@ -59,7 +59,7 @@ class MockPTExtRepresentation : public MockPTRepresentation,
     MOCK_METHOD0(ResetAppConsents, bool());
     MOCK_METHOD3(GetUserPermissionsForDevice,
                  bool(const std::string&, StringArray*, StringArray*));
-    MOCK_METHOD3(GetUserPermissionsForApp,
+    MOCK_METHOD3(GetPermissionsForApp,
                  bool(const std::string&, const std::string&,
                       FunctionalIdType* group_types));
     MOCK_METHOD2(GetDeviceGroupsFromPolicies,

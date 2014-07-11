@@ -7,8 +7,10 @@ package com.ford.syncV4.test;
  * Time: 9:58 AM
  */
 
+import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.service.secure.SecurityInternalError;
+import com.ford.syncV4.service.secure.mutations.MessageFilter;
 import com.ford.syncV4.service.secure.mutations.MutationManager;
 
 import java.util.List;
@@ -17,6 +19,20 @@ import java.util.List;
  * This class stores all the necessary data for SDK testing
  */
 public class TestConfig {
+
+    private static MessageFilter messageFilter;
+
+    public static void setEncrypt(boolean encrypt){
+        messageFilter.setEncrypt(encrypt);
+    }
+
+    public static boolean isEncrypt(){
+        return messageFilter.isEncrypt();
+    }
+
+    public static RPCRequest filter(RPCRequest msg) {
+        return messageFilter.filter(msg);
+    }
 
     /**
      * Allow to skip Root Device check in case of, for example, Android emulator

@@ -103,7 +103,7 @@ using namespace ::security_manager;
     }
     void TearDown() OVERRIDE {
       // Wait call methods in thread
-      usleep(20000);
+      usleep(500000);
       // Strict mocks are the same as EXPECT_CALL(ALL).Times(0)
     }
 
@@ -223,7 +223,7 @@ using namespace ::security_manager;
         WillOnce(Return(false));
     EXPECT_CALL(mock_listener2,
                 OnHandshakeDone(key, first_call_value)).
-        // Emulate true (assept) result
+        // Emulate true (accept) result
         WillOnce(Return(true));
 
     const bool second_call_value = false;

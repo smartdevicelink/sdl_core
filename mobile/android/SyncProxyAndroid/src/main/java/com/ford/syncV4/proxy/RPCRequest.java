@@ -29,23 +29,13 @@ public class RPCRequest extends RPCMessage {
         this.setCorrelationId(that.getCorrelationID());
     }
 
-<<<<<<< HEAD
     public Integer getCorrelationID() {
         return (Integer) function.get(Names.correlationID);
     }
 
-    public void setCorrelationID(Integer correlationID) {
+    public void setCorrelationId(Integer correlationID) {
         if (correlationID != null) {
             function.put(Names.correlationID, correlationID);
-=======
-	public Integer getCorrelationID() {
-		return (Integer)function.get(Names.correlationID);
-	}
-	
-	public void setCorrelationId(Integer correlationID) {
-		if (correlationID != null) {
-            function.put(Names.correlationID, correlationID );
->>>>>>> develop
         } else if (parameters.contains(Names.correlationID)) {
             function.remove(Names.correlationID);
         }
@@ -65,4 +55,6 @@ public class RPCRequest extends RPCMessage {
     public void setDoEncryption(boolean doEncryption) {
         this.doEncryption = doEncryption;
     }
+
+
 }

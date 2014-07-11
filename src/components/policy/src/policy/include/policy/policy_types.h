@@ -280,8 +280,8 @@ typedef std::vector<uint32_t> FunctionalGroupIDs;
 typedef std::map<GroupType, FunctionalGroupIDs> FunctionalIdType;
 
 /**
- * @brief Array of functional group ids binded to group name (e.g.
- * VehicleData-4) and user_consent_prompt (e.g. VehicleData)
+ * @brief Array of functional group ids binded to user_consent_prompt (e.g.
+ * VehicleData) and group name (e.g. VehicleData-4)
  */
 typedef std::map<uint32_t, std::pair<std::string, std::string> > FunctionalGroupNames;
 

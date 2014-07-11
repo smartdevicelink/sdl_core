@@ -661,7 +661,7 @@ class CodeGenerator(object):
                     type=u"int64_t",
                     params=self._gen_schema_item_param_values(
                         [[u"int64_t", param.min_value],
-                         [u"int64_t", param.max_value],
+                         [u"int64_t", str(param.max_value) + u"LL"],
                          [u"int64_t", param.default_value]]))
             else:
                 raise GenerateError("Parameter value too large: " + str(param.max_value))

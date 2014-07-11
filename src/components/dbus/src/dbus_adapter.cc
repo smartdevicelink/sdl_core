@@ -698,10 +698,7 @@ bool DBusAdapter::GetOneArgument(
   if (rules->obligatory) {
     return GetValue(iter, rules, args[rules->name]);
   } else {
-    if (!GetOptionalValue(iter, rules, args[rules->name])) {
-      args.erase(rules->name);
-    }
-    return true;  // for optional argument always true
+    return GetOptionalValue(iter, rules, args);
   }
 }
 
@@ -801,6 +798,7 @@ bool DBusAdapter::GetArrayValue(
     const ford_message_descriptions::ArrayDescription* rules,
     smart_objects::SmartObject& param) {
   smart_objects::SmartObject array(smart_objects::SmartType_Array);
+
   int i = 0;
   DBusMessageIter sub_iter;
   dbus_message_iter_recurse(iter, &sub_iter);
@@ -819,6 +817,7 @@ bool DBusAdapter::GetStructValue(
     DBusMessageIter* iter,
     const ford_message_descriptions::StructDescription* rules,
     smart_objects::SmartObject& param) {
+
   DBusMessageIter sub_iter;
   dbus_message_iter_recurse(iter, &sub_iter);
   const ParameterDescription** entry;
@@ -839,9 +838,14 @@ bool DBusAdapter::GetOptionalValue(
     DBusMessageIter* iter,
     const ford_message_descriptions::ParameterDescription* rules,
     smart_objects::SmartObject& param) {
+  int type = dbus_message_iter_get_arg_type(iter);
+  if (type != DBUS_TYPE_STRUCT) {
+    LOG4CXX_WARN(logger_, "DBus: Not expected type of argument. It is not optional parameter.");
+    return false;
+  }
+
   DBusMessageIter sub_iter;
   dbus_message_iter_recurse(iter, &sub_iter);
-
   ford_message_descriptions::ParameterDescription flagRules = { "flag",
       ford_message_descriptions::Boolean, true };
   smart_objects::SmartObject flag;
@@ -850,9 +854,9 @@ bool DBusAdapter::GetOptionalValue(
   }
   if (flag.asBool()) {
     dbus_message_iter_next(&sub_iter);
-    return GetValue(&sub_iter, rules, param);
+    return GetValue(&sub_iter, rules, param[rules->name]);
   } else {
-    return false;
+    return true;
   }
 }
 

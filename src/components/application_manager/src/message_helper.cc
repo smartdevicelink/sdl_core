@@ -73,14 +73,16 @@ hmi_apis::Common_Language::eType ToCommonLanguage(
   return hmi_apis::Common_Language::eType(lang_val);
 }
 
-typedef std::map<std::string, hmi_apis::Common_AppPriority::eType> CommonAppPriorityMap;
+typedef
+std::map<std::string, hmi_apis::Common_AppPriority::eType> CommonAppPriorityMap;
+
 CommonAppPriorityMap app_priority_values = {
   {"NORMAL", hmi_apis::Common_AppPriority::NORMAL},
   {"COMMUNICATION", hmi_apis::Common_AppPriority::COMMUNICATION},
   {"EMERGENCY", hmi_apis::Common_AppPriority::EMERGENCY},
   {"NAVIGATION", hmi_apis::Common_AppPriority::NAVIGATION},
   {"NONE", hmi_apis::Common_AppPriority::NONE},
-  {"VOICE_COMMUNICATION", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
+  {"voiceCommunication", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
   {"INVALID_ENUM", hmi_apis::Common_AppPriority::INVALID_ENUM}
 };
 
@@ -243,6 +245,14 @@ std::string MessageHelper::CommonLanguageToString(
     default:
       return "";
   }
+}
+
+uint32_t MessageHelper::GetAppCommandLimit(const std::string& policy_app_id) {
+  std::string priority;
+  policy::PolicyHandler::instance()->policy_manager()->GetPriority(
+        policy_app_id, &priority);
+  return policy::PolicyHandler::instance()->policy_manager()->
+      GetNotificationsNumber(priority);
 }
 
 void MessageHelper::SendHMIStatusNotification(
@@ -1485,7 +1495,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
                                        smart_objects::SmartType_Map);
 
     smart_objects::SmartObject& item = allowed_functions_array[index];
-    item[strings::name] = (*it).group_name;
+    item[strings::name] = (*it).group_alias;
     item[strings::id] = (*it).group_id;
     policy::GroupConsent permission_state = (*it).state;
     // If state undefined, 'allowed' parameter should be absent
@@ -2240,7 +2250,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
       for (size_t i = 0; i < object.length(); i++) {
         ++tab;
 
-        printf("\n%s%d: ", tab_buffer.c_str(), i);
+        printf("\n%s%zu: ", tab_buffer.c_str(), i);
         if (!PrintSmartObject(object.getElement(i))) {
           printf("\n");
           return false;

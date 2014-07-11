@@ -59,12 +59,28 @@ set(TARGET_OPTION 	"$ENV{TARGET}")
 set(MEDIA_MODE_OPTION 	"$ENV{MEDIA_MODE}")
 set(HMI_ADAPTER_OPTION 	"$ENV{HMI_ADAPTER}")
 set(ENABLE_LOG_OPTION 	"$ENV{ENABLE_LOG}")
+set(ARCH_TYPE_OPTION	"$ENV{ARCH_TYPE}")
 
 add_custom_target(pasa-tarball
   COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} PASA
   COMMAND tar -czv -C /tmp/PASA -f ${CMAKE_BINARY_DIR}/pasa.tar.gz .
   DEPENDS HMI_API MOBILE_API v4_protocol_v1_2_no_extra
 )
+
+add_custom_target(ford-tarball
+  COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} FORD
+  COMMAND tar -czv -C /tmp/FORD -f ${CMAKE_BINARY_DIR}/ford.tar.gz .
+  DEPENDS HMI_API MOBILE_API v4_protocol_v1_2_no_extra
+)
+
+if (ARCH_TYPE_OPTION)
+  if (NOT (${ARCH_TYPE_OPTION} STREQUAL "x86") AND NOT (${ARCH_TYPE_OPTION} STREQUAL "armv7"))
+    message(AUTHOR_WARNING "HW architecture is not defined, using x86. Allowed values are x86/armv7 (case sensitive)")
+    set(ARCH_TYPE_OPTION	"x86")
+  endif ()
+else ()
+    set(ARCH_TYPE_OPTION	"x86")
+endif()
 
 if (OS_TYPE_OPTION)
   if (${OS_TYPE_OPTION} STREQUAL "QNX")

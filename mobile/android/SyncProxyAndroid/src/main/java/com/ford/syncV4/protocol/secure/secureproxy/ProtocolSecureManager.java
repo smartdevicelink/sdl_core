@@ -7,6 +7,7 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.transport.ITransportListener;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,7 +29,6 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
     ISSLComponent secureProxy;
     ISSLComponent sslClient;
     private boolean handshakeFinished = false;
-    private CountDownLatch countDownLatchInput = new CountDownLatch(1);
 
     public boolean isHandshakeFinished() {
         return handshakeFinished;
@@ -38,23 +38,6 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
         this.handshakeFinished = handshakeFinished;
     }
 
-    public synchronized CountDownLatch getCountDownLatchOutput() {
-        return countDownLatchOutput;
-    }
-
-    public synchronized void setCountDownLatchOutput(CountDownLatch countDownLatchOutput) {
-        this.countDownLatchOutput = countDownLatchOutput;
-    }
-
-    public synchronized CountDownLatch getCountDownLatchInput() {
-        return countDownLatchInput;
-    }
-
-    public synchronized void setCountDownLatchInput(CountDownLatch countDownLatchInput) {
-        this.countDownLatchInput = countDownLatchInput;
-    }
-
-    private CountDownLatch countDownLatchOutput = new CountDownLatch(1);
     private byte[] cypheredData = null;
     private byte[] deCypheredData = null;
     Set<ServiceType> serviceTypesToEncrypt = new HashSet<ServiceType>();
@@ -173,12 +156,13 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
     @Override
     public byte[] sendDataToProxyServerByChunk(boolean isEncrypted, byte[] data) throws IOException, InterruptedException {
         if (isEncrypted) {
-            RPCCodedDataListener listenerOFCodedData = new RPCCodedDataListener();
+            CountDownLatch countDownLatch = new CountDownLatch(1);
+            RPCCodedDataListener listenerOFCodedData = new RPCCodedDataListener(countDownLatch);
             Log.i("cypheredData.length < 1000", "data.length" + data.length);
             listenerOFCodedData.setOriginalLength(data.length - WiProProtocol.SSL_OVERHEAD);
             writeDataToProxyServer(data, listenerOFCodedData);
-            getCountDownLatchOutput().await();
-            return deCypheredData;
+            countDownLatch.await();
+            return cypheredData;
         } else {
             return data;
         }
@@ -187,9 +171,10 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
     @Override
     public byte[] sendDataToProxyServerByteByByte(boolean isEncrypted, byte[] data) throws IOException, InterruptedException {
         if (isEncrypted) {
-            IRPCodedDataListener listenerOfDeCodedData = new RPCDeCodedDataListener();
+            CountDownLatch countDownLatch = new CountDownLatch(1);
+            IRPCodedDataListener listenerOfDeCodedData = new RPCDeCodedDataListener(countDownLatch);
             writeDataToProxyServer(data, listenerOfDeCodedData);
-            getCountDownLatchOutput().await();
+            countDownLatch.await();
             return deCypheredData;
         } else {
             return data;
@@ -210,11 +195,12 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
         if (!isEncrypted) {
             return data;
         }
-        RPCCodedDataListener listenerOFCodedData = new RPCCodedDataListener();
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        RPCCodedDataListener listenerOFCodedData = new RPCCodedDataListener(countDownLatch);
         Log.i("cypheredData.length < 1000", "data.length" + data.length);
         listenerOFCodedData.setOriginalLength(data.length);
         writeDataToSSLSocket(data, listenerOFCodedData);
-        getCountDownLatchInput().await();
+        countDownLatch.await();
         Log.i("cypheredData.length < 1000", "return cypheredData" + cypheredData.length);
         return cypheredData;
     }
@@ -230,9 +216,10 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
         final int bytesToExpectForHeader = 32;
         int bytesReceived = 0;
         int jsonSize = 0;
+        private CountDownLatch mCountDownLatch;
 
-        private RPCDeCodedDataListener() {
-            setCountDownLatchOutput(new CountDownLatch(1));
+        private RPCDeCodedDataListener(CountDownLatch countDownLatch) {
+            mCountDownLatch = countDownLatch;
         }
 
         @Override
@@ -244,7 +231,7 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
                     bytesReceived += bytes.length;
                 } catch (IOException e) {
                     DebugTool.logError("Failed to parse frame", e);
-                    countDownLatchOutput.countDown();
+                    mCountDownLatch.countDown();
                 }
                 if (bytesReceived > bytesToExpectForHeader) {
                     jsonSize = getJsonSizeFromHeader(Arrays.copyOfRange(bOutput.toByteArray(), 0, 32));
@@ -252,7 +239,7 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
 
                 if (jsonSize != 0 && bOutput.size() - 12 == jsonSize) {
                     deCypheredData = bOutput.toByteArray();
-                    countDownLatchOutput.countDown();
+                    mCountDownLatch.countDown();
                     bytesReceived = 0;
                     jsonSize = 0;
                     bOutput = new ByteArrayOutputStream();
@@ -282,9 +269,10 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
         int originalLength;
         int bytesReceived;
         int count = 0;
+        private CountDownLatch mCountDownLatch;
 
-        private RPCCodedDataListener() {
-            setCountDownLatchInput(new CountDownLatch(1));
+        private RPCCodedDataListener(CountDownLatch countDownLatch) {
+            mCountDownLatch = countDownLatch;
         }
 
         @Override
@@ -296,7 +284,7 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
                     bytesReceived += bytes.length;
                 } catch (IOException e) {
                     DebugTool.logError("Failed to code frame", e);
-                    countDownLatchInput.countDown();
+                    mCountDownLatch.countDown();
                 }
                 Log.i("cypheredData.length < 1000", " bytesReceived " + bytesReceived + " originalLength " + getOriginalLength() + " thread:" + Thread.currentThread().getName());
                 if (bytesReceived > getOriginalLength()) {
@@ -305,7 +293,7 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
                     bytesReceived = 0;
                     setOriginalLength(0);
                     Log.i("cypheredData.length < 1000", " countDownLatchInput.countDown()");
-                    countDownLatchInput.countDown();
+                    mCountDownLatch.countDown();
                 }
             }
         }

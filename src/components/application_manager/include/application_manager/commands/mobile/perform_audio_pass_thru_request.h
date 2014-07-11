@@ -104,6 +104,14 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
    */
   void StartMicrophoneRecording();
 
+  /**
+   * @brief Checks perform audio pass thru params(initialPrompt, ...).
+   * When type is String there is a check on the contents \t\n \\t \\n
+   * @return if perform audio pass thru contains \t\n \\t \\n return TRUE,
+   * FALSE otherwise
+   */
+  bool IsWhiteSpaceExist();
+
   //flag display state of speak during perform audio pass thru
   bool is_active_tts_speak_;
 

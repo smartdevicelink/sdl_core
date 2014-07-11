@@ -232,41 +232,46 @@ Item
 
         console.debug("SDL.ActivateApp Request enter", appId);
 
-        RequestToSDL.SDL_ActivateApp(appId, function(params){
-            settingsContainer.activateApp_Response(appId, params)
+        RequestToSDL.SDL_ActivateApp(appId, function(isSDLAllowed, device, isPermissionsConsentNeeded, isAppPermissionsRevoked, appRevokedPermissions, isAppRevoked, priority){
+            settingsContainer.activateApp_Response(appId, isSDLAllowed, device, isPermissionsConsentNeeded, isAppPermissionsRevoked, appRevokedPermissions, isAppRevoked, priority)
         })
 
         console.debug("SDL.ActivateApp Request exit");
     }
 
-    function activateApp_Response (appId, params) {
+    function activateApp_Response (appId, isSDLAllowed, device, isPermissionsConsentNeeded, isAppPermissionsRevoked, appRevokedPermissions, isAppRevoked, priority) {
 
         console.debug("activateApp_Response enter", appId);
 
-        if (!params.isSDLAllowed) {
+        if (!isSDLAllowed) {
 
             userActionPopUp.activate("Allow SDL Functionality request",
-                                        "Would you like to allow SDL functionality for device '" + params.device.name + "'?",
+                                        "Would you like to allow SDL functionality for device '" + device.name + "'?",
                                         function(result){
-                                            allowSDLFunctionality(result, params.device)
-                                        }
+                                            allowSDLFunctionality(result, device)
+                                        },
+                                        true
                                     )
         }
 
-        if (params.isPermissionsConsentNeeded) {
-            RequestToSDL.SDL_GetListOfPermissions(appId, function(params){
-                settingsContainer.getListOfPermissions_Response(appId, params)
+        if (isPermissionsConsentNeeded) {
+            RequestToSDL.SDL_GetListOfPermissions(appId, function(allowedFunctions){
+                settingsContainer.getListOfPermissions_Response(appId, allowedFunctions)
             })
         }
 
-        if (params.isAppPermissionsRevoked) {
-            //setAppPermissions remove revoked permissions
+        if (isAppPermissionsRevoked) {
+
+            appPermissionsRevoked(appId, appRevokedPermissions, "AppPermissionsRevoked")
         }
 
-        if (params.isAppRevoked) {
-            //popupActivate("Current version of app is no longer supported!");
-            //? unregister app or set to level NONE
-        } else if (params.isSDLAllowed && !params.isPermissionsConsentNeeded) {
+        if (isAppRevoked) {
+
+
+            RequestToSDL.SDL_GetUserFriendlyMessage(["AppUnsupported"], dataContainer.hmiUILanguage, function(messages){
+                settingsContainer.getUserFriendlyMessageAppPermissionsRevoked("AppUnsupported", messages)
+            });
+        } else if (isSDLAllowed && !isPermissionsConsentNeeded) {
             dataContainer.setCurrentApplication(appId)
             contentLoader.go(
                 Internal.chooseAppStartScreen(
@@ -296,25 +301,71 @@ Item
             messageCodes.push(x.name);
         });
 
-        RequestToSDL.SDL_GetUserFriendlyMessage(messageCodes, dataContainer.hmiUILanguage, function(params){
-            settingsContainer.onAppPermissionConsent_Notification(appId, params)
+        RequestToSDL.SDL_GetUserFriendlyMessage(messageCodes, dataContainer.hmiUILanguage, function(messages){
+            settingsContainer.onAppPermissionConsent_Notification(appId, messages)
         });
 
         console.log("getListOfPermissions_Response exit");
     }
 
-    function onAppPermissionConsent_Notification (appId, params) {
+    function appPermissionsRevoked (appId, permissions, title) {
+
+        var messageCodes = [];
+
+        permissions.forEach(function (x) {
+            messageCodes.push(x.name);
+        });
+
+        messageCodes.push("AppPermissionsRevoked");
+
+        RequestToSDL.SDL_GetUserFriendlyMessage(messageCodes, dataContainer.hmiUILanguage, function(messages){
+            settingsContainer.getUserFriendlyMessageAppPermissionsRevoked(title, messages)
+        });
+    }
+
+    function getUserFriendlyMessageAppPermissionsRevoked (title, messages) {
+        var tts = "",
+            text = "";
+
+        messages.forEach(function (x) {
+            if (x.tts) {
+                tts += x.tts;
+            }
+            if (x.textBody) {
+                text += x.textBody;
+            }
+        });
+
+        if (tts) {
+            ttsPopUp.activate(tts)
+        }
+
+        userActionPopUp.activate(title, text, null, false)
+
+    }
+
+    function onAppPermissionConsent_Notification (appId, messages) {
         console.log("onAppPermissionConsent_Notification enter");
 
         onAppPermissionConsentPopUp.permissionItems.clear()
 
-        for (var i = 0; i < params.length; i++) {
+        var tts = "";
+
+        for (var i = 0; i < messages.length; i++) {
             onAppPermissionConsentPopUp.permissionItems.append({
-                                 "messageCode": params[i].messageCode,
-                                 "label": params[i].label,
-                                 "textBody": params[i].textBody,
+                                 "messageCode": messages[i].messageCode,
+                                 "label": messages[i].label,
+                                 "textBody": messages[i].textBody,
                                  "allowed": false
-                             })
+                             });
+
+            if (messages[i].tts) {
+                tts += x.tts;
+            }
+        }
+
+        if (tts) {
+            ttsPopUp.activate(tts)
         }
 
         onAppPermissionConsentPopUp.activate(appId)

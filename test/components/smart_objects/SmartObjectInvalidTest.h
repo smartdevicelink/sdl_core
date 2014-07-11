@@ -90,7 +90,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         // ---- unsigned int ---- //
         obj = static_cast<unsigned int>(100);
         ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_int_value, obj.asUInt());
+        ASSERT_EQ(invalid_unsigned_int_value, obj.asUInt());
 
         // ---- DOUBLE ---- //
         obj = 3.14;

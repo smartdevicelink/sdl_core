@@ -48,7 +48,6 @@ class StatisticsManager;
 }  // namespace usage_statistics
 
 namespace application_manager {
-
 namespace mobile_api = mobile_apis;
 
 class ApplicationImpl : public virtual InitialApplicationDataImpl,
@@ -163,15 +162,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   UsageStatistics& usage_report();
 
-  /*
-   * @breaf Check frequency of readDID requests
-   */
-  bool IsReadDIDAllowed();
-
-  /*
-   * @breaf Check frequency of GetVehicleData requests
-   */
-  bool IsGetVehicleDataAllowed();
+  bool IsCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
+                               TLimitSource source);
 
 
  protected:
@@ -220,17 +212,18 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   ProtocolVersion                          protocol_version_;
   bool                                     alert_in_background_;
 
-  /*
-   * first is timestamp
-   * second is count of requests since first
+  /**
+   * @brief Defines number per time in seconds limits
    */
-  std::pair<TimevalStruct, uint32_t>       get_vehice_data_frequency_;
+  typedef std::pair<TimevalStruct, uint32_t> TimeToNumberLimit;
 
-  /*
-   * first is timestamp
-   * second is count of requests since first
+  /**
+   * @brief Defines specific command number per time in seconds limits
    */
-  std::pair<TimevalStruct, uint32_t>       read_did_frequency_;
+  typedef std::map<mobile_apis::FunctionID::eType, TimeToNumberLimit>
+  CommandNumberTimeLimit;
+
+  CommandNumberTimeLimit cmd_number_to_time_limits_;
 
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };

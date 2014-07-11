@@ -82,16 +82,20 @@ public class PolicyFilesManager {
             return;
         }
 
+        String infoMessage = "Custom Policy Update is found";
+
         // Use dummy JSON update if real file do not provided
         if (data.length == 0) {
             data = AppUtils.contentsOfResource(R.raw.policy_table_update);
+
+            infoMessage = "Predefined Policy Update is found";
         }
 
-        SafeToast.showToastAnyThread("Policy Update is found");
+        SafeToast.showToastAnyThread(infoMessage);
 
         // TODO : Logging to be refactored
         if (logAdapter != null) {
-            logAdapter.logMessage("Policy Update is found", Log.DEBUG, true);
+            logAdapter.logMessage(infoMessage, Log.DEBUG, true);
         }
 
         try {

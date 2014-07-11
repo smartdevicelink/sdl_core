@@ -65,10 +65,10 @@ namespace connection_handler {
  * and sessions and provides it to AppManager.
  */
 class ConnectionHandlerImpl : public ConnectionHandler,
-    public transport_manager::TransportManagerListenerEmpty,
-    public protocol_handler::SessionObserver,
-    public DevicesDiscoveryStarter,
-    public utils::Singleton<ConnectionHandlerImpl> {
+  public transport_manager::TransportManagerListenerEmpty,
+  public protocol_handler::SessionObserver,
+  public DevicesDiscoveryStarter,
+  public utils::Singleton<ConnectionHandlerImpl> {
  public:
   /**
    * \brief Destructor
@@ -80,21 +80,21 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param observer Pointer to observer object.
    */
   virtual void set_connection_handler_observer(
-      ConnectionHandlerObserver *observer);
+    ConnectionHandlerObserver *observer);
 
   /**
     * \brief Sets pointer to TransportManager.
     * \param transport_mngr Pointer to TransportManager object.
     **/
   virtual void set_transport_manager(
-      transport_manager::TransportManager *transport_mngr);
+    transport_manager::TransportManager *transport_mngr);
 
   /**
    * \brief Sets pointer to ProtocolHandler.
    * \param protocol_handler Pointer to ProtocolHandler object.
    **/
   void set_protocol_handler(
-      protocol_handler::ProtocolHandler *protocol_handler);
+    protocol_handler::ProtocolHandler *protocol_handler);
 
   /**
    * \brief Connects to all services of device
@@ -107,7 +107,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   virtual void StartTransportManager();
 
   virtual void OnDeviceListUpdated(
-      const std::vector<transport_manager::DeviceInfo>&);
+    const std::vector<transport_manager::DeviceInfo> &);
 
   virtual void OnFindNewApplicationsRequest();
 
@@ -125,7 +125,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
 
   virtual void OnScanDevicesFinished();
   virtual void OnScanDevicesFailed(
-      const transport_manager::SearchDeviceError &error);
+    const transport_manager::SearchDeviceError &error);
 
   /**
    * \brief Notifies about established connection.
@@ -133,30 +133,30 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param connection_id ID of new connection.
    **/
   virtual void OnConnectionEstablished(
-      const transport_manager::DeviceInfo &device_info,
-      const transport_manager::ConnectionUID &connection_id);
+    const transport_manager::DeviceInfo &device_info,
+    const transport_manager::ConnectionUID &connection_id);
   virtual void OnConnectionFailed(
-      const transport_manager::DeviceInfo &device_info,
-      const transport_manager::ConnectError &error);
+    const transport_manager::DeviceInfo &device_info,
+    const transport_manager::ConnectError &error);
   virtual void OnConnectionClosed(
-      transport_manager::ConnectionUID connection_id);
+    transport_manager::ConnectionUID connection_id);
   virtual void OnConnectionClosedFailure(
-      transport_manager::ConnectionUID connection_id,
-      const transport_manager::DisconnectError &error);
+    transport_manager::ConnectionUID connection_id,
+    const transport_manager::DisconnectError &error);
   virtual void OnUnexpectedDisconnect(
-      transport_manager::ConnectionUID connection_id,
-      const transport_manager::CommunicationError &error);
+    transport_manager::ConnectionUID connection_id,
+    const transport_manager::CommunicationError &error);
   virtual void OnDeviceConnectionLost(
-      const connection_handler::DeviceHandle &device,
-      const transport_manager::DisconnectDeviceError &error);
+    const connection_handler::DeviceHandle &device,
+    const transport_manager::DisconnectDeviceError &error);
   /**
    * \brief Informs about failure during DisconnectDevice procedure of TM
    * \param device Information about disconnected device
    * \param error Information about possible reason of loosing connection
    */
   virtual void OnDisconnectFailed(
-      const connection_handler::DeviceHandle &device,
-      const transport_manager::DisconnectDeviceError &error);
+    const connection_handler::DeviceHandle &device,
+    const transport_manager::DisconnectDeviceError &error);
 
   /**
    * \brief Callback function used by ProtocolHandler
@@ -168,10 +168,10 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \return uint32_t Id (number) of new session if successful, otherwise 0.
    */
   virtual uint32_t OnSessionStartedCallback(
-      const transport_manager::ConnectionUID &connection_handle,
-      const uint8_t session_id,
-      const protocol_handler::ServiceType &service_type,
-      const bool is_protected);
+    const transport_manager::ConnectionUID &connection_handle,
+    const uint8_t session_id,
+    const protocol_handler::ServiceType &service_type,
+    const bool is_protected);
 
   /**
    * \brief Callback function used by ProtocolHandler
@@ -183,9 +183,9 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \return uint32_t 0 if operation fails, session key otherwise
    */
   virtual uint32_t OnSessionEndedCallback(
-      const transport_manager::ConnectionUID &connection_handle,
-      const uint8_t session_id, const uint32_t &hashCode,
-      const protocol_handler::ServiceType &service_type);
+    const transport_manager::ConnectionUID &connection_handle,
+    const uint8_t session_id, const uint32_t &hashCode,
+    const protocol_handler::ServiceType &service_type);
 
   /**
    * \brief Creates unique identifier of session (can be used as hash)
@@ -196,8 +196,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \return int32_t Unique key for session
    */
   virtual uint32_t KeyFromPair(
-      transport_manager::ConnectionUID connection_handle,
-      uint8_t session_id);
+    transport_manager::ConnectionUID connection_handle,
+    uint8_t session_id);
 
   /**
    * \brief Returns connection identifier and session number from given session key
@@ -241,8 +241,8 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \return \c SecurityQuery::ProtectSessionResult value
    */
   int SetSSLContext(
-      const uint32_t &key,
-      security_manager::SSLContext *context) OVERRIDE;
+    const uint32_t &key,
+    security_manager::SSLContext *context) OVERRIDE;
 
   /**
    * \brief Gets crypto context of connection, use service_type to get NULL
@@ -253,16 +253,16 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \return \ref SSLContext of connection
    */
   security_manager::SSLContext *GetSSLContext(
-      const uint32_t &key,
-      const protocol_handler::ServiceType &service_type) OVERRIDE;
+    const uint32_t &key,
+    const protocol_handler::ServiceType &service_type) OVERRIDE;
   /**
    * \brief Set protection flag to service in session by key
    * \param key Unique key used by other components as session identifier
    * \param service_type Type of service
    */
   void SetProtectionFlag(
-      const uint32_t &key,
-      const protocol_handler::ServiceType &service_type) OVERRIDE;
+    const uint32_t &key,
+    const protocol_handler::ServiceType &service_type) OVERRIDE;
 #endif  // ENABLE_SECURITY
 
   /**
@@ -329,6 +329,26 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \brief Keep connection associated with the key from being closed by heartbeat monitor
    */
   void KeepConnectionAlive(uint32_t connection_key, uint8_t session_id);
+
+  /**
+   * \brief binds protocol version with session
+   *
+   * \param connection_key pair of connection and session id
+   * \param protocol_version contains protocol version of
+   * \registered application.
+   */
+  virtual void BindProtocolVersionWithSession(uint32_t connection_key,
+      uint8_t protocol_version);
+
+  /**
+   * \brief returns TRUE if session supports sending HEART BEAT ACK to mobile side
+   * \param  connection_handle Connection identifier whithin which session exists
+   * \param sessionId Identifier of the session
+   * \return TRUE if session has protocol version which supports heartbeat otherwise returns FALSE
+   */
+  virtual bool CheckSupportHeartBeat(
+    transport_manager::ConnectionUID connection_handle,
+    uint8_t session_id);
  private:
   /**
    * \brief Default class constructor
@@ -344,7 +364,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   void RemoveConnection(const ConnectionHandle connection_handle);
 
   void OnConnectionEnded(
-      const transport_manager::ConnectionUID &connection_id);
+    const transport_manager::ConnectionUID &connection_id);
 
   /**
    * \brief Pointer to observer
@@ -383,13 +403,12 @@ class ConnectionHandlerImpl : public ConnectionHandler,
  public:
   ConnectionList &getConnectionList();
   void addDeviceConnection(
-      const transport_manager::DeviceInfo &device_info,
-      const transport_manager::ConnectionUID &connection_id);
+    const transport_manager::DeviceInfo &device_info,
+    const transport_manager::ConnectionUID &connection_id);
 #endif
  private:
   FRIEND_BASE_SINGLETON_CLASS(ConnectionHandlerImpl);
   DISALLOW_COPY_AND_ASSIGN(ConnectionHandlerImpl);
 };
 }  // namespace connection_handler
-
 #endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_CONNECTION_HANDLER_IMPL_H_
