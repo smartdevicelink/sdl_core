@@ -998,9 +998,6 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
                   kDefaultPoliciesSnapshotFileName,
                   kPolicySection, kPathToSnapshotKey);
 
-  policy_snapshot_file_name_ = system_files_path_ +
-                               '/' + policy_snapshot_file_name_;
-
   LOG_UPDATED_VALUE(policy_snapshot_file_name_, kPathToSnapshotKey,
                     kPolicySection);
 
