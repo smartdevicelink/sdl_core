@@ -63,7 +63,6 @@ import com.ford.syncV4.proxy.rpc.Speak;
 import com.ford.syncV4.proxy.rpc.SubscribeButton;
 import com.ford.syncV4.proxy.rpc.SyncMsgVersion;
 import com.ford.syncV4.proxy.rpc.SyncPData;
-import com.ford.syncV4.proxy.rpc.SystemRequest;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterface;
 import com.ford.syncV4.proxy.rpc.UnregisterAppInterfaceResponse;
@@ -89,6 +88,7 @@ import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VrCapabilities;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
+import com.ford.syncV4.proxy.systemrequest.SystemRequestProxyImpl;
 import com.ford.syncV4.service.Service;
 import com.ford.syncV4.service.secure.SecureServiceMessageCallback;
 import com.ford.syncV4.service.secure.SecureServiceMessageManager;
@@ -116,8 +116,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase> implements
-        ISystemRequestProxy {
+public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase> {
 
     // Synchronization Objects
     static final Object CONNECTION_REFERENCE_LOCK = new Object(),
@@ -245,10 +244,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      * Handler for OnSystemRequest notifications.
      */
     private IOnSystemRequestHandler onSystemRequestHandler;
-    /**
-     * Correlation ID that was last used for messages created internally.
-     */
-    private int lastCorrelationId = 40000;
     /**
      * An object which process Secure Service messages
      */
@@ -1646,9 +1641,53 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         return /*contains*/false;
     }
 
+    /**
+     * Handle {@link com.ford.syncV4.proxy.rpc.OnSystemRequest} notification received from SDL
+     *
+     * @param appId Application identifier
+     * @param hash  Serialized hashtable of the notification
+     */
     protected void handleOnSystemRequest(final String appId, Hashtable hash) {
 
         final OnSystemRequest msg = new OnSystemRequest(hash);
+        final FileType fileType = msg.getFileType();
+        final RequestType requestType = msg.getRequestType();
+        final Vector<String> urls = msg.getUrl();
+        final Integer offset = msg.getOffset();
+        final Integer length = msg.getLength();
+
+        /**
+         * Implementation of the {@link com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy}
+         * to provide callbacks of the {@link com.ford.syncV4.proxy.rpc.OnSystemRequest}
+         * processing
+         */
+        final SystemRequestProxyImpl systemRequestProxy = new SystemRequestProxyImpl(
+
+                /**
+                 * Callbacks of the {@link com.ford.syncV4.proxy.rpc.OnSystemRequest} processing
+                 * (created {@link com.ford.syncV4.proxy.RPCRequest} or error message)
+                 */
+                new SystemRequestProxyImpl.ISystemRequestProxyCallback() {
+
+                    /**
+                     * Send {@link com.ford.syncV4.proxy.RPCRequest} that has been created in the
+                     * {@link com.ford.syncV4.proxy.systemrequest.SystemRequestProxyImpl} helper
+                     * class based on {@link com.ford.syncV4.proxy.rpc.OnSystemRequest} processing
+                     * algorithm
+                     *
+                     * @param appId      Application identifier
+                     * @param rpcRequest {@link com.ford.syncV4.proxy.RPCRequest}
+                     *
+                     * @throws SyncException
+                     */
+                    @Override
+                    public void onSendingRPCRequest(String appId, RPCRequest rpcRequest)
+                            throws SyncException {
+                        sendRPCRequest(appId, rpcRequest);
+                    }
+                }
+        );
+
         if (_callbackToUIThread) {
             // Run in UI thread
             _mainUIHandler.post(new Runnable() {
@@ -1661,58 +1700,77 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             mProxyListener.onOnSystemRequest(appId, msg);
         }
 
-        final FileType fileType = msg.getFileType();
-        final RequestType requestType = msg.getRequestType();
-
         if (requestType == RequestType.HTTP) {
             if (fileType == FileType.BINARY) {
                 Logger.d(LOG_TAG + " PolicyTableSnapshot url:" + msg.getUrl());
-                processPolicyTableSnapshot(appId, msg.getBulkData(), fileType, requestType);
+                processPolicyTableSnapshot(appId, msg.getBulkData(), fileType, requestType,
+                        systemRequestProxy);
             } else {
-                final Vector<String> urls = msg.getUrl();
-                if (urls != null) {
-                    Runnable request = new Runnable() {
-                        @Override
-                        public void run() {
-                            onSystemRequestHandler.onFilesDownloadRequest(appId,
-                                    SyncProxyBase.this, urls, fileType);
-                        }
-                    };
-                    if (_callbackToUIThread) {
-                        _mainUIHandler.post(request);
-                    } else {
-                        request.run();
-                    }
-                } else {
-                    Logger.w("OnSystemRequest HTTP: no urls set");
-                }
-            }
-        } else if (requestType == RequestType.FILE_RESUME) {
-            final Vector<String> urls = msg.getUrl();
-            final Integer offset = msg.getOffset();
-            final Integer length = msg.getLength();
-            final boolean allRequiredParamsSet =
-                    (urls != null) && (offset != null) && (length != null);
-            if (allRequiredParamsSet) {
                 Runnable request = new Runnable() {
                     @Override
                     public void run() {
-                        onSystemRequestHandler.onFileResumeRequest(appId,
-                                SyncProxyBase.this, urls.get(0), offset, length, fileType);
+
+                        // TODO : Probably it is some better way to validate input parameters
+                        if (urls == null) {
+                            handleOnSystemRequestError("OnSystemRequest " +
+                                    "'" + RequestType.FILE_RESUME + "': urls are null");
+                            return;
+                        }
+                        if (urls.size() == 0) {
+                            handleOnSystemRequestError("OnSystemRequest " +
+                                    "'" + RequestType.FILE_RESUME + "': urls are empty");
+                            return;
+                        }
+
+                        onSystemRequestHandler.onFilesDownloadRequest(appId,
+                                systemRequestProxy, urls, fileType);
                     }
                 };
-
                 if (_callbackToUIThread) {
                     _mainUIHandler.post(request);
                 } else {
                     request.run();
                 }
+            }
+        } else if (requestType == RequestType.FILE_RESUME) {
+            Runnable request = new Runnable() {
+                @Override
+                public void run() {
+
+                    // TODO : Probably it is some better way to validate input parameters
+                    if (urls == null) {
+                        handleOnSystemRequestError("OnSystemRequest " +
+                                "'" + RequestType.FILE_RESUME + "': urls are null");
+                        return;
+                    }
+                    if (urls.size() == 0) {
+                        handleOnSystemRequestError("OnSystemRequest " +
+                                "'" + RequestType.FILE_RESUME + "': urls are empty");
+                        return;
+                    }
+                    if (offset == null) {
+                        handleOnSystemRequestError("OnSystemRequest: offset is null");
+                        return;
+                    }
+                    if (length == null) {
+                        handleOnSystemRequestError("OnSystemRequest: length is null");
+                        return;
+                    }
+
+                    onSystemRequestHandler.onFileResumeRequest(appId,
+                            systemRequestProxy, urls.get(0), offset, length, fileType);
+                }
+            };
+
+            if (_callbackToUIThread) {
+                _mainUIHandler.post(request);
             } else {
-                Logger.w("OnSystemRequest FILE_RESUME: a required parameter is missing");
+                request.run();
             }
         } else if (requestType == RequestType.PROPRIETARY) {
             if (fileType == FileType.JSON) {
-                processPolicyTableSnapshot(appId, msg.getBulkData(), fileType, requestType);
+                processPolicyTableSnapshot(appId, msg.getBulkData(), fileType, requestType,
+                        systemRequestProxy);
             }
         }
     }
@@ -3225,58 +3283,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         this.onSystemRequestHandler = onSystemRequestHandler;
     }
 
-    /**
-     * Returns the next correlation ID used for internal messages.
-     *
-     * @return next correlation ID
-     */
-    private int nextCorrelationId() {
-        return ++lastCorrelationId;
-    }
-
-    @Override
-    public void putSystemFile(String appId, String filename, byte[] data, FileType fileType)
-            throws SyncException {
-        putSystemFile(appId, filename, data, null, fileType);
-    }
-
-    @Override
-    public void putSystemFile(final String appId, String filename, byte[] data, Integer offset,
-                              FileType fileType) throws SyncException {
-        final int correlationID = nextCorrelationId();
-        final PutFile putFile = RPCRequestFactory.buildPutFile(filename, fileType, null, data,
-                correlationID);
-        putFile.setSystemFile(true);
-        if (offset != null) {
-            putFile.setOffset(offset);
-            putFile.setLength(data.length);
-        }
-        sendRPCRequest(appId, putFile);
-        //internalRequestCorrelationIDs.add(correlationID);
-    }
-
-    @Override
-    public void putPolicyTableUpdateFile(String appId, String filename, byte[] data,
-                                         FileType fileType, RequestType requestType)
-                                         throws SyncException {
-
-        final int correlationId = nextCorrelationId();
-
-        if (fileType == FileType.BINARY) {
-            PutFile putFile = RPCRequestFactory.buildPutFile(filename, FileType.JSON, null, data,
-                    correlationId);
-            putFile.setSystemFile(true);
-            sendRPCRequest(appId, putFile);
-        } else if (fileType == FileType.JSON) {
-            SystemRequest systemRequest = RPCRequestFactory.buildSystemRequest(filename, data,
-                    correlationId, requestType);
-
-            sendRPCRequest(appId, systemRequest);
-        }
-
-        //internalRequestCorrelationIDs.add(correlationId);
-    }
-
     private void setUpSecureServiceManager() {
         mSecureServiceMessageManager = new SecureServiceMessageManager();
         mSecureServiceMessageCallback = new SecureServiceMessageCallback();
@@ -3302,10 +3308,26 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
             @Override
             public void onHandshakeError(SecurityInternalError error) {
-                InternalProxyMessage proxyMessage = new OnError("Handshake Error " + error, new Exception("Handshake Error " + error));
+                InternalProxyMessage proxyMessage = new OnError("Handshake Error " + error,
+                        new Exception("Handshake Error " + error));
                 dispatchInternalMessage(proxyMessage);
             }
         });
+    }
+
+    private void handleOnSystemRequestError(final String message) {
+        Logger.e(message);
+        if (_callbackToUIThread) {
+            // Run in UI thread
+            _mainUIHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    mProxyListener.onError(message, null);
+                }
+            });
+        } else {
+            mProxyListener.onError(message, null);
+        }
     }
 
     /**
@@ -3316,11 +3338,12 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      */
     private void processPolicyTableSnapshot(final String appId, final byte[] snapshot,
                                             final FileType fileType,
-                                            final RequestType requestType) {
+                                            final RequestType requestType,
+                                            final ISystemRequestProxy systemRequestProxy) {
         Runnable request = new Runnable() {
             @Override
             public void run() {
-                onSystemRequestHandler.onPolicyTableSnapshotRequest(appId, SyncProxyBase.this,
+                onSystemRequestHandler.onPolicyTableSnapshotRequest(appId, systemRequestProxy,
                         snapshot, fileType, requestType);
             }
         };

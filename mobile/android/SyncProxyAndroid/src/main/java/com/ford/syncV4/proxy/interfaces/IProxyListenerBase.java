@@ -38,7 +38,6 @@ import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
-import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
 import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
@@ -56,7 +55,6 @@ import com.ford.syncV4.proxy.rpc.SystemRequestResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
-import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 
 public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 											ISyncEncodedSyncPDataListener,
@@ -86,12 +84,12 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	public void onProxyClosed(String info, Exception e);
 	
 	/**
-	 * onProxyError() being called indicates that the SYNC Proxy experenced an error.
+	 * This method called when the SYNC Proxy experienced an error.
 	 *
-     * @param info - Includes information about the Exception that occurred.
-     * @param e    - The exception that occurred.
+     * @param info      Includes information about the Exception that occurred.
+     * @param throwable The exception that occurred. <b>May be NULL</b>
      */
-    public void onError(String info, Throwable e);
+    public void onError(String info, Throwable throwable);
 
 
     /**
@@ -350,8 +348,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onHashChange(String appId, OnHashChange onHashChange);
 
     /**
-     * Notify that {@link com.ford.syncV4.protocol.enums.ServiceType#Secure_Service} has been
-     * started
+     * Notify that SecureService has been started
      */
     public void onSecureServiceStart();
 
@@ -370,7 +367,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
      * transport
      *
      * @param appId      Application identifier
-     * @param rpcRequest Instance of the {@link com.ford.syncV4.proxy.RPCRequest} object
+     * @param putFile    Instance of the {@link com.ford.syncV4.proxy.RPCRequest} object
      */
     public void onPutFileRequest(String appId, PutFile putFile);
 

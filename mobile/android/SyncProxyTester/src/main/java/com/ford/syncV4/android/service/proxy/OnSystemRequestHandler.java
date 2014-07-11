@@ -33,8 +33,8 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
     }
 
     @Override
-    public void onFilesDownloadRequest(final String appId, final ISystemRequestProxy proxy, List<String> urls,
-                                       FileType fileType) {
+    public void onFilesDownloadRequest(final String appId, final ISystemRequestProxy proxy,
+                                       List<String> urls, FileType fileType) {
 
         // Simulate Files downloading request and future processing
         // Then, call appropriate method at provided callback which implement
@@ -58,8 +58,9 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
     }
 
     @Override
-    public void onFileResumeRequest(final String appId, final ISystemRequestProxy proxy, String filename,
-                                    final Integer offset, final Integer length, FileType fileType) {
+    public void onFileResumeRequest(final String appId, final ISystemRequestProxy proxy,
+                                    String filename, final Integer offset, final Integer length,
+                                    FileType fileType) {
 
         // Simulate Files download resumption request and future processing
         // Then, call appropriate method at provided callback which implement
@@ -85,8 +86,9 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
 
     @Override
     public void onPolicyTableSnapshotRequest(final String appId, final ISystemRequestProxy proxy,
-                                             byte[] data,
-                                             final FileType fileType, final RequestType requestType) {
+                                             byte[] data, final FileType fileType,
+                                             final RequestType requestType) {
+
         // TODO : Logging to be refactored
         if (data == null) {
             if (mLogAdapter != null) {

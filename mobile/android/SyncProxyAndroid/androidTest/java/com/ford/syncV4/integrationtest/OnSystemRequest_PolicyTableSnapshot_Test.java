@@ -25,6 +25,7 @@ import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
+import com.ford.syncV4.session.SessionTest;
 import com.ford.syncV4.syncConnection.SyncConnection;
 import com.ford.syncV4.test.TestConfig;
 
@@ -42,7 +43,6 @@ import java.util.Arrays;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyByte;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
@@ -134,11 +134,12 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
 
                 final ISystemRequestProxy proxy =
                         (ISystemRequestProxy) invocationOnMock.getArguments()[0];
-                proxy.putPolicyTableUpdateFile(filename, data, fileType, requestType);
+                proxy.putPolicyTableUpdateFile(SessionTest.APP_ID, filename, data, fileType,
+                        requestType);
                 return null;
             }
         }).when(handlerMock)
-          .onPolicyTableSnapshotRequest(anyByte(), notNull(ISystemRequestProxy.class), eq(dataSnapshot),
+          .onPolicyTableSnapshotRequest(anyString(), notNull(ISystemRequestProxy.class), eq(dataSnapshot),
                   eq(fileType), eq(requestType));
         proxy.setOnSystemRequestHandler(handlerMock);
 
@@ -168,7 +169,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
         checkPutFileJSON(protocolMessage.getData(), fileType);
         final byte[] data = Arrays.copyOfRange(dataSnapshot, 0, maxDataSize);
         assertThat(protocolMessage.getBulkData(), is(data));
-        final int putFileRequestCorrID = protocolMessage.getCorrId();
+        final int putFileRequestCorrID = protocolMessage.getCorrID();
 
         // the listener should not be called for OnSystemRequest
         verifyZeroInteractions(proxyListenerMock);

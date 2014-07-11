@@ -2,7 +2,6 @@ package com.ford.syncV4.proxy;
 
 import android.test.InstrumentationTestCase;
 
-import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.WiProProtocol;
@@ -26,7 +25,6 @@ import com.ford.syncV4.transport.usb.USBTransportConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mockito.ArgumentCaptor;
 
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -58,7 +56,7 @@ import static org.mockito.Mockito.when;
  */
 public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
-    private static final int PUT_FILE_FUNCTION_ID = 32;
+    //private static final int PUT_FILE_FUNCTION_ID = 32;
     private static final int ON_SYSTEM_REQUEST_FUNCTION_ID = 32781;
     private static final int WAIT_TIMEOUT = 20;
     private WiProProtocol protocolMock;
@@ -453,7 +451,10 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
                 eq(length), eq(fileType));
     }
 
-    public void testPutSystemFileShouldSendCorrectFirstProtocolMessage()
+    // TODO : This is obsolete test case as SyncProxyBase now is not implements appropriate
+    // interface. There is a concrete implementation for the OnSystemRequest processing result
+
+    /*public void testPutSystemFileShouldSendCorrectFirstProtocolMessage()
             throws InterruptedException, JSONException, SyncException {
 
         // fake data for PutFile
@@ -468,7 +469,16 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         proxy.getInterfaceBroker().onProtocolSessionStarted(SessionTest.SESSION_ID,
                 ProtocolConstants.PROTOCOL_VERSION_TWO);
 
-        proxy.putSystemFile(SessionTest.APP_ID, filename, data, fileType);
+        Vector<String> urls = new Vector<String>();
+        urls.add(filename);
+
+        OnSystemRequest onSystemRequest = new OnSystemRequest();
+        onSystemRequest.setUrl(urls);
+        onSystemRequest.setBulkData(data);
+        onSystemRequest.setFileType(fileType);
+        onSystemRequest.setRequestType(RequestType.HTTP);
+
+        proxy.handleOnSystemRequest(SessionTest.APP_ID, onSystemRequest.store);
 
         Thread.sleep(WAIT_TIMEOUT);
 
@@ -481,9 +491,12 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         checkSystemPutFileJSON(pm.getData(), 0, maxDataSize, filename, fileType);
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm.getBulkData(), is(data0));
-    }
+    }*/
 
-    public void testPutSystemFileWithOffsetShouldSendCorrectFirstProtocolMessage()
+    // TODO : This is obsolete test case as SyncProxyBase now is not implements appropriate
+    // interface. There is a concrete implementation for the OnSystemRequest processing result
+
+    /*public void testPutSystemFileWithOffsetShouldSendCorrectFirstProtocolMessage()
             throws InterruptedException, JSONException, SyncException {
         // fake data for PutFile
         final int extraDataSize = 10;
@@ -497,7 +510,17 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         proxy.initializeSession(SessionTest.APP_ID);
         proxy.getInterfaceBroker().onProtocolSessionStarted(SessionTest.SESSION_ID,
                 ProtocolConstants.PROTOCOL_VERSION_TWO);
-        proxy.putSystemFile(SessionTest.APP_ID, filename, data, offset, fileType);
+
+        Vector<String> urls = new Vector<String>();
+        urls.add(filename);
+
+        OnSystemRequest onSystemRequest = new OnSystemRequest();
+        onSystemRequest.setUrl(urls);
+        onSystemRequest.setBulkData(data);
+        onSystemRequest.setOffset(offset);
+        onSystemRequest.setFileType(fileType);
+
+        proxy.handleOnSystemRequest(SessionTest.APP_ID, onSystemRequest.store);
 
         Thread.sleep(WAIT_TIMEOUT);
 
@@ -510,7 +533,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         checkSystemPutFileJSON(pm.getData(), offset, maxDataSize, filename, fileType);
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm.getBulkData(), is(data0));
-    }
+    }*/
 
     public void testOnSystemRequestHTTPandBINARYTriggerProcessPolicy() throws InterruptedException {
         proxy.setOnSystemRequestHandler(handlerMock);
