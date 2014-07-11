@@ -154,11 +154,12 @@ Item {
 
     function policyUpdate(file, timeout, retry) {
         console.log("enter policyUpdate");
-        settingsContainer.filePSnapshot = file;
+        settingsContainer.filePTSnapshot = file;
         settingsContainer.timeoutPTExchange = timeout;
         settingsContainer.retriesPTExchange = retry;
         var service = 7; // service type for Ford specific policy
         RequestToSDL.SDL_GetURLS(service, settingsContainer.startPTExchange);
+        console.log("exit policyUpdate");
     }
 
     function systemRequest(requestType, fileName, appID) {
@@ -177,5 +178,6 @@ Item {
                 break;
             }
         }
+        console.log("exit systemRequest");
     }
 }

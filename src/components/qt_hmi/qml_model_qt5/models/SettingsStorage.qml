@@ -152,10 +152,12 @@ Item
     }
 
     function startPTExchange(urls) {
+        console.log("enter startPTExchange");
         urlsPTExchange = urls;
         currentRetry = 0;
         currentUrl = 0;
         tryUpdatePolicy();
+        console.log("exit startPTExchange");
     }
 
     function startIVSU(urls) {
@@ -165,12 +167,15 @@ Item
     }
 
     function getUrl() {
+        console.log("enter getUrl");
         if (currentUrl >= 0 && currentUrl < urlsPTExchange.length) {
-          var url = urlsPTExchange[currentUrl];
-          currentUrl = (currentUrl + 1) / urlsPTExchange.length;
-          return url;
+            var url = urlsPTExchange[currentUrl];
+            currentUrl = (currentUrl + 1) / urlsPTExchange.length;
+            console.log("exit getUrl");
+            return url;
         } else {
-          return {url: ""}
+            console.log("exit getUrl (empty)");
+            return {url: ""}
         }
     }
 
@@ -185,6 +190,7 @@ Item
     }
 
     function sendSystemRequest(type, url, fileName, applicationId) {
+        console.log("enter sendSystemRequest");
         var offset = 1000;
         var length = 10000;
         var appId = applicationId ? applicationId : "default";
@@ -193,9 +199,11 @@ Item
         sdlBasicCommunication.onSystemRequest(type, url, Common.FileType.JSON,
                                               offset, length, timeoutPTExchange,
                                               file, appId);
+        console.log("enter sendSystemRequest");
     }
 
     function tryUpdatePolicy() {
+        console.log("enter tryUpdatePolicy");
         if (urlsPTExchange.length) {
             var url = getUrl();
             sendSystemRequest(Common.RequestType.PROPRIETARY, url.url, filePTSnapshot, url.policyAppId);
@@ -205,8 +213,10 @@ Item
 
         retriesTimer.interval = getInterval();
         if (retriesTimer.interval > 0) {
+            console.log("start retry strategy");
             retriesTimer.start();
         }
+        console.log("exit tryUpdatePolicy");
     }
 
     function systemRequest(type) {
@@ -218,8 +228,10 @@ Item
     }
 
     function stopPTExchange(fileName) {
+        console.log("enter stopPTExchange");
         retriesTimer.stop();
         sdlSDL.onReceivedPolicyUpdate(fileName);
+        console.log("exit stopPTExchange");
     }
 
     Timer {
