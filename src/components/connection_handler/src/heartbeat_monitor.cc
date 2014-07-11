@@ -48,10 +48,6 @@ HeartBeatMonitor::HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
       is_active(true) {
 }
 
-HeartBeatMonitor::~HeartBeatMonitor() {
-
-}
-
 void HeartBeatMonitor::threadMain() {
    std::map<uint8_t, SessionState>::iterator it;
 

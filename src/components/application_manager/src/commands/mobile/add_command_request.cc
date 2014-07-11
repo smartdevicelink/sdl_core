@@ -350,7 +350,9 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       ApplicationSharedPtr application =
           ApplicationManagerImpl::instance()->application(connection_key());
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
-      application->UpdateHash();
+      if (true == result) {
+        application->UpdateHash();
+      }
     }
   }
 }

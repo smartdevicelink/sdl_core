@@ -50,7 +50,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
  * If packet data is not printable return error message
  */
 std::string ConvertPacketDataToString(const uint8_t *data,
-                                      const std::size_t data_size);
+                                      const size_t data_size);
 
 const size_t kStackSize = 32768;
 
@@ -64,7 +64,7 @@ class ProtocolHandlerImpl::IncomingDataHandler {
     DCHECK(out_frames != NULL);
     const ConnectionID connection_id = tm_message->connection_key();
     const uint8_t *data = tm_message->data();
-    const std::size_t size = tm_message->data_size();
+    const size_t size = tm_message->data_size();
     DCHECK(size > 0); DCHECK(data != NULL);
     LOG4CXX_TRACE(logger_, "Start of processing incoming data of size "
                                << size << " for connection " << connection_id);
@@ -172,6 +172,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
 }
 
 ProtocolHandlerImpl::~ProtocolHandlerImpl() {
+  sync_primitives::AutoLock lock(protocol_observers_lock_);
   if (!protocol_observers_.empty()) {
     LOG4CXX_WARN(logger_, "Not all observers have unsubscribed"
                  " from ProtocolHandlerImpl");
@@ -183,6 +184,7 @@ void ProtocolHandlerImpl::AddProtocolObserver(ProtocolObserver *observer) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to IProtocolObserver.");
     return;
   }
+  sync_primitives::AutoLock lock(protocol_observers_lock_);
   protocol_observers_.insert(observer);
 }
 
@@ -1234,7 +1236,7 @@ void ProtocolHandlerImpl::SetTimeMetricObserver(PHMetricObserver *observer) {
 #endif  // TIME_TESTER
 
 std::string ConvertPacketDataToString(const uint8_t *data,
-                                      const std::size_t data_size) {
+                                      const size_t data_size) {
   if (0 == data_size)
     return std::string();
   bool is_printable_array = true;

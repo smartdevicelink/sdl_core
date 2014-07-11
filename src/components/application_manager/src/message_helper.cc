@@ -30,6 +30,10 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+#undef __STDC_FORMAT_MACROS
+
 #include <set>
 #include <string>
 #include <algorithm>
@@ -2281,7 +2285,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
       break;
     }
     case NsSmartDeviceLink::NsSmartObjects::SmartType_Integer:
-      printf("%d", object.asInt());
+      printf("%" PRId64 "\n", object.asInt64());
       break;
     case NsSmartDeviceLink::NsSmartObjects::SmartType_String:
       printf("%s", object.asString().c_str());
