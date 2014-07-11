@@ -42,7 +42,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager-usb")
 
 class AoaInitSequence : public UsbControlTransferSequence {
  public:
@@ -56,6 +56,7 @@ class AoaInitSequence : public UsbControlTransferSequence {
 };
 
 void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
+  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice: "<< device);
   if (IsAppleDevice(device)) {
     SupportedDeviceFound(device);
   }
@@ -66,9 +67,11 @@ void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
       TurnIntoAccessoryMode(device);
     }
   }
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 void UsbDeviceScanner::OnDeviceLeft(PlatformUsbDevice* device) {
+  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice "<< device);
   bool list_changed = false;
   pthread_mutex_lock(&devices_mutex_);
   for (Devices::iterator it = devices_.begin(); it != devices_.end(); ++it) {
@@ -80,6 +83,7 @@ void UsbDeviceScanner::OnDeviceLeft(PlatformUsbDevice* device) {
   }
   pthread_mutex_unlock(&devices_mutex_);
   if (list_changed) UpdateList();
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 UsbDeviceScanner::UsbDeviceScanner(TransportAdapterController* controller)
@@ -156,14 +160,13 @@ AoaInitSequence::AoaInitSequence() : UsbControlTransferSequence() {
 }
 
 void UsbDeviceScanner::TurnIntoAccessoryMode(PlatformUsbDevice* device) {
-  LOG4CXX_INFO(logger_, "USB device VID:" << device->vendor_id()
-                                          << " PID:" << device->product_id()
-                                          << " turning into accessory mode");
+  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice: " << device);
   GetUsbHandler()->StartControlTransferSequence(new AoaInitSequence, device);
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 void UsbDeviceScanner::SupportedDeviceFound(PlatformUsbDevice* device) {
-  LOG4CXX_INFO(logger_, "Supported device found");
+  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice: "<< device);
 
   pthread_mutex_lock(&devices_mutex_);
   devices_.push_back(device);
@@ -175,6 +178,7 @@ void UsbDeviceScanner::SupportedDeviceFound(PlatformUsbDevice* device) {
                             << ") identified as: " << device->GetManufacturer()
                             << ", " << device->GetProductName());
   UpdateList();
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 TransportAdapter::Error UsbDeviceScanner::Init() {
@@ -186,6 +190,7 @@ TransportAdapter::Error UsbDeviceScanner::Scan() {
 }
 
 void UsbDeviceScanner::UpdateList() {
+  LOG4CXX_TRACE(logger_, "enter");
   DeviceVector device_vector;
   pthread_mutex_lock(&devices_mutex_);
   for (Devices::const_iterator it = devices_.begin(); it != devices_.end();
@@ -205,6 +210,7 @@ void UsbDeviceScanner::UpdateList() {
 
   LOG4CXX_INFO(logger_, "USB search done " << device_vector.size());
   controller_->SearchDeviceDone(device_vector);
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 void UsbDeviceScanner::Terminate() {}

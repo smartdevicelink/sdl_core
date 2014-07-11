@@ -50,7 +50,7 @@ TcpDevice::TcpDevice(const in_addr_t& in_addr, const std::string& name)
 }
 
 bool TcpDevice::IsSameAs(const Device* other) const {
-  LOG4CXX_TRACE(logger_, "enter: " << other);
+  LOG4CXX_TRACE(logger_, "enter Device: " << other);
   const TcpDevice* other_tcp_device = static_cast<const TcpDevice*>(other);
   LOG4CXX_TRACE(logger_, "exit");
   return other_tcp_device->in_addr_ == in_addr_;
@@ -70,7 +70,7 @@ ApplicationList TcpDevice::GetApplicationList() const {
 }
 
 ApplicationHandle TcpDevice::AddIncomingApplication(int socket_fd) {
-  LOG4CXX_TRACE(logger_, "enter: " << socket_fd);
+  LOG4CXX_TRACE(logger_, "enter Socket_fd: " << socket_fd);
   Application app;
   app.incoming = true;
   app.socket = socket_fd;
@@ -97,7 +97,7 @@ ApplicationHandle TcpDevice::AddDiscoveredApplication(int port) {
 
 
 void TcpDevice::RemoveApplication(const ApplicationHandle app_handle) {
-  LOG4CXX_TRACE(logger_, "enter: " << app_handle);
+  LOG4CXX_TRACE(logger_, "enter ApplicationHandle: " << app_handle);
   pthread_mutex_lock(&applications_mutex_);
   applications_.erase(app_handle);
   pthread_mutex_unlock(&applications_mutex_);
@@ -109,14 +109,14 @@ TcpDevice::~TcpDevice() {
 }
 
 int TcpDevice::GetApplicationSocket(const ApplicationHandle app_handle) const {
-  LOG4CXX_TRACE(logger_, "enter: " << app_handle);
+  LOG4CXX_TRACE(logger_, "enter ApplicationHandle: " << app_handle);
   std::map<ApplicationHandle, Application>::const_iterator it = applications_.find(app_handle);
   if(applications_.end() == it) {
-      LOG4CXX_TRACE(logger_, "exit");
+      LOG4CXX_TRACE(logger_, "exit -1");
       return -1;
   }
   if(! it->second.incoming) {
-      LOG4CXX_TRACE(logger_, "exit");
+      LOG4CXX_TRACE(logger_, "exit -1");
       return -1;
   }
   LOG4CXX_TRACE(logger_, "exit");
@@ -124,17 +124,17 @@ int TcpDevice::GetApplicationSocket(const ApplicationHandle app_handle) const {
 }
 
 int TcpDevice::GetApplicationPort(const ApplicationHandle app_handle) const {
-  LOG4CXX_TRACE(logger_, "enter: " << app_handle);
+  LOG4CXX_TRACE(logger_, "enter ApplicationHandle: " << app_handle);
   std::map<ApplicationHandle, Application>::const_iterator it = applications_.find(app_handle);
   if(applications_.end() == it) {
-      LOG4CXX_TRACE(logger_, "exit");
+      LOG4CXX_TRACE(logger_, "exit -1");
       return -1;
   }
   if(it->second.incoming) {
-      LOG4CXX_TRACE(logger_, "exit");
+      LOG4CXX_TRACE(logger_, "exit -1");
       return -1;
   }
-  LOG4CXX_TRACE(logger_, "exit");
+  LOG4CXX_TRACE(logger_, "exit -1");
   return it->second.port;
 }
 

@@ -53,8 +53,7 @@
 
 namespace transport_manager {
 namespace transport_adapter {
-
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager-bluetooth")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 BluetoothTransportAdapter::~BluetoothTransportAdapter() {
 }
@@ -69,7 +68,7 @@ DeviceType BluetoothTransportAdapter::GetDeviceType() const {
 }
 
 void BluetoothTransportAdapter::Store() const {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_TRACE(logger_, "enter");
   Json::Value bluetooth_adapter_dictionary;
   Json::Value devices_dictionary;
   DeviceList device_ids = GetDeviceList();
@@ -108,11 +107,11 @@ void BluetoothTransportAdapter::Store() const {
   bluetooth_adapter_dictionary["devices"] = devices_dictionary;
   resumption::LastState::instance()->dictionary["TransportManager"]["BluetoothAdapter"] =
     bluetooth_adapter_dictionary;
-  LOG4CXX_TRACE_EXIT(logger_);
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 bool BluetoothTransportAdapter::Restore() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_TRACE(logger_, "enter");
   bool errors_occured = false;
   const Json::Value bluetooth_adapter_dictionary =
     resumption::LastState::instance()->dictionary["TransportManager"]["BluetoothAdapter"];
@@ -147,10 +146,9 @@ bool BluetoothTransportAdapter::Restore() {
       }
     }
   }
-  LOG4CXX_TRACE_EXIT(logger_);
+  LOG4CXX_TRACE(logger_, "exit Errors_occured: " << !errors_occured);
   return !errors_occured;
 }
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-

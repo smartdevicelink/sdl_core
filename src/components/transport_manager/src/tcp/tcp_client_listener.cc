@@ -76,7 +76,7 @@ TcpClientListener::TcpClientListener(TransportAdapterController* controller,
       thread_stop_requested_(false) {}
 
 void* tcpClientListenerThread(void* data) {
-  LOG4CXX_TRACE(logger_, "enter: " << data);
+  LOG4CXX_TRACE(logger_, "enter Data: " << data);
   TcpClientListener* tcpClientListener = static_cast<TcpClientListener*>(data);
   assert(tcpClientListener != 0);
   tcpClientListener->Thread();
@@ -106,7 +106,7 @@ TcpClientListener::~TcpClientListener() {
 }
 
 void SetKeepaliveOptions(const int fd) {
-  LOG4CXX_TRACE(logger_, "enter: " << fd);
+  LOG4CXX_TRACE(logger_, "enter Fd: " << fd);
   int yes = 1;
   int keepidle = 3;  // 3 seconds to disconnection detecting
   int keepcnt = 5;
@@ -153,8 +153,6 @@ void SetKeepaliveOptions(const int fd) {
 
 void TcpClientListener::Thread() {
   LOG4CXX_TRACE(logger_, "enter");
-  LOG4CXX_INFO(logger_, "Tcp client listener thread started");
-
   while (false == thread_stop_requested_) {
     sockaddr_in client_address;
     socklen_t client_address_size = sizeof(client_address);
@@ -194,8 +192,6 @@ void TcpClientListener::Thread() {
       delete connection;
     }
   }
-
-  LOG4CXX_INFO(logger_, "Tcp client listener thread finished");
   LOG4CXX_TRACE(logger_, "exit");
 }
 

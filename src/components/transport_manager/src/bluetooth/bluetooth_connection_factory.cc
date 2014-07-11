@@ -42,7 +42,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager-bluetooth")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 BluetoothConnectionFactory::BluetoothConnectionFactory(
     TransportAdapterController* controller)
@@ -55,7 +55,7 @@ TransportAdapter::Error BluetoothConnectionFactory::Init() {
 
 TransportAdapter::Error BluetoothConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-    LOG4CXX_TRACE(logger_, "enter. device_uid: " << device_uid<< ", app_handle: " << app_handle);
+  LOG4CXX_TRACE(logger_, "enter. device_uid: " << &device_uid << ", app_handle: " << &app_handle);
   BluetoothSocketConnection* connection(
       new BluetoothSocketConnection(device_uid, app_handle, controller_));
   TransportAdapter::Error error = connection->Start();
@@ -63,7 +63,7 @@ TransportAdapter::Error BluetoothConnectionFactory::CreateConnection(
     LOG4CXX_INFO(logger_, "connection::Start() failed");
     delete connection;
   }
-  LOG4CXX_TRACE(logger_, "exit");
+  LOG4CXX_TRACE(logger_, "exit error: " << error);
   return error;
 }
 

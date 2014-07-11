@@ -50,8 +50,7 @@
 
 namespace transport_manager {
 namespace transport_adapter {
-
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager-bluetooth")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 BluetoothSocketConnection::BluetoothSocketConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle,
@@ -63,7 +62,7 @@ BluetoothSocketConnection::~BluetoothSocketConnection() {
 }
 
 bool BluetoothSocketConnection::Establish(ConnectError** error) {
-  LOG4CXX_INFO(logger_, "enter (#" << pthread_self() << ")");
+  LOG4CXX_TRACE(logger_, "enter (#" << pthread_self() << "), error: " << error);
   DeviceSptr device = controller()->FindDevice(device_handle());
 
   BluetoothDevice* bluetooth_device =
@@ -75,8 +74,7 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
     LOG4CXX_ERROR(logger_,
                   "Application " << application_handle() << " not found");
     *error = new ConnectError();
-    LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
-    LOG4CXX_TRACE(logger_, "exit_1. Establish: false")
+    LOG4CXX_TRACE(logger_, "exit (#" << pthread_self() << "). Establish: false");
     return false;
   }
 
@@ -98,8 +96,7 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
           logger_,
           "Failed to create RFCOMM socket for device " << device_handle());
       *error = new ConnectError();
-      LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
-      LOG4CXX_TRACE(logger_, "exit_1. Establish: false")
+      LOG4CXX_TRACE(logger_, "exit (#" << pthread_self() << ")");
       return false;
     }
     connect_status = ::connect(rfcomm_socket,
@@ -124,17 +121,14 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
         logger_,
         "Failed to Connect to remote device " << BluetoothDevice::GetUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for session " << this);
     *error = new ConnectError();
-    LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
-    LOG4CXX_TRACE(logger_, "exit_1. Establish: false");
+    LOG4CXX_TRACE(logger_, "exit (#" << pthread_self() << "). Establish: false");
     return false;
   }
 
   set_socket(rfcomm_socket);
-  LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
-  LOG4CXX_TRACE(logger_, "exit_2. Establish: true")
+  LOG4CXX_TRACE(logger_, "exit (#" << pthread_self() << "). Establish: true");
   return true;
 }
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-

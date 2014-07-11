@@ -45,7 +45,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager-usb")
 
 UsbConnectionFactory::UsbConnectionFactory(
     TransportAdapterController* controller)
@@ -61,9 +61,11 @@ void UsbConnectionFactory::SetUsbHandler(const UsbHandlerSptr& usb_handler) {
 
 TransportAdapter::Error UsbConnectionFactory::CreateConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
+  LOG4CXX_TRACE(logger_, "enter DeviceUID: " << &device_uid << ", ApplicationHandle: " << &app_handle);
   DeviceSptr device = controller_->FindDevice(device_uid);
   if (!device.valid()) {
     LOG4CXX_ERROR(logger_, "device " << device_uid << " not found");
+    LOG4CXX_TRACE(logger_, "exit");
     return TransportAdapter::BAD_PARAM;
   }
 
@@ -77,9 +79,11 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
 
   if (usb_connection->Init()) {
     LOG4CXX_INFO(logger_, "USB connection initialised");
+    LOG4CXX_TRACE(logger_, "exit");
     return TransportAdapter::OK;
   }
   else {
+    LOG4CXX_TRACE(logger_, "exit");
     return TransportAdapter::FAIL;
   }
 }
