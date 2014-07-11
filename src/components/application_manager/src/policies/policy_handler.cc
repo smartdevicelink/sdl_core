@@ -133,11 +133,10 @@ PolicyManager* PolicyHandler::LoadPolicyLibrary() {
 
 PolicyManager* PolicyHandler::CreateManager() {
   typedef PolicyManager* (*CreateManager)();
-  CreateManager create_manager = 0;
-  *(void**)(&create_manager) = dlsym(dl_handle_, "CreateManager");
+  CreateManager create_manager = reinterpret_cast<CreateManager>(dlsym(dl_handle_, "CreateManager"));
   char* error_string = dlerror();
   if (error_string == NULL) {
-    policy_manager_ = (*create_manager)();
+    policy_manager_ = create_manager();
   } else {
     LOG4CXX_WARN(logger_, error_string);
   }
