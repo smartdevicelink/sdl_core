@@ -338,10 +338,9 @@ bool UsbConnection::OpenEndpoints() {
       if (iface_desc == NULL) {
         break;
       }
-#if LOG_ENABLED
-      const uint8_t interface_number =
+#if ENABLE_LOG
+      const uint8_t interface_number = iface_desc->interface.bInterfaceNumber;
 #endif
-      iface_desc->interface.bInterfaceNumber;
       const uint8_t interface_subclass =
           iface_desc->interface.bInterfaceSubClass;
       LOG4CXX_INFO(logger_, "USB interface number "
