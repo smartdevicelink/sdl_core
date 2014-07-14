@@ -15,12 +15,12 @@ import com.ford.syncV4.session.Session;
 public class HandshakeDataListener implements IHandshakeDataListener {
 
     private MutationManager mutationManager;
-    private SyncProxyBase syncProxyBase;
+    private IMessageDispatcher messageDispatcher;
     private byte sessionID = Session.DEFAULT_SESSION_ID;
     private byte version = 2;
 
-    public HandshakeDataListener(SyncProxyBase syncProxyBase) {
-        this.syncProxyBase = syncProxyBase;
+    public HandshakeDataListener(IMessageDispatcher messageDispatcher) {
+        this.messageDispatcher = messageDispatcher;
     }
 
     public MutationManager getMutationManager() {
@@ -36,7 +36,7 @@ public class HandshakeDataListener implements IHandshakeDataListener {
         ProtocolMessage protocolMessage =
                 SecureServiceMessageFactory.buildHandshakeRequest(sessionID, data, version);
         ProtocolMessage message = mutateHandshakeMessage(protocolMessage);
-        syncProxyBase.dispatchOutgoingMessage(message);
+        messageDispatcher.dispatchOutgoingMessage(message);
     }
 
     private ProtocolMessage mutateHandshakeMessage(ProtocolMessage protocolMessage) {
@@ -60,7 +60,7 @@ public class HandshakeDataListener implements IHandshakeDataListener {
             errorMsg = e.getMessage();
         }
         InternalProxyMessage proxyMessage = new OnError(errorMsg, e);
-        syncProxyBase.dispatchInternalMessage(proxyMessage);
+        messageDispatcher.dispatchInternalMessage(proxyMessage);
     }
 
     @Override
