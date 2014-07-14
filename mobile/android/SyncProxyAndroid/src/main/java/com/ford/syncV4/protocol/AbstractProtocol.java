@@ -50,11 +50,11 @@ public abstract class AbstractProtocol {
         setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MIN);
     }
 
-    public synchronized HashMap<Byte, SecureSessionContext> getSecureSessionContextHashMap() {
+    public  HashMap<Byte, SecureSessionContext> getSecureSessionContextHashMap() {
         return secureSessionContextHashMap;
     }
 
-    public synchronized void setSecureSessionContextHashMap(HashMap<Byte, SecureSessionContext> secureSessionContextHashMap) {
+    public void setSecureSessionContextHashMap(HashMap<Byte, SecureSessionContext> secureSessionContextHashMap) {
         this.secureSessionContextHashMap = secureSessionContextHashMap;
     }
 
@@ -183,9 +183,17 @@ public abstract class AbstractProtocol {
             } else {
                 dataChunkNotCyphered = Arrays.copyOfRange(data, offset, offset + length);
             }
-            if (getSecureSessionContextHashMap() != null) {
+            Logger.d(getClass().getSimpleName() + " RPC " + header);
+            Logger.d(getClass().getSimpleName() + " getSecureSessionContextHashMap" + getSecureSessionContextHashMap());
+
+            if (getSecureSessionContextHashMap().get(header.getSessionId()) != null) {
+
                 SecureSessionContext secureSessionContext = getSecureSessionContextHashMap().get(header.getSessionId());
+                Logger.d(getClass().getSimpleName() + " secureSessionContext" + secureSessionContext);
+                Logger.d(getClass().getSimpleName() + " protocolSecureManager" + secureSessionContext.protocolSecureManager);
+                Logger.d(getClass().getSimpleName() + " isHandshakeFinished" + secureSessionContext.protocolSecureManager.isHandshakeFinished());
                 if (secureSessionContext.protocolSecureManager != null && secureSessionContext.protocolSecureManager.isHandshakeFinished()) {
+
                     try {
                         byte[] dataChunk = secureSessionContext.protocolSecureManager.sendDataTOSSLClient(header.isEncrypted(), dataChunkNotCyphered);
                         header.setDataSize(dataChunk.length);
@@ -198,12 +206,15 @@ public abstract class AbstractProtocol {
                         DebugTool.logError("Error data coding", e);
                     }
                 } else {
+                    Logger.d(getClass().getSimpleName() + " sendMessage" + header);
                     sendMessage(header, dataChunkNotCyphered);
                 }
             } else {
+                Logger.d(getClass().getSimpleName() + " sendMessage " + header);
                 sendMessage(header, dataChunkNotCyphered);
             }
         } else {
+            Logger.d(getClass().getSimpleName() + " handleProtocolMessageBytesToSend" + header);
             byte[] frameHeader = header.assembleHeaderBytes();
             handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
         }

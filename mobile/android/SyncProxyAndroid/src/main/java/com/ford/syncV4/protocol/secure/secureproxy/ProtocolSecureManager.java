@@ -298,4 +298,18 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
             }
         }
     }
+
+    @Override
+    public String toString() {
+        return "ProtocolSecureManager{" +
+                "handshakeDataListener=" + handshakeDataListener +
+                ", listener=" + listener +
+                ", secureProxy=" + secureProxy +
+                ", sslClient=" + sslClient +
+                ", handshakeFinished=" + handshakeFinished +
+                ", cypheredData=" + Arrays.toString(cypheredData) +
+                ", deCypheredData=" + Arrays.toString(deCypheredData) +
+                ", serviceTypesToEncrypt=" + serviceTypesToEncrypt +
+                '}';
+    }
 }

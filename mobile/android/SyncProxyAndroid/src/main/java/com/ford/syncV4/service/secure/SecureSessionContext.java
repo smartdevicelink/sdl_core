@@ -73,4 +73,15 @@ public class SecureSessionContext {
         secureProxyServerListener.setVersion(version);
         ((HandshakeDataListener) secureProxyServerListener).setMutationManager(mutationManager);
     }
+
+    @Override
+    public String toString() {
+        return "SecureSessionContext{" +
+                "messageDispatcher=" + messageDispatcher +
+                ", mSecureServiceMessageManager=" + mSecureServiceMessageManager +
+                ", mSecureServiceMessageCallback=" + mSecureServiceMessageCallback +
+                ", protocolSecureManager=" + protocolSecureManager +
+                ", secureProxyServerListener=" + secureProxyServerListener +
+                '}';
+    }
 }

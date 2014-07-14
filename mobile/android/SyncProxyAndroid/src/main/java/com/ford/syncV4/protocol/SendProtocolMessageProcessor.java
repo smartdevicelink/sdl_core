@@ -170,7 +170,7 @@ public class SendProtocolMessageProcessor {
                                           }
                 );
             } else {
-                //Logger.d(LOG_TAG + " RPC");
+                Logger.d(LOG_TAG + " RPC" + header);
                 singleMessageExecutor.submit(new Runnable() {
 
                                                  @Override

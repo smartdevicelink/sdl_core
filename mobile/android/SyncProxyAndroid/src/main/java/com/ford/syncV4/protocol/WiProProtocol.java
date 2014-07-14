@@ -78,10 +78,9 @@ public class WiProProtocol extends AbstractProtocol {
 
     @Override
     public void handleProtocolSessionStarted(ServiceType serviceType, byte sessionId, boolean encrypted, byte version) {
-        super.handleProtocolSessionStarted(serviceType, sessionId, encrypted, version);
-
         Logger.d(CLASS_NAME + " Protocol Session Started, protocol ver:" + version);
         setProtocolVersion(version);
+        super.handleProtocolSessionStarted(serviceType, sessionId, encrypted, version);
     }
 
     @Override

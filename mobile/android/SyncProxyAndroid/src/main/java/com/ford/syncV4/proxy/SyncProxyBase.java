@@ -17,7 +17,6 @@ import com.ford.syncV4.net.SyncPDataSender;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.protocol.secure.secureproxy.IProtocolSecureManager;
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
@@ -2767,7 +2766,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         final String appIdString = String.valueOf(appId);
         appIds.add(appIdString);
         raiTable.put(appIdString, registerAppInterface);
-
+        Logger.d("RAI send" + registerAppInterface);
         sendRPCRequestPrivate(appIdString, registerAppInterface);
     }
 
@@ -3068,6 +3067,10 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         return syncSession.getAppIdBySessionId(sessionId);
     }
 
+    public String getAutoActivateIdReturned() {
+        return _autoActivateIdReturned;
+    }
+
     private Runnable reconnectRunnableTask = new Runnable() {
 
         @Override
@@ -3095,10 +3098,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             reconnectHandler.postDelayed(this, PROXY_RECONNECT_DELAY);
         }
     };
-
-    public String getAutoActivateIdReturned() {
-        return _autoActivateIdReturned;
-    }
 
     public void setAutoActivateIdReturned(String autoActivateIdDesired) {
         this._autoActivateIdReturned = autoActivateIdDesired;
@@ -3163,13 +3162,13 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             mSyncConnection.startRpcService(syncSession.getSessionIdByAppId(appId), encrypted);
         }
     }
-    // TODO : Hide this method from public when no Test Cases are need
 
     private void updateSecureProxyState(String appId) {
         SecureSessionContext secureSessionContext = secureSessionContextMap.get(syncSession.getSessionIdByAppId(appId));
         secureSessionContext.updateSecureProxyState(syncSession.getSessionIdByAppId(appId), getSyncConnection().getProtocolVersion(), getTestConfig().getHandshakeMutationManager());
 
     }
+    // TODO : Hide this method from public when no Test Cases are need
 
     protected void endSession(byte sessionId, EndServiceInitiator initiator) {
         String appId = syncSession.getAppIdBySessionId(sessionId);
@@ -3275,11 +3274,11 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }
     }
 
-    // TODO : Hide this method from public when no Test Cases are need
-
     public IOnSystemRequestHandler getOnSystemRequestHandler() {
         return onSystemRequestHandler;
     }
+
+    // TODO : Hide this method from public when no Test Cases are need
 
     public void setOnSystemRequestHandler(IOnSystemRequestHandler onSystemRequestHandler) {
         this.onSystemRequestHandler = onSystemRequestHandler;
@@ -3308,7 +3307,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             mProxyListener.onError(message, null);
         }
     }
-
 
     /**
      * Process policy file snapshot request
@@ -3466,14 +3464,12 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                     ", protocol version:" + (int) version +
                     ", negotiated protocol version: " + mSyncConnection.getProtocolVersion();
             Logger.i(message);
-
-            startProtocolSession(sessionId);
-
             mSyncConnection.addHeartbeatMonitor(sessionId, heartBeatInterval, heartBeatAck);
             mSyncConnection.startHeartbeatMonitor(sessionId);
             secureSessionContextMap.put(sessionId, new SecureSessionContext(SyncProxyBase.this));
             setUpSecureServiceManager(sessionId);
             setupSecureProxy(sessionId);
+            startProtocolSession(sessionId);
         }
 
         @Override
@@ -3522,5 +3518,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             queueOutgoingMessage(protocolMessage);
         }
     }
+
 
 }
