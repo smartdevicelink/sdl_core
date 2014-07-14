@@ -2,8 +2,8 @@ package com.ford.syncV4.protocol;
 
 
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
+import com.ford.syncV4.service.secure.SecureSessionContext;
 import com.ford.syncV4.service.secure.mutations.AbstractMutation;
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.util.DebugTool;
@@ -11,42 +11,35 @@ import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Hashtable;
 
 public abstract class AbstractProtocol {
 
-    protected static final String CLASS_NAME = AbstractProtocol.class.getSimpleName();
     public static final int SSL_OVERHEAD = 64;
     public static final int MTU_SIZE = 1500;
-
+    protected static final String CLASS_NAME = AbstractProtocol.class.getSimpleName();
     public static int PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_DEFAULT;
     public static int MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE - SSL_OVERHEAD;
-
-    private volatile IProtocolListener mProtocolListener;
     protected byte[] mHeaderBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
+    protected final Hashtable<Integer, MessageFrameAssembler> ASSEMBLER_FOR_MESSAGE_ID =
+            new Hashtable<Integer, MessageFrameAssembler>();
+    protected final Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>> ASSEMBLER_FOR_SESSION_ID =
+            new Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>>();
     protected int mHeaderBufWritePos = 0;
-
     /**
      * Indicates whether RPC Session has been started or not. This is a simple check condition to
      * separate start ordinary RPC Service from start or start failure od the secured RPC Service
      */
-    protected boolean hasRPCStarted;
+
+    private volatile IProtocolListener mProtocolListener;
     private TestConfig testConfig;
-
-    public synchronized ProtocolSecureManager getProtocolSecureManager() {
-        return protocolSecureManager;
-    }
-
-    public synchronized void setProtocolSecureManager(ProtocolSecureManager protocolSecureManager) {
-        this.protocolSecureManager = protocolSecureManager;
-    }
-
-    private ProtocolSecureManager protocolSecureManager;
+    private HashMap<Byte, SecureSessionContext> secureSessionContextHashMap;
     //private static File audioFile;
     //private static File videoFile;
     //private static FileOutputStream audioOutputFileStream;
     //private static FileOutputStream videoOutputFileStream;
     private ProtocolVersion mProtocolVersion = new ProtocolVersion();
-
 
     // Caller must provide a non-null IProtocolListener interface reference.
     public AbstractProtocol(IProtocolListener protocolListener) {
@@ -55,6 +48,14 @@ public abstract class AbstractProtocol {
         }
         mProtocolListener = protocolListener;
         setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_MIN);
+    }
+
+    public synchronized HashMap<Byte, SecureSessionContext> getSecureSessionContextHashMap() {
+        return secureSessionContextHashMap;
+    }
+
+    public synchronized void setSecureSessionContextHashMap(HashMap<Byte, SecureSessionContext> secureSessionContextHashMap) {
+        this.secureSessionContextHashMap = secureSessionContextHashMap;
     }
 
     public void removeListener() {
@@ -81,6 +82,16 @@ public abstract class AbstractProtocol {
         return mProtocolVersion.getCurrentVersion();
     }
 
+    public void setProtocolVersion(byte version) {
+        mProtocolVersion.setCurrentVersion(version);
+
+        if (mProtocolVersion.getCurrentVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
+            updateDataStructureToProtocolVersion(version);
+        } else {
+            Logger.d(CLASS_NAME + " Protocol version:" + mProtocolVersion.getCurrentVersion());
+        }
+    }
+
     /**
      * <b>This method is for the Test Cases only</b>
      *
@@ -100,24 +111,16 @@ public abstract class AbstractProtocol {
         ProtocolConstants.PROTOCOL_VERSION_MAX = version;
     }
 
-    public void setProtocolVersion(byte version) {
-        mProtocolVersion.setCurrentVersion(version);
-
-        if (mProtocolVersion.getCurrentVersion() >= ProtocolConstants.PROTOCOL_VERSION_TWO) {
-            updateDataStructureToProtocolVersion(version);
-        } else {
-            Logger.d(CLASS_NAME + " Protocol version:" + mProtocolVersion.getCurrentVersion());
-        }
-    }
-
     /**
      * Send heart beat header
+     *
      * @param sessionId id of the current session
      */
     public abstract void SendHeartBeatMessage(byte sessionId);
 
     /**
      * Send heart beat ack header
+     *
      * @param sessionId id of the current session
      */
     public abstract void SendHeartBeatAckMessage(byte sessionId);
@@ -169,33 +172,37 @@ public abstract class AbstractProtocol {
     }
 
     private void composeMessage(ProtocolFrameHeader header, byte[] data, int offset, int length) {
-            Logger.d("SyncProxyTester", "Frame encrypted " + header.isEncrypted());
-            if (data != null) {
-                if (offset >= data.length) {
-                    throw new IllegalArgumentException("offset should not be more then length");
-                }
-                byte[] dataChunkNotCyphered = null;
-                if (offset + length >= data.length) {
-                    dataChunkNotCyphered = Arrays.copyOfRange(data, offset, data.length);
-                } else {
-                    dataChunkNotCyphered = Arrays.copyOfRange(data, offset, offset + length);
-                }
-
-                if (getProtocolSecureManager() != null && getProtocolSecureManager().isHandshakeFinished()) {
+        Logger.d("SyncProxyTester", "Frame encrypted " + header.isEncrypted());
+        if (data != null) {
+            if (offset >= data.length) {
+                throw new IllegalArgumentException("offset should not be more then length");
+            }
+            byte[] dataChunkNotCyphered = null;
+            if (offset + length >= data.length) {
+                dataChunkNotCyphered = Arrays.copyOfRange(data, offset, data.length);
+            } else {
+                dataChunkNotCyphered = Arrays.copyOfRange(data, offset, offset + length);
+            }
+            if (getSecureSessionContextHashMap() != null) {
+                SecureSessionContext secureSessionContext = getSecureSessionContextHashMap().get(header.getSessionId());
+                if (secureSessionContext.protocolSecureManager != null && secureSessionContext.protocolSecureManager.isHandshakeFinished()) {
                     try {
-                        byte[] dataChunk = getProtocolSecureManager().sendDataTOSSLClient(header.isEncrypted(), dataChunkNotCyphered);
+                        byte[] dataChunk = secureSessionContext.protocolSecureManager.sendDataTOSSLClient(header.isEncrypted(), dataChunkNotCyphered);
                         header.setDataSize(dataChunk.length);
                         sendMessage(header, dataChunk);
                     } catch (IOException e) {
-                        getProtocolSecureManager().reportAnError(e);
+                        secureSessionContext.protocolSecureManager.reportAnError(e);
                         DebugTool.logError("Error data coding", e);
                     } catch (InterruptedException e) {
-                        getProtocolSecureManager().reportAnError(e);
+                        secureSessionContext.protocolSecureManager.reportAnError(e);
                         DebugTool.logError("Error data coding", e);
                     }
                 } else {
                     sendMessage(header, dataChunkNotCyphered);
                 }
+            } else {
+                sendMessage(header, dataChunkNotCyphered);
+            }
         } else {
             byte[] frameHeader = header.assembleHeaderBytes();
             handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
@@ -205,7 +212,7 @@ public abstract class AbstractProtocol {
 
     private void sendMessage(ProtocolFrameHeader header, byte[] dataChunk) {
 
-        if (getTestConfig()!=null){
+        if (getTestConfig() != null) {
             AbstractMutation mutation = getTestConfig().getSecureServiceMutationManager().getHeadMutation();
             if (mutation != null) {
                 mutation.mutate(header, dataChunk);
@@ -401,11 +408,13 @@ public abstract class AbstractProtocol {
         mHeaderBufWritePos = 0;
     }
 
+    public TestConfig getTestConfig() {
+        return testConfig;
+    }
+
     public void setTestConfig(TestConfig testConfig) {
         this.testConfig = testConfig;
     }
 
-    public TestConfig getTestConfig() {
-        return testConfig;
-    }
+
 }

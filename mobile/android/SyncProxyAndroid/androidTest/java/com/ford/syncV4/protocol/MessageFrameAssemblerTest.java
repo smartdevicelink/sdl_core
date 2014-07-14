@@ -5,7 +5,6 @@ import android.test.InstrumentationTestCase;
 import com.ford.syncV4.protocol.enums.FrameDataControlFrameType;
 import com.ford.syncV4.protocol.enums.FrameType;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.protocol.secure.secureproxy.IProtocolSecureManager;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.session.SessionTest;
 
@@ -40,7 +39,7 @@ public class MessageFrameAssemblerTest extends InstrumentationTestCase {
                 getInstrumentation().getTargetContext().getCacheDir().getPath());
 
         mListener = mock(MessageFrameAssemblerListener.class);
-        mAssembler = new MessageFrameAssembler(mListener, mock(IProtocolSecureManager.class));
+        mAssembler = new MessageFrameAssembler(mListener);
 
         mSessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         mProtocolVersionCaptor = ArgumentCaptor.forClass(byte.class);
@@ -51,7 +50,7 @@ public class MessageFrameAssemblerTest extends InstrumentationTestCase {
 
     public void testConstructorWitNullListenerFail() {
         try {
-            MessageFrameAssembler assembler = new MessageFrameAssembler(null, mock(IProtocolSecureManager.class));
+            MessageFrameAssembler assembler = new MessageFrameAssembler(null);
             fail("Expected NullPointerException to be thrown");
         } catch (NullPointerException e) {
             assertTrue(true);
