@@ -104,6 +104,7 @@ import com.stericson.RootTools.RootTools;
 
 import java.io.OutputStream;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -152,9 +153,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
      */
     protected final Session syncSession = new Session();
     final int HEARTBEAT_CORRELATION_ID = 65531; // TODO: remove
-    private final SecureSessionContext secureSessionContext = new SecureSessionContext(this);
     private final HashSet<String> appIds = new HashSet<String>();
-
     // These variables are not used
     //protected Boolean _haveReceivedFirstFocusLevel = false;
     //protected Boolean _haveReceivedFirstFocusLevelFull = false;
@@ -195,7 +194,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     protected VehicleType _vehicleType = null;
     protected Boolean firstTimeFull = true;
     SyncConnection mSyncConnection;
-
+    private HashMap<Byte, SecureSessionContext> secureSessionContextMap = new HashMap<Byte, SecureSessionContext>();
     private IRPCMessageHandler rpcMessageHandler;
     private ProxyListenerType mProxyListener = null;
     // Device Info for logging
@@ -387,7 +386,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         SyncProxyBase.heartBeatAck = isHearBeatAck;
     }
 
-    private void setUpSecureServiceManager() {
+    private void setUpSecureServiceManager(byte sessionID) {
+        SecureSessionContext secureSessionContext = secureSessionContextMap.get(sessionID);
         secureSessionContext.setUpSecureServiceManager();
     }
 
@@ -608,12 +608,14 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         this._priorAudioStreamingState = priorAudioStreamingState;
     }
 
-    public ProtocolSecureManager getProtocolSecureManager() {
+    public ProtocolSecureManager getProtocolSecureManager(String appID) {
+        SecureSessionContext secureSessionContext = secureSessionContextMap.get(syncSession.getSessionIdByAppId(appID));
         return secureSessionContext.protocolSecureManager;
     }
 
-    public void setProtocolSecureManager(ProtocolSecureManager protocolSecureManager) {
-        this.secureSessionContext.protocolSecureManager = protocolSecureManager;
+    public void setProtocolSecureManager(byte sessionId, ProtocolSecureManager protocolSecureManager) {
+        SecureSessionContext secureSessionContext = secureSessionContextMap.get(sessionId);
+        secureSessionContext.protocolSecureManager = protocolSecureManager;
     }
 
     /**
@@ -906,9 +908,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         /*if (syncConnection == null) {
             throw new NullPointerException("SYNCConnection can not be set to null");
         }*/
-        if (secureSessionContext.mSecureServiceMessageCallback == null) {
-            return;
-        }
     }
 
     /*
@@ -1113,9 +1112,10 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }
     }
 
-    private void setupSecureProxy() {
+    private void setupSecureProxy(byte sessionId) {
+        SecureSessionContext secureSessionContext = secureSessionContextMap.get(sessionId);
         secureSessionContext.setupSecureProxy();
-        mSyncConnection.getWiProProtocol().setProtocolSecureManager(secureSessionContext.protocolSecureManager);
+        mSyncConnection.getWiProProtocol().setSecureSessionContextHashMap(secureSessionContextMap);
         mSyncConnection.getWiProProtocol().setTestConfig(getTestConfig());
     }
 
@@ -2064,6 +2064,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     }
 
     protected void onProtocolServiceStarted_MobileNavi(final byte sessionId, final boolean encrypted) {
+        SecureSessionContext secureSessionContext = secureSessionContextMap.get(sessionId);
         Logger.i("Mobile Navi service started");
         createService(sessionId, ServiceType.Mobile_Nav, encrypted);
         if (secureSessionContext.protocolSecureManager != null &&
@@ -2086,6 +2087,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     }
 
     protected void onProtocolServiceStarted_Audio(final byte sessionId, final boolean encrypted) {
+        SecureSessionContext secureSessionContext = secureSessionContextMap.get(sessionId);
         Logger.i("Mobile Audio service started, sesId:" + sessionId);
         createService(sessionId, ServiceType.Audio_Service, encrypted);
         if (secureSessionContext.protocolSecureManager != null &&
@@ -2108,6 +2110,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     }
 
     protected void onProtocolServiceStarted_RPC(final byte sessionId, final boolean encrypted) {
+        SecureSessionContext secureSessionContext = secureSessionContextMap.get(sessionId);
         Logger.i("RPC service started, sesId:" + sessionId);
         createService(sessionId, ServiceType.RPC, encrypted);
         if (secureSessionContext.protocolSecureManager != null &&
@@ -2993,6 +2996,10 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         return syncSession.getServicesNumber();
     }
 
+    protected byte getSessionIdByAppId(String appId) {
+        return syncSession.getSessionIdByAppId(appId);
+    }
+
     private Runnable reconnectRunnableTask = new Runnable() {
 
         @Override
@@ -3020,10 +3027,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             reconnectHandler.postDelayed(this, PROXY_RECONNECT_DELAY);
         }
     };
-
-    protected byte getSessionIdByAppId(String appId) {
-        return syncSession.getSessionIdByAppId(appId);
-    }
 
     protected String getAppIdBySessionId(byte sessionId) {
         return syncSession.getAppIdBySessionId(sessionId);
@@ -3067,7 +3070,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             initializeSession(appId);
         }
     }
-    // TODO : Hide this method from public when no Test Cases are need
 
     /**
      * Initialize new Session. <b>In production this method MUST be private</b>
@@ -3089,9 +3091,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
         syncSession.addAppId(appId);
         mSyncConnection.initialiseSession(Session.DEFAULT_SESSION_ID);
-        setUpSecureServiceManager();
-        setupSecureProxy();
     }
+    // TODO : Hide this method from public when no Test Cases are need
 
     public void startRpcService(String appId, boolean encrypted) {
         if (mSyncConnection != null) {
@@ -3101,6 +3102,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     }
 
     private void updateSecureProxyState(String appId) {
+        SecureSessionContext secureSessionContext = secureSessionContextMap.get(syncSession.getSessionIdByAppId(appId));
         secureSessionContext.updateSecureProxyState(syncSession.getSessionIdByAppId(appId), getSyncConnection().getProtocolVersion(), getTestConfig().getHandshakeMutationManager());
     }
 
@@ -3145,8 +3147,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         this.rpcRequestConverterFactory = rpcRequestConverterFactory;
     }
 
-    // TODO : Hide this method from public when no Test Cases are need
-
     protected void processRegisterAppInterfaceResponse(final byte sessionId,
                                                        final RegisterAppInterfaceResponse response) {
 
@@ -3184,10 +3184,13 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }
     }
 
+    // TODO : Hide this method from public when no Test Cases are need
+
     /**
      * Restore interrupted Services
      */
     public void restoreServices(String appId) {
+        SecureSessionContext secureSessionContext = secureSessionContextMap.get(syncSession.getSessionIdByAppId(appId));
         Logger.d(LOG_TAG + " Restore Services for appId:" + appId + " " + syncSession);
         if (!syncSession.isServicesEmpty() && mSyncConnection.getIsConnected()) {
             byte sessionId = syncSession.getSessionIdByAppId(appId);
@@ -3405,6 +3408,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
             // do not put these messages into queue
             if (msg.getServiceType() == ServiceType.Heartbeat) {
+                SecureSessionContext secureSessionContext = secureSessionContextMap.get(msg.getSessionID());
                 secureSessionContext.mSecureServiceMessageManager.processMessage(msg);
                 return;
             }
@@ -3428,6 +3432,9 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
             mSyncConnection.addHeartbeatMonitor(sessionId, heartBeatInterval, heartBeatAck);
             mSyncConnection.startHeartbeatMonitor(sessionId);
+            secureSessionContextMap.put(sessionId, new SecureSessionContext(SyncProxyBase.this));
+            setUpSecureServiceManager(sessionId);
+            setupSecureProxy(sessionId);
         }
 
         @Override

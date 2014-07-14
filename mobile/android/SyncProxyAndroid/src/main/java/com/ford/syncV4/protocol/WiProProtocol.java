@@ -5,7 +5,6 @@ import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.session.Session;
-import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Hashtable;
@@ -417,7 +416,7 @@ public class WiProProtocol extends AbstractProtocol {
                 public void onHandleAppUnregistered() {
                     handleAppUnregistered();
                 }
-            }, getProtocolSecureManager());
+            }, getSecureSessionContextHashMap().get(header.getSessionId()).protocolSecureManager);
             ASSEMBLER_FOR_MESSAGE_ID.put(header.getMessageID(), messageFrameAssembler);
         }
 
