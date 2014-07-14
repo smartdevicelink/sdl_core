@@ -12,26 +12,18 @@ import java.util.Hashtable;
 public class WiProProtocol extends AbstractProtocol {
 
     private final static String FailurePropagating_Msg = "Failure propagating ";
+    private static final String CLASS_NAME = WiProProtocol.class.getSimpleName();
+    private final SendProtocolMessageProcessor sendProtocolMessageProcessor =
+            new SendProtocolMessageProcessor();
+    private final Hashtable<Byte, Integer> sessionsHashIds = new Hashtable<Byte, Integer>();
+    protected Hashtable<Byte, Object> _messageLocks = new Hashtable<Byte, Object>();
+    protected boolean hasRPCStarted;
     boolean _haveHeader = false;
     int _headerBufWritePos = 0;
     ProtocolFrameHeader _currentHeader = null;
     byte[] _dataBuf = null;
     int _dataBufWritePos = 0;
     int hashID = 0;
-
-    protected Hashtable<Byte, Object> _messageLocks = new Hashtable<Byte, Object>();
-
-    private static final String CLASS_NAME = WiProProtocol.class.getSimpleName();
-    private final Hashtable<Integer, MessageFrameAssembler> ASSEMBLER_FOR_MESSAGE_ID =
-            new Hashtable<Integer, MessageFrameAssembler>();
-    private final Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>> ASSEMBLER_FOR_SESSION_ID =
-            new Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>>();
-
-    private final SendProtocolMessageProcessor sendProtocolMessageProcessor =
-            new SendProtocolMessageProcessor();
-
-    private final Hashtable<Byte, Integer> sessionsHashIds = new Hashtable<Byte, Integer>();
-
     private ProtocolFrameHeader mCurrentHeader = null;
     private boolean mHaveHeader = false;
     private byte[] mDataBuf = null;
@@ -297,6 +289,10 @@ public class WiProProtocol extends AbstractProtocol {
             receivedBytesReadPos += bytesNeeded;
 
             MessageFrameAssembler assembler = getFrameAssemblerForFrame(mCurrentHeader);
+            if (getSecureSessionContextHashMap() != null && getSecureSessionContextHashMap().get(mCurrentHeader.getSessionId()) != null)
+            {
+                assembler.setProtocolSecureManager(getSecureSessionContextHashMap().get(mCurrentHeader.getSessionId()).protocolSecureManager);
+            }
             handleProtocolFrameReceived(mCurrentHeader, mDataBuf, assembler);
 
             // Reset all class member variables for next frame
@@ -416,10 +412,9 @@ public class WiProProtocol extends AbstractProtocol {
                 public void onHandleAppUnregistered() {
                     handleAppUnregistered();
                 }
-            }, getSecureSessionContextHashMap().get(header.getSessionId()).protocolSecureManager);
+            });
             ASSEMBLER_FOR_MESSAGE_ID.put(header.getMessageID(), messageFrameAssembler);
         }
-
         return messageFrameAssembler;
     }
 

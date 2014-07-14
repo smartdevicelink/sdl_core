@@ -12,6 +12,7 @@ import com.ford.syncV4.util.logger.Logger;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Hashtable;
 
 public abstract class AbstractProtocol {
 
@@ -21,12 +22,16 @@ public abstract class AbstractProtocol {
     public static int PROTOCOL_FRAME_HEADER_SIZE = ProtocolConstants.PROTOCOL_FRAME_HEADER_SIZE_DEFAULT;
     public static int MAX_DATA_SIZE = MTU_SIZE - PROTOCOL_FRAME_HEADER_SIZE - SSL_OVERHEAD;
     protected byte[] mHeaderBuf = new byte[PROTOCOL_FRAME_HEADER_SIZE];
+    protected final Hashtable<Integer, MessageFrameAssembler> ASSEMBLER_FOR_MESSAGE_ID =
+            new Hashtable<Integer, MessageFrameAssembler>();
+    protected final Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>> ASSEMBLER_FOR_SESSION_ID =
+            new Hashtable<Byte, Hashtable<Integer, MessageFrameAssembler>>();
     protected int mHeaderBufWritePos = 0;
     /**
      * Indicates whether RPC Session has been started or not. This is a simple check condition to
      * separate start ordinary RPC Service from start or start failure od the secured RPC Service
      */
-    protected boolean hasRPCStarted;
+
     private volatile IProtocolListener mProtocolListener;
     private TestConfig testConfig;
     private HashMap<Byte, SecureSessionContext> secureSessionContextHashMap;
@@ -192,6 +197,8 @@ public abstract class AbstractProtocol {
                         secureSessionContext.protocolSecureManager.reportAnError(e);
                         DebugTool.logError("Error data coding", e);
                     }
+                } else {
+                    sendMessage(header, dataChunkNotCyphered);
                 }
             } else {
                 sendMessage(header, dataChunkNotCyphered);
@@ -408,4 +415,6 @@ public abstract class AbstractProtocol {
     public void setTestConfig(TestConfig testConfig) {
         this.testConfig = testConfig;
     }
+
+
 }

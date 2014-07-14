@@ -9,14 +9,12 @@ import com.ford.syncV4.proxy.IMessageDispatcher;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
 import com.ford.syncV4.service.secure.mutations.MutationManager;
-import com.ford.syncV4.test.TestConfig;
 
 import java.io.IOException;
 
 public class SecureSessionContext {
 
     private final IMessageDispatcher messageDispatcher;
-    IHandshakeDataListener secureProxyServerListener;
     /**
      * An object which process Secure Service messages
      */
@@ -26,6 +24,8 @@ public class SecureSessionContext {
      */
     public SecureServiceMessageCallback mSecureServiceMessageCallback;
     public ProtocolSecureManager protocolSecureManager;
+
+    IHandshakeDataListener secureProxyServerListener;
 
     public SecureSessionContext(IMessageDispatcher messageDispatcher) {
         this.messageDispatcher = messageDispatcher;

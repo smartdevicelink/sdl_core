@@ -17,6 +17,7 @@ import com.ford.syncV4.net.SyncPDataSender;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.protocol.secure.secureproxy.IProtocolSecureManager;
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
@@ -3000,6 +3001,10 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         return syncSession.getSessionIdByAppId(appId);
     }
 
+    protected String getAppIdBySessionId(byte sessionId) {
+        return syncSession.getAppIdBySessionId(sessionId);
+    }
+
     private Runnable reconnectRunnableTask = new Runnable() {
 
         @Override
@@ -3027,10 +3032,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             reconnectHandler.postDelayed(this, PROXY_RECONNECT_DELAY);
         }
     };
-
-    protected String getAppIdBySessionId(byte sessionId) {
-        return syncSession.getAppIdBySessionId(sessionId);
-    }
 
     public String getAutoActivateIdReturned() {
         return _autoActivateIdReturned;
@@ -3092,7 +3093,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         syncSession.addAppId(appId);
         mSyncConnection.initialiseSession(Session.DEFAULT_SESSION_ID);
     }
-    // TODO : Hide this method from public when no Test Cases are need
 
     public void startRpcService(String appId, boolean encrypted) {
         if (mSyncConnection != null) {
@@ -3100,10 +3100,12 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             mSyncConnection.startRpcService(syncSession.getSessionIdByAppId(appId), encrypted);
         }
     }
+    // TODO : Hide this method from public when no Test Cases are need
 
     private void updateSecureProxyState(String appId) {
         SecureSessionContext secureSessionContext = secureSessionContextMap.get(syncSession.getSessionIdByAppId(appId));
         secureSessionContext.updateSecureProxyState(syncSession.getSessionIdByAppId(appId), getSyncConnection().getProtocolVersion(), getTestConfig().getHandshakeMutationManager());
+
     }
 
     protected void endSession(byte sessionId, EndServiceInitiator initiator) {
@@ -3184,8 +3186,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }
     }
 
-    // TODO : Hide this method from public when no Test Cases are need
-
     /**
      * Restore interrupted Services
      */
@@ -3211,6 +3211,8 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             }
         }
     }
+
+    // TODO : Hide this method from public when no Test Cases are need
 
     public IOnSystemRequestHandler getOnSystemRequestHandler() {
         return onSystemRequestHandler;
@@ -3483,6 +3485,5 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             queueOutgoingMessage(protocolMessage);
         }
     }
-
 
 }

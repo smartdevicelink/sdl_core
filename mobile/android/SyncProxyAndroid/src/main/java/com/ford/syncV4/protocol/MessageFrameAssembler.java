@@ -28,27 +28,33 @@ import java.io.IOException;
 public class MessageFrameAssembler {
 
     private static final String CLASS_NAME = MessageFrameAssembler.class.getSimpleName();
-    private final IProtocolSecureManager mProtocolSecureManager;
     protected boolean hasFirstFrame = false;
     protected boolean hasSecondFrame = false;
+    private IProtocolSecureManager mProtocolSecureManager;
     /**
      * Listener, to provide callbacks of the assemble message logic
      */
     private MessageFrameAssemblerListener mMessageFrameAssemblerListener;
-
     private ByteArrayOutputStream accumulator = null;
 
     /**
      * Constructor
      *
-     * @param listener {@link com.ford.syncV4.protocol.MessageFrameAssemblerListener}
+     * @param listener {@link MessageFrameAssemblerListener}
      */
-    public MessageFrameAssembler(MessageFrameAssemblerListener listener, IProtocolSecureManager protocolSecureManager) {
+    public MessageFrameAssembler(MessageFrameAssemblerListener listener) {
         if (listener == null) {
             throw new NullPointerException("MessageFrameAssemblerListener can not be null");
         }
         mMessageFrameAssemblerListener = listener;
-        mProtocolSecureManager = protocolSecureManager;
+    }
+
+    public IProtocolSecureManager getProtocolSecureManager() {
+        return mProtocolSecureManager;
+    }
+
+    public void setProtocolSecureManager(IProtocolSecureManager mProtocolSecureManager) {
+        this.mProtocolSecureManager = mProtocolSecureManager;
     }
 
     /**
