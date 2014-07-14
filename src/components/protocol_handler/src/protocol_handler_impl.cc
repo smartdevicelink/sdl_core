@@ -480,7 +480,7 @@ void ProtocolHandlerImpl::OnTMMessageReceiveFailed(
 }
 
 void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr message) {
-  LOG4CXX_ERROR(logger_, "ProtocolHandlerImpl::NotifySubscribers");
+  LOG4CXX_TRACE(logger_, "ProtocolHandlerImpl::NotifySubscribers");
   sync_primitives::AutoLock lock(protocol_observers_lock_);
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
@@ -489,7 +489,7 @@ void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr message) {
 }
 
 void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
-  LOG4CXX_INFO(logger_, "Sending message finished successfully.");
+  LOG4CXX_DEBUG(logger_, "Sending message finished successfully.");
 
   uint32_t connection_handle = 0;
   uint8_t sessionID = 0;
@@ -1036,6 +1036,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       return RESULT_OK;
     }
     if (ssl_context->IsInitCompleted()) {
+      // mark service as protected
+      session_observer_->SetProtectionFlag(connection_key, service_type);
       // Start service as protected with current SSLContext
       SendStartSessionAck(connection_id, session_id, packet.protocol_version(),
                           connection_key, packet.service_type(), PROTECTION_ON);

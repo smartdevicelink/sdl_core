@@ -76,12 +76,12 @@ class SecurityQuery {
     ERROR_NOT_SUPPORTED              = 0x03,  // SDL does not support encryption
     ERROR_SERVICE_ALREADY_PROTECTED  = 0x04,
     ERROR_SERVICE_NOT_PROTECTED      = 0x05,  // got handshake or encrypted data
-                                              // for not protected service ???
+                                              // for not protected service
     ERROR_DECRYPTION_FAILED          = 0x06,
     ERROR_ENCRYPTION_FAILED          = 0x07,
     ERROR_SSL_INVALID_DATA           = 0x08,
     ERROR_INTERNAL                   = 0xFF,
-    ERROR_UNKWOWN_INTERNAL_ERROR     = 0xFE  // error valeu for testing
+    ERROR_UNKWOWN_INTERNAL_ERROR     = 0xFE  // error value for testing
   };
   /**
    * \brief QueryHeader is 12 byte header of security query
