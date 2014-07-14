@@ -715,8 +715,6 @@ void ApplicationManagerImpl::OnMessageReceived(
   if (outgoing_message) {
     messages_from_mobile_.PostMessage(
       impl::MessageFromMobile(outgoing_message));
-  } else {
-    LOG4CXX_WARN(logger_, "Incorrect message received");
   }
 }
 
@@ -819,7 +817,7 @@ bool ApplicationManagerImpl::IsAudioStreamingAllowed(uint32_t connection_key) co
   ApplicationSharedPtr app = application(connection_key);
 
   if (!app) {
-    LOG4CXX_INFO(logger_, "An application is not registered.");
+    LOG4CXX_WARN(logger_, "An application is not registered.");
     return false;
   }
 
@@ -837,7 +835,7 @@ bool ApplicationManagerImpl::IsVideoStreamingAllowed(uint32_t connection_key) co
   ApplicationSharedPtr app = application(connection_key);
 
   if (!app) {
-    LOG4CXX_INFO(logger_, "An application is not registered.");
+    LOG4CXX_WARN(logger_, "An application is not registered.");
     return false;
   }
 
@@ -1557,7 +1555,7 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
       &&
       message->service_type() != protocol_handler::kBulk) {
     // skip this message, not under handling of ApplicationManager
-    LOG4CXX_INFO(logger_, "Skipping message; not the under AM handling.");
+    LOG4CXX_TRACE(logger_, "Skipping message; not the under AM handling.");
     return outgoing_message;
   }
 
