@@ -2291,8 +2291,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void syncProxyStartRPCService(String appId, boolean encrypted) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
             if (encrypted) {
-                if (mSyncProxy.getProtocolSecureManager() != null) {
-                    mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.RPC);
+                if (mSyncProxy.getProtocolSecureManager(appId) != null) {
+                    mSyncProxy.getProtocolSecureManager(appId).addServiceToEncrypt(ServiceType.RPC);
                 }
             }
             mSyncProxy.startRpcService(appId, encrypted);
@@ -2302,8 +2302,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void syncProxyStartAudioService(String appId, boolean encrypted) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
             if (encrypted) {
-                if (mSyncProxy.getProtocolSecureManager() != null) {
-                    mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.Audio_Service);
+                if (mSyncProxy.getProtocolSecureManager(appId) != null) {
+                    mSyncProxy.getProtocolSecureManager(appId).addServiceToEncrypt(ServiceType.Audio_Service);
                 }
             }
             mSyncProxy.startAudioService(appId, encrypted);
@@ -2546,8 +2546,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void syncProxyStartMobileNavService(String appId, boolean encrypted) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
             if (encrypted) {
-                if (mSyncProxy.getProtocolSecureManager() != null) {
-                    mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.Mobile_Nav);
+                if (mSyncProxy.getProtocolSecureManager(appId) != null) {
+                    mSyncProxy.getProtocolSecureManager(appId).addServiceToEncrypt(ServiceType.Mobile_Nav);
                 }
             }
             mSyncProxy.startMobileNavService(appId, encrypted);

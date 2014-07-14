@@ -13,6 +13,7 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitorsManager;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitorListener;
+import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.session.Session;
@@ -689,4 +690,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             mTestConfig.setDoKeepUSBTransportConnected(false);
         }
     }
+
+
 }

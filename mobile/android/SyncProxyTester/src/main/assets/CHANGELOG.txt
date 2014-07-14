@@ -1,3 +1,6 @@
+[CW29]
+* SYNC Mobile SDK | SyncProxyTester: Added possibility to start several secure sessions.
+
 [CW28]
 * SYNC Mobile SDK: PutFile - length parameter does not match total length of file if offset is set to 0
 * SyncProxyTester: SDL returns "INVALID_DATA" on UpdateTurnList request with empty navigationText or turnIcon of element
