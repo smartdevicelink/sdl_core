@@ -7,8 +7,14 @@ package com.ford.syncV4.protocol.secure;
  * Time: 1:24 PM
  */
 
+import com.ford.syncV4.marshal.JsonRPCMarshaller;
 import com.ford.syncV4.protocol.BinaryFrameHeader;
 import com.ford.syncV4.service.secure.SecurityInternalError;
+
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.Objects;
 
 /**
  * This class build a payload byte array for the Secure Service
@@ -80,34 +86,14 @@ public class SecureServicePayload {
     public SecurityInternalError getSecureError() {
         if (mData != null) {
             int result = mBinaryFrameHeader.getBulkData()[0];
-            switch (result) {
-                case 0x0:
-                    return SecurityInternalError.ERROR_SUCCESS;
-                case 0x1:
-                    return SecurityInternalError.ERROR_INVALID_QUERY_SIZE;
-                case 0x2:
-                    return SecurityInternalError.ERROR_INVALID_QUERY_ID;
-                case 0x3:
-                    return SecurityInternalError.ERROR_NOT_SUPPORTED;
-                case 0x4:
-                    return SecurityInternalError.ERROR_SERVICE_ALREADY_PROTECTED;
-                case 0x5:
-                    return SecurityInternalError.ERROR_CREATE_SSLCONTEXT;
-                case 0x6:
-                    return SecurityInternalError.ERROR_SERVICE_NOT_PROTECTED;
-                case 0x7:
-                    return SecurityInternalError.ERROR_DECRYPTION_FAILED;
-                case 0x8:
-                    return SecurityInternalError.ERROR_ENCRYPTION_FAILED;
-                case 0xF0:
-                    return SecurityInternalError.ERROR_SSL_INVALID_DATA;
-                case 0xF1:
-                    return SecurityInternalError.ERROR_INTERNAL;
-                case 0xFF:
-                    return SecurityInternalError.ERROR_UNKWOWN_INTERNAL_ERROR;
-            }
+            return SecurityInternalError.getError(result);
         }
         return SecurityInternalError.UNKNOWN;
     }
 
+    public Hashtable<String, Object> getSecureErrorDescription() {
+        JsonRPCMarshaller marshaller = new JsonRPCMarshaller();
+        Hashtable<String, Object> error =  marshaller.unmarshall(mBinaryFrameHeader.getJsonData());
+        return error;
+    }
 }
