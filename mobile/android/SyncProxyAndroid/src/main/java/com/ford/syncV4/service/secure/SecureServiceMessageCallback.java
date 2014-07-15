@@ -9,6 +9,8 @@ package com.ford.syncV4.service.secure;
 
 import com.ford.syncV4.protocol.secure.secureproxy.IProtectServiceListener;
 
+import java.util.Hashtable;
+
 /**
  * This class is implement {@link ISecureServiceMessageCallback}
  */
@@ -37,7 +39,7 @@ public class SecureServiceMessageCallback implements ISecureServiceMessageCallba
     }
 
     @Override
-    public void onHandshakeError(SecurityInternalError error) {
-        protectServiceListener.onHandshakeError(error);
+    public void onHandshakeError(SecurityInternalError error, Hashtable<String, Object> errorDescription) {
+        protectServiceListener.onHandshakeError(error, errorDescription);
     }
 }

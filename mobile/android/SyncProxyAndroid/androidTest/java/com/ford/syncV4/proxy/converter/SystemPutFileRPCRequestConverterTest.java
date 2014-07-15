@@ -91,7 +91,7 @@ public class SystemPutFileRPCRequestConverterTest
         assertThat(pm.getData(), notNullValue());
         assertThat(pm.getJsonSize(), greaterThan(0));
         assertThat(pm.getSessionID(), is(sessionID));
-        assertThat(pm.getCorrId(), is(correlationID));
+        assertThat(pm.getCorrID(), is(correlationID));
         assertThat(pm.getBulkData(), is(data));
     }
 
@@ -117,7 +117,7 @@ public class SystemPutFileRPCRequestConverterTest
         assertThat(pm.getData(), notNullValue());
         assertThat(pm.getJsonSize(), greaterThan(0));
         assertThat(pm.getSessionID(), is(sessionID));
-        assertThat(pm.getCorrId(), is(correlationID));
+        assertThat(pm.getCorrID(), is(correlationID));
         assertThat(pm.getBulkData(), nullValue());
     }
 
@@ -155,7 +155,7 @@ public class SystemPutFileRPCRequestConverterTest
         checkSystemPutFileJSON(json0, 0, maxDataSize, fileName, fileType);
         assertThat(pm0.getJsonSize(), is(json0.length));
         assertThat(pm0.getSessionID(), is(sessionID));
-        assertThat(pm0.getCorrId(), is(correlationID));
+        assertThat(pm0.getCorrID(), is(correlationID));
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm0.getBulkData(), is(data0));
 
@@ -166,7 +166,7 @@ public class SystemPutFileRPCRequestConverterTest
                 fileName, fileType);
         assertThat(pm1.getJsonSize(), is(json1.length));
         assertThat(pm1.getSessionID(), is(sessionID));
-        assertThat(pm1.getCorrId(), is(correlationID));
+        assertThat(pm1.getCorrID(), is(correlationID));
         final byte[] data1 = Arrays.copyOfRange(data, maxDataSize, dataSize);
         assertThat(pm1.getBulkData(), is(data1));
     }
@@ -206,7 +206,7 @@ public class SystemPutFileRPCRequestConverterTest
         checkSystemPutFileJSON(json0, 0, maxDataSize, fileName, fileType);
         assertThat(pm0.getJsonSize(), is(json0.length));
         assertThat(pm0.getSessionID(), is(sessionID));
-        assertThat(pm0.getCorrId(), is(correlationID));
+        assertThat(pm0.getCorrID(), is(correlationID));
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm0.getBulkData(), is(data0));
 
@@ -217,7 +217,7 @@ public class SystemPutFileRPCRequestConverterTest
                 fileName, fileType);
         assertThat(pm1.getJsonSize(), is(json1.length));
         assertThat(pm1.getSessionID(), is(sessionID));
-        assertThat(pm1.getCorrId(), is(correlationID));
+        assertThat(pm1.getCorrID(), is(correlationID));
         final byte[] data1 = Arrays.copyOfRange(data, maxDataSize, dataSize);
         assertThat(pm1.getBulkData(), is(data1));
     }
@@ -290,7 +290,7 @@ public class SystemPutFileRPCRequestConverterTest
         checkSystemPutFileJSON(data1, offset, data.length, fileName, null);
         assertThat(pm.getJsonSize(), is(data1.length));
         assertThat(pm.getSessionID(), is(sessionID));
-        assertThat(pm.getCorrId(), is(correlationID));
+        assertThat(pm.getCorrID(), is(correlationID));
         assertThat(pm.getBulkData(), is(data));
     }
 
@@ -330,7 +330,7 @@ public class SystemPutFileRPCRequestConverterTest
         checkSystemPutFileJSON(json0, offset, maxDataSize, fileName, fileType);
         assertThat(pm0.getJsonSize(), is(json0.length));
         assertThat(pm0.getSessionID(), is(sessionID));
-        assertThat(pm0.getCorrId(), is(correlationID));
+        assertThat(pm0.getCorrID(), is(correlationID));
         final byte[] data0 = Arrays.copyOfRange(data, 0, maxDataSize);
         assertThat(pm0.getBulkData(), is(data0));
 
@@ -341,7 +341,7 @@ public class SystemPutFileRPCRequestConverterTest
                 dataSize - maxDataSize, fileName, fileType);
         assertThat(pm1.getJsonSize(), is(json1.length));
         assertThat(pm1.getSessionID(), is(sessionID));
-        assertThat(pm1.getCorrId(), is(correlationID));
+        assertThat(pm1.getCorrID(), is(correlationID));
         final byte[] data1 = Arrays.copyOfRange(data, maxDataSize, dataSize);
         assertThat(pm1.getBulkData(), is(data1));
     }

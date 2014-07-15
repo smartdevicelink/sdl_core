@@ -96,8 +96,10 @@ void IAP2Connection::ReceiveData() {
   int size = iap2_eap_recv(iap2ea_hdl_, buffer_, kBufferSize);
   if (size != -1) {
     LOG4CXX_INFO(logger_, "iAP2: received " << size << " bytes on protocol " << protocol_name_);
-    RawMessagePtr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
-    controller_->DataReceiveDone(device_uid_, app_handle_, message);
+    if (size != 0) {
+      RawMessagePtr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
+      controller_->DataReceiveDone(device_uid_, app_handle_, message);
+    }
   }
   else {
     switch (errno) {

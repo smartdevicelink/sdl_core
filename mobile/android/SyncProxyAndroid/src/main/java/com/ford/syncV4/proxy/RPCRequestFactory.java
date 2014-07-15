@@ -50,6 +50,7 @@ import java.util.Vector;
 
 public class RPCRequestFactory {
 
+    @SuppressWarnings("unused")
     private static final String LOG_TAG = RPCRequestFactory.class.getSimpleName();
 
     /**
@@ -64,8 +65,22 @@ public class RPCRequestFactory {
     private static final int SYNC_MSG_MAJOR_VERSION = 1;
     private static final int SYNC_MSG_MINOR_VERSION = 0;
 
-	public static EncodedSyncPData buildEncodedSyncPData(
-			Vector<String> data, Integer correlationID) {
+    /**
+     * Correlation ID that was last used for messages created internally.
+     */
+    private static int sCorrelationId = 40000;
+
+    /**
+     * Returns the next correlation ID used for internal messages.
+     *
+     * @return next correlation ID
+     */
+    private static int getCorrelationId() {
+        return sCorrelationId++;
+    }
+
+	public static EncodedSyncPData buildEncodedSyncPData(Vector<String> data,
+                                                         Integer correlationID) {
 		
 		if(data == null) return null;
 		
@@ -395,14 +410,12 @@ public class RPCRequestFactory {
      * @param fileType       File type {@link com.ford.syncV4.proxy.rpc.enums.FileType}
      * @param persistentFile Boolean value indicated whether this file is persistent or not
      * @param fileData       Raw file data
-     * @param correlationId  Correlation Id of the object
      * @return <b>PutFile</b> object
      */
     public static PutFile buildPutFile(String syncFileName, FileType fileType,
-                                       Boolean persistentFile, byte[] fileData,
-                                       Integer correlationId) {
+                                       Boolean persistentFile, byte[] fileData) {
         PutFile putFile = buildPutFile();
-        putFile.setCorrelationId(correlationId);
+        putFile.setCorrelationId(getCorrelationId());
         putFile.setSyncFileName(syncFileName);
         putFile.setFileType(fileType);
         if (persistentFile != null) {
@@ -419,16 +432,15 @@ public class RPCRequestFactory {
      * Build {@link com.ford.syncV4.proxy.rpc.PutFile} object
      * @param fileName      name of the associated file
      * @param data          bytes array
-     * @param correlationID correlation id of the request
      * @return {@link com.ford.syncV4.proxy.rpc.PutFile}
      */
     public static SystemRequest buildSystemRequest(String fileName, byte[] data,
-                                                   Integer correlationID, RequestType requestType) {
+                                                   RequestType requestType) {
         SystemRequest systemRequest = new SystemRequest();
         systemRequest.setFileName(fileName);
         systemRequest.setBulkData(data);
         systemRequest.setRequestType(requestType);
-        systemRequest.setCorrelationId(correlationID);
+        systemRequest.setCorrelationId(getCorrelationId());
 
         return systemRequest;
     }

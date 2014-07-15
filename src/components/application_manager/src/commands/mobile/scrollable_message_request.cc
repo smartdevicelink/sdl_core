@@ -42,16 +42,16 @@ namespace application_manager {
 
 namespace commands {
 
-ScrollabelMessageRequest::ScrollabelMessageRequest(
+ScrollableMessageRequest::ScrollableMessageRequest(
     const MessageSharedPtr& message)
  : CommandRequestImpl(message) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
-ScrollabelMessageRequest::~ScrollabelMessageRequest() {
+ScrollableMessageRequest::~ScrollableMessageRequest() {
 }
 
-bool ScrollabelMessageRequest::Init() {
+bool ScrollableMessageRequest::Init() {
 
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
@@ -66,8 +66,8 @@ bool ScrollabelMessageRequest::Init() {
   return true;
 }
 
-void ScrollabelMessageRequest::Run() {
-  LOG4CXX_INFO(logger_, "ScrollabelMessageRequest::Run");
+void ScrollableMessageRequest::Run() {
+  LOG4CXX_INFO(logger_, "ScrollableMessageRequest::Run");
 
   ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
       ->application((*message_)[strings::params][strings::connection_key].asUInt());
@@ -87,7 +87,6 @@ void ScrollabelMessageRequest::Run() {
     return;
   }
 
-  // Checking scrollabel message on contained \t\n \\t \\n
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming scrollabel message has contains \t\n \\t \\n");
@@ -113,8 +112,8 @@ void ScrollabelMessageRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::UI_ScrollableMessage, &msg_params, true);
 }
 
-void ScrollabelMessageRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "ScrollabelMessageRequest::on_event");
+void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "ScrollableMessageRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -151,9 +150,8 @@ void ScrollabelMessageRequest::on_event(const event_engine::Event& event) {
   }
 }
 
-bool ScrollabelMessageRequest::IsWhiteSpaceExist() {
-  LOG4CXX_INFO(logger_, "ScrollabelMessageRequest::IsWhiteSpaceExist");
-  bool return_value = false;
+bool ScrollableMessageRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "ScrollableMessageRequest::IsWhiteSpaceExist");
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
@@ -164,19 +162,28 @@ bool ScrollabelMessageRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
 
     for (; it_sb != it_sb_end; ++it_sb) {
+
+      if ((*it_sb).keyExists(strings::text)) {
+        str = (*it_sb)[strings::text].asCharArray();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_ERROR(logger_,
+                       "Invalid soft_buttons text syntax check failed");
+          return true;
+        }
+      }
+
       if ((*it_sb).keyExists(strings::image)) {
         str = (*it_sb)[strings::image][strings::value].asCharArray();
         if (!CheckSyntax(str, true)) {
-          LOG4CXX_INFO(logger_,
+          LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons image value syntax check failed");
-          return_value = true;
-          break;
+          return true;
         }
       }
+
     }
   }
-
-  return return_value;
+  return false;
 }
 
 }  // namespace commands

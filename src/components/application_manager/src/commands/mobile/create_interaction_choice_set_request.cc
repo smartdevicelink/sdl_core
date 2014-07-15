@@ -259,20 +259,19 @@ bool CreateInteractionChoiceSetRequest::compareStr(
 bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
     const smart_objects::SmartObject& choice_set) {
   LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::IsWhiteSpaceExist");
-  bool return_value = false;
   const char* str = NULL;
 
   str = choice_set[strings::menu_name].asCharArray();
   if (!CheckSyntax(str, true)) {
     LOG4CXX_ERROR(logger_, "Invalid menu_name syntax check failed");
-    return_value = true;
+    return true;
   }
 
   if (choice_set.keyExists(strings::secondary_text)) {
     str = choice_set[strings::secondary_text].asCharArray();
     if (!CheckSyntax(str, true)) {
       LOG4CXX_ERROR(logger_, "Invalid secondary_text syntax check failed");
-      return_value = true;
+      return true;
     }
   }
 
@@ -280,20 +279,19 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
     str = choice_set[strings::tertiary_text].asCharArray();
     if (!CheckSyntax(str, true)) {
       LOG4CXX_ERROR(logger_, "Invalid tertiary_text syntax check failed");
-      return_value = true;
+      return true;
     }
   }
 
   if (choice_set.keyExists(strings::vr_commands)) {
-    size_t len =
+    const size_t len =
         choice_set[strings::vr_commands].length();
 
     for (size_t i = 0; i < len; ++i) {
       str = choice_set[strings::vr_commands][i].asCharArray();
       if (!CheckSyntax(str, true)) {
         LOG4CXX_ERROR(logger_, "Invalid vr_commands syntax check failed");
-        return_value = true;
-        break;
+        return true;
       }
     }
   }
@@ -302,11 +300,11 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
     str = choice_set[strings::image][strings::value].asCharArray();
     if (!CheckSyntax(str, true)) {
       LOG4CXX_ERROR(logger_, "Invalid image value syntax check failed");
-      return_value = true;
+      return true;
     }
   }
 
-  return return_value;
+  return false;
 }
 
 void CreateInteractionChoiceSetRequest::SendVRAddCommandRequest(

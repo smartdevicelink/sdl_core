@@ -45,17 +45,17 @@ namespace commands {
 /**
  * @brief scrollable message request command class
  **/
-class ScrollabelMessageRequest : public CommandRequestImpl {
+class ScrollableMessageRequest : public CommandRequestImpl {
  public:
   /**
-   * @brief ScrollabeMessageRequest class constructor
+   * @brief ScrollableMessageRequest class constructor
    **/
-  explicit ScrollabelMessageRequest(const MessageSharedPtr& message);
+  explicit ScrollableMessageRequest(const MessageSharedPtr& message);
 
   /**
    * @brief SliderCommand class destructor
    **/
-  virtual ~ScrollabelMessageRequest();
+  virtual ~ScrollableMessageRequest();
 
   /**
    * @brief Initialize request params
@@ -76,14 +76,14 @@ class ScrollabelMessageRequest : public CommandRequestImpl {
 
  private:
   /**
-   * @brief Checks scrollabel message param
+   * @brief Checks scrollable message param
    * When type is String there is a check on the contents \t\n \\t \\n
-   * @return if scrollabel message contains \t\n \\t \\n return TRUE,
+   * @return if scrollable message contains \t\n \\t \\n return TRUE,
    * FALSE otherwise
    */
   bool IsWhiteSpaceExist();
 
-  DISALLOW_COPY_AND_ASSIGN(ScrollabelMessageRequest);
+  DISALLOW_COPY_AND_ASSIGN(ScrollableMessageRequest);
 };
 
 }  // namespace commands

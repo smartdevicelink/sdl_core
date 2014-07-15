@@ -65,7 +65,7 @@ class ClientTcpSocket {
     }
   }
 
-  std::string receive(std::size_t size) {
+  std::string receive(size_t size) {
     char* buf = new char[size];
     ssize_t read = recv(socket_, buf, size, MSG_WAITALL);
     if (read != -1) {

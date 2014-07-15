@@ -350,7 +350,9 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       ApplicationSharedPtr application =
           ApplicationManagerImpl::instance()->application(connection_key());
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
-      application->UpdateHash();
+      if (true == result) {
+        application->UpdateHash();
+      }
     }
   }
 }
@@ -361,29 +363,27 @@ bool AddCommandRequest::IsPendingResponseExist() {
 
 bool AddCommandRequest::IsWhiteSpaceExist() {
   LOG4CXX_INFO(logger_, "AddCommandRequest::IsWhiteSpaceExist");
-  bool return_value = false;
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     str = (*message_)[strings::msg_params][strings::menu_params]
                                    [strings::menu_name].asCharArray();
-    if (!CheckSyntax(str)) {
-      LOG4CXX_INFO(logger_, "Invalid menu name syntax check failed.");
-      return_value = true;
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid menu name syntax check failed.");
+      return true;
     }
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::vr_commands)) {
-    size_t len =
+    const size_t len =
         (*message_)[strings::msg_params][strings::vr_commands].length();
 
     for (size_t i = 0; i < len; ++i) {
       str = (*message_)[strings::msg_params]
                         [strings::vr_commands][i].asCharArray();
-      if (!CheckSyntax(str)) {
-        LOG4CXX_INFO(logger_, "Invalid vr_commands syntax check failed");
-        return_value = true;
-        break;
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid vr_commands syntax check failed");
+        return true;
       }
     }
   }
@@ -391,14 +391,12 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
   if ((*message_)[strings::msg_params].keyExists(strings::cmd_icon)) {
     str = (*message_)[strings::msg_params]
                       [strings::cmd_icon][strings::value].asCharArray();
-
     if (!CheckSyntax(str, true)) {
-      LOG4CXX_INFO(logger_, "Invalid cmd_icon value syntax check failed");
-      return_value = true;
+      LOG4CXX_ERROR(logger_, "Invalid cmd_icon value syntax check failed");
+      return true;
     }
   }
-
-  return return_value;
+  return false;
 }
 
 }  // namespace commands

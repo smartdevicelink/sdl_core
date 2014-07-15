@@ -52,7 +52,6 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
  public:
   HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
                    Connection *connection);
-  ~HeartBeatMonitor();
 
   /**
    * Thread procedure.

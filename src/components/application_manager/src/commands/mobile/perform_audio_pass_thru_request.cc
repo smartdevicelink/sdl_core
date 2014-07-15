@@ -244,7 +244,6 @@ void PerformAudioPassThruRequest::StartMicrophoneRecording() {
 
 bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
   LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::IsWhiteSpaceExist");
-  bool return_value = false;
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
@@ -257,14 +256,12 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
     for (; it_ip != it_ip_end; ++it_ip) {
       str = (*it_ip)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
-        LOG4CXX_INFO(logger_, "Invalid initial_prompt syntax check failed");
-        return_value = true;
-        break;
+        LOG4CXX_ERROR(logger_, "Invalid initial_prompt syntax check failed");
+        return true;
       }
     }
   }
-
-  return return_value;
+  return false;
 }
 
 }  // namespace commands

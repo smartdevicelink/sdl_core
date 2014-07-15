@@ -715,8 +715,6 @@ void ApplicationManagerImpl::OnMessageReceived(
   if (outgoing_message) {
     messages_from_mobile_.PostMessage(
       impl::MessageFromMobile(outgoing_message));
-  } else {
-    LOG4CXX_WARN(logger_, "Incorrect message received");
   }
 }
 
@@ -819,7 +817,7 @@ bool ApplicationManagerImpl::IsAudioStreamingAllowed(uint32_t connection_key) co
   ApplicationSharedPtr app = application(connection_key);
 
   if (!app) {
-    LOG4CXX_INFO(logger_, "An application is not registered.");
+    LOG4CXX_WARN(logger_, "An application is not registered.");
     return false;
   }
 
@@ -837,7 +835,7 @@ bool ApplicationManagerImpl::IsVideoStreamingAllowed(uint32_t connection_key) co
   ApplicationSharedPtr app = application(connection_key);
 
   if (!app) {
-    LOG4CXX_INFO(logger_, "An application is not registered.");
+    LOG4CXX_WARN(logger_, "An application is not registered.");
     return false;
   }
 
@@ -1557,7 +1555,7 @@ utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
       &&
       message->service_type() != protocol_handler::kBulk) {
     // skip this message, not under handling of ApplicationManager
-    LOG4CXX_INFO(logger_, "Skipping message; not the under AM handling.");
+    LOG4CXX_TRACE(logger_, "Skipping message; not the under AM handling.");
     return outgoing_message;
   }
 
@@ -1801,15 +1799,16 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
   std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
+    ApplicationSharedPtr app_to_remove = *it;
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-      (*it)->app_id(), unregister_reason_);
+        app_to_remove->app_id(), unregister_reason_);
+    UnregisterApplication(app_to_remove->app_id(),
+                          mobile_apis::Result::INVALID_ENUM, is_ignition_off);
 
-    uint32_t app_id = (*it)->app_id();
-    UnregisterApplication(app_id, mobile_apis::Result::INVALID_ENUM,
-                          is_ignition_off);
-    connection_handler_->CloseSession(app_id);
+    connection_handler_->CloseSession(app_to_remove->app_id());
     it = application_list_.begin();
   }
+
   if (is_ignition_off) {
    resume_controller().IgnitionOff();
   }
@@ -1831,12 +1830,12 @@ void ApplicationManagerImpl::UnregisterApplication(
       application(app_id)->usage_report().RecordRemovalsForBadBehavior();
       break;
     }
-
     default: {
       LOG4CXX_ERROR(logger_, "Unknown unregister reason");
       break;
     }
   }
+
   ApplicationSharedPtr app_to_remove;
   {
     sync_primitives::AutoLock lock(applications_list_lock_);
@@ -1868,11 +1867,6 @@ void ApplicationManagerImpl::UnregisterApplication(
   MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove);
 
   request_ctrl_.terminateAppRequests(app_id);
-
-  //  {
-  //    sync_primitives::AutoLock lock(applications_list_lock_);
-
-  //  }
   return;
 }
 
@@ -1994,8 +1988,12 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
 
   if (hmi_level == mobile_apis::HMILevel::HMI_NONE
       && function_id != mobile_apis::FunctionID::UnregisterAppInterfaceID) {
-    application_by_policy_id(policy_app_id)->
-        usage_report().RecordRpcSentInHMINone();
+    ApplicationSharedPtr app = application_by_policy_id(policy_app_id);
+    if (!app) {
+      LOG4CXX_ERROR(logger_, "No application for policy id " << policy_app_id);
+      return mobile_apis::Result::GENERIC_ERROR;
+    }
+    app->usage_report().RecordRpcSentInHMINone();
   }
 
   const std::string log_msg = "Application: "+ policy_app_id+

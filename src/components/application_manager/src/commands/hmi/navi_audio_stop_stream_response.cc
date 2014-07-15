@@ -29,21 +29,21 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "application_manager/commands/hmi/audio_start_stream_response.h"
+#include "application_manager/commands/hmi/navi_audio_stop_stream_response.h"
 
 namespace application_manager {
 
 namespace commands {
 
-AudioStartStreamResponse::AudioStartStreamResponse(const MessageSharedPtr& message)
+AudioStopStreamResponse::AudioStopStreamResponse(const MessageSharedPtr& message)
     : ResponseFromHMI(message) {
 }
 
-AudioStartStreamResponse::~AudioStartStreamResponse() {
+AudioStopStreamResponse::~AudioStopStreamResponse() {
 }
 
-void AudioStartStreamResponse::Run() {
-  LOG4CXX_INFO(logger_, "AudioStartStreamResponse::Run");
+void AudioStopStreamResponse::Run() {
+  LOG4CXX_INFO(logger_, "AudioStopStreamResponse::Run");
 
 }
 

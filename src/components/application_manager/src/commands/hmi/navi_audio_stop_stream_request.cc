@@ -29,73 +29,26 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "application_manager/commands/hmi/navi_audio_stop_stream_request.h"
 
-#ifndef TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_INIT_HMI_H_
-#define TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_INIT_HMI_H_
+namespace application_manager {
 
-#include <string.h>
-#include <dirent.h>
-#include <stdio.h>
-#include <sys/stat.h>
-#include <signal.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <cstdio>
-#include <cstdlib>
-#include <vector>
-#include <string>
-#include <iostream>
-#include <fstream>
+namespace commands {
 
-#include "utils/macro.h"
-#include "utils/signals.h"
-#include "config_profile/profile.h"
-#include "networking.h"
-#include "application_manager/message_helper.h"
-#include "utils/threads/thread_delegate.h"
-#include "utils/threads/thread_options.h"
-#include "utils/threads/thread.h"
+AudioStopStreamRequest::AudioStopStreamRequest(
+    const MessageSharedPtr& message)
+    : RequestToHMI(message) {
+}
 
-namespace InitializeHMI {
-  /**
-   * @brief Patch to browser
-   */
-  const char kBrowser[] = "/usr/bin/chromium-browser";
-  /**
-   * @brief Browser name
-   */
-  const char kBrowserName[] = "chromium-browser";
-  /**
-   * @brief Browser params
-   */
-  const char kBrowserParams[] = "--auth-schemes=basic,digest,ntlm";
-  /**
-   * @brief Local host address
-   */
-  const char kLocalHostAddress[] = "127.0.0.1";
-  /**
-   * @brief Initialize HTML based HMI.
-   *
-   * @return true if success otherwise false.
-   */
-  // bool InitHmi();
+AudioStopStreamRequest::~AudioStopStreamRequest() {
+}
 
-  class InitHMI : public threads::ThreadDelegate {
-   public:
-    InitHMI();
+void AudioStopStreamRequest::Run() {
+  LOG4CXX_INFO(logger_, "AudioStopStreamRequest::Run");
 
-    ~InitHMI();
+  SendRequest();
+}
 
-    virtual void threadMain();
+}  // namespace commands
 
-   private:
-    DISALLOW_COPY_AND_ASSIGN(InitHMI);
-  };
-
-  bool InitFuncHmi();
-
-  bool InitHmi();
-
-}  // namespace InitializeHMI
-
-#endif  // TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_INIT_HMI_H_
+}  // namespace application_manager

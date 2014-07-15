@@ -146,7 +146,7 @@ size-options.lnt // This .lnt file should be generated (preferrably
 
 // =========================================================
 // Generally useful suppressions:
--wlib(0)      // sets the warning level within library headers to 1
+//-wlib(0)      // sets the warning level within library headers to 1
               // (no warnings, just syntax errors).  Comment out if you
               // are actually linting library headers.
 -elib(123)    // 123 is really a warning, but it's in the "Error" range.

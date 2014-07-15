@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,32 +29,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_TEST_HMI_H_
-#define TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_TEST_HMI_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_STOP_STREAM_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_STOP_STREAM_RESPONSE_H_
 
-#include "application_manager/application_manager_impl.h"
-#include "connection_handler/connection_handler_impl.h"
-#include "smart_objects/smart_object.h"
-#include "hmi_message_handler/hmi_message_handler_impl.h"
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
-#include "rpc/hmi_message_handler_tester.h"
-#include "rpc/init_start_data.h"
+namespace application_manager {
 
-namespace am = application_manager;
-namespace jsn = NsSmartDeviceLink::NsJSONHandler::strings;
-namespace smart = NsSmartDeviceLink::NsSmartObjects;
+namespace commands {
 
-namespace test {
-  namespace app_manager_test {
-    /**
-     * @brief testHMI. Init Device. Updated Device List to connaction_handler,
-     * establish connaction. Registr Application. Send HMIRequest to
-     * ManageMobileCommand with params AddCommand
-     */
-    void TestHMI();
+/**
+ * @brief NaviStopStreamResponse command class
+ **/
+class AudioStopStreamResponse : public ResponseFromHMI {
+ public:
+  /**
+   * @brief AudioStopStreamResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit AudioStopStreamResponse(const MessageSharedPtr& message);
 
-  }  // namespace app_manager_test
-}  // namespace test
+  /**
+   * @brief OnNaviStopStreamResponse class destructor
+   **/
+  virtual ~AudioStopStreamResponse();
 
-#endif  // TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_TEST_HMI_H_
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
+ private:
+  DISALLOW_COPY_AND_ASSIGN(AudioStopStreamResponse);
+};
+
+}  // namespace commands
+
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_STOP_STREAM_RESPONSE_H_

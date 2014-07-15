@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,56 +29,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_SMOKE_TEST_EXP_MEDIA_H_
-#define TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_SMOKE_TEST_EXP_MEDIA_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_RESPONSE_H_
 
-#include <stdio.h>
-#include <libxml/xmlreader.h>
-#include <string>
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
-#include "rpc/xml_parser.h"
-#include "rpc/add_test.h"
-#include "rpc/init_start_data.h"
-#include "rpc/protocol_handler_mockup.h"
-#include "rpc/hmi_message_handler_tester.h"
+namespace application_manager {
 
-#include "smart_objects/smart_object.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/message_helper.h"
-#include "application_manager/application_impl.h"
+namespace commands {
 
-namespace am = application_manager;
-namespace jsn = NsSmartDeviceLink::NsJSONHandler::strings;
-namespace smart = NsSmartDeviceLink::NsSmartObjects;
-
-namespace test {
+/**
+ * @brief AudioStartStreamResponse command class
+ **/
+class AudioStartStreamResponse : public ResponseFromHMI {
+ public:
+  /**
+   * @brief AudioStartStreamResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit AudioStartStreamResponse(const MessageSharedPtr& message);
 
   /**
-   * @brief Function read test from xml files and create Gtest to verify Mobile
-   * response and HMI request
-   *
-   * @param Patch to folder has xml files
-   *
-   */
-  void SmokeTestExpMedia(const char* patch);
+   * @brief AudioStartStreamResponse class destructor
+   **/
+  virtual ~AudioStartStreamResponse();
 
   /**
-   * @brief Function checks whether remains untested HMI request
-   *
-   * @return true if not request or false otherwise
-   *
-   */
-  bool CheckNotTestedHMIRequest();
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  /**
-   * @brief Function init params smoke test
-   *
-   * @return true if all init
-   *
-   */
-  bool InitSmokeTestExpMedia();
+ private:
+  DISALLOW_COPY_AND_ASSIGN(AudioStartStreamResponse);
+};
 
-}  // namespace test
+}  // namespace commands
 
-#endif  // TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_SMOKE_TEST_EXP_MEDIA_H_
+}  // namespace application_manager
 
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_RESPONSE_H_

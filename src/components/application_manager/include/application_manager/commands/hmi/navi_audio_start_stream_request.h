@@ -30,47 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_INIT_START_DATA_H_
-#define TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_INIT_START_DATA_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_REQUEST_H_
 
-#include "rpc/init_hmi.h"
-#include "rpc/protocol_handler_mockup.h"
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
-#include "transport_manager/error.h"
-#include "transport_manager/transport_adapter/transport_adapter_event.h"
-#include "transport_manager/transport_adapter/transport_adapter_listener_impl.h"
-#include "transport_manager/transport_adapter/transport_adapter_controller.h"
-#include "transport_manager/transport_adapter/transport_adapter_impl.h"
-#include "transport_manager/transport_adapter/server_connection_factory.h"
-#include "transport_manager/transport_adapter/client_connection_listener.h"
-#include "transport_manager/tcp/tcp_connection_factory.h"
-#include "transport_manager/tcp/tcp_client_listener.h"
-#include "transport_manager/tcp/dnssd_service_browser.h"
-#include "transport_manager/tcp/tcp_transport_adapter.h"
-#include "application_manager/application_manager_impl.h"
-#include "utils/logger.h"
+namespace application_manager {
 
-namespace am = application_manager;
-namespace smart = NsSmartDeviceLink::NsSmartObjects;
-namespace jsn = NsSmartDeviceLink::NsJSONHandler::strings;
-
-namespace test {
-/**
- * @brief Initialize TransportManager, ProtocolHandlerImpl, ConnectionHandlerImpl
- * ApplicationManagerImpl, MessageBrokerAdapter
- */
-void InitStartData();
+namespace commands {
 
 /**
- * @brief Registration application
- */
-void RegApp();
+ * @brief AudioStartStreamRequest command class
+ **/
+class AudioStartStreamRequest : public RequestToHMI {
+ public:
+  /**
+   * @brief AudioStartStreamRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit AudioStartStreamRequest(const MessageSharedPtr& message);
 
-/**
- * @brief Activate application
- */
-void ActivateApp();
+  /**
+   * @brief OnNaviStartStreamRequest class destructor
+   **/
+  virtual ~AudioStartStreamRequest();
 
-}  // namespace test
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-#endif  // TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_INIT_START_DATA_H_
+ private:
+  DISALLOW_COPY_AND_ASSIGN(AudioStartStreamRequest);
+};
+
+}  // namespace commands
+
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_START_STREAM_REQUEST_H_

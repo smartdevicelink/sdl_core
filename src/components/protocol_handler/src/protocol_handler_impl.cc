@@ -51,7 +51,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ProtocolHandler")
  * If packet data is not printable return error message
  */
 std::string ConvertPacketDataToString(const uint8_t *data,
-                                      const std::size_t data_size);
+                                      const size_t data_size);
 
 const size_t kStackSize = 32768;
 
@@ -65,7 +65,7 @@ class ProtocolHandlerImpl::IncomingDataHandler {
     DCHECK(out_frames != NULL);
     const ConnectionID connection_id = tm_message->connection_key();
     const uint8_t *data = tm_message->data();
-    const std::size_t size = tm_message->data_size();
+    const size_t size = tm_message->data_size();
     DCHECK(size > 0); DCHECK(data != NULL);
     LOG4CXX_TRACE(logger_, "Start of processing incoming data of size "
                                << size << " for connection " << connection_id);
@@ -173,6 +173,7 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
 }
 
 ProtocolHandlerImpl::~ProtocolHandlerImpl() {
+  sync_primitives::AutoLock lock(protocol_observers_lock_);
   if (!protocol_observers_.empty()) {
     LOG4CXX_WARN(logger_, "Not all observers have unsubscribed"
                  " from ProtocolHandlerImpl");
@@ -184,6 +185,7 @@ void ProtocolHandlerImpl::AddProtocolObserver(ProtocolObserver *observer) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to IProtocolObserver.");
     return;
   }
+  sync_primitives::AutoLock lock(protocol_observers_lock_);
   protocol_observers_.insert(observer);
 }
 
@@ -479,7 +481,7 @@ void ProtocolHandlerImpl::OnTMMessageReceiveFailed(
 }
 
 void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr message) {
-  LOG4CXX_ERROR(logger_, "ProtocolHandlerImpl::NotifySubscribers");
+  LOG4CXX_TRACE(logger_, "ProtocolHandlerImpl::NotifySubscribers");
   sync_primitives::AutoLock lock(protocol_observers_lock_);
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
@@ -488,7 +490,7 @@ void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr message) {
 }
 
 void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
-  LOG4CXX_INFO(logger_, "Sending message finished successfully.");
+  LOG4CXX_DEBUG(logger_, "Sending message finished successfully.");
 
   uint32_t connection_handle = 0;
   uint8_t sessionID = 0;
@@ -1039,6 +1041,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       return RESULT_OK;
     }
     if (ssl_context->IsInitCompleted()) {
+      // mark service as protected
+      session_observer_->SetProtectionFlag(connection_key, service_type);
       // Start service as protected with current SSLContext
       SendStartSessionAck(connection_id, session_id, packet.protocol_version(),
                           connection_key, packet.service_type(), PROTECTION_ON);
@@ -1069,11 +1073,12 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
   LOG4CXX_INFO(
       logger_,
       "Sending heart beat acknowledgment for connection " << connection_id);
-  if (session_observer_->CheckSupportHeartBeat(
+  if (session_observer_->IsHeartBeatSupported(
       connection_id, packet.session_id())) {
     return SendHeartBeatAck(connection_id, packet.session_id(),
                               packet.message_id());
   }
+  LOG4CXX_WARN(logger_, "HeartBeat is not supported");
   return RESULT_HEARTBEAT_IS_NOT_SUPPORTED;
 }
 
@@ -1083,7 +1088,7 @@ void ProtocolHandlerImpl::Handle(
 
   connection_handler::ConnectionHandlerImpl *connection_handler =
         connection_handler::ConnectionHandlerImpl::instance();
-  if (session_observer_->CheckSupportHeartBeat(
+  if (session_observer_->IsHeartBeatSupported(
         message->connection_id(), message->session_id())) {
     connection_handler->KeepConnectionAlive(message->connection_id(),
                                             message->session_id());
@@ -1238,7 +1243,7 @@ void ProtocolHandlerImpl::SetTimeMetricObserver(PHMetricObserver *observer) {
 #endif  // TIME_TESTER
 
 std::string ConvertPacketDataToString(const uint8_t *data,
-                                      const std::size_t data_size) {
+                                      const size_t data_size) {
   if (0 == data_size)
     return std::string();
   bool is_printable_array = true;

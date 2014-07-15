@@ -58,7 +58,6 @@ void SpeakRequest::Run() {
     return;
   }
 
-  // Checking speak on contained \t\n \\t \\n
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming speak has contains \t\n \\t \\n");
@@ -126,7 +125,6 @@ void SpeakRequest::ProcessTTSSpeakResponse(
 
 bool SpeakRequest::IsWhiteSpaceExist() {
   LOG4CXX_INFO(logger_, "SpeakRequest::IsWhiteSpaceExist");
-  bool return_value = false;
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
@@ -140,13 +138,11 @@ bool SpeakRequest::IsWhiteSpaceExist() {
       str = (*it_tc)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
-        return_value = true;
-        break;
+        return true;
       }
     }
   }
-
-  return return_value;
+  return false;
 }
 
 }  // namespace commands

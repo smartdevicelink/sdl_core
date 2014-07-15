@@ -89,7 +89,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
         //return some connection_key
         WillRepeatedly(Return(connection_key));
     EXPECT_CALL(session_observer_mock,
-                CheckSupportHeartBeat(connection_id, _)).
+                IsHeartBeatSupported(connection_id, _)).
         //return false to avoid call KeepConnectionAlive
         WillRepeatedly(Return(false));
   }
@@ -382,13 +382,16 @@ TEST_F(ProtocolHandlerImplTest,SecurityEnable_StartSessionProtected_SSLInitializ
       //emulate SSL is initilized
       WillOnce(Return(true));
 
+  // Expect service protection enable
+  EXPECT_CALL(session_observer_mock,
+              SetProtectionFlag(connection_key, start_service));
+
   // expect send Ack with PROTECTION_ON (on SSL is initilized)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON))).
       WillOnce(Return(E_SUCCESS));
 
   SendControlMessage(PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
-
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_OFF on session handshhake fail
@@ -483,7 +486,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_HandshakeSu
       // emulate protection for service is not enabled
       WillOnce(ReturnNull());
 
-  // On success handshake mark service as protected
+  // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service));
 
@@ -538,7 +541,7 @@ TEST_F(ProtocolHandlerImplTest,
       // emulate protection for service is not enabled
       WillOnce(ReturnNull());
 
-  // On success handshake mark service as protected
+  // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service));
 
@@ -597,7 +600,7 @@ TEST_F(ProtocolHandlerImplTest,
       // emulate protection for service is not enabled
       WillOnce(ReturnNull());
 
-  // On success handshake mark service as protected
+  // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service));
 

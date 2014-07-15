@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/audio_start_stream_request.h"
+#include "application_manager/commands/hmi/navi_audio_start_stream_request.h"
 
 namespace application_manager {
 

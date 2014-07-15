@@ -127,6 +127,7 @@ import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
+import com.ford.syncV4.proxy.systemrequest.SystemRequestProxyImpl;
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
 import com.ford.syncV4.transport.BaseTransportConfig;
@@ -541,9 +542,27 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         super.onDestroy();
     }
 
+    /**
+     * This is a method allowed to send Policy Table Update file manually (for the Testing purposes)
+     *
+     * @param appId       Application id
+     * @param fileType    Type of the File
+     * @param requestType Type of the request
+     */
     public void sendPolicyTableUpdate(String appId, FileType fileType, RequestType requestType) {
-        LogAdapter logAdapter = getLogAdapterByAppId(appId);
-        PolicyFilesManager.sendPolicyTableUpdate(appId, mSyncProxy, fileType, requestType, logAdapter);
+
+        final SystemRequestProxyImpl systemRequestProxy = new SystemRequestProxyImpl(
+                new SystemRequestProxyImpl.ISystemRequestProxyCallback() {
+                    @Override
+                    public void onSendingRPCRequest(String appId, RPCRequest rpcRequest)
+                            throws SyncException {
+                        syncProxySendRPCRequest(appId, rpcRequest);
+                    }
+                }
+        );
+        final LogAdapter logAdapter = getLogAdapterByAppId(appId);
+        PolicyFilesManager.sendPolicyTableUpdate(appId, systemRequestProxy, fileType, requestType,
+                logAdapter);
     }
 
     public void setCloseSessionCallback(ICloseSession closeSessionCallback) {
@@ -945,8 +964,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onError(String info, Throwable e) {
-        createErrorMessageForAdapter("Proxy error: " + info);
+    public void onError(String info, Throwable throwable) {
+        createErrorMessageForAdapter("SYNC Proxy error: " + info);
     }
 
     /**
@@ -2272,8 +2291,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void syncProxyStartRPCService(String appId, boolean encrypted) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
             if (encrypted) {
-                if (mSyncProxy.getProtocolSecureManager() != null) {
-                    mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.RPC);
+                if (mSyncProxy.getProtocolSecureManager(appId) != null) {
+                    mSyncProxy.getProtocolSecureManager(appId).addServiceToEncrypt(ServiceType.RPC);
                 }
             }
             mSyncProxy.startRpcService(appId, encrypted);
@@ -2283,8 +2302,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void syncProxyStartAudioService(String appId, boolean encrypted) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
             if (encrypted) {
-                if (mSyncProxy.getProtocolSecureManager() != null) {
-                    mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.Audio_Service);
+                if (mSyncProxy.getProtocolSecureManager(appId) != null) {
+                    mSyncProxy.getProtocolSecureManager(appId).addServiceToEncrypt(ServiceType.Audio_Service);
                 }
             }
             mSyncProxy.startAudioService(appId, encrypted);
@@ -2527,8 +2546,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     public void syncProxyStartMobileNavService(String appId, boolean encrypted) {
         if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
             if (encrypted) {
-                if (mSyncProxy.getProtocolSecureManager() != null) {
-                    mSyncProxy.getProtocolSecureManager().addServiceToEncrypt(ServiceType.Mobile_Nav);
+                if (mSyncProxy.getProtocolSecureManager(appId) != null) {
+                    mSyncProxy.getProtocolSecureManager(appId).addServiceToEncrypt(ServiceType.Mobile_Nav);
                 }
             }
             mSyncProxy.startMobileNavService(appId, encrypted);

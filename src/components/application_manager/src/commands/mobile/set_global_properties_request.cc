@@ -249,6 +249,7 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
+
   // check TTS params
   if (is_help_prompt_present || is_timeout_prompt_present) {
     smart_objects::SmartObject params =
@@ -380,7 +381,6 @@ bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(
 
 bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
   LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::IsWhiteSpaceExist");
-  bool return_value = false;
   const char* str;
 
   const smart_objects::SmartObject& msg_params =
@@ -397,8 +397,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
       str = (*it_hp)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
         LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
-        return_value = true;
-        break;
+        return true;
       }
     }
   }
@@ -414,8 +413,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
       str = (*it_tp)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
         LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
-        return_value = true;
-        break;
+        return true;
       }
     }
   }
@@ -433,13 +431,11 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
         if (!CheckSyntax(str, true)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid vrHelp image value syntax check failed");
-          return_value = true;
-          break;
+          return true;
         }
       }
     }
   }
-
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_icon)) {
     str = (*message_)[strings::msg_params]
@@ -447,11 +443,11 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 
     if (!CheckSyntax(str, true)) {
       LOG4CXX_ERROR(logger_, "Invalid menu_icon value syntax check failed");
-      return_value = true;
+      return true;
     }
   }
 
-  return return_value;
+  return false;
 }
 
 }  // namespace commands

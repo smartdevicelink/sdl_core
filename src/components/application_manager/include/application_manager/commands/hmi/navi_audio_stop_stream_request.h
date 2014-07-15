@@ -1,5 +1,4 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/* Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,46 +29,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_G_TEST_FORD_H_
-#define TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_G_TEST_FORD_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_STOP_STREAM_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_STOP_STREAM_REQUEST_H_
 
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include "application_manager/commands/hmi/request_to_hmi.h"
 
-#include "rpc/gmock_class_container.h"
-#include "utils/macro.h"
+namespace application_manager {
+
+namespace commands {
 
 /**
-* @brief Class replace TEST and Call's Gtest/Gmock of Google
-*/
-class GTestFord : public testing::Test {
+ * @brief AudioStopStreamRequest command class
+ **/
+class AudioStopStreamRequest : public RequestToHMI {
  public:
   /**
-   * @brief Constructor
-   */
-  GTestFord();
+   * @brief AudioStopStreamRequest class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit AudioStopStreamRequest(const MessageSharedPtr& message);
 
   /**
-   * @brief Virtual Distructor
-   */
-  virtual ~GTestFord();
+   * @brief NaviStopStreamRequest class destructor
+   **/
+  virtual ~AudioStopStreamRequest();
+
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
  private:
-  /**
-   * @brief main function where the testing is executed
-   *
-   * @param
-   *
-   * @return void
-   */
-  virtual void TestBody();
-
-  /**
-   * @brief Change pointer element to GMockClassContainer mas_
-   */
-  static int index_;
-
-  DISALLOW_COPY_AND_ASSIGN(GTestFord);
+  DISALLOW_COPY_AND_ASSIGN(AudioStopStreamRequest);
 };
 
-#endif  // TEST_COMPONENTS_APPLICATION_MANAGER_RPC_INCLUDE_RPC_G_TEST_FORD_H_
+}  // namespace commands
+
+}  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_AUDIO_STOP_STREAM_REQUEST_H_
