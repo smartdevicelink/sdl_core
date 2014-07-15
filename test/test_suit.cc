@@ -89,13 +89,6 @@ int main(int argc, char **argv) {
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   INIT_LOGGER("log4cxx.properties");
 
-
-#ifdef TESTS_WITH_HMI
-  test::AdminAppTest app;
-
-  app.Run();
-  sleep(5);
-#endif
   int result = RUN_ALL_TESTS();
 
 #if defined(__cplusplus) and defined(GCOV_ENABLED)
