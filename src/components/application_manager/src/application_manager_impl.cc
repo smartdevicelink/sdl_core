@@ -1992,8 +1992,12 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
 
   if (hmi_level == mobile_apis::HMILevel::HMI_NONE
       && function_id != mobile_apis::FunctionID::UnregisterAppInterfaceID) {
-    application_by_policy_id(policy_app_id)->
-        usage_report().RecordRpcSentInHMINone();
+    ApplicationSharedPtr app = application_by_policy_id(policy_app_id);
+    if (!app) {
+      LOG4CXX_ERROR(logger_, "No application for policy id " << policy_app_id);
+      return mobile_apis::Result::GENERIC_ERROR;
+    }
+    app->usage_report().RecordRpcSentInHMINone();
   }
 
   const std::string log_msg = "Application: "+ policy_app_id+
