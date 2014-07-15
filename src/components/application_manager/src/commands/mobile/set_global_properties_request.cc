@@ -249,6 +249,7 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
+
   // check TTS params
   if (is_help_prompt_present || is_timeout_prompt_present) {
     smart_objects::SmartObject params =

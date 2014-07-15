@@ -1799,15 +1799,16 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
   std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
+    ApplicationSharedPtr app_to_remove = *it;
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-      (*it)->app_id(), unregister_reason_);
+        app_to_remove->app_id(), unregister_reason_);
+    UnregisterApplication(app_to_remove->app_id(),
+                          mobile_apis::Result::INVALID_ENUM, is_ignition_off);
 
-    uint32_t app_id = (*it)->app_id();
-    UnregisterApplication(app_id, mobile_apis::Result::INVALID_ENUM,
-                          is_ignition_off);
-    connection_handler_->CloseSession(app_id);
+    connection_handler_->CloseSession(app_to_remove->app_id());
     it = application_list_.begin();
   }
+
   if (is_ignition_off) {
    resume_controller().IgnitionOff();
   }
@@ -1829,12 +1830,12 @@ void ApplicationManagerImpl::UnregisterApplication(
       application(app_id)->usage_report().RecordRemovalsForBadBehavior();
       break;
     }
-
     default: {
       LOG4CXX_ERROR(logger_, "Unknown unregister reason");
       break;
     }
   }
+
   ApplicationSharedPtr app_to_remove;
   {
     sync_primitives::AutoLock lock(applications_list_lock_);
@@ -1866,11 +1867,6 @@ void ApplicationManagerImpl::UnregisterApplication(
   MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove);
 
   request_ctrl_.terminateAppRequests(app_id);
-
-  //  {
-  //    sync_primitives::AutoLock lock(applications_list_lock_);
-
-  //  }
   return;
 }
 
