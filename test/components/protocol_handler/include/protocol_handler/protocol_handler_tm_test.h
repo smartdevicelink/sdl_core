@@ -76,7 +76,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
         //return some connection_key
         WillRepeatedly(Return(connection_key));
     EXPECT_CALL(session_observer_mock,
-                CheckSupportHeartBeat(connection_id, _)).
+                IsHeartBeatSupported(connection_id, _)).
         //return false to avoid call KeepConnectionAlive
         WillRepeatedly(Return(false));
   }

@@ -766,6 +766,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
 
 void ConnectionHandlerImpl::BindProtocolVersionWithSession(
     uint32_t connection_key, uint8_t protocol_version) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::BindProtocolVersionWithSession()");
   uint32_t connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);
@@ -777,12 +778,14 @@ void ConnectionHandlerImpl::BindProtocolVersionWithSession(
   }
 }
 
-bool ConnectionHandlerImpl::CheckSupportHeartBeat(
+bool ConnectionHandlerImpl::IsHeartBeatSupported(
     transport_manager::ConnectionUID connection_handle,uint8_t session_id) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::IsHeartBeatSupported()");
   sync_primitives::AutoLock lock(connection_list_lock_);
   uint32_t connection = static_cast<uint32_t>(connection_handle);
   ConnectionList::iterator it = connection_list_.find(connection);
   if (connection_list_.end() == it) {
+    LOG4CXX_WARN(logger_, "Connection not found !");
     return false;
   }
   return it->second->SupportHeartBeat(session_id);

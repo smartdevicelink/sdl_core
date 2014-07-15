@@ -346,7 +346,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param sessionId Identifier of the session
    * \return TRUE if session has protocol version which supports heartbeat otherwise returns FALSE
    */
-  virtual bool CheckSupportHeartBeat(
+  virtual bool IsHeartBeatSupported(
     transport_manager::ConnectionUID connection_handle,
     uint8_t session_id);
  private:
