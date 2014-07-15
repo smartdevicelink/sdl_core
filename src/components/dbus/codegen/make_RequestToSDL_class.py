@@ -155,6 +155,7 @@ class Impl(FordXmlParser):
 
                 out.write('Q%sValue hmi_callback) {\n' % prefix_class_item)
                 with CodeBlock(out) as output:
+                    output.write('LOG4CXX_TRACE(logger_, "Enter");\n')
                     output.write('QList<QVariant> args;\n')
                     for param_el in request.findall('param'):
                         param = self.make_param_desc(param_el, iface_name)
@@ -166,7 +167,8 @@ class Impl(FordXmlParser):
                         else:
                             output.write('args << ' + param.name + ';\n')
                     output.write('new requests::' + request_full_name + '(' + interface_el.get('name') + 
-                                 ', "' + request_name + '", args, hmi_callback);\n}\n')
+                                 ', "' + request_name + '", args, hmi_callback);\n')
+                    output.write('LOG4CXX_TRACE(logger_, "Exit")\n}\n\n')
         
 
     def make_source_file(self, out):
@@ -307,7 +309,10 @@ source_out.write("""/**
 source_out.write('#include "request_to_sdl.h"\n')
 source_out.write("#include <QtDBus/QDBusConnection>\n")
 source_out.write("#include <QtDBus/QDBusInterface>\n")
-source_out.write('#include "hmi_requests.h"\n\n')
+source_out.write('#include "hmi_requests.h"\n')
+source_out.write('#include "utils/logger.h"\n\n')
+source_out.write('CREATE_LOGGERPTR_GLOBAL(logger_, DBusPlugin);\n\n')
+
 
 
 
