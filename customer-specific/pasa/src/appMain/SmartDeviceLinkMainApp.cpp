@@ -89,7 +89,10 @@ void startSmartDeviceLink()
     }
 
 
-    main_namespace::LifeCycle::instance()->StartComponents();
+    if (!main_namespace::LifeCycle::instance()->StartComponents()) {
+      LOG4CXX_INFO(logger, "StartComponents failed.");
+      exit(EXIT_FAILURE);
+    }
 
     // --------------------------------------------------------------------------
     // Third-Party components initialization.

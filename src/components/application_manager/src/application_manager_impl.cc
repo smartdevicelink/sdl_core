@@ -1323,12 +1323,14 @@ bool ApplicationManagerImpl::ManageHMICommand(
   return false;
 }
 
-void ApplicationManagerImpl::Init() {
+bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
+  bool init_result = true;
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
-    DCHECK(policy::PolicyHandler::instance()->InitPolicyTable());
+    init_result = policy::PolicyHandler::instance()->InitPolicyTable();
   }
+  return init_result;
 }
 
 bool ApplicationManagerImpl::ConvertMessageToSO(
