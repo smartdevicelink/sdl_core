@@ -43,209 +43,197 @@ namespace transport_manager {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 TransportAdapterListenerImpl::TransportAdapterListenerImpl(
-    TransportManagerImpl* manager, TransportAdapter* adapter)
-    : transport_manager_impl_(manager), transport_adapter_(adapter) {}
+  TransportManagerImpl *manager, TransportAdapter *adapter) :
+  transport_manager_impl_(manager), transport_adapter_(adapter) {
+}
 
 void TransportAdapterListenerImpl::OnSearchDeviceDone(
-    const TransportAdapter* adapter) {
+  const TransportAdapter *adapter) {
   const TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE,
-      transport_adapter_, "", 0, RawMessagePtr(), new BaseError());
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE,
+    transport_adapter_, "", 0, RawMessagePtr(), BaseErrorPtr());
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
 
 void TransportAdapterListenerImpl::OnSearchDeviceFailed(
-    const TransportAdapter* adapter,
-    const SearchDeviceError& error) {
-  SearchDeviceError* err = new SearchDeviceError(error);
+  const TransportAdapter *adapter, const SearchDeviceError &error) {
+  SearchDeviceError *err = new SearchDeviceError(error);
   const TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL,
-      transport_adapter_, "", 0, RawMessagePtr(), err);
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL,
+    transport_adapter_, "", 0, RawMessagePtr(), BaseErrorPtr(err));
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
 
 void TransportAdapterListenerImpl::OnDeviceListUpdated(
-    const TransportAdapter* adapter) {
+  const TransportAdapter *adapter) {
   const TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED,
-      transport_adapter_, "", 0, RawMessagePtr(), BaseErrorPtr());
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED,
+    transport_adapter_, "", 0, RawMessagePtr(), BaseErrorPtr());
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
 
-void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(const TransportAdapter* adapter) {
+void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(
+  const TransportAdapter *adapter) {
   const TransportAdapterEvent event(
     TransportAdapterListenerImpl::ON_FIND_NEW_APPLICATIONS_REQUEST,
-    transport_adapter_,
-    "",
-    0,
-    RawMessagePtr(),
-    BaseErrorPtr()
-  );
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    transport_adapter_, "", 0, RawMessagePtr(), BaseErrorPtr());
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
 
 void TransportAdapterListenerImpl::OnConnectDone(
-    const TransportAdapter* adapter, const DeviceUID& device,
-    const ApplicationHandle& application_id) {
+  const TransportAdapter *adapter, const DeviceUID &device,
+  const ApplicationHandle &application_id) {
   const TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE,
-      transport_adapter_, device, application_id, RawMessagePtr(),
-      new BaseError());
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE,
+    transport_adapter_, device, application_id, RawMessagePtr(),
+    BaseErrorPtr(new BaseError()));
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
 
 void TransportAdapterListenerImpl::OnConnectFailed(
-    const TransportAdapter* adapter, const DeviceUID& device,
-    const ApplicationHandle& app_id, const ConnectError& error) {
-  ConnectError* err = new ConnectError(error);
+  const TransportAdapter *adapter, const DeviceUID &device,
+  const ApplicationHandle &app_id, const ConnectError &error) {
+  ConnectError *err = new ConnectError(error);
   const TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL,
-      transport_adapter_, device, app_id, RawMessagePtr(), err);
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL,
+    transport_adapter_, device, app_id, RawMessagePtr(), BaseErrorPtr(err));
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
 
 void TransportAdapterListenerImpl::OnDisconnectDone(
-    const TransportAdapter* adapter, const DeviceUID& device,
-    const ApplicationHandle& app_id) {
+  const TransportAdapter *adapter, const DeviceUID &device,
+  const ApplicationHandle &app_id) {
   const TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE,
-      transport_adapter_, device, app_id, RawMessagePtr(), new BaseError());
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE,
+    transport_adapter_, device, app_id, RawMessagePtr(),
+    BaseErrorPtr(new BaseError()));
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
 
 void TransportAdapterListenerImpl::OnDisconnectFailed(
-    const TransportAdapter* adapter, const DeviceUID& device,
-    const ApplicationHandle& app_id, const DisconnectError& error) {
-  DisconnectError* err = new DisconnectError(error);
+  const TransportAdapter *adapter, const DeviceUID &device,
+  const ApplicationHandle &app_id, const DisconnectError &error) {
+  DisconnectError *err = new DisconnectError(error);
   const TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL,
-      transport_adapter_, device, app_id, RawMessagePtr(), err);
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL,
+    transport_adapter_, device, app_id, RawMessagePtr(), BaseErrorPtr(err));
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
 
 void TransportAdapterListenerImpl::OnDisconnectDeviceDone(
-    const TransportAdapter* adapter, const DeviceUID& device) {}
+  const TransportAdapter *adapter, const DeviceUID &device) {
+}
 
 void TransportAdapterListenerImpl::OnDisconnectDeviceFailed(
-    const TransportAdapter* adapter, const DeviceUID& device,
-    const DisconnectDeviceError& error) {}
+  const TransportAdapter *adapter, const DeviceUID &device,
+  const DisconnectDeviceError &error) {
+}
 
 void TransportAdapterListenerImpl::OnDataReceiveDone(
-    const TransportAdapter* adapter, const DeviceUID& device,
-    const ApplicationHandle& app_id, const RawMessagePtr data_container) {
+  const TransportAdapter *adapter, const DeviceUID &device,
+  const ApplicationHandle &app_id, const RawMessagePtr data_container) {
   const TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE,
-      transport_adapter_, device, app_id, data_container, new BaseError());
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE,
+    transport_adapter_, device, app_id, data_container,
+    BaseErrorPtr(new BaseError()));
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
 
 void TransportAdapterListenerImpl::OnDataReceiveFailed(
-    const TransportAdapter* adapter, const DeviceUID& device,
-    const ApplicationHandle& app_id, const DataReceiveError& error) {
-  DataReceiveError* err = new DataReceiveError(error);
+  const TransportAdapter *adapter, const DeviceUID &device,
+  const ApplicationHandle &app_id, const DataReceiveError &error) {
+  DataReceiveError *err = new DataReceiveError(error);
   const TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL,
-      transport_adapter_, device, app_id, RawMessagePtr(), err);
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL,
+    transport_adapter_, device, app_id, RawMessagePtr(), BaseErrorPtr(err));
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
 
 void TransportAdapterListenerImpl::OnDataSendDone(
-    const TransportAdapter* adapter, const DeviceUID& device,
-    const ApplicationHandle& app_id, const RawMessagePtr data_container) {
+  const TransportAdapter *adapter, const DeviceUID &device,
+  const ApplicationHandle &app_id, const RawMessagePtr data_container) {
   const TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE,
-      transport_adapter_, device, app_id, data_container, new BaseError());
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE,
+    transport_adapter_, device, app_id, data_container,
+    new BaseError());
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
 
 void TransportAdapterListenerImpl::OnDataSendFailed(
-    const TransportAdapter* adapter, const DeviceUID& device,
-    const ApplicationHandle& app_id, const RawMessagePtr data_container,
-    const DataSendError& error) {
-  DataSendError* err = new DataSendError(error);
+  const TransportAdapter *adapter, const DeviceUID &device,
+  const ApplicationHandle &app_id, const RawMessagePtr data_container,
+  const DataSendError &error) {
+  DataSendError *err = new DataSendError(error);
   const TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL,
-      transport_adapter_, device, app_id, data_container, err);
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL,
+    transport_adapter_, device, app_id, data_container, BaseErrorPtr(err));
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
 
 void TransportAdapterListenerImpl::OnConnectRequested(
-    const TransportAdapter* adapter, const DeviceUID& device_handle,
-    const ApplicationHandle& app_handle) {}
+  const TransportAdapter *adapter, const DeviceUID &device_handle,
+  const ApplicationHandle &app_handle) {
+}
 
 void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
-    const TransportAdapter* adapter,
-    const DeviceUID& device, const ApplicationHandle& application,
-    const CommunicationError& error) {
-  CommunicationError* err = new CommunicationError(error);
+  const TransportAdapter *adapter, const DeviceUID &device,
+  const ApplicationHandle &application, const CommunicationError &error) {
+  CommunicationError *err = new CommunicationError(error);
   const TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
-      transport_adapter_, device, application, RawMessagePtr(), err);
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    TransportAdapterListenerImpl::EventTypeEnum::ON_UNEXPECTED_DISCONNECT,
+    transport_adapter_, device, application, RawMessagePtr(), BaseErrorPtr(err));
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
 
 void TransportAdapterListenerImpl::OnCommunicationError(
-    const TransportAdapter* adapter, const DeviceUID& device,
-    const ApplicationHandle& app_id) {
+  const TransportAdapter *adapter, const DeviceUID &device,
+  const ApplicationHandle &app_id) {
   const TransportAdapterEvent event(
-      TransportAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR,
-      transport_adapter_, device, app_id, RawMessagePtr(), new BaseError());
-
-  if (transport_manager::E_SUCCESS !=
-      transport_manager_impl_->ReceiveEventFromDevice(event)) {
-    LOG4CXX_WARN(logger_, "Failed to receive event from device");
-  }
+    TransportAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR,
+    transport_adapter_, device, app_id, RawMessagePtr(),
+    BaseErrorPtr(new BaseError()));
+  if (transport_manager::E_SUCCESS
+      != transport_manager_impl_->ReceiveEventFromDevice(event)) {
+      LOG4CXX_WARN(logger_, "Failed to receive event from device");
+    }
 }
-}  // namespace transport_manager
+} // namespace transport_manager
