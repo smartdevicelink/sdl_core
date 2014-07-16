@@ -227,12 +227,6 @@ class PolicyHandler :
                                       bool is_allowed);
 
   /**
-   * Adds http header (temporary method)
-   * @param pt_string string without htt header
-   */
-  BinaryMessageSptr AddHttpHeader(const BinaryMessageSptr& pt_string);
-
-  /**
    * Checks whether application is revoked
    * @param app_id id application
    * @return true if application is revoked

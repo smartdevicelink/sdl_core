@@ -506,40 +506,6 @@ void PolicyHandler::OnPendingPermissionChange(
   }
 }
 
-BinaryMessageSptr PolicyHandler::AddHttpHeader(
-    const BinaryMessageSptr& pt_string) {
-  // Creating new value to avoid backslashes with direct converting from string
-  Json::Value policy_table(Json::objectValue);
-  Json::Reader reader;
-  reader.parse(std::string(pt_string->begin(), pt_string->end()), policy_table);
-
-  Json::Value packet(Json::objectValue);
-  packet["HTTPRequest"] = Json::Value(Json::objectValue);
-  packet["HTTPRequest"]["headers"] = Json::Value(Json::objectValue);
-  packet["HTTPRequest"]["headers"]["ContentType"] = Json::Value("application/json");
-  packet["HTTPRequest"]["headers"]["ConnectTimeout"] =
-      Json::Value(policy_manager_->TimeoutExchange());
-  packet["HTTPRequest"]["headers"]["DoOutput"] = Json::Value(true);
-  packet["HTTPRequest"]["headers"]["DoInput"] = Json::Value(true);
-  packet["HTTPRequest"]["headers"]["UseCaches"] = Json::Value(false);
-  packet["HTTPRequest"]["headers"]["RequestMethod"] = Json::Value("POST");
-  packet["HTTPRequest"]["headers"]["ReadTimeout"] =
-      Json::Value(policy_manager_->TimeoutExchange());
-  packet["HTTPRequest"]["headers"]["InstanceFollowRedirects"] =
-      Json::Value(false);
-  packet["HTTPRequest"]["headers"]["charset"] = Json::Value("utf-8");
-  packet["HTTPRequest"]["headers"]["Content_Length"] =
-      Json::Value(static_cast<int>(pt_string->size()));
-  packet["HTTPRequest"]["body"] = Json::Value(Json::objectValue);
-  packet["HTTPRequest"]["body"]["data"] = Json::Value(Json::objectValue);
-  packet["HTTPRequest"]["body"]["data"] = policy_table;
-
-  Json::StyledWriter writer;
-  std::string message = writer.write(packet);
-  LOG4CXX_DEBUG(logger_, "Packet PT: " << message);
-  return new BinaryMessage(message.begin(), message.end());
-}
-
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
   LOG4CXX_INFO(logger_, "PolicyHandler::SendMessageToSDK");
   POLICY_LIB_CHECK(false);

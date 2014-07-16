@@ -45,7 +45,8 @@ namespace str = strings;
 PerformAudioPassThruRequest::PerformAudioPassThruRequest(
     const MessageSharedPtr& message)
     : CommandRequestImpl(message),
-      is_active_tts_speak_(false) {
+      is_active_tts_speak_(false),
+      result_tts_speak_(mobile_apis::Result::SUCCESS) {
 }
 
 PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {
@@ -117,16 +118,6 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_PerformAudioPassThru: {
 
-      std::string return_info;
-      mobile_apis::Result::eType mobile_code =
-          GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-          message[strings::params][hmi_response::code].asUInt()));
-
-      if (mobile_apis::Result::UNSUPPORTED_RESOURCE == mobile_code) {
-        mobile_code = mobile_apis::Result::WARNINGS;
-        return_info = "Unsupported phoneme type sent in a prompt";
-      }
-
       if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
         ApplicationManagerImpl::instance()->StopAudioPassThru(connection_key());
       }
@@ -135,8 +126,19 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
         SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL);
       }
 
+      std::string return_info;
+      mobile_apis::Result::eType mobile_code =
+          GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asUInt()));
+
       bool result = mobile_apis::Result::SUCCESS == mobile_code ||
-                    mobile_apis::Result::RETRY == mobile_code;
+                          mobile_apis::Result::RETRY == mobile_code;
+
+      if ((mobile_apis::Result::SUCCESS == mobile_code) &&
+          (mobile_apis::Result::UNSUPPORTED_RESOURCE == result_tts_speak_)) {
+        mobile_code = mobile_apis::Result::WARNINGS;
+        return_info = "Unsupported phoneme type sent in a prompt";
+      }
 
       SendResponse(result, mobile_code, return_info.c_str(),
                    &(message[strings::msg_params]));
@@ -144,6 +146,8 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
+      result_tts_speak_ = GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asUInt()));
       is_active_tts_speak_ = false;
       SendRecordStartNotification();
       StartMicrophoneRecording();
@@ -173,7 +177,7 @@ void PerformAudioPassThruRequest::SendSpeakRequest() {
       msg_params[hmi_request::tts_chunks][i][str::text] =
           (*message_)[str::msg_params][str::initial_prompt][i][str::text];
       msg_params[hmi_request::tts_chunks][i][str::type] =
-          hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+          (*message_)[str::msg_params][str::initial_prompt][i][str::type];
     }
     // app_id
     msg_params[strings::app_id] = connection_key();

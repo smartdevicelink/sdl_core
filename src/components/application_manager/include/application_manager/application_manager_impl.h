@@ -182,7 +182,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     /**
      * Inits application manager
      */
-    virtual void Init();
+    virtual bool Init();
 
     /**
      * @brief Stop work.
