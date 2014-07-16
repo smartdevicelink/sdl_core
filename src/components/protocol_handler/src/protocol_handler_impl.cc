@@ -1164,6 +1164,7 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
                 << out_data_size << " bytes");
   DCHECK(out_data);
   DCHECK(out_data_size);
+  DCHECK(out_data_size <= MAXIMUM_FRAME_DATA_SIZE);
   packet->set_protection_flag(true);
   packet->set_data(out_data, out_data_size);
   return RESULT_OK;
