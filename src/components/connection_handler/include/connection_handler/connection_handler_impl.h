@@ -381,7 +381,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   /**
    * \brief List of devices
    */
-  DeviceList device_list_;
+  DeviceMap device_list_;
 
   /**
    * \brief List of connections

@@ -35,10 +35,10 @@
 
 #include <gtest/gtest.h>
 #include <algorithm>
+#include "protocol/common.h"
 #include "connection_handler/connection.h"
-#include "protocol_handler/protocol_packet.h"
 #include "connection_handler/connection_handler_impl.h"
-#include "protocol_handler/service_type.h"
+#include "protocol/service_type.h"
 #include "utils/shared_ptr.h"
 
 #define EXPECT_RETURN_TRUE true
@@ -49,8 +49,8 @@
 namespace test {
 namespace components {
 namespace connection_handle {
-  using namespace connection_handler;
-  using namespace protocol_handler;
+  using namespace ::connection_handler;
+  using namespace ::protocol_handler;
 
 class ConnectionTest: public ::testing::Test {
  protected:

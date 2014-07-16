@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_AUDIO_A2DP_SOURCE_PLAYER_ADAPTER_H_
 
 #include <map>
-#include "protocol_handler/raw_message.h"
+#include "protocol/common.h"
 #include "media_manager/media_adapter_impl.h"
 
 namespace threads {
@@ -48,7 +48,7 @@ class A2DPSourcePlayerAdapter : public MediaAdapterImpl {
     A2DPSourcePlayerAdapter();
     ~A2DPSourcePlayerAdapter();
     void SendData(int32_t application_key,
-                  const protocol_handler::RawMessagePtr message) {}
+                  const RawMessagePtr message) {}
     void StartActivity(int32_t application_key);
     void StopActivity(int32_t application_key);
     bool is_app_performing_activity(int32_t application_key);

@@ -52,6 +52,7 @@
 #include "security_manager/security_query_test.h"
 #endif  // ENABLE_SECURITY
 
+// TODO(EZamakhov): add TM and other test
 #include "media_manager/media_manager_impl_test.h"
 #include "SmartObjectDraftTest.h"
 #include "SmartObjectInvalidTest.h"

@@ -189,7 +189,7 @@ SmartType TNumberSchemaItem<uint32_t>::getSmartType();
  * @return SmartType_Double.
  **/
 template<>
-SmartType TNumberSchemaItem<double>::getSmartType(void);
+SmartType TNumberSchemaItem<double>::getSmartType();
 
 template<typename NumberType>
 utils::SharedPtr<TNumberSchemaItem<NumberType> >

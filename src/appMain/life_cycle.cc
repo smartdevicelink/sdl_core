@@ -39,7 +39,7 @@
 #include "resumption/last_state.h"
 
 #ifdef ENABLE_SECURITY
-#include "security_manager/security_manager.h"
+#include "security_manager/security_manager_impl.h"
 #include "security_manager/crypto_manager_impl.h"
 #endif  // ENABLE_SECURITY
 
@@ -120,34 +120,34 @@ bool LifeCycle::StartComponents() {
   DCHECK(hmi_handler_ != NULL)
 
 #ifdef ENABLE_SECURITY
-  security_manager_ = new security_manager::SecurityManager();
+  security_manager_ = new security_manager::SecurityManagerImpl();
 
   // FIXME(EZamakhov): move to Config or in Sm initialization method
   std::string cert_filename;
   profile::Profile::instance()->ReadStringValue(
         &cert_filename, "",
-        security_manager::SecurityManager::ConfigSection(), "CertificatePath");
+        security_manager::SecurityManagerImpl::ConfigSection(), "CertificatePath");
 
   std::string ssl_mode;
   profile::Profile::instance()->ReadStringValue(
-          &ssl_mode, "CLIENT", security_manager::SecurityManager::ConfigSection(), "SSLMode");
+          &ssl_mode, "CLIENT", security_manager::SecurityManagerImpl::ConfigSection(), "SSLMode");
   crypto_manager_ = new security_manager::CryptoManagerImpl();
 
   std::string key_filename;
   profile::Profile::instance()->ReadStringValue(
-        &key_filename, "", security_manager::SecurityManager::ConfigSection(), "KeyPath");
+        &key_filename, "", security_manager::SecurityManagerImpl::ConfigSection(), "KeyPath");
 
   std::string ciphers_list;
   profile::Profile::instance()->ReadStringValue(
-        &ciphers_list, SSL_TXT_ALL, security_manager::SecurityManager::ConfigSection(), "CipherList");
+        &ciphers_list, SSL_TXT_ALL, security_manager::SecurityManagerImpl::ConfigSection(), "CipherList");
 
   bool verify_peer;
   profile::Profile::instance()->ReadBoolValue(
-        &verify_peer, false, security_manager::SecurityManager::ConfigSection(), "VerifyPeer");
+        &verify_peer, false, security_manager::SecurityManagerImpl::ConfigSection(), "VerifyPeer");
 
   std::string protocol_name;
   profile::Profile::instance()->ReadStringValue(
-      &protocol_name, "TLSv1.2", security_manager::SecurityManager::ConfigSection(), "Protocol");
+      &protocol_name, "TLSv1.2", security_manager::SecurityManagerImpl::ConfigSection(), "Protocol");
 
   security_manager::Protocol protocol;
   if (protocol_name == "TLSv1.0") {

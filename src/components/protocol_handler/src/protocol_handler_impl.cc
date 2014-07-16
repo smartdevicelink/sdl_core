@@ -32,6 +32,7 @@
 
 #include "protocol_handler/protocol_handler_impl.h"
 #include <memory.h>
+#include <algorithm>    // std::find
 
 #include "connection_handler/connection_handler_impl.h"
 #include "config_profile/profile.h"
@@ -604,7 +605,7 @@ RESULT_CODE ProtocolHandlerImpl::SendSingleFrameMessage(
   LOG4CXX_TRACE_ENTER(logger_);
 
   ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
-      protocol_version, PROTECTION_OFF, FRAME_TYPE_SINGLE, service_type, 0,
+      protocol_version, PROTECTION_OFF, FRAME_TYPE_SINGLE, service_type, FRAME_DATA_SINGLE,
       session_id, data_size, message_counters_[session_id]++, data));
 
   raw_ford_messages_to_mobile_.PostMessage(
@@ -656,7 +657,8 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   const ProtocolFramePtr firstPacket(
         new protocol_handler::ProtocolPacket(
           connection_id, protocol_version, PROTECTION_OFF, FRAME_TYPE_FIRST,
-          service_type, 0, session_id, FIRST_FRAME_DATA_SIZE, message_id, out_data));
+          service_type, FRAME_DATA_FIRST, session_id, FIRST_FRAME_DATA_SIZE,
+          message_id, out_data));
 
   raw_ford_messages_to_mobile_.PostMessage(
       impl::RawFordMessageToMobile(firstPacket, false));
@@ -665,7 +667,10 @@ RESULT_CODE ProtocolHandlerImpl::SendMultiFrameMessage(
   for (uint32_t i = 0; i < frames_count; ++i) {
     const bool is_last_frame = (i == (frames_count - 1));
     const size_t frame_size = is_last_frame ? lastframe_size : maxdata_size;
-    const uint8_t data_type = is_last_frame ? 0 : (i % FRAME_DATA_MAX_VALUE + 1);
+    const uint8_t data_type =
+        is_last_frame
+        ? FRAME_DATA_LAST_CONSECUTIVE
+        : (i % FRAME_DATA_MAX_CONSECUTIVE + 1);
     const bool is_final_packet = is_last_frame ? is_final_message : false;
 
     const ProtocolFramePtr ptr(new protocol_handler::ProtocolPacket(connection_id,
@@ -792,7 +797,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
       return RESULT_FAIL;
     }
 
-    if (packet->frame_data() == FRAME_DATA_LAST_FRAME) {
+    if (packet->frame_data() == FRAME_DATA_LAST_CONSECUTIVE) {
       LOG4CXX_INFO(
           logger_,
           "Last frame of multiframe message size " << packet->data_size()
@@ -959,7 +964,7 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
 //        const std::string error_text("Connection is already protected");
 //        LOG4CXX_WARN(logger_, error_text << ", key " << connection_key);
 //        security_manager_->SendInternalError(
-//              connection_key, security_manager::SecurityQuery::ERROR_SERVICE_ALREADY_PROTECTED, error_text);
+//              connection_key, security_manager::SecurityManager::ERROR_SERVICE_ALREADY_PROTECTED, error_text);
         protocol_handler_->SendStartSessionNAck(connection_id_, session_id_,
                                                 protocol_version_, service_type_);
       } else {
@@ -1029,7 +1034,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
       const std::string error("CreateSSLContext failed");
       LOG4CXX_ERROR(logger_, error);
       security_manager_->SendInternalError(
-          connection_key, security_manager::SecurityQuery::ERROR_INTERNAL, error);
+          connection_key, security_manager::SecurityManager::ERROR_INTERNAL, error);
       // Start service without protection
       SendStartSessionAck(connection_id, session_id, packet.protocol_version(),
                           connection_key, packet.service_type(), PROTECTION_OFF);
@@ -1119,8 +1124,7 @@ void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile &message) {
 }
 
 #ifdef ENABLE_SECURITY
-void ProtocolHandlerImpl::set_security_manager(
-    security_manager::SecurityManager *security_manager) {
+void ProtocolHandlerImpl::set_security_manager(security_manager::SecurityManager* security_manager) {
   if (!security_manager) {
     LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to SecurityManager.");
     return;
@@ -1157,7 +1161,7 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
     const std::string error_text(context->LastError());
     LOG4CXX_ERROR(logger_, "Enryption failed: " << error_text);
     security_manager_->SendInternalError(connection_key,
-          security_manager::SecurityQuery::ERROR_ENCRYPTION_FAILED, error_text);
+          security_manager::SecurityManager::ERROR_ENCRYPTION_FAILED, error_text);
     return RESULT_OK;
   };
   LOG4CXX_DEBUG(logger_, "Encrypted " << packet->data_size() << " bytes to "
@@ -1193,7 +1197,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
     const std::string error_text("Fail decryption for unprotected service ");
     LOG4CXX_ERROR(logger_, error_text << static_cast<int>(packet->service_type()));
     security_manager_->SendInternalError(connection_key,
-          security_manager::SecurityQuery::ERROR_SERVICE_NOT_PROTECTED, error_text);
+          security_manager::SecurityManager::ERROR_SERVICE_NOT_PROTECTED, error_text);
     return RESULT_ENCRYPTION_FAILED;
   }
   const uint8_t *out_data;
@@ -1203,7 +1207,7 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
     const std::string error_text(context->LastError());
     LOG4CXX_ERROR(logger_, "Decryption failed: " << error_text);
     security_manager_->SendInternalError(connection_key,
-          security_manager::SecurityQuery::ERROR_DECRYPTION_FAILED, error_text);
+          security_manager::SecurityManager::ERROR_DECRYPTION_FAILED, error_text);
     return RESULT_ENCRYPTION_FAILED;
   };
   LOG4CXX_DEBUG(logger_, "Decrypted " << packet->data_size() << " bytes to "

@@ -64,7 +64,7 @@ class CAlwaysFalseSchemaItem : public ISchemaItem {
   /**
    * @brief Constructor.
    **/
-  CAlwaysFalseSchemaItem(void);
+  CAlwaysFalseSchemaItem();
 
   /**
    * @brief Copy constructor.

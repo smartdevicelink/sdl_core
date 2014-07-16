@@ -34,7 +34,6 @@
 
 #include "utils/macro.h"
 #include "application_manager/mobile_message_handler.h"
-#include "protocol_handler/service_type.h"
 #include "protocol_handler/protocol_payload.h"
 #include "protocol_handler/protocol_packet.h"
 #include "utils/bitstream.h"
@@ -57,7 +56,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "MobileMessageHandler")
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV1(
-  const protocol_handler::RawMessagePtr message) {
+  const RawMessagePtr message) {
   LOG4CXX_INFO(logger_,
                "MobileMessageHandler HandleIncomingMessageProtocolV1()");
   application_manager::Message* outgoing_message =
@@ -87,7 +86,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV2(
-  const protocol_handler::RawMessagePtr message) {
+  const RawMessagePtr message) {
   LOG4CXX_INFO(logger_,
                "MobileMessageHandler HandleIncomingMessageProtocolV2()");
 

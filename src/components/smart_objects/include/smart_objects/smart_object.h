@@ -404,7 +404,7 @@ class SmartObject {
    * @return std::string Value of the object converted to bool type or invalid_string_value if
    *         conversion is not possible
    **/
-  // operator std::string(void) const;
+  // operator std::string() const;
   /**
    * @brief Returns current object converted to string
    *
@@ -470,7 +470,7 @@ class SmartObject {
    * @return SmartBinary Value of the object converted to binary type or invalid_binary_value if
    *         conversion is not possible
    **/
-  // operator SmartBinary(void) const;
+  // operator SmartBinary() const;
   /**
    * @brief Returns current object converted to binary
    *

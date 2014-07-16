@@ -4,12 +4,14 @@ find_package(Glib-2.0 REQUIRED)
 # --- GoogleTest example
 #add_subdirectory(./gtest-example)
 
+include_directories(
+  ${CMAKE_SOURCE_DIR}/test/components/include)
+
 # --- components tests
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/policy/test/policy ./policy)
 add_subdirectory(./tools)
-
 
 set (INCLUDE_DIR
   ${GMOCK_INCLUDE_DIRECTORY}
@@ -107,7 +109,6 @@ endif()
 add_executable("test_suit" "./test_suit.cc")
 file(COPY ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem DESTINATION ${CMAKE_BINARY_DIR}/test/)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-
 
 include_directories(${INCLUDE_DIR})
 target_link_libraries("test_suit" ${LIBRARIES})

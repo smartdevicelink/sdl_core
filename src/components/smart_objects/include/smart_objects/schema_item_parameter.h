@@ -87,7 +87,7 @@ class TSchemaItemParameter {
 };
 
 template<typename ParameterType>
-TSchemaItemParameter<ParameterType>::TSchemaItemParameter(void)
+TSchemaItemParameter<ParameterType>::TSchemaItemParameter()
     : mIsSpecified(false),
       mValue() {
 }

@@ -20,6 +20,7 @@ set (LIBRARIES
     formatters
     jsoncpp
     ${RTLIB}
+    ProtocolLibrary
 )
 
 set (SOURCES

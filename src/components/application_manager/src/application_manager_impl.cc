@@ -704,7 +704,7 @@ std::string ApplicationManagerImpl::GetDeviceName(
 }
 
 void ApplicationManagerImpl::OnMessageReceived(
-  const protocol_handler::RawMessagePtr message) {
+  const RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMessageReceived");
 
   if (!message) {
@@ -722,7 +722,7 @@ void ApplicationManagerImpl::OnMessageReceived(
 }
 
 void ApplicationManagerImpl::OnMobileMessageSent(
-  const protocol_handler::RawMessagePtr message) {
+  const RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnMobileMessageSent");
 }
 
@@ -745,7 +745,7 @@ void ApplicationManagerImpl::OnErrorSending(
 }
 
 void ApplicationManagerImpl::OnDeviceListUpdated(
-  const connection_handler::DeviceList& device_list) {
+    const connection_handler::DeviceMap& device_list) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnDeviceListUpdated");
 
   smart_objects::SmartObject* update_list = new smart_objects::SmartObject;
@@ -1550,7 +1550,7 @@ bool ApplicationManagerImpl::ConvertSOtoMessage(
 }
 
 utils::SharedPtr<Message> ApplicationManagerImpl::ConvertRawMsgToMessage(
-  const protocol_handler::RawMessagePtr message) {
+  const RawMessagePtr message) {
   DCHECK(message);
   utils::SharedPtr<Message> outgoing_message;
 
@@ -2117,7 +2117,7 @@ uint32_t ApplicationManagerImpl::GetAvailableSpaceForApp(
   app_storage_path += folder_name;
 
   if (file_system::DirectoryExists(app_storage_path)) {
-    uint32_t size_of_directory = file_system::DirectorySize(app_storage_path);
+    size_t size_of_directory = file_system::DirectorySize(app_storage_path);
     if (app_quota < size_of_directory) {
       return 0;
     }

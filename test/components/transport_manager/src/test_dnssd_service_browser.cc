@@ -35,13 +35,13 @@ class MockTransportAdapterController : public TransportAdapterController {
   MOCK_METHOD2(DisconnectDone,
       void(const DeviceUID& device_handle, const ApplicationHandle& app_handle));
   MOCK_METHOD3(DataReceiveDone,
-      void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, RawMessageSptr message));
+      void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, RawMessagePtr message));
   MOCK_METHOD3(DataReceiveFailed,
       void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, const DataReceiveError& error));
   MOCK_METHOD3(DataSendDone,
-      void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, RawMessageSptr message));
+      void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, RawMessagePtr message));
   MOCK_METHOD4(DataSendFailed,
-      void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, RawMessageSptr message, const DataSendError& error));
+      void(const DeviceUID& device_handle, const ApplicationHandle& app_handle, RawMessagePtr message, const DataSendError& error));
 };
 
 in_addr_t GetIfaceAddress() {

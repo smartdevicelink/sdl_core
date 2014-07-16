@@ -1,9 +1,7 @@
 include_directories (
   ./include/
-  ../transport_manager/include/
   ../protocol_handler/include/
   ../config_profile/include/
-  ${SecurityManagerIncludeDir}/
   ../utils/include/
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
@@ -18,6 +16,7 @@ set (SOURCES
 
 set(LIBRARIES
   ConfigProfile
+  ProtocolLibrary
 )
 
 add_library(connectionHandler ${SOURCES})

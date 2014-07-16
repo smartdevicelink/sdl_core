@@ -1,4 +1,4 @@
-/**
+/*
 * Copyright (c) 2013, Ford Motor Company
 * All rights reserved.
 *
@@ -37,7 +37,7 @@
 #include "utils/singleton.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
-#include "protocol_handler/service_type.h"
+#include "protocol/service_type.h"
 #include "media_manager/media_manager.h"
 #include "media_manager/media_adapter_impl.h"
 #include "media_manager/media_adapter_listener.h"
@@ -62,9 +62,9 @@ class MediaManagerImpl : public MediaManager,
     virtual void StartAudioStreaming(int32_t application_key);
     virtual void StopAudioStreaming(int32_t application_key);
     virtual void OnMessageReceived(
-      const protocol_handler::RawMessagePtr message);
+      const RawMessagePtr message);
     virtual void OnMobileMessageSent(
-      const protocol_handler::RawMessagePtr message);
+      const RawMessagePtr message);
     virtual void FramesProcessed(int32_t application_key, int32_t frame_number);
 
   protected:

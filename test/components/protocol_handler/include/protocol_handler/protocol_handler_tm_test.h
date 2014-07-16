@@ -31,24 +31,37 @@
  */
 #ifndef TEST_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_TM_TEST_H_
 #define TEST_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_TM_TEST_H_
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
+#include <string>
 
 #include "utils/shared_ptr.h"
 
 #include "protocol_handler/protocol_handler_impl.h"
-#include "protocol_handler/protocol_handler_mock.h"
+#include "protocol/common.h"
 
-namespace test  {
-namespace components  {
+#include "protocol_handler/protocol_handler_mock.h"
+#include "protocol_handler/protocol_observer_mock.h"
+#include "protocol_handler/session_observer_mock.h"
+#include "protocol_handler/control_message_matcher.h"
+#include "security_manager/security_manager_mock.h"
+#include "security_manager/ssl_context_mock.h"
+#include "transport_manager/transport_manager_mock.h"
+
+namespace test {
+namespace components {
 namespace protocol_handler_test {
 
 // id passed as NULL for new session establishing
 #define NEW_SESSION_ID        0u
 #define SESSION_START_REJECT  0u
 
-using namespace protocol_handler;
-using namespace transport_manager;
+using namespace ::protocol_handler;
+using namespace ::transport_manager;  // For TM states
+//using namespace ::security_manager;
+using ::transport_manager::TransportManagerListener;
+using protocol_handler_test::ControlMessage;
 using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::AllOf;
@@ -119,17 +132,17 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   ::utils::SharedPtr<ProtocolHandlerImpl> protocol_handler_impl;
   TransportManagerListener* tm_listener;
   // Uniq connection
-  ConnectionUID connection_id;
+  ::transport_manager::ConnectionUID connection_id;
   // id of established session
   uint8_t session_id;
   // uniq id as connection_id and session_id in one
   uint32_t connection_key;
   uint32_t message_id;
-  testing::StrictMock<TransportManagerMock> transport_manager_mock;
-  testing::StrictMock<SessionObserverMock>  session_observer_mock;
+  testing::StrictMock<transport_manager_test::TransportManagerMock> transport_manager_mock;
+  testing::StrictMock<protocol_handler_test::SessionObserverMock>   session_observer_mock;
 #ifdef ENABLE_SECURITY
-  testing::NiceMock<SecurityManagerMock>    security_manager_mock;
-  testing::NiceMock<SSLContextMock>         ssl_context_mock;
+  testing::NiceMock<security_manager_test::SecurityManagerMock>     security_manager_mock;
+  testing::NiceMock<security_manager_test::SSLContextMock>          ssl_context_mock;
 #endif  // ENABLE_SECURITY
 };
 

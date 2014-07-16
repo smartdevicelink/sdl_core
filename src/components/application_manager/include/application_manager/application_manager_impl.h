@@ -64,7 +64,6 @@
 #ifdef TIME_TESTER
 #include "time_metric_observer.h"
 #endif  // TIME_TESTER
-#include "protocol_handler/service_type.h"
 
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
@@ -402,18 +401,18 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Overriden ProtocolObserver method
      */
     virtual void OnMessageReceived(
-        const protocol_handler::RawMessagePtr message);
+        const RawMessagePtr message);
 
     /*
      * @brief Overriden ProtocolObserver method
      */
     virtual void OnMobileMessageSent(
-        const protocol_handler::RawMessagePtr message);
+        const RawMessagePtr message);
 
     void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
-    void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
+    void OnDeviceListUpdated(const connection_handler::DeviceMap& device_list);
     //TODO (EZamakhov): fix all indentations in this file
   virtual void OnFindNewApplicationsRequest();
     void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
@@ -599,7 +598,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                             Message& output);
     utils::SharedPtr<Message> ConvertRawMsgToMessage(
-      const protocol_handler::RawMessagePtr message);
+      const RawMessagePtr message);
 
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);

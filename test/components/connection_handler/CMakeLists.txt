@@ -1,14 +1,11 @@
 include_directories (
   ${GMOCK_INCLUDE_DIRECTORY}
   ./include
-  ../../../src/components/transport_manager/include
+  ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include
+  ${CMAKE_SOURCE_DIR}/src/components/protocol_handler/include
   ../../../src/components/utils/include
-  ../../../src/components/protocol_handler/include
-  ../../../src/components/connection_handler/include
   ../../../src/components/config_profile/include
-  ${SecurityManagerIncludeDir}
   ../security_manager/include
-  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set (LIBRARIES
@@ -18,9 +15,9 @@ set (LIBRARIES
     gmock_main
     ProtocolHandler
     connectionHandler
-    TransportManager
     Utils
     ConfigProfile
+    ProtocolLibrary
 )
 
 set (SOURCES
