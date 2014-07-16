@@ -326,7 +326,7 @@ void PolicyHandler::SetDeviceInfo(std::string& device_id,
 }
 
 void PolicyHandler::OnAppPermissionConsent(
-  const PermissionConsent& permissions) {
+  PermissionConsent &permissions) {
   LOG4CXX_INFO(logger_, "OnAppPermissionConsent");
   POLICY_LIB_CHECK_VOID();
   if (!permissions.policy_app_id.empty()) {

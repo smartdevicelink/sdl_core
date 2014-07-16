@@ -127,7 +127,7 @@ class PolicyHandler :
    * @brief Store user-changed permissions consent to DB
    * @param permissions User-changed group permissions consent
    */
-  void OnAppPermissionConsent(const PermissionConsent& permissions);
+  void OnAppPermissionConsent(PermissionConsent& permissions);
 
   /**
    * @brief Get appropriate message parameters and send them with response
