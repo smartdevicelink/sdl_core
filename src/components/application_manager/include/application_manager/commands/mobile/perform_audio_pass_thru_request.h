@@ -36,6 +36,7 @@
 
 #include "application_manager/commands/command_request_impl.h"
 #include "utils/macro.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -114,6 +115,7 @@ class PerformAudioPassThruRequest : public CommandRequestImpl {
 
   //flag display state of speak during perform audio pass thru
   bool is_active_tts_speak_;
+  mobile_apis::Result::eType result_tts_speak_;
 
   DISALLOW_COPY_AND_ASSIGN(PerformAudioPassThruRequest);
 };
