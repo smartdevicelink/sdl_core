@@ -74,8 +74,7 @@ SQLPTRepresentation::SQLPTRepresentation()
 }
 
 SQLPTRepresentation::~SQLPTRepresentation() {
-  printf("~SQLPTRepresentation\n");
-  db_->BackupDB();
+  db_->Backup();
   db_->Close();
   delete db_;
 }
