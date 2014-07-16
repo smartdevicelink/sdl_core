@@ -55,7 +55,11 @@ PerformAudioPassThruRequest::~PerformAudioPassThruRequest() {
 void PerformAudioPassThruRequest::onTimeOut() {
   LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::onTimeOut");
 
-  ApplicationManagerImpl::instance()->StopAudioPassThru(connection_key());
+  if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
+    ApplicationManagerImpl::instance()->StopAudioPassThru(connection_key());
+  }
+
+  FinishTTSSpeak();
 
   CommandRequestImpl::onTimeOut();
 }
@@ -91,7 +95,6 @@ void PerformAudioPassThruRequest::Run() {
     return;
   }
 
-  // Checking perform audio pass thru on contained \t\n \\t \\n
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming perform audio pass thru has contains \t\n \\t \\n");
@@ -121,10 +124,8 @@ void PerformAudioPassThruRequest::on_event(const event_engine::Event& event) {
       if (ApplicationManagerImpl::instance()->end_audio_pass_thru()) {
         ApplicationManagerImpl::instance()->StopAudioPassThru(connection_key());
       }
-      if (is_active_tts_speak_) {
-        is_active_tts_speak_ = false;
-        SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL);
-      }
+
+      FinishTTSSpeak();
 
       std::string return_info;
       mobile_apis::Result::eType mobile_code =
@@ -265,7 +266,38 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
       }
     }
   }
+
+  if ((*message_)[strings::msg_params].
+      keyExists(strings::audio_pass_display_text1)) {
+
+    str = (*message_)[strings::msg_params]
+                     [strings::audio_pass_display_text1].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_,
+          "Invalid audio_pass_display_text1 value syntax check failed");
+      return true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].
+      keyExists(strings::audio_pass_display_text2)) {
+
+    str = (*message_)[strings::msg_params]
+                     [strings::audio_pass_display_text2].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_,
+          "Invalid audio_pass_display_text2 value syntax check failed");
+      return true;
+    }
+  }
   return false;
+}
+
+void PerformAudioPassThruRequest::FinishTTSSpeak(){
+  if (is_active_tts_speak_) {
+    is_active_tts_speak_ = false;
+    SendHMIRequest(hmi_apis::FunctionID::TTS_StopSpeaking, NULL);
+  }
 }
 
 }  // namespace commands

@@ -128,7 +128,6 @@ void PerformInteractionRequest::Run() {
     }
   }
 
-  // Checking perform interaction on contained \t\n \\t \\n
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming perform interaction has contains \t\n \\t \\n");
@@ -740,13 +739,12 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::IsWhiteSpaceExist");
   const char* str = NULL;
 
-  if ((*message_)[strings::msg_params].keyExists(strings::initial_text)) {
-    str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
-    if (!CheckSyntax(str, true)) {
-      LOG4CXX_ERROR(logger_, "Invalid initial_text syntax check failed");
-      return true;
-    }
+  str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
+  if (!CheckSyntax(str, true)) {
+    LOG4CXX_ERROR(logger_, "Invalid initial_text syntax check failed");
+    return true;
   }
+
 
   if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
     const smart_objects::SmartArray* ip_array =
