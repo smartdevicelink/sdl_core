@@ -111,6 +111,7 @@ bool LifeCycle::StartComponents() {
     application_manager::ApplicationManagerImpl::instance();
   DCHECK(app_manager_ != NULL);
   if (!app_manager_->Init()) {
+    LOG4CXX_ERROR(logger_, "Application manager init failed.");
     return false;
   }
 

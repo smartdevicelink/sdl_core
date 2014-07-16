@@ -382,7 +382,7 @@ bool CommandRequestImpl::CheckAllowedParameters() {
         smart_objects::SmartObject* response =
           MessageHelper::CreateBlockedByPoliciesResponse(
               static_cast<mobile_api::FunctionID::eType>(function_id()),
-              check_result, correlation_id(), (*it_app_list).get()->app_id());
+              check_result, correlation_id(), (*it_app_list)->app_id());
 
         ApplicationManagerImpl::instance()->SendMessageToMobile(response);
         return false;
@@ -390,9 +390,9 @@ bool CommandRequestImpl::CheckAllowedParameters() {
 
       // If no parameters specified in policy table, no restriction will be
       // applied for parameters
-      if (!params_permissions.allowed_params.size() &&
-          !params_permissions.disallowed_params.size() &&
-          !params_permissions.undefined_params.size()) {
+      if (params_permissions.allowed_params.empty() &&
+          params_permissions.disallowed_params.empty() &&
+          params_permissions.undefined_params.empty()) {
         return true;
       }
 
