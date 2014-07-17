@@ -203,6 +203,7 @@ bool RequestWatchdog::checkTimeScaleMaxRequest(
     TimevalStruct end = date_time::DateTime::getCurrentTime();
     TimevalStruct start;
     start.tv_sec = end.tv_sec - app_time_scale;
+    start.tv_usec = 0;
 
     TimeScale scale(start, end, connection_key);
     uint32_t count = 0;
@@ -233,6 +234,7 @@ bool RequestWatchdog::checkHMILevelTimeScaleMaxRequest(
     TimevalStruct end = date_time::DateTime::getCurrentTime();
     TimevalStruct start;
     start.tv_sec = end.tv_sec - app_time_scale;
+    start.tv_usec = 0;
 
     HMILevelTimeScale scale(start, end, connection_key, hmi_level);
     uint32_t count = 0;
