@@ -34,6 +34,7 @@ INCLUDES = \
 	$(CFG_INCS) \
 	$(CC_IFLAG)./ \
 	$(CC_IFLAG)../utils/include \
+	$(CC_IFLAG)../include \
 	$(CC_IFLAG)../formatters/include \
 	$(CC_IFLAG)../smart_objects/include \
 	$(DEPENDS_INCLUDES)

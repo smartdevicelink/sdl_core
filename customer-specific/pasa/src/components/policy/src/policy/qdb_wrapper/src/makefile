@@ -33,8 +33,7 @@ INCLUDES = \
 	$(CFG_INCS) \
 	$(CC_IFLAG)./ \
 	$(CC_IFLAG)../include \
-	$(CC_IFLAG)../../../../../utils/include \
-    $(CC_IFLAG)../../../../../../3rd_party/log4cxx/include \
+	$(CC_IFLAG)../../../../../include \
 	$(DEPENDS_INCLUDES)
 
 
