@@ -48,16 +48,8 @@ EndAudioPassThruRequest::~EndAudioPassThruRequest() {
 
 void EndAudioPassThruRequest::Run() {
   LOG4CXX_INFO(logger_, "EndAudioPassThruRequest::Run");
-  bool ended_successfully =
-      ApplicationManagerImpl::instance()->end_audio_pass_thru();
 
-  if (ended_successfully) {
-    SendHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru, NULL, true);
-    ApplicationManagerImpl::instance()->StopAudioPassThru(connection_key());
-  } else {
-    SendResponse(false, mobile_apis::Result::REJECTED,
-                 "No PerformAudioPassThru is now active");
-  }
+  SendHMIRequest(hmi_apis::FunctionID::UI_EndAudioPassThru, NULL, true);
 }
 
 void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
@@ -66,13 +58,22 @@ void EndAudioPassThruRequest::on_event(const event_engine::Event& event) {
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_EndAudioPassThru: {
-      mobile_apis::Result::eType result_code =
-          static_cast<mobile_apis::Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
+      mobile_apis::Result::eType mobile_code =
+          GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asUInt()));
 
-      bool result = mobile_apis::Result::SUCCESS == result_code;
+      bool result = mobile_apis::Result::SUCCESS == mobile_code;
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      if (result) {
+        bool ended_successfully =
+            ApplicationManagerImpl::instance()->end_audio_pass_thru();
+        if (ended_successfully) {
+            ApplicationManagerImpl::instance()->StopAudioPassThru(
+                connection_key());
+        }
+      }
+
+      SendResponse(result, mobile_code, NULL, &(message[strings::msg_params]));
       break;
     }
     default: {
