@@ -168,9 +168,9 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.Alert":
                 {
 
-                    SDL.SDLModel.onUIAlert(request.params, request.id);
-
-                    SDL.SDLController.onSystemContextChange(request.params.appID);
+                    if (SDL.SDLModel.onUIAlert(request.params, request.id)) {
+                        SDL.SDLController.onSystemContextChange(request.params.appID);
+                    }
 
                     break;
                 }
@@ -230,9 +230,9 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.PerformInteraction":
                 {
 
-                    SDL.SDLModel.uiPerformInteraction(request);
-
-                    SDL.SDLController.onSystemContextChange();
+                    if (SDL.SDLModel.uiPerformInteraction(request)) {
+                        SDL.SDLController.onSystemContextChange();
+                    }
 
                     break;
                 }
@@ -260,9 +260,9 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.ScrollableMessage":
                 {
 
-                    SDL.SDLModel.onSDLScrolableMessage(request, request.id);
-
-                    SDL.SDLController.onSystemContextChange();
+                    if (SDL.SDLModel.onSDLScrolableMessage(request, request.id)) {
+                        SDL.SDLController.onSystemContextChange();
+                    }
 
                     break;
                 }
@@ -775,10 +775,15 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.PerformAudioPassThru":
                 {
 
-                    this.performAudioPassThruRequestID = request.id;
-                    SDL.SDLModel.UIPerformAudioPassThru(request.params);
+                    if (this.performAudioPassThruRequestID > 0) {
+                        this.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, request.method, 'PerformAudioPassThru request aborted!');
+                    } else {
 
-                    SDL.SDLController.onSystemContextChange();
+                        this.performAudioPassThruRequestID = request.id;
+                        SDL.SDLModel.UIPerformAudioPassThru(request.params);
+
+                        SDL.SDLController.onSystemContextChange();
+                    }
 
                     break;
                 }

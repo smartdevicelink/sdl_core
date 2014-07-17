@@ -504,6 +504,7 @@ SDL.SDLController = Em.Object
             FFW.UI.sendUIResult(result,
                 FFW.UI.performAudioPassThruRequestID,
                 "UI.PerformAudioPassThru");
+            FFW.UI.performAudioPassThruRequestID = -1;
         },
         /**
          * Method close PerformAudioPassThruPopUp and call error response from
@@ -519,6 +520,7 @@ SDL.SDLController = Em.Object
                 FFW.UI.performAudioPassThruRequestID,
                 "UI.PerformAudioPassThru",
                 "PerformAudioPassThru was not completed successfuly!");
+            FFW.UI.performAudioPassThruRequestID = -1;
         },
         /**
          * Method to set language for UI component with parameters sent from
