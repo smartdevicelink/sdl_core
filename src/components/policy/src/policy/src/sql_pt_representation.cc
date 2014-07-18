@@ -1121,7 +1121,9 @@ bool SQLPTRepresentation::UpdateRequired() const {
 
 void SQLPTRepresentation::SaveUpdateRequired(bool value) {
   dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kUpdateFlagUpdateRequired)) {
+  // TODO(AOleynik): Quick fix, will be reworked
+  if (!query.Prepare(/*sql_pt::kUpdateFlagUpdateRequired*/
+                     "UPDATE `module_meta` SET `flag_update_required` = ?")) {
     LOG4CXX_WARN(logger_,
                  "Incorrect update into module meta (update_required)");
     return;
