@@ -413,6 +413,10 @@ SDL.SDLController = Em.Object
             SDL.SDLModel.set('interactionData.vrHelp', null);
 
             SDL.SDLController.getApplicationModel(appID).activeRequests.uiPerformInteraction = null;
+
+            if (SDL.TTSPopUp.active && FFW.TTS.requestId == null) {
+                SDL.TTSPopUp.DeactivateTTS();
+            }
         },
         /**
          * Method to sent notification ABORTED for VR PerformInteraction
@@ -426,6 +430,10 @@ SDL.SDLController = Em.Object
             SDL.SDLModel.set('VRActive', false);
 
             SDL.InteractionChoicesView.timerUpdate();
+
+            if (choiceID && SDL.TTSPopUp.active && FFW.TTS.requestId == null) {
+                SDL.TTSPopUp.DeactivateTTS();
+            }
         },
         /**
          * Method to sent notification for Alert
