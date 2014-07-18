@@ -354,6 +354,12 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
     application_manager::ApplicationManagerImpl::instance()->application(
       connection_key);
 
+  if (!app.valid()) {
+    LOG4CXX_WARN(logger_, "Connection key '" << connection_key << "' "
+                 "not found within registered applications.");
+    return;
+  }
+
   DeviceParams device_params;
   application_manager::MessageHelper::GetDeviceInfoForApp(connection_key,
       &device_params);
@@ -430,7 +436,7 @@ void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
-  if (app && app->hmi_level() != mobile_apis::HMILevel::HMI_NONE) {
+  if (app.valid() && app->hmi_level() != mobile_apis::HMILevel::HMI_NONE) {
     LOG4CXX_INFO(logger_, "Application_id " << policy_app_id << " is revoked.");
     AppPermissions permissions = policy_manager_->GetAppPermissionsChanges(
                                    policy_app_id);
@@ -463,7 +469,7 @@ void PolicyHandler::OnPendingPermissionChange(
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
-  if (!app) {
+  if (!app.valid()) {
     LOG4CXX_WARN(logger_,
                  "No app found for " << policy_app_id << " policy app id.");
     return;
@@ -655,6 +661,12 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     application_manager::ApplicationSharedPtr app =
       app_manager->application(last_activated_app_id_);
 
+    if (!app.valid()) {
+      LOG4CXX_WARN(logger_, "Application with id '" << last_activated_app_id_
+                   << "' not found within registered applications.");
+      return;
+    }
+
     if (is_allowed) {
       if (app) {
         // Send HMI status notification to mobile
@@ -697,7 +709,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()->application(
       connection_key);
-  if (!app) {
+  if (!app.valid()) {
     LOG4CXX_WARN(logger_, "Activated App failed: no app found.");
     return;
   }
@@ -814,7 +826,7 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
 
-  if (!app) {
+  if (!app.valid()) {
     LOG4CXX_WARN(
       logger_,
       "Connection_key not found for application_id:" << policy_app_id);
@@ -911,7 +923,7 @@ std::string PolicyHandler::GetAppName(const std::string& policy_app_id) {
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
 
-  if (!app) {
+  if (!app.valid()) {
     LOG4CXX_WARN(
       logger_,
       "Connection_key not found for application_id:" << policy_app_id);
