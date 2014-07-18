@@ -480,7 +480,6 @@ void ProtocolHandlerImpl::OnTMMessageReceiveFailed(
 }
 
 void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr message) {
-  LOG4CXX_TRACE(logger_, "ProtocolHandlerImpl::NotifySubscribers");
   sync_primitives::AutoLock lock(protocol_observers_lock_);
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
@@ -745,6 +744,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
       }
 #endif
 
+  // TODO(EZamakhov): check service in session
   NotifySubscribers(rawMessage);
   LOG4CXX_TRACE_EXIT(logger_);
   return RESULT_OK;
@@ -833,6 +833,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
         metric_observer_->EndMessageProcess(metric);
       }
 #endif  // TIME_TESTER
+      // TODO(EZamakhov): check service in session
       NotifySubscribers(rawMessage);
 
       incomplete_multi_frame_messages_.erase(it);
@@ -1158,6 +1159,10 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
     LOG4CXX_ERROR(logger_, "Enryption failed: " << error_text);
     security_manager_->SendInternalError(connection_key,
           security_manager::SecurityQuery::ERROR_ENCRYPTION_FAILED, error_text);
+    // Close session to prevent usage unprotected service/session
+    session_observer_->OnSessionEndedCallback(
+          packet->connection_id(), packet->session_id(),
+          packet->message_id(),    kRpc);
     return RESULT_OK;
   };
   LOG4CXX_DEBUG(logger_, "Encrypted " << packet->data_size() << " bytes to "
@@ -1205,6 +1210,10 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
     LOG4CXX_ERROR(logger_, "Decryption failed: " << error_text);
     security_manager_->SendInternalError(connection_key,
           security_manager::SecurityQuery::ERROR_DECRYPTION_FAILED, error_text);
+    // Close session to prevent usage unprotected service/session
+    session_observer_->OnSessionEndedCallback(
+          packet->connection_id(), packet->session_id(),
+          packet->message_id(),    kRpc);
     return RESULT_ENCRYPTION_FAILED;
   };
   LOG4CXX_DEBUG(logger_, "Decrypted " << packet->data_size() << " bytes to "
