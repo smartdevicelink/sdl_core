@@ -126,15 +126,18 @@ bool IAP2Device::RecordByAppId(ApplicationHandle app_id, AppRecord& record) cons
 
 void IAP2Device::OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* handle) {
   char protocol_index;
+  std::string pool_protocol_name;
+  bool thread_launched;
   protocol_name_pool_lock_.Acquire();
   if (!free_protocol_name_pool_.empty()) {
     ProtocolNamePool::iterator i = free_protocol_name_pool_.begin();
-    std::string pool_protocol_name = i->first;
+    pool_protocol_name = i->first;
     std::string thread_name = "iAP2 connect notifier (" + pool_protocol_name + ")";
     utils::SharedPtr<threads::Thread> thread = new threads::Thread(thread_name.c_str(),
       new IAP2ConnectThreadDelegate(this, pool_protocol_name));
     LOG4CXX_INFO(logger_, "iAP2: starting connection thread for protocol " << pool_protocol_name);
     thread->start();
+    thread_launched = true;
     pool_connection_threads_lock_.Acquire();
     ThreadContainer::iterator j = pool_connection_threads_.find(pool_protocol_name);
     if (j != pool_connection_threads_.end()) {
@@ -149,6 +152,7 @@ void IAP2Device::OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* ha
   else {
     LOG4CXX_INFO(logger_, "iAP2: protocol pool is empty");
     protocol_index = 255;
+    thread_launched = false;
   }
   protocol_name_pool_lock_.Release();
   char buffer[] = {protocol_index};
@@ -158,6 +162,17 @@ void IAP2Device::OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* ha
   }
   else {
     LOG4CXX_WARN(logger_, "iAP2: error occurred while sending data on hub protocol " << protocol_name);
+    if (thread_launched) {
+      pool_connection_threads_lock_.Acquire();
+      ThreadContainer::iterator j = pool_connection_threads_.find(pool_protocol_name);
+      if (j != pool_connection_threads_.end()) {
+        utils::SharedPtr<threads::Thread> thread = j->second;
+        thread->stop();
+        pool_connection_threads_.erase(j);
+      }
+      pool_connection_threads_lock_.Release();
+      ReturnToPool(pool_protocol_name);
+    }
   }
   LOG4CXX_TRACE(logger_, "iAP2: closing connection on hub protocol " << protocol_name);
   if (iap2_eap_close(handle) != -1) {
