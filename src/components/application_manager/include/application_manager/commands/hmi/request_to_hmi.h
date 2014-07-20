@@ -58,7 +58,18 @@ class RequestToHMI : public CommandImpl {
    * @brief Retrieves application ID
    */
   inline uint32_t application_id() const;
+
+  /**
+   * @brief Retrieves request default timeout.
+   * If request has a custom timeout, request_timeout_ should be reassign to it
+   *
+   * @return Request default timeout
+   */
+  inline unsigned int default_timeout() const;
+
  private:
+  uint32_t default_timeout_;
+
   DISALLOW_COPY_AND_ASSIGN(RequestToHMI);
 };
 int32_t RequestToHMI::correlation_id() const {
@@ -66,6 +77,10 @@ int32_t RequestToHMI::correlation_id() const {
 }
 uint32_t RequestToHMI::application_id() const {
   return (*message_)[strings::msg_params][strings::app_id].asUInt();
+}
+
+unsigned int RequestToHMI::default_timeout() const {
+  return default_timeout_;
 }
 
 }  // namespace commands

@@ -59,6 +59,7 @@ AlertRequest::AlertRequest(const MessageSharedPtr& message)
 }
 
 AlertRequest::~AlertRequest() {
+  LOG4CXX_INFO(logger_, "~AlertRequest()");
 }
 
 bool AlertRequest::Init() {

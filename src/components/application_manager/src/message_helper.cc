@@ -384,6 +384,8 @@ smart_objects::SmartObject* MessageHelper::GetHashUpdateNotification(
   (*message)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::OnHashChangeID;
   (*message)[strings::params][strings::connection_key] = app_id;
+  (*message)[strings::params][strings::message_type] =
+          static_cast<int32_t>(kNotification);;
 
   return message;
 }
@@ -1251,7 +1253,7 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
 
   if (hmi_apis::Common_HMILevel::FULL != level &&
       hmi_apis::Common_HMILevel::INVALID_ENUM != level) {
-    (*message)[strings::msg_params]["level"] = level;
+    (*message)[strings::msg_params][strings::activate_app_hmi_level] = level;
   }
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
@@ -1312,7 +1314,7 @@ void MessageHelper::GetDeviceInfoForApp(uint32_t connection_key,
   GetDeviceInfoForHandle(device_info->device_handle, device_info);
 }
 
-void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
+void MessageHelper::SendSDLActivateAppResponse(policy::AppPermissions& permissions,
     uint32_t correlation_id) {
   smart_objects::SmartObject* message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);

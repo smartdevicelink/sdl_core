@@ -207,6 +207,7 @@ void CommandRequestImpl::SendHMIRequest(
   const uint32_t hmi_correlation_id =
        ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
   if (use_events) {
+    LOG4CXX_WARN(logger_, "subscribe_on_event " << function_id << " " << hmi_correlation_id);
     subscribe_on_event(function_id, hmi_correlation_id);
   }
 

@@ -45,31 +45,10 @@ ActivateAppResponse::~ActivateAppResponse() {
 }
 
 void ActivateAppResponse::Run() {
-  LOG4CXX_INFO(logger_, "ActivateAppResponse::Run");
-  const hmi_apis::Common_Result::eType code =
-      static_cast<hmi_apis::Common_Result::eType>(
-          (*message_)[strings::params][hmi_response::code].asInt());
-  if (hmi_apis::Common_Result::SUCCESS == code) {
-    int32_t correlation_id = ResponseFromHMI::correlation_id();
-    // Mobile id is converted to HMI id for HMI requests
-    const uint32_t hmi_app_id = ApplicationManagerImpl::instance()->
-        application_id(correlation_id);
-    if (!hmi_app_id) {
-      LOG4CXX_ERROR(logger_, "Error hmi_app_id = "<< hmi_app_id);
-      return;
-    }
-    // Need to use here application by hmi app ID
-    ApplicationSharedPtr application = ApplicationManagerImpl::instance()->
-                                       application_by_hmi_app(hmi_app_id);
-    if (application) {
-      ApplicationManagerImpl::instance()->ActivateApplication(application);
-      MessageHelper::SendHMIStatusNotification(*(application.get()));
-    } else {
-      LOG4CXX_ERROR(logger_, "Application can't be activated.");
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, "Error result code"<<code);
-  }
+  LOG4CXX_INFO(logger_, "ActivateAppResponse::Run " << correlation_id());
+  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_ActivateApp);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

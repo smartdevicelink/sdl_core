@@ -110,6 +110,15 @@ class TimerThread {
      */
     virtual bool isRunning();
 
+    /*
+     * @brief Stop timer update timeout and start timer again
+     * Note that it cancel thread of timer, If you use it from callback,
+     * it probably will stop execution of callback function
+     * @param timeout_seconds new timout value
+     *
+     */
+    virtual void updateTimeOut(const uint32_t timeout_seconds);
+    threads::Thread*                                   thread_;
   protected:
 
     /**
@@ -118,6 +127,27 @@ class TimerThread {
     void onTimeOut() const;
 
   private:
+
+    class TimerReseter: public threads::ThreadDelegate {
+      public:
+        /*
+         * @brief Default constructor
+         *
+         * @param timer_thread The Timer_thread pointer
+         * @timeout_sec new timeout to tetup for timer
+         */
+        TimerReseter(TimerThread* timer_thread, uint32_t timeout_sec);
+
+
+        /*
+         * @brief Thread main function.
+         * will stop timer_thread and run it again
+         */
+        virtual void threadMain();
+      private:
+        TimerThread* timer_thread_;
+        uint32_t timeout_sec_;
+    };
 
     /**
      * @brief Delegate release timer, will call callback function one time
@@ -129,7 +159,6 @@ class TimerThread {
          * @brief Default constructor
          *
          * @param timer_thread The Timer_thread pointer
-         * @param timeout      Timeout to be set
          */
         TimerDelegate(const TimerThread* timer_thread);
 
@@ -149,11 +178,10 @@ class TimerThread {
         virtual bool exitThreadMain();
 
         /**
-         * @brief Restart timer
-         *
+         * @brief Set new Timeout
          * @param timeout_seconds New timeout to be set
          */
-        virtual void setTimeOut(uint32_t timeout_seconds);
+        virtual void setTimeOut(const uint32_t timeout_seconds);
 
       protected:
         const TimerThread*                               timer_thread_;
@@ -193,7 +221,7 @@ class TimerThread {
     void (T::*callback_)();
     T*                                                 callee_;
     TimerDelegate*                                     delegate_;
-    threads::Thread*                                   thread_;
+    //threads::Thread*                                   thread_;
     mutable bool                                       is_running_;
 
     DISALLOW_COPY_AND_ASSIGN(TimerThread);
@@ -206,8 +234,17 @@ TimerThread<T>::TimerThread(const char* name, T* callee, void (T::*f)(), bool is
     delegate_(NULL),
     thread_(NULL),
     is_running_(false) {
-  delegate_ = is_looper ? new TimerLooperDelegate(this) : new TimerDelegate(this);
-  thread_ = new threads::Thread(name, delegate_);
+  if (is_looper) {
+    delegate_ = new TimerLooperDelegate(this);
+  } else {
+    delegate_ = new TimerDelegate(this);
+  }
+
+  if (delegate_) {
+    thread_ = new threads::Thread("TimerThread", delegate_);
+   // printf("Timet thread created %lu\n", thread_->thread_handle());
+    fflush(stdout);
+  }
 }
 
 template <class T>
@@ -239,6 +276,8 @@ void TimerThread<T>::start(uint32_t timeout_seconds) {
 template <class T>
 void TimerThread<T>::stop() {
   if (delegate_ && thread_) {
+    printf("MY thread before stop\n");
+    fflush(stdout);
     thread_->stop();
     is_running_ = false;
   }
@@ -247,6 +286,26 @@ void TimerThread<T>::stop() {
 template <class T>
 bool TimerThread<T>::isRunning() {
   return is_running_;
+}
+
+#include "stdio.h"
+
+template <class T>
+void TimerThread<T>::updateTimeOut(const uint32_t timeout_seconds) {
+  pthread_t id = pthread_self();
+
+  printf("MY updateTimeOut for thread %lu from %lu\n", id, thread_->thread_handle());
+  fflush(stdout);
+
+  TimerReseter* delegate = new TimerReseter(this, timeout_seconds);
+  threads::Thread thread_reseter("TimerReseter", delegate);
+  thread_reseter.start();
+  printf("MY TimerReseter started \n");
+  fflush(stdout);
+  thread_reseter.join();
+  //seep(2);// there thread will be killed
+  printf("MY after join \n\n");
+  fflush(stdout);
 }
 
 template <class T>
@@ -313,6 +372,8 @@ void TimerThread<T>::TimerLooperDelegate::threadMain() {
     if (ConditionalVariable::kTimeout == wait_status ||
         wait_seconds_left <= 0) {
       TimerDelegate::timer_thread_->onTimeOut();
+      printf("\nMY Loopthread Delegate speel fore: %d\n", TimerDelegate::timeout_seconds_);
+      fflush(stdout);
       end_time = time(NULL) + TimerDelegate::timeout_seconds_;
     }
   }
@@ -331,8 +392,29 @@ bool TimerThread<T>::TimerDelegate::exitThreadMain() {
 }
 
 template <class T>
-void TimerThread<T>::TimerDelegate::setTimeOut(uint32_t timeout_seconds) {
+void TimerThread<T>::TimerDelegate::setTimeOut(const uint32_t timeout_seconds) {
   timeout_seconds_ = timeout_seconds;
+}
+template <class T>
+TimerThread<T>::TimerReseter::TimerReseter(TimerThread *timer_thread,
+                                        uint32_t timeout_sec):
+  timer_thread_(timer_thread),
+  timeout_sec_(timeout_sec) {
+  DCHECK(timer_thread);
+  DCHECK(timeout_sec > 0);
+}
+
+template <class T>
+void TimerThread<T>::TimerReseter::threadMain() {
+  pthread_t id = pthread_self();
+  printf("MY TimerReseter threadMain my thread =  %lu try to stop: %lu \n", id, timer_thread_->thread_->thread_handle());
+  fflush(stdout);
+  timer_thread_->stop();
+  printf("MY after TimerReseter stop \n");
+  fflush(stdout);
+  timer_thread_->start(timeout_sec_);
+  printf("MY after TimerReseter start\n");
+  fflush(stdout);
 }
 
 }  // namespace timer
