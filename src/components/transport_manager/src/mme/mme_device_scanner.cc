@@ -59,7 +59,7 @@ MmeDeviceScanner::~MmeDeviceScanner() {
 
 TransportAdapter::Error MmeDeviceScanner::Init() {
   TransportAdapter::Error error = TransportAdapter::OK;
-
+#if !QNX_BARE_SYSTEM_WORKAROUND
   const std::string& mme_db_name = profile::Profile::instance()->mme_db_name();
   LOG4CXX_TRACE(logger_, "Connecting to " << mme_db_name);
   qdb_hdl_ = qdb_connect(mme_db_name.c_str(), 0);
@@ -119,12 +119,22 @@ TransportAdapter::Error MmeDeviceScanner::Init() {
     notify_thread_ = new threads::Thread("MME MQ notifier", new NotifyThreadDelegate(event_mqd_, ack_mqd_, this));
     notify_thread_->start();
   }
-
+#endif
   initialised_ = true;
   return error;
 }
 
 TransportAdapter::Error MmeDeviceScanner::Scan() {
+#if QNX_BARE_SYSTEM_WORKAROUND
+  IAPDevice* iap_device = new IAPDevice("/dev/ipod1", "Apple iPhone (iAP)", "__iphone_iap", controller_);
+  devices_.insert(std::make_pair(1, MmeDevicePtr(iap_device)));
+  IAP2Device* iap2_device = new IAP2Device("/dev/ipod0", "Apple iPhone (iAP2)", "__iphone_iap2", controller_);
+  devices_.insert(std::make_pair(2, MmeDevicePtr(iap2_device)));
+  NotifyDevicesUpdated();
+  iap_device->Init();
+  iap2_device->Init();
+  return TransportAdapter::OK;
+#else
   MsidContainer msids;
   if (GetMmeList(msids)) {
     DeviceContainer devices;
@@ -179,6 +189,7 @@ TransportAdapter::Error MmeDeviceScanner::Scan() {
   else {
     return TransportAdapter::FAIL;
   }
+#endif
 }
 
 void MmeDeviceScanner::Terminate() {
