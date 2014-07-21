@@ -95,7 +95,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   }
   void TearDown() OVERRIDE {
     // Wait call methods in thread
-    usleep(500000);
+    usleep(100000);
   }
 
   // Emulate connection establish
@@ -138,6 +138,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   // uniq id as connection_id and session_id in one
   uint32_t connection_key;
   uint32_t message_id;
+  // Strict mocks (same as all methods EXPECT_CALL().Times(0))
   testing::StrictMock<transport_manager_test::TransportManagerMock> transport_manager_mock;
   testing::StrictMock<protocol_handler_test::SessionObserverMock>   session_observer_mock;
 #ifdef ENABLE_SECURITY

@@ -98,7 +98,7 @@ TEST_F(MediaManagerTest, AddAndPlayStream) {
 
   device = device_two;
 
-  const __useconds_t sleeptime = 1 * date_time::DateTime::MICROSECONDS_IN_MILLISECONDS;
+  const __useconds_t sleeptime = 0.5 * date_time::DateTime::MICROSECONDS_IN_MILLISECONDS;
 
   mediaManager->PlayA2DPSource(1);
   // mediaManager->playA2DPSource(1);

@@ -232,7 +232,10 @@ TEST_F(SSLTest, Positive) {
     ASSERT_FALSE(client_buf == NULL);
     ASSERT_GT(client_buf_len, 0u);
   }
-
+  // expect empty buffers after init complete
+  ASSERT_TRUE(client_buf == NULL);
+  ASSERT_TRUE(client_buf_len == 0);
+  // expect both side initialization complete
   EXPECT_TRUE(client_ctx->IsInitCompleted());
   EXPECT_TRUE(server_ctx->IsInitCompleted());
 
@@ -279,7 +282,10 @@ TEST_F(SSLTest, EcncryptionFail) {
                                           &client_buf, &client_buf_len),
               security_manager::SSLContext::Handshake_Result_Success);
   }
-
+  // expect empty buffers after init complete
+  ASSERT_TRUE(client_buf == NULL);
+  ASSERT_TRUE(client_buf_len == 0);
+  // expect both side initialization complete
   EXPECT_TRUE(client_ctx->IsInitCompleted());
   EXPECT_TRUE(server_ctx->IsInitCompleted());
 

@@ -103,8 +103,7 @@ using namespace ::security_manager;
     }
     void TearDown() OVERRIDE {
       // Wait call methods in thread
-      usleep(500000);
-      // Strict mocks are the same as EXPECT_CALL(ALL).Times(0)
+      usleep(100000);
     }
 
     void SetMockCryptoManger() {
@@ -269,7 +268,6 @@ using namespace ::security_manager;
     const RawMessagePtr rawMessagePtr(
           new RawMessage(key, protocolVersion, NULL, 0));
     security_manager_->OnMobileMessageSent(rawMessagePtr);
-    // Strict mocks are the same as EXPECT_CALL(ALL).Times(0)
   }
   /*
    * Shall skip all not-Secure messages
@@ -281,7 +279,6 @@ using namespace ::security_manager;
     call_OnMessageReceived(NULL, 0, kMobileNav);
     call_OnMessageReceived(NULL, 0, kBulk);
     call_OnMessageReceived(NULL, 0, kInvalidServiceType);
-    // Strict mocks are the same as EXPECT_CALL(ALL).Times(0)
   }
   /*
    * Shall send InternallError on null data recieved
