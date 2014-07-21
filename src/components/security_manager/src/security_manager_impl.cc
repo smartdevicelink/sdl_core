@@ -102,7 +102,7 @@ void SecurityManagerImpl::set_crypto_manager(CryptoManager *crypto_manager) {
   crypto_manager_ = crypto_manager;
 }
 
-void SecurityManagerImpl::Handle(const SecurityMessage &message) {
+void SecurityManagerImpl::Handle(const SecurityMessage message) {
   DCHECK(message);
   LOG4CXX_INFO(logger_, "Received Security message from Mobile side");
   if (!crypto_manager_)  {

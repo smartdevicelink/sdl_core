@@ -207,7 +207,7 @@ void ProtocolHandlerImpl::set_session_observer(SessionObserver *observer) {
     // Do not return from here!
   }
 
-  sync_primitives::AutoLock session_lock(session_observers_lock_);
+
   session_observer_ = observer;
 }
 
@@ -369,7 +369,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
     return;
   }
 
-  sync_primitives::AutoLock session_lock(session_observers_lock_);
+
   if (!session_observer_) {
     LOG4CXX_ERROR(
         logger_,
@@ -500,7 +500,6 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
                                     message->data(),
                                     message->data_size());
 
-  sync_primitives::AutoLock session_lock(session_observers_lock_);
   session_observer_->PairFromKey(message->connection_key(),
                                  &connection_handle,
                                  &sessionID);
@@ -1090,13 +1089,21 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
 }
 
 void ProtocolHandlerImpl::Handle(
-    const impl::RawFordMessageFromMobile &message) {
+    const impl::RawFordMessageFromMobile message) {
   LOG4CXX_TRACE_ENTER(logger_);
-  sync_primitives::AutoLock session_lock(session_observers_lock_);
+
+  if (NULL == session_observer_) {
+    LOG4CXX_WARN(logger_, "Session Observer is NULL");
+    return;
+  }
   connection_handler::ConnectionHandlerImpl *connection_handler =
         connection_handler::ConnectionHandlerImpl::instance();
-  if (session_observer_->IsHeartBeatSupported(
-        message->connection_id(), message->session_id())) {
+  LOG4CXX_INFO(logger_, "Message : " << message.get())
+  LOG4CXX_INFO(logger_, "session_observer_: " <<session_observer_)
+  uint8_t c_id = message->connection_id();
+  uint32_t m_id = message->session_id();
+
+  if (session_observer_->IsHeartBeatSupported(c_id, m_id)) {
     connection_handler->KeepConnectionAlive(message->connection_id(),
                                             message->session_id());
   }
@@ -1113,7 +1120,7 @@ void ProtocolHandlerImpl::Handle(
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
-void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile &message) {
+void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile message) {
   LOG4CXX_INFO_EXT(
       logger_,
       "Message to mobile app: connection id " <<

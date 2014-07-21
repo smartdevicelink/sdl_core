@@ -77,6 +77,16 @@ ConnectionHandlerImpl::~ConnectionHandlerImpl() {
   LOG4CXX_TRACE(logger_, "Destructing ConnectionHandlerImpl.");
 }
 
+void ConnectionHandlerImpl::Stop() {
+  LOG4CXX_TRACE_ENTER(logger_);
+  ConnectionList::iterator itr = connection_list_.begin();
+  while (itr != connection_list_.end()) {
+    RemoveConnection(itr->second->connection_handle());
+    itr = connection_list_.begin();
+  }
+  LOG4CXX_TRACE_EXIT(logger_);
+}
+
 void ConnectionHandlerImpl::set_connection_handler_observer(
     ConnectionHandlerObserver *observer) {
   LOG4CXX_DEBUG(logger_, "ConnectionHandlerImpl::set_connection_handler_observer() "

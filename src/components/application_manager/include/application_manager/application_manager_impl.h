@@ -609,16 +609,16 @@ class ApplicationManagerImpl : public ApplicationManager,
      * of messages. Beware, each is called on different thread!
      */
     // CALLED ON messages_from_mobile_ thread!
-    virtual void Handle(const impl::MessageFromMobile& message) OVERRIDE;
+    virtual void Handle(const impl::MessageFromMobile message) OVERRIDE;
 
     // CALLED ON messages_to_mobile_ thread!
-    virtual void Handle(const impl::MessageToMobile& message) OVERRIDE;
+    virtual void Handle(const impl::MessageToMobile message) OVERRIDE;
 
     // CALLED ON messages_from_hmi_ thread!
-    virtual void Handle(const impl::MessageFromHmi& message) OVERRIDE;
+    virtual void Handle(const impl::MessageFromHmi message) OVERRIDE;
 
     // CALLED ON messages_to_hmi_ thread!
-    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
+    virtual void Handle(const impl::MessageToHmi message) OVERRIDE;
 
     void SendUpdateAppList(const std::list<uint32_t>& applications_ids);
     void OnApplicationListUpdateTimer();

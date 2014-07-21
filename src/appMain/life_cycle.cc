@@ -382,6 +382,9 @@ void LifeCycle::StopComponents() {
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
   protocol_handler_->RemoveProtocolObserver(media_manager_);
+#ifdef ENABLE_SECURITY
+  protocol_handler_->RemoveProtocolObserver(security_manager_);
+#endif  // ENABLE_SECURITY
   media_manager_->SetProtocolHandler(NULL);
   media_manager::MediaManagerImpl::destroy();
 
@@ -389,12 +392,14 @@ void LifeCycle::StopComponents() {
   transport_manager_->Stop();
   transport_manager::TransportManagerDefault::destroy();
 
-  LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
-  protocol_handler_->set_session_observer(NULL);
-  connection_handler::ConnectionHandlerImpl::destroy();
+  LOG4CXX_INFO(logger_, "Stopping Connection Handler.");
+  connection_handler::ConnectionHandlerImpl::instance()->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete protocol_handler_;
+
+  LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
+  connection_handler::ConnectionHandlerImpl::destroy();
 
 #ifdef ENABLE_SECURITY
   LOG4CXX_INFO(logger_, "Destroying Crypto Manager");

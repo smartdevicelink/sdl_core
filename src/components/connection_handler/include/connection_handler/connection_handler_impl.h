@@ -75,6 +75,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    */
   virtual ~ConnectionHandlerImpl();
 
+    void Stop();
   /**
    * \brief Sets observer pointer for connection_handler.
    * \param observer Pointer to observer object.
