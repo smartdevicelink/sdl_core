@@ -347,7 +347,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Unknown connection!");
+    LOG4CXX_WARN(logger_, "Unknown connection!");
     return 0;
   }
   Connection *connection = it->second;
@@ -356,14 +356,14 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     LOG4CXX_INFO(logger_, "Session "  << static_cast<uint32_t>(session_id)
                  << " to be removed");
     if (!connection->RemoveSession(session_id)) {
-      LOG4CXX_ERROR(logger_, "Not possible to remove session!");
+      LOG4CXX_WARN(logger_, "Not possible to remove session!");
       return 0;
     }
   } else {
     LOG4CXX_INFO(logger_, "Service "  << static_cast<uint32_t>(service_type)
                  << " to be removed");
     if (!connection->RemoveService(session_id, service_type)) {
-      LOG4CXX_ERROR(logger_, "Not possible to remove service!");
+      LOG4CXX_WARN(logger_, "Not possible to remove service!");
       return 0;
     }
   }
