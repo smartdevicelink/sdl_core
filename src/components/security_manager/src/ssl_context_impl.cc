@@ -136,8 +136,8 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
                 const uint8_t** const out_data, size_t* out_data_size) {
   DCHECK(out_data);
   DCHECK(out_data_size);
-  &out_data = NULL;
-  &out_data_size = 0;
+  *out_data = NULL;
+  *out_data_size = 0;
   // TODO(Ezamakhov): add test - hanshake fail -> restart StartHandshake
   sync_primitives::AutoLock locker(bio_locker);
   if (SSL_is_init_finished(connection_)) {
