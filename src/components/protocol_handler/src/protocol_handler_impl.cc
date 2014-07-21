@@ -724,7 +724,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
         "FRAME_TYPE_SINGLE message of size " << packet->data_size() << "; message "
         << ConvertPacketDataToString(packet->data(), packet->data_size()));
 
-  sync_primitives::AutoLock session_lock(session_observers_lock_);
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_,
                   "Cannot handle message from Transport"
@@ -764,7 +763,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     ConnectionID connection_id, const ProtocolFramePtr packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  sync_primitives::AutoLock session_lock(session_observers_lock_);
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "No ISessionObserver set.");
     LOG4CXX_TRACE_EXIT(logger_);
@@ -860,7 +858,6 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     ConnectionID connection_id, const ProtocolFramePtr packet) {
   LOG4CXX_TRACE_ENTER(logger_);
 
-  sync_primitives::AutoLock session_lock(session_observers_lock_);
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "ISessionObserver is not set.");
     LOG4CXX_TRACE_EXIT(logger_);
@@ -1095,7 +1092,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
 void ProtocolHandlerImpl::Handle(
     const impl::RawFordMessageFromMobile &message) {
   LOG4CXX_TRACE_ENTER(logger_);
-
+  sync_primitives::AutoLock session_lock(session_observers_lock_);
   connection_handler::ConnectionHandlerImpl *connection_handler =
         connection_handler::ConnectionHandlerImpl::instance();
   if (session_observer_->IsHeartBeatSupported(
