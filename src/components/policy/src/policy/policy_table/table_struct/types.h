@@ -60,6 +60,7 @@ struct ApplicationParams : CompositeType {
     Strings groups;
     Optional< Strings > nicknames;
     Optional< AppHMITypes > AppHMIType;
+    Enum<Priority> priority;
     Optional< Integer<uint16_t, 1, 65225> > memory_kb;
     Optional< Integer<uint16_t, 1, 65225> > heart_beat_timeout_ms;
     Optional< String<0, 255> > certificate;
