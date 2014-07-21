@@ -203,9 +203,11 @@ void ProtocolHandlerImpl::RemoveProtocolObserver(ProtocolObserver* observer) {
 
 void ProtocolHandlerImpl::set_session_observer(SessionObserver *observer) {
   if (!observer) {
-    LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to ISessionObserver.");
+    LOG4CXX_WARN(logger_, "Invalid (NULL) pointer to ISessionObserver.");
     // Do not return from here!
   }
+
+  sync_primitives::AutoLock session_lock(session_observers_lock_);
   session_observer_ = observer;
 }
 
@@ -367,6 +369,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
     return;
   }
 
+  sync_primitives::AutoLock session_lock(session_observers_lock_);
   if (!session_observer_) {
     LOG4CXX_ERROR(
         logger_,
@@ -497,6 +500,7 @@ void ProtocolHandlerImpl::OnTMMessageSend(const RawMessagePtr message) {
                                     message->data(),
                                     message->data_size());
 
+  sync_primitives::AutoLock session_lock(session_observers_lock_);
   session_observer_->PairFromKey(message->connection_key(),
                                  &connection_handle,
                                  &sessionID);
@@ -720,6 +724,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
         "FRAME_TYPE_SINGLE message of size " << packet->data_size() << "; message "
         << ConvertPacketDataToString(packet->data(), packet->data_size()));
 
+  sync_primitives::AutoLock session_lock(session_observers_lock_);
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_,
                   "Cannot handle message from Transport"
@@ -758,6 +763,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     ConnectionID connection_id, const ProtocolFramePtr packet) {
   LOG4CXX_TRACE_ENTER(logger_);
+
+  sync_primitives::AutoLock session_lock(session_observers_lock_);
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "No ISessionObserver set.");
     LOG4CXX_TRACE_EXIT(logger_);
@@ -852,6 +859,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     ConnectionID connection_id, const ProtocolFramePtr packet) {
   LOG4CXX_TRACE_ENTER(logger_);
+
+  sync_primitives::AutoLock session_lock(session_observers_lock_);
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "ISessionObserver is not set.");
     LOG4CXX_TRACE_EXIT(logger_);
