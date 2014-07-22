@@ -106,6 +106,9 @@ void SubscribeVehicleDataRequest::Run() {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
+  smart_objects::SmartObject response_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+
   msg_params[strings::app_id] = app->app_id();
 
   for (; vehicle_data.end() != it; ++it) {
@@ -119,6 +122,10 @@ void SubscribeVehicleDataRequest::Run() {
         VehicleDataType key_type = it->second;
         if (app->SubscribeToIVI(static_cast<uint32_t>(key_type))) {
           ++subscribed_items;
+        } else {
+          response_params[key_name][strings::data_type] = key_type;
+          response_params[key_name][strings::result_code] =
+              mobile_apis::VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED;
         }
       }
     }
@@ -132,7 +139,8 @@ void SubscribeVehicleDataRequest::Run() {
   } else if (0 == subscribed_items) {
     SendResponse(false,
                  mobile_apis::Result::IGNORED,
-                 "Already subscribed on provided VehicleData");
+                 "Already subscribed on provided VehicleData",
+                 &response_params);
     return;
   }
 
@@ -234,9 +242,9 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   const char* return_info = NULL;
   if (result) {
     if (IsAnythingAlreadySubscribed()) {
-      result_code = mobile_apis::Result::WARNINGS;
+      result_code = mobile_apis::Result::IGNORED;
       return_info =
-          std::string("Unsupported phoneme type sent in a prompt").c_str();
+        td::string("Some provided VehicleData was already subscribed.").c_str();
     }
   }
 
