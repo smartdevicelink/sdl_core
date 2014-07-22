@@ -10,8 +10,6 @@
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/mock_transport_adapter_listener.h"
 
-using ::test::components::transport_manager::MockTransportAdapterListener;
-
 namespace transport_manager {
 namespace transport_adapter {
 
@@ -56,14 +54,26 @@ class ClientTcpSocket {
   }
 
   bool Send(const std::string& str) {
-    ssize_t written = write(socket_, str.c_str(), str.size());
-    return written == str.size();
+    size_t size = str.size();
+    ssize_t written = write(socket_, str.c_str(), size);
+    if (written != -1) {
+      size_t count = static_cast<size_t>(written);
+      return count == size;
+    }
+    else {
+      return false;
+    }
   }
 
-  std::string receive(std::size_t size) {
+  std::string receive(size_t size) {
     char* buf = new char[size];
     ssize_t read = recv(socket_, buf, size, MSG_WAITALL);
-    return std::string(buf, buf + size);
+    if (read != -1) {
+      return std::string(buf, buf + read);
+    }
+    else {
+      return std::string();
+    }
   }
 
   void Disconnect() {
@@ -122,7 +132,6 @@ class TcpAdapterTest : public ::testing::Test {
     abs_time.tv_sec = now.tv_sec + 1;
     abs_time.tv_nsec = now.tv_usec * 1000;
     while (suspended_) {
-      int i;
       if (ETIMEDOUT
           == pthread_cond_timedwait(&suspend_cond_, &suspend_mutex_,
                                     &abs_time)) {
@@ -147,7 +156,7 @@ class TcpAdapterTest : public ::testing::Test {
 
   const uint16_t port_;
   TransportAdapter* transport_adapter_;
-  MockTransportAdapterListener mock_dal_;
+  ::test::components::transport_manager::MockTransportAdapterListener mock_dal_;
   ClientTcpSocket client_;
 
   pthread_cond_t suspend_cond_;
@@ -191,7 +200,7 @@ struct SendHelper {
   explicit SendHelper(TransportAdapter::Error expected_error)
       : expected_error_(expected_error),
         message_(
-            new protocol_handler::RawMessage(
+            new RawMessage(
                 1,
                 1,
                 const_cast<unsigned char*>(reinterpret_cast<const unsigned char*>("efgh")),
@@ -207,7 +216,7 @@ struct SendHelper {
                                                              message_));
   }
   TransportAdapter::Error expected_error_;
-  transport_manager::RawMessageSptr message_;
+  RawMessagePtr message_;
 };
 
 TEST_F(TcpAdapterTestWithListenerAutoStart, Send) {
@@ -264,7 +273,7 @@ TEST_F(TcpAdapterTestWithListenerAutoStart, SendToDisconnected) {
 TEST_F(TcpAdapterTestWithListenerAutoStart, SendFailed) {
   static unsigned char zzz[2000000];  //2000000 is much more than socket buffer
   SendHelper* helper = new SendHelper(TransportAdapter::OK);
-  helper->message_ = new protocol_handler::RawMessage(1, 1, zzz, sizeof(zzz));
+  helper->message_ = new RawMessage(1, 1, zzz, sizeof(zzz));
   {
     ::testing::InSequence seq;
     EXPECT_CALL(mock_dal_, OnConnectDone(transport_adapter_, _, _)).WillOnce(

@@ -106,6 +106,13 @@ void SetGlobalPropertiesRequest::Run() {
     }
   }
 
+  if (IsWhiteSpaceExist()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming set global properties has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   bool is_help_prompt_present = msg_params.keyExists(strings::help_prompt);
   bool is_timeout_prompt_present = msg_params.keyExists(
       strings::timeout_prompt);
@@ -241,6 +248,7 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
+
   // check TTS params
   if (is_help_prompt_present || is_timeout_prompt_present) {
     smart_objects::SmartObject params =
@@ -368,6 +376,136 @@ bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(
       || params.keyExists(strings::menu_title)
       || params.keyExists(strings::menu_icon)
       || params.keyExists(strings::keyboard_properties);
+}
+
+bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::IsWhiteSpaceExist");
+  const char* str;
+
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  if (msg_params.keyExists(strings::help_prompt)) {
+    const smart_objects::SmartArray* hp_array =
+        msg_params[strings::help_prompt].asArray();
+
+    smart_objects::SmartArray::const_iterator it_hp = hp_array->begin();
+    smart_objects::SmartArray::const_iterator it_hp_end = hp_array->end();
+
+    for (; it_hp != it_hp_end; ++it_hp) {
+      str = (*it_hp)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
+        return true;
+      }
+    }
+  }
+
+  if (msg_params.keyExists(strings::timeout_prompt)) {
+    const smart_objects::SmartArray* tp_array =
+        msg_params[strings::timeout_prompt].asArray();
+
+    smart_objects::SmartArray::const_iterator it_tp = tp_array->begin();
+    smart_objects::SmartArray::const_iterator it_tp_end = tp_array->end();
+
+    for (; it_tp != it_tp_end; ++it_tp) {
+      str = (*it_tp)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
+        return true;
+      }
+    }
+  }
+
+  if (msg_params.keyExists(strings::vr_help)) {
+    const smart_objects::SmartArray* vh_array =
+        msg_params[strings::vr_help].asArray();
+
+    smart_objects::SmartArray::const_iterator it_vh = vh_array->begin();
+    smart_objects::SmartArray::const_iterator it_vh_end = vh_array->end();
+
+    for (; it_vh != it_vh_end; ++it_vh) {
+
+      str = (*it_vh)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid vr_help text syntax check failed");
+        return true;
+      }
+
+      if ((*it_vh).keyExists(strings::image)) {
+        str = (*it_vh)[strings::image][strings::value].asCharArray();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_ERROR(logger_,
+                       "Invalid vr_help image value syntax check failed");
+          return true;
+        }
+      }
+
+    }
+  }
+
+  if (msg_params.keyExists(strings::menu_icon)) {
+    str = msg_params[strings::menu_icon][strings::value].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid menu_icon value syntax check failed");
+      return true;
+    }
+  }
+
+  if (msg_params.keyExists(strings::vr_help_title)) {
+    str = msg_params[strings::vr_help_title].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid vr_help_title value syntax check failed");
+      return true;
+    }
+  }
+
+  if (msg_params.keyExists(strings::menu_title)) {
+    str = msg_params[strings::menu_title].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid menu_title value syntax check failed");
+      return true;
+    }
+  }
+
+
+  if (msg_params.keyExists(strings::keyboard_properties)) {
+
+    if (msg_params[strings::keyboard_properties].
+        keyExists(strings::limited_character_list)) {
+
+      const smart_objects::SmartArray* lcl_array =
+          msg_params[strings::keyboard_properties]
+                     [strings::limited_character_list].asArray();
+
+      smart_objects::SmartArray::const_iterator it_lcl = lcl_array->begin();
+      smart_objects::SmartArray::const_iterator it_lcl_end = lcl_array->end();
+
+      for (; it_lcl != it_lcl_end; ++it_lcl) {
+        str = (*it_lcl).asCharArray();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_ERROR(logger_, "Invalid keyboard_properties "
+              "limited_character_list syntax check failed");
+          return true;
+        }
+      }
+    }
+
+    if (msg_params[strings::keyboard_properties].
+        keyExists(strings::auto_complete_text)) {
+
+      str = msg_params[strings::keyboard_properties]
+                       [strings::auto_complete_text].asCharArray();
+
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid keyboard_properties "
+            "auto_complete_text syntax check failed");
+        return true;
+      }
+    }
+
+  }
+  return false;
 }
 
 }  // namespace commands

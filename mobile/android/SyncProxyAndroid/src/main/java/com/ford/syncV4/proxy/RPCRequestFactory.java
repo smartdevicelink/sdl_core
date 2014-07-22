@@ -39,10 +39,18 @@ import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 
+
+/**
+ * This class provides the functionality to create messages of
+ * {@link com.ford.syncV4.proxy.RPCMessage} type
+ */
+
 import java.util.Vector;
+
 
 public class RPCRequestFactory {
 
+    @SuppressWarnings("unused")
     private static final String LOG_TAG = RPCRequestFactory.class.getSimpleName();
 
     /**
@@ -57,13 +65,27 @@ public class RPCRequestFactory {
     private static final int SYNC_MSG_MAJOR_VERSION = 1;
     private static final int SYNC_MSG_MINOR_VERSION = 0;
 
-	public static EncodedSyncPData buildEncodedSyncPData(
-			Vector<String> data, Integer correlationID) {
+    /**
+     * Correlation ID that was last used for messages created internally.
+     */
+    private static int sCorrelationId = 40000;
+
+    /**
+     * Returns the next correlation ID used for internal messages.
+     *
+     * @return next correlation ID
+     */
+    private static int getCorrelationId() {
+        return sCorrelationId++;
+    }
+
+	public static EncodedSyncPData buildEncodedSyncPData(Vector<String> data,
+                                                         Integer correlationID) {
 		
 		if(data == null) return null;
 		
 		EncodedSyncPData msg = new EncodedSyncPData();
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 		msg.setData(data);
 		return msg;
 	}
@@ -74,7 +96,7 @@ public class RPCRequestFactory {
 		if(data == null) return null;
 		
 		SyncPData msg = new SyncPData();
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 		msg.setSyncPData(data);
 		return msg;
 	}
@@ -96,7 +118,7 @@ public class RPCRequestFactory {
 			String menuText, Integer parentID, Integer position,
 			Vector<String> vrCommands, Integer correlationID) {
 		AddCommand addCommand = new AddCommand();
-		addCommand.setCorrelationID(correlationID);
+		addCommand.setCorrelationId(correlationID);
 		addCommand.setCmdID(commandID);
 		addCommand.setVrCommands(vrCommands);
 		
@@ -121,7 +143,7 @@ public class RPCRequestFactory {
 	public static AddCommand buildAddCommand(Integer commandID,
 			Vector<String> vrCommands, Integer correlationID) {
 		AddCommand addCommand = new AddCommand();
-		addCommand.setCorrelationID(correlationID);
+		addCommand.setCorrelationId(correlationID);
 		addCommand.setCmdID(commandID);
 		addCommand.setVrCommands(vrCommands);
 
@@ -150,7 +172,7 @@ public class RPCRequestFactory {
 	public static AddSubMenu buildAddSubMenu(Integer menuID, String menuName,
 			Integer position, Integer correlationID) {
 		AddSubMenu addSubMenu = new AddSubMenu();
-		addSubMenu.setCorrelationID(correlationID);
+		addSubMenu.setCorrelationId(correlationID);
 		addSubMenu.setMenuName(menuName);
 		addSubMenu.setMenuID(menuID);
 		addSubMenu.setPosition(position);
@@ -195,7 +217,7 @@ public class RPCRequestFactory {
 			String alertText1, String alertText2, Boolean playTone,
 			Integer duration, Integer correlationID) {
 		Alert msg = new Alert();
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 		msg.setAlertText1(alertText1);
 		msg.setAlertText2(alertText2);
 		msg.setDuration(duration);
@@ -232,7 +254,7 @@ public class RPCRequestFactory {
 		CreateInteractionChoiceSet createInteractionChoiceSet = new CreateInteractionChoiceSet();
 		createInteractionChoiceSet.setChoiceSet(choiceSet);
 		createInteractionChoiceSet.setInteractionChoiceSetID(interactionChoiceSetID);
-		createInteractionChoiceSet.setCorrelationID(correlationID);
+		createInteractionChoiceSet.setCorrelationId(correlationID);
 		return createInteractionChoiceSet;
 	}
 	
@@ -240,14 +262,14 @@ public class RPCRequestFactory {
 			Integer correlationID) {
 		DeleteCommand msg = new DeleteCommand();
 		msg.setCmdID(commandID);
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 		return msg;
 	}
 	
 	public static DeleteFile buildDeleteFile(String syncFileName,
 			Integer correlationID) {
 		DeleteFile deleteFile = new DeleteFile();
-		deleteFile.setCorrelationID(correlationID);
+		deleteFile.setCorrelationId(correlationID);
 		deleteFile.setSyncFileName(syncFileName);
 		return deleteFile;
 	}
@@ -256,7 +278,7 @@ public class RPCRequestFactory {
 			Integer interactionChoiceSetID, Integer correlationID) {
 		DeleteInteractionChoiceSet msg = new DeleteInteractionChoiceSet();
 		msg.setInteractionChoiceSetID(interactionChoiceSetID);
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 
 		return msg;
 	}
@@ -264,7 +286,7 @@ public class RPCRequestFactory {
 	public static DeleteSubMenu buildDeleteSubMenu(Integer menuID,
 			Integer correlationID) {
 		DeleteSubMenu msg = new DeleteSubMenu();
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 		msg.setMenuID(menuID);
 
 		return msg;
@@ -272,7 +294,7 @@ public class RPCRequestFactory {
 	
 	public static ListFiles buildListFiles(Integer correlationID) {
 		ListFiles listFiles = new ListFiles();
-		listFiles.setCorrelationID(correlationID);
+		listFiles.setCorrelationId(correlationID);
 		return listFiles;
 	}
 
@@ -290,7 +312,7 @@ public class RPCRequestFactory {
 		msg.setTimeout(timeout);
 		msg.setHelpPrompt(helpChunks);
 		msg.setTimeoutPrompt(timeoutChunks);
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 		
 		return msg;
 	}
@@ -349,7 +371,7 @@ public class RPCRequestFactory {
 		msg.setInteractionMode(interactionMode);
 		msg.setTimeout(timeout);
 		msg.setHelpPrompt(helpChunks);
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 		return msg;
 	}
 	
@@ -374,29 +396,11 @@ public class RPCRequestFactory {
 
     /**
      * Build empty <b>PutFile</b> object
+     *
      * @return empty <b>PutFile</b> object
      */
     public static PutFile buildPutFile() {
-        PutFile putFile = new PutFile();
-        return putFile;
-    }
-
-    /**
-     * Build {@link com.ford.syncV4.proxy.rpc.PutFile} object
-     * @param fileName      name of the associated file
-     * @param data          bytes array
-     * @param correlationID correlation id of the request
-     * @return {@link com.ford.syncV4.proxy.rpc.PutFile}
-     */
-    public static SystemRequest buildSystemRequest(String fileName, byte[] data,
-                                             Integer correlationID, RequestType requestType) {
-        SystemRequest systemRequest = new SystemRequest();
-        systemRequest.setFileName(fileName);
-        systemRequest.setBulkData(data);
-        systemRequest.setRequestType(requestType);
-        systemRequest.setCorrelationID(correlationID);
-
-        return systemRequest;
+        return new PutFile();
     }
 
     /**
@@ -406,21 +410,40 @@ public class RPCRequestFactory {
      * @param fileType       File type {@link com.ford.syncV4.proxy.rpc.enums.FileType}
      * @param persistentFile Boolean value indicated whether this file is persistent or not
      * @param fileData       Raw file data
-     * @param correlationID  Correlation Id of the object
      * @return <b>PutFile</b> object
      */
-	public static PutFile buildPutFile(String syncFileName, FileType fileType,
-			Boolean persistentFile, byte[] fileData, Integer correlationID) {
-		PutFile putFile = new PutFile();
-		putFile.setCorrelationID(correlationID);
-		putFile.setSyncFileName(syncFileName);
-		putFile.setFileType(fileType);
-		if (persistentFile != null) {
+    public static PutFile buildPutFile(String syncFileName, FileType fileType,
+                                       Boolean persistentFile, byte[] fileData) {
+        PutFile putFile = buildPutFile();
+        putFile.setCorrelationId(getCorrelationId());
+        putFile.setSyncFileName(syncFileName);
+        putFile.setFileType(fileType);
+        if (persistentFile != null) {
             putFile.setPersistentFile(persistentFile);
         }
-		putFile.setBulkData(fileData);
-		return putFile;
-	}
+        putFile.setBulkData(fileData);
+        if (fileData != null) {
+            putFile.setLength(fileData.length);
+        }
+        return putFile;
+    }
+
+    /**
+     * Build {@link com.ford.syncV4.proxy.rpc.PutFile} object
+     * @param fileName      name of the associated file
+     * @param data          bytes array
+     * @return {@link com.ford.syncV4.proxy.rpc.PutFile}
+     */
+    public static SystemRequest buildSystemRequest(String fileName, byte[] data,
+                                                   RequestType requestType) {
+        SystemRequest systemRequest = new SystemRequest();
+        systemRequest.setFileName(fileName);
+        systemRequest.setBulkData(data);
+        systemRequest.setRequestType(requestType);
+        systemRequest.setCorrelationId(getCorrelationId());
+
+        return systemRequest;
+    }
 
     public static RegisterAppInterface buildRegisterAppInterface() {
         return new RegisterAppInterface();
@@ -436,7 +459,7 @@ public class RPCRequestFactory {
 		if (correlationID == null) {
 			correlationID = 1;
 		}
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 
         // TODO : For the TEST CASES only
 		/*if (syncMsgVersion == null) {
@@ -526,7 +549,7 @@ public class RPCRequestFactory {
      */
 	public static SetAppIcon buildSetAppIcon(String syncFileName, Integer correlationID) {
 		SetAppIcon setAppIcon = new SetAppIcon();
-		setAppIcon.setCorrelationID(correlationID);
+		setAppIcon.setCorrelationId(correlationID);
 		setAppIcon.setSyncFileName(syncFileName);
 		return setAppIcon;
 	}
@@ -564,7 +587,7 @@ public class RPCRequestFactory {
                                                                Vector<TTSChunk> timeoutChunks,
                                                                Integer correlationID) {
 		SetGlobalProperties req = new SetGlobalProperties();
-		req.setCorrelationID(correlationID);
+		req.setCorrelationId(correlationID);
 		req.setHelpPrompt(helpChunks);
 		req.setTimeoutPrompt(timeoutChunks);
 
@@ -594,7 +617,7 @@ public class RPCRequestFactory {
 		}
 
 		msg.setUpdateMode(updateMode);
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 
 		return msg;
 	}
@@ -615,7 +638,7 @@ public class RPCRequestFactory {
 			String statusBar, String mediaClock, String mediaTrack,
 			TextAlignment alignment, Integer correlationID) {
 		Show msg = new Show();
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 		msg.setMainField1(mainText1);
 		msg.setMainField2(mainText2);
 		msg.setStatusBar(statusBar);
@@ -643,7 +666,7 @@ public class RPCRequestFactory {
 			Integer correlationID) {
 
 		Speak msg = new Speak();
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 
 		msg.setTtsChunks(ttsChunks);
 
@@ -666,7 +689,7 @@ public class RPCRequestFactory {
                                                        Integer correlationID) {
 
 		SubscribeButton msg = new SubscribeButton();
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 		msg.setButtonName(buttonName);
 
 		return msg;
@@ -714,7 +737,7 @@ public class RPCRequestFactory {
      */
 	public static UnregisterAppInterface buildUnregisterAppInterface(Integer correlationId) {
 		UnregisterAppInterface msg = buildUnregisterAppInterface();
-		msg.setCorrelationID(correlationId);
+		msg.setCorrelationId(correlationId);
 		return msg;
 	}
 	
@@ -722,7 +745,7 @@ public class RPCRequestFactory {
                                                            Integer correlationID) {
 
 		UnsubscribeButton msg = new UnsubscribeButton();
-		msg.setCorrelationID(correlationID);
+		msg.setCorrelationId(correlationID);
 		msg.setButtonName(buttonName);
 		return msg;
 	}

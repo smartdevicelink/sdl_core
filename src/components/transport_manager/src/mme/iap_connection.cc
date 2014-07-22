@@ -56,7 +56,7 @@ void IAPConnection::Init() {
   controller_->ConnectDone(device_uid_, app_handle_);
 }
 
-TransportAdapter::Error IAPConnection::SendData(RawMessageSptr message) {
+TransportAdapter::Error IAPConnection::SendData(RawMessagePtr message) {
   int session_id;
 
   { // auto_lock scope
@@ -93,7 +93,7 @@ void IAPConnection::ReceiveData(int session_id) {
   int size = ipod_eaf_recv(ipod_hdl_, session_id, buffer_, kBufferSize);
   if (size != -1) {
     LOG4CXX_INFO(logger_, "iAP: received " << size << " bytes");
-    RawMessageSptr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
+    RawMessagePtr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
     controller_->DataReceiveDone(device_uid_, app_handle_, message);
   }
   else {

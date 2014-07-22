@@ -1,7 +1,6 @@
 package com.ford.syncV4.protocol;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.session.Session;
 
 public interface IProtocolListener {
 
@@ -14,7 +13,7 @@ public interface IProtocolListener {
 	void onProtocolMessageReceived(ProtocolMessage msg);
 
 	// Called to indicate that a protocol syncSession has been started (from either side)
-	void onProtocolSessionStarted(byte sessionId, byte version);
+	void onProtocolSessionStarted(byte sessionId, byte version, boolean encrypted);
 
     /**
      * Called to indicate that a protocol EndService has been received
@@ -48,7 +47,7 @@ public interface IProtocolListener {
 
     void onProtocolAppUnregistered();
 
-    void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version);
+    void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version);
 
     void onStartServiceNackReceived(byte sessionId, ServiceType serviceType);
 

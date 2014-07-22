@@ -66,7 +66,7 @@ void CFormatterTestHelper::compareObjects(
   if (SmartType_Array == first.getType()) {
     ASSERT_EQ(SmartType_Array, second.getType());
 
-    for (int i = 0; i < first.length(); i++) {
+    for (size_t i = 0; i < first.length(); i++) {
       compareObjects(first.getElement(i), second.getElement(i));
     }
   } else if (SmartType_Map == first.getType()) {

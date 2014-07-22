@@ -3,6 +3,8 @@ package com.ford.syncV4.proxy;
 import android.util.SparseArray;
 
 import com.ford.syncV4.protocol.ProtocolMessage;
+import com.ford.syncV4.protocol.enums.FunctionID;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.util.List;
 
@@ -15,13 +17,16 @@ import java.util.List;
  * Created by enikolsky on 2014-01-22.
  */
 public class ProtocolMessageHolder implements IProtocolMessageHolder {
-    private SparseArray<List<ProtocolMessage>> array =
-            new SparseArray<List<ProtocolMessage>>();
+
+    @SuppressWarnings("unused")
+    private static final String LOG_TAG = ProtocolMessageHolder.class.getSimpleName();
+
+    private final SparseArray<List<ProtocolMessage>> array = new SparseArray<List<ProtocolMessage>>();
 
     @Override
     public void saveMessages(List<ProtocolMessage> messages) {
-        final int corrID = messages.get(0).getCorrID();
-        array.put(corrID, messages);
+        final int corrId = messages.get(0).getCorrID();
+        array.put(corrId, messages);
     }
 
     @Override

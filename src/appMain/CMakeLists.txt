@@ -63,14 +63,15 @@ set(LIBRARIES
   SmartObjects
   ${TIME_TESTER_LIB}
   formatters
+  ProtocolLibrary
   ProtocolHandler
   connectionHandler
   TransportManager
+  ${SecurityManagerLibrary}
   HMIMessageHandler
-  MessageBroker  
+  MessageBroker
   ${BROKER_LIBRARIES}
   Utils
-  encryption
   jsoncpp
   ConfigProfile
   RequestWatchdog
@@ -84,10 +85,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 if (BUILD_BT_SUPPORT)
-	list(APPEND LIBRARIES bluetooth)
+  list(APPEND LIBRARIES bluetooth)
 endif()
 if (BUILD_AVAHI_SUPPORT)
-	list(APPEND LIBRARIES avahi-client avahi-common)
+  list(APPEND LIBRARIES avahi-client avahi-common)
 endif()
 if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -108,6 +109,7 @@ include_directories (
   ../components/application_manager/include
   ../components/formatters/include
   ../components/transport_manager/include
+  ${SecurityManagerIncludeDir}
   ../components/config_profile/include
   ../components/utils/include/
   ../components/connection_handler/include/
@@ -123,6 +125,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
+  ${CMAKE_BINARY_DIR}/src/components/policy/src/policy
   ${CMAKE_SOURCE_DIR}
   ${default_media_inc}
   ${LOG4CXX_INCLUDE_DIRECTORY}
@@ -145,7 +148,6 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CUR
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/test.txt DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/policy_table.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/hmi_capabilities.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
@@ -184,8 +186,9 @@ endif ()
 # Install rules
 install(TARGETS ${PROJECT} DESTINATION bin)
 install(
-  FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini policy_table.json
+  FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
     hmi_capabilities.json sdl_preloaded_pt.json
+    ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
 )
 if (${WEB_HMI})

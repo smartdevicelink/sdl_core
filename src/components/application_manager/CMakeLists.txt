@@ -14,7 +14,6 @@ include_directories (
   ../connection_handler/include/
   ../config_profile/include/
   ../request_watchdog/include/
-  ../transport_manager/include/
   ../resumption/include/
   ../rpc_base/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
@@ -340,10 +339,10 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/navi_start_stream_response.cc
 ./src/commands/hmi/navi_stop_stream_request.cc
 ./src/commands/hmi/navi_stop_stream_response.cc
-./src/commands/hmi/audio_start_stream_request.cc
-./src/commands/hmi/audio_start_stream_response.cc
-./src/commands/hmi/audio_stop_stream_request.cc
-./src/commands/hmi/audio_stop_stream_response.cc
+./src/commands/hmi/navi_audio_start_stream_request.cc
+./src/commands/hmi/navi_audio_start_stream_response.cc
+./src/commands/hmi/navi_audio_stop_stream_request.cc
+./src/commands/hmi/navi_audio_stop_stream_response.cc
 ./src/commands/hmi/on_system_request_notification.cc
 ./src/commands/hmi/on_put_file_notification.cc
 ./src/commands/hmi/on_resume_audio_source_notification.cc
@@ -408,6 +407,7 @@ endif (${HMI_DBUS_API})
 SET (LIBRARIES
   UsageStatistics
   dl
+  ProtocolLibrary
 )
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")

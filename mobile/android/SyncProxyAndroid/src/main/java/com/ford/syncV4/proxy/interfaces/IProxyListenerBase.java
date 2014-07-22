@@ -2,6 +2,7 @@ package com.ford.syncV4.proxy.interfaces;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCRequest;
+import com.ford.syncV4.proxy.RPCResponse;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenuResponse;
 import com.ford.syncV4.proxy.rpc.AlertManeuverResponse;
@@ -37,7 +38,6 @@ import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
-import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
 import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
@@ -55,7 +55,6 @@ import com.ford.syncV4.proxy.rpc.SystemRequestResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
-import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 
 public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 											ISyncEncodedSyncPDataListener,
@@ -85,28 +84,28 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	public void onProxyClosed(String info, Exception e);
 	
 	/**
-	 * onProxyError() being called indicates that the SYNC Proxy experenced an error.
+	 * This method called when the SYNC Proxy experienced an error.
 	 *
-     * @param info - Includes information about the Exception that occurred.
-     * @param e - The exception that occurred.
+     * @param info      Includes information about the Exception that occurred.
+     * @param throwable The exception that occurred. <b>May be NULL</b>
      */
-	public void onError(String info, Throwable e);
-	
-	
-	/**
-	 * onGenericResponse() being called indicates that SYNC could not determine the
-	 * type of request it is responding to. This is usually result of an unknown RPC Request
-	 * being sent.
-	 * 
-	 * @param response - Includes detailed information about the response.
-	 */
-	public void onGenericResponse(GenericResponse response);
-	
-	/**
-	 * onOnCommand() being called indicates that the user selected a command on SYNC.
-	 * 
-	 * @param notification - Contains information about the command chosen.
-	 */
+    public void onError(String info, Throwable throwable);
+
+
+    /**
+     * onGenericResponse() being called indicates that SYNC could not determine the
+     * type of request it is responding to. This is usually result of an unknown RPC Request
+     * being sent.
+     *
+     * @param response - Includes detailed information about the response.
+     */
+    public void onGenericResponse(GenericResponse response);
+
+    /**
+     * onOnCommand() being called indicates that the user selected a command on SYNC.
+     *
+     * @param notification - Contains information about the command chosen.
+     */
 	public void onOnCommand(String appId, OnCommand notification);
 	
 	/**
@@ -310,7 +309,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onSystemRequestResponse(String appId, SystemRequestResponse response);
 
-    public void onMobileNaviStart(String appId);
+    public void onMobileNaviStart(String appId,boolean encrypted);
 
     public void onMobileNavAckReceived(String appId, int frameReceivedNumber);
 
@@ -333,7 +332,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 
     public void onSessionStarted(String appId);
 
-    public void onAudioServiceStart(String appId);
+    public void onAudioServiceStart(String appId, boolean encrypted);
 
     public void onStartServiceNackReceived(String appId, ServiceType serviceType);
 
@@ -349,6 +348,11 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onHashChange(String appId, OnHashChange onHashChange);
 
     /**
+     * Notify that SecureService has been started
+     */
+    public void onSecureServiceStart();
+
+    /**
      * Provide a callback to listener in case of USB problem
      * https://code.google.com/p/android/issues/detail?id=20545
      */
@@ -357,14 +361,27 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onDiagnosticMessageResponse(String appId,
                                             DiagnosticMessageResponse diagnosticMessageResponse);
 
+    public void onSecureSessionStarted(String appId);
     /**
      * Provides a callback when {@link com.ford.syncV4.proxy.RPCRequest} is going to be sent over
      * transport
      *
      * @param appId      Application identifier
-     * @param rpcRequest Instance of the {@link com.ford.syncV4.proxy.RPCRequest} object
+     * @param putFile    Instance of the {@link com.ford.syncV4.proxy.RPCRequest} object
      */
+    public void onPutFileRequest(String appId, PutFile putFile);
+
     public void onRPCRequest(String appId, RPCRequest rpcRequest);
 
+    /**
+     * Provides a callback when {@link com.ford.syncV4.proxy.RPCResponse} is received over
+     * transport
+     *
+     * @param appId       Application identifier
+     * @param rpcResponse Instance of the {@link com.ford.syncV4.proxy.RPCResponse} object
+     */
+    public void onRPCResponse(String appId, RPCResponse rpcResponse);
+
     public void onOnSystemRequest(String appId, OnSystemRequest notification);
+
 }

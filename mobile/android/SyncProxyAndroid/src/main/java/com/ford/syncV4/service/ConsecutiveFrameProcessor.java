@@ -30,22 +30,22 @@ public class ConsecutiveFrameProcessor {
 
     /**
      * Process a data into a sequence of small messages
-     *
-     * @param data                  byte array of the data
+     *  @param data                  byte array of the data
      * @param sessionID             id of the session
      * @param messageID             id of the message
      * @param serviceType           type of the service
      * @param protocolVersionToSend version of current protocol
+     * @param encrypted
      * @param maxDataSize           maximum data size
      * @param callback              lifecycle callback
      */
     public void process(byte[] data, byte sessionID, final int messageID, ServiceType serviceType,
-                        byte protocolVersionToSend, int maxDataSize,
+                        byte protocolVersionToSend, boolean encrypted, int maxDataSize,
                         IConsecutiveFrameProcessor callback) {
         ProtocolFrameHeader firstHeader =
                 ProtocolFrameHeaderFactory.createMultiSendDataFirst(serviceType,
                         sessionID, messageID, protocolVersionToSend);
-
+        firstHeader.setEncrypted(encrypted);
         // Assemble first frame.
         int frameCount = getFrameCount(data.length, maxDataSize);
         byte[] firstFrameData = new byte[8];
@@ -81,6 +81,7 @@ public class ConsecutiveFrameProcessor {
                     ProtocolFrameHeaderFactory.createMultiSendDataRest(serviceType,
                             sessionID, bytesToWrite, frameSequenceNumber,
                             messageID, protocolVersionToSend);
+            consecHeader.setEncrypted(encrypted);
             callback.onProtocolFrameToSend(consecHeader, data, currentOffset, bytesToWrite);
             currentOffset += bytesToWrite;
         }

@@ -187,6 +187,19 @@ const char reason[] = "reason";
 const char available[] = "available";
 const char text[] = "text";
 const char character_set[] = "characterSet";
+const char secondary_text[] = "secondaryText";
+const char tertiary_text[] = "tertiaryText";
+const char hardware[] = "hardware";
+const char firmware_rev[] = "firmwareRev";
+const char os[] = "os";
+const char os_version[] = "osVersion";
+const char carrier[] = "carrier";
+const char slider_header[] = "sliderHeader";
+
+// duplicate names from hmi_request
+const char limited_character_list[] = "limitedCharacterList";
+const char auto_complete_text[] = "autoCompleteText";
+const char navigation_text[] = "navigationText";
 
 // vehicle info
 const char gps[] = "gps";

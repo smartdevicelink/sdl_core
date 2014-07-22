@@ -30,6 +30,10 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+#undef __STDC_FORMAT_MACROS
+
 #include <set>
 #include <string>
 #include <algorithm>
@@ -73,14 +77,16 @@ hmi_apis::Common_Language::eType ToCommonLanguage(
   return hmi_apis::Common_Language::eType(lang_val);
 }
 
-typedef std::map<std::string, hmi_apis::Common_AppPriority::eType> CommonAppPriorityMap;
+typedef
+std::map<std::string, hmi_apis::Common_AppPriority::eType> CommonAppPriorityMap;
+
 CommonAppPriorityMap app_priority_values = {
   {"NORMAL", hmi_apis::Common_AppPriority::NORMAL},
   {"COMMUNICATION", hmi_apis::Common_AppPriority::COMMUNICATION},
   {"EMERGENCY", hmi_apis::Common_AppPriority::EMERGENCY},
   {"NAVIGATION", hmi_apis::Common_AppPriority::NAVIGATION},
   {"NONE", hmi_apis::Common_AppPriority::NONE},
-  {"VOICE_COMMUNICATION", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
+  {"voiceCommunication", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
   {"INVALID_ENUM", hmi_apis::Common_AppPriority::INVALID_ENUM}
 };
 
@@ -114,7 +120,7 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
 }  // namespace
 
 }
-std::pair<const char*, VehicleDataType> kVehicleDataInitializer[] = {
+std::pair<std::string, VehicleDataType> kVehicleDataInitializer[] = {
   std::make_pair(strings::gps, VehicleDataType::GPS), std::make_pair(
     strings::speed, VehicleDataType::SPEED), std::make_pair(
       strings::rpm, VehicleDataType::RPM), std::make_pair(
@@ -243,6 +249,14 @@ std::string MessageHelper::CommonLanguageToString(
     default:
       return "";
   }
+}
+
+uint32_t MessageHelper::GetAppCommandLimit(const std::string& policy_app_id) {
+  std::string priority;
+  policy::PolicyHandler::instance()->policy_manager()->GetPriority(
+        policy_app_id, &priority);
+  return policy::PolicyHandler::instance()->policy_manager()->
+      GetNotificationsNumber(priority);
 }
 
 void MessageHelper::SendHMIStatusNotification(
@@ -545,7 +559,7 @@ smart_objects::SmartObject* MessageHelper::CreateBlockedByPoliciesResponse(
 }
 
 smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
-  const connection_handler::DeviceList& devices) {
+  const connection_handler::DeviceMap& devices) {
   smart_objects::SmartObject* device_list_so = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
 
@@ -557,7 +571,7 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
         smart_objects::SmartType_Array);
   smart_objects::SmartObject& list_so = (*device_list_so)[strings::device_list];
   int32_t index = 0;
-  for (connection_handler::DeviceList::const_iterator it = devices.begin();
+  for (connection_handler::DeviceMap::const_iterator it = devices.begin();
        devices.end() != it; ++it) {
     const connection_handler::Device& d =
       static_cast<connection_handler::Device>(it->second);
@@ -1485,7 +1499,7 @@ void MessageHelper::SendGetListOfPermissionsResponse(
                                        smart_objects::SmartType_Map);
 
     smart_objects::SmartObject& item = allowed_functions_array[index];
-    item[strings::name] = (*it).group_name;
+    item[strings::name] = (*it).group_alias;
     item[strings::id] = (*it).group_id;
     policy::GroupConsent permission_state = (*it).state;
     // If state undefined, 'allowed' parameter should be absent
@@ -2222,6 +2236,7 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
 
 // TODO(AK): change printf to logger
 bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
+  return true;
 #ifdef ENABLE_LOG
   static uint32_t tab = 0;
   std::string tab_buffer;
@@ -2239,7 +2254,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
       for (size_t i = 0; i < object.length(); i++) {
         ++tab;
 
-        printf("\n%s%d: ", tab_buffer.c_str(), i);
+        printf("\n%s%zu: ", tab_buffer.c_str(), i);
         if (!PrintSmartObject(object.getElement(i))) {
           printf("\n");
           return false;
@@ -2270,7 +2285,7 @@ bool MessageHelper::PrintSmartObject(const smart_objects::SmartObject& object) {
       break;
     }
     case NsSmartDeviceLink::NsSmartObjects::SmartType_Integer:
-      printf("%d", object.asInt());
+      printf("%" PRId64 "\n", object.asInt64());
       break;
     case NsSmartDeviceLink::NsSmartObjects::SmartType_String:
       printf("%s", object.asString().c_str());

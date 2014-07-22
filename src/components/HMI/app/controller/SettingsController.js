@@ -310,7 +310,7 @@ SDL.SettingsController = Em.Object.create( {
         clearTimeout(SDL.SDLModel.policyUpdateRetry.timer);
         SDL.SDLModel.policyUpdateRetry.timer = null;
 
-        if (!abort || (SDL.SDLModel.policyUpdateRetry.try < SDL.SDLModel.policyUpdateRetry.retry.length)) {
+        if (abort !== "ABORT" && (SDL.SDLModel.policyUpdateRetry.try < SDL.SDLModel.policyUpdateRetry.retry.length)) {
 
             SDL.SDLModel.policyUpdateRetry.oldTimer = SDL.SDLModel.policyUpdateRetry.oldTimer +
                 SDL.SDLModel.policyUpdateRetry.timeout * 1000 +
@@ -334,6 +334,7 @@ SDL.SettingsController = Em.Object.create( {
 
             SDL.SDLModel.policyUpdateRetry.try++;
         } else {
+            clearTimeout(SDL.SDLModel.policyUpdateRetry.timer);
             SDL.SDLModel.policyUpdateRetry = {
                 timeout: null,
                 retry: [],

@@ -220,7 +220,7 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
 
 TransportAdapter::Error TransportAdapterImpl::SendData(
     const DeviceUID& device_id, const ApplicationHandle& app_handle,
-    const RawMessageSptr data) {
+    const RawMessagePtr data) {
   if (!initialised_) return BAD_STATE;
 
   ConnectionSptr connection = FindEstablishedConnection(device_id, app_handle);
@@ -453,7 +453,7 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
 
 void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
                                            const ApplicationHandle& app_handle,
-                                           RawMessageSptr message) {
+                                           RawMessagePtr message) {
 #ifdef TIME_TESTER
   if (metric_observer_) {
     metric_observer_->StartRawMsg(message.get());
@@ -474,7 +474,7 @@ void TransportAdapterImpl::DataReceiveFailed(
 
 void TransportAdapterImpl::DataSendDone(const DeviceUID& device_id,
                                         const ApplicationHandle& app_handle,
-                                        RawMessageSptr message) {
+                                        RawMessagePtr message) {
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it)
     (*it)->OnDataSendDone(this, device_id, app_handle, message);
@@ -482,7 +482,7 @@ void TransportAdapterImpl::DataSendDone(const DeviceUID& device_id,
 
 void TransportAdapterImpl::DataSendFailed(const DeviceUID& device_id,
                                           const ApplicationHandle& app_handle,
-                                          RawMessageSptr message,
+                                          RawMessagePtr message,
                                           const DataSendError& error) {
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it)

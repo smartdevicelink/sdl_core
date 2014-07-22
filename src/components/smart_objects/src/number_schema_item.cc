@@ -41,6 +41,10 @@ template<> SmartType TNumberSchemaItem<uint32_t>::getSmartType() {
   return SmartType_Integer;
 }
 
+template<> SmartType TNumberSchemaItem<int64_t>::getSmartType() {
+  return SmartType_Integer;
+}
+
 template<> SmartType TNumberSchemaItem<double>::getSmartType() {
   return SmartType_Double;
 }

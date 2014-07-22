@@ -64,6 +64,12 @@ enum APIVersion {
   kAPIV3 = 3
 };
 
+enum TLimitSource {
+  POLICY_TABLE = 0,
+  CONFIG_FILE
+};
+
+
 struct Version {
   APIVersion min_supported_api_version;
   APIVersion max_supported_api_version;
@@ -464,15 +470,14 @@ class Application : public virtual InitialApplicationData,
     virtual bool IsSubscribedToIVI(uint32_t vehicle_info_type_) = 0;
     virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type_) = 0;
 
-    /*
-     * @breaf Check frequency of readDID requests
+    /**
+     * @brief Check, if limits for command number per time is exceeded
+     * @param cmd_id Unique command id from mobile API
+     * @param source Limits source, e.g. policy table, config file etc.
+     * @return true, if - excedeed, otherwise - false
      */
-    virtual bool IsReadDIDAllowed() = 0;
-
-    /*
-     * @breaf Check frequency of GetVehicleData requests
-     */
-    virtual bool IsGetVehicleDataAllowed() = 0;
+    virtual bool IsCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
+                                         TLimitSource source) = 0;
 
     /**
      * Returns object for recording statistics

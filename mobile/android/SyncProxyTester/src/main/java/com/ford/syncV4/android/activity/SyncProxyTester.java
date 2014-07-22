@@ -2,6 +2,7 @@ package com.ford.syncV4.android.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
@@ -66,6 +67,7 @@ import com.ford.syncV4.proxy.rpc.SubscribeVehicleData;
 import com.ford.syncV4.proxy.rpc.SystemRequest;
 import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleData;
+import com.ford.syncV4.proxy.rpc.UpdateTurnList;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
@@ -91,9 +93,14 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         IBluetoothDeviceManager, ConnectionListener, PutFileDialog.PutFileDialogListener,
         IProxyServiceEvent {
 
+    /**
+     * String to join/split help, timeout, VR prompts, etc.
+     */
+    public static final String JOIN_STRING = ",";
+    public static final String ButtonSubscriptions = "ButtonSubscriptions";
+    public static final String VehicleDataSubscriptions = "VehicleDataSubscriptions";
     @SuppressWarnings("unused")
     private static final String LOG_TAG = SyncProxyTester.class.getSimpleName();
-
     /**
      * The name of the file where all the data coming with
      * {@link OnAudioPassThru} notifications is saved. The root directory is the
@@ -101,15 +108,24 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     private static final String AUDIOPASSTHRU_OUTPUT_FILE = "audiopassthru.wav";
     /**
-     * String to join/split help, timeout, VR prompts, etc.
+     * Time out in milliseconds for exit from application. If application is not correctly
+     * destroyed within specified timeout - then we force destroy procedure
      */
-    public static final String JOIN_STRING = ",";
+    private static final int EXIT_TIMEOUT = 7000;
+    private final static String ROOTED_DEVICE_ALERT_DIALOG_TAG = "RootedDeviceDialogTag";
     private static SyncProxyTester sActivityInstance;
     private static byte[] _ESN;
     /**
      * Autoincrementing id for new softbuttons.
      */
     private static int autoIncSoftButtonId = 5500;
+    /**
+     * UI Handler to perform actions in UI Thread
+     */
+    private final Handler mUIHandler = new Handler(Looper.getMainLooper());
+    // Get Bound Proxy Service from MainApp
+    // make it public to access from Fragments
+    public ProxyService mBoundProxyService;
     /**
      * The output stream to write audioPassThru data.
      */
@@ -128,11 +144,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     private ArrayAdapter<ImageType> imageTypeAdapter;
     /**
-     * Time out in milliseconds for exit from application. If application is not correctly
-     * destroyed within specified timeout - then we force destroy procedure
-     */
-    private static final int EXIT_TIMEOUT = 7000;
-    /**
      * Handler object to monitor exit procedure. If exit procedure fails, then this object will
      * manage application to destroy
      */
@@ -150,41 +161,10 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      * progress dialog of the Exit Application
      */
     private ProgressDialog mExitProgressDialog;
-    /**
-     * UI Handler to perform actions in UI Thread
-     */
-    private final Handler mUIHandler = new Handler(Looper.getMainLooper());
-
-    public static final String ButtonSubscriptions = "ButtonSubscriptions";
-    public static final String VehicleDataSubscriptions = "VehicleDataSubscriptions";
-
     private SyncReceiver mSyncReceiver;
     private BluetoothDeviceManager mBluetoothDeviceManager;
-
-    // Get Bound Proxy Service from MainApp
-    // make it public to access from Fragments
-    public ProxyService mBoundProxyService;
-
-    public static SyncProxyTester getInstance() {
-        return sActivityInstance;
-    }
-
-    public static void setESN(byte[] ESN) {
-        _ESN = ESN;
-    }
-
-    public static byte[] getESN() {
-        return _ESN;
-    }
-
-    public static int getNewSoftButtonId() {
-        return autoIncSoftButtonId++;
-    }
-
-    public void runInUIThread(Runnable runnable) {
-        mUIHandler.post(runnable);
-    }
-    
+    // Probably this is obsolete approch as there is Services Pool inside SDK
+    private ExecutorService mStreamCommandsExecutorService;
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
      * fragments for each of the sections. We use a
@@ -196,12 +176,43 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ArrayAdapter<String> adapter;
     private ActionBar mActionBar;
-
     /**
      * The {@link android.support.v4.view.ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
     private ImageView mImageView;
+
+    public static SyncProxyTester getInstance() {
+        return sActivityInstance;
+    }
+
+    public static byte[] getESN() {
+        return _ESN;
+    }
+
+    public static void setESN(byte[] ESN) {
+        _ESN = ESN;
+    }
+
+    public static int getNewSoftButtonId() {
+        return autoIncSoftButtonId++;
+    }
+
+    /**
+     * Splits the string with a comma and returns a vector of TTSChunks.
+     */
+    public static Vector<TTSChunk> ttsChunksFromString(String string) {
+        Vector<TTSChunk> chunks = new Vector<TTSChunk>();
+        for (String stringChunk : string.split(JOIN_STRING)) {
+            TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, stringChunk);
+            chunks.add(chunk);
+        }
+        return chunks;
+    }
+
+    public void runInUIThread(Runnable runnable) {
+        mUIHandler.post(runnable);
+    }
 
     /**
      * Action Tab section - start
@@ -270,10 +281,10 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         });
 
         addListeners();
+        mStreamCommandsExecutorService = Executors.newFixedThreadPool(3);
     }
 
     /**
-     *
      * @param syncAppId Id of the SyncProxyTester application instance
      */
     public void onSetUpDialogResult(final String syncAppId) {
@@ -326,6 +337,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
         intentFilter.addAction(Intent.ACTION_MEDIA_BUTTON);
         intentFilter.addAction(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
+        intentFilter.addAction(ProxyService.ROOTED_DEVICE_INTENT);
 
         if (mSyncReceiver == null) {
             mSyncReceiver = new SyncReceiver();
@@ -336,6 +348,13 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     if (mBoundProxyService != null) {
                         mBoundProxyService.pauseAnnoyingRepetitiveAudio();
                     }
+                }
+
+                @Override
+                public void onRootedDevice() {
+                    DialogFragment rootedDeviceAlertView = RootedDeviceAlertView.newInstance();
+                    rootedDeviceAlertView.setCancelable(false);
+                    rootedDeviceAlertView.show(getFragmentManager(), ROOTED_DEVICE_ALERT_DIALOG_TAG);
                 }
             });
 
@@ -481,8 +500,28 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }*/
     }
 
+    /**
+     * A callback form the Test Module indicated that current AppId has been changed
+     *
+     * @param newAppId new AppId
+     */
     @Override
-    public void onServiceStart(ServiceType serviceType, String appId) {
+    public void onInvalidateAppId(final String newAppId) {
+        /*PlaceholderFragment currentFragment = getCurrentActiveFragment();
+        if (currentFragment == null) {
+            return;
+        }
+        currentFragment.setAppId(newAppId);*/
+        MainApp.getInstance().runInUIThread(new Runnable() {
+            @Override
+            public void run() {
+                updateActiveTabView(newAppId);
+            }
+        });
+    }
+
+    @Override
+    public void onServiceStart(ServiceType serviceType, String appId, final boolean encoded) {
 
         final PlaceholderFragment fragment = getFragmentByAppId(appId);
         if (fragment == null) {
@@ -494,14 +533,14 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             //mLogAdapter.logMessage(SyncProxyTester.class.getSimpleName() + " '" + serviceType +
             //        "' service can not " + "start with NULL Proxy Service", Log.WARN);
             Logger.w(SyncProxyTester.class.getSimpleName() + " '" + serviceType +
-                            "' service can not " + "start with NULL Proxy Service");
+                    "' service can not " + "start with NULL Proxy Service");
             return;
         }
 
         Logger.d(LOG_TAG + " Fragment '" + fragment + "' appId:" + appId);
 
         fragment.getLogAdapter().logMessage("Service '" + serviceType + "' started, " +
-                "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion(), true);
+                "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion() + "encrypted " + encoded, true);
 
         if (serviceType == ServiceType.Audio_Service) {
             MainApp.getInstance().runInUIThread(new Runnable() {
@@ -512,7 +551,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     if (outputStream == null) {
                         return;
                     }
-                    fragment.setAudioServiceStateOn(outputStream);
+                    fragment.setAudioServiceStateOn(outputStream, encoded);
                 }
             });
         } else if (serviceType == ServiceType.Mobile_Nav) {
@@ -524,7 +563,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     if (outputStream == null) {
                         return;
                     }
-                    fragment.setMobileNaviStateOn(outputStream);
+                    fragment.setMobileNaviStateOn(outputStream, encoded);
                 }
             });
         } else if (serviceType == ServiceType.RPC) {
@@ -586,6 +625,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
      */
     private void showProtocolPropertiesInTitle() {
         final SharedPreferences prefs = getSharedPreferences(Const.PREFS_NAME, 0);
+        int protocolVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
+        boolean isMedia = prefs.getBoolean(Const.PREFS_KEY_ISMEDIAAPP, Const.PREFS_DEFAULT_ISMEDIAAPP);
         String transportType = null;
         switch (prefs.getInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE,
                 Const.Transport.PREFS_DEFAULT_TRANSPORT_TYPE)) {
@@ -599,7 +640,9 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 transportType = "USB";
                 break;
         }
-        setTitle(getResources().getString(R.string.tester_app_name) + " " + transportType);
+        setTitle(getResources().getString(R.string.tester_app_name) + " (Start protocol v:"
+                + protocolVersion + ", " + (isMedia ? "" : "non-") + "media, "
+                + transportType + ")");
     }
 
     @Override
@@ -857,18 +900,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     /**
-     * Splits the string with a comma and returns a vector of TTSChunks.
-     */
-    public static Vector<TTSChunk> ttsChunksFromString(String string) {
-        Vector<TTSChunk> chunks = new Vector<TTSChunk>();
-        for (String stringChunk : string.split(JOIN_STRING)) {
-            TTSChunk chunk = TTSChunkFactory.createChunk(SpeechCapabilities.TEXT, stringChunk);
-            chunks.add(chunk);
-        }
-        return chunks;
-    }
-
-    /**
      * Calls the setter with setterName on the msg.
      */
     public void setVehicleDataParam(RPCRequest msg, Class msgClass, String setterName) {
@@ -1004,6 +1035,22 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }
         mBoundProxyService.commandAddCommandResumable(appId, addCommand);
         getCurrentActiveFragment().onAddCommandDialogResult(addCommand);
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.UpdateTurnListDialog}
+     *
+     * @param updateTurnList {@link com.ford.syncV4.proxy.rpc.UpdateTurnList}
+     */
+    public void onUpdateTurnListDialogResult(String appId, UpdateTurnList updateTurnList) {
+        if (mBoundProxyService == null) {
+            return;
+        }
+        if (getCurrentActiveFragment() == null) {
+            return;
+        }
+        mBoundProxyService.syncProxySendRPCRequest(appId, updateTurnList);
     }
 
     /**
@@ -1230,7 +1277,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                     "Output file "
                             + (outFile != null ? outFile.toString()
                             : "'unknown'")
-                            + " can't be opened for writing", e);
+                            + " can't be opened for writing", e
+            );
         } catch (IOException e) {
             logToConsoleAndUI("Can't write to output file", e);
         }
@@ -1298,7 +1346,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             if (Result.RETRY != result) {
                 return;
             }
-            latestPerformAudioPassThruMsg.setCorrelationID(fragment.getCorrelationId());
+            latestPerformAudioPassThruMsg.setCorrelationId(fragment.getCorrelationId());
             if (mBoundProxyService == null) {
                 return;
             }
@@ -1392,12 +1440,15 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }
     }
 
-    public void startMobileNaviService(final String appId) {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        executorService.submit(new Runnable() {
+    public void startMobileNaviService(final String appId, final boolean encrypted) {
+
+        mStreamCommandsExecutorService.submit(new Runnable() {
             @Override
             public void run() {
-                final PlaceholderFragment fragment = getFragmentByAppId(appId);
+                if (!isProxyReadyForWork(appId)) {
+                    return;
+                }
+                PlaceholderFragment fragment = getFragmentByAppId(appId);
                 if (fragment == null) {
                     Logger.w("Start Mobile Navi service, Fragment NULL");
                     return;
@@ -1407,10 +1458,34 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-                mBoundProxyService.syncProxyStartMobileNavService(appId);
+                mBoundProxyService.syncProxyStartMobileNavService(appId, encrypted);
             }
         });
     }
+
+    public void startRPCService(final String appId, final boolean encrypted) {
+
+        mStreamCommandsExecutorService.submit(new Runnable() {
+            @Override
+            public void run() {
+                if (!isProxyReadyForWork(appId)) {
+                    return;
+                }
+                PlaceholderFragment fragment = getFragmentByAppId(appId);
+                if (fragment == null) {
+                    Logger.w("Start RPC service, Fragment NULL");
+                    return;
+                }
+                fragment.getLogAdapter().logMessage("Should start RPC service encrypted " + encrypted, true);
+
+                if (mBoundProxyService == null) {
+                    return;
+                }
+                mBoundProxyService.syncProxyStartRPCService(appId, encrypted);
+            }
+        });
+    }
+
 
     public void onSyncServiceError(String appId, String message) {
 
@@ -1439,31 +1514,57 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     public void stopMobileNavService(final String appId) {
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        executorService.submit(new Runnable() {
+
+        mStreamCommandsExecutorService.submit(new Runnable() {
             @Override
             public void run() {
-                final PlaceholderFragment fragment = getFragmentByAppId(appId);
-                if (fragment == null) {
-                    Logger.w("Stop Mobile Navi, Fragment NULL");
+                if (!isProxyReadyForWork(appId)) {
                     return;
                 }
-                fragment.getLogAdapter().logMessage("Should stop Mobile Navi", true);
+                final PlaceholderFragment fragment = getFragmentByAppId(appId);
+                if (fragment == null) {
+                    Logger.w("Stop Audio Service, Fragment NULL");
+                    return;
+                }
+                fragment.getLogAdapter().logMessage("Should stop Audio service", true);
 
                 if (mBoundProxyService == null) {
                     return;
                 }
-                closeMobileNaviOutputStream();
                 mBoundProxyService.syncProxyStopMobileNaviService(appId);
+                closeMobileNaviOutputStream();
             }
         });
     }
 
-    public void startAudioService(final String appId) {
+    public boolean isProxyReadyForWork(String appId) {
+        if (mBoundProxyService == null) {
+            return false;
+        }
+        if (!mBoundProxyService.isSyncProxyNotNull()) {
+            onSyncServiceError(appId, "Error. Proxy is null");
+            return false;
+        }
+        if (!mBoundProxyService.isSyncProxyConnected()) {
+            onSyncServiceError(appId, "Error. Proxy is not connected");
+            return false;
+        }
+        if (!mBoundProxyService.isSyncProxyConnectionNotNull()) {
+            onSyncServiceError(appId, "Error. Sync Connection is null");
+            return false;
+        }
+        return true;
+    }
+
+    public void startAudioService(final String appId, final boolean encrypted) {
+
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new Runnable() {
             @Override
             public void run() {
+                if (!isProxyReadyForWork(appId)) {
+                    return;
+                }
                 PlaceholderFragment fragment = getFragmentByAppId(appId);
                 if (fragment == null) {
                     Logger.w("Start Audio Service, Fragment NULL");
@@ -1474,7 +1575,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 if (mBoundProxyService == null) {
                     return;
                 }
-                mBoundProxyService.syncProxyStartAudioService(appId);
+                mBoundProxyService.syncProxyStartAudioService(appId, encrypted);
             }
         });
     }
@@ -1482,8 +1583,12 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     public void stopAudioService(final String appId) {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
         executorService.submit(new Runnable() {
+
             @Override
             public void run() {
+                if (!isProxyReadyForWork(appId)) {
+                    return;
+                }
                 final PlaceholderFragment fragment = getFragmentByAppId(appId);
                 if (fragment == null) {
                     Logger.w("Stop Audio Service, Fragment NULL");
@@ -1496,6 +1601,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 }
                 closeAudioOutputStream();
                 mBoundProxyService.syncProxyStopAudioService(appId);
+                closeAudioOutputStream();
             }
         });
     }
@@ -1522,6 +1628,17 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         ConnectionListenersManager.removeConnectionListener(this);
     }
 
+    private PlaceholderFragment getFragmentAt(int index) {
+        Fragment fragment = getSupportFragmentManager()
+                .findFragmentByTag("android:switcher:" + R.id.pager + ":" + index);
+        // based on the current position you can then cast the fragment to the correct
+        // class and call the method:
+        if (fragment != null) {
+            return ((PlaceholderFragment) fragment);
+        }
+        return null;
+    }
+
     /**
      * Callback of the exit timer. If the correct destroy procedure fails we use Process.killProcess
      */
@@ -1533,17 +1650,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             stopService(new Intent(SyncProxyTester.this, ProxyService.class));
         }
     };
-
-    private PlaceholderFragment getFragmentAt(int index) {
-        Fragment fragment = getSupportFragmentManager()
-                .findFragmentByTag("android:switcher:" + R.id.pager + ":" + index);
-        // based on the current position you can then cast the fragment to the correct
-        // class and call the method:
-        if (fragment != null) {
-            return ((PlaceholderFragment) fragment);
-        }
-        return null;
-    }
 
     private PlaceholderFragment getCurrentActiveFragment() {
         Fragment fragment = getSupportFragmentManager()
@@ -1559,6 +1665,7 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
 
     /**
      * Return Fragment instance associated with the provided Application Id
+     *
      * @param appId Application Id
      * @return {@link com.ford.syncV4.android.activity.PlaceholderFragment}
      */
@@ -1579,20 +1686,18 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
     }
 
     /**
-     * Exit Application section
-     */
-
-    /**
      * Exit from Activity
      */
-    private void exitApp() {
+    void exitApp() {
         Logger.i("Exit " + SyncProxyTester.class.getSimpleName() + "\n\n");
         super.finish();
 
         MainApp.getInstance().exitApp();
     }
 
-    // TODO : Move this block to MainApp
+    /**
+     * Exit Application section
+     */
 
     /**
      * Stops the proxy service.
@@ -1621,6 +1726,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         executeDestroyService();
     }
 
+    // TODO : Move this block to MainApp
+
     private void executeDestroyService() {
 
         if (mStopServicesTimeOutHandler != null) {
@@ -1635,12 +1742,11 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 mStopProxyServiceTimeOutHandler.postDelayed(mExitPostDelayedCallback, EXIT_TIMEOUT);
 
                 String[] appIds = mBoundProxyService.getAllAppIds();
-                for (String appId: appIds) {
+                for (String appId : appIds) {
                     stopMobileNavService(appId);
                     stopAudioService(appId);
                 }
-
-                mBoundProxyService.destroyService();
+                mBoundProxyService.disposeSyncProxy();
             }
         });
     }
@@ -1654,33 +1760,6 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         }
         return mExitProgressDialog;
     }
-
-    /**
-     * Callback of the exit timer. If the correct destroy procedure fails we use Process.killProcess
-     */
-    private Runnable mExitPostDelayedCallback = new Runnable() {
-        @Override
-        public void run() {
-            Logger.w("Exit App timer callback");
-            mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
-            getExitDialog().dismiss();
-            exitApp();
-            android.os.Process.killProcess(android.os.Process.myPid());
-        }
-    };
-
-    /**
-     * Callback of the End Services timer.
-     */
-    private Runnable mEndServicesPostDelayedCallback = new Runnable() {
-        @Override
-        public void run() {
-            Logger.w("End Services callback");
-            mStopServicesTimeOutHandler.removeCallbacks(mEndServicesPostDelayedCallback);
-
-            executeDestroyService();
-        }
-    };
 
     public void onUSBNoSuchDeviceException() {
         MainApp.getInstance().runInUIThread(new Runnable() {
@@ -1705,10 +1784,71 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             return;
         }
         // TODO : Reconsider
-        systemRequest.setCorrelationID(fragment.getCorrelationId());
+        systemRequest.setCorrelationId(fragment.getCorrelationId());
         if (mBoundProxyService == null) {
             return;
         }
         mBoundProxyService.sendRPCRequestWithPreprocess(appId, systemRequest);
+    }
+
+    /**
+     * Callback of the exit timer. If the correct destroy procedure fails we use Process.killProcess
+     */
+    private Runnable mExitPostDelayedCallback = new Runnable() {
+        @Override
+        public void run() {
+            Logger.w("Exit App timer callback");
+            mStopProxyServiceTimeOutHandler.removeCallbacks(mExitPostDelayedCallback);
+            getExitDialog().dismiss();
+            exitApp();
+            android.os.Process.killProcess(android.os.Process.myPid());
+        }
+    };
+
+    /**
+     * Starts to encrypt Audio Service
+     *
+     * @param appId
+     */
+    public void startAudioServiceEncryption(String appId) {
+        Logger.d("Audio Service start encrypt");
+        startAudioService(appId, true);
+    }
+
+    /**
+     * Callback of the End Services timer.
+     */
+    private Runnable mEndServicesPostDelayedCallback = new Runnable() {
+        @Override
+        public void run() {
+            Logger.w("End Services callback");
+            mStopServicesTimeOutHandler.removeCallbacks(mEndServicesPostDelayedCallback);
+
+            executeDestroyService();
+        }
+    };
+
+    /**
+     * Stops to encrypt Audio Service
+     */
+    public void startNotSecureAudioService(String appId) {
+        Logger.d("Audio Service start not encrypt");
+        startAudioService(appId, false);
+    }
+
+    /**
+     * Starts to encrypt Mobile Navi Service
+     */
+    public void startMobileNaviServiceEncryption(String appId) {
+        Logger.d("Mobile Navi Service start encrypt");
+        startMobileNaviService(appId, true);
+    }
+
+    /**
+     * Stops to encrypt Mobile Navi Service
+     */
+    public void startMobileNaviNotEncryptedService(String appId) {
+        Logger.d("Mobile Navi Service start not encrypt");
+        startMobileNaviService(appId, false);
     }
 }

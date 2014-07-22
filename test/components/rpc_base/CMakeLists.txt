@@ -20,7 +20,6 @@ set (SOURCES
 
 if (${HMI_DBUS_API})
   # Build dbus tests
-  find_package(DBus)
   include_directories(${DBUS_INCLUDE_DIRS})
   set (LIBRARIES ${LIBRARIES} DBus)
   set (SOURCES ${SOURCES} rpc_base_dbus_test.cc)

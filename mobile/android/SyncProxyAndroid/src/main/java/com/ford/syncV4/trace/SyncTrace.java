@@ -183,7 +183,7 @@ public class SyncTrace {
 			correlationID = ((RPCRequest)rpcMsg).getCorrelationID();
 		} else if (rpcMsg instanceof RPCResponse) {
 			hasCorrelationID = true;
-			correlationID = ((RPCResponse)rpcMsg).getCorrelationID();
+			correlationID = ((RPCResponse)rpcMsg).getCorrelationId();
 		} // end-if
 		if (hasCorrelationID) {
 			rpcAsXml.append("<cid>");
@@ -286,7 +286,7 @@ public class SyncTrace {
 		sb.append("<ver>");
 		sb.append(hdr.getVersion());
 		sb.append("</ver><cmp>");
-		sb.append(hdr.isCompressed());
+		sb.append(hdr.isEncrypted());
 		sb.append("</cmp><ft>");
 		sb.append(getProtocolFrameType(hdr.getFrameType()));
 		sb.append("</ft><st>");

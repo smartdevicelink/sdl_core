@@ -1,0 +1,5 @@
+/*! \page tools Tools
+
+Project uses following special tools:
+    - \subpage tools_interfacegenerator "InterfaceGenerator"
+*/

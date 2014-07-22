@@ -67,7 +67,7 @@ public class ApplicationIconManager {
         Logger.d(TAG + " SetAppIcon");
         SetAppIcon setAppIcon = RPCRequestFactory.buildSetAppIcon();
         setAppIcon.setSyncFileName(ICON_SYNC_FILENAME);
-        setAppIcon.setCorrelationID(proxyService.getNextCorrelationID());
+        setAppIcon.setCorrelationId(proxyService.getNextCorrelationID());
 
         proxyService.sendRPCRequestWithPreprocess(mAppId, setAppIcon);
 

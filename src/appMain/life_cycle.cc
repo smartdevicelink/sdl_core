@@ -38,9 +38,15 @@
 #endif
 #include "resumption/last_state.h"
 
+#ifdef ENABLE_SECURITY
+#include "security_manager/security_manager_impl.h"
+#include "security_manager/crypto_manager_impl.h"
+#endif  // ENABLE_SECURITY
+
 using threads::Thread;
 
 namespace main_namespace {
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 
 namespace {
@@ -48,20 +54,23 @@ void NameMessageBrokerThread(const System::Thread& thread,
                              const std::string& name) {
   Thread::SetNameForId(Thread::Id(thread.GetId()), name);
 }
-
-} // namespace
+}  // namespace
 
 LifeCycle::LifeCycle()
   : transport_manager_(NULL)
   , protocol_handler_(NULL)
   , connection_handler_(NULL)
   , app_manager_(NULL)
+#ifdef ENABLE_SECURITY
+  , crypto_manager_(NULL)
+  , security_manager_(NULL)
+#endif  // ENABLE_SECURITY
   , hmi_handler_(NULL)
   , hmi_message_adapter_(NULL)
   , media_manager_(NULL)
 #ifdef TIME_TESTER
   , time_tester_(NULL)
-#endif //TIME_TESTER
+#endif  // TIME_TESTER
 #ifdef DBUS_HMIADAPTER
   , dbus_adapter_(NULL)
   , dbus_adapter_thread_(NULL)
@@ -81,6 +90,7 @@ LifeCycle::LifeCycle()
   , mb_pasa_adapter_thread_(NULL)
 #endif  // PASA_HMI
 #endif  // CUSTOMER_PASA
+  , components_started(false)
 { }
 
 bool LifeCycle::StartComponents() {
@@ -100,11 +110,70 @@ bool LifeCycle::StartComponents() {
   app_manager_ =
     application_manager::ApplicationManagerImpl::instance();
   DCHECK(app_manager_ != NULL);
-  app_manager_->Init();
+  if (!app_manager_->Init()) {
+    LOG4CXX_ERROR(logger_, "Application manager init failed.");
+    return false;
+  }
 
   hmi_handler_ =
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_ != NULL)
+
+#ifdef ENABLE_SECURITY
+  security_manager_ = new security_manager::SecurityManagerImpl();
+
+  // FIXME(EZamakhov): move to Config or in Sm initialization method
+  std::string cert_filename;
+  profile::Profile::instance()->ReadStringValue(
+        &cert_filename, "",
+        security_manager::SecurityManagerImpl::ConfigSection(), "CertificatePath");
+
+  std::string ssl_mode;
+  profile::Profile::instance()->ReadStringValue(
+          &ssl_mode, "CLIENT", security_manager::SecurityManagerImpl::ConfigSection(), "SSLMode");
+  crypto_manager_ = new security_manager::CryptoManagerImpl();
+
+  std::string key_filename;
+  profile::Profile::instance()->ReadStringValue(
+        &key_filename, "", security_manager::SecurityManagerImpl::ConfigSection(), "KeyPath");
+
+  std::string ciphers_list;
+  profile::Profile::instance()->ReadStringValue(
+        &ciphers_list, SSL_TXT_ALL, security_manager::SecurityManagerImpl::ConfigSection(), "CipherList");
+
+  bool verify_peer;
+  profile::Profile::instance()->ReadBoolValue(
+        &verify_peer, false, security_manager::SecurityManagerImpl::ConfigSection(), "VerifyPeer");
+
+  std::string protocol_name;
+  profile::Profile::instance()->ReadStringValue(
+      &protocol_name, "TLSv1.2", security_manager::SecurityManagerImpl::ConfigSection(), "Protocol");
+
+  security_manager::Protocol protocol;
+  if (protocol_name == "TLSv1.0") {
+    protocol = security_manager::TLSv1;
+  } else if (protocol_name == "TLSv1.1") {
+      protocol = security_manager::TLSv1_1;
+  } else if (protocol_name == "TLSv1.2") {
+    protocol = security_manager::TLSv1_2;
+  } else if (protocol_name == "SSLv3") {
+    protocol = security_manager::SSLv3;
+  } else {
+    LOG4CXX_ERROR(logger_, "Unknown protocol: " << protocol_name);
+    return false;
+  }
+
+  if (!crypto_manager_->Init(
+      ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
+          protocol,
+          cert_filename,
+          key_filename,
+          ciphers_list,
+          verify_peer)) {
+    LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
+    return false;
+  }
+#endif  // ENABLE_SECURITY
 
   transport_manager_->AddEventListener(protocol_handler_);
   transport_manager_->AddEventListener(connection_handler_);
@@ -113,30 +182,41 @@ bool LifeCycle::StartComponents() {
 
   media_manager_ = media_manager::MediaManagerImpl::instance();
 
-  connection_handler_->SetProtocolHandler(protocol_handler_);
   protocol_handler_->set_session_observer(connection_handler_);
   protocol_handler_->AddProtocolObserver(media_manager_);
   protocol_handler_->AddProtocolObserver(app_manager_);
+#ifdef ENABLE_SECURITY
+  protocol_handler_->AddProtocolObserver(security_manager_);
+  protocol_handler_->set_security_manager(security_manager_);
+#endif  // ENABLE_SECURITY
   media_manager_->SetProtocolHandler(protocol_handler_);
 
   connection_handler_->set_transport_manager(transport_manager_);
+  connection_handler_->set_protocol_handler(protocol_handler_);
   connection_handler_->set_connection_handler_observer(app_manager_);
+
+#ifdef ENABLE_SECURITY
+  security_manager_->set_session_observer(connection_handler_);
+  security_manager_->set_protocol_handler(protocol_handler_);
+  security_manager_->set_crypto_manager(crypto_manager_);
+#endif  // ENABLE_SECURITY
 
   // it is important to initialise TimeTester before TM to listen TM Adapters
 #ifdef TIME_TESTER
   time_tester_ = new time_tester::TimeManager();
   time_tester_->Init(protocol_handler_);
-#endif //TIME_TESTER
+#endif  // TIME_TESTER
   // It's important to initialise TM after setting up listener chain
   // [TM -> CH -> AM], otherwise some events from TM could arrive at nowhere
   transport_manager_->Init();
 #ifndef CUSTOMER_PASA
-  //start transport manager
+  // start transport manager
   transport_manager_->Visibility(true);
 #endif
   app_manager_->set_protocol_handler(protocol_handler_);
   app_manager_->set_connection_handler(connection_handler_);
   app_manager_->set_hmi_message_handler(hmi_handler_);
+  components_started = true;
   return true;
 }
 
@@ -150,7 +230,7 @@ bool LifeCycle::InitMessageSystem() {
     hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     mb_pasa_adapter_);
   if (!mb_pasa_adapter_->MqOpen()) {
-    LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
+    LOG4CXX_FATAL(logger_, "Cannot connect to remote peer!");
     return false;
   }
 
@@ -171,7 +251,7 @@ bool LifeCycle::InitMessageSystem() {
   message_broker_ =
     NsMessageBroker::CMessageBroker::getInstance();
   if (!message_broker_) {
-    LOG4CXX_INFO(logger_, " Wrong pMessageBroker pointer!");
+    LOG4CXX_FATAL(logger_, " Wrong pMessageBroker pointer!");
     return false;
   }
 
@@ -181,27 +261,27 @@ bool LifeCycle::InitMessageSystem() {
     profile::Profile::instance()->server_port(),
     message_broker_);
   if (!message_broker_server_) {
-    LOG4CXX_INFO(logger_, " Wrong pJSONRPC20Server pointer!");
+    LOG4CXX_FATAL(logger_, " Wrong pJSONRPC20Server pointer!");
     return false;
   }
   message_broker_->startMessageBroker(message_broker_server_);
   if (!networking::init()) {
-    LOG4CXX_INFO(logger_, " Networking initialization failed!");
+    LOG4CXX_FATAL(logger_, " Networking initialization failed!");
     return false;
   }
 
   if (!message_broker_server_->Bind()) {
-    LOG4CXX_FATAL(logger_, "Bind failed!");
+    LOG4CXX_FATAL(logger_, "Message broker server bind failed!");
     return false;
   } else {
-    LOG4CXX_INFO(logger_, "Bind successful!");
+    LOG4CXX_INFO(logger_, "Message broker server bind successful!");
   }
 
   if (!message_broker_server_->Listen()) {
-    LOG4CXX_FATAL(logger_, "Listen failed!");
+    LOG4CXX_FATAL(logger_, "Message broker server listen failed!");
     return false;
   } else {
-    LOG4CXX_INFO(logger_, " Listen successful!");
+    LOG4CXX_INFO(logger_, " Message broker server listen successful!");
   }
 
   mb_adapter_ =
@@ -213,7 +293,7 @@ bool LifeCycle::InitMessageSystem() {
     hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     mb_adapter_);
     if (!mb_adapter_->Connect()) {
-      LOG4CXX_INFO(logger_, "Cannot connect to remote peer!");
+      LOG4CXX_FATAL(logger_, "Cannot connect to remote peer!");
       return false;
     }
 
@@ -254,14 +334,13 @@ bool LifeCycle::InitMessageSystem() {
  * @return true if success otherwise false.
  */
 bool LifeCycle::InitMessageSystem() {
-
   dbus_adapter_ = new hmi_message_handler::DBusMessageAdapter(
     hmi_message_handler::HMIMessageHandlerImpl::instance());
 
   hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     dbus_adapter_);
   if (!dbus_adapter_->Init()) {
-    LOG4CXX_INFO(logger_, "Cannot init DBus service!");
+    LOG4CXX_FATAL(logger_, "Cannot init DBus service!");
     return false;
   }
 
@@ -292,6 +371,10 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // CUSTOMER_PASA
 
 void LifeCycle::StopComponents() {
+  if (components_started == false) {
+    LOG4CXX_ERROR(logger_, "Components wasn't started");
+    return;
+  }
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
@@ -299,6 +382,9 @@ void LifeCycle::StopComponents() {
 
   LOG4CXX_INFO(logger_, "Destroying Media Manager");
   protocol_handler_->RemoveProtocolObserver(media_manager_);
+#ifdef ENABLE_SECURITY
+  protocol_handler_->RemoveProtocolObserver(security_manager_);
+#endif  // ENABLE_SECURITY
   media_manager_->SetProtocolHandler(NULL);
   media_manager::MediaManagerImpl::destroy();
 
@@ -306,12 +392,23 @@ void LifeCycle::StopComponents() {
   transport_manager_->Stop();
   transport_manager::TransportManagerDefault::destroy();
 
-  LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
-  protocol_handler_->set_session_observer(NULL);
-  connection_handler::ConnectionHandlerImpl::destroy();
+  LOG4CXX_INFO(logger_, "Stopping Connection Handler.");
+  connection_handler::ConnectionHandlerImpl::instance()->Stop();
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete protocol_handler_;
+
+  LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
+  connection_handler::ConnectionHandlerImpl::destroy();
+
+#ifdef ENABLE_SECURITY
+  LOG4CXX_INFO(logger_, "Destroying Crypto Manager");
+  crypto_manager_->Finish();
+  delete crypto_manager_;
+
+  LOG4CXX_INFO(logger_, "Destroying Security Manager");
+  delete security_manager_;
+#endif  // ENABLE_SECURITY
 
   LOG4CXX_INFO(logger_, "Destroying Last State");
   resumption::LastState::destroy();
@@ -389,7 +486,8 @@ void LifeCycle::StopComponents() {
     delete time_tester_;
     time_tester_ = NULL;
   }
-#endif //TIME_TESTER
+#endif  // TIME_TESTER
+  components_started =false;
 }
 
 }  //  namespace main_namespace

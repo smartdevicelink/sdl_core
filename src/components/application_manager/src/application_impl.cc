@@ -97,9 +97,13 @@ ApplicationImpl::ApplicationImpl(
       device_(0),
       usage_report_(mobile_app_id, statistics_manager),
       protocol_version_(ProtocolVersion::kV3),
-      alert_in_background_(false),
-      get_vehice_data_frequency_({date_time::DateTime::getCurrentTime(), 1}),
-      read_did_frequency_({date_time::DateTime::getCurrentTime(), 1}) {
+      alert_in_background_(false) {
+
+  cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] =
+      {date_time::DateTime::getCurrentTime(), 0};
+  cmd_number_to_time_limits_[mobile_apis::FunctionID::GetVehicleDataID] =
+      {date_time::DateTime::getCurrentTime(), 0};
+
 
   set_mobile_app_id(smart_objects::SmartObject(mobile_app_id));
   set_name(app_name);
@@ -419,42 +423,92 @@ UsageStatistics& ApplicationImpl::usage_report() {
   return usage_report_;
 }
 
-bool ApplicationImpl::IsReadDIDAllowed() {
-  std::pair<uint32_t, int32_t> frequency_restrictions;
-  frequency_restrictions = profile::Profile::instance()->read_did_frequency();
+bool ApplicationImpl::IsCommandLimitsExceeded(
+    mobile_apis::FunctionID::eType cmd_id,
+    TLimitSource source) {
   TimevalStruct current = date_time::DateTime::getCurrentTime();
+  switch (source) {
+  // In case of config file values there is COMMON limitations for number of
+  // commands per certain time in seconds, i.e. 5 requests per 10 seconds with
+  // any interval between them
+  case CONFIG_FILE: {
+    CommandNumberTimeLimit::iterator it =
+        cmd_number_to_time_limits_.find(cmd_id);
+    if (cmd_number_to_time_limits_.end() == it) {
+      LOG4CXX_WARN(logger_, "Limits for command id " << cmd_id
+                   << "had not been set.");
+      return true;
+    }
 
-  if (current.tv_sec - read_did_frequency_.first.tv_sec > frequency_restrictions.second) {
-    read_did_frequency_.first = current;
-    read_did_frequency_.second = 1;
-    return true;
+    TimeToNumberLimit& limit = it->second;
+
+    std::pair<uint32_t, int32_t> frequency_restrictions;
+
+    if (mobile_apis::FunctionID::ReadDIDID == cmd_id) {
+      frequency_restrictions =
+          profile::Profile::instance()->read_did_frequency();
+
+    } else if (mobile_apis::FunctionID::GetVehicleDataID == cmd_id) {
+      frequency_restrictions =
+          profile::Profile::instance()->get_vehicle_data_frequency();
+    }
+
+    if (current.tv_sec <= limit.first.tv_sec + frequency_restrictions.second) {
+      if (limit.second < frequency_restrictions.first) {
+        ++limit.second;
+        return false;
+      }
+      return true;
+    }
+
+    limit.first = current;
+    limit.second = 1;
+
+    return false;
+
+    break;
+  }
+  // In case of policy table values, there is EVEN limitation for number of
+  // commands per minute, e.g. 10 command per minute i.e. 1 command per 6 sec
+  case POLICY_TABLE: {
+    uint32_t cmd_limit = application_manager::MessageHelper::GetAppCommandLimit(
+          mobile_app_id_->asString());
+
+    if (0 == cmd_limit) {
+      return true;
+    }
+
+    const uint32_t dummy_limit = 1;
+    CommandNumberTimeLimit::iterator it =
+        cmd_number_to_time_limits_.find(cmd_id);
+    // If no command with cmd_id had been executed yet, just add to limits
+    if (cmd_number_to_time_limits_.end() == it) {
+      cmd_number_to_time_limits_[cmd_id] = {current, dummy_limit};
+      return false;
+    }
+
+    const uint32_t minute = 60;
+
+    TimeToNumberLimit& limit = it->second;
+
+    // Checking even limitation for command
+    if (static_cast<uint32_t>(current.tv_sec - limit.first.tv_sec) <
+        minute/cmd_limit) {
+      return true;
+    }
+
+    cmd_number_to_time_limits_[cmd_id] = {current, dummy_limit};
+
+    return false;
+    break;
+  }
+  default: {
+    LOG4CXX_WARN(logger_, "Limit source is not implemented.");
+    break;
+  }
   }
 
-  if (read_did_frequency_.second <= frequency_restrictions.first) {
-    read_did_frequency_.second++;
-    return true;
-  }
-
-  return false;
-}
-
-bool ApplicationImpl::IsGetVehicleDataAllowed() {
-  std::pair<uint32_t, int32_t> frequency_restrictions;
-  frequency_restrictions = profile::Profile::instance()->get_vehicle_data_frequency();
-  TimevalStruct current = date_time::DateTime::getCurrentTime();
-
-  if (current.tv_sec - get_vehice_data_frequency_.first.tv_sec > frequency_restrictions.second) {
-    get_vehice_data_frequency_.first = current;
-    get_vehice_data_frequency_.second = 0;
-    return true;
-  }
-
-  if (get_vehice_data_frequency_.second <= frequency_restrictions.first) {
-    get_vehice_data_frequency_.second++;
-    return true;
-  }
-
-  return false;
+  return true;
 }
 
 const std::set<mobile_apis::ButtonName::eType>& ApplicationImpl::SubscribedButtons() const {

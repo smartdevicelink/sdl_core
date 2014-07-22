@@ -89,20 +89,12 @@ bool PerformInteractionRequest::Init() {
 void PerformInteractionRequest::Run() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::Run");
 
-  // timer_.start(2);
-
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
-
-  if (0 != app->is_perform_interaction_active()) {
-    LOG4CXX_INFO(logger_, "Another perform interaction is running!");
-    SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
@@ -128,16 +120,19 @@ void PerformInteractionRequest::Run() {
     }
   }
 
-  uint32_t correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
+  if (IsWhiteSpaceExist()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming perform interaction has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
 
   int32_t mode =
       (*message_)[strings::msg_params][strings::interaction_mode].asInt();
 
   app->set_perform_interaction_mode(mode);
 
-  interaction_mode_ =
-      static_cast<mobile_apis::InteractionMode::eType>(mode);
+  interaction_mode_ = static_cast<mobile_apis::InteractionMode::eType>(mode);
 
   switch (interaction_mode_) {
     case mobile_apis::InteractionMode::BOTH: {
@@ -154,7 +149,7 @@ void PerformInteractionRequest::Run() {
         return;
       }
 
-      app->set_perform_interaction_active(correlation_id);
+      app->set_perform_interaction_active(correlation_id());
       SendVRPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
@@ -174,7 +169,7 @@ void PerformInteractionRequest::Run() {
         return;
       }
 
-      app->set_perform_interaction_active(correlation_id);
+      app->set_perform_interaction_active(correlation_id());
       SendVRPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
@@ -190,7 +185,7 @@ void PerformInteractionRequest::Run() {
       }
 
       // TODO(DK): need to implement timeout
-      app->set_perform_interaction_active(correlation_id);
+      app->set_perform_interaction_active(correlation_id());
       SendVRPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
@@ -285,11 +280,7 @@ void PerformInteractionRequest::ProcessVRResponse(
     LOG4CXX_INFO(logger_, "VR response aborted");
     if (mobile_apis::InteractionMode::VR_ONLY == interaction_mode_) {
       LOG4CXX_INFO(logger_, "Abort send Close Popup");
-      smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-      c_p_request_so[hmi_request::method_name] = "UI.PerformInteraction";
-      SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
-      DisablePerformInteraction();
+      TerminatePerformInteraction();
       SendResponse(false, mobile_apis::Result::ABORTED);
       return;
     } else {
@@ -299,6 +290,14 @@ void PerformInteractionRequest::ProcessVRResponse(
                                                                default_timeout());
       return;
     }
+  }
+
+  if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
+      vr_perform_interaction_code_) {
+    LOG4CXX_INFO(logger_, "VR response WARNINGS");
+    TerminatePerformInteraction();
+    SendResponse(true, mobile_apis::Result::WARNINGS);
+    return;
   }
 
   int32_t choise_id = message[strings::msg_params][strings::choice_id].asInt();
@@ -320,12 +319,7 @@ void PerformInteractionRequest::ProcessVRResponse(
   }
   if (choice_id_chosen) {
     LOG4CXX_INFO(logger_, "Command was choice id!");
-    smart_objects::SmartObject c_p_request_so = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    c_p_request_so[hmi_request::method_name] = "UI.PerformInteraction";
-    SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &(c_p_request_so));
-    DisablePerformInteraction();
-
+    TerminatePerformInteraction();
     (*message_)[strings::params][strings::function_id] =
         static_cast<int32_t>(mobile_apis::FunctionID::PerformInteractionID);
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
@@ -360,36 +354,34 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
   LOG4CXX_INFO(logger_,
                "PerformInteractionRequest::ProcessPerformInteractionResponse");
   ui_response_recived = true;
-  DisablePerformInteraction();
 
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = message[strings::msg_params];
 
   bool result = false;
-  int32_t hmi_response_code =
-      message[strings::params][hmi_response::code].asInt();
-  if ((hmi_apis::Common_Result::SUCCESS ==
-      static_cast<hmi_apis::Common_Result::eType>(hmi_response_code)) ||
-      (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-          static_cast<hmi_apis::Common_Result::eType>(hmi_response_code))) {
+  mobile_apis::Result::eType result_code =
+            GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+                message[strings::params][hmi_response::code].asUInt()));
+  if ((mobile_apis::Result::SUCCESS == result_code) ||
+      (mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code)) {
     if (message[strings::msg_params].keyExists(strings::manual_text_entry)) {
       msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_KEYBOARD;
     } else {
       msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_MENU;
     }
+    DisablePerformInteraction();
     result = true;
+  } else if (mobile_apis::Result::REJECTED == result_code) {
+    LOG4CXX_ERROR(logger_, "Request was rejected");
   }
 
   const char* return_info = NULL;
-  mobile_apis::Result::eType result_code =
-      static_cast<mobile_apis::Result::eType>(hmi_response_code);
   if (result) {
-    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-        hmi_apis::Common_Result::eType(hmi_response_code)) {
+    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) {
       result_code = mobile_apis::Result::WARNINGS;
-      return_info = std::string(
-          "Unsupported phoneme type sent in any item").c_str();
+      return_info =
+          std::string("Unsupported phoneme type sent in any item").c_str();
     }
   }
 
@@ -539,7 +531,7 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
           }
         }
       } else {
-        LOG4CXX_ERROR(logger_, "Can't found choiset!")
+        LOG4CXX_ERROR(logger_, "Can't found choiceSet!")
       }
     }
   }
@@ -575,8 +567,8 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
                  true);
 }
 
-void PerformInteractionRequest::DeleteParameterFromTTSChunk
-(smart_objects::SmartObject* array_tts_chunk) {
+void PerformInteractionRequest::DeleteParameterFromTTSChunk(
+    smart_objects::SmartObject* array_tts_chunk) {
   int32_t length = array_tts_chunk->length();
   for (int32_t i = 0; i < length; ++i) {
     array_tts_chunk[i].erase(strings::type);
@@ -727,6 +719,91 @@ void PerformInteractionRequest::DisablePerformInteraction() {
     app->set_perform_interaction_mode(-1);
     app->DeletePerformInteractionChoiceSetMap();
   }
+}
+
+bool PerformInteractionRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::IsWhiteSpaceExist");
+  const char* str = NULL;
+
+  str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
+  if (!CheckSyntax(str, true)) {
+    LOG4CXX_ERROR(logger_, "Invalid initial_text syntax check failed");
+    return true;
+  }
+
+
+  if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
+    const smart_objects::SmartArray* ip_array =
+        (*message_)[strings::msg_params][strings::initial_prompt].asArray();
+
+    smart_objects::SmartArray::const_iterator it_ip = ip_array->begin();
+    smart_objects::SmartArray::const_iterator it_ip_end = ip_array->end();
+
+    for (; it_ip != it_ip_end; ++it_ip) {
+      str = (*it_ip)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid initial_prompt syntax check failed");
+        return true;
+      }
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::help_prompt)) {
+    const smart_objects::SmartArray* hp_array =
+        (*message_)[strings::msg_params][strings::help_prompt].asArray();
+
+    smart_objects::SmartArray::const_iterator it_hp = hp_array->begin();
+    smart_objects::SmartArray::const_iterator it_hp_end = hp_array->end();
+
+    for (; it_hp != it_hp_end; ++it_hp) {
+      str = (*it_hp)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
+        return true;
+      }
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
+    const smart_objects::SmartArray* tp_array =
+        (*message_)[strings::msg_params][strings::timeout_prompt].asArray();
+
+    smart_objects::SmartArray::const_iterator it_tp = tp_array->begin();
+    smart_objects::SmartArray::const_iterator it_tp_end = tp_array->end();
+
+    for (; it_tp != it_tp_end; ++it_tp) {
+      str = (*it_tp)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
+        return true;
+      }
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
+    const smart_objects::SmartArray* vh_array =
+        (*message_)[strings::msg_params][strings::vr_help].asArray();
+
+    smart_objects::SmartArray::const_iterator it_vh = vh_array->begin();
+    smart_objects::SmartArray::const_iterator it_vh_end = vh_array->end();
+
+    for (; it_vh != it_vh_end; ++it_vh) {
+      str = (*it_vh)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid vr_help syntax check failed");
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+void PerformInteractionRequest::TerminatePerformInteraction() {
+  smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+  msg_params[hmi_request::method_name] = "UI.PerformInteraction";
+  SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &msg_params);
+  DisablePerformInteraction();
 }
 
 }  // namespace commands

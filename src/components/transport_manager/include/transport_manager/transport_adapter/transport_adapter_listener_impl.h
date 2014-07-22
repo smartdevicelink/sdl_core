@@ -37,9 +37,9 @@
 #include "transport_manager/transport_adapter/transport_adapter_listener.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 
-using transport_manager::transport_adapter::TransportAdapter;
-
 namespace transport_manager {
+
+using transport_manager::transport_adapter::TransportAdapter;
 
 class TransportManagerImpl;
 
@@ -77,11 +77,6 @@ class TransportAdapterListenerImpl
    */
   TransportAdapterListenerImpl(TransportManagerImpl* manager,
                                TransportAdapter* adapter);
-
-  /**
-   * @brief Dectructor.
-   */
-  virtual ~TransportAdapterListenerImpl();
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -134,8 +129,7 @@ class TransportAdapterListenerImpl
    * @param adapter Pointer to the device adapter.
    * @param device Device unique identifier.
    * @param app_id Handle of application.
-   * @param error Error class with information about possible reason of connect
-   *failure.
+   * @param error Error class with information about possible reason of failure.
    */
   virtual void OnConnectFailed(const TransportAdapter* adapter,
                                const DeviceUID& device,
@@ -232,7 +226,7 @@ class TransportAdapterListenerImpl
   virtual void OnDataReceiveDone(const TransportAdapter* adapter,
                                  const DeviceUID& device,
                                  const ApplicationHandle& app_id,
-                                 const RawMessageSptr data_container);
+                                 const RawMessagePtr data_container);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -263,7 +257,7 @@ class TransportAdapterListenerImpl
   virtual void OnDataSendDone(const TransportAdapter* adapter,
                               const DeviceUID& device,
                               const ApplicationHandle& app_id,
-                              const RawMessageSptr data_container);
+                              const RawMessagePtr data_container);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -273,7 +267,7 @@ class TransportAdapterListenerImpl
   virtual void OnDataSendFailed(const TransportAdapter* adapter,
                                 const DeviceUID& device,
                                 const ApplicationHandle& app_id,
-                                const RawMessageSptr data_container,
+                                const RawMessagePtr data_container,
                                 const DataSendError& error);
 
   /**

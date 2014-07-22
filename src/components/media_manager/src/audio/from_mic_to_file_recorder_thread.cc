@@ -119,9 +119,6 @@ void FromMicToFileRecorderThread::threadMain() {
     }
   };
 
-  pthread_t wait;
-  int32_t retcode;
-
   if (!g_thread_supported()) {
     g_thread_init(NULL);
   }

@@ -41,6 +41,16 @@ public class BTTransport extends SyncTransport {
     static final boolean ANDROID_PRIOR_TO_42 =
             Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1;
 
+    @Override
+    public synchronized InputStream getInputStream() {
+        return _input;
+    }
+
+    @Override
+    public synchronized OutputStream getOutputStream() {
+        return _output;
+    }
+
     public BTTransport(ITransportListener transportListener) {
 		super(transportListener);
 	}
@@ -201,19 +211,20 @@ public class BTTransport extends SyncTransport {
 	 * offset and of the provided length to fragment transmission.
 	 */
 	public boolean sendBytesOverTransport(byte[] msgBytes, int offset, int length) {
-		boolean sendResult = false;
+		boolean sendResult;
 		try {
 			_output.write(msgBytes, offset, length);
             _output.flush();
             decreaseSpeed();
 			sendResult = true;
+            //Logger.i(CLASS_NAME + " sent " + msgBytes.length + " bytes");
 		} catch (Exception ex) {
 			Logger.e(CLASS_NAME + " error writing to Bluetooth socket: " + ex.toString(), ex);
 			handleTransportError("Error writing to Bluetooth socket:", ex);
 			sendResult = false;
-		} // end-catch
+		}
 		return sendResult;
-	} // end-method
+	}
 
     /**
      * Sleeps for a while after transmitting some data on Android prior to 4.2.

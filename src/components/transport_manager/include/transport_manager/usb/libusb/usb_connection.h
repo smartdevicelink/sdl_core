@@ -57,7 +57,7 @@ class UsbConnection : public Connection {
   virtual ~UsbConnection();
 
  protected:
-  virtual TransportAdapter::Error SendData(RawMessageSptr message);
+  virtual TransportAdapter::Error SendData(RawMessagePtr message);
   virtual TransportAdapter::Error Disconnect();
 
  private:
@@ -85,8 +85,8 @@ class UsbConnection : public Connection {
   libusb_transfer* in_transfer_;
   libusb_transfer* out_transfer_;
 
-  std::list<RawMessageSptr> out_messages_;
-  RawMessageSptr current_out_message_;
+  std::list<RawMessagePtr> out_messages_;
+  RawMessagePtr current_out_message_;
   pthread_mutex_t out_messages_mutex_;
   size_t bytes_sent_;
   bool disconnecting_;

@@ -2,7 +2,6 @@ package com.ford.syncV4.android.activity;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -21,7 +20,6 @@ import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.Image;
 import com.ford.syncV4.proxy.rpc.MenuParams;
 import com.ford.syncV4.proxy.rpc.enums.ImageType;
-import com.ford.syncV4.util.logger.Logger;
 
 import java.util.Arrays;
 import java.util.Vector;
@@ -93,8 +91,8 @@ public class AddCommandDialog extends BaseDialogFragment {
                         }
 
                         AddCommand addCommand = RPCRequestFactory.buildAddCommand();
-                        addCommand.setCorrelationID(((SyncProxyTester) getActivity())
-                                  .getNextCorrelationIdForCurrentFragment());
+                        addCommand.setCorrelationId(((SyncProxyTester) getActivity())
+                                .getNextCorrelationIdForCurrentFragment());
                         addCommand.setCmdID(cmdID);
 
                         if (chkUseMenuParams.isChecked()) {

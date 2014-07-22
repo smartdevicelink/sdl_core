@@ -52,6 +52,8 @@ while test $# -gt 0; do
                     echo "$ setup_env.sh - Installs all packages and configures system invironment for smartdevicelink "
                     echo "                 core compilation and running."
                     echo "                 IMPORTANT: only mandatory packages will be installed if run without -a option"
+                    echo "                 IMPORTANT: this script should be runed with superuser privileges."
+                    echo "                 IMPORTANT: if you use proxy, you should start skript with sudo -E ./setup_env.sh {ARGS}"
                     echo " "
                     echo "Usage: setup_env.sh [option] "
                     echo "Options:"
@@ -70,6 +72,7 @@ done
 #Check sudo
 if [ $EUID != 0 ]; then
     echo "This script should be run using sudo or as the root user"
+    echo "If you use proxy $http_proxy and $https_proxy enviroment variables shoud be defined"
     exit 1
 fi
 

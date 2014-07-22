@@ -34,7 +34,6 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_H_
 
 #include <set>
-#include "protocol_handler/raw_message.h"
 #include "media_manager/media_adapter.h"
 #include "media_manager/media_adapter_listener.h"
 #include "utils/macro.h"

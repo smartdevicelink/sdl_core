@@ -10,6 +10,7 @@ package com.ford.syncV4.android.policies;
 import android.os.Environment;
 import android.util.Log;
 
+import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SafeToast;
 import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.Const;
@@ -81,11 +82,20 @@ public class PolicyFilesManager {
             return;
         }
 
-        SafeToast.showToastAnyThread("Policy Update is found");
+        String infoMessage = "Custom Policy Update is found";
+
+        // Use dummy JSON update if real file do not provided
+        if (data.length == 0) {
+            data = AppUtils.contentsOfResource(R.raw.policy_table_update);
+
+            infoMessage = "Predefined Policy Update is found";
+        }
+
+        SafeToast.showToastAnyThread(infoMessage);
 
         // TODO : Logging to be refactored
         if (logAdapter != null) {
-            logAdapter.logMessage("Policy Update is found", Log.DEBUG, true);
+            logAdapter.logMessage(infoMessage, Log.DEBUG, true);
         }
 
         try {

@@ -34,7 +34,6 @@
 
 import QtQuick 2.0
 import "../hmi_api/Common.js" as Common
-import "../models/RequestToSDL.js" as RequestToSDL
 import "../models/Internal.js" as Internal
 
 Item
@@ -153,10 +152,12 @@ Item
     }
 
     function startPTExchange(urls) {
+        console.log("enter startPTExchange");
         urlsPTExchange = urls;
         currentRetry = 0;
         currentUrl = 0;
         tryUpdatePolicy();
+        console.log("exit startPTExchange");
     }
 
     function startIVSU(urls) {
@@ -166,12 +167,15 @@ Item
     }
 
     function getUrl() {
+        console.log("enter getUrl");
         if (currentUrl >= 0 && currentUrl < urlsPTExchange.length) {
-          var url = urlsPTExchange[currentUrl];
-          currentUrl = (currentUrl + 1) / urlsPTExchange.length;
-          return url;
+            var url = urlsPTExchange[currentUrl];
+            currentUrl = (currentUrl + 1) / urlsPTExchange.length;
+            console.log("exit getUrl");
+            return url;
         } else {
-          return {url: ""}
+            console.log("exit getUrl (empty)");
+            return {url: ""}
         }
     }
 
@@ -186,6 +190,7 @@ Item
     }
 
     function sendSystemRequest(type, url, fileName, applicationId) {
+        console.log("enter sendSystemRequest");
         var offset = 1000;
         var length = 10000;
         var appId = applicationId ? applicationId : "default";
@@ -194,9 +199,11 @@ Item
         sdlBasicCommunication.onSystemRequest(type, url, Common.FileType.JSON,
                                               offset, length, timeoutPTExchange,
                                               file, appId);
+        console.log("enter sendSystemRequest");
     }
 
     function tryUpdatePolicy() {
+        console.log("enter tryUpdatePolicy");
         if (urlsPTExchange.length) {
             var url = getUrl();
             sendSystemRequest(Common.RequestType.PROPRIETARY, url.url, filePTSnapshot, url.policyAppId);
@@ -206,8 +213,10 @@ Item
 
         retriesTimer.interval = getInterval();
         if (retriesTimer.interval > 0) {
+            console.log("start retry strategy");
             retriesTimer.start();
         }
+        console.log("exit tryUpdatePolicy");
     }
 
     function systemRequest(type) {
@@ -219,8 +228,10 @@ Item
     }
 
     function stopPTExchange(fileName) {
+        console.log("enter stopPTExchange");
         retriesTimer.stop();
         sdlSDL.onReceivedPolicyUpdate(fileName);
+        console.log("exit stopPTExchange");
     }
 
     Timer {
@@ -233,41 +244,46 @@ Item
 
         console.debug("SDL.ActivateApp Request enter", appId);
 
-        RequestToSDL.SDL_ActivateApp(appId, function(params){
-            settingsContainer.activateApp_Response(appId, params)
+        RequestToSDL.SDL_ActivateApp(appId, function(isSDLAllowed, device, isPermissionsConsentNeeded, isAppPermissionsRevoked, appRevokedPermissions, isAppRevoked, priority){
+            settingsContainer.activateApp_Response(appId, isSDLAllowed, device, isPermissionsConsentNeeded, isAppPermissionsRevoked, appRevokedPermissions, isAppRevoked, priority)
         })
 
         console.debug("SDL.ActivateApp Request exit");
     }
 
-    function activateApp_Response (appId, params) {
+    function activateApp_Response (appId, isSDLAllowed, device, isPermissionsConsentNeeded, isAppPermissionsRevoked, appRevokedPermissions, isAppRevoked, priority) {
 
         console.debug("activateApp_Response enter", appId);
 
-        if (!params.isSDLAllowed) {
+        if (!isSDLAllowed) {
 
             userActionPopUp.activate("Allow SDL Functionality request",
-                                        "Would you like to allow SDL functionality for device '" + params.device.name + "'?",
+                                        "Would you like to allow SDL functionality for device '" + device.name + "'?",
                                         function(result){
-                                            allowSDLFunctionality(result, params.device)
-                                        }
+                                            allowSDLFunctionality(result, device)
+                                        },
+                                        true
                                     )
         }
 
-        if (params.isPermissionsConsentNeeded) {
-            RequestToSDL.SDL_GetListOfPermissions(appId, function(params){
-                settingsContainer.getListOfPermissions_Response(appId, params)
+        if (isPermissionsConsentNeeded) {
+            RequestToSDL.SDL_GetListOfPermissions(appId, function(allowedFunctions){
+                settingsContainer.getListOfPermissions_Response(appId, allowedFunctions)
             })
         }
 
-        if (params.isAppPermissionsRevoked) {
-            //setAppPermissions remove revoked permissions
+        if (isAppPermissionsRevoked) {
+
+            appPermissionsRevoked(appId, appRevokedPermissions, "AppPermissionsRevoked")
         }
 
-        if (params.isAppRevoked) {
-            //popupActivate("Current version of app is no longer supported!");
-            //? unregister app or set to level NONE
-        } else if (params.isSDLAllowed && !params.isPermissionsConsentNeeded) {
+        if (isAppRevoked) {
+
+
+            RequestToSDL.SDL_GetUserFriendlyMessage(["AppUnsupported"], dataContainer.hmiUILanguage, function(messages){
+                settingsContainer.getUserFriendlyMessageAppPermissionsRevoked("AppUnsupported", messages)
+            });
+        } else if (isSDLAllowed && !isPermissionsConsentNeeded) {
             dataContainer.setCurrentApplication(appId)
             contentLoader.go(
                 Internal.chooseAppStartScreen(
@@ -290,25 +306,81 @@ Item
     function getListOfPermissions_Response (appId, allowedFunctions) {
         console.log("getListOfPermissions_Response enter");
 
-        var app = dataContainer.getApplication(appId),
-                messageCodes = [];
-        app.allowedFunctions = allowedFunctions
+        var app = dataContainer.getApplication(appId);
+        var messageCodes = [];
+        allowedFunctions.forEach(function (x) {
+            app.allowedFunctions.append({name: x.name, id: x.id, allowed: x.allowed});
+            messageCodes.push(x.name);
+        });
 
-        for (var i = 0; i < allowedFunctions.length; i++) {
-            messageCodes.push(allowedFunctions[i].name);
-        }
-
-        RequestToSDL.SDL_GetUserFriendlyMessage(messageCodes, dataContainer.hmiUILanguage, function(params){
-            settingsContainer.onAppPermissionConsent_Notification(appId, params)
+        RequestToSDL.SDL_GetUserFriendlyMessage(messageCodes, dataContainer.hmiUILanguage, function(messages){
+            settingsContainer.onAppPermissionConsent_Notification(appId, messages)
         });
 
         console.log("getListOfPermissions_Response exit");
     }
 
-    function onAppPermissionConsent_Notification (appId, params) {
+    function appPermissionsRevoked (appId, permissions, title) {
+
+        var messageCodes = [];
+
+        permissions.forEach(function (x) {
+            messageCodes.push(x.name);
+        });
+
+        messageCodes.push("AppPermissionsRevoked");
+
+        RequestToSDL.SDL_GetUserFriendlyMessage(messageCodes, dataContainer.hmiUILanguage, function(messages){
+            settingsContainer.getUserFriendlyMessageAppPermissionsRevoked(title, messages)
+        });
+    }
+
+    function getUserFriendlyMessageAppPermissionsRevoked (title, messages) {
+        var tts = "",
+            text = "";
+
+        messages.forEach(function (x) {
+            if (x.tts) {
+                tts += x.tts;
+            }
+            if (x.textBody) {
+                text += x.textBody;
+            }
+        });
+
+        if (tts) {
+            ttsPopUp.activate(tts)
+        }
+
+        userActionPopUp.activate(title, text, null, false)
+
+    }
+
+    function onAppPermissionConsent_Notification (appId, messages) {
         console.log("onAppPermissionConsent_Notification enter");
 
-        onAppPermissionConsentPopUp.activate(params, appId)
+        onAppPermissionConsentPopUp.permissionItems.clear()
+
+        var tts = "";
+
+        for (var i = 0; i < messages.length; i++) {
+            onAppPermissionConsentPopUp.permissionItems.append({
+                                 "messageCode": messages[i].messageCode,
+                                 "label": messages[i].label,
+                                 "textBody": messages[i].textBody,
+                                 "allowed": false
+                             });
+
+            if (messages[i].tts) {
+                tts += x.tts;
+            }
+        }
+
+        if (tts) {
+            ttsPopUp.activate(tts)
+        }
+
+        onAppPermissionConsentPopUp.activate(appId)
 
         console.log("onAppPermissionConsent_Notification enter");
     }

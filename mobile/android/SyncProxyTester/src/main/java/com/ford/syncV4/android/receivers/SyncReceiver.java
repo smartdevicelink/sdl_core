@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.view.KeyEvent;
 
+import com.ford.syncV4.android.service.ProxyService;
+import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.util.logger.Logger;
 
 public class SyncReceiver extends BroadcastReceiver {
@@ -81,6 +83,12 @@ public class SyncReceiver extends BroadcastReceiver {
         if (action.equals(android.media.AudioManager.ACTION_AUDIO_BECOMING_NOISY)) {
             if (mSyncReceiverCallback != null) {
                 mSyncReceiverCallback.onReceive();
+            }
+        }
+
+        if (action.equals(ProxyService.ROOTED_DEVICE_INTENT)) {
+            if (mSyncReceiverCallback != null) {
+                mSyncReceiverCallback.onRootedDevice();
             }
         }
     }

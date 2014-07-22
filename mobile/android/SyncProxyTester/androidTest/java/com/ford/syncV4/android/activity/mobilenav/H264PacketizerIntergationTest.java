@@ -46,7 +46,7 @@ public class H264PacketizerIntergationTest extends ActivityInstrumentationTestCa
         inputStream = new PipedInputStream();
         outputStream = new PipedOutputStream();
         inputStream.connect(outputStream);
-        sut = new H264Packetizer(this, inputStream, (byte) 0, ServiceType.Mobile_Nav);
+        sut = new H264Packetizer(this, inputStream, (byte) 0, ServiceType.Mobile_Nav, false);
     }
 
     // TODO : Should be reconsider

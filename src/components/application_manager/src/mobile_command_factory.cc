@@ -405,7 +405,7 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
           == static_cast<int>(application_manager::MessageType::kResponse)) {
         command.reset(new commands::ScrollableMessageResponse(message));
       } else {
-        command.reset(new commands::ScrollabelMessageRequest(message));
+        command.reset(new commands::ScrollableMessageRequest(message));
       }
       break;
     }

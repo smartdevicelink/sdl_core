@@ -211,6 +211,12 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
         return mobile_apis::Result::DUPLICATE_NAME;
       }
     }
+
+    if (IsWhiteSpaceExist((*it_array))) {
+      LOG4CXX_ERROR(logger_,
+                    "Incoming choice set has contains \t\n \\t \\n");
+      return mobile_apis::Result::INVALID_DATA;
+    }
   }
 
   return mobile_apis::Result::SUCCESS;
@@ -247,6 +253,57 @@ bool CreateInteractionChoiceSetRequest::compareStr(
     const NsSmartDeviceLink::NsSmartObjects::SmartObject& str2) {
 
   return 0 == strcasecmp(str1.asCharArray(), str2.asCharArray());
+}
+
+bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
+    const smart_objects::SmartObject& choice_set) {
+  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::IsWhiteSpaceExist");
+  const char* str = NULL;
+
+  str = choice_set[strings::menu_name].asCharArray();
+  if (!CheckSyntax(str, true)) {
+    LOG4CXX_ERROR(logger_, "Invalid menu_name syntax check failed");
+    return true;
+  }
+
+  if (choice_set.keyExists(strings::secondary_text)) {
+    str = choice_set[strings::secondary_text].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid secondary_text syntax check failed");
+      return true;
+    }
+  }
+
+  if (choice_set.keyExists(strings::tertiary_text)) {
+    str = choice_set[strings::tertiary_text].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid tertiary_text syntax check failed");
+      return true;
+    }
+  }
+
+  if (choice_set.keyExists(strings::vr_commands)) {
+    const size_t len =
+        choice_set[strings::vr_commands].length();
+
+    for (size_t i = 0; i < len; ++i) {
+      str = choice_set[strings::vr_commands][i].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid vr_commands syntax check failed");
+        return true;
+      }
+    }
+  }
+
+  if (choice_set.keyExists(strings::image)) {
+    str = choice_set[strings::image][strings::value].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid image value syntax check failed");
+      return true;
+    }
+  }
+
+  return false;
 }
 
 void CreateInteractionChoiceSetRequest::SendVRAddCommandRequest(
