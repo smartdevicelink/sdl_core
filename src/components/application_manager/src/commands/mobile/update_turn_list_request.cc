@@ -192,7 +192,6 @@ bool UpdateTurnListRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
 
     for (; it_sb != it_sb_end; ++it_sb) {
-
       if ((*it_sb).keyExists(strings::text)) {
         str = (*it_sb)[strings::text].asCharArray();
         if (!CheckSyntax(str, true)) {
@@ -222,7 +221,6 @@ bool UpdateTurnListRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_tl_end = tl_array->end();
 
     for (; it_tl != it_tl_end; ++it_tl) {
-
       if ((*it_tl).keyExists(strings::navigation_text)) {
         str = (*it_tl)[strings::navigation_text].asCharArray();
         if (!CheckSyntax(str, true)) {
