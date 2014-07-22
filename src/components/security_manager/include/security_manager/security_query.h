@@ -66,24 +66,6 @@ class SecurityQuery {
     INVALID_QUERY_ID         = 0xFFFFFF
   };
   /**
-   * \brief InternalErrors is 1 byte identifier of internal error
-   * Handle as binary data in Ford Protocol
-   */
-  enum InternalErrors {
-    ERROR_SUCCESS                    = 0x00,
-    ERROR_INVALID_QUERY_SIZE         = 0x01,  // wrong size of query data
-    ERROR_INVALID_QUERY_ID           = 0x02,  // unknown query id
-    ERROR_NOT_SUPPORTED              = 0x03,  // SDL does not support encryption
-    ERROR_SERVICE_ALREADY_PROTECTED  = 0x04,
-    ERROR_SERVICE_NOT_PROTECTED      = 0x05,  // got handshake or encrypted data
-                                              // for not protected service ???
-    ERROR_DECRYPTION_FAILED          = 0x06,
-    ERROR_ENCRYPTION_FAILED          = 0x07,
-    ERROR_SSL_INVALID_DATA           = 0x08,
-    ERROR_INTERNAL                   = 0xFF,
-    ERROR_UNKWOWN_INTERNAL_ERROR     = 0xFE  // error valeu for testing
-  };
-  /**
    * \brief QueryHeader is 12 byte header of security query
    * Equal Ford Binary Header Definition
    */

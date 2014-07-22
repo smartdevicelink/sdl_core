@@ -276,10 +276,8 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   const std::string app_id = app_policy.first;
 
   AppPermissions permissions_diff(app_id);
-#if defined (EXTENDED_POLICY)
   permissions_diff.priority = policy_table::EnumToJsonString(
                                 app_policy.second.priority);
-#endif
 
   // Check revocation
   if (!IsPredefinedApp(app_policy) && IsAppRevoked(app_policy)) {

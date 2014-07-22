@@ -11,6 +11,7 @@ import com.ford.syncV4.proxy.callbacks.OnError;
 import com.ford.syncV4.service.secure.mutations.MutationManager;
 
 import java.io.IOException;
+import java.util.Hashtable;
 
 public class SecureSessionContext {
 
@@ -56,8 +57,12 @@ public class SecureSessionContext {
             }
 
             @Override
-            public void onHandshakeError(SecurityInternalError error) {
-                InternalProxyMessage proxyMessage = new OnError("Handshake Error " + error, new Exception("Handshake Error " + error));
+            public void onHandshakeError(SecurityInternalError error, Hashtable<String, Object> errorDescription) {
+                String errorMessage = "";
+                if (errorDescription != null){
+                    errorMessage = errorDescription.toString();
+                }
+                InternalProxyMessage proxyMessage = new OnError("Handshake Error " + error+ "; Messagee: " + errorMessage, new Exception("Handshake Error " + error + "; Messagee: " + errorMessage));
                 messageDispatcher.dispatchInternalMessage(proxyMessage);
             }
         });

@@ -739,13 +739,54 @@ void PolicyManagerImpl::SetDeviceInfo(const std::string& device_id,
 #endif
 }
 
+void PolicyManagerImpl::EnsureCorrectPermissionConsent(const FunctionalGroupNames& group_names, PermissionConsent& permissions)
+{
+    std::vector<FunctionalGroupPermission>::iterator group_perm_iter =
+            permissions.group_permissions.begin();
+
+    std::vector<FunctionalGroupPermission>::iterator group_perm_iter_end =
+            permissions.group_permissions.end();
+
+    for(; group_perm_iter != group_perm_iter_end; ++group_perm_iter) {
+
+      const std::uint32_t id = (*group_perm_iter).group_id;
+      FunctionalGroupNames::const_iterator group_name_iter = group_names.find(id);
+
+      if (group_names.end() == group_name_iter) {
+        LOG4CXX_WARN(logger_, "Can't change user consent for unexisted function."
+                     << "\t\nid: " << id
+                     << "\t\nalias: " << (*group_perm_iter).group_alias
+                     << "\t\ngroup name: " << (*group_perm_iter).group_name);
+      }
+      // check if group_alias is not empty string
+      // which means it has user_consent_promt ability
+      else if ((*group_name_iter).second.first.empty()) {
+        LOG4CXX_WARN(logger_, "Specified function is not in user consent group."
+                      << "\t\nid: " << id
+                      << "\t\nalias: " << (*group_perm_iter).group_alias
+                      << "\t\ngroup name: " << (*group_perm_iter).group_name);
+
+        permissions.group_permissions.erase(group_perm_iter);
+      }
+    }
+}
+
 void PolicyManagerImpl::SetUserConsentForApp(
-  const PermissionConsent& permissions) {
+  PermissionConsent& permissions) {
   LOG4CXX_INFO(logger_, "SetUserConsentForApp");
 #if defined (EXTENDED_POLICY)
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (pt_ext) {
+
+    FunctionalGroupNames group_names;
+    if (!pt_ext->GetFunctionalGroupNames(group_names)) {
+      LOG4CXX_WARN(logger_, "Can't get functional group names");
+      return;
+    }
+
+    EnsureCorrectPermissionConsent(group_names, permissions);
+
     // TODO(AOleynik): Change device id to appropriate value (MAC with SHA-256)
     // in parameters
     if (!pt_ext->SetUserPermissionsForApp(permissions)) {
@@ -810,19 +851,10 @@ bool PolicyManagerImpl::GetPriority(const std::string& policy_app_id,
     LOG4CXX_WARN(logger_, "Input priority parameter is null.");
     return false;
   }
-#if defined (EXTENDED_POLICY)
-  PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
-                                .pt_data().get());
-  if (!pt_ext) {
-    LOG4CXX_WARN(logger_, "Can't get priority.");
-    return false;
-  }
 
-  return pt_ext->GetPriority(policy_app_id, priority);
-#else
-  priority->clear();
-  return true;
-#endif
+  return policy_table_.pt_data()->GetPriority(policy_app_id, priority);
+
+
 }
 
 std::vector<UserFriendlyMessage> PolicyManagerImpl::GetUserFriendlyMessages(

@@ -52,14 +52,15 @@
 #include "security_manager/security_query_test.h"
 #endif  // ENABLE_SECURITY
 
+// TODO(EZamakhov): add TM and other test
 #include "media_manager/media_manager_impl_test.h"
 #include "SmartObjectDraftTest.h"
 #include "SmartObjectInvalidTest.h"
 #include "SmartObjectStressTest.h"
 #include "SmartObjectUnitTest.h"
 #include "TSharedPtrTest.h"
-//#include "jsoncpp/json_reader_test.h"
 
+// #include "jsoncpp/json_reader_test.h"
 // #include "json_handler/smart_schema_draft_test.h"
 // #include "SmartObjectConvertionTimeTest.h"
 // #include "request_watchdog/request_watchdog_test.h"
@@ -68,14 +69,7 @@
 // #include "json_handler/formatters/formatter_json_alrpcv2_test.h"
 // #include "json_handler/formatters/formatter_json_rpcv2_test.h"
 
-#ifdef TESTS_WITH_HMI
-#include "hmi_message_handler/hmi_message_handler.h"
-#include "life_cycle.cc"
-#include "rpc/admin_app_test.h"
-#include "utils/threads/thread.h"
-#include "utils/threads/thread_options.h"
-#include "rpc/test_app_manager.h"
-#endif
+
 
 // #define QT_HMI
 
@@ -89,13 +83,6 @@ int main(int argc, char **argv) {
   profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
   INIT_LOGGER("log4cxx.properties");
 
-
-#ifdef TESTS_WITH_HMI
-  test::AdminAppTest app;
-
-  app.Run();
-  sleep(5);
-#endif
   int result = RUN_ALL_TESTS();
 
 #if defined(__cplusplus) and defined(GCOV_ENABLED)
@@ -103,5 +90,6 @@ int main(int argc, char **argv) {
 #endif
 
   sleep(2);
+  DEINIT_LOGGER();
   return result;
 }

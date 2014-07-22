@@ -38,6 +38,7 @@
 namespace policy {
 namespace sql_pt {
 
+extern const std::string kSelectPriority;
 extern const std::string kCreateSchema;
 extern const std::string kDropSchema;
 extern const std::string kDeleteData;

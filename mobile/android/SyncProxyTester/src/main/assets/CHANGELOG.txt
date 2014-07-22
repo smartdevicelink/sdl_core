@@ -1,4 +1,5 @@
 [CW29]
++ SYNC Mobile SDK: added ssl error description listing
 * SYNC Mobile SDK | SyncProxyTester: Added possibility to start several secure sessions.
 
 [CW28]

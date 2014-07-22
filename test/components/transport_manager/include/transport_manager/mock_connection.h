@@ -1,6 +1,6 @@
 /*
  * \file mock_connection.h
- * \brief 
+ * \brief
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -46,7 +46,6 @@ using ::transport_manager::DeviceHandle;
 using ::transport_manager::transport_adapter::Connection;
 using ::transport_manager::transport_adapter::TransportAdapterController;
 using ::transport_manager::ConnectError;
-using ::transport_manager::RawMessageSptr;
 using ::transport_manager::transport_adapter::ThreadedSocketConnection;
 using ::transport_manager::transport_adapter::TransportAdapter;
 namespace test {

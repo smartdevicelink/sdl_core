@@ -131,7 +131,6 @@ void AddCommandRequest::Run() {
     return;
   }
 
-  // Checking add command on contained \t\n \\t \\n
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming add command has contains \t\n \\t \\n");

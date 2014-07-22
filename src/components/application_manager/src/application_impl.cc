@@ -474,11 +474,11 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
     uint32_t cmd_limit = application_manager::MessageHelper::GetAppCommandLimit(
           mobile_app_id_->asString());
 
-    if (!cmd_limit) {
+    if (0 == cmd_limit) {
       return true;
     }
 
-    uint32_t dummy_limit = 1;
+    const uint32_t dummy_limit = 1;
     CommandNumberTimeLimit::iterator it =
         cmd_number_to_time_limits_.find(cmd_id);
     // If no command with cmd_id had been executed yet, just add to limits
@@ -487,7 +487,7 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
       return false;
     }
 
-    uint32_t minute = 60;
+    const uint32_t minute = 60;
 
     TimeToNumberLimit& limit = it->second;
 

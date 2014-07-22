@@ -143,7 +143,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
      * Method updates popup timer when data changes through keyboard
      */
     timerUpdate: function (){
-        if (this.timeout) {
+        if (this.timeout && this.input.value !== null) {
             clearTimeout(this.timer);
             var self = this;
             this.timer = setTimeout(function () {
@@ -258,6 +258,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
         } else {
 
             clearTimeout(this.timer);
+            this.timer = null;
             this.set('active', false);
             SDL.SDLController.VRMove();
             SDL.Keyboard.deactivate();

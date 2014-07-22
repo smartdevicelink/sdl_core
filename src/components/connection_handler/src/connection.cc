@@ -42,7 +42,7 @@
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/ssl_context.h"
-#include "security_manager/security_query.h"
+#include "security_manager/security_manager.h"
 #endif  // ENABLE_SECURITY
 
 /**
@@ -225,11 +225,11 @@ int Connection::SetSSLContext(uint8_t session_id,
   SessionMap::iterator session_it = session_map_.find(session_id);
   if (session_it == session_map_.end()) {
     LOG4CXX_WARN(logger_, "Session not found in this connection!");
-    return security_manager::SecurityQuery::ERROR_INTERNAL;
+    return security_manager::SecurityManager::ERROR_INTERNAL;
   }
   Session &session = session_it->second;
   session.ssl_context = context;
-  return security_manager::SecurityQuery::ERROR_SUCCESS;
+  return security_manager::SecurityManager::ERROR_SUCCESS;
 }
 
 security_manager::SSLContext *Connection::GetSSLContext(
@@ -322,7 +322,8 @@ void Connection::UpdateProtocolVersionSession(
     uint8_t session_id, uint8_t protocol_version) {
   sync_primitives::AutoLock lock(session_map_lock_);
   SessionMap::iterator session_it = session_map_.find(session_id);
-  if (session_it == session_map_.end()) {
+  if (session_map_.end() == session_it) {
+    LOG4CXX_WARN(logger_, "Session not found in this connection!");
     return;
   }
   Session &session = session_it->second;
@@ -331,14 +332,13 @@ void Connection::UpdateProtocolVersionSession(
 
 bool Connection::SupportHeartBeat(uint8_t session_id) {
   sync_primitives::AutoLock lock(session_map_lock_);
-  //version of the protocol for which is supported heartbeat
-  uint8_t pv_support_heartbeat = 3;
   SessionMap::iterator session_it = session_map_.find(session_id);
-  if (session_it == session_map_.end()) {
+  if (session_map_.end() == session_it) {
+    LOG4CXX_WARN(logger_, "Session not found in this connection!");
     return false;
   }
   Session &session = session_it->second;
-  return pv_support_heartbeat == session.protocol_version;
+  return ::protocol_handler::PROTOCOL_VERSION_3 == session.protocol_version;
 }
 
 void Connection::StartHeartBeat(uint8_t session_id) {

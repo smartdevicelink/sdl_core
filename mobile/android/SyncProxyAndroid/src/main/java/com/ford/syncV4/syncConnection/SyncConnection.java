@@ -560,8 +560,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolSessionStarted(byte sessionId, byte version) {
-        mConnectionListener.onProtocolSessionStarted(sessionId, version);
+    public void onProtocolSessionStarted(byte sessionId, byte version, boolean encrypted) {
+        mConnectionListener.onProtocolSessionStarted(sessionId, version, encrypted);
         synchronized (START_PROTOCOL_SESSION_LOCK) {
             START_PROTOCOL_SESSION_LOCK.notify();
         }

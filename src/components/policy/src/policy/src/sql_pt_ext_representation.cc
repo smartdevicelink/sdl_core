@@ -1223,32 +1223,6 @@ bool SQLPTExtRepresentation::GetDefaultHMI(const std::string& policy_app_id,
   return true;
 }
 
-bool SQLPTExtRepresentation::GetPriority(const std::string& policy_app_id,
-    std::string* priority) {
-  LOG4CXX_INFO(logger_, "GetPriority");
-  dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt_ext::kSelectPriority)) {
-    LOG4CXX_INFO(logger_, "Incorrect statement for priority.");
-    return false;
-  }
-
-  query.Bind(0, policy_app_id);
-
-  if (!query.Exec()) {
-    LOG4CXX_INFO(logger_, "Error during select priority.");
-    return false;
-  }
-
-  if (query.IsNull(0)) {
-    priority->clear();
-    return true;
-  }
-
-  priority->assign(query.GetString(0));
-
-  return true;
-}
-
 bool SQLPTExtRepresentation::CountUnconsentedGroups(
   const std::string& policy_app_id,
   const std::string& device_id,

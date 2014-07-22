@@ -206,7 +206,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
-  if (app->IsCommandLimitsExceeded(
+  if (mobile_apis::HMILevel::HMI_BACKGROUND == app->hmi_level() &&
+      app->IsCommandLimitsExceeded(
         static_cast<mobile_apis::FunctionID::eType>(function_id()),
         application_manager::TLimitSource::POLICY_TABLE)) {
     LOG4CXX_ERROR(logger_, "Alert frequency is too high.");
@@ -383,7 +384,6 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
     smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
 
     for (; it_sb != it_sb_end; ++it_sb) {
-
       if ((*it_sb).keyExists(strings::text)) {
         str = (*it_sb)[strings::text].asCharArray();
         if (!CheckSyntax(str, true)) {

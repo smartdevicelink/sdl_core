@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "transport_manager/transport_manager_impl.h"
+
 #include <pthread.h>
 #include <stdint.h>
 #include <cstring>
@@ -39,16 +41,15 @@
 #include <limits>
 #include <functional>
 #include <sstream>
+
 #include "utils/macro.h"
 #include "utils/logger.h"
-#include "protocol_handler/raw_message.h"
-#include "protocol_handler/protocol_packet.h"
-#include "transport_manager/transport_manager_impl.h"
+#include "transport_manager/common.h"
 #include "transport_manager/transport_manager_listener.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
-#include "config_profile/profile.h"
 #include "transport_manager/transport_adapter/transport_adapter_event.h"
+#include "config_profile/profile.h"
 
 using ::transport_manager::transport_adapter::TransportAdapter;
 
@@ -56,7 +57,8 @@ namespace transport_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-TransportManagerImpl::Connection TransportManagerImpl::convert(TransportManagerImpl::ConnectionInternal& p) {
+TransportManagerImpl::Connection TransportManagerImpl::convert(
+    const TransportManagerImpl::ConnectionInternal& p) {
   TransportManagerImpl::Connection c;
   c.application = p.application;
   c.device = p.device;
@@ -164,7 +166,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
   for (EventQueue::const_iterator it = event_queue_.begin();
     it != event_queue_.end();
     ++it) {
-    if (it->application_id() == static_cast<ApplicationHandle>(cid)) {
+    if (it->application_id == static_cast<ApplicationHandle>(cid)) {
       ++messages_count;
     }
   }
@@ -242,7 +244,7 @@ int TransportManagerImpl::Stop() {
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::SendMessageToDevice(const RawMessageSptr message) {
+int TransportManagerImpl::SendMessageToDevice(const RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "Send message to device called with arguments "
                             << message.get());
   if (false == this->is_initialized_) {
@@ -270,9 +272,8 @@ int TransportManagerImpl::SendMessageToDevice(const RawMessageSptr message) {
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::ReceiveEventFromDevice(
-    const TransportAdapterEvent& event) {
-  if (false == this->is_initialized_) {
+int TransportManagerImpl::ReceiveEventFromDevice(const TransportAdapterEvent& event) {
+  if (!is_initialized_) {
     LOG4CXX_ERROR(logger_, "TM is not initialized.");
     return E_TM_IS_NOT_INITIALIZED;
   }
@@ -313,7 +314,7 @@ int TransportManagerImpl::AddTransportAdapter(
   return E_SUCCESS;
 }
 
-int TransportManagerImpl::SearchDevices(void) {
+int TransportManagerImpl::SearchDevices() {
   if (!this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TM is not initialized");
     return E_TM_IS_NOT_INITIALIZED;
@@ -330,8 +331,7 @@ int TransportManagerImpl::SearchDevices(void) {
     TransportAdapter::Error scanResult = (*it)->SearchDevices();
     if (transport_adapter::TransportAdapter::OK == scanResult) {
       success_occured = true;
-    }
-    else {
+    } else {
       LOG4CXX_ERROR(logger_, "Transport Adapter search failed "
                                  << *it << "[" << (*it)->GetDeviceType()
                                  << "]");
@@ -363,7 +363,7 @@ int TransportManagerImpl::SearchDevices(void) {
     : E_ADAPTERS_FAIL;
 }
 
-int TransportManagerImpl::Init(void) {
+int TransportManagerImpl::Init() {
   LOG4CXX_INFO(logger_, "Init is called");
   all_thread_active_ = true;
 
@@ -421,7 +421,7 @@ int TransportManagerImpl::Visibility(const bool& on_off) const {
 
 void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
   std::set<DeviceInfo> old_devices;
-  for (DeviceList::iterator it = device_list_.begin();
+  for (DeviceInfoList::iterator it = device_list_.begin();
        it != device_list_.end();) {
     if (it->first == ta) {
       old_devices.insert(it->second);
@@ -432,8 +432,8 @@ void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
   }
 
   std::set<DeviceInfo> new_devices;
-  const transport_adapter::DeviceList dev_list = ta->GetDeviceList();
-  for (transport_adapter::DeviceList::const_iterator it = dev_list.begin();
+  const DeviceList dev_list = ta->GetDeviceList();
+  for (DeviceList::const_iterator it = dev_list.begin();
        it != dev_list.end(); ++it) {
     DeviceHandle device_handle = converter_.UidToHandle(*it);
     DeviceInfo info(device_handle, *it, ta->DeviceName(*it));
@@ -445,7 +445,7 @@ void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
   std::set_difference(new_devices.begin(), new_devices.end(),
     old_devices.begin(), old_devices.end(),
     std::inserter(added_devices, added_devices.begin()));
-  for(std::set<DeviceInfo>::const_iterator it = added_devices.begin();
+  for (std::set<DeviceInfo>::const_iterator it = added_devices.begin();
     it != added_devices.end();
     ++it) {
     RaiseEvent(&TransportManagerListener::OnDeviceAdded, *it);
@@ -456,14 +456,14 @@ void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
     new_devices.begin(), new_devices.end(),
     std::inserter(removed_devices, removed_devices.begin()));
 
-  for(std::set<DeviceInfo>::const_iterator it = removed_devices.begin();
+  for (std::set<DeviceInfo>::const_iterator it = removed_devices.begin();
     it != removed_devices.end();
     ++it) {
     RaiseEvent(&TransportManagerListener::OnDeviceRemoved, *it);
   }
 }
 
-void TransportManagerImpl::PostMessage(const RawMessageSptr message) {
+void TransportManagerImpl::PostMessage(const RawMessagePtr message) {
   LOG4CXX_INFO(logger_, "Post message called serial number " << message.get());
 
 #ifdef USE_RWLOCK
@@ -481,7 +481,7 @@ void TransportManagerImpl::PostMessage(const RawMessageSptr message) {
   LOG4CXX_INFO(logger_, "Post message complete");
 }
 
-void TransportManagerImpl::RemoveMessage(const RawMessageSptr message) {
+void TransportManagerImpl::RemoveMessage(const RawMessagePtr message) {
   // TODO: Reconsider necessity of this method, remove if it's useless,
   //       make to work otherwise.
   //       2013-08-21 dchmerev@luxoft.com
@@ -506,7 +506,6 @@ void TransportManagerImpl::PostEvent(const TransportAdapterEvent& event) {
 #else
   pthread_mutex_lock(&event_queue_mutex_);
 #endif
-  RawMessageSptr data = event.data();
   event_queue_.push_back(event);
   pthread_cond_signal(&device_listener_thread_wakeup_);
 #ifdef USE_RWLOCK
@@ -539,7 +538,8 @@ void TransportManagerImpl::RemoveConnection(uint32_t id) {
 
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
     const ConnectionUID& id) {
-  for (std::vector<ConnectionInternal>::iterator  it = connections_.begin(); it != connections_.end(); ++it) {
+  for (std::vector<ConnectionInternal>::iterator it = connections_.begin();
+       it != connections_.end(); ++it) {
     if (it->id == id) {
       return &*it;
     }
@@ -549,7 +549,8 @@ TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
 
 TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
     const DeviceUID& device, const ApplicationHandle& application) {
-  for (std::vector<ConnectionInternal>::iterator it = connections_.begin(); it != connections_.end(); ++it) {
+  for (std::vector<ConnectionInternal>::iterator it = connections_.begin();
+       it != connections_.end(); ++it) {
     if (it->device == device && it->application == application) {
       return &*it;
     }
@@ -558,9 +559,9 @@ TransportManagerImpl::ConnectionInternal* TransportManagerImpl::GetConnection(
 }
 
 void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
-  const transport_adapter::DeviceList device_list = ta->GetDeviceList();
+  const DeviceList device_list = ta->GetDeviceList();
   LOG4CXX_INFO(logger_, "DEVICE_LIST_UPDATED " << device_list.size());
-  for (transport_adapter::DeviceList::const_iterator it = device_list.begin();
+  for (DeviceList::const_iterator it = device_list.begin();
        it != device_list.end(); ++it) {
     device_to_adapter_map_.insert(std::make_pair(*it, ta));
     DeviceHandle device_handle = converter_.UidToHandle(*it);
@@ -569,14 +570,14 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
   }
   UpdateDeviceList(ta);
   std::vector<DeviceInfo> device_infos;
-  for (DeviceList::const_iterator it = device_list_.begin();
+  for (DeviceInfoList::const_iterator it = device_list_.begin();
        it != device_list_.end(); ++it) {
     device_infos.push_back(it->second);
   }
   RaiseEvent(&TransportManagerListener::OnDeviceListUpdated, device_infos);
 }
 
-void TransportManagerImpl::EventListenerThread(void) {
+void TransportManagerImpl::EventListenerThread() {
 #ifndef USE_RWLOCK
   pthread_mutex_lock(&event_queue_mutex_);
 #endif
@@ -587,25 +588,17 @@ void TransportManagerImpl::EventListenerThread(void) {
       event_queue_rwlock_.AcquireForReading();
 #endif
       LOG4CXX_INFO(logger_, "Event listener queue pushed to process events");
-      EventQueue::iterator current = event_queue_.begin();
-      TransportAdapter* ta = current->transport_adapter();
-      ApplicationHandle app_handle = current->application_id();
-      DeviceUID device_id = current->device_uid();
-      DeviceHandle device_handle;
-      BaseError* error = current->event_error();
-      RawMessageSptr data = current->data();
-      int event_type = current->event_type();
-      event_queue_.erase(current);
+      EventQueue::iterator current_it = event_queue_.begin();
+      const TransportAdapterEvent event = *(current_it);
+      event_queue_.erase(current_it);
 #ifdef USE_RWLOCK
       event_queue_rwlock_.Release();
 #else
       pthread_mutex_unlock(&event_queue_mutex_);
 #endif
-      transport_adapter::DeviceList dev_list;
-      ConnectionInternal* connection = GetConnection(device_id, app_handle);
-      std::vector<DeviceInfo>::iterator device_info_iterator;
+      ConnectionInternal* connection = GetConnection(event.device_uid, event.application_id);
 
-      switch (event_type) {
+      switch (event.event_type) {
         case TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE: {
           LOG4CXX_INFO(logger_, "Event ON_SEARCH_DONE");
           RaiseEvent(&TransportManagerListener::OnScanDevicesFinished);
@@ -615,13 +608,13 @@ void TransportManagerImpl::EventListenerThread(void) {
           LOG4CXX_INFO(logger_, "Event ON_SEARCH_FAIL");
           // error happened in real search process (external error)
           RaiseEvent(&TransportManagerListener::OnScanDevicesFailed,
-                     *static_cast<SearchDeviceError*>(error));
+                     *static_cast<SearchDeviceError*>(event.event_error.get()));
           break;
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED
             : {
           LOG4CXX_INFO(logger_, "Event ON_DEVICE_LIST_UPDATED");
-          OnDeviceListUpdated(ta);
+          OnDeviceListUpdated(event.transport_adapter);
           break;
         }
         case TransportAdapterListenerImpl::ON_FIND_NEW_APPLICATIONS_REQUEST: {
@@ -631,29 +624,30 @@ void TransportManagerImpl::EventListenerThread(void) {
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_DONE: {
           LOG4CXX_INFO(logger_, "Event ON_CONNECT_DONE");
-          device_handle = converter_.UidToHandle(device_id);
-          AddConnection(ConnectionInternal(this, ta, ++connection_id_counter_,
-                                           device_id, app_handle,
+          const DeviceHandle device_handle = converter_.UidToHandle(event.device_uid);
+          AddConnection(ConnectionInternal(this, event.transport_adapter, ++connection_id_counter_,
+                                           event.device_uid, event.application_id,
                                            device_handle));
           RaiseEvent(
               &TransportManagerListener::OnConnectionEstablished,
-              DeviceInfo(device_handle, device_id, ta->DeviceName(device_id)),
-              connection_id_counter_);
+              DeviceInfo(device_handle, event.device_uid,
+                         event.transport_adapter->DeviceName(event.device_uid)),
+                         connection_id_counter_);
           break;
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL: {
           LOG4CXX_INFO(logger_, "Event ON_CONNECT_FAIL");
           RaiseEvent(&TransportManagerListener::OnConnectionFailed,
-                     DeviceInfo(converter_.UidToHandle(device_id), device_id,
-                                ta->DeviceName(device_id)),
+                     DeviceInfo(converter_.UidToHandle(event.device_uid), event.device_uid,
+                                event.transport_adapter->DeviceName(event.device_uid)),
                      ConnectError());
           break;
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE: {
           LOG4CXX_INFO(logger_, "Event ON_DISCONNECT_DONE");
           if (connection == NULL) {
-            LOG4CXX_ERROR(logger_, "Connection ('" << device_id << ", "
-                                                   << app_handle
+            LOG4CXX_ERROR(logger_, "Connection ('" << event.device_uid << ", "
+                                                   << event.application_id
                                                    << ") not found");
             break;
           }
@@ -664,7 +658,7 @@ void TransportManagerImpl::EventListenerThread(void) {
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_FAIL: {
           LOG4CXX_INFO(logger_, "Event ON_DISCONNECT_FAIL");
-          device_handle = converter_.UidToHandle(device_id);
+          const DeviceHandle device_handle = converter_.UidToHandle(event.device_uid);
           RaiseEvent(&TransportManagerListener::OnDisconnectFailed,
                      device_handle, DisconnectDeviceError());
           break;
@@ -672,13 +666,13 @@ void TransportManagerImpl::EventListenerThread(void) {
         case TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE: {
           LOG4CXX_INFO(logger_, "Event ON_SEND_DONE");
           if (connection == NULL) {
-            LOG4CXX_ERROR(logger_, "Connection ('" << device_id << ", "
-                                                   << app_handle
+            LOG4CXX_ERROR(logger_, "Connection ('" << event.device_uid << ", "
+                                                   << event.application_id
                                                    << ") not found");
             break;
           }
-          RaiseEvent(&TransportManagerListener::OnTMMessageSend, data);
-          this->RemoveMessage(data);
+          RaiseEvent(&TransportManagerListener::OnTMMessageSend, event.event_data);
+          this->RemoveMessage(event.event_data);
           if (connection->shutDown && --connection->messages_count == 0) {
             connection->timer->stop();
             connection->transport_adapter->Disconnect(connection->device,
@@ -689,8 +683,8 @@ void TransportManagerImpl::EventListenerThread(void) {
         case TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL: {
           LOG4CXX_INFO(logger_, "Event ON_SEND_FAIL");
           if (connection == NULL) {
-            LOG4CXX_ERROR(logger_, "Connection ('" << device_id << ", "
-                                                   << app_handle
+            LOG4CXX_ERROR(logger_, "Connection ('" << event.device_uid << ", "
+                                                   << event.application_id
                                                    << ") not found");
             break;
           }
@@ -700,9 +694,8 @@ void TransportManagerImpl::EventListenerThread(void) {
           LOG4CXX_ERROR(logger_, "Transport adapter failed to send data");
           // TODO(YK): potential error case -> thread unsafe
           // update of message content
-          data->set_waiting(true);
-          if (data.valid()) {
-            data->set_waiting(true);
+          if (event.event_data.valid()) {
+            event.event_data->set_waiting(true);
           } else {
             LOG4CXX_ERROR(logger_, "Data is invalid");
           }
@@ -711,31 +704,31 @@ void TransportManagerImpl::EventListenerThread(void) {
         case TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE: {
           LOG4CXX_INFO(logger_, "Event ON_RECEIVED_DONE");
           if (connection == NULL) {
-            LOG4CXX_ERROR(logger_, "Connection ('" << device_id << ", "
-                                                   << app_handle
+            LOG4CXX_ERROR(logger_, "Connection ('" << event.device_uid << ", "
+                                                   << event.application_id
                                                    << ") not found");
             break;
           }
-          data->set_connection_key(connection->id);
+          event.event_data->set_connection_key(connection->id);
 #ifdef TIME_TESTER
           if (metric_observer_) {
-            metric_observer_->StopRawMsg(data.get());
+            metric_observer_->StopRawMsg(event.event_data.get());
           }
 #endif  // TIME_TESTER
-          RaiseEvent(&TransportManagerListener::OnTMMessageReceived, data);
+          RaiseEvent(&TransportManagerListener::OnTMMessageReceived, event.event_data);
           break;
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_FAIL: {
           LOG4CXX_INFO(logger_, "Event ON_RECEIVED_FAIL");
           if (connection == NULL) {
-            LOG4CXX_ERROR(logger_, "Connection ('" << device_id << ", "
-                                                   << app_handle
+            LOG4CXX_ERROR(logger_, "Connection ('" << event.device_uid << ", "
+                                                   << event.application_id
                                                    << ") not found");
             break;
           }
 
           RaiseEvent(&TransportManagerListener::OnTMMessageReceiveFailed,
-                     connection->id, *static_cast<DataReceiveError*>(error));
+                     connection->id, *static_cast<DataReceiveError*>(event.event_error.get()));
           break;
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR
@@ -749,17 +742,16 @@ void TransportManagerImpl::EventListenerThread(void) {
           if (connection) {
             RaiseEvent(&TransportManagerListener::OnUnexpectedDisconnect,
                        connection->id,
-                       *static_cast<CommunicationError*>(error));
+                       *static_cast<CommunicationError*>(event.event_error.get()));
             RemoveConnection(connection->id);
           } else {
-            LOG4CXX_ERROR(logger_, "Connection ('" << device_id << ", "
-                                                   << app_handle
+            LOG4CXX_ERROR(logger_, "Connection ('" << event.device_uid << ", "
+                                                   << event.application_id
                                                    << ") not found");
           }
           break;
         }
       }  // switch
-      delete error;
 #ifndef USE_RWLOCK
       pthread_mutex_lock(&event_queue_mutex_);
 #endif
@@ -789,7 +781,7 @@ void* TransportManagerImpl::MessageQueueStartThread(void* data) {
   return 0;
 }
 
-void TransportManagerImpl::MessageQueueThread(void) {
+void TransportManagerImpl::MessageQueueThread() {
   LOG4CXX_INFO(logger_, "Message queue thread started");
 
 #ifndef USE_RWLOCK
@@ -813,7 +805,7 @@ void TransportManagerImpl::MessageQueueThread(void) {
 #endif
         break;
       }
-      RawMessageSptr active_msg = *it;
+      RawMessagePtr active_msg = *it;
 #ifdef USE_RWLOCK
       message_queue_rwlock_.Release();
 #else
@@ -853,9 +845,9 @@ void TransportManagerImpl::MessageQueueThread(void) {
             active_msg->set_waiting(true);
           } else {
             LOG4CXX_ERROR(logger_, "Data sent error");
-	    RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
-	             DataSendError("Send failed - message removed"),
-		     active_msg);
+      RaiseEvent(&TransportManagerListener::OnTMMessageSendFailed,
+               DataSendError("Send failed - message removed"),
+         active_msg);
             message_queue_.remove(active_msg);
           }
         }

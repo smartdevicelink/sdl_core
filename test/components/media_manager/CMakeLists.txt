@@ -2,7 +2,6 @@ include_directories (
   ${GMOCK_INCLUDE_DIRECTORY}
   ../../../src/components/media_manager/include
   ../../../src/components/utils/include/
-  ../../../src/components/protocol_handler/include/
   ../../../test/components/media_manager/include
     /usr/lib/i386-linux-gnu/glib-2.0/include
     /usr/lib/x86_64-linux-gnu/glib-2.0/include/

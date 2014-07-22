@@ -143,6 +143,10 @@ RESULT_CODE ProtocolPacket::appendData(uint8_t *chunkData,
   return RESULT_FAIL;
 }
 
+size_t ProtocolPacket::packet_size() const {
+  return packet_header_.dataSize;
+}
+
 RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t *message,
                                               uint32_t messageSize) {
   uint8_t offset = 0;

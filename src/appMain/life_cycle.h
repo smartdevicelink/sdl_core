@@ -66,7 +66,7 @@
 #ifdef ENABLE_SECURITY
 namespace security_manager {
 class CryptoManager;
-class SecurityManager;
+class SecurityManagerImpl;
 }  // namespace security_manager
 #endif  // ENABLE_SECURITY
 

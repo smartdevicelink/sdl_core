@@ -74,6 +74,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     virtual EndpointUrls GetUpdateUrls(int service_type);
 
     virtual int GetNotificationsNumber(const std::string& priority);
+    virtual bool GetPriority(const std::string& policy_app_id,
+                             std::string* priority);
     InitResult Init();
     bool Close();
     bool Clear();

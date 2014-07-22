@@ -89,20 +89,12 @@ bool PerformInteractionRequest::Init() {
 void PerformInteractionRequest::Run() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::Run");
 
-  // timer_.start(2);
-
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    return;
-  }
-
-  if (0 != app->is_perform_interaction_active()) {
-    LOG4CXX_INFO(logger_, "Another perform interaction is running!");
-    SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
@@ -128,7 +120,6 @@ void PerformInteractionRequest::Run() {
     }
   }
 
-  // Checking perform interaction on contained \t\n \\t \\n
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming perform interaction has contains \t\n \\t \\n");
@@ -136,16 +127,12 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
-  uint32_t correlation_id =
-      (*message_)[strings::params][strings::correlation_id].asUInt();
-
   int32_t mode =
       (*message_)[strings::msg_params][strings::interaction_mode].asInt();
 
   app->set_perform_interaction_mode(mode);
 
-  interaction_mode_ =
-      static_cast<mobile_apis::InteractionMode::eType>(mode);
+  interaction_mode_ = static_cast<mobile_apis::InteractionMode::eType>(mode);
 
   switch (interaction_mode_) {
     case mobile_apis::InteractionMode::BOTH: {
@@ -162,7 +149,7 @@ void PerformInteractionRequest::Run() {
         return;
       }
 
-      app->set_perform_interaction_active(correlation_id);
+      app->set_perform_interaction_active(correlation_id());
       SendVRPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
@@ -182,7 +169,7 @@ void PerformInteractionRequest::Run() {
         return;
       }
 
-      app->set_perform_interaction_active(correlation_id);
+      app->set_perform_interaction_active(correlation_id());
       SendVRPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
@@ -198,7 +185,7 @@ void PerformInteractionRequest::Run() {
       }
 
       // TODO(DK): need to implement timeout
-      app->set_perform_interaction_active(correlation_id);
+      app->set_perform_interaction_active(correlation_id());
       SendVRPerformInteractionRequest(app);
       SendUIPerformInteractionRequest(app);
       break;
@@ -367,36 +354,34 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
   LOG4CXX_INFO(logger_,
                "PerformInteractionRequest::ProcessPerformInteractionResponse");
   ui_response_recived = true;
-  DisablePerformInteraction();
 
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = message[strings::msg_params];
 
   bool result = false;
-  int32_t hmi_response_code =
-      message[strings::params][hmi_response::code].asInt();
-  if ((hmi_apis::Common_Result::SUCCESS ==
-      static_cast<hmi_apis::Common_Result::eType>(hmi_response_code)) ||
-      (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-          static_cast<hmi_apis::Common_Result::eType>(hmi_response_code))) {
+  mobile_apis::Result::eType result_code =
+            GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+                message[strings::params][hmi_response::code].asUInt()));
+  if ((mobile_apis::Result::SUCCESS == result_code) ||
+      (mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code)) {
     if (message[strings::msg_params].keyExists(strings::manual_text_entry)) {
       msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_KEYBOARD;
     } else {
       msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_MENU;
     }
+    DisablePerformInteraction();
     result = true;
+  } else if (mobile_apis::Result::REJECTED == result_code) {
+    LOG4CXX_ERROR(logger_, "Request was rejected");
   }
 
   const char* return_info = NULL;
-  mobile_apis::Result::eType result_code =
-      static_cast<mobile_apis::Result::eType>(hmi_response_code);
   if (result) {
-    if (hmi_apis::Common_Result::UNSUPPORTED_RESOURCE ==
-        hmi_apis::Common_Result::eType(hmi_response_code)) {
+    if (mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) {
       result_code = mobile_apis::Result::WARNINGS;
-      return_info = std::string(
-          "Unsupported phoneme type sent in any item").c_str();
+      return_info =
+          std::string("Unsupported phoneme type sent in any item").c_str();
     }
   }
 
@@ -546,7 +531,7 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
           }
         }
       } else {
-        LOG4CXX_ERROR(logger_, "Can't found choiset!")
+        LOG4CXX_ERROR(logger_, "Can't found choiceSet!")
       }
     }
   }
@@ -582,8 +567,8 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
                  true);
 }
 
-void PerformInteractionRequest::DeleteParameterFromTTSChunk
-(smart_objects::SmartObject* array_tts_chunk) {
+void PerformInteractionRequest::DeleteParameterFromTTSChunk(
+    smart_objects::SmartObject* array_tts_chunk) {
   int32_t length = array_tts_chunk->length();
   for (int32_t i = 0; i < length; ++i) {
     array_tts_chunk[i].erase(strings::type);
@@ -740,13 +725,12 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
   LOG4CXX_INFO(logger_, "PerformInteractionRequest::IsWhiteSpaceExist");
   const char* str = NULL;
 
-  if ((*message_)[strings::msg_params].keyExists(strings::initial_text)) {
-    str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
-    if (!CheckSyntax(str, true)) {
-      LOG4CXX_ERROR(logger_, "Invalid initial_text syntax check failed");
-      return true;
-    }
+  str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
+  if (!CheckSyntax(str, true)) {
+    LOG4CXX_ERROR(logger_, "Invalid initial_text syntax check failed");
+    return true;
   }
+
 
   if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
     const smart_objects::SmartArray* ip_array =

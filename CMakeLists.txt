@@ -46,7 +46,6 @@ option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 option(TIME_TESTER "Enable profiling time test util" ON)
-option(BUILD_TESTS_WITH_HMI "Possibility to build and run HMI tests" OFF)
 option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SECURITY "Security Ford protocol protection" ON)
@@ -158,6 +157,11 @@ if (ENABLE_GCOV)
   add_definitions(-DGCOV_ENABLED)
 endif()
 set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
+
+#include_directories(
+#  ../../../src/components/policy/
+#  ../../../src/components/rpc_base/
+#)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-DOS_LINUX)
@@ -342,6 +346,12 @@ if (HMIADAPTER STREQUAL "mqueue")
     add_definitions(-DHMI_JSON_API)
 endif()
 
+# --- Directory with SDL interfaces, global types and ProtocolLib component
+include_directories(
+  ${CMAKE_SOURCE_DIR}/src/components/include
+  ${CMAKE_SOURCE_DIR}/src/components/protocol/include
+)
+
 # --- 3rd party libs
 set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party)
 set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/3rd_party)
@@ -386,9 +396,6 @@ add_subdirectory(./src/appMain)
 
 # Building tests
 if(BUILD_TESTS)
-    if(BUILD_TESTS_WITH_HMI)
-      add_definitions(-DTESTS_WITH_HMI)
-    endif()
     enable_testing()
     include(Dart)
     # Framework GoogleTest is also integrated together gmock

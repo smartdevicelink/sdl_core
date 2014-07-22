@@ -65,7 +65,6 @@ extern const std::string kSelectMetaParams;
 extern const std::string kCountAppLevel;
 extern const std::string kUpdateGroupPermissions;
 extern const std::string kSelectDefaultHmi;
-extern const std::string kSelectPriority;
 extern const std::string kInsertApplication;
 extern const std::string kSelectFriendlyMsg;
 extern const std::string kSelectAppGroupsId;

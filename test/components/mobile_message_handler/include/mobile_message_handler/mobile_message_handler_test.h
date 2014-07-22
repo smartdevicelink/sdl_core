@@ -80,7 +80,7 @@ class MobileMessageHandlerTester :
      * \brief Method for sending message to Mobile Application.
      * \param message RawMessage with params to be sent to Mobile App.
      */
-    void SendMessageToMobileApp(const transport_manager::RawMessageSptr& message) {}
+    void SendMessageToMobileApp(const RawMessagePtr& message) {}
 
     void SendFramesNumber(int connection_key, int number_of_frames) {}
 
@@ -103,7 +103,7 @@ class MobileMessageHandlerTester :
       cond_var.NotifyOne();
     }
 
-    void sendMessageToMobileApp(const transport_manager::RawMessageSptr message) {
+    void sendMessageToMobileApp(const RawMessagePtr message) {
       //      mmh_->OnMessageReceived(message);//todo: YK uncoment sometime
     }
 

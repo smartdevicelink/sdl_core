@@ -533,6 +533,26 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
       }
     }
 
+    // vr check
+    if (msg_params.keyExists(strings::vr_synonyms)) {
+      const std::vector<smart_objects::SmartObject>* new_vr =
+          msg_params[strings::vr_synonyms].asArray();
+
+      std::vector<smart_objects::SmartObject>::const_iterator it_vr =
+          new_vr->begin();
+
+      std::vector<smart_objects::SmartObject>::const_iterator it_vr_End =
+          new_vr->end();
+
+      for (; it_vr != it_vr_End; ++it_vr) {
+        std::string vr_synonym = it_vr->asString();
+        if (!strcasecmp(cur_name.c_str(), vr_synonym.c_str())) {
+          LOG4CXX_ERROR(logger_, "Some VR synonyms are known already.");
+          return mobile_apis::Result::DUPLICATE_NAME;
+        }
+      }
+    }  // end vr check
+
   }  // application for end
 
   return mobile_apis::Result::SUCCESS;
@@ -764,6 +784,108 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
         LOG4CXX_ERROR(logger_, "Invalid tts_name syntax check failed");
         return true;
       }
+    }
+  }
+
+  if ((*message_)[strings::msg_params].
+      keyExists(strings::ngn_media_screen_app_name)) {
+    str = (*message_)[strings::msg_params]
+                      [strings::ngn_media_screen_app_name].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_,
+                    "Invalid ngn_media_screen_app_name syntax check failed");
+      return true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_synonyms)) {
+    const smart_objects::SmartArray* vs_array =
+        (*message_)[strings::msg_params][strings::vr_synonyms].asArray();
+
+    smart_objects::SmartArray::const_iterator it_vs = vs_array->begin();
+    smart_objects::SmartArray::const_iterator it_vs_end = vs_array->end();
+
+    for (; it_vs != it_vs_end; ++it_vs) {
+      str = (*it_vs).asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid vr_synonyms syntax check failed");
+        return true;
+      }
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
+    str = (*message_)[strings::msg_params][strings::hash_id].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid hash_id syntax check failed");
+      return true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::device_info)) {
+
+    if ((*message_)[strings::msg_params][strings::device_info].
+                                         keyExists(strings::hardware)) {
+      str = (*message_)[strings::msg_params]
+                  [strings::device_info][strings::hardware].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_,
+                      "Invalid device_info hardware syntax check failed");
+        return true;
+      }
+    }
+
+    if ((*message_)[strings::msg_params][strings::device_info].
+                                         keyExists(strings::firmware_rev)) {
+      str = (*message_)[strings::msg_params]
+                  [strings::device_info][strings::firmware_rev].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_,
+                      "Invalid device_info firmware_rev syntax check failed");
+        return true;
+      }
+    }
+
+    if ((*message_)[strings::msg_params][strings::device_info].
+                                         keyExists(strings::os)) {
+      str = (*message_)[strings::msg_params]
+                  [strings::device_info][strings::os].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_,
+                      "Invalid device_info os syntax check failed");
+        return true;
+      }
+    }
+
+    if ((*message_)[strings::msg_params][strings::device_info].
+                                         keyExists(strings::os_version)) {
+      str = (*message_)[strings::msg_params]
+                  [strings::device_info][strings::os_version].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_,
+                      "Invalid device_info os_version syntax check failed");
+        return true;
+      }
+    }
+
+    if ((*message_)[strings::msg_params][strings::device_info].
+                                         keyExists(strings::carrier)) {
+      str = (*message_)[strings::msg_params]
+                  [strings::device_info][strings::carrier].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_,
+                      "Invalid device_info carrier syntax check failed");
+        return true;
+      }
+    }
+
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
+    str = (*message_)[strings::msg_params][strings::app_id].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid app_id syntax check failed");
+      return true;
     }
   }
   return false;
