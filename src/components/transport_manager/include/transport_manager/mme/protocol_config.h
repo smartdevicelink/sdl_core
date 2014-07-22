@@ -45,16 +45,16 @@ class ProtocolConfig {
 
   static const ProtocolNameContainer& LegacyProtocolNames();
   static const ProtocolNameContainer& HubProtocolNames();
-  static const ProtocolNameContainer& PoolProtocolNames();
+  static const ProtocolNameContainer& IAPPoolProtocolNames();
+  static const ProtocolNameContainer& IAP2PoolProtocolNames();
 
  private:
   static const ProtocolNameContainer ReadLegacyProtocolNames();
   static const ProtocolNameContainer ReadHubProtocolNames();
-  static const ProtocolNameContainer ReadPoolProtocolNames();
+  static const ProtocolNameContainer ReadIAPPoolProtocolNames();
+  static const ProtocolNameContainer ReadIAP2PoolProtocolNames();
 
-  static const ProtocolNameContainer ReadProtocolNames(const std::string& section_name);
-
-  static const char* config_file_name_;
+  static const ProtocolNameContainer ReadProtocolNames(const std::string& config_file_name, const std::string& section_name);
 };
 
 }  // namespace transport_adapter

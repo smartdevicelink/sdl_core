@@ -80,7 +80,7 @@ bool IAP2Device::Init() {
   }
 
   int pool_index = 0;
-  const ProtocolConfig::ProtocolNameContainer& pool_protocol_names = ProtocolConfig::PoolProtocolNames();
+  const ProtocolConfig::ProtocolNameContainer& pool_protocol_names = ProtocolConfig::IAP2PoolProtocolNames();
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = pool_protocol_names.begin(); i != pool_protocol_names.end(); ++i) {
     std::string protocol_name = *i;
     free_protocol_name_pool_.insert(std::make_pair(protocol_name, ++pool_index));
