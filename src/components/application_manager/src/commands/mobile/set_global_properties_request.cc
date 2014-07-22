@@ -425,7 +425,6 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_vh_end = vh_array->end();
 
     for (; it_vh != it_vh_end; ++it_vh) {
-
       str = (*it_vh)[strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
         LOG4CXX_ERROR(logger_, "Invalid vr_help text syntax check failed");
@@ -470,7 +469,6 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 
 
   if (msg_params.keyExists(strings::keyboard_properties)) {
-
     if (msg_params[strings::keyboard_properties].
         keyExists(strings::limited_character_list)) {
 

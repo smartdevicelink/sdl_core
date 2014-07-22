@@ -9,7 +9,7 @@ enum ResultCode {
   SUCCES = 0,
   MISSED_FILE_NAME,
   READ_ERROR,
-  PARCE_ERROR
+  PARSE_ERROR
 };
 
 void help() {
@@ -37,19 +37,19 @@ int main(int argc, char** argv) {
   Json::Value value;
   bool parce_result = reader.parse(json_string, value);
   if (false == parce_result) {
-    std::cout << "Json parce fails"<<std::endl;
-    exit(PARCE_ERROR);
+    std::cout << "Json parce fails" << std::endl;
+    exit(PARSE_ERROR);
   }
 
-  policy_table::Table* table = new policy_table::Table(&value);
-  bool is_valid = table->is_valid();
+  policy_table::Table table(&value);
+  bool is_valid = table.is_valid();
   if (true == is_valid ) {
     std::cout << "Table is valid" << std::endl;
     exit(SUCCES);
   }
   std::cout << "Table is not valid" << std::endl;
   rpc::ValidationReport report("policy_table");
-  table->ReportErrors(&report);
+  table.ReportErrors(&report);
   std::cout << "Errors: " << std::endl << rpc::PrettyFormat(report) << std::endl;
 
   return SUCCES;
