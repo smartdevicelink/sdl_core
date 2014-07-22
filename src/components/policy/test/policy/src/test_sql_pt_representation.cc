@@ -422,6 +422,7 @@ TEST_F(SQLPTRepresentationTest, SaveGenerateSnapshot) {
 
   Json::Value& app_policies = policy_table["app_policies"];
   app_policies["default"] = Json::Value(Json::objectValue);
+  app_policies["default"]["priority"] = Json::Value("EMERGENCY");
   app_policies["default"]["memory_kb"] = Json::Value(50);
   app_policies["default"]["watchdog_timer_ms"] = Json::Value(100);
   app_policies["default"]["groups"] = Json::Value(Json::arrayValue);

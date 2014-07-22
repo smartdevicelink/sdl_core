@@ -154,7 +154,7 @@ TransportAdapter::Error BluetoothPASAConnection::Notify() const {
 }
 
 TransportAdapter::Error BluetoothPASAConnection::SendData(
-    RawMessageSptr message) {
+    RawMessagePtr message) {
   LOG4CXX_TRACE_ENTER(logger_);
   sync_primitives::AutoLock auto_lock(frames_to_send_lock_);
   frames_to_send_.push(message);
@@ -184,7 +184,7 @@ void BluetoothPASAConnection::Thread() {
     sync_primitives::AutoLock auto_lock(frames_to_send_lock_);
     while (!frames_to_send_.empty()) {
       LOG4CXX_DEBUG(logger_, "removing message (#" << pthread_self() << ")");
-      RawMessageSptr message = frames_to_send_.front();
+      RawMessagePtr message = frames_to_send_.front();
       frames_to_send_.pop();
       controller_->DataSendFailed(device_handle(), application_handle(),
                                   message, DataSendError());
@@ -302,7 +302,7 @@ bool BluetoothPASAConnection::Receive() {
     if (numBytes > 0) {
       LOG4CXX_DEBUG( logger_,
             "Received " << numBytes << " bytes for connection " << this);
-      RawMessageSptr frame(
+      RawMessagePtr frame(
             new protocol_handler::RawMessage(0, 0, buffer, numBytes));
       controller_->DataReceiveDone(device_handle(), application_handle(), frame);
     } else if (numBytes < 0) {
@@ -331,7 +331,7 @@ bool BluetoothPASAConnection::Send() {
 
   while (!frames_to_send.empty()) {
     LOG4CXX_INFO(logger_, "frames_to_send is not empty" << pthread_self() << ")");
-    RawMessageSptr frame = frames_to_send.front();
+    RawMessagePtr frame = frames_to_send.front();
     bool frame_sent = false;
     if (frame) {
       if (frame->data() && frame->data_size() > 0 ) {

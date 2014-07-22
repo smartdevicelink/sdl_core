@@ -52,10 +52,12 @@ public class FileStreamingLogic {
     }
 
     public void startFileStreaming() {
-        if (staticFileReader == null || staticFileReader.getStatus() == AsyncTask.Status.FINISHED){
+        if (staticFileReader == null || staticFileReader.getStatus() == AsyncTask.Status.FINISHED) {
             createStaticFileReader();
         }
-        staticFileReader.execute(fileResID);
+        if (staticFileReader.getStatus().equals(AsyncTask.Status.PENDING)) {
+            staticFileReader.execute(fileResID);
+        }
     }
 
     public boolean isStreamingInProgress() {

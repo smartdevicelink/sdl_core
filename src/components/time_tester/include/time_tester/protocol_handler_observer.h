@@ -44,7 +44,7 @@ class ProtocolHandlerObserver: public protocol_handler::PHMetricObserver {
  public:
   explicit ProtocolHandlerObserver(TimeManager* time_manager);
 
-  virtual void StartMessageProcess(uint32_t message_id);
+  virtual void StartMessageProcess(uint32_t message_id, const TimevalStruct& start_time);
 
   virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m);
 

@@ -1,19 +1,11 @@
 include_directories (
   ${GMOCK_INCLUDE_DIRECTORY}
+  ./include
   ${CMAKE_SOURCE_DIR}/src/components/transport_manager/include
-  ${CMAKE_SOURCE_DIR}/src/components/utils/include/
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include/
-  ${CMAKE_SOURCE_DIR}/src/components/protocol_handler/include/
-  ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include/
-  ${CMAKE_SOURCE_DIR}/test/components/transport_manager/include/
   ${LIBUSB_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
-
-set(RTLIB rt)
-if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-set(RTLIB )
-endif()
 
 set (LIBRARIES
     gtest
@@ -26,8 +18,8 @@ set (LIBRARIES
     Utils
     ConfigProfile
     jsoncpp
-    
     ${RTLIB}
+    ProtocolLibrary
 )
 
 if (BUILD_AVAHI_SUPPORT)
@@ -48,7 +40,7 @@ set (SOURCES
    ./src/mock_transport_adapter.cc
    ./src/mock_device_scanner.cc
    ./src/raw_message_matcher.cc
-   ./src/transport_manager.cc
+   ./src/transport_manager_test.cc
 )
 
 set (TESTUSBSOURCES
@@ -63,7 +55,7 @@ create_test("test_TcpTransportAdapter" "src/test_tcp_transport_adapter.cc" "${LI
 #target_link_libraries("test_DnssdServiceDiscovery" ${LIBRARIES})
 #add_test(test_DnssdServiceDiscovery, ./test_DnssdServiceDiscovery.sh)
 
-target_link_libraries("test_TransportManagerTest" TransportManager)
+target_link_libraries("test_TransportManagerTest" TransportManager )
 
 if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")

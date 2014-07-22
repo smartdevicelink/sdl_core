@@ -74,8 +74,7 @@ SQLPTRepresentation::SQLPTRepresentation()
 }
 
 SQLPTRepresentation::~SQLPTRepresentation() {
-  printf("~SQLPTRepresentation\n");
-  db_->BackupDB();
+  db_->Backup();
   db_->Close();
   delete db_;
 }
@@ -100,7 +99,8 @@ CheckPermissionResult SQLPTRepresentation::CheckPermissions(
   LOG4CXX_INFO(
     logger_,
     "Level is "
-    << (result.hmi_level_permitted == kRpcAllowed ? "permitted" : "not permitted"));
+    << (result.hmi_level_permitted == kRpcAllowed ? "permitted"
+                                                  : "not permitted"));
   std::string parameter;
   while (ret) {
     if (!query.IsNull(0)) {
@@ -231,7 +231,8 @@ std::vector<UserFriendlyMessage> SQLPTRepresentation::GetUserFriendlyMsg(
 }
 
 EndpointUrls SQLPTRepresentation::GetUpdateUrls(int service_type) {
-  LOG4CXX_INFO(logger_, "SQLPTRepresentation::GetUpdateUrls for " << service_type);
+  LOG4CXX_INFO(logger_, "SQLPTRepresentation::GetUpdateUrls for "
+               << service_type);
   dbms::SQLQuery query(db());
   EndpointUrls ret;
   if (query.Prepare(sql_pt::kSelectEndpoint)) {
@@ -251,9 +252,55 @@ EndpointUrls SQLPTRepresentation::GetUpdateUrls(int service_type) {
   return ret;
 }
 
-int SQLPTRepresentation::GetNotificationsNumber(
-  policy_table::Priority priority) {
+int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
+  LOG4CXX_INFO(logger_, "GetNotificationsNumber");
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectNotificationsPerPriority)) {
+    LOG4CXX_WARN(logger_, "Incorrect select statement for priority "
+                 "notification number.");
+    return 0;
+  }
+  query.Bind(0, priority);
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Incorrect select from notifications by priority.");
+    return 0;
+  }
+
+  if (!query.IsNull(0)) {
+    return query.GetInteger(0);
+  }
+
   return 0;
+}
+
+bool SQLPTRepresentation::GetPriority(const std::string& policy_app_id,
+                                      std::string* priority) {
+  LOG4CXX_INFO(logger_, "GetPriority");
+  if (NULL == priority) {
+    LOG4CXX_WARN(logger_, "Input priority parameter is null.");
+    return false;
+  }
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectPriority)) {
+    LOG4CXX_INFO(logger_, "Incorrect statement for priority.");
+    return false;
+  }
+
+  query.Bind(0, policy_app_id);
+
+  if (!query.Exec()) {
+    LOG4CXX_INFO(logger_, "Error during select priority.");
+    return false;
+  }
+
+  if (query.IsNull(0)) {
+    priority->clear();
+    return true;
+  }
+
+  priority->assign(query.GetString(0));
+
+  return true;
 }
 
 InitResult SQLPTRepresentation::Init() {
@@ -275,8 +322,10 @@ InitResult SQLPTRepresentation::Init() {
         while (db_check.Next()) {
           if (db_check.GetString(0).compare("ok") == 0) {
             dbms::SQLQuery check_first_run(db());
-            if (check_first_run.Prepare(sql_pt::kIsFirstRun) && check_first_run.Next()) {
-              LOG4CXX_INFO(logger_, "Selecting is first run " << check_first_run.GetBoolean(0));
+            if (check_first_run.Prepare(sql_pt::kIsFirstRun) &&
+                check_first_run.Next()) {
+              LOG4CXX_INFO(logger_, "Selecting is first run "
+                           << check_first_run.GetBoolean(0));
               if (check_first_run.GetBoolean(0)) {
                 dbms::SQLQuery set_not_first_run(db());
                 set_not_first_run.Exec(sql_pt::kSetNotFirstRun);
@@ -347,7 +396,8 @@ bool SQLPTRepresentation::Clear() {
   return true;
 }
 
-utils::SharedPtr<policy_table::Table> SQLPTRepresentation::GenerateSnapshot() const {
+utils::SharedPtr<policy_table::Table>
+SQLPTRepresentation::GenerateSnapshot() const {
   LOG4CXX_INFO(logger_, "GenerateSnapshot");
   utils::SharedPtr<policy_table::Table> table = new policy_table::Table();
   GatherModuleMeta(&*table->policy_table.module_meta);
@@ -514,10 +564,14 @@ bool SQLPTRepresentation::GatherApplicationPolicies(
       (*apps)[app_id] = params;
       continue;
     }
-    *params.memory_kb = query.GetInteger(1);
-    *params.heart_beat_timeout_ms = query.GetInteger(2);
+    policy_table::Priority priority;
+    policy_table::EnumFromJsonString(query.GetString(1), &priority);
+    params.priority = priority;
+
+    *params.memory_kb = query.GetInteger(2);
+    *params.heart_beat_timeout_ms = query.GetInteger(3);
     if (!query.IsNull(3)) {
-      *params.certificate = query.GetString(3);
+      *params.certificate = query.GetString(4);
     }
     if (!GatherAppGroup(app_id, &params.groups)) {
       return false;
@@ -707,11 +761,12 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   }
 
   app_query.Bind(0, app.first);
-  app_query.Bind(1, app.second.is_null());
-  app_query.Bind(2, app.second.memory_kb);
-  app_query.Bind(3, app.second.heart_beat_timeout_ms);
+  app_query.Bind(1, std::string(policy_table::EnumToJsonString(app.second.priority)));
+  app_query.Bind(2, app.second.is_null());
+  app_query.Bind(3, app.second.memory_kb);
+  app_query.Bind(4, app.second.heart_beat_timeout_ms);
   app.second.certificate.is_initialized() ?
-  app_query.Bind(4, app.second.certificate) : app_query.Bind(4);
+  app_query.Bind(5, app.second.certificate) : app_query.Bind(5);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -1101,7 +1156,9 @@ bool SQLPTRepresentation::UpdateRequired() const {
 
 void SQLPTRepresentation::SaveUpdateRequired(bool value) {
   dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kUpdateFlagUpdateRequired)) {
+  // TODO(AOleynik): Quick fix, will be reworked
+  if (!query.Prepare(/*sql_pt::kUpdateFlagUpdateRequired*/
+                     "UPDATE `module_meta` SET `flag_update_required` = ?")) {
     LOG4CXX_WARN(logger_,
                  "Incorrect update into module meta (update_required)");
     return;
@@ -1318,16 +1375,24 @@ bool SQLPTRepresentation::CopyApplication(const std::string& source,
     return false;
   }
   query.Bind(0, destination);
-  source_app.IsNull(0) ? query.Bind(1) : query.Bind(1, source_app.GetBoolean(0));
-  source_app.IsNull(1) ? query.Bind(2) : query.Bind(2, source_app.GetBoolean(1));
-  source_app.IsNull(2) ? query.Bind(3) : query.Bind(3, source_app.GetString(2));
-  source_app.IsNull(3) ? query.Bind(4) : query.Bind(4, source_app.GetString(3));
-  source_app.IsNull(4) ? query.Bind(5) : query.Bind(5, source_app.GetBoolean(4));
-  source_app.IsNull(5) ? query.Bind(6) : query.Bind(6, source_app.GetBoolean(5));
-  source_app.IsNull(6) ? query.Bind(7) : query.Bind(7, source_app.GetBoolean(6));
+  source_app.IsNull(0) ? query.Bind(1)
+                       : query.Bind(1, source_app.GetBoolean(0));
+  source_app.IsNull(1) ? query.Bind(2)
+                       : query.Bind(2, source_app.GetBoolean(1));
+  source_app.IsNull(2) ? query.Bind(3)
+                       : query.Bind(3, source_app.GetString(2));
+  source_app.IsNull(3) ? query.Bind(4)
+                       : query.Bind(4, source_app.GetString(3));
+  source_app.IsNull(4) ? query.Bind(5)
+                       : query.Bind(5, source_app.GetBoolean(4));
+  source_app.IsNull(5) ? query.Bind(6)
+                       : query.Bind(6, source_app.GetBoolean(5));
+  source_app.IsNull(6) ? query.Bind(7)
+                       : query.Bind(7, source_app.GetBoolean(6));
   query.Bind(8, source_app.GetInteger(7));
   query.Bind(9, source_app.GetInteger(8));
-  source_app.IsNull(9) ? query.Bind(10) : query.Bind(10, source_app.GetString(9));
+  source_app.IsNull(9) ? query.Bind(10)
+                       : query.Bind(10, source_app.GetString(9));
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Failed inserting into application.");
     return false;

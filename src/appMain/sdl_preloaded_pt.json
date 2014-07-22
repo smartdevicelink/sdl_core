@@ -22,6 +22,7 @@
 			"notifications_per_minute_by_priority": {
 				"EMERGENCY": 60,
 				"NAVIGATION": 15,
+				"voiceCommunication": 10,
 				"COMMUNICATION": 6,
 				"NORMAL": 4,
 				"NONE": 0

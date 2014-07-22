@@ -36,7 +36,7 @@ public class MobileNavSessionTest extends InstrumentationTestCase {
         WiProProtocol wiProProtocol = mock(WiProProtocol.class);
         Mockito.doThrow(new IllegalArgumentException("Can't call this method"))
                 .when(wiProProtocol).StartProtocolService(ServiceType.Mobile_Nav,
-                Session.DEFAULT_SESSION_ID);
+                Session.DEFAULT_SESSION_ID, false);
         return wiProProtocol;
     }
 
@@ -47,6 +47,6 @@ public class MobileNavSessionTest extends InstrumentationTestCase {
 
     public void testMobileNavigationStartSession() {
         mMobileNavSession.startService(SessionTest.SESSION_ID);
-        assertTrue("should get here",true);
+        assertTrue("should get here", true);
     }
 }

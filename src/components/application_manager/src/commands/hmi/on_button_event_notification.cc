@@ -45,9 +45,6 @@ OnButtonEventNotification::OnButtonEventNotification(
     const MessageSharedPtr& message) : NotificationFromHMI(message) {
 }
 
-OnButtonEventNotification::~OnButtonEventNotification() {
-}
-
 void OnButtonEventNotification::Run() {
   LOG4CXX_INFO(logger_, "OnButtonEventNotification::Run");
 

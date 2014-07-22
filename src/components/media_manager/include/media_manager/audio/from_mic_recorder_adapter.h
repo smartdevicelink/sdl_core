@@ -47,7 +47,7 @@ class FromMicRecorderAdapter : public MediaAdapterImpl {
     FromMicRecorderAdapter();
     ~FromMicRecorderAdapter();
     void SendData(int32_t application_key,
-                  const protocol_handler::RawMessagePtr& message) {}
+                  const RawMessagePtr message) {}
     void StartActivity(int32_t application_key);
     void StopActivity(int32_t application_key);
     bool is_app_performing_activity(int32_t application_key);

@@ -58,7 +58,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         std::string to_string(const int value) const
         {
             std::ostringstream oss;
-	    oss << value;
+      oss << value;
             return oss.str();
         }
 

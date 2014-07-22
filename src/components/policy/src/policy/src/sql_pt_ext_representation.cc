@@ -108,10 +108,10 @@ bool SQLPTExtRepresentation::GetUserPermissionsForDevice(
   return true;
 }
 
-bool SQLPTExtRepresentation::GetUserPermissionsForApp(
+bool SQLPTExtRepresentation::GetPermissionsForApp(
   const std::string& device_id, const std::string& policy_app_id,
   FunctionalIdType* group_types) {
-  LOG4CXX_INFO(logger_, "GetUserPermissionsForApp");
+  LOG4CXX_INFO(logger_, "GetPermissionsForApp");
   if (!group_types) {
     LOG4CXX_WARN(logger_, "Input parameter for group types is null.");
     return false;
@@ -1219,32 +1219,6 @@ bool SQLPTExtRepresentation::GetDefaultHMI(const std::string& policy_app_id,
   }
 
   default_hmi->assign(query.GetString(0));
-
-  return true;
-}
-
-bool SQLPTExtRepresentation::GetPriority(const std::string& policy_app_id,
-    std::string* priority) {
-  LOG4CXX_INFO(logger_, "GetPriority");
-  dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt_ext::kSelectPriority)) {
-    LOG4CXX_INFO(logger_, "Incorrect statement for priority.");
-    return false;
-  }
-
-  query.Bind(0, policy_app_id);
-
-  if (!query.Exec()) {
-    LOG4CXX_INFO(logger_, "Error during select priority.");
-    return false;
-  }
-
-  if (query.IsNull(0)) {
-    priority->clear();
-    return true;
-  }
-
-  priority->assign(query.GetString(0));
 
   return true;
 }

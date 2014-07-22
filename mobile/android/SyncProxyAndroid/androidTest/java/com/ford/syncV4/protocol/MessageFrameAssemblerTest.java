@@ -11,6 +11,8 @@ import com.ford.syncV4.session.SessionTest;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
+import static org.mockito.Mockito.mock;
+
 /**
  * Created with Android Studio.
  * Author: Chernyshov Yuriy - Mobile Development
@@ -27,6 +29,7 @@ public class MessageFrameAssemblerTest extends InstrumentationTestCase {
     private ArgumentCaptor<Byte> mSessionIdCaptor;
     private ArgumentCaptor<Byte> mProtocolVersionCaptor;
     private ArgumentCaptor<Integer> mMessageIdCaptor;
+    private ArgumentCaptor<Boolean> mIsEncryptedCaptor;
 
     @Override
     protected void setUp() throws Exception {
@@ -35,13 +38,14 @@ public class MessageFrameAssemblerTest extends InstrumentationTestCase {
         System.setProperty("dexmaker.dexcache",
                 getInstrumentation().getTargetContext().getCacheDir().getPath());
 
-        mListener = Mockito.mock(MessageFrameAssemblerListener.class);
+        mListener = mock(MessageFrameAssemblerListener.class);
         mAssembler = new MessageFrameAssembler(mListener);
 
         mSessionIdCaptor = ArgumentCaptor.forClass(byte.class);
         mProtocolVersionCaptor = ArgumentCaptor.forClass(byte.class);
         mMessageIdCaptor = ArgumentCaptor.forClass(Integer.class);
         mServiceTypeCaptor = ArgumentCaptor.forClass(ServiceType.class);
+        mIsEncryptedCaptor = ArgumentCaptor.forClass(boolean.class);
     }
 
     public void testConstructorWitNullListenerFail() {
@@ -144,7 +148,7 @@ public class MessageFrameAssemblerTest extends InstrumentationTestCase {
 
         Mockito.verify(mListener, Mockito.times(1)).onStartServiceACK(mSessionIdCaptor.capture(),
                 mMessageIdCaptor.capture(), mServiceTypeCaptor.capture(),
-                mProtocolVersionCaptor.capture());
+                mProtocolVersionCaptor.capture(), mIsEncryptedCaptor.capture());
 
         assertEquals(SessionTest.SESSION_ID, mSessionIdCaptor.getValue().byteValue());
         assertEquals(MSG_ID, mMessageIdCaptor.getValue().intValue());

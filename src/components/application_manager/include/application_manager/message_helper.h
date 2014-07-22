@@ -165,7 +165,7 @@ class MessageHelper {
      *
      */
     static smart_objects::SmartObject* CreateDeviceListSO(
-      const connection_handler::DeviceList& devices);
+      const connection_handler::DeviceMap& devices);
 
     static smart_objects::SmartObject* CreateModuleInfoSO(
       uint32_t function_id);
@@ -429,6 +429,14 @@ class MessageHelper {
      */
     static std::string CommonLanguageToString(
       hmi_apis::Common_Language::eType language);
+
+    /**
+     * @brief Gets command limit number per minute for specific application
+     * @param policy_app_id Unique application id
+     * @return Limit for number of command per minute
+     */
+    static uint32_t GetAppCommandLimit(const std::string& policy_app_id);
+
   private:
     static smart_objects::SmartObject* CreateChangeRegistration(
       int32_t function_id, int32_t language, uint32_t app_id);

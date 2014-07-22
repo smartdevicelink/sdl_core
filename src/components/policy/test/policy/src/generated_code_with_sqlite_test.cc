@@ -144,8 +144,7 @@ TEST_F(GeneratedCodeTest, UpdateSectionAppPolicies) {
   policy_table::ApplicationPolicies ap;
   const std::string application_id = "12345678";
   ap[application_id].groups.push_back("Base-4");
-  // This param is present in extended policy table interface only
-  //ap[application_id].priority = policy_table::P_NORMAL;
+  ap[application_id].priority = policy_table::P_NORMAL;
 
   EXPECT_TRUE(policy_table::UpdateSection(&db, ap));
 

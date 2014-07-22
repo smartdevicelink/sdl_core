@@ -229,9 +229,11 @@ void GetVehicleDataRequest::Run() {
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
-  if (!app->IsGetVehicleDataAllowed()) {
-    SendResponse(false, mobile_apis::Result::REJECTED);
-    LOG4CXX_ERROR(logger_, "Rejected. GetVehicleData frequency is to large");
+  if (app->IsCommandLimitsExceeded(
+        static_cast<mobile_apis::FunctionID::eType>(function_id()),
+        application_manager::TLimitSource::CONFIG_FILE)) {
+    LOG4CXX_ERROR(logger_, "GetVehicleData frequency is too high.");
+    SendResponse(false, mobile_apis::Result::REJECTED);    
     return;
   }
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();

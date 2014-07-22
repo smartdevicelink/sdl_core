@@ -18,7 +18,7 @@ public interface ISyncConnectionListener {
 	
 	public void onProtocolMessageReceived(ProtocolMessage msg);
 	
-	public void onProtocolSessionStarted(byte sessionId, byte version);
+	public void onProtocolSessionStarted(byte sessionId, byte version, boolean encrypted);
 	
 	public void onProtocolServiceEnded(ServiceType serviceType, byte sessionId);
 
@@ -28,7 +28,7 @@ public interface ISyncConnectionListener {
 
     public void onMobileNavAckReceived(byte sessionId, int frameReceivedNumber);
 
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version);
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted,byte version);
 
     public void onStartServiceNackReceived(byte sessionId, ServiceType serviceType);
 

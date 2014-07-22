@@ -46,7 +46,7 @@ class PipeStreamerAdapter : public MediaAdapterImpl {
     PipeStreamerAdapter();
     virtual ~PipeStreamerAdapter();
     virtual void SendData(int32_t application_key,
-                          const protocol_handler::RawMessagePtr& message);
+                          const RawMessagePtr message);
     virtual void StartActivity(int32_t application_key);
     virtual void StopActivity(int32_t application_key);
     virtual bool is_app_performing_activity(int32_t application_key);
@@ -104,7 +104,7 @@ class PipeStreamerAdapter : public MediaAdapterImpl {
 
     bool                                          is_ready_;
     threads::Thread*                              thread_;
-    MessageQueue<protocol_handler::RawMessagePtr> messages_;
+    MessageQueue<RawMessagePtr> messages_;
 
     DISALLOW_COPY_AND_ASSIGN(PipeStreamerAdapter);
 };

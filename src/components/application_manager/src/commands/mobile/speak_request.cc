@@ -58,6 +58,13 @@ void SpeakRequest::Run() {
     return;
   }
 
+  if (IsWhiteSpaceExist()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming speak has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   (*message_)[strings::msg_params][strings::app_id] = app->app_id();
   (*message_)[strings::msg_params][hmi_request::speak_type] =
       hmi_apis::Common_SpeakType::SPEAK;
@@ -114,6 +121,28 @@ void SpeakRequest::ProcessTTSSpeakResponse(
 
   SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
                return_info, &(message[strings::msg_params]));
+}
+
+bool SpeakRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "SpeakRequest::IsWhiteSpaceExist");
+  const char* str = NULL;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {
+    const smart_objects::SmartArray* tc_array =
+        (*message_)[strings::msg_params][strings::tts_chunks].asArray();
+
+    smart_objects::SmartArray::const_iterator it_tc = tc_array->begin();
+    smart_objects::SmartArray::const_iterator it_tc_end = tc_array->end();
+
+    for (; it_tc != it_tc_end; ++it_tc) {
+      str = (*it_tc)[strings::text].asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 }  // namespace commands

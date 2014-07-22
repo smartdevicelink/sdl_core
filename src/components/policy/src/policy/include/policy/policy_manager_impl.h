@@ -97,7 +97,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void SetDeviceInfo(const std::string& device_id,
                                const DeviceInfo& device_info);
 
-    virtual void SetUserConsentForApp(const PermissionConsent& permissions);
+    virtual void SetUserConsentForApp(PermissionConsent &permissions);
 
     virtual bool GetDefaultHmi(const std::string& policy_app_id,
                                std::string* default_hmi);
@@ -122,6 +122,8 @@ class PolicyManagerImpl : public PolicyManager {
                                const std::string& wers_country_code,
                                const std::string& language);
     virtual void OnSystemReady();
+
+    virtual uint32_t GetNotificationsNumber(const std::string& priority);
 
     // Interface StatisticsManager (begin)
     virtual void Increment(usage_statistics::GlobalCounterId type);
@@ -213,6 +215,15 @@ class PolicyManagerImpl : public PolicyManager {
      * @brief Check update status and notify HMI on changes
      */
     void CheckUpdateStatus();
+
+    /**
+     * @brief Validate PermissionConsent structure and removes all invalid data from it.
+     * So, after this method is done specified PermissionConsent will be valid or empty.
+     * @param group_names The groups according to which we will validate permissions
+     * @param permissions PermissionConsent structure that should be validated.
+     */
+    void EnsureCorrectPermissionConsent(const FunctionalGroupNames &group_names,
+                                        PermissionConsent& permissions);
 
     PolicyListener* listener_;
     PolicyTable policy_table_;

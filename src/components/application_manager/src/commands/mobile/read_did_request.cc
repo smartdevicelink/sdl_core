@@ -67,9 +67,11 @@ void ReadDIDRequest::Run() {
     return;
   }
 
-  if (!app->IsReadDIDAllowed()) {
-    SendResponse(false, mobile_apis::Result::REJECTED);
-    LOG4CXX_ERROR(logger_, "Rejected. ReadDID frequency is to large");
+  if (app->IsCommandLimitsExceeded(
+        static_cast<mobile_apis::FunctionID::eType>(function_id()),
+        application_manager::TLimitSource::CONFIG_FILE)) {
+    LOG4CXX_ERROR(logger_, "ReadDID frequency is too high.");
+    SendResponse(false, mobile_apis::Result::REJECTED);    
     return;
   }
 

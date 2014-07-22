@@ -63,14 +63,15 @@ set(LIBRARIES
   SmartObjects
   ${TIME_TESTER_LIB}
   formatters
+  ProtocolLibrary
   ProtocolHandler
   connectionHandler
   TransportManager
+  ${SecurityManagerLibrary}
   HMIMessageHandler
-  MessageBroker  
+  MessageBroker
   ${BROKER_LIBRARIES}
   Utils
-  encryption
   jsoncpp
   ConfigProfile
   RequestWatchdog
@@ -84,10 +85,10 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 if (BUILD_BT_SUPPORT)
-	list(APPEND LIBRARIES bluetooth)
+  list(APPEND LIBRARIES bluetooth)
 endif()
 if (BUILD_AVAHI_SUPPORT)
-	list(APPEND LIBRARIES avahi-client avahi-common)
+  list(APPEND LIBRARIES avahi-client avahi-common)
 endif()
 if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -99,6 +100,7 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
 endif()
 
 include_directories (
@@ -108,6 +110,7 @@ include_directories (
   ../components/application_manager/include
   ../components/formatters/include
   ../components/transport_manager/include
+  ${SecurityManagerIncludeDir}
   ../components/config_profile/include
   ../components/utils/include/
   ../components/connection_handler/include/
@@ -123,6 +126,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/
   ${CMAKE_BINARY_DIR}/src/components/
   ${CMAKE_SOURCE_DIR}/src/components/dbus/include/
+  ${CMAKE_BINARY_DIR}/src/components/policy/src/policy
   ${CMAKE_SOURCE_DIR}
   ${default_media_inc}
   ${LOG4CXX_INCLUDE_DIRECTORY}
@@ -185,6 +189,7 @@ install(TARGETS ${PROJECT} DESTINATION bin)
 install(
   FILES log4cxx.properties audio.8bit.wav test.txt smartDeviceLink.ini
     hmi_capabilities.json sdl_preloaded_pt.json
+    ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
 )
 if (${WEB_HMI})

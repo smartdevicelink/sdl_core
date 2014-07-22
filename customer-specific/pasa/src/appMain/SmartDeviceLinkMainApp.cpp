@@ -89,7 +89,10 @@ void startSmartDeviceLink()
     }
 
 
-    main_namespace::LifeCycle::instance()->StartComponents();
+    if (!main_namespace::LifeCycle::instance()->StartComponents()) {
+      LOG4CXX_INFO(logger, "StartComponents failed.");
+      exit(EXIT_FAILURE);
+    }
 
     // --------------------------------------------------------------------------
     // Third-Party components initialization.
@@ -164,7 +167,8 @@ int main(int argc, char** argv) {
 
   INIT_LOGGER(profile::Profile::instance()->log4cxx_config_file());
 
-  LOG4CXX_INFO(logger, " Application main()");
+  LOG4CXX_INFO(logger, "Snapshot: {TAG}");
+  LOG4CXX_INFO(logger, "Application main()");
 
   utils::SharedPtr<threads::Thread> applink_notification_thread = new threads::Thread("Applink notification thread", new ApplinkNotificationThreadDelegate());
   applink_notification_thread->start();

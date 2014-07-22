@@ -63,7 +63,7 @@ PipeStreamerAdapter::~PipeStreamerAdapter() {
 
 void PipeStreamerAdapter::SendData(
   int32_t application_key,
-  const protocol_handler::RawMessagePtr& message) {
+  const RawMessagePtr message) {
   LOG4CXX_INFO(logger, "PipeStreamerAdapter::SendData");
 
   if (application_key != current_application_) {
@@ -146,7 +146,7 @@ void PipeStreamerAdapter::Streamer::threadMain() {
 
   while (!stop_flag_) {
     while (!server_->messages_.empty()) {
-      protocol_handler::RawMessagePtr msg = server_->messages_.pop();
+      RawMessagePtr msg = server_->messages_.pop();
       if (!msg) {
         LOG4CXX_ERROR(logger, "Null pointer message");
         continue;

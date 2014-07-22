@@ -29,8 +29,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "utils/system.h"
-
 #ifdef __QNX__
 #  include <process.h>
 #else  // __QNX__
@@ -43,8 +41,10 @@
 
 #include <algorithm>
 #include <functional>
+#include <cstring>
 
 #include "utils/logger.h"
+#include "utils/system.h"
 
 namespace utils {
 
@@ -88,7 +88,8 @@ bool System::Execute(bool wait) {
   delete[] argv;
 
   if (ret == -1) {
-    LOG4CXX_ERROR(logger_, "Can't execute command: " << command_);
+    LOG4CXX_ERROR(logger_, "Can't execute command: " << command_
+                  << " Errno is: " << std::strerror(errno));
     return false;
   }
 

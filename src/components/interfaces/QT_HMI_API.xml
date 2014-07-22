@@ -1107,7 +1107,7 @@
       <param name="width" type="Integer" minvalue="1" maxvalue="500">
         <description>The number of characters in one row of this field.</description>
       </param>
-      <param name="rows" type="Integer" minvalue="1" maxvalue="3">
+      <param name="rows" type="Integer" minvalue="1" maxvalue="8">
         <description>The number of rows of this field.</description>
       </param>
     </struct>
@@ -1338,7 +1338,7 @@
       <param name="imageFields" type="Common.ImageField" minsize="1" maxsize="100" array="true" mandatory="false">
         <description>A set of all fields that support images. See ImageField</description>
       </param>
-      <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
+      <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="0" maxsize="100" array="true" mandatory="true">
         <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
       </param>
       <param name="imageCapabilities" type="Common.ImageType" array="true" minsize="0" maxsize="2" mandatory="false">
@@ -3304,6 +3304,26 @@
     </function>
     <function name="OnSteeringWheelAngle" messagetype="notification" provider="hmi">
       <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="true">
+        <description>Current angle of the steering wheel (in deg)</description>
+      </param>
+    </function>
+    <function name="OnECallInfo" messagetype="notification" provider="hmi">
+      <param name="eCallInfo" type="Common.ECallInfo" mandatory="true">
+        <description>Current angle of the steering wheel (in deg)</description>
+      </param>
+    </function>
+    <function name="OnAirbagStatus" messagetype="notification" provider="hmi">
+      <param name="airbagStatus" type="Common.AirbagStatus" mandatory="true">
+        <description>Current angle of the steering wheel (in deg)</description>
+      </param>
+    </function>
+    <function name="OnEmergencyEvent" messagetype="notification" provider="hmi">
+      <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="true">
+        <description>Current angle of the steering wheel (in deg)</description>
+      </param>
+    </function>
+    <function name="OnClusterModeStatus" messagetype="notification" provider="hmi">
+      <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="true">
         <description>Current angle of the steering wheel (in deg)</description>
       </param>
     </function>

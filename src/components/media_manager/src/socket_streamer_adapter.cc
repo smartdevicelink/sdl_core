@@ -125,7 +125,7 @@ void SocketStreamerAdapter::Init() {
 
 void SocketStreamerAdapter::SendData(
   int32_t application_key,
-  const protocol_handler::RawMessagePtr& message) {
+  const RawMessagePtr message) {
   LOG4CXX_INFO(logger, "SocketStreamerAdapter::sendData");
 
 
@@ -171,7 +171,7 @@ void SocketStreamerAdapter::Streamer::threadMain() {
     is_first_loop_ = true;
     while (is_client_connected_) {
       while (!server_->messages_.empty()) {
-        protocol_handler::RawMessagePtr msg = server_->messages_.pop();
+        RawMessagePtr msg = server_->messages_.pop();
         if (!msg) {
           LOG4CXX_ERROR(logger, "Null pointer message");
           continue;
@@ -290,7 +290,7 @@ bool SocketStreamerAdapter::Streamer::is_ready() const {
 }
 
 bool SocketStreamerAdapter::Streamer::send(
-  const protocol_handler::RawMessagePtr& msg) {
+  const RawMessagePtr msg) {
   if (!is_ready()) {
     LOG4CXX_ERROR_EXT(logger, " Socket is not ready");
     return false;

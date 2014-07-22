@@ -13,8 +13,6 @@ set (TEST_HMI_INTERFACES
   basic_communication
   tts
   ui
-  vehicle_info
-  vr
 )
 
 if (${HMI_DBUS_API})
@@ -44,7 +42,6 @@ set (SOURCES
 
 if (${HMI_DBUS_API})
   # Build dbus tests
-  find_package(DBus)
   include_directories(
       ${CMAKE_SOURCE_DIR}/src/components/dbus/include
       ${DBUS_INCLUDE_DIRS}

@@ -47,14 +47,14 @@ public interface MessageFrameAssemblerListener {
      * A method, which indicates that
      * {@link com.ford.syncV4.protocol.enums.FrameDataControlFrameType#StartServiceACK} has been
      * received
-     *
-     * @param sessionId       Identifier of the current SYNC Session
+     *  @param sessionId       Identifier of the current SYNC Session
      * @param messageId       Identifier of the message
      * @param serviceType     Type of the Service
      * @param protocolVersion Version of the protocol, returned by the SDL
+     * @param encrypted
      */
     public void onStartServiceACK(byte sessionId, int messageId, ServiceType serviceType,
-                                  byte protocolVersion);
+                                  byte protocolVersion, boolean encrypted);
 
     /**
      * A method, which indicates that

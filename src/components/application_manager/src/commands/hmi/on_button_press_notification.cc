@@ -46,9 +46,6 @@ OnButtonPressNotification::OnButtonPressNotification(
     const MessageSharedPtr& message) : NotificationFromHMI(message) {
 }
 
-OnButtonPressNotification::~OnButtonPressNotification() {
-}
-
 void OnButtonPressNotification::Run() {
   LOG4CXX_INFO(logger_, "OnButtonPressNotification::Run");
   event_engine::Event event(hmi_apis::FunctionID::Buttons_OnButtonPress);

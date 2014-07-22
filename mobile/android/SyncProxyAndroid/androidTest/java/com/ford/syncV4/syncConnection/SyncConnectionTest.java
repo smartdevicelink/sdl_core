@@ -27,8 +27,8 @@ import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -52,6 +52,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     private TCPTransportConfig mTransportConfig;
 
     public SyncConnectionTest() {
+
     }
 
     @Override
@@ -81,7 +82,8 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         Session session = SessionTest.getInitializedSession();
         ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(
                 ServiceType.Mobile_Nav, session.getSessionIdByAppId(SessionTest.APP_ID),
-                ProtocolConstants.PROTOCOL_VERSION_TWO);
+                ProtocolConstants.PROTOCOL_VERSION_TWO, false);
+
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(session, mTransportConfig,
                 mock(ISyncConnectionListener.class)) {
@@ -106,7 +108,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);
         protocol.StartProtocolService(ServiceType.Mobile_Nav, session.getSessionIdByAppId(
-                SessionTest.APP_ID));
+                SessionTest.APP_ID), false);
 
         countDownLatch.await(1, TimeUnit.SECONDS);
 
@@ -124,14 +126,12 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                 mock(ISyncConnectionListener.class)) {
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionId,
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted,
                                                  byte version) {
-                super.onProtocolServiceStarted(serviceType, sessionId, version);
-
+                super.onProtocolServiceStarted(serviceType,sessionID,encrypted, version);
                 passed[0] = true;
-
                 assertEquals("ServiceType should be equal.", header.getServiceType(), serviceType);
-                assertEquals("Frame headers should be equal.", header.getSessionId(), sessionId);
+                assertEquals("Frame headers should be equal.", header.getSessionId(), sessionID);
                 assertEquals("Version should be equal.", header.getVersion(), version);
 
                 countDownLatch.countDown();
@@ -242,7 +242,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         ProtocolFrameHeader header =
                 ProtocolFrameHeaderFactory.createStartSession(ServiceType.Audio_Service,
                         session.getSessionIdByAppId(SessionTest.APP_ID),
-                        ProtocolConstants.PROTOCOL_VERSION_TWO);
+                        ProtocolConstants.PROTOCOL_VERSION_TWO, false);
         final ProtocolFrameHeader realHeader = header;
         final SyncConnection connection = new SyncConnection(session, mTransportConfig,
                 mock(ISyncConnectionListener.class)) {
@@ -264,11 +264,9 @@ public class SyncConnectionTest extends InstrumentationTestCase {
         WiProProtocol protocol = (WiProProtocol) connection.getWiProProtocol();
         protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_THREE);
         protocol.StartProtocolService(ServiceType.Audio_Service,
-                session.getSessionIdByAppId(SessionTest.APP_ID));
-
+                session.getSessionIdByAppId(SessionTest.APP_ID), false);
         // wait for processing
         Thread.sleep(50);
-
         assertTrue(isPassed[0]);
     }
 
@@ -277,7 +275,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                 mTransportConfig,
                 mock(ISyncConnectionListener.class));
         connection.init();
-        OutputStream stream = connection.startAudioDataTransfer(SessionTest.SESSION_ID);
+        OutputStream stream = connection.startAudioDataTransfer(SessionTest.SESSION_ID, false);
         assertNotNull("output stream should be created", stream);
     }
 
@@ -286,7 +284,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                 mTransportConfig,
                 mock(ISyncConnectionListener.class));
         connection.init();
-        OutputStream stream = connection.startAudioDataTransfer(SessionTest.SESSION_ID);
+        OutputStream stream = connection.startAudioDataTransfer(SessionTest.SESSION_ID, false);
         assertNotNull("audio pacetizer should not be null", connection.mAudioPacketizer);
     }
 
@@ -307,7 +305,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
                 mTransportConfig,
                 mock(ISyncConnectionListener.class));
         connection.init();
-        OutputStream stream = connection.startAudioDataTransfer(SessionTest.SESSION_ID);
+        OutputStream stream = connection.startAudioDataTransfer(SessionTest.SESSION_ID, false);
         H264Packetizer packetizer = (H264Packetizer) connection.mAudioPacketizer;
         assertEquals("session id should be equal SESSION_ID", SessionTest.SESSION_ID,
                 packetizer.getSessionID());
@@ -400,9 +398,9 @@ public class SyncConnectionTest extends InstrumentationTestCase {
 
         final byte maxByte = (byte) 0xFF;
         final byte[] bytes =
-                { 0x21, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00,
+                {0x21, 0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D, 0x00, 0x00,
                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-                        0x00, maxByte, maxByte, maxByte, maxByte, 0x00 };
+                        0x00, maxByte, maxByte, maxByte, maxByte, 0x00};
         connection.onTransportBytesReceived(bytes, bytes.length);
 
         ArgumentCaptor<Throwable> throwableArgumentCaptor =

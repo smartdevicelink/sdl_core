@@ -141,7 +141,10 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
               break;
             }
           }
-          if (!application_exist_with_audible_state) {
+          if (application_exist_with_audible_state) {
+            application->set_audio_streaming_state(
+                mobile_apis::AudioStreamingState::NOT_AUDIBLE);
+          } else {
             MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
           }
         }

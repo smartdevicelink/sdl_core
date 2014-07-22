@@ -25,7 +25,7 @@ public class WiProProtocolUSBTest extends TestCase {
 
             @Override
             public void onProtocolSessionStarted(byte sessionId,
-                                                 byte version) {
+                                                 byte version, boolean encrypted) {
             }
 
             @Override
@@ -61,7 +61,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version) {
 
             }
 
@@ -79,6 +79,7 @@ public class WiProProtocolUSBTest extends TestCase {
             public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId) {
 
             }
+
         };
 
         requiredMethodCalled = false;
@@ -121,7 +122,7 @@ public class WiProProtocolUSBTest extends TestCase {
 
             @Override
             public void onProtocolSessionStarted(byte sessionId,
-                                                 byte version) {
+                                                 byte version, boolean encrypted) {
             }
 
             @Override
@@ -159,7 +160,7 @@ public class WiProProtocolUSBTest extends TestCase {
             }
 
             @Override
-            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version) {
+            public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted,byte version) {
 
             }
 
@@ -177,6 +178,7 @@ public class WiProProtocolUSBTest extends TestCase {
             public void onProtocolServiceEndedAck(ServiceType serviceType, byte sessionId) {
 
             }
+
         };
 
         final WiProProtocol protocol = new WiProProtocol(protocolListener);

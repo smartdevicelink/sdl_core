@@ -56,7 +56,7 @@ class IAP2Connection : public Connection {
   bool Init();
 
  protected:
-  virtual TransportAdapter::Error SendData(RawMessageSptr message);
+  virtual TransportAdapter::Error SendData(RawMessagePtr message);
   virtual TransportAdapter::Error Disconnect();
 
  private:

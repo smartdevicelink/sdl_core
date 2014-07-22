@@ -34,11 +34,11 @@ public class JsonRPCMarshaller implements IJsonRPCMarshaller {
     }
 
     public Hashtable<String, Object> unmarshall(byte[] message) {
-        if (message != null) {
+        /*if (message != null) {
             Logger.d(CLASS_NAME + " receive " + message.length + " bytes");
         } else {
             Logger.w(CLASS_NAME + " receive null bytes");
-        }
+        }*/
         Hashtable<String, Object> ret = null;
         String jsonString = new String(message);
         try {

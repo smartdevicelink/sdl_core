@@ -73,6 +73,14 @@ class AlertManeuverRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event);
 
  private:
+  /**
+   * @brief Checks alert maneuver params(ttsChunks, ...).
+   * When type is String there is a check on the contents \t\n \\t \\n
+   * @return if alert maneuver contains \t\n \\t \\n return TRUE,
+   * FALSE otherwise
+   */
+  bool IsWhiteSpaceExist();
+
   mobile_apis::Result::eType  tts_speak_result_code_;
   mobile_apis::Result::eType  navi_alert_maneuver_result_code_;
   Pending pending_requests_;

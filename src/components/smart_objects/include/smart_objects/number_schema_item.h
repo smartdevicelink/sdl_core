@@ -189,7 +189,7 @@ SmartType TNumberSchemaItem<uint32_t>::getSmartType();
  * @return SmartType_Double.
  **/
 template<>
-SmartType TNumberSchemaItem<double>::getSmartType(void);
+SmartType TNumberSchemaItem<double>::getSmartType();
 
 template<typename NumberType>
 utils::SharedPtr<TNumberSchemaItem<NumberType> >
@@ -218,12 +218,14 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
     result = Errors::OK;
     NumberType value;
 
-    if (std::string("i") == typeid(value).name()) {
+    if (typeid(int32_t) == typeid(value)) {
       value = Object.asInt();
-    } else if (std::string("j") == typeid(value).name()) {
+    } else if (typeid(uint32_t) == typeid(value)) {
       value = Object.asUInt();
-    } else if (std::string("d") == typeid(value).name()) {
+    } else if (typeid(double) == typeid(value)) {
       value = Object.asDouble();
+    } else if (typeid(int64_t) == typeid(value)) {
+      value = Object.asInt64();
     } else {
       NOTREACHED();
       value = NumberType(); // this line removes compiler warning

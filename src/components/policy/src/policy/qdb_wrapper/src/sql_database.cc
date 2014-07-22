@@ -30,10 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstring>
 #include "qdb_wrapper/sql_database.h"
+#include "utils/logger.h"
 
 namespace policy {
 namespace dbms {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "SQLDatabase")
 
 SQLDatabase::SQLDatabase(const std::string& db_name)
     : conn_(NULL),
@@ -96,13 +100,13 @@ qdb_hdl_t* SQLDatabase::conn() const {
   return conn_;
 }
 
-bool SQLDatabase::BackupDB() {
+bool SQLDatabase::Backup() {
   if (qdb_backup(conn_, QDB_ATTACH_DEFAULT) == -1) {
 	error_ = Error::ERROR;
-	printf("Backup_err\n");
+    LOG4CXX_ERROR(logger_, "Backup returned error: " << std::strerror(errno));
 	return false;
   }
-  printf("Backup_ok\n");
+  LOG4CXX_INFO(logger_, "Backup was successful.");
   return true;
 }
 

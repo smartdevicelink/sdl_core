@@ -36,10 +36,10 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_THREADED_SOCKET_CONNECTION_H_
 
 #include <poll.h>
-
 #include <queue>
 
 #include "transport_manager/transport_adapter/connection.h"
+#include "protocol/common.h"
 
 using ::transport_manager::transport_adapter::Connection;
 
@@ -61,7 +61,7 @@ class ThreadedSocketConnection : public Connection {
    *
    * @return Error Information about possible reason of sending data failure.
    */
-  TransportAdapter::Error SendData(RawMessageSptr message);
+  TransportAdapter::Error SendData(RawMessagePtr message);
 
   /**
    * @brief Disconnect the current connection.
@@ -143,7 +143,7 @@ class ThreadedSocketConnection : public Connection {
   /**
    * @brief Frames that must be sent to remote device.
    **/
-  typedef std::queue<RawMessageSptr> FrameQueue;
+  typedef std::queue<RawMessagePtr> FrameQueue;
   FrameQueue frames_to_send_;
   mutable pthread_mutex_t frames_to_send_mutex_;
 
@@ -158,4 +158,4 @@ class ThreadedSocketConnection : public Connection {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SOCKET_COMMUNICATION
+#endif  //SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_SOCKET_COMMUNICATION

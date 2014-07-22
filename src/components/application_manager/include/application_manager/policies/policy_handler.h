@@ -127,7 +127,7 @@ class PolicyHandler :
    * @brief Store user-changed permissions consent to DB
    * @param permissions User-changed group permissions consent
    */
-  void OnAppPermissionConsent(const PermissionConsent& permissions);
+  void OnAppPermissionConsent(PermissionConsent& permissions);
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -225,12 +225,6 @@ class PolicyHandler :
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,
                                       bool is_allowed);
-
-  /**
-   * Adds http header (temporary method)
-   * @param pt_string string without htt header
-   */
-  BinaryMessageSptr AddHttpHeader(const BinaryMessageSptr& pt_string);
 
   /**
    * Checks whether application is revoked

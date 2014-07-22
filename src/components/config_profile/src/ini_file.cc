@@ -128,7 +128,7 @@ char* ini_read_value(const char *fname,
           tag[i] = toupper(tag[i]);
       }
     } else {
-      // FIXME (dchmerev@gmail.com): Unnecessary condition
+      // FIXME (dchmerev): Unnecessary condition
       if ((INI_RIGHT_CHAPTER == result) || (INI_WRONG_CHAPTER == result)) {
         fclose(fp);
         return NULL;

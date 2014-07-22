@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,13 +42,15 @@ static const size_t kRpcTypeBits       = 4;
 static const size_t kRpcFunctionIdBits = 32 - kRpcTypeBits;
 static const size_t kCorellationIdBits = 32;
 static const size_t kJsonSizeBits      = 32;
-static const size_t PayloadHeaderBits =
-    kRpcTypeBits + kRpcFunctionIdBits + kCorellationIdBits + kJsonSizeBits;
+static const size_t PayloadHeaderBits  = kRpcTypeBits +
+                                         kRpcFunctionIdBits +
+                                         kCorellationIdBits +
+                                         kJsonSizeBits;
 }
 
 namespace protocol_handler {
 
-void Extract(utils::BitStream* bs, ProtocolPayloadHeaderV2* headerv2) {
+void Extract(utils::BitStream *bs, ProtocolPayloadHeaderV2 *headerv2) {
   DCHECK(bs && headerv2);
   if (*bs) {
     uint8_t rpc_type;
@@ -64,7 +66,7 @@ void Extract(utils::BitStream* bs, ProtocolPayloadHeaderV2* headerv2) {
   }
 }
 
-void Extract(utils::BitStream* bs, ProtocolPayloadV2* payload,
+void Extract(utils::BitStream *bs, ProtocolPayloadV2 *payload,
              size_t payload_size) {
   DCHECK(bs && payload);
   if (*bs) {
@@ -77,21 +79,23 @@ void Extract(utils::BitStream* bs, ProtocolPayloadV2* payload,
   }
 }
 
-std::ostream& operator<<(std::ostream& os, const ProtocolPayloadHeaderV2& payload_header) {
-  return os<<"(ProtocolPayloadHeaderV2"
-           <<"  rpc_type: "<<payload_header.rpc_type
-           <<", rpc_function_id: "<<payload_header.rpc_function_id
-           <<", corellation_id: "<<payload_header.corellation_id
-           <<", json_size: "<<payload_header.json_size
-           <<")";
+std::ostream &operator<<(std::ostream &os,
+                         const ProtocolPayloadHeaderV2 &payload_header) {
+  return os << "(ProtocolPayloadHeaderV2"     << "  rpc_type: "
+            << payload_header.rpc_type        << ", rpc_function_id: "
+            << payload_header.rpc_function_id << ", corellation_id: "
+            << payload_header.corellation_id  << ", json_size: "
+            << payload_header.json_size       << ")";
 }
 
-std::ostream& operator<<(std::ostream& os, const ProtocolPayloadV2& payload) {
-  return os<<"(ProtocolPayloadV2"
-           <<"  header: "<<payload.header
-           <<", json (bytes): "<<payload.json.size()
-           <<", data (bytes): "<<payload.data.size()
-           <<")";
+std::ostream &operator<<(std::ostream &os, const ProtocolPayloadV2 &payload) {
+  return os << "(ProtocolPayloadV2" << "  header: " << payload.header
+            << ", json (bytes): "   << payload.json.size() << ", data (bytes): "
+            << payload.data.size()  << ")";
 }
 
-} // namespace protocol_handler
+size_t ProtocolPayloadV2SizeBits() {
+  return PayloadHeaderBits;
+}
+
+}  // namespace protocol_handler

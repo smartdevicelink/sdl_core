@@ -53,5 +53,4 @@ class MediaAdapterListener {
     virtual void OnActivityEnded(int32_t application_key) = 0;
 };
 }  //  namespace media_manager
-
 #endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_LISTENER_H_

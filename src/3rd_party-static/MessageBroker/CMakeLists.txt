@@ -4,8 +4,8 @@ set(MESSAGE_BROKER_INCLUDE_DIRECTORY ${MESSAGE_BROKER_INCLUDE_DIRECTORY} PARENT_
 include_directories (
   ./include/
   ../jsoncpp/include
-	../../components/utils/include
-  
+  ../../components/utils/include
+
 )
 
 set (MESSAGE_BROKER_SOURCES

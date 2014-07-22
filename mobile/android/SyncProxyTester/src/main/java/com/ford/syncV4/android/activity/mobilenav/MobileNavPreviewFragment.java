@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SafeToast;
@@ -19,7 +20,7 @@ import java.io.OutputStream;
 
 public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
 
-    private static final String TAG = MobileNavPreviewFragment.class.getSimpleName();
+    private static final String LOG_TAG = "MobileNavPreviewFragment";
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -33,29 +34,27 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         initiateView(view);
     }
 
-    public void onMobileNaviCheckBoxAction(View v) {
-        changeMobileNaviCheckBoxState();
-    }
-
     @Override
     public void setStateOff() {
         super.setStateOff();
-        CheckBox box = (CheckBox) getView().findViewById(R.id.mobileNavCheckBox);
-        box.setChecked(false);
-        Button button = (Button) getView().findViewById(R.id.videobutton);
-        button.setEnabled(false);
     }
 
-    public void setMobileNaviStateOn(OutputStream stream) {
+    public void setMobileNaviStateOn(OutputStream stream, boolean encrypted) {
         mSessionCheckBoxState.setStateOn();
-        Button button = (Button) getView().findViewById(R.id.videobutton);
-        button.setEnabled(true);
-        mDataStreamingButton.setEnabled(true);
-
         mFileStreamingLogic.setOutputStream(stream);
         mFileStreamingLogic.createStaticFileReader();
         if (mFileStreamingLogic.isStreamingInProgress()) {
             startFileStreaming();
+        }
+        notifyServiceState(encrypted);
+    }
+
+    private void notifyServiceState(boolean encrypted) {
+        TextView textView = (TextView) getView().findViewById(R.id.service_status_text_view);
+        if (encrypted) {
+            textView.setText("Service is cyphered");
+        } else {
+            textView.setText("Service is Not cyphered");
         }
     }
 
@@ -72,28 +71,59 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
             @Override
             public void onClick(View view) {
                 if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
-                    onMobileNaviCheckBoxAction(view);
+                    changeCheckBoxState();
                 } else {
                     SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
                 }
             }
         });
+        Button sendSecureServiceButton = (Button) view.findViewById(R.id.mobile_navi_service_secure_button_view);
+        sendSecureServiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
+                    sendStartEncryptedService();
+                } else {
+                    SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
+                }
+            }
+        });
+
+        Button sendNotSecureServiceButton = (Button) view.findViewById(R.id.mobile_navi_not_service_secure_button_view);
+        sendNotSecureServiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
+                    sendStartNotEncryptedService();
+                } else {
+                    SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
+                }
+            }
+        });
+
         mSessionCheckBoxState = new MobileNaviCheckBoxState(checkBox, getActivity());
-        mSessionCheckBoxState.setStateOff();
     }
 
-    private void changeMobileNaviCheckBoxState() {
+    private void sendStartEncryptedService() {
+        SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        syncProxyTester.startMobileNaviServiceEncryption(getAppId());
+    }
+
+    private void sendStartNotEncryptedService() {
+        SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        syncProxyTester.startMobileNaviNotEncryptedService(getAppId());
+    }
+
+    private void changeCheckBoxState() {
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
-            tester.startMobileNaviService(getAppId());
+            tester.startMobileNaviService(getAppId(), false);
         } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             mFileStreamingLogic.resetStreaming();
             SyncProxyTester tester = (SyncProxyTester) getActivity();
             tester.stopMobileNavService(getAppId());
             mSessionCheckBoxState.setStateOff();
-            Button button = (Button) getView().findViewById(R.id.videobutton);
-            button.setEnabled(false);
         }
     }
 
@@ -112,7 +142,7 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
                 break;
 
             default:
-                Logger.e(TAG + " Unknown video source " + videoSource);
+                Logger.e(LOG_TAG, " Unknown video source " + videoSource);
                 return;
         }
         startBaseFileStreaming(videoResID);

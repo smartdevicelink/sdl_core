@@ -3,20 +3,30 @@ package com.ford.syncV4.transport;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.util.logger.Logger;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+
 public abstract class SyncTransport {
 
+    private static final String SYNC_LIB_TRACE_KEY = "42baba60-eb57-11df-98cf-0800200c9a66";
     public static final String DISCONNECT_REASON_END_OF_STREAM_REACHED = "EndOfStreamReached";
 
     private final static String CLASS_NAME = SyncTransport.class.getSimpleName();
     private final static String FailurePropagating_Msg = "Failure propagating ";
+
+    private String _sendLockObj = "lock";
+
+    public abstract InputStream getInputStream();
+
+    public abstract OutputStream getOutputStream();
+
+    // Get status of transport connection
+    public Boolean getIsConnected() {
+        return isConnected;
+    }
     private static final String SEND_LOCK_OBJ = "lock";
 
 	private volatile Boolean isConnected = false;
-
-	// Get status of transport connection
-	public Boolean getIsConnected() {
-		return isConnected;
-	}
 
     //protected SyncTransport(String endpointName, String param2, ITransportListener transportListener)
     protected SyncTransport(ITransportListener transportListener) {
@@ -29,24 +39,24 @@ public abstract class SyncTransport {
     public void removeListener() {
         mTransportListener = null;
     }
-    
+
     // This method is called by the subclass to indicate that data has arrived from
     // the transport.
     protected void handleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
 		try {
+            Logger.d(CLASS_NAME + " -> receive " + receivedBytesLength + " bytes");
 			// Trace received data
 			if (receivedBytesLength > 0) {
 				// Send transport data to the siphon server
 				//SiphonServer.sendBytesFromSYNC(receivedBytes, 0, receivedBytesLength);
-                Logger.d(CLASS_NAME + " Receive Bytes");
-				
+
 				mTransportListener.onTransportBytesReceived(receivedBytes, receivedBytesLength);
-			} // end-if
+			}
 		} catch (Exception excp) {
 			Logger.e(FailurePropagating_Msg + "handleBytesFromTransport: " + excp.toString(), excp);
 			handleTransportError(FailurePropagating_Msg, excp);
-		} // end-catch
-    } // end-method
+		}
+    }
 
     // This method must be implemented by transport subclass, and is called by this
     // base class to actually send an array of bytes out over the transport.  This
@@ -58,16 +68,17 @@ public abstract class SyncTransport {
     public boolean sendBytes(byte[] message) {
         return sendBytes(message, 0, message.length);
     } // end-method
-    
+
     // This method is called by whomever has reference to transport to have bytes
     // sent out over transport.
     public boolean sendBytes(byte[] message, int offset, int length) {
         boolean bytesWereSent = false;
         synchronized (SEND_LOCK_OBJ) {
-        	bytesWereSent = sendBytesOverTransport(message, offset, length);
+            Logger.i(CLASS_NAME + " <- sending " + length + " bytes");
+            bytesWereSent = sendBytesOverTransport(message, offset, length);
         } // end-lock
         // Send transport data to the siphon server
-		//SiphonServer.sendBytesFromAPP(message, offset, length);
+        //SiphonServer.sendBytesFromAPP(message, offset, length);
         //Logger.d(CLASS_NAME + " Bytes sent");
         return bytesWereSent;
     } // end-method
@@ -76,29 +87,30 @@ public abstract class SyncTransport {
 
     // This method is called by the subclass to indicate that transport connection
     // has been established.
-	protected void handleTransportConnected() {
-		isConnected = true;
-		try {
+    protected void handleTransportConnected() {
+        isConnected = true;
+        try {
             Logger.d(CLASS_NAME + " Connected");
 			mTransportListener.onTransportConnected();
 		} catch (Exception excp) {
 			Logger.e(FailurePropagating_Msg + "onTransportConnected: " + excp.toString(), excp);
 			handleTransportError(FailurePropagating_Msg + "onTransportConnected", excp);
-		}
-	}
-	
+		} // end-catch
+	} // end-method
+
     // This method is called by the subclass to indicate that transport disconnection
     // has occurred.
-	protected void handleTransportDisconnected(final String info) {
-		isConnected = false;
-		try {
+    protected void handleTransportDisconnected(final String info) {
+        isConnected = false;
+
+        try {
             Logger.d(CLASS_NAME + " Disconnected");
 			mTransportListener.onTransportDisconnected(info);
 		} catch (Exception excp) {
 			Logger.e(FailurePropagating_Msg + "onTransportDisconnected: " + excp.toString(), excp);
 		}
 	}
-	
+
 	// This method is called by the subclass to indicate a transport error has occurred.
 	protected void handleTransportError(final String message, final Exception ex) {
 		isConnected = false;
@@ -109,19 +121,19 @@ public abstract class SyncTransport {
         mTransportListener.onServerSocketInit(serverSocketPort);
     }
 
-	public abstract void openConnection() throws SyncException;
-	public abstract void disconnect();
+    public abstract void openConnection() throws SyncException;
+
+    public abstract void disconnect();
 
     // This method is called when the SDK doesn't want to read anything from the
     // transport anymore. It is required for the USB transport.
     public abstract void stopReading();
-	
-	/**
-	 * Abstract method which should be implemented by subclasses in order to return actual type of the transport. 
-	 * 
-	 * @return One of {@link TransportType} enumeration values.
-	 * 
-	 * @see TransportType
-	 */
-	public abstract TransportType getTransportType();
+
+    /**
+     * Abstract method which should be implemented by subclasses in order to return actual type of the transport.
+     *
+     * @return One of {@link TransportType} enumeration values.
+     * @see TransportType
+     */
+    public abstract TransportType getTransportType();
 } // end-class

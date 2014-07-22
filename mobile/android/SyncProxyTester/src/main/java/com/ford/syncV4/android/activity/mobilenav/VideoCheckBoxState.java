@@ -12,8 +12,9 @@ public class VideoCheckBoxState extends CheckBoxState {
 
     public VideoCheckBoxState(CheckBox item, Context context) {
         super(item, context);
-        hintString = getResources().getString(R.string.video_streaming_hint);
-        textString = getResources().getString(R.string.video_check_box_on);
+        //hintString = getResources().getString(R.string.service_check_view_on);
+        textStringOff = getResources().getString(R.string.service_check_view_off);
+        textStringOn = getResources().getString(R.string.service_check_view_on);
         setStateOff();
     }
 }
