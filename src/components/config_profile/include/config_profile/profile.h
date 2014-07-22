@@ -438,6 +438,10 @@ class Profile : public utils::Singleton<Profile> {
 
     const std::string& iap_hub_protocol() const;
 
+    const std::string& iap_system_config() const;
+
+    const std::string& iap2_system_config() const;
+
     int iap2_hub_connect_attempts() const;
 
 
@@ -608,6 +612,8 @@ class Profile : public utils::Singleton<Profile> {
 
     std::string                     iap_legacy_protocol_;
     std::string                     iap_hub_protocol_;
+    std::string                     iap_system_config_;
+    std::string                     iap2_system_config_;
     int                             iap2_hub_connect_attempts_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
