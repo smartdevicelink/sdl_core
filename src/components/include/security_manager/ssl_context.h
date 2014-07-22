@@ -54,7 +54,7 @@
  * \param in_data        [in]   data sent by other side
  * \param in_data_size   [in]   size of data in \ref in_data buffer
  * \param out_data       [out]  response of SSL context if there is one. If not, equals NULL
- * \param out_data_size  [out]  length of response
+ * \param out_data_size  [out]  length of response. On no response, equals 0
  */
 
 namespace security_manager {

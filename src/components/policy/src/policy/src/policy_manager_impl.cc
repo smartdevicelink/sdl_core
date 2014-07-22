@@ -851,19 +851,10 @@ bool PolicyManagerImpl::GetPriority(const std::string& policy_app_id,
     LOG4CXX_WARN(logger_, "Input priority parameter is null.");
     return false;
   }
-#if defined (EXTENDED_POLICY)
-  PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
-                                .pt_data().get());
-  if (!pt_ext) {
-    LOG4CXX_WARN(logger_, "Can't get priority.");
-    return false;
-  }
 
-  return pt_ext->GetPriority(policy_app_id, priority);
-#else
-  priority->clear();
-  return true;
-#endif
+  return policy_table_.pt_data()->GetPriority(policy_app_id, priority);
+
+
 }
 
 std::vector<UserFriendlyMessage> PolicyManagerImpl::GetUserFriendlyMessages(

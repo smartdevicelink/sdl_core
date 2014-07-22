@@ -2629,7 +2629,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onRPCServiceStart(String appId, boolean encrypted) {
+        public void onSecureSessionStarted(String appId) {
 
         }
 

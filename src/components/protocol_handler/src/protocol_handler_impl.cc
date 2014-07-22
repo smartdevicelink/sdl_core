@@ -203,9 +203,11 @@ void ProtocolHandlerImpl::RemoveProtocolObserver(ProtocolObserver* observer) {
 
 void ProtocolHandlerImpl::set_session_observer(SessionObserver *observer) {
   if (!observer) {
-    LOG4CXX_ERROR(logger_, "Invalid (NULL) pointer to ISessionObserver.");
+    LOG4CXX_WARN(logger_, "Invalid (NULL) pointer to ISessionObserver.");
     // Do not return from here!
   }
+
+
   session_observer_ = observer;
 }
 
@@ -367,6 +369,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
     return;
   }
 
+
   if (!session_observer_) {
     LOG4CXX_ERROR(
         logger_,
@@ -481,7 +484,6 @@ void ProtocolHandlerImpl::OnTMMessageReceiveFailed(
 }
 
 void ProtocolHandlerImpl::NotifySubscribers(const RawMessagePtr message) {
-  LOG4CXX_TRACE(logger_, "ProtocolHandlerImpl::NotifySubscribers");
   sync_primitives::AutoLock lock(protocol_observers_lock_);
   for (ProtocolObservers::iterator it = protocol_observers_.begin();
       protocol_observers_.end() != it; ++it) {
@@ -750,6 +752,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
       }
 #endif
 
+  // TODO(EZamakhov): check service in session
   NotifySubscribers(rawMessage);
   LOG4CXX_TRACE_EXIT(logger_);
   return RESULT_OK;
@@ -758,6 +761,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
     ConnectionID connection_id, const ProtocolFramePtr packet) {
   LOG4CXX_TRACE_ENTER(logger_);
+
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "No ISessionObserver set.");
     LOG4CXX_TRACE_EXIT(logger_);
@@ -838,6 +842,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
         metric_observer_->EndMessageProcess(metric);
       }
 #endif  // TIME_TESTER
+      // TODO(EZamakhov): check service in session
       NotifySubscribers(rawMessage);
 
       incomplete_multi_frame_messages_.erase(it);
@@ -851,6 +856,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessage(
     ConnectionID connection_id, const ProtocolFramePtr packet) {
   LOG4CXX_TRACE_ENTER(logger_);
+
   if (!session_observer_) {
     LOG4CXX_ERROR(logger_, "ISessionObserver is not set.");
     LOG4CXX_TRACE_EXIT(logger_);
@@ -1083,13 +1089,21 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
 }
 
 void ProtocolHandlerImpl::Handle(
-    const impl::RawFordMessageFromMobile &message) {
+    const impl::RawFordMessageFromMobile message) {
   LOG4CXX_TRACE_ENTER(logger_);
 
+  if (NULL == session_observer_) {
+    LOG4CXX_WARN(logger_, "Session Observer is NULL");
+    return;
+  }
   connection_handler::ConnectionHandlerImpl *connection_handler =
         connection_handler::ConnectionHandlerImpl::instance();
-  if (session_observer_->IsHeartBeatSupported(
-        message->connection_id(), message->session_id())) {
+  LOG4CXX_INFO(logger_, "Message : " << message.get())
+  LOG4CXX_INFO(logger_, "session_observer_: " <<session_observer_)
+  uint8_t c_id = message->connection_id();
+  uint32_t m_id = message->session_id();
+
+  if (session_observer_->IsHeartBeatSupported(c_id, m_id)) {
     connection_handler->KeepConnectionAlive(message->connection_id(),
                                             message->session_id());
   }
@@ -1106,7 +1120,7 @@ void ProtocolHandlerImpl::Handle(
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
-void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile &message) {
+void ProtocolHandlerImpl::Handle(const impl::RawFordMessageToMobile message) {
   LOG4CXX_INFO_EXT(
       logger_,
       "Message to mobile app: connection id " <<
@@ -1162,12 +1176,17 @@ RESULT_CODE ProtocolHandlerImpl::EncryptFrame(ProtocolFramePtr packet) {
     LOG4CXX_ERROR(logger_, "Enryption failed: " << error_text);
     security_manager_->SendInternalError(connection_key,
           security_manager::SecurityManager::ERROR_ENCRYPTION_FAILED, error_text);
+    // Close session to prevent usage unprotected service/session
+    session_observer_->OnSessionEndedCallback(
+          packet->connection_id(), packet->session_id(),
+          packet->message_id(),    kRpc);
     return RESULT_OK;
   };
   LOG4CXX_DEBUG(logger_, "Encrypted " << packet->data_size() << " bytes to "
                 << out_data_size << " bytes");
   DCHECK(out_data);
   DCHECK(out_data_size);
+  DCHECK(out_data_size <= MAXIMUM_FRAME_DATA_SIZE);
   packet->set_protection_flag(true);
   packet->set_data(out_data, out_data_size);
   return RESULT_OK;
@@ -1208,6 +1227,10 @@ RESULT_CODE ProtocolHandlerImpl::DecryptFrame(ProtocolFramePtr packet) {
     LOG4CXX_ERROR(logger_, "Decryption failed: " << error_text);
     security_manager_->SendInternalError(connection_key,
           security_manager::SecurityManager::ERROR_DECRYPTION_FAILED, error_text);
+    // Close session to prevent usage unprotected service/session
+    session_observer_->OnSessionEndedCallback(
+          packet->connection_id(), packet->session_id(),
+          packet->message_id(),    kRpc);
     return RESULT_ENCRYPTION_FAILED;
   };
   LOG4CXX_DEBUG(logger_, "Decrypted " << packet->data_size() << " bytes to "

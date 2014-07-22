@@ -387,7 +387,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
 
             @Override
             public void onProtocolSessionStarted(byte sessionId,
-                                                 byte version) {
+                                                 byte version, boolean encrypted) {
             }
 
             @Override
@@ -505,7 +505,7 @@ public class WiProProtocolTest extends InstrumentationTestCase {
             }
 
             @Override
-            public void onProtocolSessionStarted(byte sessionId, byte version) {
+            public void onProtocolSessionStarted(byte sessionId, byte version, boolean encrypted) {
                 assertEquals("syncSession id should be SESSION_ID", SESSION_ID, sessionId);
                 passed[0] = true;
             }

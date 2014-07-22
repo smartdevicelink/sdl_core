@@ -442,9 +442,9 @@ class ProtocolHandlerImpl
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON raw_ford_messages_from_mobile_ thread!
-  void Handle(const impl::RawFordMessageFromMobile &message);
+  void Handle(const impl::RawFordMessageFromMobile message);
   // CALLED ON raw_ford_messages_to_mobile_ thread!
-  void Handle(const impl::RawFordMessageToMobile &message);
+  void Handle(const impl::RawFordMessageToMobile message);
 
 #ifdef ENABLE_SECURITY
   /**
@@ -517,7 +517,8 @@ class ProtocolHandlerImpl
   // Thread that pumps messages prepared to being sent to mobile side.
   impl::ToMobileQueue raw_ford_messages_to_mobile_;
 
-    sync_primitives::Lock protocol_observers_lock_;
+  sync_primitives::Lock protocol_observers_lock_;
+
 #ifdef TIME_TESTER
   PHMetricObserver *metric_observer_;
 #endif  // TIME_TESTER

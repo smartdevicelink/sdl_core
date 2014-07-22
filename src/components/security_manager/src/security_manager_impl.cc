@@ -102,7 +102,7 @@ void SecurityManagerImpl::set_crypto_manager(CryptoManager *crypto_manager) {
   crypto_manager_ = crypto_manager;
 }
 
-void SecurityManagerImpl::Handle(const SecurityMessage &message) {
+void SecurityManagerImpl::Handle(const SecurityMessage message) {
   DCHECK(message);
   LOG4CXX_INFO(logger_, "Received Security message from Mobile side");
   if (!crypto_manager_)  {
@@ -315,6 +315,7 @@ void SecurityManagerImpl::SendHandshakeBinData(
   const SecurityQuery::QueryHeader header(
         SecurityQuery::NOTIFICATION,
         SecurityQuery::SEND_HANDSHAKE_DATA, seq_number);
+  DCHECK(data_size < 1024 * 1024 *1024);
   const SecurityQuery query = SecurityQuery(header, connection_key, data, data_size);
   SendQuery(query, connection_key);
   LOG4CXX_DEBUG(logger_, "Sent " << data_size << " bytes handshake data ")

@@ -65,6 +65,7 @@ std::string CryptoManagerImpl::SSLContextImpl::LastError() const {
 }
 
 bool CryptoManagerImpl::SSLContextImpl::IsInitCompleted() const {
+  sync_primitives::AutoLock locker(bio_locker);
   return SSL_is_init_finished(connection_);
 }
 
@@ -132,16 +133,20 @@ CryptoManagerImpl::SSLContextImpl::max_block_sizes =
 
 SSLContext::HandshakeResult CryptoManagerImpl::SSLContextImpl::
 DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
-                const uint8_t** const out_data, size_t *out_data_size) {
-  // TODO(Ezamakhov): add test - hanshake fail -> restart StartHandshake
+                const uint8_t** const out_data, size_t* out_data_size) {
+  DCHECK(out_data);
+  DCHECK(out_data_size);
   *out_data = NULL;
-  if (IsInitCompleted()) {
+  *out_data_size = 0;
+  // TODO(Ezamakhov): add test - hanshake fail -> restart StartHandshake
+  sync_primitives::AutoLock locker(bio_locker);
+  if (SSL_is_init_finished(connection_)) {
     is_handshake_pending_ = false;
     return SSLContext::Handshake_Result_Success;
   }
 
   if (in_data && in_data_size) {
-    int ret = BIO_write(bioIn_, in_data, in_data_size);
+    const int ret = BIO_write(bioIn_, in_data, in_data_size);
     if (ret <= 0) {
       is_handshake_pending_ = false;
       SSL_clear(connection_);
@@ -174,7 +179,7 @@ DoHandshakeStep(const uint8_t*  const in_data,  size_t in_data_size,
     EnsureBufferSizeEnough(pend);
 
     const int read_count = BIO_read(bioOut_, buffer_, pend);
-    if (read_count  == pend) {
+    if (read_count  == static_cast<int>(pend)) {
       *out_data_size = read_count;
       *out_data =  buffer_;
     } else {
@@ -191,6 +196,7 @@ bool CryptoManagerImpl::SSLContextImpl::Encrypt(
     const uint8_t *  const in_data,  size_t in_data_size,
     const uint8_t ** const out_data, size_t *out_data_size) {
 
+  sync_primitives::AutoLock locker(bio_locker);
   if (!SSL_is_init_finished(connection_) ||
       !in_data ||
       !in_data_size) {
@@ -203,7 +209,9 @@ bool CryptoManagerImpl::SSLContextImpl::Encrypt(
   EnsureBufferSizeEnough(len);
   const int read_size = BIO_read(bioOut_, buffer_, len);
   DCHECK(len == read_size);
-  if (read_size < 0) {
+  if (read_size <= 0) {
+    // Reset filter and connection deinitilization instead
+    BIO_reset(bioFilter_);
     return false;
   }
   *out_data_size = read_size;
@@ -216,6 +224,7 @@ bool CryptoManagerImpl::SSLContextImpl::Decrypt(
     const uint8_t *  const in_data,  size_t in_data_size,
     const uint8_t ** const out_data, size_t *out_data_size) {
 
+  sync_primitives::AutoLock locker(bio_locker);
   if (!SSL_is_init_finished(connection_)) {
     return false;
   }
@@ -231,8 +240,12 @@ bool CryptoManagerImpl::SSLContextImpl::Decrypt(
   while (len) {
     EnsureBufferSizeEnough(len + offset);
     len = BIO_read(bioFilter_, buffer_ + offset, len);
-    if (len < 0)
+    // TODO(EZamakhov): investigate BIO_read return 0, -1 and -2 meanings
+    if (len <= 0) {
+      // Reset filter and connection deinitilization instead
+      BIO_reset(bioFilter_);
       return false;
+    }
     *out_data_size += len;
     offset += len;
     len = BIO_ctrl_pending(bioFilter_);

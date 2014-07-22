@@ -169,7 +169,7 @@ template<typename T, class Q> T MessageQueue<T, Q>::pop() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
   if (shutting_down_) {
     CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-    LOG4CXX_ERROR(logger_, "Runtime error, pushing into queue"
+    LOG4CXX_ERROR(logger_, "Runtime error, pop from queue"
                          " that is being shut down");
   }
   if (queue_.empty()) {

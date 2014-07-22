@@ -342,8 +342,7 @@ bool UpdateSection(dbms::SQLDatabase* db,
     policy_table::ApplicationParams app_params = (*it_ap).second;
 
     // Priority binding
-    // This param is present in extended policy table interface only
-    //app_policies_sqlquery.Bind(2, app_params.priority);
+    app_policies_sqlquery.Bind(2, app_params.priority);
     app_policies_sqlquery.Bind(2, "Dummy priority parameter");
 
     // Add record to AppPolicies table

@@ -35,6 +35,8 @@
 namespace policy {
 namespace sql_pt {
 
+const std::string kSelectPriority =
+    "SELECT `priority_value` FROM `application` WHERE `id` = ? LIMIT 1";
 const std::string kCreateSchema =
   "BEGIN; "
   "CREATE TABLE IF NOT EXISTS `device`( "
@@ -450,8 +452,8 @@ const std::string kInsertRpcWithParameter =
   "  VALUES (?, ?, ?, ?)";
 
 const std::string kInsertApplication =
-  "INSERT OR IGNORE INTO `application` (`id`, `is_revoked`, `memory_kb`,"
-  " `heart_beat_timeout_ms`, `certificate`) VALUES (?,?,?,?,?)";
+  "INSERT OR IGNORE INTO `application` (`id`, `priority_value`, `is_revoked`, `memory_kb`,"
+  " `heart_beat_timeout_ms`, `certificate`) VALUES (?,?,?,?,?,?)";
 
 const std::string kInsertAppGroup =
   "INSERT INTO `app_group` (`application_id`, `functional_group_id`)"
@@ -547,7 +549,7 @@ const std::string kSelectAllRpcs =
 const std::string kSelectUserMsgsVersion =
   "SELECT DISTINCT `number` FROM `version`";
 
-const std::string kSelectAppPolicies = "SELECT `id`, `memory_kb`, "
+const std::string kSelectAppPolicies = "SELECT `id`, `priority_value`, `memory_kb`, "
                                        " `heart_beat_timeout_ms`, `certificate` FROM `application`";
 
 const std::string kSelectAppGroups = "SELECT `f`.`name` FROM `app_group` AS `a`"

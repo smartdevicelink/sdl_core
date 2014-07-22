@@ -98,9 +98,9 @@ class HMIMessageHandlerImpl
   // threads::MessageLoopThread<*>::Handler implementations
 
   // CALLED ON messages_from_hmi_ THREAD!
-  virtual void Handle(const impl::MessageFromHmi& message) OVERRIDE;
+  virtual void Handle(const impl::MessageFromHmi message) OVERRIDE;
   // CALLED ON messages_to_hmi_ THREAD!
-  virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
+  virtual void Handle(const impl::MessageToHmi message) OVERRIDE;
  private:
 
   HMIMessageObserver* observer_;

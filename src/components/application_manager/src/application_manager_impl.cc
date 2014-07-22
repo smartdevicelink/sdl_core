@@ -415,28 +415,28 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
 
   bool is_new_app_media = app->is_media_application();
 
+  if (app->IsFullscreen()) {
+    LOG4CXX_WARN(logger_, "Application is already active.");
+    return false;
+  }
+  if (mobile_api::HMILevel::eType::HMI_LIMITED !=
+      app->hmi_level()) {
+    if (app->has_been_activated()) {
+      MessageHelper::SendAppDataToHMI(app);
+    }
+  }
+  app->MakeFullscreen();
   for (std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
        application_list_.end() != it;
        ++it) {
     ApplicationSharedPtr curr_app = *it;
     if (app->app_id() == curr_app->app_id()) {
-      if (curr_app->IsFullscreen()) {
-        LOG4CXX_WARN(logger_, "Application is already active.");
-        return false;
-      }
-      if (mobile_api::HMILevel::eType::HMI_LIMITED !=
-          curr_app->hmi_level()) {
-        if (curr_app->has_been_activated()) {
-          MessageHelper::SendAppDataToHMI(curr_app);
-        }
-      }
-      if (!curr_app->MakeFullscreen()) {
-        return false;
-      }
+      continue;
     } else {
       if (is_new_app_media) {
         if (curr_app->IsAudible()) {
           curr_app->MakeNotAudible();
+          MessageHelper::SendHMIStatusNotification(*curr_app);
         }
       }
       if (curr_app->IsFullscreen()) {
@@ -1875,7 +1875,7 @@ void ApplicationManagerImpl::UnregisterApplication(
   return;
 }
 
-void ApplicationManagerImpl::Handle(const impl::MessageFromMobile& message) {
+void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
   LOG4CXX_INFO(logger_, "Received message from Mobile side");
 
   if (!message) {
@@ -1885,7 +1885,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromMobile& message) {
   ProcessMessageFromMobile(message);
 }
 
-void ApplicationManagerImpl::Handle(const impl::MessageToMobile& message) {
+void ApplicationManagerImpl::Handle(const impl::MessageToMobile message) {
   protocol_handler::RawMessage* rawMessage = 0;
   if (message->protocol_version() == application_manager::kV1) {
     rawMessage = MobileMessageHandler::HandleOutgoingMessageProtocolV1(message);
@@ -1924,7 +1924,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageToMobile& message) {
   }
 }
 
-void ApplicationManagerImpl::Handle(const impl::MessageFromHmi& message) {
+void ApplicationManagerImpl::Handle(const impl::MessageFromHmi message) {
   LOG4CXX_INFO(logger_, "Received message from hmi");
 
   if (!message) {
@@ -1935,7 +1935,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromHmi& message) {
   ProcessMessageFromHMI(message);
 }
 
-void ApplicationManagerImpl::Handle(const impl::MessageToHmi& message) {
+void ApplicationManagerImpl::Handle(const impl::MessageToHmi message) {
   LOG4CXX_INFO(logger_, "Received message to hmi");
   if (!hmi_handler_) {
     LOG4CXX_ERROR(logger_, "Observer is not set for HMIMessageHandler");
@@ -2048,17 +2048,22 @@ void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
 void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
   std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
   std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
+  //according with SDLAQ-CRS-839
+  bool is_application_audible = false;
+
   for (; it != itEnd; ++it) {
     if ((*it)->is_media_application()) {
       if (kTTSSessionChanging == changing_state) {
         (*it)->set_tts_speak_state(false);
       }
-      if ((!(vr_session_started())) &&
+      if ((!is_application_audible) && (!(vr_session_started())) &&
           ((*it)->audio_streaming_state() !=
-           mobile_apis::AudioStreamingState::AUDIBLE) &&
-           (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level())) {
+              mobile_apis::AudioStreamingState::AUDIBLE) &&
+          (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level())) {
+        //according with SDLAQ-CRS-839
+        is_application_audible = true;
         (*it)->set_audio_streaming_state(
-          mobile_apis::AudioStreamingState::AUDIBLE);
+            mobile_apis::AudioStreamingState::AUDIBLE);
         MessageHelper::SendHMIStatusNotification(*(*it));
       }
     }

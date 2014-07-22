@@ -361,7 +361,7 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
     public void onDiagnosticMessageResponse(String appId,
                                             DiagnosticMessageResponse diagnosticMessageResponse);
 
-    public void onRPCServiceStart(String appId, boolean encrypted);
+    public void onSecureSessionStarted(String appId);
     /**
      * Provides a callback when {@link com.ford.syncV4.proxy.RPCRequest} is going to be sent over
      * transport

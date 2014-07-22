@@ -3,20 +3,17 @@
 #
 
 # Name of the componet (team/domain prefix '_' component name)
-COMPONENT_NAME = policy/qdb_wrapper
+COMPONENT_NAME = protocol
 
 ifndef PRJ_ROOT
 export PRJ_ROOT = $(CURDIR)/../../../../
 endif
 include $(PRJ_ROOT)cfg/depends.mk
 
-OBJS_FILE=.objs.txt
-
 # Additive Compile Flags (Flags from initiating make process will still apply)
 DEFS += \
 	-Wc,-Werror=return-type \
 	-Wc,-Wuninitialized \
-	 -DEXTENDED_POLICY
 
 # Set local includes and then the reference includes (priority order determines search path)
 # Default pattern are any configuration includes (which would be things like qnx), local (Team) component directories,
@@ -33,8 +30,8 @@ INCLUDES = \
 	$(CFG_INCS) \
 	$(CC_IFLAG)./ \
 	$(CC_IFLAG)../include \
-	$(CC_IFLAG)../../../../../include \
-	$(CC_IFLAG)../../../../../../3rd_party/log4cxx/include \
+	$(CC_IFLAG)../../include \
+	$(CC_IFLAG)../../../3rd_party/log4cxx/include \
 	$(DEPENDS_INCLUDES)
 
 
@@ -45,7 +42,6 @@ INCLUDES = \
 #  $(TEAM_ROOT)NS_MessageCenter/lib/NS_MessageCenter/
 LIB_PATHS += \
   $(DEPENDS_LIB_PATHS) \
-  qdb
   
 
 # Define binary outputs.  These can be libraries or executables.
@@ -59,7 +55,7 @@ LIB_PATHS += \
 #  LIB - Define the static library for Message Queue
 #
 #
-COMPONENT_LIB = $(LIB_PATH)$(LIB_PREFIX)dbms$(DEBUG_EXT).$(LIB_EXT)
+COMPONENT_LIB = $(LIB_PATH)$(LIB_PREFIX)$(COMPONENT_NAME)$(DEBUG_EXT).$(LIB_EXT)
 
 ## Sources Section
 
@@ -71,8 +67,11 @@ COMPONENT_LIB = $(LIB_PATH)$(LIB_PREFIX)dbms$(DEBUG_EXT).$(LIB_EXT)
 COMPONENT_SRCS = \
 	$(wildcard *.c*) \
 
+# Define sources that my not be local to your component
+# here, you can define indivial files or wildcard from 
+# a different folder.
+NON_LOCAL_SRCS = \
  
- .NOTPARALLEL:
 
 # List of all sources to be built.  Can be assembled from the other defintitions.
 #  This only defines sources for the current directory, so if there are subdirectories
@@ -80,6 +79,7 @@ COMPONENT_SRCS = \
 #  direct the building of sources, but no linking into a binary)
 SOURCES = \
 	$(COMPONENT_SRCS) \
+	$(NON_LOCAL_SRCS) \
 
 
 
@@ -89,7 +89,7 @@ SOURCES = \
 #
 C_LANG_OBJECTS = $(addprefix $(BLD_PATH),$(addsuffix .$(OBJ_EXT),$(basename $(filter %.c ,$(SOURCES) ) ) ) )
 CPP_LANG_OBJECTS = $(addprefix $(BLD_PATH),$(addsuffix .$(OBJ_EXT),$(basename $(filter %.cpp %.cxx,$(SOURCES) ) ) ) )
-CC_LANG_OBJECTS = $(addprefix $(abspath $(BLD_PATH))/,$(addsuffix .$(OBJ_EXT),$(basename $(filter %.cc,$(SOURCES) ) ) ) )
+CC_LANG_OBJECTS = $(addprefix $(BLD_PATH),$(addsuffix .$(OBJ_EXT),$(basename $(filter %.cc,$(SOURCES) ) ) ) )
 
 
 # List of all sources to be generated.  Can be assembled from the other defintitions.
@@ -99,18 +99,19 @@ OBJECTS = \
 	$(CC_LANG_OBJECTS) \
 
 
-# assuming all objects should be included in the executable.
-ALL_OBJECTS = \
-	$(addprefix $(abspath $(BLD_PATH))/,$(addsuffix .$(OBJ_EXT),$(basename $(NON_LOCAL_SRCS) ) ) ) \
-				$(OBJECTS)
-
-
+	
 # All headers that are dependencies.  Wildcard is easy to pickup local headers.
 #  This is only to automate the rebuilding, all builds on the servers are cleans
 #  So this is not a huge deal when building on a component level.
 HEADERS = \
-	$(wildcard *.h*) \
-	$(wildcard ../include/*.h*) \
+	$(wildcard ../include/$(COMPONENT_NAME)/*.h*) \
+	$(wildcard ../../transport_manager/include/transport_manager/*.h*) \
+	$(wildcard ../../transport_manager/include/transport_manager/pasa_bt/*.h*) \
+	$(wildcard ../../transport_manager/include/transport_manager/device_adapter/*.h*) \
+	$(wildcard ../../transport_manager/include/transport_manager/tcp/*.h*) \
+	$(wildcard ../../connection_handler/include/connection_handler/*.h*) \
+	$(wildcard ../../utils/include/utils/*.h*) \
+	$(wildcard ../../utils/include/utils/threads/*.h*) \
 
 	
 LIBRARIES = \
@@ -141,10 +142,8 @@ local: $(OBJECTS)
 # Defines specific for each deliverable
 
 # For a static library
-$(COMPONENT_LIB): $(ALL_OBJECTS)
-	@echo $^ > $(OBJS_FILE)
-	xargs --arg-file=$(OBJS_FILE) $(AR) $(AR_FLAGS) $(AR_OFLAG) $(@)
-
+$(COMPONENT_LIB): $(OBJECTS)
+	$(AR_CMD)
 
 # Standard set of derived targets
 library: base \
@@ -163,7 +162,6 @@ clean:
 	-rm -f $(BINARIES)
 	-rm -f $(LIBRARIES)
 	-rm -f $(OBJECTS)
-	-rm -f $(OBJS_FILE)
 	@echo "objs: --> $(OBJECTS)"
 	@echo "sources: --> $(SOURCES)"
 	@echo "headers: --> $(HEADERS)"
