@@ -147,8 +147,13 @@ bool BluetoothTransportAdapter::Restore() {
       }
     }
   }
-  LOG4CXX_TRACE(logger_, "exit Errors_occured: " << !errors_occured);
-  return !errors_occured;
+  bool result = !errors_occured;
+  if (result) {
+      LOG4CXX_TRACE(logger_, "exit with TRUE");
+  } else {
+      LOG4CXX_TRACE(logger_, "exit with FALSE");
+  }
+  return result;
 }
 
 }  // namespace transport_adapter

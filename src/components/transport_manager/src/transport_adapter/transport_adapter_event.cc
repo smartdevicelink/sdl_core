@@ -1,6 +1,4 @@
 /**
- * \file transport_adapter_event.cc
- * \brief TransportAdapterEvent class source file.
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *

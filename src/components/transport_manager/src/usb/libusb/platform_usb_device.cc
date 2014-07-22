@@ -1,6 +1,4 @@
 /**
- * \file platform_usb_device.cc
- * \brief Libusb PlatformUsbDevice class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -57,7 +55,7 @@ PlatformUsbDevice::PlatformUsbDevice(
     libusb_device_(device_libusb) {}
 
 std::string PlatformUsbDevice::GetDescString(uint8_t index) const {
-  LOG4CXX_TRACE(logger_, "enter Index: " << index);
+  LOG4CXX_TRACE(logger_, "enter. index: " << index);
   unsigned char buf[128];
   const int libusb_ret = libusb_get_string_descriptor_ascii(
                            libusb_device_handle_, index, buf, sizeof(buf));

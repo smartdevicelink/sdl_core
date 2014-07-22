@@ -49,7 +49,7 @@ TransportAdapterListenerImpl::TransportAdapterListenerImpl(
 
 void TransportAdapterListenerImpl::OnSearchDeviceDone(
   const TransportAdapter* adapter) {
-  LOG4CXX_TRACE(logger_, "enter adapter: " << adapter);
+  LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter);
   TransportAdapterEvent event(
     TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_DONE,
     transport_adapter_, "", 0, RawMessageSptr(), new BaseError());
@@ -64,7 +64,7 @@ void TransportAdapterListenerImpl::OnSearchDeviceDone(
 void TransportAdapterListenerImpl::OnSearchDeviceFailed(
   const TransportAdapter* adapter,
   const SearchDeviceError& error) {
-  LOG4CXX_TRACE(logger_, "enter adapter: " << adapter << ", error: " << &error);
+  LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter << ", error: " << &error);
   SearchDeviceError* err = new SearchDeviceError(error);
   TransportAdapterEvent event(
     TransportAdapterListenerImpl::EventTypeEnum::ON_SEARCH_FAIL,
@@ -79,7 +79,7 @@ void TransportAdapterListenerImpl::OnSearchDeviceFailed(
 
 void TransportAdapterListenerImpl::OnDeviceListUpdated(
   const TransportAdapter* adapter) {
-  LOG4CXX_TRACE(logger_, "enter adapter: " << adapter);
+  LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter);
   TransportAdapterEvent event(
     TransportAdapterListenerImpl::EventTypeEnum::ON_DEVICE_LIST_UPDATED,
     transport_adapter_, "", 0, RawMessageSptr(), NULL);
@@ -93,7 +93,7 @@ void TransportAdapterListenerImpl::OnDeviceListUpdated(
 
 void TransportAdapterListenerImpl::OnFindNewApplicationsRequest(
   const TransportAdapter* adapter) {
-  LOG4CXX_TRACE(logger_, "enter adapter: " << adapter);
+  LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter);
   TransportAdapterEvent event(
     TransportAdapterListenerImpl::ON_FIND_NEW_APPLICATIONS_REQUEST,
     transport_adapter_,
@@ -130,7 +130,7 @@ void TransportAdapterListenerImpl::OnConnectDone(
 void TransportAdapterListenerImpl::OnConnectFailed(
   const TransportAdapter* adapter, const DeviceUID& device,
   const ApplicationHandle& app_id, const ConnectError& error) {
-  LOG4CXX_TRACE(logger_, "enter adapter: " << adapter << ", device: " << &device <<
+  LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter << ", device: " << &device <<
                 ", application_id: " << &app_id << ", error: " << &error);
   ConnectError* err = new ConnectError(error);
   TransportAdapterEvent event(
@@ -147,7 +147,7 @@ void TransportAdapterListenerImpl::OnConnectFailed(
 void TransportAdapterListenerImpl::OnDisconnectDone(
   const TransportAdapter* adapter, const DeviceUID& device,
   const ApplicationHandle& app_id) {
-  LOG4CXX_TRACE(logger_, "enter adapter: " << adapter << ", device: " << &device <<
+  LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter << ", device: " << &device <<
                 ", application_id: " << &app_id);
   TransportAdapterEvent event(
     TransportAdapterListenerImpl::EventTypeEnum::ON_DISCONNECT_DONE,
@@ -163,7 +163,7 @@ void TransportAdapterListenerImpl::OnDisconnectDone(
 void TransportAdapterListenerImpl::OnDisconnectFailed(
   const TransportAdapter* adapter, const DeviceUID& device,
   const ApplicationHandle& app_id, const DisconnectError& error) {
-  LOG4CXX_TRACE(logger_, "enter adapter: " << adapter << ", device: " << &device <<
+  LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter << ", device: " << &device <<
                 ", application_id: " << &app_id << ", error: " << &error);
   DisconnectError* err = new DisconnectError(error);
   TransportAdapterEvent event(
@@ -187,7 +187,7 @@ void TransportAdapterListenerImpl::OnDisconnectDeviceFailed(
 void TransportAdapterListenerImpl::OnDataReceiveDone(
   const TransportAdapter* adapter, const DeviceUID& device,
   const ApplicationHandle& app_id, const RawMessageSptr data_container) {
-  LOG4CXX_TRACE(logger_, "enter adapter: " << adapter << ", device: " << &device <<
+  LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter << ", device: " << &device <<
                 ", application_id: " << &app_id << ", data_container: " << data_container);
   TransportAdapterEvent event(
     TransportAdapterListenerImpl::EventTypeEnum::ON_RECEIVED_DONE,
@@ -203,7 +203,7 @@ void TransportAdapterListenerImpl::OnDataReceiveDone(
 void TransportAdapterListenerImpl::OnDataReceiveFailed(
   const TransportAdapter* adapter, const DeviceUID& device,
   const ApplicationHandle& app_id, const DataReceiveError& error) {
-  LOG4CXX_TRACE(logger_, "enter adapter: " << adapter << ", device: " << &device <<
+  LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter << ", device: " << &device <<
                 ", application_id: " << &app_id << ", error: " << &error);
   DataReceiveError* err = new DataReceiveError(error);
   TransportAdapterEvent event(
@@ -220,7 +220,7 @@ void TransportAdapterListenerImpl::OnDataReceiveFailed(
 void TransportAdapterListenerImpl::OnDataSendDone(
   const TransportAdapter* adapter, const DeviceUID& device,
   const ApplicationHandle& app_id, const RawMessageSptr data_container) {
-  LOG4CXX_TRACE(logger_, "enter adapter: " << adapter << ", device: " << &device <<
+  LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter << ", device: " << &device <<
                 ", application_id: " << &app_id << ", data_container: " << data_container);
   TransportAdapterEvent event(
     TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE,
@@ -237,7 +237,7 @@ void TransportAdapterListenerImpl::OnDataSendFailed(
   const TransportAdapter* adapter, const DeviceUID& device,
   const ApplicationHandle& app_id, const RawMessageSptr data_container,
   const DataSendError& error) {
-  LOG4CXX_TRACE(logger_, "enter adapter: " << adapter << ", device: " << &device <<
+  LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter << ", device: " << &device <<
                 ", application_id: " << &app_id << ", data_container: " << data_container << ", error: "
                 << &error);
   DataSendError* err = new DataSendError(error);
@@ -260,7 +260,7 @@ void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
   const TransportAdapter* adapter,
   const DeviceUID& device, const ApplicationHandle& application,
   const CommunicationError& error) {
-  LOG4CXX_TRACE(logger_, "enter adapter: " << adapter << ", device: " << &device <<
+  LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter << ", device: " << &device <<
                 ", application: " << &application << ", error: " << &error);
   CommunicationError* err = new CommunicationError(error);
   TransportAdapterEvent event(
@@ -277,7 +277,7 @@ void TransportAdapterListenerImpl::OnUnexpectedDisconnect(
 void TransportAdapterListenerImpl::OnCommunicationError(
   const TransportAdapter* adapter, const DeviceUID& device,
   const ApplicationHandle& app_id) {
-  LOG4CXX_TRACE(logger_, "enter adapter: " << adapter << ", device: " << &device <<
+  LOG4CXX_TRACE(logger_, "enter. adapter: " << adapter << ", device: " << &device <<
                 ", application_id: " << &app_id);
   TransportAdapterEvent event(
     TransportAdapterListenerImpl::EventTypeEnum::ON_COMMUNICATION_ERROR,
