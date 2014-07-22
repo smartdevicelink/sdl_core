@@ -34,6 +34,7 @@
 #include <fstream>
 
 #include "utils/logger.h"
+#include "config_profile/profile.h"
 
 #include "transport_manager/mme/iap2_device.h"
 #include "transport_manager/mme/protocol_config.h"
@@ -251,6 +252,7 @@ IAP2Device::IAP2HubConnectThreadDelegate::IAP2HubConnectThreadDelegate(
 
 void IAP2Device::IAP2HubConnectThreadDelegate::threadMain() {
   std::string mount_point = parent_->mount_point();
+  int max_attempts = profile::Profile::instance()->iap2_hub_connect_attempts();
   int attemtps = 0;
   while (true) {
     LOG4CXX_TRACE(logger_, "iAP2: connecting to " << mount_point << " on hub protocol " << protocol_name_);

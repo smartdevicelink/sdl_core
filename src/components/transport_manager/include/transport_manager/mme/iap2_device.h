@@ -101,8 +101,6 @@ class IAP2Device : public MmeDevice {
     IAP2HubConnectThreadDelegate(IAP2Device* parent, const std::string& protocol_name);
     void threadMain();
    private:
-    static const int max_attempts = 3;  // TODO(nvaganov@luxoft.com) move to config
-
     IAP2Device* parent_;
     std::string protocol_name_;
   };
