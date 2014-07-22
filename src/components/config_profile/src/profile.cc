@@ -68,6 +68,7 @@ const char* kVrCommandsSection = "VR COMMANDS";
 const char* kTransportManagerSection = "TransportManager";
 const char* kApplicationManagerSection = "ApplicationManager";
 const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
+const char* kIAPSection = "IAP";
 
 const char* kHmiCapabilitiesKey = "HMICapabilities";
 const char* kPathToSnapshotKey = "PathToSnapshot";
@@ -133,6 +134,9 @@ const char* kAckMQKey = "AckMQ";
 const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
 const char* kReadDIDFrequencykey = "ReadDIDRequest";
 const char* kGetVehicleDataFrequencyKey = "GetVehicleDataRequest";
+const char* kLegacyProtocolKey = "LegacyProtocol";
+const char* kHubProtocolKey = "HubProtocol";
+const char* kIAP2HubConnectAttemptskey = "IAP2HubConnectAttempts";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -151,6 +155,8 @@ const char* kDefaultAckMQ = "/dev/mqueue/FromSDLCoreUSBAdapter";
 const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
 const char* kDefaultRecordingFileName = "record.wav";
 const char* kDefaultThreadPoolSize = "ThreadPoolSize";
+const char* kDefaultLegacyProtocol = "com.ford.sync.prot0";
+const char* kDefaultHubProtocol = "com.smartdevicelink.prot0";
 
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
@@ -175,6 +181,7 @@ const uint32_t kDefaultApplicationListUpdateTimeout = 1;
 const std::pair<uint32_t, uint32_t> kReadDIDFrequency = {5 , 1};
 const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = {5 , 1};
 const uint32_t kDefaultMaxThreadPoolSize = 2;
+const int kDefaultIAP2HubConnectAttempts = 0;
 
 }  // namespace
 
@@ -233,7 +240,10 @@ Profile::Profile()
     ack_mq_name_(kDefaultAckMQ),
     recording_file_source_(kDefaultRecordingFileSourceName),
     recording_file_name_(kDefaultRecordingFileName),
-    application_list_update_timeout_(kDefaultApplicationListUpdateTimeout) {
+    application_list_update_timeout_(kDefaultApplicationListUpdateTimeout),
+    iap_legacy_protocol_(kDefaultLegacyProtocol),
+    iap_hub_protocol_(kDefaultHubProtocol),
+    iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts) {
 }
 
 Profile::~Profile() {
@@ -483,6 +493,18 @@ const std::pair<uint32_t, int32_t>& Profile::get_vehicle_data_frequency() const 
 
 uint32_t Profile::thread_pool_size() const  {
   return max_thread_pool_size_;
+}
+
+const std::string& Profile::iap_legacy_protocol() const {
+  return iap_legacy_protocol_;
+}
+
+const std::string& Profile::iap_hub_protocol() const {
+  return iap_hub_protocol_;
+}
+
+int Profile::iap2_hub_connect_attempts() const {
+  return iap2_hub_connect_attempts_;
 }
 
 void Profile::UpdateValues() {
@@ -1036,6 +1058,27 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
   if (max_thread_pool_size_ > kDefaultMaxThreadPoolSize) {
     max_thread_pool_size_ = kDefaultMaxThreadPoolSize;
   }
+
+  ReadStringValue(&iap_legacy_protocol_,
+      kDefaultLegacyProtocol,
+      kIAPSection,
+      kLegacyProtocolKey);
+
+  LOG_UPDATED_VALUE(iap_hub_protocol_, kLegacyProtocolKey, kIAPSection);
+
+  ReadStringValue(&iap_hub_protocol_,
+      kDefaultHubProtocol,
+      kIAPSection,
+      kHubProtocolKey);
+
+  LOG_UPDATED_VALUE(iap_hub_protocol_, kHubProtocolKey, kIAPSection);
+
+  ReadIntValue(&iap2_hub_connect_attempts_,
+      kDefaultIAP2HubConnectAttempts,
+      kIAPSection,
+      kIAP2HubConnectAttemptskey);
+
+  LOG_UPDATED_VALUE(iap2_hub_connect_attempts_, kIAP2HubConnectAttemptskey, kIAPSection);
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,
