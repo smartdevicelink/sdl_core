@@ -1596,9 +1596,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onRPCServiceStart(String appId, boolean encrypted) {
+    public void onSecureSessionStarted(String appId) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.RPC, appId, encrypted);
+            mProxyServiceEvent.onServiceStart(ServiceType.RPC, appId, true);
         }
     }
 

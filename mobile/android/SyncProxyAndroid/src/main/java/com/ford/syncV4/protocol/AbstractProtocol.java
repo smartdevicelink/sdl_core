@@ -186,7 +186,8 @@ public abstract class AbstractProtocol {
             Logger.d(getClass().getSimpleName() + " RPC " + header);
             Logger.d(getClass().getSimpleName() + " getSecureSessionContextHashMap" + getSecureSessionContextHashMap());
 
-            if (getSecureSessionContextHashMap().get(header.getSessionId()) != null) {
+            if (getSecureSessionContextHashMap() != null &&
+                    getSecureSessionContextHashMap().get(header.getSessionId()) != null) {
 
                 SecureSessionContext secureSessionContext = getSecureSessionContextHashMap().get(header.getSessionId());
                 Logger.d(getClass().getSimpleName() + " secureSessionContext" + secureSessionContext);
@@ -358,7 +359,7 @@ public abstract class AbstractProtocol {
      */
     protected void handleProtocolSessionStarted(ServiceType serviceType,
                                                 byte sessionId, boolean encrypted, byte version) {
-        mProtocolListener.onProtocolSessionStarted(sessionId, version);
+        mProtocolListener.onProtocolSessionStarted(sessionId, version, encrypted);
     }
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,

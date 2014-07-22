@@ -134,8 +134,8 @@ public class Session {
      *
      * @return <b>true</b> if exists, <b>false</b> otherwise
      */
-    public boolean hasSessionId(byte sessionId) {
-        return sessionIds.contains(sessionId);
+    public synchronized boolean hasSessionId(byte sessionId) {
+        return sessionIds.containsValue(sessionId);
     }
 
     /**
@@ -205,7 +205,7 @@ public class Session {
 
 
     public Service getService(ServiceType serviceType) {
-        if (servicesList == null || servicesList.isEmpty()) {
+        if (servicesList.isEmpty()) {
             return null;
         }
         for (Service service : servicesList) {
