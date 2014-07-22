@@ -251,15 +251,23 @@ IAP2Device::IAP2HubConnectThreadDelegate::IAP2HubConnectThreadDelegate(
 
 void IAP2Device::IAP2HubConnectThreadDelegate::threadMain() {
   std::string mount_point = parent_->mount_point();
+  int attemtps = 0;
   while (true) {
     LOG4CXX_TRACE(logger_, "iAP2: connecting to " << mount_point << " on hub protocol " << protocol_name_);
     iap2ea_hdl_t* handle = iap2_eap_open(mount_point.c_str(), protocol_name_.c_str(), 0);
-    if (handle != 0){
+    if (handle != 0) {
       LOG4CXX_DEBUG(logger_, "iAP2: connected to " << mount_point << " on hub protocol " << protocol_name_);
+      attemtps = 0;
       parent_->OnHubConnect(protocol_name_, handle);
     }
     else {
-      LOG4CXX_WARN(logger_, "iAP2: could not connect to " << mount_point << " on hub protocol " << protocol_name_);
+      if ((0 == max_attempts) || (++attemtps < max_attempts)) {
+        LOG4CXX_WARN(logger_, "iAP2: could not connect to " << mount_point << " on hub protocol " << protocol_name_);
+      }
+      else {
+        LOG4CXX_ERROR(logger_, "iAP2: hub protocol " << protocol_name_ << " unavailable after " << max_attempts << " attempts in a row, quit trying");
+        break;
+      }
     }
   }
 }
@@ -274,7 +282,7 @@ void IAP2Device::IAP2ConnectThreadDelegate::threadMain() {
   std::string mount_point = parent_->mount_point();
   LOG4CXX_TRACE(logger_, "iAP2: connecting to " << mount_point << " on protocol " << protocol_name_);
   iap2ea_hdl_t* handle = iap2_eap_open(mount_point.c_str(), protocol_name_.c_str(), 0);
-  if (handle != 0){
+  if (handle != 0) {
     LOG4CXX_DEBUG(logger_, "iAP2: connected to " << mount_point << " on protocol " << protocol_name_);
     parent_->OnConnect(protocol_name_, handle);
   }

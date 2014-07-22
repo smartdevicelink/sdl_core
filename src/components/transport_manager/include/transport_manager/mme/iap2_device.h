@@ -97,12 +97,14 @@ class IAP2Device : public MmeDevice {
   sync_primitives::Lock pool_connection_threads_lock_;
 
   class IAP2HubConnectThreadDelegate : public threads::ThreadDelegate {
-    public:
-      IAP2HubConnectThreadDelegate(IAP2Device* parent, const std::string& protocol_name);
-      void threadMain();
-    private:
-      IAP2Device* parent_;
-      std::string protocol_name_;
+   public:
+    IAP2HubConnectThreadDelegate(IAP2Device* parent, const std::string& protocol_name);
+    void threadMain();
+   private:
+    static const int max_attempts = 3;  // TODO(nvaganov@luxoft.com) move to config
+
+    IAP2Device* parent_;
+    std::string protocol_name_;
   };
 
   class IAP2ConnectThreadDelegate : public threads::ThreadDelegate {
