@@ -67,9 +67,15 @@ class IAPDevice : public MmeDevice {
   virtual ApplicationList GetApplicationList() const;
 
  private:
+  typedef std::map<uint32_t, ApplicationHandle> AppContainer;
+  typedef std::map<int, ApplicationHandle> AppTable;
+  typedef std::map<ApplicationHandle, IAPConnection*> ConnectionContainer;
+  typedef std::map<std::string, int> ProtocolNamePool;
+  typedef std::pair<std::string, ipod_hdl_t*> AppRecord;
+
   static const int kProtocolNameSize = 256;
 
-  ipod_hdl_t* RegisterConnection(ApplicationHandle app_id, IAPConnection* connection);
+  const AppRecord RegisterConnection(ApplicationHandle app_id, IAPConnection* connection);
   void UnregisterConnection(ApplicationHandle app_id);
   void OnSessionOpened(uint32_t protocol_id, int session_id);
   void OnSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id);
@@ -83,19 +89,15 @@ class IAPDevice : public MmeDevice {
   utils::SharedPtr<threads::Thread> receiver_thread_;
   ApplicationHandle last_app_id_;
 
-  typedef std::map<uint32_t, ApplicationHandle> AppContainer;
   AppContainer apps_;
   mutable sync_primitives::Lock apps_lock_;
 
-  typedef std::map<int, ApplicationHandle> AppTable;
   AppTable app_table_;
   sync_primitives::Lock app_table_lock_;
 
-  typedef std::map<ApplicationHandle, IAPConnection*> ConnectionContainer;
   ConnectionContainer connections_;
   sync_primitives::Lock connections_lock_;
 
-  typedef std::map<std::string, int> ProtocolNamePool;
   ProtocolNamePool free_protocol_name_pool_;
   ProtocolNamePool protocol_in_use_name_pool_;
   sync_primitives::Lock protocol_name_pool_lock_;

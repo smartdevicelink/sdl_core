@@ -99,7 +99,7 @@ ApplicationList IAPDevice::GetApplicationList() const {
   return app_list;
 }
 
-ipod_hdl_t* IAPDevice::RegisterConnection(ApplicationHandle app_id, IAPConnection* connection) {
+const IAPDevice::AppRecord IAPDevice::RegisterConnection(ApplicationHandle app_id, IAPConnection* connection) {
   connections_lock_.Acquire();
   LOG4CXX_INFO(logger_, "iAP: registering new connection for application " << app_id);
   connections_.insert(std::make_pair(app_id, connection));
@@ -117,7 +117,24 @@ ipod_hdl_t* IAPDevice::RegisterConnection(ApplicationHandle app_id, IAPConnectio
   }
   app_table_lock_.Release();
 
-  return ipod_hdl_;
+  AppRecord record;
+
+// Need to find protocol name for this connection
+  apps_lock_.Acquire();
+  for (AppContainer::const_iterator j = apps_.begin(); j != apps_.end(); ++j) {
+    if (j->second == app_id) {
+      uint32_t protocol_id = j->first;
+      char protocol_name[kProtocolNameSize];
+      ipod_eaf_getprotocol(ipod_hdl_, protocol_id, protocol_name, kProtocolNameSize);
+      record.first = protocol_name;
+      break;
+    }
+  }
+  apps_lock_.Release();
+
+  record.second = ipod_hdl_;
+
+  return record;
 }
 
 void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
@@ -208,7 +225,7 @@ void IAPDevice::OnHubSessionOpened(uint32_t protocol_id, const char* protocol_na
     free_protocol_name_pool_.erase(i);
   }
   else {
-    LOG4CXX_INFO(logger_, "iAP: protocol pool is empty");
+    LOG4CXX_WARN(logger_, "iAP: protocol pool is empty");
     protocol_index = 255;
   }
   protocol_name_pool_lock_.Release();
