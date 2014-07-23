@@ -69,7 +69,7 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
   uint8_t rfcomm_channel;
   if (!bluetooth_device->GetRfcommChannel(application_handle(),
                                           &rfcomm_channel)) {
-    LOG4CXX_EDEBUG(logger_,
+    LOG4CXX_DEBUG(logger_,
                    "Application " << application_handle() << " not found");
     *error = new ConnectError();
     LOG4CXX_TRACE(logger_, "exit with FALSE");

@@ -35,13 +35,16 @@
 
 #include "config_profile/profile.h"
 
-#include "utils/logger.h"
-
 #include "transport_manager/transport_manager_default.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
+#include "utils/logger.h"
 
 #ifdef BLUETOOTH_SUPPORT
+#ifdef CUSTOMER_PASA
+#include "transport_manager/pasa_bt/bluetooth_PASA_transport_adapter.h"
+#else
 #include "transport_manager/bluetooth/bluetooth_transport_adapter.h"
+#endif
 #endif
 
 #ifdef USB_SUPPORT
@@ -54,19 +57,22 @@
 
 
 namespace transport_manager {
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 int TransportManagerDefault::Init() {
   LOG4CXX_TRACE(logger_, "enter");
   if (E_SUCCESS != TransportManagerImpl::Init()) {
-    LOG4CXX_TRACE(logger_, "exit");
+    LOG4CXX_TRACE(logger_, "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != TransportManagerImpl::Init()");
     return E_TM_IS_NOT_INITIALIZED;
   }
   transport_adapter::TransportAdapterImpl* ta;
 #ifdef BLUETOOTH_SUPPORT
 
+#ifdef CUSTOMER_PASA
+  ta = new transport_adapter::BluetoothPASATransportAdapter;
+#else
   ta = new transport_adapter::BluetoothTransportAdapter;
+#endif
 
 #ifdef TIME_TESTER
   if (metric_observer_) {
@@ -101,13 +107,13 @@ int TransportManagerDefault::Init() {
 #endif  // TIME_TESTER
   AddTransportAdapter(ta);
 #endif
-  LOG4CXX_TRACE(logger_, "exit");
+  LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
 }
 
 TransportManagerDefault::~TransportManagerDefault() {}
 
 TransportManagerDefault::TransportManagerDefault()
-  : TransportManagerImpl() {}
+    : TransportManagerImpl() {}
 
 }  //  namespace transport_manager
