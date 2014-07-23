@@ -234,7 +234,7 @@ TEST_F(SSLTest, Positive) {
   }
   // expect empty buffers after init complete
   ASSERT_TRUE(client_buf == NULL);
-  ASSERT_TRUE(client_buf_len == 0);
+  ASSERT_EQ(client_buf_len, 0);
   // expect both side initialization complete
   EXPECT_TRUE(client_ctx->IsInitCompleted());
   EXPECT_TRUE(server_ctx->IsInitCompleted());
@@ -284,7 +284,7 @@ TEST_F(SSLTest, EcncryptionFail) {
   }
   // expect empty buffers after init complete
   ASSERT_TRUE(client_buf == NULL);
-  ASSERT_TRUE(client_buf_len == 0);
+  ASSERT_EQ(client_buf_len, 0);
   // expect both side initialization complete
   EXPECT_TRUE(client_ctx->IsInitCompleted());
   EXPECT_TRUE(server_ctx->IsInitCompleted());

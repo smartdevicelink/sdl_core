@@ -40,6 +40,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/logger.h"
+#include "utils/date_time.h"
 
 namespace test {
 namespace components {
@@ -98,7 +99,7 @@ TEST_F(MediaManagerTest, AddAndPlayStream) {
 
   device = device_two;
 
-  const __useconds_t sleeptime = 0.5 * date_time::DateTime::MICROSECONDS_IN_MILLISECONDS;
+  const useconds_t sleeptime = 100;
 
   mediaManager->PlayA2DPSource(1);
   // mediaManager->playA2DPSource(1);
