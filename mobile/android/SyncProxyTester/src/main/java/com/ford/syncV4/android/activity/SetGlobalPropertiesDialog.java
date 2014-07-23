@@ -198,7 +198,7 @@ public class SetGlobalPropertiesDialog extends BaseDialogFragment {
                         }
 
                         if (numberOfChoices > 0) {
-                            setGlobalProperties.setCorrelationID(((SyncProxyTester) getActivity())
+                            setGlobalProperties.setCorrelationId(((SyncProxyTester) getActivity())
                                     .getNextCorrelationIdForCurrentFragment());
 
                             ((SyncProxyTester) getActivity())

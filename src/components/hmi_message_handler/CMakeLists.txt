@@ -30,11 +30,6 @@ set (SOURCES
     ${DBUS_SOURCE}
 )
 
-set(RTLIB rt)
-if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-set(RTLIB )
-endif()
-
 set (LIBRARIES
   Utils
   ${DBUS_ADAPTER}

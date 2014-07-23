@@ -102,20 +102,6 @@ class AddCommandRequest : public CommandRequestImpl {
    */
   bool CheckCommandParentId(ApplicationConstSharedPtr app);
 
-  /*
-   * @brief Check if commands has valid syntax
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool CheckVRCommandsNames();
-
-    /*
-   * @brief Check if menuNames has valid syntax
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool CheckMenuName();
-
   DISALLOW_COPY_AND_ASSIGN(AddCommandRequest);
 
   /*
@@ -124,6 +110,14 @@ class AddCommandRequest : public CommandRequestImpl {
    * @return true if all responses received
    */
   bool IsPendingResponseExist();
+
+  /**
+   * @brief Checks add command param
+   * When type is String there is a check on the contents \t\n \\t \\n
+   * @return if add command contains \t\n \\t \\n return TRUE,
+   * FALSE otherwise
+   */
+  bool IsWhiteSpaceExist();
 
   bool send_ui_;
   bool send_vr_;

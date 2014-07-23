@@ -30,9 +30,10 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "media_manager/video/video_stream_to_file_adapter.h"
-#include "utils/file_system.h"
 #include "utils/logger.h"
+#include "utils/file_system.h"
+#include "config_profile/profile.h"
+#include "media_manager/video/video_stream_to_file_adapter.h"
 
 namespace media_manager {
 
@@ -66,7 +67,7 @@ void VideoStreamToFileAdapter::Init() {
 
 void VideoStreamToFileAdapter::SendData(
   int32_t application_key,
-  const protocol_handler::RawMessagePtr& message) {
+  const RawMessagePtr message) {
   LOG4CXX_INFO(logger, "VideoStreamToFileAdapter::SendData "
                << application_key);
 
@@ -142,7 +143,7 @@ void VideoStreamToFileAdapter::Streamer::threadMain() {
 
   while (!stop_flag_) {
     while (!server_->messages_.empty()) {
-      protocol_handler::RawMessagePtr msg = server_->messages_.pop();
+      RawMessagePtr msg = server_->messages_.pop();
       if (!msg) {
         LOG4CXX_ERROR(logger, "Null pointer message");
         continue;
@@ -178,6 +179,9 @@ bool VideoStreamToFileAdapter::Streamer::exitThreadMain() {
 
 void VideoStreamToFileAdapter::Streamer::open() {
   LOG4CXX_INFO(logger, "Streamer::open()" << server_->file_name_.c_str());
+
+  DCHECK(file_system::CreateDirectoryRecursively(
+      profile::Profile::instance()->app_storage_folder()));
 
   file_stream_ = file_system::Open(server_->file_name_);
   if (!file_stream_) {

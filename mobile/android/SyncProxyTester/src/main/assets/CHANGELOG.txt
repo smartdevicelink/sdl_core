@@ -1,4 +1,25 @@
+[CW29]
++ SYNC Mobile SDK: added ssl error description listing
+* SYNC Mobile SDK | SyncProxyTester: Added possibility to start several secure sessions.
+
+[CW28]
+* SYNC Mobile SDK: PutFile - length parameter does not match total length of file if offset is set to 0
+* SyncProxyTester: SDL returns "INVALID_DATA" on UpdateTurnList request with empty navigationText or turnIcon of element
+* SYNC Mobile SDK | SyncProxyTester: Add possibility to restore connection during autotest
+
+[CW27]
+* SyncProxyTester | SyncProxyAndroid SDK: Changed SSL error testing
+* SYNC Mobile SDK: SDL should always do a notification of the mobile app about closed session
+* SyncProxyTester: Log two request of UnsubscribeButton on mobile
+* SyncProxyTester: Some RPC responses are not shown in the list view
+* SyncProxyTester: Incorrect representation of the "key - value" pair in the RPC Request at the XML test
+* SyncProxyTester: Crashes while executing cics_UpperBound_big.xml
+
 [CW26]
++ SyncProxyTester | SyncProxyAndroid SDK: Added test handshake error sending to SDL.
+
+[CW25]
+* SyncProxyTester | SyncProxyAndroid SDK: major develop to WP2 branch merge
 * SYNC Mobile SDK | SyncProxyTester: RPC Request "UnregisterAppInterface" send error
 * SYNC Mobile SDK | SyncProxyTester: Resumption: Heartbeat timeout after IgnitionOff on mobile
 * SyncProxyTester: AppInterfaceUnregisteredReason is displayed as service message
@@ -70,6 +91,11 @@
 + SyncProxyTester: Set AppId parameter at Application SetUp dialog
 
 [CW11]
+* SyncProxyAndroid SDK: Bulk data messages are not coded
+* SyncProxyAndroid SDK: change RPC coded frame decode procedure
++ SyncProxyTester: added ability to choose service to cypher
++ SyncProxyAndroid SDK: added secure RPC service
+- SyncProxyAndroid SDK: removed secure audio encryption service
 * SyncProxyTester: Fix "log request of PerformAudioPassThru on mobile twice"
 * SyncProxyTester: Fix bug with "Impossible to register app after unregistering while smoke test execution"
 * SyncProxyTester: Fix bug with "Two requests RegisterAppInterface with and without hashID after UnregisterAppInterface"

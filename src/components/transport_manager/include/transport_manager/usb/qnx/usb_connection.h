@@ -58,7 +58,7 @@ class UsbConnection : public Connection {
 
   virtual ~UsbConnection();
  protected:
-  virtual TransportAdapter::Error SendData(RawMessageSptr message);
+  virtual TransportAdapter::Error SendData(RawMessagePtr message);
   virtual TransportAdapter::Error Disconnect();
  private:
   friend void InTransferCallback(usbd_urb* urb, usbd_pipe*, void*);
@@ -86,8 +86,8 @@ class UsbConnection : public Connection {
   usbd_urb* in_urb_;
   usbd_urb* out_urb_;
 
-  std::list<RawMessageSptr> out_messages_;
-  RawMessageSptr current_out_message_;
+  std::list<RawMessagePtr> out_messages_;
+  RawMessagePtr current_out_message_;
   pthread_mutex_t out_messages_mutex_;
   size_t bytes_sent_;
   bool disconnecting_;
@@ -98,4 +98,4 @@ class UsbConnection : public Connection {
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_CONNECTION_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_CONNECTION_H_

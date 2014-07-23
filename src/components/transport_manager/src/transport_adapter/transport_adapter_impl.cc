@@ -220,7 +220,7 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
 
 TransportAdapter::Error TransportAdapterImpl::SendData(
     const DeviceUID& device_id, const ApplicationHandle& app_handle,
-    const RawMessageSptr data) {
+    const RawMessagePtr data) {
   if (!initialised_) return BAD_STATE;
 
   ConnectionSptr connection = FindEstablishedConnection(device_id, app_handle);
@@ -453,7 +453,7 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
 
 void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
                                            const ApplicationHandle& app_handle,
-                                           RawMessageSptr message) {
+                                           RawMessagePtr message) {
 #ifdef TIME_TESTER
   if (metric_observer_) {
     metric_observer_->StartRawMsg(message.get());
@@ -474,7 +474,7 @@ void TransportAdapterImpl::DataReceiveFailed(
 
 void TransportAdapterImpl::DataSendDone(const DeviceUID& device_id,
                                         const ApplicationHandle& app_handle,
-                                        RawMessageSptr message) {
+                                        RawMessagePtr message) {
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it)
     (*it)->OnDataSendDone(this, device_id, app_handle, message);
@@ -482,7 +482,7 @@ void TransportAdapterImpl::DataSendDone(const DeviceUID& device_id,
 
 void TransportAdapterImpl::DataSendFailed(const DeviceUID& device_id,
                                           const ApplicationHandle& app_handle,
-                                          RawMessageSptr message,
+                                          RawMessagePtr message,
                                           const DataSendError& error) {
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it)
@@ -637,7 +637,7 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
   ApplicationList app_list = device->GetApplicationList();
   LOG4CXX_DEBUG(logger_, "Device " << device->name() << " has "
                 << app_list.size() << " applications.")
-  bool errors_occured = false;
+  bool errors_occurred = false;
   for (ApplicationList::iterator it = app_list.begin(); it != app_list.end(); ++it) {
     const ApplicationHandle app_handle = *it;
     LOG4CXX_INFO(logger_, "Attempt to connect device " << device_id <<
@@ -654,11 +654,11 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
         LOG4CXX_ERROR(logger_, "Connect to device " << device_id <<
                                ", channel " << app_handle <<
                                " failed with error " << error);
-        errors_occured = true;
+        errors_occurred = true;
         break;
     }
   }
-  return errors_occured ? FAIL : OK;
+  return errors_occurred ? FAIL : OK;
 }
 
 void TransportAdapterImpl::RemoveDevice(const DeviceUID& device_handle) {

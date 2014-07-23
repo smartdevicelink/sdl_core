@@ -54,7 +54,7 @@ uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
   }
 }
 
-uint32_t file_system::FileSize(const std::string &path) {
+int64_t file_system::FileSize(const std::string &path) {
   if (file_system::FileExists(path)) {
     struct stat file_info;
     memset(reinterpret_cast<void*>(&file_info), 0, sizeof(file_info));
@@ -64,8 +64,8 @@ uint32_t file_system::FileSize(const std::string &path) {
   return 0;
 }
 
-uint32_t file_system::DirectorySize(const std::string& path) {
-  uint32_t size = 0;
+size_t file_system::DirectorySize(const std::string& path) {
+  size_t size = 0;
   int32_t return_code = 0;
   DIR* directory = NULL;
 

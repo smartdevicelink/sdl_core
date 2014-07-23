@@ -339,7 +339,7 @@
       <element name="MFD5">
         <description> 5 inch GEN1.1 display </description>
       </element>
-      <element name="GEN3_8-INCH" internal_name="GEN3_8_INCH"/>
+      <element name="GEN3_8_INCH"/>
     </enum>
     <enum name="ImageType">
       <description>Contains information about the type of image.</description>
@@ -1107,7 +1107,7 @@
       <param name="width" type="Integer" minvalue="1" maxvalue="500">
         <description>The number of characters in one row of this field.</description>
       </param>
-      <param name="rows" type="Integer" minvalue="1" maxvalue="3">
+      <param name="rows" type="Integer" minvalue="1" maxvalue="8">
         <description>The number of rows of this field.</description>
       </param>
     </struct>
@@ -1338,7 +1338,7 @@
       <param name="imageFields" type="Common.ImageField" minsize="1" maxsize="100" array="true" mandatory="false">
         <description>A set of all fields that support images. See ImageField</description>
       </param>
-      <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
+      <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="0" maxsize="100" array="true" mandatory="true">
         <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
       </param>
       <param name="imageCapabilities" type="Common.ImageType" array="true" minsize="0" maxsize="2" mandatory="false">
@@ -1383,12 +1383,6 @@
       <param name="samplingRate" type="Common.SamplingRate" mandatory="true"/>
       <param name="bitsPerSample" type="Common.BitsPerSample" mandatory="true"/>
       <param name="audioType" type="Common.AudioType" mandatory="true"/>
-    </struct>
-    <struct name="Coordinate">
-      <param name="xCoord" type="Integer" mandatory="true">
-  </param>
-      <param name="yCoord" type="Integer" mandatory="true">
-  </param>
     </struct>
     <struct name="TextFieldStruct">
       <param name="fieldName" type="Common.TextFieldName" mandatory="true">
@@ -2645,7 +2639,7 @@
       <param name="event" type="Common.KeyboardEvent" mandatory="true">
         <description>On-screen keyboard input data.</description>
       </param>
-      <param name="data" type="String" maxlength="500" mandatory="false">
+      <param name="data" type="String" minlength="0" maxlength="500" mandatory="false">
         <description>On-screen keyboard input data.</description>
         <description>For dynamic keypress events, this will be the current compounded string of entry text.</description>
         <description>For entry submission events, this will be the full text entry (this will always return regardless of the mode).</description>
@@ -2948,6 +2942,9 @@
         <description>
       	Array of bytes comprising CAN message.
       </description>
+      </param>
+      <param name="appID" type="Integer" mandatory="true">
+        <description>ID of application that requested this RPC.</description>
       </param>
     </function>
     <function name="DiagnosticMessage" messagetype="response">
@@ -3307,6 +3304,26 @@
     </function>
     <function name="OnSteeringWheelAngle" messagetype="notification" provider="hmi">
       <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="true">
+        <description>Current angle of the steering wheel (in deg)</description>
+      </param>
+    </function>
+    <function name="OnECallInfo" messagetype="notification" provider="hmi">
+      <param name="eCallInfo" type="Common.ECallInfo" mandatory="true">
+        <description>Current angle of the steering wheel (in deg)</description>
+      </param>
+    </function>
+    <function name="OnAirbagStatus" messagetype="notification" provider="hmi">
+      <param name="airbagStatus" type="Common.AirbagStatus" mandatory="true">
+        <description>Current angle of the steering wheel (in deg)</description>
+      </param>
+    </function>
+    <function name="OnEmergencyEvent" messagetype="notification" provider="hmi">
+      <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="true">
+        <description>Current angle of the steering wheel (in deg)</description>
+      </param>
+    </function>
+    <function name="OnClusterModeStatus" messagetype="notification" provider="hmi">
+      <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="true">
         <description>Current angle of the steering wheel (in deg)</description>
       </param>
     </function>
@@ -3958,7 +3975,8 @@
     </function>
     <function name="OnDeviceStateChanged" messagetype="notification" scope="internal" provider="hmi">
       <param name="deviceState" type="Common.DeviceState" mandatory="true"/>
-      <param name="deviceInternalId" type="String" mandatory="true"/>
+      <param name="deviceInternalId" type="String" mandatory="true" minlength="0" maxlength="500" />
+      <param name="deviceId" type="Common.DeviceInfo" mandatory="false"/>
     </function>
   </interface>
 </interfaces>

@@ -33,8 +33,14 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_CONTROLLER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_CONTROLLER_H_
 
+#include <vector>
 #include <list>
+
 #include "utils/lock.h"
+#include "utils/shared_ptr.h"
+#include "utils/threads/thread.h"
+#include "utils/conditional_variable.h"
+#include "utils/threads/thread_delegate.h"
 #include "interfaces/MOBILE_API.h"
 #include "request_watchdog/request_watchdog.h"
 #include "request_watchdog/watchdog_subscriber.h"
@@ -43,6 +49,8 @@
 namespace application_manager {
 
 namespace request_controller {
+
+using namespace threads;
 
 /*
  * @brief RequestController class is used to control currently active mobile
@@ -60,7 +68,7 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
   typedef utils::SharedPtr<commands::Command> Request;
 
   /**
-   * @brief Synchronizing state identifiers
+   * @brief Result code for addRequest
    */
   enum TResult
   {
@@ -70,7 +78,18 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
     NONE_HMI_LEVEL_MANY_REQUESTS
   };
 
+  /**
+   * @brief Thread pool state
+   */
+  enum TPoolState
+  {
+    UNDEFINED = 0,
+    STARTED,
+    STOPPED,
+  };
+
   // Methods
+
   /*
    * @brief Class constructor
    *
@@ -82,6 +101,18 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
    *
    */
   virtual ~RequestController();
+
+  /*
+   * @brief Initialize thread pool
+   *
+   */
+  void  InitializeThreadpool();
+
+  /*
+   * @brief Destroy thread pool
+   *
+   */
+  void DestroyThreadpool();
 
   /*
    * @brief Check if max request amount wasn't exceed and adds request to queue.
@@ -134,8 +165,38 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
 
  private:
 
+  // Data types
+
+  class Worker : public ThreadDelegate {
+   public:
+    Worker(RequestController* requestController);
+    virtual ~Worker();
+    virtual void threadMain();
+    virtual bool exitThreadMain();
+   protected:
+   private:
+    RequestController*                               request_controller_;
+    volatile bool                                    stop_flag_;
+    bool                                             is_active_;
+  };
+
+  /**
+   * @brief Typedef for thread shared pointer
+   */
+  typedef utils::SharedPtr<Thread>            ThreadSharedPtr;
+
+  std::vector<ThreadSharedPtr>                pool_;
+  volatile TPoolState                         pool_state_;
+  uint32_t                                    pool_size_;
+  sync_primitives::ConditionalVariable        cond_var_;
+
   std::list<Request>                          request_list_;
   sync_primitives::Lock                       request_list_lock_;
+
+  std::list<Request>                          pending_request_list_;
+  sync_primitives::Lock                       pending_request_list_lock_;
+
+  // TODO(DK): remove watchdog and use timer instead of it
   request_watchdog::Watchdog*                 watchdog_;
 
   DISALLOW_COPY_AND_ASSIGN(RequestController);

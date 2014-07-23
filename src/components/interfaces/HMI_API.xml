@@ -362,7 +362,7 @@
     <element name="MFD5">
     <description> 5 inch GEN1.1 display </description>
     </element>
-    <element name="GEN3_8-INCH" internal_name="GEN3_8_INCH" />
+    <element name="GEN3_8_INCH"/>
   </enum>
 
 <enum name="ImageType">
@@ -1173,7 +1173,7 @@
   <param name="width" type="Integer" minvalue="1" maxvalue="500">
     <description>The number of characters in one row of this field.</description>
   </param>
-  <param name="rows" type="Integer" minvalue="1" maxvalue="3">
+  <param name="rows" type="Integer" minvalue="1" maxvalue="8">
     <description>The number of rows of this field.</description>
   </param>
 </struct>
@@ -1422,7 +1422,7 @@
   <param name="imageFields" type="Common.ImageField" minsize="1" maxsize="100" array="true" mandatory="false">
     <description>A set of all fields that support images. See ImageField</description>
   </param>
-  <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="1" maxsize="100" array="true" mandatory="true">
+  <param name="mediaClockFormats" type="Common.MediaClockFormat" minsize="0" maxsize="100" array="true" mandatory="true">
     <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
   </param>
   <param name="imageCapabilities" type="Common.ImageType" array="true" minsize="0" maxsize="2" mandatory="false">
@@ -1469,13 +1469,6 @@
   <param name="samplingRate" type="Common.SamplingRate" mandatory="true"/>
   <param name="bitsPerSample" type="Common.BitsPerSample" mandatory="true"/>
   <param name="audioType" type="Common.AudioType" mandatory="true"/>
-</struct>
-
-<struct name="Coordinate">
-  <param name="xCoord" type="Integer" mandatory="true">
-  </param>
-  <param name="yCoord" type="Integer" mandatory="true">
-  </param>
 </struct>
 
 <struct name="TextFieldStruct">
@@ -3151,7 +3144,7 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-	<!-- Ford Specific Data Items -->
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -3167,7 +3160,7 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
+        <!-- / Ford Specific Data Items -->
   </function>
   <function name="SubscribeVehicleData" messagetype="response">
     <param name="gps" type="Common.VehicleDataResult" mandatory="false">
@@ -3227,7 +3220,7 @@
     <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-	<!-- Ford Specific Data Items -->
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -3243,7 +3236,7 @@
     <param name="myKey" type="Common.VehicleDataResult" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
+        <!-- / Ford Specific Data Items -->
   </function>
   <function name="UnsubscribeVehicleData" messagetype="request">
     <description>
@@ -3309,7 +3302,7 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-	<!-- Ford Specific Data Items -->
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -3325,7 +3318,7 @@
     <param name="myKey" type="Boolean" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
+        <!-- / Ford Specific Data Items -->
   </function>
   <function name="UnsubscribeVehicleData" messagetype="response">
     <param name="gps" type="Common.VehicleDataResult" mandatory="false">
@@ -3385,7 +3378,7 @@
     <param name="steeringWheelAngle" type="Common.VehicleDataResult" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-	<!-- Ford Specific Data Items -->
+        <!-- Ford Specific Data Items -->
     <param name="eCallInfo" type="Common.VehicleDataResult" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
@@ -3401,7 +3394,7 @@
     <param name="myKey" type="Common.VehicleDataResult" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
-	<!-- / Ford Specific Data Items -->
+        <!-- / Ford Specific Data Items -->
   </function>
   <function name="GetVehicleData" messagetype="request">
     <description>Non periodic vehicle data read request.</description>
@@ -3465,16 +3458,16 @@
     <param name="steeringWheelAngle" type="Boolean" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
-    <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
+    <param name="eCallInfo" type="Boolean" mandatory="false">
       <description>Emergency Call notification and confirmation data</description>
     </param>
-    <param name="airbagStatus" type="Common.AirbagStatus" mandatory="false">
+    <param name="airbagStatus" type="Boolean" mandatory="false">
       <description>The status of the air bags</description>
     </param>
-    <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="false">
+    <param name="emergencyEvent" type="Boolean" mandatory="false">
       <description>Information related to an emergency event (and if it occurred)</description>
     </param>
-    <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="false">
+    <param name="clusterModeStatus" type="Boolean" mandatory="false">
       <description>The status modes of the cluster</description>
     </param>
     <param name="myKey" type="Boolean" mandatory="false">
@@ -3545,6 +3538,18 @@
     <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
     </param>
+    <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Common.AirbagStatus" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="false">
+      <description>The status modes of the cluster</description>
+    </param>
     <param name="myKey" type="Common.MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>
     </param>
@@ -3610,6 +3615,18 @@
     </param>
     <param name="steeringWheelAngle" type="Float" minvalue="-2000" maxvalue="2000" mandatory="false">
       <description>Current angle of the steering wheel (in deg)</description>
+    </param>
+    <param name="eCallInfo" type="Common.ECallInfo" mandatory="false">
+      <description>Emergency Call notification and confirmation data</description>
+    </param>
+    <param name="airbagStatus" type="Common.AirbagStatus" mandatory="false">
+      <description>The status of the air bags</description>
+    </param>
+    <param name="emergencyEvent" type="Common.EmergencyEvent" mandatory="false">
+      <description>Information related to an emergency event (and if it occurred)</description>
+    </param>
+    <param name="clusterModeStatus" type="Common.ClusterModeStatus" mandatory="false">
+      <description>The status modes of the cluster</description>
     </param>
     <param name="myKey" type="Common.MyKey" mandatory="false">
       <description>Information related to the MyKey feature</description>

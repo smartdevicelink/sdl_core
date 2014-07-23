@@ -23,8 +23,9 @@ import com.ford.syncV4.transport.usb.USBTransportConfig;
 
 import org.mockito.ArgumentCaptor;
 
-import static org.hamcrest.CoreMatchers.containsString;
+
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.StringContains.containsString;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
@@ -161,13 +162,14 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
             @Override
-            protected void onProtocolServiceStarted_MobileNavi(byte sessionId) {
-                super.onProtocolServiceStarted_MobileNavi(sessionId);
+            protected void onProtocolServiceStarted_MobileNavi(byte sessionId, boolean encrypted) {
+                super.onProtocolServiceStarted_MobileNavi(sessionId, encrypted);
                 assertEquals("Session ID should be equal",
                         syncSession.getSessionIdByAppId(SessionTest.APP_ID), SESSION_ID);
             }
+
         };
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION, false);
     }
 
     public void testReceivedMobileNavSessionIncomingMessage() throws Exception {
@@ -338,7 +340,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
         };
         ArgumentCaptor<String> appIdCaptor = ArgumentCaptor.forClass(String.class);
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION, false);
         verify(listenerALM).onSessionStarted(appIdCaptor.capture());
         assertEquals(SessionTest.APP_ID_DEFAULT, appIdCaptor.getValue());
     }

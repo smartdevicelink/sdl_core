@@ -113,7 +113,7 @@ void BluetoothTransportAdapter::Store() const {
 
 bool BluetoothTransportAdapter::Restore() {
   LOG4CXX_TRACE_ENTER(logger_);
-  bool errors_occured = false;
+  bool errors_occurred = false;
   const Json::Value bluetooth_adapter_dictionary =
     resumption::LastState::instance()->dictionary["TransportManager"]["BluetoothAdapter"];
   const Json::Value devices_dictionary = bluetooth_adapter_dictionary["devices"];
@@ -143,12 +143,12 @@ bool BluetoothTransportAdapter::Restore() {
       rfcomm_channels.begin(); j != rfcomm_channels.end(); ++j) {
       ApplicationHandle app_handle = *j; // for Bluetooth device app_handle is just RFCOMM channel
       if (Error::OK != Connect(device->unique_device_id(), app_handle)) {
-        errors_occured = true;
+        errors_occurred = true;
       }
     }
   }
   LOG4CXX_TRACE_EXIT(logger_);
-  return !errors_occured;
+  return !errors_occurred;
 }
 
 }  // namespace transport_adapter

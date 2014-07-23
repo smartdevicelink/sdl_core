@@ -68,7 +68,6 @@ import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
 import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
-import com.ford.syncV4.proxy.rpc.RegisterAppInterface;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
 import com.ford.syncV4.proxy.rpc.ScrollableMessageResponse;
 import com.ford.syncV4.proxy.rpc.SetAppIconResponse;
@@ -88,7 +87,6 @@ import com.ford.syncV4.proxy.rpc.TTSChunk;
 import com.ford.syncV4.proxy.rpc.UnsubscribeButtonResponse;
 import com.ford.syncV4.proxy.rpc.UnsubscribeVehicleDataResponse;
 import com.ford.syncV4.proxy.rpc.UpdateTurnListResponse;
-import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.proxy.rpc.enums.ButtonName;
 import com.ford.syncV4.proxy.rpc.enums.GlobalProperty;
 import com.ford.syncV4.proxy.rpc.enums.InteractionMode;
@@ -1954,13 +1952,18 @@ public class SyncProxyALMManager {
         }
 
         @Override
+        public void onRPCResponse(String appId, RPCResponse rpcResponse) {
+
+        }
+
+        @Override
         public void onOnSystemRequest(String appId, OnSystemRequest notification) {
 
         }
 
         @Override
 		public void onAddSubMenuResponse(String appId, AddSubMenuResponse response) {
-			final ISyncAddSubMenuResponseListener listener = _addSubMenuResponseListeners.get(response.getCorrelationID());
+			final ISyncAddSubMenuResponseListener listener = _addSubMenuResponseListeners.get(response.getCorrelationId());
 			SyncSubMenu syncSubMenuToReturn = null;
 			Object tagToReturn = null;
 			
@@ -1971,23 +1974,23 @@ public class SyncProxyALMManager {
 
 			// If adding command was successful, find the command that was added
 			if (response.getSuccess()) {
-				syncSubMenuToReturn = _syncSubMenusByCorrelationID.get(response.getCorrelationID());
-				removeSyncSubMenuByCorrelationID(response.getCorrelationID());
+				syncSubMenuToReturn = _syncSubMenusByCorrelationID.get(response.getCorrelationId());
+				removeSyncSubMenuByCorrelationID(response.getCorrelationId());
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onAddSubMenuResponse(response, syncSubMenuToReturn, tagToReturn);
 			
-			removeIProxyAddSubMenuResponseListener(response.getCorrelationID());
+			removeIProxyAddSubMenuResponseListener(response.getCorrelationId());
 		}
 	
 		@Override
 		public void onAlertResponse(String appId, AlertResponse response) {
-			final ISyncAlertResponseListener listener = _alertResponseListeners.get(response.getCorrelationID());
+			final ISyncAlertResponseListener listener = _alertResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			// Return if listener is null
@@ -1996,19 +1999,19 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onAlertResponse(response, tagToReturn);
 			
-			removeIProxyAlertResponseListener(response.getCorrelationID());
+			removeIProxyAlertResponseListener(response.getCorrelationId());
 		}
 	
 		@Override
 		public void onCreateInteractionChoiceSetResponse(String appId,
                                                          CreateInteractionChoiceSetResponse response) {
-			final ISyncCreateInteractionChoiceSetResponseListener listener = _createInteractionChoiceSetResponseListeners.get(response.getCorrelationID());
+			final ISyncCreateInteractionChoiceSetResponseListener listener = _createInteractionChoiceSetResponseListeners.get(response.getCorrelationId());
 			SyncChoiceSet syncChoiceSetToReturn = null;
 			Object tagToReturn = null;
 			
@@ -2020,23 +2023,23 @@ public class SyncProxyALMManager {
 			
 			// If adding choiceset was successful, find the choiceset that was added
 			if (response.getSuccess()) {
-				syncChoiceSetToReturn = _syncChoiceSetByCorrelationID.get(response.getCorrelationID());
-				removeSyncChoiceSetByCorrelationID(response.getCorrelationID());
+				syncChoiceSetToReturn = _syncChoiceSetByCorrelationID.get(response.getCorrelationId());
+				removeSyncChoiceSetByCorrelationID(response.getCorrelationId());
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onCreateInteractionChoiceSetResponse(response, syncChoiceSetToReturn, tagToReturn);
 			
-			removeIProxyCreateInteractionChoiceSetResponse(response.getCorrelationID());
+			removeIProxyCreateInteractionChoiceSetResponse(response.getCorrelationId());
 		}
 	
 		@Override
 		public void onDeleteCommandResponse(String appId, DeleteCommandResponse response) {
-			final ISyncDeleteCommandResponseListener listener = _createDeleteCommandResponseListeners.get(response.getCorrelationID());
+			final ISyncDeleteCommandResponseListener listener = _createDeleteCommandResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			// Return if listener is null
@@ -2045,19 +2048,19 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onDeleteCommandResponse(response, tagToReturn);
 			
-			removeIProxyDeleteCommandResponse(response.getCorrelationID());
+			removeIProxyDeleteCommandResponse(response.getCorrelationId());
 		}
 	
 		@Override
 		public void onDeleteInteractionChoiceSetResponse(String appId,
                                                          DeleteInteractionChoiceSetResponse response) {
-			final ISyncDeleteInteractionChoiceSetResponseListener listener = _deleteInteractionchoiceSetResponseListeners.get(response.getCorrelationID());		
+			final ISyncDeleteInteractionChoiceSetResponseListener listener = _deleteInteractionchoiceSetResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			if (listener == null) {
@@ -2065,18 +2068,18 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onDeleteInteractionChoiceSetResponse(response, tagToReturn);
 			
-			removeIProxyDeleteInteractionChoiceSetResponseListener(response.getCorrelationID());
+			removeIProxyDeleteInteractionChoiceSetResponseListener(response.getCorrelationId());
 		}
 	
 		@Override
 		public void onDeleteSubMenuResponse(String appId, DeleteSubMenuResponse response) {
-			final ISyncDeleteSubMenuResponseListener listener = _deleteSubMenuResponseListeners.get(response.getCorrelationID());
+			final ISyncDeleteSubMenuResponseListener listener = _deleteSubMenuResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			// Return if listener is null
@@ -2085,13 +2088,13 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onDeleteSubMenuResponse(response, tagToReturn);
 			
-			removeIProxyDeleteSubMenuResponseListener(response.getCorrelationID());
+			removeIProxyDeleteSubMenuResponseListener(response.getCorrelationId());
 		}
 	
 		@Override
@@ -2123,7 +2126,7 @@ public class SyncProxyALMManager {
 	
 		@Override
 		public void onEncodedSyncPDataResponse(String appId, EncodedSyncPDataResponse response) {
-			final ISyncEncodedSyncPDataResponseListener listener = _encodedSyncPDataResponseListeners.get(response.getCorrelationID());
+			final ISyncEncodedSyncPDataResponseListener listener = _encodedSyncPDataResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			// Return if listener is null
@@ -2132,18 +2135,18 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onEncodedSyncPDataResponse(response, tagToReturn);
 			
-			removeIProxyEncodedSyncPDataResponseListener(response.getCorrelationID());
+			removeIProxyEncodedSyncPDataResponseListener(response.getCorrelationId());
 		}
 	
 		@Override
 		public void onSyncPDataResponse(String appId, SyncPDataResponse response) {
-			final ISyncSyncPDataResponseListener listener = _syncPDataResponseListeners.get(response.getCorrelationID());
+			final ISyncSyncPDataResponseListener listener = _syncPDataResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			// Return if listener is null
@@ -2152,23 +2155,23 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onSyncPDataResponse(response, tagToReturn);
 			
-			removeIProxySyncPDataResponseListener(response.getCorrelationID());
+			removeIProxySyncPDataResponseListener(response.getCorrelationId());
 		}
 	
 		@Override
-		public void onError(String info, Throwable e) {
-			_lifecycleListener.onError(info, e);
+		public void onError(String info, Throwable throwable) {
+			_lifecycleListener.onError(info, throwable);
 		}
 		
 		@Override
 		public void onPerformInteractionResponse(String appId, PerformInteractionResponse response) {
-			final ISyncPerformInteractionResponseListener listener = _performInteractionResponseListeners.get(response.getCorrelationID());
+			final ISyncPerformInteractionResponseListener listener = _performInteractionResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			// Return if listener is null
@@ -2199,19 +2202,19 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onPerformInteractionResponse(response, tagToReturn);
 			
-			removeIProxyPerformInteractionResponseListener(response.getCorrelationID());
+			removeIProxyPerformInteractionResponseListener(response.getCorrelationId());
 		}
 	
 		@Override
 		public void onResetGlobalPropertiesResponse(String appId,
                                                     ResetGlobalPropertiesResponse response) {
-			final ISyncResetGlobalPropertiesListener listener = _resetGlobalPropertiesResponseListeners.get(response.getCorrelationID());
+			final ISyncResetGlobalPropertiesListener listener = _resetGlobalPropertiesResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			// Return if listener is null
@@ -2220,19 +2223,19 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onResetGlobalPropertiesResponse(response, tagToReturn);
 			
-			removeIProxyResetGlobalPropertiesResponse(response.getCorrelationID());
+			removeIProxyResetGlobalPropertiesResponse(response.getCorrelationId());
 		}
 	
 		@Override
 		public void onSetGlobalPropertiesResponse(String appId,
                                                   SetGlobalPropertiesResponse response) {
-			final ISyncSetGlobalPropertiesResponseListener listener = _setGlobalPropertiesResponseListeners.get(response.getCorrelationID());
+			final ISyncSetGlobalPropertiesResponseListener listener = _setGlobalPropertiesResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			// Return if listener is null
@@ -2241,18 +2244,18 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onSetGlobalPropertiesResponse(response, tagToReturn);
 			
-			removeIProxySetGlobalPropertiesResponseListener(response.getCorrelationID());
+			removeIProxySetGlobalPropertiesResponseListener(response.getCorrelationId());
 		}
 	
 		@Override
 		public void onSetMediaClockTimerResponse(String appId, SetMediaClockTimerResponse response) {
-			final ISyncSetMediaClockTimerResponseListener listener = _setMediaClockTimerResponseListeners.get(response.getCorrelationID());
+			final ISyncSetMediaClockTimerResponseListener listener = _setMediaClockTimerResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			// Return if listener is null
@@ -2261,18 +2264,18 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onSetMediaClockTimerResponse(response, tagToReturn);
 			
-			removeIProxySetMediaClockTimerResponseListener(response.getCorrelationID());
+			removeIProxySetMediaClockTimerResponseListener(response.getCorrelationId());
 		}
 	
 		@Override
 		public void onShowResponse(String appId, ShowResponse response) {
-			final ISyncShowResponseListener listener = _showResponseListeners.get(response.getCorrelationID());
+			final ISyncShowResponseListener listener = _showResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			// Return if listener is null
@@ -2281,18 +2284,18 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onShowResponse(response, tagToReturn);
 			
-			removeIProxyShowResponseListener(response.getCorrelationID());
+			removeIProxyShowResponseListener(response.getCorrelationId());
 		}
 	
 		@Override
 		public void onSpeakResponse(String appId, SpeakResponse response) {
-			final ISyncSpeakResponseListener listener = _speakResponseListeners.get(response.getCorrelationID());
+			final ISyncSpeakResponseListener listener = _speakResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			// Return if listener is null
@@ -2301,13 +2304,13 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onSpeakResponse(appId, response, tagToReturn);
 			
-			removeIProxySpeakResponseListener(response.getCorrelationID());
+			removeIProxySpeakResponseListener(response.getCorrelationId());
 		}
 	
 		@Override
@@ -2336,7 +2339,7 @@ public class SyncProxyALMManager {
 	
 		@Override
 		public void onSubscribeButtonResponse(String appId, SubscribeButtonResponse response) {
-			final ISyncButtonListener listener = _buttonResponseListeners.get(response.getCorrelationID());
+			final ISyncButtonListener listener = _buttonResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			// Return if listener is null
@@ -2345,13 +2348,13 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onSubscribeButtonResponse(response, tagToReturn);
 			
-			removeAddIProxySyncButtonResponseListener(response.getCorrelationID());		
+			removeAddIProxySyncButtonResponseListener(response.getCorrelationId());
 		}
 	
 		@Override
@@ -2371,7 +2374,7 @@ public class SyncProxyALMManager {
 	
 		@Override
 		public void onAddCommandResponse(String appId, AddCommandResponse response) {
-			final ISyncCommandListener listener = _commandResponseListeners.get(response.getCorrelationID());
+			final ISyncCommandListener listener = _commandResponseListeners.get(response.getCorrelationId());
 			SyncCommand syncCommandToReturn = null;
 			Object tagToReturn = null;
 			
@@ -2382,18 +2385,18 @@ public class SyncProxyALMManager {
 			
 			// If adding command was successful, find the command that was added
 			if (response.getSuccess()) {
-				syncCommandToReturn = _syncCommandsByCorrelationID.get(response.getCorrelationID());
-				removeSyncCommandByCorrelationID(response.getCorrelationID());
+				syncCommandToReturn = _syncCommandsByCorrelationID.get(response.getCorrelationId());
+				removeSyncCommandByCorrelationID(response.getCorrelationId());
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onAddCommandResponse(response, syncCommandToReturn, tagToReturn);
 			
-			removeAddCommandResponseListener(response.getCorrelationID());
+			removeAddCommandResponseListener(response.getCorrelationId());
 		}
 	
 		@Override
@@ -2407,7 +2410,7 @@ public class SyncProxyALMManager {
 	
 		@Override
 		public void onUnsubscribeButtonResponse(String appId, UnsubscribeButtonResponse response) {
-			final ISyncUnsubscribeButtonResponseListener listener = _unsubscribeButtonResponseListeners.get(response.getCorrelationID());
+			final ISyncUnsubscribeButtonResponseListener listener = _unsubscribeButtonResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;
 			
 			// Return if listener is null
@@ -2416,13 +2419,13 @@ public class SyncProxyALMManager {
 			}
 			
 			// Set tag, null if none exists
-			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationID());
+			tagToReturn = _genericTagsByCorrelationID.get(response.getCorrelationId());
 			// Remove any tag tied to this correlationID
-			removeGenericObjectTagByCorrelationID(response.getCorrelationID());
+			removeGenericObjectTagByCorrelationID(response.getCorrelationId());
 			
 			listener.onUnsubscribeButtonResponse(response, tagToReturn);
 			
-			removeIProxyUnsubscribeButtonResponseListener(response.getCorrelationID());
+			removeIProxyUnsubscribeButtonResponseListener(response.getCorrelationId());
 		}
 		
 		@Override
@@ -2561,8 +2564,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onMobileNaviStart(String appId) {
-
+        public void onMobileNaviStart(String appId, boolean encrypted) {
         }
 
         @Override
@@ -2606,7 +2608,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onAudioServiceStart(String appId) {
+        public void onAudioServiceStart(String appId, boolean encrypted) {
 
         }
 
@@ -2627,12 +2629,29 @@ public class SyncProxyALMManager {
         }
 
         @Override
+        public void onSecureSessionStarted(String appId) {
+
+        }
+
+        @Override
         public void onHashChange(String appId, OnHashChange onHashChange) {
+
 
         }
 
         @Override
         public void onStartSession(String appId) {
+
+        }
+
+        @Override
+        public void onSecureServiceStart() {
+
+        }
+
+        @Override
+        public void onPutFileRequest(String appId, PutFile putFile) {
+
 
         }
 

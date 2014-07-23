@@ -127,7 +127,7 @@ public class SendProtocolMessageProcessorTest extends TestCase {
 
         for (int i = 0; i < messagesCount; i++) {
             processor.process(ServiceType.RPC, ProtocolConstants.PROTOCOL_VERSION_TWO,
-                    new byte[0], MAX_DATA_SIZE, SESSION_ID, 1);
+                    false, new byte[0], MAX_DATA_SIZE, SESSION_ID, 1);
 
         }
 
@@ -164,7 +164,7 @@ public class SendProtocolMessageProcessorTest extends TestCase {
 
         for (int i = 0; i < messagesCount; i++) {
             processor.process(ServiceType.Mobile_Nav, ProtocolConstants.PROTOCOL_VERSION_TWO,
-                    new byte[0], MAX_DATA_SIZE, SESSION_ID, 1);
+                    false, new byte[0], MAX_DATA_SIZE, SESSION_ID, 1);
 
         }
 
@@ -201,7 +201,7 @@ public class SendProtocolMessageProcessorTest extends TestCase {
 
         for (int i = 0; i < messagesCount; i++) {
             processor.process(ServiceType.Audio_Service, ProtocolConstants.PROTOCOL_VERSION_TWO,
-                    new byte[0], MAX_DATA_SIZE, SESSION_ID, 1);
+                    false, new byte[0], MAX_DATA_SIZE, SESSION_ID, 1);
 
         }
 
@@ -239,7 +239,7 @@ public class SendProtocolMessageProcessorTest extends TestCase {
 
         for (int i = 0; i < messagesCount; i++) {
             processor.process(ServiceType.RPC, ProtocolConstants.PROTOCOL_VERSION_TWO,
-                    new byte[dataSize], MAX_DATA_SIZE, SESSION_ID, 1);
+                    false, new byte[dataSize], MAX_DATA_SIZE, SESSION_ID, 1);
 
         }
 
@@ -306,11 +306,11 @@ public class SendProtocolMessageProcessorTest extends TestCase {
                     break;
             }
             processor.process(serviceType, ProtocolConstants.PROTOCOL_VERSION_TWO,
-                    new byte[dataSize], MAX_DATA_SIZE, SESSION_ID, 1);
+                    false, new byte[dataSize], MAX_DATA_SIZE, SESSION_ID, 1);
 
         }
 
-        countDownLatch.await(3, TimeUnit.SECONDS);
+        countDownLatch.await(5, TimeUnit.SECONDS);
 
         processor.shutdownAllExecutors();
 

@@ -1,122 +1,158 @@
 package com.ford.syncV4.protocol;
 
+import android.util.Log;
+
 import com.ford.syncV4.util.BitConverter;
 
 public class BinaryFrameHeader {
-    private static final int WIPRO_PROTOCOL_HEADER_LENGTH = 12;
-    private byte _rpcType;
-	private int _functionID;
-	private int _correlationID;
-	private int _jsonSize;
-	
-	private byte[] _jsonData;
-	private byte[] _bulkData;
-	
-	public BinaryFrameHeader() {}
-	
-	public static BinaryFrameHeader parseBinaryHeader(byte[] binHeader) {
-		BinaryFrameHeader msg = new BinaryFrameHeader();
-		
-		byte RPC_Type = (byte) (binHeader[0] >>> 4);
-		msg.setRPCType(RPC_Type);
-		
-		int _functionID = (BitConverter.intFromByteArray(binHeader, 0) & 0x0FFFFFFF);
-		msg.setFunctionID(_functionID);
-		
-		int corrID = BitConverter.intFromByteArray(binHeader, 4);
-		msg.setCorrID(corrID);
-		
-		int _jsonSize = BitConverter.intFromByteArray(binHeader, 8);
-		msg.setJsonSize(_jsonSize);
 
-        if (_jsonSize > 0) {
-            byte[] _jsonData = new byte[_jsonSize];
-            System.arraycopy(binHeader, WIPRO_PROTOCOL_HEADER_LENGTH, _jsonData,
-                    0, _jsonSize);
-            msg.setJsonData(_jsonData);
-        } else if (_jsonSize < 0) {
+    private static final String TAG = "BinaryFrameHeader";
+
+    private byte mRpcType;
+    private int mFunctionID;
+    private int mCorrelationID;
+    private int mJsonSize;
+
+    private byte[] mJsonData;
+    private byte[] mBulkData;
+
+    public BinaryFrameHeader() {
+
+    }
+
+    /**
+     * Parse Secure Service binary protocol data
+     *
+     * @param binHeader Secure service binary protocol
+     *
+     * @return Secure Service binary protocol data as array of the bytes
+     */
+    public static byte[] parseSecureServiceBinaryHeaderData(byte[] binHeader) {
+
+        final int binarySecureDataSize = binHeader.length - ProtocolConst.PROTOCOL_V2_HEADER_SIZE;
+        if (binarySecureDataSize > 0) {
+            byte[] mSecureData = new byte[binarySecureDataSize];
+            System.arraycopy(binHeader,
+                    ProtocolConst.PROTOCOL_V2_HEADER_SIZE, mSecureData, 0, mSecureData.length);
+            return mSecureData;
+        }
+        return new byte[0];
+    }
+
+    public static BinaryFrameHeader parseBinaryHeader(byte[] binHeader) {
+        BinaryFrameHeader msg = new BinaryFrameHeader();
+
+        byte RPC_Type = (byte) (binHeader[0] >>> 4);
+        msg.setRPCType(RPC_Type);
+
+        int functionID = (BitConverter.intFromByteArray(binHeader, 0) & 0x0FFFFFFF);
+        msg.setFunctionID(functionID);
+
+        int corrID = BitConverter.intFromByteArray(binHeader, 4);
+        msg.setCorrID(corrID);
+
+        int jsonSize = BitConverter.intFromByteArray(binHeader, 8);
+        msg.setJsonSize(jsonSize);
+
+        if (jsonSize > 0) {
+
+            Log.d(TAG, "JSON size:" + jsonSize + ", header:" + binHeader.length);
+
+            byte[] jsonData = new byte[jsonSize];
+            System.arraycopy(binHeader, ProtocolConst.PROTOCOL_V2_HEADER_SIZE, jsonData, 0,
+                    jsonSize);
+            msg.setJsonData(jsonData);
+        } else if (jsonSize < 0) {
             // the size is over 2 GB; Java doesn't allow us to create such arrays
-            final long jsonSize =
-                    BitConverter.unsignedIntFromByteArray(binHeader, 8);
+            final long jsonSizeNew = BitConverter.unsignedIntFromByteArray(binHeader, 8);
             throw new OutOfMemoryError(
-                    String.format("Can't allocate memory for JSON of %d bytes",
-                            jsonSize));
+                    String.format("Can't allocate memory for JSON of %d bytes", jsonSizeNew));
         }
 
-        final int binaryDataSize = binHeader.length - _jsonSize -
-                WIPRO_PROTOCOL_HEADER_LENGTH;
+        final int binaryDataSize = binHeader.length - jsonSize - ProtocolConst.PROTOCOL_V2_HEADER_SIZE;
         if (binaryDataSize > 0) {
-            byte[] _bulkData = new byte[binaryDataSize];
+            byte[] bulkData = new byte[binaryDataSize];
             System.arraycopy(binHeader,
-                    WIPRO_PROTOCOL_HEADER_LENGTH + _jsonSize, _bulkData, 0,
-                    _bulkData.length);
-            msg.setBulkData(_bulkData);
+                    ProtocolConst.PROTOCOL_V2_HEADER_SIZE + jsonSize, bulkData, 0, bulkData.length);
+            msg.setBulkData(bulkData);
         }
 
         return msg;
-	}
-	
-	protected byte[] assembleHeaderBytes() {
-		int binHeader = _functionID;
-        // reset the 4 leftmost bits, for _rpcType
+    }
+
+    protected byte[] assembleHeaderBytes() {
+        int binHeader = mFunctionID;
+        // reset the 4 leftmost bits, for mRpcType
         binHeader &= 0xFFFFFFFF >>> 4;
-		binHeader |= (_rpcType << 28);
-		
-		byte[] ret = new byte[WIPRO_PROTOCOL_HEADER_LENGTH];
-		System.arraycopy(BitConverter.intToByteArray(binHeader), 0, ret, 0, 4);
-		System.arraycopy(BitConverter.intToByteArray(_correlationID), 0, ret, 4, 4);
-		System.arraycopy(BitConverter.intToByteArray(_jsonSize), 0, ret, 8, 4);
-		
-		return ret;
-	}
-	
-	public byte getRPCType() {
-		return _rpcType;
-	}
+        binHeader |= (mRpcType << 28);
 
-	public void setRPCType(byte _rpcType) {
-		this._rpcType = _rpcType;
-	}
+        byte[] ret = new byte[ProtocolConst.PROTOCOL_V2_HEADER_SIZE];
+        System.arraycopy(BitConverter.intToByteArray(binHeader), 0, ret, 0, 4);
+        System.arraycopy(BitConverter.intToByteArray(mCorrelationID), 0, ret, 4, 4);
+        System.arraycopy(BitConverter.intToByteArray(mJsonSize), 0, ret, 8, 4);
 
-	public int getFunctionID() {
-		return _functionID;
-	}
+        return ret;
+    }
 
-	public void setFunctionID(int _functionID) {
-		this._functionID = _functionID;
-	}
+    public byte getRPCType() {
+        return mRpcType;
+    }
 
-	public int getCorrID() {
-		return _correlationID;
-	}
+    public void setRPCType(byte rpcType) {
+        this.mRpcType = rpcType;
+    }
 
-	public void setCorrID(int _correlationID) {
-		this._correlationID = _correlationID;
-	}
+    public int getFunctionID() {
+        return mFunctionID;
+    }
 
-	public int getJsonSize() {
-		return _jsonSize;
-	}
+    public void setFunctionID(int functionID) {
+        this.mFunctionID = functionID;
+    }
 
-	public void setJsonSize(int _jsonSize) {
-		this._jsonSize = _jsonSize;
-	}
-	
-	public byte[] getJsonData() {
-		return _jsonData;
-	}
-	
-	public void setJsonData(byte[] _jsonData) {
-		this._jsonData = new byte[this._jsonSize];
-		System.arraycopy(_jsonData, 0, this._jsonData, 0, _jsonSize);
-		//this._jsonData = _jsonData;
-	}
-	
-	public byte[] getBulkData() {
-		return _bulkData;
-	}
-	
-	public void setBulkData(byte[] _bulkData) {
-		this._bulkData = _bulkData;
-	}
+    public int getCorrID() {
+        return mCorrelationID;
+    }
+
+    public void setCorrID(int correlationID) {
+        this.mCorrelationID = correlationID;
+    }
+
+    public int getJsonSize() {
+        return mJsonSize;
+    }
+
+    public void setJsonSize(int jsonSize) {
+        this.mJsonSize = jsonSize;
+    }
+
+    public byte[] getJsonData() {
+        return mJsonData;
+    }
+
+    public void setJsonData(byte[] jsonData) {
+        this.mJsonData = new byte[this.mJsonSize];
+        System.arraycopy(jsonData, 0, this.mJsonData, 0, mJsonSize);
+        //this.mJsonData = mJsonData;
+    }
+
+    public byte[] getBulkData() {
+        return mBulkData;
+    }
+
+    public void setBulkData(byte[] bulkData) {
+        this.mBulkData = bulkData;
+    }
+
+    @Override
+    public String toString() {
+        return "BinaryFrameHeader{" +
+                "mRpcType=" + mRpcType +
+                ", mFunctionID=" + mFunctionID +
+                ", mCorrelationID=" + mCorrelationID +
+                ", mJsonSize=" + mJsonSize +
+                ", mJsonData=" + BitConverter.bytesToHex(mJsonData) +
+                ", mBulkData=" + BitConverter.bytesToHex(mBulkData) +
+                '}';
+    }
 }

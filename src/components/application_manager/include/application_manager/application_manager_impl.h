@@ -46,6 +46,7 @@
 #include "application_manager/vehicle_info_data.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
+#include "hmi_message_handler/hmi_message_sender.h"
 
 #include "media_manager/media_manager_impl.h"
 
@@ -63,7 +64,6 @@
 #ifdef TIME_TESTER
 #include "time_metric_observer.h"
 #endif  // TIME_TESTER
-#include "protocol_handler/service_type.h"
 
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
@@ -83,19 +83,12 @@ namespace NsSmartObjects {
 class SmartObject;
 }
 }
-
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
 namespace threads {
 class Thread;
 }
 class CommandNotificationImpl;
-
-#ifdef TESTS_WITH_HMI
-namespace test {
-  class ApplicationManagerImplTest;
-}
-#endif
 
 namespace application_manager {
 namespace mobile_api = mobile_apis;
@@ -106,6 +99,8 @@ enum VRTTSSessionChanging {
   kVRSessionChanging = 0,
   kTTSSessionChanging = 1
 };
+
+struct CommandParametersPermissions;
 
 namespace impl {
 using namespace threads;
@@ -187,7 +182,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     /**
      * Inits application manager
      */
-    virtual void Init();
+    virtual bool Init();
 
     /**
      * @brief Stop work.
@@ -405,23 +400,23 @@ class ApplicationManagerImpl : public ApplicationManager,
     /*
      * @brief Overriden ProtocolObserver method
      */
-  virtual void OnMessageReceived(
-      const protocol_handler::RawMessagePtr& message);
+    virtual void OnMessageReceived(
+        const RawMessagePtr message);
 
     /*
      * @brief Overriden ProtocolObserver method
      */
-  virtual void OnMobileMessageSent(
-      const protocol_handler::RawMessagePtr& message);
+    virtual void OnMobileMessageSent(
+        const RawMessagePtr message);
 
-  void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
+    void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
-    void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
+    void OnDeviceListUpdated(const connection_handler::DeviceMap& device_list);
     //TODO (EZamakhov): fix all indentations in this file
   virtual void OnFindNewApplicationsRequest();
     void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
-  bool OnServiceStartedCallback(
+    bool OnServiceStartedCallback(
       const connection_handler::DeviceHandle& device_handle,
       const int32_t& session_key, const protocol_handler::ServiceType& type);
     void OnServiceEndedCallback(const int32_t& session_key,
@@ -552,7 +547,7 @@ class ApplicationManagerImpl : public ApplicationManager,
         const std::vector<uint8_t>& binary_data,
         const std::string& file_path,
         const std::string& file_name,
-        const uint32_t offset);
+        const int64_t offset);
 
     /**
      * @brief Get available app space
@@ -575,41 +570,35 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     // TODO(AOleynik): Temporary added, to fix build. Should be reworked.
     connection_handler::ConnectionHandler* connection_handler();
+
+    /**
+     * @brief Checks, if given RPC is allowed at current HMI level for specific
+     * application in policy table
+     * @param policy_app_id Application id
+     * @param hmi_level Current HMI level of application
+     * @param function_id FunctionID of RPC
+     * @param params_permissions Permissions for RPC parameters (e.g.
+     * SubscribeVehicleData) defined in policy table
+     * @return SUCCESS, if allowed, otherwise result code of check
+     */
+    mobile_apis::Result::eType CheckPolicyPermissions(
+        const std::string& policy_app_id,
+        mobile_apis::HMILevel::eType hmi_level,
+        mobile_apis::FunctionID::eType function_id,
+        CommandParametersPermissions* params_permissions = NULL);
+
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
     hmi_apis::HMI_API& hmi_so_factory();
     mobile_apis::MOBILE_API& mobile_so_factory();
 
-    void CreateHMIMatrix(HMIMatrix* matrix);
-
-    /**
-     * \brief Performs check using PoliciesManager of availability
-     * of the message for the application. If error occured it is sent
-     * as response to initiator of request.
-     * \param message Message received for application
-     * \param application Application that recieved message to be checked by policies
-     * \return bool Indicates whether message is allowed for application
-     */
-    bool CheckPolicies(smart_objects::SmartObject* message,
-                       ApplicationSharedPtr app);
-
-    /**
-     * \brief Using HMIMatrix checks which messages sent to HMI are of higher priority
-     * and acts accordingly (closes message with lower priority,
-     * rejects message in case message with higher priority is operating on HMI).
-     * If error occured it is sent as response to initiator of request.
-     * \param message Message received for application
-     * \return bool Indicates whether message is allowed for application
-     */
-    bool CheckHMIMatrix(smart_objects::SmartObject* message);
-
     bool ConvertMessageToSO(const Message& message,
                             smart_objects::SmartObject& output);
     bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                             Message& output);
     utils::SharedPtr<Message> ConvertRawMsgToMessage(
-      const protocol_handler::RawMessagePtr& message);
+      const RawMessagePtr message);
 
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
@@ -620,32 +609,19 @@ class ApplicationManagerImpl : public ApplicationManager,
      * of messages. Beware, each is called on different thread!
      */
     // CALLED ON messages_from_mobile_ thread!
-    virtual void Handle(const impl::MessageFromMobile& message) OVERRIDE;
+    virtual void Handle(const impl::MessageFromMobile message) OVERRIDE;
 
     // CALLED ON messages_to_mobile_ thread!
-    virtual void Handle(const impl::MessageToMobile& message) OVERRIDE;
+    virtual void Handle(const impl::MessageToMobile message) OVERRIDE;
 
     // CALLED ON messages_from_hmi_ thread!
-    virtual void Handle(const impl::MessageFromHmi& message) OVERRIDE;
+    virtual void Handle(const impl::MessageFromHmi message) OVERRIDE;
 
     // CALLED ON messages_to_hmi_ thread!
-    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
+    virtual void Handle(const impl::MessageToHmi message) OVERRIDE;
 
     void SendUpdateAppList(const std::list<uint32_t>& applications_ids);
     void OnApplicationListUpdateTimer();
-
-    /**
-     * @brief Checks, if given RPC is allowed at current HMI level for specific
-     * application in policy table
-     * @param policy_app_id Application id
-     * @param hmi_level Current HMI level of application
-     * @param function_id FunctionID of RPC
-     * @return SUCCESS, if allowed, otherwise result code of check
-     */
-    mobile_apis::Result::eType CheckPolicyPermissions(
-        const std::string& policy_app_id,
-        mobile_apis::HMILevel::eType hmi_level,
-        mobile_apis::FunctionID::eType function_id);
 
     /*
      * @brief Function is called on IGN_OFF, Master_reset or Factory_defaults
@@ -740,9 +716,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 
     FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);
-#ifdef TESTS_WITH_HMI
-    friend class test::ApplicationManagerImplTest;
-#endif
 };
 
 const std::set<ApplicationSharedPtr>& ApplicationManagerImpl::applications() const {

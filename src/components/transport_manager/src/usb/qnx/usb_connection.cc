@@ -128,7 +128,6 @@ void UsbConnection::OnInTransfer(usbd_urb* urb) {
                                                    << len);
 
   if (!error) {
-    const uint32_t urb_status = status & USBD_URB_STATUS_MASK;
     switch (status) {
       case USBD_STATUS_CMP:
       case USBD_STATUS_CMP_ERR | USBD_STATUS_DATA_UNDERRUN:
@@ -145,7 +144,7 @@ void UsbConnection::OnInTransfer(usbd_urb* urb) {
     controller_->DataReceiveFailed(device_uid_, app_handle_,
                                    DataReceiveError());
   } else {
-    RawMessageSptr msg(new protocol_handler::RawMessage(0, 0, in_buffer_, len));
+    RawMessagePtr msg(new protocol_handler::RawMessage(0, 0, in_buffer_, len));
     controller_->DataReceiveDone(device_uid_, app_handle_, msg);
   }
 
@@ -202,7 +201,6 @@ void UsbConnection::OnOutTransfer(usbd_urb* urb) {
                                                     << len);
 
   if (!error) {
-    const uint32_t urb_status = status & USBD_URB_STATUS_MASK;
     switch (status) {
       case USBD_STATUS_CMP:
       case USBD_STATUS_CMP_ERR | USBD_STATUS_DATA_UNDERRUN:
@@ -239,7 +237,7 @@ void UsbConnection::OnOutTransfer(usbd_urb* urb) {
   pthread_mutex_unlock(&out_messages_mutex_);
 }
 
-TransportAdapter::Error UsbConnection::SendData(RawMessageSptr message) {
+TransportAdapter::Error UsbConnection::SendData(RawMessagePtr message) {
   if (disconnecting_) {
     return TransportAdapter::BAD_STATE;
   }
@@ -263,7 +261,7 @@ void UsbConnection::Finalise() {
   disconnecting_ = true;
   usbd_abort_pipe(in_pipe_);
   usbd_abort_pipe(out_pipe_);
-  for (std::list<RawMessageSptr>::iterator it = out_messages_.begin();
+  for (std::list<RawMessagePtr>::iterator it = out_messages_.begin();
        it != out_messages_.end(); it = out_messages_.erase(it)) {
     controller_->DataSendFailed(device_uid_, app_handle_, *it, DataSendError());
   }

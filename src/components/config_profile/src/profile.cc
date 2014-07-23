@@ -35,6 +35,8 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sstream>
+#include <algorithm>
 
 #include "config_profile/ini_file.h"
 #include "utils/logger.h"
@@ -66,6 +68,7 @@ const char* kVrCommandsSection = "VR COMMANDS";
 const char* kTransportManagerSection = "TransportManager";
 const char* kApplicationManagerSection = "ApplicationManager";
 const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
+const char* kIAPSection = "IAP";
 
 const char* kHmiCapabilitiesKey = "HMICapabilities";
 const char* kPathToSnapshotKey = "PathToSnapshot";
@@ -131,6 +134,11 @@ const char* kAckMQKey = "AckMQ";
 const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
 const char* kReadDIDFrequencykey = "ReadDIDRequest";
 const char* kGetVehicleDataFrequencyKey = "GetVehicleDataRequest";
+const char* kLegacyProtocolKey = "LegacyProtocol";
+const char* kHubProtocolKey = "HubProtocol";
+const char* kIAPSystemConfigKey = "IAPSystemConfig";
+const char* kIAP2SystemConfigKey = "IAP2SystemConfig";
+const char* kIAP2HubConnectAttemptskey = "IAP2HubConnectAttempts";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -148,6 +156,12 @@ const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
 const char* kDefaultAckMQ = "/dev/mqueue/FromSDLCoreUSBAdapter";
 const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
 const char* kDefaultRecordingFileName = "record.wav";
+const char* kDefaultThreadPoolSize = "ThreadPoolSize";
+const char* kDefaultLegacyProtocol = "com.ford.sync.prot0";
+const char* kDefaultHubProtocol = "com.smartdevicelink.prot0";
+const char* kDefaultIAPSystemConfig = "/fs/mp/etc/mm/ipod.cfg";
+const char* kDefaultIAP2SystemConfig = "/fs/mp/etc/mm/iap2.cfg";
+
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultServerPort = 8087;
@@ -170,6 +184,9 @@ const uint32_t kDefaultTransportManagerDisconnectTimeout = 0;
 const uint32_t kDefaultApplicationListUpdateTimeout = 1;
 const std::pair<uint32_t, uint32_t> kReadDIDFrequency = {5 , 1};
 const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = {5 , 1};
+const uint32_t kDefaultMaxThreadPoolSize = 2;
+const int kDefaultIAP2HubConnectAttempts = 0;
+
 }  // namespace
 
 namespace profile {
@@ -227,7 +244,12 @@ Profile::Profile()
     ack_mq_name_(kDefaultAckMQ),
     recording_file_source_(kDefaultRecordingFileSourceName),
     recording_file_name_(kDefaultRecordingFileName),
-    application_list_update_timeout_(kDefaultApplicationListUpdateTimeout) {
+    application_list_update_timeout_(kDefaultApplicationListUpdateTimeout),
+    iap_legacy_protocol_(kDefaultLegacyProtocol),
+    iap_hub_protocol_(kDefaultHubProtocol),
+    iap_system_config_(kDefaultIAPSystemConfig),
+    iap2_system_config_(kDefaultIAP2SystemConfig),
+    iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts) {
 }
 
 Profile::~Profile() {
@@ -371,7 +393,7 @@ const std::string& Profile::remote_logging_flag_file() const {
 }
 
 const std::string& Profile::remote_logging_flag_file_path() const {
-	return remote_logging_flag_file_path_;
+  return remote_logging_flag_file_path_;
 }
 #endif
 
@@ -403,7 +425,7 @@ const std::string& Profile::app_info_storage() const {
   return app_info_storage_;
 }
 
-const int32_t Profile::heart_beat_timeout() const {
+int32_t Profile::heart_beat_timeout() const {
   return heart_beat_timeout_;
 }
 
@@ -473,6 +495,30 @@ const std::pair<uint32_t, int32_t>& Profile::read_did_frequency() const  {
 
 const std::pair<uint32_t, int32_t>& Profile::get_vehicle_data_frequency() const  {
   return get_vehicle_data_frequency_;
+}
+
+uint32_t Profile::thread_pool_size() const  {
+  return max_thread_pool_size_;
+}
+
+const std::string& Profile::iap_legacy_protocol() const {
+  return iap_legacy_protocol_;
+}
+
+const std::string& Profile::iap_hub_protocol() const {
+  return iap_hub_protocol_;
+}
+
+const std::string& Profile::iap_system_config() const {
+  return iap_system_config_;
+}
+
+const std::string& Profile::iap2_system_config() const {
+  return iap2_system_config_;
+}
+
+int Profile::iap2_hub_connect_attempts() const {
+  return iap2_hub_connect_attempts_;
 }
 
 void Profile::UpdateValues() {
@@ -611,12 +657,16 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
     ReadStringValue(&named_video_pipe_path_, "" , kMediaManagerSection,
                     kNamedVideoPipePathKey);
 
+    named_video_pipe_path_ = app_storage_folder_ + "/" + named_video_pipe_path_;
+
     LOG_UPDATED_VALUE(named_video_pipe_path_, kNamedVideoPipePathKey,
                       kMediaManagerSection);
 
     // Named audio pipe path
     ReadStringValue(&named_audio_pipe_path_, "" , kMediaManagerSection,
                     kNamedAudioPipePathKey);
+
+    named_audio_pipe_path_ = app_storage_folder_ + "/" + named_audio_pipe_path_;
 
     LOG_UPDATED_VALUE(named_audio_pipe_path_, kNamedAudioPipePathKey,
                       kMediaManagerSection);
@@ -648,14 +698,14 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
                       kMainSection);
     // Remote logging flag file
     ReadStringValue(&remote_logging_flag_file_, "", kMainSection,
-    		        kRemoteLoggingFlagFileKey);
+                kRemoteLoggingFlagFileKey);
 
     LOG_UPDATED_VALUE(remote_logging_flag_file_, kRemoteLoggingFlagFileKey,
                       kMainSection);
 
     // Remote logging flag file
     ReadStringValue(&remote_logging_flag_file_path_, "", kMainSection,
-        		    kRemoteLoggingFlagFilePathKey);
+                kRemoteLoggingFlagFilePathKey);
 
     LOG_UPDATED_VALUE(remote_logging_flag_file_path_, kRemoteLoggingFlagFilePathKey,
                       kMainSection);
@@ -1015,10 +1065,53 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
   ReadUintIntPairValue(&get_vehicle_data_frequency_, kGetVehicleDataFrequency,
                    kMainSection, kGetVehicleDataFrequencyKey);
 
+  ReadUIntValue(&max_thread_pool_size_,
+                kDefaultMaxThreadPoolSize,
+                kApplicationManagerSection,
+                kDefaultThreadPoolSize);
+  if (max_thread_pool_size_ > kDefaultMaxThreadPoolSize) {
+    max_thread_pool_size_ = kDefaultMaxThreadPoolSize;
+  }
+
+  ReadStringValue(&iap_legacy_protocol_,
+      kDefaultLegacyProtocol,
+      kIAPSection,
+      kLegacyProtocolKey);
+
+  LOG_UPDATED_VALUE(iap_hub_protocol_, kLegacyProtocolKey, kIAPSection);
+
+  ReadStringValue(&iap_hub_protocol_,
+      kDefaultHubProtocol,
+      kIAPSection,
+      kHubProtocolKey);
+
+  LOG_UPDATED_VALUE(iap_hub_protocol_, kHubProtocolKey, kIAPSection);
+
+  ReadStringValue(&iap_system_config_,
+      kDefaultIAPSystemConfig,
+      kIAPSection,
+      kIAPSystemConfigKey);
+
+  LOG_UPDATED_VALUE(iap_system_config_, kIAPSystemConfigKey, kIAPSection);
+
+  ReadStringValue(&iap2_system_config_,
+      kDefaultIAP2SystemConfig,
+      kIAPSection,
+      kIAP2SystemConfigKey);
+
+  LOG_UPDATED_VALUE(iap2_system_config_, kIAP2SystemConfigKey, kIAPSection);
+
+  ReadIntValue(&iap2_hub_connect_attempts_,
+      kDefaultIAP2HubConnectAttempts,
+      kIAPSection,
+      kIAP2HubConnectAttemptskey);
+
+  LOG_UPDATED_VALUE(iap2_hub_connect_attempts_, kIAP2HubConnectAttemptskey, kIAPSection);
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,
                         const char* const pKey) const {
+  DCHECK(value);
   bool ret = false;
 
   char buf[INI_LINE_LEN + 1];
@@ -1034,12 +1127,12 @@ bool Profile::ReadValue(bool* value, const char* const pSection,
 
     ret = true;
   }
-
   return ret;
 }
 
 bool Profile::ReadValue(std::string* value, const char* const pSection,
                         const char* const pKey) const {
+  DCHECK(value);
   bool ret = false;
 
   char buf[INI_LINE_LEN + 1];
@@ -1049,13 +1142,13 @@ bool Profile::ReadValue(std::string* value, const char* const pSection,
     *value = buf;
     ret = true;
   }
-
   return ret;
 }
 
 bool Profile::ReadStringValue(std::string* value, const char* default_value,
                               const char* const pSection,
                               const char* const pKey) const {
+  DCHECK(value);
   if (!ReadValue(value, pSection, pKey)) {
     *value = default_value;
     return false;
@@ -1063,22 +1156,80 @@ bool Profile::ReadStringValue(std::string* value, const char* default_value,
   return true;
 }
 
-bool Profile::ReadUintIntPairValue(std::pair<uint32_t, int32_t>* value,
-                               const  std::pair<uint32_t, uint32_t>& default_value,
-                               const char *const pSection,
-                               const char *const pKey) const {
+bool Profile::ReadIntValue(int32_t* value, const int32_t default_value,
+                           const char* const pSection,
+                           const char* const pKey) const {
+  DCHECK(value);
   std::string string_value;
   if (!ReadValue(&string_value, pSection, pKey)) {
     *value = default_value;
     return false;
-  } else {
-    std::string first_str = string_value.substr(0, string_value.find(","));
-    std::string second_str = string_value.substr(string_value.find(",") + 1,
-                                                 string_value.size() - first_str.size());
-    (*value).first = strtoul(first_str.c_str(), NULL, 10);
-    (*value).second = strtoul(second_str.c_str(), NULL, 10);
-    return true;
   }
+  *value = atoi(string_value.c_str());
+  return true;
+}
+
+bool Profile::ReadUintIntPairValue(std::pair<uint32_t, int32_t>* value,
+                                   const  std::pair<uint32_t, uint32_t>& default_value,
+                                   const char *const pSection,
+                                   const char *const pKey) const {
+  std::string string_value;
+  if (!ReadValue(&string_value, pSection, pKey)) {
+    *value = default_value;
+    return false;
+  }
+  std::string first_str = string_value.substr(0, string_value.find(","));
+  std::string second_str = string_value.substr(string_value.find(",") + 1,
+                                               string_value.size() - first_str.size());
+  (*value).first = strtoul(first_str.c_str(), NULL, 10);
+  (*value).second = strtoul(second_str.c_str(), NULL, 10);
+  return true;
+}
+
+bool Profile::ReadBoolValue(bool* value, const bool default_value,
+                           const char* const pSection,
+                           const char* const pKey) const {
+  DCHECK(value);
+  bool read_value;
+  const bool result = ReadValue(&read_value, pSection, pKey);
+  *value = result ? read_value : default_value;
+  return result;
+}
+namespace {
+int32_t hex_to_int(const std::string& value) {
+  return static_cast<int32_t>(strtol(value.c_str(), NULL, 16));
+}
+}
+
+std::list<int> Profile::ReadIntContainer(
+    const char * const pSection, const char * const pKey,
+    bool *out_result) const {
+  const std::list<std::string> string_list =
+      ReadStringContainer(pSection, pKey, out_result);
+  std::list<int> value_list;
+  value_list.resize(string_list.size());
+  std::transform(string_list.begin(), string_list.end(),
+                 value_list.begin(), hex_to_int);
+  return value_list;
+}
+
+std::list<std::string> Profile::ReadStringContainer(
+    const char * const pSection, const char * const pKey,
+    bool *out_result) const {
+  std::string string;
+  const bool result = ReadValue(&string, pSection, pKey);
+  if (out_result)
+    *out_result = result;
+  std::list<std::string> value_container;
+  if (result) {
+    std::istringstream iss(string);
+    std::string temp_str;
+    while (iss) {
+      if (!getline( iss, temp_str, ',' )) break;
+      value_container.push_back(temp_str);
+    }
+  }
+  return value_container;
 }
 
 bool Profile::ReadUIntValue(uint16_t* value, uint16_t default_value,
@@ -1138,4 +1289,21 @@ bool Profile::ReadUIntValue(uint64_t* value, uint64_t default_value,
   }
 }
 
+void Profile::LogContainer(const std::vector<std::string>& container,
+                           std::string* log) {
+  if (container.empty()) {
+    return;
+  }
+  if (NULL == log) {
+    return;
+  }
+  std::vector<std::string>::const_iterator it = container.begin();
+  std::vector<std::string>::const_iterator it_end = container.end();
+  for (; it != it_end-1; ++it) {
+    log->append(*it);
+    log->append(" ; ");
+  }
+
+  log->append(container.back());
+}
 }  //  namespace profile

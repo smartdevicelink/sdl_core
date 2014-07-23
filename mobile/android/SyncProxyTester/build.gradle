@@ -9,6 +9,7 @@ dependencies {
     compile project(':SyncProxyAndroid')
     compile project(':FileExplorer')
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.0'
+    compile files('libs/RootTools.jar')
     compile 'com.android.support:appcompat-v7:19.+'
 }
 

@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class DefaultRPCRequestConverter implements IRPCRequestConverter {
 
+    @SuppressWarnings("unused")
     private static final String CLASS_NAME = DefaultRPCRequestConverter.class.getSimpleName();
 
     @Override
@@ -26,13 +27,14 @@ public class DefaultRPCRequestConverter implements IRPCRequestConverter {
                                                      byte sessionID,
                                                      IJsonRPCMarshaller marshaller,
                                                      byte protocolVersion) {
-        Logger.d(CLASS_NAME + " DefaultMarshaller converter: " + marshaller);
+        //Logger.d(CLASS_NAME + " DefaultMarshaller converter: " + marshaller);
 
         byte[] msgBytes = marshaller.marshall(request, protocolVersion);
 
         ProtocolMessage pm = new ProtocolMessage();
         pm.setVersion(protocolVersion);
         pm.setData(msgBytes);
+        pm.setEncrypted(request.isDoEncryption());
         pm.setSessionID(sessionID);
         pm.setMessageType(MessageType.RPC);
         pm.setServiceType(ServiceType.RPC);

@@ -56,7 +56,7 @@ void IAPConnection::Init() {
   controller_->ConnectDone(device_uid_, app_handle_);
 }
 
-TransportAdapter::Error IAPConnection::SendData(RawMessageSptr message) {
+TransportAdapter::Error IAPConnection::SendData(RawMessagePtr message) {
   int session_id;
 
   { // auto_lock scope
@@ -76,7 +76,7 @@ TransportAdapter::Error IAPConnection::SendData(RawMessageSptr message) {
     return TransportAdapter::OK;
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP: error occured while sending data");
+    LOG4CXX_WARN(logger_, "iAP: error occurred while sending data");
     controller_->DataSendFailed(device_uid_, app_handle_, message, DataSendError());
     return TransportAdapter::FAIL;
   }
@@ -93,11 +93,11 @@ void IAPConnection::ReceiveData(int session_id) {
   int size = ipod_eaf_recv(ipod_hdl_, session_id, buffer_, kBufferSize);
   if (size != -1) {
     LOG4CXX_INFO(logger_, "iAP: received " << size << " bytes");
-    RawMessageSptr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
+    RawMessagePtr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
     controller_->DataReceiveDone(device_uid_, app_handle_, message);
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP: error occured while receiving data");
+    LOG4CXX_WARN(logger_, "iAP: error occurred while receiving data");
     controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
   }
 }

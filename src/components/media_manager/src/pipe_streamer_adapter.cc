@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "utils/logger.h"
+#include "utils/file_system.h"
 #include "config_profile/profile.h"
 #include "media_manager/pipe_streamer_adapter.h"
 
@@ -62,7 +63,7 @@ PipeStreamerAdapter::~PipeStreamerAdapter() {
 
 void PipeStreamerAdapter::SendData(
   int32_t application_key,
-  const protocol_handler::RawMessagePtr& message) {
+  const RawMessagePtr message) {
   LOG4CXX_INFO(logger, "PipeStreamerAdapter::SendData");
 
   if (application_key != current_application_) {
@@ -145,7 +146,7 @@ void PipeStreamerAdapter::Streamer::threadMain() {
 
   while (!stop_flag_) {
     while (!server_->messages_.empty()) {
-      protocol_handler::RawMessagePtr msg = server_->messages_.pop();
+      RawMessagePtr msg = server_->messages_.pop();
       if (!msg) {
         LOG4CXX_ERROR(logger, "Null pointer message");
         continue;
@@ -195,7 +196,10 @@ bool PipeStreamerAdapter::Streamer::exitThreadMain() {
 
 void PipeStreamerAdapter::Streamer::open() {
 
-  LOG4CXX_INFO(logger, "Streamer::open()" << server_->named_pipe_path_.c_str());
+  LOG4CXX_INFO(logger, "Streamer::open() " << server_->named_pipe_path_.c_str());
+
+  DCHECK(file_system::CreateDirectoryRecursively(
+      profile::Profile::instance()->app_storage_folder()));
 
   if ((mkfifo(server_->named_pipe_path_.c_str(),
               S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH) < 0)

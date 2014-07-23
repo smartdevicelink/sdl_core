@@ -82,10 +82,9 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
                 .findViewById(R.id.registerappinterface_useAppHMITypes);
         final MultiSpinner<AppHMIType> appHMITypeSpinner = (MultiSpinner) layout
                 .findViewById(R.id.registerappinterface_appHMITypeSpinner);
-        final CheckBox useAppID = (CheckBox) layout
-                .findViewById(R.id.registerappinterface_useAppID);
-        final EditText appIdView =
-                (EditText) layout.findViewById(R.id.registerappinterface_appID);
+
+        final CheckBox useAppID = (CheckBox) layout.findViewById(R.id.registerappinterface_useAppID);
+        final EditText appIdView = (EditText) layout.findViewById(R.id.registerappinterface_appID);
 
         updateDeviceInfoView(layout);
 
@@ -110,7 +109,7 @@ public class RegisterAppInterfaceDialog extends BaseDialogFragment {
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         RegisterAppInterface registerAppInterface = new RegisterAppInterface();
-                        registerAppInterface.setCorrelationID(((SyncProxyTester) getActivity())
+                        registerAppInterface.setCorrelationId(((SyncProxyTester) getActivity())
                                 .getNextCorrelationIdForCurrentFragment());
 
                         String appName = appNameView.getText().toString();

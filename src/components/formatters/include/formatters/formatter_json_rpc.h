@@ -55,7 +55,7 @@ namespace Formatters {
 class FormatterJsonRpc: public CFormatterJsonBase {
   public:
     /**
-     * @brief No errors occured during the parsing of the input JSON string.
+     * @brief No errors occurred during the parsing of the input JSON string.
      */
     static const int32_t kSuccess = 0;
 
@@ -120,8 +120,8 @@ class FormatterJsonRpc: public CFormatterJsonBase {
      * @param str input JSON string.
      * @param out The resulting SmartObject.
      *
-     * @return An integer that is a bitwise-or of all error codes occured
-     *         during the parsing of the input string. 0 if no errors occured.
+     * @return An integer that is a bitwise-or of all error codes occurred
+     *         during the parsing of the input string. 0 if no errors occurred.
      */
     template <typename FunctionId, typename MessageType>
     static int32_t FromString(const std::string& str,
@@ -218,8 +218,8 @@ class FormatterJsonRpc: public CFormatterJsonBase {
      * @param method_value JSON value with function id.
      * @param out The resulting SmartObject.
      *
-     * @return An integer that is a bitwise-or of all error codes occured
-     *         during the parsing of the function id. 0 if no errors occured.
+     * @return An integer that is a bitwise-or of all error codes occurred
+     *         during the parsing of the function id. 0 if no errors occurred.
      */
     template <typename FunctionId>
     static int32_t ParseFunctionId(const Json::Value& method_value,

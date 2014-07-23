@@ -122,7 +122,7 @@ void TcpTransportAdapter::Store() const {
 
 bool TcpTransportAdapter::Restore() {
   LOG4CXX_TRACE_ENTER(logger_);
-  bool errors_occured = false;
+  bool errors_occurred = false;
 #ifndef CUSTOMER_PASA
   const Json::Value tcp_adapter_dictionary =
     resumption::LastState::instance()->dictionary["TransportManager"]["TcpAdapter"];
@@ -144,13 +144,13 @@ bool TcpTransportAdapter::Restore() {
       int port = atoi(port_record.c_str());
       ApplicationHandle app_handle = tcp_device->AddDiscoveredApplication(port);
       if (Error::OK != Connect(device->unique_device_id(), app_handle)) {
-        errors_occured = true;
+        errors_occurred = true;
       }
     }
   }
 #endif
   LOG4CXX_TRACE_EXIT(logger_);
-  return !errors_occured;
+  return !errors_occurred;
 }
 
 }  // namespace transport_adapter

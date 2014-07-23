@@ -67,9 +67,14 @@ class IAPDevice : public MmeDevice {
   virtual ApplicationList GetApplicationList() const;
 
  private:
+  static const int kProtocolNameSize = 256;
+
   ipod_hdl_t* RegisterConnection(ApplicationHandle app_id, IAPConnection* connection);
   void UnregisterConnection(ApplicationHandle app_id);
   void OnSessionOpened(uint32_t protocol_id, int session_id);
+  void OnSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id);
+  void OnHubSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id);
+  void OnRegularSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id);
   void OnSessionClosed(int session_id);
   void OnDataReady(int session_id);
 
@@ -90,6 +95,11 @@ class IAPDevice : public MmeDevice {
   ConnectionContainer connections_;
   sync_primitives::Lock connections_lock_;
 
+  typedef std::map<std::string, int> ProtocolNamePool;
+  ProtocolNamePool free_protocol_name_pool_;
+  ProtocolNamePool protocol_in_use_name_pool_;
+  sync_primitives::Lock protocol_name_pool_lock_;
+
   class IAPEventThreadDelegate : public threads::PulseThreadDelegate {
    public:
     IAPEventThreadDelegate(ipod_hdl_t* ipod_hdl, IAPDevice* parent);
@@ -100,7 +110,6 @@ class IAPDevice : public MmeDevice {
 
    private:
     static const size_t kEventsBufferSize = 32;
-    static const int kProtocolNameSize = 256;
 
     void ParseEvents();
     void AcceptSession(uint32_t protocol_id);

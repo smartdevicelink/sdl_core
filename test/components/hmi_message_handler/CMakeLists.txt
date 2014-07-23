@@ -5,16 +5,10 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
   ${CMAKE_SOURCE_DIR}/src/components/application_manager/include/
   ${CMAKE_SOURCE_DIR}/src/components/hmi_message_handler/include/
-  ${CMAKE_SOURCE_DIR}/src/components/protocol_handler/include/
   ${CMAKE_SOURCE_DIR}/src/components/smart_objects/include/
   ${CMAKE_SOURCE_DIR}/test/components/hmi_message_handler/include/
   ${CMAKE_BINARY_DIR}/src/components/
 )
-
-set(RTLIB rt)
-if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
-set(RTLIB )
-endif()
 
 set (LIBRARIES
     gtest
@@ -28,6 +22,7 @@ set (LIBRARIES
     jsoncpp
     HMIMessageHandler
     ${RTLIB}
+    ProtocolLibrary
 )
 
 set (SOURCES

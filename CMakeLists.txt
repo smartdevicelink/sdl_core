@@ -46,9 +46,9 @@ option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
 option(BUILD_BACKTRACE_SUPPORT "backtrace support" ON)
 option(BUILD_TESTS "Possibility to build and run tests" OFF)
 option(TIME_TESTER "Enable profiling time test util" ON)
-option(BUILD_TESTS_WITH_HMI "Possibility to build and run HMI tests" OFF)
 option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
+option(ENABLE_SECURITY "Security Ford protocol protection" ON)
 option(EXTENDED_POLICY_FLAG "Build with specific features and extended functionality" OFF)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
@@ -58,6 +58,7 @@ set(TARGET_OPTION 	"$ENV{TARGET}")
 set(MEDIA_MODE_OPTION 	"$ENV{MEDIA_MODE}")
 set(HMI_ADAPTER_OPTION 	"$ENV{HMI_ADAPTER}")
 set(ENABLE_LOG_OPTION 	"$ENV{ENABLE_LOG}")
+set(ARCH_TYPE_OPTION	"$ENV{ARCH_TYPE}")
 
 add_custom_target(pasa-tarball
   COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} PASA
@@ -65,10 +66,25 @@ add_custom_target(pasa-tarball
   DEPENDS HMI_API MOBILE_API v4_protocol_v1_2_no_extra
 )
 
+add_custom_target(ford-tarball
+  COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} FORD
+  COMMAND tar -czv -C /tmp/FORD -f ${CMAKE_BINARY_DIR}/ford.tar.gz .
+  DEPENDS HMI_API MOBILE_API v4_protocol_v1_2_no_extra
+)
+
+if (ARCH_TYPE_OPTION)
+  if (NOT (${ARCH_TYPE_OPTION} STREQUAL "x86") AND NOT (${ARCH_TYPE_OPTION} STREQUAL "armv7"))
+    message(AUTHOR_WARNING "HW architecture is not defined, using x86. Allowed values are x86/armv7 (case sensitive)")
+    set(ARCH_TYPE_OPTION	"x86")
+  endif ()
+else ()
+    set(ARCH_TYPE_OPTION	"x86")
+endif()
+
 if (OS_TYPE_OPTION)
   if (${OS_TYPE_OPTION} STREQUAL "QNX")
     message(STATUS "Jenkins integration: set build process for QNX")
-    #do not use include after project() command. 
+    #do not use include after project() command.
     #Such usecase results in infinite cycle of reinitialization of compiler and other variables
     INCLUDE("./qnx_6.5.0_linux_x86.cmake")
     #tests are not supported yet for QNX build
@@ -141,6 +157,11 @@ if (ENABLE_GCOV)
   add_definitions(-DGCOV_ENABLED)
 endif()
 set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
+
+#include_directories(
+#  ../../../src/components/policy/
+#  ../../../src/components/rpc_base/
+#)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   add_definitions(-DOS_LINUX)
@@ -325,6 +346,12 @@ if (HMIADAPTER STREQUAL "mqueue")
     add_definitions(-DHMI_JSON_API)
 endif()
 
+# --- Directory with SDL interfaces, global types and ProtocolLib component
+include_directories(
+  ${CMAKE_SOURCE_DIR}/src/components/include
+  ${CMAKE_SOURCE_DIR}/src/components/protocol/include
+)
+
 # --- 3rd party libs
 set(3RD_PARTY_SOURCE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/3rd_party)
 set(3RD_PARTY_BINARY_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/src/3rd_party)
@@ -338,6 +365,22 @@ add_custom_target(install-3rd_party
   DEPENDS 3rd_party
   WORKING_DIRECTORY ${3RD_PARTY_BINARY_DIRECTORY}
 )
+
+if(BUILD_TESTS)
+  add_definitions(-DBUILD_TESTS)
+endif()
+
+if(ENABLE_SECURITY)
+  add_definitions(-DENABLE_SECURITY)
+  set(SecurityManagerLibrary SecurityManager)
+  set(SecurityManagerIncludeDir ${CMAKE_SOURCE_DIR}/src/components/security_manager/include)
+  set(SecurityManagerTestIncludeDir ${CMAKE_SOURCE_DIR}/test/components/security_manager/include)
+endif()
+
+set(RTLIB rt)
+if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
+set(RTLIB )
+endif()
 
 # --- 3rd party libs (static)
 add_subdirectory(./src/3rd_party-static)
@@ -353,15 +396,11 @@ add_subdirectory(./src/appMain)
 
 # Building tests
 if(BUILD_TESTS)
-    if(BUILD_TESTS_WITH_HMI)
-      add_definitions(-DTESTS_WITH_HMI)
-    endif()
     enable_testing()
     include(Dart)
     # Framework GoogleTest is also integrated together gmock
     # and must not be added separately
     add_subdirectory(./src/3rd_party-static/gmock-1.7.0)
-    set(GMOCK_INCLUDE_DIRECTORY ${GMOCK_INCLUDE_DIRECTORY} PARENT_SCOPE)
     add_subdirectory(./test)
 endif()
 

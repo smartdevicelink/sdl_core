@@ -2,6 +2,7 @@ package com.ford.syncV4.transport;
 
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
+import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.io.BufferedInputStream;
@@ -62,7 +63,15 @@ public class TCPTransport extends SyncTransport {
     /**
      * Instance of the server socket
      */
-    private ServerSocket mServerSocket = null;
+    private  ServerSocket mServerSocket = null;
+
+    public synchronized InputStream getInputStream() {
+        return mInputStream;
+    }
+
+    public synchronized OutputStream getOutputStream() {
+        return mOutputStream;
+    }
 
     /**
      * Instance of the input stream. Used to read data from ApplinkCore
@@ -115,21 +124,21 @@ public class TCPTransport extends SyncTransport {
         if (currentState == TCPTransportState.CONNECTED) {
             synchronized (this) {
                 if (mOutputStream != null) {
-                    //Logger.i("TCPTransport: sendBytesOverTransport request accepted. Trying to send data");
                     try {
                         mOutputStream.write(msgBytes, offset, length);
                         bResult = true;
-                        //Logger.i("TCPTransport.sendBytesOverTransport: successfully send data:" + msgBytes.length);
+                        //Logger.i(CLASS_NAME + " sent " + msgBytes.length + " bytes");
                     } catch (IOException e) {
-                        Logger.e(CLASS_NAME + " SendBytesOverTransport: error during sending data: " + e.getMessage());
+                        e.printStackTrace();
+                        Logger.e(CLASS_NAME + " error during sending data: " + e.getMessage());
                         bResult = false;
                     }
                 } else {
-                    Logger.e(CLASS_NAME + " SendBytesOverTransport request accepted, but output stream is null");
+                    Logger.e(CLASS_NAME + " request accepted, but output stream is null");
                 }
             }
         } else {
-            Logger.i(CLASS_NAME + " SendBytesOverTransport request rejected. Transport is not connected");
+            Logger.i(CLASS_NAME + " request rejected. Transport is not connected");
             bResult = false;
         }
 
@@ -341,13 +350,13 @@ public class TCPTransport extends SyncTransport {
          */
         @Override
         public void run() {
-            Logger.i("TCPTransport.run: transport thread created. Starting connect stage");
+            Logger.i(CLASS_NAME + " transport thread created");
 
             while (!isHalted) {
                 setCurrentState(TCPTransportState.CONNECTING);
                 if (!connect()) {
                     if (isHalted) {
-                        Logger.i("TCPTransport.run: Connection failed, but thread already halted");
+                        Logger.w(CLASS_NAME + " connection failed, but thread already halted");
                     } else {
                         disconnect("Failed to connect to Sync", new SyncException("Failed to connect to Sync"
                                 , SyncExceptionCause.SYNC_CONNECTION_FAILED));
@@ -361,7 +370,7 @@ public class TCPTransport extends SyncTransport {
                 byte[] buffer = new byte[READ_BUFFER_SIZE];
 
                 while (!isHalted) {
-                    Logger.i("TCPTransport.run: Waiting for data...");
+                    Logger.i(CLASS_NAME + " waiting for data...");
                     int bytesRead;
                     try {
                         bytesRead = mInputStream.read(buffer);
@@ -372,25 +381,21 @@ public class TCPTransport extends SyncTransport {
 
                     synchronized (TCPTransport.this) {
                         if (mThread.isInterrupted()) {
-                            Logger.i("TCPTransport.run: Got new data but thread is interrupted");
+                            Logger.i(CLASS_NAME + " got new data but thread is interrupted");
                             break;
                         }
                     }
 
-                    Logger.i("TCPTransport.run: Got new data");
                     if (-1 == bytesRead) {
                         internalHandleTCPDisconnect();
                         break;
-                    } else if (0 == bytesRead) {
-                        Logger.i("TCPTransport.run: Received zero bytes");
                     } else {
-                        Logger.i(String.format("TCPTransport.run: Received %d bytes", bytesRead));
                         handleReceivedBytes(buffer, bytesRead);
                     }
                 }
             }
 
-            Logger.i("TCPTransport.run: Thread terminated");
+            Logger.i(CLASS_NAME + " thread terminated");
             setCurrentState(TCPTransportState.IDLE);
         }
 

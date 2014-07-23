@@ -211,7 +211,7 @@ bool RequestWatchdog::checkTimeScaleMaxRequest(
 
     if (count == max_request_per_time_scale ) {
       LOG4CXX_ERROR(logger_, "Requests count " << count <<
-                    " exceed application limit" << max_request_per_time_scale);
+                    " exceed application limit " << max_request_per_time_scale);
       result = false;
     }
 
@@ -241,7 +241,7 @@ bool RequestWatchdog::checkHMILevelTimeScaleMaxRequest(
 
     if (count == max_request_per_time_scale ) {
       LOG4CXX_ERROR(logger_, "Requests count " << count <<
-                    " exceed application limit" << max_request_per_time_scale
+                    " exceed application limit " << max_request_per_time_scale
                     << " in hmi level " << hmi_level);
       result = false;
     }
@@ -286,7 +286,8 @@ void RequestWatchdog::stopDispatcherThreadIfNeeded() {
   queueDispatcherThread.stop();
 }
 
-RequestWatchdog::QueueDispatcherThreadDelegate::QueueDispatcherThreadDelegate(RequestWatchdog* inRequestWatchdog)
+RequestWatchdog::QueueDispatcherThreadDelegate::QueueDispatcherThreadDelegate(
+    RequestWatchdog* inRequestWatchdog)
   : threads::ThreadDelegate()
   , stop_flag_(false)
   ,requestWatchdog_(inRequestWatchdog)

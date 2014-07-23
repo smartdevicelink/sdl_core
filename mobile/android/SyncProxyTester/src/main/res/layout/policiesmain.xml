@@ -32,7 +32,7 @@ android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
 		<TableRow
-		    android:id="@+id/LinearLayout01"
+		    android:id="@+id/LinearLayout02"
 		    android:layout_width="fill_parent"
 		    android:layout_height="match_parent" >			
 
@@ -62,7 +62,7 @@ android:layout_width="fill_parent"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 		<TableRow
-		    android:id="@+id/LinearLayout01"
+		    android:id="@+id/LinearLayout03"
 		    android:layout_width="fill_parent"
 		    android:layout_height="match_parent" >
         	

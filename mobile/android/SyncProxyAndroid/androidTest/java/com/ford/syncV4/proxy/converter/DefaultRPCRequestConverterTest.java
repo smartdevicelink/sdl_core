@@ -64,7 +64,7 @@ public class DefaultRPCRequestConverterTest extends InstrumentationTestCase {
 
         Show msg = new Show();
         msg.setAlignment(TextAlignment.CENTERED);
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -91,7 +91,7 @@ public class DefaultRPCRequestConverterTest extends InstrumentationTestCase {
         PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setSyncFileName("file");
         msg.setBulkData(data);
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -117,7 +117,7 @@ public class DefaultRPCRequestConverterTest extends InstrumentationTestCase {
 
         PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setSyncFileName("file");
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -146,7 +146,7 @@ public class DefaultRPCRequestConverterTest extends InstrumentationTestCase {
 
         PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -176,7 +176,7 @@ public class DefaultRPCRequestConverterTest extends InstrumentationTestCase {
 
         PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -207,7 +207,7 @@ public class DefaultRPCRequestConverterTest extends InstrumentationTestCase {
 
         PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setBulkData(data);
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,

@@ -1,32 +1,35 @@
-// Copyright (c) 2013, Ford Motor Company
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms, with or without
-// modification, are permitted provided that the following conditions are met:
-//
-// Redistributions of source code must retain the above copyright notice, this
-// list of conditions and the following disclaimer.
-//
-// Redistributions in binary form must reproduce the above copyright notice,
-// this list of conditions and the following
-// disclaimer in the documentation and/or other materials provided with the
-// distribution.
-//
-// Neither the name of the Ford Motor Company nor the names of its contributors
-// may be used to endorse or promote products derived from this software
-// without specific prior written permission.
-//
-// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-// AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-// IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 'A PARTICULAR PURPOSE
-// ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-// LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-// CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-// SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-// CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-// ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-// POSSIBILITY OF SUCH DAMAGE.
+/*
+ * Copyright (c) 2014, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_
 #define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_
 
@@ -229,6 +232,40 @@ class SmartObject {
    **/
   bool operator==(uint32_t Value) const;
 
+  /**
+   * @name Support of type: int64_t
+   * @{
+   */
+  /**
+   * @brief Constructor for creating object of type: int64_t
+   *
+   * @param InitialValue Initial object value
+   **/
+  explicit SmartObject(int64_t InitialValue);
+
+  /**
+   * @brief Returns current object converted to int64_t
+   *
+   * @return int64_t
+   **/
+  int64_t asInt64() const;
+
+  /**
+   * @brief Assignment operator for type: int64_t
+   *
+   * @param  NewValue New object value
+   * @return SmartObject&
+   **/
+  SmartObject& operator=(int64_t NewValue);
+
+  /**
+   * @brief Comparison operator for comparing object with integer value
+   *
+   * @param  Value Value to compare object with
+   * @return bool
+   **/
+  bool operator==(int64_t Value) const;
+
   /** @} */
 
   /**
@@ -367,7 +404,7 @@ class SmartObject {
    * @return std::string Value of the object converted to bool type or invalid_string_value if
    *         conversion is not possible
    **/
-  // operator std::string(void) const;
+  // operator std::string() const;
   /**
    * @brief Returns current object converted to string
    *
@@ -433,7 +470,7 @@ class SmartObject {
    * @return SmartBinary Value of the object converted to binary type or invalid_binary_value if
    *         conversion is not possible
    **/
-  // operator SmartBinary(void) const;
+  // operator SmartBinary() const;
   /**
    * @brief Returns current object converted to binary
    *
@@ -639,31 +676,14 @@ class SmartObject {
    * @param  NewValue New object value
    * @return void
    **/
-  inline void set_value_integer(int32_t NewValue);
-
-  /**
-   * @brief Sets new integer value to the object.
-   *
-   * This method changes also internal object type
-   *
-   * @param  NewValue New object value
-   * @return void
-   **/
-  inline void set_value_unsigned_int(uint32_t NewValue);
+  inline void set_value_integer(int64_t NewValue);
 
   /**
    * @brief Converts object to int32_t type
    *
    * @return int32_t Converted value or invalid_int_value if conversion not possible
    **/
-  inline int32_t convert_int() const;
-
-  /**
-   * @brief Converts object to int32_t type
-   *
-   * @return int32_t Converted value or invalid_int_value if conversion not possible
-   **/
-  inline uint32_t convert_unsigned_int() const;
+  inline int64_t convert_int() const;
   /** @} */
 
   /**
@@ -825,12 +845,12 @@ class SmartObject {
   static double convert_string_to_double(const std::string* Value);
 
   /**
-   * @brief Converts string to uint32_t
+   * @brief Converts string to int64_t
    *
    * @param Value Pointer to string to convert
-   * @return uint32_t int32_t
+   * @return int64_t int64_t
    **/
-  static uint32_t convert_string_to_unsigned_int(const std::string* Value);
+  static uint64_t convert_string_to_integer(const std::string* Value);
 
   /**
    * @brief Converts double value to string
@@ -879,8 +899,7 @@ class SmartObject {
     double double_value;
     bool bool_value;
     char char_value;
-    int32_t int_value;
-    // uint32_t unsigned_int_value;
+    int64_t int_value;
     std::string* str_value;
     SmartArray* array_value;
     SmartMap* map_value;
@@ -910,6 +929,7 @@ static const bool invalid_bool_value = false;
  **/
 static const int32_t invalid_int_value = -1;
 static const int32_t invalid_unsigned_int_value = 0;
+static const int64_t invalid_int64_value = -1;
 
 /**
  * @brief Value that is used as invalid value for char type

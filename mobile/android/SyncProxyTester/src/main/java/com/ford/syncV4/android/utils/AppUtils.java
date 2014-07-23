@@ -53,7 +53,7 @@ public class AppUtils {
         try {
             return contentsOfResource(new FileInputStream(file));
         } catch (FileNotFoundException e) {
-            Logger.e(TAG + " Contents Of Resource exception", e);
+            Logger.e(TAG + " Contents Of Resource exception", e.getMessage());
         }
         return new byte[0];
     }

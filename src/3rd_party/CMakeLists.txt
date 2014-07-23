@@ -52,6 +52,7 @@ endif()
 
 # --- libexpat
 add_subdirectory(expat-2.1.0)
+set(EXPAT_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
 
 # --- libapr-1
 add_subdirectory(apr-cmake)
@@ -68,3 +69,5 @@ set(LOG4CXX_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
 
 # --- D-Bus
 add_subdirectory(dbus-cmake)
+set(DBUS_BUILD_DIRECTORY ${DBUS_BUILD_DIRECTORY} PARENT_SCOPE)
+set(DBUS_INCLUDE_DIRS ${DBUS_INCLUDE_DIRS} PARENT_SCOPE)

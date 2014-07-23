@@ -1,4 +1,3 @@
-
 set(target TransportManager)
 
 include_directories (
@@ -17,7 +16,6 @@ if (BUILD_BT_SUPPORT)
   )
 endif()
 
-
 set (SOURCES
   ./src/transport_manager_impl.cc
   ./src/transport_manager_default.cc
@@ -27,7 +25,6 @@ set (SOURCES
   ./src/transport_adapter/threaded_socket_connection.cc
   ./src/tcp/tcp_client_listener.cc
   ./src/tcp/tcp_device.cc
-  ./src/transport_adapter/transport_adapter_event.cc
   ./src/tcp/tcp_socket_connection.cc
   ./src/tcp/tcp_connection_factory.cc
 )
@@ -78,10 +75,12 @@ if (BUILD_MME_SUPPORT)
     src/mme/mme_connection_factory.cc
     src/mme/iap_connection.cc
     src/mme/iap2_connection.cc
+    src/mme/protocol_config.cc
   )
 endif(BUILD_MME_SUPPORT)
 
 add_library(${target} ${SOURCES})
+target_link_libraries(${target} ProtocolLibrary)
 
 if (BUILD_USB_SUPPORT)
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")

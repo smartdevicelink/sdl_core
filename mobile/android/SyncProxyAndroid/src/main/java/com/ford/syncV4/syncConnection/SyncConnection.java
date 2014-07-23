@@ -13,6 +13,7 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitorsManager;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitorListener;
+import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.session.Session;
@@ -263,11 +264,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public OutputStream startH264(byte rpcSessionID) {
+    public OutputStream startH264(byte rpcSessionID, boolean encrypt) {
         try {
             OutputStream os = new PipedOutputStream();
             InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mVideoPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Mobile_Nav);
+            mVideoPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Mobile_Nav, encrypt);
             mVideoPacketizer.start();
             return os;
         } catch (Exception e) {
@@ -290,11 +291,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public OutputStream startAudioDataTransfer(byte rpcSessionID) {
+    public OutputStream startAudioDataTransfer(byte rpcSessionID, boolean encrypt) {
         try {
             OutputStream os = new PipedOutputStream();
             InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mAudioPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Audio_Service);
+            mAudioPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Audio_Service, encrypt);
             mAudioPacketizer.start();
             return os;
         } catch (IOException e) {
@@ -352,7 +353,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         mProtocol.SendMessage(msg);
     }
 
-    public void startMobileNavService(byte sessionId) {
+    public void startMobileNavService(byte sessionId,  boolean isCyphered) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!getIsConnected()) {
                 return;
@@ -360,7 +361,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (mProtocol == null) {
                 return;
             }
-            mProtocol.StartProtocolService(ServiceType.Mobile_Nav, sessionId);
+            mProtocol.StartProtocolService(ServiceType.Mobile_Nav, sessionId, isCyphered);
             synchronized (START_SERVICE_LOCK){
                 try {
                     START_SERVICE_LOCK.wait(1000);
@@ -371,7 +372,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-    public void startAudioService(byte sessionId) {
+    public void startAudioService(byte sessionId,boolean isCyphered) {
         synchronized (PROTOCOL_REFERENCE_LOCK) {
             if (!getIsConnected()) {
                 return;
@@ -379,7 +380,26 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             if (mProtocol == null) {
                 return;
             }
-            mProtocol.StartProtocolService(ServiceType.Audio_Service, sessionId);
+            mProtocol.StartProtocolService(ServiceType.Audio_Service, sessionId, isCyphered);
+            synchronized (START_SERVICE_LOCK){
+                try {
+                    START_SERVICE_LOCK.wait(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    public void startRpcService(byte sessionId, boolean isCyphered) {
+        synchronized (PROTOCOL_REFERENCE_LOCK) {
+            if (!getIsConnected()) {
+                return;
+            }
+            if (mProtocol == null) {
+                return;
+            }
+            mProtocol.StartProtocolService(ServiceType.RPC, sessionId, isCyphered);
             synchronized (START_SERVICE_LOCK){
                 try {
                     START_SERVICE_LOCK.wait(1000);
@@ -398,6 +418,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
                 return;
             }
             try {
+                //Logger.d(CLASS_NAME + " -> Bytes:" + receivedBytes.length);
                 mProtocol.HandleReceivedBytes(receivedBytes, receivedBytesLength);
             } catch (OutOfMemoryError e) {
                 final String info = " Out of memory while handling incoming message";
@@ -506,7 +527,7 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         // Protocol has packaged bytes to send, pass to transport for transmission
         synchronized (TRANSPORT_REFERENCE_LOCK) {
             if (mTransport != null) {
-                Logger.d(CLASS_NAME + " <- Bytes:" + BitConverter.bytesToHex(msgBytes));
+                //Logger.d(CLASS_NAME + " <- Bytes:" + BitConverter.bytesToHex(msgBytes));
                 mTransport.sendBytes(msgBytes, offset, length);
             }
         }
@@ -539,8 +560,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolSessionStarted(byte sessionId, byte version) {
-        mConnectionListener.onProtocolSessionStarted(sessionId, version);
+    public void onProtocolSessionStarted(byte sessionId, byte version, boolean encrypted) {
+        mConnectionListener.onProtocolSessionStarted(sessionId, version, encrypted);
         synchronized (START_PROTOCOL_SESSION_LOCK) {
             START_PROTOCOL_SESSION_LOCK.notify();
         }
@@ -613,8 +634,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, byte version){
-        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID, version);
+    public void onProtocolServiceStarted(ServiceType serviceType, byte sessionID, boolean encrypted, byte version){
+        mConnectionListener.onProtocolServiceStarted(serviceType, sessionID, encrypted,version);
         synchronized (START_SERVICE_LOCK){
             START_SERVICE_LOCK.notify();
         }
@@ -642,7 +663,9 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void sendH264(ProtocolMessage pm) {
-        sendMessage(pm);
+        if (pm != null) {
+            sendMessage(pm);
+        }
     }
 
     private void processTransportStopReading() {
@@ -667,4 +690,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             mTestConfig.setDoKeepUSBTransportConnected(false);
         }
     }
+
+
 }

@@ -21,9 +21,6 @@ DOT_GIT=$GIT_REPO/.git/
 POLICY_REPO=$GIT_REPO/src/components/policy
 POLICY_DOT_GIT=$GIT_REPO/.git/modules/src/components/policy
 
-git submodule init
-git submodule update 
-
 echo "Enter first name: " 
 read FIRST_NAME
 echo "Enter last name: " 

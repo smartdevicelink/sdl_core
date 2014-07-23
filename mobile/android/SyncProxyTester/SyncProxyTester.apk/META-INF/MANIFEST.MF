@@ -1,0 +1,192 @@
+Manifest-Version: 1.0
+Created-By: 1.0 (Android)
+
+Name: res/drawable-mdpi/action.png
+SHA1-Digest: s3l/jSBaTqhSl6gm6FhwFsr97uM=
+
+Name: res/layout/selectprotocol.xml
+SHA1-Digest: 5Eigp1TnmOjNb/HV8kztaSwQ0UY=
+
+Name: res/layout/alert.xml
+SHA1-Digest: ap5St7JVXDbvphw0Z1YFkHYRWic=
+
+Name: res/layout/performinteraction.xml
+SHA1-Digest: +NYQIguj7W7HIUPqXObXd0E9wZ8=
+
+Name: res/drawable-ldpi/icon.png
+SHA1-Digest: i7vxaosoiS+9HzKB7ZgIsXMYRLY=
+
+Name: res/drawable-mdpi/icon.png
+SHA1-Digest: 7Ft/Rirt+l/JRX2KjDREScdbCZk=
+
+Name: res/layout/policiesmain.xml
+SHA1-Digest: 2s+XuV/wC8Kzv5eganrad/077cc=
+
+Name: res/xml/accessory_filter.xml
+SHA1-Digest: ng4AUU6jh/lpj2pOpjVAmvndjdg=
+
+Name: res/layout/registerappinterface.xml
+SHA1-Digest: khbOevz5T+AhXCwqbetxcNLID/g=
+
+Name: res/layout/policiesrow.xml
+SHA1-Digest: jg9akpGgV5tjmot1yfxCg5KDms8=
+
+Name: res/layout/speak.xml
+SHA1-Digest: seRNHd4bMiFtZffJfxLRmduK29I=
+
+Name: res/layout/alertmaneuver.xml
+SHA1-Digest: 0bxiS1nfl6NUTNM+sALpES15E/g=
+
+Name: res/layout/addcommand.xml
+SHA1-Digest: 3lOHB67c0YZtk21iezXMXNUylvQ=
+
+Name: res/layout/setdisplaylayout.xml
+SHA1-Digest: 94lc4oJirIad2h38MhX8aZcVbLM=
+
+Name: assets/build.info
+SHA1-Digest: 2aE7tWjmhSyfk0ZRr+D/03fs7Uw=
+
+Name: res/raw/test_video.mp4
+SHA1-Digest: IMaw6pWd9U9yB33W+cHZtd65T7s=
+
+Name: res/drawable-mdpi/turn_forward_secondary.png
+SHA1-Digest: Dc61wsPfq0llbE6QdLecGugEUJ8=
+
+Name: res/layout/main.xml
+SHA1-Digest: u3TgmMttocdA6PMv7/UXJhlt3v4=
+
+Name: res/drawable/file.png
+SHA1-Digest: 0/J/zR8dQNeMcZ/NWm9jIXi4JFM=
+
+Name: res/drawable-mdpi/turn_forward.png
+SHA1-Digest: vXeW8pJnW8tzibUV/PmoBAN1oa0=
+
+Name: res/layout/scrollablemessage.xml
+SHA1-Digest: mZmTf1JWvx/yiVhIxkUszBSzLQ0=
+
+Name: res/layout/slider.xml
+SHA1-Digest: Wn2+gXh8uzdTENE5IRY3A7bOCyo=
+
+Name: res/drawable/folder.png
+SHA1-Digest: 6y+60rEvgMdkt/TURvRRdei6OGM=
+
+Name: assets/CHANGELOG.txt
+SHA1-Digest: 8HxwqXG+uBWFVqabSVQ0SvyuKMA=
+
+Name: res/layout/show.xml
+SHA1-Digest: VXHtoSMfDTHzBrSzSf0Fz6m8cic=
+
+Name: res/layout/encodedsyncpdata.xml
+SHA1-Digest: GA2WKtJm7UOb1UG7fgtufAbjI60=
+
+Name: res/layout/putfile.xml
+SHA1-Digest: eMjTFfREG+PexYLfo2EKbSPAGrI=
+
+Name: res/drawable-mdpi/turn_left.png
+SHA1-Digest: pL+R4+qMOQU8owfEkk+zE39q5yg=
+
+Name: res/layout/row.xml
+SHA1-Digest: D/qQmxOHUDkiOVF8FJ+ZlESErlE=
+
+Name: res/menu/mobile_nav_preview.xml
+SHA1-Digest: QleG4tudPG3lhYwXYbKb/pxUSaA=
+
+Name: res/layout/file_dialog_row.xml
+SHA1-Digest: vv9IQMPi7OOirsLPRFR0gdX5t98=
+
+Name: res/drawable-hdpi/fiesta.png
+SHA1-Digest: 7B8B06uhz2PeEqt18YKgXp3QD3U=
+
+Name: res/layout/readdid.xml
+SHA1-Digest: wTyrb8dwEnp4z4BEj9K9QOWB0hA=
+
+Name: res/layout/setappicon.xml
+SHA1-Digest: IEdPPejvwy8hBIPcxwe8SvGV35A=
+
+Name: res/raw/arco.mp3
+SHA1-Digest: jz3mKB83royGLT6/MjqDBy5P17g=
+
+Name: res/layout/activity_mobile_nav_preview.xml
+SHA1-Digest: HRKwNLquNYGFkqw9T9CbLxv+N7E=
+
+Name: res/drawable-mdpi/turn_right.png
+SHA1-Digest: y79EmUQJU+5hr8iQKy7Ym6cPNVM=
+
+Name: resources.arsc
+SHA1-Digest: vJIDlGzkotHd1Hk6bLHdIx+OczI=
+
+Name: res/layout/setglobalproperties.xml
+SHA1-Digest: BUeWPhZy5IQWlsGcjGxHS1W45Ms=
+
+Name: res/drawable-mdpi/turn_right_secondary.png
+SHA1-Digest: GWd+7huqmxvjfddiQeDpA86rm8g=
+
+Name: res/layout/softbuttons.xml
+SHA1-Digest: 8R+R0D97s/w93RRdW/h1Pp2Sfb4=
+
+Name: AndroidManifest.xml
+SHA1-Digest: lDZgwQ7lEU6k6ExJPjB9KpXZo38=
+
+Name: res/layout/softbutton_row.xml
+SHA1-Digest: hPKituFlFbiAG77sMtfHJ4mhmxA=
+
+Name: res/layout/createinteractionchoices.xml
+SHA1-Digest: iOVdMOP634X25oHRARbfApZ4QSI=
+
+Name: res/layout/performaudiopassthru.xml
+SHA1-Digest: HkmN0OSuKqX/rYH5RMf+4SlW7bM=
+
+Name: res/layout/setmediaclock.xml
+SHA1-Digest: 7RVL2UX3jTRB+FypYn1ynmEHrws=
+
+Name: res/layout/addsubmenu.xml
+SHA1-Digest: f+9xWsNY/v1w7quJMVnboqBy85c=
+
+Name: res/raw/fiesta.png
+SHA1-Digest: cFT9m47MXRr3edh4RhpuRYtfodc=
+
+Name: res/layout/file_dialog_main.xml
+SHA1-Digest: hegwq/U8SffLXKbuONuPsw25iE4=
+
+Name: res/layout/softbutton.xml
+SHA1-Digest: rwVLFSiuozyTzmgsjhDEK0FRUUY=
+
+Name: res/layout/changeregistration.xml
+SHA1-Digest: N1tH4ImPMY8tiRYBHq4CKOWU5tU=
+
+Name: res/layout/resetglobalproperties.xml
+SHA1-Digest: LKy8awDPaWUfW1vpiNvroh0FD4g=
+
+Name: classes.dex
+SHA1-Digest: CBNv3L4O5m9M6sOXrGhDatgWsqk=
+
+Name: res/layout/getdtcs.xml
+SHA1-Digest: Ip+wgkax0M07FTB6RsrzfIblu4Q=
+
+Name: res/raw/faq_welcome_orientation.mp4
+SHA1-Digest: WZJBCiGGBfXkmUFk9YCAOobxKY0=
+
+Name: res/layout/showconstanttbt.xml
+SHA1-Digest: DqKBALITKWMmwmxoTmfwTmhlprU=
+
+Name: res/drawable/icon.png
+SHA1-Digest: 7Ft/Rirt+l/JRX2KjDREScdbCZk=
+
+Name: res/drawable-mdpi/fiesta.png
+SHA1-Digest: 7B8B06uhz2PeEqt18YKgXp3QD3U=
+
+Name: res/drawable-mdpi/turn_left_secondary.png
+SHA1-Digest: JEKAsLQBp1IlsYSDA2e87aZx17Y=
+
+Name: res/drawable-ldpi/fiesta.png
+SHA1-Digest: 7B8B06uhz2PeEqt18YKgXp3QD3U=
+
+Name: res/drawable-hdpi/icon.png
+SHA1-Digest: Vj/qhxk8ic8FE0/kT6E3vgRJ4mE=
+
+Name: res/layout/activity_keyboardproperties.xml
+SHA1-Digest: 2O0utKeI8gX6BOyzyun6u17gZu0=
+
+Name: res/layout/updateturnlist.xml
+SHA1-Digest: jmD7+WZuLQtEF0DBOumfQQmY6fw=
+

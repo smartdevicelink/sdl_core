@@ -33,7 +33,6 @@
  */
 
 import QtQuick 2.0
-import "../models/RequestToSDL.js" as RequestToSDL
 
 Item {
     function updateDeviceList (deviceList) {
@@ -155,15 +154,30 @@ Item {
 
     function policyUpdate(file, timeout, retry) {
         console.log("enter policyUpdate");
-        settingsContainer.filePSnapshot = file;
+        settingsContainer.filePTSnapshot = file;
         settingsContainer.timeoutPTExchange = timeout;
         settingsContainer.retriesPTExchange = retry;
         var service = 7; // service type for Ford specific policy
         RequestToSDL.SDL_GetURLS(service, settingsContainer.startPTExchange);
+        console.log("exit policyUpdate");
     }
 
     function systemRequest(requestType, fileName, appID) {
         console.log("enter systemRequest");
-        settingsContainer.stopPTExchange(fileName);
+        switch (requestType) {
+            case Common.RequestType.PROPRIETARY: {
+                settingsContainer.stopPTExchange(fileName);
+                break;
+            }
+            case Common.RequestType.HTTP: {
+                if (fileName === "IVSU") {
+                    settingsContainer.updateIVSU(appID);
+                } else {
+                    settingsContainer.decrypt(fileName, appID);
+                }
+                break;
+            }
+        }
+        console.log("exit systemRequest");
     }
 }

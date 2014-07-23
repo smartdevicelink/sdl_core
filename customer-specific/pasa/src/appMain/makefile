@@ -43,6 +43,7 @@ INCLUDES = \
 	$(CC_IFLAG)../components/policies/include \
 	$(CC_IFLAG)../components/resumption/include \
 	$(CC_IFLAG)../components \
+	$(CC_IFLAG)../components/include \
 	$(CC_IFLAG)../3rd_party-static/MessageBroker/include \
 	$(CC_IFLAG)../3rd_party-static/jsoncpp/include \
 	$(CC_IFLAG)../3rd_party-static/encryption/include \
@@ -76,6 +77,7 @@ STATIC_LIBS += \
 	hmi_message_handler$(DEBUG_EXT) \
 	connection_handler$(DEBUG_EXT) \
 	protocol_handler$(DEBUG_EXT) \
+	protocol$(DEBUG_EXT) \
 	transport_manager$(DEBUG_EXT) \
 	resumption$(DEBUG_EXT) \
 	usage_statistics$(DEBUG_EXT) \

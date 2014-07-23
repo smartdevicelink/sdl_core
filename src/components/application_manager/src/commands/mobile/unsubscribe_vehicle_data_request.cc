@@ -110,6 +110,9 @@ void UnsubscribeVehicleDataRequest::Run() {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
+  smart_objects::SmartObject response_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+
   msg_params[strings::app_id] = app->app_id();
 
   for (; vehicle_data.end() != it; ++it) {
@@ -123,6 +126,10 @@ void UnsubscribeVehicleDataRequest::Run() {
         VehicleDataType key_type = it->second;
         if (app->UnsubscribeFromIVI(static_cast<uint32_t>(key_type))) {
           ++unsubscribed_items;
+        } else {
+          response_params[key_name][strings::data_type] = key_type;
+          response_params[key_name][strings::result_code] =
+              mobile_apis::VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED;
         }
       }
     }
@@ -130,11 +137,11 @@ void UnsubscribeVehicleDataRequest::Run() {
 
   if (0 == items_to_unsubscribe) {
     SendResponse(false, mobile_apis::Result::INVALID_DATA,
-                 "No data in the request", &msg_params);
+                 "No data in the request");
     return;
   } else if (0 == unsubscribed_items) {
     SendResponse(false, mobile_apis::Result::IGNORED,
-                 "Was not subscribed on any VehicleData", &msg_params);
+                 "Was not subscribed on any VehicleData", &response_params);
     return;
   }
 
@@ -233,9 +240,9 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   if (result) {
     if (IsAnythingAlreadyUnsubscribed()) {
-      result_code = mobile_apis::Result::WARNINGS;
+      result_code = mobile_apis::Result::IGNORED;
       return_info =
-          std::string("Unsupported phoneme type sent in a prompt").c_str();
+          std::string("Some provided VehicleData was not subscribed.").c_str();
     }
   }
 

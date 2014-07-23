@@ -7,6 +7,7 @@ import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.transport.TransportType;
+import com.stericson.RootTools.RootTools;
 
 /**
  * Created with Android Studio.
@@ -260,6 +261,14 @@ public class AppPreferencesManager {
     }
 
     /**
+     * @return true if it is necessary to check whether device has been rooted
+     */
+    public static boolean getDoDeviceRootCheck() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_DO_DEVICE_ROOT_CHECK, true);
+    }
+
+    /**
      * Set protocol minimum supported version int value
      * @param value version of the protocol
      */
@@ -267,6 +276,17 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(Const.PREFS_KEY_PROTOCOL_MIN_VERSION, value);
+        editor.commit();
+    }
+
+    /**
+     * Set true if it is necessary to check whether device has been rooted
+     * @param value boolean value
+     */
+    public static void setDoDeviceRootCheck(boolean value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.PREF_KEY_DO_DEVICE_ROOT_CHECK, value);
         editor.commit();
     }
 

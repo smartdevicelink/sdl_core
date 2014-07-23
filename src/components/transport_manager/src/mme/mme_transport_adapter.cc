@@ -53,6 +53,9 @@ TransportAdapter::Error MmeTransportAdapter::Init() {
   if (TransportAdapter::OK == error) {
     initialised_ = true;
   }
+#if QNX_BARE_SYSTEM_WORKAROUND
+  device_scanner_->Scan();
+#endif
   return error;
 }
 

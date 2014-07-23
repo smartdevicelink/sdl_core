@@ -1,4 +1,5 @@
-/* Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -50,8 +51,7 @@ class Connection;
 class HeartBeatMonitor: public threads::ThreadDelegate {
  public:
   HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
-                   Connection* connection);
-  ~HeartBeatMonitor();
+                   Connection *connection);
 
   /**
    * Thread procedure.
@@ -59,18 +59,18 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
   virtual void threadMain();
 
   /**
-    * \brief add new session
-    */
+   * \brief add and remove session
+   */
   void AddSession(uint8_t session_id);
   void RemoveSession(uint8_t session_id);
 
-  /*
-   * Resets timer preventing session from being killed
+  /**
+  * \brief Resets timer preventing session from being killed
    */
   void KeepAlive(uint8_t session_id);
 
-  /*
-   * Thread exit procedure.
+  /**
+   * \brief Thread exit procedure.
    */
   virtual bool exitThreadMain();
 
@@ -78,7 +78,7 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
   // \brief Heartbeat timeout, should be read from profile
   const int32_t heartbeat_timeout_seconds_;
   // \brief Connection that must be closed when timeout elapsed
-  Connection* connection_;
+  Connection *connection_;
 
   static const int32_t kdefault_cycle_timeout = 1000000;
 
@@ -100,4 +100,4 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
 
 } // namespace connection_handler
 
-#endif // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEARTBEAT_MONITOR_H_
+#endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEARTBEAT_MONITOR_H_

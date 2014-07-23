@@ -54,7 +54,7 @@ class CObjectSchemaItem : public ISchemaItem {
     /**
      * @brief Default constructor.
      **/
-    SMember(void);
+    SMember();
 
     /**
      * @brief Constructor.

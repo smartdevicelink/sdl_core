@@ -1,19 +1,17 @@
 find_package(Gstreamer-1.0 REQUIRED)
 find_package(Glib-2.0 REQUIRED)
 
-if (BUILD_TESTS_WITH_HMI)
-find_package(LibXML2 REQUIRED)
-endif(BUILD_TESTS_WITH_HMI)
-
 # --- GoogleTest example
 #add_subdirectory(./gtest-example)
+
+include_directories(
+  ${CMAKE_SOURCE_DIR}/test/components/include)
 
 # --- components tests
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/policy/test/policy ./policy)
 add_subdirectory(./tools)
-
 
 set (INCLUDE_DIR
   ${GMOCK_INCLUDE_DIRECTORY}
@@ -31,6 +29,7 @@ set (INCLUDE_DIR
   ../src/components/protocol_handler/include
   ../src/components/transport_manager/include
   ../src/components/connection_handler/include
+  ${SecurityManagerIncludeDir}
   ../src/components/formatters/include
   ../src/components/smart_objects/include
   ../src/components/formatters/include
@@ -44,6 +43,8 @@ set (INCLUDE_DIR
   ../test/components/json_handler/include
   ../test/components/smart_objects
   ../test/components/transport_manager
+  ../test/components/connection_handler/include
+  ../test/components/security_manager/include
   ../test/components/
   ../test/thirdPartyLibs/jsoncpp/include
   ../test/components/application_manager
@@ -68,7 +69,6 @@ set(LIBRARIES
     v4_protocol_v1_2_no_extra
     SmartObjects
     RequestWatchdog
-    #policy
     ProtocolHandler
     Utils
     ConfigProfile
@@ -80,6 +80,7 @@ set(LIBRARIES
     #test_RequestWatchdogTest
     #test_ProtocolHandlerTest
     #test_JSONCPPTest
+    #test_MobileMessageHandlerTest
     connectionHandler
     MOBILE_API
     jsoncpp
@@ -92,12 +93,12 @@ set(LIBRARIES
     # rt
     # ${GSTREAMER_gstreamer_LIBRARY}
     Resumption
+    Policy
+    ${SecurityManagerLibrary}
 )
-
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  list(APPEND LIBRARIES dl)
+if(ENABLE_SECURITY)
+  LIST(APPEND LIBRARIES test_SecurityManager)
 endif()
-
 
 if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -106,18 +107,10 @@ endif()
 endif()
 
 add_executable("test_suit" "./test_suit.cc")
+file(COPY ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem DESTINATION ${CMAKE_BINARY_DIR}/test/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-if (BUILD_TESTS_WITH_HMI)
-include_directories(${INCLUDE_DIR} ${LibXML2_INCLUDE_DIR})
-target_link_libraries("test_suit" 
-  test_App_Manager 
-  ${LIBRARIES} 
-  ${LibXML2_LIBRARIES} -lxml2
-  avahi-client
-  )
-else (BUILD_TESTS_WITH_HMI)
 include_directories(${INCLUDE_DIR})
 target_link_libraries("test_suit" ${LIBRARIES})
-endif (BUILD_TESTS_WITH_HMI)
 
 # vim: set ts=2 sw=2 et:

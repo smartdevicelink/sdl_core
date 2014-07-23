@@ -213,7 +213,7 @@ TransportAdapter::Error IpodPASAConnection::Notify() const {
 }
 
 TransportAdapter::Error IpodPASAConnection::SendData(
-    RawMessageSptr message) {
+    RawMessagePtr message) {
   LOG4CXX_TRACE_ENTER(logger_);
   pthread_mutex_lock(&frames_to_send_mutex_);
   frames_to_send_.push(message);
@@ -244,7 +244,7 @@ void IpodPASAConnection::Thread() {
     Finalize();
     while (!frames_to_send_.empty()) {
       LOG4CXX_INFO(logger_, "removing message (#" << pthread_self() << ")");
-      RawMessageSptr message = frames_to_send_.front();
+      RawMessagePtr message = frames_to_send_.front();
       frames_to_send_.pop();
       controller_->DataSendFailed(device_handle(), application_handle(),
                                   message, DataSendError());
@@ -341,7 +341,7 @@ bool IpodPASAConnection::Send() {
   size_t offset = 0;
   while (!frames_to_send.empty()) {
     LOG4CXX_INFO(logger_, "frames_to_send is not empty" << pthread_self() << ")");
-    RawMessageSptr frame = frames_to_send.front();
+    RawMessagePtr frame = frames_to_send.front();
 
     if (0 != frame)
     {
@@ -615,7 +615,7 @@ void IpodPASAConnection::HandleEAFEvents() {
                                           //SDLLOG(ZONE_INFO, "Received Frame Packet of size " << frameData->length);
                                           //SDLLOG(ZONE_INFO, "Received Frame Packet: "); printBufferInHex(frameData->data, frameData->length);
     
-                                          RawMessageSptr frame(
+                                          RawMessagePtr frame(
                                               new protocol_handler::RawMessage(0, 0, frameData, static_cast<size_t>(frameSize)));
                                           controller_->DataReceiveDone(device_handle(), application_handle(),
                                                                          frame);

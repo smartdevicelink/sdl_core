@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.TextView;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.SafeToast;
@@ -50,38 +51,82 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
                 }
             }
         });
+        Button startCypheredServiceButton = (Button) view.findViewById(R.id.audio_service_secure_checkbox_view);
+        startCypheredServiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasServiceInServicesPool(getAppId(),ServiceType.RPC)) {
+                    startSecureAudioService(getAppId());
+                } else {
+                    SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
+                }
+            }
+        });
+
+        Button startNotCypheredServiceButton = (Button) view.findViewById(R.id.audio_service_not_service_secure_button_view);
+        startNotCypheredServiceButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (hasServiceInServicesPool(getAppId(), ServiceType.RPC)) {
+                    startNotSecureAudioService(getAppId());
+                } else {
+                    SafeToast.showToastAnyThread(getString(R.string.rpc_service_not_started));
+                }
+            }
+        });
+
         mSessionCheckBoxState = new AudioServiceCheckboxState(checkBox, getActivity());
         mSessionCheckBoxState.setStateOff();
+    }
+
+
+    private void startNotSecureAudioService(String appId) {
+        SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        syncProxyTester.startNotSecureAudioService(appId);
+    }
+
+    private void startSecureAudioService(String appId) {
+        SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        syncProxyTester.startAudioServiceEncryption(appId);
     }
 
     private void changeCheckBoxState() {
         final SyncProxyTester tester = (SyncProxyTester) getActivity();
         if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.OFF)) {
             mSessionCheckBoxState.setStateDisabled();
-            tester.startAudioService(getAppId());
+            tester.startAudioService(getAppId(), false);
         } else if (mSessionCheckBoxState.getState().equals(CheckBoxStateValue.ON)) {
             mFileStreamingLogic.resetStreaming();
             tester.stopAudioService(getAppId());
             mSessionCheckBoxState.setStateOff();
-            mDataStreamingButton.setEnabled(false);
+            //mDataStreamingButton.setEnabled(false);
         }
     }
 
     @Override
     public void setStateOff() {
         super.setStateOff();
-        CheckBox box = (CheckBox) getView().findViewById(R.id.audioServiceCheckBox);
-        box.setChecked(false);
     }
 
-    public void setAudioServiceStateOn(OutputStream stream) {
+
+    public void setAudioServiceStateOn(OutputStream stream, boolean encrypted) {
         mSessionCheckBoxState.setStateOn();
-        mDataStreamingButton.setEnabled(true);
+        //mDataStreamingButton.setEnabled(true);
 
         mFileStreamingLogic.setOutputStream(stream);
         mFileStreamingLogic.createStaticFileReader();
         if (mFileStreamingLogic.isStreamingInProgress()) {
             startBaseFileStreaming(R.raw.audio_pcm);
+        }
+        notifyAudioServiceState(encrypted);
+    }
+
+    private void notifyAudioServiceState(boolean encrypted){
+        TextView textView = (TextView) getView().findViewById(R.id.audio_service_status_text_view);
+        if (encrypted) {
+            textView.setText("Service is cyphered");
+        } else {
+            textView.setText("Service is Not cyphered");
         }
     }
 }

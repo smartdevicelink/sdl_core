@@ -77,7 +77,7 @@ public class SystemPutFileRPCRequestConverterTest
         PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setSyncFileName("file");
         msg.setBulkData(data);
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -103,7 +103,7 @@ public class SystemPutFileRPCRequestConverterTest
 
         PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setSyncFileName("file");
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -140,7 +140,7 @@ public class SystemPutFileRPCRequestConverterTest
         msg.setBulkData(data);
         msg.setSyncFileName(fileName);
         msg.setFileType(fileType);
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -191,7 +191,7 @@ public class SystemPutFileRPCRequestConverterTest
         msg.setBulkData(data);
         msg.setSyncFileName(fileName);
         msg.setFileType(fileType);
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -240,7 +240,7 @@ public class SystemPutFileRPCRequestConverterTest
         msg.setBulkData(data);
         msg.setSyncFileName(fileName);
         msg.setFileType(fileType);
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -275,7 +275,7 @@ public class SystemPutFileRPCRequestConverterTest
         msg.setSyncFileName(fileName);
         msg.setBulkData(data);
         msg.setOffset(offset);
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -315,7 +315,7 @@ public class SystemPutFileRPCRequestConverterTest
         msg.setSyncFileName(fileName);
         msg.setFileType(fileType);
         msg.setOffset(offset);
-        msg.setCorrelationID(correlationID);
+        msg.setCorrelationId(correlationID);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
