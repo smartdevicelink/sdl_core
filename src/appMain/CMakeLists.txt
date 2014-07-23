@@ -132,11 +132,19 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
+add_custom_command(OUTPUT gitversion.cc
+  COMMAND echo -n const char *gitVersion = "\\\"" > ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc
+  COMMAND git rev-parse HEAD | tr -d \"\\n\" >> ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc
+  COMMAND echo "\\\"\;" >> ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+  )
 set (SOURCES
   main.cc
   life_cycle.cc
   signal_handlers.cc
+  ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc
 )
+
 
 if( NOT CMAKE_BUILD_TYPE )
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)

@@ -30,6 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <unistd.h>
+
 #include "application_manager/commands/hmi/update_device_list_request.h"
 #include <unistd.h>
 #include "application_manager/application_manager_impl.h"
