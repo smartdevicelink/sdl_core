@@ -239,7 +239,7 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
   const char* return_info = NULL;
 
   if (result) {
-    if (IsAnythingAlreadyUnsubscribed()) {
+    if (IsAnythingAlreadyUnsubscribed(message[strings::msg_params])) {
       result_code = mobile_apis::Result::IGNORED;
       return_info =
           std::string("Some provided VehicleData was not subscribed.").c_str();
@@ -251,18 +251,17 @@ void UnsubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 #endif // #ifdef HMI_DBUS_API
 }
 
-bool UnsubscribeVehicleDataRequest::IsAnythingAlreadyUnsubscribed() {
-  LOG4CXX_INFO(logger_, "UnsubscribeVehicleDataRequest::Run");
+bool UnsubscribeVehicleDataRequest::IsAnythingAlreadyUnsubscribed(
+                           const smart_objects::SmartObject& msg_params) const {
+  LOG4CXX_INFO(logger_, "IsAnythingAlreadyUnsubscribed");
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
 
   for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
-
-      if ((*message_)[strings::msg_params][it->first]
-          [strings::result_code].asInt() ==
-          hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED) {
+    if (msg_params.keyExists(it->first)) {
+      if (msg_params[it->first][strings::result_code].asInt() ==
+        hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_NOT_SUBSCRIBED) {
         return true;
       }
     }
