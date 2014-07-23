@@ -36,6 +36,8 @@
 #include "config_profile/profile.h"
 #include "interfaces/HMI_API.h"
 
+#include <unistd.h>
+
 namespace application_manager {
 
 namespace commands {
