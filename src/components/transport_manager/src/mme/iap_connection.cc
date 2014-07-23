@@ -101,8 +101,15 @@ void IAPConnection::ReceiveData(int session_id) {
     }
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP: error occurred while receiving data on protocol " << protocol_name_);
-    controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
+    switch (errno) {
+      case ENODATA:
+        LOG4CXX_TRACE(logger_, "iAP: no data on protocol " << protocol_name_ << " (not an error)");
+        break;
+      default:
+        LOG4CXX_WARN(logger_, "iAP: error occurred while receiving data on protocol " << protocol_name_);
+        controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
+        break;
+    }
   }
 }
 
