@@ -363,7 +363,12 @@ SDL.SDLVehicleInfoModel = Em.Object
 
                 var subscribeVIData = {};
                 for (var key in message.params) {
-                    if (message.params[key] && key != 'appID' && key in SDL.SDLController.getApplicationModel(message.params.appID).subscribedData && key !== "clusterModeStatus") {
+                    if (key != 'appID' && SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key]) {
+                        subscribeVIData[key] = {
+                            dataType: this.eVehicleDataType[key],
+                            resultCode: "DATA_ALREADY_SUBSCRIBED"
+                        };
+                    } else if (key != 'appID' && !SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] && key !== "clusterModeStatus") {
                         SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] = message.params[key];
                         subscribeVIData[key] = {
                             dataType: this.eVehicleDataType[key],
@@ -395,7 +400,13 @@ SDL.SDLVehicleInfoModel = Em.Object
 
                 var subscribeVIData = {};
                 for (var key in message.params) {
-                    if (message.params[key] && key != 'appID' && key in SDL.SDLController.getApplicationModel(message.params.appID).subscribedData && key !== "clusterModeStatus") {
+                    if (key != 'appID' && !SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key]) {
+                        SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] = false;
+                        subscribeVIData[key] = {
+                            dataType: this.eVehicleDataType[key],
+                            resultCode: "DATA_NOT_SUBSCRIBED"
+                        };
+                    } else if (key != 'appID' && key in SDL.SDLController.getApplicationModel(message.params.appID).subscribedData && key !== "clusterModeStatus") {
                         SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] = false;
                         subscribeVIData[key] = {
                             dataType: this.eVehicleDataType[key],
