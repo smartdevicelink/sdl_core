@@ -322,7 +322,7 @@ int TransportManagerImpl::SearchDevices() {
 
   LOG4CXX_INFO(logger_, "Search device called");
 
-  bool success_occured = false;
+  bool success_occurred = false;
 
   for (std::vector<TransportAdapter*>::iterator it =
            transport_adapters_.begin();
@@ -330,8 +330,9 @@ int TransportManagerImpl::SearchDevices() {
     LOG4CXX_INFO(logger_, "Iterating over transport adapters");
     TransportAdapter::Error scanResult = (*it)->SearchDevices();
     if (transport_adapter::TransportAdapter::OK == scanResult) {
-      success_occured = true;
-    } else {
+      success_occurred = true;
+    }
+    else {
       LOG4CXX_ERROR(logger_, "Transport Adapter search failed "
                                  << *it << "[" << (*it)->GetDeviceType()
                                  << "]");
@@ -358,7 +359,7 @@ int TransportManagerImpl::SearchDevices() {
 
   LOG4CXX_INFO(logger_, "SearchDevices() function is complete");
 
-  return (success_occured || transport_adapters_.empty())
+  return (success_occurred || transport_adapters_.empty())
     ? E_SUCCESS
     : E_ADAPTERS_FAIL;
 }

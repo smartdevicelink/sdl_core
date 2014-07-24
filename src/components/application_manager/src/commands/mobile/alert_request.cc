@@ -104,6 +104,15 @@ void AlertRequest::Run() {
   }
 }
 
+void AlertRequest::onTimeOut() {
+  if (false == (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    CommandRequestImpl::onTimeOut();
+    return;
+  }
+  LOG4CXX_INFO(logger_, "default timeout ignored. "
+                        "AlertRequest with soft buttons wait timeout on HMI side");
+}
+
 void AlertRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "AlertRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();

@@ -85,7 +85,8 @@ class UnsubscribeVehicleDataRequest : public CommandRequestImpl {
 #endif // #ifdef HMI_DBUS_API
 
  private:
-  bool IsAnythingAlreadyUnsubscribed();
+  bool IsAnythingAlreadyUnsubscribed(
+      const smart_objects::SmartObject& msg_params) const;
   DISALLOW_COPY_AND_ASSIGN(UnsubscribeVehicleDataRequest);
 };
 

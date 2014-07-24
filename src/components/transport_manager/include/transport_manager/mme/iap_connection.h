@@ -71,6 +71,7 @@ class IAPConnection : public Connection {
   TransportAdapterController* controller_;
   IAPDevice* parent_;
   ipod_hdl_t* ipod_hdl_;
+  std::string protocol_name_; // for logging purposes only
   uint8_t buffer_[kBufferSize];
 
   std::set<int> session_ids_;

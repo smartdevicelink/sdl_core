@@ -30,42 +30,34 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/mme/mme_transport_adapter.h"
-#include "transport_manager/mme/mme_device_scanner.h"
-#include "transport_manager/mme/mme_connection_factory.h"
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_PROTOCOL_CONFIG_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_PROTOCOL_CONFIG_H_
+
+#include <list>
+#include <string>
 
 namespace transport_manager {
 namespace transport_adapter {
 
-MmeTransportAdapter::MmeTransportAdapter() : TransportAdapterImpl(new MmeDeviceScanner(this), new MmeConnectionFactory(this), 0), initialised_(false) {
-}
+class ProtocolConfig {
+ public:
+  typedef std::list<std::string> ProtocolNameContainer;
 
-DeviceType MmeTransportAdapter::GetDeviceType() const {
-  return "sdl-mme";
-}
+  static const ProtocolNameContainer& LegacyProtocolNames();
+  static const ProtocolNameContainer& HubProtocolNames();
+  static const ProtocolNameContainer& IAPPoolProtocolNames();
+  static const ProtocolNameContainer& IAP2PoolProtocolNames();
 
-bool MmeTransportAdapter::IsInitialised() const {
-  return initialised_;
-}
+ private:
+  static const ProtocolNameContainer ReadLegacyProtocolNames();
+  static const ProtocolNameContainer ReadHubProtocolNames();
+  static const ProtocolNameContainer ReadIAPPoolProtocolNames();
+  static const ProtocolNameContainer ReadIAP2PoolProtocolNames();
 
-TransportAdapter::Error MmeTransportAdapter::Init() {
-  TransportAdapter::Error error = TransportAdapterImpl::Init();
-  if (TransportAdapter::OK == error) {
-    initialised_ = true;
-  }
-#if QNX_BARE_SYSTEM_WORKAROUND
-  device_scanner_->Scan();
-#endif
-  return error;
-}
-
-void MmeTransportAdapter::ApplicationListUpdated(const DeviceUID& device_handle) {
-  ConnectDevice(device_handle);
-}
-
-bool MmeTransportAdapter::ToBeAutoConnected(DeviceSptr device) const {
-  return true;
-}
+  static const ProtocolNameContainer ReadProtocolNames(const std::string& config_file_name, const std::string& section_name);
+};
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
+
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_PROTOCOL_CONFIG_H_

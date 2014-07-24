@@ -75,6 +75,7 @@ if (BUILD_MME_SUPPORT)
     src/mme/mme_connection_factory.cc
     src/mme/iap_connection.cc
     src/mme/iap2_connection.cc
+    src/mme/protocol_config.cc
   )
 endif(BUILD_MME_SUPPORT)
 
