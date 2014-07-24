@@ -1985,14 +1985,13 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     private void startProtocolSession(final byte sessionId) {
         final String associatedAppId = syncSession.updateSessionId(sessionId);
         Logger.d("Start Protocol session appId:" + associatedAppId + " sesId:" + sessionId +
-                " exists:" + syncSession.hasService(associatedAppId, ServiceType.RPC) + " " + syncSession.hashCode());
+                " exists:" + syncSession.hasService(associatedAppId, ServiceType.RPC));
         if (!syncSession.hasService(associatedAppId, ServiceType.RPC)) {
             Service service = new Service();
             service.setServiceType(ServiceType.RPC);
             service.setAppId(associatedAppId);
             syncSession.addService(service);
         }
-
 
         if (_callbackToUIThread) {
             // Run in UI thread
@@ -3095,17 +3094,27 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         this.rpcMessageHandler = RPCMessageHandler;
     }
 
-    public void startMobileNavService(String appId, boolean cyphered) {
+    public void startMobileNavService(String appId, boolean encrypted) {
+        if (encrypted) {
+            if (getProtocolSecureManager(appId) != null) {
+                getProtocolSecureManager(appId).addServiceToEncrypt(ServiceType.Mobile_Nav);
+            }
+        }
         if (mSyncConnection != null) {
             updateSecureProxyState(appId);
-            mSyncConnection.startMobileNavService(syncSession.getSessionIdByAppId(appId), cyphered);
+            mSyncConnection.startMobileNavService(syncSession.getSessionIdByAppId(appId), encrypted);
         }
     }
 
-    public void startAudioService(String appId, boolean cyphered) {
+    public void startAudioService(String appId, boolean encrypted) {
+        if (encrypted) {
+            if (getProtocolSecureManager(appId) != null) {
+                getProtocolSecureManager(appId).addServiceToEncrypt(ServiceType.Audio_Service);
+            }
+        }
         if (mSyncConnection != null) {
             updateSecureProxyState(appId);
-            mSyncConnection.startAudioService(syncSession.getSessionIdByAppId(appId), cyphered);
+            mSyncConnection.startAudioService(syncSession.getSessionIdByAppId(appId), encrypted);
         }
     }
 
@@ -3141,10 +3150,16 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     }
 
     public void startRpcService(String appId, boolean encrypted) {
-        if (mSyncConnection != null) {
-            updateSecureProxyState(appId);
-            mSyncConnection.startRpcService(syncSession.getSessionIdByAppId(appId), encrypted);
+        if (mSyncConnection == null) {
+            return;
         }
+        if (encrypted) {
+            if (getProtocolSecureManager(appId) != null) {
+                getProtocolSecureManager(appId).addServiceToEncrypt(ServiceType.RPC);
+            }
+        }
+        updateSecureProxyState(appId);
+        mSyncConnection.startRpcService(syncSession.getSessionIdByAppId(appId), encrypted);
     }
 
     private void updateSecureProxyState(String appId) {
@@ -3464,6 +3479,11 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 }
 
                 final String appId = syncSession.getAppIdBySessionId(sessionId);
+                final Service service = syncSession.getService(appId, ServiceType.RPC);
+                if (service != null) {
+                    service.setEncrypted(true);
+                }
+
                 if (_callbackToUIThread) {
                     // Run in UI thread
                     _mainUIHandler.post(new Runnable() {
@@ -3485,6 +3505,25 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             setUpSecureServiceManager(sessionId);
             setUpSecureProxy(sessionId);
             startProtocolSession(sessionId);
+
+            // Start to restore secure RPC session if it has been started earlier.
+            final String appId = syncSession.getAppIdBySessionId(sessionId);
+            final Service service = syncSession.getService(appId, ServiceType.RPC);
+            if (service == null) {
+                return;
+            }
+
+            // Test Part start here
+            if (mTestConfig.isDoStartSecureSession()) {
+                service.setEncrypted(true);
+                // Reset flag to default
+                mTestConfig.setDoStartSecureSession(false);
+            }
+            // Test Part end here
+
+            if (service.isEncrypted()) {
+                startRpcService(appId, true);
+            }
         }
 
         @Override

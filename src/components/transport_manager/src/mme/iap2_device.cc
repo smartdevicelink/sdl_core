@@ -151,7 +151,7 @@ void IAP2Device::OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* ha
     free_protocol_name_pool_.erase(i);
   }
   else {
-    LOG4CXX_INFO(logger_, "iAP2: protocol pool is empty");
+    LOG4CXX_WARN(logger_, "iAP2: protocol pool is empty");
     protocol_index = 255;
     thread_launched = false;
   }

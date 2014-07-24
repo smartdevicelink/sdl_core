@@ -48,11 +48,13 @@ IAPConnection::IAPConnection(const DeviceUID& device_uid,
   app_handle_(app_handle),
   controller_(controller),
   parent_(parent) {
-
-  ipod_hdl_ = parent_->RegisterConnection(app_handle_, this);
 }
 
 void IAPConnection::Init() {
+  IAPDevice::AppRecord record = parent_->RegisterConnection(app_handle_, this);
+  protocol_name_ = record.first;
+  ipod_hdl_ = record.second;
+
   controller_->ConnectDone(device_uid_, app_handle_);
 }
 
@@ -62,21 +64,21 @@ TransportAdapter::Error IAPConnection::SendData(RawMessagePtr message) {
   { // auto_lock scope
     sync_primitives::AutoLock auto_lock(session_ids_lock_);
     if (session_ids_.empty()) {
-      LOG4CXX_WARN(logger_, "iAP: no opened sessions");
+      LOG4CXX_WARN(logger_, "iAP: no opened sessions on protocol " << protocol_name_);
       return TransportAdapter::BAD_STATE;
     }
 // How is session for sending data chosen?
     session_id = *session_ids_.begin();
   } // auto_lock scope
 
-  LOG4CXX_TRACE(logger_, "iAP: sending data");
+  LOG4CXX_TRACE(logger_, "iAP: sending data on protocol " << protocol_name_);
   if (ipod_eaf_send(ipod_hdl_, session_id, message->data(), message->data_size()) != -1) {
-    LOG4CXX_INFO(logger_, "iAP: data sent successfully");
+    LOG4CXX_INFO(logger_, "iAP: data on protocol " << protocol_name_ << " sent successfully");
     controller_->DataSendDone(device_uid_, app_handle_, message);
     return TransportAdapter::OK;
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP: error occurred while sending data");
+    LOG4CXX_WARN(logger_, "iAP: error occurred while sending data on protocol " << protocol_name_);
     controller_->DataSendFailed(device_uid_, app_handle_, message, DataSendError());
     return TransportAdapter::FAIL;
   }
@@ -89,16 +91,25 @@ TransportAdapter::Error IAPConnection::Disconnect() {
 }
 
 void IAPConnection::ReceiveData(int session_id) {
-  LOG4CXX_TRACE(logger_, "iAP: receiving data on session " << session_id);
+  LOG4CXX_TRACE(logger_, "iAP: receiving data on protocol " << protocol_name_ << " (session " << session_id << ")");
   int size = ipod_eaf_recv(ipod_hdl_, session_id, buffer_, kBufferSize);
   if (size != -1) {
-    LOG4CXX_INFO(logger_, "iAP: received " << size << " bytes");
-    RawMessagePtr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
-    controller_->DataReceiveDone(device_uid_, app_handle_, message);
+    LOG4CXX_INFO(logger_, "iAP: received " << size << " bytes on protocol " << protocol_name_);
+    if (size != 0) {
+      RawMessagePtr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
+      controller_->DataReceiveDone(device_uid_, app_handle_, message);
+    }
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP: error occurred while receiving data");
-    controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
+    switch (errno) {
+      case ENODATA:
+        LOG4CXX_TRACE(logger_, "iAP: no data on protocol " << protocol_name_ << " (not an error)");
+        break;
+      default:
+        LOG4CXX_WARN(logger_, "iAP: error occurred while receiving data on protocol " << protocol_name_);
+        controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
+        break;
+    }
   }
 }
 
