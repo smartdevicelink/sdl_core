@@ -1,17 +1,16 @@
 package com.ford.syncV4.android.module;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManager.WakeLock;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Xml;
 
-import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.AcceptedRPC;
@@ -78,9 +77,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This is a class that provide functionality to process XML tests (load from file, parse, execute,
@@ -224,11 +223,11 @@ public class ModuleTest {
 
     private int numIterations;
 
-    private ArrayList<Pair<Integer, Result>> expecting = new ArrayList<Pair<Integer, Result>>();
+    private final ArrayList<Pair<Integer, Result>> expectingResults = new ArrayList<Pair<Integer, Result>>();
 
     private Test currentTest = null;
 
-    public static ArrayList<Pair<Integer, Result>> sResponses = new ArrayList<Pair<Integer, Result>>();
+    public static final ArrayList<Pair<Integer, Result>> responses = new ArrayList<Pair<Integer, Result>>();
 
     /**
      * Factory that is used to return a reader for the binary data in tests.
@@ -454,17 +453,15 @@ public class ModuleTest {
                                     String testName = parser.getAttributeValue(null, TEST_NAME_ATTR);
                                     Logger.d(TAG + " Test '" + testName + "' started");
                                     currentTest = new Test(testName, pause, null);
-                                    expecting.clear();
-                                    sResponses.clear();
+                                    expectingResults.clear();
+                                    responses.clear();
                                     numIterations = 1;
                                     try {
-                                        if (parser.getAttributeName(1) != null) {
-                                            if (parser.getAttributeName(1).equalsIgnoreCase("iterations")) {
-                                                try {
-                                                    numIterations = Integer.parseInt(parser.getAttributeValue(1));
-                                                } catch (Exception e) {
-                                                    Logger.w(TAG + " Unable to parse number of iterations");
-                                                }
+                                        if (parser.getAttributeName(1).equalsIgnoreCase("iterations")) {
+                                            try {
+                                                numIterations = Integer.parseInt(parser.getAttributeValue(1));
+                                            } catch (Exception e) {
+                                                Logger.w(TAG + " Unable to parse number of iterations");
                                             }
                                         }
                                     } catch (Exception e) {
@@ -631,19 +628,17 @@ public class ModuleTest {
                                         currentTest.addRequest(wrapper);
                                     }
                                 } else if (name.equalsIgnoreCase(TEST_TAG_NAME_RESULT)) {
-                                    expecting.add(new Pair<Integer, Result>(Integer.parseInt(parser.getAttributeValue(0)), (Result.valueForString(parser.getAttributeValue(1)))));
+                                    final int correlationId = Integer.parseInt(parser.getAttributeValue(0));
+                                    final Result result = Result.valueForString(parser.getAttributeValue(1));
+                                    expectingResults.add(new Pair<Integer, Result>(correlationId, result));
                                 } else if (name.equalsIgnoreCase(TEST_TAG_NAME_USER_PROMPT) && integration) {
                                     userPrompt = parser.getAttributeValue(0);
                                 } else if (name.equalsIgnoreCase(TEST_TAG_NAME_ACTION)) {
                                     String attributeName = parser.getAttributeValue(null, ACTION_NAME_ATTR);
                                     //Logger.d(TAG + " ActionName:" + attributeName);
-                                    if (StringUtils.isNotEmpty(attributeName) &&
-                                            attributeName.equals(TestActionItem.START_RPC_SERVICE)) {
-                                        String nextAppId = parser.getAttributeValue(null, NEXT_APP_ID_ATTR);
-                                        testActionItem = new TestActionItem(attributeName);
+                                    if (StringUtils.isNotEmpty(attributeName)) {
                                         long pause = 0;
-                                        String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
-                                        //Logger.d(TAG + " ActionPause:" + pauseString);
+                                        final String pauseString = parser.getAttributeValue(null, PAUSE_ATTR);
                                         if (pauseString != null) {
                                             try {
                                                 pause = Long.parseLong(pauseString);
@@ -651,10 +646,19 @@ public class ModuleTest {
                                                 Logger.e(TAG + " Couldn't parse pause number: " + pauseString);
                                             }
                                         }
-                                        testActionItem.setDelay(pause);
-                                        if (StringUtils.isNotEmpty(nextAppId)) {
-                                            testActionItem.setNextAppId(nextAppId);
+
+                                        if (attributeName.equals(TestActionItem.START_RPC_SERVICE)) {
+                                            String nextAppId = parser.getAttributeValue(null, NEXT_APP_ID_ATTR);
+                                            testActionItem = new TestActionItem(attributeName);
+                                            testActionItem.setDelay(pause);
+                                            if (StringUtils.isNotEmpty(nextAppId)) {
+                                                testActionItem.setNextAppId(nextAppId);
+                                            }
+                                        } else if (attributeName.equals(TestActionItem.PAUSE)) {
+                                            testActionItem = new TestActionItem(attributeName);
+                                            testActionItem.setDelay(pause);
                                         }
+
                                     }
                                 }
                                 break;
@@ -677,7 +681,7 @@ public class ModuleTest {
                                                 localPass = false;
                                                 StringBuilder errorBuilder = new StringBuilder(currentTest.getName());
                                                 errorBuilder.append(" Expected");
-                                                for (Pair p : expecting) {
+                                                for (Pair p : expectingResults) {
                                                     errorBuilder.append(FIELD_SEPARATOR);
                                                     errorBuilder.append(p.first);
                                                     errorBuilder.append(" ");
@@ -687,7 +691,7 @@ public class ModuleTest {
 
                                                 errorBuilder.append(currentTest.getName());
                                                 errorBuilder.append(" Actual");
-                                                for (Pair p : sResponses) {
+                                                for (Pair p : responses) {
                                                     errorBuilder.append(FIELD_SEPARATOR);
                                                     errorBuilder.append(p.first);
                                                     errorBuilder.append(" ");
@@ -1035,6 +1039,17 @@ public class ModuleTest {
             });
 
             mProxyService.getRestoreConnectionToRPCService().acquireLock();
+        } else if (testActionItem.getActionName().equals(TestActionItem.PAUSE)) {
+            try {
+                // delay between tests
+                Logger.d("TRACE:" + testActionItem.getDelay());
+                synchronized (this) {
+                    this.wait(testActionItem.getDelay());
+                }
+            } catch (InterruptedException e) {
+                mLogAdapter.logMessage("InterruptedException", true);
+            }
+            Logger.d("TRACE complete");
         }
     }
 
@@ -1096,16 +1111,17 @@ public class ModuleTest {
                     }
                 }*/
 
-                int numResponses = expecting.size();
+                final int numResponses = expectingResults.size();
                 if (numResponses > 0) {
                     mProxyService.waiting(true);
                 }
 
-                IJsonRPCMarshaller defaultMarshaller = new JsonRPCMarshaller();
+                final IJsonRPCMarshaller defaultMarshaller = new JsonRPCMarshaller();
                 CustomJsonRPCMarshaller customMarshaller = null;
 
                 RPCRequestWrapper wrapper;
 
+                //Logger.d(TAG + " Send Test size:" + currentTest.getRequestsSize());
                 for (int i = 0; i < currentTest.getRequestsSize(); i++) {
 
                     mCurrentTestIndex = i;
@@ -1169,48 +1185,69 @@ public class ModuleTest {
                     //mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
                 }
 
-                long pause = currentTest.getPause();
+                // Make sure that method will be completed in the Runnable object
+                final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+                // Object to complete test
+                Runnable runnable = new Runnable() {
+
+                    @Override
+                    public void run() {
+                        mProxyService.waiting(false);
+                        restoreMarshaller(defaultMarshaller);
+                        if (!expectingResults.equals(responses)) {
+                            return;
+                        }
+                        testResult.setTestComplete(true);
+
+                        countDownLatch.countDown();
+                    }
+                };
+
+                final long pause = currentTest.getPause();
+
+                Looper.prepare();
+                final Handler handler = new Handler(Looper.myLooper());
+
                 if (pause > 0) {
                     Logger.d(TAG + " Pause for tests set " + pause + " ms. after " + currentTest.getName());
-                    try {
-                        // delay after the test
-                        synchronized (this) {
-                            this.wait(pause);
-                        }
-                    } catch (InterruptedException e) {
-                        mLogAdapter.logMessage("InterruptedException", true);
-                    }
+                    handler.postDelayed(runnable, pause);
                 } else {
                     Logger.i(TAG + " No pause after " + currentTest.getName());
                 }
                 Logger.d(TAG + " Pause for tests set after " + currentTest.getName() + " completed");
 
                 // wait for incoming messages
-                try {
-                    synchronized (this) {
-                        this.wait(100);
+                while (expectingResults.size() > responses.size()) {
+                    try {
+                        synchronized (this) {
+                            this.wait(100);
+                        }
+                    } catch (InterruptedException e) {
+                        mLogAdapter.logMessage("InterruptedException", true);
                     }
+                    if (expectingResults.size() == responses.size()) {
+                        break;
+                    }
+                }
+
+                if (pause > 0) {
+                    handler.removeCallbacks(runnable);
+                }
+                runnable.run();
+
+                try {
+                    countDownLatch.await(300, TimeUnit.MILLISECONDS);
                 } catch (InterruptedException e) {
-                    mLogAdapter.logMessage("InterruptedException", true);
+                    // ignore
                 }
 
-                mProxyService.waiting(false);
-
-                if (!expecting.equals(sResponses)) {
+                /*if (!integration) {
                     restoreMarshaller(defaultMarshaller);
                     return;
-                }
+                }*/
 
-                // restore the default marshaller
-                mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
-                testResult.setTestComplete(true);
-
-                if (!integration) {
-                    restoreMarshaller(defaultMarshaller);
-                    return;
-                }
-
-                MainApp.getInstance().runInUIThread(new Runnable() {
+                /*MainApp.getInstance().runInUIThread(new Runnable() {
                     public void run() {
                         AlertDialog.Builder alert = new AlertDialog.Builder(mActivityInstance);
                         alert.setMessage(userPrompt);
@@ -1238,20 +1275,10 @@ public class ModuleTest {
                         );
                         alert.show();
                     }
-                });
-
-                try {
-                    synchronized (this) {
-                        this.wait();
-                    }
-                } catch (InterruptedException e) {
-                    mLogAdapter.logMessage("InterruptedException", true);
-                }
-
-                restoreMarshaller(defaultMarshaller);
+                });*/
             }
 
-            private void showInterruptDialog(final String title, final String message,
+            /*private void showInterruptDialog(final String title, final String message,
                                              final boolean doInterruptFlow) {
                 final CountDownLatch countDownLatch = new CountDownLatch(1);
 
@@ -1291,7 +1318,7 @@ public class ModuleTest {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }
+            }*/
 
             private void restoreMarshaller(IJsonRPCMarshaller defaultMarshaller) {
                 mProxyService.syncProxySetJsonRPCMarshaller(defaultMarshaller);
