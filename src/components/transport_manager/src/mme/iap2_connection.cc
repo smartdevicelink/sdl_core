@@ -78,7 +78,7 @@ TransportAdapter::Error IAP2Connection::SendData(RawMessagePtr message) {
     return TransportAdapter::OK;
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP2: error occured while sending data on protocol " << protocol_name_);
+    LOG4CXX_WARN(logger_, "iAP2: error occurred while sending data on protocol " << protocol_name_);
     controller_->DataSendFailed(device_uid_, app_handle_, message, DataSendError());
     return TransportAdapter::FAIL;
   }
@@ -113,7 +113,7 @@ void IAP2Connection::ReceiveData() {
         controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
         break;
       default:
-        LOG4CXX_WARN(logger_, "iAP2: error occured while receiving data on protocol " << protocol_name_);
+        LOG4CXX_WARN(logger_, "iAP2: error occurred while receiving data on protocol " << protocol_name_);
         controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
         break;
     }

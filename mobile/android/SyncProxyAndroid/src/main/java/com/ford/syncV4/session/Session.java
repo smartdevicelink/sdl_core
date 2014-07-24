@@ -134,8 +134,8 @@ public class Session {
      *
      * @return <b>true</b> if exists, <b>false</b> otherwise
      */
-    public boolean hasSessionId(byte sessionId) {
-        return sessionIds.contains(sessionId);
+    public synchronized boolean hasSessionId(byte sessionId) {
+        return sessionIds.containsValue(sessionId);
     }
 
     /**
@@ -203,13 +203,21 @@ public class Session {
         return false;
     }
 
-
-    public Service getService(ServiceType serviceType) {
-        if (servicesList == null || servicesList.isEmpty()) {
+    /**
+     * Check whether {@link com.ford.syncV4.service.Service} with provided
+     * {@link com.ford.syncV4.protocol.enums.ServiceType} and Session Id exists in the collection
+     *
+     * @param appId       Application Id
+     * @param serviceType {@link com.ford.syncV4.protocol.enums.ServiceType}
+     *
+     * @return {@link com.ford.syncV4.service.Service} or null if there is no such
+     */
+    public Service getService(String appId, ServiceType serviceType) {
+        if (servicesList.isEmpty()) {
             return null;
         }
         for (Service service : servicesList) {
-            if (service.getServiceType() == serviceType) {
+            if (service.getAppId().equals(appId) && service.getServiceType() == serviceType) {
                 return service;
             }
         }

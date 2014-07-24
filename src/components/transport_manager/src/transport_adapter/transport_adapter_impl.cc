@@ -637,7 +637,7 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
   ApplicationList app_list = device->GetApplicationList();
   LOG4CXX_DEBUG(logger_, "Device " << device->name() << " has "
                 << app_list.size() << " applications.")
-  bool errors_occured = false;
+  bool errors_occurred = false;
   for (ApplicationList::iterator it = app_list.begin(); it != app_list.end(); ++it) {
     const ApplicationHandle app_handle = *it;
     LOG4CXX_INFO(logger_, "Attempt to connect device " << device_id <<
@@ -654,11 +654,11 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
         LOG4CXX_ERROR(logger_, "Connect to device " << device_id <<
                                ", channel " << app_handle <<
                                " failed with error " << error);
-        errors_occured = true;
+        errors_occurred = true;
         break;
     }
   }
-  return errors_occured ? FAIL : OK;
+  return errors_occurred ? FAIL : OK;
 }
 
 void TransportAdapterImpl::RemoveDevice(const DeviceUID& device_handle) {

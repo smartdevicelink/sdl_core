@@ -169,7 +169,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
             }
 
         };
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION, false);
     }
 
     public void testReceivedMobileNavSessionIncomingMessage() throws Exception {
@@ -340,7 +340,7 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
 
         };
         ArgumentCaptor<String> appIdCaptor = ArgumentCaptor.forClass(String.class);
-        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION);
+        proxyALM.getInterfaceBroker().onProtocolSessionStarted(SESSION_ID, VERSION, false);
         verify(listenerALM).onSessionStarted(appIdCaptor.capture());
         assertEquals(SessionTest.APP_ID_DEFAULT, appIdCaptor.getValue());
     }

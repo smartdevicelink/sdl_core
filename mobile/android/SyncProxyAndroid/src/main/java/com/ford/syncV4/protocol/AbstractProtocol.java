@@ -6,7 +6,6 @@ import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.service.secure.SecureSessionContext;
 import com.ford.syncV4.service.secure.mutations.AbstractMutation;
 import com.ford.syncV4.test.TestConfig;
-import com.ford.syncV4.util.DebugTool;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
@@ -172,7 +171,7 @@ public abstract class AbstractProtocol {
     }
 
     private void composeMessage(ProtocolFrameHeader header, byte[] data, int offset, int length) {
-        Logger.d("SyncProxyTester", "Frame encrypted " + header.isEncrypted());
+        //Logger.d(CLASS_NAME + " composeMessage, encrypted " + header.isEncrypted());
         if (data != null) {
             if (offset >= data.length) {
                 throw new IllegalArgumentException("offset should not be more then length");
@@ -183,15 +182,16 @@ public abstract class AbstractProtocol {
             } else {
                 dataChunkNotCyphered = Arrays.copyOfRange(data, offset, offset + length);
             }
-            Logger.d(getClass().getSimpleName() + " RPC " + header);
-            Logger.d(getClass().getSimpleName() + " getSecureSessionContextHashMap" + getSecureSessionContextHashMap());
+            //Logger.d(CLASS_NAME + " RPC " + header);
+            //Logger.d(CLASS_NAME + " getSecureSessionContextHashMap:" + getSecureSessionContextHashMap());
 
-            if (getSecureSessionContextHashMap().get(header.getSessionId()) != null) {
+            if (getSecureSessionContextHashMap() != null &&
+                    getSecureSessionContextHashMap().get(header.getSessionId()) != null) {
 
                 SecureSessionContext secureSessionContext = getSecureSessionContextHashMap().get(header.getSessionId());
-                Logger.d(getClass().getSimpleName() + " secureSessionContext" + secureSessionContext);
-                Logger.d(getClass().getSimpleName() + " protocolSecureManager" + secureSessionContext.protocolSecureManager);
-                Logger.d(getClass().getSimpleName() + " isHandshakeFinished" + secureSessionContext.protocolSecureManager.isHandshakeFinished());
+                //Logger.d(CLASS_NAME + " secureSessionContext:" + secureSessionContext);
+                //Logger.d(CLASS_NAME + " protocolSecureManager:" + secureSessionContext.protocolSecureManager);
+                //Logger.d(CLASS_NAME + " isHandshakeFinished:" + secureSessionContext.protocolSecureManager.isHandshakeFinished());
                 if (secureSessionContext.protocolSecureManager != null && secureSessionContext.protocolSecureManager.isHandshakeFinished()) {
 
                     try {
@@ -200,29 +200,26 @@ public abstract class AbstractProtocol {
                         sendMessage(header, dataChunk);
                     } catch (IOException e) {
                         secureSessionContext.protocolSecureManager.reportAnError(e);
-                        DebugTool.logError("Error data coding", e);
+                        Logger.e(CLASS_NAME + " error data coding:" + e.getMessage());
                     } catch (InterruptedException e) {
                         secureSessionContext.protocolSecureManager.reportAnError(e);
-                        DebugTool.logError("Error data coding", e);
+                        Logger.e(CLASS_NAME + " error data coding:" + e.getMessage());
                     }
                 } else {
-                    Logger.d(getClass().getSimpleName() + " sendMessage" + header);
                     sendMessage(header, dataChunkNotCyphered);
                 }
             } else {
-                Logger.d(getClass().getSimpleName() + " sendMessage " + header);
                 sendMessage(header, dataChunkNotCyphered);
             }
         } else {
-            Logger.d(getClass().getSimpleName() + " handleProtocolMessageBytesToSend" + header);
+            //Logger.d(CLASS_NAME + " composeMessage:" + header);
             byte[] frameHeader = header.assembleHeaderBytes();
             handleProtocolMessageBytesToSend(frameHeader, 0, frameHeader.length);
         }
     }
 
-
     private void sendMessage(ProtocolFrameHeader header, byte[] dataChunk) {
-
+        Logger.d(CLASS_NAME + " sendMessage:" + header);
         if (getTestConfig() != null) {
             AbstractMutation mutation = getTestConfig().getSecureServiceMutationManager().getHeadMutation();
             if (mutation != null) {
@@ -358,7 +355,7 @@ public abstract class AbstractProtocol {
      */
     protected void handleProtocolSessionStarted(ServiceType serviceType,
                                                 byte sessionId, boolean encrypted, byte version) {
-        mProtocolListener.onProtocolSessionStarted(sessionId, version);
+        mProtocolListener.onProtocolSessionStarted(sessionId, version, encrypted);
     }
 
     protected void handleProtocolServiceStarted(ServiceType serviceType,

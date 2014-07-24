@@ -58,7 +58,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
     //private static final int PUT_FILE_FUNCTION_ID = 32;
     private static final int ON_SYSTEM_REQUEST_FUNCTION_ID = 32781;
-    private static final int WAIT_TIMEOUT = 20;
+    private static final int WAIT_TIMEOUT = 250;
     private WiProProtocol protocolMock;
     private SyncConnection connectionMock;
     private SyncProxyALM proxy;

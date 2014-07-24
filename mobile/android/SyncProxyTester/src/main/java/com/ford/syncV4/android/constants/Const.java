@@ -104,5 +104,6 @@ public class Const {
     public static final String PREF_KEY_DO_DEVICE_ROOT_CHECK = "DoDeviceRootCheck";
 
     public static final String TEST_DATA_DIR_NAME = "test_data";
-}
 
+    public static final String PREF_KEY_START_SECURE_SESSION = "StartSecureSession";
+}

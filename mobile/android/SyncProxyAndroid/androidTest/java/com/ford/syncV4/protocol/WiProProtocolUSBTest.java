@@ -25,7 +25,7 @@ public class WiProProtocolUSBTest extends TestCase {
 
             @Override
             public void onProtocolSessionStarted(byte sessionId,
-                                                 byte version) {
+                                                 byte version, boolean encrypted) {
             }
 
             @Override
@@ -122,7 +122,7 @@ public class WiProProtocolUSBTest extends TestCase {
 
             @Override
             public void onProtocolSessionStarted(byte sessionId,
-                                                 byte version) {
+                                                 byte version, boolean encrypted) {
             }
 
             @Override

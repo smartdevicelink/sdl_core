@@ -384,6 +384,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mTestConfig.setUseHashId(AppPreferencesManager.getUseHashId());
         mTestConfig.setCustomHashId(AppPreferencesManager.getCustomHashId());
         mTestConfig.setUseCustomHashId(AppPreferencesManager.getUseCustomHashId());
+        mTestConfig.setDoStartSecureSession(AppPreferencesManager.getIsStartSecureSession());
     }
 
     private boolean startProxy() {
@@ -1596,9 +1597,9 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onRPCServiceStart(String appId, boolean encrypted) {
+    public void onSecureSessionStarted(String appId) {
         if (mProxyServiceEvent != null) {
-            mProxyServiceEvent.onServiceStart(ServiceType.RPC, appId, encrypted);
+            mProxyServiceEvent.onServiceStart(ServiceType.RPC, appId, true);
         }
     }
 
@@ -2289,23 +2290,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     public void syncProxyStartRPCService(String appId, boolean encrypted) {
-        if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
-            if (encrypted) {
-                if (mSyncProxy.getProtocolSecureManager(appId) != null) {
-                    mSyncProxy.getProtocolSecureManager(appId).addServiceToEncrypt(ServiceType.RPC);
-                }
-            }
-            mSyncProxy.startRpcService(appId, encrypted);
+        if (mSyncProxy == null) {
+            return;
         }
+        mSyncProxy.startRpcService(appId, encrypted);
     }
 
     public void syncProxyStartAudioService(String appId, boolean encrypted) {
-        if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
-            if (encrypted) {
-                if (mSyncProxy.getProtocolSecureManager(appId) != null) {
-                    mSyncProxy.getProtocolSecureManager(appId).addServiceToEncrypt(ServiceType.Audio_Service);
-                }
-            }
+        if (mSyncProxy != null) {
             mSyncProxy.startAudioService(appId, encrypted);
         }
     }
@@ -2542,25 +2534,17 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         return ProtocolConstants.PROTOCOL_VERSION_UNDEFINED;
     }
 
-
     public void syncProxyStartMobileNavService(String appId, boolean encrypted) {
-        if (mSyncProxy != null && mSyncProxy.getSyncConnection() != null) {
-            if (encrypted) {
-                if (mSyncProxy.getProtocolSecureManager(appId) != null) {
-                    mSyncProxy.getProtocolSecureManager(appId).addServiceToEncrypt(ServiceType.Mobile_Nav);
-                }
-            }
+        if (mSyncProxy != null) {
             mSyncProxy.startMobileNavService(appId, encrypted);
         }
     }
-
 
     public void syncProxyStopMobileNaviService(String appId) {
         if (mSyncProxy != null) {
             mSyncProxy.stopMobileNaviService(appId);
         }
     }
-
 
     public OutputStream syncProxyStartH264(String appId) {
         if (mSyncProxy != null) {

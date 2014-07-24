@@ -106,6 +106,9 @@ void SubscribeVehicleDataRequest::Run() {
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
+  smart_objects::SmartObject response_params = smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+
   msg_params[strings::app_id] = app->app_id();
 
   for (; vehicle_data.end() != it; ++it) {
@@ -119,6 +122,10 @@ void SubscribeVehicleDataRequest::Run() {
         VehicleDataType key_type = it->second;
         if (app->SubscribeToIVI(static_cast<uint32_t>(key_type))) {
           ++subscribed_items;
+        } else {
+          response_params[key_name][strings::data_type] = key_type;
+          response_params[key_name][strings::result_code] =
+              mobile_apis::VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED;
         }
       }
     }
@@ -132,7 +139,8 @@ void SubscribeVehicleDataRequest::Run() {
   } else if (0 == subscribed_items) {
     SendResponse(false,
                  mobile_apis::Result::IGNORED,
-                 "Already subscribed on provided VehicleData");
+                 "Already subscribed on provided VehicleData",
+                 &response_params);
     return;
   }
 
@@ -233,10 +241,10 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 
   const char* return_info = NULL;
   if (result) {
-    if (IsAnythingAlreadySubscribed()) {
-      result_code = mobile_apis::Result::WARNINGS;
+    if (IsAnythingAlreadySubscribed(message[strings::msg_params])) {
+      result_code = mobile_apis::Result::IGNORED;
       return_info =
-          std::string("Unsupported phoneme type sent in a prompt").c_str();
+        std::string("Already subscribed on some provided VehicleData").c_str();
     }
   }
 
@@ -248,19 +256,17 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
 #endif // #ifdef HMI_DBUS_API
 }
 
-bool SubscribeVehicleDataRequest::IsAnythingAlreadySubscribed() {
-  LOG4CXX_INFO(logger_, "SubscribeVehicleDataRequest::Run");
+bool SubscribeVehicleDataRequest::IsAnythingAlreadySubscribed(
+                           const smart_objects::SmartObject& msg_params) const {
+  LOG4CXX_INFO(logger_, "IsAnythingAlreadySubscribed");
 
   const VehicleData& vehicle_data = MessageHelper::vehicle_data();
   VehicleData::const_iterator it = vehicle_data.begin();
 
   for (; vehicle_data.end() != it; ++it) {
-    if (true == (*message_)[strings::msg_params].keyExists(it->first)) {
-
-      if ((*message_)[strings::msg_params][it->first]
-                                           [strings::result_code].asInt() ==
-          hmi_apis::Common_VehicleDataResultCode::
-          VDRC_DATA_ALREADY_SUBSCRIBED) {
+    if (msg_params.keyExists(it->first)) {
+      if (msg_params[it->first][strings::result_code].asInt() ==
+        hmi_apis::Common_VehicleDataResultCode::VDRC_DATA_ALREADY_SUBSCRIBED) {
         return true;
       }
     }

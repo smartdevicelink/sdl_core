@@ -43,6 +43,20 @@ FLAGS = Em.Object.create( {
 
     WEBSOCKET_URL: "ws://127.0.0.1:8087",
 
-    TOUCH_EVENT_STARTED: false
+    TOUCH_EVENT_STARTED: false,
+
+    BC: true,
+
+    UI: true,
+
+    VI: true,
+
+    VR: true,
+
+    Buttons: true,
+
+    TTS: true,
+
+    Navi: true
 
 });
