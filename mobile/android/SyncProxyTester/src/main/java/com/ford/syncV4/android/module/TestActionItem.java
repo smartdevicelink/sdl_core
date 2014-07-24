@@ -16,6 +16,7 @@ public class TestActionItem {
      * This is a value of the {@link ModuleTest#ACTION_NAME_ATTR} attribute
      */
     public final static String START_RPC_SERVICE = "startRPCService";
+    public final static String PAUSE = "pause";
 
     private long mDelay;
     private String mActionName;
