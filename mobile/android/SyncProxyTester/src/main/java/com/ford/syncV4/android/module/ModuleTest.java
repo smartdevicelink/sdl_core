@@ -1194,12 +1194,10 @@ public class ModuleTest {
                     @Override
                     public void run() {
                         mProxyService.waiting(false);
-                        restoreMarshaller(defaultMarshaller);
-                        if (!expectingResults.equals(responses)) {
-                            return;
+                        if (expectingResults.equals(responses)) {
+                            testResult.setTestComplete(true);
                         }
-                        testResult.setTestComplete(true);
-
+                        restoreMarshaller(defaultMarshaller);
                         countDownLatch.countDown();
                     }
                 };
