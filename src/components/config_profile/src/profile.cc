@@ -1078,7 +1078,7 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
       kIAPSection,
       kLegacyProtocolKey);
 
-  LOG_UPDATED_VALUE(iap_hub_protocol_, kLegacyProtocolKey, kIAPSection);
+  LOG_UPDATED_VALUE(iap_legacy_protocol_, kLegacyProtocolKey, kIAPSection);
 
   ReadStringValue(&iap_hub_protocol_,
       kDefaultHubProtocol,
