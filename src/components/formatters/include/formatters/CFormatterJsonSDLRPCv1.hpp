@@ -183,8 +183,8 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
       }
     }
 
-    FunctionId functionId;
-    MessageType messageType;
+    FunctionId functionId = FunctionId::INVALID_ENUM;
+    MessageType messageType = MessageType::INVALID_ENUM;
 
     if (kSuccess == result) {
       if (!NsSmartObjects::EnumConversionHelper<MessageType>::StringToEnum(type, &messageType)) {
