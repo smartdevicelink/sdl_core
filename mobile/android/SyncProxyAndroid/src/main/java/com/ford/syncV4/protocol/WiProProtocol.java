@@ -7,7 +7,6 @@ import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.logger.Logger;
 
-import java.util.HashMap;
 import java.util.Hashtable;
 
 public class WiProProtocol extends AbstractProtocol {
@@ -207,7 +206,7 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     @Override
-    public void HandleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
+    public synchronized void HandleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
         int receivedBytesReadPos = 0;
 
         //Logger.d(CLASS_NAME + " -> current protocol ver:" + getProtocolVersion());
