@@ -33,7 +33,6 @@
 #include <unistd.h>
 
 #include "application_manager/commands/hmi/update_device_list_request.h"
-#include <unistd.h>
 #include "application_manager/application_manager_impl.h"
 #include "config_profile/profile.h"
 #include "interfaces/HMI_API.h"
