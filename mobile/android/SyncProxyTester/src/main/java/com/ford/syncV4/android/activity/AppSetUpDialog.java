@@ -76,9 +76,7 @@ public class AppSetUpDialog extends BaseDialogFragment {
         });
 
         final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
-        final CheckBox isHearBeatAck = (CheckBox) view.findViewById(R.id.heartbeatAck);
         final CheckBox doDeviceRootCheckView = (CheckBox) view.findViewById(R.id.root_detection_view);
-
 
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
@@ -163,24 +161,6 @@ public class AppSetUpDialog extends BaseDialogFragment {
         } else {
             customAppIdEditView.setText(AppPreferencesManager.getCustomAppId());
         }
-        /*customAppIdEditView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                //Log.d(LOG_TAG, "App Id before changed to: " + customAppIdEditView.getText().toString().trim());
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //Log.d(LOG_TAG, "App Id on changed to: " + customAppIdEditView.getText().toString().trim());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                Log.d(LOG_TAG, "App Id after changed to: " +
-                        customAppIdEditView.getText().toString().trim());
-                AppPreferencesManager.setCustomAppId(customAppIdEditView.getText().toString().trim());
-            }
-        });*/
 
         transportGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -292,15 +272,6 @@ public class AppSetUpDialog extends BaseDialogFragment {
                         String lang = ((Language) langSpinner.getSelectedItem()).name();
                         String hmiLang = ((Language) hmiLangSpinner.getSelectedItem()).name();
 
-                        int transportType = Const.Transport.KEY_USB;
-                        switch (transportGroup.getCheckedRadioButtonId()) {
-                            case R.id.selectprotocol_radioWiFi:
-                                transportType = Const.Transport.KEY_TCP;
-                                break;
-                            case R.id.selectprotocol_radioBT:
-                                transportType = Const.Transport.KEY_BLUETOOTH;
-                                break;
-                        }
                         String ipAddress = ipAddressEditText.getText().toString();
                         int tcpPort = Integer.parseInt(tcpPortEditText.getText().toString());
                         boolean autoSetAppIcon = autoSetAppIconCheckBox.isChecked();
@@ -312,7 +283,13 @@ public class AppSetUpDialog extends BaseDialogFragment {
                         if (AppPreferencesManager.getIsCustomAppId()) {
                             AppPreferencesManager.setCustomAppId(appId);
                         }
-                        boolean success = prefs.edit()
+
+                        final CheckBox isStartSessionSecuredView =
+                                (CheckBox) view.findViewById(R.id.selectprotocol_session_encrypted);
+                        AppPreferencesManager.setIsStartSecureSession(
+                                isStartSessionSecuredView.isChecked());
+
+                        final boolean success = prefs.edit()
                                 .putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
                                 .putBoolean(Const.PREFS_KEY_ISNAVIAPP, isNavi)
                                 .putBoolean(Const.Transport.PREFS_KEY_IS_NSD, mNSDPrefValue)

@@ -11,111 +11,104 @@
         android:padding="15dp">
 
         <TextView
-            android:text="Protocol Version:"
-            android:paddingBottom="5dp"
-            android:textStyle="bold"
-            android:textSize="18sp"
-            android:layout_gravity="center"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingBottom="5dp"
+            android:text="Protocol Version:"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
-                android:text="MIN: "
-                android:textSize="18sp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="MIN: "
+                android:textSize="18sp" />
 
             <EditText
                 android:id="@+id/protocol_min_view"
-                android:inputType="number"
-                android:layout_weight="1"
-                android:layout_marginRight="10dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_marginRight="10dp"
+                android:layout_weight="1"
+                android:inputType="number" />
 
             <TextView
-                android:text="MAX: "
-                android:textSize="18sp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="MAX: "
+                android:textSize="18sp" />
 
             <EditText
                 android:id="@+id/protocol_max_view"
-                android:inputType="number"
-                android:layout_weight="1"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="number" />
 
         </LinearLayout>
 
         <View
-            android:background="@android:color/darker_gray"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
             android:layout_width="fill_parent"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@android:color/darker_gray" />
 
         <TextView
-            android:text="Heart Beat:"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:paddingBottom="5dp"
             android:paddingTop="5dp"
-            android:textStyle="bold"
+            android:text="Heart Beat:"
             android:textSize="18sp"
-            android:layout_gravity="center"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:textStyle="bold" />
 
-    <LinearLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
 
-
-
             <CheckBox
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-
-                android:layout_marginRight="15dp"
-                android:text="Heartbeat"
-                android:visibility="visible"
                 android:id="@+id/heartbeat"
-                android:checked="true" />
-
-            <CheckBox
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
 
+                android:layout_height="wrap_content"
                 android:layout_marginRight="15dp"
-
-                android:text="ACK"
-                android:visibility="visible"
-                android:id="@+id/heartbeatAck"
-                android:checked="true" />
-
+                android:checked="true"
+                android:text="Heartbeat"
+                android:visibility="visible" />
 
             <CheckBox
+                android:id="@+id/heartbeatAck"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
-                android:text="Detect Root"
-                android:visibility="visible"
-                android:id="@+id/root_detection_view" />
+                android:layout_marginRight="15dp"
+                android:checked="true"
+                android:text="ACK"
+                android:visibility="visible" />
 
         </LinearLayout>
 
-
         <View
-            android:background="@android:color/darker_gray"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
             android:layout_width="fill_parent"
-            android:layout_height="1dp"/>
+            android:layout_height="1dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginTop="5dp"
+            android:background="@android:color/darker_gray" />
+
+        <CheckBox
+            android:id="@+id/root_detection_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Detect Root"
+            android:visibility="visible" />
 
         <CheckBox
             android:id="@+id/selectprotocol_checkMedia"
@@ -141,8 +134,8 @@
                 android:id="@+id/selectprotocol_radioSourceMP4"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/selectprotocol_sourceMP4"
-                android:checked="true" />
+                android:checked="true"
+                android:text="@string/selectprotocol_sourceMP4" />
 
             <RadioButton
                 android:id="@+id/selectprotocol_radioSourceH264"
@@ -150,6 +143,23 @@
                 android:layout_height="wrap_content"
                 android:text="@string/selectprotocol_sourceH264" />
         </RadioGroup>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingBottom="5dp"
+            android:paddingTop="5dp"
+            android:text="Session:"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <CheckBox
+            android:id="@+id/selectprotocol_session_encrypted"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingRight="5dp"
+            android:text="@string/selectprotocol_session_encrypted" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -181,10 +191,10 @@
 
             <CheckBox
                 android:id="@+id/selectprotocol_appIdCustom"
-                android:text="@string/selectprotocol_appIdCustom"
-                android:paddingRight="5dp"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:paddingRight="5dp"
+                android:text="@string/selectprotocol_appIdCustom" />
 
             <EditText
                 android:id="@+id/selectprotocol_appId"
@@ -196,6 +206,13 @@
                 android:inputType="textCapSentences"
                 android:maxLength="25" />
         </LinearLayout>
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="10dp"
+            android:background="@android:color/darker_gray" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -239,13 +256,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </LinearLayout>
+
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/app_set_up_dialog_transport_view"
-            android:orientation="vertical"
             android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
             <RadioGroup
                 android:id="@+id/selectprotocol_radioGroupTransport"
@@ -255,25 +273,25 @@
 
                 <RadioButton
                     android:id="@+id/selectprotocol_radioWiFi"
-                    android:layout_weight="1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:gravity="center"
                     android:text="@string/selectprotocol_wifi" />
 
                 <RadioButton
                     android:id="@+id/selectprotocol_radioBT"
-                    android:layout_weight="1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:gravity="center"
                     android:text="@string/selectprotocol_bluetooth" />
 
                 <RadioButton
                     android:id="@+id/selectprotocol_radioUSB"
-                    android:layout_weight="1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:checked="true"
                     android:gravity="center"
                     android:text="@string/selectprotocol_usb" />
@@ -297,21 +315,21 @@
 
                 <ToggleButton
                     android:id="@+id/nsd_toggle_btn"
-                    android:layout_gravity="center"
-                    android:layout_weight="1"
-                    android:layout_marginRight="5dp"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="1" />
             </LinearLayout>
 
             <TextView
                 android:id="@+id/nsd_unsupported_api_label_view"
-                android:text="@string/nsd_unsupported_api_level_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="20dp"
                 android:gravity="center"
-                android:visibility="gone"
-                android:layout_marginBottom="20dp" />
+                android:text="@string/nsd_unsupported_api_level_text"
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/ip_address_layout"
@@ -410,7 +428,7 @@
             android:id="@+id/set_up_dialog_hash_id"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/set_up_dialog_fake_hash_id"/>
+            android:text="@string/set_up_dialog_fake_hash_id" />
 
     </LinearLayout>
 

@@ -1,3 +1,6 @@
+[CW30]
++ SYNC Mobile SDK | SyncProxyTester: Add possibility to restore encryption state at SPT side
+
 [CW29]
 + SYNC Mobile SDK: added ssl error description listing
 * SYNC Mobile SDK | SyncProxyTester: Added possibility to start several secure sessions.
