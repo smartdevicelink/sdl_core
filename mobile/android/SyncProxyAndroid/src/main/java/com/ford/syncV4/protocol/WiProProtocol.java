@@ -182,7 +182,6 @@ public class WiProProtocol extends AbstractProtocol {
 
     private void processProtocolMessage(ServiceType serviceType, byte protocolVersionToSend, final boolean encrypted,
                                         byte[] data, byte sessionID) {
-        encryptMessage(sessionID, encrypted, data);
         sendProtocolMessageProcessor.setCallback(new SendProtocolMessageProcessor.ISendProtocolMessageProcessor() {
 
             @Override
