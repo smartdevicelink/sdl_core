@@ -95,7 +95,7 @@ public class SendProtocolMessageProcessor {
 
         if (data.length > maxDataSize) {
             //Logger.d(LOG_TAG + " BULK_DATA");
-            singleMessageExecutor.submit(new Runnable() {
+            bulkDataDataExecutor.submit(new Runnable() {
 
                 @Override
                 public void run() {
@@ -134,13 +134,13 @@ public class SendProtocolMessageProcessor {
             header.setEncrypted(encrypted);
 
             if (serviceType == ServiceType.Audio_Service) {
-                if (singleMessageExecutor.isTerminated()) {
+                if (audioExecutor.isTerminated()) {
                     return;
                 }
-                if (singleMessageExecutor.isShutdown()) {
+                if (audioExecutor.isShutdown()) {
                     return;
                 }
-                singleMessageExecutor.submit(new Runnable() {
+                audioExecutor.submit(new Runnable() {
 
                                          @Override
                                          public void run() {
@@ -152,13 +152,13 @@ public class SendProtocolMessageProcessor {
                                      }
                 );
             } else if (serviceType == ServiceType.Mobile_Nav) {
-                if (singleMessageExecutor.isTerminated()) {
+                if (mobileNaviExecutor.isTerminated()) {
                     return;
                 }
-                if (singleMessageExecutor.isShutdown()) {
+                if (mobileNaviExecutor.isShutdown()) {
                     return;
                 }
-                singleMessageExecutor.submit(new Runnable() {
+                mobileNaviExecutor.submit(new Runnable() {
 
                                               @Override
                                               public void run() {
