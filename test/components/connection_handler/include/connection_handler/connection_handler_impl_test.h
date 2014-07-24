@@ -54,7 +54,7 @@ class ConnectionHandlerTest: public ::testing::Test {
  protected:
   void SetUp() OVERRIDE {
     connection_handler_ = ConnectionHandlerImpl::instance();
-    uid = 1;
+    uid = 1u;
     connection_key = connection_handler_->KeyFromPair(0, 0u);
   }
   void TearDown() OVERRIDE {
@@ -190,7 +190,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Audio) {
   EXPECT_NE(session_id, 0u);
   const ConnectionList& connection_list = connection_handler_->getConnectionList();
   EXPECT_EQ(connection_list.size(), 1u);
-  EXPECT_EQ(connection_list.begin()->first, uid);
+  EXPECT_EQ(connection_list.begin()->first, static_cast<int>(uid));
 
   //start new session with Audio service
   const uint32_t session_id_on_start_secure =
@@ -200,7 +200,7 @@ TEST_F(ConnectionHandlerTest, SessionStarted_Audio) {
   EXPECT_EQ(session_id_on_start_secure, session_id);
   ConnectionList& connection_list_new = connection_handler_->getConnectionList();
   EXPECT_EQ(connection_list.size(), 1u);
-  EXPECT_EQ(connection_list_new.begin()->first, uid);
+  EXPECT_EQ(connection_list_new.begin()->first, static_cast<int>(uid));
 }
 
 TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
@@ -215,7 +215,7 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
   EXPECT_NE(session_id, 0u);
   const ConnectionList& connection_list = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list.empty());
-  EXPECT_EQ(connection_list.begin()->first, uid);
+  EXPECT_EQ(connection_list.begin()->first, static_cast<int>(uid));
 
   //start new session with RPC service
   const uint32_t session_id_on_start_secure =
@@ -225,7 +225,7 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
   EXPECT_EQ(session_id_on_start_secure, session_id);
   ConnectionList& connection_list_start_secure = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list_start_secure.empty());
-  EXPECT_EQ(connection_list_start_secure.begin()->first, uid);
+  EXPECT_EQ(connection_list_start_secure.begin()->first, static_cast<int>(uid));
 
   //start new session with RPC service
   const uint32_t session_key_on_end_secure =
@@ -238,7 +238,7 @@ TEST_F(ConnectionHandlerTest, SessionEnded_Audio) {
   EXPECT_EQ(session_id_on_end_secure, session_id);
   ConnectionList& connection_list_on_end_secure = connection_handler_->getConnectionList();
   EXPECT_FALSE(connection_list_on_end_secure.empty());
-  EXPECT_EQ(connection_list_on_end_secure.begin()->first, uid);
+  EXPECT_EQ(connection_list_on_end_secure.begin()->first, static_cast<int>(uid));
 }
 
 TEST_F(ConnectionHandlerTest, SessionStarted_StartSession_SecureSpecific_Unprotect) {

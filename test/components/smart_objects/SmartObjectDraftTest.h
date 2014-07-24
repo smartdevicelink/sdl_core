@@ -88,7 +88,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         // ---- unsigned int ---- //
         obj = static_cast<unsigned int>(100);
-        ASSERT_EQ(100, obj.asUInt());
+        ASSERT_EQ(100u, obj.asUInt());
 
         // ---- DOUBLE ---- //
         obj = 3.14;
@@ -170,7 +170,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         // ---- unsigned int ---- //
         obj = static_cast<unsigned int>(100);
-        ASSERT_EQ(100, obj.asUInt());
+        ASSERT_EQ(100u, obj.asUInt());
 
         // ---- DOUBLE ---- //
         obj = 3.14;

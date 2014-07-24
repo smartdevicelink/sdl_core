@@ -484,29 +484,29 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
     {
         SmartObject obj;
 
-        ASSERT_EQ(0, obj.length()) << "Wrong size for the uninitialized object";
+        ASSERT_EQ(0u, obj.length()) << "Wrong size for the uninitialized object";
 
         obj = 1234;
-        ASSERT_EQ(0, obj.length()) << "Wrong size for the int object";
+        ASSERT_EQ(0u, obj.length()) << "Wrong size for the int object";
 
         std::string str("Some test very long string");
         obj = str;
         ASSERT_EQ(str.size(), obj.length()) << "The size of the object containing string is not correct";
 
         obj = true;
-        ASSERT_EQ(0, obj.length()) << "Wrong size of the true";
+        ASSERT_EQ(0u, obj.length()) << "Wrong size of the true";
 
         obj = 0.1234;
-        ASSERT_EQ(0, obj.length()) << "Wrong size of the double";
+        ASSERT_EQ(0u, obj.length()) << "Wrong size of the double";
 
         obj = 'A';
-        ASSERT_EQ(0, obj.length()) << "Wrong size of the char";
+        ASSERT_EQ(0u, obj.length()) << "Wrong size of the char";
 
         makeMapObject(obj, 12);
-        ASSERT_EQ(12, obj.length()) << "Wrong size of the object containing map";
+        ASSERT_EQ(12u, obj.length()) << "Wrong size of the object containing map";
 
         makeArrayObject(obj, 21);
-        ASSERT_EQ(21, obj.length()) << "Wrong size of the object containing array";
+        ASSERT_EQ(21u, obj.length()) << "Wrong size of the object containing array";
     }
 
    TEST(CopyObjectsTest, SmartObjectTest)
@@ -544,15 +544,15 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         srcObj["two"] = 2;
         srcObj["three"] = 3;
 
-        ASSERT_EQ(3, srcObj.length());
+        ASSERT_EQ(3u, srcObj.length());
         ASSERT_EQ(2, srcObj["two"].asInt());
 
         ASSERT_TRUE(srcObj.erase("two"));
         ASSERT_FALSE(srcObj.erase("two"));
 
-        ASSERT_EQ(2, srcObj.length());
+        ASSERT_EQ(2u, srcObj.length());
         ASSERT_EQ(-1, srcObj["two"].asInt());
-        ASSERT_EQ(3, srcObj.length());      // the element "two" was accessed in the previous line so the element has been created
+        ASSERT_EQ(3u, srcObj.length());      // the element "two" was accessed in the previous line so the element has been created
 
         srcObj["two"] = 2;
 
@@ -562,31 +562,31 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
 
         ASSERT_TRUE(srcObj.erase("one"));
 
-        ASSERT_EQ(2, srcObj.length());
+        ASSERT_EQ(2u, srcObj.length());
 
         ASSERT_TRUE(srcObj.erase("two"));
 
-        ASSERT_EQ(1, srcObj.length());
+        ASSERT_EQ(1u, srcObj.length());
 
         ASSERT_TRUE(srcObj.erase("three"));
 
-        ASSERT_EQ(0, srcObj.length());
+        ASSERT_EQ(0u, srcObj.length());
 
         srcObj["one"]["two"]["three"]["0"] = "1";
         srcObj["one"]["two"]["three"]["1"] = "2";
 
-        ASSERT_EQ(1, srcObj.length());
-        ASSERT_EQ(1, srcObj["one"].length());
-        ASSERT_EQ(1, srcObj["one"]["two"].length());
-        ASSERT_EQ(2, srcObj["one"]["two"]["three"].length());
+        ASSERT_EQ(1u, srcObj.length());
+        ASSERT_EQ(1u, srcObj["one"].length());
+        ASSERT_EQ(1u, srcObj["one"]["two"].length());
+        ASSERT_EQ(2u, srcObj["one"]["two"]["three"].length());
 
         ASSERT_TRUE(srcObj["one"]["two"]["three"].erase("0"));
         ASSERT_FALSE(srcObj["one"]["two"]["three"].erase("0"));
 
-        ASSERT_EQ(1, srcObj["one"]["two"]["three"].length());
+        ASSERT_EQ(1u, srcObj["one"]["two"]["three"].length());
 
         ASSERT_TRUE(srcObj["one"].erase("two"));
-        ASSERT_EQ(0, srcObj["one"].length());
+        ASSERT_EQ(0u, srcObj["one"].length());
 
         srcObj = 1234;       // not a map
         ASSERT_FALSE(srcObj.erase("one"));

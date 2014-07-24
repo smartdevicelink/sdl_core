@@ -206,13 +206,13 @@ TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyMap) {
       map_schema, result_object_empty_map);
   ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType())
       << "smartObject is not map type";
-  ASSERT_EQ(0, result_object_empty_map.length()) << "non empty map";
+  ASSERT_EQ(0u, result_object_empty_map.length()) << "non empty map";
 
   formatter_ns::CMetaFormatter::CreateObjectByPattern(object,
       map_schema, result_object_empty_map);
   ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType())
       << "smartObject is not map type";
-  ASSERT_EQ(0, result_object_empty_map.length()) << "non empty map";
+  ASSERT_EQ(0u, result_object_empty_map.length()) << "non empty map";
 
   object["field1"] = 0;
   object["field2"] = smartobjects_ns::SmartObject();
@@ -220,7 +220,7 @@ TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyMap) {
       map_schema, result_object_empty_map);
   ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType())
       << "smartObject is not map type";
-  ASSERT_EQ(0, result_object_empty_map.length()) << "non empty map";
+  ASSERT_EQ(0u, result_object_empty_map.length()) << "non empty map";
 
   // fill object with any values. Result must be the same
   FillObjectIdenticalToSchema(object);
@@ -228,7 +228,7 @@ TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyMap) {
       map_schema, result_object_empty_map);
   ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType())
       << "smartObject is not map type";
-  ASSERT_EQ(0, result_object_empty_map.length()) << "non empty map";
+  ASSERT_EQ(0u, result_object_empty_map.length()) << "non empty map";
 
   // fill object with any values. Result must be the same
   FillObjectIdenticalToSchemaWithoutNoMandatoriesParams(object);
@@ -236,7 +236,7 @@ TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyMap) {
       map_schema, result_object_empty_map);
   ASSERT_EQ(smartobjects_ns::SmartType_Map,  result_object_empty_map.getType())
       << "smartObject is not map type";
-  ASSERT_EQ(0, result_object_empty_map.length()) << "non empty map";
+  ASSERT_EQ(0u, result_object_empty_map.length()) << "non empty map";
 
   if (true == kIsPrintOut) {
     std::string str;
@@ -261,13 +261,13 @@ TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyArray) {
       array_schema, result_object_empty_array);
   ASSERT_EQ(smartobjects_ns::SmartType_Array, result_object_empty_array.getType())
       << "smartObject is not array type";
-  ASSERT_EQ(0, result_object_empty_array.length())  << "non empty array";
+  ASSERT_EQ(0u, result_object_empty_array.length())  << "non empty array";
 
   formatter_ns::CMetaFormatter::CreateObjectByPattern(object,
       array_schema, result_object_empty_array);
   ASSERT_EQ(smartobjects_ns::SmartType_Array, result_object_empty_array.getType())
       << "smartObject is not array type";
-  ASSERT_EQ(0, result_object_empty_array.length()) << "non empty array";
+  ASSERT_EQ(0u, result_object_empty_array.length()) << "non empty array";
 
   // fill object with any values. Result must be the same
   FillObjectIdenticalToSchema(object);
@@ -275,7 +275,7 @@ TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyArray) {
       array_schema, result_object_empty_array);
   ASSERT_EQ(smartobjects_ns::SmartType_Array, result_object_empty_array.getType())
       << "smartObject is not array type";
-  ASSERT_EQ(0, result_object_empty_array.length()) << "non empty array";
+  ASSERT_EQ(0u, result_object_empty_array.length()) << "non empty array";
 
   // fill object with any values. Result must be the same
   FillObjectWithoutSomeMandatoryFields(object);
@@ -283,7 +283,7 @@ TEST_F(CMetaFormatterTestHelper, test_SimpleEmptyArray) {
       array_schema, result_object_empty_array);
   ASSERT_EQ(smartobjects_ns::SmartType_Array, result_object_empty_array.getType())
       << "smartObject is not array type";
-  ASSERT_EQ(0, result_object_empty_array.length()) << "non empty array";
+  ASSERT_EQ(0u, result_object_empty_array.length()) << "non empty array";
 
   if (true == kIsPrintOut) {
     std::string str;
@@ -411,26 +411,26 @@ TEST_F(CMetaFormatterTestHelper, testEmptyArrayAndEmptyMapWithOtherParameters) {
     result_object[strings_ns::S_PARAMS][strings_ns::S_MESSAGE_TYPE].asInt());
   EXPECT_EQ(55,
     result_object[strings_ns::S_PARAMS][strings_ns::S_CORRELATION_ID].asInt());
-  EXPECT_EQ(11,
+  EXPECT_EQ(11u,
     result_object[strings_ns::S_PARAMS][strings_ns::S_PROTOCOL_VERSION].asUInt());
 
   EXPECT_EQ(smartobjects_ns::SmartType_Map,
     result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyMap1"].getType());
-  EXPECT_EQ(0,
+  EXPECT_EQ(0u,
     result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyMap1"].length());
   EXPECT_EQ(smartobjects_ns::SmartType_Map,
     result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyMap2"].getType());
-  EXPECT_EQ(0,
+  EXPECT_EQ(0u,
     result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyMap2"].length());
   EXPECT_EQ(smartobjects_ns::SmartType_Array,
     result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyAray"].getType());
-  EXPECT_EQ(0,
+  EXPECT_EQ(0u,
     result_object[strings_ns::S_MSG_PARAMS]["mandatory_emptyAray"].length());
   EXPECT_EQ(100,
     result_object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][0].asInt());
   EXPECT_EQ(200,
     result_object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][1].asInt());
-  EXPECT_EQ(300,
+  EXPECT_EQ(300u,
     result_object[strings_ns::S_MSG_PARAMS]["non_mandatory_Array"][2].asUInt());
   EXPECT_EQ(std::string("defValue"),
     result_object[strings_ns::S_MSG_PARAMS]["mandatory_string"].asString());

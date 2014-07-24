@@ -247,10 +247,10 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
       messageType_allowedEnumSubsetValues.insert(MessageTypeTest::response);
       messageType_allowedEnumSubsetValues.insert(MessageTypeTest::notification);
 
-      utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> functionId_SchemaItem =
+      ::utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> functionId_SchemaItem =
         NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<FunctionIdTest::eType>::create(functionId_allowedEnumSubsetValues);
 
-      utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> messageType_SchemaItem =
+      ::utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> messageType_SchemaItem =
         NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<MessageTypeTest::eType>::create(messageType_allowedEnumSubsetValues);
 
       std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember> paramsMembersMap;
@@ -287,19 +287,19 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
       messageType_allowedEnumSubsetValues.insert(MessageTypeTest::response);
       messageType_allowedEnumSubsetValues.insert(MessageTypeTest::notification);
 
-      utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> success_SchemaItem =
+      ::utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> success_SchemaItem =
         NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>());
 
-      utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> resultCode_SchemaItem =
+      ::utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> resultCode_SchemaItem =
         NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<TestType::eType>::create(resultCode_allowedEnumSubsetValues
             , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<TestType::eType>());
 
-      utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> info_SchemaItem =
+      ::utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> info_SchemaItem =
         NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t>(0)
             , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t>(1000)
             , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string>());
 
-      utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> tryAgainTime_SchemaItem =
+      ::utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> tryAgainTime_SchemaItem =
         NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<int>(0)
             , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<int>(2000000000)
             , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<int>());

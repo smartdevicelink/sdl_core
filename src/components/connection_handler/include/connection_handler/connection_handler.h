@@ -115,7 +115,7 @@ class ConnectionHandler {
   virtual void SendHeartBeat(ConnectionHandle connection_handle,
                             uint8_t session_id) = 0;
 
-  /*
+  /**
    * \brief binds protocol version with session
    *
    * \param connection_key pair of connection and session id

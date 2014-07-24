@@ -570,7 +570,7 @@ TEST_F(GeneratedInterfaceTests, FrankenstructFromJson) {
   ASSERT_RPCTYPE_VALID(fbmi);
   ASSERT_FALSE(fbmi.empty());
   ASSERT_FALSE(fbmi.struct_empty());
-  ASSERT_EQ(1, fbmi.size());
+  ASSERT_EQ(1u, fbmi.size());
   ASSERT_EQ(2, fbmi.mandatoryInt);
   ASSERT_EQ("str", std::string(fbmi["hello"]));
 }
@@ -583,7 +583,7 @@ TEST_F(GeneratedInterfaceTests, FrankenstructFromInvalidJson) {
   ASSERT_FALSE(fbmi.is_valid());
   ASSERT_FALSE(fbmi.empty());
   ASSERT_FALSE(fbmi.struct_empty());
-  ASSERT_EQ(1, fbmi.size());
+  ASSERT_EQ(1u, fbmi.size());
   ASSERT_EQ(2, fbmi.mandatoryInt);
   rpc::ValidationReport report("fbmi");
   fbmi.ReportErrors(&report);

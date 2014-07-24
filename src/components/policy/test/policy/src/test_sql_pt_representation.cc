@@ -139,7 +139,7 @@ TEST_F(SQLPTRepresentationTest, CheckPermissionsAllowed) {
   CheckPermissionResult ret;
   ret = reps->CheckPermissions("12345", "FULL", "Update");
   EXPECT_TRUE(ret.hmi_level_permitted == ::policy::kRpcAllowed);
-  ASSERT_EQ(2, ret.list_of_allowed_params->size());
+  ASSERT_EQ(2u, ret.list_of_allowed_params->size());
   EXPECT_EQ("gps", (*ret.list_of_allowed_params)[0]);
   EXPECT_EQ("speed", (*ret.list_of_allowed_params)[1]);
 }
@@ -192,7 +192,7 @@ TEST_F(SQLPTRepresentationTest, GetUpdateUrls) {
 
   ASSERT_TRUE(dbms->Exec(query_insert));
   ret = reps->GetUpdateUrls(7);
-  ASSERT_EQ(2, ret.size());
+  ASSERT_EQ(2u, ret.size());
   EXPECT_EQ("http://ford.com/cloud/1", ret[0].url);
   EXPECT_EQ("http://ford.com/cloud/2", ret[1].url);
 
@@ -314,7 +314,7 @@ TEST_F(SQLPTRepresentationTest, SecondsBetweenRetries) {
   const char* query_delete = "DELETE FROM `seconds_between_retry`; ";
   ASSERT_TRUE(dbms->Exec(query_delete));
   ASSERT_TRUE(reps->SecondsBetweenRetries(&seconds));
-  EXPECT_EQ(0, seconds.size());
+  EXPECT_EQ(0u, seconds.size());
 
   const char* query_insert =
     "INSERT INTO `seconds_between_retry` (`index`, `value`) "
@@ -323,7 +323,7 @@ TEST_F(SQLPTRepresentationTest, SecondsBetweenRetries) {
     "  VALUES (1, 20); ";
   ASSERT_TRUE(dbms->Exec(query_insert));
   ASSERT_TRUE(reps->SecondsBetweenRetries(&seconds));
-  ASSERT_EQ(2, seconds.size());
+  ASSERT_EQ(2u, seconds.size());
   EXPECT_EQ(10, seconds[0]);
   EXPECT_EQ(20, seconds[1]);
 }

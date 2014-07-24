@@ -61,8 +61,8 @@ void MediaManagerTest::TearDown() {
 }
 
 TEST_F(MediaManagerTest, RecordMicrophoneStream) {
-  media_manager::MediaManager* mediaManager =
-    media_manager::MediaManagerImpl::instance();
+//  media_manager::MediaManager* mediaManager =
+//    media_manager::MediaManagerImpl::instance();
 
   //mediaManager->startMicrophoneRecording(std::string("record.wav"),
   //                   mobile_apis::SamplingRate::SamplingRate_44KHZ,
@@ -81,34 +81,10 @@ TEST_F(MediaManagerTest, AddAndPlayStream) {
   media_manager::MediaManager* mediaManager =
     media_manager::MediaManagerImpl::instance();
 
-  sockaddr device, device_one, device_two;
-
-  device_one.sa_data[0] = 0xf8;
-  device_one.sa_data[1] = 0xd0;
-  device_one.sa_data[2] = 0xbd;
-  device_one.sa_data[3] = 0xac;
-  device_one.sa_data[4] = 0xb4;
-  device_one.sa_data[5] = 0x5d;
-
-  device_two.sa_data[0] = 0x18;
-  device_two.sa_data[1] = 0x87;
-  device_two.sa_data[2] = 0x96;
-  device_two.sa_data[3] = 0x05;
-  device_two.sa_data[4] = 0xe4;
-  device_two.sa_data[5] = 0x08;
-
-  device = device_two;
-
   const useconds_t sleeptime = 100;
 
   mediaManager->PlayA2DPSource(1);
-  // mediaManager->playA2DPSource(1);
   LOG4CXX_INFO(logger_, ".Playing stream");
-  //LOG4CXX_TRACE(logger, );
-  //while (true) {
-    usleep(sleeptime);
-   // LOG4CXX_TRACE(logger, ".");
-  //}
 
   usleep(sleeptime);
 
@@ -117,7 +93,6 @@ TEST_F(MediaManagerTest, AddAndPlayStream) {
   usleep(sleeptime);
 
   mediaManager->PlayA2DPSource(1);
-  // mediaManager->playA2DPSource(1);
 
   usleep(sleeptime);
 

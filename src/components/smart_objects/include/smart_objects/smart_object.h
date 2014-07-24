@@ -928,7 +928,7 @@ static const bool invalid_bool_value = false;
  * @brief Value that is used as invalid value for int32_t type
  **/
 static const int32_t invalid_int_value = -1;
-static const int32_t invalid_unsigned_int_value = 0;
+static const uint32_t invalid_unsigned_int_value = 0;
 static const int64_t invalid_int64_value = -1;
 
 /**

@@ -208,7 +208,7 @@ bool CryptoManagerImpl::SSLContextImpl::Encrypt(
 
   EnsureBufferSizeEnough(len);
   const int read_size = BIO_read(bioOut_, buffer_, len);
-  DCHECK(len == read_size);
+  DCHECK(len == static_cast<size_t>(read_size));
   if (read_size <= 0) {
     // Reset filter and connection deinitilization instead
     BIO_reset(bioFilter_);
