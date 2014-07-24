@@ -182,6 +182,7 @@ public class WiProProtocol extends AbstractProtocol {
 
     private void processProtocolMessage(ServiceType serviceType, byte protocolVersionToSend, final boolean encrypted,
                                         byte[] data, byte sessionID) {
+        encryptMessage(sessionID, encrypted, data);
         sendProtocolMessageProcessor.setCallback(new SendProtocolMessageProcessor.ISendProtocolMessageProcessor() {
 
             @Override
@@ -282,6 +283,7 @@ public class WiProProtocol extends AbstractProtocol {
             receivedBytesReadPos += bytesNeeded;
 
             MessageFrameAssembler assembler = getFrameAssemblerForFrame(mCurrentHeader);
+            Logger.i("mCurrentHeader " + mCurrentHeader + "MessageFrameAssembler " + assembler);
             if (getSecureSessionContextHashMap() != null && getSecureSessionContextHashMap().get(mCurrentHeader.getSessionId()) != null) {
                 assembler.setProtocolSecureManager(getSecureSessionContextHashMap().get(mCurrentHeader.getSessionId()).protocolSecureManager);
             }
