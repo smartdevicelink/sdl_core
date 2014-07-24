@@ -98,7 +98,7 @@ public class MessageFrameAssembler {
     private void handleFirstDataFrame(byte[] data, int frameHeaderSize) {
         //The message is new, so let's figure out how big it is.
         final int size = BitConverter.intFromByteArray(data, 0);
-        Logger.d("TRACE size:" + size + " hSize:" + frameHeaderSize + " dSize:" + data.length);
+        //Logger.d("TRACE size:" + size + " hSize:" + frameHeaderSize + " dSize:" + data.length);
         accumulator = new ByteArrayOutputStream(size - frameHeaderSize);
     }
 
