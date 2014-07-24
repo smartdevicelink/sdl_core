@@ -119,12 +119,12 @@ bool PolicyManagerImpl::LoadPTFromFile(const std::string& file_name) {
     "Loading from file was " << (final_result ? "successful" : "unsuccessful"));
 
   // Initial setting of snapshot data
-  if (!policy_table_snapshot_) {
+  if (policy_table_.pt_data()->IsPTPreloaded() && !policy_table_snapshot_) {
     policy_table_snapshot_ = policy_table_.pt_data()->GenerateSnapshot();
     if (!policy_table_snapshot_) {
       LOG4CXX_WARN(logger_,
                    "Failed to create initial snapshot of policy table");
-      return final_result;
+      return false;
     }
   }
 
@@ -1002,9 +1002,13 @@ void PolicyManagerImpl::GetPermissionsForApp(
     // If application is limited to default only related groups ara allowed
     // If application is limited to pre_Dataconsent only related groups are
     // allowed
+    FunctionalGroupIDs default_groups = group_types[kTypeDefault];
     if (kDefaultId == app_id_to_check) {
+      auto_allowed_groups.clear();
       allowed_groups = group_types[kTypeDefault];
     } else if (kPreDataConsentId == app_id_to_check) {
+      auto_allowed_groups.clear();
+      default_groups = FunctionalGroupIDs();
       allowed_groups = group_types[kTypePreDataConsented];
     } else {
       allowed_groups = group_types[kTypeAllowed];
@@ -1012,11 +1016,6 @@ void PolicyManagerImpl::GetPermissionsForApp(
 
     FunctionalGroupIDs disallowed_groups = group_types[kTypeDisallowed];
     FunctionalGroupIDs preconsented_groups = group_types[kTypePreconsented];
-    // If application is limited to pre_DataConsent - no default groups
-    // permissions should be used
-    FunctionalGroupIDs default_groups =
-      app_id_to_check == kPreDataConsentId ?
-      FunctionalGroupIDs() : group_types[kTypeDefault];
 
     // Find common disallowed groups
     FunctionalGroupIDs common_disallowed = disallowed_groups;
