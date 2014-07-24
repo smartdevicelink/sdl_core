@@ -58,7 +58,7 @@
 #include "SmartObjectInvalidTest.h"
 #include "SmartObjectStressTest.h"
 #include "SmartObjectUnitTest.h"
-#include "SmartObjectConvertionTimeTest.h"
+//#include "SmartObjectConvertionTimeTest.h"
 #include "TSharedPtrTest.h"
 
 // #include "jsoncpp/json_reader_test.h"
