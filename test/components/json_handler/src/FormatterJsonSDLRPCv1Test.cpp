@@ -1029,67 +1029,60 @@ namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
 template<>
-const std::map<test::components::json_handler::formatters::FunctionID::eType,
-    std::string> &
-NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<
-    test::components::json_handler::formatters::FunctionID::eType>::getEnumElementsStringRepresentation(
-    void) {
-  static bool isInitialized = false;
-  static std::map<test::components::json_handler::formatters::FunctionID::eType,
-      std::string> enumStringRepresentationMap;
-
-  if (false == isInitialized) {
-    enumStringRepresentationMap.insert(
-        std::make_pair(
-            test::components::json_handler::formatters::FunctionID::RegisterAppInterface,
-            "RegisterAppInterface"));
-    enumStringRepresentationMap.insert(
-        std::make_pair(
-            test::components::json_handler::formatters::FunctionID::UnregisterAppInterface,
-            "UnregisterAppInterface"));
-    enumStringRepresentationMap.insert(
-        std::make_pair(
-            test::components::json_handler::formatters::FunctionID::SetGlobalProperties,
-            "SetGlobalProperties"));
-
-    isInitialized = true;
-  }
-
-  return enumStringRepresentationMap;
-}
+const EnumConversionHelper<test::components::json_handler::formatters::FunctionID::eType>::EnumToCStringMap
+EnumConversionHelper<test::components::json_handler::formatters::FunctionID::eType>::enum_to_cstring_map_ =
+  EnumConversionHelper<test::components::json_handler::formatters::FunctionID::eType>::InitEnumToCStringMap();
 
 template<>
-const std::map<test::components::json_handler::formatters::messageType::eType,
-    std::string> &
-NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<
-    test::components::json_handler::formatters::messageType::eType>::getEnumElementsStringRepresentation(
-    void) {
-  static bool isInitialized = false;
-  static std::map<
-      test::components::json_handler::formatters::messageType::eType,
-      std::string> enumStringRepresentationMap;
+const EnumConversionHelper<test::components::json_handler::formatters::FunctionID::eType>::CStringToEnumMap
+EnumConversionHelper<test::components::json_handler::formatters::FunctionID::eType>::cstring_to_enum_map_ =
+  EnumConversionHelper<test::components::json_handler::formatters::FunctionID::eType>::InitCStringToEnumMap();
 
-  if (false == isInitialized) {
-    enumStringRepresentationMap.insert(
-        std::make_pair(
-            test::components::json_handler::formatters::messageType::request,
-            "request"));
-    enumStringRepresentationMap.insert(
-        std::make_pair(
-            test::components::json_handler::formatters::messageType::response,
-            "response"));
-    enumStringRepresentationMap.insert(
-        std::make_pair(
-            test::components::json_handler::formatters::messageType::notification,
-            "notification"));
+template<>
+const char* const
+EnumConversionHelper<test::components::json_handler::formatters::FunctionID::eType>::cstring_values_[] = {
+    "RegisterAppInterface",
+    "UnregisterAppInterface",
+    "SetGlobalProperties"
+};
 
-    isInitialized = true;
-  }
+template<>
+const test::components::json_handler::formatters::FunctionID::eType
+EnumConversionHelper<test::components::json_handler::formatters::FunctionID::eType>::enum_values_[] = {
+    test::components::json_handler::formatters::FunctionID::RegisterAppInterface,
+    test::components::json_handler::formatters::FunctionID::UnregisterAppInterface,
+    test::components::json_handler::formatters::FunctionID::SetGlobalProperties
+};
 
-  return enumStringRepresentationMap;
+template<>
+const EnumConversionHelper<test::components::json_handler::formatters::messageType::eType>::EnumToCStringMap
+EnumConversionHelper<test::components::json_handler::formatters::messageType::eType>::enum_to_cstring_map_ =
+  EnumConversionHelper<test::components::json_handler::formatters::messageType::eType>::InitEnumToCStringMap();
+
+template<>
+const EnumConversionHelper<test::components::json_handler::formatters::messageType::eType>::CStringToEnumMap
+EnumConversionHelper<test::components::json_handler::formatters::messageType::eType>::cstring_to_enum_map_ =
+  EnumConversionHelper<test::components::json_handler::formatters::messageType::eType>::InitCStringToEnumMap();
+
+template<>
+const char* const
+EnumConversionHelper<test::components::json_handler::formatters::messageType::eType>::cstring_values_[] = {
+    "request",
+    "response",
+    "notification"
+};
+
+template<>
+const test::components::json_handler::formatters::messageType::eType
+EnumConversionHelper<test::components::json_handler::formatters::messageType::eType>::enum_values_[] = {
+    test::components::json_handler::formatters::messageType::request,
+    test::components::json_handler::formatters::messageType::response,
+    test::components::json_handler::formatters::messageType::notification
+};
+
 }
 }
-}
+
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);

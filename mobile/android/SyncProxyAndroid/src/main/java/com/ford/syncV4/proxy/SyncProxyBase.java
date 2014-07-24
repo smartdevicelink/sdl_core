@@ -3512,6 +3512,15 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             if (service == null) {
                 return;
             }
+
+            // Test Part start here
+            if (mTestConfig.isDoStartSecureSession()) {
+                service.setEncrypted(true);
+                // Reset flag to default
+                mTestConfig.setDoStartSecureSession(false);
+            }
+            // Test Part end here
+
             if (service.isEncrypted()) {
                 startRpcService(appId, true);
             }

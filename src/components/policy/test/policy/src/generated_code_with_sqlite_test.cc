@@ -87,7 +87,7 @@ TEST_F(GeneratedCodeTest, FindSectionEndpoints) {
   EXPECT_TRUE(db.Open());
   policy_table::ServiceEndpoints ep;
   EXPECT_TRUE(policy_table::FindSection(&db, ep));
-  EXPECT_EQ(1, ep.size());
+  EXPECT_EQ(1u, ep.size());
   std::string url = ep["0x07"]["default"].front();
   EXPECT_EQ("http://test.example.com", url);
 }

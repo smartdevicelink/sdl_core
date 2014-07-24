@@ -442,7 +442,7 @@ class SmartObject {
    * @param  Value Value to compare object with
    * @return bool
    **/
-  bool operator==(std::string Value) const;
+  bool operator==(const std::string& Value) const;
 
   /**
    * @brief Comparison operator for comparing object with string value
@@ -540,8 +540,8 @@ class SmartObject {
    * @param  Key Key of element to return
    * @return SmartObject&
    **/
-  SmartObject& operator[](const std::string Key);
-  const SmartObject& operator[](const std::string Key) const;
+  SmartObject& operator[](const std::string& Key);
+  const SmartObject& operator[](const std::string& Key) const;
 
   /**
    * @brief Support of map-like access
@@ -587,6 +587,9 @@ class SmartObject {
    * @return Set of map keys or empty set if object has type other than map
    **/
   std::set<std::string> enumerate() const;
+
+  SmartMap::iterator map_begin() const {return m_data.map_value->begin();}
+  SmartMap::iterator map_end() const {return m_data.map_value->end();}
 
   /**
    * @brief Checks for key presense when object is behaves like a map
@@ -826,7 +829,7 @@ class SmartObject {
    * @param Key Key of element to retrieve
    * @return SmartObject&
    **/
-  inline SmartObject& handle_map_access(std::string Key);
+  inline SmartObject& handle_map_access(const std::string& Key);
   /** @} */
 
   /**
@@ -925,7 +928,7 @@ static const bool invalid_bool_value = false;
  * @brief Value that is used as invalid value for int32_t type
  **/
 static const int32_t invalid_int_value = -1;
-static const int32_t invalid_unsigned_int_value = 0;
+static const uint32_t invalid_unsigned_int_value = 0;
 static const int64_t invalid_int64_value = -1;
 
 /**

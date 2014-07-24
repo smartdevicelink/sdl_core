@@ -384,6 +384,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mTestConfig.setUseHashId(AppPreferencesManager.getUseHashId());
         mTestConfig.setCustomHashId(AppPreferencesManager.getCustomHashId());
         mTestConfig.setUseCustomHashId(AppPreferencesManager.getUseCustomHashId());
+        mTestConfig.setDoStartSecureSession(AppPreferencesManager.getIsStartSecureSession());
     }
 
     private boolean startProxy() {

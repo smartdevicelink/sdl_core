@@ -319,4 +319,6 @@
     <string name="ok_string">OK</string>
     <string name="cancel_string">Cancel</string>
 
+    <string name="selectprotocol_session_encrypted">Encrypted</string>
+
 </resources>

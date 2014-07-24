@@ -30,9 +30,10 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef TEST_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEART_BEAT_MONITOR_TEST_H_
-#define TEST_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEART_BEAT_MONITOR_TEST_H_
+#ifndef TEST_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_HEART_BEAT_MONITOR_TEST_H_
+#define TEST_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_HEART_BEAT_MONITOR_TEST_H_
 
+#include <string>
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
@@ -43,69 +44,106 @@
 namespace test  {
 namespace components  {
 namespace protocol_handler_test {
-using namespace connection_handler;
+using ::testing::_;
 
-class ConnectionHandlerMock: public ConnectionHandler {
+class ConnectionHandlerMock: public connection_handler::ConnectionHandler {
  public:
-  MOCK_METHOD1(set_connection_handler_observer, void(ConnectionHandlerObserver*));
-  MOCK_METHOD1(set_transport_manager, void(transport_manager::TransportManager*));
-  MOCK_METHOD0(StartTransportManager,void());
-  MOCK_METHOD1(ConnectToDevice, void(DeviceHandle device_handle));
-  MOCK_METHOD1(CloseConnection, void(ConnectionHandle connection_handle));
+  MOCK_METHOD1(set_connection_handler_observer,
+               void(connection_handler::ConnectionHandlerObserver*));
+  MOCK_METHOD1(set_transport_manager,
+               void(transport_manager::TransportManager*));
+  MOCK_METHOD0(StartTransportManager,
+               void());
+  MOCK_METHOD1(ConnectToDevice,
+               void(connection_handler::DeviceHandle device_handle));
+  MOCK_METHOD0(ConnectToAllDevices,
+               void());
+  MOCK_METHOD1(CloseConnection,
+               void(connection_handler::ConnectionHandle connection_handle));
+  MOCK_METHOD1(GetConnectionSessionsCount, uint32_t(uint32_t connection_key));
+  MOCK_METHOD2(GetDeviceID,
+               bool(const std::string& mac_address,
+                    connection_handler::DeviceHandle* device_handle));
+  MOCK_METHOD1(CloseSession,
+               void(uint32_t key));
+  MOCK_METHOD2(CloseSession,
+               void(connection_handler::ConnectionHandle connection_handle,
+                    uint8_t session_id));
+  MOCK_METHOD1(StartSessionHeartBeat,
+               void(uint32_t key));
+  MOCK_METHOD2(SendHeartBeat,
+               void(connection_handler::ConnectionHandle connection_handle,
+                    uint8_t session_id));
+  MOCK_METHOD2(BindProtocolVersionWithSession,
+               void(uint32_t connection_key,
+                    uint8_t protocol_version));
 };
 
 class HeartBeatMonitorTest: public testing::Test {
- public:
-  static const uint32_t kTimeout = 2;
-  ConnectionHandlerMock connection_handler_mock;
-  connection_handler::Connection connection;
-  HeartBeatMonitorTest()
-  : connection(42, 0, &connection_handler_mock, kTimeout) {
+protected:
+  virtual void SetUp() {
   }
-  ~HeartBeatMonitorTest() {
+ public:
+  testing::NiceMock<ConnectionHandlerMock>   connection_handler_mock;
+  connection_handler::Connection connection;
+  static const int32_t kTimeout = 2;
+  static const connection_handler::ConnectionHandle connection_handle = 0xABCDEF;
+  HeartBeatMonitorTest()
+    : connection(connection_handle, 0, &connection_handler_mock, kTimeout) {
   }
 };
 
-TEST_F(HeartBeatMonitorTest, TimerNotElapsed){
-  EXPECT_CALL(connection_handler_mock, CloseConnection(42))
-      .Times(0);
-  connection.AddNewSession();
-  sleep(kTimeout - 1);
-}
-
-TEST_F(HeartBeatMonitorTest, TimerElapsed){
-  EXPECT_CALL(connection_handler_mock, CloseConnection(42));
+TEST_F(HeartBeatMonitorTest, TimerNotStarted) {
+  // Whithout StartHeartBeat nothing to be call
+  EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
   connection.AddNewSession();
   sleep(kTimeout + 1);
 }
-TEST_F(HeartBeatMonitorTest, KeptAlive){
-  EXPECT_CALL(connection_handler_mock, CloseConnection(42))
-      .Times(0);
-  connection.AddNewSession();
-  sleep(kTimeout - 1);
-  connection.KeepAlive();
-  sleep(kTimeout - 1);
-  connection.KeepAlive();
-  sleep(kTimeout - 1);
-  connection.KeepAlive();
+
+TEST_F(HeartBeatMonitorTest, TimerNotElapsed) {
+  EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
+  const uint32_t session = connection.AddNewSession();
+  connection.StartHeartBeat(session);
   sleep(kTimeout - 1);
 }
 
-TEST_F(HeartBeatMonitorTest, NotKeptAlive){
-  EXPECT_CALL(connection_handler_mock, CloseConnection(42))
-      .Times(1);
-  connection.AddNewSession();
-  sleep(kTimeout - 1);
-  connection.KeepAlive();
-  sleep(kTimeout - 1);
-  connection.KeepAlive();
-  sleep(kTimeout - 1);
-  connection.KeepAlive();
+TEST_F(HeartBeatMonitorTest, TimerElapsed) {
+  const uint32_t session = connection.AddNewSession();
+  connection.StartHeartBeat(session);
+
+  // FIXME(EZamakhov): not called
+  EXPECT_CALL(connection_handler_mock, CloseConnection(connection_handle));
   sleep(kTimeout + 1);
 }
+TEST_F(HeartBeatMonitorTest, KeptAlive) {
+  EXPECT_CALL(connection_handler_mock, CloseConnection(_)).Times(0);
+  const uint32_t session = connection.AddNewSession();
+  connection.StartHeartBeat(session);
+  sleep(kTimeout - 1);
+  connection.KeepAlive(session);
+  sleep(kTimeout - 1);
+  connection.KeepAlive(session);
+  sleep(kTimeout - 1);
+  connection.KeepAlive(session);
+  sleep(kTimeout - 1);
+}
 
-}
-}
+TEST_F(HeartBeatMonitorTest, NotKeptAlive) {
+  const uint32_t session = connection.AddNewSession();
+  connection.StartHeartBeat(session);
+
+  // FIXME(EZamakhov): not called
+  EXPECT_CALL(connection_handler_mock, CloseConnection(session)).Times(1);
+  sleep(kTimeout - 1);
+  connection.KeepAlive(session);
+  sleep(kTimeout - 1);
+  connection.KeepAlive(session);
+  sleep(kTimeout - 1);
+  connection.KeepAlive(session);
+  sleep(kTimeout + 13);
 }
 
-#endif  // TEST_COMPONENTS_CONNECTION_HANDLER_INCLUDE_HEART_BEAT_MONITOR_TEST_H_
+}  // namespace protocol_handler_test
+}  // namespace components
+}  // namespace test
+#endif  // TEST_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_HEART_BEAT_MONITOR_TEST_H_

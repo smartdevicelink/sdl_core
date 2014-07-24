@@ -420,8 +420,8 @@ mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
   const std::string& hmi_level) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   mobile_apis::HMILevel::eType value;
-  if (TEnumSchemaItem<mobile_apis::HMILevel::eType>::stringToEnum(
-        hmi_level, value)) {
+  if (EnumConversionHelper<mobile_apis::HMILevel::eType>::StringToEnum(
+        hmi_level, &value)) {
     return value;
   }
   return mobile_apis::HMILevel::INVALID_ENUM;
@@ -430,34 +430,27 @@ mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
 std::string MessageHelper::StringifiedHMILevel(
   mobile_apis::HMILevel::eType hmi_level) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
-  typedef std::map<mobile_apis::HMILevel::eType, std::string> EnumMap;
-  const EnumMap& enum_map =
-    TEnumSchemaItem<mobile_apis::HMILevel::eType>::getEnumElementsStringRepresentation();
-  EnumMap::const_iterator found = enum_map.find(hmi_level);
-  if (found != enum_map.end()) {
-    const std::string& enum_name = found->second;
-    return enum_name;
-  } else {
-    return "";
+  const char* str = 0;
+  if (EnumConversionHelper<mobile_apis::HMILevel::eType>::EnumToCString(
+        hmi_level, &str)) {
+    return str;
   }
+  return std::string();
 }
 
 std::string MessageHelper::StringifiedFunctionID(
   mobile_apis::FunctionID::eType function_id) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
-  typedef std::map<mobile_apis::FunctionID::eType, std::string> EnumMap;
-  const EnumMap& enum_map =
-    TEnumSchemaItem<mobile_apis::FunctionID::eType>::getEnumElementsStringRepresentation();
-  EnumMap::const_iterator found = enum_map.find(function_id);
-  if (found != enum_map.end()) {
-    const std::string& enum_name = found->second;
+  const char* str = 0;
+  if (EnumConversionHelper<mobile_apis::FunctionID::eType>::EnumToCString(
+        function_id, &str)) {
+    const std::string enum_name = str;
     // Strip 'ID' suffix from value name
     DCHECK(enum_name.length() > 2
            && enum_name.substr(enum_name.length() - 2) == "ID");
     return enum_name.substr(0, enum_name.length() - 2);
-  } else {
-    return "";
   }
+  return std::string();
 }
 
 #ifdef HMI_DBUS_API

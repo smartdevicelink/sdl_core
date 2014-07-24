@@ -187,8 +187,7 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
     MessageType messageType;
 
     if (kSuccess == result) {
-      typedef NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<MessageType> MessageTypeEnum;
-      if (false == MessageTypeEnum::stringToEnum(type, messageType)) {
+      if (!NsSmartObjects::EnumConversionHelper<MessageType>::StringToEnum(type, &messageType)) {
         // If MessageType is not found than FunctionId and CorrelationId can not be found either
         result = kMessageTypeNotFound | kFunctionIdNotFound
             | kCorrelationIdNotFound;
@@ -196,10 +195,8 @@ int32_t Formatters::CFormatterJsonSDLRPCv1::fromString(
     }
 
     if (kSuccess == result) {
-      typedef NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<FunctionId> FunctionIdEnum;
-      if (false
-          == FunctionIdEnum::stringToEnum(root[type][S_NAME].asString(),
-                                          functionId)) {
+      if (!NsSmartObjects::EnumConversionHelper<FunctionId>::StringToEnum(root[type][S_NAME].asString(),
+                                          &functionId)) {
         result = kFunctionIdNotFound;
         functionId = FunctionId::INVALID_ENUM;
       }
