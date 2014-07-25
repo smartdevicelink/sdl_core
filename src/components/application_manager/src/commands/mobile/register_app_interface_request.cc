@@ -175,8 +175,17 @@ void RegisterAppInterfaceRequest::Run() {
     return;
   }
 
+  mobile_apis::Result::eType coincidence_result =
+      CheckCoincidence();
+
+  if (mobile_apis::Result::SUCCESS != coincidence_result) {
+    LOG4CXX_ERROR_EXT(logger_, "Coincidence check failed.");
+    SendResponse(false, coincidence_result);
+    return;
+  }
+
   if (IsApplicationWithSameAppIdRegistered()) {
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    SendResponse(false, mobile_apis::Result::DISALLOWED);
     return;
   }
 
@@ -184,15 +193,6 @@ void RegisterAppInterfaceRequest::Run() {
   if (mobile_apis::Result::SUCCESS != restriction_result) {
     LOG4CXX_ERROR_EXT(logger_, "Param names restrictions check failed.");
     SendResponse(false, restriction_result);
-    return;
-  }
-
-  mobile_apis::Result::eType coincidence_result =
-    CheckCoincidence();
-
-  if (mobile_apis::Result::SUCCESS != coincidence_result) {
-    LOG4CXX_ERROR_EXT(logger_, "Coincidence check failed.");
-    SendResponse(false, coincidence_result);
     return;
   }
 
