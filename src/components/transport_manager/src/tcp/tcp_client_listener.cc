@@ -74,7 +74,7 @@ TcpClientListener::TcpClientListener(TransportAdapterController* controller,
     thread_stop_requested_(false) {}
 
 void* tcpClientListenerThread(void* data) {
-  LOG4CXX_TRACE(logger_, "enter. data: " << data);
+  LOG4CXX_TRACE(logger_, "enter. data  " << data);
   TcpClientListener* tcpClientListener = static_cast<TcpClientListener*>(data);
   assert(tcpClientListener != 0);
   tcpClientListener->Thread();
@@ -157,7 +157,7 @@ void TcpClientListener::Thread() {
     const int connection_fd = accept(socket_, (struct sockaddr*)&client_address,
                                      &client_address_size);
     if (thread_stop_requested_) {
-      LOG4CXX_TRACE(logger_, "exit. Condition: thread_stop_requested_");
+      LOG4CXX_DEBUG(logger_, "thread_stop_requested_");
       break;
     }
 
@@ -201,7 +201,8 @@ void TcpClientListener::Thread() {
 TransportAdapter::Error TcpClientListener::StartListening() {
   LOG4CXX_TRACE(logger_, "enter");
   if (thread_started_) {
-    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::BAD_STATE");
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::BAD_STATE. Condition: thread_started_");
     return TransportAdapter::BAD_STATE;
   }
 
@@ -209,7 +210,7 @@ TransportAdapter::Error TcpClientListener::StartListening() {
 
   if (-1 == socket_) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to create socket");
-    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL");
+    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL. Condition: -1 == socket_");
     return TransportAdapter::FAIL;
   }
 
@@ -242,10 +243,8 @@ TransportAdapter::Error TcpClientListener::StartListening() {
     thread_started_ = true;
     LOG4CXX_DEBUG(logger_, "Tcp client listener thread started");
   } else {
-    LOG4CXX_ERROR(
-      logger_,
-      "Tcp client listener thread start failed, error code "
-      << thread_start_error);
+    LOG4CXX_ERROR(logger_, "Tcp client listener thread start failed, error code "
+                  << thread_start_error);
     LOG4CXX_TRACE(logger_,
                   "exit with TransportAdapter::FAIL. Condition: 0 !== thread_start_error");
     return TransportAdapter::FAIL;

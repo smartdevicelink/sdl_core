@@ -96,13 +96,8 @@ bool BluetoothDevice::IsSameAs(const Device* other) const {
       result = true;
     }
   }
-  if (result) {
-    LOG4CXX_TRACE(logger_, "exit with TRUE");
-    return true;
-  } else {
-    LOG4CXX_TRACE(logger_, "exit with FALSE");
-    return false;
-  }
+  LOG4CXX_TRACE(logger_, "exit with " << result ? "TRUE" : "FALSE");
+  return result;
 }
 
 ApplicationList BluetoothDevice::GetApplicationList() const {

@@ -297,7 +297,7 @@ DeviceList TransportAdapterImpl::GetDeviceList() const {
     devices.push_back(it->first);
   }
   pthread_mutex_unlock(&devices_mutex_);
-  LOG4CXX_TRACE(logger_, "exit with DeviceList size = " << devices.size());
+  LOG4CXX_TRACE(logger_, "exit with DeviceList. It's' size = " << devices.size());
   return devices;
 }
 
@@ -311,7 +311,7 @@ DeviceSptr TransportAdapterImpl::AddDevice(DeviceSptr device) {
     existing_device = i->second;
     if (device->IsSameAs(existing_device.get())) {
       same_device_found = true;
-      LOG4CXX_TRACE(logger_, "exit. Condition: evice->IsSameAs(existing_device.get())");
+      LOG4CXX_DEBUG(logger_, "device " << device << "already exists");
       break;
     }
   }
@@ -330,7 +330,7 @@ DeviceSptr TransportAdapterImpl::AddDevice(DeviceSptr device) {
     if (ToBeAutoConnected(device)) {
       ConnectDevice(device);
     }
-    LOG4CXX_TRACE(logger_, "exit. Condition: NOT same_device_found");
+    LOG4CXX_TRACE(logger_, "exit with DeviceSptr " << device);
     return device;
   }
 }
@@ -350,7 +350,7 @@ void TransportAdapterImpl::SearchDeviceDone(const DeviceVector& devices) {
       if (device->IsSameAs(existing_device.get())) {
         existing_device->set_keep_on_disconnect(true);
         device_found = true;
-        LOG4CXX_TRACE(logger_, "exit. Condition: device->IsSameAs(existing_device.get())");
+        LOG4CXX_DEBUG(logger_, "device found. DeviceSptr" << it->second);
         break;
       }
     }
@@ -506,8 +506,7 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
     const ApplicationHandle& current_app_handle = it->first.second;
     if (current_device_id == device_id && current_app_handle != app_handle) {
       device_disconnected = false;
-      LOG4CXX_TRACE(logger_,
-                    "exit. Condition: current_device_id == device_id && current_app_handle != app_handle");
+      LOG4CXX_DEBUG(logger_, "break. Condition: current_device_id == device_id && current_app_handle != app_handle");
       break;
     }
   }
@@ -773,20 +772,17 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
     const Error error = Connect(device_id, app_handle);
     switch (error) {
       case OK:
-        LOG4CXX_DEBUG(logger_, "OK");
-        LOG4CXX_TRACE(logger_, "exit. Condition: error = OK");
+        LOG4CXX_DEBUG(logger_, "error = OK");
         break;
       case ALREADY_EXISTS:
-        LOG4CXX_DEBUG(logger_, "Already connected");
-        LOG4CXX_TRACE(logger_, "exit. Condition: error = ALREADY_EXISTS");
+        LOG4CXX_DEBUG(logger_, "error = ALREADY_EXISTS");
         break;
       default:
         LOG4CXX_ERROR(logger_, "Connect to device " << device_id <<
                       ", channel " << app_handle <<
                       " failed with error " << error);
         errors_occured = true;
-        LOG4CXX_TRACE(logger_, "exit");
-        LOG4CXX_TRACE(logger_, "exit. Condition: error = default case in switch");
+        LOG4CXX_DEBUG(logger_, "switch (error), default case");
         break;
     }
   }

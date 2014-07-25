@@ -56,7 +56,7 @@ class AoaInitSequence : public UsbControlTransferSequence {
 };
 
 void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
-  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice: " << device);
+  LOG4CXX_TRACE(logger_, "enter. PlatformUsbDevice* " << device);
   if (IsAppleDevice(device)) {
     SupportedDeviceFound(device);
   } else {
@@ -70,7 +70,7 @@ void UsbDeviceScanner::OnDeviceArrived(PlatformUsbDevice* device) {
 }
 
 void UsbDeviceScanner::OnDeviceLeft(PlatformUsbDevice* device) {
-  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice " << device);
+  LOG4CXX_TRACE(logger_, "enter. PlatformUsbDevice " << device);
   bool list_changed = false;
   pthread_mutex_lock(&devices_mutex_);
   for (Devices::iterator it = devices_.begin(); it != devices_.end(); ++it) {
@@ -195,7 +195,7 @@ AoaInitSequence::AoaInitSequence() : UsbControlTransferSequence() {
 }
 
 void UsbDeviceScanner::TurnIntoAccessoryMode(PlatformUsbDevice* device) {
-  LOG4CXX_TRACE(logger_, "enter PlatformUsbDevice: " << device);
+  LOG4CXX_TRACE(logger_, "enter. PlatformUsbDevice: " << device);
   GetUsbHandler()->StartControlTransferSequence(new AoaInitSequence, device);
   LOG4CXX_TRACE(logger_, "exit");
 }

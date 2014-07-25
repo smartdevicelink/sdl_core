@@ -33,6 +33,7 @@
 #include "transport_manager/usb/usb_connection_factory.h"
 #include "transport_manager/usb/usb_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
+#include "utils/logger.h"
 
 #if defined(__QNXNTO__)
 #include "transport_manager/usb/qnx/usb_connection.h"
@@ -40,12 +41,10 @@
 #include "transport_manager/usb/libusb/usb_connection.h"
 #endif
 
-#include "utils/logger.h"
-
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager-usb")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 UsbConnectionFactory::UsbConnectionFactory(
   TransportAdapterController* controller)
@@ -66,7 +65,8 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
   DeviceSptr device = controller_->FindDevice(device_uid);
   if (!device.valid()) {
     LOG4CXX_ERROR(logger_, "device " << device_uid << " not found");
-    LOG4CXX_TRACE(logger_, "exit");
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::BAD_PARAM. Condition: !device.valid()");
     return TransportAdapter::BAD_PARAM;
   }
 
@@ -80,10 +80,10 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
 
   if (usb_connection->Init()) {
     LOG4CXX_INFO(logger_, "USB connection initialised");
-    LOG4CXX_TRACE(logger_, "exit");
+    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK. Condition: USB connection initialised");
     return TransportAdapter::OK;
   } else {
-    LOG4CXX_TRACE(logger_, "exit");
+    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL. Condition: USB connection NOT initialised");
     return TransportAdapter::FAIL;
   }
 }

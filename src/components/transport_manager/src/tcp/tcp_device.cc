@@ -59,7 +59,7 @@ bool TcpDevice::IsSameAs(const Device* other) const {
 
   if (other_tcp_device->in_addr_ == in_addr_) {
     LOG4CXX_TRACE(logger_,
-                  "exit with TRUE. Condition other_tcp_device->in_addr_ == in_addr_");
+                  "exit with TRUE. Condition: other_tcp_device->in_addr_ == in_addr_");
     return true;
   } else {
     LOG4CXX_TRACE(logger_, "exit with FALSE");

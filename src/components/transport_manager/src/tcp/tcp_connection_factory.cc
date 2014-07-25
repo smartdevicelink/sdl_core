@@ -61,7 +61,7 @@ TransportAdapter::Error TcpConnectionFactory::CreateConnection(
     LOG4CXX_ERROR(logger_, "Transport adapter error " << error);
     delete connection;
   }
-  LOG4CXX_TRACE(logger_, "exit with Error " << error);
+  LOG4CXX_TRACE(logger_, "exit with error " << error);
   return error;
 }
 

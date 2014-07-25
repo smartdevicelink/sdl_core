@@ -37,10 +37,12 @@
 #include "transport_manager/usb/usb_device_scanner.h"
 #include "transport_manager/usb/usb_connection_factory.h"
 #include "transport_manager/usb/common.h"
+#include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 UsbAoaAdapter::UsbAoaAdapter()
   : TransportAdapterImpl(new UsbDeviceScanner(this),
                          new UsbConnectionFactory(this), 0),
@@ -62,15 +64,21 @@ bool UsbAoaAdapter::IsInitialised() const {
 }
 
 TransportAdapter::Error UsbAoaAdapter::Init() {
+  LOG4CXX_TRACE(logger_, "enter");
   TransportAdapter::Error error = usb_handler_->Init();
   if (error != TransportAdapter::OK) {
+    LOG4CXX_TRACE(logger_, "exit with error " << error <<
+                  ". Condition: error != TransportAdapter::OK");
     return error;
   }
   error = TransportAdapterImpl::Init();
   if (error != TransportAdapter::OK) {
+    LOG4CXX_TRACE(logger_, "exit with error " << error <<
+                  ". Condition: error != TransportAdapter::OK");
     return error;
   }
   is_initialised_ = true;
+  LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK");
   return TransportAdapter::OK;
 }
 

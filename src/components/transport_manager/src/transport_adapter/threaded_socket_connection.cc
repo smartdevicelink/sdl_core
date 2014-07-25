@@ -139,8 +139,8 @@ void ThreadedSocketConnection::Finalize() {
 TransportAdapter::Error ThreadedSocketConnection::Notify() const {
   LOG4CXX_TRACE(logger_, "enter");
   if (-1 == write_fd_) {
-    LOG4CXX_ERROR_WITH_ERRNO(
-      logger_, "Failed to wake up connection thread for connection " << this);
+    LOG4CXX_ERROR_WITH_ERRNO(logger_,
+                             "Failed to wake up connection thread for connection " << this);
     LOG4CXX_TRACE(logger_, "exit with TransportAdapter::BAD_STATE");
     return TransportAdapter::BAD_STATE;
   }

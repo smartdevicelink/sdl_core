@@ -69,12 +69,10 @@ TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {
 }
 
 bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
-  LOG4CXX_ERROR(logger_, "enter. error " << error);
+  LOG4CXX_TRACE(logger_, "enter. error " << error);
   DeviceSptr device = controller()->FindDevice(device_handle());
   if (!device.valid()) {
-    LOG4CXX_ERROR(
-      logger_,
-      "Device " << device_handle() << " not found");
+    LOG4CXX_ERROR(logger_, "Device " << device_handle() << " not found");
     *error = new ConnectError();
     LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: !device.valid()");
     return false;
@@ -83,9 +81,7 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
 
   int port;
   if (-1 == (port = tcp_device->GetApplicationPort(application_handle()))) {
-    LOG4CXX_ERROR(
-      logger_,
-      "Application port for " << application_handle() << " not found");
+    LOG4CXX_ERROR(logger_, "Application port for " << application_handle() << " not found");
     *error = new ConnectError();
     LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: port not found");
     return false;

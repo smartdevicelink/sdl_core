@@ -101,12 +101,10 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
                                sizeof(remoteSocketAddress));
     if (0 == connect_status) {
       LOG4CXX_DEBUG(logger_, "rfcomm Connect ok");
-      LOG4CXX_TRACE(logger_, "exit on break. Condition: 0 == connect_status");
       break;
     }
     if (errno != 111 && errno != 104) {
       LOG4CXX_DEBUG(logger_, "rfcomm Connect errno " << errno);
-      LOG4CXX_TRACE(logger_, "exit on break. Condition: errno != 111 && errno != 104");
       break;
     }
     if (errno) {

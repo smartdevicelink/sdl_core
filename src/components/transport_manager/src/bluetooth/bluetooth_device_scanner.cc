@@ -77,7 +77,7 @@ int FindPairedDevs(std::vector<bdaddr_t>* result) {
 
   FILE* pipe = popen(cmd, "r");
   if (!pipe) {
-    LOG4CXX_TRACE(logger_, "exit -1");
+    LOG4CXX_TRACE(logger_, "exit -1. Condition: !pipe");
     return -1;
   }
   char* buffer = new char[1028];
@@ -129,7 +129,7 @@ void* bluetoothDeviceScannerThread(void* data) {
     static_cast<BluetoothDeviceScanner*>(data);
   assert(bluetoothDeviceScanner != 0);
   bluetoothDeviceScanner->Thread();
-  LOG4CXX_TRACE(logger_, "exit 0");
+  LOG4CXX_TRACE(logger_, "exit with 0");
   return 0;
 }
 

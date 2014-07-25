@@ -104,15 +104,15 @@ bool UsbConnection::PostInTransfer() {
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOG4CXX_ERROR(logger_, "libusb_submit_transfer failed: "
                   << libusb_error_name(libusb_ret));
-    LOG4CXX_TRACE(logger_, "exit. FALSE");
+    LOG4CXX_TRACE(logger_, "exit with FALSE");
     return false;
   }
-  LOG4CXX_TRACE(logger_, "exit. TRUE");
+  LOG4CXX_TRACE(logger_, "exit with TRUE");
   return true;
 }
 
 void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
-  LOG4CXX_TRACE(logger_, "enterю Libusb_transfer: " << transfer);
+  LOG4CXX_TRACE(logger_, "enter. Libusb_transfer: " << transfer);
   if (transfer->status == LIBUSB_TRANSFER_COMPLETED) {
     if (LOG4CXX_IS_TRACE_ENABLED(logger_)) {
       std::ostringstream hexdata;
@@ -161,7 +161,7 @@ bool UsbConnection::PostOutTransfer() {
   LOG4CXX_TRACE(logger_, "enter");
   out_transfer_ = libusb_alloc_transfer(0);
   if (0 == out_transfer_) {
-    LOG4CXX_TRACE(logger_, "exit. FALSE, 0 == out_transfer");
+    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: 0 == out_transfer");
     return false;
   }
   libusb_fill_bulk_transfer(out_transfer_, device_handle_, out_endpoint_,
@@ -175,10 +175,10 @@ bool UsbConnection::PostOutTransfer() {
     controller_->ConnectionAborted(device_uid_, app_handle_,
                                    CommunicationError());
     Disconnect();
-    LOG4CXX_TRACE(logger_, "exit, FALSE, LIBUSB_SUCCESS != libusb_ret");
+    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: LIBUSB_SUCCESS != libusb_ret");
     return false;
   }
-  LOG4CXX_TRACE(logger_, "exit");
+  LOG4CXX_TRACE(logger_, "exit with TRUE");
   return true;
 }
 
@@ -260,14 +260,14 @@ TransportAdapter::Error UsbConnection::Disconnect() {
   Finalise();
   LOG4CXX_INFO(logger_, "USB disconnect done " << device_uid_);
   controller_->DisconnectDone(device_uid_, app_handle_);
-  LOG4CXX_TRACE(logger_, "exit. TransportAdapter::OK");
+  LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK");
   return TransportAdapter::OK;
 }
 
 bool UsbConnection::Init() {
   LOG4CXX_TRACE(logger_, "enter");
   if (!FindEndpoints()) {
-    LOG4CXX_TRACE(logger_, "exit. FALSE, !FindEndpoints()");
+    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: !FindEndpoints()");
     return false;
   }
 
@@ -275,14 +275,14 @@ bool UsbConnection::Init() {
   if (0 == in_buffer_) {
     LOG4CXX_ERROR(logger_, "in buffer allocation failed (size "
                   << in_endpoint_max_packet_size_ << ")");
-    LOG4CXX_TRACE(logger_, "exit. FALSE, 0 == in_buffer_");
+    LOG4CXX_TRACE(logger_, "exit with FALSE. COndition: 0 == in_buffer_");
     return false;
   }
 
   in_transfer_ = libusb_alloc_transfer(0);
   if (0 == in_transfer_) {
     LOG4CXX_ERROR(logger_, "libusb_alloc_transfer failed");
-    LOG4CXX_TRACE(logger_, "exit. FALSE, 0 == in_transfer_");
+    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: 0 == in_transfer_");
     return false;
   }
 
@@ -290,7 +290,7 @@ bool UsbConnection::Init() {
   if (!PostInTransfer()) {
     controller_->ConnectionAborted(device_uid_, app_handle_,
                                    CommunicationError());
-    LOG4CXX_TRACE(logger_, "exit. TRUE, !PostInTransfer()");
+    LOG4CXX_TRACE(logger_, "exit with TRUE. Condition: !PostInTransfer()");
     return true;
   }
   LOG4CXX_TRACE(logger_, "exit. TRUE");
@@ -305,7 +305,7 @@ bool UsbConnection::FindEndpoints() {
   if (LIBUSB_SUCCESS != libusb_ret) {
     LOG4CXX_ERROR(logger_, "libusb_get_active_config_descriptor failed: "
                   << libusb_error_name(libusb_ret));
-    LOG4CXX_TRACE(logger_, "exit. FALSE, LIBUSB_SUCCESS != libusb_ret");
+    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: LIBUSB_SUCCESS != libusb_ret");
     return false;
   }
 
@@ -336,13 +336,9 @@ bool UsbConnection::FindEndpoints() {
   }
   libusb_free_config_descriptor(config);
 
-  if (!(find_in_endpoint || find_out_endpoint)) {
-      LOG4CXX_TRACE(logger_, "exit. TRUE");
-      return true;
-  } else {
-      LOG4CXX_TRACE(logger_, "exit. FALSE");
-      return false;
-  }
+  bool result = !(find_in_endpoint || find_out_endpoint);
+  LOG4CXX_TRACE(logger_, "exit with " << result ? "TRUE" : "FALSE");
+  return result;
 }
 
 }  // namespace transport_adapter
