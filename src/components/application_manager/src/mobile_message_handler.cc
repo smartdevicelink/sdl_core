@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,8 @@
 
 #include "utils/macro.h"
 #include "application_manager/mobile_message_handler.h"
-#include "protocol_handler/service_type.h"
 #include "protocol_handler/protocol_payload.h"
+#include "protocol_handler/protocol_packet.h"
 #include "utils/bitstream.h"
 #include "utils/logger.h"
 
@@ -56,7 +56,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "MobileMessageHandler")
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV1(
-  const protocol_handler::RawMessagePtr& message) {
+  const RawMessagePtr message) {
   LOG4CXX_INFO(logger_,
                "MobileMessageHandler HandleIncomingMessageProtocolV1()");
   application_manager::Message* outgoing_message =
@@ -86,7 +86,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV2(
-  const protocol_handler::RawMessagePtr& message) {
+  const RawMessagePtr message) {
   LOG4CXX_INFO(logger_,
                "MobileMessageHandler HandleIncomingMessageProtocolV2()");
 
@@ -97,9 +97,9 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
 
   // Silently drop message if it wasn't parsed correctly
   if (message_bytestream.IsBad()) {
-    LOG4CXX_INFO(logger_,
+    LOG4CXX_WARN(logger_,
                  "Drop ill-formed message from mobile, partially parsed: "
-                 <<payload);
+                 << payload);
     return NULL;
   }
 
@@ -154,16 +154,15 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   if (message->json_message().length() == 0) {
     LOG4CXX_ERROR(logger_, "json string is empty.")
   }
-  const uint32_t MAX_HEADER_SIZE = 12;
-
   uint32_t jsonSize = message->json_message().length();
   uint32_t binarySize = 0;
   if (message->has_binary_data()) {
     binarySize = message->binary_data()->size();
   }
 
-  uint8_t* dataForSending = new uint8_t[MAX_HEADER_SIZE + jsonSize
-      + binarySize];
+  const size_t dataForSendingSize =
+      protocol_handler::PROTOCOL_HEADER_V2_SIZE + jsonSize + binarySize;
+  uint8_t* dataForSending = new uint8_t[dataForSendingSize];
   uint8_t offset = 0;
 
   uint8_t rpcTypeFlag = 0;
@@ -213,7 +212,7 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
     new protocol_handler::RawMessage(message->connection_key(),
                                      message->protocol_version(),
                                      dataForSending,
-                                     MAX_HEADER_SIZE + jsonSize + binarySize);
+                                     dataForSendingSize);
 
   return msgToProtocolHandler;
 }

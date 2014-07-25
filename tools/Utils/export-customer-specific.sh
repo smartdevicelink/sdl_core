@@ -177,8 +177,12 @@ for entry in $include_bin; do
   done
 done
 
-cp -r $specificdir/* $export_dir
+function snapshot_tag() {
+    date  +"SNAPSHOT_PASA%d%m%Y"
+}
 
+cp -r $specificdir/* $export_dir
+sed 's/{TAG}/'$(snapshot_tag)'/g' -i $export_dir/src/appMain/SmartDeviceLinkMainApp.cpp
 find $export_dir \
   -regex '.*\.\(cc\|h\|cpp\|hpp\)' \
   -exec unix2dos {} \;

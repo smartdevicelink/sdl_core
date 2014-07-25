@@ -7,11 +7,13 @@ import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.logger.Logger;
 
 public class ProtocolFrameHeader {
+	private boolean isEncrypted = false;
 
     private static final String CLASS_NAME = ProtocolFrameHeader.class.getSimpleName();
 
 	private byte version = ProtocolConstants.PROTOCOL_VERSION_ONE;
-	private boolean compressed = false;
+
+
 	private FrameType frameType = FrameType.Control;
 	private ServiceType serviceType = ServiceType.RPC;
 	private byte frameData = 0;
@@ -32,7 +34,7 @@ public class ProtocolFrameHeader {
 		msg.setVersion(version);
 		
 		boolean compressed = 1 == ((header[0] & 0x08) >>> 3);
-		msg.setCompressed(compressed);
+		msg.setEncrypted(compressed);
 		
 		byte frameType = (byte) (header[0] & 0x07);
 		msg.setFrameType(FrameType.valueOf(frameType));
@@ -67,7 +69,7 @@ public class ProtocolFrameHeader {
 		int header = 0;
 		header |= (version & 0x0F);
 		header <<= 1;
-		header |= (compressed ? 1 : 0);
+		header |= (isEncrypted ? 1 : 0);
 		header <<= 3;
 		header |= (frameType.value() & 0x07);
 		header <<= 8;
@@ -95,23 +97,22 @@ public class ProtocolFrameHeader {
             return null;
         }
 	}
-	
-	public String toString() {
-        StringBuilder stringBuilder = new StringBuilder(ProtocolFrameHeader.class.getSimpleName());
-        stringBuilder.append(" {");
-        stringBuilder.append("sesId:").append(sessionID).append(", ");
-        stringBuilder.append("ver:").append(version).append(", ");
-        stringBuilder.append((compressed ? "compr" : "uncompr")).append(", ");
-        stringBuilder.append("frType:").append(frameType.getName()).append(", ");
-        stringBuilder.append("serType:").append(serviceType.getName()).append(", ");
-        stringBuilder.append("frData:").append(frameData).append(", ");
-        stringBuilder.append("dataSize:").append(dataSize).append(", ");
-        stringBuilder.append("msgId:").append(messageID);
-        stringBuilder.append("}");
-		return stringBuilder.toString();
-	}
-	
-	public byte getVersion() {
+
+    @Override
+    public String toString() {
+        return "ProtocolFrameHeader{" +
+                "isEncrypted=" + isEncrypted +
+                ", version=" + version +
+                ", frameType=" + frameType +
+                ", serviceType=" + serviceType +
+                ", frameData=" + frameData +
+                ", sessionID=" + sessionID +
+                ", dataSize=" + dataSize +
+                ", messageID=" + messageID +
+                '}';
+    }
+
+    public byte getVersion() {
 		return version;
 	}
 
@@ -119,12 +120,12 @@ public class ProtocolFrameHeader {
 		this.version = version;
 	}
 
-	public boolean isCompressed() {
-		return compressed;
+	public boolean isEncrypted() {
+		return isEncrypted;
 	}
 
-	public void setCompressed(boolean compressed) {
-		this.compressed = compressed;
+	public void setEncrypted(boolean encrypted) {
+		this.isEncrypted = encrypted;
 	}
 
 	public byte getFrameData() {

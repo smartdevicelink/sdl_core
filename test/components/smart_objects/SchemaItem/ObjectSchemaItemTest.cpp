@@ -247,26 +247,45 @@ TEST_F(ObjectSchemaItemTest, test_object_with_incorrect_params) {
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 template<>
-const std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string>& TEnumSchemaItem<test::components::SmartObjects::SchemaItem::TestType::eType>::getEnumElementsStringRepresentation(void) {
-  static bool isInitialized = false;
-  static std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string> enumStringRepresentationMap;
+const EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::EnumToCStringMap
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::enum_to_cstring_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::InitEnumToCStringMap();
 
-  if (false == isInitialized) {
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::APPLICATION_NOT_REGISTERED, "APPLICATION_NOT_REGISTERED"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::SUCCESS, "SUCCESS"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::TOO_MANY_PENDING_REQUESTS, "TOO_MANY_PENDING_REQUESTS"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::REJECTED, "REJECTED"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::INVALID_DATA, "INVALID_DATA"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::OUT_OF_MEMORY, "OUT_OF_MEMORY"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::ABORTED, "ABORTED"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::USER_DISALLOWED, "USER_DISALLOWED"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::GENERIC_ERROR, "GENERIC_ERROR"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::DISALLOWED, "DISALLOWED"));
+template<>
+const EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::CStringToEnumMap
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::cstring_to_enum_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::InitCStringToEnumMap();
 
-    isInitialized = true;
-  }
-  return enumStringRepresentationMap;
-}
+template<>
+const char* const
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::cstring_values_[] = {
+    "APPLICATION_NOT_REGISTERED",
+    "SUCCESS",
+    "TOO_MANY_PENDING_REQUESTS",
+    "REJECTED",
+    "INVALID_DATA",
+    "OUT_OF_MEMORY",
+    "ABORTED",
+    "USER_DISALLOWED",
+    "GENERIC_ERROR",
+    "DISALLOWED"
+};
+
+template<>
+const test::components::SmartObjects::SchemaItem::TestType::eType
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::enum_values_[] = {
+    test::components::SmartObjects::SchemaItem::TestType::APPLICATION_NOT_REGISTERED,
+    test::components::SmartObjects::SchemaItem::TestType::SUCCESS,
+    test::components::SmartObjects::SchemaItem::TestType::TOO_MANY_PENDING_REQUESTS,
+    test::components::SmartObjects::SchemaItem::TestType::REJECTED,
+    test::components::SmartObjects::SchemaItem::TestType::INVALID_DATA,
+    test::components::SmartObjects::SchemaItem::TestType::OUT_OF_MEMORY,
+    test::components::SmartObjects::SchemaItem::TestType::ABORTED,
+    test::components::SmartObjects::SchemaItem::TestType::USER_DISALLOWED,
+    test::components::SmartObjects::SchemaItem::TestType::GENERIC_ERROR,
+    test::components::SmartObjects::SchemaItem::TestType::DISALLOWED
+};
+
 }
 }
 

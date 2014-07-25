@@ -93,6 +93,7 @@ public class PutFileDialog extends BaseDialogFragment {
         final EditText txtOffset = (EditText) layout.findViewById(R.id.putfile_offset);
         final CheckBox chkLength = (CheckBox) layout.findViewById(R.id.putfile_useLength);
         final EditText txtLength = (EditText) layout.findViewById(R.id.putfile_length);
+        final CheckBox doEncrypt = (CheckBox) layout.findViewById(R.id.putfile_do_encrypt_view);
 
         // Use the Builder class for convenient dialog construction
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -136,7 +137,7 @@ public class PutFileDialog extends BaseDialogFragment {
                                     getArguments().getString(APP_ID_KEY),
                                     (FileType) spnFileType.getSelectedItem(), syncFileName, data,
                                     correlationId, chkPersistentFile.isChecked(),
-                                    chkSystemFile.isChecked(), length, offset, null);
+                                    chkSystemFile.isChecked(), length, offset, null, doEncrypt.isChecked());
                         }
                     } else {
                         SafeToast.showToastAnyThread("Can't read data from file");

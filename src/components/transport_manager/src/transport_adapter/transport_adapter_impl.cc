@@ -31,7 +31,6 @@
  */
 
 #include "config_profile/profile.h"
-
 #include "utils/logger.h"
 
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
@@ -233,13 +232,13 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
     }
   }
   pthread_mutex_unlock(&connections_mutex_);
-  LOG4CXX_TRACE(logger_, "exit with OK");
-  return OK;
+  LOG4CXX_TRACE(logger_, "exit with error " << error);
+  return error;
 }
 
 TransportAdapter::Error TransportAdapterImpl::SendData(
   const DeviceUID& device_id, const ApplicationHandle& app_handle,
-  const RawMessageSptr data) {
+  const RawMessagePtr data) {
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id << ", app_handle: " <<
                 &app_handle << ", data: " << data);
   if (!initialised_) {
@@ -506,7 +505,8 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
     const ApplicationHandle& current_app_handle = it->first.second;
     if (current_device_id == device_id && current_app_handle != app_handle) {
       device_disconnected = false;
-      LOG4CXX_DEBUG(logger_, "break. Condition: current_device_id == device_id && current_app_handle != app_handle");
+      LOG4CXX_DEBUG(logger_,
+                    "break. Condition: current_device_id == device_id && current_app_handle != app_handle");
       break;
     }
   }
@@ -533,9 +533,10 @@ void TransportAdapterImpl::DisconnectDone(const DeviceUID& device_id,
 
 void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
     const ApplicationHandle& app_handle,
-    RawMessageSptr message) {
+    RawMessagePtr message) {
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id << ", app_handle: " <<
                 &app_handle << ", message: " << message);
+
 #ifdef TIME_TESTER
   if (metric_observer_) {
     metric_observer_->StartRawMsg(message.get());
@@ -561,7 +562,7 @@ void TransportAdapterImpl::DataReceiveFailed(
 
 void TransportAdapterImpl::DataSendDone(const DeviceUID& device_id,
                                         const ApplicationHandle& app_handle,
-                                        RawMessageSptr message) {
+                                        RawMessagePtr message) {
   LOG4CXX_TRACE(logger_, "enter");
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it) {
@@ -572,7 +573,7 @@ void TransportAdapterImpl::DataSendDone(const DeviceUID& device_id,
 
 void TransportAdapterImpl::DataSendFailed(const DeviceUID& device_id,
     const ApplicationHandle& app_handle,
-    RawMessageSptr message,
+    RawMessagePtr message,
     const DataSendError& error) {
   LOG4CXX_TRACE(logger_, "enter");
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
@@ -763,8 +764,8 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
   DeviceUID device_id = device->unique_device_id();
   ApplicationList app_list = device->GetApplicationList();
   LOG4CXX_INFO(logger_, "Device " << device->name() << " has "
-                << app_list.size() << " applications.")
-  bool errors_occured = false;
+               << app_list.size() << " applications.");
+  bool errors_occurred = false;
   for (ApplicationList::iterator it = app_list.begin(); it != app_list.end(); ++it) {
     const ApplicationHandle app_handle = *it;
     LOG4CXX_DEBUG(logger_, "Attempt to connect device " << device_id <<
@@ -781,12 +782,12 @@ TransportAdapter::Error TransportAdapterImpl::ConnectDevice(DeviceSptr device) {
         LOG4CXX_ERROR(logger_, "Connect to device " << device_id <<
                       ", channel " << app_handle <<
                       " failed with error " << error);
-        errors_occured = true;
+        errors_occurred = true;
         LOG4CXX_DEBUG(logger_, "switch (error), default case");
         break;
     }
   }
-  if (errors_occured) {
+  if (errors_occurred) {
     LOG4CXX_TRACE(logger_, "exit with error:FAIL");
     return FAIL;
   } else {

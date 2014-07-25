@@ -38,8 +38,6 @@
 #include "utils/shared_ptr.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 
-using utils::SharedPtr;
-
 namespace transport_manager {
 
 namespace transport_adapter {
@@ -65,7 +63,7 @@ class Connection {
    *
    * @return Error Information about possible reason of sending data failure.
    */
-  virtual TransportAdapter::Error SendData(RawMessageSptr message) = 0;
+  virtual TransportAdapter::Error SendData(RawMessagePtr message) = 0;
 
   /**
    * @brief Disconnect the current connection.
@@ -80,5 +78,4 @@ typedef utils::SharedPtr<Connection> ConnectionSptr;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif /* CONNECTION_H_ */
+#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_CONNECTION_H_

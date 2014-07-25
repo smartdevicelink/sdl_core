@@ -46,7 +46,6 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
     bool CanAppStealFocus(const std::string& app_id);
     bool GetDefaultHMI(const std::string& policy_app_id,
                        std::string* default_hmi);
-    bool GetPriority(const std::string& policy_app_id, std::string* priority);
     bool ResetUserConsent();
     bool ResetDeviceConsents();
     bool ResetAppConsents();
@@ -54,7 +53,7 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
                                      StringArray* consented_groups = NULL,
                                      StringArray* disallowed_groups = NULL);
 
-    bool GetUserPermissionsForApp(
+    bool GetPermissionsForApp(
       const std::string& device_id, const std::string& policy_app_id,
       FunctionalIdType* group_types);
 

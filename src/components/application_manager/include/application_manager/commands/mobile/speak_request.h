@@ -81,7 +81,7 @@ class SpeakRequest : public CommandRequestImpl {
    * @brief Checks speak param ttsChunks on the contents \t\n \\t \\n
    * @return if speak contains \t\n \\t \\n return TRUE, FALSE otherwise
    */
-  bool IsWhitespaceExist();
+  bool IsWhiteSpaceExist();
 
   DISALLOW_COPY_AND_ASSIGN(SpeakRequest);
 };

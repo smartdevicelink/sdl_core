@@ -51,20 +51,22 @@ bool DeviceParams::Validate() const {
 bool PolicyTable::Validate() const {
   for (ApplicationPolicies::const_iterator it = app_policies.begin();
        app_policies.end() != it; ++it) {
+    // TODO(AOleynik): checks below are disabled until clarification with
+    // customer, see APPLINK-8149
     if (kDeviceApp == it->first) {
-      if (it->second.AppHMIType.is_initialized()
+      if (/*it->second.AppHMIType.is_initialized()
           || it->second.memory_kb.is_initialized()
           || it->second.heart_beat_timeout_ms.is_initialized()
-          || it->second.nicknames.is_initialized()) {
+          ||*/ it->second.nicknames.is_initialized()) {
         initialization_state__ = kUninitialized;
         return false;
       }
       continue;
     }
     if (kDefaultApp == it->first || kPreDataConsentApp == it->first) {
-      if (!it->second.memory_kb.is_initialized()
+      if (/*!it->second.memory_kb.is_initialized()
           || !it->second.heart_beat_timeout_ms.is_initialized()
-          || it->second.nicknames.is_initialized()) {
+          ||*/ it->second.nicknames.is_initialized()) {
         initialization_state__ = kUninitialized;
         return false;
       }
@@ -72,9 +74,9 @@ bool PolicyTable::Validate() const {
     }
     if (!it->second.is_null() && !it->second.is_string()
         && (!it->second.nicknames.is_initialized()
-            || !it->second.AppHMIType.is_initialized()
+            /*|| !it->second.AppHMIType.is_initialized()
             || !it->second.memory_kb.is_initialized()
-            || !it->second.heart_beat_timeout_ms.is_initialized())) {
+            || !it->second.heart_beat_timeout_ms.is_initialized()*/)) {
       initialization_state__ = kUninitialized;
       return false;
     }

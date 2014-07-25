@@ -104,6 +104,15 @@ void AlertRequest::Run() {
   }
 }
 
+void AlertRequest::onTimeOut() {
+  if (false == (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    CommandRequestImpl::onTimeOut();
+    return;
+  }
+  LOG4CXX_INFO(logger_, "default timeout ignored. "
+                        "AlertRequest with soft buttons wait timeout on HMI side");
+}
+
 void AlertRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "AlertRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
@@ -206,7 +215,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
-  if (app->IsCommandLimitsExceeded(
+  if (mobile_apis::HMILevel::HMI_BACKGROUND == app->hmi_level() &&
+      app->IsCommandLimitsExceeded(
         static_cast<mobile_apis::FunctionID::eType>(function_id()),
         application_manager::TLimitSource::POLICY_TABLE)) {
     LOG4CXX_ERROR(logger_, "Alert frequency is too high.");
@@ -336,12 +346,13 @@ void AlertRequest::SendPlayToneNotification(int32_t app_id) {
 }
 
 bool AlertRequest::CheckStringsOfAlertRequest() {
+  LOG4CXX_INFO(logger_, "AlertRequest::CheckStringsOfAlertRequest");
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     str = (*message_)[strings::msg_params][strings::alert_text1].asCharArray();
     if (!CheckSyntax(str, true)) {
-      LOG4CXX_INFO(logger_, "alert_text_1 syntax check failed");
+      LOG4CXX_ERROR(logger_, "Invalid alert_text_1 syntax check failed");
       return  false;
     }
   }
@@ -349,7 +360,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
     str = (*message_)[strings::msg_params][strings::alert_text2].asCharArray();
     if (!CheckSyntax(str, true)) {
-      LOG4CXX_INFO(logger_, "alert_text_2 syntax check failed");
+      LOG4CXX_ERROR(logger_, "Invalid alert_text_2 syntax check failed");
       return  false;
     }
   }
@@ -357,7 +368,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
     str = (*message_)[strings::msg_params][strings::alert_text3].asCharArray();
     if (!CheckSyntax(str, true)) {
-      LOG4CXX_INFO(logger_, "alert_text_3 syntax check failed");
+      LOG4CXX_ERROR(logger_, "Invalid alert_text_3 syntax check failed");
       return  false;
     }
   }
@@ -368,12 +379,40 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
     for (size_t i = 0; i < tts_chunks_array.length(); ++i) {
       str = tts_chunks_array[i][strings::text].asCharArray();
       if (!CheckSyntax(str, true)) {
-        LOG4CXX_INFO(logger_, "tts_chunks syntax check failed");
+        LOG4CXX_ERROR(logger_, "Invalid tts_chunks text syntax check failed");
         return false;
       }
     }
   }
 
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    const smart_objects::SmartArray* sb_array =
+        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
+
+    smart_objects::SmartArray::const_iterator it_sb = sb_array->begin();
+    smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
+
+    for (; it_sb != it_sb_end; ++it_sb) {
+      if ((*it_sb).keyExists(strings::text)) {
+        str = (*it_sb)[strings::text].asCharArray();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_ERROR(logger_,
+                       "Invalid soft_buttons text syntax check failed");
+          return false;
+        }
+      }
+
+      if ((*it_sb).keyExists(strings::image)) {
+        str = (*it_sb)[strings::image][strings::value].asCharArray();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_ERROR(logger_,
+                       "Invalid soft_buttons image value syntax check failed");
+          return false;
+        }
+      }
+
+    }
+  }
   return true;
 }
 

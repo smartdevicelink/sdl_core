@@ -37,7 +37,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE, transportTypeIntValue);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -68,7 +68,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(Const.Policy.PREF_KEY_POLICY_UPDATE_FILE_PATH, filePath);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -90,7 +90,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(Const.Policy.PREF_KEY_POLICY_UPDATE_AUTO_REPLAY, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -112,7 +112,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(Const.HashId.PREF_KEY_USE_HASH_ID, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -134,7 +134,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(Const.HashId.PREF_KEY_USE_CUSTOM_HASH_ID, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -157,7 +157,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(Const.HashId.PREF_KEY_CUSTOM_HASH_ID, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -178,7 +178,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(Const.HashId.PREF_KEY_LAST_HASH_IDS, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -205,7 +205,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(Const.PREF_KEY_IS_CUSTOM_APP_ID, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -221,7 +221,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(Const.PREF_KEY_CUSTOM_APP_ID, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -230,6 +230,26 @@ public class AppPreferencesManager {
     public static String getCustomAppId() {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         return sharedPreferences.getString(Const.PREF_KEY_CUSTOM_APP_ID, "");
+    }
+
+    /**
+     * Set flag that indicates whether to start Session as secured
+     *
+     * @param value boolean value
+     */
+    public static void setIsStartSecureSession(boolean value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.PREF_KEY_START_SECURE_SESSION, value);
+        editor.apply();
+    }
+
+    /**
+     * @return flag that indicates whether to start Session as secured
+     */
+    public static boolean getIsStartSecureSession() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_START_SECURE_SESSION, false);
     }
 
     /**
@@ -256,7 +276,15 @@ public class AppPreferencesManager {
         disableLock = !disableLock;
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING, disableLock);
-        editor.commit();
+        editor.apply();
+    }
+
+    /**
+     * @return true if it is necessary to check whether device has been rooted
+     */
+    public static boolean getDoDeviceRootCheck() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_DO_DEVICE_ROOT_CHECK, true);
     }
 
     /**
@@ -267,7 +295,18 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(Const.PREFS_KEY_PROTOCOL_MIN_VERSION, value);
-        editor.commit();
+        editor.apply();
+    }
+
+    /**
+     * Set true if it is necessary to check whether device has been rooted
+     * @param value boolean value
+     */
+    public static void setDoDeviceRootCheck(boolean value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.PREF_KEY_DO_DEVICE_ROOT_CHECK, value);
+        editor.apply();
     }
 
     /**
@@ -286,7 +325,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(Const.PREFS_KEY_PROTOCOL_MAX_VERSION, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**

@@ -118,8 +118,8 @@ void TcpTransportAdapter::Store() const {
 }
 
 bool TcpTransportAdapter::Restore() {
-    LOG4CXX_TRACE(logger_, "enter");
-  bool errors_occured = false;
+  LOG4CXX_TRACE(logger_, "enter");
+  bool errors_occurred = false;
 #ifndef CUSTOMER_PASA
   const Json::Value tcp_adapter_dictionary =
     resumption::LastState::instance()->dictionary["TransportManager"]["TcpAdapter"];
@@ -141,13 +141,18 @@ bool TcpTransportAdapter::Restore() {
       int port = atoi(port_record.c_str());
       ApplicationHandle app_handle = tcp_device->AddDiscoveredApplication(port);
       if (Error::OK != Connect(device->unique_device_id(), app_handle)) {
-        errors_occured = true;
+        errors_occurred = true;
       }
     }
   }
 #endif
-  LOG4CXX_TRACE(logger_, "exit with result " << !errors_occured);
-  return !errors_occured;
+  bool result = !errors_occurred;
+  if (result) {
+    LOG4CXX_TRACE(logger_, "exit with TRUE");
+  } else {
+    LOG4CXX_TRACE(logger_, "exit with FALSE");
+  }
+  return result;
 }
 
 }  // namespace transport_adapter

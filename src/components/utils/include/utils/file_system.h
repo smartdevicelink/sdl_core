@@ -55,7 +55,7 @@ uint64_t GetAvailableDiskSpace(const std::string& path);
  *
  * @param path to directory
  */
-uint32_t DirectorySize(const std::string& path);
+size_t DirectorySize(const std::string& path);
 
 /*
  * @brief Get size of current file

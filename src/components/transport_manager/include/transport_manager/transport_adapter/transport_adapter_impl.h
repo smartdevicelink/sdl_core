@@ -43,6 +43,10 @@
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
 
+#ifdef TIME_TESTER
+#include "transport_manager/time_metric_observer.h"
+#endif  // TIME_TESTER
+
 namespace transport_manager {
 
 namespace transport_adapter {
@@ -90,8 +94,7 @@ class TransportAdapterImpl : public TransportAdapter,
    *
    * Called from transport manager to start device adapter.
    *
-   * @return Error information about possible reason of starting client listener
-   *failure.
+   * @return Error information about possible reason of failure.
    **/
   virtual TransportAdapter::Error Init();
 
@@ -117,8 +120,7 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param device_handle Device unique identifier to connect to.
    * @param app_handle Handle of application to connect to.
    *
-   * @return Error information about possible reason of connecting to device
-   *failure.
+   * @return Error information about possible reason of failure.
    **/
   virtual TransportAdapter::Error Connect(const DeviceUID& device_handle,
                                           const ApplicationHandle& app_handle);
@@ -163,21 +165,19 @@ class TransportAdapterImpl : public TransportAdapter,
    **/
   virtual TransportAdapter::Error SendData(const DeviceUID& device_handle,
                                            const ApplicationHandle& app_handle,
-                                           const RawMessageSptr data);
+                                           const RawMessagePtr data);
 
   /**
    * @brief Start client listener.
    *
-   * @return Error information about possible reason of starting client listener
-   *failure.
+   * @return Error information about possible reason of failure.
    */
   virtual TransportAdapter::Error StartClientListening();
 
   /**
    * @brief Stop client listener.
    *
-   * @return Error information about possible reason of stopping client listener
-   *failure.
+   * @return Error information about possible reason of failure.
    */
   virtual TransportAdapter::Error StopClientListening();
 
@@ -337,7 +337,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual void DataReceiveDone(const DeviceUID& device_handle,
                                const ApplicationHandle& app_handle,
-                               RawMessageSptr message);
+                               RawMessagePtr message);
 
   /**
    * @brief Launch OnDataReceiveFailed event in the device adapter listener.
@@ -359,7 +359,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual void DataSendDone(const DeviceUID& device_handle,
                             const ApplicationHandle& app_handle,
-                            RawMessageSptr message);
+                            RawMessagePtr message);
 
   /**
    * @brief Launch OnDataSendFailed event in the device adapter listener.
@@ -371,7 +371,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual void DataSendFailed(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle,
-                              RawMessageSptr message,
+                              RawMessagePtr message,
                               const DataSendError& error);
 
   /**
@@ -457,12 +457,6 @@ class TransportAdapterImpl : public TransportAdapter,
    * @brief Flag variable that notify initialized device adapter or not.
    */
   bool initialised_;
-
-  /**
-   * @brief Type definition of container(map) that holds device unique
-   *identifier(key value) and smart pointer to the device(mapped value).
-   **/
-  typedef std::map<DeviceUID, DeviceSptr> DeviceMap;
 
   /**
    * @brief Structure that holds information about connection.

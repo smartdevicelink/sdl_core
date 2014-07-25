@@ -132,14 +132,6 @@ class PerformInteractionRequest : public CommandRequestImpl  {
       application_manager::ApplicationSharedPtr const app);
 
   /*
-   * @brief Prepare request for sending to HMI
-   *
-   * @param array of structure of TTS
-   *
-   */
-  void DeleteParameterFromTTSChunk(smart_objects::SmartObject* array_tts_chunk);
-
-  /*
    * @brief Sends UI Show VR help request to HMI
    *
    * @param app_id Application ID
@@ -195,7 +187,7 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    * @return if perform interaction contains \t\n \\t \\n return TRUE,
    * FALSE otherwise
    */
-  bool IsWhitespaceExist();
+  bool IsWhiteSpaceExist();
 
   /**
    * @brief Send HMI close PopUp and call DisablePerformInteraction

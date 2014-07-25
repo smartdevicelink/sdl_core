@@ -38,7 +38,7 @@ public interface IProxyServiceEvent {
      *
      * @param serviceType a type of the service
      */
-    public void onServiceStart(ServiceType serviceType, String appId);
+    public void onServiceStart(ServiceType serviceType, String appId, boolean encrypted);
 
     /**
      * Dispatch when receive Ack message

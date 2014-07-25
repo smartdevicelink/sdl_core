@@ -41,15 +41,11 @@ using namespace sync_primitives;
 CREATE_LOGGERPTR_GLOBAL(logger_, "HeartBeatMonitor")
 
 HeartBeatMonitor::HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
-                                   Connection* connection)
+                                   Connection *connection)
     : heartbeat_timeout_seconds_(heartbeat_timeout_seconds),
       connection_(connection),
       stop_flag_(false),
       is_active(true) {
-}
-
-HeartBeatMonitor::~HeartBeatMonitor() {
-
 }
 
 void HeartBeatMonitor::threadMain() {
@@ -62,10 +58,11 @@ void HeartBeatMonitor::threadMain() {
 
     it = sessions_.begin();
     while (it != sessions_.end()) {
-      if (it->second.heartbeat_expiration_.tv_sec < date_time::DateTime::getCurrentTime().tv_sec) {
-        if (it->second.is_heartbeat_sent_) {
-          LOG4CXX_INFO(logger_, "Session with id " << static_cast<int32_t>(it->first) <<" timed out, closing");
-          uint8_t session_id = it->first;
+      SessionState &state = it->second;
+      if (state.heartbeat_expiration_.tv_sec < date_time::DateTime::getCurrentTime().tv_sec) {
+        if (state.is_heartbeat_sent_) {
+          LOG4CXX_WARN(logger_, "Session with id " << static_cast<int32_t>(it->first) <<" timed out, closing");
+          const uint8_t session_id = it->first;
 
           {
             // Unlock sessions_list_lock_ to avoid deadlock during session and session heartbeat removing
@@ -75,14 +72,14 @@ void HeartBeatMonitor::threadMain() {
 
           it = sessions_.begin();
         } else {
-          it->second.heartbeat_expiration_ =
+          state.heartbeat_expiration_ =
               date_time::DateTime::getCurrentTime();
-          it->second.heartbeat_expiration_.tv_sec +=
+          state.heartbeat_expiration_.tv_sec +=
               heartbeat_timeout_seconds_;
 
           connection_->SendHeartBeat(it->first);
 
-          it->second.is_heartbeat_sent_ = true;
+          state.is_heartbeat_sent_ = true;
           ++it;
         }
       } else {
@@ -95,20 +92,18 @@ void HeartBeatMonitor::threadMain() {
 }
 
 void HeartBeatMonitor::AddSession(uint8_t session_id) {
-  LOG4CXX_INFO(logger_, "Add session with id" <<
+  LOG4CXX_INFO(logger_, "Add session with id " <<
                static_cast<int32_t>(session_id));
-
   AutoLock auto_lock(sessions_list_lock_);
-
   if (sessions_.end() != sessions_.find(session_id)) {
+    LOG4CXX_WARN(logger_, "Session with id " << static_cast<int32_t>(session_id)
+                 << "already exists");
     return;
   }
-
   SessionState session_state;
   session_state.heartbeat_expiration_ = date_time::DateTime::getCurrentTime();
   session_state.heartbeat_expiration_.tv_sec +=  heartbeat_timeout_seconds_;
   session_state.is_heartbeat_sent_ = false;
-
   sessions_[session_id] = session_state;
 
   LOG4CXX_INFO(logger_, "Start heartbeat for session: " <<

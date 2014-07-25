@@ -189,7 +189,7 @@ SmartType TNumberSchemaItem<uint32_t>::getSmartType();
  * @return SmartType_Double.
  **/
 template<>
-SmartType TNumberSchemaItem<double>::getSmartType(void);
+SmartType TNumberSchemaItem<double>::getSmartType();
 
 template<typename NumberType>
 utils::SharedPtr<TNumberSchemaItem<NumberType> >
@@ -228,6 +228,7 @@ Errors::eType TNumberSchemaItem<NumberType>::validate(
       value = Object.asInt64();
     } else {
       NOTREACHED();
+      value = NumberType(); // this line removes compiler warning
     }
 
     NumberType rangeLimit;

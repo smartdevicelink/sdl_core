@@ -87,11 +87,11 @@ DnssdServiceBrowser::~DnssdServiceBrowser() {
 
 void DnssdServiceBrowser::OnClientConnected() {
   initialised_ = true;
-  LOG4CXX_DEBUG(logger_, "AvahiClient ready");
+  LOG4CXX_INFO(logger_, "AvahiClient ready");
 }
 
 void DnssdServiceBrowser::OnClientFailure() {
-  LOG4CXX_TRACE(logger_, "enter")
+  LOG4CXX_TRACE(logger_, "enter");
   const int avahi_errno = avahi_client_errno(avahi_client_);
   if (avahi_errno == AVAHI_ERR_DISCONNECTED) {
     LOG4CXX_DEBUG(logger_, "AvahiClient disconnected");
@@ -139,32 +139,32 @@ void AvahiServiceBrowserCallback(AvahiServiceBrowser* avahi_service_browser,
   DnssdServiceBrowser* dnssd_service_browser =
     static_cast<DnssdServiceBrowser*>(data);
 
-  int avahi_errno;
   switch (event) {
     case AVAHI_BROWSER_FAILURE:
-      avahi_errno = avahi_client_errno(
-                      avahi_service_browser_get_client(avahi_service_browser));
       LOG4CXX_ERROR(
-        logger_,
-        "AvahiServiceBrowser failure: " << avahi_strerror(avahi_errno));
+          logger_,
+          "AvahiServiceBrowser failure: " << avahi_strerror(
+                      avahi_client_errno(
+                          avahi_service_browser_get_client(
+                              avahi_service_browser))));
       break;
 
     case AVAHI_BROWSER_NEW:
       dnssd_service_browser->AddService(interface, protocol, name, type,
                                         domain);
-      LOG4CXX_DEBUG(logger_, "eevent: AVAHI_BROWSER_NEW");
+      LOG4CXX_DEBUG(logger_, "event: AVAHI_BROWSER_NEW");
       break;
 
     case AVAHI_BROWSER_REMOVE:
       dnssd_service_browser->RemoveService(interface, protocol, name, type,
                                            domain);
-      LOG4CXX_DEBUG(logger_, "eevent: AVAHI_BROWSER_REMOVE");
+      LOG4CXX_DEBUG(logger_, "event: AVAHI_BROWSER_REMOVE");
       break;
 
     case AVAHI_BROWSER_ALL_FOR_NOW:
-      LOG4CXX_DEBUG(logger_, "eevent: AVAHI_BROWSER_ALL_FOR_NOW");
+      LOG4CXX_DEBUG(logger_, "event: AVAHI_BROWSER_ALL_FOR_NOW");
     case AVAHI_BROWSER_CACHE_EXHAUSTED:
-      LOG4CXX_DEBUG(logger_, "eevent: AVAHI_BROWSER_CACHE_EXHAUSTED");
+      LOG4CXX_DEBUG(logger_, "event: AVAHI_BROWSER_CACHE_EXHAUSTED");
       break;
   }
   LOG4CXX_TRACE(logger_, "exit");

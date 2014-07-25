@@ -34,6 +34,7 @@ INCLUDES = \
 	$(CC_IFLAG)../qdb_wrapper/include \
 	$(CC_IFLAG)../sqlite_wrapper/include \
 	$(CC_IFLAG)../policy_table/table_struct_ext \
+	$(CC_IFLAG)../../../../include \
 	$(CC_IFLAG)../../../../rpc_base/include \
 	$(CC_IFLAG)../../../../utils/include \
 	$(CC_IFLAG)../../../../../3rd_party-static/jsoncpp/include \

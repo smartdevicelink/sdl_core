@@ -12,8 +12,8 @@ public class AudioServiceCheckboxState extends CheckBoxState {
 
     public AudioServiceCheckboxState(CheckBox item, Context context) {
         super(item, context);
-        hintString = getResources().getString(R.string.audio_service_hint);
-        textString = getResources().getString(R.string.audio_service_on);
+        textStringOff = getResources().getString(R.string.service_check_view_off);
+        textStringOn = getResources().getString(R.string.service_check_view_on);
         setStateOff();
     }
 }

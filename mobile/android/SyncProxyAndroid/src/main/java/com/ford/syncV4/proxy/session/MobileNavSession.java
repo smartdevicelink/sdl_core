@@ -22,6 +22,6 @@ public class MobileNavSession {
     }
 
     public void startService(byte sessionId) {
-        mAbstractProtocol.StartProtocolService(ServiceType.Mobile_Nav, sessionId);
+        mAbstractProtocol.StartProtocolService(ServiceType.Mobile_Nav, sessionId, false);
     }
 }

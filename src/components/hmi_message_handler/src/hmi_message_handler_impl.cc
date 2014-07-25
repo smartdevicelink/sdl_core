@@ -98,7 +98,7 @@ void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
   }
 }
 
-void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi& message) {
+void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi message) {
   LOG4CXX_INFO(logger_, "Received message from hmi");
 
   if (!observer_) {
@@ -110,7 +110,7 @@ void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi& message) {
   LOG4CXX_INFO(logger_, "Message from hmi given away.");
 
 }
-void HMIMessageHandlerImpl::Handle(const impl::MessageToHmi& message) {
+void HMIMessageHandlerImpl::Handle(const impl::MessageToHmi message) {
   for (std::set<HMIMessageAdapter*>::iterator it =
       message_adapters_.begin();
       it != message_adapters_.end();

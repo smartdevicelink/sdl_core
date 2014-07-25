@@ -33,6 +33,12 @@
 #ifndef SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_OBSERVER_H_
 #define SRC_COMPONENTS_HMI_MESSAGE_HANDLER_INCLUDE_HMI_MESSAGE_HANDLER_HMI_MESSAGE_OBSERVER_H_
 
+#include "utils/shared_ptr.h"
+
+namespace application_manager {
+class Message;
+}
+
 namespace hmi_message_handler {
 
 class HMIMessageObserver {

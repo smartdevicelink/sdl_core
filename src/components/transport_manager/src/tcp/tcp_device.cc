@@ -85,6 +85,7 @@ ApplicationHandle TcpDevice::AddIncomingApplication(int socket_fd) {
   Application app;
   app.incoming = true;
   app.socket = socket_fd;
+  app.port = 0; // this line removes compiler warning
   pthread_mutex_lock(&applications_mutex_);
   const ApplicationHandle app_handle = ++last_handle_;
   applications_[app_handle] = app;
@@ -97,6 +98,7 @@ ApplicationHandle TcpDevice::AddDiscoveredApplication(int port) {
   LOG4CXX_TRACE(logger_, "enter. port " << port);
   Application app;
   app.incoming = false;
+  app.socket = 0;  // this line removes compiler warning
   app.port = port;
   pthread_mutex_lock(&applications_mutex_);
   const ApplicationHandle app_handle = ++last_handle_;

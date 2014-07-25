@@ -51,15 +51,13 @@ class MockPTExtRepresentation : public MockPTRepresentation,
                  bool(const std::string& app_id));
     MOCK_METHOD2(GetDefaultHMI,
                  bool(const std::string& app_id, std::string* default_hmi));
-    MOCK_METHOD2(GetPriority,
-                 bool(const std::string& app_id, std::string* priority));
     MOCK_METHOD0(ResetUserConsent,
                  bool());
     MOCK_METHOD0(ResetDeviceConsents, bool());
     MOCK_METHOD0(ResetAppConsents, bool());
     MOCK_METHOD3(GetUserPermissionsForDevice,
                  bool(const std::string&, StringArray*, StringArray*));
-    MOCK_METHOD3(GetUserPermissionsForApp,
+    MOCK_METHOD3(GetPermissionsForApp,
                  bool(const std::string&, const std::string&,
                       FunctionalIdType* group_types));
     MOCK_METHOD2(GetDeviceGroupsFromPolicies,

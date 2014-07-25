@@ -119,12 +119,12 @@ bool PolicyManagerImpl::LoadPTFromFile(const std::string& file_name) {
     "Loading from file was " << (final_result ? "successful" : "unsuccessful"));
 
   // Initial setting of snapshot data
-  if (!policy_table_snapshot_) {
+  if (policy_table_.pt_data()->IsPTPreloaded() && !policy_table_snapshot_) {
     policy_table_snapshot_ = policy_table_.pt_data()->GenerateSnapshot();
     if (!policy_table_snapshot_) {
       LOG4CXX_WARN(logger_,
                    "Failed to create initial snapshot of policy table");
-      return final_result;
+      return false;
     }
   }
 
@@ -739,13 +739,54 @@ void PolicyManagerImpl::SetDeviceInfo(const std::string& device_id,
 #endif
 }
 
+void PolicyManagerImpl::EnsureCorrectPermissionConsent(const FunctionalGroupNames& group_names, PermissionConsent& permissions)
+{
+    std::vector<FunctionalGroupPermission>::iterator group_perm_iter =
+            permissions.group_permissions.begin();
+
+    std::vector<FunctionalGroupPermission>::iterator group_perm_iter_end =
+            permissions.group_permissions.end();
+
+    for(; group_perm_iter != group_perm_iter_end; ++group_perm_iter) {
+
+      const std::uint32_t id = (*group_perm_iter).group_id;
+      FunctionalGroupNames::const_iterator group_name_iter = group_names.find(id);
+
+      if (group_names.end() == group_name_iter) {
+        LOG4CXX_WARN(logger_, "Can't change user consent for unexisted function."
+                     << "\t\nid: " << id
+                     << "\t\nalias: " << (*group_perm_iter).group_alias
+                     << "\t\ngroup name: " << (*group_perm_iter).group_name);
+      }
+      // check if group_alias is not empty string
+      // which means it has user_consent_promt ability
+      else if ((*group_name_iter).second.first.empty()) {
+        LOG4CXX_WARN(logger_, "Specified function is not in user consent group."
+                      << "\t\nid: " << id
+                      << "\t\nalias: " << (*group_perm_iter).group_alias
+                      << "\t\ngroup name: " << (*group_perm_iter).group_name);
+
+        permissions.group_permissions.erase(group_perm_iter);
+      }
+    }
+}
+
 void PolicyManagerImpl::SetUserConsentForApp(
-  const PermissionConsent& permissions) {
+  PermissionConsent& permissions) {
   LOG4CXX_INFO(logger_, "SetUserConsentForApp");
 #if defined (EXTENDED_POLICY)
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (pt_ext) {
+
+    FunctionalGroupNames group_names;
+    if (!pt_ext->GetFunctionalGroupNames(group_names)) {
+      LOG4CXX_WARN(logger_, "Can't get functional group names");
+      return;
+    }
+
+    EnsureCorrectPermissionConsent(group_names, permissions);
+
     // TODO(AOleynik): Change device id to appropriate value (MAC with SHA-256)
     // in parameters
     if (!pt_ext->SetUserPermissionsForApp(permissions)) {
@@ -810,19 +851,10 @@ bool PolicyManagerImpl::GetPriority(const std::string& policy_app_id,
     LOG4CXX_WARN(logger_, "Input priority parameter is null.");
     return false;
   }
-#if defined (EXTENDED_POLICY)
-  PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
-                                .pt_data().get());
-  if (!pt_ext) {
-    LOG4CXX_WARN(logger_, "Can't get priority.");
-    return false;
-  }
 
-  return pt_ext->GetPriority(policy_app_id, priority);
-#else
-  priority->clear();
-  return true;
-#endif
+  return policy_table_.pt_data()->GetPriority(policy_app_id, priority);
+
+
 }
 
 std::vector<UserFriendlyMessage> PolicyManagerImpl::GetUserFriendlyMessages(
@@ -848,11 +880,28 @@ void PolicyManagerImpl::GetUserConsentForApp(
                                 .pt_data().get());
   if (pt_ext) {
     FunctionalIdType group_types;
-    if (!pt_ext->GetUserPermissionsForApp(device_id, policy_app_id,
+    if (!pt_ext->GetPermissionsForApp(device_id, policy_app_id,
                                           &group_types)) {
       LOG4CXX_WARN(logger_, "Can't get user permissions for app "
                    << policy_app_id);
       return;
+    }
+
+    // Functional groups w/o alias ("user_consent_prompt") considered as
+    // automatically allowed and it could not be changed by user
+    FunctionalGroupNames group_names;
+    if (!pt_ext->GetFunctionalGroupNames(group_names)) {
+      LOG4CXX_WARN(logger_, "Can't get functional group names");
+      return;
+    }
+
+    FunctionalGroupNames::const_iterator it = group_names.begin();
+    FunctionalGroupNames::const_iterator it_end = group_names.end();
+    FunctionalGroupIDs auto_allowed_groups;
+    for (;it != it_end; ++it) {
+      if (it->second.first.empty()) {
+        auto_allowed_groups.push_back(it->first);
+      }
     }
 
     FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
@@ -864,32 +913,33 @@ void PolicyManagerImpl::GetUserConsentForApp(
         group_types[kTypePreDataConsented];
     FunctionalGroupIDs device_groups = group_types[kTypeDevice];
 
-    FunctionalGroupIDs allowed_preconsented =
-        ExcludeSame(preconsented_groups, consent_disallowed_groups);
+    // Sorting groups by consent
+    FunctionalGroupIDs preconsented_wo_auto =
+        ExcludeSame(preconsented_groups, auto_allowed_groups);
+
+    FunctionalGroupIDs preconsented_wo_disallowed_auto =
+        ExcludeSame(preconsented_wo_auto, consent_disallowed_groups);
 
     FunctionalGroupIDs allowed_groups = Merge(consent_allowed_groups,
-                                              allowed_preconsented);
+                                              preconsented_wo_disallowed_auto);
 
-    FunctionalGroupIDs first_excluded_groups = Merge(default_groups,
-                                                     predataconsented_groups);
+    FunctionalGroupIDs merged_stage_1 = Merge(default_groups,
+                                              predataconsented_groups);
 
-    FunctionalGroupIDs excluded_groups = Merge(first_excluded_groups,
-                                               device_groups);
+    FunctionalGroupIDs merged_stage_2 = Merge(merged_stage_1,
+                                              device_groups);
 
-    FunctionalGroupIDs only_needed_groups = ExcludeSame(all_groups,
-                                                        excluded_groups);
+    FunctionalGroupIDs merged_stage_3 = Merge(merged_stage_2,
+                                              auto_allowed_groups);
 
-    FunctionalGroupIDs no_disallowed_groups =
-        ExcludeSame(only_needed_groups, consent_disallowed_groups);
+    FunctionalGroupIDs excluded_stage_1 = ExcludeSame(all_groups,
+                                                      merged_stage_3);
 
-    FunctionalGroupIDs undefined_consent = ExcludeSame(no_disallowed_groups,
+    FunctionalGroupIDs excluded_stage_2 =
+        ExcludeSame(excluded_stage_1, consent_disallowed_groups);
+
+    FunctionalGroupIDs undefined_consent = ExcludeSame(excluded_stage_2,
                                                        allowed_groups);
-
-    FunctionalGroupNames group_names;
-    if (!pt_ext->GetFunctionalGroupNames(group_names)) {
-      LOG4CXX_WARN(logger_, "Can't get functional group names");
-      return;
-    }
 
     // Fill result
     FillFunctionalGroupPermissions(undefined_consent, group_names,
@@ -923,11 +973,28 @@ void PolicyManagerImpl::GetPermissionsForApp(
     }
 
     FunctionalIdType group_types;
-    if (!pt_ext->GetUserPermissionsForApp(device_id, app_id_to_check,
+    if (!pt_ext->GetPermissionsForApp(device_id, app_id_to_check,
                                           &group_types)) {
       LOG4CXX_WARN(logger_, "Can't get user permissions for app "
                    << policy_app_id);
       return;
+    }
+
+    // Functional groups w/o alias ("user_consent_prompt") considered as
+    // automatically allowed and it could not be changed by user
+    FunctionalGroupNames group_names;
+    if (!pt_ext->GetFunctionalGroupNames(group_names)) {
+      LOG4CXX_WARN(logger_, "Can't get functional group names");
+      return;
+    }
+
+    FunctionalGroupNames::const_iterator it = group_names.begin();
+    FunctionalGroupNames::const_iterator it_end = group_names.end();
+    FunctionalGroupIDs auto_allowed_groups;
+    for (;it != it_end; ++it) {
+      if (it->second.first.empty()) {
+        auto_allowed_groups.push_back(it->first);
+      }
     }
 
     FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
@@ -935,9 +1002,13 @@ void PolicyManagerImpl::GetPermissionsForApp(
     // If application is limited to default only related groups ara allowed
     // If application is limited to pre_Dataconsent only related groups are
     // allowed
+    FunctionalGroupIDs default_groups = group_types[kTypeDefault];
     if (kDefaultId == app_id_to_check) {
+      auto_allowed_groups.clear();
       allowed_groups = group_types[kTypeDefault];
     } else if (kPreDataConsentId == app_id_to_check) {
+      auto_allowed_groups.clear();
+      default_groups = FunctionalGroupIDs();
       allowed_groups = group_types[kTypePreDataConsented];
     } else {
       allowed_groups = group_types[kTypeAllowed];
@@ -945,11 +1016,6 @@ void PolicyManagerImpl::GetPermissionsForApp(
 
     FunctionalGroupIDs disallowed_groups = group_types[kTypeDisallowed];
     FunctionalGroupIDs preconsented_groups = group_types[kTypePreconsented];
-    // If application is limited to pre_DataConsent - no default groups
-    // permissions should be used
-    FunctionalGroupIDs default_groups =
-      app_id_to_check == kPreDataConsentId ?
-      FunctionalGroupIDs() : group_types[kTypeDefault];
 
     // Find common disallowed groups
     FunctionalGroupIDs common_disallowed = disallowed_groups;
@@ -957,9 +1023,15 @@ void PolicyManagerImpl::GetPermissionsForApp(
     // Find common allowed groups
     FunctionalGroupIDs allowed_preconsented = Merge(allowed_groups,
                                               preconsented_groups);
+
+    FunctionalGroupIDs allowed_preconsented_auto = Merge(allowed_preconsented,
+                                                         auto_allowed_groups);
+    // Default groups always allowed
     FunctionalGroupIDs related_defaults = FindSame(all_groups, default_groups);
-    FunctionalGroupIDs all_allowed = Merge(allowed_preconsented,
+
+    FunctionalGroupIDs all_allowed = Merge(allowed_preconsented_auto,
                                            related_defaults);
+
     FunctionalGroupIDs common_allowed = ExcludeSame(all_allowed,
                                                     common_disallowed);
 
@@ -968,12 +1040,6 @@ void PolicyManagerImpl::GetPermissionsForApp(
                                                    common_disallowed);
     FunctionalGroupIDs undefined_consent = ExcludeSame(no_disallowed,
                                                        common_allowed);
-
-    FunctionalGroupNames group_names;
-    if (!pt_ext->GetFunctionalGroupNames(group_names)) {
-      LOG4CXX_WARN(logger_, "Can't get functional group names");
-      return;
-    }
 
     // Fill result
     FillFunctionalGroupPermissions(undefined_consent, group_names,

@@ -31,6 +31,7 @@ DEFS += \
 INCLUDES = \
 	$(CFG_INCS) \
 	$(CC_IFLAG)../../../../../../3rd_party-static/jsoncpp/include \
+	$(CC_IFLAG)../../../../../include \
 	$(CC_IFLAG)../../../../../rpc_base/include \
 	$(DEPENDS_INCLUDES)
 

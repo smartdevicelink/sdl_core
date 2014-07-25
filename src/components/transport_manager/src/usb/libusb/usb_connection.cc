@@ -124,8 +124,8 @@ void UsbConnection::OnInTransfer(libusb_transfer* transfer) {
                     << transfer->actual_length
                     << ", data:" << hexdata.str());
     }
-    RawMessageSptr data(new protocol_handler::RawMessage(
-                          0, 0, in_buffer_, transfer->actual_length));
+    RawMessagePtr data(new protocol_handler::RawMessage(
+        0, 0, in_buffer_, transfer->actual_length));
     controller_->DataReceiveDone(device_uid_, app_handle_, data);
   } else {
     LOG4CXX_ERROR(logger_, "USB transfer failed: " << transfer->status);
@@ -206,7 +206,7 @@ void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
   LOG4CXX_TRACE(logger_, "exit");
 }
 
-TransportAdapter::Error UsbConnection::SendData(RawMessageSptr message) {
+TransportAdapter::Error UsbConnection::SendData(RawMessagePtr message) {
   LOG4CXX_TRACE(logger_, "enter RawMessageSptr: " << message);
   if (disconnecting_) {
     LOG4CXX_TRACE(logger_, "exit. TransportAdapter::BAD_STATE");
@@ -243,7 +243,7 @@ void UsbConnection::Finalise() {
       waiting_in_transfer_cancel_ = false;
     }
   }
-  for (std::list<RawMessageSptr>::iterator it = out_messages_.begin();
+  for (std::list<RawMessagePtr>::iterator it = out_messages_.begin();
        it != out_messages_.end(); it = out_messages_.erase(it)) {
     controller_->DataSendFailed(device_uid_, app_handle_, *it, DataSendError());
   }

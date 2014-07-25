@@ -276,10 +276,8 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   const std::string app_id = app_policy.first;
 
   AppPermissions permissions_diff(app_id);
-#if defined (EXTENDED_POLICY)
   permissions_diff.priority = policy_table::EnumToJsonString(
                                 app_policy.second.priority);
-#endif
 
   // Check revocation
   if (!IsPredefinedApp(app_policy) && IsAppRevoked(app_policy)) {
@@ -393,6 +391,9 @@ bool FillNotificationData::operator()(const RpcValueType& rpc) {
                      (*it).second.parameter_permissions[current_key_]);
     ExcludeSame();
   } else {
+    // Init mandatory keys, since they should be present irrespectively of
+    // values presence
+    InitRpcKeys(rpc.first);
     // If rpc is not present - add its permissions
     UpdateHMILevels(rpc.second.hmi_levels,
                     data_[rpc.first].hmi_permissions[current_key_]);
@@ -509,6 +510,13 @@ void FillNotificationData::ExcludeSameParameters(
                       std::inserter(diff_parameter, diff_parameter.begin()));
 
   source = diff_parameter;
+}
+
+void FillNotificationData::InitRpcKeys(const std::string& rpc_name) {
+  data_[rpc_name].hmi_permissions[kAllowedKey];
+  data_[rpc_name].hmi_permissions[kUserDisallowedKey];
+  data_[rpc_name].parameter_permissions[kAllowedKey];
+  data_[rpc_name].parameter_permissions[kUserDisallowedKey];
 }
 
 ProcessFunctionalGroup::ProcessFunctionalGroup(

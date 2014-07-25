@@ -178,7 +178,7 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
    * @return if register app interface contains \t\n \\t \\n return TRUE,
    * FALSE otherwise
    */
-  bool IsWhitespaceExist();
+  bool IsWhiteSpaceExist();
 
   std::string response_info_;
 

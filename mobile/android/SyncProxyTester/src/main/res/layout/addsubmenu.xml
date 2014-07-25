@@ -4,10 +4,7 @@
         android:layout_width="fill_parent"
         android:orientation="vertical"
         android:id="@+id/submenu_Root"
-        android:paddingLeft="20dip"
-        android:paddingRight="20dip"
-        android:layout_marginLeft="10dip"
-        android:layout_marginRight="10dip"
+        android:padding="15dp"
         android:layout_height="wrap_content">
 
     <TextView
@@ -45,8 +42,7 @@
             android:layout_height="wrap_content"
             android:checked="true"
             android:text="@string/addsubmenu_menuPos"
-            android:id="@+id/addsubmenu_useMenuPos"
-            android:layout_gravity="left|center_vertical"/>
+            android:id="@+id/addsubmenu_useMenuPos"/>
 
     <EditText
             android:text="@string/addsubmenu_menuPosDefault"
@@ -56,5 +52,11 @@
             android:maxLength="4"
             android:freezesText="true"
             android:inputType="number"/>
+
+    <CheckBox
+        android:id="@+id/add_sub_menu_do_encrypt_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/do_encrypt"/>
 
 </LinearLayout>

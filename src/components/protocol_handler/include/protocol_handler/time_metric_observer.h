@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -32,7 +32,7 @@
 
 #ifndef SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
 #define SRC_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_TIME_METRIC_OBSERVER_H_
-#include "protocol_handler/raw_message.h"
+#include "protocol/common.h"
 
 #include <stdint.h>
 #include "utils/date_time.h"
@@ -48,10 +48,7 @@ class PHMetricObserver {
     TimevalStruct begin;
     TimevalStruct end;
   };
-  /**
-   */
-  virtual void StartMessageProcess(uint32_t message_id) = 0;
-
+  virtual void StartMessageProcess(uint32_t message_id, const TimevalStruct &start_time) = 0;
   virtual void EndMessageProcess(utils::SharedPtr<MessageMetric> m) = 0;
   virtual ~PHMetricObserver(){}
 };

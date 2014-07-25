@@ -1,25 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <TableLayout
+    <ScrollView
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
-
-        <TableRow
-            android:id="@+id/LinearLayout01"
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content">
-
-        </TableRow>
-
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"/>
-    </TableLayout>
+        android:layout_height="fill_parent"
+        android:scrollbars="none"
+        android:layout_weight="1">
 
     <TableLayout
         android:layout_width="fill_parent"
@@ -31,60 +21,152 @@
 
             <Button
                 android:id="@+id/btnPlayPause"
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Play/Pause"/>
+                android:text="Play/Pause" />
         </TableRow>
 
         <TableRow
-            android:id="@+id/LinearLayout04"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
 
             <Button
-                android:id="@+id/btnSendMessage"
-                android:layout_width="wrap_content"
+                android:id="@+id/btnServices"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:enabled="true"
-                android:text="Send Message"/>
+                android:text="Services: Open / Close" />
         </TableRow>
 
-        <TableRow
-            android:id="@+id/LinearLayout05"
-            android:layout_width="fill_parent"
+
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+
+            xmlns:tools="http://schemas.android.com/tools"
+            android:orientation="vertical"
+
+            android:layout_width="match_parent"
             android:layout_height="wrap_content">
+
+            <TextView
+                android:text="RPC Service"
+                android:textSize="18sp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
+            <RelativeLayout
+                android:layout_marginBottom="10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/rpc_secure_checkbox"
+                    android:text="Encrypt RPC"
+                    android:checked="false"
+                    android:layout_below="@+id/rpc_service_state"
+                    android:layout_alignParentLeft="true" />
+
+                <Spinner
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/secure_error_spinner"
+                    android:layout_below="@+id/rpc_secure_checkbox"
+                    android:layout_alignParentLeft="true" />
+
+                <Button
+                    android:id="@+id/secure_error_msg_button"
+                    android:text="@string/secure_error_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/secure_error_spinner"
+                    android:layout_alignParentLeft="true" />
+
+                <Button
+                    android:id="@+id/rpc_service_secure_button_view"
+                    android:text="@string/secure_service_send_rpc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/secure_error_msg_button"
+                    android:layout_alignParentLeft="true" />
+
+                <Button
+                    android:id="@+id/rpc_non_secure_button_view"
+                    android:text="@string/not_secure_service_send_rpc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/rpc_service_secure_button_view"
+                    android:layout_alignParentLeft="true" />
+
+                <TextView
+                    android:id="@+id/rpc_service_state"
+
+                    android:layout_width="wrap_content"
+                    android:text="@string/rpc_service_state"
+                    android:layout_height="wrap_content" />
+
+
+            </RelativeLayout>
+
+            <TextView
+                android:text="Mobile Service"
+                android:textSize="18sp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
 
             <fragment
                 android:id="@+id/videoFragment"
-                android:name="com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment"
+                class="com.ford.syncV4.android.activity.mobilenav.MobileNavPreviewFragment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="10dp"
                 tools:layout="@layout/activity_mobile_nav_preview" />
-        </TableRow>
 
-        <TableRow
-            android:id="@+id/LinearLayout06"
-            android:layout_width="fill_parent"
-            android:paddingTop="5dip"
-            android:layout_height="wrap_content">
+            <TextView
+                android:text="Audio Service"
+                android:textSize="18sp"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content" />
+
 
             <fragment
                 android:id="@+id/audioFragment"
-                android:name="com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment"
+                class="com.ford.syncV4.android.activity.mobilenav.AudioServicePreviewFragment"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:layout="@layout/activity_audio_service_preview" />
 
-        </TableRow>
+
+        </LinearLayout>
+    </TableRow>
+
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+
+        <Button
+            android:id="@+id/btnSendMessage"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Send Message" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+
+        <ListView
+            android:id="@+id/messageList"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent" />
+    </TableRow>
 
     </TableLayout>
-
-    <ListView
-        android:id="@+id/messageList"
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:visibility="visible"/>
+    </ScrollView>
 
 </LinearLayout>

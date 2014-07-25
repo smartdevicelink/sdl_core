@@ -63,6 +63,13 @@
 #endif  // MESSAGEBROKER_HMIADAPTER
 #include "system.h"      // cpplint: Include the directory when naming .h files
 
+#ifdef ENABLE_SECURITY
+namespace security_manager {
+class CryptoManager;
+class SecurityManagerImpl;
+}  // namespace security_manager
+#endif  // ENABLE_SECURITY
+
 namespace main_namespace {
 class LifeCycle : public utils::Singleton<LifeCycle> {
   public:
@@ -81,12 +88,16 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
+#ifdef ENABLE_SECURITY
+    security_manager::CryptoManager* crypto_manager_;
+    security_manager::SecurityManager* security_manager_;
+#endif  // ENABLE_SECURITY
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
     hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
     media_manager::MediaManagerImpl* media_manager_;
 #ifdef TIME_TESTER
     time_tester::TimeManager* time_tester_;
-#endif //TIME_TESTER
+#endif  // TIME_TESTER
 #ifdef DBUS_HMIADAPTER
     hmi_message_handler::DBusMessageAdapter* dbus_adapter_;
     System::Thread* dbus_adapter_thread_;
@@ -109,10 +120,9 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
 #endif  // CUSTOMER_PASA
 
     bool components_started;
-    DISALLOW_COPY_AND_ASSIGN(LifeCycle);
-
     FRIEND_BASE_SINGLETON_CLASS(LifeCycle);
+    DISALLOW_COPY_AND_ASSIGN(LifeCycle);
 };
 }  //  namespace main_namespace
 
-#endif  //  SRC_APPMAIN_LIFE_CYCLE_H_
+#endif  // SRC_APPMAIN_LIFE_CYCLE_H_

@@ -44,9 +44,6 @@ const std::string kSelectStealFocus =
 const std::string kSelectDefaultHmi =
   "SELECT `default_hmi` FROM `application` WHERE `id` = ? LIMIT 1";
 
-const std::string kSelectPriority =
-  "SELECT `priority_value` FROM `application` WHERE `id` = ? LIMIT 1";
-
 const std::string kResetDeviceConsents = "DELETE FROM `device_consent_group`";
 
 const std::string kResetAppConsents = "DELETE FROM `consent_group`";
@@ -138,8 +135,10 @@ const std::string kCountUnconsentedGroups =
   " (SELECT NULL FROM `app_group` AS `def` WHERE "
   " (`def`.`application_id` = ? OR "
   " `def`.`application_id` = ?) "
-  " AND `def`.`functional_group_id` = `a`.`functional_group_id`)";
-
+  " AND `def`.`functional_group_id` = `a`.`functional_group_id`)"
+  " AND NOT EXISTS (SELECT NULL FROM `functional_group` AS `f` "
+  " WHERE (`a`.`functional_group_id` = `f`.`id`"
+  " AND`f`.`user_consent_prompt` IS NULL))";
 
 const std::string kSelectModuleMeta = "SELECT* FROM `module_meta`";
 

@@ -1,8 +1,5 @@
-/**
- * \file DevicesDiscoveryStarter.hpp
- * \brief Starter of devices discovering process.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -44,7 +41,7 @@
  */
 namespace connection_handler {
 /**
- * \class DevicesDiscoveryStarter
+ * \class DevicesDiscoveryStarter
  * \brief Starter of devices discovering process class
  */
 class DevicesDiscoveryStarter {
@@ -70,6 +67,6 @@ class DevicesDiscoveryStarter {
   virtual ~DevicesDiscoveryStarter() {
   }
 };
-}/* namespace connection_handler */
+}  // namespace connection_handler
 
 #endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_DEVICES_DISCOVERY_STARTER_H_

@@ -42,16 +42,16 @@ namespace application_manager {
 
 namespace commands {
 
-ScrollabelMessageRequest::ScrollabelMessageRequest(
+ScrollableMessageRequest::ScrollableMessageRequest(
     const MessageSharedPtr& message)
  : CommandRequestImpl(message) {
   subscribe_on_event(hmi_apis::FunctionID::UI_OnResetTimeout);
 }
 
-ScrollabelMessageRequest::~ScrollabelMessageRequest() {
+ScrollableMessageRequest::~ScrollableMessageRequest() {
 }
 
-bool ScrollabelMessageRequest::Init() {
+bool ScrollableMessageRequest::Init() {
 
   /* Timeout in milliseconds.
      If omitted a standard value of 10000 milliseconds is used.*/
@@ -66,8 +66,8 @@ bool ScrollabelMessageRequest::Init() {
   return true;
 }
 
-void ScrollabelMessageRequest::Run() {
-  LOG4CXX_INFO(logger_, "ScrollabelMessageRequest::Run");
+void ScrollableMessageRequest::Run() {
+  LOG4CXX_INFO(logger_, "ScrollableMessageRequest::Run");
 
   ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
       ->application((*message_)[strings::params][strings::connection_key].asUInt());
@@ -84,6 +84,13 @@ void ScrollabelMessageRequest::Run() {
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
     SendResponse(false, processing_result);
+    return;
+  }
+
+  if (IsWhiteSpaceExist()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming scrollabel message has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
@@ -105,8 +112,8 @@ void ScrollabelMessageRequest::Run() {
   SendHMIRequest(hmi_apis::FunctionID::UI_ScrollableMessage, &msg_params, true);
 }
 
-void ScrollabelMessageRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "ScrollabelMessageRequest::on_event");
+void ScrollableMessageRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "ScrollableMessageRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -141,6 +148,42 @@ void ScrollabelMessageRequest::on_event(const event_engine::Event& event) {
       break;
     }
   }
+}
+
+bool ScrollableMessageRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "ScrollableMessageRequest::IsWhiteSpaceExist");
+  const char* str = NULL;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    const smart_objects::SmartArray* sb_array =
+        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
+
+    smart_objects::SmartArray::const_iterator it_sb = sb_array->begin();
+    smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
+
+    for (; it_sb != it_sb_end; ++it_sb) {
+
+      if ((*it_sb).keyExists(strings::text)) {
+        str = (*it_sb)[strings::text].asCharArray();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_ERROR(logger_,
+                       "Invalid soft_buttons text syntax check failed");
+          return true;
+        }
+      }
+
+      if ((*it_sb).keyExists(strings::image)) {
+        str = (*it_sb)[strings::image][strings::value].asCharArray();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_ERROR(logger_,
+                       "Invalid soft_buttons image value syntax check failed");
+          return true;
+        }
+      }
+
+    }
+  }
+  return false;
 }
 
 }  // namespace commands

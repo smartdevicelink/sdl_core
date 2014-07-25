@@ -65,6 +65,7 @@ import com.ford.syncV4.proxy.rpc.OnTouchEvent;
 import com.ford.syncV4.proxy.rpc.OnVehicleData;
 import com.ford.syncV4.proxy.rpc.PerformAudioPassThruResponse;
 import com.ford.syncV4.proxy.rpc.PerformInteractionResponse;
+import com.ford.syncV4.proxy.rpc.PutFile;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
 import com.ford.syncV4.proxy.rpc.ReadDIDResponse;
 import com.ford.syncV4.proxy.rpc.ResetGlobalPropertiesResponse;
@@ -2164,8 +2165,8 @@ public class SyncProxyALMManager {
 		}
 	
 		@Override
-		public void onError(String info, Throwable e) {
-			_lifecycleListener.onError(info, e);
+		public void onError(String info, Throwable throwable) {
+			_lifecycleListener.onError(info, throwable);
 		}
 		
 		@Override
@@ -2563,8 +2564,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onMobileNaviStart(String appId) {
-
+        public void onMobileNaviStart(String appId, boolean encrypted) {
         }
 
         @Override
@@ -2608,7 +2608,7 @@ public class SyncProxyALMManager {
         }
 
         @Override
-        public void onAudioServiceStart(String appId) {
+        public void onAudioServiceStart(String appId, boolean encrypted) {
 
         }
 
@@ -2629,12 +2629,29 @@ public class SyncProxyALMManager {
         }
 
         @Override
+        public void onSecureSessionStarted(String appId) {
+
+        }
+
+        @Override
         public void onHashChange(String appId, OnHashChange onHashChange) {
+
 
         }
 
         @Override
         public void onStartSession(String appId) {
+
+        }
+
+        @Override
+        public void onSecureServiceStart() {
+
+        }
+
+        @Override
+        public void onPutFileRequest(String appId, PutFile putFile) {
+
 
         }
 

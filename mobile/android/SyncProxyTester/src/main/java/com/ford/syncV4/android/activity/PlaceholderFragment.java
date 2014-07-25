@@ -95,6 +95,8 @@ import com.ford.syncV4.proxy.rpc.enums.SystemAction;
 import com.ford.syncV4.proxy.rpc.enums.TextAlignment;
 import com.ford.syncV4.proxy.rpc.enums.UpdateMode;
 import com.ford.syncV4.proxy.rpc.enums.VehicleDataType;
+import com.ford.syncV4.service.secure.SecurityInternalError;
+import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.util.Base64;
 import com.ford.syncV4.util.logger.Logger;
 import com.lamerman.FileDialog;
@@ -125,7 +127,6 @@ public class PlaceholderFragment extends Fragment {
      * Placeholder for the Application Id field
      */
     public static final String EMPTY_APP_ID = "";
-
     private static final String LOG_TAG = PlaceholderFragment.class.getSimpleName();
     private static final String MOBILE_NAV_FRAGMENT_TAG = "MOBILE_NAV_FRAGMENT_TAG";
     private static final String AUDIO_FRAGMENT_TAG = "AUDIO_FRAGMENT_TAG";
@@ -152,7 +153,16 @@ public class PlaceholderFragment extends Fragment {
     private static final int CREATECHOICESET_MAXCHOICES = 100;
     private static final int SHOW_MAXSOFTBUTTONS = 8;
     private static final int CHOICESETID_UNSET = -1;
-
+    /**
+     * Latest choiceSetId, required to add it to the adapter when a successful
+     * CreateInteractionChoiceSetResponse comes.
+     */
+    private int mLatestCreateChoiceSetId = CHOICESETID_UNSET;
+    /**
+     * Latest choiceSetId, required to delete it from the adapter when a
+     * successful DeleteInteractionChoiceSetResponse comes.
+     */
+    private int _latestDeleteChoiceSetId = CHOICESETID_UNSET;
     // Request id for SoftButtonsListActivity
     public static final int REQUEST_LIST_SOFTBUTTONS = 43;
     // Request id for ChoiceListActivity
@@ -162,9 +172,16 @@ public class PlaceholderFragment extends Fragment {
      * Autoincrementing id for new choices.
      */
     private static int autoIncChoiceId = 9000;
-
+    private final Map<Integer, Integer> mCommandIdToParentSubmenuMap =
+            new ConcurrentHashMap<Integer, Integer>();
+    /**
+     * Stores the number of selections of each message to sort them by
+     * most-popular usage.
+     * <p/>
+     * Make it temporary public to access from the Fragment
+     */
+    public Map<String, Integer> messageSelectCount;
     private boolean isFirstActivityRun = true;
-
     private ArrayAdapter<VehicleDataType> mVehicleDataType = null;
     private LogAdapter mLogAdapter;
     private ArrayAdapter<ButtonName> mButtonAdapter = null;
@@ -172,13 +189,8 @@ public class PlaceholderFragment extends Fragment {
     private ArrayAdapter<Integer> mCommandAdapter = null;
     private ArrayAdapter<Integer> mChoiceSetAdapter = null;
     private ArrayAdapter<String> mPutFileAdapter = null;
-
-    private final Map<Integer, Integer> mCommandIdToParentSubmenuMap =
-            new ConcurrentHashMap<Integer, Integer>();
-
     private MobileNavPreviewFragment mMobileNavPreviewFragment;
     private AudioServicePreviewFragment mAudioServicePreviewFragment;
-
     private boolean[] isButtonSubscribed = null;
     private boolean[] isVehicleDataSubscribed = null;
     private int mAutoIncCorrId = 0;
@@ -194,29 +206,11 @@ public class PlaceholderFragment extends Fragment {
      * filename is set after choosing.
      */
     private EditText txtLocalFileName;
-
     /**
      * Latest SyncSubMenu, required to delete the submenu from the adapter
      * when a successful DeleteSubMenuResponse comes.
      */
     private SyncSubMenu _latestDeleteSubmenu = null;
-    /**
-     * Stores the number of selections of each message to sort them by
-     * most-popular usage.
-     *
-     * Make it temporary public to access from the Fragment
-     */
-    public Map<String, Integer> messageSelectCount;
-    /**
-     * Latest choiceSetId, required to add it to the adapter when a successful
-     * CreateInteractionChoiceSetResponse comes.
-     */
-    private int mLatestCreateChoiceSetId = CHOICESETID_UNSET;
-    /**
-     * Latest choiceSetId, required to delete it from the adapter when a
-     * successful DeleteInteractionChoiceSetResponse comes.
-     */
-    private int _latestDeleteChoiceSetId = CHOICESETID_UNSET;
     /**
      * The Include Soft Buttons checkbox in the current dialog. Kept here to
      * check it when the user has explicitly set the soft buttons.
@@ -234,6 +228,13 @@ public class PlaceholderFragment extends Fragment {
     private SyncSubMenu mLatestAddSubmenu = null;
     private Pair<Integer, Integer> mLatestAddCommand = null;
 
+    public PlaceholderFragment() {
+        mMobileNavPreviewFragment = new MobileNavPreviewFragment();
+        mAudioServicePreviewFragment = new AudioServicePreviewFragment();
+
+        Logger.d(LOG_TAG + " Constructor");
+    }
+
     /**
      * Returns a new instance of this fragment for the given section number.
      */
@@ -245,19 +246,13 @@ public class PlaceholderFragment extends Fragment {
         return fragment;
     }
 
-    public PlaceholderFragment() {
-        mMobileNavPreviewFragment = new MobileNavPreviewFragment();
-        mAudioServicePreviewFragment = new AudioServicePreviewFragment();
-
-        Logger.d(LOG_TAG + " Constructor");
-    }
-
     public static int getNewChoiceId() {
         return autoIncChoiceId++;
     }
 
     /**
      * Return Application Id associated with the specific Fragment
+     *
      * @return Application Id
      */
     public String getAppId() {
@@ -266,6 +261,7 @@ public class PlaceholderFragment extends Fragment {
 
     /**
      * Set Application Id for the specific Fragment
+     *
      * @param value Application Id
      */
     public void setAppId(String value) {
@@ -295,7 +291,7 @@ public class PlaceholderFragment extends Fragment {
             int fragmentsCounter = ((SyncProxyTester) getActivity()).getFragmentsCount();
             BaseDialogFragment appSetupDialogFragment =
                     BaseDialogFragment.newInstance(AppSetUpDialog.class.getName(), getAppId(),
-                                                   fragmentsCounter <= 1);
+                            fragmentsCounter <= 1);
             appSetupDialogFragment.show(getActivity().getFragmentManager(), APP_SETUP_DIALOG_TAG);
             //appSetupDialogFragment.setCancelable(false);
         } else {
@@ -344,8 +340,134 @@ public class PlaceholderFragment extends Fragment {
         transaction.replace(R.id.audio_fragment_holder, mAudioServicePreviewFragment,
                 AUDIO_FRAGMENT_TAG);
         transaction.commit();*/
-
+        setupSecureServices(rootView);
         return rootView;
+    }
+
+    private void setupSecureServices(View rootView) {
+
+        CheckBox checkBoxRpcEncode = (CheckBox) rootView.findViewById(R.id.rpc_secure_checkbox);
+        checkBoxRpcEncode.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                TestConfig.setEncrypt(isChecked);
+            }
+        });
+
+        setupHandshakeErrorSpinner(rootView);
+        setupSecureServiceSpinner(rootView);
+
+        // RPC Service Secure check box processing
+        Button rpcSecureCheckBoxView = (Button) rootView.findViewById(R.id.rpc_service_secure_button_view);
+        rpcSecureCheckBoxView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processRPCSecureCheckBox();
+            }
+        });
+
+        // RPC Service Secure check box processing
+        Button rpcNotSecureCheckBoxView = (Button) rootView.findViewById(R.id.rpc_non_secure_button_view);
+        rpcNotSecureCheckBoxView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                processRPCNotSecureCheckBox();
+            }
+        });
+    }
+
+    private void setupSecureServiceSpinner(View rootView) {
+        final Spinner spinner = (Spinner) rootView.findViewById(R.id.secure_service_error_spinner);
+        final ArrayAdapter<SecurityInternalError> securityErrorAdapter = new ArrayAdapter<SecurityInternalError>(getActivity(),
+                android.R.layout.simple_spinner_item, new SecurityInternalError[]{SecurityInternalError.UNKNOWN, SecurityInternalError.ERROR_DECRYPTION_FAILED, SecurityInternalError.ERROR_SERVICE_NOT_PROTECTED});
+        securityErrorAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(securityErrorAdapter);
+        spinner.setSelection(0);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                SecurityInternalError securityInternalError = (SecurityInternalError) spinner.getSelectedItem();
+                updateSecureServiceError(securityInternalError);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                SecurityInternalError securityInternalError = (SecurityInternalError) spinner.getSelectedItem();
+                updateSecureServiceError(securityInternalError);
+            }
+        });
+    }
+
+    private void updateSecureServiceError(SecurityInternalError securityInternalError) {
+        final ProxyService boundProxyService = getProxyService();
+        if (boundProxyService == null) return;
+        List<SecurityInternalError> securityInternalErrorArrayList = new ArrayList<SecurityInternalError>();
+        securityInternalErrorArrayList.add(securityInternalError);
+        boundProxyService.getTestConfig().setSecureServiceErrorList(securityInternalErrorArrayList);
+    }
+
+    private void setupHandshakeErrorSpinner(View rootView) {
+        final Spinner spinner = (Spinner) rootView.findViewById(R.id.secure_error_spinner);
+        final ArrayAdapter<SecurityInternalError> securityErrorAdapter = new ArrayAdapter<SecurityInternalError>(getActivity(),
+                android.R.layout.simple_spinner_item, new SecurityInternalError[]{SecurityInternalError.UNKNOWN, SecurityInternalError.ERROR_INVALID_QUERY_ID, SecurityInternalError.ERROR_INVALID_QUERY_SIZE, SecurityInternalError.ERROR_SSL_INVALID_DATA});
+        securityErrorAdapter.setDropDownViewResource(
+                android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(securityErrorAdapter);
+        spinner.setSelection(0);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                SecurityInternalError securityInternalError = (SecurityInternalError) spinner.getSelectedItem();
+                updateHandshakeConfigError(securityInternalError);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                SecurityInternalError securityInternalError = (SecurityInternalError) spinner.getSelectedItem();
+                updateHandshakeConfigError(securityInternalError);
+            }
+        });
+    }
+
+    private void updateHandshakeConfigError(SecurityInternalError securityInternalError) {
+        final ProxyService boundProxyService = getProxyService();
+        if (boundProxyService == null) return;
+        List<SecurityInternalError> securityInternalErrorArrayList = new ArrayList<SecurityInternalError>();
+        securityInternalErrorArrayList.add(securityInternalError);
+        boundProxyService.getTestConfig().setHandshakeErrorList(securityInternalErrorArrayList);
+    }
+
+    private ProxyService getProxyService() {
+        final SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        if (syncProxyTester == null) {
+            return null;
+        }
+        final ProxyService boundProxyService = syncProxyTester.mBoundProxyService;
+        if (boundProxyService == null) {
+            return null;
+        }
+        return boundProxyService;
+    }
+
+    /**
+     * Process a state of the "Start Secure RPC Service" checkbox
+     */
+    private void processRPCSecureCheckBox() {
+        Logger.d("Start Secure RPC service");
+        startRPCService(true);
+    }
+
+    private void processRPCNotSecureCheckBox() {
+        Logger.d("Start Not Secure RPC service");
+        startRPCService(false);
+    }
+
+    public void startRPCService(final boolean encrypted) {
+        SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();
+        syncProxyTester.startRPCService(getAppId(), encrypted);
     }
 
     @Override
@@ -408,7 +530,7 @@ public class PlaceholderFragment extends Fragment {
         menu.add(0, MenuConstants.MENU_TOGGLE_CONSOLE, nextMenuItemOrder++, "Toggle Console");
         menu.add(0, MenuConstants.MENU_CLEAR, nextMenuItemOrder++, "Clear Messages");
         //if (tabsCount == 1) {
-            menu.add(0, MenuConstants.MENU_EXIT, nextMenuItemOrder++, "Exit");
+        menu.add(0, MenuConstants.MENU_EXIT, nextMenuItemOrder++, "Exit");
         //}
         menu.add(0, MenuConstants.MENU_CLOSE_SESSION, nextMenuItemOrder++, "Close Session");
         //menu.add(0, MENU_TOGGLE_MEDIA, nextMenuItemOrder++, "Toggle Media");
@@ -657,15 +779,15 @@ public class PlaceholderFragment extends Fragment {
         return mAutoIncCorrId++;
     }
 
-    public void setAudioServiceStateOn(OutputStream outputStream) {
+    public void setAudioServiceStateOn(OutputStream outputStream, boolean encoded) {
         if (mAudioServicePreviewFragment != null) {
-            mAudioServicePreviewFragment.setAudioServiceStateOn(outputStream);
+            mAudioServicePreviewFragment.setAudioServiceStateOn(outputStream, encoded);
         }
     }
 
-    public void setMobileNaviStateOn(OutputStream outputStream) {
+    public void setMobileNaviStateOn(OutputStream outputStream, boolean encoded) {
         if (mMobileNavPreviewFragment != null) {
-            mMobileNavPreviewFragment.setMobileNaviStateOn(outputStream);
+            mMobileNavPreviewFragment.setMobileNaviStateOn(outputStream, encoded);
         }
     }
 
@@ -1474,7 +1596,7 @@ public class PlaceholderFragment extends Fragment {
                         final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
                         final CheckBox useProgressIndicator = (CheckBox) layout.findViewById(R.id.alert_useProgressIndicator);
                         final CheckBox useDuration = (CheckBox) layout.findViewById(R.id.alert_useDuration);
-
+                        final CheckBox doEncryptView = (CheckBox) layout.findViewById(R.id.alert_do_encrypt_view);
                         chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
 
                         SoftButton sb1 = new SoftButton();
@@ -1528,6 +1650,7 @@ public class PlaceholderFragment extends Fragment {
                                                 .createSimpleTTSChunks(toSpeak);
                                         msg.setTtsChunks(ttsChunks);
                                     }
+                                    msg.setDoEncryption(doEncryptView.isChecked());
                                     if (chkIncludeSoftButtons.isChecked() &&
                                             (currentSoftButtons != null) &&
                                             (currentSoftButtons.size() > 0)) {
@@ -1586,7 +1709,8 @@ public class PlaceholderFragment extends Fragment {
                                         }
                                         _latestDeleteSubmenu = menu;
                                     }
-                                });
+                                }
+                        );
                         builder.show();
                     }
 
@@ -1681,7 +1805,7 @@ public class PlaceholderFragment extends Fragment {
                                 ADD_SUB_MENU_DIALOG_TAG);
                     }
 
-                    private void sendSystemRequest(){
+                    private void sendSystemRequest() {
                         BaseDialogFragment fragment = BaseDialogFragment.newInstance(
                                 SystemRequestDialog.class.getName(), getAppId());
                         fragment.show(getActivity().getFragmentManager(), SYSTEM_REQST_DIALOG_TAG);
@@ -2202,7 +2326,8 @@ public class PlaceholderFragment extends Fragment {
                                 msg.setInitialPrompt(((SyncProxyTester) getActivity()).ttsChunksFromString(initialPrompt.getText().toString()));
                                 msg.setInteractionMode(
                                         interactionModeAdapter.getItem(
-                                                interactionModeSpinner.getSelectedItemPosition()));
+                                                interactionModeSpinner.getSelectedItemPosition())
+                                );
                                 msg.setInteractionChoiceSetIDList(choiceSetIDs);
 
                                 if (helpPromptCheck.isChecked()) {
@@ -2595,7 +2720,8 @@ public class PlaceholderFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
                     }
-                });
+                }
+        );
         builder.setView(layout);
         builder.show();
     }
@@ -2659,7 +2785,8 @@ public class PlaceholderFragment extends Fragment {
                     public void onClick(DialogInterface dialog, int id) {
                         dialog.cancel();
                     }
-                });
+                }
+        );
         builder.setView(layout);
         builder.show();
     }
@@ -2737,6 +2864,7 @@ public class PlaceholderFragment extends Fragment {
         if (boundProxyService == null) {
             return;
         }
+        rpcRequest = TestConfig.filter(rpcRequest);
         boundProxyService.sendRPCRequestWithPreprocess(getAppId(), rpcRequest);
     }
 }

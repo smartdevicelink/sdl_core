@@ -73,17 +73,18 @@ public class SendProtocolMessageProcessor {
 
     /**
      * Process data into {@link com.ford.syncV4.protocol.ProtocolMessage}
-     *
-     * @param serviceType           type of the service
+     *  @param serviceType           type of the service
      * @param protocolVersionToSend protocol version
+     * @param encrypted
      * @param data                  byte array
      * @param maxDataSize           maximum size of the data
      * @param sessionID             id of the session
      * @param messageId             id of the message
      */
     public void process(final ServiceType serviceType, final byte protocolVersionToSend,
-                        final byte[] data, final int maxDataSize,
-                        final byte sessionID, final int messageId) {
+                        final boolean encrypted, final byte[] data, final int maxDataSize,
+                        final byte sessionID, final int messageId
+    ) {
 
         if (data == null) {
             callback.onProtocolFrameToSendError(ERROR_TYPE.DATA_NPE, "Data is NULL");
@@ -103,7 +104,7 @@ public class SendProtocolMessageProcessor {
                             new ConsecutiveFrameProcessor();
 
                     consecutiveFrameProcessor.process(data, sessionID, messageId,
-                            serviceType, protocolVersionToSend, maxDataSize,
+                            serviceType, protocolVersionToSend,encrypted, maxDataSize,
                             new ConsecutiveFrameProcessor.IConsecutiveFrameProcessor() {
 
                                 @Override
@@ -119,12 +120,18 @@ public class SendProtocolMessageProcessor {
                 }
             });
         } else if (serviceType == ServiceType.Heartbeat) {
-            // Move logic to separate methods
-            // processHeartbeat, processHeartbeatAck
+            final ProtocolFrameHeader header =
+                    ProtocolFrameHeaderFactory.createSingleSendData(serviceType,
+                            sessionID, data.length, messageId, protocolVersionToSend);
+            if (callback != null) {
+                callback.onProtocolFrameToSend(header, data, 0, data.length);
+            }
+
         } else {
             final ProtocolFrameHeader header =
                     ProtocolFrameHeaderFactory.createSingleSendData(serviceType,
                             sessionID, data.length, messageId, protocolVersionToSend);
+            header.setEncrypted(encrypted);
 
             if (serviceType == ServiceType.Audio_Service) {
                 if (audioExecutor.isTerminated()) {
@@ -163,7 +170,7 @@ public class SendProtocolMessageProcessor {
                                           }
                 );
             } else {
-                //Logger.d(LOG_TAG + " RPC");
+                Logger.d(LOG_TAG + " RPC" + header);
                 singleMessageExecutor.submit(new Runnable() {
 
                                                  @Override
@@ -251,7 +258,7 @@ public class SendProtocolMessageProcessor {
             public void run() {
                 if (callback != null) {
                     ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(
-                            ServiceType.RPC, sessionId, protocolVersionToSend);
+                            ServiceType.RPC, sessionId, protocolVersionToSend, false);
                     callback.onProtocolFrameToSend(header, null, 0, 0);
                 }
             }
@@ -309,18 +316,20 @@ public class SendProtocolMessageProcessor {
     /**
      * Process Start service message to send
      *
+     * @param serviceType           type of the service
      * @param protocolVersionToSend protocol version
      * @param sessionId             id of the session
+     * @param isCyphered            encrypt or not encrypt
      */
     public void processStartService(final ServiceType serviceType, final byte protocolVersionToSend,
-                                    final byte sessionId) {
+                                    final byte sessionId,  final boolean isCyphered) {
         Logger.d(LOG_TAG + " Start Service:" + serviceType);
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 if (callback != null) {
                     ProtocolFrameHeader header = ProtocolFrameHeaderFactory.createStartSession(
-                            serviceType, sessionId, protocolVersionToSend);
+                            serviceType, sessionId, protocolVersionToSend, isCyphered);
                     callback.onProtocolFrameToSend(header, null, 0, 0);
                 }
             }
@@ -328,7 +337,19 @@ public class SendProtocolMessageProcessor {
         singleMessageExecutor.submit(runnable);
     }
 
-    /**
+    /*
+    * Process Start service message to send
+    *
+            * @param serviceType           type of the service
+    * @param protocolVersionToSend protocol version
+    * @param sessionId             id of the session
+    */
+    public void processStartService(final ServiceType serviceType, final byte protocolVersionToSend,
+                                    final byte sessionId ) {
+        processStartService(serviceType, protocolVersionToSend, sessionId, false);
+    }
+
+/*
      * Shut down audio executor
      * @throws InterruptedException
      */

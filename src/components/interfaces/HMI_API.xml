@@ -1173,7 +1173,7 @@
   <param name="width" type="Integer" minvalue="1" maxvalue="500">
     <description>The number of characters in one row of this field.</description>
   </param>
-  <param name="rows" type="Integer" minvalue="1" maxvalue="3">
+  <param name="rows" type="Integer" minvalue="1" maxvalue="8">
     <description>The number of rows of this field.</description>
   </param>
 </struct>

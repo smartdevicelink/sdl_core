@@ -91,6 +91,12 @@ void SliderRequest::Run() {
     }
   }
 
+  if (IsWhiteSpaceExist()) {
+    LOG4CXX_ERROR(logger_, "Incoming slider has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
@@ -141,6 +147,34 @@ void SliderRequest::on_event(const event_engine::Event& event) {
                mobile_apis::Result::eType(response_code),
                0,
                &response_msg_params);
+}
+
+bool SliderRequest::IsWhiteSpaceExist() {
+  LOG4CXX_INFO(logger_, "PerformAudioPassThruRequest::IsWhiteSpaceExist");
+  const char* str = NULL;
+
+  str = (*message_)[strings::msg_params][strings::slider_header].asCharArray();
+  if (!CheckSyntax(str, true)) {
+    LOG4CXX_ERROR(logger_, "Invalid slider_header value syntax check failed");
+    return true;
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::slider_footer)) {
+    const smart_objects::SmartArray* sf_array =
+        (*message_)[strings::msg_params][strings::slider_footer].asArray();
+
+    smart_objects::SmartArray::const_iterator it_sf = sf_array->begin();
+    smart_objects::SmartArray::const_iterator it_sf_end = sf_array->end();
+
+    for (; it_sf != it_sf_end; ++it_sf) {
+      str = (*it_sf).asCharArray();
+      if (!CheckSyntax(str, true)) {
+        LOG4CXX_ERROR(logger_, "Invalid slider_footer syntax check failed");
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 }  // namespace commands

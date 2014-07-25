@@ -7,10 +7,11 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp"
-        android:paddingBottom="15dp"
+
         android:minWidth="300dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:layout_margin="15dp">
+
 
         <CheckBox
             android:id="@+id/registerappinterface_new_session"
@@ -290,6 +291,7 @@
                 android:inputType="number"/>
 
         </LinearLayout>
+
 
     </LinearLayout>
 
