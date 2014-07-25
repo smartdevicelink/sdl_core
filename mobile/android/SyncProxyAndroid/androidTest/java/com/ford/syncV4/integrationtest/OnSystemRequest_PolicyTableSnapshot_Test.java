@@ -15,7 +15,7 @@ import com.ford.syncV4.proxy.SyncProxyALM;
 import com.ford.syncV4.proxy.SyncProxyBase;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.converter.IRPCRequestConverterFactory;
-import com.ford.syncV4.proxy.converter.SystemPutFileRPCRequestConverter;
+import com.ford.syncV4.proxy.converter.PutFileRPCRequestConverter;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.PutFileResponse;
@@ -105,7 +105,7 @@ public class OnSystemRequest_PolicyTableSnapshot_Test extends InstrumentationTes
             }
         };
 
-        final SystemPutFileRPCRequestConverter converter = new SystemPutFileRPCRequestConverter();
+        final PutFileRPCRequestConverter converter = new PutFileRPCRequestConverter();
         maxDataSize = 64;
         converter.setMaxDataSize(maxDataSize);
         IRPCRequestConverterFactory factoryMock = mock(IRPCRequestConverterFactory.class);

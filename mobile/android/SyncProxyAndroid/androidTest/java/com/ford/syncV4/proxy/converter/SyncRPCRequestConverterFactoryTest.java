@@ -41,21 +41,21 @@ public class SyncRPCRequestConverterFactoryTest extends TestCase {
     public void testGetConverterShouldReturnDefaultConverterForDefaultPutFile() {
         PutFile msg = RPCRequestFactory.buildPutFile();
         assertThat(factory.getConverterForRequest(msg),
-                instanceOf(DefaultRPCRequestConverter.class));
+                instanceOf(PutFileRPCRequestConverter.class));
     }
 
     public void testGetConverterShouldReturnDefaultConverterForNotSystemPutFile() {
         PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setSystemFile(false);
         assertThat(factory.getConverterForRequest(msg),
-                instanceOf(DefaultRPCRequestConverter.class));
+                instanceOf(PutFileRPCRequestConverter.class));
     }
 
     public void testGetConverterShouldReturnSystemPutFileConverterForSystemPutFile() {
         PutFile msg = RPCRequestFactory.buildPutFile();
         msg.setSystemFile(true);
         assertThat(factory.getConverterForRequest(msg),
-                instanceOf(SystemPutFileRPCRequestConverter.class));
+                instanceOf(PutFileRPCRequestConverter.class));
     }
 
     public void testGetConverterShouldCacheDefaultConverterForKnownRequest() {
@@ -75,7 +75,7 @@ public class SyncRPCRequestConverterFactoryTest extends TestCase {
 
         final IRPCRequestConverter converter =
                 factory.getConverterForRequest(msg1);
-        assertThat("SystemPutFileRPCRequestConverter isn't cached",
+        assertThat("PutFileRPCRequestConverter isn't cached",
                 factory.getConverterForRequest(msg2), sameInstance(converter));
     }
 

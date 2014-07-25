@@ -10,7 +10,7 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.converter.IRPCRequestConverterFactory;
-import com.ford.syncV4.proxy.converter.SystemPutFileRPCRequestConverter;
+import com.ford.syncV4.proxy.converter.PutFileRPCRequestConverter;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
 import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.TestCommon;
@@ -89,7 +89,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
 
         handlerMock = mock(IOnSystemRequestHandler.class);
 
-        final SystemPutFileRPCRequestConverter converter = new SystemPutFileRPCRequestConverter();
+        final PutFileRPCRequestConverter converter = new PutFileRPCRequestConverter();
         maxDataSize = 32;
         converter.setMaxDataSize(maxDataSize);
         IRPCRequestConverterFactory factoryMock = mock(IRPCRequestConverterFactory.class);

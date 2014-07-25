@@ -2,15 +2,14 @@ package com.ford.syncV4.proxy.converter;
 
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.Names;
-import com.ford.syncV4.proxy.rpc.PutFile;
 
 /**
  * The default Sync factory.
  *
  * Created by enikolsky on 2014-01-20.
  */
-public class SyncRPCRequestConverterFactory
-        implements IRPCRequestConverterFactory {
+public class SyncRPCRequestConverterFactory implements IRPCRequestConverterFactory {
+
     private IRPCRequestConverter defaultConverter;
     private IRPCRequestConverter systemPutFileConverter;
 
@@ -21,12 +20,8 @@ public class SyncRPCRequestConverterFactory
         final String functionName = request.getFunctionName();
 
         if (Names.PutFile.equals(functionName)) {
-            PutFile putFile = (PutFile) request;
-            final Boolean isSystemFile = putFile.getSystemFile();
-            if ((isSystemFile != null) && isSystemFile) {
-                converter = getSystemPutFileConverter();
-            }
-        }else if ( Names.internalTestSecurityError.equals(functionName)){
+            converter = getSystemPutFileConverter();
+        } else if (Names.internalTestSecurityError.equals(functionName)) {
             converter = getSecureErrorRPCRequestConverter();
         }
 
@@ -43,7 +38,7 @@ public class SyncRPCRequestConverterFactory
 
     private IRPCRequestConverter getSystemPutFileConverter() {
         if (systemPutFileConverter == null) {
-            systemPutFileConverter = new SystemPutFileRPCRequestConverter();
+            systemPutFileConverter = new PutFileRPCRequestConverter();
         }
 
         return systemPutFileConverter;
@@ -52,5 +47,4 @@ public class SyncRPCRequestConverterFactory
     private IRPCRequestConverter getSecureErrorRPCRequestConverter() {
         return new SecureErrorRPCRequestConverter();
     }
-
 }

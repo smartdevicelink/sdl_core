@@ -726,7 +726,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onOnHMIStatus(String appId, OnHMIStatus notification) {
-        //Logger.d(TAG + " OnHMIStatusChange AppId:" + appId);
+        Logger.d(TAG + " OnHMIStatusChange to:" + notification.getHmiLevel());
 
         createDebugMessageForAdapter(appId, notification);
 

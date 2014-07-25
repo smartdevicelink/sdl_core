@@ -3444,7 +3444,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
         @Override
         public void onProtocolMessageReceived(ProtocolMessage msg) {
-            Logger.d("ProtocolMessageReceived:" + msg);
+            //Logger.d("ProtocolMessageReceived:" + msg);
 
             // do not put these messages into queue
             if (msg.getServiceType() == ServiceType.Heartbeat) {

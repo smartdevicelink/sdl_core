@@ -6,7 +6,6 @@ import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.proxy.RPCRequest;
-import com.ford.syncV4.util.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,28 +23,53 @@ public class DefaultRPCRequestConverter implements IRPCRequestConverter {
 
     @Override
     public List<ProtocolMessage> getProtocolMessages(RPCRequest request,
-                                                     byte sessionID,
+                                                     byte sessionId,
                                                      IJsonRPCMarshaller marshaller,
                                                      byte protocolVersion) {
-        //Logger.d(CLASS_NAME + " DefaultMarshaller converter: " + marshaller);
 
+        List<ProtocolMessage> messagesList = new ArrayList<ProtocolMessage>(1);
+        messagesList.add(createProtocolMessage(request, sessionId, protocolVersion, MessageType.RPC,
+                ServiceType.RPC, request.getBulkData(), marshaller));
+        return messagesList;
+    }
+
+    /**
+     * Factory method to convert {@link com.ford.syncV4.proxy.RPCRequest} into
+     * {@link com.ford.syncV4.protocol.ProtocolMessage}
+     *
+     * @param request         {@link com.ford.syncV4.proxy.RPCRequest} object
+     * @param sessionId       Session Id
+     * @param protocolVersion Version of the used protocol
+     * @param messageType     Type of the Message
+     * @param serviceType     Type of the Service
+     * @param bulkData        Bytes array of the bulk data
+     * @param marshaller      Marshaller to convert {@link com.ford.syncV4.proxy.RPCRequest} into
+     *                        {@link com.ford.syncV4.protocol.ProtocolMessage}
+     *
+     * @return converted {@link com.ford.syncV4.protocol.ProtocolMessage}
+     */
+    public static ProtocolMessage createProtocolMessage(RPCRequest request,
+                                                        byte sessionId,
+                                                        byte protocolVersion,
+                                                        MessageType messageType,
+                                                        ServiceType serviceType,
+                                                        byte[] bulkData,
+                                                        IJsonRPCMarshaller marshaller) {
         byte[] msgBytes = marshaller.marshall(request, protocolVersion);
 
-        ProtocolMessage pm = new ProtocolMessage();
-        pm.setVersion(protocolVersion);
-        pm.setData(msgBytes);
-        pm.setEncrypted(request.isDoEncryption());
-        pm.setSessionID(sessionID);
-        pm.setMessageType(MessageType.RPC);
-        pm.setServiceType(ServiceType.RPC);
-        pm.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
-        pm.setCorrID(request.getCorrelationID());
-        if (request.getBulkData() != null) {
-            pm.setBulkData(request.getBulkData());
+        ProtocolMessage protocolMessage = new ProtocolMessage();
+        protocolMessage.setVersion(protocolVersion);
+        protocolMessage.setData(msgBytes);
+        protocolMessage.setEncrypted(request.isDoEncryption());
+        protocolMessage.setSessionID(sessionId);
+        protocolMessage.setMessageType(messageType);
+        protocolMessage.setServiceType(serviceType);
+        protocolMessage.setFunctionID(FunctionID.getFunctionID(request.getFunctionName()));
+        protocolMessage.setCorrID(request.getCorrelationID());
+        if (bulkData != null) {
+            protocolMessage.setBulkData(bulkData);
         }
 
-        List<ProtocolMessage> res = new ArrayList<ProtocolMessage>(1);
-        res.add(pm);
-        return res;
+        return protocolMessage;
     }
 }
