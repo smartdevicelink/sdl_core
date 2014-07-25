@@ -1023,9 +1023,9 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     ConnectionID connection_id, const ProtocolPacket &packet) {
-  LOG4CXX_INFO_EXT(logger_,
-                   "Protocol version: " <<
-                   static_cast<int>(packet.protocol_version()));
+  LOG4CXX_TRACE(logger_,
+                "Protocol version: " <<
+                static_cast<int>(packet.protocol_version()));
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
   const uint8_t protocol_version = packet.protocol_version();
 
@@ -1045,7 +1045,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     LOG4CXX_WARN_EXT(logger_, "Refused to create service " <<
                      static_cast<int32_t>(service_type) << " type.");
     SendStartSessionNAck(connection_id, packet.session_id(),
-                         packet.protocol_version(), packet.service_type());
+                         protocol_version, packet.service_type());
     return RESULT_OK;
   }
   const uint32_t connection_key =
