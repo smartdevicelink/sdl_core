@@ -36,6 +36,8 @@
 #include "application_manager/message_helper.h"
 #include "utils/file_system.h"
 
+#include <string.h>
+
 namespace application_manager {
 
 namespace commands {
@@ -316,9 +318,11 @@ bool ShowRequest::CheckStringsOfShowRequest() {
         // CheckSyntax without second param(false to default).
         // Requirement. Show with SoftButtons->text contain only whitespace
         if (!CheckSyntax(str)) {
-          LOG4CXX_ERROR(logger_,
+          if (strlen(str)) {
+            LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons text syntax check failed");
-          return false;
+            return false;
+          }
         }
       }
 
