@@ -266,7 +266,11 @@ int TransportManagerImpl::SendMessageToDevice(const RawMessagePtr message) {
         "TransportManagerImpl::Disconnect: Connection is to shut down.");
     return E_CONNECTION_IS_TO_SHUTDOWN;
   }
-
+#ifdef TIME_TESTER
+  if (metric_observer_) {
+    metric_observer_->StartRawMsg(message.get());
+  }
+#endif  // TIME_TESTER
   this->PostMessage(message);
   LOG4CXX_INFO(logger_, "Message posted");
   return E_SUCCESS;
@@ -666,6 +670,11 @@ void TransportManagerImpl::EventListenerThread() {
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_DONE: {
           LOG4CXX_INFO(logger_, "Event ON_SEND_DONE");
+#ifdef TIME_TESTER
+          if (metric_observer_) {
+            metric_observer_->StopRawMsg(event.event_data.get());
+          }
+#endif  // TIME_TESTER
           if (connection == NULL) {
             LOG4CXX_ERROR(logger_, "Connection ('" << event.device_uid << ", "
                                                    << event.application_id
@@ -683,6 +692,11 @@ void TransportManagerImpl::EventListenerThread() {
         }
         case TransportAdapterListenerImpl::EventTypeEnum::ON_SEND_FAIL: {
           LOG4CXX_INFO(logger_, "Event ON_SEND_FAIL");
+#ifdef TIME_TESTER
+          if (metric_observer_) {
+            metric_observer_->StopRawMsg(event.event_data.get());
+          }
+#endif  // TIME_TESTER
           if (connection == NULL) {
             LOG4CXX_ERROR(logger_, "Connection ('" << event.device_uid << ", "
                                                    << event.application_id

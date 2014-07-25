@@ -1,4 +1,5 @@
 [CW30]
+* SyncProxyTester:Ignoring pauses in autotest
 + SYNC Mobile SDK | SyncProxyTester: Add possibility to restore encryption state at SPT side
 
 [CW29]

@@ -118,9 +118,9 @@ void UpdateTurnListRequest::Run() {
             navigation_text;
       }
     }
-
-    msg_params[strings::app_id] = app->app_id();
   }
+
+  msg_params[strings::app_id] = app->app_id();
 
   if ((*message_)[strings::msg_params].keyExists(strings::turn_list) ||
       (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {

@@ -279,4 +279,15 @@ public class MessageFrameAssembler {
         return (message.getRPCType() == ProtocolMessage.RPCTYPE_RESPONSE) &&
                 (message.getFunctionID() == FunctionID.getFunctionID(Names.UnregisterAppInterface));
     }
+
+    @Override
+    public String toString() {
+        return "MessageFrameAssembler{" +
+                "hasFirstFrame=" + hasFirstFrame +
+                ", hasSecondFrame=" + hasSecondFrame +
+                ", mProtocolSecureManager=" + mProtocolSecureManager +
+                ", mMessageFrameAssemblerListener=" + mMessageFrameAssemblerListener +
+                ", accumulator=" + accumulator +
+                '}';
+    }
 }

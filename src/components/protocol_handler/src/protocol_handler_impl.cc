@@ -361,6 +361,9 @@ void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
 
 void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
                                                  bool final_message) {
+#ifdef TIME_TESTER
+    const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
+#endif  // TIME_TESTER
   LOG4CXX_TRACE_ENTER(logger_);
   if (!message) {
     LOG4CXX_ERROR(logger_,
@@ -377,6 +380,16 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
         " ISessionObserver doesn't exist.");
     return;
   }
+  uint32_t connection_handle = 0;
+  uint8_t sessionID = 0;
+  session_observer_->PairFromKey(message->connection_key(), &connection_handle,
+                                 &sessionID);
+  uint32_t message_id = message_counters_[sessionID];
+#ifdef TIME_TESTER
+    if (metric_observer_) {
+      metric_observer_->StartMessageProcess(message_id, start_time);
+    }
+#endif  // TIME_TESTER
 
   const uint32_t header_size = (PROTOCOL_VERSION_1 == message->protocol_version())
       ? PROTOCOL_HEADER_V1_SIZE : PROTOCOL_HEADER_V2_SIZE;
@@ -392,10 +405,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
 #endif  // ENABLE_SECURITY
   DCHECK(MAXIMUM_FRAME_DATA_SIZE > maxDataSize);
 
-  uint32_t connection_handle = 0;
-  uint8_t sessionID = 0;
-  session_observer_->PairFromKey(message->connection_key(), &connection_handle,
-                                 &sessionID);
+
 
   if (message->data_size() <= maxDataSize) {
     RESULT_CODE result = SendSingleFrameMessage(connection_handle, sessionID,
@@ -424,6 +434,16 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
           "ProtocolHandler failed to send multiframe messages.");
     }
   }
+#ifdef TIME_TESTER
+      if (metric_observer_) {
+        PHMetricObserver::MessageMetric *metric
+            = new PHMetricObserver::MessageMetric();
+        metric->message_id = message_id;
+        metric->connection_key = message->connection_key();
+        metric->raw_msg = message;
+        metric_observer_->EndMessageProcess(metric);
+      }
+#endif
   LOG4CXX_TRACE_EXIT(logger_);
 }
 

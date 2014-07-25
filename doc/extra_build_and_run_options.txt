@@ -35,22 +35,23 @@
 
 6) Additional cmake flags:
   1: EXTENDED_POLICY_FLAG
-      Build with specific features and extended functionality
       By default it is OFF.
-      You can switch it off with -DEXTENDED_POLICY option on cmake
-      Policy should not be delivered to GENIVI
+      Build with specific features and extended functionality
+        Note: Policy should not be delivered to GENIVI
+
   2: EXTENDED_MEDIA_MODE
       By default it is OFF.
       Turn on and off extended Madia Manager features relates to PulseAudio A2DP and GStreamer
+
   3: ENABLE_SECURITY
-    By default it is ON.
-    Security Ford protocol protection
+      By default it is ON.
+      Security Ford protocol protection
 
   4: CMAKE_BUILD_TYPE
-    By default it is Debug.
-    Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel
-    For release build use "-D CMAKE_BUILD_TYPE=Release"
-      Note: For QNX+QtHMI build flag "-DCMAKE_BUILD_TYPE=Release" is plainly required
+      By default it is Debug.
+      Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel
+      For release build use "-D CMAKE_BUILD_TYPE=Release"
+        Note: For QNX+QtHMI build flag "-DCMAKE_BUILD_TYPE=Release" is plainly required
 
 7) To configure  project for eclipse support use:
     cmake -G "Eclipse CDT4 - Unix Makefiles" <PATH_TO_SRC>  
@@ -101,7 +102,11 @@
   11.3 Execute
         # sync
         # sync
-  11.4 Modify /fs/mp/scripts/startup_gf.sh add there:
-        on -C0 -p 18 $GF_APPS/SmartDeviceLink > /dev/null &
+  11.4 Chech if startup skript runs SDL.
+  11.5 If you want to collect log, change startul SDL line
+        from:
+             on -C0 -p 12 SmartDeviceLink > /dev/null &
+        to
+            on -C0 -p 12 SmartDeviceLink >  /fs/rwdata/{PATH_TO_FILE}&
   11.5 Restart target
 

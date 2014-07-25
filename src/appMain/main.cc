@@ -61,6 +61,7 @@
 // ----------------------------------------------------------------------------
 
 CREATE_LOGGERPTR_GLOBAL(logger, "appMain")
+extern const char* gitVersion;
 namespace {
 
 const std::string kBrowser = "/usr/bin/chromium-browser";
@@ -139,6 +140,7 @@ int32_t main(int32_t argc, char** argv) {
   // --------------------------------------------------------------------------
   // Logger initialization
   INIT_LOGGER("log4cxx.properties");
+  LOG4CXX_INFO(logger, gitVersion);
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
