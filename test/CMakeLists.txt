@@ -42,6 +42,7 @@ set (INCLUDE_DIR
   ../test/components/utils/include
   ../test/components/json_handler/include
   ../test/components/smart_objects
+  ../test/components/smart_objects/SchemaItem
   ../test/components/transport_manager
   ../test/components/connection_handler/include
   ../test/components/security_manager/include

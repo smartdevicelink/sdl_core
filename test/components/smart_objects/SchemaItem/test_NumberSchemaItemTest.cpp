@@ -39,6 +39,8 @@
 
 namespace test { namespace components { namespace SmartObjects { namespace SchemaItem { namespace NumberSchemaItemTest {
 
+using NsSmartDeviceLink::NsSmartObjects::ISchemaItemPtr;
+
     /**
      * Test NumberSchemaItem as INT with no default value
      *
@@ -51,8 +53,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<int>> item =
-            TNumberSchemaItem<int>::create(); // No default value, no min, no max
+        ISchemaItemPtr item = TNumberSchemaItem<int>::create(); // No default value, no min, no max
 
         //Object int
         obj = 5;
@@ -96,8 +97,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<int>> item =
-            TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(10)); // No default value, no max value
+        ISchemaItemPtr item = TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(10)); // No default value, no max value
 
         //Object int correct
         obj = 15;
@@ -130,10 +130,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<int>> item =
-            TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(),
-                TSchemaItemParameter<int>(749)
-            ); // No default value, no min value
+        ISchemaItemPtr item = TNumberSchemaItem<int>::create(
+              TSchemaItemParameter<int>(), TSchemaItemParameter<int>(749)  ); // No default value, no min value
 
         //Object int correct
         obj = 749;
@@ -166,10 +164,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<int>> item =
-            TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(-949),
-                TSchemaItemParameter<int>(749)
-            ); // No default value
+        ISchemaItemPtr item = TNumberSchemaItem<int>::create(
+              TSchemaItemParameter<int>(-949), TSchemaItemParameter<int>(749) ); // No default value
 
         //Object int correct
         obj = 749;
@@ -210,11 +206,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<int>> item =
-            TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(-12000),
-                TSchemaItemParameter<int>(100),
-                TSchemaItemParameter<int>(-38)
-            );
+        ISchemaItemPtr item = TNumberSchemaItem<int>::create(
+              TSchemaItemParameter<int>(-12000),
+              TSchemaItemParameter<int>(100),
+              TSchemaItemParameter<int>(-38));
 
         //Object int correct
         obj = -12000;
@@ -271,11 +266,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<int>> item =
-            TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(90),
-                TSchemaItemParameter<int>(100),
-                TSchemaItemParameter<int>(50)
-            ); // Default value out of range
+        ISchemaItemPtr item = TNumberSchemaItem<int>::create(
+              TSchemaItemParameter<int>(90),
+              TSchemaItemParameter<int>(100),
+              TSchemaItemParameter<int>(50)); // Default value out of range
 
         //Object int correct
         obj = 90;
@@ -329,11 +323,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<int>> item =
-            TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(-120),
-                TSchemaItemParameter<int>(100),
-                TSchemaItemParameter<int>(-38)
-            );
+        ISchemaItemPtr item = TNumberSchemaItem<int>::create(
+              TSchemaItemParameter<int>(-120),
+              TSchemaItemParameter<int>(100),
+              TSchemaItemParameter<int>(-38));
 
         obj["min"] = -120;
         obj["out_of_min"] = -121;
@@ -376,11 +369,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<int>> item =
-            TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(-120),
-                TSchemaItemParameter<int>(100),
-                TSchemaItemParameter<int>(-38)
-            );
+        ISchemaItemPtr item = TNumberSchemaItem<int>::create(
+              TSchemaItemParameter<int>(-120),
+              TSchemaItemParameter<int>(100),
+              TSchemaItemParameter<int>(-38) );
 
         obj[0] = -121;
         obj[1] = -120;
@@ -432,8 +424,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<double>> item =
-            TNumberSchemaItem<double>::create(); // No default value, no min, no max
+        ISchemaItemPtr item = TNumberSchemaItem<double>::create(); // No default value, no min, no max
 
         //Object int
         obj = 5.79;
@@ -479,8 +470,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<double>> item =
-            TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(10.0)); // No default value, no max value
+        ISchemaItemPtr item = TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(10.0)); // No default value, no max value
 
         //Object double correct
         obj = 10.000001;
@@ -513,10 +503,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<double>> item =
-            TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(),
-                TSchemaItemParameter<double>(749.0)
-            ); // No default value, no min value
+        ISchemaItemPtr item = TNumberSchemaItem<double>::create(
+              TSchemaItemParameter<double>(), TSchemaItemParameter<double>(749.0)); // No default value, no min value
 
         //Object double correct
         obj = 749.0;
@@ -549,10 +537,8 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<double>> item =
-            TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(-949.0),
-                TSchemaItemParameter<double>(749.0)
-            ); // No default value
+        ISchemaItemPtr item = TNumberSchemaItem<double>::create(
+              TSchemaItemParameter<double>(-949.0), TSchemaItemParameter<double>(749.0)); // No default value
 
         //Object double correct
         obj = 749.0;
@@ -593,11 +579,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<double>> item =
-            TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(-12000.0),
-                TSchemaItemParameter<double>(100.0),
-                TSchemaItemParameter<double>(-38.0)
-            );
+        ISchemaItemPtr item = TNumberSchemaItem<double>::create(
+              TSchemaItemParameter<double>(-12000.0),
+              TSchemaItemParameter<double>(100.0),
+              TSchemaItemParameter<double>(-38.0));
 
         //Object double correct
         obj = -12000.0;
@@ -654,11 +639,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<double>> item =
-            TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(90.0),
-                TSchemaItemParameter<double>(100.0),
-                TSchemaItemParameter<double>(50.0)
-            ); // Default value out of range
+        ISchemaItemPtr item = TNumberSchemaItem<double>::create(
+              TSchemaItemParameter<double>(90.0),
+              TSchemaItemParameter<double>(100.0),
+              TSchemaItemParameter<double>(50.0)); // Default value out of range
 
         //Object double correct
         obj = 90.0;
@@ -712,11 +696,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<double>> item =
-            TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(-120.0),
-                TSchemaItemParameter<double>(100.0),
-                TSchemaItemParameter<double>(-38.0)
-            );
+        ISchemaItemPtr item = TNumberSchemaItem<double>::create(
+              TSchemaItemParameter<double>(-120.0),
+              TSchemaItemParameter<double>(100.0),
+              TSchemaItemParameter<double>(-38.0));
 
         obj["min"] = -120.0;
         obj["out_of_min"] = -120.001;
@@ -758,11 +741,10 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         SmartObject obj;
 
-        utils::SharedPtr<TNumberSchemaItem<double>> item =
-            TNumberSchemaItem<double>::create(TSchemaItemParameter<double>(-120.0),
-                TSchemaItemParameter<double>(100.0),
-                TSchemaItemParameter<double>(-38.0)
-            );
+        ISchemaItemPtr item = TNumberSchemaItem<double>::create(
+              TSchemaItemParameter<double>(-120.0),
+              TSchemaItemParameter<double>(100.0),
+              TSchemaItemParameter<double>(-38.0));
 
         obj[0] = -120.001;
         obj[1] = -120.0;
@@ -803,9 +785,3 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     }
 
 }}}}}
-
-int main(int argc, char **argv) {
-  //PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
-  ::testing::InitGoogleMock(&argc, argv);
-  return RUN_ALL_TESTS();
-}

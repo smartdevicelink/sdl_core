@@ -90,7 +90,8 @@ enum eType {
 class ObjectSchemaItemTest : public ::testing::Test {
   protected:
   // Create SmartObjectSchema for test object
-  utils::SharedPtr<ISchemaItem> initObjectSchemaItem(void) {
+
+  ISchemaItemPtr initObjectSchemaItem() {
     std::set<TestType::eType> resultCode_allowedEnumSubsetValues;
     resultCode_allowedEnumSubsetValues.insert(
         TestType::APPLICATION_NOT_REGISTERED);
@@ -106,25 +107,25 @@ class ObjectSchemaItemTest : public ::testing::Test {
     resultCode_allowedEnumSubsetValues.insert(TestType::GENERIC_ERROR);
     resultCode_allowedEnumSubsetValues.insert(TestType::DISALLOWED);
 
-    utils::SharedPtr<ISchemaItem> success_SchemaItem =
+    ISchemaItemPtr success_SchemaItem =
       CBoolSchemaItem::create(TSchemaItemParameter<bool>());
 
-    utils::SharedPtr<ISchemaItem> resultCode_SchemaItem =
+    ISchemaItemPtr resultCode_SchemaItem =
       TEnumSchemaItem<TestType::eType>::create(
         resultCode_allowedEnumSubsetValues
         , TSchemaItemParameter<TestType::eType>());
 
-    utils::SharedPtr<ISchemaItem> info_SchemaItem =
+    ISchemaItemPtr info_SchemaItem =
       CStringSchemaItem::create(TSchemaItemParameter<size_t>(0)
                                 , TSchemaItemParameter<size_t>(10)
                                 , TSchemaItemParameter<std::string>());
 
-    utils::SharedPtr<ISchemaItem> tryAgainTime_SchemaItem =
+    ISchemaItemPtr tryAgainTime_SchemaItem =
       TNumberSchemaItem<int>::create(TSchemaItemParameter<int>(0)
                                       , TSchemaItemParameter<int>(2000)
                                       , TSchemaItemParameter<int>());
 
-    std::map<std::string, ObjectOptionalSchemaItem::SMember> schemaMembersMap;
+    ObjectOptionalSchemaItem::Members schemaMembersMap;
 
     schemaMembersMap["success"] =
         ObjectOptionalSchemaItem::SMember(success_SchemaItem, true);
@@ -135,7 +136,7 @@ class ObjectSchemaItemTest : public ::testing::Test {
     schemaMembersMap["tryAgainTime"] =
         ObjectOptionalSchemaItem::SMember(tryAgainTime_SchemaItem, true);
 
-    std::map<std::string, ObjectOptionalSchemaItem::SMember> paramsMembersMap;
+    ObjectOptionalSchemaItem::Members paramsMembersMap;
     paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_FUNCTION_ID] =  // NOLINT
       ObjectOptionalSchemaItem::SMember(TEnumSchemaItem<TestType::eType>::create(resultCode_allowedEnumSubsetValues), true);  // NOLINT
     paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MESSAGE_TYPE] =  // NOLINT
@@ -151,7 +152,7 @@ class ObjectSchemaItemTest : public ::testing::Test {
     paramsMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PROTOCOL_TYPE] =  // NOLINT
       ObjectOptionalSchemaItem::SMember(TNumberSchemaItem<int>::create(), true);  // NOLINT
 
-    std::map<std::string, ObjectOptionalSchemaItem::SMember> rootMembersMap;
+    ObjectOptionalSchemaItem::Members rootMembersMap;
     rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS] =
       ObjectOptionalSchemaItem::SMember(ObjectOptionalSchemaItem::create(schemaMembersMap), true);  // NOLINT
     rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_PARAMS] =
@@ -162,18 +163,17 @@ class ObjectSchemaItemTest : public ::testing::Test {
 
   //------------------------------------------------------------------------
 
-  utils::SharedPtr<ISchemaItem> initObjectOptonalSchemaItem(
-      bool isOtptionalMandatory = false) {
+  ISchemaItemPtr initObjectOptonalSchemaItem(bool isOtptionalMandatory = false) {
   // NOLINT
-    utils::SharedPtr<ISchemaItem> priority_item =
+    ISchemaItemPtr priority_item =
       CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
                                 TSchemaItemParameter<size_t>(100),
                                 TSchemaItemParameter<std::string>("NONE"));
 
-    utils::SharedPtr<ISchemaItem> groups_item =
+    ISchemaItemPtr groups_item =
       CArraySchemaItem::create(CStringSchemaItem::create());
 
-    utils::SharedPtr<ISchemaItem> nicknames_item =
+    ISchemaItemPtr nicknames_item =
       CArraySchemaItem::create(CStringSchemaItem::create());
 
     std::map<std::string, CObjectSchemaItem::SMember> app_id_map;
@@ -184,7 +184,7 @@ class ObjectSchemaItemTest : public ::testing::Test {
     std::map<std::string, CObjectSchemaItem::SMember> app_policies_map;
     // non mandatory optional parameter
     app_policies_map[ObjectOptionalSchemaItem::kOptionalGenericFieldName] =
-      CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map), isOtptionalMandatory); // NOLINT
+      CObjectSchemaItem::SMember(CObjectSchemaItem::create(app_id_map), isOtptionalMandatory);
 
     std::map<std::string, CObjectSchemaItem::SMember> policy_table_map;
     policy_table_map["app_policies"] =
@@ -201,18 +201,17 @@ class ObjectSchemaItemTest : public ::testing::Test {
 
   //------------------------------------------------------------------------
 
-  utils::SharedPtr<ISchemaItem> initObjectOptonalSchemaItemAlongWithStaticMember(  // NOLINT
-      bool isOtptionalMandatory = false) {
+  ISchemaItemPtr initObjectOptonalSchemaItemAlongWithStaticMember(bool isOtptionalMandatory = false) {
   // NOLINT
-    utils::SharedPtr<ISchemaItem> priority_item =
+    ISchemaItemPtr priority_item =
       CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
                                 TSchemaItemParameter<size_t>(100),
                                 TSchemaItemParameter<std::string>("NONE"));
 
-    utils::SharedPtr<ISchemaItem> groups_item =
+    ISchemaItemPtr groups_item =
       CArraySchemaItem::create(CStringSchemaItem::create());
 
-    utils::SharedPtr<ISchemaItem> nicknames_item =
+    ISchemaItemPtr nicknames_item =
       CArraySchemaItem::create(CStringSchemaItem::create());
 
     std::map<std::string, CObjectSchemaItem::SMember> app_id_map;
@@ -246,8 +245,7 @@ class ObjectSchemaItemTest : public ::testing::Test {
 
   //------------------------------------------------------------------------
 
-  utils::SharedPtr<ISchemaItem>
-    initTestSchemaWithEnum(bool isOtptionalMandatory = false) {
+  ISchemaItemPtr initTestSchemaWithEnum(bool isOtptionalMandatory = false) {
   // NOLINT
     std::set<Priority::eType> allowed_priority;
     allowed_priority.insert(Priority::PRIORITY_COMMUNICATION);
@@ -256,13 +254,13 @@ class ObjectSchemaItemTest : public ::testing::Test {
     allowed_priority.insert(Priority::PRIORITY_NONE);
     allowed_priority.insert(Priority::PRIORITY_NORMAL);
 
-    utils::SharedPtr<ISchemaItem> priority_item =
+    ISchemaItemPtr priority_item =
       TEnumSchemaItem<Priority::eType>::create(allowed_priority);
 
-    utils::SharedPtr<ISchemaItem> groups_item =
+    ISchemaItemPtr groups_item =
       CArraySchemaItem::create(CStringSchemaItem::create());
 
-    utils::SharedPtr<ISchemaItem> nicknames_item =
+    ISchemaItemPtr nicknames_item =
       CArraySchemaItem::create(CStringSchemaItem::create());
 
     std::map<std::string, CObjectSchemaItem::SMember> app_id_map;
@@ -297,7 +295,7 @@ class ObjectSchemaItemTest : public ::testing::Test {
 
 TEST_F(ObjectSchemaItemTest, test_too_few_object_params) {
   SmartObject obj;
-  utils::SharedPtr<ISchemaItem> item = initObjectSchemaItem();
+  ISchemaItemPtr item = initObjectSchemaItem();
 
   obj[S_PARAMS][S_MESSAGE_TYPE] = "request";
   obj[S_PARAMS][S_FUNCTION_ID] = "some function";
@@ -312,13 +310,14 @@ TEST_F(ObjectSchemaItemTest, test_too_few_object_params) {
 
 TEST_F(ObjectSchemaItemTest, test_too_many_object_params) {
   SmartObject srcObj;
-  utils::SharedPtr<ISchemaItem> item = initObjectSchemaItem();
+  ISchemaItemPtr item = initObjectSchemaItem();
 
   srcObj[S_PARAMS][S_MESSAGE_TYPE] = 1;
   srcObj[S_PARAMS][S_FUNCTION_ID] = 3;
   srcObj[S_PARAMS][S_CORRELATION_ID] = 13;
   srcObj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
   srcObj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
+  // unexpected parameters appId/appName and others
   srcObj[S_MSG_PARAMS]["appId"] = "APP ID";
   srcObj[S_MSG_PARAMS]["appName"] = "APP NAME";
   srcObj[S_MSG_PARAMS]["appType"][0] = "SYSTEM";
@@ -333,8 +332,7 @@ TEST_F(ObjectSchemaItemTest, test_too_many_object_params) {
   srcObj[S_MSG_PARAMS]["ttsName"][0]["type"] = "TEXT";
   srcObj[S_MSG_PARAMS]["vrSynonyms"][0] = "Synonym1";
   srcObj[S_MSG_PARAMS]["vrSynonyms"][1] = "Synonym2";
-  srcObj[S_MSG_PARAMS]["null"] =
-    NsSmartDeviceLink::NsSmartObjects::SmartObject();
+  srcObj[S_MSG_PARAMS]["null"] = NsSmartDeviceLink::NsSmartObjects::SmartObject();
   srcObj[S_MSG_PARAMS]["double"] = -0.1234;
   srcObj[S_MSG_PARAMS]["success"] = true;
   srcObj[S_MSG_PARAMS]["resultCode"] = 2;
@@ -347,8 +345,8 @@ TEST_F(ObjectSchemaItemTest, test_too_many_object_params) {
 
 
 TEST_F(ObjectSchemaItemTest, test_object_with_correct_params) {
-  SmartObject obj, dstObj;
-  utils::SharedPtr<ISchemaItem> item = initObjectSchemaItem();
+  SmartObject obj;
+  ISchemaItemPtr item = initObjectSchemaItem();
 
   obj[S_PARAMS][S_MESSAGE_TYPE] = "APPLICATION_NOT_REGISTERED";
   obj[S_PARAMS][S_FUNCTION_ID] = "GENERIC_ERROR";
@@ -360,6 +358,7 @@ TEST_F(ObjectSchemaItemTest, test_object_with_correct_params) {
   obj[S_MSG_PARAMS]["tryAgainTime"] = 322;
 
   int resultType = item->validate(obj);
+  // S_FUNCTION_ID is string before schema apply
   EXPECT_EQ(Errors::INVALID_VALUE, resultType);
 
   item->applySchema(obj);
@@ -387,7 +386,7 @@ TEST_F(ObjectSchemaItemTest, test_object_with_correct_params) {
 
 TEST_F(ObjectSchemaItemTest, test_object_with_incorrect_params) {
   SmartObject obj;
-  utils::SharedPtr<ISchemaItem> item = initObjectSchemaItem();
+  ISchemaItemPtr item = initObjectSchemaItem();
 
   obj[S_PARAMS][S_MESSAGE_TYPE] = "request";
   obj[S_PARAMS][S_FUNCTION_ID] = "some function";
@@ -403,8 +402,36 @@ TEST_F(ObjectSchemaItemTest, test_object_with_incorrect_params) {
   EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 }
 
+TEST_F(ObjectSchemaItemTest, full_fake_object) {
+
+  CObjectSchemaItem::Members schemaMembersMap;
+  schemaMembersMap["schema_param1"] = CObjectSchemaItem::SMember(
+        TNumberSchemaItem<int>::create(), false);
+  schemaMembersMap["schema_param2"] = CObjectSchemaItem::SMember(
+        TNumberSchemaItem<int>::create(), false);
+  schemaMembersMap["schema_param3"] = CObjectSchemaItem::SMember(
+        TNumberSchemaItem<int>::create(), false);
+
+  CObjectSchemaItem::Members rootMembersMap;
+  rootMembersMap[NsSmartDeviceLink::NsJSONHandler::strings::S_MSG_PARAMS] =
+    CObjectSchemaItem::SMember(CObjectSchemaItem::create(schemaMembersMap), true);
+
+  const ISchemaItemPtr item = CObjectSchemaItem::create(rootMembersMap);
+
+  smartobj::SmartObject object;
+  object[S_MSG_PARAMS]["unknown_parameter1"] = 7;
+  object[S_MSG_PARAMS]["unknown_parameter2"] = 6;
+  object[S_MSG_PARAMS]["unknown_parameter3"] = "sliderHeader";
+
+  EXPECT_EQ(Errors::ERROR, item->validate(object));
+
+  object[S_MSG_PARAMS]["param1"] = 0;
+
+  EXPECT_EQ(Errors::OK, item->validate(object));
+}
+
 TEST_F(ObjectSchemaItemTest, test_object_with_optional_params) {
-  std::string json_str(
+  const std::string json_str(
   "{\n"
     "  \"policy_table\":{\n"
     "    \"app_policies\": {\n"
@@ -428,11 +455,11 @@ TEST_F(ObjectSchemaItemTest, test_object_with_optional_params) {
 
   ASSERT_EQ(true, fromstring_result);
 
-  utils::SharedPtr<ISchemaItem> schema1 = initObjectOptonalSchemaItem(false);
+  ISchemaItemPtr schema1 = initObjectOptonalSchemaItem(false);
   int resultType = schema1->validate(object);
   EXPECT_EQ(Errors::OK, resultType);
 
-  utils::SharedPtr<ISchemaItem> schema2 = initObjectOptonalSchemaItem(true);
+  ISchemaItemPtr schema2 = initObjectOptonalSchemaItem(true);
   resultType = schema2->validate(object);
   EXPECT_EQ(Errors::OK, resultType);
 
@@ -479,8 +506,8 @@ TEST_F(ObjectSchemaItemTest, test_object_with_optional_params_failed_validation)
 
   ASSERT_EQ(true, fromstring_result);
 
-  utils::SharedPtr<ISchemaItem> schema1 = initObjectOptonalSchemaItem(false);
-  utils::SharedPtr<ISchemaItem> schema2 = initObjectOptonalSchemaItem(true);
+  ISchemaItemPtr schema1 = initObjectOptonalSchemaItem(false);
+  ISchemaItemPtr schema2 = initObjectOptonalSchemaItem(true);
 
   /////////////////////////////////////////////
   // Below tests with failed validation.
@@ -488,7 +515,7 @@ TEST_F(ObjectSchemaItemTest, test_object_with_optional_params_failed_validation)
 
   // Schema is created in initObjectOptonalSchemaItemAlongWithStaticMember()
   // that describes another object (object from TEST_F(test_object_with_optional_and_static_param))  // NOLINT
-  utils::SharedPtr<ISchemaItem> schema_item_another_object =
+  ISchemaItemPtr schema_item_another_object =
     initObjectOptonalSchemaItemAlongWithStaticMember();
   int resultType = schema_item_another_object->validate(object);
   // mising mandatory parameter policy_table|app_policies|default
@@ -502,7 +529,7 @@ TEST_F(ObjectSchemaItemTest, test_object_with_optional_params_failed_validation)
   // Remove optional parameter.
   // Set optional parameter as mandatory in schema.
   object["policy_table"]["app_policies"].erase("789");
-  utils::SharedPtr<ISchemaItem> schema_optional_mandatory =
+  ISchemaItemPtr schema_optional_mandatory =
     initObjectOptonalSchemaItem(true);
   resultType = schema_optional_mandatory->validate(object);
   EXPECT_EQ(Errors::MISSING_MANDATORY_UNTITLED_PARAMETER, resultType);
@@ -539,12 +566,12 @@ TEST_F(ObjectSchemaItemTest, test_object_with_optional_and_static_param) {
 
   ASSERT_EQ(true, fromstring_result);
 
-  utils::SharedPtr<ISchemaItem> schema1 =
+  ISchemaItemPtr schema1 =
     initObjectOptonalSchemaItemAlongWithStaticMember(false);
   int resultType = schema1->validate(object);
   EXPECT_EQ(Errors::OK, resultType);
 
-  utils::SharedPtr<ISchemaItem> schema2 =
+  ISchemaItemPtr schema2 =
     initObjectOptonalSchemaItemAlongWithStaticMember(true);
   resultType = schema2->validate(object);
   EXPECT_EQ(Errors::OK, resultType);
@@ -583,32 +610,23 @@ TEST_F(ObjectSchemaItemTest, test_strings_to_enum_convertion) {
 
   ASSERT_EQ(true, fromstring_result);
 
-  utils::SharedPtr<ISchemaItem> schema1 = initTestSchemaWithEnum(false);
+  ISchemaItemPtr schema1 = initTestSchemaWithEnum(false);
   schema1->applySchema(object);
-  int resultType = schema1->validate(object);
-  EXPECT_EQ(Errors::OK, resultType);
+  EXPECT_EQ(Errors::OK, schema1->validate(object));
   EXPECT_EQ(Priority::PRIORITY_NORMAL,
     object["policy_table"]["app_policies"]["789"]["priority"].asInt());
-
   EXPECT_EQ(Priority::PRIORITY_NONE,
     object["policy_table"]["app_policies"]["default"]["priority"].asInt());
 
   schema1->unapplySchema(object);
-  EXPECT_EQ("NORMAL",
-    object["policy_table"]["app_policies"]["789"]["priority"].asString());
-
   EXPECT_EQ("NONE",
     object["policy_table"]["app_policies"]["default"]["priority"].asString());
 
-
-//   utils::SharedPtr<ISchemaItem> schema2 = initTestSchemaWithEnum(true);
-//   resultType = schema2->validate(object);
-//   EXPECT_EQ(Errors::OK, resultType);
+  // Unknown for shema idems will be deleted
+  EXPECT_TRUE(object["policy_table"]["app_policies"]["789"]["priority"].asString().empty());
 }
 
 // ----------------------------------------------------------------------------
-
-
 }  // namespace SchemaItem
 }  // namespace SmartObjects
 }  // namespace components
@@ -693,8 +711,3 @@ EnumConversionHelper<test::components::SmartObjects::SchemaItem::Priority::eType
 
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink
-
-int main(int argc, char** argv) {
-  ::testing::InitGoogleMock(&argc, argv);
-  return RUN_ALL_TESTS();
-}

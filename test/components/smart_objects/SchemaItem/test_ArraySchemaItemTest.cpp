@@ -48,7 +48,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CArraySchemaItem> item = CArraySchemaItem::create(); // No schema item, no min and max size
+        ISchemaItemPtr item = CArraySchemaItem::create(); // No schema item, no min and max size
 
         obj[0] = 38;
         obj[1] = true;
@@ -127,7 +127,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CArraySchemaItem> item = CArraySchemaItem::create(); // No min and max size
+        ISchemaItemPtr item = CArraySchemaItem::create(); // No min and max size
 
         obj[0] = "Some String";
         obj[1] = "true";
@@ -188,7 +188,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CArraySchemaItem> item = CArraySchemaItem::create(
+        ISchemaItemPtr item = CArraySchemaItem::create(
                 CStringSchemaItem::create(TSchemaItemParameter<size_t>(25)),
             TSchemaItemParameter<size_t>(3)); // No max size
 
@@ -220,7 +220,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CArraySchemaItem> item = CArraySchemaItem::create(
+        ISchemaItemPtr item = CArraySchemaItem::create(
                 CStringSchemaItem::create(
                     TSchemaItemParameter<size_t>(),
                     TSchemaItemParameter<size_t>(25)),
@@ -261,7 +261,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CArraySchemaItem> item = CArraySchemaItem::create(
+        ISchemaItemPtr item = CArraySchemaItem::create(
                 CStringSchemaItem::create(
                     TSchemaItemParameter<size_t>(),
                     TSchemaItemParameter<size_t>(25)),
@@ -305,7 +305,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CArraySchemaItem> item = CArraySchemaItem::create(
+        ISchemaItemPtr item = CArraySchemaItem::create(
                 CStringSchemaItem::create(
                     TSchemaItemParameter<size_t>(),
                     TSchemaItemParameter<size_t>(25)),
@@ -347,7 +347,3 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     }
 }}}}}
 
-int main(int argc, char **argv) {
-  ::testing::InitGoogleMock(&argc, argv);
-  return RUN_ALL_TESTS();
-}

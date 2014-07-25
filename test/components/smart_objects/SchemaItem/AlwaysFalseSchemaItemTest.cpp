@@ -47,7 +47,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         SmartObject obj;
 
-        utils::SharedPtr<ISchemaItem> item = CAlwaysFalseSchemaItem::create();
+        ISchemaItemPtr item = CAlwaysFalseSchemaItem::create();
 
         obj = 5;
         int resultType = item->validate(obj);
@@ -89,8 +89,3 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
     }
 }}}}}
-
-int main(int argc, char **argv) {
-  ::testing::InitGoogleMock(&argc, argv);
-  return RUN_ALL_TESTS();
-}

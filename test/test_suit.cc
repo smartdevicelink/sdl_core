@@ -61,6 +61,15 @@
 //#include "SmartObjectConvertionTimeTest.h"
 #include "TSharedPtrTest.h"
 
+// SmartObject Schema tests
+#include "test_BoolSchemaItemTest.cpp"
+#include "test_NumberSchemaItemTest.cpp"
+#include "test_StringSchemaItemTest.cpp"
+#include "test_ArraySchemaItemTest.cpp"
+#include "AlwaysTrueSchemaItemTest.cpp"
+#include "AlwaysFalseSchemaItemTest.cpp"
+#include "object_optional_schema_test.cc"
+
 // #include "jsoncpp/json_reader_test.h"
 // #include "json_handler/smart_schema_draft_test.h"
 // #include "request_watchdog/request_watchdog_test.h"

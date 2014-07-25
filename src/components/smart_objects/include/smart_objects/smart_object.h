@@ -120,7 +120,7 @@ typedef std::vector<uint8_t> SmartBinary;
  * This class act as Variant type from other languages and can be used as primitive type
  * like bool, int32_t, char, double, string and as complex type like array and map.
  **/
-class SmartObject {
+class SmartObject FINAL {
  public:
   /**
    * @brief Constructor.
@@ -396,7 +396,7 @@ class SmartObject {
    *
    * @param InitialValue Initial object value
    **/
-  explicit SmartObject(char* InitialValue);
+  explicit SmartObject(const char* InitialValue);
 
   /**
    * @brief Conversion operator to type: string
@@ -465,13 +465,6 @@ class SmartObject {
   explicit SmartObject(const SmartBinary& InitialValue);
 
   /**
-   * @brief Conversion operator to type: binary
-   *
-   * @return SmartBinary Value of the object converted to binary type or invalid_binary_value if
-   *         conversion is not possible
-   **/
-  // operator SmartBinary() const;
-  /**
    * @brief Returns current object converted to binary
    *
    * @return SmartBinary
@@ -491,7 +484,7 @@ class SmartObject {
    * @param  NewValue New object value
    * @return SmartObject&
    **/
-  SmartObject& operator=(SmartBinary);
+  SmartObject& operator=(const SmartBinary&);
 
   /**
    * @brief Comparison operator for comparing object with binary value
@@ -499,7 +492,7 @@ class SmartObject {
    * @param  Value Value to compare object with
    * @return bool
    **/
-  bool operator==(SmartBinary) const;
+  bool operator==(const SmartBinary&) const;
   /** @} */
 
   /**
@@ -509,7 +502,7 @@ class SmartObject {
   /**
    * @brief Support of array-like access
    *
-   * @param  Index index of element to return
+   * @param  Index index of element to return, on -1 create new element at end
    * @return SmartObject&
    **/
   SmartObject& operator[](int32_t Index);
@@ -526,8 +519,7 @@ class SmartObject {
    *
    * @return Element of array or null object if element can't be provided.
    **/
-  const SmartObject & getElement(size_t Index) const;
-
+  const SmartObject& getElement(size_t Index) const;
   /** @} */
 
   /**
@@ -579,7 +571,7 @@ class SmartObject {
    *
    * @return Element of map or null object if element can't be provided.
    **/
-  const SmartObject & getElement(const std::string & Key) const;
+  const SmartObject& getElement(const std::string& Key) const;
 
   /**
    * @brief Enumerates content of the object when it behaves like a map.
@@ -588,8 +580,12 @@ class SmartObject {
    **/
   std::set<std::string> enumerate() const;
 
-  SmartMap::iterator map_begin() const {return m_data.map_value->begin();}
-  SmartMap::iterator map_end() const {return m_data.map_value->end();}
+  SmartMap::iterator map_begin() const {
+    return m_data.map_value->begin();
+  }
+  SmartMap::iterator map_end() const {
+    return m_data.map_value->end();
+  }
 
   /**
    * @brief Checks for key presense when object is behaves like a map
@@ -597,7 +593,7 @@ class SmartObject {
    * @param Key Key to check presense for
    * @return bool
    **/
-  bool keyExists(const std::string & Key) const;
+  bool keyExists(const std::string& Key) const;
 
   /**
    * @brief Removes element from the map.
@@ -606,7 +602,7 @@ class SmartObject {
    *
    * @return true if success, false if there is no such element in the map
    */
-  bool erase(const std::string & Key);
+  bool erase(const std::string& Key);
   /** @} */
 
   /**
@@ -633,7 +629,7 @@ class SmartObject {
    * @param schema Schema for object validation
    * @return void
    **/
-  void setSchema(CSmartSchema schema);
+  void setSchema(const CSmartSchema& schema);
 
   /**
    * @brief Returns attached schema
@@ -641,7 +637,6 @@ class SmartObject {
    * @return CSmartSchema
    **/
   CSmartSchema getSchema();
-  /** @} */
 
   /**
    * @brief Returns current object type
@@ -663,7 +658,7 @@ class SmartObject {
   size_t length() const;
 
  protected:
-  static std::string OperatorToTransform(const SmartMap::value_type &pair) ;
+  static std::string OperatorToTransform(const SmartMap::value_type& pair);
   /**
    * @name Support of type: int32_t (internal)
    * @{
@@ -782,7 +777,6 @@ class SmartObject {
    * @return int32_t Converted value or invalid_string_value if conversion not possible
    **/
   inline std::string convert_string() const;
-  /** @} */
 
   /**
    * @name Support of type: binary (internal)
@@ -796,7 +790,7 @@ class SmartObject {
    * @param  NewValue New object value
    * @return void
    **/
-  inline void set_value_binary(SmartBinary NewValue);
+  inline void set_value_binary(const SmartBinary& NewValue);
 
   /**
    * @brief Converts object to binary type
@@ -804,25 +798,15 @@ class SmartObject {
    * @return int32_t Converted value or invalid_binary_value if conversion not possible
    **/
   inline SmartBinary convert_binary() const;
-  /** @} */
 
-  /**
-   * @name Array-like interface support (internal)
-   * @{
-   */
   /**
    * @brief Returns SmartObject from internal array data by it's index
    *
    * @param Index Index of element to retrieve
    * @return SmartObject&
    **/
-  SmartObject& handle_array_access(int32_t Index);
-  /** @} */
+  SmartObject& handle_array_access(const int32_t Index);
 
-  /**
-   * @name Map-like interface support (internal)
-   * @{
-   */
   /**
    * @brief Returns SmartObject from internal map data by it's key
    *
@@ -830,12 +814,7 @@ class SmartObject {
    * @return SmartObject&
    **/
   inline SmartObject& handle_map_access(const std::string& Key);
-  /** @} */
 
-  /**
-   * @name Helper conversion methods
-   * @{
-   */
   /**
    * @brief Converts string to double
    *
@@ -917,8 +896,6 @@ class SmartObject {
   CSmartSchema m_schema;
 };
 
-
-
 /**
  * @brief Value that is used as invalid value for bool type
  **/
@@ -955,11 +932,6 @@ static SmartObject invalid_object_value(SmartType_Invalid);
  * @brief Value that is used as invalid value for object type
  **/
 static const SmartBinary invalid_binary_value;
-
-
-
-
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink
-
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_SMART_OBJECT_H_

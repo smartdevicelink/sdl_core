@@ -50,7 +50,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(); // No default value, no max length
+        ISchemaItemPtr item = CStringSchemaItem::create(); // No default value, no max length
 
         //Object - valid string
         obj = "New valid string";
@@ -96,7 +96,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(
+        ISchemaItemPtr item = CStringSchemaItem::create(
             TSchemaItemParameter<size_t>(),
             TSchemaItemParameter<size_t>(),
             TSchemaItemParameter<std::string>("Default string")); // Default value, no max length
@@ -141,7 +141,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(
+        ISchemaItemPtr item = CStringSchemaItem::create(
             TSchemaItemParameter<size_t>(0),
             TSchemaItemParameter<size_t>(25),
             TSchemaItemParameter<std::string>("Default string"));
@@ -176,7 +176,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(
+        ISchemaItemPtr item = CStringSchemaItem::create(
             TSchemaItemParameter<size_t>(0),
             TSchemaItemParameter<size_t>(25),
             TSchemaItemParameter<std::string>("Default string"));
@@ -238,7 +238,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         using namespace NsSmartDeviceLink::NsSmartObjects;
         SmartObject obj;
 
-        utils::SharedPtr<CStringSchemaItem> item = CStringSchemaItem::create(
+        ISchemaItemPtr item = CStringSchemaItem::create(
             TSchemaItemParameter<size_t>(0),
             TSchemaItemParameter<size_t>(25),
             TSchemaItemParameter<std::string>("Default string"));
@@ -304,8 +304,3 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         EXPECT_EQ(Errors::OK, resultType);    }
 
 }}}}}
-
-int main(int argc, char **argv) {
-  ::testing::InitGoogleMock(&argc, argv);
-  return RUN_ALL_TESTS();
-}

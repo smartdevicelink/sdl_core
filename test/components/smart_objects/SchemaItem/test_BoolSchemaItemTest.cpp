@@ -28,16 +28,18 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#include <string>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
+
+#include "utils/shared_ptr.h"
 
 #include "smart_objects/smart_object.h"
 #include "smart_objects/bool_schema_item.h"
 
-#include <string>
-
-
 namespace test { namespace components { namespace SmartObjects { namespace SchemaItem { namespace SchemaItemDraftTest {
+
+using NsSmartDeviceLink::NsSmartObjects::ISchemaItemPtr;
 
     /**
      * Test BoolSchemaItem no default value
@@ -49,8 +51,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
 
-        utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
-            NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(); // No default value
+        ISchemaItemPtr item = NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(); // No default value
 
         obj = 5;
         ASSERT_EQ(5, obj.asInt());
@@ -89,7 +90,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
 
-        utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
+        ISchemaItemPtr item =
             NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(
                 NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>(false)); // Default value = false
 
@@ -125,7 +126,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST(test_map_validate, test_BoolSchemaItemTest)
     {
         NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
-        utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
+        ISchemaItemPtr item =
             NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(
                 NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>(false)); // Default value = false
 
@@ -157,8 +158,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST(test_array_validate, test_BoolSchemaItemTest)
     {
         NsSmartDeviceLink::NsSmartObjects::SmartObject obj;
-        utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem> item =
-            NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create();
+        ISchemaItemPtr item = NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create();
 
         obj[0] = true;
         obj[1] = false;
@@ -193,9 +193,3 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     }
 
 }}}}}
-
-int main(int argc, char **argv) {
-  //PropertyConfigurator::doConfigure(LOG4CPLUS_TEXT("log4cplus.properties"));
-  ::testing::InitGoogleMock(&argc, argv);
-  return RUN_ALL_TESTS();
-}
