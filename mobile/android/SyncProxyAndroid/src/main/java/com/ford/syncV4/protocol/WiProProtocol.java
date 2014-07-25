@@ -281,7 +281,7 @@ public class WiProProtocol extends AbstractProtocol {
             receivedBytesReadPos += bytesNeeded;
 
             MessageFrameAssembler assembler = getFrameAssemblerForFrame(mCurrentHeader);
-            Logger.i("mCurrentHeader " + mCurrentHeader + "MessageFrameAssembler " + assembler);
+            //Logger.i("mCurrentHeader " + mCurrentHeader + "MessageFrameAssembler " + assembler);
             if (getSecureSessionContextHashMap() != null && getSecureSessionContextHashMap().get(mCurrentHeader.getSessionId()) != null) {
                 assembler.setProtocolSecureManager(getSecureSessionContextHashMap().get(mCurrentHeader.getSessionId()).protocolSecureManager);
             }
