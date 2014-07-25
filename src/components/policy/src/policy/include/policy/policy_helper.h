@@ -115,6 +115,7 @@ struct FillNotificationData {
                               const std::set<HMILevel>& target);
     void ExcludeSameParameters(std::set<Parameter>& source,
                                const std::set<Parameter>& target);
+    void InitRpcKeys(const std::string& rpc_name);
     std::string current_key_;
     Permissions& data_;
 };
