@@ -1,0 +1,4 @@
+#ifndef DEFAULT_SHEMA_ITEM_H
+#define DEFAULT_SHEMA_ITEM_H
+
+#endif // DEFAULT_SHEMA_ITEM_H
