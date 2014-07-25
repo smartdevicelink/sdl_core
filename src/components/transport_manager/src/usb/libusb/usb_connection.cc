@@ -337,7 +337,11 @@ bool UsbConnection::FindEndpoints() {
   libusb_free_config_descriptor(config);
 
   bool result = !(find_in_endpoint || find_out_endpoint);
-  LOG4CXX_TRACE(logger_, "exit with " << result ? "TRUE" : "FALSE");
+  if (result) {
+      LOG4CXX_TRACE(logger_, "exit with TRUE");
+  } else {
+      LOG4CXX_TRACE(logger_, "exit with FALSE");
+  }
   return result;
 }
 

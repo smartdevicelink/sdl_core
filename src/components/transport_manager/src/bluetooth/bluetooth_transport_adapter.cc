@@ -53,6 +53,7 @@
 
 namespace transport_manager {
 namespace transport_adapter {
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 BluetoothTransportAdapter::~BluetoothTransportAdapter() {
@@ -147,8 +148,13 @@ bool BluetoothTransportAdapter::Restore() {
       }
     }
   }
-  LOG4CXX_TRACE(logger_, "exit with " << !errors_occured ? "TRUE" : "FALSE");
-  return !errors_occured;
+  bool result = !errors_occured;
+  if (result) {
+    LOG4CXX_TRACE(logger_, "exit with TRUE");
+  } else {
+      LOG4CXX_TRACE(logger_, "exit with FALSE");
+  }
+  return result;
 }
 
 }  // namespace transport_adapter

@@ -146,7 +146,7 @@ int TransportManagerImpl::DisconnectDevice(const DeviceHandle& device_handle) {
 
   transport_adapter::TransportAdapter* ta = device_to_adapter_map_[device_id];
   if (NULL == ta) {
-    LOG4CXX_WARNING(logger_, "No device adapter found by id " << device_id);
+    LOG4CXX_WARN(logger_, "No device adapter found by id " << device_id);
     LOG4CXX_TRACE(logger_, "exit with E_INVALID_HANDLE. Condition: NULL == ta");
     return E_INVALID_HANDLE;
   }
