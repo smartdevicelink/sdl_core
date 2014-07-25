@@ -440,7 +440,13 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
         }
       }
       if (curr_app->IsFullscreen()) {
+        if (true == curr_app->is_media_application()) {
+          PutApplicationInLimited(app);
+        } else {
+          app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
+        }
         MessageHelper::ResetGlobalproperties(curr_app);
+        MessageHelper::SendHMIStatusNotification(*curr_app);
       }
     }
   }

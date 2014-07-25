@@ -67,6 +67,8 @@ void ShowRequest::Run() {
     return;
   }
 
+  // CheckStringsOfShowRequest must be before ProcessSoftButtons.
+  // (text contain whitespace)
   if (!CheckStringsOfShowRequest()) {
      LOG4CXX_ERROR(logger_, "Incorrect characters in string");
      SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -311,7 +313,9 @@ bool ShowRequest::CheckStringsOfShowRequest() {
 
       if ((*it_sb).keyExists(strings::text)) {
         str = (*it_sb)[strings::text].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        // CheckSyntax without second param(false to default).
+        // Requirement. Show with SoftButtons->text contain only whitespace
+        if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons text syntax check failed");
           return false;
