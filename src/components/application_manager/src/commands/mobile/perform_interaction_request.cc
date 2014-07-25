@@ -504,7 +504,6 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
     msg_params[strings::help_prompt] =
         (*message_)[strings::msg_params][strings::help_prompt];
 
-    DeleteParameterFromTTSChunk(&msg_params[strings::help_prompt]);
   } else {
     msg_params[strings::help_prompt] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -539,8 +538,6 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   if ((*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
     msg_params[strings::timeout_prompt] =
             (*message_)[strings::msg_params][strings::timeout_prompt];
-
-    DeleteParameterFromTTSChunk(&msg_params[strings::timeout_prompt]);
   } else {
     msg_params[strings::timeout_prompt] = msg_params[strings::help_prompt];
   }
@@ -548,8 +545,6 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
       msg_params[strings::initial_prompt] =
           (*message_)[strings::msg_params][strings::initial_prompt];
-
-      DeleteParameterFromTTSChunk(&msg_params[strings::initial_prompt]);
   }
 
   mobile_apis::InteractionMode::eType mode =
@@ -565,14 +560,6 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
 
   SendHMIRequest(hmi_apis::FunctionID::VR_PerformInteraction, &msg_params,
                  true);
-}
-
-void PerformInteractionRequest::DeleteParameterFromTTSChunk(
-    smart_objects::SmartObject* array_tts_chunk) {
-  int32_t length = array_tts_chunk->length();
-  for (int32_t i = 0; i < length; ++i) {
-    array_tts_chunk[i].erase(strings::type);
-  }
 }
 
 bool PerformInteractionRequest::CheckChoiceSetMenuNames(
