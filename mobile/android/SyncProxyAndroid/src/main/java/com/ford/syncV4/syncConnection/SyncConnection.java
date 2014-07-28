@@ -13,7 +13,6 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitorsManager;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitorListener;
-import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.session.Session;
@@ -31,7 +30,6 @@ import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.nsd.NSDHelper;
 import com.ford.syncV4.transport.usb.USBTransport;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
-import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
@@ -311,22 +309,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
-<<<<<<< Updated upstream
-    public OutputStream startAudioDataTransfer(byte rpcSessionID, boolean encrypt) {
-        try {
-            OutputStream os = new PipedOutputStream();
-            InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mAudioPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Audio_Service, encrypt);
-            mAudioPacketizer.start();
-            return os;
-        } catch (IOException e) {
-            Logger.e(CLASS_NAME + " Unable to start audio streaming:" + e.toString());
-        }
-        return null;
-    }
-
-=======
->>>>>>> Stashed changes
     public void stopAudioDataTransfer() {
         try {
             if (mProtocol != null) {

@@ -898,7 +898,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * <<<<<<< HEAD
      * Set a value of the {@link com.ford.syncV4.syncConnection.SyncConnection} instance.
      *
      * @param value new {@link com.ford.syncV4.syncConnection.SyncConnection} reference
@@ -2248,19 +2247,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }
     }
 
-<<<<<<< Updated upstream
-    public OutputStream startAudioDataTransfer(String appId) {
-        OutputStream stream = null;
-        if (mSyncConnection != null) {
-            boolean encrypt = false;
-            final Service service = syncSession.getService(appId, ServiceType.Audio_Service);
-            if (service != null) {
-                encrypt = service.isEncrypted();
-            }
-            stream = mSyncConnection.startAudioDataTransfer(syncSession.getSessionIdByAppId(appId), encrypt);
-        }
-        return stream;
-=======
     public OutputStream startDataTransfer(String appId, ServiceType serviceType) {
         if (mSyncConnection == null) {
             return null;
@@ -2280,7 +2266,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         Logger.d(LOG_TAG + " start data transfer appId:" + appId + ", serType:" + service +
                 ", outStream:" + outputStream);
         return outputStream;
->>>>>>> Stashed changes
     }
 
     public void stopAudioDataTransfer() {
