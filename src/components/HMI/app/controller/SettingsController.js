@@ -259,20 +259,37 @@ SDL.SettingsController = Em.Object.create( {
         FFW.BasicCommunication.GetURLS();
     },
 
-    AllowSDLFunctionality: function(device) {
-        this.currentDeviceAllowance = device;
-        SDL.SDLModel.connectedDevices[device.id].sdlFunctionality.popUpId = SDL.PopUp.popupActivate("Would you like to allow SDL functionality for device '" + device.name + "'?", SDL.SettingsController.OnAllowSDLFunctionality);
-    },
+    AllowSDLFunctionality: function(messages) {
 
-    onSDLConsentNeededHandler: function(params) {
-        this.currentDeviceAllowance = params.device;
-
-        //FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message, this.OnAllowSDLFunctionality)});
+        SDL.PopUp.popupActivate(messages[0].textBody, SDL.SettingsController.OnAllowSDLFunctionality);
     },
 
     userFriendlyMessagePopUp: function(appId, messageCode) {
 
         FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message)}, appId, messageCode);
+    },
+
+    simpleParseUserFriendlyMessageData: function (messages) {
+        var tts = "",
+            text = "";
+
+        messages.forEach(function (x) {
+            if (x.ttsString) {
+                tts += x.ttsString;
+            }
+            if (x.textBody) {
+                text += x.textBody;
+            }
+        });
+
+        if (tts) {
+            SDL.TTSPopUp.ActivateTTS(tts);
+        }
+
+
+        if (text) {
+            SDL.PopUp.popupActivate(text);
+        }
     },
 
     OnAllowSDLFunctionality: function(result) {
