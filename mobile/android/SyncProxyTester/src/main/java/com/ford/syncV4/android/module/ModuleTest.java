@@ -1042,14 +1042,12 @@ public class ModuleTest {
         } else if (testActionItem.getActionName().equals(TestActionItem.PAUSE)) {
             try {
                 // delay between tests
-                Logger.d("TRACE:" + testActionItem.getDelay());
                 synchronized (this) {
                     this.wait(testActionItem.getDelay());
                 }
             } catch (InterruptedException e) {
                 mLogAdapter.logMessage("InterruptedException", true);
             }
-            Logger.d("TRACE complete");
         }
     }
 

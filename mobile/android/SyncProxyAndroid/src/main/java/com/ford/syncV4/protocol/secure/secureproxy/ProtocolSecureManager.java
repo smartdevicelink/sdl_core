@@ -1,10 +1,13 @@
 package com.ford.syncV4.protocol.secure.secureproxy;
 
+import android.util.Log;
+
 import com.ford.syncV4.protocol.WiProProtocol;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.transport.ITransportListener;
 import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.DebugTool;
+import com.ford.syncV4.util.logger.Logger;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -155,7 +158,7 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
         if (isEncrypted) {
             CountDownLatch countDownLatch = new CountDownLatch(1);
             RPCCodedDataListener listenerOFCodedData = new RPCCodedDataListener(countDownLatch);
-            //Logger.i("cypheredData.length < 1000", "data.length" + data.length);
+            Log.i("cypheredData.length < 1000", "data.length" + data.length);
             listenerOFCodedData.setOriginalLength(data.length - WiProProtocol.SSL_OVERHEAD);
             writeDataToProxyServer(data, listenerOFCodedData);
             countDownLatch.await();
@@ -194,11 +197,11 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
         }
         CountDownLatch countDownLatch = new CountDownLatch(1);
         RPCCodedDataListener listenerOFCodedData = new RPCCodedDataListener(countDownLatch);
-        //Logger.i("cypheredData.length < 1000", "data.length" + data.length);
+        Log.i("cypheredData.length < 1000", "data.length" + data.length);
         listenerOFCodedData.setOriginalLength(data.length);
         writeDataToSSLSocket(data, listenerOFCodedData);
         countDownLatch.await();
-        //Logger.i("cypheredData.length < 1000", "return cypheredData" + cypheredData.length);
+        Log.i("cypheredData.length < 1000", "return cypheredData" + cypheredData.length);
         return cypheredData;
     }
 
@@ -283,13 +286,13 @@ public class ProtocolSecureManager implements IProtocolSecureManager {
                     DebugTool.logError("Failed to code frame", e);
                     mCountDownLatch.countDown();
                 }
-                //Logger.i("cypheredData.length < 1000", " bytesReceived " + bytesReceived + " originalLength " + getOriginalLength() + " thread:" + Thread.currentThread().getName());
+                Log.i("cypheredData.length < 1000", " bytesReceived " + bytesReceived + " originalLength " + getOriginalLength() + " thread:" + Thread.currentThread().getName());
                 if (bytesReceived > getOriginalLength()) {
                     cypheredData = bOutput.toByteArray();
                     bOutput = new ByteArrayOutputStream();
                     bytesReceived = 0;
                     setOriginalLength(0);
-                    //Logger.i("cypheredData.length < 1000", " countDownLatchInput.countDown()");
+                    Log.i("cypheredData.length < 1000", " countDownLatchInput.countDown()");
                     mCountDownLatch.countDown();
                 }
             }

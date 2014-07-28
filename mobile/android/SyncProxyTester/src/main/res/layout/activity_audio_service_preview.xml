@@ -28,17 +28,19 @@
         android:id="@+id/audio_service_secure_checkbox_view"
         android:text="@string/start_secure_service"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_below="@+id/audioServiceCheckBox"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/app_regular_text_color"/>
 
     <Button
         android:id="@+id/audio_service_not_service_secure_button_view"
         android:text="@string/start_not_secure_service"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/audio_service_secure_checkbox_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:textColor="@color/app_regular_text_color"/>
 
     <TextView
         android:id="@+id/audio_service_status_text_view"
@@ -50,12 +52,21 @@
 
     <Button
         android:textColor="@color/app_regular_text_color"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Start File Streaming"
         android:id="@+id/audio_file_streaming"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/audio_service_status_text_view" />
+
+    <Button
+        android:textColor="@color/app_regular_text_color"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Stop File Streaming"
+        android:layout_alignParentRight="true"
+        android:id="@+id/audio_file_streaming_stop"
         android:layout_below="@+id/audio_service_status_text_view"
-        android:enabled="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_toRightOf="@id/audio_file_streaming"/>
 
 </RelativeLayout>

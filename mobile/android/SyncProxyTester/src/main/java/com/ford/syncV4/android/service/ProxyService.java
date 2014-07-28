@@ -2310,7 +2310,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     public OutputStream syncProxyStartAudioDataTransfer(String appId) {
         if (mSyncProxy != null) {
-            return mSyncProxy.startAudioDataTransfer(appId);
+            return mSyncProxy.startDataTransfer(appId, ServiceType.Audio_Service);
         }
         return null;
     }
@@ -2548,7 +2548,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     public OutputStream syncProxyStartH264(String appId) {
         if (mSyncProxy != null) {
-            return mSyncProxy.startH264(appId);
+            return mSyncProxy.startDataTransfer(appId, ServiceType.Mobile_Nav);
         }
         return null;
     }

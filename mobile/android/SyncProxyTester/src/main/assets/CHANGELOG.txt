@@ -1,3 +1,6 @@
+[CW31]
++ SyncProxyTester: Add possibility to stream audio (video) w/o sending start service
+
 [CW30]
 * SyncProxyTester: SDL doesn't handle wrong type of "systemFile" parameter
 + SyncProxyTester: Modify UpdateTurnList request

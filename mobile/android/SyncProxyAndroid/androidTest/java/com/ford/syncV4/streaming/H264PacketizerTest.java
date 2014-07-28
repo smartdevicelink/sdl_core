@@ -190,11 +190,11 @@ public class H264PacketizerTest extends AndroidTestCase {
             private int count = 0;
 
             @Override
-            public void sendH264(ProtocolMessage protocolMessage) {
-                if (count == 0 && protocolMessage != null && Arrays.equals(protocolMessage.getData(), sampleData)) {
+            public void sendH264(ProtocolMessage pm) {
+                if (count == 0 && pm != null && Arrays.equals(pm.getData(), sampleData)) {
                     isTestValid[0] = true;
                     count++;
-                } else if (count == 1 && protocolMessage != null && Arrays.equals(protocolMessage.getData(), data2)) {
+                } else if (count == 1 && pm != null && Arrays.equals(pm.getData(), data2)) {
                     isTestValid[0] = true;
                     count++;
                 } else {

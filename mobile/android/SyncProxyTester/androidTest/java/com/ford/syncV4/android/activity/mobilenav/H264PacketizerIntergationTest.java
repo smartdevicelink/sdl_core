@@ -135,7 +135,7 @@ public class H264PacketizerIntergationTest extends ActivityInstrumentationTestCa
     }
 
     @Override
-    public void sendH264(ProtocolMessage protocolMessage) {
+    public void sendH264(ProtocolMessage pm) {
 
     }
 }

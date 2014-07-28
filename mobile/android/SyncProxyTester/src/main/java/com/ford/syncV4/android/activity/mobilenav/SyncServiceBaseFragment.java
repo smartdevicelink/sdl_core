@@ -5,11 +5,14 @@ import android.support.v4.app.Fragment;
 import android.widget.Button;
 
 import com.ford.syncV4.android.MainApp;
+import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.listener.ConnectionListener;
 import com.ford.syncV4.android.listener.ConnectionListenersManager;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.util.logger.Logger;
+
+import java.io.OutputStream;
 
 /**
  * Created with Android Studio.
@@ -24,10 +27,12 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
     private static final String TAG = SyncServiceBaseFragment.class.getSimpleName();
 
     protected Button mDataStreamingButton;
+    protected Button mStopDataStreamingButton;
     protected CheckBoxState mSessionCheckBoxState;
     protected FileStreamingLogic mFileStreamingLogic;
 
     private String mAppId = "";
+    private ServiceType mServiceType = null;
 
     @Override
     public void onProxyClosed() {
@@ -70,7 +75,25 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
         mAppId = value;
     }
 
+    public ServiceType getServiceType() {
+        if (mServiceType == null) {
+            throw new NullPointerException(((Object) this).getClass().getSimpleName() +
+                    " get ServiceType is NULL," +
+                    " probably it has not been initialized in the super class");
+        }
+        return mServiceType;
+    }
+
+    public void setServiceType(ServiceType value) {
+        mServiceType = value;
+    }
+
     protected void startBaseFileStreaming(int resourceId) {
+        if (mFileStreamingLogic.getOutputStream() == null) {
+            OutputStream outputStream = ((SyncProxyTester) getActivity())
+                    .getOutputStreamForService(getAppId(), getServiceType());
+            mFileStreamingLogic.setOutputStream(outputStream);
+        }
         mFileStreamingLogic.setFileResID(resourceId);
         mFileStreamingLogic.startFileStreaming();
     }

@@ -2242,37 +2242,45 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }
     }
 
-    public OutputStream startH264(String appId) {
-        OutputStream stream = null;
-        if (mSyncConnection != null) {
-            boolean encrypt = false;
-            final Service service = syncSession.getService(appId, ServiceType.Mobile_Nav);
-            if (service != null) {
-                encrypt = service.isEncrypted();
-            }
-            byte sessionId = getSessionIdByAppId(appId);
-            stream = mSyncConnection.startH264(sessionId, encrypt);
-        }
-        return stream;
-    }
-
     public void stopH264() {
         if (mSyncConnection != null) {
             mSyncConnection.stopH264();
         }
     }
 
+<<<<<<< Updated upstream
     public OutputStream startAudioDataTransfer(String appId) {
+        OutputStream stream = null;
         if (mSyncConnection != null) {
+            boolean encrypt = false;
+            final Service service = syncSession.getService(appId, ServiceType.Audio_Service);
+            if (service != null) {
+                encrypt = service.isEncrypted();
+            }
+            stream = mSyncConnection.startAudioDataTransfer(syncSession.getSessionIdByAppId(appId), encrypt);
+        }
+        return stream;
+=======
+    public OutputStream startDataTransfer(String appId, ServiceType serviceType) {
+        if (mSyncConnection == null) {
             return null;
         }
         boolean encrypt = false;
         final byte sessionId = syncSession.getSessionIdByAppId(appId);
-        final Service service = syncSession.getService(appId, ServiceType.Audio_Service);
+        final Service service = syncSession.getService(appId, serviceType);
         if (service != null) {
             encrypt = service.isEncrypted();
         }
-        return mSyncConnection.startAudioDataTransfer(sessionId, encrypt);
+        OutputStream outputStream = null;
+        if (serviceType == ServiceType.Audio_Service) {
+            outputStream = mSyncConnection.startAudioDataTransfer(sessionId, encrypt);
+        } else if (serviceType == ServiceType.Mobile_Nav) {
+            outputStream = mSyncConnection.startH264(sessionId, encrypt);
+        }
+        Logger.d(LOG_TAG + " start data transfer appId:" + appId + ", serType:" + service +
+                ", outStream:" + outputStream);
+        return outputStream;
+>>>>>>> Stashed changes
     }
 
     public void stopAudioDataTransfer() {

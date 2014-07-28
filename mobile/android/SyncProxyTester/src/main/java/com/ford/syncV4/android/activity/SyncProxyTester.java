@@ -546,8 +546,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             MainApp.getInstance().runInUIThread(new Runnable() {
                 @Override
                 public void run() {
-                    OutputStream outputStream = mBoundProxyService
-                            .syncProxyStartAudioDataTransfer(fragment.getAppId());
+                    OutputStream outputStream = getOutputStreamForService(fragment.getAppId(),
+                            ServiceType.Audio_Service);
                     if (outputStream == null) {
                         return;
                     }
@@ -558,8 +558,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             MainApp.getInstance().runInUIThread(new Runnable() {
                 @Override
                 public void run() {
-                    OutputStream outputStream = mBoundProxyService
-                            .syncProxyStartH264(fragment.getAppId());
+                    OutputStream outputStream = getOutputStreamForService(fragment.getAppId(),
+                            ServiceType.Mobile_Nav);
                     if (outputStream == null) {
                         return;
                     }
@@ -611,6 +611,18 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 }
             }
         });
+    }
+
+    public OutputStream getOutputStreamForService(String appId, ServiceType serviceType) {
+        OutputStream outputStream = null;
+        if (serviceType == ServiceType.Audio_Service) {
+            outputStream = mBoundProxyService.syncProxyStartAudioDataTransfer(appId);
+        } else if (serviceType == ServiceType.Mobile_Nav) {
+            outputStream = mBoundProxyService.syncProxyStartH264(appId);
+        }
+        Logger.d(LOG_TAG + " OutStream for '" + serviceType + "', appId:" + appId +
+                " is:" + outputStream);
+        return outputStream;
     }
 
     public int getNextCorrelationIdForCurrentFragment() {
