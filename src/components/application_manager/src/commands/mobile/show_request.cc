@@ -36,6 +36,8 @@
 #include "application_manager/message_helper.h"
 #include "utils/file_system.h"
 
+#include <string.h>
+
 namespace application_manager {
 
 namespace commands {
@@ -67,6 +69,8 @@ void ShowRequest::Run() {
     return;
   }
 
+  // CheckStringsOfShowRequest must be before ProcessSoftButtons.
+  // (text contain whitespace)
   if (!CheckStringsOfShowRequest()) {
      LOG4CXX_ERROR(logger_, "Incorrect characters in string");
      SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -311,10 +315,14 @@ bool ShowRequest::CheckStringsOfShowRequest() {
 
       if ((*it_sb).keyExists(strings::text)) {
         str = (*it_sb)[strings::text].asCharArray();
-        if (!CheckSyntax(str, true)) {
-          LOG4CXX_ERROR(logger_,
+        // CheckSyntax without second param(false to default).
+        // Requirement. Show with SoftButtons->text contain only whitespace
+        if (!CheckSyntax(str)) {
+          if (strlen(str)) {
+            LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons text syntax check failed");
-          return false;
+            return false;
+          }
         }
       }
 

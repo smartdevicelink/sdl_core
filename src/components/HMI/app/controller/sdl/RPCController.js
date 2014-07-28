@@ -39,15 +39,35 @@ SDL.RPCController = Em.Object
         /**
          * Start register RPC components on controller init
          */
-        init: function() {
+        ConnectToSDL: function() {
 
-            FFW.Buttons.connect();
-            FFW.TTS.connect();
-            FFW.VR.connect();
-            FFW.BasicCommunication.connect();
-            FFW.UI.connect();
-            FFW.VehicleInfo.connect();
-            FFW.Navigation.connect();
+            if (FLAGS.Buttons) {
+                FFW.Buttons.connect();
+            }
+
+            if (FLAGS.TTS) {
+                FFW.TTS.connect();
+            }
+
+            if (FLAGS.VR) {
+                FFW.VR.connect();
+            }
+
+            if (FLAGS.BC) {
+                FFW.BasicCommunication.connect();
+            }
+
+            if (FLAGS.UI) {
+                FFW.UI.connect();
+            }
+
+            if (FLAGS.VI) {
+                FFW.VehicleInfo.connect();
+            }
+
+            if (FLAGS.Navi) {
+                FFW.Navigation.connect();
+            }
         },
 
         capabilitiesCheck: function(key, value) {

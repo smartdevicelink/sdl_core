@@ -235,52 +235,60 @@ enum Type {
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
+template<>
+const EnumConversionHelper<test::components::json_handler::formatters::function_id::Type>::EnumToCStringMap
+EnumConversionHelper<test::components::json_handler::formatters::function_id::Type>::enum_to_cstring_map_ =
+  EnumConversionHelper<test::components::json_handler::formatters::function_id::Type>::InitEnumToCStringMap();
 
-namespace func_id = test::components::json_handler::formatters::function_id;
+template<>
+const EnumConversionHelper<test::components::json_handler::formatters::function_id::Type>::CStringToEnumMap
+EnumConversionHelper<test::components::json_handler::formatters::function_id::Type>::cstring_to_enum_map_ =
+  EnumConversionHelper<test::components::json_handler::formatters::function_id::Type>::InitCStringToEnumMap();
 
-template <>
-const std::map<func_id::Type, std::string> &
-TEnumSchemaItem<func_id::Type>::getEnumElementsStringRepresentation() {
-  static bool is_initialized = false;
-  static std::map<func_id::Type, std::string> enum_string_representation;
+template<>
+const char* const
+EnumConversionHelper<test::components::json_handler::formatters::function_id::Type>::cstring_values_[] = {
+    "RegisterAppInterface",
+    "UnregisterAppInterface",
+    "SetGlobalProperties"
+};
 
-  if (!is_initialized) {
-    enum_string_representation.insert(std::make_pair(
-        func_id::kRegisterAppInterface, "RegisterAppInterface"));
-    enum_string_representation.insert(std::make_pair(
-        func_id::kUnregisterAppInterface, "UnregisterAppInterface"));
-    enum_string_representation.insert(std::make_pair(
-        func_id::kSetGlobalProperties, "SetGlobalProperties"));
+template<>
+const test::components::json_handler::formatters::function_id::Type
+EnumConversionHelper<test::components::json_handler::formatters::function_id::Type>::enum_values_[] = {
+    test::components::json_handler::formatters::function_id::kRegisterAppInterface,
+    test::components::json_handler::formatters::function_id::kUnregisterAppInterface,
+    test::components::json_handler::formatters::function_id::kSetGlobalProperties
+};
 
-    is_initialized = true;
-  }
+template<>
+const EnumConversionHelper<test::components::json_handler::formatters::message_type::Type>::EnumToCStringMap
+EnumConversionHelper<test::components::json_handler::formatters::message_type::Type>::enum_to_cstring_map_ =
+  EnumConversionHelper<test::components::json_handler::formatters::message_type::Type>::InitEnumToCStringMap();
 
-  return enum_string_representation;
+template<>
+const EnumConversionHelper<test::components::json_handler::formatters::message_type::Type>::CStringToEnumMap
+EnumConversionHelper<test::components::json_handler::formatters::message_type::Type>::cstring_to_enum_map_ =
+  EnumConversionHelper<test::components::json_handler::formatters::message_type::Type>::InitCStringToEnumMap();
+
+template<>
+const char* const
+EnumConversionHelper<test::components::json_handler::formatters::message_type::Type>::cstring_values_[] = {
+    "request",
+    "response",
+    "notification"
+};
+
+template<>
+const test::components::json_handler::formatters::message_type::Type
+EnumConversionHelper<test::components::json_handler::formatters::message_type::Type>::enum_values_[] = {
+    test::components::json_handler::formatters::message_type::kRequest,
+    test::components::json_handler::formatters::message_type::kResponse,
+    test::components::json_handler::formatters::message_type::kNotification
+};
+
 }
-
-namespace msg_type = test::components::json_handler::formatters::message_type;
-
-template <>
-const std::map<msg_type::Type, std::string> &
-TEnumSchemaItem<msg_type::Type>::getEnumElementsStringRepresentation() {
-  static bool is_initialized = false;
-  static std::map<msg_type::Type, std::string> enum_string_representation;
-
-  if (!is_initialized) {
-    enum_string_representation.insert(std::make_pair(
-        msg_type::kRequest, "request"));
-    enum_string_representation.insert(std::make_pair(
-        msg_type::kResponse, "response"));
-    enum_string_representation.insert(std::make_pair(
-        msg_type::kNotification, "notification"));
-
-    is_initialized = true;
-  }
-
-  return enum_string_representation;
 }
-} // namespace NsSmartObjects
-} // namespace NsSmartDeviceLink
 
 int main(int argc, char **argv)
 {

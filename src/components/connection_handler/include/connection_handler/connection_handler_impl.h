@@ -75,6 +75,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    */
   virtual ~ConnectionHandlerImpl();
 
+    void Stop();
   /**
    * \brief Sets observer pointer for connection_handler.
    * \param observer Pointer to observer object.
@@ -346,7 +347,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param sessionId Identifier of the session
    * \return TRUE if session has protocol version which supports heartbeat otherwise returns FALSE
    */
-  virtual bool CheckSupportHeartBeat(
+  virtual bool IsHeartBeatSupported(
     transport_manager::ConnectionUID connection_handle,
     uint8_t session_id);
  private:
@@ -381,7 +382,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   /**
    * \brief List of devices
    */
-  DeviceList device_list_;
+  DeviceMap device_list_;
 
   /**
    * \brief List of connections

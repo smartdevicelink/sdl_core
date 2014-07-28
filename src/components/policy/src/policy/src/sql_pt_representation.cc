@@ -74,8 +74,7 @@ SQLPTRepresentation::SQLPTRepresentation()
 }
 
 SQLPTRepresentation::~SQLPTRepresentation() {
-  printf("~SQLPTRepresentation\n");
-  db_->BackupDB();
+  db_->Backup();
   db_->Close();
   delete db_;
 }
@@ -272,6 +271,36 @@ int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
   }
 
   return 0;
+}
+
+bool SQLPTRepresentation::GetPriority(const std::string& policy_app_id,
+                                      std::string* priority) {
+  LOG4CXX_INFO(logger_, "GetPriority");
+  if (NULL == priority) {
+    LOG4CXX_WARN(logger_, "Input priority parameter is null.");
+    return false;
+  }
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectPriority)) {
+    LOG4CXX_INFO(logger_, "Incorrect statement for priority.");
+    return false;
+  }
+
+  query.Bind(0, policy_app_id);
+
+  if (!query.Exec()) {
+    LOG4CXX_INFO(logger_, "Error during select priority.");
+    return false;
+  }
+
+  if (query.IsNull(0)) {
+    priority->clear();
+    return true;
+  }
+
+  priority->assign(query.GetString(0));
+
+  return true;
 }
 
 InitResult SQLPTRepresentation::Init() {
@@ -535,10 +564,14 @@ bool SQLPTRepresentation::GatherApplicationPolicies(
       (*apps)[app_id] = params;
       continue;
     }
-    *params.memory_kb = query.GetInteger(1);
-    *params.heart_beat_timeout_ms = query.GetInteger(2);
+    policy_table::Priority priority;
+    policy_table::EnumFromJsonString(query.GetString(1), &priority);
+    params.priority = priority;
+
+    *params.memory_kb = query.GetInteger(2);
+    *params.heart_beat_timeout_ms = query.GetInteger(3);
     if (!query.IsNull(3)) {
-      *params.certificate = query.GetString(3);
+      *params.certificate = query.GetString(4);
     }
     if (!GatherAppGroup(app_id, &params.groups)) {
       return false;
@@ -728,11 +761,12 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   }
 
   app_query.Bind(0, app.first);
-  app_query.Bind(1, app.second.is_null());
-  app_query.Bind(2, app.second.memory_kb);
-  app_query.Bind(3, app.second.heart_beat_timeout_ms);
+  app_query.Bind(1, std::string(policy_table::EnumToJsonString(app.second.priority)));
+  app_query.Bind(2, app.second.is_null());
+  app_query.Bind(3, app.second.memory_kb);
+  app_query.Bind(4, app.second.heart_beat_timeout_ms);
   app.second.certificate.is_initialized() ?
-  app_query.Bind(4, app.second.certificate) : app_query.Bind(4);
+  app_query.Bind(5, app.second.certificate) : app_query.Bind(5);
 
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
@@ -1122,7 +1156,9 @@ bool SQLPTRepresentation::UpdateRequired() const {
 
 void SQLPTRepresentation::SaveUpdateRequired(bool value) {
   dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kUpdateFlagUpdateRequired)) {
+  // TODO(AOleynik): Quick fix, will be reworked
+  if (!query.Prepare(/*sql_pt::kUpdateFlagUpdateRequired*/
+                     "UPDATE `module_meta` SET `flag_update_required` = ?")) {
     LOG4CXX_WARN(logger_,
                  "Incorrect update into module meta (update_required)");
     return;

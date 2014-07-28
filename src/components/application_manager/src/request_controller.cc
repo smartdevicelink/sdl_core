@@ -223,8 +223,6 @@ void RequestController::updateRequestTimeout(
     const uint32_t& connection_key,
     const uint32_t& mobile_correlation_id,
     const uint32_t& new_timeout) {
-  LOG4CXX_INFO(logger_, "RequestController::updateRequestTimeout()");
-
   watchdog_->updateRequestTimeout(connection_key,
                                   mobile_correlation_id,
                                   new_timeout);

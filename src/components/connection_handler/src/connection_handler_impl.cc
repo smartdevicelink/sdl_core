@@ -40,7 +40,7 @@
 #include "config_profile/profile.h"
 
 #ifdef ENABLE_SECURITY
-#include "security_manager/security_query.h"
+#include "security_manager/security_manager.h"
 #endif  // ENABLE_SECURITY
 
 namespace {
@@ -75,6 +75,16 @@ ConnectionHandlerImpl::ConnectionHandlerImpl()
 
 ConnectionHandlerImpl::~ConnectionHandlerImpl() {
   LOG4CXX_TRACE(logger_, "Destructing ConnectionHandlerImpl.");
+}
+
+void ConnectionHandlerImpl::Stop() {
+  LOG4CXX_TRACE_ENTER(logger_);
+  ConnectionList::iterator itr = connection_list_.begin();
+  while (itr != connection_list_.end()) {
+    RemoveConnection(itr->second->connection_handle());
+    itr = connection_list_.begin();
+  }
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void ConnectionHandlerImpl::set_connection_handler_observer(
@@ -131,7 +141,7 @@ void ConnectionHandlerImpl::OnDeviceAdded(
     const transport_manager::DeviceInfo &device_info) {
   LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnDeviceAdded()");
   device_list_.insert(
-        DeviceList::value_type(
+        DeviceMap::value_type(
           device_info.device_handle(),
           Device(device_info.device_handle(), device_info.name(),
                  device_info.mac_address())));
@@ -186,7 +196,7 @@ void ConnectionHandlerImpl::OnConnectionEstablished(
     const transport_manager::ConnectionUID &connection_id) {
   LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnConnectionEstablished()");
 
-  DeviceListIterator it = device_list_.find(device_info.device_handle());
+  DeviceMap::iterator it = device_list_.find(device_info.device_handle());
   if (device_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown device!");
     return;
@@ -347,7 +357,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Unknown connection!");
+    LOG4CXX_WARN(logger_, "Unknown connection!");
     return 0;
   }
   Connection *connection = it->second;
@@ -356,14 +366,14 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     LOG4CXX_INFO(logger_, "Session "  << static_cast<uint32_t>(session_id)
                  << " to be removed");
     if (!connection->RemoveSession(session_id)) {
-      LOG4CXX_ERROR(logger_, "Not possible to remove session!");
+      LOG4CXX_WARN(logger_, "Not possible to remove session!");
       return 0;
     }
   } else {
     LOG4CXX_INFO(logger_, "Service "  << static_cast<uint32_t>(service_type)
                  << " to be removed");
     if (!connection->RemoveService(session_id, service_type)) {
-      LOG4CXX_ERROR(logger_, "Not possible to remove service!");
+      LOG4CXX_WARN(logger_, "Not possible to remove service!");
       return 0;
     }
   }
@@ -455,7 +465,7 @@ int32_t ConnectionHandlerImpl::GetDataOnSessionKey(
 
 struct CompareMAC {
   explicit CompareMAC(const std::string &mac) : mac_(mac) {}
-  bool operator() (const DeviceList::value_type &device) {
+  bool operator() (const DeviceMap::value_type &device) {
     return strcasecmp(device.second.mac_address().c_str(), mac_.c_str()) == 0;
   }
  private:
@@ -464,7 +474,7 @@ struct CompareMAC {
 
 bool ConnectionHandlerImpl::GetDeviceID(const std::string &mac_address,
                                         DeviceHandle *device_handle) {
-  DeviceList::const_iterator it = std::find_if(device_list_.begin(),
+  DeviceMap::const_iterator it = std::find_if(device_list_.begin(),
                                                device_list_.end(),
                                                CompareMAC(mac_address));
   if (it != device_list_.end()) {
@@ -482,7 +492,7 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::GetDataOnDeviceID");
 
   int32_t result = -1;
-  DeviceListIterator it = device_list_.find(device_handle);
+  DeviceMap::iterator it = device_list_.find(device_handle);
   if (device_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Device not found!");
     return result;
@@ -530,7 +540,7 @@ int ConnectionHandlerImpl::SetSSLContext(
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
-    return security_manager::SecurityQuery::ERROR_INTERNAL;
+    return security_manager::SecurityManager::ERROR_INTERNAL;
   }
   Connection &connection = *it->second;
   return connection.SetSSLContext(session_id, context);
@@ -586,7 +596,7 @@ void ConnectionHandlerImpl::StartDevicesDiscovery() {
 
 void ConnectionHandlerImpl::ConnectToDevice(
     connection_handler::DeviceHandle device_handle) {
-  connection_handler::DeviceList::const_iterator it_in;
+  connection_handler::DeviceMap::const_iterator it_in;
   it_in = device_list_.find(device_handle);
   if (device_list_.end() != it_in) {
     LOG4CXX_INFO_EXT(logger_,
@@ -606,7 +616,7 @@ void ConnectionHandlerImpl::ConnectToDevice(
 }
 
 void ConnectionHandlerImpl::ConnectToAllDevices() {
-  for (DeviceListIterator i = device_list_.begin(); i != device_list_.end(); ++i) {
+  for (DeviceMap::iterator i = device_list_.begin(); i != device_list_.end(); ++i) {
     connection_handler::DeviceHandle device_handle = i->first;
     ConnectToDevice(device_handle);
   }
@@ -766,6 +776,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
 
 void ConnectionHandlerImpl::BindProtocolVersionWithSession(
     uint32_t connection_key, uint8_t protocol_version) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::BindProtocolVersionWithSession()");
   uint32_t connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(connection_key, &connection_handle, &session_id);
@@ -777,12 +788,14 @@ void ConnectionHandlerImpl::BindProtocolVersionWithSession(
   }
 }
 
-bool ConnectionHandlerImpl::CheckSupportHeartBeat(
+bool ConnectionHandlerImpl::IsHeartBeatSupported(
     transport_manager::ConnectionUID connection_handle,uint8_t session_id) {
+  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::IsHeartBeatSupported()");
   sync_primitives::AutoLock lock(connection_list_lock_);
   uint32_t connection = static_cast<uint32_t>(connection_handle);
   ConnectionList::iterator it = connection_list_.find(connection);
   if (connection_list_.end() == it) {
+    LOG4CXX_WARN(logger_, "Connection not found !");
     return false;
   }
   return it->second->SupportHeartBeat(session_id);

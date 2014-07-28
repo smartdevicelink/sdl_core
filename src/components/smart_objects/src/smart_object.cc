@@ -336,7 +336,7 @@ void SmartObject::set_value_double(double NewValue) {
   m_data.double_value = NewValue;
 }
 
-double SmartObject::convert_double(void) const {
+double SmartObject::convert_double() const {
   double retval;
 
   switch (m_type) {
@@ -518,7 +518,7 @@ SmartObject& SmartObject::operator=(const std::string& NewValue) {
   return *this;
 }
 
-bool SmartObject::operator==(std::string Value) const {
+bool SmartObject::operator==(const std::string& Value) const {
   std::string comp = convert_string();
   if (comp == invalid_string_value) {
     return false;
@@ -532,7 +532,7 @@ void SmartObject::set_value_string(const std::string& NewValue) {
   m_data.str_value = new std::string(NewValue);
 }
 
-std::string SmartObject::convert_string(void) const {
+std::string SmartObject::convert_string() const {
   std::string retval;
   std::stringstream stream;
 
@@ -648,7 +648,7 @@ void SmartObject::set_value_binary(SmartBinary NewValue) {
   m_data.binary_value = new SmartBinary(NewValue);
 }
 
-SmartBinary SmartObject::convert_binary(void) const {
+SmartBinary SmartObject::convert_binary() const {
   switch (m_type) {
     case SmartType_Binary:
       return *(m_data.binary_value);
@@ -711,11 +711,11 @@ inline SmartObject& SmartObject::handle_array_access(int32_t Index) {
 // MAP INTERFACE SUPPORT
 // =============================================================
 
-SmartObject& SmartObject::operator[](const std::string Key) {
+SmartObject& SmartObject::operator[](const std::string& Key) {
   return handle_map_access(Key);
 }
 
-const SmartObject& SmartObject::operator[] (const std::string Key) const {
+const SmartObject& SmartObject::operator[] (const std::string& Key) const {
   return getElement(Key);
 }
 
@@ -770,7 +770,7 @@ const SmartObject& SmartObject::getElement(const std::string & Key) const {
   return invalid_object_value;
 }
 
-SmartObject& SmartObject::handle_map_access(const std::string Key) {
+SmartObject& SmartObject::handle_map_access(const std::string& Key) {
   if (m_type == SmartType_Invalid) {
     return *this;
   }

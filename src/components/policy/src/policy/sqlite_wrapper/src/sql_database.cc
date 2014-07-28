@@ -98,7 +98,7 @@ void SQLDatabase::set_path(const std::string& path) {
   databasename_ = path +  databasename_;
 }
 
-bool SQLDatabase::BackupDB() {
+bool SQLDatabase::Backup() {
    return true;
 }
 }  // namespace dbms

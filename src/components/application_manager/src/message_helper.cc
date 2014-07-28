@@ -420,8 +420,8 @@ mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
   const std::string& hmi_level) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
   mobile_apis::HMILevel::eType value;
-  if (TEnumSchemaItem<mobile_apis::HMILevel::eType>::stringToEnum(
-        hmi_level, value)) {
+  if (EnumConversionHelper<mobile_apis::HMILevel::eType>::StringToEnum(
+        hmi_level, &value)) {
     return value;
   }
   return mobile_apis::HMILevel::INVALID_ENUM;
@@ -430,34 +430,27 @@ mobile_apis::HMILevel::eType MessageHelper::StringToHMILevel(
 std::string MessageHelper::StringifiedHMILevel(
   mobile_apis::HMILevel::eType hmi_level) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
-  typedef std::map<mobile_apis::HMILevel::eType, std::string> EnumMap;
-  const EnumMap& enum_map =
-    TEnumSchemaItem<mobile_apis::HMILevel::eType>::getEnumElementsStringRepresentation();
-  EnumMap::const_iterator found = enum_map.find(hmi_level);
-  if (found != enum_map.end()) {
-    const std::string& enum_name = found->second;
-    return enum_name;
-  } else {
-    return "";
+  const char* str = 0;
+  if (EnumConversionHelper<mobile_apis::HMILevel::eType>::EnumToCString(
+        hmi_level, &str)) {
+    return str;
   }
+  return std::string();
 }
 
 std::string MessageHelper::StringifiedFunctionID(
   mobile_apis::FunctionID::eType function_id) {
   using namespace NsSmartDeviceLink::NsSmartObjects;
-  typedef std::map<mobile_apis::FunctionID::eType, std::string> EnumMap;
-  const EnumMap& enum_map =
-    TEnumSchemaItem<mobile_apis::FunctionID::eType>::getEnumElementsStringRepresentation();
-  EnumMap::const_iterator found = enum_map.find(function_id);
-  if (found != enum_map.end()) {
-    const std::string& enum_name = found->second;
+  const char* str = 0;
+  if (EnumConversionHelper<mobile_apis::FunctionID::eType>::EnumToCString(
+        function_id, &str)) {
+    const std::string enum_name = str;
     // Strip 'ID' suffix from value name
     DCHECK(enum_name.length() > 2
            && enum_name.substr(enum_name.length() - 2) == "ID");
     return enum_name.substr(0, enum_name.length() - 2);
-  } else {
-    return "";
   }
+  return std::string();
 }
 
 #ifdef HMI_DBUS_API
@@ -559,7 +552,7 @@ smart_objects::SmartObject* MessageHelper::CreateBlockedByPoliciesResponse(
 }
 
 smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
-  const connection_handler::DeviceList& devices) {
+  const connection_handler::DeviceMap& devices) {
   smart_objects::SmartObject* device_list_so = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
 
@@ -571,7 +564,7 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
         smart_objects::SmartType_Array);
   smart_objects::SmartObject& list_so = (*device_list_so)[strings::device_list];
   int32_t index = 0;
-  for (connection_handler::DeviceList::const_iterator it = devices.begin();
+  for (connection_handler::DeviceMap::const_iterator it = devices.begin();
        devices.end() != it; ++it) {
     const connection_handler::Device& d =
       static_cast<connection_handler::Device>(it->second);
@@ -665,7 +658,7 @@ MessageHelper::SmartObjectList MessageHelper::GetIVISubscribtionRequests(
 #endif // #ifdef HMI_JSON_API
 #ifdef HMI_DBUS_API
   //Generate list of ivi_subrequests
-  for (int i = 0; i < sizeof(ivi_subrequests) / sizeof(ivi_subrequests[0]); ++i) {
+  for (size_t i = 0; i < sizeof(ivi_subrequests) / sizeof(ivi_subrequests[0]); ++i) {
     const VehicleInfo_Requests& sr = ivi_subrequests[i];
     if (true == msg_params.keyExists(sr.str)
         && true == msg_params[sr.str].asBool()) {

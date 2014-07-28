@@ -7,7 +7,6 @@ import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.MessageType;
 import com.ford.syncV4.proxy.RPCRequestFactory;
 import com.ford.syncV4.proxy.rpc.PutFile;
-import com.ford.syncV4.proxy.rpc.Show;
 import com.ford.syncV4.proxy.rpc.TestCommon;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 
@@ -27,7 +26,7 @@ import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNull.notNullValue;
 
 /**
- * Tests for SystemPutFileRPCRequestConverter class.
+ * Tests for PutFileRPCRequestConverter class.
  *
  * Created by enikolsky on 2014-01-21.
  */
@@ -42,7 +41,7 @@ public class SystemPutFileRPCRequestConverterTest
     private static final String SYNC_FILENAME = "syncFileName";
     private static final String SYSTEM_FILE = "systemFile";
     private static final String FILE_TYPE = "fileType";
-    private SystemPutFileRPCRequestConverter converter;
+    private PutFileRPCRequestConverter converter;
     private JsonRPCMarshaller marshaller;
 
     @Override
@@ -50,7 +49,7 @@ public class SystemPutFileRPCRequestConverterTest
         super.setUp();
         TestCommon.setupMocking(this);
 
-        converter = new SystemPutFileRPCRequestConverter();
+        converter = new PutFileRPCRequestConverter();
         marshaller = new JsonRPCMarshaller();
     }
 
@@ -60,12 +59,6 @@ public class SystemPutFileRPCRequestConverterTest
 
         MatcherAssert.assertThat(converter.getMaxDataSize(),
                 greaterThanOrEqualTo(minMaxDataSize));
-    }
-
-    public void testGetProtocolMessagesShouldReturnEmptyListIfRequestIsNotPutFile() {
-        assertThat(
-                converter.getProtocolMessages(new Show(), (byte) 0, marshaller,
-                        PROTOCOL_VERSION).size(), is(0));
     }
 
     public void testGetProtocolMessagesForSmallPutFileShouldReturnCorrectProtocolMessage()
@@ -141,6 +134,7 @@ public class SystemPutFileRPCRequestConverterTest
         msg.setSyncFileName(fileName);
         msg.setFileType(fileType);
         msg.setCorrelationId(correlationID);
+        msg.setSystemFile(true);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -192,6 +186,7 @@ public class SystemPutFileRPCRequestConverterTest
         msg.setSyncFileName(fileName);
         msg.setFileType(fileType);
         msg.setCorrelationId(correlationID);
+        msg.setSystemFile(true);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -241,6 +236,7 @@ public class SystemPutFileRPCRequestConverterTest
         msg.setSyncFileName(fileName);
         msg.setFileType(fileType);
         msg.setCorrelationId(correlationID);
+        msg.setSystemFile(true);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -276,6 +272,7 @@ public class SystemPutFileRPCRequestConverterTest
         msg.setBulkData(data);
         msg.setOffset(offset);
         msg.setCorrelationId(correlationID);
+        msg.setSystemFile(true);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,
@@ -316,6 +313,7 @@ public class SystemPutFileRPCRequestConverterTest
         msg.setFileType(fileType);
         msg.setOffset(offset);
         msg.setCorrelationId(correlationID);
+        msg.setSystemFile(true);
 
         final List<ProtocolMessage> protocolMessages =
                 converter.getProtocolMessages(msg, sessionID, marshaller,

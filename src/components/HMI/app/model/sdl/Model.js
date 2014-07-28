@@ -994,10 +994,11 @@ SDL.SDLModel = Em.Object.create({
             } else {
                 SDL.ScrollableMessage.activate(SDL.SDLController.getApplicationModel(request.params.appID).appName, request.params, messageRequestId);
             }
+            return true;
         } else {
             FFW.UI.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, request.method, 'Higher priority request is being processed on HMI!');
+            return false;
         }
-
     },
 
     /**
@@ -1135,8 +1136,10 @@ SDL.SDLModel = Em.Object.create({
 
         if (!SDL.AlertPopUp.active) {
             SDL.AlertPopUp.AlertActive(message, alertRequestId);
+            return true;
         } else {
             SDL.SDLController.alertResponse(this.resultCode['REJECTED'], alertRequestId);
+            return false;
         }
     },
 
@@ -1150,21 +1153,22 @@ SDL.SDLModel = Em.Object.create({
 
         if (!SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction) {
             SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction = message.id;
-        } else {
-            SDL.SDLController.interactionChoiseCloseResponse(message.params.appID, SDL.SDLModel.resultCode['REJECTED']);
-            return;
-        }
 
-        if (message.params && message.params.vrHelpTitle && message.params.vrHelp) {
+            if (message.params && message.params.vrHelpTitle && message.params.vrHelp) {
 
-            SDL.SDLModel.set('interactionData.vrHelpTitle', message.params.vrHelpTitle);
-            SDL.SDLModel.set('interactionData.vrHelp', message.params.vrHelp);
-        }
+                SDL.SDLModel.set('interactionData.vrHelpTitle', message.params.vrHelpTitle);
+                SDL.SDLModel.set('interactionData.vrHelp', message.params.vrHelp);
+            }
 
-       // if (message.params.choiceSet || message.params.interactionLayout == "KEYBOARD") {
             SDL.InteractionChoicesView.activate(message);
             SDL.SDLController.VRMove();
-        //}
+
+            return true;
+        } else {
+
+            FFW.UI.sendError(SDL.SDLModel.resultCode['REJECTED'], message.id, message.method, "UI PerformInterection REJECTED on HMI");
+            return false;
+        }
     },
 
     /**
@@ -1178,7 +1182,7 @@ SDL.SDLModel = Em.Object.create({
         if (!SDL.SDLModel.vrActiveRequests.vrPerformInteraction) {
             SDL.SDLModel.vrActiveRequests.vrPerformInteraction = message.id;
         } else {
-            SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['REJECTED']);
+            FFW.VR.sendError(SDL.SDLModel.resultCode['REJECTED'], message.id, message.method, "VR PerformInterection REJECTED on HMI")
             return;
         }
 

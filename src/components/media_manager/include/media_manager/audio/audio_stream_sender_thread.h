@@ -38,6 +38,10 @@
 #include "utils/threads/thread_delegate.h"
 #include "utils/lock.h"
 
+#ifdef CUSTOMER_PASA
+#include <mqueue.h>
+#endif // CUSTOMER_PASA
+
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 class SmartObject;
@@ -106,6 +110,10 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
     bool SendEndAudioPassThru();
 
     void sendAudioChunkToMobile();
+
+#ifdef CUSTOMER_PASA
+    void mqSendAudioChunkToMobile();
+#endif // CUSTOMER_PASA
 
     /*
      * @brief Creates command for corresponding smart object

@@ -97,6 +97,16 @@ void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
           }
         }
 
+        if (message[strings::msg_params].keyExists(hmi_response::button_capabilities)) {
+          hmi_capabilities.set_button_capabilities(
+              message[strings::msg_params][hmi_response::button_capabilities]);
+        }
+
+        if (message[strings::msg_params].keyExists(hmi_response::preset_bank_capabilities)) {
+          hmi_capabilities.set_preset_bank_capabilities(
+              message[strings::msg_params][hmi_response::preset_bank_capabilities]);
+        }
+
       }
       SendResponse(response_success, result_code, NULL, &(message[strings::msg_params]));
       break;

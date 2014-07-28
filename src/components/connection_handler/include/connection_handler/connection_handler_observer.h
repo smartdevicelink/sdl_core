@@ -35,7 +35,7 @@
 
 #include "connection_handler/device.h"
 #include "connection_handler/connection.h"
-#include "protocol_handler/service_type.h"
+#include "protocol/service_type.h"
 
 /**
  * \namespace connection_handler
@@ -58,7 +58,7 @@ class ConnectionHandlerObserver {
    * \param DeviceList New list of available devices.
    **/
   virtual void OnDeviceListUpdated(
-      const connection_handler::DeviceList &device_list) = 0;
+      const connection_handler::DeviceMap &device_list) = 0;
 
   /**
    * @brief Reaction to "Find new applications" request

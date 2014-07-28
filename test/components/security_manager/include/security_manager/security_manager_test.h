@@ -35,24 +35,39 @@
 
 #include <gtest/gtest.h>
 #include <string>
-#include "security_manager/security_manager.h"
+
+#include "utils/byte_order.h"
+#include "protocol/common.h"
+#include "security_manager/security_manager_impl.h"
+
+#include "protocol_handler/session_observer_mock.h"
+#include "protocol_handler/protocol_handler_mock.h"
+#include "protocol_handler/protocol_observer_mock.h"
 #include "security_manager/security_manager_mock.h"
-#include "connection_handler/connection_handler_impl.h"
-#include "protocol_handler/protocol_packet.h"
+#include "security_manager/security_query_matcher.h"
+#include "security_manager/crypto_manager_mock.h"
+#include "security_manager/ssl_context_mock.h"
+#include "security_manager/security_manager_listener_mock.h"
+#include "transport_manager/transport_manager_mock.h"
 
 // TODO(EZamakhov): add test on get correct/wrong InternalError
 // TODO(EZamakhov): check connection_key the same and seq_number
 // TODO(EZamakhov): check ::SendData with correct query_id and query_type
 
-namespace test  {
-namespace components  {
+namespace test {
+namespace components {
 namespace security_manager_test {
+
+using namespace ::protocol_handler;
+using ::protocol_handler::ServiceType;
+using namespace ::transport_manager;
+using namespace ::security_manager;
 
   // Sample data for handshake data emulation
   const int32_t key = 0x1;
   const int32_t seq_number = 0x2;
-  const protocol_handler::ServiceType secureServiceType = protocol_handler::kControl;
-  const uint32_t protocolVersion = protocol_handler::PROTOCOL_VERSION_2;
+  const ServiceType secureServiceType = kControl;
+  const uint32_t protocolVersion = PROTOCOL_VERSION_2;
   const bool is_final = false;
 
   const uint8_t handshake_data[] = {0x1, 0x2, 0x3, 0x4, 0x5};
@@ -64,9 +79,10 @@ namespace security_manager_test {
   const size_t handshake_data_out_size =
       sizeof(handshake_data_out)/sizeof(handshake_data_out[0]);
 
-  using ::protocol_handler::RawMessage;
-  using ::protocol_handler::RawMessagePtr;
+//  using ::RawMessage;
+//  using ::RawMessagePtr;
   using ::security_manager::SecurityQuery;
+  using security_manager_test::InternalErrorWithErrId;
   using ::testing::Return;
   using ::testing::ReturnNull;
   using ::testing::ReturnPointee;
@@ -74,19 +90,20 @@ namespace security_manager_test {
   using ::testing::ElementsAreArray;
   using ::testing::SetArgPointee;
   using ::testing::_;
+  using ::security_manager::SecurityManager;
+  using ::security_manager::SecurityManagerImpl;
 
   class SecurityManagerTest: public ::testing::Test {
    protected:
     void SetUp() OVERRIDE {
-      security_manager_.reset(new security_manager::SecurityManager());
+      security_manager_.reset(new SecurityManagerImpl());
       security_manager_->set_session_observer(&mock_session_observer);
-      security_manager_->set_protocol_handler(&mock_protocol_observer);
+      security_manager_->set_protocol_handler(&mock_protocol_handler);
       security_manager_->AddListener(&mock_sm_listener);
     }
     void TearDown() OVERRIDE {
       // Wait call methods in thread
-      usleep(500000);
-      // Strict mocks are the same as EXPECT_CALL(ALL).Times(0)
+      usleep(100000);
     }
 
     void SetMockCryptoManger() {
@@ -96,7 +113,7 @@ namespace security_manager_test {
     * Wrapper for fast emulate recieve SecurityManager::OnMessageReceived
     */
     void call_OnMessageReceived(const uint8_t* const data, uint32_t dataSize,
-                                const protocol_handler::ServiceType serviceType) {
+                                const ServiceType serviceType) {
       const RawMessagePtr rawMessagePtr(
             new RawMessage(key, protocolVersion, data, dataSize, serviceType));
       security_manager_->OnMessageReceived(rawMessagePtr);
@@ -118,7 +135,7 @@ namespace security_manager_test {
       memcpy(data_sending + sizeof(header), data, data_size);
 
       call_OnMessageReceived(data_sending, data_sending_size,
-                             protocol_handler::kControl);
+                             kControl);
       delete[] data_sending;
     }
     /*
@@ -134,15 +151,14 @@ namespace security_manager_test {
         EmulateMobileMessage(header, data, data_size);
       }
     }
-    ::utils::SharedPtr<security_manager::SecurityManager> security_manager_;
+    ::utils::SharedPtr<SecurityManagerImpl> security_manager_;
     // Strict mocks (same as all methods EXPECT_CALL().Times(0))
-    testing::StrictMock<SessionObserverMock>   mock_session_observer;
-    testing::StrictMock<ProtocoloObserverMock> mock_protocol_observer;
-    testing::StrictMock<CryptoManagerMock>     mock_crypto_manager;
-    testing::StrictMock<SSLContextMock>        mock_ssl_context_new;
-    testing::StrictMock<SSLContextMock>        mock_ssl_context_exists;
-    testing::StrictMock<SMListenerMock>        mock_sm_listener;
-    SMListenerMock                             mock_sm_listener2;
+    testing::StrictMock<protocol_handler_test::SessionObserverMock>   mock_session_observer;
+    testing::StrictMock<protocol_handler_test::ProtocolHandlerMock>   mock_protocol_handler;
+    testing::StrictMock<security_manager_test::CryptoManagerMock>     mock_crypto_manager;
+    testing::StrictMock<security_manager_test::SSLContextMock>        mock_ssl_context_new;
+    testing::StrictMock<security_manager_test::SSLContextMock>        mock_ssl_context_exists;
+    testing::StrictMock<security_manager_test::SMListenerMock>        mock_sm_listener;
   };
   // Test Bodies
 
@@ -151,13 +167,13 @@ namespace security_manager_test {
    * and shall not call any methodes
    */
   TEST_F(SecurityManagerTest, SetNULL_Intefaces) {
-    security_manager_.reset(new security_manager::SecurityManager());
+    security_manager_.reset(new SecurityManagerImpl());
     security_manager_->set_session_observer(NULL);
     security_manager_->set_protocol_handler(NULL);
     security_manager_->set_crypto_manager(NULL);
     security_manager_->AddListener(NULL);
     // additional check not null config section
-    EXPECT_TRUE(security_manager::SecurityManager::ConfigSection());
+    EXPECT_TRUE(SecurityManagerImpl::ConfigSection());
   }
   /*
    * Add/Remove NULL listeners do not any additional logics
@@ -233,10 +249,10 @@ namespace security_manager_test {
    */
   TEST_F(SecurityManagerTest, SecurityManager_NULLCryptoManager) {
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_NOT_SUPPORTED), is_final)).
+                    SecurityManager::ERROR_NOT_SUPPORTED), is_final)).
         Times(1);
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
@@ -252,28 +268,26 @@ namespace security_manager_test {
     const RawMessagePtr rawMessagePtr(
           new RawMessage(key, protocolVersion, NULL, 0));
     security_manager_->OnMobileMessageSent(rawMessagePtr);
-    // Strict mocks are the same as EXPECT_CALL(ALL).Times(0)
   }
   /*
    * Shall skip all not-Secure messages
    */
   TEST_F(SecurityManagerTest, GetWrongServiceType) {
     // Call with wrong Service type
-    call_OnMessageReceived(NULL, 0, protocol_handler::kRpc);
-    call_OnMessageReceived(NULL, 0, protocol_handler::kAudio);
-    call_OnMessageReceived(NULL, 0, protocol_handler::kMobileNav);
-    call_OnMessageReceived(NULL, 0, protocol_handler::kBulk);
-    call_OnMessageReceived(NULL, 0, protocol_handler::kInvalidServiceType);
-    // Strict mocks are the same as EXPECT_CALL(ALL).Times(0)
+    call_OnMessageReceived(NULL, 0, kRpc);
+    call_OnMessageReceived(NULL, 0, kAudio);
+    call_OnMessageReceived(NULL, 0, kMobileNav);
+    call_OnMessageReceived(NULL, 0, kBulk);
+    call_OnMessageReceived(NULL, 0, kInvalidServiceType);
   }
   /*
    * Shall send InternallError on null data recieved
    */
   TEST_F(SecurityManagerTest, GetEmptyQuery) {
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INVALID_QUERY_SIZE), is_final)).
+                    SecurityManager::ERROR_INVALID_QUERY_SIZE), is_final)).
         Times(1);
     // Call with NULL data
     call_OnMessageReceived(NULL, 0, secureServiceType);
@@ -284,10 +298,10 @@ namespace security_manager_test {
   TEST_F(SecurityManagerTest, GetWrongJSONSize) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INVALID_QUERY_SIZE), is_final)).
+                    SecurityManager::ERROR_INVALID_QUERY_SIZE), is_final)).
         Times(1);
     SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
@@ -301,10 +315,10 @@ namespace security_manager_test {
   TEST_F(SecurityManagerTest, GetInvalidQueryId) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INVALID_QUERY_ID), is_final)).
+                    SecurityManager::ERROR_INVALID_QUERY_ID), is_final)).
         Times(1);
     const SecurityQuery::QueryHeader header(
           SecurityQuery::REQUEST,
@@ -321,7 +335,7 @@ namespace security_manager_test {
 
     // Return mock SSLContext
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, protocol_handler::kControl)).
+                GetSSLContext(key, kControl)).
         WillOnce(Return(&mock_ssl_context_new));
 
     const security_manager::SSLContext* rezult = security_manager_->CreateSSLContext(key);
@@ -333,15 +347,15 @@ namespace security_manager_test {
   TEST_F(SecurityManagerTest, CreateSSLContext_ErrorCreateSSL) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INTERNAL), is_final)).
+                    SecurityManager::ERROR_INTERNAL), is_final)).
         Times(1);
 
     // Emulate SessionObserver and CryptoManager result
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, protocol_handler::kControl)).
+                GetSSLContext(key, kControl)).
         WillOnce(ReturnNull());
     EXPECT_CALL(mock_crypto_manager,
                 CreateSSLContext()).
@@ -357,15 +371,15 @@ namespace security_manager_test {
   TEST_F(SecurityManagerTest, CreateSSLContext_SetSSLContextError) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_UNKWOWN_INTERNAL_ERROR), is_final)).
+                    SecurityManager::ERROR_UNKWOWN_INTERNAL_ERROR), is_final)).
         Times(1);
 
     // Emulate SessionObserver and CryptoManager result
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, protocol_handler::kControl)).
+                GetSSLContext(key, kControl)).
         WillOnce(ReturnNull());
     EXPECT_CALL(mock_crypto_manager,
                 CreateSSLContext()).
@@ -375,7 +389,7 @@ namespace security_manager_test {
         Times(1);
     EXPECT_CALL(mock_session_observer,
                 SetSSLContext(key, &mock_ssl_context_new)).
-        WillOnce(Return(SecurityQuery::ERROR_UNKWOWN_INTERNAL_ERROR));
+        WillOnce(Return(SecurityManager::ERROR_UNKWOWN_INTERNAL_ERROR));
 
     const bool rezult = security_manager_->CreateSSLContext(key);
     EXPECT_FALSE(rezult);
@@ -390,7 +404,7 @@ namespace security_manager_test {
 
     // Emulate SessionObserver and CryptoManager result
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, protocol_handler::kControl)).
+                GetSSLContext(key, kControl)).
         WillOnce(ReturnNull()).
         // additional check for debug code
         WillOnce(Return(&mock_ssl_context_exists));
@@ -399,7 +413,7 @@ namespace security_manager_test {
         WillOnce(Return(&mock_ssl_context_new));
     EXPECT_CALL(mock_session_observer,
                 SetSSLContext(key, &mock_ssl_context_new)).
-        WillOnce(Return(SecurityQuery::ERROR_SUCCESS));
+        WillOnce(Return(SecurityManager::ERROR_SUCCESS));
 
     const bool rezult = security_manager_->CreateSSLContext(key);
     EXPECT_TRUE(rezult);
@@ -410,10 +424,10 @@ namespace security_manager_test {
   TEST_F(SecurityManagerTest, StartHandshake_ServiceStillUnprotected) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_INTERNAL
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INTERNAL), is_final)).
+                    SecurityManager::ERROR_INTERNAL), is_final)).
         Times(1);
     // Expect notifying listeners (unsuccess)
     EXPECT_CALL(mock_sm_listener,
@@ -422,7 +436,7 @@ namespace security_manager_test {
 
     // Emulate SessionObserver result
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, protocol_handler::kControl)).
+                GetSSLContext(key, kControl)).
         WillOnce(ReturnNull());
 
     security_manager_->StartHandshake(key);
@@ -434,10 +448,10 @@ namespace security_manager_test {
     SetMockCryptoManger();
 
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INTERNAL), is_final)).
+                    SecurityManager::ERROR_INTERNAL), is_final)).
         Times(1);
     // Expect notifying listeners (unsuccess)
     EXPECT_CALL(mock_sm_listener,
@@ -446,7 +460,7 @@ namespace security_manager_test {
 
     // Emulate SessionObserver result
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, protocol_handler::kControl)).
+                GetSSLContext(key, kControl)).
         WillOnce(Return(&mock_ssl_context_exists));
     EXPECT_CALL(mock_ssl_context_exists,
                 IsInitCompleted()).
@@ -467,13 +481,13 @@ namespace security_manager_test {
     SetMockCryptoManger();
 
     // Expect send one message (with correct pointer and size data)
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(_, is_final)).
         Times(1);
 
     // Return mock SSLContext
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, protocol_handler::kControl)).
+                GetSSLContext(key, kControl)).
         Times(3).
         WillRepeatedly(Return(&mock_ssl_context_exists));
     // Expect initialization check on each call StartHandshake
@@ -516,7 +530,7 @@ namespace security_manager_test {
 
     // Emulate SessionObserver result
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, protocol_handler::kControl)).
+                GetSSLContext(key, kControl)).
         WillOnce(Return(&mock_ssl_context_exists));
     EXPECT_CALL(mock_ssl_context_exists,
                 IsInitCompleted()).
@@ -531,10 +545,10 @@ namespace security_manager_test {
   TEST_F(SecurityManagerTest, ProccessHandshakeData_WrongDataSize) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_INVALID_QUERY_SIZE), is_final)).
+                    SecurityManager::ERROR_INVALID_QUERY_SIZE), is_final)).
         Times(1);
     EmulateMobileMessageHandShake(NULL, 0);
   }
@@ -546,10 +560,10 @@ namespace security_manager_test {
   TEST_F(SecurityManagerTest, ProccessHandshakeData_ServiceNotProtected) {
     SetMockCryptoManger();
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_SERVICE_NOT_PROTECTED), is_final)).
+                    SecurityManager::ERROR_SERVICE_NOT_PROTECTED), is_final)).
         Times(1);
     // Expect notifying listeners (unsuccess)
     EXPECT_CALL(mock_sm_listener,
@@ -558,7 +572,7 @@ namespace security_manager_test {
 
     // Emulate SessionObserver result
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, protocol_handler::kControl)).
+                GetSSLContext(key, kControl)).
         WillOnce(ReturnNull());
 
     const uint8_t data[] = {0x1, 0x2};
@@ -576,10 +590,10 @@ namespace security_manager_test {
     const int handshake_emulates = 4;
 
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   InternalErrorWithErrId(
-                    SecurityQuery::ERROR_SSL_INVALID_DATA), is_final)).
+                    SecurityManager::ERROR_SSL_INVALID_DATA), is_final)).
         Times(handshake_emulates);
     // Expect notifying listeners (unsuccess)
     EXPECT_CALL(mock_sm_listener,
@@ -588,7 +602,7 @@ namespace security_manager_test {
 
     // Emulate SessionObserver and CryptoManager result
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, protocol_handler::kControl)).
+                GetSSLContext(key, kControl)).
         Times(handshake_emulates).
         WillRepeatedly(Return(&mock_ssl_context_exists));
     // Emulate DoHandshakeStep fail logics
@@ -630,7 +644,7 @@ namespace security_manager_test {
     const int handshake_emulates = 2;
 
     // Expect InternalError with ERROR_ID
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(
                   // FIXME : !!!
                   _, is_final)).
@@ -646,7 +660,7 @@ namespace security_manager_test {
         Times(handshake_emulates).
         WillRepeatedly(Return(false));
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, protocol_handler::kControl)).
+                GetSSLContext(key, kControl)).
         Times(handshake_emulates).
         WillRepeatedly(Return(&mock_ssl_context_exists));
 
@@ -682,7 +696,7 @@ namespace security_manager_test {
 
     // Emulate SessionObserver and CryptoManager result
     EXPECT_CALL(mock_session_observer,
-                GetSSLContext(key, protocol_handler::kControl)).
+                GetSSLContext(key, kControl)).
         Times(handshake_emulates).
         WillRepeatedly(Return(&mock_ssl_context_exists));
     EXPECT_CALL(mock_ssl_context_exists,
@@ -721,7 +735,7 @@ namespace security_manager_test {
                               Handshake_Result_Success)));
 
     // Expect send two message (with correct pointer and size data)
-    EXPECT_CALL(mock_protocol_observer,
+    EXPECT_CALL(mock_protocol_handler,
                 SendMessageToMobileApp(_, is_final)).
         Times(2);
 

@@ -1,6 +1,4 @@
 /**
- * \file tcp_socket_connection.cc
- * \brief TcpSocketConnection class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -49,9 +47,9 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 
 TcpSocketConnection::TcpSocketConnection(const DeviceUID& device_uid,
-                                         const ApplicationHandle& app_handle,
-                                         TransportAdapterController* controller)
-    : ThreadedSocketConnection(device_uid, app_handle, controller) {
+    const ApplicationHandle& app_handle,
+    TransportAdapterController* controller)
+  : ThreadedSocketConnection(device_uid, app_handle, controller) {
 }
 
 TcpSocketConnection::~TcpSocketConnection() {
@@ -62,31 +60,30 @@ bool TcpSocketConnection::Establish(ConnectError** error) {
 }
 
 TcpServerOiginatedSocketConnection::TcpServerOiginatedSocketConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle,
-    TransportAdapterController* controller)
-    : ThreadedSocketConnection(device_uid, app_handle, controller) {
+  const DeviceUID& device_uid, const ApplicationHandle& app_handle,
+  TransportAdapterController* controller)
+  : ThreadedSocketConnection(device_uid, app_handle, controller) {
 }
 
 TcpServerOiginatedSocketConnection::~TcpServerOiginatedSocketConnection() {
 }
 
 bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
+  LOG4CXX_TRACE(logger_, "enter. error " << error);
   DeviceSptr device = controller()->FindDevice(device_handle());
   if (!device.valid()) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Device " << device_handle() << " not found");
+    LOG4CXX_ERROR(logger_, "Device " << device_handle() << " not found");
     *error = new ConnectError();
+    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: !device.valid()");
     return false;
   }
   TcpDevice* tcp_device = static_cast<TcpDevice*>(device.get());
 
   int port;
   if (-1 == (port = tcp_device->GetApplicationPort(application_handle()))) {
-    LOG4CXX_ERROR(
-        logger_,
-        "Application port for " << application_handle() << " not found");
+    LOG4CXX_ERROR(logger_, "Application port for " << application_handle() << " not found");
     *error = new ConnectError();
+    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: port not found");
     return false;
   }
 
@@ -94,6 +91,7 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   if (socket < 0) {
     LOG4CXX_ERROR(logger_, "Failed to create socket");
     *error = new ConnectError();
+    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: failed to create socket");
     return false;
   }
 
@@ -104,15 +102,17 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
   addr.sin_port = htons(port);
 
   LOG4CXX_INFO(logger_, "Connecting " << inet_ntoa(addr.sin_addr) << ":"
-                                      << port);
+               << port);
   if (::connect(socket, (struct sockaddr*) &addr, sizeof(addr)) < 0) {
     LOG4CXX_ERROR(logger_, "Failed to connect for application "
-                               << application_handle() << ", error " << errno);
+                  << application_handle() << ", error " << errno);
     *error = new ConnectError();
+    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: failed to connect to application");
     return false;
   }
 
   set_socket(socket);
+  LOG4CXX_TRACE(logger_, "exit with TRUE");
   return true;
 }
 

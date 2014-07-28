@@ -229,30 +229,47 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
 }}}}
 
-namespace NsSmartDeviceLink { namespace NsSmartObjects {
-    template<>
-    const std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string> & TEnumSchemaItem<test::components::SmartObjects::SchemaItem::TestType::eType>::getEnumElementsStringRepresentation(void)
-    {
-        static bool isInitialized = false;
-        static std::map<test::components::SmartObjects::SchemaItem::TestType::eType, std::string> enumStringRepresentationMap;
+namespace NsSmartDeviceLink {
+namespace NsSmartObjects {
 
-        if (false == isInitialized)
-        {
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::USER_EXIT, "USER_EXIT"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::IGNITION_OFF, "IGNITION_OFF"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::BLUETOOTH_OFF, "BLUETOOTH_OFF"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::USB_DISCONNECTED, "USB_DISCONNECTED"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::TOO_MANY_REQUESTS, "TOO_MANY_REQUESTS"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::MASTER_RESET, "MASTER_RESET"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::FACTORY_DEFAULTS, "FACTORY_DEFAULTS"));
-            enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SchemaItem::TestType::APP_UNAUTHORIZED, "APP_UNAUTHORIZED"));
+template<>
+const EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::EnumToCStringMap
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::enum_to_cstring_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::InitEnumToCStringMap();
 
-            isInitialized = true;
-        }
+template<>
+const EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::CStringToEnumMap
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::cstring_to_enum_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::InitCStringToEnumMap();
 
-        return enumStringRepresentationMap;
-    }
-}}
+template<>
+const char* const
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::cstring_values_[] = {
+    "USER_EXIT",
+    "IGNITION_OFF",
+    "BLUETOOTH_OFF",
+    "USB_DISCONNECTED",
+    "TOO_MANY_REQUESTS",
+    "MASTER_RESET",
+    "FACTORY_DEFAULTS",
+    "APP_UNAUTHORIZED"
+};
+
+template<>
+const test::components::SmartObjects::SchemaItem::TestType::eType
+EnumConversionHelper<test::components::SmartObjects::SchemaItem::TestType::eType>::enum_values_[] = {
+    test::components::SmartObjects::SchemaItem::TestType::USER_EXIT,
+    test::components::SmartObjects::SchemaItem::TestType::IGNITION_OFF,
+    test::components::SmartObjects::SchemaItem::TestType::BLUETOOTH_OFF,
+    test::components::SmartObjects::SchemaItem::TestType::USB_DISCONNECTED,
+    test::components::SmartObjects::SchemaItem::TestType::TOO_MANY_REQUESTS,
+    test::components::SmartObjects::SchemaItem::TestType::MASTER_RESET,
+    test::components::SmartObjects::SchemaItem::TestType::FACTORY_DEFAULTS,
+    test::components::SmartObjects::SchemaItem::TestType::APP_UNAUTHORIZED
+};
+
+}
+}
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);

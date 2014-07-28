@@ -1,4 +1,11 @@
+[CW30]
+* SyncProxyTester: SDL doesn't handle wrong type of "systemFile" parameter
++ SyncProxyTester: Modify UpdateTurnList request
+* SyncProxyTester:Ignoring pauses in autotest
++ SYNC Mobile SDK | SyncProxyTester: Add possibility to restore encryption state at SPT side
+
 [CW29]
++ SYNC Mobile SDK: added ssl error description listing
 * SYNC Mobile SDK | SyncProxyTester: Added possibility to start several secure sessions.
 
 [CW28]

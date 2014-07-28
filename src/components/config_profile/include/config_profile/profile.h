@@ -213,6 +213,12 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& audio_stream_file() const;
 #ifdef CUSTOMER_PASA
     /**
+     * @brief Returns name fo mqueue from which SDL
+     * will be able to obtain data.
+     */
+    const std::string& mq_name() const;
+
+    /**
       * @brief Returns path to log4cxx configuration file
       */
     const std::string& log4cxx_config_file() const;
@@ -434,6 +440,16 @@ class Profile : public utils::Singleton<Profile> {
      */
     uint32_t thread_pool_size() const;
 
+    const std::string& iap_legacy_protocol() const;
+
+    const std::string& iap_hub_protocol() const;
+
+    const std::string& iap_system_config() const;
+
+    const std::string& iap2_system_config() const;
+
+    int iap2_hub_connect_attempts() const;
+
 
   private:
     /**
@@ -577,6 +593,7 @@ class Profile : public utils::Singleton<Profile> {
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
 #ifdef CUSTOMER_PASA
+    std::string                     mq_name_;
     std::string                     log4cxx_config_file_;
     std::string                     remote_logging_flag_file_;
     std::string                     remote_logging_flag_file_path_;
@@ -599,6 +616,12 @@ class Profile : public utils::Singleton<Profile> {
      * second is time scale
      */
     std::pair<uint32_t, int32_t>   get_vehicle_data_frequency_;
+
+    std::string                     iap_legacy_protocol_;
+    std::string                     iap_hub_protocol_;
+    std::string                     iap_system_config_;
+    std::string                     iap2_system_config_;
+    int                             iap2_hub_connect_attempts_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

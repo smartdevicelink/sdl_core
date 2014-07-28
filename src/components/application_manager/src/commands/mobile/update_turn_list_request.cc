@@ -118,9 +118,9 @@ void UpdateTurnListRequest::Run() {
             navigation_text;
       }
     }
-
-    msg_params[strings::app_id] = app->app_id();
   }
+
+  msg_params[strings::app_id] = app->app_id();
 
   if ((*message_)[strings::msg_params].keyExists(strings::turn_list) ||
       (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
@@ -192,7 +192,6 @@ bool UpdateTurnListRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
 
     for (; it_sb != it_sb_end; ++it_sb) {
-
       if ((*it_sb).keyExists(strings::text)) {
         str = (*it_sb)[strings::text].asCharArray();
         if (!CheckSyntax(str, true)) {
@@ -222,6 +221,15 @@ bool UpdateTurnListRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_tl_end = tl_array->end();
 
     for (; it_tl != it_tl_end; ++it_tl) {
+      if ((*it_tl).keyExists(strings::navigation_text)) {
+        str = (*it_tl)[strings::navigation_text].asCharArray();
+        if (!CheckSyntax(str, true)) {
+          LOG4CXX_ERROR(logger_,
+              "Invalid turn_list navigation_text text syntax check failed");
+          return true;
+        }
+      }
+
       if ((*it_tl).keyExists(strings::turn_icon)) {
         str = (*it_tl)[strings::turn_icon][strings::value].asCharArray();
         if (!CheckSyntax(str, true)) {
@@ -230,6 +238,7 @@ bool UpdateTurnListRequest::IsWhiteSpaceExist() {
           return true;
         }
       }
+
     }
   }
   return false;

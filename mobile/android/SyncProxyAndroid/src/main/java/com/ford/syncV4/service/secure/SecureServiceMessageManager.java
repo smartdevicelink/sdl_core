@@ -15,6 +15,8 @@ import com.ford.syncV4.protocol.secure.SecureServicePayload;
 import com.ford.syncV4.protocol.secure.SecureServicePayloadParser;
 
 import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.Objects;
 
 /**
  * This class provides main functionality to manage (process, etc ...) SecureService messages
@@ -62,7 +64,8 @@ public class SecureServiceMessageManager {
             byte [] data = Arrays.copyOfRange(protocolMessage.getData(), 12, protocolMessage.getData().length);
             mMessageCallback.onHandshakeResponse(data);
         }else{
-            mMessageCallback.onHandshakeError(secureServicePayload.getSecureError());
+            Hashtable<String, Object> errorDescription = secureServicePayload.getSecureErrorDescription();
+            mMessageCallback.onHandshakeError(secureServicePayload.getSecureError(), errorDescription);
         }
     }
 }

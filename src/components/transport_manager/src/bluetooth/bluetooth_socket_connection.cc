@@ -1,6 +1,4 @@
 /**
- * \file bluetooth_socket_connection.cc
- * \brief BluetoothSocketConnection class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -50,32 +48,31 @@
 
 namespace transport_manager {
 namespace transport_adapter {
-
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 BluetoothSocketConnection::BluetoothSocketConnection(
-    const DeviceUID& device_uid, const ApplicationHandle& app_handle,
-    TransportAdapterController* controller)
-    : ThreadedSocketConnection(device_uid, app_handle, controller) {
+  const DeviceUID& device_uid, const ApplicationHandle& app_handle,
+  TransportAdapterController* controller)
+  : ThreadedSocketConnection(device_uid, app_handle, controller) {
 }
 
 BluetoothSocketConnection::~BluetoothSocketConnection() {
 }
 
 bool BluetoothSocketConnection::Establish(ConnectError** error) {
-  LOG4CXX_INFO(logger_, "enter (#" << pthread_self() << ")");
+  LOG4CXX_TRACE(logger_, "enter. (#" << pthread_self() << "), error: " << error);
   DeviceSptr device = controller()->FindDevice(device_handle());
 
   BluetoothDevice* bluetooth_device =
-      static_cast<BluetoothDevice*>(device.get());
+    static_cast<BluetoothDevice*>(device.get());
 
   uint8_t rfcomm_channel;
   if (!bluetooth_device->GetRfcommChannel(application_handle(),
                                           &rfcomm_channel)) {
-    LOG4CXX_ERROR(logger_,
-                  "Application " << application_handle() << " not found");
+    LOG4CXX_DEBUG(logger_,
+                   "Application " << application_handle() << " not found");
     *error = new ConnectError();
-    LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
+    LOG4CXX_TRACE(logger_, "exit with FALSE");
     return false;
   }
 
@@ -89,48 +86,47 @@ bool BluetoothSocketConnection::Establish(ConnectError** error) {
 
   int attempts = 4;
   int connect_status = 0;
-  LOG4CXX_INFO(logger_, "start rfcomm Connect attempts");
+  LOG4CXX_DEBUG(logger_, "start rfcomm Connect attempts");
   do {
     rfcomm_socket = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM);
     if (-1 == rfcomm_socket) {
-      LOG4CXX_ERROR_WITH_ERRNO(
-          logger_,
-          "Failed to create RFCOMM socket for device " << device_handle());
+      LOG4CXX_ERROR_WITH_ERRNO(logger_,
+                               "Failed to create RFCOMM socket for device " << device_handle());
       *error = new ConnectError();
-      LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
+      LOG4CXX_TRACE(logger_, "exit with FALSE");
       return false;
     }
     connect_status = ::connect(rfcomm_socket,
                                (struct sockaddr*) &remoteSocketAddress,
                                sizeof(remoteSocketAddress));
     if (0 == connect_status) {
-      LOG4CXX_INFO(logger_, "rfcomm Connect ok");
+      LOG4CXX_DEBUG(logger_, "rfcomm Connect ok");
       break;
     }
-    LOG4CXX_INFO(logger_, "rfcomm Connect errno " << errno);
     if (errno != 111 && errno != 104) {
+      LOG4CXX_DEBUG(logger_, "rfcomm Connect errno " << errno);
       break;
     }
     if (errno) {
+      LOG4CXX_DEBUG(logger_, "rfcomm Connect errno " << errno);
       close(rfcomm_socket);
     }
     sleep(2);
   } while (--attempts > 0);
   LOG4CXX_INFO(logger_, "rfcomm Connect attempts finished");
   if (0 != connect_status) {
-    LOG4CXX_ERROR_WITH_ERRNO(
-        logger_,
-        "Failed to Connect to remote device " << BluetoothDevice::GetUniqueDeviceId(remoteSocketAddress.rc_bdaddr) << " for session " << this);
+    LOG4CXX_DEBUG(logger_,
+                  "Failed to Connect to remote device " << BluetoothDevice::GetUniqueDeviceId(
+                    remoteSocketAddress.rc_bdaddr) << " for session " << this);
     *error = new ConnectError();
-    LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
+    LOG4CXX_TRACE(logger_, "exit with FALSE");
     return false;
   }
 
   set_socket(rfcomm_socket);
-  LOG4CXX_INFO(logger_, "exit (#" << pthread_self() << ")");
+  LOG4CXX_TRACE(logger_, "exit with TRUE");
   return true;
 }
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-

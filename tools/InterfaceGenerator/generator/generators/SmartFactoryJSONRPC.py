@@ -100,7 +100,7 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
         u'''error_response_schema));\n''')
 
     _error_response_schema_template = (
-        u'''std::map<std::string, CObjectSchemaItem::SMember> '''
+        u'''CObjectSchemaItem::Members '''
         u'''params_members;\n'''
         u'''params_members[NsSmartDeviceLink::NsJSONHandler::'''
         u'''strings::S_FUNCTION_ID] = CObjectSchemaItem::SMember('''
@@ -126,8 +126,7 @@ class CodeGenerator(SmartFactoryBase.CodeGenerator):
         u'''strings::kMessage] = CObjectSchemaItem::SMember('''
         u'''CStringSchemaItem::create(), true);\n'''
         u'''\n'''
-        u'''std::map<std::string, '''
-        u'''CObjectSchemaItem::SMember> root_members_map;\n'''
+        u'''CObjectSchemaItem::Members root_members_map;\n'''
         u'''root_members_map[NsSmartDeviceLink::NsJSONHandler::'''
         u'''strings::S_PARAMS] = CObjectSchemaItem::SMember('''
         u'''CObjectSchemaItem::create(params_members), true);\n'''

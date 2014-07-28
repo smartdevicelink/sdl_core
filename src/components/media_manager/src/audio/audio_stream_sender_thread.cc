@@ -54,6 +54,7 @@ namespace media_manager {
 using sync_primitives::AutoLock;
 
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
+const uint32_t kMqueueMessageSize = 65536;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AudioPassThruThread")
 
@@ -84,7 +85,11 @@ void AudioStreamSenderThread::threadMain() {
       break;
     }
 
+#ifdef CUSTOMER_PASA
+    mqSendAudioChunkToMobile();
+#else
     sendAudioChunkToMobile();
+#endif // CUSTOMER_PASA
   }
 
   LOG4CXX_TRACE_EXIT(logger_);
@@ -128,6 +133,35 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
   offset_ = 0;
 #endif
 }
+
+#ifdef CUSTOMER_PASA
+void AudioStreamSenderThread::mqSendAudioChunkToMobile() {
+  mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
+  const mqd_t handle = mq_open(fileName_.c_str(), O_RDWR, mode, 0);
+
+  if (-1 == handle) {
+    LOG4CXX_ERROR(logger_, "Unable to open mqueue in order to obtain data: "
+                  << strerror(errno));
+    return;
+  }
+
+  std::vector<uint8_t> data;
+  data.reserve(kMqueueMessageSize);
+  const ssize dataSize = mq_receive(handle,
+                                    static_cast<char*>(&data.front()),
+                                    data.size(), 0);
+  if (-1 == dataSize) {
+    LOG4CXX_ERROR(logger_, "Unable to recieve data from mqueue: "
+                  << strerror(errno));
+    return;
+  }
+  data.resize(dataSize);
+
+  application_manager::ApplicationManagerImpl::instance()->
+  SendAudioPassThroughNotification(session_key_, data);
+  }
+}
+#endif // CUSTOMER_PASA
 
 bool AudioStreamSenderThread::getShouldBeStopped() {
   AutoLock auto_lock(shouldBeStoped_lock_);

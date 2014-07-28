@@ -134,11 +134,10 @@ PolicyManager* PolicyHandler::LoadPolicyLibrary() {
 
 PolicyManager* PolicyHandler::CreateManager() {
   typedef PolicyManager* (*CreateManager)();
-  CreateManager create_manager = 0;
-  *(void**)(&create_manager) = dlsym(dl_handle_, "CreateManager");
+  CreateManager create_manager = reinterpret_cast<CreateManager>(dlsym(dl_handle_, "CreateManager"));
   char* error_string = dlerror();
   if (error_string == NULL) {
-    policy_manager_ = (*create_manager)();
+    policy_manager_ = create_manager();
   } else {
     LOG4CXX_WARN(logger_, error_string);
   }
@@ -326,7 +325,7 @@ void PolicyHandler::SetDeviceInfo(std::string& device_id,
 }
 
 void PolicyHandler::OnAppPermissionConsent(
-  const PermissionConsent& permissions) {
+  PermissionConsent &permissions) {
   LOG4CXX_INFO(logger_, "OnAppPermissionConsent");
   POLICY_LIB_CHECK_VOID();
   if (!permissions.policy_app_id.empty()) {
@@ -353,6 +352,12 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()->application(
       connection_key);
+
+  if (!app.valid()) {
+    LOG4CXX_WARN(logger_, "Connection key '" << connection_key << "' "
+                 "not found within registered applications.");
+    return;
+  }
 
   DeviceParams device_params;
   application_manager::MessageHelper::GetDeviceInfoForApp(connection_key,
@@ -430,7 +435,7 @@ void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
-  if (app && app->hmi_level() != mobile_apis::HMILevel::HMI_NONE) {
+  if (app.valid() && app->hmi_level() != mobile_apis::HMILevel::HMI_NONE) {
     LOG4CXX_INFO(logger_, "Application_id " << policy_app_id << " is revoked.");
     AppPermissions permissions = policy_manager_->GetAppPermissionsChanges(
                                    policy_app_id);
@@ -463,7 +468,7 @@ void PolicyHandler::OnPendingPermissionChange(
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
-  if (!app) {
+  if (!app.valid()) {
     LOG4CXX_WARN(logger_,
                  "No app found for " << policy_app_id << " policy app id.");
     return;
@@ -504,40 +509,6 @@ void PolicyHandler::OnPendingPermissionChange(
     default:
       break;
   }
-}
-
-BinaryMessageSptr PolicyHandler::AddHttpHeader(
-    const BinaryMessageSptr& pt_string) {
-  // Creating new value to avoid backslashes with direct converting from string
-  Json::Value policy_table(Json::objectValue);
-  Json::Reader reader;
-  reader.parse(std::string(pt_string->begin(), pt_string->end()), policy_table);
-
-  Json::Value packet(Json::objectValue);
-  packet["HTTPRequest"] = Json::Value(Json::objectValue);
-  packet["HTTPRequest"]["headers"] = Json::Value(Json::objectValue);
-  packet["HTTPRequest"]["headers"]["ContentType"] = Json::Value("application/json");
-  packet["HTTPRequest"]["headers"]["ConnectTimeout"] =
-      Json::Value(policy_manager_->TimeoutExchange());
-  packet["HTTPRequest"]["headers"]["DoOutput"] = Json::Value(true);
-  packet["HTTPRequest"]["headers"]["DoInput"] = Json::Value(true);
-  packet["HTTPRequest"]["headers"]["UseCaches"] = Json::Value(false);
-  packet["HTTPRequest"]["headers"]["RequestMethod"] = Json::Value("POST");
-  packet["HTTPRequest"]["headers"]["ReadTimeout"] =
-      Json::Value(policy_manager_->TimeoutExchange());
-  packet["HTTPRequest"]["headers"]["InstanceFollowRedirects"] =
-      Json::Value(false);
-  packet["HTTPRequest"]["headers"]["charset"] = Json::Value("utf-8");
-  packet["HTTPRequest"]["headers"]["Content_Length"] =
-      Json::Value(static_cast<int>(pt_string->size()));
-  packet["HTTPRequest"]["body"] = Json::Value(Json::objectValue);
-  packet["HTTPRequest"]["body"]["data"] = Json::Value(Json::objectValue);
-  packet["HTTPRequest"]["body"]["data"] = policy_table;
-
-  Json::StyledWriter writer;
-  std::string message = writer.write(packet);
-  LOG4CXX_DEBUG(logger_, "Packet PT: " << message);
-  return new BinaryMessage(message.begin(), message.end());
 }
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string) {
@@ -689,6 +660,12 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     application_manager::ApplicationSharedPtr app =
       app_manager->application(last_activated_app_id_);
 
+    if (!app.valid()) {
+      LOG4CXX_WARN(logger_, "Application with id '" << last_activated_app_id_
+                   << "' not found within registered applications.");
+      return;
+    }
+
     if (is_allowed) {
       if (app) {
         // Send HMI status notification to mobile
@@ -731,7 +708,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()->application(
       connection_key);
-  if (!app) {
+  if (!app.valid()) {
     LOG4CXX_WARN(logger_, "Activated App failed: no app found.");
     return;
   }
@@ -848,7 +825,7 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
 
-  if (!app) {
+  if (!app.valid()) {
     LOG4CXX_WARN(
       logger_,
       "Connection_key not found for application_id:" << policy_app_id);
@@ -945,7 +922,7 @@ std::string PolicyHandler::GetAppName(const std::string& policy_app_id) {
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
 
-  if (!app) {
+  if (!app.valid()) {
     LOG4CXX_WARN(
       logger_,
       "Connection_key not found for application_id:" << policy_app_id);

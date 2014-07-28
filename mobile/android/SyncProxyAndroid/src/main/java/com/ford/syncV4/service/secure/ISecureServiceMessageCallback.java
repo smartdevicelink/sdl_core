@@ -9,6 +9,8 @@ package com.ford.syncV4.service.secure;
 
 import com.ford.syncV4.protocol.enums.ServiceType;
 
+import java.util.Hashtable;
+
 /**
  * This interface describes callback functions which are recognized by Secure Service messages
  * processor
@@ -25,5 +27,5 @@ public interface ISecureServiceMessageCallback {
      */
     public void onHandshakeResponse(byte[] data);
 
-    public void onHandshakeError(SecurityInternalError error);
+    public void onHandshakeError(SecurityInternalError error, Hashtable<String, Object> errorDescription);
 }

@@ -31,24 +31,37 @@
  */
 #ifndef TEST_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_TM_TEST_H_
 #define TEST_COMPONENTS_PROTOCOL_HANDLER_INCLUDE_PROTOCOL_HANDLER_PROTOCOL_HANDLER_TM_TEST_H_
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
+
+#include <string>
 
 #include "utils/shared_ptr.h"
 
 #include "protocol_handler/protocol_handler_impl.h"
-#include "protocol_handler/protocol_handler_mock.h"
+#include "protocol/common.h"
 
-namespace test  {
-namespace components  {
+#include "protocol_handler/protocol_handler_mock.h"
+#include "protocol_handler/protocol_observer_mock.h"
+#include "protocol_handler/session_observer_mock.h"
+#include "protocol_handler/control_message_matcher.h"
+#include "security_manager/security_manager_mock.h"
+#include "security_manager/ssl_context_mock.h"
+#include "transport_manager/transport_manager_mock.h"
+
+namespace test {
+namespace components {
 namespace protocol_handler_test {
 
 // id passed as NULL for new session establishing
 #define NEW_SESSION_ID        0u
 #define SESSION_START_REJECT  0u
 
-using namespace protocol_handler;
-using namespace transport_manager;
+using namespace ::protocol_handler;
+using namespace ::transport_manager;  // For TM states
+//using namespace ::security_manager;
+using ::transport_manager::TransportManagerListener;
+using protocol_handler_test::ControlMessage;
 using ::testing::Return;
 using ::testing::ReturnNull;
 using ::testing::AllOf;
@@ -76,13 +89,13 @@ class ProtocolHandlerImplTest : public ::testing::Test {
         //return some connection_key
         WillRepeatedly(Return(connection_key));
     EXPECT_CALL(session_observer_mock,
-                CheckSupportHeartBeat(connection_id, _)).
+                IsHeartBeatSupported(connection_id, _)).
         //return false to avoid call KeepConnectionAlive
         WillRepeatedly(Return(false));
   }
   void TearDown() OVERRIDE {
     // Wait call methods in thread
-    usleep(500000);
+    usleep(100000);
   }
 
   // Emulate connection establish
@@ -119,17 +132,18 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   ::utils::SharedPtr<ProtocolHandlerImpl> protocol_handler_impl;
   TransportManagerListener* tm_listener;
   // Uniq connection
-  ConnectionUID connection_id;
+  ::transport_manager::ConnectionUID connection_id;
   // id of established session
   uint8_t session_id;
   // uniq id as connection_id and session_id in one
   uint32_t connection_key;
   uint32_t message_id;
-  testing::StrictMock<TransportManagerMock> transport_manager_mock;
-  testing::StrictMock<SessionObserverMock>  session_observer_mock;
+  // Strict mocks (same as all methods EXPECT_CALL().Times(0))
+  testing::StrictMock<transport_manager_test::TransportManagerMock> transport_manager_mock;
+  testing::StrictMock<protocol_handler_test::SessionObserverMock>   session_observer_mock;
 #ifdef ENABLE_SECURITY
-  testing::NiceMock<SecurityManagerMock>    security_manager_mock;
-  testing::NiceMock<SSLContextMock>         ssl_context_mock;
+  testing::NiceMock<security_manager_test::SecurityManagerMock>     security_manager_mock;
+  testing::NiceMock<security_manager_test::SSLContextMock>          ssl_context_mock;
 #endif  // ENABLE_SECURITY
 };
 
@@ -369,13 +383,16 @@ TEST_F(ProtocolHandlerImplTest,SecurityEnable_StartSessionProtected_SSLInitializ
       //emulate SSL is initilized
       WillOnce(Return(true));
 
+  // Expect service protection enable
+  EXPECT_CALL(session_observer_mock,
+              SetProtectionFlag(connection_key, start_service));
+
   // expect send Ack with PROTECTION_ON (on SSL is initilized)
   EXPECT_CALL(transport_manager_mock,
               SendMessageToDevice(ControlMessage(FRAME_DATA_START_SERVICE_ACK, PROTECTION_ON))).
       WillOnce(Return(E_SUCCESS));
 
   SendControlMessage(PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
-
 }
 /*
  * ProtocolHandler shall send Ack with PROTECTION_OFF on session handshhake fail
@@ -470,7 +487,7 @@ TEST_F(ProtocolHandlerImplTest, SecurityEnable_StartSessionProtected_HandshakeSu
       // emulate protection for service is not enabled
       WillOnce(ReturnNull());
 
-  // On success handshake mark service as protected
+  // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service));
 
@@ -525,7 +542,7 @@ TEST_F(ProtocolHandlerImplTest,
       // emulate protection for service is not enabled
       WillOnce(ReturnNull());
 
-  // On success handshake mark service as protected
+  // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service));
 
@@ -584,7 +601,7 @@ TEST_F(ProtocolHandlerImplTest,
       // emulate protection for service is not enabled
       WillOnce(ReturnNull());
 
-  // On success handshake mark service as protected
+  // Expect service protection enable
   EXPECT_CALL(session_observer_mock,
               SetProtectionFlag(connection_key, start_service));
 

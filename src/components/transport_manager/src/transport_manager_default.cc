@@ -37,6 +37,7 @@
 
 #include "transport_manager/transport_manager_default.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
+#include "utils/logger.h"
 
 #ifdef BLUETOOTH_SUPPORT
 #ifdef CUSTOMER_PASA
@@ -56,9 +57,12 @@
 
 
 namespace transport_manager {
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 int TransportManagerDefault::Init() {
+  LOG4CXX_TRACE(logger_, "enter");
   if (E_SUCCESS != TransportManagerImpl::Init()) {
+    LOG4CXX_TRACE(logger_, "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != TransportManagerImpl::Init()");
     return E_TM_IS_NOT_INITIALIZED;
   }
   transport_adapter::TransportAdapterImpl* ta;
@@ -103,7 +107,7 @@ int TransportManagerDefault::Init() {
 #endif  // TIME_TESTER
   AddTransportAdapter(ta);
 #endif
-
+  LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
 }
 

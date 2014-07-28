@@ -64,7 +64,6 @@
 #ifdef TIME_TESTER
 #include "time_metric_observer.h"
 #endif  // TIME_TESTER
-#include "protocol_handler/service_type.h"
 
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
@@ -90,12 +89,6 @@ namespace threads {
 class Thread;
 }
 class CommandNotificationImpl;
-
-#ifdef TESTS_WITH_HMI
-namespace test {
-  class ApplicationManagerImplTest;
-}
-#endif
 
 namespace application_manager {
 namespace mobile_api = mobile_apis;
@@ -189,7 +182,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     /**
      * Inits application manager
      */
-    virtual void Init();
+    virtual bool Init();
 
     /**
      * @brief Stop work.
@@ -408,18 +401,18 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Overriden ProtocolObserver method
      */
     virtual void OnMessageReceived(
-        const protocol_handler::RawMessagePtr message);
+        const RawMessagePtr message);
 
     /*
      * @brief Overriden ProtocolObserver method
      */
     virtual void OnMobileMessageSent(
-        const protocol_handler::RawMessagePtr message);
+        const RawMessagePtr message);
 
     void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
-    void OnDeviceListUpdated(const connection_handler::DeviceList& device_list);
+    void OnDeviceListUpdated(const connection_handler::DeviceMap& device_list);
     //TODO (EZamakhov): fix all indentations in this file
   virtual void OnFindNewApplicationsRequest();
     void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
@@ -605,7 +598,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                             Message& output);
     utils::SharedPtr<Message> ConvertRawMsgToMessage(
-      const protocol_handler::RawMessagePtr message);
+      const RawMessagePtr message);
 
     void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
     void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
@@ -616,16 +609,16 @@ class ApplicationManagerImpl : public ApplicationManager,
      * of messages. Beware, each is called on different thread!
      */
     // CALLED ON messages_from_mobile_ thread!
-    virtual void Handle(const impl::MessageFromMobile& message) OVERRIDE;
+    virtual void Handle(const impl::MessageFromMobile message) OVERRIDE;
 
     // CALLED ON messages_to_mobile_ thread!
-    virtual void Handle(const impl::MessageToMobile& message) OVERRIDE;
+    virtual void Handle(const impl::MessageToMobile message) OVERRIDE;
 
     // CALLED ON messages_from_hmi_ thread!
-    virtual void Handle(const impl::MessageFromHmi& message) OVERRIDE;
+    virtual void Handle(const impl::MessageFromHmi message) OVERRIDE;
 
     // CALLED ON messages_to_hmi_ thread!
-    virtual void Handle(const impl::MessageToHmi& message) OVERRIDE;
+    virtual void Handle(const impl::MessageToHmi message) OVERRIDE;
 
     void SendUpdateAppList(const std::list<uint32_t>& applications_ids);
     void OnApplicationListUpdateTimer();
@@ -723,9 +716,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 
     FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);
-#ifdef TESTS_WITH_HMI
-    friend class test::ApplicationManagerImplTest;
-#endif
 };
 
 const std::set<ApplicationSharedPtr>& ApplicationManagerImpl::applications() const {

@@ -46,7 +46,6 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
     bool CanAppStealFocus(const std::string& app_id);
     bool GetDefaultHMI(const std::string& policy_app_id,
                        std::string* default_hmi);
-    bool GetPriority(const std::string& policy_app_id, std::string* priority);
     bool ResetUserConsent();
     bool ResetDeviceConsents();
     bool ResetAppConsents();

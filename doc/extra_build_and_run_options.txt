@@ -28,31 +28,46 @@
     OS_TYPE: LINUX, QNX - target OS for executing smartDeviceLinkCore
     DEBUG: ON, OFF- add debug information
     HMI_TYPE: HTML5, QML2, QML1, NONE - type of HMI
-    MEDIA_MODE: EXTENDED_MEDIA, DEFAULT_MEDIA - using extended media mode
+    MEDIA_MODE: EXTENDED_MEDIA, DEFAULT_MEDIA - using extended or default media mode
     HMI_ADAPTER: MESSAGEBROKER, DBUS, MQUEUE - type of transport to use
     ENABLE_LOG: LOG_ON, LOG_OFF - switch on or switch off logging 
     Note: Sheldued build of all possible configurations you can find there http://172.30.18.18:8080/job/main_sdl_mc/
 
-6) You can manage policy functional with EXTENDED_POLICY_FLAG
-    If you by default it is ON.
-    You can switch it off with environment variable or with -DEXTENDED_POLICY option on cmake
-    Policy should not be delivered to GENIVI
+6) Additional cmake flags:
+  1: EXTENDED_POLICY_FLAG
+      By default it is OFF.
+      Build with specific features and extended functionality
+        Note: Policy should not be delivered to GENIVI
 
-6) To configure  project for eclipse support use:
+  2: EXTENDED_MEDIA_MODE
+      By default it is OFF.
+      Turn on and off extended Madia Manager features relates to PulseAudio A2DP and GStreamer
+
+  3: ENABLE_SECURITY
+      By default it is ON.
+      Security Ford protocol protection
+
+  4: CMAKE_BUILD_TYPE
+      By default it is Debug.
+      Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel
+      For release build use "-D CMAKE_BUILD_TYPE=Release"
+        Note: For QNX+QtHMI build flag "-DCMAKE_BUILD_TYPE=Release" is plainly required
+
+7) To configure  project for eclipse support use:
     cmake -G "Eclipse CDT4 - Unix Makefiles" <PATH_TO_SRC>  
 
-7) Setup environment:
+8) Setup environment:
     Read the built-in setup environment help ("./setup_env.sh --help")
 
-8) Colorized logs:
-  8.1. Make sure grc is installed:
+9) Colorized logs:
+  9.1. Make sure grc is installed:
     $ sudo apt-get install grc
 
-  8.2. Copy the config files from the grc/ directory into ~/.grc/ directory:
+  9.2. Copy the config files from the grc/ directory into ~/.grc/ directory:
     $ mkdir ~/.grc
     $ cp grc/* ~/.grc/
 
-  8.3. Add an alias to your shell's config (usually, ~/.bashrc or ~/.zshrc):
+  9.3. Add an alias to your shell's config (usually, ~/.bashrc or ~/.zshrc):
     $ alias grca='grc -es --colour=auto'
 
   Either restart the shell session or source the edited file:
@@ -60,19 +75,19 @@
     or
     $ source ~/.zshrc
 
-  8.4. Start the smartDeviceLink core with the following command:
+  9.4. Start the smartDeviceLink core with the following command:
     $ grca ./smartDeviceLinkCore
 
 9) To build SDL with MME support (iPhone connection over USB) unpack iap archives from src/thirdPartyLibs:
                 # tar -xjf iap.build.tar.bz2 -C $QNX_TARGET
                 # tar -xjf iap.armv7-qnx.runtime.tar.bz2 -C $QNX_TARGET/armle-v7
                 Note: MME is supported only for ARMv7 platform
-10) Build SDL for deploying on target
+11) Build SDL for deploying on target
   Note: You should compile SDL on Windows with Momentics studio
   
-  10.1 After successful compile you should login on target by TELNET and execute:
+  11.1 After successful compilation you should login on target by TELNET and execute:
         # mount –uw /fs/mp
-  10.2 Copy files on target:
+  11.2 Copy files on target:
         bin\armle-v7\release\SmartDeviceLink ==> /fs/mp/apps/SmartDeviceLink
         dll\armle-v7\release\* ==> /fs/mp/apps/usr/lib/
         src\appMain\hmi_capabilities.json => /fs/mp/etc/AppLink/hmi_capabilities.json
@@ -84,10 +99,14 @@
         src\appMain\smartDeviceLink.ini => /fs/mp/etc/AppLink/smartDeviceLink.ini
         src\appMain\init_policy.sh => /fs/mp/etc/AppLink/init_policy.sh
         src\appMain\init_policy_pasa.sh => /fs/mp/etc/AppLink/init_policy_pasa.sh
-  10.3 Execute
+  11.3 Execute
         # sync
         # sync
-  10.4 Modify /fs/mp/scripts/startup_gf.sh add there:
-        on -C0 -p 18 $GF_APPS/SmartDeviceLink > /dev/null &
-  10.5 Restart target
-  
+  11.4 Chech if startup skript runs SDL.
+  11.5 If you want to collect log, change startul SDL line
+        from:
+             on -C0 -p 12 SmartDeviceLink > /dev/null &
+        to
+            on -C0 -p 12 SmartDeviceLink >  /fs/rwdata/{PATH_TO_FILE}&
+  11.5 Restart target
+

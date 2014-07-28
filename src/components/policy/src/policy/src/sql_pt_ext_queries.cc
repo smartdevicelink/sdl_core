@@ -44,9 +44,6 @@ const std::string kSelectStealFocus =
 const std::string kSelectDefaultHmi =
   "SELECT `default_hmi` FROM `application` WHERE `id` = ? LIMIT 1";
 
-const std::string kSelectPriority =
-  "SELECT `priority_value` FROM `application` WHERE `id` = ? LIMIT 1";
-
 const std::string kResetDeviceConsents = "DELETE FROM `device_consent_group`";
 
 const std::string kResetAppConsents = "DELETE FROM `consent_group`";

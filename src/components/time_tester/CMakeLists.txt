@@ -25,7 +25,6 @@ set (SOURCES
     ./src/application_manager_metric.cc
     ./src/transport_manager_metric.cc
     ./src/protocol_handler_metric.cc
-
 )
 
 add_library("TimeTester" ${SOURCES})

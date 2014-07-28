@@ -18,7 +18,7 @@ public interface ISyncConnectionListener {
 	
 	public void onProtocolMessageReceived(ProtocolMessage msg);
 	
-	public void onProtocolSessionStarted(byte sessionId, byte version);
+	public void onProtocolSessionStarted(byte sessionId, byte version, boolean encrypted);
 	
 	public void onProtocolServiceEnded(ServiceType serviceType, byte sessionId);
 

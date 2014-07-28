@@ -212,7 +212,6 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
       }
     }
 
-    // Checking choice set on contained \t\n \\t \\n
     if (IsWhiteSpaceExist((*it_array))) {
       LOG4CXX_ERROR(logger_,
                     "Incoming choice set has contains \t\n \\t \\n");

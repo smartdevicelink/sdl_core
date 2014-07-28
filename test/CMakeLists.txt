@@ -1,19 +1,17 @@
 find_package(Gstreamer-1.0 REQUIRED)
 find_package(Glib-2.0 REQUIRED)
 
-if (BUILD_TESTS_WITH_HMI)
-find_package(LibXML2 REQUIRED)
-endif(BUILD_TESTS_WITH_HMI)
-
 # --- GoogleTest example
 #add_subdirectory(./gtest-example)
+
+include_directories(
+  ${CMAKE_SOURCE_DIR}/test/components/include)
 
 # --- components tests
 add_subdirectory(./components)
 add_subdirectory(./thirdPartyLibs)
 add_subdirectory(${CMAKE_SOURCE_DIR}/src/components/policy/test/policy ./policy)
 add_subdirectory(./tools)
-
 
 set (INCLUDE_DIR
   ${GMOCK_INCLUDE_DIRECTORY}
@@ -59,10 +57,6 @@ set (INCLUDE_DIR
 #  ${GLIB_glib_2_INCLUDE_DIR}
 )
 
-if(BUILD_TESTS_WITH_HMI)
-  LIST(APPEND INCLUDE_DIR ${LibXML2_INCLUDE_DIR})
-endif()
-
 set(LIBRARIES
     MediaManager
     ApplicationManager
@@ -106,15 +100,6 @@ if(ENABLE_SECURITY)
   LIST(APPEND LIBRARIES test_SecurityManager)
 endif()
 
-if(BUILD_TESTS_WITH_HMI)
-  LIST(APPEND LIBRARIES test_App_Manager  ${LibXML2_LIBRARIES} -lxml2)
-endif()
-
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  list(APPEND LIBRARIES dl)
-endif()
-
-
 if (BUILD_USB_SUPPORT)
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   list(APPEND LIBRARIES Libusb-1.0.16)
@@ -123,18 +108,9 @@ endif()
 
 add_executable("test_suit" "./test_suit.cc")
 file(COPY ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem DESTINATION ${CMAKE_BINARY_DIR}/test/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-if(BUILD_TESTS_WITH_HMI)
-include_directories(${INCLUDE_DIR} ${LibXML2_INCLUDE_DIR})
-target_link_libraries("test_suit"
-  test_App_Manager
-  ${LIBRARIES}
-  ${LibXML2_LIBRARIES} -lxml2
-  avahi-client
-  )
-else(BUILD_TESTS_WITH_HMI)
-  include_directories(${INCLUDE_DIR})
-  target_link_libraries("test_suit" ${LIBRARIES})
-endif(BUILD_TESTS_WITH_HMI)
+include_directories(${INCLUDE_DIR})
+target_link_libraries("test_suit" ${LIBRARIES})
 
 # vim: set ts=2 sw=2 et:

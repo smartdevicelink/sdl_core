@@ -89,6 +89,10 @@ public class TestConfig {
      */
     private boolean mDoKeepUSBTransportConnected = false;
     /**
+     * Indicates whether to start new Session as secured
+     */
+    private boolean mDoStartSecureSession = false;
+    /**
      * Min version of the protocol
      */
     private byte mProtocolMinVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
@@ -219,6 +223,23 @@ public class TestConfig {
      */
     public void setDoKeepUSBTransportConnected(boolean mDoKeepUSBTransportConnected) {
         this.mDoKeepUSBTransportConnected = mDoKeepUSBTransportConnected;
+    }
+
+    /**
+     * @return <b>true</b> if a new Session need to be secured, <b>false</b> otherwise
+     */
+    public boolean isDoStartSecureSession() {
+        return mDoStartSecureSession;
+    }
+
+    /**
+     * Set a flag that indicates that a new Session need to be start as secured
+     *
+     * @param mDoStartSecureSession <b>true</b> if a new Session need to be secured,
+     *                              <b>false</b> otherwise
+     */
+    public void setDoStartSecureSession(boolean mDoStartSecureSession) {
+        this.mDoStartSecureSession = mDoStartSecureSession;
     }
 
     /**
