@@ -133,18 +133,29 @@ FFW.RPCClient = Em.Object
 
             JSON.parse(evt.data, SDL.RPCController.capabilitiesCheck);
 
-            switch (SDL.RPCController.capabilityCheckResult) {
-                case 'UNSUPPORTED_RESOURCE': {
+            if (jsonObj.method == 'UI.Show' && SDL.RPCController.capabilityCheckResult == 'UNSUPPORTED_RESOURCE' && Object.size(jsonObj.params) != 3 && jsonObj.params.showStrings.length != 0) {
 
-                    this.observer.errorResponsePull[jsonObj.id] = SDL.SDLModel.resultCode["UNSUPPORTED_RESOURCE"];
+                this.observer.errorResponsePull[jsonObj.id] = SDL.SDLModel.resultCode["WARNINGS"];
 
-                    Em.Logger.error('Unsupported incoming resource! In method ' + jsonObj.method);
+                Em.Logger.error('Image of STATIC type is not supported on HMI. Other information was successfully displayed');
 
-                    SDL.RPCController.capabilityCheckResult = null;
+                SDL.RPCController.capabilityCheckResult = null;
+            } else {
 
-                    break;
+                switch (SDL.RPCController.capabilityCheckResult) {
+                    case 'UNSUPPORTED_RESOURCE': {
+
+                        this.observer.errorResponsePull[jsonObj.id] = SDL.SDLModel.resultCode["UNSUPPORTED_RESOURCE"];
+
+                        Em.Logger.error('Unsupported incoming resource! In method ' + jsonObj.method);
+
+                        SDL.RPCController.capabilityCheckResult = null;
+
+                        break;
+                    }
                 }
             }
+
 
             // handle component registration
             if (jsonObj.id == this.registerRequestId && jsonObj.method == null && typeof jsonObj.result == 'number') {
@@ -285,7 +296,7 @@ FFW.RPCClient = Em.Object
 
                     obj.error = {
                         "code": this.observer.errorResponsePull[obj.id],
-                        "message": "Unsupported incoming resource!",
+                        "message": this.observer.errorResponsePull[obj.id] == 21 ? "Image of STATIC type is not supported on HMI. Other information was successfully displayed" : "Unsupported incoming resource!",
                         "data": {
                             "method": method
                         }
