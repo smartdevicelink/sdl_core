@@ -54,7 +54,9 @@ namespace media_manager {
 using sync_primitives::AutoLock;
 
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
+#if CUSTOMER_PASA
 const uint32_t kMqueueMessageSize = 65536;
+#endif // CUSTOMER_PASA
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AudioPassThruThread")
 
