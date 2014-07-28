@@ -337,11 +337,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public Boolean getIsConnected() {
-        Logger.d(CLASS_NAME + " get is connected, tr:" + mTransport);
+        //Logger.d(CLASS_NAME + " get is connected, tr:" + mTransport);
         if (mTransport == null) {
             return false;
         }
-        Logger.d(CLASS_NAME + " get is connected, tr con:" + mTransport.getIsConnected());
+        //Logger.d(CLASS_NAME + " get is connected, tr con:" + mTransport.getIsConnected());
         return mTransport.getIsConnected();
     }
 

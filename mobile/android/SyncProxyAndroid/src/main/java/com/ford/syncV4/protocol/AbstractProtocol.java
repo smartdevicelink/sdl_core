@@ -219,7 +219,7 @@ public abstract class AbstractProtocol {
     }
 
     private void sendMessage(ProtocolFrameHeader header, byte[] dataChunk) {
-        Logger.d(CLASS_NAME + " sendMessage:" + header);
+        //Logger.d(CLASS_NAME + " sendMessage:" + header);
         if (getTestConfig() != null) {
             AbstractMutation mutation = getTestConfig().getSecureServiceMutationManager().getHeadMutation();
             if (mutation != null) {
