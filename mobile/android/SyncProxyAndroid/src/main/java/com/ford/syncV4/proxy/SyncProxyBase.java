@@ -2263,16 +2263,16 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     }
 
     public OutputStream startAudioDataTransfer(String appId) {
-        OutputStream stream = null;
         if (mSyncConnection != null) {
-            boolean encrypt = false;
-            final Service service = syncSession.getService(appId, ServiceType.Audio_Service);
-            if (service != null) {
-                encrypt = service.isEncrypted();
-            }
-            stream = mSyncConnection.startAudioDataTransfer(syncSession.getSessionIdByAppId(appId), encrypt);
+            return null;
         }
-        return stream;
+        boolean encrypt = false;
+        final byte sessionId = syncSession.getSessionIdByAppId(appId);
+        final Service service = syncSession.getService(appId, ServiceType.Audio_Service);
+        if (service != null) {
+            encrypt = service.isEncrypted();
+        }
+        return mSyncConnection.startAudioDataTransfer(sessionId, encrypt);
     }
 
     public void stopAudioDataTransfer() {

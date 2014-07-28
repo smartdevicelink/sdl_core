@@ -13,7 +13,6 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitorsManager;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitorListener;
-import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.session.Session;
@@ -31,7 +30,6 @@ import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.nsd.NSDHelper;
 import com.ford.syncV4.transport.usb.USBTransport;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
-import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
@@ -48,7 +46,7 @@ import java.util.Hashtable;
  * When use this class, it is <b>necessary</b> to call 'init( ... )' method to initialize transport
  * connection
  */
-public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener {
+public class SyncConnection implements IProtocolListener, ITransportListener {
     private static final String CLASS_NAME = SyncConnection.class.getSimpleName();
     SyncTransport mTransport = null;
     AbstractProtocol mProtocol = null;
@@ -268,7 +266,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         try {
             OutputStream os = new PipedOutputStream();
             InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mVideoPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Mobile_Nav, encrypt);
+            mVideoPacketizer = new H264Packetizer(new IStreamListener() {
+                @Override
+                public void sendH264(ProtocolMessage protocolMessage) {
+                    if (protocolMessage != null) {
+                        sendMessage(protocolMessage);
+                    }
+                }
+            }, is, rpcSessionID, ServiceType.Mobile_Nav, encrypt);
             mVideoPacketizer.start();
             return os;
         } catch (Exception e) {
@@ -295,7 +300,14 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         try {
             OutputStream os = new PipedOutputStream();
             InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mAudioPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Audio_Service, encrypt);
+            mAudioPacketizer = new H264Packetizer(new IStreamListener() {
+                @Override
+                public void sendH264(ProtocolMessage protocolMessage) {
+                    if (protocolMessage != null) {
+                        sendMessage(protocolMessage);
+                    }
+                }
+            }, is, rpcSessionID, ServiceType.Audio_Service, encrypt);
             mAudioPacketizer.start();
             return os;
         } catch (IOException e) {
@@ -332,11 +344,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public Boolean getIsConnected() {
-        Logger.d(CLASS_NAME + " get is connected, tr:" + mTransport);
+        //Logger.d(CLASS_NAME + " get is connected, tr:" + mTransport);
         if (mTransport == null) {
             return false;
         }
-        Logger.d(CLASS_NAME + " get is connected, tr con:" + mTransport.getIsConnected());
+        //Logger.d(CLASS_NAME + " get is connected, tr con:" + mTransport.getIsConnected());
         return mTransport.getIsConnected();
     }
 
@@ -659,13 +671,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
      */
     public TransportType getCurrentTransportType() {
         return mTransport.getTransportType();
-    }
-
-    @Override
-    public void sendH264(ProtocolMessage pm) {
-        if (pm != null) {
-            sendMessage(pm);
-        }
     }
 
     private void processTransportStopReading() {
