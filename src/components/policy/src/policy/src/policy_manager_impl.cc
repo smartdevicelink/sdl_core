@@ -493,9 +493,11 @@ void PolicyManagerImpl::CheckAppPolicyState(const std::string& application_id) {
 
   if (PolicyTableStatus::StatusUpToDate == GetPolicyTableStatus()) {
     set_update_required(true);
-  } else {
-    set_exchange_pending(true);
   }
+  // TODO(AOleynik): Should be clarified, is it correct state change?
+//  else {
+//    set_exchange_pending(true);
+//  }
 
   SendNotificationOnPermissionsUpdated(application_id);
 }

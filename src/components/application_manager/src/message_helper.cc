@@ -1461,8 +1461,8 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 }
 
 void MessageHelper::SendGetListOfPermissionsResponse(
-  std::vector<policy::FunctionalGroupPermission>& permissions,
-  uint32_t correlation_id) {
+    const std::vector<policy::FunctionalGroupPermission>& permissions,
+    uint32_t correlation_id) {
   smart_objects::SmartObject* message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!message) {

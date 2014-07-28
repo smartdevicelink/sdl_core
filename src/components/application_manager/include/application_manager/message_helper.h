@@ -272,7 +272,7 @@ class MessageHelper {
      * @param correlation_id Correlation id of request
      */
     static void SendGetListOfPermissionsResponse(
-      std::vector<policy::FunctionalGroupPermission>& permissions,
+      const std::vector<policy::FunctionalGroupPermission>& permissions,
       uint32_t correlation_id);
 
     /*
