@@ -7,18 +7,27 @@ import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 
 /**
- * Created by Andrew Batutin on 9/11/13.
+ * Created by Andrew Batutin on 9/11/13
  */
 public class StaticFileReader extends AsyncTask<Integer, byte[], Void> {
 
-    private final Activity mContext;
+    // A weak reference to the enclosing class
+    // We do this to avoid memory leaks during Java Garbage Collection
+    private WeakReference<Activity> mOuterContext;
+
     private DataReaderListener mListener;
 
     public StaticFileReader(Activity context, DataReaderListener listener) {
-        mContext = context;
+        mOuterContext = new WeakReference<Activity>(context);
         mListener = listener;
+    }
+
+    public void clear() {
+        mOuterContext.clear();
+        mListener = null;
     }
 
     @Override
@@ -37,9 +46,12 @@ public class StaticFileReader extends AsyncTask<Integer, byte[], Void> {
     }
 
     private synchronized void readFileFromRaw(Integer id) {
+        // Get an actual reference to the Activity from the WeakReference.
+        final Activity activity = mOuterContext.get();
+
         // Open the input stream
-        InputStream is = mContext.getResources().openRawResource(id);
-        byte[] buffer = new byte[1000];
+        final InputStream is = activity.getResources().openRawResource(id);
+        final byte[] buffer = new byte[1000];
         int length;
         try {
             while ((length = is.read(buffer)) != -1 && !isCancelled()) {

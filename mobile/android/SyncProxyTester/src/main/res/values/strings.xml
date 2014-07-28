@@ -320,5 +320,7 @@
     <string name="cancel_string">Cancel</string>
 
     <string name="selectprotocol_session_encrypted">Encrypted</string>
+    <string name="turn_on_label">Turn On</string>
+    <string name="loop_file_label">Loop file</string>
 
 </resources>

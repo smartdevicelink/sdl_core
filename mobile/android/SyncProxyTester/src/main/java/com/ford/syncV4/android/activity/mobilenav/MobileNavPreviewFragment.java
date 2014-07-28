@@ -111,12 +111,10 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         mSessionCheckBoxState = new MobileNaviCheckBoxState(checkBox, getActivity());
 
         mStopDataStreamingButton = (Button) getView().findViewById(R.id.file_streaming_stop);
-        mStopDataStreamingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mFileStreamingLogic.resetStreaming();
-            }
-        });
+        mStopDataStreamingButton.setOnClickListener(stopFileStreamingListener);
+
+        CheckBox loopFileView = (CheckBox) view.findViewById(R.id.mobile_nav_loop_file);
+        loopFileView.setOnCheckedChangeListener(loopFileStreamListener);
     }
 
     private void sendStartEncryptedService() {

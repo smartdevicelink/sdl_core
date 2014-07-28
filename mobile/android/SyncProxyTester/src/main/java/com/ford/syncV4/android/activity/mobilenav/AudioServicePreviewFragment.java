@@ -86,14 +86,11 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
         mSessionCheckBoxState.setStateOff();
 
         mStopDataStreamingButton = (Button) getView().findViewById(R.id.audio_file_streaming_stop);
-        mStopDataStreamingButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mFileStreamingLogic.resetStreaming();
-            }
-        });
-    }
+        mStopDataStreamingButton.setOnClickListener(stopFileStreamingListener);
 
+        CheckBox loopFileView = (CheckBox) view.findViewById(R.id.audio_service_loop_data);
+        loopFileView.setOnCheckedChangeListener(loopFileStreamListener);
+    }
 
     private void startNotSecureAudioService(String appId) {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();

@@ -51,10 +51,29 @@ public class FileStreamingLogic {
         cancelStreaming();
     }
 
+    public void restartFileStreaming() {
+        if (staticFileReader == null) {
+            Logger.w("Can not restart file streaming, file reader is null");
+            return;
+        }
+        if (staticFileReader.getStatus().equals(AsyncTask.Status.RUNNING)) {
+            staticFileReader.cancel(true);
+
+            // TODO : potential infinite loop point
+            while (!staticFileReader.isCancelled()) {
+                // Waiting for the cancel to be complete
+            }
+        }
+        staticFileReader.clear();
+        staticFileReader = null;
+        startFileStreaming();
+    }
+
     public void startFileStreaming() {
         if (staticFileReader == null || staticFileReader.getStatus() == AsyncTask.Status.FINISHED) {
             createStaticFileReader();
         }
+        Logger.d("Start file streaming, status:" + staticFileReader.getStatus());
         if (staticFileReader.getStatus().equals(AsyncTask.Status.PENDING)) {
             staticFileReader.execute(fileResID);
         }
@@ -91,7 +110,7 @@ public class FileStreamingLogic {
             @Override
             public void onCancelReading() {
                 Logger.d(TAG + " On Cancel reading");
-                context.dataStreamingStopped();
+                context.dataStreamingCanceled();
             }
 
             @Override

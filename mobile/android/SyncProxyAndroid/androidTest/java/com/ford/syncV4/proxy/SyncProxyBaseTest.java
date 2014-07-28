@@ -254,7 +254,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 ProtocolConstants.PROTOCOL_VERSION_THREE, false);
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service,
                 SessionTest.SESSION_ID,false, ProtocolConstants.PROTOCOL_VERSION_THREE);
-        proxyALM.startDataTransfer(SessionTest.APP_ID);
+        proxyALM.startDataTransfer(SessionTest.APP_ID, ServiceType.Audio_Service);
         ArgumentCaptor<Byte> sessionIDCaptor = ArgumentCaptor.forClass(byte.class);
         ArgumentCaptor<Boolean> encryptionCaptor = ArgumentCaptor.forClass(boolean.class);
         verify(proxyALM.mSyncConnection, times(1)).startAudioDataTransfer(sessionIDCaptor.capture(), encryptionCaptor.capture());
@@ -268,7 +268,7 @@ public class SyncProxyBaseTest extends InstrumentationTestCase {
                 ProtocolConstants.PROTOCOL_VERSION_THREE, false);
         proxyALM.getInterfaceBroker().onProtocolServiceStarted(ServiceType.Audio_Service,
                 SessionTest.SESSION_ID,false, ProtocolConstants.PROTOCOL_VERSION_THREE);
-        OutputStream stream = proxyALM.startDataTransfer(SessionTest.APP_ID);
+        OutputStream stream = proxyALM.startDataTransfer(SessionTest.APP_ID, ServiceType.Audio_Service);
         assertNotNull("stream should not be null", stream);
     }
 

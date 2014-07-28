@@ -2,7 +2,9 @@ package com.ford.syncV4.android.activity.mobilenav;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.activity.SyncProxyTester;
@@ -33,6 +35,7 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
 
     private String mAppId = "";
     private ServiceType mServiceType = null;
+    private volatile boolean mDoFileStreamingLoop = false;
 
     @Override
     public void onProxyClosed() {
@@ -49,6 +52,15 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
 
     @Override
     public void dataStreamingStopped() {
+        mDataStreamingButton.setText("Start File Streaming");
+
+        if (mDoFileStreamingLoop) {
+            mFileStreamingLogic.restartFileStreaming();
+        }
+    }
+
+    @Override
+    public void dataStreamingCanceled() {
         mDataStreamingButton.setText("Start File Streaming");
     }
 
@@ -110,6 +122,21 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
         mFileStreamingLogic.resetStreaming();
         mSessionCheckBoxState.setStateOff();
     }
+
+    protected CompoundButton.OnCheckedChangeListener loopFileStreamListener =
+            new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    mDoFileStreamingLoop = isChecked;
+                }
+            };
+
+    protected View.OnClickListener stopFileStreamingListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mFileStreamingLogic.resetStreaming();
+        }
+    };
 
     /**
      * Add all necessary listeners
