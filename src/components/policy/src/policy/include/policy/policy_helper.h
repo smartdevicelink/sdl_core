@@ -196,6 +196,15 @@ FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
 FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
                             const FunctionalGroupIDs& second);
 
+/**
+ * @brief Unwrap application policies from predefined values to specific policy
+ * values, i.e. if application has "default", it will be assigned default
+ * policies
+ * @param app_policies Application policies to unwrap
+ * @return true, if succeded, otherwise - false
+ */
+bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies);
+
 }
 
 #endif // SRC_COMPONENTS_POLICY_INCLUDE_POLICY_POLICY_HELPER_H_

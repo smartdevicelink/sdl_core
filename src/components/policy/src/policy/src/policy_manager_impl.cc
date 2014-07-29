@@ -170,6 +170,10 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     return false;
   }
 
+  // Replace predefined policies with its actual setting, e.g. "123":"default"
+  // to actual values of default section
+  UnwrapAppPolicies(pt_update->policy_table.app_policies);
+
   // Check and update permissions for applications, send notifications
   CheckPermissionsChanges(pt_update);
 
