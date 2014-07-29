@@ -68,7 +68,17 @@ SDL.AppPermissionsView = Em.ContainerView.create( {
 
             SDL.SettingsController.onState(element);
 
-            FFW.BasicCommunication.OnAppPermissionConsent(SDL.SDLController.getApplicationModel(SDL.AppPermissionsView.currentAppId).allowedFunctions, "GUI", SDL.AppPermissionsView.currentAppId);
+            var permissions = [];
+
+            for (var i = 0; i < SDL.AppPermissionsView.appList.list._childViews.length; i++) {
+                permissions.push({
+                    "name": SDL.AppPermissionsView.appList.list._childViews[i].name,
+                    "id": SDL.AppPermissionsView.appList.list._childViews[i].id,
+                    "allowed": SDL.AppPermissionsView.appList.list._childViews[i].allowed
+                });
+            }
+
+            FFW.BasicCommunication.OnAppPermissionConsent(permissions, "GUI", SDL.AppPermissionsView.currentAppId);
 
             SDL.AppPermissionsView.currentAppId = null;
         },
@@ -80,35 +90,21 @@ SDL.AppPermissionsView = Em.ContainerView.create( {
     /**
      * Function to add application to application list
      */
-    update: function(appID) {
-
-        this.currentAppId = appID;
+    update: function(message, appID) {
 
         this.appList.items = [];
 
-        var i,
-            text = '',
-            app = SDL.SDLController.getApplicationModel(appID).allowedFunctions;
-
-        for (i = 0; i < app.length; i++) {
-
-            if (app[i].allowed === true) {
-                text = " - Allowed";
-            } else if (app[i].allowed === false) {
-                text = " - Not allowed";
-            } else {
-                text = " - Undefined";
-            }
+        for (var i = 0; i < message.length; i++) {
 
             this.appList.items.push({
                 type: SDL.Button,
                 params: {
                     action: 'changeAppPermission',
                     target: 'SDL.SettingsController',
-                    text: app[i].name + text,
-                    name: app[i].name,
-                    allowed: app[i].allowed,
-                    id: app[i].id,
+                    text: message[i].name + " - Not allowed",
+                    name: message[i].name,
+                    allowed: false,
+                    id: message[i].id,
                     appID: appID
                 }
             });
