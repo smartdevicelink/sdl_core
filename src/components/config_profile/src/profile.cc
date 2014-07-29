@@ -388,6 +388,7 @@ const std::string& Profile::audio_stream_file() const {
 
 #ifdef CUSTOMER_PASA
 const std::string &profile::Profile::mq_name() const {
+  LOG4CXX_INFO(logger_, "Default MQ name " << mq_name_);
   return mq_name_;
 }
 

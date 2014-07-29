@@ -149,7 +149,7 @@ void AudioStreamSenderThread::mqSendAudioChunkToMobile() {
 
   std::vector<uint8_t> data;
   data.reserve(kMqueueMessageSize);
-  const ssize dataSize = mq_receive(handle,
+  const ssize_t dataSize = mq_receive(handle,
                                     reinterpret_cast<char*>(&data.front()),
                                     data.size(), 0);
   if (-1 == dataSize) {

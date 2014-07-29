@@ -213,7 +213,7 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& audio_stream_file() const;
 #ifdef CUSTOMER_PASA
     /**
-     * @brief Returns name fo mqueue from which SDL
+     * @brief Returns name for mqueue from which SDL
      * will be able to obtain data.
      */
     const std::string& mq_name() const;
