@@ -69,6 +69,9 @@ AudioStreamSenderThread::AudioStreamSenderThread(
 }
 
 AudioStreamSenderThread::~AudioStreamSenderThread() {
+#ifdef CUSTOMER_PASA
+  mq_unlink(fileName_.c_str());
+#endif // CUSTOMER_PASA
 }
 
 void AudioStreamSenderThread::threadMain() {
