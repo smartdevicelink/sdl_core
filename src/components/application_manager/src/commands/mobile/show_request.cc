@@ -214,22 +214,25 @@ void ShowRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_Show: {
       LOG4CXX_INFO(logger_, "Received UI_Show event");
-
+      std::string response_info("");
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
       bool result = false;
-      HMICapabilities& hmi_capabilities =
-                      ApplicationManagerImpl::instance()->hmi_capabilities();
+
       if (mobile_apis::Result::SUCCESS == result_code) {
         result = true;
-      } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
-          hmi_capabilities.is_ui_cooperating()) {
+      } else if (mobile_apis::Result::WARNINGS == result_code) {
         result = true;
+        if (message[strings::params].keyExists(hmi_response::message)) {
+          response_info = message[strings::params][hmi_response::message].asString();
+        }
       }
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(result, result_code,
+                   response_info.empty() ? NULL : response_info.c_str(),
+                       &(message[strings::msg_params]));
       break;
     }
     default: {
