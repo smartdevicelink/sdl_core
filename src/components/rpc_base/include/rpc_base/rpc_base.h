@@ -49,6 +49,14 @@ class MessageWriter;
 
 namespace rpc {
 class ValidationReport;
+namespace policy_table_interface_base {
+
+enum PolicyTableType {
+  PT_PRELOADED,
+  PT_UPDATE,
+  PT_SNAPSHOT
+};
+}
 
 template<typename T> class Range;
 class PrimitiveType;
@@ -88,6 +96,9 @@ class PrimitiveType {
     bool is_initialized() const;
     bool is_valid() const;
     void ReportErrors(ValidationReport* report) const;
+    policy_table_interface_base::PolicyTableType GetPolicyTableType();
+    virtual void SetPolicyTableType(policy_table_interface_base::PolicyTableType pt_type);
+
   protected:
     enum ValueState {
       kUninitialized,
@@ -98,8 +109,10 @@ class PrimitiveType {
     static ValueState InitHelper(bool is_next);
     static ValueState InitHelper(const Json::Value* value,
                                  bool (Json::Value::*type_check)() const);
+
   protected:
     ValueState value_state_;
+    policy_table_interface_base::PolicyTableType policy_table_type_;
 };
 
 /*
@@ -109,6 +122,9 @@ class CompositeType {
   public:
     void mark_initialized();
     void ReportErrors(ValidationReport* report) const;
+    policy_table_interface_base::PolicyTableType GetPolicyTableType();
+    virtual void SetPolicyTableType(policy_table_interface_base::PolicyTableType pt_type);
+
   protected:
     enum InitializationState {
       kUninitialized,
@@ -121,6 +137,7 @@ class CompositeType {
                                           bool (Json::Value::*type_check)() const);
   protected:
     mutable InitializationState initialization_state__;
+    policy_table_interface_base::PolicyTableType policy_table_type_;
 };
 
 /*
@@ -255,6 +272,7 @@ class Array : public std::vector<T>, public CompositeType {
     bool is_valid() const;
     bool is_initialized() const;
     void ReportErrors(ValidationReport* report) const;
+    virtual void SetPolicyTableType(policy_table_interface_base::PolicyTableType pt_type);
 };
 
 template<typename T, size_t minsize, size_t maxsize>
@@ -283,6 +301,7 @@ class Map : public std::map<std::string, T>, public CompositeType  {
     bool is_valid() const;
     bool is_initialized() const;
     void ReportErrors(ValidationReport* report) const;
+    virtual void SetPolicyTableType(policy_table_interface_base::PolicyTableType pt_type);
 };
 
 template<typename T>
@@ -365,6 +384,11 @@ class Optional {
     bool is_valid() const;
     bool is_initialized() const;
     void ReportErrors(ValidationReport* report) const;
+    policy_table_interface_base::PolicyTableType GetPolicyTableType();
+    virtual void SetPolicyTableType(policy_table_interface_base::PolicyTableType pt_type);
+
+  protected:
+    policy_table_interface_base::PolicyTableType policy_table_type_;
   private:
     T value_;
 };

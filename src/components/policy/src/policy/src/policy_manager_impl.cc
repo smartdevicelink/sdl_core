@@ -113,6 +113,13 @@ bool PolicyManagerImpl::LoadPTFromFile(const std::string& file_name) {
     utils::SharedPtr<policy_table::Table> table = new policy_table::Table();
     return false;
   }
+
+  if (!table->is_valid()) {
+    rpc::ValidationReport report("policy_table");
+    table->ReportErrors(&report);
+    LOG4CXX_WARN(logger_, "Parsed table is not valid " <<
+                 rpc::PrettyFormat(report));
+  }
   final_result = final_result && policy_table_.pt_data()->Save(*table);
   LOG4CXX_INFO(
     logger_,
@@ -150,7 +157,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 
   // Parse message into table struct
   utils::SharedPtr<policy_table::Table> pt_update = Parse(pt_content);
-
+  pt_update->SetPolicyTableType(policy_table::PT_UPDATE);
   if (!pt_update) {
     LOG4CXX_WARN(logger_, "Parsed table pointer is 0.");
     return false;
@@ -348,7 +355,15 @@ BinaryMessageSptr PolicyManagerImpl::RequestPTUpdate() {
     pt_ext->UnpairedDevicesList(&unpaired_device_ids_);
   }
 #endif  // EXTENDED_POLICY
-
+  policy_table_snapshot_->SetPolicyTableType(policy_table::PT_SNAPSHOT);
+  if (false == policy_table_snapshot_->is_valid()) {
+    LOG4CXX_INFO(
+          logger_, "Policy snappshot is not valid");
+    rpc::ValidationReport report("policy_table");
+    policy_table_snapshot_->ReportErrors(&report);
+    LOG4CXX_INFO(logger_,
+                 "Errors: " << rpc::PrettyFormat(report));
+  }
   Json::Value value = policy_table_snapshot_->ToJsonValue();
   Json::FastWriter writer;
   std::string message_string = writer.write(value);

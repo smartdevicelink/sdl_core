@@ -116,6 +116,16 @@ void ApplicationParams::ReportErrors(rpc::ValidationReport* report__) const {
   }
 }
 
+void ApplicationParams::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  AppHMIType.SetPolicyTableType(pt_type);
+  groups.SetPolicyTableType(pt_type);
+  priority.SetPolicyTableType(pt_type);
+  memory_kb.SetPolicyTableType(pt_type);
+  heart_beat_timeout_ms.SetPolicyTableType(pt_type);
+  certificate.SetPolicyTableType(pt_type);
+}
+
 // RpcParameters methods
 RpcParameters::RpcParameters()
   : CompositeType(kUninitialized) {
@@ -171,6 +181,12 @@ void RpcParameters::ReportErrors(rpc::ValidationReport* report__) const {
   }
 }
 
+void RpcParameters::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  hmi_levels.SetPolicyTableType(pt_type);
+  parameters.SetPolicyTableType(pt_type);
+}
+
 // Rpcs methods
 Rpcs::Rpcs()
   : CompositeType(kUninitialized) {
@@ -224,6 +240,12 @@ void Rpcs::ReportErrors(rpc::ValidationReport* report__) const {
   if (!rpcs.is_valid()) {
     rpcs.ReportErrors(&report__->ReportSubobject("rpcs"));
   }
+}
+
+void Rpcs::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  user_consent_prompt.SetPolicyTableType(pt_type);
+  rpcs.SetPolicyTableType(pt_type);
 }
 
 // ModuleConfig methods
@@ -402,6 +424,22 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   }
 }
 
+void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  device_certificates.SetPolicyTableType(pt_type);
+  preloaded_pt.SetPolicyTableType(pt_type);
+  exchange_after_x_ignition_cycles.SetPolicyTableType(pt_type);
+  exchange_after_x_kilometers.SetPolicyTableType(pt_type);
+  exchange_after_x_days.SetPolicyTableType(pt_type);
+  timeout_after_x_seconds.SetPolicyTableType(pt_type);
+  seconds_between_retries.SetPolicyTableType(pt_type);
+  endpoints.SetPolicyTableType(pt_type);
+  notifications_per_minute_by_priority.SetPolicyTableType(pt_type);
+  vehicle_make.SetPolicyTableType(pt_type);
+  vehicle_model.SetPolicyTableType(pt_type);
+  vehicle_year.SetPolicyTableType(pt_type);
+}
+
 // MessageString methods
 MessageString::MessageString()
   : CompositeType(kUninitialized) {
@@ -490,6 +528,15 @@ void MessageString::ReportErrors(rpc::ValidationReport* report__) const {
   }
 }
 
+void MessageString::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  line1.SetPolicyTableType(pt_type);
+  line2.SetPolicyTableType(pt_type);
+  tts.SetPolicyTableType(pt_type);
+  label.SetPolicyTableType(pt_type);
+  textBody.SetPolicyTableType(pt_type);
+}
+
 // MessageLanguages methods
 MessageLanguages::MessageLanguages()
   : CompositeType(kUninitialized) {
@@ -524,6 +571,7 @@ bool MessageLanguages::struct_empty() const {
   }
   return true;
 }
+
 void MessageLanguages::ReportErrors(rpc::ValidationReport* report__) const {
   if (struct_empty()) {
     rpc::CompositeType::ReportErrors(report__);
@@ -531,6 +579,11 @@ void MessageLanguages::ReportErrors(rpc::ValidationReport* report__) const {
   if (!languages.is_valid()) {
     languages.ReportErrors(&report__->ReportSubobject("languages"));
   }
+}
+
+void MessageLanguages::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  languages.SetPolicyTableType(pt_type);
 }
 
 // ConsumerFriendlyMessages methods
@@ -586,6 +639,12 @@ void ConsumerFriendlyMessages::ReportErrors(rpc::ValidationReport* report__) con
   if (!messages.is_valid()) {
     messages.ReportErrors(&report__->ReportSubobject("messages"));
   }
+}
+
+void ConsumerFriendlyMessages::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  version.SetPolicyTableType(pt_type);
+  messages.SetPolicyTableType(pt_type);
 }
 
 // ModuleMeta methods
@@ -690,6 +749,11 @@ void UsageAndErrorCounts::ReportErrors(rpc::ValidationReport* report__) const {
   if (!app_level.is_valid()) {
     app_level.ReportErrors(&report__->ReportSubobject("app_level"));
   }
+}
+
+void UsageAndErrorCounts::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  app_level.SetPolicyTableType(pt_type);
 }
 
 // DeviceParams methods
@@ -838,6 +902,17 @@ void PolicyTable::ReportErrors(rpc::ValidationReport* report__) const {
   }
 }
 
+void PolicyTable::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  app_policies.SetPolicyTableType(pt_type);
+  functional_groupings.SetPolicyTableType(pt_type);
+  consumer_friendly_messages.SetPolicyTableType(pt_type);
+  module_config.SetPolicyTableType(pt_type);
+  module_meta.SetPolicyTableType(pt_type);
+  usage_and_error_counts.SetPolicyTableType(pt_type);
+  device_data.SetPolicyTableType(pt_type);
+}
+
 // Table methods
 Table::Table()
   : CompositeType(kUninitialized) {
@@ -879,6 +954,11 @@ void Table::ReportErrors(rpc::ValidationReport* report__) const {
   if (!policy_table.is_valid()) {
     policy_table.ReportErrors(&report__->ReportSubobject("policy_table"));
   }
+}
+
+void Table::SetPolicyTableType(PolicyTableType pt_type) {
+  CompositeType::SetPolicyTableType(pt_type);
+  policy_table.SetPolicyTableType(pt_type);
 }
 
 }  // namespace policy_table_interface_base
