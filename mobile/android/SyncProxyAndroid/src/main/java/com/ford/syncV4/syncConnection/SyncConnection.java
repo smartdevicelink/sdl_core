@@ -610,6 +610,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onProtocolHeartbeatACK(byte sessionId) {
+        if (mTestConfig != null) {
+            if (!mTestConfig.isDoProcessHearBeatSDLAck()) {
+                Logger.w("Do not process Heartbeat message Ack from SDL");
+                return;
+            }
+        }
         heartbeatMonitorsManager.heartbeatACKReceived(sessionId);
     }
 

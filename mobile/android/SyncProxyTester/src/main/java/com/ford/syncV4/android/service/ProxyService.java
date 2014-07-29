@@ -155,8 +155,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     public static final String ROOTED_DEVICE_INTENT = "com.ford.syncV4.android.service.rooted_device";
 
-    public static final int HEARTBEAT_INTERVAL = 5000;
-    public static final int HEARTBEAT_INTERVAL_MAX = Integer.MAX_VALUE;
     private Integer autoIncCorrId = 1;
 
     private static final String ICON_SYNC_FILENAME = "icon.png";
@@ -385,6 +383,12 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mTestConfig.setCustomHashId(AppPreferencesManager.getCustomHashId());
         mTestConfig.setUseCustomHashId(AppPreferencesManager.getUseCustomHashId());
         mTestConfig.setDoStartSecureSession(AppPreferencesManager.getIsStartSecureSession());
+        mTestConfig.setProtocolMinVersion((byte) AppPreferencesManager.getProtocolMinVersion());
+        mTestConfig.setProtocolMaxVersion((byte) AppPreferencesManager.getProtocolMaxVersion());
+        mTestConfig.setHeartbeatInterval(AppPreferencesManager.getHeartbeatInterval());
+        mTestConfig.setDoHeartbeatAck(AppPreferencesManager.getIsHeartbeatAck());
+        mTestConfig.setDoRootDeviceCheck(AppPreferencesManager.getDoDeviceRootCheck());
+        mTestConfig.setDoProcessHearBeatSDLAck(AppPreferencesManager.isProcessHeartBeatSDLAck());
     }
 
     private boolean startProxy() {
@@ -446,15 +450,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     appId = AppPreferencesManager.getCustomAppId();
                 }
 
-                mTestConfig.setDoRootDeviceCheck(AppPreferencesManager.getDoDeviceRootCheck());
-
                 SyncProxyConfigurationResources syncProxyConfigurationResources =
                         new SyncProxyConfigurationResources();
                 syncProxyConfigurationResources.setTelephonyManager(
                         (TelephonyManager) MainApp.getInstance().getSystemService(Context.TELEPHONY_SERVICE));
-
-                mTestConfig.setProtocolMinVersion((byte) AppPreferencesManager.getProtocolMinVersion());
-                mTestConfig.setProtocolMaxVersion((byte) AppPreferencesManager.getProtocolMaxVersion());
 
                 Logger.i("Start SYNC Proxy's instance, vrSynonyms:" + vrSynonyms);
                 mSyncProxy = new SyncProxyALM(this,
@@ -899,7 +898,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             }
         }
         createErrorMessageForAdapter(" SYNC Proxy closed:" + message);
-        boolean wasConnected = !firstHMIStatusChange;
+        final boolean wasConnected = !firstHMIStatusChange;
         firstHMIStatusChange = true;
         prevHMILevel = HMILevel.HMI_NONE;
         for (String appId : mApplicationIconManagerHashtable.keySet()) {
@@ -922,6 +921,11 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                         (cause != SyncExceptionCause.BLUETOOTH_DISABLED) &&
                         (cause != SyncExceptionCause.SYNC_REGISTRATION_ERROR)) {
                     //reset();
+                    if (cause == SyncExceptionCause.HEARTBEAT_PAST_DUE) {
+                        if (AppPreferencesManager.isReconnectOnHBTimeout()) {
+                            reset();
+                        }
+                    }
                 } else if (info.equals(SyncTransport.DISCONNECT_REASON_END_OF_STREAM_REACHED)) {
                     reset();
                 }

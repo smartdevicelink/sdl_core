@@ -17,6 +17,7 @@ import com.ford.syncV4.net.SyncPDataSender;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
@@ -120,13 +121,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             OUTGOING_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
             INTERNAL_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
             APP_INTERFACE_LOCK = new Object();
-    /**
-     * Interval between heartbeat messages, in milliseconds.
-     * NOTE: this value is not specified in the protocol, and thus must be
-     * negotiated with the Sync.
-     */
-    static final int HEARTBEAT_INTERVAL = 5000;
-    private static int heartBeatInterval = HEARTBEAT_INTERVAL;
     @SuppressWarnings("unused")
     private static final String LOG_TAG = SyncProxyBase.class.getSimpleName();
     /**
@@ -146,7 +140,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     private int mUnregisterAppInterfaceCorrelationId = UNREGISTER_APP_INTERFACE_CORRELATION_ID;
     private static final int POLICIES_CORRELATION_ID = 65535;
     private int mPoliciesCorrelationId = POLICIES_CORRELATION_ID;
-    private static boolean heartBeatAck = true;
     /**
      * Keep track of all opened Sync Sessions. Need to be "protected" in order to support
      * UnitTesting
@@ -373,18 +366,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
         // Trace that ctor has fired
         Logger.i("SyncProxy Created, instanceID=" + this.toString());
-    }
-
-    public static int getHeartBeatInterval() {
-        return heartBeatInterval;
-    }
-
-    public static void setHeartBeatInterval(int heartBeatInterval) {
-        SyncProxyBase.heartBeatInterval = heartBeatInterval;
-    }
-
-    public static void isHeartbeatAck(boolean isHearBeatAck) {
-        SyncProxyBase.heartBeatAck = isHearBeatAck;
     }
 
     private void setUpSecureServiceManager(byte sessionID) {
@@ -3431,8 +3412,9 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             //String appId = syncSession.getAppIdBySessionId(sessionId);
             //stopSession(appId);
 
-            final String msg = "Heartbeat timeout";
-            notifyProxyClosed(msg, new SyncException(msg, SyncExceptionCause.HEARTBEAT_PAST_DUE));
+            notifyProxyClosed(HeartbeatMonitor.HEARTBEAT_TIMEOUT_MSG,
+                    new SyncException(HeartbeatMonitor.HEARTBEAT_TIMEOUT_MSG,
+                            SyncExceptionCause.HEARTBEAT_PAST_DUE));
         }
 
         @Override
@@ -3492,7 +3474,15 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 return;
             }
 
-            mSyncConnection.addHeartbeatMonitor(sessionId, heartBeatInterval, heartBeatAck);
+            int heartbeatInterval = HeartbeatMonitor.HEARTBEAT_INTERVAL;
+            boolean doSendHeartBeatAck = true;
+
+            if (mTestConfig != null) {
+                heartbeatInterval = mTestConfig.getHeartbeatInterval();
+                doSendHeartBeatAck = mTestConfig.isDoHeartbeatAck();
+            }
+
+            mSyncConnection.addHeartbeatMonitor(sessionId, heartbeatInterval, doSendHeartBeatAck);
             mSyncConnection.startHeartbeatMonitor(sessionId);
             secureSessionContextMap.put(sessionId, new SecureSessionContext(SyncProxyBase.this));
             setUpSecureServiceManager(sessionId);

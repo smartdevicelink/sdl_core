@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.constants.Const;
+import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.transport.TransportType;
 
@@ -350,5 +351,64 @@ public class AppPreferencesManager {
      */
     private static Context getAppContext() {
         return MainApp.getInstance().getApplicationContext();
+    }
+
+    /**
+     * @return interval of the Heartbeat messages in milliseconds
+     */
+    public static int getHeartbeatInterval() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getInt(Const.PREF_KEY_HB_INTERVAL,
+                HeartbeatMonitor.HEARTBEAT_INTERVAL);
+    }
+
+    /**
+     * Set interval of the Heartbeat messages in milliseconds
+     *
+     * @param value value in milliseconds
+     */
+    public static void setHeartbeatInterval(int value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(Const.PREF_KEY_HB_INTERVAL, value);
+        editor.apply();
+    }
+
+    /**
+     * @return true if it is necessary to send Ack for the Heartbeat Message
+     * (which has been sent from SDL), false - otherwise
+     */
+    public static boolean getIsHeartbeatAck() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_HB_ACK, true);
+    }
+
+    /**
+     * Set true if it is necessary to send Ack for the Heartbeat Message
+     * (which has been sent from SDL), false - otherwise
+     *
+     * @param value true or false
+     */
+    public static void setIsHeartbeatAck(boolean value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.PREF_KEY_HB_ACK, value);
+        editor.apply();
+    }
+
+    /**
+     * @return true if it is necessary to reconnect when Heartbeat Timed Out, false - otherwise
+     */
+    public static boolean isReconnectOnHBTimeout() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_RECONNECT_ON_HB_TIMEOUT, true);
+    }
+
+    /**
+     * @return true if it is necessary to process Ack from SDl on HeartBeat message, false - otherwise
+     */
+    public static boolean isProcessHeartBeatSDLAck() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_PROCESS_SDL_HB_ACK, true);
     }
 }

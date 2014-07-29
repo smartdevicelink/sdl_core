@@ -1,5 +1,6 @@
 package com.ford.syncV4.android.activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -24,9 +25,8 @@ import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.manager.AppIdManager;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
-import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.proxy.SyncProxyBase;
+import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.transport.TransportType;
@@ -52,7 +52,7 @@ public class AppSetUpDialog extends BaseDialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Context context = getActivity();
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(
-                getActivity().LAYOUT_INFLATER_SERVICE);
+                Activity.LAYOUT_INFLATER_SERVICE);
         final View view = inflater.inflate(R.layout.selectprotocol,
                 (ViewGroup) getActivity().findViewById(R.id.selectprotocol_Root));
         String[] services = new String[]{ServiceType.AUDIO_SERVICE_NAME, ServiceType.MOBILE_NAV_NAME};
@@ -77,7 +77,8 @@ public class AppSetUpDialog extends BaseDialogFragment {
 
         final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
         final CheckBox doDeviceRootCheckView = (CheckBox) view.findViewById(R.id.root_detection_view);
-
+        final CheckBox reconnectionOnHBView = (CheckBox) view.findViewById(R.id.hb_reconnection_view);
+        final CheckBox processAckFromSDLView = (CheckBox) view.findViewById(R.id.ack_from_sdl);
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkMobileNavi);
@@ -302,6 +303,10 @@ public class AppSetUpDialog extends BaseDialogFragment {
                                 .putInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT, tcpPort)
                                 .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON, autoSetAppIcon)
                                 .putBoolean(Const.PREFS_KEY_HEARTBEAT, isHearBeat.isChecked())
+                                .putBoolean(Const.PREF_KEY_PROCESS_SDL_HB_ACK,
+                                        processAckFromSDLView.isChecked())
+                                .putBoolean(Const.PREF_KEY_RECONNECT_ON_HB_TIMEOUT,
+                                        reconnectionOnHBView.isChecked())
                                 .commit();
                         if (!success) {
                             Logger.w(LOG_TAG + "Can't save selected protocol properties");
@@ -318,14 +323,11 @@ public class AppSetUpDialog extends BaseDialogFragment {
     }
 
     private void setupHeartbeat(View view) {
-        CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
-        CheckBox isHearBeatAck = (CheckBox) view.findViewById(R.id.heartbeatAck);
-        if (isHearBeat.isChecked()) {
-            SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL);
-        } else {
-            SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL_MAX);
-        }
-        SyncProxyBase.isHeartbeatAck(isHearBeatAck.isChecked());
+        final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
+        final CheckBox isHearBeatAck = (CheckBox) view.findViewById(R.id.heartbeatAck);
+        AppPreferencesManager.setHeartbeatInterval(isHearBeat.isChecked() ?
+                HeartbeatMonitor.HEARTBEAT_INTERVAL : HeartbeatMonitor.HEARTBEAT_INTERVAL_MAX);
+        AppPreferencesManager.setIsHeartbeatAck(isHearBeatAck.isChecked());
     }
 
     private void showNSDUnsupportedView(View view) {

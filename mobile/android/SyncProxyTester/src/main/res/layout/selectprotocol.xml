@@ -15,7 +15,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:paddingBottom="5dp"
-            android:text="Protocol Version:"
+            android:text="@string/protocol_version_label"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -27,7 +27,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="MIN: "
+                android:text="@string/minimum_abbr_label"
                 android:textSize="18sp" />
 
             <EditText
@@ -41,7 +41,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="MAX: "
+                android:text="@string/maximum_abbr_label"
                 android:textSize="18sp" />
 
             <EditText
@@ -66,35 +66,41 @@
             android:layout_gravity="center"
             android:paddingBottom="5dp"
             android:paddingTop="5dp"
-            android:text="Heart Beat:"
+            android:text="@string/heartbeat_label"
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <CheckBox
+            android:id="@+id/heartbeat"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_marginRight="15dp"
+            android:checked="true"
+            android:text="Heartbeat" />
 
-            <CheckBox
-                android:id="@+id/heartbeat"
-                android:layout_width="wrap_content"
+        <CheckBox
+            android:id="@+id/heartbeatAck"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="15dp"
+            android:checked="true"
+            android:text="ACK from Mobile" />
 
-                android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
-                android:checked="true"
-                android:text="Heartbeat"
-                android:visibility="visible" />
+        <CheckBox
+            android:id="@+id/ack_from_sdl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="15dp"
+            android:checked="true"
+            android:text="ACK from SDL" />
 
-            <CheckBox
-                android:id="@+id/heartbeatAck"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="15dp"
-                android:checked="true"
-                android:text="ACK"
-                android:visibility="visible" />
-
-        </LinearLayout>
+        <CheckBox
+            android:id="@+id/hb_reconnection_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="15dp"
+            android:checked="true"
+            android:text="@string/reconnect_when_hb_timeout_label" />
 
         <View
             android:layout_width="fill_parent"
@@ -107,8 +113,7 @@
             android:id="@+id/root_detection_view"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Detect Root"
-            android:visibility="visible" />
+            android:text="Detect Root" />
 
         <CheckBox
             android:id="@+id/selectprotocol_checkMedia"

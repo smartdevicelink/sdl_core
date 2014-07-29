@@ -7,6 +7,7 @@ package com.ford.syncV4.test;
  * Time: 9:58 AM
  */
 
+import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.proxy.RPCRequest;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.service.secure.SecurityInternalError;
@@ -100,6 +101,72 @@ public class TestConfig {
      * Max version of the protocol
      */
     private byte mProtocolMaxVersion = ProtocolConstants.PROTOCOL_VERSION_MIN;
+
+    /**
+     * Field to keep a value of the HeartBeat Interval
+     */
+    private int mHeartbeatInterval = HeartbeatMonitor.HEARTBEAT_INTERVAL;
+
+    /**
+     * Field to keep a value of the capability to response for the HeartBeat which is sent from
+     * SDL side with the Ack
+     */
+    private boolean mDoHeartbeatAck = true;
+
+    /**
+     * Field to keep a value that indicates whether to process Ack for the Heartbeat message or not.
+     * Default value is true.
+     */
+    private boolean mDoProcessHearBeatSDLAck = true;
+
+    /**
+     * @return a value that indicates whether to process Ack for the Heartbeat message or not.
+     * Default value is true.
+     */
+    public boolean isDoProcessHearBeatSDLAck() {
+        return mDoProcessHearBeatSDLAck;
+    }
+
+    /**
+     * Set a value that indicates whether to process Ack for the Heartbeat message or not.
+     * Default value is true.
+     *
+     * @param value true or false
+     */
+    public void setDoProcessHearBeatSDLAck(boolean value) {
+        mDoProcessHearBeatSDLAck = value;
+    }
+
+    /**
+     * @return an interval in milliseconds for the HeartBeat messages
+     */
+    public int getHeartbeatInterval() {
+        return mHeartbeatInterval;
+    }
+
+    /**
+     * Set an interval in milliseconds for the HeartBeat messages
+     *
+     * @param value interval in milliseconds
+     */
+    public void setHeartbeatInterval(int value) {
+        mHeartbeatInterval = value;
+    }
+
+    /**
+     * @return true if it is necessary to send Ack for the SDL's heartBeat message, false otherwise
+     */
+    public boolean isDoHeartbeatAck() {
+        return mDoHeartbeatAck;
+    }
+
+    /**
+     * Set true if it is necessary to send Ack for the SDL's heartBeat message, false otherwise
+     * @param value true or false
+     */
+    public void setDoHeartbeatAck(boolean value) {
+        mDoHeartbeatAck = value;
+    }
 
     public MutationManager getSecureServiceMutationManager() {
         return secureServiceMutationManager;

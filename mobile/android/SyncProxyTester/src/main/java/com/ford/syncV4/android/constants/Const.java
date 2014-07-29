@@ -106,4 +106,9 @@ public class Const {
     public static final String TEST_DATA_DIR_NAME = "test_data";
 
     public static final String PREF_KEY_START_SECURE_SESSION = "StartSecureSession";
+
+    public static final String PREF_KEY_HB_INTERVAL = "HeartBeatInterval";
+    public static final String PREF_KEY_HB_ACK = "HeartBeatAck";
+    public static final String PREF_KEY_PROCESS_SDL_HB_ACK = "ProcessSDLHeartBeatAck";
+    public static final String PREF_KEY_RECONNECT_ON_HB_TIMEOUT = "ReconnectOnHBTimeOut";
 }
