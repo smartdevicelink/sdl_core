@@ -157,7 +157,7 @@ void MediaManagerImpl::StartMicrophoneRecording(
       application(application_key);
   std::string file_path =
 #ifdef CUSTOMER_PASA
-  profile::Profile::instance()->mq_name();
+  profile::Profile::instance()->audio_mq_path();
 #else
   profile::Profile::instance()->app_storage_folder();
   file_path += "/";

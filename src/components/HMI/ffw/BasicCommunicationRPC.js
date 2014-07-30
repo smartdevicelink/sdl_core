@@ -593,9 +593,13 @@ FFW.BasicCommunication = FFW.RPCObserver
                 "id": itemIndex,
                 "method": "SDL.GetListOfPermissions",
                 "params": {
-                    "appID": appID
                 }
             };
+
+            if (appID) {
+                JSONMessage.params.appID = appID;
+            }
+
             this.client.send(JSONMessage);
         },
 

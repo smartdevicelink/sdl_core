@@ -89,6 +89,7 @@ const char* kVideoStreamFileKey = "VideoStreamFile";
 const char* kAudioStreamFileKey = "AudioStreamFile";
 
 #ifdef CUSTOMER_PASA
+const char* kAudioMQPath = "MQAudioPath";
 const char* kLoggerConfigFileKey = "LoggerConfigFileKey";
 const char* kRemoteLoggingFlagFileKey = "RemoteLoggingFlagFile";
 const char* kRemoteLoggingFlagFilePathKey = "RemoteLoggingFlagFilePath";
@@ -148,7 +149,7 @@ const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
 #ifdef CUSTOMER_PASA
-const char* kDefaultMQName = "/to_mobile";
+const char* kDefaultMQName = "/dev/mqueue/AppLinkAudioPass";
 const char* kDefaultLog4cxxConfig = "/fs/mp/etc/AppLink/log4cxx.properties";
 const char* kDefaultRemoteLoggingFlagFile = "";
 #endif
@@ -237,7 +238,7 @@ Profile::Profile()
     transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort),
     tts_delimiter_(kDefaultTtsDelimiter),
 #ifdef CUSTOMER_PASA
-    mq_name_(kDefaultMQName),
+    audio_mq_path_(kDefaultMQName),
     log4cxx_config_file_(kDefaultLog4cxxConfig),
     remote_logging_flag_file_(kDefaultRemoteLoggingFlagFile),
 #endif
@@ -387,9 +388,9 @@ const std::string& Profile::audio_stream_file() const {
 }
 
 #ifdef CUSTOMER_PASA
-const std::string &profile::Profile::mq_name() const {
-  LOG4CXX_INFO(logger_, "Default MQ name " << mq_name_);
-  return mq_name_;
+const std::string &profile::Profile::audio_mq_path() const {
+  LOG4CXX_INFO(logger_, "Default MQ name " << audio_mq_path_);
+  return audio_mq_path_;
 }
 
 const std::string& Profile::log4cxx_config_file() const {
@@ -697,6 +698,11 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
                       kMediaManagerSection);
 
 #ifdef CUSTOMER_PASA
+    ReadStringValue(&audio_mq_path_, "", kMediaManagerSection,
+                    kAudioMQPath);
+
+    LOG_UPDATED_VALUE(log4cxx_config_file_, kAudioMQPath,
+                      kMediaManagerSection);
     // log4cxx config file
     ReadStringValue(&log4cxx_config_file_, "", kMainSection,
                     kLoggerConfigFileKey);

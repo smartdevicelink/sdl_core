@@ -561,12 +561,12 @@ void PolicyHandler::OnSystemInfoUpdateRequired() {
 
 void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
   LOG4CXX_INFO(logger_, "OnAppRevoked");
+  LOG4CXX_INFO(logger_, "Application_id " << policy_app_id << " is revoked.");
   POLICY_LIB_CHECK_VOID();
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
-  if (app.valid() && app->hmi_level() != mobile_apis::HMILevel::HMI_NONE) {
-    LOG4CXX_INFO(logger_, "Application_id " << policy_app_id << " is revoked.");
+  if (app.valid() && app->hmi_level() != mobile_apis::HMILevel::HMI_NONE) {    
     AppPermissions permissions = policy_manager_->GetAppPermissionsChanges(
                                    policy_app_id);
     permissions.appRevoked = true;

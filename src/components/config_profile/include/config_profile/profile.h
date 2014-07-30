@@ -216,7 +216,7 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Returns name for mqueue from which SDL
      * will be able to obtain data.
      */
-    const std::string& mq_name() const;
+    const std::string& audio_mq_path() const;
 
     /**
       * @brief Returns path to log4cxx configuration file

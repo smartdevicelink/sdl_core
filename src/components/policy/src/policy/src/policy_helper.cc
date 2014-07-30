@@ -296,7 +296,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
       current_policies[app_policy.first] = app_policy.second;
     }
     return true;
-  }
+  }  
 
   // TODO(PV): do we really need this check?
   if (IsNewAppication(app_id)) {
@@ -307,7 +307,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
     return true;
   }
 
-  if (!NicknamesMatch(app_id, app_policy)) {
+  if (!IsPredefinedApp(app_policy) && !NicknamesMatch(app_id, app_policy)) {
     permissions_diff.appUnauthorized = true;
     pm_->app_permissions_diff_.insert(std::make_pair(app_id, permissions_diff));
     pm_->listener()->OnPendingPermissionChange(app_policy.first);
@@ -648,6 +648,26 @@ FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
                             std::unique(same.begin(), same.end())));
 
   return same;
+}
+
+bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
+  policy_table::ApplicationPolicies::iterator it = app_policies.begin();
+  policy_table::ApplicationPolicies::iterator it_default = app_policies.
+                                                           find(kDefaultId);
+  for (; app_policies.end() != it; ++it) {
+    // Set default policies for app, if there is record like "123":"default"
+    if (kDefaultId.compare((*it).second.get_string()) == 0) {
+      if (it != app_policies.end()) {
+        (*it).second = (*it_default).second;
+      } else {
+        LOG4CXX_ERROR(logger_, "There is no default application policy was "
+                      "found in PTU.");
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 }

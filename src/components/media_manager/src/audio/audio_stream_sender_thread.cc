@@ -69,6 +69,9 @@ AudioStreamSenderThread::AudioStreamSenderThread(
 }
 
 AudioStreamSenderThread::~AudioStreamSenderThread() {
+#ifdef CUSTOMER_PASA
+  mq_unlink(fileName_.c_str());
+#endif // CUSTOMER_PASA
 }
 
 void AudioStreamSenderThread::threadMain() {
@@ -157,6 +160,10 @@ void AudioStreamSenderThread::mqSendAudioChunkToMobile() {
                   << strerror(errno));
     return;
   }
+
+  LOG4CXX_INFO(logger_, "The " << dataSize
+                << " bytes have been successfully obtained.");
+
   data.resize(dataSize);
 
   application_manager::ApplicationManagerImpl::instance()->
