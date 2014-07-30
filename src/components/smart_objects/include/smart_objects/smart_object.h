@@ -657,6 +657,18 @@ class SmartObject FINAL {
    **/
   size_t length() const;
 
+
+  /**
+   * @brief Nequation template operator
+   *
+   * @param  Other value to be compared with
+   * @return bool Result of nequation
+   **/
+  template<typename Type>
+  bool operator!=(const Type& Other) const{
+    return !(*this == Other);
+  }
+
  protected:
   static std::string OperatorToTransform(const SmartMap::value_type& pair);
   /**
