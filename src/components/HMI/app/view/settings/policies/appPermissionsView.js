@@ -98,12 +98,20 @@ SDL.AppPermissionsView = Em.ContainerView.create( {
 
         for (var i = 0; i < message.length; i++) {
 
+            var text = " - Undefined";
+
+            if (message[i].allowed === true) {
+                text = " - Allowed";
+            } else if (message[i].allowed === false) {
+                text = " - Not allowed";
+            }
+
             this.appList.items.push({
                 type: SDL.Button,
                 params: {
                     action: 'changeAppPermission',
                     target: 'SDL.SettingsController',
-                    text: message[i].allowed ? message[i].name + " - Not allowed" : message[i].name + " - Allowed",
+                    text: text,
                     name: message[i].name,
                     allowed: message[i].allowed,
                     id: message[i].id,
