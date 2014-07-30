@@ -44,9 +44,6 @@ from copy import copy
 from ford_xml_parser import FordXmlParser, ParamDesc
 from code_formatter import CodeBlock
 
-prefix_class_item = 'Declarative'
-invoke_type_connection = 'Direct'
-
 def defaultValue(param):
     if param.type == "Integer":
         return "0"
@@ -75,7 +72,7 @@ class Impl(FordXmlParser):
                 for param_el in request.findall('param'):
                     all_params.append(param_el)                    
                 with CodeBlock(out) as output:
-                    output.write("Q_INVOKABLE void " + interface_el.get('name') + "_" +request.get('name') + "(")
+                    output.write("Q_INVOKABLE bool " + interface_el.get('name') + "_" +request.get('name') + "(")
                 impl.args_for_function_definition(all_params, interface_el.get('name'), out)
                 output.write(");\n")
                  
@@ -121,26 +118,6 @@ class Impl(FordXmlParser):
         return "xxx"
 
 
-    def optional_param_type(self, param):
-        if param.array:
-            param_copy = copy(param)
-            param_copy.array = False
-            if param.type == 'String':
-                return "QStringList"
-            return "QList< " + self.qt_param_type(param_copy) + " >"
-        if param.type == 'Integer' or param.enum:
-            return 'int'
-        elif param.type == 'String':
-            return 'QString'
-        elif param.type == 'Boolean':
-            return 'bool'
-        elif param.type == 'Float':
-            return 'double'
-        elif param.struct:
-            return "_".join(param.fulltype)
-        return "xxx"
-
-
     def make_requests_for_source(self, out):
         for interface_el in self.el_tree.findall('interface'):
             request_responses = self.find_request_response_pairs_by_provider(interface_el, "sdl")
@@ -148,28 +125,73 @@ class Impl(FordXmlParser):
                 request_name = request.get('name')
                 iface_name = interface_el.get('name')
                 request_full_name = iface_name + '_' + request_name
-                out.write('void RequestToSDL::' + request_full_name + '(')
+                out.write('bool RequestToSDL::' + request_full_name + '(')
                 for param_el in request.findall('param'):
                     param = self.make_param_desc(param_el, iface_name)
                     out.write('%s %s,' % (self.qt_param_type(param), param.name))
 
                 out.write('Q%sValue hmi_callback) {\n' % prefix_class_item)
                 with CodeBlock(out) as output:
-                    output.write('LOG4CXX_TRACE(logger_, "Enter");\n')
+                    output.write('LOG4CXX_TRACE(logger_, "ENTER");\n')
                     output.write('QList<QVariant> args;\n')
                     for param_el in request.findall('param'):
                         param = self.make_param_desc(param_el, iface_name)
+                        #self.write_param_validation(param, param.name, "return false", out)         
+                                                
+
                         if not param.mandatory:
-                            output.write("OptionalArgument<%s> o_%s;\n" % (self.optional_param_type(param), param.name))
+                            output.write("OptionalArgument<%s> o_%s;\n" % (self.qt_param_type(param), param.name))
                             output.write("o_%s.presence = !%s.isNull();\n" % (param.name, param.name))
-                            output.write("o_%s.val = %s.value<%s>();\n" % (param.name, param.name, self.optional_param_type(param)))
+                            output.write("o_%s.val = %s.value<%s>();\n" % (param.name, param.name, self.qt_param_type(param)))
                             output.write('args << QVariant::fromValue(o_%s);\n' % param.name)
                         else:
                             output.write('args << ' + param.name + ';\n')
                     output.write('new requests::' + request_full_name + '(' + interface_el.get('name') + 
                                  ', "' + request_name + '", args, hmi_callback);\n')
-                    output.write('LOG4CXX_TRACE(logger_, "Exit")\n}\n\n')
-        
+                                    
+                    output.write('LOG4CXX_TRACE(logger_, "EXIT");return true;\n}\n\n')      
+
+
+    def write_param_validation(self, param, param_name, fail_statement, out, level=0):
+        if not param.mandatory and (param.restricted or param.restrictedArray or (param.struct and any(map(lambda x: x.restricted, self.structs[param.fulltype])))):
+            out.write("if (%s.presence) {\n" % param_name)
+            param_copy = copy(param)
+            param_copy.mandatory = True
+            with CodeBlock(out) as out:
+                self.write_param_validation(param_copy, param_name + ".val", fail_statement, out, level+1)
+            out.write("}\n")
+        elif param.array:
+            if param.minSize > 0:
+                out.write("if ({0}.count() < {1}) {{ {2}; }}\n".format(param_name, param.minSize, fail_statement))
+            if param.maxSize != None:
+                out.write("if ({0}.count() > {1}) {{ {2}; }}\n".format(param_name, param.maxSize, fail_statement))
+            if param.restricted:
+                out.write('for ({0}::const_iterator it_{2} = {1}.begin(); it_{2} != {1}.end(); ++it_{2}) {{\n'.format(self.qt_param_type(param), param_name, level))
+                with CodeBlock(out) as out:
+                    param_copy = copy(param)
+                    param_copy.array = False
+                    self.write_param_validation(param_copy, "(*it_{0})".format(level), fail_statement, out, level+1)
+                out.write("}\n")
+        elif param.struct:
+            for p in self.structs[param.fulltype]:
+                self.write_param_validation(p, "{0}.{1}".format(param_name, p.name), fail_statement, out, level+1)
+        elif param.type == "Integer" or param.type == "Float":
+            conditions = []
+            if (param.minValue != None):
+                conditions.append("(%s < %s)" % (param_name, param.minValue))
+            if (param.maxValue != None):
+                conditions.append("(%s > %s)" % (param_name, param.maxValue))
+            if conditions:
+                out.write('if (%s) { %s; }\n' % (' || '.join(conditions), fail_statement))
+        elif param.type == "String":
+            conditions = []
+            if (param.minLength > 0):
+                conditions.append("(%s.size() < %s)" % (param_name, param.minLength))
+            if (param.maxLength > 0):
+                conditions.append("(%s.size() > %s)" % (param_name, param.maxLength))
+            if conditions:
+                out.write('if (%s) { %s; }\n' % (' || '.join(conditions), fail_statement))
+
 
     def make_source_file(self, out):
         out.write('RequestToSDL::RequestToSDL(QObject *parent) {\n')
@@ -188,17 +210,20 @@ class Impl(FordXmlParser):
         out.write('}\n\n')
         impl.make_requests_for_source(out)
 
-
 arg_parser = ArgumentParser(description="Generator of Qt to QDbus C++ part")
 arg_parser.add_argument('--infile', required=True, help="full name of input file, e.g. applink/src/components/interfaces/QT_HMI_API.xml")
 arg_parser.add_argument('--version', required=False, help="Qt version 4.8.5 (default) or 5.1.0")
 arg_parser.add_argument('--outdir', required=True, help="path to directory where output files request_to_sdl.h, request_to_sdl.cc will be saved")
 args = arg_parser.parse_args()
 
+
 if args.version == "4.8.5":
     prefix_class_item = 'Script'
     invoke_type_connection = 'Direct'
 elif args.version == "5.1.0":
+    prefix_class_item = 'JS'
+    invoke_type_connection = 'BlockingQueued'
+else:
     prefix_class_item = 'JS'
     invoke_type_connection = 'BlockingQueued'
 
@@ -214,13 +239,8 @@ header_out = open(args.outdir + '/' + header_name, "w")
 source_out = open(args.outdir + '/' + source_name, "w")
 
 header_out.write("// Warning! This file is generated by '%s'. Edit at your own risk.\n" % argv[0])
-header_out.write("""/**
- * @file request_to_sdl.h
- * @brief Generated class that process requests from qtHMI
- *
- * This file is a part of HMI D-Bus layer.
- */
-// Copyright (c) 2013, Ford Motor Company
+header_out.write("""
+// Copyright (c) 2014, Ford Motor Company
 // All rights reserved.
 //
 // Redistribution and use in source and binary forms, with or without
@@ -268,12 +288,7 @@ header_out.write("#endif  // SRC_COMPONENTS_QT_HMI_QML_PLUGINS_DBUS_ADAPTER_REQU
 
 
 source_out.write("// Warning! This file is generated by '%s'. Edit at your own risk.\n" % argv[0])
-source_out.write("""/**
- * @file request_to_sdl.cc
- * @brief Generated class that process requests from qtHMI
- *
- * This file is a part of HMI D-Bus layer.
- */
+source_out.write("""
 // Copyright (c) 2014, Ford Motor Company
 // All rights reserved.
 //
@@ -311,9 +326,6 @@ source_out.write("#include <QtDBus/QDBusConnection>\n")
 source_out.write("#include <QtDBus/QDBusInterface>\n")
 source_out.write('#include "hmi_requests.h"\n')
 source_out.write('#include "utils/logger.h"\n\n')
-source_out.write('CREATE_LOGGERPTR_GLOBAL(logger_, DBusPlugin);\n\n')
-
-
-
+source_out.write('CREATE_LOGGERPTR_GLOBAL(logger_, "DBusPlugin")\n\n')
 
 impl.make_source_file(source_out)
