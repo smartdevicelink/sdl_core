@@ -58,7 +58,6 @@
 #include "SmartObjectInvalidTest.h"
 #include "SmartObjectStressTest.h"
 #include "SmartObjectUnitTest.h"
-//#include "SmartObjectConvertionTimeTest.h"
 #include "TSharedPtrTest.h"
 
 // SmartObject Schema tests
@@ -68,7 +67,6 @@
 #include "test_ArraySchemaItemTest.cpp"
 #include "AlwaysTrueSchemaItemTest.cpp"
 #include "AlwaysFalseSchemaItemTest.cpp"
-#include "object_optional_schema_test.cc"
 
 // #include "jsoncpp/json_reader_test.h"
 // #include "json_handler/smart_schema_draft_test.h"

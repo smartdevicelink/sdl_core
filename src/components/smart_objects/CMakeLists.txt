@@ -15,7 +15,6 @@ set (SOURCES
     ./src/string_schema_item.cc
     ./src/enum_schema_item.cc
     ./src/number_schema_item.cc
-    ./src/object_optional_schema_item.cc
 )
 
 add_library("SmartObjects" ${SOURCES})

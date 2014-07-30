@@ -22,11 +22,8 @@ set (SOURCES
   ./test_NumberSchemaItemTest.cpp
   ./test_StringSchemaItemTest.cpp
   ./test_ArraySchemaItemTest.cpp
-#TODO(EZamakhov): remove
-#  ./ObjectSchemaItemTest.cpp
   ./AlwaysTrueSchemaItemTest.cpp
   ./AlwaysFalseSchemaItemTest.cpp
-  ./object_optional_schema_test.cc
 )
 
 add_library(test_SmartObjectSchema ${SOURCES})
