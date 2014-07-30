@@ -93,7 +93,9 @@ void PolicyManagerImpl::set_listener(PolicyListener* listener) {
 
 PolicyManagerImpl::~PolicyManagerImpl() {
   LOG4CXX_INFO(logger_, "Destroying policy manager.");
-  policy_table_.pt_data()->SaveUpdateRequired(update_required_);
+  if (policy_table_.pt_data().valid()) {
+    policy_table_.pt_data()->SaveUpdateRequired(update_required_);
+  }
 }
 
 bool PolicyManagerImpl::LoadPTFromFile(const std::string& file_name) {

@@ -111,7 +111,7 @@ void Thread::join() {
                 apr_status_t stat = apr_thread_join(&startStat, thread);
                 thread = NULL;
                 if (stat != APR_SUCCESS) {
-                        throw ThreadException(stat);
+                        //throw ThreadException(stat);
                 }
         }
 #endif

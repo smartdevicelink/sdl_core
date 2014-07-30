@@ -171,6 +171,8 @@ int32_t main(int32_t argc, char** argv) {
 #endif  // __QNX__
 
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
+    main_namespace::LifeCycle::instance()->StopComponents();
+    DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
 

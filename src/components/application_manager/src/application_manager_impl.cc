@@ -1335,10 +1335,52 @@ bool ApplicationManagerImpl::ManageHMICommand(
 bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   bool init_result = true;
-  if (policy_manager_) {
-    LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
-    init_result = policy::PolicyHandler::instance()->InitPolicyTable();
-  }
+  do {
+    if (policy_manager_) {
+      LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
+      init_result = policy::PolicyHandler::instance()->InitPolicyTable();
+    }
+    const std::string app_storage_folder = 
+      profile::Profile::instance()->app_storage_folder();
+    if (!file_system::DirectoryExists(app_storage_folder)) {
+      LOG4CXX_WARN(logger_, "Storage directory doesn't exist");
+      // if storage directory doesn't exist try to create it
+      if (!file_system::CreateDirectoryRecursively(app_storage_folder)) {
+        LOG4CXX_ERROR(logger_, "Unable to create Storage directory "
+                                << app_storage_folder);
+        init_result = false;
+        break;
+      }
+    }
+    if (!(file_system::IsWritingAllowed(app_storage_folder) &&
+          file_system::IsReadingAllowed(app_storage_folder))) {
+      LOG4CXX_ERROR(logger_,
+                   "Storage directory doesn't have read/write permissions");
+      init_result = false;
+      break;
+    }
+
+    const std::string system_files_path = 
+      profile::Profile::instance()->system_files_path();
+    if (!file_system::DirectoryExists(system_files_path)) {
+      LOG4CXX_WARN(logger_, "System files directory doesn't exist");
+      // if system directory doesn't exist try to create it
+      if (!file_system::CreateDirectoryRecursively(system_files_path)) {
+        LOG4CXX_ERROR(logger_, "Unable to create System directory "
+                                << system_files_path);
+        init_result = false;
+        break;
+      }
+    }
+    if (!(file_system::IsWritingAllowed(system_files_path) &&
+          file_system::IsReadingAllowed(system_files_path))) {
+      LOG4CXX_ERROR(logger_,
+                   "System directory doesn't have read/write permissions");
+      init_result = false;
+      break;
+    }
+  } while (false);
+
   return init_result;
 }
 
