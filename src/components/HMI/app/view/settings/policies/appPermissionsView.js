@@ -92,6 +92,8 @@ SDL.AppPermissionsView = Em.ContainerView.create( {
      */
     update: function(message, appID) {
 
+        SDL.AppPermissionsView.currentAppId = appID;
+
         this.appList.items = [];
 
         for (var i = 0; i < message.length; i++) {
@@ -101,9 +103,9 @@ SDL.AppPermissionsView = Em.ContainerView.create( {
                 params: {
                     action: 'changeAppPermission',
                     target: 'SDL.SettingsController',
-                    text: message[i].name + " - Not allowed",
+                    text: message[i].allowed ? message[i].name + " - Not allowed" : message[i].name + " - Allowed",
                     name: message[i].name,
-                    allowed: false,
+                    allowed: message[i].allowed,
                     id: message[i].id,
                     appID: appID
                 }
