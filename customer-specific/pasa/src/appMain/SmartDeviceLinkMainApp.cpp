@@ -8,6 +8,7 @@
 #include "utils/logger.h"
 #include "utils/system.h"
 #include "utils/signals.h"
+#include "utils/file_system.h"
 #include "config_profile/profile.h"
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
@@ -51,6 +52,23 @@ bool remoteLoggingFlagFileValid() {
 	return true;
 }
 
+std::string getCurrentLogFileName() {
+
+   std::vector<std::string> availableLogFiles;
+
+   availableLogFiles = file_system::ListFilesWithSubStr(
+               profile::Profile::instance()->target_log_file_home_dir(),
+               profile::Profile::instance()->target_log_file_name_pattern());
+
+      if (availableLogFiles.empty()) {
+         return "";
+      }
+
+      std::sort(availableLogFiles.begin(), availableLogFiles.end());
+
+      return availableLogFiles.back();
+}
+
 void startSmartDeviceLink()
 {
     // --------------------------------------------------------------------------
@@ -71,18 +89,42 @@ void startSmartDeviceLink()
 
       LOG4CXX_INFO(logger, "Enable logging to USB");
 
+      std::string currentLogFileName = getCurrentLogFileName();
+
+      if (!currentLogFileName.empty()) {
+         LOG4CXX_INFO(logger, "Current logfile name is = " << currentLogFileName);
+
+         std::vector<uint8_t> targetLogFileContent;
+
+         file_system::ReadBinaryFile(
+                       profile::Profile::instance()->target_log_file_home_dir()
+                 + currentLogFileName,
+                 targetLogFileContent);
+
+         file_system::WriteBinaryFile(
+                 profile::Profile::instance()->remote_logging_flag_file_path()
+                 + currentLogFileName,
+                 targetLogFileContent);
+      }
+
       log4cxx::helpers::Pool p;
 
-      std::string paramAppender = "LogFile";
-      std::string paramFileName = profile::Profile::instance()->remote_logging_flag_file_path() + "smartdevicelink.log";
+      std::string paramFileAppender = "LogFile";
+      std::string paramConsoleAppender = "Console";
 
-      LOG4CXX_DECODE_CHAR(logAppender, paramAppender);
+      std::string paramFileName = profile::Profile::instance()->remote_logging_flag_file_path() + currentLogFileName;
+
+      LOG4CXX_DECODE_CHAR(logFileAppender, paramFileAppender);
+      LOG4CXX_DECODE_CHAR(logConsoleAppender, paramConsoleAppender);
       LOG4CXX_DECODE_CHAR(logFileName, paramFileName );
 
-      log4cxx::FileAppenderPtr fileAppender = logger->getLoggerRepository()->getRootLogger()->getAppender(logAppender);
+      log4cxx::LoggerPtr rootLogger = logger->getLoggerRepository()->getRootLogger();
+
+      log4cxx::FileAppenderPtr fileAppender = rootLogger->getAppender(logFileAppender);
+
+      rootLogger->removeAppender(logConsoleAppender);
 
       if(fileAppender != NULL) {
-        LOG4CXX_INFO(logger, "fileAppender != NULL");
         fileAppender->setFile(logFileName);
         fileAppender->activateOptions(p);
       }

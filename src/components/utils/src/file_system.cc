@@ -336,6 +336,53 @@ std::vector<std::string> file_system::ListFiles(
   return listFiles;
 }
 
+std::vector<std::string> file_system::ListFilesWithSubStr(
+  const std::string& directory_name, const std::string& sub_str) {
+  std::vector<std::string> listFiles;
+  if (!DirectoryExists(directory_name)) {
+    return listFiles;
+  }
+
+  int32_t return_code = 0;
+  DIR* directory = NULL;
+#ifndef __QNXNTO__
+  struct dirent dir_element_;
+  struct dirent* dir_element = &dir_element_;
+#else
+  char* direntbuffer =
+      new char[offsetof(struct dirent, d_name) +
+               pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
+  struct dirent* dir_element = new(direntbuffer) dirent;
+#endif
+  struct dirent* result = NULL;
+
+  directory = opendir(directory_name.c_str());
+  if (NULL != directory) {
+    return_code = readdir_r(directory, dir_element, &result);
+
+    for (; NULL != result && 0 == return_code;
+         return_code = readdir_r(directory, dir_element, &result)) {
+      if (0 == strcmp(result->d_name, "..")
+          || 0 == strcmp(result->d_name, ".")) {
+        continue;
+      }
+
+      std::string fileName(result->d_name);
+
+      if (std::string::npos != fileName.find(sub_str)) {
+         listFiles.push_back(fileName);
+      }
+    }
+
+    closedir(directory);
+#ifdef __QNXNTO__
+    delete[] direntbuffer;
+#endif
+  }
+
+  return listFiles;
+}
+
 bool file_system::WriteBinaryFile(const std::string& name,
                                   const std::vector<uint8_t>& contents) {
   using namespace std;

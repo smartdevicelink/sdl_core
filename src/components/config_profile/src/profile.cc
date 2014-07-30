@@ -89,10 +89,13 @@ const char* kVideoStreamFileKey = "VideoStreamFile";
 const char* kAudioStreamFileKey = "AudioStreamFile";
 
 #ifdef CUSTOMER_PASA
+const char* kLoggerSection = "LOGGING";
 const char* kAudioMQPath = "MQAudioPath";
-const char* kLoggerConfigFileKey = "LoggerConfigFileKey";
+const char* kLoggerConfigFileKey = "LoggerConfigFile";
 const char* kRemoteLoggingFlagFileKey = "RemoteLoggingFlagFile";
 const char* kRemoteLoggingFlagFilePathKey = "RemoteLoggingFlagFilePath";
+const char* kTargetLogFileHomeDirKey = "TargetLogFileHomeDir";
+const char* kTargetLogFileNamePatternKey = "TargetLogFileNamePattern";
 #endif
 
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";
@@ -151,7 +154,10 @@ const char* kDefaultTtsDelimiter = ",";
 #ifdef CUSTOMER_PASA
 const char* kDefaultMQName = "/dev/mqueue/AppLinkAudioPass";
 const char* kDefaultLog4cxxConfig = "/fs/mp/etc/AppLink/log4cxx.properties";
-const char* kDefaultRemoteLoggingFlagFile = "";
+const char* kDefaultRemoteLoggingFlagFile = "log/capturelog.evt";
+const char* kDefaultRemoteLoggingFlagFilePath = "/fs/usb0/";
+const char* kDefaultTargetLogFileHomeDir = "/fs/rwdata/logs/";
+const char* kDefaultTargetLogFileNamePattern ="smartdevicelink.log";
 #endif
 const char* kDefaultMmeDatabaseName = "/dev/qdb/mediaservice_db";
 const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
@@ -241,6 +247,9 @@ Profile::Profile()
     audio_mq_path_(kDefaultMQName),
     log4cxx_config_file_(kDefaultLog4cxxConfig),
     remote_logging_flag_file_(kDefaultRemoteLoggingFlagFile),
+    remote_logging_flag_file_path_(kDefaultRemoteLoggingFlagFilePath),
+    target_log_file_home_dir_(kDefaultTargetLogFileHomeDir),
+    target_log_file_name_pattern_(kDefaultTargetLogFileNamePattern),
 #endif
     mme_db_name_(kDefaultMmeDatabaseName),
     event_mq_name_(kDefaultEventMQ),
@@ -402,6 +411,14 @@ const std::string& Profile::remote_logging_flag_file() const {
 
 const std::string& Profile::remote_logging_flag_file_path() const {
   return remote_logging_flag_file_path_;
+}
+
+const std::string& Profile::target_log_file_home_dir() const {
+  return target_log_file_home_dir_;
+}
+
+const std::string& Profile::target_log_file_name_pattern() const {
+  return target_log_file_name_pattern_;
 }
 #endif
 
@@ -704,24 +721,36 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
     LOG_UPDATED_VALUE(log4cxx_config_file_, kAudioMQPath,
                       kMediaManagerSection);
     // log4cxx config file
-    ReadStringValue(&log4cxx_config_file_, "", kMainSection,
+    ReadStringValue(&log4cxx_config_file_, "", kLoggerSection,
                     kLoggerConfigFileKey);
 
     LOG_UPDATED_VALUE(log4cxx_config_file_, kLoggerConfigFileKey,
-                      kMainSection);
+                      kLoggerSection);
     // Remote logging flag file
-    ReadStringValue(&remote_logging_flag_file_, "", kMainSection,
+    ReadStringValue(&remote_logging_flag_file_, "", kLoggerSection,
                 kRemoteLoggingFlagFileKey);
 
     LOG_UPDATED_VALUE(remote_logging_flag_file_, kRemoteLoggingFlagFileKey,
-                      kMainSection);
+                      kLoggerSection);
 
     // Remote logging flag file
-    ReadStringValue(&remote_logging_flag_file_path_, "", kMainSection,
+    ReadStringValue(&remote_logging_flag_file_path_, "", kLoggerSection,
                 kRemoteLoggingFlagFilePathKey);
 
     LOG_UPDATED_VALUE(remote_logging_flag_file_path_, kRemoteLoggingFlagFilePathKey,
-                      kMainSection);
+                      kLoggerSection);
+
+    ReadStringValue(&target_log_file_home_dir_, "", kLoggerSection,
+                    kTargetLogFileHomeDirKey);
+
+    LOG_UPDATED_VALUE(target_log_file_home_dir_, kTargetLogFileHomeDirKey,
+                      kLoggerSection);
+
+    ReadStringValue(&target_log_file_name_pattern_, "", kLoggerSection,
+                    kTargetLogFileNamePatternKey);
+
+    LOG_UPDATED_VALUE(target_log_file_name_pattern_, kTargetLogFileNamePatternKey,
+                      kLoggerSection);
 #endif
 
   // Mixing audio parameter
