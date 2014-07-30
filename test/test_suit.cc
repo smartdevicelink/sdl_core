@@ -65,6 +65,7 @@
 #include "test_NumberSchemaItemTest.cpp"
 #include "test_StringSchemaItemTest.cpp"
 #include "test_ArraySchemaItemTest.cpp"
+#include "test_CObjectSchemaItem.cpp"
 #include "AlwaysTrueSchemaItemTest.cpp"
 #include "AlwaysFalseSchemaItemTest.cpp"
 

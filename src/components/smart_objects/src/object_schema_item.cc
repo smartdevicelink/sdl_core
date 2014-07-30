@@ -55,59 +55,59 @@ utils::SharedPtr<CObjectSchemaItem> CObjectSchemaItem::create(const Members& mem
   return new CObjectSchemaItem(members);
 }
 
-Errors::eType CObjectSchemaItem::validate(const SmartObject& Object) {
-  static bool is_valid = false;
-  Errors::eType result = Errors::ERROR;
+Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {
+  if (SmartType_Map != object.getType()) {
+    return Errors::INVALID_VALUE;
+  }
+  // FIXME(EZamakhov): remove static var for avoid problems on multi-thread handling
+  // on get straight requirments from ABritanova
+  static bool is_sub_element_correct = false;
 
-  if (SmartType_Map == Object.getType()) {
-    result = Errors::OK;
+  std::set<std::string> object_keys = object.enumerate();
 
-    for (Members::const_iterator i = mMembers.begin(); i != mMembers.end();
-         ++i) {
-      if (Object.keyExists(i->first)) {
-        if (kMsgParams == i->first) {
-          is_valid = false;
-        }
+  for (Members::const_iterator it = mMembers.begin(); it != mMembers.end(); ++it) {
+    const std::string& key = it->first;
+    const SMember& member = it->second;
 
-        result = i->second.mSchemaItem->validate(Object.getElement(i->first));
-
-        if (kMsgParams == i->first) {
-          if ((!is_valid) && ( 0 < (*i->second.mSchemaItem).GetMemberSize())) {
-            result = Errors::ERROR;
-          }
-        }
-
-      } else {
-        if (i->second.mIsMandatory) {
-          result = Errors::MISSING_MANDATORY_PARAMETER;
-        }
+    Key_Iterator key_it = object_keys.find(key);
+    if (object_keys.end() == key_it) {
+      if (member.mIsMandatory) {
+        return Errors::MISSING_MANDATORY_PARAMETER;
       }
-
-      if ((Errors::OK != result) && (Errors::UNEXPECTED_PARAMETER != result)) {
-        break;
-      }
+      continue;
+    }
+    // FIXME(EZamakhov): remove kMsgParams compare and add universal algo
+    // on get straight requirments from ABritanova
+    const bool is_msg_param = (0 == key.compare(kMsgParams));
+    if (is_msg_param) {
+      is_sub_element_correct = false;
     }
 
-    if (Errors::OK == result) {
-      for (SmartMap::const_iterator k = Object.map_begin();
-           k != Object.map_end(); ++k) {
-        if (mMembers.end() == mMembers.find(k->first)) {
-          result = Errors::UNEXPECTED_PARAMETER;
-        } else {
-          is_valid = true;
-        }
-      }
+    const Errors::eType result = member.mSchemaItem->validate(object.getElement(key));
+
+    // FIXME(EZamakhov): remove check UNEXPECTED_PARAMETER
+    // on get straight requirments from ABritanova
+    if (Errors::OK != result && Errors::UNEXPECTED_PARAMETER) {
+      return result;
     }
 
-  } else {
-    result = Errors::INVALID_VALUE;
+    if (is_msg_param) {
+      if ((!is_sub_element_correct) && (member.mSchemaItem->GetMemberSize() > 0)) {
+        return Errors::ERROR;
+      }
+    }
+    object_keys.erase(key_it);
+  }
+  is_sub_element_correct = true;
+
+  // FIXME(EZamakhov): change count unhandled keys
+  // on get straight requirments from ABritanova
+  // More then one unhandled (fake) key is error
+  if(object_keys.size() > 1) {
+    return Errors::UNEXPECTED_PARAMETER;
   }
 
-  if (Errors::OK == result) {
-    is_valid = true;
-  }
-
-  return result;
+  return Errors::OK;
 }
 
 void CObjectSchemaItem::applySchema(SmartObject& Object) {

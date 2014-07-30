@@ -187,6 +187,7 @@ class EnumConversionHelper {
   };
 
   static EnumToCStringMap InitEnumToCStringMap() {
+    DCHECK(Size::value == sizeof(enum_values_) / sizeof(enum_values_[0]));
     EnumToCStringMap result;
     for (size_t i = 0; i < Size::value; ++i) {
       result[enum_values_[i]] = cstring_values_[i];
@@ -195,12 +196,14 @@ class EnumConversionHelper {
   }
 
   static CStringToEnumMap InitCStringToEnumMap() {
+    DCHECK(Size::value == sizeof(enum_values_) / sizeof(enum_values_[0]));
     CStringToEnumMap result;
     for (size_t i = 0; i < Size::value; ++i) {
       result[cstring_values_[i]] = enum_values_[i];
     }
     return result;
   }
+  DISALLOW_COPY_AND_ASSIGN(EnumConversionHelper<EnumType>);
 };
 
 

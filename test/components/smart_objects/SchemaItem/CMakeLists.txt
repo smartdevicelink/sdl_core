@@ -22,6 +22,7 @@ set (SOURCES
   ./test_NumberSchemaItemTest.cpp
   ./test_StringSchemaItemTest.cpp
   ./test_ArraySchemaItemTest.cpp
+  ./test_CObjectSchemaItem.cpp
   ./AlwaysTrueSchemaItemTest.cpp
   ./AlwaysFalseSchemaItemTest.cpp
 )
