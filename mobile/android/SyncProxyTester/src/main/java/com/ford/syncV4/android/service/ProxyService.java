@@ -923,11 +923,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     //reset();
                     if (cause == SyncExceptionCause.HEARTBEAT_PAST_DUE) {
                         if (AppPreferencesManager.isReconnectOnHBTimeout()) {
-                            reset();
+                            disposeSyncProxy();
+                            startProxyIfNetworkConnected();
                         }
                     }
                 } else if (info.equals(SyncTransport.DISCONNECT_REASON_END_OF_STREAM_REACHED)) {
-                    reset();
+                    disposeSyncProxy();
+                    startProxyIfNetworkConnected();
                 }
             }
         } else {
@@ -936,12 +938,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         }
     }
 
-    public void reset() {
+    /*private void reset() {
         if (mSyncProxy == null) {
+            Logger.w(TAG + " reset, SYNC Proxy is NULL");
             return;
         }
         // In case we run exit() - this is a quick marker of exiting.
         if (mProxyServiceEvent != null) {
+            Logger.w(TAG + " reset, ProxyServiceEvent not NULL");
             return;
         }
         try {
@@ -954,7 +958,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 stopServiceBySelf();
             }
         }
-    }
+    }*/
 
     /**
      * Restarting SyncProxyALM. For example after changing transport type
