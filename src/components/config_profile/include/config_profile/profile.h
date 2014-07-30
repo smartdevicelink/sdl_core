@@ -593,7 +593,7 @@ class Profile : public utils::Singleton<Profile> {
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
 #ifdef CUSTOMER_PASA
-    std::string                     mq_name_;
+    std::string                     audio_mq_path_;
     std::string                     log4cxx_config_file_;
     std::string                     remote_logging_flag_file_;
     std::string                     remote_logging_flag_file_path_;
