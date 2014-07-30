@@ -419,6 +419,12 @@ void PolicyHandler::OnAppPermissionConsent(const uint32_t connection_key,
     return;
   }
 
+  if (!app_to_device_link_.size()) {
+    LOG4CXX_WARN(logger_, "There are no applications previously stored for "
+                 "setting common permissions.");
+    return;
+  }
+
   std::map<std::string, std::string>::const_iterator it =
       app_to_device_link_.begin();
   std::map<std::string, std::string>::const_iterator it_end =
@@ -473,38 +479,61 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
   POLICY_LIB_CHECK_VOID();
   // If no specific app was passed, get permissions for all currently registered
   // applications
-  LinkAppToDevice linker(app_to_device_link_);
   if (!connection_key) {
-    std::set<application_manager::ApplicationSharedPtr>::const_iterator it =
+    LinkAppToDevice linker(app_to_device_link_);
+    std::set<application_manager::ApplicationSharedPtr>::const_iterator it_app =
         application_manager::ApplicationManagerImpl::instance()->
         applications().begin();
-    std::set<application_manager::ApplicationSharedPtr>::const_iterator it_end =
-        application_manager::ApplicationManagerImpl::instance()->
+    std::set<application_manager::ApplicationSharedPtr>::const_iterator
+        it_app_end = application_manager::ApplicationManagerImpl::instance()->
         applications().end();
 
     // Add all currently registered applications
-    std::for_each(it, it_end, linker);
+    std::for_each(it_app, it_app_end, linker);
+
+    PermissionsConsolidator consolidator;
+    std::vector<policy::FunctionalGroupPermission> group_permissions;
+    std::map<std::string, std::string>::const_iterator it =
+        app_to_device_link_.begin();
+    for (;it != app_to_device_link_.end(); ++it) {
+      policy_manager_->GetUserConsentForApp(it->second, it->first,
+                                            group_permissions);
+      consolidator.Consolidate(group_permissions);
+    }
+
+    application_manager::MessageHelper::SendGetListOfPermissionsResponse(
+      consolidator.GetConsolidatedPermissions(), correlation_id);
+
+    return;
+  }
+
+  // Single app only
+  application_manager::ApplicationSharedPtr app =
+    application_manager::ApplicationManagerImpl::instance()->application(
+      connection_key);
+
+  if (!app.valid()) {
+    LOG4CXX_WARN(logger_, "Connection key '" << connection_key << "' "
+                 "not found within registered applications.");
+    return;
+  }
+
+  DeviceParams device_params;
+  application_manager::MessageHelper::GetDeviceInfoForApp(connection_key,
+      &device_params);
+  std::vector<FunctionalGroupPermission> group_permissions;
+  if (device_params.device_mac_address.empty()) {
+    LOG4CXX_WARN(logger_, "Couldn't find device, which hosts application.");
+  } else if (!app) {
+    LOG4CXX_WARN(logger_, "Couldn't find application to get permissions.");
   } else {
-    application_manager::ApplicationSharedPtr app =
-      application_manager::ApplicationManagerImpl::instance()->application(
-        connection_key);
-
-    // Add single application only
-    linker(app);
-  }
-
-  PermissionsConsolidator consolidator;
-  std::vector<policy::FunctionalGroupPermission> group_permissions;
-  std::map<std::string, std::string>::const_iterator it =
-      app_to_device_link_.begin();
-  for (;it != app_to_device_link_.end(); ++it) {
-    policy_manager_->GetUserConsentForApp(it->second, it->first,
+    policy_manager_->GetUserConsentForApp(device_params.device_mac_address,
+                                          app->mobile_app_id()->asString(),
                                           group_permissions);
-    consolidator.Consolidate(group_permissions);
-  }
 
-  application_manager::MessageHelper::SendGetListOfPermissionsResponse(
-    consolidator.GetConsolidatedPermissions(), correlation_id);
+    application_manager::MessageHelper::SendGetListOfPermissionsResponse(
+      group_permissions, correlation_id);
+  }
 }
 
 void PolicyHandler::OnGetStatusUpdate(const uint32_t correlation_id) {

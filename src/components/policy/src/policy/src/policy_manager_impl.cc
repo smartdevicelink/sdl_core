@@ -745,64 +745,59 @@ void PolicyManagerImpl::SetDeviceInfo(const std::string& device_id,
 #endif
 }
 
-void PolicyManagerImpl::EnsureCorrectPermissionConsent(const FunctionalGroupNames& group_names, PermissionConsent& permissions)
+PermissionConsent PolicyManagerImpl::EnsureCorrectPermissionConsent(
+    const PermissionConsent& permissions_to_check)
 {
-    std::vector<FunctionalGroupPermission>::iterator group_perm_iter =
-            permissions.group_permissions.begin();
+  std::vector<FunctionalGroupPermission> current_user_consents;
+  GetUserConsentForApp(permissions_to_check.device_id,
+                       permissions_to_check.policy_app_id,
+                       current_user_consents);
 
-    std::vector<FunctionalGroupPermission>::iterator group_perm_iter_end =
-            permissions.group_permissions.end();
+  PermissionConsent permissions_to_set;
+  permissions_to_set.device_id = permissions_to_check.device_id;
+  permissions_to_set.policy_app_id = permissions_to_check.policy_app_id;
+  permissions_to_set.consent_source = permissions_to_check.consent_source;
 
-    for(; group_perm_iter != group_perm_iter_end; ++group_perm_iter) {
+  std::vector<FunctionalGroupPermission>::const_iterator it =
+      permissions_to_check.group_permissions.begin();
+  std::vector<FunctionalGroupPermission>::const_iterator it_end =
+      permissions_to_check.group_permissions.end();
 
-      const std::uint32_t id = (*group_perm_iter).group_id;
-      FunctionalGroupNames::const_iterator group_name_iter = group_names.find(id);
+  for (;it != it_end; ++it) {
+    std::vector<FunctionalGroupPermission>::const_iterator it_curr =
+        current_user_consents.begin();
+    std::vector<FunctionalGroupPermission>::const_iterator it_curr_end =
+        current_user_consents.end();
 
-      if (group_names.end() == group_name_iter) {
-        LOG4CXX_WARN(logger_, "Can't change user consent for unexisted function."
-                     << "\t\nid: " << id
-                     << "\t\nalias: " << (*group_perm_iter).group_alias
-                     << "\t\ngroup name: " << (*group_perm_iter).group_name);
-      }
-      // check if group_alias is not empty string
-      // which means it has user_consent_promt ability
-      else if ((*group_name_iter).second.first.empty()) {
-        LOG4CXX_WARN(logger_, "Specified function is not in user consent group."
-                      << "\t\nid: " << id
-                      << "\t\nalias: " << (*group_perm_iter).group_alias
-                      << "\t\ngroup name: " << (*group_perm_iter).group_name);
-
-        permissions.group_permissions.erase(group_perm_iter);
+    for (; it_curr != it_curr_end; ++it_curr) {
+      if (it->group_alias == it_curr->group_alias &&
+          it->group_id == it_curr->group_id) {
+        permissions_to_set.group_permissions.push_back(*it);
       }
     }
+  }
+
+  return permissions_to_set;
 }
 
 void PolicyManagerImpl::SetUserConsentForApp(
-  PermissionConsent& permissions) {
+    const PermissionConsent& permissions) {
   LOG4CXX_INFO(logger_, "SetUserConsentForApp");
 #if defined (EXTENDED_POLICY)
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (pt_ext) {
+    PermissionConsent verified_permissions =
+        EnsureCorrectPermissionConsent(permissions);
 
-    FunctionalGroupNames group_names;
-    if (!pt_ext->GetFunctionalGroupNames(group_names)) {
-      LOG4CXX_WARN(logger_, "Can't get functional group names");
-      return;
-    }
-
-    EnsureCorrectPermissionConsent(group_names, permissions);
-
-    // TODO(AOleynik): Change device id to appropriate value (MAC with SHA-256)
-    // in parameters
-    if (!pt_ext->SetUserPermissionsForApp(permissions)) {
+    if (!pt_ext->SetUserPermissionsForApp(verified_permissions)) {
       LOG4CXX_WARN(logger_, "Can't set user permissions for application.");
     }
     // Send OnPermissionChange notification, since consents were changed
     std::vector<FunctionalGroupPermission> app_group_permissons;
-    GetPermissionsForApp(permissions.device_id,
-                             permissions.policy_app_id,
-                             app_group_permissons);
+    GetPermissionsForApp(verified_permissions.device_id,
+                         verified_permissions.policy_app_id,
+                         app_group_permissons);
 
     // Get current functional groups from DB with RPC permissions
     policy_table::FunctionalGroupings functional_groups;
@@ -824,9 +819,9 @@ void PolicyManagerImpl::SetUserConsentForApp(
                             app_group_permissons, notification_data);
 
     std::string default_hmi;
-    pt_ext->GetDefaultHMI(permissions.policy_app_id, &default_hmi);
+    pt_ext->GetDefaultHMI(verified_permissions.policy_app_id, &default_hmi);
 
-    listener()->OnPermissionsUpdated(permissions.policy_app_id,
+    listener()->OnPermissionsUpdated(verified_permissions.policy_app_id,
                                      notification_data,
                                      default_hmi);
   }
