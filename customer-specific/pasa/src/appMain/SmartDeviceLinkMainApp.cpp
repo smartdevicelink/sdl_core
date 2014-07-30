@@ -1,5 +1,8 @@
 // ----------------------------------------------------------------------------
 
+#include <algorithm>
+#include <log4cxx/fileappender.h>
+
 #include "./life_cycle.h"
 #include "SmartDeviceLinkMainApp.h"
 #include "signal_handlers.h"
@@ -26,8 +29,6 @@
 #include "networking.h"  // cpplint: Include the directory when naming .h files
 #include "system.h"      // cpplint: Include the directory when naming .h files
 // ----------------------------------------------------------------------------
-
-#include <log4cxx/fileappender.h>
 
 bool g_bTerminate = false;
 
@@ -60,13 +61,13 @@ std::string getCurrentLogFileName() {
                profile::Profile::instance()->target_log_file_home_dir(),
                profile::Profile::instance()->target_log_file_name_pattern());
 
-      if (availableLogFiles.empty()) {
-         return "";
-      }
+   if (availableLogFiles.empty()) {
+      return "";
+   }
 
-      std::sort(availableLogFiles.begin(), availableLogFiles.end());
+   std::sort(availableLogFiles.begin(), availableLogFiles.end());
 
-      return availableLogFiles.back();
+   return availableLogFiles.back();
 }
 
 void startSmartDeviceLink()
