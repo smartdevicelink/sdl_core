@@ -74,13 +74,22 @@ class CDefaultSchemaItem : public ISchemaItem {
 
  protected:
   explicit CDefaultSchemaItem(const ParameterType& DefaultValue);
-  // TODO(EZamakhov): add brief
+  /**
+   * @brief SmartType getter for primitive types common logic
+   * @return SmartType for ShemaItem
+   */
   virtual SmartType getSmartType() const = 0;
+  /**
+   * @brief Default value getter for primitive types common logic
+   * @return Default value for selected type
+   */
   virtual Type getDefaultValue() const = 0;
   /**
    * @param DefaultValue Default value of a parameter.
    */
   const ParameterType mDefaultValue;
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(CDefaultSchemaItem<Type>);
 };
 

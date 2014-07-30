@@ -67,6 +67,8 @@ SmartObject::SmartObject(SmartType Type)
     : m_type(SmartType_Null),
       m_schema() {
   switch (Type) {
+    case SmartType_Null:
+      break;
     case SmartType_Integer:
       set_value_integer(0);
       break;
@@ -96,9 +98,9 @@ SmartObject::SmartObject(SmartType Type)
     case SmartType_Invalid:
       m_type = SmartType_Invalid;
       break;
-    default: {
+    default:
+      DCHECK(!"Unhandled smart object type");
       break;
-    }
   }
 }
 
@@ -157,6 +159,7 @@ bool SmartObject::operator==(const SmartObject& Other) const {
     case SmartType_Invalid:
       return true;
     default:
+      DCHECK(!"Unhandled smart object type");
       break;
   }
   return false;
@@ -190,12 +193,11 @@ SmartObject& SmartObject::operator=(const int32_t NewValue) {
 }
 
 bool SmartObject::operator==(const int32_t Value) const {
-  int64_t comp = convert_int();
-  if (comp == invalid_int_value) {
+  const int64_t comp = convert_int();
+  if (comp == invalid_int64_value) {
     return false;
-  } else {
-    return comp == Value;
   }
+  return comp == static_cast<int64_t>(Value);
 }
 
 void SmartObject::set_value_integer(int64_t NewValue) {
@@ -230,7 +232,7 @@ SmartObject::SmartObject(uint32_t InitialValue)
 }
 
 uint32_t SmartObject::asUInt() const {
-  int64_t convert = convert_int();
+  const int64_t convert = convert_int();
   if (invalid_int64_value == convert) {
     return invalid_unsigned_int_value;
   }
@@ -247,12 +249,11 @@ SmartObject& SmartObject::operator=(const uint32_t NewValue) {
 }
 
 bool SmartObject::operator==(const uint32_t Value) const {
-  int64_t comp = convert_int();
+  const int64_t comp = convert_int();
   if (comp == invalid_int_value) {
     return false;
-  } else {
-    return static_cast<uint32_t>(comp) == Value;
   }
+  return comp == static_cast<int64_t>(Value);
 }
 
 // =============================================================
@@ -277,12 +278,11 @@ SmartObject& SmartObject::operator=(const int64_t NewValue) {
 }
 
 bool SmartObject::operator==(const int64_t Value) const {
-  int64_t comp = convert_int();
+  const int64_t comp = convert_int();
   if (comp == invalid_int_value) {
     return false;
-  } else {
-    return comp == Value;
   }
+  return comp == Value;
 }
 
 // =============================================================
@@ -307,15 +307,14 @@ SmartObject& SmartObject::operator=(const double NewValue) {
 }
 
 bool SmartObject::operator==(const double Value) const {
-  double comp = convert_double();
+  const double comp = convert_double();
   if (comp == invalid_double_value) {
     return false;
-  } else {
-    return comp == Value;
   }
+  return comp == Value;
 }
 
-void SmartObject::set_value_double(double NewValue) {
+void SmartObject::set_value_double(const double NewValue) {
   set_new_type(SmartType_Double);
   m_data.double_value = NewValue;
 }
@@ -409,7 +408,7 @@ SmartObject& SmartObject::operator=(const char NewValue) {
 }
 
 bool SmartObject::operator==(const char Value) const {
-  char comp = convert_char();
+  const char comp = convert_char();
   if (comp == invalid_char_value) {
     return false;
   }
@@ -500,7 +499,7 @@ std::string SmartObject::convert_string() const {
 // CHAR* TYPE SUPPORT
 // =============================================================
 
-SmartObject::SmartObject(const char* InitialValue)
+SmartObject::SmartObject(const char* const InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;

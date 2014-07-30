@@ -657,7 +657,6 @@ class SmartObject FINAL {
    **/
   size_t length() const;
 
-
   /**
    * @brief Nequation template operator
    *
@@ -789,6 +788,7 @@ class SmartObject FINAL {
    * @return int32_t Converted value or invalid_string_value if conversion not possible
    **/
   inline std::string convert_string() const;
+  /** @} */
 
   /**
    * @name Support of type: binary (internal)

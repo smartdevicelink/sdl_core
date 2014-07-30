@@ -55,10 +55,10 @@ class CStringSchemaItem : public CDefaultSchemaItem<std::string> {
    * @return Shared pointer to a new schema item.
    **/
   static utils::SharedPtr<CStringSchemaItem> create(
-      const TSchemaItemParameter<size_t>& MinLength = TSchemaItemParameter<size_t>(),
-      const TSchemaItemParameter<size_t>& MaxLength = TSchemaItemParameter<size_t>(),
-      const TSchemaItemParameter<std::string>& DefaultValue = TSchemaItemParameter<std::string>());
-
+    const TSchemaItemParameter<size_t>& MinLength = TSchemaItemParameter<size_t>(),
+    const TSchemaItemParameter<size_t>& MaxLength = TSchemaItemParameter<size_t>(),
+    const TSchemaItemParameter<std::string>& DefaultValue =
+      TSchemaItemParameter<std::string>());
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
@@ -86,5 +86,4 @@ class CStringSchemaItem : public CDefaultSchemaItem<std::string> {
 };
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink
-
 #endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_STRING_SCHEMA_ITEM_H_

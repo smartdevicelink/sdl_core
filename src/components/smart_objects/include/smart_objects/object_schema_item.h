@@ -42,7 +42,6 @@
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
 
-
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 /**
@@ -58,30 +57,24 @@ class CObjectSchemaItem : public ISchemaItem {
      * @brief Default constructor.
      **/
     SMember();
-
     /**
      * @brief Constructor.
-     *
      * @param SchemaItem Member schema item.
      * @param IsMandatory true if member is mandatory, false
      *                    otherwise. Defaults to true.
      **/
     SMember(const ISchemaItemPtr SchemaItem,
             const bool IsMandatory = true);
-
     /**
      * @brief Member schema item.
      **/
     ISchemaItemPtr mSchemaItem;
-
     /**
      * @brief true if member is mandatory, false otherwise.
      **/
     bool mIsMandatory;
   };
-
   typedef std::map<std::string, SMember> Members;
-
   /**
    * @brief Create a new schema item.
    *
@@ -91,43 +84,32 @@ class CObjectSchemaItem : public ISchemaItem {
    * @return Shared pointer to a new schema item.
    **/
   static utils::SharedPtr<CObjectSchemaItem> create(const Members& Members);
-
   /**
    * @brief Validate smart object.
-   *
    * @param Object Object to validate.
-   *
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
-
   /**
    * @brief Apply schema.
-   *
    * @param Object Object to apply schema.
    **/
   void applySchema(SmartObject& Object) OVERRIDE;
-
   /**
    * @brief Unapply schema.
-   *
    * @param Object Object to unapply schema.
    **/
   void unapplySchema(SmartObject& Object) OVERRIDE;
-
   /**
    * @brief Build smart object by smart schema having copied matched
    *        parameters from pattern smart object
-   *
    * @param pattern_object pattern object
    * @param result_object object to build
    */
   void BuildObjectBySchema(const SmartObject& pattern_object,
                            SmartObject& result_object) OVERRIDE;
-
   /**
    * @brief Get size mMembers map
-   *
    * @return Size of mMembers
    */
   size_t GetMemberSize() OVERRIDE;
@@ -135,7 +117,6 @@ class CObjectSchemaItem : public ISchemaItem {
  protected:
   /**
    * @brief Constructor.
-   *
    * @param Members Map of member name to SMember structure
    *                describing the object member.
    **/

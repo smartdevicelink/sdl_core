@@ -47,10 +47,8 @@ namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
 template <typename EnumType> class EnumConversionHelper;
-
 /**
  * @brief Enumeration schema item.
- *
  * @tparam EnumType Enumeration type.
  **/
 template<typename EnumType>
@@ -58,26 +56,20 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
  public:
   /**
    * @brief Create a new schema item.
-   *
    * @param AllowedElements Set of allowed enumeration elements.
    * @param DefaultValue Default value.
-   *
    * @return Shared pointer to a new schema item.
    **/
   static utils::SharedPtr<TEnumSchemaItem> create(
     const std::set<EnumType>& AllowedElements,
     const TSchemaItemParameter<EnumType>& DefaultValue =
       TSchemaItemParameter<EnumType>());
-
   /**
    * @brief Validate smart object.
-   *
    * @param Object Object to validate.
-   *
    * @return NsSmartObjects::Errors::eType
    **/
-  virtual Errors::eType validate(const SmartObject& Object);
-
+  Errors::eType validate(const SmartObject& Object) OVERRIDE;
   /**
    * @brief Apply schema.
    * This implementation checks if enumeration is represented as string
@@ -85,17 +77,12 @@ class TEnumSchemaItem : public CDefaultSchemaItem<EnumType> {
    * map.
    * @param Object Object to apply schema.
    **/
-  // TODO(cpplint): Is this a non-const reference?
-  // If so, make const or use a pointer.
-  virtual void applySchema(SmartObject& Object);
-
+  void applySchema(SmartObject& Object) OVERRIDE;
   /**
    * @brief Unapply schema.
    * @param Object Object to unapply schema.
    **/
-  // TODO(cpplint): Is this a non-const reference?
-  // If so, make const or use a pointer.
-  virtual void unapplySchema(SmartObject& Object);
+  void unapplySchema(SmartObject& Object) OVERRIDE;
 
  private:
   /**
@@ -226,8 +213,6 @@ Errors::eType TEnumSchemaItem<EnumType>::validate(const SmartObject& Object) {
   return Errors::OK;
 }
 
-// TODO(cpplint): Is this a non-const reference?
-// If so, make const or use a pointer.
 template<typename EnumType>
 void TEnumSchemaItem<EnumType>::applySchema(SmartObject& Object) {
   if (SmartType_String == Object.getType()) {
@@ -238,8 +223,6 @@ void TEnumSchemaItem<EnumType>::applySchema(SmartObject& Object) {
   }
 }
 
-// TODO(cpplint): Is this a non-const reference?
-// If so, make const or use a pointer.
 template<typename EnumType>
 void TEnumSchemaItem<EnumType>::unapplySchema(SmartObject& Object) {
   if (SmartType_Integer == Object.getType()) {

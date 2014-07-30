@@ -29,4 +29,4 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "smart_objects/enum_schema_item.h"
+#include "smart_objects/default_shema_item.h"

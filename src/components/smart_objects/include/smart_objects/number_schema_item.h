@@ -41,10 +41,8 @@
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
-
 /**
  * @brief Number schema item.
- *
  * @tparam NumberType Number type.
  **/
 template<typename NumberType>
@@ -52,11 +50,9 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
  public:
   /**
    * @brief Create a new schema item.
-   *
    * @param MinValue Minimum allowed value.
    * @param MaxValue Maximum allowed value.
    * @param DefaultValue Default value.
-   *
    * @return Shared pointer to a new schema item.
    **/
   static utils::SharedPtr<TNumberSchemaItem> create(
@@ -67,9 +63,7 @@ class TNumberSchemaItem : public CDefaultSchemaItem<NumberType> {
 
   /**
    * @brief Validate smart object.
-   *
    * @param Object Object to validate.
-   *
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
@@ -163,7 +157,6 @@ NumberType TNumberSchemaItem<NumberType>::getDefaultValue() const {
  * @brief Specialization of getSmartType for number types.
  * @return SmartType.
  **/
-
 template<typename NumberType>
 SmartType TNumberSchemaItem<NumberType>::getSmartType() const {
   DCHECK(!"Wrong type of template class");
