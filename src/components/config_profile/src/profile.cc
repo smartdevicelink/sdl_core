@@ -149,7 +149,7 @@ const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
 #ifdef CUSTOMER_PASA
-const char* kDefaultMQName = "/dev/mqueue/audio";
+const char* kDefaultMQName = "/dev/mqueue/AppLinkAudioPass";
 const char* kDefaultLog4cxxConfig = "/fs/mp/etc/AppLink/log4cxx.properties";
 const char* kDefaultRemoteLoggingFlagFile = "";
 #endif
