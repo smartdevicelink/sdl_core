@@ -111,7 +111,7 @@ SDL.AppPermissionsView = Em.ContainerView.create( {
                 params: {
                     action: 'changeAppPermission',
                     target: 'SDL.SettingsController',
-                    text: text,
+                    text: message[i].name + text,
                     name: message[i].name,
                     allowed: message[i].allowed,
                     id: message[i].id,
