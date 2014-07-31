@@ -1,4 +1,5 @@
 [CW31]
+* SyncProxyTester: Asynchronous RPC API in XMP
 + SyncProxyTester: Add possibility to restore connection after HB timeout from SPT
 + SyncProxyTester: Add possibility to send audio/video streaming infinitely
 + SyncProxyTester: Add possibility to stream audio (video) w/o sending start service
