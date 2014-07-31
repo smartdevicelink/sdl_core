@@ -139,16 +139,9 @@ void IAP2Device::OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* ha
   }
   else {
     LOG4CXX_WARN(logger_, "iAP2: error occurred while sending data on hub protocol " << protocol_name);
-    if (thread_launched) {
-      pool_connection_threads_lock_.Acquire();
-      ThreadContainer::iterator j = pool_connection_threads_.find(pool_protocol_name);
-      if (j != pool_connection_threads_.end()) {
-        utils::SharedPtr<threads::Thread> thread = j->second;
-        thread->stop();
-        pool_connection_threads_.erase(j);
-      }
-      pool_connection_threads_lock_.Release();
-      ReturnToPool(pool_protocol_name);
+    if (picked) {
+      StopThread(pool_protocol_name);
+      FreeProtocol(pool_protocol_name);
     }
   }
   LOG4CXX_TRACE(logger_, "iAP2: closing connection on hub protocol " << protocol_name);
@@ -212,12 +205,20 @@ bool IAP2Device::PickProtocol(char* index, std::string* name) {
     FreeProtocolNamePool::iterator i = free_protocol_name_pool_.begin();
     *index = i->first;
     *name = i->second;
-    protocol_in_use_name_pool_.insert(std::make_pair(index, name));
+    protocol_in_use_name_pool_.insert(std::make_pair(*name, *index));
     free_protocol_name_pool_.erase(i);
 
-    TimerContainer::iterator timer = timers_protocols_.find(*name);
-    if (timer != timers_protocols_.end()) {
-      timer->second->Start();
+    TimerContainer::iterator it = timers_protocols_.find(*name);
+    if (it != timers_protocols_.end()) {
+      it->second->Start();
+    } else {
+// TODO(KKolodiy): This is turned off because applications don't connect
+//                 after thread is stopped. May be problem is in QNX library.
+/*
+ *    TimerProtocolSPtr timer = new TimerProtocol(*name, this);
+ *    timers_protocols_.insert(std::make_pair(*name, timer));
+ *    timer->Start();
+ */
     }
     return true;
   }
@@ -274,7 +275,6 @@ void IAP2Device::StopThread(const std::string& protocol_name) {
     thread->stop();
     pool_connection_threads_.erase(j);
   }
-  pool_connection_threads_lock_.Release();
 }
 
 IAP2Device::IAP2HubConnectThreadDelegate::IAP2HubConnectThreadDelegate(
@@ -328,10 +328,14 @@ void IAP2Device::IAP2ConnectThreadDelegate::threadMain() {
   }
 }
 
+int IAP2Device::TimerProtocol::TimerProtocol::timeout_ = 5;
+
 IAP2Device::TimerProtocol::TimerProtocol(std::string name, IAP2Device* parent)
     : name_(name),
       timer_(new Timer(this, &TimerProtocol::Shoot)),
-      parent_(parent) {}
+      parent_(parent) {
+  timeout_ = profile::Profile::instance()->iap_hub_timeout_wait_connection();
+}
 
 IAP2Device::TimerProtocol::~TimerProtocol() {
   Stop();
@@ -339,14 +343,17 @@ IAP2Device::TimerProtocol::~TimerProtocol() {
 }
 
 void IAP2Device::TimerProtocol::Start() {
+  LOG4CXX_DEBUG(logger_, "iAP2: start timer (protocol: " << name_ << "timeout: " << timeout_);
   timer_->start(timeout_);
 }
 
 void IAP2Device::TimerProtocol::Stop() {
+  LOG4CXX_DEBUG(logger_, "iAP2: stop timer (protocol: " << name_);
   timer_->stop();
 }
 
 void IAP2Device::TimerProtocol::Shoot() {
+  LOG4CXX_DEBUG(logger_, "iAP2: shoot timer (protocol: " << name_);
   parent_->StopThread(name_);
   parent_->FreeProtocol(name_);
 }

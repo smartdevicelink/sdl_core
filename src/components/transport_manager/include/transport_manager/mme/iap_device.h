@@ -160,8 +160,7 @@ class IAPDevice : public MmeDevice {
     void Stop();
    private:
     typedef timer::TimerThread<TimerProtocol> Timer;
-    static const int timeout_ = profile::Profile::instance()
-        ->iap_hub_timeout_wait_connection();
+    static int timeout_;
     std::string name_;
     Timer* timer_;
     IAPDevice* parent_;

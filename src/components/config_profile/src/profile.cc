@@ -197,7 +197,7 @@ const std::pair<uint32_t, uint32_t> kReadDIDFrequency = {5 , 1};
 const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = {5 , 1};
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
-const int kDefaultIAPHubTimeoutWaitConnection = 1;
+const int kDefaultIAPHubTimeoutWaitConnection = 5;
 
 }  // namespace
 

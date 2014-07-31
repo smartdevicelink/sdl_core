@@ -31,6 +31,7 @@
  */
 
 #include "utils/logger.h"
+#include "config_profile/profile.h"
 
 #include "transport_manager/mme/iap_device.h"
 #include "transport_manager/mme/iap_connection.h"
@@ -68,7 +69,8 @@ bool IAPDevice::Init() {
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = pool_protocol_names.begin(); i != pool_protocol_names.end(); ++i) {
     std::string protocol_name = *i;
     free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
-    timers_protocols_.push_back(new TimerProtocol(protocol_name, this));
+    timers_protocols_.insert(std::make_pair(protocol_name,
+                                            new TimerProtocol(protocol_name, this)));
   }
 
   LOG4CXX_TRACE(logger_, "iAP: connecting to " << mount_point());
@@ -209,14 +211,14 @@ char IAPDevice::PickProtocol() {
   char index;
   sync_primitives::AutoLock locker(protocol_name_pool_lock_);
   if (!free_protocol_name_pool_.empty()) {
-    ProtocolNamePool::iterator i = free_protocol_name_pool_.begin();
-    std::string protocol_name = i->first;
-    LOG4CXX_INFO(logger_, "iAP: protocol " << protocol_name << " picked out from pool");
-    index = i->second;
-    protocol_in_use_name_pool_.insert(*i);
+    FreeProtocolNamePool::iterator i = free_protocol_name_pool_.begin();
+    std::string name = i->second;
+    LOG4CXX_INFO(logger_, "iAP: protocol " << name << " picked out from pool");
+    index = i->first;
+    protocol_in_use_name_pool_.insert(std::make_pair(name, index));
     free_protocol_name_pool_.erase(i);
 
-    TimerContainer::iterator timer = timers_protocols_.find(protocol_name);
+    TimerContainer::iterator timer = timers_protocols_.find(name);
     if (timer != timers_protocols_.end()) {
       timer->second->Start();
     }
@@ -437,10 +439,14 @@ void IAPDevice::IAPEventThreadDelegate::OpenSession(uint32_t protocol_id, const 
   }
 }
 
+int IAPDevice::TimerProtocol::TimerProtocol::timeout_ = 5;
+
 IAPDevice::TimerProtocol::TimerProtocol(std::string name, IAPDevice* parent)
     : name_(name),
       timer_(new Timer(this, &TimerProtocol::Shoot)),
-      parent_(parent) {}
+      parent_(parent) {
+  timeout_ = profile::Profile::instance()->iap_hub_timeout_wait_connection();
+}
 
 IAPDevice::TimerProtocol::~TimerProtocol() {
   Stop();
@@ -448,14 +454,17 @@ IAPDevice::TimerProtocol::~TimerProtocol() {
 }
 
 void IAPDevice::TimerProtocol::Start() {
+  LOG4CXX_DEBUG(logger_, "iAP2: start timer (protocol: " << name_ << "timeout: " << timeout_);
   timer_->start(timeout_);
 }
 
 void IAPDevice::TimerProtocol::Stop() {
+  LOG4CXX_DEBUG(logger_, "iAP2: stop timer (protocol: " << name_);
   timer_->stop();
 }
 
 void IAPDevice::TimerProtocol::Shoot() {
+  LOG4CXX_DEBUG(logger_, "iAP: shoot timer (protocol: " << name_);
   parent_->FreeProtocol(name_);
 }
 
