@@ -618,36 +618,37 @@ void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
 }
 
 void PolicyHandler::OnPendingPermissionChange(
-  const std::string& policy_app_id) {
+    const std::string& policy_app_id) {
   LOG4CXX_INFO(logger_, "PolicyHandler::OnPendingPermissionChange for "
                << policy_app_id);
   POLICY_LIB_CHECK_VOID();
   AppPermissions permissions = policy_manager_->GetAppPermissionsChanges(
                                  policy_app_id);
   application_manager::ApplicationSharedPtr app =
-    application_manager::ApplicationManagerImpl::instance()
-    ->application_by_policy_id(policy_app_id);
+      application_manager::ApplicationManagerImpl::instance()
+      ->application_by_policy_id(policy_app_id);
   if (!app.valid()) {
     LOG4CXX_WARN(logger_,
                  "No app found for " << policy_app_id << " policy app id.");
     return;
   }
   switch (app->hmi_level()) {
-    case mobile_apis::HMILevel::HMI_FULL:
-    case mobile_apis::HMILevel::HMI_LIMITED: {
-      if (permissions.appPermissionsConsentNeeded) {
-        application_manager::MessageHelper::
-            SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
-        policy_manager_->RemovePendingPermissionChanges(policy_app_id);
-        break;
-      }
+  case mobile_apis::HMILevel::HMI_FULL:
+  case mobile_apis::HMILevel::HMI_LIMITED: {
+    if (permissions.appPermissionsConsentNeeded) {
+      application_manager::MessageHelper::
+          SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
+      policy_manager_->RemovePendingPermissionChanges(policy_app_id);
+      break;
     }
-    case mobile_apis::HMILevel::HMI_BACKGROUND: {
-      if (permissions.isAppPermissionsRevoked
-          || permissions.appUnauthorized) {
-        application_manager::MessageHelper::
-            SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
+  }
+  case mobile_apis::HMILevel::HMI_BACKGROUND: {
+    if (permissions.isAppPermissionsRevoked
+        || permissions.appUnauthorized) {
+      application_manager::MessageHelper::
+          SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
 
+      if (permissions.appUnauthorized) {
         application_manager::ApplicationManagerImpl::instance()
             ->DeactivateApplication(app);
         application_manager::MessageHelper::
@@ -656,17 +657,18 @@ void PolicyHandler::OnPendingPermissionChange(
               mobile_apis::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
 
         application_manager::ApplicationManagerImpl::instance()->
-        UnregisterApplication(app->app_id(), mobile_apis::Result::INVALID_ENUM,
-                              false);
-
-        policy_manager_->RemovePendingPermissionChanges(policy_app_id);
-        break;
+            UnregisterApplication(app->app_id(),
+                                  mobile_apis::Result::INVALID_ENUM,
+                                  false);
       }
+      policy_manager_->RemovePendingPermissionChanges(policy_app_id);
       break;
     }
-    case mobile_apis::HMILevel::HMI_NONE:
-    default:
-      break;
+    break;
+  }
+  case mobile_apis::HMILevel::HMI_NONE:
+  default:
+    break;
   }
 }
 
