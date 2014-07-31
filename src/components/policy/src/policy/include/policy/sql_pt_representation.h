@@ -160,6 +160,13 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const policy_table::NumberOfNotificationsPerMinute& notifications);
     bool SaveMessageType(const std::string& type);
     bool SaveLanguage(const std::string& code);
+
+    /**
+     * @brief Allows to generate hash from the specified string.
+     * @param name - the string from which hash should be generated.
+     * @return str_to_hash - for the specified string.
+     */
+    unsigned long generate_hash(const std::string& str_to_hash);
 };
 }  //  namespace policy
 
