@@ -385,6 +385,10 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
     }
   }
 
+  if (mobile_apis::Result::TIMED_OUT == result_code) {
+    DisablePerformInteraction();
+  }
+
   SendResponse(result, result_code, return_info, &(msg_params));
 }
 
