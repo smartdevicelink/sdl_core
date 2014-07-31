@@ -111,6 +111,7 @@ void Thread::join() {
                 apr_status_t stat = apr_thread_join(&startStat, thread);
                 thread = NULL;
                 if (stat != APR_SUCCESS) {
+                        // please see https://issues.apache.org/jira/browse/LOGCXX-278.
                         //throw ThreadException(stat);
                 }
         }

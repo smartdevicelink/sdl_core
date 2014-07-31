@@ -298,7 +298,7 @@ bool file_system::IsWritingAllowed(const std::string& name) {
 }
 
 bool file_system::IsReadingAllowed(const std::string& name) {
-  return IsAccessible(name.c_str(), R_OK);
+  return IsAccessible(name, R_OK);
 }
 
 std::vector<std::string> file_system::ListFiles(

@@ -92,6 +92,7 @@ void SocketHubAppender::close()
             closed = true;
         }
 
+        //please see https://issues.apache.org/jira/browse/LOGCXX-278.
         //LogLog::debug(LOG4CXX_STR("closing SocketHubAppender ") + getName());
         //
         //  wait until the server thread completes
@@ -99,6 +100,7 @@ void SocketHubAppender::close()
         thread.join();
 
         synchronized sync(mutex);
+        // please see https://issues.apache.org/jira/browse/LOGCXX-278.
         // close all of the connections
         //LogLog::debug(LOG4CXX_STR("closing client connections"));
         for (std::vector<helpers::ObjectOutputStreamPtr>::iterator iter = streams.begin();
@@ -114,7 +116,7 @@ void SocketHubAppender::close()
          }
         streams.erase(streams.begin(), streams.end());
 
-
+        // please see https://issues.apache.org/jira/browse/LOGCXX-278.
         /*LogLog::debug(LOG4CXX_STR("SocketHubAppender ")
               + getName() + LOG4CXX_STR(" closed"));*/
 }

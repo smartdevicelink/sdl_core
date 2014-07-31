@@ -1338,7 +1338,10 @@ bool ApplicationManagerImpl::Init() {
   do {
     if (policy_manager_) {
       LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
-      init_result = policy::PolicyHandler::instance()->InitPolicyTable();
+      if (!policy::PolicyHandler::instance()->InitPolicyTable()) {
+        init_result = false;
+        break;
+      }
     }
     const std::string app_storage_folder = 
       profile::Profile::instance()->app_storage_folder();
