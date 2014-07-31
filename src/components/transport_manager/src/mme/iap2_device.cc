@@ -339,8 +339,7 @@ IAP2Device::TimerProtocol::~TimerProtocol() {
 }
 
 void IAP2Device::TimerProtocol::Start() {
-  // TODO(KKolodiy): timeout from config
-  timer_->start(1000);
+  timer_->start(timeout_);
 }
 
 void IAP2Device::TimerProtocol::Stop() {

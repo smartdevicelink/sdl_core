@@ -44,6 +44,7 @@
 #include "utils/threads/thread_delegate.h"
 #include "utils/threads/thread.h"
 #include "utils/lock.h"
+#include "utils/timer_thread.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -157,6 +158,8 @@ class IAP2Device : public MmeDevice {
     void Stop();
    private:
     typedef timer::TimerThread<TimerProtocol> Timer;
+    static const int timeout_ = profile::Profile::instance()
+        ->iap_hub_timeout_wait_connection();
     std::string name_;
     Timer* timer_;
     IAP2Device* parent_;

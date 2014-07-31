@@ -144,6 +144,7 @@ const char* kPoolProtocolMaskKey = "PoolProtocol";
 const char* kIAPSystemConfigKey = "IAPSystemConfig";
 const char* kIAP2SystemConfigKey = "IAP2SystemConfig";
 const char* kIAP2HubConnectAttemptskey = "IAP2HubConnectAttempts";
+const char* kIAPHubTimeoutWaitConnectionKey = "TimeoutWaitConnection";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -196,6 +197,7 @@ const std::pair<uint32_t, uint32_t> kReadDIDFrequency = {5 , 1};
 const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = {5 , 1};
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
+const int kDefaultIAPHubTimeoutWaitConnection = 1;
 
 }  // namespace
 
@@ -264,7 +266,8 @@ Profile::Profile()
     iap_pool_protocol_mask_(kDefaultPoolProtocolMask),
     iap_system_config_(kDefaultIAPSystemConfig),
     iap2_system_config_(kDefaultIAP2SystemConfig),
-    iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts) {
+    iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts),
+    iap_hub_timeout_wait_connection_(kDefaultIAPHubTimeoutWaitConnection) {
 }
 
 Profile::~Profile() {
@@ -551,6 +554,10 @@ const std::string& Profile::iap2_system_config() const {
 
 int Profile::iap2_hub_connect_attempts() const {
   return iap2_hub_connect_attempts_;
+}
+
+int Profile::iap_hub_timeout_wait_connection() const {
+  return iap_hub_timeout_wait_connection_;
 }
 
 void Profile::UpdateValues() {
@@ -1163,6 +1170,13 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
       kIAP2HubConnectAttemptskey);
 
   LOG_UPDATED_VALUE(iap2_hub_connect_attempts_, kIAP2HubConnectAttemptskey, kIAPSection);
+
+  ReadIntValue(&iap_hub_timeout_wait_connection_,
+      kDefaultIAPHubTimeoutWaitConnection,
+      kIAPSection,
+      kIAPHubTimeoutWaitConnectionKey);
+
+  LOG_UPDATED_VALUE(iap_hub_timeout_wait_connection_, kIAPHubTimeoutWaitConnectionKey, kIAPSection);
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,
