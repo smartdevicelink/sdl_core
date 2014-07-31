@@ -40,14 +40,16 @@ android {
     def flavorNames = ["Alice", "Sandy", "Kate", "Caroline", "Amy"]
 
     productFlavors {
+
         mainFlavor {
+
         }
 
         flavorNames.each {
             def fullFlavorName = "spt" + it + "Flavor"
             def packageFlavorName = "com.ford.syncV4.SPT" + it
             "${fullFlavorName}" {
-                packageName "${packageFlavorName}"
+                applicationId "${packageFlavorName}"
             }
         }
     }

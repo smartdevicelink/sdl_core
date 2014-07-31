@@ -10,11 +10,11 @@ buildscript {
 }
 
 int[] sdksAvailable() {
-    def androidPath = androidSdkPath() +'/tools/android'
+    def androidPath = androidSdkPath() + '/tools/android'
     def sdks = new ByteArrayOutputStream()
 
     exec {
-        commandLine   androidPath, 'list'
+        commandLine androidPath, 'list'
         standardOutput = sdks
     }
     sdks = sdks
@@ -25,7 +25,15 @@ int[] sdksAvailable() {
             // leave only strings with API levels
             .findAll { it ==~ /\s*API level:.*/ }
             // extract the API levels
-            .collect { (it =~ /\s*API level:\s*(\d+).*/)[0][1].toInteger() }
+            .collect {
+            // Since API level now has a letters in the name, for example "API level:L" this is
+            // a simple (not a professional) way to accept only numbers
+                if ((it =~ /\s*API level:\s*(\d+).*/).size() > 0) {
+                    (it =~ /\s*API level:\s*(\d+).*/)[0][1].toInteger()
+                } else {
+                    0
+                }
+            }
             // sort from highest to lowest
             .sort({ a, b -> b <=> a })
     sdks
