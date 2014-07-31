@@ -76,11 +76,10 @@ void OnExitAllApplicationsNotification::Run() {
   }
 
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
-  app_manager->SetUnregisterAllApplicationsReason(mob_reason);
-  app_manager->UnregisterAllApplications();
+    app_manager->SetUnregisterAllApplicationsReason(mob_reason);
+  app_manager->UnregisterAllApplications(true);
 
-  if (mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET == mob_reason
-      ||
+  if (mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET == mob_reason ||
       mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS == mob_reason) {
     app_manager->HeadUnitReset(mob_reason);
   }

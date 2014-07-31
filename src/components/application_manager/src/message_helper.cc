@@ -1172,7 +1172,7 @@ MessageHelper::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
 }
 
 void MessageHelper::SendOnAppUnregNotificationToHMI(
-  ApplicationConstSharedPtr app) {
+  ApplicationConstSharedPtr app, bool is_unexpected_disconnect) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!notification) {
@@ -1188,6 +1188,8 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
   // we put hmi_app_id because applicaton list does not contain application on this momment
   // and ReplaceHMIByMobileAppId function will be unable to replace app_id to hmi_app_id
   message[strings::msg_params][strings::app_id] = app->hmi_app_id();
+  message[strings::msg_params][strings::unexpected_disconnect] =
+    is_unexpected_disconnect;
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
 

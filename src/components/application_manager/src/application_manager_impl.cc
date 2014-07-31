@@ -1008,8 +1008,12 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
   switch (type) {
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
+      /* in case it was unexpected disconnect application will be removed
+       and we will notify HMI that it was unexpected disconnect,
+       but in case it was closed by mobile we will be unable to find it in the list
+      */
       UnregisterApplication(session_key, mobile_apis::Result::INVALID_ENUM,
-                            true);
+                            true, true);
       break;
     }
     case protocol_handler::kMobileNav: {
@@ -1846,7 +1850,7 @@ void ApplicationManagerImpl::SendOnSDLClose() {
   hmi_handler_->SendMessageToHMI(message_to_send);
 }
 
-void ApplicationManagerImpl::UnregisterAllApplications() {
+void ApplicationManagerImpl::UnregisterAllApplications(bool generated_by_hmi) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::UnregisterAllApplications " <<
                unregister_reason_);
 
@@ -1856,13 +1860,16 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
       unregister_reason_ ==
       mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF ? true : false;
 
+  bool is_unexpected_disconnect = (generated_by_hmi != true);
+
   std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
     ApplicationSharedPtr app_to_remove = *it;
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
         app_to_remove->app_id(), unregister_reason_);
     UnregisterApplication(app_to_remove->app_id(),
-                          mobile_apis::Result::INVALID_ENUM, is_ignition_off);
+                          mobile_apis::Result::INVALID_ENUM, is_ignition_off,
+                          is_unexpected_disconnect);
 
     connection_handler_->CloseSession(app_to_remove->app_id());
     it = application_list_.begin();
@@ -1875,7 +1882,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
 void ApplicationManagerImpl::UnregisterApplication(
   const uint32_t& app_id, mobile_apis::Result::eType reason,
-  bool is_resuming) {
+  bool is_resuming, bool is_unexpected_disconnect) {
   LOG4CXX_INFO(logger_,
                "ApplicationManagerImpl::UnregisterApplication " << app_id);
 
@@ -1923,7 +1930,8 @@ void ApplicationManagerImpl::UnregisterApplication(
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru();
   }
-  MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove);
+  MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove,
+                                                 is_unexpected_disconnect);
 
   request_ctrl_.terminateAppRequests(app_id);
   return;

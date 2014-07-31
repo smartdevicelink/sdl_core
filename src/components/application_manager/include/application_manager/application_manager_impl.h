@@ -233,11 +233,14 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param app_id Application id
      * @param reason reason of unregistering application
      * @param is_resuming describes - is this unregister
-     *        is normal or need to be resumed
+     *        is normal or need to be resumed\
+     * @param is_unexpected_disconnect 
+     * Indicates if connection was unexpectedly lost(TM layer, HB)
      */
     void UnregisterApplication(const uint32_t& app_id,
                                mobile_apis::Result::eType reason,
-                               bool is_resuming = false);
+                               bool is_resuming = false,
+                               bool is_unexpected_disconnect = false);
 
     /*
      * @brief Sets unregister reason for closing all registered applications
@@ -258,7 +261,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     /*
      * @brief Closes all registered applications
      */
-    void UnregisterAllApplications();
+    void UnregisterAllApplications(bool generated_by_hmi = false);
 
     bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
     bool LoadAppDataToHMI(ApplicationSharedPtr app);
