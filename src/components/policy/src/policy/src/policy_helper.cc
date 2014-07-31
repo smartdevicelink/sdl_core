@@ -659,6 +659,7 @@ bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
     if (kDefaultId.compare((*it).second.get_string()) == 0) {
       if (it != app_policies.end()) {
         (*it).second = (*it_default).second;
+        it->second.set_to_string(kDefaultId);
       } else {
         LOG4CXX_ERROR(logger_, "There is no default application policy was "
                       "found in PTU.");

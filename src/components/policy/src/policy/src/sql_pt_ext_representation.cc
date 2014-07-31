@@ -632,6 +632,22 @@ bool SQLPTExtRepresentation::SaveApplicationPolicies(
 
 bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
     const policy_table::ApplicationPolicies::value_type& app) {
+  LOG4CXX_INFO(logger_, "Saving data for application: " << app.first);
+  if (app.second.is_string()) {
+    if (kDefaultId.compare(app.second.get_string()) == 0) {
+      if (!SetDefaultPolicy(app.first)) {
+        return false;
+      }
+    } else if (kPreDataConsentId.compare(app.second.get_string()) == 0) {
+      if (!SetPredataPolicy(app.first)) {
+        return false;
+      }
+    }
+
+    // Stop saving other params, since predefined permissions already set
+    return true;
+  }
+
   dbms::SQLQuery app_query(db());
   if (!app_query.Prepare(sql_pt_ext::kInsertApplication)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement into application.");
@@ -655,22 +671,6 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
     return false;
-  }
-
-  LOG4CXX_INFO(logger_, "Saving data for application: " << app.first);
-  if (app.second.is_string()) {
-    if (kDefaultId.compare(app.second.get_string()) == 0) {
-      if (!SetDefaultPolicy(app.first)) {
-        return false;
-      }
-    } else if (kPreDataConsentId.compare(app.second.get_string()) == 0) {
-      if (!SetPredataPolicy(app.first)) {
-        return false;
-      }
-    }
-
-    // Stop saving other params, since predefined permissions already set
-    return true;
   }
 
   if (!SaveAppGroup(app.first, app.second.groups)) {
