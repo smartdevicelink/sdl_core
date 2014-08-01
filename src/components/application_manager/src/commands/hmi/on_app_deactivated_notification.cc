@@ -50,18 +50,26 @@ OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {
 
 void OnAppDeactivatedNotification::Run() {
   LOG4CXX_INFO(logger_, "OnAppDeactivatedNotification::Run");
-
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->active_application();
-
-  if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "OnAppDeactivatedNotification no active app!");
+  uint32_t application_id = (*message_)[strings::msg_params]
+                                        [strings::app_id].asUInt();
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+      application_id);
+  if (!app.valid()) {
+    LOG4CXX_ERROR(logger_, "Application not found, id="<<application_id);
     return;
   }
-
-  if ((*message_)[strings::msg_params][strings::app_id].asUInt()
-      != app->app_id()) {
-    LOG4CXX_ERROR_EXT(logger_, "Wrong application id!");
-    return;
+  if (!((hmi_apis::Common_DeactivateReason::AUDIO ==
+      (*message_)[strings::msg_params][hmi_request::reason].asInt()) &&
+      (app->hmi_level() == mobile_api::HMILevel::eType::HMI_LIMITED))) {
+    app = ApplicationManagerImpl::instance()->active_application();
+    if (!app.valid()) {
+      LOG4CXX_ERROR_EXT(logger_, "OnAppDeactivatedNotification no active app!");
+      return;
+    }
+    if (application_id != app->app_id()) {
+      LOG4CXX_ERROR_EXT(logger_, "Wrong application id!");
+      return;
+    }
   }
 
   if (mobile_api::HMILevel::eType::HMI_NONE == app->hmi_level()) {
