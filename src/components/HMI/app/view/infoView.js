@@ -86,7 +86,8 @@ SDL.InfoView = Em.ContainerView.create( {
                     'travelLinkButton',
                     'calendarButton',
                     'appsButton',
-                    'sdlButton'
+                    'sdlButton',
+                    'goToCD'
                 ],
 
             servicesButton: SDL.Button.extend( {
@@ -174,6 +175,15 @@ SDL.InfoView = Em.ContainerView.create( {
                 iconBinding: 'SDL.NonMediaController.currentAppIcon',
                 action: 'activateCurrentApp',
                 target: 'SDL.NonMediaController'
+            } ),
+
+            goToCD: SDL.Button.extend( {
+                elementId: 'info_leftMenu_goToCD',
+                classNames: 'menu-item lsp1_p',
+                text: 'Go To CD',
+                action: 'turnOnCD',
+                icon: 'images/media/ico_cd.png',
+                target: 'SDL.MediaController'
             } )
         } )
     } )

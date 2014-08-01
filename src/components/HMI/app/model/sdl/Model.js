@@ -1429,6 +1429,11 @@ SDL.SDLModel = Em.Object.create({
                 }
             }
 
+            if (SDL.SDLModel.stateLimited && reason === 'AUDIO') {
+
+                SDL.SDLModel.stateLimited = null;
+            }
+
             SDL.TurnByTurnView.deactivate();
 
             FFW.BasicCommunication.OnAppDeactivated(reason, appID);
