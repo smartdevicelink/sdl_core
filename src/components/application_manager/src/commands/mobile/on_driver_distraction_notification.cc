@@ -53,17 +53,7 @@ OnDriverDistractionNotification::~OnDriverDistractionNotification() {
 void OnDriverDistractionNotification::Run() {
   LOG4CXX_INFO(logger_, "OnDriverDistractionNotification::Run");
 
-  const std::set<ApplicationSharedPtr>& applications =
-      ApplicationManagerImpl::instance()->applications();
-
-  std::set<ApplicationSharedPtr>::iterator it = applications.begin();
-  for (; applications.end() != it; ++it) {
-    ApplicationSharedPtr app = *it;
-    if (mobile_apis::HMILevel::eType::HMI_NONE != app->hmi_level()) {
-      (*message_)[strings::params][strings::connection_key] = app->app_id();
-      SendNotification();
-    }
-  }
+  SendNotification();
 }
 
 }  // namespace mobile
