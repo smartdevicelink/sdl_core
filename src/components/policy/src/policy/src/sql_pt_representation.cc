@@ -32,6 +32,7 @@
 
 #include <sstream>
 #include <stdlib.h>
+#include <stdint.h>
 #include "utils/logger.h"
 #include "policy/sql_pt_representation.h"
 #include "policy/sql_wrapper.h"
@@ -654,7 +655,10 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
     // That's why we use hash as a primary key insted of
     // simple auto incremental index.
     const long int id = abs(GenerateHash(it->first));
-    query.Bind(0, id);
+    // SQLite's Bind doesn support 'long' type
+    // So we need to explicitly cast it to int64_t
+    // to avoid ambiguity.
+    query.Bind(0, static_cast<int64_t>(id));
     query.Bind(1, it->first);
     it->second.user_consent_prompt.is_initialized() ?
     query.Bind(2, *(it->second.user_consent_prompt)) : query.Bind(2);
