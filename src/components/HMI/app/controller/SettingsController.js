@@ -198,7 +198,26 @@ SDL.SettingsController = Em.Object.create( {
 
     AllowSDLFunctionality: function(messages) {
 
-        SDL.PopUp.popupActivate(messages[0].textBody, SDL.SettingsController.OnAllowSDLFunctionality);
+        var str = '';
+
+        if (messages[0].line1) {
+            str += messages[0].line1;
+        }
+
+        if (messages[0].line2) {
+            str += messages[0].line2;
+        }
+
+        if (messages[0].textBody) {
+            str += messages[0].textBody;
+        }
+
+        if (str) {
+            SDL.PopUp.popupActivate(messages[0].textBody, SDL.SettingsController.OnAllowSDLFunctionality);
+        } else {
+            SDL.PopUp.popupActivate('WARNING!!!!!!!!!!!!!! There is no text from SDL in GetUserFriendlyMessage for DataConsent parameter!!! Please allow the device...', SDL.SettingsController.OnAllowSDLFunctionality);
+        }
+
     },
 
     userFriendlyMessagePopUp: function(appId, messageCode) {

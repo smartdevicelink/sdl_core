@@ -447,10 +447,6 @@ FFW.BasicCommunication = FFW.RPCObserver
                     };
                     this.client.send(JSONMessage);
                 }
-                if (request.method == "SDL.GetUserFriendlyMessage") {
-                    //TO DO
-                    //popUp activation
-                }
                 if (request.method == "BasicCommunication.PolicyUpdate") {
                     SDL.SettingsController.policyUpdateFile = request.params.file;
 
