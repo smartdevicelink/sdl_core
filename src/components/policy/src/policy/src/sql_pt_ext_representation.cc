@@ -704,6 +704,11 @@ bool SQLPTExtRepresentation::GatherApplicationPolicies(
   while (query.Next()) {
     rpc::Nullable<policy_table::ApplicationParams> params;
     const std::string& app_id = query.GetString(0);
+    if (IsApplicationRevoked(app_id)) {
+      params.set_to_null();
+      (*apps)[app_id] = params;
+      continue;
+    }
     policy_table::Priority priority;
     policy_table::EnumFromJsonString(query.GetString(1), &priority);
     params.priority = priority;
