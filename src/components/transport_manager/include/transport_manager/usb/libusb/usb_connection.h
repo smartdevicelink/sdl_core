@@ -1,8 +1,5 @@
-/**
- * \file usb_connection.h
- * \brief UsbConnection class header file.
- *
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2013-2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -36,7 +33,9 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_CONNECTION_H_
 
-#include <pthread.h>
+#include <list>
+
+#include "utils/lock.h"
 
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
@@ -51,9 +50,7 @@ class UsbConnection : public Connection {
                 const ApplicationHandle& app_handle,
                 TransportAdapterController* controller,
                 const UsbHandlerSptr& usb_handler, PlatformUsbDevice* device);
-
   bool Init();
-
   virtual ~UsbConnection();
 
  protected:
@@ -61,15 +58,14 @@ class UsbConnection : public Connection {
   virtual TransportAdapter::Error Disconnect();
 
  private:
-  friend void InTransferCallback(struct libusb_transfer*);
-  friend void OutTransferCallback(struct libusb_transfer*);
-  bool FindEndpoints();
   void PopOutMessage();
   bool PostInTransfer();
   bool PostOutTransfer();
   void OnInTransfer(struct libusb_transfer*);
   void OnOutTransfer(struct libusb_transfer*);
   void Finalise();
+  void AbortConnection();
+  bool FindEndpoints();
 
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
@@ -87,14 +83,14 @@ class UsbConnection : public Connection {
 
   std::list<RawMessagePtr> out_messages_;
   RawMessagePtr current_out_message_;
-  pthread_mutex_t out_messages_mutex_;
+  sync_primitives::Lock out_messages_mutex_;
   size_t bytes_sent_;
   bool disconnecting_;
   bool waiting_in_transfer_cancel_;
   bool waiting_out_transfer_cancel_;
+  friend void InTransferCallback(struct libusb_transfer*);
+  friend void OutTransferCallback(struct libusb_transfer*);
 };
-
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_LIBUSB_USB_CONNECTION_H_
