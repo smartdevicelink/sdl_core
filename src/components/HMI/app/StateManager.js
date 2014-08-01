@@ -219,7 +219,18 @@ var StateManager = Em.StateManager.extend({
             this._super();
         },
 
-        player: Em.State.create({}),
+        player: Em.State.create({
+
+            enter: function () {
+
+                this._super();
+                if (SDL.SDLModel.stateLimited) {
+                    
+                    FFW.BasicCommunication.OnAppDeactivated('AUDIO', SDL.SDLModel.stateLimited);
+                    SDL.SDLModel.stateLimited = null;
+                }
+            }
+        }),
 
         sdlmedia: Em.State.create({
 

@@ -24,3 +24,4 @@ SDL.ActivateApp
 
 		SDL.SDLModel.activateAppRequestsList[5013] = 846930886
 		FFW.BasicCommunication.client.onWSMessage({"data":'{"id":5013,"jsonrpc":"2.0","result":{"code":0,"isAppPermissionsRevoked":false,"isAppRevoked":false,"isPermissionsConsentNeeded":false,"isSDLAllowed":true,"method":"SDL.ActivateApp","priority":"EMERGENCY"}}'})
+Turn ON CD SDL.States.goToState("media.player");
