@@ -51,7 +51,8 @@ class CodeBlock:
         if self.indent >= 1:
             self.indent -= 1
     def write(self, s):
-        self.out.write('  ' * self.indent + s)
+        for l in s.splitlines(True):
+            self.out.write('  ' * self.indent + l)
         
 # vim: set ts=4 sw=4 et:
 		

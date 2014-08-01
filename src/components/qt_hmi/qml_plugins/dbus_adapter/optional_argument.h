@@ -67,6 +67,17 @@ const QDBusArgument& operator >> (const QDBusArgument& arg, OptionalArgument<T>&
   return arg;
 }
 
+template<class T>
+inline
+bool VariantToValue(const QVariant& variant, OptionalArgument<T>& o) {
+  if (variant.isNull()) {
+    o.presence = false;
+    return true;
+  }
+  o.presence = true;
+  return VariantToValue(variant, o.val);
+}
+
 #if QT_4
 Q_DECLARE_METATYPE(QList<int>)
 #endif // QT_4
