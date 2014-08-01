@@ -33,6 +33,7 @@
  */
 
 import QtQuick 2.0
+import "../hmi_api/Common.js" as Common
 
 Item {
     function updateDeviceList (deviceList) {
@@ -163,7 +164,10 @@ Item {
     }
 
     function systemRequest(requestType, fileName, appID) {
-        console.log("enter systemRequest");
+        console.log("enter systemRequest", requestType, fileName, appID);
+
+        console.log(requestType, Common.RequestType.PROPRIETARY, Common.RequestType.HTTP);
+
         switch (requestType) {
             case Common.RequestType.PROPRIETARY: {
                 settingsContainer.stopPTExchange(fileName);

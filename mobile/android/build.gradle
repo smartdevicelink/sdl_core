@@ -10,11 +10,11 @@ buildscript {
 }
 
 int[] sdksAvailable() {
-    def androidPath = androidSdkPath() +'/tools/android'
+    def androidPath = androidSdkPath() + '/tools/android'
     def sdks = new ByteArrayOutputStream()
 
     exec {
-        commandLine   androidPath, 'list'
+        commandLine androidPath, 'list'
         standardOutput = sdks
     }
     sdks = sdks
@@ -25,7 +25,15 @@ int[] sdksAvailable() {
             // leave only strings with API levels
             .findAll { it ==~ /\s*API level:.*/ }
             // extract the API levels
-            .collect { (it =~ /\s*API level:\s*(\d+).*/)[0][1].toInteger() }
+            .collect {
+            // Since API level now has a letters in the name, for example "API level:L" this is
+            // a simple (not a professional) way to accept only numbers
+                if ((it =~ /\s*API level:\s*(\d+).*/).size() > 0) {
+                    (it =~ /\s*API level:\s*(\d+).*/)[0][1].toInteger()
+                } else {
+                    0
+                }
+            }
             // sort from highest to lowest
             .sort({ a, b -> b <=> a })
     sdks
@@ -56,9 +64,25 @@ String androidSDKDir() {
 }
 
 String androidSdkPath() {
-    Properties properties = new Properties()
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
-    def androidExecPath = properties.getProperty('sdk.dir')
+    def androidExecPath
+    // A file "local.properties" must contain a path to Android SDK
+    File localPropertiesFile = project.rootProject.file('local.properties');
+    if (localPropertiesFile.exists() && !localPropertiesFile.isDirectory()) {
+        // If this file exists and is not a directory, then process it
+        Properties properties = new Properties()
+        properties.load(localPropertiesFile.newDataInputStream())
+        androidExecPath = properties.getProperty('sdk.dir')
+    } else {
+        // For the Jenkins there is no "local.properties" file and we are looking for the
+        // environment variable to get a path to Android SDK
+        androidExecPath = System.env.ANDROID_HOME
+    }
+    if (androidExecPath == null) {
+        androidExecPath = ""
+    }
+    if (androidExecPath.equals("")) {
+        throw new Exception("Can not locate Android SDK path")
+    }
     androidExecPath
 }
 
@@ -91,4 +115,4 @@ String latestBuildToolsAvailable(String defaultBuildTools) {
 }
 
 ext.compileSdkVersion = highestSdkAvailable(19)
-ext.buildToolsVersion = latestBuildToolsAvailable("19.0.3")
+ext.buildToolsVersion = latestBuildToolsAvailable("19.1.0")

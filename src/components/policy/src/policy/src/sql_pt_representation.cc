@@ -31,6 +31,8 @@
  */
 
 #include <sstream>
+#include <stdlib.h>
+#include <stdint.h>
 #include "utils/logger.h"
 #include "policy/sql_pt_representation.h"
 #include "policy/sql_wrapper.h"
@@ -645,10 +647,21 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
   }
 
   policy_table::FunctionalGroupings::const_iterator it;
+
   for (it = groups.begin(); it != groups.end(); ++it) {
-    query.Bind(0, it->first);
+    // Since we uses this id in other tables, we have to be sure
+    // that id for certain group will be same in case when
+    // we drop records from the table and add them again.
+    // That's why we use hash as a primary key insted of
+    // simple auto incremental index.
+    const long int id = abs(GenerateHash(it->first));
+    // SQLite's Bind doesn support 'long' type
+    // So we need to explicitly cast it to int64_t
+    // to avoid ambiguity.
+    query.Bind(0, static_cast<int64_t>(id));
+    query.Bind(1, it->first);
     it->second.user_consent_prompt.is_initialized() ?
-    query.Bind(1, *(it->second.user_consent_prompt)) : query.Bind(1);
+    query.Bind(2, *(it->second.user_consent_prompt)) : query.Bind(2);
 
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into functional groups");
@@ -1026,6 +1039,19 @@ bool SQLPTRepresentation::SaveLanguage(const std::string& code) {
   }
 
   return true;
+}
+
+unsigned long SQLPTRepresentation::GenerateHash(const std::string& str_to_hash) {
+
+  unsigned long hash = 5381U;
+  std::string::const_iterator it = str_to_hash.begin();
+  std::string::const_iterator it_end = str_to_hash.end();
+
+  for (;it != it_end; ++it) {
+       hash = ((hash << 5) + hash) + (*it);
+  }
+
+  return hash;
 }
 
 bool SQLPTRepresentation::SaveMessageString(

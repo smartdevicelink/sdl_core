@@ -79,7 +79,7 @@ public class SyncProxyTesterTest extends ActivityInstrumentationTestCase2<SyncPr
     }
 
     @Override
-    public void sendH264(ProtocolMessage protocolMessage) {
+    public void sendH264(ProtocolMessage pm) {
 
     }
 }

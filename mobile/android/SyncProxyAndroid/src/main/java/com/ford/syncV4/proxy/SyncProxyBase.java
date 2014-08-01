@@ -17,6 +17,7 @@ import com.ford.syncV4.net.SyncPDataSender;
 import com.ford.syncV4.protocol.ProtocolMessage;
 import com.ford.syncV4.protocol.enums.FunctionID;
 import com.ford.syncV4.protocol.enums.ServiceType;
+import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.callbacks.InternalProxyMessage;
 import com.ford.syncV4.proxy.callbacks.OnError;
@@ -120,13 +121,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             OUTGOING_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
             INTERNAL_MESSAGE_QUEUE_THREAD_LOCK = new Object(),
             APP_INTERFACE_LOCK = new Object();
-    /**
-     * Interval between heartbeat messages, in milliseconds.
-     * NOTE: this value is not specified in the protocol, and thus must be
-     * negotiated with the Sync.
-     */
-    static final int HEARTBEAT_INTERVAL = 5000;
-    private static int heartBeatInterval = HEARTBEAT_INTERVAL;
     @SuppressWarnings("unused")
     private static final String LOG_TAG = SyncProxyBase.class.getSimpleName();
     /**
@@ -146,7 +140,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     private int mUnregisterAppInterfaceCorrelationId = UNREGISTER_APP_INTERFACE_CORRELATION_ID;
     private static final int POLICIES_CORRELATION_ID = 65535;
     private int mPoliciesCorrelationId = POLICIES_CORRELATION_ID;
-    private static boolean heartBeatAck = true;
     /**
      * Keep track of all opened Sync Sessions. Need to be "protected" in order to support
      * UnitTesting
@@ -373,18 +366,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
         // Trace that ctor has fired
         Logger.i("SyncProxy Created, instanceID=" + this.toString());
-    }
-
-    public static int getHeartBeatInterval() {
-        return heartBeatInterval;
-    }
-
-    public static void setHeartBeatInterval(int heartBeatInterval) {
-        SyncProxyBase.heartBeatInterval = heartBeatInterval;
-    }
-
-    public static void isHeartbeatAck(boolean isHearBeatAck) {
-        SyncProxyBase.heartBeatAck = isHearBeatAck;
     }
 
     private void setUpSecureServiceManager(byte sessionID) {
@@ -898,7 +879,6 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * <<<<<<< HEAD
      * Set a value of the {@link com.ford.syncV4.syncConnection.SyncConnection} instance.
      *
      * @param value new {@link com.ford.syncV4.syncConnection.SyncConnection} reference
@@ -2242,37 +2222,31 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         }
     }
 
-    public OutputStream startH264(String appId) {
-        OutputStream stream = null;
-        if (mSyncConnection != null) {
-            boolean encrypt = false;
-            final Service service = syncSession.getService(appId, ServiceType.Mobile_Nav);
-            if (service != null) {
-                encrypt = service.isEncrypted();
-            }
-            byte sessionId = getSessionIdByAppId(appId);
-            stream = mSyncConnection.startH264(sessionId, encrypt);
-        }
-        return stream;
-    }
-
     public void stopH264() {
         if (mSyncConnection != null) {
             mSyncConnection.stopH264();
         }
     }
 
-    public OutputStream startAudioDataTransfer(String appId) {
-        if (mSyncConnection != null) {
+    public OutputStream startDataTransfer(String appId, ServiceType serviceType) {
+        if (mSyncConnection == null) {
             return null;
         }
         boolean encrypt = false;
         final byte sessionId = syncSession.getSessionIdByAppId(appId);
-        final Service service = syncSession.getService(appId, ServiceType.Audio_Service);
+        final Service service = syncSession.getService(appId, serviceType);
         if (service != null) {
             encrypt = service.isEncrypted();
         }
-        return mSyncConnection.startAudioDataTransfer(sessionId, encrypt);
+        OutputStream outputStream = null;
+        if (serviceType == ServiceType.Audio_Service) {
+            outputStream = mSyncConnection.startAudioDataTransfer(sessionId, encrypt);
+        } else if (serviceType == ServiceType.Mobile_Nav) {
+            outputStream = mSyncConnection.startH264(sessionId, encrypt);
+        }
+        Logger.d(LOG_TAG + " start data transfer appId:" + appId + ", serType:" + service +
+                ", outStream:" + outputStream);
+        return outputStream;
     }
 
     public void stopAudioDataTransfer() {
@@ -3438,8 +3412,9 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             //String appId = syncSession.getAppIdBySessionId(sessionId);
             //stopSession(appId);
 
-            final String msg = "Heartbeat timeout";
-            notifyProxyClosed(msg, new SyncException(msg, SyncExceptionCause.HEARTBEAT_PAST_DUE));
+            notifyProxyClosed(HeartbeatMonitor.HEARTBEAT_TIMEOUT_MSG,
+                    new SyncException(HeartbeatMonitor.HEARTBEAT_TIMEOUT_MSG,
+                            SyncExceptionCause.HEARTBEAT_PAST_DUE));
         }
 
         @Override
@@ -3499,7 +3474,15 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 return;
             }
 
-            mSyncConnection.addHeartbeatMonitor(sessionId, heartBeatInterval, heartBeatAck);
+            int heartbeatInterval = HeartbeatMonitor.HEARTBEAT_INTERVAL;
+            boolean doSendHeartBeatAck = true;
+
+            if (mTestConfig != null) {
+                heartbeatInterval = mTestConfig.getHeartbeatInterval();
+                doSendHeartBeatAck = mTestConfig.isDoHeartbeatAck();
+            }
+
+            mSyncConnection.addHeartbeatMonitor(sessionId, heartbeatInterval, doSendHeartBeatAck);
             mSyncConnection.startHeartbeatMonitor(sessionId);
             secureSessionContextMap.put(sessionId, new SecureSessionContext(SyncProxyBase.this));
             setUpSecureServiceManager(sessionId);

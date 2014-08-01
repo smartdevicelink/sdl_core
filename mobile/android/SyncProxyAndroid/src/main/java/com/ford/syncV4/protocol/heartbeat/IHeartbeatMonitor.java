@@ -33,6 +33,20 @@ public interface IHeartbeatMonitor {
     public void setInterval(int interval);
 
     /**
+     * Get a flag that indicates that it is necessary to send Heartbeat ack
+     *
+     * @return true or false
+     */
+    public boolean isHeartBeatAck();
+
+    /**
+     * Get a flag that indicates that it is necessary to send Heartbeat ack
+     *
+     * @param value true or false
+     */
+    public void setHeartBeatAck(boolean value);
+
+    /**
      * Returns the listener.
      *
      * @return the listener
@@ -51,7 +65,7 @@ public interface IHeartbeatMonitor {
      */
     public void notifyTransportOutputActivity();
 
-    void notifyTransportInputActivity();
+    public void notifyTransportInputActivity();
 
     /**
      * Notifies the monitor about a received heartbeat ACK message.

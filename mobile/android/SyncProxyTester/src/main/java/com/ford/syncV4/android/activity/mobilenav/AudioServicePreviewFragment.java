@@ -21,6 +21,13 @@ import java.io.OutputStream;
 public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setServiceType(ServiceType.Audio_Service);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.activity_audio_service_preview, container, false);
@@ -77,8 +84,13 @@ public class AudioServicePreviewFragment extends SyncServiceBaseFragment {
 
         mSessionCheckBoxState = new AudioServiceCheckboxState(checkBox, getActivity());
         mSessionCheckBoxState.setStateOff();
-    }
 
+        mStopDataStreamingButton = (Button) getView().findViewById(R.id.audio_file_streaming_stop);
+        mStopDataStreamingButton.setOnClickListener(stopFileStreamingListener);
+
+        CheckBox loopFileView = (CheckBox) view.findViewById(R.id.audio_service_loop_data);
+        loopFileView.setOnCheckedChangeListener(loopFileStreamListener);
+    }
 
     private void startNotSecureAudioService(String appId) {
         SyncProxyTester syncProxyTester = (SyncProxyTester) getActivity();

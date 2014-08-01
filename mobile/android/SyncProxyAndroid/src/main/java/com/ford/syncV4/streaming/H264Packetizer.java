@@ -24,11 +24,9 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         return thread;
     }
 
-    public H264Packetizer(IStreamListener streamListener, InputStream is, byte sessionId,
-                          ServiceType serviceType, boolean encrypt) throws IOException {
-        super(streamListener, is, sessionId);
-        this.serviceType = serviceType;
-        mSessionId = sessionId;
+    public H264Packetizer(IStreamListener streamListener, InputStream is, byte rpcSessionID, ServiceType serviceType, boolean encrypt) throws IOException {
+        super(streamListener, is, rpcSessionID);
+        _serviceType = serviceType;
         this.encrypt = encrypt;
     }
 
@@ -53,14 +51,6 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
         } finally {
             thread = null;
         }
-    }
-
-    @Override
-    public void sendMessage(ProtocolMessage protocolMessage) {
-        if (protocolMessage == null) {
-            return;
-        }
-        mStreamListener.sendH264(protocolMessage);
     }
 
     public void run() {
@@ -92,8 +82,8 @@ public class H264Packetizer extends AbstractPacketizer implements Runnable {
 
     public ProtocolMessage createProtocolMessage(byte[] frameData) {
         ProtocolMessage pm = new ProtocolMessage();
-        pm.setSessionID(mSessionId);
-        pm.setServiceType(serviceType);
+        pm.setSessionID(_rpcSessionID);
+        pm.setServiceType(_serviceType);
         pm.setFunctionID(0);
         pm.setCorrID(getNextCorrelationId());
         pm.setData(frameData, frameData.length);

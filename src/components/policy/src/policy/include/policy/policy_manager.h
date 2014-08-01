@@ -242,7 +242,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * valid data as well as invalid. So we will remove all invalid data
      * from this structure.
      */
-    virtual void SetUserConsentForApp(PermissionConsent& permissions) = 0;
+    virtual void SetUserConsentForApp(const PermissionConsent& permissions) = 0;
 
     /**
      * @brief Get default HMI level for application

@@ -451,9 +451,17 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
     } else if (mobile_apis::FunctionID::GetVehicleDataID == cmd_id) {
       frequency_restrictions =
           profile::Profile::instance()->get_vehicle_data_frequency();
+    } else {
+      LOG4CXX_INFO(logger_, "No restrictions for request");
+      return false;
     }
 
-    if (current.tv_sec <= limit.first.tv_sec + frequency_restrictions.second) {
+    LOG4CXX_INFO(logger_, "Time Info: " <<
+                 "\n Current: " << current.tv_sec <<
+                 "\n Limit: (" << limit.first.tv_sec << "," << limit.second << ")"
+                 "\n frequency_restrictions: (" << frequency_restrictions.first << "," << frequency_restrictions.second << ")"
+                 );
+    if (current.tv_sec < limit.first.tv_sec + frequency_restrictions.second) {
       if (limit.second < frequency_restrictions.first) {
         ++limit.second;
         return false;

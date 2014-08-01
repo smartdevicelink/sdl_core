@@ -162,7 +162,7 @@ public class ProtocolMessage {
     public String toString() {
         return "ProtocolMessage{" +
                 "version=" + version +
-                ", serviceType=" + _serviceType +
+                ", _serviceType=" + _serviceType +
                 ", _messageType=" + _messageType +
                 ", isEncrypted=" + isEncrypted +
                 ", _sessionID=" + _sessionID +

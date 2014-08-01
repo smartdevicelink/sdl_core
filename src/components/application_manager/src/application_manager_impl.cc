@@ -1008,8 +1008,12 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
   switch (type) {
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
+      /* in case it was unexpected disconnect application will be removed
+       and we will notify HMI that it was unexpected disconnect,
+       but in case it was closed by mobile we will be unable to find it in the list
+      */
       UnregisterApplication(session_key, mobile_apis::Result::INVALID_ENUM,
-                            true);
+                            true, true);
       break;
     }
     case protocol_handler::kMobileNav: {
@@ -1335,10 +1339,55 @@ bool ApplicationManagerImpl::ManageHMICommand(
 bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   bool init_result = true;
-  if (policy_manager_) {
-    LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
-    init_result = policy::PolicyHandler::instance()->InitPolicyTable();
-  }
+  do {
+    if (policy_manager_) {
+      LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
+      if (!policy::PolicyHandler::instance()->InitPolicyTable()) {
+        init_result = false;
+        break;
+      }
+    }
+    const std::string app_storage_folder = 
+      profile::Profile::instance()->app_storage_folder();
+    if (!file_system::DirectoryExists(app_storage_folder)) {
+      LOG4CXX_WARN(logger_, "Storage directory doesn't exist");
+      // if storage directory doesn't exist try to create it
+      if (!file_system::CreateDirectoryRecursively(app_storage_folder)) {
+        LOG4CXX_ERROR(logger_, "Unable to create Storage directory "
+                                << app_storage_folder);
+        init_result = false;
+        break;
+      }
+    }
+    if (!(file_system::IsWritingAllowed(app_storage_folder) &&
+          file_system::IsReadingAllowed(app_storage_folder))) {
+      LOG4CXX_ERROR(logger_,
+                   "Storage directory doesn't have read/write permissions");
+      init_result = false;
+      break;
+    }
+
+    const std::string system_files_path = 
+      profile::Profile::instance()->system_files_path();
+    if (!file_system::DirectoryExists(system_files_path)) {
+      LOG4CXX_WARN(logger_, "System files directory doesn't exist");
+      // if system directory doesn't exist try to create it
+      if (!file_system::CreateDirectoryRecursively(system_files_path)) {
+        LOG4CXX_ERROR(logger_, "Unable to create System directory "
+                                << system_files_path);
+        init_result = false;
+        break;
+      }
+    }
+    if (!(file_system::IsWritingAllowed(system_files_path) &&
+          file_system::IsReadingAllowed(system_files_path))) {
+      LOG4CXX_ERROR(logger_,
+                   "System directory doesn't have read/write permissions");
+      init_result = false;
+      break;
+    }
+  } while (false);
+
   return init_result;
 }
 
@@ -1801,7 +1850,7 @@ void ApplicationManagerImpl::SendOnSDLClose() {
   hmi_handler_->SendMessageToHMI(message_to_send);
 }
 
-void ApplicationManagerImpl::UnregisterAllApplications() {
+void ApplicationManagerImpl::UnregisterAllApplications(bool generated_by_hmi) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::UnregisterAllApplications " <<
                unregister_reason_);
 
@@ -1811,13 +1860,16 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
       unregister_reason_ ==
       mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF ? true : false;
 
+  bool is_unexpected_disconnect = (generated_by_hmi != true);
+
   std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
     ApplicationSharedPtr app_to_remove = *it;
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
         app_to_remove->app_id(), unregister_reason_);
     UnregisterApplication(app_to_remove->app_id(),
-                          mobile_apis::Result::INVALID_ENUM, is_ignition_off);
+                          mobile_apis::Result::INVALID_ENUM, is_ignition_off,
+                          is_unexpected_disconnect);
 
     connection_handler_->CloseSession(app_to_remove->app_id());
     it = application_list_.begin();
@@ -1830,7 +1882,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
 void ApplicationManagerImpl::UnregisterApplication(
   const uint32_t& app_id, mobile_apis::Result::eType reason,
-  bool is_resuming) {
+  bool is_resuming, bool is_unexpected_disconnect) {
   LOG4CXX_INFO(logger_,
                "ApplicationManagerImpl::UnregisterApplication " << app_id);
 
@@ -1878,7 +1930,8 @@ void ApplicationManagerImpl::UnregisterApplication(
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru();
   }
-  MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove);
+  MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove,
+                                                 is_unexpected_disconnect);
 
   request_ctrl_.terminateAppRequests(app_id);
   return;

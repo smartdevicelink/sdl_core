@@ -32,6 +32,13 @@
     HMI_ADAPTER: MESSAGEBROKER, DBUS, MQUEUE - type of transport to use
     ENABLE_LOG: LOG_ON, LOG_OFF - switch on or switch off logging 
     Note: Sheldued build of all possible configurations you can find there http://172.30.18.18:8080/job/main_sdl_mc/
+    Note: Example ( build for QNX without logging for release with Web HMI):
+            "$ export OS_TYPE=LINUX"
+            "$ export DEBUG=OFF"
+            "$ export HMI_TYPE=HTML5"
+            "$ cmake ../applink"
+            "$ make install"
+
 
 6) Additional cmake flags:
   1: EXTENDED_POLICY_FLAG

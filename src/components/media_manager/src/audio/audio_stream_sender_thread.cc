@@ -54,7 +54,9 @@ namespace media_manager {
 using sync_primitives::AutoLock;
 
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
+#ifdef CUSTOMER_PASA
 const uint32_t kMqueueMessageSize = 65536;
+#endif // CUSTOMER_PASA
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AudioPassThruThread")
 
@@ -67,6 +69,9 @@ AudioStreamSenderThread::AudioStreamSenderThread(
 }
 
 AudioStreamSenderThread::~AudioStreamSenderThread() {
+#ifdef CUSTOMER_PASA
+  mq_unlink(fileName_.c_str());
+#endif // CUSTOMER_PASA
 }
 
 void AudioStreamSenderThread::threadMain() {
@@ -147,19 +152,22 @@ void AudioStreamSenderThread::mqSendAudioChunkToMobile() {
 
   std::vector<uint8_t> data;
   data.reserve(kMqueueMessageSize);
-  const ssize dataSize = mq_receive(handle,
-                                    static_cast<char*>(&data.front()),
+  const ssize_t dataSize = mq_receive(handle,
+                                    reinterpret_cast<char*>(&data.front()),
                                     data.size(), 0);
   if (-1 == dataSize) {
     LOG4CXX_ERROR(logger_, "Unable to recieve data from mqueue: "
                   << strerror(errno));
     return;
   }
+
+  LOG4CXX_INFO(logger_, "The " << dataSize
+                << " bytes have been successfully obtained.");
+
   data.resize(dataSize);
 
   application_manager::ApplicationManagerImpl::instance()->
   SendAudioPassThroughNotification(session_key_, data);
-  }
 }
 #endif // CUSTOMER_PASA
 

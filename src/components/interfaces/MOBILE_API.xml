@@ -3070,6 +3070,7 @@
       <element name="DISALLOWED"/>
       <element name="UNSUPPORTED_RESOURCE"/>
       <element name="ABORTED"/>
+      <element name="WARNINGS"/>
     </param>
 
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">

@@ -556,13 +556,18 @@ SDL.SDLModel = Em.Object.create({
      * Function make diff between two arrays of permissions
      * remove argument array from existed array of permissions
      */
-    setAppPermissions: function(oldPermissions){
-        var temp = this.appPermissions.filter(function(item, i) {
-            var ok = oldPermissions.indexOf(item) === -1;
-            return ok;
+    setAppPermissions: function(appID, permissions){
+
+        var messageCodes = [];
+
+        permissions.forEach(function (x) {
+            messageCodes.push(x.name);
         });
 
-        this.set('appPermissions', temp);
+        messageCodes.push("AppPermissionsRevoked");
+
+        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.SettingsController.simpleParseUserFriendlyMessageData(message)}, appID, messageCodes);
+
     },
 
     /**
@@ -1422,6 +1427,11 @@ SDL.SDLModel = Em.Object.create({
                     reason = 'GENERAL';
                     break;
                 }
+            }
+
+            if (SDL.SDLModel.stateLimited && reason === 'AUDIO') {
+
+                SDL.SDLModel.stateLimited = null;
             }
 
             SDL.TurnByTurnView.deactivate();

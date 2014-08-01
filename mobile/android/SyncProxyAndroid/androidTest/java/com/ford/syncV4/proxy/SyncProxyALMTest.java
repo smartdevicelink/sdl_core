@@ -345,59 +345,6 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
         assertEquals(SessionTest.APP_ID_DEFAULT, appIdCaptor.getValue());
     }
 
-    public void testHeartBeatIsSet() throws Exception {
-        SyncMsgVersion syncMsgVersion = RPCStructFactory.createSyncMsgVersion();
-        TCPTransportConfig conf = mock(TCPTransportConfig.class);
-        final IProxyListenerALM listenerALM = mock(IProxyListenerALM.class);
-        SyncProxyALM proxyALM = new SyncProxyALM(listenerALM,
-                                /*sync proxy configuration resources*/null,
-                                /*enable advanced lifecycle management true,*/
-                                "appName",
-                                /*ngn media app*/null,
-                                /*vr synonyms*/null,
-                                /*is media app*/true,
-                                /*app type*/null,
-                                syncMsgVersion,
-                                /*language desired*/Language.EN_US,
-                                /*HMI Display Language Desired*/Language.EN_US,
-                                /*App ID*/"8675308",
-                                /*autoActivateID*/null,
-                                /*callbackToUIThre1ad*/ false,
-                                /*preRegister*/ false,
-                                2,
-                                conf, new TestConfig()) {
-
-
-            @Override
-            public void initializeProxy() throws SyncException {
-                // Reset all of the flags and state variables
-                //_haveReceivedFirstNonNoneHMILevel = false;
-                //_haveReceivedFirstFocusLevel = false;
-                //_haveReceivedFirstFocusLevelFull = false;
-                //_syncIntefaceAvailablity = SyncInterfaceAvailability.SYNC_INTERFACE_UNAVAILABLE;
-
-                // Setup SyncConnection
-                synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (mSyncConnection != null) {
-                        mSyncConnection.closeConnection();
-                        mSyncConnection = null;
-                    }
-                    mSyncConnection = mock(SyncConnection.class);
-                    when(mSyncConnection.getIsConnected()).thenReturn(true);
-                }
-                synchronized (CONNECTION_REFERENCE_LOCK) {
-                    if (mSyncConnection != null) {
-                        mSyncConnection.startTransport();
-                    }
-                }
-            }
-
-        };
-        SyncProxyALM.setHeartBeatInterval(50);
-        assertEquals("Heartbeat should be 50", 50, SyncProxyALM.getHeartBeatInterval());
-    }
-
-
     public void testMaxJsonSizeInIncomingMessageShouldCallOnError() throws SyncException {
         final WiProProtocol protocol = new WiProProtocol(mock(IProtocolListener.class));
         protocol.setProtocolVersion(ProtocolConstants.PROTOCOL_VERSION_TWO);

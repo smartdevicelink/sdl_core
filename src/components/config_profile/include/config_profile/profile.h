@@ -213,10 +213,10 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& audio_stream_file() const;
 #ifdef CUSTOMER_PASA
     /**
-     * @brief Returns name fo mqueue from which SDL
+     * @brief Returns name for mqueue from which SDL
      * will be able to obtain data.
      */
-    const std::string& mq_name() const;
+    const std::string& audio_mq_path() const;
 
     /**
       * @brief Returns path to log4cxx configuration file
@@ -234,8 +234,19 @@ class Profile : public utils::Singleton<Profile> {
       * if this path exists in the system log file will be
       * saved to the USb drive
       */
-#endif
+
     const std::string& remote_logging_flag_file_path() const;
+
+    /**
+      * @brief Returns path on the target where the log files are being stored.
+      */
+    const std::string& target_log_file_home_dir() const;
+
+    /**
+      * @brief Returns path on the target log file name pattern.
+      */
+    const std::string& target_log_file_name_pattern() const;
+#endif
     /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none
@@ -593,10 +604,12 @@ class Profile : public utils::Singleton<Profile> {
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
 #ifdef CUSTOMER_PASA
-    std::string                     mq_name_;
+    std::string                     audio_mq_path_;
     std::string                     log4cxx_config_file_;
     std::string                     remote_logging_flag_file_;
     std::string                     remote_logging_flag_file_path_;
+    std::string                     target_log_file_home_dir_;
+    std::string                     target_log_file_name_pattern_;
 #endif
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;

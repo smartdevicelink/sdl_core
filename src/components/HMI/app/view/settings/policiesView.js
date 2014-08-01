@@ -118,6 +118,16 @@ SDL.PoliciesView = Em.ContainerView.create( {
             {
                 type: SDL.Button,
                 params: {
+                    text: 'Get list of permissions',
+                    click: function () {
+                        FFW.BasicCommunication.GetListOfPermissions();
+                    },
+                    onDown: false
+                }
+            },
+            {
+                type: SDL.Button,
+                params: {
                     text: 'Device state change',
                     action: 'onState',
                     target: 'SDL.SettingsController',

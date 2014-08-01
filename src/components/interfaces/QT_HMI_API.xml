@@ -1888,7 +1888,16 @@
       </param>
     </function>
     <function name="OnAppUnregistered" messagetype="notification" provider="sdl">
-      <description>Issued by SDL to notify HMI about application unregistered. Application then to be removed from application list; all data connected with application has to be cleared up.</description>
+      <description>
+        Issued by SDL to notify HMI about application unregistered.
+        Application then to be removed from application list; all data connected with application has to be cleared up.
+      </description>
+      <param name="unexpectedDisconnect" type="Boolean" mandatory="true">
+        <description>
+          SDL sends 'true' in case the connection is unexpectedly lost.
+          SDL sends 'false' in case the mobile app is unregistered gracefully (via appropriate RPC)
+        </description>
+      </param>
       <param name="appID" type="Integer" mandatory="true">
         <description>ID of the application unregistered</description>
       </param>

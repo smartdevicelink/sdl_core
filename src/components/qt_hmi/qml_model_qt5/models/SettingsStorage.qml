@@ -196,6 +196,7 @@ Item
         var appId = applicationId ? applicationId : "default";
         var file = fileName ? fileName : fileIVSU;
 
+        console.log("AAAAAAAAAAAAAAAAAAAAAA sdlBasicCommunication.onSystemRequest");
         sdlBasicCommunication.onSystemRequest(type, url, Common.FileType.JSON,
                                               offset, length, timeoutPTExchange,
                                               file, appId);
@@ -253,7 +254,7 @@ Item
 
     function activateApp_Response (appId, isSDLAllowed, device, isPermissionsConsentNeeded, isAppPermissionsRevoked, appRevokedPermissions, isAppRevoked, priority) {
 
-        console.debug("activateApp_Response enter", appId);
+        console.debug("activateApp_Response enter", appId, isSDLAllowed, device, isPermissionsConsentNeeded, isAppPermissionsRevoked, appRevokedPermissions, isAppRevoked, priority);
 
         if (!isSDLAllowed) {
 
@@ -284,6 +285,7 @@ Item
                 settingsContainer.getUserFriendlyMessageAppPermissionsRevoked("AppUnsupported", messages)
             });
         } else if (isSDLAllowed && !isPermissionsConsentNeeded) {
+
             dataContainer.setCurrentApplication(appId)
             contentLoader.go(
                 Internal.chooseAppStartScreen(
@@ -296,7 +298,7 @@ Item
     }
 
     function allowSDLFunctionality (result, device) {
-        console.log("allowSDLFunctionality enter");
+        console.log("allowSDLFunctionality enter", result, device);
 
         sdlSDL.onAllowSDLFunctionality(device, result, Common.ConsentSource.GUI)
 

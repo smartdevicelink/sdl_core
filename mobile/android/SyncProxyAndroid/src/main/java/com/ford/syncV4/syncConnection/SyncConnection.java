@@ -46,7 +46,7 @@ import java.util.Hashtable;
  * When use this class, it is <b>necessary</b> to call 'init( ... )' method to initialize transport
  * connection
  */
-public class SyncConnection implements IProtocolListener, ITransportListener {
+public class SyncConnection implements IProtocolListener, ITransportListener, IStreamListener {
     private static final String CLASS_NAME = SyncConnection.class.getSimpleName();
     SyncTransport mTransport = null;
     AbstractProtocol mProtocol = null;
@@ -262,18 +262,31 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
         }
     }
 
-    public OutputStream startH264(byte rpcSessionID, boolean encrypt) {
+    public OutputStream startAudioDataTransfer(byte rpcSessionID, boolean encrypt) {
         try {
             OutputStream os = new PipedOutputStream();
             InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mVideoPacketizer = new H264Packetizer(new IStreamListener() {
+            mAudioPacketizer = new H264Packetizer(new IStreamListener() {
                 @Override
                 public void sendH264(ProtocolMessage protocolMessage) {
                     if (protocolMessage != null) {
                         sendMessage(protocolMessage);
                     }
                 }
-            }, is, rpcSessionID, ServiceType.Mobile_Nav, encrypt);
+            }, is, rpcSessionID, ServiceType.Audio_Service, encrypt);
+            mAudioPacketizer.start();
+            return os;
+        } catch (IOException e) {
+            Logger.e(CLASS_NAME + " Unable to start audio streaming:" + e.toString());
+        }
+        return null;
+    }
+
+    public OutputStream startH264(byte rpcSessionID, boolean encrypt) {
+        try {
+            OutputStream os = new PipedOutputStream();
+            InputStream is = new PipedInputStream((PipedOutputStream) os);
+            mVideoPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Mobile_Nav, encrypt);
             mVideoPacketizer.start();
             return os;
         } catch (Exception e) {
@@ -294,26 +307,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
             mVideoPacketizer.removeListener();
             mVideoPacketizer.stop();
         }
-    }
-
-    public OutputStream startAudioDataTransfer(byte rpcSessionID, boolean encrypt) {
-        try {
-            OutputStream os = new PipedOutputStream();
-            InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mAudioPacketizer = new H264Packetizer(new IStreamListener() {
-                @Override
-                public void sendH264(ProtocolMessage protocolMessage) {
-                    if (protocolMessage != null) {
-                        sendMessage(protocolMessage);
-                    }
-                }
-            }, is, rpcSessionID, ServiceType.Audio_Service, encrypt);
-            mAudioPacketizer.start();
-            return os;
-        } catch (IOException e) {
-            Logger.e(CLASS_NAME + " Unable to start audio streaming:" + e.toString());
-        }
-        return null;
     }
 
     public void stopAudioDataTransfer() {
@@ -617,6 +610,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
 
     @Override
     public void onProtocolHeartbeatACK(byte sessionId) {
+        if (mTestConfig != null) {
+            if (!mTestConfig.isDoProcessHearBeatSDLAck()) {
+                Logger.w("Do not process Heartbeat message Ack from SDL");
+                return;
+            }
+        }
         heartbeatMonitorsManager.heartbeatACKReceived(sessionId);
     }
 
@@ -671,6 +670,13 @@ public class SyncConnection implements IProtocolListener, ITransportListener {
      */
     public TransportType getCurrentTransportType() {
         return mTransport.getTransportType();
+    }
+
+    @Override
+    public void sendH264(ProtocolMessage pm) {
+        if (pm != null) {
+            sendMessage(pm);
+        }
     }
 
     private void processTransportStopReading() {

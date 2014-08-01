@@ -23,6 +23,13 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
     private static final String LOG_TAG = "MobileNavPreviewFragment";
 
     @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setServiceType(ServiceType.Mobile_Nav);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         return inflater.inflate(R.layout.activity_mobile_nav_preview, container, false);
@@ -102,6 +109,12 @@ public class MobileNavPreviewFragment extends SyncServiceBaseFragment {
         });
 
         mSessionCheckBoxState = new MobileNaviCheckBoxState(checkBox, getActivity());
+
+        mStopDataStreamingButton = (Button) getView().findViewById(R.id.file_streaming_stop);
+        mStopDataStreamingButton.setOnClickListener(stopFileStreamingListener);
+
+        CheckBox loopFileView = (CheckBox) view.findViewById(R.id.mobile_nav_loop_file);
+        loopFileView.setOnCheckedChangeListener(loopFileStreamListener);
     }
 
     private void sendStartEncryptedService() {

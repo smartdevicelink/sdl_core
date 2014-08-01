@@ -1042,14 +1042,12 @@ public class ModuleTest {
         } else if (testActionItem.getActionName().equals(TestActionItem.PAUSE)) {
             try {
                 // delay between tests
-                Logger.d("TRACE:" + testActionItem.getDelay());
                 synchronized (this) {
                     this.wait(testActionItem.getDelay());
                 }
             } catch (InterruptedException e) {
                 mLogAdapter.logMessage("InterruptedException", true);
             }
-            Logger.d("TRACE complete");
         }
     }
 
@@ -1194,7 +1192,7 @@ public class ModuleTest {
                     @Override
                     public void run() {
                         mProxyService.waiting(false);
-                        if (expectingResults.equals(responses)) {
+                        if (doesArraysEquals(expectingResults, responses)) {
                             testResult.setTestComplete(true);
                         }
                         restoreMarshaller(defaultMarshaller);
@@ -1391,5 +1389,49 @@ public class ModuleTest {
         } else {
             Logger.d(TAG + " Can't release wakeLock, it's null");
         }
+    }
+
+    /**
+     * Method to detect whether all the responses are equals to their expected results, no matter in
+     * what order responses are come
+     *
+     * @param arrayList_A collection of the data
+     * @param arrayList_B collection of the data
+     *
+     * @return true if all of the responses are expected, false - otherwise
+     */
+    protected static boolean doesArraysEquals(ArrayList<Pair<Integer, Result>> arrayList_A,
+                                     ArrayList<Pair<Integer, Result>> arrayList_B) {
+
+        if (arrayList_A == null && arrayList_B == null) {
+            return true;
+        }
+
+        if (arrayList_A == null) {
+            return false;
+        }
+
+        if (arrayList_B == null) {
+            return false;
+        }
+
+        final int length_A = arrayList_A.size();
+        final int length_B = arrayList_B.size();
+
+        if (length_A != length_B) {
+            return false;
+        }
+
+        int resultCount = 0;
+
+        for (Pair<Integer, Result> pair_A : arrayList_A) {
+            for (Pair<Integer, Result> pair_B : arrayList_B) {
+                if (pair_A.first.equals(pair_B.first) && pair_A.second == pair_B.second) {
+                    resultCount++;
+                }
+            }
+        }
+
+        return resultCount == length_A;
     }
 }
