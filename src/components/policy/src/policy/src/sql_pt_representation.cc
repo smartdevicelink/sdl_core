@@ -31,6 +31,7 @@
  */
 
 #include <sstream>
+#include <stdlib.h>
 #include "utils/logger.h"
 #include "policy/sql_pt_representation.h"
 #include "policy/sql_wrapper.h"
@@ -652,7 +653,7 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
     // we drop records from the table and add them again.
     // That's why we use hash as a primary key insted of
     // simple auto incremental index.
-    const int64_t id = ::abs(generate_hash(it->first));
+    const long int id = abs(GenerateHash(it->first));
     query.Bind(0, id);
     query.Bind(1, it->first);
     it->second.user_consent_prompt.is_initialized() ?
@@ -1036,7 +1037,7 @@ bool SQLPTRepresentation::SaveLanguage(const std::string& code) {
   return true;
 }
 
-unsigned long SQLPTRepresentation::generate_hash(const std::string& str_to_hash) {
+unsigned long SQLPTRepresentation::GenerateHash(const std::string& str_to_hash) {
 
   unsigned long hash = 5381U;
   std::string::const_iterator it = str_to_hash.begin();

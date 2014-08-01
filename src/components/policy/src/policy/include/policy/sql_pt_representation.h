@@ -163,10 +163,11 @@ class SQLPTRepresentation : public virtual PTRepresentation {
 
     /**
      * @brief Allows to generate hash from the specified string.
-     * @param name - the string from which hash should be generated.
-     * @return str_to_hash - for the specified string.
+     * The djb2 algorithm uses for hash generation.
+     * @param str_to_hash - the string from which hash should be generated.
+     * @return integer hash for the specified string.
      */
-    unsigned long generate_hash(const std::string& str_to_hash);
+    unsigned long GenerateHash(const std::string& str_to_hash);
 };
 }  //  namespace policy
 
