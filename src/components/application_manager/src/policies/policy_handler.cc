@@ -793,8 +793,38 @@ void PolicyHandler::StartPTExchange(bool skip_device_selection) {
 void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     uint32_t device_id) {
   LOG4CXX_INFO(logger_, "OnAllowSDLFunctionalityNotification");
-  POLICY_LIB_CHECK_VOID();
-  if (device_id) {
+  POLICY_LIB_CHECK_VOID();  
+  // Device ids, need to be changed
+  std::set<uint32_t> device_ids;
+
+  application_manager::ApplicationManagerImpl* app_manager =
+    application_manager::ApplicationManagerImpl::instance();
+
+  // Common devices consents change
+  if (!device_id) {
+    const std::set<application_manager::ApplicationSharedPtr>&  app_list =
+        app_manager->applications();
+
+    std::set<application_manager::ApplicationSharedPtr>::const_iterator
+        it_app_list = app_list.begin();
+    std::set<application_manager::ApplicationSharedPtr>::const_iterator
+        it_app_end = app_list.end();
+
+    for (;it_app_list != it_app_end; ++it_app_list) {
+      if (!(*it_app_list).valid()) {
+        continue;
+      }
+      device_ids.insert(it_app_list->get()->device());
+    }
+  } else {
+    device_ids.insert(device_id);
+  }
+
+  std::set<uint32_t>::const_iterator it_ids = device_ids.begin();
+  std::set<uint32_t>::const_iterator it_ids_end = device_ids.end();
+  for (;it_ids != it_ids_end; ++it_ids) {
+    const uint32_t device_id = *it_ids;
+
     DeviceParams device_params;
     application_manager::MessageHelper::GetDeviceInfoForHandle(device_id,
         &device_params);
@@ -805,7 +835,17 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     }
     policy_manager_->SetUserConsentForDevice(device_params.device_mac_address,
         is_allowed);
+#ifdef EXTENDED_POLICY
+    if (!is_allowed) {
+      ApplicationList app_list = app_manager->applications();
+      std::for_each(app_list.begin(), app_list.end(),
+                    DeactivateApplication(device_id));
+    }
+#endif
+  }
 
+  // Case, when specific device was changed
+  if (device_id) {
     DeviceHandles::iterator it = std::find(pending_device_handles_.begin(),
                                            pending_device_handles_.end(),
                                            device_id);
@@ -815,9 +855,9 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     }
 
     pending_device_handles_.erase(it);
+  }
 #ifdef EXTENDED_POLICY
-    application_manager::ApplicationManagerImpl* app_manager =
-      application_manager::ApplicationManagerImpl::instance();
+  if (is_allowed) {
     application_manager::ApplicationSharedPtr app =
       app_manager->application(last_activated_app_id_);
 
@@ -826,28 +866,21 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
                    << "' not found within registered applications.");
       return;
     }
-
-    if (is_allowed) {
-      if (app) {
-        // Send HMI status notification to mobile
-        // TODO(PV): requires additonal checking
-        //app_manager->PutApplicationInFull(app);
-        application_manager::MessageHelper::SendActivateAppToHMI(app->app_id());
-        app_manager->ActivateApplication(app);
-      }
-
-      // Skip device selection, since user already consented device usage
-      StartPTExchange(true);
-    } else {
-      ApplicationList app_list = app_manager->applications();
-      std::for_each(app_list.begin(), app_list.end(),
-                    DeactivateApplication(device_id));
+    if (app) {
+      // Send HMI status notification to mobile
+      // TODO(PV): requires additonal checking
+      //app_manager->PutApplicationInFull(app);
+      application_manager::MessageHelper::SendActivateAppToHMI(app->app_id());
+      app_manager->ActivateApplication(app);
     }
-#else  // EXTENDED_POLICY
+
     // Skip device selection, since user already consented device usage
     StartPTExchange(true);
-#endif  // EXTENDED_POLICY
   }
+#else  // EXTENDED_POLICY
+  // Skip device selection, since user already consented device usage
+  StartPTExchange(true);
+#endif // NO EXTENDED POLICY
 }
 
 void PolicyHandler::OnIgnitionCycleOver() {
