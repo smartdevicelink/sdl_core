@@ -1690,6 +1690,13 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             mProxyListener.onOnSystemRequest(appId, msg);
         }
 
+        if (mTestConfig != null) {
+            if (!mTestConfig.isDoProcessPolicyTableSnapshot()) {
+                Logger.w("OnSystemRequest stopped processed by TestConfig");
+                return;
+            }
+        }
+
         if (requestType == RequestType.HTTP) {
             if (fileType == FileType.BINARY) {
                 Logger.d(LOG_TAG + " PolicyTableSnapshot url:" + msg.getUrl());

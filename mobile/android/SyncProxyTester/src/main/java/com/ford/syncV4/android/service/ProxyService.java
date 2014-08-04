@@ -376,7 +376,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     /**
-     * Prepare all necessary parameters to be passed to Sync proxy
+     * Prepare all necessary test parameters to be passed to SYNC Proxy
      */
     private void prepareTestConfig() {
         mTestConfig.setUseHashId(AppPreferencesManager.getUseHashId());
@@ -389,6 +389,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mTestConfig.setDoHeartbeatAck(AppPreferencesManager.getIsHeartbeatAck());
         mTestConfig.setDoRootDeviceCheck(AppPreferencesManager.getDoDeviceRootCheck());
         mTestConfig.setDoProcessHearBeatSDLAck(AppPreferencesManager.isProcessHeartBeatSDLAck());
+        mTestConfig.setDoProcessPolicyTableSnapshot(
+                AppPreferencesManager.getIsProcessPolicyTableSnapshot());
     }
 
     private boolean startProxy() {

@@ -526,14 +526,12 @@ public class PlaceholderFragment extends Fragment {
         int menuSize = menu.size();
         int tabsCount = ((SyncProxyTester) getActivity()).getFragmentsCount();
         int nextMenuItemOrder = menu.getItem(menuSize - 1).getOrder() + 1;
-        //menu.add(0, MenuConstants.MENU_PROXY_START, nextMenuItemOrder++, "Proxy Start");
         menu.add(0, MenuConstants.MENU_TOGGLE_CONSOLE, nextMenuItemOrder++, "Toggle Console");
         menu.add(0, MenuConstants.MENU_CLEAR, nextMenuItemOrder++, "Clear Messages");
         //if (tabsCount == 1) {
         menu.add(0, MenuConstants.MENU_EXIT, nextMenuItemOrder++, "Exit");
         //}
         menu.add(0, MenuConstants.MENU_CLOSE_SESSION, nextMenuItemOrder++, "Close Session");
-        //menu.add(0, MENU_TOGGLE_MEDIA, nextMenuItemOrder++, "Toggle Media");
         menu.add(0, MenuConstants.MENU_HASH_ID_SETUP, nextMenuItemOrder++, "HashId setup");
         menu.add(0, MenuConstants.MENU_CLEAR_FUNCTIONS_USAGE, nextMenuItemOrder++, "Reset functions usage");
         if (tabsCount == 1) {
@@ -541,62 +539,18 @@ public class PlaceholderFragment extends Fragment {
         }
         menu.add(0, MenuConstants.MENU_POLICIES_TEST, nextMenuItemOrder++, "Policies Test");
         menu.add(0, MenuConstants.MENU_SET_UP_POLICY_FILES, nextMenuItemOrder++, "Set Up Policy files");
-        MenuItem menuitem = menu.add(0, MenuConstants.MENU_WAKE_LOCK, nextMenuItemOrder++, "Lock screen while testing");
+        MenuItem menuitem = menu.add(0, MenuConstants.MENU_WAKE_LOCK, nextMenuItemOrder++,
+                "Lock screen while testing");
         menuitem.setCheckable(true);
         menuitem.setChecked(!AppPreferencesManager.getDisableLockFlag());
-        menu.add(0, MenuConstants.MENU_FEEDBACK, nextMenuItemOrder, "Feedback");
+        menu.add(0, MenuConstants.MENU_FEEDBACK, nextMenuItemOrder++,
+                getString(R.string.main_menu_feedback));
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
-            /*case MenuConstants.MENU_PROXY_START:
-                if (AppPreferencesManager.getTransportType() == TransportType.BLUETOOTH) {
-                    BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-                    if (!mBtAdapter.isEnabled()) {
-                        mBtAdapter.enable();
-                    }
-
-                    if (!mBtAdapter.isDiscovering()) {
-                        Intent discoverableIntent = new Intent(
-                                BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-                        discoverableIntent.putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION,
-                                300);
-                        startActivity(discoverableIntent);
-                    }
-                }
-
-                // TODO : To be reconsider
-                //if (mBoundProxyService == null) {
-                //    bindProxyService(this, mProxyServiceConnectionProxy);
-                //} else {
-                //    mBoundProxyService.addLogAdapter(mLogAdapter);
-                //}
-
-                ExecutorService executorService = Executors.newSingleThreadExecutor();
-                executorService.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        *//*if (mBoundProxyService != null) {
-
-                            // We need to set listener to null and then re-init it, unless there will
-                            // be another way to check it at 'reset()' method
-
-                            if (!mBoundProxyService.isSyncProxyConnected()) {
-                                mBoundProxyService.getTestConfig().setDoCallRegisterAppInterface(false);
-                            }
-                            mBoundProxyService.setProxyServiceEvent(null);
-
-                            mBoundProxyService.reset();
-
-                            // Re-init listener
-
-                            mBoundProxyService.setProxyServiceEvent(SyncProxyTester.this);
-                        }*//*
-                    }
-                });
-                return true;*/
             case MenuConstants.MENU_XML_TEST:
                 openXmlFilePathDialog();
                 break;
@@ -663,7 +617,6 @@ public class PlaceholderFragment extends Fragment {
             case MenuConstants.MENU_FEEDBACK:
                 DialogFragment feedbackDialog = FeedbackDialog.newInstance();
                 feedbackDialog.show(getActivity().getFragmentManager(), FEEDBACK_DIALOG_TAG);
-                break;
         }
 
         return false;
