@@ -2030,7 +2030,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageToHmi message) {
   }
 
   hmi_handler_->SendMessageToHMI(message);
-  LOG4CXX_INFO(logger_, "Message from hmi given away.");
+  LOG4CXX_INFO(logger_, "Message to hmi given away.");
 }
 
 mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
