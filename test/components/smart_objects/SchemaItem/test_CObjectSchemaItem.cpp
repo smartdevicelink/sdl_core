@@ -132,13 +132,13 @@ class ObjectSchemaItemTest : public ::testing::Test {
     CObjectSchemaItem::Members schemaMembersMap;
     schemaMembersMap[Keys::RESULT_CODE] =
       CObjectSchemaItem::SMember(
-        TEnumSchemaItem<ResultType::eType>::create(resultCode_values), true);
+        TEnumSchemaItem<ResultType::eType>::create(resultCode_values), false);
     schemaMembersMap[Keys::INFO] =
       CObjectSchemaItem::SMember(
         CStringSchemaItem::create(TSchemaItemParameter<size_t>(0),
                                   TSchemaItemParameter<size_t>(10)), false);
     schemaMembersMap[Keys::SUCCESS] =
-      CObjectSchemaItem::SMember(CBoolSchemaItem::create(), true);
+      CObjectSchemaItem::SMember(CBoolSchemaItem::create(), false);
 
     CObjectSchemaItem::Members rootMembersMap;
     rootMembersMap[S_PARAMS] =
@@ -241,20 +241,24 @@ TEST_F(ObjectSchemaItemTest, validation_missing_mandatory) {
   ISchemaItemPtr item = initObjectSchemaItem();
   SmartObject obj;
 
-  obj[S_PARAMS][S_FUNCTION_ID] = 2;
-  obj[S_PARAMS][S_CORRELATION_ID] = 0XFF2;
+  // missed obj[S_PARAMS][S_FUNCTION_ID]
+  // missed obj[S_PARAMS][S_CORRELATION_ID]
   // missed obj[S_PARAMS][S_PROTOCOL_VERSION]
   obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 2;
   obj[S_MSG_PARAMS][Keys::INFO] = "123";
-  // missed mandatory  obj[S_MSG_PARAMS][Keys::SUCCESS]
+  obj[S_MSG_PARAMS][Keys::SUCCESS] = false;
 
   EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, item->validate(obj));
 
-  obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  // obj[S_MSG_PARAMS][Keys::SUCCESS] is still messed
+  obj[S_PARAMS][S_FUNCTION_ID] = 2;
+  // S_CORRELATION_ID and S_PROTOCOL_VERSION is still missed
   EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, item->validate(obj));
 
-  obj[S_MSG_PARAMS][Keys::SUCCESS] =  true;
+  obj[S_PARAMS][S_CORRELATION_ID] = 0XFF2;
+  // S_PROTOCOL_VERSION is still missed
+  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, item->validate(obj));
+
+  obj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
   EXPECT_EQ(Errors::OK, item->validate(obj));
 }
 
@@ -268,21 +272,14 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param) {
   obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 2;
   obj[S_MSG_PARAMS][Keys::INFO] = "123";
   obj[S_MSG_PARAMS][Keys::SUCCESS] = true;
-  obj["ONE_FAKE_PARAM"] = SmartObject(0ll);
+  obj["FAKE_PARAM1"] = SmartObject(0ll);
+  obj["FAKE_PARAM2"] = SmartObject("123");
 
-  // FIXME(EZamakhov): change count unhandled keys
-  // on get straight requirments from ABritanova
-  // one! fake parameter is OK
+  // anyfake parameter is OK
   EXPECT_EQ(Errors::OK, item->validate(obj));
 
-  obj["UNEXPECTED_PARAMETER1"] = SmartObject(1.0d);
-  EXPECT_EQ(Errors::UNEXPECTED_PARAMETER, item->validate(obj));
-
-  obj["UNEXPECTED_PARAMETER2"] = SmartObject('2');
-  EXPECT_EQ(Errors::UNEXPECTED_PARAMETER, item->validate(obj));
-
-  obj["UNEXPECTED_PARAMETER3"] = SmartObject("3");
-  EXPECT_EQ(Errors::UNEXPECTED_PARAMETER, item->validate(obj));
+  item->applySchema(obj);
+  EXPECT_EQ(Errors::OK, item->validate(obj));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_empty_params) {
@@ -294,9 +291,14 @@ TEST_F(ObjectSchemaItemTest, validation_empty_params) {
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
   obj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
   // S_MSG_PARAMS has only fake parameter
-  obj[S_MSG_PARAMS]["ONE_FAKE_PARAM"] = SmartObject();
+  obj[S_MSG_PARAMS]["FAKE_PARAM1"] = SmartObject();
+  obj[S_MSG_PARAMS]["FAKE_PARAM2"] = SmartObject();
+  obj[S_MSG_PARAMS]["FAKE_PARAM3"] = SmartObject();
 
-  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, item->validate(obj));
+  EXPECT_EQ(Errors::OK, item->validate(obj));
+
+  item->applySchema(obj);
+  EXPECT_EQ(Errors::OK, item->validate(obj));
 }
 
 TEST_F(ObjectSchemaItemTest, test_strings_to_enum_convertion) {

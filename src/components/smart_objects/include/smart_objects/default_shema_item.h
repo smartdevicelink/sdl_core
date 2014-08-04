@@ -119,7 +119,7 @@ void CDefaultSchemaItem<Type>::BuildObjectBySchema(
   if (getSmartType() == pattern_object.getType()) {
     result_object = pattern_object;
   } else {
-    if (setDefaultValue(result_object)) {
+    if (!setDefaultValue(result_object)) {
       result_object = getDefaultValue();
     }
   }

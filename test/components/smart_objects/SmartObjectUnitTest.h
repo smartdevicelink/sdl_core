@@ -194,7 +194,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Smart
         SmartObject objInt(5678);
         ASSERT_EQ(5678, objInt.asInt()) << "Wrong constructor with int param";
 
-        char c_str[] = "test c_string";
+        const char *c_str = "test c_string";
         SmartObject obj_c_str(c_str);
         ASSERT_EQ("test c_string", obj_c_str.asString()) << "Wrong constructor with c_str param";
 

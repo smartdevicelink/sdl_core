@@ -51,7 +51,7 @@ Errors::eType CStringSchemaItem::validate(const SmartObject& Object) {
   size_t length;
 
   if (mMinLength.getValue(length) && (value.size() < length)) {
-    return Errors::INVALID_VALUE;
+    return Errors::OUT_OF_RANGE;
   }
   if (mMaxLength.getValue(length) && (value.size() > length)) {
     return Errors::OUT_OF_RANGE;

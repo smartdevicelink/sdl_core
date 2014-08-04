@@ -30,25 +30,28 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <algorithm>
+
 #include "smart_objects/always_false_schema_item.h"
 #include "smart_objects/object_schema_item.h"
 #include "smart_objects/smart_object.h"
 
-namespace smart_objects_ns = NsSmartDeviceLink::NsSmartObjects;
-
+namespace {
+const char connection_key[] = "connection_key";
+const char binary_data[] = "binary_data";
+}
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 
-const char *kMsgParams = "msg_params";
-
 CObjectSchemaItem::SMember::SMember()
-    : mSchemaItem(CAlwaysFalseSchemaItem::create()),
-      mIsMandatory(true) {
+  : mSchemaItem(CAlwaysFalseSchemaItem::create()),
+    mIsMandatory(true) {
 }
 
-CObjectSchemaItem::SMember::SMember(const ISchemaItemPtr SchemaItem, const bool IsMandatory)
-    : mSchemaItem(SchemaItem),
-      mIsMandatory(IsMandatory) {
+CObjectSchemaItem::SMember::SMember(const ISchemaItemPtr SchemaItem,
+                                    const bool IsMandatory)
+  : mSchemaItem(SchemaItem),
+    mIsMandatory(IsMandatory) {
 }
 
 utils::SharedPtr<CObjectSchemaItem> CObjectSchemaItem::create(const Members& members) {
@@ -59,9 +62,6 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {
   if (SmartType_Map != object.getType()) {
     return Errors::INVALID_VALUE;
   }
-  // FIXME(EZamakhov): remove static var for avoid problems on multi-thread handling
-  // on get straight requirments from ABritanova
-  static bool is_sub_element_correct = false;
 
   std::set<std::string> object_keys = object.enumerate();
 
@@ -76,37 +76,12 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {
       }
       continue;
     }
-    // FIXME(EZamakhov): remove kMsgParams compare and add universal algo
-    // on get straight requirments from ABritanova
-    const bool is_msg_param = (0 == key.compare(kMsgParams));
-    if (is_msg_param) {
-      is_sub_element_correct = false;
-    }
-
     const Errors::eType result = member.mSchemaItem->validate(object.getElement(key));
-
-    // FIXME(EZamakhov): remove check UNEXPECTED_PARAMETER
-    // on get straight requirments from ABritanova
-    if (Errors::OK != result && Errors::UNEXPECTED_PARAMETER) {
+    if (Errors::OK != result) {
       return result;
-    }
-
-    if (is_msg_param) {
-      if ((!is_sub_element_correct) && (member.mSchemaItem->GetMemberSize() > 0)) {
-        return Errors::ERROR;
-      }
     }
     object_keys.erase(key_it);
   }
-  is_sub_element_correct = true;
-
-  // FIXME(EZamakhov): change count unhandled keys
-  // on get straight requirments from ABritanova
-  // More then one unhandled (fake) key is error
-  if(object_keys.size() > 1) {
-    return Errors::UNEXPECTED_PARAMETER;
-  }
-
   return Errors::OK;
 }
 
@@ -114,26 +89,30 @@ void CObjectSchemaItem::applySchema(SmartObject& Object) {
   if (SmartType_Map != Object.getType()) {
     return;
   }
-  for (Members::const_iterator it = mMembers.end(); it != mMembers.end(); ++it) {
+
+  for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end(); ++it) {
     const std::string& key = it->first;
-    const SMember& member = it->second;
-    SmartObject def_value;
-    if (member.mSchemaItem->setDefaultValue(def_value) &&
-        !Object.keyExists(key)) {
-      Object[key] = SmartObject(def_value.getType());
-      if (SmartType_Boolean == def_value.getType()) {
-        Object[key] = def_value.asBool();
-      } else if (SmartType_Integer == def_value.getType()) {
-        Object[key] = def_value.asUInt();
-      } else if (SmartType_Double == def_value.getType()) {
-        Object[key] = def_value.asDouble();
-      }
+    if (mMembers.end() == mMembers.find(key)
+        // FIXME(EZamakhov): Remove illigal usage of connection_key/binary_data in AM
+        && key.compare(connection_key) != 0
+        && key.compare(binary_data) != 0
+        ) {
+      // remove fake params
+      Object.erase(key);
     }
   }
 
-  for (Members::const_iterator i = mMembers.begin(); i != mMembers.end(); ++i) {
-    if (Object.keyExists(i->first)) {
-      i->second.mSchemaItem->applySchema(Object[i->first]);
+  SmartObject default_value;
+  for (Members::const_iterator it = mMembers.begin(); it != mMembers.end(); ++it) {
+    const std::string& key = it->first;
+    const SMember& member = it->second;
+    if (!Object.keyExists(key)) {
+      if (member.mSchemaItem->setDefaultValue(default_value)) {
+        Object[key] = default_value;
+        member.mSchemaItem->applySchema(Object[key]);
+      }
+    } else {
+      member.mSchemaItem->applySchema(Object[key]);
     }
   }
 }
@@ -159,17 +138,19 @@ void CObjectSchemaItem::unapplySchema(SmartObject& Object) {
   }
 }
 
-void CObjectSchemaItem::BuildObjectBySchema(const SmartObject& pattern_object,
-                                            SmartObject& result_object) {
+void CObjectSchemaItem::BuildObjectBySchema(
+  const SmartObject& pattern_object, SmartObject& result_object) {
   result_object = SmartObject(SmartType_Map);
   const bool pattern_is_map = SmartType_Map == pattern_object.getType();
 
   for (Members::const_iterator it = mMembers.begin(); it != mMembers.end(); ++it) {
     const std::string& key = it->first;
     const SMember& member = it->second;
-    member.mSchemaItem->BuildObjectBySchema(
-          (pattern_object.keyExists(key) && pattern_is_map) ? pattern_object.getElement(key) : SmartObject(),
-          result_object[key]);
+    const bool pattern_exists = pattern_is_map && pattern_object.keyExists(key);
+    const SmartObject& pattern =
+      pattern_exists ? pattern_object.getElement(key) : SmartObject();
+    member.mSchemaItem->BuildObjectBySchema(pattern, result_object[key]);
+    // TODO(EZamakhov): mandatory and not exists ?????
   }
 }
 
@@ -178,7 +159,7 @@ size_t CObjectSchemaItem::GetMemberSize() {
 }
 
 CObjectSchemaItem::CObjectSchemaItem(const Members& members)
-    : mMembers(members) {}
+  : mMembers(members) {}
 
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink

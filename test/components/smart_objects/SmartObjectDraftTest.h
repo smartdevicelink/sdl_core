@@ -267,7 +267,7 @@ using NsSmartDeviceLink::NsSmartObjects::SmartType;
 
     TEST(SmartObjectsDraftTest, compare_double_type)
     {
-      SmartObject value       = SmartObject(6.0f);
+      SmartObject value       = SmartObject(6.0);
       SmartObject same_value  = SmartObject(6.0d);
 
       ASSERT_EQ(value, same_value);

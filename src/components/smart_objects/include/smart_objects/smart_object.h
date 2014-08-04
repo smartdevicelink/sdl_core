@@ -137,6 +137,15 @@ class SmartObject FINAL {
   SmartObject(const SmartObject& Other);
 
   /**
+   * @brief Constructor for avoid cast
+   * from unknown type
+   *
+   * @param pointer
+   **/
+  template<typename UnknownType>
+  SmartObject(const UnknownType&);
+
+  /**
    * @brief Constructor for creating object of given primitive type.
    *
    * Only primitive types (bool, int32_t, char, double, string) are supported.
@@ -350,13 +359,6 @@ class SmartObject FINAL {
   explicit SmartObject(char InitialValue);
 
   /**
-   * @brief Conversion operator to type: char
-   *
-   * @return char Value of the object converted to bool type or invalid_char_value if
-   *         conversion is not possible
-   **/
-  // operator char() const;
-  /**
    * @brief Returns current object converted to char
    *
    * @return char
@@ -398,13 +400,6 @@ class SmartObject FINAL {
    **/
   explicit SmartObject(const char* InitialValue);
 
-  /**
-   * @brief Conversion operator to type: string
-   *
-   * @return std::string Value of the object converted to bool type or invalid_string_value if
-   *         conversion is not possible
-   **/
-  // operator std::string() const;
   /**
    * @brief Returns current object converted to string
    *
@@ -581,9 +576,11 @@ class SmartObject FINAL {
   std::set<std::string> enumerate() const;
 
   SmartMap::iterator map_begin() const {
+    DCHECK(m_type == SmartType_Map);
     return m_data.map_value->begin();
   }
   SmartMap::iterator map_end() const {
+    DCHECK(m_type == SmartType_Map);
     return m_data.map_value->end();
   }
 

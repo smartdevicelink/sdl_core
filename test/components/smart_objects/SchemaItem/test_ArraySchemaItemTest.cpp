@@ -190,7 +190,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
 
         ISchemaItemPtr item = CArraySchemaItem::create(
                 CStringSchemaItem::create(TSchemaItemParameter<size_t>(25)),
-            TSchemaItemParameter<size_t>(3)); // No max size
+            TSchemaItemParameter<size_t>(3));
 
         obj[0] = "Some String";
 
@@ -205,7 +205,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
         obj[2] = "New String";
 
         resultType = item->validate(obj);
-        EXPECT_EQ(Errors::INVALID_VALUE, resultType);
+        EXPECT_EQ(Errors::OUT_OF_RANGE, resultType);
 
         EXPECT_EQ(std::string("Some String"), obj[0].asString());
         EXPECT_EQ(std::string("true"), obj[1].asString());

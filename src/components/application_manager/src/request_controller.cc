@@ -65,7 +65,7 @@ RequestController::~RequestController() {
 
   if (watchdog_) {
     watchdog_->RemoveListener(this);
-    delete watchdog_; 
+    delete watchdog_;
     watchdog_ = NULL;
   }
 }
@@ -223,7 +223,7 @@ void RequestController::updateRequestTimeout(
     const uint32_t& connection_key,
     const uint32_t& mobile_correlation_id,
     const uint32_t& new_timeout) {
-  LOG4CXX_INFO(logger_, "RequestController::updateRequestTimeout()");
+  LOG4CXX_TRACE(logger_, "RequestController::updateRequestTimeout()");
 
   watchdog_->updateRequestTimeout(connection_key,
                                   mobile_correlation_id,
