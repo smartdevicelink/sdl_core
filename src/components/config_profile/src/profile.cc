@@ -138,8 +138,9 @@ const char* kAckMQKey = "AckMQ";
 const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
 const char* kReadDIDFrequencykey = "ReadDIDRequest";
 const char* kGetVehicleDataFrequencyKey = "GetVehicleDataRequest";
-const char* kLegacyProtocolKey = "LegacyProtocol";
-const char* kHubProtocolKey = "HubProtocol";
+const char* kLegacyProtocolMaskKey = "LegacyProtocol";
+const char* kHubProtocolMaskKey = "HubProtocol";
+const char* kPoolProtocolMaskKey = "PoolProtocol";
 const char* kIAPSystemConfigKey = "IAPSystemConfig";
 const char* kIAP2SystemConfigKey = "IAP2SystemConfig";
 const char* kIAP2HubConnectAttemptskey = "IAP2HubConnectAttempts";
@@ -165,8 +166,9 @@ const char* kDefaultAckMQ = "/dev/mqueue/FromSDLCoreUSBAdapter";
 const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
 const char* kDefaultRecordingFileName = "record.wav";
 const char* kDefaultThreadPoolSize = "ThreadPoolSize";
-const char* kDefaultLegacyProtocol = "com.ford.sync.prot0";
-const char* kDefaultHubProtocol = "com.smartdevicelink.prot0";
+const char* kDefaultLegacyProtocolMask = "com.ford.sync.prot[0-29]";
+const char* kDefaultHubProtocolMask = "com.smartdevicelink.prot0";
+const char* kDefaultPoolProtocolMask = "com.smartdevicelink.prot[1-29]";
 const char* kDefaultIAPSystemConfig = "/fs/mp/etc/mm/ipod.cfg";
 const char* kDefaultIAP2SystemConfig = "/fs/mp/etc/mm/iap2.cfg";
 
@@ -257,8 +259,9 @@ Profile::Profile()
     recording_file_source_(kDefaultRecordingFileSourceName),
     recording_file_name_(kDefaultRecordingFileName),
     application_list_update_timeout_(kDefaultApplicationListUpdateTimeout),
-    iap_legacy_protocol_(kDefaultLegacyProtocol),
-    iap_hub_protocol_(kDefaultHubProtocol),
+    iap_legacy_protocol_mask_(kDefaultLegacyProtocolMask),
+    iap_hub_protocol_mask_(kDefaultHubProtocolMask),
+    iap_pool_protocol_mask_(kDefaultPoolProtocolMask),
     iap_system_config_(kDefaultIAPSystemConfig),
     iap2_system_config_(kDefaultIAP2SystemConfig),
     iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts) {
@@ -526,12 +529,16 @@ uint32_t Profile::thread_pool_size() const  {
   return max_thread_pool_size_;
 }
 
-const std::string& Profile::iap_legacy_protocol() const {
-  return iap_legacy_protocol_;
+const std::string& Profile::iap_legacy_protocol_mask() const {
+  return iap_legacy_protocol_mask_;
 }
 
-const std::string& Profile::iap_hub_protocol() const {
-  return iap_hub_protocol_;
+const std::string& Profile::iap_hub_protocol_mask() const {
+  return iap_hub_protocol_mask_;
+}
+
+const std::string& Profile::iap_pool_protocol_mask() const {
+  return iap_pool_protocol_mask_;
 }
 
 const std::string& Profile::iap_system_config() const {
@@ -1115,19 +1122,26 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
     max_thread_pool_size_ = kDefaultMaxThreadPoolSize;
   }
 
-  ReadStringValue(&iap_legacy_protocol_,
-      kDefaultLegacyProtocol,
+  ReadStringValue(&iap_legacy_protocol_mask_,
+      kDefaultLegacyProtocolMask,
       kIAPSection,
-      kLegacyProtocolKey);
+      kLegacyProtocolMaskKey);
 
-  LOG_UPDATED_VALUE(iap_legacy_protocol_, kLegacyProtocolKey, kIAPSection);
+  LOG_UPDATED_VALUE(iap_legacy_protocol_mask_, kLegacyProtocolMaskKey, kIAPSection);
 
-  ReadStringValue(&iap_hub_protocol_,
-      kDefaultHubProtocol,
+  ReadStringValue(&iap_hub_protocol_mask_,
+      kDefaultHubProtocolMask,
       kIAPSection,
-      kHubProtocolKey);
+      kHubProtocolMaskKey);
 
-  LOG_UPDATED_VALUE(iap_hub_protocol_, kHubProtocolKey, kIAPSection);
+  LOG_UPDATED_VALUE(iap_hub_protocol_mask_, kHubProtocolMaskKey, kIAPSection);
+
+  ReadStringValue(&iap_pool_protocol_mask_,
+      kDefaultPoolProtocolMask,
+      kIAPSection,
+      kPoolProtocolMaskKey);
+
+  LOG_UPDATED_VALUE(iap_pool_protocol_mask_, kPoolProtocolMaskKey, kIAPSection);
 
   ReadStringValue(&iap_system_config_,
       kDefaultIAPSystemConfig,
