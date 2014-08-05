@@ -57,6 +57,7 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddSubMenu;
+import com.ford.syncV4.proxy.rpc.Alert;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
@@ -1018,6 +1019,20 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             return;
         }
         getCurrentActiveFragment().onAddSubMenuDialogResult(addSubMenu, syncSubMenu);
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.AlertDialog}
+     *
+     * @param appId Application Id
+     * @param alert {@link com.ford.syncV4.proxy.rpc.Alert} request
+     */
+    public void onAlertDialogResult(String appId, Alert alert) {
+        if (mBoundProxyService == null) {
+            return;
+        }
+        mBoundProxyService.syncProxySendRPCRequest(appId, alert);
     }
 
     /**

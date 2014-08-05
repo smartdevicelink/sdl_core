@@ -144,6 +144,7 @@ public class PlaceholderFragment extends Fragment {
     private final static String REGISTER_APP_INTERFACE_DIALOG_TAG = "RegisterAppInterfaceDialogTag";
     private final static String HASH_ID_SET_UP_DIALOG_TAG = "HashIdSetUpDialogTag";
     private final static String FEEDBACK_DIALOG_TAG = "FeedbackDialogTag";
+    private final static String ALERT_DIALOG_TAG = "AlertDialogTag";
     private static final String MSC_PREFIX = "msc_";
 
     private static final int ALERT_MAXSOFTBUTTONS = 4;
@@ -1031,11 +1032,17 @@ public class PlaceholderFragment extends Fragment {
                 ((SyncProxyTester) getActivity()).getImageTypeAdapter();
 
         new AlertDialog.Builder(getActivity())
-                .setTitle("Pick a Function")
+                .setTitle("Select RPC Request")
                 .setAdapter(adapter, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         if (adapter.getItem(which).equals(Names.Alert)) {
-                            sendAlert();
+                            // Create and show dialog for the RPC Request - Alert
+                            BaseDialogFragment alertDialogFragment =
+                                    BaseDialogFragment.newInstance(
+                                            com.ford.syncV4.android.activity.AlertDialog.class.getName(),
+                                            getAppId());
+                            alertDialogFragment.show(getActivity().getFragmentManager(),
+                                    ALERT_DIALOG_TAG);
                         } else if (adapter.getItem(which).equals(Names.Speak)) {
                             //something
                             AlertDialog.Builder builder;
@@ -1530,101 +1537,6 @@ public class PlaceholderFragment extends Fragment {
                                 mLatestDeleteCommandCmdID = cmdID;
                             }
                         });
-                        builder.show();
-                    }
-
-                    /**
-                     * Sends Alert message.
-                     */
-                    private void sendAlert() {
-                        final Context mContext = adapter.getContext();
-                        LayoutInflater inflater = (LayoutInflater) mContext
-                                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                        View layout = inflater.inflate(R.layout.alert, null);
-                        final EditText txtSpeak = (EditText) layout.findViewById(R.id.txtSpeak);
-                        final EditText txtAlertField1 = (EditText) layout.findViewById(R.id.txtAlertField1);
-                        final EditText txtAlertField2 = (EditText) layout.findViewById(R.id.txtAlertField2);
-                        final EditText txtAlertField3 = (EditText) layout.findViewById(R.id.txtAlertField3);
-                        final EditText txtDuration = (EditText) layout.findViewById(R.id.txtDuration);
-                        final CheckBox chkPlayTone = (CheckBox) layout.findViewById(R.id.chkPlayTone);
-                        final CheckBox useProgressIndicator = (CheckBox) layout.findViewById(R.id.alert_useProgressIndicator);
-                        final CheckBox useDuration = (CheckBox) layout.findViewById(R.id.alert_useDuration);
-                        final CheckBox doEncryptView = (CheckBox) layout.findViewById(R.id.alert_do_encrypt_view);
-                        chkIncludeSoftButtons = (CheckBox) layout.findViewById(R.id.chkIncludeSBs);
-
-                        SoftButton sb1 = new SoftButton();
-                        sb1.setSoftButtonID(
-                                SyncProxyTester.getNewSoftButtonId());
-                        sb1.setText("ReRoute");
-                        sb1.setType(SoftButtonType.SBT_TEXT);
-                        sb1.setIsHighlighted(false);
-                        sb1.setSystemAction(SystemAction.STEAL_FOCUS);
-                        SoftButton sb2 = new SoftButton();
-                        sb2.setSoftButtonID(SyncProxyTester.getNewSoftButtonId());
-                        sb2.setText("Close");
-                        sb2.setType(SoftButtonType.SBT_TEXT);
-                        sb2.setIsHighlighted(false);
-                        sb2.setSystemAction(SystemAction.DEFAULT_ACTION);
-                        currentSoftButtons = new Vector<SoftButton>();
-                        currentSoftButtons.add(sb1);
-                        currentSoftButtons.add(sb2);
-
-                        Button btnSoftButtons = (Button) layout.findViewById(R.id.alert_btnSoftButtons);
-                        btnSoftButtons.setOnClickListener(new View.OnClickListener() {
-                            @Override
-                            public void onClick(View v) {
-                                IntentHelper
-                                        .addObjectForKey(currentSoftButtons,
-                                                Const.INTENTHELPER_KEY_OBJECTSLIST);
-                                Intent intent = new Intent(mContext, SoftButtonsListActivity.class);
-                                intent.putExtra(Const.INTENT_KEY_OBJECTS_MAXNUMBER, ALERT_MAXSOFTBUTTONS);
-                                startActivityForResult(intent, REQUEST_LIST_SOFTBUTTONS);
-                            }
-                        });
-
-                        AlertDialog.Builder builder = new AlertDialog.Builder(mContext);
-                        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                try {
-                                    Alert msg = new Alert();
-                                    msg.setCorrelationId(getCorrelationId());
-                                    msg.setAlertText1(txtAlertField1.getText().toString());
-                                    msg.setAlertText2(txtAlertField2.getText().toString());
-                                    msg.setAlertText3(txtAlertField3.getText().toString());
-                                    if (useDuration.isChecked()) {
-                                        msg.setDuration(Integer.parseInt(txtDuration.getText().toString()));
-                                    }
-                                    msg.setPlayTone(chkPlayTone.isChecked());
-                                    msg.setProgressIndicator(useProgressIndicator.isChecked());
-
-                                    String toSpeak = txtSpeak.getText().toString();
-                                    if (toSpeak.length() > 0) {
-                                        Vector<TTSChunk> ttsChunks = TTSChunkFactory
-                                                .createSimpleTTSChunks(toSpeak);
-                                        msg.setTtsChunks(ttsChunks);
-                                    }
-                                    msg.setDoEncryption(doEncryptView.isChecked());
-                                    if (chkIncludeSoftButtons.isChecked() &&
-                                            (currentSoftButtons != null) &&
-                                            (currentSoftButtons.size() > 0)) {
-                                        msg.setSoftButtons(currentSoftButtons);
-                                    }
-                                    sendRPCRequestToProxy(msg);
-                                } catch (NumberFormatException e) {
-                                    SafeToast.showToastAnyThread("Couldn't parse number");
-                                }
-                                currentSoftButtons = null;
-                                chkIncludeSoftButtons = null;
-                            }
-                        });
-                        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                currentSoftButtons = null;
-                                chkIncludeSoftButtons = null;
-                                dialog.cancel();
-                            }
-                        });
-                        builder.setView(layout);
                         builder.show();
                     }
 
