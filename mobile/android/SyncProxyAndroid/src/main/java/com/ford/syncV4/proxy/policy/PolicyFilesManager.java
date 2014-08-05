@@ -1,4 +1,4 @@
-package com.ford.syncV4.android.policies;
+package com.ford.syncV4.proxy.policy;
 
 /**
  * Created with Android Studio.

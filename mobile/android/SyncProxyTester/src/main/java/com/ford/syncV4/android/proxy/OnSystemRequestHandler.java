@@ -1,18 +1,18 @@
-package com.ford.syncV4.android.service.proxy;
+package com.ford.syncV4.android.proxy;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 
 import com.ford.syncV4.android.R;
-import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
-import com.ford.syncV4.android.policies.PolicyFilesManager;
 import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.exception.SyncException;
+import com.ford.syncV4.proxy.policy.PolicyFilesManager;
+import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
+import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandlerCallback;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
 
 import java.util.Arrays;
@@ -24,12 +24,25 @@ import java.util.List;
  * Date: 2/12/14
  * Time: 2:50 PM
  */
+
+/**
+ * This is an implementation of the {@link com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler}
+ * interface and provides a possibility and main functionality for the handling
+ * {@link com.ford.syncV4.proxy.rpc.OnSystemRequest} notifications. In particular, process
+ * Policy Table Snapshot (PTS), download files, etc...
+ */
 public class OnSystemRequestHandler implements IOnSystemRequestHandler {
 
-    private LogAdapter mLogAdapter;
+    private static final String LOG_TAG = OnSystemRequestHandler.class.getSimpleName();
 
-    public OnSystemRequestHandler(LogAdapter mLogAdapter) {
-        this.mLogAdapter = mLogAdapter;
+    private IOnSystemRequestHandlerCallback mCallback;
+
+    public OnSystemRequestHandler(IOnSystemRequestHandlerCallback callback) {
+        if (callback == null) {
+            throw new NullPointerException(LOG_TAG + " Constructor -> " +
+                    IOnSystemRequestHandlerCallback.class.getSimpleName() + " implementation is null");
+        }
+        mCallback = callback;
     }
 
     @Override
@@ -47,11 +60,7 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
                 try {
                     proxy.putSystemFile(appId, "system.update", data, FileType.AUDIO_WAVE);
                 } catch (SyncException e) {
-                    // TODO : Logging to be refactored
-                    if (mLogAdapter != null) {
-                        mLogAdapter.logMessage("Can't upload system file:" + e.getMessage(),
-                                Log.ERROR, true);
-                    }
+                    mCallback.onError("Can't upload system file:" + e.getMessage());
                 }
             }
         }, 500);
@@ -74,31 +83,36 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
                 try {
                     proxy.putSystemFile(appId, "system.update", data, offset, FileType.AUDIO_WAVE);
                 } catch (SyncException e) {
-                    // TODO : Logging to be refactored
-                    if (mLogAdapter != null) {
-                        mLogAdapter.logMessage("Can't upload system file:" + e.getMessage(),
-                                Log.ERROR, true);
-                    }
+                    mCallback.onError("Can't upload system file:" + e.getMessage());
                 }
             }
         }, 500);
     }
 
     @Override
-    public void onPolicyTableSnapshotRequest(final String appId, final ISystemRequestProxy proxy,
-                                             byte[] data, final FileType fileType,
-                                             final RequestType requestType) {
+    public void onPolicyTableSnapshotRequest(final String appId,
+                                             final OnSystemRequest onSystemRequest,
+                                             final ISystemRequestProxy proxy) {
 
-        // TODO : Logging to be refactored
-        if (data == null) {
-            if (mLogAdapter != null) {
-                mLogAdapter.logMessage("Policy Snapshot data is null", Log.ERROR, true);
-            }
+        if (onSystemRequest == null) {
+            mCallback.onError("OnPolicyTableSnapshotRequest -> request is null");
             return;
         }
-        if (mLogAdapter != null) {
-            mLogAdapter.logMessage("Policy Table Snapshot download request", Log.DEBUG, true);
+
+        if (proxy == null) {
+            mCallback.onError("OnPolicyTableSnapshotRequest -> proxy is null");
+            return;
         }
+
+        final byte[] data = onSystemRequest.getBulkData();
+        final FileType fileType = onSystemRequest.getFileType();
+        final RequestType requestType = onSystemRequest.getRequestType();
+
+        if (data == null) {
+            mCallback.onError("Policy Snapshot data is null");
+            return;
+        }
+        mCallback.onSuccess("Policy Table Snapshot download request");
 
         PolicyFilesManager.savePolicyTableSnapshot(data);
 
