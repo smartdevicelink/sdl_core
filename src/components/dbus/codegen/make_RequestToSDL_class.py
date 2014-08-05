@@ -103,7 +103,8 @@ class Impl(FordXmlParser):
             return 'double'
         elif param.struct:
             return "_".join(param.fulltype)
-        return "Unexpected problem with types. Project wont compile. Check python codegen scripts"
+        else:
+            raise RuntimeError('Unknown type: ' + param.type)
 
 
     def make_requests_for_source(self, out):
