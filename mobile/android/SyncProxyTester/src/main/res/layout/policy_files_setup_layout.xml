@@ -6,21 +6,6 @@
     android:orientation="vertical"
     android:padding="20dip" >
 
-    <CheckBox
-        android:id="@+id/policy_dialog_do_no_auto_send_view"
-        android:text="@string/policy_dialog_do_no_auto_send_label"
-        android:checked="true"
-        android:layout_marginBottom="0dp"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:text="@string/policy_dialog_do_no_auto_send_hint_text"
-        android:layout_marginBottom="15dp"
-        android:enabled="false"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
-
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"

@@ -3,11 +3,11 @@ package com.ford.syncV4.proxy.systemrequest;
 import android.os.Handler;
 import android.os.Looper;
 
-import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.proxy.policy.PolicyFilesManager;
 import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
+import com.ford.syncV4.test.TestConfig;
 
 /**
  * Created with Android Studio.
@@ -28,6 +28,12 @@ public class OnSystemRequestPolicyHandler implements IOnSystemRequestPolicyHandl
 
     private IOnSystemRequestHandlerCallback mCallback;
 
+    /**
+     * This is a field which stores all the configured data for the SDK testing
+     * purposes and shot NOT be included in the release.
+     */
+    private TestConfig mTestConfig;
+
     public OnSystemRequestPolicyHandler(IOnSystemRequestHandlerCallback callback) {
         if (callback == null) {
             throw new NullPointerException(LOG_TAG + " Constructor -> " +
@@ -36,18 +42,22 @@ public class OnSystemRequestPolicyHandler implements IOnSystemRequestPolicyHandl
         mCallback = callback;
     }
 
+    public void setTestConfig(TestConfig value) {
+        mTestConfig = value;
+    }
+
     @Override
     public void onPolicyTableSnapshotRequest(final String appId,
                                              final OnSystemRequest onSystemRequest,
                                              final ISystemRequestProxy proxy) {
 
         if (onSystemRequest == null) {
-            mCallback.onError("OnPolicyTableSnapshotRequest -> request is null");
+            mCallback.onError(appId, "OnPolicyTableSnapshotRequest -> request is null");
             return;
         }
 
         if (proxy == null) {
-            mCallback.onError("OnPolicyTableSnapshotRequest -> proxy is null");
+            mCallback.onError(appId, "OnPolicyTableSnapshotRequest -> proxy is null");
             return;
         }
 
@@ -56,27 +66,27 @@ public class OnSystemRequestPolicyHandler implements IOnSystemRequestPolicyHandl
         final RequestType requestType = onSystemRequest.getRequestType();
 
         if (data == null) {
-            mCallback.onError("Policy Snapshot data is null");
+            mCallback.onError(appId, "Policy Snapshot data is null");
             return;
         }
-        mCallback.onSuccess("Policy Table Snapshot download request");
 
-        PolicyFilesManager.savePolicyTableSnapshot(data);
+        mCallback.onSuccess(appId, "Policy Table Snapshot download request");
 
         // Simulate Policy Table Snapshot file processing
         // Then, call appropriate method at provided callback which implement
         // ISystemRequestProxy interface
 
-        if (!AppPreferencesManager.getPolicyTableUpdateAutoReplay()) {
-            return;
-        }
-
         new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
             @Override
             public void run() {
 
-                PolicyFilesManager.sendPolicyTableUpdate(appId, proxy, fileType, requestType,
-                        mLogAdapter);
+                byte[] data = new byte[0];
+                if (mTestConfig != null) {
+                    data = mTestConfig.getPolicyTableUpdateData();
+                }
+
+                PolicyFilesManager.sendPolicyTableUpdate(appId, proxy, fileType, requestType, data,
+                        mCallback);
 
             }
         }, 500);

@@ -411,24 +411,4 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         return sharedPreferences.getBoolean(Const.PREF_KEY_PROCESS_SDL_HB_ACK, true);
     }
-
-    /**
-     * @return true if it is necessary to process Policy Table Snapshot from SDL, false - otherwise
-     */
-    public static boolean getIsProcessPolicyTableSnapshot() {
-        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
-        return sharedPreferences.getBoolean(Const.PREF_KEY_PROCESS_POLICY_TABLE_SNAPSHOT, true);
-    }
-
-    /**
-     * Set true if it is necessary to process Policy Table Snapshot from SDL, false - otherwise
-     *
-     * @param value true or false
-     */
-    public static void setIsProcessPolicyTableSnapshot(boolean value) {
-        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putBoolean(Const.PREF_KEY_PROCESS_POLICY_TABLE_SNAPSHOT, value);
-        editor.apply();
-    }
 }

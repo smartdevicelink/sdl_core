@@ -32,10 +32,10 @@ import com.ford.syncV4.android.manager.RestoreConnectionManager;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
-import com.ford.syncV4.android.policies.PolicyFilesManager;
+import com.ford.syncV4.android.proxy.OnSystemRequestHandler;
 import com.ford.syncV4.android.receivers.SyncReceiver;
-import com.ford.syncV4.android.service.proxy.OnSystemRequestHandler;
 import com.ford.syncV4.android.utils.AppUtils;
+import com.ford.syncV4.android.utils.PolicyUtils;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
@@ -50,6 +50,7 @@ import com.ford.syncV4.proxy.SyncProxyConfigurationResources;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
+import com.ford.syncV4.proxy.policy.PolicyFilesManager;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenu;
@@ -127,6 +128,8 @@ import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
+import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
+import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandlerCallback;
 import com.ford.syncV4.proxy.systemrequest.SystemRequestProxyImpl;
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
@@ -187,6 +190,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             new ConcurrentHashMap<String, ApplicationIconManager>();
     private ConnectionListenersManager mConnectionListenersManager;
     private final IBinder mBinder = new ProxyServiceBinder(this);
+    /**
+     * Handler for OnSystemRequest notifications.
+     */
+    private IOnSystemRequestHandler onSystemRequestHandler;
 
     /**
      * Semaphore object to wait for the connection to be restored up to
@@ -390,7 +397,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mTestConfig.setDoRootDeviceCheck(AppPreferencesManager.getDoDeviceRootCheck());
         mTestConfig.setDoProcessHearBeatSDLAck(AppPreferencesManager.isProcessHeartBeatSDLAck());
         mTestConfig.setDoProcessPolicyTableSnapshot(
-                AppPreferencesManager.getIsProcessPolicyTableSnapshot());
+                AppPreferencesManager.getPolicyTableUpdateAutoReplay());
+        mTestConfig.setPolicyTableUpdateData(PolicyUtils.getPolicyUpdateData());
     }
 
     private boolean startProxy() {
@@ -457,7 +465,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 syncProxyConfigurationResources.setTelephonyManager(
                         (TelephonyManager) MainApp.getInstance().getSystemService(Context.TELEPHONY_SERVICE));
 
-                Logger.i("Start SYNC Proxy's instance, vrSynonyms:" + vrSynonyms);
+                Logger.i("Start SYNC Proxy's instance");
                 mSyncProxy = new SyncProxyALM(this,
                         syncProxyConfigurationResources /*sync proxy configuration resources*/,
                         appName,
@@ -494,11 +502,24 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             mSyncProxy.initializeSessions();
         }
 
-        LogAdapter logAdapter = getLogAdapterByAppId(appId);
-        OnSystemRequestHandler mOnSystemRequestHandler = new OnSystemRequestHandler(logAdapter);
+        if (onSystemRequestHandler == null) {
+            onSystemRequestHandler = new OnSystemRequestHandler(
+                    new IOnSystemRequestHandlerCallback() {
 
-        mSyncProxy.setOnSystemRequestHandler(mOnSystemRequestHandler);
+                        @Override
+                        public void onError(String appId, String message) {
+                            //Logger.e(TAG + " onSystemRequestHandler:" + message);
+                            onOnSystemRequestPolicyError(appId, message);
+                        }
 
+                        @Override
+                        public void onSuccess(String appId, String message) {
+                            //Logger.d(TAG + " onSystemRequestHandler:" + message);
+                            onOnSystemRequestPolicySuccess(appId, message);
+                        }
+                    }
+            );
+        }
 
         createInfoMessageForAdapter(" SYNC Proxy started");
 
@@ -562,9 +583,20 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     }
                 }
         );
-        final LogAdapter logAdapter = getLogAdapterByAppId(appId);
         PolicyFilesManager.sendPolicyTableUpdate(appId, systemRequestProxy, fileType, requestType,
-                logAdapter);
+                PolicyUtils.getPolicyUpdateData(),
+                new IOnSystemRequestHandlerCallback() {
+                    @Override
+                    public void onError(String appId, String message) {
+                        onOnSystemRequestPolicyError(appId, message);
+                    }
+
+                    @Override
+                    public void onSuccess(String appId, String message) {
+                        onOnSystemRequestPolicySuccess(appId, message);
+                    }
+                }
+        );
     }
 
     public void setCloseSessionCallback(ICloseSession closeSessionCallback) {
@@ -1730,13 +1762,122 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     @Override
     public void onOnSystemRequest(String appId, OnSystemRequest notification) {
         createDebugMessageForAdapter(appId, notification);
+
+        final FileType fileType = notification.getFileType();
+        final RequestType requestType = notification.getRequestType();
+        final Vector<String> urls = notification.getUrl();
+        final Integer offset = notification.getOffset();
+        final Integer length = notification.getLength();
+        final byte[] bulkData = notification.getBulkData();
+
+        if (requestType == RequestType.HTTP && fileType == FileType.BINARY) {
+            Logger.w("Stop OnSystemRequest process as this combination is reserved for the Ford " +
+                    "specific case (Policy)");
+
+            PolicyUtils.savePolicyTableSnapshot(bulkData);
+
+            return;
+        }
+        if (requestType == RequestType.PROPRIETARY && fileType == FileType.JSON) {
+            Logger.w("Stop OnSystemRequest process as this combination is reserved for the Ford " +
+                    "specific case (Policy)");
+
+            PolicyUtils.savePolicyTableSnapshot(bulkData);
+
+            return;
+        }
+
+        /**
+         * Implementation of the {@link com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy}
+         * to provide callbacks of the {@link com.ford.syncV4.proxy.rpc.OnSystemRequest}
+         * processing
+         */
+        final SystemRequestProxyImpl systemRequestProxy = new SystemRequestProxyImpl(
+
+                /**
+                 * Callbacks of the {@link com.ford.syncV4.proxy.rpc.OnSystemRequest} processing
+                 * (created {@link com.ford.syncV4.proxy.RPCRequest} or error message)
+                 */
+                new SystemRequestProxyImpl.ISystemRequestProxyCallback() {
+
+                    /**
+                     * Send {@link com.ford.syncV4.proxy.RPCRequest} that has been created in the
+                     * {@link com.ford.syncV4.proxy.systemrequest.SystemRequestProxyImpl} helper
+                     * class based on {@link com.ford.syncV4.proxy.rpc.OnSystemRequest} processing
+                     * algorithm
+                     *
+                     * @param appId      Application identifier
+                     * @param rpcRequest {@link com.ford.syncV4.proxy.RPCRequest}
+                     *
+                     * @throws SyncException
+                     */
+                    @Override
+                    public void onSendingRPCRequest(String appId, RPCRequest rpcRequest)
+                            throws SyncException {
+                        if (mSyncProxy == null) {
+                            return;
+                        }
+                        mSyncProxy.sendRPCRequest(appId, rpcRequest);
+                    }
+                }
+        );
+
+        if (requestType == RequestType.HTTP) {
+            // TODO : Probably it is some better way to validate input parameters
+            if (urls == null) {
+                createErrorMessageForAdapter(appId, "OnSystemRequest " +
+                        "'" + RequestType.FILE_RESUME + "': urls are null");
+                return;
+            }
+            if (urls.size() == 0) {
+                createErrorMessageForAdapter(appId, "OnSystemRequest " +
+                        "'" + RequestType.FILE_RESUME + "': urls are empty");
+                return;
+            }
+
+            onSystemRequestHandler.onFilesDownloadRequest(appId, systemRequestProxy, urls, fileType);
+        } else if (requestType == RequestType.FILE_RESUME) {
+            // TODO : Probably it is some better way to validate input parameters
+            if (urls == null) {
+                createErrorMessageForAdapter(appId, "OnSystemRequest " +
+                        "'" + RequestType.FILE_RESUME + "': urls are null");
+                return;
+            }
+            if (urls.size() == 0) {
+                createErrorMessageForAdapter(appId, "OnSystemRequest " +
+                        "'" + RequestType.FILE_RESUME + "': urls are empty");
+                return;
+            }
+            if (offset == null) {
+                createErrorMessageForAdapter(appId, "OnSystemRequest: offset is null");
+                return;
+            }
+            if (length == null) {
+                createErrorMessageForAdapter(appId, "OnSystemRequest: length is null");
+                return;
+            }
+
+            onSystemRequestHandler.onFileResumeRequest(appId,
+                    systemRequestProxy, urls.get(0), offset, length, fileType);
+        }
     }
 
     /**
-     * ******************************
-     * * SYNC AppLink Policies Callback's **
-     * *******************************
+     * **********************************
+     * SYNC AppLink Policies Callbacks  *
+     * **********************************
      */
+
+    @Override
+    public void onOnSystemRequestPolicySuccess(String appId, String message) {
+
+    }
+
+    @Override
+    public void onOnSystemRequestPolicyError(String appId, String message) {
+
+    }
+
     @Override
     public void onOnPermissionsChange(String appId, OnPermissionsChange notification) {
         createDebugMessageForAdapter(appId, notification);

@@ -126,6 +126,11 @@ public class TestConfig {
     private boolean mDoProcessPolicyTableSnapshot = true;
 
     /**
+     * This is a holder field for the test data of the Policy Table Update response
+     */
+    private byte[] mPolicyTableUpdateData = new byte[0];
+
+    /**
      * @return a value that indicates whether to process Ack for the Heartbeat message or not.
      * Default value is true.
      */
@@ -389,5 +394,21 @@ public class TestConfig {
      */
     public void setDoProcessPolicyTableSnapshot(boolean value) {
         mDoProcessPolicyTableSnapshot = value;
+    }
+
+    /**
+     * @return the data for the Policy Table Update response
+     */
+    public byte[] getPolicyTableUpdateData() {
+        return mPolicyTableUpdateData;
+    }
+
+    /**
+     * Set the data for the Policy Table Update response
+     *
+     * @param value array of the bytes
+     */
+    public void setPolicyTableUpdateData(byte[] value) {
+        mPolicyTableUpdateData = value;
     }
 }

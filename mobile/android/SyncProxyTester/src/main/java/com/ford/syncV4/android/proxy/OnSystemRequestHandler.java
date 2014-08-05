@@ -4,13 +4,9 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.ford.syncV4.android.R;
-import com.ford.syncV4.android.manager.AppPreferencesManager;
 import com.ford.syncV4.android.utils.AppUtils;
 import com.ford.syncV4.exception.SyncException;
-import com.ford.syncV4.proxy.policy.PolicyFilesManager;
-import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
-import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler;
 import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandlerCallback;
 import com.ford.syncV4.proxy.systemrequest.ISystemRequestProxy;
@@ -29,7 +25,7 @@ import java.util.List;
  * This is an implementation of the {@link com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler}
  * interface and provides a possibility and main functionality for the handling
  * {@link com.ford.syncV4.proxy.rpc.OnSystemRequest} notifications. In particular, process
- * Policy Table Snapshot (PTS), download files, etc...
+ * download files, etc...
  */
 public class OnSystemRequestHandler implements IOnSystemRequestHandler {
 
@@ -60,7 +56,7 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
                 try {
                     proxy.putSystemFile(appId, "system.update", data, FileType.AUDIO_WAVE);
                 } catch (SyncException e) {
-                    mCallback.onError("Can't upload system file:" + e.getMessage());
+                    mCallback.onError(appId, "Can't upload system file:" + e.getMessage());
                 }
             }
         }, 500);
@@ -83,54 +79,8 @@ public class OnSystemRequestHandler implements IOnSystemRequestHandler {
                 try {
                     proxy.putSystemFile(appId, "system.update", data, offset, FileType.AUDIO_WAVE);
                 } catch (SyncException e) {
-                    mCallback.onError("Can't upload system file:" + e.getMessage());
+                    mCallback.onError(appId, "Can't upload system file:" + e.getMessage());
                 }
-            }
-        }, 500);
-    }
-
-    @Override
-    public void onPolicyTableSnapshotRequest(final String appId,
-                                             final OnSystemRequest onSystemRequest,
-                                             final ISystemRequestProxy proxy) {
-
-        if (onSystemRequest == null) {
-            mCallback.onError("OnPolicyTableSnapshotRequest -> request is null");
-            return;
-        }
-
-        if (proxy == null) {
-            mCallback.onError("OnPolicyTableSnapshotRequest -> proxy is null");
-            return;
-        }
-
-        final byte[] data = onSystemRequest.getBulkData();
-        final FileType fileType = onSystemRequest.getFileType();
-        final RequestType requestType = onSystemRequest.getRequestType();
-
-        if (data == null) {
-            mCallback.onError("Policy Snapshot data is null");
-            return;
-        }
-        mCallback.onSuccess("Policy Table Snapshot download request");
-
-        PolicyFilesManager.savePolicyTableSnapshot(data);
-
-        // Simulate Policy Table Snapshot file processing
-        // Then, call appropriate method at provided callback which implement
-        // ISystemRequestProxy interface
-
-        if (!AppPreferencesManager.getPolicyTableUpdateAutoReplay()) {
-            return;
-        }
-
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                PolicyFilesManager.sendPolicyTableUpdate(appId, proxy, fileType, requestType,
-                        mLogAdapter);
-
             }
         }, 500);
     }
