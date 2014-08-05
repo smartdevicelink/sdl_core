@@ -1399,7 +1399,7 @@ FFW.UI = FFW.RPCObserver.create({
                 "id": sliderRequestID,
                 "error": {
                     "code": resultCode, // type (enum) from SDL protocol
-                    "message": 'Slider request aborted.',
+                    "message": 'Slider request ABORTED or TIMED OUT.',
                     "data": {
                         "method": 'UI.Slider'
                     }

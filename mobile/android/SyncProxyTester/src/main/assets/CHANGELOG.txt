@@ -1,3 +1,6 @@
+[CW32]
+* SyncProxyTester: UpdateTurnList - SDL send incorrect result code (INVALID_DATA) on correct request
+
 [CW31]
 * SyncProxyTester: Asynchronous RPC API in XMP
 + SyncProxyTester: Add possibility to restore connection after HB timeout from SPT

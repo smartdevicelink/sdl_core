@@ -53,10 +53,10 @@ void ReadDIDRequest::Run() {
 
   uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asUInt();
-  uint32_t corr_id = (*message_)[strings::params][strings::correlation_id]
-      .asUInt();
+
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
-  LOG4CXX_INFO(logger_, "Correlation_id :" << corr_id);
+  LOG4CXX_INFO(logger_, "Correlation_id :" << (*message_)[strings::params][strings::correlation_id]
+               .asUInt());
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "An application is not registered.");

@@ -164,7 +164,7 @@ void RequestWatchdog::removeRequest(uint32_t connection_key,
 void RequestWatchdog::updateRequestTimeout(uint32_t connection_key,
                                            uint32_t correlation_id,
                                            uint32_t new_timeout_value) {
-  LOG4CXX_INFO(logger_, "RequestController::updateRequestTimeout("
+  LOG4CXX_TRACE(logger_, "RequestController::updateRequestTimeout("
                << connection_key << ","
                << correlation_id << ","
                << new_timeout_value << ")");

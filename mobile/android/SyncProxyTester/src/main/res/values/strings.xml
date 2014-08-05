@@ -328,4 +328,8 @@
     <string name="maximum_abbr_label">MAX: </string>
     <string name="heartbeat_label">Heart Beat:</string>
 
+    <string name="main_menu_feedback">Feedback</string>
+    <string name="policy_dialog_do_no_auto_send_label">Do not process Policy Table Snapshot</string>
+    <string name="policy_dialog_do_no_auto_send_hint_text">Need to re-start application when changed</string>
+
 </resources>

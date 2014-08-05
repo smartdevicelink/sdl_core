@@ -13,6 +13,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -126,6 +128,16 @@ public class PolicyFilesSetUpDialog extends BaseDialogFragment {
                 ((SyncProxyTester) getActivity()).onPolicyFilesSetUpDialogResult_SendUpdate(
                         getArguments().getString(APP_ID_KEY), fileType,
                         requestType);
+            }
+        });
+
+        CheckBox processPolicyTableSnapshotView =
+                (CheckBox) layout.findViewById(R.id.policy_dialog_do_no_auto_send_view);
+        processPolicyTableSnapshotView.setChecked(AppPreferencesManager.getIsProcessPolicyTableSnapshot());
+        processPolicyTableSnapshotView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                AppPreferencesManager.setIsProcessPolicyTableSnapshot(isChecked);
             }
         });
 

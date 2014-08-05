@@ -71,7 +71,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     is_vr_session_strated_(false),
     hmi_cooperating_(false),
     is_all_apps_allowed_(true),
-    media_manager_(media_manager::MediaManagerImpl::instance()),
+    media_manager_(NULL),
     hmi_handler_(NULL),
     connection_handler_(NULL),
     policy_manager_(policy::PolicyHandler::instance()->LoadPolicyLibrary()),
@@ -1386,6 +1386,7 @@ bool ApplicationManagerImpl::Init() {
       init_result = false;
       break;
     }
+    media_manager_ = media_manager::MediaManagerImpl::instance();
   } while (false);
 
   return init_result;
