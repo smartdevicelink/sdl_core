@@ -411,4 +411,25 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         return sharedPreferences.getBoolean(Const.PREF_KEY_PROCESS_SDL_HB_ACK, true);
     }
+
+    /**
+     * @return true if it is necessary to override Policy Table Update data, false - otherwise.<br>
+     * Default is <b>false</b>
+     */
+    public static boolean isOverridePolicyTableUpdateData() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.Policy.PREF_KEY_POLICY_UPDATE_OVERRIDE_DATA, false);
+    }
+
+    /**
+     * Set true if it is necessary to override Policy Table Update data, false - otherwise
+     *
+     * @param value true or false
+     */
+    public static void setOverridePolicyTableUpdateData(boolean value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.Policy.PREF_KEY_POLICY_UPDATE_OVERRIDE_DATA, value);
+        editor.apply();
+    }
 }

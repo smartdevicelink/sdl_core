@@ -1,13 +1,20 @@
 package com.ford.syncV4.proxy.systemrequest;
 
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.ford.syncV4.net.IDataDownloader;
+import com.ford.syncV4.net.PolicyDataDownloaderImpl;
 import com.ford.syncV4.proxy.policy.PolicyFilesManager;
 import com.ford.syncV4.proxy.rpc.OnSystemRequest;
 import com.ford.syncV4.proxy.rpc.enums.FileType;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
+import com.ford.syncV4.service.IDataServiceProvider;
+import com.ford.syncV4.service.PolicyDataServiceProviderImpl;
 import com.ford.syncV4.test.TestConfig;
+
+import java.util.Vector;
 
 /**
  * Created with Android Studio.
@@ -70,25 +77,33 @@ public class OnSystemRequestPolicyHandler implements IOnSystemRequestPolicyHandl
             return;
         }
 
+        Vector<String> urls = onSystemRequest.getUrl();
+        if (urls == null) {
+            mCallback.onError(appId, "Policy Snapshot url is null");
+            return;
+        }
+        if (urls.isEmpty()) {
+            mCallback.onError(appId, "Policy Snapshot url is empty");
+            return;
+        }
+
+        String url = onSystemRequest.getUrl().get(0);
+
         mCallback.onSuccess(appId, "Policy Table Snapshot download request");
 
-        // Simulate Policy Table Snapshot file processing
-        // Then, call appropriate method at provided callback which implement
-        // ISystemRequestProxy interface
+        IDataDownloader downloader = new PolicyDataDownloaderImpl();
+        IDataServiceProvider serviceProvider = new PolicyDataServiceProviderImpl();
+        byte[] responseData = serviceProvider.getPolicyTableUpdateData(downloader, Uri.parse(url),
+                onSystemRequest.getBulkData());
 
-        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
-            @Override
-            public void run() {
-
-                byte[] data = new byte[0];
-                if (mTestConfig != null) {
-                    data = mTestConfig.getPolicyTableUpdateData();
-                }
-
-                PolicyFilesManager.sendPolicyTableUpdate(appId, proxy, fileType, requestType, data,
-                        mCallback);
-
+        // Test Config:
+        if (mTestConfig != null) {
+            if (mTestConfig.isDoOverridePolicyTableUpdateData()) {
+                responseData = mTestConfig.getPolicyTableUpdateData();
             }
-        }, 500);
+        }
+
+        PolicyFilesManager.sendPolicyTableUpdate(appId, proxy, fileType, requestType, responseData,
+                mCallback);
     }
 }

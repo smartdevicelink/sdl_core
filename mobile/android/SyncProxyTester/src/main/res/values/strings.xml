@@ -329,5 +329,6 @@
     <string name="heartbeat_label">Heart Beat:</string>
 
     <string name="main_menu_feedback">Feedback</string>
+    <string name="policy_dialog_override_update_label">Override Policy Table Update data</string>
 
 </resources>

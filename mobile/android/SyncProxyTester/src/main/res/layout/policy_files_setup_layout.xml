@@ -6,7 +6,16 @@
     android:orientation="vertical"
     android:padding="20dip" >
 
+    <CheckBox
+        android:id="@+id/policy_dialog_override_update_view"
+        android:text="@string/policy_dialog_override_update_label"
+        android:layout_marginBottom="15dp"
+        android:checked="true"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" />
+
     <TextView
+        android:id="@+id/policy_update_local_file_name_label_view"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="5dp"

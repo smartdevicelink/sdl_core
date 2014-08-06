@@ -68,12 +68,18 @@ public class AppUtils {
     }
 
     /**
-     * Save bytes to a file
-     * @param data
-     * @param filePath
-     * @return
+     * Save data bytes to a file
+     *
+     * @param data     data as bytes array
+     * @param filePath a path to file
+     *
+     * @return true in case of success, false - otherwise
      */
     public static boolean saveDataToFile(byte[] data, String filePath) {
+        if (data == null) {
+            Logger.w(TAG + " save data to file -> data is null, path:" + filePath);
+            return false;
+        }
         File file = new File(filePath);
         Logger.d(TAG + " Saving data to file '" + filePath + "', exists:" + file.exists());
         if (file.exists()) {

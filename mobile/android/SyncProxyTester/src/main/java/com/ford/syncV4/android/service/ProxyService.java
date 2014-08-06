@@ -18,6 +18,7 @@ import android.util.SparseArray;
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.PlaceholderFragment;
+import com.ford.syncV4.android.activity.SafeToast;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.Const;
@@ -399,6 +400,8 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mTestConfig.setDoProcessPolicyTableSnapshot(
                 AppPreferencesManager.getPolicyTableUpdateAutoReplay());
         mTestConfig.setPolicyTableUpdateData(PolicyUtils.getPolicyUpdateData());
+        mTestConfig.setDoOverridePolicyTableUpdateData(
+                AppPreferencesManager.isOverridePolicyTableUpdateData());
     }
 
     private boolean startProxy() {
@@ -1870,12 +1873,14 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
 
     @Override
     public void onOnSystemRequestPolicySuccess(String appId, String message) {
-
+        createDebugMessageForAdapter(appId, message);
+        SafeToast.showToastAnyThread(message);
     }
 
     @Override
     public void onOnSystemRequestPolicyError(String appId, String message) {
-
+        createErrorMessageForAdapter(appId, message);
+        SafeToast.showToastAnyThread(message);
     }
 
     @Override
