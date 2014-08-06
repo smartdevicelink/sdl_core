@@ -84,7 +84,6 @@ void DbusPlugin::registerTypes(const char *uri) {
   dbusController_ = new DBusController();
   requestToSDL_ = new RequestToSDL();
 
-
   HmiProxy::api_adaptors_.SetDBusController(dbusController_);
 }
 

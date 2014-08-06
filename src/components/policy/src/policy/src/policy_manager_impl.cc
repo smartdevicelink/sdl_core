@@ -118,17 +118,7 @@ bool PolicyManagerImpl::LoadPTFromFile(const std::string& file_name) {
   final_result = final_result && policy_table_.pt_data()->Save(*table);
   LOG4CXX_INFO(
     logger_,
-    "Loading from file was " << (final_result ? "successful" : "unsuccessful"));
-
-  // Initial setting of snapshot data
-  if (policy_table_.pt_data()->IsPTPreloaded() && !policy_table_snapshot_) {
-    policy_table_snapshot_ = policy_table_.pt_data()->GenerateSnapshot();
-    if (!policy_table_snapshot_) {
-      LOG4CXX_WARN(logger_,
-                   "Failed to create initial snapshot of policy table");
-      return false;
-    }
-  }
+    "Loading from file was " << (final_result ? "successful" : "unsuccessful"));  
 
   RefreshRetrySequence();
   return final_result;
@@ -172,30 +162,40 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     return false;
   }
 
+  sync_primitives::AutoLock lock(apps_registration_lock_);
+
+  // Get current DB data, since it could be updated during awaiting of PTU
+  utils::SharedPtr<policy_table::Table> policy_table_snapshot =
+      policy_table_.pt_data()->GenerateSnapshot();
+  if (!policy_table_snapshot) {
+    LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
+    return false;
+  }
+
   // Replace predefined policies with its actual setting, e.g. "123":"default"
   // to actual values of default section
   UnwrapAppPolicies(pt_update->policy_table.app_policies);
 
   // Check and update permissions for applications, send notifications
-  CheckPermissionsChanges(pt_update);
+  CheckPermissionsChanges(pt_update, policy_table_snapshot);
 
   // Replace current data with updated
-  policy_table_snapshot_->policy_table.functional_groupings = pt_update
+  policy_table_snapshot->policy_table.functional_groupings = pt_update
       ->policy_table.functional_groupings;
 
-  policy_table_snapshot_->policy_table.module_config = pt_update->policy_table
+  policy_table_snapshot->policy_table.module_config = pt_update->policy_table
       .module_config;
 
   bool is_message_part_updated = pt_update->policy_table
                                  .consumer_friendly_messages.is_initialized();
 
   if (is_message_part_updated) {
-    policy_table_snapshot_->policy_table.consumer_friendly_messages->messages =
+    policy_table_snapshot->policy_table.consumer_friendly_messages->messages =
       pt_update->policy_table.consumer_friendly_messages->messages;
   }
 
   // Save data to DB
-  if (!policy_table_.pt_data()->Save(*policy_table_snapshot_)) {
+  if (!policy_table_.pt_data()->Save(*policy_table_snapshot)) {
     LOG4CXX_WARN(logger_, "Unsuccessful save of updated policy table.");
     return false;
   }
@@ -227,12 +227,13 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 }
 
 void PolicyManagerImpl::CheckPermissionsChanges(
-  const utils::SharedPtr<policy_table::Table> pt_update) {
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) {
   LOG4CXX_INFO(logger_, "Checking incoming permissions.");
 
   std::for_each(pt_update->policy_table.app_policies.begin(),
                 pt_update->policy_table.app_policies.end(),
-                CheckAppPolicy(this, pt_update));
+                CheckAppPolicy(this, pt_update, snapshot));
 }
 
 void PolicyManagerImpl::PrepareNotificationData(
@@ -317,28 +318,11 @@ EndpointUrls PolicyManagerImpl::GetUpdateUrls(int service_type) {
 
 BinaryMessageSptr PolicyManagerImpl::RequestPTUpdate() {
   LOG4CXX_INFO(logger_, "Creating PT Snapshot");  
-  policy_table_snapshot_ = policy_table_.pt_data()->GenerateSnapshot();
-  if (!policy_table_snapshot_) {
+  utils::SharedPtr<policy_table::Table> policy_table_snapshot =
+      policy_table_.pt_data()->GenerateSnapshot();
+  if (!policy_table_snapshot) {
     LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
     return NULL;
-  }
-
-  policy_table::ApplicationPolicies& apps = policy_table_snapshot_->
-                                            policy_table.app_policies;
-  std::map<std::string,
-      rpc::Stringifyable<rpc::Nullable<
-      rpc::policy_table_interface_base::ApplicationParams>>>::iterator it =
-      apps.begin();
-  // TODO(AOleynik): Should we check here for 'device' also?
-  for (; apps.end() != it; ++it) {
-    if (policy_table_.pt_data()->IsDefaultPolicy(it->first)) {
-      it->second.set_to_string(kDefaultId);
-      continue;
-    }
-    if (policy_table_.pt_data()->IsPredataPolicy(it->first)) {
-      it->second.set_to_string(kPreDataConsentId);
-      continue;
-    }
   }
 
   set_exchange_in_progress(true);
@@ -355,7 +339,7 @@ BinaryMessageSptr PolicyManagerImpl::RequestPTUpdate() {
   }
 #endif  // EXTENDED_POLICY
 
-  Json::Value value = policy_table_snapshot_->ToJsonValue();
+  Json::Value value = policy_table_snapshot->ToJsonValue();
   Json::FastWriter writer;
   std::string message_string = writer.write(value);
   return new BinaryMessage(message_string.begin(), message_string.end());
@@ -461,6 +445,7 @@ void PolicyManagerImpl::CheckAppPolicyState(const std::string& application_id) {
   LOG4CXX_INFO(logger_, "CheckAppPolicyState");
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent  = GetUserConsentForDevice(device_id);
+  sync_primitives::AutoLock lock(apps_registration_lock_);
   if (!policy_table_.pt_data()->IsApplicationRepresented(application_id)) {
     LOG4CXX_INFO(
       logger_,

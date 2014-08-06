@@ -81,7 +81,8 @@ bool operator!=(const policy_table::ApplicationParams& first,
  */
 struct CheckAppPolicy {
     CheckAppPolicy(PolicyManagerImpl* pm,
-                   const utils::SharedPtr<policy_table::Table> update);
+                   const utils::SharedPtr<policy_table::Table> update,
+                   const utils::SharedPtr<policy_table::Table> snapshot);
     bool HasSameGroups(const AppPoliciesValueType& app_policy,
                        AppPermissions* perms) const;
     bool IsNewAppication(const std::string& application_id) const;
@@ -95,6 +96,7 @@ struct CheckAppPolicy {
   private:
     PolicyManagerImpl* pm_;
     const utils::SharedPtr<policy_table::Table> update_;
+    const utils::SharedPtr<policy_table::Table> snapshot_;
 };
 
 /*

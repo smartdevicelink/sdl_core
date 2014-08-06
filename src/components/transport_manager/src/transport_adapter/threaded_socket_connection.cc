@@ -43,7 +43,7 @@
 
 namespace transport_manager {
 namespace transport_adapter {
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 ThreadedSocketConnection::ThreadedSocketConnection(
   const DeviceUID& device_id, const ApplicationHandle& app_handle,

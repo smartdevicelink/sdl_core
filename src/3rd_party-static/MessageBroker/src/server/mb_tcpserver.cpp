@@ -96,10 +96,9 @@ namespace NsMessageBroker
              *pReceivingBuffer = std::string(&buf[0], nb);
              return false;
            }
-
-           unsigned int b_size;
+		   unsigned int b_size = (unsigned int)nb;
            mWebSocketHandler.parseWebSocketData(&buf[0], b_size);
-           nb = b_size;
+		   nb = b_size;
          }
 
          *pReceivingBuffer = std::string(&buf[0], nb);

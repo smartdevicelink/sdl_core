@@ -182,7 +182,6 @@ void UsbHandler::DeviceLeft(libusb_device* device_libusb) {
   for (Devices::iterator it = devices_.begin(); it != devices_.end(); ++it) {
     if ((*it)->GetLibusbDevice() == device_libusb) {
       devices_.erase(it);
-      LOG4CXX_DEBUG(logger_, "break. Condition: (*it)->GetLibusbDevice() == device_libusb");
       break;
     }
   }

@@ -42,7 +42,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager-usb")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 class AoaInitSequence : public UsbControlTransferSequence {
  public:
