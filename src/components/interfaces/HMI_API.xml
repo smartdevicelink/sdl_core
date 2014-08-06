@@ -2366,7 +2366,7 @@
   </function>
   <function name="ChangeRegistration" messagetype="request">
     <description>Request from SmartDeviceLink to HMI to change language of TTS.</description>
-    <param name="ttsName" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+    <param name="ttsName" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
       <description>Request new ttsName registration</description>
     </param>
     <param name="language" type="Common.Language" mandatory="true">
@@ -2928,7 +2928,7 @@
     <param name="phoneNumber" type="String" maxlength="500" mandatory="false">
       <description>     Phone number of intended location / establishment (if applicable)   </description>
     </param>
-    <param name="locationImage" type="Image" mandatory="false">
+    <param name="locationImage" type="Common.Image" mandatory="false">
       <description>     Image / icon of intended location (if applicable and supported)   </description>
     </param>
   </function>
