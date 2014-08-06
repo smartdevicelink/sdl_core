@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $OS_TYPE ]; then 
-  if [ $OS_TYPE != "QNX" ]; then
+  if [ $OS_TYPE == "LINUX" ]; then
     (cd ../build/test/ && ./test_suit --gtest_output="xml:$1/test_results/test_suit.xml") && ls -l $1/test_results/
     lcov --capture --directory ../build --output-file $1/coverage_draft_one.info
     lcov --remove $1/coverage_draft_one.info /usr/include/\* --output-file $1/coverage_draft_two.info
