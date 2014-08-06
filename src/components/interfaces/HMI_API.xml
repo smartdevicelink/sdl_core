@@ -462,6 +462,9 @@
 </enum>
 
 <enum name="ImageFieldName">
+  <element name="locationImage">
+    <description>The optional image of a destination / location</description>
+  </element>
   <element name="softButtonImage">
     <description>The image field for SoftButton</description>
   </element>
@@ -1974,17 +1977,11 @@
         <description>The information about application registered. See HMIApplication. </description>
       </param>
       <param name="ttsName" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
-        <description> TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
-          Needs to be unique over all applications.
-          May not be empty.
-          May not start with a new line character.
-          May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
-        </description>
       </param>
       <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
         <description>
           Defines additional voice recognition commands.
-          May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
+          May not interfere with any app name of previously registered applications and any predefined blacklist of words (global commands)
         </description>
       </param>
       <param name="resumeVrGrammars" type="Boolean" mandatory="false">
@@ -2278,6 +2275,9 @@
   </function>
   <function name="ChangeRegistration" messagetype="request">
     <description>Request from SmartDeviceLink to HMI to change language of VR.</description>
+    <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>Request new VR synonyms registration</description>
+    </param>
     <param name="language" type="Common.Language" mandatory="true">
       <description>The language application wants to switch to.</description>
     </param>
@@ -2366,6 +2366,9 @@
   </function>
   <function name="ChangeRegistration" messagetype="request">
     <description>Request from SmartDeviceLink to HMI to change language of TTS.</description>
+    <param name="ttsName" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+      <description>Request new ttsName registration</description>
+    </param>
     <param name="language" type="Common.Language" mandatory="true">
       <description>The language application wants to switch to.</description>
     </param>
@@ -2475,7 +2478,7 @@
       <description>App defined SoftButtons.</description>
       <description>If omitted, the currently displayed SoftButton values should not change.</description>
     </param>
-    <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="8" array="true" mandatory="false">
+    <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="10" array="true" mandatory="false">
       <description>App labeled on-screen presets (i.e. GEN3 media presets or dynamic search suggestions).</description>
       <description>If omitted on supported displays, the presets will be shown as not defined.</description>
     </param>
@@ -2658,6 +2661,12 @@
   </function>
   <function name="ChangeRegistration" messagetype="request">
     <description>Request from SmartDeviceLink to HMI to change language for app.</description>
+    <param name="appName" type="String" maxlength="100" mandatory="false">
+      <description>Request new app name registration</description>
+    </param>
+    <param name="ngnMediaScreenAppName" type="String" maxlength="100" mandatory="false">
+      <description>Request new app short name registration</description>
+    </param>
     <param name="language" type="Common.Language" mandatory="true">
       <description>The language application wants to switch to.</description>
     </param>
@@ -2900,6 +2909,30 @@
     <param name="available" type="Boolean" mandatory="true">
       <description>Must be true if Navigation is present and ready to communicate with SDL.</description>
     </param>
+  </function>
+  <function name="SendLocation" messagetype="request">
+      <description>That allows the app to send a destination to the embedded nav system.</description>
+    <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
+    </param>
+    <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
+    </param>
+    <param name="locationName" type="String" maxlength="500" mandatory="false">
+      <description>     Name / title of intended location   </description>
+    </param>
+    <param name="locationDescription" type="String" maxlength="500" mandatory="false">
+      <description>        Description intended location / establishment (if applicable)   </description>
+    </param>
+    <param name="addressLines" type="String" maxlength="500" minsize="0" maxsize="4" array="true" mandatory="false">
+      <description>     Location address (if applicable)   </description>
+    </param>
+    <param name="phoneNumber" type="String" maxlength="500" mandatory="false">
+      <description>     Phone number of intended location / establishment (if applicable)   </description>
+    </param>
+    <param name="locationImage" type="Image" mandatory="false">
+      <description>     Image / icon of intended location (if applicable and supported)   </description>
+    </param>
+  </function>
+  <function name="SendLocation" messagetype="response" >
   </function>
   <function name="ShowConstantTBT" messagetype="request">
     <description>Request from SmartDeviceLinkCore to HMI to show info about navigation.</description>
