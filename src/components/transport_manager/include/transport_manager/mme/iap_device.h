@@ -70,7 +70,8 @@ class IAPDevice : public MmeDevice {
   typedef std::map<uint32_t, ApplicationHandle> AppContainer;
   typedef std::map<int, ApplicationHandle> AppTable;
   typedef std::map<ApplicationHandle, IAPConnection*> ConnectionContainer;
-  typedef std::map<std::string, int> ProtocolNamePool;
+  typedef std::map<int, std::string> FreeProtocolNamePool;
+  typedef std::map<std::string, int> ProtocolInUseNamePool;
   typedef std::pair<std::string, ipod_hdl_t*> AppRecord;
 
   static const int kProtocolNameSize = 256;
@@ -98,8 +99,8 @@ class IAPDevice : public MmeDevice {
   ConnectionContainer connections_;
   sync_primitives::Lock connections_lock_;
 
-  ProtocolNamePool free_protocol_name_pool_;
-  ProtocolNamePool protocol_in_use_name_pool_;
+  FreeProtocolNamePool free_protocol_name_pool_;
+  ProtocolInUseNamePool protocol_in_use_name_pool_;
   sync_primitives::Lock protocol_name_pool_lock_;
 
   class IAPEventThreadDelegate : public threads::PulseThreadDelegate {
