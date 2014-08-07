@@ -233,9 +233,9 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     private IProtocolMessageHolder protocolMessageHolder =
             new ProtocolMessageHolder();
     /**
-     * Handler for OnSystemRequest Policy notifications.
+     * Handler for OnSystemRequest notifications.
      */
-    private IOnSystemRequestHandler onSystemRequestHandler;
+    private IOnSystemRequestHandler mOnSystemRequestHandler;
     /**
      * Correlation ID that was last used for messages created internally.
      */
@@ -3218,12 +3218,23 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
     }
 
     /**
-     * Returns the next correlation ID used for internal messages.
+     * <b>THIS METHOD IS FOR THE TEST ONLY</b><br>
      *
-     * @return next correlation ID
+     * @return an instance of the {@link com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler}
      */
-    private int nextCorrelationId() {
-        return ++lastCorrelationId;
+    protected IOnSystemRequestHandler getOnSystemRequestHandler() {
+        return mOnSystemRequestHandler;
+    }
+
+    /**
+     * <b>THIS METHOD IS FOR THE TEST ONLY</b><br>
+     * Set a value of the {@link com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler}
+     * implementation
+     *
+     * @param value instance of the {@link com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler}
+     */
+    protected void setOnSystemRequestHandler(IOnSystemRequestHandler value) {
+        mOnSystemRequestHandler = value;
     }
 
     /**
@@ -3249,7 +3260,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
         Runnable request = new Runnable() {
             @Override
             public void run() {
-                onSystemRequestHandler.onPolicyTableSnapshotRequest(appId, onSystemRequest,
+                mOnSystemRequestHandler.onPolicyTableSnapshotRequest(appId, onSystemRequest,
                         systemRequestProxy);
             }
         };
@@ -3292,7 +3303,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 return;
             }
 
-            onSystemRequestHandler.onFilesDownloadRequest(appId, systemRequestProxy, urls, fileType);
+            mOnSystemRequestHandler.onFilesDownloadRequest(appId, systemRequestProxy, urls, fileType);
         } else if (requestType == RequestType.FILE_RESUME) {
             // TODO : Probably it is some better way to validate input parameters
             if (urls == null) {
@@ -3314,7 +3325,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 return;
             }
 
-            onSystemRequestHandler.onFileResumeRequest(appId,
+            mOnSystemRequestHandler.onFileResumeRequest(appId,
                     systemRequestProxy, urls.get(0), offset, length, fileType);
         }
     }
@@ -3493,13 +3504,13 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
             }
 
             // Up to now this is a simple check that the handler has single instance
-            if (onSystemRequestHandler == null) {
-                onSystemRequestHandler = new OnSystemRequestHandlerImpl(
+            if (mOnSystemRequestHandler == null) {
+                mOnSystemRequestHandler = new OnSystemRequestHandlerImpl(
                         new IOnSystemRequestHandlerCallback() {
 
                             @Override
                             public void onError(final String appId, final String message) {
-                                //Logger.e(LOG_TAG + " onSystemRequestHandler:" + message);
+                                //Logger.e(LOG_TAG + " mOnSystemRequestHandler:" + message);
 
                                 // Create error callback
                                 if (_callbackToUIThread) {
@@ -3523,7 +3534,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
 
                             @Override
                             public void onSuccess(final String appId, final String message) {
-                                //Logger.d(LOG_TAG + " onSystemRequestHandler:" + message);
+                                //Logger.d(LOG_TAG + " mOnSystemRequestHandler:" + message);
 
                                 // Create success callback
                                 if (_callbackToUIThread) {
@@ -3548,7 +3559,7 @@ public abstract class SyncProxyBase<ProxyListenerType extends IProxyListenerBase
                 );
 
                 // Test Config section
-                ((OnSystemRequestHandlerImpl)onSystemRequestHandler).setTestConfig(mTestConfig);
+                ((OnSystemRequestHandlerImpl) mOnSystemRequestHandler).setTestConfig(mTestConfig);
             }
 
             mSyncConnection.addHeartbeatMonitor(sessionId, heartbeatInterval, doSendHeartBeatAck);
