@@ -4,6 +4,7 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.net.IDataDownloader;
 import com.ford.syncV4.net.PolicyDataDownloaderImpl;
 import com.ford.syncV4.proxy.policy.PolicyFilesManager;
@@ -14,6 +15,7 @@ import com.ford.syncV4.service.IDataServiceProvider;
 import com.ford.syncV4.service.PolicyDataServiceProviderImpl;
 import com.ford.syncV4.test.TestConfig;
 
+import java.util.List;
 import java.util.Vector;
 
 /**
@@ -24,14 +26,14 @@ import java.util.Vector;
  */
 
 /**
- * This is an implementation of the {@link com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandler}
+ * This is an implementation of the {@link IOnSystemRequestHandler}
  * interface and provides a possibility and main functionality for the handling
  * {@link com.ford.syncV4.proxy.rpc.OnSystemRequest} notifications. In particular, process
- * Policy Table Snapshot (PTS), download files, etc...
+ * of the files downloading, policy, etc...
  */
-public class OnSystemRequestPolicyHandler implements IOnSystemRequestPolicyHandler {
+public class OnSystemRequestHandlerImpl implements IOnSystemRequestHandler {
 
-    private static final String LOG_TAG = OnSystemRequestPolicyHandler.class.getSimpleName();
+    private static final String LOG_TAG = OnSystemRequestHandlerImpl.class.getSimpleName();
 
     private IOnSystemRequestHandlerCallback mCallback;
 
@@ -41,7 +43,7 @@ public class OnSystemRequestPolicyHandler implements IOnSystemRequestPolicyHandl
      */
     private TestConfig mTestConfig;
 
-    public OnSystemRequestPolicyHandler(IOnSystemRequestHandlerCallback callback) {
+    public OnSystemRequestHandlerImpl(IOnSystemRequestHandlerCallback callback) {
         if (callback == null) {
             throw new NullPointerException(LOG_TAG + " Constructor -> " +
                     IOnSystemRequestHandlerCallback.class.getSimpleName() + " implementation is null");
@@ -51,6 +53,53 @@ public class OnSystemRequestPolicyHandler implements IOnSystemRequestPolicyHandl
 
     public void setTestConfig(TestConfig value) {
         mTestConfig = value;
+    }
+
+    @Override
+    public void onFilesDownloadRequest(final String appId, final ISystemRequestProxy proxy,
+                                       List<String> urls, FileType fileType) {
+
+        // Simulate Files downloading request and future processing
+        // Then, call appropriate method at provided callback which implement
+        // ISystemRequestProxy interface
+
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                // TODO : Implement fake data here but in actual it is necessary to provide data from SDL
+                final byte[] data = new byte[100];
+                try {
+                    proxy.putSystemFile(appId, "system.update", data, FileType.AUDIO_WAVE);
+                } catch (SyncException e) {
+                    mCallback.onError(appId, "Can't upload system file:" + e.getMessage());
+                }
+            }
+        }, 500);
+    }
+
+    @Override
+    public void onFileResumeRequest(final String appId, final ISystemRequestProxy proxy,
+                                    String filename, final Integer offset, final Integer length,
+                                    FileType fileType) {
+
+        // Simulate Files download resumption request and future processing
+        // Then, call appropriate method at provided callback which implement
+        // ISystemRequestProxy interface
+
+        new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //final byte[] data = Arrays.copyOfRange(
+                //        AppUtils.contentsOfResource(R.raw.audio_short), offset, offset + length);
+                // TODO : Implement fake data here but in actual it is necessary to provide data from SDL
+                final byte[] data = new byte[100];
+                try {
+                    proxy.putSystemFile(appId, "system.update", data, offset, FileType.AUDIO_WAVE);
+                } catch (SyncException e) {
+                    mCallback.onError(appId, "Can't upload system file:" + e.getMessage());
+                }
+            }
+        }, 500);
     }
 
     @Override
