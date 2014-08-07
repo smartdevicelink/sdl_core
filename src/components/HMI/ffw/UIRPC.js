@@ -269,6 +269,10 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.ChangeRegistration":
                 {
 
+                    if (request.params.appName) {
+                        SDL.SDLController.getApplicationModel(request.params.app).set('appName', request.params.appName);
+                    }
+
                     SDL.SDLModel.changeRegistrationUI(request.params.language, request.params.appID);
                     this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 
@@ -663,7 +667,7 @@ FFW.UI = FFW.RPCObserver.create({
                                             "doublePressAvailable": false
                                         }
                                     },
-                                    "numCustomPresetsAvailable": 8
+                                    "numCustomPresetsAvailable": 10
                                 },
                                 "buttonCapabilities": [
                                     {
@@ -1191,7 +1195,7 @@ FFW.UI = FFW.RPCObserver.create({
                                         "doublePressAvailable": false
                                     }
                                 },
-                                "numCustomPresetsAvailable": 8
+                                "numCustomPresetsAvailable": 10
                             },
                             "audioPassThruCapabilities": {
                                 "samplingRate": "44KHZ",

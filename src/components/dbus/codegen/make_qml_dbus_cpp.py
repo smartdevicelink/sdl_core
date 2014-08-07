@@ -233,7 +233,8 @@ class Impl(FordXmlParser):
             if (param.maxLength > 0):
                 conditions.append("(%s.size() > %s)" % (param_name, param.maxLength))
             if conditions:
-                out.write('if (%s) { %s; }\n' % (' || '.join(conditions), fail_statement))
+                with CodeBlock(out) as out:
+                    out.write('if (%s) { %s;\n }\n' % (' || '.join(conditions), fail_statement))
 
     def qt_param_type(self, param):
         if not param.mandatory:

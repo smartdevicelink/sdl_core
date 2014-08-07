@@ -179,52 +179,48 @@ public class RPCRequestFactory {
 
 		return addSubMenu;
 	}
-	
-	public static Alert buildAlert(String ttsText, Boolean playTone,
-			Integer correlationID) {
-		Vector<TTSChunk> chunks = TTSChunkFactory
-				.createSimpleTTSChunks(ttsText);
-		Alert msg = buildAlert(chunks, null, null, playTone, null,
-				correlationID);
-		return msg;
+
+    /**
+     * Alert section
+     */
+
+    public static Alert buildAlert() {
+        return new Alert();
+    }
+
+	public static Alert buildAlert(String ttsText, Boolean playTone, Integer correlationId) {
+		Vector<TTSChunk> chunks = TTSChunkFactory.createSimpleTTSChunks(ttsText);
+        return buildAlert(chunks, null, null, playTone, null, correlationId);
 	}
 	
-	public static Alert buildAlert(String alertText1, String alertText2,
-			Integer duration, Integer correlationID) {
-		Alert msg = buildAlert((Vector<TTSChunk>) null, alertText1, alertText2,
-				null, duration, correlationID);
-		return msg;
+	public static Alert buildAlert(String alertText1, String alertText2, Integer duration,
+                                   Integer correlationId) {
+        return buildAlert((Vector<TTSChunk>) null, alertText1, alertText2,	null, duration,
+                correlationId);
 	}
 	
-	public static Alert buildAlert(String ttsText, String alertText1,
-			String alertText2, Boolean playTone, Integer duration,
-			Integer correlationID) {
-		Vector<TTSChunk> chunks = TTSChunkFactory
-				.createSimpleTTSChunks(ttsText);
-		Alert msg = buildAlert(chunks, alertText1, alertText2, playTone,
-				duration, correlationID);
-		return msg;
+	public static Alert buildAlert(String ttsText, String alertText1, String alertText2,
+                                   Boolean playTone, Integer duration, Integer correlationId) {
+		Vector<TTSChunk> chunks = TTSChunkFactory.createSimpleTTSChunks(ttsText);
+        return buildAlert(chunks, alertText1, alertText2, playTone, duration, correlationId);
 	}
 	
 	public static Alert buildAlert(Vector<TTSChunk> chunks, Boolean playTone,
-			Integer correlationID) {
-		Alert msg = buildAlert(chunks, null, null, playTone, null,
-				correlationID);
-		return msg;
+                                   Integer correlationId) {
+        return buildAlert(chunks, null, null, playTone, null, correlationId);
 	}
 	
-	public static Alert buildAlert(Vector<TTSChunk> ttsChunks,
-			String alertText1, String alertText2, Boolean playTone,
-			Integer duration, Integer correlationID) {
-		Alert msg = new Alert();
-		msg.setCorrelationId(correlationID);
-		msg.setAlertText1(alertText1);
-		msg.setAlertText2(alertText2);
-		msg.setDuration(duration);
-		msg.setPlayTone(playTone);
-		msg.setTtsChunks(ttsChunks);
-
-		return msg;
+	public static Alert buildAlert(Vector<TTSChunk> ttsChunks, String alertText1,
+                                   String alertText2, Boolean playTone, Integer duration,
+                                   Integer correlationId) {
+		Alert alert = buildAlert();
+		alert.setCorrelationId(correlationId);
+		alert.setAlertText1(alertText1);
+		alert.setAlertText2(alertText2);
+		alert.setDuration(duration);
+		alert.setPlayTone(playTone);
+		alert.setTtsChunks(ttsChunks);
+		return alert;
 	}
 
     /**

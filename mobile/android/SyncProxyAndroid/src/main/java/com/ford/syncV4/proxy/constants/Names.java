@@ -21,6 +21,7 @@ public class Names {
 	public static final String DeleteInteractionChoiceSet = "DeleteInteractionChoiceSet";
 	public static final String PerformInteraction = "PerformInteraction";
 	public static final String EncodedSyncPData = "EncodedSyncPData";
+    @Deprecated
 	public static final String SyncPData = "SyncPData";
 	public static final String SubscribeButton = "SubscribeButton";
 	public static final String UnsubscribeButton = "UnsubscribeButton";
@@ -86,7 +87,9 @@ public class Names {
 	public static final String OnButtonEvent = "OnButtonEvent";
 	public static final String OnHMIStatus = "OnHMIStatus";
 	public static final String OnTBTClientState = "OnTBTClientState";
+    @Deprecated
 	public static final String OnEncodedSyncPData = "OnEncodedSyncPData";
+    @Deprecated
 	public static final String OnSyncPData = "OnSyncPData";
 	public static final String OnDriverDistraction = "OnDriverDistraction";
 	public static final String OnAppInterfaceUnregistered = "OnAppInterfaceUnregistered";
@@ -480,4 +483,14 @@ public class Names {
     public static final String errorId = "errorId";
     public static final String errorMessage = "errorMessage";
     public static final String internalTestSecurityError = "InternalError";
+
+    /**
+     * v4_protocol_v3_1_revA
+     */
+    public static final String SendLocation = "SendLocation";
+    public static final String locationName = "locationName";
+    public static final String locationDescription = "locationDescription";
+    public static final String addressLines = "addressLines";
+    public static final String phoneNumber = "phoneNumber";
+    public static final String locationImage = "locationImage";
 }

@@ -107,6 +107,8 @@ void ScrollableMessageRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[strings::soft_buttons] =
         (*message_)[strings::msg_params][strings::soft_buttons];
+    MessageHelper::SubscribeApplicationToSoftButton(
+        (*message_)[strings::msg_params], app, function_id());
   }
 
   SendHMIRequest(hmi_apis::FunctionID::UI_ScrollableMessage, &msg_params, true);

@@ -120,6 +120,12 @@ public class TestConfig {
     private boolean mDoProcessHearBeatSDLAck = true;
 
     /**
+     * Field indicated that whether it is necessary to process Policy Table Snapshot which
+     * comes from SDL or not
+     */
+    private boolean mDoProcessPolicyTableSnapshot = true;
+
+    /**
      * @return a value that indicates whether to process Ack for the Heartbeat message or not.
      * Default value is true.
      */
@@ -365,5 +371,23 @@ public class TestConfig {
         for (SecurityInternalError securityInternalError : securityInternalErrorArrayList) {
             secureServiceMutationManager.addMutationForError(securityInternalError);
         }
+    }
+
+    /**
+     * @return true if it is necessary to process Policy Table Snapshot which
+     * comes from SDL or false - otherwise
+     */
+    public boolean isDoProcessPolicyTableSnapshot() {
+        return mDoProcessPolicyTableSnapshot;
+    }
+
+    /**
+     * Set true if it is necessary to process Policy Table Snapshot which
+     * comes from SDL or false - otherwise
+     *
+     * @param value true or false
+     */
+    public void setDoProcessPolicyTableSnapshot(boolean value) {
+        mDoProcessPolicyTableSnapshot = value;
     }
 }

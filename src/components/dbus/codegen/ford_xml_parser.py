@@ -84,8 +84,8 @@ class FordXmlParser:
 
 	param_desc.restricted = param_desc.minValue != None or \
 	                        param_desc.maxValue != None or \
-			        param_desc.minLength > 0 or \
-			        param_desc.maxLength > 0
+			                param_desc.minLength > 0 or \
+			                param_desc.maxLength > 0
 	param_desc.restrictedArray = param_desc.array and (param_desc.minSize > 0 or param_desc.maxSize > 0)
         if iface is None:
             return param_desc

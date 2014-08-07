@@ -90,16 +90,18 @@ bool operator!=(const policy_table::ApplicationParams& first,
 }
 
 CheckAppPolicy::CheckAppPolicy(
-  PolicyManagerImpl* pm, const utils::SharedPtr<policy_table::Table> update)
+    PolicyManagerImpl* pm,
+    const utils::SharedPtr<policy_table::Table> update,
+    const utils::SharedPtr<policy_table::Table> snapshot)
   : pm_(pm),
-    update_(update) {
+    update_(update),
+    snapshot_(snapshot) {
 }
 
 bool CheckAppPolicy::HasSameGroups(const AppPoliciesValueType& app_policy,
                                    AppPermissions* perms) const {
   const std::string app_id = app_policy.first;
-  AppPoliciesConstItr it = pm_->policy_table_snapshot_->policy_table
-                           .app_policies.find(app_id);
+  AppPoliciesConstItr it = snapshot_->policy_table.app_policies.find(app_id);
 
   if (app_policy.second.is_string()) {
     return (it->second.is_string() &&
@@ -159,8 +161,8 @@ bool CheckAppPolicy::HasSameGroups(const AppPoliciesValueType& app_policy,
 }
 
 bool CheckAppPolicy::IsNewAppication(const std::string& application_id) const {
-  const policy_table::ApplicationPolicies& current_policies = pm_
-      ->policy_table_snapshot_->policy_table.app_policies;
+  const policy_table::ApplicationPolicies& current_policies =
+      snapshot_->policy_table.app_policies;
   AppPoliciesConstItr it_app_policies_curr = current_policies.begin();
   AppPoliciesConstItr it_app_policies_curr_end = current_policies.end();
 
@@ -270,8 +272,8 @@ bool CheckAppPolicy::NicknamesMatch(
 }
 
 bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
-  policy_table::ApplicationPolicies& current_policies = pm_
-      ->policy_table_snapshot_->policy_table.app_policies;
+  policy_table::ApplicationPolicies& current_policies =
+      snapshot_->policy_table.app_policies;
 
   const std::string app_id = app_policy.first;
 

@@ -39,7 +39,7 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 TcpConnectionFactory::TcpConnectionFactory(TransportAdapterController* controller)
   : controller_(controller) {

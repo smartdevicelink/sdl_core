@@ -55,7 +55,7 @@ PlatformUsbDevice::PlatformUsbDevice(
     libusb_device_(device_libusb) {}
 
 std::string PlatformUsbDevice::GetDescString(uint8_t index) const {
-  LOG4CXX_TRACE(logger_, "enter. index: " << index);
+  LOG4CXX_TRACE(logger_, "enter. index: " << int(index));
   unsigned char buf[128];
   const int libusb_ret = libusb_get_string_descriptor_ascii(
                            libusb_device_handle_, index, buf, sizeof(buf));

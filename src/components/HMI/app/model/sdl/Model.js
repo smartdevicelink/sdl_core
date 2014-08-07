@@ -944,13 +944,6 @@ SDL.SDLModel = Em.Object.create({
             return;
         }
 
-        if (params.ttsName) {
-            for (var i = 0; i < params.ttsName.length; i++) {
-                var message = {"cmdID": 0, "vrCommands": [params.ttsName[i].text], "appID": params.application.appID, "type": "Application"};
-                this.addCommandVR(message);
-            }
-        }
-
         if (params.vrSynonyms) {
 
             var message = {"cmdID": 0, "vrCommands": params.vrSynonyms, "appID": params.application.appID, "type": "Application"};

@@ -566,6 +566,12 @@ bool SQLPTRepresentation::GatherApplicationPolicies(
       (*apps)[app_id] = params;
       continue;
     }
+    if (IsDefaultPolicy(app_id)) {
+      (*apps)[app_id].set_to_string(kDefaultId);
+    }
+    if (IsPredataPolicy(app_id)) {
+      (*apps)[app_id].set_to_string(kPreDataConsentId);
+    }
     policy_table::Priority priority;
     policy_table::EnumFromJsonString(query.GetString(1), &priority);
     params.priority = priority;

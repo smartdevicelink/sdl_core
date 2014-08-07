@@ -254,6 +254,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
 }
 
 void AlertRequest::SendAlertRequest(int32_t app_id) {
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
@@ -286,6 +288,8 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[hmi_request::soft_buttons] =
         (*message_)[strings::msg_params][strings::soft_buttons];
+    MessageHelper::SubscribeApplicationToSoftButton(
+        (*message_)[strings::msg_params], app, function_id());
   }
   // app_id
   msg_params[strings::app_id] = app_id;
