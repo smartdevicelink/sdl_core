@@ -9,19 +9,38 @@ import com.ford.syncV4.proxy.rpc.enums.AppHMIType;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.util.logger.Logger;
 
+/**
+ * Establishes an interface with a mobile application.
+ * Before {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
+ * no other commands will be accepted / executed.
+ */
 public class RegisterAppInterface extends RPCRequest {
 
     private static final String LOG_TAG = RegisterAppInterface.class.getSimpleName();
     private static final int HASH_ID_MAX_LENGTH = 100;
 
+    /**
+     * Constructor
+     */
     public RegisterAppInterface() {
         super(Names.RegisterAppInterface);
     }
 
+    /**
+     * Constructor
+     *
+     * @param hash hash table of the {@link com.ford.syncV4.proxy.rpc.RegisterAppInterface}
+     *             structure
+     */
     public RegisterAppInterface(Hashtable hash) {
         super(hash);
     }
 
+    /**
+     * See {@link com.ford.syncV4.proxy.rpc.SyncMsgVersion}
+     *
+     * @return instance of {@link com.ford.syncV4.proxy.rpc.SyncMsgVersion}
+     */
     public SyncMsgVersion getSyncMsgVersion() {
         Object obj = parameters.get(Names.syncMsgVersion);
         if (obj instanceof SyncMsgVersion) {
@@ -32,6 +51,11 @@ public class RegisterAppInterface extends RPCRequest {
         return null;
     }
 
+    /**
+     * Set {@link com.ford.syncV4.proxy.rpc.SyncMsgVersion}
+     *
+     * @param syncMsgVersion instance of {@link com.ford.syncV4.proxy.rpc.SyncMsgVersion}
+     */
     public void setSyncMsgVersion(SyncMsgVersion syncMsgVersion) {
         if (syncMsgVersion != null) {
             parameters.put(Names.syncMsgVersion, syncMsgVersion);
@@ -40,10 +64,36 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
+    /**
+     * The mobile application name, e.g. "Ford Drive Green".
+     * Needs to be unique over all applications.
+     * May not be empty.
+     * May not start with a new line character.
+     * May not interfere with any name or synonym of previously registered applications and any
+     * predefined blacklist of words (global commands)
+     * Needs to be unique over all applications. Applications with the same name will be rejected.
+     * Only characters from char set
+     * [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+     *
+     * @return application name
+     */
     public Object getAppName() {
         return parameters.get(Names.appName);
     }
 
+    /**
+     * The mobile application name, e.g. "Ford Drive Green".
+     * Needs to be unique over all applications.
+     * May not be empty.
+     * May not start with a new line character.
+     * May not interfere with any name or synonym of previously registered applications and any
+     * predefined blacklist of words (global commands)
+     * Needs to be unique over all applications. Applications with the same name will be rejected.
+     * Only characters from char set
+     * [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+     *
+     * @param appName application name
+     */
     public void setAppName(Object appName) {
         if (appName != null) {
             parameters.put(Names.appName, appName);
@@ -52,6 +102,17 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
+    /**
+     * TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".
+     * Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
+     * Needs to be unique over all applications.
+     * May not be empty.
+     * May not start with a new line character.
+     * Only characters from char set
+     * [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+     *
+     * @return array of the {@link com.ford.syncV4.proxy.rpc.TTSChunk}'s
+     */
     public Vector<TTSChunk> getTtsName() {
         if (parameters.get(Names.ttsName) instanceof Vector<?>) {
             Vector<?> list = (Vector<?>) parameters.get(Names.ttsName);
@@ -75,6 +136,17 @@ public class RegisterAppInterface extends RPCRequest {
         return null;
     }
 
+    /**
+     * TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".
+     * Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
+     * Needs to be unique over all applications.
+     * May not be empty.
+     * May not start with a new line character.
+     * Only characters from char set
+     * [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+     *
+     * @param ttsName array of the {@link com.ford.syncV4.proxy.rpc.TTSChunk}'s
+     */
     public void setTtsName(Vector<TTSChunk> ttsName) {
         if (ttsName != null) {
             parameters.put(Names.ttsName, ttsName);
@@ -83,10 +155,28 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
+    /**
+     * Provides an abbreviated version of the app name (if needed),
+     * that will be displayed on the NGN media screen.
+     * If not provided, the appName is used instead (and will be truncated if too long)
+     * Only characters from char set
+     * [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+     *
+     * @return abbreviated version of the app name
+     */
     public Object getNgnMediaScreenAppName() {
         return parameters.get(Names.ngnMediaScreenAppName);
     }
 
+    /**
+     * Provides an abbreviated version of the app name (if needed),
+     * that will be displayed on the NGN media screen.
+     * If not provided, the appName is used instead (and will be truncated if too long)
+     * Only characters from char set
+     * [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+     *
+     * @param ngnMediaScreenAppName abbreviated version of the app name
+     */
     public void setNgnMediaScreenAppName(Object ngnMediaScreenAppName) {
         if (ngnMediaScreenAppName != null) {
             parameters.put(Names.ngnMediaScreenAppName, ngnMediaScreenAppName);
@@ -95,6 +185,15 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
+    /**
+     * Defines an additional voice recognition command.
+     * May not interfere with any app name of previously registered applications and any
+     * predefined blacklist of words (global commands)
+     * Only characters from char set
+     * [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+     *
+     * @return additional voice recognition command
+     */
     public Vector<Object> getVrSynonyms() {
         if (parameters.get(Names.vrSynonyms) instanceof Vector<?>) {
             Vector<?> list = (Vector<?>) parameters.get(Names.vrSynonyms);
@@ -112,6 +211,15 @@ public class RegisterAppInterface extends RPCRequest {
         return null;
     }
 
+    /**
+     * Defines an additional voice recognition command.
+     * May not interfere with any app name of previously registered applications and any
+     * predefined blacklist of words (global commands)
+     * Only characters from char set
+     * [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
+     *
+     * @param vrSynonyms additional voice recognition command
+     */
     public void setVrSynonyms(Vector<Object> vrSynonyms) {
         if (vrSynonyms != null) {
             parameters.put(Names.vrSynonyms, vrSynonyms);
@@ -120,10 +228,24 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
+    /**
+     * Indicates if the application is a media or a non-media application.
+     * Only media applications will be able to stream audio to Sync that is audible outside
+     * of the BT media source.
+     *
+     * @return true or false
+     */
     public Object getIsMediaApplication() {
         return parameters.get(Names.isMediaApplication);
     }
 
+    /**
+     * Indicates if the application is a media or a non-media application.
+     * Only media applications will be able to stream audio to Sync that is audible outside
+     * of the BT media source.
+     *
+     * @param isMediaApplication true or false
+     */
     public void setIsMediaApplication(Object isMediaApplication) {
         if (isMediaApplication != null) {
             parameters.put(Names.isMediaApplication, isMediaApplication);
@@ -132,6 +254,14 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
+    /**
+     * See {@link com.ford.syncV4.proxy.rpc.enums.Language}
+     * Current app’s expected VR+TTS language
+     * If there is a mismatch with SYNC, the app will be able to change this registration with
+     * changeRegistration prior to app being brought into focus.
+     *
+     * @return {@link com.ford.syncV4.proxy.rpc.enums.Language}
+     */
     public Language getLanguageDesired() {
         Object obj = parameters.get(Names.languageDesired);
         if (obj instanceof Language) {
@@ -148,6 +278,14 @@ public class RegisterAppInterface extends RPCRequest {
         return null;
     }
 
+    /**
+     * See {@link com.ford.syncV4.proxy.rpc.enums.Language}
+     * Current app’s expected VR+TTS language
+     * If there is a mismatch with SYNC, the app will be able to change this registration with
+     * changeRegistration prior to app being brought into focus.
+     *
+     * @param languageDesired {@link com.ford.syncV4.proxy.rpc.enums.Language}
+     */
     public void setLanguageDesired(Language languageDesired) {
         if (languageDesired != null) {
             parameters.put(Names.languageDesired, languageDesired);
@@ -156,6 +294,14 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
+    /**
+     * See {@link com.ford.syncV4.proxy.rpc.enums.Language}
+     * Current app’s expected display language
+     * If there is a mismatch with SYNC, the app will be able to change this registration with
+     * changeRegistration prior to app being brought into focus.
+     *
+     * @return {@link com.ford.syncV4.proxy.rpc.enums.Language}
+     */
     public Language getHmiDisplayLanguageDesired() {
         Object obj = parameters.get(Names.hmiDisplayLanguageDesired);
         if (obj instanceof Language) {
@@ -172,6 +318,14 @@ public class RegisterAppInterface extends RPCRequest {
         return null;
     }
 
+    /**
+     * See {@link com.ford.syncV4.proxy.rpc.enums.Language}
+     * Current app’s expected display language
+     * If there is a mismatch with SYNC, the app will be able to change this registration with
+     * changeRegistration prior to app being brought into focus.
+     *
+     * @param hmiDisplayLanguageDesired {@link com.ford.syncV4.proxy.rpc.enums.Language}
+     */
     public void setHmiDisplayLanguageDesired(Language hmiDisplayLanguageDesired) {
         if (hmiDisplayLanguageDesired != null) {
             parameters.put(Names.hmiDisplayLanguageDesired, hmiDisplayLanguageDesired);
@@ -180,6 +334,12 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
+    /**
+     * See {@link com.ford.syncV4.proxy.rpc.enums.AppHMIType}
+     * List of all applicable app HMI types stating which HMI classifications to be given to the app.
+     *
+     * @return {@link com.ford.syncV4.proxy.rpc.enums.AppHMIType}
+     */
     public Vector<AppHMIType> getAppType() {
         if (parameters.get(Names.appHMIType) instanceof Vector<?>) {
             Vector<?> list = (Vector<?>) parameters.get(Names.appHMIType);
@@ -212,6 +372,12 @@ public class RegisterAppInterface extends RPCRequest {
         return null;
     }
 
+    /**
+     * See {@link com.ford.syncV4.proxy.rpc.enums.AppHMIType}
+     * List of all applicable app HMI types stating which HMI classifications to be given to the app.
+     *
+     * @param appHMIType {@link com.ford.syncV4.proxy.rpc.enums.AppHMIType}
+     */
     public void setAppType(Vector<AppHMIType> appHMIType) {
         if (appHMIType != null) {
             parameters.put(Names.appHMIType, appHMIType);
@@ -220,10 +386,20 @@ public class RegisterAppInterface extends RPCRequest {
         }
     }
 
+    /**
+     * ID used to validate app with policy table entries
+     *
+     * @return Application Id
+     */
     public Object getAppId() {
         return parameters.get(Names.appID);
     }
 
+    /**
+     * ID used to validate app with policy table entries
+     *
+     * @param appID Application Id
+     */
     public void setAppId(Object appID) {
         if (appID != null) {
             parameters.put(Names.appID, appID);

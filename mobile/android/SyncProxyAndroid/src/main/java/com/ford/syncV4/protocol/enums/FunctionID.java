@@ -80,6 +80,7 @@ public class FunctionID {
             put(Names.SetDisplayLayout, 36);
             put(Names.DiagnosticMessage, 37);
             put(Names.SystemRequest, 38);
+            put(Names.SendLocation, 39);
 
             /*
                 Base Notifications
