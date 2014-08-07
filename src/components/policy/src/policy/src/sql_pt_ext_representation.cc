@@ -779,8 +779,9 @@ bool SQLPTExtRepresentation::GatherUsageAndErrorCounts(
 bool SQLPTExtRepresentation::GatherAppLevels(
   policy_table::AppLevels* apps) const {
   dbms::SQLQuery query(db());
-  if (query.Prepare(sql_pt_ext::kSelectAppLevels)) {
-    LOG4CXX_INFO(logger_, "Failed select from app_level");
+  if (!query.Prepare(sql_pt_ext::kSelectAppLevels)) {
+    LOG4CXX_INFO(logger_, "Failed select from app_level. SQLError = "
+                 << query.LastError().text());
     return false;
   }
   const int kSecondsInMinute = 60;
