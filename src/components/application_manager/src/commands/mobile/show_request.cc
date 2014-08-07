@@ -194,6 +194,12 @@ void ShowRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[strings::soft_buttons] =
         (*message_)[strings::msg_params][strings::soft_buttons];
+    if ((*message_)[strings::msg_params][strings::soft_buttons].length() == 0) {
+      app->UnsubscribeFromSoftButtons(function_id());
+    } else {
+      MessageHelper::SubscribeApplicationToSoftButton(
+          (*message_)[strings::msg_params], app, function_id());
+    }
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::custom_presets)) {
