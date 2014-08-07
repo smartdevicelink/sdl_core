@@ -602,6 +602,39 @@ void ApplicationImpl::LoadPersistentFiles() {
   }
 }
 
+void ApplicationImpl::SubscribeToSoftButtons(int32_t cmd_id,
+                                        const SoftButtonID& softbuttons_id) {
+  sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
+  if (static_cast<int32_t>(mobile_apis::FunctionID::ScrollableMessageID) == cmd_id) {
+    CommandSoftButtonID::iterator it = cmd_softbuttonid_.find(cmd_id);
+    if (cmd_softbuttonid_.end() == it) {
+      cmd_softbuttonid_[cmd_id] = softbuttons_id;
+    }
+  } else {
+    cmd_softbuttonid_[cmd_id] = softbuttons_id;
+  }
+}
+
+
+bool ApplicationImpl::IsSubscribedToSoftButton(const uint32_t softbutton_id) {
+  sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
+  CommandSoftButtonID::iterator it = cmd_softbuttonid_.begin();
+  for (; it != cmd_softbuttonid_.end(); ++it) {
+    if((it->second).find(softbutton_id) != (it->second).end()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
+  sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
+  CommandSoftButtonID::iterator it = cmd_softbuttonid_.find(cmd_id);
+  if(it != cmd_softbuttonid_.end()) {
+    cmd_softbuttonid_.erase(it);
+  }
+}
+
 
 
 }  // namespace application_manager

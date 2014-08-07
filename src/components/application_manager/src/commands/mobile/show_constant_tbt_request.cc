@@ -162,6 +162,10 @@ void ShowConstantTBTRequest::Run() {
           (*message_)[strings::msg_params][strings::time_to_destination];
   }
 
+  if (msg_params.keyExists(strings::soft_buttons)) {
+    MessageHelper::SubscribeApplicationToSoftButton(msg_params, app, function_id());
+  }
+
   app->set_tbt_show_command(msg_params);
   SendHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT, &msg_params,
                  true);

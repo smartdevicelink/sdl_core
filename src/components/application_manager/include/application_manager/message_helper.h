@@ -422,6 +422,20 @@ class MessageHelper {
       smart_objects::SmartObject& message_params,
       ApplicationConstSharedPtr app);
 
+    /*
+     * @brief subscribe application to softbutton
+     *
+     * @param message_params contains data of request
+     *
+     * @param app current application
+     *
+     * @param function_id Unique command id from mobile API
+     */
+    static void SubscribeApplicationToSoftButton(
+        smart_objects::SmartObject& message_params,
+        ApplicationSharedPtr app,
+        int32_t function_id);
+
     static bool PrintSmartObject(const smart_objects::SmartObject& object);
 
     template<typename From, typename To>

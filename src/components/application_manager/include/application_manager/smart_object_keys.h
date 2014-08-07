@@ -119,6 +119,7 @@ const char progress_indicator[] = "progressIndicator";
 const char alert_type[] = "alertType";
 const char play_tone[] = "playTone";
 const char soft_buttons[] = "softButtons";
+const char soft_button_id[] = "softButtonID";
 const char custom_presets[] = "customPresets";
 const char audio_pass_display_text1[] = "audioPassThruDisplayText1";
 const char audio_pass_display_text2[] = "audioPassThruDisplayText2";

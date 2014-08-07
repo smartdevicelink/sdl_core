@@ -84,7 +84,6 @@ NON_LOCAL_SRCS = \
 	$(wildcard tcp/*.c*) \
 	$(wildcard pasa_bt/*.c*) \
 	$(wildcard mme/*.c*) \
-	#$(wildcard usb/*.c*) \
  
  .NOTPARALLEL:
 
@@ -126,7 +125,6 @@ HEADERS = \
 	$(wildcard ../include/$(COMPONENT_NAME)/pasa_bt/*.h*) \
 	$(wildcard ../include/$(COMPONENT_NAME)/tcp/*.h*) \
 	$(wildcard ../include/$(COMPONENT_NAME)/transport_adapter/*.h*) \
-	$(wildcard ../include/$(COMPONENT_NAME)/usb/*.h*) \
 	$(wildcard ../../protocol_handler/include/protocol_handler/*.h*) \
 	$(wildcard ../../resumption/include/*.h*) \
 	$(wildcard ../../connection_handler/include/connection_handler/*.h*) \
@@ -181,7 +179,6 @@ subdirs:
 	$(MAKE) -C transport_adapter $(MAKECMDGOALS)
 	$(MAKE) -C tcp $(MAKECMDGOALS)
 	$(MAKE) -C pasa_bt $(MAKECMDGOALS) 
-	#$(MAKE) -C usb $(MAKECMDGOALS) 
 	$(MAKE) -C mme $(MAKECMDGOALS)
 	 
 	
