@@ -26,38 +26,38 @@ public class SendLocation extends RPCRequest {
         super(that);
     }
 
-    public void setLongitudeDegrees(Float longitudeDegrees) {
+    public void setLongitudeDegrees(Double longitudeDegrees) {
         if (longitudeDegrees != null) {
-            store.put(Names.longitudeDegrees, longitudeDegrees);
+            parameters.put(Names.longitudeDegrees, longitudeDegrees);
         } else {
-            store.remove(Names.longitudeDegrees);
+            parameters.remove(Names.longitudeDegrees);
         }
     }
 
-    public Float getLongitudeDegrees() {
+    public Double getLongitudeDegrees() {
         if (!parameters.containsKey(Names.longitudeDegrees)) {
             return null;
         }
-        if (parameters.get(Names.longitudeDegrees) instanceof Integer) {
-            return (Float) parameters.get(Names.longitudeDegrees);
+        if (parameters.get(Names.longitudeDegrees) instanceof Double) {
+            return (Double) parameters.get(Names.longitudeDegrees);
         }
         return null;
     }
 
-    public void setLatitudeDegrees(Float latitudeDegrees) {
+    public void setLatitudeDegrees(Double latitudeDegrees) {
         if (latitudeDegrees != null) {
-            store.put(Names.latitudeDegrees, latitudeDegrees);
+            parameters.put(Names.latitudeDegrees, latitudeDegrees);
         } else {
-            store.remove(Names.latitudeDegrees);
+            parameters.remove(Names.latitudeDegrees);
         }
     }
 
-    public Float getLatitudeDegrees() {
+    public Double getLatitudeDegrees() {
         if (!parameters.containsKey(Names.latitudeDegrees)) {
             return null;
         }
-        if (parameters.get(Names.latitudeDegrees) instanceof Integer) {
-            return (Float) parameters.get(Names.latitudeDegrees);
+        if (parameters.get(Names.latitudeDegrees) instanceof Double) {
+            return (Double) parameters.get(Names.latitudeDegrees);
         }
         return null;
     }
@@ -69,9 +69,9 @@ public class SendLocation extends RPCRequest {
      */
     public void setLocationName(String locationName) {
         if (locationName != null) {
-            store.put(Names.locationName, locationName);
+            parameters.put(Names.locationName, locationName);
         } else {
-            store.remove(Names.locationName);
+            parameters.remove(Names.locationName);
         }
     }
 
@@ -95,9 +95,9 @@ public class SendLocation extends RPCRequest {
      */
     public void setLocationDescription(String locationName) {
         if (locationName != null) {
-            store.put(Names.locationDescription, locationName);
+            parameters.put(Names.locationDescription, locationName);
         } else {
-            store.remove(Names.locationDescription);
+            parameters.remove(Names.locationDescription);
         }
     }
 
@@ -121,9 +121,9 @@ public class SendLocation extends RPCRequest {
      */
     public void setAddressLines(Vector<String> addressLines) {
         if (addressLines != null) {
-            store.put(Names.addressLines, addressLines);
+            parameters.put(Names.addressLines, addressLines);
         } else {
-            store.remove(Names.addressLines);
+            parameters.remove(Names.addressLines);
         }
     }
 
@@ -150,9 +150,9 @@ public class SendLocation extends RPCRequest {
      */
     public void setPhoneNumber(String phoneNumber) {
         if (phoneNumber != null) {
-            store.put(Names.phoneNumber, phoneNumber);
+            parameters.put(Names.phoneNumber, phoneNumber);
         } else {
-            store.remove(Names.phoneNumber);
+            parameters.remove(Names.phoneNumber);
         }
     }
 
@@ -176,9 +176,9 @@ public class SendLocation extends RPCRequest {
      */
     public void setLocationImage(Image locationImage) {
         if (locationImage != null) {
-            store.put(Names.locationImage, locationImage);
+            parameters.put(Names.locationImage, locationImage);
         } else {
-            store.remove(Names.locationImage);
+            parameters.remove(Names.locationImage);
         }
     }
 
