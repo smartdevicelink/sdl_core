@@ -69,7 +69,7 @@ IAP2Device::~IAP2Device() {
 }
 
 bool IAP2Device::Init() {
-  const ProtocolConfig::ProtocolNameContainer& legacy_protocol_names = ProtocolConfig::LegacyProtocolNames();
+  const ProtocolConfig::ProtocolNameContainer& legacy_protocol_names = ProtocolConfig::IAP2LegacyProtocolNames();
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = legacy_protocol_names.begin(); i != legacy_protocol_names.end(); ++i) {
     std::string protocol_name = *i;
     ::std::string thread_name = "iAP2 connect notifier (" + protocol_name + ")";
@@ -87,7 +87,7 @@ bool IAP2Device::Init() {
     free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
   }
 
-  const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::HubProtocolNames();
+  const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::IAP2HubProtocolNames();
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = hub_protocol_names.begin(); i != hub_protocol_names.end(); ++i) {
     std::string protocol_name = *i;
     ::std::string thread_name = "iAP2 hub connect notifier (" + protocol_name + ")";

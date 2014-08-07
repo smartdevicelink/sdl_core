@@ -34,6 +34,7 @@
 #include "application_manager/commands/mobile/scrollable_message_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "interfaces/HMI_API.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 
@@ -46,7 +47,15 @@ ScrollableMessageResponse::ScrollableMessageResponse(
 
 void ScrollableMessageResponse::Run() {
   LOG4CXX_INFO(logger_, "ScrollableMessageResponse::Run");
-
+  mobile_apis::Result::eType result_code = static_cast<mobile_apis::Result::eType>(
+      (*message_)[strings::msg_params][strings::result_code].asInt());
+  ApplicationSharedPtr application =
+      ApplicationManagerImpl::instance()->application(
+          (*message_)[strings::params][strings::connection_key].asInt());
+  if ((mobile_apis::Result::REJECTED != result_code) && application) {
+    application->UnsubscribeFromSoftButtons(
+        (*message_)[strings::params][strings::function_id].asInt());
+  }
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 

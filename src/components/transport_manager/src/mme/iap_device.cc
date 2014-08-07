@@ -198,7 +198,7 @@ void IAPDevice::OnSessionOpened(uint32_t protocol_id, int session_id) {
 }
 
 void IAPDevice::OnSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id) {
-  const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::HubProtocolNames();
+  const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::IAPHubProtocolNames();
   bool is_hub = false;
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = hub_protocol_names.begin(); i != hub_protocol_names.end(); ++i) {
     if (protocol_name == *i) {

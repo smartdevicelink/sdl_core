@@ -218,6 +218,11 @@ FFW.VR = FFW.RPCObserver.create( {
 
                 SDL.SDLModel.changeRegistrationTTSVR(request.params.language, request.params.appID);
 
+                if (request.params.vrSynonyms) {
+                    SDL.VRPopUp.DeleteCommand(0, request.params.appID);
+                    SDL.VRPopUp.AddCommand(0, request.params.vrSynonyms, request.params.appID, "Application");
+                }
+
                 this.sendVRResult(SDL.SDLModel.resultCode["SUCCESS"],
                     request.id,
                     request.method);

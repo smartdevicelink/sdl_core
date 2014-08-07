@@ -122,6 +122,11 @@ void UpdateTurnListRequest::Run() {
 
   msg_params[strings::app_id] = app->app_id();
 
+  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    MessageHelper::SubscribeApplicationToSoftButton((*message_)[strings::msg_params],
+                                                    app, function_id());
+  }
+
   if ((*message_)[strings::msg_params].keyExists(strings::turn_list) ||
       (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     SendHMIRequest(hmi_apis::FunctionID::Navigation_UpdateTurnList, &msg_params,

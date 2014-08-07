@@ -42,6 +42,7 @@
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
 #include "connection_handler/device.h"
+#include "utils/lock.h"
 
 namespace usage_statistics {
 class StatisticsManager;
@@ -164,7 +165,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   bool IsCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
                                TLimitSource source);
+  virtual void SubscribeToSoftButtons(int32_t cmd_id,
+                                      const SoftButtonID& softbuttons_id);
+  virtual bool IsSubscribedToSoftButton(const uint32_t softbutton_id);
 
+  virtual void UnsubscribeFromSoftButtons(int32_t cmd_id);
 
  protected:
 
@@ -223,8 +228,15 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   typedef std::map<mobile_apis::FunctionID::eType, TimeToNumberLimit>
   CommandNumberTimeLimit;
 
+  /**
+   * @brief Defines id of SoftButton which is related from name of command
+   */
+  typedef std::map<int32_t, SoftButtonID>
+  CommandSoftButtonID;
   CommandNumberTimeLimit cmd_number_to_time_limits_;
-
+  CommandSoftButtonID cmd_softbuttonid_;
+  // Lock for command soft button id
+  sync_primitives::Lock cmd_softbuttonid_lock_;
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 

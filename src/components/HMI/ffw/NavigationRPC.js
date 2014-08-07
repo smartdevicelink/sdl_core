@@ -236,6 +236,14 @@ FFW.Navigation = FFW.RPCObserver.create( {
 
                     break;
                 }
+                case "Navigation.SendLocation": {
+
+                    this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+
+                    break;
+                }
             }
         }
     },
