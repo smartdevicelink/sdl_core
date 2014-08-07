@@ -7,9 +7,11 @@ import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import java.util.List;
 
 /**
- * Interface for handling special OnSystemRequest notifications: Download and Resume.
+ * Interface for handling special OnSystemRequest notifications: Download and Resume file, Policy,
+ * etc ...
  *
  * Created by enikolsky on 2014-02-03.
+ * Co-author: Yuriy Chernyshov
  */
 public interface IOnSystemRequestHandler {
     /**
@@ -40,4 +42,15 @@ public interface IOnSystemRequestHandler {
     public void onFileResumeRequest(String appId, ISystemRequestProxy proxy, String filename,
                                     Integer offset, Integer length,
                                     FileType fileType);
+
+    /**
+     * Requests to get Policy Table Snapshot file as raw data and process it. When done, result
+     * should be upload with
+     *
+     * @param proxy           The proxy used to upload the given file
+     * @param onSystemRequest {@link com.ford.syncV4.proxy.rpc.OnSystemRequest} notification
+     * @param appId           Application identifier
+     */
+    public void onPolicyTableSnapshotRequest(String appId, OnSystemRequest onSystemRequest,
+                                             ISystemRequestProxy proxy);
 }

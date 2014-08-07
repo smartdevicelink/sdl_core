@@ -2163,13 +2163,18 @@ public class SyncProxyALMManager {
 			
 			removeIProxySyncPDataResponseListener(response.getCorrelationId());
 		}
-	
-		@Override
-		public void onError(String info, Throwable throwable) {
-			_lifecycleListener.onError(info, throwable);
-		}
-		
-		@Override
+
+        @Override
+        public void onError(String info) {
+
+        }
+
+        @Override
+        public void onError(String appId, String errorMessage) {
+
+        }
+
+        @Override
 		public void onPerformInteractionResponse(String appId, PerformInteractionResponse response) {
 			final ISyncPerformInteractionResponseListener listener = _performInteractionResponseListeners.get(response.getCorrelationId());
 			Object tagToReturn = null;

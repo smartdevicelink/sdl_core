@@ -86,11 +86,17 @@ public interface IProxyListenerBase extends ISyncDriverDistractionListener,
 	/**
 	 * This method called when the SYNC Proxy experienced an error.
 	 *
-     * @param info      Includes information about the Exception that occurred.
-     * @param throwable The exception that occurred. <b>May be NULL</b>
+     * @param info Includes information about the Exception that occurred.
      */
-    public void onError(String info, Throwable throwable);
+    public void onError(String info);
 
+    /**
+     * This method called when the SYNC Proxy experienced an error.
+     *
+     * @param appId         Application identifier
+     * @param errorMessage  Includes information about the Exception that occurred.
+     */
+    public void onError(String appId, String errorMessage);
 
     /**
      * onGenericResponse() being called indicates that SYNC could not determine the
