@@ -121,6 +121,10 @@ void IAPConnection::OnSessionOpened(int session_id) {
 void IAPConnection::OnSessionClosed(int session_id) {
   sync_primitives::AutoLock auto_lock(session_ids_lock_);
   session_ids_.erase(session_id);
+  if (session_ids_.empty()) {
+    parent_->UnregisterConnection(app_handle_);
+    controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
+  }
 }
 
 }  // namespace transport_adapter

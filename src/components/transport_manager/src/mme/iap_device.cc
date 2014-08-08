@@ -282,6 +282,8 @@ void IAPDevice::OnSessionClosed(int session_id) {
   AppTable::iterator i = app_table_.find(session_id);
   if (i != app_table_.end()) {
     ApplicationHandle app_id = i->second;
+    LOG4CXX_DEBUG(logger_, "iAP: dropping session " << session_id << " for application " << app_id);
+    app_table_.erase(i);
     connections_lock_.Acquire();
     ConnectionContainer::const_iterator j = connections_.find(app_id);
     if (j != connections_.end()) {
@@ -292,8 +294,6 @@ void IAPDevice::OnSessionClosed(int session_id) {
       LOG4CXX_WARN(logger_, "iAP: no connection corresponding to application " << app_id);
     }
     connections_lock_.Release();
-    LOG4CXX_DEBUG(logger_, "iAP: dropping session " << session_id << " for application " << app_id);
-    app_table_.erase(i);
   }
   app_table_lock_.Release();
 }
