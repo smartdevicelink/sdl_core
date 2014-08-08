@@ -9,6 +9,8 @@ package com.ford.syncV4.net.parser;
 
 import com.ford.syncV4.net.HttpRequestParameters;
 
+import org.json.JSONException;
+
 /**
  * This class provides a functionality for the HTTP request data extraction from SDL message
  */
@@ -28,7 +30,7 @@ public abstract class RequestAbstractDataParser {
     protected static final String KEY_READ_TIMEOUT = "ReadTimeout";
     protected static final String KEY_INSTANCE_FOLLOW_REDIRECTS = "InstanceFollowRedirects";
     protected static final String KEY_CHARSET = "charset";
-    protected static final String KEY_CONTENT_LENGTH = "Content-Length";
+    public static final String KEY_CONTENT_LENGTH = "Content-Length";
     protected static final String KEY_BODY = "body";
 
     /**
@@ -38,5 +40,5 @@ public abstract class RequestAbstractDataParser {
      *
      * @return instance of the {@link com.ford.syncV4.net.HttpRequestParameters} object
      */
-    public abstract HttpRequestParameters getHTTPRequestParameters(byte[] incomingData);
+    public abstract HttpRequestParameters getHTTPRequestParameters(byte[] incomingData) throws JSONException;
 }

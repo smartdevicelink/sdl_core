@@ -2,6 +2,7 @@ package com.ford.syncV4.service;
 
 import android.net.Uri;
 
+import com.ford.syncV4.net.HttpRequestParameters;
 import com.ford.syncV4.net.IDataDownloader;
 
 /**
@@ -24,11 +25,11 @@ public interface IDataServiceProvider {
      *
      * @param dataDownloader implementation of the {@link com.ford.syncV4.net.IDataDownloader}
      *                       interface
-     * @param uri            Uri of the network resource
-     * @param requestData    bytes array of the request body
+     * @param url            network resource Url
+     * @param incomingData   bytes array of the incoming from SDL message
      *
      * @return bytes array
      */
-    public byte[] getPolicyTableUpdateData(IDataDownloader dataDownloader, Uri uri,
-                                           byte[] requestData);
+    public byte[] getPolicyTableUpdateData(IDataDownloader dataDownloader, String url,
+                                           byte[] incomingData);
 }

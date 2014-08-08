@@ -1,7 +1,6 @@
 package com.ford.syncV4.net;
 
-import android.net.Uri;
-
+import com.ford.syncV4.net.parser.RequestAbstractDataParser;
 import com.ford.syncV4.util.logger.Logger;
 
 import org.apache.http.HttpEntity;
@@ -10,10 +9,11 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
 /**
@@ -31,24 +31,42 @@ public class PolicyDataDownloaderImpl implements IDataDownloader {
 
     private static final String LOG_TAG = PolicyDataDownloaderImpl.class.getSimpleName();
 
-    private static final String HEADER_CONTENT_TYPE = "Content-Type";
-    private static final String HEADER_CONTENT_LENGTH = "Content-Length";
-    private static final String HEADER_CHAR_SET = "charset";
-
-    private static final String HEADER_CONTENT_TYPE_JSON = "application/json";
-    private static final String HEADER_CHAR_SET_UTF_8 = "utf-8";
-
     @Override
-    public byte[] downloadDataFromUri(Uri uri, byte[] requestData) {
-        if (uri == null) {
-            throw new NullPointerException(LOG_TAG + " downloadDataFromUri -> uri is null");
+    public byte[] downloadDataFromUri(HttpRequestParameters httpRequestParameters) {
+
+        String url = httpRequestParameters.getUri().toString();
+        Logger.d(LOG_TAG + " Request url:" + url);
+
+        HttpEntityEnclosingRequestBase request = null;
+
+        if (httpRequestParameters.getRequestMethod() == HttpRequestParameters.REQUEST_METHOD.POST) {
+            request = new HttpPost(url);
         }
-        HttpPost request = new HttpPost(uri.toString());
-        request.setHeader(HEADER_CONTENT_TYPE, HEADER_CONTENT_TYPE_JSON);
-        request.setHeader(HEADER_CONTENT_LENGTH, String.valueOf(requestData.length));
-        request.setHeader(HEADER_CHAR_SET, HEADER_CHAR_SET_UTF_8);
-        request.setEntity(new ByteArrayEntity(requestData));
+
+        if (request == null) {
+            Logger.w(LOG_TAG + " downloadDataFromUri -> request is null, " +
+                    "method:" + httpRequestParameters.getRequestMethod());
+            return new byte[0];
+        }
+
+        for (String headerName : httpRequestParameters.getRequestHeadersKeysSet()) {
+            // We don't need to set a length of the data as it may be wrong
+            if (headerName.equals(RequestAbstractDataParser.KEY_CONTENT_LENGTH)) {
+                continue;
+            }
+            //Logger.d(LOG_TAG + " Request header " +
+            //        "'" + headerName + ":" + httpRequestParameters.getHeaderValue(headerName) + "'");
+            request.setHeader(headerName, httpRequestParameters.getHeaderValue(headerName));
+        }
+
         HttpClient httpClient = new DefaultHttpClient();
+        String jsonString = httpRequestParameters.getRequestBody().toString();
+        InputStreamEntity reqEntity =
+                new InputStreamEntity(new ByteArrayInputStream(jsonString.getBytes()),
+                        jsonString.length());
+        reqEntity.setContentType("application/json");
+        request.setEntity(reqEntity);
+
         try {
             HttpResponse httpResponse = httpClient.execute(request);
             Logger.d(LOG_TAG + " Response code: " + httpResponse.getStatusLine().getStatusCode());
@@ -64,7 +82,7 @@ public class PolicyDataDownloaderImpl implements IDataDownloader {
                 }
             }
         } catch (ClientProtocolException e) {
-            Logger.e(LOG_TAG + " ClientProtocolException: " + e.getMessage());
+            Logger.e(LOG_TAG + " ClientProtocolException: " + e);
         } catch (IOException e) {
             Logger.e(LOG_TAG + " IOException: " + e.getMessage());
         }
