@@ -1,4 +1,38 @@
-﻿import QtTest 1.0
+﻿/**
+ * @file tst_ScrollableMessage.qml
+ * @brief Test Case for ScrollableMessageView.
+ * Copyright (c) 2014, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+import QtTest 1.0
 import QtQuick 2.0
 import QtMultimedia 5.0
 import com.ford.sdl.hmi.dbus_adapter 1.0
@@ -64,7 +98,6 @@ Item
          * Test Cases
          */
 
-        // -> Proverka dobavleniya -> Udaleniye kommandu -> Proverka udaleniya
         function test_01_deleteCommand()
         {
             console.debug("enter")
@@ -104,93 +137,74 @@ Item
            sdlUIProxy.deleteCommand(initData2)
 
             var a = 0
-            for(var i=0;((a===0)&&( i<app.options.count)); i++)
+            for(var i = 0;((a === 0) && ( i < app.options.count)); i++)
             {
                 if (app.options.get(i).id===initData2.menuID)
                     {
-                    a=1
+                        a = 1
                     }
             }
-            compare (a, 0, "Command into menu not removed")
+            compare (a, 0, "Command in menu isn't removed")
 
 
            destroyView()
            console.debug("exit")
        }
 
-        //Sozdaniye submenu -> Sozdanie kommandu v submenu -> Proverka sozdaniya -> Udaleniye kommandu iz submenu -> Proverka udaleniya
-        //
-        function test_02_deleteCommand()
-        {
+        function test_02_deleteCommand() {
             console.debug("enter")
             var initData = {
                 menuID: 1000,
                 menuParams: {
                     position: 1,
                     menuName: "SubMenu"
-                            },
+                },
                 appID: 1
-                           }
+            }
 
             var initData2 = {
                 cmdID: 1,
                 menuParams: {
                     menuName:"",
-                            },
+                },
                 cmdIcon:"",
                 appID: 1
-                            }
+            }
 
             createMessageView(initData.appID)
             var app = dataContainer.getApplication(initData.appID)
             var MenuCount = app.options.count
-            app.options.append (
-              {
+            app.options.append ({
                 "id": initData.menuID,
                 "name": initData.menuParams.menuName,
                 "position": initData.menuParams.position,
                 "type": Internal.MenuItemType.MI_SUBMENU,
                 "icon": undefined,
-                "subMenu":[  {
-                               "id":initData2.cmdID,
-                               "name": initData2.menuParams.menuName,
-                               "position": Constants.positionOfElementWithoutPosition,
-                               "type": Internal.MenuItemType.MI_PARENT,
-                               "icon": {
-                               "imageType": Common.ImageType.DYNAMIC,
-                               "value": "../res/nav/turnArrow.png"
-                              },
+                "subMenu":[{
+                                "id":initData2.cmdID,
+                                "name": initData2.menuParams.menuName,
+                                "position": Constants.positionOfElementWithoutPosition,
+                                "type": Internal.MenuItemType.MI_PARENT,
+                                "icon": {
+                                "imageType": Common.ImageType.DYNAMIC,
+                                "value": "../res/nav/turnArrow.png"
+                                 },
 
-                               "subMenu": []
-                              }
-                          ]
-              })
+                                "subMenu": []
+                           }]
+            })
 
             compare(app.options.count, MenuCount+1, "SubMenu into added")
             var SubMenuCount = app.options.get(0).subMenu.count
-            compare( SubMenuCount, 1, "Command into SubMenu is not added")
+            compare( SubMenuCount, 1, "Command is not added into SubMenu")
 
             sdlUIProxy.deleteCommand(initData2)
 
-            for (var i = 0; i<app.options.count;i++)
-            {
-                var option = app.options.get(i)
-                if (option.type === Internal.MenuItemType.MI_SUBMENU)
-                {
-                    var subMenu = option.subMenu
-                    for (var j = 0; j < subMenu.count; )
-                    {
-                        compare(subMenu.get(j).id, !(initData2.cmdID), "Command into removed")
-                        j++
-                    }
-                }
-            }
            compare(app.options.count , MenuCount+1, "Menu is changed")
            compare(app.options.get(0).subMenu.count, SubMenuCount-1, "Command into SubMenu is not removed")
 
            destroyView()
            console.debug("exit")
-
         }
     }
 }

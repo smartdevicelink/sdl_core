@@ -62,13 +62,11 @@ Item {
             dataContainer   = mainObject.getDataStorage()
         }
 
-
-
         function destroyTime() {
             mainObject.destroy()
         }
 
-        //Отсутствие конечного времени. Программа работает как таймер.
+        //No end time, works like a timer
         function test_01_noEndTimeInCountUp() {
             console.debug("enter")
 
@@ -90,7 +88,7 @@ Item {
             console.debug("exit")
         }
 
-        //Отстутствие начального времени. Программа обрабатывает ошибку.
+        //No start time. Function process error
         function test_02_noStartTime() {
             console.debug("enter")
 
@@ -110,7 +108,7 @@ Item {
             console.debug("exit")
         }
 
-        //Нажатие кнопки "стоп", когда программа на паузе. Игнорирование команды.
+        //Receive "pause", when onready paused
         function test_03_pauseAfterPause() {
             console.debug("enter")
 
@@ -135,7 +133,7 @@ Item {
             console.debug("exit")
         }
 
-        //Нажатие кнопки "продолжить", когда часы очистили. Игнорирование команды.
+        //Receive "RESUME" after "CLEAR"
         function test_04_resumeAfterClear() {
             console.debug("enter")
 
@@ -163,8 +161,6 @@ Item {
             console.debug("exit")
         }
 
-        //Нажатие кнопки "продолжить", после того, как таймер отсчитает время.
-        //Команда должна игнорироваться, но программа пишет, что выполнила команду успешно, хоть и ничего не сделала.
         function test_05_resumeAfterEnd() {
             console.debug("enter")
 
@@ -197,7 +193,7 @@ Item {
             console.debug("exit")
         }
 
-        //Запустить отсчёт времени 2 раза подряд. Программа работает корректно.
+        //Launch "COUNTUP" twice
         function test_06_twoCountUp() {
             console.debug("enter")
 
@@ -223,7 +219,7 @@ Item {
             console.debug("exit")
         }
 
-        //Нажать клавишу "продолжить", когда время не на паузе. Игнорирование команды.
+        //Get "RESUME", when clock is paused
         function test_07_resumeAfterResume() {
             console.debug("enter")
 
@@ -246,7 +242,7 @@ Item {
             console.debug("exit")
         }
 
-        //Запустить отсчёт времени в одну сторону, а потом в другую. Работает корректно.
+
         function test_08_countDownAfterCountUp() {
             console.debug("enter")
 
@@ -271,7 +267,7 @@ Item {
             destroyTime()
             console.debug("exit")
         }
-        //Отсутствие конечного времени. Программа работает как таймер. НО!!! Исчезает прогрессбар.
+
         function test_09_noEndTimeInCountDown() {
             console.debug("enter")
 

@@ -35,9 +35,9 @@
 import QtTest 1.0
 import QtQuick 2.0
 import QtMultimedia 5.0
-//import com.ford.sdl.hmi.dbus_adapter 1.0
-//import com.ford.sdl.hmi.hw_buttons 1.0
-//import com.ford.sdl.hmi.log4cxx 1.0
+import com.ford.sdl.hmi.dbus_adapter 1.0
+import com.ford.sdl.hmi.hw_buttons 1.0
+import com.ford.sdl.hmi.log4cxx 1.0
 import "../../../../src/components/qt_hmi/qml_model_qt5/controls"
 import "../../../../src/components/qt_hmi/qml_model_qt5/views"
 import "../../../../src/components/qt_hmi/qml_model_qt5/hmi_api" as HmiApi
@@ -100,7 +100,7 @@ Item {
         }
 
 
-        //zapolnenie vseh poley, proverka sohranenia ih v dataContainer.
+        //Fill up all fields, check save process to dataContainer
         function test_01_create() {
             console.debug("enter")
             var initData  = {
@@ -163,7 +163,7 @@ Item {
             destroyShow()
             console.debug("exit")
                         }
-        //vse pola pustie
+          //All fields are empty
           function test_02_emptyInit()
           {
               console.debug("enter")
@@ -227,7 +227,8 @@ Item {
               destroyShow()
               console.debug("exit")
           }
-//tol'ko obazatel'nue pola
+
+    //Mandatory fields only
     function test_03_create_mandatory_only() {
         console.debug("enter")
         var initData  = {
@@ -262,7 +263,7 @@ Item {
         destroyShow()
         console.debug("exit")
                     }
-    //pole s lishnim parametrom
+    //Field with extra param
     function test_04_fake_param() {
         console.debug("enter")
         var initData  = {
@@ -274,7 +275,7 @@ Item {
                 {fieldName:Common.TextFieldName.mainField4,fieldText:"showString4"},
                 {fieldName:Common.TextFieldName.mediaTrack,fieldText:"mediaTrack"},
                 {fieldName:Common.TextFieldName.statusBar,fieldText:"StatusBar",fakeParam:"FakeParam"},
-              {fieldName:Common.TextFieldName.mediaClock,fieldText:"12:34"}
+                {fieldName:Common.TextFieldName.mediaClock,fieldText:"12:34"}
                         ]
                         }
 
@@ -311,7 +312,7 @@ Item {
         sldUI.show (initData)
 
         try {
-
+            //Magic with digits - because enum of text.Alighnment enum and sdl alignment doesn't match
             var a;
             if(app.hmiUITextAlignment === 1) a=0;
             if(app.hmiUITextAlignment === 2) a=1;
@@ -357,7 +358,6 @@ Item {
         catch (e) {}
         destroyShow()
         console.debug("exit")
-                    }
-
+     }
 }
 }

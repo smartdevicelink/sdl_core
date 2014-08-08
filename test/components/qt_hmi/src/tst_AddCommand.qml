@@ -1,7 +1,7 @@
 /**
  * @file tst_AddSubMenu.qml
  * @brief Test Case for OptionsView.
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +31,6 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 
 import QtTest 1.0
 import QtQuick 2.0
@@ -68,7 +67,6 @@ Item {
         function createView(appID) {
             mainWindowLoader.source = "../../../../src/components/qt_hmi/qml_model_qt5/MainWindow.qml"
             var mainWindowObject = mainWindowLoader.item
-
             sdlUIProxy      = mainWindowObject.getUIProxy()
             dataContainer   = mainWindowObject.getDataStorage()
             dataContainer.addApplication({appName:"TestAppName", appId:appID})
@@ -162,7 +160,6 @@ Item {
             }
 
             for (var i = 0; i < 1010; i++) {
-
                 initData.Commands.push({
                     cmdID: i,
                     cmdIcon: {
