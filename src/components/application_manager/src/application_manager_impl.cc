@@ -2104,42 +2104,49 @@ void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
     hmi_capabilities_.attenuated_supported()
     ? mobile_apis::AudioStreamingState::ATTENUATED
     : mobile_apis::AudioStreamingState::NOT_AUDIBLE;
+  std::set<ApplicationSharedPtr> local_app_list = application_list_;
 
-  std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
+  std::set<ApplicationSharedPtr>::const_iterator it = local_app_list.begin();
+  std::set<ApplicationSharedPtr>::const_iterator itEnd = local_app_list.end();
   for (; it != itEnd; ++it) {
-    if ((*it)->is_media_application()) {
-      if (kTTSSessionChanging == changing_state) {
-        (*it)->set_tts_speak_state(true);
-      }
-      if ((*it)->audio_streaming_state() != state) {
-        (*it)->set_audio_streaming_state(state);
-        MessageHelper::SendHMIStatusNotification(*(*it));
+    if ((*it).valid()) {
+      if ((*it)->is_media_application()) {
+        if (kTTSSessionChanging == changing_state) {
+          (*it)->set_tts_speak_state(true);
+        }
+        if ((*it)->audio_streaming_state() != state) {
+          (*it)->set_audio_streaming_state(state);
+          MessageHelper::SendHMIStatusNotification(*(*it));
+        }
       }
     }
   }
 }
 
 void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
-  std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
+
+  std::set<ApplicationSharedPtr> local_app_list = application_list_;
+  std::set<ApplicationSharedPtr>::const_iterator it = local_app_list.begin();
+  std::set<ApplicationSharedPtr>::const_iterator itEnd = local_app_list.end();
   //according with SDLAQ-CRS-839
   bool is_application_audible = false;
 
   for (; it != itEnd; ++it) {
-    if ((*it)->is_media_application()) {
-      if (kTTSSessionChanging == changing_state) {
-        (*it)->set_tts_speak_state(false);
-      }
-      if ((!is_application_audible) && (!(vr_session_started())) &&
-          ((*it)->audio_streaming_state() !=
-              mobile_apis::AudioStreamingState::AUDIBLE) &&
-          (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level())) {
-        //according with SDLAQ-CRS-839
-        is_application_audible = true;
-        (*it)->set_audio_streaming_state(
-            mobile_apis::AudioStreamingState::AUDIBLE);
-        MessageHelper::SendHMIStatusNotification(*(*it));
+    if ((*it).valid()) {
+      if ((*it)->is_media_application()) {
+        if (kTTSSessionChanging == changing_state) {
+          (*it)->set_tts_speak_state(false);
+        }
+        if ((!is_application_audible) && (!(vr_session_started())) &&
+            ((*it)->audio_streaming_state() !=
+             mobile_apis::AudioStreamingState::AUDIBLE) &&
+            (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level())) {
+          //according with SDLAQ-CRS-839
+          is_application_audible = true;
+          (*it)->set_audio_streaming_state(
+                mobile_apis::AudioStreamingState::AUDIBLE);
+          MessageHelper::SendHMIStatusNotification(*(*it));
+        }
       }
     }
   }
