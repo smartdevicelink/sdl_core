@@ -1938,6 +1938,18 @@ void ApplicationManagerImpl::UnregisterApplication(
   return;
 }
 
+
+void ApplicationManagerImpl::UnregisterRevokedApplication(
+    const uint32_t& app_id, mobile_apis::Result::eType reason) {
+  UnregisterApplication(app_id, reason);
+
+  connection_handler_->CloseSession(app_id);
+
+  if (application_list_.empty()) {
+    connection_handler_->CloseRevokedConnection(app_id);
+  }
+}
+
 void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
   LOG4CXX_INFO(logger_, "Received message from Mobile side");
 
