@@ -556,13 +556,18 @@ SDL.SDLModel = Em.Object.create({
      * Function make diff between two arrays of permissions
      * remove argument array from existed array of permissions
      */
-    setAppPermissions: function(oldPermissions){
-        var temp = this.appPermissions.filter(function(item, i) {
-            var ok = oldPermissions.indexOf(item) === -1;
-            return ok;
+    setAppPermissions: function(appID, permissions){
+
+        var messageCodes = [];
+
+        permissions.forEach(function (x) {
+            messageCodes.push(x.name);
         });
 
-        this.set('appPermissions', temp);
+        messageCodes.push("AppPermissionsRevoked");
+
+        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.SettingsController.simpleParseUserFriendlyMessageData(message)}, appID, messageCodes);
+
     },
 
     /**
@@ -939,13 +944,6 @@ SDL.SDLModel = Em.Object.create({
             return;
         }
 
-        if (params.ttsName) {
-            for (var i = 0; i < params.ttsName.length; i++) {
-                var message = {"cmdID": 0, "vrCommands": [params.ttsName[i].text], "appID": params.application.appID, "type": "Application"};
-                this.addCommandVR(message);
-            }
-        }
-
         if (params.vrSynonyms) {
 
             var message = {"cmdID": 0, "vrCommands": params.vrSynonyms, "appID": params.application.appID, "type": "Application"};
@@ -994,10 +992,11 @@ SDL.SDLModel = Em.Object.create({
             } else {
                 SDL.ScrollableMessage.activate(SDL.SDLController.getApplicationModel(request.params.appID).appName, request.params, messageRequestId);
             }
+            return true;
         } else {
             FFW.UI.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, request.method, 'Higher priority request is being processed on HMI!');
+            return false;
         }
-
     },
 
     /**
@@ -1008,30 +1007,33 @@ SDL.SDLModel = Em.Object.create({
      */
     setProperties: function(params) {
 
-        for (var i in params) {
-            if (i === "keyboardProperties") {
-                if (params[i].language) {
-                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.language', params[i].language);
-                }
-                if (params[i].keyboardLayout) {
-                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.keyboardLayout', params[i].keyboardLayout);
-                }
-                if (params[i].keypressMode) {
-                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.keypressMode', params[i].keypressMode);
-                }
-                if (params[i].limitedCharacterList) {
-                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.limitedCharacterList', params[i].limitedCharacterList);
+        if (SDL.SDLController.getApplicationModel(params.appID)) {
+            for (var i in params) {
+                if (i === "keyboardProperties") {
+                    if (params[i].language) {
+                        SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.language', params[i].language);
+                    }
+                    if (params[i].keyboardLayout) {
+                        SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.keyboardLayout', params[i].keyboardLayout);
+                    }
+                    if (params[i].keypressMode) {
+                        SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.keypressMode', params[i].keypressMode);
+                    }
+                    if (params[i].limitedCharacterList) {
+                        SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.limitedCharacterList', params[i].limitedCharacterList);
+                    } else {
+                        SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.limitedCharacterList', []);
+                    }
+                    if (params[i].autoCompleteText) {
+                        SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.autoCompleteText', params[i].autoCompleteText);
+                    }
                 } else {
-                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.limitedCharacterList', []);
+                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.' + i, params[i]);
                 }
-                if (params[i].autoCompleteText) {
-                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.autoCompleteText', params[i].autoCompleteText);
-                }
-            } else {
-                SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.' + i, params[i]);
             }
+        } else {
+            console.error("CriticalError! No app registered with current appID!");
         }
-
     },
 
     /**
@@ -1135,8 +1137,10 @@ SDL.SDLModel = Em.Object.create({
 
         if (!SDL.AlertPopUp.active) {
             SDL.AlertPopUp.AlertActive(message, alertRequestId);
+            return true;
         } else {
             SDL.SDLController.alertResponse(this.resultCode['REJECTED'], alertRequestId);
+            return false;
         }
     },
 
@@ -1150,21 +1154,22 @@ SDL.SDLModel = Em.Object.create({
 
         if (!SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction) {
             SDL.SDLController.getApplicationModel(message.params.appID).activeRequests.uiPerformInteraction = message.id;
-        } else {
-            SDL.SDLController.interactionChoiseCloseResponse(message.params.appID, SDL.SDLModel.resultCode['REJECTED']);
-            return;
-        }
 
-        if (message.params && message.params.vrHelpTitle && message.params.vrHelp) {
+            if (message.params && message.params.vrHelpTitle && message.params.vrHelp) {
 
-            SDL.SDLModel.set('interactionData.vrHelpTitle', message.params.vrHelpTitle);
-            SDL.SDLModel.set('interactionData.vrHelp', message.params.vrHelp);
-        }
+                SDL.SDLModel.set('interactionData.vrHelpTitle', message.params.vrHelpTitle);
+                SDL.SDLModel.set('interactionData.vrHelp', message.params.vrHelp);
+            }
 
-       // if (message.params.choiceSet || message.params.interactionLayout == "KEYBOARD") {
             SDL.InteractionChoicesView.activate(message);
             SDL.SDLController.VRMove();
-        //}
+
+            return true;
+        } else {
+
+            FFW.UI.sendError(SDL.SDLModel.resultCode['REJECTED'], message.id, message.method, "UI PerformInterection REJECTED on HMI");
+            return false;
+        }
     },
 
     /**
@@ -1178,7 +1183,7 @@ SDL.SDLModel = Em.Object.create({
         if (!SDL.SDLModel.vrActiveRequests.vrPerformInteraction) {
             SDL.SDLModel.vrActiveRequests.vrPerformInteraction = message.id;
         } else {
-            SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode['REJECTED']);
+            FFW.VR.sendError(SDL.SDLModel.resultCode['REJECTED'], message.id, message.method, "VR PerformInterection REJECTED on HMI")
             return;
         }
 
@@ -1418,6 +1423,11 @@ SDL.SDLModel = Em.Object.create({
                     reason = 'GENERAL';
                     break;
                 }
+            }
+
+            if (SDL.SDLModel.stateLimited && reason === 'AUDIO') {
+
+                SDL.SDLModel.stateLimited = null;
             }
 
             SDL.TurnByTurnView.deactivate();

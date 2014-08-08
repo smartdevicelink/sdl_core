@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@color/main_bg_color"
     android:layout_width="fill_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/main_bg_color">
 
     <TextView
+        android:id="@+id/title"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:textColor="#FFFFFF"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="MobileNav Service"
-        android:id="@+id/title"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true" />
+        android:text="MobileNav Service"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textColor="#FFFFFF" />
 
     <CheckBox
         android:id="@+id/mobileNavCheckBox"
@@ -20,43 +20,63 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/title"
+        android:hint="@string/turn_on_label"
         android:text="@string/service_check_view_on"
-        android:textColor="@color/app_regular_text_color"
-        android:checked="false"
-        android:enabled="false"
-        android:hint="@string/mobile_navi_hint" />
+        android:textColor="@color/app_regular_text_color" />
+
+    <CheckBox
+        android:id="@+id/mobile_nav_loop_file"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/title"
+        android:layout_marginLeft="20dp"
+        android:layout_toRightOf="@id/mobileNavCheckBox"
+        android:text="@string/loop_file_label"
+        android:textColor="@color/app_regular_text_color" />
 
     <Button
         android:id="@+id/mobile_navi_service_secure_button_view"
-        android:text="@string/start_secure_service"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_below="@+id/title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_below="@+id/mobileNavCheckBox"
+        android:text="@string/start_secure_service"
+        android:textColor="@color/app_regular_text_color" />
 
     <Button
         android:id="@+id/mobile_navi_not_service_secure_button_view"
-        android:text="@string/start_not_secure_service"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
         android:layout_below="@+id/mobile_navi_service_secure_button_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:text="@string/start_not_secure_service"
+        android:textColor="@color/app_regular_text_color" />
 
     <TextView
         android:id="@+id/service_status_text_view"
         android:layout_width="match_parent"
-        android:text="Service State:"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/mobile_navi_not_service_secure_button_view" />
+        android:layout_below="@+id/mobile_navi_not_service_secure_button_view"
+        android:text="Service State:" />
 
     <Button
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Start File Streaming"
         android:id="@+id/file_streaming"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
         android:layout_below="@+id/service_status_text_view"
-        android:enabled="true"
-        android:textColor="@color/app_regular_text_color"
-        android:layout_centerHorizontal="true" />
+        android:text="Start File Streaming"
+        android:textColor="@color/app_regular_text_color" />
+
+    <Button
+        android:id="@+id/file_streaming_stop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/service_status_text_view"
+        android:layout_toRightOf="@id/file_streaming"
+        android:text="Stop File Streaming"
+        android:textColor="@color/app_regular_text_color" />
 
 </RelativeLayout>

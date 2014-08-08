@@ -55,7 +55,7 @@ uint64_t GetAvailableDiskSpace(const std::string& path);
  *
  * @param path to directory
  */
-uint32_t DirectorySize(const std::string& path);
+size_t DirectorySize(const std::string& path);
 
 /*
  * @brief Get size of current file
@@ -174,12 +174,39 @@ bool RemoveDirectory(const std::string& directory_name,
 bool IsAccessible(const std::string& name, int32_t how);
 
 /**
+  * @brief Check access rights for writing
+  *
+  * @param name path to file or folder
+  * @return returns true if has access rights.
+  */
+bool IsWritingAllowed(const std::string& name);
+
+/**
+  * @brief Check access rights for reading
+  *
+  * @param name path to file.
+  * @return returns true if file has access rights.
+  */
+bool IsReadingAllowed(const std::string& name);
+
+/**
   * @brief Lists all files in given directory
   *
   * @param name path to directory.
   * @return returns list of files.
   */
 std::vector<std::string> ListFiles(const std::string& directory_name);
+
+
+/**
+  * @brief Lists files in given directory
+  * if file name contains given substring
+  * @param name path to directory.
+  * @param substring.
+  * @return returns list of files.
+  */
+std::vector<std::string> ListFilesWithSubStr(const std::string& directory_name,
+                                             const std::string& sub_str);
 
 /**
  * @brief Creates or overwrites file with given binary contents

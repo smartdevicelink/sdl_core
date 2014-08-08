@@ -18,7 +18,7 @@ set (SOURCES
   ${CMAKE_CURRENT_SOURCE_DIR}/src/schema.cc
 )
 
-set (LIBRARIES dbus-1)
+set (LIBRARIES dbus-1 -L${DBUS_LIBS_DIRECTORY})
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/message_descriptions.cc

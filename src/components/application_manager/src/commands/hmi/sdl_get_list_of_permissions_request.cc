@@ -47,9 +47,13 @@ SDLGetListOfPermissionsRequest::~SDLGetListOfPermissionsRequest() {
 
 void SDLGetListOfPermissionsRequest::Run() {
   LOG4CXX_INFO(logger_, "SDLGetListOfPermissionsRequest::Run");
+  uint32_t connection_key = 0;
+  if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
+    connection_key = (*message_)[strings::msg_params][strings::app_id].asUInt();
+  }
   policy::PolicyHandler::instance()->OnGetListOfPermissions(
-      (*message_)[strings::msg_params][strings::app_id].asUInt(),
-      (*message_)[strings::params][strings::correlation_id].asUInt());
+        connection_key,
+        (*message_)[strings::params][strings::correlation_id].asUInt());
 }
 
 }  // namespace commands

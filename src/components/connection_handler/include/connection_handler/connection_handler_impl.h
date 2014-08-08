@@ -75,6 +75,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    */
   virtual ~ConnectionHandlerImpl();
 
+    void Stop();
   /**
    * \brief Sets observer pointer for connection_handler.
    * \param observer Pointer to observer object.
@@ -280,15 +281,14 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   virtual void StartDevicesDiscovery();
 
   /**
-   * \brief Close all associated sessions and close
-   * the connection associated with the key
-   * \param key Unique key used by other components as session identifier
+   * @brief Close the connection revoked by Policy
+   * @param connection_key pair of connection and session id
    */
-  virtual void CloseConnection(uint32_t key);
+  virtual void CloseRevokedConnection(uint32_t connection_key);
 
   /**
-   * \brief Close all associated sessions and close the
-   * connection pointed by handle
+   * @brief Close the connection pointed by handle
+   * @param connection_handle Connection unique id
    */
   virtual void CloseConnection(ConnectionHandle connection_handle) OVERRIDE;
 
@@ -346,7 +346,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param sessionId Identifier of the session
    * \return TRUE if session has protocol version which supports heartbeat otherwise returns FALSE
    */
-  virtual bool CheckSupportHeartBeat(
+  virtual bool IsHeartBeatSupported(
     transport_manager::ConnectionUID connection_handle,
     uint8_t session_id);
  private:
@@ -381,7 +381,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   /**
    * \brief List of devices
    */
-  DeviceList device_list_;
+  DeviceMap device_list_;
 
   /**
    * \brief List of connections

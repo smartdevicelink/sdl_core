@@ -225,6 +225,15 @@ struct FunctionalGroupPermission {
           state(kGroupUndefined) {
     }
 
+    bool operator ==(const FunctionalGroupPermission& rhs) {
+      if (this->group_id == rhs.group_id &&
+          this->group_alias == rhs.group_alias &&
+          this->group_name == rhs.group_name) {
+        return true;
+      }
+      return false;
+    }
+
     std::string group_alias;
     std::string group_name;
     uint32_t group_id;

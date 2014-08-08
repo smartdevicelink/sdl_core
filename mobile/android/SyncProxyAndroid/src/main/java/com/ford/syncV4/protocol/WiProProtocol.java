@@ -7,24 +7,15 @@ import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.session.Session;
 import com.ford.syncV4.util.logger.Logger;
 
-import java.util.HashMap;
 import java.util.Hashtable;
 
 public class WiProProtocol extends AbstractProtocol {
 
-    private final static String FailurePropagating_Msg = "Failure propagating ";
     private static final String CLASS_NAME = WiProProtocol.class.getSimpleName();
     private final SendProtocolMessageProcessor sendProtocolMessageProcessor =
             new SendProtocolMessageProcessor();
     private final Hashtable<Byte, Integer> sessionsHashIds = new Hashtable<Byte, Integer>();
     protected Hashtable<Byte, Object> _messageLocks = new Hashtable<Byte, Object>();
-    boolean _haveHeader = false;
-    int _headerBufWritePos = 0;
-    ProtocolFrameHeader _currentHeader = null;
-    byte[] _dataBuf = null;
-    int _dataBufWritePos = 0;
-    int hashID = 0;
-    private HashMap<Byte, Boolean> hasRPCStartedMap = new HashMap<Byte, Boolean>();
     private ProtocolFrameHeader mCurrentHeader = null;
     private boolean mHaveHeader = false;
     private byte[] mDataBuf = null;
@@ -77,7 +68,8 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     @Override
-    public void handleProtocolSessionStarted(ServiceType serviceType, byte sessionId, boolean encrypted, byte version) {
+    public void handleProtocolSessionStarted(ServiceType serviceType, byte sessionId,
+                                             boolean encrypted, byte version) {
         Logger.d(CLASS_NAME + " Protocol Session Started, protocol ver:" + version);
         setProtocolVersion(version);
         super.handleProtocolSessionStarted(serviceType, sessionId, encrypted, version);
@@ -214,7 +206,7 @@ public class WiProProtocol extends AbstractProtocol {
     }
 
     @Override
-    public void HandleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
+    public synchronized void HandleReceivedBytes(byte[] receivedBytes, int receivedBytesLength) {
         int receivedBytesReadPos = 0;
 
         //Logger.d(CLASS_NAME + " -> current protocol ver:" + getProtocolVersion());
@@ -289,6 +281,7 @@ public class WiProProtocol extends AbstractProtocol {
             receivedBytesReadPos += bytesNeeded;
 
             MessageFrameAssembler assembler = getFrameAssemblerForFrame(mCurrentHeader);
+            //Logger.i("mCurrentHeader " + mCurrentHeader + "MessageFrameAssembler " + assembler);
             if (getSecureSessionContextHashMap() != null && getSecureSessionContextHashMap().get(mCurrentHeader.getSessionId()) != null) {
                 assembler.setProtocolSecureManager(getSecureSessionContextHashMap().get(mCurrentHeader.getSessionId()).protocolSecureManager);
             }
@@ -345,7 +338,8 @@ public class WiProProtocol extends AbstractProtocol {
 
                 @Override
                 public void onStartServiceACK(byte sessionId, int messageId,
-                                              ServiceType serviceType, byte protocolVersion, boolean encrypted) {
+                                              ServiceType serviceType, byte protocolVersion,
+                                              boolean encrypted) {
                     // Use this sessionID to create a message lock
                     Object messageLock = _messageLocks.get(sessionId);
                     if (messageLock == null) {
@@ -358,14 +352,10 @@ public class WiProProtocol extends AbstractProtocol {
                     inspectStartServiceACKHeader(serviceType, sessionId, encrypted, protocolVersion);
                 }
 
-                private void inspectStartServiceACKHeader(ServiceType serviceType, byte sessionId, boolean encrypted, byte protocolVersion) {
+                private void inspectStartServiceACKHeader(ServiceType serviceType, byte sessionId,
+                                                          boolean encrypted, byte protocolVersion) {
                     if (serviceType.equals(ServiceType.RPC)) {
-                        if (hasRPCStartedMap.get(sessionId) == null || !hasRPCStartedMap.get(sessionId)) {
-                            handleProtocolSessionStarted(serviceType, sessionId, encrypted, protocolVersion);
-                            hasRPCStartedMap.put(sessionId, true);
-                        } else {
-                            handleProtocolServiceStarted(serviceType, sessionId, encrypted, protocolVersion);
-                        }
+                        handleProtocolSessionStarted(serviceType, sessionId, encrypted, protocolVersion);
                     } else {
                         handleProtocolServiceStarted(serviceType, sessionId, encrypted, protocolVersion);
 
@@ -379,7 +369,6 @@ public class WiProProtocol extends AbstractProtocol {
 
                 @Override
                 public void onEndService(byte sessionId, int messageId, ServiceType serviceType) {
-                    hasRPCStartedMap.put(sessionId, false);
                     handleEndServiceFrame(sessionId, messageId, serviceType);
                 }
 
@@ -396,7 +385,6 @@ public class WiProProtocol extends AbstractProtocol {
 
                 @Override
                 public void onEndServiceACK(byte sessionId, int messageId, ServiceType serviceType) {
-                    hasRPCStartedMap.put(sessionId, false);
                     handleEndServiceAckFrame(sessionId, messageId, serviceType);
                 }
 
@@ -454,5 +442,4 @@ public class WiProProtocol extends AbstractProtocol {
         }
         return result;
     }
-
 }

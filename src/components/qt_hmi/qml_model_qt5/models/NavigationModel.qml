@@ -45,6 +45,6 @@ QtObject {
 
     property real distanceToManeuver: 0
     property real distanceToManeuverScale: 0
-    property bool maneuverComplete: null
+    property bool maneuverComplete: false
     property int appID: -1
 }

@@ -294,7 +294,7 @@ public class SyncConnectionTest extends InstrumentationTestCase {
     public void testStartAudioDataTransferStartsPacetizer() throws Exception {
         final SyncConnection connection = new SyncConnection(mock(ISyncConnectionListener.class));
         connection.init(mTransportConfig);
-        OutputStream stream = connection.startAudioDataTransfer(SESSION_ID);
+        OutputStream stream = connection.startDataTransfer(SESSION_ID);
         H264Packetizer packetizer = (H264Packetizer) connection.mAudioPacketizer;
         assertEquals(Thread.State.RUNNABLE, packetizer.getThread().getState());
     }

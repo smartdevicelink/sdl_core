@@ -35,15 +35,13 @@
 
 #include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/transport_adapter/connection.h"
+#include "protocol/common.h"
 
 namespace transport_manager {
-
 namespace transport_adapter {
-
 
 class TransportAdapterController {
  public:
-
   virtual ~TransportAdapterController() {
   }
 
@@ -166,7 +164,7 @@ class TransportAdapterController {
    */
   virtual void DataReceiveDone(const DeviceUID& device_handle,
                                const ApplicationHandle& app_handle,
-                               RawMessageSptr message) = 0;
+                               RawMessagePtr message) = 0;
 
   /**
    * @brief Launch OnDataReceiveFailed event in the device adapter listener.
@@ -188,7 +186,7 @@ class TransportAdapterController {
    */
   virtual void DataSendDone(const DeviceUID& device_handle,
                             const ApplicationHandle& app_handle,
-                            RawMessageSptr message) = 0;
+                            RawMessagePtr message) = 0;
 
   /**
    * @brief Launch OnDataSendFailed event in the device adapter listener.
@@ -200,7 +198,7 @@ class TransportAdapterController {
    */
   virtual void DataSendFailed(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle,
-                              RawMessageSptr message, const DataSendError&) = 0;
+                              RawMessagePtr message, const DataSendError&) = 0;
 #ifdef CUSTOMER_PASA
   virtual TransportAdapter::Error DisconnectDevice(
       const DeviceUID& device_handle) = 0;
@@ -212,5 +210,4 @@ class TransportAdapterController {
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif /* transport_adapter_CONTROLLER_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_CONTROLLER_H_

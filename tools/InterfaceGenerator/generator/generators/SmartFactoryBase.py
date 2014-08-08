@@ -204,29 +204,28 @@ class CodeGenerator(object):
         return u"\n".join([self._enum_to_str_converter_template.substitute(
             namespace=namespace,
             enum=x.name,
-            mapping=self._indent_code(self._gen_enum_to_str_mapping(
-                x, namespace), 2)) for x in enums])
+            cstringvalues=self._indent_code(self._gen_enum_cstring_values(x), 2),
+            enumvalues=self._indent_code(self._gen_enum_enum_values(x, namespace), 2))
+            for x in enums])
 
-    def _gen_enum_to_str_mapping(self, enum, namespace):
-        """Generate enum to string mapping code.
-
-        Generates part of source code with specific enum to string value
-        mapping.
-
+    def _gen_enum_cstring_values(self, enum):
+        """Generate list of c-string representing enum values.
         Keyword arguments:
-        enums -- enum to generate string mapping.
-        namespace -- namespace to address enum.
-
+        enum -- enum to generate string mapping.
         Returns:
-        String value with enum to string mapping source code.
-
+        String value with c-string values.
         """
+        return u",\n".join(['"' + x.name + '"' for x in enum.elements.values()])
 
-        return u"\n".join([self._enum_to_str_mapping_template.substitute(
-            namespace=namespace,
-            enum_name=enum.name,
-            enum_value=x.primary_name,
-            string=x.name) for x in enum.elements.values()])
+    def _gen_enum_enum_values(self, enum, namespace):
+        """Generate list of all enum values.
+        Keyword arguments:
+        enum -- enum to generate the list.
+        namespace -- namespace to address enum.
+        Returns:
+        String value with enum values.
+        """
+        return u",\n".join([namespace + "::" + enum.name + "::" + x.primary_name for x in enum.elements.values()])
 
     def _gen_h_class(self, class_name, params, functions, structs):
         """Generate source code of class for header file.
@@ -1434,26 +1433,36 @@ class CodeGenerator(object):
         u'''\n''')
 
     _enum_to_str_converter_template = string.Template(
-        u'''template <>\n'''
-        u'''const std::map<${namespace}::${enum}::eType, '''
-        u'''std::string> &TEnumSchemaItem<${namespace}::${enum}::eType>::'''
-        u'''getEnumElementsStringRepresentation() {\n'''
-        u'''  static bool is_initialized = false;\n'''
-        u'''  static std::map<${namespace}::${enum}::eType, '''
-        u'''std::string> enum_string_representation;\n'''
+        u'''template<>\n'''
+        u'''const EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''EnumToCStringMap\n'''
+        u'''EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''enum_to_cstring_map_ =\n'''
+        u'''  EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''InitEnumToCStringMap();\n'''
         u'''\n'''
-        u'''  if (false == is_initialized) {\n'''
-        u'''${mapping}'''
+        u'''template<>\n'''
+        u'''const EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''CStringToEnumMap\n'''
+        u'''EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''cstring_to_enum_map_ =\n'''
+        u'''  EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''InitCStringToEnumMap();\n'''
         u'''\n'''
-        u'''    is_initialized = true;\n'''
-        u'''  }\n'''
+        u'''template<>\n'''
+        u'''const char* const\n'''
+        u'''EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''cstring_values_[] = {\n'''
+        u'''${cstringvalues}'''
+        u'''};\n'''
         u'''\n'''
-        u'''  return enum_string_representation;\n'''
-        u'''}\n''')
-
-    _enum_to_str_mapping_template = string.Template(
-        u'''enum_string_representation.insert(std::make_pair(${namespace}::'''
-        u'''${enum_name}::${enum_value}, "${string}"));''')
+        u'''template<>\n'''
+        u'''const ${namespace}::${enum}::eType\n'''
+        u'''EnumConversionHelper<${namespace}::${enum}::eType>::'''
+        u'''enum_values_[] = {\n'''
+        u'''${enumvalues}'''
+        u'''};\n'''
+        u'''\n''')
 
     _struct_schema_item_template = string.Template(
         u'''utils::SharedPtr<ISchemaItem> struct_schema_item_${name} = '''
@@ -1482,7 +1491,7 @@ class CodeGenerator(object):
     _struct_impl_code_tempate = string.Template(
         u'''${schema_loc_decl}'''
         u'''${schema_items_decl}'''
-        u'''std::map<std::string, CObjectSchemaItem::SMember> '''
+        u'''CObjectSchemaItem::Members '''
         u'''schema_members;\n\n'''
         u'''${schema_item_fill}'''
         u'''return CObjectSchemaItem::create(schema_members);''')
@@ -1535,14 +1544,14 @@ class CodeGenerator(object):
     _function_impl_code_tempate = string.Template(
         u'''${schema_loc_decl}'''
         u'''${schema_items_decl}'''
-        u'''std::map<std::string, CObjectSchemaItem::SMember> '''
+        u'''CObjectSchemaItem::Members '''
         u'''schema_members;\n\n'''
         u'''${schema_item_fill}'''
-        u'''std::map<std::string, CObjectSchemaItem::SMember> '''
+        u'''CObjectSchemaItem::Members '''
         u'''params_members;\n'''
         u'''${schema_params_fill}'''
         u'''\n'''
-        u'''std::map<std::string, CObjectSchemaItem::SMember> '''
+        u'''CObjectSchemaItem::Members '''
         u'''root_members_map;\n'''
         u'''root_members_map[NsSmartDeviceLink::NsJSONHandler::'''
         u'''strings::S_MSG_PARAMS] = '''

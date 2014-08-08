@@ -93,6 +93,221 @@ SDL.warningView = Em.ContainerView
 
                     self.set('isReady', true);
                 }, 2000);
+
+                var components = Em.ContainerView.create({
+
+                    classNames: 'components',
+
+                    childViews: [
+                        'BasicCommunication',
+                        'Buttons',
+                        'Navigation',
+                        'TTS',
+                        'UI',
+                        'VI',
+                        'VR'
+                    ],
+
+                    BasicCommunication: Em.ContainerView.extend({
+
+                        classNames: 'component',
+
+                        childViews: [
+                            'checkBox',
+                            'text'
+                        ],
+
+                        checkBox: Em.Checkbox.extend( {
+
+                            elementId: 'basicCommunicationCheckBox',
+
+                            classNames: 'basicCommunicationCheckBox item',
+
+                            checkedBinding: 'FLAGS.BC'
+
+                        }),
+
+                        text: SDL.Label.extend({
+
+                            classNames: 'basicCommunicationText item',
+
+                            content: 'BasicCommunication'
+
+                        })
+                    }),
+
+                    Buttons: Em.ContainerView.extend({
+
+                        classNames: 'component',
+
+                        childViews: [
+                            'checkBox',
+                            'text'
+                        ],
+
+                        checkBox: Em.Checkbox.extend( {
+
+                            elementId: 'buttonsCheckBox',
+
+                            classNames: 'buttonsCheckBox item',
+
+                            checkedBinding: 'FLAGS.Buttons'
+
+                        }),
+
+                        text: SDL.Label.extend({
+
+                            classNames: 'buttonsText item',
+
+                            content: 'Buttons'
+
+                        })
+                    }),
+
+                    Navigation: Em.ContainerView.extend({
+
+                        classNames: 'component',
+
+                        childViews: [
+                            'checkBox',
+                            'text'
+                        ],
+
+                        checkBox: Em.Checkbox.extend( {
+
+                            elementId: 'navigationCheckBox',
+
+                            classNames: 'navigationCheckBox item',
+
+                            checkedBinding: 'FLAGS.Navi'
+
+                        }),
+
+                        text: SDL.Label.extend({
+
+                            classNames: 'navigationText item',
+
+                            content: 'Navigation'
+
+                        })
+                    }),
+
+                    TTS: Em.ContainerView.extend({
+
+                        classNames: 'component',
+
+                        childViews: [
+                            'checkBox',
+                            'text'
+                        ],
+
+                        checkBox: Em.Checkbox.extend( {
+
+                            elementId: 'ttsCheckBox',
+
+                            classNames: 'ttsCheckBox item',
+
+                            checkedBinding: 'FLAGS.TTS'
+
+                        }),
+
+                        text: SDL.Label.extend({
+
+                            classNames: 'ttsText item',
+
+                            content: 'TTS'
+
+                        })
+                    }),
+
+                    UI: Em.ContainerView.extend({
+
+                        classNames: 'component',
+
+                        childViews: [
+                            'checkBox',
+                            'text'
+                        ],
+
+                        checkBox: Em.Checkbox.extend( {
+
+                            elementId: 'uiCheckBox',
+
+                            classNames: 'uiCheckBox item',
+
+                            checkedBinding: 'FLAGS.UI'
+
+                        }),
+
+                        text: SDL.Label.extend({
+
+                            classNames: 'uiText item',
+
+                            content: 'UI'
+
+                        })
+                    }),
+
+                    VI: Em.ContainerView.extend({
+
+                        classNames: 'component',
+
+                        childViews: [
+                            'checkBox',
+                            'text'
+                        ],
+
+                        checkBox: Em.Checkbox.extend( {
+
+                            elementId: 'viCheckBox',
+
+                            classNames: 'viCheckBox item',
+
+                            checkedBinding: 'FLAGS.VI'
+
+                        }),
+
+                        text: SDL.Label.extend({
+
+                            classNames: 'viText item',
+
+                            content: 'VI'
+
+                        })
+                    }),
+
+                    VR: Em.ContainerView.extend({
+
+                        classNames: 'component',
+
+                        childViews: [
+                            'checkBox',
+                            'text'
+                        ],
+
+                        checkBox: Em.Checkbox.extend( {
+
+                            elementId: 'vrCheckBox',
+
+                            classNames: 'vrCheckBox item',
+
+                            checkedBinding: 'FLAGS.VR'
+
+                        }),
+
+                        text: SDL.Label.extend({
+
+                            classNames: 'vrText item',
+
+                            content: 'VR'
+
+                        })
+                    })
+
+                });
+
+                components.appendTo('#warning_view');
+
             }.observes('SDL.appReady'),
 
             actionDown: function(event) {
@@ -113,6 +328,8 @@ SDL.warningView = Em.ContainerView
 
                     self._parentView.set('hide', true);
                 }, 1000);
+
+                SDL.RPCController.ConnectToSDL();
             }
         })
     });

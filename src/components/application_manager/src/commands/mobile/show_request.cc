@@ -36,6 +36,8 @@
 #include "application_manager/message_helper.h"
 #include "utils/file_system.h"
 
+#include <string.h>
+
 namespace application_manager {
 
 namespace commands {
@@ -67,6 +69,8 @@ void ShowRequest::Run() {
     return;
   }
 
+  // CheckStringsOfShowRequest must be before ProcessSoftButtons.
+  // (text contain whitespace)
   if (!CheckStringsOfShowRequest()) {
      LOG4CXX_ERROR(logger_, "Incorrect characters in string");
      SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -190,6 +194,12 @@ void ShowRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[strings::soft_buttons] =
         (*message_)[strings::msg_params][strings::soft_buttons];
+    if ((*message_)[strings::msg_params][strings::soft_buttons].length() == 0) {
+      app->UnsubscribeFromSoftButtons(function_id());
+    } else {
+      MessageHelper::SubscribeApplicationToSoftButton(
+          (*message_)[strings::msg_params], app, function_id());
+    }
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::custom_presets)) {
@@ -210,22 +220,25 @@ void ShowRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_Show: {
       LOG4CXX_INFO(logger_, "Received UI_Show event");
-
+      std::string response_info("");
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
       bool result = false;
-      HMICapabilities& hmi_capabilities =
-                      ApplicationManagerImpl::instance()->hmi_capabilities();
+
       if (mobile_apis::Result::SUCCESS == result_code) {
         result = true;
-      } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
-          hmi_capabilities.is_ui_cooperating()) {
+      } else if (mobile_apis::Result::WARNINGS == result_code) {
         result = true;
+        if (message[strings::params].keyExists(hmi_response::message)) {
+          response_info = message[strings::params][hmi_response::message].asString();
+        }
       }
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(result, result_code,
+                   response_info.empty() ? NULL : response_info.c_str(),
+                       &(message[strings::msg_params]));
       break;
     }
     default: {
@@ -311,10 +324,14 @@ bool ShowRequest::CheckStringsOfShowRequest() {
 
       if ((*it_sb).keyExists(strings::text)) {
         str = (*it_sb)[strings::text].asCharArray();
-        if (!CheckSyntax(str, true)) {
-          LOG4CXX_ERROR(logger_,
+        // CheckSyntax without second param(false to default).
+        // Requirement. Show with SoftButtons->text contain only whitespace
+        if (!CheckSyntax(str)) {
+          if (strlen(str)) {
+            LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons text syntax check failed");
-          return false;
+            return false;
+          }
         }
       }
 

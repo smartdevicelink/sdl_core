@@ -118,12 +118,16 @@ public class UpdateTurnListDialog extends BaseDialogFragment {
                                                 turn.setTurnIcon(turnImage);
                                             }
                                         }
-                                        turnsArray.add(turn);
+                                        if (turnListEnabled || iconListEnabled) {
+                                            turnsArray.add(turn);
+                                        }
                                     }
                                     final UpdateTurnList updateTurnList = new UpdateTurnList();
                                     updateTurnList.setCorrelationId(((SyncProxyTester) getActivity())
                                             .getNextCorrelationIdForCurrentFragment());
-                                    updateTurnList.setTurnList(turnsArray);
+                                    if (turnListEnabled || iconListEnabled) {
+                                        updateTurnList.setTurnList(turnsArray);
+                                    }
                                     if (useSoftButtons.isChecked()) {
                                         updateTurnList.setSoftButtons(currentSoftButtons);
                                     }

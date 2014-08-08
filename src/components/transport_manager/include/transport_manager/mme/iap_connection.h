@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_IAP_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_IAP_CONNECTION_H_
 
+#include <set>
 #include <ipod/ipod.h>
 
 #include "utils/lock.h"
@@ -55,7 +56,7 @@ class IAPConnection : public Connection {
   void Init();
 
  protected:
-  virtual TransportAdapter::Error SendData(RawMessageSptr message);
+  virtual TransportAdapter::Error SendData(RawMessagePtr message);
   virtual TransportAdapter::Error Disconnect();
 
  private:
@@ -70,6 +71,7 @@ class IAPConnection : public Connection {
   TransportAdapterController* controller_;
   IAPDevice* parent_;
   ipod_hdl_t* ipod_hdl_;
+  std::string protocol_name_; // for logging purposes only
   uint8_t buffer_[kBufferSize];
 
   std::set<int> session_ids_;

@@ -35,9 +35,9 @@
 
 #include "transport_manager/common.h"
 #include "transport_manager/error.h"
+#include "protocol/common.h"
 
 namespace transport_manager {
-
 namespace transport_adapter {
 
 class TransportAdapter;
@@ -196,7 +196,7 @@ class TransportAdapterListener {
   virtual void OnDataSendDone(const TransportAdapter* transport_adapter,
                               const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle,
-                              const RawMessageSptr data_container) = 0;
+                              const RawMessagePtr data_container) = 0;
 
   /**
    * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create data receive error,
@@ -210,7 +210,7 @@ class TransportAdapterListener {
   virtual void OnDataSendFailed(const TransportAdapter* transport_adapter,
                                 const DeviceUID& device_handle,
                                 const ApplicationHandle& app_handle,
-                                const RawMessageSptr data_container,
+                                const RawMessagePtr data_container,
                                 const DataSendError& error) = 0;
 
   /**
@@ -225,7 +225,7 @@ class TransportAdapterListener {
   virtual void OnDataReceiveDone(const TransportAdapter* transport_adapter,
                                  const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle,
-                                 const RawMessageSptr data_container) = 0;
+                                 const RawMessagePtr data_container) = 0;
 
   /**
    * @brief Search specified device adapter in the container of shared pointers to device adapters to be sure it is available, create data send error,
@@ -251,5 +251,4 @@ class TransportAdapterListener {
 
 }  // transport_adapter namespace
 }  // transport_manager namespace
-
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_transport_adapter_LISTENER
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_ADAPTER_TRANSPORT_ADAPTER_LISTENER_H_

@@ -38,7 +38,6 @@
 #include <set>
 #include "utils/prioritized_queue.h"
 #include "utils/message_queue.h"
-#include "utils/threads/thread.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/shared_ptr.h"
 
@@ -54,13 +53,11 @@
 #endif  // TIME_TESTER
 
 #ifdef ENABLE_SECURITY
-namespace security_manager {
-class SecurityManager;
-}  // namespace security_manager
+#include "security_manager/security_manager.h"
 #endif  // ENABLE_SECURITY
 
 /**
- *\namespace NsProtocolHandler
+ *\namespace protocol_handlerHandler
  *\brief Namespace for SmartDeviceLink ProtocolHandler related functionality.
  */
 namespace protocol_handler {
@@ -445,9 +442,9 @@ class ProtocolHandlerImpl
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON raw_ford_messages_from_mobile_ thread!
-  void Handle(const impl::RawFordMessageFromMobile &message);
+  void Handle(const impl::RawFordMessageFromMobile message);
   // CALLED ON raw_ford_messages_to_mobile_ thread!
-  void Handle(const impl::RawFordMessageToMobile &message);
+  void Handle(const impl::RawFordMessageToMobile message);
 
 #ifdef ENABLE_SECURITY
   /**
@@ -520,7 +517,8 @@ class ProtocolHandlerImpl
   // Thread that pumps messages prepared to being sent to mobile side.
   impl::ToMobileQueue raw_ford_messages_to_mobile_;
 
-    sync_primitives::Lock protocol_observers_lock_;
+  sync_primitives::Lock protocol_observers_lock_;
+
 #ifdef TIME_TESTER
   PHMetricObserver *metric_observer_;
 #endif  // TIME_TESTER

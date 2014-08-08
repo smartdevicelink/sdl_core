@@ -74,6 +74,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     virtual EndpointUrls GetUpdateUrls(int service_type);
 
     virtual int GetNotificationsNumber(const std::string& priority);
+    virtual bool GetPriority(const std::string& policy_app_id,
+                             std::string* priority);
     InitResult Init();
     bool Close();
     bool Clear();
@@ -158,6 +160,14 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const policy_table::NumberOfNotificationsPerMinute& notifications);
     bool SaveMessageType(const std::string& type);
     bool SaveLanguage(const std::string& code);
+
+    /**
+     * @brief Allows to generate hash from the specified string.
+     * The djb2 algorithm uses for hash generation.
+     * @param str_to_hash - the string from which hash should be generated.
+     * @return integer hash for the specified string.
+     */
+    unsigned long GenerateHash(const std::string& str_to_hash);
 };
 }  //  namespace policy
 

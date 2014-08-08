@@ -162,6 +162,10 @@ void ShowConstantTBTRequest::Run() {
           (*message_)[strings::msg_params][strings::time_to_destination];
   }
 
+  if (msg_params.keyExists(strings::soft_buttons)) {
+    MessageHelper::SubscribeApplicationToSoftButton(msg_params, app, function_id());
+  }
+
   app->set_tbt_show_command(msg_params);
   SendHMIRequest(hmi_apis::FunctionID::Navigation_ShowConstantTBT, &msg_params,
                  true);
@@ -252,6 +256,43 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
     }
   }
 
+  if ((*message_)[strings::msg_params].keyExists(strings::navigation_text_1)) {
+    str = (*message_)[strings::msg_params]
+                      [strings::navigation_text_1].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_,
+                    "Invalid navigation_text_1 value syntax check failed");
+      return true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::navigation_text_2)) {
+    str = (*message_)[strings::msg_params]
+                      [strings::navigation_text_2].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_,
+                    "Invalid navigation_text_2 value syntax check failed");
+      return true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::eta)) {
+    str = (*message_)[strings::msg_params][strings::eta].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_, "Invalid eta value syntax check failed");
+      return true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::total_distance)) {
+    str = (*message_)[strings::msg_params]
+                      [strings::total_distance].asCharArray();
+    if (!CheckSyntax(str, true)) {
+      LOG4CXX_ERROR(logger_,
+                    "Invalid total_distance value syntax check failed");
+      return true;
+    }
+  }
   return false;
 }
 

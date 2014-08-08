@@ -1,5 +1,6 @@
 package com.ford.syncV4.android.activity;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -24,9 +25,8 @@ import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.constants.Const;
 import com.ford.syncV4.android.manager.AppIdManager;
 import com.ford.syncV4.android.manager.AppPreferencesManager;
-import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.protocol.enums.ServiceType;
-import com.ford.syncV4.proxy.SyncProxyBase;
+import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.transport.TransportType;
@@ -52,7 +52,7 @@ public class AppSetUpDialog extends BaseDialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         Context context = getActivity();
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(
-                getActivity().LAYOUT_INFLATER_SERVICE);
+                Activity.LAYOUT_INFLATER_SERVICE);
         final View view = inflater.inflate(R.layout.selectprotocol,
                 (ViewGroup) getActivity().findViewById(R.id.selectprotocol_Root));
         String[] services = new String[]{ServiceType.AUDIO_SERVICE_NAME, ServiceType.MOBILE_NAV_NAME};
@@ -76,10 +76,9 @@ public class AppSetUpDialog extends BaseDialogFragment {
         });
 
         final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
-        final CheckBox isHearBeatAck = (CheckBox) view.findViewById(R.id.heartbeatAck);
         final CheckBox doDeviceRootCheckView = (CheckBox) view.findViewById(R.id.root_detection_view);
-
-
+        final CheckBox reconnectionOnHBView = (CheckBox) view.findViewById(R.id.hb_reconnection_view);
+        final CheckBox processAckFromSDLView = (CheckBox) view.findViewById(R.id.ack_from_sdl);
         final CheckBox mediaCheckBox = (CheckBox) view.findViewById(R.id.selectprotocol_checkMedia);
         final CheckBox naviCheckBox = (CheckBox) view.findViewById(
                 R.id.selectprotocol_checkMobileNavi);
@@ -163,24 +162,6 @@ public class AppSetUpDialog extends BaseDialogFragment {
         } else {
             customAppIdEditView.setText(AppPreferencesManager.getCustomAppId());
         }
-        /*customAppIdEditView.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                //Log.d(LOG_TAG, "App Id before changed to: " + customAppIdEditView.getText().toString().trim());
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                //Log.d(LOG_TAG, "App Id on changed to: " + customAppIdEditView.getText().toString().trim());
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                Log.d(LOG_TAG, "App Id after changed to: " +
-                        customAppIdEditView.getText().toString().trim());
-                AppPreferencesManager.setCustomAppId(customAppIdEditView.getText().toString().trim());
-            }
-        });*/
 
         transportGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -292,15 +273,6 @@ public class AppSetUpDialog extends BaseDialogFragment {
                         String lang = ((Language) langSpinner.getSelectedItem()).name();
                         String hmiLang = ((Language) hmiLangSpinner.getSelectedItem()).name();
 
-                        int transportType = Const.Transport.KEY_USB;
-                        switch (transportGroup.getCheckedRadioButtonId()) {
-                            case R.id.selectprotocol_radioWiFi:
-                                transportType = Const.Transport.KEY_TCP;
-                                break;
-                            case R.id.selectprotocol_radioBT:
-                                transportType = Const.Transport.KEY_BLUETOOTH;
-                                break;
-                        }
                         String ipAddress = ipAddressEditText.getText().toString();
                         int tcpPort = Integer.parseInt(tcpPortEditText.getText().toString());
                         boolean autoSetAppIcon = autoSetAppIconCheckBox.isChecked();
@@ -312,7 +284,13 @@ public class AppSetUpDialog extends BaseDialogFragment {
                         if (AppPreferencesManager.getIsCustomAppId()) {
                             AppPreferencesManager.setCustomAppId(appId);
                         }
-                        boolean success = prefs.edit()
+
+                        final CheckBox isStartSessionSecuredView =
+                                (CheckBox) view.findViewById(R.id.selectprotocol_session_encrypted);
+                        AppPreferencesManager.setIsStartSecureSession(
+                                isStartSessionSecuredView.isChecked());
+
+                        final boolean success = prefs.edit()
                                 .putBoolean(Const.PREFS_KEY_ISMEDIAAPP, isMedia)
                                 .putBoolean(Const.PREFS_KEY_ISNAVIAPP, isNavi)
                                 .putBoolean(Const.Transport.PREFS_KEY_IS_NSD, mNSDPrefValue)
@@ -325,6 +303,10 @@ public class AppSetUpDialog extends BaseDialogFragment {
                                 .putInt(Const.Transport.PREFS_KEY_TRANSPORT_PORT, tcpPort)
                                 .putBoolean(Const.PREFS_KEY_AUTOSETAPPICON, autoSetAppIcon)
                                 .putBoolean(Const.PREFS_KEY_HEARTBEAT, isHearBeat.isChecked())
+                                .putBoolean(Const.PREF_KEY_PROCESS_SDL_HB_ACK,
+                                        processAckFromSDLView.isChecked())
+                                .putBoolean(Const.PREF_KEY_RECONNECT_ON_HB_TIMEOUT,
+                                        reconnectionOnHBView.isChecked())
                                 .commit();
                         if (!success) {
                             Logger.w(LOG_TAG + "Can't save selected protocol properties");
@@ -341,14 +323,11 @@ public class AppSetUpDialog extends BaseDialogFragment {
     }
 
     private void setupHeartbeat(View view) {
-        CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
-        CheckBox isHearBeatAck = (CheckBox) view.findViewById(R.id.heartbeatAck);
-        if (isHearBeat.isChecked()) {
-            SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL);
-        } else {
-            SyncProxyBase.setHeartBeatInterval(ProxyService.HEARTBEAT_INTERVAL_MAX);
-        }
-        SyncProxyBase.isHeartbeatAck(isHearBeatAck.isChecked());
+        final CheckBox isHearBeat = (CheckBox) view.findViewById(R.id.heartbeat);
+        final CheckBox isHearBeatAck = (CheckBox) view.findViewById(R.id.heartbeatAck);
+        AppPreferencesManager.setHeartbeatInterval(isHearBeat.isChecked() ?
+                HeartbeatMonitor.HEARTBEAT_INTERVAL : HeartbeatMonitor.HEARTBEAT_INTERVAL_MAX);
+        AppPreferencesManager.setIsHeartbeatAck(isHearBeatAck.isChecked());
     }
 
     private void showNSDUnsupportedView(View view) {

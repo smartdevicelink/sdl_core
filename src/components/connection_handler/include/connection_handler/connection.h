@@ -39,7 +39,7 @@
 #include "utils/lock.h"
 #include "connection_handler/device.h"
 #include "connection_handler/heartbeat_monitor.h"
-#include "protocol_handler/service_type.h"
+#include "protocol/service_type.h"
 
 #ifdef ENABLE_SECURITY
 namespace security_manager {

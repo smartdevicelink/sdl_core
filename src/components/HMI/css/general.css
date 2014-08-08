@@ -1132,6 +1132,24 @@ px
     line-height: 50px;
 }
 
+#warning_view .components{
+    margin-top: 20px;
+    width: 420px;
+}
+
+#warning_view .component{
+    width: 200px;
+    height: 20px;
+    float: right;
+    position: relative;
+}
+
+#warning_view .item{
+    position: relative;
+    float: left;
+    margin-left: 10px;
+}
+
 .hideWarning {
     width: 0px !important;
     overflow: hidden;

@@ -85,7 +85,8 @@ class SubscribeVehicleDataRequest : public CommandRequestImpl {
 #endif // #ifdef HMI_DBUS_API
 
  private:
-  bool IsAnythingAlreadySubscribed();
+  bool IsAnythingAlreadySubscribed(
+      const smart_objects::SmartObject& msg_params) const;
 
   DISALLOW_COPY_AND_ASSIGN(SubscribeVehicleDataRequest);
 };

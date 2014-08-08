@@ -5,9 +5,9 @@ import android.content.SharedPreferences;
 
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.constants.Const;
+import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitor;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.transport.TransportType;
-import com.stericson.RootTools.RootTools;
 
 /**
  * Created with Android Studio.
@@ -38,7 +38,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(Const.Transport.PREFS_KEY_TRANSPORT_TYPE, transportTypeIntValue);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -69,7 +69,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(Const.Policy.PREF_KEY_POLICY_UPDATE_FILE_PATH, filePath);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -91,7 +91,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(Const.Policy.PREF_KEY_POLICY_UPDATE_AUTO_REPLAY, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -113,7 +113,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(Const.HashId.PREF_KEY_USE_HASH_ID, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -135,7 +135,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(Const.HashId.PREF_KEY_USE_CUSTOM_HASH_ID, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -158,7 +158,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(Const.HashId.PREF_KEY_CUSTOM_HASH_ID, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -179,7 +179,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(Const.HashId.PREF_KEY_LAST_HASH_IDS, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -206,7 +206,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(Const.PREF_KEY_IS_CUSTOM_APP_ID, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -222,7 +222,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(Const.PREF_KEY_CUSTOM_APP_ID, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -231,6 +231,26 @@ public class AppPreferencesManager {
     public static String getCustomAppId() {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         return sharedPreferences.getString(Const.PREF_KEY_CUSTOM_APP_ID, "");
+    }
+
+    /**
+     * Set flag that indicates whether to start Session as secured
+     *
+     * @param value boolean value
+     */
+    public static void setIsStartSecureSession(boolean value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.PREF_KEY_START_SECURE_SESSION, value);
+        editor.apply();
+    }
+
+    /**
+     * @return flag that indicates whether to start Session as secured
+     */
+    public static boolean getIsStartSecureSession() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_START_SECURE_SESSION, false);
     }
 
     /**
@@ -257,7 +277,7 @@ public class AppPreferencesManager {
         disableLock = !disableLock;
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(Const.PREFS_KEY_DISABLE_LOCK_WHEN_TESTING, disableLock);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -276,7 +296,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(Const.PREFS_KEY_PROTOCOL_MIN_VERSION, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -287,7 +307,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putBoolean(Const.PREF_KEY_DO_DEVICE_ROOT_CHECK, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -306,7 +326,7 @@ public class AppPreferencesManager {
         SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putInt(Const.PREFS_KEY_PROTOCOL_MAX_VERSION, value);
-        editor.commit();
+        editor.apply();
     }
 
     /**
@@ -331,5 +351,84 @@ public class AppPreferencesManager {
      */
     private static Context getAppContext() {
         return MainApp.getInstance().getApplicationContext();
+    }
+
+    /**
+     * @return interval of the Heartbeat messages in milliseconds
+     */
+    public static int getHeartbeatInterval() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getInt(Const.PREF_KEY_HB_INTERVAL,
+                HeartbeatMonitor.HEARTBEAT_INTERVAL);
+    }
+
+    /**
+     * Set interval of the Heartbeat messages in milliseconds
+     *
+     * @param value value in milliseconds
+     */
+    public static void setHeartbeatInterval(int value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(Const.PREF_KEY_HB_INTERVAL, value);
+        editor.apply();
+    }
+
+    /**
+     * @return true if it is necessary to send Ack for the Heartbeat Message
+     * (which has been sent from SDL), false - otherwise
+     */
+    public static boolean getIsHeartbeatAck() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_HB_ACK, true);
+    }
+
+    /**
+     * Set true if it is necessary to send Ack for the Heartbeat Message
+     * (which has been sent from SDL), false - otherwise
+     *
+     * @param value true or false
+     */
+    public static void setIsHeartbeatAck(boolean value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.PREF_KEY_HB_ACK, value);
+        editor.apply();
+    }
+
+    /**
+     * @return true if it is necessary to reconnect when Heartbeat Timed Out, false - otherwise
+     */
+    public static boolean isReconnectOnHBTimeout() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_RECONNECT_ON_HB_TIMEOUT, true);
+    }
+
+    /**
+     * @return true if it is necessary to process Ack from SDl on HeartBeat message, false - otherwise
+     */
+    public static boolean isProcessHeartBeatSDLAck() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_PROCESS_SDL_HB_ACK, true);
+    }
+
+    /**
+     * @return true if it is necessary to process Policy Table Snapshot from SDL, false - otherwise
+     */
+    public static boolean getIsProcessPolicyTableSnapshot() {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        return sharedPreferences.getBoolean(Const.PREF_KEY_PROCESS_POLICY_TABLE_SNAPSHOT, true);
+    }
+
+    /**
+     * Set true if it is necessary to process Policy Table Snapshot from SDL, false - otherwise
+     *
+     * @param value true or false
+     */
+    public static void setIsProcessPolicyTableSnapshot(boolean value) {
+        SharedPreferences sharedPreferences = getAppContext().getSharedPreferences(Const.PREFS_NAME, 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putBoolean(Const.PREF_KEY_PROCESS_POLICY_TABLE_SNAPSHOT, value);
+        editor.apply();
     }
 }

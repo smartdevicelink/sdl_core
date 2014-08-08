@@ -57,7 +57,7 @@ class ApplicationManager {
     /**
      * Inits application manager
      */
-    virtual void Init() = 0;
+    virtual bool Init() = 0;
 
     /**
      * @brief Stop work.

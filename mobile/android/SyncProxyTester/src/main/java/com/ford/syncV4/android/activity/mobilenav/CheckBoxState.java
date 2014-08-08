@@ -11,7 +11,6 @@ public class CheckBoxState {
 
     protected final CheckBox item;
     protected CheckBoxStateValue state;
-    //protected String hintString;
     protected String textStringOff;
     protected String textStringOn;
     protected Context context;
@@ -44,7 +43,6 @@ public class CheckBoxState {
 
     public void setStateOff() {
         getItem().setText(textStringOn);
-        //getItem().setHint(hintString);
         getItem().setEnabled(true);
         getItem().setChecked(false);
         setState(CheckBoxStateValue.OFF);

@@ -2,14 +2,19 @@ package com.ford.syncV4.android.activity.mobilenav;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.View;
 import android.widget.Button;
+import android.widget.CompoundButton;
 
 import com.ford.syncV4.android.MainApp;
+import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.listener.ConnectionListener;
 import com.ford.syncV4.android.listener.ConnectionListenersManager;
 import com.ford.syncV4.android.service.ProxyService;
 import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.util.logger.Logger;
+
+import java.io.OutputStream;
 
 /**
  * Created with Android Studio.
@@ -24,10 +29,13 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
     private static final String TAG = SyncServiceBaseFragment.class.getSimpleName();
 
     protected Button mDataStreamingButton;
+    protected Button mStopDataStreamingButton;
     protected CheckBoxState mSessionCheckBoxState;
     protected FileStreamingLogic mFileStreamingLogic;
 
     private String mAppId = "";
+    private ServiceType mServiceType = null;
+    private volatile boolean mDoFileStreamingLoop = false;
 
     @Override
     public void onProxyClosed() {
@@ -44,6 +52,15 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
 
     @Override
     public void dataStreamingStopped() {
+        mDataStreamingButton.setText("Start File Streaming");
+
+        if (mDoFileStreamingLoop) {
+            mFileStreamingLogic.restartFileStreaming();
+        }
+    }
+
+    @Override
+    public void dataStreamingCanceled() {
         mDataStreamingButton.setText("Start File Streaming");
     }
 
@@ -70,7 +87,25 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
         mAppId = value;
     }
 
+    public ServiceType getServiceType() {
+        if (mServiceType == null) {
+            throw new NullPointerException(((Object) this).getClass().getSimpleName() +
+                    " get ServiceType is NULL," +
+                    " probably it has not been initialized in the super class");
+        }
+        return mServiceType;
+    }
+
+    public void setServiceType(ServiceType value) {
+        mServiceType = value;
+    }
+
     protected void startBaseFileStreaming(int resourceId) {
+        if (mFileStreamingLogic.getOutputStream() == null) {
+            OutputStream outputStream = ((SyncProxyTester) getActivity())
+                    .getOutputStreamForService(getAppId(), getServiceType());
+            mFileStreamingLogic.setOutputStream(outputStream);
+        }
         mFileStreamingLogic.setFileResID(resourceId);
         mFileStreamingLogic.startFileStreaming();
     }
@@ -87,6 +122,21 @@ public class SyncServiceBaseFragment extends Fragment implements ServicePreviewF
         mFileStreamingLogic.resetStreaming();
         mSessionCheckBoxState.setStateOff();
     }
+
+    protected CompoundButton.OnCheckedChangeListener loopFileStreamListener =
+            new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    mDoFileStreamingLoop = isChecked;
+                }
+            };
+
+    protected View.OnClickListener stopFileStreamingListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mFileStreamingLogic.resetStreaming();
+        }
+    };
 
     /**
      * Add all necessary listeners

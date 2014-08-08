@@ -165,7 +165,7 @@ class MessageHelper {
      *
      */
     static smart_objects::SmartObject* CreateDeviceListSO(
-      const connection_handler::DeviceList& devices);
+      const connection_handler::DeviceMap& devices);
 
     static smart_objects::SmartObject* CreateModuleInfoSO(
       uint32_t function_id);
@@ -216,7 +216,14 @@ class MessageHelper {
     static void SendAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
     static SmartObjectList CreateAddSubMenuRequestToHMI(ApplicationConstSharedPtr app);
 
-    static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app);
+    /*
+     * @brief Creates BasicCommunication.OnAppUnregistered notification
+     * @param app Application instance
+     * @param is_unexpected_disconnect 
+     * Indicates if connection was unexpectedly lost by TM or HB
+     */
+    static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app,
+                                                bool is_unexpected_disconnect = false);
     static void ResetGlobalproperties(ApplicationSharedPtr app);
 
     static void SendActivateAppToHMI(
@@ -272,7 +279,7 @@ class MessageHelper {
      * @param correlation_id Correlation id of request
      */
     static void SendGetListOfPermissionsResponse(
-      std::vector<policy::FunctionalGroupPermission>& permissions,
+      const std::vector<policy::FunctionalGroupPermission>& permissions,
       uint32_t correlation_id);
 
     /*
@@ -414,6 +421,20 @@ class MessageHelper {
     static mobile_apis::Result::eType ProcessSoftButtons(
       smart_objects::SmartObject& message_params,
       ApplicationConstSharedPtr app);
+
+    /*
+     * @brief subscribe application to softbutton
+     *
+     * @param message_params contains data of request
+     *
+     * @param app current application
+     *
+     * @param function_id Unique command id from mobile API
+     */
+    static void SubscribeApplicationToSoftButton(
+        smart_objects::SmartObject& message_params,
+        ApplicationSharedPtr app,
+        int32_t function_id);
 
     static bool PrintSmartObject(const smart_objects::SmartObject& object);
 

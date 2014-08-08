@@ -319,4 +319,17 @@
     <string name="ok_string">OK</string>
     <string name="cancel_string">Cancel</string>
 
+    <string name="selectprotocol_session_encrypted">Encrypted</string>
+    <string name="turn_on_label">Turn On</string>
+    <string name="loop_file_label">Loop file</string>
+    <string name="reconnect_when_hb_timeout_label">Reconnect when timeout</string>
+    <string name="protocol_version_label">Protocol Version:</string>
+    <string name="minimum_abbr_label">MIN: </string>
+    <string name="maximum_abbr_label">MAX: </string>
+    <string name="heartbeat_label">Heart Beat:</string>
+
+    <string name="main_menu_feedback">Feedback</string>
+    <string name="policy_dialog_do_no_auto_send_label">Do not process Policy Table Snapshot</string>
+    <string name="policy_dialog_do_no_auto_send_hint_text">Need to re-start application when changed</string>
+
 </resources>

@@ -34,17 +34,14 @@ include_directories(
   ../../../src/thirdPartyLibs/gmock-1.7.0/include
   ../../../src/thirdPartyLibs/gmock-1.7.0/gtest/include
   ${SecurityManagerIncludeDir}
-  ../../../src/components/transport_manager/include
-  ../../../src/components/protocol_handler/include
-  ../../../src/components/connection_handler/include
-  ../../../src/components/utils/include
+  ${CMAKE_SOURCE_DIR}/src/components/protocol_handler/include
 )
 
 set(SOURCES
   ./src/crypto_manager_impl_test.cc
   ./src/security_manager_test.cc
   ./src/security_query_test.cc
-  ./src/security_manager_mock.cc
+  ./src/security_query_matcher.cc
 )
 
 set(LIBRARIES
@@ -57,9 +54,9 @@ set(LIBRARIES
   ssl
   ProtocolHandler
   connectionHandler
-  TransportManager
   Utils
   ${RTLIB}
+  ProtocolLibrary
 )
 
 add_library(test_SecurityManager ${SOURCES})

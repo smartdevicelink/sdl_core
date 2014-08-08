@@ -94,20 +94,11 @@ class Device {
    * \brief Mac address of device if available
    */
   std::string mac_address_;
-
 };
 
 /**
  * \brief Type for Devices map
  */
-typedef std::map<int32_t, Device> DeviceList;
-
-/**
- * \brief Type for Devices map iterator
- * Key is DeviceHandle which is uniq
- */
-typedef DeviceList::iterator DeviceListIterator;
-
+typedef std::map<int32_t, Device> DeviceMap;
 }  // namespace connection_handler
-
 #endif  // SRC_COMPONENTS_CONNECTION_HANDLER_INCLUDE_CONNECTION_HANDLER_DEVICE_H_

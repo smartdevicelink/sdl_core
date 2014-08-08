@@ -46,15 +46,9 @@ namespace application_manager {
 namespace {
 
 std::string LanguageIdToString(Language::eType lang_id) {
-  typedef std::map<Language::eType, std::string> EnumMap;
-  const EnumMap& enum_map =
-      TEnumSchemaItem<Language::eType>::getEnumElementsStringRepresentation();
-  EnumMap::const_iterator found = enum_map.find(lang_id);
-  if (found != enum_map.end()) {
-    return found->second;
-  } else {
-    return "unknown";
-  }
+  const char* str;
+  const bool ok = EnumConversionHelper<Language::eType>::EnumToCString(lang_id, &str);
+  return ok ? str : "unknown";
 }
 
 }  // namespace

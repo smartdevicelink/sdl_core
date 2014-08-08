@@ -163,6 +163,16 @@ class PTRepresentation {
     virtual int GetNotificationsNumber(const std::string& priority) = 0;
 
     /**
+     * @brief Get priority for given application
+     * @param policy_app_id Unique application id
+     * @param priority Priority for application or empty, if value was not set
+     * @return true, if succedeed, otherwise - false
+     */
+    virtual bool GetPriority(const std::string& policy_app_id,
+                             std::string* priority) = 0;
+
+
+    /**
      * @brief Initialized Policy Table (load)
      * @return bool Success of operation
      */

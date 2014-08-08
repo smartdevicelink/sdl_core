@@ -13,7 +13,6 @@ import com.ford.syncV4.protocol.enums.ServiceType;
 import com.ford.syncV4.protocol.heartbeat.HeartbeatMonitorsManager;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitor;
 import com.ford.syncV4.protocol.heartbeat.IHeartbeatMonitorListener;
-import com.ford.syncV4.protocol.secure.secureproxy.ProtocolSecureManager;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.rpc.enums.AppInterfaceUnregisteredReason;
 import com.ford.syncV4.session.Session;
@@ -31,7 +30,6 @@ import com.ford.syncV4.transport.TransportType;
 import com.ford.syncV4.transport.nsd.NSDHelper;
 import com.ford.syncV4.transport.usb.USBTransport;
 import com.ford.syncV4.transport.usb.USBTransportConfig;
-import com.ford.syncV4.util.BitConverter;
 import com.ford.syncV4.util.logger.Logger;
 
 import java.io.IOException;
@@ -264,6 +262,26 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
         }
     }
 
+    public OutputStream startAudioDataTransfer(byte rpcSessionID, boolean encrypt) {
+        try {
+            OutputStream os = new PipedOutputStream();
+            InputStream is = new PipedInputStream((PipedOutputStream) os);
+            mAudioPacketizer = new H264Packetizer(new IStreamListener() {
+                @Override
+                public void sendH264(ProtocolMessage protocolMessage) {
+                    if (protocolMessage != null) {
+                        sendMessage(protocolMessage);
+                    }
+                }
+            }, is, rpcSessionID, ServiceType.Audio_Service, encrypt);
+            mAudioPacketizer.start();
+            return os;
+        } catch (IOException e) {
+            Logger.e(CLASS_NAME + " Unable to start audio streaming:" + e.toString());
+        }
+        return null;
+    }
+
     public OutputStream startH264(byte rpcSessionID, boolean encrypt) {
         try {
             OutputStream os = new PipedOutputStream();
@@ -289,19 +307,6 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
             mVideoPacketizer.removeListener();
             mVideoPacketizer.stop();
         }
-    }
-
-    public OutputStream startAudioDataTransfer(byte rpcSessionID, boolean encrypt) {
-        try {
-            OutputStream os = new PipedOutputStream();
-            InputStream is = new PipedInputStream((PipedOutputStream) os);
-            mAudioPacketizer = new H264Packetizer(this, is, rpcSessionID, ServiceType.Audio_Service, encrypt);
-            mAudioPacketizer.start();
-            return os;
-        } catch (IOException e) {
-            Logger.e(CLASS_NAME + " Unable to start audio streaming:" + e.toString());
-        }
-        return null;
     }
 
     public void stopAudioDataTransfer() {
@@ -332,11 +337,11 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     public Boolean getIsConnected() {
-        Logger.d(CLASS_NAME + " get is connected, tr:" + mTransport);
+        //Logger.d(CLASS_NAME + " get is connected, tr:" + mTransport);
         if (mTransport == null) {
             return false;
         }
-        Logger.d(CLASS_NAME + " get is connected, tr con:" + mTransport.getIsConnected());
+        //Logger.d(CLASS_NAME + " get is connected, tr con:" + mTransport.getIsConnected());
         return mTransport.getIsConnected();
     }
 
@@ -560,8 +565,8 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
     }
 
     @Override
-    public void onProtocolSessionStarted(byte sessionId, byte version) {
-        mConnectionListener.onProtocolSessionStarted(sessionId, version);
+    public void onProtocolSessionStarted(byte sessionId, byte version, boolean encrypted) {
+        mConnectionListener.onProtocolSessionStarted(sessionId, version, encrypted);
         synchronized (START_PROTOCOL_SESSION_LOCK) {
             START_PROTOCOL_SESSION_LOCK.notify();
         }
@@ -605,6 +610,12 @@ public class SyncConnection implements IProtocolListener, ITransportListener, IS
 
     @Override
     public void onProtocolHeartbeatACK(byte sessionId) {
+        if (mTestConfig != null) {
+            if (!mTestConfig.isDoProcessHearBeatSDLAck()) {
+                Logger.w("Do not process Heartbeat message Ack from SDL");
+                return;
+            }
+        }
         heartbeatMonitorsManager.heartbeatACKReceived(sessionId);
     }
 

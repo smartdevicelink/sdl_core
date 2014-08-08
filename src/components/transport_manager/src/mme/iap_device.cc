@@ -34,6 +34,7 @@
 
 #include "transport_manager/mme/iap_device.h"
 #include "transport_manager/mme/iap_connection.h"
+#include "transport_manager/mme/protocol_config.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -62,6 +63,13 @@ IAPDevice::~IAPDevice() {
 }
 
 bool IAPDevice::Init() {
+  int pool_index = 0;
+  const ProtocolConfig::ProtocolNameContainer& pool_protocol_names = ProtocolConfig::IAPPoolProtocolNames();
+  for (ProtocolConfig::ProtocolNameContainer::const_iterator i = pool_protocol_names.begin(); i != pool_protocol_names.end(); ++i) {
+    std::string protocol_name = *i;
+    free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
+  }
+
   LOG4CXX_TRACE(logger_, "iAP: connecting to " << mount_point());
   ipod_hdl_ = ipod_connect(mount_point().c_str(), 0);
   if (ipod_hdl_ != 0) {
@@ -91,7 +99,7 @@ ApplicationList IAPDevice::GetApplicationList() const {
   return app_list;
 }
 
-ipod_hdl_t* IAPDevice::RegisterConnection(ApplicationHandle app_id, IAPConnection* connection) {
+const IAPDevice::AppRecord IAPDevice::RegisterConnection(ApplicationHandle app_id, IAPConnection* connection) {
   connections_lock_.Acquire();
   LOG4CXX_INFO(logger_, "iAP: registering new connection for application " << app_id);
   connections_.insert(std::make_pair(app_id, connection));
@@ -109,7 +117,24 @@ ipod_hdl_t* IAPDevice::RegisterConnection(ApplicationHandle app_id, IAPConnectio
   }
   app_table_lock_.Release();
 
-  return ipod_hdl_;
+  AppRecord record;
+
+// Need to find protocol name for this connection
+  apps_lock_.Acquire();
+  for (AppContainer::const_iterator j = apps_.begin(); j != apps_.end(); ++j) {
+    if (j->second == app_id) {
+      uint32_t protocol_id = j->first;
+      char protocol_name[kProtocolNameSize];
+      ipod_eaf_getprotocol(ipod_hdl_, protocol_id, protocol_name, kProtocolNameSize);
+      record.first = protocol_name;
+      break;
+    }
+  }
+  apps_lock_.Release();
+
+  record.second = ipod_hdl_;
+
+  return record;
 }
 
 void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
@@ -119,28 +144,13 @@ void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
   connections_lock_.Release();
 
   app_table_lock_.Acquire();
-  for (AppTable::iterator prv = app_table_.begin(), i = prv; i != app_table_.end();) {
+  for (AppTable::iterator i = app_table_.begin(); i != app_table_.end();) {
     if (i->second == app_id) {
       int session_id = i->first;
       LOG4CXX_DEBUG(logger_, "iAP: dropping session " << session_id << " for application " << app_id);
-// The next lines
-// are just a substitution for
-// i = erase(i);
-// which isn't yet implemented
-      bool head_removed = (app_table_.begin() == i);
-      app_table_.erase(i);
-      if (head_removed) {
-        prv = app_table_.begin();
-        i = prv;
-      }
-      else {
-        i = prv;
-        ++i;
-      }
-      break;
+      app_table_.erase(i++);
     }
     else {
-      prv = i;
       ++i;
     }
   }
@@ -148,30 +158,27 @@ void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
 
   bool removed = false;
   apps_lock_.Acquire();
-  for (AppContainer::iterator prv = apps_.begin(), i = prv; i != apps_.end();) {
+  for (AppContainer::iterator i = apps_.begin(); i != apps_.end(); ++i) {
     if (i->second == app_id) {
       uint32_t protocol_id = i->first;
-      LOG4CXX_DEBUG(logger_, "iAP: dropping protocol " << protocol_id << " for application " << app_id);
-// The next lines
-// are just a substitution for
-// i = erase(i);
-// which isn't yet implemented
-      bool head_removed = (apps_.begin() == i);
+      char protocol_name[kProtocolNameSize];
+      ipod_eaf_getprotocol(ipod_hdl_, protocol_id, protocol_name, kProtocolNameSize);
+      LOG4CXX_DEBUG(logger_, "iAP: dropping protocol " << protocol_name << " for application " << app_id);
       apps_.erase(i);
       removed = true;
-      if (head_removed) {
-        prv = apps_.begin();
-        i = prv;
+
+      protocol_name_pool_lock_.Acquire();
+      ProtocolInUseNamePool::iterator j = protocol_in_use_name_pool_.find(protocol_name);
+      if (j != protocol_in_use_name_pool_.end()) {
+        LOG4CXX_INFO(logger_, "iAP: returning protocol " << protocol_name << " back to pool");
+        int protocol_index = j->second;
+        free_protocol_name_pool_.insert(std::make_pair(protocol_index, protocol_name));
+        protocol_in_use_name_pool_.erase(j);
       }
-      else {
-        i = prv;
-        ++i;
-      }
+      protocol_name_pool_lock_.Release();
+
+// each application id can appear only once that's why we break the loop
       break;
-    }
-    else {
-      prv = i;
-      ++i;
     }
   }
   apps_lock_.Release();
@@ -179,9 +186,61 @@ void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
   if (removed) {
     controller_->ApplicationListUpdated(unique_device_id());
   }
+  else {
+    LOG4CXX_WARN(logger_, "iAP: cannot remove application " << app_id);
+  }
 }
 
 void IAPDevice::OnSessionOpened(uint32_t protocol_id, int session_id) {
+  char protocol_name[kProtocolNameSize];
+  ipod_eaf_getprotocol(ipod_hdl_, protocol_id, protocol_name, kProtocolNameSize);
+  OnSessionOpened(protocol_id, protocol_name, session_id);
+}
+
+void IAPDevice::OnSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id) {
+  const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::IAPHubProtocolNames();
+  bool is_hub = false;
+  for (ProtocolConfig::ProtocolNameContainer::const_iterator i = hub_protocol_names.begin(); i != hub_protocol_names.end(); ++i) {
+    if (protocol_name == *i) {
+      is_hub = true;
+      break;
+    }
+  }
+  if (is_hub) {
+    OnHubSessionOpened(protocol_id, protocol_name, session_id);
+  }
+  else {
+    OnRegularSessionOpened(protocol_id, protocol_name, session_id);
+  }
+}
+
+void IAPDevice::OnHubSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id) {
+  char protocol_index;
+  protocol_name_pool_lock_.Acquire();
+  if (!free_protocol_name_pool_.empty()) {
+    FreeProtocolNamePool::iterator i = free_protocol_name_pool_.begin();
+    protocol_index = i->first;
+    std::string pool_protocol_name = i->second;
+    LOG4CXX_INFO(logger_, "iAP: protocol " << pool_protocol_name << " picked out from pool");
+    protocol_in_use_name_pool_.insert(std::make_pair(pool_protocol_name, protocol_index));
+    free_protocol_name_pool_.erase(i);
+  }
+  else {
+    LOG4CXX_WARN(logger_, "iAP: protocol pool is empty");
+    protocol_index = 255;
+  }
+  protocol_name_pool_lock_.Release();
+  char buffer[] = {protocol_index};
+  LOG4CXX_TRACE(logger_, "iAP: sending data on hub protocol " << protocol_name);
+  if (ipod_eaf_send(ipod_hdl_, session_id, buffer, sizeof(buffer)) != -1) {
+    LOG4CXX_DEBUG(logger_, "iAP: data on hub protocol " << protocol_name << " sent successfully");
+  }
+  else {
+    LOG4CXX_WARN(logger_, "iAP: error occurred while sending data on hub protocol " << protocol_name);
+  }
+}
+
+void IAPDevice::OnRegularSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id) {
   bool inserted = false;
   ApplicationHandle app_id;
   apps_lock_.Acquire();
@@ -191,7 +250,7 @@ void IAPDevice::OnSessionOpened(uint32_t protocol_id, int session_id) {
   }
   else {
     app_id = ++last_app_id_;
-    LOG4CXX_DEBUG(logger_, "iAP: adding new application " << app_id << " on protocol " << protocol_id);
+    LOG4CXX_DEBUG(logger_, "iAP: adding new application " << app_id << " on protocol " << protocol_name);
     apps_.insert(std::make_pair(protocol_id, app_id));
     inserted = true;
   }
@@ -235,9 +294,6 @@ void IAPDevice::OnSessionClosed(int session_id) {
     connections_lock_.Release();
     LOG4CXX_DEBUG(logger_, "iAP: dropping session " << session_id << " for application " << app_id);
     app_table_.erase(i);
-  }
-  else {
-    LOG4CXX_WARN(logger_, "iAP: no application corresponding to session " << session_id);
   }
   app_table_lock_.Release();
 }
@@ -353,7 +409,7 @@ void IAPDevice::IAPEventThreadDelegate::OpenSession(uint32_t protocol_id, const 
   int session_id = ipod_eaf_session_open(ipod_hdl_, protocol_id);
   if (session_id != -1) {
     LOG4CXX_DEBUG(logger_, "iAP: opened session " << session_id << " on protocol " << protocol_name);
-    parent_->OnSessionOpened(protocol_id, session_id);
+    parent_->OnSessionOpened(protocol_id, protocol_name, session_id);
   }
   else {
     LOG4CXX_ERROR(logger_, "iAP: failed to open session on protocol " << protocol_name);

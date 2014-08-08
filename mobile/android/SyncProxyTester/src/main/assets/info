@@ -1,4 +1,13 @@
-RootTools
+1. In order to be able to build and test project with Jenkins it is necessary to set next environment
+variables:
+- ANDROID_HOME and ANDROID_NDK_HOME
+both of them can be set in the "/etc/environment" file (sudo gedit /etc/environment)
+Example:
+ANDROID_NDK_HOME=/home/user/Software/android-ndk
+ANDROID_HOME=/home/user/Software/android-studio/sdk
+Note that it is necessary to LogOut / LogIn form the users account in order to force the changes
+
+2. RootTools
 
 library source:
 https://code.google.com/p/roottools

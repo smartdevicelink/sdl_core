@@ -47,6 +47,8 @@
 #include "transport_manager/mme/mme_device.h"
 #include "transport_manager/mme/pasa.h"
 
+#define QNX_BARE_SYSTEM_WORKAROUND 0
+
 namespace transport_manager {
 namespace transport_adapter {
 

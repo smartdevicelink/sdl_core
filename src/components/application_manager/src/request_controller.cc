@@ -106,74 +106,82 @@ RequestController::TResult RequestController::addRequest(
 
   RequestController::TResult result = RequestController::SUCCESS;
   {
-    const commands::CommandRequestImpl* request_impl =
+    commands::CommandRequestImpl* request_impl =
       static_cast<commands::CommandRequestImpl*>(request.get());
 
-    const uint32_t& app_hmi_level_none_time_scale =
-        profile::Profile::instance()->app_hmi_level_none_time_scale();
+    // TODO: discuss this solution with dklimenko
+    // Call Init() first to be sure that all command-specific parameters
+    // are up to date.
+    if (request_impl->Init()) {
 
-    const uint32_t& app_hmi_level_none_max_request_per_time_scale =
-     profile::Profile::instance()->app_hmi_level_none_time_scale_max_requests();
+      const uint32_t& app_hmi_level_none_time_scale =
+          profile::Profile::instance()->app_hmi_level_none_time_scale();
 
-    const uint32_t& app_time_scale =
-        profile::Profile::instance()->app_time_scale();
+      const uint32_t& app_hmi_level_none_max_request_per_time_scale =
+       profile::Profile::instance()->app_hmi_level_none_time_scale_max_requests();
 
-    const uint32_t& max_request_per_time_scale =
-        profile::Profile::instance()->app_time_scale_max_requests();
+      const uint32_t& app_time_scale =
+          profile::Profile::instance()->app_time_scale();
 
-    const uint32_t& pending_requests_amount =
-        profile::Profile::instance()->pending_requests_amount();
+      const uint32_t& max_request_per_time_scale =
+          profile::Profile::instance()->app_time_scale_max_requests();
 
-    const mobile_apis::HMILevel::eType hmi_level_none =
-        mobile_apis::HMILevel::HMI_NONE;
+      const uint32_t& pending_requests_amount =
+          profile::Profile::instance()->pending_requests_amount();
 
-    if (false == watchdog_->checkHMILevelTimeScaleMaxRequest(hmi_level_none,
-                  request_impl->connection_key(), app_hmi_level_none_time_scale,
-                  app_hmi_level_none_max_request_per_time_scale)) {
-      LOG4CXX_ERROR(logger_, "Too many application requests in hmi level NONE");
-      result = RequestController::NONE_HMI_LEVEL_MANY_REQUESTS;
-    } else if (false == watchdog_->checkTimeScaleMaxRequest(
-                                  request_impl->connection_key(),
-                                  app_time_scale, max_request_per_time_scale)) {
-      LOG4CXX_ERROR(logger_, "Too many application requests");
-      result = RequestController::TOO_MANY_REQUESTS;
-    } else if (pending_requests_amount == request_list_.size()) {
-      LOG4CXX_ERROR(logger_, "Too many pending request");
-      result = RequestController::TOO_MANY_PENDING_REQUESTS;
-    } else {
+      const mobile_apis::HMILevel::eType hmi_level_none =
+          mobile_apis::HMILevel::HMI_NONE;
 
-      {
-        AutoLock auto_lock(request_list_lock_);
+      if (false == watchdog_->checkHMILevelTimeScaleMaxRequest(hmi_level_none,
+                    request_impl->connection_key(), app_hmi_level_none_time_scale,
+                    app_hmi_level_none_max_request_per_time_scale)) {
+        LOG4CXX_ERROR(logger_, "Too many application requests in hmi level NONE");
+        result = RequestController::NONE_HMI_LEVEL_MANY_REQUESTS;
+      } else if (false == watchdog_->checkTimeScaleMaxRequest(
+                                    request_impl->connection_key(),
+                                    app_time_scale, max_request_per_time_scale)) {
+        LOG4CXX_ERROR(logger_, "Too many application requests");
+        result = RequestController::TOO_MANY_REQUESTS;
+      } else if (pending_requests_amount == request_list_.size()) {
+        LOG4CXX_ERROR(logger_, "Too many pending request");
+        result = RequestController::TOO_MANY_PENDING_REQUESTS;
+      } else {
+
+        {
+          AutoLock auto_lock(request_list_lock_);
 
 
-        if (0 == request_impl->default_timeout()) {
-          LOG4CXX_INFO(logger_, "Default timeout was set to 0."
-                                "Watchdog will not track this request.");
-        } else {
-          watchdog_->addRequest(new request_watchdog::RequestInfo(
-                                  request_impl->function_id(),
-                                  request_impl->connection_key(),
-                                  request_impl->correlation_id(),
-                                  request_impl->default_timeout(),
-                                  hmi_level));
+          if (0 == request_impl->default_timeout()) {
+            LOG4CXX_INFO(logger_, "Default timeout was set to 0."
+                                  "Watchdog will not track this request.");
+          } else {
+            watchdog_->addRequest(new request_watchdog::RequestInfo(
+                                    request_impl->function_id(),
+                                    request_impl->connection_key(),
+                                    request_impl->correlation_id(),
+                                    request_impl->default_timeout(),
+                                    hmi_level));
 
-          LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
-                       << request_impl->default_timeout());
+            LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
+                         << request_impl->default_timeout());
+          }
+
+          request_list_.push_back(request);
+          LOG4CXX_INFO(logger_, "RequestController size is "
+                       << request_list_.size()
+                       << " Pending request size is "
+                       << pending_request_list_.size()
+                     );
         }
 
-        request_list_.push_back(request);
-        LOG4CXX_INFO(logger_, "RequestController size is "
-                     << request_list_.size()
-                     << " Pending request size is "
-                     << pending_request_list_.size()
-                   );
+        // wake up one thread that is waiting for a task to be available
+        cond_var_.NotifyOne();
       }
-
-      // wake up one thread that is waiting for a task to be available
-      cond_var_.NotifyOne();
+    }
+    else {
+      LOG4CXX_WARN(logger_, "The request didn't' initilize.");
     }
   }
-
   return result;
 }
 
@@ -223,8 +231,6 @@ void RequestController::updateRequestTimeout(
     const uint32_t& connection_key,
     const uint32_t& mobile_correlation_id,
     const uint32_t& new_timeout) {
-  LOG4CXX_INFO(logger_, "RequestController::updateRequestTimeout()");
-
   watchdog_->updateRequestTimeout(connection_key,
                                   mobile_correlation_id,
                                   new_timeout);
@@ -296,7 +302,7 @@ void RequestController::Worker::threadMain() {
     AutoUnlock unlock(auto_lock);
 
     // execute
-    if (request_impl->CheckPermissions() && request_impl->Init()) {
+    if(request_impl->CheckPermissions()) {
       request_impl->Run();
     }
   }

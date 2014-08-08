@@ -104,6 +104,15 @@ void AlertRequest::Run() {
   }
 }
 
+void AlertRequest::onTimeOut() {
+  if (false == (*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
+    CommandRequestImpl::onTimeOut();
+    return;
+  }
+  LOG4CXX_INFO(logger_, "default timeout ignored. "
+                        "AlertRequest with soft buttons wait timeout on HMI side");
+}
+
 void AlertRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_INFO(logger_, "AlertRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
@@ -206,7 +215,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
-  if (app->IsCommandLimitsExceeded(
+  if (mobile_apis::HMILevel::HMI_BACKGROUND == app->hmi_level() &&
+      app->IsCommandLimitsExceeded(
         static_cast<mobile_apis::FunctionID::eType>(function_id()),
         application_manager::TLimitSource::POLICY_TABLE)) {
     LOG4CXX_ERROR(logger_, "Alert frequency is too high.");
@@ -244,6 +254,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
 }
 
 void AlertRequest::SendAlertRequest(int32_t app_id) {
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
@@ -276,6 +288,8 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[hmi_request::soft_buttons] =
         (*message_)[strings::msg_params][strings::soft_buttons];
+    MessageHelper::SubscribeApplicationToSoftButton(
+        (*message_)[strings::msg_params], app, function_id());
   }
   // app_id
   msg_params[strings::app_id] = app_id;
@@ -383,7 +397,6 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
     smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
 
     for (; it_sb != it_sb_end; ++it_sb) {
-
       if ((*it_sb).keyExists(strings::text)) {
         str = (*it_sb)[strings::text].asCharArray();
         if (!CheckSyntax(str, true)) {

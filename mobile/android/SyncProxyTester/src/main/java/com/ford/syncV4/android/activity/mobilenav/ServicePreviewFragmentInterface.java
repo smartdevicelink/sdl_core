@@ -11,5 +11,7 @@ public interface ServicePreviewFragmentInterface {
 
     public void dataStreamingStopped();
 
+    public void dataStreamingCanceled();
+
     public Activity getActivity();
 }

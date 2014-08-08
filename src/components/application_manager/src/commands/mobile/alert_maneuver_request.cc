@@ -101,6 +101,8 @@ void AlertManeuverRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[hmi_request::soft_buttons] =
               (*message_)[strings::msg_params][strings::soft_buttons];
+    MessageHelper::SubscribeApplicationToSoftButton((*message_)[strings::msg_params],
+                                                        app, function_id());
   }
 
   pending_requests_.Add(hmi_apis::FunctionID::Navigation_AlertManeuver);
@@ -219,7 +221,6 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
     smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
 
     for (; it_sb != it_sb_end; ++it_sb) {
-
       if ((*it_sb).keyExists(strings::text)) {
         str = (*it_sb)[strings::text].asCharArray();
         if (!CheckSyntax(str, true)) {

@@ -168,9 +168,9 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.Alert":
                 {
 
-                    SDL.SDLModel.onUIAlert(request.params, request.id);
-
-                    SDL.SDLController.onSystemContextChange(request.params.appID);
+                    if (SDL.SDLModel.onUIAlert(request.params, request.id)) {
+                        SDL.SDLController.onSystemContextChange(request.params.appID);
+                    }
 
                     break;
                 }
@@ -230,9 +230,9 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.PerformInteraction":
                 {
 
-                    SDL.SDLModel.uiPerformInteraction(request);
-
-                    SDL.SDLController.onSystemContextChange();
+                    if (SDL.SDLModel.uiPerformInteraction(request)) {
+                        SDL.SDLController.onSystemContextChange();
+                    }
 
                     break;
                 }
@@ -260,14 +260,18 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.ScrollableMessage":
                 {
 
-                    SDL.SDLModel.onSDLScrolableMessage(request, request.id);
-
-                    SDL.SDLController.onSystemContextChange();
+                    if (SDL.SDLModel.onSDLScrolableMessage(request, request.id)) {
+                        SDL.SDLController.onSystemContextChange();
+                    }
 
                     break;
                 }
                 case "UI.ChangeRegistration":
                 {
+
+                    if (request.params.appName) {
+                        SDL.SDLController.getApplicationModel(request.params.app).set('appName', request.params.appName);
+                    }
 
                     SDL.SDLModel.changeRegistrationUI(request.params.language, request.params.appID);
                     this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
@@ -663,7 +667,7 @@ FFW.UI = FFW.RPCObserver.create({
                                             "doublePressAvailable": false
                                         }
                                     },
-                                    "numCustomPresetsAvailable": 8
+                                    "numCustomPresetsAvailable": 10
                                 },
                                 "buttonCapabilities": [
                                     {
@@ -775,10 +779,15 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.PerformAudioPassThru":
                 {
 
-                    this.performAudioPassThruRequestID = request.id;
-                    SDL.SDLModel.UIPerformAudioPassThru(request.params);
+                    if (this.performAudioPassThruRequestID > 0) {
+                        this.sendError(SDL.SDLModel.resultCode["REJECTED"], request.id, request.method, 'PerformAudioPassThru request aborted!');
+                    } else {
 
-                    SDL.SDLController.onSystemContextChange();
+                        this.performAudioPassThruRequestID = request.id;
+                        SDL.SDLModel.UIPerformAudioPassThru(request.params);
+
+                        SDL.SDLController.onSystemContextChange();
+                    }
 
                     break;
                 }
@@ -1186,7 +1195,7 @@ FFW.UI = FFW.RPCObserver.create({
                                         "doublePressAvailable": false
                                     }
                                 },
-                                "numCustomPresetsAvailable": 8
+                                "numCustomPresetsAvailable": 10
                             },
                             "audioPassThruCapabilities": {
                                 "samplingRate": "44KHZ",
@@ -1394,7 +1403,7 @@ FFW.UI = FFW.RPCObserver.create({
                 "id": sliderRequestID,
                 "error": {
                     "code": resultCode, // type (enum) from SDL protocol
-                    "message": 'Slider request aborted.',
+                    "message": 'Slider request ABORTED or TIMED OUT.',
                     "data": {
                         "method": 'UI.Slider'
                     }

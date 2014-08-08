@@ -42,10 +42,7 @@ public class Service {
 
     @Override
     public String toString() {
-        return "Service{" +
-                ", serviceType=" + serviceType +
-                ", encrypted=" + encrypted +
-                '}';
+        return "Service{serviceType=" + serviceType + ", encrypted=" + encrypted + '}';
     }
 
     @Override

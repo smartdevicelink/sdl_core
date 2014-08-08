@@ -237,7 +237,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
 
     /**
      * @brief Set user consent for application functional groups
-     * @param permissions User-defined application group pemissions
+     * @param permissions User-defined application group pemissions.
+     * The permissions is not const reference because it may contains
+     * valid data as well as invalid. So we will remove all invalid data
+     * from this structure.
      */
     virtual void SetUserConsentForApp(const PermissionConsent& permissions) = 0;
 

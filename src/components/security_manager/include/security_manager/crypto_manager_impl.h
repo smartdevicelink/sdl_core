@@ -43,6 +43,7 @@
 #include "security_manager/crypto_manager.h"
 #include "security_manager/ssl_context.h"
 #include "utils/macro.h"
+#include "utils/lock.h"
 
 namespace security_manager {
 class CryptoManagerImpl : public CryptoManager {
@@ -73,6 +74,7 @@ class CryptoManagerImpl : public CryptoManager {
     BIO *bioIn_;
     BIO *bioOut_;
     BIO *bioFilter_;
+    mutable sync_primitives::Lock bio_locker;
     size_t buffer_size_;
     uint8_t *buffer_;
     bool is_handshake_pending_;

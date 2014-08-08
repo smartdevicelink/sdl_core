@@ -74,7 +74,20 @@ void OnDriverDistractionNotification::Run() {
   (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
       state;
 
-  SendNotificationToMobile(on_driver_distraction);
+  std::set<ApplicationSharedPtr> applications =
+      ApplicationManagerImpl::instance()->applications();
+
+  std::set<ApplicationSharedPtr>::iterator it = applications.begin();
+  for (; applications.end() != it; ++it) {
+    ApplicationSharedPtr app = *it;
+    if (app.valid()) {
+      if (mobile_apis::HMILevel::eType::HMI_NONE != app->hmi_level()) {
+          (*on_driver_distraction)[strings::params]
+                                  [strings::connection_key] = app->app_id();
+          SendNotificationToMobile(on_driver_distraction);
+      }
+    }
+  }
 }
 
 }  // namespace hmi

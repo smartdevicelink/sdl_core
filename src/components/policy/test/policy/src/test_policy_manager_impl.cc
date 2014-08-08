@@ -256,7 +256,7 @@ TEST_F(PolicyManagerImplTest, CheckPermissions) {
       "12345678", "FULL", "Alert");
   EXPECT_EQ(::policy::kRpcAllowed, out_result.hmi_level_permitted);
   ASSERT_TRUE(out_result.list_of_allowed_params);
-  ASSERT_EQ(2, out_result.list_of_allowed_params->size());
+  ASSERT_EQ(2u, out_result.list_of_allowed_params->size());
   EXPECT_EQ("speed", (*out_result.list_of_allowed_params)[0]);
   EXPECT_EQ("gps", (*out_result.list_of_allowed_params)[1]);
 }

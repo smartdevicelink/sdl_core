@@ -91,7 +91,7 @@ namespace security_manager_test {
                    std::string* device_name,
                    std::list<uint32_t>* applications_list,
                    std::string* mac_address));
-    MOCK_METHOD2(CheckSupportHeartBeat,
+    MOCK_METHOD2(IsHeartBeatSupported,
                  bool( transport_manager::ConnectionUID connection_handle,
                        uint8_t session_id));
   };

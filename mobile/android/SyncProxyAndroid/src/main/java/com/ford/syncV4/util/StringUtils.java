@@ -52,4 +52,25 @@ public class StringUtils {
     public static boolean isNotEmpty(final CharSequence cs) {
         return !StringUtils.isEmpty(cs);
     }
+
+    /**
+     * Compares two Strings, returning true if they are equal.
+     * nulls are handled without exceptions. Two null references are considered to be equal.
+     * The comparison is case sensitive.
+     * <pre>
+     * StringUtils.equals(null, null)   = true
+     * StringUtils.equals(null, "abc")  = false
+     * StringUtils.equals("abc", null)  = false
+     * StringUtils.equals("abc", "abc") = true
+     * StringUtils.equals("abc", "ABC") = false
+     * </pre>
+     *
+     * @param str1 the first String, may be null
+     * @param str2 the second String, may be null
+     *
+     * @return true if the Strings are equal, case sensitive, or both null
+     */
+    public static boolean equals(String str1, String str2) {
+        return str1 == null ? str2 == null : str1.equals(str2);
+    }
 }

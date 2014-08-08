@@ -32,6 +32,22 @@
  */
 SDL.SDLController = Em.Object
     .create( {
+
+        init: function () {
+
+            /**
+             * Added object size counter
+             */
+            Object.size = function(obj) {
+                var size = 0, key;
+                for (key in obj) {
+                    if (obj.hasOwnProperty(key)) size++;
+                }
+                return size;
+            }
+
+        },
+
         /**
          * Current system context
          * 
@@ -413,6 +429,10 @@ SDL.SDLController = Em.Object
             SDL.SDLModel.set('interactionData.vrHelp', null);
 
             SDL.SDLController.getApplicationModel(appID).activeRequests.uiPerformInteraction = null;
+
+            if (SDL.TTSPopUp.active && FFW.TTS.requestId == null) {
+                SDL.TTSPopUp.DeactivateTTS();
+            }
         },
         /**
          * Method to sent notification ABORTED for VR PerformInteraction
@@ -426,6 +446,10 @@ SDL.SDLController = Em.Object
             SDL.SDLModel.set('VRActive', false);
 
             SDL.InteractionChoicesView.timerUpdate();
+
+            if (choiceID && SDL.TTSPopUp.active && FFW.TTS.requestId == null) {
+                SDL.TTSPopUp.DeactivateTTS();
+            }
         },
         /**
          * Method to sent notification for Alert
@@ -504,6 +528,7 @@ SDL.SDLController = Em.Object
             FFW.UI.sendUIResult(result,
                 FFW.UI.performAudioPassThruRequestID,
                 "UI.PerformAudioPassThru");
+            FFW.UI.performAudioPassThruRequestID = -1;
         },
         /**
          * Method close PerformAudioPassThruPopUp and call error response from
@@ -519,6 +544,7 @@ SDL.SDLController = Em.Object
                 FFW.UI.performAudioPassThruRequestID,
                 "UI.PerformAudioPassThru",
                 "PerformAudioPassThru was not completed successfuly!");
+            FFW.UI.performAudioPassThruRequestID = -1;
         },
         /**
          * Method to set language for UI component with parameters sent from

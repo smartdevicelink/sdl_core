@@ -162,7 +162,8 @@ class PolicyManagerImpl : public PolicyManager {
      * @param Policy table update struct
      */
     void CheckPermissionsChanges(
-      const utils::SharedPtr<policy_table::Table> update);
+      const utils::SharedPtr<policy_table::Table> update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
 
     /**
      * @brief Fill structure to be sent with OnPermissionsChanged notification
@@ -216,9 +217,17 @@ class PolicyManagerImpl : public PolicyManager {
      */
     void CheckUpdateStatus();
 
+    /**
+     * @brief Validate PermissionConsent structure according to currently
+     * assigned groups
+     * @param permissions PermissionConsent structure that should be validated.
+     * @return PermissonConsent struct, which contains no foreign groups
+     */
+    PermissionConsent EnsureCorrectPermissionConsent(
+        const PermissionConsent& permissions_to_check);
+
     PolicyListener* listener_;
     PolicyTable policy_table_;
-    utils::SharedPtr<policy_table::Table> policy_table_snapshot_;
     bool exchange_in_progress_;
     bool update_required_;
     bool exchange_pending_;
@@ -226,6 +235,7 @@ class PolicyManagerImpl : public PolicyManager {
     sync_primitives::Lock update_required_lock_;
     sync_primitives::Lock exchange_pending_lock_;
     sync_primitives::Lock update_request_list_lock_;
+    sync_primitives::Lock apps_registration_lock_;
     std::map<std::string, AppPermissions> app_permissions_diff_;
 
     /**

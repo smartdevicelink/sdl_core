@@ -152,7 +152,7 @@
 }
 
 #info_nonMedia .presets .ffw-button {
-	width: 103px;
+	width: 82px;
 	height: 38px;
 	position: relative;
 	float: left;
@@ -162,6 +162,16 @@
 	border-top: 1px solid #222;
 	border-left: 1px solid #222;
 	text-align: center;
+}
+
+#info_nonMedia .presets .ffw-button .text{
+    margin-left: 5px;
+    width: 77px;
+    position: absolute;
+    left: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
 }
 
 #info_nonMedia .app_image img {
@@ -215,7 +225,7 @@
 	display: block;
 	position: absolute;
 	left: 10px;
-	width: 105px;
+	width: 84px;
 	height: 50px;
 	font-size: 20px;
 	line-height: 50px;
@@ -345,6 +355,16 @@
 	padding-right: 15px;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+#slider_view .okButton{
+    top: 379px;
+    left: 364px;
+    width: 54px;
+    height: 17px;
+    border: 1px solid #333;
+    border-radius: 2px;
+    padding: 10px;
 }
 
 #slider_view .sliderControl {

@@ -83,8 +83,7 @@ public class SendProtocolMessageProcessor {
      */
     public void process(final ServiceType serviceType, final byte protocolVersionToSend,
                         final boolean encrypted, final byte[] data, final int maxDataSize,
-                        final byte sessionID, final int messageId
-    ) {
+                        final byte sessionID, final int messageId) {
 
         if (data == null) {
             callback.onProtocolFrameToSendError(ERROR_TYPE.DATA_NPE, "Data is NULL");
@@ -170,7 +169,7 @@ public class SendProtocolMessageProcessor {
                                           }
                 );
             } else {
-                Logger.d(LOG_TAG + " RPC" + header);
+                //Logger.d(LOG_TAG + " RPC" + header);
                 singleMessageExecutor.submit(new Runnable() {
 
                                                  @Override

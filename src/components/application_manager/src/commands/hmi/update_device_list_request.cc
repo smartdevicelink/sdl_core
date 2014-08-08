@@ -32,7 +32,10 @@
 
 #include "application_manager/commands/hmi/update_device_list_request.h"
 #include "application_manager/application_manager_impl.h"
+#include "config_profile/profile.h"
 #include "interfaces/HMI_API.h"
+
+#include <unistd.h>
 
 namespace application_manager {
 
@@ -48,6 +51,28 @@ UpdateDeviceListRequest::~UpdateDeviceListRequest() {
 
 void UpdateDeviceListRequest::Run() {
   LOG4CXX_INFO(logger_, "UpdateDeviceListRequest::Run");
+
+#ifndef CUSTOMER_PASA
+  // Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
+  // Flag conditional compilation "CUSTOMER_PASA" is used in order to exclude
+  // hit code to RTC
+  if (true == profile::Profile::instance()->launch_hmi()) {
+    int32_t connection_key =
+        (*message_)[strings::params][strings::connection_key].asUInt();
+    int32_t correlation_id =
+        (*message_)[strings::params][strings::correlation_id].asUInt();
+    uint32_t default_timeout = profile::Profile::instance()->default_timeout();
+
+    // wait till HMI started
+    while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
+      sleep(1);
+      // TODO(DK): timer_->StartWait(1);
+      ApplicationManagerImpl::instance()->
+          updateRequestTimeout(connection_key, correlation_id, default_timeout);
+    }
+  }
+#endif
+
   SendRequest();
 }
 

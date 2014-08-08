@@ -119,6 +119,7 @@ const char progress_indicator[] = "progressIndicator";
 const char alert_type[] = "alertType";
 const char play_tone[] = "playTone";
 const char soft_buttons[] = "softButtons";
+const char soft_button_id[] = "softButtonID";
 const char custom_presets[] = "customPresets";
 const char audio_pass_display_text1[] = "audioPassThruDisplayText1";
 const char audio_pass_display_text2[] = "audioPassThruDisplayText2";
@@ -189,6 +190,17 @@ const char text[] = "text";
 const char character_set[] = "characterSet";
 const char secondary_text[] = "secondaryText";
 const char tertiary_text[] = "tertiaryText";
+const char hardware[] = "hardware";
+const char firmware_rev[] = "firmwareRev";
+const char os[] = "os";
+const char os_version[] = "osVersion";
+const char carrier[] = "carrier";
+const char slider_header[] = "sliderHeader";
+
+// duplicate names from hmi_request
+const char limited_character_list[] = "limitedCharacterList";
+const char auto_complete_text[] = "autoCompleteText";
+const char navigation_text[] = "navigationText";
 
 // vehicle info
 const char gps[] = "gps";
@@ -248,6 +260,7 @@ const char hash_id[] = "hashID";
 const char time_stamp[] = "timeStamp";
 const char manual_text_entry[] = "manualTextEntry";
 const char image_type_supported[] = "imageTypeSupported";
+const char unexpected_disconnect[] = "unexpectedDisconnect";
 }  // namespace strings
 
 namespace mobile_notification {

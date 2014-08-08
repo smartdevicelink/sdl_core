@@ -247,10 +247,10 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
       messageType_allowedEnumSubsetValues.insert(MessageTypeTest::response);
       messageType_allowedEnumSubsetValues.insert(MessageTypeTest::notification);
 
-      utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> functionId_SchemaItem =
+      ::utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> functionId_SchemaItem =
         NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<FunctionIdTest::eType>::create(functionId_allowedEnumSubsetValues);
 
-      utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> messageType_SchemaItem =
+      ::utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> messageType_SchemaItem =
         NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<MessageTypeTest::eType>::create(messageType_allowedEnumSubsetValues);
 
       std::map<std::string, NsSmartDeviceLink::NsSmartObjects::CObjectSchemaItem::SMember> paramsMembersMap;
@@ -287,19 +287,19 @@ class SmartObjectConvertionTimeTest : public ::testing::Test {
       messageType_allowedEnumSubsetValues.insert(MessageTypeTest::response);
       messageType_allowedEnumSubsetValues.insert(MessageTypeTest::notification);
 
-      utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> success_SchemaItem =
+      ::utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> success_SchemaItem =
         NsSmartDeviceLink::NsSmartObjects::CBoolSchemaItem::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<bool>());
 
-      utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> resultCode_SchemaItem =
+      ::utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> resultCode_SchemaItem =
         NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<TestType::eType>::create(resultCode_allowedEnumSubsetValues
             , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<TestType::eType>());
 
-      utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> info_SchemaItem =
+      ::utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> info_SchemaItem =
         NsSmartDeviceLink::NsSmartObjects::CStringSchemaItem::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t>(0)
             , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<size_t>(1000)
             , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<std::string>());
 
-      utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> tryAgainTime_SchemaItem =
+      ::utils::SharedPtr<NsSmartDeviceLink::NsSmartObjects::ISchemaItem> tryAgainTime_SchemaItem =
         NsSmartDeviceLink::NsSmartObjects::TNumberSchemaItem<int>::create(NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<int>(0)
             , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<int>(2000000000)
             , NsSmartDeviceLink::NsSmartObjects::TSchemaItemParameter<int>());
@@ -601,63 +601,99 @@ TEST_F(SmartObjectConvertionTimeTest, test_object_without_enum_convertion) {
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
+
 template<>
-const std::map < test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType
-, std::string > & TEnumSchemaItem<test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType>::getEnumElementsStringRepresentation(void) {
-  static bool isInitialized = false;
-  static std::map < test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType
-  , std::string > enumStringRepresentationMap;
+const EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType>::EnumToCStringMap
+EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType>::enum_to_cstring_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType>::InitEnumToCStringMap();
 
-  if (false == isInitialized) {
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::APPLICATION_NOT_REGISTERED, "APPLICATION_NOT_REGISTERED"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::SUCCESS, "SUCCESS"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::TOO_MANY_PENDING_REQUESTS, "TOO_MANY_PENDING_REQUESTS"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::REJECTED, "REJECTED"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::INVALID_DATA, "INVALID_DATA"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::OUT_OF_MEMORY, "OUT_OF_MEMORY"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::ABORTED, "ABORTED"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::USER_DISALLOWED, "USER_DISALLOWED"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::GENERIC_ERROR, "GENERIC_ERROR"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType::DISALLOWED, "DISALLOWED"));
+template<>
+const EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType>::CStringToEnumMap
+EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType>::cstring_to_enum_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType>::InitCStringToEnumMap();
 
-    isInitialized = true;
-  }
-  return enumStringRepresentationMap;
-}
+template<>
+const char* const
+EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType>::cstring_values_[] = {
+    "APPLICATION_NOT_REGISTERED",
+    "SUCCESS",
+    "TOO_MANY_PENDING_REQUESTS",
+    "REJECTED",
+    "INVALID_DATA",
+    "OUT_OF_MEMORY",
+    "ABORTED",
+    "USER_DISALLOWED",
+    "GENERIC_ERROR",
+    "DISALLOWED"
+};
 
-template <>
-const std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType, std::string>&
-NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType>::getEnumElementsStringRepresentation(void) {
-  static bool isInitialized = false;
-  static std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType, std::string> enumStringRepresentationMap;
+template<>
+const test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType
+EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::eType>::enum_values_[] = {
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::APPLICATION_NOT_REGISTERED,
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::SUCCESS,
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::TOO_MANY_PENDING_REQUESTS,
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::REJECTED,
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::INVALID_DATA,
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::OUT_OF_MEMORY,
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::ABORTED,
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::USER_DISALLOWED,
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::GENERIC_ERROR,
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::TestType::DISALLOWED
+};
 
-  if (false == isInitialized) {
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::RegisterAppInterface, "RegisterAppInterface"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::UnregisterAppInterface, "UnregisterAppInterface"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::SetGlobalProperties, "SetGlobalProperties"));
+template<>
+const EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType>::EnumToCStringMap
+EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType>::enum_to_cstring_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType>::InitEnumToCStringMap();
 
-    isInitialized = true;
-  }
+template<>
+const EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType>::CStringToEnumMap
+EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType>::cstring_to_enum_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType>::InitCStringToEnumMap();
 
-  return enumStringRepresentationMap;
-}
+template<>
+const char* const
+EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType>::cstring_values_[] = {
+    "RegisterAppInterface",
+    "UnregisterAppInterface",
+    "SetGlobalProperties"
+};
 
-template <>
-const std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType, std::string>&
-NsSmartDeviceLink::NsSmartObjects::TEnumSchemaItem<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType>::getEnumElementsStringRepresentation(void) {
-  static bool isInitialized = false;
-  static std::map<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType, std::string> enumStringRepresentationMap;
+template<>
+const test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType
+EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::eType>::enum_values_[] = {
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::RegisterAppInterface,
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::UnregisterAppInterface,
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::FunctionIdTest::SetGlobalProperties
+};
 
-  if (false == isInitialized) {
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::request, "request"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::response, "response"));
-    enumStringRepresentationMap.insert(std::make_pair(test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::notification, "notification"));
+template<>
+const EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType>::EnumToCStringMap
+EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType>::enum_to_cstring_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType>::InitEnumToCStringMap();
 
-    isInitialized = true;
-  }
+template<>
+const EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType>::CStringToEnumMap
+EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType>::cstring_to_enum_map_ =
+  EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType>::InitCStringToEnumMap();
 
-  return enumStringRepresentationMap;
-}
+template<>
+const char* const
+EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType>::cstring_values_[] = {
+    "request",
+    "response",
+    "notification"
+};
+
+template<>
+const test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType
+EnumConversionHelper<test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::eType>::enum_values_[] = {
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::request,
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::response,
+    test::components::SmartObjects::SmartObjectConvertionTimeTest::MessageTypeTest::notification
+};
+
 }
 }
 

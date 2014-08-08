@@ -63,6 +63,7 @@ set(LIBRARIES
   SmartObjects
   ${TIME_TESTER_LIB}
   formatters
+  ProtocolLibrary
   ProtocolHandler
   connectionHandler
   TransportManager
@@ -99,6 +100,7 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
   list(APPEND LIBRARIES apr-1 -L${APR_LIBS_DIRECTORY})
   list(APPEND LIBRARIES aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY})
+  list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
 endif()
 
 include_directories (
@@ -130,11 +132,23 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 
+add_custom_target(gitversion
+  COMMAND echo -n const char *gitVersion = "\\\"Built against " > ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc
+  COMMAND git rev-parse HEAD | tr -d \"\\n\" >> ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc
+  COMMAND echo " revision\\\"\;" >> ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+)
+add_custom_command(
+  OUTPUT gitversion.cc
+  DEPENDS gitversion
+)
 set (SOURCES
   main.cc
   life_cycle.cc
   signal_handlers.cc
+  gitversion.cc
 )
+
 
 if( NOT CMAKE_BUILD_TYPE )
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Choose the type of build. Options are: None, Debug, Release, RelWithDebInfo, MinSizeRel." FORCE)
@@ -178,8 +192,9 @@ if (${QT_HMI})
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/start_hmi.sh
     "#!/bin/sh\n${start_command} ${command_arguments}\n")
 elseif (${WEB_HMI})
+  file(COPY ${CMAKE_HOME_DIRECTORY}/src/components/HMI/ DESTINATION ${CMAKE_BINARY_DIR}/src/components/HMI/)
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link
-    "${CMAKE_HOME_DIRECTORY}/src/components/HMI/index.html")
+    "${CMAKE_BINARY_DIR}/src/components/HMI/index.html")
 endif ()
 
 # Install rules

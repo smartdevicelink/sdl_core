@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
  */
 
 #include "utils/file_system.h"
+#include "utils/logger.h"
 
 #include <sys/statvfs.h>
 #include <sys/stat.h>
@@ -43,6 +44,8 @@
 #include <fstream>
 #include <cstddef>
 #include <algorithm>
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
   struct statvfs fsInfo;
@@ -64,8 +67,8 @@ int64_t file_system::FileSize(const std::string &path) {
   return 0;
 }
 
-uint32_t file_system::DirectorySize(const std::string& path) {
-  uint32_t size = 0;
+size_t file_system::DirectorySize(const std::string& path) {
+  size_t size = 0;
   int32_t return_code = 0;
   DIR* directory = NULL;
 
@@ -213,7 +216,9 @@ std::string file_system::CurrentWorkingDirectory() {
   size_t filename_max_lenght = 1024;
   char currentAppPath[filename_max_lenght];
   memset(currentAppPath, 0, filename_max_lenght);
-  getcwd(currentAppPath, filename_max_lenght);
+  if (0 == getcwd(currentAppPath, filename_max_lenght)) {
+    LOG4CXX_WARN(logger_, "Could not get CWD");
+  }
 
   char path[filename_max_lenght];
   memset(path, 0, filename_max_lenght);
@@ -288,6 +293,14 @@ bool file_system::IsAccessible(const std::string& name, int32_t how) {
   return !access(name.c_str(), how);
 }
 
+bool file_system::IsWritingAllowed(const std::string& name) {
+  return IsAccessible(name, W_OK);
+}
+
+bool file_system::IsReadingAllowed(const std::string& name) {
+  return IsAccessible(name, R_OK);
+}
+
 std::vector<std::string> file_system::ListFiles(
   const std::string& directory_name) {
   std::vector<std::string> listFiles;
@@ -320,6 +333,53 @@ std::vector<std::string> file_system::ListFiles(
       }
 
       listFiles.push_back(std::string(result->d_name));
+    }
+
+    closedir(directory);
+#ifdef __QNXNTO__
+    delete[] direntbuffer;
+#endif
+  }
+
+  return listFiles;
+}
+
+std::vector<std::string> file_system::ListFilesWithSubStr(
+  const std::string& directory_name, const std::string& sub_str) {
+  std::vector<std::string> listFiles;
+  if (!DirectoryExists(directory_name)) {
+    return listFiles;
+  }
+
+  int32_t return_code = 0;
+  DIR* directory = NULL;
+#ifndef __QNXNTO__
+  struct dirent dir_element_;
+  struct dirent* dir_element = &dir_element_;
+#else
+  char* direntbuffer =
+      new char[offsetof(struct dirent, d_name) +
+               pathconf(directory_name.c_str(), _PC_NAME_MAX) + 1];
+  struct dirent* dir_element = new(direntbuffer) dirent;
+#endif
+  struct dirent* result = NULL;
+
+  directory = opendir(directory_name.c_str());
+  if (NULL != directory) {
+    return_code = readdir_r(directory, dir_element, &result);
+
+    for (; NULL != result && 0 == return_code;
+         return_code = readdir_r(directory, dir_element, &result)) {
+      if (0 == strcmp(result->d_name, "..")
+          || 0 == strcmp(result->d_name, ".")) {
+        continue;
+      }
+
+      std::string fileName(result->d_name);
+
+      if (std::string::npos != fileName.find(sub_str)) {
+         listFiles.push_back(fileName);
+      }
     }
 
     closedir(directory);

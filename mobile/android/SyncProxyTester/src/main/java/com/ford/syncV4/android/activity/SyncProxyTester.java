@@ -57,6 +57,7 @@ import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddSubMenu;
+import com.ford.syncV4.proxy.rpc.Alert;
 import com.ford.syncV4.proxy.rpc.OnAudioPassThru;
 import com.ford.syncV4.proxy.rpc.OnKeyboardInput;
 import com.ford.syncV4.proxy.rpc.OnTouchEvent;
@@ -540,14 +541,14 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
         Logger.d(LOG_TAG + " Fragment '" + fragment + "' appId:" + appId);
 
         fragment.getLogAdapter().logMessage("Service '" + serviceType + "' started, " +
-                "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion() + "encrypted " + encoded, true);
+                "protocol version: " + mBoundProxyService.syncProxyGetWiProVersion() + ", encrypted:" + encoded, true);
 
         if (serviceType == ServiceType.Audio_Service) {
             MainApp.getInstance().runInUIThread(new Runnable() {
                 @Override
                 public void run() {
-                    OutputStream outputStream = mBoundProxyService
-                            .syncProxyStartAudioDataTransfer(fragment.getAppId());
+                    OutputStream outputStream = getOutputStreamForService(fragment.getAppId(),
+                            ServiceType.Audio_Service);
                     if (outputStream == null) {
                         return;
                     }
@@ -558,8 +559,8 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             MainApp.getInstance().runInUIThread(new Runnable() {
                 @Override
                 public void run() {
-                    OutputStream outputStream = mBoundProxyService
-                            .syncProxyStartH264(fragment.getAppId());
+                    OutputStream outputStream = getOutputStreamForService(fragment.getAppId(),
+                            ServiceType.Mobile_Nav);
                     if (outputStream == null) {
                         return;
                     }
@@ -611,6 +612,18 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
                 }
             }
         });
+    }
+
+    public OutputStream getOutputStreamForService(String appId, ServiceType serviceType) {
+        OutputStream outputStream = null;
+        if (serviceType == ServiceType.Audio_Service) {
+            outputStream = mBoundProxyService.syncProxyStartAudioDataTransfer(appId);
+        } else if (serviceType == ServiceType.Mobile_Nav) {
+            outputStream = mBoundProxyService.syncProxyStartH264(appId);
+        }
+        Logger.d(LOG_TAG + " OutStream for '" + serviceType + "', appId:" + appId +
+                " is:" + outputStream);
+        return outputStream;
     }
 
     public int getNextCorrelationIdForCurrentFragment() {
@@ -1006,6 +1019,20 @@ public class SyncProxyTester extends ActionBarActivity implements ActionBar.TabL
             return;
         }
         getCurrentActiveFragment().onAddSubMenuDialogResult(addSubMenu, syncSubMenu);
+    }
+
+    /**
+     * This is a callback function for the result of the
+     * {@link com.ford.syncV4.android.activity.AlertDialog}
+     *
+     * @param appId Application Id
+     * @param alert {@link com.ford.syncV4.proxy.rpc.Alert} request
+     */
+    public void onAlertDialogResult(String appId, Alert alert) {
+        if (mBoundProxyService == null) {
+            return;
+        }
+        mBoundProxyService.syncProxySendRPCRequest(appId, alert);
     }
 
     /**

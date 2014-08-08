@@ -44,9 +44,6 @@ const std::string kSelectStealFocus =
 const std::string kSelectDefaultHmi =
   "SELECT `default_hmi` FROM `application` WHERE `id` = ? LIMIT 1";
 
-const std::string kSelectPriority =
-  "SELECT `priority_value` FROM `application` WHERE `id` = ? LIMIT 1";
-
 const std::string kResetDeviceConsents = "DELETE FROM `device_consent_group`";
 
 const std::string kResetAppConsents = "DELETE FROM `consent_group`";
@@ -104,7 +101,7 @@ const std::string kSelectUsageAndErrorCount =
 const std::string kSelectAppLevels =
   "SELECT `application_id`, `minutes_in_hmi_full`, `minutes_in_hmi_limited`, "
   "  `minutes_in_hmi_background`, `minutes_in_hmi_none`, "
-  "  `count_of_rfcomm_limit_reached`, `count_of_user_selections`, "
+  "  `count_of_rfcom_limit_reached`, `count_of_user_selections`, "
   "  `count_of_rejections_sync_out_of_memory`, "
   "  `count_of_rejections_nickname_mismatch`, "
   "  `count_of_rejections_duplicate_name`, "

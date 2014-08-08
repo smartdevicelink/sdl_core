@@ -70,7 +70,7 @@ bool IAP2Connection::Init() {
   }
 }
 
-TransportAdapter::Error IAP2Connection::SendData(RawMessageSptr message) {
+TransportAdapter::Error IAP2Connection::SendData(RawMessagePtr message) {
   LOG4CXX_TRACE(logger_, "iAP2: sending data on protocol " << protocol_name_);
   if (iap2_eap_send(iap2ea_hdl_, message->data(), message->data_size()) != -1) {
     LOG4CXX_INFO(logger_, "iAP2: data on protocol " << protocol_name_ << " sent successfully");
@@ -78,7 +78,7 @@ TransportAdapter::Error IAP2Connection::SendData(RawMessageSptr message) {
     return TransportAdapter::OK;
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP2: error occured while sending data on protocol " << protocol_name_);
+    LOG4CXX_WARN(logger_, "iAP2: error occurred while sending data on protocol " << protocol_name_);
     controller_->DataSendFailed(device_uid_, app_handle_, message, DataSendError());
     return TransportAdapter::FAIL;
   }
@@ -97,7 +97,7 @@ void IAP2Connection::ReceiveData() {
   if (size != -1) {
     LOG4CXX_INFO(logger_, "iAP2: received " << size << " bytes on protocol " << protocol_name_);
     if (size != 0) {
-      RawMessageSptr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
+      RawMessagePtr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
       controller_->DataReceiveDone(device_uid_, app_handle_, message);
     }
   }
@@ -113,7 +113,7 @@ void IAP2Connection::ReceiveData() {
         controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
         break;
       default:
-        LOG4CXX_WARN(logger_, "iAP2: error occured while receiving data on protocol " << protocol_name_);
+        LOG4CXX_WARN(logger_, "iAP2: error occurred while receiving data on protocol " << protocol_name_);
         controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
         break;
     }

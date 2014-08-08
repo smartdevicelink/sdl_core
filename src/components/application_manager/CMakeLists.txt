@@ -14,7 +14,6 @@ include_directories (
   ../connection_handler/include/
   ../config_profile/include/
   ../request_watchdog/include/
-  ../transport_manager/include/
   ../resumption/include/
   ../rpc_base/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
@@ -408,6 +407,7 @@ endif (${HMI_DBUS_API})
 SET (LIBRARIES
   UsageStatistics
   dl
+  ProtocolLibrary
 )
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")

@@ -1,4 +1,20 @@
+[CW32]
+* SyncProxyTester: UpdateTurnList - SDL send incorrect result code (INVALID_DATA) on correct request
+
+[CW31]
+* SyncProxyTester: Asynchronous RPC API in XMP
++ SyncProxyTester: Add possibility to restore connection after HB timeout from SPT
++ SyncProxyTester: Add possibility to send audio/video streaming infinitely
++ SyncProxyTester: Add possibility to stream audio (video) w/o sending start service
+
+[CW30]
+* SyncProxyTester: SDL doesn't handle wrong type of "systemFile" parameter
++ SyncProxyTester: Modify UpdateTurnList request
+* SyncProxyTester:Ignoring pauses in autotest
++ SYNC Mobile SDK | SyncProxyTester: Add possibility to restore encryption state at SPT side
+
 [CW29]
++ SYNC Mobile SDK: added ssl error description listing
 * SYNC Mobile SDK | SyncProxyTester: Added possibility to start several secure sessions.
 
 [CW28]

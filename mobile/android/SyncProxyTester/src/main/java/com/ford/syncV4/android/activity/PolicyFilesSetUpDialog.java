@@ -3,7 +3,6 @@ package com.ford.syncV4.android.activity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,8 +10,11 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -41,7 +43,8 @@ public class PolicyFilesSetUpDialog extends BaseDialogFragment {
         final Context mContext = getActivity();
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        View layout = inflater.inflate(R.layout.policy_files_setup_layout, null);
+        View layout = inflater.inflate(R.layout.policy_files_setup_layout,
+                (ViewGroup) getActivity().findViewById(R.id.selectprotocol_Root));
 
         mSelectedPolicyUpdateFileNameView =
                 (EditText) layout.findViewById(R.id.policy_update_local_file_name);
@@ -95,7 +98,7 @@ public class PolicyFilesSetUpDialog extends BaseDialogFragment {
                 // TODO : Reconsider this check point
                 FileType fileType = FileType.JSON;
                 String selectedObjectString = String.valueOf(fileTypeView.getSelectedItem());
-                if (selectedObjectString == null) {
+                if (selectedObjectString != null) {
                     if (selectedObjectString.equalsIgnoreCase(fileTypesArray[0])) {
                         fileType = FileType.JSON;
                     } else if (selectedObjectString.equalsIgnoreCase(fileTypesArray[1])) {
@@ -106,18 +109,18 @@ public class PolicyFilesSetUpDialog extends BaseDialogFragment {
                 // TODO : Reconsider this check point
                 RequestType requestType = RequestType.HTTP;
                 selectedObjectString = String.valueOf(requestTypeView.getSelectedItem());
-                if (selectedObjectString == null) {
+                if (selectedObjectString != null) {
                     if (selectedObjectString.equalsIgnoreCase(requestTypesArray[0])) {
                         requestType = RequestType.HTTP;
-                    } else if (selectedObjectString.equalsIgnoreCase(fileTypesArray[1])) {
+                    } else if (selectedObjectString.equalsIgnoreCase(requestTypesArray[1])) {
                         requestType = RequestType.FILE_RESUME;
-                    } else if (selectedObjectString.equalsIgnoreCase(fileTypesArray[2])) {
+                    } else if (selectedObjectString.equalsIgnoreCase(requestTypesArray[2])) {
                         requestType = RequestType.AUTH_REQUEST;
-                    } else if (selectedObjectString.equalsIgnoreCase(fileTypesArray[3])) {
+                    } else if (selectedObjectString.equalsIgnoreCase(requestTypesArray[3])) {
                         requestType = RequestType.AUTH_CHALLENGE;
-                    } else if (selectedObjectString.equalsIgnoreCase(fileTypesArray[4])) {
+                    } else if (selectedObjectString.equalsIgnoreCase(requestTypesArray[4])) {
                         requestType = RequestType.AUTH_ACK;
-                    } else if (selectedObjectString.equalsIgnoreCase(fileTypesArray[5])) {
+                    } else if (selectedObjectString.equalsIgnoreCase(requestTypesArray[5])) {
                         requestType = RequestType.PROPRIETARY;
                     }
                 }
@@ -125,6 +128,16 @@ public class PolicyFilesSetUpDialog extends BaseDialogFragment {
                 ((SyncProxyTester) getActivity()).onPolicyFilesSetUpDialogResult_SendUpdate(
                         getArguments().getString(APP_ID_KEY), fileType,
                         requestType);
+            }
+        });
+
+        CheckBox processPolicyTableSnapshotView =
+                (CheckBox) layout.findViewById(R.id.policy_dialog_do_no_auto_send_view);
+        processPolicyTableSnapshotView.setChecked(AppPreferencesManager.getIsProcessPolicyTableSnapshot());
+        processPolicyTableSnapshotView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                AppPreferencesManager.setIsProcessPolicyTableSnapshot(isChecked);
             }
         });
 

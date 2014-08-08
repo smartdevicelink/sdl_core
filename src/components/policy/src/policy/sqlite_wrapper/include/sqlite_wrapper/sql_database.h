@@ -97,7 +97,8 @@ class SQLDatabase {
   /**
    * Call backup for opened DB
    */
-  bool BackupDB();
+  bool Backup();
+
  protected:
   /**
    * Gets connection to the SQLite database
