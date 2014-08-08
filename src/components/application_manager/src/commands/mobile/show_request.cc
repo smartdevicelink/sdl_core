@@ -92,7 +92,9 @@ void ShowRequest::Run() {
 
   mobile_apis::Result::eType verification_result =
       mobile_apis::Result::SUCCESS;
-  if ((*message_)[strings::msg_params].keyExists(strings::graphic)) {
+  if (((*message_)[strings::msg_params].keyExists(strings::graphic)) &&
+      ((*message_)[strings::msg_params]
+                   [strings::graphic][strings::value].asString()).length()) {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::graphic], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
