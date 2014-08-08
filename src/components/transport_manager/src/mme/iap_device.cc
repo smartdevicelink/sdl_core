@@ -67,7 +67,7 @@ bool IAPDevice::Init() {
   const ProtocolConfig::ProtocolNameContainer& pool_protocol_names = ProtocolConfig::IAPPoolProtocolNames();
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = pool_protocol_names.begin(); i != pool_protocol_names.end(); ++i) {
     std::string protocol_name = *i;
-    free_protocol_name_pool_.insert(std::make_pair(protocol_name, ++pool_index));
+    free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
   }
 
   LOG4CXX_TRACE(logger_, "iAP: connecting to " << mount_point());
@@ -168,10 +168,11 @@ void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
       removed = true;
 
       protocol_name_pool_lock_.Acquire();
-      ProtocolNamePool::iterator j = protocol_in_use_name_pool_.find(protocol_name);
+      ProtocolInUseNamePool::iterator j = protocol_in_use_name_pool_.find(protocol_name);
       if (j != protocol_in_use_name_pool_.end()) {
         LOG4CXX_INFO(logger_, "iAP: returning protocol " << protocol_name << " back to pool");
-        free_protocol_name_pool_.insert(*j);
+        int protocol_index = j->second;
+        free_protocol_name_pool_.insert(std::make_pair(protocol_index, protocol_name));
         protocol_in_use_name_pool_.erase(j);
       }
       protocol_name_pool_lock_.Release();
@@ -197,7 +198,7 @@ void IAPDevice::OnSessionOpened(uint32_t protocol_id, int session_id) {
 }
 
 void IAPDevice::OnSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id) {
-  const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::HubProtocolNames();
+  const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::IAPHubProtocolNames();
   bool is_hub = false;
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = hub_protocol_names.begin(); i != hub_protocol_names.end(); ++i) {
     if (protocol_name == *i) {
@@ -217,11 +218,11 @@ void IAPDevice::OnHubSessionOpened(uint32_t protocol_id, const char* protocol_na
   char protocol_index;
   protocol_name_pool_lock_.Acquire();
   if (!free_protocol_name_pool_.empty()) {
-    ProtocolNamePool::iterator i = free_protocol_name_pool_.begin();
-    std::string pool_protocol_name = i->first;
+    FreeProtocolNamePool::iterator i = free_protocol_name_pool_.begin();
+    protocol_index = i->first;
+    std::string pool_protocol_name = i->second;
     LOG4CXX_INFO(logger_, "iAP: protocol " << pool_protocol_name << " picked out from pool");
-    protocol_index = i->second;
-    protocol_in_use_name_pool_.insert(*i);
+    protocol_in_use_name_pool_.insert(std::make_pair(pool_protocol_name, protocol_index));
     free_protocol_name_pool_.erase(i);
   }
   else {

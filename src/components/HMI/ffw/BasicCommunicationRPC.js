@@ -320,17 +320,17 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                 if (notification.params.isAppPermissionsRevoked) {
 
-                    SDL.SDLModel.setAppPermissions(appID, response.result.appRevokedPermissions);
+                    SDL.SDLModel.setAppPermissions(notification.params.appID, response.result.appRevokedPermissions);
                 }
 
                 if (notification.params.appRevoked) {
 
-                    FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, appID, ["AppUnsupported"]);
+                    FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, notification.params.appID, ["AppUnsupported"]);
                 }
 
                 if (notification.params.appUnauthorized) {
 
-                    FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, appID, ["AppUnauthorized"]);
+                    FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, notification.params.appID, ["AppUnauthorized"]);
                 }
             }
 

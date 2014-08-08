@@ -451,9 +451,11 @@ class Profile : public utils::Singleton<Profile> {
      */
     uint32_t thread_pool_size() const;
 
-    const std::string& iap_legacy_protocol() const;
+    const std::string& iap_legacy_protocol_mask() const;
 
-    const std::string& iap_hub_protocol() const;
+    const std::string& iap_hub_protocol_mask() const;
+
+    const std::string& iap_pool_protocol_mask() const;
 
     const std::string& iap_system_config() const;
 
@@ -630,8 +632,9 @@ class Profile : public utils::Singleton<Profile> {
      */
     std::pair<uint32_t, int32_t>   get_vehicle_data_frequency_;
 
-    std::string                     iap_legacy_protocol_;
-    std::string                     iap_hub_protocol_;
+    std::string                     iap_legacy_protocol_mask_;
+    std::string                     iap_hub_protocol_mask_;
+    std::string                     iap_pool_protocol_mask_;
     std::string                     iap_system_config_;
     std::string                     iap2_system_config_;
     int                             iap2_hub_connect_attempts_;

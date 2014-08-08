@@ -954,10 +954,13 @@ void PolicyManagerImpl::GetPermissionsForApp(
                                 .pt_data().get());
   // For extended policy
   if (pt_ext) {
+    bool allowed_by_default = false;
     if (pt_ext->IsDefaultPolicy(policy_app_id)) {
       app_id_to_check = kDefaultId;
+      allowed_by_default = true;
     } else if (pt_ext->IsPredataPolicy(policy_app_id)) {
       app_id_to_check = kPreDataConsentId;
+      allowed_by_default = true;
     }
 
     FunctionalIdType group_types;
@@ -976,67 +979,61 @@ void PolicyManagerImpl::GetPermissionsForApp(
       return;
     }
 
-    FunctionalGroupNames::const_iterator it = group_names.begin();
-    FunctionalGroupNames::const_iterator it_end = group_names.end();
-    FunctionalGroupIDs auto_allowed_groups;
-    for (;it != it_end; ++it) {
-      if (it->second.first.empty()) {
-        auto_allowed_groups.push_back(it->first);
-      }
-    }
+    // The "default" and "pre_DataConsent" are auto-allowed groups
+    // So, check if application in the one of these mode.
+    if (allowed_by_default) {
+      GroupType type = (kDefaultId == app_id_to_check ?
+            kTypeDefault : kTypePreDataConsented);
 
-    FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
-    FunctionalGroupIDs allowed_groups;
-    // If application is limited to default only related groups ara allowed
-    // If application is limited to pre_Dataconsent only related groups are
-    // allowed
-    FunctionalGroupIDs default_groups = group_types[kTypeDefault];
-    if (kDefaultId == app_id_to_check) {
-      auto_allowed_groups.clear();
-      allowed_groups = group_types[kTypeDefault];
-    } else if (kPreDataConsentId == app_id_to_check) {
-      auto_allowed_groups.clear();
-      default_groups = FunctionalGroupIDs();
-      allowed_groups = group_types[kTypePreDataConsented];
+      FillFunctionalGroupPermissions(group_types[type], group_names,
+                                     kGroupAllowed, permissions);
     } else {
-      allowed_groups = group_types[kTypeAllowed];
+
+      // The code bellow allows to process application which
+      // has specific permissions(not default and pre_DataConsent).
+
+      // All groups for specific application
+      FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
+
+      // Groups assigned by the user for specific application
+      FunctionalGroupIDs allowed_groups = group_types[kTypeAllowed];
+
+      // Groups disallowed by the user for specific application
+      FunctionalGroupIDs common_disallowed = group_types[kTypeDisallowed];
+
+      // Groups that allowed by default but can be changed by the user
+      FunctionalGroupIDs preconsented_groups = group_types[kTypePreconsented];
+
+      // Pull common groups from allowed and preconsented parts.
+      FunctionalGroupIDs allowed_preconsented = Merge(allowed_groups,
+                                                preconsented_groups);
+
+      // Get all groups that we suppose are allowed.
+      FunctionalGroupIDs all_allowed = Merge(allowed_preconsented,
+                                             all_groups);
+
+      // In case when same groups exists in disallowed and allowed tables,
+      // disallowed one have priority over allowed. So we have to remove
+      // all disallowed groups from allowed table.
+      FunctionalGroupIDs common_allowed = ExcludeSame(all_allowed,
+                                                      common_disallowed);
+
+      // Remove all disallowed groups from application specific groups.
+      FunctionalGroupIDs no_disallowed = ExcludeSame(all_groups,
+                                                     common_disallowed);
+
+      // Undefined groups are groups that have no allowed or disallowed type.
+      FunctionalGroupIDs undefined_consent = ExcludeSame(no_disallowed,
+                                                         common_allowed);
+
+      // Fill result
+      FillFunctionalGroupPermissions(undefined_consent, group_names,
+                                     kGroupUndefined, permissions);
+      FillFunctionalGroupPermissions(common_allowed, group_names,
+                                     kGroupAllowed, permissions);
+      FillFunctionalGroupPermissions(common_disallowed, group_names,
+                                     kGroupDisallowed, permissions);
     }
-
-    FunctionalGroupIDs disallowed_groups = group_types[kTypeDisallowed];
-    FunctionalGroupIDs preconsented_groups = group_types[kTypePreconsented];
-
-    // Find common disallowed groups
-    FunctionalGroupIDs common_disallowed = disallowed_groups;
-
-    // Find common allowed groups
-    FunctionalGroupIDs allowed_preconsented = Merge(allowed_groups,
-                                              preconsented_groups);
-
-    FunctionalGroupIDs allowed_preconsented_auto = Merge(allowed_preconsented,
-                                                         auto_allowed_groups);
-    // Default groups always allowed
-    FunctionalGroupIDs related_defaults = FindSame(all_groups, default_groups);
-
-    FunctionalGroupIDs all_allowed = Merge(allowed_preconsented_auto,
-                                           related_defaults);
-
-    FunctionalGroupIDs common_allowed = ExcludeSame(all_allowed,
-                                                    common_disallowed);
-
-    // Find groups with undefinded consent
-    FunctionalGroupIDs no_disallowed = ExcludeSame(all_groups,
-                                                   common_disallowed);
-    FunctionalGroupIDs undefined_consent = ExcludeSame(no_disallowed,
-                                                       common_allowed);
-
-    // Fill result
-    FillFunctionalGroupPermissions(undefined_consent, group_names,
-                                   kGroupUndefined, permissions);
-    FillFunctionalGroupPermissions(common_allowed, group_names,
-                                   kGroupAllowed, permissions);
-    FillFunctionalGroupPermissions(common_disallowed, group_names,
-                                   kGroupDisallowed, permissions);
-
     return;
   }
 #else
