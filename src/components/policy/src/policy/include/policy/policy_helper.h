@@ -94,6 +94,7 @@ struct CheckAppPolicy {
                         const AppPoliciesValueType& app_policy) const;
     bool operator()(const AppPoliciesValueType& app_policy);
   private:
+    bool IsConsentRequired(const std::string& group_name) const;
     PolicyManagerImpl* pm_;
     const utils::SharedPtr<policy_table::Table> update_;
     const utils::SharedPtr<policy_table::Table> snapshot_;

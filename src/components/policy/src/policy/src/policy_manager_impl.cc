@@ -47,9 +47,42 @@ policy::PolicyManager* CreateManager() {
 }
 
 namespace {
-void CheckPreloadedGroups(policy_table::ApplicationParams& app_param) {
 
+struct CheckGroupName {
+  CheckGroupName(const std::string& name)
+    : name_(name) {
+  }
+
+  bool operator()(const policy::FunctionalGroupPermission& value) {
+    return value.group_name == name_;
+  }
+
+private:
+  const std::string& name_;
+};
+
+struct CopyPermissions{
+  CopyPermissions(const std::vector<policy::FunctionalGroupPermission>& groups)
+    : groups_(groups) {
+  }
+
+bool operator()(policy::FunctionalGroupPermission& value) {
+  CheckGroupName checker(value.group_name);
+  std::vector<policy::FunctionalGroupPermission>::const_iterator it =
+      std::find_if(groups_.begin(), groups_.end(), checker);
+  if (groups_.end() == it) {
+    return false;
+  }
+  value.group_alias = it->group_alias;
+  value.group_id = it->group_id;
+  value.state = it->state;
+  return true;
 }
+
+private:
+  const std::vector<policy::FunctionalGroupPermission>& groups_;
+};
+
 }
 
 namespace policy {
@@ -1311,15 +1344,24 @@ void PolicyManagerImpl::CheckUpdateStatus() {
 }
 
 AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
-  const std::string& app_id) {
-  typedef std::map<std::string, AppPermissions>::const_iterator PermissionsIt;
-  PermissionsIt app_id_diff = app_permissions_diff_.find(app_id);
-  AppPermissions permissions(app_id);
+    const std::string& device_id,
+    const std::string& policy_app_id) {
+  typedef std::map<std::string, AppPermissions>::iterator PermissionsIt;
+  PermissionsIt app_id_diff = app_permissions_diff_.find(policy_app_id);
+  AppPermissions permissions(policy_app_id);
   if (app_permissions_diff_.end() != app_id_diff) {
+    // At this point we're able to know the device id for which user consents
+    // could be evaluated
+    std::vector<FunctionalGroupPermission> groups;
+    GetUserConsentForApp(device_id, policy_app_id, groups);
+    CopyPermissions copier(groups);
+    std::for_each(app_id_diff->second.appRevokedPermissions.begin(),
+                  app_id_diff->second.appRevokedPermissions.end(),
+                  copier);
     permissions = app_id_diff->second;
   } else {
-    permissions.appPermissionsConsentNeeded = IsConsentNeeded(app_id);
-    permissions.appRevoked = IsApplicationRevoked(app_id);
+    permissions.appPermissionsConsentNeeded = IsConsentNeeded(policy_app_id);
+    permissions.appRevoked = IsApplicationRevoked(policy_app_id);
     GetPriority(permissions.application_id, &permissions.priority);
   }
   return permissions;

@@ -136,7 +136,8 @@ class PolicyManagerImpl : public PolicyManager {
                      int32_t timespan_seconds);    
     // Interface StatisticsManager (end)
 
-    AppPermissions GetAppPermissionsChanges(const std::string& app_id);
+    AppPermissions GetAppPermissionsChanges(const std::string& device_id,
+                                            const std::string& policy_app_id);
     void RemovePendingPermissionChanges(const std::string& app_id);
 
     void SendNotificationOnPermissionsUpdated(const std::string& application_id);

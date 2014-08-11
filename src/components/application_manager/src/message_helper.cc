@@ -1320,12 +1320,7 @@ void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
       .isAppPermissionsRevoked;
 
   if (permissions.isAppPermissionsRevoked) {
-    (*message)[strings::msg_params]["appRevokedPermissions"] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-    for (size_t i = 0; i < permissions.appRevokedPermissions.size(); ++i) {
-      (*message)[strings::msg_params]["appRevokedPermissions"][i] = permissions
-          .appRevokedPermissions[i];
-    }
+    FillAppRevokedPermissions(permissions, *message);
   }
 
   (*message)[strings::msg_params]["isPermissionsConsentNeeded"] = permissions
@@ -1890,6 +1885,32 @@ void MessageHelper::SendOnPermissionsChangeNotification(
   ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
 
+void MessageHelper::FillAppRevokedPermissions(
+    const policy::AppPermissions& permissions,
+    smart_objects::SmartObject& message) {
+
+  message[strings::msg_params]["appRevokedPermissions"] =
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
+  smart_objects::SmartObject& revoked_permission_items =
+      message[strings::msg_params]["appRevokedPermissions"];
+  for (size_t i = 0; i < permissions.appRevokedPermissions.size(); ++i) {
+    revoked_permission_items[i] = smart_objects::SmartObject(
+                                    smart_objects::SmartType_Map);
+    smart_objects::SmartObject& permission_item = revoked_permission_items[i];
+    permission_item["name"] = permissions.appRevokedPermissions[i].
+                              group_alias;
+
+    permission_item["id"] = permissions.appRevokedPermissions[i].group_id;
+
+    if (policy::kGroupUndefined !=
+        permissions.appRevokedPermissions[i].state) {
+      permission_item["allowed"] =
+          policy::kGroupAllowed == permissions.appRevokedPermissions[i].state
+          ? true : false;
+    }
+  }
+}
+
 void MessageHelper::SendOnAppPermissionsChangedNotification(
   uint32_t connection_key, const policy::AppPermissions& permissions) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
@@ -1913,13 +1934,10 @@ void MessageHelper::SendOnAppPermissionsChangedNotification(
   if (permissions.isAppPermissionsRevoked) {
     message[strings::msg_params]["isAppPermissionsRevoked"] = permissions
         .isAppPermissionsRevoked;
-    message[strings::msg_params]["appRevokedPermissions"] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-    for (size_t i = 0; i < permissions.appRevokedPermissions.size(); ++i) {
-      message[strings::msg_params]["appRevokedPermissions"][i] = permissions
-          .appRevokedPermissions[i];
-    }
+
+    FillAppRevokedPermissions(permissions, message);
   }
+
   if (permissions.appPermissionsConsentNeeded) {
     message[strings::msg_params]["appPermissionsConsentNeeded"] = permissions
         .appPermissionsConsentNeeded;
