@@ -558,7 +558,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         Thread.sleep(WAIT_TIMEOUT);
 
         verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(eq(SessionTest.APP_ID_DEFAULT),
-                notNull(ISystemRequestProxy.class), eq(data), eq(fileType), eq(requestType));
+                notNull(OnSystemRequest.class), notNull(ISystemRequestProxy.class));
     }
 
     public void testOnSystemRequestPROPRIETARYandJSONTriggerProcessPolicy() throws InterruptedException {
@@ -581,7 +581,7 @@ public class SyncProxyBase_OnSystemRequestTest extends InstrumentationTestCase {
         Thread.sleep(WAIT_TIMEOUT);
 
         verify(handlerMock, times(1)).onPolicyTableSnapshotRequest(eq(SessionTest.APP_ID_DEFAULT),
-                notNull(ISystemRequestProxy.class), eq(data), eq(fileType), eq(requestType));
+                notNull(OnSystemRequest.class), notNull(ISystemRequestProxy.class));
     }
 
     // TODO other request types

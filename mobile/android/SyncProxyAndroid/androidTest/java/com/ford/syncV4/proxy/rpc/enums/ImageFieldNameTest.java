@@ -13,6 +13,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
  * Created by enikolsky on 2014-02-07.
  */
 public class ImageFieldNameTest extends TestCase {
+
     public void testAllValuesFromSpecificationShouldBeDefined() {
         assertThat(ImageFieldName.values(),
                 IsArrayContainingInAnyOrder.arrayContainingInAnyOrder(
@@ -23,7 +24,7 @@ public class ImageFieldNameTest extends TestCase {
                         ImageFieldName.menuIcon, ImageFieldName.cmdIcon,
                         ImageFieldName.appIcon, ImageFieldName.graphic,
                         ImageFieldName.showConstantTBTIcon,
-                        ImageFieldName.showConstantTBTNextTurnIcon));
+                        ImageFieldName.showConstantTBTNextTurnIcon, ImageFieldName.locationImage));
     }
 
     public void testValueForStringsoftButtonImageShouldReturnCorrectValue() {
@@ -127,6 +128,11 @@ public class ImageFieldNameTest extends TestCase {
     public void testshowConstantTBTNextTurnIconToStringShouldReturnCorrectValue() {
         assertThat(ImageFieldName.showConstantTBTNextTurnIcon.toString(),
                 is("showConstantTBTNextTurnIcon"));
+    }
+
+    public void testshowConstantLocationImageToStringShouldReturnCorrectValue() {
+        assertThat(ImageFieldName.locationImage.toString(),
+                is("locationImage"));
     }
 
     public void testValueForStringUnknownShouldThrowIllegalArgumentException() {

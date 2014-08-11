@@ -7,21 +7,15 @@
     android:padding="20dip" >
 
     <CheckBox
-        android:id="@+id/policy_dialog_do_no_auto_send_view"
-        android:text="@string/policy_dialog_do_no_auto_send_label"
-        android:checked="true"
-        android:layout_marginBottom="0dp"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:text="@string/policy_dialog_do_no_auto_send_hint_text"
+        android:id="@+id/policy_dialog_override_update_view"
+        android:text="@string/policy_dialog_override_update_label"
         android:layout_marginBottom="15dp"
-        android:enabled="false"
+        android:checked="true"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" />
 
     <TextView
+        android:id="@+id/policy_update_local_file_name_label_view"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:paddingBottom="5dp"

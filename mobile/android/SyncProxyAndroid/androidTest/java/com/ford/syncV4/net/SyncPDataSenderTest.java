@@ -32,7 +32,8 @@ public class SyncPDataSenderTest extends InstrumentationTestCase {
 
     private static String sSyncPDataBase64Payload = "";
 
-    public void testSendSyncPData() throws SyncException, UnsupportedEncodingException,
+    // TODO : Require Internet connection
+    /*public void testSendSyncPData() throws SyncException, UnsupportedEncodingException,
             InterruptedException {
 
         SyncPDataSender syncPDataSender = new SyncPDataSender(123);
@@ -57,7 +58,7 @@ public class SyncPDataSenderTest extends InstrumentationTestCase {
         countDownLatch.await(AWAIT_TIMEOUT, TimeUnit.MILLISECONDS);
 
         assertTrue(result[0]);
-    }
+    }*/
 
     /*public void testSendEncodedSyncPData() throws SyncException, UnsupportedEncodingException,
             InterruptedException {

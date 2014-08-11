@@ -17,6 +17,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.constants.Const;
@@ -43,7 +44,7 @@ public class PolicyFilesSetUpDialog extends BaseDialogFragment {
         final Context mContext = getActivity();
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 Context.LAYOUT_INFLATER_SERVICE);
-        View layout = inflater.inflate(R.layout.policy_files_setup_layout,
+        final View layout = inflater.inflate(R.layout.policy_files_setup_layout,
                 (ViewGroup) getActivity().findViewById(R.id.selectprotocol_Root));
 
         mSelectedPolicyUpdateFileNameView =
@@ -69,11 +70,31 @@ public class PolicyFilesSetUpDialog extends BaseDialogFragment {
             }
         });
 
-        final Spinner fileTypeView = (Spinner) layout.findViewById(R.id.send_policy_update_file_type);
-        final Spinner requestTypeView = (Spinner) layout.findViewById(R.id.send_policy_update_request_type);
+        final Spinner fileTypeView =
+                (Spinner) layout.findViewById(R.id.send_policy_update_file_type);
+        final Spinner requestTypeView =
+                (Spinner) layout.findViewById(R.id.send_policy_update_request_type);
         // Create an ArrayAdapter using the string array and a default spinner layout
-        final String[] fileTypesArray = getActivity().getResources().getStringArray(R.array.policy_update_file_type);
-        final String[] requestTypesArray = getActivity().getResources().getStringArray(R.array.policy_update_request_type);
+        final String[] fileTypesArray = getActivity().getResources()
+                .getStringArray(R.array.policy_update_file_type);
+        final String[] requestTypesArray = getActivity().getResources()
+                .getStringArray(R.array.policy_update_request_type);
+        final CheckBox overridePolicyTableUpdateDataView =
+                (CheckBox) layout.findViewById(R.id.policy_dialog_override_update_view);
+        overridePolicyTableUpdateDataView.setChecked(
+                AppPreferencesManager.isOverridePolicyTableUpdateData()
+        );
+        processOverridePolicyTableUpdateDataView(layout,
+                overridePolicyTableUpdateDataView.isChecked());
+        overridePolicyTableUpdateDataView.setOnCheckedChangeListener(
+                new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        AppPreferencesManager.setOverridePolicyTableUpdateData(isChecked);
+                        processOverridePolicyTableUpdateDataView(layout, isChecked);
+                    }
+                }
+        );
 
         ArrayAdapter<CharSequence> fileTypesAdapter = ArrayAdapter.createFromResource(getActivity(),
                 R.array.policy_update_file_type, android.R.layout.simple_spinner_item);
@@ -131,16 +152,6 @@ public class PolicyFilesSetUpDialog extends BaseDialogFragment {
             }
         });
 
-        CheckBox processPolicyTableSnapshotView =
-                (CheckBox) layout.findViewById(R.id.policy_dialog_do_no_auto_send_view);
-        processPolicyTableSnapshotView.setChecked(AppPreferencesManager.getIsProcessPolicyTableSnapshot());
-        processPolicyTableSnapshotView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                AppPreferencesManager.setIsProcessPolicyTableSnapshot(isChecked);
-            }
-        });
-
         return new AlertDialog.Builder(mContext)
                 .setTitle(getString(R.string.policy_files_setup_dialog_title))
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
@@ -169,5 +180,18 @@ public class PolicyFilesSetUpDialog extends BaseDialogFragment {
                 AppPreferencesManager.setPolicyTableUpdateFilePath(filePath);
             }
         }
+    }
+
+    private void processOverridePolicyTableUpdateDataView(View view, boolean isChecked) {
+        TextView policyUpdateFileChooserLabelView =
+                (TextView) view.findViewById(R.id.policy_update_local_file_name_label_view);
+        EditText policyUpdateFileNameView =
+                (EditText) view.findViewById(R.id.policy_update_local_file_name);
+        Button policyUpdateFileButtonView =
+                (Button) view.findViewById(R.id.policy_update_select_file_button);
+
+        policyUpdateFileChooserLabelView.setEnabled(isChecked);
+        policyUpdateFileNameView.setEnabled(isChecked);
+        policyUpdateFileButtonView.setEnabled(isChecked);
     }
 }

@@ -1,3 +1,6 @@
+[CW33]
++ SYNC Mobile SDK: Policy data exchange with Ford's backend
+
 [CW32]
 * SyncProxyTester: UpdateTurnList - SDL send incorrect result code (INVALID_DATA) on correct request
 

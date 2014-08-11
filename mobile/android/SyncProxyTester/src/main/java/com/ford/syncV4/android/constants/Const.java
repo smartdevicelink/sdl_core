@@ -68,6 +68,7 @@ public class Const {
     public static final class Policy {
         public static final String PREF_KEY_POLICY_UPDATE_FILE_PATH = "PolicyUpdateFilePath";
         public static final String PREF_KEY_POLICY_UPDATE_AUTO_REPLAY = "PolicyUpdateAutoReplay";
+        public static final String PREF_KEY_POLICY_UPDATE_OVERRIDE_DATA = "PolicyUpdateOverrideData";
     }
 
     // HashId properties
@@ -111,6 +112,4 @@ public class Const {
     public static final String PREF_KEY_HB_ACK = "HeartBeatAck";
     public static final String PREF_KEY_PROCESS_SDL_HB_ACK = "ProcessSDLHeartBeatAck";
     public static final String PREF_KEY_RECONNECT_ON_HB_TIMEOUT = "ReconnectOnHBTimeOut";
-
-    public static final String PREF_KEY_PROCESS_POLICY_TABLE_SNAPSHOT = "ProcessPolicyTableSnapshot";
 }

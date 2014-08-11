@@ -126,6 +126,17 @@ public class TestConfig {
     private boolean mDoProcessPolicyTableSnapshot = true;
 
     /**
+     * This is a holder field for the test data of the Policy Table Update response
+     */
+    private byte[] mPolicyTableUpdateData = new byte[0];
+
+    /**
+     * This flag indicated whether it is necessary to override a data received with the
+     * Policy Table Update. Default is false.
+     */
+    private boolean mDoOverridePolicyTableUpdateData = true;
+
+    /**
      * @return a value that indicates whether to process Ack for the Heartbeat message or not.
      * Default value is true.
      */
@@ -389,5 +400,41 @@ public class TestConfig {
      */
     public void setDoProcessPolicyTableSnapshot(boolean value) {
         mDoProcessPolicyTableSnapshot = value;
+    }
+
+    /**
+     * @return the data for the Policy Table Update response
+     */
+    public byte[] getPolicyTableUpdateData() {
+        return mPolicyTableUpdateData;
+    }
+
+    /**
+     * Set the data for the Policy Table Update response
+     *
+     * @param value array of the bytes
+     */
+    public void setPolicyTableUpdateData(byte[] value) {
+        mPolicyTableUpdateData = value;
+    }
+
+    /**
+     * This flag indicated whether it is necessary to override a data received with the
+     * Policy Table Update.
+     *
+     * @return true or false
+     */
+    public boolean isDoOverridePolicyTableUpdateData() {
+        return mDoOverridePolicyTableUpdateData;
+    }
+
+    /**
+     * This flag indicated whether it is necessary to override a data received with the
+     * Policy Table Update.
+     *
+     * @param value true or false
+     */
+    public void setDoOverridePolicyTableUpdateData(boolean value) {
+        mDoOverridePolicyTableUpdateData = value;
     }
 }

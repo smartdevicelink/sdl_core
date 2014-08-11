@@ -18,6 +18,7 @@ import android.util.SparseArray;
 import com.ford.syncV4.android.MainApp;
 import com.ford.syncV4.android.R;
 import com.ford.syncV4.android.activity.PlaceholderFragment;
+import com.ford.syncV4.android.activity.SafeToast;
 import com.ford.syncV4.android.activity.SyncProxyTester;
 import com.ford.syncV4.android.adapters.LogAdapter;
 import com.ford.syncV4.android.constants.Const;
@@ -32,10 +33,9 @@ import com.ford.syncV4.android.manager.RestoreConnectionManager;
 import com.ford.syncV4.android.module.ModuleTest;
 import com.ford.syncV4.android.policies.PoliciesTest;
 import com.ford.syncV4.android.policies.PoliciesTesterActivity;
-import com.ford.syncV4.android.policies.PolicyFilesManager;
 import com.ford.syncV4.android.receivers.SyncReceiver;
-import com.ford.syncV4.android.service.proxy.OnSystemRequestHandler;
 import com.ford.syncV4.android.utils.AppUtils;
+import com.ford.syncV4.android.utils.PolicyUtils;
 import com.ford.syncV4.exception.SyncException;
 import com.ford.syncV4.exception.SyncExceptionCause;
 import com.ford.syncV4.marshal.IJsonRPCMarshaller;
@@ -50,6 +50,7 @@ import com.ford.syncV4.proxy.SyncProxyConfigurationResources;
 import com.ford.syncV4.proxy.constants.Names;
 import com.ford.syncV4.proxy.constants.ProtocolConstants;
 import com.ford.syncV4.proxy.interfaces.IProxyListenerALMTesting;
+import com.ford.syncV4.proxy.policy.PolicyFilesManager;
 import com.ford.syncV4.proxy.rpc.AddCommand;
 import com.ford.syncV4.proxy.rpc.AddCommandResponse;
 import com.ford.syncV4.proxy.rpc.AddSubMenu;
@@ -127,6 +128,7 @@ import com.ford.syncV4.proxy.rpc.enums.HMILevel;
 import com.ford.syncV4.proxy.rpc.enums.Language;
 import com.ford.syncV4.proxy.rpc.enums.RequestType;
 import com.ford.syncV4.proxy.rpc.enums.Result;
+import com.ford.syncV4.proxy.systemrequest.IOnSystemRequestHandlerCallback;
 import com.ford.syncV4.proxy.systemrequest.SystemRequestProxyImpl;
 import com.ford.syncV4.test.TestConfig;
 import com.ford.syncV4.transport.BTTransportConfig;
@@ -390,7 +392,10 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
         mTestConfig.setDoRootDeviceCheck(AppPreferencesManager.getDoDeviceRootCheck());
         mTestConfig.setDoProcessHearBeatSDLAck(AppPreferencesManager.isProcessHeartBeatSDLAck());
         mTestConfig.setDoProcessPolicyTableSnapshot(
-                AppPreferencesManager.getIsProcessPolicyTableSnapshot());
+                AppPreferencesManager.getPolicyTableUpdateAutoReplay());
+        mTestConfig.setPolicyTableUpdateData(PolicyUtils.getPolicyUpdateData());
+        mTestConfig.setDoOverridePolicyTableUpdateData(
+                AppPreferencesManager.isOverridePolicyTableUpdateData());
     }
 
     private boolean startProxy() {
@@ -457,7 +462,7 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                 syncProxyConfigurationResources.setTelephonyManager(
                         (TelephonyManager) MainApp.getInstance().getSystemService(Context.TELEPHONY_SERVICE));
 
-                Logger.i("Start SYNC Proxy's instance, vrSynonyms:" + vrSynonyms);
+                Logger.i("Start SYNC Proxy's instance");
                 mSyncProxy = new SyncProxyALM(this,
                         syncProxyConfigurationResources /*sync proxy configuration resources*/,
                         appName,
@@ -493,12 +498,6 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
             // then we call Session initialization
             mSyncProxy.initializeSessions();
         }
-
-        LogAdapter logAdapter = getLogAdapterByAppId(appId);
-        OnSystemRequestHandler mOnSystemRequestHandler = new OnSystemRequestHandler(logAdapter);
-
-        mSyncProxy.setOnSystemRequestHandler(mOnSystemRequestHandler);
-
 
         createInfoMessageForAdapter(" SYNC Proxy started");
 
@@ -562,9 +561,20 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
                     }
                 }
         );
-        final LogAdapter logAdapter = getLogAdapterByAppId(appId);
         PolicyFilesManager.sendPolicyTableUpdate(appId, systemRequestProxy, fileType, requestType,
-                logAdapter);
+                PolicyUtils.getPolicyUpdateData(),
+                new IOnSystemRequestHandlerCallback() {
+                    @Override
+                    public void onError(String appId, String message) {
+                        onOnSystemRequestPolicyError(appId, message);
+                    }
+
+                    @Override
+                    public void onSuccess(String appId, String message) {
+                        onOnSystemRequestPolicySuccess(appId, message);
+                    }
+                }
+        );
     }
 
     public void setCloseSessionCallback(ICloseSession closeSessionCallback) {
@@ -975,8 +985,13 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     }
 
     @Override
-    public void onError(String info, Throwable throwable) {
-        createErrorMessageForAdapter("SYNC Proxy error: " + info);
+    public void onError(String errorMessage) {
+        createErrorMessageForAdapter(errorMessage);
+    }
+
+    @Override
+    public void onError(String appId, String errorMessage) {
+        createErrorMessageForAdapter(appId, errorMessage);
     }
 
     /**
@@ -1730,13 +1745,41 @@ public class ProxyService extends Service implements IProxyListenerALMTesting {
     @Override
     public void onOnSystemRequest(String appId, OnSystemRequest notification) {
         createDebugMessageForAdapter(appId, notification);
+
+        final FileType fileType = notification.getFileType();
+        final RequestType requestType = notification.getRequestType();
+        final byte[] bulkData = notification.getBulkData();
+
+        boolean doSavePolicySnapshot = false;
+        if (requestType == RequestType.HTTP && fileType == FileType.BINARY) {
+            doSavePolicySnapshot = true;
+        } else if (requestType == RequestType.PROPRIETARY && fileType == FileType.JSON) {
+            doSavePolicySnapshot = true;
+        }
+        if (doSavePolicySnapshot) {
+            Logger.i("Save Policy Table Snapshot");
+            PolicyUtils.savePolicyTableSnapshot(bulkData);
+        }
     }
 
     /**
-     * ******************************
-     * * SYNC AppLink Policies Callback's **
-     * *******************************
+     * **********************************
+     * SYNC AppLink Policies Callbacks  *
+     * **********************************
      */
+
+    @Override
+    public void onOnSystemRequestPolicySuccess(String appId, String message) {
+        createDebugMessageForAdapter(appId, message);
+        SafeToast.showToastAnyThread(message);
+    }
+
+    @Override
+    public void onOnSystemRequestPolicyError(String appId, String message) {
+        createErrorMessageForAdapter(appId, message);
+        SafeToast.showToastAnyThread(message);
+    }
+
     @Override
     public void onOnPermissionsChange(String appId, OnPermissionsChange notification) {
         createDebugMessageForAdapter(appId, notification);

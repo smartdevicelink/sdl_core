@@ -371,11 +371,10 @@ public class SyncProxyALMTest extends InstrumentationTestCase {
                         0x00, maxByte, maxByte, maxByte, maxByte, 0x00 };
         connection.onTransportBytesReceived(bytes, bytes.length);
 
-        ArgumentCaptor<Throwable> throwableArgumentCaptor =
-                ArgumentCaptor.forClass(Throwable.class);
-        verify(proxyListenerMock, timeout(100).times(1)).onError(anyString(),
-                throwableArgumentCaptor.capture());
-        assertThat(throwableArgumentCaptor.getValue().toString(),
-                containsString(OutOfMemoryError.class.getSimpleName()));
+        final String errorMessage = "Out of memory";
+
+        ArgumentCaptor<String> stringArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(proxyListenerMock, timeout(100).times(1)).onError(stringArgumentCaptor.capture());
+        assertThat(stringArgumentCaptor.getValue(), containsString(errorMessage));
     }
 }
