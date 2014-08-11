@@ -61,11 +61,11 @@ public class PolicyDataDownloaderImpl implements IDataDownloader {
 
         HttpClient httpClient = new DefaultHttpClient();
         String jsonString = httpRequestParameters.getRequestBody().toString();
-        InputStreamEntity reqEntity =
+        InputStreamEntity inputStreamEntity =
                 new InputStreamEntity(new ByteArrayInputStream(jsonString.getBytes()),
                         jsonString.length());
-        reqEntity.setContentType("application/json");
-        request.setEntity(reqEntity);
+        inputStreamEntity.setContentType("application/json");
+        request.setEntity(inputStreamEntity);
 
         try {
             HttpResponse httpResponse = httpClient.execute(request);
