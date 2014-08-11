@@ -144,7 +144,10 @@ bool CheckAppPolicy::HasSameGroups(const AppPoliciesValueType& app_policy,
       old_it = ++diff.first;
       new_it = diff.second;
     } else {
-      perms->appPermissionsConsentNeeded = true;
+      // according to the SDLAQ-CRS-2757 we have to set
+      // appPermissionsConsentNeeded should not be set to true
+      // in case if this group is auto-allowed
+      perms->appPermissionsConsentNeeded = IsConsentRequired(*new_it);
       old_it = diff.first;
       new_it = ++diff.second;
     }
