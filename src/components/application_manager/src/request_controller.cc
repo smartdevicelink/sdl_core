@@ -303,7 +303,7 @@ void RequestController::Worker::threadMain() {
     AutoUnlock unlock(auto_lock);
 
     // execute
-    if(request_impl->CheckPermissions()) {
+    if (request_impl->CheckPermissions()) {
       request_impl->Run();
     }
   }
