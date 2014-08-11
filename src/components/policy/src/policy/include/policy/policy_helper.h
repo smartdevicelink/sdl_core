@@ -94,6 +94,11 @@ struct CheckAppPolicy {
                         const AppPoliciesValueType& app_policy) const;
     bool operator()(const AppPoliciesValueType& app_policy);
   private:
+    /**
+     * @brief Allows to check if appropriate group requires any consent.
+     * @param group_name the group for which consent will be checked.
+     * @return true if consent is required, false otherwise.
+     */
     bool IsConsentRequired(const std::string& group_name) const;
     PolicyManagerImpl* pm_;
     const utils::SharedPtr<policy_table::Table> update_;
