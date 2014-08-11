@@ -334,7 +334,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 this.appInfo.set('alignment', "text-align:center");
             }
 
-            if (params.graphic) {
+            if (params.graphic && params.graphic.value != '') {
                 this.appInfo.set('trackIcon', params.graphic.value);
             } else {
                 this.appInfo.set('trackIcon', 'images/sdl/audio_icon.jpg');
