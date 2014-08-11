@@ -154,7 +154,7 @@ bool SliderRequest::IsWhiteSpaceExist() {
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::slider_header].asCharArray();
-  if (!CheckSyntax(str, true)) {
+  if (!CheckSyntax(str)) {
     LOG4CXX_ERROR(logger_, "Invalid slider_header value syntax check failed");
     return true;
   }
@@ -168,7 +168,7 @@ bool SliderRequest::IsWhiteSpaceExist() {
 
     for (; it_sf != it_sf_end; ++it_sf) {
       str = (*it_sf).asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid slider_footer syntax check failed");
         return true;
       }

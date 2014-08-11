@@ -367,7 +367,7 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     str = (*message_)[strings::msg_params][strings::menu_params]
                                    [strings::menu_name].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid menu name syntax check failed.");
       return true;
     }
@@ -380,7 +380,7 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
     for (size_t i = 0; i < len; ++i) {
       str = (*message_)[strings::msg_params]
                         [strings::vr_commands][i].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid vr_commands syntax check failed");
         return true;
       }
@@ -390,7 +390,7 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
   if ((*message_)[strings::msg_params].keyExists(strings::cmd_icon)) {
     str = (*message_)[strings::msg_params]
                       [strings::cmd_icon][strings::value].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid cmd_icon value syntax check failed");
       return true;
     }

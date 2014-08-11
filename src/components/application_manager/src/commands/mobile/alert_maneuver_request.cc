@@ -68,19 +68,22 @@ void AlertManeuverRequest::Run() {
     return;
   }
 
+  // IsWhiteSpaceExist must be before ProcessSoftButtons.
+  // because of checking on whitespace in text of softbutton
+  if (IsWhiteSpaceExist()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming alert maneuver has contains \\t\\n \\\\t \\\\n"
+                  "text contains only whitespace in ttsChunks");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
   if (mobile_apis::Result::SUCCESS != processing_result) {
     LOG4CXX_ERROR(logger_, "Wrong soft buttons parameters!");
     SendResponse(false, processing_result);
-    return;
-  }
-
-  if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_,
-                  "Incoming alert maneuver has contains \t\n \\t \\n");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
@@ -206,7 +209,7 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
 
     for (; it_tc != it_tc_end; ++it_tc) {
       str = (*it_tc)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
         return true;
       }
@@ -223,7 +226,7 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
     for (; it_sb != it_sb_end; ++it_sb) {
       if ((*it_sb).keyExists(strings::text)) {
         str = (*it_sb)[strings::text].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (strlen(str) && !CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons text syntax check failed");
           return true;
@@ -232,7 +235,7 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
 
       if ((*it_sb).keyExists(strings::image)) {
         str = (*it_sb)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons image value syntax check failed");
           return true;

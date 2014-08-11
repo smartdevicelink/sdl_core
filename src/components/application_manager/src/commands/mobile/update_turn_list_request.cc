@@ -62,6 +62,15 @@ void UpdateTurnListRequest::Run() {
     return;
   }
 
+  // IsWhiteSpaceExist must be before ProcessSoftButtons.
+  // because of checking on whitespace in text of softbutton
+  if (IsWhiteSpaceExist()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming update turn list has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
@@ -85,13 +94,6 @@ void UpdateTurnListRequest::Run() {
         return;
       }
     }
-  }
-
-  if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_,
-                  "Incoming update turn list has contains \t\n \\t \\n");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
-    return;
   }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
@@ -199,7 +201,7 @@ bool UpdateTurnListRequest::IsWhiteSpaceExist() {
     for (; it_sb != it_sb_end; ++it_sb) {
       if ((*it_sb).keyExists(strings::text)) {
         str = (*it_sb)[strings::text].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (strlen(str) && !CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons text syntax check failed");
           return true;
@@ -208,7 +210,7 @@ bool UpdateTurnListRequest::IsWhiteSpaceExist() {
 
       if ((*it_sb).keyExists(strings::image)) {
         str = (*it_sb)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons image value syntax check failed");
           return true;
@@ -228,7 +230,7 @@ bool UpdateTurnListRequest::IsWhiteSpaceExist() {
     for (; it_tl != it_tl_end; ++it_tl) {
       if ((*it_tl).keyExists(strings::navigation_text)) {
         str = (*it_tl)[strings::navigation_text].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
               "Invalid turn_list navigation_text text syntax check failed");
           return true;
@@ -237,7 +239,7 @@ bool UpdateTurnListRequest::IsWhiteSpaceExist() {
 
       if ((*it_tl).keyExists(strings::turn_icon)) {
         str = (*it_tl)[strings::turn_icon][strings::value].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid turn_list turn_icon value syntax check failed");
           return true;

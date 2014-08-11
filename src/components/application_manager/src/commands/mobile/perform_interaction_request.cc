@@ -717,7 +717,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
-  if (!CheckSyntax(str, true)) {
+  if (!CheckSyntax(str)) {
     LOG4CXX_ERROR(logger_, "Invalid initial_text syntax check failed");
     return true;
   }
@@ -732,7 +732,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_ip != it_ip_end; ++it_ip) {
       str = (*it_ip)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid initial_prompt syntax check failed");
         return true;
       }
@@ -748,7 +748,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_hp != it_hp_end; ++it_hp) {
       str = (*it_hp)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
         return true;
       }
@@ -764,7 +764,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_tp != it_tp_end; ++it_tp) {
       str = (*it_tp)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
         return true;
       }
@@ -780,9 +780,18 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_vh != it_vh_end; ++it_vh) {
       str = (*it_vh)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid vr_help syntax check failed");
         return true;
+      }
+
+      if ((*it_vh).keyExists(strings::image)) {
+        str = (*it_vh)[strings::image][strings::value].asCharArray();
+        if (!CheckSyntax(str)) {
+          LOG4CXX_ERROR(logger_,
+                        "Invalid vr_help image value syntax check failed");
+          return true;
+        }
       }
     }
   }

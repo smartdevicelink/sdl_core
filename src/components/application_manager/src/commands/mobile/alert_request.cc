@@ -224,6 +224,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
+  // CheckStringsOfAlertRequest must be before ProcessSoftButtons.
+  // because of checking on whitespace in text of softbutton
   if (!CheckStringsOfAlertRequest()) {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return false;
@@ -355,7 +357,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     str = (*message_)[strings::msg_params][strings::alert_text1].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid alert_text_1 syntax check failed");
       return  false;
     }
@@ -363,7 +365,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
     str = (*message_)[strings::msg_params][strings::alert_text2].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid alert_text_2 syntax check failed");
       return  false;
     }
@@ -371,7 +373,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
     str = (*message_)[strings::msg_params][strings::alert_text3].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid alert_text_3 syntax check failed");
       return  false;
     }
@@ -382,7 +384,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
         (*message_)[strings::msg_params][strings::tts_chunks];
     for (size_t i = 0; i < tts_chunks_array.length(); ++i) {
       str = tts_chunks_array[i][strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_chunks text syntax check failed");
         return false;
       }
@@ -399,7 +401,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
     for (; it_sb != it_sb_end; ++it_sb) {
       if ((*it_sb).keyExists(strings::text)) {
         str = (*it_sb)[strings::text].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (strlen(str) && !CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons text syntax check failed");
           return false;
@@ -408,7 +410,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
 
       if ((*it_sb).keyExists(strings::image)) {
         str = (*it_sb)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons image value syntax check failed");
           return false;
