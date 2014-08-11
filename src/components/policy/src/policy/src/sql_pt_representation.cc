@@ -962,7 +962,7 @@ bool SQLPTRepresentation::SaveServiceEndpoints(
         query.Bind(0, service);
         query.Bind(1, *url_it);
         query.Bind(2, app_it->first);
-        if (!query.Exec()) {
+        if (!query.Exec() || !query.Reset()) {
           LOG4CXX_WARN(logger_, "Incorrect insert into endpoint");
           return false;
         }

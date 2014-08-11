@@ -319,7 +319,7 @@ TEST_F(SQLPTExtRepresentationTest, UnpairedDevicesList) {
 
   std::vector<std::string> output;
   ASSERT_TRUE(reps->UnpairedDevicesList(&output));
-  ASSERT_EQ(2, output.size());
+  ASSERT_EQ(2u, output.size());
   EXPECT_NE(output.end(), std::find(output.begin(), output.end(), "12345"));
   EXPECT_NE(output.end(), std::find(output.begin(), output.end(), "54321"));
 }

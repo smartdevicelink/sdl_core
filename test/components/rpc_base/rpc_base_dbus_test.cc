@@ -186,7 +186,7 @@ TEST_F(DbusDeserialization, DeserializeArray) {
     ASSERT_TRUE(array.is_valid());
     ASSERT_FALSE(reader.has_failed());
     ASSERT_FALSE(reader.HasNext());
-    ASSERT_EQ(array.size(), 2);
+    ASSERT_EQ(array.size(), 2u);
     ASSERT_EQ(array[0], 5);
     ASSERT_EQ(array[1], 33);
 
@@ -219,9 +219,9 @@ TEST_F(DbusDeserialization, DeserializeArrayOfArrays) {
     ASSERT_TRUE(array.is_valid());
     ASSERT_FALSE(reader.has_failed());
     ASSERT_FALSE(reader.HasNext());
-    ASSERT_EQ(array.size(), 2);
-    ASSERT_EQ(array[0].size(), 2);
-    ASSERT_EQ(array[1].size(), 2);
+    ASSERT_EQ(array.size(), 2u);
+    ASSERT_EQ(array[0].size(), 2u);
+    ASSERT_EQ(array[1].size(), 2u);
     ASSERT_EQ(array[0][0], 5);
     ASSERT_EQ(array[0][1], 6);
     ASSERT_EQ(array[1][0], 7);
@@ -253,7 +253,7 @@ TEST_F(DbusDeserialization, DeserializeMap) {
     ASSERT_TRUE(amap.is_valid());
     ASSERT_FALSE(reader.has_failed());
     ASSERT_FALSE(reader.HasNext());
-    ASSERT_EQ(amap.size(), 2);
+    ASSERT_EQ(amap.size(), 2u);
     ASSERT_EQ(amap["Hello"], kValue0);
     ASSERT_EQ(amap["World"], kValue1);
 
@@ -483,9 +483,9 @@ TEST_F(DbusDeserialization, SerializeDeserializeMapOfArrays) {
     Map<Array<Integer<int32_t, 1, 100>, 1, 5>,1, 90 > readback(&reader);
     ASSERT_TRUE(readback.is_initialized());
     ASSERT_TRUE(readback.is_valid());
-    ASSERT_EQ(readback.size(), 2);
-    ASSERT_EQ(readback["first"].size(), 2);
-    ASSERT_EQ(readback["second"].size(), 2);
+    ASSERT_EQ(readback.size(), 2u);
+    ASSERT_EQ(readback["first"].size(), 2u);
+    ASSERT_EQ(readback["second"].size(), 2u);
     ASSERT_EQ(readback["first"][0], 1);
     ASSERT_EQ(readback["first"][1], 42);
     ASSERT_EQ(readback["second"][0], 17);
