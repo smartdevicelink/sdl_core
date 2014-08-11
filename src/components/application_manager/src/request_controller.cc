@@ -179,7 +179,8 @@ RequestController::TResult RequestController::addRequest(
       }
     }
     else {
-      LOG4CXX_WARN(logger_, "The request didn't' initilize.");
+      LOG4CXX_ERROR(logger_, "The request didn't initilize.");
+      result = RequestController::INIT_FAILED;
     }
   }
   return result;
