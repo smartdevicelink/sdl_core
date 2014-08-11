@@ -286,7 +286,7 @@ void MessageHelper::SendHMIStatusNotification(
   message[strings::msg_params][strings::system_context] =
     static_cast<int32_t>(application_impl.system_context());
 
-  DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(notification));
+  ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
