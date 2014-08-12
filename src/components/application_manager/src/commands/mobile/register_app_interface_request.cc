@@ -477,8 +477,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     }
   }
 
-  MessageHelper::SendOnAppRegisteredNotificationToHMI(
-    *(application.get()), resumption);
+  SendResponse(true, result, add_info, params);
+
+  MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()),
+                                                      resumption);
+
+  MessageHelper::SendChangeRegistrationRequestToHMI(application);
 
   // Check necessity of policy update for current application
   // TODO(KKolodiy): need remove policy_manager
@@ -490,7 +494,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
   }
 
-  SendResponse(true, result, add_info, params);
   if (result != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {
