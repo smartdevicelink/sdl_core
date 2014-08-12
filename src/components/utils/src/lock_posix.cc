@@ -52,6 +52,28 @@ Lock::Lock()
   }
 }
 
+Lock::Lock(bool is_mutex_recursive)
+#ifndef NDEBUG
+      : lock_taken_(false)
+#endif // NDEBUG
+{
+  int32_t status;
+
+  if (is_mutex_recursive) {
+    pthread_mutexattr_t attr;
+
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+    status = pthread_mutex_init(&mutex_, &attr);
+  } else {
+    status = pthread_mutex_init(&mutex_, NULL);
+  }
+
+  if (status != 0) {
+    LOG4CXX_ERROR(logger_, "Failed to initialize mutex");
+  }
+}
+
 Lock::~Lock() {
 #ifndef NDEBUG
   if (lock_taken_) {

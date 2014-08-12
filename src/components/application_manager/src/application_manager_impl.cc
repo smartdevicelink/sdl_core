@@ -66,7 +66,8 @@ namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
 
 ApplicationManagerImpl::ApplicationManagerImpl()
-  : audio_pass_thru_active_(false),
+  : applications_list_lock_(true),
+    audio_pass_thru_active_(false),
     is_distracting_driver_(false),
     is_vr_session_strated_(false),
     hmi_cooperating_(false),

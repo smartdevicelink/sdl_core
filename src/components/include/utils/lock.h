@@ -64,6 +64,7 @@ typedef pthread_mutex_t PlatformMutex;
 class Lock {
  public:
   Lock();
+  Lock(bool is_mutex_recursive);
   ~Lock();
 
   // Ackquire the lock. Must be called only once on a thread.

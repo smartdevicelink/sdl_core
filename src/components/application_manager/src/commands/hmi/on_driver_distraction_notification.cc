@@ -74,8 +74,8 @@ void OnDriverDistractionNotification::Run() {
   (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
       state;
 
-  std::set<ApplicationSharedPtr> applications =
-      ApplicationManagerImpl::instance()->applications();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  std::set<ApplicationSharedPtr> applications = accessor.applications();
 
   std::set<ApplicationSharedPtr>::iterator it = applications.begin();
   for (; applications.end() != it; ++it) {

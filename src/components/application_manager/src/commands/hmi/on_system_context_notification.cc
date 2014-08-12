@@ -49,8 +49,8 @@ OnSystemContextNotification::~OnSystemContextNotification() {
 void OnSystemContextNotification::Run() {
   LOG4CXX_INFO(logger_, "OnSystemContextNotification::Run");
 
-  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  const std::set<ApplicationSharedPtr>& app_list = app_mgr->applications();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  const std::set<ApplicationSharedPtr>& app_list = accessor.applications();
   std::set<ApplicationSharedPtr>::const_iterator it = app_list.begin();
   uint32_t app_id = 0;
   mobile_api::SystemContext::eType system_context =

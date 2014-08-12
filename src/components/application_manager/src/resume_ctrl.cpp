@@ -130,7 +130,8 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
           //notification resumeAudioSource is sent if only resumed application has
           //AudioStreamingState=AUDIBLE
           bool application_exist_with_audible_state = false;
-          const std::set<ApplicationSharedPtr>& app_list = app_mngr_->applications();
+          ApplicationManagerImpl::ApplicationListAccessor accessor;
+          const std::set<ApplicationSharedPtr>& app_list = accessor.applications();
           std::set<ApplicationSharedPtr>::const_iterator app_list_it = app_list.begin();
           uint32_t app_id = application->app_id();
           for (; app_list.end() != app_list_it; ++app_list_it) {
@@ -460,6 +461,7 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
   LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id()->asString());
 
   Json::Value::iterator it = GetSavedApplications().begin();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
   for (; it != GetSavedApplications().end(); ++it) {
     const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
 
@@ -472,7 +474,7 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
         RestoreApplicationData(application);
       }
       application->UpdateHash();
-      if (!timer_.isRunning() && app_mngr_->applications().size() > 1) {
+      if (!timer_.isRunning() && accessor.applications().size() > 1) {
         RestoreApplicationHMILevel(application);
         RemoveApplicationFromSaved(application);
       } else {
@@ -499,11 +501,12 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
   LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id()->asString());
 
   Json::Value::iterator it = GetSavedApplications().begin();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
   for (; it != GetSavedApplications().end(); ++it) {
     const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
     if (saved_m_app_id == application->mobile_app_id()->asString()) {
       uint32_t time_stamp= (*it)[strings::time_stamp].asUInt();
-      if (!timer_.isRunning() && app_mngr_->applications().size() > 1) {
+      if (!timer_.isRunning() && accessor.applications().size() > 1) {
         RestoreApplicationHMILevel(application);
         RemoveApplicationFromSaved(application);
       } else {

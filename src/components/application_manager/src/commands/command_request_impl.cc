@@ -361,8 +361,8 @@ bool CommandRequestImpl::CheckAllowedParameters() {
   }
 
   typedef std::set<application_manager::ApplicationSharedPtr> ApplicationList;
-  ApplicationList app_list =
-      application_manager::ApplicationManagerImpl::instance()->applications();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  ApplicationList app_list = accessor.applications();
   ApplicationList::const_iterator it_app_list = app_list.begin();
   ApplicationList::const_iterator it_app_list_end = app_list.end();
   for (; it_app_list != it_app_list_end; ++it_app_list) {
