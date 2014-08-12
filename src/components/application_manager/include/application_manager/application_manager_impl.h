@@ -242,6 +242,14 @@ class ApplicationManagerImpl : public ApplicationManager,
                                bool is_resuming = false,
                                bool is_unexpected_disconnect = false);
 
+    /**
+    * @brief Unregister application revoked by Policy
+    * @param app_id Application id
+    * @param reason Reason of unregistering application
+    */
+    void UnregisterRevokedApplication(const uint32_t& app_id,
+                                      mobile_apis::Result::eType reason);
+
     /*
      * @brief Sets unregister reason for closing all registered applications
      * duringHU switching off

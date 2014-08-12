@@ -135,21 +135,32 @@ bool CheckAppPolicy::HasSameGroups(const AppPoliciesValueType& app_policy,
       old_it = diff.first;
       break;
     }
-    if (Compare(*diff.first, *diff.second)) {
+    if (Compare(*diff.first, *diff.second) &&
+        IsConsentRequired(*(diff.first))) {
       perms->isAppPermissionsRevoked = true;
-      perms->appRevokedPermissions.push_back(*(diff.first));
+      FunctionalGroupPermission group;
+      group.group_name = *(diff.first);
+      perms->appRevokedPermissions.push_back(group);
       old_it = ++diff.first;
       new_it = diff.second;
     } else {
-      perms->appPermissionsConsentNeeded = true;
+      // according to the SDLAQ-CRS-2757 we have to set
+      // appPermissionsConsentNeeded should not be set to true
+      // in case if this group is auto-allowed
+      perms->appPermissionsConsentNeeded = IsConsentRequired(*new_it);
       old_it = diff.first;
       new_it = ++diff.second;
     }
   }
 
   for (StringsConstItr it = old_it; it != it_groups_curr_end; ++it) {
+    if (!IsConsentRequired(*it)) {
+      continue;
+    }
     perms->isAppPermissionsRevoked = true;
-    perms->appRevokedPermissions.push_back(*it);
+    FunctionalGroupPermission group;
+    group.group_name = *it;
+    perms->appRevokedPermissions.push_back(group);
   }
 
   if (it_groups_new_end != new_it) {
@@ -358,6 +369,17 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   }
 
   return true;
+}
+
+bool CheckAppPolicy::IsConsentRequired(const std::string& group_name) const {
+  const policy_table::FunctionalGroupings& functional_groupings =
+      snapshot_->policy_table.functional_groupings;
+  FuncGroupConstItr it = functional_groupings.find(group_name);
+  if (functional_groupings.end() == it) {
+    return false;
+  }
+
+  return it->second.user_consent_prompt.is_initialized();
 }
 
 FillNotificationData::FillNotificationData(Permissions& data,

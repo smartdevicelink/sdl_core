@@ -458,7 +458,15 @@ class MessageHelper {
      */
     static uint32_t GetAppCommandLimit(const std::string& policy_app_id);
 
-  private:
+    private:
+    /**
+     * @brief Allows to fill SO according to the  current permissions.
+     * @param permissions application permissions.
+     * @param message which should be filled.
+     */
+    static void FillAppRevokedPermissions(const policy::AppPermissions& permissions,
+                                   smart_objects::SmartObject& message);
+
     static smart_objects::SmartObject* CreateChangeRegistration(
       int32_t function_id, int32_t language, uint32_t app_id);
 

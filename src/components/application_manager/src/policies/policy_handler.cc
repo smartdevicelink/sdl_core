@@ -595,8 +595,12 @@ void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
-  if (app.valid() && app->hmi_level() != mobile_apis::HMILevel::HMI_NONE) {    
+  if (app.valid() && app->hmi_level() != mobile_apis::HMILevel::HMI_NONE) {
+    DeviceParams device_params;
+    application_manager::MessageHelper::GetDeviceInfoForApp(app->app_id(),
+                                                            &device_params);
     AppPermissions permissions = policy_manager_->GetAppPermissionsChanges(
+                                   device_params.device_mac_address,
                                    policy_app_id);
     permissions.appRevoked = true;
     application_manager::MessageHelper::SendOnAppPermissionsChangedNotification(
@@ -609,8 +613,8 @@ void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
           mobile_apis::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
 
     application_manager::ApplicationManagerImpl::instance()->
-    UnregisterApplication(app->app_id(), mobile_apis::Result::INVALID_ENUM,
-                          false);
+        UnregisterRevokedApplication(app->app_id(),
+                                     mobile_apis::Result::INVALID_ENUM);
     app->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
     return;
@@ -622,8 +626,6 @@ void PolicyHandler::OnPendingPermissionChange(
   LOG4CXX_INFO(logger_, "PolicyHandler::OnPendingPermissionChange for "
                << policy_app_id);
   POLICY_LIB_CHECK_VOID();
-  AppPermissions permissions = policy_manager_->GetAppPermissionsChanges(
-                                 policy_app_id);
   application_manager::ApplicationSharedPtr app =
       application_manager::ApplicationManagerImpl::instance()
       ->application_by_policy_id(policy_app_id);
@@ -632,6 +634,14 @@ void PolicyHandler::OnPendingPermissionChange(
                  "No app found for " << policy_app_id << " policy app id.");
     return;
   }
+
+  DeviceParams device_params;
+  application_manager::MessageHelper::GetDeviceInfoForApp(app->app_id(),
+                                                          &device_params);
+  AppPermissions permissions = policy_manager_->GetAppPermissionsChanges(
+                                 device_params.device_mac_address,
+                                 policy_app_id);
+
   switch (app->hmi_level()) {
   case mobile_apis::HMILevel::HMI_FULL:
   case mobile_apis::HMILevel::HMI_LIMITED: {
@@ -657,9 +667,8 @@ void PolicyHandler::OnPendingPermissionChange(
               mobile_apis::AppInterfaceUnregisteredReason::APP_UNAUTHORIZED);
 
         application_manager::ApplicationManagerImpl::instance()->
-            UnregisterApplication(app->app_id(),
-                                  mobile_apis::Result::INVALID_ENUM,
-                                  false);
+            UnregisterRevokedApplication(app->app_id(),
+                                         mobile_apis::Result::INVALID_ENUM);
       }
       policy_manager_->RemovePendingPermissionChanges(policy_app_id);
       break;
@@ -916,15 +925,19 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
       permissions.isSDLAllowed = true;
     }
   } else {
+    DeviceParams device_params;
+    application_manager::MessageHelper::GetDeviceInfoForApp(connection_key,
+                                                            &device_params);
     permissions = policy_manager_->GetAppPermissionsChanges(
+                    device_params.device_mac_address,
                     policy_app_id);
+
 #if defined(EXTENDED_POLICY)
     application_manager::UsageStatistics& usage = app->usage_report();
 
     usage.RecordAppUserSelection();
 
-    application_manager::MessageHelper::GetDeviceInfoForApp(connection_key,
-        &permissions.deviceInfo);
+    permissions.deviceInfo = device_params;
 
     DeviceConsent consent = policy_manager_->GetUserConsentForDevice(
                               permissions.deviceInfo.device_mac_address);

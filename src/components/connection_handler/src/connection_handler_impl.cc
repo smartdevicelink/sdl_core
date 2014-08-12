@@ -632,12 +632,12 @@ void ConnectionHandlerImpl::StartTransportManager() {
   transport_manager_->Visibility(true);
 }
 
-void ConnectionHandlerImpl::CloseConnection(uint32_t key) {
-  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::CloseConnection by HB");
+void ConnectionHandlerImpl::CloseRevokedConnection(uint32_t connection_key) {
+  LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::CloseRevokedConnection");
 
   uint32_t connection_handle = 0;
   uint8_t session_id = 0;
-  PairFromKey(key, &connection_handle, &session_id);
+  PairFromKey(connection_key, &connection_handle, &session_id);
 
   CloseConnection(connection_handle);
 }

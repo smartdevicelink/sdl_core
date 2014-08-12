@@ -47,9 +47,42 @@ policy::PolicyManager* CreateManager() {
 }
 
 namespace {
-void CheckPreloadedGroups(policy_table::ApplicationParams& app_param) {
 
+struct CheckGroupName {
+  CheckGroupName(const std::string& name)
+    : name_(name) {
+  }
+
+  bool operator()(const policy::FunctionalGroupPermission& value) {
+    return value.group_name == name_;
+  }
+
+private:
+  const std::string& name_;
+};
+
+struct CopyPermissions{
+  CopyPermissions(const std::vector<policy::FunctionalGroupPermission>& groups)
+    : groups_(groups) {
+  }
+
+bool operator()(policy::FunctionalGroupPermission& value) {
+  CheckGroupName checker(value.group_name);
+  std::vector<policy::FunctionalGroupPermission>::const_iterator it =
+      std::find_if(groups_.begin(), groups_.end(), checker);
+  if (groups_.end() == it) {
+    return false;
+  }
+  value.group_alias = it->group_alias;
+  value.group_id = it->group_id;
+  value.state = it->state;
+  return true;
 }
+
+private:
+  const std::vector<policy::FunctionalGroupPermission>& groups_;
+};
+
 }
 
 namespace policy {
@@ -954,10 +987,13 @@ void PolicyManagerImpl::GetPermissionsForApp(
                                 .pt_data().get());
   // For extended policy
   if (pt_ext) {
+    bool allowed_by_default = false;
     if (pt_ext->IsDefaultPolicy(policy_app_id)) {
       app_id_to_check = kDefaultId;
+      allowed_by_default = true;
     } else if (pt_ext->IsPredataPolicy(policy_app_id)) {
       app_id_to_check = kPreDataConsentId;
+      allowed_by_default = true;
     }
 
     FunctionalIdType group_types;
@@ -976,67 +1012,61 @@ void PolicyManagerImpl::GetPermissionsForApp(
       return;
     }
 
-    FunctionalGroupNames::const_iterator it = group_names.begin();
-    FunctionalGroupNames::const_iterator it_end = group_names.end();
-    FunctionalGroupIDs auto_allowed_groups;
-    for (;it != it_end; ++it) {
-      if (it->second.first.empty()) {
-        auto_allowed_groups.push_back(it->first);
-      }
-    }
+    // The "default" and "pre_DataConsent" are auto-allowed groups
+    // So, check if application in the one of these mode.
+    if (allowed_by_default) {
+      GroupType type = (kDefaultId == app_id_to_check ?
+            kTypeDefault : kTypePreDataConsented);
 
-    FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
-    FunctionalGroupIDs allowed_groups;
-    // If application is limited to default only related groups ara allowed
-    // If application is limited to pre_Dataconsent only related groups are
-    // allowed
-    FunctionalGroupIDs default_groups = group_types[kTypeDefault];
-    if (kDefaultId == app_id_to_check) {
-      auto_allowed_groups.clear();
-      allowed_groups = group_types[kTypeDefault];
-    } else if (kPreDataConsentId == app_id_to_check) {
-      auto_allowed_groups.clear();
-      default_groups = FunctionalGroupIDs();
-      allowed_groups = group_types[kTypePreDataConsented];
+      FillFunctionalGroupPermissions(group_types[type], group_names,
+                                     kGroupAllowed, permissions);
     } else {
-      allowed_groups = group_types[kTypeAllowed];
+
+      // The code bellow allows to process application which
+      // has specific permissions(not default and pre_DataConsent).
+
+      // All groups for specific application
+      FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
+
+      // Groups assigned by the user for specific application
+      FunctionalGroupIDs allowed_groups = group_types[kTypeAllowed];
+
+      // Groups disallowed by the user for specific application
+      FunctionalGroupIDs common_disallowed = group_types[kTypeDisallowed];
+
+      // Groups that allowed by default but can be changed by the user
+      FunctionalGroupIDs preconsented_groups = group_types[kTypePreconsented];
+
+      // Pull common groups from allowed and preconsented parts.
+      FunctionalGroupIDs allowed_preconsented = Merge(allowed_groups,
+                                                preconsented_groups);
+
+      // Get all groups that we suppose are allowed.
+      FunctionalGroupIDs all_allowed = Merge(allowed_preconsented,
+                                             all_groups);
+
+      // In case when same groups exists in disallowed and allowed tables,
+      // disallowed one have priority over allowed. So we have to remove
+      // all disallowed groups from allowed table.
+      FunctionalGroupIDs common_allowed = ExcludeSame(all_allowed,
+                                                      common_disallowed);
+
+      // Remove all disallowed groups from application specific groups.
+      FunctionalGroupIDs no_disallowed = ExcludeSame(all_groups,
+                                                     common_disallowed);
+
+      // Undefined groups are groups that have no allowed or disallowed type.
+      FunctionalGroupIDs undefined_consent = ExcludeSame(no_disallowed,
+                                                         common_allowed);
+
+      // Fill result
+      FillFunctionalGroupPermissions(undefined_consent, group_names,
+                                     kGroupUndefined, permissions);
+      FillFunctionalGroupPermissions(common_allowed, group_names,
+                                     kGroupAllowed, permissions);
+      FillFunctionalGroupPermissions(common_disallowed, group_names,
+                                     kGroupDisallowed, permissions);
     }
-
-    FunctionalGroupIDs disallowed_groups = group_types[kTypeDisallowed];
-    FunctionalGroupIDs preconsented_groups = group_types[kTypePreconsented];
-
-    // Find common disallowed groups
-    FunctionalGroupIDs common_disallowed = disallowed_groups;
-
-    // Find common allowed groups
-    FunctionalGroupIDs allowed_preconsented = Merge(allowed_groups,
-                                              preconsented_groups);
-
-    FunctionalGroupIDs allowed_preconsented_auto = Merge(allowed_preconsented,
-                                                         auto_allowed_groups);
-    // Default groups always allowed
-    FunctionalGroupIDs related_defaults = FindSame(all_groups, default_groups);
-
-    FunctionalGroupIDs all_allowed = Merge(allowed_preconsented_auto,
-                                           related_defaults);
-
-    FunctionalGroupIDs common_allowed = ExcludeSame(all_allowed,
-                                                    common_disallowed);
-
-    // Find groups with undefinded consent
-    FunctionalGroupIDs no_disallowed = ExcludeSame(all_groups,
-                                                   common_disallowed);
-    FunctionalGroupIDs undefined_consent = ExcludeSame(no_disallowed,
-                                                       common_allowed);
-
-    // Fill result
-    FillFunctionalGroupPermissions(undefined_consent, group_names,
-                                   kGroupUndefined, permissions);
-    FillFunctionalGroupPermissions(common_allowed, group_names,
-                                   kGroupAllowed, permissions);
-    FillFunctionalGroupPermissions(common_disallowed, group_names,
-                                   kGroupDisallowed, permissions);
-
     return;
   }
 #else
@@ -1314,15 +1344,24 @@ void PolicyManagerImpl::CheckUpdateStatus() {
 }
 
 AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
-  const std::string& app_id) {
-  typedef std::map<std::string, AppPermissions>::const_iterator PermissionsIt;
-  PermissionsIt app_id_diff = app_permissions_diff_.find(app_id);
-  AppPermissions permissions(app_id);
+    const std::string& device_id,
+    const std::string& policy_app_id) {
+  typedef std::map<std::string, AppPermissions>::iterator PermissionsIt;
+  PermissionsIt app_id_diff = app_permissions_diff_.find(policy_app_id);
+  AppPermissions permissions(policy_app_id);
   if (app_permissions_diff_.end() != app_id_diff) {
+    // At this point we're able to know the device id for which user consents
+    // could be evaluated
+    std::vector<FunctionalGroupPermission> groups;
+    GetUserConsentForApp(device_id, policy_app_id, groups);
+    CopyPermissions copier(groups);
+    std::for_each(app_id_diff->second.appRevokedPermissions.begin(),
+                  app_id_diff->second.appRevokedPermissions.end(),
+                  copier);
     permissions = app_id_diff->second;
   } else {
-    permissions.appPermissionsConsentNeeded = IsConsentNeeded(app_id);
-    permissions.appRevoked = IsApplicationRevoked(app_id);
+    permissions.appPermissionsConsentNeeded = IsConsentNeeded(policy_app_id);
+    permissions.appRevoked = IsApplicationRevoked(policy_app_id);
     GetPriority(permissions.application_id, &permissions.priority);
   }
   return permissions;

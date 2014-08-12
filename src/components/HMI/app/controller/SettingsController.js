@@ -236,6 +236,12 @@ SDL.SettingsController = Em.Object.create( {
             if (x.textBody) {
                 text += x.textBody;
             }
+            if (x.line1) {
+                text += x.line1;
+            }
+            if (x.line2) {
+                text += x.line2;
+            }
         });
 
         if (tts) {

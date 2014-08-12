@@ -73,6 +73,12 @@ class ConnectionHandler {
   virtual void ConnectToAllDevices() = 0;
 
   /**
+   * @brief  Close the connection revoked by Policy
+   * @param connection_key pair of connection and session id
+   */
+  virtual void CloseRevokedConnection(uint32_t connection_key) = 0;
+
+  /**
    * \brief Close all associated sessions and close the connection pointed by handle
    */
   virtual void CloseConnection(ConnectionHandle connection_handle) = 0;

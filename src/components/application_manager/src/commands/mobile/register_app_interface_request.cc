@@ -757,7 +757,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::app_name].asCharArray();
-  if (!CheckSyntax(str, true)) {
+  if (!CheckSyntax(str)) {
     LOG4CXX_ERROR(logger_, "Invalid app_name syntax check failed");
     return true;
   }
@@ -772,7 +772,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
 
     for (; it_tn != it_tn_end; ++it_tn) {
       str = (*it_tn)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_name syntax check failed");
         return true;
       }
@@ -783,7 +783,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
       keyExists(strings::ngn_media_screen_app_name)) {
     str = (*message_)[strings::msg_params]
                       [strings::ngn_media_screen_app_name].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid ngn_media_screen_app_name syntax check failed");
       return true;
@@ -799,7 +799,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
 
     for (; it_vs != it_vs_end; ++it_vs) {
       str = (*it_vs).asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid vr_synonyms syntax check failed");
         return true;
       }
@@ -808,7 +808,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
     str = (*message_)[strings::msg_params][strings::hash_id].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid hash_id syntax check failed");
       return true;
     }
@@ -820,7 +820,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                                          keyExists(strings::hardware)) {
       str = (*message_)[strings::msg_params]
                   [strings::device_info][strings::hardware].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info hardware syntax check failed");
         return true;
@@ -831,7 +831,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                                          keyExists(strings::firmware_rev)) {
       str = (*message_)[strings::msg_params]
                   [strings::device_info][strings::firmware_rev].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info firmware_rev syntax check failed");
         return true;
@@ -842,7 +842,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                                          keyExists(strings::os)) {
       str = (*message_)[strings::msg_params]
                   [strings::device_info][strings::os].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info os syntax check failed");
         return true;
@@ -853,7 +853,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                                          keyExists(strings::os_version)) {
       str = (*message_)[strings::msg_params]
                   [strings::device_info][strings::os_version].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info os_version syntax check failed");
         return true;
@@ -864,7 +864,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                                          keyExists(strings::carrier)) {
       str = (*message_)[strings::msg_params]
                   [strings::device_info][strings::carrier].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info carrier syntax check failed");
         return true;
@@ -875,7 +875,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
     str = (*message_)[strings::msg_params][strings::app_id].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid app_id syntax check failed");
       return true;
     }
