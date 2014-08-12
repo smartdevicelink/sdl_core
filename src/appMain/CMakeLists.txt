@@ -155,6 +155,9 @@ if( NOT CMAKE_BUILD_TYPE )
 endif()
 
 add_executable(${PROJECT} ${SOURCES})
+set_target_properties(${PROJECT}
+                      PROPERTIES
+                        INSTALL_RPATH /usr/local/lib)
 target_link_libraries(${PROJECT} ${LIBRARIES})
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

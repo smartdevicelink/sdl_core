@@ -38,6 +38,8 @@ set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_S
 set(CMAKE_AUTOMOC ON)
 set(SOURCES log4cxx_plugin.cc)
 
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-rpath /usr/local/lib")
+
 add_library(${target} SHARED ${SOURCES})
 
 if (${qt_version} MATCHES "4.8.5")
