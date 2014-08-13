@@ -39,6 +39,10 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
+AOADevice::AOADevice(AOAWrapper::AOAHandle handle)
+    : handle_(handle) {
+}
+
 bool AOADevice::IsSameAs(const Device* other_device) const {
   const AOADevice* other_aoa_device = dynamic_cast<const AOADevice*>(other_device);
   if (other_aoa_device) {

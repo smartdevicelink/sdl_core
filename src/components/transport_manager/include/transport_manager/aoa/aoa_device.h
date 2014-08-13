@@ -41,12 +41,15 @@ namespace transport_adapter {
 
 class AOADevice : public Device {
  public:
+  explicit AOADevice(AOAWrapper::AOAHandle handle);
   virtual bool IsSameAs(const Device* other_device) const;
   virtual ApplicationList GetApplicationList() const;
 
  private:
   AOAWrapper::AOAHandle handle_;
 };
+
+typedef utils::SharedPtr<AOADevice> AOADevicePtr;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager

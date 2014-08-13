@@ -30,50 +30,69 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/aoa/aoa_transport_adapter.h"
+#include "transport_manager/aoa/aoa_device_scanner.h"
 
 #include "utils/logger.h"
-#include "transport_manager/aoa/aoa_wrapper.h"
-#include "transport_manager/aoa/aoa_device_scanner.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-AOATransportAdapter::AOATransportAdapter()
-    : TransportAdapterImpl(new AOADeviceScanner(this), NULL, NULL),
-      initialised_(false) {
+
+AOADeviceScanner::AOADeviceScanner(TransportAdapterController* controller)
+    : initialised_(false),
+      observer_(NULL),
+      controller_(controller) {
 }
 
-AOATransportAdapter::~AOATransportAdapter() {
-  initialised_ = false;
+TransportAdapter::Error AOADeviceScanner::Init() {
+  observer_ = new ScannerObserver(this);
+  initialised_ = AOAWrapper::Init(observer_);
+  return (initialised_) ? TransportAdapter::OK : TransportAdapter::FAIL;
 }
 
-TransportAdapter::Error AOATransportAdapter::Init() {
-  LOG4CXX_TRACE(logger_, "AOA: Init");
-  TransportAdapter::Error error = TransportAdapterImpl::Init();
-  if (error != TransportAdapter::OK) {
-    LOG4CXX_WARN(logger_, "AOA: Init error " << error);
-    return error;
+TransportAdapter::Error AOADeviceScanner::Scan() {
+  return TransportAdapter::NOT_SUPPORTED;
+}
+
+void AOADeviceScanner::Terminate() {
+  AOAWrapper::Shutdown();
+  delete observer_;
+  observer_ = NULL;
+}
+
+bool AOADeviceScanner::IsInitialised() const {
+  return initialised_;
+}
+
+void AOADeviceScanner::NotifyDevicesUpdated() {
+  DeviceVector devices;
+  devices_lock_.Acquire();
+  for (DeviceContainer::const_iterator i = devices_.begin(); i != devices_.end(); ++i) {
+    AOADevicePtr aoa_device = i->second;
+    DeviceSptr device = AOADevicePtr::static_pointer_cast<Device>(aoa_device);
+    devices.push_back(device);
   }
-  initialised_ = true;
-  LOG4CXX_TRACE(logger_, "AOA: Init OK");
-  return TransportAdapter::OK;
+  devices_lock_.Release();
+  controller_->SearchDeviceDone(devices);
 }
 
-DeviceType AOATransportAdapter::GetDeviceType() const {
-  return "sdl-pasa-aoa";
+void AOADeviceScanner::AddDevice(AOAWrapper::AOAHandle hdl) {
+  AOADevicePtr aoa_device(new AOADevice(hdl));
+  sync_primitives::AutoLock loker(devices_lock_);
+  devices_.insert(std::make_pair(hdl, aoa_device));
 }
 
-bool AOATransportAdapter::IsInitialised() const {
-  return initialised_ && TransportAdapterImpl::IsInitialised();
+AOADeviceScanner::ScannerObserver::ScannerObserver(AOADeviceScanner* parent)
+    : parent_(parent) {
 }
 
-bool AOATransportAdapter::ToBeAutoConnected(DeviceSptr device) const {
-  return true;
+void AOADeviceScanner::ScannerObserver::OnConnectedDevice(AOAWrapper::AOAHandle hdl) {
+  LOG4CXX_TRACE(logger_, "AOA: new device is connected");
+  parent_->AddDevice(hdl);
+  parent_->NotifyDevicesUpdated();
 }
 
-}  // namespace transport_adapter
 }  // namespace transport_manager
-
+}  // namespace transport_adapter

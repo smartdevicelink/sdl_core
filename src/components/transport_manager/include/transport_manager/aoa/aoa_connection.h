@@ -39,7 +39,6 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-class AOAWrapper;
 class TransportAdapterController;
 
 class AOAConnection : public Connection {
@@ -55,10 +54,18 @@ class AOAConnection : public Connection {
   virtual TransportAdapter::Error Disconnect();
 
  private:
-  AOAWrapper *wrapper_;
+  AOAWrapper* wrapper_;
+  AOADeviceObserver* observer_;
   DeviceUID device_uid_;
   ApplicationHandle app_handle_;
   TransportAdapterController* controller_;
+
+  class DeviceObserver : public AOADeviceObserver {
+   public:
+    explicit DeviceObserver(AOAConnection* parent);
+    void OnReceivedMessage(RawMessagePtr message);
+    void OnTransmittedMessage(AOAWrapper::AOAHandle handle, bool success);
+  };
 };
 
 }  // namespace transport_adapter

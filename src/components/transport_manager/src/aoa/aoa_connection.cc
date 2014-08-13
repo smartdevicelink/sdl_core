@@ -48,11 +48,14 @@ AOAConnection::AOAConnection(const DeviceUID& device_uid,
     : wrapper_(new AOAWrapper(aoa_handle)),
       device_uid_(device_uid),
       app_handle_(app_handle),
-      controller_(controller) {
-
+      controller_(controller),
+      observer_(new DeviceObserver(this)) {
+  wrapper_->Subscribe(observer_);
 }
 
 AOAConnection::~AOAConnection() {
+  wrapper_->Unsubscribe();
+  delete observer_;
   delete wrapper_;
 }
 
@@ -71,6 +74,14 @@ TransportAdapter::Error AOAConnection::Disconnect() {
   LOG4CXX_TRACE(logger_, "AOA: disconnect " << device_uid_ << " " << app_handle_);
   controller_->DisconnectDone(device_uid_, app_handle_);
   return TransportAdapter::OK;
+}
+
+void AOAConnection::DeviceObserver::OnReceivedMessage(RawMessagePtr message) {
+  //controller_->DataReceiveDone(message);
+}
+
+void AOAConnection::DeviceObserver::OnTransmittedMessage(
+    AOAWrapper::AOAHandle handle, bool success) {
 }
 
 }  // namespace transport_adapter

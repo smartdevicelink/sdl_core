@@ -90,8 +90,18 @@ bool AOAWrapper::Init(AOAScannerObserver *observer) {
   LOG4CXX_TRACE(logger_, "AOA: init");
   int ret = aoa_init(NULL, NULL, &OnConnectedDevice, &observer,
                      AOA_FLAG_EXTERNAL_SWITCH);
-  if (AOAWrapper::IsError(ret)) {
-    AOAWrapper::PrintError(ret);
+  if (IsError(ret)) {
+    PrintError(ret);
+    return false;
+  }
+  return true;
+}
+
+bool AOAWrapper::SetCallback(AOADeviceObserver *observer,
+                             uint32_t endpoint) const {
+  int ret = aoa_set_callback(hdl_, &OnReceivedData, &observer, endpoint);
+  if (IsError(ret)) {
+    PrintError(ret);
     return false;
   }
   return true;
@@ -99,17 +109,32 @@ bool AOAWrapper::Init(AOAScannerObserver *observer) {
 
 bool AOAWrapper::Subscribe(AOADeviceObserver *observer) const {
   LOG4CXX_TRACE(logger_, "AOA: subscribe on receive data" << hdl_);
-  int ret_r = aoa_set_callback(hdl_, &OnReceivedData, &observer,
-                               AOA_EPT_ACCESSORY_BULKIN);
-  if (AOAWrapper::IsError(ret_r)) {
-    AOAWrapper::PrintError(ret_r);
+  if (!SetCallback(observer, AOA_EPT_ACCESSORY_BULKIN)) {
     return false;
   }
   LOG4CXX_TRACE(logger_, "AOA: subscribe on transmit data" << hdl_);
-  int ret_t = aoa_set_callback(hdl_, &OnTransmittedData, observer,
-                               AOA_EPT_ACCESSORY_BULKOUT);
-  if (AOAWrapper::IsError(ret_t)) {
-    AOAWrapper::PrintError(ret_t);
+  if (!SetCallback(observer, AOA_EPT_ACCESSORY_BULKOUT)) {
+    return false;
+  }
+  return true;
+}
+
+bool AOAWrapper::UnsetCallback(uint32_t endpoint) const {
+  int ret_r = aoa_set_callback(hdl_, NULL, NULL, endpoint);
+  if (IsError(ret_r)) {
+    PrintError(ret_r);
+    return false;
+  }
+  return true;
+}
+
+bool AOAWrapper::Unsubscribe() const {
+  LOG4CXX_TRACE(logger_, "AOA: unsubscribe on receive data" << hdl_);
+  if (!UnsetCallback(AOA_EPT_ACCESSORY_BULKIN)) {
+    return false;
+  }
+  LOG4CXX_TRACE(logger_, "AOA: unsubscribe on transmit data" << hdl_);
+  if (!UnsetCallback(AOA_EPT_ACCESSORY_BULKOUT)) {
     return false;
   }
   return true;
