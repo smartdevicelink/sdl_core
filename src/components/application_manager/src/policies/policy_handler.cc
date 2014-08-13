@@ -842,6 +842,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     }
     policy_manager_->SetUserConsentForDevice(device_params.device_mac_address,
         is_allowed);
+
 #ifdef EXTENDED_POLICY
     if (!is_allowed) {
       application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
@@ -865,6 +866,8 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     pending_device_handles_.erase(it);
   }
 #ifdef EXTENDED_POLICY
+  application_manager::ApplicationManagerImpl* app_manager =
+      application_manager::ApplicationManagerImpl::instance();
   if (is_allowed) {
     application_manager::ApplicationSharedPtr app =
       app_manager->application(last_activated_app_id_);
@@ -1162,7 +1165,7 @@ void PolicyHandler::RemoveDevice(const std::string& device_id) {
   application_manager::ApplicationManagerImpl* app_manager =
     application_manager::ApplicationManagerImpl::instance();
   if (app_manager->connection_handler()->GetDeviceID(device_id, &device_uid)) {
-    ApplicationManagerImpl::ApplicationListAccessor accessor;
+    application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
     ApplicationList app_list = accessor.applications();
     std::for_each(app_list.begin(), app_list.end(),
                   DeactivateApplication(device_uid));
