@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_
 
+#include "transport_manager/transport_adapter/device.h"
 #include "transport_manager/aoa/aoa_wrapper.h"
 
 namespace transport_manager {

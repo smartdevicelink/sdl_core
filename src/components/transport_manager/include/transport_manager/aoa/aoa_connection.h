@@ -34,11 +34,13 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_CONNECTION_H_
 
 #include "transport_manager/transport_adapter/connection.h"
+#include "transport_manager/aoa/aoa_wrapper.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
 class AOAWrapper;
+class TransportAdapterController;
 
 class AOAConnection : public Connection {
  public:

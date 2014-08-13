@@ -33,6 +33,7 @@
 #include "transport_manager/aoa/aoa_connection.h"
 
 #include "utils/logger.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/aoa/aoa_wrapper.h"
 
 namespace transport_manager {
@@ -57,7 +58,7 @@ AOAConnection::~AOAConnection() {
 
 TransportAdapter::Error AOAConnection::SendData(RawMessagePtr message) {
   LOG4CXX_TRACE(logger_, "AOA: send data to " << device_uid_ << " " << app_handle_);
-  if (wrapper_->SendToBulkEndpoint(message)) {
+  if (wrapper_->SendMessage(message)) {
     controller_->DataSendDone(device_uid_, app_handle_, message);
     return TransportAdapter::OK;
   } else {

@@ -33,40 +33,71 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_WRAPPER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_WRAPPER_H_
 
-#include <aoa/aoa.h>
+#include <stdint.h>
+#include <vector>
+
+#include "protocol/common.h"
+
+struct aoa_hdl_s;
 
 namespace transport_manager {
 namespace transport_adapter {
 
-enum AOAVersion { AOA_Unknown, AOA_1_0, AOA_2_0 };
+enum AOAVersion { AOA_Ver_Unknown, AOA_Ver_1_0, AOA_Ver_2_0 };
+enum AOAMode { AOA_Mode_Accessory, AOA_Mode_Audio, AOA_Mode_Debug };
+enum AOAEndpoint { AOA_Ept_Accessory_BulkIn, AOA_Ept_Accessory_BulkOut,
+                   AOA_Ept_Accessory_Control };
+
+class AOAScannerObserver;
+class AOADeviceObserver;
 
 class AOAWrapper {
  public:
-  typedef aoa_hdl_t* AOAHandle;
+  typedef aoa_hdl_s* AOAHandle;
 
-  static bool Init() const;
-  static bool Shutdown() const;
-  static inline bool IsError(int ret) const;
-  static inline void PrintError(int ret) const;
-  static bool IsValidHandle(AOAHandle hdl) const;
-  static AOAVersion GetProtocol(AOAHandle hdl) const;
+  static bool Init(AOAScannerObserver* observer);
+  static bool Shutdown();
+  static inline bool IsError(int ret);
+  static inline void PrintError(int ret);
 
-  AOAWrapper(AOAHandle hdl);
+  explicit AOAWrapper(AOAHandle hdl);
+  AOAWrapper(AOAHandle hdl, uint32_t timeout);
 
   bool IsValidHandle() const;
-  AOAVersion GetProtocol() const;
-  uint32_t GetMaximumSizeBuffer() const;
-  bool Subscribe() const;
-  bool SendToControlEndpoint(uint16_t request, uint16_t value, uint16_t index,
+  AOAVersion GetProtocolVesrion() const;
+  uint32_t GetBufferMaximumSize(AOAEndpoint endpoint) const;
+  std::vector<AOAMode> GetModes() const;
+  std::vector<AOAEndpoint> GetEndpoints() const;
+  bool Subscribe(AOADeviceObserver* observer) const;
+  bool SendMessage(RawMessagePtr message) const;
+  bool SendControlMessage(uint16_t request, uint16_t value, uint16_t index,
                              RawMessagePtr message) const;
-  bool SendToBulkEndpoint(RawMessagePtr message) const;
+  bool ReceiveMessage(RawMessagePtr *message) const;
+  bool ReceiveControlMessage(uint16_t request, uint16_t value, uint16_t index,
+                             RawMessagePtr *message) const;
 
  private:
   AOAHandle hdl_;
-  uint32_t endpoint_;
   uint32_t timeout_;
 
-  static AOAVersion Version(uint16_t version);
+  inline AOAVersion Version(uint16_t version) const;
+  inline uint32_t BitEndpoint(AOAEndpoint endpoint) const;
+  inline bool IsValueExistInMask(uint32_t bitmask, uint32_t value) const;
+  std::vector<AOAMode> CreateModesList(uint32_t modes_mask) const;
+  std::vector<AOAEndpoint> CreateEndpointsList(uint32_t endpoints_mask) const;
+};
+
+class AOAScannerObserver {
+ public:
+  virtual void OnConnectedDevice(AOAWrapper::AOAHandle handle) = 0;
+  virtual ~AOAScannerObserver() {}
+};
+
+class AOADeviceObserver {
+ public:
+  virtual void OnReceivedMessage(RawMessagePtr message) = 0;
+  virtual void OnTransmittedMessage(AOAWrapper::AOAHandle handle, bool success) = 0;
+  virtual ~AOADeviceObserver() {}
 };
 
 }  // namespace transport_adapter

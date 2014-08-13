@@ -50,9 +50,16 @@ AOATransportAdapter::~AOATransportAdapter() {
   AOAWrapper::Shutdown();
 }
 
+class ScannerObserver: public AOAScannerObserver {
+	void OnConnectedDevice(AOAWrapper::AOAHandle hdl) {
+		LOG4CXX_TRACE(logger_, "new device is connected");
+	}
+};
+
 TransportAdapter::Error AOATransportAdapter::Init() {
   LOG4CXX_TRACE(logger_, "AOA: Init");
-  if (!AOAWrapper::Init()) {
+  AOAScannerObserver* scanner_observer = new ScannerObserver();
+  if (!AOAWrapper::Init(scanner_observer)) {
     return TransportAdapter::FAIL;
   }
   TransportAdapter::Error error = TransportAdapterImpl::Init();
