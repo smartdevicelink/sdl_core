@@ -844,7 +844,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
         is_allowed);
 #ifdef EXTENDED_POLICY
     if (!is_allowed) {
-      ApplicationManagerImpl::ApplicationListAccessor accessor;
+      application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
       ApplicationList app_list = accessor.applications();
       std::for_each(app_list.begin(), app_list.end(),
                     DeactivateApplication(device_id));
