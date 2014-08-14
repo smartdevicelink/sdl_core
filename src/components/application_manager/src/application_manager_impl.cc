@@ -1863,9 +1863,9 @@ void ApplicationManagerImpl::UnregisterAllApplications(bool generated_by_hmi) {
       mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF ? true : false;
 
   bool is_unexpected_disconnect = (generated_by_hmi != true);
-
-  std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
-  while (it != application_list_.end()) {
+  ApplicationListAccessor accessor;
+  std::set<ApplicationSharedPtr>::iterator it = accessor.applications().begin();
+  while (it != accessor.applications().end()) {
     ApplicationSharedPtr app_to_remove = *it;
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
         app_to_remove->app_id(), unregister_reason_);
