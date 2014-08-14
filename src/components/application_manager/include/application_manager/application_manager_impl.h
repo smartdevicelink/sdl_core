@@ -605,8 +605,7 @@ class ApplicationManagerImpl : public ApplicationManager,
       /**
        * @brief ApplicationListAccessor class constructor
        */
-      ApplicationListAccessor()
-      {
+      ApplicationListAccessor() {
         ApplicationManagerImpl::instance()->applications_list_lock_.Acquire();
       }
 
