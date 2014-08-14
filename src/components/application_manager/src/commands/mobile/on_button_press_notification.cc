@@ -68,7 +68,7 @@ void OnButtonPressNotification::Run() {
   std::vector<ApplicationSharedPtr>::const_iterator it = subscribedApps.begin();
   for (; subscribedApps.end() != it; ++it) {
     ApplicationSharedPtr subscribed_app = *it;
-    if ((!subscribed_app) || (!subscribed_app.valid())) {
+    if (!subscribed_app) {
       LOG4CXX_WARN_EXT(logger_, "Null pointer to subscribed app.");
       continue;
     }
