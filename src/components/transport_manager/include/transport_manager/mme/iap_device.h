@@ -110,6 +110,7 @@ class IAPDevice : public MmeDevice {
    protected:
     virtual bool ArmEvent(struct sigevent* event);
     virtual void OnPulse();
+    void Finalize() OVERRIDE {}
 
    private:
     static const size_t kEventsBufferSize = 32;

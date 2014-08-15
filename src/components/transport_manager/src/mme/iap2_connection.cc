@@ -49,7 +49,8 @@ IAP2Connection::IAP2Connection(const DeviceUID& device_uid,
   IAP2Device* parent) : device_uid_(device_uid),
   app_handle_(app_handle),
   controller_(controller),
-  parent_(parent) {
+  parent_(parent),
+  unexpected_disconnect_(false) {
 }
 
 bool IAP2Connection::Init() {
@@ -65,8 +66,12 @@ bool IAP2Connection::Init() {
     controller_->ConnectDone(device_uid_, app_handle_);
     return true;
   }
-  else {
-    return false;
+  return false;
+}
+
+void IAP2Connection::Finalize() {
+  if (unexpected_disconnect_) {
+    controller_->DisconnectDone(device_uid_, app_handle_);
   }
 }
 
@@ -105,6 +110,7 @@ void IAP2Connection::ReceiveData() {
     switch (errno) {
       case ECONNRESET:
         LOG4CXX_INFO(logger_, "iAP2: protocol " << protocol_name_ << " disconnected");
+        unexpected_disconnect_ = true;
 // receiver_thread_->stop() cannot be invoked here
 // because this method is called from receiver_thread_
 // anyway delegate can be stopped directly
@@ -163,6 +169,10 @@ bool IAP2Connection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event) {
 
 void IAP2Connection::ReceiverThreadDelegate::OnPulse() {
   parent_->ReceiveData();
+}
+
+void IAP2Connection::ReceiverThreadDelegate::Finalize() {
+  parent_->Finalize();
 }
 
 }  // namespace transport_adapter

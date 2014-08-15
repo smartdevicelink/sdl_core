@@ -88,6 +88,7 @@ void PulseThreadDelegate::threadMain() {
       }
     }
   }
+  Finalize();
 }
 
 bool PulseThreadDelegate::exitThreadMain() {
