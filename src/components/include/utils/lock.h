@@ -37,7 +37,8 @@
 #else
 #error Please implement lock for your OS
 #endif
-
+#include <stdint.h>
+#include <atomic>
 #include "utils/macro.h"
 
 namespace sync_primitives {
@@ -84,9 +85,17 @@ class Lock {
   impl::PlatformMutex mutex_;
 
 #ifndef NDEBUG
-  // Basic debugging aid, a flag that signals wether this lock is currently taken
-  // Allows detection of abandoned and recursively captured mutexes
-  bool lock_taken_;
+  /**
+  * @brief Basic debugging aid, a flag that signals wether this lock is currently taken
+  * Allows detection of abandoned and recursively captured mutexes
+  */
+  std::atomic_uint lock_taken_;
+
+  /**
+  * @brief Describe if mutex is recurcive or not
+  */
+  std::atomic_bool is_mutex_recursive_;
+
   void AssertFreeAndMarkTaken();
   void AssertTakenAndMarkFree();
 #else
@@ -94,7 +103,7 @@ class Lock {
   void AssertTakenAndMarkFree() {}
 #endif
 
- private:
+
   friend class ConditionalVariable;
   DISALLOW_COPY_AND_ASSIGN(Lock);
 };
