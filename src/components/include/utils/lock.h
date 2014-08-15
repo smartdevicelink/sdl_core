@@ -38,7 +38,6 @@
 #error Please implement lock for your OS
 #endif
 #include <stdint.h>
-#include <atomic>
 #include "utils/macro.h"
 
 namespace sync_primitives {
@@ -89,12 +88,12 @@ class Lock {
   * @brief Basic debugging aid, a flag that signals wether this lock is currently taken
   * Allows detection of abandoned and recursively captured mutexes
   */
-  std::atomic_uint lock_taken_;
+  uint32_t lock_taken_;
 
   /**
   * @brief Describe if mutex is recurcive or not
   */
-  std::atomic_bool is_mutex_recursive_;
+  bool is_mutex_recursive_;
 
   void AssertFreeAndMarkTaken();
   void AssertTakenAndMarkFree();
