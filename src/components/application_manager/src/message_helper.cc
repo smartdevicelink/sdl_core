@@ -386,7 +386,7 @@ void MessageHelper::SendHashUpdateNotification(const uint32_t app_id) {
 
   smart_objects::SmartObject* so = GetHashUpdateNotification(app_id);
   PrintSmartObject(*so);
-  DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(so));
+  ApplicationManagerImpl::instance()->ManageMobileCommand(so);
 }
 
 void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
