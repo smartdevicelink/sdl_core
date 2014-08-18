@@ -344,7 +344,33 @@ void IAPDevice::IAPEventThreadDelegate::OnPulse() {
 }
 
 void IAPDevice::IAPEventThreadDelegate::ParseEvents() {
+  LOG4CXX_TRACE(logger_, "iAP: getting events");
   ssize_t nevents = ipod_eaf_getevents(ipod_hdl_, events_, kEventsBufferSize);
+
+  std::ostringstream events_debug_message;
+  events_debug_message << "iAP: got " << nevents << " events: {";
+  for (ssize_t i = 0; i < nevents; ++i) {
+    if (i != 0) {
+      events_debug_message << ", ";
+    }
+    switch (events_[i].eventtype) {
+      case IPOD_EAF_EVENT_SESSION_REQ:
+        events_debug_message << "IPOD_EAF_EVENT_SESSION_REQ";
+        break;
+      case IPOD_EAF_EVENT_SESSION_CLOSE:
+        events_debug_message << "IPOD_EAF_EVENT_SESSION_CLOSE";
+        break;
+      case IPOD_EAF_EVENT_SESSION_DATA:
+        events_debug_message << "IPOD_EAF_EVENT_SESSION_DATA";
+        break;
+      case IPOD_EAF_EVENT_SESSION_OPEN:
+        events_debug_message << "IPOD_EAF_EVENT_SESSION_OPEN";
+        break;
+    }
+  }
+  events_debug_message << "}";
+  LOG4CXX_DEBUG(logger_, events_debug_message.str());
+
   for (ssize_t i = 0; i < nevents; ++i) {
     switch (events_[i].eventtype) {
       case IPOD_EAF_EVENT_SESSION_REQ:
