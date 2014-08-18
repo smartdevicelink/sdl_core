@@ -56,8 +56,8 @@ INCLUDES = \
 #  for example to include a team component library it would be 
 #  $(TEAM_ROOT)NS_MessageCenter/lib/NS_MessageCenter/
 LIB_PATHS += \
-	$(DEPENDS_LIB_PATHS) \
 	$(SLIB_PATH) \
+	$(DEPENDS_LIB_PATHS)
 
 # Define your libs here addtional to the DEPENDS_DYNAMIC_LIBS or DEPENDS_STATIC_LIBS
 # - see depends.mk  
@@ -83,8 +83,7 @@ STATIC_LIBS += \
 	usage_statistics$(DEBUG_EXT) \
 	application_manager$(DEBUG_EXT) \
 	media_manager$(DEBUG_EXT) \
-	crypto \
-		
+	crypto
 
 
 # This only defines the dynamic libs
@@ -96,7 +95,7 @@ DYNAMIC_LIBS += \
 	apr-1$(DEBUG_EXT) \
 	expat$(DEBUG_EXT) \
 	aprutil-1$(DEBUG_EXT) \
-	log4cxx$(DEBUG_EXT) \
+	log4cxx$(DEBUG_EXT)
 
 #  LIB - For Static Libraries -> output to lib directory with specific naming
 #MATH_LIB = $(LIB_PATH)$(LIB_PREFIX)math.$(LIB_EXT)
@@ -149,7 +148,7 @@ CC_LANG_OBJECTS = $(addprefix $(abspath $(BLD_PATH))/,$(addsuffix .$(OBJ_EXT),$(
 OBJECTS = \
 	$(C_LANG_OBJECTS) \
 	$(CPP_LANG_OBJECTS) \
-	$(CC_LANG_OBJECTS) \
+	$(CC_LANG_OBJECTS)
 
 # assuming all objects should be included in the executable.
 ALL_OBJECTS = $(addprefix $(BLD_PATH),$(addsuffix .$(OBJ_EXT),$(notdir $(basename $(NON_LOCAL_SRCS) )) ) ) \
@@ -159,14 +158,14 @@ ALL_OBJECTS = $(addprefix $(BLD_PATH),$(addsuffix .$(OBJ_EXT),$(notdir $(basenam
 #  This is only to automate the rebuilding, all builds on the servers are cleans
 #  So this is not a huge deal when building on a component level.
 HEADERS = \
-	$(wildcard *.h*) \
+	$(wildcard *.h*)
 
 # Binaries are any executables.  Creating the list faciliates the default build target
 BINARIES = \
-	$(COMPONENT_EXEC) \
+	$(COMPONENT_EXEC)
 	
 LIBRARIES = \
-	$(COMPONENT_LIB) \
+	$(COMPONENT_LIB)
 
 # Make targets
 #  Standard

@@ -683,6 +683,7 @@ void TransportAdapterImpl::ConnectionAborted(
        it != listeners_.end(); ++it) {
     (*it)->OnUnexpectedDisconnect(this, device_id, app_handle, error);
   }
+  connections_.erase(std::make_pair(device_id, app_handle));
 }
 
 bool TransportAdapterImpl::IsInitialised() const {

@@ -49,7 +49,8 @@ IAP2Connection::IAP2Connection(const DeviceUID& device_uid,
   IAP2Device* parent) : device_uid_(device_uid),
   app_handle_(app_handle),
   controller_(controller),
-  parent_(parent) {
+  parent_(parent),
+  unexpected_disconnect_(false) {
 }
 
 IAP2Connection::~IAP2Connection() {
@@ -69,8 +70,12 @@ bool IAP2Connection::Init() {
     controller_->ConnectDone(device_uid_, app_handle_);
     return true;
   }
-  else {
-    return false;
+  return false;
+}
+
+void IAP2Connection::Finalize() {
+  if (unexpected_disconnect_) {
+    controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
   }
 }
 
@@ -109,12 +114,12 @@ void IAP2Connection::ReceiveData() {
     switch (errno) {
       case ECONNRESET:
         LOG4CXX_INFO(logger_, "iAP2: protocol " << protocol_name_ << " disconnected");
+        unexpected_disconnect_ = true;
 // receiver_thread_->stop() cannot be invoked here
 // because this method is called from receiver_thread_
 // anyway delegate can be stopped directly
         receiver_thread_delegate_->exitThreadMain();
         Close();
-        controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
         break;
       default:
         LOG4CXX_WARN(logger_, "iAP2: error occurred while receiving data on protocol " << protocol_name_);
@@ -138,7 +143,6 @@ bool IAP2Connection::Close() {
   }
 
   parent_->OnDisconnect(app_handle_);
-
   return result;
 }
 
@@ -167,6 +171,10 @@ bool IAP2Connection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event) {
 
 void IAP2Connection::ReceiverThreadDelegate::OnPulse() {
   parent_->ReceiveData();
+}
+
+void IAP2Connection::ReceiverThreadDelegate::Finalize() {
+  parent_->Finalize();
 }
 
 }  // namespace transport_adapter

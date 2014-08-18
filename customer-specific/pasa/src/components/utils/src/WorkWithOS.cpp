@@ -13,7 +13,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include "Utils/WorkWithOS.h"
+#include "utils/WorkWithOS.h"
 
 unsigned long int WorkWithOS::getAvailableSpace()
 {
