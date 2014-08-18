@@ -34,8 +34,9 @@ set(components_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 set(dbus_dir ${components_dir}/dbus)
 set(codegen_dir ${dbus_dir}/codegen)
 set(codegen ${codegen_dir}/make_qml_dbus_cpp.py)
-set(codegen_request_to_sdl ${codegen_dir}/make_RequestToSDL_class.py)
-set(codegen_hmi_requests ${codegen_dir}/make_HMIRequests_class.py)
+set(codegen_request_to_sdl ${codegen_dir}/make_request_to_sdl.py)
+set(codegen_hmi_requests ${codegen_dir}/make_hmi_requests.py)
+set(codegen_notification_qml ${codegen_dir}/make_notifications_qml.py)
 set(parser ${codegen_dir}/ford_xml_parser.py)
 set(interfaces_dir ${components_dir}/interfaces)
 set(api_xml ${interfaces_dir}/QT_HMI_API.xml)
@@ -66,6 +67,16 @@ add_custom_command(
   COMMENT "Generating files:
     ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.cc
     ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.h
+    from:
+    ${api_xml} ..."
+)
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/sdl_proxy.cc ${CMAKE_CURRENT_BINARY_DIR}/sdl_proxy.h
+  COMMAND python ${codegen_notification_qml} --infile ${api_xml} --version ${qt_version} --outdir ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS ${api_xml} ${codegen_hmi_requests} ${parser}
+  COMMENT "Generating files:
+    ${CMAKE_CURRENT_BINARY_DIR}/sdl_proxy.cc
+    ${CMAKE_CURRENT_BINARY_DIR}/sdl_proxy.h
     from:
     ${api_xml} ..."
 )
