@@ -245,8 +245,8 @@ bool PolicyHandler::ClearUserConsent() {
 
 uint32_t PolicyHandler::GetAppIdForSending() {
   // Get app.list
-  const ApplicationList app_list =
-    application_manager::ApplicationManagerImpl::instance()->applications();
+  application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
+  const ApplicationList app_list = accessor.applications();
 
   if (app_list.empty()) {
     return 0;
@@ -369,8 +369,9 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
   // limited to pre_DataConsent permissions, if device disallowed, or switch
   // back to their own permissions, if device allowed again, and must be
   // notified about these changes
-  ApplicationList app_list =
-    application_manager::ApplicationManagerImpl::instance()->applications();
+
+  application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
+  ApplicationList app_list = accessor.applications();
   ApplicationList::const_iterator it_app_list = app_list.begin();
   ApplicationList::const_iterator it_app_list_end = app_list.end();
   for (; it_app_list != it_app_list_end; ++it_app_list) {
@@ -481,12 +482,11 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
   // applications
   if (!connection_key) {
     LinkAppToDevice linker(app_to_device_link_);
+    application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
     std::set<application_manager::ApplicationSharedPtr>::const_iterator it_app =
-        application_manager::ApplicationManagerImpl::instance()->
-        applications().begin();
+        accessor.applications().begin();
     std::set<application_manager::ApplicationSharedPtr>::const_iterator
-        it_app_end = application_manager::ApplicationManagerImpl::instance()->
-        applications().end();
+        it_app_end = accessor.applications().end();
 
     // Add all currently registered applications
     std::for_each(it_app, it_app_end, linker);
@@ -806,13 +806,11 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
   // Device ids, need to be changed
   std::set<uint32_t> device_ids;
 
-  application_manager::ApplicationManagerImpl* app_manager =
-    application_manager::ApplicationManagerImpl::instance();
-
   // Common devices consents change
   if (!device_id) {
-    const std::set<application_manager::ApplicationSharedPtr>&  app_list =
-        app_manager->applications();
+    application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
+    const std::set<application_manager::ApplicationSharedPtr>& app_list =
+        accessor.applications();
 
     std::set<application_manager::ApplicationSharedPtr>::const_iterator
         it_app_list = app_list.begin();
@@ -844,9 +842,11 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     }
     policy_manager_->SetUserConsentForDevice(device_params.device_mac_address,
         is_allowed);
+
 #ifdef EXTENDED_POLICY
     if (!is_allowed) {
-      ApplicationList app_list = app_manager->applications();
+      application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
+      ApplicationList app_list = accessor.applications();
       std::for_each(app_list.begin(), app_list.end(),
                     DeactivateApplication(device_id));
     }
@@ -866,6 +866,8 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     pending_device_handles_.erase(it);
   }
 #ifdef EXTENDED_POLICY
+  application_manager::ApplicationManagerImpl* app_manager =
+      application_manager::ApplicationManagerImpl::instance();
   if (is_allowed) {
     application_manager::ApplicationSharedPtr app =
       app_manager->application(last_activated_app_id_);
@@ -1163,7 +1165,8 @@ void PolicyHandler::RemoveDevice(const std::string& device_id) {
   application_manager::ApplicationManagerImpl* app_manager =
     application_manager::ApplicationManagerImpl::instance();
   if (app_manager->connection_handler()->GetDeviceID(device_id, &device_uid)) {
-    ApplicationList app_list = app_manager->applications();
+    application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
+    ApplicationList app_list = accessor.applications();
     std::for_each(app_list.begin(), app_list.end(),
                   DeactivateApplication(device_uid));
   }

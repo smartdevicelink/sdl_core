@@ -386,7 +386,7 @@ void MessageHelper::SendHashUpdateNotification(const uint32_t app_id) {
 
   smart_objects::SmartObject* so = GetHashUpdateNotification(app_id);
   PrintSmartObject(*so);
-  DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(so));
+  ApplicationManagerImpl::instance()->ManageMobileCommand(so);
 }
 
 void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
@@ -821,8 +821,8 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(
   if (app->vr_help()) {
     vr_help[strings::vr_help] = (*app->vr_help());
   } else {
-    const std::set<ApplicationSharedPtr>& apps =
-      ApplicationManagerImpl::instance()->applications();
+    ApplicationManagerImpl::ApplicationListAccessor accessor;
+    const std::set<ApplicationSharedPtr>& apps = accessor.applications();
 
     int32_t index = 0;
     std::set<ApplicationSharedPtr>::const_iterator it_app = apps.begin();

@@ -96,6 +96,8 @@ const char* kRemoteLoggingFlagFileKey = "RemoteLoggingFlagFile";
 const char* kRemoteLoggingFlagFilePathKey = "RemoteLoggingFlagFilePath";
 const char* kTargetLogFileHomeDirKey = "TargetLogFileHomeDir";
 const char* kTargetLogFileNamePatternKey = "TargetLogFileNamePattern";
+const char* kTargetBootCountFileKey = "TargetBootCountFile";
+const char* kTargetTmpDirKey = "TargetTmpDir";
 #endif
 
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";
@@ -159,6 +161,8 @@ const char* kDefaultRemoteLoggingFlagFile = "log/capturelog.evt";
 const char* kDefaultRemoteLoggingFlagFilePath = "/fs/usb0/";
 const char* kDefaultTargetLogFileHomeDir = "/fs/rwdata/logs/";
 const char* kDefaultTargetLogFileNamePattern ="smartdevicelink.log";
+const char* kDefaultTargetBootCountFile = "/fs/rwdata/.flags/boot_count";
+const char* kDefaultTargetTmpDir = "/fs/tmpfs";
 #endif
 const char* kDefaultMmeDatabaseName = "/dev/qdb/mediaservice_db";
 const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
@@ -252,6 +256,8 @@ Profile::Profile()
     remote_logging_flag_file_path_(kDefaultRemoteLoggingFlagFilePath),
     target_log_file_home_dir_(kDefaultTargetLogFileHomeDir),
     target_log_file_name_pattern_(kDefaultTargetLogFileNamePattern),
+    target_boot_count_file_(kDefaultTargetBootCountFile),
+    target_tmp_dir_(kDefaultTargetTmpDir),
 #endif
     mme_db_name_(kDefaultMmeDatabaseName),
     event_mq_name_(kDefaultEventMQ),
@@ -422,6 +428,14 @@ const std::string& Profile::target_log_file_home_dir() const {
 
 const std::string& Profile::target_log_file_name_pattern() const {
   return target_log_file_name_pattern_;
+}
+
+const std::string& Profile::target_boot_count_file() const {
+  return target_boot_count_file_;
+}
+
+const std::string& Profile::target_tmp_dir() const {
+  return target_tmp_dir_;
 }
 #endif
 
@@ -758,6 +772,19 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
 
     LOG_UPDATED_VALUE(target_log_file_name_pattern_, kTargetLogFileNamePatternKey,
                       kLoggerSection);
+
+    ReadStringValue(&target_boot_count_file_, "", kMainSection,
+                    kTargetBootCountFileKey);
+
+    LOG_UPDATED_VALUE(target_boot_count_file_, kTargetBootCountFileKey,
+                      kMainSection);
+
+    ReadStringValue(&target_tmp_dir_, "", kMainSection,
+                    kTargetTmpDirKey);
+
+    LOG_UPDATED_VALUE(target_tmp_dir_, kTargetTmpDirKey,
+                      kMainSection);
+
 #endif
 
   // Mixing audio parameter

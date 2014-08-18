@@ -196,7 +196,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     ApplicationSharedPtr application(uint32_t app_id) const;
     ApplicationSharedPtr application_by_policy_id(
         const std::string& policy_app_id) const;
-    inline const std::set<ApplicationSharedPtr>& applications() const;
     ApplicationSharedPtr active_application() const;
     std::vector<ApplicationSharedPtr> applications_by_button(uint32_t button);
     std::vector<ApplicationSharedPtr> applications_by_ivi(uint32_t vehicle_info);
@@ -598,6 +597,39 @@ class ApplicationManagerImpl : public ApplicationManager,
         mobile_apis::FunctionID::eType function_id,
         CommandParametersPermissions* params_permissions = NULL);
 
+    /*
+     * Class for thread-safe access to applications list
+     */
+    class ApplicationListAccessor {
+     public:
+      /**
+       * @brief ApplicationListAccessor class constructor
+       */
+      ApplicationListAccessor() {
+        ApplicationManagerImpl::instance()->applications_list_lock_.Acquire();
+      }
+
+      /**
+       * @brief ApplicationListAccessor class destructor
+       */
+      ~ApplicationListAccessor() {
+        ApplicationManagerImpl::instance()->applications_list_lock_.Release();
+      }
+
+      /**
+       * @brief thread-safe getter for applications
+       * @return applications list
+       */
+      const std::set<ApplicationSharedPtr>& applications() {
+        return ApplicationManagerImpl::instance()->application_list_;
+      }
+
+     private:
+      DISALLOW_COPY_AND_ASSIGN(ApplicationListAccessor);
+    };
+
+    friend class ApplicationListAccessor;
+
   private:
     ApplicationManagerImpl();
     bool InitThread(threads::Thread* thread);
@@ -728,10 +760,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);
 };
-
-const std::set<ApplicationSharedPtr>& ApplicationManagerImpl::applications() const {
-  return application_list_;
-}
 
 bool ApplicationManagerImpl::vr_session_started() const {
   return is_vr_session_strated_;

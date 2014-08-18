@@ -33,6 +33,8 @@
 #include <sstream>
 #include <stdlib.h>
 #include <stdint.h>
+#include <errno.h>
+
 #include "utils/logger.h"
 #include "policy/sql_pt_representation.h"
 #include "policy/sql_wrapper.h"
@@ -1192,7 +1194,8 @@ void SQLPTRepresentation::SaveUpdateRequired(bool value) {
   if (!query.Prepare(/*sql_pt::kUpdateFlagUpdateRequired*/
                      "UPDATE `module_meta` SET `flag_update_required` = ?")) {
     LOG4CXX_WARN(logger_,
-                 "Incorrect update into module meta (update_required)");
+                 "Incorrect update into module meta (update_required): " <<
+                 strerror(errno));
     return;
   }
   query.Bind(0, value);

@@ -73,20 +73,26 @@ void OnButtonPressNotification::Run() {
       continue;
     }
 
-    if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level())
-        || (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level())) {
-      if ((static_cast<uint32_t>(mobile_apis::ButtonName::OK) != btn_id) &&
-          (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON)
-              != btn_id)) {
-        SendButtonPress(subscribed_app);
-      } else if ((static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON)
-          == btn_id) && subscribed_app->IsSubscribedToSoftButton(custom_btn_id)) {
-        SendButtonPress(subscribed_app);
-      }
-    } else {
-      LOG4CXX_WARN_EXT(logger_, "OnButtonEvent in HMI_BACKGROUND or NONE");
+    //Send ButtonPress notification only in HMI_FULL or HMI_LIMITED mode
+    if ((mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level()) &&
+        (mobile_api::HMILevel::HMI_LIMITED != subscribed_app->hmi_level())) {
+      LOG4CXX_WARN_EXT(logger_, "OnButtonPress in HMI_BACKGROUND or NONE");
       continue;
     }
+
+    //Send ButtonPress notification for OK button only in HMI_FULL mode
+    if ((static_cast<uint32_t>(mobile_apis::ButtonName::OK) == btn_id) &&
+        (mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level())) {
+      continue;
+    }
+
+    //Send ButtonPress notification for soft button only if application subscribed to it
+    if ((static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) &&
+        (!subscribed_app->IsSubscribedToSoftButton(custom_btn_id))) {
+      continue;
+    }
+
+    SendButtonPress(subscribed_app);
   }
 }
 
