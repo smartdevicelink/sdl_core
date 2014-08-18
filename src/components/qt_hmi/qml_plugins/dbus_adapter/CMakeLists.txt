@@ -73,7 +73,7 @@ add_custom_command(
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/sdl_proxy.cc ${CMAKE_CURRENT_BINARY_DIR}/sdl_proxy.h
   COMMAND python ${codegen_notification_qml} --infile ${api_xml} --version ${qt_version} --outdir ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS ${api_xml} ${codegen_hmi_requests} ${parser}
+  DEPENDS ${api_xml} ${codegen_notification_qml} ${parser}
   COMMENT "Generating files:
     ${CMAKE_CURRENT_BINARY_DIR}/sdl_proxy.cc
     ${CMAKE_CURRENT_BINARY_DIR}/sdl_proxy.h
