@@ -477,8 +477,12 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     }
   }
 
-  MessageHelper::SendOnAppRegisteredNotificationToHMI(
-    *(application.get()), resumption);
+  SendResponse(true, result, add_info, params);
+
+  MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()),
+                                                      resumption);
+
+  MessageHelper::SendChangeRegistrationRequestToHMI(application);
 
   // Check necessity of policy update for current application
   // TODO(KKolodiy): need remove policy_manager
@@ -490,7 +494,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
   }
 
-  SendResponse(true, result, add_info, params);
   if (result != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {
@@ -506,9 +509,9 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
   const smart_objects::SmartObject& msg_params =
     (*message_)[strings::msg_params];
 
-  ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  const std::set<ApplicationSharedPtr>& applications = accessor.applications();
 
-  const std::set<ApplicationSharedPtr>& applications = app_manager->applications();
   std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
   const std::string app_name = msg_params[strings::app_name].asString();
 
@@ -737,8 +740,8 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   const std::string mobile_app_id = (*message_)[strings::msg_params]
                                     [strings::app_id].asString();
 
-  const std::set<ApplicationSharedPtr>& applications =
-    ApplicationManagerImpl::instance()->applications();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  const std::set<ApplicationSharedPtr>& applications = accessor.applications();
 
   std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
   std::set<ApplicationSharedPtr>::const_iterator it_end = applications.end();

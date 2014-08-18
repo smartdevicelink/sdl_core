@@ -2,9 +2,6 @@
 	"policy_table": {
 		"module_config": {
 			"preloaded_pt": true,
-			"vehicle_make": "",
-			"vehicle_model": "",
-			"vehicle_year": "",
 			"exchange_after_x_ignition_cycles": 100,
 			"exchange_after_x_kilometers": 1800,
 			"exchange_after_x_days": 30,
@@ -22,7 +19,6 @@
 			"notifications_per_minute_by_priority": {
 				"EMERGENCY": 60,
 				"NAVIGATION": 15,
-				"voiceCommunication": 10,
 				"COMMUNICATION": 6,
 				"NORMAL": 4,
 				"NONE": 0
@@ -119,7 +115,8 @@
 						"LIMITED"]
 					},
 					"OnCommand": {
-						"hmi_levels": ["FULL",
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
 						"LIMITED"]
 					},
 					"OnDriverDistraction": {
@@ -245,6 +242,39 @@
 						"hmi_levels": ["BACKGROUND",
 						"FULL",
 						"LIMITED"]
+					}
+				}
+			},
+			"Location-1": {
+				"user_consent_prompt": "Location",
+				"rpcs": {
+					"GetVehicleData": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"],
+						"parameters": ["gps",
+						"speed"]
+					},
+					"OnVehicleData": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"],
+						"parameters": ["gps",
+						"speed"]
+					},
+					"SubscribeVehicleData": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"],
+						"parameters": ["gps",
+						"speed"]
+					},
+					"UnsubscribeVehicleData": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"],
+						"parameters": ["gps",
+						"speed"]
 					}
 				}
 			},
@@ -377,39 +407,6 @@
 						"odometer",
 						"tirePressure",
 						"wiperStatus"]
-					}
-				}
-			},
-			"Location-1": {
-				"user_consent_prompt": "Location",
-				"rpcs": {
-					"GetVehicleData": {
-						"hmi_levels": ["BACKGROUND",
-						"FULL",
-						"LIMITED"],
-						"parameters": ["gps",
-						"speed"]
-					},
-					"OnVehicleData": {
-						"hmi_levels": ["BACKGROUND",
-						"FULL",
-						"LIMITED"],
-						"parameters": ["gps",
-						"speed"]
-					},
-					"SubscribeVehicleData": {
-						"hmi_levels": ["BACKGROUND",
-						"FULL",
-						"LIMITED"],
-						"parameters": ["gps",
-						"speed"]
-					},
-					"UnsubscribeVehicleData": {
-						"hmi_levels": ["BACKGROUND",
-						"FULL",
-						"LIMITED"],
-						"parameters": ["gps",
-						"speed"]
 					}
 				}
 			},
@@ -632,13 +629,13 @@
 							"tts": "%appName% is requesting the use of the following vehicle information and permissions: %functionalGroupLabels%. If you press yes, you agree that %vehicleMake% will not be liable for any damages or loss of privacy related to %appName%’s use of your data. Please press yes to allow or no to deny.",
 							"line1": "Grant Requested",
 							"line2": "Permission(s)?",
-							"textBody": "%appName% is requesting the use of the following vehicle information and permissions: %functionalGroupLabels%. \r\n\r\nIf you press yes, you agree that %vehicleMake% will not be liable for any damages or loss of privacy related to %appName%’s use of your data. You can change these permissions and hear detailed descriptions in the mobile apps settings menu."
+							"textBody": "%appName% is requesting the use of the following vehicle information and permissions: %functionalGroupLabels%. \n\nIf you press yes, you agree that %vehicleMake% will not be liable for any damages or loss of privacy related to %appName%’s use of your data. You can change these permissions and hear detailed descriptions in the mobile apps settings menu."
 						},
 						"es-en": {
 							"tts": "%appName% solicita el uso de la siguiente información y permisos del vehículo: %functionalGroupLabels%. Si presiona Sí, acepta que %vehicleMake% no se hará responsable por los daños o pérdidas de privacidad relacionados con el uso que %appName% haga de sus datos. Presione Sí para permitir y No para denegar.",
 							"line1": "¿Otorgar permiso(s)",
 							"line2": "solicitado(s)?",
-							"textBody": "%appName% solicita el uso de la siguiente información y permisos del vehículo: %functionalGroupLabels%. Si presiona Sí, acepta que %vehicleMake% no se hará responsable por los daños o pérdidas de privacidad relacionados con el uso que %appName% haga de sus datos. Presione Sí para permitir y No para denegar. \\n\\n Puede cambiar estos permisos y consultar descripciones detalladas en el menú de configuración de las aplicaciones móviles."
+							"textBody": "%appName% solicita el uso de la siguiente información y permisos del vehículo: %functionalGroupLabels%. Si presiona Sí, acepta que %vehicleMake% no se hará responsable por los daños o pérdidas de privacidad relacionados con el uso que %appName% haga de sus datos. Presione Sí para permitir y No para denegar. \n\n Puede cambiar estos permisos y consultar descripciones detalladas en el menú de configuración de las aplicaciones móviles."
 						},
 						"es-es": {
 							"tts": "%appName% está solicitando el uso de los siguientes permisos e información del vehículo: %functionalGroupLabels%. Si pulsa sí, acepta que %vehicleMake% no será responsable de los daños o la pérdida de privacidad relacionados con el uso de sus datos por parte de %appName%. Pulse sí para permitir o no para denegar.",
@@ -1025,7 +1022,7 @@
 						"en-us": {
 							"line1": "Enable Mobile Apps",
 							"line2": "on SYNC? (Uses Data)",
-							"textBody": "Would you like to enable Mobile Apps on SYNC?\r\n\r\nTo use Mobile Apps with SYNC, SYNC will communicate with Ford at least once per month using your mobile device’s data plan. Standard rates may apply. SYNC will send your VIN and SYNC module number to Ford U.S.\r\n\r\nUpdates are about the size of an email, and the occurrence of updates depends on your vehicle usage and when a new app is found on your device. To turn on or off, visit the SYNC Settings menu. See your Owner Guide for more information."
+							"textBody": "Would you like to enable Mobile Apps on SYNC?\n\nTo use Mobile Apps with SYNC, SYNC will communicate with Ford at least once per month using your mobile device’s data plan. Standard rates may apply. SYNC will send your VIN and SYNC module number to Ford U.S.\n\nUpdates are about the size of an email, and the occurrence of updates depends on your vehicle usage and when a new app is found on your device. To turn on or off, visit the SYNC Settings menu. See your Owner Guide for more information."
 						},
 						"es-en": {
 							"textBody": "Para usar aplicaciones móviles con SYNC, este debe comunicarse con Ford al menos una vez al mes a través del plan de datos de su dispositivo móvil. Pueden aplicar tarifas normales. SYNC enviará su VIN y el número de módulo de SYNC a Ford de Estados Unidos de América. Las actualizaciones tienen el tamaño aproximado de un mensaje de correo electrónico, y la frecuencia de las actualizaciones depende del uso de su vehículo y de si se encuentran nuevas aplicaciones en su dispositivo. Para obtener más información, consulte la Guía del propietario. /r Presione Sí para permitir y No para denegar."
@@ -1915,8 +1912,6 @@
 		},
 		"app_policies": {
 			"default": {
-				"memory_kb": 300,
-				"heart_beat_timeout_ms": 1000,
 				"keep_context": false,
 				"steal_focus": false,
 				"priority": "NONE",
@@ -1931,8 +1926,6 @@
 				"groups": ["DataConsent-2"]
 			},
 			"pre_DataConsent": {
-				"memory_kb":300,
-				"heart_beat_timeout_ms":1000,
 				"keep_context": false,
 				"steal_focus": false,
 				"priority": "NONE",

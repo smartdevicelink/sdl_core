@@ -37,7 +37,7 @@
 #else
 #error Please implement lock for your OS
 #endif
-
+#include <stdint.h>
 #include "utils/macro.h"
 
 namespace sync_primitives {
@@ -64,6 +64,7 @@ typedef pthread_mutex_t PlatformMutex;
 class Lock {
  public:
   Lock();
+  Lock(bool is_mutex_recursive);
   ~Lock();
 
   // Ackquire the lock. Must be called only once on a thread.
@@ -83,9 +84,17 @@ class Lock {
   impl::PlatformMutex mutex_;
 
 #ifndef NDEBUG
-  // Basic debugging aid, a flag that signals wether this lock is currently taken
-  // Allows detection of abandoned and recursively captured mutexes
-  bool lock_taken_;
+  /**
+  * @brief Basic debugging aid, a flag that signals wether this lock is currently taken
+  * Allows detection of abandoned and recursively captured mutexes
+  */
+  uint32_t lock_taken_;
+
+  /**
+  * @brief Describe if mutex is recurcive or not
+  */
+  bool is_mutex_recursive_;
+
   void AssertFreeAndMarkTaken();
   void AssertTakenAndMarkFree();
 #else
@@ -93,7 +102,7 @@ class Lock {
   void AssertTakenAndMarkFree() {}
 #endif
 
- private:
+
   friend class ConditionalVariable;
   DISALLOW_COPY_AND_ASSIGN(Lock);
 };

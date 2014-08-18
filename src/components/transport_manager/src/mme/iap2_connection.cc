@@ -52,6 +52,10 @@ IAP2Connection::IAP2Connection(const DeviceUID& device_uid,
   parent_(parent) {
 }
 
+IAP2Connection::~IAP2Connection() {
+  receiver_thread_->stop();
+}
+
 bool IAP2Connection::Init() {
   IAP2Device::AppRecord record;
   if (parent_->RecordByAppId(app_handle_, record)) {

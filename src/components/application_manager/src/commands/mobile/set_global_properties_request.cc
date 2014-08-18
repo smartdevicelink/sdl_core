@@ -107,9 +107,6 @@ void SetGlobalPropertiesRequest::Run() {
   }
 
   if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_,
-                  "Incoming set global properties has contains \\t\\n \\\\t \\\\n "
-                  " text contains only whitespace in helpPrompt timeoutPrompt");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }

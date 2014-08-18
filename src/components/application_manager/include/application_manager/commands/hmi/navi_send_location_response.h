@@ -30,27 +30,31 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SYNC_PDATA_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SYNC_PDATA_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_SEND_LOCATION_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_SEND_LOCATION_RESPONSE_H_
 
-#include "application_manager/commands/command_response_impl.h"
-#include "application_manager/message.h"
-#include "utils/macro.h"
+#include "application_manager/commands/hmi/response_from_hmi.h"
 
 namespace application_manager {
+
 namespace commands {
 
-class SyncPDataResponse : public CommandResponseImpl {
+/**
+ * @brief NaviSendLocationResponse command class
+ */
+class NaviSendLocationResponse : public ResponseFromHMI {
  public:
   /**
-   * \brief SyncPDataResponse class constructor
-   **/
-  explicit SyncPDataResponse(const MessageSharedPtr& message);
+   * @brief NaviSendLocationResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   */
+  explicit NaviSendLocationResponse(const MessageSharedPtr& message);
 
   /**
-   * \brief SyncPDataResponse class destructor
-   **/
-  virtual ~SyncPDataResponse();
+   * @brief NaviSendLocationResponse class destructor
+   */
+  virtual ~NaviSendLocationResponse();
 
   /**
    * @brief Execute command
@@ -58,10 +62,11 @@ class SyncPDataResponse : public CommandResponseImpl {
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(SyncPDataResponse);
+  DISALLOW_COPY_AND_ASSIGN(NaviSendLocationResponse);
 };
 
 }  // namespace commands
+
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SYNC_PDATA_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_SEND_LOCATION_RESPONSE_H_

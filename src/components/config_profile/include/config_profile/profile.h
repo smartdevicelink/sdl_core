@@ -246,6 +246,16 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns path on the target log file name pattern.
       */
     const std::string& target_log_file_name_pattern() const;
+
+    /**
+      * @brief Returns path to the target boot count file.
+      */
+    const std::string& target_boot_count_file() const;
+
+    /**
+      * @brief Returns path to tmp directory on the target.
+      */
+    const std::string& target_tmp_dir() const;
 #endif
     /**
      * @brief Returns allowable max amount of requests per time scale for
@@ -612,6 +622,8 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     remote_logging_flag_file_path_;
     std::string                     target_log_file_home_dir_;
     std::string                     target_log_file_name_pattern_;
+    std::string                     target_boot_count_file_;
+    std::string                     target_tmp_dir_;
 #endif
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;

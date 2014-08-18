@@ -261,6 +261,11 @@ const char time_stamp[] = "timeStamp";
 const char manual_text_entry[] = "manualTextEntry";
 const char image_type_supported[] = "imageTypeSupported";
 const char unexpected_disconnect[] = "unexpectedDisconnect";
+const char location_name[] = "locationName";
+const char location_description[] = "locationDescription";
+const char address_lines[] = "addressLines";
+const char phone_number[] = "phoneNumber";
+const char location_image[] = "locationImage";
 }  // namespace strings
 
 namespace mobile_notification {

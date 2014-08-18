@@ -270,7 +270,7 @@ FFW.UI = FFW.RPCObserver.create({
                 {
 
                     if (request.params.appName) {
-                        SDL.SDLController.getApplicationModel(request.params.app).set('appName', request.params.appName);
+                        SDL.SDLController.getApplicationModel(request.params.appID).set('appName', request.params.appName);
                     }
 
                     SDL.SDLModel.changeRegistrationUI(request.params.language, request.params.appID);

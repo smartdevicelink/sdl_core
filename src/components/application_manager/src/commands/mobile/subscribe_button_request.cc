@@ -33,7 +33,6 @@
 
 #include "application_manager/commands/mobile/subscribe_button_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
@@ -51,8 +50,8 @@ SubscribeButtonRequest::~SubscribeButtonRequest() {
 void SubscribeButtonRequest::Run() {
   LOG4CXX_INFO(logger_, "SubscribeButtonRequest::Run");
 
-  uint32_t app_id = (*message_)[strings::params][strings::connection_key].asUInt();
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
@@ -60,10 +59,18 @@ void SubscribeButtonRequest::Run() {
     return;
   }
 
-  const uint32_t btn_id = ((*message_)[str::msg_params][str::button_name]
-      .asUInt());
+  const mobile_apis::ButtonName::eType btn_id =
+      static_cast<mobile_apis::ButtonName::eType>(
+          (*message_)[str::msg_params][str::button_name].asUInt());
 
-  if (app->IsSubscribedToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
+  if (!IsSubscribtionAllowed(app, btn_id)) {
+    LOG4CXX_ERROR_EXT(logger_, "Subscribe on button " << btn_id
+                      << " isn't allowed");
+    SendResponse(false, mobile_apis::Result::REJECTED);
+    return;
+  }
+
+  if (app->IsSubscribedToButton(btn_id)) {
     LOG4CXX_ERROR_EXT(logger_, "Already subscribed to button " << btn_id);
     SendResponse(false, mobile_apis::Result::IGNORED);
     return;
@@ -73,6 +80,20 @@ void SubscribeButtonRequest::Run() {
   SendResponse(true, mobile_apis::Result::SUCCESS);
 
   app->UpdateHash();
+}
+
+bool SubscribeButtonRequest::IsSubscribtionAllowed(
+    ApplicationSharedPtr app, mobile_apis::ButtonName::eType btn_id) {
+
+  if (!app->is_media_application() &&
+      ((mobile_apis::ButtonName::SEEKLEFT == btn_id) ||
+       (mobile_apis::ButtonName::SEEKRIGHT == btn_id)||
+       (mobile_apis::ButtonName::TUNEUP == btn_id)   ||
+       (mobile_apis::ButtonName::TUNEDOWN == btn_id))) {
+    return false;
+  }
+
+  return true;
 }
 
 }  // namespace commands

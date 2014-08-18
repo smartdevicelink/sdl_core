@@ -30,38 +30,38 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ENCODED_SYNC_PDATA_RESPONSE_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ENCODED_SYNC_PDATA_RESPONSE_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_LOCATION_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_LOCATION_RESPONSE_H_
 
 #include "application_manager/commands/command_response_impl.h"
 #include "application_manager/message.h"
-#include "utils/macro.h"
+
 
 namespace application_manager {
 namespace commands {
 
-class EncodedSyncPDataResponse : public CommandResponseImpl {
+class SendLocationResponse : public CommandResponseImpl {
  public:
   /**
-   * \brief EncodedSyncPDataResponse class constructor
-   **/
-  explicit EncodedSyncPDataResponse(const MessageSharedPtr& message);
+   * @brief SendLocationResponse class constructor
+   */
+  explicit SendLocationResponse(const MessageSharedPtr& message);
 
   /**
-   * \brief EncodedSyncPDataResponse class destructor
-   **/
-  virtual ~EncodedSyncPDataResponse();
+   * @brief SendLocationResponse class destructor
+   */
+  virtual ~SendLocationResponse();
 
   /**
    * @brief Execute command
-   **/
+   */
   virtual void Run();
 
  private:
-  DISALLOW_COPY_AND_ASSIGN(EncodedSyncPDataResponse);
+  DISALLOW_COPY_AND_ASSIGN(SendLocationResponse);
 };
 
 }  // namespace commands
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ENCODED_SYNC_PDATA_RESPONSE_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_LOCATION_RESPONSE_H_

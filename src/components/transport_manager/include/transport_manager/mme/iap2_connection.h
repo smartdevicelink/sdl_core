@@ -52,6 +52,7 @@ class IAP2Connection : public Connection {
     const ApplicationHandle& app_handle,
     TransportAdapterController* controller,
     IAP2Device* parent);
+  ~IAP2Connection();
 
   bool Init();
 
