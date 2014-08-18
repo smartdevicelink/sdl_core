@@ -45,25 +45,6 @@ from ford_xml_parser import FordXmlParser, ParamDesc
 from code_formatter import CodeBlock
 
 class Notifications_qml(FordXmlParser):
-    def iterate_notifications(self, name_format, param_type_gen, out):
-        for interface_el in self.el_tree.findall('interface'):
-            iface_name = interface_el.get('name')
-            notifications = self.find_notifications_by_provider(interface_el, "sdl")
-            for notification_el in notifications:
-                with CodeBlock(out) as out:
-                    out.write("void %s%s(" % (name_format, notification_el.get("name")))
-                param_el_count = 1
-                list_of_params = notification_el.findall("param")
-                list_of_params_len = len(list_of_params)
-                for param_el in list_of_params:
-                    param = self.make_param_desc(param_el, iface_name)
-                    out.write("%s %s" % (param_type_gen(param), param_el.get("name")))
-                    if param_el_count < list_of_params_len:
-                        out.write(", ")
-                    param_el_count += 1
-                out.write(");\n")
-
-
     def make_header(self, out):
         out.write("class SdlProxy: public Item {\n")
         with CodeBlock(out) as out:
@@ -74,10 +55,43 @@ class Notifications_qml(FordXmlParser):
             out.write("private:\n")
             out.write("QDBusInterface *sdlBasicCommunicationInterface;\n")
             out.write("signals:\n")
-        self.iterate_notifications("", self.qml_param_type, out)
+        #self.iterate_notifications("", self.qml_param_type, out)
+        for interface_el in self.el_tree.findall('interface'):
+            iface_name = interface_el.get('name')
+            notifications = self.find_notifications_by_provider(interface_el, "sdl")
+            for notification_el in notifications:
+                with CodeBlock(out) as out:
+                    out.write("void %s(" % notification_el.get("name"))
+                param_el_count = 1
+                list_of_params = notification_el.findall("param")
+                list_of_params_len = len(list_of_params)
+                for param_el in list_of_params:
+                    param = self.make_param_desc(param_el, iface_name)
+                    out.write("QVariant %s" % param_el.get("name"))
+                    if param_el_count < list_of_params_len:
+                        out.write(", ")
+                    param_el_count += 1
+                out.write(");\n")
         with CodeBlock(out) as out:
             out.write("private slots:\n")
-        self.iterate_notifications("slot_", self.qt_param_type, out)
+        #self.iterate_notifications("slot_", self.qt_param_type, out)
+        for interface_el in self.el_tree.findall('interface'):
+            iface_name = interface_el.get('name')
+            notifications = self.find_notifications_by_provider(interface_el, "sdl")
+            for notification_el in notifications:
+                with CodeBlock(out) as out:
+                    out.write("void slot_%s(" % notification_el.get("name"))
+                param_el_count = 1
+                list_of_params = notification_el.findall("param")
+                list_of_params_len = len(list_of_params)
+                for param_el in list_of_params:
+                    param = self.make_param_desc(param_el, iface_name)
+                    out.write("%s %s" % (self.qt_param_type(param), param_el.get("name")))
+                    if param_el_count < list_of_params_len:
+                        out.write(", ")
+                    param_el_count += 1
+                out.write(");\n")
+        out.write("};\n")
 
 
     def qt_param_type(self, param):
@@ -144,7 +158,7 @@ class Notifications_qml(FordXmlParser):
                     out.write("QDBusConnection::sessionBus().connect(\n")
                     with CodeBlock(out) as out:
                         out.write("\"com.ford.sdl.core\", \"/\", \"com.ford.sdl.core.%s\",\n" % iface_name)
-                        out.write("\"%s\", this, SLOT(%s(" % (iface_name, notification_el.get("name")))
+                        out.write("\"%s\", this, SLOT(slot_%s(" % (iface_name, notification_el.get("name")))
                 qml_args()
                 out.write(")));\n")
         out.write("}\n\n")
@@ -153,7 +167,7 @@ class Notifications_qml(FordXmlParser):
             notifications = self.find_notifications_by_provider(interface_el, "sdl")
             for notification_el in notifications:
                 notific_full_name = interface_el.get("name") + "_" + notification_el.get("name")
-                out.write("void SdlProxy::%s(" % notification_el.get("name"))
+                out.write("void SdlProxy::slot_%s(" % notification_el.get("name"))
                 qml_args()
                 out.write(") {\n")
                 with CodeBlock(out) as out:
@@ -170,7 +184,8 @@ class Notifications_qml(FordXmlParser):
                     list_of_params = notification_el.findall("param")
                     list_of_params_len = len(list_of_params)
                     for param_el in list_of_params:
-                        out.write("%s %s" % (param_el.get("name") + "_variant", param_el.get("name")))
+                        param = self.make_param_desc(param_el, iface_name)
+                        out.write("%s" %  param.name + "_qvariant")
                         if param_el_count < list_of_params_len:
                             out.write(", ")
                         param_el_count += 1  

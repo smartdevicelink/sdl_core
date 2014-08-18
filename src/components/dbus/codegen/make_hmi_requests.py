@@ -68,8 +68,8 @@ class Impl(FordXmlParser):
                     output.write('Q_OBJECT\n')
                 out.write(' public:\n')
                 with CodeBlock(out) as output:
-                    output.write(request_full_name + '(QDBusInterface *interface, QString name, QList<QVariant> args, QJSValue hmi_callback):\n')
-                    output.write('  HMIRequest(interface, name, args, hmi_callback) {}\n')
+                    output.write(request_full_name + '(QJSValue hmi_callback, QDBusInterface *interface, QList<QVariant> args, QString name):\n')
+                    output.write('  HMIRequest(hmi_callback, interface, args, name) {}\n')
                 out.write(' private:\n')
                 with CodeBlock(out) as output:
                     output.write('QJSValueList fillArgsList();\n};\n\n')
@@ -82,7 +82,7 @@ class Impl(FordXmlParser):
             output.write('Q_OBJECT\n')
         out.write('public:\n')
         with CodeBlock(out) as output:
-            output.write('HMIRequest(QDBusInterface *interface, QString name, QList<QVariant> args, QJSValue hmi_callback);\n')
+            output.write('HMIRequest(QJSValue hmi_callback, QDBusInterface *interface, QList<QVariant> args, QString name );\n')
         out.write('protected:\n')
         with CodeBlock(out) as output:
             output.write('virtual QJSValueList fillArgsList() = 0;\n')
@@ -202,8 +202,8 @@ class Impl(FordXmlParser):
                 out.write('}\n\n')
              
         
-        out.write('HMIRequest::HMIRequest(QDBusInterface *interface, QString name, QList<QVariant> args, QJSValue hmi_callback):\n')
-        out.write('      interface_(interface), args_(args), hmi_callback_(hmi_callback) {\n')
+        out.write('HMIRequest::HMIRequest(QJSValue hmi_callback, QDBusInterface *interface, QList<QVariant> args, QString name) :\n')
+        out.write('      hmi_callback_(hmi_callback), interface_(interface), args_(args) {\n')
         with CodeBlock(out) as output:
             output.write('QDBusPendingCall pcall = interface->asyncCallWithArgumentList(name, args);\n')
             output.write('watcher_ = new QDBusPendingCallWatcher(pcall);\n')

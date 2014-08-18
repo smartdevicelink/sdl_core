@@ -90,14 +90,16 @@ set(CMAKE_AUTOMOC ON)
 set(SOURCES
   dbus_plugin.cc
   ${CMAKE_CURRENT_BINARY_DIR}/qml_dbus.cc
+  moc_qml_dbus.cpp
   sdl_proxy.cc
+  moc_sdl_proxy.cpp
   hmi_proxy.cc
   stream_qvariant.cc
   moc_qml_dbus.cpp
   dbus_controller.cc
   request_to_sdl.cc
-  hmi_requests.cc
   moc_request_to_sdl.cpp
+  hmi_requests.cc
   moc_hmi_requests.cpp
 )
 include_directories(
@@ -113,6 +115,7 @@ if (${qt_version} MATCHES "4.8.5")
   qt4_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.h moc_hmi_requests.cpp)
   qt4_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.h moc_request_to_sdl.cpp)
   qt4_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/qml_dbus.h moc_qml_dbus.cpp)
+  qt4_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/sdl_proxy.h moc_sdl_proxy.cpp)
   qt4_use_modules(${target} Core DBus Declarative)
   set(model_dir ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt4/)
   set(copy_destination ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt4/${destination})
@@ -120,6 +123,7 @@ elseif (${qt_version} MATCHES "5.1.0")
   qt5_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.h moc_hmi_requests.cpp)
   qt5_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.h moc_request_to_sdl.cpp)
   qt5_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/qml_dbus.h moc_qml_dbus.cpp)
+  qt5_generate_moc(${CMAKE_CURRENT_BINARY_DIR}/sdl_proxy.h moc_sdl_proxy.cpp)
   qt5_use_modules(${target} Core DBus Qml)
   set(model_dir ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt5/)
   set(copy_destination ${CMAKE_CURRENT_BINARY_DIR}/../../qml_model_qt5/${destination})

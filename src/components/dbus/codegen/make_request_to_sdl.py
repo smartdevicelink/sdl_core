@@ -135,8 +135,8 @@ class Impl(FordXmlParser):
                             out.write('LOG4CXX_ERROR(logger_, "%s in %s is NOT valid");\n' % (param.name, request_full_name))
                             out.write('return false;\n')
                         out.write('}\n')
-                    output.write('new requests::' + request_full_name + '(' + interface_el.get('name') + 
-                                 ', "' + request_name + '", args, hmi_callback);\n')
+                    output.write('new requests::' + request_full_name + '(hmi_callback, ' + interface_el.get('name') + ' , args, '
+                                  + '"' + request_name + '");\n')
                     output.write('LOG4CXX_TRACE(logger_, "EXIT");\n')
                     output.write('return true;\n')
                 out.write('}\n\n')
