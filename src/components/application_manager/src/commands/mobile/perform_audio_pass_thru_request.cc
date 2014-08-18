@@ -239,6 +239,8 @@ void PerformAudioPassThruRequest::SendRecordStartNotification() {
 }
 
 void PerformAudioPassThruRequest::StartMicrophoneRecording() {
+  ApplicationManagerImpl::instance()->begin_audio_pass_thru();
+
   ApplicationManagerImpl::instance()->StartAudioPassThruThread(
       connection_key(), correlation_id(),
       (*message_)[str::msg_params][str::max_duration].asInt(),
