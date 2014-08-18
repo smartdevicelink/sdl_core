@@ -71,7 +71,7 @@ bool IAP2Connection::Init() {
 
 void IAP2Connection::Finalize() {
   if (unexpected_disconnect_) {
-    controller_->DisconnectDone(device_uid_, app_handle_);
+    controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
   }
 }
 
@@ -116,7 +116,6 @@ void IAP2Connection::ReceiveData() {
 // anyway delegate can be stopped directly
         receiver_thread_delegate_->exitThreadMain();
         Close();
-        controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
         break;
       default:
         LOG4CXX_WARN(logger_, "iAP2: error occurred while receiving data on protocol " << protocol_name_);
@@ -140,7 +139,6 @@ bool IAP2Connection::Close() {
   }
 
   parent_->OnDisconnect(app_handle_);
-
   return result;
 }
 
