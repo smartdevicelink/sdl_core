@@ -966,9 +966,16 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
   }
 
+  // If application is revoked it should not be activated
+  // In this case we need to activate application
+  if (false == permissions.appRevoked || true == permissions.isSDLAllowed) {
+    application_manager::ApplicationManagerImpl::instance()->
+        ActivateApplication(app);
+  }
+
   last_activated_app_id_ = connection_key;
   application_manager::MessageHelper::SendActivateAppResponse(permissions,
-      correlation_id);
+                                                              correlation_id);
   application_manager::MessageHelper::SendHMIStatusNotification(*app.get());
 }
 

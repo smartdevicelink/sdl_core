@@ -1343,6 +1343,8 @@ void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
                              ->application_by_policy_id(permissions.application_id);
   if (app) {
     ApplicationManagerImpl::instance()->ActivateApplication(app);
+  } else {
+    LOG4CXX_WARN(logger_, "Unable to find app_id: " << permissions.application_id);
   }
 }
 
