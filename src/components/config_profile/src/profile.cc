@@ -1148,6 +1148,8 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
   if (max_thread_pool_size_ > kDefaultMaxThreadPoolSize) {
     max_thread_pool_size_ = kDefaultMaxThreadPoolSize;
   }
+  LOG_UPDATED_VALUE(max_thread_pool_size_,
+      kDefaultMaxThreadPoolSize, kApplicationManagerSection);
 
   ReadStringValue(&iap_legacy_protocol_mask_,
       kDefaultLegacyProtocolMask,

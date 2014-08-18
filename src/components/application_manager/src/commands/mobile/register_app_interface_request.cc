@@ -573,9 +573,9 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
     return mobile_apis::Result::DISALLOWED;
   }
-  const bool init_result = policy_manager->GetInitialAppData(
-                             message[strings::msg_params][strings::app_id].asString(), &app_nicknames,
-                             &app_hmi_types);
+  std::string mobile_app_id = message[strings::msg_params][strings::app_id].asString();
+  const bool init_result = policy_manager->GetInitialAppData(mobile_app_id, &app_nicknames,
+                                                             &app_hmi_types);
 
   if (!init_result) {
     LOG4CXX_ERROR(logger_, "Error during initial application data check.");
@@ -590,6 +590,10 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
       LOG4CXX_WARN(logger_,
                    "Application name was not found in nicknames list.");
       //App should be unregistered, if its name is not present in nicknames list
+      usage_statistics::AppCounter count_of_rejections_nickname_mismatch(
+        policy_manager, mobile_app_id,
+        usage_statistics::REJECTIONS_NICKNAME_MISMATCH);
+      ++count_of_rejections_nickname_mismatch;
       return mobile_apis::Result::DISALLOWED;
     }
   }

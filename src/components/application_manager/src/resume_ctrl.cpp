@@ -383,16 +383,15 @@ bool ResumeCtrl::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
 }
 
 bool ResumeCtrl::IsApplicationSaved(const std::string& mobile_app_id) {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::IsApplicationSaved " << mobile_app_id);
-
+  bool result = false;
   for (Json::Value::iterator it = GetSavedApplications().begin();
       it != GetSavedApplications().end(); ++it) {
     if ((*it)[strings::app_id].asString() == mobile_app_id) {
-      return true;
+      result = true;
     }
   }
-
-  return false;
+  LOG4CXX_INFO(logger_, "IsApplicationSaved " << mobile_app_id << " : " << (result?"true":"false"));
+  return result;
 }
 
 uint32_t ResumeCtrl::GetHMIApplicationID(const std::string& mobile_app_id) {
