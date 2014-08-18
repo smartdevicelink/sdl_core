@@ -46,7 +46,7 @@ def parse_input():
         print("Configuration file is missing :", subscribers_file_name)
         exit(1)
     if not os.path.exists(messages_filename):
-        print("Configuration file is missing :", subscribers_file_name)
+        print("Subscribers file is missing :", subscribers_file_name)
         exit(1)
     f = open(subscribers_file_name, "r+")
     lines = f.readlines()
