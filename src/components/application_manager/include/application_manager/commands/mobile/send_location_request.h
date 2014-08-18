@@ -31,61 +31,57 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_SYNC_PDATA_NOTIFICATION_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_SYNC_PDATA_NOTIFICATION_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_LOCATION_REQUEST_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_LOCATION_REQUEST_H_
 
-#include "application_manager/commands/command_response_impl.h"
-#include "utils/timer_thread.h"
-#include "utils/macro.h"
+#include "application_manager/commands/command_request_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-class Application;
-
 /**
- * @brief OnSyncPDataNotification class is used as callback including binary
- * data of any SyncP packets that SYNC needs to send back to the mobile device
- **/
-class OnSyncPDataNotification : public CommandResponseImpl {
+ * @brief send location request command class
+ */
+class SendLocationRequest : public CommandRequestImpl {
  public:
   /**
-   * @brief OnSyncPDataNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnSyncPDataNotification(const MessageSharedPtr& message);
+   * @brief SendLocationRquest class constructor
+   */
+  explicit SendLocationRequest(const MessageSharedPtr& message);
 
   /**
-   * @brief OnSyncPDataNotification class destructor
-   **/
-  virtual ~OnSyncPDataNotification();
+   * @brief SendLocationRquest class destructor
+   */
+  virtual ~SendLocationRequest();
 
   /**
    * @brief Execute command
-   **/
+   */
   virtual void Run();
 
   /**
-   * @brief Timer callback function
+   * @brief Interface method that is called whenever new event received
    *
+   * @param event The received event
    */
-  void onTimer();
+  virtual void on_event(const event_engine::Event& event);
 
  private:
-  /*
-   * @brief Sends sync pdata notification to mobile device
+
+  /**
+   * @brief Checks sendlocation params(locationName, locationDescription, ...).
+   * Checks string if it contains \t\n \\t \\n or whitespace
+   * @return true if string contains invalid characters, otherwise returns false
    */
-  void SendPData();
+  bool IsWhiteSpaceExist();
 
-  // members
-  timer::TimerThread<OnSyncPDataNotification> timer_;
 
-  DISALLOW_COPY_AND_ASSIGN(OnSyncPDataNotification);
+  DISALLOW_COPY_AND_ASSIGN(SendLocationRequest);
 };
 
 }  // namespace commands
+
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_ENCODED_SYNC_PDATA_NOTIFICATION_H_
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SEND_LOCATION_REQUEST_H_

@@ -31,7 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/sync_pdata_response.h"
+#include "application_manager/commands/mobile/send_location_response.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
 #include "interfaces/HMI_API.h"
@@ -40,26 +40,17 @@ namespace application_manager {
 
 namespace commands {
 
-SyncPDataResponse::SyncPDataResponse(const MessageSharedPtr& message)
+SendLocationResponse::SendLocationResponse(const MessageSharedPtr& message)
     : CommandResponseImpl(message) {
 }
 
-SyncPDataResponse::~SyncPDataResponse() {
+SendLocationResponse::~SendLocationResponse() {
 }
 
-void SyncPDataResponse::Run() {
-  LOG4CXX_INFO(logger_, "SyncPDataResponse::Run");
+void SendLocationResponse::Run() {
+  LOG4CXX_INFO(logger_, "SendLocationResponse::Run");
 
-  // check if response false
-  if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {
-    if ((*message_)[strings::msg_params][strings::success].asBool() == false) {
-      LOG4CXX_ERROR(logger_, "Success = false");
-      SendResponse(false);
-      return;
-    }
-  }
-
-  SendResponse(true);
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 
 }  // namespace commands
