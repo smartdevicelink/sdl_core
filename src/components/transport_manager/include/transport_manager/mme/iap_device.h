@@ -75,9 +75,9 @@ class IAPDevice : public MmeDevice {
   typedef std::map<std::string, int> ProtocolInUseNamePool;
   typedef std::pair<std::string, ipod_hdl_t*> AppRecord;
 
-  class TimerProtocol;
-  typedef utils::SharedPtr<TimerProtocol> TimerProtocolSPtr;
-  typedef std::map<std::string, TimerProtocolSPtr> TimerContainer;
+  class ProtocolConnectionTimer;
+  typedef utils::SharedPtr<ProtocolConnectionTimer> ProtocolConnectionTimerSPtr;
+  typedef std::map<std::string, ProtocolConnectionTimerSPtr> TimerContainer;
 
   static const int kProtocolNameSize = 256;
 
@@ -92,21 +92,29 @@ class IAPDevice : public MmeDevice {
 
   /**
    * Picks protocol from pool of protocols
-   * @return protocol index
-   */
-  char PickProtocol();
-
-  /**
-   * Takes protocol to use
+   * @param index of protocol
    * @param name of protocol
+   * @return true if protocol was picked
    */
-  void TakeProtocol(const std::string& name);
+  bool PickProtocol(char* index, std::string* name);
 
   /**
    * Frees protocol
    * @param name of protocol
    */
   void FreeProtocol(const std::string& name);
+
+  /**
+   * Starts timer for protocol
+   * @param name of protocol
+   */
+  void StartTimer(const std::string& name);
+
+  /**
+   * Stops timer for protocol
+   * @param name of protocol
+   */
+  void StopTimer(const std::string& name);
 
   TransportAdapterController* controller_;
   ipod_hdl_t* ipod_hdl_;
@@ -152,15 +160,14 @@ class IAPDevice : public MmeDevice {
     ipod_eaf_event_t events_[kEventsBufferSize];
   };
 
-  class TimerProtocol {
+  class ProtocolConnectionTimer {
    public:
-    TimerProtocol(std::string name, IAPDevice* parent);
-    ~TimerProtocol();
+    ProtocolConnectionTimer(const std::string& name, IAPDevice* parent);
+    ~ProtocolConnectionTimer();
     void Start();
     void Stop();
    private:
-    typedef timer::TimerThread<TimerProtocol> Timer;
-    static int timeout_;
+    typedef timer::TimerThread<ProtocolConnectionTimer> Timer;
     std::string name_;
     Timer* timer_;
     IAPDevice* parent_;
@@ -168,7 +175,6 @@ class IAPDevice : public MmeDevice {
   };
 
   friend class IAPConnection;
-  friend class TimerProtocol;
 };
 
 }  // namespace transport_adapter

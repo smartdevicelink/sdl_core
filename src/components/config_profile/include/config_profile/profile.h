@@ -466,7 +466,7 @@ class Profile : public utils::Singleton<Profile> {
     /**
      * @return seconds
      */
-    int iap_hub_timeout_wait_connection() const;
+    int iap_hub_connection_wait_timeout() const;
 
   private:
     /**
@@ -642,7 +642,7 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     iap_system_config_;
     std::string                     iap2_system_config_;
     int                             iap2_hub_connect_attempts_;
-    int                             iap_hub_timeout_wait_connection_;
+    int                             iap_hub_connection_wait_timeout_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

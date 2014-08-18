@@ -130,6 +130,7 @@ void IAP2Device::OnHubConnect(const std::string& protocol_name, iap2ea_hdl_t* ha
   std::string pool_protocol_name;
   bool picked = PickProtocol(&protocol_index, &pool_protocol_name);
   if (picked) {
+    StartTimer(pool_protocol_name);
     StartThread(pool_protocol_name);
   }
   char buffer[] = {protocol_index};
@@ -199,41 +200,51 @@ void IAP2Device::OnDisconnect(ApplicationHandle app_id) {
   }
 }
 
-bool IAP2Device::PickProtocol(char* index, std::string* name) {
-  sync_primitives::AutoLock locker(protocol_name_pool_lock_);
-  if (!free_protocol_name_pool_.empty()) {
-    FreeProtocolNamePool::iterator i = free_protocol_name_pool_.begin();
-    *index = i->first;
-    *name = i->second;
-    protocol_in_use_name_pool_.insert(std::make_pair(*name, *index));
-    free_protocol_name_pool_.erase(i);
-
-    TimerContainer::iterator it = timers_protocols_.find(*name);
-    if (it != timers_protocols_.end()) {
-      it->second->Start();
-    } else {
-// TODO(KKolodiy): This is turned off because applications don't connect
-//                 after thread is stopped. May be problem is in QNX library.
-/*
- *    TimerProtocolSPtr timer = new TimerProtocol(*name, this);
- *    timers_protocols_.insert(std::make_pair(*name, timer));
- *    timer->Start();
- */
-    }
-    return true;
+void IAP2Device::StartTimer(const std::string& name) {
+  TimerContainer::iterator i = timers_protocols_.find(name);
+  if (i != timers_protocols_.end()) {
+    ProtocolConnectionTimerSPtr timer = i->second;
+    timer->Start();
+  } else {
+    // TODO(KKolodiy): This is turned off because applications don't connect
+    //                 after thread is stopped. May be problem is in QNX library.
+    /*
+         ProtocolConnectionTimerSPtr timer = new ProtocolConnectionTimer(name, this);
+         timers_protocols_.insert(std::make_pair(name, timer));
+         timer->Start();
+     */
   }
-  else {
+  LOG4CXX_TRACE(logger_, "iAP2: timer for protocol " << name << " was started");
+}
+
+bool IAP2Device::PickProtocol(char* index, std::string* name) {
+  DCHECK(index);
+  DCHECK(name);
+
+  sync_primitives::AutoLock locker(protocol_name_pool_lock_);
+  if (free_protocol_name_pool_.empty()) {
     LOG4CXX_WARN(logger_, "iAP2: protocol pool is empty");
     *index = 255;
     return false;
   }
+
+  FreeProtocolNamePool::iterator i = free_protocol_name_pool_.begin();
+  *index = i->first;
+  *name = i->second;
+  protocol_in_use_name_pool_.insert(std::make_pair(*name, *index));
+  free_protocol_name_pool_.erase(i);
+  LOG4CXX_DEBUG(logger_, "iAP2: protocol " << *name << " picked out from pool");
+
+  return true;
 }
 
-void IAP2Device::TakeProtocol(const std::string& name) {
+void IAP2Device::StopTimer(const std::string& name) {
   sync_primitives::AutoLock auto_lock(timers_protocols_lock_);
-  TimerContainer::iterator timer = timers_protocols_.find(name);
-  if (timer != timers_protocols_.end()) {
-    timer->second->Stop();
+  TimerContainer::iterator i = timers_protocols_.find(name);
+  if (i != timers_protocols_.end()) {
+    ProtocolConnectionTimerSPtr timer = i->second;
+    timer->Stop();
+    LOG4CXX_TRACE(logger_, "iAP2: timer for protocol " << name << " was stopped");
   }
 }
 
@@ -256,15 +267,14 @@ void IAP2Device::StartThread(const std::string& protocol_name) {
   std::string thread_name = "iAP2 connect notifier (" + protocol_name + ")";
   utils::SharedPtr<threads::Thread> thread = new threads::Thread(thread_name.c_str(),
     new IAP2ConnectThreadDelegate(this, protocol_name));
-  LOG4CXX_INFO(logger_, "iAP2: starting connection thread for protocol " << protocol_name);
+  LOG4CXX_DEBUG(logger_, "iAP2: starting connection thread for protocol " << protocol_name);
   thread->start();
-  pool_connection_threads_lock_.Acquire();
+  sync_primitives::AutoLock auto_lock(pool_connection_threads_lock_);
   ThreadContainer::iterator j = pool_connection_threads_.find(protocol_name);
   if (j != pool_connection_threads_.end()) {
     pool_connection_threads_.erase(j);
   }
   pool_connection_threads_.insert(std::make_pair(protocol_name, thread));
-  pool_connection_threads_lock_.Release();
 }
 
 void IAP2Device::StopThread(const std::string& protocol_name) {
@@ -317,7 +327,7 @@ void IAP2Device::IAP2ConnectThreadDelegate::threadMain() {
   std::string mount_point = parent_->mount_point();
   LOG4CXX_TRACE(logger_, "iAP2: connecting to " << mount_point << " on protocol " << protocol_name_);
   iap2ea_hdl_t* handle = iap2_eap_open(mount_point.c_str(), protocol_name_.c_str(), 0);
-  parent_->TakeProtocol(protocol_name_);
+  parent_->StopTimer(protocol_name_);
   if (handle != 0) {
     LOG4CXX_DEBUG(logger_, "iAP2: connected to " << mount_point << " on protocol " << protocol_name_);
     parent_->OnConnect(protocol_name_, handle);
@@ -328,32 +338,31 @@ void IAP2Device::IAP2ConnectThreadDelegate::threadMain() {
   }
 }
 
-int IAP2Device::TimerProtocol::TimerProtocol::timeout_ = 5;
-
-IAP2Device::TimerProtocol::TimerProtocol(std::string name, IAP2Device* parent)
+IAP2Device::ProtocolConnectionTimer::ProtocolConnectionTimer(const std::string& name, IAP2Device* parent)
     : name_(name),
-      timer_(new Timer(this, &TimerProtocol::Shoot)),
+      timer_(new Timer(this, &ProtocolConnectionTimer::Shoot)),
       parent_(parent) {
-  timeout_ = profile::Profile::instance()->iap_hub_timeout_wait_connection();
 }
 
-IAP2Device::TimerProtocol::~TimerProtocol() {
+IAP2Device::ProtocolConnectionTimer::~ProtocolConnectionTimer() {
   Stop();
   delete timer_;
 }
 
-void IAP2Device::TimerProtocol::Start() {
-  LOG4CXX_DEBUG(logger_, "iAP2: start timer (protocol: " << name_ << "timeout: " << timeout_);
-  timer_->start(timeout_);
+void IAP2Device::ProtocolConnectionTimer::Start() {
+  int timeout = profile::Profile::instance()->iap_hub_connection_wait_timeout();
+  LOG4CXX_DEBUG(logger_, "iAP2: start timer (protocol: " << name_ <<
+                ", timeout: " << timeout << ")");
+  timer_->start(timeout);
 }
 
-void IAP2Device::TimerProtocol::Stop() {
-  LOG4CXX_DEBUG(logger_, "iAP2: stop timer (protocol: " << name_);
+void IAP2Device::ProtocolConnectionTimer::Stop() {
+  LOG4CXX_DEBUG(logger_, "iAP2: stop timer (protocol: " << name_ << ")");
   timer_->stop();
 }
 
-void IAP2Device::TimerProtocol::Shoot() {
-  LOG4CXX_DEBUG(logger_, "iAP2: shoot timer (protocol: " << name_);
+void IAP2Device::ProtocolConnectionTimer::Shoot() {
+  LOG4CXX_DEBUG(logger_, "iAP2: shoot timer (protocol: " << name_ << ")");
   parent_->StopThread(name_);
   parent_->FreeProtocol(name_);
 }

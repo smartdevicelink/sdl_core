@@ -74,9 +74,9 @@ class IAP2Device : public MmeDevice {
   typedef std::map<ApplicationHandle, AppRecord> AppContainer;
   typedef std::map<std::string, utils::SharedPtr<threads::Thread> > ThreadContainer;
 
-  class TimerProtocol;
-  typedef utils::SharedPtr<TimerProtocol> TimerProtocolSPtr;
-  typedef std::map<std::string, TimerProtocolSPtr> TimerContainer;
+  class ProtocolConnectionTimer;
+  typedef utils::SharedPtr<ProtocolConnectionTimer> ProtocolConnectionTimerSPtr;
+  typedef std::map<std::string, ProtocolConnectionTimerSPtr> TimerContainer;
 
   bool RecordByAppId(ApplicationHandle app_id, AppRecord& record) const;
 
@@ -99,21 +99,29 @@ class IAP2Device : public MmeDevice {
 
   /**
    * Picks protocol from pool of protocols
-   * @return true if protocol was picked and threprotocol index
+   * @param index of protocol
+   * @param name of protocol
+   * @return true if protocol was picked
    */
   bool PickProtocol(char* index, std::string* name);
-
-  /**
-   * Takes protocol to use
-   * @param name of protocol
-   */
-  void TakeProtocol(const std::string& name);
 
   /**
    * Frees protocol
    * @param name of protocol
    */
   bool FreeProtocol(const std::string& name);
+
+  /**
+   * Starts timer for protocol
+   * @param name of protocol
+   */
+  void StartTimer(const std::string& name);
+
+  /**
+   * Stops timer for protocol
+   * @param name of protocol
+   */
+  void StopTimer(const std::string& name);
 
   TransportAdapterController* controller_;
   int last_app_id_;
@@ -150,14 +158,14 @@ class IAP2Device : public MmeDevice {
       std::string protocol_name_;
   };
 
-  class TimerProtocol {
+  class ProtocolConnectionTimer {
    public:
-    TimerProtocol(std::string name, IAP2Device* parent);
-    ~TimerProtocol();
+    ProtocolConnectionTimer(const std::string& name, IAP2Device* parent);
+    ~ProtocolConnectionTimer();
     void Start();
     void Stop();
    private:
-    typedef timer::TimerThread<TimerProtocol> Timer;
+    typedef timer::TimerThread<ProtocolConnectionTimer> Timer;
     static int timeout_;
     std::string name_;
     Timer* timer_;
@@ -166,7 +174,6 @@ class IAP2Device : public MmeDevice {
   };
 
   friend class IAP2Connection;
-  friend class TimerProtocol;
 };
 
 }  // namespace transport_adapter
