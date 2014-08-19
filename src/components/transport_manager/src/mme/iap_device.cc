@@ -469,13 +469,13 @@ IAPDevice::ProtocolConnectionTimer::~ProtocolConnectionTimer() {
 
 void IAPDevice::ProtocolConnectionTimer::Start() {
   int timeout = profile::Profile::instance()->iap_hub_connection_wait_timeout();
-  LOG4CXX_DEBUG(logger_, "iAP2: start timer (protocol: " << name_ <<
+  LOG4CXX_DEBUG(logger_, "iAP: start timer (protocol: " << name_ <<
                 ", timeout: " << timeout << ")");
   timer_->start(timeout);
 }
 
 void IAPDevice::ProtocolConnectionTimer::Stop() {
-  LOG4CXX_DEBUG(logger_, "iAP2: stop timer (protocol: " << name_ << ")");
+  LOG4CXX_DEBUG(logger_, "iAP: stop timer (protocol: " << name_ << ")");
   timer_->stop();
 }
 

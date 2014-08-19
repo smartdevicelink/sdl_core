@@ -244,7 +244,7 @@ void IAP2Device::StopTimer(const std::string& name) {
   if (i != timers_protocols_.end()) {
     ProtocolConnectionTimerSPtr timer = i->second;
     timer->Stop();
-    LOG4CXX_TRACE(logger_, "iAP2: timer for protocol " << name << " was stopped");
+    LOG4CXX_DEBUG(logger_, "iAP2: timer for protocol " << name << " was stopped");
   }
 }
 

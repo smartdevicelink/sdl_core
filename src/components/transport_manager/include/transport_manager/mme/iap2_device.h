@@ -166,7 +166,6 @@ class IAP2Device : public MmeDevice {
     void Stop();
    private:
     typedef timer::TimerThread<ProtocolConnectionTimer> Timer;
-    static int timeout_;
     std::string name_;
     Timer* timer_;
     IAP2Device* parent_;
