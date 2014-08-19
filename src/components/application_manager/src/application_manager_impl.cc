@@ -1247,6 +1247,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
         connection_key, mobile_api::AppInterfaceUnregisteredReason::
         REQUEST_WHILE_IN_NONE_HMI_LEVEL);
 
+      application(connection_key)->usage_report().RecordRemovalsForBadBehavior();
       UnregisterApplication(connection_key, mobile_apis::Result::INVALID_ENUM,
                             false);
       return false;
@@ -2074,7 +2075,9 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
       LOG4CXX_ERROR(logger_, "No application for policy id " << policy_app_id);
       return mobile_apis::Result::GENERIC_ERROR;
     }
-    app->usage_report().RecordRpcSentInHMINone();
+    if (result.hmi_level_permitted != policy::kRpcAllowed) {
+      app->usage_report().RecordRpcSentInHMINone();
+    }
   }
 
   const std::string log_msg = "Application: "+ policy_app_id+

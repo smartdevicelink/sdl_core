@@ -174,12 +174,25 @@ void RegisterAppInterfaceRequest::Run() {
     SendResponse(false, policy_result);
     return;
   }
+  policy::PolicyManager* policy_manager =
+      policy::PolicyHandler::instance()->policy_manager();
+  if (!policy_manager) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    SendResponse(false, mobile_apis::Result::DISALLOWED);
+    return;  
+  }
 
   mobile_apis::Result::eType coincidence_result =
       CheckCoincidence();
 
   if (mobile_apis::Result::SUCCESS != coincidence_result) {
     LOG4CXX_ERROR_EXT(logger_, "Coincidence check failed.");
+    if (mobile_apis::Result::DUPLICATE_NAME == coincidence_result) {
+      usage_statistics::AppCounter count_of_rejections_duplicate_name(
+        policy_manager, mobile_app_id,
+        usage_statistics::REJECTIONS_DUPLICATE_NAME);
+      ++count_of_rejections_duplicate_name;
+    }
     SendResponse(false, coincidence_result);
     return;
   }
@@ -503,9 +516,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
 mobile_apis::Result::eType
 RegisterAppInterfaceRequest::CheckCoincidence() {
-
-  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::CheckCoincidence ");
-
+  LOG4CXX_TRACE_ENTER(logger_);
   const smart_objects::SmartObject& msg_params =
     (*message_)[strings::msg_params];
 
