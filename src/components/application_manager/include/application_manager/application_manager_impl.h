@@ -602,6 +602,16 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     class ApplicationListAccessor {
      public:
+
+      // typedef for Applications list
+      typedef const std::set<ApplicationSharedPtr>& TAppList;
+
+      // typedef for Applications list iterator
+      typedef std::set<ApplicationSharedPtr>::iterator TAppListIt;
+
+      // typedef for Applications list const iterator
+      typedef std::set<ApplicationSharedPtr>::const_iterator TAppListConstIt;
+
       /**
        * @brief ApplicationListAccessor class constructor
        */
@@ -620,7 +630,7 @@ class ApplicationManagerImpl : public ApplicationManager,
        * @brief thread-safe getter for applications
        * @return applications list
        */
-      const std::set<ApplicationSharedPtr>& applications() {
+      TAppList applications() {
         return ApplicationManagerImpl::instance()->application_list_;
       }
 
