@@ -39,6 +39,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/pulse_thread_delegate.h"
 #include "utils/lock.h"
+#include "utils/timer_thread.h"
 
 #include "transport_manager/mme/mme_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -74,6 +75,10 @@ class IAPDevice : public MmeDevice {
   typedef std::map<std::string, int> ProtocolInUseNamePool;
   typedef std::pair<std::string, ipod_hdl_t*> AppRecord;
 
+  class ProtocolConnectionTimer;
+  typedef utils::SharedPtr<ProtocolConnectionTimer> ProtocolConnectionTimerSPtr;
+  typedef std::map<std::string, ProtocolConnectionTimerSPtr> TimerContainer;
+
   static const int kProtocolNameSize = 256;
 
   const AppRecord RegisterConnection(ApplicationHandle app_id, IAPConnection* connection);
@@ -84,6 +89,32 @@ class IAPDevice : public MmeDevice {
   void OnRegularSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id);
   void OnSessionClosed(int session_id);
   void OnDataReady(int session_id);
+
+  /**
+   * Picks protocol from pool of protocols
+   * @param index of protocol
+   * @param name of protocol
+   * @return true if protocol was picked
+   */
+  bool PickProtocol(char* index, std::string* name);
+
+  /**
+   * Frees protocol
+   * @param name of protocol
+   */
+  void FreeProtocol(const std::string& name);
+
+  /**
+   * Starts timer for protocol
+   * @param name of protocol
+   */
+  void StartTimer(const std::string& name);
+
+  /**
+   * Stops timer for protocol
+   * @param name of protocol
+   */
+  void StopTimer(const std::string& name);
 
   TransportAdapterController* controller_;
   ipod_hdl_t* ipod_hdl_;
@@ -102,6 +133,8 @@ class IAPDevice : public MmeDevice {
   FreeProtocolNamePool free_protocol_name_pool_;
   ProtocolInUseNamePool protocol_in_use_name_pool_;
   sync_primitives::Lock protocol_name_pool_lock_;
+  TimerContainer timers_protocols_;
+  sync_primitives::Lock timers_protocols_lock_;
 
   class IAPEventThreadDelegate : public threads::PulseThreadDelegate {
    public:
@@ -125,6 +158,20 @@ class IAPDevice : public MmeDevice {
     IAPDevice* parent_;
     ipod_hdl_t* ipod_hdl_;
     ipod_eaf_event_t events_[kEventsBufferSize];
+  };
+
+  class ProtocolConnectionTimer {
+   public:
+    ProtocolConnectionTimer(const std::string& name, IAPDevice* parent);
+    ~ProtocolConnectionTimer();
+    void Start();
+    void Stop();
+   private:
+    typedef timer::TimerThread<ProtocolConnectionTimer> Timer;
+    std::string name_;
+    Timer* timer_;
+    IAPDevice* parent_;
+    void Shoot();
   };
 
   friend class IAPConnection;
