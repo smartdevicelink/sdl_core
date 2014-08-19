@@ -1536,6 +1536,7 @@ void MessageHelper::ResetGlobalproperties(ApplicationSharedPtr app) {
     smart_objects::SmartObject helpPrompt = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     helpPrompt[strings::text] = help_prompt[i];
+    helpPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
     so_help_prompt[i] = helpPrompt;
   }
 
@@ -1552,6 +1553,7 @@ void MessageHelper::ResetGlobalproperties(ApplicationSharedPtr app) {
     smart_objects::SmartObject timeoutPrompt = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
     timeoutPrompt[strings::text] = time_out_promt[i];
+    timeoutPrompt[strings::text] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
     so_time_out_promt[i] = timeoutPrompt;
   }
 
