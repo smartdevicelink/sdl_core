@@ -206,13 +206,9 @@ void IAP2Device::StartTimer(const std::string& name) {
     ProtocolConnectionTimerSPtr timer = i->second;
     timer->Start();
   } else {
-    // TODO(KKolodiy): This is turned off because applications don't connect
-    //                 after thread is stopped. May be problem is in QNX library.
-    /*
-         ProtocolConnectionTimerSPtr timer = new ProtocolConnectionTimer(name, this);
-         timers_protocols_.insert(std::make_pair(name, timer));
-         timer->Start();
-     */
+    ProtocolConnectionTimerSPtr timer = new ProtocolConnectionTimer(name, this);
+    timers_protocols_.insert(std::make_pair(name, timer));
+    timer->Start();
   }
   LOG4CXX_TRACE(logger_, "iAP2: timer for protocol " << name << " was started");
 }
