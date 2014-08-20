@@ -60,11 +60,17 @@ class AOAConnection : public Connection {
   ApplicationHandle app_handle_;
   TransportAdapterController* controller_;
 
+  void ReceiveDone(RawMessagePtr message);
+  void ReceiveFailed();
+  void Abort();
+
   class DeviceObserver : public AOADeviceObserver {
    public:
     explicit DeviceObserver(AOAConnection* parent);
-    void OnReceivedMessage(RawMessagePtr message);
-    void OnTransmittedMessage(AOAWrapper::AOAHandle handle, bool success);
+    void OnReceivedMessage(bool success, RawMessagePtr message);
+    void OnTransmittedMessage(bool success);
+   private:
+    AOAConnection* parent_;
   };
 };
 

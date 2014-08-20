@@ -61,6 +61,11 @@ AOAConnection::~AOAConnection() {
 
 TransportAdapter::Error AOAConnection::SendData(RawMessagePtr message) {
   LOG4CXX_TRACE(logger_, "AOA: send data to " << device_uid_ << " " << app_handle_);
+  if (!wrapper_->IsValidHandle()) {
+    controller_->ConnectionAborted(device_uid_, app_handle_,
+                                   CommunicationError());
+    return TransportAdapter::FAIL;
+  }
   if (wrapper_->SendMessage(message)) {
     controller_->DataSendDone(device_uid_, app_handle_, message);
     return TransportAdapter::OK;
@@ -70,18 +75,50 @@ TransportAdapter::Error AOAConnection::SendData(RawMessagePtr message) {
   }
 }
 
+void AOAConnection::ReceiveDone(RawMessagePtr message) {
+  LOG4CXX_TRACE(logger_, "AOA: receive data from " << device_uid_ << " " << app_handle_);
+  controller_->DataReceiveDone(device_uid_, app_handle_, message);
+}
+
+void AOAConnection::ReceiveFailed() {
+  LOG4CXX_TRACE(logger_, "AOA: receive failed from " << device_uid_ << " " << app_handle_);
+  controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
+}
+
+void AOAConnection::Abort() {
+  LOG4CXX_TRACE(logger_, "AOA: aborted " << device_uid_ << " " << app_handle_);
+  controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
+}
+
 TransportAdapter::Error AOAConnection::Disconnect() {
   LOG4CXX_TRACE(logger_, "AOA: disconnect " << device_uid_ << " " << app_handle_);
   controller_->DisconnectDone(device_uid_, app_handle_);
   return TransportAdapter::OK;
 }
 
-void AOAConnection::DeviceObserver::OnReceivedMessage(RawMessagePtr message) {
-  //controller_->DataReceiveDone(message);
+AOAConnection::DeviceObserver::DeviceObserver(AOAConnection* parent)
+    : parent_(parent) {
 }
 
-void AOAConnection::DeviceObserver::OnTransmittedMessage(
-    AOAWrapper::AOAHandle handle, bool success) {
+void AOAConnection::DeviceObserver::OnReceivedMessage(bool success,
+                                                      RawMessagePtr message) {
+  if (success) {
+    parent_->ReceiveDone(message);
+  } else if (wrapper_->IsValidHandle()) {
+    parent_->ReceiveFailed();
+  } else {
+    parent_->Abort();
+  }
+}
+
+void AOAConnection::DeviceObserver::OnTransmittedMessage(bool success) {
+  if (success) {
+    // TODO(KKolodiy): need to think
+  } else if (wrapper_->IsValidHandle()) {
+    // TODO(KKolodiy): need to think
+  } else {
+    parent_->Abort();
+  }
 }
 
 }  // namespace transport_adapter

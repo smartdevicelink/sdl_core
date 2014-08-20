@@ -86,8 +86,8 @@ class AOAWrapper {
   inline bool IsValueExistInMask(uint32_t bitmask, uint32_t value) const;
   std::vector<AOAMode> CreateModesList(uint32_t modes_mask) const;
   std::vector<AOAEndpoint> CreateEndpointsList(uint32_t endpoints_mask) const;
-  bool SetCallback(AOADeviceObserver *observer, uint32_t endpoint) const;
-  bool UnsetCallback(uint32_t endpoint) const;
+  bool SetCallback(AOADeviceObserver *observer, AOAEndpoint endpoint) const;
+  bool UnsetCallback(AOAEndpoint endpoint) const;
 };
 
 class AOAScannerObserver {
@@ -98,8 +98,8 @@ class AOAScannerObserver {
 
 class AOADeviceObserver {
  public:
-  virtual void OnReceivedMessage(RawMessagePtr message) = 0;
-  virtual void OnTransmittedMessage(AOAWrapper::AOAHandle handle, bool success) = 0;
+  virtual void OnReceivedMessage(bool success, RawMessagePtr message) = 0;
+  virtual void OnTransmittedMessage(bool success) = 0;
   virtual ~AOADeviceObserver() {}
 };
 

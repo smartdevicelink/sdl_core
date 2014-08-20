@@ -56,10 +56,11 @@ static void OnReceivedData(aoa_hdl_t *hdl, uint8_t *data, uint32_t sz,
     AOAWrapper::PrintError(status);
   }
 
+  bool success = !error;
   AOADeviceObserver* const* p = static_cast<AOADeviceObserver* const*>(udata);
   AOADeviceObserver* observer = *p;
   RawMessagePtr message = new RawMessage(0, 0, data, sz);
-  observer->OnReceivedMessage(message);
+  observer->OnReceivedMessage(success, message);
 }
 
 static void OnTransmittedData(aoa_hdl_t *hdl, uint8_t *data, uint32_t sz,
@@ -73,7 +74,7 @@ static void OnTransmittedData(aoa_hdl_t *hdl, uint8_t *data, uint32_t sz,
   bool success = !error;
   AOADeviceObserver* const* p = static_cast<AOADeviceObserver* const*>(udata);
   AOADeviceObserver* observer = *p;
-  observer->OnTransmittedMessage(hdl, success);
+  observer->OnTransmittedMessage(success);
 }
 
 AOAWrapper::AOAWrapper(AOAHandle hdl)
@@ -98,8 +99,14 @@ bool AOAWrapper::Init(AOAScannerObserver *observer) {
 }
 
 bool AOAWrapper::SetCallback(AOADeviceObserver *observer,
-                             uint32_t endpoint) const {
-  int ret = aoa_set_callback(hdl_, &OnReceivedData, &observer, endpoint);
+                             AOAEndpoint endpoint) const {
+  LOG4CXX_TRACE(logger_, "AOA: set callback " << hdl_ << ", endpoint "<< endpoint);
+  data_clbk_t* callback;
+  switch (endpoint) {
+    case AOA_Ept_Accessory_BulkIn: callback = &OnReceivedData; break;
+    case AOA_Ept_Accessory_BulkOut: callback = &OnTransmittedData; break;
+  }
+  int ret = aoa_set_callback(hdl_, callback, &observer, BitEndpoint(endpoint));
   if (IsError(ret)) {
     PrintError(ret);
     return false;
@@ -109,18 +116,18 @@ bool AOAWrapper::SetCallback(AOADeviceObserver *observer,
 
 bool AOAWrapper::Subscribe(AOADeviceObserver *observer) const {
   LOG4CXX_TRACE(logger_, "AOA: subscribe on receive data" << hdl_);
-  if (!SetCallback(observer, AOA_EPT_ACCESSORY_BULKIN)) {
+  if (!SetCallback(observer, AOA_Ept_Accessory_BulkIn)) {
     return false;
   }
   LOG4CXX_TRACE(logger_, "AOA: subscribe on transmit data" << hdl_);
-  if (!SetCallback(observer, AOA_EPT_ACCESSORY_BULKOUT)) {
+  if (!SetCallback(observer, AOA_Ept_Accessory_BulkOut)) {
     return false;
   }
   return true;
 }
 
-bool AOAWrapper::UnsetCallback(uint32_t endpoint) const {
-  int ret_r = aoa_set_callback(hdl_, NULL, NULL, endpoint);
+bool AOAWrapper::UnsetCallback(AOAEndpoint endpoint) const {
+  int ret_r = aoa_set_callback(hdl_, NULL, NULL, BitEndpoint(endpoint));
   if (IsError(ret_r)) {
     PrintError(ret_r);
     return false;
@@ -130,11 +137,11 @@ bool AOAWrapper::UnsetCallback(uint32_t endpoint) const {
 
 bool AOAWrapper::Unsubscribe() const {
   LOG4CXX_TRACE(logger_, "AOA: unsubscribe on receive data" << hdl_);
-  if (!UnsetCallback(AOA_EPT_ACCESSORY_BULKIN)) {
+  if (!UnsetCallback(AOA_Ept_Accessory_BulkIn)) {
     return false;
   }
   LOG4CXX_TRACE(logger_, "AOA: unsubscribe on transmit data" << hdl_);
-  if (!UnsetCallback(AOA_EPT_ACCESSORY_BULKOUT)) {
+  if (!UnsetCallback(AOA_Ept_Accessory_BulkOut)) {
     return false;
   }
   return true;
