@@ -597,7 +597,7 @@ class ApplicationManagerImpl : public ApplicationManager,
         mobile_apis::FunctionID::eType function_id,
         CommandParametersPermissions* params_permissions = NULL);
 
-    /*
+    /**
      * Class for thread-safe access to applications list
      */
     class ApplicationListAccessor {

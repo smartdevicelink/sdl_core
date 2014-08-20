@@ -968,7 +968,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
 
   // If application is revoked it should not be activated
   // In this case we need to activate application
-  if (false == permissions.appRevoked || true == permissions.isSDLAllowed) {
+  if (false == permissions.appRevoked && true == permissions.isSDLAllowed) {
     application_manager::ApplicationManagerImpl::instance()->
         ActivateApplication(app);
   }

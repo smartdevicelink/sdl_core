@@ -145,18 +145,30 @@ void CommandRequestImpl::SendResponse(
   response[strings::params][strings::protocol_version] =
       CommandImpl::protocol_version_;
   response[strings::params][strings::connection_key] = connection_key();
+
+
   response[strings::params][strings::function_id] = function_id();
 
   if (response_params) {
     response[strings::msg_params] = *response_params;
   }
 
-  // Add disallowed parameters from request back to response with appropriate
-  // reasons
-  AddDisallowedParameters(response);
-
   if (info) {
     response[strings::msg_params][strings::info] = std::string(info);
+  }
+
+  // Add disallowed parameters and info from request back to response with appropriate
+  // reasons (VehicleData result codes)
+  if (result_code != mobile_apis::Result::APPLICATION_NOT_REGISTERED) {
+    const mobile_apis::FunctionID::eType& id =
+        static_cast<mobile_apis::FunctionID::eType>(function_id());
+    if ((id == mobile_apis::FunctionID::SubscribeVehicleDataID)  ||
+        (id == mobile_apis::FunctionID::UnsubscribeVehicleDataID)) {
+      AddDisallowedParameters(response);
+      AddDisallowedParametersToInfo(response);
+    } else if (id == mobile_apis::FunctionID::GetVehicleDataID) {
+      AddDisallowedParametersToInfo(response);
+    }
   }
 
   response[strings::msg_params][strings::success] = success;
@@ -461,11 +473,50 @@ void CommandRequestImpl::RemoveDisallowedParameters(
   }
 }
 
+void CommandRequestImpl::AddDissalowedParameterToInfoString(
+    std::string& info, const std::string& param) const {
+  //prepare disallowed params enumeration for response info string
+  if (info.empty()) {
+    info = "\'" + param + "\'";
+  } else {
+    info = info + "," + " " + "\'" + param + "\'";
+  }
+}
+
+void CommandRequestImpl::AddDisallowedParametersToInfo(
+    smart_objects::SmartObject& response) const {
+  std::string info;
+
+  std::vector<std::string>::const_iterator it =
+      parameters_permissions_.disallowed_params.begin();
+  for (; it != parameters_permissions_.disallowed_params.end(); ++it) {
+    AddDissalowedParameterToInfoString(info, (*it));
+  }
+
+  it = parameters_permissions_.undefined_params.begin();
+  for (; it != parameters_permissions_.undefined_params.end(); ++it) {
+    AddDissalowedParameterToInfoString(info, (*it));
+  }
+
+  if (!info.empty()) {
+    info += " disallowed by policies.";
+
+    if (!response[strings::msg_params][strings::info].asString().empty()) {
+      //If we already have info add info about disallowed params to it
+      response[strings::msg_params][strings::info] =
+          response[strings::msg_params][strings::info].asString() + " " + info;
+    } else {
+      response[strings::msg_params][strings::info] = info;
+    }
+  }
+}
+
 void CommandRequestImpl::AddDisallowedParameters(
     smart_objects::SmartObject& response) {
   DisallowedParamsInserter disallowed_inserter(
         response,
         mobile_apis::VehicleDataResultCode::VDRC_USER_DISALLOWED);
+
   std::for_each(parameters_permissions_.disallowed_params.begin(),
                 parameters_permissions_.disallowed_params.end(),
                 disallowed_inserter);
@@ -473,9 +524,15 @@ void CommandRequestImpl::AddDisallowedParameters(
   DisallowedParamsInserter undefined_inserter(
         response,
         mobile_apis::VehicleDataResultCode::VDRC_DISALLOWED);
+
   std::for_each(parameters_permissions_.undefined_params.begin(),
                 parameters_permissions_.undefined_params.end(),
                 undefined_inserter);
+}
+
+bool CommandRequestImpl::HasDisallowedParams() const {
+  return ((!parameters_permissions_.disallowed_params.empty()) ||
+         (!parameters_permissions_.undefined_params.empty()));
 }
 
 }  // namespace commands

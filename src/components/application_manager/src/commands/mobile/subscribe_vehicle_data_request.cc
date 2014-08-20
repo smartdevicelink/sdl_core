@@ -132,14 +132,17 @@ void SubscribeVehicleDataRequest::Run() {
   }
 
   if (0 == items_to_subscribe) {
-    SendResponse(false,
-                 mobile_apis::Result::INVALID_DATA,
-                 "No data in the request");
+    if (HasDisallowedParams()) {
+      SendResponse(false, mobile_apis::Result::DISALLOWED);
+    } else {
+      SendResponse(false, mobile_apis::Result::INVALID_DATA,
+                   "No data in the request");
+    }
     return;
   } else if (0 == subscribed_items) {
     SendResponse(false,
                  mobile_apis::Result::IGNORED,
-                 "Already subscribed on provided VehicleData",
+                 "Already subscribed on provided VehicleData.",
                  &response_params);
     return;
   }
@@ -244,7 +247,7 @@ void SubscribeVehicleDataRequest::on_event(const event_engine::Event& event) {
     if (IsAnythingAlreadySubscribed(message[strings::msg_params])) {
       result_code = mobile_apis::Result::IGNORED;
       return_info =
-        std::string("Already subscribed on some provided VehicleData").c_str();
+        std::string("Already subscribed on some provided VehicleData.").c_str();
     }
   }
 
