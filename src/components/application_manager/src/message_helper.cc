@@ -386,7 +386,9 @@ void MessageHelper::SendHashUpdateNotification(const uint32_t app_id) {
 
   smart_objects::SmartObject* so = GetHashUpdateNotification(app_id);
   PrintSmartObject(*so);
-  ApplicationManagerImpl::instance()->ManageMobileCommand(so);
+  if (!ApplicationManagerImpl::instance()->ManageMobileCommand(so)) {
+    LOG4CXX_ERROR_EXT(logger_, "Failed to send HashUpdate notification.");
+  }
 }
 
 void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
