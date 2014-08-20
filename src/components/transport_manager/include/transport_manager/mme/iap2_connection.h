@@ -62,7 +62,7 @@ class IAP2Connection : public Connection {
   virtual TransportAdapter::Error Disconnect();
 
  private:
-  static const size_t kBufferSize = 1024;
+  static const size_t kBufferSize = 32768;
 
   void ReceiveData();
   bool Close();

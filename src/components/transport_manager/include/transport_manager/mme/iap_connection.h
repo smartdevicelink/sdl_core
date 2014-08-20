@@ -60,7 +60,7 @@ class IAPConnection : public Connection {
   virtual TransportAdapter::Error Disconnect();
 
  private:
-  static const size_t kBufferSize = 1024;
+  static const size_t kBufferSize = 32768;
 
   void ReceiveData(int session_id);
   void OnSessionOpened(int session_id);
