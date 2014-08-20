@@ -49,7 +49,9 @@ IAPDevice::IAPDevice(const std::string& mount_point,
   MmeDevice(mount_point, name, unique_device_id),
   controller_(controller),
   ipod_hdl_(0),
-  last_app_id_(0) {
+  last_app_id_(0),
+  app_table_lock_(true),
+  connections_lock_(true) {
 }
 
 IAPDevice::~IAPDevice() {
