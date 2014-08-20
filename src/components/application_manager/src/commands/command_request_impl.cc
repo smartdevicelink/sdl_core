@@ -145,8 +145,6 @@ void CommandRequestImpl::SendResponse(
   response[strings::params][strings::protocol_version] =
       CommandImpl::protocol_version_;
   response[strings::params][strings::connection_key] = connection_key();
-
-
   response[strings::params][strings::function_id] = function_id();
 
   if (response_params) {
@@ -475,7 +473,7 @@ void CommandRequestImpl::RemoveDisallowedParameters(
 
 void CommandRequestImpl::AddDissalowedParameterToInfoString(
     std::string& info, const std::string& param) const {
-  //prepare disallowed params enumeration for response info string
+  // prepare disallowed params enumeration for response info string
   if (info.empty()) {
     info = "\'" + param + "\'";
   } else {
@@ -502,7 +500,7 @@ void CommandRequestImpl::AddDisallowedParametersToInfo(
     info += " disallowed by policies.";
 
     if (!response[strings::msg_params][strings::info].asString().empty()) {
-      //If we already have info add info about disallowed params to it
+      // If we already have info add info about disallowed params to it
       response[strings::msg_params][strings::info] =
           response[strings::msg_params][strings::info].asString() + " " + info;
     } else {
@@ -516,7 +514,6 @@ void CommandRequestImpl::AddDisallowedParameters(
   DisallowedParamsInserter disallowed_inserter(
         response,
         mobile_apis::VehicleDataResultCode::VDRC_USER_DISALLOWED);
-
   std::for_each(parameters_permissions_.disallowed_params.begin(),
                 parameters_permissions_.disallowed_params.end(),
                 disallowed_inserter);
@@ -524,7 +521,6 @@ void CommandRequestImpl::AddDisallowedParameters(
   DisallowedParamsInserter undefined_inserter(
         response,
         mobile_apis::VehicleDataResultCode::VDRC_DISALLOWED);
-
   std::for_each(parameters_permissions_.undefined_params.begin(),
                 parameters_permissions_.undefined_params.end(),
                 undefined_inserter);
