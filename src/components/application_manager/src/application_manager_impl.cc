@@ -2118,7 +2118,9 @@ void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
         if (kTTSSessionChanging == changing_state) {
           (*it)->set_tts_speak_state(true);
         }
-        if ((*it)->audio_streaming_state() != state) {
+        if ((*it)->audio_streaming_state() != state &&
+            (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level()) &&
+            (mobile_api::HMILevel::HMI_BACKGROUND != (*it)->hmi_level())) {
           (*it)->set_audio_streaming_state(state);
           MessageHelper::SendHMIStatusNotification(*(*it));
         }
@@ -2132,8 +2134,6 @@ void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
   std::set<ApplicationSharedPtr> local_app_list = application_list_;
   std::set<ApplicationSharedPtr>::const_iterator it = local_app_list.begin();
   std::set<ApplicationSharedPtr>::const_iterator itEnd = local_app_list.end();
-  //according with SDLAQ-CRS-839
-  bool is_application_audible = false;
 
   for (; it != itEnd; ++it) {
     if ((*it).valid()) {
@@ -2141,14 +2141,14 @@ void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
         if (kTTSSessionChanging == changing_state) {
           (*it)->set_tts_speak_state(false);
         }
-        if ((!is_application_audible) && (!(vr_session_started())) &&
+        if ((!(vr_session_started())) &&
+            (!((*it)->tts_speak_state())) &&
             ((*it)->audio_streaming_state() !=
              mobile_apis::AudioStreamingState::AUDIBLE) &&
-            (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level())) {
-          //according with SDLAQ-CRS-839
-          is_application_audible = true;
+            (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level()) &&
+            (mobile_api::HMILevel::HMI_BACKGROUND != (*it)->hmi_level())) {
           (*it)->set_audio_streaming_state(
-                mobile_apis::AudioStreamingState::AUDIBLE);
+              mobile_apis::AudioStreamingState::AUDIBLE);
           MessageHelper::SendHMIStatusNotification(*(*it));
         }
       }
