@@ -39,8 +39,11 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-AOADevice::AOADevice(AOAWrapper::AOAHandle handle)
-    : handle_(handle) {
+AOADevice::AOADevice(AOAWrapper::AOAHandle handle,
+                     const std::string& name,
+                     const DeviceUID& unique_id)
+    : Device(name, unique_id),
+      handle_(handle) {
 }
 
 bool AOADevice::IsSameAs(const Device* other_device) const {
@@ -57,7 +60,9 @@ bool AOADevice::IsSameAs(const Device* other_device) const {
 ApplicationList AOADevice::GetApplicationList() const {
   // Device has got only one application
   const ApplicationHandle kNumberApplication = 1;
-  return ApplicationList().push_back(kNumberApplication);
+  ApplicationList list;
+  list.push_back(kNumberApplication);
+  return list;
 }
 
 AOAWrapper::AOAHandle AOADevice::handle() const {

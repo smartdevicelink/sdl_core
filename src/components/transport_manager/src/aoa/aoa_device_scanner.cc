@@ -34,6 +34,8 @@
 
 #include "utils/logger.h"
 
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+
 namespace transport_manager {
 namespace transport_adapter {
 
@@ -78,8 +80,20 @@ void AOADeviceScanner::NotifyDevicesUpdated() {
   controller_->SearchDeviceDone(devices);
 }
 
+std::string AOADeviceScanner::GetName() {
+  sync_primitives::AutoLock loker(devices_lock_);
+  return "AOA device #" + devices_.size();
+}
+
+std::string AOADeviceScanner::GetUniqueId() {
+  sync_primitives::AutoLock loker(devices_lock_);
+  return "AOA#" + devices_.size();
+}
+
 void AOADeviceScanner::AddDevice(AOAWrapper::AOAHandle hdl) {
-  AOADevicePtr aoa_device(new AOADevice(hdl));
+  const std::string name = GetName();
+  const std::string unique_id = GetUniqueId();
+  AOADevicePtr aoa_device(new AOADevice(hdl, name, unique_id));
   sync_primitives::AutoLock loker(devices_lock_);
   devices_.insert(std::make_pair(hdl, aoa_device));
 }

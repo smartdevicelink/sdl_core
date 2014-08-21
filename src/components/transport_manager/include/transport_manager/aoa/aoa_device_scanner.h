@@ -35,6 +35,8 @@
 
 #include <map>
 
+#include "utils/lock.h"
+
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/aoa/aoa_device.h"
 #include "transport_manager/aoa/aoa_wrapper.h"
@@ -65,6 +67,8 @@ class AOADeviceScanner : public DeviceScanner {
 
   void AddDevice(AOAWrapper::AOAHandle hdl);
   void NotifyDevicesUpdated();
+  std::string GetName();
+  std::string GetUniqueId();
 
   class ScannerObserver : public AOAScannerObserver {
    public:

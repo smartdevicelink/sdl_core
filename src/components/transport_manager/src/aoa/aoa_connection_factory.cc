@@ -30,7 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "transport_manager/aoa/aoa_connection_factory.h"
+
 #include "utils/logger.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "transport_manager/aoa/aoa_device.h"
+#include "transport_manager/aoa/aoa_connection.h"
 
 namespace transport_manager {
 namespace transport_adapter {

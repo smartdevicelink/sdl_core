@@ -104,7 +104,7 @@ bool AOAWrapper::SetCallback(AOADeviceObserver *observer,
                              AOAEndpoint endpoint) const {
   LOG4CXX_TRACE(logger_,
                 "AOA: set callback " << hdl_ << ", endpoint "<< endpoint);
-  data_clbk_t* callback;
+  data_clbk_t callback;
   switch (endpoint) {
     case AOA_Ept_Accessory_BulkIn:
       callback = &OnReceivedData;

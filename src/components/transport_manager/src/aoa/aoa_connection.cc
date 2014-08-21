@@ -46,10 +46,10 @@ AOAConnection::AOAConnection(const DeviceUID& device_uid,
                              TransportAdapterController* controller,
                              AOAWrapper::AOAHandle aoa_handle)
     : wrapper_(new AOAWrapper(aoa_handle)),
+      observer_(new DeviceObserver(this)),
       device_uid_(device_uid),
       app_handle_(app_handle),
-      controller_(controller),
-      observer_(new DeviceObserver(this)) {
+      controller_(controller) {
   wrapper_->Subscribe(observer_);
 }
 
@@ -121,7 +121,7 @@ void AOAConnection::DeviceObserver::OnReceivedMessage(bool success,
                                                       RawMessagePtr message) {
   if (success) {
     parent_->ReceiveDone(message);
-  } else if (wrapper_->IsValidHandle()) {
+  } else if (parent_->wrapper_->IsValidHandle()) {
     parent_->ReceiveFailed();
   } else {
     parent_->Abort();
@@ -133,7 +133,7 @@ void AOAConnection::DeviceObserver::OnTransmittedMessage(
     bool success, RawMessagePtr message) {
   if (success) {
     parent_->TransmitDone(message);
-  } else if (wrapper_->IsValidHandle()) {
+  } else if (parent_->wrapper_->IsValidHandle()) {
     parent_->TransmitFailed(message);
   } else {
     parent_->Abort();

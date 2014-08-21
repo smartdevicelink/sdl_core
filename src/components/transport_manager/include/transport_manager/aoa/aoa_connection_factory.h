@@ -59,4 +59,3 @@ class AOAConnectionFactory : public ServerConnectionFactory {
 }  // namespace transport_manager
 
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_CONNECTION_FACTORY_H_
-}

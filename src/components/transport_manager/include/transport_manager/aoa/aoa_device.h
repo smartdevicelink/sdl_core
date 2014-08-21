@@ -41,7 +41,9 @@ namespace transport_adapter {
 
 class AOADevice : public Device {
  public:
-  explicit AOADevice(AOAWrapper::AOAHandle handle);
+  explicit AOADevice(AOAWrapper::AOAHandle handle,
+                     const std::string& name,
+                     const DeviceUID& unique_id);
   virtual bool IsSameAs(const Device* other_device) const;
   virtual ApplicationList GetApplicationList() const;
   AOAWrapper::AOAHandle handle() const;
