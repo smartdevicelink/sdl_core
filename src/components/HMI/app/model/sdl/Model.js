@@ -1269,7 +1269,7 @@ SDL.SDLModel = Em.Object.create({
             FFW.UI.sendUIResult(this.resultCode["SUCCESS"], FFW.UI.endAudioPassThruRequestID, "UI.EndAudioPassThru");
             SDL.SDLController.performAudioPassThruResponse(this.resultCode["SUCCESS"]);
         } else {
-            FFW.UI.sendError(this.resultCode["GENERIC_ERROR"], FFW.UI.endAudioPassThruRequestID, "UI.EndAudioPassThru", "UI.PerformAudioPassThru are not processed at the moment!");
+            FFW.UI.sendError(this.resultCode["REJECTED"], FFW.UI.endAudioPassThruRequestID, "UI.EndAudioPassThru", "UI.PerformAudioPassThru are not processed at the moment!");
         }
     },
 
