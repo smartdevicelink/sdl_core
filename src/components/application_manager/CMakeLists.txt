@@ -95,8 +95,6 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/delete_sub_menu_request.cc
 ./src/commands/mobile/delete_sub_menu_response.cc
 ./src/commands/mobile/dial_number_request.cc
-./src/commands/mobile/encoded_sync_pdata_request.cc
-./src/commands/mobile/encoded_sync_pdata_response.cc
 ./src/commands/mobile/end_audio_pass_thru_request.cc
 ./src/commands/mobile/end_audio_pass_thru_response.cc
 ./src/commands/mobile/generic_response.cc
@@ -113,7 +111,6 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/on_button_event_notification.cc
 ./src/commands/mobile/on_button_press_notification.cc
 ./src/commands/mobile/on_driver_distraction_notification.cc
-./src/commands/mobile/on_encoded_sync_pdata_notification.cc
 ./src/commands/mobile/on_hmi_status_notification.cc
 ./src/commands/mobile/on_language_change_notification.cc
 ./src/commands/mobile/on_command_notification.cc
@@ -162,11 +159,10 @@ set (MOBILE_COMMANDS_SOURCES
 ./src/commands/mobile/unsubscribe_vehicle_data_response.cc
 ./src/commands/mobile/update_turn_list_request.cc
 ./src/commands/mobile/update_turn_list_response.cc
-./src/commands/mobile/sync_pdata_request.cc
-./src/commands/mobile/sync_pdata_response.cc
 ./src/commands/mobile/system_request.cc
 ./src/commands/mobile/system_response.cc
-./src/commands/mobile/on_sync_pdata_notification.cc
+./src/commands/mobile/send_location_request.cc
+./src/commands/mobile/send_location_response.cc
 ./src/commands/mobile/on_keyboard_input_notification.cc
 ./src/commands/mobile/on_touch_event_notification.cc
 ./src/commands/mobile/on_system_request_notification.cc
@@ -305,6 +301,8 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/navi_update_turn_list_response.cc
 ./src/commands/hmi/navi_show_constant_tbt_request.cc
 ./src/commands/hmi/navi_show_constant_tbt_response.cc
+./src/commands/hmi/navi_send_location_request.cc
+./src/commands/hmi/navi_send_location_response.cc
 ./src/commands/hmi/on_ready_notification.cc
 ./src/commands/hmi/on_system_context_notification.cc
 ./src/commands/hmi/on_device_chosen_notification.cc

@@ -709,6 +709,12 @@ bool SQLPTExtRepresentation::GatherApplicationPolicies(
       (*apps)[app_id] = params;
       continue;
     }
+    if (IsDefaultPolicy(app_id)) {
+      (*apps)[app_id].set_to_string(kDefaultId);
+    }
+    if (IsPredataPolicy(app_id)) {
+      (*apps)[app_id].set_to_string(kPreDataConsentId);
+    }
     policy_table::Priority priority;
     policy_table::EnumFromJsonString(query.GetString(1), &priority);
     params.priority = priority;
@@ -773,8 +779,9 @@ bool SQLPTExtRepresentation::GatherUsageAndErrorCounts(
 bool SQLPTExtRepresentation::GatherAppLevels(
   policy_table::AppLevels* apps) const {
   dbms::SQLQuery query(db());
-  if (query.Prepare(sql_pt_ext::kSelectAppLevels)) {
-    LOG4CXX_INFO(logger_, "Failed select from app_level");
+  if (!query.Prepare(sql_pt_ext::kSelectAppLevels)) {
+    LOG4CXX_INFO(logger_, "Failed select from app_level. SQLError = "
+                 << query.LastError().text());
     return false;
   }
   const int kSecondsInMinute = 60;

@@ -39,6 +39,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/pulse_thread_delegate.h"
 #include "utils/lock.h"
+#include "utils/timer_thread.h"
 
 #include "transport_manager/mme/mme_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -70,8 +71,13 @@ class IAPDevice : public MmeDevice {
   typedef std::map<uint32_t, ApplicationHandle> AppContainer;
   typedef std::map<int, ApplicationHandle> AppTable;
   typedef std::map<ApplicationHandle, IAPConnection*> ConnectionContainer;
-  typedef std::map<std::string, int> ProtocolNamePool;
+  typedef std::map<int, std::string> FreeProtocolNamePool;
+  typedef std::map<std::string, int> ProtocolInUseNamePool;
   typedef std::pair<std::string, ipod_hdl_t*> AppRecord;
+
+  class ProtocolConnectionTimer;
+  typedef utils::SharedPtr<ProtocolConnectionTimer> ProtocolConnectionTimerSPtr;
+  typedef std::map<std::string, ProtocolConnectionTimerSPtr> TimerContainer;
 
   static const int kProtocolNameSize = 256;
 
@@ -83,6 +89,32 @@ class IAPDevice : public MmeDevice {
   void OnRegularSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id);
   void OnSessionClosed(int session_id);
   void OnDataReady(int session_id);
+
+  /**
+   * Picks protocol from pool of protocols
+   * @param index of protocol
+   * @param name of protocol
+   * @return true if protocol was picked
+   */
+  bool PickProtocol(char* index, std::string* name);
+
+  /**
+   * Frees protocol
+   * @param name of protocol
+   */
+  void FreeProtocol(const std::string& name);
+
+  /**
+   * Starts timer for protocol
+   * @param name of protocol
+   */
+  void StartTimer(const std::string& name);
+
+  /**
+   * Stops timer for protocol
+   * @param name of protocol
+   */
+  void StopTimer(const std::string& name);
 
   TransportAdapterController* controller_;
   ipod_hdl_t* ipod_hdl_;
@@ -98,9 +130,11 @@ class IAPDevice : public MmeDevice {
   ConnectionContainer connections_;
   sync_primitives::Lock connections_lock_;
 
-  ProtocolNamePool free_protocol_name_pool_;
-  ProtocolNamePool protocol_in_use_name_pool_;
+  FreeProtocolNamePool free_protocol_name_pool_;
+  ProtocolInUseNamePool protocol_in_use_name_pool_;
   sync_primitives::Lock protocol_name_pool_lock_;
+  TimerContainer timers_protocols_;
+  sync_primitives::Lock timers_protocols_lock_;
 
   class IAPEventThreadDelegate : public threads::PulseThreadDelegate {
    public:
@@ -124,6 +158,20 @@ class IAPDevice : public MmeDevice {
     IAPDevice* parent_;
     ipod_hdl_t* ipod_hdl_;
     ipod_eaf_event_t events_[kEventsBufferSize];
+  };
+
+  class ProtocolConnectionTimer {
+   public:
+    ProtocolConnectionTimer(const std::string& name, IAPDevice* parent);
+    ~ProtocolConnectionTimer();
+    void Start();
+    void Stop();
+   private:
+    typedef timer::TimerThread<ProtocolConnectionTimer> Timer;
+    std::string name_;
+    Timer* timer_;
+    IAPDevice* parent_;
+    void Shoot();
   };
 
   friend class IAPConnection;

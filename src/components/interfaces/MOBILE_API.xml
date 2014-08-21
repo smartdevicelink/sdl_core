@@ -367,6 +367,7 @@
     <element name="MASTER_RESET" />
     <element name="FACTORY_DEFAULTS" />
     <element name="APP_UNAUTHORIZED" />
+    <element name="PROTOCOL_VIOLATION" />
   </enum>
 
   <enum name="TriggerSource">
@@ -714,6 +715,10 @@
 
     <element name="showConstantTBTNextTurnIcon">
       <description>The secondary image field for ShowConstantTBT</description>
+    </element>
+    
+    <element name="locationImage">
+      <description>The optional image of a destination / location</description>
     </element>
   </enum>
 
@@ -1892,7 +1897,7 @@
     <param name="imageFields" type="ImageField" minsize="1" maxsize="100" array="true">
        <description>A set of all fields that support images. See ImageField</description>
      </param>
-    <param name="mediaClockFormats" type="MediaClockFormat" minsize="1" maxsize="100" array="true">
+    <param name="mediaClockFormats" type="MediaClockFormat" minsize="0" maxsize="100" array="true">
       <description>A set of all supported formats of the media clock. See MediaClockFormat</description>
     </param>
     <param name="graphicSupported" type="Boolean">
@@ -2153,6 +2158,7 @@
     <element name="SetDisplayLayoutID" value="36" hexvalue="24" />
     <element name="DiagnosticMessageID" value="37" hexvalue="25" />    
     <element name="SystemRequestID" value="38" hexvalue="26" /> 
+    <element name="SendLocationID" value="39" hexvalue="27" />  
 
 
 
@@ -2181,19 +2187,13 @@
 	Range = 0x 0001 0000 - 0x 0001 7FFF
 -->
 
-    <element name="EncodedSyncPDataID" value="65536" hexvalue="10000" />
-    <element name="SyncPDataID" value="65537" hexvalue="10001" />
-
-
+    
 <!--
 	Ford Specific Notifications
 	Range = 0x 0001 8000 - 0x 0001 FFFF
 -->
 
-    <element name="OnEncodedSyncPDataID" value="98304" hexvalue="18000" />
-    <element name="OnSyncPDataID" value="98305" hexvalue="18001" />
-
-  </enum>
+ </enum>
 
   <enum name="messageType">
     <description>
@@ -2236,9 +2236,6 @@
       	Needs to be unique over all applications.
       	May not be empty.
       	May not start with a new line character.
-      	May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
-      	Needs to be unique over all applications. Applications with the same name will be rejected.
-      	Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
       </description>
     </param>
 
@@ -2253,7 +2250,8 @@
     <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
       <description>
       	Defines an additional voice recognition command.
-      	May not interfere with any name or synonym of previously registered applications and any predefined blacklist of words (global commands)
+	May not interfere with any app name of previously registered applications and any predefined blacklist of words 
+	(global commands)
       	Only characters from char set [@TODO: Create char set (character/hex value) for each ACM and refer to] are supported.
       </description>
     </param>
@@ -3043,7 +3041,7 @@
       </description>
     </param>
 
-    <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="8" array="true" mandatory="false">
+    <param name="customPresets" type="String" maxlength="500" minsize="0" maxsize="10" array="true" mandatory="false">
       <description>
       	App labeled on-screen presets (i.e. GEN2).
       	If omitted on supported displays, the presets will be shown as not defined.
@@ -4248,13 +4246,28 @@
   </function>
 
   <function name="ChangeRegistration" functionID="ChangeRegistrationID" messagetype="request">
-    <param name="language" type="Language" mandatory="true">
-        <description>Requested SYNC voice engine (VR+TTS) language registration</description>
+   <param name="language" type="Language" mandatory="true">
+        <description>Requested voice engine (VR+TTS) language registration</description>
     </param>
     <param name="hmiDisplayLanguage" type="Language" mandatory="true">
       <description>Request display language registration</description>
     </param>
-  </function>
+    <param name="appName" type="String" maxlength="100" mandatory="false">
+      <description>Request new app name registration</description>
+    </param>
+    <param name="ttsName" type="TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+      <description>Request new ttsName registration</description>
+    </param>
+    <param name="ngnMediaScreenAppName" type="String" maxlength="100" mandatory="false">
+      <description>Request new app short name registration</description>
+    </param>
+    <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
+      <description>Request new VR synonyms registration</description>
+    </param>  
+
+</function>
+
+
 
   <function name="ChangeRegistration" functionID="ChangeRegistrationID" messagetype="response">
 
@@ -4275,6 +4288,7 @@
       <element name="GENERIC_ERROR"/>
       <element name="REJECTED"/>
       <element name="DISALLOWED"/>
+      <element name="DUPLICATE_NAME"/>
     </param>
 
     <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
@@ -4592,6 +4606,57 @@
      </param>
   </function> 
 
+  <function name="SendLocation" functionID="SendLocationID" messagetype="request">
+     <param name="longitudeDegrees" type="Float" minvalue="-180" maxvalue="180" mandatory="true">
+     </param>
+     <param name="latitudeDegrees" type="Float" minvalue="-90" maxvalue="90" mandatory="true">
+     </param>
+     <param name="locationName" type="String" maxlength="500" mandatory="false">
+        <description>
+           Name / title of intended location
+        </description>      
+     </param>
+     <param name="locationDescription" type="String" maxlength="500" mandatory="false">
+        <description>
+           Description intended location / establishment (if applicable)
+	</description>      
+     </param>
+     <param name="addressLines" type="String" maxlength="500" minsize="0" maxsize="4" array="true" mandatory="false">
+	<description>
+	   Location address (if applicable)
+	</description>      
+     </param>
+     <param name="phoneNumber" type="String" maxlength="500" mandatory="false">
+        <description>
+           Phone number of intended location / establishment (if applicable)
+	</description>      
+     </param>
+     <param name="locationImage" type="Image" mandatory="false">
+        <description>
+           Image / icon of intended location (if applicable and supported)
+	</description>      
+     </param>
+  </function>
+
+  <function name="SendLocation" functionID="SendLocationID" messagetype="response" >
+     <param name="success" type="Boolean" platform="documentation">
+        <description> true, if successful; false, if failed </description>
+     </param>
+     
+     <param name="resultCode" type="Result" platform="documentation">
+      <description>See Result</description>
+      <element name="SUCCESS"/>
+      <element name="INVALID_DATA"/>
+      <element name="OUT_OF_MEMORY"/>
+      <element name="TOO_MANY_PENDING_REQUESTS"/>
+      <element name="APPLICATION_NOT_REGISTERED"/>
+      <element name="GENERIC_ERROR"/>
+      <element name="REJECTED"/> 
+      <element name="UNSUPPORTED_RESOURCE"/> 
+      <element name="DISALLOWED"/> 
+     </param> 
+  </function>
+
 
   <!-- Notifications -->
 
@@ -4825,111 +4890,4 @@
 <!-- ~~~~~~~~~~~~~~~~~~ -->
 <!-- Ford Specific APIs -->
 <!-- ~~~~~~~~~~~~~~~~~~ -->
-
-  <function name="EncodedSyncPData" functionID="EncodedSyncPDataID" messagetype="request">
-    <description>
-    	Allows encoded data in the form of SyncP packets to be sent to the SYNC module.
-    	Legacy / v1 Protocol implementation; use SyncPData instead.
-    </description>
-
-    <param name="data" type="String" maxlength="1000000" minsize="1" maxsize="100" array="true" mandatory="true">
-      <description>Contains base64 encoded string of SyncP packets.</description>
-      <todo>What is the maxlength?</todo>
-    </param>
-  </function>
-
-  <function name="EncodedSyncPData" functionID="EncodedSyncPDataID" messagetype="response">
-  	<param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	</param>
-
-    <param name="resultCode" type="Result" platform="documentation">
-      <description>See Result</description>
-      <element name="SUCCESS"/>
-      <element name="INVALID_DATA"/>
-      <element name="OUT_OF_MEMORY"/>
-      <element name="TOO_MANY_PENDING_REQUESTS"/>
-      <element name="APPLICATION_NOT_REGISTERED"/>
-      <element name="GENERIC_ERROR"/>
-      <element name="REJECTED"/>
-    </param>
-
-    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
-      <description>Provides additional human readable info regarding the result.</description>
-    </param>
-  </function>
-
-  <function name="SyncPData" functionID="SyncPDataID" messagetype="request">
-    <description>
-    	Allows binary data in the form of SyncP packets to be sent to the SYNC module.
-    	Binary data is in binary part of hybrid msg.
-    </description>
-
-  </function>
-
-  <function name="SyncPData" functionID="SyncPDataID" messagetype="response">
-  	<param name="success" type="Boolean" platform="documentation">
-		<description> true, if successful; false, if failed </description>
-	</param>
-
-    <param name="resultCode" type="Result" platform="documentation">
-      <description>See Result</description>
-      <element name="SUCCESS"/>
-      <element name="INVALID_DATA"/>
-      <element name="OUT_OF_MEMORY"/>
-      <element name="TOO_MANY_PENDING_REQUESTS"/>
-      <element name="APPLICATION_NOT_REGISTERED"/>
-      <element name="GENERIC_ERROR"/>
-      <element name="REJECTED"/>
-    </param>
-
-    <param name="info" type="String" maxlength="1000" mandatory="false" platform="documentation">
-      <description>Provides additional human readable info regarding the result.</description>
-    </param>
-  </function>
-
-  <function name="OnEncodedSyncPData" functionID="OnEncodedSyncPDataID" messagetype="notification">
-    <description>
-    	Callback including encoded data of any SyncP packets that SYNC needs to send back to the mobile device.
-    	Legacy / v1 Protocol implementation; responds to EncodedSyncPData.
-    </description>
-    <param name="data" type="String" maxlength="1000000" minsize="1" maxsize="100" mandatory="true" array="true">
-      <description>Contains base64 encoded string of SyncP packets.</description>
-    </param>
-    <param name="URL" type="String" maxlength="1000" mandatory="false">
-      <description>
-      	If blank, the SyncP data shall be forwarded to the app.
-      	If not blank, the SyncP data shall be forwarded to the provided URL.
-      </description>
-    </param>
-    <param name="Timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
-      <description>
-      	If blank, the SyncP data shall be forwarded to the app.
-      	If not blank, the SyncP data shall be forwarded with the provided timeout in seconds.
-      </description>
-    </param>
-  </function>
-
-  <function name="OnSyncPData" functionID="OnSyncPDataID" messagetype="notification">
-    <description>
-    	Callback including binary data of any SyncP packets that SYNC needs to send back to the mobile device.
-    	Responds to SyncPData.
-    	Binary data is in binary part of hybrid msg.
-    </description>
-
-    <param name="URL" type="String" maxlength="1000" mandatory="false">
-      <description>
-      	If blank, the SyncP data shall be forwarded to the app.
-      	If not blank, the SyncP data shall be forwarded to the provided URL.
-      </description>
-    </param>
-    <param name="Timeout" type="Integer" minvalue="0" maxvalue="2000000000" mandatory="false">
-      <description>
-      	If blank, the SyncP data shall be forwarded to the app.
-      	If not blank, the SyncP data shall be forwarded with the provided timeout in seconds.
-      </description>
-    </param>
-
-  </function>
-
-  </interface>
+</interface>

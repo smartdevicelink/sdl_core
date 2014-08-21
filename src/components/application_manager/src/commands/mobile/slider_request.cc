@@ -141,7 +141,9 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   const bool is_response_success =
       (mobile_apis::Result::SUCCESS == response_code) ||
       //Aborted has slider_position data
-      (mobile_apis::Result::ABORTED == response_code);
+      (mobile_apis::Result::ABORTED == response_code) ||
+      //according with SDLAQ-CRS-2904
+      (mobile_apis::Result::TIMED_OUT == response_code);
 
   SendResponse(is_response_success,
                mobile_apis::Result::eType(response_code),
@@ -154,7 +156,7 @@ bool SliderRequest::IsWhiteSpaceExist() {
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::slider_header].asCharArray();
-  if (!CheckSyntax(str, true)) {
+  if (!CheckSyntax(str)) {
     LOG4CXX_ERROR(logger_, "Invalid slider_header value syntax check failed");
     return true;
   }
@@ -168,7 +170,7 @@ bool SliderRequest::IsWhiteSpaceExist() {
 
     for (; it_sf != it_sf_end; ++it_sf) {
       str = (*it_sf).asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid slider_footer syntax check failed");
         return true;
       }

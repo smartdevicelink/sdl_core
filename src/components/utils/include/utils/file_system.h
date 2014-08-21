@@ -197,17 +197,6 @@ bool IsReadingAllowed(const std::string& name);
   */
 std::vector<std::string> ListFiles(const std::string& directory_name);
 
-
-/**
-  * @brief Lists files in given directory
-  * if file name contains given substring
-  * @param name path to directory.
-  * @param substring.
-  * @return returns list of files.
-  */
-std::vector<std::string> ListFilesWithSubStr(const std::string& directory_name,
-                                             const std::string& sub_str);
-
 /**
  * @brief Creates or overwrites file with given binary contents
  * @param name path to the file

@@ -78,6 +78,15 @@ void ScrollableMessageRequest::Run() {
     return;
   }
 
+  // IsWhiteSpaceExist must be before ProcessSoftButtons.
+  // because of checking on whitespace in text of softbutton
+  if (IsWhiteSpaceExist()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming scrollabel message has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
@@ -87,12 +96,7 @@ void ScrollableMessageRequest::Run() {
     return;
   }
 
-  if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_,
-                  "Incoming scrollabel message has contains \t\n \\t \\n");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
-    return;
-  }
+
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -107,6 +111,8 @@ void ScrollableMessageRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[strings::soft_buttons] =
         (*message_)[strings::msg_params][strings::soft_buttons];
+    MessageHelper::SubscribeApplicationToSoftButton(
+        (*message_)[strings::msg_params], app, function_id());
   }
 
   SendHMIRequest(hmi_apis::FunctionID::UI_ScrollableMessage, &msg_params, true);
@@ -165,7 +171,7 @@ bool ScrollableMessageRequest::IsWhiteSpaceExist() {
 
       if ((*it_sb).keyExists(strings::text)) {
         str = (*it_sb)[strings::text].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (strlen(str) && !CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons text syntax check failed");
           return true;
@@ -174,7 +180,7 @@ bool ScrollableMessageRequest::IsWhiteSpaceExist() {
 
       if ((*it_sb).keyExists(strings::image)) {
         str = (*it_sb)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons image value syntax check failed");
           return true;

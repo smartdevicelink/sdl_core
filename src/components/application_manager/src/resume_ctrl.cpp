@@ -130,7 +130,8 @@ bool ResumeCtrl::RestoreApplicationHMILevel(ApplicationSharedPtr application) {
           //notification resumeAudioSource is sent if only resumed application has
           //AudioStreamingState=AUDIBLE
           bool application_exist_with_audible_state = false;
-          const std::set<ApplicationSharedPtr>& app_list = app_mngr_->applications();
+          ApplicationManagerImpl::ApplicationListAccessor accessor;
+          const std::set<ApplicationSharedPtr>& app_list = accessor.applications();
           std::set<ApplicationSharedPtr>::const_iterator app_list_it = app_list.begin();
           uint32_t app_id = application->app_id();
           for (; app_list.end() != app_list_it; ++app_list_it) {
@@ -382,16 +383,15 @@ bool ResumeCtrl::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
 }
 
 bool ResumeCtrl::IsApplicationSaved(const std::string& mobile_app_id) {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::IsApplicationSaved " << mobile_app_id);
-
+  bool result = false;
   for (Json::Value::iterator it = GetSavedApplications().begin();
       it != GetSavedApplications().end(); ++it) {
     if ((*it)[strings::app_id].asString() == mobile_app_id) {
-      return true;
+      result = true;
     }
   }
-
-  return false;
+  LOG4CXX_INFO(logger_, "IsApplicationSaved " << mobile_app_id << " : " << (result?"true":"false"));
+  return result;
 }
 
 uint32_t ResumeCtrl::GetHMIApplicationID(const std::string& mobile_app_id) {
@@ -460,6 +460,7 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
   LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id()->asString());
 
   Json::Value::iterator it = GetSavedApplications().begin();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
   for (; it != GetSavedApplications().end(); ++it) {
     const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
 
@@ -472,7 +473,7 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
         RestoreApplicationData(application);
       }
       application->UpdateHash();
-      if (!timer_.isRunning() && app_mngr_->applications().size() > 1) {
+      if (!timer_.isRunning() && accessor.applications().size() > 1) {
         RestoreApplicationHMILevel(application);
         RemoveApplicationFromSaved(application);
       } else {
@@ -499,11 +500,12 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
   LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id()->asString());
 
   Json::Value::iterator it = GetSavedApplications().begin();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
   for (; it != GetSavedApplications().end(); ++it) {
     const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
     if (saved_m_app_id == application->mobile_app_id()->asString()) {
       uint32_t time_stamp= (*it)[strings::time_stamp].asUInt();
-      if (!timer_.isRunning() && app_mngr_->applications().size() > 1) {
+      if (!timer_.isRunning() && accessor.applications().size() > 1) {
         RestoreApplicationHMILevel(application);
         RemoveApplicationFromSaved(application);
       } else {

@@ -36,6 +36,7 @@ set -e
 INSTALL_ALL=false
 INSTALL_QT_HMI=false
 INSTALL_QNX_TOOLS=false
+SILENT_MODE=false
 
 while test $# -gt 0; do
         case "$1" in
@@ -47,6 +48,9 @@ while test $# -gt 0; do
                     ;;
                 -qnx)
                     INSTALL_QNX_TOOLS=true
+                    ;;
+                -s)
+                    SILENT_MODE=true
                     ;;
                 -h|--help|*)
                     echo "$ setup_env.sh - Installs all packages and configures system invironment for smartdevicelink "
@@ -132,16 +136,30 @@ progress_indicator_id=0
 function progress_indicator() {
     sleep_time=0.2
     echo -ne "|"
-    while true; do
-        echo -ne "\b|"
+    if $SILENT_MODE; then
+      while true; do
+        echo -ne "\b|" 1>/dev/null
         sleep $sleep_time
-        echo -ne "\b/"
+        echo -ne "\b/" 1>/dev/null 
         sleep $sleep_time
-        echo -ne "\b-"
+        echo -ne "\b-" 1>/dev/null
         sleep $sleep_time
-        echo -ne "\b\\"
+        echo -ne "\b\\"1>/dev/null
         sleep $sleep_time
-    done
+      done
+    else
+      while true; do
+	echo -ne "\b|"
+	sleep $sleep_time
+	echo -ne "\b/" 
+	sleep $sleep_time
+	echo -ne "\b-" 
+	sleep $sleep_time
+	echo -ne "\b\\"
+	sleep $sleep_time
+      done
+    fi
+
 }
 function stop_progress_indicator {
     exec 2>/dev/null
@@ -161,12 +179,16 @@ function apt-install() {
         return 1;
     fi
     set -x #Show install command to user"
-    apt-get install --yes --force-yes ${APT_INSTALL_FLAGS} $*
+    if $SILENT_MODE; then
+      apt-get install --yes --force-yes ${APT_INSTALL_FLAGS} $* 1>/dev/null
+    else
+      apt-get install --yes --force-yes ${APT_INSTALL_FLAGS} $*
+    fi
     set +x
 }
 
 echo "Installing wget"
-apt-install wget
+apt-install wget 
 echo $OK
 
 #Load by wget from FTP function
@@ -185,7 +207,11 @@ function load-from-ftp() {
 
     FTP_USER="sdl_user"
     FTP_PASS="sdl_user"
-    wget ${DOWNLOAD_LINK} -P ${DOWNLOAD_DST} --ftp-user=${FTP_USER} --ftp-password=${FTP_PASS} --no-proxy -c
+    if $SILENT_MODE; then
+      wget ${DOWNLOAD_LINK} -P ${DOWNLOAD_DST} --ftp-user=${FTP_USER} --ftp-password=${FTP_PASS} --no-proxy -c --no-verbose
+    else
+      wget ${DOWNLOAD_LINK} -P ${DOWNLOAD_DST} --ftp-user=${FTP_USER} --ftp-password=${FTP_PASS} --no-proxy -c
+    fi
 }
 
 cp /etc/apt/sources.list /etc/apt/sources.list.backup
@@ -406,27 +432,37 @@ if $QT5_HMI; then
     fi
     echo $OK
 
+    QT_FOLDER=runfile
+    QT5_RUNFILE_EXT=run
+    if $SILENT_MODE; then
+      QT_FOLDER=archive
+      QT5_RUNFILE_EXT=tar.gz
+    fi
     if $NEED_QT5_INSTALL; then
-        if [ ${ARCH} == "i386" ]; then
-            QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.run"
-            QT5_RUNFILE_SRC="${APPLINK_FTP_SERVER}/Distrs/Qt5.1/runfile/i386"
-        elif [ ${ARCH} == "x64" ]; then
-            QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.run"
-            QT5_RUNFILE_SRC="${APPLINK_FTP_SERVER}/Distrs/Qt5.1/runfile/x64"
-        fi
-        QT5_RUNFILE_DST=${TEMP_FOLDER}"/qt5"
-        QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
+	if [ ${ARCH} == "i386" ]; then
+            QT5_RUNFILE="qt-linux-opensource-5.1.0-x86-offline.$QT5_RUNFILE_EXT"
+            QT5_RUNFILE_SRC="${APPLINK_FTP_SERVER}/Distrs/Qt5.1/$QT_FOLDER/i386"
+         elif [ ${ARCH} == "x64" ]; then
+            QT5_RUNFILE="qt-linux-opensource-5.1.0-x86_64-offline.$QT5_RUNFILE_EXT"
+            QT5_RUNFILE_SRC="${APPLINK_FTP_SERVER}/Distrs/Qt5.1/$QT_FOLDER/x64"
+         fi
+         QT5_RUNFILE_DST=${TEMP_FOLDER}"/qt5"
+         QT5_RUNFILE_BIN=${QT5_RUNFILE_DST}"/"${QT5_RUNFILE}
 
-        echo "Download Qt5 installation runfile, please be patient"
-        load-from-ftp ${QT5_RUNFILE_SRC}/${QT5_RUNFILE}  ${QT5_RUNFILE_DST}
-        echo $OK
+         echo "Download Qt5 installation runfile, please be patient"
+         load-from-ftp ${QT5_RUNFILE_SRC}/${QT5_RUNFILE}  ${QT5_RUNFILE_DST}
+         echo $OK
 
-        echo "Installing Qt5 libraries"
-        chmod +x ${QT5_RUNFILE_BIN}
-        ${QT5_RUNFILE_BIN}
-        #Update location of Qt
-        updatedb
-        echo $OK
+         echo "Installing Qt5 libraries"
+         if $SILENT_MODE; then
+	  tar -xzf ${QT5_RUNFILE_BIN} -C /
+	else
+          chmod +x ${QT5_RUNFILE_BIN}
+          ${QT5_RUNFILE_BIN}
+	fi
+	#Update location of Qt
+	updatedb
+	echo $OK
     fi
 
     echo "Installing OpenGL development files"

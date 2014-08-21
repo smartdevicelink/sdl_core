@@ -70,7 +70,7 @@ void ShowRequest::Run() {
   }
 
   // CheckStringsOfShowRequest must be before ProcessSoftButtons.
-  // (text contain whitespace)
+  // because of checking on whitespace in text of softbutton
   if (!CheckStringsOfShowRequest()) {
      LOG4CXX_ERROR(logger_, "Incorrect characters in string");
      SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -92,7 +92,9 @@ void ShowRequest::Run() {
 
   mobile_apis::Result::eType verification_result =
       mobile_apis::Result::SUCCESS;
-  if ((*message_)[strings::msg_params].keyExists(strings::graphic)) {
+  if (((*message_)[strings::msg_params].keyExists(strings::graphic)) &&
+      ((*message_)[strings::msg_params]
+                   [strings::graphic][strings::value].asString()).length()) {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::graphic], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
@@ -194,6 +196,12 @@ void ShowRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[strings::soft_buttons] =
         (*message_)[strings::msg_params][strings::soft_buttons];
+    if ((*message_)[strings::msg_params][strings::soft_buttons].length() == 0) {
+      app->UnsubscribeFromSoftButtons(function_id());
+    } else {
+      MessageHelper::SubscribeApplicationToSoftButton(
+          (*message_)[strings::msg_params], app, function_id());
+    }
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::custom_presets)) {
@@ -248,49 +256,49 @@ bool ShowRequest::CheckStringsOfShowRequest() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_4)) {
     str = (*message_)[strings::msg_params][strings::main_field_4].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid main_field_4 syntax check failed");
       return  false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_3)) {
     str = (*message_)[strings::msg_params][strings::main_field_3].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid main_field_3 syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_2)) {
     str = (*message_)[strings::msg_params][strings::main_field_2].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid main_field_2 syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
     str = (*message_)[strings::msg_params][strings::main_field_1].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid main_field_1 syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::status_bar)) {
     str = (*message_)[strings::msg_params][strings::status_bar].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid status_bar syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::media_clock)) {
     str = (*message_)[strings::msg_params][strings::media_clock].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid media_clock syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::media_track)) {
     str = (*message_)[strings::msg_params][strings::media_track].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid media_track syntax check failed");
       return false;
     }
@@ -300,7 +308,7 @@ bool ShowRequest::CheckStringsOfShowRequest() {
           (*message_)[strings::msg_params][strings::custom_presets];
       for (size_t i = 0; i < custom_presets_array.length(); ++i) {
         str = custom_presets_array[i].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_, "Invalid custom_presets syntax check failed");
           return false;
         }
@@ -320,18 +328,16 @@ bool ShowRequest::CheckStringsOfShowRequest() {
         str = (*it_sb)[strings::text].asCharArray();
         // CheckSyntax without second param(false to default).
         // Requirement. Show with SoftButtons->text contain only whitespace
-        if (!CheckSyntax(str)) {
-          if (strlen(str)) {
-            LOG4CXX_ERROR(logger_,
-                       "Invalid soft_buttons text syntax check failed");
-            return false;
-          }
+        if (strlen(str) && !CheckSyntax(str)) {
+          LOG4CXX_ERROR(logger_,
+                        "Invalid soft_buttons text syntax check failed");
+          return false;
         }
       }
 
       if ((*it_sb).keyExists(strings::image)) {
         str = (*it_sb)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons image value syntax check failed");
           return false;
@@ -344,7 +350,7 @@ bool ShowRequest::CheckStringsOfShowRequest() {
   if ((*message_)[strings::msg_params].keyExists(strings::graphic)) {
     str = (*message_)[strings::msg_params]
                      [strings::graphic][strings::value].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid graphic value syntax check failed");
       return false;
     }
@@ -353,7 +359,7 @@ bool ShowRequest::CheckStringsOfShowRequest() {
   if ((*message_)[strings::msg_params].keyExists(strings::secondary_graphic)) {
     str = (*message_)[strings::msg_params]
                      [strings::secondary_graphic][strings::value].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                    "Invalid secondary_graphic value syntax check failed");
       return false;

@@ -33,6 +33,8 @@
 #include <sstream>
 #include <stdlib.h>
 #include <stdint.h>
+#include <errno.h>
+
 #include "utils/logger.h"
 #include "policy/sql_pt_representation.h"
 #include "policy/sql_wrapper.h"
@@ -566,6 +568,12 @@ bool SQLPTRepresentation::GatherApplicationPolicies(
       (*apps)[app_id] = params;
       continue;
     }
+    if (IsDefaultPolicy(app_id)) {
+      (*apps)[app_id].set_to_string(kDefaultId);
+    }
+    if (IsPredataPolicy(app_id)) {
+      (*apps)[app_id].set_to_string(kPreDataConsentId);
+    }
     policy_table::Priority priority;
     policy_table::EnumFromJsonString(query.GetString(1), &priority);
     params.priority = priority;
@@ -956,7 +964,7 @@ bool SQLPTRepresentation::SaveServiceEndpoints(
         query.Bind(0, service);
         query.Bind(1, *url_it);
         query.Bind(2, app_it->first);
-        if (!query.Exec()) {
+        if (!query.Exec() || !query.Reset()) {
           LOG4CXX_WARN(logger_, "Incorrect insert into endpoint");
           return false;
         }
@@ -971,37 +979,42 @@ bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
   const policy_table::ConsumerFriendlyMessages& messages) {
   LOG4CXX_INFO(logger_, "SaveConsumerFriendlyMessages");
 
-  dbms::SQLQuery query(db());
-  if (!query.Exec(sql_pt::kDeleteMessageString)) {
-    LOG4CXX_WARN(logger_, "Incorrect delete from message.");
-    return false;
-  }
-
-  if (query.Prepare(sql_pt::kUpdateVersion)) {
-    query.Bind(0, messages.version);
-    if (!query.Exec()) {
-      LOG4CXX_WARN(logger_, "Incorrect update into version.");
+  // According CRS-2419  If there is no “consumer_friendly_messages” key,
+  // the current local consumer_friendly_messages section shall be maintained in
+  // the policy table. So it won't be changed/updated
+  if (messages.messages.is_initialized()) {
+    dbms::SQLQuery query(db());
+    if (!query.Exec(sql_pt::kDeleteMessageString)) {
+      LOG4CXX_WARN(logger_, "Incorrect delete from message.");
       return false;
     }
-  } else {
-    LOG4CXX_WARN(logger_, "Incorrect update statement for version.");
-    return false;
-  }
 
-  policy_table::Messages::const_iterator it;
-  // TODO(IKozyrenko): Check logic if optional container is missing
-  for (it = messages.messages->begin(); it != messages.messages->end(); ++it) {
-    if (!SaveMessageType(it->first)) {
-      return false;
-    }
-    const policy_table::Languages& langs = it->second.languages;
-    policy_table::Languages::const_iterator lang_it;
-    for (lang_it = langs.begin(); lang_it != langs.end(); ++lang_it) {
-      if (!SaveLanguage(lang_it->first)) {
+    if (query.Prepare(sql_pt::kUpdateVersion)) {
+      query.Bind(0, messages.version);
+      if (!query.Exec()) {
+        LOG4CXX_WARN(logger_, "Incorrect update into version.");
         return false;
       }
-      if (!SaveMessageString(it->first, lang_it->first, lang_it->second)) {
+    } else {
+      LOG4CXX_WARN(logger_, "Incorrect update statement for version.");
+      return false;
+    }
+
+    policy_table::Messages::const_iterator it;
+    // TODO(IKozyrenko): Check logic if optional container is missing
+    for (it = messages.messages->begin(); it != messages.messages->end(); ++it) {
+      if (!SaveMessageType(it->first)) {
         return false;
+      }
+      const policy_table::Languages& langs = it->second.languages;
+      policy_table::Languages::const_iterator lang_it;
+      for (lang_it = langs.begin(); lang_it != langs.end(); ++lang_it) {
+        if (!SaveLanguage(lang_it->first)) {
+          return false;
+        }
+        if (!SaveMessageString(it->first, lang_it->first, lang_it->second)) {
+          return false;
+        }
       }
     }
   }
@@ -1186,7 +1199,8 @@ void SQLPTRepresentation::SaveUpdateRequired(bool value) {
   if (!query.Prepare(/*sql_pt::kUpdateFlagUpdateRequired*/
                      "UPDATE `module_meta` SET `flag_update_required` = ?")) {
     LOG4CXX_WARN(logger_,
-                 "Incorrect update into module meta (update_required)");
+                 "Incorrect update into module meta (update_required): " <<
+                 strerror(errno));
     return;
   }
   query.Bind(0, value);

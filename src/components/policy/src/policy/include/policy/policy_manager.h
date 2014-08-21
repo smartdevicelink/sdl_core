@@ -290,8 +290,17 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual void GetPermissionsForApp(
       const std::string& device_id, const std::string& policy_app_id,
       std::vector<FunctionalGroupPermission>& permissions) = 0;
+
+    /**
+     * @brief Gets specific application permissions changes since last policy
+     * table update
+     * @param device_id Id of device, which hosts application
+     * @param policy_app_id Unique application id
+     * @return Permissions changes
+     */
     virtual AppPermissions GetAppPermissionsChanges(
-      const std::string& app_id) = 0;
+      const std::string& device_id, const std::string& policy_app_id) = 0;
+
     virtual void RemovePendingPermissionChanges(const std::string& app_id) = 0;
 
     /**

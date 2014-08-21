@@ -44,13 +44,15 @@ HeartBeatMonitor::HeartBeatMonitor(int32_t heartbeat_timeout_seconds,
                                    Connection *connection)
     : heartbeat_timeout_seconds_(heartbeat_timeout_seconds),
       connection_(connection),
+      sessions_list_lock_(true),
       stop_flag_(false),
-      is_active(true) {
+      is_active(false) {
 }
 
 void HeartBeatMonitor::threadMain() {
-   std::map<uint8_t, SessionState>::iterator it;
-
+  std::map<uint8_t, SessionState>::iterator it;
+  AutoLock main_lock(main_thread_lock);
+  is_active = true;
   while (!stop_flag_) {
     usleep(kdefault_cycle_timeout);
 
@@ -61,15 +63,9 @@ void HeartBeatMonitor::threadMain() {
       SessionState &state = it->second;
       if (state.heartbeat_expiration_.tv_sec < date_time::DateTime::getCurrentTime().tv_sec) {
         if (state.is_heartbeat_sent_) {
-          LOG4CXX_WARN(logger_, "Session with id " << static_cast<int32_t>(it->first) <<" timed out, closing");
           const uint8_t session_id = it->first;
-
-          {
-            // Unlock sessions_list_lock_ to avoid deadlock during session and session heartbeat removing
-            AutoUnlock auto_unlock(auto_lock);
-            connection_->CloseSession(session_id);
-          }
-
+          LOG4CXX_WARN(logger_, "Session with id " << session_id <<" timed out, closing");
+          connection_->CloseSession(session_id);
           it = sessions_.begin();
         } else {
           state.heartbeat_expiration_ =
@@ -93,7 +89,7 @@ void HeartBeatMonitor::threadMain() {
 
 void HeartBeatMonitor::AddSession(uint8_t session_id) {
   LOG4CXX_INFO(logger_, "Add session with id " <<
-               static_cast<int32_t>(session_id));
+               session_id);
   AutoLock auto_lock(sessions_list_lock_);
   if (sessions_.end() != sessions_.find(session_id)) {
     LOG4CXX_WARN(logger_, "Session with id " << static_cast<int32_t>(session_id)
@@ -136,11 +132,10 @@ void HeartBeatMonitor::KeepAlive(uint8_t session_id) {
 }
 
 bool HeartBeatMonitor::exitThreadMain() {
+  LOG4CXX_TRACE_ENTER(logger_);
   stop_flag_ = true;
-  while (is_active) {
-    usleep(10000);
-  }
-  LOG4CXX_INFO(logger_, "exitThreadMain");
+  AutoLock main_lock(main_thread_lock);
+  LOG4CXX_TRACE_EXIT(logger_);
   return true;
 }
 

@@ -31,8 +31,6 @@ For some extra build options, look into doc/extra_build_and_run_options.txt
               1.2.10.1: If file "/etc/rc.d/rc.local" is either absent or empty then copy file "<Project_Root_Src>/qnx/rc.local" to folder "/etc/rc.d"
               1.2.10.2: If file "/etc/rc.d/rc.local" exists and is nonempty then append the last line of file "<Project_Root_Src>/qnx/rc.local" to its end
 
-
-
 2) Build and run on Linux with web HMI.
   2.1: Build SDL:
     2.1.1: Run "sudo -E ./setup_env.sh" to install all mandatory packages.
@@ -72,17 +70,17 @@ For some extra build options, look into doc/extra_build_and_run_options.txt
       Note: this step has to be done just once for each combination of target system (Linux/QNX) and CPU architecture (x86/armv7).
         "$ make 3rd_party"
         "$ sudo make install-3rd_party"
-    3.1.5 Run build process “$make install”
+    3.1.5: Run "sudo ldconfig" to configure dynamic linker run-time bindings.
+    3.1.6: Run build process “$make install”
 
   3.2 Run SDL:
     3.2.1: Go to the binary folder "cd <Project_Linux_Build_Qt>/bin".
     3.2.2: If HMI and SDL are running on separate computers:
         2.2.2.1: Set up "export DBUS_SESSION_BUS_ADDRESS=tcp:host=<HOST>,port=<PORT>" on HMI side (e.g. "export DBUS_SESSION_BUS_ADDRESS=tcp:host=192.168.243.131,port=8087").
-
     3.2.2: Prepare Policy.
           "$ LD_LIBRARY_PATH=$LD_LIBRARY_PATH:."
           "$ export LD_LIBRARY_PATH"
-         Note: If libPolicy.so is in other place then use following format:
+            Note: If libPolicy.so is in other place then use following format:
               LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<PATH_TO_POLICY_LIBRARY>
     3.2.3. Run SDL "$ ./smartDeviceLinkCore".
          Note: HMI shall be started automatically.
@@ -185,7 +183,7 @@ For some extra build options, look into doc/extra_build_and_run_options.txt
           Note: If SDL unexpectedly terminates (with any error) check that real IP of QNX Server is same to IP in "/etc/dbus-1/session.conf"
       5.2.9: On Linux host goto "<Project_Linux_Build_Qt>/bin" folder and execute "<QT_HOME_DIR>/qmlscene -I ./hmi/plugins ./hmi/MainWindow.qml" command.
 
-6) Build and run SDLCore  on QNX with Qt HMI runed on Qnx
+6) Build and run SDLCore on QNX with Qt HMI runed on Qnx
   6.1:Build Project
     6.1.1: Run "sudo -E ./setup_env.sh -qnx -qt" to install all mandatory packages.
       Note: You should run setup_env.sh only on first building target configuration.

@@ -422,6 +422,20 @@ class MessageHelper {
       smart_objects::SmartObject& message_params,
       ApplicationConstSharedPtr app);
 
+    /*
+     * @brief subscribe application to softbutton
+     *
+     * @param message_params contains data of request
+     *
+     * @param app current application
+     *
+     * @param function_id Unique command id from mobile API
+     */
+    static void SubscribeApplicationToSoftButton(
+        smart_objects::SmartObject& message_params,
+        ApplicationSharedPtr app,
+        int32_t function_id);
+
     static bool PrintSmartObject(const smart_objects::SmartObject& object);
 
     template<typename From, typename To>
@@ -444,7 +458,15 @@ class MessageHelper {
      */
     static uint32_t GetAppCommandLimit(const std::string& policy_app_id);
 
-  private:
+    private:
+    /**
+     * @brief Allows to fill SO according to the  current permissions.
+     * @param permissions application permissions.
+     * @param message which should be filled.
+     */
+    static void FillAppRevokedPermissions(const policy::AppPermissions& permissions,
+                                   smart_objects::SmartObject& message);
+
     static smart_objects::SmartObject* CreateChangeRegistration(
       int32_t function_id, int32_t language, uint32_t app_id);
 

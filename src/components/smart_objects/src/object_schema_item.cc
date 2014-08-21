@@ -139,12 +139,14 @@ void CObjectSchemaItem::applySchema(SmartObject& Object) {
 
 void CObjectSchemaItem::unapplySchema(SmartObject& Object) {
   if (SmartType_Map == Object.getType()) {
-    for (SmartMap::const_iterator k = Object.map_begin(); k != Object.map_end();
-         ++k) {
+    SmartMap::const_iterator k = Object.map_begin();
+    for (;k != Object.map_end();) {
       if (mMembers.end() == mMembers.find(k->first)) {
             // remove fake params
-        Object.erase(k->first);
-        }
+        Object.erase((k++)->first);
+      } else {
+        ++k;
+      }
     }
 
     for (Members::const_iterator i = mMembers.begin(); i != mMembers.end();

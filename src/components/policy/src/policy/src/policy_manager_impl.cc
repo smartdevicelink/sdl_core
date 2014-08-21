@@ -47,9 +47,42 @@ policy::PolicyManager* CreateManager() {
 }
 
 namespace {
-void CheckPreloadedGroups(policy_table::ApplicationParams& app_param) {
 
+struct CheckGroupName {
+  CheckGroupName(const std::string& name)
+    : name_(name) {
+  }
+
+  bool operator()(const policy::FunctionalGroupPermission& value) {
+    return value.group_name == name_;
+  }
+
+private:
+  const std::string& name_;
+};
+
+struct CopyPermissions{
+  CopyPermissions(const std::vector<policy::FunctionalGroupPermission>& groups)
+    : groups_(groups) {
+  }
+
+bool operator()(policy::FunctionalGroupPermission& value) {
+  CheckGroupName checker(value.group_name);
+  std::vector<policy::FunctionalGroupPermission>::const_iterator it =
+      std::find_if(groups_.begin(), groups_.end(), checker);
+  if (groups_.end() == it) {
+    return false;
+  }
+  value.group_alias = it->group_alias;
+  value.group_id = it->group_id;
+  value.state = it->state;
+  return true;
 }
+
+private:
+  const std::vector<policy::FunctionalGroupPermission>& groups_;
+};
+
 }
 
 namespace policy {
@@ -118,17 +151,7 @@ bool PolicyManagerImpl::LoadPTFromFile(const std::string& file_name) {
   final_result = final_result && policy_table_.pt_data()->Save(*table);
   LOG4CXX_INFO(
     logger_,
-    "Loading from file was " << (final_result ? "successful" : "unsuccessful"));
-
-  // Initial setting of snapshot data
-  if (policy_table_.pt_data()->IsPTPreloaded() && !policy_table_snapshot_) {
-    policy_table_snapshot_ = policy_table_.pt_data()->GenerateSnapshot();
-    if (!policy_table_snapshot_) {
-      LOG4CXX_WARN(logger_,
-                   "Failed to create initial snapshot of policy table");
-      return false;
-    }
-  }
+    "Loading from file was " << (final_result ? "successful" : "unsuccessful"));  
 
   RefreshRetrySequence();
   return final_result;
@@ -172,30 +195,40 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     return false;
   }
 
+  sync_primitives::AutoLock lock(apps_registration_lock_);
+
+  // Get current DB data, since it could be updated during awaiting of PTU
+  utils::SharedPtr<policy_table::Table> policy_table_snapshot =
+      policy_table_.pt_data()->GenerateSnapshot();
+  if (!policy_table_snapshot) {
+    LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
+    return false;
+  }
+
   // Replace predefined policies with its actual setting, e.g. "123":"default"
   // to actual values of default section
   UnwrapAppPolicies(pt_update->policy_table.app_policies);
 
   // Check and update permissions for applications, send notifications
-  CheckPermissionsChanges(pt_update);
+  CheckPermissionsChanges(pt_update, policy_table_snapshot);
 
   // Replace current data with updated
-  policy_table_snapshot_->policy_table.functional_groupings = pt_update
+  policy_table_snapshot->policy_table.functional_groupings = pt_update
       ->policy_table.functional_groupings;
 
-  policy_table_snapshot_->policy_table.module_config = pt_update->policy_table
+  policy_table_snapshot->policy_table.module_config = pt_update->policy_table
       .module_config;
 
   bool is_message_part_updated = pt_update->policy_table
                                  .consumer_friendly_messages.is_initialized();
 
   if (is_message_part_updated) {
-    policy_table_snapshot_->policy_table.consumer_friendly_messages->messages =
+    policy_table_snapshot->policy_table.consumer_friendly_messages->messages =
       pt_update->policy_table.consumer_friendly_messages->messages;
   }
 
   // Save data to DB
-  if (!policy_table_.pt_data()->Save(*policy_table_snapshot_)) {
+  if (!policy_table_.pt_data()->Save(*policy_table_snapshot)) {
     LOG4CXX_WARN(logger_, "Unsuccessful save of updated policy table.");
     return false;
   }
@@ -227,12 +260,13 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 }
 
 void PolicyManagerImpl::CheckPermissionsChanges(
-  const utils::SharedPtr<policy_table::Table> pt_update) {
+    const utils::SharedPtr<policy_table::Table> pt_update,
+    const utils::SharedPtr<policy_table::Table> snapshot) {
   LOG4CXX_INFO(logger_, "Checking incoming permissions.");
 
   std::for_each(pt_update->policy_table.app_policies.begin(),
                 pt_update->policy_table.app_policies.end(),
-                CheckAppPolicy(this, pt_update));
+                CheckAppPolicy(this, pt_update, snapshot));
 }
 
 void PolicyManagerImpl::PrepareNotificationData(
@@ -317,28 +351,11 @@ EndpointUrls PolicyManagerImpl::GetUpdateUrls(int service_type) {
 
 BinaryMessageSptr PolicyManagerImpl::RequestPTUpdate() {
   LOG4CXX_INFO(logger_, "Creating PT Snapshot");  
-  policy_table_snapshot_ = policy_table_.pt_data()->GenerateSnapshot();
-  if (!policy_table_snapshot_) {
+  utils::SharedPtr<policy_table::Table> policy_table_snapshot =
+      policy_table_.pt_data()->GenerateSnapshot();
+  if (!policy_table_snapshot) {
     LOG4CXX_ERROR(logger_, "Failed to create snapshot of policy table");
     return NULL;
-  }
-
-  policy_table::ApplicationPolicies& apps = policy_table_snapshot_->
-                                            policy_table.app_policies;
-  std::map<std::string,
-      rpc::Stringifyable<rpc::Nullable<
-      rpc::policy_table_interface_base::ApplicationParams>>>::iterator it =
-      apps.begin();
-  // TODO(AOleynik): Should we check here for 'device' also?
-  for (; apps.end() != it; ++it) {
-    if (policy_table_.pt_data()->IsDefaultPolicy(it->first)) {
-      it->second.set_to_string(kDefaultId);
-      continue;
-    }
-    if (policy_table_.pt_data()->IsPredataPolicy(it->first)) {
-      it->second.set_to_string(kPreDataConsentId);
-      continue;
-    }
   }
 
   set_exchange_in_progress(true);
@@ -355,7 +372,7 @@ BinaryMessageSptr PolicyManagerImpl::RequestPTUpdate() {
   }
 #endif  // EXTENDED_POLICY
 
-  Json::Value value = policy_table_snapshot_->ToJsonValue();
+  Json::Value value = policy_table_snapshot->ToJsonValue();
   Json::FastWriter writer;
   std::string message_string = writer.write(value);
   return new BinaryMessage(message_string.begin(), message_string.end());
@@ -461,6 +478,7 @@ void PolicyManagerImpl::CheckAppPolicyState(const std::string& application_id) {
   LOG4CXX_INFO(logger_, "CheckAppPolicyState");
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent  = GetUserConsentForDevice(device_id);
+  sync_primitives::AutoLock lock(apps_registration_lock_);
   if (!policy_table_.pt_data()->IsApplicationRepresented(application_id)) {
     LOG4CXX_INFO(
       logger_,
@@ -969,10 +987,13 @@ void PolicyManagerImpl::GetPermissionsForApp(
                                 .pt_data().get());
   // For extended policy
   if (pt_ext) {
+    bool allowed_by_default = false;
     if (pt_ext->IsDefaultPolicy(policy_app_id)) {
       app_id_to_check = kDefaultId;
+      allowed_by_default = true;
     } else if (pt_ext->IsPredataPolicy(policy_app_id)) {
       app_id_to_check = kPreDataConsentId;
+      allowed_by_default = true;
     }
 
     FunctionalIdType group_types;
@@ -991,67 +1012,61 @@ void PolicyManagerImpl::GetPermissionsForApp(
       return;
     }
 
-    FunctionalGroupNames::const_iterator it = group_names.begin();
-    FunctionalGroupNames::const_iterator it_end = group_names.end();
-    FunctionalGroupIDs auto_allowed_groups;
-    for (;it != it_end; ++it) {
-      if (it->second.first.empty()) {
-        auto_allowed_groups.push_back(it->first);
-      }
-    }
+    // The "default" and "pre_DataConsent" are auto-allowed groups
+    // So, check if application in the one of these mode.
+    if (allowed_by_default) {
+      GroupType type = (kDefaultId == app_id_to_check ?
+            kTypeDefault : kTypePreDataConsented);
 
-    FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
-    FunctionalGroupIDs allowed_groups;
-    // If application is limited to default only related groups ara allowed
-    // If application is limited to pre_Dataconsent only related groups are
-    // allowed
-    FunctionalGroupIDs default_groups = group_types[kTypeDefault];
-    if (kDefaultId == app_id_to_check) {
-      auto_allowed_groups.clear();
-      allowed_groups = group_types[kTypeDefault];
-    } else if (kPreDataConsentId == app_id_to_check) {
-      auto_allowed_groups.clear();
-      default_groups = FunctionalGroupIDs();
-      allowed_groups = group_types[kTypePreDataConsented];
+      FillFunctionalGroupPermissions(group_types[type], group_names,
+                                     kGroupAllowed, permissions);
     } else {
-      allowed_groups = group_types[kTypeAllowed];
+
+      // The code bellow allows to process application which
+      // has specific permissions(not default and pre_DataConsent).
+
+      // All groups for specific application
+      FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
+
+      // Groups assigned by the user for specific application
+      FunctionalGroupIDs allowed_groups = group_types[kTypeAllowed];
+
+      // Groups disallowed by the user for specific application
+      FunctionalGroupIDs common_disallowed = group_types[kTypeDisallowed];
+
+      // Groups that allowed by default but can be changed by the user
+      FunctionalGroupIDs preconsented_groups = group_types[kTypePreconsented];
+
+      // Pull common groups from allowed and preconsented parts.
+      FunctionalGroupIDs allowed_preconsented = Merge(allowed_groups,
+                                                preconsented_groups);
+
+      // Get all groups that we suppose are allowed.
+      FunctionalGroupIDs all_allowed = Merge(allowed_preconsented,
+                                             all_groups);
+
+      // In case when same groups exists in disallowed and allowed tables,
+      // disallowed one have priority over allowed. So we have to remove
+      // all disallowed groups from allowed table.
+      FunctionalGroupIDs common_allowed = ExcludeSame(all_allowed,
+                                                      common_disallowed);
+
+      // Remove all disallowed groups from application specific groups.
+      FunctionalGroupIDs no_disallowed = ExcludeSame(all_groups,
+                                                     common_disallowed);
+
+      // Undefined groups are groups that have no allowed or disallowed type.
+      FunctionalGroupIDs undefined_consent = ExcludeSame(no_disallowed,
+                                                         common_allowed);
+
+      // Fill result
+      FillFunctionalGroupPermissions(undefined_consent, group_names,
+                                     kGroupUndefined, permissions);
+      FillFunctionalGroupPermissions(common_allowed, group_names,
+                                     kGroupAllowed, permissions);
+      FillFunctionalGroupPermissions(common_disallowed, group_names,
+                                     kGroupDisallowed, permissions);
     }
-
-    FunctionalGroupIDs disallowed_groups = group_types[kTypeDisallowed];
-    FunctionalGroupIDs preconsented_groups = group_types[kTypePreconsented];
-
-    // Find common disallowed groups
-    FunctionalGroupIDs common_disallowed = disallowed_groups;
-
-    // Find common allowed groups
-    FunctionalGroupIDs allowed_preconsented = Merge(allowed_groups,
-                                              preconsented_groups);
-
-    FunctionalGroupIDs allowed_preconsented_auto = Merge(allowed_preconsented,
-                                                         auto_allowed_groups);
-    // Default groups always allowed
-    FunctionalGroupIDs related_defaults = FindSame(all_groups, default_groups);
-
-    FunctionalGroupIDs all_allowed = Merge(allowed_preconsented_auto,
-                                           related_defaults);
-
-    FunctionalGroupIDs common_allowed = ExcludeSame(all_allowed,
-                                                    common_disallowed);
-
-    // Find groups with undefinded consent
-    FunctionalGroupIDs no_disallowed = ExcludeSame(all_groups,
-                                                   common_disallowed);
-    FunctionalGroupIDs undefined_consent = ExcludeSame(no_disallowed,
-                                                       common_allowed);
-
-    // Fill result
-    FillFunctionalGroupPermissions(undefined_consent, group_names,
-                                   kGroupUndefined, permissions);
-    FillFunctionalGroupPermissions(common_allowed, group_names,
-                                   kGroupAllowed, permissions);
-    FillFunctionalGroupPermissions(common_disallowed, group_names,
-                                   kGroupDisallowed, permissions);
-
     return;
   }
 #else
@@ -1329,15 +1344,24 @@ void PolicyManagerImpl::CheckUpdateStatus() {
 }
 
 AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
-  const std::string& app_id) {
-  typedef std::map<std::string, AppPermissions>::const_iterator PermissionsIt;
-  PermissionsIt app_id_diff = app_permissions_diff_.find(app_id);
-  AppPermissions permissions(app_id);
+    const std::string& device_id,
+    const std::string& policy_app_id) {
+  typedef std::map<std::string, AppPermissions>::iterator PermissionsIt;
+  PermissionsIt app_id_diff = app_permissions_diff_.find(policy_app_id);
+  AppPermissions permissions(policy_app_id);
   if (app_permissions_diff_.end() != app_id_diff) {
+    // At this point we're able to know the device id for which user consents
+    // could be evaluated
+    std::vector<FunctionalGroupPermission> groups;
+    GetUserConsentForApp(device_id, policy_app_id, groups);
+    CopyPermissions copier(groups);
+    std::for_each(app_id_diff->second.appRevokedPermissions.begin(),
+                  app_id_diff->second.appRevokedPermissions.end(),
+                  copier);
     permissions = app_id_diff->second;
   } else {
-    permissions.appPermissionsConsentNeeded = IsConsentNeeded(app_id);
-    permissions.appRevoked = IsApplicationRevoked(app_id);
+    permissions.appPermissionsConsentNeeded = IsConsentNeeded(policy_app_id);
+    permissions.appRevoked = IsApplicationRevoked(policy_app_id);
     GetPriority(permissions.application_id, &permissions.priority);
   }
   return permissions;

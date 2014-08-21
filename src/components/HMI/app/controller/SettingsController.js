@@ -236,6 +236,12 @@ SDL.SettingsController = Em.Object.create( {
             if (x.textBody) {
                 text += x.textBody;
             }
+            if (x.line1) {
+                text += x.line1;
+            }
+            if (x.line2) {
+                text += x.line2;
+            }
         });
 
         if (tts) {
@@ -291,16 +297,12 @@ SDL.SettingsController = Em.Object.create( {
 
             SDL.SDLModel.policyUpdateRetry.timer = setTimeout(
                 function(){
-                    if (SDL.SDLModel.policyURLs.length > SDL.SDLModel.policyUpdateRetry.try) {
-                        FFW.BasicCommunication.OnSystemRequest(
-                            "PROPRIETARY",
-                            SDL.SDLModel.policyURLs[SDL.SDLModel.policyUpdateRetry.try].policyAppId,
-                            SDL.SettingsController.policyUpdateFile,
-                            SDL.SDLModel.policyURLs[SDL.SDLModel.policyUpdateRetry.try].url
-                        );
-                    } else {
-                        FFW.BasicCommunication.OnSystemRequest("PROPRIETARY");
-                    }
+                    FFW.BasicCommunication.OnSystemRequest(
+                        "PROPRIETARY",
+                        SDL.SDLModel.policyURLs[0].policyAppId,
+                        SDL.SettingsController.policyUpdateFile,
+                        SDL.SDLModel.policyURLs[0].url
+                    );
                     SDL.SettingsController.policyUpdateRetry();
                 }, SDL.SDLModel.policyUpdateRetry.oldTimer
             );

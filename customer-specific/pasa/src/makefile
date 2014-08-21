@@ -14,7 +14,7 @@ COMPONENT_NAME = SmartDeviceLink
 DEFS += \
 	-Wc,-std=gnu++0x \
 	-DEXTENDED_POLICY \
-	-DENABLE_LOG \
+	-DENABLE_LOG
 
 all:
 	@echo "***************************************************************************"

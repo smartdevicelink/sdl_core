@@ -189,21 +189,21 @@ void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
     bytes_sent_ += transfer->actual_length;
     if (bytes_sent_ == current_out_message_->data_size()) {
       LOG4CXX_DEBUG(logger_, "USB out transfer, data sent: "
-                   << current_out_message_.get());
+                    << current_out_message_.get());
       controller_->DataSendDone(device_uid_, app_handle_, current_out_message_);
-
-    } else {
-      LOG4CXX_ERROR(logger_, "USB out transfer failed: "
-                    << libusb_error_name(transfer->status));
-      controller_->DataSendFailed(device_uid_, app_handle_, current_out_message_,
-                                  DataSendError());
       PopOutMessage();
     }
-    libusb_free_transfer(transfer);
-    out_transfer_ = NULL;
-    waiting_out_transfer_cancel_ = false;
-    LOG4CXX_TRACE(logger_, "exit");
+  } else {
+    LOG4CXX_ERROR(logger_, "USB out transfer failed: "
+                  << libusb_error_name(transfer->status));
+    controller_->DataSendFailed(device_uid_, app_handle_, current_out_message_,
+                                DataSendError());
+    PopOutMessage();
   }
+  libusb_free_transfer(transfer);
+  out_transfer_ = NULL;
+  waiting_out_transfer_cancel_ = false;
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 TransportAdapter::Error UsbConnection::SendData(RawMessagePtr message) {
@@ -260,8 +260,8 @@ void UsbConnection::Finalise() {
 
 void UsbConnection::AbortConnection() {
   LOG4CXX_TRACE(logger_, "enter");
+  Finalise();
   controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
-  Disconnect();
   LOG4CXX_TRACE(logger_, "exit");
 }
 

@@ -66,7 +66,8 @@ namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
 
 ApplicationManagerImpl::ApplicationManagerImpl()
-  : audio_pass_thru_active_(false),
+  : applications_list_lock_(true),
+    audio_pass_thru_active_(false),
     is_distracting_driver_(false),
     is_vr_session_strated_(false),
     hmi_cooperating_(false),
@@ -1246,6 +1247,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
         connection_key, mobile_api::AppInterfaceUnregisteredReason::
         REQUEST_WHILE_IN_NONE_HMI_LEVEL);
 
+      application(connection_key)->usage_report().RecordRemovalsForBadBehavior();
       UnregisterApplication(connection_key, mobile_apis::Result::INVALID_ENUM,
                             false);
       return false;
@@ -1862,9 +1864,9 @@ void ApplicationManagerImpl::UnregisterAllApplications(bool generated_by_hmi) {
       mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF ? true : false;
 
   bool is_unexpected_disconnect = (generated_by_hmi != true);
-
-  std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
-  while (it != application_list_.end()) {
+  ApplicationListAccessor accessor;
+  std::set<ApplicationSharedPtr>::iterator it = accessor.applications().begin();
+  while (it != accessor.applications().end()) {
     ApplicationSharedPtr app_to_remove = *it;
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
         app_to_remove->app_id(), unregister_reason_);
@@ -1936,6 +1938,18 @@ void ApplicationManagerImpl::UnregisterApplication(
 
   request_ctrl_.terminateAppRequests(app_id);
   return;
+}
+
+
+void ApplicationManagerImpl::UnregisterRevokedApplication(
+    const uint32_t& app_id, mobile_apis::Result::eType reason) {
+  UnregisterApplication(app_id, reason);
+
+  connection_handler_->CloseSession(app_id);
+
+  if (application_list_.empty()) {
+    connection_handler_->CloseRevokedConnection(app_id);
+  }
 }
 
 void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
@@ -2061,7 +2075,9 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
       LOG4CXX_ERROR(logger_, "No application for policy id " << policy_app_id);
       return mobile_apis::Result::GENERIC_ERROR;
     }
-    app->usage_report().RecordRpcSentInHMINone();
+    if (result.hmi_level_permitted != policy::kRpcAllowed) {
+      app->usage_report().RecordRpcSentInHMINone();
+    }
   }
 
   const std::string log_msg = "Application: "+ policy_app_id+
@@ -2092,42 +2108,49 @@ void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
     hmi_capabilities_.attenuated_supported()
     ? mobile_apis::AudioStreamingState::ATTENUATED
     : mobile_apis::AudioStreamingState::NOT_AUDIBLE;
+  std::set<ApplicationSharedPtr> local_app_list = application_list_;
 
-  std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
+  std::set<ApplicationSharedPtr>::const_iterator it = local_app_list.begin();
+  std::set<ApplicationSharedPtr>::const_iterator itEnd = local_app_list.end();
   for (; it != itEnd; ++it) {
-    if ((*it)->is_media_application()) {
-      if (kTTSSessionChanging == changing_state) {
-        (*it)->set_tts_speak_state(true);
-      }
-      if ((*it)->audio_streaming_state() != state) {
-        (*it)->set_audio_streaming_state(state);
-        MessageHelper::SendHMIStatusNotification(*(*it));
+    if ((*it).valid()) {
+      if ((*it)->is_media_application()) {
+        if (kTTSSessionChanging == changing_state) {
+          (*it)->set_tts_speak_state(true);
+        }
+        if ((*it)->audio_streaming_state() != state) {
+          (*it)->set_audio_streaming_state(state);
+          MessageHelper::SendHMIStatusNotification(*(*it));
+        }
       }
     }
   }
 }
 
 void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
-  std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
+
+  std::set<ApplicationSharedPtr> local_app_list = application_list_;
+  std::set<ApplicationSharedPtr>::const_iterator it = local_app_list.begin();
+  std::set<ApplicationSharedPtr>::const_iterator itEnd = local_app_list.end();
   //according with SDLAQ-CRS-839
   bool is_application_audible = false;
 
   for (; it != itEnd; ++it) {
-    if ((*it)->is_media_application()) {
-      if (kTTSSessionChanging == changing_state) {
-        (*it)->set_tts_speak_state(false);
-      }
-      if ((!is_application_audible) && (!(vr_session_started())) &&
-          ((*it)->audio_streaming_state() !=
-              mobile_apis::AudioStreamingState::AUDIBLE) &&
-          (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level())) {
-        //according with SDLAQ-CRS-839
-        is_application_audible = true;
-        (*it)->set_audio_streaming_state(
-            mobile_apis::AudioStreamingState::AUDIBLE);
-        MessageHelper::SendHMIStatusNotification(*(*it));
+    if ((*it).valid()) {
+      if ((*it)->is_media_application()) {
+        if (kTTSSessionChanging == changing_state) {
+          (*it)->set_tts_speak_state(false);
+        }
+        if ((!is_application_audible) && (!(vr_session_started())) &&
+            ((*it)->audio_streaming_state() !=
+             mobile_apis::AudioStreamingState::AUDIBLE) &&
+            (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level())) {
+          //according with SDLAQ-CRS-839
+          is_application_audible = true;
+          (*it)->set_audio_streaming_state(
+                mobile_apis::AudioStreamingState::AUDIBLE);
+          MessageHelper::SendHMIStatusNotification(*(*it));
+        }
       }
     }
   }

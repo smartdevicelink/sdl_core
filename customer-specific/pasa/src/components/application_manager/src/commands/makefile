@@ -56,7 +56,7 @@ INCLUDES = \
 #  for example to include a team component library it would be 
 #  $(TEAM_ROOT)NS_MessageCenter/lib/NS_MessageCenter/
 LIB_PATHS += \
-  $(DEPENDS_LIB_PATHS) \
+  $(DEPENDS_LIB_PATHS)
   
 
 # Define binary outputs.  These can be libraries or executables.
@@ -80,7 +80,7 @@ LIB_PATHS += \
 # Define generic line that pulls all c, cc, cpp files 
 # since your in the src folder is pull only files from there
 COMPONENT_SRCS = \
-	$(wildcard *.c*) \
+	$(wildcard *.c*)
 
 # Define sources that my not be local to your component
 # here, you can define indivial files or wildcard from 
@@ -94,7 +94,7 @@ NON_LOCAL_SRCS =
 #  direct the building of sources, but no linking into a binary)
 SOURCES = \
 	$(COMPONENT_SRCS) \
-	$(NON_LOCAL_SRCS) \
+	$(NON_LOCAL_SRCS)
 
 
 
@@ -111,7 +111,7 @@ CC_LANG_OBJECTS = $(addprefix $(BLD_PATH),$(addsuffix .$(OBJ_EXT),$(basename $(f
 OBJECTS = \
 	$(C_LANG_OBJECTS) \
 	$(CPP_LANG_OBJECTS) \
-	$(CC_LANG_OBJECTS) \
+	$(CC_LANG_OBJECTS)
 
 
 	
@@ -122,7 +122,7 @@ HEADERS = \
 	
 	
 LIBRARIES = \
-	$(COMPONENT_LIB) \
+	$(COMPONENT_LIB)
 
 
 # Make targets

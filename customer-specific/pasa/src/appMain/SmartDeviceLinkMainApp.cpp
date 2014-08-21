@@ -53,31 +53,24 @@ bool remoteLoggingFlagFileValid() {
 	return true;
 }
 
-std::string getCurrentLogFileName() {
+int getBootCount() {
 
-   std::vector<std::string> availableLogFiles;
+    std::string fileContent;
+    int bootCount;
 
-   availableLogFiles = file_system::ListFilesWithSubStr(
-               profile::Profile::instance()->target_log_file_home_dir(),
-               profile::Profile::instance()->target_log_file_name_pattern());
+    file_system::ReadFile(profile::Profile::instance()->target_boot_count_file(),
+                        fileContent);
 
-   if (availableLogFiles.empty()) {
-      return "";
-   }
+    std::stringstream(fileContent) >> bootCount;
 
-   std::sort(availableLogFiles.begin(), availableLogFiles.end());
-
-   return availableLogFiles.back();
+    return bootCount;
 }
 
 void startSmartDeviceLink()
 {
-    // --------------------------------------------------------------------------
-    // Logger initialization
-
-	INIT_LOGGER(profile::Profile::instance()->log4cxx_config_file());
-
     LOG4CXX_INFO(logger, " Application started!");
+    int bootCount = getBootCount();
+    LOG4CXX_INFO(logger, "Boot count: " << getBootCount());
 
     // --------------------------------------------------------------------------
     // Components initialization
@@ -90,22 +83,22 @@ void startSmartDeviceLink()
 
       LOG4CXX_INFO(logger, "Enable logging to USB");
 
-      std::string currentLogFileName = getCurrentLogFileName();
+      std::string currentLogFilePath = profile::Profile::instance()->target_tmp_dir() +
+                 "/" + profile::Profile::instance()->target_log_file_name_pattern();
+      std::stringstream stream;
+      stream << bootCount;
+      std::string usbLogFilePath = profile::Profile::instance()->remote_logging_flag_file_path() +
+                         stream.str() + "." +
+                         profile::Profile::instance()->target_log_file_name_pattern();
 
-      if (!currentLogFileName.empty()) {
-         LOG4CXX_INFO(logger, "Current logfile name is = " << currentLogFileName);
+      if (!currentLogFilePath.empty()) {
+         LOG4CXX_INFO(logger, "Copy existing log info to USB from " << currentLogFilePath);
 
          std::vector<uint8_t> targetLogFileContent;
 
-         file_system::ReadBinaryFile(
-                       profile::Profile::instance()->target_log_file_home_dir()
-                 + currentLogFileName,
-                 targetLogFileContent);
+         file_system::ReadBinaryFile(currentLogFilePath, targetLogFileContent);
 
-         file_system::WriteBinaryFile(
-                 profile::Profile::instance()->remote_logging_flag_file_path()
-                 + currentLogFileName,
-                 targetLogFileContent);
+         file_system::WriteBinaryFile(usbLogFilePath, targetLogFileContent);
       }
 
       log4cxx::helpers::Pool p;
@@ -113,7 +106,7 @@ void startSmartDeviceLink()
       std::string paramFileAppender = "LogFile";
       std::string paramConsoleAppender = "Console";
 
-      std::string paramFileName = profile::Profile::instance()->remote_logging_flag_file_path() + currentLogFileName;
+      std::string paramFileName = usbLogFilePath;
 
       LOG4CXX_DECODE_CHAR(logFileAppender, paramFileAppender);
       LOG4CXX_DECODE_CHAR(logConsoleAppender, paramConsoleAppender);
@@ -126,6 +119,7 @@ void startSmartDeviceLink()
       rootLogger->removeAppender(logConsoleAppender);
 
       if(fileAppender != NULL) {
+        fileAppender->setAppend(true);
         fileAppender->setFile(logFileName);
         fileAppender->activateOptions(p);
       }

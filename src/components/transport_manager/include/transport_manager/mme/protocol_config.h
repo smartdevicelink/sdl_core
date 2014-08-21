@@ -43,18 +43,25 @@ class ProtocolConfig {
  public:
   typedef std::list<std::string> ProtocolNameContainer;
 
-  static const ProtocolNameContainer& LegacyProtocolNames();
-  static const ProtocolNameContainer& HubProtocolNames();
+  static const ProtocolNameContainer& IAPLegacyProtocolNames();
+  static const ProtocolNameContainer& IAP2LegacyProtocolNames();
+  static const ProtocolNameContainer& IAPHubProtocolNames();
+  static const ProtocolNameContainer& IAP2HubProtocolNames();
   static const ProtocolNameContainer& IAPPoolProtocolNames();
   static const ProtocolNameContainer& IAP2PoolProtocolNames();
 
  private:
-  static const ProtocolNameContainer ReadLegacyProtocolNames();
-  static const ProtocolNameContainer ReadHubProtocolNames();
+  static const std::string iap_section_name;
+  static const std::string iap2_section_name;
+
+  static const ProtocolNameContainer ReadIAPLegacyProtocolNames();
+  static const ProtocolNameContainer ReadIAP2LegacyProtocolNames();
+  static const ProtocolNameContainer ReadIAPHubProtocolNames();
+  static const ProtocolNameContainer ReadIAP2HubProtocolNames();
   static const ProtocolNameContainer ReadIAPPoolProtocolNames();
   static const ProtocolNameContainer ReadIAP2PoolProtocolNames();
 
-  static const ProtocolNameContainer ReadProtocolNames(const std::string& config_file_name, const std::string& section_name);
+  static const ProtocolNameContainer ReadProtocolNames(const std::string& config_file_name, const std::string& section_name, const std::string& protocol_mask);
 };
 
 }  // namespace transport_adapter
