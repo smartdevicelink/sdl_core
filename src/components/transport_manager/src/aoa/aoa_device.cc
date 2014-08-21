@@ -44,10 +44,11 @@ AOADevice::AOADevice(AOAWrapper::AOAHandle handle)
 }
 
 bool AOADevice::IsSameAs(const Device* other_device) const {
-  const AOADevice* other_aoa_device = static_cast<const AOADevice*>(other_device);
+  const AOADevice* other_aoa_device =
+      static_cast<const AOADevice*>(other_device);
   if (other_aoa_device) {
-    return (other_aoa_device->unique_device_id() == unique_device_id()) &&
-        (other_aoa_device->handle_ == handle_);
+    return (other_aoa_device->unique_device_id() == unique_device_id())
+        && (other_aoa_device->handle_ == handle_);
   } else {
     return false;
   }

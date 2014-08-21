@@ -66,7 +66,7 @@ class AOADeviceScanner : public DeviceScanner {
   void AddDevice(AOAWrapper::AOAHandle hdl);
   void NotifyDevicesUpdated();
 
-  class ScannerObserver: public AOAScannerObserver {
+  class ScannerObserver : public AOAScannerObserver {
    public:
     explicit ScannerObserver(AOADeviceScanner* parent);
     void OnConnectedDevice(AOAWrapper::AOAHandle hdl);

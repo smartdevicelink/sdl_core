@@ -39,7 +39,6 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-
 AOADeviceScanner::AOADeviceScanner(TransportAdapterController* controller)
     : initialised_(false),
       observer_(NULL),
@@ -69,7 +68,8 @@ bool AOADeviceScanner::IsInitialised() const {
 void AOADeviceScanner::NotifyDevicesUpdated() {
   DeviceVector devices;
   devices_lock_.Acquire();
-  for (DeviceContainer::const_iterator i = devices_.begin(); i != devices_.end(); ++i) {
+  for (DeviceContainer::const_iterator i = devices_.begin();
+      i != devices_.end(); ++i) {
     AOADevicePtr aoa_device = i->second;
     DeviceSptr device = AOADevicePtr::static_pointer_cast<Device>(aoa_device);
     devices.push_back(device);
@@ -88,7 +88,8 @@ AOADeviceScanner::ScannerObserver::ScannerObserver(AOADeviceScanner* parent)
     : parent_(parent) {
 }
 
-void AOADeviceScanner::ScannerObserver::OnConnectedDevice(AOAWrapper::AOAHandle hdl) {
+void AOADeviceScanner::ScannerObserver::OnConnectedDevice(
+    AOAWrapper::AOAHandle hdl) {
   LOG4CXX_TRACE(logger_, "AOA: new device is connected");
   parent_->AddDevice(hdl);
   parent_->NotifyDevicesUpdated();

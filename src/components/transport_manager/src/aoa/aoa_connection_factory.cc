@@ -37,7 +37,8 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
-AOAConnectionFactory::AOAConnectionFactory(TransportAdapterController* controller)
+AOAConnectionFactory::AOAConnectionFactory(
+    TransportAdapterController* controller)
     : controller_(controller) {
 }
 
@@ -50,9 +51,10 @@ bool AOAConnectionFactory::IsInitialised() const {
 }
 
 TransportAdapter::Error AOAConnectionFactory::CreateConnection(
-  const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
-  LOG4CXX_TRACE(logger_, "AOA: create connection DeviceUID: " << &device_uid <<
-                ", ApplicationHandle: " << &app_handle);
+    const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
+  LOG4CXX_TRACE(
+      logger_,
+      "AOA: create connection DeviceUID: " << &device_uid << ", ApplicationHandle: " << &app_handle);
 
   DeviceSptr device = controller_->FindDevice(device_uid);
   if (!device) {
@@ -62,7 +64,8 @@ TransportAdapter::Error AOAConnectionFactory::CreateConnection(
 
   AOADevicePtr aoa_device = DeviceSptr::static_pointer_cast<AOADevice>(device);
   ConnectionSptr connection = new AOAConnection(device_uid, app_handle,
-      controller_, aoa_device->handle());
+                                                controller_,
+                                                aoa_device->handle());
   controller_->ConnectionCreated(connection, device_uid, app_handle);
 
   LOG4CXX_INFO(logger_, "AOA: connection created");

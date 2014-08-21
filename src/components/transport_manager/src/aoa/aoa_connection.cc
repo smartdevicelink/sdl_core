@@ -60,46 +60,55 @@ AOAConnection::~AOAConnection() {
 }
 
 TransportAdapter::Error AOAConnection::SendData(RawMessagePtr message) {
-  LOG4CXX_TRACE(logger_, "AOA: send data to " << device_uid_ << " " << app_handle_);
+  LOG4CXX_TRACE(logger_,
+                "AOA: send data to " << device_uid_ << " " << app_handle_);
   if (!wrapper_->IsValidHandle()) {
     Abort();
     Disconnect();
     return TransportAdapter::FAIL;
   }
   if (!wrapper_->SendMessage(message)) {
-    controller_->DataSendFailed(device_uid_, app_handle_, message, DataSendError());
+    controller_->DataSendFailed(device_uid_, app_handle_, message,
+                                DataSendError());
     return TransportAdapter::FAIL;
   }
   return TransportAdapter::OK;
 }
 
 void AOAConnection::ReceiveDone(RawMessagePtr message) {
-  LOG4CXX_TRACE(logger_, "AOA: receive data from " << device_uid_ << " " << app_handle_);
+  LOG4CXX_TRACE(logger_,
+                "AOA: receive data from " << device_uid_ << " " << app_handle_);
   controller_->DataReceiveDone(device_uid_, app_handle_, message);
 }
 
 void AOAConnection::ReceiveFailed() {
-  LOG4CXX_WARN(logger_, "AOA: receive failed from " << device_uid_ << " " << app_handle_);
+  LOG4CXX_WARN(logger_,
+               "AOA: receive failed from " << device_uid_ << " " << app_handle_);
   controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
 }
 
 void AOAConnection::TransmitDone(RawMessagePtr message) {
-  LOG4CXX_TRACE(logger_, "AOA: transmit data to " << device_uid_ << " " << app_handle_);
+  LOG4CXX_TRACE(logger_,
+                "AOA: transmit data to " << device_uid_ << " " << app_handle_);
   controller_->DataSendDone(device_uid_, app_handle_, message);
 }
 
 void AOAConnection::TransmitFailed(RawMessagePtr message) {
-  LOG4CXX_WARN(logger_, "AOA: transmit failed to " << device_uid_ << " " << app_handle_);
-  controller_->DataSendFailed(device_uid_, app_handle_, message, DataSendError());
+  LOG4CXX_WARN(logger_,
+               "AOA: transmit failed to " << device_uid_ << " " << app_handle_);
+  controller_->DataSendFailed(device_uid_, app_handle_, message,
+                              DataSendError());
 }
 
 void AOAConnection::Abort() {
   LOG4CXX_TRACE(logger_, "AOA: aborted " << device_uid_ << " " << app_handle_);
-  controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
+  controller_->ConnectionAborted(device_uid_, app_handle_,
+                                 CommunicationError());
 }
 
 TransportAdapter::Error AOAConnection::Disconnect() {
-  LOG4CXX_TRACE(logger_, "AOA: disconnect " << device_uid_ << " " << app_handle_);
+  LOG4CXX_TRACE(logger_,
+                "AOA: disconnect " << device_uid_ << " " << app_handle_);
   controller_->DisconnectDone(device_uid_, app_handle_);
   return TransportAdapter::OK;
 }
@@ -120,8 +129,8 @@ void AOAConnection::DeviceObserver::OnReceivedMessage(bool success,
   }
 }
 
-void AOAConnection::DeviceObserver::OnTransmittedMessage(bool success,
-                                                         RawMessagePtr message) {
+void AOAConnection::DeviceObserver::OnTransmittedMessage(
+    bool success, RawMessagePtr message) {
   if (success) {
     parent_->TransmitDone(message);
   } else if (wrapper_->IsValidHandle()) {

@@ -43,10 +43,21 @@ struct aoa_hdl_s;
 namespace transport_manager {
 namespace transport_adapter {
 
-enum AOAVersion { AOA_Ver_Unknown, AOA_Ver_1_0, AOA_Ver_2_0 };
-enum AOAMode { AOA_Mode_Accessory, AOA_Mode_Audio, AOA_Mode_Debug };
-enum AOAEndpoint { AOA_Ept_Accessory_BulkIn, AOA_Ept_Accessory_BulkOut,
-                   AOA_Ept_Accessory_Control };
+enum AOAVersion {
+  AOA_Ver_Unknown,
+  AOA_Ver_1_0,
+  AOA_Ver_2_0
+};
+enum AOAMode {
+  AOA_Mode_Accessory,
+  AOA_Mode_Audio,
+  AOA_Mode_Debug
+};
+enum AOAEndpoint {
+  AOA_Ept_Accessory_BulkIn,
+  AOA_Ept_Accessory_BulkOut,
+  AOA_Ept_Accessory_Control
+};
 
 class AOAScannerObserver;
 class AOADeviceObserver;
@@ -72,7 +83,7 @@ class AOAWrapper {
   bool Unsubscribe() const;
   bool SendMessage(RawMessagePtr message) const;
   bool SendControlMessage(uint16_t request, uint16_t value, uint16_t index,
-                             RawMessagePtr message) const;
+                          RawMessagePtr message) const;
   bool ReceiveMessage(RawMessagePtr *message) const;
   bool ReceiveControlMessage(uint16_t request, uint16_t value, uint16_t index,
                              RawMessagePtr *message) const;
@@ -93,14 +104,16 @@ class AOAWrapper {
 class AOAScannerObserver {
  public:
   virtual void OnConnectedDevice(AOAWrapper::AOAHandle handle) = 0;
-  virtual ~AOAScannerObserver() {}
+  virtual ~AOAScannerObserver() {
+  }
 };
 
 class AOADeviceObserver {
  public:
   virtual void OnReceivedMessage(bool success, RawMessagePtr message) = 0;
   virtual void OnTransmittedMessage(bool success, RawMessagePtr message) = 0;
-  virtual ~AOADeviceObserver() {}
+  virtual ~AOADeviceObserver() {
+  }
 };
 
 }  // namespace transport_adapter

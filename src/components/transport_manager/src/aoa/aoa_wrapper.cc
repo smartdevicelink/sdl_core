@@ -43,7 +43,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 static void OnConnectedDevice(aoa_hdl_t *hdl, const void *udata) {
   LOG4CXX_DEBUG(logger_, "AOA: connected device " << hdl);
-  AOAScannerObserver* const* p = static_cast<AOAScannerObserver* const*>(udata);
+  AOAScannerObserver* const * p =
+      static_cast<AOAScannerObserver* const *>(udata);
   AOAScannerObserver* observer = *p;
   observer->OnConnectedDevice(hdl);
 }
@@ -57,7 +58,7 @@ static void OnReceivedData(aoa_hdl_t *hdl, uint8_t *data, uint32_t sz,
   }
 
   bool success = !error;
-  AOADeviceObserver* const* p = static_cast<AOADeviceObserver* const*>(udata);
+  AOADeviceObserver* const * p = static_cast<AOADeviceObserver* const *>(udata);
   AOADeviceObserver* observer = *p;
   RawMessagePtr message = new RawMessage(0, 0, data, sz);
   observer->OnReceivedMessage(success, message);
@@ -72,7 +73,7 @@ static void OnTransmittedData(aoa_hdl_t *hdl, uint8_t *data, uint32_t sz,
   }
 
   bool success = !error;
-  AOADeviceObserver* const* p = static_cast<AOADeviceObserver* const*>(udata);
+  AOADeviceObserver* const * p = static_cast<AOADeviceObserver* const *>(udata);
   AOADeviceObserver* observer = *p;
   RawMessagePtr message = new RawMessage(0, 0, data, sz);
   observer->OnTransmittedMessage(success, message);
@@ -101,14 +102,21 @@ bool AOAWrapper::Init(AOAScannerObserver *observer) {
 
 bool AOAWrapper::SetCallback(AOADeviceObserver *observer,
                              AOAEndpoint endpoint) const {
-  LOG4CXX_TRACE(logger_, "AOA: set callback " << hdl_ << ", endpoint "<< endpoint);
+  LOG4CXX_TRACE(logger_,
+                "AOA: set callback " << hdl_ << ", endpoint "<< endpoint);
   data_clbk_t* callback;
   switch (endpoint) {
-    case AOA_Ept_Accessory_BulkIn: callback = &OnReceivedData; break;
-    case AOA_Ept_Accessory_BulkOut: callback = &OnTransmittedData; break;
+    case AOA_Ept_Accessory_BulkIn:
+      callback = &OnReceivedData;
+      break;
+    case AOA_Ept_Accessory_BulkOut:
+      callback = &OnTransmittedData;
+      break;
     default:
-      LOG4CXX_ERROR(logger_, "AOA: " << endpoint <<
-                    " endpoint doesn't support to use callback");
+      LOG4CXX_ERROR(
+          logger_,
+          "AOA: " << endpoint << " endpoint doesn't support to use callback")
+      ;
       return false;
   }
   int ret = aoa_set_callback(hdl_, callback, &observer, BitEndpoint(endpoint));
@@ -175,9 +183,12 @@ bool AOAWrapper::IsValidHandle() const {
 
 AOAVersion AOAWrapper::Version(uint16_t version) const {
   switch (version) {
-    case 1: return AOA_Ver_1_0;
-    case 2: return AOA_Ver_2_0;
-    default: return AOA_Ver_Unknown;
+    case 1:
+      return AOA_Ver_1_0;
+    case 2:
+      return AOA_Ver_2_0;
+    default:
+      return AOA_Ver_Unknown;
   }
 }
 
@@ -194,10 +205,14 @@ AOAVersion AOAWrapper::GetProtocolVesrion() const {
 uint32_t AOAWrapper::BitEndpoint(AOAEndpoint endpoint) const {
   const uint32_t kUndefined = 0;
   switch (endpoint) {
-    case AOA_Ept_Accessory_BulkIn: return AOA_EPT_ACCESSORY_BULKIN;
-    case AOA_Ept_Accessory_BulkOut: return AOA_EPT_ACCESSORY_BULKOUT;
-    case AOA_Ept_Accessory_Control: return AOA_EPT_ACCESSORY_CONTROL;
-    default: return kUndefined;
+    case AOA_Ept_Accessory_BulkIn:
+      return AOA_EPT_ACCESSORY_BULKIN;
+    case AOA_Ept_Accessory_BulkOut:
+      return AOA_EPT_ACCESSORY_BULKOUT;
+    case AOA_Ept_Accessory_Control:
+      return AOA_EPT_ACCESSORY_CONTROL;
+    default:
+      return kUndefined;
   }
 }
 
@@ -265,8 +280,8 @@ bool AOAWrapper::SendMessage(RawMessagePtr message) const {
   LOG4CXX_TRACE(logger_, "AOA: send to bulk endpoint");
   uint8_t *data = message->data();
   size_t length = message->data_size();
-  int ret = aoa_bulk_tx(hdl_, AOA_EPT_ACCESSORY_BULKOUT, timeout_,
-                        data, &length);
+  int ret = aoa_bulk_tx(hdl_, AOA_EPT_ACCESSORY_BULKOUT, timeout_, data,
+                        &length);
   if (IsError(ret)) {
     PrintError(ret);
     return false;
@@ -280,8 +295,8 @@ bool AOAWrapper::SendControlMessage(uint16_t request, uint16_t value,
   LOG4CXX_TRACE(logger_, "AOA: send to control endpoint");
   uint8_t *data = message->data();
   size_t length = message->data_size();
-  int ret = aoa_control_tx(hdl_, AOA_EPT_ACCESSORY_CONTROL, timeout_,
-                           request, value, index, data, &length);
+  int ret = aoa_control_tx(hdl_, AOA_EPT_ACCESSORY_CONTROL, timeout_, request,
+                           value, index, data, &length);
   if (IsError(ret)) {
     PrintError(ret);
     return false;
@@ -308,9 +323,8 @@ bool AOAWrapper::ReceiveControlMessage(uint16_t request, uint16_t value,
   LOG4CXX_TRACE(logger_, "AOA: receive from control endpoint");
   uint8_t *data;
   uint32_t size;
-  int ret = aoa_control_rx(hdl_, AOA_EPT_ACCESSORY_CONTROL, timeout_,
-                           request, value, index,
-                           &data, &size);
+  int ret = aoa_control_rx(hdl_, AOA_EPT_ACCESSORY_CONTROL, timeout_, request,
+                           value, index, &data, &size);
   if (IsError(ret)) {
     PrintError(ret);
     return false;
