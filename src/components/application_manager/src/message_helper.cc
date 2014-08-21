@@ -370,9 +370,13 @@ smart_objects::SmartObject* MessageHelper::GetHashUpdateNotification(
   LOG4CXX_INFO(logger_, "GetHashUpdateNotification" << app_id);
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
                                app_id);
-  DCHECK(app.get());
 
-  smart_objects::SmartObject* message = new smart_objects::SmartObject(
+  smart_objects::SmartObject* message = NULL;
+  if (app.get()) {
+    return message;
+  }
+
+  message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   (*message)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::OnHashChangeID;
@@ -385,9 +389,11 @@ void MessageHelper::SendHashUpdateNotification(const uint32_t app_id) {
   LOG4CXX_INFO(logger_, "SendHashUpdateNotification");
 
   smart_objects::SmartObject* so = GetHashUpdateNotification(app_id);
-  PrintSmartObject(*so);
-  if (!ApplicationManagerImpl::instance()->ManageMobileCommand(so)) {
-    LOG4CXX_ERROR_EXT(logger_, "Failed to send HashUpdate notification.");
+  if (so) {
+    PrintSmartObject(*so);
+    if (!ApplicationManagerImpl::instance()->ManageMobileCommand(so)) {
+      LOG4CXX_ERROR_EXT(logger_, "Failed to send HashUpdate notification.");
+    }
   }
 }
 

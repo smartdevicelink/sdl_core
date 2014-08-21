@@ -454,10 +454,15 @@ void ResumeCtrl::IgnitionOff() {
 bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
                                  uint32_t hash) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::StartResumption");
-  DCHECK(application.get());
-  LOG4CXX_INFO(logger_, "app_id = " << application->app_id());
-  LOG4CXX_INFO(logger_, "hmi_app_id = " << application->hmi_app_id());
-  LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id()->asString());
+  if (!application.valid()) {
+    LOG4CXX_WARN(logger_, "Application not exist");
+    return false;
+  }
+
+  LOG4CXX_INFO(logger_, "app_id = " << application->app_id()
+                        << "hmi_app_id = " << application->hmi_app_id()
+                        << "mobile_id = "
+                        << application->mobile_app_id()->asString());
 
   Json::Value::iterator it = GetSavedApplications().begin();
   ApplicationManagerImpl::ApplicationListAccessor accessor;
@@ -494,10 +499,14 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
 
 bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
   LOG4CXX_INFO(logger_, "ResumeCtrl::StartResumptionOnlyHMILevel");
-  DCHECK(application.get());
+  if (!application.valid()) {
+    LOG4CXX_WARN(logger_, "Application not exist");
+    return false;
+  }
 
-  LOG4CXX_INFO(logger_, "app_id = " << application->app_id());
-  LOG4CXX_INFO(logger_, "mobile_id = " << application->mobile_app_id()->asString());
+  LOG4CXX_INFO(logger_, "app_id = " << application->app_id()
+                        << "mobile_id = "
+                        << application->mobile_app_id()->asString());
 
   Json::Value::iterator it = GetSavedApplications().begin();
   ApplicationManagerImpl::ApplicationListAccessor accessor;
