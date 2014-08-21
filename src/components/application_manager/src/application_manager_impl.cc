@@ -116,11 +116,6 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_INFO(logger_, "Destructing ApplicationManager.");
 
-  if (policy_manager_) {
-    LOG4CXX_INFO(logger_, "Unloading policy library.");
-    policy::PolicyHandler::instance()->UnloadPolicyLibrary();
-  }
-
   SendOnSDLClose();
 
   policy_manager_ = NULL;
@@ -142,6 +137,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 bool ApplicationManagerImpl::Stop() {
   LOG4CXX_INFO(logger_, "Stop ApplicationManager.");
   application_list_update_timer_->stop();
+
   try {
     UnregisterAllApplications();
   } catch (...) {
@@ -149,6 +145,10 @@ bool ApplicationManagerImpl::Stop() {
                   "An error occurred during unregistering applications.");
   }
 
+  if (policy_manager_) {
+    LOG4CXX_INFO(logger_, "Unloading policy library.");
+    policy::PolicyHandler::instance()->UnloadPolicyLibrary();
+  }
   return true;
 }
 
