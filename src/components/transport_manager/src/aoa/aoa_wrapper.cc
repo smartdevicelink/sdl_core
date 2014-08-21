@@ -74,7 +74,8 @@ static void OnTransmittedData(aoa_hdl_t *hdl, uint8_t *data, uint32_t sz,
   bool success = !error;
   AOADeviceObserver* const* p = static_cast<AOADeviceObserver* const*>(udata);
   AOADeviceObserver* observer = *p;
-  observer->OnTransmittedMessage(success);
+  RawMessagePtr message = new RawMessage(0, 0, data, sz);
+  observer->OnTransmittedMessage(success, message);
 }
 
 AOAWrapper::AOAWrapper(AOAHandle hdl)
@@ -105,6 +106,10 @@ bool AOAWrapper::SetCallback(AOADeviceObserver *observer,
   switch (endpoint) {
     case AOA_Ept_Accessory_BulkIn: callback = &OnReceivedData; break;
     case AOA_Ept_Accessory_BulkOut: callback = &OnTransmittedData; break;
+    default:
+      LOG4CXX_ERROR(logger_, "AOA: " << endpoint <<
+                    " endpoint doesn't support to use callback");
+      return false;
   }
   int ret = aoa_set_callback(hdl_, callback, &observer, BitEndpoint(endpoint));
   if (IsError(ret)) {

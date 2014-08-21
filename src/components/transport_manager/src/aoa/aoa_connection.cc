@@ -62,17 +62,15 @@ AOAConnection::~AOAConnection() {
 TransportAdapter::Error AOAConnection::SendData(RawMessagePtr message) {
   LOG4CXX_TRACE(logger_, "AOA: send data to " << device_uid_ << " " << app_handle_);
   if (!wrapper_->IsValidHandle()) {
-    controller_->ConnectionAborted(device_uid_, app_handle_,
-                                   CommunicationError());
+    Abort();
+    Disconnect();
     return TransportAdapter::FAIL;
   }
-  if (wrapper_->SendMessage(message)) {
-    controller_->DataSendDone(device_uid_, app_handle_, message);
-    return TransportAdapter::OK;
-  } else {
+  if (!wrapper_->SendMessage(message)) {
     controller_->DataSendFailed(device_uid_, app_handle_, message, DataSendError());
     return TransportAdapter::FAIL;
   }
+  return TransportAdapter::OK;
 }
 
 void AOAConnection::ReceiveDone(RawMessagePtr message) {
@@ -81,8 +79,18 @@ void AOAConnection::ReceiveDone(RawMessagePtr message) {
 }
 
 void AOAConnection::ReceiveFailed() {
-  LOG4CXX_TRACE(logger_, "AOA: receive failed from " << device_uid_ << " " << app_handle_);
+  LOG4CXX_WARN(logger_, "AOA: receive failed from " << device_uid_ << " " << app_handle_);
   controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
+}
+
+void AOAConnection::TransmitDone(RawMessagePtr message) {
+  LOG4CXX_TRACE(logger_, "AOA: transmit data to " << device_uid_ << " " << app_handle_);
+  controller_->DataSendDone(device_uid_, app_handle_, message);
+}
+
+void AOAConnection::TransmitFailed(RawMessagePtr message) {
+  LOG4CXX_WARN(logger_, "AOA: transmit failed to " << device_uid_ << " " << app_handle_);
+  controller_->DataSendFailed(device_uid_, app_handle_, message, DataSendError());
 }
 
 void AOAConnection::Abort() {
@@ -108,16 +116,19 @@ void AOAConnection::DeviceObserver::OnReceivedMessage(bool success,
     parent_->ReceiveFailed();
   } else {
     parent_->Abort();
+    parent_->Disconnect();
   }
 }
 
-void AOAConnection::DeviceObserver::OnTransmittedMessage(bool success) {
+void AOAConnection::DeviceObserver::OnTransmittedMessage(bool success,
+                                                         RawMessagePtr message) {
   if (success) {
-    // TODO(KKolodiy): need to think
+    parent_->TransmitDone(message);
   } else if (wrapper_->IsValidHandle()) {
-    // TODO(KKolodiy): need to think
+    parent_->TransmitFailed(message);
   } else {
     parent_->Abort();
+    parent_->Disconnect();
   }
 }
 

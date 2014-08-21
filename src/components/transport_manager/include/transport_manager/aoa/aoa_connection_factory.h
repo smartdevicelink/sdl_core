@@ -30,29 +30,33 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_CONNECTION_FACTORY_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_CONNECTION_FACTORY_H_
 
-#include "transport_manager/transport_adapter/device.h"
-#include "transport_manager/aoa/aoa_wrapper.h"
+#include "transport_manager/transport_adapter/server_connection_factory.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class AOADevice : public Device {
+class TransportAdapterController;
+
+class AOAConnectionFactory : public ServerConnectionFactory {
  public:
-  explicit AOADevice(AOAWrapper::AOAHandle handle);
-  virtual bool IsSameAs(const Device* other_device) const;
-  virtual ApplicationList GetApplicationList() const;
-  AOAWrapper::AOAHandle handle() const;
+  explicit AOAConnectionFactory(TransportAdapterController* controller);
+
+ protected:
+  virtual TransportAdapter::Error Init();
+  virtual TransportAdapter::Error CreateConnection(
+    const DeviceUID& device_uid, const ApplicationHandle& app_handle);
+  virtual void Terminate();
+  virtual bool IsInitialised() const;
 
  private:
-  AOAWrapper::AOAHandle handle_;
+  TransportAdapterController* controller_;
 };
-
-typedef utils::SharedPtr<AOADevice> AOADevicePtr;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_CONNECTION_FACTORY_H_
+}

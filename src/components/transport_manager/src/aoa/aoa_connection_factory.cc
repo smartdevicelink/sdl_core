@@ -30,29 +30,48 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_
-
-#include "transport_manager/transport_adapter/device.h"
-#include "transport_manager/aoa/aoa_wrapper.h"
+#include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class AOADevice : public Device {
- public:
-  explicit AOADevice(AOAWrapper::AOAHandle handle);
-  virtual bool IsSameAs(const Device* other_device) const;
-  virtual ApplicationList GetApplicationList() const;
-  AOAWrapper::AOAHandle handle() const;
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
- private:
-  AOAWrapper::AOAHandle handle_;
-};
+AOAConnectionFactory::AOAConnectionFactory(TransportAdapterController* controller)
+    : controller_(controller) {
+}
 
-typedef utils::SharedPtr<AOADevice> AOADevicePtr;
+TransportAdapter::Error AOAConnectionFactory::Init() {
+  return TransportAdapter::OK;
+}
+
+bool AOAConnectionFactory::IsInitialised() const {
+  return true;
+}
+
+TransportAdapter::Error AOAConnectionFactory::CreateConnection(
+  const DeviceUID& device_uid, const ApplicationHandle& app_handle) {
+  LOG4CXX_TRACE(logger_, "AOA: create connection DeviceUID: " << &device_uid <<
+                ", ApplicationHandle: " << &app_handle);
+
+  DeviceSptr device = controller_->FindDevice(device_uid);
+  if (!device) {
+    LOG4CXX_ERROR(logger_, "AOA: device " << device_uid << " not found");
+    return TransportAdapter::BAD_PARAM;
+  }
+
+  AOADevicePtr aoa_device = DeviceSptr::static_pointer_cast<AOADevice>(device);
+  ConnectionSptr connection = new AOAConnection(device_uid, app_handle,
+      controller_, aoa_device->handle());
+  controller_->ConnectionCreated(connection, device_uid, app_handle);
+
+  LOG4CXX_INFO(logger_, "AOA: connection created");
+  return TransportAdapter::OK;
+}
+
+void AOAConnectionFactory::Terminate() {
+}
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_

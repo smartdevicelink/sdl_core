@@ -99,7 +99,7 @@ class AOAScannerObserver {
 class AOADeviceObserver {
  public:
   virtual void OnReceivedMessage(bool success, RawMessagePtr message) = 0;
-  virtual void OnTransmittedMessage(bool success) = 0;
+  virtual void OnTransmittedMessage(bool success, RawMessagePtr message) = 0;
   virtual ~AOADeviceObserver() {}
 };
 

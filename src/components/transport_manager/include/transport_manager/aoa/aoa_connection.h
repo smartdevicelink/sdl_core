@@ -62,13 +62,15 @@ class AOAConnection : public Connection {
 
   void ReceiveDone(RawMessagePtr message);
   void ReceiveFailed();
+  void TransmitDone(RawMessagePtr message);
+  void TransmitFailed(RawMessagePtr message);
   void Abort();
 
   class DeviceObserver : public AOADeviceObserver {
    public:
     explicit DeviceObserver(AOAConnection* parent);
     void OnReceivedMessage(bool success, RawMessagePtr message);
-    void OnTransmittedMessage(bool success);
+    void OnTransmittedMessage(bool success, RawMessagePtr message);
    private:
     AOAConnection* parent_;
   };

@@ -35,6 +35,7 @@
 #include "utils/logger.h"
 #include "transport_manager/aoa/aoa_wrapper.h"
 #include "transport_manager/aoa/aoa_device_scanner.h"
+#include "transport_manager/aoa/aoa_connection_factory.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -42,7 +43,8 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 AOATransportAdapter::AOATransportAdapter()
-    : TransportAdapterImpl(new AOADeviceScanner(this), NULL, NULL),
+    : TransportAdapterImpl(new AOADeviceScanner(this),
+                           new AOAConnectionFactory(this), NULL),
       initialised_(false) {
 }
 

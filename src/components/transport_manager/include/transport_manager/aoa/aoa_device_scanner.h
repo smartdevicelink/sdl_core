@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_SCANNER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_SCANNER_H_
 
+#include <map>
+
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/aoa/aoa_device.h"
 #include "transport_manager/aoa/aoa_wrapper.h"

@@ -44,18 +44,23 @@ AOADevice::AOADevice(AOAWrapper::AOAHandle handle)
 }
 
 bool AOADevice::IsSameAs(const Device* other_device) const {
-  const AOADevice* other_aoa_device = dynamic_cast<const AOADevice*>(other_device);
+  const AOADevice* other_aoa_device = static_cast<const AOADevice*>(other_device);
   if (other_aoa_device) {
     return (other_aoa_device->unique_device_id() == unique_device_id()) &&
         (other_aoa_device->handle_ == handle_);
-  }
-  else {
+  } else {
     return false;
   }
 }
 
 ApplicationList AOADevice::GetApplicationList() const {
-  return ApplicationList();
+  // Device has got only one application
+  const ApplicationHandle kNumberApplication = 1;
+  return ApplicationList().push_back(kNumberApplication);
+}
+
+AOAWrapper::AOAHandle AOADevice::handle() const {
+  return handle_;
 }
 
 }  // namespace transport_adapter

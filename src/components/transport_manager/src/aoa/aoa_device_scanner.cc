@@ -94,5 +94,5 @@ void AOADeviceScanner::ScannerObserver::OnConnectedDevice(AOAWrapper::AOAHandle 
   parent_->NotifyDevicesUpdated();
 }
 
-}  // namespace transport_manager
 }  // namespace transport_adapter
+}  // namespace transport_manager
