@@ -99,6 +99,20 @@ SDL.SDLModel = Em.Object.create({
     stateLimited: null,
 
     /**
+     * FLAG of any app in limited level exists
+     */
+    limitedExist: false,
+
+    applicationStatusBar: function () {
+
+        if (this.limitedExist) {
+            return SDL.SDLController.getApplicationModel(this.stateLimited).statusText;
+        } else {
+            return '';
+        }
+    }.property("this.limitedExist"),
+
+    /**
      * IScroll object to manage scroll on PerformInteraction view
      *
      * @type {Object}
@@ -1428,6 +1442,7 @@ SDL.SDLModel = Em.Object.create({
             if (SDL.SDLModel.stateLimited && reason === 'AUDIO') {
 
                 SDL.SDLModel.stateLimited = null;
+                SDL.SDLModel.set('limitedExist', false);
             }
 
             SDL.TurnByTurnView.deactivate();

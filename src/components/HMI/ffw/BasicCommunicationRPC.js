@@ -244,6 +244,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                         if (SDL.SDLModel.stateLimited == appID) {
                             SDL.SDLModel.stateLimited = null;
+                            SDL.SDLModel.set('limitedExist', false);
                         }
 
                         if (response.result.isSDLAllowed) {
@@ -423,6 +424,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                         if (SDL.SDLModel.stateLimited == request.params.appID) {
                             SDL.SDLModel.stateLimited = null;
+                            SDL.SDLModel.set('limitedExist', false);
                         }
 
                         SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
