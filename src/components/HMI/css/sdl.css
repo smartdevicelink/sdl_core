@@ -207,6 +207,7 @@
 
 #sdl_options .list-content .ico {
 	height: 49px;
+    width: 49px;
 	float: left;
     position: relative;
 }

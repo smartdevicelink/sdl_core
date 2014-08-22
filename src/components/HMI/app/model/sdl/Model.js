@@ -105,7 +105,7 @@ SDL.SDLModel = Em.Object.create({
 
     applicationStatusBar: function () {
 
-        if (this.limitedExist) {
+        if (this.limitedExist && SDL.SDLController.getApplicationModel(this.stateLimited)) {
             return SDL.SDLController.getApplicationModel(this.stateLimited).statusText;
         } else {
             return '';
