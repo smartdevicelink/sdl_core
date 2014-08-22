@@ -57,7 +57,7 @@ IAPDevice::IAPDevice(const std::string& mount_point,
 IAPDevice::~IAPDevice() {
   receiver_thread_->stop();
 
-  LOG4CXX_TRACE(logger_, "iAP: disconecting from " << mount_point());
+  LOG4CXX_TRACE(logger_, "iAP: disconnecting from " << mount_point());
   if (ipod_disconnect(ipod_hdl_) != -1) {
     LOG4CXX_DEBUG(logger_, "iAP: disconnected from " << mount_point());
   }
