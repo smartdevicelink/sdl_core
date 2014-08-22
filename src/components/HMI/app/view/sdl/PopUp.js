@@ -42,7 +42,8 @@ SDL.PopUp = Em.ContainerView.create({
     [
         'message',
         'buttonOk',
-        'buttonCancel'
+        'buttonCancel',
+        'backButton'
     ],
 
     classNameBindings: [
@@ -59,6 +60,17 @@ SDL.PopUp = Em.ContainerView.create({
     content: 'Title',
 
     active: false,
+
+    backButton: SDL.Button.extend( {
+        classNames: 'button backButton',
+        text: 'X',
+        click: function () {
+            SDL.PopUp.set('active', false);
+        },
+        buttonAction: true,
+        onDown: false,
+        disabledBinding: 'parentView.buttons'
+    }),
 
     buttons: true,
 
