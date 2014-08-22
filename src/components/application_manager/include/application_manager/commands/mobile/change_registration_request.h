@@ -34,6 +34,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
 
+#include <strings.h>
+
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/pending.h"
 #include "utils/macro.h"
