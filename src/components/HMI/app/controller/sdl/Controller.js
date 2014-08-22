@@ -736,16 +736,25 @@ SDL.SDLController = Em.Object
         onSoftButtonActionUpCustom: function(element) {
 
             if (element.time > 0) {
-                FFW.Buttons.buttonEventCustom("CUSTOM_BUTTON",
+                FFW.Buttons.buttonEventCustom(
+                    "CUSTOM_BUTTON",
                     "BUTTONUP",
-                    element.softButtonID);
+                    element.softButtonID,
+                    element.appID
+                );
             } else {
-                FFW.Buttons.buttonEventCustom("CUSTOM_BUTTON",
+                FFW.Buttons.buttonEventCustom(
+                    "CUSTOM_BUTTON",
                     "BUTTONUP",
-                    element.softButtonID);
-                FFW.Buttons.buttonPressedCustom("CUSTOM_BUTTON",
+                    element.softButtonID,
+                    element.appID
+                );
+                FFW.Buttons.buttonPressedCustom(
+                    "CUSTOM_BUTTON",
                     "SHORT",
-                    element.softButtonID);
+                    element.softButtonID,
+                    element.appID
+                );
             }
             clearTimeout(element.timer);
             element.time = 0;
@@ -757,15 +766,21 @@ SDL.SDLController = Em.Object
          */
         onSoftButtonActionDownCustom: function(element) {
 
-            FFW.Buttons.buttonEventCustom("CUSTOM_BUTTON",
+            FFW.Buttons.buttonEventCustom(
+                "CUSTOM_BUTTON",
                 "BUTTONDOWN",
-                element.softButtonID);
+                element.softButtonID,
+                element.appID
+            );
             element.time = 0;
             element.timer = setTimeout(function() {
 
-                FFW.Buttons.buttonPressedCustom("CUSTOM_BUTTON",
+                FFW.Buttons.buttonPressedCustom(
+                    "CUSTOM_BUTTON",
                     "LONG",
-                    element.softButtonID);
+                    element.softButtonID,
+                    element.appID
+                );
                 element.time++;
             }, 2000);
         },
