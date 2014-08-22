@@ -1869,6 +1869,9 @@
     	<param name="customButtonID" type="Integer" mandatory="false" minvalue="0" maxvalue="65536">
     		<description>Must be provided if ButtonName is CUSTOM_BUTTON, this references the integer ID passed by a custom button. (e.g. softButtonName)</description>
     	</param>
+        <param name="appID" type="Integer" mandatory="false">
+            <description>ID of the application.</description>
+        </param>
     </function>
     <function name="OnButtonPress" messagetype="notification">
         <param name="name" type="Common.ButtonName" mandatory="true"/>
@@ -1877,6 +1880,9 @@
         </param>
         <param name="customButtonID" type="Integer" mandatory="false" minvalue="0" maxvalue="65536">
             <description>Must be returned if ButtonName is CUSTOM_BUTTON, this references the string passed by a custom button. (e.g. softButtonName)</description>
+        </param>
+        <param name="appID" type="Integer" mandatory="false">
+            <description>ID of the application.</description>
         </param>
     </function>
 </interface>
