@@ -174,6 +174,8 @@ const std::string kInsertApplication =
   " `default_hmi`, `priority_value`, `is_revoked`, `memory_kb`, "
   " `heart_beat_timeout_ms`, `certificate`) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
 
+const std::string kCollectFriendlyMsg = "SELECT * FROM `message`";
+
 const std::string kSelectFriendlyMsg =
   "SELECT `tts`, `label`, `line1`, `line2`, `textBody` FROM `message` "
   "WHERE `message_type_name` = ? AND `language_code` = ? LIMIT 1";

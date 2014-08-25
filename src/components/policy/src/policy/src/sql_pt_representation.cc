@@ -244,7 +244,7 @@ EndpointUrls SQLPTRepresentation::GetUpdateUrls(int service_type) {
     while (query.Next()) {
       EndpointData data;
 
-      data.url = query.GetString(0);
+      data.url.push_back(query.GetString(0));
       if (!query.IsNull(1)) {
         data.app_id = query.GetString(1);
       }
@@ -622,22 +622,19 @@ bool SQLPTRepresentation::Save(const policy_table::Table& table) {
     db_->RollbackTransaction();
     return false;
   }
-// TODO(AOleynik): According to requirements we don't have to replace these
-// sections. Also this part leads to restoring of data, which could be deleted
-// before. Commented to check, if there any dependecies from these code.
-// Probably, appropriate methods should be removed also then.
-//  if (!SaveDeviceData(*table.policy_table.device_data)) {
-//    db_->RollbackTransaction();
-//    return false;
-//  }
-//  if (!SaveUsageAndErrorCounts(*table.policy_table.usage_and_error_counts)) {
-//    db_->RollbackTransaction();
-//    return false;
-//  }
-//  if (!SaveModuleMeta(*table.policy_table.module_meta)) {
-//    db_->RollbackTransaction();
-//    return false;
-//  }
+
+  if (!SaveDeviceData(*table.policy_table.device_data)) {
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!SaveUsageAndErrorCounts(*table.policy_table.usage_and_error_counts)) {
+    db_->RollbackTransaction();
+    return false;
+  }
+  if (!SaveModuleMeta(*table.policy_table.module_meta)) {
+    db_->RollbackTransaction();
+    return false;
+  }
   db_->CommitTransaction();
   return true;
 }
@@ -1298,22 +1295,42 @@ bool SQLPTRepresentation::GatherAppGroup(
   return true;
 }
 
-bool SQLPTRepresentation::IsApplicationRevoked(
-  const std::string& app_id) const {
+bool SQLPTRepresentation::SaveApplicationCustomData(const std::string& app_id,
+                                                    bool is_revoked,
+                                                    bool is_default,
+                                                    bool is_predata) {
   dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kSelectApplicationRevoked)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from is_revoked of application");
+  if (!query.Prepare(sql_pt::kUpdateApplicationCustomData)) {
+    LOG4CXX_WARN(logger_, "Incorrect update in application");
     return false;
   }
 
   query.Bind(0, app_id);
+  query.Bind(1, is_revoked);
+  query.Bind(1, is_default);
+  query.Bind(2, is_predata);
+
   if (!query.Exec()) {
-    LOG4CXX_WARN(logger_, "Failed select is_revoked of application");
+    LOG4CXX_WARN(logger_, "Failed update in application");
     return false;
   }
-  return query.IsNull(0) ? false : query.GetBoolean(0);
+
+  return true;
 }
 
+bool SQLPTRepresentation::IsApplicationRevoked(
+    const std::string& app_id) const {
+
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectApplicationRevoked)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from is_revoked of application");
+  }
+   if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Failed select is_revoked of application");
+     return false;
+  }
+  return query.IsNull(0) ? false : query.GetBoolean(0);
+ }
 bool SQLPTRepresentation::IsApplicationRepresented(
   const std::string& app_id) const {
   dbms::SQLQuery query(db());

@@ -132,10 +132,9 @@ struct CheckPermissionResult {
   @struct Holds Url string and optional policy app id.
   */
 struct EndpointData {
-    explicit EndpointData(const std::string& url_string = "")
-        : url(url_string)
-        , app_id("default") {}
-    std::string url;
+    explicit EndpointData()
+        : app_id("default") {}
+    std::vector<std::string> url;
     std::string app_id;
 };
 

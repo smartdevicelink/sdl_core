@@ -59,7 +59,7 @@ void GetUrls::Run() {
     object[strings::msg_params][hmi_response::urls] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
     for (size_t i = 0; i < endpoints.size(); ++i) {
-      object[strings::msg_params][hmi_response::urls][i][strings::url] = endpoints[i].url;
+      object[strings::msg_params][hmi_response::urls][i][strings::url] = endpoints[i].url[0];
       if (policy::kDefaultId != endpoints[i].app_id) {
         object[strings::msg_params][hmi_response::urls][i][hmi_response::policy_app_id] =
           endpoints[i].app_id;

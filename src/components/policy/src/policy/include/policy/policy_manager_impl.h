@@ -37,6 +37,7 @@
 #include "utils/shared_ptr.h"
 #include "utils/lock.h"
 #include "policy/policy_manager.h"
+#include "policy/cache_manager.h"
 #include "policy/policy_table.h"
 #include "policy/update_status_manager.h"
 #include "./functions.h"
@@ -156,8 +157,7 @@ class PolicyManagerImpl : public PolicyManager {
     void AddApplication(const std::string& application_id);
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(
-      const BinaryMessage& pt_content);
-    virtual bool LoadPTFromFile(const std::string& file_name);
+        const BinaryMessage& pt_content);
 
   private:
     /*
@@ -231,7 +231,15 @@ class PolicyManagerImpl : public PolicyManager {
 
     PolicyListener* listener_;
     PolicyTable policy_table_;
+
     UpdateStatusManager update_status_manager_;
+    CacheManager cache;
+    bool exchange_in_progress_;
+    bool update_required_;
+    bool exchange_pending_;
+    sync_primitives::Lock exchange_in_progress_lock_;
+    sync_primitives::Lock update_required_lock_;
+    sync_primitives::Lock exchange_pending_lock_;
     sync_primitives::Lock update_request_list_lock_;
     sync_primitives::Lock apps_registration_lock_;
     std::map<std::string, AppPermissions> app_permissions_diff_;
