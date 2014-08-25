@@ -67,7 +67,9 @@ AudioStreamSenderThread::AudioStreamSenderThread(
 }
 
 AudioStreamSenderThread::~AudioStreamSenderThread() {
+#ifdef CUSTOMER_PASA
   mq_unlink(fileName_.c_str());
+#endif
 }
 
 void AudioStreamSenderThread::threadMain() {
@@ -85,8 +87,11 @@ void AudioStreamSenderThread::threadMain() {
     if (getShouldBeStopped()) {
       break;
     }
-
+#ifdef CUSTOMER_PASA
     mqSendAudioChunkToMobile();
+#else
+    sendAudioChunkToMobile();
+#endif
   }
 
   LOG4CXX_TRACE_EXIT(logger_);
@@ -131,6 +136,7 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
 #endif
 }
 
+#ifdef CUSTOMER_PASA
 void AudioStreamSenderThread::mqSendAudioChunkToMobile() {
   mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
   const mqd_t handle = mq_open(fileName_.c_str(), O_RDWR, mode, 0);
@@ -178,7 +184,7 @@ void AudioStreamSenderThread::mqSendAudioChunkToMobile() {
   application_manager::ApplicationManagerImpl::instance()->
   SendAudioPassThroughNotification(session_key_, data);
 }
-
+#endif
 bool AudioStreamSenderThread::getShouldBeStopped() {
   AutoLock auto_lock(shouldBeStoped_lock_);
 
