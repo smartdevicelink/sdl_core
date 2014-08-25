@@ -74,11 +74,11 @@ void ReadDIDRequest::Run() {
         static_cast<mobile_apis::FunctionID::eType>(function_id()),
         application_manager::TLimitSource::CONFIG_FILE)) {
     LOG4CXX_ERROR(logger_, "ReadDID frequency is too high.");
-    SendResponse(false, mobile_apis::Result::REJECTED);    
+    SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
 
-  if (0 == (*message_)[strings::msg_params][strings::did_location].length()) {
+  if ((*message_)[strings::msg_params][strings::did_location].empty()) {
     LOG4CXX_ERROR_EXT(logger_, "INVALID_DATA");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;

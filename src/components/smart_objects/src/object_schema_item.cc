@@ -29,16 +29,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "smart_objects/object_schema_item.h"
 
 #include <algorithm>
 
 #include "smart_objects/always_false_schema_item.h"
-#include "smart_objects/object_schema_item.h"
 #include "smart_objects/smart_object.h"
 
 namespace {
 const char connection_key[] = "connection_key";
 const char binary_data[] = "binary_data";
+const char msg_params[] = "msg_params";
 }
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -69,14 +70,15 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {
     const std::string& key = it->first;
     const SMember& member = it->second;
 
-    Key_Iterator key_it = object_keys.find(key);
+    std::set<std::string>::const_iterator key_it = object_keys.find(key);
     if (object_keys.end() == key_it) {
       if (member.mIsMandatory) {
         return Errors::MISSING_MANDATORY_PARAMETER;
       }
       continue;
     }
-    const Errors::eType result = member.mSchemaItem->validate(object.getElement(key));
+    const SmartObject& field = object.getElement(key);
+    const Errors::eType result = member.mSchemaItem->validate(field);
     if (Errors::OK != result) {
       return result;
     }

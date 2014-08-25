@@ -95,8 +95,9 @@ const char SUCCESS[]        = "success";
 
 class ObjectSchemaItemTest : public ::testing::Test {
  protected:
+  ISchemaItemPtr schema_item;
   // Create SmartObjectSchema for test object
-  ISchemaItemPtr initObjectSchemaItem() {
+  void SetUp() {
     std::set<FunctionID::eType> function_values;
     function_values.insert(FunctionID::Function0);
     function_values.insert(FunctionID::Function1);
@@ -146,14 +147,12 @@ class ObjectSchemaItemTest : public ::testing::Test {
     rootMembersMap[S_MSG_PARAMS] =
       CObjectSchemaItem::SMember(CObjectSchemaItem::create(schemaMembersMap), true);
 
-    return CObjectSchemaItem::create(rootMembersMap);
+    schema_item = CObjectSchemaItem::create(rootMembersMap);
   }
 };
 
 TEST_F(ObjectSchemaItemTest, validation_correct) {
-  ISchemaItemPtr item = initObjectSchemaItem();
   SmartObject obj;
-
   obj[S_PARAMS][S_FUNCTION_ID] = 0;
   obj[S_PARAMS][S_CORRELATION_ID] = 0XFF0;
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
@@ -161,13 +160,11 @@ TEST_F(ObjectSchemaItemTest, validation_correct) {
   obj[S_MSG_PARAMS][Keys::INFO] = "0123456789";
   obj[S_MSG_PARAMS][Keys::SUCCESS] = true;
 
-  EXPECT_EQ(Errors::OK, item->validate(obj));
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_correct_skip_not_mandatory) {
-  ISchemaItemPtr item = initObjectSchemaItem();
   SmartObject obj;
-
   obj[S_PARAMS][S_FUNCTION_ID] = 1;
   obj[S_PARAMS][S_CORRELATION_ID] = -0xFF1;
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
@@ -175,17 +172,15 @@ TEST_F(ObjectSchemaItemTest, validation_correct_skip_not_mandatory) {
   // skip non-mandatory obj[S_MSG_PARAMS][Keys::INFO]
   obj[S_MSG_PARAMS][Keys::SUCCESS] = false;
 
-  EXPECT_EQ(Errors::OK, item->validate(obj));
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_invalid_param) {
-  ISchemaItemPtr item = initObjectSchemaItem();
   SmartObject obj;
-
   obj[S_PARAMS] = "some parameters";
   obj[S_MSG_PARAMS] = "some message parameters";
 
-  EXPECT_EQ(Errors::INVALID_VALUE, item->validate(obj));
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
 
   obj[S_PARAMS][S_FUNCTION_ID] = "some function";
   obj[S_PARAMS][S_CORRELATION_ID] = "some correlation id";
@@ -193,28 +188,26 @@ TEST_F(ObjectSchemaItemTest, validation_invalid_param) {
   obj[S_MSG_PARAMS][Keys::RESULT_CODE] = "some result";
   obj[S_MSG_PARAMS][Keys::SUCCESS] = 0xABC;
 
-  EXPECT_EQ(Errors::INVALID_VALUE, item->validate(obj));
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
 
   obj[S_PARAMS][S_FUNCTION_ID] = 1;
-  EXPECT_EQ(Errors::INVALID_VALUE, item->validate(obj));
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
 
   obj[S_PARAMS][S_CORRELATION_ID] = -0xFF1;
-  EXPECT_EQ(Errors::INVALID_VALUE, item->validate(obj));
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
 
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
-  EXPECT_EQ(Errors::INVALID_VALUE, item->validate(obj));
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
 
   obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 1;
-  EXPECT_EQ(Errors::INVALID_VALUE, item->validate(obj));
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
 
   obj[S_MSG_PARAMS][Keys::SUCCESS] = false;
 
-  EXPECT_EQ(Errors::OK, item->validate(obj));
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 }
 TEST_F(ObjectSchemaItemTest, validation_invalid_not_mandatory_param) {
-  ISchemaItemPtr item = initObjectSchemaItem();
   SmartObject obj;
-
   obj[S_PARAMS][S_FUNCTION_ID] = 0;
   obj[S_PARAMS][S_CORRELATION_ID] = 0XFF0;
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
@@ -223,24 +216,22 @@ TEST_F(ObjectSchemaItemTest, validation_invalid_not_mandatory_param) {
 
   // invalid non-mandatory obj[S_MSG_PARAMS][Keys::INFO]
   obj[S_MSG_PARAMS][Keys::INFO] = 0x10;
-  EXPECT_EQ(Errors::INVALID_VALUE, item->validate(obj));
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
 
   // invalid non-mandatory obj[S_MSG_PARAMS][Keys::INFO]
   obj[S_MSG_PARAMS][Keys::INFO] = true;
-  EXPECT_EQ(Errors::INVALID_VALUE, item->validate(obj));
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
 
   // invalid non-mandatory obj[S_MSG_PARAMS][Keys::INFO]
   obj[S_MSG_PARAMS][Keys::INFO] = SmartObject();
-  EXPECT_EQ(Errors::INVALID_VALUE, item->validate(obj));
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
 
   obj[S_MSG_PARAMS][Keys::INFO] = "info";
-  EXPECT_EQ(Errors::OK, item->validate(obj));
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_missing_mandatory) {
-  ISchemaItemPtr item = initObjectSchemaItem();
   SmartObject obj;
-
   // missed obj[S_PARAMS][S_FUNCTION_ID]
   // missed obj[S_PARAMS][S_CORRELATION_ID]
   // missed obj[S_PARAMS][S_PROTOCOL_VERSION]
@@ -248,22 +239,24 @@ TEST_F(ObjectSchemaItemTest, validation_missing_mandatory) {
   obj[S_MSG_PARAMS][Keys::INFO] = "123";
   obj[S_MSG_PARAMS][Keys::SUCCESS] = false;
 
-  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, item->validate(obj));
+  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, schema_item->validate(obj));
 
   obj[S_PARAMS][S_FUNCTION_ID] = 2;
   // S_CORRELATION_ID and S_PROTOCOL_VERSION is still missed
-  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, item->validate(obj));
+  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, schema_item->validate(obj));
 
   obj[S_PARAMS][S_CORRELATION_ID] = 0XFF2;
   // S_PROTOCOL_VERSION is still missed
-  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, item->validate(obj));
+  EXPECT_EQ(Errors::MISSING_MANDATORY_PARAMETER, schema_item->validate(obj));
 
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
-  EXPECT_EQ(Errors::OK, item->validate(obj));
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_unexpected_param) {
-  ISchemaItemPtr item = initObjectSchemaItem();
+  const char* fake1 = "FAKE_PARAM1";
+  const char* fake2 = "FAKE_PARAM2";
+  const char* fake3 = "FAKE_PARAM3";
 
   SmartObject obj;
   obj[S_PARAMS][S_FUNCTION_ID] = 0;
@@ -272,39 +265,82 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param) {
   obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 2;
   obj[S_MSG_PARAMS][Keys::INFO] = "123";
   obj[S_MSG_PARAMS][Keys::SUCCESS] = true;
-  obj["FAKE_PARAM1"] = SmartObject(0ll);
-  obj["FAKE_PARAM2"] = SmartObject("123");
 
-  // anyfake parameter is OK
-  EXPECT_EQ(Errors::OK, item->validate(obj));
+  obj[fake1] = SmartObject(0ll);
+  // any fake parameter is OK
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 
-  item->applySchema(obj);
-  EXPECT_EQ(Errors::OK, item->validate(obj));
+  obj[S_PARAMS][fake2] = SmartObject("123");
+  // any fake parameters are OK
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+
+  obj[S_MSG_PARAMS][fake3] = true;
+  // any fake parameters are OK
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+}
+
+TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
+  const char* fake1 = "FAKE_PARAM1";
+  const char* fake2 = "FAKE_PARAM2";
+  const char* fake3 = "FAKE_PARAM3";
+
+  SmartObject obj;
+  obj[S_PARAMS][S_FUNCTION_ID] = 0;
+  obj[S_PARAMS][S_CORRELATION_ID] = 0XFF;
+  obj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
+  obj[S_MSG_PARAMS][Keys::RESULT_CODE] = 2;
+  obj[S_MSG_PARAMS][Keys::INFO] = "123";
+  obj[S_MSG_PARAMS][Keys::SUCCESS] = true;
+
+  obj[fake1] = SmartObject(0ll);
+  obj[S_PARAMS][fake2] = SmartObject("123");
+  obj[S_MSG_PARAMS][fake3] = true;
+
+  // Check apply schema
+  schema_item->applySchema(obj);
+  // all fake parameters are romed on apply schema
+  EXPECT_FALSE(obj.keyExists(fake1));
+  EXPECT_FALSE(obj[S_PARAMS].keyExists(fake2));
+  EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(fake3));
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+
+  obj[fake1] = SmartObject(0ll);
+  obj[S_PARAMS][fake2] = SmartObject("123");
+  obj[S_MSG_PARAMS][fake3] = true;
+
+  // Check unapply schema
+  schema_item->unapplySchema(obj);
+  // all fake parameters are romed on apply schema
+  EXPECT_FALSE(obj.keyExists(fake1));
+  EXPECT_FALSE(obj[S_PARAMS].keyExists(fake2));
+  EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(fake3));
+  // Invalide state after enum convertion
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
 }
 
 TEST_F(ObjectSchemaItemTest, validation_empty_params) {
   SmartObject obj;
-  ISchemaItemPtr item = initObjectSchemaItem();
-
   obj[S_PARAMS][S_FUNCTION_ID] = 1;
   obj[S_PARAMS][S_CORRELATION_ID] = 0xFF;
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 2;
   obj[S_PARAMS][S_PROTOCOL_TYPE] = 0;
   // S_MSG_PARAMS has only fake parameter
   obj[S_MSG_PARAMS]["FAKE_PARAM1"] = SmartObject();
-  obj[S_MSG_PARAMS]["FAKE_PARAM2"] = SmartObject();
-  obj[S_MSG_PARAMS]["FAKE_PARAM3"] = SmartObject();
+  obj[S_MSG_PARAMS]["FAKE_PARAM2"] = SmartObject(0x1);
+  obj[S_MSG_PARAMS]["FAKE_PARAM3"] = SmartObject("2");
 
-  EXPECT_EQ(Errors::OK, item->validate(obj));
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 
-  item->applySchema(obj);
-  EXPECT_EQ(Errors::OK, item->validate(obj));
+  schema_item->applySchema(obj);
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+
+  schema_item->unapplySchema(obj);
+  // Invalide state after enum convertion
+  EXPECT_EQ(Errors::INVALID_VALUE, schema_item->validate(obj));
 }
 
-TEST_F(ObjectSchemaItemTest, test_strings_to_enum_convertion) {
-  ISchemaItemPtr schema = initObjectSchemaItem();
+TEST_F(ObjectSchemaItemTest, test_strings_to_enum_conversion) {
   SmartObject object;
-
   object[S_PARAMS][S_FUNCTION_ID] = SmartObject();
   object[S_PARAMS][S_CORRELATION_ID] = 0XFF0;
   object[S_PARAMS][S_PROTOCOL_VERSION] = 1;
@@ -316,7 +352,8 @@ TEST_F(ObjectSchemaItemTest, test_strings_to_enum_convertion) {
   const Results results = EnumConversionHelper<ResultType::eType>::cstring_to_enum_map();
 
   typedef EnumConversionHelper<FunctionID::eType>::CStringToEnumMap Functions;
-  const Functions functions = EnumConversionHelper<FunctionID::eType>::cstring_to_enum_map();
+  const Functions functions =
+    EnumConversionHelper<FunctionID::eType>::cstring_to_enum_map();
 
   for (Results::const_iterator res_it = results.begin(); res_it != results.end();
        ++res_it) {
@@ -331,22 +368,22 @@ TEST_F(ObjectSchemaItemTest, test_strings_to_enum_convertion) {
       object[S_MSG_PARAMS][Keys::RESULT_CODE] = result_type_str;
 
       // S_FUNCTION_ID and RESULT_CODE are not converted to int
-      EXPECT_NE(Errors::OK, schema->validate(object));
+      EXPECT_NE(Errors::OK, schema_item->validate(object));
 
-      schema->applySchema(object);
-      EXPECT_EQ(Errors::OK, schema->validate(object));
+      schema_item->applySchema(object);
+      EXPECT_EQ(Errors::OK, schema_item->validate(object));
 
-      // check convertion result
+      // check conversion result
       EXPECT_EQ(function_type,
                 object[S_PARAMS][S_FUNCTION_ID].asInt());
       EXPECT_EQ(result_type,
                 object[S_MSG_PARAMS][Keys::RESULT_CODE].asInt());
 
-      schema->unapplySchema(object);
+      schema_item->unapplySchema(object);
       // S_FUNCTION_ID and RESULT_CODE are string
-      EXPECT_NE(Errors::OK, schema->validate(object));
+      EXPECT_NE(Errors::OK, schema_item->validate(object));
 
-      // check convertion result
+      // check conversion result
       EXPECT_EQ(function_str,
                 object[S_PARAMS][S_FUNCTION_ID].asString());
       EXPECT_EQ(result_type_str,

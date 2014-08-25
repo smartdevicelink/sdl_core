@@ -28,64 +28,65 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
+#include <string>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
 #include "smart_objects/smart_object.h"
 #include "smart_objects/always_false_schema_item.h"
 
-#include <string>
+namespace test {
+namespace components {
+namespace SmartObjects {
+namespace SchemaItem {
+using namespace NsSmartDeviceLink::NsSmartObjects;
 
+/**
+ * Test AlwaysFalseSchemaItem
+ **/
+TEST(test_AlwaysFalseSchemaItemTest, simple_test) {
+  SmartObject obj;
 
-namespace test { namespace components { namespace SmartObjects { namespace SchemaItem { namespace SchemaItemDraftTest {
-    using namespace NsSmartDeviceLink::NsSmartObjects;
+  ISchemaItemPtr item = CAlwaysFalseSchemaItem::create();
 
-    /**
-     * Test AlwaysFalseSchemaItem
-     **/
-    TEST(test_AlwaysFalseSchemaItemTest, simple_test)
-    {
-        SmartObject obj;
+  obj = 5;
+  int resultType = item->validate(obj);
+  EXPECT_EQ(Errors::ERROR, resultType);
+  EXPECT_EQ(5, obj.asInt());
 
-        ISchemaItemPtr item = CAlwaysFalseSchemaItem::create();
+  obj = true;
+  resultType = item->validate(obj);
+  EXPECT_EQ(Errors::ERROR, resultType);
+  EXPECT_TRUE(obj.asBool());
 
-        obj = 5;
-        int resultType = item->validate(obj);
-        EXPECT_EQ(Errors::ERROR, resultType);
-        EXPECT_EQ(5, obj.asInt());
+  obj = "Test";
+  resultType = item->validate(obj);
+  EXPECT_EQ(Errors::ERROR, resultType);
+  EXPECT_EQ(std::string("Test"), obj.asString());
 
-        obj = true;
-        resultType = item->validate(obj);
-        EXPECT_EQ(Errors::ERROR, resultType);
-        EXPECT_TRUE(obj.asBool());
+  obj["First"] = "Some string";
+  obj["Second"] = 555;
+  resultType = item->validate(obj["First"]);
+  EXPECT_EQ(Errors::ERROR, resultType);
+  resultType = item->validate(obj["Second"]);
+  EXPECT_EQ(Errors::ERROR, resultType);
+  resultType = item->validate(obj);
+  EXPECT_EQ(Errors::ERROR, resultType);
+  EXPECT_EQ(std::string("Some string"), obj["First"].asString());
+  EXPECT_EQ(555, obj["Second"].asInt());
 
-        obj = "Test";
-        resultType = item->validate(obj);
-        EXPECT_EQ(Errors::ERROR, resultType);
-        EXPECT_EQ(std::string("Test"), obj.asString());
-
-        obj["First"] = "Some string";
-        obj["Second"] = 555;
-        resultType = item->validate(obj["First"]);
-        EXPECT_EQ(Errors::ERROR, resultType);
-        resultType = item->validate(obj["Second"]);
-        EXPECT_EQ(Errors::ERROR, resultType);
-        resultType = item->validate(obj);
-        EXPECT_EQ(Errors::ERROR, resultType);
-        EXPECT_EQ(std::string("Some string"),obj["First"].asString());
-        EXPECT_EQ(555, obj["Second"].asInt());
-
-
-        obj[0] = true;
-        obj[1] = false;
-        resultType = item->validate(obj[0]);
-        EXPECT_EQ(Errors::ERROR, resultType);
-        resultType = item->validate(obj[1]);
-        EXPECT_EQ(Errors::ERROR, resultType);
-        resultType = item->validate(obj);
-        EXPECT_EQ(Errors::ERROR, resultType);
-        EXPECT_TRUE(obj[0].asBool());
-        EXPECT_FALSE(obj[1].asBool());
-
-    }
-}}}}}
+  obj[0] = true;
+  obj[1] = false;
+  resultType = item->validate(obj[0]);
+  EXPECT_EQ(Errors::ERROR, resultType);
+  resultType = item->validate(obj[1]);
+  EXPECT_EQ(Errors::ERROR, resultType);
+  resultType = item->validate(obj);
+  EXPECT_EQ(Errors::ERROR, resultType);
+  EXPECT_TRUE(obj[0].asBool());
+  EXPECT_FALSE(obj[1].asBool());
+}
+}  // namespace SchemaItem
+}  // namespace SmartObjects
+}  // namespace components
+}  // namespace test

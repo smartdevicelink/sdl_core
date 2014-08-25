@@ -83,7 +83,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     connection_key = 0xFF00AAu;
     message_id = 0xABCDEFu;
 
-    // expect ConnectionHandler support methods call (convertion, check heartbeat)
+    // expect ConnectionHandler support methods call (conversion, check heartbeat)
     EXPECT_CALL(session_observer_mock,
                 KeyFromPair(connection_id, session_id)).
         //return some connection_key
