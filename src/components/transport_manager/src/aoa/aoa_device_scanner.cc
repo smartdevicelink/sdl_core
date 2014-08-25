@@ -48,8 +48,10 @@ AOADeviceScanner::AOADeviceScanner(TransportAdapterController* controller)
 }
 
 TransportAdapter::Error AOADeviceScanner::Init() {
+  const std::string kPathToConfig = "/fs/mp/etc/mm/aoa.conf";
+  const AOAWrapper::AOAUsbInfo info;
   observer_ = new ScannerObserver(this);
-  initialised_ = AOAWrapper::Init(observer_);
+  initialised_ = AOAWrapper::Init(kPathToConfig, info, observer_);
   return (initialised_) ? TransportAdapter::OK : TransportAdapter::FAIL;
 }
 

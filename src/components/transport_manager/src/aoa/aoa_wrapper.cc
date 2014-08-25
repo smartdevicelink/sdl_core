@@ -89,10 +89,14 @@ AOAWrapper::AOAWrapper(AOAHandle hdl, uint32_t timeout)
       timeout_(timeout) {
 }
 
-bool AOAWrapper::Init(AOAScannerObserver *observer) {
+bool AOAWrapper::Init(const std::string& path_to_config,
+                      const AOAWrapper::AOAUsbInfo& aoa_usb_info,
+                      AOAScannerObserver *observer) {
   LOG4CXX_TRACE(logger_, "AOA: init");
-  int ret = aoa_init(NULL, NULL, &OnConnectedDevice, &observer,
-                     AOA_FLAG_EXTERNAL_SWITCH);
+  usb_info_t usb_info;
+  PrepareUsbInfo(aoa_usb_info, &usb_info);
+  int ret = aoa_init(path_to_config.c_str(), &usb_info, &OnConnectedDevice,
+                     &observer, AOA_FLAG_UNIQUE_DEVICE);
   if (IsError(ret)) {
     PrintError(ret);
     return false;
@@ -341,5 +345,14 @@ void AOAWrapper::PrintError(int ret) {
   LOG4CXX_ERROR(logger_, "AOA: error " << ret << " - " << aoa_err2str(ret));
 }
 
+void AOAWrapper::PrepareUsbInfo(const AOAUsbInfo& aoa_usb_info,
+                                usb_info_t* usb_info) {
+  usb_info->path = aoa_usb_info.path.c_str();
+  usb_info->busno = aoa_usb_info.busno;
+  usb_info->devno = aoa_usb_info.devno;
+  usb_info->iface = aoa_usb_info.iface;
+}
+
 }  // namespace transport_adapter
 }  // namespace transport_manager
+
