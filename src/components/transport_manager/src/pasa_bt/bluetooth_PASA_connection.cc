@@ -295,29 +295,35 @@ void BluetoothPASAConnection::Transmit() {
 bool BluetoothPASAConnection::Receive() {
   LOG4CXX_TRACE_ENTER(logger_);
   uint8_t buffer[4096];
-  int32_t numBytes = 0;
 
-  do {
-    numBytes = read(sppDeviceFd, (void*)buffer, 2047);
+  while(true) {
+    const ssize_t numBytes = read(sppDeviceFd, (void*)buffer, 2047);
+    const int errno_value = errno;
+    LOG4CXX_DEBUG( logger_,
+          "Received " << numBytes << " bytes for connection " << this);
     if (numBytes > 0) {
-      LOG4CXX_DEBUG( logger_,
-            "Received " << numBytes << " bytes for connection " << this);
       RawMessagePtr frame(
             new protocol_handler::RawMessage(0, 0, buffer, numBytes));
       controller_->DataReceiveDone(device_handle(), application_handle(), frame);
-    } else if (numBytes < 0) {
-      if (EAGAIN != errno && EWOULDBLOCK != errno) {
-        LOG4CXX_ERROR_WITH_ERRNO(logger_,
-                                 "recv() failed for connection " << this);
-        LOG4CXX_TRACE_EXIT(logger_);
-        return false;
-      }
-    } else {
+      // try to read more
+      continue;
+    }
+    if (numBytes == 0) {
       LOG4CXX_WARN(logger_, "Connection " << this << " closed by remote peer");
       LOG4CXX_TRACE_EXIT(logger_);
       return false;
     }
-  } while (numBytes > 0);
+    // numBytes < 0
+    if (EAGAIN == errno_value || EWOULDBLOCK == errno_value) {
+      LOG4CXX_ERROR(logger_, "No more data avalible for connection " << this);
+      // No more data avalible
+      break;
+    }
+    LOG4CXX_ERROR(logger_, "recv() failed for connection " << this
+                  << ", error code " << errno_value << " (" << strerror(errno_value) << ")")
+    LOG4CXX_TRACE_EXIT(logger_);
+    return false;
+  }
   LOG4CXX_TRACE_EXIT(logger_);
   return true;
 }
@@ -330,16 +336,18 @@ bool BluetoothPASAConnection::Send() {
   frames_to_send_lock_.Release();
 
   while (!frames_to_send.empty()) {
-    LOG4CXX_INFO(logger_, "frames_to_send is not empty" << pthread_self() << ")");
+    LOG4CXX_INFO(logger_, "frames_to_send is not empty (#" << pthread_self() << ")");
     RawMessagePtr frame = frames_to_send.front();
     bool frame_sent = false;
     if (frame) {
       if (frame->data() && frame->data_size() > 0 ) {
+        LOG4CXX_DEBUG(logger_, frame->data_size() << " bytes to write (#" << pthread_self() << ")");
         if (frame->data_size() < MAX_SPP_PACKET_SIZE) {
           SPPframe sppFrame = {};
           sppFrame.length = frame->data_size();
           memcpy(sppFrame.data, frame->data(), sppFrame.length);
           const ssize_t written = write(sppDeviceFd, (void*)sppFrame.data, sppFrame.length);
+          LOG4CXX_DEBUG(logger_, "written " << written << " bytes (#" << pthread_self() << ")");
           frame_sent = (written >= sppFrame.length);
         } else {
           //Send Frame in MAX_SPPFRAME_MESSAGE chunks
@@ -348,10 +356,12 @@ bool BluetoothPASAConnection::Send() {
             SPPframe sppFrame = {};
             sppFrame.length = ((bytesSent + MAX_SPP_PACKET_SIZE) < frame->data_size() )
                 ? MAX_SPP_PACKET_SIZE : frame->data_size() - bytesSent;
+            DCHECK(sppFrame.length);
 
             memcpy(sppFrame.data, &(frame->data())[bytesSent], sppFrame.length);
 
             const ssize_t written = write(sppDeviceFd, (void*)sppFrame.data, sppFrame.length);
+            LOG4CXX_DEBUG(logger_, "written " << written << " bytes (#" << pthread_self() << ")");
             frame_sent = (written >= sppFrame.length);
 
             if (!frame_sent){

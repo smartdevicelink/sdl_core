@@ -228,7 +228,7 @@ void BluetoothPASADeviceScanner::Thread() {
       device_scan_requested_ = false;
     }
   }
-  LOG4CXX_INFO(logger_, "Bluetooth device scanner thread finished");
+  LOG4CXX_INFO(logger_, "PASA Bluetooth device scanner thread finished");
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
@@ -288,7 +288,7 @@ void BluetoothPASADeviceScanner::Terminate() {
   CloseMsgQ(mPASAFWSendHandle);
 
   if (thread_started_) {
-    LOG4CXX_INFO(logger_, "Waiting for bluetooth device scanner thread termination");
+    LOG4CXX_INFO(logger_, "Waiting for PASA bluetooth device scanner thread termination");
     {
       sync_primitives::AutoLock auto_lock(device_scan_requested_lock_);
       device_scan_requested_ = false;
@@ -297,7 +297,7 @@ void BluetoothPASADeviceScanner::Terminate() {
     pthread_join(mPASAFWMsgHandlerThread, 0);
 
     pthread_join(thread_, 0);
-    LOG4CXX_INFO(logger_, "Bluetooth device scanner thread terminated");
+    LOG4CXX_INFO(logger_, "PASA Bluetooth device scanner thread terminated");
   }
   LOG4CXX_TRACE_EXIT(logger_);
 }

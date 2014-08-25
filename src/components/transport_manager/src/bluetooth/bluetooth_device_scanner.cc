@@ -463,7 +463,7 @@ void BluetoothDeviceScanner::Terminate() {
     LOG4CXX_INFO(logger_,
                  "Waiting for bluetooth device scanner thread termination");
     pthread_join(thread_, 0);
-    LOG4CXX_INFO(logger_, "Bluetooth device scanner thread terminated");
+    LOG4CXX_INFO(logger_, "PASA Bluetooth device scanner thread joined");
   }
   LOG4CXX_TRACE(logger_, "exit");
 }

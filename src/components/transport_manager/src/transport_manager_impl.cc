@@ -89,7 +89,7 @@ TransportManagerImpl::TransportManagerImpl()
 }
 
 TransportManagerImpl::~TransportManagerImpl() {
-  LOG4CXX_DEBUG(logger_, "TransportManager object destroyed");
+  LOG4CXX_DEBUG(logger_, "TransportManager object destroying");
 
   for (std::vector<TransportAdapter*>::iterator it =
          transport_adapters_.begin();
@@ -107,6 +107,7 @@ TransportManagerImpl::~TransportManagerImpl() {
   pthread_cond_destroy(&message_queue_cond_);
   pthread_mutex_destroy(&event_queue_mutex_);
   pthread_cond_destroy(&device_listener_thread_wakeup_);
+  LOG4CXX_INFO(logger_, "TransportManager object destroyed");
 }
 
 int TransportManagerImpl::ConnectDevice(const DeviceHandle& device_handle) {
