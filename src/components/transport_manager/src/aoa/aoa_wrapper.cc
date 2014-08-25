@@ -89,13 +89,25 @@ AOAWrapper::AOAWrapper(AOAHandle hdl, uint32_t timeout)
       timeout_(timeout) {
 }
 
+bool AOAWrapper::Init(AOAScannerObserver *observer) {
+  LOG4CXX_TRACE(logger_, "AOA: init default");
+  int ret = aoa_init(NULL, NULL, &OnConnectedDevice,
+                     &observer, AOA_FLAG_EXTERNAL_SWITCH);
+  if (IsError(ret)) {
+    PrintError(ret);
+    return false;
+  }
+  return true;
+}
+
 bool AOAWrapper::Init(const std::string& path_to_config,
                       const AOAWrapper::AOAUsbInfo& aoa_usb_info,
                       AOAScannerObserver *observer) {
   LOG4CXX_TRACE(logger_, "AOA: init");
+  const char* config_path = (path_to_config.empty()) ? NULL : path_to_config.c_str();
   usb_info_t usb_info;
   PrepareUsbInfo(aoa_usb_info, &usb_info);
-  int ret = aoa_init(path_to_config.c_str(), &usb_info, &OnConnectedDevice,
+  int ret = aoa_init(config_path, &usb_info, &OnConnectedDevice,
                      &observer, AOA_FLAG_UNIQUE_DEVICE);
   if (IsError(ret)) {
     PrintError(ret);

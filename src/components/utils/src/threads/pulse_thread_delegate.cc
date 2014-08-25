@@ -64,6 +64,10 @@ PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
 }
 
 void PulseThreadDelegate::threadMain() {
+  if (!Init()) {
+    LOG4CXX_ERROR(logger_, "Fail initialize pulse on QNX " << chid_);
+    return;
+  }
   while (run_) {
     struct sigevent event;
     SIGEV_PULSE_INIT(&event, coid_, SIGEV_PULSE_PRIO_INHERIT, PULSE_CODE, 0);

@@ -35,11 +35,12 @@
 
 #include <stdint.h>
 #include <vector>
+#include <string>
 
 #include "protocol/common.h"
 
 struct aoa_hdl_s;
-struct usb_info_t;
+struct usb_info_s;
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -73,6 +74,7 @@ class AOAWrapper {
     uint32_t iface;  /* Device interface */
   };
 
+  static bool Init(AOAScannerObserver* observer);
   static bool Init(const std::string& path_to_config,
                    const AOAWrapper::AOAUsbInfo& info,
                    AOAScannerObserver* observer);
@@ -101,6 +103,7 @@ class AOAWrapper {
   AOAHandle hdl_;
   uint32_t timeout_;
 
+  static void PrepareUsbInfo(const AOAUsbInfo& aoa_usb_info, usb_info_s* usb_info);
   inline AOAVersion Version(uint16_t version) const;
   inline uint32_t BitEndpoint(AOAEndpoint endpoint) const;
   inline bool IsValueExistInMask(uint32_t bitmask, uint32_t value) const;
@@ -108,7 +111,6 @@ class AOAWrapper {
   std::vector<AOAEndpoint> CreateEndpointsList(uint32_t endpoints_mask) const;
   bool SetCallback(AOADeviceObserver *observer, AOAEndpoint endpoint) const;
   bool UnsetCallback(AOAEndpoint endpoint) const;
-  void PrepareUsbInfo(const AOAUsbInfo& aoa_usb_info, usb_info_t* usb_info);
 };
 
 class AOAScannerObserver {

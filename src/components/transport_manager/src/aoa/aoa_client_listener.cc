@@ -32,6 +32,10 @@
 
 #include "transport_manager/aoa/aoa_client_listener.h"
 
+#include <unistd.h>
+#include <sys/iomsg.h>
+#include <sys/pps.h>
+
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 namespace transport_manager {
@@ -42,6 +46,7 @@ AOAClientListener::AOAClientListener(TransportAdapterController* controller)
 }
 
 TransportAdapter::Error AOAClientListener::Init() {
+  return TransportAdapter::OK;
 
 }
 
@@ -50,15 +55,50 @@ void AOAClientListener::Terminate() {
 }
 
 bool AOAClientListener::IsInitialised() const {
-
+  return true;
 }
 
 TransportAdapter::Error AOAClientListener::StartListening() {
-
+  return TransportAdapter::OK;
 }
 
 TransportAdapter::Error AOAClientListener::StopListening() {
+  return TransportAdapter::OK;
+}
 
+AOAClientListener::PpsThreadDelegate::PpsThreadDelegate(AOAClientListener* parent)
+    : parent_(parent),
+      fd_(-1) {
+}
+
+bool AOAClientListener::PpsThreadDelegate::Init() {
+  if ( (fd_ = open(PPS_PATH_ROOT PPS_PATH_ALL, O_RDONLY)) == -1 ) {
+    LOG4CXX_ERROR(logger_, "Error opening file '" << PPS_PATH_ROOT PPS_PATH_ALL
+                  << "': (" << strerror(errno) << ")");
+    return false;
+  }
+  return true;
+}
+
+bool AOAClientListener::PpsThreadDelegate::ArmEvent(struct sigevent* event) {
+  uint8_t buf[2048];
+  while (ionotify(fd_, _NOTIFY_ACTION_POLLARM, _NOTIFY_COND_INPUT, &event)
+      & _NOTIFY_COND_INPUT) {
+    int size = read(fd_, buf, sizeof(buf));
+    if (size > 0) {
+      buf[size] = '\0';
+      //parent_->process_ppsdata(buf, size);
+    }
+  }
+  return true;
+}
+
+void AOAClientListener::PpsThreadDelegate::OnPulse() {
+}
+
+void AOAClientListener::PpsThreadDelegate::Finalize() {
+  close(fd_);
+  fd_ = -1;
 }
 
 }  // namespace transport_adapter

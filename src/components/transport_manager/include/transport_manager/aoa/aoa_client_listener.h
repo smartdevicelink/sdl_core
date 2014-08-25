@@ -54,6 +54,21 @@ class AOAClientListener : public ClientConnectionListener {
 
  private:
   TransportAdapterController* controller_;
+
+  class PpsThreadDelegate : public threads::PulseThreadDelegate {
+   public:
+    explicit PpsThreadDelegate(AOAClientListener* parent);
+
+   protected:
+    virtual bool Init();
+    virtual bool ArmEvent(struct sigevent* event);
+    virtual void OnPulse();
+    virtual void Finalize();
+
+   private:
+    AOAClientListener* parent_;
+    int fd_;
+  };
 };
 
 }  // namespace transport_adapter
