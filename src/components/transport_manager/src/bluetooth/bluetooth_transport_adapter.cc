@@ -60,8 +60,8 @@ BluetoothTransportAdapter::~BluetoothTransportAdapter() {
 }
 
 BluetoothTransportAdapter::BluetoothTransportAdapter()
-    : TransportAdapterImpl(new BluetoothDeviceScanner(this, true, 0),
-                           new BluetoothConnectionFactory(this), 0) {
+  : TransportAdapterImpl(new BluetoothDeviceScanner(this, true, 0),
+                         new BluetoothConnectionFactory(this), 0) {
 }
 
 DeviceType BluetoothTransportAdapter::GetDeviceType() const {
@@ -69,7 +69,7 @@ DeviceType BluetoothTransportAdapter::GetDeviceType() const {
 }
 
 void BluetoothTransportAdapter::Store() const {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_TRACE(logger_, "enter");
   Json::Value bluetooth_adapter_dictionary;
   Json::Value devices_dictionary;
   DeviceList device_ids = GetDeviceList();
@@ -108,17 +108,17 @@ void BluetoothTransportAdapter::Store() const {
   bluetooth_adapter_dictionary["devices"] = devices_dictionary;
   resumption::LastState::instance()->dictionary["TransportManager"]["BluetoothAdapter"] =
     bluetooth_adapter_dictionary;
-  LOG4CXX_TRACE_EXIT(logger_);
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 bool BluetoothTransportAdapter::Restore() {
-  LOG4CXX_TRACE_ENTER(logger_);
-  bool errors_occurred = false;
+  LOG4CXX_TRACE(logger_, "enter");
+  bool errors_occured = false;
   const Json::Value bluetooth_adapter_dictionary =
     resumption::LastState::instance()->dictionary["TransportManager"]["BluetoothAdapter"];
   const Json::Value devices_dictionary = bluetooth_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();
-    i != devices_dictionary.end(); ++i) {
+       i != devices_dictionary.end(); ++i) {
     const Json::Value device_dictionary = *i;
     std::string name = device_dictionary["name"].asString();
     std::string address_record = device_dictionary["address"].asString();
@@ -127,7 +127,7 @@ bool BluetoothTransportAdapter::Restore() {
     RfcommChannelVector rfcomm_channels;
     const Json::Value applications_dictionary = device_dictionary["applications"];
     for (Json::Value::const_iterator j = applications_dictionary.begin();
-      j != applications_dictionary.end(); ++j) {
+         j != applications_dictionary.end(); ++j) {
       const Json::Value application_dictionary = *j;
       std::string rfcomm_channel_record =
         application_dictionary["rfcomm_channel"].asString();
@@ -140,17 +140,22 @@ bool BluetoothTransportAdapter::Restore() {
     DeviceSptr device(bluetooth_device);
     AddDevice(device);
     for (RfcommChannelVector::const_iterator j =
-      rfcomm_channels.begin(); j != rfcomm_channels.end(); ++j) {
-      ApplicationHandle app_handle = *j; // for Bluetooth device app_handle is just RFCOMM channel
+           rfcomm_channels.begin(); j != rfcomm_channels.end(); ++j) {
+      ApplicationHandle app_handle =
+        *j; // for Bluetooth device app_handle is just RFCOMM channel
       if (Error::OK != Connect(device->unique_device_id(), app_handle)) {
-        errors_occurred = true;
+        errors_occured = true;
       }
     }
   }
-  LOG4CXX_TRACE_EXIT(logger_);
-  return !errors_occurred;
+  bool result = !errors_occured;
+  if (result) {
+    LOG4CXX_TRACE(logger_, "exit with TRUE");
+  } else {
+      LOG4CXX_TRACE(logger_, "exit with FALSE");
+  }
+  return result;
 }
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-

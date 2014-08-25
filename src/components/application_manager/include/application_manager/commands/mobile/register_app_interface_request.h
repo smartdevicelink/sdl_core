@@ -125,24 +125,6 @@ class RegisterAppInterfaceRequest : public CommandRequestImpl {
   mobile_apis::Result::eType CheckCoincidence();
 
   /*
-   * @brief Predicate for using with CheckCoincidence method to compare with TTS SO
-   *
-   * return TRUE if there is coincidence of TTS text field, otherwise FALSE
-   */
-  struct CoincidencePredicateTTS {
-    explicit CoincidencePredicateTTS(const std::string &newItem)
-    :newItem_(newItem)
-    {};
-
-    bool operator()(smart_objects::SmartObject obj) {
-      const std::string text = obj[strings::text].asString();
-      return !(strcasecmp(text.c_str(), newItem_.c_str()));
-    };
-
-    const std::string &newItem_;
-  };
-
-  /*
   * @brief Predicate for using with CheckCoincidence method to compare with VR synonym SO
   *
   * return TRUE if there is coincidence of VR, otherwise FALSE

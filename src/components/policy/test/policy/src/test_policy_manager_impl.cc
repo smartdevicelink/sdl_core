@@ -309,7 +309,7 @@ TEST_F(PolicyManagerImplTest, DISABLED_LoadPT) {
       Json::Value(1);
   module_config["notifications_per_minute_by_priority"]["navigation"] =
       Json::Value(2);
-  module_config["notifications_per_minute_by_priority"]["voiceCommunication"] =
+  module_config["notifications_per_minute_by_priority"]["VOICECOMM"] =
       Json::Value(3);
   module_config["notifications_per_minute_by_priority"]["communication"] =
       Json::Value(4);

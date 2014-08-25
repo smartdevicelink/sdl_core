@@ -160,7 +160,8 @@ SDL.AlertManeuverPopUp = Em.ContainerView.create( {
                     classNames: 'list-item softButton ' + softButtonsClass,
                     elementId: 'softButton' + i,
                     templateName: params[i].image ? 'rightIcon' : 'text',
-                    systemAction: params[i].systemAction
+                    systemAction: params[i].systemAction,
+                    appID: params.appID
                 } ) );
             }
         }

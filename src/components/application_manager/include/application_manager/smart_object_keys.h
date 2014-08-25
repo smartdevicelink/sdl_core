@@ -119,6 +119,7 @@ const char progress_indicator[] = "progressIndicator";
 const char alert_type[] = "alertType";
 const char play_tone[] = "playTone";
 const char soft_buttons[] = "softButtons";
+const char soft_button_id[] = "softButtonID";
 const char custom_presets[] = "customPresets";
 const char audio_pass_display_text1[] = "audioPassThruDisplayText1";
 const char audio_pass_display_text2[] = "audioPassThruDisplayText2";
@@ -259,6 +260,12 @@ const char hash_id[] = "hashID";
 const char time_stamp[] = "timeStamp";
 const char manual_text_entry[] = "manualTextEntry";
 const char image_type_supported[] = "imageTypeSupported";
+const char unexpected_disconnect[] = "unexpectedDisconnect";
+const char location_name[] = "locationName";
+const char location_description[] = "locationDescription";
+const char address_lines[] = "addressLines";
+const char phone_number[] = "phoneNumber";
+const char location_image[] = "locationImage";
 }  // namespace strings
 
 namespace mobile_notification {

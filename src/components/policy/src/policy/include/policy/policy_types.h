@@ -156,31 +156,6 @@ struct DeviceParams {
 };
 
 /**
- * @brief Stores data to be sent to HMI on application permissions change
- */
-struct AppPermissions {
-
-    AppPermissions(const std::string& app_id)
-        : application_id(app_id),
-          isAppPermissionsRevoked(false),
-          appRevoked(false),
-          appPermissionsConsentNeeded(false),
-          appUnauthorized(false) {
-    }
-
-    std::string application_id;
-    bool isAppPermissionsRevoked;
-    // TODO(AOleynik):  Change type according to HMI_API spec
-    std::vector<std::string> appRevokedPermissions;
-    bool appRevoked;
-    bool appPermissionsConsentNeeded;
-    bool appUnauthorized;
-    bool isSDLAllowed;
-    std::string priority;
-    DeviceParams deviceInfo;
-};
-
-/**
  * @brief User consent for device data usage
  */
 enum DeviceConsent {
@@ -225,10 +200,43 @@ struct FunctionalGroupPermission {
           state(kGroupUndefined) {
     }
 
+    bool operator ==(const FunctionalGroupPermission& rhs) {
+      if (this->group_id == rhs.group_id &&
+          this->group_alias == rhs.group_alias &&
+          this->group_name == rhs.group_name) {
+        return true;
+      }
+      return false;
+    }
+
     std::string group_alias;
     std::string group_name;
     uint32_t group_id;
     GroupConsent state;
+};
+
+/**
+ * @brief Stores data to be sent to HMI on application permissions change
+ */
+struct AppPermissions {
+
+    AppPermissions(const std::string& app_id)
+        : application_id(app_id),
+          isAppPermissionsRevoked(false),
+          appRevoked(false),
+          appPermissionsConsentNeeded(false),
+          appUnauthorized(false) {
+    }
+
+    std::string application_id;
+    bool isAppPermissionsRevoked;
+    std::vector<policy::FunctionalGroupPermission> appRevokedPermissions;
+    bool appRevoked;
+    bool appPermissionsConsentNeeded;
+    bool appUnauthorized;
+    bool isSDLAllowed;
+    std::string priority;
+    DeviceParams deviceInfo;
 };
 
 /**

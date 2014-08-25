@@ -385,6 +385,10 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
     }
   }
 
+  if (mobile_apis::Result::TIMED_OUT == result_code) {
+    DisablePerformInteraction();
+  }
+
   SendResponse(result, result_code, return_info, &(msg_params));
 }
 
@@ -504,7 +508,6 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
     msg_params[strings::help_prompt] =
         (*message_)[strings::msg_params][strings::help_prompt];
 
-    DeleteParameterFromTTSChunk(&msg_params[strings::help_prompt]);
   } else {
     msg_params[strings::help_prompt] =
         smart_objects::SmartObject(smart_objects::SmartType_Array);
@@ -539,8 +542,6 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   if ((*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
     msg_params[strings::timeout_prompt] =
             (*message_)[strings::msg_params][strings::timeout_prompt];
-
-    DeleteParameterFromTTSChunk(&msg_params[strings::timeout_prompt]);
   } else {
     msg_params[strings::timeout_prompt] = msg_params[strings::help_prompt];
   }
@@ -548,8 +549,6 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
       msg_params[strings::initial_prompt] =
           (*message_)[strings::msg_params][strings::initial_prompt];
-
-      DeleteParameterFromTTSChunk(&msg_params[strings::initial_prompt]);
   }
 
   mobile_apis::InteractionMode::eType mode =
@@ -565,14 +564,6 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
 
   SendHMIRequest(hmi_apis::FunctionID::VR_PerformInteraction, &msg_params,
                  true);
-}
-
-void PerformInteractionRequest::DeleteParameterFromTTSChunk(
-    smart_objects::SmartObject* array_tts_chunk) {
-  int32_t length = array_tts_chunk->length();
-  for (int32_t i = 0; i < length; ++i) {
-    array_tts_chunk[i].erase(strings::type);
-  }
 }
 
 bool PerformInteractionRequest::CheckChoiceSetMenuNames(
@@ -726,7 +717,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
-  if (!CheckSyntax(str, true)) {
+  if (!CheckSyntax(str)) {
     LOG4CXX_ERROR(logger_, "Invalid initial_text syntax check failed");
     return true;
   }
@@ -741,7 +732,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_ip != it_ip_end; ++it_ip) {
       str = (*it_ip)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid initial_prompt syntax check failed");
         return true;
       }
@@ -757,7 +748,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_hp != it_hp_end; ++it_hp) {
       str = (*it_hp)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
         return true;
       }
@@ -773,7 +764,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_tp != it_tp_end; ++it_tp) {
       str = (*it_tp)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
         return true;
       }
@@ -789,9 +780,18 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_vh != it_vh_end; ++it_vh) {
       str = (*it_vh)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid vr_help syntax check failed");
         return true;
+      }
+
+      if ((*it_vh).keyExists(strings::image)) {
+        str = (*it_vh)[strings::image][strings::value].asCharArray();
+        if (!CheckSyntax(str)) {
+          LOG4CXX_ERROR(logger_,
+                        "Invalid vr_help image value syntax check failed");
+          return true;
+        }
       }
     }
   }

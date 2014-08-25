@@ -51,24 +51,13 @@ void OnAppPermissionConsentNotification::Run() {
   LOG4CXX_INFO(logger_, "OnAppPermissionConsentNotification::Run");
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
 
+  uint32_t connection_key = 0;
+
   policy::PermissionConsent permission_consent;
 
   // If user defined group permissions for specific app
   if (msg_params.keyExists(strings::app_id)) {
-    uint32_t connection_key = msg_params[strings::app_id].asUInt();
-    ApplicationSharedPtr app =
-        application_manager::ApplicationManagerImpl::instance()
-        ->application(connection_key);
-
-    if (app.valid()) {
-      permission_consent.policy_app_id = app->mobile_app_id()->asString();
-      policy::DeviceParams device_params;
-      application_manager::MessageHelper::GetDeviceInfoForHandle(
-        app->device(),
-        &device_params);
-
-      permission_consent.device_id = device_params.device_mac_address;
-    }
+    connection_key = msg_params[strings::app_id].asUInt();
   }
 
   if (msg_params.keyExists("consentedFunctions")) {
@@ -93,7 +82,7 @@ void OnAppPermissionConsentNotification::Run() {
 
     permission_consent.consent_source = msg_params["source"].asString();
 
-    policy::PolicyHandler::instance()->OnAppPermissionConsent(
+    policy::PolicyHandler::instance()->OnAppPermissionConsent(connection_key,
       permission_consent);
   }
 }

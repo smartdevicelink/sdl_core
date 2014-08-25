@@ -242,7 +242,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * valid data as well as invalid. So we will remove all invalid data
      * from this structure.
      */
-    virtual void SetUserConsentForApp(PermissionConsent& permissions) = 0;
+    virtual void SetUserConsentForApp(const PermissionConsent& permissions) = 0;
 
     /**
      * @brief Get default HMI level for application
@@ -290,8 +290,17 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual void GetPermissionsForApp(
       const std::string& device_id, const std::string& policy_app_id,
       std::vector<FunctionalGroupPermission>& permissions) = 0;
+
+    /**
+     * @brief Gets specific application permissions changes since last policy
+     * table update
+     * @param device_id Id of device, which hosts application
+     * @param policy_app_id Unique application id
+     * @return Permissions changes
+     */
     virtual AppPermissions GetAppPermissionsChanges(
-      const std::string& app_id) = 0;
+      const std::string& device_id, const std::string& policy_app_id) = 0;
+
     virtual void RemovePendingPermissionChanges(const std::string& app_id) = 0;
 
     /**

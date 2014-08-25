@@ -60,7 +60,8 @@ void SpeakRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
-                  "Incoming speak has contains \t\n \\t \\n");
+                  "Incoming speak has contains \\t\\n \\\\t \\\\n "
+                  " text contains only whitespace in ttsChunks");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -136,7 +137,7 @@ bool SpeakRequest::IsWhiteSpaceExist() {
 
     for (; it_tc != it_tc_end; ++it_tc) {
       str = (*it_tc)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
         return true;
       }

@@ -34,6 +34,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
 
+#include <strings.h>
+
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/pending.h"
 #include "utils/macro.h"
@@ -109,13 +111,48 @@ class ChangeRegistrationRequest : public CommandRequestImpl  {
                      const hmi_apis::Common_Result::eType vr,
                      const hmi_apis::Common_Result::eType tts);
 
-  Pending pending_requests_;
+  /**
+   * @brief Checks change_registration params(ttsName, appname,
+   * ngnMediaScreenAppName, vrSynonyms) on invalid characters.
+   *
+   * @return true if command contains \t\n \\t \\n of whitespace otherwise
+   * returns false.
+   */
+   bool IsWhiteSpaceExist();
+   /*
+    *  @brief Check parameters (name, vr) for
+    * coincidence with already known parameters of registered applications
+    *
+    * return SUCCESS if there is no coincidence of app.name/VR synonyms,
+    * otherwise appropriate error code returns
+    */
+   mobile_apis::Result::eType CheckCoincidence();
 
-  hmi_apis::Common_Result::eType ui_result_;
-  hmi_apis::Common_Result::eType vr_result_;
-  hmi_apis::Common_Result::eType tts_result_;
+   /*
+    * @brief Predicate for using with CheckCoincidence method to compare with VR synonym SO
+    *
+    * return TRUE if there is coincidence of VR, otherwise FALSE
+    */
+   struct CoincidencePredicateVR {
+     explicit CoincidencePredicateVR(const std::string &newItem)
+     :newItem_(newItem)
+     {};
 
-  DISALLOW_COPY_AND_ASSIGN(ChangeRegistrationRequest);
+     bool operator()(smart_objects::SmartObject obj) {
+       const std::string vr_synonym = obj.asString();
+       return !(strcasecmp(vr_synonym.c_str(), newItem_.c_str()));
+     };
+
+     const std::string &newItem_;
+   };
+
+   Pending pending_requests_;
+
+   hmi_apis::Common_Result::eType ui_result_;
+   hmi_apis::Common_Result::eType vr_result_;
+   hmi_apis::Common_Result::eType tts_result_;
+
+   DISALLOW_COPY_AND_ASSIGN(ChangeRegistrationRequest);
 };
 
 }  // namespace commands

@@ -164,7 +164,10 @@ void RequestWatchdog::removeRequest(uint32_t connection_key,
 void RequestWatchdog::updateRequestTimeout(uint32_t connection_key,
                                            uint32_t correlation_id,
                                            uint32_t new_timeout_value) {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_TRACE(logger_, "RequestController::updateRequestTimeout("
+               << connection_key << ","
+               << correlation_id << ","
+               << new_timeout_value << ")");
 
   {
     AutoLock auto_lock(requestsLock_);
@@ -203,6 +206,7 @@ bool RequestWatchdog::checkTimeScaleMaxRequest(
     TimevalStruct end = date_time::DateTime::getCurrentTime();
     TimevalStruct start;
     start.tv_sec = end.tv_sec - app_time_scale;
+    start.tv_usec = 0;
 
     TimeScale scale(start, end, connection_key);
     uint32_t count = 0;
@@ -233,6 +237,7 @@ bool RequestWatchdog::checkHMILevelTimeScaleMaxRequest(
     TimevalStruct end = date_time::DateTime::getCurrentTime();
     TimevalStruct start;
     start.tv_sec = end.tv_sec - app_time_scale;
+    start.tv_usec = 0;
 
     HMILevelTimeScale scale(start, end, connection_key, hmi_level);
     uint32_t count = 0;

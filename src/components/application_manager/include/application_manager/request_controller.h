@@ -75,7 +75,8 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
     SUCCESS = 0,
     TOO_MANY_REQUESTS,
     TOO_MANY_PENDING_REQUESTS,
-    NONE_HMI_LEVEL_MANY_REQUESTS
+    NONE_HMI_LEVEL_MANY_REQUESTS,
+    INIT_FAILED
   };
 
   /**

@@ -155,9 +155,14 @@ void MediaManagerImpl::StartMicrophoneRecording(
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()->
       application(application_key);
-  std::string file_path = profile::Profile::instance()->app_storage_folder();
+  std::string file_path =
+#ifdef CUSTOMER_PASA
+  profile::Profile::instance()->audio_mq_path();
+#else
+  profile::Profile::instance()->app_storage_folder();
   file_path += "/";
   file_path += output_file;
+#endif // CUSTOMER_PASA
   from_mic_listener_ = new FromMicRecorderListener(file_path);
 #if defined(EXTENDED_MEDIA_MODE)
   if (from_mic_recorder_) {

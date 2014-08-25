@@ -43,7 +43,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 Lock::Lock()
 #ifndef NDEBUG
-      : lock_taken_(false)
+      : lock_taken_(0),
+        is_mutex_recursive_(false)
 #endif // NDEBUG
 {
   int32_t status = pthread_mutex_init(&mutex_, NULL);
@@ -52,9 +53,32 @@ Lock::Lock()
   }
 }
 
+Lock::Lock(bool is_mutex_recursive)
+#ifndef NDEBUG
+      : lock_taken_(0),
+        is_mutex_recursive_(is_mutex_recursive)
+#endif // NDEBUG
+{
+  int32_t status;
+
+  if (is_mutex_recursive) {
+    pthread_mutexattr_t attr;
+
+    pthread_mutexattr_init(&attr);
+    pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE);
+    status = pthread_mutex_init(&mutex_, &attr);
+  } else {
+    status = pthread_mutex_init(&mutex_, NULL);
+  }
+
+  if (status != 0) {
+    LOG4CXX_ERROR(logger_, "Failed to initialize mutex");
+  }
+}
+
 Lock::~Lock() {
 #ifndef NDEBUG
-  if (lock_taken_) {
+  if (lock_taken_ > 0) {
     LOG4CXX_ERROR(logger_, "Destroying non-released mutex");
   }
 #endif
@@ -83,15 +107,15 @@ void Lock::Release() {
 bool Lock::Try() {
   bool ackquired = false;
 #ifndef NDEBUG
-  if (lock_taken_) {
-    LOG4CXX_ERROR(logger_, "Trying to lock already taken mutex");
+  if ((lock_taken_ > 0) && !is_mutex_recursive_) {
+    LOG4CXX_ERROR(logger_, "Trying to lock already taken not recurcive mutex");
   }
 #endif
   switch(pthread_mutex_trylock(&mutex_)) {
     case 0: {
       ackquired = true;
 #ifndef NDEBUG
-      lock_taken_ = true;
+      lock_taken_++;
 #endif
     } break;
     case EBUSY: {
@@ -107,16 +131,18 @@ bool Lock::Try() {
 
 #ifndef NDEBUG
 void Lock::AssertFreeAndMarkTaken() {
-  if (lock_taken_) {
-    LOG4CXX_ERROR(logger_, "Locking already taken mutex");
+  if ((lock_taken_ > 0) && !is_mutex_recursive_) {
+    LOG4CXX_ERROR(logger_, "Locking already taken not recurcive mutex");
+    NOTREACHED();
   }
-  lock_taken_ = true;
+  lock_taken_++;
 }
 void Lock::AssertTakenAndMarkFree() {
-  if (!lock_taken_) {
+  if (lock_taken_ == 0) {
     LOG4CXX_ERROR(logger_, "Unlocking a mutex that is not taken");
+    NOTREACHED();
   }
-  lock_taken_ = false;
+  lock_taken_--;
 }
 #endif
 

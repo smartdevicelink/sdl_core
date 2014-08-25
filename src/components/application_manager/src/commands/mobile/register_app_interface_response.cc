@@ -32,9 +32,6 @@
  */
 
 #include "application_manager/commands/mobile/register_app_interface_response.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
-#include "application_manager/message_helper.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -57,13 +54,6 @@ void RegisterAppInterfaceResponse::Run() {
   }
 
   SendResponse(success, result_code, last_message);
-
-  if (success) {
-    ApplicationSharedPtr application =
-        ApplicationManagerImpl::instance()->application(
-            (*message_)[strings::params][strings::connection_key].asInt());
-    MessageHelper::SendChangeRegistrationRequestToHMI(application);
-  }
 }
 
 }  // namespace commands

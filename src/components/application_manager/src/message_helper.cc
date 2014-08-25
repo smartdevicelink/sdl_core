@@ -86,7 +86,7 @@ CommonAppPriorityMap app_priority_values = {
   {"EMERGENCY", hmi_apis::Common_AppPriority::EMERGENCY},
   {"NAVIGATION", hmi_apis::Common_AppPriority::NAVIGATION},
   {"NONE", hmi_apis::Common_AppPriority::NONE},
-  {"voiceCommunication", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
+  {"VOICECOMM", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
   {"INVALID_ENUM", hmi_apis::Common_AppPriority::INVALID_ENUM}
 };
 
@@ -286,7 +286,7 @@ void MessageHelper::SendHMIStatusNotification(
   message[strings::msg_params][strings::system_context] =
     static_cast<int32_t>(application_impl.system_context());
 
-  DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(notification));
+  ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
@@ -370,9 +370,13 @@ smart_objects::SmartObject* MessageHelper::GetHashUpdateNotification(
   LOG4CXX_INFO(logger_, "GetHashUpdateNotification" << app_id);
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
                                app_id);
-  DCHECK(app.get());
 
-  smart_objects::SmartObject* message = new smart_objects::SmartObject(
+  smart_objects::SmartObject* message = NULL;
+  if (app.get()) {
+    return message;
+  }
+
+  message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   (*message)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::OnHashChangeID;
@@ -385,8 +389,12 @@ void MessageHelper::SendHashUpdateNotification(const uint32_t app_id) {
   LOG4CXX_INFO(logger_, "SendHashUpdateNotification");
 
   smart_objects::SmartObject* so = GetHashUpdateNotification(app_id);
-  PrintSmartObject(*so);
-  DCHECK(ApplicationManagerImpl::instance()->ManageMobileCommand(so));
+  if (so) {
+    PrintSmartObject(*so);
+    if (!ApplicationManagerImpl::instance()->ManageMobileCommand(so)) {
+      LOG4CXX_ERROR_EXT(logger_, "Failed to send HashUpdate notification.");
+    }
+  }
 }
 
 void MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
@@ -658,7 +666,7 @@ MessageHelper::SmartObjectList MessageHelper::GetIVISubscribtionRequests(
 #endif // #ifdef HMI_JSON_API
 #ifdef HMI_DBUS_API
   //Generate list of ivi_subrequests
-  for (int i = 0; i < sizeof(ivi_subrequests) / sizeof(ivi_subrequests[0]); ++i) {
+  for (size_t i = 0; i < sizeof(ivi_subrequests) / sizeof(ivi_subrequests[0]); ++i) {
     const VehicleInfo_Requests& sr = ivi_subrequests[i];
     if (true == msg_params.keyExists(sr.str)
         && true == msg_params[sr.str].asBool()) {
@@ -821,8 +829,8 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(
   if (app->vr_help()) {
     vr_help[strings::vr_help] = (*app->vr_help());
   } else {
-    const std::set<ApplicationSharedPtr>& apps =
-      ApplicationManagerImpl::instance()->applications();
+    ApplicationManagerImpl::ApplicationListAccessor accessor;
+    const std::set<ApplicationSharedPtr>& apps = accessor.applications();
 
     int32_t index = 0;
     std::set<ApplicationSharedPtr>::const_iterator it_app = apps.begin();
@@ -1172,7 +1180,7 @@ MessageHelper::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
 }
 
 void MessageHelper::SendOnAppUnregNotificationToHMI(
-  ApplicationConstSharedPtr app) {
+  ApplicationConstSharedPtr app, bool is_unexpected_disconnect) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!notification) {
@@ -1188,6 +1196,8 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
   // we put hmi_app_id because applicaton list does not contain application on this momment
   // and ReplaceHMIByMobileAppId function will be unable to replace app_id to hmi_app_id
   message[strings::msg_params][strings::app_id] = app->hmi_app_id();
+  message[strings::msg_params][strings::unexpected_disconnect] =
+    is_unexpected_disconnect;
   ApplicationManagerImpl::instance()->ManageHMICommand(&message);
 }
 
@@ -1318,12 +1328,7 @@ void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
       .isAppPermissionsRevoked;
 
   if (permissions.isAppPermissionsRevoked) {
-    (*message)[strings::msg_params]["appRevokedPermissions"] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-    for (size_t i = 0; i < permissions.appRevokedPermissions.size(); ++i) {
-      (*message)[strings::msg_params]["appRevokedPermissions"][i] = permissions
-          .appRevokedPermissions[i];
-    }
+    FillAppRevokedPermissions(permissions, *message);
   }
 
   (*message)[strings::msg_params]["isPermissionsConsentNeeded"] = permissions
@@ -1346,6 +1351,8 @@ void MessageHelper::SendActivateAppResponse(policy::AppPermissions& permissions,
                              ->application_by_policy_id(permissions.application_id);
   if (app) {
     ApplicationManagerImpl::instance()->ActivateApplication(app);
+  } else {
+    LOG4CXX_WARN(logger_, "Unable to find app_id: " << permissions.application_id);
   }
 }
 
@@ -1461,8 +1468,8 @@ void MessageHelper::SendGetUserFriendlyMessageResponse(
 }
 
 void MessageHelper::SendGetListOfPermissionsResponse(
-  std::vector<policy::FunctionalGroupPermission>& permissions,
-  uint32_t correlation_id) {
+    const std::vector<policy::FunctionalGroupPermission>& permissions,
+    uint32_t correlation_id) {
   smart_objects::SmartObject* message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   if (!message) {
@@ -1537,6 +1544,7 @@ void MessageHelper::ResetGlobalproperties(ApplicationSharedPtr app) {
     smart_objects::SmartObject helpPrompt = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     helpPrompt[strings::text] = help_prompt[i];
+    helpPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
     so_help_prompt[i] = helpPrompt;
   }
 
@@ -1553,6 +1561,7 @@ void MessageHelper::ResetGlobalproperties(ApplicationSharedPtr app) {
     smart_objects::SmartObject timeoutPrompt = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
     timeoutPrompt[strings::text] = time_out_promt[i];
+    timeoutPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
     so_time_out_promt[i] = timeoutPrompt;
   }
 
@@ -1888,6 +1897,32 @@ void MessageHelper::SendOnPermissionsChangeNotification(
   ApplicationManagerImpl::instance()->ManageMobileCommand(notification);
 }
 
+void MessageHelper::FillAppRevokedPermissions(
+    const policy::AppPermissions& permissions,
+    smart_objects::SmartObject& message) {
+
+  message[strings::msg_params]["appRevokedPermissions"] =
+    smart_objects::SmartObject(smart_objects::SmartType_Array);
+  smart_objects::SmartObject& revoked_permission_items =
+      message[strings::msg_params]["appRevokedPermissions"];
+  for (size_t i = 0; i < permissions.appRevokedPermissions.size(); ++i) {
+    revoked_permission_items[i] = smart_objects::SmartObject(
+                                    smart_objects::SmartType_Map);
+    smart_objects::SmartObject& permission_item = revoked_permission_items[i];
+    permission_item["name"] = permissions.appRevokedPermissions[i].
+                              group_alias;
+
+    permission_item["id"] = permissions.appRevokedPermissions[i].group_id;
+
+    if (policy::kGroupUndefined !=
+        permissions.appRevokedPermissions[i].state) {
+      permission_item["allowed"] =
+          policy::kGroupAllowed == permissions.appRevokedPermissions[i].state
+          ? true : false;
+    }
+  }
+}
+
 void MessageHelper::SendOnAppPermissionsChangedNotification(
   uint32_t connection_key, const policy::AppPermissions& permissions) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject(
@@ -1911,13 +1946,10 @@ void MessageHelper::SendOnAppPermissionsChangedNotification(
   if (permissions.isAppPermissionsRevoked) {
     message[strings::msg_params]["isAppPermissionsRevoked"] = permissions
         .isAppPermissionsRevoked;
-    message[strings::msg_params]["appRevokedPermissions"] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-    for (size_t i = 0; i < permissions.appRevokedPermissions.size(); ++i) {
-      message[strings::msg_params]["appRevokedPermissions"][i] = permissions
-          .appRevokedPermissions[i];
-    }
+
+    FillAppRevokedPermissions(permissions, message);
   }
+
   if (permissions.appPermissionsConsentNeeded) {
     message[strings::msg_params]["appPermissionsConsentNeeded"] = permissions
         .appPermissionsConsentNeeded;
@@ -2225,6 +2257,18 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
     message_params.erase(strings::soft_buttons);
   }
   return mobile_apis::Result::SUCCESS;
+}
+
+void MessageHelper::SubscribeApplicationToSoftButton(
+    smart_objects::SmartObject& message_params, ApplicationSharedPtr app,
+    int32_t function_id) {
+  SoftButtonID softbuttons_id;
+  smart_objects::SmartObject& soft_buttons = message_params[strings::soft_buttons];
+  unsigned int length = soft_buttons.length();
+  for(unsigned int i = 0; i < length; ++i) {
+    softbuttons_id.insert(soft_buttons[i][strings::soft_button_id].asUInt());
+  }
+  app->SubscribeToSoftButtons(function_id, softbuttons_id);
 }
 
 // TODO(AK): change printf to logger

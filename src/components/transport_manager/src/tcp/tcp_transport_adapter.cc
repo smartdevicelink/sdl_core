@@ -1,6 +1,4 @@
 /**
- * \file tcp_transport_adapter.cc
- * \brief TcpTransportAdapter class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -58,14 +56,14 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportAdapterImpl")
 
 TcpTransportAdapter::TcpTransportAdapter(const uint16_t port)
-    : TransportAdapterImpl(
+  : TransportAdapterImpl(
 #ifdef AVAHI_SUPPORT
-          new DnssdServiceBrowser(this),
+    new DnssdServiceBrowser(this),
 #else
-          NULL,
+    NULL,
 #endif
-          new TcpConnectionFactory(this),
-          new TcpClientListener(this, port, false)) {
+    new TcpConnectionFactory(this),
+    new TcpClientListener(this, port, false)) {
 }
 
 TcpTransportAdapter::~TcpTransportAdapter() {
@@ -76,8 +74,7 @@ DeviceType TcpTransportAdapter::GetDeviceType() const {
 }
 
 void TcpTransportAdapter::Store() const {
-  LOG4CXX_TRACE_ENTER(logger_);
-
+  LOG4CXX_TRACE(logger_, "enter");
   Json::Value tcp_adapter_dictionary;
   Json::Value devices_dictionary;
   DeviceList device_ids = GetDeviceList();
@@ -117,18 +114,18 @@ void TcpTransportAdapter::Store() const {
   tcp_adapter_dictionary["devices"] = devices_dictionary;
   resumption::LastState::instance()->dictionary["TransportManager"]["TcpAdapter"] =
     tcp_adapter_dictionary;
-  LOG4CXX_TRACE_EXIT(logger_);
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 bool TcpTransportAdapter::Restore() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_TRACE(logger_, "enter");
   bool errors_occurred = false;
 #ifndef CUSTOMER_PASA
   const Json::Value tcp_adapter_dictionary =
     resumption::LastState::instance()->dictionary["TransportManager"]["TcpAdapter"];
   const Json::Value devices_dictionary = tcp_adapter_dictionary["devices"];
   for (Json::Value::const_iterator i = devices_dictionary.begin();
-    i != devices_dictionary.end(); ++i) {
+       i != devices_dictionary.end(); ++i) {
     const Json::Value device_dictionary = *i;
     std::string name = device_dictionary["name"].asString();
     std::string address_record = device_dictionary["address"].asString();
@@ -138,7 +135,7 @@ bool TcpTransportAdapter::Restore() {
     AddDevice(device);
     const Json::Value applications_dictionary = device_dictionary["applications"];
     for (Json::Value::const_iterator j = applications_dictionary.begin();
-      j != applications_dictionary.end(); ++j) {
+         j != applications_dictionary.end(); ++j) {
       const Json::Value application_dictionary = *j;
       std::string port_record = application_dictionary["port"].asString();
       int port = atoi(port_record.c_str());
@@ -149,8 +146,13 @@ bool TcpTransportAdapter::Restore() {
     }
   }
 #endif
-  LOG4CXX_TRACE_EXIT(logger_);
-  return !errors_occurred;
+  bool result = !errors_occurred;
+  if (result) {
+    LOG4CXX_TRACE(logger_, "exit with TRUE");
+  } else {
+    LOG4CXX_TRACE(logger_, "exit with FALSE");
+  }
+  return result;
 }
 
 }  // namespace transport_adapter

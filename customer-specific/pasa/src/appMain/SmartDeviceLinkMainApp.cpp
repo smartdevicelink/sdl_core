@@ -1,5 +1,8 @@
 // ----------------------------------------------------------------------------
 
+#include <algorithm>
+#include <log4cxx/fileappender.h>
+
 #include "./life_cycle.h"
 #include "SmartDeviceLinkMainApp.h"
 #include "signal_handlers.h"
@@ -8,6 +11,7 @@
 #include "utils/logger.h"
 #include "utils/system.h"
 #include "utils/signals.h"
+#include "utils/file_system.h"
 #include "config_profile/profile.h"
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
@@ -25,8 +29,6 @@
 #include "networking.h"  // cpplint: Include the directory when naming .h files
 #include "system.h"      // cpplint: Include the directory when naming .h files
 // ----------------------------------------------------------------------------
-
-#include <log4cxx/fileappender.h>
 
 bool g_bTerminate = false;
 
@@ -51,14 +53,24 @@ bool remoteLoggingFlagFileValid() {
 	return true;
 }
 
+int getBootCount() {
+
+    std::string fileContent;
+    int bootCount;
+
+    file_system::ReadFile(profile::Profile::instance()->target_boot_count_file(),
+                        fileContent);
+
+    std::stringstream(fileContent) >> bootCount;
+
+    return bootCount;
+}
+
 void startSmartDeviceLink()
 {
-    // --------------------------------------------------------------------------
-    // Logger initialization
-
-	INIT_LOGGER(profile::Profile::instance()->log4cxx_config_file());
-
     LOG4CXX_INFO(logger, " Application started!");
+    int bootCount = getBootCount();
+    LOG4CXX_INFO(logger, "Boot count: " << getBootCount());
 
     // --------------------------------------------------------------------------
     // Components initialization
@@ -71,18 +83,43 @@ void startSmartDeviceLink()
 
       LOG4CXX_INFO(logger, "Enable logging to USB");
 
+      std::string currentLogFilePath = profile::Profile::instance()->target_tmp_dir() +
+                 "/" + profile::Profile::instance()->target_log_file_name_pattern();
+      std::stringstream stream;
+      stream << bootCount;
+      std::string usbLogFilePath = profile::Profile::instance()->remote_logging_flag_file_path() +
+                         stream.str() + "." +
+                         profile::Profile::instance()->target_log_file_name_pattern();
+
+      if (!currentLogFilePath.empty()) {
+         LOG4CXX_INFO(logger, "Copy existing log info to USB from " << currentLogFilePath);
+
+         std::vector<uint8_t> targetLogFileContent;
+
+         file_system::ReadBinaryFile(currentLogFilePath, targetLogFileContent);
+
+         file_system::WriteBinaryFile(usbLogFilePath, targetLogFileContent);
+      }
+
       log4cxx::helpers::Pool p;
 
-      std::string paramAppender = "LogFile";
-      std::string paramFileName = profile::Profile::instance()->remote_logging_flag_file_path() + "smartdevicelink.log";
+      std::string paramFileAppender = "LogFile";
+      std::string paramConsoleAppender = "Console";
 
-      LOG4CXX_DECODE_CHAR(logAppender, paramAppender);
+      std::string paramFileName = usbLogFilePath;
+
+      LOG4CXX_DECODE_CHAR(logFileAppender, paramFileAppender);
+      LOG4CXX_DECODE_CHAR(logConsoleAppender, paramConsoleAppender);
       LOG4CXX_DECODE_CHAR(logFileName, paramFileName );
 
-      log4cxx::FileAppenderPtr fileAppender = logger->getLoggerRepository()->getRootLogger()->getAppender(logAppender);
+      log4cxx::LoggerPtr rootLogger = logger->getLoggerRepository()->getRootLogger();
+
+      log4cxx::FileAppenderPtr fileAppender = rootLogger->getAppender(logFileAppender);
+
+      rootLogger->removeAppender(logConsoleAppender);
 
       if(fileAppender != NULL) {
-        LOG4CXX_INFO(logger, "fileAppender != NULL");
+        fileAppender->setAppend(true);
         fileAppender->setFile(logFileName);
         fileAppender->activateOptions(p);
       }

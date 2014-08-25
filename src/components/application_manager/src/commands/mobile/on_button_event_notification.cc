@@ -56,6 +56,11 @@ void OnButtonEventNotification::Run() {
   const uint32_t btn_id =
       static_cast<uint32_t>(
           (*message_)[strings::msg_params][hmi_response::button_name].asInt());
+  uint32_t custom_btn_id = 0;
+  if ((*message_)[strings::msg_params].keyExists(hmi_response::custom_button_id)) {
+    custom_btn_id = (*message_)[strings::msg_params]
+                                           [hmi_response::custom_button_id].asUInt();
+  }
 
   const std::vector<ApplicationSharedPtr>& subscribedApps =
       ApplicationManagerImpl::instance()->applications_by_button(btn_id);
@@ -68,15 +73,26 @@ void OnButtonEventNotification::Run() {
       continue;
     }
 
-    if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level())
-        || (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level()
-            && static_cast<uint32_t>(mobile_apis::ButtonName::OK) !=
-                btn_id)) {
-      SendButtonEvent(subscribed_app);
-    } else {
+    //Send ButtonEvent notification only in HMI_FULL or HMI_LIMITED mode
+    if ((mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level()) &&
+        (mobile_api::HMILevel::HMI_LIMITED != subscribed_app->hmi_level())) {
       LOG4CXX_WARN_EXT(logger_, "OnButtonEvent in HMI_BACKGROUND or NONE");
       continue;
     }
+
+    //Send ButtonEvent notification for OK button only in HMI_FULL mode
+    if ((static_cast<uint32_t>(mobile_apis::ButtonName::OK) == btn_id) &&
+        (mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level())) {
+      continue;
+    }
+
+    //Send ButtonEvent notification for soft button only if application subscribed to it
+    if ((static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) &&
+        (!subscribed_app->IsSubscribedToSoftButton(custom_btn_id))) {
+      continue;
+    }
+
+    SendButtonEvent(subscribed_app);
   }
 }
 

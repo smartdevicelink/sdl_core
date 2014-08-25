@@ -118,11 +118,11 @@ void FromMicToFileRecorderThread::threadMain() {
         NULL
     }
   };
-
+#ifndef GLIB_VERSION_2_32 // g_thread_init() does nothing since 2.32
   if (!g_thread_supported()) {
     g_thread_init(NULL);
   }
-
+#endif
   // Parse the arguments
   context = g_option_context_new("-- M-AUDIO RAW");
   g_option_context_add_main_entries(context, entries, NULL);

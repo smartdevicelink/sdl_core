@@ -99,6 +99,20 @@ SDL.SDLModel = Em.Object.create({
     stateLimited: null,
 
     /**
+     * FLAG of any app in limited level exists
+     */
+    limitedExist: false,
+
+    applicationStatusBar: function () {
+
+        if (this.limitedExist && SDL.SDLController.getApplicationModel(this.stateLimited)) {
+            return SDL.SDLController.getApplicationModel(this.stateLimited).statusText;
+        } else {
+            return '';
+        }
+    }.property("this.limitedExist"),
+
+    /**
      * IScroll object to manage scroll on PerformInteraction view
      *
      * @type {Object}
@@ -556,13 +570,18 @@ SDL.SDLModel = Em.Object.create({
      * Function make diff between two arrays of permissions
      * remove argument array from existed array of permissions
      */
-    setAppPermissions: function(oldPermissions){
-        var temp = this.appPermissions.filter(function(item, i) {
-            var ok = oldPermissions.indexOf(item) === -1;
-            return ok;
+    setAppPermissions: function(appID, permissions){
+
+        var messageCodes = [];
+
+        permissions.forEach(function (x) {
+            messageCodes.push(x.name);
         });
 
-        this.set('appPermissions', temp);
+        messageCodes.push("AppPermissionsRevoked");
+
+        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.SettingsController.simpleParseUserFriendlyMessageData(message)}, appID, messageCodes);
+
     },
 
     /**
@@ -939,13 +958,6 @@ SDL.SDLModel = Em.Object.create({
             return;
         }
 
-        if (params.ttsName) {
-            for (var i = 0; i < params.ttsName.length; i++) {
-                var message = {"cmdID": 0, "vrCommands": [params.ttsName[i].text], "appID": params.application.appID, "type": "Application"};
-                this.addCommandVR(message);
-            }
-        }
-
         if (params.vrSynonyms) {
 
             var message = {"cmdID": 0, "vrCommands": params.vrSynonyms, "appID": params.application.appID, "type": "Application"};
@@ -1009,30 +1021,33 @@ SDL.SDLModel = Em.Object.create({
      */
     setProperties: function(params) {
 
-        for (var i in params) {
-            if (i === "keyboardProperties") {
-                if (params[i].language) {
-                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.language', params[i].language);
-                }
-                if (params[i].keyboardLayout) {
-                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.keyboardLayout', params[i].keyboardLayout);
-                }
-                if (params[i].keypressMode) {
-                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.keypressMode', params[i].keypressMode);
-                }
-                if (params[i].limitedCharacterList) {
-                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.limitedCharacterList', params[i].limitedCharacterList);
+        if (SDL.SDLController.getApplicationModel(params.appID)) {
+            for (var i in params) {
+                if (i === "keyboardProperties") {
+                    if (params[i].language) {
+                        SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.language', params[i].language);
+                    }
+                    if (params[i].keyboardLayout) {
+                        SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.keyboardLayout', params[i].keyboardLayout);
+                    }
+                    if (params[i].keypressMode) {
+                        SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.keypressMode', params[i].keypressMode);
+                    }
+                    if (params[i].limitedCharacterList) {
+                        SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.limitedCharacterList', params[i].limitedCharacterList);
+                    } else {
+                        SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.limitedCharacterList', []);
+                    }
+                    if (params[i].autoCompleteText) {
+                        SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.autoCompleteText', params[i].autoCompleteText);
+                    }
                 } else {
-                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.limitedCharacterList', []);
+                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.' + i, params[i]);
                 }
-                if (params[i].autoCompleteText) {
-                    SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.autoCompleteText', params[i].autoCompleteText);
-                }
-            } else {
-                SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.' + i, params[i]);
             }
+        } else {
+            console.error("CriticalError! No app registered with current appID!");
         }
-
     },
 
     /**
@@ -1268,7 +1283,7 @@ SDL.SDLModel = Em.Object.create({
             FFW.UI.sendUIResult(this.resultCode["SUCCESS"], FFW.UI.endAudioPassThruRequestID, "UI.EndAudioPassThru");
             SDL.SDLController.performAudioPassThruResponse(this.resultCode["SUCCESS"]);
         } else {
-            FFW.UI.sendError(this.resultCode["GENERIC_ERROR"], FFW.UI.endAudioPassThruRequestID, "UI.EndAudioPassThru", "UI.PerformAudioPassThru are not processed at the moment!");
+            FFW.UI.sendError(this.resultCode["REJECTED"], FFW.UI.endAudioPassThruRequestID, "UI.EndAudioPassThru", "UI.PerformAudioPassThru are not processed at the moment!");
         }
     },
 
@@ -1422,6 +1437,12 @@ SDL.SDLModel = Em.Object.create({
                     reason = 'GENERAL';
                     break;
                 }
+            }
+
+            if (SDL.SDLModel.stateLimited && reason === 'AUDIO') {
+
+                SDL.SDLModel.stateLimited = null;
+                SDL.SDLModel.set('limitedExist', false);
             }
 
             SDL.TurnByTurnView.deactivate();

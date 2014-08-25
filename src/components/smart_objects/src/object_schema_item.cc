@@ -90,15 +90,18 @@ void CObjectSchemaItem::applySchema(SmartObject& Object) {
     return;
   }
 
-  for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end(); ++it) {
+  for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end(); ) {
     const std::string& key = it->first;
     if (mMembers.end() == mMembers.find(key)
         // FIXME(EZamakhov): Remove illigal usage of connection_key/binary_data in AM
         && key.compare(connection_key) != 0
         && key.compare(binary_data) != 0
         ) {
+      ++it;
       // remove fake params
       Object.erase(key);
+    } else {
+      it++;
     }
   }
 
@@ -121,11 +124,14 @@ void CObjectSchemaItem::unapplySchema(SmartObject& Object) {
   if (SmartType_Map != Object.getType()) {
     return;
   }
-  for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end(); ++it) {
+  for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end();) {
     const std::string& key = it->first;
     if (mMembers.end() == mMembers.find(key)) {
+      ++it;
       // remove fake params
       Object.erase(key);
+    } else {
+      it++;
     }
   }
 

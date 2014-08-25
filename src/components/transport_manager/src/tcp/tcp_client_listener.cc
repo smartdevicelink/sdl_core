@@ -1,6 +1,4 @@
 /**
- * \file tcp_client_listener.cc
- * \brief TcpClientListener class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -66,19 +64,21 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 TcpClientListener::TcpClientListener(TransportAdapterController* controller,
                                      const uint16_t port,
                                      const bool enable_keepalive)
-    : port_(port),
-      enable_keepalive_(enable_keepalive),
-      controller_(controller),
-      thread_(),
-      socket_(-1),
-      thread_started_(false),
-      shutdown_requested_(false),
-      thread_stop_requested_(false) {}
+  : port_(port),
+    enable_keepalive_(enable_keepalive),
+    controller_(controller),
+    thread_(),
+    socket_(-1),
+    thread_started_(false),
+    shutdown_requested_(false),
+    thread_stop_requested_(false) {}
 
 void* tcpClientListenerThread(void* data) {
+  LOG4CXX_TRACE(logger_, "enter. data  " << data);
   TcpClientListener* tcpClientListener = static_cast<TcpClientListener*>(data);
   assert(tcpClientListener != 0);
   tcpClientListener->Thread();
+  LOG4CXX_TRACE(logger_, "exit");
   return 0;
 }
 
@@ -87,10 +87,12 @@ TransportAdapter::Error TcpClientListener::Init() {
 }
 
 void TcpClientListener::Terminate() {
+  LOG4CXX_TRACE(logger_, "enter");
   shutdown_requested_ = true;
   if (TransportAdapter::OK != StopListening()) {
     LOG4CXX_ERROR(logger_, "Cannot stop listening TCP");
   }
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 bool TcpClientListener::IsInitialised() const {
@@ -102,6 +104,7 @@ TcpClientListener::~TcpClientListener() {
 }
 
 void SetKeepaliveOptions(const int fd) {
+  LOG4CXX_TRACE(logger_, "enter. fd: " << fd);
   int yes = 1;
   int keepidle = 3;  // 3 seconds to disconnection detecting
   int keepcnt = 5;
@@ -143,17 +146,20 @@ void SetKeepaliveOptions(const int fd) {
   setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPALIVE, &tval, sizeof(tval));
 #endif  // __QNX__
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 void TcpClientListener::Thread() {
-  LOG4CXX_INFO(logger_, "Tcp client listener thread started");
-
+  LOG4CXX_TRACE(logger_, "enter");
   while (false == thread_stop_requested_) {
     sockaddr_in client_address;
     socklen_t client_address_size = sizeof(client_address);
     const int connection_fd = accept(socket_, (struct sockaddr*)&client_address,
                                      &client_address_size);
-    if (thread_stop_requested_) break;
+    if (thread_stop_requested_) {
+      LOG4CXX_DEBUG(logger_, "thread_stop_requested_");
+      break;
+    }
 
     if (connection_fd < 0) {
       LOG4CXX_ERROR_WITH_ERRNO(logger_, "accept() failed");
@@ -161,7 +167,7 @@ void TcpClientListener::Thread() {
     }
 
     if (AF_INET != client_address.sin_family) {
-      LOG4CXX_ERROR(logger_, "Address of connected client is invalid");
+      LOG4CXX_DEBUG(logger_, "Address of connected client is invalid");
       continue;
     }
 
@@ -170,35 +176,41 @@ void TcpClientListener::Thread() {
             sizeof(device_name) / sizeof(device_name[0]));
     LOG4CXX_INFO(logger_, "Connected client " << device_name);
 
-    if (enable_keepalive_) SetKeepaliveOptions(connection_fd);
+    if (enable_keepalive_) {
+      SetKeepaliveOptions(connection_fd);
+    }
 
     TcpDevice* tcp_device = new TcpDevice(client_address.sin_addr.s_addr, device_name);
     DeviceSptr device = controller_->AddDevice(tcp_device);
     tcp_device = static_cast<TcpDevice*>(device.get());
     const ApplicationHandle app_handle = tcp_device->AddIncomingApplication(
-        connection_fd);
+                                           connection_fd);
 
     TcpSocketConnection* connection(
-        new TcpSocketConnection(device->unique_device_id(), app_handle,
-                                controller_));
+      new TcpSocketConnection(device->unique_device_id(), app_handle,
+                              controller_));
     connection->set_socket(connection_fd);
     const TransportAdapter::Error error = connection->Start();
     if (error != TransportAdapter::OK) {
       delete connection;
     }
   }
-
-  LOG4CXX_INFO(logger_, "Tcp client listener thread finished");
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 TransportAdapter::Error TcpClientListener::StartListening() {
-  if (thread_started_)
+  LOG4CXX_TRACE(logger_, "enter");
+  if (thread_started_) {
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::BAD_STATE. Condition: thread_started_");
     return TransportAdapter::BAD_STATE;
+  }
 
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
 
   if (-1 == socket_) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "Failed to create socket");
+    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL. Condition: -1 == socket_");
     return TransportAdapter::FAIL;
   }
 
@@ -213,32 +225,41 @@ TransportAdapter::Error TcpClientListener::StartListening() {
 
   if (0 != bind(socket_, (sockaddr*) &server_address, sizeof(server_address))) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "bind() failed");
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::FAIL. Condition: 0 != bind(socket_, (sockaddr*) &server_address, sizeof(server_address))");
     return TransportAdapter::FAIL;
   }
 
   if (0 != listen(socket_, 128)) {
     LOG4CXX_ERROR_WITH_ERRNO(logger_, "listen() failed");
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::FAIL. Condition: 0 != listen(socket_, 128)");
     return TransportAdapter::FAIL;
   }
 
   const int thread_start_error = pthread_create(&thread_, 0,
-                                                &tcpClientListenerThread, this);
+                                 &tcpClientListenerThread, this);
   if (0 == thread_start_error) {
     thread_started_ = true;
-    LOG4CXX_INFO(logger_, "Tcp client listener thread started");
+    LOG4CXX_DEBUG(logger_, "Tcp client listener thread started");
   } else {
-    LOG4CXX_ERROR(
-        logger_,
-        "Tcp client listener thread start failed, error code "
-            << thread_start_error);
+    LOG4CXX_ERROR(logger_, "Tcp client listener thread start failed, error code "
+                  << thread_start_error);
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::FAIL. Condition: 0 !== thread_start_error");
     return TransportAdapter::FAIL;
   }
+  LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK");
   return TransportAdapter::OK;
 }
 
 TransportAdapter::Error TcpClientListener::StopListening() {
-  if (!thread_started_)
+  LOG4CXX_TRACE(logger_, "enter");
+  if (!thread_started_) {
+    LOG4CXX_TRACE(logger_,
+                  "exit with TransportAdapter::BAD_STATE. Condition !thread_started_");
     return TransportAdapter::BAD_STATE;
+  }
 
   thread_stop_requested_ = true;
   int byebyesocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -251,11 +272,12 @@ TransportAdapter::Error TcpClientListener::StopListening() {
   shutdown(byebyesocket, SHUT_RDWR);
   close(byebyesocket);
   pthread_join(thread_, 0);
-  LOG4CXX_INFO(logger_, "Tcp client listener thread terminated");
+  LOG4CXX_DEBUG(logger_, "Tcp client listener thread terminated");
   close(socket_);
   socket_ = -1;
   thread_started_ = false;
   thread_stop_requested_ = false;
+  LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK");
   return TransportAdapter::OK;
 }
 

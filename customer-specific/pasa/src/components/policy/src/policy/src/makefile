@@ -12,9 +12,9 @@ include $(PRJ_ROOT)cfg/depends.mk
  
 # Additive Compile Flags (Flags from initiating make process will still apply)
 DEFS += \
-	-Wc,-Werror=return-type \
-	-Wc,-Wuninitialized \
 	-DEXTENDED_POLICY \
+	-Wc,-Werror=return-type \
+	-Wc,-Wuninitialized
  
 # Set local includes and then the reference includes (priority order determines search path)
 # Default pattern are any configuration includes (which would be things like qnx), local (Team) component directories,
@@ -47,7 +47,7 @@ INCLUDES = \
 #  for example to include a team component library it would be
 #  $(TEAM_ROOT)NS_MessageCenter/lib/NS_MessageCenter/
 LIB_PATHS += \
-  $(DEPENDS_LIB_PATHS) \
+  $(DEPENDS_LIB_PATHS)
   
 # Define your libs here addtional to the DEPENDS_DYNAMIC_LIBS or DEPENDS_STATIC_LIBS
 # - see depends.mk  
@@ -80,7 +80,7 @@ COMPONENT_LIB = $(SLIB_PATH)$(LIB_PREFIX)$(COMPONENT_NAME)$(DEBUG_EXT).$(SO_EXT)
 # Define generic line that pulls all c, cc, cpp files
 # since your in the src folder is pull only files from there
 COMPONENT_SRCS = \
-	$(wildcard *.c*) \
+	$(wildcard *.c*)
  
 # Define sources that my not be local to your component
 # here, you can define indivial files or wildcard from
@@ -95,7 +95,7 @@ NON_LOCAL_SRCS = \
 #  direct the building of sources, but no linking into a binary)
 SOURCES = \
                 $(COMPONENT_SRCS) \
-                $(NON_LOCAL_SRCS) \
+                $(NON_LOCAL_SRCS)
   
 #
 # Convert the source files to object files with correct folder location.
@@ -109,7 +109,7 @@ CC_LANG_OBJECTS = $(addprefix $(abspath $(BLD_PATH))/,$(addsuffix .$(OBJ_EXT),$(
 OBJECTS = \
 	$(C_LANG_OBJECTS) \
 	$(CPP_LANG_OBJECTS) \
-	$(CC_LANG_OBJECTS) \
+	$(CC_LANG_OBJECTS)
  
 ALL_OBJECTS = $(addprefix $(BLD_PATH),$(addsuffix .$(OBJ_EXT),$(notdir $(basename $(NON_LOCAL_SRCS) )) ) ) \
 				$(OBJECTS)

@@ -39,6 +39,7 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
     childViews:
         [
             'backButton',
+            'okButton',
             'captionText',
             'headerLabel',
             'footerLabel',
@@ -69,16 +70,18 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
      * Extend deactivate method send SUCCESS response on deactivate with current
      * slider value
      */
-    deactivate: function(ABORTED) {
+    deactivate: function(timeout) {
         this._super();
         this.timeout = null;
         clearTimeout(this.timer);
         this.timer = null;
 
-        if (ABORTED === true) {
-            FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["SUCCESS"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
+        if (timeout === true) {
+                FFW.UI.sendSliderResult(SDL.SDLModel.resultCode["TIMED_OUT"], this.get('sliderRequestId'));
+        } else if (timeout === false) {
+            FFW.UI.sendSliderResult(SDL.SDLModel.resultCode["SUCCESS"], this.get('sliderRequestId'), this.get('adjustControl.sliderValue.value'));
         } else {
-            FFW.UI.sendSliderResult( SDL.SDLModel.resultCode["ABORTED"], this.get( 'sliderRequestId' ), this.get( 'adjustControl.sliderValue.value' ) );
+            FFW.UI.sendSliderResult(SDL.SDLModel.resultCode["ABORTED"], this.get('sliderRequestId'), this.get('adjustControl.sliderValue.value'));
         }
 
         SDL.SDLController.onSystemContextChange();
@@ -111,6 +114,15 @@ SDL.SliderView = SDL.SDLAbstractView.create( {
             }, this.timeout);
         }
     }.observes('this.adjustControl.sliderValue.value'),
+
+    okButton: SDL.Button.extend( {
+        classNames: 'okButton',
+        text: 'Submit',
+        onDown: false,
+        click: function() {
+            SDL.SliderView.deactivate(false);
+        }
+    } ),
 
     adjustControl: Em.ContainerView.extend( {
 

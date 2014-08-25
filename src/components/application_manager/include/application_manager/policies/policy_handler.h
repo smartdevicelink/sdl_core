@@ -125,9 +125,12 @@ class PolicyHandler :
 
   /**
    * @brief Store user-changed permissions consent to DB
+   * @param connection_key Connection key of application or 0, if permissions
+   * should be applied to all applications
    * @param permissions User-changed group permissions consent
    */
-  void OnAppPermissionConsent(PermissionConsent& permissions);
+  void OnAppPermissionConsent(const uint32_t connection_key,
+                              PermissionConsent& permissions);
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -143,7 +146,8 @@ class PolicyHandler :
   /**
    * @brief Get list of permissions for application/device binded to
    * connection key from request and send response
-   * @param connection_key Connection key
+   * @param connection_key Connection key for specific application or 0 for all
+   * currently registered applications
    * @param correlation_id Correlation id from request
    */
   void OnGetListOfPermissions(const uint32_t connection_key,
@@ -287,6 +291,12 @@ private:
   inline PolicyManager* CreateManager();
 
   bool is_user_requested_policy_table_update_;
+
+  /**
+   * @brief Application-to-device map is used for getting/setting user consents
+   * for all apps
+   */
+  std::map<std::string, std::string> app_to_device_link_;
 
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
   FRIEND_BASE_SINGLETON_CLASS_WITH_DELETER(PolicyHandler,

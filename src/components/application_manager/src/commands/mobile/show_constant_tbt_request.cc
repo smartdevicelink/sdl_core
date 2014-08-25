@@ -71,6 +71,14 @@ void ShowConstantTBTRequest::Run() {
       smart_objects::SmartType_Map);
   msg_params = (*message_)[strings::msg_params];
 
+  // IsWhiteSpaceExist must be before ProcessSoftButtons.
+  // because of checking on whitespace in text of softbutton
+  if (IsWhiteSpaceExist()) {
+    LOG4CXX_ERROR(logger_,
+                  "Incoming show constant TBT has contains \t\n \\t \\n");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
 
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons(msg_params, app);
@@ -102,13 +110,6 @@ void ShowConstantTBTRequest::Run() {
       SendResponse(false, verification_result);
       return;
     }
-  }
-
-  if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_,
-                  "Incoming show constant TBT has contains \t\n \\t \\n");
-    SendResponse(false, mobile_apis::Result::INVALID_DATA);
-    return;
   }
 
   msg_params[strings::app_id] = app->app_id();
@@ -160,6 +161,10 @@ void ShowConstantTBTRequest::Run() {
           static_cast<int32_t>(hmi_apis::Common_TextFieldName::timeToDestination);
       msg_params[hmi_request::navi_texts][index++][hmi_request::field_text] =
           (*message_)[strings::msg_params][strings::time_to_destination];
+  }
+
+  if (msg_params.keyExists(strings::soft_buttons)) {
+    MessageHelper::SubscribeApplicationToSoftButton(msg_params, app, function_id());
   }
 
   app->set_tbt_show_command(msg_params);
@@ -214,7 +219,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
 
       if ((*it_sb).keyExists(strings::text)) {
         str = (*it_sb)[strings::text].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (strlen(str) && !CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons text syntax check failed");
           return true;
@@ -223,7 +228,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
 
       if ((*it_sb).keyExists(strings::image)) {
         str = (*it_sb)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid soft_buttons image value syntax check failed");
           return true;
@@ -236,7 +241,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
   if ((*message_)[strings::msg_params].keyExists(strings::turn_icon)) {
     str = (*message_)[strings::msg_params]
                       [strings::turn_icon][strings::value].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid turn_icon value syntax check failed");
       return true;
     }
@@ -245,7 +250,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
   if ((*message_)[strings::msg_params].keyExists(strings::next_turn_icon)) {
     str = (*message_)[strings::msg_params]
                       [strings::next_turn_icon][strings::value].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid next_turn_icon value syntax check failed");
       return true;
@@ -255,7 +260,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
   if ((*message_)[strings::msg_params].keyExists(strings::navigation_text_1)) {
     str = (*message_)[strings::msg_params]
                       [strings::navigation_text_1].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid navigation_text_1 value syntax check failed");
       return true;
@@ -265,7 +270,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
   if ((*message_)[strings::msg_params].keyExists(strings::navigation_text_2)) {
     str = (*message_)[strings::msg_params]
                       [strings::navigation_text_2].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid navigation_text_2 value syntax check failed");
       return true;
@@ -274,7 +279,7 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::eta)) {
     str = (*message_)[strings::msg_params][strings::eta].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid eta value syntax check failed");
       return true;
     }
@@ -283,9 +288,19 @@ bool ShowConstantTBTRequest::IsWhiteSpaceExist() {
   if ((*message_)[strings::msg_params].keyExists(strings::total_distance)) {
     str = (*message_)[strings::msg_params]
                       [strings::total_distance].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid total_distance value syntax check failed");
+      return true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::time_to_destination)) {
+    str = (*message_)[strings::msg_params]
+                      [strings::time_to_destination].asCharArray();
+    if (strlen(str) && !CheckSyntax(str)) {
+      LOG4CXX_ERROR(logger_,
+                    "Invalid time_to_destination value syntax check failed");
       return true;
     }
   }

@@ -144,12 +144,7 @@ void MessageReader::MoveToNext() {
   if (!HasNext()) {
     MarkFailed();
   }
-  dbus_bool_t moved = dbus_message_iter_next(&iterator_);
-  // Ignore return value because when moving after last element
-  // 'moved' is false. But it is okay to move after the last element
-  // because only when moved there NextValueType becomes
-  // DBUS_TYPE_INVALID.
-  moved;
+  dbus_message_iter_next(&iterator_);
 }
 
 void MessageReader::MarkFailed() {

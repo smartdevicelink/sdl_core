@@ -114,7 +114,7 @@ SDL.BaseNavigationView = Em.ContainerView.create({
                             softButtonID: naviParams.softButtons[i].softButtonID,
                             systemAction: naviParams.softButtons[i].systemAction,
                             classNames: 'navButton softButton softButton'  + (i + 1),
-                            appID: null
+                            appID: naviParams.appID
                         }));
                 }
             }

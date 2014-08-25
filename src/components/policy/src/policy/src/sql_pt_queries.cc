@@ -440,8 +440,8 @@ const std::string kSelectEndpoint =
   "SELECT `url`, `application_id` FROM `endpoint` WHERE `service` = ? ";
 
 const std::string kInsertFunctionalGroup =
-  "INSERT INTO `functional_group` (`name`, `user_consent_prompt`) "
-  "  VALUES (?, ?)";
+  "INSERT INTO `functional_group` (`id`, `name`, `user_consent_prompt`) "
+  "  VALUES (?, ?, ?)";
 
 const std::string kInsertRpc =
   "INSERT INTO `rpc` (`name`, `hmi_level_value`, `functional_group_id`) "

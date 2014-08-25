@@ -261,14 +261,14 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
   const char* str = NULL;
 
   str = choice_set[strings::menu_name].asCharArray();
-  if (!CheckSyntax(str, true)) {
+  if (!CheckSyntax(str)) {
     LOG4CXX_ERROR(logger_, "Invalid menu_name syntax check failed");
     return true;
   }
 
   if (choice_set.keyExists(strings::secondary_text)) {
     str = choice_set[strings::secondary_text].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid secondary_text syntax check failed");
       return true;
     }
@@ -276,7 +276,7 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
 
   if (choice_set.keyExists(strings::tertiary_text)) {
     str = choice_set[strings::tertiary_text].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid tertiary_text syntax check failed");
       return true;
     }
@@ -288,7 +288,7 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
 
     for (size_t i = 0; i < len; ++i) {
       str = choice_set[strings::vr_commands][i].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid vr_commands syntax check failed");
         return true;
       }
@@ -297,12 +297,19 @@ bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
 
   if (choice_set.keyExists(strings::image)) {
     str = choice_set[strings::image][strings::value].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid image value syntax check failed");
       return true;
     }
   }
 
+  if (choice_set.keyExists(strings::secondary_image)) {
+    str = choice_set[strings::secondary_image][strings::value].asCharArray();
+    if (!CheckSyntax(str)) {
+      LOG4CXX_ERROR(logger_, "Invalid secondary_image value syntax check failed");
+      return true;
+    }
+  }
   return false;
 }
 

@@ -201,7 +201,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                 if (response.id in SDL.SDLModel.userFriendlyMessagePull) {
                     var callbackObj = SDL.SDLModel.userFriendlyMessagePull[response.id];
-                    callbackObj.callbackFunc(response.result.message, callbackObj.appID);
+                    callbackObj.callbackFunc(response.result.messages, callbackObj.appID);
                     delete SDL.SDLModel.userFriendlyMessagePull[response.id];
                 }
             }
@@ -216,43 +216,24 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                     if (!response.result.isSDLAllowed) {
 
-                        var device;
+                        SDL.SettingsController.currentDeviceAllowance = response.result.device;
 
-                        if (response.result.device) {
-                            device = response.result.device;
-                        } else {
-
-                            device = {
-                                id: appID,
-                                name: SDL.SDLController.getApplicationModel(appID).deviceName
-                            };
-                        }
-
-                        SDL.SettingsController.AllowSDLFunctionality(device);
+                        FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.AllowSDLFunctionality, appID, ["DataConsent"]);
                     }
 
                     if (response.result.isPermissionsConsentNeeded) {
 
                         this.GetListOfPermissions(appID);
-
-                        //this.OnAppPermissionConsent(response.result.allowedFunctions, "GUI", appID);
                     }
 
                     if (response.result.isAppPermissionsRevoked) {
 
-                        SDL.SettingsController.userFriendlyMessagePopUp(appID, response.result.appRevokedPermissions);
-
-                        //deleted array
-                        SDL.SDLModel.setAppPermissions(response.result.appRevokedPermissions);
+                        SDL.SDLModel.setAppPermissions(appID, response.result.appRevokedPermissions);
                     }
 
                     if (response.result.isAppRevoked) {
 
-                        SDL.PopUp.popupActivate("Current version of app is no longer supported!");
-
-                        SDL.SDLModel.onAppUnregistered({
-                            "appID": appID
-                        });
+                        FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, appID, ["AppUnsupported"]);
                     } else {
 
                         SDL.SDLController.getApplicationModel(appID).deviceID = response.result.device ? response.result.device.id : null;
@@ -263,6 +244,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                         if (SDL.SDLModel.stateLimited == appID) {
                             SDL.SDLModel.stateLimited = null;
+                            SDL.SDLModel.set('limitedExist', false);
                         }
 
                         if (response.result.isSDLAllowed) {
@@ -339,32 +321,17 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                 if (notification.params.isAppPermissionsRevoked) {
 
-                    SDL.SettingsController.userFriendlyMessagePopUp(notification.params.appID, notification.params.appRevokedPermissions);
-
-                    //deleted array
-                    SDL.SDLModel.setAppPermissions(notification.params.appRevokedPermissions);
+                    SDL.SDLModel.setAppPermissions(notification.params.appID, response.result.appRevokedPermissions);
                 }
 
                 if (notification.params.appRevoked) {
 
-                    SDL.PopUp.popupActivate("Current version of app is no longer supported!");
-                    
-//                  TO DO
-//                    Remove comments if this functionality will be needed
-//                    if (notification.params.appID == SDL.SDLAppController.model.appID) {
-//                        SDL.SDLAppController.deactivateApp();
-//                    }
+                    FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, notification.params.appID, ["AppUnsupported"]);
                 }
 
                 if (notification.params.appUnauthorized) {
 
-                    SDL.PopUp.popupActivate("Current version of app is Unauthorized!");
-
-//                  TO DO
-//                    Remove comments if this functionality will be needed
-//                    if (notification.params.appID == SDL.SDLAppController.model.appID) {
-//                        SDL.SDLAppController.deactivateApp();
-//                    }
+                    FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, notification.params.appID, ["AppUnauthorized"]);
                 }
             }
 
@@ -431,9 +398,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                     var message = "Was found " + request.params.applications.length + " apps";
 
                     SDL.PopUp.popupActivate(message);
-//                    if (SDL.States.info.active) {
-//                        SDL.SDLController.onGetAppList(request.params.applications);
-//                    }
+
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
                         request.method);
@@ -459,6 +424,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                         if (SDL.SDLModel.stateLimited == request.params.appID) {
                             SDL.SDLModel.stateLimited = null;
+                            SDL.SDLModel.set('limitedExist', false);
                         }
 
                         SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
@@ -482,10 +448,6 @@ FFW.BasicCommunication = FFW.RPCObserver
                         }
                     };
                     this.client.send(JSONMessage);
-                }
-                if (request.method == "SDL.GetUserFriendlyMessage") {
-                    //TO DO
-                    //popUp activation
                 }
                 if (request.method == "BasicCommunication.PolicyUpdate") {
                     SDL.SettingsController.policyUpdateFile = request.params.file;
@@ -601,13 +563,10 @@ FFW.BasicCommunication = FFW.RPCObserver
                 "id": itemIndex,
                 "method": "SDL.GetUserFriendlyMessage",
                 "params": {
-                    "language": SDL.SDLModel.hmiUILanguage
+                    "language": SDL.SDLModel.hmiUILanguage,
+                    "messageCodes": messageCodes
                 }
             };
-
-            if (messageCodes) {
-                JSONMessage.params.messageCodes = messageCodes;
-            }
 
             this.client.send(JSONMessage);
         },
@@ -632,9 +591,13 @@ FFW.BasicCommunication = FFW.RPCObserver
                 "id": itemIndex,
                 "method": "SDL.GetListOfPermissions",
                 "params": {
-                    "appID": appID
                 }
             };
+
+            if (appID) {
+                JSONMessage.params.appID = appID;
+            }
+
             this.client.send(JSONMessage);
         },
 
@@ -679,7 +642,7 @@ FFW.BasicCommunication = FFW.RPCObserver
          * @param {String}
          *            device
          */
-        OnAllowSDLFunctionality: function(allowed, source, device) {
+        OnAllowSDLFunctionality: function(allowed, source) {
 
             Em.Logger.log("FFW.SDL.OnAllowSDLFunctionality");
 
@@ -693,10 +656,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
             };
 
-
-
-            if (device) {
-                JSONMessage.params.device = device;
+            if (SDL.SettingsController.currentDeviceAllowance) {
+                JSONMessage.params.device = SDL.SettingsController.currentDeviceAllowance;
             }
 
             this.client.send(JSONMessage);

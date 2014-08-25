@@ -281,15 +281,14 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   virtual void StartDevicesDiscovery();
 
   /**
-   * \brief Close all associated sessions and close
-   * the connection associated with the key
-   * \param key Unique key used by other components as session identifier
+   * @brief Close the connection revoked by Policy
+   * @param connection_key pair of connection and session id
    */
-  virtual void CloseConnection(uint32_t key);
+  virtual void CloseRevokedConnection(uint32_t connection_key);
 
   /**
-   * \brief Close all associated sessions and close the
-   * connection pointed by handle
+   * @brief Close the connection pointed by handle
+   * @param connection_handle Connection unique id
    */
   virtual void CloseConnection(ConnectionHandle connection_handle) OVERRIDE;
 
