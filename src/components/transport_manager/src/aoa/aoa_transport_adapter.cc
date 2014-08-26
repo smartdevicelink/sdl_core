@@ -33,9 +33,11 @@
 #include "transport_manager/aoa/aoa_transport_adapter.h"
 
 #include "utils/logger.h"
-#include "transport_manager/aoa/aoa_wrapper.h"
 #include "transport_manager/aoa/aoa_device_scanner.h"
 #include "transport_manager/aoa/aoa_connection_factory.h"
+#include "transport_manager/aoa/aoa_client_listener.h"
+
+#include "transport_manager/aoa/pps_device_scanner.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -43,8 +45,9 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 AOATransportAdapter::AOATransportAdapter()
-    : TransportAdapterImpl(new AOADeviceScanner(this),
-                           new AOAConnectionFactory(this), NULL),
+    : TransportAdapterImpl(new PPSDeviceScanner(this),
+                           new AOAConnectionFactory(this),
+                           0),
       initialised_(false) {
 }
 

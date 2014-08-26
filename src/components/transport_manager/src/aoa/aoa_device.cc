@@ -39,6 +39,12 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
+AOADevice::AOADevice(const std::string& name,
+                     const DeviceUID& unique_id)
+    : Device(name, unique_id),
+      handle_(0) {
+}
+
 AOADevice::AOADevice(AOAWrapper::AOAHandle handle,
                      const std::string& name,
                      const DeviceUID& unique_id)

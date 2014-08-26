@@ -30,31 +30,47 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_
+#include "transport_manager/aoa/aoa_dynamic_device.h"
 
-#include "transport_manager/transport_adapter/device.h"
+#include "utils/logger.h"
 #include "transport_manager/aoa/aoa_wrapper.h"
+#include "transport_manager/transport_adapter/device_scanner.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class AOADevice : public Device {
- public:
-  AOADevice(const std::string& name, const DeviceUID& unique_id);
-  AOADevice(AOAWrapper::AOAHandle handle, const std::string& name,
-            const DeviceUID& unique_id);
-  virtual bool IsSameAs(const Device* other_device) const;
-  virtual ApplicationList GetApplicationList() const;
-  AOAWrapper::AOAHandle handle() const;
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
- protected:
-  AOAWrapper::AOAHandle handle_;
-};
+const std::string AOADynamicDevice::kPathToConfig = "";  // default on QNX /etc/mm/aoa.conf
 
-typedef utils::SharedPtr<AOADevice> AOADevicePtr;
+AOADynamicDevice::AOADynamicDevice(const std::string& name,
+                                   const DeviceUID& unique_id,
+                                   DeviceScanner* scanner)
+    : AOADevice(name, unique_id),
+      observer_(new ScannerObserver(this)),
+      scanner_(scanner) {
+  AOAWrapper::Init(kPathToConfig, observer_);
+}
+
+AOADynamicDevice::~AOADynamicDevice() {
+  AOAWrapper::Shutdown();
+  delete observer_;
+  observer_ = NULL;
+}
+
+void AOADynamicDevice::SetHandle(AOAWrapper::AOAHandle hdl) {
+  handle_ = hdl;
+}
+
+AOADynamicDevice::ScannerObserver::ScannerObserver(AOADynamicDevice* parent)
+    : parent_(parent) {
+}
+
+void AOADynamicDevice::ScannerObserver::OnConnectedDevice(
+    AOAWrapper::AOAHandle hdl) {
+  LOG4CXX_TRACE(logger_, "AOA: new device is connected");
+  parent_->SetHandle(hdl);
+}
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_

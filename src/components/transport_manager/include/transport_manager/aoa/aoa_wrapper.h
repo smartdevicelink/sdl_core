@@ -69,14 +69,24 @@ class AOAWrapper {
   typedef aoa_hdl_s* AOAHandle;
   struct AOAUsbInfo {
     std::string path;  /* Path to the USB stack */
+    int aoa_version;
     uint32_t devno;  /* Device number */
     uint32_t busno;  /* Device bus number */
+    std::string manufacturer;
+    uint32_t vendor_id;
+    std::string product;
+    uint32_t product_id;
+    std::string serial_number;
     uint32_t iface;  /* Device interface */
   };
 
   static bool Init(AOAScannerObserver* observer);
   static bool Init(const std::string& path_to_config,
-                   const AOAWrapper::AOAUsbInfo& info,
+                   AOAScannerObserver* observer);
+  static bool Init(const AOAWrapper::AOAUsbInfo& aoa_usb_info,
+                   AOAScannerObserver* observer);
+  static bool Init(const std::string& path_to_config,
+                   const AOAWrapper::AOAUsbInfo& aoa_usb_info,
                    AOAScannerObserver* observer);
   static bool Shutdown();
   static inline bool IsError(int ret);

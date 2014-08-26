@@ -41,6 +41,8 @@ namespace transport_adapter {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
+const std::string AOADeviceScanner::kPathToConfig = "";  // default on QNX /etc/mm/aoa.conf
+
 AOADeviceScanner::AOADeviceScanner(TransportAdapterController* controller)
     : initialised_(false),
       observer_(NULL),
@@ -48,12 +50,12 @@ AOADeviceScanner::AOADeviceScanner(TransportAdapterController* controller)
 }
 
 TransportAdapter::Error AOADeviceScanner::Init() {
-  // TODO(KKolodiy) need to read this parameters from somewhere
-  const std::string kPathToConfig = "/fs/mp/etc/mm/aoa.conf";
-  const AOAWrapper::AOAUsbInfo info;
   observer_ = new ScannerObserver(this);
-  //initialised_ = AOAWrapper::Init(kPathToConfig, info, observer_);
-  initialised_ = AOAWrapper::Init(observer_);
+  if (kPathToConfig.empty()) {
+    initialised_ = AOAWrapper::Init(observer_);
+  } else {
+    initialised_ = AOAWrapper::Init(kPathToConfig, observer_);
+  }
   return (initialised_) ? TransportAdapter::OK : TransportAdapter::FAIL;
 }
 

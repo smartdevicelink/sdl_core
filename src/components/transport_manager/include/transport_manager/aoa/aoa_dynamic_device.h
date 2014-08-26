@@ -29,32 +29,41 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DYNAMIC_DEVICE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DYNAMIC_DEVICE_H_
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_
+#include <string>
 
-#include "transport_manager/transport_adapter/device.h"
-#include "transport_manager/aoa/aoa_wrapper.h"
+#include "transport_manager/aoa/aoa_device.h"
 
 namespace transport_manager {
 namespace transport_adapter {
 
-class AOADevice : public Device {
+class DeviceScanner;
+
+class AOADynamicDevice : public AOADevice {
  public:
-  AOADevice(const std::string& name, const DeviceUID& unique_id);
-  AOADevice(AOAWrapper::AOAHandle handle, const std::string& name,
-            const DeviceUID& unique_id);
-  virtual bool IsSameAs(const Device* other_device) const;
-  virtual ApplicationList GetApplicationList() const;
-  AOAWrapper::AOAHandle handle() const;
+  AOADynamicDevice(const std::string& name, const DeviceUID& unique_id,
+                   DeviceScanner *scanner);
+  ~AOADynamicDevice();
 
- protected:
-  AOAWrapper::AOAHandle handle_;
+ private:
+  static const std::string kPathToConfig;
+  AOAScannerObserver* observer_;
+  DeviceScanner* scanner_;
+
+  void SetHandle(AOAWrapper::AOAHandle hdl);
+
+  class ScannerObserver : public AOAScannerObserver {
+   public:
+    explicit ScannerObserver(AOADynamicDevice* parent);
+    void OnConnectedDevice(AOAWrapper::AOAHandle hdl);
+   private:
+    AOADynamicDevice* parent_;
+  };
 };
-
-typedef utils::SharedPtr<AOADevice> AOADevicePtr;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DYNAMIC_DEVICE_H_

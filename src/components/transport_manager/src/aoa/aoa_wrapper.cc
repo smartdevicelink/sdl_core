@@ -101,13 +101,38 @@ bool AOAWrapper::Init(AOAScannerObserver *observer) {
 }
 
 bool AOAWrapper::Init(const std::string& path_to_config,
+                      AOAScannerObserver* observer) {
+  LOG4CXX_TRACE(logger_, "AOA: init default usb_info");
+  int ret = aoa_init(path_to_config.c_str(), NULL, &OnConnectedDevice,
+                     &observer, AOA_FLAG_EXTERNAL_SWITCH);
+  if (IsError(ret)) {
+    PrintError(ret);
+    return false;
+  }
+  return true;
+}
+
+bool AOAWrapper::Init(const AOAWrapper::AOAUsbInfo& aoa_usb_info,
+                      AOAScannerObserver* observer) {
+  LOG4CXX_TRACE(logger_, "AOA: init default path to config");
+  usb_info_t usb_info;
+  PrepareUsbInfo(aoa_usb_info, &usb_info);
+  int ret = aoa_init(NULL, &usb_info, &OnConnectedDevice,
+                     &observer, AOA_FLAG_UNIQUE_DEVICE);
+  if (IsError(ret)) {
+    PrintError(ret);
+    return false;
+  }
+  return true;
+}
+
+bool AOAWrapper::Init(const std::string& path_to_config,
                       const AOAWrapper::AOAUsbInfo& aoa_usb_info,
                       AOAScannerObserver *observer) {
   LOG4CXX_TRACE(logger_, "AOA: init");
-  const char* config_path = (path_to_config.empty()) ? NULL : path_to_config.c_str();
   usb_info_t usb_info;
   PrepareUsbInfo(aoa_usb_info, &usb_info);
-  int ret = aoa_init(config_path, &usb_info, &OnConnectedDevice,
+  int ret = aoa_init(path_to_config.c_str(), &usb_info, &OnConnectedDevice,
                      &observer, AOA_FLAG_UNIQUE_DEVICE);
   if (IsError(ret)) {
     PrintError(ret);
@@ -358,7 +383,7 @@ void AOAWrapper::PrintError(int ret) {
 }
 
 void AOAWrapper::PrepareUsbInfo(const AOAUsbInfo& aoa_usb_info,
-                                usb_info_t* usb_info) {
+                                usb_info_s* usb_info) {
   usb_info->path = aoa_usb_info.path.c_str();
   usb_info->busno = aoa_usb_info.busno;
   usb_info->devno = aoa_usb_info.devno;
@@ -367,4 +392,3 @@ void AOAWrapper::PrepareUsbInfo(const AOAUsbInfo& aoa_usb_info,
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-

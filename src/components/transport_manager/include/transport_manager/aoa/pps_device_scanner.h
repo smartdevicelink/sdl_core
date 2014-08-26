@@ -30,15 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_SCANNER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_SCANNER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_PPS_DEVICE_SCANNER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_PPS_DEVICE_SCANNER_H_
 
 #include <map>
+#include <string>
 
 #include "utils/lock.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/pulse_thread_delegate.h"
 
 #include "transport_manager/transport_adapter/device_scanner.h"
-#include "transport_manager/aoa/aoa_device.h"
+#include "transport_manager/aoa/aoa_dynamic_device.h"
 #include "transport_manager/aoa/aoa_wrapper.h"
 
 namespace transport_manager {
@@ -46,9 +49,10 @@ namespace transport_adapter {
 
 class TransportAdapterController;
 
-class AOADeviceScanner : public DeviceScanner {
+class PPSDeviceScanner : public DeviceScanner {
  public:
-  explicit AOADeviceScanner(TransportAdapterController* controller);
+  explicit PPSDeviceScanner(TransportAdapterController* controller);
+  ~PPSDeviceScanner();
 
  protected:
   virtual TransportAdapter::Error Init();
@@ -57,30 +61,44 @@ class AOADeviceScanner : public DeviceScanner {
   virtual bool IsInitialised() const;
 
  private:
-  typedef std::map<AOAWrapper::AOAHandle, AOADevicePtr> DeviceContainer;
+  typedef std::map<DeviceUID, AOADevicePtr> DeviceContainer;
 
-  static const std::string kPathToConfig;
+  static const std::string kPpsPathRoot;
+  static const std::string kPpsPathAll;
+  static const std::string kPpsPathCtrl;
   bool initialised_;
-  AOAScannerObserver* observer_;
   TransportAdapterController* controller_;
   DeviceContainer devices_;
   sync_primitives::Lock devices_lock_;
+  int fd_;
+  threads::Thread* thread_;
 
-  void AddDevice(AOAWrapper::AOAHandle hdl);
+  bool OpenPps();
+  void ClosePps();
+  bool ArmEvent(struct sigevent* event);
+  void Process(uint8_t* buf, size_t size);
+  std::string ParsePps(char* ppsdata, const char** vals);
+  void WritePpsData(const char* objname, const char** attrs);
+  bool CheckData(const char** attrs);
+  void FillUsbInfo(const std::string& object_name, const char** attrs,
+                   AOAWrapper::AOAUsbInfo* info);
+  void AddDevice(const AOAWrapper::AOAUsbInfo& aoa_usb_info);
   void NotifyDevicesUpdated();
-  std::string GetName();
-  std::string GetUniqueId();
 
-  class ScannerObserver : public AOAScannerObserver {
+  class PpsThreadDelegate : public threads::PulseThreadDelegate {
    public:
-    explicit ScannerObserver(AOADeviceScanner* parent);
-    void OnConnectedDevice(AOAWrapper::AOAHandle hdl);
+    explicit PpsThreadDelegate(PPSDeviceScanner* parent);
+
+   protected:
+    virtual bool ArmEvent(struct sigevent* event);
+    virtual void OnPulse();
+
    private:
-    AOADeviceScanner* parent_;
+    PPSDeviceScanner* parent_;
   };
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
 
-#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DEVICE_SCANNER_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_PPS_DEVICE_SCANNER_H_

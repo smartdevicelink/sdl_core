@@ -33,6 +33,12 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_CLIENT_LISTENER_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_CLIENT_LISTENER_H_
 
+#include <string>
+
+#include "utils/threads/pulse_thread_delegate.h"
+#include "transport_manager/transport_adapter/client_connection_listener.h"
+#include "transport_manager/aoa/aoa_wrapper.h"
+
 namespace transport_manager {
 namespace transport_adapter {
 
@@ -53,7 +59,19 @@ class AOAClientListener : public ClientConnectionListener {
   TransportAdapter::Error StopListening();
 
  private:
+  static const std::string kPpsPathRoot;
+  static const std::string kPpsPathAll;
+  static const std::string kPpsPathCtrl;
   TransportAdapterController* controller_;
+  int fd_;
+
+  bool OpenPps();
+  void ClosePps();
+  bool ArmEvent(struct sigevent* event);
+  void ProcessPpsData(uint8_t* buf, size_t size);
+  void WritePpsData(const char* objname, const char** attrs);
+  void FillUsbInfo(const char* objname, const char** attrs,
+                   AOAWrapper::AOAUsbInfo* info);
 
   class PpsThreadDelegate : public threads::PulseThreadDelegate {
    public:
@@ -67,12 +85,10 @@ class AOAClientListener : public ClientConnectionListener {
 
    private:
     AOAClientListener* parent_;
-    int fd_;
   };
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
 
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_CLIENT_LISTENER_H_
