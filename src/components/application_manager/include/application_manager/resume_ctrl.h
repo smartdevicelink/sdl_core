@@ -91,6 +91,25 @@ class ResumeCtrl: public event_engine::EventObserver {
     bool RestoreApplicationHMILevel(ApplicationSharedPtr application);
 
     /**
+     * @brief Set application HMI Level as stored in policy
+     * @param application is application witch HMI Level is need to setup
+     * @return true if success, otherwise return false
+     */
+    bool SetupDefaultHMILevel(ApplicationSharedPtr application);
+
+    /**
+     * @brief Setup HmiLevel for application
+     * Do routine of setting up hmi_level
+     * @param application is application witch HMI Level is need to setup
+     * @hmi_level HMI Level is needed to setup
+     * @hmi_level AudioStreamingState is needed to setup
+     * @return true if success, otherwise return false
+     */
+    bool SetupHMILevel(ApplicationSharedPtr application,
+                       mobile_apis::HMILevel::eType hmi_level,
+                       mobile_apis::AudioStreamingState::eType audio_streaming_state);
+
+    /**
      * @brief Set application HMI Level as saved
      * @param application is application witch HMI Level is need to restore
      * @return true if success, otherwise return false

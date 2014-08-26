@@ -372,7 +372,7 @@ smart_objects::SmartObject* MessageHelper::GetHashUpdateNotification(
                                app_id);
 
   smart_objects::SmartObject* message = NULL;
-  if (app.get()) {
+  if (NULL == app.get()) {
     return message;
   }
 
