@@ -96,8 +96,7 @@ ApplicationImpl::ApplicationImpl(
       audio_streaming_state_(mobile_api::AudioStreamingState::NOT_AUDIBLE),
       device_(0),
       usage_report_(mobile_app_id, statistics_manager),
-      protocol_version_(ProtocolVersion::kV3),
-      alert_in_background_(false) {
+      protocol_version_(ProtocolVersion::kV3) {
 
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] =
       {date_time::DateTime::getCurrentTime(), 0};
@@ -319,14 +318,6 @@ uint32_t ApplicationImpl::get_grammar_id() const {
 
 void ApplicationImpl::set_grammar_id(uint32_t value) {
   grammar_id_ = value;
-}
-
-bool ApplicationImpl::alert_in_background() const {
-  return alert_in_background_;
-}
-
-void ApplicationImpl::set_alert_in_background(bool state_of_alert) {
-  alert_in_background_ = state_of_alert;
 }
 
 bool ApplicationImpl::has_been_activated() const {

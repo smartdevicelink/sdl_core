@@ -49,40 +49,28 @@ OnSystemContextNotification::~OnSystemContextNotification() {
 void OnSystemContextNotification::Run() {
   LOG4CXX_INFO(logger_, "OnSystemContextNotification::Run");
 
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-  const std::set<ApplicationSharedPtr>& app_list = accessor.applications();
-  std::set<ApplicationSharedPtr>::const_iterator it = app_list.begin();
-  uint32_t app_id = 0;
   mobile_api::SystemContext::eType system_context =
-      static_cast<mobile_api::SystemContext::eType>(
-          (*message_)[strings::msg_params][hmi_notification::system_context].asInt());
+    static_cast<mobile_api::SystemContext::eType>(
+    (*message_)[strings::msg_params][hmi_notification::system_context].asInt());
 
-  if (((*message_)[strings::msg_params].keyExists(strings::app_id)) &&
-      (mobile_api::SystemContext::SYSCTXT_ALERT == system_context)) {
-    app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
+  ApplicationSharedPtr app;
+
+  if ((mobile_api::SystemContext::SYSCTXT_VRSESSION == system_context) ||
+      (mobile_api::SystemContext::SYSCTXT_MENU == system_context) ||
+      (mobile_api::SystemContext::SYSCTXT_HMI_OBSCURED == system_context)) {
+    app = ApplicationManagerImpl::instance()->active_application();
+  } else if ((mobile_api::SystemContext::SYSCTXT_ALERT == system_context) ||
+             (mobile_api::SystemContext::SYSCTXT_MAIN == system_context)) {
+    if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
+      app = ApplicationManagerImpl::instance()->
+        application((*message_)[strings::msg_params][strings::app_id].asUInt());
+    }
   }
 
-  // SDLAQ-CRS-833 implementation
-  for (; app_list.end() != it; ++it) {
-    // send notification for background app
-    if ((app_id != 0) && ((*it)->app_id() == app_id) &&
-        (mobile_api::HMILevel::HMI_BACKGROUND == (*it)->hmi_level())) {
-      if (system_context != (*it)->system_context()) {
-        (*it)->set_alert_in_background(true);
-        SendSystemContextNotification((*it), system_context);
-      }
-      // change system context for full app
-      system_context = mobile_api::SystemContext::SYSCTXT_HMI_OBSCURED;
-    } else if ((mobile_api::HMILevel::HMI_BACKGROUND == (*it)->hmi_level()) &&
-        (true == (*it)->alert_in_background())) {
-      (*it)->set_alert_in_background(false);
-      SendSystemContextNotification((*it), system_context);
-    } else if (((mobile_api::HMILevel::HMI_FULL == (*it)->hmi_level()) ||
-        (mobile_api::HMILevel::HMI_LIMITED == (*it)->hmi_level())) &&
-        (system_context != (*it)->system_context())) {
-      // If context actually changed
-      SendSystemContextNotification((*it), system_context);
-    }
+  if (app.valid()) {
+    SendSystemContextNotification(app, system_context);
+  } else {
+    LOG4CXX_ERROR(logger_, "Ignored wrong SystemContext notification!");
   }
 }
 

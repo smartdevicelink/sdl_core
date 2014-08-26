@@ -2108,10 +2108,11 @@ void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
     hmi_capabilities_.attenuated_supported()
     ? mobile_apis::AudioStreamingState::ATTENUATED
     : mobile_apis::AudioStreamingState::NOT_AUDIBLE;
-  std::set<ApplicationSharedPtr> local_app_list = application_list_;
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  ApplicationManagerImpl::TAppList local_app_list = accessor.applications();
 
-  std::set<ApplicationSharedPtr>::const_iterator it = local_app_list.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd = local_app_list.end();
+  ApplicationManagerImpl::TAppListConstIt it = local_app_list.begin();
+  ApplicationManagerImpl::TAppListConstIt itEnd = local_app_list.end();
   for (; it != itEnd; ++it) {
     if ((*it).valid()) {
       if ((*it)->is_media_application()) {
@@ -2131,9 +2132,10 @@ void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
 
 void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
 
-  std::set<ApplicationSharedPtr> local_app_list = application_list_;
-  std::set<ApplicationSharedPtr>::const_iterator it = local_app_list.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd = local_app_list.end();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  ApplicationManagerImpl::TAppList local_app_list = application_list_;
+  ApplicationManagerImpl::TAppListConstIt it = local_app_list.begin();
+  ApplicationManagerImpl::TAppListConstIt itEnd = local_app_list.end();
 
   for (; it != itEnd; ++it) {
     if ((*it).valid()) {

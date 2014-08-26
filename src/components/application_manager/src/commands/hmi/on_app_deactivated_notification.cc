@@ -91,9 +91,9 @@ void OnAppDeactivatedNotification::Run() {
 
       // switch HMI level for all applications in FULL or LIMITED
       ApplicationManagerImpl::ApplicationListAccessor accessor;
-      ApplicationManagerImpl::ApplicationListAccessor::TAppList applications =
+      ApplicationManagerImpl::TAppList applications =
           accessor.applications();
-      ApplicationManagerImpl::ApplicationListAccessor::TAppListIt it =
+      ApplicationManagerImpl::TAppListIt it =
           applications.begin();
       for (; applications.end() != it; ++it) {
           ApplicationSharedPtr app = *it;
