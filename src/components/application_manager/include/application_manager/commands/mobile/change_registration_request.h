@@ -119,19 +119,20 @@ class ChangeRegistrationRequest : public CommandRequestImpl  {
    * returns false.
    */
    bool IsWhiteSpaceExist();
-   /*
-    *  @brief Check parameters (name, vr) for
+
+   /**
+    * @brief Check parameters (name, vr) for
     * coincidence with already known parameters of registered applications
     *
-    * return SUCCESS if there is no coincidence of app.name/VR synonyms,
+    * @return SUCCESS if there is no coincidence of app.name/VR synonyms,
     * otherwise appropriate error code returns
     */
    mobile_apis::Result::eType CheckCoincidence();
 
-   /*
+   /**
     * @brief Predicate for using with CheckCoincidence method to compare with VR synonym SO
     *
-    * return TRUE if there is coincidence of VR, otherwise FALSE
+    * @return TRUE if there is coincidence of VR, otherwise FALSE
     */
    struct CoincidencePredicateVR {
      explicit CoincidencePredicateVR(const std::string &newItem)
