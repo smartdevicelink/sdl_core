@@ -39,7 +39,7 @@
 namespace {
 const char connection_key[] = "connection_key";
 const char binary_data[] = "binary_data";
-const char msg_params[] = "msg_params";
+const char app_id[] = "appID";
 }
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -95,9 +95,10 @@ void CObjectSchemaItem::applySchema(SmartObject& Object) {
   for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end(); ) {
     const std::string& key = it->first;
     if (mMembers.end() == mMembers.find(key)
-        // FIXME(EZamakhov): Remove illigal usage of connection_key/binary_data in AM
+        // FIXME(EZamakhov): Remove illigal usage of filed in AM
         && key.compare(connection_key) != 0
         && key.compare(binary_data) != 0
+        && key.compare(app_id) != 0
         ) {
       ++it;
       // remove fake params
