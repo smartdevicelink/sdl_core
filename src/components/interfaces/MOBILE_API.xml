@@ -737,7 +737,7 @@
                 Can be set as a root screen.
         </description>
     </element>
-    <element name="NON_MEDIA" rootscreen="true">
+    <element name="NON-MEDIA" internal_name="NON_MEDIA" rootscreen="true">
         <description>
                 Default Non-media screen.
                 Can be set as a root screen.
