@@ -63,6 +63,7 @@ class PPSDeviceScanner : public DeviceScanner {
  private:
   typedef std::map<DeviceUID, AOADevicePtr> DeviceContainer;
 
+  static const std::string kUSBStackPath;
   static const std::string kPpsPathRoot;
   static const std::string kPpsPathAll;
   static const std::string kPpsPathCtrl;

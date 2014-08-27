@@ -33,9 +33,9 @@
 #include "transport_manager/aoa/pps_device_scanner.h"
 
 #include <stdlib.h>
+#include <unistd.h>
 #include <limits.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <stdint.h>
@@ -70,9 +70,22 @@ enum {
   ATTR_COUNT
 };
 
+/* The keys required by usblauncher to send to the device */
+static const char *keys[] = { "manufacturer", "model", "description", "version",
+    "uri", "serial",
+
+    NULL };
+
+/* The values used to switch the phone into AOA mode */
+static const char *values[] = { "QNX Multimedia", "QNX", "2.0",
+    "QNX AOA Demo Application", "http://www.qnx.com", "12345678",
+
+    NULL };
+
+const std::string PPSDeviceScanner::kUSBStackPath = "/dev/io-usb/io-usb";
 const std::string PPSDeviceScanner::kPpsPathRoot = "/pps/qnx/device/";
 const std::string PPSDeviceScanner::kPpsPathAll = ".all";
-const std::string PPSDeviceScanner::kPpsPathCtrl = "usb_ctrl";
+const std::string PPSDeviceScanner::kPpsPathCtrl = "usb_ctrl1";
 
 PPSDeviceScanner::PPSDeviceScanner(TransportAdapterController* controller)
     : initialised_(false),
@@ -137,18 +150,24 @@ std::string PPSDeviceScanner::ParsePps(char* ppsdata, const char** vals) {
   static const char* attrs[] = { "aoa", "busno", "devno", "manufacturer",
       "vendor_id", "product", "product_id", "serial_number", NULL };
   int rc;
-  char* objname = NULL;
+  std::string object_name;
   pps_attrib_t info = { 0 };
   /* Loop through the PPS objects looking for aoa, busno, devno and etc. */
   while ((rc = ppsparse(&ppsdata, NULL, attrs, &info, 0))) {
     if (rc == PPS_OBJECT) {
-      objname = info.obj_name + 1;
+      if (info.obj_name) {
+        object_name = info.obj_name;
+      }
+      LOG4CXX_DEBUG(logger_, "AOA: object name " << object_name);
     } else if (rc == PPS_ATTRIBUTE && info.attr_index != -1) {
+      LOG4CXX_DEBUG(
+          logger_, "AOA: index " << info.attr_index << ", value " << info.value);
       /* If our value matches our attribute index, keep a pointer to it */
       vals[info.attr_index] = info.value;
     }
   }
-  return objname;
+
+  return object_name;
 }
 
 void PPSDeviceScanner::Process(uint8_t* buf, size_t size) {
@@ -164,8 +183,8 @@ void PPSDeviceScanner::Process(uint8_t* buf, size_t size) {
   if (CheckData(vals)) {
     AOAWrapper::AOAUsbInfo aoa_usb_info;
     FillUsbInfo(object_name, vals, &aoa_usb_info);
-    AddDevice(aoa_usb_info);
     WritePpsData(object_name.c_str(), vals);
+    AddDevice(aoa_usb_info);
   }
 }
 
@@ -183,53 +202,60 @@ bool PPSDeviceScanner::CheckData(const char** attrs) {
 void PPSDeviceScanner::FillUsbInfo(const std::string& object_name,
                                    const char** attrs,
                                    AOAWrapper::AOAUsbInfo* info) {
-  info->path = kPpsPathRoot + "/" + object_name;
-  info->aoa_version = atoi(attrs[ATTR_AOA]);
-  info->busno = atoi(attrs[ATTR_BUSNO]);
-  info->devno = atoi(attrs[ATTR_DEVNO]);
+  info->path = kUSBStackPath;
+  info->aoa_version = strtoul(attrs[ATTR_AOA], NULL, 0);
+  info->busno = strtoul(attrs[ATTR_BUSNO], NULL, 0);
+  info->devno = strtoul(attrs[ATTR_DEVNO], NULL, 0);
   info->manufacturer = attrs[ATTR_MANUFACTURER];
-  info->vendor_id = atoi(attrs[ATTR_VENDOR_ID]);
+  info->vendor_id = strtoul(attrs[ATTR_VENDOR_ID], NULL, 0);
   info->product = attrs[ATTR_PRODUCT];
-  info->product_id = atoi(attrs[ATTR_PRODUCT_ID]);
+  info->product_id = strtoul(attrs[ATTR_PRODUCT_ID], NULL, 0);
   info->serial_number = attrs[ATTR_SERIAL_NUMBER];
   info->iface = 0;
 }
 
 void PPSDeviceScanner::WritePpsData(const char* objname, const char** attrs) {
-//  int i, rc, fd;
-//  char  cmd[PATH_MAX];
-//  size_t  sz;
-//
-//  /* Do we have an object name? */
-//  if (!objname) {
-//    return;
-//  }
-//
-//  /* Create the PPS request string (start_aoa::busno,devno,request_mask,key=value,key=value,...) */
-//  sz = snprintf( cmd, sizeof(cmd), "start_aoa::busno=%s,devno=%s,modes=%u", attrs[ATTR_BUSNO], attrs[ATTR_DEVNO], REQUEST_MASK );
-//
-//  i=0;
-//  while ( keys[i] ) {
-//    /* Add all the key/value pairs to the request */
-//    sz += snprintf( cmd + sz, sizeof(cmd) - sz, ",%s=%s", keys[i], values[i] );
-//    i++;
-//  }
-//
-//  /* Open the object we want to write to */
-//  fd = open( PPS_PATH_ROOT PPS_PATH_CTRL, O_WRONLY );
-//  if ( fd == -1 ) {
-//    fprintf( stderr, "Error opening file '%s': (%s)\n", PPS_PATH_ROOT PPS_PATH_CTRL, strerror(errno) );
-//    return;
-//  }
-//
-//  /* Write to the PPS object */
-//  rc = write( fd, cmd, sz );
-//  if ( rc == -1 ) {
-//    fprintf( stderr, "Error writing to file '%s': (%s)\n%s\n", PPS_PATH_ROOT PPS_PATH_CTRL, strerror(errno), cmd );
-//    return;
-//  }
-//
-//  close( fd );
+  LOG4CXX_TRACE(logger_, "AOA: Write pps to device");
+  int i, rc, fd;
+  char cmd[PATH_MAX];
+  size_t sz;
+
+  /* Do we have an object name? */
+  if (!objname) {
+    return;
+  }
+
+  /* Create the PPS request string (start_aoa::busno,devno,request_mask,key=value,key=value,...) */
+  sz = snprintf(cmd, sizeof(cmd), "start_aoa::busno=%s,devno=%s,modes=%u",
+                attrs[ATTR_BUSNO], attrs[ATTR_DEVNO], REQUEST_MASK);
+
+  i = 0;
+  while (keys[i]) {
+    /* Add all the key/value pairs to the request */
+    sz += snprintf(cmd + sz, sizeof(cmd) - sz, ",%s=%s", keys[i], values[i]);
+    i++;
+  }
+
+  /* Open the object we want to write to */
+  std::string ctrl = kPpsPathRoot + kPpsPathCtrl;
+  fd = open(ctrl.c_str(), O_WRONLY);
+  if (fd == -1) {
+    LOG4CXX_ERROR(
+        logger_,
+        "AOA: Error opening file '" << ctrl << "': " << strerror(errno) << "'");
+    return;
+  }
+
+  /* Write to the PPS object */
+  rc = write(fd, cmd, sz);
+  if (rc == -1) {
+    LOG4CXX_ERROR(
+        logger_,
+        "AOA: Error writing to file '" << ctrl << "': " << strerror(errno) << "' " << cmd);
+    return;
+  }
+
+  close(fd);
 }
 
 void PPSDeviceScanner::ClosePps() {
@@ -241,7 +267,8 @@ void PPSDeviceScanner::ClosePps() {
 void PPSDeviceScanner::AddDevice(const AOAWrapper::AOAUsbInfo& aoa_usb_info) {
   LOG4CXX_TRACE(logger_, "AOA: add device");
   AOADevicePtr aoa_device(
-      new AOADynamicDevice(aoa_usb_info.product, aoa_usb_info.serial_number, this));
+      new AOADynamicDevice(aoa_usb_info.product, aoa_usb_info.serial_number,
+                           aoa_usb_info, controller_));
   sync_primitives::AutoLock loker(devices_lock_);
   devices_.insert(std::make_pair(aoa_usb_info.serial_number, aoa_device));
 }

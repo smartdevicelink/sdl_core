@@ -34,7 +34,7 @@
 
 #include "utils/logger.h"
 #include "transport_manager/aoa/aoa_wrapper.h"
-#include "transport_manager/transport_adapter/device_scanner.h"
+#include "transport_manager/transport_adapter/transport_adapter_controller.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -45,11 +45,29 @@ const std::string AOADynamicDevice::kPathToConfig = "";  // default on QNX /etc/
 
 AOADynamicDevice::AOADynamicDevice(const std::string& name,
                                    const DeviceUID& unique_id,
-                                   DeviceScanner* scanner)
+                                   const AOAWrapper::AOAUsbInfo& info,
+                                   TransportAdapterController* controller)
     : AOADevice(name, unique_id),
       observer_(new ScannerObserver(this)),
-      scanner_(scanner) {
-  AOAWrapper::Init(kPathToConfig, observer_);
+      controller_(controller) {
+  if (kPathToConfig.empty()) {
+    AOAWrapper::Init(info, observer_);
+  } else {
+    AOAWrapper::Init(kPathToConfig, info, observer_);
+  }
+}
+
+AOADynamicDevice::AOADynamicDevice(const std::string& name,
+                                   const DeviceUID& unique_id,
+                                   TransportAdapterController* controller)
+    : AOADevice(name, unique_id),
+      observer_(new ScannerObserver(this)),
+      controller_(controller) {
+  if (kPathToConfig.empty()) {
+    AOAWrapper::Init(observer_);
+  } else {
+    AOAWrapper::Init(kPathToConfig, observer_);
+  }
 }
 
 AOADynamicDevice::~AOADynamicDevice() {
@@ -59,7 +77,11 @@ AOADynamicDevice::~AOADynamicDevice() {
 }
 
 void AOADynamicDevice::SetHandle(AOAWrapper::AOAHandle hdl) {
+  // Now only one device supported
   handle_ = hdl;
+  DeviceVector devices;
+  devices.push_back(DeviceSptr(this));
+  controller_->SearchDeviceDone(devices);
 }
 
 AOADynamicDevice::ScannerObserver::ScannerObserver(AOADynamicDevice* parent)

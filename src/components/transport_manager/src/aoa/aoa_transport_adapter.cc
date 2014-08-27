@@ -35,7 +35,6 @@
 #include "utils/logger.h"
 #include "transport_manager/aoa/aoa_device_scanner.h"
 #include "transport_manager/aoa/aoa_connection_factory.h"
-#include "transport_manager/aoa/aoa_client_listener.h"
 
 #include "transport_manager/aoa/pps_device_scanner.h"
 

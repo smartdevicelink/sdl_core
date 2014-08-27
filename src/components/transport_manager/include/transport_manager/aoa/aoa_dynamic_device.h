@@ -39,18 +39,21 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-class DeviceScanner;
+class TransportAdapterController;
 
 class AOADynamicDevice : public AOADevice {
  public:
   AOADynamicDevice(const std::string& name, const DeviceUID& unique_id,
-                   DeviceScanner *scanner);
+                   const AOAWrapper::AOAUsbInfo& info,
+                   TransportAdapterController* controller);
+  AOADynamicDevice(const std::string& name, const DeviceUID& unique_id,
+                   TransportAdapterController* controller);
   ~AOADynamicDevice();
 
  private:
   static const std::string kPathToConfig;
   AOAScannerObserver* observer_;
-  DeviceScanner* scanner_;
+  TransportAdapterController* controller_;
 
   void SetHandle(AOAWrapper::AOAHandle hdl);
 
