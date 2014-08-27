@@ -75,7 +75,7 @@ void OnDriverDistractionNotification::Run() {
       state;
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  const std::set<ApplicationSharedPtr>& applications = accessor.applications();
+  const std::set<ApplicationSharedPtr> applications = accessor.applications();
 
   std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
   for (; applications.end() != it; ++it) {

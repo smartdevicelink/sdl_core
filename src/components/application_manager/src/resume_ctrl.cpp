@@ -203,7 +203,7 @@ bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
       //AudioStreamingState=AUDIBLE
       bool application_exist_with_audible_state = false;
       ApplicationManagerImpl::ApplicationListAccessor accessor;
-      const std::set<ApplicationSharedPtr>& app_list = accessor.applications();
+      const std::set<ApplicationSharedPtr> app_list = accessor.applications();
       std::set<ApplicationSharedPtr>::const_iterator app_list_it = app_list.begin();
       uint32_t app_id = application->app_id();
       for (; app_list.end() != app_list_it; ++app_list_it) {

@@ -830,7 +830,7 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(
     vr_help[strings::vr_help] = (*app->vr_help());
   } else {
     ApplicationManagerImpl::ApplicationListAccessor accessor;
-    const std::set<ApplicationSharedPtr>& apps = accessor.applications();
+    const std::set<ApplicationSharedPtr> apps = accessor.applications();
 
     int32_t index = 0;
     std::set<ApplicationSharedPtr>::const_iterator it_app = apps.begin();
