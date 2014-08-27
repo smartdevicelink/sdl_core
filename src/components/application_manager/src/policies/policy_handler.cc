@@ -458,8 +458,6 @@ void PolicyHandler::OnAppPermissionConsent(const uint32_t connection_key,
     permissions.device_id = it->second;
     policy_manager_->SetUserConsentForApp(permissions);
   }
-
-  app_to_device_link_.clear();
 }
 
 void PolicyHandler::OnGetUserFriendlyMessage(
