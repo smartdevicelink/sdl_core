@@ -35,6 +35,7 @@
 
 #include <map>
 #include <string>
+#include <string.h>
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/macro.h"

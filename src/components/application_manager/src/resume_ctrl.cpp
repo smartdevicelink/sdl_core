@@ -173,8 +173,9 @@ bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
     LOG4CXX_ERROR(logger_, "SetupHMILevel() application pointer in invalid");
     return false;
   }
-
+#ifdef ENABLE_LOG
   bool seted_up_hmi_level = hmi_level;
+#endif
   if ((hmi_level == application->hmi_level()) &&
       (hmi_level != mobile_apis::HMILevel::HMI_NONE)) {
     LOG4CXX_INFO(logger_, "Hmi level " << hmi_level << " should not be sutuped to "
@@ -184,9 +185,17 @@ bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
   }
 
   if (hmi_level == mobile_apis::HMILevel::HMI_FULL) {
+#ifdef ENABLE_LOG
     seted_up_hmi_level = app_mngr_->PutApplicationInFull(application);
+#else
+    app_mngr_->PutApplicationInFull(application);
+#endif
   } else if (hmi_level == mobile_apis::HMILevel::HMI_LIMITED) {
+#ifdef ENABLE_LOG
     seted_up_hmi_level = app_mngr_->PutApplicationInLimited(application);
+#else
+    app_mngr_->PutApplicationInLimited(application);
+#endif
     if (audio_streaming_state == mobile_apis::AudioStreamingState::AUDIBLE) {
       //implemented SDLAQ-CRS-839
       //checking the existence of application with AudioStreamingState=AUDIBLE
