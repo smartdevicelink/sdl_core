@@ -481,10 +481,11 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
   if (!connection_key) {
     LinkAppToDevice linker(app_to_device_link_);
     application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
+    const ApplicationList app_list = accessor.applications();
     std::set<application_manager::ApplicationSharedPtr>::const_iterator it_app =
-        accessor.applications().begin();
+        app_list.begin();
     std::set<application_manager::ApplicationSharedPtr>::const_iterator
-        it_app_end = accessor.applications().end();
+        it_app_end = app_list.end();
 
     // Add all currently registered applications
     std::for_each(it_app, it_app_end, linker);
@@ -807,7 +808,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
   // Common devices consents change
   if (!device_id) {
     application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
-    const std::set<application_manager::ApplicationSharedPtr>& app_list =
+    const std::set<application_manager::ApplicationSharedPtr> app_list =
         accessor.applications();
 
     std::set<application_manager::ApplicationSharedPtr>::const_iterator
