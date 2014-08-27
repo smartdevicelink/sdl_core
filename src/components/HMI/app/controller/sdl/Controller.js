@@ -89,6 +89,14 @@ SDL.SDLController = Em.Object
             'SDL.Keyboard.active'),
 
         /**
+         * Flag consider that previously alert request was received from SDL for app in BACKGROUND HMI level
+         * the applications appID will be stashed as current value
+         *
+         * @type number
+         */
+        backgroundAlertAppID: null,
+
+        /**
          * List of SDL application models
          * 
          * @type object
@@ -845,6 +853,26 @@ SDL.SDLController = Em.Object
          */
         onSystemContextChange: function(appID) {
 
-            FFW.UI.OnSystemContext(this.get('sysContext'), appID);
+            var sysContextValue = this.get('sysContext');
+
+            if (appID || this.backgroundAlertAppID){
+
+                if (SDL.SDLAppController.model && SDL.SDLAppController.model.appID != appID && this.backgroundAlertAppID == null) {
+                    this.backgroundAlertAppID = appID;
+                    FFW.UI.OnSystemContext(sysContextValue, appID);
+                    FFW.UI.OnSystemContext('HMI_OBSCURED', SDL.SDLAppController.model.appID);
+                } else if (SDL.SDLAppController.model && SDL.SDLAppController.model.appID != appID && this.backgroundAlertAppID != null && SDL.SDLAppController.model.appID != this.backgroundAlertAppID) {
+                    FFW.UI.OnSystemContext('MAIN', this.backgroundAlertAppID);
+                    FFW.UI.OnSystemContext(sysContextValue, SDL.SDLAppController.model.appID);
+                }
+            } else {
+                if (SDL.SDLAppController.model) {
+                    appID = SDL.SDLAppController.model.appID;
+                } else {
+                    appID = null;
+                }
+
+                FFW.UI.OnSystemContext(sysContextValue, appID);
+            }
         }
     });
