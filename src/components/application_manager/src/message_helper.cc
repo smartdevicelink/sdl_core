@@ -107,11 +107,10 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
     if (button.keyExists(strings::image)) {
       SmartObject& buttonImage = button[strings::image];
 
-      // Image name must not be empty
-      std::string file_name = buttonImage[strings::value].asString();
-      file_name.erase(remove(file_name.begin(), file_name.end(), ' '),
-                      file_name.end());
-      if (file_name.empty()) {
+      // Image name must not be empty and must not contain incorrect
+      //character
+      if (false == MessageHelper::VerifySoftButtonString(
+          buttonImage[strings::value].asString())) {
         return false;
       }
     }
@@ -2136,21 +2135,17 @@ mobile_apis::Result::eType MessageHelper::VerifyImageVrHelpItems(
   return mobile_apis::Result::SUCCESS;
 }
 
-ResultVerifySoftButtonText MessageHelper::VerifySoftButtonText(
-  smart_objects::SmartObject& soft_button) {
-  std::string text = soft_button[strings::text].asString();
-  if ((std::string::npos != text.find_first_of("\t\n")) ||
-      (std::string::npos != text.find("\\n")) ||
-      (std::string::npos != text.find("\\t"))) {
-    return kIncorrectCharacter;
+bool MessageHelper::VerifySoftButtonString(const std::string& str) {
+
+  if ((std::string::npos != str.find_first_of("\t\n")) ||
+      (std::string::npos != str.find("\\n")) ||
+      (std::string::npos != str.find("\\t")) ||
+      (std::string::npos == str.find_first_not_of(' '))) {
+    LOG4CXX_ERROR(logger_, "MessageHelper::VerifySoftButtonString"
+                  "string contains incorrect character");
+    return false;
   }
-  text.erase(remove(text.begin(), text.end(), ' '), text.end());
-  if (text.size()) {
-    return kStringContainsCharacter;
-  } else {
-    soft_button.erase(strings::text);
-  }
-  return kStringEmpty;
+  return true;
 }
 
 mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
@@ -2187,7 +2182,10 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         if (!image_supported) {
           continue;
         }
-
+        //Any text value for type "IMAGE" should be ignored.
+        if (request_soft_buttons[i].keyExists(strings::text)) {
+          request_soft_buttons[i].erase(strings::text);
+        }
         if (request_soft_buttons[i].keyExists(strings::image)) {
           mobile_apis::Result::eType verification_result = VerifyImage(
                 request_soft_buttons[i][strings::image], app);
@@ -2200,26 +2198,18 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         break;
       }
       case mobile_apis::SoftButtonType::SBT_TEXT: {
-        if (!request_soft_buttons[i].keyExists(strings::text)) {
-          return mobile_apis::Result::INVALID_DATA;
-        }
-        ResultVerifySoftButtonText result =
-            VerifySoftButtonText(request_soft_buttons[i]);
-        if (kStringEmpty == result) {
-          continue;
-        } else if (kIncorrectCharacter == result) {
+        if ((!request_soft_buttons[i].keyExists(strings::text)) ||
+            (!VerifySoftButtonString(
+                request_soft_buttons[i][strings::text].asString()))) {
           return mobile_apis::Result::INVALID_DATA;
         }
         break;
       }
       case mobile_apis::SoftButtonType::SBT_BOTH: {
 
-        if (request_soft_buttons[i].keyExists(strings::text)) {
-          if (kIncorrectCharacter == VerifySoftButtonText(
-              request_soft_buttons[i])) {
-            return mobile_apis::Result::INVALID_DATA;
-          }
-        } else {
+        if ((!request_soft_buttons[i].keyExists(strings::text)) ||
+            (!VerifySoftButtonString(
+                request_soft_buttons[i][strings::text].asString()))) {
           return mobile_apis::Result::INVALID_DATA;
         }
 

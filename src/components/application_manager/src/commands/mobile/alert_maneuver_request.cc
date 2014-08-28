@@ -68,8 +68,6 @@ void AlertManeuverRequest::Run() {
     return;
   }
 
-  // IsWhiteSpaceExist must be before ProcessSoftButtons.
-  // because of checking on whitespace in text of softbutton
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming alert maneuver has contains \\t\\n \\\\t \\\\n"
@@ -78,6 +76,7 @@ void AlertManeuverRequest::Run() {
     return;
   }
 
+  //ProcessSoftButtons checks strings on the contents incorrect character
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
@@ -213,35 +212,6 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
         LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
         return true;
       }
-    }
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    const smart_objects::SmartArray* sb_array =
-        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
-
-    smart_objects::SmartArray::const_iterator it_sb = sb_array->begin();
-    smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
-
-    for (; it_sb != it_sb_end; ++it_sb) {
-      if ((*it_sb).keyExists(strings::text)) {
-        str = (*it_sb)[strings::text].asCharArray();
-        if (strlen(str) && !CheckSyntax(str)) {
-          LOG4CXX_ERROR(logger_,
-                       "Invalid soft_buttons text syntax check failed");
-          return true;
-        }
-      }
-
-      if ((*it_sb).keyExists(strings::image)) {
-        str = (*it_sb)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str)) {
-          LOG4CXX_ERROR(logger_,
-                       "Invalid soft_buttons image value syntax check failed");
-          return true;
-        }
-      }
-
     }
   }
   return false;
