@@ -80,10 +80,12 @@ class PPSDeviceScanner : public DeviceScanner {
   void Process(uint8_t* buf, size_t size);
   std::string ParsePps(char* ppsdata, const char** vals);
   void WritePpsData(const char* objname, const char** attrs);
-  bool CheckData(const char** attrs);
+  bool IsAOADevice(const char** attrs);
   void FillUsbInfo(const std::string& object_name, const char** attrs,
                    AOAWrapper::AOAUsbInfo* info);
+  bool IsAOAMode(const AOAWrapper::AOAUsbInfo& aoa_usb_info);
   void AddDevice(const AOAWrapper::AOAUsbInfo& aoa_usb_info);
+  void InitDevice(const AOAWrapper::AOAUsbInfo& aoa_usb_info);
   void NotifyDevicesUpdated();
 
   class PpsThreadDelegate : public threads::PulseThreadDelegate {

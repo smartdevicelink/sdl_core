@@ -46,14 +46,15 @@ class AOADynamicDevice : public AOADevice {
   AOADynamicDevice(const std::string& name, const DeviceUID& unique_id,
                    const AOAWrapper::AOAUsbInfo& info,
                    TransportAdapterController* controller);
-  AOADynamicDevice(const std::string& name, const DeviceUID& unique_id,
-                   TransportAdapterController* controller);
   ~AOADynamicDevice();
+
+  bool Init();
 
  private:
   static const std::string kPathToConfig;
   AOAScannerObserver* observer_;
   TransportAdapterController* controller_;
+  AOAWrapper::AOAUsbInfo aoa_usb_info_;
 
   void SetHandle(AOAWrapper::AOAHandle hdl);
 

@@ -49,31 +49,22 @@ AOADynamicDevice::AOADynamicDevice(const std::string& name,
                                    TransportAdapterController* controller)
     : AOADevice(name, unique_id),
       observer_(new ScannerObserver(this)),
-      controller_(controller) {
-  if (kPathToConfig.empty()) {
-    AOAWrapper::Init(info, observer_);
-  } else {
-    AOAWrapper::Init(kPathToConfig, info, observer_);
-  }
-}
-
-AOADynamicDevice::AOADynamicDevice(const std::string& name,
-                                   const DeviceUID& unique_id,
-                                   TransportAdapterController* controller)
-    : AOADevice(name, unique_id),
-      observer_(new ScannerObserver(this)),
-      controller_(controller) {
-  if (kPathToConfig.empty()) {
-    AOAWrapper::Init(observer_);
-  } else {
-    AOAWrapper::Init(kPathToConfig, observer_);
-  }
+      controller_(controller),
+      aoa_usb_info_(info) {
 }
 
 AOADynamicDevice::~AOADynamicDevice() {
   AOAWrapper::Shutdown();
   delete observer_;
   observer_ = NULL;
+}
+
+bool AOADynamicDevice::Init() {
+  if (kPathToConfig.empty()) {
+    return AOAWrapper::Init(aoa_usb_info_, observer_);
+  } else {
+    return AOAWrapper::Init(kPathToConfig, aoa_usb_info_, observer_);
+  }
 }
 
 void AOADynamicDevice::SetHandle(AOAWrapper::AOAHandle hdl) {

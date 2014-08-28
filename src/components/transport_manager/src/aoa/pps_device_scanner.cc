@@ -45,6 +45,8 @@
 #include <sys/iomsg.h>
 #include <sys/neutrino.h>
 
+#include <algorithm>
+
 #include "utils/logger.h"
 
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -71,16 +73,23 @@ enum {
 };
 
 /* The keys required by usblauncher to send to the device */
-static const char *keys[] = { "manufacturer", "model", "description", "version",
-    "uri", "serial",
+static const char *kKeys[] = { "manufacturer", "model", "description",
+    "version", "uri", "serial",
 
     NULL };
 
 /* The values used to switch the phone into AOA mode */
-static const char *values[] = { "QNX Multimedia", "QNX", "2.0",
+static const char *kValues[] = { "QNX Multimedia", "QNX", "2.0",
     "QNX AOA Demo Application", "http://www.qnx.com", "12345678",
 
     NULL };
+
+/*
+ * Product list of known devices (currently sequential so we
+ * could get away with an integer range instead).
+ */
+static const uint32_t kProductList[] = { 0x2d00, 0x2d01, 0x2d02, 0x2d03, 0x2d04,
+    0x2d05 };
 
 const std::string PPSDeviceScanner::kUSBStackPath = "/dev/io-usb/io-usb";
 const std::string PPSDeviceScanner::kPpsPathRoot = "/pps/qnx/device/";
@@ -180,15 +189,50 @@ void PPSDeviceScanner::Process(uint8_t* buf, size_t size) {
   const char* vals[ATTR_COUNT] = { 0 };
 
   std::string object_name = ParsePps(ppsdata, vals);
-  if (CheckData(vals)) {
+  if (IsAOADevice(vals)) {
     AOAWrapper::AOAUsbInfo aoa_usb_info;
     FillUsbInfo(object_name, vals, &aoa_usb_info);
-    WritePpsData(object_name.c_str(), vals);
-    AddDevice(aoa_usb_info);
+    if (IsAOAMode(aoa_usb_info)) {
+      InitDevice(aoa_usb_info);
+    } else {
+      WritePpsData(object_name.c_str(), vals);
+      AddDevice(aoa_usb_info);
+    }
   }
 }
 
-bool PPSDeviceScanner::CheckData(const char** attrs) {
+void PPSDeviceScanner::InitDevice(const AOAWrapper::AOAUsbInfo& aoa_usb_info) {
+  sync_primitives::AutoLock loker(devices_lock_);
+  DeviceContainer::iterator i = devices_.find(aoa_usb_info.serial_number);
+  if (i != devices_.end()) {
+    AOADevicePtr::static_pointer_cast<AOADynamicDevice>(i->second)->Init();
+  }
+}
+
+bool PPSDeviceScanner::IsAOAMode(const AOAWrapper::AOAUsbInfo& aoa_usb_info) {
+  LOG4CXX_TRACE(logger_, "AOA: check a mode device");
+  /*
+   * Check a device if it's already in AOA mode (product and vendor ID's
+   * will match a known list).
+   */
+  const uint32_t kVendorIdGoogle = 0x18d1;
+  if (aoa_usb_info.vendor_id == kVendorIdGoogle) {
+    const uint32_t* product_list_begin = kProductList;
+    const uint32_t* product_list_end = kProductList
+        + sizeof(kProductList) / sizeof(uint32_t);
+    const uint32_t* p = std::find(product_list_begin, product_list_end,
+                                  aoa_usb_info.product_id);
+    if (p != product_list_end) {
+      LOG4CXX_DEBUG(
+          logger_,
+          "AOA: mode of device " << aoa_usb_info.serial_number << " is AOA");
+      return true;
+    }
+  }
+  return false;
+}
+
+bool PPSDeviceScanner::IsAOADevice(const char** attrs) {
   LOG4CXX_TRACE(logger_, "AOA: check data about device");
   /* Make sure we support AOA and have all fields */
   for (int i = 0; i < ATTR_COUNT; i++) {
@@ -230,9 +274,9 @@ void PPSDeviceScanner::WritePpsData(const char* objname, const char** attrs) {
                 attrs[ATTR_BUSNO], attrs[ATTR_DEVNO], REQUEST_MASK);
 
   i = 0;
-  while (keys[i]) {
+  while (kKeys[i]) {
     /* Add all the key/value pairs to the request */
-    sz += snprintf(cmd + sz, sizeof(cmd) - sz, ",%s=%s", keys[i], values[i]);
+    sz += snprintf(cmd + sz, sizeof(cmd) - sz, ",%s=%s", kKeys[i], kValues[i]);
     i++;
   }
 
