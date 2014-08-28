@@ -297,7 +297,7 @@ void BluetoothPASADeviceScanner::Terminate() {
     pthread_join(mPASAFWMsgHandlerThread, 0);
 
     pthread_join(thread_, 0);
-    LOG4CXX_INFO(logger_, "PASA Bluetooth device scanner thread terminated");
+    LOG4CXX_INFO(logger_, "PASA Bluetooth device scanner thread finished.");
   }
   LOG4CXX_TRACE_EXIT(logger_);
 }

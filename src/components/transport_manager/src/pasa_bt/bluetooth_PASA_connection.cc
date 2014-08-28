@@ -294,28 +294,28 @@ void BluetoothPASAConnection::Transmit() {
 
 bool BluetoothPASAConnection::Receive() {
   LOG4CXX_TRACE_ENTER(logger_);
-  uint8_t buffer[4096];
+  uint8_t buffer[MAX_SPP_PACKET_SIZE];
 
-  while(true) {
-    const ssize_t numBytes = read(sppDeviceFd, (void*)buffer, 2047);
+  while (true) {
+    const ssize_t num_bytes = read(sppDeviceFd, (void*)buffer, MAX_SPP_PACKET_SIZE);
     const int errno_value = errno;
     LOG4CXX_DEBUG( logger_,
-          "Received " << numBytes << " bytes for connection " << this);
-    if (numBytes > 0) {
+          "Received " << num_bytes << " bytes for connection " << this);
+    if (num_bytes > 0) {
       RawMessagePtr frame(
-            new protocol_handler::RawMessage(0, 0, buffer, numBytes));
+            new protocol_handler::RawMessage(0, 0, buffer, num_bytes));
       controller_->DataReceiveDone(device_handle(), application_handle(), frame);
       // try to read more
       continue;
     }
-    if (numBytes == 0) {
+    if (num_bytes == 0) {
       LOG4CXX_WARN(logger_, "Connection " << this << " closed by remote peer");
       LOG4CXX_TRACE_EXIT(logger_);
       return false;
     }
     // numBytes < 0
     if (EAGAIN == errno_value || EWOULDBLOCK == errno_value) {
-      LOG4CXX_ERROR(logger_, "No more data avalible for connection " << this);
+      LOG4CXX_DEBUG(logger_, "No more data avalible for connection " << this);
       // No more data avalible
       break;
     }
