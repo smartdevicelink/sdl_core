@@ -376,7 +376,7 @@ FFW.BasicCommunication = FFW.RPCObserver
             if (this.validationCheck(request)) {
 
                 if (request.method == "BasicCommunication.MixingAudioSupported") {
-                    this.MixingAudioSupported(true);
+                    this.MixingAudioSupported(request.id, true);
                 }
                 if (request.method == "BasicCommunication.AllowAllApps") {
                     this.AllowAllApps(true);
@@ -1008,14 +1008,14 @@ FFW.BasicCommunication = FFW.RPCObserver
          *
          * @params {Number}
          */
-        MixingAudioSupported: function(attenuatedSupported) {
+        MixingAudioSupported: function(requestid, attenuatedSupported) {
 
             Em.Logger.log("FFW.BasicCommunication.MixingAudioSupportedResponse");
 
             // send request
 
             var JSONMessage = {
-                "id": this.client.idStart,
+                "id": requestid,
                 "jsonrpc": "2.0",
                 "result": {
                     "code": 0,

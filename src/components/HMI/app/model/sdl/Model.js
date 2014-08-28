@@ -433,6 +433,12 @@ SDL.SDLModel = Em.Object.create({
      */
     registeredApps: [],
 
+    /**
+     * List of unregistered applications, to verify which app is reestablished connection
+     *
+     * @type object
+     */
+    unRegisteredApps: [],
 
     /**
      * List of objects with params for connected devices
@@ -978,6 +984,11 @@ SDL.SDLModel = Em.Object.create({
         }
 
         SDL.SDLController.registerApplication(params.application, applicationType);
+
+        if (SDL.SDLModel.unRegisteredApps.indexOf(params.application.appID) >= 0) {
+            setTimeout(function(){ SDL.PopUp.popupActivate("Connection with " + params.application.appName + "  is re-established.")}, 1000);
+            this.unRegisteredApps.pop(params.application.appID);
+        }
     },
 
     /**
@@ -989,6 +1000,11 @@ SDL.SDLModel = Em.Object.create({
     onAppUnregistered: function (params) {
 
         if (SDL.SDLController.getApplicationModel(params.appID)) {
+
+            if (params.unexpectedDisconnect) {
+                SDL.PopUp.popupActivate("The connection with the " + SDL.SDLController.getApplicationModel(params.appID).appName + " was unexpectedly lost.");
+                this.unRegisteredApps.push(params.appID);
+            }
 
             if (SDL.SDLController.getApplicationModel(params.appID).activeRequests.uiPerformInteraction) {
                 SDL.InteractionChoicesView.deactivate("ABORTED");
