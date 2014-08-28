@@ -155,7 +155,7 @@ bool ResumeCtrl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
           return false;
         }
       } else {
-        LOG4CXX_ERROR(logger_, "SetupDefaultHMILevel() unable to get default hmi_level for"
+        LOG4CXX_ERROR(logger_, "SetupDefaultHMILevel() unable to get default hmi_level for "
                       << policy_app_id);
       }
     } else {
@@ -176,9 +176,17 @@ bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
 #ifdef ENABLE_LOG
   bool seted_up_hmi_level = hmi_level;
 #endif
+  policy::PolicyManager* policy_manager =
+      policy::PolicyHandler::instance()->policy_manager();
+  if (0 == policy_manager->IsConsentNeeded(application->mobile_app_id()->asString())) {
+    LOG4CXX_ERROR(logger_, "Resumption abort. Data consent wasn't allowed");
+    return false;
+  }
+
+
   if ((hmi_level == application->hmi_level()) &&
       (hmi_level != mobile_apis::HMILevel::HMI_NONE)) {
-    LOG4CXX_INFO(logger_, "Hmi level " << hmi_level << " should not be sutuped to "
+    LOG4CXX_INFO(logger_, "Hmi level " << hmi_level << " should not be set to "
                  << application->mobile_app_id()->asString() << "  " << application->hmi_level());
 
     return false;
@@ -228,9 +236,9 @@ bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
     MessageHelper::SendHMIStatusNotification(*(application.get()));
   }
 
-  LOG4CXX_INFO(logger_, "aplication   "
+  LOG4CXX_INFO(logger_, "Set up application "
                << application->mobile_app_id()->asString()
-               << "seted up to HMILevel " << seted_up_hmi_level);
+               << " to HMILevel " << seted_up_hmi_level);
   return true;
 }
 
@@ -591,14 +599,15 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
     if (saved_m_app_id == application->mobile_app_id()->asString()) {
       uint32_t time_stamp= (*it)[strings::time_stamp].asUInt();
       if (!timer_.isRunning() && accessor.applications().size() > 1) {
+        // resume in case there is already registered app
         RestoreApplicationHMILevel(application);
         RemoveApplicationFromSaved(application);
       } else {
         sync_primitives::AutoLock auto_lock(queue_lock_);
-        MessageHelper::SendHMIStatusNotification(*application);
         SetupDefaultHMILevel(application);
         waiting_for_timer_.insert(std::make_pair(application->app_id(),
                                                  time_stamp));
+        // woun't start timer if it is active already
         timer_.start(kTimeStep);
       }
       return true;
@@ -688,7 +697,8 @@ bool ResumeCtrl::CheckApplicationHash(ApplicationSharedPtr application,
 }
 
 void ResumeCtrl::onTimer() {
-  LOG4CXX_INFO(logger_, "ResumeCtrl::onTimer()" << waiting_for_timer_.size());
+  LOG4CXX_INFO(logger_, "ResumeCtrl::onTimer() size is "
+                         << waiting_for_timer_.size());
   sync_primitives::AutoLock auto_lock(queue_lock_);
 
   std::multiset<application_timestamp, TimeStampComparator>::iterator it=

@@ -125,6 +125,8 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual uint32_t GetNotificationsNumber(const std::string& priority);
 
+    virtual int IsConsentNeeded(const std::string& app_id);
+
     // Interface StatisticsManager (begin)
     virtual void Increment(usage_statistics::GlobalCounterId type);
     virtual void Increment(const std::string& app_id,
@@ -210,8 +212,6 @@ class PolicyManagerImpl : public PolicyManager {
      * @brief Remove first application in the update permissions request list
      */
     void RemoveAppFromUpdateList();
-
-    int IsConsentNeeded(const std::string& app_id);
 
     /**
      * @brief Check update status and notify HMI on changes
