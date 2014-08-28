@@ -90,8 +90,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
 #ifdef TIME_TESTER
     metric_observer_(NULL),
 #endif  // TIME_TESTER
-    application_list_update_timer_(new ApplicationListUpdateTimer(this))
-{
+    application_list_update_timer_(new ApplicationListUpdateTimer(this)) {
+    std::srand(std::time(0));
 }
 
 bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
@@ -865,6 +865,7 @@ uint32_t ApplicationManagerImpl::GenerateGrammarID() {
 
 uint32_t ApplicationManagerImpl::GenerateNewHMIAppID() {
   uint32_t hmi_app_id = rand();
+
   while (resume_ctrl_.IsHMIApplicationIdExist(hmi_app_id)) {
     hmi_app_id = rand();
   }

@@ -445,6 +445,16 @@ bool ResumeCtrl::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
     }
   }
 
+  std::set<ApplicationSharedPtr>::iterator it =
+                                  app_mngr_->application_list_.begin();
+  std::set<ApplicationSharedPtr>::iterator it_end =
+                                   app_mngr_->application_list_.end();
+  for (;it != it_end; ++it) {
+    if (hmi_app_id == (*it)->hmi_app_id()) {
+      return true;
+    }
+  }
+
   return false;
 }
 
