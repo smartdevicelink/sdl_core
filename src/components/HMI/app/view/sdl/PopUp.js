@@ -61,6 +61,8 @@ SDL.PopUp = Em.ContainerView.create({
 
     active: false,
 
+    timer: null,
+
     backButton: SDL.Button.extend( {
         classNames: 'button backButton',
         text: 'X',
@@ -120,12 +122,15 @@ SDL.PopUp = Em.ContainerView.create({
     popupActivate: function(message, callback) {
         this.set('active', true);
 
+        clearTimeout(this.timer);
+        this.timer = null;
+
         if (callback) {
             this.set('callback', callback);
             this.set('buttons', false);
         } else {
             this.set('buttons', true);
-            setTimeout(function(){
+            this.timer = setTimeout(function(){
                 SDL.PopUp.deactivate();
             },
             3000);
