@@ -855,7 +855,7 @@ SDL.SDLController = Em.Object
 
             var sysContextValue = this.get('sysContext');
 
-            if (appID || this.backgroundAlertAppID){
+            if ((appID && SDL.SDLController.getApplicationModel(appID) != SDL.SDLAppController.model) || this.backgroundAlertAppID){
 
                 if (SDL.SDLAppController.model && SDL.SDLAppController.model.appID != appID && this.backgroundAlertAppID == null) {
                     this.backgroundAlertAppID = appID;
