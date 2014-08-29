@@ -78,8 +78,8 @@ class PPSDeviceScanner : public DeviceScanner {
   void ClosePps();
   bool ArmEvent(struct sigevent* event);
   void Process(uint8_t* buf, size_t size);
-  std::string ParsePps(char* ppsdata, const char** vals);
-  void WritePpsData(const char* objname, const char** attrs);
+  std::string ParsePpsData(char* ppsdata, const char** vals);
+  void SwitchMode(const char* objname, const char** attrs);
   bool IsAOADevice(const char** attrs);
   void FillUsbInfo(const std::string& object_name, const char** attrs,
                    AOAWrapper::AOAUsbInfo* info);

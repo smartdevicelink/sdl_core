@@ -154,7 +154,7 @@ bool PPSDeviceScanner::ArmEvent(struct sigevent* event) {
   return true;
 }
 
-std::string PPSDeviceScanner::ParsePps(char* ppsdata, const char** vals) {
+std::string PPSDeviceScanner::ParsePpsData(char* ppsdata, const char** vals) {
   LOG4CXX_TRACE(logger_, "AOA: parse pps data");
   static const char* attrs[] = { "aoa", "busno", "devno", "manufacturer",
       "vendor_id", "product", "product_id", "serial_number", NULL };
@@ -188,14 +188,14 @@ void PPSDeviceScanner::Process(uint8_t* buf, size_t size) {
   char* ppsdata = reinterpret_cast<char*>(buf);
   const char* vals[ATTR_COUNT] = { 0 };
 
-  std::string object_name = ParsePps(ppsdata, vals);
+  std::string object_name = ParsePpsData(ppsdata, vals);
   if (IsAOADevice(vals)) {
     AOAWrapper::AOAUsbInfo aoa_usb_info;
     FillUsbInfo(object_name, vals, &aoa_usb_info);
     if (IsAOAMode(aoa_usb_info)) {
       InitDevice(aoa_usb_info);
     } else {
-      WritePpsData(object_name.c_str(), vals);
+      SwitchMode(object_name.c_str(), vals);
       AddDevice(aoa_usb_info);
     }
   }
@@ -217,12 +217,11 @@ bool PPSDeviceScanner::IsAOAMode(const AOAWrapper::AOAUsbInfo& aoa_usb_info) {
    */
   const uint32_t kVendorIdGoogle = 0x18d1;
   if (aoa_usb_info.vendor_id == kVendorIdGoogle) {
-    const uint32_t* product_list_begin = kProductList;
-    const uint32_t* product_list_end = kProductList
+    const uint32_t* begin = kProductList;
+    const uint32_t* end = kProductList
         + sizeof(kProductList) / sizeof(uint32_t);
-    const uint32_t* p = std::find(product_list_begin, product_list_end,
-                                  aoa_usb_info.product_id);
-    if (p != product_list_end) {
+    const uint32_t* p = std::find(begin, end, aoa_usb_info.product_id);
+    if (p != end) {
       LOG4CXX_DEBUG(
           logger_,
           "AOA: mode of device " << aoa_usb_info.serial_number << " is AOA");
@@ -258,8 +257,8 @@ void PPSDeviceScanner::FillUsbInfo(const std::string& object_name,
   info->iface = 0;
 }
 
-void PPSDeviceScanner::WritePpsData(const char* objname, const char** attrs) {
-  LOG4CXX_TRACE(logger_, "AOA: Write pps to device");
+void PPSDeviceScanner::SwitchMode(const char* objname, const char** attrs) {
+  LOG4CXX_TRACE(logger_, "AOA: switch mode");
   int i, rc, fd;
   char cmd[PATH_MAX];
   size_t sz;
