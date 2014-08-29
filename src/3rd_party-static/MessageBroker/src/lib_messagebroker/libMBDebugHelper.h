@@ -9,7 +9,6 @@
 
 #include <cstdio>
 
-#define DEBUG_MB_ON
 /**
 * \def DEBUG_MB_ON
 * \brief Switches on MessageBroker debug messages.
