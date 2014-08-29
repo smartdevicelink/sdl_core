@@ -576,6 +576,11 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::Buttons_GetCapabilities));
   ManageHMICommand(button_capabilities);
+
+  utils::SharedPtr<smart_objects::SmartObject> mixing_audio_supported_request(
+      MessageHelper::CreateModuleInfoSO(
+          hmi_apis::FunctionID::BasicCommunication_MixingAudioSupported));
+  ManageHMICommand(mixing_audio_supported_request);
 #ifdef CUSTOMER_PASA
   //Line start of transportManager component was left for panasonic
   if (!connection_handler_) {
