@@ -43,14 +43,14 @@ namespace {
 CREATE_LOGGERPTR_GLOBAL(logger, "SmartDeviceLinkMainApp")
 
 bool remoteLoggingFlagFileExists(const std::string& name) {
-	LOG4CXX_INFO(logger, "Check path: " << name);
+  LOG4CXX_INFO(logger, "Check path: " << name);
 
-	struct stat buffer;
-	return (stat (name.c_str(), &buffer) == 0);
+  struct stat buffer;
+  return (stat (name.c_str(), &buffer) == 0);
 }
 
 bool remoteLoggingFlagFileValid() {
-	return true;
+  return true;
 }
 
 int getBootCount() {
@@ -140,17 +140,18 @@ void startSmartDeviceLink()
     }
     LOG4CXX_INFO(logger, "InitMessageBroker successful");
 
-	// --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
 }
 
 
 
 void stopSmartDeviceLink()
 {
-	LOG4CXX_INFO(logger, " Application stopped!");
-        main_namespace::LifeCycle::instance()->StopComponents();
+  LOG4CXX_INFO(logger, " LifeCycle stopping!");
+  main_namespace::LifeCycle::instance()->StopComponents();
+  LOG4CXX_INFO(logger, " LifeCycle stopped!");
 
-	g_bTerminate = true;
+  g_bTerminate = true;
 }
 
 class ApplinkNotificationThreadDelegate : public threads::ThreadDelegate {
@@ -196,7 +197,7 @@ void ApplinkNotificationThreadDelegate::threadMain() {
  * \brief Entry point of the program.
  * \param argc number of argument
  * \param argv array of arguments
- * \return EXIT_SUCCESS or EXIT_FAILURE
+ * \return EXIT_SUCCESS
  */
 int main(int argc, char** argv) {
   threads::Thread::MaskSignals();
@@ -207,7 +208,8 @@ int main(int argc, char** argv) {
   LOG4CXX_INFO(logger, "Snapshot: {TAG}");
   LOG4CXX_INFO(logger, "Application main()");
 
-  utils::SharedPtr<threads::Thread> applink_notification_thread = new threads::Thread("Applink notification thread", new ApplinkNotificationThreadDelegate());
+  utils::SharedPtr<threads::Thread> applink_notification_thread =
+      new threads::Thread("Applink notification thread", new ApplinkNotificationThreadDelegate());
   applink_notification_thread->start();
 
   utils::SubscribeToTerminateSignal(main_namespace::dummy_signal_handler);
@@ -217,10 +219,8 @@ int main(int argc, char** argv) {
   LOG4CXX_INFO(logger, "Stopping application due to signal caught");
   stopSmartDeviceLink();
 
-  return 0;
+  LOG4CXX_INFO(logger, "Application successfully stopped");
+  DEINIT_LOGGER();
+  return EXIT_SUCCESS;
 }
-
-
 ///EOF
-
-

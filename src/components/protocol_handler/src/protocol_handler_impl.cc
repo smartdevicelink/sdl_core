@@ -384,11 +384,11 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
   uint8_t sessionID = 0;
   session_observer_->PairFromKey(message->connection_key(), &connection_handle,
                                  &sessionID);
-  uint32_t message_id = message_counters_[sessionID];
 #ifdef TIME_TESTER
-    if (metric_observer_) {
-      metric_observer_->StartMessageProcess(message_id, start_time);
-    }
+  uint32_t message_id = message_counters_[sessionID];
+  if (metric_observer_) {
+    metric_observer_->StartMessageProcess(message_id, start_time);
+  }
 #endif  // TIME_TESTER
 
   const uint32_t header_size = (PROTOCOL_VERSION_1 == message->protocol_version())
