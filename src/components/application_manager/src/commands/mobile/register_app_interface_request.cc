@@ -478,13 +478,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   if (resumption) {
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
     if (!resumer.CheckApplicationHash(application, hash_id)) {
-      result = mobile_apis::Result::RESUME_FAILED;
       LOG4CXX_WARN(logger_, "Hash does not matches");
-      add_info = "Hash does not matches";
-    } else if (!resumer.CheckPersistenceFilesForResumption(application)) {
       result = mobile_apis::Result::RESUME_FAILED;
+      add_info = "Hash does not matches";
+      resumption = false;
+    } else if (!resumer.CheckPersistenceFilesForResumption(application)) {
       LOG4CXX_WARN(logger_, "Persistent data is missed");
+      result = mobile_apis::Result::RESUME_FAILED;
       add_info = "Persistent data is missed";
+      resumption = false;
     } else {
       add_info = " Resume Succeed";
     }
