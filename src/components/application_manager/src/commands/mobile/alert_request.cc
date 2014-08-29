@@ -131,7 +131,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::UI_Alert: {
       LOG4CXX_INFO(logger_, "Received UI_Alert event");
-      DCHECK(awaiting_ui_alert_response_);
+      // Unsubscribe from event to avoid unwanted messages
+      unsubscribe_from_event(hmi_apis::FunctionID::UI_Alert);
       awaiting_ui_alert_response_ = false;
 
       if (awaiting_tts_speak_response_) {
@@ -151,7 +152,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
-      DCHECK(awaiting_tts_speak_response_);
+      // Unsubscribe from event to avoid unwanted messages
+      unsubscribe_from_event(hmi_apis::FunctionID::TTS_Speak);
       awaiting_tts_speak_response_ = false;
       tts_speak_response_ = static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -159,7 +161,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_StopSpeaking: {
       LOG4CXX_INFO(logger_, "Received TTS_StopSpeaking event");
-      DCHECK(awaiting_tts_stop_speaking_response_);
+      // Unsubscribe from event to avoid unwanted messages
+      unsubscribe_from_event(hmi_apis::FunctionID::TTS_StopSpeaking);
       awaiting_tts_stop_speaking_response_ = false;
       break;
     }
