@@ -178,7 +178,9 @@ bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
 #endif
   policy::PolicyManager* policy_manager =
       policy::PolicyHandler::instance()->policy_manager();
-  if (0 == policy_manager->IsConsentNeeded(application->mobile_app_id()->asString())) {
+
+  if (policy::DeviceConsent::kDeviceAllowed !=
+      policy_manager->GetUserConsentForDevice(application->device())) {
     LOG4CXX_ERROR(logger_, "Resumption abort. Data consent wasn't allowed");
     return false;
   }
