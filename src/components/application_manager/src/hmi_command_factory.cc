@@ -255,6 +255,8 @@
 #include "application_manager/commands/hmi/get_urls.h"
 #include "application_manager/commands/hmi/get_urls_response.h"
 #include "application_manager/commands/hmi/on_device_state_changed_notification.h"
+#include "application_manager/commands/hmi/navi_send_location_request.h"
+#include "application_manager/commands/hmi/navi_send_location_response.h"
 
 namespace application_manager {
 
@@ -1992,6 +1994,14 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
         command.reset(new commands::BasicCommunicationSystemResponse(message));
       } else {
         command.reset(new commands::BasicCommunicationSystemRequest(message));
+      }
+      break;
+    }
+    case hmi_apis::FunctionID::Navigation_SendLocation: {
+      if (is_response) {
+        command.reset(new commands::NaviSendLocationResponse(message));
+      } else {
+        command.reset(new commands::NaviSendLocationRequest(message));
       }
       break;
     }

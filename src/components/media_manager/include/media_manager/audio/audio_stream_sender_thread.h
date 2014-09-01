@@ -112,6 +112,9 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
     void sendAudioChunkToMobile();
 
 #ifdef CUSTOMER_PASA
+    /**
+     * @brief The function allows to send data obtained from mqueue.
+     */
     void mqSendAudioChunkToMobile();
 #endif // CUSTOMER_PASA
 

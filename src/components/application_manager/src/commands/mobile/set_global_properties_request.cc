@@ -107,8 +107,6 @@ void SetGlobalPropertiesRequest::Run() {
   }
 
   if (IsWhiteSpaceExist()) {
-    LOG4CXX_ERROR(logger_,
-                  "Incoming set global properties has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -394,7 +392,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 
     for (; it_hp != it_hp_end; ++it_hp) {
       str = (*it_hp)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
         return true;
       }
@@ -410,7 +408,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 
     for (; it_tp != it_tp_end; ++it_tp) {
       str = (*it_tp)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
         return true;
       }
@@ -426,14 +424,14 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 
     for (; it_vh != it_vh_end; ++it_vh) {
       str = (*it_vh)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid vr_help text syntax check failed");
         return true;
       }
 
       if ((*it_vh).keyExists(strings::image)) {
         str = (*it_vh)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_,
                        "Invalid vr_help image value syntax check failed");
           return true;
@@ -445,7 +443,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 
   if (msg_params.keyExists(strings::menu_icon)) {
     str = msg_params[strings::menu_icon][strings::value].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid menu_icon value syntax check failed");
       return true;
     }
@@ -453,7 +451,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 
   if (msg_params.keyExists(strings::vr_help_title)) {
     str = msg_params[strings::vr_help_title].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid vr_help_title value syntax check failed");
       return true;
     }
@@ -461,7 +459,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 
   if (msg_params.keyExists(strings::menu_title)) {
     str = msg_params[strings::menu_title].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid menu_title value syntax check failed");
       return true;
     }
@@ -481,7 +479,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
 
       for (; it_lcl != it_lcl_end; ++it_lcl) {
         str = (*it_lcl).asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_, "Invalid keyboard_properties "
               "limited_character_list syntax check failed");
           return true;
@@ -495,7 +493,7 @@ bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
       str = msg_params[strings::keyboard_properties]
                        [strings::auto_complete_text].asCharArray();
 
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid keyboard_properties "
             "auto_complete_text syntax check failed");
         return true;

@@ -293,6 +293,14 @@ bool file_system::IsAccessible(const std::string& name, int32_t how) {
   return !access(name.c_str(), how);
 }
 
+bool file_system::IsWritingAllowed(const std::string& name) {
+  return IsAccessible(name, W_OK);
+}
+
+bool file_system::IsReadingAllowed(const std::string& name) {
+  return IsAccessible(name, R_OK);
+}
+
 std::vector<std::string> file_system::ListFiles(
   const std::string& directory_name) {
   std::vector<std::string> listFiles;

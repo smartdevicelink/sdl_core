@@ -160,12 +160,6 @@ class PolicyHandler :
   void OnGetStatusUpdate(const uint32_t correlation_id);
 
   /**
-      * @brief Get Urls for service
-      * @param
-      */
-
-
-    /**
    * @brief Send notification to HMI with changed policy update status
    * @param status Current policy update state
    */

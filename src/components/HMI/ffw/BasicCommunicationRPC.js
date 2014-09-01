@@ -244,6 +244,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                         if (SDL.SDLModel.stateLimited == appID) {
                             SDL.SDLModel.stateLimited = null;
+                            SDL.SDLModel.set('limitedExist', false);
                         }
 
                         if (response.result.isSDLAllowed) {
@@ -320,17 +321,17 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                 if (notification.params.isAppPermissionsRevoked) {
 
-                    SDL.SDLModel.setAppPermissions(appID, response.result.appRevokedPermissions);
+                    SDL.SDLModel.setAppPermissions(notification.params.appID, response.result.appRevokedPermissions);
                 }
 
                 if (notification.params.appRevoked) {
 
-                    FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, appID, ["AppUnsupported"]);
+                    FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, notification.params.appID, ["AppUnsupported"]);
                 }
 
                 if (notification.params.appUnauthorized) {
 
-                    FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, appID, ["AppUnauthorized"]);
+                    FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, notification.params.appID, ["AppUnauthorized"]);
                 }
             }
 
@@ -353,9 +354,7 @@ FFW.BasicCommunication = FFW.RPCObserver
             }
             if (notification.method == this.onSDLConsentNeededNotification) {
 
-                //Show popUp
-                SDL.SettingsController.AllowSDLFunctionality(notification.params.device);
-
+                FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.AllowSDLFunctionality, null, ["DataConsent"]);
             }
             if (notification.method == this.onResumeAudioSourceNotification) {
 
@@ -375,7 +374,7 @@ FFW.BasicCommunication = FFW.RPCObserver
             if (this.validationCheck(request)) {
 
                 if (request.method == "BasicCommunication.MixingAudioSupported") {
-                    this.MixingAudioSupported(true);
+                    this.MixingAudioSupported(request.id, true);
                 }
                 if (request.method == "BasicCommunication.AllowAllApps") {
                     this.AllowAllApps(true);
@@ -423,6 +422,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                         if (SDL.SDLModel.stateLimited == request.params.appID) {
                             SDL.SDLModel.stateLimited = null;
+                            SDL.SDLModel.set('limitedExist', false);
                         }
 
                         SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
@@ -446,10 +446,6 @@ FFW.BasicCommunication = FFW.RPCObserver
                         }
                     };
                     this.client.send(JSONMessage);
-                }
-                if (request.method == "SDL.GetUserFriendlyMessage") {
-                    //TO DO
-                    //popUp activation
                 }
                 if (request.method == "BasicCommunication.PolicyUpdate") {
                     SDL.SettingsController.policyUpdateFile = request.params.file;
@@ -593,9 +589,13 @@ FFW.BasicCommunication = FFW.RPCObserver
                 "id": itemIndex,
                 "method": "SDL.GetListOfPermissions",
                 "params": {
-                    "appID": appID
                 }
             };
+
+            if (appID) {
+                JSONMessage.params.appID = appID;
+            }
+
             this.client.send(JSONMessage);
         },
 
@@ -1006,14 +1006,14 @@ FFW.BasicCommunication = FFW.RPCObserver
          *
          * @params {Number}
          */
-        MixingAudioSupported: function(attenuatedSupported) {
+        MixingAudioSupported: function(requestid, attenuatedSupported) {
 
             Em.Logger.log("FFW.BasicCommunication.MixingAudioSupportedResponse");
 
             // send request
 
             var JSONMessage = {
-                "id": this.client.idStart,
+                "id": requestid,
                 "jsonrpc": "2.0",
                 "result": {
                     "code": 0,

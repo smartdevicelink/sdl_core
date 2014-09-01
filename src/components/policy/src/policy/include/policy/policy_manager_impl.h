@@ -97,7 +97,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void SetDeviceInfo(const std::string& device_id,
                                const DeviceInfo& device_info);
 
-    virtual void SetUserConsentForApp(PermissionConsent &permissions);
+    virtual void SetUserConsentForApp(const PermissionConsent& permissions);
 
     virtual bool GetDefaultHmi(const std::string& policy_app_id,
                                std::string* default_hmi);
@@ -125,6 +125,8 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual uint32_t GetNotificationsNumber(const std::string& priority);
 
+    virtual int IsConsentNeeded(const std::string& app_id);
+
     // Interface StatisticsManager (begin)
     virtual void Increment(usage_statistics::GlobalCounterId type);
     virtual void Increment(const std::string& app_id,
@@ -136,7 +138,8 @@ class PolicyManagerImpl : public PolicyManager {
                      int32_t timespan_seconds);    
     // Interface StatisticsManager (end)
 
-    AppPermissions GetAppPermissionsChanges(const std::string& app_id);
+    AppPermissions GetAppPermissionsChanges(const std::string& device_id,
+                                            const std::string& policy_app_id);
     void RemovePendingPermissionChanges(const std::string& app_id);
 
     void SendNotificationOnPermissionsUpdated(const std::string& application_id);
@@ -162,7 +165,8 @@ class PolicyManagerImpl : public PolicyManager {
      * @param Policy table update struct
      */
     void CheckPermissionsChanges(
-      const utils::SharedPtr<policy_table::Table> update);
+      const utils::SharedPtr<policy_table::Table> update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
 
     /**
      * @brief Fill structure to be sent with OnPermissionsChanged notification
@@ -209,25 +213,22 @@ class PolicyManagerImpl : public PolicyManager {
      */
     void RemoveAppFromUpdateList();
 
-    int IsConsentNeeded(const std::string& app_id);
-
     /**
      * @brief Check update status and notify HMI on changes
      */
     void CheckUpdateStatus();
 
     /**
-     * @brief Validate PermissionConsent structure and removes all invalid data from it.
-     * So, after this method is done specified PermissionConsent will be valid or empty.
-     * @param group_names The groups according to which we will validate permissions
+     * @brief Validate PermissionConsent structure according to currently
+     * assigned groups
      * @param permissions PermissionConsent structure that should be validated.
+     * @return PermissonConsent struct, which contains no foreign groups
      */
-    void EnsureCorrectPermissionConsent(const FunctionalGroupNames &group_names,
-                                        PermissionConsent& permissions);
+    PermissionConsent EnsureCorrectPermissionConsent(
+        const PermissionConsent& permissions_to_check);
 
     PolicyListener* listener_;
     PolicyTable policy_table_;
-    utils::SharedPtr<policy_table::Table> policy_table_snapshot_;
     bool exchange_in_progress_;
     bool update_required_;
     bool exchange_pending_;
@@ -235,6 +236,7 @@ class PolicyManagerImpl : public PolicyManager {
     sync_primitives::Lock update_required_lock_;
     sync_primitives::Lock exchange_pending_lock_;
     sync_primitives::Lock update_request_list_lock_;
+    sync_primitives::Lock apps_registration_lock_;
     std::map<std::string, AppPermissions> app_permissions_diff_;
 
     /**

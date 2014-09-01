@@ -23,13 +23,14 @@
   3.1.1. Install Ubuntu/Xubuntu 12.04 or higher.
   3.1.2. Configure source repositories (check "Canonical Partners" repositories in Update Manager->Settings->SW source).
   3.1.3. Perform "sudo apt-get install git" command in terminal.
-  3.1.4. Clone git repository with "git clone git@adc.luxoft.com:applink".
-    Note: the permissions to download the repository are required. Apply PSavyelyev@luxoft.com on this matter.
+  3.1.4. Clone git repository:
+    3.1.4.1. Set your git username and email:
+               "git config --global user.name "Name Surname"" – your name and last name should be the same as in JIRA and another Atlassian tools
+               "git config --global user.email username@luxoft.com" – your email
+    3.1.4.2. Clone git repository:
+               "git clone https://username@adc.luxoft.com/stash/scm/ford/applink.git"
   3.1.5. Switch to <Main_Develop> branch: "git checkout <Main_Develop>".
-  3.1.6. Initialize submodule(s): "git submodule init".
-  3.1.7. Update submodule(s): "git submodule update".
-
-  3.1.8. Run "sudo ./setup_env.sh -a" to install all mandatory and optional packages.
+  3.1.6. Run "sudo ./setup_env.sh -a" to install all mandatory and optional packages.
     Note: read the built-in setup environment help ("./setup_env.sh --help") which provides the description of predefined options:
       a) for Web HMI, b) for QML HMI, c) for QNX support.
 
@@ -109,7 +110,8 @@
     "make 3rd_party"
     "sudo make install-3rd_party"
     Note: this step has to be done just once for each combination of target system (Linux/QNX) and CPU architecture (x86/armv7).
-  5.6. Run build process “make install” in previous directory.
+  5.6. Run "sudo ldconfig" to configure dynamic linker run-time bindings.
+  5.7. Run build process “make install” in previous directory.
 
 ==========================================================================================================
 6. Common run on Linux host (SDL + HMI).

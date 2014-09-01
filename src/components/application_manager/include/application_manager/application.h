@@ -142,6 +142,11 @@ typedef std::map<uint32_t, smart_objects::SmartObject*> ChoiceSetMap;
  */
 typedef std::map<uint32_t, smart_objects::SmartObject*> PerformChoiceSetMap;
 
+/**
+ * @brief Defines id of SoftButton
+ */
+typedef std::set<uint32_t> SoftButtonID;
+
 class DynamicApplicationData {
   public:
     virtual ~DynamicApplicationData() {
@@ -430,20 +435,6 @@ class Application : public virtual InitialApplicationData,
     virtual uint32_t get_grammar_id() const = 0 ;
     virtual void set_grammar_id(uint32_t value) = 0;
 
-    /**
-     * @brief returns attribute alert_in_background_
-     * @return TRUE if application runs alert request from background level
-     * otherwise returns FALSE
-     */
-    virtual bool alert_in_background() const = 0;
-
-    /**
-     * @brief if application activates alert in background level method sets
-     * TRUE
-     * @param state_of_alert contains TRUE if alert is activated otherwise
-     * contains FALSE
-     */
-    virtual void set_alert_in_background(bool state_of_alert) = 0;
     virtual void set_protocol_version(
         const ProtocolVersion& protocol_version) = 0;
     virtual ProtocolVersion protocol_version() const = 0;
@@ -484,6 +475,28 @@ class Application : public virtual InitialApplicationData,
      * @return object for recording statistics
      */
     virtual UsageStatistics& usage_report() = 0;
+
+    /**
+     * @brief Keeps id of softbuttons which is created in commands:
+     * Alert, Show, ScrollableMessage, ShowConstantTBT, AlertManeuver, UpdateTurnList
+     * @param cmd_id Unique command id from mobile API
+     * @param list of softbuttons were created by command.
+     */
+    virtual void SubscribeToSoftButtons(int32_t cmd_id,
+                                       const SoftButtonID& softbuttons_id) = 0;
+
+    /**
+     * @brief Determine the existence of softbutton
+     * @param Softbutton_id contains id of softbutton
+     * @return Returns true if application contains softbutton id otherwise returns false.
+     */
+    virtual bool IsSubscribedToSoftButton(const uint32_t softbutton_id) = 0;
+
+    /**
+     * @brief Removes list of softbuttons which is created in commands
+     * @param cmd_id Unique command id from mobile API
+     */
+    virtual void UnsubscribeFromSoftButtons(int32_t cmd_id) = 0;
 };
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;

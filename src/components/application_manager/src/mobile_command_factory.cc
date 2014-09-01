@@ -52,8 +52,6 @@
 #include "application_manager/commands/mobile/delete_sub_menu_request.h"
 #include "application_manager/commands/mobile/delete_sub_menu_response.h"
 #include "application_manager/commands/mobile/dial_number_request.h"
-#include "application_manager/commands/mobile/encoded_sync_pdata_request.h"
-#include "application_manager/commands/mobile/encoded_sync_pdata_response.h"
 #include "application_manager/commands/mobile/end_audio_pass_thru_request.h"
 #include "application_manager/commands/mobile/end_audio_pass_thru_response.h"
 #include "application_manager/commands/mobile/generic_response.h"
@@ -68,7 +66,6 @@
 #include "application_manager/commands/mobile/on_button_event_notification.h"
 #include "application_manager/commands/mobile/on_button_press_notification.h"
 #include "application_manager/commands/mobile/on_driver_distraction_notification.h"
-#include "application_manager/commands/mobile/on_encoded_sync_pdata_notification.h"
 #include "application_manager/commands/mobile/on_hmi_status_notification.h"
 #include "application_manager/commands/mobile/on_language_change_notification.h"
 #include "application_manager/commands/mobile/on_command_notification.h"
@@ -118,16 +115,15 @@
 #include "application_manager/commands/mobile/unsubscribe_vehicle_data_response.h"
 #include "application_manager/commands/mobile/update_turn_list_request.h"
 #include "application_manager/commands/mobile/update_turn_list_response.h"
-#include "application_manager/commands/mobile/sync_pdata_request.h"
-#include "application_manager/commands/mobile/sync_pdata_response.h"
 #include "application_manager/commands/mobile/system_request.h"
 #include "application_manager/commands/mobile/system_response.h"
-#include "application_manager/commands/mobile/on_sync_pdata_notification.h"
 #include "application_manager/commands/mobile/on_keyboard_input_notification.h"
 #include "application_manager/commands/mobile/on_touch_event_notification.h"
 #include "application_manager/commands/mobile/on_system_request_notification.h"
 #include "application_manager/commands/mobile/diagnostic_message_request.h"
 #include "application_manager/commands/mobile/diagnostic_message_response.h"
+#include "application_manager/commands/mobile/send_location_request.h"
+#include "application_manager/commands/mobile/send_location_response.h"
 #include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
@@ -355,24 +351,6 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
-    case mobile_apis::FunctionID::SyncPDataID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::SyncPDataResponse(message));
-      } else {
-        command.reset(new commands::SyncPDataRequest(message));
-      }
-      break;
-    }
-    case mobile_apis::FunctionID::EncodedSyncPDataID: {
-      if ((*message)[strings::params][strings::message_type]
-          == static_cast<int>(application_manager::MessageType::kResponse)) {
-        command.reset(new commands::EncodedSyncPDataResponse(message));
-      } else {
-        command.reset(new commands::EncodedSyncPDataRequest(message));
-      }
-      break;
-    }
     case mobile_apis::FunctionID::UnsubscribeVehicleDataID: {
       if ((*message)[strings::params][strings::message_type]
           == static_cast<int>(application_manager::MessageType::kResponse)) {
@@ -490,6 +468,15 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
       }
       break;
     }
+    case mobile_apis::FunctionID::SendLocationID: {
+      if ((*message)[strings::params][strings::message_type]
+          == static_cast<int>(application_manager::MessageType::kResponse)) {
+        command.reset(new commands::SendLocationResponse(message));
+      } else {
+        command.reset(new commands::SendLocationRequest(message));
+      }
+      break;
+    }
     case mobile_apis::FunctionID::OnButtonEventID: {
       command.reset(new commands::mobile::OnButtonEventNotification(message));
       break;
@@ -534,10 +521,6 @@ CommandSharedPtr MobileCommandFactory::CreateCommand(
     }
     case mobile_apis::FunctionID::OnHMIStatusID: {
       command.reset(new commands::OnHMIStatusNotification(message));
-      break;
-    }
-    case mobile_apis::FunctionID::OnSyncPDataID: {
-      command.reset(new commands::OnSyncPDataNotification(message));
       break;
     }
     case mobile_apis::FunctionID::OnKeyboardInputID: {

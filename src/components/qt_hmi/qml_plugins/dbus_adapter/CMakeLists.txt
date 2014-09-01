@@ -34,8 +34,8 @@ set(components_dir ${CMAKE_CURRENT_SOURCE_DIR}/../../..)
 set(dbus_dir ${components_dir}/dbus)
 set(codegen_dir ${dbus_dir}/codegen)
 set(codegen ${codegen_dir}/make_qml_dbus_cpp.py)
-set(codegen2 ${codegen_dir}/make_RequestToSDL_class.py)
-set(codegen3 ${codegen_dir}/make_HMIRequests_class.py)
+set(codegen_request_to_sdl ${codegen_dir}/make_RequestToSDL_class.py)
+set(codegen_hmi_requests ${codegen_dir}/make_HMIRequests_class.py)
 set(parser ${codegen_dir}/ford_xml_parser.py)
 set(interfaces_dir ${components_dir}/interfaces)
 set(api_xml ${interfaces_dir}/QT_HMI_API.xml)
@@ -51,8 +51,8 @@ add_custom_command(
 )
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.cc ${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.h
-  COMMAND python ${codegen2} --infile ${api_xml} --version ${qt_version} --outdir ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS ${api_xml} ${codegen2} ${parser}
+  COMMAND python ${codegen_request_to_sdl} --infile ${api_xml} --version ${qt_version} --outdir ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS ${api_xml} ${codegen_request_to_sdl} ${parser}
   COMMENT "Generating files:
     ${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.cc
     ${CMAKE_CURRENT_BINARY_DIR}/request_to_sdl.h
@@ -61,8 +61,8 @@ add_custom_command(
 )
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.cc ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.h
-  COMMAND python ${codegen3} --infile ${api_xml} --version ${qt_version} --outdir ${CMAKE_CURRENT_BINARY_DIR}
-  DEPENDS ${api_xml} ${codegen3} ${parser}
+  COMMAND python ${codegen_hmi_requests} --infile ${api_xml} --version ${qt_version} --outdir ${CMAKE_CURRENT_BINARY_DIR}
+  DEPENDS ${api_xml} ${codegen_hmi_requests} ${parser}
   COMMENT "Generating files:
     ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.cc
     ${CMAKE_CURRENT_BINARY_DIR}/hmi_requests.h

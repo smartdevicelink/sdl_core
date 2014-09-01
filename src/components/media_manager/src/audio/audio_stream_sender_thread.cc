@@ -54,9 +54,7 @@ namespace media_manager {
 using sync_primitives::AutoLock;
 
 const int32_t AudioStreamSenderThread::kAudioPassThruTimeout = 1;
-#ifdef CUSTOMER_PASA
-const uint32_t kMqueueMessageSize = 65536;
-#endif // CUSTOMER_PASA
+const uint32_t kMqueueMessageSize = 4095;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "AudioPassThruThread")
 
@@ -69,6 +67,9 @@ AudioStreamSenderThread::AudioStreamSenderThread(
 }
 
 AudioStreamSenderThread::~AudioStreamSenderThread() {
+#ifdef CUSTOMER_PASA
+  mq_unlink(fileName_.c_str());
+#endif
 }
 
 void AudioStreamSenderThread::threadMain() {
@@ -86,12 +87,11 @@ void AudioStreamSenderThread::threadMain() {
     if (getShouldBeStopped()) {
       break;
     }
-
 #ifdef CUSTOMER_PASA
     mqSendAudioChunkToMobile();
 #else
     sendAudioChunkToMobile();
-#endif // CUSTOMER_PASA
+#endif
   }
 
   LOG4CXX_TRACE_EXIT(logger_);
@@ -147,23 +147,44 @@ void AudioStreamSenderThread::mqSendAudioChunkToMobile() {
     return;
   }
 
-  std::vector<uint8_t> data;
-  data.reserve(kMqueueMessageSize);
-  const ssize dataSize = mq_receive(handle,
-                                    reinterpret_cast<char*>(&data.front()),
-                                    data.size(), 0);
+  struct mq_attr attr;
+  char* buffer;
+
+  if (-1 == mq_getattr(handle, &attr)) {
+    LOG4CXX_ERROR(logger_, "Unable to read mq_attributes: "
+                    << strerror(errno));
+    return;
+  } else {
+    LOG4CXX_INFO(logger_, "mq_msgsize = " << attr.mq_msgsize);
+  }
+
+  buffer = new char[attr.mq_msgsize];
+  if (buffer == NULL) {
+    LOG4CXX_INFO(logger_, "Memory allocation error");
+    return;
+  }
+
+  const ssize_t dataSize = mq_receive(handle, buffer, attr.mq_msgsize, 0);
+
   if (-1 == dataSize) {
     LOG4CXX_ERROR(logger_, "Unable to recieve data from mqueue: "
                   << strerror(errno));
     return;
   }
-  data.resize(dataSize);
+
+  LOG4CXX_INFO(logger_, "The " << dataSize
+                << " bytes have been successfully obtained.");
+
+  std::vector<uint8_t> data(buffer, buffer + dataSize);
+
+  delete[] buffer;
+
+  LOG4CXX_INFO(logger_, "data.size() =  " << data.size());
 
   application_manager::ApplicationManagerImpl::instance()->
   SendAudioPassThroughNotification(session_key_, data);
 }
-#endif // CUSTOMER_PASA
-
+#endif
 bool AudioStreamSenderThread::getShouldBeStopped() {
   AutoLock auto_lock(shouldBeStoped_lock_);
 

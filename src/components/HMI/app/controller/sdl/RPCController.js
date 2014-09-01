@@ -839,6 +839,21 @@ SDL.RPCController = Em.Object
                 },
 
                 /**
+                 * Validate method for request Navigation.SendLocation
+                 *
+                 * @param {Object}
+                 *            params
+                 */
+                SendLocation: function(params) {
+
+                    this.resultStruct = {
+                        "resultCode": SDL.SDLModel.resultCode["SUCCESS"]
+                    };
+
+                    return this.resultStruct;
+                },
+
+                /**
                  * Validate method for request Navigation.AlertManeuver
                  *
                  * @param {Object}

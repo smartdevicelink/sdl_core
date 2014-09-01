@@ -174,12 +174,25 @@ void RegisterAppInterfaceRequest::Run() {
     SendResponse(false, policy_result);
     return;
   }
+  policy::PolicyManager* policy_manager =
+      policy::PolicyHandler::instance()->policy_manager();
+  if (!policy_manager) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    SendResponse(false, mobile_apis::Result::DISALLOWED);
+    return;  
+  }
 
   mobile_apis::Result::eType coincidence_result =
       CheckCoincidence();
 
   if (mobile_apis::Result::SUCCESS != coincidence_result) {
     LOG4CXX_ERROR_EXT(logger_, "Coincidence check failed.");
+    if (mobile_apis::Result::DUPLICATE_NAME == coincidence_result) {
+      usage_statistics::AppCounter count_of_rejections_duplicate_name(
+        policy_manager, mobile_app_id,
+        usage_statistics::REJECTIONS_DUPLICATE_NAME);
+      ++count_of_rejections_duplicate_name;
+    }
     SendResponse(false, coincidence_result);
     return;
   }
@@ -465,20 +478,26 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   if (resumption) {
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
     if (!resumer.CheckApplicationHash(application, hash_id)) {
-      result = mobile_apis::Result::RESUME_FAILED;
       LOG4CXX_WARN(logger_, "Hash does not matches");
-      add_info = "Hash does not matches";
-    } else if (!resumer.CheckPersistenceFilesForResumption(application)) {
       result = mobile_apis::Result::RESUME_FAILED;
+      add_info = "Hash does not matches";
+      resumption = false;
+    } else if (!resumer.CheckPersistenceFilesForResumption(application)) {
       LOG4CXX_WARN(logger_, "Persistent data is missed");
+      result = mobile_apis::Result::RESUME_FAILED;
       add_info = "Persistent data is missed";
+      resumption = false;
     } else {
       add_info = " Resume Succeed";
     }
   }
 
-  MessageHelper::SendOnAppRegisteredNotificationToHMI(
-    *(application.get()), resumption);
+  SendResponse(true, result, add_info, params);
+
+  MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()),
+                                                      resumption);
+
+  MessageHelper::SendChangeRegistrationRequestToHMI(application);
 
   // Check necessity of policy update for current application
   // TODO(KKolodiy): need remove policy_manager
@@ -490,7 +509,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
   }
 
-  SendResponse(true, result, add_info, params);
   if (result != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {
@@ -500,15 +518,13 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
 mobile_apis::Result::eType
 RegisterAppInterfaceRequest::CheckCoincidence() {
-
-  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::CheckCoincidence ");
-
+  LOG4CXX_TRACE_ENTER(logger_);
   const smart_objects::SmartObject& msg_params =
     (*message_)[strings::msg_params];
 
-  ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  const std::set<ApplicationSharedPtr> applications = accessor.applications();
 
-  const std::set<ApplicationSharedPtr>& applications = app_manager->applications();
   std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
   const std::string app_name = msg_params[strings::app_name].asString();
 
@@ -570,9 +586,9 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
     return mobile_apis::Result::DISALLOWED;
   }
-  const bool init_result = policy_manager->GetInitialAppData(
-                             message[strings::msg_params][strings::app_id].asString(), &app_nicknames,
-                             &app_hmi_types);
+  std::string mobile_app_id = message[strings::msg_params][strings::app_id].asString();
+  const bool init_result = policy_manager->GetInitialAppData(mobile_app_id, &app_nicknames,
+                                                             &app_hmi_types);
 
   if (!init_result) {
     LOG4CXX_ERROR(logger_, "Error during initial application data check.");
@@ -587,6 +603,10 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
       LOG4CXX_WARN(logger_,
                    "Application name was not found in nicknames list.");
       //App should be unregistered, if its name is not present in nicknames list
+      usage_statistics::AppCounter count_of_rejections_nickname_mismatch(
+        policy_manager, mobile_app_id,
+        usage_statistics::REJECTIONS_NICKNAME_MISMATCH);
+      ++count_of_rejections_nickname_mismatch;
       return mobile_apis::Result::DISALLOWED;
     }
   }
@@ -737,8 +757,8 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
   const std::string mobile_app_id = (*message_)[strings::msg_params]
                                     [strings::app_id].asString();
 
-  const std::set<ApplicationSharedPtr>& applications =
-    ApplicationManagerImpl::instance()->applications();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  const std::set<ApplicationSharedPtr> applications = accessor.applications();
 
   std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
   std::set<ApplicationSharedPtr>::const_iterator it_end = applications.end();
@@ -757,7 +777,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::app_name].asCharArray();
-  if (!CheckSyntax(str, true)) {
+  if (!CheckSyntax(str)) {
     LOG4CXX_ERROR(logger_, "Invalid app_name syntax check failed");
     return true;
   }
@@ -772,7 +792,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
 
     for (; it_tn != it_tn_end; ++it_tn) {
       str = (*it_tn)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_name syntax check failed");
         return true;
       }
@@ -783,7 +803,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
       keyExists(strings::ngn_media_screen_app_name)) {
     str = (*message_)[strings::msg_params]
                       [strings::ngn_media_screen_app_name].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                     "Invalid ngn_media_screen_app_name syntax check failed");
       return true;
@@ -799,7 +819,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
 
     for (; it_vs != it_vs_end; ++it_vs) {
       str = (*it_vs).asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid vr_synonyms syntax check failed");
         return true;
       }
@@ -808,7 +828,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::hash_id)) {
     str = (*message_)[strings::msg_params][strings::hash_id].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid hash_id syntax check failed");
       return true;
     }
@@ -820,7 +840,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                                          keyExists(strings::hardware)) {
       str = (*message_)[strings::msg_params]
                   [strings::device_info][strings::hardware].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info hardware syntax check failed");
         return true;
@@ -831,7 +851,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                                          keyExists(strings::firmware_rev)) {
       str = (*message_)[strings::msg_params]
                   [strings::device_info][strings::firmware_rev].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info firmware_rev syntax check failed");
         return true;
@@ -842,7 +862,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                                          keyExists(strings::os)) {
       str = (*message_)[strings::msg_params]
                   [strings::device_info][strings::os].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info os syntax check failed");
         return true;
@@ -853,7 +873,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                                          keyExists(strings::os_version)) {
       str = (*message_)[strings::msg_params]
                   [strings::device_info][strings::os_version].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info os_version syntax check failed");
         return true;
@@ -864,7 +884,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
                                          keyExists(strings::carrier)) {
       str = (*message_)[strings::msg_params]
                   [strings::device_info][strings::carrier].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_,
                       "Invalid device_info carrier syntax check failed");
         return true;
@@ -875,7 +895,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::app_id)) {
     str = (*message_)[strings::msg_params][strings::app_id].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid app_id syntax check failed");
       return true;
     }

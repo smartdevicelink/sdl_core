@@ -66,12 +66,13 @@ namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
 
 ApplicationManagerImpl::ApplicationManagerImpl()
-  : audio_pass_thru_active_(false),
+  : applications_list_lock_(true),
+    audio_pass_thru_active_(false),
     is_distracting_driver_(false),
     is_vr_session_strated_(false),
     hmi_cooperating_(false),
     is_all_apps_allowed_(true),
-    media_manager_(media_manager::MediaManagerImpl::instance()),
+    media_manager_(NULL),
     hmi_handler_(NULL),
     connection_handler_(NULL),
     policy_manager_(policy::PolicyHandler::instance()->LoadPolicyLibrary()),
@@ -89,8 +90,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
 #ifdef TIME_TESTER
     metric_observer_(NULL),
 #endif  // TIME_TESTER
-    application_list_update_timer_(new ApplicationListUpdateTimer(this))
-{
+    application_list_update_timer_(new ApplicationListUpdateTimer(this)) {
+    std::srand(std::time(0));
 }
 
 bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
@@ -115,11 +116,6 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_INFO(logger_, "Destructing ApplicationManager.");
 
-  if (policy_manager_) {
-    LOG4CXX_INFO(logger_, "Unloading policy library.");
-    policy::PolicyHandler::instance()->UnloadPolicyLibrary();
-  }
-
   SendOnSDLClose();
 
   policy_manager_ = NULL;
@@ -141,6 +137,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 bool ApplicationManagerImpl::Stop() {
   LOG4CXX_INFO(logger_, "Stop ApplicationManager.");
   application_list_update_timer_->stop();
+
   try {
     UnregisterAllApplications();
   } catch (...) {
@@ -148,6 +145,10 @@ bool ApplicationManagerImpl::Stop() {
                   "An error occurred during unregistering applications.");
   }
 
+  if (policy_manager_) {
+    LOG4CXX_INFO(logger_, "Unloading policy library.");
+    policy::PolicyHandler::instance()->UnloadPolicyLibrary();
+  }
   return true;
 }
 
@@ -575,6 +576,11 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::Buttons_GetCapabilities));
   ManageHMICommand(button_capabilities);
+
+  utils::SharedPtr<smart_objects::SmartObject> mixing_audio_supported_request(
+      MessageHelper::CreateModuleInfoSO(
+          hmi_apis::FunctionID::BasicCommunication_MixingAudioSupported));
+  ManageHMICommand(mixing_audio_supported_request);
 #ifdef CUSTOMER_PASA
   //Line start of transportManager component was left for panasonic
   if (!connection_handler_) {
@@ -864,6 +870,7 @@ uint32_t ApplicationManagerImpl::GenerateGrammarID() {
 
 uint32_t ApplicationManagerImpl::GenerateNewHMIAppID() {
   uint32_t hmi_app_id = rand();
+
   while (resume_ctrl_.IsHMIApplicationIdExist(hmi_app_id)) {
     hmi_app_id = rand();
   }
@@ -1008,8 +1015,12 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
   switch (type) {
     case protocol_handler::kRpc: {
       LOG4CXX_INFO(logger_, "Remove application.");
+      /* in case it was unexpected disconnect application will be removed
+       and we will notify HMI that it was unexpected disconnect,
+       but in case it was closed by mobile we will be unable to find it in the list
+      */
       UnregisterApplication(session_key, mobile_apis::Result::INVALID_ENUM,
-                            true);
+                            true, true);
       break;
     }
     case protocol_handler::kMobileNav: {
@@ -1242,6 +1253,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
         connection_key, mobile_api::AppInterfaceUnregisteredReason::
         REQUEST_WHILE_IN_NONE_HMI_LEVEL);
 
+      application(connection_key)->usage_report().RecordRemovalsForBadBehavior();
       UnregisterApplication(connection_key, mobile_apis::Result::INVALID_ENUM,
                             false);
       return false;
@@ -1335,10 +1347,56 @@ bool ApplicationManagerImpl::ManageHMICommand(
 bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   bool init_result = true;
-  if (policy_manager_) {
-    LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
-    init_result = policy::PolicyHandler::instance()->InitPolicyTable();
-  }
+  do {
+    if (policy_manager_) {
+      LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
+      if (!policy::PolicyHandler::instance()->InitPolicyTable()) {
+        init_result = false;
+        break;
+      }
+    }
+    const std::string app_storage_folder = 
+      profile::Profile::instance()->app_storage_folder();
+    if (!file_system::DirectoryExists(app_storage_folder)) {
+      LOG4CXX_WARN(logger_, "Storage directory doesn't exist");
+      // if storage directory doesn't exist try to create it
+      if (!file_system::CreateDirectoryRecursively(app_storage_folder)) {
+        LOG4CXX_ERROR(logger_, "Unable to create Storage directory "
+                                << app_storage_folder);
+        init_result = false;
+        break;
+      }
+    }
+    if (!(file_system::IsWritingAllowed(app_storage_folder) &&
+          file_system::IsReadingAllowed(app_storage_folder))) {
+      LOG4CXX_ERROR(logger_,
+                   "Storage directory doesn't have read/write permissions");
+      init_result = false;
+      break;
+    }
+
+    const std::string system_files_path = 
+      profile::Profile::instance()->system_files_path();
+    if (!file_system::DirectoryExists(system_files_path)) {
+      LOG4CXX_WARN(logger_, "System files directory doesn't exist");
+      // if system directory doesn't exist try to create it
+      if (!file_system::CreateDirectoryRecursively(system_files_path)) {
+        LOG4CXX_ERROR(logger_, "Unable to create System directory "
+                                << system_files_path);
+        init_result = false;
+        break;
+      }
+    }
+    if (!(file_system::IsWritingAllowed(system_files_path) &&
+          file_system::IsReadingAllowed(system_files_path))) {
+      LOG4CXX_ERROR(logger_,
+                   "System directory doesn't have read/write permissions");
+      init_result = false;
+      break;
+    }
+    media_manager_ = media_manager::MediaManagerImpl::instance();
+  } while (false);
+
   return init_result;
 }
 
@@ -1801,7 +1859,7 @@ void ApplicationManagerImpl::SendOnSDLClose() {
   hmi_handler_->SendMessageToHMI(message_to_send);
 }
 
-void ApplicationManagerImpl::UnregisterAllApplications() {
+void ApplicationManagerImpl::UnregisterAllApplications(bool generated_by_hmi) {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::UnregisterAllApplications " <<
                unregister_reason_);
 
@@ -1811,13 +1869,18 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
       unregister_reason_ ==
       mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF ? true : false;
 
+  bool is_unexpected_disconnect = (generated_by_hmi != true);
+
+  sync_primitives::AutoLock lock(applications_list_lock_);
+
   std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
   while (it != application_list_.end()) {
     ApplicationSharedPtr app_to_remove = *it;
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
         app_to_remove->app_id(), unregister_reason_);
     UnregisterApplication(app_to_remove->app_id(),
-                          mobile_apis::Result::INVALID_ENUM, is_ignition_off);
+                          mobile_apis::Result::INVALID_ENUM, is_ignition_off,
+                          is_unexpected_disconnect);
 
     connection_handler_->CloseSession(app_to_remove->app_id());
     it = application_list_.begin();
@@ -1830,7 +1893,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
 
 void ApplicationManagerImpl::UnregisterApplication(
   const uint32_t& app_id, mobile_apis::Result::eType reason,
-  bool is_resuming) {
+  bool is_resuming, bool is_unexpected_disconnect) {
   LOG4CXX_INFO(logger_,
                "ApplicationManagerImpl::UnregisterApplication " << app_id);
 
@@ -1858,6 +1921,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     for (; it != application_list_.end(); ++it) {
       if ((*it)->app_id() == app_id) {
         app_to_remove = *it;
+        break;
       }
     }
     application_list_.erase(app_to_remove);
@@ -1878,10 +1942,23 @@ void ApplicationManagerImpl::UnregisterApplication(
     StopAudioPassThru(app_id);
     MessageHelper::SendStopAudioPathThru();
   }
-  MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove);
+  MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove,
+                                                 is_unexpected_disconnect);
 
   request_ctrl_.terminateAppRequests(app_id);
   return;
+}
+
+
+void ApplicationManagerImpl::UnregisterRevokedApplication(
+    const uint32_t& app_id, mobile_apis::Result::eType reason) {
+  UnregisterApplication(app_id, reason);
+
+  connection_handler_->CloseSession(app_id);
+
+  if (application_list_.empty()) {
+    connection_handler_->CloseRevokedConnection(app_id);
+  }
 }
 
 void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
@@ -2007,7 +2084,9 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
       LOG4CXX_ERROR(logger_, "No application for policy id " << policy_app_id);
       return mobile_apis::Result::GENERIC_ERROR;
     }
-    app->usage_report().RecordRpcSentInHMINone();
+    if (result.hmi_level_permitted != policy::kRpcAllowed) {
+      app->usage_report().RecordRpcSentInHMINone();
+    }
   }
 
   const std::string log_msg = "Application: "+ policy_app_id+
@@ -2038,42 +2117,51 @@ void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
     hmi_capabilities_.attenuated_supported()
     ? mobile_apis::AudioStreamingState::ATTENUATED
     : mobile_apis::AudioStreamingState::NOT_AUDIBLE;
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  ApplicationManagerImpl::TAppList local_app_list = accessor.applications();
 
-  std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
+  ApplicationManagerImpl::TAppListConstIt it = local_app_list.begin();
+  ApplicationManagerImpl::TAppListConstIt itEnd = local_app_list.end();
   for (; it != itEnd; ++it) {
-    if ((*it)->is_media_application()) {
-      if (kTTSSessionChanging == changing_state) {
-        (*it)->set_tts_speak_state(true);
-      }
-      if ((*it)->audio_streaming_state() != state) {
-        (*it)->set_audio_streaming_state(state);
-        MessageHelper::SendHMIStatusNotification(*(*it));
+    if ((*it).valid()) {
+      if ((*it)->is_media_application()) {
+        if (kTTSSessionChanging == changing_state) {
+          (*it)->set_tts_speak_state(true);
+        }
+        if ((*it)->audio_streaming_state() != state &&
+            (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level()) &&
+            (mobile_api::HMILevel::HMI_BACKGROUND != (*it)->hmi_level())) {
+          (*it)->set_audio_streaming_state(state);
+          MessageHelper::SendHMIStatusNotification(*(*it));
+        }
       }
     }
   }
 }
 
 void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
-  std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd = application_list_.end();
-  //according with SDLAQ-CRS-839
-  bool is_application_audible = false;
+
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  ApplicationManagerImpl::TAppList local_app_list = application_list_;
+  ApplicationManagerImpl::TAppListConstIt it = local_app_list.begin();
+  ApplicationManagerImpl::TAppListConstIt itEnd = local_app_list.end();
 
   for (; it != itEnd; ++it) {
-    if ((*it)->is_media_application()) {
-      if (kTTSSessionChanging == changing_state) {
-        (*it)->set_tts_speak_state(false);
-      }
-      if ((!is_application_audible) && (!(vr_session_started())) &&
-          ((*it)->audio_streaming_state() !=
-              mobile_apis::AudioStreamingState::AUDIBLE) &&
-          (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level())) {
-        //according with SDLAQ-CRS-839
-        is_application_audible = true;
-        (*it)->set_audio_streaming_state(
-            mobile_apis::AudioStreamingState::AUDIBLE);
-        MessageHelper::SendHMIStatusNotification(*(*it));
+    if ((*it).valid()) {
+      if ((*it)->is_media_application()) {
+        if (kTTSSessionChanging == changing_state) {
+          (*it)->set_tts_speak_state(false);
+        }
+        if ((!(vr_session_started())) &&
+            (!((*it)->tts_speak_state())) &&
+            ((*it)->audio_streaming_state() !=
+             mobile_apis::AudioStreamingState::AUDIBLE) &&
+            (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level()) &&
+            (mobile_api::HMILevel::HMI_BACKGROUND != (*it)->hmi_level())) {
+          (*it)->set_audio_streaming_state(
+              mobile_apis::AudioStreamingState::AUDIBLE);
+          MessageHelper::SendHMIStatusNotification(*(*it));
+        }
       }
     }
   }

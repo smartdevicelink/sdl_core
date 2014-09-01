@@ -31,6 +31,7 @@
  */
 
 #include "utils/logger.h"
+#include "config_profile/profile.h"
 
 #include "transport_manager/mme/iap_device.h"
 #include "transport_manager/mme/iap_connection.h"
@@ -47,13 +48,16 @@ IAPDevice::IAPDevice(const std::string& mount_point,
                      TransportAdapterController* controller) :
   MmeDevice(mount_point, name, unique_device_id),
   controller_(controller),
-  last_app_id_(0) {
+  ipod_hdl_(0),
+  last_app_id_(0),
+  app_table_lock_(true),
+  connections_lock_(true) {
 }
 
 IAPDevice::~IAPDevice() {
   receiver_thread_->stop();
 
-  LOG4CXX_TRACE(logger_, "iAP: disconecting from " << mount_point());
+  LOG4CXX_TRACE(logger_, "iAP: disconnecting from " << mount_point());
   if (ipod_disconnect(ipod_hdl_) != -1) {
     LOG4CXX_DEBUG(logger_, "iAP: disconnected from " << mount_point());
   }
@@ -67,7 +71,9 @@ bool IAPDevice::Init() {
   const ProtocolConfig::ProtocolNameContainer& pool_protocol_names = ProtocolConfig::IAPPoolProtocolNames();
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = pool_protocol_names.begin(); i != pool_protocol_names.end(); ++i) {
     std::string protocol_name = *i;
-    free_protocol_name_pool_.insert(std::make_pair(protocol_name, ++pool_index));
+    free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
+    timers_protocols_.insert(std::make_pair(protocol_name,
+                                            new ProtocolConnectionTimer(protocol_name, this)));
   }
 
   LOG4CXX_TRACE(logger_, "iAP: connecting to " << mount_point());
@@ -166,16 +172,7 @@ void IAPDevice::UnregisterConnection(ApplicationHandle app_id) {
       LOG4CXX_DEBUG(logger_, "iAP: dropping protocol " << protocol_name << " for application " << app_id);
       apps_.erase(i);
       removed = true;
-
-      protocol_name_pool_lock_.Acquire();
-      ProtocolNamePool::iterator j = protocol_in_use_name_pool_.find(protocol_name);
-      if (j != protocol_in_use_name_pool_.end()) {
-        LOG4CXX_INFO(logger_, "iAP: returning protocol " << protocol_name << " back to pool");
-        free_protocol_name_pool_.insert(*j);
-        protocol_in_use_name_pool_.erase(j);
-      }
-      protocol_name_pool_lock_.Release();
-
+      FreeProtocol(protocol_name);
 // each application id can appear only once that's why we break the loop
       break;
     }
@@ -197,7 +194,7 @@ void IAPDevice::OnSessionOpened(uint32_t protocol_id, int session_id) {
 }
 
 void IAPDevice::OnSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id) {
-  const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::HubProtocolNames();
+  const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::IAPHubProtocolNames();
   bool is_hub = false;
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = hub_protocol_names.begin(); i != hub_protocol_names.end(); ++i) {
     if (protocol_name == *i) {
@@ -213,22 +210,66 @@ void IAPDevice::OnSessionOpened(uint32_t protocol_id, const char* protocol_name,
   }
 }
 
+void IAPDevice::StartTimer(const std::string& name) {
+  TimerContainer::iterator i = timers_protocols_.find(name);
+  if (i != timers_protocols_.end()) {
+    ProtocolConnectionTimerSPtr timer = i->second;
+    timer->Start();
+    LOG4CXX_TRACE(logger_, "iAP: timer for protocol " << name << " was started");
+  } else {
+    LOG4CXX_WARN(logger_, "iAP: timer for protocol " << name << " was not found");
+  }
+}
+
+bool IAPDevice::PickProtocol(char* index, std::string* name) {
+  DCHECK(index);
+  DCHECK(name);
+
+  sync_primitives::AutoLock locker(protocol_name_pool_lock_);
+  if (free_protocol_name_pool_.empty()) {
+    LOG4CXX_WARN(logger_, "iAP: protocol pool is empty");
+    *index = 255;
+    return false;
+  }
+
+  FreeProtocolNamePool::iterator i = free_protocol_name_pool_.begin();
+  *index = i->first;
+  *name = i->second;
+  protocol_in_use_name_pool_.insert(std::make_pair(*name, *index));
+  free_protocol_name_pool_.erase(i);
+  LOG4CXX_DEBUG(logger_, "iAP: protocol " << *name << " picked out from pool");
+
+  return true;
+}
+
+void IAPDevice::StopTimer(const std::string& name) {
+  sync_primitives::AutoLock locker(timers_protocols_lock_);
+  TimerContainer::iterator i = timers_protocols_.find(name);
+  if (i != timers_protocols_.end()) {
+    ProtocolConnectionTimerSPtr timer = i->second;
+    timer->Stop();
+    LOG4CXX_TRACE(logger_, "iAP: timer for protocol " << name << " was stopped");
+  }
+}
+
+void IAPDevice::FreeProtocol(const std::string& name) {
+  sync_primitives::AutoLock locker(protocol_name_pool_lock_);
+  ProtocolInUseNamePool::iterator j = protocol_in_use_name_pool_.find(name);
+  if (j != protocol_in_use_name_pool_.end()) {
+    LOG4CXX_DEBUG(logger_, "iAP: returning protocol " << name << " back to pool");
+    int index = j->second;
+    free_protocol_name_pool_.insert(std::make_pair(index, name));
+    protocol_in_use_name_pool_.erase(j);
+  }
+}
+
 void IAPDevice::OnHubSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id) {
   char protocol_index;
-  protocol_name_pool_lock_.Acquire();
-  if (!free_protocol_name_pool_.empty()) {
-    ProtocolNamePool::iterator i = free_protocol_name_pool_.begin();
-    std::string pool_protocol_name = i->first;
-    LOG4CXX_INFO(logger_, "iAP: protocol " << pool_protocol_name << " picked out from pool");
-    protocol_index = i->second;
-    protocol_in_use_name_pool_.insert(*i);
-    free_protocol_name_pool_.erase(i);
+  std::string pool_protocol_name;
+  if (PickProtocol(&protocol_index, &pool_protocol_name)) {
+    StartTimer(pool_protocol_name);
   }
-  else {
-    LOG4CXX_WARN(logger_, "iAP: protocol pool is empty");
-    protocol_index = 255;
-  }
-  protocol_name_pool_lock_.Release();
+
   char buffer[] = {protocol_index};
   LOG4CXX_TRACE(logger_, "iAP: sending data on hub protocol " << protocol_name);
   if (ipod_eaf_send(ipod_hdl_, session_id, buffer, sizeof(buffer)) != -1) {
@@ -242,6 +283,7 @@ void IAPDevice::OnHubSessionOpened(uint32_t protocol_id, const char* protocol_na
 void IAPDevice::OnRegularSessionOpened(uint32_t protocol_id, const char* protocol_name, int session_id) {
   bool inserted = false;
   ApplicationHandle app_id;
+  StopTimer(protocol_name);
   apps_lock_.Acquire();
   AppContainer::const_iterator i = apps_.find(protocol_id);
   if (i != apps_.end()) {
@@ -281,6 +323,8 @@ void IAPDevice::OnSessionClosed(int session_id) {
   AppTable::iterator i = app_table_.find(session_id);
   if (i != app_table_.end()) {
     ApplicationHandle app_id = i->second;
+    LOG4CXX_DEBUG(logger_, "iAP: dropping session " << session_id << " for application " << app_id);
+    app_table_.erase(i);
     connections_lock_.Acquire();
     ConnectionContainer::const_iterator j = connections_.find(app_id);
     if (j != connections_.end()) {
@@ -291,8 +335,6 @@ void IAPDevice::OnSessionClosed(int session_id) {
       LOG4CXX_WARN(logger_, "iAP: no connection corresponding to application " << app_id);
     }
     connections_lock_.Release();
-    LOG4CXX_DEBUG(logger_, "iAP: dropping session " << session_id << " for application " << app_id);
-    app_table_.erase(i);
   }
   app_table_lock_.Release();
 }
@@ -343,7 +385,33 @@ void IAPDevice::IAPEventThreadDelegate::OnPulse() {
 }
 
 void IAPDevice::IAPEventThreadDelegate::ParseEvents() {
+  LOG4CXX_TRACE(logger_, "iAP: getting events");
   ssize_t nevents = ipod_eaf_getevents(ipod_hdl_, events_, kEventsBufferSize);
+
+  std::ostringstream events_debug_message;
+  events_debug_message << "iAP: got " << nevents << " events: {";
+  for (ssize_t i = 0; i < nevents; ++i) {
+    if (i != 0) {
+      events_debug_message << ", ";
+    }
+    switch (events_[i].eventtype) {
+      case IPOD_EAF_EVENT_SESSION_REQ:
+        events_debug_message << "IPOD_EAF_EVENT_SESSION_REQ";
+        break;
+      case IPOD_EAF_EVENT_SESSION_CLOSE:
+        events_debug_message << "IPOD_EAF_EVENT_SESSION_CLOSE";
+        break;
+      case IPOD_EAF_EVENT_SESSION_DATA:
+        events_debug_message << "IPOD_EAF_EVENT_SESSION_DATA";
+        break;
+      case IPOD_EAF_EVENT_SESSION_OPEN:
+        events_debug_message << "IPOD_EAF_EVENT_SESSION_OPEN";
+        break;
+    }
+  }
+  events_debug_message << "}";
+  LOG4CXX_DEBUG(logger_, events_debug_message.str());
+
   for (ssize_t i = 0; i < nevents; ++i) {
     switch (events_[i].eventtype) {
       case IPOD_EAF_EVENT_SESSION_REQ:
@@ -413,6 +481,35 @@ void IAPDevice::IAPEventThreadDelegate::OpenSession(uint32_t protocol_id, const 
   else {
     LOG4CXX_ERROR(logger_, "iAP: failed to open session on protocol " << protocol_name);
   }
+}
+
+IAPDevice::ProtocolConnectionTimer::ProtocolConnectionTimer(
+    const std::string& name, IAPDevice* parent)
+    : name_(name),
+      timer_(new Timer(this, &ProtocolConnectionTimer::Shoot)),
+      parent_(parent) {
+}
+
+IAPDevice::ProtocolConnectionTimer::~ProtocolConnectionTimer() {
+  Stop();
+  delete timer_;
+}
+
+void IAPDevice::ProtocolConnectionTimer::Start() {
+  int timeout = profile::Profile::instance()->iap_hub_connection_wait_timeout();
+  LOG4CXX_DEBUG(logger_, "iAP: start timer (protocol: " << name_ <<
+                ", timeout: " << timeout << ")");
+  timer_->start(timeout);
+}
+
+void IAPDevice::ProtocolConnectionTimer::Stop() {
+  LOG4CXX_DEBUG(logger_, "iAP: stop timer (protocol: " << name_ << ")");
+  timer_->stop();
+}
+
+void IAPDevice::ProtocolConnectionTimer::Shoot() {
+  LOG4CXX_DEBUG(logger_, "iAP: shoot timer (protocol: " << name_ << ")");
+  parent_->FreeProtocol(name_);
 }
 
 }  // namespace transport_adapter

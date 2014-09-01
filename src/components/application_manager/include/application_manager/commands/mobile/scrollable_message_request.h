@@ -75,14 +75,6 @@ class ScrollableMessageRequest : public CommandRequestImpl {
   virtual void on_event(const event_engine::Event& event);
 
  private:
-  /**
-   * @brief Checks scrollable message param
-   * When type is String there is a check on the contents \t\n \\t \\n
-   * @return if scrollable message contains \t\n \\t \\n return TRUE,
-   * FALSE otherwise
-   */
-  bool IsWhiteSpaceExist();
-
   DISALLOW_COPY_AND_ASSIGN(ScrollableMessageRequest);
 };
 

@@ -66,6 +66,18 @@ void ChangeRegistrationRequest::Run() {
     return;
   }
 
+  if (IsWhiteSpaceExist()) {
+    LOG4CXX_INFO(logger_,
+                 "Incoming request contains \t\n \\t \\n or whitespace");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+  if (mobile_apis::Result::SUCCESS != CheckCoincidence()) {
+    SendResponse(false, mobile_apis::Result::DUPLICATE_NAME);
+    return;
+  }
+
   if (!hmi_capabilities.is_ui_cooperating()) {
     ui_result_ = hmi_apis::Common_Result::UNSUPPORTED_RESOURCE;
   }
@@ -103,6 +115,18 @@ void ChangeRegistrationRequest::Run() {
 
   ui_params[strings::language] = hmi_language;
   ui_params[strings::app_id] = app->app_id();
+  if ((*message_)[strings::msg_params].keyExists(strings::app_name)) {
+    ui_params[strings::app_name] =
+        (*message_)[strings::msg_params][strings::app_name];
+    app->set_name((*message_)[strings::msg_params][strings::app_name].asString());
+  }
+  if ((*message_)[strings::msg_params].keyExists(
+      strings::ngn_media_screen_app_name)) {
+    ui_params[strings::ngn_media_screen_app_name] =
+        (*message_)[strings::msg_params][strings::ngn_media_screen_app_name];
+    app->set_ngn_media_screen_name((*message_)[strings::msg_params]
+                                        [strings::ngn_media_screen_app_name]);
+  }
 
   SendHMIRequest(hmi_apis::FunctionID::UI_ChangeRegistration,
                  &ui_params, true);
@@ -115,7 +139,11 @@ void ChangeRegistrationRequest::Run() {
       (*message_)[strings::msg_params][strings::language];
 
   vr_params[strings::app_id] = app->app_id();
-
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_synonyms)) {
+    vr_params[strings::vr_synonyms] = (*message_)[strings::msg_params]
+                                                  [strings::vr_synonyms];
+    app -> set_vr_synonyms((*message_)[strings::msg_params][strings::vr_synonyms]);
+  }
   SendHMIRequest(hmi_apis::FunctionID::VR_ChangeRegistration,
                  &vr_params, true);
 
@@ -127,6 +155,11 @@ void ChangeRegistrationRequest::Run() {
       (*message_)[strings::msg_params][strings::language];
 
   tts_params[strings::app_id] = app->app_id();
+  if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
+    tts_params[strings::tts_name] = (*message_)[strings::msg_params]
+                                                [strings::tts_name];
+    app->set_tts_name((*message_)[strings::msg_params][strings::tts_name]);
+  }
 
   SendHMIRequest(hmi_apis::FunctionID::TTS_ChangeRegistration,
                  &tts_params, true);
@@ -281,6 +314,117 @@ bool ChangeRegistrationRequest::IsLanguageSupportedByTTS(
 
   LOG4CXX_ERROR(logger_, "Language isn't supported by TTS");
   return false;
+}
+
+bool ChangeRegistrationRequest::IsWhiteSpaceExist() {
+  const char* str = NULL;
+
+  if ((*message_)[strings::msg_params].keyExists(strings::app_name)) {
+    str = (*message_)[strings::msg_params][strings::app_name].asCharArray();
+    if (!CheckSyntax(str)) {
+      LOG4CXX_ERROR(logger_, "Invalid app_name syntax check failed");
+      return true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::tts_name)) {
+    const smart_objects::SmartArray* tn_array =
+        (*message_)[strings::msg_params][strings::tts_name].asArray();
+
+    smart_objects::SmartArray::const_iterator it_tn = tn_array->begin();
+    smart_objects::SmartArray::const_iterator it_tn_end = tn_array->end();
+
+    for (; it_tn != it_tn_end; ++it_tn) {
+      str = (*it_tn)[strings::text].asCharArray();
+      if (!CheckSyntax(str)) {
+        LOG4CXX_ERROR(logger_, "Invalid tts_name syntax check failed");
+        return true;
+      }
+    }
+  }
+
+  if ((*message_)[strings::msg_params].
+      keyExists(strings::ngn_media_screen_app_name)) {
+    str = (*message_)[strings::msg_params]
+                      [strings::ngn_media_screen_app_name].asCharArray();
+    if (!CheckSyntax(str)) {
+      LOG4CXX_ERROR(logger_,
+                    "Invalid ngn_media_screen_app_name syntax check failed");
+      return true;
+    }
+  }
+
+  if ((*message_)[strings::msg_params].keyExists(strings::vr_synonyms)) {
+    const smart_objects::SmartArray* vs_array =
+        (*message_)[strings::msg_params][strings::vr_synonyms].asArray();
+
+    smart_objects::SmartArray::const_iterator it_vs = vs_array->begin();
+    smart_objects::SmartArray::const_iterator it_vs_end = vs_array->end();
+
+    for (; it_vs != it_vs_end; ++it_vs) {
+      str = (*it_vs).asCharArray();
+      if (!CheckSyntax(str)) {
+        LOG4CXX_ERROR(logger_, "Invalid vr_synonyms syntax check failed");
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
+  LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::CheckCoincidence");
+
+  const smart_objects::SmartObject& msg_params =
+      (*message_)[strings::msg_params];
+
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  const std::set<ApplicationSharedPtr> applications = accessor.applications();
+  std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
+  std::string app_name;
+  uint32_t app_id = connection_key();
+  if (msg_params.keyExists(strings::app_name)) {
+    app_name = msg_params[strings::app_name].asString();
+  }
+
+  for (; applications.end() != it; ++it) {
+    if (app_id == (*it)->app_id()) {
+      continue;
+    }
+
+    const std::string& cur_name = (*it)->name();
+    if (msg_params.keyExists(strings::app_name)) {
+      if (!strcasecmp(app_name.c_str(), cur_name.c_str())) {
+        LOG4CXX_ERROR(logger_, "Application name is known already.");
+        return mobile_apis::Result::DUPLICATE_NAME;
+      }
+
+      const smart_objects::SmartObject* vr = (*it)->vr_synonyms();
+      const std::vector<smart_objects::SmartObject>* curr_vr = NULL;
+      if (NULL != vr) {
+        curr_vr = vr->asArray();
+        CoincidencePredicateVR v(app_name);
+
+        if (0 != std::count_if(curr_vr->begin(), curr_vr->end(), v)) {
+          LOG4CXX_ERROR(logger_, "Application name is known already.");
+          return mobile_apis::Result::DUPLICATE_NAME;
+        }
+      }
+    }
+
+    // vr check
+    if (msg_params.keyExists(strings::vr_synonyms)) {
+      const std::vector<smart_objects::SmartObject>* new_vr =
+          msg_params[strings::vr_synonyms].asArray();
+
+      CoincidencePredicateVR v(cur_name);
+      if (0 != std::count_if(new_vr->begin(), new_vr->end(), v)) {
+        LOG4CXX_ERROR(logger_, "vr_synonyms duplicated with app_name .");
+        return mobile_apis::Result::DUPLICATE_NAME;
+      }
+    }  // end vr check
+  }  // application for end
+  return mobile_apis::Result::SUCCESS;
 }
 
 }  // namespace commands

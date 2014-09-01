@@ -632,6 +632,22 @@ bool SQLPTExtRepresentation::SaveApplicationPolicies(
 
 bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
     const policy_table::ApplicationPolicies::value_type& app) {
+  LOG4CXX_INFO(logger_, "Saving data for application: " << app.first);
+  if (app.second.is_string()) {
+    if (kDefaultId.compare(app.second.get_string()) == 0) {
+      if (!SetDefaultPolicy(app.first)) {
+        return false;
+      }
+    } else if (kPreDataConsentId.compare(app.second.get_string()) == 0) {
+      if (!SetPredataPolicy(app.first)) {
+        return false;
+      }
+    }
+
+    // Stop saving other params, since predefined permissions already set
+    return true;
+  }
+
   dbms::SQLQuery app_query(db());
   if (!app_query.Prepare(sql_pt_ext::kInsertApplication)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement into application.");
@@ -655,22 +671,6 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
     return false;
-  }
-
-  LOG4CXX_INFO(logger_, "Saving data for application: " << app.first);
-  if (app.second.is_string()) {
-    if (kDefaultId.compare(app.second.get_string()) == 0) {
-      if (!SetDefaultPolicy(app.first)) {
-        return false;
-      }
-    } else if (kPreDataConsentId.compare(app.second.get_string()) == 0) {
-      if (!SetPredataPolicy(app.first)) {
-        return false;
-      }
-    }
-
-    // Stop saving other params, since predefined permissions already set
-    return true;
   }
 
   if (!SaveAppGroup(app.first, app.second.groups)) {
@@ -704,6 +704,17 @@ bool SQLPTExtRepresentation::GatherApplicationPolicies(
   while (query.Next()) {
     rpc::Nullable<policy_table::ApplicationParams> params;
     const std::string& app_id = query.GetString(0);
+    if (IsApplicationRevoked(app_id)) {
+      params.set_to_null();
+      (*apps)[app_id] = params;
+      continue;
+    }
+    if (IsDefaultPolicy(app_id)) {
+      (*apps)[app_id].set_to_string(kDefaultId);
+    }
+    if (IsPredataPolicy(app_id)) {
+      (*apps)[app_id].set_to_string(kPreDataConsentId);
+    }
     policy_table::Priority priority;
     policy_table::EnumFromJsonString(query.GetString(1), &priority);
     params.priority = priority;
@@ -768,8 +779,9 @@ bool SQLPTExtRepresentation::GatherUsageAndErrorCounts(
 bool SQLPTExtRepresentation::GatherAppLevels(
   policy_table::AppLevels* apps) const {
   dbms::SQLQuery query(db());
-  if (query.Prepare(sql_pt_ext::kSelectAppLevels)) {
-    LOG4CXX_INFO(logger_, "Failed select from app_level");
+  if (!query.Prepare(sql_pt_ext::kSelectAppLevels)) {
+    LOG4CXX_INFO(logger_, "Failed select from app_level. SQLError = "
+                 << query.LastError().text());
     return false;
   }
   const int kSecondsInMinute = 60;

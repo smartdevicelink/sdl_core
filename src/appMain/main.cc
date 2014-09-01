@@ -171,6 +171,8 @@ int32_t main(int32_t argc, char** argv) {
 #endif  // __QNX__
 
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
+    main_namespace::LifeCycle::instance()->StopComponents();
+    DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
 
@@ -207,6 +209,8 @@ int32_t main(int32_t argc, char** argv) {
   LOG4CXX_INFO(logger, "Stopping application due to signal caught");
 
   main_namespace::LifeCycle::instance()->StopComponents();
+
+  LOG4CXX_INFO(logger, "Application successfully stopped");
   DEINIT_LOGGER();
 
   return EXIT_SUCCESS;

@@ -40,7 +40,7 @@ TEST(GeneratedInterfaceDbusTests, TestDbusDeserialization) {
     ASSERT_TRUE(dm.is_valid());
     ASSERT_EQ(dm.targetID, 22);
     ASSERT_EQ(dm.messageLength, 42);
-    ASSERT_EQ(dm.messageData.size(), 1);
+    ASSERT_EQ(dm.messageData.size(), 1u);
   }
 }
 
@@ -63,8 +63,8 @@ TEST(GeneratedInterfaceDbusTests, TestDbusSerializationDeserialization) {
     ASSERT_TRUE(dm.is_valid());
     ASSERT_EQ(dm.targetID, 70);
     ASSERT_EQ(dm.messageLength, 1);
-    ASSERT_EQ(dm.messageData.size(), 1);
-    ASSERT_EQ(dm.messageData[0], 42);
+    ASSERT_EQ(dm.messageData.size(), 1u);
+    ASSERT_EQ(dm.messageData[0], 42u);
   }
 }
 

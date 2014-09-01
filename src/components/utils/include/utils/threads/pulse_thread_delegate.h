@@ -71,6 +71,12 @@ class PulseThreadDelegate : public ThreadDelegate {
   */
   virtual void OnPulse() = 0;
 
+/**
+  * Finalizes thread
+  * Can free resources
+  */
+  virtual void Finalize() {}
+
  private:
   enum {PULSE_CODE = _PULSE_CODE_MINAVAIL + 1};
 

@@ -174,6 +174,22 @@ bool RemoveDirectory(const std::string& directory_name,
 bool IsAccessible(const std::string& name, int32_t how);
 
 /**
+  * @brief Check access rights for writing
+  *
+  * @param name path to file or folder
+  * @return returns true if has access rights.
+  */
+bool IsWritingAllowed(const std::string& name);
+
+/**
+  * @brief Check access rights for reading
+  *
+  * @param name path to file.
+  * @return returns true if file has access rights.
+  */
+bool IsReadingAllowed(const std::string& name);
+
+/**
   * @brief Lists all files in given directory
   *
   * @param name path to directory.

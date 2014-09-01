@@ -81,7 +81,8 @@ bool operator!=(const policy_table::ApplicationParams& first,
  */
 struct CheckAppPolicy {
     CheckAppPolicy(PolicyManagerImpl* pm,
-                   const utils::SharedPtr<policy_table::Table> update);
+                   const utils::SharedPtr<policy_table::Table> update,
+                   const utils::SharedPtr<policy_table::Table> snapshot);
     bool HasSameGroups(const AppPoliciesValueType& app_policy,
                        AppPermissions* perms) const;
     bool IsNewAppication(const std::string& application_id) const;
@@ -93,8 +94,15 @@ struct CheckAppPolicy {
                         const AppPoliciesValueType& app_policy) const;
     bool operator()(const AppPoliciesValueType& app_policy);
   private:
+    /**
+     * @brief Allows to check if appropriate group requires any consent.
+     * @param group_name the group for which consent will be checked.
+     * @return true if consent is required, false otherwise.
+     */
+    bool IsConsentRequired(const std::string& group_name) const;
     PolicyManagerImpl* pm_;
     const utils::SharedPtr<policy_table::Table> update_;
+    const utils::SharedPtr<policy_table::Table> snapshot_;
 };
 
 /*
@@ -195,6 +203,15 @@ FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
  */
 FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
                             const FunctionalGroupIDs& second);
+
+/**
+ * @brief Unwrap application policies from predefined values to specific policy
+ * values, i.e. if application has "default", it will be assigned default
+ * policies
+ * @param app_policies Application policies to unwrap
+ * @return true, if succeded, otherwise - false
+ */
+bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies);
 
 }
 

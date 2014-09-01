@@ -96,8 +96,7 @@ ApplicationImpl::ApplicationImpl(
       audio_streaming_state_(mobile_api::AudioStreamingState::NOT_AUDIBLE),
       device_(0),
       usage_report_(mobile_app_id, statistics_manager),
-      protocol_version_(ProtocolVersion::kV3),
-      alert_in_background_(false) {
+      protocol_version_(ProtocolVersion::kV3) {
 
   cmd_number_to_time_limits_[mobile_apis::FunctionID::ReadDIDID] =
       {date_time::DateTime::getCurrentTime(), 0};
@@ -321,14 +320,6 @@ void ApplicationImpl::set_grammar_id(uint32_t value) {
   grammar_id_ = value;
 }
 
-bool ApplicationImpl::alert_in_background() const {
-  return alert_in_background_;
-}
-
-void ApplicationImpl::set_alert_in_background(bool state_of_alert) {
-  alert_in_background_ = state_of_alert;
-}
-
 bool ApplicationImpl::has_been_activated() const {
   return has_been_activated_;
 }
@@ -451,9 +442,17 @@ bool ApplicationImpl::IsCommandLimitsExceeded(
     } else if (mobile_apis::FunctionID::GetVehicleDataID == cmd_id) {
       frequency_restrictions =
           profile::Profile::instance()->get_vehicle_data_frequency();
+    } else {
+      LOG4CXX_INFO(logger_, "No restrictions for request");
+      return false;
     }
 
-    if (current.tv_sec <= limit.first.tv_sec + frequency_restrictions.second) {
+    LOG4CXX_INFO(logger_, "Time Info: " <<
+                 "\n Current: " << current.tv_sec <<
+                 "\n Limit: (" << limit.first.tv_sec << "," << limit.second << ")"
+                 "\n frequency_restrictions: (" << frequency_restrictions.first << "," << frequency_restrictions.second << ")"
+                 );
+    if (current.tv_sec < limit.first.tv_sec + frequency_restrictions.second) {
       if (limit.second < frequency_restrictions.first) {
         ++limit.second;
         return false;
@@ -591,6 +590,39 @@ void ApplicationImpl::LoadPersistentFiles() {
                              << " File type is " << file.file_type);
       AddFile(file);
     }
+  }
+}
+
+void ApplicationImpl::SubscribeToSoftButtons(int32_t cmd_id,
+                                        const SoftButtonID& softbuttons_id) {
+  sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
+  if (static_cast<int32_t>(mobile_apis::FunctionID::ScrollableMessageID) == cmd_id) {
+    CommandSoftButtonID::iterator it = cmd_softbuttonid_.find(cmd_id);
+    if (cmd_softbuttonid_.end() == it) {
+      cmd_softbuttonid_[cmd_id] = softbuttons_id;
+    }
+  } else {
+    cmd_softbuttonid_[cmd_id] = softbuttons_id;
+  }
+}
+
+
+bool ApplicationImpl::IsSubscribedToSoftButton(const uint32_t softbutton_id) {
+  sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
+  CommandSoftButtonID::iterator it = cmd_softbuttonid_.begin();
+  for (; it != cmd_softbuttonid_.end(); ++it) {
+    if((it->second).find(softbutton_id) != (it->second).end()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
+  sync_primitives::AutoLock lock(cmd_softbuttonid_lock_);
+  CommandSoftButtonID::iterator it = cmd_softbuttonid_.find(cmd_id);
+  if(it != cmd_softbuttonid_.end()) {
+    cmd_softbuttonid_.erase(it);
   }
 }
 

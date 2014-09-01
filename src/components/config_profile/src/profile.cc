@@ -89,9 +89,15 @@ const char* kVideoStreamFileKey = "VideoStreamFile";
 const char* kAudioStreamFileKey = "AudioStreamFile";
 
 #ifdef CUSTOMER_PASA
-const char* kLoggerConfigFileKey = "LoggerConfigFileKey";
+const char* kLoggerSection = "LOGGING";
+const char* kAudioMQPath = "MQAudioPath";
+const char* kLoggerConfigFileKey = "LoggerConfigFile";
 const char* kRemoteLoggingFlagFileKey = "RemoteLoggingFlagFile";
 const char* kRemoteLoggingFlagFilePathKey = "RemoteLoggingFlagFilePath";
+const char* kTargetLogFileHomeDirKey = "TargetLogFileHomeDir";
+const char* kTargetLogFileNamePatternKey = "TargetLogFileNamePattern";
+const char* kTargetBootCountFileKey = "TargetBootCountFile";
+const char* kTargetTmpDirKey = "TargetTmpDir";
 #endif
 
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";
@@ -134,11 +140,13 @@ const char* kAckMQKey = "AckMQ";
 const char* kApplicationListUpdateTimeoutKey = "ApplicationListUpdateTimeout";
 const char* kReadDIDFrequencykey = "ReadDIDRequest";
 const char* kGetVehicleDataFrequencyKey = "GetVehicleDataRequest";
-const char* kLegacyProtocolKey = "LegacyProtocol";
-const char* kHubProtocolKey = "HubProtocol";
+const char* kLegacyProtocolMaskKey = "LegacyProtocol";
+const char* kHubProtocolMaskKey = "HubProtocol";
+const char* kPoolProtocolMaskKey = "PoolProtocol";
 const char* kIAPSystemConfigKey = "IAPSystemConfig";
 const char* kIAP2SystemConfigKey = "IAP2SystemConfig";
 const char* kIAP2HubConnectAttemptskey = "IAP2HubConnectAttempts";
+const char* kIAPHubConnectionWaitTimeoutKey = "ConnectionWaitTimeout";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -148,9 +156,14 @@ const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
 const char* kDefaultTtsDelimiter = ",";
 #ifdef CUSTOMER_PASA
-const char* kDefaultMQName = "/to_mobile";
+const char* kDefaultMQName = "/dev/mqueue/AppLinkAudioPass";
 const char* kDefaultLog4cxxConfig = "/fs/mp/etc/AppLink/log4cxx.properties";
-const char* kDefaultRemoteLoggingFlagFile = "";
+const char* kDefaultRemoteLoggingFlagFile = "log/capturelog.evt";
+const char* kDefaultRemoteLoggingFlagFilePath = "/fs/usb0/";
+const char* kDefaultTargetLogFileHomeDir = "/fs/rwdata/logs/";
+const char* kDefaultTargetLogFileNamePattern ="smartdevicelink.log";
+const char* kDefaultTargetBootCountFile = "/fs/rwdata/.flags/boot_count";
+const char* kDefaultTargetTmpDir = "/fs/tmpfs";
 #endif
 const char* kDefaultMmeDatabaseName = "/dev/qdb/mediaservice_db";
 const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
@@ -158,8 +171,9 @@ const char* kDefaultAckMQ = "/dev/mqueue/FromSDLCoreUSBAdapter";
 const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
 const char* kDefaultRecordingFileName = "record.wav";
 const char* kDefaultThreadPoolSize = "ThreadPoolSize";
-const char* kDefaultLegacyProtocol = "com.ford.sync.prot0";
-const char* kDefaultHubProtocol = "com.smartdevicelink.prot0";
+const char* kDefaultLegacyProtocolMask = "com.ford.sync.prot[0-29]";
+const char* kDefaultHubProtocolMask = "com.smartdevicelink.prot0";
+const char* kDefaultPoolProtocolMask = "com.smartdevicelink.prot[1-29]";
 const char* kDefaultIAPSystemConfig = "/fs/mp/etc/mm/ipod.cfg";
 const char* kDefaultIAP2SystemConfig = "/fs/mp/etc/mm/iap2.cfg";
 
@@ -187,6 +201,7 @@ const std::pair<uint32_t, uint32_t> kReadDIDFrequency = {5 , 1};
 const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = {5 , 1};
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
+const int kDefaultIAPHubConnectionWaitTimeout = 10;
 
 }  // namespace
 
@@ -237,9 +252,14 @@ Profile::Profile()
     transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort),
     tts_delimiter_(kDefaultTtsDelimiter),
 #ifdef CUSTOMER_PASA
-    mq_name_(kDefaultMQName),
+    audio_mq_path_(kDefaultMQName),
     log4cxx_config_file_(kDefaultLog4cxxConfig),
     remote_logging_flag_file_(kDefaultRemoteLoggingFlagFile),
+    remote_logging_flag_file_path_(kDefaultRemoteLoggingFlagFilePath),
+    target_log_file_home_dir_(kDefaultTargetLogFileHomeDir),
+    target_log_file_name_pattern_(kDefaultTargetLogFileNamePattern),
+    target_boot_count_file_(kDefaultTargetBootCountFile),
+    target_tmp_dir_(kDefaultTargetTmpDir),
 #endif
     mme_db_name_(kDefaultMmeDatabaseName),
     event_mq_name_(kDefaultEventMQ),
@@ -247,11 +267,13 @@ Profile::Profile()
     recording_file_source_(kDefaultRecordingFileSourceName),
     recording_file_name_(kDefaultRecordingFileName),
     application_list_update_timeout_(kDefaultApplicationListUpdateTimeout),
-    iap_legacy_protocol_(kDefaultLegacyProtocol),
-    iap_hub_protocol_(kDefaultHubProtocol),
+    iap_legacy_protocol_mask_(kDefaultLegacyProtocolMask),
+    iap_hub_protocol_mask_(kDefaultHubProtocolMask),
+    iap_pool_protocol_mask_(kDefaultPoolProtocolMask),
     iap_system_config_(kDefaultIAPSystemConfig),
     iap2_system_config_(kDefaultIAP2SystemConfig),
-    iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts) {
+    iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts),
+    iap_hub_connection_wait_timeout_(kDefaultIAPHubConnectionWaitTimeout) {
 }
 
 Profile::~Profile() {
@@ -387,8 +409,9 @@ const std::string& Profile::audio_stream_file() const {
 }
 
 #ifdef CUSTOMER_PASA
-const std::string &profile::Profile::mq_name() const {
-  return mq_name_;
+const std::string &profile::Profile::audio_mq_path() const {
+  LOG4CXX_INFO(logger_, "Default MQ name " << audio_mq_path_);
+  return audio_mq_path_;
 }
 
 const std::string& Profile::log4cxx_config_file() const {
@@ -400,6 +423,22 @@ const std::string& Profile::remote_logging_flag_file() const {
 
 const std::string& Profile::remote_logging_flag_file_path() const {
   return remote_logging_flag_file_path_;
+}
+
+const std::string& Profile::target_log_file_home_dir() const {
+  return target_log_file_home_dir_;
+}
+
+const std::string& Profile::target_log_file_name_pattern() const {
+  return target_log_file_name_pattern_;
+}
+
+const std::string& Profile::target_boot_count_file() const {
+  return target_boot_count_file_;
+}
+
+const std::string& Profile::target_tmp_dir() const {
+  return target_tmp_dir_;
 }
 #endif
 
@@ -507,12 +546,16 @@ uint32_t Profile::thread_pool_size() const  {
   return max_thread_pool_size_;
 }
 
-const std::string& Profile::iap_legacy_protocol() const {
-  return iap_legacy_protocol_;
+const std::string& Profile::iap_legacy_protocol_mask() const {
+  return iap_legacy_protocol_mask_;
 }
 
-const std::string& Profile::iap_hub_protocol() const {
-  return iap_hub_protocol_;
+const std::string& Profile::iap_hub_protocol_mask() const {
+  return iap_hub_protocol_mask_;
+}
+
+const std::string& Profile::iap_pool_protocol_mask() const {
+  return iap_pool_protocol_mask_;
 }
 
 const std::string& Profile::iap_system_config() const {
@@ -525,6 +568,10 @@ const std::string& Profile::iap2_system_config() const {
 
 int Profile::iap2_hub_connect_attempts() const {
   return iap2_hub_connect_attempts_;
+}
+
+int Profile::iap_hub_connection_wait_timeout() const {
+  return iap_hub_connection_wait_timeout_;
 }
 
 void Profile::UpdateValues() {
@@ -696,25 +743,55 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
                       kMediaManagerSection);
 
 #ifdef CUSTOMER_PASA
+    ReadStringValue(&audio_mq_path_, "", kMediaManagerSection,
+                    kAudioMQPath);
+
+    LOG_UPDATED_VALUE(log4cxx_config_file_, kAudioMQPath,
+                      kMediaManagerSection);
     // log4cxx config file
-    ReadStringValue(&log4cxx_config_file_, "", kMainSection,
+    ReadStringValue(&log4cxx_config_file_, "", kLoggerSection,
                     kLoggerConfigFileKey);
 
     LOG_UPDATED_VALUE(log4cxx_config_file_, kLoggerConfigFileKey,
-                      kMainSection);
+                      kLoggerSection);
     // Remote logging flag file
-    ReadStringValue(&remote_logging_flag_file_, "", kMainSection,
+    ReadStringValue(&remote_logging_flag_file_, "", kLoggerSection,
                 kRemoteLoggingFlagFileKey);
 
     LOG_UPDATED_VALUE(remote_logging_flag_file_, kRemoteLoggingFlagFileKey,
-                      kMainSection);
+                      kLoggerSection);
 
     // Remote logging flag file
-    ReadStringValue(&remote_logging_flag_file_path_, "", kMainSection,
+    ReadStringValue(&remote_logging_flag_file_path_, "", kLoggerSection,
                 kRemoteLoggingFlagFilePathKey);
 
     LOG_UPDATED_VALUE(remote_logging_flag_file_path_, kRemoteLoggingFlagFilePathKey,
+                      kLoggerSection);
+
+    ReadStringValue(&target_log_file_home_dir_, "", kLoggerSection,
+                    kTargetLogFileHomeDirKey);
+
+    LOG_UPDATED_VALUE(target_log_file_home_dir_, kTargetLogFileHomeDirKey,
+                      kLoggerSection);
+
+    ReadStringValue(&target_log_file_name_pattern_, "", kLoggerSection,
+                    kTargetLogFileNamePatternKey);
+
+    LOG_UPDATED_VALUE(target_log_file_name_pattern_, kTargetLogFileNamePatternKey,
+                      kLoggerSection);
+
+    ReadStringValue(&target_boot_count_file_, "", kMainSection,
+                    kTargetBootCountFileKey);
+
+    LOG_UPDATED_VALUE(target_boot_count_file_, kTargetBootCountFileKey,
                       kMainSection);
+
+    ReadStringValue(&target_tmp_dir_, "", kMainSection,
+                    kTargetTmpDirKey);
+
+    LOG_UPDATED_VALUE(target_tmp_dir_, kTargetTmpDirKey,
+                      kMainSection);
+
 #endif
 
   // Mixing audio parameter
@@ -1078,20 +1155,29 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
   if (max_thread_pool_size_ > kDefaultMaxThreadPoolSize) {
     max_thread_pool_size_ = kDefaultMaxThreadPoolSize;
   }
+  LOG_UPDATED_VALUE(max_thread_pool_size_,
+      kDefaultMaxThreadPoolSize, kApplicationManagerSection);
 
-  ReadStringValue(&iap_legacy_protocol_,
-      kDefaultLegacyProtocol,
+  ReadStringValue(&iap_legacy_protocol_mask_,
+      kDefaultLegacyProtocolMask,
       kIAPSection,
-      kLegacyProtocolKey);
+      kLegacyProtocolMaskKey);
 
-  LOG_UPDATED_VALUE(iap_legacy_protocol_, kLegacyProtocolKey, kIAPSection);
+  LOG_UPDATED_VALUE(iap_legacy_protocol_mask_, kLegacyProtocolMaskKey, kIAPSection);
 
-  ReadStringValue(&iap_hub_protocol_,
-      kDefaultHubProtocol,
+  ReadStringValue(&iap_hub_protocol_mask_,
+      kDefaultHubProtocolMask,
       kIAPSection,
-      kHubProtocolKey);
+      kHubProtocolMaskKey);
 
-  LOG_UPDATED_VALUE(iap_hub_protocol_, kHubProtocolKey, kIAPSection);
+  LOG_UPDATED_VALUE(iap_hub_protocol_mask_, kHubProtocolMaskKey, kIAPSection);
+
+  ReadStringValue(&iap_pool_protocol_mask_,
+      kDefaultPoolProtocolMask,
+      kIAPSection,
+      kPoolProtocolMaskKey);
+
+  LOG_UPDATED_VALUE(iap_pool_protocol_mask_, kPoolProtocolMaskKey, kIAPSection);
 
   ReadStringValue(&iap_system_config_,
       kDefaultIAPSystemConfig,
@@ -1113,6 +1199,14 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
       kIAP2HubConnectAttemptskey);
 
   LOG_UPDATED_VALUE(iap2_hub_connect_attempts_, kIAP2HubConnectAttemptskey, kIAPSection);
+
+  ReadIntValue(&iap_hub_connection_wait_timeout_,
+      kDefaultIAPHubConnectionWaitTimeout,
+      kIAPSection,
+      kIAPHubConnectionWaitTimeoutKey);
+
+  LOG_UPDATED_VALUE(iap_hub_connection_wait_timeout_,
+                    kIAPHubConnectionWaitTimeoutKey, kIAPSection);
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,

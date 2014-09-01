@@ -84,10 +84,10 @@ namespace transport_adapter {
 
 void IpodPASAConnection::printBufferInHex(uint8_t *buf, int len)
 {
-	printf("(hex)");
-	for (int i=0; i<len; i++)
-		printf(" %02X", buf[i]);
-	printf("\n");
+  printf("(hex)");
+  for (int i=0; i<len; i++)
+    printf(" %02X", buf[i]);
+  printf("\n");
 }
 
 
@@ -340,7 +340,7 @@ bool IpodPASAConnection::Send() {
   bool frame_sent = false;
   size_t offset = 0;
   while (!frames_to_send.empty()) {
-    LOG4CXX_INFO(logger_, "frames_to_send is not empty" << pthread_self() << ")");
+    LOG4CXX_INFO(logger_, "frames_to_send is not empty " << pthread_self() << ")");
     RawMessagePtr frame = frames_to_send.front();
 
     if (0 != frame)
@@ -403,33 +403,33 @@ bool IpodPASAConnection::Send() {
 
 int IpodPASAConnection::sendEAFData(ipod_hdl_t *fd, int ssid, uint8_t *buf, int len)
 {
-	int result = 0;
-	int retry = 0;
+  int result = 0;
+  int retry = 0;
 
-	do
-	{
-		if ((result = ipod_eaf_send(fd, ssid, buf, len)) == -1)
-		{
-			if (errno == EIO)
-			{
-				delay(100);
+  do
+  {
+    if ((result = ipod_eaf_send(fd, ssid, buf, len)) == -1)
+    {
+      if (errno == EIO)
+      {
+        delay(100);
                 LOG4CXX_WARN(logger_, "Retrying to send EAF data again");
-				retry++;
-			}
-			else
-			{
+        retry++;
+      }
+      else
+      {
                 LOG4CXX_WARN(logger_, "ipod_eaf_send failure: " << strerror(errno));
-				return -1;
-			}
-		}
-		else
-		{
-			return 0;
-		}
+        return -1;
+      }
+    }
+    else
+    {
+      return 0;
+    }
 
-	}while (retry < MAX_EAF_SEND_RETRY);
+  }while (retry < MAX_EAF_SEND_RETRY);
 
-	return -1;
+  return -1;
 }
 
 void* ReceiveEAFEvents(void* arg)
@@ -442,7 +442,7 @@ void* ReceiveEAFEvents(void* arg)
   connection->HandleEAFEvents();
 
     LOG4CXX_TRACE_EXIT(logger_);
-	return (NULL);
+  return (NULL);
 }
 
 
@@ -502,7 +502,7 @@ bool IpodPASAConnection::Establish(ConnectError** error) {
           else
           {
               pthread_create(&mEAFEventThread, 0, &ReceiveEAFEvents, this);
-              pthread_setname_np(mEAFEventThread, "EAF Event Thread");   
+              pthread_setname_np(mEAFEventThread, "EAF Event Thread");
               ret = true;
           }
       }
@@ -575,7 +575,7 @@ void IpodPASAConnection::HandleEAFEvents() {
                               case IPOD_EAF_EVENT_SESSION_REQ:
                               {
                                   LOG4CXX_INFO(logger_, "IPOD_EAF_EVENT_SESSION_REQ - protid " << events[i].eventinfo);
-    
+
                                   if (ipod_eaf_session_accept(hdl, events[i].eventinfo, 0) == -1)
                                   {
                                       LOG4CXX_ERROR_WITH_ERRNO(logger_, "ipod_eaf_session_accept failure: " << strerror(errno));
@@ -603,26 +603,26 @@ void IpodPASAConnection::HandleEAFEvents() {
                                   if (sessionid != -1)
                                   {
                                       LOG4CXX_INFO(logger_, "IPOD_EAF_EVENT_SESSION_DATA - ssid " << events[i].eventinfo);
-    
+
                                       uint8_t frameData[MAX_EAF_BUFF_SIZE];
                                       int frameSize = ipod_eaf_recv(hdl,
                                                                     events[i].eventinfo,
                                                                     frameData,
                                                                     MAX_EAF_BUFF_SIZE);
-    
+
                                       if (frameSize > 0)
                                       {
                                           //SDLLOG(ZONE_INFO, "Received Frame Packet of size " << frameData->length);
                                           //SDLLOG(ZONE_INFO, "Received Frame Packet: "); printBufferInHex(frameData->data, frameData->length);
-    
+
                                           RawMessagePtr frame(
                                               new protocol_handler::RawMessage(0, 0, frameData, static_cast<size_t>(frameSize)));
                                           controller_->DataReceiveDone(device_handle(), application_handle(),
                                                                          frame);
                                           LOG4CXX_INFO(logger_, "Received Frame Packet of size " << frameSize);
-    
+
                                           //SDLLOG(ZONE_INFO, "Received Frame Packet: "); CAdapter->printBufferInHex(frameData, frameSize);
-    
+
                                       }
                                   }
                               }

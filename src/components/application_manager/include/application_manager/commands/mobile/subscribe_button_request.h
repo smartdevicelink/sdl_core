@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_SUBSCRIBE_BUTTON_REQUEST_H_
 
 #include "application_manager/commands/command_request_impl.h"
+#include "application_manager/application_impl.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -64,6 +65,20 @@ class SubscribeButtonRequest : public CommandRequestImpl {
   virtual void Run();
 
  private:
+
+  /**
+   * @brief Checks if button subscription allowed. In case non-media
+   * application trying to subscribe on buttons(tune, seek) negative result will
+   * be returned
+   *
+   * @param app     Application requested subscription
+   * @param btn_id  Button to be subscribe
+   *
+   * @return TRUE on success, otherwise false
+   **/
+  bool IsSubscribtionAllowed(ApplicationSharedPtr app,
+                             const mobile_apis::ButtonName::eType btn_id);
+
   DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
 };
 

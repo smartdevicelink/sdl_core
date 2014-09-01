@@ -160,6 +160,14 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const policy_table::NumberOfNotificationsPerMinute& notifications);
     bool SaveMessageType(const std::string& type);
     bool SaveLanguage(const std::string& code);
+
+    /**
+     * @brief Allows to generate hash from the specified string.
+     * The djb2 algorithm uses for hash generation.
+     * @param str_to_hash - the string from which hash should be generated.
+     * @return integer hash for the specified string.
+     */
+    unsigned long GenerateHash(const std::string& str_to_hash);
 };
 }  //  namespace policy
 

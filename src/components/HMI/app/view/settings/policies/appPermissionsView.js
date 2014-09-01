@@ -68,7 +68,17 @@ SDL.AppPermissionsView = Em.ContainerView.create( {
 
             SDL.SettingsController.onState(element);
 
-            FFW.BasicCommunication.OnAppPermissionConsent(SDL.SDLController.getApplicationModel(SDL.AppPermissionsView.currentAppId).allowedFunctions, "GUI", SDL.AppPermissionsView.currentAppId);
+            var permissions = [];
+
+            for (var i = 0; i < SDL.AppPermissionsView.appList.list._childViews.length; i++) {
+                permissions.push({
+                    "name": SDL.AppPermissionsView.appList.list._childViews[i].name,
+                    "id": SDL.AppPermissionsView.appList.list._childViews[i].id,
+                    "allowed": SDL.AppPermissionsView.appList.list._childViews[i].allowed
+                });
+            }
+
+            FFW.BasicCommunication.OnAppPermissionConsent(permissions, "GUI", SDL.AppPermissionsView.currentAppId);
 
             SDL.AppPermissionsView.currentAppId = null;
         },
@@ -80,24 +90,20 @@ SDL.AppPermissionsView = Em.ContainerView.create( {
     /**
      * Function to add application to application list
      */
-    update: function(appID) {
+    update: function(message, appID) {
 
-        this.currentAppId = appID;
+        SDL.AppPermissionsView.currentAppId = appID;
 
         this.appList.items = [];
 
-        var i,
-            text = '',
-            app = SDL.SDLController.getApplicationModel(appID).allowedFunctions;
+        for (var i = 0; i < message.length; i++) {
 
-        for (i = 0; i < app.length; i++) {
+            var text = " - Undefined";
 
-            if (app[i].allowed === true) {
+            if (message[i].allowed === true) {
                 text = " - Allowed";
-            } else if (app[i].allowed === false) {
+            } else if (message[i].allowed === false) {
                 text = " - Not allowed";
-            } else {
-                text = " - Undefined";
             }
 
             this.appList.items.push({
@@ -105,10 +111,10 @@ SDL.AppPermissionsView = Em.ContainerView.create( {
                 params: {
                     action: 'changeAppPermission',
                     target: 'SDL.SettingsController',
-                    text: app[i].name + text,
-                    name: app[i].name,
-                    allowed: app[i].allowed,
-                    id: app[i].id,
+                    text: message[i].name + text,
+                    name: message[i].name,
+                    allowed: message[i].allowed,
+                    id: message[i].id,
                     appID: appID
                 }
             });

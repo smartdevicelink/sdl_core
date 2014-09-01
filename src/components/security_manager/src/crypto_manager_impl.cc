@@ -38,7 +38,8 @@
 #include "utils/logger.h"
 #include "utils/atomic.h"
 
-#define TLS1_1_MINIMAL_VERSION 0x1000100f
+#define TLS1_1_MINIMAL_VERSION            0x1000100fL
+#define CONST_SSL_METHOD_MINIMAL_VERSION  0x00909000L
 
 namespace security_manager {
 
@@ -65,7 +66,7 @@ bool CryptoManagerImpl::Init(Mode mode,
 
   mode_ = mode;
   const bool is_server = (mode == SERVER);
-#if OPENSSL_VERSION_NUMBER < TLS1_1_MINIMAL_VERSION
+#if OPENSSL_VERSION_NUMBER < CONST_SSL_METHOD_MINIMAL_VERSION
   SSL_METHOD *method;
 #else
   const SSL_METHOD *method;

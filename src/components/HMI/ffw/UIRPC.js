@@ -269,6 +269,10 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.ChangeRegistration":
                 {
 
+                    if (request.params.appName) {
+                        SDL.SDLController.getApplicationModel(request.params.appID).set('appName', request.params.appName);
+                    }
+
                     SDL.SDLModel.changeRegistrationUI(request.params.language, request.params.appID);
                     this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 
@@ -663,7 +667,7 @@ FFW.UI = FFW.RPCObserver.create({
                                             "doublePressAvailable": false
                                         }
                                     },
-                                    "numCustomPresetsAvailable": 8
+                                    "numCustomPresetsAvailable": 10
                                 },
                                 "buttonCapabilities": [
                                     {
@@ -1191,7 +1195,7 @@ FFW.UI = FFW.RPCObserver.create({
                                         "doublePressAvailable": false
                                     }
                                 },
-                                "numCustomPresetsAvailable": 8
+                                "numCustomPresetsAvailable": 10
                             },
                             "audioPassThruCapabilities": {
                                 "samplingRate": "44KHZ",
@@ -1345,20 +1349,31 @@ FFW.UI = FFW.RPCObserver.create({
 
         Em.Logger.log("FFW.UI.AlertResponse");
 
-        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+        switch (resultCode) {
+            case SDL.SDLModel.resultCode["SUCCESS"]: {
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": id,
+                    "result": {
+                        "code": resultCode, // type (enum) from SDL protocol
+                        "method": 'UI.Alert'
+                    }
+                };
+                this.client.send(JSONMessage);
 
-            // send repsonse
-            var JSONMessage = {
-                "jsonrpc": "2.0",
-                "id": id,
-                "result": {
-                    "code": resultCode, // type (enum) from SDL protocol
-                    "method": 'UI.Alert'
-                }
-            };
-            this.client.send(JSONMessage);
-        } else {
-            this.sendError(resultCode, id, "UI.Alert", 'Alert request aborted.');
+                break;
+            }
+            case SDL.SDLModel.resultCode["ABORTED"]: {
+
+                this.sendError(resultCode, id, "UI.Alert", 'Alert request aborted.');
+                break;
+            }
+            case SDL.SDLModel.resultCode["REJECTED"]: {
+
+                this.sendError(resultCode, id, "UI.Alert", 'Another Alert is active.');
+                break;
+            }
         }
     },
 
@@ -1399,7 +1414,7 @@ FFW.UI = FFW.RPCObserver.create({
                 "id": sliderRequestID,
                 "error": {
                     "code": resultCode, // type (enum) from SDL protocol
-                    "message": 'Slider request aborted.',
+                    "message": 'Slider request ABORTED or TIMED OUT.',
                     "data": {
                         "method": 'UI.Slider'
                     }
