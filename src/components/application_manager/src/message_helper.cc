@@ -575,8 +575,13 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
        devices.end() != it; ++it) {
     const connection_handler::Device& d =
       static_cast<connection_handler::Device>(it->second);
-    list_so[index][strings::name] = d.user_friendly_name();
+    list_so[index][strings::name] = d.user_friendly_name();    
     list_so[index][strings::id] = it->second.device_handle();
+    policy::DeviceConsent device_consent =
+        policy::PolicyHandler::instance()->policy_manager()->
+        GetUserConsentForDevice(it->second.mac_address());
+    list_so[index][strings::isSDLAllowed] =
+        policy::DeviceConsent::kDeviceAllowed == device_consent ? true : false;
     ++index;
   }
   return device_list_so;
