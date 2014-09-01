@@ -213,16 +213,16 @@ SDL.SettingsController = Em.Object.create( {
         }
 
         if (str) {
-            SDL.PopUp.popupActivate(messages[0].textBody, SDL.SettingsController.OnAllowSDLFunctionality);
+            SDL.PopUp.create().appendTo('body').popupActivate(messages[0].textBody, SDL.SettingsController.OnAllowSDLFunctionality);
         } else {
-            SDL.PopUp.popupActivate('WARNING!!!!!!!!!!!!!! There is no text from SDL in GetUserFriendlyMessage for DataConsent parameter!!! Please allow the device...', SDL.SettingsController.OnAllowSDLFunctionality);
+            SDL.PopUp.create().appendTo('body').popupActivate('WARNING!!!!!!!!!!!!!! There is no text from SDL in GetUserFriendlyMessage for DataConsent parameter!!! Please allow the device...', SDL.SettingsController.OnAllowSDLFunctionality);
         }
 
     },
 
     userFriendlyMessagePopUp: function(appId, messageCode) {
 
-        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message)}, appId, messageCode);
+        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.create().appendTo('body').popupActivate(message)}, appId, messageCode);
     },
 
     simpleParseUserFriendlyMessageData: function (messages) {
@@ -250,7 +250,7 @@ SDL.SettingsController = Em.Object.create( {
 
 
         if (text) {
-            SDL.PopUp.popupActivate(text);
+            SDL.PopUp.create().appendTo('body').popupActivate(text);
         }
     },
 
