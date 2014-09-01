@@ -113,8 +113,8 @@ SDL.PopUp = Em.ContainerView.extend({
             this.callback(event.buttonAction);
         }
 
-
         this.set('callback', null);
+        this.remove();
     },
 
     popupActivate: function(message, callback) {
