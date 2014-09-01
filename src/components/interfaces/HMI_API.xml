@@ -1542,6 +1542,9 @@
   <param name="id" type="Integer" mandatory="true">
     <description>The ID of the device connected</description>
   </param>
+  <param name="isSDLAllowed" type="Boolean" mandatory="false">
+    <description>Sent by SDL in UpdateDeviceList. ’true’ – if device is allowed for PolicyTable Exchange; ‘false’ – if device is NOT allowed for PolicyTable Exchange </description>
+  </param>
 </struct>
 
 <!--IVI part-->
