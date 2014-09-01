@@ -235,6 +235,7 @@ bool AlertRequest::Validate(uint32_t app_id) {
   }
 
   //ProcessSoftButtons checks strings on the contents incorrect character
+
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
@@ -388,7 +389,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
         (*message_)[strings::msg_params][strings::tts_chunks];
     for (size_t i = 0; i < tts_chunks_array.length(); ++i) {
       str = tts_chunks_array[i][strings::text].asCharArray();
-      if (!CheckSyntax(str)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_chunks text syntax check failed");
         return false;
       }

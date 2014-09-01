@@ -79,6 +79,7 @@ void ShowConstantTBTRequest::Run() {
   }
 
   //ProcessSoftButtons checks strings on the contents incorrect character
+
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons(msg_params, app);
 

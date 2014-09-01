@@ -732,7 +732,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_ip != it_ip_end; ++it_ip) {
       str = (*it_ip)[strings::text].asCharArray();
-      if (!CheckSyntax(str)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid initial_prompt syntax check failed");
         return true;
       }
@@ -748,7 +748,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_hp != it_hp_end; ++it_hp) {
       str = (*it_hp)[strings::text].asCharArray();
-      if (!CheckSyntax(str)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
         return true;
       }
@@ -764,7 +764,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_tp != it_tp_end; ++it_tp) {
       str = (*it_tp)[strings::text].asCharArray();
-      if (!CheckSyntax(str)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
         return true;
       }

@@ -262,7 +262,7 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
 
     for (; it_ip != it_ip_end; ++it_ip) {
       str = (*it_ip)[strings::text].asCharArray();
-      if (!CheckSyntax(str)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid initial_prompt syntax check failed");
         return true;
       }

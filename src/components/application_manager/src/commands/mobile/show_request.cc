@@ -76,6 +76,7 @@ void ShowRequest::Run() {
    }
 
   //ProcessSoftButtons checks strings on the contents incorrect character
+
   mobile_apis::Result::eType processing_result = mobile_apis::Result::SUCCESS;
   if(((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) &&
       ((*message_)[strings::msg_params][strings::soft_buttons].length() > 0)) {

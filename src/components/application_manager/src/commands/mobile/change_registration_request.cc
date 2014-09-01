@@ -336,7 +336,7 @@ bool ChangeRegistrationRequest::IsWhiteSpaceExist() {
 
     for (; it_tn != it_tn_end; ++it_tn) {
       str = (*it_tn)[strings::text].asCharArray();
-      if (!CheckSyntax(str)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_name syntax check failed");
         return true;
       }

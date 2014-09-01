@@ -79,6 +79,7 @@ void ScrollableMessageRequest::Run() {
   }
 
   //ProcessSoftButtons checks strings on the contents incorrect character
+
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 

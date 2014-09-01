@@ -77,6 +77,7 @@ void AlertManeuverRequest::Run() {
   }
 
   //ProcessSoftButtons checks strings on the contents incorrect character
+
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
@@ -208,7 +209,7 @@ bool AlertManeuverRequest::IsWhiteSpaceExist() {
 
     for (; it_tc != it_tc_end; ++it_tc) {
       str = (*it_tc)[strings::text].asCharArray();
-      if (!CheckSyntax(str)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_chunks syntax check failed");
         return true;
       }
