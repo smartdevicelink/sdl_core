@@ -179,8 +179,11 @@ bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
   policy::PolicyManager* policy_manager =
       policy::PolicyHandler::instance()->policy_manager();
 
+  const std::string device_id =
+      MessageHelper::GetDeviceMacAddressForHandle(application->device());
+
   if (policy::DeviceConsent::kDeviceAllowed !=
-      policy_manager->GetUserConsentForDevice(application->device())) {
+      policy_manager->GetUserConsentForDevice(device_id)) {
     LOG4CXX_ERROR(logger_, "Resumption abort. Data consent wasn't allowed");
     return false;
   }
