@@ -60,10 +60,10 @@ void OnDriverDistractionNotification::Run() {
           .asInt());
   ApplicationManagerImpl::instance()->set_driver_distraction(state);
 
-  smart_objects::SmartObject* on_driver_distraction =
+  MessageSharedPtr on_driver_distraction =
       new smart_objects::SmartObject();
 
-  if (NULL == on_driver_distraction) {
+  if (false == on_driver_distraction.valid()) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
     return;
   }
