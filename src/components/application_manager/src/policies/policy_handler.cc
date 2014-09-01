@@ -892,6 +892,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     if (registration_in_progress) {
       StartPTExchange(true);
       registration_in_progress = false;
+
     }
     application_manager::ApplicationManagerImpl* app_manager =
         application_manager::ApplicationManagerImpl::instance();
