@@ -361,6 +361,7 @@ FFW.BasicCommunication = FFW.RPCObserver
             }
             if (notification.method == this.onSDLConsentNeededNotification) {
 
+                SDL.SettingsController.currentDeviceAllowance = notification.params.device;
                 FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.AllowSDLFunctionality, null, ["DataConsent"]);
             }
             if (notification.method == this.onResumeAudioSourceNotification) {
