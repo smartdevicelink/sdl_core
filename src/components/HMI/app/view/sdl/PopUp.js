@@ -32,9 +32,7 @@
  * @version 1.0
  */
 
-SDL.PopUp = Em.ContainerView.create({
-
-    elementId: 'PopUp',
+SDL.PopUp = Em.ContainerView.extend({
 
     classNames: 'PopUp',
 
@@ -67,7 +65,7 @@ SDL.PopUp = Em.ContainerView.create({
         classNames: 'button backButton',
         text: 'X',
         click: function () {
-            SDL.PopUp.set('active', false);
+            this._parentView.deactivate();
         },
         buttonAction: true,
         onDown: false,
@@ -115,8 +113,8 @@ SDL.PopUp = Em.ContainerView.create({
             this.callback(event.buttonAction);
         }
 
-
         this.set('callback', null);
+        this.remove();
     },
 
     popupActivate: function(message, callback) {
@@ -130,10 +128,11 @@ SDL.PopUp = Em.ContainerView.create({
             this.set('buttons', false);
         } else {
             this.set('buttons', true);
+            var self = this;
             this.timer = setTimeout(function(){
-                SDL.PopUp.deactivate();
+                self.deactivate();
             },
-            3000);
+            5000);
         }
 
         this.set('content', message);

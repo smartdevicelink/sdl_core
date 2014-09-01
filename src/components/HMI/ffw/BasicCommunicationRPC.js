@@ -274,7 +274,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                 Em.Logger.log("SDL.GetStatusUpdate: Response from SDL!");
 
-                SDL.PopUp.popupActivate(response.result);
+                SDL.PopUp.create().appendTo('body').popupActivate(response.result);
             }
 
             if (response.result.method == "SDL.GetURLS") {
@@ -315,7 +315,6 @@ FFW.BasicCommunication = FFW.RPCObserver
 
             if (notification.method == this.onStatusUpdateNotification) {
 
-                //SDL.PopUp.popupActivate(notification.status);
                 SDL.TTSPopUp.ActivateTTS(notification.params.status);
             }
 
@@ -403,7 +402,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                     var message = "Was found " + request.params.applications.length + " apps";
 
-                    SDL.PopUp.popupActivate(message);
+                    SDL.PopUp.create().appendTo('body').popupActivate(message);
 
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,

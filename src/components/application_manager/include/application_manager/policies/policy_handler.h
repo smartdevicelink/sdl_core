@@ -225,6 +225,20 @@ class PolicyHandler :
                                       bool is_allowed);
 
   /**
+   * @brief Allows to check consents for the connected device
+   * and send OnSDLConsentNeeded in case when device has no consent.
+   *
+   * @return true in case device has consent,  false otherwise.
+   */
+  virtual bool EnsureDeviceConsented();
+
+  /**
+   * @brief Allows to add new or update existed application during
+   * registration process
+   * @param the policy aplication id.
+   */
+  void AddApplication(const std::string& application_id);
+  /**
    * Checks whether application is revoked
    * @param app_id id application
    * @return true if application is revoked
@@ -276,6 +290,7 @@ private:
   utils::SharedPtr<PolicyEventObserver> event_observer_;
   bool on_ignition_check_done_;
   uint32_t last_activated_app_id_;
+  bool registration_in_progress;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI

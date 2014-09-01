@@ -101,13 +101,15 @@ class ResumeCtrl: public event_engine::EventObserver {
      * @brief Setup HmiLevel for application
      * Do routine of setting up hmi_level
      * @param application is application witch HMI Level is need to setup
-     * @hmi_level HMI Level is needed to setup
-     * @hmi_level AudioStreamingState is needed to setup
+     * @param hmi_level HMI Level is needed to setup
+     * @param hmi_level AudioStreamingState is needed to setup
+     * @param check_policy indicate if policy data consent must be verified
      * @return true if success, otherwise return false
      */
     bool SetupHMILevel(ApplicationSharedPtr application,
                        mobile_apis::HMILevel::eType hmi_level,
-                       mobile_apis::AudioStreamingState::eType audio_streaming_state);
+                       mobile_apis::AudioStreamingState::eType audio_streaming_state,
+                       bool check_policy = true);
 
     /**
      * @brief Set application HMI Level as saved

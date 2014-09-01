@@ -69,7 +69,6 @@ class PolicyManagerImpl : public PolicyManager {
     virtual bool ExceededDays(int days);
     virtual bool ExceededKilometers(int kilometers);
     virtual void IncrementIgnitionCycles();
-    virtual void CheckAppPolicyState(const std::string& application_id);
     virtual PolicyTableStatus GetPolicyTableStatus();
     virtual void ResetRetrySequence();
     virtual int NextRetryTimeout();
@@ -150,6 +149,7 @@ class PolicyManagerImpl : public PolicyManager {
     bool CanAppStealFocus(const std::string& app_id);
     void MarkUnpairedDevice(const std::string& device_id);
 
+    void AddApplication(const std::string& application_id);
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(
       const BinaryMessage& pt_content);
@@ -226,6 +226,31 @@ class PolicyManagerImpl : public PolicyManager {
      */
     PermissionConsent EnsureCorrectPermissionConsent(
         const PermissionConsent& permissions_to_check);
+
+    /**
+     * @brief Allows to process case when added application is not present in
+     * policy db.
+     * @param policy application id.
+     * @param cuuren consent for application's device.
+     */
+    void AddNewApplication(const std::string& application_id,
+                           DeviceConsent device_consent);
+
+    /**
+     * @brief Allows to process case when added application is already
+     * in policy db.
+     * @param policy application id.
+     * @param cuuren consent for application's device.
+     */
+    void AddExistedApplication(const std::string& application_id,
+                               DeviceConsent device_consent);
+
+    /**
+     * @brief Check if certain application already in policy db.
+     * @param policy application id.
+     * @return true if application presents false otherwise.
+     */
+    bool IsNewApplication(const std::string& application_id) const;
 
     PolicyListener* listener_;
     PolicyTable policy_table_;

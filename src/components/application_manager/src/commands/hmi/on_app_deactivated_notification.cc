@@ -101,6 +101,7 @@ void OnAppDeactivatedNotification::Run() {
             if (mobile_apis::HMILevel::eType::HMI_FULL == app->hmi_level() ||
                 mobile_apis::HMILevel::eType::HMI_LIMITED == app->hmi_level()) {
                 app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
+                MessageHelper::SendHMIStatusNotification(*app);
             }
           }
       }

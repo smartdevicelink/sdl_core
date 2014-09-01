@@ -162,12 +162,15 @@ bool ResumeCtrl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
       LOG4CXX_ERROR(logger_, "SetupDefaultHMILevel() Unable to load Policy ");
     }
   }
-  return SetupHMILevel(application, default_hmi, mobile_apis::AudioStreamingState::NOT_AUDIBLE);
+
+  return SetupHMILevel(application, default_hmi,
+                       mobile_apis::AudioStreamingState::NOT_AUDIBLE, false);
 }
 
 bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
                                mobile_apis::HMILevel::eType hmi_level,
-                               mobile_apis::AudioStreamingState::eType audio_streaming_state) {
+                               mobile_apis::AudioStreamingState::eType audio_streaming_state,
+                               bool check_policy) {
 
   if (false == application.valid()) {
     LOG4CXX_ERROR(logger_, "SetupHMILevel() application pointer in invalid");
@@ -178,8 +181,14 @@ bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
 #endif
   policy::PolicyManager* policy_manager =
       policy::PolicyHandler::instance()->policy_manager();
-  if (0 == policy_manager->IsConsentNeeded(application->mobile_app_id()->asString())) {
+
+  const std::string device_id =
+      MessageHelper::GetDeviceMacAddressForHandle(application->device());
+
+  if ((true == check_policy) && (policy::DeviceConsent::kDeviceAllowed !=
+      policy_manager->GetUserConsentForDevice(device_id))) {
     LOG4CXX_ERROR(logger_, "Resumption abort. Data consent wasn't allowed");
+    SetupDefaultHMILevel(application);
     return false;
   }
 
@@ -561,6 +570,7 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
       if (hash == saved_hash) {
         RestoreApplicationData(application);
       }
+
       application->UpdateHash();
       if (!timer_.isRunning() && accessor.applications().size() > 1) {
         RestoreApplicationHMILevel(application);

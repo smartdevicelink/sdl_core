@@ -991,7 +991,7 @@ SDL.SDLModel = Em.Object.create({
         SDL.SDLController.registerApplication(params.application, applicationType);
 
         if (SDL.SDLModel.unRegisteredApps.indexOf(params.application.appID) >= 0) {
-            setTimeout(function(){ SDL.PopUp.popupActivate("Connection with " + params.application.appName + "  is re-established.")}, 1000);
+            setTimeout(function(){ SDL.PopUp.create().appendTo('body').popupActivate("Connection with " + params.application.appName + "  is re-established.")}, 1000);
             this.unRegisteredApps.pop(params.application.appID);
         }
     },
@@ -1007,7 +1007,7 @@ SDL.SDLModel = Em.Object.create({
         if (SDL.SDLController.getApplicationModel(params.appID)) {
 
             if (params.unexpectedDisconnect) {
-                SDL.PopUp.popupActivate("The connection with the " + SDL.SDLController.getApplicationModel(params.appID).appName + " was unexpectedly lost.");
+                SDL.PopUp.create().appendTo('body').popupActivate("The connection with the " + SDL.SDLController.getApplicationModel(params.appID).appName + " was unexpectedly lost.");
                 this.unRegisteredApps.push(params.appID);
             }
 
@@ -1110,21 +1110,6 @@ SDL.SDLModel = Em.Object.create({
             } else {
 
                 exist = false;
-            }
-        }
-
-        var dev = SDL.SDLModel.connectedDevices;
-        for (var key in dev) {
-
-            if (dev.hasOwnProperty(key)) {
-                if (params.deviceList.filterProperty("id", parseInt(key)).length == 0) {
-
-                    if (SDL.PopUp.popUpId == dev[key].sdlFunctionality.popUpId) {
-                        SDL.PopUp.deactivate();
-                    }
-
-                    delete dev[key];
-                }
             }
         }
 

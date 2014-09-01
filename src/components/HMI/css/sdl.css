@@ -666,7 +666,7 @@
 	height: 20px;
 	padding: 10px;
 }
-#PopUp.PopUp{
+.PopUp{
     left: 200px;
     width: 400px;
     height: 245px;
@@ -678,7 +678,7 @@
     border-radius: 6px;
 }
 
-#PopUp .text{
+.PopUp .text{
     top: 41px;
     left: 5px;
     width: 390px;
@@ -690,28 +690,28 @@
     text-overflow: ellipsis;
 }
 
-#PopUp .OkButton{
+.PopUp .OkButton{
     top: 190px;
     left: 5px;
     width: 190px;
     border: 1px solid #393939;
 }
 
-#PopUp .OkButton span{
+.PopUp .OkButton span{
     font-size: 20px;
     line-height: 50px;
     cursor: pointer;
     margin-left: 82px;
 }
 
-#PopUp .CancelButton{
+.PopUp .CancelButton{
     top: 190px;
     left: 205px;
     width: 190px;
     border: 1px solid #393939;
 }
 
-#PopUp .CancelButton span{
+.PopUp .CancelButton span{
     font-size: 20px;
     line-height: 50px;
     cursor: pointer;

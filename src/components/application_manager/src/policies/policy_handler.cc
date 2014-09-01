@@ -172,6 +172,7 @@ PolicyHandler::PolicyHandler()
 #endif  // EXTENDED_POLICY
     on_ignition_check_done_(false),
     last_activated_app_id_(0),
+    registration_in_progress(false),
     is_user_requested_policy_table_update_(false) {
 }
 
@@ -385,6 +386,26 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
         (*it_app_list).get()->mobile_app_id()->asString());
     }
   }
+}
+
+bool PolicyHandler::EnsureDeviceConsented() {
+    LOG4CXX_INFO(logger_, "PolicyHandler::EnsureDeviceConsented");
+
+  DeviceParams device_params;
+  DeviceConsent consent = GetDeviceForSending(device_params);
+  const bool hasConsent = kDeviceHasNoConsent != consent;
+  if (!hasConsent) {
+    // Send OnSDLConsentNeeded to HMI for user consent on device usage
+    pending_device_handles_.push_back(device_params.device_handle);
+    application_manager::MessageHelper::SendOnSDLConsentNeeded(device_params);
+  }
+  return hasConsent;
+}
+
+void PolicyHandler::AddApplication(const std::string& application_id) {
+  // TODO (AGaliuzov): remove this workaround during refactoring.
+  registration_in_progress = true;
+  policy_manager()->AddApplication(application_id);
 }
 
 void PolicyHandler::SetDeviceInfo(std::string& device_id,
@@ -864,26 +885,33 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
 
     pending_device_handles_.erase(it);
   }
+
 #ifdef EXTENDED_POLICY
-  application_manager::ApplicationManagerImpl* app_manager =
-      application_manager::ApplicationManagerImpl::instance();
   if (is_allowed) {
-    application_manager::ApplicationSharedPtr app =
-      app_manager->application(last_activated_app_id_);
+    // TODO (AGaliuzov): remove this workaround during refactoring.
+    if (registration_in_progress) {
+      StartPTExchange(true);
+      registration_in_progress = false;
 
-    if (!app.valid()) {
-      LOG4CXX_WARN(logger_, "Application with id '" << last_activated_app_id_
-                   << "' not found within registered applications.");
-      return;
     }
-    if (app) {
-      // Send HMI status notification to mobile
-      // TODO(PV): requires additonal checking
-      //app_manager->PutApplicationInFull(app);
-      application_manager::MessageHelper::SendActivateAppToHMI(app->app_id());
-      app_manager->ActivateApplication(app);
-    }
+    application_manager::ApplicationManagerImpl* app_manager =
+        application_manager::ApplicationManagerImpl::instance();
 
+      application_manager::ApplicationSharedPtr app =
+        app_manager->application(last_activated_app_id_);
+
+      if (!app.valid()) {
+        LOG4CXX_WARN(logger_, "Application with id '" << last_activated_app_id_
+                     << "' not found within registered applications.");
+        return;
+      }
+      if (app) {
+        // Send HMI status notification to mobile
+        // TODO(PV): requires additonal checking
+        //app_manager->PutApplicationInFull(app);
+        application_manager::MessageHelper::SendActivateAppToHMI(app->app_id());
+        app_manager->ActivateApplication(app);
+      }
     // Skip device selection, since user already consented device usage
     StartPTExchange(true);
   }
