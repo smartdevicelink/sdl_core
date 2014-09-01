@@ -13,12 +13,31 @@ namespace NsMessageBroker
 {
    CMessageBrokerController::CMessageBrokerController(const std::string& address, uint16_t port, std::string name):
    TcpClient(address, port),
+#ifdef CUSTOMER_PASA
+   MqClient(std::string(""), std::string("")),
+#endif
    m_receivingBuffer(""),
    mControllersIdStart(-1),
    mControllersIdCurrent(0)
    {
       mControllersName = name;
+#ifdef CUSTOMER_PASA
+      mClientType = TCP;
+#endif
    }
+
+#ifdef CUSTOMER_PASA
+   CMessageBrokerController::CMessageBrokerController(const std::string& send_queue, const std::string& receive_queue, std::string name):
+   TcpClient(std::string(""), 0),
+   MqClient(send_queue, receive_queue),
+   m_receivingBuffer(""),
+   mControllersIdStart(-1),
+   mControllersIdCurrent(0)
+   {
+      mControllersName = name;
+      mClientType = MQUEUE;
+   }
+#endif
 
    std::string CMessageBrokerController::getControllersName()
    {
@@ -29,10 +48,34 @@ namespace NsMessageBroker
    {
    }
 
+#ifdef CUSTOMER_PASA
+   ssize_t CMessageBrokerController::clientRecv(std::string& data)
+   {
+	   switch(mClientType)
+	   {
+		   case TCP: 	return TcpClient::Recv(data);
+		   case MQUEUE:	return MqClient::Recv(data);
+	   }
+   }
+
+   ssize_t CMessageBrokerController::clientSend(const std::string& data)
+   {
+	   switch(mClientType)
+	   {
+		   case TCP: 	return TcpClient::Send(data);
+		   case MQUEUE:	return MqClient::Send(data);
+	   }
+   }
+
+#endif
    ssize_t CMessageBrokerController::Recv(std::string& data)
    {
       DBG_MSG(("CMessageBrokerController::Recv()\n"));
+#ifdef CUSTOMER_PASA
+      ssize_t recv = clientRecv(data);
+#else
       ssize_t recv = TcpClient::Recv(data);
+#endif 
       DBG_MSG(("Received message: %s\n", data.c_str()));
       m_receivingBuffer += data;
       while (!stop)
@@ -110,7 +153,11 @@ namespace NsMessageBroker
 
    ssize_t CMessageBrokerController::Send(const std::string& data)
    {
+#ifdef CUSTOMER_PASA
+      return clientSend(data);
+#else
       return TcpClient::Send(data);
+#endif
    }
 
    void CMessageBrokerController::sendJsonMessage(Json::Value& message)
@@ -271,15 +318,14 @@ namespace NsMessageBroker
 
    void* CMessageBrokerController::MethodForReceiverThread(void * arg)
    {
+      sync_primitives::AutoLock auto_lock(receiving_thread_lock_);
       stop = false;
-      is_active = true;
       arg = arg; // to avoid compiler warnings
       while(!stop)
       {
          std::string data = "";
          Recv(data);
       }
-      is_active = false;
       return NULL;
    }
 
