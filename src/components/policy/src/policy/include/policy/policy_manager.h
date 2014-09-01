@@ -113,12 +113,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual bool ResetUserConsent() = 0;
 
     /**
-     * @brief Checks, if policy update is necessary for application
-     * @param Application id assigned by Ford to the application
-     */
-    virtual void CheckAppPolicyState(const std::string& application_id) = 0;
-
-    /**
      * @brief Returns current status of policy table for HMI
      * @return Current status of policy table
      */
@@ -337,6 +331,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @param device_id id device
      */
     virtual void MarkUnpairedDevice(const std::string& device_id) = 0;
+
+    /**
+     * @brief Adds, application to the db or update existed one
+     * run PTU if policy update is necessary for application.
+     * @param Application id assigned by Ford to the application
+     */
+    virtual void AddApplication(const std::string& application_id) = 0;
 
     /**
      * @brief Removes unpaired device records and related records from DB

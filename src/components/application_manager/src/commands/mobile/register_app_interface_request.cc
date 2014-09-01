@@ -282,8 +282,18 @@ void RegisterAppInterfaceRequest::Run() {
     policy::PolicyHandler::instance()->SetDeviceInfo(device_mac_address,
         device_info);
 
-    // Check policy update on ignition on, if it was not done before
-    policy::PolicyHandler::instance()->PTExchangeAtIgnition();
+    // Add registered application to the policy db.
+    policy::PolicyHandler::instance()->
+        AddApplication(msg_params[strings::app_id].asString());
+
+    // Ensure that device has consents to start policy update procedure.
+    // In case when device has no consent, EnsureDeviceConsented will send
+    // OnSDLConsentNeeded and will start PTU in OnAllowSDLFunctionality.
+    if (policy::PolicyHandler::instance()->EnsureDeviceConsented()) {
+      // Allows to start policy table exchange. I will check
+      // current update state and will or will not run the exchange process.
+      policy::PolicyHandler::instance()->OnPTExchangeNeeded();
+    }
 
     SendRegisterAppInterfaceResponseToMobile();
   }
@@ -498,16 +508,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
                                                       resumption);
 
   MessageHelper::SendChangeRegistrationRequestToHMI(application);
-
-  // Check necessity of policy update for current application
-  // TODO(KKolodiy): need remove policy_manager
-  policy::PolicyManager* policy_manager =
-      policy::PolicyHandler::instance()->policy_manager();
-  if (!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-  } else {
-    policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
-  }
 
   if (result != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);

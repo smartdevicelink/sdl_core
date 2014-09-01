@@ -408,14 +408,14 @@ TEST_F(PolicyManagerImplTest, ResetUserConsent) {
 }
 #endif  // EXTENDED_POLICY
 
-TEST_F(PolicyManagerImplTest, CheckAppPolicyState) {
+TEST_F(PolicyManagerImplTest, AddApplication) {
   ::testing::NiceMock<MockPTExtRepresentation> mock_pt;
 
   // TODO(AOleynik): Implementation of method should be changed to avoid
   // using of snapshot
   PolicyManagerImpl* manager = new PolicyManagerImpl();
   manager->ResetDefaultPT(::policy::PolicyTable(&mock_pt));
-  //manager->CheckAppPolicyState("12345678");
+  //manager->AddApplication("12345678");
 }
 
 TEST_F(PolicyManagerImplTest, GetPolicyTableStatus) {
