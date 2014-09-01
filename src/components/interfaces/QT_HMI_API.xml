@@ -309,6 +309,7 @@
       <element name="IGNITION_OFF"/>
       <element name="MASTER_RESET"/>
       <element name="FACTORY_DEFAULTS"/>
+      <element name="SUSPEND" />
     </enum>
     <enum name="DisplayType">
       <description>The possible types of HU display.</description>
@@ -1795,6 +1796,8 @@
       <param name="appID" type="Integer" mandatory="true">
         <description>The ID of app to be resumed audio source.</description>
       </param>
+    </function>
+    <function name="OnSDLPersistenceComplete" messagetype="notification" provider="sdl">
     </function>
     <function name="UpdateAppList" messagetype="request" provider="hmi">
       <description>Issued by SDL to notify HMI about new applications registered.</description>

@@ -53,6 +53,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         onPutFileSubscribeRequestID: -1,
         onStatusUpdateSubscribeRequestID: -1,
         onAppPermissionChangedSubscribeRequestID: -1,
+        onSDLPersistenceCompleteSubscribeRequestID: -1,
         onFileRemovedSubscribeRequestID: -1,
         onAppRegisteredSubscribeRequestID: -1,
         onAppUnregisteredSubscribeRequestID: -1,
@@ -64,6 +65,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         onPutFileUnsubscribeRequestID: -1,
         onStatusUpdateUnsubscribeRequestID: -1,
         onAppPermissionChangedUnsubscribeRequestID: -1,
+        onSDLPersistenceCompleteUnsubscribeRequestID: -1,
         onFileRemovedUnsubscribeRequestID: -1,
         onAppRegisteredUnsubscribeRequestID: -1,
         onAppUnregisteredUnsubscribeRequestID: -1,
@@ -75,6 +77,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         // const
         onStatusUpdateNotification: "SDL.OnStatusUpdate",
         onAppPermissionChangedNotification: "SDL.OnAppPermissionChanged",
+        onSDLPersistenceCompleteNotification: "BasicCommunication.OnSDLPersistenceComplete",
         onPutFileNotification: "BasicCommunication.OnPutFile",
         onFileRemovedNotification: "BasicCommunication.OnFileRemoved",
         onAppRegisteredNotification: "BasicCommunication.OnAppRegistered",
@@ -126,6 +129,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                 .subscribeToNotification(this.onStatusUpdateNotification);
             this.onAppPermissionChangedSubscribeRequestID = this.client
                 .subscribeToNotification(this.onAppPermissionChangedNotification);
+            this.onSDLPersistenceCompleteSubscribeRequestID = this.client
+                .subscribeToNotification(this.onSDLPersistenceCompleteNotification);
             this.onFileRemovedSubscribeRequestID = this.client
                 .subscribeToNotification(this.onFileRemovedNotification);
             this.onAppRegisteredSubscribeRequestID = this.client
@@ -158,6 +163,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                 .unsubscribeFromNotification(this.onStatusUpdateNotification);
             this.onAppPermissionChangedUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onAppPermissionChangedNotification);
+            this.onSDLPersistenceCompleteUnsubscribeRequestID = this.client
+                .unsubscribeFromNotification(this.onSDLPersistenceCompleteNotification);
             this.onFileRemovedUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onFileRemovedNotification);
             this.onAppRegisteredUnsubscribeRequestID = this.client

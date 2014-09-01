@@ -297,6 +297,10 @@ SDL.SDLModel = Em.Object.create({
         {
             name: "FACTORY_DEFAULTS",
             id  : 2
+        },
+        {
+            name: "SUSPEND",
+            id  : 3
         }
     ],
 
@@ -704,7 +708,8 @@ SDL.SDLModel = Em.Object.create({
         if ((params.fileType === "GRAPHIC_PNG" || params.fileType === "GRAPHIC_BMP" || params.fileType === "GRAPHIC_JPEG") && SDL.SDLController.getApplicationModel(params.appID)) {
             result = SDL.SDLController.getApplicationModel(params.appID).onImageRemoved(params.fileName);
 
-            if (SDL.SDLController.getApplicationModel(params.appID).appIcon.indexOf(params.fileName) != -1 && params.fileName.length == SDL.SDLController.getApplicationModel(params.appID).appIcon.length) {
+            if (SDL.SDLController.getApplicationModel(params.appID).appIcon.indexOf(params.fileName) != -1
+                && params.fileName.length == SDL.SDLController.getApplicationModel(params.appID).appIcon.length) {
                 SDL.SDLController.getApplicationModel(params.appID).set('appIcon', SDL.SDLModel.defaultListOfIcons.app);
             }
 

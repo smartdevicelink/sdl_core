@@ -241,7 +241,8 @@ SDL.SDLAppModel = Em.Object.extend({
 
                         // Check image name with each command in each subMenu
                         if (this.commandsList[commands][i].icon) {
-                            if (this.commandsList[commands][i].icon.indexOf(imageName) != -1 && imageName.length == this.commandsList[commands][i].icon.length) {
+                            if (this.commandsList[commands][i].icon.indexOf(imageName) != -1
+                                && imageName.length == this.commandsList[commands][i].icon.length) {
 
                                 // If found same image path than set default icon path
                                 this.commandsList[commands][i].icon = SDL.SDLModel.defaultListOfIcons.command;
