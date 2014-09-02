@@ -1493,5 +1493,21 @@ bool SQLPTExtRepresentation::UnpairedDevicesList(DeviceIds* device_ids) const {
   return true;
 }
 
+bool SQLPTExtRepresentation::SetVINValue(const std::string& value){
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt_ext::kUpdateModuleMetaVinParam)) {
+    LOG4CXX_WARN(logger_, "Incorect statement for updating module_meta params");
+    return false;
+  }
+
+  query.Bind(0, value);
+  const bool result = query.Exec();
+
+  if (!result) {
+    LOG4CXX_WARN(logger_, "Failed update module_meta");
+  }
+  return result;
+}
+
 }  // namespace policy
 

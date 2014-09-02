@@ -126,6 +126,8 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual int IsConsentNeeded(const std::string& app_id);
 
+    virtual void SetVINValue(const std::string& value);
+
     // Interface StatisticsManager (begin)
     virtual void Increment(usage_statistics::GlobalCounterId type);
     virtual void Increment(const std::string& app_id,

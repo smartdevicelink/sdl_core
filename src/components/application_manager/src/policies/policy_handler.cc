@@ -608,6 +608,30 @@ void PolicyHandler::OnSystemInfoUpdateRequired() {
   application_manager::MessageHelper::SendGetSystemInfoRequest();
 }
 
+void PolicyHandler::OnVIIsReady() {
+  const uint32_t correlation_id = application_manager::
+      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+  std::vector<std::string> params;
+  params.push_back(application_manager::strings::vin);
+
+  application_manager::MessageHelper::CreateGetVehicleDataRequest(
+        correlation_id, params);
+
+}
+
+void PolicyHandler::OnVehicleDataUpdated(
+    const smart_objects::SmartObject& message) {
+#if defined (EXTENDED_POLICY)
+  if (message[application_manager::strings::msg_params].
+      keyExists(application_manager::strings::vin)) {
+    policy_manager()->SetVINValue(
+          message[application_manager::strings::msg_params]
+          [application_manager::strings::vin].asString());
+  }
+#endif // EXTENDED_POLICY
+}
+
 void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
   LOG4CXX_INFO(logger_, "OnAppRevoked");
   LOG4CXX_INFO(logger_, "Application_id " << policy_app_id << " is revoked.");

@@ -375,6 +375,12 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @return Amount of groups for which app is allowed
      */
     virtual int IsConsentNeeded(const std::string& app_id) = 0;
+
+    /**
+     * @brief Allows to update 'vin' value in module_meta.
+     * @param new value for the parameter.
+     */
+    virtual void SetVINValue(const std::string& value) = 0;
 };
 
 }  // namespace policy

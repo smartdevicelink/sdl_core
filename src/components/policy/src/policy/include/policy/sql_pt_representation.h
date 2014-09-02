@@ -145,6 +145,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     virtual bool SetDefaultPolicy(const std::string& app_id);
     virtual void SetPreloaded(bool value);
 
+    virtual bool SetVINValue(const std::string& value);
+
     dbms::SQLDatabase* db() const;
     virtual bool SetIsDefault(const std::string& app_id, bool is_default) const;
 

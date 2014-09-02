@@ -31,6 +31,7 @@
  */
 #include "application_manager/commands/hmi/vi_get_vehicle_data_response.h"
 #include "application_manager/event_engine/event.h"
+#include "application_manager/policies/policy_handler.h"
 #include "interfaces/HMI_API.h"
 
 namespace application_manager {
@@ -78,10 +79,13 @@ void VIGetVehicleDataResponse::Run() {
           (*message_)[strings::params][strings::protocol_version];
     }
 
+
     event.set_smart_object(*result_so);
   } else {
     event.set_smart_object(*message_);
+    policy::PolicyHandler::instance()->OnVehicleDataUpdated(*message_);
   }
+
 
   event.raise();
 }

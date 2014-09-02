@@ -123,6 +123,7 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
     bool SetUnpairedDevice(const std::string& device_id) const;
     bool UnpairedDevicesList(DeviceIds* device_ids) const;
 
+    virtual bool SetVINValue(const std::string& value);
   private:
     void GatherModuleMeta(policy_table::ModuleMeta* meta) const;
     void GatherPreconsentedGroup(const std::string& app_id,

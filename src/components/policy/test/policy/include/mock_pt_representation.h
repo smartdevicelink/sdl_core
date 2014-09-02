@@ -69,6 +69,8 @@ class MockPTRepresentation : virtual public PTRepresentation {
                  bool(const std::string& app_id, std::string* priority));
     MOCK_METHOD0(GetVehicleData,
                  VehicleData());
+    MOCK_METHOD1(SetVINValue,
+                 bool(const std::string& value));
     MOCK_METHOD2(GetUserFriendlyMsg,
                  std::vector<UserFriendlyMessage>(const std::vector<std::string>& msg_code,
                      const std::string& language));

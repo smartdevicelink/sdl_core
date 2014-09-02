@@ -145,6 +145,9 @@ const std::string kSelectModuleMeta = "SELECT* FROM `module_meta`";
 const std::string kUpdateMetaParams = "UPDATE `module_meta` SET "
                                       "`ccpu_version` = ?, `wers_country_code` = ?, `language` = ? ";
 
+const std::string kUpdateModuleMetaVinParam =
+    "UPDATE `module_meta` SET `vin` = ? ";
+
 const std::string kSelectMetaParams = "SELECT `ccpu_version`, "
                    "`wers_country_code`, `language` from `module_meta`";
 

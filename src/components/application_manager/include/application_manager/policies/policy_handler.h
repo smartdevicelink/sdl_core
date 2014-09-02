@@ -194,6 +194,17 @@ class PolicyHandler :
   virtual void OnSystemInfoUpdateRequired();
 
   /**
+   * @brief Sends GetVehicleData request in case when Vechicle info is ready.
+   */
+  virtual void OnVIIsReady();
+
+  /**
+   * @brief Allows to update vechicle data info.
+   * @param SmartIbject which contains all needed information.
+   */
+  virtual void OnVehicleDataUpdated(const smart_objects::SmartObject& message);
+
+  /**
    * Removes device
    * @param device_id id of device
    */

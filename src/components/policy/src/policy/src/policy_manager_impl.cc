@@ -1282,6 +1282,12 @@ int PolicyManagerImpl::IsConsentNeeded(const std::string& app_id) {
   return 0;
 }
 
+void PolicyManagerImpl::SetVINValue(const std::string& value) {
+#if defined (EXTENDED_POLICY)
+  policy_table_.pt_data()->SetVINValue(value);
+#endif // EXTENDED_POLICY
+}
+
 void PolicyManagerImpl::CheckUpdateStatus() {
   LOG4CXX_INFO(logger_, "CheckUpdateStatus");
   policy::PolicyTableStatus status = GetPolicyTableStatus();

@@ -139,6 +139,16 @@ class PTRepresentation {
     virtual VehicleData GetVehicleData() = 0;
 
     /**
+     * @brief Allows to update 'vin' field in module_meta table.
+     *
+     * @param new 'vin' value.
+     *
+     * @return true in case when data has been successfully updated,
+     * false otherwise.
+     */
+    virtual bool SetVINValue(const std::string& value) = 0;
+
+    /**
      * @brief Get message text for displaying/pronouncing for user
      * dependent on language and context.
      * @param msg_codes Context of message (Driver distraction, Grant permission etc)
