@@ -119,28 +119,36 @@ AOAConnection::DeviceObserver::DeviceObserver(AOAConnection* parent)
     : parent_(parent) {
 }
 
+void AOAConnection::OnMessageReceived(bool success, RawMessagePtr message) {
+  if (success) {
+    ReceiveDone(message);
+  } else if (wrapper_->IsHandleValid()) {
+    ReceiveFailed();
+  } else {
+    Abort();
+    Disconnect();
+  }
+}
+
+void AOAConnection::OnMessageTransmitted(bool success, RawMessagePtr message) {
+  if (success) {
+    TransmitDone(message);
+  } else if (wrapper_->IsHandleValid()) {
+    TransmitFailed(message);
+  } else {
+    Abort();
+    Disconnect();
+  }
+}
+
 void AOAConnection::DeviceObserver::OnMessageReceived(bool success,
                                                       RawMessagePtr message) {
-  if (success) {
-    parent_->ReceiveDone(message);
-  } else if (parent_->wrapper_->IsHandleValid()) {
-    parent_->ReceiveFailed();
-  } else {
-    parent_->Abort();
-    parent_->Disconnect();
-  }
+  parent_->OnMessageReceived(success, message);
 }
 
 void AOAConnection::DeviceObserver::OnMessageTransmitted(
     bool success, RawMessagePtr message) {
-  if (success) {
-    parent_->TransmitDone(message);
-  } else if (parent_->wrapper_->IsHandleValid()) {
-    parent_->TransmitFailed(message);
-  } else {
-    parent_->Abort();
-    parent_->Disconnect();
-  }
+  parent_->OnMessageTransmitted(success, message);
 }
 
 }  // namespace transport_adapter

@@ -68,16 +68,16 @@ class AOAWrapper {
  public:
   typedef aoa_hdl_s* AOAHandle;
   struct AOAUsbInfo {
-    std::string path;  /* Path to the USB stack */
+    std::string path; /* Path to the USB stack */
     int aoa_version;
-    uint32_t devno;  /* Device number */
-    uint32_t busno;  /* Device bus number */
+    uint32_t devno; /* Device number */
+    uint32_t busno; /* Device bus number */
     std::string manufacturer;
     uint32_t vendor_id;
     std::string product;
     uint32_t product_id;
     std::string serial_number;
-    uint32_t iface;  /* Device interface */
+    uint32_t iface; /* Device interface */
   };
 
   static bool Init(AOAScannerObserver* observer);
@@ -105,15 +105,16 @@ class AOAWrapper {
   bool SendMessage(RawMessagePtr message) const;
   bool SendControlMessage(uint16_t request, uint16_t value, uint16_t index,
                           RawMessagePtr message) const;
-  bool ReceiveMessage(RawMessagePtr *message) const;
-  bool ReceiveControlMessage(uint16_t request, uint16_t value, uint16_t index,
-                             RawMessagePtr *message) const;
+  RawMessagePtr ReceiveMessage() const;
+  RawMessagePtr ReceiveControlMessage(uint16_t request, uint16_t value,
+                                      uint16_t index) const;
 
  private:
   AOAHandle hdl_;
   uint32_t timeout_;
 
-  static void PrepareUsbInfo(const AOAUsbInfo& aoa_usb_info, usb_info_s* usb_info);
+  static void PrepareUsbInfo(const AOAUsbInfo& aoa_usb_info,
+                             usb_info_s* usb_info);
   inline AOAVersion Version(uint16_t version) const;
   inline uint32_t BitEndpoint(AOAEndpoint endpoint) const;
   inline bool IsValueInMask(uint32_t bitmask, uint32_t value) const;

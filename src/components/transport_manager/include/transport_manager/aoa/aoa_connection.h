@@ -60,6 +60,8 @@ class AOAConnection : public Connection {
   ApplicationHandle app_handle_;
   TransportAdapterController* controller_;
 
+  void OnMessageReceived(bool success, RawMessagePtr message);
+  void OnMessageTransmitted(bool success, RawMessagePtr message);
   void ReceiveDone(RawMessagePtr message);
   void ReceiveFailed();
   void TransmitDone(RawMessagePtr message);

@@ -343,22 +343,21 @@ bool AOAWrapper::SendControlMessage(uint16_t request, uint16_t value,
   return true;
 }
 
-bool AOAWrapper::ReceiveMessage(RawMessagePtr *message) const {
+RawMessagePtr AOAWrapper::ReceiveMessage() const {
   LOG4CXX_TRACE(logger_, "AOA: receive from endpoint");
   uint8_t *data;
   uint32_t size;
   int ret = aoa_bulk_rx(hdl_, AOA_EPT_ACCESSORY_BULKIN, timeout_, &data, &size);
   if (IsError(ret)) {
     PrintError(ret);
-    return false;
+    return RawMessagePtr();
   }
-  (*message) = new RawMessage(0, 0, data, size);
-  return true;
+  return RawMessagePtr(new RawMessage(0, 0, data, size));
 }
 
-bool AOAWrapper::ReceiveControlMessage(uint16_t request, uint16_t value,
-                                       uint16_t index,
-                                       RawMessagePtr *message) const {
+RawMessagePtr AOAWrapper::ReceiveControlMessage(uint16_t request,
+                                                uint16_t value,
+                                                uint16_t index) const {
   LOG4CXX_TRACE(logger_, "AOA: receive from control endpoint");
   uint8_t *data;
   uint32_t size;
@@ -366,10 +365,9 @@ bool AOAWrapper::ReceiveControlMessage(uint16_t request, uint16_t value,
                            value, index, &data, &size);
   if (IsError(ret)) {
     PrintError(ret);
-    return false;
+    return RawMessagePtr();
   }
-  (*message) = new RawMessage(0, 0, data, size);
-  return true;
+  return RawMessagePtr(new RawMessage(0, 0, data, size));
 }
 
 bool AOAWrapper::IsError(int ret) {
