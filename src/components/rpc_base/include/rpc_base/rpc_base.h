@@ -49,13 +49,21 @@ class MessageWriter;
 
 namespace rpc {
 class ValidationReport;
+
 namespace policy_table_interface_base {
 
 enum PolicyTableType {
+  INVALID_PT_TYPE = -1,
   PT_PRELOADED,
   PT_UPDATE,
   PT_SNAPSHOT
 };
+const std::string ommited_validation_info = "should be ommited in ";
+const std::string required_validation_info = "is required in ";
+
+std::string PolicyTableTypeToString(const PolicyTableType pt_type);
+
+
 }
 
 template<typename T> class Range;
@@ -96,7 +104,7 @@ class PrimitiveType {
     bool is_initialized() const;
     bool is_valid() const;
     void ReportErrors(ValidationReport* report) const;
-    policy_table_interface_base::PolicyTableType GetPolicyTableType();
+    policy_table_interface_base::PolicyTableType GetPolicyTableType() const;
     virtual void SetPolicyTableType(policy_table_interface_base::PolicyTableType pt_type);
 
   protected:
@@ -122,7 +130,7 @@ class CompositeType {
   public:
     void mark_initialized();
     void ReportErrors(ValidationReport* report) const;
-    policy_table_interface_base::PolicyTableType GetPolicyTableType();
+    policy_table_interface_base::PolicyTableType GetPolicyTableType() const;
     virtual void SetPolicyTableType(policy_table_interface_base::PolicyTableType pt_type);
 
   protected:
@@ -384,7 +392,7 @@ class Optional {
     bool is_valid() const;
     bool is_initialized() const;
     void ReportErrors(ValidationReport* report) const;
-    policy_table_interface_base::PolicyTableType GetPolicyTableType();
+    policy_table_interface_base::PolicyTableType GetPolicyTableType() const;
     virtual void SetPolicyTableType(policy_table_interface_base::PolicyTableType pt_type);
 
   protected:

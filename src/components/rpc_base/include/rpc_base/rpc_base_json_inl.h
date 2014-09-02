@@ -51,7 +51,7 @@ inline PrimitiveType::ValueState PrimitiveType::InitHelper(
   }
 }
 
-inline policy_table_interface_base::PolicyTableType PrimitiveType::GetPolicyTableType()  {
+inline policy_table_interface_base::PolicyTableType PrimitiveType::GetPolicyTableType() const  {
   return policy_table_type_;
 }
 
@@ -77,7 +77,7 @@ inline CompositeType::InitializationState CompositeType::InitHelper(
   }
 }
 
-inline policy_table_interface_base::PolicyTableType CompositeType::GetPolicyTableType() {
+inline policy_table_interface_base::PolicyTableType CompositeType::GetPolicyTableType() const {
   return policy_table_type_;
 }
 

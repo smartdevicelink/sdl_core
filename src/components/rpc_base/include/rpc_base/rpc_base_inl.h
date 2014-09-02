@@ -590,13 +590,14 @@ void Optional<T>::ReportErrors(ValidationReport* report) const {
   }
 }
 template<typename T>
-inline rpc::policy_table_interface_base::PolicyTableType Optional<T>::GetPolicyTableType() {
+inline rpc::policy_table_interface_base::PolicyTableType Optional<T>::GetPolicyTableType() const {
   return policy_table_type_;
 }
 
 template<typename T>
 void rpc::Optional<T>::SetPolicyTableType(rpc::policy_table_interface_base::PolicyTableType pt_type) {
   policy_table_type_ = pt_type;
+  value_.SetPolicyTableType(pt_type);
 }
 
 /*
