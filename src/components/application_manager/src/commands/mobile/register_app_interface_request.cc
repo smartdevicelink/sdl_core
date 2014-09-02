@@ -35,6 +35,7 @@
 
 #include <unistd.h>
 #include <algorithm>
+#include <string.h>
 
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"

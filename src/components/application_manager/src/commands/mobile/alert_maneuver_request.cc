@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string.h>
 #include "application_manager/commands/mobile/alert_maneuver_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"

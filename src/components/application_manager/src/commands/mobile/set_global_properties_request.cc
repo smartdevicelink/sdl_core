@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string.h>
 #include <algorithm>
 #include "application_manager/commands/mobile/set_global_properties_request.h"
 #include "application_manager/application_manager_impl.h"
