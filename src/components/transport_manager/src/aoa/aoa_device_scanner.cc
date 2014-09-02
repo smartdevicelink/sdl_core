@@ -32,6 +32,8 @@
 
 #include "transport_manager/aoa/aoa_device_scanner.h"
 
+#include <sstream>
+
 #include "utils/logger.h"
 
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -86,21 +88,25 @@ void AOADeviceScanner::NotifyDevicesUpdated() {
   controller_->SearchDeviceDone(devices);
 }
 
-std::string AOADeviceScanner::GetName() {
-  sync_primitives::AutoLock loker(devices_lock_);
-  return "AOA device #" + devices_.size();
+std::string AOADeviceScanner::GetName(const std::string& unique_id) {
+  sync_primitives::AutoLock locker(devices_lock_);
+  return "AOA device " + unique_id;
 }
 
 std::string AOADeviceScanner::GetUniqueId() {
-  sync_primitives::AutoLock loker(devices_lock_);
-  return "AOA#" + devices_.size();
+  sync_primitives::AutoLock locker(devices_lock_);
+  static int counter = 0;
+  ++counter;
+  std::ostringstream stream;
+  stream << counter;
+  return "#_" + stream.str() + "_aoa";
 }
 
 void AOADeviceScanner::AddDevice(AOAWrapper::AOAHandle hdl) {
-  const std::string name = GetName();
   const std::string unique_id = GetUniqueId();
+  const std::string name = GetName(unique_id);
   AOADevicePtr aoa_device(new AOADevice(hdl, name, unique_id));
-  sync_primitives::AutoLock loker(devices_lock_);
+  sync_primitives::AutoLock locker(devices_lock_);
   devices_.insert(std::make_pair(hdl, aoa_device));
 }
 
@@ -108,7 +114,7 @@ AOADeviceScanner::ScannerObserver::ScannerObserver(AOADeviceScanner* parent)
     : parent_(parent) {
 }
 
-void AOADeviceScanner::ScannerObserver::OnConnectedDevice(
+void AOADeviceScanner::ScannerObserver::OnDeviceConnected(
     AOAWrapper::AOAHandle hdl) {
   LOG4CXX_TRACE(logger_, "AOA: new device is connected");
   parent_->AddDevice(hdl);

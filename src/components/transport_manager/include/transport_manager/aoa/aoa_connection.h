@@ -69,8 +69,8 @@ class AOAConnection : public Connection {
   class DeviceObserver : public AOADeviceObserver {
    public:
     explicit DeviceObserver(AOAConnection* parent);
-    void OnReceivedMessage(bool success, RawMessagePtr message);
-    void OnTransmittedMessage(bool success, RawMessagePtr message);
+    void OnMessageReceived(bool success, RawMessagePtr message);
+    void OnMessageTransmitted(bool success, RawMessagePtr message);
    private:
     AOAConnection* parent_;
   };

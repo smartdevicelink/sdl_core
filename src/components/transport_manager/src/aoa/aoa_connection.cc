@@ -62,7 +62,7 @@ AOAConnection::~AOAConnection() {
 TransportAdapter::Error AOAConnection::SendData(RawMessagePtr message) {
   LOG4CXX_TRACE(logger_,
                 "AOA: send data to " << device_uid_ << " " << app_handle_);
-  if (!wrapper_->IsValidHandle()) {
+  if (!wrapper_->IsHandleValid()) {
     Abort();
     Disconnect();
     return TransportAdapter::FAIL;
@@ -76,8 +76,9 @@ TransportAdapter::Error AOAConnection::SendData(RawMessagePtr message) {
 }
 
 void AOAConnection::ReceiveDone(RawMessagePtr message) {
-  LOG4CXX_TRACE(logger_,
-                "AOA: receive data from " << device_uid_ << " " << app_handle_);
+  LOG4CXX_TRACE(
+      logger_,
+      "AOA: receive done data from " << device_uid_ << " " << app_handle_);
   controller_->DataReceiveDone(device_uid_, app_handle_, message);
 }
 
@@ -88,8 +89,9 @@ void AOAConnection::ReceiveFailed() {
 }
 
 void AOAConnection::TransmitDone(RawMessagePtr message) {
-  LOG4CXX_TRACE(logger_,
-                "AOA: transmit data to " << device_uid_ << " " << app_handle_);
+  LOG4CXX_TRACE(
+      logger_,
+      "AOA: transmit done data to " << device_uid_ << " " << app_handle_);
   controller_->DataSendDone(device_uid_, app_handle_, message);
 }
 
@@ -117,11 +119,11 @@ AOAConnection::DeviceObserver::DeviceObserver(AOAConnection* parent)
     : parent_(parent) {
 }
 
-void AOAConnection::DeviceObserver::OnReceivedMessage(bool success,
+void AOAConnection::DeviceObserver::OnMessageReceived(bool success,
                                                       RawMessagePtr message) {
   if (success) {
     parent_->ReceiveDone(message);
-  } else if (parent_->wrapper_->IsValidHandle()) {
+  } else if (parent_->wrapper_->IsHandleValid()) {
     parent_->ReceiveFailed();
   } else {
     parent_->Abort();
@@ -129,11 +131,11 @@ void AOAConnection::DeviceObserver::OnReceivedMessage(bool success,
   }
 }
 
-void AOAConnection::DeviceObserver::OnTransmittedMessage(
+void AOAConnection::DeviceObserver::OnMessageTransmitted(
     bool success, RawMessagePtr message) {
   if (success) {
     parent_->TransmitDone(message);
-  } else if (parent_->wrapper_->IsValidHandle()) {
+  } else if (parent_->wrapper_->IsHandleValid()) {
     parent_->TransmitFailed(message);
   } else {
     parent_->Abort();

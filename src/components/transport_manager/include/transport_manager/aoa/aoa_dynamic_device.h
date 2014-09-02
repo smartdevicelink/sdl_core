@@ -61,7 +61,7 @@ class AOADynamicDevice : public AOADevice {
   class ScannerObserver : public AOAScannerObserver {
    public:
     explicit ScannerObserver(AOADynamicDevice* parent);
-    void OnConnectedDevice(AOAWrapper::AOAHandle hdl);
+    void OnDeviceConnected(AOAWrapper::AOAHandle hdl);
    private:
     AOADynamicDevice* parent_;
   };

@@ -68,13 +68,13 @@ class AOADeviceScanner : public DeviceScanner {
 
   void AddDevice(AOAWrapper::AOAHandle hdl);
   void NotifyDevicesUpdated();
-  std::string GetName();
+  std::string GetName(const std::string& unique_id);
   std::string GetUniqueId();
 
   class ScannerObserver : public AOAScannerObserver {
    public:
     explicit ScannerObserver(AOADeviceScanner* parent);
-    void OnConnectedDevice(AOAWrapper::AOAHandle hdl);
+    void OnDeviceConnected(AOAWrapper::AOAHandle hdl);
    private:
     AOADeviceScanner* parent_;
   };

@@ -65,7 +65,7 @@ PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
 
 void PulseThreadDelegate::threadMain() {
   if (!Init()) {
-    LOG4CXX_ERROR(logger_, "Fail initialize pulse on QNX " << chid_);
+    LOG4CXX_ERROR(logger_, "Failed to initialize thread for QNX channel " << chid_);
     return;
   }
   while (run_) {

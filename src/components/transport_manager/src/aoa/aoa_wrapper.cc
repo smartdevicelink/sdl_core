@@ -46,7 +46,7 @@ static void OnConnectedDevice(aoa_hdl_t *hdl, const void *udata) {
   AOAScannerObserver* const * p =
       static_cast<AOAScannerObserver* const *>(udata);
   AOAScannerObserver* observer = *p;
-  observer->OnConnectedDevice(hdl);
+  observer->OnDeviceConnected(hdl);
 }
 
 static void OnReceivedData(aoa_hdl_t *hdl, uint8_t *data, uint32_t sz,
@@ -61,7 +61,7 @@ static void OnReceivedData(aoa_hdl_t *hdl, uint8_t *data, uint32_t sz,
   AOADeviceObserver* const * p = static_cast<AOADeviceObserver* const *>(udata);
   AOADeviceObserver* observer = *p;
   RawMessagePtr message = new RawMessage(0, 0, data, sz);
-  observer->OnReceivedMessage(success, message);
+  observer->OnMessageReceived(success, message);
 }
 
 static void OnTransmittedData(aoa_hdl_t *hdl, uint8_t *data, uint32_t sz,
@@ -76,7 +76,7 @@ static void OnTransmittedData(aoa_hdl_t *hdl, uint8_t *data, uint32_t sz,
   AOADeviceObserver* const * p = static_cast<AOADeviceObserver* const *>(udata);
   AOADeviceObserver* observer = *p;
   RawMessagePtr message = new RawMessage(0, 0, data, sz);
-  observer->OnTransmittedMessage(success, message);
+  observer->OnMessageTransmitted(success, message);
 }
 
 AOAWrapper::AOAWrapper(AOAHandle hdl)
@@ -143,7 +143,7 @@ bool AOAWrapper::Init(const std::string& path_to_config,
 bool AOAWrapper::SetCallback(AOADeviceObserver *observer,
                              AOAEndpoint endpoint) const {
   LOG4CXX_TRACE(logger_,
-                "AOA: set callback " << hdl_ << ", endpoint "<< endpoint);
+                "AOA: set callback " << hdl_ << ", endpoint " << endpoint);
   data_clbk_t callback;
   switch (endpoint) {
     case AOA_Ept_Accessory_BulkIn:
@@ -154,8 +154,7 @@ bool AOAWrapper::SetCallback(AOADeviceObserver *observer,
       break;
     default:
       LOG4CXX_ERROR(
-          logger_,
-          "AOA: " << endpoint << " endpoint doesn't support to use callback")
+          logger_, "AOA: " << endpoint << " endpoint doesn't support callbacks")
       ;
       return false;
   }
@@ -168,11 +167,11 @@ bool AOAWrapper::SetCallback(AOADeviceObserver *observer,
 }
 
 bool AOAWrapper::Subscribe(AOADeviceObserver *observer) const {
-  LOG4CXX_TRACE(logger_, "AOA: subscribe on receive data" << hdl_);
+  LOG4CXX_TRACE(logger_, "AOA: subscribe on receive data " << hdl_);
   if (!SetCallback(observer, AOA_Ept_Accessory_BulkIn)) {
     return false;
   }
-  LOG4CXX_TRACE(logger_, "AOA: subscribe on transmit data" << hdl_);
+  LOG4CXX_TRACE(logger_, "AOA: subscribe on transmit data " << hdl_);
   if (!SetCallback(observer, AOA_Ept_Accessory_BulkOut)) {
     return false;
   }
@@ -210,7 +209,7 @@ bool AOAWrapper::Shutdown() {
   return true;
 }
 
-bool AOAWrapper::IsValidHandle() const {
+bool AOAWrapper::IsHandleValid() const {
   LOG4CXX_TRACE(logger_, "AOA: check handle " << hdl_);
   bool valid;
   int ret = aoa_get_valid(hdl_, &valid);
@@ -265,19 +264,19 @@ uint32_t AOAWrapper::GetBufferMaximumSize(AOAEndpoint endpoint) const {
   return size;
 }
 
-bool AOAWrapper::IsValueExistInMask(uint32_t bitmask, uint32_t value) const {
+bool AOAWrapper::IsValueInMask(uint32_t bitmask, uint32_t value) const {
   return (bitmask & value) == value;
 }
 
 std::vector<AOAMode> AOAWrapper::CreateModesList(uint32_t modes_mask) const {
   std::vector<AOAMode> list;
-  if (IsValueExistInMask(modes_mask, AOA_MODE_ACCESSORY)) {
+  if (IsValueInMask(modes_mask, AOA_MODE_ACCESSORY)) {
     list.push_back(AOA_Mode_Accessory);
   }
-  if (IsValueExistInMask(modes_mask, AOA_MODE_AUDIO)) {
+  if (IsValueInMask(modes_mask, AOA_MODE_AUDIO)) {
     list.push_back(AOA_Mode_Audio);
   }
-  if (IsValueExistInMask(modes_mask, AOA_MODE_DEBUG)) {
+  if (IsValueInMask(modes_mask, AOA_MODE_DEBUG)) {
     list.push_back(AOA_Mode_Debug);
   }
   return list;
@@ -295,13 +294,13 @@ std::vector<AOAMode> AOAWrapper::GetModes() const {
 std::vector<AOAEndpoint> AOAWrapper::CreateEndpointsList(
     uint32_t endpoints_mask) const {
   std::vector<AOAEndpoint> list;
-  if (IsValueExistInMask(endpoints_mask, AOA_EPT_ACCESSORY_BULKIN)) {
+  if (IsValueInMask(endpoints_mask, AOA_EPT_ACCESSORY_BULKIN)) {
     list.push_back(AOA_Ept_Accessory_BulkIn);
   }
-  if (IsValueExistInMask(endpoints_mask, AOA_EPT_ACCESSORY_BULKOUT)) {
+  if (IsValueInMask(endpoints_mask, AOA_EPT_ACCESSORY_BULKOUT)) {
     list.push_back(AOA_Ept_Accessory_BulkOut);
   }
-  if (IsValueExistInMask(endpoints_mask, AOA_EPT_ACCESSORY_CONTROL)) {
+  if (IsValueInMask(endpoints_mask, AOA_EPT_ACCESSORY_CONTROL)) {
     list.push_back(AOA_Ept_Accessory_Control);
   }
   return list;

@@ -95,7 +95,7 @@ class AOAWrapper {
   explicit AOAWrapper(AOAHandle hdl);
   AOAWrapper(AOAHandle hdl, uint32_t timeout);
 
-  bool IsValidHandle() const;
+  bool IsHandleValid() const;
   AOAVersion GetProtocolVesrion() const;
   uint32_t GetBufferMaximumSize(AOAEndpoint endpoint) const;
   std::vector<AOAMode> GetModes() const;
@@ -116,7 +116,7 @@ class AOAWrapper {
   static void PrepareUsbInfo(const AOAUsbInfo& aoa_usb_info, usb_info_s* usb_info);
   inline AOAVersion Version(uint16_t version) const;
   inline uint32_t BitEndpoint(AOAEndpoint endpoint) const;
-  inline bool IsValueExistInMask(uint32_t bitmask, uint32_t value) const;
+  inline bool IsValueInMask(uint32_t bitmask, uint32_t value) const;
   std::vector<AOAMode> CreateModesList(uint32_t modes_mask) const;
   std::vector<AOAEndpoint> CreateEndpointsList(uint32_t endpoints_mask) const;
   bool SetCallback(AOADeviceObserver *observer, AOAEndpoint endpoint) const;
@@ -125,15 +125,15 @@ class AOAWrapper {
 
 class AOAScannerObserver {
  public:
-  virtual void OnConnectedDevice(AOAWrapper::AOAHandle handle) = 0;
+  virtual void OnDeviceConnected(AOAWrapper::AOAHandle handle) = 0;
   virtual ~AOAScannerObserver() {
   }
 };
 
 class AOADeviceObserver {
  public:
-  virtual void OnReceivedMessage(bool success, RawMessagePtr message) = 0;
-  virtual void OnTransmittedMessage(bool success, RawMessagePtr message) = 0;
+  virtual void OnMessageReceived(bool success, RawMessagePtr message) = 0;
+  virtual void OnMessageTransmitted(bool success, RawMessagePtr message) = 0;
   virtual ~AOADeviceObserver() {
   }
 };

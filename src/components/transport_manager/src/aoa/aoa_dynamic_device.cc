@@ -79,7 +79,7 @@ AOADynamicDevice::ScannerObserver::ScannerObserver(AOADynamicDevice* parent)
     : parent_(parent) {
 }
 
-void AOADynamicDevice::ScannerObserver::OnConnectedDevice(
+void AOADynamicDevice::ScannerObserver::OnDeviceConnected(
     AOAWrapper::AOAHandle hdl) {
   LOG4CXX_TRACE(logger_, "AOA: new device is connected");
   parent_->SetHandle(hdl);
