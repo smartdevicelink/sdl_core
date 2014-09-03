@@ -81,8 +81,9 @@ void AudioStreamSenderThread::threadMain() {
     if (getShouldBeStopped()) {
       break;
     }
-
+#ifndef CUSTOMER_PASA
     usleep(kAudioPassThruTimeout * 1000000);
+#endif
 
     if (getShouldBeStopped()) {
       break;
