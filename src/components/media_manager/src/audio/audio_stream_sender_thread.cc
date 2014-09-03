@@ -83,11 +83,10 @@ void AudioStreamSenderThread::threadMain() {
     }
 #ifndef CUSTOMER_PASA
     usleep(kAudioPassThruTimeout * 1000000);
-#endif
-
     if (getShouldBeStopped()) {
       break;
     }
+#endif
 #ifdef CUSTOMER_PASA
     mqSendAudioChunkToMobile();
 #else
