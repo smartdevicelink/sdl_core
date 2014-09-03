@@ -1882,11 +1882,18 @@
         <description>The information about application registered. See HMIApplication. </description>
       </param>
       <param name="ttsName" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false">
+        <description>
+          TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".
+          Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
+          May not be empty.
+          May not start with a new line character.
+          Not unique value
+        </description>
       </param>
       <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
         <description>
-          Defines additional voice recognition commands.
-          May not interfere with any app name of previously registered applications and any predefined blacklist of words (global commands)
+            Defines an additional voice recognition command.
+            Must not interfere with any name of previously registered applications(SDL makes check).
         </description>
       </param>
       <param name="resumeVrGrammars" type="Boolean" mandatory="false">
@@ -2170,7 +2177,11 @@
     <function name="ChangeRegistration" messagetype="request" provider="hmi">
       <description>Request from SmartDeviceLink to HMI to change language of VR.</description>
       <param name="vrSynonyms" type="String" maxlength="40" minsize="1" maxsize="100" array="true" mandatory="false">
-        <description>Request new VR synonyms registration</description>
+        <description>
+          Request new VR synonyms registration
+          Defines an additional voice recognition command.
+          Must not interfere with any name of previously registered applications(SDL makes check).
+        </description>
       </param>
       <param name="language" type="Common.Language" mandatory="true">
         <description>The language application wants to switch to.</description>
@@ -2260,7 +2271,14 @@
     <function name="ChangeRegistration" messagetype="request" provider="hmi">
       <description>Request from SmartDeviceLink to HMI to change language of TTS.</description>
       <param name="ttsName" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
-        <description>Request new ttsName registration</description>
+        <description>
+          Request new ttsName registration
+          TTS string for VR recognition of the mobile application name, e.g. "Ford Drive Green".
+          Meant to overcome any failing on speech engine in properly pronouncing / understanding app name.
+          May not be empty.
+          May not start with a new line character.
+          Not unique value (SDL makes all the checks)
+        </description>
       </param>
       <param name="language" type="Common.Language" mandatory="true">
         <description>The language application wants to switch to.</description>
@@ -2554,7 +2572,13 @@
     <function name="ChangeRegistration" messagetype="request" provider="hmi">
       <description>Request from SmartDeviceLink to HMI to change language for app.</description>
       <param name="appName" type="String" maxlength="100" mandatory="false">
-        <description>Request new app name registration</description>
+        <description>
+          Request new app name registration
+          Needs to be unique over all applications.
+          May not be empty. May not start with a new line character.
+          May not interfere with any name or synonym of any registered applications.
+          Applications with the same name will be rejected. (SDL makes all the checks)
+        </description>
       </param>
       <param name="ngnMediaScreenAppName" type="String" maxlength="100" mandatory="false">
         <description>Request new app short name registration</description>
