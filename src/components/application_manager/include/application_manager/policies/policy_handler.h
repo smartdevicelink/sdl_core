@@ -256,6 +256,11 @@ class PolicyHandler :
    */
   bool IsApplicationRevoked(const std::string& app_id);
 
+  /**
+   * @brief Notifies policy manager, that PTS was sent out
+   */
+  void OnUpdateRequestSentToMobile();
+
 protected:
 
   /**
@@ -288,7 +293,7 @@ protected:
    * @param status Internal policy update status
    * @return Converted status for sending to HMI
    */
-  const std::string ConvertUpdateStatus(policy::PolicyTableStatus status);
+  const std::string ConvertUpdateStatus(policy::PolicyTableStatus status);  
 
 private:
   PolicyHandler();

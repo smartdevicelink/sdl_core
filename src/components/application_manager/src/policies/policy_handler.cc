@@ -767,8 +767,8 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
 
   if (policy_manager_->GetPolicyTableStatus() !=
       PolicyTableStatus::StatusUpdatePending) {
-    LOG4CXX_WARN(logger_,
-                 "Update policy is skipped because request to update was not");
+    LOG4CXX_WARN(logger_, "PTU processing skipped, since current status is "
+                          "different from pending.");
     return false;
   }
 
@@ -794,9 +794,12 @@ bool PolicyHandler::ReceiveMessageFromSDK(const std::string& file,
     application_manager::MessageHelper::CreateGetVehicleDataRequest(
           correlation_id, vehicle_data_args);
   } else  {
-    // TODO(PV): should be exchange restarted at this point?
+#ifdef EXTENDED_POLICY
+    LOG4CXX_WARN(logger_, "Exchange wasn't successful.");
+#else
     LOG4CXX_WARN(logger_, "Exchange wasn't successful, trying another one.");
-    //OnPTExchangeNeeded();
+    OnPTExchangeNeeded();
+#endif
   }
   return ret;
 }
@@ -1240,6 +1243,11 @@ bool PolicyHandler::IsApplicationRevoked(const std::string& app_id) {
   POLICY_LIB_CHECK(false);
 
   return policy_manager_->IsApplicationRevoked(app_id);
+}
+
+void PolicyHandler::OnUpdateRequestSentToMobile() {
+  LOG4CXX_INFO(logger_, "OnUpdateRequestSentToMobile");
+  policy_manager_->OnUpdateStarted();
 }
 
 }  //  namespace policy

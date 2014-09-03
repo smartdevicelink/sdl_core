@@ -1133,10 +1133,14 @@ void ApplicationManagerImpl::SendMessageToMobile(
     if (mobile_apis::Result::SUCCESS != check_result) {
       return;
     }
+
+    if (function_id == mobile_apis::FunctionID::OnSystemRequestID) {
+      policy::PolicyHandler::instance()->OnUpdateRequestSentToMobile();
+    }
   }
 
   messages_to_mobile_.PostMessage(impl::MessageToMobile(message_to_send,
-                                  final_message));
+                                  final_message));  
 }
 
 bool ApplicationManagerImpl::ManageMobileCommand(

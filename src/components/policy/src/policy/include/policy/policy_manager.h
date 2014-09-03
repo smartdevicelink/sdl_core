@@ -174,6 +174,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual void OnExceededTimeout() = 0;
 
     /**
+     * @brief Handler of PTS sending out
+     */
+    virtual void OnUpdateStarted() = 0;
+
+    /**
      * @brief Check user consent for mobile device data connection
      * @param device_id Unique device identifier
      * @return status of device consent

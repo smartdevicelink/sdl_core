@@ -59,6 +59,7 @@ set(SOURCES
   ./src/policy_table.cc
   ./src/sql_pt_queries.cc
   ./src/sql_pt_representation.cc
+  ./src/update_status_manager.cc
 )
 
 if (EXTENDED_POLICY_FLAG)

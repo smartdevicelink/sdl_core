@@ -38,6 +38,7 @@
 #include "utils/lock.h"
 #include "policy/policy_manager.h"
 #include "policy/policy_table.h"
+#include "policy/update_status_manager.h"
 #include "./functions.h"
 #include "usage_statistics/statistics_manager.h"
 
@@ -75,6 +76,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual int TimeoutExchange();
     virtual const std::vector<int> RetrySequenceDelaysSeconds();
     virtual void OnExceededTimeout();
+    virtual void OnUpdateStarted();
     virtual void PTUpdatedAt(int kilometers, int days_after_epoch);
 
     /**
@@ -155,8 +157,6 @@ class PolicyManagerImpl : public PolicyManager {
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(
       const BinaryMessage& pt_content);
-    //      virtual bool Validate();
-    //      virtual bool ValidateResponseAgainsRequest();
     virtual bool LoadPTFromFile(const std::string& file_name);
 
   private:
@@ -183,26 +183,6 @@ class PolicyManagerImpl : public PolicyManager {
       const policy_table::Strings& group_names,
       const std::vector<FunctionalGroupPermission>& group_permission,
       Permissions& notification_data);
-    /*
-     * @brief Sets flag for update progress
-     *
-     * @param value
-     */
-    void set_exchange_in_progress(bool value);
-
-    /*
-     * @brief Sets flag for pending update
-     *
-     * @param value
-     */
-    void set_exchange_pending(bool value);
-
-    /*
-     * @brief Sets flag for update necessity
-     *
-     * @param value
-     */
-    void set_update_required(bool value);
 
     /**
      * @brief Add application id at the end of update permissions request list
@@ -214,11 +194,6 @@ class PolicyManagerImpl : public PolicyManager {
      * @brief Remove first application in the update permissions request list
      */
     void RemoveAppFromUpdateList();
-
-    /**
-     * @brief Check update status and notify HMI on changes
-     */
-    void CheckUpdateStatus();
 
     /**
      * @brief Validate PermissionConsent structure according to currently
@@ -256,12 +231,7 @@ class PolicyManagerImpl : public PolicyManager {
 
     PolicyListener* listener_;
     PolicyTable policy_table_;
-    bool exchange_in_progress_;
-    bool update_required_;
-    bool exchange_pending_;
-    sync_primitives::Lock exchange_in_progress_lock_;
-    sync_primitives::Lock update_required_lock_;
-    sync_primitives::Lock exchange_pending_lock_;
+    UpdateStatusManager update_status_manager_;
     sync_primitives::Lock update_request_list_lock_;
     sync_primitives::Lock apps_registration_lock_;
     std::map<std::string, AppPermissions> app_permissions_diff_;
@@ -295,11 +265,6 @@ class PolicyManagerImpl : public PolicyManager {
      * Lock for guarding recording statistics
      */
     sync_primitives::Lock statistics_lock_;
-
-    /**
-     * @brief Last status of policy table update
-     */
-    policy::PolicyTableStatus last_update_status_;
 
     /**
      * @brief Device id, which is used during PTU handling for specific
