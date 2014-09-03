@@ -39,6 +39,7 @@
 
 #include "transport_manager/pasa_bt/bluetooth_PASA_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "utils/threads/thread.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -56,7 +57,6 @@ BluetoothPASAConnection::BluetoothPASAConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle,
     TransportAdapterController* controller)
     : read_fd_(-1), write_fd_(-1), controller_(controller),
-      thread_(),
       terminate_flag_(false),
       unexpected_disconnect_(false),
       device_uid_(device_uid),
@@ -67,7 +67,13 @@ BluetoothPASAConnection::~BluetoothPASAConnection() {
     LOG4CXX_TRACE_ENTER(logger_);
     terminate_flag_ = true;
     Notify();
-    pthread_join(thread_, 0);
+    errno = 0;
+    if(0 != pthread_detach(thread_)) {
+      const int err = errno;
+      LOG4CXX_WARN_WITH_ERRNO(logger_, "Could not detach thread "
+                               << ", error code " << err << " (" << strerror(err) << ")");
+//      pthread_cancel(thread_);
+    }
     if (-1 != read_fd_)
       close(read_fd_);
     if (-1 != write_fd_)
@@ -115,6 +121,8 @@ TransportAdapter::Error BluetoothPASAConnection::Start() {
     LOG4CXX_TRACE_EXIT(logger_);
     return TransportAdapter::FAIL;
   }
+  const std::string thread_name = std::string("BT Connection") /*+ device_handle()*/;
+  pthread_setname_np(thread_, thread_name.c_str());
   LOG4CXX_DEBUG(logger_, "thread created (#" << pthread_self() << ")");
   LOG4CXX_TRACE_EXIT(logger_);
   return TransportAdapter::OK;

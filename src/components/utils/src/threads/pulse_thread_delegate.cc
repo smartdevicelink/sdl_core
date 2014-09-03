@@ -37,28 +37,24 @@
 
 namespace threads {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "threads::PulseThreadDelegate")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
   LOG4CXX_TRACE(logger_, "Creating QNX channel");
   chid_ = ChannelCreate(0);
-  if (chid_ != -1) {
-    LOG4CXX_DEBUG(logger_, "Created QNX channel " << chid_);
-  }
-  else {
+  if (chid_ == -1) {
     LOG4CXX_ERROR(logger_, "Failed to create QNX channel");
     return;
   }
+  LOG4CXX_DEBUG(logger_, "Created QNX channel " << chid_);
 
   LOG4CXX_TRACE(logger_, "Connecting to QNX channel " << chid_);
   coid_ = ConnectAttach(ND_LOCAL_NODE, 0, chid_, _NTO_SIDE_CHANNEL, 0);
-  if (coid_ != -1) {
-    LOG4CXX_DEBUG(logger_, "Connected to QNX channel " << chid_);
-  }
-  else {
+  if (coid_ == -1) {
     LOG4CXX_ERROR(logger_, "Failed to connect to QNX channel " << chid_);
     return;
   }
+  LOG4CXX_DEBUG(logger_, "Connected to QNX channel " << chid_);
 
   run_ = true;
 }

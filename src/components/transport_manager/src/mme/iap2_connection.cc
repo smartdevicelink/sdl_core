@@ -62,7 +62,7 @@ bool IAP2Connection::Init() {
   if (parent_->RecordByAppId(app_handle_, record)) {
     protocol_name_ = record.first;
     iap2ea_hdl_ = record.second;
-    std::string thread_name = "iAP2 receiver (" + protocol_name_ + ")";
+    const std::string thread_name = "iAP2 " + protocol_name_;
     receiver_thread_delegate_ = new ReceiverThreadDelegate(iap2ea_hdl_, this);
     receiver_thread_ = new threads::Thread(thread_name.c_str(), receiver_thread_delegate_);
     receiver_thread_->start();

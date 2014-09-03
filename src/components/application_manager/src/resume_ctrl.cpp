@@ -23,17 +23,17 @@ namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 ResumeCtrl::ResumeCtrl(ApplicationManagerImpl* app_mngr)
   : app_mngr_(app_mngr),
-    timer_(this, &ResumeCtrl::onTimer) {
+    timer_("ResumeCtrl", this, &ResumeCtrl::onTimer) {
 }
 
 void ResumeCtrl::SaveAllApplications() {
   LOG4CXX_INFO(logger_, "ResumeCtrl::SaveApplications()");
   DCHECK(app_mngr_);
 
-  std::set<ApplicationSharedPtr>::iterator it = 
-								  app_mngr_->application_list_.begin();
+  std::set<ApplicationSharedPtr>::iterator it =
+                  app_mngr_->application_list_.begin();
   std::set<ApplicationSharedPtr>::iterator it_end =
-								   app_mngr_->application_list_.end();
+                   app_mngr_->application_list_.end();
   for (; it != it_end; ++it) {
     SaveApplication(*it);
   }

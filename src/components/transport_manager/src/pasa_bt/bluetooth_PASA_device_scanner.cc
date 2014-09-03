@@ -67,14 +67,14 @@ BluetoothPASADeviceScanner::BluetoothPASADeviceScanner(
   TransportAdapterController* controller, bool auto_repeat_search,
   int auto_repeat_pause_sec)
   : controller_(controller),
-    thread_(),
     thread_started_(false),
     shutdown_requested_(false),
     device_scan_requested_(false),
     device_scan_requested_cv_(),
     auto_repeat_search_(auto_repeat_search),
+    auto_repeat_pause_sec_(auto_repeat_pause_sec) ,
     mPASAFWSendHandle(OpenMsgQ(PREFIX_STR_FROMSDLCOREBTADAPTER_QUEUE, true, true)),
-    auto_repeat_pause_sec_(auto_repeat_pause_sec) {
+    mq_ToSDL(NULL){
 }
 
 
@@ -254,7 +254,7 @@ TransportAdapter::Error BluetoothPASADeviceScanner::Init() {
   found_devices_with_sdl_.clear();
 
   const int income_messages_thread_start_error =
-      pthread_create(&mPASAFWMsgHandlerThread, 0, handlePASAFrameworkIncomingMessages, this);
+      pthread_create(&bt_PASA_msg_thread_, 0, handlePASAFrameworkIncomingMessages, this);
   if (0 != income_messages_thread_start_error) {
     LOG4CXX_ERROR( logger_,
                    "Bluetooth device scanner Init: PASA incoming messages thread start failed,"
@@ -262,10 +262,10 @@ TransportAdapter::Error BluetoothPASADeviceScanner::Init() {
     LOG4CXX_TRACE_EXIT(logger_);
     return TransportAdapter::FAIL;
   }
-  pthread_setname_np(mPASAFWMsgHandlerThread, "PASAFW BTAdapter");
+  pthread_setname_np(bt_PASA_msg_thread_, "BT PASA Framwork Messages");
 
   const int bt_thread_start_error =
-      pthread_create(&thread_, 0, &bluetoothDeviceScannerThread, this);
+      pthread_create(&bt_device_scanner_thread_, 0, &bluetoothDeviceScannerThread, this);
   if (0 != bt_thread_start_error) {
     LOG4CXX_ERROR( logger_,
                    "Bluetooth device scanner Init: BT thread start failed,"
@@ -273,6 +273,7 @@ TransportAdapter::Error BluetoothPASADeviceScanner::Init() {
     LOG4CXX_TRACE_EXIT(logger_);
     return TransportAdapter::FAIL;
   }
+  pthread_setname_np(bt_device_scanner_thread_, "BT PASA Scanner");
   LOG4CXX_INFO(logger_, "Bluetooth device scanner thread started");
 
   thread_started_ = true;
@@ -294,9 +295,9 @@ void BluetoothPASADeviceScanner::Terminate() {
       device_scan_requested_ = false;
       device_scan_requested_cv_.NotifyOne();
     }
-    pthread_join(mPASAFWMsgHandlerThread, 0);
+    pthread_join(bt_PASA_msg_thread_, 0);
 
-    pthread_join(thread_, 0);
+    pthread_join(bt_device_scanner_thread_, 0);
     LOG4CXX_INFO(logger_, "PASA Bluetooth device scanner thread finished.");
   }
   LOG4CXX_TRACE_EXIT(logger_);

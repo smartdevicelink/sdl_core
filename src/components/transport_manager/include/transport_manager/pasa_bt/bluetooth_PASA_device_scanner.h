@@ -132,9 +132,9 @@ protected:
   void UpdateTotalApplicationList();
 
   TransportAdapterController* controller_;
-  pthread_t thread_;
+  pthread_t bt_device_scanner_thread_;
 
-  pthread_t mPASAFWMsgHandlerThread;
+  pthread_t bt_PASA_msg_thread_;
   bool thread_started_;
   bool shutdown_requested_;
   bool device_scan_requested_;

@@ -65,7 +65,7 @@ RequestController::~RequestController() {
 
   if (watchdog_) {
     watchdog_->RemoveListener(this);
-    delete watchdog_; 
+    delete watchdog_;
     watchdog_ = NULL;
   }
 }
@@ -78,7 +78,7 @@ void RequestController::InitializeThreadpool()
   for (uint32_t i = 0; i < pool_size_; i++) {
     char name [50];
     snprintf(name, sizeof(name)/sizeof(name[0]),
-             "Request thread %d", i);
+             "AM Pool %d", i);
     pool_.push_back(ThreadSharedPtr(new Thread(name, new Worker(this))));
     pool_[i]->start();
     LOG4CXX_INFO(logger_, "RequestController::InitializeThreadpool() " << name);

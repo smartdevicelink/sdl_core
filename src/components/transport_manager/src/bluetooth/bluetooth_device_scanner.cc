@@ -439,6 +439,7 @@ TransportAdapter::Error BluetoothDeviceScanner::Init() {
   if (0 == thread_start_error) {
     thread_started_ = true;
     LOG4CXX_INFO(logger_, "Bluetooth device scanner thread started");
+    pthread_setname_np(thread_, "BT Device Scaner");
   } else {
     LOG4CXX_ERROR(logger_,
                   "Bluetooth device scanner thread start failed, error code "

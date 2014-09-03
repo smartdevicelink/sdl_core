@@ -70,7 +70,7 @@ void FromMicRecorderAdapter::StartActivity(int32_t application_key) {
     FromMicToFileRecorderThread* thread_delegate =
       new FromMicToFileRecorderThread(
       output_file_, duration_);
-    recorder_thread_ = new threads::Thread("MicrophoneRecorder",
+    recorder_thread_ = new threads::Thread("MicrophoneRec",
                                            thread_delegate);
   }
 

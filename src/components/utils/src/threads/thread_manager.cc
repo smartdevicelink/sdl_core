@@ -62,12 +62,11 @@ std::string UnnamedThreadRegistry::GetUniqueName(PlatformThreadHandle id) {
   IdNameMap::iterator found = id_number_.find(id);
   if (found != id_number_.end()) {
     return found->second;
-  } else {
-    ++last_thread_number_;
-    std::stringstream namestream;
-    namestream<<kUnknownName<<last_thread_number_;
-    return id_number_[id] = namestream.str();
   }
+  ++last_thread_number_;
+  std::stringstream namestream;
+  namestream << kUnknownName << last_thread_number_;
+  return id_number_[id] = namestream.str();
 }
 
 ThreadManager::ThreadManager() {
@@ -79,36 +78,37 @@ ThreadManager::~ThreadManager() {
 
 void ThreadManager::RegisterName(PlatformThreadHandle id, const string& name) {
   AutoLock auto_lock(state_lock_);
-  if (names_.count(name) == 0) {
-    names_.insert(name);
-    pair<IdNamesMap::iterator, bool> inserted =
-        id_names_.insert(make_pair(id, name));
-    if (!inserted.second) {
-      LOG4CXX_ERROR(logger_, "Trying to register thread name " << name
+  if (names_.find(name) != names_.end()) {
+    LOG4CXX_ERROR(logger_, "Ignoring duplicate thread name: " << name);
+    return;
+  }
+  names_.insert(name);
+  pair<IdNamesMap::iterator, bool> inserted =
+      id_names_.insert(make_pair(id, name));
+  if (!inserted.second) {
+    LOG4CXX_ERROR(logger_, "Trying to register thread name " << name
                            <<", but it is already registered with name "
                            <<inserted.first->second);
-    }
-  } else {
-    LOG4CXX_ERROR(logger_, "Ignoring duplicate thread name: " + name);
   }
 }
 
 string ThreadManager::GetName(PlatformThreadHandle id) const {
   AutoLock auto_lock(state_lock_);
   IdNamesMap::const_iterator found = id_names_.find(id);
-  if (found != id_names_.end()) {
-    return found->second;
-  } else {
-    LOG4CXX_WARN(logger_, "Thread doesn't have associated name");
+  if (found == id_names_.end()) {
+    LOG4CXX_WARN(logger_, "Thread " << id << " doesn't have associated name");
     return unnamed_thread_namer_.GetUniqueName(id);
   }
+  return found->second;
 }
 
 void ThreadManager::Unregister(PlatformThreadHandle id) {
   AutoLock auto_lock(state_lock_);
-  string name = id_names_[id];
-  names_.erase(name);
-  id_names_.erase(id);
+  IdNamesMap::iterator it = id_names_.find(id);
+  if(it != id_names_.end()) {
+    names_.erase(it->second);
+    id_names_.erase(it);
+  }
 }
 
 } // namespace impl

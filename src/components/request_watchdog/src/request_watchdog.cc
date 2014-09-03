@@ -56,7 +56,7 @@ Watchdog* RequestWatchdog::instance() {
 }
 */
 RequestWatchdog::RequestWatchdog()
-  : queueDispatcherThread("RequestQueueThread",
+  : queueDispatcherThread("AM Watchdog",
                           new QueueDispatcherThreadDelegate(this)) {
   LOG4CXX_TRACE_ENTER(logger_);
   queueDispatcherThread.start();

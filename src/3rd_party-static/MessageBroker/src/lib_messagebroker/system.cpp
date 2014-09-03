@@ -76,6 +76,7 @@ bool Thread::Start(bool detach) {
 
   /* create thread */
   ret = pthread_create(&m_id, &attr, &Thread::Call, this);
+  pthread_setname_np(m_id, "MB Thread");
   pthread_attr_destroy(&attr);
   return ret == 0;
 }

@@ -80,10 +80,10 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     request_ctrl_(),
     hmi_so_factory_(NULL),
     mobile_so_factory_(NULL),
-    messages_from_mobile_("application_manager::FromMobileThreadImpl", this),
-    messages_to_mobile_("application_manager::ToMobileThreadImpl", this),
-    messages_from_hmi_("application_manager::FromHMHThreadImpl", this),
-    messages_to_hmi_("application_manager::ToHMHThreadImpl", this),
+    messages_from_mobile_("AM FromMobile", this),
+    messages_to_mobile_("AM ToMobile", this),
+    messages_from_hmi_("AM FromHMI", this),
+    messages_to_hmi_("AM ToHMI", this),
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF),
     resume_ctrl_(this),
@@ -1355,7 +1355,7 @@ bool ApplicationManagerImpl::Init() {
         break;
       }
     }
-    const std::string app_storage_folder = 
+    const std::string app_storage_folder =
       profile::Profile::instance()->app_storage_folder();
     if (!file_system::DirectoryExists(app_storage_folder)) {
       LOG4CXX_WARN(logger_, "Storage directory doesn't exist");
@@ -1375,7 +1375,7 @@ bool ApplicationManagerImpl::Init() {
       break;
     }
 
-    const std::string system_files_path = 
+    const std::string system_files_path =
       profile::Profile::instance()->system_files_path();
     if (!file_system::DirectoryExists(system_files_path)) {
       LOG4CXX_WARN(logger_, "System files directory doesn't exist");

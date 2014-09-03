@@ -233,7 +233,7 @@ class Thread {
   static size_t kMinStackSize;
 
  protected:
-  std::string name_;
+  const std::string name_;
   ThreadDelegate* delegate_;
   impl::PlatformThreadHandle thread_handle_;
   ThreadOptions thread_options_;

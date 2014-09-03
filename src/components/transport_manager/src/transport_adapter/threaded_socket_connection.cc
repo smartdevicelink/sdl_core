@@ -111,15 +111,16 @@ TransportAdapter::Error ThreadedSocketConnection::Start() {
     return TransportAdapter::FAIL;
   }
 
-  if (0 == pthread_create(&thread_, 0, &StartThreadedSocketConnection, this)) {
-    LOG4CXX_DEBUG(logger_, "thread created (#" << pthread_self() << ")");
-    LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK");
-    return TransportAdapter::OK;
-  } else {
+  if (0 != pthread_create(&thread_, 0, &StartThreadedSocketConnection, this)) {
     LOG4CXX_WARN(logger_, "thread creation failed (#" << pthread_self() << ")");
     LOG4CXX_TRACE(logger_, "exit with TransportAdapter::FAIL");
     return TransportAdapter::FAIL;
   }
+  LOG4CXX_DEBUG(logger_, "thread created (#" << pthread_self() << ")");
+  LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK");
+  const std::string thread_name = std::string("Socket ") + device_handle();
+  pthread_setname_np(thread_, thread_name.c_str());
+  return TransportAdapter::OK;
 }
 
 void ThreadedSocketConnection::Finalize() {
