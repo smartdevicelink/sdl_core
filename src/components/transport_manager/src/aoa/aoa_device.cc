@@ -65,10 +65,9 @@ bool AOADevice::IsSameAs(const Device* other_device) const {
 
 ApplicationList AOADevice::GetApplicationList() const {
   // Device has got only one application
-  const ApplicationHandle kNumberApplication = 1;
-  ApplicationList list;
-  list.push_back(kNumberApplication);
-  return list;
+  const ApplicationList::size_type kSize = 1;
+  const ApplicationList::value_type kNumberApplication = 1;
+  return ApplicationList(kSize, kNumberApplication);
 }
 
 AOAWrapper::AOAHandle AOADevice::handle() const {

@@ -89,7 +89,6 @@ void AOADeviceScanner::NotifyDevicesUpdated() {
 }
 
 std::string AOADeviceScanner::GetName(const std::string& unique_id) {
-  sync_primitives::AutoLock locker(devices_lock_);
   return "AOA device " + unique_id;
 }
 

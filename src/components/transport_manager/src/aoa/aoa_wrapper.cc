@@ -34,6 +34,7 @@
 
 #include <aoa/aoa.h>
 
+#include "utils/macro.h"
 #include "utils/logger.h"
 
 namespace transport_manager {
@@ -363,6 +364,8 @@ RawMessagePtr AOAWrapper::ReceiveMessage() const {
     PrintError(ret);
     return RawMessagePtr();
   }
+  DCHECK(data);
+  assert(size > 0);
   return RawMessagePtr(new RawMessage(0, 0, data, size));
 }
 
@@ -378,6 +381,8 @@ RawMessagePtr AOAWrapper::ReceiveControlMessage(uint16_t request,
     PrintError(ret);
     return RawMessagePtr();
   }
+  DCHECK(data);
+  assert(size > 0);
   return RawMessagePtr(new RawMessage(0, 0, data, size));
 }
 
