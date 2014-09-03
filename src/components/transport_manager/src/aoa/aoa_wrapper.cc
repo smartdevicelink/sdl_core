@@ -79,19 +79,24 @@ static void OnTransmittedData(aoa_hdl_t *hdl, uint8_t *data, uint32_t sz,
   observer->OnMessageTransmitted(success, message);
 }
 
+AOAScannerObserver* AOAWrapper::scanner_observer_ = 0;
+
 AOAWrapper::AOAWrapper(AOAHandle hdl)
     : hdl_(hdl),
-      timeout_(AOA_TIMEOUT_DEFAULT) {
+      timeout_(AOA_TIMEOUT_DEFAULT),
+      device_observer_(0) {
 }
 
 AOAWrapper::AOAWrapper(AOAHandle hdl, uint32_t timeout)
     : hdl_(hdl),
-      timeout_(timeout) {
+      timeout_(timeout),
+      device_observer_(0) {
 }
 
 bool AOAWrapper::Init(AOAScannerObserver *observer) {
   LOG4CXX_TRACE(logger_, "AOA: init default");
-  int ret = aoa_init(NULL, NULL, &OnConnectedDevice, &observer, 0);
+  scanner_observer_ = observer;
+  int ret = aoa_init(NULL, NULL, &OnConnectedDevice, &scanner_observer_, 0);
   if (IsError(ret)) {
     PrintError(ret);
     return false;
@@ -102,8 +107,9 @@ bool AOAWrapper::Init(AOAScannerObserver *observer) {
 bool AOAWrapper::Init(const std::string& path_to_config,
                       AOAScannerObserver* observer) {
   LOG4CXX_TRACE(logger_, "AOA: init default usb_info");
+  scanner_observer_ = observer;
   int ret = aoa_init(path_to_config.c_str(), NULL, &OnConnectedDevice,
-                     &observer, 0);
+                     &scanner_observer_, 0);
   if (IsError(ret)) {
     PrintError(ret);
     return false;
@@ -114,9 +120,10 @@ bool AOAWrapper::Init(const std::string& path_to_config,
 bool AOAWrapper::Init(const AOAWrapper::AOAUsbInfo& aoa_usb_info,
                       AOAScannerObserver* observer) {
   LOG4CXX_TRACE(logger_, "AOA: init default path to config");
+  scanner_observer_ = observer;
   usb_info_t usb_info;
   PrepareUsbInfo(aoa_usb_info, &usb_info);
-  int ret = aoa_init(NULL, &usb_info, &OnConnectedDevice, &observer,
+  int ret = aoa_init(NULL, &usb_info, &OnConnectedDevice, &scanner_observer_,
                      AOA_FLAG_UNIQUE_DEVICE);
   if (IsError(ret)) {
     PrintError(ret);
@@ -129,10 +136,11 @@ bool AOAWrapper::Init(const std::string& path_to_config,
                       const AOAWrapper::AOAUsbInfo& aoa_usb_info,
                       AOAScannerObserver *observer) {
   LOG4CXX_TRACE(logger_, "AOA: init");
+  scanner_observer_ = observer;
   usb_info_t usb_info;
   PrepareUsbInfo(aoa_usb_info, &usb_info);
   int ret = aoa_init(path_to_config.c_str(), &usb_info, &OnConnectedDevice,
-                     &observer, AOA_FLAG_UNIQUE_DEVICE);
+                     &scanner_observer_, AOA_FLAG_UNIQUE_DEVICE);
   if (IsError(ret)) {
     PrintError(ret);
     return false;
@@ -140,8 +148,7 @@ bool AOAWrapper::Init(const std::string& path_to_config,
   return true;
 }
 
-bool AOAWrapper::SetCallback(AOADeviceObserver *observer,
-                             AOAEndpoint endpoint) const {
+bool AOAWrapper::SetCallback(AOAEndpoint endpoint) const {
   LOG4CXX_TRACE(logger_,
                 "AOA: set callback " << hdl_ << ", endpoint " << endpoint);
   data_clbk_t callback;
@@ -158,7 +165,8 @@ bool AOAWrapper::SetCallback(AOADeviceObserver *observer,
       ;
       return false;
   }
-  int ret = aoa_set_callback(hdl_, callback, &observer, BitEndpoint(endpoint));
+  int ret = aoa_set_callback(hdl_, callback, &device_observer_,
+                             BitEndpoint(endpoint));
   if (IsError(ret)) {
     PrintError(ret);
     return false;
@@ -166,13 +174,14 @@ bool AOAWrapper::SetCallback(AOADeviceObserver *observer,
   return true;
 }
 
-bool AOAWrapper::Subscribe(AOADeviceObserver *observer) const {
+bool AOAWrapper::Subscribe(AOADeviceObserver *observer) {
   LOG4CXX_TRACE(logger_, "AOA: subscribe on receive data " << hdl_);
-  if (!SetCallback(observer, AOA_Ept_Accessory_BulkIn)) {
+  device_observer_ = observer;
+  if (!SetCallback(AOA_Ept_Accessory_BulkIn)) {
     return false;
   }
   LOG4CXX_TRACE(logger_, "AOA: subscribe on transmit data " << hdl_);
-  if (!SetCallback(observer, AOA_Ept_Accessory_BulkOut)) {
+  if (!SetCallback(AOA_Ept_Accessory_BulkOut)) {
     return false;
   }
   return true;
@@ -187,7 +196,7 @@ bool AOAWrapper::UnsetCallback(AOAEndpoint endpoint) const {
   return true;
 }
 
-bool AOAWrapper::Unsubscribe() const {
+bool AOAWrapper::Unsubscribe() {
   LOG4CXX_TRACE(logger_, "AOA: unsubscribe on receive data" << hdl_);
   if (!UnsetCallback(AOA_Ept_Accessory_BulkIn)) {
     return false;
@@ -196,6 +205,7 @@ bool AOAWrapper::Unsubscribe() const {
   if (!UnsetCallback(AOA_Ept_Accessory_BulkOut)) {
     return false;
   }
+  device_observer_ = 0;
   return true;
 }
 
@@ -206,6 +216,7 @@ bool AOAWrapper::Shutdown() {
     PrintError(ret);
     return false;
   }
+  scanner_observer_ = 0;
   return true;
 }
 

@@ -100,8 +100,8 @@ class AOAWrapper {
   uint32_t GetBufferMaximumSize(AOAEndpoint endpoint) const;
   std::vector<AOAMode> GetModes() const;
   std::vector<AOAEndpoint> GetEndpoints() const;
-  bool Subscribe(AOADeviceObserver* observer) const;
-  bool Unsubscribe() const;
+  bool Subscribe(AOADeviceObserver* observer);
+  bool Unsubscribe();
   bool SendMessage(RawMessagePtr message) const;
   bool SendControlMessage(uint16_t request, uint16_t value, uint16_t index,
                           RawMessagePtr message) const;
@@ -110,8 +110,10 @@ class AOAWrapper {
                                       uint16_t index) const;
 
  private:
+  static AOAScannerObserver* scanner_observer_;
   AOAHandle hdl_;
   uint32_t timeout_;
+  AOADeviceObserver* device_observer_;
 
   static void PrepareUsbInfo(const AOAUsbInfo& aoa_usb_info,
                              usb_info_s* usb_info);
@@ -120,7 +122,7 @@ class AOAWrapper {
   inline bool IsValueInMask(uint32_t bitmask, uint32_t value) const;
   std::vector<AOAMode> CreateModesList(uint32_t modes_mask) const;
   std::vector<AOAEndpoint> CreateEndpointsList(uint32_t endpoints_mask) const;
-  bool SetCallback(AOADeviceObserver *observer, AOAEndpoint endpoint) const;
+  bool SetCallback(AOAEndpoint endpoint) const;
   bool UnsetCallback(AOAEndpoint endpoint) const;
 };
 
