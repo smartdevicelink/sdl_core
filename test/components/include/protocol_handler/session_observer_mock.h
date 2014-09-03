@@ -72,12 +72,13 @@ class SessionObserverMock: public ::protocol_handler::SessionObserver {
                        uint32_t *app_id,
                        std::list<int32_t> *sessions_list,
                        uint32_t *device_id));
-  MOCK_METHOD4(GetDataOnDeviceID,
+  MOCK_METHOD5(GetDataOnDeviceID,
                int32_t(
                  uint32_t device_handle,
                  std::string *device_name,
                  std::list<uint32_t> *applications_list,
-                 std::string *mac_address));
+                 std::string *mac_address,
+                 std::string *connection_type));
   MOCK_METHOD2(IsHeartBeatSupported,
                bool(transport_manager::ConnectionUID connection_handle,
                     uint8_t session_id));

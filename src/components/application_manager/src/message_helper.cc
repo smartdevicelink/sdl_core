@@ -1286,7 +1286,7 @@ void MessageHelper::GetDeviceInfoForHandle(const uint32_t device_handle,
   }
   connection_handler::ConnectionHandlerImpl::instance()->GetDataOnDeviceID(
     device_handle, &device_info->device_name, NULL,
-    &device_info->device_mac_address);
+    &device_info->device_mac_address, &device_info->device_connection_type);
 }
 
 void MessageHelper::GetDeviceInfoForApp(uint32_t connection_key,

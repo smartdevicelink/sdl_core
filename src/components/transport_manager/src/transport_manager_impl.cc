@@ -494,7 +494,7 @@ void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
   for (DeviceList::const_iterator it = dev_list.begin();
        it != dev_list.end(); ++it) {
     DeviceHandle device_handle = converter_.UidToHandle(*it);
-    DeviceInfo info(device_handle, *it, ta->DeviceName(*it));
+    DeviceInfo info(device_handle, *it, ta->DeviceName(*it), ta->GetConnectionType());
     device_list_.push_back(std::make_pair(ta, info));
     new_devices.insert(info);
   }
@@ -640,7 +640,7 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
        it != device_list.end(); ++it) {
     device_to_adapter_map_.insert(std::make_pair(*it, ta));
     DeviceHandle device_handle = converter_.UidToHandle(*it);
-    DeviceInfo info(device_handle, *it, ta->DeviceName(*it));
+    DeviceInfo info(device_handle, *it, ta->DeviceName(*it), ta->GetConnectionType());
     RaiseEvent(&TransportManagerListener::OnDeviceFound, info);
   }
   UpdateDeviceList(ta);
@@ -705,7 +705,8 @@ void TransportManagerImpl::EventListenerThread() {
                                            device_handle));
           RaiseEvent(&TransportManagerListener::OnConnectionEstablished,
                      DeviceInfo(device_handle, event.device_uid,
-                                event.transport_adapter->DeviceName(event.device_uid)),
+                                event.transport_adapter->DeviceName(event.device_uid),
+                                event.transport_adapter->GetConnectionType()),
                      connection_id_counter_);
           LOG4CXX_DEBUG(logger_, "event_type = ON_CONNECT_DONE");
           break;
@@ -713,7 +714,8 @@ void TransportManagerImpl::EventListenerThread() {
         case TransportAdapterListenerImpl::EventTypeEnum::ON_CONNECT_FAIL: {
           RaiseEvent(&TransportManagerListener::OnConnectionFailed,
                      DeviceInfo(converter_.UidToHandle(event.device_uid), event.device_uid,
-                                event.transport_adapter->DeviceName(event.device_uid)),
+                                event.transport_adapter->DeviceName(event.device_uid),
+                                event.transport_adapter->GetConnectionType()),
                      ConnectError());
           LOG4CXX_DEBUG(logger_, "event_type = ON_CONNECT_FAIL");
           break;

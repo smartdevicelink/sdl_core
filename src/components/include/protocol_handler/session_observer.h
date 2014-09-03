@@ -128,12 +128,14 @@ class SessionObserver {
    * \param device_name Returned: name of device
    * \param applications_list Returned: applications on device
    * \param mac_address Returned: List of session keys
+   * \param connection_type Returned: type of connection (USB, BT, etc.)
    * \return int32_t -1 in case of error or 0 in case of success
    */
   virtual int32_t GetDataOnDeviceID(uint32_t device_handle,
                                     std::string *device_name,
                                     std::list<uint32_t> *applications_list,
-                                    std::string *mac_address) = 0;
+                                    std::string *mac_address,
+                                    std::string *connection_type) = 0;
 
   /**
    * \brief returns TRUE if session supports sending HEARTBEAT ACK to mobile side

@@ -272,10 +272,15 @@ void RegisterAppInterfaceRequest::Run() {
       }
     }
 
+    const connection_handler::DeviceHandle handle = app->device();
     // Add device to policy table and set device info, if any
     std::string device_mac_address =
-      application_manager::MessageHelper::GetDeviceMacAddressForHandle(app->device());
+      application_manager::MessageHelper::GetDeviceMacAddressForHandle(handle);
+    policy::DeviceParams dev_params;
+    application_manager::MessageHelper::GetDeviceInfoForHandle(handle,
+                                                               &dev_params);
     policy::DeviceInfo device_info;
+    device_info.connection_type = dev_params.device_connection_type;
     if (msg_params.keyExists(strings::device_info)) {
       FillDeviceInfo(&device_info);
     }

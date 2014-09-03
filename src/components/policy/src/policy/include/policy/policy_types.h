@@ -47,6 +47,7 @@ enum PolicyErrorEnum {
 
 const std::string kDefaultDeviceMacAddress = "00:00:00:00:00:00";
 const std::string kDefaultDeviceName = "MyDevice";
+const std::string kDefaultDeviceConnectionType = "UNKNOWN";
 
 /**
  * @brief Constants for special ids in application policies section of
@@ -147,11 +148,13 @@ struct DeviceParams {
     DeviceParams()
         : device_name(kDefaultDeviceName),
           device_mac_address(kDefaultDeviceMacAddress),
+          device_connection_type(kDefaultDeviceConnectionType),
           device_handle(0) {
     }
 
     std::string device_name;
     std::string device_mac_address;
+    std::string device_connection_type;
     uint32_t device_handle;
 };
 
@@ -179,6 +182,7 @@ struct DeviceInfo {
     std::string os_ver;
     std::string carrier;
     uint32_t max_number_rfcom_ports;
+    std::string connection_type;
 };
 
 /**

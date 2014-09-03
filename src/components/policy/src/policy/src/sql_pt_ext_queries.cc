@@ -63,8 +63,8 @@ const std::string kUpdateDeviceConsentedGroup =
 
 const std::string kUpdateDevice =
   "UPDATE `device` SET `hardware` = ?, `firmware_rev` = ?, `os` = ?, "
-  "`os_version` = ?, `carrier` = ?, `max_number_rfcom_ports` = ? "
-  "WHERE `id` = ? ";
+  "`os_version` = ?, `carrier` = ?, `max_number_rfcom_ports` = ?, "
+  " `connection_type` = ? WHERE `id` = ? ";
 
 const std::string kInsertDeviceConsentedGroup =
   "INSERT OR IGNORE INTO `device_consent_group` "
@@ -73,8 +73,9 @@ const std::string kInsertDeviceConsentedGroup =
 
 const std::string kInsertDevice =
   "INSERT OR IGNORE INTO `device` "
-  "(`id`, `hardware`, `firmware_rev`, `os`, `os_version`, `carrier`, `max_number_rfcom_ports`) "
-  "VALUES (?,?,?,?,?,?,?)";
+  "(`id`, `hardware`, `firmware_rev`, `os`, `os_version`, `carrier`,"
+    "`max_number_rfcom_ports`, `connection_type`) "
+  "VALUES (?,?,?,?,?,?,?,?)";
 
 const std::string kSelectDeviceData = "SELECT * FROM `device`";
 
@@ -114,8 +115,8 @@ const std::string kSelectAppLevels =
   "FROM `app_level`";
 const std::string kInsertDeviceData =
   "INSERT OR IGNORE INTO `device` "
-  "(`id`, `hardware`, `firmware_rev`, `os`, `os_version`, `carrier`, `max_number_rfcom_ports`) "
-  "VALUES (?,?,?,?,?,?,?) ";
+  "(`id`, `hardware`, `firmware_rev`, `os`, `os_version`, `carrier`, "
+  "`max_number_rfcom_ports`,`connection_type`) VALUES (?,?,?,?,?,?,?,?) ";
 
 const std::string kInsertConsentGroups =
   "INSERT OR IGNORE INTO `consent_group` "

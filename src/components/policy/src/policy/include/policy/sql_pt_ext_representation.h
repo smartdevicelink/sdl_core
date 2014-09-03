@@ -60,13 +60,14 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
     bool GetDeviceGroupsFromPolicies(policy_table::Strings* groups = NULL,
                                      policy_table::Strings* preconsented_groups =
                                        NULL);
-    bool SetDeviceData(const std::string& device_id, const std::string& hardware =
-                         "",
-                       const std::string& firmware = "", const std::string& os =
-                         "",
+    bool SetDeviceData(const std::string& device_id,
+                       const std::string& hardware = "",
+                       const std::string& firmware = "",
+                       const std::string& os = "",
                        const std::string& os_version = "",
                        const std::string& carrier = "",
-                       const uint32_t number_of_ports = 0);
+                       const uint32_t number_of_ports = 0,
+                       const std::string& connection_type = "");
     bool SetUserPermissionsForDevice(const std::string& device_id,
                                      const StringArray& consented_groups =
                                        StringArray(),

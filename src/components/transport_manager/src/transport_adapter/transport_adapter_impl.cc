@@ -731,6 +731,15 @@ std::string TransportAdapterImpl::DeviceName(const DeviceUID& device_id) const {
   }
 }
 
+std::string TransportAdapterImpl::GetConnectionType() const {
+  const std::string deviceType = GetDeviceType();
+  std::string result("USB_serial_number");
+  if ("sdl-tcp" == deviceType || "sdl-bluetooth" == deviceType) {
+    result.assign("BTMAC");
+  }
+  return result;
+}
+
 #ifdef TIME_TESTER
 void TransportAdapterImpl::SetTimeMetricObserver(TMMetricObserver* observer) {
   metric_observer_ = observer;

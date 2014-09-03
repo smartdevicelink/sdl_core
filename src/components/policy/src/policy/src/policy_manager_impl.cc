@@ -667,7 +667,8 @@ void PolicyManagerImpl::SetDeviceInfo(const std::string& device_id,
     if (!pt_ext->SetDeviceData(device_id, device_info.hardware,
                                device_info.firmware_rev, device_info.os,
                                device_info.os_ver, device_info.carrier,
-                               device_info.max_number_rfcom_ports)) {
+                               device_info.max_number_rfcom_ports,
+                               device_info.connection_type)) {
       LOG4CXX_WARN(logger_, "Can't set device data.");
     }
   }

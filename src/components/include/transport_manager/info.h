@@ -97,6 +97,11 @@ class DeviceInfo : public Info {
    */
   DeviceHandle device_handle_;
 
+  /**
+   * @brief The connection type used by device.
+   */
+  ConnectionType connection_type_;
+
  public:
   /**
    * @brief Constructor.
@@ -106,10 +111,11 @@ class DeviceInfo : public Info {
    * @param name Name of device.
    */
   DeviceInfo(DeviceHandle device_handle, std::string mac_address,
-             std::string name)
+             std::string name, const ConnectionType& connection_type)
     : Info(name),
       mac_address_(mac_address),
-      device_handle_(device_handle) {
+      device_handle_(device_handle),
+      connection_type_(connection_type) {
   }
 
   /**
@@ -124,6 +130,14 @@ class DeviceInfo : public Info {
    */
   DeviceHandle device_handle() const {
     return device_handle_;
+  }
+
+  /**
+   * @brief Return connection_type_.
+   * @return
+   */
+  ConnectionType connection_type() const {
+    return connection_type_;
   }
 
   /**
