@@ -45,6 +45,12 @@ from ford_xml_parser import FordXmlParser, ParamDesc
 from code_formatter import CodeBlock
 
 class Notifications_qml(FordXmlParser):
+    def first_letter_to_lower_case(self, s):
+        if len(s) == 0:
+            return s
+        else:
+            return s[0].lower() + s[1:]
+
     def make_header(self, out):
         out.write("class SdlProxy: public Item {\n")
         with CodeBlock(out) as out:
@@ -55,13 +61,12 @@ class Notifications_qml(FordXmlParser):
             out.write("private:\n")
             out.write("QDBusInterface *sdlBasicCommunicationInterface;\n")
             out.write("signals:\n")
-        #self.iterate_notifications("", self.qml_param_type, out)
         for interface_el in self.el_tree.findall('interface'):
             iface_name = interface_el.get('name')
             notifications = self.find_notifications_by_provider(interface_el, "sdl")
             for notification_el in notifications:
                 with CodeBlock(out) as out:
-                    out.write("void %s(" % notification_el.get("name"))
+                    out.write("void %s(" % self.first_letter_to_lower_case( notification_el.get("name")) )
                 param_el_count = 1
                 list_of_params = notification_el.findall("param")
                 list_of_params_len = len(list_of_params)
@@ -74,7 +79,6 @@ class Notifications_qml(FordXmlParser):
                 out.write(");\n")
         with CodeBlock(out) as out:
             out.write("private slots:\n")
-        #self.iterate_notifications("slot_", self.qt_param_type, out)
         for interface_el in self.el_tree.findall('interface'):
             iface_name = interface_el.get('name')
             notifications = self.find_notifications_by_provider(interface_el, "sdl")
@@ -179,7 +183,7 @@ class Notifications_qml(FordXmlParser):
                         out.write("%s = QVariant::fromValue(%s);\n" % (tmp_param_name, param.name))
                         self.write_param_validation(param, param.name, "\nLOG4CXX_ERROR(logger_, \"%s in %s out of bounds\")" % (param.name, notific_full_name), out)
                         out.write("\n")                    
-                    out.write("emit %s(" % notification_el.get("name"))
+                    out.write("emit %s(" % self.first_letter_to_lower_case( notification_el.get("name")) )
                     param_el_count = 1
                     list_of_params = notification_el.findall("param")
                     list_of_params_len = len(list_of_params)
