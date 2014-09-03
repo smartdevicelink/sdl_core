@@ -172,6 +172,7 @@ PolicyHandler::PolicyHandler()
 #endif  // EXTENDED_POLICY
     on_ignition_check_done_(false),
     last_activated_app_id_(0),
+    registration_in_progress(false),
     is_user_requested_policy_table_update_(false) {
 }
 
@@ -387,6 +388,26 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
   }
 }
 
+bool PolicyHandler::EnsureDeviceConsented() {
+    LOG4CXX_INFO(logger_, "PolicyHandler::EnsureDeviceConsented");
+
+  DeviceParams device_params;
+  DeviceConsent consent = GetDeviceForSending(device_params);
+  const bool hasConsent = kDeviceHasNoConsent != consent;
+  if (!hasConsent) {
+    // Send OnSDLConsentNeeded to HMI for user consent on device usage
+    pending_device_handles_.push_back(device_params.device_handle);
+    application_manager::MessageHelper::SendOnSDLConsentNeeded(device_params);
+  }
+  return hasConsent;
+}
+
+void PolicyHandler::AddApplication(const std::string& application_id) {
+  // TODO (AGaliuzov): remove this workaround during refactoring.
+  registration_in_progress = true;
+  policy_manager()->AddApplication(application_id);
+}
+
 void PolicyHandler::SetDeviceInfo(std::string& device_id,
                                   const DeviceInfo& device_info) {
   LOG4CXX_INFO(logger_, "SetDeviceInfo");
@@ -458,8 +479,6 @@ void PolicyHandler::OnAppPermissionConsent(const uint32_t connection_key,
     permissions.device_id = it->second;
     policy_manager_->SetUserConsentForApp(permissions);
   }
-
-  app_to_device_link_.clear();
 }
 
 void PolicyHandler::OnGetUserFriendlyMessage(
@@ -483,10 +502,11 @@ void PolicyHandler::OnGetListOfPermissions(const uint32_t connection_key,
   if (!connection_key) {
     LinkAppToDevice linker(app_to_device_link_);
     application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
+    const ApplicationList app_list = accessor.applications();
     std::set<application_manager::ApplicationSharedPtr>::const_iterator it_app =
-        accessor.applications().begin();
+        app_list.begin();
     std::set<application_manager::ApplicationSharedPtr>::const_iterator
-        it_app_end = accessor.applications().end();
+        it_app_end = app_list.end();
 
     // Add all currently registered applications
     std::for_each(it_app, it_app_end, linker);
@@ -586,6 +606,30 @@ void PolicyHandler::OnSystemInfoUpdateRequired() {
   LOG4CXX_INFO(logger_, "OnSystemInfoUpdateRequired");
   POLICY_LIB_CHECK_VOID();
   application_manager::MessageHelper::SendGetSystemInfoRequest();
+}
+
+void PolicyHandler::OnVIIsReady() {
+  const uint32_t correlation_id = application_manager::
+      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+  std::vector<std::string> params;
+  params.push_back(application_manager::strings::vin);
+
+  application_manager::MessageHelper::CreateGetVehicleDataRequest(
+        correlation_id, params);
+
+}
+
+void PolicyHandler::OnVehicleDataUpdated(
+    const smart_objects::SmartObject& message) {
+#if defined (EXTENDED_POLICY)
+  if (message[application_manager::strings::msg_params].
+      keyExists(application_manager::strings::vin)) {
+    policy_manager()->SetVINValue(
+          message[application_manager::strings::msg_params]
+          [application_manager::strings::vin].asString());
+  }
+#endif // EXTENDED_POLICY
 }
 
 void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
@@ -809,7 +853,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
   // Common devices consents change
   if (!device_id) {
     application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
-    const std::set<application_manager::ApplicationSharedPtr>& app_list =
+    const std::set<application_manager::ApplicationSharedPtr> app_list =
         accessor.applications();
 
     std::set<application_manager::ApplicationSharedPtr>::const_iterator
@@ -865,26 +909,33 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
 
     pending_device_handles_.erase(it);
   }
+
 #ifdef EXTENDED_POLICY
-  application_manager::ApplicationManagerImpl* app_manager =
-      application_manager::ApplicationManagerImpl::instance();
   if (is_allowed) {
-    application_manager::ApplicationSharedPtr app =
-      app_manager->application(last_activated_app_id_);
+    // TODO (AGaliuzov): remove this workaround during refactoring.
+    if (registration_in_progress) {
+      StartPTExchange(true);
+      registration_in_progress = false;
 
-    if (!app.valid()) {
-      LOG4CXX_WARN(logger_, "Application with id '" << last_activated_app_id_
-                   << "' not found within registered applications.");
-      return;
     }
-    if (app) {
-      // Send HMI status notification to mobile
-      // TODO(PV): requires additonal checking
-      //app_manager->PutApplicationInFull(app);
-      application_manager::MessageHelper::SendActivateAppToHMI(app->app_id());
-      app_manager->ActivateApplication(app);
-    }
+    application_manager::ApplicationManagerImpl* app_manager =
+        application_manager::ApplicationManagerImpl::instance();
 
+      application_manager::ApplicationSharedPtr app =
+        app_manager->application(last_activated_app_id_);
+
+      if (!app.valid()) {
+        LOG4CXX_WARN(logger_, "Application with id '" << last_activated_app_id_
+                     << "' not found within registered applications.");
+        return;
+      }
+      if (app) {
+        // Send HMI status notification to mobile
+        // TODO(PV): requires additonal checking
+        //app_manager->PutApplicationInFull(app);
+        application_manager::MessageHelper::SendActivateAppToHMI(app->app_id());
+        app_manager->ActivateApplication(app);
+      }
     // Skip device selection, since user already consented device usage
     StartPTExchange(true);
   }
@@ -966,17 +1017,21 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
   }
 
+  bool is_app_activated = false;
   // If application is revoked it should not be activated
   // In this case we need to activate application
   if (false == permissions.appRevoked && true == permissions.isSDLAllowed) {
-    application_manager::ApplicationManagerImpl::instance()->
+    is_app_activated =
+        application_manager::ApplicationManagerImpl::instance()->
         ActivateApplication(app);
   }
 
   last_activated_app_id_ = connection_key;
   application_manager::MessageHelper::SendActivateAppResponse(permissions,
                                                               correlation_id);
-  application_manager::MessageHelper::SendHMIStatusNotification(*app.get());
+  if (is_app_activated) {
+    application_manager::MessageHelper::SendHMIStatusNotification(*app.get());
+  }
 }
 
 void PolicyHandler::PTExchangeAtIgnition() {

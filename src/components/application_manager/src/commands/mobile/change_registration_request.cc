@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string.h>
 #include <algorithm>
 #include "application_manager/commands/mobile/change_registration_request.h"
 #include "application_manager/application_manager_impl.h"
@@ -336,7 +337,7 @@ bool ChangeRegistrationRequest::IsWhiteSpaceExist() {
 
     for (; it_tn != it_tn_end; ++it_tn) {
       str = (*it_tn)[strings::text].asCharArray();
-      if (!CheckSyntax(str)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_name syntax check failed");
         return true;
       }
@@ -379,7 +380,7 @@ mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
       (*message_)[strings::msg_params];
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  const std::set<ApplicationSharedPtr>& applications = accessor.applications();
+  const std::set<ApplicationSharedPtr> applications = accessor.applications();
   std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
   std::string app_name;
   uint32_t app_id = connection_key();

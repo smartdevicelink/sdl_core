@@ -34,6 +34,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_MOBILE_CHANGE_REGISTRATION_REQUEST_H_
 
+#include <strings.h>
+
 #include "application_manager/commands/command_request_impl.h"
 #include "application_manager/commands/pending.h"
 #include "utils/macro.h"
@@ -117,19 +119,20 @@ class ChangeRegistrationRequest : public CommandRequestImpl  {
    * returns false.
    */
    bool IsWhiteSpaceExist();
-   /*
-    *  @brief Check parameters (name, vr) for
+
+   /**
+    * @brief Check parameters (name, vr) for
     * coincidence with already known parameters of registered applications
     *
-    * return SUCCESS if there is no coincidence of app.name/VR synonyms,
+    * @return SUCCESS if there is no coincidence of app.name/VR synonyms,
     * otherwise appropriate error code returns
     */
    mobile_apis::Result::eType CheckCoincidence();
 
-   /*
+   /**
     * @brief Predicate for using with CheckCoincidence method to compare with VR synonym SO
     *
-    * return TRUE if there is coincidence of VR, otherwise FALSE
+    * @return TRUE if there is coincidence of VR, otherwise FALSE
     */
    struct CoincidencePredicateVR {
      explicit CoincidencePredicateVR(const std::string &newItem)

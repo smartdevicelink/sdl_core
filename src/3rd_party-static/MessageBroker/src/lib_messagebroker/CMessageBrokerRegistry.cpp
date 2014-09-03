@@ -55,12 +55,13 @@ namespace NsMessageBroker
          int fd = it->second;
          mControllersList.erase(it);
          std::multimap <std::string, int>::iterator it_s = mSubscribersList.begin();
-         for (; it_s !=mSubscribersList.end(); ++it_s) {
+         for (; it_s !=mSubscribersList.end(); ) {
            if (it_s->second == fd) {
-             mSubscribersList.erase(it_s);
+             mSubscribersList.erase(it_s++);
+           } else {
+             ++it_s;
            }
          }
-
       } else
       {
          DBG_MSG(("No such controller in the list!\n"));
@@ -95,20 +96,20 @@ namespace NsMessageBroker
 
    void CMessageBrokerRegistry::deleteSubscriber(int fd, std::string name)
    {
-      DBG_MSG(("CMessageBrokerRegistry::deleteSubscriber()\n"));
-      std::pair<std::multimap <std::string, int>::iterator, std::multimap <std::string, int>::iterator> p = mSubscribersList.equal_range(name);
-      if (p.first != p.second)
-      {
-         std::multimap <std::string, int>::iterator itr;
-         for (itr = p.first; itr != p.second; itr++)
-         {
-            if (fd == itr->second)
-            {
-               mSubscribersList.erase(itr);
-            }
-         }
-      }
-      DBG_MSG(("Count of subscribers: %d\n", mSubscribersList.size()));
+       DBG_MSG(("CMessageBrokerRegistry::deleteSubscriber()\n"));
+       std::pair<std::multimap <std::string, int>::iterator, std::multimap <std::string, int>::iterator> p = mSubscribersList.equal_range(name);
+       if (p.first != p.second) {
+           std::multimap <std::string, int>::iterator itr;
+           for (itr = p.first; itr != p.second; ) {
+               DBG_MSG(("My for loop %s, %d", itr->first.c_str() ,itr->second));
+               if (fd == itr->second) {
+                   mSubscribersList.erase(itr++);
+               } else {
+                   ++itr;
+               }
+           }
+       }
+       DBG_MSG(("Count of subscribers: %d\n", mSubscribersList.size()));
    }
 
    int CMessageBrokerRegistry::getDestinationFd(std::string name)

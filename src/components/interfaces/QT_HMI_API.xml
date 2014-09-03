@@ -309,6 +309,7 @@
       <element name="IGNITION_OFF"/>
       <element name="MASTER_RESET"/>
       <element name="FACTORY_DEFAULTS"/>
+      <element name="SUSPEND" />
     </enum>
     <enum name="DisplayType">
       <description>The possible types of HU display.</description>
@@ -1450,6 +1451,9 @@
       <param name="id" type="Integer" mandatory="true">
         <description>The ID of the device connected</description>
       </param>
+      <param name="isSDLAllowed" type="Boolean" mandatory="false">
+        <description>Sent by SDL in UpdateDeviceList. ’true’ – if device is allowed for PolicyTable Exchange; ‘false’ – if device is NOT allowed for PolicyTable Exchange </description>
+      </param>
     </struct>
     <!--IVI part-->
     <struct name="GPSData">
@@ -1763,6 +1767,9 @@
       <param name="customButtonID" type="Integer" mandatory="false" minvalue="0" maxvalue="65536">
         <description>Must be provided if ButtonName is CUSTOM_BUTTON, this references the integer ID passed by a custom button. (e.g. softButtonName)</description>
       </param>
+      <param name="appID" type="Integer" mandatory="false">
+        <description>ID of the application.</description>
+      </param>
     </function>
     <function name="OnButtonPress" messagetype="notification" provider="hmi">
       <param name="name" type="Common.ButtonName" mandatory="true"/>
@@ -1771,6 +1778,9 @@
       </param>
       <param name="customButtonID" type="Integer" mandatory="false" minvalue="0" maxvalue="65536">
         <description>Must be returned if ButtonName is CUSTOM_BUTTON, this references the string passed by a custom button. (e.g. softButtonName)</description>
+      </param>
+      <param name="appID" type="Integer" mandatory="false">
+        <description>ID of the application.</description>
       </param>
     </function>
   </interface>
@@ -1789,6 +1799,8 @@
       <param name="appID" type="Integer" mandatory="true">
         <description>The ID of app to be resumed audio source.</description>
       </param>
+    </function>
+    <function name="OnSDLPersistenceComplete" messagetype="notification" provider="sdl">
     </function>
     <function name="UpdateAppList" messagetype="request" provider="hmi">
       <description>Issued by SDL to notify HMI about new applications registered.</description>

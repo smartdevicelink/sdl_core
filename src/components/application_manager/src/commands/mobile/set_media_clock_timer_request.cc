@@ -51,9 +51,8 @@ SetMediaClockRequest::~SetMediaClockRequest() {
 void SetMediaClockRequest::Run() {
   LOG4CXX_INFO(logger_, "SetMediaClockRequest::Run");
 
-  uint32_t app_id = (*message_)[strings::params][strings::connection_key]
-      .asUInt();
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
@@ -74,7 +73,8 @@ void SetMediaClockRequest::Run() {
     msg_params = (*message_)[strings::msg_params];
     msg_params[strings::app_id] = app->app_id();
 
-    SendHMIRequest(hmi_apis::FunctionID::UI_SetMediaClockTimer, &msg_params, true);
+    SendHMIRequest(hmi_apis::FunctionID::UI_SetMediaClockTimer,
+                   &msg_params, true);
   } else {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
@@ -103,43 +103,46 @@ void SetMediaClockRequest::on_event(const event_engine::Event& event) {
 }
 
 bool SetMediaClockRequest::isDataValid() {
-  if (!(*message_)[strings::msg_params].keyExists(strings::start_time)
-      && ((*message_)[strings::msg_params][strings::update_mode]
-          == mobile_apis::UpdateMode::COUNTUP
-          || (*message_)[strings::msg_params][strings::update_mode]
-              == mobile_apis::UpdateMode::COUNTDOWN)) {
-    LOG4CXX_INFO(logger_, "Data is invalid");
-    return false;
-  } else if (((*message_)[strings::msg_params].keyExists(strings::start_time))
-      && ((*message_)[strings::msg_params][strings::update_mode]
-           == mobile_apis::UpdateMode::COUNTUP
-       || (*message_)[strings::msg_params][strings::update_mode]
-           == mobile_apis::UpdateMode::COUNTDOWN) &&
-           ((*message_)[strings::msg_params].keyExists(strings::end_time))) {
-    unsigned int start_time_in_seconds = 0;
-    unsigned int end_time_in_seconds = 0;
-    start_time_in_seconds = ((*message_)[strings::msg_params]
-        [strings::start_time][strings::hours].asUInt()) * 3600;
-    start_time_in_seconds += ((*message_)[strings::msg_params]
-        [strings::start_time][strings::minutes].asUInt()) * 60;
-    start_time_in_seconds += ((*message_)[strings::msg_params]
-        [strings::start_time][strings::seconds].asUInt());
-    end_time_in_seconds = ((*message_)[strings::msg_params]
-        [strings::end_time][strings::hours].asUInt()) * 3600;
-    end_time_in_seconds += ((*message_)[strings::msg_params]
-        [strings::end_time][strings::minutes].asUInt()) * 60;
-    end_time_in_seconds += ((*message_)[strings::msg_params]
-        [strings::end_time][strings::seconds].asUInt());
-    if (((end_time_in_seconds > start_time_in_seconds) &&
-        ((*message_)[strings::msg_params][strings::update_mode] ==
-            mobile_apis::UpdateMode::COUNTDOWN)) ||
-        ((end_time_in_seconds < start_time_in_seconds) &&
-                ((*message_)[strings::msg_params][strings::update_mode] ==
-                    mobile_apis::UpdateMode::COUNTUP))) {
-      LOG4CXX_INFO(logger_, "Data is invalid");
-          return false;
+  smart_objects::SmartObject msg_params = (*message_)[strings::msg_params];
+  mobile_apis::UpdateMode::eType update_mode =
+      static_cast<mobile_apis::UpdateMode::eType>(
+          msg_params[strings::update_mode].asUInt());
+
+  if (update_mode == mobile_apis::UpdateMode::COUNTUP ||
+      update_mode == mobile_apis::UpdateMode::COUNTDOWN) {
+
+    if (!msg_params.keyExists(strings::start_time)) {
+      LOG4CXX_INFO(logger_, "Invalid data");
+      return false;
+    }
+
+    if (msg_params.keyExists(strings::end_time)) {
+      unsigned int start_time_in_seconds = 0;
+      start_time_in_seconds =
+          (msg_params[strings::start_time][strings::hours].asUInt()) * 3600;
+      start_time_in_seconds +=
+          (msg_params[strings::start_time][strings::minutes].asUInt()) * 60;
+      start_time_in_seconds +=
+          (msg_params[strings::start_time][strings::seconds].asUInt());
+
+      unsigned int end_time_in_seconds = 0;
+      end_time_in_seconds =
+          (msg_params[strings::end_time][strings::hours].asUInt()) * 3600;
+      end_time_in_seconds +=
+          (msg_params[strings::end_time][strings::minutes].asUInt()) * 60;
+      end_time_in_seconds +=
+          (msg_params[strings::end_time][strings::seconds].asUInt());
+
+      if (((end_time_in_seconds > start_time_in_seconds) &&
+          (update_mode == mobile_apis::UpdateMode::COUNTDOWN)) ||
+          ((end_time_in_seconds < start_time_in_seconds) &&
+          (update_mode == mobile_apis::UpdateMode::COUNTUP))) {
+        LOG4CXX_INFO(logger_, "Invalid data");
+        return false;
+      }
     }
   }
+
   LOG4CXX_INFO(logger_, "Data is valid");
   return true;
 }

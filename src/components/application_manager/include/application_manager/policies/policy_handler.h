@@ -160,12 +160,6 @@ class PolicyHandler :
   void OnGetStatusUpdate(const uint32_t correlation_id);
 
   /**
-      * @brief Get Urls for service
-      * @param
-      */
-
-
-    /**
    * @brief Send notification to HMI with changed policy update status
    * @param status Current policy update state
    */
@@ -200,6 +194,17 @@ class PolicyHandler :
   virtual void OnSystemInfoUpdateRequired();
 
   /**
+   * @brief Sends GetVehicleData request in case when Vechicle info is ready.
+   */
+  virtual void OnVIIsReady();
+
+  /**
+   * @brief Allows to update vechicle data info.
+   * @param SmartIbject which contains all needed information.
+   */
+  virtual void OnVehicleDataUpdated(const smart_objects::SmartObject& message);
+
+  /**
    * Removes device
    * @param device_id id of device
    */
@@ -230,6 +235,20 @@ class PolicyHandler :
   virtual void OnDeviceConsentChanged(const std::string& device_id,
                                       bool is_allowed);
 
+  /**
+   * @brief Allows to check consents for the connected device
+   * and send OnSDLConsentNeeded in case when device has no consent.
+   *
+   * @return true in case device has consent,  false otherwise.
+   */
+  virtual bool EnsureDeviceConsented();
+
+  /**
+   * @brief Allows to add new or update existed application during
+   * registration process
+   * @param the policy aplication id.
+   */
+  void AddApplication(const std::string& application_id);
   /**
    * Checks whether application is revoked
    * @param app_id id application
@@ -282,6 +301,7 @@ private:
   utils::SharedPtr<PolicyEventObserver> event_observer_;
   bool on_ignition_check_done_;
   uint32_t last_activated_app_id_;
+  bool registration_in_progress;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI

@@ -597,20 +597,20 @@ class ApplicationManagerImpl : public ApplicationManager,
         mobile_apis::FunctionID::eType function_id,
         CommandParametersPermissions* params_permissions = NULL);
 
+    // typedef for Applications list
+    typedef const std::set<ApplicationSharedPtr> TAppList;
+
+    // typedef for Applications list iterator
+    typedef std::set<ApplicationSharedPtr>::iterator TAppListIt;
+
+    // typedef for Applications list const iterator
+    typedef std::set<ApplicationSharedPtr>::const_iterator TAppListConstIt;
+
     /**
      * Class for thread-safe access to applications list
      */
     class ApplicationListAccessor {
      public:
-
-      // typedef for Applications list
-      typedef const std::set<ApplicationSharedPtr>& TAppList;
-
-      // typedef for Applications list iterator
-      typedef std::set<ApplicationSharedPtr>::iterator TAppListIt;
-
-      // typedef for Applications list const iterator
-      typedef std::set<ApplicationSharedPtr>::const_iterator TAppListConstIt;
 
       /**
        * @brief ApplicationListAccessor class constructor
@@ -626,6 +626,9 @@ class ApplicationManagerImpl : public ApplicationManager,
         ApplicationManagerImpl::instance()->applications_list_lock_.Release();
       }
 
+      // TODO(VS): Now we have return application list by value, because we have
+      // situations, when our process is killed without Stop method called.
+      // This problem must be discussed and fixed.
       /**
        * @brief thread-safe getter for applications
        * @return applications list

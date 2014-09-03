@@ -140,21 +140,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual uint32_t curHash() const;
 
   /**
-   * @brief returns attribute alert_in_background_
-   * @return TRUE if application runs alert request from background level
-   * otherwise returns FALSE
-   */
-  virtual bool alert_in_background() const;
-
-  /**
-   * @brief if application activates alert in background level method sets
-   * TRUE
-   * @param state_of_alert contains TRUE if alert is activated otherwise
-   * contains FALSE
-   */
-  virtual void set_alert_in_background(bool state_of_alert);
-
-  /**
    * @brief Change Hash for current application
    * and send notification to mobile
    * @return updated_hash
@@ -215,7 +200,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   std::set<uint32_t>                       subscribed_vehicle_info_;
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
-  bool                                     alert_in_background_;
 
   /**
    * @brief Defines number per time in seconds limits

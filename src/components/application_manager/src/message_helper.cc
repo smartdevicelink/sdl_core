@@ -86,7 +86,7 @@ CommonAppPriorityMap app_priority_values = {
   {"EMERGENCY", hmi_apis::Common_AppPriority::EMERGENCY},
   {"NAVIGATION", hmi_apis::Common_AppPriority::NAVIGATION},
   {"NONE", hmi_apis::Common_AppPriority::NONE},
-  {"voiceCommunication", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
+  {"VOICECOMM", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
   {"INVALID_ENUM", hmi_apis::Common_AppPriority::INVALID_ENUM}
 };
 
@@ -107,11 +107,10 @@ bool ValidateSoftButtons(smart_objects::SmartObject& soft_buttons) {
     if (button.keyExists(strings::image)) {
       SmartObject& buttonImage = button[strings::image];
 
-      // Image name must not be empty
-      std::string file_name = buttonImage[strings::value].asString();
-      file_name.erase(remove(file_name.begin(), file_name.end(), ' '),
-                      file_name.end());
-      if (file_name.empty()) {
+      // Image name must not be empty and must not contain incorrect
+      //character
+      if (false == MessageHelper::VerifySoftButtonString(
+          buttonImage[strings::value].asString())) {
         return false;
       }
     }
@@ -370,9 +369,13 @@ smart_objects::SmartObject* MessageHelper::GetHashUpdateNotification(
   LOG4CXX_INFO(logger_, "GetHashUpdateNotification" << app_id);
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
                                app_id);
-  DCHECK(app.get());
 
-  smart_objects::SmartObject* message = new smart_objects::SmartObject(
+  smart_objects::SmartObject* message = NULL;
+  if (NULL == app.get()) {
+    return message;
+  }
+
+  message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
   (*message)[strings::params][strings::function_id] =
     mobile_apis::FunctionID::OnHashChangeID;
@@ -385,9 +388,11 @@ void MessageHelper::SendHashUpdateNotification(const uint32_t app_id) {
   LOG4CXX_INFO(logger_, "SendHashUpdateNotification");
 
   smart_objects::SmartObject* so = GetHashUpdateNotification(app_id);
-  PrintSmartObject(*so);
-  if (!ApplicationManagerImpl::instance()->ManageMobileCommand(so)) {
-    LOG4CXX_ERROR_EXT(logger_, "Failed to send HashUpdate notification.");
+  if (so) {
+    PrintSmartObject(*so);
+    if (!ApplicationManagerImpl::instance()->ManageMobileCommand(so)) {
+      LOG4CXX_ERROR_EXT(logger_, "Failed to send HashUpdate notification.");
+    }
   }
 }
 
@@ -570,8 +575,13 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
        devices.end() != it; ++it) {
     const connection_handler::Device& d =
       static_cast<connection_handler::Device>(it->second);
-    list_so[index][strings::name] = d.user_friendly_name();
+    list_so[index][strings::name] = d.user_friendly_name();    
     list_so[index][strings::id] = it->second.device_handle();
+    policy::DeviceConsent device_consent =
+        policy::PolicyHandler::instance()->policy_manager()->
+        GetUserConsentForDevice(it->second.mac_address());
+    list_so[index][strings::isSDLAllowed] =
+        policy::DeviceConsent::kDeviceAllowed == device_consent ? true : false;
     ++index;
   }
   return device_list_so;
@@ -824,7 +834,7 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(
     vr_help[strings::vr_help] = (*app->vr_help());
   } else {
     ApplicationManagerImpl::ApplicationListAccessor accessor;
-    const std::set<ApplicationSharedPtr>& apps = accessor.applications();
+    const std::set<ApplicationSharedPtr> apps = accessor.applications();
 
     int32_t index = 0;
     std::set<ApplicationSharedPtr>::const_iterator it_app = apps.begin();
@@ -2130,21 +2140,17 @@ mobile_apis::Result::eType MessageHelper::VerifyImageVrHelpItems(
   return mobile_apis::Result::SUCCESS;
 }
 
-ResultVerifySoftButtonText MessageHelper::VerifySoftButtonText(
-  smart_objects::SmartObject& soft_button) {
-  std::string text = soft_button[strings::text].asString();
-  if ((std::string::npos != text.find_first_of("\t\n")) ||
-      (std::string::npos != text.find("\\n")) ||
-      (std::string::npos != text.find("\\t"))) {
-    return kIncorrectCharacter;
+bool MessageHelper::VerifySoftButtonString(const std::string& str) {
+
+  if ((std::string::npos != str.find_first_of("\t\n")) ||
+      (std::string::npos != str.find("\\n")) ||
+      (std::string::npos != str.find("\\t")) ||
+      (std::string::npos == str.find_first_not_of(' '))) {
+    LOG4CXX_ERROR(logger_, "MessageHelper::VerifySoftButtonString"
+                  "string contains incorrect character");
+    return false;
   }
-  text.erase(remove(text.begin(), text.end(), ' '), text.end());
-  if (text.size()) {
-    return kStringContainsCharacter;
-  } else {
-    soft_button.erase(strings::text);
-  }
-  return kStringEmpty;
+  return true;
 }
 
 mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
@@ -2181,7 +2187,10 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         if (!image_supported) {
           continue;
         }
-
+        //Any text value for type "IMAGE" should be ignored.
+        if (request_soft_buttons[i].keyExists(strings::text)) {
+          request_soft_buttons[i].erase(strings::text);
+        }
         if (request_soft_buttons[i].keyExists(strings::image)) {
           mobile_apis::Result::eType verification_result = VerifyImage(
                 request_soft_buttons[i][strings::image], app);
@@ -2194,26 +2203,18 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
         break;
       }
       case mobile_apis::SoftButtonType::SBT_TEXT: {
-        if (!request_soft_buttons[i].keyExists(strings::text)) {
-          return mobile_apis::Result::INVALID_DATA;
-        }
-        ResultVerifySoftButtonText result =
-            VerifySoftButtonText(request_soft_buttons[i]);
-        if (kStringEmpty == result) {
-          continue;
-        } else if (kIncorrectCharacter == result) {
+        if ((!request_soft_buttons[i].keyExists(strings::text)) ||
+            (!VerifySoftButtonString(
+                request_soft_buttons[i][strings::text].asString()))) {
           return mobile_apis::Result::INVALID_DATA;
         }
         break;
       }
       case mobile_apis::SoftButtonType::SBT_BOTH: {
 
-        if (request_soft_buttons[i].keyExists(strings::text)) {
-          if (kIncorrectCharacter == VerifySoftButtonText(
-              request_soft_buttons[i])) {
-            return mobile_apis::Result::INVALID_DATA;
-          }
-        } else {
+        if ((!request_soft_buttons[i].keyExists(strings::text)) ||
+            (!VerifySoftButtonString(
+                request_soft_buttons[i][strings::text].asString()))) {
           return mobile_apis::Result::INVALID_DATA;
         }
 

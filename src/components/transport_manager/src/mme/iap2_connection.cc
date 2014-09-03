@@ -75,7 +75,7 @@ bool IAP2Connection::Init() {
 
 void IAP2Connection::Finalize() {
   if (unexpected_disconnect_) {
-    controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
+    controller_->DisconnectDone(device_uid_, app_handle_);
   }
 }
 
@@ -94,6 +94,7 @@ TransportAdapter::Error IAP2Connection::SendData(RawMessagePtr message) {
 }
 
 TransportAdapter::Error IAP2Connection::Disconnect() {
+  controller_->ConnectionFinished(device_uid_, app_handle_);
   receiver_thread_->stop();
   TransportAdapter::Error error = Close() ? TransportAdapter::OK : TransportAdapter::FAIL;
   controller_->DisconnectDone(device_uid_, app_handle_);
@@ -120,6 +121,7 @@ void IAP2Connection::ReceiveData() {
 // anyway delegate can be stopped directly
         receiver_thread_delegate_->exitThreadMain();
         Close();
+        controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
         break;
       default:
         LOG4CXX_WARN(logger_, "iAP2: error occurred while receiving data on protocol " << protocol_name_);

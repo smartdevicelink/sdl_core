@@ -1454,5 +1454,9 @@ void SQLPTRepresentation::SetPreloaded(bool value) {
   }
 }
 
+bool SQLPTRepresentation::SetVINValue(const std::string& value) {
+  return true;
+}
+
 }  // namespace policy
 

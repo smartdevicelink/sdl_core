@@ -260,8 +260,8 @@ void UsbConnection::Finalise() {
 
 void UsbConnection::AbortConnection() {
   LOG4CXX_TRACE(logger_, "enter");
-  Finalise();
   controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
+  Disconnect();
   LOG4CXX_TRACE(logger_, "exit");
 }
 

@@ -53,6 +53,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         onPutFileSubscribeRequestID: -1,
         onStatusUpdateSubscribeRequestID: -1,
         onAppPermissionChangedSubscribeRequestID: -1,
+        onSDLPersistenceCompleteSubscribeRequestID: -1,
         onFileRemovedSubscribeRequestID: -1,
         onAppRegisteredSubscribeRequestID: -1,
         onAppUnregisteredSubscribeRequestID: -1,
@@ -64,6 +65,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         onPutFileUnsubscribeRequestID: -1,
         onStatusUpdateUnsubscribeRequestID: -1,
         onAppPermissionChangedUnsubscribeRequestID: -1,
+        onSDLPersistenceCompleteUnsubscribeRequestID: -1,
         onFileRemovedUnsubscribeRequestID: -1,
         onAppRegisteredUnsubscribeRequestID: -1,
         onAppUnregisteredUnsubscribeRequestID: -1,
@@ -75,6 +77,7 @@ FFW.BasicCommunication = FFW.RPCObserver
         // const
         onStatusUpdateNotification: "SDL.OnStatusUpdate",
         onAppPermissionChangedNotification: "SDL.OnAppPermissionChanged",
+        onSDLPersistenceCompleteNotification: "BasicCommunication.OnSDLPersistenceComplete",
         onPutFileNotification: "BasicCommunication.OnPutFile",
         onFileRemovedNotification: "BasicCommunication.OnFileRemoved",
         onAppRegisteredNotification: "BasicCommunication.OnAppRegistered",
@@ -126,6 +129,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                 .subscribeToNotification(this.onStatusUpdateNotification);
             this.onAppPermissionChangedSubscribeRequestID = this.client
                 .subscribeToNotification(this.onAppPermissionChangedNotification);
+            this.onSDLPersistenceCompleteSubscribeRequestID = this.client
+                .subscribeToNotification(this.onSDLPersistenceCompleteNotification);
             this.onFileRemovedSubscribeRequestID = this.client
                 .subscribeToNotification(this.onFileRemovedNotification);
             this.onAppRegisteredSubscribeRequestID = this.client
@@ -158,6 +163,8 @@ FFW.BasicCommunication = FFW.RPCObserver
                 .unsubscribeFromNotification(this.onStatusUpdateNotification);
             this.onAppPermissionChangedUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onAppPermissionChangedNotification);
+            this.onSDLPersistenceCompleteUnsubscribeRequestID = this.client
+                .unsubscribeFromNotification(this.onSDLPersistenceCompleteNotification);
             this.onFileRemovedUnsubscribeRequestID = this.client
                 .unsubscribeFromNotification(this.onFileRemovedNotification);
             this.onAppRegisteredUnsubscribeRequestID = this.client
@@ -244,6 +251,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                         if (SDL.SDLModel.stateLimited == appID) {
                             SDL.SDLModel.stateLimited = null;
+                            SDL.SDLModel.set('limitedExist', false);
                         }
 
                         if (response.result.isSDLAllowed) {
@@ -266,7 +274,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                 Em.Logger.log("SDL.GetStatusUpdate: Response from SDL!");
 
-                SDL.PopUp.popupActivate(response.result);
+                SDL.PopUp.create().appendTo('body').popupActivate(response.result);
             }
 
             if (response.result.method == "SDL.GetURLS") {
@@ -307,7 +315,6 @@ FFW.BasicCommunication = FFW.RPCObserver
 
             if (notification.method == this.onStatusUpdateNotification) {
 
-                //SDL.PopUp.popupActivate(notification.status);
                 SDL.TTSPopUp.ActivateTTS(notification.params.status);
             }
 
@@ -353,9 +360,8 @@ FFW.BasicCommunication = FFW.RPCObserver
             }
             if (notification.method == this.onSDLConsentNeededNotification) {
 
-                //Show popUp
-                SDL.SettingsController.AllowSDLFunctionality(notification.params.device);
-
+                SDL.SettingsController.currentDeviceAllowance = notification.params.device;
+                FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.AllowSDLFunctionality, null, ["DataConsent"]);
             }
             if (notification.method == this.onResumeAudioSourceNotification) {
 
@@ -375,7 +381,7 @@ FFW.BasicCommunication = FFW.RPCObserver
             if (this.validationCheck(request)) {
 
                 if (request.method == "BasicCommunication.MixingAudioSupported") {
-                    this.MixingAudioSupported(true);
+                    this.MixingAudioSupported(request.id, true);
                 }
                 if (request.method == "BasicCommunication.AllowAllApps") {
                     this.AllowAllApps(true);
@@ -396,7 +402,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                     var message = "Was found " + request.params.applications.length + " apps";
 
-                    SDL.PopUp.popupActivate(message);
+                    SDL.PopUp.create().appendTo('body').popupActivate(message);
 
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
@@ -423,6 +429,7 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                         if (SDL.SDLModel.stateLimited == request.params.appID) {
                             SDL.SDLModel.stateLimited = null;
+                            SDL.SDLModel.set('limitedExist', false);
                         }
 
                         SDL.SDLController.getApplicationModel(request.params.appID).turnOnSDL(request.params.appID);
@@ -1006,14 +1013,14 @@ FFW.BasicCommunication = FFW.RPCObserver
          *
          * @params {Number}
          */
-        MixingAudioSupported: function(attenuatedSupported) {
+        MixingAudioSupported: function(requestid, attenuatedSupported) {
 
             Em.Logger.log("FFW.BasicCommunication.MixingAudioSupportedResponse");
 
             // send request
 
             var JSONMessage = {
-                "id": this.client.idStart,
+                "id": requestid,
                 "jsonrpc": "2.0",
                 "result": {
                     "code": 0,

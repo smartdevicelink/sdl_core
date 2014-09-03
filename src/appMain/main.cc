@@ -209,6 +209,8 @@ int32_t main(int32_t argc, char** argv) {
   LOG4CXX_INFO(logger, "Stopping application due to signal caught");
 
   main_namespace::LifeCycle::instance()->StopComponents();
+
+  LOG4CXX_INFO(logger, "Application successfully stopped");
   DEINIT_LOGGER();
 
   return EXIT_SUCCESS;

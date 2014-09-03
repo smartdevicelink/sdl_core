@@ -35,6 +35,7 @@
 
 #include <map>
 #include <string>
+#include <string.h>
 #include "interfaces/MOBILE_API.h"
 #include "interfaces/HMI_API.h"
 #include "utils/macro.h"
@@ -60,12 +61,6 @@ namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
  * @param VehicleDataType Enum for vehicle data
  */
 typedef std::map<std::string, VehicleDataType> VehicleData;
-
-enum ResultVerifySoftButtonText {
-  kIncorrectCharacter = 0,
-  kStringContainsCharacter = 1,
-  kStringEmpty = 2
-};
 
 /**
  * @brief MessageHelper class
@@ -415,8 +410,14 @@ class MessageHelper {
     static mobile_apis::Result::eType VerifyImageVrHelpItems(
       smart_objects::SmartObject& message, ApplicationConstSharedPtr app);
 
-    static ResultVerifySoftButtonText VerifySoftButtonText(
-        smart_objects::SmartObject& soft_button);
+    /**
+     * @brief Checks string if it contains incorrect character \t\n \\t \\n
+     * or string contains only whitespace
+     * @param parameter str contains string which must be checked
+     * @return returns FALSE if string contains incorrect character or
+     * string is empty otherwise returns TRUE
+     */
+    static bool VerifySoftButtonString(const std::string& str);
 
     static mobile_apis::Result::eType ProcessSoftButtons(
       smart_objects::SmartObject& message_params,

@@ -69,6 +69,8 @@ class SystemRequest : public CommandRequestImpl {
    */
   virtual void on_event(const event_engine::Event& event);
  private:
+
+  static uint32_t index;
   DISALLOW_COPY_AND_ASSIGN(SystemRequest);
 };
 

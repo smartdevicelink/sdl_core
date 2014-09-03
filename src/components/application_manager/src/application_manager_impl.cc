@@ -90,8 +90,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
 #ifdef TIME_TESTER
     metric_observer_(NULL),
 #endif  // TIME_TESTER
-    application_list_update_timer_(new ApplicationListUpdateTimer(this))
-{
+    application_list_update_timer_(new ApplicationListUpdateTimer(this)) {
+    std::srand(std::time(0));
 }
 
 bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
@@ -116,11 +116,6 @@ bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_INFO(logger_, "Destructing ApplicationManager.");
 
-  if (policy_manager_) {
-    LOG4CXX_INFO(logger_, "Unloading policy library.");
-    policy::PolicyHandler::instance()->UnloadPolicyLibrary();
-  }
-
   SendOnSDLClose();
 
   policy_manager_ = NULL;
@@ -142,6 +137,7 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 bool ApplicationManagerImpl::Stop() {
   LOG4CXX_INFO(logger_, "Stop ApplicationManager.");
   application_list_update_timer_->stop();
+
   try {
     UnregisterAllApplications();
   } catch (...) {
@@ -149,6 +145,10 @@ bool ApplicationManagerImpl::Stop() {
                   "An error occurred during unregistering applications.");
   }
 
+  if (policy_manager_) {
+    LOG4CXX_INFO(logger_, "Unloading policy library.");
+    policy::PolicyHandler::instance()->UnloadPolicyLibrary();
+  }
   return true;
 }
 
@@ -576,6 +576,11 @@ void ApplicationManagerImpl::OnHMIStartedCooperation() {
       MessageHelper::CreateModuleInfoSO(
           hmi_apis::FunctionID::Buttons_GetCapabilities));
   ManageHMICommand(button_capabilities);
+
+  utils::SharedPtr<smart_objects::SmartObject> mixing_audio_supported_request(
+      MessageHelper::CreateModuleInfoSO(
+          hmi_apis::FunctionID::BasicCommunication_MixingAudioSupported));
+  ManageHMICommand(mixing_audio_supported_request);
 #ifdef CUSTOMER_PASA
   //Line start of transportManager component was left for panasonic
   if (!connection_handler_) {
@@ -865,6 +870,7 @@ uint32_t ApplicationManagerImpl::GenerateGrammarID() {
 
 uint32_t ApplicationManagerImpl::GenerateNewHMIAppID() {
   uint32_t hmi_app_id = rand();
+
   while (resume_ctrl_.IsHMIApplicationIdExist(hmi_app_id)) {
     hmi_app_id = rand();
   }
@@ -1864,9 +1870,11 @@ void ApplicationManagerImpl::UnregisterAllApplications(bool generated_by_hmi) {
       mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF ? true : false;
 
   bool is_unexpected_disconnect = (generated_by_hmi != true);
-  ApplicationListAccessor accessor;
-  std::set<ApplicationSharedPtr>::iterator it = accessor.applications().begin();
-  while (it != accessor.applications().end()) {
+
+  sync_primitives::AutoLock lock(applications_list_lock_);
+
+  std::set<ApplicationSharedPtr>::iterator it = application_list_.begin();
+  while (it != application_list_.end()) {
     ApplicationSharedPtr app_to_remove = *it;
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
         app_to_remove->app_id(), unregister_reason_);
@@ -1913,6 +1921,7 @@ void ApplicationManagerImpl::UnregisterApplication(
     for (; it != application_list_.end(); ++it) {
       if ((*it)->app_id() == app_id) {
         app_to_remove = *it;
+        break;
       }
     }
     application_list_.erase(app_to_remove);
@@ -2108,17 +2117,20 @@ void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
     hmi_capabilities_.attenuated_supported()
     ? mobile_apis::AudioStreamingState::ATTENUATED
     : mobile_apis::AudioStreamingState::NOT_AUDIBLE;
-  std::set<ApplicationSharedPtr> local_app_list = application_list_;
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  ApplicationManagerImpl::TAppList local_app_list = accessor.applications();
 
-  std::set<ApplicationSharedPtr>::const_iterator it = local_app_list.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd = local_app_list.end();
+  ApplicationManagerImpl::TAppListConstIt it = local_app_list.begin();
+  ApplicationManagerImpl::TAppListConstIt itEnd = local_app_list.end();
   for (; it != itEnd; ++it) {
     if ((*it).valid()) {
       if ((*it)->is_media_application()) {
         if (kTTSSessionChanging == changing_state) {
           (*it)->set_tts_speak_state(true);
         }
-        if ((*it)->audio_streaming_state() != state) {
+        if ((*it)->audio_streaming_state() != state &&
+            (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level()) &&
+            (mobile_api::HMILevel::HMI_BACKGROUND != (*it)->hmi_level())) {
           (*it)->set_audio_streaming_state(state);
           MessageHelper::SendHMIStatusNotification(*(*it));
         }
@@ -2129,11 +2141,10 @@ void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
 
 void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
 
-  std::set<ApplicationSharedPtr> local_app_list = application_list_;
-  std::set<ApplicationSharedPtr>::const_iterator it = local_app_list.begin();
-  std::set<ApplicationSharedPtr>::const_iterator itEnd = local_app_list.end();
-  //according with SDLAQ-CRS-839
-  bool is_application_audible = false;
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  ApplicationManagerImpl::TAppList local_app_list = application_list_;
+  ApplicationManagerImpl::TAppListConstIt it = local_app_list.begin();
+  ApplicationManagerImpl::TAppListConstIt itEnd = local_app_list.end();
 
   for (; it != itEnd; ++it) {
     if ((*it).valid()) {
@@ -2141,14 +2152,14 @@ void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
         if (kTTSSessionChanging == changing_state) {
           (*it)->set_tts_speak_state(false);
         }
-        if ((!is_application_audible) && (!(vr_session_started())) &&
+        if ((!(vr_session_started())) &&
+            (!((*it)->tts_speak_state())) &&
             ((*it)->audio_streaming_state() !=
              mobile_apis::AudioStreamingState::AUDIBLE) &&
-            (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level())) {
-          //according with SDLAQ-CRS-839
-          is_application_audible = true;
+            (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level()) &&
+            (mobile_api::HMILevel::HMI_BACKGROUND != (*it)->hmi_level())) {
           (*it)->set_audio_streaming_state(
-                mobile_apis::AudioStreamingState::AUDIBLE);
+              mobile_apis::AudioStreamingState::AUDIBLE);
           MessageHelper::SendHMIStatusNotification(*(*it));
         }
       }

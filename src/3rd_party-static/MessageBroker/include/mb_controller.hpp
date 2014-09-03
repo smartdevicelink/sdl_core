@@ -12,6 +12,10 @@
 #include "json/json.h"
 
 #include "mb_tcpclient.hpp"
+#ifdef CUSTOMER_PASA
+#include "mb_mqclient.hpp"
+
+#endif
 #include "utils/lock.h"
 
 #include <cstring> 
@@ -24,10 +28,13 @@ namespace NsMessageBroker
 {
 
    /**
-    *�\class CMessageBrokerController
+    *\class CMessageBrokerController
     * \brief MessageBroker Controller.
     */
    class CMessageBrokerController : public TcpClient
+#ifdef CUSTOMER_PASA
+                                  , public MqClient
+#endif
    {
    public:
       /**
@@ -37,6 +44,10 @@ namespace NsMessageBroker
       * \param name name of component
       */
       CMessageBrokerController(const std::string& address, uint16_t port, std::string name);
+
+#ifdef CUSTOMER_PASA
+      CMessageBrokerController(const std::string& send_queue, const std::string& receive_queue, std::string name);
+#endif
 
       /**
       * \brief Destructor.
@@ -186,11 +197,9 @@ namespace NsMessageBroker
       */
       void* MethodForReceiverThread(void * arg);
 
-      virtual void exitReceavingThread() {
+      virtual void exitReceivingThread() {
         stop = true;
-        while (is_active) {
-          sleep(1);
-        }
+        sync_primitives::AutoLock auto_lock(receiving_thread_lock_);
       }
 
    protected:
@@ -199,20 +208,16 @@ namespace NsMessageBroker
        */
       volatile bool stop;
 
-      /**
-       * @brief Flag represents that receaving data is active
-       */
-      volatile bool is_active;
-
    private:
       /**
       * \brief Method for receiving messages without tcp packeting.
       * \param message received data
       */
       void onMessageReceived(Json::Value message);
-
-
-
+#ifdef CUSTOMER_PASA
+      ssize_t clientRecv(std::string& data);
+      ssize_t clientSend(const std::string& data);
+#endif
       /**
       * \brief Start value of id's diapason.
       */
@@ -252,11 +257,20 @@ namespace NsMessageBroker
       * \brief JSON writer.
       */
      Json::FastWriter m_receiverWriter;
+#ifdef CUSTOMER_PASA
+     enum client_type_t {TCP, MQUEUE};
 
+     client_type_t mClientType;
+#endif
      /*
       * @brief mutex for mWaitResponseQueue
       */
      sync_primitives::Lock       queue_lock_;
+
+     /*
+      * @brief mutex for Mutex for correct finishing of receiving thread
+      */
+     sync_primitives::Lock       receiving_thread_lock_;
       
    };
 } /* namespace NsMessageBroker */

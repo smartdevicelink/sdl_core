@@ -68,15 +68,21 @@ TransportAdapterImpl::TransportAdapterImpl(
 TransportAdapterImpl::~TransportAdapterImpl() {
   if (device_scanner_) {
     device_scanner_->Terminate();
+    LOG4CXX_DEBUG(logger_, "device_scanner_ " << device_scanner_ << " terminated.");
     delete device_scanner_;
+    LOG4CXX_DEBUG(logger_, "device_scanner_ " << device_scanner_ << " deleted.");
   }
   if (server_connection_factory_) {
     server_connection_factory_->Terminate();
+    LOG4CXX_DEBUG(logger_, "server_connection_factory " << server_connection_factory_ << " terminated.");
     delete server_connection_factory_;
+    LOG4CXX_DEBUG(logger_, "server_connection_factory " << server_connection_factory_ << " deleted.");
   }
   if (client_connection_listener_) {
     client_connection_listener_->Terminate();
+    LOG4CXX_DEBUG(logger_, "client_connection_listener_ " << client_connection_listener_ << " terminated.");
     delete client_connection_listener_;
+    LOG4CXX_DEBUG(logger_, "client_connection_listener_ " << client_connection_listener_ << " deleted.");
   }
 
   pthread_mutex_lock(&connections_mutex_);
@@ -85,11 +91,15 @@ TransportAdapterImpl::~TransportAdapterImpl() {
   pthread_mutex_unlock(&connections_mutex_);
   connections.clear();
 
+  LOG4CXX_DEBUG(logger_, "Connections deleted");
+
   pthread_mutex_lock(&devices_mutex_);
   DeviceMap devices;
   std::swap(devices, devices_);
   pthread_mutex_unlock(&devices_mutex_);
   devices.clear();
+
+  LOG4CXX_DEBUG(logger_, "Devices deleted");
 
   pthread_mutex_destroy(&connections_mutex_);
   pthread_mutex_destroy(&devices_mutex_);
@@ -683,7 +693,6 @@ void TransportAdapterImpl::ConnectionAborted(
        it != listeners_.end(); ++it) {
     (*it)->OnUnexpectedDisconnect(this, device_id, app_handle, error);
   }
-  connections_.erase(std::make_pair(device_id, app_handle));
 }
 
 bool TransportAdapterImpl::IsInitialised() const {

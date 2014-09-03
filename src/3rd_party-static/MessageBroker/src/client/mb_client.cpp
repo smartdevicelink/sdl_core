@@ -66,7 +66,6 @@ namespace NsMessageBroker
 
    void Client::Close()
    {
-      shutdown(m_sock, SHUT_RDWR);
       close(m_sock);
       m_sock = -1;
    }

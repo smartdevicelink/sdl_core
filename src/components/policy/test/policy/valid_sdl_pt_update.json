@@ -1771,7 +1771,7 @@
             "NAVIGATION" : 15,
             "NONE" : 0,
             "NORMAL" : 4,
-            "voiceCommunication" : 10
+            "VOICECOMM" : 10
          },
          "preloaded_pt" : true,
          "seconds_between_retries" : [ 1, 5, 25, 125, 625 ],

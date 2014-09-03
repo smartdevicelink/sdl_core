@@ -228,6 +228,7 @@ var StateManager = Em.StateManager.extend({
                     
                     FFW.BasicCommunication.OnAppDeactivated('AUDIO', SDL.SDLModel.stateLimited);
                     SDL.SDLModel.stateLimited = null;
+                    SDL.SDLModel.set('limitedExist', false);
                 }
             }
         }),
@@ -245,6 +246,7 @@ var StateManager = Em.StateManager.extend({
                 this._super();
 
                 SDL.SDLModel.stateLimited = SDL.SDLAppController.model.appID;
+                SDL.SDLModel.set('limitedExist', true);
                 SDL.SDLAppController.deactivateApp();
             }
 
@@ -262,6 +264,7 @@ var StateManager = Em.StateManager.extend({
             this._super();
 
             SDL.SDLModel.stateLimited = SDL.SDLAppController.model.appID;
+            SDL.SDLModel.set('limitedExist', true);
             SDL.SDLAppController.deactivateApp();
         }
     }),

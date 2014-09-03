@@ -474,58 +474,6 @@ bool PolicyManagerImpl::ResetUserConsent() {
 #endif
 }
 
-void PolicyManagerImpl::CheckAppPolicyState(const std::string& application_id) {
-  LOG4CXX_INFO(logger_, "CheckAppPolicyState");
-  const std::string device_id = GetCurrentDeviceId(application_id);
-  DeviceConsent device_consent  = GetUserConsentForDevice(device_id);
-  sync_primitives::AutoLock lock(apps_registration_lock_);
-  if (!policy_table_.pt_data()->IsApplicationRepresented(application_id)) {
-    LOG4CXX_INFO(
-      logger_,
-      "Setting default permissions for application id: " << application_id);
-#if defined (EXTENDED_POLICY)
-    if (kDeviceHasNoConsent == device_consent ||
-        kDeviceDisallowed == device_consent) {
-      PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(
-                                      policy_table_.pt_data().get());
-      if (!pt_ext) {
-        LOG4CXX_WARN(logger_, "Can't cleanup unpaired devices.");
-        return;
-      }
-      pt_ext->SetPredataPolicy(application_id);
-    } else {
-      policy_table_.pt_data()->SetDefaultPolicy(application_id);
-    }
-#else
-    policy_table_.pt_data()->SetDefaultPolicy(application_id);
-#endif
-  } else if (kDeviceHasNoConsent != device_consent
-            && policy_table_.pt_data()->IsPredataPolicy(application_id)) {
-      // If device consent changed to allowed during application being
-      // disconnected, app permissions should be changed also
-      if (kDeviceAllowed == device_consent) {
-        policy_table_.pt_data()->SetDefaultPolicy(application_id);
-      }
-      SendNotificationOnPermissionsUpdated(application_id);
-      return;
-  } else if (!policy_table_.pt_data()->IsDefaultPolicy(application_id)) {
-    SendNotificationOnPermissionsUpdated(application_id);
-    return;
-  }
-
-  AddAppToUpdateList(application_id);
-
-  if (PolicyTableStatus::StatusUpToDate == GetPolicyTableStatus()) {
-    set_update_required(true);
-  }
-  // TODO(AOleynik): Should be clarified, is it correct state change?
-//  else {
-//    set_exchange_pending(true);
-//  }
-
-  SendNotificationOnPermissionsUpdated(application_id);
-}
-
 void PolicyManagerImpl::SendNotificationOnPermissionsUpdated(
   const std::string& application_id) {
   const std::string device_id = GetCurrentDeviceId(application_id);
@@ -1334,6 +1282,12 @@ int PolicyManagerImpl::IsConsentNeeded(const std::string& app_id) {
   return 0;
 }
 
+void PolicyManagerImpl::SetVINValue(const std::string& value) {
+#if defined (EXTENDED_POLICY)
+  policy_table_.pt_data()->SetVINValue(value);
+#endif // EXTENDED_POLICY
+}
+
 void PolicyManagerImpl::CheckUpdateStatus() {
   LOG4CXX_INFO(logger_, "CheckUpdateStatus");
   policy::PolicyTableStatus status = GetPolicyTableStatus();
@@ -1407,6 +1361,67 @@ void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
     SetUserConsentForDevice(device_id, false);
   }
 #endif  // EXTENDED_POLICY
+}
+
+void PolicyManagerImpl::AddApplication(const std::string& application_id) {
+  LOG4CXX_INFO(logger_, "AddApplication");
+  const std::string device_id = GetCurrentDeviceId(application_id);
+  DeviceConsent device_consent  = GetUserConsentForDevice(device_id);
+  sync_primitives::AutoLock lock(apps_registration_lock_);
+
+  if (IsNewApplication(application_id)) {
+    AddNewApplication(application_id, device_consent);
+    AddAppToUpdateList(application_id);
+    if (PolicyTableStatus::StatusUpToDate == GetPolicyTableStatus()) {
+      set_update_required(true);
+    }
+  } else {
+    AddExistedApplication(application_id, device_consent);
+  }
+  SendNotificationOnPermissionsUpdated(application_id);
+}
+
+void PolicyManagerImpl::AddNewApplication(const std::string& application_id,
+                                          DeviceConsent device_consent) {
+  LOG4CXX_INFO(logger_, "PolicyManagerImpl::AddNewApplication");
+
+  LOG4CXX_INFO(
+    logger_,
+    "Setting default permissions for application id: " << application_id);
+#if defined (EXTENDED_POLICY)
+  if (kDeviceHasNoConsent == device_consent ||
+      kDeviceDisallowed == device_consent) {
+    PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(
+                                    policy_table_.pt_data().get());
+    if (!pt_ext) {
+      LOG4CXX_WARN(logger_, "Can't cleanup unpaired devices.");
+      return;
+    }
+    pt_ext->SetPredataPolicy(application_id);
+  } else {
+    policy_table_.pt_data()->SetDefaultPolicy(application_id);
+  }
+#else
+  policy_table_.pt_data()->SetDefaultPolicy(application_id);
+#endif
+}
+
+void PolicyManagerImpl::AddExistedApplication(
+    const std::string& application_id, DeviceConsent device_consent) {
+
+  if (kDeviceHasNoConsent != device_consent
+      && policy_table_.pt_data()->IsPredataPolicy(application_id)) {
+    // If device consent changed to allowed during application being
+    // disconnected, app permissions should be changed also
+    if (kDeviceAllowed == device_consent) {
+      policy_table_.pt_data()->SetDefaultPolicy(application_id);
+    }
+  }
+}
+
+bool PolicyManagerImpl::IsNewApplication(
+    const std::string& application_id) const {
+  return false == policy_table_.pt_data()->IsApplicationRepresented(application_id);
 }
 
 bool PolicyManagerImpl::ResetPT(const std::string& file_name) {

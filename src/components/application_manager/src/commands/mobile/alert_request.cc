@@ -131,7 +131,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::UI_Alert: {
       LOG4CXX_INFO(logger_, "Received UI_Alert event");
-      DCHECK(awaiting_ui_alert_response_);
+      // Unsubscribe from event to avoid unwanted messages
+      unsubscribe_from_event(hmi_apis::FunctionID::UI_Alert);
       awaiting_ui_alert_response_ = false;
 
       if (awaiting_tts_speak_response_) {
@@ -151,7 +152,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
-      DCHECK(awaiting_tts_speak_response_);
+      // Unsubscribe from event to avoid unwanted messages
+      unsubscribe_from_event(hmi_apis::FunctionID::TTS_Speak);
       awaiting_tts_speak_response_ = false;
       tts_speak_response_ = static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -159,7 +161,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_StopSpeaking: {
       LOG4CXX_INFO(logger_, "Received TTS_StopSpeaking event");
-      DCHECK(awaiting_tts_stop_speaking_response_);
+      // Unsubscribe from event to avoid unwanted messages
+      unsubscribe_from_event(hmi_apis::FunctionID::TTS_StopSpeaking);
       awaiting_tts_stop_speaking_response_ = false;
       break;
     }
@@ -226,12 +229,12 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
-  // CheckStringsOfAlertRequest must be before ProcessSoftButtons.
-  // because of checking on whitespace in text of softbutton
   if (!CheckStringsOfAlertRequest()) {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return false;
   }
+
+  //ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
@@ -386,39 +389,10 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
         (*message_)[strings::msg_params][strings::tts_chunks];
     for (size_t i = 0; i < tts_chunks_array.length(); ++i) {
       str = tts_chunks_array[i][strings::text].asCharArray();
-      if (!CheckSyntax(str)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_chunks text syntax check failed");
         return false;
       }
-    }
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    const smart_objects::SmartArray* sb_array =
-        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
-
-    smart_objects::SmartArray::const_iterator it_sb = sb_array->begin();
-    smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
-
-    for (; it_sb != it_sb_end; ++it_sb) {
-      if ((*it_sb).keyExists(strings::text)) {
-        str = (*it_sb)[strings::text].asCharArray();
-        if (strlen(str) && !CheckSyntax(str)) {
-          LOG4CXX_ERROR(logger_,
-                       "Invalid soft_buttons text syntax check failed");
-          return false;
-        }
-      }
-
-      if ((*it_sb).keyExists(strings::image)) {
-        str = (*it_sb)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str)) {
-          LOG4CXX_ERROR(logger_,
-                       "Invalid soft_buttons image value syntax check failed");
-          return false;
-        }
-      }
-
     }
   }
   return true;

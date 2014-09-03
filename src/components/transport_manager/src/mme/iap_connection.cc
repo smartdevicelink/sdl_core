@@ -91,31 +91,44 @@ TransportAdapter::Error IAPConnection::Disconnect() {
 }
 
 void IAPConnection::ReceiveData(int session_id) {
-  LOG4CXX_TRACE(logger_, "iAP: receiving data on protocol " << protocol_name_ << " (session " << session_id << ")");
-  int size = ipod_eaf_recv(ipod_hdl_, session_id, buffer_, kBufferSize);
-  if (size != -1) {
-    LOG4CXX_INFO(logger_, "iAP: received " << size << " bytes on protocol " << protocol_name_);
-    if (size != 0) {
-      RawMessagePtr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
-      controller_->DataReceiveDone(device_uid_, app_handle_, message);
+  int iterations = 0;
+// QNX undocumented feature:
+// it's necessary to read data
+// until ENODATA occurs
+  while (true) {
+    LOG4CXX_TRACE(logger_, "iAP: receiving data on protocol " << protocol_name_ << " (session " << session_id << ")");
+    int size = ipod_eaf_recv(ipod_hdl_, session_id, buffer_, kBufferSize);
+    if (size != -1) {
+      LOG4CXX_DEBUG(logger_, "iAP: received " << size << " bytes on protocol " << protocol_name_);
+      if (size != 0) {
+        RawMessagePtr message(new protocol_handler::RawMessage(0, 0, buffer_, size));
+        controller_->DataReceiveDone(device_uid_, app_handle_, message);
+      }
+      ++iterations;
     }
-  }
-  else {
-    switch (errno) {
-      case ENODATA:
-        LOG4CXX_TRACE(logger_, "iAP: no data on protocol " << protocol_name_ << " (not an error)");
-        break;
-      default:
-        LOG4CXX_WARN(logger_, "iAP: error occurred while receiving data on protocol " << protocol_name_);
-        controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
-        break;
+    else {
+      switch (errno) {
+        case ENODATA:
+          LOG4CXX_DEBUG(logger_, "iAP: data on protocol " << protocol_name_ << " read completely in " << iterations << " iterations");
+          break;
+        default:
+          LOG4CXX_WARN(logger_, "iAP: error occurred while receiving data on protocol " << protocol_name_);
+          controller_->DataReceiveFailed(device_uid_, app_handle_, DataReceiveError());
+          break;
+      }
+      break;
     }
   }
 }
 
 void IAPConnection::OnSessionOpened(int session_id) {
-  sync_primitives::AutoLock auto_lock(session_ids_lock_);
+  session_ids_lock_.Acquire();
   session_ids_.insert(session_id);
+  session_ids_lock_.Release();
+// QNX undocumented feature:
+// it's necessary to read data
+// even if no IPOD_EAF_EVENT_SESSION_DATA event has come
+  ReceiveData(session_id);
 }
 
 void IAPConnection::OnSessionClosed(int session_id) {

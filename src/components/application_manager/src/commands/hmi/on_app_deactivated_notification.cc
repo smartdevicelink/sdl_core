@@ -91,9 +91,9 @@ void OnAppDeactivatedNotification::Run() {
 
       // switch HMI level for all applications in FULL or LIMITED
       ApplicationManagerImpl::ApplicationListAccessor accessor;
-      ApplicationManagerImpl::ApplicationListAccessor::TAppList applications =
+      ApplicationManagerImpl::TAppList applications =
           accessor.applications();
-      ApplicationManagerImpl::ApplicationListAccessor::TAppListIt it =
+      ApplicationManagerImpl::TAppListIt it =
           applications.begin();
       for (; applications.end() != it; ++it) {
           ApplicationSharedPtr app = *it;
@@ -101,6 +101,7 @@ void OnAppDeactivatedNotification::Run() {
             if (mobile_apis::HMILevel::eType::HMI_FULL == app->hmi_level() ||
                 mobile_apis::HMILevel::eType::HMI_LIMITED == app->hmi_level()) {
                 app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
+                MessageHelper::SendHMIStatusNotification(*app);
             }
           }
       }

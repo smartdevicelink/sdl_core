@@ -47,6 +47,8 @@ INCLUDES = \
 	$(CC_IFLAG)../../resumption/include \
 	$(CC_IFLAG)../../components/interfaces \
 	$(CC_IFLAG)../../policy/src/policy/usage_statistics/include \
+	$(CC_IFLAG)../../policy/src/policy/policy_table/table_struct_ext \
+	$(CC_IFLAG)../../rpc_base/include \
 	$(CC_IFLAG)../../ \
 	$(CC_IFLAG)../../../3rd_party-static/jsoncpp/include \
 	$(CC_IFLAG)../../../3rd_party-static/encryption/include \

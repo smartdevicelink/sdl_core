@@ -35,6 +35,7 @@
 
 #include <unistd.h>
 #include <algorithm>
+#include <string.h>
 
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -282,8 +283,18 @@ void RegisterAppInterfaceRequest::Run() {
     policy::PolicyHandler::instance()->SetDeviceInfo(device_mac_address,
         device_info);
 
-    // Check policy update on ignition on, if it was not done before
-    policy::PolicyHandler::instance()->PTExchangeAtIgnition();
+    // Add registered application to the policy db.
+    policy::PolicyHandler::instance()->
+        AddApplication(msg_params[strings::app_id].asString());
+
+    // Ensure that device has consents to start policy update procedure.
+    // In case when device has no consent, EnsureDeviceConsented will send
+    // OnSDLConsentNeeded and will start PTU in OnAllowSDLFunctionality.
+    if (policy::PolicyHandler::instance()->EnsureDeviceConsented()) {
+      // Allows to start policy table exchange. I will check
+      // current update state and will or will not run the exchange process.
+      policy::PolicyHandler::instance()->OnPTExchangeNeeded();
+    }
 
     SendRegisterAppInterfaceResponseToMobile();
   }
@@ -478,13 +489,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   if (resumption) {
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
     if (!resumer.CheckApplicationHash(application, hash_id)) {
-      result = mobile_apis::Result::RESUME_FAILED;
       LOG4CXX_WARN(logger_, "Hash does not matches");
-      add_info = "Hash does not matches";
-    } else if (!resumer.CheckPersistenceFilesForResumption(application)) {
       result = mobile_apis::Result::RESUME_FAILED;
+      add_info = "Hash does not matches";
+      resumption = false;
+    } else if (!resumer.CheckPersistenceFilesForResumption(application)) {
       LOG4CXX_WARN(logger_, "Persistent data is missed");
+      result = mobile_apis::Result::RESUME_FAILED;
       add_info = "Persistent data is missed";
+      resumption = false;
     } else {
       add_info = " Resume Succeed";
     }
@@ -496,16 +509,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
                                                       resumption);
 
   MessageHelper::SendChangeRegistrationRequestToHMI(application);
-
-  // Check necessity of policy update for current application
-  // TODO(KKolodiy): need remove policy_manager
-  policy::PolicyManager* policy_manager =
-      policy::PolicyHandler::instance()->policy_manager();
-  if (!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-  } else {
-    policy_manager->CheckAppPolicyState(msg_params[strings::app_id].asString());
-  }
 
   if (result != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
@@ -521,7 +524,7 @@ RegisterAppInterfaceRequest::CheckCoincidence() {
     (*message_)[strings::msg_params];
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  const std::set<ApplicationSharedPtr>& applications = accessor.applications();
+  const std::set<ApplicationSharedPtr> applications = accessor.applications();
 
   std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
   const std::string app_name = msg_params[strings::app_name].asString();
@@ -756,7 +759,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
                                     [strings::app_id].asString();
 
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  const std::set<ApplicationSharedPtr>& applications = accessor.applications();
+  const std::set<ApplicationSharedPtr> applications = accessor.applications();
 
   std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
   std::set<ApplicationSharedPtr>::const_iterator it_end = applications.end();
@@ -790,7 +793,7 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
 
     for (; it_tn != it_tn_end; ++it_tn) {
       str = (*it_tn)[strings::text].asCharArray();
-      if (!CheckSyntax(str)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_name syntax check failed");
         return true;
       }

@@ -737,7 +737,7 @@
                 Can be set as a root screen.
         </description>
     </element>
-    <element name="NON_MEDIA" rootscreen="true">
+    <element name="NON-MEDIA" internal_name="NON_MEDIA" rootscreen="true">
         <description>
                 Default Non-media screen.
                 Can be set as a root screen.
@@ -1998,7 +1998,7 @@
 
   <struct name="TTSChunk">
     <description>A TTS chunk, that consists of the text/phonemes to speak and the type (like text or SAPI)</description>
-    <param name="text" maxlength="500" type="String">
+    <param name="text" minlength="0" maxlength="500" type="String">
       <description>
       	The text or phonemes to speak.
       	May not be empty.

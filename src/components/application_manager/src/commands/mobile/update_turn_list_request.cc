@@ -62,14 +62,14 @@ void UpdateTurnListRequest::Run() {
     return;
   }
 
-  // IsWhiteSpaceExist must be before ProcessSoftButtons.
-  // because of checking on whitespace in text of softbutton
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
                   "Incoming update turn list has contains \t\n \\t \\n");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
+
+  //ProcessSoftButtons checks strings on the contents incorrect character
 
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
@@ -190,35 +190,6 @@ bool UpdateTurnListRequest::CheckTurnListArray() {
 bool UpdateTurnListRequest::IsWhiteSpaceExist() {
   LOG4CXX_INFO(logger_, "UpdateTurnListRequest::IsWhiteSpaceExist");
   const char* str = NULL;
-
-  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    const smart_objects::SmartArray* sb_array =
-        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
-
-    smart_objects::SmartArray::const_iterator it_sb = sb_array->begin();
-    smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
-
-    for (; it_sb != it_sb_end; ++it_sb) {
-      if ((*it_sb).keyExists(strings::text)) {
-        str = (*it_sb)[strings::text].asCharArray();
-        if (strlen(str) && !CheckSyntax(str)) {
-          LOG4CXX_ERROR(logger_,
-                       "Invalid soft_buttons text syntax check failed");
-          return true;
-        }
-      }
-
-      if ((*it_sb).keyExists(strings::image)) {
-        str = (*it_sb)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str)) {
-          LOG4CXX_ERROR(logger_,
-                       "Invalid soft_buttons image value syntax check failed");
-          return true;
-        }
-      }
-
-    }
-  }
 
   if ((*message_)[strings::msg_params].keyExists(strings::turn_list)) {
     const smart_objects::SmartArray* tl_array =
