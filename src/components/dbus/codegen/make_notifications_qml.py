@@ -45,6 +45,7 @@ from ford_xml_parser import FordXmlParser, ParamDesc
 from code_formatter import CodeBlock
 
 class Notifications_qml(FordXmlParser):
+    #Used for qt signal names, because qt signals cannot begin with a capital letter
     def first_letter_to_lower_case(self, s):
         if len(s) == 0:
             return s
