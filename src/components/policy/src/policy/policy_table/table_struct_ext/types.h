@@ -153,11 +153,11 @@ struct ModuleConfig : CompositeType {
 
 struct MessageString : CompositeType {
   public:
-    Optional< String<1, 255> > line1;
-    Optional< String<1, 255> > line2;
+    Optional< String<1, 65535> > line1;
+    Optional< String<1, 65535> > line2;
     Optional< String<1, 65535> > tts;
-    Optional< String<1, 255> > label;
-    Optional< String<1, 500> > textBody;
+    Optional< String<1, 65535> > label;
+    Optional< String<1, 65535> > textBody;
   public:
     MessageString();
     ~MessageString();
