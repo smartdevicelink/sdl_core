@@ -330,15 +330,15 @@ Rectangle {
     SDLAdapter {
         id: sdlProxy
 
-        onResumeAudioSource: {
+        onOnResumeAudioSource: {
 
         }
 
-        onFileRemoved: {
+        onOnFileRemoved: {
 
         }
 
-        onAppRegistered: {
+        onOnAppRegistered: {
             console.debug("enter onAppRegistered")
             var appTypeToAdd = 0
             if (application.appType !== undefined) {
@@ -372,7 +372,7 @@ Rectangle {
             console.debug("exit onAppRegistered")
         }
 
-        onAppUnregistered: {
+        onOnAppUnregistered: {
             console.debug("enter onAppUnregistered")            
             if ((dataContainer.currentApplication.appId === appId)) {
                 if (dataContainer.applicationContext) {
@@ -391,28 +391,28 @@ Rectangle {
             beep.play()
         }
 
-        onSdlClose: {
+        onOnSDLClose: {
 
         }
 
-        onPutFile: {
+        onOnPutFile: {
             console.log("OnPutFile: ", offset, length, fileSize, FileName,
                         syncFileName, fileType, persistentFile);
         }
 
-        onRecordStart: {
+        onOnRecordStart: {
 
         }
 
-        onAppPermissionChanged: {
+        onOnAppPermissionChanged: {
 
         }
 
-        onSdlConsentNeeded: {
+        onOnSDLConsentNeeded: {
 
         }
 
-        onStatusUpdate: {
+        onOnStatusUpdate: {
             console.log("enter onStatusUpdate")
             settingsContainer.updateStatus(status);
         }

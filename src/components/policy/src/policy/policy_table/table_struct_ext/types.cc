@@ -763,12 +763,11 @@ void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
 AppLevel::AppLevel()
   : CompositeType(kUninitialized) {
 }
-AppLevel::AppLevel(uint16_t minutes_in_hmi_full, const std::string& app_registration_language_gui, const std::string& app_registration_language_vui, uint16_t count_of_rfcom_limit_reached, uint16_t minutes_in_hmi_limited, uint16_t minutes_in_hmi_background, uint16_t minutes_in_hmi_none, uint16_t count_of_user_selections, uint16_t count_of_rejections_sync_out_of_memory, uint16_t count_of_rejections_nickname_mismatch, uint16_t count_of_rejections_duplicate_name, uint16_t count_of_rejected_rpc_calls, uint16_t count_of_rpcs_sent_in_hmi_none, uint16_t count_of_removals_for_bad_behavior, uint16_t count_of_run_attempts_while_revoked)
+AppLevel::AppLevel(uint16_t minutes_in_hmi_full, const std::string& app_registration_language_gui, const std::string& app_registration_language_vui, uint16_t minutes_in_hmi_limited, uint16_t minutes_in_hmi_background, uint16_t minutes_in_hmi_none, uint16_t count_of_user_selections, uint16_t count_of_rejections_sync_out_of_memory, uint16_t count_of_rejections_nickname_mismatch, uint16_t count_of_rejections_duplicate_name, uint16_t count_of_rejected_rpc_calls, uint16_t count_of_rpcs_sent_in_hmi_none, uint16_t count_of_removals_for_bad_behavior, uint16_t count_of_run_attempts_while_revoked)
   : CompositeType(kUninitialized),
     minutes_in_hmi_full(minutes_in_hmi_full),
     app_registration_language_gui(app_registration_language_gui),
     app_registration_language_vui(app_registration_language_vui),
-    count_of_rfcom_limit_reached(count_of_rfcom_limit_reached),
     minutes_in_hmi_limited(minutes_in_hmi_limited),
     minutes_in_hmi_background(minutes_in_hmi_background),
     minutes_in_hmi_none(minutes_in_hmi_none),
@@ -788,7 +787,6 @@ AppLevel::AppLevel(const Json::Value* value__)
     minutes_in_hmi_full(impl::ValueMember(value__, "minutes_in_hmi_full")),
     app_registration_language_gui(impl::ValueMember(value__, "app_registration_language_gui")),
     app_registration_language_vui(impl::ValueMember(value__, "app_registration_language_vui")),
-    count_of_rfcom_limit_reached(impl::ValueMember(value__, "count_of_rfcom_limit_reached")),
     minutes_in_hmi_limited(impl::ValueMember(value__, "minutes_in_hmi_limited")),
     minutes_in_hmi_background(impl::ValueMember(value__, "minutes_in_hmi_background")),
     minutes_in_hmi_none(impl::ValueMember(value__, "minutes_in_hmi_none")),
@@ -806,7 +804,6 @@ Json::Value AppLevel::ToJsonValue() const {
   impl::WriteJsonField("minutes_in_hmi_full", minutes_in_hmi_full, &result__);
   impl::WriteJsonField("app_registration_language_gui", app_registration_language_gui, &result__);
   impl::WriteJsonField("app_registration_language_vui", app_registration_language_vui, &result__);
-  impl::WriteJsonField("count_of_rfcom_limit_reached", count_of_rfcom_limit_reached, &result__);
   impl::WriteJsonField("minutes_in_hmi_limited", minutes_in_hmi_limited, &result__);
   impl::WriteJsonField("minutes_in_hmi_background", minutes_in_hmi_background, &result__);
   impl::WriteJsonField("minutes_in_hmi_none", minutes_in_hmi_none, &result__);
@@ -828,9 +825,6 @@ bool AppLevel::is_valid() const {
     return false;
   }
   if (!app_registration_language_vui.is_valid()) {
-    return false;
-  }
-  if (!count_of_rfcom_limit_reached.is_valid()) {
     return false;
   }
   if (!minutes_in_hmi_limited.is_valid()) {
@@ -880,9 +874,6 @@ bool AppLevel::struct_empty() const {
   }
 
   if (app_registration_language_vui.is_initialized()) {
-    return false;
-  }
-  if (count_of_rfcom_limit_reached.is_initialized()) {
     return false;
   }
 
@@ -938,9 +929,6 @@ void AppLevel::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!app_registration_language_vui.is_valid()) {
     app_registration_language_vui.ReportErrors(&report__->ReportSubobject("app_registration_language_vui"));
-  }
-  if (!count_of_rfcom_limit_reached.is_valid()) {
-    count_of_rfcom_limit_reached.ReportErrors(&report__->ReportSubobject("count_of_rfcom_limit_reached"));
   }
   if (!minutes_in_hmi_limited.is_valid()) {
     minutes_in_hmi_limited.ReportErrors(&report__->ReportSubobject("minutes_in_hmi_limited"));

@@ -18,6 +18,7 @@ set(LIBRARIES
   gmock_main
   Policy
   ConfigProfile
+  ${RTLIB}
 )
 
 set(SHARED_LIBRARY_LIBRARIES

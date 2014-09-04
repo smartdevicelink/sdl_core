@@ -64,6 +64,10 @@ PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
 }
 
 void PulseThreadDelegate::threadMain() {
+  if (!Init()) {
+    LOG4CXX_ERROR(logger_, "Failed to initialize thread for QNX channel " << chid_);
+    return;
+  }
   while (run_) {
     struct sigevent event;
 // pulse priority is used to increase receiving thread priority

@@ -795,17 +795,16 @@ bool SQLPTExtRepresentation::GatherAppLevels(
     level.minutes_in_hmi_limited = query.GetInteger(2) / kSecondsInMinute;
     level.minutes_in_hmi_background = query.GetInteger(3) / kSecondsInMinute;
     level.minutes_in_hmi_none = query.GetInteger(4) / kSecondsInMinute;
-    level.count_of_rfcom_limit_reached = query.GetInteger(5);
-    level.count_of_user_selections = query.GetInteger(6);
-    level.count_of_rejections_sync_out_of_memory = query.GetInteger(7);
-    level.count_of_rejections_nickname_mismatch = query.GetInteger(8);
-    level.count_of_rejections_duplicate_name = query.GetInteger(9);
-    level.count_of_rejected_rpc_calls = query.GetInteger(10);
-    level.count_of_rpcs_sent_in_hmi_none = query.GetInteger(11);
-    level.count_of_removals_for_bad_behavior = query.GetInteger(12);
-    level.count_of_run_attempts_while_revoked = query.GetInteger(13);
-    level.app_registration_language_gui = query.GetString(14);
-    level.app_registration_language_vui = query.GetString(15);
+    level.count_of_user_selections = query.GetInteger(5);
+    level.count_of_rejections_sync_out_of_memory = query.GetInteger(6);
+    level.count_of_rejections_nickname_mismatch = query.GetInteger(7);
+    level.count_of_rejections_duplicate_name = query.GetInteger(8);
+    level.count_of_rejected_rpc_calls = query.GetInteger(9);
+    level.count_of_rpcs_sent_in_hmi_none = query.GetInteger(10);
+    level.count_of_removals_for_bad_behavior = query.GetInteger(11);
+    level.count_of_run_attempts_while_revoked = query.GetInteger(12);
+    level.app_registration_language_gui = query.GetString(13);
+    level.app_registration_language_vui = query.GetString(14);
     (*apps)[query.GetString(0)] = level;
   }
 
