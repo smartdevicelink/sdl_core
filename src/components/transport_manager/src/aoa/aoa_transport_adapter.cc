@@ -44,8 +44,13 @@ namespace transport_adapter {
 CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 AOATransportAdapter::AOATransportAdapter()
-    : TransportAdapterImpl(new PPSDeviceScanner(this),
-                           new AOAConnectionFactory(this),
+    : TransportAdapterImpl(
+#ifdef CUSTOMER_PASA
+        new PPSDeviceScanner(this),
+#else
+        new AOADeviceScanner(this),
+#endif  // CUSTOMER_PASA
+        new AOAConnectionFactory(this),
                            0),
       initialised_(false) {
 }

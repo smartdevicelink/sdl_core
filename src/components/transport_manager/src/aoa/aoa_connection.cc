@@ -51,6 +51,7 @@ AOAConnection::AOAConnection(const DeviceUID& device_uid,
       app_handle_(app_handle),
       controller_(controller) {
   wrapper_->Subscribe(observer_);
+  controller_->ConnectDone(device_uid_, app_handle_);
 }
 
 AOAConnection::~AOAConnection() {

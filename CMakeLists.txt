@@ -40,6 +40,7 @@ option(EXTENDED_MEDIA_MODE "Turn on and off extended Madia Manager features rela
 option(BUILD_SHARED_LIBS "Build all libraries as shared (if ON) or static (if OFF)" OFF)
 option(BUILD_BT_SUPPORT "Bluetooth support" ON)
 option(BUILD_USB_SUPPORT "libusb support" ON)
+option(BUILD_AOA_SUPPORT "libaoa support" OFF)
 option(BUILD_MME_SUPPORT "Apple devices support" OFF)
 option(BUILD_AVAHI_SUPPORT "libavahi support" ON)
 option(BUILD_RWLOCK_SUPPORT "rwlocks support" OFF)
@@ -173,22 +174,37 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   SET(EXTENDED_MEDIA_MODE OFF)
 endif()
 
+if (BUILD_AOA_SUPPORT)
+if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
+  add_definitions(-DAOA_SUPPORT)
+  set(BUILD_USB_SUPPORT OFF)
+  message(STATUS "AOA support is enabled")
+else ()
+  message(FATAL_ERROR "Library libAOA is supported on QNX only")
+endif()
+endif(BUILD_AOA_SUPPORT)
+
 if (BUILD_USB_SUPPORT)
   add_definitions(-DUSB_SUPPORT)
+  message(STATUS "USB support is enabled")
 endif()
+
 
 if (BUILD_BT_SUPPORT)
   add_definitions(-DBLUETOOTH_SUPPORT)
+  message(STATUS "Bluetooth support is enabled")
 endif()
 
 if (BUILD_MME_SUPPORT)
   add_definitions(-DMME_SUPPORT)
+  message(STATUS "MME support is enabled")
 endif(BUILD_MME_SUPPORT)
 
 if (BUILD_AVAHI_SUPPORT)
   add_definitions(-DAVAHI_SUPPORT)
 # --- Check libavahi-common, libavahi-client availability
   find_package(Libavahi)
+  message(STATUS "Avahi support is enabled")
 endif()
 
 if (BUILD_RWLOCK_SUPPORT)
