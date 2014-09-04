@@ -50,6 +50,10 @@ bool ConsumerFriendlyMessages::Validate() const {
   return true;
 }
 bool ModuleMeta::Validate() const {
+  if (GetPolicyTableType() == PT_UPDATE ||
+      GetPolicyTableType() == PT_PRELOADED) {
+    return false;
+  }
   return true;
 }
 bool AppLevel::Validate() const {

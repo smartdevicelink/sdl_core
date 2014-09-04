@@ -482,7 +482,7 @@ Json::Value MessageString::ToJsonValue() const {
 }
 bool MessageString::is_valid() const {
   if (struct_empty()) {
-    return initialization_state__ == kInitialized;
+    return initialization_state__ == kInitialized && Validate();
   }
   if (!line1.is_valid()) {
     return false;
@@ -691,9 +691,9 @@ Json::Value ModuleMeta::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   return result__;
 }
-bool ModuleMeta::is_valid() const {
+bool ModuleMeta::is_valid() const {  
   if (struct_empty()) {
-    return initialization_state__ == kInitialized;
+    return initialization_state__ == kInitialized && Validate();
   }
   return Validate();
 }
@@ -724,7 +724,7 @@ Json::Value AppLevel::ToJsonValue() const {
 }
 bool AppLevel::is_valid() const {
   if (struct_empty()) {
-    return initialization_state__ == kInitialized;
+    return initialization_state__ == kInitialized && Validate();
   }
   return Validate();
 }
@@ -764,7 +764,7 @@ Json::Value UsageAndErrorCounts::ToJsonValue() const {
 }
 bool UsageAndErrorCounts::is_valid() const {
   if (struct_empty()) {
-    return initialization_state__ == kInitialized;
+    return initialization_state__ == kInitialized && Validate();
   }
   if (!app_level.is_valid()) {
     return false;
@@ -815,7 +815,7 @@ Json::Value DeviceParams::ToJsonValue() const {
 }
 bool DeviceParams::is_valid() const {
   if (struct_empty()) {
-    return initialization_state__ == kInitialized;
+    return initialization_state__ == kInitialized && Validate();
   }
   return Validate();
 }

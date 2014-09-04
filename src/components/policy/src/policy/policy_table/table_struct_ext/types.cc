@@ -532,7 +532,7 @@ Json::Value MessageString::ToJsonValue() const {
 }
 bool MessageString::is_valid() const {
   if (struct_empty()) {
-    return initialization_state__ == kInitialized;
+    return initialization_state__ == kInitialized && Validate();
   }
   if (!line1.is_valid()) {
     return false;
@@ -768,7 +768,7 @@ Json::Value ModuleMeta::ToJsonValue() const {
 }
 bool ModuleMeta::is_valid() const {
   if (struct_empty()) {
-    return initialization_state__ == kInitialized;
+    return initialization_state__ == kInitialized && Validate();
   }
   if (!ccpu_version.is_valid()) {
     return false;
@@ -847,6 +847,12 @@ void ModuleMeta::ReportErrors(rpc::ValidationReport* report__) const {
   }
   if (!vin.is_valid()) {
     vin.ReportErrors(&report__->ReportSubobject("vin"));
+  }
+  if (GetPolicyTableType() == PT_UPDATE ||
+      GetPolicyTableType() == PT_PRELOADED) {
+    std::string validation_info = ommited_validation_info +
+                                  PolicyTableTypeToString(GetPolicyTableType());
+    report__->set_validation_info(validation_info.c_str());
   }
 }
 
@@ -1121,7 +1127,7 @@ Json::Value UsageAndErrorCounts::ToJsonValue() const {
 }
 bool UsageAndErrorCounts::is_valid() const {
   if (struct_empty()) {
-    return initialization_state__ == kInitialized;
+    return initialization_state__ == kInitialized && Validate();
   }
   if (!count_of_iap_buffer_full.is_valid()) {
     return false;
@@ -1210,7 +1216,7 @@ Json::Value ConsentRecords::ToJsonValue() const {
 }
 bool ConsentRecords::is_valid() const {
   if (struct_empty()) {
-    return initialization_state__ == kInitialized;
+    return initialization_state__ == kInitialized && Validate();
   }
   if (!consent_groups.is_valid()) {
     return false;
@@ -1290,7 +1296,7 @@ Json::Value DeviceParams::ToJsonValue() const {
 }
 bool DeviceParams::is_valid() const {
   if (struct_empty()) {
-    return initialization_state__ == kInitialized;
+    return initialization_state__ == kInitialized && Validate();
   }
   if (!hardware.is_valid()) {
     return false;
