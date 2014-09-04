@@ -83,8 +83,11 @@ NON_LOCAL_SRCS = \
 	$(wildcard transport_adapter/*.c*) \
 	$(wildcard tcp/*.c*) \
 	$(wildcard pasa_bt/*.c*) \
-	$(wildcard mme/*.c*) \
-	$(wildcard aoa/*.c*)
+	$(wildcard mme/*.c*)
+
+ifdef BUILD_AOA_SUPPORT
+NON_LOCAL_SRCS += $(wildcard aoa/*.c*)
+endif
  
  .NOTPARALLEL:
 
@@ -181,8 +184,9 @@ subdirs:
 	$(MAKE) -C tcp $(MAKECMDGOALS)
 	$(MAKE) -C pasa_bt $(MAKECMDGOALS) 
 	$(MAKE) -C mme $(MAKECMDGOALS)
+ifdef BUILD_AOA_SUPPORT
 	$(MAKE) -C aoa $(MAKECMDGOALS)
-	 
+endif
 	
 clean:
 	-rm -f $(BINARIES)
