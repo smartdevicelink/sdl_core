@@ -38,6 +38,7 @@
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
+#include "utils/threads/thread.h"
 
 #include "transport_manager/pasa_bt/bluetooth_PASA_device.h"
 
@@ -92,6 +93,20 @@ protected:
      */
     virtual bool IsInitialised() const;
   private:
+  class DeviceScannerDelegate: public threads::ThreadDelegate {
+  public:
+    explicit DeviceScannerDelegate(BluetoothPASADeviceScanner* scanner);
+    void threadMain() OVERRIDE;
+  private:
+    BluetoothPASADeviceScanner* scanner_;
+  };
+  class PASAMessageDelegate: public threads::ThreadDelegate {
+  public:
+    explicit PASAMessageDelegate(BluetoothPASADeviceScanner* scanner);
+    void threadMain() OVERRIDE;
+  private:
+    BluetoothPASADeviceScanner* scanner_;
+  };
   /**
    * @brief Waits for external scan request or time out for repeated search or terminate request
    */
@@ -132,9 +147,9 @@ protected:
   void UpdateTotalApplicationList();
 
   TransportAdapterController* controller_;
-  pthread_t bt_device_scanner_thread_;
+  threads::Thread* bt_device_scanner_thread_;
 
-  pthread_t bt_PASA_msg_thread_;
+  threads::Thread* bt_PASA_msg_thread_;
   bool thread_started_;
   bool shutdown_requested_;
   bool device_scan_requested_;

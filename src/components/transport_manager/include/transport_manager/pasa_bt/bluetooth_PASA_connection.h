@@ -42,6 +42,7 @@
 #include "transport_manager/transport_adapter/connection.h"
 #include "utils/logger.h"
 #include "utils/lock.h"
+#include "utils/threads/thread.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -119,6 +120,14 @@ class BluetoothPASAConnection
   ApplicationHandle application_handle() const;
 
  private:
+  class BluetoothPASAConnectionDelegate: public threads::ThreadDelegate {
+  public:
+    explicit BluetoothPASAConnectionDelegate(BluetoothPASAConnection* connection);
+    void threadMain() OVERRIDE;
+  private:
+    BluetoothPASAConnection* connection_;
+  };
+
   int read_fd_;
   int write_fd_;
   void Thread();
@@ -139,7 +148,7 @@ class BluetoothPASAConnection
   FrameQueue frames_to_send_;
   mutable sync_primitives::Lock frames_to_send_lock_;
 
-  pthread_t thread_;
+  threads::Thread* thread_;
 
   bool terminate_flag_;
   bool unexpected_disconnect_;
@@ -149,6 +158,7 @@ class BluetoothPASAConnection
   std::string sPPQ;
   int sppDeviceFd;
 };
+
 }  // namespace transport_adapter
 }  // namespace transport_manager
 #endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_PASA_BT_BLUETOOTH_PASA_CONNECTION_H_

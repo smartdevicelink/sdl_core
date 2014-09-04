@@ -46,6 +46,7 @@
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
+#include "utils/threads/thread.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -106,6 +107,14 @@ class BluetoothDeviceScanner : public DeviceScanner {
     virtual bool IsInitialised() const;
   private:
 
+  class BluetoothDeviceScannerDelegate: public threads::ThreadDelegate {
+  public:
+    explicit BluetoothDeviceScannerDelegate(BluetoothDeviceScanner* scanner);
+    void threadMain() OVERRIDE;
+  private:
+    BluetoothDeviceScanner* scanner_;
+  };
+
     typedef std::vector<uint8_t> RfcommChannelVector;
 
   /**
@@ -150,8 +159,7 @@ class BluetoothDeviceScanner : public DeviceScanner {
                                 DeviceVector* discovered_devices);
 
   TransportAdapterController* controller_;
-  pthread_t thread_;
-  bool thread_started_;
+  threads::Thread* thread_;
   bool shutdown_requested_;
   bool ready_;
   bool device_scan_requested_;
