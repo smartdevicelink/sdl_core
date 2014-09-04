@@ -66,7 +66,10 @@ PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
 void PulseThreadDelegate::threadMain() {
   while (run_) {
     struct sigevent event;
-    SIGEV_PULSE_INIT(&event, coid_, SIGEV_PULSE_PRIO_INHERIT, PULSE_CODE, 0);
+// pulse priority is used to increase receiving thread priority
+// TODO (nvaganov@luxoft.com): move constant value to config
+    short int pulse_priority = 63;
+    SIGEV_PULSE_INIT(&event, coid_, pulse_priority, PULSE_CODE, 0);
     if (ArmEvent(&event)) {
       struct _pulse pulse;
       LOG4CXX_INFO(logger_, "Waiting for pulse on QNX channel " << chid_);
