@@ -146,9 +146,9 @@ Item {
         }
     }
 
-    function activateApp() {
+    function activateApp(appID, priority, level) {
         console.log("Message Received - {method: 'BasicCommunication.ActivateApp', params:{ " +
-                    //"appID: " + appID +
+                    "appID: " + appID +
                     "}}")
         contentLoader.go("views/SDLPlayerView.qml", appID);
     }

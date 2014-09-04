@@ -196,7 +196,6 @@ Item
         var appId = applicationId ? applicationId : "default";
         var file = fileName ? fileName : fileIVSU;
 
-        console.log("AAAAAAAAAAAAAAAAAAAAAA sdlBasicCommunication.onSystemRequest");
         sdlBasicCommunication.onSystemRequest(type, url, Common.FileType.JSON,
                                               offset, length, timeoutPTExchange,
                                               file, appId);
@@ -280,7 +279,6 @@ Item
 
         if (isAppRevoked) {
 
-
             RequestToSDL.SDL_GetUserFriendlyMessage(["AppUnsupported"], dataContainer.hmiUILanguage, function(messages){
                 settingsContainer.getUserFriendlyMessageAppPermissionsRevoked("AppUnsupported", messages)
             });
@@ -310,8 +308,10 @@ Item
 
         var app = dataContainer.getApplication(appId);
         var messageCodes = [];
+
+        app.allowedFunctions = allowedFunctions;
+
         allowedFunctions.forEach(function (x) {
-            app.allowedFunctions.append({name: x.name, id: x.id, allowed: x.allowed});
             messageCodes.push(x.name);
         });
 
@@ -370,7 +370,8 @@ Item
                                  "messageCode": messages[i].messageCode,
                                  "label": messages[i].label,
                                  "textBody": messages[i].textBody,
-                                 "allowed": false
+                                 "allowed": false,
+                                 "id": messages[i].id
                              });
 
             if (messages[i].tts) {

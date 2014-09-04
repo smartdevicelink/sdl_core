@@ -855,13 +855,22 @@ SDL.SDLController = Em.Object
 
             var sysContextValue = this.get('sysContext');
 
-            if ((appID && SDL.SDLController.getApplicationModel(appID) != SDL.SDLAppController.model) || this.backgroundAlertAppID){
+            if ((appID && SDL.SDLController.getApplicationModel(appID) != SDL.SDLAppController.model)
+                || this.backgroundAlertAppID){
 
-                if (SDL.SDLAppController.model && SDL.SDLAppController.model.appID != appID && this.backgroundAlertAppID == null) {
+                if (SDL.SDLAppController.model
+                    && SDL.SDLAppController.model.appID != appID
+                    && this.backgroundAlertAppID == null) {
+
                     this.backgroundAlertAppID = appID;
                     FFW.UI.OnSystemContext(sysContextValue, appID);
                     FFW.UI.OnSystemContext('HMI_OBSCURED', SDL.SDLAppController.model.appID);
-                } else if (SDL.SDLAppController.model && SDL.SDLAppController.model.appID != appID && this.backgroundAlertAppID != null && SDL.SDLAppController.model.appID != this.backgroundAlertAppID) {
+
+                } else if (SDL.SDLAppController.model
+                    && SDL.SDLAppController.model.appID != appID
+                    && this.backgroundAlertAppID != null
+                    && SDL.SDLAppController.model.appID != this.backgroundAlertAppID) {
+
                     FFW.UI.OnSystemContext('MAIN', this.backgroundAlertAppID);
                     FFW.UI.OnSystemContext(sysContextValue, SDL.SDLAppController.model.appID);
                 }
