@@ -140,12 +140,14 @@ class CompositeType {
       kInvalidInitialized
     };
     explicit CompositeType(InitializationState init_state);
+    virtual ~CompositeType(){}
     static InitializationState InitHelper(bool is_next);
     static InitializationState InitHelper(const Json::Value* value,
                                           bool (Json::Value::*type_check)() const);
   protected:
     mutable InitializationState initialization_state__;
     policy_table_interface_base::PolicyTableType policy_table_type_;
+
 };
 
 /*
