@@ -84,6 +84,7 @@ NON_LOCAL_SRCS = \
 	$(wildcard tcp/*.c*) \
 	$(wildcard pasa_bt/*.c*) \
 	$(wildcard mme/*.c*) \
+	$(wildcard aoa/*.c*)
  
  .NOTPARALLEL:
 
@@ -180,6 +181,7 @@ subdirs:
 	$(MAKE) -C tcp $(MAKECMDGOALS)
 	$(MAKE) -C pasa_bt $(MAKECMDGOALS) 
 	$(MAKE) -C mme $(MAKECMDGOALS)
+	$(MAKE) -C aoa $(MAKECMDGOALS)
 	 
 	
 clean:

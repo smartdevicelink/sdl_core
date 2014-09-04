@@ -383,6 +383,12 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual std::string DeviceName(const DeviceUID& device_id) const;
 
+  /**
+   * @brief Allows to obtain connection type used by device.
+   * @return connection type.
+   */
+  virtual std::string GetConnectionType() const;
+
 #ifdef TIME_TESTER
   /**
    * @brief Setup observer for time metric.

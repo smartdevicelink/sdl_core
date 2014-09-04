@@ -228,12 +228,14 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param device_name Returned: name of device
    * \param applications_list Returned: applications on device
    * \param mac_address Returned: List of session keys
+   * \param connection_type Returned: type of connection (USB, BT, etc.)
    * \return int32_t -1 in case of error or 0 in case of success
    */
   virtual int32_t GetDataOnDeviceID(connection_handler::DeviceHandle device_handle,
                                     std::string *device_name = NULL,
                                     std::list<uint32_t> *applications_list = NULL,
-                                    std::string *mac_address = NULL);
+                                    std::string *mac_address = NULL,
+                                    std::string* connection_type = NULL);
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets crypto context of connection

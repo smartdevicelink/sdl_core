@@ -65,13 +65,14 @@ class MockPTExtRepresentation : public MockPTRepresentation,
     MOCK_METHOD2(GetUserFriendlyMsg,
                  std::vector<UserFriendlyMessage>(const std::vector<std::string>& msg_code,
                      const std::string& language));
-    MOCK_METHOD7(SetDeviceData, bool (const std::string& device_id,
+    MOCK_METHOD8(SetDeviceData, bool (const std::string& device_id,
                                       const std::string& hardware,
                                       const std::string& firmware,
                                       const std::string& os,
                                       const std::string& os_version,
                                       const std::string& carrier,
-                                      const uint32_t number_of_ports));
+                                      const uint32_t number_of_ports,
+                                      const std::string& connection_type));
     MOCK_METHOD6(SetDeviceData,
                  bool(const std::string&, const std::string&, const std::string&, const std::string&, const std::string&, const std::string&));
     MOCK_METHOD2(SetMaxNumberPorts,

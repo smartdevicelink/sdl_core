@@ -174,6 +174,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual void OnExceededTimeout() = 0;
 
     /**
+     * @brief Handler of PTS sending out
+     */
+    virtual void OnUpdateStarted() = 0;
+
+    /**
      * @brief Check user consent for mobile device data connection
      * @param device_id Unique device identifier
      * @return status of device consent
@@ -377,7 +382,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual int IsConsentNeeded(const std::string& app_id) = 0;
 
     /**
-     * @brief Allows to update 'vin' value in module_meta.
+     * @brief Allows to update Vehicle Identification Number in policy table.
      * @param new value for the parameter.
      */
     virtual void SetVINValue(const std::string& value) = 0;

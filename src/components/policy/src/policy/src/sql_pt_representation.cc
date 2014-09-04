@@ -1459,4 +1459,3 @@ bool SQLPTRepresentation::SetVINValue(const std::string& value) {
 }
 
 }  // namespace policy
-

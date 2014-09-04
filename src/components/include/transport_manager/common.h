@@ -66,6 +66,11 @@ typedef unsigned int DeviceHandle;
 typedef unsigned int ConnectionUID;
 
 /**
+ * @brief Type definition for variable that hold connection type.
+ */
+typedef std::string ConnectionType;
+
+/**
  * @brief Type definition for variable that hold device unique identifier.
  */
 typedef std::string DeviceUID;

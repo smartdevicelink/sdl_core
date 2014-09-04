@@ -153,11 +153,11 @@ struct ModuleConfig : CompositeType {
 
 struct MessageString : CompositeType {
   public:
-    Optional< String<1, 255> > line1;
-    Optional< String<1, 255> > line2;
+    Optional< String<1, 65535> > line1;
+    Optional< String<1, 65535> > line2;
     Optional< String<1, 65535> > tts;
-    Optional< String<1, 255> > label;
-    Optional< String<1, 500> > textBody;
+    Optional< String<1, 65535> > label;
+    Optional< String<1, 65535> > textBody;
   public:
     MessageString();
     ~MessageString();
@@ -234,7 +234,6 @@ struct AppLevel : CompositeType {
     Integer<uint16_t, 0, 65535> minutes_in_hmi_full;
     String<1, 10> app_registration_language_gui;
     String<1, 10> app_registration_language_vui;
-    Integer<uint16_t, 0, 65535> count_of_rfcom_limit_reached;
     Integer<uint16_t, 0, 65535> minutes_in_hmi_limited;
     Integer<uint16_t, 0, 65535> minutes_in_hmi_background;
     Integer<uint16_t, 0, 65535> minutes_in_hmi_none;
@@ -248,7 +247,7 @@ struct AppLevel : CompositeType {
     Integer<uint16_t, 0, 65535> count_of_run_attempts_while_revoked;
   public:
     AppLevel();
-    AppLevel(uint16_t minutes_in_hmi_full, const std::string& app_registration_language_gui, const std::string& app_registration_language_vui, uint16_t count_of_rfcom_limit_reached, uint16_t minutes_in_hmi_limited, uint16_t minutes_in_hmi_background, uint16_t minutes_in_hmi_none, uint16_t count_of_user_selections, uint16_t count_of_rejections_sync_out_of_memory, uint16_t count_of_rejections_nickname_mismatch, uint16_t count_of_rejections_duplicate_name, uint16_t count_of_rejected_rpc_calls, uint16_t count_of_rpcs_sent_in_hmi_none, uint16_t count_of_removals_for_bad_behavior, uint16_t count_of_run_attempts_while_revoked);
+    AppLevel(uint16_t minutes_in_hmi_full, const std::string& app_registration_language_gui, const std::string& app_registration_language_vui, uint16_t minutes_in_hmi_limited, uint16_t minutes_in_hmi_background, uint16_t minutes_in_hmi_none, uint16_t count_of_user_selections, uint16_t count_of_rejections_sync_out_of_memory, uint16_t count_of_rejections_nickname_mismatch, uint16_t count_of_rejections_duplicate_name, uint16_t count_of_rejected_rpc_calls, uint16_t count_of_rpcs_sent_in_hmi_none, uint16_t count_of_removals_for_bad_behavior, uint16_t count_of_run_attempts_while_revoked);
     ~AppLevel();
     explicit AppLevel(const Json::Value* value__);
     Json::Value ToJsonValue() const;
@@ -306,6 +305,7 @@ struct DeviceParams : CompositeType {
     Optional< Nullable< String<1, 255> > > carrier;
     Optional< UserConsentRecords > user_consent_records;
     Optional< Integer<uint8_t, 0, 255> > max_number_rfcom_ports;
+    Optional< String<1, 255> > connection_type;
   public:
     DeviceParams();
     ~DeviceParams();

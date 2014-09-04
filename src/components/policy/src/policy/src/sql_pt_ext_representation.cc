@@ -180,7 +180,8 @@ bool SQLPTExtRepresentation::SetDeviceData(const std::string& device_id,
     const std::string& os,
     const std::string& os_version,
     const std::string& carrier,
-    const uint32_t number_of_ports) {
+    const uint32_t number_of_ports,
+    const std::string& connection_type) {
   LOG4CXX_INFO(logger_, "SetDeviceData");
   dbms::SQLQuery count_query(db());
   if (!count_query.Prepare(sql_pt_ext::kCountDevice)) {
@@ -212,6 +213,7 @@ bool SQLPTExtRepresentation::SetDeviceData(const std::string& device_id,
     update_query.Bind(4, carrier);
     update_query.Bind(5, static_cast<int>(number_of_ports));
     update_query.Bind(6, device_id);
+    update_query.Bind(7, connection_type);
 
     if (!update_query.Exec() || !update_query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect update for device.");
@@ -235,6 +237,7 @@ bool SQLPTExtRepresentation::SetDeviceData(const std::string& device_id,
   insert_query.Bind(4, os_version);
   insert_query.Bind(5, carrier);
   insert_query.Bind(6, static_cast<int>(number_of_ports));
+  insert_query.Bind(7, connection_type);
 
   if (!insert_query.Exec() || !insert_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert to device.");
@@ -792,17 +795,16 @@ bool SQLPTExtRepresentation::GatherAppLevels(
     level.minutes_in_hmi_limited = query.GetInteger(2) / kSecondsInMinute;
     level.minutes_in_hmi_background = query.GetInteger(3) / kSecondsInMinute;
     level.minutes_in_hmi_none = query.GetInteger(4) / kSecondsInMinute;
-    level.count_of_rfcom_limit_reached = query.GetInteger(5);
-    level.count_of_user_selections = query.GetInteger(6);
-    level.count_of_rejections_sync_out_of_memory = query.GetInteger(7);
-    level.count_of_rejections_nickname_mismatch = query.GetInteger(8);
-    level.count_of_rejections_duplicate_name = query.GetInteger(9);
-    level.count_of_rejected_rpc_calls = query.GetInteger(10);
-    level.count_of_rpcs_sent_in_hmi_none = query.GetInteger(11);
-    level.count_of_removals_for_bad_behavior = query.GetInteger(12);
-    level.count_of_run_attempts_while_revoked = query.GetInteger(13);
-    level.app_registration_language_gui = query.GetString(14);
-    level.app_registration_language_vui = query.GetString(15);
+    level.count_of_user_selections = query.GetInteger(5);
+    level.count_of_rejections_sync_out_of_memory = query.GetInteger(6);
+    level.count_of_rejections_nickname_mismatch = query.GetInteger(7);
+    level.count_of_rejections_duplicate_name = query.GetInteger(8);
+    level.count_of_rejected_rpc_calls = query.GetInteger(9);
+    level.count_of_rpcs_sent_in_hmi_none = query.GetInteger(10);
+    level.count_of_removals_for_bad_behavior = query.GetInteger(11);
+    level.count_of_run_attempts_while_revoked = query.GetInteger(12);
+    level.app_registration_language_gui = query.GetString(13);
+    level.app_registration_language_vui = query.GetString(14);
     (*apps)[query.GetString(0)] = level;
   }
 
@@ -906,6 +908,7 @@ bool SQLPTExtRepresentation::SaveDeviceData(
     query.Bind(4, *(it->second.os_version));
     query.Bind(5, *(it->second.carrier));
     query.Bind(6, *(it->second.max_number_rfcom_ports));
+    query.Bind(7, *(it->second.connection_type));
 
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into device data.");

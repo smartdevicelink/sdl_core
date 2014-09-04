@@ -95,7 +95,9 @@ DYNAMIC_LIBS += \
 	apr-1$(DEBUG_EXT) \
 	expat$(DEBUG_EXT) \
 	aprutil-1$(DEBUG_EXT) \
-	log4cxx$(DEBUG_EXT)
+	log4cxx$(DEBUG_EXT) \
+	aoa$(DEBUG_EXT) \
+	pps
 
 #  LIB - For Static Libraries -> output to lib directory with specific naming
 #MATH_LIB = $(LIB_PATH)$(LIB_PREFIX)math.$(LIB_EXT)

@@ -155,7 +155,8 @@ class PTExtRepresentation : public virtual PTRepresentation {
                                const std::string& os = "",
                                const std::string& os_version = "",
                                const std::string& carrier = "",
-                               const uint32_t number_of_ports = 0) = 0;
+                               const uint32_t number_of_ports = 0,
+                               const std::string& connection_type = "") = 0;
 
     /**
      * @brief Sets user consent for particular mobile device,

@@ -144,7 +144,7 @@ void ConnectionHandlerImpl::OnDeviceAdded(
         DeviceMap::value_type(
           device_info.device_handle(),
           Device(device_info.device_handle(), device_info.name(),
-                 device_info.mac_address())));
+                 device_info.mac_address(), device_info.connection_type())));
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
@@ -487,8 +487,10 @@ bool ConnectionHandlerImpl::GetDeviceID(const std::string &mac_address,
 }
 
 int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
-    DeviceHandle device_handle, std::string *device_name,
-    std::list<uint32_t> *applications_list, std::string *mac_address) {
+    DeviceHandle device_handle,
+    std::string *device_name,
+    std::list<uint32_t> *applications_list, std::string *mac_address,
+    std::string* connection_type ) {
   LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::GetDataOnDeviceID");
 
   int32_t result = -1;
@@ -501,7 +503,9 @@ int32_t ConnectionHandlerImpl::GetDataOnDeviceID(
   if (device_name) {
     *device_name = it->second.user_friendly_name();
   }
-
+  if (connection_type) {
+    *connection_type = it->second.connection_type();
+  }
   if (applications_list) {
     applications_list->clear();
     sync_primitives::AutoLock connection_list_lock(connection_list_lock_);
