@@ -22,24 +22,52 @@ bool Rpcs::Validate() const {
   return true;
 }
 bool ModuleConfig::Validate() const {
+  if (PT_PRELOADED == GetPolicyTableType()) {
+
+    if (vehicle_make.is_initialized()) {
+      return false;
+    }
+    if (vehicle_year.is_initialized()) {
+      return false;
+    }
+    if (vehicle_model.is_initialized()) {
+      return false;
+    }
+  }
   return true;
 }
+
 bool MessageString::Validate() const {
   return true;
 }
 bool MessageLanguages::Validate() const {
+  if (PT_SNAPSHOT == GetPolicyTableType()) {
+    return false;
+  }
   return true;
 }
 bool ConsumerFriendlyMessages::Validate() const {
   return true;
 }
 bool ModuleMeta::Validate() const {
+  if (GetPolicyTableType() == PT_UPDATE ||
+      GetPolicyTableType() == PT_PRELOADED) {
+    return false;
+  }
   return true;
 }
 bool AppLevel::Validate() const {
+  if (PT_PRELOADED == GetPolicyTableType() ||
+      PT_SNAPSHOT == GetPolicyTableType()) {
+    return false;
+  }
   return true;
 }
 bool UsageAndErrorCounts::Validate() const {
+  if (PT_PRELOADED == GetPolicyTableType() ||
+      PT_SNAPSHOT == GetPolicyTableType()) {
+   return false;
+  }
   return true;
 }
 bool ConsentRecords::Validate() const {
@@ -63,31 +91,16 @@ bool PolicyTable::Validate() const {
       }
       continue;
     }
-    if (kDefaultApp == it->first || kPreDataConsentApp == it->first) {
-      if (/*!it->second.memory_kb.is_initialized()
-          || !it->second.heart_beat_timeout_ms.is_initialized()
-          ||*/ it->second.nicknames.is_initialized()) {
-        initialization_state__ = kUninitialized;
-        return false;
-      }
-      continue;
-    }
-    if (!it->second.is_null() && !it->second.is_string()
-        && (!it->second.nicknames.is_initialized()
-            /*|| !it->second.AppHMIType.is_initialized()
-            || !it->second.memory_kb.is_initialized()
-            || !it->second.heart_beat_timeout_ms.is_initialized()*/)) {
-      initialization_state__ = kUninitialized;
-      return false;
-    }
   }
-  if (consumer_friendly_messages.is_initialized()) {
-    if (!(*consumer_friendly_messages).messages.is_initialized()) {
+  if (PT_PRELOADED == GetPolicyTableType() ||
+      PT_SNAPSHOT == GetPolicyTableType()) {
+    if (device_data.is_initialized()) {
       return false;
     }
   }
   return true;
 }
+
 bool Table::Validate() const {
   return true;
 }
