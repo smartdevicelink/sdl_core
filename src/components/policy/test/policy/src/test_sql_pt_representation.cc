@@ -411,7 +411,6 @@ TEST_F(SQLPTRepresentationTest, SaveGenerateSnapshot) {
   app12345counters["count_of_rejections_nickname_mismatch"] = 0;
   app12345counters["count_of_rejections_sync_out_of_memory"] = 0;
   app12345counters["count_of_removals_for_bad_behavior"] = 0;
-  app12345counters["count_of_rfcom_limit_reached"] = 0;
   app12345counters["count_of_rpcs_sent_in_hmi_none"] = 0;
   app12345counters["count_of_run_attempts_while_revoked"] = 0;
   app12345counters["count_of_user_selections"] = 0;
