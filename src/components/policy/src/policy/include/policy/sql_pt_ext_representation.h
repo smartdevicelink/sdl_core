@@ -123,6 +123,9 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
     bool IsPredataPolicy(const std::string& app_id) const;
     bool SetUnpairedDevice(const std::string& device_id) const;
     bool UnpairedDevicesList(DeviceIds* device_ids) const;
+    bool RemoveAppConsentForGroup(
+        const std::string& policy_app_id,
+        const std::string& functional_group_name) const;
 
     virtual bool SetVINValue(const std::string& value);
   private:

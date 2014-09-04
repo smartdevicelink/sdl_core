@@ -966,7 +966,7 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
           std::string(policy_table::EnumToJsonString(*(it->second.input))));
       }
 
-      if (!query.Exec() && !query.Reset()) {
+      if (!query.Exec() || !query.Reset()) {
         LOG4CXX_WARN(logger_, "Incorrect insert into consent group.");
         return false;
       }
@@ -1510,6 +1510,41 @@ bool SQLPTExtRepresentation::SetVINValue(const std::string& value){
     LOG4CXX_WARN(logger_, "Failed update module_meta");
   }
   return result;
+}
+
+bool SQLPTExtRepresentation::RemoveAppConsentForGroup(
+    const std::string& policy_app_id,
+    const std::string& functional_group_name) const {
+  dbms::SQLQuery query_group_id(db());
+  if (!query_group_id.Prepare(sql_pt_ext::kSelectGroupId)) {
+    LOG4CXX_WARN(logger_, "Incorect statement for select group name.");
+    return false;
+  }
+
+  query_group_id.Bind(0, functional_group_name);
+
+  if (!query_group_id.Exec()) {
+    LOG4CXX_WARN(logger_, "Failed to select group id.");
+    return false;
+  }
+
+  const int id = query_group_id.GetInteger(0);
+
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt_ext::kDeleteAppGroupConsent)) {
+    LOG4CXX_WARN(logger_, "Incorect statement for remove app consent.");
+    return false;
+  }
+
+  query.Bind(0, policy_app_id);
+  query.Bind(1, id);
+
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Failed to remove app consent.");
+    return false;
+  }
+
+  return true;
 }
 
 }  // namespace policy

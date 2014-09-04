@@ -619,18 +619,22 @@ bool SQLPTRepresentation::Save(const policy_table::Table& table) {
     db_->RollbackTransaction();
     return false;
   }
-  if (!SaveDeviceData(*table.policy_table.device_data)) {
-    db_->RollbackTransaction();
-    return false;
-  }
-  if (!SaveUsageAndErrorCounts(*table.policy_table.usage_and_error_counts)) {
-    db_->RollbackTransaction();
-    return false;
-  }
-  if (!SaveModuleMeta(*table.policy_table.module_meta)) {
-    db_->RollbackTransaction();
-    return false;
-  }
+// TODO(AOleynik): According to requirements we don't have to replace these
+// sections. Also this part leads to restoring of data, which could be deleted
+// before. Commented to check, if there any dependecies from these code.
+// Probably, appropriate methods should be removed also then.
+//  if (!SaveDeviceData(*table.policy_table.device_data)) {
+//    db_->RollbackTransaction();
+//    return false;
+//  }
+//  if (!SaveUsageAndErrorCounts(*table.policy_table.usage_and_error_counts)) {
+//    db_->RollbackTransaction();
+//    return false;
+//  }
+//  if (!SaveModuleMeta(*table.policy_table.module_meta)) {
+//    db_->RollbackTransaction();
+//    return false;
+//  }
   db_->CommitTransaction();
   return true;
 }

@@ -317,6 +317,17 @@ class PTExtRepresentation : public virtual PTRepresentation {
      * @return true if success
      */
     virtual bool UnpairedDevicesList(DeviceIds* device_ids) const = 0;
+
+    /**
+     * @brief Remove application consent for particular group
+     * @param policy_app_id Unique application id
+     * @param functional_group_name Functional group name, which consents should
+     * be removed
+     * @return true, in case of success, otherwise - false
+     */
+    virtual bool RemoveAppConsentForGroup(
+      const std::string& policy_app_id,
+      const std::string& functional_group_name) const = 0;
 };
 }  //  namespace policy
 

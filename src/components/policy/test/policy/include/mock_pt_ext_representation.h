@@ -119,6 +119,8 @@ class MockPTExtRepresentation : public MockPTRepresentation,
     MOCK_METHOD2(SetIsPredata, bool(const std::string& app_id, bool is_predata));
     MOCK_CONST_METHOD1(SetUnpairedDevice, bool(const std::string& device_id));
     MOCK_CONST_METHOD1(UnpairedDevicesList, bool(DeviceIds* device_ids));
+    MOCK_CONST_METHOD2(RemoveAppConsentForGroup, bool(const std::string& policy_app_id,
+                                                      const std::string& functional_group));
 };
 
 }  // namespace policy

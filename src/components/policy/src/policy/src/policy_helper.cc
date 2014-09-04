@@ -167,6 +167,21 @@ bool CheckAppPolicy::HasSameGroups(const AppPoliciesValueType& app_policy,
     perms->appPermissionsConsentNeeded = true;
   }
 
+  if (perms->isAppPermissionsRevoked) {
+    PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(
+                                    pm_->policy_table_.pt_data().get());
+    if (pt_ext) {
+      std::vector<policy::FunctionalGroupPermission>::const_iterator it =
+          perms->appRevokedPermissions.begin();
+      std::vector<policy::FunctionalGroupPermission>::const_iterator it_end =
+          perms->appRevokedPermissions.end();
+      for (;it != it_end; ++it) {
+       pt_ext->RemoveAppConsentForGroup(perms->application_id, it->group_name);
+      }
+    }
+  }
+
+
   return !(perms->appRevokedPermissions.size() > 0
            || perms->appPermissionsConsentNeeded);
 }

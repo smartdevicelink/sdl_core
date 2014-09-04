@@ -123,6 +123,12 @@ const std::string kInsertConsentGroups =
   "(`device_id`, `application_id`, `functional_group_id`, `is_consented`, `input`) "
   "VALUES (?,?,?,?,?)";
 
+const std::string kDeleteAppGroupConsent = "DELETE FROM `consent_group` WHERE "
+  "`application_id` = ? AND `functional_group_id` = ? ";
+
+ const std::string kSelectGroupId =
+     "SELECT `id` FROM `functional_group` WHERE `name` = ? ";
+
 const std::string kCountUnconsentedGroups =
   "SELECT COUNT(`a`.`functional_group_id`) FROM `app_group` AS `a` "
   " WHERE `a`.`application_id` = ?  AND NOT EXISTS "
