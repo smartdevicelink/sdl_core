@@ -3,14 +3,12 @@
 #
 
 # Name of the componet (team/domain prefix '_' component name)
-COMPONENT_NAME = transport_manager
+COMPONENT_NAME = transport_manager/aoa
 
 ifndef PRJ_ROOT
-export PRJ_ROOT = $(CURDIR)/../../../../
+export PRJ_ROOT = $(CURDIR)/../../../../../
 endif
 include $(PRJ_ROOT)cfg/depends.mk
-
-OBJS_FILE=.objs.txt
 
 # Additive Compile Flags (Flags from initiating make process will still apply)
 DEFS += \
@@ -31,15 +29,13 @@ DEFS += \
 INCLUDES = \
 	$(CFG_INCS) \
 	$(CC_IFLAG)./ \
-	$(CC_IFLAG)../include \
 	$(CC_IFLAG)../../include \
-	$(CC_IFLAG)../../protocol_handler/include \
-	$(CC_IFLAG)../../connection_handler/include \
-	$(CC_IFLAG)../../config_profile/include \
-    $(CC_IFLAG)../../resumption/include \
-	$(CC_IFLAG)../../utils/include \
-	$(CC_IFLAG)../../../3rd_party-static/jsoncpp/include/json \
-	$(CC_IFLAG)../../../3rd_party/log4cxx/include \
+	$(CC_IFLAG)../../../include \
+	$(CC_IFLAG)../../../protocol_handler/include \
+	$(CC_IFLAG)../../../connection_handler/include \
+	$(CC_IFLAG)../../../utils/include \
+	$(CC_IFLAG)../../../config_profile/include \
+	$(CC_IFLAG)../../../../3rd_party/log4cxx/include \
 	$(DEPENDS_INCLUDES)
 
 
@@ -63,7 +59,7 @@ LIB_PATHS += \
 #  LIB - Define the static library for Message Queue
 #
 #
-COMPONENT_LIB = $(LIB_PATH)$(LIB_PREFIX)$(COMPONENT_NAME)$(DEBUG_EXT).$(LIB_EXT)
+#COMPONENT_LIB = $(LIB_PATH)$(LIB_PREFIX)$(COMPONENT_NAME)$(DEBUG_EXT).$(LIB_EXT)
 
 ## Sources Section
 
@@ -74,19 +70,12 @@ COMPONENT_LIB = $(LIB_PATH)$(LIB_PREFIX)$(COMPONENT_NAME)$(DEBUG_EXT).$(LIB_EXT)
 # since your in the src folder is pull only files from there
 COMPONENT_SRCS = \
 	$(wildcard *.c*)
-	
 
 # Define sources that my not be local to your component
 # here, you can define indivial files or wildcard from 
 # a different folder.
-NON_LOCAL_SRCS = \
-	$(wildcard transport_adapter/*.c*) \
-	$(wildcard tcp/*.c*) \
-	$(wildcard pasa_bt/*.c*) \
-	$(wildcard mme/*.c*) \
-	$(wildcard aoa/*.c*)
- 
- .NOTPARALLEL:
+NON_LOCAL_SRCS =
+  
 
 # List of all sources to be built.  Can be assembled from the other defintitions.
 #  This only defines sources for the current directory, so if there are subdirectories
@@ -94,6 +83,8 @@ NON_LOCAL_SRCS = \
 #  direct the building of sources, but no linking into a binary)
 SOURCES = \
 	$(COMPONENT_SRCS) \
+	$(NON_LOCAL_SRCS)
+
 
 
 #
@@ -102,7 +93,7 @@ SOURCES = \
 #
 C_LANG_OBJECTS = $(addprefix $(BLD_PATH),$(addsuffix .$(OBJ_EXT),$(basename $(filter %.c ,$(SOURCES) ) ) ) )
 CPP_LANG_OBJECTS = $(addprefix $(BLD_PATH),$(addsuffix .$(OBJ_EXT),$(basename $(filter %.cpp %.cxx,$(SOURCES) ) ) ) )
-CC_LANG_OBJECTS = $(addprefix $(abspath $(BLD_PATH))/,$(addsuffix .$(OBJ_EXT),$(basename $(filter %.cc,$(SOURCES) ) ) ) )
+CC_LANG_OBJECTS = $(addprefix $(BLD_PATH),$(addsuffix .$(OBJ_EXT),$(basename $(filter %.cc,$(SOURCES) ) ) ) )
 
 
 # List of all sources to be generated.  Can be assembled from the other defintitions.
@@ -112,26 +103,18 @@ OBJECTS = \
 	$(CC_LANG_OBJECTS)
 
 
-# assuming all objects should be included in the executable.
-ALL_OBJECTS = \
-	$(addprefix $(abspath $(BLD_PATH))/,$(addsuffix .$(OBJ_EXT),$(basename $(NON_LOCAL_SRCS) ) ) ) \
-				$(OBJECTS)
-
 	
 # All headers that are dependencies.  Wildcard is easy to pickup local headers.
 #  This is only to automate the rebuilding, all builds on the servers are cleans
 #  So this is not a huge deal when building on a component level.
 HEADERS = \
-	$(wildcard ../include/$(COMPONENT_NAME)/*.h*) \
-	$(wildcard ../include/$(COMPONENT_NAME)/pasa_bt/*.h*) \
-	$(wildcard ../include/$(COMPONENT_NAME)/tcp/*.h*) \
-	$(wildcard ../include/$(COMPONENT_NAME)/transport_adapter/*.h*) \
-	$(wildcard ../../protocol_handler/include/protocol_handler/*.h*) \
-	$(wildcard ../../resumption/include/*.h*) \
-	$(wildcard ../../connection_handler/include/connection_handler/*.h*) \
-	$(wildcard ../../utils/include/utils/*.h*) \
-	$(wildcard ../../utils/include/utils/threads/*.h*) \
-	$(wildcard ../../../3rd_party-static/jsoncpp/include/json/*.h*) \
+	$(wildcard ../../include/$(COMPONENT_NAME)/*.h*) \
+	$(wildcard ../../include/tranpsort_manager/*.h*) \
+	$(wildcard ../../../protocol_handler/include/protocol_handler/*.h*) \
+	$(wildcard ../../../connection_handler/include/connection_handler/*.h*) \
+	$(wildcard ../../../utils/include/utils/*.h*) \
+	$(wildcard ../../../utils/include/utils/threads/*.h*) \
+
 	
 LIBRARIES = \
 	$(COMPONENT_LIB)
@@ -161,9 +144,8 @@ local: $(OBJECTS)
 # Defines specific for each deliverable
 
 # For a static library
-$(COMPONENT_LIB): $(ALL_OBJECTS)
-	@echo $^ > $(OBJS_FILE)
-	xargs --arg-file=$(OBJS_FILE) $(AR) $(AR_FLAGS) $(AR_OFLAG) $(@)
+$(COMPONENT_LIB): $(OBJECTS)
+	$(AR_CMD)
 
 # Standard set of derived targets
 library: base \
@@ -177,12 +159,6 @@ binary: base \
 #  standard form is of
 #  $(MAKE) -C subdirectory_name $(MAKECMDGOALS) 
 subdirs:
-	$(MAKE) -C transport_adapter $(MAKECMDGOALS)
-	$(MAKE) -C tcp $(MAKECMDGOALS)
-	$(MAKE) -C pasa_bt $(MAKECMDGOALS) 
-	$(MAKE) -C mme $(MAKECMDGOALS)
-	$(MAKE) -C aoa $(MAKECMDGOALS)
-	 
 	
 clean:
 	-rm -f $(BINARIES)
