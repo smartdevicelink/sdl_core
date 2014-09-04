@@ -98,6 +98,7 @@ const char* kTargetLogFileHomeDirKey = "TargetLogFileHomeDir";
 const char* kTargetLogFileNamePatternKey = "TargetLogFileNamePattern";
 const char* kTargetBootCountFileKey = "TargetBootCountFile";
 const char* kTargetTmpDirKey = "TargetTmpDir";
+const char* kLogFileMaxSizeKey = "LogFileMaxSize";
 #endif
 
 const char* kMixingAudioSupportedKey = "MixingAudioSupported";
@@ -164,6 +165,7 @@ const char* kDefaultTargetLogFileHomeDir = "/fs/rwdata/logs/";
 const char* kDefaultTargetLogFileNamePattern ="smartdevicelink.log";
 const char* kDefaultTargetBootCountFile = "/fs/rwdata/.flags/boot_count";
 const char* kDefaultTargetTmpDir = "/fs/tmpfs";
+const char* kDefaultLogFileMaxSize = "1024K";
 #endif
 const char* kDefaultMmeDatabaseName = "/dev/qdb/mediaservice_db";
 const char* kDefaultEventMQ = "/dev/mqueue/ToSDLCoreUSBAdapter";
@@ -439,6 +441,10 @@ const std::string& Profile::target_boot_count_file() const {
 
 const std::string& Profile::target_tmp_dir() const {
   return target_tmp_dir_;
+}
+
+const std::string& Profile::log_file_max_size() const {
+  return log_file_max_size_;
 }
 #endif
 
@@ -791,6 +797,11 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
 
     LOG_UPDATED_VALUE(target_tmp_dir_, kTargetTmpDirKey,
                       kMainSection);
+
+    ReadStringValue(&log_file_max_size_, kDefaultLogFileMaxSize, kLoggerSection,
+                    kLogFileMaxSizeKey);
+
+    LOG_UPDATED_VALUE(log_file_max_size_, kLogFileMaxSizeKey, kLoggerSection);
 
 #endif
 

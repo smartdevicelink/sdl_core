@@ -256,6 +256,11 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns path to tmp directory on the target.
       */
     const std::string& target_tmp_dir() const;
+
+    /**
+     * @brief Returns max size limit of log file
+     */
+    const std::string& log_file_max_size() const;
 #endif
     /**
      * @brief Returns allowable max amount of requests per time scale for
@@ -628,6 +633,7 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     target_log_file_name_pattern_;
     std::string                     target_boot_count_file_;
     std::string                     target_tmp_dir_;
+    std::string                     log_file_max_size_;
 #endif
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;
