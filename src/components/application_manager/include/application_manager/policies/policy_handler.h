@@ -200,7 +200,7 @@ class PolicyHandler :
 
   /**
    * @brief Allows to update vechicle data info.
-   * @param SmartIbject which contains all needed information.
+   * @param SmartObject which contains all needed information.
    */
   virtual void OnVehicleDataUpdated(const smart_objects::SmartObject& message);
 

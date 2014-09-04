@@ -382,7 +382,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual int IsConsentNeeded(const std::string& app_id) = 0;
 
     /**
-     * @brief Allows to update 'vin' value in module_meta.
+     * @brief Allows to update Vehicle Identification Number in policy table.
      * @param new value for the parameter.
      */
     virtual void SetVINValue(const std::string& value) = 0;
