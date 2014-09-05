@@ -63,7 +63,7 @@ bool AppLevel::Validate() const {
 
 bool UsageAndErrorCounts::Validate() const {
   if (PT_PRELOADED == GetPolicyTableType() ||
-      PT_SNAPSHOT == GetPolicyTableType()) {
+      PT_UPDATE == GetPolicyTableType()) {
    return false;
   }
   return true;
@@ -86,7 +86,7 @@ bool PolicyTable::Validate() const {
     }
   }
   if (PT_PRELOADED == GetPolicyTableType() ||
-      PT_SNAPSHOT == GetPolicyTableType()) {
+      PT_UPDATE == GetPolicyTableType()) {
     if (device_data.is_initialized()) {
       return false;
     }

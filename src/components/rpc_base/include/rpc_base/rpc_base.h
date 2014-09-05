@@ -52,16 +52,16 @@ class ValidationReport;
 
 namespace policy_table_interface_base {
 
-enum PolicyTableType {
-  INVALID_PT_TYPE = -1,
-  PT_PRELOADED,
-  PT_UPDATE,
-  PT_SNAPSHOT
-};
-const std::string ommited_validation_info = "should be ommited in ";
-const std::string required_validation_info = "is required in ";
+  enum PolicyTableType {
+    INVALID_PT_TYPE = -1,
+    PT_PRELOADED,
+    PT_UPDATE,
+    PT_SNAPSHOT
+  };
+  const std::string ommited_validation_info = "should be ommited in ";
+  const std::string required_validation_info = "is required in ";
 
-std::string PolicyTableTypeToString(const PolicyTableType pt_type);
+  std::string PolicyTableTypeToString(const PolicyTableType pt_type);
 
 
 }

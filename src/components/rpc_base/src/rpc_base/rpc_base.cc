@@ -33,22 +33,5 @@
 #include "rpc_base/rpc_base.h"
 
 namespace rpc {
-  namespace policy_table_interface_base {
-    std::string PolicyTableTypeToString(const PolicyTableType pt_type) {
-        switch (pt_type) {
-          case PT_PRELOADED: {
-            return "PT_PRELOADED";
-          }
-          case PT_UPDATE: {
-            return "PT_UPDATE";
-          }
-          case PT_SNAPSHOT: {
-            return "PT_SNAPSHOT";
-          }
-          default :{
-            return "INVALID_PT_TYPE";
-          }
-        }
-    }
-  }  // namespace policy_table_interface_base
+
 }  // namespace rpc

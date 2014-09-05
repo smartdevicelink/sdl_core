@@ -1038,7 +1038,8 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
       break;
     }
     default:
-      LOG4CXX_WARN(logger_, "Unknown type of service to be ended.");
+      LOG4CXX_WARN(logger_, "Unknown type of service to be ended." <<
+                   type);
       break;
   }
 }

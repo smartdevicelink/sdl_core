@@ -4,6 +4,24 @@
 
 namespace rpc {
 namespace policy_table_interface_base {
+
+  std::string PolicyTableTypeToString(const PolicyTableType pt_type) {
+      switch (pt_type) {
+        case PT_PRELOADED: {
+          return "PT_PRELOADED";
+        }
+        case PT_UPDATE: {
+          return "PT_UPDATE";
+        }
+        case PT_SNAPSHOT: {
+          return "PT_SNAPSHOT";
+        }
+        default :{
+          return "INVALID_PT_TYPE";
+        }
+      }
+  }
+
 // ApplicationParams methods
 ApplicationParams::ApplicationParams()
   : CompositeType(kUninitialized) {
@@ -1155,7 +1173,7 @@ void UsageAndErrorCounts::ReportErrors(rpc::ValidationReport* report__) const {
     rpc::CompositeType::ReportErrors(report__);
   }
   if (PT_PRELOADED == GetPolicyTableType() ||
-      PT_SNAPSHOT == GetPolicyTableType()) {
+      PT_UPDATE == GetPolicyTableType()) {
     std::string validation_info = ommited_validation_info +
                                   PolicyTableTypeToString(GetPolicyTableType());
     report__->set_validation_info(validation_info);
@@ -1469,7 +1487,7 @@ void PolicyTable::ReportErrors(rpc::ValidationReport* report__) const {
     rpc::CompositeType::ReportErrors(report__);
   }
   if (PT_PRELOADED == GetPolicyTableType() ||
-      PT_SNAPSHOT == GetPolicyTableType()) {
+      PT_UPDATE == GetPolicyTableType()) {
     std::string validation_info = ommited_validation_info +
                                   PolicyTableTypeToString(GetPolicyTableType());
 

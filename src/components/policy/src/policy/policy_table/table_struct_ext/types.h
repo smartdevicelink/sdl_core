@@ -70,8 +70,8 @@ struct ApplicationParams : CompositeType {
     Enum<HmiLevel> default_hmi;
     Boolean keep_context;
     Boolean steal_focus;
-    Optional< Integer<uint16_t, 1, 65225> > memory_kb;
-    Optional< Integer<uint16_t, 1, 65225> > heart_beat_timeout_ms;
+    Optional< Integer<uint16_t, 0, 65225> > memory_kb;
+    Optional< Integer<uint16_t, 0, 65225> > heart_beat_timeout_ms;
     Optional< String<0, 255> > certificate;
   public:
     ApplicationParams();
@@ -137,9 +137,9 @@ struct ModuleConfig : CompositeType {
     SecondsBetweenRetries seconds_between_retries;
     ServiceEndpoints endpoints;
     NumberOfNotificationsPerMinute notifications_per_minute_by_priority;
-    Optional< String<1, 100> > vehicle_make;
-    Optional< String<1, 100> > vehicle_model;
-    Optional< String<4, 4> > vehicle_year;
+    Optional< String<0, 100> > vehicle_make;
+    Optional< String<0, 100> > vehicle_model;
+    Optional< String<0, 4> > vehicle_year;
   public:
     ModuleConfig();
     ModuleConfig(uint8_t exchange_after_x_ignition_cycles, int64_t exchange_after_x_kilometers, uint8_t exchange_after_x_days, uint16_t timeout_after_x_seconds, const SecondsBetweenRetries& seconds_between_retries, const ServiceEndpoints& endpoints, const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority);
@@ -216,13 +216,13 @@ struct ConsumerFriendlyMessages : CompositeType {
 
 struct ModuleMeta : CompositeType {
   public:
-    Optional< String<1, 250> > ccpu_version;
-    Optional< String<1, 250> > language;
-    Optional< String<1, 250> > wers_country_code;
+    Optional< String<0, 250> > ccpu_version;
+    Optional< String<0, 250> > language;
+    Optional< String<0, 250> > wers_country_code;
     Optional< Integer<uint16_t, 0, 65535> > pt_exchanged_at_odometer_x;
     Optional< Integer<uint16_t, 0, 65535> > pt_exchanged_x_days_after_epoch;
     Optional< Integer<uint16_t, 0, 65535> > ignition_cycles_since_last_exchange;
-    Optional< String<1, 250> > vin;
+    Optional< String<0, 250> > vin;
   public:
     ModuleMeta();
     ~ModuleMeta();
@@ -241,7 +241,7 @@ struct AppLevel : CompositeType {
   public:
     Integer<uint16_t, 0, 65535> minutes_in_hmi_full;
     String<1, 10> app_registration_language_gui;
-    String<1, 10> app_registration_language_vui;
+    String<0, 10> app_registration_language_vui;
     Integer<uint16_t, 0, 65535> minutes_in_hmi_limited;
     Integer<uint16_t, 0, 65535> minutes_in_hmi_background;
     Integer<uint16_t, 0, 65535> minutes_in_hmi_none;
@@ -313,7 +313,7 @@ struct DeviceParams : CompositeType {
     Optional< Nullable< String<1, 255> > > firmware_rev;
     Optional< String<1, 255> > os;
     Optional< String<1, 255> > os_version;
-    Optional< Nullable< String<1, 255> > > carrier;
+    Optional< Nullable< String<0, 255> > > carrier;
     Optional< UserConsentRecords > user_consent_records;
     Optional< Integer<uint8_t, 0, 255> > max_number_rfcom_ports;
     Optional< String<1, 255> > connection_type;
