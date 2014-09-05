@@ -533,6 +533,9 @@ bool SQLPTRepresentation::GatherFunctionalGroupings(
         }
       }
     }
+    if (!rpcs_tbl.rpcs.is_initialized()) {
+      rpcs_tbl.rpcs.set_to_null();
+    }
     rpcs.Reset();
     (*groups)[func_group.GetString(1)] = rpcs_tbl;
   }
