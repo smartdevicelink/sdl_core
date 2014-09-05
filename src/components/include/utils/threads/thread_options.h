@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_THREADS_THREAD_OPTIONS_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_THREADS_THREAD_OPTIONS_H_
 
+#include <cstdio>
+
 namespace threads {
 
 /**

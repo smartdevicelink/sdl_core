@@ -39,6 +39,7 @@
 #include "utils/threads/thread.h"
 #include "utils/threads/thread_manager.h"
 #include "utils/logger.h"
+#include "pthread.h"
 
 using namespace std;
 using namespace threads::impl;
@@ -55,6 +56,13 @@ static void* threadFunc(void* closure) {
 static pthread_t main_thread_id;
 static bool main_thread_id_set = false;
 
+#ifndef __QNXNTO__
+  const int EOK = 0;
+#endif
+
+#if defined(OS_POSIX)
+  const size_t THREAD_NAME_SIZE = 15;
+#endif
 }
 
 namespace threads {
@@ -63,7 +71,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 size_t Thread::kMinStackSize = PTHREAD_STACK_MIN; /* Ubuntu : 16384 ; QNX : 256; */
 
-bool Thread::Id::operator==(const Thread::Id other) const {
+bool Thread::Id::operator==(const Thread::Id& other) const {
   return pthread_equal(id_, other.id_) != 0;
 }
 
@@ -73,21 +81,18 @@ Thread::Id Thread::CurrentId() {
 }
 
 //static
-std::string Thread::NameFromId(Id thread_id) {
+std::string Thread::NameFromId(const Id& thread_id) {
   return ThreadManager::instance()->GetName(thread_id.id_);
 }
 
 //static
-void Thread::SetNameForId(Id thread_id, const std::string& name) {
+void Thread::SetNameForId(const Id& thread_id, const std::string& name) {
   ThreadManager::instance()->RegisterName(thread_id.id_, name);
 
   const std::string striped_name =
-      name.length() > 15 ? std::string(name.begin(), name.begin() + 15) : name;
+      name.length() > THREAD_NAME_SIZE ? std::string(name.begin(), name.begin() + THREAD_NAME_SIZE) : name;
 
   const int pthread_result = pthread_setname_np(thread_id.id_, striped_name.c_str());
-#   ifndef __QNXNTO__
-  const int EOK = 0;
-#   endif
   if (pthread_result != EOK) {
     LOG4CXX_WARN(logger_,"Couldn't set pthread name \"" << striped_name
                       << "\", error code " << pthread_result <<
@@ -144,8 +149,11 @@ bool Thread::start() {
 }
 
 bool Thread::startWithOptions(const ThreadOptions& options) {
+  LOG4CXX_TRACE_ENTER(logger_);
   if (!delegate_) {
     NOTREACHED();
+    LOG4CXX_ERROR(logger_, "NULL delegate");
+    LOG4CXX_TRACE_EXIT(logger_);
     return false;
   }
 
@@ -153,70 +161,92 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 
   pthread_attr_t attributes;
   int pthread_result = pthread_attr_init(&attributes);
-  if (pthread_result != 0) {
-    LOG4CXX_WARN(logger_,"Couldn't init pthread attributes."
-                 " Error code = " << pthread_result);
+  if (pthread_result != EOK) {
+    LOG4CXX_WARN(logger_,"Couldn't init pthread attributes. Error code = "
+                 << pthread_result << "(\"" << strerror(pthread_result) << "\")");
   }
+
   if (!thread_options_.is_joinable()) {
     pthread_result = pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
     if (pthread_result != 0) {
-      LOG4CXX_WARN(logger_,"Couldn't set detach state attribute. Error code = " << pthread_result);
+      LOG4CXX_WARN(logger_,"Couldn't set detach state attribute.. Error code = "
+                   << pthread_result << "(\"" << strerror(pthread_result) << "\")");
     }
   }
 
-  // 0 - default value
-  if (thread_options_.stack_size() > 0
-      && thread_options_.stack_size() >= Thread::kMinStackSize) {
-    pthread_result = pthread_attr_setstacksize(&attributes, thread_options_.stack_size());
+  const size_t stack_size = thread_options_.stack_size();
+  if (stack_size >= Thread::kMinStackSize) {
+    pthread_result = pthread_attr_setstacksize(&attributes, stack_size);
     if (pthread_result != 0) {
-      LOG4CXX_WARN(logger_,"Couldn't set stacksize = " << thread_options_.stack_size() <<
-                   "Error code = " << pthread_result);
+      LOG4CXX_WARN(logger_,"Couldn't set stacksize = " << stack_size <<
+                   ". Error code = " << pthread_result << "(\""
+                   << strerror(pthread_result) << "\")");
     }
   }
-  isThreadRunning_ = !pthread_create(&thread_handle_, &attributes,
-                                     threadFunc, delegate_);
-  if (isThreadRunning_) {
+
+  pthread_result = pthread_create(&thread_handle_, &attributes, threadFunc, delegate_);
+  isThreadRunning_ = (pthread_result == EOK);
+  if (!isThreadRunning_) {
+    LOG4CXX_WARN(logger_, "Couldn't cancel thread. Error code = "
+                 << pthread_result << "(\"" << strerror(pthread_result) << "\")");
+  } else {
     LOG4CXX_INFO(logger_,"Created thread: " << name_);
     SetNameForId(Id(thread_handle_), name_);
   }
-
-  pthread_result = pthread_attr_destroy(&attributes);
-  if (pthread_result != 0) {
-    LOG4CXX_WARN(logger_,"Couldn't destroy pthread attributes."
-                 " Error code = " << pthread_result);
-  }
+  LOG4CXX_TRACE_EXIT(logger_);
   return isThreadRunning_;
 }
 
 void Thread::stop() {
+  LOG4CXX_TRACE_ENTER(logger_);
   if (!is_running()) {
     return;
   }
 
-  if (NULL != delegate_) {
-    if (!delegate_->exitThreadMain()) {
-      if (thread_handle_ != pthread_self()) {
-        pthread_cancel(thread_handle_);
-      }
+  // TODO (EZamakhov): why exitThreadMain return bool and stop does not?
+  if (delegate_ && !delegate_->exitThreadMain()) {
+      if (thread_handle_ == pthread_self()) {
+        LOG4CXX_ERROR(logger_,
+                     "Couldn't cancel the same thread (#" << thread_handle_
+                     << "\"" << name_ << "\")");
+      } else {
+        const int pthread_result = pthread_cancel(thread_handle_);
+        if (pthread_result != EOK) {
+          LOG4CXX_WARN(logger_,
+                       "Couldn't cancel thread (#" << thread_handle_ << " \"" << name_ <<
+                       "\") from thread #" << pthread_self() << ". Error code = "
+                       << pthread_result << "(\"" << strerror(pthread_result) << "\")");
+        }
     }
   }
 
   // Wait for the thread to exit.  It should already have terminated but make
   // sure this assumption is valid.
-
   join();
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void Thread::join() {
-  int pthread_result = pthread_join(thread_handle_, NULL);
-  if (pthread_result != 0) {
-    LOG4CXX_WARN(logger_,"Couldn't join thread "
-                 " Error code = " << pthread_result);
+  LOG4CXX_TRACE_ENTER(logger_);
+  if (thread_handle_ == pthread_self()) {
+    LOG4CXX_ERROR(logger_,
+                 "Couldn't join with the same thread (#" << thread_handle_
+                 << "\"" << name_ << "\")");
+    pthread_exit(NULL);
+  } else {
+    const int pthread_result = pthread_join(thread_handle_, NULL);
+    if (pthread_result != EOK) {
+      LOG4CXX_WARN(logger_,
+                   "Couldn't join thread (#" << thread_handle_ << " \"" << name_ <<
+                   "\") from thread #" << pthread_self() << ". Error code = "
+                   << pthread_result << "(\"" << strerror(pthread_result) << "\")");
+    }
   }
   isThreadRunning_ = false;
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
-std::ostream& operator<<(std::ostream& os, Thread::Id thread_id) {
+std::ostream& operator<<(std::ostream& os, const Thread::Id& thread_id) {
   return os<<Thread::NameFromId(thread_id);
 }
 

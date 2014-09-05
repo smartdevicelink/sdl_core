@@ -77,7 +77,7 @@ typedef pthread_t PlatformThreadHandle;
  */
 class Thread {
  public:
-  /*
+  /**
    * Class that represents unique in-process thread identifier
    * due to restriction of pthread API it only allows checks
    * for equality to different thread id and no ordering.
@@ -88,7 +88,7 @@ class Thread {
   class Id {
    public:
     explicit Id(const impl::PlatformThreadHandle& id): id_(id) {}
-    bool operator==(const Id that) const;
+    bool operator==(const Id& that) const;
    private:
     impl::PlatformThreadHandle id_;
     friend class Thread;
@@ -98,10 +98,10 @@ class Thread {
   static Id CurrentId();
 
   // Get name associated with thread identified by thread_id
-  static std::string NameFromId(Id thread_id);
+  static std::string NameFromId(const Id& thread_id);
 
   // Give thread thread_id a name, helpful for debugging
-  static void SetNameForId(Id thread_id, const std::string& name);
+  static void SetNameForId(const Id& thread_id, const std::string& name);
 
   /**
    * @brief Set current thread as main
@@ -243,10 +243,10 @@ class Thread {
   DISALLOW_COPY_AND_ASSIGN(Thread);
 };
 
-inline bool operator!= (Thread::Id left, Thread::Id right) {
+inline bool operator!= (const Thread::Id& left, const Thread::Id& right) {
   return !(left == right);
 }
-std::ostream& operator<<(std::ostream& os, Thread::Id thread_id);
+std::ostream& operator<<(std::ostream& os, const Thread::Id& thread_id);
 
 }  // namespace threads
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_THREADS_THREAD_H_
