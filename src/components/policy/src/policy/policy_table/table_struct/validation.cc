@@ -55,7 +55,7 @@ bool ModuleMeta::Validate() const {
 
 bool AppLevel::Validate() const {
   if (PT_PRELOADED == GetPolicyTableType() ||
-      PT_SNAPSHOT == GetPolicyTableType()) {
+      PT_UPDATE == GetPolicyTableType()) {
     return false;
   }
   return true;

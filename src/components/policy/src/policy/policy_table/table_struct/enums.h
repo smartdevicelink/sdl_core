@@ -2,7 +2,7 @@
 #ifndef POLICY_TABLE_INTERFACE_BASE_POLICY_TABLE_INTERFACE_BASE_ENUMS_H_
 #define POLICY_TABLE_INTERFACE_BASE_POLICY_TABLE_INTERFACE_BASE_ENUMS_H_
 #include <string>
-#include
+
 namespace rpc {
 namespace policy_table_interface_base {
 

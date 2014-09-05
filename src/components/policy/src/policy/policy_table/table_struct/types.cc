@@ -757,7 +757,7 @@ void AppLevel::ReportErrors(rpc::ValidationReport* report__) const {
     rpc::CompositeType::ReportErrors(report__);
   }
   if (PT_PRELOADED == GetPolicyTableType() ||
-      PT_SNAPSHOT == GetPolicyTableType()) {
+      PT_UPDATE == GetPolicyTableType()) {
     std::string validation_info = ommited_validation_info +
                                       PolicyTableTypeToString(GetPolicyTableType());
     report__->set_validation_info(validation_info);

@@ -309,14 +309,14 @@ struct ConsentRecords : CompositeType {
 
 struct DeviceParams : CompositeType {
   public:
-    Optional< String<1, 255> > hardware;
+    Optional< String<0, 255> > hardware;
     Optional< Nullable< String<1, 255> > > firmware_rev;
-    Optional< String<1, 255> > os;
-    Optional< String<1, 255> > os_version;
+    Optional< String<0, 255> > os;
+    Optional< String<0, 255> > os_version;
     Optional< Nullable< String<0, 255> > > carrier;
     Optional< UserConsentRecords > user_consent_records;
     Optional< Integer<uint8_t, 0, 255> > max_number_rfcom_ports;
-    Optional< String<1, 255> > connection_type;
+    Optional< String<0, 255> > connection_type;
   public:
     DeviceParams();
     ~DeviceParams();

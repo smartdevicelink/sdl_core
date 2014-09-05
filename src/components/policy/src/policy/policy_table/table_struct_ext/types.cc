@@ -1089,6 +1089,12 @@ void AppLevel::ReportErrors(rpc::ValidationReport* report__) const {
   if (!count_of_run_attempts_while_revoked.is_valid()) {
     count_of_run_attempts_while_revoked.ReportErrors(&report__->ReportSubobject("count_of_run_attempts_while_revoked"));
   }
+  if (PT_PRELOADED == GetPolicyTableType() ||
+      PT_UPDATE == GetPolicyTableType()) {
+    std::string validation_info = ommited_validation_info +
+                                      PolicyTableTypeToString(GetPolicyTableType());
+    report__->set_validation_info(validation_info);
+  }
 }
 
 void AppLevel::SetPolicyTableType(PolicyTableType pt_type) {
