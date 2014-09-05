@@ -146,40 +146,20 @@ RequestController::TResult RequestController::addRequest(
         LOG4CXX_ERROR(logger_, "Too many pending request");
         result = RequestController::TOO_MANY_PENDING_REQUESTS;
       } else {
-
         {
           AutoLock auto_lock(request_list_lock_);
-
-
-          if (0 == request_impl->default_timeout()) {
-            LOG4CXX_INFO(logger_, "Default timeout was set to 0."
-                                  "Watchdog will not track this request.");
-          } else {
-            watchdog_->addRequest(new request_watchdog::RequestInfo(
-                                    request_impl->function_id(),
-                                    request_impl->connection_key(),
-                                    request_impl->correlation_id(),
-                                    request_impl->default_timeout(),
-                                    hmi_level));
-
-            LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
-                         << request_impl->default_timeout());
-          }
-
-          request_list_.push_back(request);
+          request_list_.push_back(IncomingRequest(request, hmi_level));
           LOG4CXX_INFO(logger_, "RequestController size is "
-                       << request_list_.size()
-                       << " Pending request size is "
-                       << pending_request_list_.size()
-                     );
+                                << request_list_.size()
+                                << " Pending request size is "
+                                << pending_request_list_.size());
         }
 
         // wake up one thread that is waiting for a task to be available
         cond_var_.NotifyOne();
       }
-    }
-    else {
-      LOG4CXX_ERROR(logger_, "The request didn't initilize.");
+    } else {
+      LOG4CXX_ERROR(logger_, "Unable to initialize request");
       result = RequestController::INIT_FAILED;
     }
   }
@@ -290,14 +270,29 @@ void RequestController::Worker::threadMain() {
       break;
     }
 
-    Request request(request_controller_->request_list_.front());
-    commands::CommandRequestImpl* request_impl = NULL;
-    request_impl = static_cast<commands::CommandRequestImpl*>(request.get());
+    IncomingRequest incoming_request(request_controller_->request_list_.front());
+    commands::CommandRequestImpl* request_impl =
+        static_cast<commands::CommandRequestImpl*>(incoming_request.request.get());
+    if (0 == request_impl->default_timeout()) {
+      LOG4CXX_INFO(logger_, "Default timeout was set to 0."
+                            "Watchdog will not track this request.");
+    } else {
+      request_controller_->watchdog_->addRequest(
+          new request_watchdog::RequestInfo(
+                   request_impl->function_id(),
+                   request_impl->connection_key(),
+                   request_impl->correlation_id(),
+                   request_impl->default_timeout(),
+                   incoming_request.hmi_level));
+
+      LOG4CXX_INFO(logger_, "Adding request to watchdog. Default timeout is "
+                   << request_impl->default_timeout());
+    }
     request_controller_->request_list_.pop_front();
 
     //pending_request_list_.Acquire();
     request_controller_->pending_request_list_lock_.Acquire();
-    request_controller_->pending_request_list_.push_back(request);
+    request_controller_->pending_request_list_.push_back(incoming_request.request);
     request_controller_->pending_request_list_lock_.Release();
 
     AutoUnlock unlock(auto_lock);
@@ -305,6 +300,7 @@ void RequestController::Worker::threadMain() {
     // execute
     if (request_impl->CheckPermissions()) {
       request_impl->Run();
+      request_impl->CleanUp();
     }
   }
 

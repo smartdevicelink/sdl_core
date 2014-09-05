@@ -181,6 +181,17 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
     bool                                             is_active_;
   };
 
+  // Structure that represent incoming request and app HMI level
+  struct IncomingRequest
+  {
+    IncomingRequest(Request req, mobile_apis::HMILevel::eType level) {
+      request = req;
+      hmi_level = level;
+    }
+    Request                         request;
+    mobile_apis::HMILevel::eType    hmi_level;
+  };
+
   /**
    * @brief Typedef for thread shared pointer
    */
@@ -191,7 +202,7 @@ class RequestController: public request_watchdog::WatchdogSubscriber  {
   uint32_t                                    pool_size_;
   sync_primitives::ConditionalVariable        cond_var_;
 
-  std::list<Request>                          request_list_;
+  std::list<IncomingRequest>                  request_list_;
   sync_primitives::Lock                       request_list_lock_;
 
   std::list<Request>                          pending_request_list_;
