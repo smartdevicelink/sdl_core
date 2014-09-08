@@ -328,7 +328,7 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Should Policy be turned off? (Library not loaded)
      * @return Flag
      */
-    bool policy_turn_off() const;
+    bool enable_policy() const;
 
     /*
      * @brief Timeout in transport manager before disconnect
@@ -617,7 +617,7 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t                        heart_beat_timeout_;
     std::string                     preloaded_pt_file_;
     std::string                     policy_snapshot_file_name_;
-    bool                            policy_turn_off_;
+    bool                            enable_policy_;
     uint32_t                        transport_manager_disconnect_timeout_;
     bool                            use_last_state_;
     std::vector<uint32_t>           supported_diag_modes_;

@@ -54,8 +54,9 @@ PTExchangeHandlerImpl::~PTExchangeHandlerImpl() {
 void PTExchangeHandlerImpl::Start() {
   sync_primitives::AutoLock locker(retry_sequence_lock_);
   retry_sequence_.stop();
-  if (policy_handler_->policy_manager()) {
-    policy_handler_->policy_manager()->ResetRetrySequence();
+  PolicyManager* policy_manager = policy_handler_->policy_manager();
+  if (policy_manager) {
+    policy_manager->ResetRetrySequence();
   }
   retry_sequence_.start();
 }
