@@ -94,25 +94,6 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     std::srand(std::time(0));
 }
 
-bool ApplicationManagerImpl::InitThread(threads::Thread* thread) {
-  if (!thread) {
-    LOG4CXX_ERROR(logger_, "Failed to allocate memory for thread object");
-    return false;
-  }
-  LOG4CXX_INFO(
-    logger_,
-    "Starting thread with stack size "
-    << profile::Profile::instance()->thread_min_stack_size());
-  if (!thread->start()) {
-    /*startWithOptions(
-     threads::ThreadOptions(
-     profile::Profile::instance()->thread_min_stack_size()))*/
-    LOG4CXX_ERROR(logger_, "Failed to start thread");
-    return false;
-  }
-  return true;
-}
-
 ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_INFO(logger_, "Destructing ApplicationManager.");
 
@@ -1359,6 +1340,9 @@ bool ApplicationManagerImpl::Init() {
         init_result = false;
         break;
       }
+    } else  {
+      LOG4CXX_ERROR(logger_, "Policy library is not loaded. Check LD_LIBRARY_PATH");
+      init_result = false;
     }
     const std::string app_storage_folder = 
       profile::Profile::instance()->app_storage_folder();

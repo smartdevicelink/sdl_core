@@ -645,7 +645,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
   private:
     ApplicationManagerImpl();
-    bool InitThread(threads::Thread* thread);
+
     hmi_apis::HMI_API& hmi_so_factory();
     mobile_apis::MOBILE_API& mobile_so_factory();
 
