@@ -1902,6 +1902,8 @@ void ApplicationManagerImpl::UnregisterApplication(
   LOG4CXX_INFO(logger_,
                "ApplicationManagerImpl::UnregisterApplication " << app_id);
 
+  sync_primitives::AutoLock lock(applications_list_lock_);
+
   switch (reason) {
     case mobile_apis::Result::SUCCESS:break;
     case mobile_apis::Result::DISALLOWED: break;
@@ -1919,23 +1921,14 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
 
   ApplicationSharedPtr app_to_remove;
-  {
-    sync_primitives::AutoLock lock(applications_list_lock_);
-
-    std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
-    for (; it != application_list_.end(); ++it) {
-      if ((*it)->app_id() == app_id) {
-        app_to_remove = *it;
-        break;
-      }
+  std::set<ApplicationSharedPtr>::const_iterator it = application_list_.begin();
+  for (; it != application_list_.end(); ++it) {
+    if ((*it)->app_id() == app_id) {
+      app_to_remove = *it;
+      break;
     }
-    application_list_.erase(app_to_remove);
   }
-
-  if (!app_to_remove) {
-    LOG4CXX_INFO(logger_, "Application is already unregistered.");
-    return;
-  }
+  application_list_.erase(app_to_remove);
 
   if (is_resuming) {
     resume_ctrl_.SaveApplication(app_to_remove);
