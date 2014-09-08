@@ -182,7 +182,7 @@ PolicyHandler::~PolicyHandler() {
 }
 
 PolicyManager* PolicyHandler::LoadPolicyLibrary() {
-  if (PolicyEnabled()) {
+  if (!PolicyEnabled()) {
     LOG4CXX_WARN(logger_, "System is configured to work without policy "
                  "functionality.");
     policy_manager_ = NULL;
@@ -982,7 +982,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
 
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    if (PolicyEnabled()) {
+    if (!PolicyEnabled()) {
       permissions.isSDLAllowed = true;
     }
   } else {

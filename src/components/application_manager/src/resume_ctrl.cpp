@@ -134,7 +134,7 @@ bool ResumeCtrl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
 
   mobile_apis::HMILevel::eType default_hmi = mobile_apis::HMILevel::HMI_NONE;
 
-  if (!policy::PolicyHandler::instance()->PolicyEnabled()) {
+  if (policy::PolicyHandler::instance()->PolicyEnabled()) {
     policy::PolicyManager* policy_manager =
         policy::PolicyHandler::instance()->policy_manager();
     if (policy_manager) {
