@@ -180,12 +180,12 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 
   // Parse message into table struct
   utils::SharedPtr<policy_table::Table> pt_update = Parse(pt_content);
-  pt_update->SetPolicyTableType(policy_table::PT_UPDATE);
   if (!pt_update) {
     LOG4CXX_WARN(logger_, "Parsed table pointer is 0.");
     update_status_manager_.OnWrongUpdateReceived();
     return false;
   }
+  pt_update->SetPolicyTableType(policy_table::PT_UPDATE);
 
 #if defined (EXTENDED_POLICY)
   file_system::DeleteFile(file);
