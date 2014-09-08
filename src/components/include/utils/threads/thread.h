@@ -247,6 +247,5 @@ inline bool operator!= (const Thread::Id& left, const Thread::Id& right) {
   return !(left == right);
 }
 std::ostream& operator<<(std::ostream& os, const Thread::Id& thread_id);
-
 }  // namespace threads
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_THREADS_THREAD_H_

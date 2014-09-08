@@ -168,7 +168,7 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 
   if (!thread_options_.is_joinable()) {
     pthread_result = pthread_attr_setdetachstate(&attributes, PTHREAD_CREATE_DETACHED);
-    if (pthread_result != 0) {
+    if (pthread_result != EOK) {
       LOG4CXX_WARN(logger_,"Couldn't set detach state attribute.. Error code = "
                    << pthread_result << "(\"" << strerror(pthread_result) << "\")");
     }
@@ -177,7 +177,7 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
   const size_t stack_size = thread_options_.stack_size();
   if (stack_size >= Thread::kMinStackSize) {
     pthread_result = pthread_attr_setstacksize(&attributes, stack_size);
-    if (pthread_result != 0) {
+    if (pthread_result != EOK) {
       LOG4CXX_WARN(logger_,"Couldn't set stacksize = " << stack_size <<
                    ". Error code = " << pthread_result << "(\""
                    << strerror(pthread_result) << "\")");
@@ -215,7 +215,7 @@ void Thread::stop() {
           LOG4CXX_WARN(logger_,
                        "Couldn't cancel thread (#" << thread_handle_ << " \"" << name_ <<
                        "\") from thread #" << pthread_self() << ". Error code = "
-                       << pthread_result << "(\"" << strerror(pthread_result) << "\")");
+                       << pthread_result << " (\"" << strerror(pthread_result) << "\")");
         }
     }
   }

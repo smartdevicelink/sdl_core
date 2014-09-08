@@ -30,8 +30,8 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef MESSAGE_QUEUE_H
-#define MESSAGE_QUEUE_H
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_PASA_BT_MESSAGE_QUEUE_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_PASA_BT_MESSAGE_QUEUE_H_
 
 #include <mqueue.h>
 #include <stdint.h>
@@ -81,4 +81,4 @@ int SendMsgQ(const mqd_t q_fd,
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-#endif // MESSAGE_QUEUE_H
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_PASA_BT_MESSAGE_QUEUE_H_

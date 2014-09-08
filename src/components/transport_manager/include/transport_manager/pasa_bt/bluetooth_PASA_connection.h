@@ -53,7 +53,7 @@ class TransportAdapterController;
  * @brief Class responsible for communication over bluetooth sockets.
  */
 class BluetoothPASAConnection
-    : public ::transport_manager::transport_adapter::Connection {
+  : public ::transport_manager::transport_adapter::Connection {
  public:
   /**
    * @brief Constructor.
@@ -121,10 +121,10 @@ class BluetoothPASAConnection
 
  private:
   class BluetoothPASAConnectionDelegate: public threads::ThreadDelegate {
-  public:
+   public:
     explicit BluetoothPASAConnectionDelegate(BluetoothPASAConnection* connection);
     void threadMain() OVERRIDE;
-  private:
+   private:
     BluetoothPASAConnection* connection_;
   };
 

@@ -88,7 +88,9 @@ BluetoothPASADeviceScanner::DeviceScannerDelegate::DeviceScannerDelegate(
 }
 
 void BluetoothPASADeviceScanner::DeviceScannerDelegate::threadMain() {
-
+  LOG4CXX_TRACE_ENTER(logger_);
+  scanner_->Thread();
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 BluetoothPASADeviceScanner::PASAMessageDelegate::PASAMessageDelegate(
@@ -134,16 +136,6 @@ void BluetoothPASADeviceScanner::PASAMessageDelegate::threadMain() {
     }
   }
   LOG4CXX_TRACE_EXIT(logger_);
-}
-
-void* bluetoothDeviceScannerThread(void* data) {
-  LOG4CXX_TRACE_ENTER(logger_);
-  BluetoothPASADeviceScanner* bluetoothDeviceScanner =
-    static_cast<BluetoothPASADeviceScanner*>(data);
-  assert(bluetoothDeviceScanner != 0);
-  bluetoothDeviceScanner->Thread();
-  LOG4CXX_TRACE_EXIT(logger_);
-  return 0;
 }
 
 bool BluetoothPASADeviceScanner::IsInitialised() const {

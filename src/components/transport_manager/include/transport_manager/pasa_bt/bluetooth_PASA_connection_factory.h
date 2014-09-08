@@ -30,16 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_CONNECTION_FACTORY_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_CONNECTION_FACTORY_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_PASA_BT_BLUETOOTH_PASA_CONNECTION_FACTORY_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_PASA_BT_BLUETOOTH_PASA_CONNECTION_FACTORY_H_
 
 #include "transport_manager/transport_adapter/server_connection_factory.h"
 
 namespace transport_manager {
 namespace transport_adapter {
-
 class TransportAdapterController;
-
 /**
  * @brief Create connections.
  */
@@ -51,8 +49,8 @@ class BluetoothPASAConnectionFactory : public ServerConnectionFactory {
    * @param controller Pointer to the device adapter controller.
    */
   BluetoothPASAConnectionFactory(TransportAdapterController* controller);
- protected:
 
+ protected:
   /**
    * @brief BT initialization
    */
@@ -65,13 +63,11 @@ class BluetoothPASAConnectionFactory : public ServerConnectionFactory {
    * @param ap_handle Handle of application.
    */
   virtual TransportAdapter::Error CreateConnection(const DeviceUID& device_uid,
-                                                   const ApplicationHandle& app_handle);
-
+      const ApplicationHandle& app_handle);
   /**
    * @brief
    */
   virtual void Terminate();
-
   /**
    * @brief Check for initialization.
    *
@@ -79,11 +75,11 @@ class BluetoothPASAConnectionFactory : public ServerConnectionFactory {
    * false - not initialized.
    */
   virtual bool IsInitialised() const;
+
  private:
   TransportAdapterController* controller_;
 };
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_CONNECTION_FACTORY_H_
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_PASA_BT_BLUETOOTH_PASA_CONNECTION_FACTORY_H_
