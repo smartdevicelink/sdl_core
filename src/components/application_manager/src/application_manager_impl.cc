@@ -1915,7 +1915,7 @@ void ApplicationManagerImpl::UnregisterApplication(
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Unknown unregister reason");
+      LOG4CXX_ERROR(logger_, "Unknown unregister reason " << reason);
       break;
     }
   }
@@ -1927,6 +1927,10 @@ void ApplicationManagerImpl::UnregisterApplication(
       app_to_remove = *it;
       break;
     }
+  }
+  if (!app_to_remove) {
+    LOG4CXX_ERROR(logger_, "Cant find application with app_id = " << app_id);
+    return;
   }
   application_list_.erase(app_to_remove);
 
