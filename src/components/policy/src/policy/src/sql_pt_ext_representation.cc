@@ -666,7 +666,7 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
     4, std::string(policy_table::EnumToJsonString(app.second.priority)));
   app_query.Bind(
     5, app.second.is_null());
-  app_query.Bind(6, app.second.memory_kb);
+  app_query.Bind(6, app.second.memory_kb->operator IntType());
   app_query.Bind(7, app.second.heart_beat_timeout_ms);
   app.second.certificate.is_initialized() ?
   app_query.Bind(8, *app.second.certificate) : app_query.Bind(8, std::string());

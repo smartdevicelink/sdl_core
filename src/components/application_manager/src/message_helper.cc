@@ -1592,9 +1592,6 @@ void MessageHelper::ResetGlobalproperties(ApplicationSharedPtr app) {
   }
 
   app->set_vr_help(vr_help_items);
-
-  // send global properties
-  SendGlobalPropertiesToHMI(app);
 }
 
 void MessageHelper::SendNaviStartStream(const std::string& url,
