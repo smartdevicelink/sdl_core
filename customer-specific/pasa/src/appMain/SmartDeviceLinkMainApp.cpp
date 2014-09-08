@@ -268,7 +268,7 @@ int main(int argc, char** argv) {
   threads::Thread::MaskSignals();
   threads::Thread::SetMainThread();
 
-  LOG4CXX_INFO(logger, "Snapshot: SNAPSHOT_PASA03092014");
+  LOG4CXX_INFO(logger, "Snapshot: {TAG}");
   LOG4CXX_INFO(logger, "Application main()");
 
   utils::SharedPtr<threads::Thread> applink_notification_thread =

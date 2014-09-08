@@ -72,7 +72,8 @@ bool Range<T>::Includes(U val) const {
  * PrimitiveType base class
  */
 inline PrimitiveType::PrimitiveType(ValueState value_state)
-    : value_state_(value_state) {
+    : value_state_(value_state),
+      policy_table_type_(policy_table_interface_base::PT_PRELOADED) {
 }
 
 inline bool PrimitiveType::is_initialized() const {
