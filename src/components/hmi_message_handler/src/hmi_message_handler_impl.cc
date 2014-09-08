@@ -50,6 +50,7 @@ HMIMessageHandlerImpl::HMIMessageHandlerImpl()
 
 HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::~HMIMessageHandlerImpl()");
+  sync_primitives::AutoLock lock(observer_locker_);
   observer_ = NULL;
   if (!message_adapters_.empty()) {
     LOG4CXX_WARN(logger_, "Not all HMIMessageAdapter have unsubscribed from"
@@ -59,6 +60,7 @@ HMIMessageHandlerImpl::~HMIMessageHandlerImpl() {
 
 void HMIMessageHandlerImpl::OnMessageReceived(MessageSharedPointer message) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::OnMessageReceived()");
+  sync_primitives::AutoLock lock(observer_locker_);
   if (!observer_) {
     LOG4CXX_WARN(logger_, "No HMI message observer set!");
     return;
@@ -78,6 +80,7 @@ void HMIMessageHandlerImpl::set_message_observer(HMIMessageObserver* observer) {
 
 void HMIMessageHandlerImpl::OnErrorSending(MessageSharedPointer message) {
   LOG4CXX_INFO(logger_, "HMIMessageHandlerImpl::OnErrorSending()");
+  sync_primitives::AutoLock lock(observer_locker_);
   if (!observer_) {
     LOG4CXX_WARN(logger_, "No HMI message observer set!");
     return;
@@ -100,7 +103,7 @@ void HMIMessageHandlerImpl::RemoveHMIMessageAdapter(
 
 void HMIMessageHandlerImpl::Handle(const impl::MessageFromHmi message) {
   LOG4CXX_INFO(logger_, "Received message from hmi");
-
+  sync_primitives::AutoLock lock(observer_locker_);
   if (!observer_) {
     LOG4CXX_ERROR(logger_, "Observer is not set for HMIMessageHandler");
     return;
