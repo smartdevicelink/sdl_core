@@ -1536,64 +1536,6 @@ smart_objects::SmartObject* MessageHelper::CreateNegativeResponse(
   return response;
 }
 
-void MessageHelper::ResetGlobalproperties(ApplicationSharedPtr app) {
-  // reset help_prompt
-  const std::vector<std::string>& help_prompt = profile::Profile::instance()
-      ->help_prompt();
-
-  smart_objects::SmartObject so_help_prompt = smart_objects::SmartObject(
-        smart_objects::SmartType_Array);
-
-  for (uint32_t i = 0; i < help_prompt.size(); ++i) {
-    smart_objects::SmartObject helpPrompt = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    helpPrompt[strings::text] = help_prompt[i];
-    helpPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
-    so_help_prompt[i] = helpPrompt;
-  }
-
-  app->set_help_prompt(so_help_prompt);
-
-  // reset timeout prompt
-  const std::vector<std::string>& time_out_promt = profile::Profile::instance()
-      ->time_out_promt();
-
-  smart_objects::SmartObject so_time_out_promt = smart_objects::SmartObject(
-        smart_objects::SmartType_Array);
-
-  for (uint32_t i = 0; i < time_out_promt.size(); ++i) {
-    smart_objects::SmartObject timeoutPrompt = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-    timeoutPrompt[strings::text] = time_out_promt[i];
-    timeoutPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
-    so_time_out_promt[i] = timeoutPrompt;
-  }
-
-  app->set_timeout_prompt(so_time_out_promt);
-
-  // reset VR help title
-  smart_objects::SmartObject help_title(app->name());
-  app->set_vr_help_title(help_title);
-
-  // reset VR help items
-  const CommandsMap& cmdMap = app->commands_map();
-  smart_objects::SmartObject vr_help_items;
-
-  int32_t index = 0;
-  CommandsMap::const_iterator command_it = cmdMap.begin();
-
-  for (; cmdMap.end() != command_it; ++command_it) {
-    if (true == (*command_it->second).keyExists(strings::vr_commands)) {
-      // use only first
-      vr_help_items[index][strings::position] = (index + 1);
-      vr_help_items[index++][strings::text] =
-        (*command_it->second)[strings::vr_commands][0];
-    }
-  }
-
-  app->set_vr_help(vr_help_items);
-}
-
 void MessageHelper::SendNaviStartStream(const std::string& url,
                                         int32_t connection_key) {
   LOG4CXX_INFO(logger_, "MessageHelper::SendNaviStartStream");

@@ -427,7 +427,6 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
         } else {
           app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
         }
-        MessageHelper::ResetGlobalproperties(curr_app);
         MessageHelper::SendHMIStatusNotification(*curr_app);
       }
     }
@@ -510,10 +509,6 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::PutApplicationInFull(
     MessageHelper::SendActivateAppToHMI(app->app_id());
   }
   return result;
-}
-
-void ApplicationManagerImpl::DeactivateApplication(ApplicationSharedPtr app) {
-  MessageHelper::ResetGlobalproperties(app);
 }
 
 void ApplicationManagerImpl::ConnectToDevice(uint32_t id) {

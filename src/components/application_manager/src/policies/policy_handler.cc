@@ -76,8 +76,6 @@ struct DeactivateApplication {
 
     void operator()(const application_manager::ApplicationSharedPtr& app) {
       if (device_id_ == app->device()) {
-        application_manager::ApplicationManagerImpl::instance()
-        ->DeactivateApplication(app);
         app->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
         application_manager::MessageHelper::SendActivateAppToHMI(
           app->app_id(), hmi_apis::Common_HMILevel::NONE);
@@ -652,8 +650,6 @@ void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
     permissions.appRevoked = true;
     application_manager::MessageHelper::SendOnAppPermissionsChangedNotification(
       app->app_id(), permissions);
-    application_manager::ApplicationManagerImpl::instance()
-    ->DeactivateApplication(app);
     application_manager::MessageHelper::
         SendOnAppInterfaceUnregisteredNotificationToMobile(
           app->app_id(),
@@ -706,8 +702,6 @@ void PolicyHandler::OnPendingPermissionChange(
           SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
 
       if (permissions.appUnauthorized) {
-        application_manager::ApplicationManagerImpl::instance()
-            ->DeactivateApplication(app);
         application_manager::MessageHelper::
             SendOnAppInterfaceUnregisteredNotificationToMobile(
               app->app_id(),

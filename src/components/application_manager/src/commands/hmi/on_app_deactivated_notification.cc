@@ -87,8 +87,6 @@ void OnAppDeactivatedNotification::Run() {
           app->set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
         }
       }
-      ApplicationManagerImpl::instance()->DeactivateApplication(app);
-
       // switch HMI level for all applications in FULL or LIMITED
       ApplicationManagerImpl::ApplicationListAccessor accessor;
       ApplicationManagerImpl::TAppList applications =
@@ -109,7 +107,6 @@ void OnAppDeactivatedNotification::Run() {
     }
     case hmi_apis::Common_DeactivateReason::PHONECALL: {
       app->set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
-      ApplicationManagerImpl::instance()->DeactivateApplication(app);
       app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       break;
     }
@@ -122,7 +119,6 @@ void OnAppDeactivatedNotification::Run() {
           app->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
         }
       } else {
-        ApplicationManagerImpl::instance()->DeactivateApplication(app);
         app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       }
       break;

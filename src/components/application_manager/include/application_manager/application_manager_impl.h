@@ -291,7 +291,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     mobile_api::HMILevel::eType PutApplicationInFull(ApplicationSharedPtr app);
 
-    void DeactivateApplication(ApplicationSharedPtr app);
     void ConnectToDevice(uint32_t id);
     void OnHMIStartedCooperation();
 
