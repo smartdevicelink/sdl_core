@@ -98,6 +98,37 @@ void PerformInteractionRequest::Run() {
     return;
   }
 
+  mobile_apis::LayoutMode::eType interaction_layout =
+      mobile_apis::LayoutMode::INVALID_ENUM;
+  if ((*message_)[strings::msg_params].keyExists(
+      hmi_request::interaction_layout)) {
+    interaction_layout = static_cast<mobile_apis::LayoutMode::eType>(
+    (*message_)[strings::msg_params][hmi_request::interaction_layout].asInt());
+  }
+
+  if ((mobile_apis::InteractionMode::VR_ONLY ==
+      static_cast<mobile_apis::InteractionMode::eType>(
+          (*message_)[strings::msg_params][strings::interaction_mode].asInt())) &&
+      (mobile_apis::LayoutMode::KEYBOARD == interaction_layout)) {
+    LOG4CXX_ERROR_EXT(
+        logger_,
+        "PerformInteraction contains InteractionMode = VR_ONLY and "
+        "interactionLayout=KEYBOARD");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+  if ((0 == (*message_)
+      [strings::msg_params][strings::interaction_choice_set_id_list].length()) &&
+      (mobile_apis::LayoutMode::KEYBOARD != interaction_layout)) {
+    LOG4CXX_ERROR_EXT(
+              logger_,
+              "interactionChoiceSetIDList is empty and without parameter"
+              "interactionLayout=KEYBOARD");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
   if ((*message_)[strings::msg_params].keyExists(strings::vr_help)) {
     if (mobile_apis::Result::SUCCESS != MessageHelper::VerifyImageVrHelpItems(
         (*message_)[strings::msg_params][strings::vr_help], app)) {
@@ -509,9 +540,10 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
         (*message_)[strings::msg_params][strings::help_prompt];
 
   } else {
-    msg_params[strings::help_prompt] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
-
+    if (choice_list.length() != 0) {
+      msg_params[strings::help_prompt] =
+          smart_objects::SmartObject(smart_objects::SmartType_Array);
+    }
     int32_t index = 0;
     for (uint32_t i = 0; i < choice_list.length(); ++i) {
       smart_objects::SmartObject* choice_set =
@@ -543,7 +575,9 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
     msg_params[strings::timeout_prompt] =
             (*message_)[strings::msg_params][strings::timeout_prompt];
   } else {
-    msg_params[strings::timeout_prompt] = msg_params[strings::help_prompt];
+    if (msg_params.keyExists(strings::help_prompt)) {
+      msg_params[strings::timeout_prompt] = msg_params[strings::help_prompt];
+    }
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
