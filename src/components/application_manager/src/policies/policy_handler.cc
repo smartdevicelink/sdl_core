@@ -623,9 +623,6 @@ void PolicyHandler::OnVehicleDataUpdated(
 #if defined (EXTENDED_POLICY)
   if (message[application_manager::strings::msg_params].
       keyExists(application_manager::strings::vin)) {
-    if (NULL == policy_manager()) {
-
-    }
     policy_manager()->SetVINValue(
           message[application_manager::strings::msg_params]
           [application_manager::strings::vin].asString());
