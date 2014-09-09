@@ -1190,7 +1190,7 @@ bool ApplicationManagerImpl::ManageMobileCommand(
       app_hmi_level = app->hmi_level();
     }
 
-    // commands will be launched from requesr_ctrl
+    // commands will be launched from request_ctrl
     request_controller::RequestController::TResult result =
       request_ctrl_.addRequest(command, app_hmi_level);
 
