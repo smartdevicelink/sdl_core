@@ -126,10 +126,13 @@ bool ApplicationManagerImpl::Stop() {
                   "An error occurred during unregistering applications.");
   }
 
+#ifndef CUSTOMER_PASA
+  // for PASA customer policy backup should happen OnExitAllApp(SUSPEND)
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Unloading policy library.");
     policy::PolicyHandler::instance()->UnloadPolicyLibrary();
   }
+#endif
   return true;
 }
 
@@ -1790,6 +1793,19 @@ void ApplicationManagerImpl::HeadUnitReset(
       return;
     }
   }
+}
+
+void ApplicationManagerImpl::HeadUnitSuspend() {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::HeadUnitSuspend");
+#ifdef CUSTOMER_PASA
+  if (policy_manager_) {
+    LOG4CXX_INFO(logger_, "Unloading policy library.");
+    policy::PolicyHandler::instance()->UnloadPolicyLibrary();
+  }
+
+  LOG4CXX_INFO(logger_, "Destroying Last State");
+  resumption::LastState::destroy();
+#endif
 }
 
 void ApplicationManagerImpl::SendOnSDLClose() {

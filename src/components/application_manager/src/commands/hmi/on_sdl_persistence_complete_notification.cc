@@ -30,49 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_ALL_APPLICATIONS_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_ALL_APPLICATIONS_REQUEST_H_
-
-#include "application_manager/commands/hmi/notification_from_hmi.h"
+#include "application_manager/commands/hmi/on_sdl_persistence_complete_notification.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief OnExitAllApplicationsNotification command class
- **/
-class OnExitAllApplicationsNotification : public NotificationFromHMI {
- public:
-  /**
-   * @brief OnExitAllApplicationsNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnExitAllApplicationsNotification(const MessageSharedPtr& message);
+OnSDLPersistenceCompleteNotification::OnSDLPersistenceCompleteNotification(
+    const MessageSharedPtr& message)
+    : NotificationToHMI(message) {
+}
 
-  /**
-   * @brief OnExitAllApplicationsNotification class destructor
-   **/
-  virtual ~OnExitAllApplicationsNotification();
+OnSDLPersistenceCompleteNotification::~OnSDLPersistenceCompleteNotification() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
- private:
-
-  /**
-   * @brief Notify's HMI that SDL stored all data required for resumption
-   **/
-  void SendOnSDLPersistenceComplete();
-
-  DISALLOW_COPY_AND_ASSIGN(OnExitAllApplicationsNotification);
-};
+void OnSDLPersistenceCompleteNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnSDLpersistenceCompleteNotification::Run");
+  SendNotification();
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_ALL_APPLICATIONS_REQUEST_H_

@@ -30,49 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_ALL_APPLICATIONS_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_ALL_APPLICATIONS_REQUEST_H_
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SDL_PERSISTENCE_COMPLETE_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SDL_PERSISTENCE_COMPLETE_NOTIFICATION_H_
 
-#include "application_manager/commands/hmi/notification_from_hmi.h"
+#include "application_manager/commands/hmi/notification_to_hmi.h"
 
 namespace application_manager {
 
 namespace commands {
 
 /**
- * @brief OnExitAllApplicationsNotification command class
+ * @brief OnSDLPersistenceCompleteNotification command class
  **/
-class OnExitAllApplicationsNotification : public NotificationFromHMI {
- public:
-  /**
-   * @brief OnExitAllApplicationsNotification class constructor
-   *
-   * @param message Incoming SmartObject message
-   **/
-  explicit OnExitAllApplicationsNotification(const MessageSharedPtr& message);
+class OnSDLPersistenceCompleteNotification : public NotificationToHMI {
+  public:
+    /**
+     * @brief OnSDLPersistenceCompleteNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnSDLPersistenceCompleteNotification(const MessageSharedPtr& message);
 
-  /**
-   * @brief OnExitAllApplicationsNotification class destructor
-   **/
-  virtual ~OnExitAllApplicationsNotification();
+    /**
+     * @brief OnSDLPersistenceCompleteNotification class destructor
+     **/
+    virtual ~OnSDLPersistenceCompleteNotification();
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
- private:
-
-  /**
-   * @brief Notify's HMI that SDL stored all data required for resumption
-   **/
-  void SendOnSDLPersistenceComplete();
-
-  DISALLOW_COPY_AND_ASSIGN(OnExitAllApplicationsNotification);
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnSDLPersistenceCompleteNotification);
 };
 
 }  // namespace commands
 
 }  // namespace application_manager
 
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_EXIT_ALL_APPLICATIONS_REQUEST_H_
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SDL_PERSISTENCE_COMPLETE_NOTIFICATION_H_
