@@ -180,7 +180,7 @@ PolicyHandler::~PolicyHandler() {
 }
 
 PolicyManager* PolicyHandler::LoadPolicyLibrary() {
-  if (profile::Profile::instance()->policy_turn_off()) {
+  if (!PolicyEnabled()) {
     LOG4CXX_WARN(logger_, "System is configured to work without policy "
                  "functionality.");
     policy_manager_ = NULL;
@@ -198,6 +198,10 @@ PolicyManager* PolicyHandler::LoadPolicyLibrary() {
   }
 
   return policy_manager_;
+}
+
+bool PolicyHandler::PolicyEnabled() {
+  return profile::Profile::instance()->enable_policy();
 }
 
 PolicyManager* PolicyHandler::CreateManager() {
@@ -230,7 +234,7 @@ bool PolicyHandler::InitPolicyTable() {
 
 bool PolicyHandler::ResetPolicyTable() {
   LOG4CXX_TRACE(logger_, "Reset policy table.");
-  POLICY_LIB_CHECK(false);  
+  POLICY_LIB_CHECK(false);
   std::string preloaded_file =
     profile::Profile::instance()->preloaded_pt_file();
   return policy_manager_->ResetPT(preloaded_file);
@@ -387,7 +391,7 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
 }
 
 bool PolicyHandler::EnsureDeviceConsented() {
-    LOG4CXX_INFO(logger_, "PolicyHandler::EnsureDeviceConsented");
+  LOG4CXX_INFO(logger_, "PolicyHandler::EnsureDeviceConsented");
 
   DeviceParams device_params;
   DeviceConsent consent = GetDeviceForSending(device_params);
@@ -403,7 +407,8 @@ bool PolicyHandler::EnsureDeviceConsented() {
 void PolicyHandler::AddApplication(const std::string& application_id) {
   // TODO (AGaliuzov): remove this workaround during refactoring.
   registration_in_progress = true;
-  policy_manager()->AddApplication(application_id);
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->AddApplication(application_id);
 }
 
 void PolicyHandler::SetDeviceInfo(std::string& device_id,
@@ -621,9 +626,10 @@ void PolicyHandler::OnVIIsReady() {
 void PolicyHandler::OnVehicleDataUpdated(
     const smart_objects::SmartObject& message) {
 #if defined (EXTENDED_POLICY)
+  POLICY_LIB_CHECK_VOID();
   if (message[application_manager::strings::msg_params].
       keyExists(application_manager::strings::vin)) {
-    policy_manager()->SetVINValue(
+    policy_manager_->SetVINValue(
           message[application_manager::strings::msg_params]
           [application_manager::strings::vin].asString());
   }
@@ -631,8 +637,7 @@ void PolicyHandler::OnVehicleDataUpdated(
 }
 
 void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
-  LOG4CXX_INFO(logger_, "OnAppRevoked");
-  LOG4CXX_INFO(logger_, "Application_id " << policy_app_id << " is revoked.");
+  LOG4CXX_TRACE(logger_, "OnAppRevoked with policy_app_id " << policy_app_id << " is revoked.");
   POLICY_LIB_CHECK_VOID();
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
@@ -843,7 +848,7 @@ void PolicyHandler::StartPTExchange(bool skip_device_selection) {
 void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     uint32_t device_id) {
   LOG4CXX_INFO(logger_, "OnAllowSDLFunctionalityNotification");
-  POLICY_LIB_CHECK_VOID();  
+  POLICY_LIB_CHECK_VOID();
   // Device ids, need to be changed
   std::set<uint32_t> device_ids;
 
@@ -971,7 +976,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
 
   if (!policy_manager_) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    if (profile::Profile::instance()->policy_turn_off()) {
+    if (!PolicyEnabled()) {
       permissions.isSDLAllowed = true;
     }
   } else {
@@ -1241,6 +1246,7 @@ bool PolicyHandler::IsApplicationRevoked(const std::string& app_id) {
 
 void PolicyHandler::OnUpdateRequestSentToMobile() {
   LOG4CXX_INFO(logger_, "OnUpdateRequestSentToMobile");
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->OnUpdateStarted();
 }
 

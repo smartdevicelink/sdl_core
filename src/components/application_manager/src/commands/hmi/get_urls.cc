@@ -47,13 +47,13 @@ GetUrls::~GetUrls() {
 
 void GetUrls::Run() {
   LOG4CXX_INFO(logger_, "GetUrls::Run");
-  policy::PolicyManager* manager =
+  policy::PolicyManager* policy_manager =
     policy::PolicyHandler::instance()->policy_manager();
   smart_objects::SmartObject& object = *message_;
   object[strings::params][strings::message_type] = MessageType::kResponse;
-  if (manager) {
+  if (policy_manager) {
     policy::EndpointUrls endpoints =
-      manager->GetUpdateUrls(
+      policy_manager->GetUpdateUrls(
         object[strings::msg_params][hmi_request::service].asInt());
     object[strings::msg_params].erase(hmi_request::service);
     object[strings::msg_params][hmi_response::urls] =
