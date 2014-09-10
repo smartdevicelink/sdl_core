@@ -1113,17 +1113,11 @@ bool PolicyManagerImpl::IsApplicationRevoked(const std::string& app_id) const {
 }
 
 int PolicyManagerImpl::IsConsentNeeded(const std::string& app_id) {
-#if defined (EXTENDED_POLICY)
-  PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
-                                .pt_data().get());
-
+#ifdef EXTENDED_POLICY
   const std::string device_id = GetCurrentDeviceId(app_id);
-
   int count = 0;
-  if (pt_ext->CountUnconsentedGroups(app_id, device_id, &count)) {
+  if (cache.CountUnconsentedGroups(app_id, device_id, count)) {
     return count;
-  } else {
-    return 0;
   }
 #endif
   return 0;

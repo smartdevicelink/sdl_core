@@ -191,7 +191,6 @@ void CacheManager::GetConsentedGroups(const std::string &device_id,
 }
 
 bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
-
   LOG4CXX_INFO(logger_, "ApplyUpdate");
 #ifdef EXTENDED_POLICY
   pt->policy_table.functional_groupings =
@@ -205,8 +204,8 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
         update_pt.policy_table.consumer_friendly_messages;
   }
   Backup();
-  return true;
 #endif // EXTENDED_POLICY
+  return true;
 }
 
 void CacheManager::Backup() {
@@ -679,7 +678,7 @@ bool CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
                                           const std::string& device_id,
                                           int& result) {
 
-
+#ifdef EXTENDED_POLICY
   LOG4CXX_INFO(logger_, "CountUnconsentedGroups");
   policy_table::DeviceParams& params = (*pt->policy_table.device_data)[device_id];
   policy_table::UserConsentRecords& ucr = *(params.user_consent_records);
@@ -698,6 +697,7 @@ bool CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
       ++result;
     }
   }
+#endif // EXTENDED_POLICY
   return true;
 }
 
@@ -764,7 +764,7 @@ bool CacheManager::CleanupUnpairedDevices(const DeviceIds &device_ids) {
 }
 
 void CacheManager::Increment(const std::string &type) {
-
+#ifdef EXTENDED_POLICY
   // TODO: think about it.
   if (0 == type.compare("count_of_iap_buffer_full")) {
     *pt->policy_table.usage_and_error_counts->count_of_iap_buffer_full = 1;
@@ -773,6 +773,7 @@ void CacheManager::Increment(const std::string &type) {
   } else if (0 == type.compare("count_of_sync_reboots")) {
     *pt->policy_table.usage_and_error_counts->count_of_sync_reboots = 1;
   }
+#endif // EXTENDED_POLICY
 }
 
 void CacheManager::Increment(const std::string &app_id,
