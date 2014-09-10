@@ -686,8 +686,8 @@ bool CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
 
   policy_table::ConsentRecords cgr = ucr[policy_app_id];
 
-  policy_table::ConsentGroups::const_iterator con_iter = cgr.consent_groups->begin();
-  policy_table::ConsentGroups::const_iterator con_iter_end = cgr.consent_groups->end();
+  policy_table::ConsentGroups::const_iterator con_iter =
+      cgr.consent_groups->begin();
   policy_table::FunctionalGroupings::const_iterator groups_iter =
       pt->policy_table.functional_groupings.begin();
   policy_table::FunctionalGroupings::const_iterator groups_iter_end =
