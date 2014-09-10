@@ -335,8 +335,15 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
   const HMICapabilities& hmi_capabilities = app_manager->hmi_capabilities();
+  const uint32_t key = connection_key();
   ApplicationSharedPtr application =
-    ApplicationManagerImpl::instance()->application(connection_key());
+    ApplicationManagerImpl::instance()->application(key);
+
+  if (!application.valid()) {
+    LOG4CXX_ERROR(logger_, "There is no application for such connection key" <<
+                  key);
+    return;
+  }
 
   smart_objects::SmartObject& response_params = *params;
 
