@@ -420,9 +420,8 @@ int TransportManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "enter");
   all_thread_active_ = true;
 
-  int error_code =
-    pthread_create(&message_queue_thread_, 0, &MessageQueueStartThread, this);
-
+  int error_code = pthread_create(&message_queue_thread_, 0,
+                                  &MessageQueueStartThread, this);
   if (0 != error_code) {
     LOG4CXX_ERROR(logger_,
                   "Message queue thread is not created exit with error code "
@@ -430,10 +429,10 @@ int TransportManagerImpl::Init() {
     LOG4CXX_TRACE(logger_, "exit with E_TM_IS_NOT_INITIALIZED. Condition: 0 != error_code");
     return E_TM_IS_NOT_INITIALIZED;
   }
+  pthread_setname_np(message_queue_thread_, "TM MessageQueue");
 
-  error_code =
-    pthread_create(&event_queue_thread_, 0, &EventListenerStartThread, this);
-
+  error_code = pthread_create(&event_queue_thread_, 0,
+                              &EventListenerStartThread, this);
   if (0 != error_code) {
     LOG4CXX_ERROR(logger_,
                   "Event queue thread is not created exit with error code "
@@ -441,6 +440,7 @@ int TransportManagerImpl::Init() {
     LOG4CXX_TRACE(logger_, "exit with E_TM_IS_NOT_INITIALIZED. Condition: 0 != error_code");
     return E_TM_IS_NOT_INITIALIZED;
   }
+  pthread_setname_np(event_queue_thread_, "TM EventListener");
 
   is_initialized_ = true;
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
@@ -964,7 +964,7 @@ TransportManagerImpl::ConnectionInternal::ConnectionInternal(
   const DeviceHandle& device_handle)
   : transport_manager(transport_manager),
     transport_adapter(transport_adapter),
-    timer(new TimerInternal(this, &ConnectionInternal::DisconnectFailedRoutine)),
+    timer(new TimerInternal("TM DiscRoutine", this, &ConnectionInternal::DisconnectFailedRoutine)),
     shutDown(false),
     device_handle_(device_handle),
     messages_count(0) {

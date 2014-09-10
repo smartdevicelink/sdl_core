@@ -49,7 +49,7 @@ namespace commands {
 PerformInteractionRequest::PerformInteractionRequest(
   const MessageSharedPtr& message)
 : CommandRequestImpl(message),
-  timer_(this, &PerformInteractionRequest::onTimer),
+  timer_("PerformInteractionReq", this, &PerformInteractionRequest::onTimer),
   vr_perform_interaction_code_(mobile_apis::Result::INVALID_ENUM),
   interaction_mode_(mobile_apis::InteractionMode::INVALID_ENUM),
   ui_response_recived(false),

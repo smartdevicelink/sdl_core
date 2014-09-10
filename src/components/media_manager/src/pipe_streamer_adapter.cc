@@ -122,7 +122,7 @@ bool PipeStreamerAdapter::is_app_performing_activity(
 void PipeStreamerAdapter::Init() {
   if (!thread_) {
     LOG4CXX_INFO(logger, "Create and start sending thread");
-    thread_ = new threads::Thread("PipeStreamerAdapter", new Streamer(this));
+    thread_ = new threads::Thread("PipeStreamer", new Streamer(this));
     const size_t kStackSize = 16384;
     thread_->startWithOptions(threads::ThreadOptions(kStackSize));
   }

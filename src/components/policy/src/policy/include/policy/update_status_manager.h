@@ -119,6 +119,7 @@ private:
    public:
     UpdateResponseTimer(UpdateStatusManager* callee) :
         timer::TimerThread<UpdateStatusManager>(
+          "Policy UpdResponse",
           callee,
           &UpdateStatusManager::OnUpdateTimeoutOccurs) {
     }
