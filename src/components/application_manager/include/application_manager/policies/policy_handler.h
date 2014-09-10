@@ -246,9 +246,10 @@ class PolicyHandler :
   /**
    * @brief Allows to add new or update existed application during
    * registration process
-   * @param the policy aplication id.
+   * @param application_id The policy aplication id.
    */
   void AddApplication(const std::string& application_id);
+
   /**
    * Checks whether application is revoked
    * @param app_id id application

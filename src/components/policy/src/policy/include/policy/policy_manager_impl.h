@@ -219,7 +219,7 @@ class PolicyManagerImpl : public PolicyManager {
      * @param policy application id.
      * @param cuuren consent for application's device.
      */
-    void AddExistedApplication(const std::string& application_id,
+    void PromoteExistedApplication(const std::string& application_id,
                                DeviceConsent device_consent);
 
     /**

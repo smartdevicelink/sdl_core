@@ -1192,7 +1192,7 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id) {
       update_status_manager_.OnNewApplicationAdded();
     }
   } else {
-    AddExistedApplication(application_id, device_consent);
+    PromoteExistedApplication(application_id, device_consent);
   }
   SendNotificationOnPermissionsUpdated(application_id);
 }
@@ -1216,7 +1216,7 @@ void PolicyManagerImpl::AddNewApplication(const std::string& application_id,
 #endif
 }
 
-void PolicyManagerImpl::AddExistedApplication(
+void PolicyManagerImpl::PromoteExistedApplication(
     const std::string& application_id, DeviceConsent device_consent) {
 
   if (kDeviceHasNoConsent != device_consent

@@ -296,7 +296,7 @@ void RegisterAppInterfaceRequest::Run() {
     // In case when device has no consent, EnsureDeviceConsented will send
     // OnSDLConsentNeeded and will start PTU in OnAllowSDLFunctionality.
     if (policy::PolicyHandler::instance()->EnsureDeviceConsented()) {
-      // Allows to start policy table exchange. I will check
+      // Allows to start policy table exchange. It will check
       // current update state and will or will not run the exchange process.
       policy::PolicyHandler::instance()->OnPTExchangeNeeded();
     }
