@@ -74,7 +74,7 @@ void OnExitAllApplicationsNotification::Run() {
     case hmi_apis::Common_ApplicationsCloseReason::SUSPEND: {
       app_manager->HeadUnitSuspend();
       SendOnSDLPersistenceComplete();
-      break;
+      return;
     }
     default : {
       LOG4CXX_ERROR(logger_, "Unknown Application close reason" << reason);
