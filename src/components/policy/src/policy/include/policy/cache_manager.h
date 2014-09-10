@@ -161,9 +161,8 @@ class CacheManager {
     void GetGroupNameByHashID(const uint32_t group_id, std::string& group_name);
     void FillDeviceSpecificData();
     void FillAppSpecificData();
-    void CopyInternalParams(const std::string &from, const std::string &to);
     bool AppExists(const std::string& app_id) const;
-    unsigned long GenerateHash(const std::string& str_to_hash);
+    long int GenerateHash(const std::string& str_to_hash);
     utils::SharedPtr<policy_table::Table> pt;
 
 

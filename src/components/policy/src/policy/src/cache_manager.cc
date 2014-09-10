@@ -11,7 +11,7 @@
 
 
 #include <algorithm>
-#include <math.h>
+#include <cstdlib>
 #include <functional>
 
 namespace policy {
@@ -210,22 +210,24 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
 
 void CacheManager::Backup() {
   LOG4CXX_INFO(logger_, "Start backup.");
-  backup_->Save(*pt);
-  backup_->SaveUpdateRequired(update_required);
+  if (backup_.valid()) {
+    backup_->Save(*pt);
+    backup_->SaveUpdateRequired(update_required);
 
 
-  policy_table::ApplicationPolicies::const_iterator app_policy_iter =
-      pt->policy_table.app_policies.begin();
-  policy_table::ApplicationPolicies::const_iterator app_policy_iter_end =
-      pt->policy_table.app_policies.end();
+    policy_table::ApplicationPolicies::const_iterator app_policy_iter =
+        pt->policy_table.app_policies.begin();
+    policy_table::ApplicationPolicies::const_iterator app_policy_iter_end =
+        pt->policy_table.app_policies.end();
 
-  for (; app_policy_iter != app_policy_iter_end; ++app_policy_iter) {
+    for (; app_policy_iter != app_policy_iter_end; ++app_policy_iter) {
 
-    const std::string app_id = (*app_policy_iter).first;
-    backup_->SaveApplicationCustomData(app_id,
-                                      is_revoked[app_id],
-                                      is_default[app_id],
-                                      is_predata[app_id]);
+      const std::string app_id = (*app_policy_iter).first;
+      backup_->SaveApplicationCustomData(app_id,
+                                        is_revoked[app_id],
+                                        is_default[app_id],
+                                        is_predata[app_id]);
+    }
   }
   LOG4CXX_INFO(logger_, "End backup.");
 }
@@ -326,9 +328,9 @@ bool CacheManager::ReactOnUserDevConsentForApp(const std::string &app_id,
     // all groups get restored automatically
     if (IsPredataPolicy(app_id)) {
 
-      const policy_table::ApplicationParams& pre_data_app =
+        policy_table::ApplicationParams& pre_data_app =
           pt->policy_table.app_policies[kPreDataConsentId];
-      const policy_table::ApplicationParams& specific_app =
+        policy_table::ApplicationParams& specific_app =
           pt->policy_table.app_policies[app_id];
 
       policy_table::Strings res;
@@ -336,8 +338,7 @@ bool CacheManager::ReactOnUserDevConsentForApp(const std::string &app_id,
                             pre_data_app.groups.end(),
                             specific_app.groups.begin(),
                             specific_app.groups.end(),
-                            std::back_inserter(res),
-                            std::less<std::string>());
+                            std::back_inserter(res));
 
       if (res.empty()) {
         result = SetIsPredata(app_id, false);
@@ -800,7 +801,7 @@ bool CacheManager::SetDefaultPolicy(const std::string &app_id) {
     pt->policy_table.app_policies[app_id] =
         pt->policy_table.app_policies[kDefaultId];
 
-    CopyInternalParams(kDefaultId, app_id);
+    is_default[app_id] = true;
   }
 
   return true;
@@ -822,14 +823,6 @@ bool CacheManager::SetIsDefault(const std::string& app_id,
   return true;
 }
 
-void CacheManager::CopyInternalParams(const std::string &from,
-                                      const std::string& to) {
-
-  is_predata[to] = is_predata[from];
-  is_default[to] = is_default[from];
-  is_revoked[to] = is_revoked[from];
-}
-
 bool CacheManager::SetPredataPolicy(const std::string &app_id) {
 
   policy_table::ApplicationPolicies::const_iterator iter =
@@ -838,8 +831,7 @@ bool CacheManager::SetPredataPolicy(const std::string &app_id) {
   if (pt->policy_table.app_policies.end() != iter) {
     pt->policy_table.app_policies[app_id] =
         pt->policy_table.app_policies[kPreDataConsentId];
-
-    CopyInternalParams(kPreDataConsentId, app_id);
+    is_predata[app_id] = true;
   }
 
   return true;
@@ -943,13 +935,14 @@ void CacheManager::FillAppSpecificData() {
 }
 
 void CacheManager::FillDeviceSpecificData() {
-
+#ifdef EXTENDED_POLICY
   DeviceIds unpaired_ids;
   ex_backup_->UnpairedDevicesList(&unpaired_ids);
   for (DeviceIds::const_iterator ids_iter= unpaired_ids.begin();
        ids_iter!= unpaired_ids.end(); ++ids_iter) {
     is_unpaired[*ids_iter] = true;
   }
+#endif
 }
 
 bool CacheManager::LoadFromBackup() {
@@ -1014,7 +1007,7 @@ bool CacheManager::AppExists(const std::string &app_id) const {
   return pt->policy_table.app_policies.end() != policy_iter;
 }
 
-unsigned long CacheManager::GenerateHash(const std::string& str_to_hash) {
+long int CacheManager::GenerateHash(const std::string& str_to_hash) {
 
   unsigned long hash = 5381U;
   std::string::const_iterator it = str_to_hash.begin();
