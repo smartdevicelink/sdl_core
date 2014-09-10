@@ -193,8 +193,8 @@ TEST_F(SQLPTRepresentationTest, GetUpdateUrls) {
   ASSERT_TRUE(dbms->Exec(query_insert));
   ret = reps->GetUpdateUrls(7);
   ASSERT_EQ(2u, ret.size());
-  EXPECT_EQ("http://ford.com/cloud/1", ret[0].url);
-  EXPECT_EQ("http://ford.com/cloud/2", ret[1].url);
+  EXPECT_EQ("http://ford.com/cloud/1", ret[0].url[0]);
+  EXPECT_EQ("http://ford.com/cloud/2", ret[1].url[0]);
 
   ret = reps->GetUpdateUrls(0);
   EXPECT_TRUE(ret.empty());
