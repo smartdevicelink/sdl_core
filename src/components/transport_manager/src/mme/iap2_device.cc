@@ -71,7 +71,7 @@ IAP2Device::~IAP2Device() {
 bool IAP2Device::Init() {
   const ProtocolConfig::ProtocolNameContainer& legacy_protocol_names = ProtocolConfig::IAP2LegacyProtocolNames();
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = legacy_protocol_names.begin(); i != legacy_protocol_names.end(); ++i) {
-    std::string protocol_name = *i;
+    std::string protocol_name = i->second;
     ::std::string thread_name = "iAP2 connect notifier (" + protocol_name + ")";
     utils::SharedPtr<threads::Thread> thread = new threads::Thread(thread_name.c_str(),
       new IAP2ConnectThreadDelegate(this, protocol_name));
@@ -80,16 +80,17 @@ bool IAP2Device::Init() {
     legacy_connection_threads_.insert(std::make_pair(protocol_name, thread));
   }
 
-  int pool_index = 0;
-  const ProtocolConfig::ProtocolNameContainer& pool_protocol_names = ProtocolConfig::IAP2PoolProtocolNames();
-  for (ProtocolConfig::ProtocolNameContainer::const_iterator i = pool_protocol_names.begin(); i != pool_protocol_names.end(); ++i) {
-    std::string protocol_name = *i;
-    free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
-  }
+  free_protocol_name_pool_ = ProtocolConfig::IAP2PoolProtocolNames();
+  //int pool_index = 0;
+//  const ProtocolConfig::ProtocolNameContainer& pool_protocol_names = ProtocolConfig::IAP2PoolProtocolNames();
+//  for (ProtocolConfig::ProtocolNameContainer::const_iterator i = pool_protocol_names.begin(); i != pool_protocol_names.end(); ++i) {
+//    std::string protocol_name = *i;
+//    free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
+//  }
 
   const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::IAP2HubProtocolNames();
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = hub_protocol_names.begin(); i != hub_protocol_names.end(); ++i) {
-    std::string protocol_name = *i;
+    std::string protocol_name = i->second;
     ::std::string thread_name = "iAP2 hub connect notifier (" + protocol_name + ")";
     utils::SharedPtr<threads::Thread> thread = new threads::Thread(thread_name.c_str(),
       new IAP2HubConnectThreadDelegate(this, protocol_name));

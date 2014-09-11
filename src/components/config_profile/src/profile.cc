@@ -173,9 +173,9 @@ const char* kDefaultAckMQ = "/dev/mqueue/FromSDLCoreUSBAdapter";
 const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
 const char* kDefaultRecordingFileName = "record.wav";
 const char* kDefaultThreadPoolSize = "ThreadPoolSize";
-const char* kDefaultLegacyProtocolMask = "com.ford.sync.prot[0-29]";
-const char* kDefaultHubProtocolMask = "com.smartdevicelink.prot0";
-const char* kDefaultPoolProtocolMask = "com.smartdevicelink.prot[1-29]";
+const char* kDefaultLegacyProtocolMask = "com.ford.sync.prot";
+const char* kDefaultHubProtocolMask = "com.smartdevicelink.prot";
+const char* kDefaultPoolProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultIAPSystemConfig = "/fs/mp/etc/mm/ipod.cfg";
 const char* kDefaultIAP2SystemConfig = "/fs/mp/etc/mm/iap2.cfg";
 

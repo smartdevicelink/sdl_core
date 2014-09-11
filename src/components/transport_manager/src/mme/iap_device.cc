@@ -67,12 +67,14 @@ IAPDevice::~IAPDevice() {
 }
 
 bool IAPDevice::Init() {
-  int pool_index = 0;
-  const ProtocolConfig::ProtocolNameContainer& pool_protocol_names = ProtocolConfig::IAPPoolProtocolNames();
-  for (ProtocolConfig::ProtocolNameContainer::const_iterator i = pool_protocol_names.begin(); i != pool_protocol_names.end(); ++i) {
-    std::string protocol_name = *i;
-    free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
-    timers_protocols_.insert(std::make_pair(protocol_name,
+  free_protocol_name_pool_.clear();
+  free_protocol_name_pool_ = ProtocolConfig::IAPPoolProtocolNames();
+  //int pool_index = 0;
+ // const ProtocolConfig::ProtocolNameContainer& pool_protocol_names = ProtocolConfig::IAPPoolProtocolNames();
+  for (FreeProtocolNamePool::const_iterator i = free_protocol_name_pool_.begin(); i != free_protocol_name_pool_.end(); ++i) {
+//    std::string protocol_name = *i;
+//    free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
+    timers_protocols_.insert(std::make_pair(i->second,
                                             new ProtocolConnectionTimer(protocol_name, this)));
   }
 
@@ -197,7 +199,7 @@ void IAPDevice::OnSessionOpened(uint32_t protocol_id, const char* protocol_name,
   const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::IAPHubProtocolNames();
   bool is_hub = false;
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = hub_protocol_names.begin(); i != hub_protocol_names.end(); ++i) {
-    if (protocol_name == *i) {
+    if (protocol_name == i->second) {
       is_hub = true;
       break;
     }

@@ -116,11 +116,10 @@ const ProtocolConfig::ProtocolNameContainer ProtocolConfig::ReadIAP2PoolProtocol
 
 const ProtocolConfig::ProtocolNameContainer ProtocolConfig::ReadProtocolNames(const std::string& config_file_name, const std::string& section_name, const std::string& protocol_mask) {
   ProtocolNameContainer protocol_names;
-  std::ifstream config_file(config_file_name);
+  std::ifstream config_file(config_file_name.c_str());
   if (!config_file.fail()) {
-    LOG4CXX_TRACE(logger_, "parsing system config file " << config_file_name << " (section " << section_name << ", protocol mask \"" << protocol_mask << "\")");
-    regex_t protocol_regex;
-    regcomp(&protocol_regex, protocol_mask.c_str(), REG_NOSUB);
+    LOG4CXX_TRACE(logger_, "parsing system config file " << config_file_name
+                            << " (section " << section_name << ", protocol mask \"" << protocol_mask << "\")\n");
     std::string line;
     while (std::getline(config_file, line)) {
       if (section_name == line) { // start of specified section
@@ -128,22 +127,27 @@ const ProtocolConfig::ProtocolNameContainer ProtocolConfig::ReadProtocolNames(co
           if (line.empty()) { // end of specified section
             break;
           }
-          const size_t name_pos = 9; // protocol name start position
-          if ("protocol=" == line.substr(0, name_pos)) {
-            std::string tail = line.substr(name_pos);
-            size_t comma_pos = tail.find_first_of(','); // comma position, can be std::string::npos
-            std::string protocol_name = tail.substr(0, comma_pos);
-            if (0 == regexec(&protocol_regex, protocol_name.c_str(), 0, 0, REG_NOTEOL)) {
-              LOG4CXX_DEBUG(logger_, "adding protocol " << protocol_name);
-              protocol_names.push_back(protocol_name);
-            }
+          int prot_mask_pos = line.find(protocol_mask);
+          if (prot_mask_pos == -1){  // protocol_mask not found in line
+              continue;
           }
+
+          std::string tail = line.substr(prot_mask_pos + protocol_mask.length());
+          size_t comma_pos = tail.find_first_of(','); // comma position, can be std::string::npos
+          std:string digits_in_prot_name = tail.substr(0, comma_pos);
+          std::string prot_name = protocol_mask + digits_in_prot_name;
+
+          size_t index;
+          std::stringstream stream(digits_in_prot_name);
+          stream >> index;
+          protocol_names.insert(make_pair(index, prot_name));
+          LOG4CXX_DEBUG(logger_, "adding protocol " << protocol_name);
         }
         break; // nothing matters after specified section
       }
     }
     config_file.close();
-    LOG4CXX_TRACE(logger_, "system config file " << config_file_name << " (section " << section_name << ", protocol mask \"" << protocol_mask << "\") parsed");
+    LOG4CXX_TRACE(logger_, "system config file " << config_file_name << " (section " << section_name << ", protocol mask \"" << protocol_mask << "\") parsed\n");
   }
   else {
     LOG4CXX_ERROR(logger_, "cannot open system config file " << config_file_name);
