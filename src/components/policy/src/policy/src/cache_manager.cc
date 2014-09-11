@@ -203,7 +203,6 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
     pt->policy_table.consumer_friendly_messages =
         update_pt.policy_table.consumer_friendly_messages;
   }
-  Backup();
 #endif // EXTENDED_POLICY
   return true;
 }
@@ -851,7 +850,6 @@ bool CacheManager::SetDefaultPolicy(const std::string &app_id) {
     CopyInternalParams(kDefaultId, app_id);
     SetIsDefault(app_id, true);
     SetIsPredata(app_id, false);
-    Backup();
   }
   return true;
 }
