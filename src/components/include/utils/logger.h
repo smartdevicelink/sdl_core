@@ -35,12 +35,13 @@
 #ifdef ENABLE_LOG
   #include <errno.h>
   #include <string.h>
-  #include <log4cxx/logger.h>
+  #include <sstream>
   #include <log4cxx/propertyconfigurator.h>
+  #include "utils/push_log.h"
 #endif  // ENABLE_LOG
 
-namespace log4cxx {
 #ifdef ENABLE_LOG
+
     #define CREATE_LOGGERPTR_GLOBAL(logger_var, logger_name) \
       namespace { \
         CREATE_LOGGERPTR_LOCAL(logger_var, logger_name); \
@@ -58,23 +59,65 @@ namespace log4cxx {
 
     #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
 
+    #undef LOG4CXX_INFO
+    #define LOG4CXX_INFO(loggerPtr, logEvent) do { \
+      std::stringstream accumulator; \
+      accumulator << logEvent; \
+      logger::push_log(loggerPtr, logger::Info, accumulator.str()); \
+    } while (false)
+
     #define LOG4CXX_INFO_EXT(logger, logEvent) LOG4CXX_INFO(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_INFO_STR_EXT(logger, logEvent) LOG4CXX_INFO_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
     #define LOG4CXX_TRACE_EXT(logger, logEvent) LOG4CXX_TRACE(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_TRACE_STR_EXT(logger, logEvent) LOG4CXX_TRACE_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
+    #undef LOG4CXX_DEBUG
+    #define LOG4CXX_DEBUG(loggerPtr, logEvent) do { \
+      std::stringstream accumulator; \
+      accumulator << logEvent; \
+      logger::push_log(loggerPtr, logger::Debug, accumulator.str()); \
+    } while (false)
+
     #define LOG4CXX_DEBUG_EXT(logger, logEvent) LOG4CXX_DEBUG(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_DEBUG_STR_EXT(logger, logEvent) LOG4CXX_DEBUG_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+
+    #undef LOG4CXX_WARN
+    #define LOG4CXX_WARN(loggerPtr, logEvent) do { \
+      std::stringstream accumulator; \
+      accumulator << logEvent; \
+      logger::push_log(loggerPtr, logger::Warn, accumulator.str()); \
+    } while (false)
 
     #define LOG4CXX_WARN_EXT(logger, logEvent) LOG4CXX_WARN(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_WARN_STR_EXT(logger, logEvent) LOG4CXX_WARN_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
+    #undef LOG4CXX_ERROR
+    #define LOG4CXX_ERROR(loggerPtr, logEvent) do { \
+      std::stringstream accumulator; \
+      accumulator << logEvent; \
+      logger::push_log(loggerPtr, logger::Error, accumulator.str()); \
+    } while (false)
+
     #define LOG4CXX_ERROR_EXT(logger, logEvent) LOG4CXX_ERROR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_ERROR_STR_EXT(logger, logEvent) LOG4CXX_ERROR_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
 
+    #undef LOG4CXX_FATAL
+    #define LOG4CXX_FATAL(loggerPtr, logEvent) do { \
+      std::stringstream accumulator; \
+      accumulator << logEvent; \
+      logger::push_log(loggerPtr, logger::Fatal, accumulator.str()); \
+    } while (false)
+
     #define LOG4CXX_FATAL_EXT(logger, logEvent) LOG4CXX_FATAL(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
     #define LOG4CXX_FATAL_STR_EXT(logger, logEvent) LOG4CXX_FATAL_STR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
+
+    #undef LOG4CXX_TRACE
+    #define LOG4CXX_TRACE(loggerPtr, logEvent) do { \
+      std::stringstream accumulator; \
+      accumulator << logEvent; \
+      logger::push_log(loggerPtr, logger::Trace, accumulator.str()); \
+    } while (false)
 
     #define LOG4CXX_TRACE_ENTER(logger) LOG4CXX_TRACE(logger, "ENTER: " << __PRETTY_FUNCTION__ )
     #define LOG4CXX_TRACE_EXIT(logger) LOG4CXX_TRACE(logger, "EXIT: " << __PRETTY_FUNCTION__ )
@@ -143,5 +186,4 @@ namespace log4cxx {
     #define LOG4CXX_TRACE_EXIT(logger)
 #endif  // ENABLE_LOG
 
-}  // namespace log4cxx
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_
