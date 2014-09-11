@@ -149,6 +149,10 @@ class SharedPtr {
     static SharedPtr<OtherObjectType> static_pointer_cast(
       const SharedPtr<ObjectType>& pointer);
 
+    template<typename OtherObjectType>
+    static SharedPtr<OtherObjectType> dynamic_pointer_cast(
+      const SharedPtr<ObjectType>& pointer);
+
     /**
      * @brief Member access operator.
      *
@@ -274,6 +278,22 @@ utils::SharedPtr<OtherObjectType> utils::SharedPtr<ObjectType>::static_pointer_c
 
   if (0 != casted_pointer.mReferenceCounter) {
     atomic_post_inc(casted_pointer.mReferenceCounter);
+  }
+
+  return casted_pointer;
+}
+
+template<typename ObjectType>
+template<typename OtherObjectType>
+utils::SharedPtr<OtherObjectType> utils::SharedPtr<ObjectType>::dynamic_pointer_cast(const SharedPtr<ObjectType>& pointer) {
+  SharedPtr<OtherObjectType> casted_pointer;
+  casted_pointer.mObject = dynamic_cast<OtherObjectType*>(pointer.mObject);
+  if (NULL != casted_pointer.mObject) {
+    casted_pointer.mReferenceCounter = pointer.mReferenceCounter;
+
+    if (0 != casted_pointer.mReferenceCounter) {
+      atomic_post_inc(casted_pointer.mReferenceCounter);
+    }
   }
 
   return casted_pointer;

@@ -116,4 +116,11 @@
         to
             on -C0 -p 12 SmartDeviceLink >  /fs/rwdata/{PATH_TO_FILE}&
   11.5 Restart target
+12) Troubleshooting:
+	1. If when you run ./smartDeviceLink you see error:
+		Error with reading shared libraries: liblog4cxx.so.10
+	   Pllese do:
+		$ sudo rm /etc/ld.so.cache
+		$ sudo sudo ldconfig
+	   And try run SDL again.
 

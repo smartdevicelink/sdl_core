@@ -283,6 +283,18 @@ class PTRepresentation {
      * @return true if success
      */
     virtual bool SetDefaultPolicy(const std::string& app_id) = 0;
+
+    /**
+     * @brief SaveApplicationCustomData
+     * @param app_id
+     * @param is_revoked
+     * @param is_default
+     * @param is_predata
+     */
+    virtual bool SaveApplicationCustomData(const std::string& app_id,
+                                           bool is_revoked,
+                                           bool is_default,
+                                           bool is_predata) = 0;
 };
 
 }  //  namespace policy

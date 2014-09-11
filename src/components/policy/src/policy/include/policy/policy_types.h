@@ -133,9 +133,12 @@ struct CheckPermissionResult {
   */
 struct EndpointData {
     explicit EndpointData(const std::string& url_string = "")
-        : url(url_string)
-        , app_id("default") {}
-    std::string url;
+        : app_id("default") {
+      if (false == url_string.empty()) {
+        url.push_back(url_string);
+      }
+    }
+    std::vector<std::string> url;
     std::string app_id;
 };
 

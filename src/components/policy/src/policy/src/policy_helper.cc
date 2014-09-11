@@ -227,7 +227,7 @@ void CheckAppPolicy::SendNotification(
 
   const std::string app_id = app_policy.first;
   LOG4CXX_INFO(logger_, "Send notification for application_id:" << app_id);
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   pm_->listener()->OnPermissionsUpdated(app_id, notification_data,
                                         policy_table::EnumToJsonString(
                                           app_policy.second.default_hmi));
@@ -242,7 +242,7 @@ void CheckAppPolicy::SendOnPendingPermissions(
   const AppPoliciesValueType& app_policy, AppPermissions permissions) const {
   // TODO(AOleynik): Exclude default group(s)
   if (permissions.appPermissionsConsentNeeded) {
-#if defined(EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
     const policy_table::Strings& groups = app_policy.second.groups;
     // TODO(IKozyrenko): Check logic if optional container is missing
     const policy_table::Strings& preconsented_groups = *app_policy.second
@@ -372,7 +372,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   // if 'device' was update with new/other func groups => user consent
   // for device should be cleared.
   if (kDeviceId == app_id) {
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
     PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(
                                     pm_->policy_table_.pt_data().get());
     if (pt_ext) {
@@ -615,6 +615,7 @@ void FillFunctionalGroupPermissions(
     FunctionalGroupNames& names,
     GroupConsent state,
     std::vector<FunctionalGroupPermission>& permissions) {
+  LOG4CXX_INFO(logger_, "FillFunctionalGroupPermissions" );
   FunctionalGroupIDs::const_iterator it = ids.begin();
   FunctionalGroupIDs::const_iterator it_end = ids.end();
   for (; it != it_end; ++it) {
@@ -634,6 +635,7 @@ bool IsPredefinedApp(const AppPoliciesValueType& app) {
 
 FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
                                const FunctionalGroupIDs& what) {
+  LOG4CXX_INFO(logger_, "Exclude same groups" );
   FunctionalGroupIDs from_copy(from);
   FunctionalGroupIDs what_copy(what);
 
@@ -653,6 +655,7 @@ FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
 
 FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
                          const FunctionalGroupIDs& second) {
+  LOG4CXX_INFO(logger_, "Merge groups" );
   FunctionalGroupIDs first_copy(first);
   FunctionalGroupIDs second_copy(second);
 
@@ -672,6 +675,7 @@ FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
 
 FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
                             const FunctionalGroupIDs& second) {
+  LOG4CXX_INFO(logger_, "Find same groups");
   FunctionalGroupIDs first_copy(first);
   FunctionalGroupIDs second_copy(second);
 

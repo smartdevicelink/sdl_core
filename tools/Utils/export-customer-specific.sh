@@ -7,6 +7,11 @@ srcdir=$1
 bindir=$2
 customer=$3
 
+function post_install {
+# this function should be overrided by customer configuration file if nesessary
+    echo "Code preparing is finished"
+}
+
 function find_in_excludes_src() {
 	upper=${#excludes_src[@]}
 	lower=0
@@ -101,16 +106,9 @@ if [ -z $srcdir ] ||  [ -z $customer ]; then
   exit 1
 fi
 
-case $customer in
-  "PASA")
-    source $srcdir/customer-specific/pasa.conf
-    specificdir=$srcdir/customer-specific/pasa
-  ;;
-  "FORD")
-    source $srcdir/customer-specific/ford.conf
-    specificdir=$srcdir/customer-specific/ford
-  ;;
-esac
+source $srcdir/customer-specific/$customer.conf
+specificdir=$srcdir/customer-specific/$customer
+
 readarray -t excludes_src < <(for entry in $exclude_src; do echo $entry; done | sort)
 readarray -t excludes_bin < <(for entry in $exclude_bin; do echo $entry; done | sort)
 
@@ -124,9 +122,11 @@ mkdir $export_dir
 function integrate_src() {
   relfn=${1##$2/}
   if is_excluded_src $relfn; then 
+    echo $relfn" excluded"
     return
+  else 
+    echo "$relfn"      
   fi
-  echo "$relfn"
   if [ -d $1 ]; then
     mkdir -p $export_dir/$relfn
     for l in $1/*; do
@@ -137,6 +137,7 @@ function integrate_src() {
       $srcdir/$filter_command $1  > $export_dir/$relfn
     else
       cp $1 $export_dir/$relfn
+      echo $1" copied to "$export_dir/$relfn
     fi
   fi
 }
@@ -177,12 +178,5 @@ for entry in $include_bin; do
   done
 done
 
-function snapshot_tag() {
-    date  +"SNAPSHOT_PASA%d%m%Y"
-}
+post_install
 
-cp -r $specificdir/* $export_dir
-sed 's/{TAG}/'$(snapshot_tag)'/g' -i $export_dir/src/appMain/SmartDeviceLinkMainApp.cpp
-find $export_dir \
-  -regex '.*\.\(cc\|h\|cpp\|hpp\)' \
-  -exec unix2dos {} \;

@@ -398,9 +398,11 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
 }
 
 void AddCommandRequest::RemoveCommand() {
+  LOG4CXX_INFO(logger_, "AddCommandRequest::RemoveCommand");
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       connection_key());
-  if (!app) {
+  if (!app.valid()) {
+    LOG4CXX_ERROR(logger_, "No application associated with session key");
     return;
   }
   app->RemoveCommand((*message_)[strings::msg_params]

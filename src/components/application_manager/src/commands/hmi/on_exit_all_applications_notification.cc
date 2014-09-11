@@ -56,6 +56,8 @@ void OnExitAllApplicationsNotification::Run() {
   mobile_api::AppInterfaceUnregisteredReason::eType mob_reason =
       mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM;
 
+  ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
+
   switch (reason) {
     case hmi_apis::Common_ApplicationsCloseReason::IGNITION_OFF: {
       mob_reason = mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF;
@@ -69,14 +71,18 @@ void OnExitAllApplicationsNotification::Run() {
       mob_reason = mobile_api::AppInterfaceUnregisteredReason::FACTORY_DEFAULTS;
       break;
     }
+    case hmi_apis::Common_ApplicationsCloseReason::SUSPEND: {
+      app_manager->HeadUnitSuspend();
+      SendOnSDLPersistenceComplete();
+      return;
+    }
     default : {
-      LOG4CXX_ERROR(logger_, "Unkown Application close reason" << reason);
+      LOG4CXX_ERROR(logger_, "Unknown Application close reason" << reason);
       return;
     }
   }
 
-  ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
-    app_manager->SetUnregisterAllApplicationsReason(mob_reason);
+  app_manager->SetUnregisterAllApplicationsReason(mob_reason);
   app_manager->UnregisterAllApplications(true);
 
   if (mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET == mob_reason ||
@@ -85,6 +91,21 @@ void OnExitAllApplicationsNotification::Run() {
   }
 
   threads::Thread::InterruptMainThread();
+}
+
+void OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete() {
+  LOG4CXX_INFO(logger_, ""
+      "OnExitAllApplicationsNotification::SendOnSDLPersistenceComplete");
+
+  smart_objects::SmartObject* message =
+      new smart_objects::SmartObject(smart_objects::SmartType_Map);
+  (*message)[strings::params][strings::function_id] =
+      hmi_apis::FunctionID::BasicCommunication_OnSDLPersistenceComplete;
+  (*message)[strings::params][strings::message_type] = MessageType::kNotification;
+  (*message)[strings::params][strings::correlation_id] =
+      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
+   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
 
 }  // namespace commands

@@ -60,6 +60,7 @@ class PolicyHandler :
   PolicyManager* policy_manager() const {
     return policy_manager_;
   }
+  bool PolicyEnabled();
   bool InitPolicyTable();
   bool ResetPolicyTable();
   bool ClearUserConsent();
@@ -246,9 +247,10 @@ class PolicyHandler :
   /**
    * @brief Allows to add new or update existed application during
    * registration process
-   * @param the policy aplication id.
+   * @param application_id The policy aplication id.
    */
   void AddApplication(const std::string& application_id);
+
   /**
    * Checks whether application is revoked
    * @param app_id id application
@@ -293,7 +295,7 @@ protected:
    * @param status Internal policy update status
    * @return Converted status for sending to HMI
    */
-  const std::string ConvertUpdateStatus(policy::PolicyTableStatus status);  
+  const std::string ConvertUpdateStatus(policy::PolicyTableStatus status);
 
 private:
   PolicyHandler();

@@ -30,14 +30,15 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
-#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_SCANNER_H_
+#ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_PASA_BT_BLUETOOTH_PASA_DEVICE_SCANNER_H_
+#define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_PASA_BT_BLUETOOTH_PASA_DEVICE_SCANNER_H_
 
 #include <applink_types.h>
 
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
+#include "utils/threads/thread.h"
 
 #include "transport_manager/pasa_bt/bluetooth_PASA_device.h"
 
@@ -51,7 +52,6 @@ class TransportAdapterController;
  */
 class BluetoothPASADeviceScanner : public DeviceScanner {
  public:
-
   /**
    * @brief Constructor.
    * @param controller Transport adapter controller
@@ -59,12 +59,13 @@ class BluetoothPASADeviceScanner : public DeviceScanner {
    * @param repeat_search_pause_sec - pause between device searches, 0 means continous search
    */
   BluetoothPASADeviceScanner(TransportAdapterController* controller,
-                         bool auto_repeat_search, int repeat_search_pause_sec);
+                             bool auto_repeat_search, int repeat_search_pause_sec);
   /**
    * @brief Main thread
    */
   void Thread();
-protected:
+
+ protected:
   /**
     * @brief Start device scanner.
     *
@@ -84,14 +85,29 @@ protected:
    */
   virtual TransportAdapter::Error Scan();
 
-    /**
-     * @brief Check device scanner for initialization.
-     *
-     * @return true - initialized.
-     * false - not initialized.
-     */
-    virtual bool IsInitialised() const;
-  private:
+  /**
+   * @brief Check device scanner for initialization.
+   *
+   * @return true - initialized.
+   * false - not initialized.
+   */
+  virtual bool IsInitialised() const;
+
+ private:
+  class DeviceScannerDelegate: public threads::ThreadDelegate {
+   public:
+    explicit DeviceScannerDelegate(BluetoothPASADeviceScanner* scanner);
+    void threadMain() OVERRIDE;
+   private:
+    BluetoothPASADeviceScanner* scanner_;
+  };
+  class PASAMessageDelegate: public threads::ThreadDelegate {
+   public:
+    explicit PASAMessageDelegate(BluetoothPASADeviceScanner* scanner);
+    void threadMain() OVERRIDE;
+   private:
+    BluetoothPASADeviceScanner* scanner_;
+  };
   /**
    * @brief Waits for external scan request or time out for repeated search or terminate request
    */
@@ -100,24 +116,24 @@ protected:
   /**
    * @brief Recieve PASA framework mq messages and convert it to SDL BT messages
    */
-  static void* handlePASAFrameworkIncomingMessages(void *data);
+  static void* handlePASAFrameworkIncomingMessages(void* data);
 
   /**
    * @brief Connect BT device
    * Called on PASA FW BT SPP Connect Message
    */
-  void connectBTDevice(void *data);
+  void connectBTDevice(void* data);
 
   /**
    * @brief Disconnect BT device
    * Called on PASA FW BT Disconnect Message
    */
-  void disconnectBTDevice(void *data);
+  void disconnectBTDevice(void* data);
   /**
    * @brief Disconnect SPP (close connection)
    * Called on PPASA FW BT SPP Disconnect Message
    */
-  void disconnectBTDeviceSPP(void *data);
+  void disconnectBTDeviceSPP(void* data);
 
   /**
    * @brief Summarizes the total list of devices (paired and scanned) and notifies controller
@@ -132,9 +148,9 @@ protected:
   void UpdateTotalApplicationList();
 
   TransportAdapterController* controller_;
-  pthread_t thread_;
+  threads::Thread* bt_device_scanner_thread_;
 
-  pthread_t mPASAFWMsgHandlerThread;
+  threads::Thread* bt_PASA_msg_thread_;
   bool thread_started_;
   bool shutdown_requested_;
   bool device_scan_requested_;
@@ -150,8 +166,6 @@ protected:
   mqd_t mPASAFWSendHandle;
   mqd_t mq_ToSDL;
 };
-
 }  // namespace transport_adapter
 }  // namespace transport_manager
-
-#endif /* BLUETOOTH_DEVICE_SCANNER_H_ */
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_PASA_BT_BLUETOOTH_PASA_DEVICE_SCANNER_H_

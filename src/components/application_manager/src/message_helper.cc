@@ -251,11 +251,15 @@ std::string MessageHelper::CommonLanguageToString(
 }
 
 uint32_t MessageHelper::GetAppCommandLimit(const std::string& policy_app_id) {
+  policy::PolicyManager* policy_manager =
+      policy::PolicyHandler::instance()->policy_manager();
+  if(!policy_manager) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return 0;
+  }
   std::string priority;
-  policy::PolicyHandler::instance()->policy_manager()->GetPriority(
-        policy_app_id, &priority);
-  return policy::PolicyHandler::instance()->policy_manager()->
-      GetNotificationsNumber(priority);
+  policy_manager->GetPriority(policy_app_id, &priority);
+  return policy_manager-> GetNotificationsNumber(priority);
 }
 
 void MessageHelper::SendHMIStatusNotification(
@@ -570,18 +574,27 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
   (*device_list_so)[strings::device_list] = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
   smart_objects::SmartObject& list_so = (*device_list_so)[strings::device_list];
+  policy::PolicyManager* policy_manager =
+      policy::PolicyHandler::instance()->policy_manager();
+  if(!policy_manager) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+  }
   int32_t index = 0;
   for (connection_handler::DeviceMap::const_iterator it = devices.begin();
        devices.end() != it; ++it) {
     const connection_handler::Device& d =
       static_cast<connection_handler::Device>(it->second);
-    list_so[index][strings::name] = d.user_friendly_name();    
+    list_so[index][strings::name] = d.user_friendly_name();
     list_so[index][strings::id] = it->second.device_handle();
-    policy::DeviceConsent device_consent =
-        policy::PolicyHandler::instance()->policy_manager()->
-        GetUserConsentForDevice(it->second.mac_address());
-    list_so[index][strings::isSDLAllowed] =
-        policy::DeviceConsent::kDeviceAllowed == device_consent ? true : false;
+
+    if(policy_manager) {
+      const policy::DeviceConsent device_consent =
+          policy_manager->GetUserConsentForDevice(it->second.mac_address());
+      list_so[index][strings::isSDLAllowed] =
+          policy::DeviceConsent::kDeviceAllowed == device_consent;
+    } else {
+      list_so[index][strings::isSDLAllowed] = true;
+    }
     ++index;
   }
   return device_list_so;
@@ -1534,67 +1547,6 @@ smart_objects::SmartObject* MessageHelper::CreateNegativeResponse(
   response_data[strings::params][strings::connection_key] = connection_key;
 
   return response;
-}
-
-void MessageHelper::ResetGlobalproperties(ApplicationSharedPtr app) {
-  // reset help_prompt
-  const std::vector<std::string>& help_prompt = profile::Profile::instance()
-      ->help_prompt();
-
-  smart_objects::SmartObject so_help_prompt = smart_objects::SmartObject(
-        smart_objects::SmartType_Array);
-
-  for (uint32_t i = 0; i < help_prompt.size(); ++i) {
-    smart_objects::SmartObject helpPrompt = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    helpPrompt[strings::text] = help_prompt[i];
-    helpPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
-    so_help_prompt[i] = helpPrompt;
-  }
-
-  app->set_help_prompt(so_help_prompt);
-
-  // reset timeout prompt
-  const std::vector<std::string>& time_out_promt = profile::Profile::instance()
-      ->time_out_promt();
-
-  smart_objects::SmartObject so_time_out_promt = smart_objects::SmartObject(
-        smart_objects::SmartType_Array);
-
-  for (uint32_t i = 0; i < time_out_promt.size(); ++i) {
-    smart_objects::SmartObject timeoutPrompt = smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-    timeoutPrompt[strings::text] = time_out_promt[i];
-    timeoutPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
-    so_time_out_promt[i] = timeoutPrompt;
-  }
-
-  app->set_timeout_prompt(so_time_out_promt);
-
-  // reset VR help title
-  smart_objects::SmartObject help_title(app->name());
-  app->set_vr_help_title(help_title);
-
-  // reset VR help items
-  const CommandsMap& cmdMap = app->commands_map();
-  smart_objects::SmartObject vr_help_items;
-
-  int32_t index = 0;
-  CommandsMap::const_iterator command_it = cmdMap.begin();
-
-  for (; cmdMap.end() != command_it; ++command_it) {
-    if (true == (*command_it->second).keyExists(strings::vr_commands)) {
-      // use only first
-      vr_help_items[index][strings::position] = (index + 1);
-      vr_help_items[index++][strings::text] =
-        (*command_it->second)[strings::vr_commands][0];
-    }
-  }
-
-  app->set_vr_help(vr_help_items);
-
-  // send global properties
-  SendGlobalPropertiesToHMI(app);
 }
 
 void MessageHelper::SendNaviStartStream(const std::string& url,

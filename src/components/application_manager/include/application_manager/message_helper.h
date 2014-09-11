@@ -219,8 +219,6 @@ class MessageHelper {
      */
     static void SendOnAppUnregNotificationToHMI(ApplicationConstSharedPtr app,
                                                 bool is_unexpected_disconnect = false);
-    static void ResetGlobalproperties(ApplicationSharedPtr app);
-
     static void SendActivateAppToHMI(
       uint32_t const app_id,
       hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL);

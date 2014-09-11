@@ -69,6 +69,7 @@ extern const std::string kUpdateGroupPermissions;
 extern const std::string kSelectDefaultHmi;
 extern const std::string kInsertApplication;
 extern const std::string kSelectFriendlyMsg;
+extern const std::string kCollectFriendlyMsg;
 extern const std::string kSelectAppGroupsId;
 extern const std::string kSelectConsentedGroupsId;
 extern const std::string kCountAppConsents;

@@ -608,6 +608,10 @@ const std::string kDeleteApplication = "DELETE FROM `application`";
 const std::string kSelectApplicationRevoked =
   "SELECT `is_revoked` FROM `application` WHERE `id` = ?";
 
+const std::string kUpdateApplicationCustomData =
+  "UPDATE `application` SET `is_revoked` = ?, `is_default` = ?,"
+  "`is_predata` = ? WHERE `id` = ?";
+
 const std::string kSelectApplicationRepresented =
   "SELECT COUNT(`id`) FROM `application` WHERE `id` = ?";
 

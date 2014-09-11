@@ -344,6 +344,7 @@ class TransportManagerImpl : public TransportManager {
    **/
   TransportManagerListenerList transport_manager_listener_;
 
+  // TODO(Eamakhov): change to threads::Thread usage
   /**
    * @brief ID of message queue processing thread
    **/
