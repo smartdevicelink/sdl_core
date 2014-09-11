@@ -131,7 +131,6 @@ const ProtocolConfig::ProtocolNameContainer ProtocolConfig::ReadProtocolNames(co
           if (prot_mask_pos == -1){  // protocol_mask not found in line
               continue;
           }
-
           std::string tail = line.substr(prot_mask_pos + protocol_mask.length());
           size_t comma_pos = tail.find_first_of(','); // comma position, can be std::string::npos
           std:string digits_in_prot_name = tail.substr(0, comma_pos);

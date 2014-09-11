@@ -68,11 +68,8 @@ IAPDevice::~IAPDevice() {
 
 bool IAPDevice::Init() {
   free_protocol_name_pool_ = ProtocolConfig::IAPPoolProtocolNames();
-  //int pool_index = 0;
- // const ProtocolConfig::ProtocolNameContainer& pool_protocol_names = ProtocolConfig::IAPPoolProtocolNames();
   for (FreeProtocolNamePool::const_iterator i = free_protocol_name_pool_.begin(); i != free_protocol_name_pool_.end(); ++i) {
     std::string protocol_name = i->second;
-//    free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
     timers_protocols_.insert(std::make_pair(i->second,
                                             new ProtocolConnectionTimer(protocol_name, this)));
   }

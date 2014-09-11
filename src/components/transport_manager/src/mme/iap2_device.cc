@@ -81,12 +81,6 @@ bool IAP2Device::Init() {
   }
 
   free_protocol_name_pool_ = ProtocolConfig::IAP2PoolProtocolNames();
-  //int pool_index = 0;
-//  const ProtocolConfig::ProtocolNameContainer& pool_protocol_names = ProtocolConfig::IAP2PoolProtocolNames();
-//  for (ProtocolConfig::ProtocolNameContainer::const_iterator i = pool_protocol_names.begin(); i != pool_protocol_names.end(); ++i) {
-//    std::string protocol_name = *i;
-//    free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
-//  }
 
   const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::IAP2HubProtocolNames();
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = hub_protocol_names.begin(); i != hub_protocol_names.end(); ++i) {
