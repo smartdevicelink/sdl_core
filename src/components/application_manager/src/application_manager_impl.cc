@@ -1340,9 +1340,9 @@ bool ApplicationManagerImpl::Init() {
     }
     LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
     if (!policy::PolicyHandler::instance()->InitPolicyTable()) {
-      LOG4CXX_ERROR(logger_, "Policy table is not inted.");
-        return false;
-      }
+      LOG4CXX_ERROR(logger_, "Policy table is not initialized.");
+      return false;
+    }
   } else {
     LOG4CXX_WARN(logger_, "System is configured to work without policy functionality.");
   }
