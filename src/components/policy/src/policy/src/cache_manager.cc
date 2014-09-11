@@ -419,10 +419,48 @@ bool CacheManager::IsApplicationRevoked(const std::string app_id) {
 CheckPermissionResult CacheManager::CheckPermissions(const PTString &app_id,
                                                      const PTString &hmi_level,
                                                      const PTString &rpc) {
+  CheckPermissionResult result;
+  policy_table::Strings::const_iterator app_groups_iter =
+      pt->policy_table.app_policies[app_id].groups.begin();
+
+  policy_table::Strings::const_iterator app_groups_iter_end =
+      pt->policy_table.app_policies[app_id].groups.end();
+
+  policy_table::FunctionalGroupings::const_iterator concrete_group;
+
+  for (; app_groups_iter != app_groups_iter_end; ++app_groups_iter) {
+    concrete_group = pt->policy_table.functional_groupings.find(*app_groups_iter);
+    if (pt->policy_table.functional_groupings.end() != concrete_group) {
+      const policy_table::Rpcs& rpcs = concrete_group->second;
 
 
-  // It is Genivi
-  return CheckPermissionResult();
+      policy_table::Rpc::const_iterator rpc_iter = rpcs.rpcs.find(rpc);
+      if (rpcs.rpcs.end() != rpc_iter) {
+        policy_table::RpcParameters rpc_param = rpc_iter->second;
+
+        policy_table::HmiLevel hmi_level_e;
+        policy_table::EnumFromJsonString(hmi_level, &hmi_level_e);
+
+        policy_table::HmiLevels::const_iterator hmi_iter =
+            std::find(rpc_param.hmi_levels.begin(), rpc_param.hmi_levels.end(),
+                  hmi_level_e);
+
+        if (rpc_param.hmi_levels.end() != hmi_iter) {
+          result.hmi_level_permitted = PermitResult::kRpcAllowed;
+
+          policy_table::Parameters::const_iterator params_iter =
+              rpc_param.parameters->begin();
+          policy_table::Parameters::const_iterator params_iter_end =
+              rpc_param.parameters->end();
+          for (;params_iter != params_iter_end; ++params_iter) {
+            result.list_of_allowed_params->push_back(
+                  policy_table::EnumToJsonString(*params_iter));
+          }
+        }
+      }
+    }
+  }
+  return result;
 }
 
 bool CacheManager::IsPTPreloaded() {
