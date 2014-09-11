@@ -1333,10 +1333,10 @@ bool ApplicationManagerImpl::Init() {
       LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
       if (!policy::PolicyHandler::instance()->InitPolicyTable()) {
         init_result = false;
-        break;
+        bre
       }
     } else  {
-      LOG4CXX_ERROR(logger_, "Policy library is not loaded. Check LD_LIBRARY_PATH");
+      LOG4CXX_ERROR(logger_, "Policy is switched off or Policy library is not loaded. Check LD_LIBRARY_PATH and ini file");
       init_result = false;
     }
     const std::string app_storage_folder = 

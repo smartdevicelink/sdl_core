@@ -187,7 +187,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
   }
   pt_update->SetPolicyTableType(policy_table::PT_UPDATE);
 
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   file_system::DeleteFile(file);
 #endif  
 
@@ -373,7 +373,7 @@ CheckPermissionResult PolicyManagerImpl::CheckPermissions(
     "CheckPermissions for " << app_id << " and rpc " << rpc << " for "
     << hmi_level << " level.");
 
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   const std::string device_id = GetCurrentDeviceId(app_id);
   // Get actual application group permission according to user consents
   std::vector<FunctionalGroupPermission> app_group_permissions;
@@ -450,7 +450,7 @@ CheckPermissionResult PolicyManagerImpl::CheckPermissions(
 }
 
 bool PolicyManagerImpl::ResetUserConsent() {
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (pt_ext) {
@@ -528,7 +528,7 @@ bool PolicyManagerImpl::CleanupUnpairedDevices() {
 DeviceConsent PolicyManagerImpl::GetUserConsentForDevice(
   const std::string& device_id) {
   LOG4CXX_INFO(logger_, "GetUserConsentForDevice");
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (!pt_ext) {
@@ -598,7 +598,7 @@ void PolicyManagerImpl::SetUserConsentForDevice(const std::string& device_id,
     LOG4CXX_INFO(logger_, "Device is already " << consent << ".");
     return;
   }
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (!pt_ext) {
@@ -651,7 +651,7 @@ void PolicyManagerImpl::SetUserConsentForDevice(const std::string& device_id,
 
 bool PolicyManagerImpl::ReactOnUserDevConsentForApp(const std::string app_id,
     bool is_device_allowed) {
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (!pt_ext) {
@@ -675,7 +675,7 @@ bool PolicyManagerImpl::GetInitialAppData(const std::string& application_id,
 void PolicyManagerImpl::SetDeviceInfo(const std::string& device_id,
                                       const DeviceInfo& device_info) {
   LOG4CXX_INFO(logger_, "SetDeviceInfo");
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (pt_ext) {
@@ -728,7 +728,7 @@ PermissionConsent PolicyManagerImpl::EnsureCorrectPermissionConsent(
 void PolicyManagerImpl::SetUserConsentForApp(
     const PermissionConsent& permissions) {
   LOG4CXX_INFO(logger_, "SetUserConsentForApp");
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (pt_ext) {
@@ -776,7 +776,7 @@ void PolicyManagerImpl::SetUserConsentForApp(
 bool PolicyManagerImpl::GetDefaultHmi(const std::string& policy_app_id,
                                       std::string* default_hmi) {
   LOG4CXX_INFO(logger_, "GetDefaultHmi");
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (!pt_ext) {
@@ -805,7 +805,7 @@ bool PolicyManagerImpl::GetPriority(const std::string& policy_app_id,
 
 std::vector<UserFriendlyMessage> PolicyManagerImpl::GetUserFriendlyMessages(
   const std::vector<std::string>& message_code, const std::string& language) {
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   // For extended policy
@@ -821,7 +821,7 @@ void PolicyManagerImpl::GetUserConsentForApp(
   const std::string& device_id, const std::string& policy_app_id,
   std::vector<FunctionalGroupPermission>& permissions) {
   LOG4CXX_INFO(logger_, "GetUserConsentForApp");
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (pt_ext) {
@@ -905,7 +905,7 @@ void PolicyManagerImpl::GetPermissionsForApp(
   const std::string& device_id, const std::string& policy_app_id,
   std::vector<FunctionalGroupPermission>& permissions) {
   LOG4CXX_INFO(logger_, "GetPermissionsForApp");
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   std::string app_id_to_check = policy_app_id;  
 
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
@@ -1009,7 +1009,7 @@ std::string& PolicyManagerImpl::GetCurrentDeviceId(
 }
 
 void PolicyManagerImpl::SetSystemLanguage(const std::string& language) {
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (pt_ext) {
@@ -1023,7 +1023,7 @@ void PolicyManagerImpl::SetSystemInfo(const std::string& ccpu_version,
                                       const std::string& wers_country_code,
                                       const std::string& language) {
   LOG4CXX_INFO(logger_, "SetSystemInfo");
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (pt_ext) {
@@ -1039,7 +1039,7 @@ void PolicyManagerImpl::OnSystemReady() {
     listener()->OnSystemInfoUpdateRequired();
     return;
   }
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (pt_ext && !pt_ext->IsMetaInfoPresent()) {
@@ -1143,7 +1143,7 @@ void PolicyManagerImpl::Increment(usage_statistics::GlobalCounterId type) {
       LOG4CXX_INFO(logger_, "Type global counter is unknown");
       return;
   }
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   pt_ext->Increment(counter);
@@ -1182,7 +1182,7 @@ void PolicyManagerImpl::Increment(const std::string& app_id,
       LOG4CXX_INFO(logger_, "Type app counter is unknown");
       return;
   }
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   sync_primitives::AutoLock locker(statistics_lock_);
@@ -1206,7 +1206,7 @@ void PolicyManagerImpl::Set(const std::string& app_id,
       return;
   }
 
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   sync_primitives::AutoLock locker(statistics_lock_);
@@ -1217,7 +1217,7 @@ void PolicyManagerImpl::Set(const std::string& app_id,
 void PolicyManagerImpl::Add(const std::string& app_id,
                             usage_statistics::AppStopwatchId type,
                             int32_t timespan_seconds) {
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   std::string stopwatch;
   switch (type) {
     // TODO(KKolodiy): rename fields in database
@@ -1249,7 +1249,7 @@ bool PolicyManagerImpl::IsApplicationRevoked(const std::string& app_id) const {
 }
 
 int PolicyManagerImpl::IsConsentNeeded(const std::string& app_id) {
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
 
@@ -1266,7 +1266,7 @@ int PolicyManagerImpl::IsConsentNeeded(const std::string& app_id) {
 }
 
 void PolicyManagerImpl::SetVINValue(const std::string& value) {
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   policy_table_.pt_data()->SetVINValue(value);
 #endif // EXTENDED_POLICY
 }
@@ -1301,7 +1301,7 @@ void PolicyManagerImpl::RemovePendingPermissionChanges(
 }
 
 bool PolicyManagerImpl::CanAppKeepContext(const std::string& app_id) {
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (pt_ext) {
@@ -1314,7 +1314,7 @@ bool PolicyManagerImpl::CanAppKeepContext(const std::string& app_id) {
 }
 
 bool PolicyManagerImpl::CanAppStealFocus(const std::string& app_id) {
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(policy_table_
                                 .pt_data().get());
   if (pt_ext) {
@@ -1362,7 +1362,7 @@ void PolicyManagerImpl::AddNewApplication(const std::string& application_id,
   LOG4CXX_INFO(
     logger_,
     "Setting default permissions for application id: " << application_id);
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   if (kDeviceHasNoConsent == device_consent ||
       kDeviceDisallowed == device_consent) {
     PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(
