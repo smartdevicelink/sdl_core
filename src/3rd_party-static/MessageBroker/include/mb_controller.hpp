@@ -14,7 +14,8 @@
 #include "mb_tcpclient.hpp"
 #ifdef CUSTOMER_PASA
 #include "mb_mqclient.hpp"
-
+#include <sys/mman.h>
+#include <sys/stat.h>
 #endif
 #include "utils/lock.h"
 
