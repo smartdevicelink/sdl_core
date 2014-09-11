@@ -56,10 +56,43 @@ void OnButtonEventNotification::Run() {
   const uint32_t btn_id =
       static_cast<uint32_t>(
           (*message_)[strings::msg_params][hmi_response::button_name].asInt());
-  uint32_t custom_btn_id = 0;
-  if ((*message_)[strings::msg_params].keyExists(hmi_response::custom_button_id)) {
+
+  // CUSTOM_BUTTON notification
+  if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
+    // app_id is mandatory for CUSTOM_BUTTON notification
+    if (false == (*message_)[strings::msg_params].keyExists(strings::app_id)) {
+      LOG4CXX_ERROR_EXT(logger_, "CUSTOM_BUTTON OnButtonEvent without app_id.");
+      return;
+    }
+
+    // custom_button_id is mandatory for CUSTOM_BUTTON notification
+    if (false == (*message_)[strings::msg_params].keyExists(
+        hmi_response::custom_button_id)) {
+      LOG4CXX_ERROR_EXT(logger_,
+                       "CUSTOM_BUTTON OnButtonEvent without custom_button_id.");
+      return;
+    }
+
+    ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+        (*message_)[strings::msg_params][strings::app_id].asUInt());
+
+    if (false == app.valid()) {
+      LOG4CXX_ERROR_EXT(logger_, "Application doesn't exist.");
+      return;
+    }
+
+    uint32_t custom_btn_id = 0;
     custom_btn_id = (*message_)[strings::msg_params]
-                                           [hmi_response::custom_button_id].asUInt();
+                               [hmi_response::custom_button_id].asUInt();
+
+    if (false == app->IsSubscribedToSoftButton(custom_btn_id)) {
+      LOG4CXX_ERROR_EXT(logger_,
+                    "Application doesn't subscribed to this custom_button_id.");
+      return;
+    }
+
+    SendButtonEvent(app);
+    return;
   }
 
   const std::vector<ApplicationSharedPtr>& subscribedApps =
@@ -83,12 +116,6 @@ void OnButtonEventNotification::Run() {
     //Send ButtonEvent notification for OK button only in HMI_FULL mode
     if ((static_cast<uint32_t>(mobile_apis::ButtonName::OK) == btn_id) &&
         (mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level())) {
-      continue;
-    }
-
-    //Send ButtonEvent notification for soft button only if application subscribed to it
-    if ((static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) &&
-        (!subscribed_app->IsSubscribedToSoftButton(custom_btn_id))) {
       continue;
     }
 
