@@ -354,6 +354,8 @@ bool CacheManager::ReactOnUserDevConsentForApp(const std::string &app_id,
     }
   }
 #endif // EXTENDED_POLICY
+  CopyInternalParams(kDefaultId, app_id);
+  SetDefaultPolicy(app_id);
   return result;
 }
 
@@ -832,16 +834,25 @@ void CacheManager::Add(const std::string &app_id,
 
 }
 
-bool CacheManager::SetDefaultPolicy(const std::string &app_id) {
+void CacheManager::CopyInternalParams(const std::string &from,
+                                      const std::string& to) {
+  is_predata[to] = is_predata[from];
+  is_default[to] = is_default[from];
+  is_revoked[to] = is_revoked[from];
+}
 
-  policy_table::ApplicationPolicies::const_iterator iter = pt->policy_table.app_policies.find(kDefaultId);
+bool CacheManager::SetDefaultPolicy(const std::string &app_id) {
+  policy_table::ApplicationPolicies::const_iterator iter =
+      pt->policy_table.app_policies.find(kDefaultId);
   if (pt->policy_table.app_policies.end() != iter) {
     pt->policy_table.app_policies[app_id] =
         pt->policy_table.app_policies[kDefaultId];
 
-    is_default[app_id] = true;
+    CopyInternalParams(kDefaultId, app_id);
+    SetIsDefault(app_id, true);
+    SetIsPredata(app_id, false);
+    Backup();
   }
-
   return true;
 }
 
@@ -854,10 +865,7 @@ bool CacheManager::IsDefaultPolicy(const std::string& app_id) {
 
 bool CacheManager::SetIsDefault(const std::string& app_id,
                                 bool is_default) {
-
-  if (this->is_default.end() != this->is_default.find(app_id)) {
-    this->is_default[app_id] = is_default;
-  }
+  this->is_default[app_id] = is_default;
   return true;
 }
 
@@ -869,14 +877,16 @@ bool CacheManager::SetPredataPolicy(const std::string &app_id) {
   if (pt->policy_table.app_policies.end() != iter) {
     pt->policy_table.app_policies[app_id] =
         pt->policy_table.app_policies[kPreDataConsentId];
-    is_predata[app_id] = true;
-  }
 
+    CopyInternalParams(kPreDataConsentId, app_id);
+
+    SetIsPredata(app_id, true);
+    SetIsDefault(app_id, false);
+  }
   return true;
 }
 
 bool CacheManager::SetIsPredata(const std::string &app_id, bool is_pre_data) {
-
   is_predata[app_id] = is_pre_data;
   return true;
 }

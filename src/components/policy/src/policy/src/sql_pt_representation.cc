@@ -763,6 +763,13 @@ bool SQLPTRepresentation::SaveApplicationPolicies(
       return false;
     }
   }
+  policy_table::ApplicationPolicies::const_iterator it_device =
+      apps.find(kDeviceId);
+  if (apps.end() != it_pre_data_consented) {
+    if (!SaveSpecificAppPolicy(*it_device)) {
+      return false;
+    }
+  }
   policy_table::ApplicationPolicies::const_iterator it;
   for (it = apps.begin(); it != apps.end(); ++it) {
     // Skip saving of predefined app, since they should be saved before
@@ -1305,10 +1312,10 @@ bool SQLPTRepresentation::SaveApplicationCustomData(const std::string& app_id,
     return false;
   }
 
-  query.Bind(0, app_id);
-  query.Bind(1, is_revoked);
+  query.Bind(0, is_revoked);
   query.Bind(1, is_default);
   query.Bind(2, is_predata);
+  query.Bind(3, app_id);
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Failed update in application");

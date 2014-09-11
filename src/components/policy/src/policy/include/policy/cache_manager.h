@@ -163,6 +163,9 @@ class CacheManager {
     void FillAppSpecificData();
     bool AppExists(const std::string& app_id) const;
     long int GenerateHash(const std::string& str_to_hash);
+
+    void CopyInternalParams(const std::string &from,
+                                          const std::string& to);
     utils::SharedPtr<policy_table::Table> pt;
 
 
