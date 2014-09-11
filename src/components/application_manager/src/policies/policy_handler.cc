@@ -625,7 +625,7 @@ void PolicyHandler::OnVIIsReady() {
 
 void PolicyHandler::OnVehicleDataUpdated(
     const smart_objects::SmartObject& message) {
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   POLICY_LIB_CHECK_VOID();
   if (message[application_manager::strings::msg_params].
       keyExists(application_manager::strings::vin)) {
@@ -987,7 +987,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
                     device_params.device_mac_address,
                     policy_app_id);
 
-#if defined(EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
     application_manager::UsageStatistics& usage = app->usage_report();
 
     usage.RecordAppUserSelection();
