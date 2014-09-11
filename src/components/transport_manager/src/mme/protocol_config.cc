@@ -141,7 +141,7 @@ const ProtocolConfig::ProtocolNameContainer ProtocolConfig::ReadProtocolNames(co
           std::stringstream stream(digits_in_prot_name);
           stream >> index;
           protocol_names.insert(make_pair(index, prot_name));
-          LOG4CXX_DEBUG(logger_, "adding protocol " << protocol_name);
+          LOG4CXX_DEBUG(logger_, "adding protocol " << prot_name);
         }
         break; // nothing matters after specified section
       }

@@ -67,12 +67,11 @@ IAPDevice::~IAPDevice() {
 }
 
 bool IAPDevice::Init() {
-  free_protocol_name_pool_.clear();
   free_protocol_name_pool_ = ProtocolConfig::IAPPoolProtocolNames();
   //int pool_index = 0;
  // const ProtocolConfig::ProtocolNameContainer& pool_protocol_names = ProtocolConfig::IAPPoolProtocolNames();
   for (FreeProtocolNamePool::const_iterator i = free_protocol_name_pool_.begin(); i != free_protocol_name_pool_.end(); ++i) {
-//    std::string protocol_name = *i;
+    std::string protocol_name = i->second;
 //    free_protocol_name_pool_.insert(std::make_pair(++pool_index, protocol_name));
     timers_protocols_.insert(std::make_pair(i->second,
                                             new ProtocolConnectionTimer(protocol_name, this)));
@@ -82,7 +81,6 @@ bool IAPDevice::Init() {
   ipod_hdl_ = ipod_connect(mount_point().c_str(), 0);
   if (ipod_hdl_ != 0) {
     LOG4CXX_DEBUG(logger_, "iAP: connected to " << mount_point());
-
     receiver_thread_ = new threads::Thread("iAP event notifier",
       new IAPEventThreadDelegate(ipod_hdl_, this));
     receiver_thread_->start();
