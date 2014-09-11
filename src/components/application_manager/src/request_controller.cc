@@ -300,7 +300,6 @@ void RequestController::Worker::threadMain() {
     // execute
     if (request_impl->CheckPermissions()) {
       request_impl->Run();
-      request_impl->CleanUp();
     }
   }
 
