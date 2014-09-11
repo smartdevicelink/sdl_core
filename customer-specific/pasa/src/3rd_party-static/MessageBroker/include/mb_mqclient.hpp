@@ -25,12 +25,10 @@
  */
 namespace NsMessageBroker
 {
-#ifdef CUSTOMER_PASA
   typedef struct {
         int     size;
         char    text[30000];
   } shmem_t;
-#endif
 
    /**
     * \class Client
@@ -74,12 +72,10 @@ namespace NsMessageBroker
          */
          MqClient();
 
-#ifdef CUSTOMER_PASA
          int     fd;
          shmem_t *ptr;
          int     fd2;
          shmem_t *ptr2;
-#endif
 
       private:
 
