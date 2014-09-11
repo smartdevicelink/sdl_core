@@ -147,6 +147,7 @@ class ThreadedSocketConnection : public Connection {
   FrameQueue frames_to_send_;
   mutable pthread_mutex_t frames_to_send_mutex_;
 
+  // TODO(Eamakhov): change to threads::Thread usage
   pthread_t thread_;
 
   int socket_;

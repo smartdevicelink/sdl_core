@@ -45,7 +45,7 @@ static const char* kErrId = "id";
 static const char* kErrText = "text";
 
 SecurityManagerImpl::SecurityManagerImpl()
-  : security_messages_("SecurityManager::security_messages_", this),
+  : security_messages_("SecurityManager", this),
   session_observer_(NULL), crypto_manager_(NULL), protocol_handler_(NULL) {
 }
 

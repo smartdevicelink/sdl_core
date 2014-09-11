@@ -23,7 +23,7 @@ namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 ResumeCtrl::ResumeCtrl(ApplicationManagerImpl* app_mngr)
   : app_mngr_(app_mngr),
-    timer_(this, &ResumeCtrl::onTimer) {
+    timer_("ResumeCtrl", this, &ResumeCtrl::onTimer) {
 }
 
 void ResumeCtrl::SaveAllApplications() {

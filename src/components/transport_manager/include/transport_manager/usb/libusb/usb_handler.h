@@ -72,6 +72,7 @@ class UsbHandler {
 
  private:
   bool shutdown_requested_;
+  // TODO(Eamakhov): change to threads::Thread usage
   pthread_t thread_;
 
   friend class UsbDeviceListener;

@@ -70,7 +70,7 @@ void TimeManager::Init(protocol_handler::ProtocolHandlerImpl* ph) {
   DCHECK(ph);
   if (!thread_) {
     streamer_ = new Streamer(this);
-    thread_ = new threads::Thread("SocketAdapter", streamer_ );
+    thread_ = new threads::Thread("TimeManager", streamer_ );
     application_manager::ApplicationManagerImpl::instance()->SetTimeMetricObserver(&app_observer);
     transport_manager::TransportManagerDefault::instance()->SetTimeMetricObserver(&tm_observer);
     ph->SetTimeMetricObserver(&ph_observer);

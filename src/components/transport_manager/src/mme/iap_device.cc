@@ -81,7 +81,7 @@ bool IAPDevice::Init() {
   if (ipod_hdl_ != 0) {
     LOG4CXX_DEBUG(logger_, "iAP: connected to " << mount_point());
 
-    receiver_thread_ = new threads::Thread("iAP event notifier",
+    receiver_thread_ = new threads::Thread("iAP event",
       new IAPEventThreadDelegate(ipod_hdl_, this));
     receiver_thread_->start();
 
@@ -486,7 +486,7 @@ void IAPDevice::IAPEventThreadDelegate::OpenSession(uint32_t protocol_id, const 
 IAPDevice::ProtocolConnectionTimer::ProtocolConnectionTimer(
     const std::string& name, IAPDevice* parent)
     : name_(name),
-      timer_(new Timer(this, &ProtocolConnectionTimer::Shoot)),
+      timer_(new Timer("iAP proto releaser", this, &ProtocolConnectionTimer::Shoot)),
       parent_(parent) {
 }
 

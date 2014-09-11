@@ -69,9 +69,10 @@ class TimerThread {
     friend class TimerDelegate;
     friend class TimerLooperDelegate;
 
-    /*
+    /**
      * @brief Default constructor
      *
+     * @param name - display string to identify the thread.
      * @param callee A class that use timer
      * @param f    CallBackFunction which will be called on timeout
      *  Atantion! "f()" will be called not in main thread but in timer thread
@@ -80,14 +81,14 @@ class TimerThread {
      *  if true, TimerThread will call "f()" function every time out
      *  until stop()
      */
-    TimerThread(T* callee , void (T::*f)(),bool is_looper = false);
+    TimerThread(const char* name, T* callee , void (T::*f)(), bool is_looper = false);
 
-    /*
+    /**
      * @brief Destructor
      */
     virtual ~TimerThread();
 
-    /*
+    /**
      * @brief Starts timer for specified timeout.
      * Previously started timeout will be set to new value.
      * On timeout TimerThread::onTimeOut interface will be called.
@@ -97,13 +98,13 @@ class TimerThread {
      */
     virtual void start(uint32_t timeout_seconds);
 
-    /*
+    /**
      * @brief Stops timer execution
      * Must not be used in callback function!
      */
     virtual void stop();
 
-    /*
+    /**
      * @brief Tell tmer status
      * @return true if timer is currently running, therwise return false
      */
@@ -111,7 +112,7 @@ class TimerThread {
 
   protected:
 
-    /*
+    /**
      * @brief Interface called by delegator on timeout
      */
     void onTimeOut() const;
@@ -124,7 +125,7 @@ class TimerThread {
     class TimerDelegate : public threads::ThreadDelegate {
       public:
 
-        /*
+        /**
          * @brief Default constructor
          *
          * @param timer_thread The Timer_thread pointer
@@ -132,22 +133,22 @@ class TimerThread {
          */
         TimerDelegate(const TimerThread* timer_thread);
 
-        /*
+        /**
          * @brief Destructor
          */
         virtual ~TimerDelegate();
 
-        /*
+        /**
          * @brief Thread main function.
          */
         virtual void threadMain();
 
-        /*
+        /**
          * @brief Called by thread::thread to free all allocated resources.
          */
         virtual bool exitThreadMain();
 
-        /*
+        /**
          * @brief Restart timer
          *
          * @param timeout_seconds New timeout to be set
@@ -174,7 +175,7 @@ class TimerThread {
     class TimerLooperDelegate : public TimerDelegate {
       public:
 
-        /*
+        /**
          * @brief Default constructor
          *
          * @param timer_thread The Timer_thread pointer
@@ -182,7 +183,7 @@ class TimerThread {
          */
         TimerLooperDelegate(const TimerThread* timer_thread);
 
-        /*
+        /**
          * @brief Thread main function.
          */
         virtual void threadMain();
@@ -199,21 +200,14 @@ class TimerThread {
 };
 
 template <class T>
-TimerThread<T>::TimerThread(T* callee, void (T::*f)(), bool is_looper)
+TimerThread<T>::TimerThread(const char* name, T* callee, void (T::*f)(), bool is_looper)
   : callback_(f),
     callee_(callee),
     delegate_(NULL),
     thread_(NULL),
     is_running_(false) {
-  if (is_looper) {
-    delegate_ = new TimerLooperDelegate(this);
-  } else {
-    delegate_ = new TimerDelegate(this);
-  }
-
-  if (delegate_) {
-    thread_ = new threads::Thread("TimerThread", delegate_);
-  }
+  delegate_ = is_looper ? new TimerLooperDelegate(this) : new TimerDelegate(this);
+  thread_ = new threads::Thread(name, delegate_);
 }
 
 template <class T>
