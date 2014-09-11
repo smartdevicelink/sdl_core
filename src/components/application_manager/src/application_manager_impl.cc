@@ -1333,61 +1333,56 @@ bool ApplicationManagerImpl::ManageHMICommand(
 
 bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
-  bool init_result = true;
-  do {
-    if (policy::PolicyHandler::instance()->PolicyEnabled() && policy_manager_) {
-      LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
-      if (!policy::PolicyHandler::instance()->InitPolicyTable()) {
-        init_result = false;
-        break;
-      }
-    } else  {
+  if (policy::PolicyHandler::instance()->PolicyEnabled()) {
+    if(!policy_manager_) {
       LOG4CXX_ERROR(logger_, "Policy library is not loaded. Check LD_LIBRARY_PATH");
-      init_result = false;
+      return false;
     }
-    const std::string app_storage_folder =
+    LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
+    if (!policy::PolicyHandler::instance()->InitPolicyTable()) {
+      LOG4CXX_ERROR(logger_, "Policy table is not inted.");
+        return false;
+      }
+  } else {
+    LOG4CXX_WARN(logger_, "System is configured to work without policy functionality.");
+  }
+  const std::string app_storage_folder =
       profile::Profile::instance()->app_storage_folder();
-    if (!file_system::DirectoryExists(app_storage_folder)) {
-      LOG4CXX_WARN(logger_, "Storage directory doesn't exist");
-      // if storage directory doesn't exist try to create it
-      if (!file_system::CreateDirectoryRecursively(app_storage_folder)) {
-        LOG4CXX_ERROR(logger_, "Unable to create Storage directory "
-                                << app_storage_folder);
-        init_result = false;
-        break;
-      }
+  if (!file_system::DirectoryExists(app_storage_folder)) {
+    LOG4CXX_WARN(logger_, "Storage directory doesn't exist");
+    // if storage directory doesn't exist try to create it
+    if (!file_system::CreateDirectoryRecursively(app_storage_folder)) {
+      LOG4CXX_ERROR(logger_, "Unable to create Storage directory "
+                    << app_storage_folder);
+      return false;
     }
-    if (!(file_system::IsWritingAllowed(app_storage_folder) &&
-          file_system::IsReadingAllowed(app_storage_folder))) {
-      LOG4CXX_ERROR(logger_,
-                   "Storage directory doesn't have read/write permissions");
-      init_result = false;
-      break;
-    }
+  }
+  if (!(file_system::IsWritingAllowed(app_storage_folder) &&
+        file_system::IsReadingAllowed(app_storage_folder))) {
+    LOG4CXX_ERROR(logger_,
+                  "Storage directory doesn't have read/write permissions");
+    return false;
+  }
 
-    const std::string system_files_path =
+  const std::string system_files_path =
       profile::Profile::instance()->system_files_path();
-    if (!file_system::DirectoryExists(system_files_path)) {
-      LOG4CXX_WARN(logger_, "System files directory doesn't exist");
-      // if system directory doesn't exist try to create it
-      if (!file_system::CreateDirectoryRecursively(system_files_path)) {
-        LOG4CXX_ERROR(logger_, "Unable to create System directory "
-                                << system_files_path);
-        init_result = false;
-        break;
-      }
+  if (!file_system::DirectoryExists(system_files_path)) {
+    LOG4CXX_WARN(logger_, "System files directory doesn't exist");
+    // if system directory doesn't exist try to create it
+    if (!file_system::CreateDirectoryRecursively(system_files_path)) {
+      LOG4CXX_ERROR(logger_, "Unable to create System directory "
+                    << system_files_path);
+      return false;
     }
-    if (!(file_system::IsWritingAllowed(system_files_path) &&
-          file_system::IsReadingAllowed(system_files_path))) {
-      LOG4CXX_ERROR(logger_,
-                   "System directory doesn't have read/write permissions");
-      init_result = false;
-      break;
-    }
-    media_manager_ = media_manager::MediaManagerImpl::instance();
-  } while (false);
-
-  return init_result;
+  }
+  if (!(file_system::IsWritingAllowed(system_files_path) &&
+        file_system::IsReadingAllowed(system_files_path))) {
+    LOG4CXX_ERROR(logger_,
+                  "System directory doesn't have read/write permissions");
+    return false;
+  }
+  media_manager_ = media_manager::MediaManagerImpl::instance();
+  return true;
 }
 
 bool ApplicationManagerImpl::ConvertMessageToSO(
