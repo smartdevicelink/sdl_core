@@ -53,6 +53,9 @@
 #include "utils/file_system.h"
 #include "application_manager/application_impl.h"
 #include "usage_statistics/counter.h"
+#ifdef CUSTOMER_PASA
+#include "resumption/last_state.h"
+#endif
 #include <time.h>
 
 namespace application_manager {
@@ -1801,8 +1804,8 @@ void ApplicationManagerImpl::HeadUnitSuspend() {
     policy::PolicyHandler::instance()->UnloadPolicyLibrary();
   }
 
-  LOG4CXX_INFO(logger_, "Destroying Last State");
-  resumption::LastState::destroy();
+  resume_controller().SaveAllApplications();
+  resumption::LastState::SaveToFileSystem();
 #endif
 }
 
@@ -1886,6 +1889,9 @@ void ApplicationManagerImpl::UnregisterAllApplications(bool generated_by_hmi) {
 
   if (is_ignition_off) {
    resume_controller().IgnitionOff();
+#ifdef CUSTOMER_PASA
+   resumption::LastState::SaveToFileSystem();
+#endif
   }
 }
 
