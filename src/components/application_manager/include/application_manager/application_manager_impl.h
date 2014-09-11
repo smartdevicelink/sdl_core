@@ -263,7 +263,14 @@ class ApplicationManagerImpl : public ApplicationManager,
      * when User chooses to reset HU.
      * Resets Policy Table if applicable.
      */
-  void HeadUnitReset(mobile_api::AppInterfaceUnregisteredReason::eType reason);
+    void HeadUnitReset(
+        mobile_api::AppInterfaceUnregisteredReason::eType reason);
+
+    /*
+     * @brief Called by HMI on SUSPEND.
+     * SDL must save all persistence data(Resume, Policy)
+     */
+    void HeadUnitSuspend();
 
     /*
      * @brief Closes all registered applications
@@ -687,8 +694,6 @@ class ApplicationManagerImpl : public ApplicationManager,
   private:
 
     // members
-
-
 
     /**
      * @brief List of applications

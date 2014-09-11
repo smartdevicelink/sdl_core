@@ -410,8 +410,11 @@ void LifeCycle::StopComponents() {
   delete security_manager_;
 #endif  // ENABLE_SECURITY
 
+#ifndef CUSTOMER_PASA
+  // for PASA customer resumption backup should happen OnExitAllApp(SUSPEND)
   LOG4CXX_INFO(logger_, "Destroying Last State");
   resumption::LastState::destroy();
+#endif
 
   LOG4CXX_INFO(logger_, "Destroying Application Manager.");
   application_manager::ApplicationManagerImpl::destroy();

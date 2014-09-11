@@ -82,6 +82,9 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
     std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
       const std::vector<std::string>& msg_codes, const std::string& language);
 
+    virtual bool  GatherConsumerFriendlyMessages(
+        policy_table::ConsumerFriendlyMessages* messages) const;
+
     bool IncreaseStatisticsData(StatisticsType type) {
       return true;
     }

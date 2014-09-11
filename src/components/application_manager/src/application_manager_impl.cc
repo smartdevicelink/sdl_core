@@ -126,10 +126,13 @@ bool ApplicationManagerImpl::Stop() {
                   "An error occurred during unregistering applications.");
   }
 
+#ifndef CUSTOMER_PASA
+  // for PASA customer policy backup should happen OnExitAllApp(SUSPEND)
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Unloading policy library.");
     policy::PolicyHandler::instance()->UnloadPolicyLibrary();
   }
+#endif
   return true;
 }
 
@@ -1103,11 +1106,14 @@ void ApplicationManagerImpl::SendMessageToMobile(
     mobile_apis::FunctionID::eType function_id =
         static_cast<mobile_apis::FunctionID::eType>(
         (*message)[strings::params][strings::function_id].asUInt());
-    mobile_apis::Result::eType check_result = CheckPolicyPermissions(
-                                                app->mobile_app_id()->asString(),
-                                                app->hmi_level(),
-                                                function_id);
+    const mobile_apis::Result::eType check_result =
+        CheckPolicyPermissions( app->mobile_app_id()->asString(),
+                                app->hmi_level(), function_id);
     if (mobile_apis::Result::SUCCESS != check_result) {
+      const std::string string_functionID =
+          MessageHelper::StringifiedFunctionID(function_id);
+      LOG4CXX_WARN(logger_, "Function \"" << string_functionID << "\" (#"
+                   << function_id << ") not allowed by policy");
       return;
     }
 
@@ -1117,7 +1123,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
   }
 
   messages_to_mobile_.PostMessage(impl::MessageToMobile(message_to_send,
-                                  final_message));  
+                                  final_message));
 }
 
 bool ApplicationManagerImpl::ManageMobileCommand(
@@ -1329,17 +1335,17 @@ bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   bool init_result = true;
   do {
-    if (policy_manager_) {
+    if (policy::PolicyHandler::instance()->PolicyEnabled() && policy_manager_) {
       LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
       if (!policy::PolicyHandler::instance()->InitPolicyTable()) {
         init_result = false;
-        bre
+        break;
       }
     } else  {
       LOG4CXX_ERROR(logger_, "Policy is switched off or Policy library is not loaded. Check LD_LIBRARY_PATH and ini file");
       init_result = false;
     }
-    const std::string app_storage_folder = 
+    const std::string app_storage_folder =
       profile::Profile::instance()->app_storage_folder();
     if (!file_system::DirectoryExists(app_storage_folder)) {
       LOG4CXX_WARN(logger_, "Storage directory doesn't exist");
@@ -1359,7 +1365,7 @@ bool ApplicationManagerImpl::Init() {
       break;
     }
 
-    const std::string system_files_path = 
+    const std::string system_files_path =
       profile::Profile::instance()->system_files_path();
     if (!file_system::DirectoryExists(system_files_path)) {
       LOG4CXX_WARN(logger_, "System files directory doesn't exist");
@@ -1792,6 +1798,19 @@ void ApplicationManagerImpl::HeadUnitReset(
   }
 }
 
+void ApplicationManagerImpl::HeadUnitSuspend() {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::HeadUnitSuspend");
+#ifdef CUSTOMER_PASA
+  if (policy_manager_) {
+    LOG4CXX_INFO(logger_, "Unloading policy library.");
+    policy::PolicyHandler::instance()->UnloadPolicyLibrary();
+  }
+
+  LOG4CXX_INFO(logger_, "Destroying Last State");
+  resumption::LastState::destroy();
+#endif
+}
+
 void ApplicationManagerImpl::SendOnSDLClose() {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendOnSDLClose");
 
@@ -2019,15 +2038,14 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     mobile_apis::FunctionID::eType function_id,
     CommandParametersPermissions* params_permissions) {
   LOG4CXX_INFO(logger_, "CheckPolicyPermissions");
-  // TODO(AOleynik): Remove check of policy_turn_off, when this flag will be
+  // TODO(AOleynik): Remove check of policy_enable, when this flag will be
   // unused in config file
-  if (profile::Profile::instance()->policy_turn_off()) {
+  if (!policy::PolicyHandler::instance()->PolicyEnabled()) {
     return mobile_apis::Result::SUCCESS;
   }
-  mobile_apis::Result::eType check_result = mobile_apis::Result::DISALLOWED;
-  if (!policy_manager_) {
+  if (!policy_manager_ ) {
     LOG4CXX_WARN(logger_, "Policy library is not loaded.");
-    return check_result;
+    return mobile_apis::Result::DISALLOWED;
   }
   const std::string stringified_functionID =
       MessageHelper::StringifiedFunctionID(function_id);
@@ -2082,11 +2100,11 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
 
     switch (result.hmi_level_permitted) {
       case policy::kRpcDisallowed:
-        return check_result = mobile_apis::Result::DISALLOWED;
+        return mobile_apis::Result::DISALLOWED;
       case policy::kRpcUserDisallowed:
-        return check_result = mobile_apis::Result::USER_DISALLOWED;
+        return mobile_apis::Result::USER_DISALLOWED;
       default:
-        return check_result = mobile_apis::Result::INVALID_ENUM;
+        return mobile_apis::Result::INVALID_ENUM;
     }
   }
   LOG4CXX_INFO(logger_, "Request is allowed by policies. "+log_msg);

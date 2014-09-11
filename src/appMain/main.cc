@@ -161,7 +161,7 @@ int32_t main(int32_t argc, char** argv) {
   }
 
 #ifdef __QNX__
-  if (!profile::Profile::instance()->policy_turn_off()) {
+  if (profile::Profile::instance()->enable_policy()) {
     if (!utils::System("./init_policy.sh").Execute(true)) {
       LOG4CXX_ERROR(logger, "Failed initialization of policy database");
       DEINIT_LOGGER();

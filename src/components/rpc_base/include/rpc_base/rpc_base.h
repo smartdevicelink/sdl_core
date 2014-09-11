@@ -225,6 +225,7 @@ class String : public PrimitiveType {
     explicit String(const Json::Value* value);
     explicit String(dbus::MessageReader* reader);
     String(const Json::Value* value, const std::string& def_value);
+    bool operator<(String new_val);
     String& operator=(const std::string& new_val);
     operator const std::string& () const;
     Json::Value ToJsonValue() const;

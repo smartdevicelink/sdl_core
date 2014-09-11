@@ -99,6 +99,7 @@ extern const std::string kUpdateFlagUpdateRequired;
 extern const std::string kSelectFlagUpdateRequired;
 extern const std::string kUpdateCountersSuccessfulUpdate;
 extern const std::string kSelectApplicationRevoked;
+extern const std::string kUpdateApplicationCustomData;
 extern const std::string kSelectApplicationRepresented;
 extern const std::string kSelectApplicationIsDefault;
 extern const std::string kUpdateIsDefault;

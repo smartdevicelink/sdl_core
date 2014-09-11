@@ -96,6 +96,13 @@ class MockPTRepresentation : virtual public PTRepresentation {
                  void(bool value));
     MOCK_METHOD3(GetInitialAppData,
                  bool(const std::string& app_id, StringArray* nicknames, StringArray* app_types));
+
+    MOCK_METHOD4(SaveApplicationCustomData,
+                 bool(const std::string& app_id,
+                      bool is_revoked,
+                      bool is_default,
+                      bool is_predata));
+
     MOCK_CONST_METHOD1(IsApplicationRevoked, bool(const std::string& app_id));
     MOCK_METHOD1(GetFunctionalGroupings,
                  bool(policy_table::FunctionalGroupings& groups));

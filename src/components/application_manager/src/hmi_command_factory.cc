@@ -243,6 +243,7 @@
 #include "application_manager/commands/hmi/ui_set_display_layout_request.h"
 #include "application_manager/commands/hmi/ui_set_display_layout_response.h"
 #include "application_manager/commands/hmi/on_sdl_close_notification.h"
+#include "application_manager/commands/hmi/on_sdl_persistence_complete_notification.h"
 #include "application_manager/commands/hmi/on_record_start_notification.h"
 #include "application_manager/commands/hmi/add_statistics_info_notification.h"
 #include "application_manager/commands/hmi/on_system_error_notification.h"
@@ -1979,6 +1980,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::BasicCommunication_OnSDLClose: {
       command.reset(new commands::OnSDLCloseNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::BasicCommunication_OnSDLPersistenceComplete: {
+      command.reset(new commands::OnSDLPersistenceCompleteNotification(message));
       break;
     }
     case hmi_apis::FunctionID::BasicCommunication_OnFileRemoved: {

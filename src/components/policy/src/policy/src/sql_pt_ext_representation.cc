@@ -518,6 +518,38 @@ std::vector<UserFriendlyMessage> SQLPTExtRepresentation::GetUserFriendlyMsg(
   return result;
 }
 
+bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
+    policy_table::ConsumerFriendlyMessages* messages) const {
+  dbms::SQLQuery query(db());
+  bool result = query.Prepare(sql_pt_ext::kCollectFriendlyMsg);
+
+  if (result) {
+    while (query.Next()) {
+
+      UserFriendlyMessage msg;
+
+      msg.tts = query.GetString(1);
+      msg.label = query.GetString(2);
+      msg.line1 = query.GetString(3);
+      msg.line2 = query.GetString(4);
+      msg.text_body = query.GetString(5);
+      msg.message_code = query.GetString(7);
+
+      std::string language = query.GetString(6);
+
+      *(*messages->messages)[msg.message_code].languages[language].tts = msg.tts;
+      *(*messages->messages)[msg.message_code].languages[language].label = msg.label;
+      *(*messages->messages)[msg.message_code].languages[language].line1 = msg.line1;
+      *(*messages->messages)[msg.message_code].languages[language].line2 = msg.line2;
+      *(*messages->messages)[msg.message_code].languages[language].textBody = msg.text_body;
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
+  }
+  return result;
+}
+
+
 bool SQLPTExtRepresentation::SetMetaInfo(const std::string& ccpu_version,
     const std::string& wers_country_code,
     const std::string& language) {
@@ -946,6 +978,7 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
           return false;
         }
         query.Bind(0, device_id);
+        // TODO(AGaliuzov): Need GroupID instead of name
         query.Bind(1, it_groups->first);
         query.Bind(2, it_groups->second);
         query.Bind(

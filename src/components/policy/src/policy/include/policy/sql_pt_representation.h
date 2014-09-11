@@ -81,13 +81,13 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     bool Clear();
     bool Drop();
     virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() const;
-    bool Save(const policy_table::Table& table);
+    virtual bool Save(const policy_table::Table& table);
     bool GetInitialAppData(const std::string& app_id, StringArray* nicknames =
                              NULL,
                            StringArray* app_hmi_types = NULL);
     bool GetFunctionalGroupings(policy_table::FunctionalGroupings& groups);
 
-  protected:
+  //protected:
     virtual void GatherModuleMeta(policy_table::ModuleMeta* meta) const;
     virtual void GatherModuleConfig(policy_table::ModuleConfig* config) const;
     virtual bool GatherUsageAndErrorCounts(
@@ -106,6 +106,11 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                        policy_table::AppHMITypes* app_types) const;
     bool GatherNickName(const std::string& app_id,
                         policy_table::Strings* nicknames) const;
+
+    virtual bool SaveApplicationCustomData(const std::string& app_id,
+                                   bool is_revoked,
+                                   bool is_default,
+                                   bool is_predata);
 
     virtual bool SaveModuleMeta(const policy_table::ModuleMeta& meta);
     virtual bool SaveModuleConfig(const policy_table::ModuleConfig& config);
@@ -135,11 +140,11 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     bool UpdateRequired() const;
     void SaveUpdateRequired(bool value);
 
-    bool IsApplicationRevoked(const std::string& app_id) const;
     bool IsApplicationRepresented(const std::string& app_id) const;
     bool CopyApplication(const std::string& source,
                          const std::string& destination);
 
+    bool IsApplicationRevoked(const std::string& app_id) const;
     virtual bool IsDefaultPolicy(const std::string& app_id) const;
     virtual bool IsPredataPolicy(const std::string& app_id) const;
     virtual bool SetDefaultPolicy(const std::string& app_id);
