@@ -97,7 +97,7 @@ TransportAdapter::Error IAP2Connection::SendData(RawMessagePtr message) {
     LOG4CXX_INFO(logger_, "iAP2: sending thread priority increased");
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP2: could not increase sending thread prioriry");
+    LOG4CXX_WARN(logger_, "iAP2: could not increase sending thread priority");
   }
 #endif
   LOG4CXX_TRACE(logger_, "iAP2: sending data on protocol " << protocol_name_);
@@ -107,7 +107,7 @@ TransportAdapter::Error IAP2Connection::SendData(RawMessagePtr message) {
     LOG4CXX_INFO(logger_, "iAP2: sending thread priority decreased to normal");
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP2: could not decrease sending thread prioriry to normal");
+    LOG4CXX_WARN(logger_, "iAP2: could not decrease sending thread priority to normal");
   }
 #endif
   if (result != -1) {
