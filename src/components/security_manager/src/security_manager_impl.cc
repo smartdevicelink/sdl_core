@@ -242,7 +242,7 @@ bool SecurityManagerImpl::ProccessHandshakeData(const SecurityMessage &inMessage
   const uint32_t connection_key = inMessage->get_connection_key();
 
   LOG4CXX_DEBUG(logger_, "Received " << inMessage->get_data_size()
-                << " bytes handshake data ")
+                << " bytes handshake data ");
 
   if (!inMessage->get_data_size()) {
     const std::string error_text("SendHandshakeData: null arguments size.");
@@ -318,7 +318,7 @@ void SecurityManagerImpl::SendHandshakeBinData(
   DCHECK(data_size < 1024 * 1024 *1024 );
   const SecurityQuery query = SecurityQuery(header, connection_key, data, data_size);
   SendQuery(query, connection_key);
-  LOG4CXX_DEBUG(logger_, "Sent " << data_size << " bytes handshake data ")
+  LOG4CXX_DEBUG(logger_, "Sent " << data_size << " bytes handshake data ");
 }
 
 void SecurityManagerImpl::SendInternalError(const uint32_t connection_key,

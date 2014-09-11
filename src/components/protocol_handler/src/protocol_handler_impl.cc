@@ -596,7 +596,7 @@ RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
                    " of size: " << packet->data_size());
   const RawMessagePtr message_to_send = packet->serializePacket();
   if (!message_to_send) {
-    LOG4CXX_ERROR(logger_, "Serialization error")
+    LOG4CXX_ERROR(logger_, "Serialization error");
         return RESULT_FAIL;
   };
   LOG4CXX_INFO(logger_,
@@ -1118,8 +1118,8 @@ void ProtocolHandlerImpl::Handle(
   }
   connection_handler::ConnectionHandlerImpl *connection_handler =
         connection_handler::ConnectionHandlerImpl::instance();
-  LOG4CXX_INFO(logger_, "Message : " << message.get())
-  LOG4CXX_INFO(logger_, "session_observer_: " <<session_observer_)
+  LOG4CXX_INFO(logger_, "Message : " << message.get());
+  LOG4CXX_INFO(logger_, "session_observer_: " <<session_observer_);
   uint8_t c_id = message->connection_id();
   uint32_t m_id = message->session_id();
 
