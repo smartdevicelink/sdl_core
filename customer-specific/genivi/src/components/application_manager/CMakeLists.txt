@@ -191,6 +191,7 @@ set (HMI_COMMANDS_SOURCES
 ./src/commands/hmi/update_device_list_request.cc
 ./src/commands/hmi/update_device_list_response.cc
 ./src/commands/hmi/on_sdl_consent_needed_notification.cc
+./src/commands/hmi/on_sdl_persistence_complete_notification.cc
 ./src/commands/hmi/on_exit_all_applications_notification.cc
 ./src/commands/hmi/on_exit_application_notification.cc
 ./src/commands/hmi/on_start_device_discovery.cc
