@@ -1805,7 +1805,7 @@ void ApplicationManagerImpl::HeadUnitSuspend() {
   }
 
   resume_controller().SaveAllApplications();
-  resumption::LastState::SaveToFileSystem();
+  resumption::LastState::instance()->SaveToFileSystem();
 #endif
 }
 
@@ -1890,7 +1890,7 @@ void ApplicationManagerImpl::UnregisterAllApplications(bool generated_by_hmi) {
   if (is_ignition_off) {
    resume_controller().IgnitionOff();
 #ifdef CUSTOMER_PASA
-   resumption::LastState::SaveToFileSystem();
+   resumption::LastState::instance()->SaveToFileSystem();
 #endif
   }
 }
