@@ -68,7 +68,7 @@ bool CacheManager::CanAppKeepContext(const std::string &app_id) {
   bool result = true;
 #ifdef EXTENDED_POLICY
   if (AppExists(app_id)) {
-    result = pt->policy_table.app_policies[app_id].keep_context;
+    result = pt_->policy_table.app_policies[app_id].keep_context;
   }
 #endif // EXTENDED_POLICY
   return result;
@@ -78,7 +78,7 @@ bool CacheManager::CanAppStealFocus(const std::string &app_id) {
   bool result = true;
 #ifdef EXTENDED_POLICY
   if (AppExists(app_id)) {
-    result = pt->policy_table.app_policies[app_id].steal_focus;
+    result = pt_->policy_table.app_policies[app_id].steal_focus;
   }
 #endif // EXTENDED_POLICY
   return result;
@@ -90,7 +90,7 @@ bool CacheManager::GetDefaultHMI(const std::string &app_id,
 #ifdef EXTENDED_POLICY
   default_hmi.clear();
   if (AppExists(app_id)) {
-      default_hmi = EnumToJsonString(pt->policy_table.
+      default_hmi = EnumToJsonString(pt_->policy_table.
                                      app_policies[app_id].default_hmi);
   }
   result = !default_hmi.empty();
@@ -102,9 +102,9 @@ bool CacheManager::GetDefaultHMI(const std::string &app_id,
 bool CacheManager::ResetUserConsent() {
 #ifdef EXTENDED_POLICY
   policy_table::DeviceData::iterator iter =
-      pt->policy_table.device_data->begin();
+      pt_->policy_table.device_data->begin();
   policy_table::DeviceData::iterator iter_end =
-      pt->policy_table.device_data->end();
+      pt_->policy_table.device_data->end();
 
   for (; iter != iter_end; ++iter) {
     iter->second.user_consent_records->clear();
@@ -120,7 +120,7 @@ bool CacheManager::GetUserPermissionsForDevice(const std::string &device_id,
 
   LOG4CXX_TRACE_ENTER(logger_);
 #ifdef EXTENDED_POLICY
-  const policy_table::DeviceParams& params = (*pt->policy_table.device_data)[device_id];
+  const policy_table::DeviceParams& params = (*pt_->policy_table.device_data)[device_id];
   const policy_table::UserConsentRecords& ucr = *(params.user_consent_records);
   policy_table::UserConsentRecords::const_iterator iter = ucr.begin();
   policy_table::UserConsentRecords::const_iterator iter_end = ucr.end();
@@ -150,9 +150,9 @@ void CacheManager::GetAllAppGroups(const std::string& app_id,
   LOG4CXX_TRACE_ENTER(logger_);
 #ifdef EXTENDED_POLICY
   policy_table::ApplicationPolicies::const_iterator app_params_iter =
-      pt->policy_table.app_policies.find(app_id);
+      pt_->policy_table.app_policies.find(app_id);
 
-  if (pt->policy_table.app_policies.end() != app_params_iter) {
+  if (pt_->policy_table.app_policies.end() != app_params_iter) {
     policy_table::Strings::const_iterator iter =
         (*app_params_iter).second.groups.begin();
     policy_table::Strings::const_iterator iter_end =
@@ -174,8 +174,8 @@ void CacheManager::GetPreConsentedGroups(const std::string &app_id,
   LOG4CXX_TRACE_ENTER(logger_);
 #ifdef EXTENDED_POLICY
   policy_table::ApplicationPolicies::const_iterator app_param_iter =
-      pt->policy_table.app_policies.find(app_id);
-  if (pt->policy_table.app_policies.end() != app_param_iter) {
+      pt_->policy_table.app_policies.find(app_id);
+  if (pt_->policy_table.app_policies.end() != app_param_iter) {
 
     policy_table::Strings::const_iterator iter = (*app_param_iter).second.preconsented_groups->begin();
     policy_table::Strings::const_iterator iter_end = (*app_param_iter).second.preconsented_groups->end();
@@ -198,9 +198,9 @@ void CacheManager::GetConsentedGroups(const std::string &device_id,
   LOG4CXX_TRACE_ENTER(logger_);
 #ifdef EXTENDED_POLICY
   policy_table::DeviceData::iterator dev_params_iter =
-      pt->policy_table.device_data->find(device_id);
+      pt_->policy_table.device_data->find(device_id);
 
-  if (pt->policy_table.device_data->end() != dev_params_iter) {
+  if (pt_->policy_table.device_data->end() != dev_params_iter) {
     const policy_table::DeviceParams& dev_par = (*dev_params_iter).second;
 
     policy_table::UserConsentRecords::const_iterator iter =
@@ -231,14 +231,14 @@ void CacheManager::GetConsentedGroups(const std::string &device_id,
 bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
   LOG4CXX_TRACE_ENTER(logger_);
 #ifdef EXTENDED_POLICY
-  pt->policy_table.functional_groupings =
+  pt_->policy_table.functional_groupings =
       update_pt.policy_table.functional_groupings;
 
-  pt->policy_table.app_policies = update_pt.policy_table.app_policies;
-  pt->policy_table.module_config = update_pt.policy_table.module_config;
+  pt_->policy_table.app_policies = update_pt.policy_table.app_policies;
+  pt_->policy_table.module_config = update_pt.policy_table.module_config;
 
   if (update_pt.policy_table.consumer_friendly_messages.is_initialized()) {
-    pt->policy_table.consumer_friendly_messages =
+    pt_->policy_table.consumer_friendly_messages =
         update_pt.policy_table.consumer_friendly_messages;
   }
 #endif // EXTENDED_POLICY
@@ -297,8 +297,8 @@ bool CacheManager::GetDeviceGroupsFromPolicies(
   LOG4CXX_TRACE_ENTER(logger_);
 #ifdef EXTENDED_POLICY
   if (AppExists(kDeviceId)) {
-    groups = pt->policy_table.app_policies[kDeviceId].groups;
-    preconsented_groups = *(pt->policy_table.app_policies[kDeviceId]).preconsented_groups;
+    groups = pt_->policy_table.app_policies[kDeviceId].groups;
+    preconsented_groups = *(pt_->policy_table.app_policies[kDeviceId]).preconsented_groups;
   }
 #endif // EXTENDED_POLICY
   LOG4CXX_TRACE_EXIT(logger_);
@@ -318,7 +318,7 @@ bool CacheManager::SetDeviceData(const std::string &device_id,
   LOG4CXX_TRACE_ENTER(logger_);
 #ifdef EXTENDED_POLICY
   policy_table::DeviceParams& params =
-      (*(pt->policy_table.device_data))[device_id];
+      (*(pt_->policy_table.device_data))[device_id];
   *params.hardware = hardware;
   *params.firmware_rev = firmware;
   *params.os = os;
@@ -339,7 +339,7 @@ bool CacheManager::SetUserPermissionsForDevice(
   sync_primitives::AutoLock auto_lock(cache_lock_);
   LOG4CXX_TRACE_ENTER(logger_);
 #ifdef EXTENDED_POLICY
-  policy_table::DeviceParams& params = (*pt->policy_table.device_data)[device_id];
+  policy_table::DeviceParams& params = (*pt_->policy_table.device_data)[device_id];
   policy_table::UserConsentRecords& ucr = *(params.user_consent_records);
   StringArray::const_iterator consent_iter_end = consented_groups.end();
   StringArray::const_iterator consent_iter = consented_groups.begin();
@@ -370,9 +370,9 @@ bool CacheManager::ReactOnUserDevConsentForApp(const std::string &app_id,
     if (IsPredataPolicy(app_id)) {
 
         policy_table::ApplicationParams& pre_data_app =
-          pt->policy_table.app_policies[kPreDataConsentId];
+          pt_->policy_table.app_policies[kPreDataConsentId];
         policy_table::ApplicationParams& specific_app =
-          pt->policy_table.app_policies[app_id];
+          pt_->policy_table.app_policies[app_id];
 
       policy_table::Strings res;
       std::set_intersection(pre_data_app.groups.begin(),
@@ -430,7 +430,7 @@ bool CacheManager::SetUserPermissionsForApp(
   std::string group_name;
   for (;iter != iter_end; ++iter) {
     if (policy::kGroupUndefined != (*iter).state) {
-      policy_table::DeviceParams& params = (*pt->policy_table.device_data)[permissions.device_id];
+      policy_table::DeviceParams& params = (*pt_->policy_table.device_data)[permissions.device_id];
       rpc::policy_table_interface_base::ConsentRecords& ucr =
           (*params.user_consent_records)[permissions.policy_app_id];
 
@@ -523,7 +523,7 @@ int CacheManager::IgnitionCyclesBeforeExchange() {
 
 #ifdef EXTENDED_POLICY
   const int last_exch = static_cast<int>
-      (*pt->policy_table.module_meta->ignition_cycles_since_last_exchange);
+      (*pt_->policy_table.module_meta->ignition_cycles_since_last_exchange);
   current = std::max(last_exch, 0);
 #endif // EXTENDED_POLICY
 
@@ -539,7 +539,7 @@ int CacheManager::KilometersBeforeExchange(int current) {
 
 #ifdef EXTENDED_POLICY
   const int odo_val = static_cast<int>
-      (*pt->policy_table.module_meta->pt_exchanged_at_odometer_x);
+      (*pt_->policy_table.module_meta->pt_exchanged_at_odometer_x);
   last = std::max(odo_val, 0);
 #endif // EXTENDED_POLICY
 
@@ -551,8 +551,8 @@ bool CacheManager::SetCountersPassedForSuccessfulUpdate(int kilometers,
                                                         int days_after_epoch) {
 
 #ifdef EXTENDED_POLICY
-  *pt->policy_table.module_meta->pt_exchanged_at_odometer_x = kilometers;
-  *pt->policy_table.module_meta->pt_exchanged_x_days_after_epoch = days_after_epoch;
+  *pt_->policy_table.module_meta->pt_exchanged_at_odometer_x = kilometers;
+  *pt_->policy_table.module_meta->pt_exchanged_x_days_after_epoch = days_after_epoch;
 #endif
   return true;
 }
@@ -566,7 +566,7 @@ int CacheManager::DaysBeforeExchange(int current) {
 
 #ifdef EXTENDED_POLICY
   const int odo_val = static_cast<int>
-      (*pt->policy_table.module_meta->pt_exchanged_x_days_after_epoch);
+      (*pt_->policy_table.module_meta->pt_exchanged_x_days_after_epoch);
   last = std::max(odo_val, 0);
 #endif // EXTENDED_POLICY
 
@@ -578,15 +578,15 @@ void CacheManager::IncrementIgnitionCycles() {
 
 #ifdef EXTENDED_POLICY
   const int ign_val = static_cast<int>
-      (*pt->policy_table.module_meta->ignition_cycles_since_last_exchange);
-  (*pt->policy_table.module_meta->ignition_cycles_since_last_exchange) = ign_val + 1;
+      (*pt_->policy_table.module_meta->ignition_cycles_since_last_exchange);
+  (*pt_->policy_table.module_meta->ignition_cycles_since_last_exchange) = ign_val + 1;
 #endif // EXTENDED_POLICY
 }
 
 void CacheManager::ResetIgnitionCycles() {
 
 #ifdef EXTENDED_POLICY
-  (*pt->policy_table.module_meta->ignition_cycles_since_last_exchange) = 0;
+  (*pt_->policy_table.module_meta->ignition_cycles_since_last_exchange) = 0;
 #endif // EXTENDED_POLICY
 }
 
@@ -630,7 +630,7 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
     std::string msg_language = language;
 
     rpc::policy_table_interface_base::MessageLanguages msg_languages =
-        (*pt->policy_table.consumer_friendly_messages->messages)[*it];
+        (*pt_->policy_table.consumer_friendly_messages->messages)[*it];
 
     // If message has no records with required language, fallback language
     // should be used instead.
@@ -766,7 +766,7 @@ bool CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
                                           int& result) {
   LOG4CXX_TRACE_ENTER(logger_);
 #ifdef EXTENDED_POLICY
-  policy_table::DeviceParams& params = (*pt->policy_table.device_data)[device_id];
+  policy_table::DeviceParams& params = (*pt_->policy_table.device_data)[device_id];
   policy_table::UserConsentRecords& ucr = *(params.user_consent_records);
 
   policy_table::ConsentRecords cgr = ucr[policy_app_id];
@@ -774,9 +774,9 @@ bool CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
   policy_table::ConsentGroups::const_iterator con_iter =
       cgr.consent_groups->begin();
   policy_table::FunctionalGroupings::const_iterator groups_iter =
-      pt->policy_table.functional_groupings.begin();
+      pt_->policy_table.functional_groupings.begin();
   policy_table::FunctionalGroupings::const_iterator groups_iter_end =
-      pt->policy_table.functional_groupings.end();
+      pt_->policy_table.functional_groupings.end();
   for (; groups_iter != groups_iter_end; ++groups_iter) {
     con_iter = cgr.consent_groups->find((*groups_iter).first);
     if (con_iter != cgr.consent_groups->end()) {
@@ -793,9 +793,9 @@ bool CacheManager::SetMetaInfo(const std::string &ccpu_version,
                                const std::string &language) {
 
 #ifdef EXTENDED_POLICY
-  *pt->policy_table.module_meta->ccpu_version = ccpu_version;
-  *pt->policy_table.module_meta->wers_country_code = wers_country_code;
-  *pt->policy_table.module_meta->language = language;
+  *pt_->policy_table.module_meta->ccpu_version = ccpu_version;
+  *pt_->policy_table.module_meta->wers_country_code = wers_country_code;
+  *pt_->policy_table.module_meta->language = language;
 #endif // EXTENDED_POLICY
   return true;
 }
@@ -803,16 +803,16 @@ bool CacheManager::SetMetaInfo(const std::string &ccpu_version,
 bool CacheManager::IsMetaInfoPresent() const {
   bool result = true;
 #ifdef EXTENDED_POLICY
-  result = NULL != pt->policy_table.module_meta->ccpu_version &&
-      NULL != pt->policy_table.module_meta->wers_country_code &&
-      NULL != pt->policy_table.module_meta->language;
+  result = NULL != pt_->policy_table.module_meta->ccpu_version &&
+      NULL != pt_->policy_table.module_meta->wers_country_code &&
+      NULL != pt_->policy_table.module_meta->language;
 #endif // EXTENDED_POLICY
   return result;
 }
 
 bool CacheManager::SetSystemLanguage(const std::string &language) {
 #ifdef EXTENDED_POLICY
-  *pt->policy_table.module_meta->language = language;
+  *pt_->policy_table.module_meta->language = language;
 #endif // EXTENDED_POLICY
   return true;
 }
@@ -821,9 +821,9 @@ bool CacheManager::GetFunctionalGroupNames(FunctionalGroupNames &names) {
   LOG4CXX_TRACE_ENTER(logger_);
 #ifdef EXTENDED_POLICY
   rpc::policy_table_interface_base::FunctionalGroupings::iterator iter =
-      pt->policy_table.functional_groupings.begin();
+      pt_->policy_table.functional_groupings.begin();
   rpc::policy_table_interface_base::FunctionalGroupings::iterator iter_end =
-      pt->policy_table.functional_groupings.end();
+      pt_->policy_table.functional_groupings.end();
 
   for (; iter != iter_end; ++iter) {
     const uint32_t id = static_cast<uint32_t> (abs(GenerateHash((*iter).first)));
@@ -843,7 +843,7 @@ bool CacheManager::CleanupUnpairedDevices(const DeviceIds &device_ids) {
   DeviceIds::const_iterator iter = device_ids.begin();
   DeviceIds::const_iterator iter_end = device_ids.end();
   for (; iter != iter_end; ++iter) {
-    is_unpaired.erase(*iter);
+    is_unpaired_.erase(*iter);
   }
 #endif // EXTENDED_POLICY
   return true;
@@ -853,11 +853,11 @@ void CacheManager::Increment(const std::string &type) {
 #ifdef EXTENDED_POLICY
   // TODO: think about it.
   if (0 == type.compare("count_of_iap_buffer_full")) {
-    *pt->policy_table.usage_and_error_counts->count_of_iap_buffer_full = 1;
+    *pt_->policy_table.usage_and_error_counts->count_of_iap_buffer_full = 1;
   } else if (0 == type.compare("count_sync_out_of_memory")) {
-    *pt->policy_table.usage_and_error_counts->count_sync_out_of_memory = 1;
+    *pt_->policy_table.usage_and_error_counts->count_sync_out_of_memory = 1;
   } else if (0 == type.compare("count_of_sync_reboots")) {
-    *pt->policy_table.usage_and_error_counts->count_of_sync_reboots = 1;
+    *pt_->policy_table.usage_and_error_counts->count_of_sync_reboots = 1;
   }
 #endif // EXTENDED_POLICY
 }
@@ -966,7 +966,7 @@ bool CacheManager::UnpairedDevicesList(DeviceIds& device_ids) {
 bool CacheManager::SetVINValue(const std::string& value) {
 
 #ifdef EXTENDED_POLICY
-  *pt->policy_table.module_meta->vin = value;
+  *pt_->policy_table.module_meta->vin = value;
 #endif // EXTENDED_POLICY
   return true;
 }
@@ -1026,7 +1026,7 @@ void CacheManager::FillDeviceSpecificData() {
   ex_backup_->UnpairedDevicesList(&unpaired_ids);
   for (DeviceIds::const_iterator ids_iter= unpaired_ids.begin();
        ids_iter!= unpaired_ids.end(); ++ids_iter) {
-    is_unpaired[*ids_iter] = true;
+    is_unpaired_[*ids_iter] = true;
   }
 #endif
 }
