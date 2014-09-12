@@ -296,6 +296,9 @@ BinaryMessageSptr PolicyManagerImpl::RequestPTUpdate() {
     return NULL;
   }
 
+  // Temporary workaround
+  *(policy_table_snapshot->policy_table.module_config.preloaded_pt) = false;
+
 #ifdef EXTENDED_POLICY
     cache.UnpairedDevicesList(unpaired_device_ids_);
 #endif  // EXTENDED_POLICY

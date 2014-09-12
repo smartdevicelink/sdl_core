@@ -896,6 +896,8 @@ bool CacheManager::SetDefaultPolicy(const std::string &app_id) {
     CopyInternalParams(kDefaultId, app_id);
     SetIsDefault(app_id, true);
     SetIsPredata(app_id, false);
+
+    pt_->policy_table.app_policies[app_id].set_to_string(kDefaultId);
   }
   return true;
 }
