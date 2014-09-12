@@ -35,6 +35,7 @@
 
 #include <map>
 #include <string>
+#include <config_profile/profile.h>
 
 namespace transport_manager {
 namespace transport_adapter {
