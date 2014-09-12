@@ -36,9 +36,26 @@
 namespace logger {
 
 bool push_log(log4cxx::LoggerPtr logger, LogLevel level, const std::string& entry) {
-  LogMessage message = {logger, level, entry};
-  LogMessageLoopThread::instance()->PostMessage(message);
-  return true;
+  typedef enum {LoggerThreadNotCreated, CreatingLoggerThread, LoggerThreadCreated} InternalStatus;
+  static InternalStatus internal_status = LoggerThreadNotCreated;
+
+  if (LoggerThreadCreated == internal_status) {
+    LogMessage message = {logger, level, entry};
+    LogMessageLoopThread::instance()->PostMessage(message);
+    return true;
+  }
+
+  if (LoggerThreadNotCreated == internal_status) {
+    internal_status = CreatingLoggerThread;
+// we'll have to drop messages
+// while creating logger thread
+    LogMessage message = {logger, level, entry};
+    LogMessageLoopThread::instance()->PostMessage(message);
+    internal_status = LoggerThreadCreated;
+    return true;
+  }
+
+  return false;
 }
 
 }  // namespace logger
