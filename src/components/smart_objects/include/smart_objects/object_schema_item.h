@@ -125,7 +125,6 @@ class CObjectSchemaItem : public ISchemaItem {
    * @brief Map of member name to SMember structure describing the object member.
    **/
   const Members mMembers;
-  typedef std::set<std::string>::const_iterator Key_Iterator;
   DISALLOW_COPY_AND_ASSIGN(CObjectSchemaItem);
 };
 }  // namespace NsSmartObjects

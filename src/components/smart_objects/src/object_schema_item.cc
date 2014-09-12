@@ -29,16 +29,17 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#include "smart_objects/object_schema_item.h"
 
 #include <algorithm>
 
 #include "smart_objects/always_false_schema_item.h"
-#include "smart_objects/object_schema_item.h"
 #include "smart_objects/smart_object.h"
 
 namespace {
 const char connection_key[] = "connection_key";
 const char binary_data[] = "binary_data";
+const char app_id[] = "appID";
 }
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -69,14 +70,15 @@ Errors::eType CObjectSchemaItem::validate(const SmartObject& object) {
     const std::string& key = it->first;
     const SMember& member = it->second;
 
-    Key_Iterator key_it = object_keys.find(key);
+    std::set<std::string>::const_iterator key_it = object_keys.find(key);
     if (object_keys.end() == key_it) {
       if (member.mIsMandatory) {
         return Errors::MISSING_MANDATORY_PARAMETER;
       }
       continue;
     }
-    const Errors::eType result = member.mSchemaItem->validate(object.getElement(key));
+    const SmartObject& field = object.getElement(key);
+    const Errors::eType result = member.mSchemaItem->validate(field);
     if (Errors::OK != result) {
       return result;
     }
@@ -90,15 +92,19 @@ void CObjectSchemaItem::applySchema(SmartObject& Object) {
     return;
   }
 
-  for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end(); ++it) {
+  for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end(); ) {
     const std::string& key = it->first;
     if (mMembers.end() == mMembers.find(key)
-        // FIXME(EZamakhov): Remove illigal usage of connection_key/binary_data in AM
+        // FIXME(EZamakhov): Remove illigal usage of filed in AM
         && key.compare(connection_key) != 0
         && key.compare(binary_data) != 0
-       ) {
+        && key.compare(app_id) != 0
+        ) {
+      ++it;
       // remove fake params
       Object.erase(key);
+    } else {
+      it++;
     }
   }
 
@@ -150,10 +156,9 @@ void CObjectSchemaItem::BuildObjectBySchema(
     const std::string& key = it->first;
     const SMember& member = it->second;
     const bool pattern_exists = pattern_is_map && pattern_object.keyExists(key);
-    const SmartObject& pattern =
-      pattern_exists ? pattern_object.getElement(key) : SmartObject();
-    member.mSchemaItem->BuildObjectBySchema(pattern, result_object[key]);
-    // TODO(EZamakhov): mandatory and not exists ?????
+    member.mSchemaItem->BuildObjectBySchema(
+          pattern_exists ? pattern_object.getElement(key) : SmartObject(),
+          result_object[key]);
   }
 }
 

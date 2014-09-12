@@ -666,7 +666,6 @@ SmartObject& SmartObject::handle_map_access(const std::string& Key) {
     return *this;
   }
 
-  // TODO(404): implement handling of non-existing keys similar to array
   if (m_type != SmartType_Map) {
     cleanup_data();
     m_type = SmartType_Map;
@@ -674,7 +673,6 @@ SmartObject& SmartObject::handle_map_access(const std::string& Key) {
   }
   SmartMap& map = *m_data.map_value;
 
-  // TODO(404): Add check for key presense
   return map[Key];
 }
 
@@ -756,6 +754,22 @@ size_t SmartObject::length() const {
       break;
   }
   return 0;
+}
+
+bool SmartObject::empty() const {
+  switch (m_type) {
+    case SmartType_String:
+      return m_data.str_value->empty();
+    case SmartType_Array:
+      return m_data.array_value->empty();
+    case SmartType_Map:
+      return m_data.map_value->empty();
+    case SmartType_Binary:
+      return m_data.binary_value->empty();
+    default:
+      break;
+  }
+  return true;
 }
 
 void SmartObject::set_new_type(SmartType NewType) {

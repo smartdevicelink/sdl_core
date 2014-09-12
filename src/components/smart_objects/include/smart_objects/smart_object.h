@@ -648,11 +648,17 @@ class SmartObject FINAL {
    * If object has type string, array or map then method returns corresponded
    * size. Otherwise returns zero.
    *
-   * @note This method does not return size of binary data.
-   *
    * @return size_t Length of the object
    **/
   size_t length() const;
+
+  /**
+   * @brief Object string/array/map/binary empty state
+   *
+   * @return Returns object string/array/map/binary empty state
+   * or true on other object typed
+   **/
+  bool empty() const;
 
   /**
    * @brief Nequation template operator
@@ -661,7 +667,7 @@ class SmartObject FINAL {
    * @return bool Result of nequation
    **/
   template<typename Type>
-  bool operator!=(const Type& Other) const{
+  bool operator!=(const Type& Other) const {
     return !(*this == Other);
   }
 
