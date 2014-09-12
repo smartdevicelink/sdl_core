@@ -1768,7 +1768,10 @@
         <description>Must be provided if ButtonName is CUSTOM_BUTTON, this references the integer ID passed by a custom button. (e.g. softButtonName)</description>
       </param>
       <param name="appID" type="Integer" mandatory="false">
-        <description>ID of the application.</description>
+        <description>
+          In case the ButtonName is CUSTOM_BUTTON, HMI must include appID parameters to OnButtonPress notification sent to SDL.
+          Otherwise, if appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
+        </description>
       </param>
     </function>
     <function name="OnButtonPress" messagetype="notification" provider="hmi">
@@ -1780,7 +1783,10 @@
         <description>Must be returned if ButtonName is CUSTOM_BUTTON, this references the string passed by a custom button. (e.g. softButtonName)</description>
       </param>
       <param name="appID" type="Integer" mandatory="false">
-        <description>ID of the application.</description>
+        <description>
+          In case the ButtonName is CUSTOM_BUTTON, HMI must include appID parameters to OnButtonPress notification sent to SDL.
+          Otherwise, if appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
+        </description>
       </param>
     </function>
   </interface>
