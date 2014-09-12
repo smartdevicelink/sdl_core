@@ -2165,8 +2165,9 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
       case mobile_apis::SoftButtonType::SBT_BOTH: {
 
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
-            (!VerifySoftButtonString(
-                request_soft_buttons[i][strings::text].asString()))) {
+            ((request_soft_buttons[i][strings::text].length())
+                && (!VerifySoftButtonString(
+                request_soft_buttons[i][strings::text].asString())))) {
           return mobile_apis::Result::INVALID_DATA;
         }
 
