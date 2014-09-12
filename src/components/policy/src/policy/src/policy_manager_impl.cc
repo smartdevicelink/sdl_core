@@ -272,14 +272,13 @@ std::string PolicyManagerImpl::GetUpdateUrl(int service_type) {
 
   static uint32_t index = 0;
   std::string url;
-  if (index < urls.size()) {
-    url = urls[index].url[0];
-  } else if (!urls.empty()) {
-    index = 0;
-    url = urls[index].url[0];
-  }
-  ++index;
 
+  if (!urls.empty() && index >= urls.size()) {
+    index = 0;
+  }
+  url = urls[index].url.empty() ? "" :urls[index].url[0];
+
+  ++index;
   return url;
 }
 
@@ -828,8 +827,6 @@ void PolicyManagerImpl::GetPermissionsForApp(
     FillFunctionalGroupPermissions(group_types[type], group_names,
                                    kGroupAllowed, permissions);
   } else {
-
-    LOG4CXX_INFO(logger_, "Get user's allowed groups.");
 
     // The code bellow allows to process application which
     // has specific permissions(not default and pre_DataConsent).

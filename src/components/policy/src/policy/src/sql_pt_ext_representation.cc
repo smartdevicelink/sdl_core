@@ -520,6 +520,10 @@ std::vector<UserFriendlyMessage> SQLPTExtRepresentation::GetUserFriendlyMsg(
 
 bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
     policy_table::ConsumerFriendlyMessages* messages) const {
+  if (NULL == messages) {
+    LOG4CXX_ERROR(logger_, "NULL pointer has been passed to fill");
+    return false;
+  }
   dbms::SQLQuery query(db());
   bool result = query.Prepare(sql_pt_ext::kCollectFriendlyMsg);
 
@@ -553,7 +557,7 @@ bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
 bool SQLPTExtRepresentation::SetMetaInfo(const std::string& ccpu_version,
     const std::string& wers_country_code,
     const std::string& language) {
-  LOG4CXX_INFO(logger_, "SetMetaInfo");
+  LOG4CXX_TRACE_ENTER(logger_);
   dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kUpdateMetaParams)) {
     LOG4CXX_WARN(logger_, "Incorrect statement for insert to module meta.");
@@ -568,7 +572,7 @@ bool SQLPTExtRepresentation::SetMetaInfo(const std::string& ccpu_version,
     LOG4CXX_WARN(logger_, "Incorrect insert to module meta.");
     return false;
   }
-
+  LOG4CXX_TRACE_EXIT(logger_);
   return true;
 }
 
