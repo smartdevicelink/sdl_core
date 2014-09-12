@@ -94,6 +94,12 @@ class TransportAdapter {
    */
   virtual DeviceType GetDeviceType() const = 0;
 
+  /**
+   * @brief Allows to obtain connection type used by device.
+   * @return connection type.
+   */
+  virtual ConnectionType GetConnectionType() const = 0;
+
   /* TODO
    virtual Error LoadState(TransportAdapterState* state) = 0;
    virtual void SaveState(TransportAdapterState* state) = 0;

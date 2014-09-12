@@ -74,6 +74,7 @@ struct ApplicationParams : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -92,6 +93,7 @@ struct RpcParameters : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -110,13 +112,14 @@ struct Rpcs : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
 
 struct ModuleConfig : CompositeType {
   public:
-    Optional< Map< String<1, 100>, 1, 255 > > device_certificates;
+    Optional< Map< String<0, 100>, 0, 255 > > device_certificates;
     Optional< Boolean > preloaded_pt;
     Integer<uint8_t, 0, 255> exchange_after_x_ignition_cycles;
     Integer<int64_t, 0, 4294967296ll> exchange_after_x_kilometers;
@@ -138,17 +141,18 @@ struct ModuleConfig : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
 
 struct MessageString : CompositeType {
   public:
-    Optional< String<1, 255> > line1;
-    Optional< String<1, 255> > line2;
+    Optional< String<1, 65535> > line1;
+    Optional< String<1, 65535> > line2;
     Optional< String<1, 65535> > tts;
-    Optional< String<1, 255> > label;
-    Optional< String<1, 500> > textBody;
+    Optional< String<1, 65535> > label;
+    Optional< String<1, 65535> > textBody;
   public:
     MessageString();
     ~MessageString();
@@ -158,6 +162,7 @@ struct MessageString : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -175,6 +180,7 @@ struct MessageLanguages : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -193,6 +199,7 @@ struct ConsumerFriendlyMessages : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -239,6 +246,7 @@ struct UsageAndErrorCounts : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -277,6 +285,7 @@ struct PolicyTable : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -294,6 +303,7 @@ struct Table : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };

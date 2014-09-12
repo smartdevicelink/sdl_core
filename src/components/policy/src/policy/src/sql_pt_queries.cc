@@ -47,6 +47,7 @@ const std::string kCreateSchema =
   "  `os_version` VARCHAR(45), "
   "  `carrier` VARCHAR(45), "
   "  `max_number_rfcom_ports` INTEGER,"
+  "  `connection_type` VARCHAR(45), "
   "  `unpaired` BOOL "
   "); "
   "CREATE TABLE IF NOT EXISTS `usage_and_error_count`( "
@@ -208,7 +209,6 @@ const std::string kCreateSchema =
   "  `minutes_in_hmi_limited` INTEGER DEFAULT 0, "
   "  `minutes_in_hmi_background` INTEGER DEFAULT 0, "
   "  `minutes_in_hmi_none` INTEGER DEFAULT 0, "
-  "  `count_of_rfcom_limit_reached` INTEGER DEFAULT 0, "
   "  `count_of_user_selections` INTEGER DEFAULT 0, "
   "  `count_of_rejections_sync_out_of_memory` INTEGER DEFAULT 0, "
   "  `count_of_rejections_nickname_mismatch` INTEGER DEFAULT 0, "
@@ -440,8 +440,8 @@ const std::string kSelectEndpoint =
   "SELECT `url`, `application_id` FROM `endpoint` WHERE `service` = ? ";
 
 const std::string kInsertFunctionalGroup =
-  "INSERT INTO `functional_group` (`name`, `user_consent_prompt`) "
-  "  VALUES (?, ?)";
+  "INSERT INTO `functional_group` (`id`, `name`, `user_consent_prompt`) "
+  "  VALUES (?, ?, ?)";
 
 const std::string kInsertRpc =
   "INSERT INTO `rpc` (`name`, `hmi_level_value`, `functional_group_id`) "
@@ -607,6 +607,10 @@ const std::string kDeleteApplication = "DELETE FROM `application`";
 
 const std::string kSelectApplicationRevoked =
   "SELECT `is_revoked` FROM `application` WHERE `id` = ?";
+
+const std::string kUpdateApplicationCustomData =
+  "UPDATE `application` SET `is_revoked` = ?, `is_default` = ?,"
+  "`is_predata` = ? WHERE `id` = ?";
 
 const std::string kSelectApplicationRepresented =
   "SELECT COUNT(`id`) FROM `application` WHERE `id` = ?";

@@ -153,14 +153,21 @@ SDL.VRPopUp = Em.ContainerView.create( {
 
     }.observes('SDL.SDLAppController.model'),
 
-    DeleteCommand: function(commandID) {
+    DeleteCommand: function(commandID, appID) {
 
-        var t = this.get('listOfCommands.list.childViews').filterProperty('commandID', commandID);
-        for (var i = 0; i < t.length; i++) {
-            t[i].remove();
-            t[i].destroy();
+        if (commandID != 0) {
+            var t = this.get('listOfCommands.list.childViews').filterProperty('commandID', commandID);
+            for (var i = 0; i < t.length; i++) {
+                t[i].remove();
+                t[i].destroy();
+            }
+        } else {
+            var t = this.get('listOfCommands.list.childViews').filterProperty('appID', appID);
+            for (var i = 0; i < t.length; i++) {
+                t[i].remove();
+                t[i].destroy();
+            }
         }
-
     },
 
     DeleteActivateApp: function(appID) {

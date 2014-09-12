@@ -31,6 +31,7 @@ INCLUDES = \
 	$(CC_IFLAG)./ \
 	$(CC_IFLAG)../../include \
 	$(CC_IFLAG)../../../jsoncpp/include \
+        $(CC_IFLAG)$(PRJ_ROOT)/src/components/include/ \
 	$(DEPENDS_INCLUDES)
 
 
@@ -40,7 +41,7 @@ INCLUDES = \
 #  for example to include a team component library it would be 
 #  $(TEAM_ROOT)NS_MessageCenter/lib/NS_MessageCenter/
 LIB_PATHS += \
-  $(DEPENDS_LIB_PATHS) \
+  $(DEPENDS_LIB_PATHS)
   
 
 # Define binary outputs.  These can be libraries or executables.
@@ -78,7 +79,7 @@ NON_LOCAL_SRCS =
 #  direct the building of sources, but no linking into a binary)
 SOURCES = \
 	$(COMPONENT_SRCS) \
-	$(NON_LOCAL_SRCS) \
+	$(NON_LOCAL_SRCS)
 
 
 
@@ -104,7 +105,7 @@ HEADERS = \
 
 	
 LIBRARIES = \
-	$(COMPONENT_LIB) \
+	$(COMPONENT_LIB)
 
 
 # Make targets

@@ -33,6 +33,7 @@ Copyright (c) 2013, Ford Motor Company
 
 #include <vector>
 #include <string>
+#include <stdio.h>
 #include "application_manager/commands/mobile/system_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -43,6 +44,8 @@ Copyright (c) 2013, Ford Motor Company
 namespace application_manager {
 
 namespace commands {
+
+uint32_t SystemRequest::index = 0;
 
 SystemRequest::SystemRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
@@ -92,6 +95,12 @@ void SystemRequest::Run() {
     file_name = (*message_)[strings::msg_params][strings::file_name].asString();
   }
 
+  // to avoid override existing file
+  const uint8_t max_size = 255;
+  char buf[max_size] = {'\0'};
+  snprintf(buf, sizeof(buf)/sizeof(buf[0]), "%d%s", index++, file_name.c_str());
+  file_name = buf;
+
   std::string full_file_path = file_path + "/" + file_name;
   if (binary_data.size()) {
     if (mobile_apis::Result::SUCCESS  !=
@@ -109,16 +118,17 @@ void SystemRequest::Run() {
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
-  if (file_name == "IVSU") {
+  if (std::string::npos != file_name.find("IVSU")) {
     msg_params[strings::file_name] = file_name.c_str();
   } else {
     msg_params[strings::file_name] = full_file_path;
   }
+
   if (mobile_apis::RequestType::PROPRIETARY != request_type) {
     msg_params[strings::app_id] = (application->mobile_app_id())->asString();
   }
-  msg_params[strings::request_type] = (*message_)[strings::msg_params]
-                                                  [strings::request_type];
+  msg_params[strings::request_type] =
+      (*message_)[strings::msg_params][strings::request_type];
   SendHMIRequest(hmi_apis::FunctionID::BasicCommunication_SystemRequest,
                  &msg_params, true);
 

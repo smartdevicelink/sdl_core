@@ -72,7 +72,8 @@ bool Range<T>::Includes(U val) const {
  * PrimitiveType base class
  */
 inline PrimitiveType::PrimitiveType(ValueState value_state)
-    : value_state_(value_state) {
+    : value_state_(value_state),
+      policy_table_type_(policy_table_interface_base::PT_PRELOADED) {
 }
 
 inline bool PrimitiveType::is_initialized() const {
@@ -112,7 +113,8 @@ inline void CompositeType::mark_initialized() {
 }
 
 inline CompositeType::CompositeType(InitializationState init_state)
-    : initialization_state__(init_state) {
+    : initialization_state__(init_state),
+      policy_table_type_(policy_table_interface_base::PT_PRELOADED) {
 }
 
 inline void CompositeType::ReportErrors(ValidationReport* report) const {
@@ -245,6 +247,11 @@ String<minlen, maxlen>::String(const char* value)
 }
 
 template<size_t minlen, size_t maxlen>
+bool String<minlen, maxlen>::operator<(String new_val) {
+  return value_ < new_val.value_;
+}
+
+template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>& String<minlen, maxlen>::operator=(const std::string& new_val) {
   value_ = new_val;
   value_state_ = length_range_.Includes(new_val.length()) ? kValid : kInvalid;
@@ -368,6 +375,16 @@ void Array<T, minsize, maxsize>::ReportErrors(ValidationReport* report) const {
   }
 }
 
+template<typename T, size_t minsize, size_t maxsize>
+void Array<T, minsize, maxsize>::SetPolicyTableType(
+    rpc::policy_table_interface_base::PolicyTableType pt_type) {
+
+  for (typename ArrayType::iterator it = this->begin();
+      it != this->end(); ++it) {
+      it->SetPolicyTableType(pt_type);
+  }
+}
+
 /*
  * Map class
  */
@@ -459,6 +476,15 @@ void Map<T, minsize, maxsize>::ReportErrors(ValidationReport* report) const {
       ValidationReport& elem_report = report->ReportSubobject(elem_name);
       i->second.ReportErrors(&elem_report);
     }
+  }
+}
+
+template<typename T, size_t minsize, size_t maxsize>
+void Map<T, minsize, maxsize>::SetPolicyTableType(
+    rpc::policy_table_interface_base::PolicyTableType pt_type) {
+  for (typename Map::iterator it = this->begin();
+      it != this->end(); ++it) {
+    it->second.SetPolicyTableType(pt_type);
   }
 }
 
@@ -568,6 +594,16 @@ void Optional<T>::ReportErrors(ValidationReport* report) const {
   } else {
     value_.ReportErrors(report);
   }
+}
+template<typename T>
+inline rpc::policy_table_interface_base::PolicyTableType Optional<T>::GetPolicyTableType() const {
+  return policy_table_type_;
+}
+
+template<typename T>
+void rpc::Optional<T>::SetPolicyTableType(rpc::policy_table_interface_base::PolicyTableType pt_type) {
+  policy_table_type_ = pt_type;
+  value_.SetPolicyTableType(pt_type);
 }
 
 /*

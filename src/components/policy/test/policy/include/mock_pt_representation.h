@@ -69,6 +69,8 @@ class MockPTRepresentation : virtual public PTRepresentation {
                  bool(const std::string& app_id, std::string* priority));
     MOCK_METHOD0(GetVehicleData,
                  VehicleData());
+    MOCK_METHOD1(SetVINValue,
+                 bool(const std::string& value));
     MOCK_METHOD2(GetUserFriendlyMsg,
                  std::vector<UserFriendlyMessage>(const std::vector<std::string>& msg_code,
                      const std::string& language));
@@ -94,6 +96,13 @@ class MockPTRepresentation : virtual public PTRepresentation {
                  void(bool value));
     MOCK_METHOD3(GetInitialAppData,
                  bool(const std::string& app_id, StringArray* nicknames, StringArray* app_types));
+
+    MOCK_METHOD4(SaveApplicationCustomData,
+                 bool(const std::string& app_id,
+                      bool is_revoked,
+                      bool is_default,
+                      bool is_predata));
+
     MOCK_CONST_METHOD1(IsApplicationRevoked, bool(const std::string& app_id));
     MOCK_METHOD1(GetFunctionalGroupings,
                  bool(policy_table::FunctionalGroupings& groups));

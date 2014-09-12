@@ -14,6 +14,7 @@ enum Priority {
   P_NORMAL,
   P_NONE,
 };
+
 bool IsValidEnum(Priority val);
 const char* EnumToJsonString(Priority val);
 bool EnumFromJsonString(const std::string& literal, Priority* result);

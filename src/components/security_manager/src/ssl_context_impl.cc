@@ -211,7 +211,7 @@ bool CryptoManagerImpl::SSLContextImpl::Encrypt(
   DCHECK(len == static_cast<size_t>(read_size));
   if (read_size <= 0) {
     // Reset filter and connection deinitilization instead
-    BIO_reset(bioFilter_);
+    BIO_ctrl(bioFilter_, BIO_CTRL_RESET, 0, NULL);
     return false;
   }
   *out_data_size = read_size;
@@ -243,7 +243,7 @@ bool CryptoManagerImpl::SSLContextImpl::Decrypt(
     // TODO(EZamakhov): investigate BIO_read return 0, -1 and -2 meanings
     if (len <= 0) {
       // Reset filter and connection deinitilization instead
-      BIO_reset(bioFilter_);
+      BIO_ctrl(bioFilter_, BIO_CTRL_RESET, 0, NULL);
       return false;
     }
     *out_data_size += len;

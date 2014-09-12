@@ -50,18 +50,26 @@ OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {
 
 void OnAppDeactivatedNotification::Run() {
   LOG4CXX_INFO(logger_, "OnAppDeactivatedNotification::Run");
-
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->active_application();
-
-  if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "OnAppDeactivatedNotification no active app!");
+  uint32_t app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(app_id);
+  if (!app.valid()) {
+    LOG4CXX_ERROR(logger_, "Application not found, id="<<app_id);
     return;
   }
 
-  if ((*message_)[strings::msg_params][strings::app_id].asUInt()
-      != app->app_id()) {
-    LOG4CXX_ERROR_EXT(logger_, "Wrong application id!");
-    return;
+  if (!((hmi_apis::Common_DeactivateReason::AUDIO ==
+      (*message_)[strings::msg_params][hmi_request::reason].asInt()) &&
+      (app->hmi_level() == mobile_api::HMILevel::eType::HMI_LIMITED))) {
+    app = ApplicationManagerImpl::instance()->active_application();
+    if (!app.valid()) {
+      LOG4CXX_ERROR_EXT(logger_, "OnAppDeactivatedNotification no active app!");
+      return;
+    }
+    if (app_id != app->app_id()) {
+      LOG4CXX_ERROR_EXT(logger_, "Wrong application id!");
+      return;
+    }
   }
 
   if (mobile_api::HMILevel::eType::HMI_NONE == app->hmi_level()) {
@@ -74,21 +82,31 @@ void OnAppDeactivatedNotification::Run() {
         if (profile::Profile::instance()->is_mixing_audio_supported() &&
             (ApplicationManagerImpl::instance()->vr_session_started() ||
              app->tts_speak_state())) {
-          app->set_audio_streaming_state(
-              mobile_api::AudioStreamingState::ATTENUATED);
+          app->set_audio_streaming_state(mobile_api::AudioStreamingState::ATTENUATED);
         } else {
-          app->set_audio_streaming_state(
-              mobile_api::AudioStreamingState::NOT_AUDIBLE);
+          app->set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
         }
       }
-      ApplicationManagerImpl::instance()->DeactivateApplication(app);
-      app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
+      // switch HMI level for all applications in FULL or LIMITED
+      ApplicationManagerImpl::ApplicationListAccessor accessor;
+      ApplicationManagerImpl::TAppList applications =
+          accessor.applications();
+      ApplicationManagerImpl::TAppListIt it =
+          applications.begin();
+      for (; applications.end() != it; ++it) {
+          ApplicationSharedPtr app = *it;
+          if (app.valid()) {
+            if (mobile_apis::HMILevel::eType::HMI_FULL == app->hmi_level() ||
+                mobile_apis::HMILevel::eType::HMI_LIMITED == app->hmi_level()) {
+                app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
+                MessageHelper::SendHMIStatusNotification(*app);
+            }
+          }
+      }
       break;
     }
     case hmi_apis::Common_DeactivateReason::PHONECALL: {
-      app->set_audio_streaming_state(
-          mobile_api::AudioStreamingState::NOT_AUDIBLE);
-      ApplicationManagerImpl::instance()->DeactivateApplication(app);
+      app->set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
       app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       break;
     }
@@ -101,7 +119,6 @@ void OnAppDeactivatedNotification::Run() {
           app->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
         }
       } else {
-        ApplicationManagerImpl::instance()->DeactivateApplication(app);
         app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       }
       break;

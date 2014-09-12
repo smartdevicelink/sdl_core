@@ -102,6 +102,18 @@ class AddCommandRequest : public CommandRequestImpl {
    */
   bool CheckCommandParentId(ApplicationConstSharedPtr app);
 
+  /**
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   */
+  virtual void onTimeOut();
+
+  /**
+   * @brief Removes command from list when HMI sends negative response or
+   * HMI does not answer on addCommand request.
+   */
+  void RemoveCommand();
+
   DISALLOW_COPY_AND_ASSIGN(AddCommandRequest);
 
   /*

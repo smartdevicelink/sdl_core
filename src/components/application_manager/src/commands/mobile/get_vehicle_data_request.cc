@@ -123,7 +123,7 @@ void GetVehicleDataRequest::SendRequestsToHmi(const int32_t app_id) {
   smart_objects::SmartObject msg_params(smart_objects::SmartType_Map);
   msg_params[strings::app_id] = app_id;
 
-  for (int32_t i = 0; i < sizeof(subrequests) / sizeof(subrequests[0]); ++i) {
+  for (size_t i = 0; i < sizeof(subrequests) / sizeof(subrequests[0]); ++i) {
     const Subrequest& sr = subrequests[i];
     if (true == (*message_)[str::msg_params].keyExists(sr.str)
         && true == (*message_)[str::msg_params][sr.str].asBool()) {
@@ -225,7 +225,7 @@ void GetVehicleDataRequest::Run() {
   }
 
   if (mobile_api::HMILevel::HMI_NONE == app->hmi_level()) {
-    LOG4CXX_ERROR(logger_, "app in HMI level HMI_NONE");
+    LOG4CXX_ERROR(logger_, "app in HMI level HMI_NONE.");
     SendResponse(false, mobile_apis::Result::REJECTED);
     return;
   }
@@ -251,9 +251,12 @@ void GetVehicleDataRequest::Run() {
   if (msg_params.length() > min_length_msg_params) {
     SendHMIRequest(hmi_apis::FunctionID::VehicleInfo_GetVehicleData,
                    &msg_params, true);
-  return;
+    return;
+  } else if (HasDisallowedParams()) {
+    SendResponse(false, mobile_apis::Result::DISALLOWED);
+  } else {
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
   }
-  SendResponse(false, mobile_apis::Result::INVALID_DATA);
 }
 
 void GetVehicleDataRequest::on_event(const event_engine::Event& event) {

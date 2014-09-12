@@ -65,13 +65,14 @@ class MockPTExtRepresentation : public MockPTRepresentation,
     MOCK_METHOD2(GetUserFriendlyMsg,
                  std::vector<UserFriendlyMessage>(const std::vector<std::string>& msg_code,
                      const std::string& language));
-    MOCK_METHOD7(SetDeviceData, bool (const std::string& device_id,
+    MOCK_METHOD8(SetDeviceData, bool (const std::string& device_id,
                                       const std::string& hardware,
                                       const std::string& firmware,
                                       const std::string& os,
                                       const std::string& os_version,
                                       const std::string& carrier,
-                                      const uint32_t number_of_ports));
+                                      const uint32_t number_of_ports,
+                                      const std::string& connection_type));
     MOCK_METHOD6(SetDeviceData,
                  bool(const std::string&, const std::string&, const std::string&, const std::string&, const std::string&, const std::string&));
     MOCK_METHOD2(SetMaxNumberPorts,
@@ -118,6 +119,8 @@ class MockPTExtRepresentation : public MockPTRepresentation,
     MOCK_METHOD2(SetIsPredata, bool(const std::string& app_id, bool is_predata));
     MOCK_CONST_METHOD1(SetUnpairedDevice, bool(const std::string& device_id));
     MOCK_CONST_METHOD1(UnpairedDevicesList, bool(DeviceIds* device_ids));
+    MOCK_CONST_METHOD2(RemoveAppConsentForGroup, bool(const std::string& policy_app_id,
+                                                      const std::string& functional_group));
 };
 
 }  // namespace policy

@@ -120,8 +120,8 @@ class CommandRequestImpl : public CommandImpl,
   /**
    * @brief Check syntax of string from mobile
    * @param str - string that need to be checked
-   * @param allow_empty_string if true methos allow empty sting
-   * @return true if succes otherwise return false
+   * @param allow_empty_string if true methods allow empty sting
+   * @return true if success otherwise return false
    */
   bool CheckSyntax(std::string str, bool allow_empty_line = false);
 
@@ -178,6 +178,12 @@ protected:
    */
   void AddDisallowedParameters(smart_objects::SmartObject& response);
 
+  /**
+   * @brief Checks if any request param was marked as disallowed by policy
+   * @return true if any param was marked as disallowed
+   */
+  bool HasDisallowedParams() const;
+
  protected:
   uint32_t                      default_timeout_;
   RequestState                  current_state_;
@@ -186,6 +192,21 @@ protected:
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CommandRequestImpl);
+
+
+  /**
+   * @brief Adds param to disallowed parameters enumeration
+   * @param info string with disallowed params enumeration
+   * @param param disallowed param
+   */
+  void AddDissalowedParameterToInfoString(std::string& info,
+                                          const std::string& param) const;
+
+  /**
+   * @brief Adds disallowed parameters to response info
+   * @param response Response message, which info should be extended
+   */
+  void AddDisallowedParametersToInfo(smart_objects::SmartObject& response) const;
 };
 
 uint32_t CommandRequestImpl::default_timeout() const {

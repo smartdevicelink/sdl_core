@@ -59,7 +59,7 @@ class Device {
    * \brief Class constructor
    */
   Device(DeviceHandle device_handle, const std::string &user_friendly_name,
-         const std::string &mac_address = "");
+         const std::string &mac_address = "", const std::string& connection_type = "");
 
   /**
    * \brief Returns device handle
@@ -79,6 +79,12 @@ class Device {
       */
   std::string mac_address() const;
 
+  /**
+   * @brief The type of connection used by device.
+   * @return connection type (USB_serial, BTMAC, etc.)
+   */
+  std::string connection_type() const;
+
  private:
   /**
    * \brief Uniq device handle.
@@ -94,6 +100,11 @@ class Device {
    * \brief Mac address of device if available
    */
   std::string mac_address_;
+
+  /**
+   * \brief The type of connection used by device.
+   */
+  std::string connection_type_;
 };
 
 /**

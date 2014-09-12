@@ -60,6 +60,7 @@ class PolicyHandler :
   PolicyManager* policy_manager() const {
     return policy_manager_;
   }
+  bool PolicyEnabled();
   bool InitPolicyTable();
   bool ResetPolicyTable();
   bool ClearUserConsent();
@@ -125,9 +126,12 @@ class PolicyHandler :
 
   /**
    * @brief Store user-changed permissions consent to DB
+   * @param connection_key Connection key of application or 0, if permissions
+   * should be applied to all applications
    * @param permissions User-changed group permissions consent
    */
-  void OnAppPermissionConsent(PermissionConsent& permissions);
+  void OnAppPermissionConsent(const uint32_t connection_key,
+                              PermissionConsent& permissions);
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -143,7 +147,8 @@ class PolicyHandler :
   /**
    * @brief Get list of permissions for application/device binded to
    * connection key from request and send response
-   * @param connection_key Connection key
+   * @param connection_key Connection key for specific application or 0 for all
+   * currently registered applications
    * @param correlation_id Correlation id from request
    */
   void OnGetListOfPermissions(const uint32_t connection_key,
@@ -156,12 +161,6 @@ class PolicyHandler :
   void OnGetStatusUpdate(const uint32_t correlation_id);
 
   /**
-      * @brief Get Urls for service
-      * @param
-      */
-
-
-    /**
    * @brief Send notification to HMI with changed policy update status
    * @param status Current policy update state
    */
@@ -196,6 +195,17 @@ class PolicyHandler :
   virtual void OnSystemInfoUpdateRequired();
 
   /**
+   * @brief Sends GetVehicleData request in case when Vechicle info is ready.
+   */
+  virtual void OnVIIsReady();
+
+  /**
+   * @brief Allows to update vechicle data info.
+   * @param SmartObject which contains all needed information.
+   */
+  virtual void OnVehicleDataUpdated(const smart_objects::SmartObject& message);
+
+  /**
    * Removes device
    * @param device_id id of device
    */
@@ -227,11 +237,31 @@ class PolicyHandler :
                                       bool is_allowed);
 
   /**
+   * @brief Allows to check consents for the connected device
+   * and send OnSDLConsentNeeded in case when device has no consent.
+   *
+   * @return true in case device has consent,  false otherwise.
+   */
+  virtual bool EnsureDeviceConsented();
+
+  /**
+   * @brief Allows to add new or update existed application during
+   * registration process
+   * @param application_id The policy aplication id.
+   */
+  void AddApplication(const std::string& application_id);
+
+  /**
    * Checks whether application is revoked
    * @param app_id id application
    * @return true if application is revoked
    */
   bool IsApplicationRevoked(const std::string& app_id);
+
+  /**
+   * @brief Notifies policy manager, that PTS was sent out
+   */
+  void OnUpdateRequestSentToMobile();
 
 protected:
 
@@ -278,6 +308,7 @@ private:
   utils::SharedPtr<PolicyEventObserver> event_observer_;
   bool on_ignition_check_done_;
   uint32_t last_activated_app_id_;
+  bool registration_in_progress;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI
@@ -287,6 +318,12 @@ private:
   inline PolicyManager* CreateManager();
 
   bool is_user_requested_policy_table_update_;
+
+  /**
+   * @brief Application-to-device map is used for getting/setting user consents
+   * for all apps
+   */
+  std::map<std::string, std::string> app_to_device_link_;
 
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
   FRIEND_BASE_SINGLETON_CLASS_WITH_DELETER(PolicyHandler,

@@ -113,12 +113,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual bool ResetUserConsent() = 0;
 
     /**
-     * @brief Checks, if policy update is necessary for application
-     * @param Application id assigned by Ford to the application
-     */
-    virtual void CheckAppPolicyState(const std::string& application_id) = 0;
-
-    /**
      * @brief Returns current status of policy table for HMI
      * @return Current status of policy table
      */
@@ -178,6 +172,11 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * Handler of exceeding timeout of exchanging policy table
      */
     virtual void OnExceededTimeout() = 0;
+
+    /**
+     * @brief Handler of PTS sending out
+     */
+    virtual void OnUpdateStarted() = 0;
 
     /**
      * @brief Check user consent for mobile device data connection
@@ -242,7 +241,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * valid data as well as invalid. So we will remove all invalid data
      * from this structure.
      */
-    virtual void SetUserConsentForApp(PermissionConsent& permissions) = 0;
+    virtual void SetUserConsentForApp(const PermissionConsent& permissions) = 0;
 
     /**
      * @brief Get default HMI level for application
@@ -290,8 +289,17 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual void GetPermissionsForApp(
       const std::string& device_id, const std::string& policy_app_id,
       std::vector<FunctionalGroupPermission>& permissions) = 0;
+
+    /**
+     * @brief Gets specific application permissions changes since last policy
+     * table update
+     * @param device_id Id of device, which hosts application
+     * @param policy_app_id Unique application id
+     * @return Permissions changes
+     */
     virtual AppPermissions GetAppPermissionsChanges(
-      const std::string& app_id) = 0;
+      const std::string& device_id, const std::string& policy_app_id) = 0;
+
     virtual void RemovePendingPermissionChanges(const std::string& app_id) = 0;
 
     /**
@@ -330,6 +338,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual void MarkUnpairedDevice(const std::string& device_id) = 0;
 
     /**
+     * @brief Adds, application to the db or update existed one
+     * run PTU if policy update is necessary for application.
+     * @param Application id assigned by Ford to the application
+     */
+    virtual void AddApplication(const std::string& application_id) = 0;
+
+    /**
      * @brief Removes unpaired device records and related records from DB
      * @param device_ids List of device_id, which should be removed
      * @return true, if succedeed, otherwise - false
@@ -359,6 +374,18 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @return
      */
     virtual uint32_t GetNotificationsNumber(const std::string& priority) = 0;
+
+    /**
+     * @brief Provide info about device consent for application
+     * @return Amount of groups for which app is allowed
+     */
+    virtual int IsConsentNeeded(const std::string& app_id) = 0;
+
+    /**
+     * @brief Allows to update Vehicle Identification Number in policy table.
+     * @param new value for the parameter.
+     */
+    virtual void SetVINValue(const std::string& value) = 0;
 };
 
 }  // namespace policy

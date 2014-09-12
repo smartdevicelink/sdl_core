@@ -13,12 +13,50 @@ namespace NsMessageBroker
 {
    CMessageBrokerController::CMessageBrokerController(const std::string& address, uint16_t port, std::string name):
    TcpClient(address, port),
+#ifdef CUSTOMER_PASA
+   MqClient(std::string(""), std::string("")),
+#endif
    m_receivingBuffer(""),
    mControllersIdStart(-1),
    mControllersIdCurrent(0)
    {
       mControllersName = name;
+#ifdef CUSTOMER_PASA
+      mClientType = TCP;
+#endif
    }
+
+#ifdef CUSTOMER_PASA
+   CMessageBrokerController::CMessageBrokerController(const std::string& send_queue, const std::string& receive_queue, std::string name):
+   TcpClient(std::string(""), 0),
+   MqClient(send_queue, receive_queue),
+   m_receivingBuffer(""),
+   mControllersIdStart(-1),
+   mControllersIdCurrent(0)
+   {
+     mControllersName = name;
+     mClientType = MQUEUE;
+
+     /* Create the shared memory object */
+     fd = shm_open("/SHNAME_SDLQUEUE", O_RDWR | O_CREAT , 0777);
+     //DBG_MSG(("MqClient::Send:A"));
+     ftruncate(fd, sizeof(shmem_t));
+     /* Set the size of the shared memory object */
+
+     // DBG_MSG(("MqClient::Send::B"));
+     /* Get a pointer to the shared memory, map it into
+      * our address space */
+     ptr = ( shmem_t *)mmap(0, sizeof(shmem_t), PROT_READ, MAP_SHARED, fd, 0);
+     // DBG_MSG(("MqClient::Send:B"));
+
+     fd2 = shm_open("/SHNAME_SDLQUEUE2",  O_RDWR | O_CREAT, 0777);
+     DBG_MSG(("A\n"));
+     ftruncate(fd2, sizeof(shmem_t));
+     /* Get a pointer to the shared memory object */
+     ptr2 =(shmem_t *) mmap(0, sizeof(shmem_t),
+     PROT_WRITE, MAP_SHARED, fd2, 0);
+   }
+#endif
 
    std::string CMessageBrokerController::getControllersName()
    {
@@ -27,17 +65,56 @@ namespace NsMessageBroker
 
    CMessageBrokerController::~CMessageBrokerController()
    {
+#ifdef CUSTOMER_PASA
+     ftruncate(fd, 0);
+     munmap(ptr, sizeof(shmem_t));
+     close(fd);
+     ftruncate(fd2, 0);
+     munmap(ptr2, sizeof(shmem_t));
+     close(fd2);
+#endif
    }
 
+#ifdef CUSTOMER_PASA
+   ssize_t CMessageBrokerController::clientRecv(std::string& data)
+   {
+	   switch(mClientType)
+	   {
+		   case TCP: 	return TcpClient::Recv(data);
+		   case MQUEUE:	return MqClient::Recv(data);
+	   }
+   }
+
+   ssize_t CMessageBrokerController::clientSend(const std::string& data)
+   {
+	   switch(mClientType)
+	   {
+		   case TCP: 	  return TcpClient::Send(data);
+		   case MQUEUE:	return MqClient::Send(data);
+		   default :    return -1;
+	   }
+   }
+#endif
    ssize_t CMessageBrokerController::Recv(std::string& data)
    {
       DBG_MSG(("CMessageBrokerController::Recv()\n"));
+#ifdef CUSTOMER_PASA
+      ssize_t recv = clientRecv(data);
+#else
       ssize_t recv = TcpClient::Recv(data);
+#endif 
       DBG_MSG(("Received message: %s\n", data.c_str()));
       m_receivingBuffer += data;
       while (!stop)
       {
          Json::Value root;
+#ifdef CUSTOMER_PASA
+         if (m_receivingBuffer.length() > sizeof(shmem_t))
+         {
+            m_receivingBuffer.clear();
+            return 0;
+         }
+#endif
          if (!m_reader.parse(m_receivingBuffer, root))
          {
             DBG_MSG(("Received not JSON string! %s\n", m_receivingBuffer.c_str()));
@@ -110,7 +187,11 @@ namespace NsMessageBroker
 
    ssize_t CMessageBrokerController::Send(const std::string& data)
    {
+#ifdef CUSTOMER_PASA
+      return clientSend(data);
+#else
       return TcpClient::Send(data);
+#endif
    }
 
    void CMessageBrokerController::sendJsonMessage(Json::Value& message)
@@ -271,15 +352,14 @@ namespace NsMessageBroker
 
    void* CMessageBrokerController::MethodForReceiverThread(void * arg)
    {
+      sync_primitives::AutoLock auto_lock(receiving_thread_lock_);
       stop = false;
-      is_active = true;
       arg = arg; // to avoid compiler warnings
       while(!stop)
       {
          std::string data = "";
          Recv(data);
       }
-      is_active = false;
       return NULL;
    }
 

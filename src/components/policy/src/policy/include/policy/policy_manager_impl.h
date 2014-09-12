@@ -37,7 +37,9 @@
 #include "utils/shared_ptr.h"
 #include "utils/lock.h"
 #include "policy/policy_manager.h"
+#include "policy/cache_manager.h"
 #include "policy/policy_table.h"
+#include "policy/update_status_manager.h"
 #include "./functions.h"
 #include "usage_statistics/statistics_manager.h"
 
@@ -69,13 +71,13 @@ class PolicyManagerImpl : public PolicyManager {
     virtual bool ExceededDays(int days);
     virtual bool ExceededKilometers(int kilometers);
     virtual void IncrementIgnitionCycles();
-    virtual void CheckAppPolicyState(const std::string& application_id);
     virtual PolicyTableStatus GetPolicyTableStatus();
     virtual void ResetRetrySequence();
     virtual int NextRetryTimeout();
     virtual int TimeoutExchange();
     virtual const std::vector<int> RetrySequenceDelaysSeconds();
     virtual void OnExceededTimeout();
+    virtual void OnUpdateStarted();
     virtual void PTUpdatedAt(int kilometers, int days_after_epoch);
 
     /**
@@ -97,7 +99,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void SetDeviceInfo(const std::string& device_id,
                                const DeviceInfo& device_info);
 
-    virtual void SetUserConsentForApp(PermissionConsent &permissions);
+    virtual void SetUserConsentForApp(const PermissionConsent& permissions);
 
     virtual bool GetDefaultHmi(const std::string& policy_app_id,
                                std::string* default_hmi);
@@ -125,6 +127,10 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual uint32_t GetNotificationsNumber(const std::string& priority);
 
+    virtual int IsConsentNeeded(const std::string& app_id);
+
+    virtual void SetVINValue(const std::string& value);
+
     // Interface StatisticsManager (begin)
     virtual void Increment(usage_statistics::GlobalCounterId type);
     virtual void Increment(const std::string& app_id,
@@ -136,7 +142,8 @@ class PolicyManagerImpl : public PolicyManager {
                      int32_t timespan_seconds);    
     // Interface StatisticsManager (end)
 
-    AppPermissions GetAppPermissionsChanges(const std::string& app_id);
+    AppPermissions GetAppPermissionsChanges(const std::string& device_id,
+                                            const std::string& policy_app_id);
     void RemovePendingPermissionChanges(const std::string& app_id);
 
     void SendNotificationOnPermissionsUpdated(const std::string& application_id);
@@ -147,12 +154,10 @@ class PolicyManagerImpl : public PolicyManager {
     bool CanAppStealFocus(const std::string& app_id);
     void MarkUnpairedDevice(const std::string& device_id);
 
+    void AddApplication(const std::string& application_id);
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(
-      const BinaryMessage& pt_content);
-    //      virtual bool Validate();
-    //      virtual bool ValidateResponseAgainsRequest();
-    virtual bool LoadPTFromFile(const std::string& file_name);
+        const BinaryMessage& pt_content);
 
   private:
     /*
@@ -162,7 +167,8 @@ class PolicyManagerImpl : public PolicyManager {
      * @param Policy table update struct
      */
     void CheckPermissionsChanges(
-      const utils::SharedPtr<policy_table::Table> update);
+      const utils::SharedPtr<policy_table::Table> update,
+      const utils::SharedPtr<policy_table::Table> snapshot);
 
     /**
      * @brief Fill structure to be sent with OnPermissionsChanged notification
@@ -177,26 +183,6 @@ class PolicyManagerImpl : public PolicyManager {
       const policy_table::Strings& group_names,
       const std::vector<FunctionalGroupPermission>& group_permission,
       Permissions& notification_data);
-    /*
-     * @brief Sets flag for update progress
-     *
-     * @param value
-     */
-    void set_exchange_in_progress(bool value);
-
-    /*
-     * @brief Sets flag for pending update
-     *
-     * @param value
-     */
-    void set_exchange_pending(bool value);
-
-    /*
-     * @brief Sets flag for update necessity
-     *
-     * @param value
-     */
-    void set_update_required(bool value);
 
     /**
      * @brief Add application id at the end of update permissions request list
@@ -209,25 +195,45 @@ class PolicyManagerImpl : public PolicyManager {
      */
     void RemoveAppFromUpdateList();
 
-    int IsConsentNeeded(const std::string& app_id);
-
     /**
-     * @brief Check update status and notify HMI on changes
-     */
-    void CheckUpdateStatus();
-
-    /**
-     * @brief Validate PermissionConsent structure and removes all invalid data from it.
-     * So, after this method is done specified PermissionConsent will be valid or empty.
-     * @param group_names The groups according to which we will validate permissions
+     * @brief Validate PermissionConsent structure according to currently
+     * assigned groups
      * @param permissions PermissionConsent structure that should be validated.
+     * @return PermissonConsent struct, which contains no foreign groups
      */
-    void EnsureCorrectPermissionConsent(const FunctionalGroupNames &group_names,
-                                        PermissionConsent& permissions);
+    PermissionConsent EnsureCorrectPermissionConsent(
+        const PermissionConsent& permissions_to_check);
+
+    /**
+     * @brief Allows to process case when added application is not present in
+     * policy db.
+     * @param policy application id.
+     * @param cuuren consent for application's device.
+     */
+    void AddNewApplication(const std::string& application_id,
+                           DeviceConsent device_consent);
+
+    /**
+     * @brief Allows to process case when added application is already
+     * in policy db.
+     * @param policy application id.
+     * @param cuuren consent for application's device.
+     */
+    void PromoteExistedApplication(const std::string& application_id,
+                               DeviceConsent device_consent);
+
+    /**
+     * @brief Check if certain application already in policy db.
+     * @param policy application id.
+     * @return true if application presents false otherwise.
+     */
+    bool IsNewApplication(const std::string& application_id) const;
 
     PolicyListener* listener_;
     PolicyTable policy_table_;
-    utils::SharedPtr<policy_table::Table> policy_table_snapshot_;
+
+    UpdateStatusManager update_status_manager_;
+    CacheManager cache;
     bool exchange_in_progress_;
     bool update_required_;
     bool exchange_pending_;
@@ -235,6 +241,7 @@ class PolicyManagerImpl : public PolicyManager {
     sync_primitives::Lock update_required_lock_;
     sync_primitives::Lock exchange_pending_lock_;
     sync_primitives::Lock update_request_list_lock_;
+    sync_primitives::Lock apps_registration_lock_;
     std::map<std::string, AppPermissions> app_permissions_diff_;
 
     /**
@@ -266,11 +273,6 @@ class PolicyManagerImpl : public PolicyManager {
      * Lock for guarding recording statistics
      */
     sync_primitives::Lock statistics_lock_;
-
-    /**
-     * @brief Last status of policy table update
-     */
-    policy::PolicyTableStatus last_update_status_;
 
     /**
      * @brief Device id, which is used during PTU handling for specific

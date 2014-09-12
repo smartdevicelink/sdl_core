@@ -63,8 +63,8 @@ const std::string kUpdateDeviceConsentedGroup =
 
 const std::string kUpdateDevice =
   "UPDATE `device` SET `hardware` = ?, `firmware_rev` = ?, `os` = ?, "
-  "`os_version` = ?, `carrier` = ?, `max_number_rfcom_ports` = ? "
-  "WHERE `id` = ? ";
+  "`os_version` = ?, `carrier` = ?, `max_number_rfcom_ports` = ?, "
+  " `connection_type` = ? WHERE `id` = ? ";
 
 const std::string kInsertDeviceConsentedGroup =
   "INSERT OR IGNORE INTO `device_consent_group` "
@@ -73,8 +73,9 @@ const std::string kInsertDeviceConsentedGroup =
 
 const std::string kInsertDevice =
   "INSERT OR IGNORE INTO `device` "
-  "(`id`, `hardware`, `firmware_rev`, `os`, `os_version`, `carrier`, `max_number_rfcom_ports`) "
-  "VALUES (?,?,?,?,?,?,?)";
+  "(`id`, `hardware`, `firmware_rev`, `os`, `os_version`, `carrier`,"
+    "`max_number_rfcom_ports`, `connection_type`) "
+  "VALUES (?,?,?,?,?,?,?,?)";
 
 const std::string kSelectDeviceData = "SELECT * FROM `device`";
 
@@ -101,7 +102,7 @@ const std::string kSelectUsageAndErrorCount =
 const std::string kSelectAppLevels =
   "SELECT `application_id`, `minutes_in_hmi_full`, `minutes_in_hmi_limited`, "
   "  `minutes_in_hmi_background`, `minutes_in_hmi_none`, "
-  "  `count_of_rfcomm_limit_reached`, `count_of_user_selections`, "
+  "  `count_of_user_selections`, "
   "  `count_of_rejections_sync_out_of_memory`, "
   "  `count_of_rejections_nickname_mismatch`, "
   "  `count_of_rejections_duplicate_name`, "
@@ -114,13 +115,19 @@ const std::string kSelectAppLevels =
   "FROM `app_level`";
 const std::string kInsertDeviceData =
   "INSERT OR IGNORE INTO `device` "
-  "(`id`, `hardware`, `firmware_rev`, `os`, `os_version`, `carrier`, `max_number_rfcom_ports`) "
-  "VALUES (?,?,?,?,?,?,?) ";
+  "(`id`, `hardware`, `firmware_rev`, `os`, `os_version`, `carrier`, "
+  "`max_number_rfcom_ports`,`connection_type`) VALUES (?,?,?,?,?,?,?,?) ";
 
 const std::string kInsertConsentGroups =
   "INSERT OR IGNORE INTO `consent_group` "
   "(`device_id`, `application_id`, `functional_group_id`, `is_consented`, `input`) "
   "VALUES (?,?,?,?,?)";
+
+const std::string kDeleteAppGroupConsent = "DELETE FROM `consent_group` WHERE "
+  "`application_id` = ? AND `functional_group_id` = ? ";
+
+ const std::string kSelectGroupId =
+     "SELECT `id` FROM `functional_group` WHERE `name` = ? ";
 
 const std::string kCountUnconsentedGroups =
   "SELECT COUNT(`a`.`functional_group_id`) FROM `app_group` AS `a` "
@@ -145,6 +152,9 @@ const std::string kSelectModuleMeta = "SELECT* FROM `module_meta`";
 const std::string kUpdateMetaParams = "UPDATE `module_meta` SET "
                                       "`ccpu_version` = ?, `wers_country_code` = ?, `language` = ? ";
 
+const std::string kUpdateModuleMetaVinParam =
+    "UPDATE `module_meta` SET `vin` = ? ";
+
 const std::string kSelectMetaParams = "SELECT `ccpu_version`, "
                    "`wers_country_code`, `language` from `module_meta`";
 
@@ -163,6 +173,8 @@ const std::string kInsertApplication =
   "INSERT OR IGNORE INTO `application`(`id`, `keep_context`, `steal_focus`, "
   " `default_hmi`, `priority_value`, `is_revoked`, `memory_kb`, "
   " `heart_beat_timeout_ms`, `certificate`) VALUES( ?, ?, ?, ?, ?, ?, ?, ?, ?) ";
+
+const std::string kCollectFriendlyMsg = "SELECT * FROM `message`";
 
 const std::string kSelectFriendlyMsg =
   "SELECT `tts`, `label`, `line1`, `line2`, `textBody` FROM `message` "

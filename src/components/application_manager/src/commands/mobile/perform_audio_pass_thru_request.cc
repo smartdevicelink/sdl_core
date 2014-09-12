@@ -31,6 +31,7 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string.h>
 #include "application_manager/commands/mobile/perform_audio_pass_thru_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
@@ -89,7 +90,8 @@ void PerformAudioPassThruRequest::Run() {
 
   if (IsWhiteSpaceExist()) {
     LOG4CXX_ERROR(logger_,
-                  "Incoming perform audio pass thru has contains \t\n \\t \\n");
+                  "Incoming perform audio pass thru has contains \\t\\n \\\\t \\\\n"
+                  " text contains only whitespace in initialPrompt");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
@@ -238,6 +240,8 @@ void PerformAudioPassThruRequest::SendRecordStartNotification() {
 }
 
 void PerformAudioPassThruRequest::StartMicrophoneRecording() {
+  ApplicationManagerImpl::instance()->begin_audio_pass_thru();
+
   ApplicationManagerImpl::instance()->StartAudioPassThruThread(
       connection_key(), correlation_id(),
       (*message_)[str::msg_params][str::max_duration].asInt(),
@@ -259,7 +263,7 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
 
     for (; it_ip != it_ip_end; ++it_ip) {
       str = (*it_ip)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid initial_prompt syntax check failed");
         return true;
       }
@@ -271,7 +275,7 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
 
     str = (*message_)[strings::msg_params]
                      [strings::audio_pass_display_text1].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
           "Invalid audio_pass_display_text1 value syntax check failed");
       return true;
@@ -283,7 +287,7 @@ bool PerformAudioPassThruRequest::IsWhiteSpaceExist() {
 
     str = (*message_)[strings::msg_params]
                      [strings::audio_pass_display_text2].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
           "Invalid audio_pass_display_text2 value syntax check failed");
       return true;

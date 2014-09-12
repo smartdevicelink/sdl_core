@@ -193,8 +193,8 @@ TEST_F(SQLPTRepresentationTest, GetUpdateUrls) {
   ASSERT_TRUE(dbms->Exec(query_insert));
   ret = reps->GetUpdateUrls(7);
   ASSERT_EQ(2u, ret.size());
-  EXPECT_EQ("http://ford.com/cloud/1", ret[0].url);
-  EXPECT_EQ("http://ford.com/cloud/2", ret[1].url);
+  EXPECT_EQ("http://ford.com/cloud/1", ret[0].url[0]);
+  EXPECT_EQ("http://ford.com/cloud/2", ret[1].url[0]);
 
   ret = reps->GetUpdateUrls(0);
   EXPECT_TRUE(ret.empty());
@@ -370,7 +370,7 @@ TEST_F(SQLPTRepresentationTest, SaveGenerateSnapshot) {
     Json::Value(1);
   module_config["notifications_per_minute_by_priority"]["navigation"] =
     Json::Value(2);
-  module_config["notifications_per_minute_by_priority"]["voiceCommunication"] =
+  module_config["notifications_per_minute_by_priority"]["VOICECOMM"] =
     Json::Value(3);
   module_config["notifications_per_minute_by_priority"]["communication"] =
     Json::Value(4);
@@ -411,7 +411,6 @@ TEST_F(SQLPTRepresentationTest, SaveGenerateSnapshot) {
   app12345counters["count_of_rejections_nickname_mismatch"] = 0;
   app12345counters["count_of_rejections_sync_out_of_memory"] = 0;
   app12345counters["count_of_removals_for_bad_behavior"] = 0;
-  app12345counters["count_of_rfcom_limit_reached"] = 0;
   app12345counters["count_of_rpcs_sent_in_hmi_none"] = 0;
   app12345counters["count_of_run_attempts_while_revoked"] = 0;
   app12345counters["count_of_user_selections"] = 0;

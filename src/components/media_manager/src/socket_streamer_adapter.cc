@@ -117,7 +117,7 @@ void SocketStreamerAdapter::Init() {
   if (!thread_) {
     LOG4CXX_INFO(logger, "Create and start sending thread");
     streamer_ = new Streamer(this);
-    thread_ = new threads::Thread("SocketStreamerAdapter", streamer_);
+    thread_ = new threads::Thread("SocketStreamer", streamer_);
     const size_t kStackSize = 16384;
     thread_->startWithOptions(threads::ThreadOptions(kStackSize));
   }

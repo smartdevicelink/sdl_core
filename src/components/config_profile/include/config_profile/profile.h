@@ -213,6 +213,12 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& audio_stream_file() const;
 #ifdef CUSTOMER_PASA
     /**
+     * @brief Returns name for mqueue from which SDL
+     * will be able to obtain data.
+     */
+    const std::string& audio_mq_path() const;
+
+    /**
       * @brief Returns path to log4cxx configuration file
       */
     const std::string& log4cxx_config_file() const;
@@ -228,8 +234,34 @@ class Profile : public utils::Singleton<Profile> {
       * if this path exists in the system log file will be
       * saved to the USb drive
       */
-#endif
+
     const std::string& remote_logging_flag_file_path() const;
+
+    /**
+      * @brief Returns path on the target where the log files are being stored.
+      */
+    const std::string& target_log_file_home_dir() const;
+
+    /**
+      * @brief Returns path on the target log file name pattern.
+      */
+    const std::string& target_log_file_name_pattern() const;
+
+    /**
+      * @brief Returns path to the target boot count file.
+      */
+    const std::string& target_boot_count_file() const;
+
+    /**
+      * @brief Returns path to tmp directory on the target.
+      */
+    const std::string& target_tmp_dir() const;
+
+    /**
+     * @brief Returns max size limit of log file
+     */
+    const std::string& log_file_max_size() const;
+#endif
     /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none
@@ -296,7 +328,7 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Should Policy be turned off? (Library not loaded)
      * @return Flag
      */
-    bool policy_turn_off() const;
+    bool enable_policy() const;
 
     /*
      * @brief Timeout in transport manager before disconnect
@@ -434,9 +466,11 @@ class Profile : public utils::Singleton<Profile> {
      */
     uint32_t thread_pool_size() const;
 
-    const std::string& iap_legacy_protocol() const;
+    const std::string& iap_legacy_protocol_mask() const;
 
-    const std::string& iap_hub_protocol() const;
+    const std::string& iap_hub_protocol_mask() const;
+
+    const std::string& iap_pool_protocol_mask() const;
 
     const std::string& iap_system_config() const;
 
@@ -444,6 +478,10 @@ class Profile : public utils::Singleton<Profile> {
 
     int iap2_hub_connect_attempts() const;
 
+    /**
+     * @return seconds
+     */
+    int iap_hub_connection_wait_timeout() const;
 
   private:
     /**
@@ -579,7 +617,7 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t                        heart_beat_timeout_;
     std::string                     preloaded_pt_file_;
     std::string                     policy_snapshot_file_name_;
-    bool                            policy_turn_off_;
+    bool                            enable_policy_;
     uint32_t                        transport_manager_disconnect_timeout_;
     bool                            use_last_state_;
     std::vector<uint32_t>           supported_diag_modes_;
@@ -587,9 +625,15 @@ class Profile : public utils::Singleton<Profile> {
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
 #ifdef CUSTOMER_PASA
+    std::string                     audio_mq_path_;
     std::string                     log4cxx_config_file_;
     std::string                     remote_logging_flag_file_;
     std::string                     remote_logging_flag_file_path_;
+    std::string                     target_log_file_home_dir_;
+    std::string                     target_log_file_name_pattern_;
+    std::string                     target_boot_count_file_;
+    std::string                     target_tmp_dir_;
+    std::string                     log_file_max_size_;
 #endif
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;
@@ -610,11 +654,13 @@ class Profile : public utils::Singleton<Profile> {
      */
     std::pair<uint32_t, int32_t>   get_vehicle_data_frequency_;
 
-    std::string                     iap_legacy_protocol_;
-    std::string                     iap_hub_protocol_;
+    std::string                     iap_legacy_protocol_mask_;
+    std::string                     iap_hub_protocol_mask_;
+    std::string                     iap_pool_protocol_mask_;
     std::string                     iap_system_config_;
     std::string                     iap2_system_config_;
     int                             iap2_hub_connect_attempts_;
+    int                             iap_hub_connection_wait_timeout_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

@@ -71,13 +71,10 @@ void OnExitApplicationNotification::Run() {
     }
 #endif
     case hmi_apis::Common_ApplicationToNONEReason::USER_EXIT : {
-      MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
-          app_impl->app_id(),
-          mobile_api::AppInterfaceUnregisteredReason::USER_EXIT);
       break;
     }
     default : {
-      LOG4CXX_WARN(logger_, "Bad reason");
+      LOG4CXX_WARN(logger_, "Unhandled reason");
       break;
     }
   }

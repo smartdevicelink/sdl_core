@@ -59,6 +59,9 @@ set(SOURCES
   ./src/policy_table.cc
   ./src/sql_pt_queries.cc
   ./src/sql_pt_representation.cc
+  ./src/update_status_manager.cc
+  ./src/cache_manager.cc
+  ${CMAKE_SOURCE_DIR}/src/components/rpc_base/src/rpc_base/rpc_base.cc
 )
 
 if (EXTENDED_POLICY_FLAG)

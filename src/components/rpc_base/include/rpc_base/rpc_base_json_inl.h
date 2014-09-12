@@ -51,6 +51,14 @@ inline PrimitiveType::ValueState PrimitiveType::InitHelper(
   }
 }
 
+inline policy_table_interface_base::PolicyTableType PrimitiveType::GetPolicyTableType() const  {
+  return policy_table_type_;
+}
+
+inline void PrimitiveType::SetPolicyTableType(policy_table_interface_base::PolicyTableType pt_type) {
+  policy_table_type_ = pt_type;
+}
+
 // static
 inline CompositeType::InitializationState CompositeType::InitHelper(
   const Json::Value* value,
@@ -67,6 +75,14 @@ inline CompositeType::InitializationState CompositeType::InitHelper(
   } else {
     return kInvalidInitialized;
   }
+}
+
+inline policy_table_interface_base::PolicyTableType CompositeType::GetPolicyTableType() const {
+  return policy_table_type_;
+}
+
+inline void CompositeType::SetPolicyTableType(policy_table_interface_base::PolicyTableType pt_type) {
+  policy_table_type_ = pt_type;
 }
 
 namespace impl {

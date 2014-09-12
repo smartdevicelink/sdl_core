@@ -196,7 +196,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     ApplicationSharedPtr application(uint32_t app_id) const;
     ApplicationSharedPtr application_by_policy_id(
         const std::string& policy_app_id) const;
-    inline const std::set<ApplicationSharedPtr>& applications() const;
     ApplicationSharedPtr active_application() const;
     std::vector<ApplicationSharedPtr> applications_by_button(uint32_t button);
     std::vector<ApplicationSharedPtr> applications_by_ivi(uint32_t vehicle_info);
@@ -233,11 +232,22 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param app_id Application id
      * @param reason reason of unregistering application
      * @param is_resuming describes - is this unregister
-     *        is normal or need to be resumed
+     *        is normal or need to be resumed\
+     * @param is_unexpected_disconnect
+     * Indicates if connection was unexpectedly lost(TM layer, HB)
      */
     void UnregisterApplication(const uint32_t& app_id,
                                mobile_apis::Result::eType reason,
-                               bool is_resuming = false);
+                               bool is_resuming = false,
+                               bool is_unexpected_disconnect = false);
+
+    /**
+    * @brief Unregister application revoked by Policy
+    * @param app_id Application id
+    * @param reason Reason of unregistering application
+    */
+    void UnregisterRevokedApplication(const uint32_t& app_id,
+                                      mobile_apis::Result::eType reason);
 
     /*
      * @brief Sets unregister reason for closing all registered applications
@@ -253,12 +263,19 @@ class ApplicationManagerImpl : public ApplicationManager,
      * when User chooses to reset HU.
      * Resets Policy Table if applicable.
      */
-  void HeadUnitReset(mobile_api::AppInterfaceUnregisteredReason::eType reason);
+    void HeadUnitReset(
+        mobile_api::AppInterfaceUnregisteredReason::eType reason);
+
+    /*
+     * @brief Called by HMI on SUSPEND.
+     * SDL must save all persistence data(Resume, Policy)
+     */
+    void HeadUnitSuspend();
 
     /*
      * @brief Closes all registered applications
      */
-    void UnregisterAllApplications();
+    void UnregisterAllApplications(bool generated_by_hmi = false);
 
     bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
     bool LoadAppDataToHMI(ApplicationSharedPtr app);
@@ -281,7 +298,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     mobile_api::HMILevel::eType PutApplicationInFull(ApplicationSharedPtr app);
 
-    void DeactivateApplication(ApplicationSharedPtr app);
     void ConnectToDevice(uint32_t id);
     void OnHMIStartedCooperation();
 
@@ -587,9 +603,55 @@ class ApplicationManagerImpl : public ApplicationManager,
         mobile_apis::FunctionID::eType function_id,
         CommandParametersPermissions* params_permissions = NULL);
 
+    // typedef for Applications list
+    typedef const std::set<ApplicationSharedPtr> TAppList;
+
+    // typedef for Applications list iterator
+    typedef std::set<ApplicationSharedPtr>::iterator TAppListIt;
+
+    // typedef for Applications list const iterator
+    typedef std::set<ApplicationSharedPtr>::const_iterator TAppListConstIt;
+
+    /**
+     * Class for thread-safe access to applications list
+     */
+    class ApplicationListAccessor {
+     public:
+
+      /**
+       * @brief ApplicationListAccessor class constructor
+       */
+      ApplicationListAccessor() {
+        ApplicationManagerImpl::instance()->applications_list_lock_.Acquire();
+      }
+
+      /**
+       * @brief ApplicationListAccessor class destructor
+       */
+      ~ApplicationListAccessor() {
+        ApplicationManagerImpl::instance()->applications_list_lock_.Release();
+      }
+
+      // TODO(VS): Now we have return application list by value, because we have
+      // situations, when our process is killed without Stop method called.
+      // This problem must be discussed and fixed.
+      /**
+       * @brief thread-safe getter for applications
+       * @return applications list
+       */
+      TAppList applications() {
+        return ApplicationManagerImpl::instance()->application_list_;
+      }
+
+     private:
+      DISALLOW_COPY_AND_ASSIGN(ApplicationListAccessor);
+    };
+
+    friend class ApplicationListAccessor;
+
   private:
     ApplicationManagerImpl();
-    bool InitThread(threads::Thread* thread);
+
     hmi_apis::HMI_API& hmi_so_factory();
     mobile_apis::MOBILE_API& mobile_so_factory();
 
@@ -632,8 +694,6 @@ class ApplicationManagerImpl : public ApplicationManager,
   private:
 
     // members
-
-
 
     /**
      * @brief List of applications
@@ -704,9 +764,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     class ApplicationListUpdateTimer : public timer::TimerThread<ApplicationManagerImpl> {
      public:
       ApplicationListUpdateTimer(ApplicationManagerImpl* callee) :
-          timer::TimerThread<ApplicationManagerImpl>(
-              callee,
-              &ApplicationManagerImpl::OnApplicationListUpdateTimer
+          timer::TimerThread<ApplicationManagerImpl>("AM ListUpdater",
+              callee, &ApplicationManagerImpl::OnApplicationListUpdateTimer
           ) {
       }
     };
@@ -717,10 +776,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);
 };
-
-const std::set<ApplicationSharedPtr>& ApplicationManagerImpl::applications() const {
-  return application_list_;
-}
 
 bool ApplicationManagerImpl::vr_session_started() const {
   return is_vr_session_strated_;

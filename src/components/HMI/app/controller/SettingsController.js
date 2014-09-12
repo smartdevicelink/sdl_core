@@ -129,70 +129,17 @@ SDL.SettingsController = Em.Object.create( {
         }
     },
 
-    changeAppPermission: function(event) {
+    changeAppPermission: function(element) {
 
-        var allowance = SDL.SDLController.getApplicationModel(event.appID).allowedFunctions;
+            if (element.allowed) {
 
-        for (var i = 0; i < allowance.length; ++i) {
+                element.allowed = false;
+                element.set('text', element.name + " - Not allowed");
+            } else {
 
-            if (allowance[i].name == event.name) {
-
-                if (allowance[i].allowed) {
-
-                    allowance[i].allowed = false;
-                    event.set('text', event.name + " - Not allowed");
-                } else {
-
-                    allowance[i].allowed = true;
-                    event.set('text', event.name + " - Allowed");
-                }
-                break;
+                element.allowed = true;
+                element.set('text', element.name + " - Allowed");
             }
-        }
-    },
-
-    /**
-     * Method to update array with app permissions which came from SDL
-     *
-     * @param {Object} params
-     *
-     */
-    onAppPermissionChanged: function(params) {
-
-        if (params.isAppPermissionsRevoked) {
-            //FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message)});
-
-            //deleted array
-            SDL.SDLModel.setAppPermissions(params.appRevokedPermissions);
-        }
-
-        if (params.isAppRevoked) {
-
-            //to do use GetUserFriendlyMessage
-            SDL.PopUp.popupActivate("Current version of app is no longer supported!");
-
-            SDL.SDLModel.onAppUnregistered({
-                "appID": params.appID
-            });
-        }
-
-        if (params.isPermissionsConsentNeeded) {
-
-            FFW.BasicCommunication.GetListOfPermissions(params.appID);
-
-            //returns allowedFunctions
-            //FFW.BasicCommunication.GetUserFriendlyMessage(function(allowedFunctions, appID){FFW.BasicCommunication.OnAppPermissionConsent(allowedFunctions, "GUI", appID)}, params.appID);
-        }
-
-        if (params.appUnauthorized) {
-
-            //to do use GetUserFriendlyMessage
-            SDL.PopUp.popupActivate("Something went wrong!");
-
-            SDL.SDLModel.onAppUnregistered({
-                "appID": params.appID
-            });
-        }
     },
 
     /**
@@ -218,13 +165,13 @@ SDL.SettingsController = Em.Object.create( {
             var appID = SDL.SDLModel.getListOfPermissionsPull[message.id],
                 messageCodes = [];
 
-            SDL.SDLController.getApplicationModel(appID).allowedFunctions = message.result.allowedFunctions;
-
             for (var i = 0; i < message.result.allowedFunctions.length; i++) {
                 messageCodes.push(message.result.allowedFunctions[i].name);
             }
 
             FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.permissionsFriendlyMessageUpdate, appID, messageCodes);
+
+            SDL.AppPermissionsView.update(message.result.allowedFunctions, appID);
 
             delete SDL.SDLModel.getListOfPermissionsPull[message.id];
         }
@@ -237,18 +184,8 @@ SDL.SettingsController = Em.Object.create( {
      *
      */
     permissionsFriendlyMessageUpdate: function(message, appID) {
-            var len = SDL.SDLController.getApplicationModel(appID).allowedFunctions.length;
 
-            for (var i = 0; i < len; i++) {
-
-                if (message && message.label) {
-                    SDL.SDLController.getApplicationModel(appID).allowedFunctions[i].text = message.label;
-                }
-            }
-
-            SDL.AppPermissionsView.update(appID);
-
-            SDL.States.goToStates('settings.policies.appPermissions');
+        SDL.States.goToStates('settings.policies.appPermissions');
     },
 
     updateSDL: function() {
@@ -259,20 +196,62 @@ SDL.SettingsController = Em.Object.create( {
         FFW.BasicCommunication.GetURLS();
     },
 
-    AllowSDLFunctionality: function(device) {
-        this.currentDeviceAllowance = device;
-        SDL.SDLModel.connectedDevices[device.id].sdlFunctionality.popUpId = SDL.PopUp.popupActivate("Would you like to allow SDL functionality for device '" + device.name + "'?", SDL.SettingsController.OnAllowSDLFunctionality);
-    },
+    AllowSDLFunctionality: function(messages) {
 
-    onSDLConsentNeededHandler: function(params) {
-        this.currentDeviceAllowance = params.device;
+        var str = '';
 
-        //FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message, this.OnAllowSDLFunctionality)});
+        if (messages[0].line1) {
+            str += messages[0].line1;
+        }
+
+        if (messages[0].line2) {
+            str += messages[0].line2;
+        }
+
+        if (messages[0].textBody) {
+            str += messages[0].textBody;
+        }
+
+        if (str) {
+            SDL.PopUp.create().appendTo('body').popupActivate(messages[0].textBody, SDL.SettingsController.OnAllowSDLFunctionality);
+        } else {
+            SDL.PopUp.create().appendTo('body').popupActivate('WARNING!!!!!!!!!!!!!! There is no text from SDL in GetUserFriendlyMessage for DataConsent parameter!!! Please allow the device...', SDL.SettingsController.OnAllowSDLFunctionality);
+        }
+
     },
 
     userFriendlyMessagePopUp: function(appId, messageCode) {
 
-        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.popupActivate(message)}, appId, messageCode);
+        FFW.BasicCommunication.GetUserFriendlyMessage(function(message){SDL.PopUp.create().appendTo('body').popupActivate(message)}, appId, messageCode);
+    },
+
+    simpleParseUserFriendlyMessageData: function (messages) {
+        var tts = "",
+            text = "";
+
+        messages.forEach(function (x) {
+            if (x.ttsString) {
+                tts += x.ttsString;
+            }
+            if (x.textBody) {
+                text += x.textBody;
+            }
+            if (x.line1) {
+                text += x.line1;
+            }
+            if (x.line2) {
+                text += x.line2;
+            }
+        });
+
+        if (tts) {
+            SDL.TTSPopUp.ActivateTTS(tts);
+        }
+
+
+        if (text) {
+            SDL.PopUp.create().appendTo('body').popupActivate(text);
+        }
     },
 
     OnAllowSDLFunctionality: function(result) {
@@ -318,16 +297,12 @@ SDL.SettingsController = Em.Object.create( {
 
             SDL.SDLModel.policyUpdateRetry.timer = setTimeout(
                 function(){
-                    if (SDL.SDLModel.policyURLs.length > SDL.SDLModel.policyUpdateRetry.try) {
-                        FFW.BasicCommunication.OnSystemRequest(
-                            "PROPRIETARY",
-                            SDL.SDLModel.policyURLs[SDL.SDLModel.policyUpdateRetry.try].policyAppId,
-                            SDL.SettingsController.policyUpdateFile,
-                            SDL.SDLModel.policyURLs[SDL.SDLModel.policyUpdateRetry.try].url
-                        );
-                    } else {
-                        FFW.BasicCommunication.OnSystemRequest("PROPRIETARY");
-                    }
+                    FFW.BasicCommunication.OnSystemRequest(
+                        "PROPRIETARY",
+                        SDL.SDLModel.policyURLs[0].policyAppId,
+                        SDL.SettingsController.policyUpdateFile,
+                        SDL.SDLModel.policyURLs[0].url
+                    );
                     SDL.SettingsController.policyUpdateRetry();
                 }, SDL.SDLModel.policyUpdateRetry.oldTimer
             );

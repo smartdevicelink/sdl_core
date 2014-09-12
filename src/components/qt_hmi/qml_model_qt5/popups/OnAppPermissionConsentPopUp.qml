@@ -44,14 +44,28 @@ PopUp {
     width: Constants.popupWidth - 200
     height: Constants.popupHeigth - 200
 
-    property int appId
+    property int appID
     property ListModel permissionItems: ListModel{}
 
     function activate(appId) {
         console.debug("onAppPermissionConsentPopUp activate enter");
-        appId = appId
+        appID = appId
         show()
         console.debug("onAppPermissionConsentPopUp activate exit");
+    }
+
+    function getFunctionalID(messageCode) {
+
+        console.debug(appID);
+
+        var app = dataContainer.getApplication(appID);
+
+        for (var i = 0; i < app.allowedFunctions.length; i++) {
+            if (messageCode == app.allowedFunctions[i].name) {
+
+                return app.allowedFunctions[i].id;
+            }
+        }
     }
 
     function deactivate() {
@@ -63,12 +77,14 @@ PopUp {
         for (var i = 0; i < permissionItems.count; i++) {
             consentedFunctions.push({
                                         "name": permissionItems.get(i).messageCode,
-                                        "id": i,
+                                        "id": getFunctionalID(permissionItems.get(i).messageCode),
                                         "allowed": permissionItems.get(i).allowed
                                     })
+
+            console.debug("consentedFunctions.push", consentedFunctions[i].name,consentedFunctions[i].id,consentedFunctions[i].allowed);
         }
 
-        sdlSDL.onAppPermissionConsent(appId, consentedFunctions, Common.ConsentSource.GUI)
+        sdlSDL.onAppPermissionConsent(appID, consentedFunctions, Common.ConsentSource.GUI);
         console.debug("onAppPermissionConsentPopUp deactivate exit");
     }
 

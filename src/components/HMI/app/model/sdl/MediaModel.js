@@ -60,6 +60,8 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                     '<no definition>',
                     '<no definition>',
                     '<no definition>',
+                    '<no definition>',
+                    '<no definition>',
                     '<no definition>'
                 ],
                 alignment    : "text-align:center"
@@ -249,7 +251,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
             this.appInfo.set('mediaTrack', '');
             this.appInfo.set('trackIcon', 'images/sdl/audio_icon.jpg');
             this.updateSoftButtons();
-            for (i = 0; i < 6; i++) {
+            for (i = 0; i < 10; i++) {
                 this.appInfo.set('customPresets.' + i, '');
             }
             this.set('mediaPreset', false);
@@ -332,7 +334,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
                 this.appInfo.set('alignment', "text-align:center");
             }
 
-            if (params.graphic) {
+            if (params.graphic && params.graphic.value != '') {
                 this.appInfo.set('trackIcon', params.graphic.value);
             } else {
                 this.appInfo.set('trackIcon', 'images/sdl/audio_icon.jpg');
@@ -343,7 +345,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
             }
 
             // Magic number is a count of Preset Buttons on HMI = 8
-            for (var i = 0; i < 8; i++) {
+            for (var i = 0; i < 10; i++) {
                 if (!params.customPresets || (params.customPresets[i] == '' || params.customPresets[i] == null)) {
                     this.appInfo.set('customPresets.' + i, 'PRESET_' + i);
                 } else {

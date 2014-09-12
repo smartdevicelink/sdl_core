@@ -42,6 +42,7 @@
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
 #include "connection_handler/device.h"
+#include "utils/lock.h"
 
 namespace usage_statistics {
 class StatisticsManager;
@@ -139,21 +140,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual uint32_t curHash() const;
 
   /**
-   * @brief returns attribute alert_in_background_
-   * @return TRUE if application runs alert request from background level
-   * otherwise returns FALSE
-   */
-  virtual bool alert_in_background() const;
-
-  /**
-   * @brief if application activates alert in background level method sets
-   * TRUE
-   * @param state_of_alert contains TRUE if alert is activated otherwise
-   * contains FALSE
-   */
-  virtual void set_alert_in_background(bool state_of_alert);
-
-  /**
    * @brief Change Hash for current application
    * and send notification to mobile
    * @return updated_hash
@@ -164,7 +150,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   bool IsCommandLimitsExceeded(mobile_apis::FunctionID::eType cmd_id,
                                TLimitSource source);
+  virtual void SubscribeToSoftButtons(int32_t cmd_id,
+                                      const SoftButtonID& softbuttons_id);
+  virtual bool IsSubscribedToSoftButton(const uint32_t softbutton_id);
 
+  virtual void UnsubscribeFromSoftButtons(int32_t cmd_id);
 
  protected:
 
@@ -210,7 +200,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   std::set<uint32_t>                       subscribed_vehicle_info_;
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
-  bool                                     alert_in_background_;
 
   /**
    * @brief Defines number per time in seconds limits
@@ -223,8 +212,15 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   typedef std::map<mobile_apis::FunctionID::eType, TimeToNumberLimit>
   CommandNumberTimeLimit;
 
+  /**
+   * @brief Defines id of SoftButton which is related from name of command
+   */
+  typedef std::map<int32_t, SoftButtonID>
+  CommandSoftButtonID;
   CommandNumberTimeLimit cmd_number_to_time_limits_;
-
+  CommandSoftButtonID cmd_softbuttonid_;
+  // Lock for command soft button id
+  sync_primitives::Lock cmd_softbuttonid_lock_;
   DISALLOW_COPY_AND_ASSIGN(ApplicationImpl);
 };
 

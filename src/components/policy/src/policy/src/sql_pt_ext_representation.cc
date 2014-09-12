@@ -180,7 +180,8 @@ bool SQLPTExtRepresentation::SetDeviceData(const std::string& device_id,
     const std::string& os,
     const std::string& os_version,
     const std::string& carrier,
-    const uint32_t number_of_ports) {
+    const uint32_t number_of_ports,
+    const std::string& connection_type) {
   LOG4CXX_INFO(logger_, "SetDeviceData");
   dbms::SQLQuery count_query(db());
   if (!count_query.Prepare(sql_pt_ext::kCountDevice)) {
@@ -212,6 +213,7 @@ bool SQLPTExtRepresentation::SetDeviceData(const std::string& device_id,
     update_query.Bind(4, carrier);
     update_query.Bind(5, static_cast<int>(number_of_ports));
     update_query.Bind(6, device_id);
+    update_query.Bind(7, connection_type);
 
     if (!update_query.Exec() || !update_query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect update for device.");
@@ -235,6 +237,7 @@ bool SQLPTExtRepresentation::SetDeviceData(const std::string& device_id,
   insert_query.Bind(4, os_version);
   insert_query.Bind(5, carrier);
   insert_query.Bind(6, static_cast<int>(number_of_ports));
+  insert_query.Bind(7, connection_type);
 
   if (!insert_query.Exec() || !insert_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert to device.");
@@ -515,6 +518,38 @@ std::vector<UserFriendlyMessage> SQLPTExtRepresentation::GetUserFriendlyMsg(
   return result;
 }
 
+bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
+    policy_table::ConsumerFriendlyMessages* messages) const {
+  dbms::SQLQuery query(db());
+  bool result = query.Prepare(sql_pt_ext::kCollectFriendlyMsg);
+
+  if (result) {
+    while (query.Next()) {
+
+      UserFriendlyMessage msg;
+
+      msg.tts = query.GetString(1);
+      msg.label = query.GetString(2);
+      msg.line1 = query.GetString(3);
+      msg.line2 = query.GetString(4);
+      msg.text_body = query.GetString(5);
+      msg.message_code = query.GetString(7);
+
+      std::string language = query.GetString(6);
+
+      *(*messages->messages)[msg.message_code].languages[language].tts = msg.tts;
+      *(*messages->messages)[msg.message_code].languages[language].label = msg.label;
+      *(*messages->messages)[msg.message_code].languages[language].line1 = msg.line1;
+      *(*messages->messages)[msg.message_code].languages[language].line2 = msg.line2;
+      *(*messages->messages)[msg.message_code].languages[language].textBody = msg.text_body;
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Incorrect statement for select friendly messages.");
+  }
+  return result;
+}
+
+
 bool SQLPTExtRepresentation::SetMetaInfo(const std::string& ccpu_version,
     const std::string& wers_country_code,
     const std::string& language) {
@@ -632,6 +667,22 @@ bool SQLPTExtRepresentation::SaveApplicationPolicies(
 
 bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
     const policy_table::ApplicationPolicies::value_type& app) {
+  LOG4CXX_INFO(logger_, "Saving data for application: " << app.first);
+  if (app.second.is_string()) {
+    if (kDefaultId.compare(app.second.get_string()) == 0) {
+      if (!SetDefaultPolicy(app.first)) {
+        return false;
+      }
+    } else if (kPreDataConsentId.compare(app.second.get_string()) == 0) {
+      if (!SetPredataPolicy(app.first)) {
+        return false;
+      }
+    }
+
+    // Stop saving other params, since predefined permissions already set
+    return true;
+  }
+
   dbms::SQLQuery app_query(db());
   if (!app_query.Prepare(sql_pt_ext::kInsertApplication)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement into application.");
@@ -647,7 +698,7 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
     4, std::string(policy_table::EnumToJsonString(app.second.priority)));
   app_query.Bind(
     5, app.second.is_null());
-  app_query.Bind(6, app.second.memory_kb);
+  app_query.Bind(6, app.second.memory_kb->operator IntType());
   app_query.Bind(7, app.second.heart_beat_timeout_ms);
   app.second.certificate.is_initialized() ?
   app_query.Bind(8, *app.second.certificate) : app_query.Bind(8, std::string());
@@ -655,22 +706,6 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
   if (!app_query.Exec() || !app_query.Reset()) {
     LOG4CXX_WARN(logger_, "Incorrect insert into application.");
     return false;
-  }
-
-  LOG4CXX_INFO(logger_, "Saving data for application: " << app.first);
-  if (app.second.is_string()) {
-    if (kDefaultId.compare(app.second.get_string()) == 0) {
-      if (!SetDefaultPolicy(app.first)) {
-        return false;
-      }
-    } else if (kPreDataConsentId.compare(app.second.get_string()) == 0) {
-      if (!SetPredataPolicy(app.first)) {
-        return false;
-      }
-    }
-
-    // Stop saving other params, since predefined permissions already set
-    return true;
   }
 
   if (!SaveAppGroup(app.first, app.second.groups)) {
@@ -704,6 +739,17 @@ bool SQLPTExtRepresentation::GatherApplicationPolicies(
   while (query.Next()) {
     rpc::Nullable<policy_table::ApplicationParams> params;
     const std::string& app_id = query.GetString(0);
+    if (IsApplicationRevoked(app_id)) {
+      params.set_to_null();
+      (*apps)[app_id] = params;
+      continue;
+    }
+    if (IsDefaultPolicy(app_id)) {
+      (*apps)[app_id].set_to_string(kDefaultId);
+    }
+    if (IsPredataPolicy(app_id)) {
+      (*apps)[app_id].set_to_string(kPreDataConsentId);
+    }
     policy_table::Priority priority;
     policy_table::EnumFromJsonString(query.GetString(1), &priority);
     params.priority = priority;
@@ -768,8 +814,9 @@ bool SQLPTExtRepresentation::GatherUsageAndErrorCounts(
 bool SQLPTExtRepresentation::GatherAppLevels(
   policy_table::AppLevels* apps) const {
   dbms::SQLQuery query(db());
-  if (query.Prepare(sql_pt_ext::kSelectAppLevels)) {
-    LOG4CXX_INFO(logger_, "Failed select from app_level");
+  if (!query.Prepare(sql_pt_ext::kSelectAppLevels)) {
+    LOG4CXX_INFO(logger_, "Failed select from app_level. SQLError = "
+                 << query.LastError().text());
     return false;
   }
   const int kSecondsInMinute = 60;
@@ -780,17 +827,16 @@ bool SQLPTExtRepresentation::GatherAppLevels(
     level.minutes_in_hmi_limited = query.GetInteger(2) / kSecondsInMinute;
     level.minutes_in_hmi_background = query.GetInteger(3) / kSecondsInMinute;
     level.minutes_in_hmi_none = query.GetInteger(4) / kSecondsInMinute;
-    level.count_of_rfcom_limit_reached = query.GetInteger(5);
-    level.count_of_user_selections = query.GetInteger(6);
-    level.count_of_rejections_sync_out_of_memory = query.GetInteger(7);
-    level.count_of_rejections_nickname_mismatch = query.GetInteger(8);
-    level.count_of_rejections_duplicate_name = query.GetInteger(9);
-    level.count_of_rejected_rpc_calls = query.GetInteger(10);
-    level.count_of_rpcs_sent_in_hmi_none = query.GetInteger(11);
-    level.count_of_removals_for_bad_behavior = query.GetInteger(12);
-    level.count_of_run_attempts_while_revoked = query.GetInteger(13);
-    level.app_registration_language_gui = query.GetString(14);
-    level.app_registration_language_vui = query.GetString(15);
+    level.count_of_user_selections = query.GetInteger(5);
+    level.count_of_rejections_sync_out_of_memory = query.GetInteger(6);
+    level.count_of_rejections_nickname_mismatch = query.GetInteger(7);
+    level.count_of_rejections_duplicate_name = query.GetInteger(8);
+    level.count_of_rejected_rpc_calls = query.GetInteger(9);
+    level.count_of_rpcs_sent_in_hmi_none = query.GetInteger(10);
+    level.count_of_removals_for_bad_behavior = query.GetInteger(11);
+    level.count_of_run_attempts_while_revoked = query.GetInteger(12);
+    level.app_registration_language_gui = query.GetString(13);
+    level.app_registration_language_vui = query.GetString(14);
     (*apps)[query.GetString(0)] = level;
   }
 
@@ -894,6 +940,7 @@ bool SQLPTExtRepresentation::SaveDeviceData(
     query.Bind(4, *(it->second.os_version));
     query.Bind(5, *(it->second.carrier));
     query.Bind(6, *(it->second.max_number_rfcom_ports));
+    query.Bind(7, *(it->second.connection_type));
 
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into device data.");
@@ -931,6 +978,7 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
           return false;
         }
         query.Bind(0, device_id);
+        // TODO(AGaliuzov): Need GroupID instead of name
         query.Bind(1, it_groups->first);
         query.Bind(2, it_groups->second);
         query.Bind(
@@ -951,7 +999,7 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
           std::string(policy_table::EnumToJsonString(*(it->second.input))));
       }
 
-      if (!query.Exec() && !query.Reset()) {
+      if (!query.Exec() || !query.Reset()) {
         LOG4CXX_WARN(logger_, "Incorrect insert into consent group.");
         return false;
       }
@@ -1478,6 +1526,57 @@ bool SQLPTExtRepresentation::UnpairedDevicesList(DeviceIds* device_ids) const {
   while (query.Next()) {
     device_ids->push_back(query.GetString(0));
   }
+  return true;
+}
+
+bool SQLPTExtRepresentation::SetVINValue(const std::string& value){
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt_ext::kUpdateModuleMetaVinParam)) {
+    LOG4CXX_WARN(logger_, "Incorect statement for updating module_meta params");
+    return false;
+  }
+
+  query.Bind(0, value);
+  const bool result = query.Exec();
+
+  if (!result) {
+    LOG4CXX_WARN(logger_, "Failed update module_meta");
+  }
+  return result;
+}
+
+bool SQLPTExtRepresentation::RemoveAppConsentForGroup(
+    const std::string& policy_app_id,
+    const std::string& functional_group_name) const {
+  dbms::SQLQuery query_group_id(db());
+  if (!query_group_id.Prepare(sql_pt_ext::kSelectGroupId)) {
+    LOG4CXX_WARN(logger_, "Incorect statement for select group name.");
+    return false;
+  }
+
+  query_group_id.Bind(0, functional_group_name);
+
+  if (!query_group_id.Exec()) {
+    LOG4CXX_WARN(logger_, "Failed to select group id.");
+    return false;
+  }
+
+  const int id = query_group_id.GetInteger(0);
+
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt_ext::kDeleteAppGroupConsent)) {
+    LOG4CXX_WARN(logger_, "Incorect statement for remove app consent.");
+    return false;
+  }
+
+  query.Bind(0, policy_app_id);
+  query.Bind(1, id);
+
+  if (!query.Exec()) {
+    LOG4CXX_WARN(logger_, "Failed to remove app consent.");
+    return false;
+  }
+
   return true;
 }
 

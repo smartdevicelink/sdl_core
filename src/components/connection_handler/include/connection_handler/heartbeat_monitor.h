@@ -80,7 +80,7 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
   // \brief Connection that must be closed when timeout elapsed
   Connection *connection_;
 
-  static const int32_t kdefault_cycle_timeout = 1000000;
+  static const int32_t kdefault_cycle_timeout = 100000;
 
   struct SessionState {
     TimevalStruct heartbeat_expiration_;
@@ -90,7 +90,9 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
   // \brief monitored sessions collection
   std::map<uint8_t, SessionState> sessions_;
 
-  sync_primitives::Lock sessions_list_lock_;
+  sync_primitives::Lock sessions_list_lock_; // recurcive
+  sync_primitives::Lock main_thread_lock;
+
 
   volatile bool stop_flag_;
   volatile bool is_active;

@@ -224,7 +224,7 @@ TEST_F(TransportManagerTest, ScanManyDeviceDone) {
 }
 
 TEST_F(TransportManagerTest, ConnectDisconnectSendReciveDone) {
-  const DeviceInfo kInfo(1, "MA:CA:DR:ES:S", "TestDeviceName");
+  const DeviceInfo kInfo(1, "MA:CA:DR:ES:S", "TestDeviceName", "BTMAC");
   const ConnectionUID kConnection = 1;
 
   EXPECT_CALL(*tm_listener, OnDeviceFound(_)).Times(1);

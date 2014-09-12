@@ -34,7 +34,7 @@ typedef Array< Enum<Parameter>, 0, 24 > Parameters;
 
 typedef Map< RpcParameters, 0, 50 > Rpc;
 
-typedef Array< String<10, 255>, 1, 255 > URL;
+typedef Array< String<10, 255>, 1, 3 > URL;
 
 typedef Map< URL, 1, 255 > URLList;
 
@@ -44,7 +44,7 @@ typedef Map< Integer<uint8_t, 0, 255>, 0, 6 > NumberOfNotificationsPerMinute;
 
 typedef Array< Integer<uint16_t, 1, 1000>, 0, 10 > SecondsBetweenRetries;
 
-typedef Map< MessageString, 0, 500 > Languages;
+typedef Map< MessageString, 0, 600 > Languages;
 
 typedef Map< MessageLanguages, 0, 255 > Messages;
 
@@ -70,8 +70,8 @@ struct ApplicationParams : CompositeType {
     Enum<HmiLevel> default_hmi;
     Boolean keep_context;
     Boolean steal_focus;
-    Optional< Integer<uint16_t, 1, 65225> > memory_kb;
-    Optional< Integer<uint16_t, 1, 65225> > heart_beat_timeout_ms;
+    Optional< Integer<uint16_t, 0, 65225> > memory_kb;
+    Optional< Integer<uint16_t, 0, 65225> > heart_beat_timeout_ms;
     Optional< String<0, 255> > certificate;
   public:
     ApplicationParams();
@@ -83,6 +83,7 @@ struct ApplicationParams : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -101,6 +102,7 @@ struct RpcParameters : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -119,6 +121,7 @@ struct Rpcs : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -134,9 +137,9 @@ struct ModuleConfig : CompositeType {
     SecondsBetweenRetries seconds_between_retries;
     ServiceEndpoints endpoints;
     NumberOfNotificationsPerMinute notifications_per_minute_by_priority;
-    Optional< String<1, 100> > vehicle_make;
-    Optional< String<1, 100> > vehicle_model;
-    Optional< String<4, 4> > vehicle_year;
+    Optional< String<0, 100> > vehicle_make;
+    Optional< String<0, 100> > vehicle_model;
+    Optional< String<0, 4> > vehicle_year;
   public:
     ModuleConfig();
     ModuleConfig(uint8_t exchange_after_x_ignition_cycles, int64_t exchange_after_x_kilometers, uint8_t exchange_after_x_days, uint16_t timeout_after_x_seconds, const SecondsBetweenRetries& seconds_between_retries, const ServiceEndpoints& endpoints, const NumberOfNotificationsPerMinute& notifications_per_minute_by_priority);
@@ -147,17 +150,18 @@ struct ModuleConfig : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
 
 struct MessageString : CompositeType {
   public:
-    Optional< String<1, 255> > line1;
-    Optional< String<1, 255> > line2;
+    Optional< String<1, 65535> > line1;
+    Optional< String<1, 65535> > line2;
     Optional< String<1, 65535> > tts;
-    Optional< String<1, 255> > label;
-    Optional< String<1, 500> > textBody;
+    Optional< String<1, 65535> > label;
+    Optional< String<1, 65535> > textBody;
   public:
     MessageString();
     ~MessageString();
@@ -167,6 +171,7 @@ struct MessageString : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -184,6 +189,7 @@ struct MessageLanguages : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
     static const std::string kMandatoryLanguage_;
@@ -203,19 +209,20 @@ struct ConsumerFriendlyMessages : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
 
 struct ModuleMeta : CompositeType {
   public:
-    Optional< String<1, 250> > ccpu_version;
-    Optional< String<1, 250> > language;
-    Optional< String<1, 250> > wers_country_code;
+    Optional< String<0, 250> > ccpu_version;
+    Optional< String<0, 250> > language;
+    Optional< String<0, 250> > wers_country_code;
     Optional< Integer<uint16_t, 0, 65535> > pt_exchanged_at_odometer_x;
     Optional< Integer<uint16_t, 0, 65535> > pt_exchanged_x_days_after_epoch;
     Optional< Integer<uint16_t, 0, 65535> > ignition_cycles_since_last_exchange;
-    Optional< String<1, 250> > vin;
+    Optional< String<0, 250> > vin;
   public:
     ModuleMeta();
     ~ModuleMeta();
@@ -225,6 +232,7 @@ struct ModuleMeta : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -233,8 +241,7 @@ struct AppLevel : CompositeType {
   public:
     Integer<uint16_t, 0, 65535> minutes_in_hmi_full;
     String<1, 10> app_registration_language_gui;
-    String<1, 10> app_registration_language_vui;
-    Integer<uint16_t, 0, 65535> count_of_rfcom_limit_reached;
+    String<0, 10> app_registration_language_vui;
     Integer<uint16_t, 0, 65535> minutes_in_hmi_limited;
     Integer<uint16_t, 0, 65535> minutes_in_hmi_background;
     Integer<uint16_t, 0, 65535> minutes_in_hmi_none;
@@ -248,7 +255,7 @@ struct AppLevel : CompositeType {
     Integer<uint16_t, 0, 65535> count_of_run_attempts_while_revoked;
   public:
     AppLevel();
-    AppLevel(uint16_t minutes_in_hmi_full, const std::string& app_registration_language_gui, const std::string& app_registration_language_vui, uint16_t count_of_rfcom_limit_reached, uint16_t minutes_in_hmi_limited, uint16_t minutes_in_hmi_background, uint16_t minutes_in_hmi_none, uint16_t count_of_user_selections, uint16_t count_of_rejections_sync_out_of_memory, uint16_t count_of_rejections_nickname_mismatch, uint16_t count_of_rejections_duplicate_name, uint16_t count_of_rejected_rpc_calls, uint16_t count_of_rpcs_sent_in_hmi_none, uint16_t count_of_removals_for_bad_behavior, uint16_t count_of_run_attempts_while_revoked);
+    AppLevel(uint16_t minutes_in_hmi_full, const std::string& app_registration_language_gui, const std::string& app_registration_language_vui, uint16_t minutes_in_hmi_limited, uint16_t minutes_in_hmi_background, uint16_t minutes_in_hmi_none, uint16_t count_of_user_selections, uint16_t count_of_rejections_sync_out_of_memory, uint16_t count_of_rejections_nickname_mismatch, uint16_t count_of_rejections_duplicate_name, uint16_t count_of_rejected_rpc_calls, uint16_t count_of_rpcs_sent_in_hmi_none, uint16_t count_of_removals_for_bad_behavior, uint16_t count_of_run_attempts_while_revoked);
     ~AppLevel();
     explicit AppLevel(const Json::Value* value__);
     Json::Value ToJsonValue() const;
@@ -256,6 +263,7 @@ struct AppLevel : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -275,6 +283,7 @@ struct UsageAndErrorCounts : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -293,19 +302,21 @@ struct ConsentRecords : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
 
 struct DeviceParams : CompositeType {
   public:
-    Optional< String<1, 255> > hardware;
+    Optional< String<0, 255> > hardware;
     Optional< Nullable< String<1, 255> > > firmware_rev;
-    Optional< String<1, 255> > os;
-    Optional< String<1, 255> > os_version;
-    Optional< Nullable< String<1, 255> > > carrier;
+    Optional< String<0, 255> > os;
+    Optional< String<0, 255> > os_version;
+    Optional< Nullable< String<0, 255> > > carrier;
     Optional< UserConsentRecords > user_consent_records;
     Optional< Integer<uint8_t, 0, 255> > max_number_rfcom_ports;
+    Optional< String<0, 255> > connection_type;
   public:
     DeviceParams();
     ~DeviceParams();
@@ -315,6 +326,7 @@ struct DeviceParams : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -338,6 +350,7 @@ struct PolicyTable : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };
@@ -355,6 +368,7 @@ struct Table : CompositeType {
     bool is_initialized() const;
     bool struct_empty() const;
     void ReportErrors(rpc::ValidationReport* report__) const;
+    virtual void SetPolicyTableType(PolicyTableType pt_type);
   private:
     bool Validate() const;
 };

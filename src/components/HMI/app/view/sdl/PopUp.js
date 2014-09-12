@@ -32,9 +32,7 @@
  * @version 1.0
  */
 
-SDL.PopUp = Em.ContainerView.create({
-
-    elementId: 'PopUp',
+SDL.PopUp = Em.ContainerView.extend({
 
     classNames: 'PopUp',
 
@@ -42,7 +40,8 @@ SDL.PopUp = Em.ContainerView.create({
     [
         'message',
         'buttonOk',
-        'buttonCancel'
+        'buttonCancel',
+        'backButton'
     ],
 
     classNameBindings: [
@@ -59,6 +58,19 @@ SDL.PopUp = Em.ContainerView.create({
     content: 'Title',
 
     active: false,
+
+    timer: null,
+
+    backButton: SDL.Button.extend( {
+        classNames: 'button backButton',
+        text: 'X',
+        click: function () {
+            this._parentView.deactivate();
+        },
+        buttonAction: true,
+        onDown: false,
+        disabledBinding: 'parentView.buttons'
+    }),
 
     buttons: true,
 
@@ -101,22 +113,26 @@ SDL.PopUp = Em.ContainerView.create({
             this.callback(event.buttonAction);
         }
 
-
         this.set('callback', null);
+        this.remove();
     },
 
     popupActivate: function(message, callback) {
         this.set('active', true);
+
+        clearTimeout(this.timer);
+        this.timer = null;
 
         if (callback) {
             this.set('callback', callback);
             this.set('buttons', false);
         } else {
             this.set('buttons', true);
-            setTimeout(function(){
-                SDL.PopUp.deactivate();
+            var self = this;
+            this.timer = setTimeout(function(){
+                self.deactivate();
             },
-            3000);
+            5000);
         }
 
         this.set('content', message);

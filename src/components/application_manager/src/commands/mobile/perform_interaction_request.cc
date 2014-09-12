@@ -49,7 +49,7 @@ namespace commands {
 PerformInteractionRequest::PerformInteractionRequest(
   const MessageSharedPtr& message)
 : CommandRequestImpl(message),
-  timer_(this, &PerformInteractionRequest::onTimer),
+  timer_("PerformInteractionReq", this, &PerformInteractionRequest::onTimer),
   vr_perform_interaction_code_(mobile_apis::Result::INVALID_ENUM),
   interaction_mode_(mobile_apis::InteractionMode::INVALID_ENUM),
   ui_response_recived(false),
@@ -95,6 +95,37 @@ void PerformInteractionRequest::Run() {
   if (!app) {
     LOG4CXX_ERROR(logger_, "Application is not registered");
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
+    return;
+  }
+
+  mobile_apis::LayoutMode::eType interaction_layout =
+      mobile_apis::LayoutMode::INVALID_ENUM;
+  if ((*message_)[strings::msg_params].keyExists(
+      hmi_request::interaction_layout)) {
+    interaction_layout = static_cast<mobile_apis::LayoutMode::eType>(
+    (*message_)[strings::msg_params][hmi_request::interaction_layout].asInt());
+  }
+
+  if ((mobile_apis::InteractionMode::VR_ONLY ==
+      static_cast<mobile_apis::InteractionMode::eType>(
+          (*message_)[strings::msg_params][strings::interaction_mode].asInt())) &&
+      (mobile_apis::LayoutMode::KEYBOARD == interaction_layout)) {
+    LOG4CXX_ERROR_EXT(
+        logger_,
+        "PerformInteraction contains InteractionMode = VR_ONLY and "
+        "interactionLayout=KEYBOARD");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+  if ((0 == (*message_)
+      [strings::msg_params][strings::interaction_choice_set_id_list].length()) &&
+      (mobile_apis::LayoutMode::KEYBOARD != interaction_layout)) {
+    LOG4CXX_ERROR_EXT(
+              logger_,
+              "interactionChoiceSetIDList is empty and without parameter"
+              "interactionLayout=KEYBOARD");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
 
@@ -385,6 +416,10 @@ void PerformInteractionRequest::ProcessPerformInteractionResponse(
     }
   }
 
+  if (mobile_apis::Result::TIMED_OUT == result_code) {
+    DisablePerformInteraction();
+  }
+
   SendResponse(result, result_code, return_info, &(msg_params));
 }
 
@@ -504,11 +539,11 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
     msg_params[strings::help_prompt] =
         (*message_)[strings::msg_params][strings::help_prompt];
 
-    DeleteParameterFromTTSChunk(&msg_params[strings::help_prompt]);
   } else {
-    msg_params[strings::help_prompt] =
-        smart_objects::SmartObject(smart_objects::SmartType_Array);
-
+    if (choice_list.length() != 0) {
+      msg_params[strings::help_prompt] =
+          smart_objects::SmartObject(smart_objects::SmartType_Array);
+    }
     int32_t index = 0;
     for (uint32_t i = 0; i < choice_list.length(); ++i) {
       smart_objects::SmartObject* choice_set =
@@ -539,17 +574,15 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
   if ((*message_)[strings::msg_params].keyExists(strings::timeout_prompt)) {
     msg_params[strings::timeout_prompt] =
             (*message_)[strings::msg_params][strings::timeout_prompt];
-
-    DeleteParameterFromTTSChunk(&msg_params[strings::timeout_prompt]);
   } else {
-    msg_params[strings::timeout_prompt] = msg_params[strings::help_prompt];
+    if (msg_params.keyExists(strings::help_prompt)) {
+      msg_params[strings::timeout_prompt] = msg_params[strings::help_prompt];
+    }
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::initial_prompt)) {
       msg_params[strings::initial_prompt] =
           (*message_)[strings::msg_params][strings::initial_prompt];
-
-      DeleteParameterFromTTSChunk(&msg_params[strings::initial_prompt]);
   }
 
   mobile_apis::InteractionMode::eType mode =
@@ -565,14 +598,6 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
 
   SendHMIRequest(hmi_apis::FunctionID::VR_PerformInteraction, &msg_params,
                  true);
-}
-
-void PerformInteractionRequest::DeleteParameterFromTTSChunk(
-    smart_objects::SmartObject* array_tts_chunk) {
-  int32_t length = array_tts_chunk->length();
-  for (int32_t i = 0; i < length; ++i) {
-    array_tts_chunk[i].erase(strings::type);
-  }
 }
 
 bool PerformInteractionRequest::CheckChoiceSetMenuNames(
@@ -726,7 +751,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
-  if (!CheckSyntax(str, true)) {
+  if (!CheckSyntax(str)) {
     LOG4CXX_ERROR(logger_, "Invalid initial_text syntax check failed");
     return true;
   }
@@ -741,7 +766,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_ip != it_ip_end; ++it_ip) {
       str = (*it_ip)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid initial_prompt syntax check failed");
         return true;
       }
@@ -757,7 +782,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_hp != it_hp_end; ++it_hp) {
       str = (*it_hp)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid help_prompt syntax check failed");
         return true;
       }
@@ -773,7 +798,7 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_tp != it_tp_end; ++it_tp) {
       str = (*it_tp)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid timeout_prompt syntax check failed");
         return true;
       }
@@ -789,9 +814,18 @@ bool PerformInteractionRequest::IsWhiteSpaceExist() {
 
     for (; it_vh != it_vh_end; ++it_vh) {
       str = (*it_vh)[strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid vr_help syntax check failed");
         return true;
+      }
+
+      if ((*it_vh).keyExists(strings::image)) {
+        str = (*it_vh)[strings::image][strings::value].asCharArray();
+        if (!CheckSyntax(str)) {
+          LOG4CXX_ERROR(logger_,
+                        "Invalid vr_help image value syntax check failed");
+          return true;
+        }
       }
     }
   }

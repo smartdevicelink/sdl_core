@@ -60,10 +60,10 @@ void OnDriverDistractionNotification::Run() {
           .asInt());
   ApplicationManagerImpl::instance()->set_driver_distraction(state);
 
-  smart_objects::SmartObject* on_driver_distraction =
+  MessageSharedPtr on_driver_distraction =
       new smart_objects::SmartObject();
 
-  if (NULL == on_driver_distraction) {
+  if (false == on_driver_distraction.valid()) {
     LOG4CXX_ERROR_EXT(logger_, "NULL pointer");
     return;
   }
@@ -74,7 +74,20 @@ void OnDriverDistractionNotification::Run() {
   (*on_driver_distraction)[strings::msg_params][mobile_notification::state] =
       state;
 
-  SendNotificationToMobile(on_driver_distraction);
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  const std::set<ApplicationSharedPtr> applications = accessor.applications();
+
+  std::set<ApplicationSharedPtr>::const_iterator it = applications.begin();
+  for (; applications.end() != it; ++it) {
+    ApplicationSharedPtr app = *it;
+    if (app.valid()) {
+      if (mobile_apis::HMILevel::eType::HMI_NONE != app->hmi_level()) {
+          (*on_driver_distraction)[strings::params]
+                                  [strings::connection_key] = app->app_id();
+          SendNotificationToMobile(on_driver_distraction);
+      }
+    }
+  }
 }
 
 }  // namespace hmi

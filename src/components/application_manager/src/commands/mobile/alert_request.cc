@@ -33,10 +33,12 @@
 
 #include "application_manager/commands/mobile/alert_request.h"
 
+#include <string.h>
+
+#include "application_manager/message_helper.h"
 #include "application_manager/application_impl.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_helper.h"
-#include <interfaces/HMI_API.h>
+
 
 namespace application_manager {
 
@@ -129,7 +131,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::UI_Alert: {
       LOG4CXX_INFO(logger_, "Received UI_Alert event");
-      DCHECK(awaiting_ui_alert_response_);
+      // Unsubscribe from event to avoid unwanted messages
+      unsubscribe_from_event(hmi_apis::FunctionID::UI_Alert);
       awaiting_ui_alert_response_ = false;
 
       if (awaiting_tts_speak_response_) {
@@ -149,7 +152,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_Speak: {
       LOG4CXX_INFO(logger_, "Received TTS_Speak event");
-      DCHECK(awaiting_tts_speak_response_);
+      // Unsubscribe from event to avoid unwanted messages
+      unsubscribe_from_event(hmi_apis::FunctionID::TTS_Speak);
       awaiting_tts_speak_response_ = false;
       tts_speak_response_ = static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt());
@@ -157,7 +161,8 @@ void AlertRequest::on_event(const event_engine::Event& event) {
     }
     case hmi_apis::FunctionID::TTS_StopSpeaking: {
       LOG4CXX_INFO(logger_, "Received TTS_StopSpeaking event");
-      DCHECK(awaiting_tts_stop_speaking_response_);
+      // Unsubscribe from event to avoid unwanted messages
+      unsubscribe_from_event(hmi_apis::FunctionID::TTS_StopSpeaking);
       awaiting_tts_stop_speaking_response_ = false;
       break;
     }
@@ -229,6 +234,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
     return false;
   }
 
+  //ProcessSoftButtons checks strings on the contents incorrect character
+
   mobile_apis::Result::eType processing_result =
       MessageHelper::ProcessSoftButtons((*message_)[strings::msg_params], app);
 
@@ -254,6 +261,8 @@ bool AlertRequest::Validate(uint32_t app_id) {
 }
 
 void AlertRequest::SendAlertRequest(int32_t app_id) {
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
 
@@ -286,6 +295,8 @@ void AlertRequest::SendAlertRequest(int32_t app_id) {
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[hmi_request::soft_buttons] =
         (*message_)[strings::msg_params][strings::soft_buttons];
+    MessageHelper::SubscribeApplicationToSoftButton(
+        (*message_)[strings::msg_params], app, function_id());
   }
   // app_id
   msg_params[strings::app_id] = app_id;
@@ -351,7 +362,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {
     str = (*message_)[strings::msg_params][strings::alert_text1].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid alert_text_1 syntax check failed");
       return  false;
     }
@@ -359,7 +370,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text2)) {
     str = (*message_)[strings::msg_params][strings::alert_text2].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid alert_text_2 syntax check failed");
       return  false;
     }
@@ -367,7 +378,7 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text3)) {
     str = (*message_)[strings::msg_params][strings::alert_text3].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid alert_text_3 syntax check failed");
       return  false;
     }
@@ -378,39 +389,10 @@ bool AlertRequest::CheckStringsOfAlertRequest() {
         (*message_)[strings::msg_params][strings::tts_chunks];
     for (size_t i = 0; i < tts_chunks_array.length(); ++i) {
       str = tts_chunks_array[i][strings::text].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (strlen(str) && !CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid tts_chunks text syntax check failed");
         return false;
       }
-    }
-  }
-
-  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    const smart_objects::SmartArray* sb_array =
-        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
-
-    smart_objects::SmartArray::const_iterator it_sb = sb_array->begin();
-    smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
-
-    for (; it_sb != it_sb_end; ++it_sb) {
-      if ((*it_sb).keyExists(strings::text)) {
-        str = (*it_sb)[strings::text].asCharArray();
-        if (!CheckSyntax(str, true)) {
-          LOG4CXX_ERROR(logger_,
-                       "Invalid soft_buttons text syntax check failed");
-          return false;
-        }
-      }
-
-      if ((*it_sb).keyExists(strings::image)) {
-        str = (*it_sb)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str, true)) {
-          LOG4CXX_ERROR(logger_,
-                       "Invalid soft_buttons image value syntax check failed");
-          return false;
-        }
-      }
-
     }
   }
   return true;

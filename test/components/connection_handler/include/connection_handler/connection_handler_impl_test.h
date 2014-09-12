@@ -64,7 +64,10 @@ class ConnectionHandlerTest: public ::testing::Test {
   void AddTestDeviceConnection() {
     const transport_manager::DeviceHandle device_handle = 0;
     const transport_manager::DeviceInfo device_info(
-          device_handle, std::string("test_address"), std::string("test_name"));
+          device_handle,
+          std::string("test_address"),
+          std::string("test_name"),
+          std::string("BTMAC"));
     //Add Device and connection
     connection_handler_->addDeviceConnection(device_info, uid);
     connection_key = connection_handler_->KeyFromPair(uid, 0u);

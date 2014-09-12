@@ -127,7 +127,7 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
     bool                                          is_ready_;
     threads::Thread*                              thread_;
     Streamer*                                     streamer_;
-    MessageQueue<RawMessagePtr> messages_;
+    MessageQueue<RawMessagePtr>                   messages_;
 
     DISALLOW_COPY_AND_ASSIGN(SocketStreamerAdapter);
 };

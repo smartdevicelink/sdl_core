@@ -90,16 +90,18 @@ bool operator!=(const policy_table::ApplicationParams& first,
 }
 
 CheckAppPolicy::CheckAppPolicy(
-  PolicyManagerImpl* pm, const utils::SharedPtr<policy_table::Table> update)
+    PolicyManagerImpl* pm,
+    const utils::SharedPtr<policy_table::Table> update,
+    const utils::SharedPtr<policy_table::Table> snapshot)
   : pm_(pm),
-    update_(update) {
+    update_(update),
+    snapshot_(snapshot) {
 }
 
 bool CheckAppPolicy::HasSameGroups(const AppPoliciesValueType& app_policy,
                                    AppPermissions* perms) const {
   const std::string app_id = app_policy.first;
-  AppPoliciesConstItr it = pm_->policy_table_snapshot_->policy_table
-                           .app_policies.find(app_id);
+  AppPoliciesConstItr it = snapshot_->policy_table.app_policies.find(app_id);
 
   if (app_policy.second.is_string()) {
     return (it->second.is_string() &&
@@ -133,34 +135,60 @@ bool CheckAppPolicy::HasSameGroups(const AppPoliciesValueType& app_policy,
       old_it = diff.first;
       break;
     }
-    if (Compare(*diff.first, *diff.second)) {
+    if (Compare(*diff.first, *diff.second) &&
+        IsConsentRequired(*(diff.first))) {
       perms->isAppPermissionsRevoked = true;
-      perms->appRevokedPermissions.push_back(*(diff.first));
+      FunctionalGroupPermission group;
+      group.group_name = *(diff.first);
+      perms->appRevokedPermissions.push_back(group);
       old_it = ++diff.first;
       new_it = diff.second;
     } else {
-      perms->appPermissionsConsentNeeded = true;
+      // according to the SDLAQ-CRS-2757 we have to set
+      // appPermissionsConsentNeeded should not be set to true
+      // in case if this group is auto-allowed
+      perms->appPermissionsConsentNeeded = IsConsentRequired(*new_it);
       old_it = diff.first;
       new_it = ++diff.second;
     }
   }
 
   for (StringsConstItr it = old_it; it != it_groups_curr_end; ++it) {
+    if (!IsConsentRequired(*it)) {
+      continue;
+    }
     perms->isAppPermissionsRevoked = true;
-    perms->appRevokedPermissions.push_back(*it);
+    FunctionalGroupPermission group;
+    group.group_name = *it;
+    perms->appRevokedPermissions.push_back(group);
   }
 
   if (it_groups_new_end != new_it) {
     perms->appPermissionsConsentNeeded = true;
   }
 
+  if (perms->isAppPermissionsRevoked) {
+    PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(
+                                    pm_->policy_table_.pt_data().get());
+    if (pt_ext) {
+      std::vector<policy::FunctionalGroupPermission>::const_iterator it =
+          perms->appRevokedPermissions.begin();
+      std::vector<policy::FunctionalGroupPermission>::const_iterator it_end =
+          perms->appRevokedPermissions.end();
+      for (;it != it_end; ++it) {
+       pt_ext->RemoveAppConsentForGroup(perms->application_id, it->group_name);
+      }
+    }
+  }
+
+
   return !(perms->appRevokedPermissions.size() > 0
            || perms->appPermissionsConsentNeeded);
 }
 
 bool CheckAppPolicy::IsNewAppication(const std::string& application_id) const {
-  const policy_table::ApplicationPolicies& current_policies = pm_
-      ->policy_table_snapshot_->policy_table.app_policies;
+  const policy_table::ApplicationPolicies& current_policies =
+      snapshot_->policy_table.app_policies;
   AppPoliciesConstItr it_app_policies_curr = current_policies.begin();
   AppPoliciesConstItr it_app_policies_curr_end = current_policies.end();
 
@@ -199,7 +227,7 @@ void CheckAppPolicy::SendNotification(
 
   const std::string app_id = app_policy.first;
   LOG4CXX_INFO(logger_, "Send notification for application_id:" << app_id);
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
   pm_->listener()->OnPermissionsUpdated(app_id, notification_data,
                                         policy_table::EnumToJsonString(
                                           app_policy.second.default_hmi));
@@ -214,7 +242,7 @@ void CheckAppPolicy::SendOnPendingPermissions(
   const AppPoliciesValueType& app_policy, AppPermissions permissions) const {
   // TODO(AOleynik): Exclude default group(s)
   if (permissions.appPermissionsConsentNeeded) {
-#if defined(EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
     const policy_table::Strings& groups = app_policy.second.groups;
     // TODO(IKozyrenko): Check logic if optional container is missing
     const policy_table::Strings& preconsented_groups = *app_policy.second
@@ -270,8 +298,8 @@ bool CheckAppPolicy::NicknamesMatch(
 }
 
 bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
-  policy_table::ApplicationPolicies& current_policies = pm_
-      ->policy_table_snapshot_->policy_table.app_policies;
+  policy_table::ApplicationPolicies& current_policies =
+      snapshot_->policy_table.app_policies;
 
   const std::string app_id = app_policy.first;
 
@@ -296,7 +324,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
       current_policies[app_policy.first] = app_policy.second;
     }
     return true;
-  }
+  }  
 
   // TODO(PV): do we really need this check?
   if (IsNewAppication(app_id)) {
@@ -307,7 +335,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
     return true;
   }
 
-  if (!NicknamesMatch(app_id, app_policy)) {
+  if (!IsPredefinedApp(app_policy) && !NicknamesMatch(app_id, app_policy)) {
     permissions_diff.appUnauthorized = true;
     pm_->app_permissions_diff_.insert(std::make_pair(app_id, permissions_diff));
     pm_->listener()->OnPendingPermissionChange(app_policy.first);
@@ -344,7 +372,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   // if 'device' was update with new/other func groups => user consent
   // for device should be cleared.
   if (kDeviceId == app_id) {
-#if defined (EXTENDED_POLICY)
+#ifdef EXTENDED_POLICY
     PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(
                                     pm_->policy_table_.pt_data().get());
     if (pt_ext) {
@@ -356,6 +384,17 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   }
 
   return true;
+}
+
+bool CheckAppPolicy::IsConsentRequired(const std::string& group_name) const {
+  const policy_table::FunctionalGroupings& functional_groupings =
+      snapshot_->policy_table.functional_groupings;
+  FuncGroupConstItr it = functional_groupings.find(group_name);
+  if (functional_groupings.end() == it) {
+    return false;
+  }
+
+  return it->second.user_consent_prompt.is_initialized();
 }
 
 FillNotificationData::FillNotificationData(Permissions& data,
@@ -391,6 +430,9 @@ bool FillNotificationData::operator()(const RpcValueType& rpc) {
                      (*it).second.parameter_permissions[current_key_]);
     ExcludeSame();
   } else {
+    // Init mandatory keys, since they should be present irrespectively of
+    // values presence
+    InitRpcKeys(rpc.first);
     // If rpc is not present - add its permissions
     UpdateHMILevels(rpc.second.hmi_levels,
                     data_[rpc.first].hmi_permissions[current_key_]);
@@ -509,6 +551,13 @@ void FillNotificationData::ExcludeSameParameters(
   source = diff_parameter;
 }
 
+void FillNotificationData::InitRpcKeys(const std::string& rpc_name) {
+  data_[rpc_name].hmi_permissions[kAllowedKey];
+  data_[rpc_name].hmi_permissions[kUserDisallowedKey];
+  data_[rpc_name].parameter_permissions[kAllowedKey];
+  data_[rpc_name].parameter_permissions[kUserDisallowedKey];
+}
+
 ProcessFunctionalGroup::ProcessFunctionalGroup(
   const policy_table::FunctionalGroupings& fg,
   const std::vector<FunctionalGroupPermission>& group_permissions,
@@ -566,6 +615,7 @@ void FillFunctionalGroupPermissions(
     FunctionalGroupNames& names,
     GroupConsent state,
     std::vector<FunctionalGroupPermission>& permissions) {
+  LOG4CXX_INFO(logger_, "FillFunctionalGroupPermissions" );
   FunctionalGroupIDs::const_iterator it = ids.begin();
   FunctionalGroupIDs::const_iterator it_end = ids.end();
   for (; it != it_end; ++it) {
@@ -585,6 +635,7 @@ bool IsPredefinedApp(const AppPoliciesValueType& app) {
 
 FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
                                const FunctionalGroupIDs& what) {
+  LOG4CXX_INFO(logger_, "Exclude same groups" );
   FunctionalGroupIDs from_copy(from);
   FunctionalGroupIDs what_copy(what);
 
@@ -604,6 +655,7 @@ FunctionalGroupIDs ExcludeSame(const FunctionalGroupIDs& from,
 
 FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
                          const FunctionalGroupIDs& second) {
+  LOG4CXX_INFO(logger_, "Merge groups" );
   FunctionalGroupIDs first_copy(first);
   FunctionalGroupIDs second_copy(second);
 
@@ -623,6 +675,7 @@ FunctionalGroupIDs Merge(const FunctionalGroupIDs& first,
 
 FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
                             const FunctionalGroupIDs& second) {
+  LOG4CXX_INFO(logger_, "Find same groups");
   FunctionalGroupIDs first_copy(first);
   FunctionalGroupIDs second_copy(second);
 
@@ -638,6 +691,27 @@ FunctionalGroupIDs FindSame(const FunctionalGroupIDs& first,
                             std::unique(same.begin(), same.end())));
 
   return same;
+}
+
+bool UnwrapAppPolicies(policy_table::ApplicationPolicies& app_policies) {
+  policy_table::ApplicationPolicies::iterator it = app_policies.begin();
+  policy_table::ApplicationPolicies::iterator it_default = app_policies.
+                                                           find(kDefaultId);
+  for (; app_policies.end() != it; ++it) {
+    // Set default policies for app, if there is record like "123":"default"
+    if (kDefaultId.compare((*it).second.get_string()) == 0) {
+      if (it != app_policies.end()) {
+        (*it).second = (*it_default).second;
+        it->second.set_to_string(kDefaultId);
+      } else {
+        LOG4CXX_ERROR(logger_, "There is no default application policy was "
+                      "found in PTU.");
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 }

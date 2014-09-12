@@ -36,6 +36,8 @@
 #include "application_manager/message_helper.h"
 #include "utils/file_system.h"
 
+#include <string.h>
+
 namespace application_manager {
 
 namespace commands {
@@ -73,6 +75,8 @@ void ShowRequest::Run() {
      return;
    }
 
+  //ProcessSoftButtons checks strings on the contents incorrect character
+
   mobile_apis::Result::eType processing_result = mobile_apis::Result::SUCCESS;
   if(((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) &&
       ((*message_)[strings::msg_params][strings::soft_buttons].length() > 0)) {
@@ -88,7 +92,9 @@ void ShowRequest::Run() {
 
   mobile_apis::Result::eType verification_result =
       mobile_apis::Result::SUCCESS;
-  if ((*message_)[strings::msg_params].keyExists(strings::graphic)) {
+  if (((*message_)[strings::msg_params].keyExists(strings::graphic)) &&
+      ((*message_)[strings::msg_params]
+                   [strings::graphic][strings::value].asString()).length()) {
     verification_result = MessageHelper::VerifyImage(
         (*message_)[strings::msg_params][strings::graphic], app);
     if (mobile_apis::Result::SUCCESS != verification_result) {
@@ -190,6 +196,12 @@ void ShowRequest::Run() {
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     msg_params[strings::soft_buttons] =
         (*message_)[strings::msg_params][strings::soft_buttons];
+    if ((*message_)[strings::msg_params][strings::soft_buttons].length() == 0) {
+      app->UnsubscribeFromSoftButtons(function_id());
+    } else {
+      MessageHelper::SubscribeApplicationToSoftButton(
+          (*message_)[strings::msg_params], app, function_id());
+    }
   }
 
   if ((*message_)[strings::msg_params].keyExists(strings::custom_presets)) {
@@ -210,22 +222,25 @@ void ShowRequest::on_event(const event_engine::Event& event) {
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_Show: {
       LOG4CXX_INFO(logger_, "Received UI_Show event");
-
+      std::string response_info("");
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
           message[strings::params][hmi_response::code].asInt());
 
       bool result = false;
-      HMICapabilities& hmi_capabilities =
-                      ApplicationManagerImpl::instance()->hmi_capabilities();
+
       if (mobile_apis::Result::SUCCESS == result_code) {
         result = true;
-      } else if ((mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code) &&
-          hmi_capabilities.is_ui_cooperating()) {
+      } else if (mobile_apis::Result::WARNINGS == result_code) {
         result = true;
+        if (message[strings::params].keyExists(hmi_response::message)) {
+          response_info = message[strings::params][hmi_response::message].asString();
+        }
       }
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(result, result_code,
+                   response_info.empty() ? NULL : response_info.c_str(),
+                       &(message[strings::msg_params]));
       break;
     }
     default: {
@@ -241,49 +256,49 @@ bool ShowRequest::CheckStringsOfShowRequest() {
 
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_4)) {
     str = (*message_)[strings::msg_params][strings::main_field_4].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid main_field_4 syntax check failed");
       return  false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_3)) {
     str = (*message_)[strings::msg_params][strings::main_field_3].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid main_field_3 syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_2)) {
     str = (*message_)[strings::msg_params][strings::main_field_2].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid main_field_2 syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::main_field_1)) {
     str = (*message_)[strings::msg_params][strings::main_field_1].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid main_field_1 syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::status_bar)) {
     str = (*message_)[strings::msg_params][strings::status_bar].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid status_bar syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::media_clock)) {
     str = (*message_)[strings::msg_params][strings::media_clock].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid media_clock syntax check failed");
       return false;
     }
   }
   if ((*message_)[strings::msg_params].keyExists(strings::media_track)) {
     str = (*message_)[strings::msg_params][strings::media_track].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid media_track syntax check failed");
       return false;
     }
@@ -293,47 +308,17 @@ bool ShowRequest::CheckStringsOfShowRequest() {
           (*message_)[strings::msg_params][strings::custom_presets];
       for (size_t i = 0; i < custom_presets_array.length(); ++i) {
         str = custom_presets_array[i].asCharArray();
-        if (!CheckSyntax(str, true)) {
+        if (!CheckSyntax(str)) {
           LOG4CXX_ERROR(logger_, "Invalid custom_presets syntax check failed");
           return false;
         }
       }
   }
 
-  if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
-    const smart_objects::SmartArray* sb_array =
-        (*message_)[strings::msg_params][strings::soft_buttons].asArray();
-
-    smart_objects::SmartArray::const_iterator it_sb = sb_array->begin();
-    smart_objects::SmartArray::const_iterator it_sb_end = sb_array->end();
-
-    for (; it_sb != it_sb_end; ++it_sb) {
-
-      if ((*it_sb).keyExists(strings::text)) {
-        str = (*it_sb)[strings::text].asCharArray();
-        if (!CheckSyntax(str, true)) {
-          LOG4CXX_ERROR(logger_,
-                       "Invalid soft_buttons text syntax check failed");
-          return false;
-        }
-      }
-
-      if ((*it_sb).keyExists(strings::image)) {
-        str = (*it_sb)[strings::image][strings::value].asCharArray();
-        if (!CheckSyntax(str, true)) {
-          LOG4CXX_ERROR(logger_,
-                       "Invalid soft_buttons image value syntax check failed");
-          return false;
-        }
-      }
-
-    }
-  }
-
   if ((*message_)[strings::msg_params].keyExists(strings::graphic)) {
     str = (*message_)[strings::msg_params]
                      [strings::graphic][strings::value].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (strlen(str) && !CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid graphic value syntax check failed");
       return false;
     }
@@ -342,7 +327,7 @@ bool ShowRequest::CheckStringsOfShowRequest() {
   if ((*message_)[strings::msg_params].keyExists(strings::secondary_graphic)) {
     str = (*message_)[strings::msg_params]
                      [strings::secondary_graphic][strings::value].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_,
                    "Invalid secondary_graphic value syntax check failed");
       return false;

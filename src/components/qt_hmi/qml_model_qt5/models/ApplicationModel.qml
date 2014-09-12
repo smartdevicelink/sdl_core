@@ -71,7 +71,7 @@ QtObject {
     property ListModel alertManeuverSoftButtons
     property ListModel customPresets
     property int languageTTSVR
-    property ListModel allowedFunctions: ListModel {}
+    property var allowedFunctions: []
     // This place is for adding new properties
 
     function reset () {
@@ -99,7 +99,7 @@ QtObject {
         languageTTSVR = -1
         hmiUITextAlignment = -1
         appType = 0
-        allowedFunctions.clear()
+        allowedFunctions = []
         console.debug("exit")
     }
 }

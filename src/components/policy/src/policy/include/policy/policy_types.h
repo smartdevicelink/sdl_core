@@ -47,6 +47,7 @@ enum PolicyErrorEnum {
 
 const std::string kDefaultDeviceMacAddress = "00:00:00:00:00:00";
 const std::string kDefaultDeviceName = "MyDevice";
+const std::string kDefaultDeviceConnectionType = "UNKNOWN";
 
 /**
  * @brief Constants for special ids in application policies section of
@@ -132,9 +133,12 @@ struct CheckPermissionResult {
   */
 struct EndpointData {
     explicit EndpointData(const std::string& url_string = "")
-        : url(url_string)
-        , app_id("default") {}
-    std::string url;
+        : app_id("default") {
+      if (false == url_string.empty()) {
+        url.push_back(url_string);
+      }
+    }
+    std::vector<std::string> url;
     std::string app_id;
 };
 
@@ -147,37 +151,14 @@ struct DeviceParams {
     DeviceParams()
         : device_name(kDefaultDeviceName),
           device_mac_address(kDefaultDeviceMacAddress),
+          device_connection_type(kDefaultDeviceConnectionType),
           device_handle(0) {
     }
 
     std::string device_name;
     std::string device_mac_address;
+    std::string device_connection_type;
     uint32_t device_handle;
-};
-
-/**
- * @brief Stores data to be sent to HMI on application permissions change
- */
-struct AppPermissions {
-
-    AppPermissions(const std::string& app_id)
-        : application_id(app_id),
-          isAppPermissionsRevoked(false),
-          appRevoked(false),
-          appPermissionsConsentNeeded(false),
-          appUnauthorized(false) {
-    }
-
-    std::string application_id;
-    bool isAppPermissionsRevoked;
-    // TODO(AOleynik):  Change type according to HMI_API spec
-    std::vector<std::string> appRevokedPermissions;
-    bool appRevoked;
-    bool appPermissionsConsentNeeded;
-    bool appUnauthorized;
-    bool isSDLAllowed;
-    std::string priority;
-    DeviceParams deviceInfo;
 };
 
 /**
@@ -204,6 +185,7 @@ struct DeviceInfo {
     std::string os_ver;
     std::string carrier;
     uint32_t max_number_rfcom_ports;
+    std::string connection_type;
 };
 
 /**
@@ -225,10 +207,43 @@ struct FunctionalGroupPermission {
           state(kGroupUndefined) {
     }
 
+    bool operator ==(const FunctionalGroupPermission& rhs) {
+      if (this->group_id == rhs.group_id &&
+          this->group_alias == rhs.group_alias &&
+          this->group_name == rhs.group_name) {
+        return true;
+      }
+      return false;
+    }
+
     std::string group_alias;
     std::string group_name;
     uint32_t group_id;
     GroupConsent state;
+};
+
+/**
+ * @brief Stores data to be sent to HMI on application permissions change
+ */
+struct AppPermissions {
+
+    AppPermissions(const std::string& app_id)
+        : application_id(app_id),
+          isAppPermissionsRevoked(false),
+          appRevoked(false),
+          appPermissionsConsentNeeded(false),
+          appUnauthorized(false) {
+    }
+
+    std::string application_id;
+    bool isAppPermissionsRevoked;
+    std::vector<policy::FunctionalGroupPermission> appRevokedPermissions;
+    bool appRevoked;
+    bool appPermissionsConsentNeeded;
+    bool appUnauthorized;
+    bool isSDLAllowed;
+    std::string priority;
+    DeviceParams deviceInfo;
 };
 
 /**

@@ -37,6 +37,7 @@
 
 #include "transport_manager/transport_manager_default.h"
 #include "transport_manager/tcp/tcp_transport_adapter.h"
+#include "utils/logger.h"
 
 #ifdef BLUETOOTH_SUPPORT
 #ifdef CUSTOMER_PASA
@@ -46,19 +47,33 @@
 #endif
 #endif
 
-#ifdef USB_SUPPORT
+#ifdef CUSTOMER_PASA
+
+#ifdef AOA_SUPPORT
+#include "transport_manager/aoa/aoa_transport_adapter.h"
+#endif  // AOA_SUPPORT
+
+#else  // CUSTOMER_PASA
+
+#if defined(AOA_SUPPORT) && defined(__QNXNTO__)
+#include "transport_manager/aoa/aoa_transport_adapter.h"
+#elif defined(USB_SUPPORT)
 #include "transport_manager/usb/usb_aoa_adapter.h"
-#endif
+#endif  // AOA_SUPPORT
+
+#endif  // CUSTOMER_PASA
 
 #ifdef MME_SUPPORT
 #include "transport_manager/mme/mme_transport_adapter.h"
 #endif
 
-
 namespace transport_manager {
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 int TransportManagerDefault::Init() {
+  LOG4CXX_TRACE(logger_, "enter");
   if (E_SUCCESS != TransportManagerImpl::Init()) {
+    LOG4CXX_TRACE(logger_, "exit with E_TM_IS_NOT_INITIALIZED. Condition: E_SUCCESS != TransportManagerImpl::Init()");
     return E_TM_IS_NOT_INITIALIZED;
   }
   transport_adapter::TransportAdapterImpl* ta;
@@ -85,7 +100,30 @@ int TransportManagerDefault::Init() {
   }
 #endif  // TIME_TESTER
   AddTransportAdapter(ta);
-#ifdef USB_SUPPORT
+
+#ifdef CUSTOMER_PASA
+
+#ifdef AOA_SUPPORT
+  ta = new transport_adapter::AOATransportAdapter();
+#ifdef TIME_TESTER
+  if (metric_observer_) {
+    ta->SetTimeMetricObserver(metric_observer_);
+  }
+#endif  // TIME_TESTER
+  AddTransportAdapter(ta);
+#endif  // AOA_SUPPORT
+
+#else  // CUSTOMER_PASA
+
+#if defined(AOA_SUPPORT) && defined(__QNXNTO__)
+  ta = new transport_adapter::AOATransportAdapter();
+#ifdef TIME_TESTER
+  if (metric_observer_) {
+    ta->SetTimeMetricObserver(metric_observer_);
+  }
+#endif  // TIME_TESTER
+  AddTransportAdapter(ta);
+#elif defined(USB_SUPPORT)
   ta = new transport_adapter::UsbAoaAdapter();
 #ifdef TIME_TESTER
   if (metric_observer_) {
@@ -93,7 +131,10 @@ int TransportManagerDefault::Init() {
   }
 #endif  // TIME_TESTER
   AddTransportAdapter(ta);
-#endif
+#endif  // AOA_SUPPORT
+
+#endif  // CUSTOMER_PASA
+
 #ifdef MME_SUPPORT
   ta = new transport_adapter::MmeTransportAdapter();
 #ifdef TIME_TESTER
@@ -104,6 +145,7 @@ int TransportManagerDefault::Init() {
   AddTransportAdapter(ta);
 #endif
 
+  LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
 }
 

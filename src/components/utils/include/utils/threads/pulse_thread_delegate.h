@@ -71,6 +71,18 @@ class PulseThreadDelegate : public ThreadDelegate {
   */
   virtual void OnPulse() = 0;
 
+  /**
+   * This method is to be initialize child class
+   * @return If this method returns false, thread will be stopped
+   */
+  virtual bool Init() { return true; }
+
+/**
+  * Finalizes thread
+  * Can free resources
+  */
+  virtual void Finalize() {}
+
  private:
   enum {PULSE_CODE = _PULSE_CODE_MINAVAIL + 1};
 

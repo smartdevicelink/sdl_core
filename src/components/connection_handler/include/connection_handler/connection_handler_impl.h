@@ -228,12 +228,14 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param device_name Returned: name of device
    * \param applications_list Returned: applications on device
    * \param mac_address Returned: List of session keys
+   * \param connection_type Returned: type of connection (USB, BT, etc.)
    * \return int32_t -1 in case of error or 0 in case of success
    */
   virtual int32_t GetDataOnDeviceID(connection_handler::DeviceHandle device_handle,
                                     std::string *device_name = NULL,
                                     std::list<uint32_t> *applications_list = NULL,
-                                    std::string *mac_address = NULL);
+                                    std::string *mac_address = NULL,
+                                    std::string* connection_type = NULL);
 #ifdef ENABLE_SECURITY
   /**
    * \brief Sets crypto context of connection
@@ -281,15 +283,14 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   virtual void StartDevicesDiscovery();
 
   /**
-   * \brief Close all associated sessions and close
-   * the connection associated with the key
-   * \param key Unique key used by other components as session identifier
+   * @brief Close the connection revoked by Policy
+   * @param connection_key pair of connection and session id
    */
-  virtual void CloseConnection(uint32_t key);
+  virtual void CloseRevokedConnection(uint32_t connection_key);
 
   /**
-   * \brief Close all associated sessions and close the
-   * connection pointed by handle
+   * @brief Close the connection pointed by handle
+   * @param connection_handle Connection unique id
    */
   virtual void CloseConnection(ConnectionHandle connection_handle) OVERRIDE;
 

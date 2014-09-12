@@ -253,7 +253,7 @@ Item
 
     function activateApp_Response (appId, isSDLAllowed, device, isPermissionsConsentNeeded, isAppPermissionsRevoked, appRevokedPermissions, isAppRevoked, priority) {
 
-        console.debug("activateApp_Response enter", appId);
+        console.debug("activateApp_Response enter", appId, isSDLAllowed, device, isPermissionsConsentNeeded, isAppPermissionsRevoked, appRevokedPermissions, isAppRevoked, priority);
 
         if (!isSDLAllowed) {
 
@@ -279,11 +279,11 @@ Item
 
         if (isAppRevoked) {
 
-
             RequestToSDL.SDL_GetUserFriendlyMessage(["AppUnsupported"], dataContainer.hmiUILanguage, function(messages){
                 settingsContainer.getUserFriendlyMessageAppPermissionsRevoked("AppUnsupported", messages)
             });
         } else if (isSDLAllowed && !isPermissionsConsentNeeded) {
+
             dataContainer.setCurrentApplication(appId)
             contentLoader.go(
                 Internal.chooseAppStartScreen(
@@ -296,7 +296,7 @@ Item
     }
 
     function allowSDLFunctionality (result, device) {
-        console.log("allowSDLFunctionality enter");
+        console.log("allowSDLFunctionality enter", result, device);
 
         sdlSDL.onAllowSDLFunctionality(device, result, Common.ConsentSource.GUI)
 
@@ -308,8 +308,10 @@ Item
 
         var app = dataContainer.getApplication(appId);
         var messageCodes = [];
+
+        app.allowedFunctions = allowedFunctions;
+
         allowedFunctions.forEach(function (x) {
-            app.allowedFunctions.append({name: x.name, id: x.id, allowed: x.allowed});
             messageCodes.push(x.name);
         });
 
@@ -368,7 +370,8 @@ Item
                                  "messageCode": messages[i].messageCode,
                                  "label": messages[i].label,
                                  "textBody": messages[i].textBody,
-                                 "allowed": false
+                                 "allowed": false,
+                                 "id": messages[i].id
                              });
 
             if (messages[i].tts) {

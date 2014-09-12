@@ -55,6 +55,12 @@ AddCommandRequest::AddCommandRequest(const MessageSharedPtr& message)
 AddCommandRequest::~AddCommandRequest() {
 }
 
+void AddCommandRequest::onTimeOut() {
+  LOG4CXX_INFO(logger_, "AddCommandRequest::onTimeOut");
+  RemoveCommand();
+  CommandRequestImpl::onTimeOut();
+}
+
 void AddCommandRequest::Run() {
   LOG4CXX_INFO(logger_, "AddCommandRequest::Run");
 
@@ -137,6 +143,10 @@ void AddCommandRequest::Run() {
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;
   }
+
+  app->AddCommand((*message_)[strings::msg_params]
+                              [strings::cmd_id].asUInt(),
+                              (*message_)[strings::msg_params]);
 
   smart_objects::SmartObject ui_msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -316,42 +326,31 @@ void AddCommandRequest::on_event(const event_engine::Event& event) {
       return;
     }
 
-    smart_objects::SmartObject* command = application->FindCommand(
-        (*message_)[strings::msg_params][strings::cmd_id].asInt());
+    if (hmi_apis::Common_Result::REJECTED == ui_result_) {
+      RemoveCommand();
+    }
 
-    if (!command) {
-      if ((((*message_)[strings::msg_params].keyExists(strings::menu_params)) ||
-          ((*message_)[strings::msg_params].keyExists(strings::vr_commands))) &&
-           (hmi_apis::Common_Result::REJECTED != ui_result_)) {
-        application->AddCommand((*message_)[strings::msg_params]
-                                      [strings::cmd_id].asInt(),
-                                      (*message_)[strings::msg_params]);
-      }
+    mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
 
-      mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+    bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
+        (hmi_apis::Common_Result::SUCCESS == vr_result_)) ||
+        ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
+        (hmi_apis::Common_Result::INVALID_ENUM == vr_result_ ||
+         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_)) ||
+        ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_ ||
+         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_ ) &&
+        (hmi_apis::Common_Result::SUCCESS == vr_result_));
 
-      bool result = ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
-                     (hmi_apis::Common_Result::SUCCESS == vr_result_)) ||
-                     ((hmi_apis::Common_Result::SUCCESS == ui_result_) &&
-                     (hmi_apis::Common_Result::INVALID_ENUM == vr_result_ ||
-                      hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == vr_result_)) ||
-                     ((hmi_apis::Common_Result::INVALID_ENUM == ui_result_ ||
-                         hmi_apis::Common_Result::UNSUPPORTED_RESOURCE == ui_result_ ) &&
-                     (hmi_apis::Common_Result::SUCCESS == vr_result_));
+    if (!result && (hmi_apis::Common_Result::REJECTED == ui_result_)) {
+      result_code = static_cast<mobile_apis::Result::eType>(ui_result_);
+    } else {
+      result_code = static_cast<mobile_apis::Result::eType>(
+          std::max(ui_result_, vr_result_));
+    }
 
-      if (!result && (hmi_apis::Common_Result::REJECTED == ui_result_)) {
-        result_code = static_cast<mobile_apis::Result::eType>(ui_result_);
-      } else {
-        result_code = static_cast<mobile_apis::Result::eType>(
-            std::max(ui_result_, vr_result_));
-      }
-
-      ApplicationSharedPtr application =
-          ApplicationManagerImpl::instance()->application(connection_key());
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
-      if (true == result) {
-        application->UpdateHash();
-      }
+    SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+    if (true == result) {
+      application->UpdateHash();
     }
   }
 }
@@ -367,7 +366,7 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
     str = (*message_)[strings::msg_params][strings::menu_params]
                                    [strings::menu_name].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid menu name syntax check failed.");
       return true;
     }
@@ -380,7 +379,7 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
     for (size_t i = 0; i < len; ++i) {
       str = (*message_)[strings::msg_params]
                         [strings::vr_commands][i].asCharArray();
-      if (!CheckSyntax(str, true)) {
+      if (!CheckSyntax(str)) {
         LOG4CXX_ERROR(logger_, "Invalid vr_commands syntax check failed");
         return true;
       }
@@ -390,12 +389,24 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
   if ((*message_)[strings::msg_params].keyExists(strings::cmd_icon)) {
     str = (*message_)[strings::msg_params]
                       [strings::cmd_icon][strings::value].asCharArray();
-    if (!CheckSyntax(str, true)) {
+    if (!CheckSyntax(str)) {
       LOG4CXX_ERROR(logger_, "Invalid cmd_icon value syntax check failed");
       return true;
     }
   }
   return false;
+}
+
+void AddCommandRequest::RemoveCommand() {
+  LOG4CXX_INFO(logger_, "AddCommandRequest::RemoveCommand");
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+      connection_key());
+  if (!app.valid()) {
+    LOG4CXX_ERROR(logger_, "No application associated with session key");
+    return;
+  }
+  app->RemoveCommand((*message_)[strings::msg_params]
+                                 [strings::cmd_id].asUInt());
 }
 
 }  // namespace commands

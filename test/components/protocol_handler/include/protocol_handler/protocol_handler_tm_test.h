@@ -101,7 +101,11 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   // Emulate connection establish
   void AddConnection() {
     tm_listener->OnConnectionEstablished(
-          DeviceInfo(DeviceHandle(1u), std::string("mac"), std::string("name")), connection_id);
+          DeviceInfo(DeviceHandle(1u),
+                     std::string("mac"),
+                     std::string("name"),
+                     std::string("BTMAC")),
+          connection_id);
   }
 #ifdef ENABLE_SECURITY
   // Emulate security manager initilization establish

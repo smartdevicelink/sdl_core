@@ -241,7 +241,7 @@ bool LifeCycle::InitMessageSystem() {
       &hmi_message_handler::MessageBrokerAdapter::SubscribeAndBeginReceiverThread,
       NULL));
   mb_pasa_adapter_thread_->Start(false);
-  NameMessageBrokerThread(*mb_pasa_adapter_thread_, "MessageBrokerAdapterThread");
+  NameMessageBrokerThread(*mb_pasa_adapter_thread_, "MB Adapter");
 
   return true;
 }
@@ -305,7 +305,7 @@ bool LifeCycle::InitMessageSystem() {
   mb_thread_->Start(false);
   // Thread can be named only when started because before that point
   // thread doesn't have valid Id to associate name with
-  NameMessageBrokerThread(*mb_thread_, "MessageBrokerThread");
+  NameMessageBrokerThread(*mb_thread_, "MessageBroker");
 
   LOG4CXX_INFO(logger_, "Start MessageBroker TCP server thread!");
   mb_server_thread_  = new System::Thread(
@@ -313,7 +313,7 @@ bool LifeCycle::InitMessageSystem() {
       *message_broker_server_, &NsMessageBroker::TcpServer::MethodForThread,
       NULL));
   mb_server_thread_->Start(false);
-  NameMessageBrokerThread(*mb_server_thread_, "MessageBrokerTCPServerThread");
+  NameMessageBrokerThread(*mb_server_thread_, "MB TCPServer");
 
   LOG4CXX_INFO(logger_, "StartAppMgr JSONRPC 2.0 controller receiver thread!");
   mb_adapter_thread_  = new System::Thread(
@@ -322,7 +322,7 @@ bool LifeCycle::InitMessageSystem() {
       &hmi_message_handler::MessageBrokerAdapter::SubscribeAndBeginReceiverThread,
       NULL));
   mb_adapter_thread_->Start(false);
-  NameMessageBrokerThread(*mb_adapter_thread_, "MessageBrokerAdapterThread");
+  NameMessageBrokerThread(*mb_adapter_thread_, "MB Adapter");
 
   return true;
 }
@@ -437,7 +437,7 @@ void LifeCycle::StopComponents() {
   if (mb_adapter_) {
     mb_adapter_->unregisterController();
     mb_adapter_->Close();
-    mb_adapter_->exitReceavingThread();
+    mb_adapter_->exitReceivingThread();
     delete mb_adapter_;
   }
   if (mb_adapter_thread_) {

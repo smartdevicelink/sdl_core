@@ -37,36 +37,39 @@
 
 namespace threads {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "threads::PulseThreadDelegate")
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 PulseThreadDelegate::PulseThreadDelegate() : run_(false) {
   LOG4CXX_TRACE(logger_, "Creating QNX channel");
   chid_ = ChannelCreate(0);
-  if (chid_ != -1) {
-    LOG4CXX_DEBUG(logger_, "Created QNX channel " << chid_);
-  }
-  else {
+  if (chid_ == -1) {
     LOG4CXX_ERROR(logger_, "Failed to create QNX channel");
     return;
   }
+  LOG4CXX_DEBUG(logger_, "Created QNX channel " << chid_);
 
   LOG4CXX_TRACE(logger_, "Connecting to QNX channel " << chid_);
   coid_ = ConnectAttach(ND_LOCAL_NODE, 0, chid_, _NTO_SIDE_CHANNEL, 0);
-  if (coid_ != -1) {
-    LOG4CXX_DEBUG(logger_, "Connected to QNX channel " << chid_);
-  }
-  else {
+  if (coid_ == -1) {
     LOG4CXX_ERROR(logger_, "Failed to connect to QNX channel " << chid_);
     return;
   }
+  LOG4CXX_DEBUG(logger_, "Connected to QNX channel " << chid_);
 
   run_ = true;
 }
 
 void PulseThreadDelegate::threadMain() {
+  if (!Init()) {
+    LOG4CXX_ERROR(logger_, "Failed to initialize thread for QNX channel " << chid_);
+    return;
+  }
   while (run_) {
     struct sigevent event;
-    SIGEV_PULSE_INIT(&event, coid_, SIGEV_PULSE_PRIO_INHERIT, PULSE_CODE, 0);
+// pulse priority is used to increase receiving thread priority
+// TODO (nvaganov@luxoft.com): move constant value to config
+    short int pulse_priority = 63;
+    SIGEV_PULSE_INIT(&event, coid_, pulse_priority, PULSE_CODE, 0);
     if (ArmEvent(&event)) {
       struct _pulse pulse;
       LOG4CXX_INFO(logger_, "Waiting for pulse on QNX channel " << chid_);
@@ -88,6 +91,7 @@ void PulseThreadDelegate::threadMain() {
       }
     }
   }
+  Finalize();
 }
 
 bool PulseThreadDelegate::exitThreadMain() {

@@ -44,6 +44,7 @@
 #include "utils/threads/thread_delegate.h"
 #include "utils/threads/thread.h"
 #include "utils/lock.h"
+#include "utils/timer_thread.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -67,10 +68,15 @@ class IAP2Device : public MmeDevice {
   virtual ApplicationList GetApplicationList() const;
 
  private:
-  typedef std::map<std::string, int> ProtocolNamePool;
+  typedef std::map<int, std::string> FreeProtocolNamePool;
+  typedef std::map<std::string, int> ProtocolInUseNamePool;
   typedef std::pair<std::string, iap2ea_hdl_t*> AppRecord;
   typedef std::map<ApplicationHandle, AppRecord> AppContainer;
   typedef std::map<std::string, utils::SharedPtr<threads::Thread> > ThreadContainer;
+
+  class ProtocolConnectionTimer;
+  typedef utils::SharedPtr<ProtocolConnectionTimer> ProtocolConnectionTimerSPtr;
+  typedef std::map<std::string, ProtocolConnectionTimerSPtr> TimerContainer;
 
   bool RecordByAppId(ApplicationHandle app_id, AppRecord& record) const;
 
@@ -79,7 +85,43 @@ class IAP2Device : public MmeDevice {
   void OnConnectFailed(const std::string& protocol_name);
   void OnDisconnect(ApplicationHandle app_id);
 
-  bool ReturnToPool(const std::string& protocol_name);
+  /**
+   * Starts thread for protocol name
+   * @param name
+   */
+  void StartThread(const std::string& protocol_name);
+
+  /**
+   * Stops thread for protocol name
+   * @param name
+   */
+  void StopThread(const std::string& protocol_name);
+
+  /**
+   * Picks protocol from pool of protocols
+   * @param index of protocol
+   * @param name of protocol
+   * @return true if protocol was picked
+   */
+  bool PickProtocol(char* index, std::string* name);
+
+  /**
+   * Frees protocol
+   * @param name of protocol
+   */
+  bool FreeProtocol(const std::string& name);
+
+  /**
+   * Starts timer for protocol
+   * @param name of protocol
+   */
+  void StartTimer(const std::string& name);
+
+  /**
+   * Stops timer for protocol
+   * @param name of protocol
+   */
+  void StopTimer(const std::string& name);
 
   TransportAdapterController* controller_;
   int last_app_id_;
@@ -87,14 +129,16 @@ class IAP2Device : public MmeDevice {
   AppContainer apps_;
   mutable sync_primitives::Lock apps_lock_;
 
-  ProtocolNamePool free_protocol_name_pool_;
-  ProtocolNamePool protocol_in_use_name_pool_;
+  FreeProtocolNamePool free_protocol_name_pool_;
+  ProtocolInUseNamePool protocol_in_use_name_pool_;
   sync_primitives::Lock protocol_name_pool_lock_;
 
   ThreadContainer legacy_connection_threads_;
   ThreadContainer hub_connection_threads_;
   ThreadContainer pool_connection_threads_;
   sync_primitives::Lock pool_connection_threads_lock_;
+  TimerContainer timers_protocols_;
+  sync_primitives::Lock timers_protocols_lock_;
 
   class IAP2HubConnectThreadDelegate : public threads::ThreadDelegate {
    public:
@@ -112,6 +156,20 @@ class IAP2Device : public MmeDevice {
     private:
       IAP2Device* parent_;
       std::string protocol_name_;
+  };
+
+  class ProtocolConnectionTimer {
+   public:
+    ProtocolConnectionTimer(const std::string& name, IAP2Device* parent);
+    ~ProtocolConnectionTimer();
+    void Start();
+    void Stop();
+   private:
+    typedef timer::TimerThread<ProtocolConnectionTimer> Timer;
+    std::string name_;
+    Timer* timer_;
+    IAP2Device* parent_;
+    void Shoot();
   };
 
   friend class IAP2Connection;

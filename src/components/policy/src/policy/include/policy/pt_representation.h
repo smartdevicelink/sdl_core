@@ -139,6 +139,16 @@ class PTRepresentation {
     virtual VehicleData GetVehicleData() = 0;
 
     /**
+     * @brief Allows to update 'vin' field in module_meta table.
+     *
+     * @param new 'vin' value.
+     *
+     * @return true in case when data has been successfully updated,
+     * false otherwise.
+     */
+    virtual bool SetVINValue(const std::string& value) = 0;
+
+    /**
      * @brief Get message text for displaying/pronouncing for user
      * dependent on language and context.
      * @param msg_codes Context of message (Driver distraction, Grant permission etc)
@@ -273,6 +283,18 @@ class PTRepresentation {
      * @return true if success
      */
     virtual bool SetDefaultPolicy(const std::string& app_id) = 0;
+
+    /**
+     * @brief SaveApplicationCustomData
+     * @param app_id
+     * @param is_revoked
+     * @param is_default
+     * @param is_predata
+     */
+    virtual bool SaveApplicationCustomData(const std::string& app_id,
+                                           bool is_revoked,
+                                           bool is_default,
+                                           bool is_predata) = 0;
 };
 
 }  //  namespace policy

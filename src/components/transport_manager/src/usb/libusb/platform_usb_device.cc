@@ -1,6 +1,4 @@
 /**
- * \file platform_usb_device.cc
- * \brief Libusb PlatformUsbDevice class source file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -45,26 +43,29 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 
 PlatformUsbDevice::PlatformUsbDevice(
-    uint8_t bus_number, uint8_t address,
-    const libusb_device_descriptor& device_descriptor,
-    libusb_device* device_libusb, libusb_device_handle* device_handle_libusb)
-    : bus_number_(bus_number),
-      address_(address),
-      vendor_id_(device_descriptor.idVendor),
-      product_id_(device_descriptor.idProduct),
-      device_descriptor_(device_descriptor),
-      libusb_device_handle_(device_handle_libusb),
-      libusb_device_(device_libusb) {}
+  uint8_t bus_number, uint8_t address,
+  const libusb_device_descriptor& device_descriptor,
+  libusb_device* device_libusb, libusb_device_handle* device_handle_libusb)
+  : bus_number_(bus_number),
+    address_(address),
+    vendor_id_(device_descriptor.idVendor),
+    product_id_(device_descriptor.idProduct),
+    device_descriptor_(device_descriptor),
+    libusb_device_handle_(device_handle_libusb),
+    libusb_device_(device_libusb) {}
 
 std::string PlatformUsbDevice::GetDescString(uint8_t index) const {
+  LOG4CXX_TRACE(logger_, "enter. index: " << int(index));
   unsigned char buf[128];
   const int libusb_ret = libusb_get_string_descriptor_ascii(
-      libusb_device_handle_, index, buf, sizeof(buf));
+                           libusb_device_handle_, index, buf, sizeof(buf));
   if (libusb_ret < 0) {
-    LOG4CXX_INFO(logger_, "Failed to get USB string descriptor: "
-                              << libusb_error_name(libusb_ret));
+    LOG4CXX_ERROR(logger_, "Failed to get USB string descriptor: "
+                 << libusb_error_name(libusb_ret));
+    LOG4CXX_TRACE(logger_, "exit with empty string");
     return "";
   }
+  LOG4CXX_TRACE(logger_, "exit");
   return std::string(reinterpret_cast<char*>(buf));
 }
 

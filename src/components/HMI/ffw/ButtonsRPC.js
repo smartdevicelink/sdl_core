@@ -303,7 +303,7 @@ FFW.Buttons = FFW.RPCObserver.create( {
      * when the RPC link is up or failed to connect and all the views are
      * rendered.
      */
-    buttonPressedCustom: function(name, type, softButtonID) {
+    buttonPressedCustom: function(name, type, softButtonID, appID) {
 
         Em.Logger.log("FFW.Buttons.OnButtonPress " + type);
 
@@ -313,7 +313,8 @@ FFW.Buttons = FFW.RPCObserver.create( {
             "params": {
                 "name": name,
                 "mode": type,
-                "customButtonID": softButtonID
+                "customButtonID": softButtonID,
+                "appID": appID
             }
         };
 
@@ -325,7 +326,7 @@ FFW.Buttons = FFW.RPCObserver.create( {
      * when the RPC link is up or failed to connect and all the views are
      * rendered.
      */
-    buttonEventCustom: function(name, type, softButtonID) {
+    buttonEventCustom: function(name, type, softButtonID, appID) {
 
         Em.Logger.log("FFW.Buttons.OnButtonEvent " + type);
 
@@ -335,11 +336,12 @@ FFW.Buttons = FFW.RPCObserver.create( {
             "params": {
                 "name": name,
                 "mode": type,
-                "customButtonID": softButtonID
+                "customButtonID": softButtonID,
+                "appID": appID
             }
         };
 
         this.client.send(JSONMessage);
 
     }
-})
+});

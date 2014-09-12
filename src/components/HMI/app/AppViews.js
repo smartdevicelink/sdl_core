@@ -63,7 +63,6 @@ SDL.AppViews = Em.ContainerView.extend( {
         SDL.BottomControls,
         SDL.TTSPopUp,
         SDL.AlertPopUp,
-        SDL.PopUp,
         SDL.AlertManeuverPopUp,
         SDL.AudioPassThruPopUp,
         SDL.VRPopUp,

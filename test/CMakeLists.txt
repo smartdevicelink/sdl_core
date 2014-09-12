@@ -91,7 +91,7 @@ set(LIBRARIES
     MessageBrokerClient
     MessageBrokerServer
     encryption
-    # rt
+    ${RTLIB}
     # ${GSTREAMER_gstreamer_LIBRARY}
     Resumption
     Policy

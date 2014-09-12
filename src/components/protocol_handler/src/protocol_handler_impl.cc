@@ -158,9 +158,9 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
 #ifdef ENABLE_SECURITY
       security_manager_(NULL),
 #endif  // ENABLE_SECURITY
-      raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
+      raw_ford_messages_from_mobile_("PH FromMobile", this,
                                      threads::ThreadOptions(kStackSize)),
-      raw_ford_messages_to_mobile_("MessagesToMobileAppHandler", this,
+      raw_ford_messages_to_mobile_("PH ToMobile", this,
                                    threads::ThreadOptions(kStackSize))
 #ifdef TIME_TESTER
       , metric_observer_(NULL)
@@ -361,6 +361,9 @@ void ProtocolHandlerImpl::SendHeartBeat(int32_t connection_id,
 
 void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
                                                  bool final_message) {
+#ifdef TIME_TESTER
+    const TimevalStruct start_time = date_time::DateTime::getCurrentTime();
+#endif  // TIME_TESTER
   LOG4CXX_TRACE_ENTER(logger_);
   if (!message) {
     LOG4CXX_ERROR(logger_,
@@ -377,6 +380,16 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
         " ISessionObserver doesn't exist.");
     return;
   }
+  uint32_t connection_handle = 0;
+  uint8_t sessionID = 0;
+  session_observer_->PairFromKey(message->connection_key(), &connection_handle,
+                                 &sessionID);
+#ifdef TIME_TESTER
+  uint32_t message_id = message_counters_[sessionID];
+  if (metric_observer_) {
+    metric_observer_->StartMessageProcess(message_id, start_time);
+  }
+#endif  // TIME_TESTER
 
   const uint32_t header_size = (PROTOCOL_VERSION_1 == message->protocol_version())
       ? PROTOCOL_HEADER_V1_SIZE : PROTOCOL_HEADER_V2_SIZE;
@@ -392,10 +405,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
 #endif  // ENABLE_SECURITY
   DCHECK(MAXIMUM_FRAME_DATA_SIZE > maxDataSize);
 
-  uint32_t connection_handle = 0;
-  uint8_t sessionID = 0;
-  session_observer_->PairFromKey(message->connection_key(), &connection_handle,
-                                 &sessionID);
+
 
   if (message->data_size() <= maxDataSize) {
     RESULT_CODE result = SendSingleFrameMessage(connection_handle, sessionID,
@@ -424,6 +434,16 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
           "ProtocolHandler failed to send multiframe messages.");
     }
   }
+#ifdef TIME_TESTER
+      if (metric_observer_) {
+        PHMetricObserver::MessageMetric *metric
+            = new PHMetricObserver::MessageMetric();
+        metric->message_id = message_id;
+        metric->connection_key = message->connection_key();
+        metric->raw_msg = message;
+        metric_observer_->EndMessageProcess(metric);
+      }
+#endif
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
@@ -1003,9 +1023,9 @@ class StartSessionHandler : public security_manager::SecurityManagerListener {
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     ConnectionID connection_id, const ProtocolPacket &packet) {
-  LOG4CXX_INFO_EXT(logger_,
-                   "Protocol version: " <<
-                   static_cast<int>(packet.protocol_version()));
+  LOG4CXX_TRACE(logger_,
+                "Protocol version: " <<
+                static_cast<int>(packet.protocol_version()));
   const ServiceType service_type = ServiceTypeFromByte(packet.service_type());
   const uint8_t protocol_version = packet.protocol_version();
 
@@ -1025,7 +1045,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
     LOG4CXX_WARN_EXT(logger_, "Refused to create service " <<
                      static_cast<int32_t>(service_type) << " type.");
     SendStartSessionNAck(connection_id, packet.session_id(),
-                         packet.protocol_version(), packet.service_type());
+                         protocol_version, packet.service_type());
     return RESULT_OK;
   }
   const uint32_t connection_key =

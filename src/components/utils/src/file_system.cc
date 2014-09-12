@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,7 @@
  */
 
 #include "utils/file_system.h"
+#include "utils/logger.h"
 
 #include <sys/statvfs.h>
 #include <sys/stat.h>
@@ -43,6 +44,8 @@
 #include <fstream>
 #include <cstddef>
 #include <algorithm>
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
   struct statvfs fsInfo;
@@ -213,7 +216,9 @@ std::string file_system::CurrentWorkingDirectory() {
   size_t filename_max_lenght = 1024;
   char currentAppPath[filename_max_lenght];
   memset(currentAppPath, 0, filename_max_lenght);
-  getcwd(currentAppPath, filename_max_lenght);
+  if (0 == getcwd(currentAppPath, filename_max_lenght)) {
+    LOG4CXX_WARN(logger_, "Could not get CWD");
+  }
 
   char path[filename_max_lenght];
   memset(path, 0, filename_max_lenght);
@@ -286,6 +291,14 @@ bool file_system::RemoveDirectory(const std::string& directory_name,
 
 bool file_system::IsAccessible(const std::string& name, int32_t how) {
   return !access(name.c_str(), how);
+}
+
+bool file_system::IsWritingAllowed(const std::string& name) {
+  return IsAccessible(name, W_OK);
+}
+
+bool file_system::IsReadingAllowed(const std::string& name) {
+  return IsAccessible(name, R_OK);
 }
 
 std::vector<std::string> file_system::ListFiles(

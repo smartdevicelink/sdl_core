@@ -57,6 +57,44 @@ void OnButtonPressNotification::Run() {
       static_cast<uint32_t>(
           (*message_)[strings::msg_params][hmi_response::button_name].asInt());
 
+  // CUSTOM_BUTTON notification
+  if (static_cast<uint32_t>(mobile_apis::ButtonName::CUSTOM_BUTTON) == btn_id) {
+    // app_id is mandatory for CUSTOM_BUTTON notification
+    if (false == (*message_)[strings::msg_params].keyExists(strings::app_id)) {
+      LOG4CXX_ERROR_EXT(logger_, "CUSTOM_BUTTON OnButtonPress without app_id.");
+      return;
+    }
+
+    // custom_button_id is mandatory for CUSTOM_BUTTON notification
+    if (false == (*message_)[strings::msg_params].keyExists(
+        hmi_response::custom_button_id)) {
+      LOG4CXX_ERROR_EXT(logger_,
+                       "CUSTOM_BUTTON OnButtonPress without custom_button_id.");
+      return;
+    }
+
+    ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
+        (*message_)[strings::msg_params][strings::app_id].asUInt());
+
+    if (false == app.valid()) {
+      LOG4CXX_ERROR_EXT(logger_, "Application doesn't exist.");
+      return;
+    }
+
+    uint32_t custom_btn_id = 0;
+    custom_btn_id = (*message_)[strings::msg_params]
+                               [hmi_response::custom_button_id].asUInt();
+
+    if (false == app->IsSubscribedToSoftButton(custom_btn_id)) {
+      LOG4CXX_ERROR_EXT(logger_,
+                    "Application doesn't subscribed to this custom_button_id.");
+      return;
+    }
+
+    SendButtonPress(app);
+    return;
+  }
+
   const std::vector<ApplicationSharedPtr>& subscribedApps =
       ApplicationManagerImpl::instance()->applications_by_button(btn_id);
 
@@ -68,15 +106,20 @@ void OnButtonPressNotification::Run() {
       continue;
     }
 
-    if ((mobile_api::HMILevel::HMI_FULL == subscribed_app->hmi_level())
-        || (mobile_api::HMILevel::HMI_LIMITED == subscribed_app->hmi_level()
-            && static_cast<uint32_t>(mobile_apis::ButtonName::OK) !=
-                btn_id)) {
-      SendButtonPress(subscribed_app);
-    } else {
-      LOG4CXX_WARN_EXT(logger_, "OnButtonEvent in HMI_BACKGROUND or NONE");
+    //Send ButtonPress notification only in HMI_FULL or HMI_LIMITED mode
+    if ((mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level()) &&
+        (mobile_api::HMILevel::HMI_LIMITED != subscribed_app->hmi_level())) {
+      LOG4CXX_WARN_EXT(logger_, "OnButtonPress in HMI_BACKGROUND or NONE");
       continue;
     }
+
+    //Send ButtonPress notification for OK button only in HMI_FULL mode
+    if ((static_cast<uint32_t>(mobile_apis::ButtonName::OK) == btn_id) &&
+        (mobile_api::HMILevel::HMI_FULL != subscribed_app->hmi_level())) {
+      continue;
+    }
+
+    SendButtonPress(subscribed_app);
   }
 }
 

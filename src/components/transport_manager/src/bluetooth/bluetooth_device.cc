@@ -1,6 +1,4 @@
-/**
- * \file bluetooth_device.cc
- * \brief BluetoothDevice class source file.
+/*
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -41,42 +39,55 @@
 
 #include <algorithm>
 #include <limits>
+#include "utils/logger.h"
 
 namespace transport_manager {
 namespace transport_adapter {
+CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 
 bool BluetoothDevice::GetRfcommChannel(const ApplicationHandle app_handle,
                                        uint8_t* channel_out) {
-  if (app_handle < 0 || app_handle > std::numeric_limits<uint8_t>::max())
+  LOG4CXX_TRACE(logger_, "enter. app_handle: " << app_handle << ", channel_out: " <<
+                channel_out);
+  if (app_handle < 0 || app_handle > std::numeric_limits<uint8_t>::max()) {
+    LOG4CXX_TRACE(logger_,
+                  "exit with FALSE. Condition: app_handle < 0 || app_handle > numeric_limits::max()");
     return false;
+  }
   const uint8_t channel = static_cast<uint8_t>(app_handle);
   RfcommChannelVector::const_iterator it = std::find(rfcomm_channels_.begin(),
-                                                     rfcomm_channels_.end(),
-                                                     channel);
-  if (it == rfcomm_channels_.end())
+      rfcomm_channels_.end(),
+      channel);
+  if (it == rfcomm_channels_.end()) {
+    LOG4CXX_TRACE(logger_, "exit with FALSE. Condition: channel not found in RfcommChannelVector");
     return false;
+  }
   *channel_out = channel;
+  LOG4CXX_TRACE(logger_, "exit with TRUE");
   return true;
 }
 
 std::string BluetoothDevice::GetUniqueDeviceId(const bdaddr_t& device_address) {
+  LOG4CXX_TRACE(logger_, "enter. device_adress: " << &device_address);
   char device_address_string[32];
   ba2str(&device_address, device_address_string);
+  LOG4CXX_TRACE(logger_, "exit with BT-" << device_address_string);
   return std::string("BT-") + device_address_string;
 }
 
 BluetoothDevice::BluetoothDevice(const bdaddr_t& device_address, const char* device_name,
                                  const RfcommChannelVector& rfcomm_channels)
-    : Device(device_name, GetUniqueDeviceId(device_address)),
-      address_(device_address),
-      rfcomm_channels_(rfcomm_channels) {
+  : Device(device_name, GetUniqueDeviceId(device_address)),
+    address_(device_address),
+    rfcomm_channels_(rfcomm_channels) {
 }
 
 bool BluetoothDevice::IsSameAs(const Device* other) const {
+  LOG4CXX_TRACE(logger_, "enter. device: " << other);
   bool result = false;
 
   const BluetoothDevice* other_bluetooth_device =
-      dynamic_cast<const BluetoothDevice*>(other);
+    dynamic_cast<const BluetoothDevice*>(other);
 
   if (0 != other_bluetooth_device) {
     if (0
@@ -85,7 +96,11 @@ bool BluetoothDevice::IsSameAs(const Device* other) const {
       result = true;
     }
   }
-
+  if (result) {
+      LOG4CXX_TRACE(logger_, "exit with TRUE");
+  } else {
+      LOG4CXX_TRACE(logger_, "exit with FALSE");
+  }
   return result;
 }
 
@@ -95,4 +110,3 @@ ApplicationList BluetoothDevice::GetApplicationList() const {
 
 }  // namespace transport_adapter
 }  // namespace transport_manager
-

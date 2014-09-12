@@ -254,7 +254,7 @@ QtObject {
                            },
                            distanceToManeuver: 0,
                            distanceToManeuverScale: 0,
-                           maneuverComplete: null
+                           maneuverComplete: false
             },
             allowedFunctions: []
             // This place is for adding new properties

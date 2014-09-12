@@ -15,7 +15,7 @@ OBJS_FILE=.objs.txt
 # Additive Compile Flags (Flags from initiating make process will still apply)
 DEFS += \
 	-Wc,-Werror=return-type \
-	-Wc,-Wuninitialized \
+	-Wc,-Wuninitialized
 
 # Set local includes and then the reference includes (priority order determines search path)
 # Default pattern are any configuration includes (which would be things like qnx), local (Team) component directories,
@@ -49,7 +49,7 @@ INCLUDES = \
 #  for example to include a team component library it would be 
 #  $(TEAM_ROOT)NS_MessageCenter/lib/NS_MessageCenter/
 LIB_PATHS += \
-  $(DEPENDS_LIB_PATHS) \
+  $(DEPENDS_LIB_PATHS)
   
 
 # Define binary outputs.  These can be libraries or executables.
@@ -73,7 +73,7 @@ COMPONENT_LIB = $(LIB_PATH)$(LIB_PREFIX)$(COMPONENT_NAME)$(DEBUG_EXT).$(LIB_EXT)
 # Define generic line that pulls all c, cc, cpp files 
 # since your in the src folder is pull only files from there
 COMPONENT_SRCS = \
-	$(wildcard *.c*) \
+	$(wildcard *.c*)
 	
 
 # Define sources that my not be local to your component
@@ -83,8 +83,11 @@ NON_LOCAL_SRCS = \
 	$(wildcard transport_adapter/*.c*) \
 	$(wildcard tcp/*.c*) \
 	$(wildcard pasa_bt/*.c*) \
-	$(wildcard mme/*.c*) \
-	#$(wildcard usb/*.c*) \
+	$(wildcard mme/*.c*)
+
+ifdef BUILD_AOA_SUPPORT
+NON_LOCAL_SRCS += $(wildcard aoa/*.c*)
+endif
  
  .NOTPARALLEL:
 
@@ -109,7 +112,7 @@ CC_LANG_OBJECTS = $(addprefix $(abspath $(BLD_PATH))/,$(addsuffix .$(OBJ_EXT),$(
 OBJECTS = \
 	$(C_LANG_OBJECTS) \
 	$(CPP_LANG_OBJECTS) \
-	$(CC_LANG_OBJECTS) \
+	$(CC_LANG_OBJECTS)
 
 
 # assuming all objects should be included in the executable.
@@ -126,7 +129,6 @@ HEADERS = \
 	$(wildcard ../include/$(COMPONENT_NAME)/pasa_bt/*.h*) \
 	$(wildcard ../include/$(COMPONENT_NAME)/tcp/*.h*) \
 	$(wildcard ../include/$(COMPONENT_NAME)/transport_adapter/*.h*) \
-	$(wildcard ../include/$(COMPONENT_NAME)/usb/*.h*) \
 	$(wildcard ../../protocol_handler/include/protocol_handler/*.h*) \
 	$(wildcard ../../resumption/include/*.h*) \
 	$(wildcard ../../connection_handler/include/connection_handler/*.h*) \
@@ -135,7 +137,7 @@ HEADERS = \
 	$(wildcard ../../../3rd_party-static/jsoncpp/include/json/*.h*) \
 	
 LIBRARIES = \
-	$(COMPONENT_LIB) \
+	$(COMPONENT_LIB)
 
 
 # Make targets
@@ -181,9 +183,10 @@ subdirs:
 	$(MAKE) -C transport_adapter $(MAKECMDGOALS)
 	$(MAKE) -C tcp $(MAKECMDGOALS)
 	$(MAKE) -C pasa_bt $(MAKECMDGOALS) 
-	#$(MAKE) -C usb $(MAKECMDGOALS) 
 	$(MAKE) -C mme $(MAKECMDGOALS)
-	 
+ifdef BUILD_AOA_SUPPORT
+	$(MAKE) -C aoa $(MAKECMDGOALS)
+endif
 	
 clean:
 	-rm -f $(BINARIES)

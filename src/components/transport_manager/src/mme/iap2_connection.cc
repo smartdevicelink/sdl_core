@@ -49,7 +49,12 @@ IAP2Connection::IAP2Connection(const DeviceUID& device_uid,
   IAP2Device* parent) : device_uid_(device_uid),
   app_handle_(app_handle),
   controller_(controller),
-  parent_(parent) {
+  parent_(parent),
+  unexpected_disconnect_(false) {
+}
+
+IAP2Connection::~IAP2Connection() {
+  receiver_thread_->stop();
 }
 
 bool IAP2Connection::Init() {
@@ -57,7 +62,7 @@ bool IAP2Connection::Init() {
   if (parent_->RecordByAppId(app_handle_, record)) {
     protocol_name_ = record.first;
     iap2ea_hdl_ = record.second;
-    std::string thread_name = "iAP2 receiver (" + protocol_name_ + ")";
+    const std::string thread_name = "iAP2 " + protocol_name_;
     receiver_thread_delegate_ = new ReceiverThreadDelegate(iap2ea_hdl_, this);
     receiver_thread_ = new threads::Thread(thread_name.c_str(), receiver_thread_delegate_);
     receiver_thread_->start();
@@ -65,14 +70,47 @@ bool IAP2Connection::Init() {
     controller_->ConnectDone(device_uid_, app_handle_);
     return true;
   }
-  else {
-    return false;
+  return false;
+}
+
+void IAP2Connection::Finalize() {
+  if (unexpected_disconnect_) {
+    controller_->DisconnectDone(device_uid_, app_handle_);
   }
 }
 
 TransportAdapter::Error IAP2Connection::SendData(RawMessagePtr message) {
+// forced priority workaround
+// is used to reduce iap2_eap_send() run time
+// not to block iap2_eap_event_arm() and iap2_eap_recv() for long
+// otherwise data is discarded in iAP2 driver
+// TODO (nvaganov@luxoft.com): move pthread calls to thread wrapper
+#define USE_FORCED_PRIORITY 1
+#if USE_FORCED_PRIORITY
+  pthread_t pid = pthread_self();
+  int policy;
+  struct sched_param param;
+  pthread_getschedparam(pid, &policy, &param);
+  int thread_priority = param.sched_priority;
+  int forced_priority = 63;
+  if (EOK == pthread_setschedprio(pid, forced_priority)) {
+    LOG4CXX_INFO(logger_, "iAP2: sending thread priority increased");
+  }
+  else {
+    LOG4CXX_WARN(logger_, "iAP2: could not increase sending thread priority");
+  }
+#endif
   LOG4CXX_TRACE(logger_, "iAP2: sending data on protocol " << protocol_name_);
-  if (iap2_eap_send(iap2ea_hdl_, message->data(), message->data_size()) != -1) {
+  int result = iap2_eap_send(iap2ea_hdl_, message->data(), message->data_size());
+#if USE_FORCED_PRIORITY
+  if (EOK == pthread_setschedprio(pid, thread_priority)) {
+    LOG4CXX_INFO(logger_, "iAP2: sending thread priority decreased to normal");
+  }
+  else {
+    LOG4CXX_WARN(logger_, "iAP2: could not decrease sending thread priority to normal");
+  }
+#endif
+  if (result != -1) {
     LOG4CXX_INFO(logger_, "iAP2: data on protocol " << protocol_name_ << " sent successfully");
     controller_->DataSendDone(device_uid_, app_handle_, message);
     return TransportAdapter::OK;
@@ -85,6 +123,7 @@ TransportAdapter::Error IAP2Connection::SendData(RawMessagePtr message) {
 }
 
 TransportAdapter::Error IAP2Connection::Disconnect() {
+  controller_->ConnectionFinished(device_uid_, app_handle_);
   receiver_thread_->stop();
   TransportAdapter::Error error = Close() ? TransportAdapter::OK : TransportAdapter::FAIL;
   controller_->DisconnectDone(device_uid_, app_handle_);
@@ -105,6 +144,7 @@ void IAP2Connection::ReceiveData() {
     switch (errno) {
       case ECONNRESET:
         LOG4CXX_INFO(logger_, "iAP2: protocol " << protocol_name_ << " disconnected");
+        unexpected_disconnect_ = true;
 // receiver_thread_->stop() cannot be invoked here
 // because this method is called from receiver_thread_
 // anyway delegate can be stopped directly
@@ -134,7 +174,6 @@ bool IAP2Connection::Close() {
   }
 
   parent_->OnDisconnect(app_handle_);
-
   return result;
 }
 
@@ -163,6 +202,10 @@ bool IAP2Connection::ReceiverThreadDelegate::ArmEvent(struct sigevent* event) {
 
 void IAP2Connection::ReceiverThreadDelegate::OnPulse() {
   parent_->ReceiveData();
+}
+
+void IAP2Connection::ReceiverThreadDelegate::Finalize() {
+  parent_->Finalize();
 }
 
 }  // namespace transport_adapter

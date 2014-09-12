@@ -64,7 +64,7 @@ void MaskedContainer::componentComplete() {
     int height = this->height();
     int width  =this->width();
 
-    for (int i = 0; i < images_.size(); ++i) {
+    for (size_t i = 0; i < images_.size(); ++i) {
         Item *item = images_[i];
         int itemWidth = item->width();
         int itemHeight = item->height();
@@ -82,7 +82,7 @@ void MaskedContainer::componentComplete() {
     mask_ = new int[height * width];
     std::fill(mask_, mask_ + height * width, -1);
 
-    for (int i = 0; i < images_.size(); ++i) {
+    for (size_t i = 0; i < images_.size(); ++i) {
         Item *item = images_[i];
         int itemWidth = item->width();
         int itemHeight = item->height();

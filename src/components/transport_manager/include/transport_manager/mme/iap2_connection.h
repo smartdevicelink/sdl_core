@@ -52,15 +52,17 @@ class IAP2Connection : public Connection {
     const ApplicationHandle& app_handle,
     TransportAdapterController* controller,
     IAP2Device* parent);
+  ~IAP2Connection();
 
   bool Init();
+  void Finalize();
 
  protected:
   virtual TransportAdapter::Error SendData(RawMessagePtr message);
   virtual TransportAdapter::Error Disconnect();
 
  private:
-  static const size_t kBufferSize = 1024;
+  static const size_t kBufferSize = 32768;
 
   void ReceiveData();
   bool Close();
@@ -72,6 +74,7 @@ class IAP2Connection : public Connection {
   iap2ea_hdl_t* iap2ea_hdl_;
   std::string protocol_name_; // for logging purposes only
   uint8_t buffer_[kBufferSize];
+  bool unexpected_disconnect_;
 
   utils::SharedPtr<threads::Thread> receiver_thread_;
   threads::ThreadDelegate* receiver_thread_delegate_;
@@ -81,6 +84,7 @@ class IAP2Connection : public Connection {
     ReceiverThreadDelegate(iap2ea_hdl_t* iap2ea_hdl, IAP2Connection* parent);
 
    protected:
+    void Finalize() OVERRIDE;
     virtual bool ArmEvent(struct sigevent* event);
     virtual void OnPulse();
 

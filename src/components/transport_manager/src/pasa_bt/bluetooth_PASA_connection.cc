@@ -39,6 +39,7 @@
 
 #include "transport_manager/pasa_bt/bluetooth_PASA_device.h"
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
+#include "utils/threads/thread.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -56,18 +57,22 @@ BluetoothPASAConnection::BluetoothPASAConnection(
     const DeviceUID& device_uid, const ApplicationHandle& app_handle,
     TransportAdapterController* controller)
     : read_fd_(-1), write_fd_(-1), controller_(controller),
-      thread_(),
+      thread_(NULL),
       terminate_flag_(false),
       unexpected_disconnect_(false),
       device_uid_(device_uid),
-      sppDeviceFd(-1),
-      app_handle_(app_handle) {
+      app_handle_(app_handle),
+      sppDeviceFd(-1) {
+  const std::string thread_name = std::string("BT Con") + device_handle();
+  thread_ = new threads::Thread(thread_name.c_str(), new BluetoothPASAConnectionDelegate(this));
 }
 BluetoothPASAConnection::~BluetoothPASAConnection() {
     LOG4CXX_TRACE_ENTER(logger_);
     terminate_flag_ = true;
     Notify();
-    pthread_join(thread_, 0);
+    errno = 0;
+    thread_->join();
+    delete thread_;
     if (-1 != read_fd_)
       close(read_fd_);
     if (-1 != write_fd_)
@@ -80,15 +85,6 @@ void BluetoothPASAConnection::Abort() {
   unexpected_disconnect_ = true;
   terminate_flag_ = true;
   LOG4CXX_TRACE_EXIT(logger_);
-}
-
-void* StartBluetoothPASAConnection(void* v) {
-  LOG4CXX_TRACE_ENTER(logger_);
-  BluetoothPASAConnection* connection =
-      static_cast<BluetoothPASAConnection*>(v);
-  connection->Thread();
-  LOG4CXX_TRACE_EXIT(logger_);
-  return NULL;
 }
 
 TransportAdapter::Error BluetoothPASAConnection::Start() {
@@ -110,8 +106,8 @@ TransportAdapter::Error BluetoothPASAConnection::Start() {
     LOG4CXX_TRACE_EXIT(logger_);
     return TransportAdapter::FAIL;
   }
-  if (0 != pthread_create(&thread_, 0, &StartBluetoothPASAConnection, this)) {
-    LOG4CXX_ERROR(logger_, "thread creation failed (#" << pthread_self() << ")");
+  if (!thread_->start()) {
+    LOG4CXX_ERROR(logger_, "thread " << thread_ << " start failed (#" << pthread_self() << ")");
     LOG4CXX_TRACE_EXIT(logger_);
     return TransportAdapter::FAIL;
   }
@@ -167,6 +163,18 @@ TransportAdapter::Error BluetoothPASAConnection::Disconnect() {
   terminate_flag_ = true;
   LOG4CXX_TRACE_EXIT(logger_);
   return Notify();
+}
+
+BluetoothPASAConnection::BluetoothPASAConnectionDelegate::BluetoothPASAConnectionDelegate(
+    BluetoothPASAConnection* connection)
+  : connection_(connection){
+}
+
+void BluetoothPASAConnection::BluetoothPASAConnectionDelegate::threadMain() {
+  LOG4CXX_TRACE_ENTER(logger_);
+  DCHECK(connection_);
+  connection_->Thread();
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void BluetoothPASAConnection::Thread() {
@@ -294,30 +302,36 @@ void BluetoothPASAConnection::Transmit() {
 
 bool BluetoothPASAConnection::Receive() {
   LOG4CXX_TRACE_ENTER(logger_);
-  uint8_t buffer[4096];
-  int32_t numBytes = 0;
+  uint8_t buffer[MAX_SPP_PACKET_SIZE];
 
-  do {
-    numBytes = read(sppDeviceFd, (void*)buffer, 2047);
-    if (numBytes > 0) {
-      LOG4CXX_DEBUG( logger_,
-            "Received " << numBytes << " bytes for connection " << this);
+  while (true) {
+    const ssize_t num_bytes = read(sppDeviceFd, (void*)buffer, MAX_SPP_PACKET_SIZE);
+    const int errno_value = errno;
+    LOG4CXX_DEBUG( logger_,
+          "Received " << num_bytes << " bytes for connection " << this);
+    if (num_bytes > 0) {
       RawMessagePtr frame(
-            new protocol_handler::RawMessage(0, 0, buffer, numBytes));
+            new protocol_handler::RawMessage(0, 0, buffer, num_bytes));
       controller_->DataReceiveDone(device_handle(), application_handle(), frame);
-    } else if (numBytes < 0) {
-      if (EAGAIN != errno && EWOULDBLOCK != errno) {
-        LOG4CXX_ERROR_WITH_ERRNO(logger_,
-                                 "recv() failed for connection " << this);
-        LOG4CXX_TRACE_EXIT(logger_);
-        return false;
-      }
-    } else {
+      // try to read more
+      continue;
+    }
+    if (num_bytes == 0) {
       LOG4CXX_WARN(logger_, "Connection " << this << " closed by remote peer");
       LOG4CXX_TRACE_EXIT(logger_);
       return false;
     }
-  } while (numBytes > 0);
+    // numBytes < 0
+    if (EAGAIN == errno_value || EWOULDBLOCK == errno_value) {
+      LOG4CXX_DEBUG(logger_, "No more data avalible for connection " << this);
+      // No more data avalible
+      break;
+    }
+    LOG4CXX_ERROR(logger_, "recv() failed for connection " << this
+                  << ", error code " << errno_value << " (" << strerror(errno_value) << ")")
+    LOG4CXX_TRACE_EXIT(logger_);
+    return false;
+  }
   LOG4CXX_TRACE_EXIT(logger_);
   return true;
 }
@@ -330,16 +344,18 @@ bool BluetoothPASAConnection::Send() {
   frames_to_send_lock_.Release();
 
   while (!frames_to_send.empty()) {
-    LOG4CXX_INFO(logger_, "frames_to_send is not empty" << pthread_self() << ")");
+    LOG4CXX_INFO(logger_, "frames_to_send is not empty (#" << pthread_self() << ")");
     RawMessagePtr frame = frames_to_send.front();
     bool frame_sent = false;
     if (frame) {
       if (frame->data() && frame->data_size() > 0 ) {
+        LOG4CXX_DEBUG(logger_, frame->data_size() << " bytes to write (#" << pthread_self() << ")");
         if (frame->data_size() < MAX_SPP_PACKET_SIZE) {
           SPPframe sppFrame = {};
           sppFrame.length = frame->data_size();
           memcpy(sppFrame.data, frame->data(), sppFrame.length);
           const ssize_t written = write(sppDeviceFd, (void*)sppFrame.data, sppFrame.length);
+          LOG4CXX_DEBUG(logger_, "written " << written << " bytes (#" << pthread_self() << ")");
           frame_sent = (written >= sppFrame.length);
         } else {
           //Send Frame in MAX_SPPFRAME_MESSAGE chunks
@@ -348,10 +364,12 @@ bool BluetoothPASAConnection::Send() {
             SPPframe sppFrame = {};
             sppFrame.length = ((bytesSent + MAX_SPP_PACKET_SIZE) < frame->data_size() )
                 ? MAX_SPP_PACKET_SIZE : frame->data_size() - bytesSent;
+            DCHECK(sppFrame.length);
 
             memcpy(sppFrame.data, &(frame->data())[bytesSent], sppFrame.length);
 
             const ssize_t written = write(sppDeviceFd, (void*)sppFrame.data, sppFrame.length);
+            LOG4CXX_DEBUG(logger_, "written " << written << " bytes (#" << pthread_self() << ")");
             frame_sent = (written >= sppFrame.length);
 
             if (!frame_sent){

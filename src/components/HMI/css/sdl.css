@@ -152,7 +152,7 @@
 }
 
 #info_nonMedia .presets .ffw-button {
-	width: 103px;
+	width: 82px;
 	height: 38px;
 	position: relative;
 	float: left;
@@ -162,6 +162,16 @@
 	border-top: 1px solid #222;
 	border-left: 1px solid #222;
 	text-align: center;
+}
+
+#info_nonMedia .presets .ffw-button .text{
+    margin-left: 5px;
+    width: 77px;
+    position: absolute;
+    left: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: left;
 }
 
 #info_nonMedia .app_image img {
@@ -196,8 +206,9 @@
 }
 
 #sdl_options .list-content .ico {
-	height: 49px;
-	float: left;
+    height: 49px;
+    width: 49px;
+    float: left;
     position: relative;
 }
 
@@ -215,7 +226,7 @@
 	display: block;
 	position: absolute;
 	left: 10px;
-	width: 105px;
+	width: 84px;
 	height: 50px;
 	font-size: 20px;
 	line-height: 50px;
@@ -345,6 +356,16 @@
 	padding-right: 15px;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+#slider_view .okButton{
+    top: 379px;
+    left: 364px;
+    width: 54px;
+    height: 17px;
+    border: 1px solid #333;
+    border-radius: 2px;
+    padding: 10px;
 }
 
 #slider_view .sliderControl {
@@ -645,7 +666,7 @@
 	height: 20px;
 	padding: 10px;
 }
-#PopUp.PopUp{
+.PopUp{
     left: 200px;
     width: 400px;
     height: 245px;
@@ -657,7 +678,7 @@
     border-radius: 6px;
 }
 
-#PopUp .text{
+.PopUp .text{
     top: 41px;
     left: 5px;
     width: 390px;
@@ -669,28 +690,28 @@
     text-overflow: ellipsis;
 }
 
-#PopUp .OkButton{
+.PopUp .OkButton{
     top: 190px;
     left: 5px;
     width: 190px;
     border: 1px solid #393939;
 }
 
-#PopUp .OkButton span{
+.PopUp .OkButton span{
     font-size: 20px;
     line-height: 50px;
     cursor: pointer;
     margin-left: 82px;
 }
 
-#PopUp .CancelButton{
+.PopUp .CancelButton{
     top: 190px;
     left: 205px;
     width: 190px;
     border: 1px solid #393939;
 }
 
-#PopUp .CancelButton span{
+.PopUp .CancelButton span{
     font-size: 20px;
     line-height: 50px;
     cursor: pointer;

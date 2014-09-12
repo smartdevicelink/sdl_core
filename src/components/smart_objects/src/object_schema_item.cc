@@ -96,7 +96,7 @@ void CObjectSchemaItem::applySchema(SmartObject& Object) {
         // FIXME(EZamakhov): Remove illigal usage of connection_key/binary_data in AM
         && key.compare(connection_key) != 0
         && key.compare(binary_data) != 0
-        ) {
+       ) {
       // remove fake params
       Object.erase(key);
     }
@@ -121,8 +121,11 @@ void CObjectSchemaItem::unapplySchema(SmartObject& Object) {
   if (SmartType_Map != Object.getType()) {
     return;
   }
-  for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end(); ++it) {
+  for (SmartMap::const_iterator it = Object.map_begin();
+       it != Object.map_end();) {
     const std::string& key = it->first;
+    // move next to avoid wrong iterator on erase
+    ++it;
     if (mMembers.end() == mMembers.find(key)) {
       // remove fake params
       Object.erase(key);
