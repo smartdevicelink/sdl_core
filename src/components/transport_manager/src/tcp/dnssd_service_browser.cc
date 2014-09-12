@@ -100,7 +100,7 @@ void DnssdServiceBrowser::OnClientFailure() {
     LOG4CXX_ERROR(logger_,
                   "AvahiClient failure: " << avahi_strerror(avahi_errno));
   }
-  LOG4CXX_TRACE(logger_, "exit")
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 void AvahiClientCallback(AvahiClient* avahi_client,
