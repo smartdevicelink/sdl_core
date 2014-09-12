@@ -529,6 +529,7 @@ public:
 
 private:
 
+  std::string currentDateTime();
   struct AppHMITypeToString {
       std::string operator()(rpc::Enum<policy_table::AppHMIType> value) {
         return std::string(

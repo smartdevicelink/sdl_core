@@ -39,6 +39,7 @@
 #include "utils/file_system.h"
 #include "json/reader.h"
 #include "utils/logger.h"
+#include <ctime>
 
 #ifdef EXTENDED_POLICY
 #  include "policy/sql_pt_ext_representation.h"
@@ -270,6 +271,15 @@ void CacheManager::Backup() {
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
+std::string CacheManager::currentDateTime() {
+  time_t     now = time(0);
+  struct tm  tstruct;
+  char       buf[80];
+  tstruct = *localtime(&now);
+  strftime(buf, sizeof(buf), "%Y-%m-%d.%X", &tstruct);
+  return buf;
+}
+
 bool CacheManager::GetPermissionsForApp(const std::string &device_id,
                                         const std::string &app_id,
                                         FunctionalIdType& group_types) {
@@ -341,6 +351,7 @@ bool CacheManager::SetUserPermissionsForDevice(
 #ifdef EXTENDED_POLICY
   policy_table::DeviceParams& params = (*pt_->policy_table.device_data)[device_id];
   policy_table::UserConsentRecords& ucr = *(params.user_consent_records);
+
   StringArray::const_iterator consent_iter_end = consented_groups.end();
   StringArray::const_iterator consent_iter = consented_groups.begin();
   StringArray::const_iterator un_consent_iter_end = disallowed_groups.end();
@@ -352,6 +363,14 @@ bool CacheManager::SetUserPermissionsForDevice(
 
   for (; un_consent_iter != un_consent_iter_end; ++un_consent_iter) {
     (*ucr[kDeviceId].consent_groups)[*un_consent_iter] = false;
+  }
+
+  policy_table::UserConsentRecords::iterator ucr_iter = ucr.begin();
+  policy_table::UserConsentRecords::iterator ucr_iter_end = ucr.end();
+  // TODO(AGaliuzov): Get this info from external data
+  for (;ucr_iter != ucr_iter_end;++ucr_iter) {
+    *ucr_iter->second.input = policy_table::Input::I_GUI;
+    *ucr_iter->second.time_stamp = currentDateTime();
   }
 #endif // EXTENDED_POLICY
   LOG4CXX_TRACE_EXIT(logger_);
