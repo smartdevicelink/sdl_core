@@ -62,7 +62,7 @@ class AOADeviceScanner : public DeviceScanner {
 
   static const std::string kPathToConfig;
   bool initialised_;
-  AOALifeDevice* life_;
+  AOADeviceLife* life_;
   TransportAdapterController* controller_;
   DeviceContainer devices_;
   sync_primitives::Lock devices_lock_;
@@ -78,11 +78,11 @@ class AOADeviceScanner : public DeviceScanner {
   std::string GetName(const std::string& unique_id);
   std::string GetUniqueId();
 
-  class LifeDevice : public AOALifeDevice {
+  class DeviceLife : public AOADeviceLife {
    public:
-    explicit LifeDevice(AOADeviceScanner* parent);
+    explicit DeviceLife(AOADeviceScanner* parent);
     void Loop(AOAWrapper::AOAHandle hdl);
-    void Died(AOAWrapper::AOAHandle hdl);
+    void OnDied(AOAWrapper::AOAHandle hdl);
    private:
     AOADeviceScanner* parent_;
   };

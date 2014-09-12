@@ -57,11 +57,10 @@ class AOADynamicDevice : public AOADevice {
  private:
   typedef std::map<AOAWrapper::AOAHandle, AOADevicePtr> DeviceContainer;
 
-  static const std::string kPathToConfig;
   static DeviceContainer devices_;
   static sync_primitives::Lock devices_lock_;
 
-  AOALifeDevice* life_;
+  AOADeviceLife* life_;
   TransportAdapterController* controller_;
   AOAWrapper::AOAUsbInfo aoa_usb_info_;
   sync_primitives::Lock life_lock_;
@@ -73,11 +72,11 @@ class AOADynamicDevice : public AOADevice {
   void RemoveDevice(AOAWrapper::AOAHandle hdl);
   void Notify();
 
-  class LifeDevice : public AOALifeDevice {
+  class DeviceLife : public AOADeviceLife {
    public:
-    explicit LifeDevice(AOADynamicDevice* parent);
+    explicit DeviceLife(AOADynamicDevice* parent);
     void Loop(AOAWrapper::AOAHandle handle);
-    void Died(AOAWrapper::AOAHandle hdl);
+    void OnDied(AOAWrapper::AOAHandle hdl);
    private:
     AOADynamicDevice* parent_;
   };

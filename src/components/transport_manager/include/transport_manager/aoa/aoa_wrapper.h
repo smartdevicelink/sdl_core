@@ -61,7 +61,7 @@ enum AOAEndpoint {
   AOA_Ept_Accessory_Control
 };
 
-class AOALifeDevice;
+class AOADeviceLife;
 class AOAConnectionObserver;
 
 class AOAWrapper {
@@ -80,17 +80,12 @@ class AOAWrapper {
     uint32_t iface; /* Device interface */
   };
 
-  static bool Init(AOALifeDevice* life);
-  static bool Init(const std::string& path_to_config,
-                   AOALifeDevice* life);
-  static bool Init(const AOAWrapper::AOAUsbInfo& aoa_usb_info,
-                   AOALifeDevice* life);
-  static bool Init(const std::string& path_to_config,
-                   const AOAWrapper::AOAUsbInfo& aoa_usb_info,
-                   AOALifeDevice* life);
+  static bool Init(AOADeviceLife* life);
+  static bool Init(AOADeviceLife* life, const std::string& config_path);
+  static bool Init(AOADeviceLife* life, const AOAWrapper::AOAUsbInfo& aoa_usb_info);
   static bool Shutdown();
   static bool IsHandleValid(AOAWrapper::AOAHandle hdl);
-  static void Died(AOAWrapper::AOAHandle hdl);
+  static void OnDied(AOAWrapper::AOAHandle hdl);
   static inline bool IsError(int ret);
   static inline void PrintError(int ret);
 
@@ -112,11 +107,13 @@ class AOAWrapper {
                                       uint16_t index) const;
 
  private:
-  static AOALifeDevice* life_;
+  static AOADeviceLife* life_;
   AOAHandle hdl_;
   uint32_t timeout_;
   AOAConnectionObserver* connection_observer_;
 
+  static bool Init(AOADeviceLife* life, const char* config_path,
+                   usb_info_s* usb_info);
   static void PrepareUsbInfo(const AOAUsbInfo& aoa_usb_info,
                              usb_info_s* usb_info);
 
@@ -129,11 +126,11 @@ class AOAWrapper {
   bool UnsetCallback(AOAEndpoint endpoint) const;
 };
 
-class AOALifeDevice {
+class AOADeviceLife {
  public:
   virtual void Loop(AOAWrapper::AOAHandle handle) = 0;
-  virtual void Died(AOAWrapper::AOAHandle handle) = 0;
-  virtual ~AOALifeDevice() {
+  virtual void OnDied(AOAWrapper::AOAHandle handle) = 0;
+  virtual ~AOADeviceLife() {
   }
 };
 

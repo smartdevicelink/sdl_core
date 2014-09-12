@@ -74,6 +74,8 @@ TransportAdapter::Error AOAConnectionFactory::CreateConnection(
                                                 aoa_device->handle());
   ConnectionSptr connection(aoa_connection);
   controller_->ConnectionCreated(connection, device_uid, app_handle);
+  LOG4CXX_INFO(logger_, "AOA: connection created");
+
   if (aoa_connection->Init()) {
     LOG4CXX_INFO(logger_, "AOA: connection initialised");
     return TransportAdapter::OK;
@@ -82,9 +84,6 @@ TransportAdapter::Error AOAConnectionFactory::CreateConnection(
     LOG4CXX_WARN(logger_, "AOA: Could not initialise AOA connection");
     return TransportAdapter::FAIL;
   }
-
-  LOG4CXX_INFO(logger_, "AOA: connection created");
-  return TransportAdapter::OK;
 }
 
 void AOAConnectionFactory::Terminate() {
