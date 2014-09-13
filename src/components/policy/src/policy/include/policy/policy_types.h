@@ -123,9 +123,9 @@ struct CheckPermissionResult {
     }
 
     PermitResult hmi_level_permitted;
-    utils::SharedPtr<std::vector<PTString> > list_of_allowed_params;
-    utils::SharedPtr<std::vector<PTString> > list_of_disallowed_params;
-    utils::SharedPtr<std::vector<PTString> > list_of_undefined_params;
+    std::vector<PTString> list_of_allowed_params;
+    std::vector<PTString> list_of_disallowed_params;
+    std::vector<PTString> list_of_undefined_params;
 };
 
 /**

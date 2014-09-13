@@ -55,9 +55,10 @@ public:
    * @return CheckPermissionResult containing flag if HMI Level is allowed
    * and list of allowed params.
    */
-  virtual CheckPermissionResult CheckPermissions(const PTString& app_id,
-                                                 const PTString& hmi_level,
-                                                 const PTString& rpc);
+  virtual void CheckPermissions(const PTString& app_id,
+                                const PTString& hmi_level,
+                                const PTString& rpc,
+                                CheckPermissionResult& result);
 
   /**
    * @brief Returns true if Policy Table was not updated yet

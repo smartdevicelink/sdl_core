@@ -490,11 +490,16 @@ bool CacheManager::IsApplicationRevoked(const std::string& app_id) {
   return app_revoked;
 }
 
-CheckPermissionResult CacheManager::CheckPermissions(const PTString &app_id,
-                                                     const PTString &hmi_level,
-                                                     const PTString &rpc) {
+void CacheManager::CheckPermissions(const PTString &app_id,
+                                    const PTString &hmi_level,
+                                    const PTString &rpc,
+                                    CheckPermissionResult &result) {
   LOG4CXX_TRACE_ENTER(logger_);
-  CheckPermissionResult result;
+  if (!pt_.valid()) {
+    LOG4CXX_ERROR(logger_, "Policy cache is not initialized.");
+    return;
+  }
+
   policy_table::Strings::const_iterator app_groups_iter =
       pt_->policy_table.app_policies[app_id].groups.begin();
 
@@ -526,8 +531,9 @@ CheckPermissionResult CacheManager::CheckPermissions(const PTString &app_id,
               rpc_param.parameters->begin();
           policy_table::Parameters::const_iterator params_iter_end =
               rpc_param.parameters->end();
+
           for (;params_iter != params_iter_end; ++params_iter) {
-            result.list_of_allowed_params->push_back(
+            result.list_of_allowed_params.push_back(
                   policy_table::EnumToJsonString(*params_iter));
           }
         }
@@ -535,7 +541,6 @@ CheckPermissionResult CacheManager::CheckPermissions(const PTString &app_id,
     }
   }
   LOG4CXX_TRACE_EXIT(logger_);
-  return result;
 }
 
 bool CacheManager::IsPTPreloaded() {

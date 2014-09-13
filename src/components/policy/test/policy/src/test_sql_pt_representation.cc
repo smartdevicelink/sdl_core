@@ -137,11 +137,11 @@ TEST_F(SQLPTRepresentationTest, CheckPermissionsAllowed) {
   ASSERT_TRUE(dbms->Exec(query));
 
   CheckPermissionResult ret;
-  ret = reps->CheckPermissions("12345", "FULL", "Update");
+  reps->CheckPermissions("12345", "FULL", "Update", ret);
   EXPECT_TRUE(ret.hmi_level_permitted == ::policy::kRpcAllowed);
-  ASSERT_EQ(2u, ret.list_of_allowed_params->size());
-  EXPECT_EQ("gps", (*ret.list_of_allowed_params)[0]);
-  EXPECT_EQ("speed", (*ret.list_of_allowed_params)[1]);
+  ASSERT_EQ(2u, ret.list_of_allowed_params.size());
+  EXPECT_EQ("gps", ret.list_of_allowed_params[0]);
+  EXPECT_EQ("speed", ret.list_of_allowed_params[1]);
 }
 
 TEST_F(SQLPTRepresentationTest, CheckPermissionsAllowedWithoutParameters) {
@@ -157,9 +157,9 @@ TEST_F(SQLPTRepresentationTest, CheckPermissionsAllowedWithoutParameters) {
   ASSERT_TRUE(dbms->Exec(query));
 
   CheckPermissionResult ret;
-  ret = reps->CheckPermissions("12345", "LIMITED", "Update");
+  reps->CheckPermissions("12345", "LIMITED", "Update", ret);
   EXPECT_TRUE(ret.hmi_level_permitted == ::policy::kRpcAllowed);
-  EXPECT_TRUE(!ret.list_of_allowed_params);
+  EXPECT_TRUE(!ret.list_of_allowed_params.empty());
 }
 
 TEST_F(SQLPTRepresentationTest, CheckPermissionsDisallowed) {
@@ -167,9 +167,9 @@ TEST_F(SQLPTRepresentationTest, CheckPermissionsDisallowed) {
   ASSERT_TRUE(dbms->Exec(query));
 
   CheckPermissionResult ret;
-  ret = reps->CheckPermissions("12345", "FULL", "Update");
+  reps->CheckPermissions("12345", "FULL", "Update", ret);
   EXPECT_EQ(::policy::kRpcDisallowed, ret.hmi_level_permitted);
-  EXPECT_TRUE(!ret.list_of_allowed_params);
+  EXPECT_TRUE(!ret.list_of_allowed_params.empty());
 }
 
 TEST_F(SQLPTRepresentationTest, IsPTPReloaded) {

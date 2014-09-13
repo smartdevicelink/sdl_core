@@ -318,8 +318,10 @@ BinaryMessageSptr PolicyManagerImpl::RequestPTUpdate() {
   return new BinaryMessage(message_string.begin(), message_string.end());
 }
 
-CheckPermissionResult PolicyManagerImpl::CheckPermissions(
-  const PTString& app_id, const PTString& hmi_level, const PTString& rpc) {
+void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
+                                         const PTString& hmi_level,
+                                          const PTString& rpc,
+                                          CheckPermissionResult& result) {
   LOG4CXX_INFO(
     logger_,
     "CheckPermissions for " << app_id << " and rpc " << rpc << " for "
@@ -355,11 +357,9 @@ CheckPermissionResult PolicyManagerImpl::CheckPermissions(
                                    GroupConsent::kGroupUndefined);
   std::for_each(app_groups.begin(), app_groups.end(), processor);
 
-  CheckPermissionResult result;
   if (rpc_permissions.end() == rpc_permissions.find(rpc)) {
     // RPC not found in list == disallowed by backend
     result.hmi_level_permitted = kRpcDisallowed;
-    return result;
   }
 
   // Check HMI level
@@ -379,25 +379,20 @@ CheckPermissionResult PolicyManagerImpl::CheckPermissions(
   }
 
   // Add parameters of RPC, if any
-  result.list_of_allowed_params = new std::vector<PTString>();
   std::copy(rpc_permissions[rpc].parameter_permissions[kAllowedKey].begin(),
             rpc_permissions[rpc].parameter_permissions[kAllowedKey].end(),
-            std::back_inserter(*result.list_of_allowed_params));
+            std::back_inserter(result.list_of_allowed_params));
 
-  result.list_of_disallowed_params = new std::vector<PTString>();
   std::copy(
         rpc_permissions[rpc].parameter_permissions[kUserDisallowedKey].begin(),
         rpc_permissions[rpc].parameter_permissions[kUserDisallowedKey].end(),
-        std::back_inserter(*result.list_of_disallowed_params));
+        std::back_inserter(result.list_of_disallowed_params));
 
-  result.list_of_undefined_params = new std::vector<PTString>();
   std::copy(rpc_permissions[rpc].parameter_permissions[kUndefinedKey].begin(),
             rpc_permissions[rpc].parameter_permissions[kUndefinedKey].end(),
-            std::back_inserter(*result.list_of_undefined_params));
-
-  return result;
+            std::back_inserter(result.list_of_undefined_params));
 #else
-  return cache.CheckPermissions(app_id, hmi_level, rpc);
+  cache.CheckPermissions(app_id, hmi_level, rpc, result);
 #endif
 }
 

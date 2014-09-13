@@ -63,9 +63,10 @@ class PolicyManagerImpl : public PolicyManager {
     virtual std::string GetUpdateUrl(int service_type);
     virtual EndpointUrls GetUpdateUrls(int service_type);
     virtual BinaryMessageSptr RequestPTUpdate();
-    virtual CheckPermissionResult CheckPermissions(const PTString& app_id,
+    virtual void CheckPermissions(const PTString& app_id,
         const PTString& hmi_level,
-        const PTString& rpc);
+        const PTString& rpc,
+        CheckPermissionResult& result);
     virtual bool ResetUserConsent();
     virtual bool ExceededIgnitionCycles();
     virtual bool ExceededDays(int days);

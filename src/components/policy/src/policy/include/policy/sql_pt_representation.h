@@ -51,9 +51,10 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   public:
     SQLPTRepresentation();
     ~SQLPTRepresentation();
-    virtual CheckPermissionResult CheckPermissions(const PTString& app_id,
+    virtual void CheckPermissions(const PTString& app_id,
         const PTString& hmi_level,
-        const PTString& rpc);
+        const PTString& rpc,
+        CheckPermissionResult& result);
 
     virtual bool IsPTPreloaded();
     virtual int IgnitionCyclesBeforeExchange();
