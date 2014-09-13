@@ -200,9 +200,11 @@ void UsbConnection::OnOutTransfer(libusb_transfer* transfer) {
                                 DataSendError());
     PopOutMessage();
   }
-  libusb_free_transfer(transfer);
-  out_transfer_ = NULL;
-  waiting_out_transfer_cancel_ = false;
+  if (!current_out_message_.valid()) {
+    libusb_free_transfer(transfer);
+    out_transfer_ = NULL;
+    waiting_out_transfer_cancel_ = false;
+  }
   LOG4CXX_TRACE(logger_, "exit");
 }
 
