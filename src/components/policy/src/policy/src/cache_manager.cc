@@ -267,6 +267,16 @@ void CacheManager::Backup() {
                                         is_default_[app_id],
                                         is_predata_[app_id]);
     }
+
+// In case of extended policy the meta info should be backuped as well.
+#ifdef EXTENDED_POLICY
+    if (ex_backup_.valid()) {
+      ex_backup_->SetMetaInfo(*(*pt_->policy_table.module_meta).ccpu_version,
+                              *(*pt_->policy_table.module_meta).wers_country_code,
+                              *(*pt_->policy_table.module_meta).language);
+      ex_backup_->SetVINValue(*(*pt_->policy_table.module_meta).vin);
+    }
+#endif // EXTENDED_POLICY
   }
   LOG4CXX_TRACE_EXIT(logger_);
 }
