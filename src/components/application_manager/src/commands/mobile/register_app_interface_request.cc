@@ -280,10 +280,11 @@ void RegisterAppInterfaceRequest::Run() {
     policy::PolicyHandler::instance()->SetDeviceInfo(device_mac_address,
         device_info);
 
+
+    SendRegisterAppInterfaceResponseToMobile();
     // Add registered application to the policy db.
     policy::PolicyHandler::instance()->
         AddApplication(msg_params[strings::app_id].asString());
-
     // Ensure that device has consents to start policy update procedure.
     // In case when device has no consent, EnsureDeviceConsented will send
     // OnSDLConsentNeeded and will start PTU in OnAllowSDLFunctionality.
@@ -292,8 +293,6 @@ void RegisterAppInterfaceRequest::Run() {
       // current update state and will or will not run the exchange process.
       policy::PolicyHandler::instance()->OnPTExchangeNeeded();
     }
-
-    SendRegisterAppInterfaceResponseToMobile();
   }
 }
 
@@ -321,17 +320,6 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   mobile_apis::Result::eType result) {
   smart_objects::SmartObject* params = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
-
-  if (!params) {
-    std::string mobile_app_id =
-      (*message_)[strings::msg_params][strings::app_id].asString();
-    usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
-      policy::PolicyHandler::instance()->policy_manager(), mobile_app_id,
-      usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
-    ++count_of_rejections_sync_out_of_memory;
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
 
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
   const HMICapabilities& hmi_capabilities = app_manager->hmi_capabilities();
