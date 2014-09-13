@@ -792,7 +792,6 @@ void PolicyManagerImpl::GetPermissionsForApp(
   const std::string& device_id, const std::string& policy_app_id,
   std::vector<FunctionalGroupPermission>& permissions) {
   LOG4CXX_INFO(logger_, "GetPermissionsForApp");
-#ifdef EXTENDED_POLICY
   std::string app_id_to_check = policy_app_id;  
 
   bool allowed_by_default = false;
@@ -837,6 +836,7 @@ void PolicyManagerImpl::GetPermissionsForApp(
     // All groups for specific application
     FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
 
+#ifdef EXTENDED_POLICY
     // Groups assigned by the user for specific application
     FunctionalGroupIDs allowed_groups = group_types[kTypeAllowed];
 
@@ -875,12 +875,14 @@ void PolicyManagerImpl::GetPermissionsForApp(
                                    kGroupAllowed, permissions);
     FillFunctionalGroupPermissions(common_disallowed, group_names,
                                    kGroupDisallowed, permissions);
+#else
+    // In case of GENIVI all groups are allowed
+    FunctionalGroupIDs common_allowed = all_groups;
+    FillFunctionalGroupPermissions(common_allowed, group_names,
+                                   kGroupAllowed, permissions);
+#endif
   }
   return;
-#else
-  // For basic policy
-  permissions = std::vector<FunctionalGroupPermission>();
-#endif
 }
 
 std::string& PolicyManagerImpl::GetCurrentDeviceId(

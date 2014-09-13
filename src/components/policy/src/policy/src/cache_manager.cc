@@ -149,7 +149,6 @@ void CacheManager::GetAllAppGroups(const std::string& app_id,
                                    FunctionalGroupIDs& all_group_ids) {
 
   LOG4CXX_TRACE_ENTER(logger_);
-#ifdef EXTENDED_POLICY
   policy_table::ApplicationPolicies::const_iterator app_params_iter =
       pt_->policy_table.app_policies.find(app_id);
 
@@ -165,7 +164,6 @@ void CacheManager::GetAllAppGroups(const std::string& app_id,
       all_group_ids.push_back(group_id);
     }
   }
-#endif // EXTENDED_POLICY
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
@@ -295,15 +293,15 @@ bool CacheManager::GetPermissionsForApp(const std::string &device_id,
                                         FunctionalIdType& group_types) {
 
   LOG4CXX_TRACE_ENTER(logger_);
-#ifdef EXTENDED_POLICY
   GetAllAppGroups(app_id, group_types[kTypeGeneral]);
-  GetPreConsentedGroups(app_id, group_types[kTypePreconsented]);
   GetAllAppGroups(kDefaultId, group_types[kTypeDefault]);
+  GetAllAppGroups(kPreDataConsentId, group_types[kTypePreDataConsented]);
+#ifdef EXTENDED_POLICY
+  GetPreConsentedGroups(app_id, group_types[kTypePreconsented]);
 
   GetConsentedGroups(device_id, app_id,
                      group_types[kTypeAllowed], group_types[kTypeDisallowed]);
 
-  GetAllAppGroups(kPreDataConsentId, group_types[kTypePreDataConsented]);
   GetAllAppGroups(kDeviceId, group_types[kTypeDevice]);
 #endif // EXTENDED_POLICY
   LOG4CXX_TRACE_EXIT(logger_);
@@ -848,7 +846,6 @@ bool CacheManager::SetSystemLanguage(const std::string &language) {
 
 bool CacheManager::GetFunctionalGroupNames(FunctionalGroupNames &names) {
   LOG4CXX_TRACE_ENTER(logger_);
-#ifdef EXTENDED_POLICY
   rpc::policy_table_interface_base::FunctionalGroupings::iterator iter =
       pt_->policy_table.functional_groupings.begin();
   rpc::policy_table_interface_base::FunctionalGroupings::iterator iter_end =
@@ -861,7 +858,6 @@ bool CacheManager::GetFunctionalGroupNames(FunctionalGroupNames &names) {
 
     names.insert(std::pair<uint32_t, std::pair<std::string, std::string> >(id, value));
   }
-#endif // EXTENDED_POLICY
   LOG4CXX_TRACE_EXIT(logger_);
   return true;
 }
