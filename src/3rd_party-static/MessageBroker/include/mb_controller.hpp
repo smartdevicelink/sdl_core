@@ -199,6 +199,7 @@ namespace NsMessageBroker
       void* MethodForReceiverThread(void * arg);
 
       virtual void exitReceivingThread() {
+        Close();
         stop = true;
         sync_primitives::AutoLock auto_lock(receiving_thread_lock_);
       }
