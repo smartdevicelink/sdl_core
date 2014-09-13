@@ -706,7 +706,6 @@ void PolicyManagerImpl::GetUserConsentForApp(
   const std::string& device_id, const std::string& policy_app_id,
   std::vector<FunctionalGroupPermission>& permissions) {
   LOG4CXX_INFO(logger_, "GetUserConsentForApp");
-#ifdef EXTENDED_POLICY
 
   FunctionalIdType group_types;
   if (!cache.GetPermissionsForApp(device_id, policy_app_id,
@@ -733,6 +732,7 @@ void PolicyManagerImpl::GetUserConsentForApp(
     }
   }
 
+#ifdef EXTENDED_POLICY
   FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
   FunctionalGroupIDs preconsented_groups = group_types[kTypePreconsented];
   FunctionalGroupIDs consent_allowed_groups = group_types[kTypeAllowed];
@@ -779,7 +779,21 @@ void PolicyManagerImpl::GetUserConsentForApp(
                                  kGroupDisallowed, permissions);
 #else
   // For basic policy
-  permissions = std::vector<FunctionalGroupPermission>();
+  FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
+  FunctionalGroupIDs default_groups = group_types[kTypeDefault];
+  FunctionalGroupIDs predataconsented_groups =
+      group_types[kTypePreDataConsented];
+
+  FunctionalGroupIDs allowed_groups;
+  FunctionalGroupIDs no_auto = ExcludeSame(all_groups, auto_allowed_groups);
+
+  if (cache.IsDefaultPolicy(policy_app_id)) {
+    allowed_groups = ExcludeSame(no_auto, default_groups);
+  } else if (cache.IsPredataPolicy(policy_app_id)) {
+    allowed_groups = ExcludeSame(no_auto, predataconsented_groups);
+  }
+  FillFunctionalGroupPermissions(allowed_groups, group_names,
+                                 kGroupAllowed, permissions);
 #endif
 }
 
