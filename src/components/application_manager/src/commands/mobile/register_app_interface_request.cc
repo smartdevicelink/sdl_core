@@ -282,9 +282,6 @@ void RegisterAppInterfaceRequest::Run() {
 
 
     SendRegisterAppInterfaceResponseToMobile();
-    // Add registered application to the policy db.
-    policy::PolicyHandler::instance()->
-        AddApplication(msg_params[strings::app_id].asString());
     // Ensure that device has consents to start policy update procedure.
     // In case when device has no consent, EnsureDeviceConsented will send
     // OnSDLConsentNeeded and will start PTU in OnAllowSDLFunctionality.

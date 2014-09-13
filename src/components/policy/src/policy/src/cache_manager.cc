@@ -498,6 +498,13 @@ void CacheManager::CheckPermissions(const PTString &app_id,
     return;
   }
 
+  if (pt_->policy_table.app_policies.end() ==
+      pt_->policy_table.app_policies.find(app_id)) {
+    LOG4CXX_ERROR(logger_, "Application id " << app_id
+                  << " was not found in policy DB.");
+    return;
+  }
+
   policy_table::Strings::const_iterator app_groups_iter =
       pt_->policy_table.app_policies[app_id].groups.begin();
 
