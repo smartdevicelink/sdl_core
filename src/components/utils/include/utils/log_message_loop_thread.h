@@ -47,6 +47,7 @@ typedef struct {
   log4cxx::LoggerPtr logger;
   LogLevel level;
   std::string entry;
+  log4cxx::spi::LocationInfo location;
 } LogMessage;
 
 typedef std::queue<LogMessage> LogMessageQueue;

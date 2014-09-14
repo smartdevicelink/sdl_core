@@ -63,7 +63,7 @@
     #define LOG4CXX_INFO(loggerPtr, logEvent) do { \
       std::stringstream accumulator; \
       accumulator << logEvent; \
-      logger::push_log(loggerPtr, logger::Info, accumulator.str()); \
+      logger::push_log(loggerPtr, logger::Info, accumulator.str(), LOG4CXX_LOCATION); \
     } while (false)
 
     #define LOG4CXX_INFO_EXT(logger, logEvent) LOG4CXX_INFO(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
@@ -76,7 +76,7 @@
     #define LOG4CXX_DEBUG(loggerPtr, logEvent) do { \
       std::stringstream accumulator; \
       accumulator << logEvent; \
-      logger::push_log(loggerPtr, logger::Debug, accumulator.str()); \
+      logger::push_log(loggerPtr, logger::Debug, accumulator.str(), LOG4CXX_LOCATION); \
     } while (false)
 
     #define LOG4CXX_DEBUG_EXT(logger, logEvent) LOG4CXX_DEBUG(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
@@ -86,7 +86,7 @@
     #define LOG4CXX_WARN(loggerPtr, logEvent) do { \
       std::stringstream accumulator; \
       accumulator << logEvent; \
-      logger::push_log(loggerPtr, logger::Warn, accumulator.str()); \
+      logger::push_log(loggerPtr, logger::Warn, accumulator.str(), LOG4CXX_LOCATION); \
     } while (false)
 
     #define LOG4CXX_WARN_EXT(logger, logEvent) LOG4CXX_WARN(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
@@ -96,7 +96,7 @@
     #define LOG4CXX_ERROR(loggerPtr, logEvent) do { \
       std::stringstream accumulator; \
       accumulator << logEvent; \
-      logger::push_log(loggerPtr, logger::Error, accumulator.str()); \
+      logger::push_log(loggerPtr, logger::Error, accumulator.str(), LOG4CXX_LOCATION); \
     } while (false)
 
     #define LOG4CXX_ERROR_EXT(logger, logEvent) LOG4CXX_ERROR(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
@@ -106,7 +106,7 @@
     #define LOG4CXX_FATAL(loggerPtr, logEvent) do { \
       std::stringstream accumulator; \
       accumulator << logEvent; \
-      logger::push_log(loggerPtr, logger::Fatal, accumulator.str()); \
+      logger::push_log(loggerPtr, logger::Fatal, accumulator.str(), LOG4CXX_LOCATION); \
     } while (false)
 
     #define LOG4CXX_FATAL_EXT(logger, logEvent) LOG4CXX_FATAL(logger, __PRETTY_FUNCTION__ << ": " << logEvent)
@@ -116,7 +116,7 @@
     #define LOG4CXX_TRACE(loggerPtr, logEvent) do { \
       std::stringstream accumulator; \
       accumulator << logEvent; \
-      logger::push_log(loggerPtr, logger::Trace, accumulator.str()); \
+      logger::push_log(loggerPtr, logger::Trace, accumulator.str(), LOG4CXX_LOCATION); \
     } while (false)
 
     #define LOG4CXX_TRACE_ENTER(logger) LOG4CXX_TRACE(logger, "ENTER: " << __PRETTY_FUNCTION__ )

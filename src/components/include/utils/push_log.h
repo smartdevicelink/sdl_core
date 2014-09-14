@@ -40,7 +40,7 @@
 
 namespace logger {
 
-bool push_log(log4cxx::LoggerPtr logger, LogLevel level, const std::string& entry);
+bool push_log(log4cxx::LoggerPtr logger, LogLevel level, const std::string& entry, const log4cxx::spi::LocationInfo& location);
 
 }  // namespace logger
 

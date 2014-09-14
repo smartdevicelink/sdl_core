@@ -35,44 +35,45 @@
 namespace logger {
 
 void LogMessageHandler::Handle(const LogMessage message) {
-// these are just log4cxx macros
+// these are basically log4cxx macros
 // they cannot be used directly here
 // because they are shadowed by our redefinitions
+// and because location is subject to substitute
   switch (message.level) {
     case Fatal:
       if (message.logger->isFatalEnabled()) {
         ::log4cxx::helpers::MessageBuffer oss_;
-        message.logger->forcedLog(::log4cxx::Level::getFatal(), oss_.str(oss_ << message.entry), LOG4CXX_LOCATION);
+        message.logger->forcedLog(::log4cxx::Level::getFatal(), oss_.str(oss_ << message.entry), message.location);
       }
       break;
     case Error:
       if (message.logger->isErrorEnabled()) {
         ::log4cxx::helpers::MessageBuffer oss_;
-        message.logger->forcedLog(::log4cxx::Level::getError(), oss_.str(oss_ << message.entry), LOG4CXX_LOCATION);
+        message.logger->forcedLog(::log4cxx::Level::getError(), oss_.str(oss_ << message.entry), message.location);
       }
       break;
     case Warn:
       if (message.logger->isWarnEnabled()) {
         ::log4cxx::helpers::MessageBuffer oss_;
-        message.logger->forcedLog(::log4cxx::Level::getWarn(), oss_.str(oss_ << message.entry), LOG4CXX_LOCATION);
+        message.logger->forcedLog(::log4cxx::Level::getWarn(), oss_.str(oss_ << message.entry), message.location);
       }
       break;
     case Info:
       if (message.logger->isInfoEnabled()) {
         ::log4cxx::helpers::MessageBuffer oss_;
-        message.logger->forcedLog(::log4cxx::Level::getInfo(), oss_.str(oss_ << message.entry), LOG4CXX_LOCATION);
+        message.logger->forcedLog(::log4cxx::Level::getInfo(), oss_.str(oss_ << message.entry), message.location);
       }
       break;
     case Debug:
       if (LOG4CXX_UNLIKELY(message.logger->isDebugEnabled())) {
         ::log4cxx::helpers::MessageBuffer oss_;
-        message.logger->forcedLog(::log4cxx::Level::getDebug(), oss_.str(oss_ << message.entry), LOG4CXX_LOCATION);
+        message.logger->forcedLog(::log4cxx::Level::getDebug(), oss_.str(oss_ << message.entry), message.location);
       }
       break;
     case Trace:
       if (LOG4CXX_UNLIKELY(message.logger->isTraceEnabled())) {
         ::log4cxx::helpers::MessageBuffer oss_;
-        message.logger->forcedLog(::log4cxx::Level::getTrace(), oss_.str(oss_ << message.entry), LOG4CXX_LOCATION);
+        message.logger->forcedLog(::log4cxx::Level::getTrace(), oss_.str(oss_ << message.entry), message.location);
       }
       break;
   }
