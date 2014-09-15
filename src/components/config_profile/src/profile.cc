@@ -148,6 +148,7 @@ const char* kIAPSystemConfigKey = "IAPSystemConfig";
 const char* kIAP2SystemConfigKey = "IAP2SystemConfig";
 const char* kIAP2HubConnectAttemptskey = "IAP2HubConnectAttempts";
 const char* kIAPHubConnectionWaitTimeoutKey = "ConnectionWaitTimeout";
+const char* kDefaultHubProtocolIndexKey = "DefaultHubProtocolIndex";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -174,11 +175,12 @@ const char* kDefaultRecordingFileSourceName = "audio.8bit.wav";
 const char* kDefaultRecordingFileName = "record.wav";
 const char* kDefaultThreadPoolSize = "ThreadPoolSize";
 const char* kDefaultLegacyProtocolMask = "com.ford.sync.prot";
-const char* kDefaultHubProtocolMask = "com.smartdevicelink.prot0";
+const char* kDefaultHubProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultPoolProtocolMask = "com.smartdevicelink.prot";
 const char* kDefaultIAPSystemConfig = "/fs/mp/etc/mm/ipod.cfg";
 const char* kDefaultIAP2SystemConfig = "/fs/mp/etc/mm/iap2.cfg";
 
+const uint32_t kDefaultHubProtocolIndex = 0;
 const uint32_t kDefaultHeartBeatTimeout = 0;
 const uint16_t kDefautTransportManagerTCPPort = 12345;
 const uint16_t kDefaultServerPort = 8087;
@@ -550,6 +552,10 @@ const std::pair<uint32_t, int32_t>& Profile::get_vehicle_data_frequency() const 
 
 uint32_t Profile::thread_pool_size() const  {
   return max_thread_pool_size_;
+}
+
+uint32_t Profile::default_hub_protocol_index() const{
+	return default_hub_protocol_index_;
 }
 
 const std::string& Profile::iap_legacy_protocol_mask() const {
@@ -1215,6 +1221,10 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
 
   LOG_UPDATED_VALUE(iap_hub_connection_wait_timeout_,
                     kIAPHubConnectionWaitTimeoutKey, kIAPSection);
+
+  ReadUIntValue(&default_hub_protocol_index_, kDefaultHubProtocolIndex, kIAPSection, kDefaultHubProtocolIndexKey);
+
+  LOG_UPDATED_VALUE(default_hub_protocol_index_, kDefaultHubProtocolIndexKey, kIAPSection);
 }
 
 bool Profile::ReadValue(bool* value, const char* const pSection,

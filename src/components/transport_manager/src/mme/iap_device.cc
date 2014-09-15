@@ -70,7 +70,7 @@ bool IAPDevice::Init() {
   free_protocol_name_pool_ = ProtocolConfig::IAPPoolProtocolNames();
   for (FreeProtocolNamePool::const_iterator i = free_protocol_name_pool_.begin(); i != free_protocol_name_pool_.end(); ++i) {
     std::string protocol_name = i->second;
-    timers_protocols_.insert(std::make_pair(i->second,
+    timers_protocols_.insert(std::make_pair(protocol_name,
                                             new ProtocolConnectionTimer(protocol_name, this)));
   }
 
