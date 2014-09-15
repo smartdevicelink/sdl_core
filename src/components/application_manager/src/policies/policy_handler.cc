@@ -1074,7 +1074,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   }
 
   last_activated_app_id_ = connection_key;
-  application_manager::MessageHelper::SendActivateAppResponse(permissions,
+  application_manager::MessageHelper::SendSDLActivateAppResponse(permissions,
                                                               correlation_id);
   if (is_app_activated) {
     application_manager::MessageHelper::SendHMIStatusNotification(*app.get());

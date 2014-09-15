@@ -44,7 +44,8 @@
 #include "utils/threads/thread_delegate.h"
 
 namespace timer {
-
+// TODO(AKutsan): Remove this logger after bugfix
+CREATE_LOGGERPTR_GLOBAL(logger_, "Timer")
 class TimerDelegate;
 
 /*
@@ -229,10 +230,10 @@ class TimerThread {
 
 template <class T>
 TimerThread<T>::TimerThread(const char* name, T* callee, void (T::*f)(), bool is_looper)
-  : callback_(f),
+  : thread_(NULL),
+    callback_(f),
     callee_(callee),
     delegate_(NULL),
-    thread_(NULL),
     is_running_(false) {
   if (is_looper) {
     delegate_ = new TimerLooperDelegate(this);
@@ -242,7 +243,6 @@ TimerThread<T>::TimerThread(const char* name, T* callee, void (T::*f)(), bool is
 
   if (delegate_) {
     thread_ = new threads::Thread("TimerThread", delegate_);
-   // printf("Timet thread created %lu\n", thread_->thread_handle());
     fflush(stdout);
   }
 }
@@ -276,7 +276,7 @@ void TimerThread<T>::start(uint32_t timeout_seconds) {
 template <class T>
 void TimerThread<T>::stop() {
   if (delegate_ && thread_) {
-    printf("MY thread before stop\n");
+    LOG4CXX_DEBUG(logger_, " thread before stop\n");
     fflush(stdout);
     thread_->stop();
     is_running_ = false;
@@ -294,17 +294,17 @@ template <class T>
 void TimerThread<T>::updateTimeOut(const uint32_t timeout_seconds) {
   pthread_t id = pthread_self();
 
-  printf("MY updateTimeOut for thread %lu from %lu\n", id, thread_->thread_handle());
+  LOG4CXX_DEBUG(logger_, "updateTimeOut for thread" << id << "from " << thread_->thread_handle());
   fflush(stdout);
 
   TimerReseter* delegate = new TimerReseter(this, timeout_seconds);
   threads::Thread thread_reseter("TimerReseter", delegate);
   thread_reseter.start();
-  printf("MY TimerReseter started \n");
+  LOG4CXX_DEBUG(logger_, " TimerReseter started");
   fflush(stdout);
   thread_reseter.join();
   //seep(2);// there thread will be killed
-  printf("MY after join \n\n");
+  LOG4CXX_DEBUG(logger_, "MY after join ");
   fflush(stdout);
 }
 
@@ -372,7 +372,7 @@ void TimerThread<T>::TimerLooperDelegate::threadMain() {
     if (ConditionalVariable::kTimeout == wait_status ||
         wait_seconds_left <= 0) {
       TimerDelegate::timer_thread_->onTimeOut();
-      printf("\nMY Loopthread Delegate speel fore: %d\n", TimerDelegate::timeout_seconds_);
+      LOG4CXX_DEBUG(logger_, "Loopthread Delegate speel fore: " << TimerDelegate::timeout_seconds_);
       fflush(stdout);
       end_time = time(NULL) + TimerDelegate::timeout_seconds_;
     }
@@ -407,13 +407,14 @@ TimerThread<T>::TimerReseter::TimerReseter(TimerThread *timer_thread,
 template <class T>
 void TimerThread<T>::TimerReseter::threadMain() {
   pthread_t id = pthread_self();
-  printf("MY TimerReseter threadMain my thread =  %lu try to stop: %lu \n", id, timer_thread_->thread_->thread_handle());
+  LOG4CXX_DEBUG(logger_, "TimerReseter threadMain my thread = "
+                 << id <<"try to stop: " << timer_thread_->thread_->thread_handle());
   fflush(stdout);
   timer_thread_->stop();
-  printf("MY after TimerReseter stop \n");
+  LOG4CXX_DEBUG(logger_, "after TimerReseter stop \n");
   fflush(stdout);
   timer_thread_->start(timeout_sec_);
-  printf("MY after TimerReseter start\n");
+  LOG4CXX_DEBUG(logger_, "after TimerReseter start \n");
   fflush(stdout);
 }
 

@@ -48,12 +48,12 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController");
 RequestController::RequestController()
   : pool_state_(UNDEFINED)
   , pool_size_(profile::Profile::instance()->thread_pool_size())
-  ,timer_(this, &RequestController::onTimer, true)
+  , timer_("RequestCtrlTimer", this, &RequestController::onTimer, true)
 {
   LOG4CXX_INFO(logger_, "RequestController::RequestController()");
   InitializeThreadpool();
   timer_.start(timer_sleep_time_);
-  printf("MY Create timer thread ; timer thread = %lu \n", timer_.thread_->thread_handle());
+  LOG4CXX_DEBUG(logger_," TEMP Create timer thread ; timer thread = " << timer_.thread_->thread_handle());
   fflush(stdout);
 }
 
@@ -477,7 +477,7 @@ void RequestController::UpdateTimer() {
   }
 
   pthread_t id = pthread_self();
-  printf("MY Update Timer from thread %lu \n", id);
+  LOG4CXX_INFO(logger_, "TEMP Update Timer from thread " << id);
   fflush(stdout);
 
   timer_.updateTimeOut(sleep_time);
