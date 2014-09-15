@@ -130,7 +130,7 @@ const ProtocolConfig::ProtocolNameContainer ProtocolConfig::ReadProtocolNames(co
   std::ifstream config_file(config_file_name.c_str());
   if (!config_file.fail()) {
     LOG4CXX_TRACE(logger_, "parsing system config file " << config_file_name
-                            << " (section " << section_name << ", protocol mask \"" << protocol_mask << "\")\n");
+                        << " (section " << section_name << ", protocol mask \"" << protocol_mask << "\")");
     std::string line;
     while (std::getline(config_file, line)) {
       if (section_name == line) { // start of specified section
@@ -140,28 +140,26 @@ const ProtocolConfig::ProtocolNameContainer ProtocolConfig::ReadProtocolNames(co
           }
           int prot_mask_pos = line.find(protocol_mask);
           if (prot_mask_pos == std::string::npos){  // protocol_mask not found in line
-              continue;
+            continue;
           }
           std::string tail = line.substr(prot_mask_pos + protocol_mask.length());
           int comma_pos = tail.find_first_of(','); // comma position, can be std::string::npos
           std::string digits_in_prot_name = tail.substr(0, comma_pos);
-
           bool valid = true;
           for (std::string::iterator it = digits_in_prot_name.begin(); it != digits_in_prot_name.end(); it++ ) {
-        	  if (*it < '0' || *it > '9') { // only digits are available
-        		  valid = false;
-        		  break;
-        	  }
+            if (*it < '0' || *it > '9') { // only digits are available
+              valid = false;
+              break;
+            }
           }
           std::string prot_name = protocol_mask + digits_in_prot_name;
           if (!valid) {
-        	  LOG4CXX_DEBUG(logger_, "Protocol NOT added: " << prot_name);
-        	  continue;
+            LOG4CXX_DEBUG(logger_, "Protocol NOT added: " << prot_name);
+            continue;
           }
           int index;
           std::stringstream stream(digits_in_prot_name);
           stream >> index;
-
           LOG4CXX_DEBUG(logger_, "adding protocol " << prot_name);
           protocol_names.insert(make_pair(index, prot_name));
         }
@@ -170,7 +168,7 @@ const ProtocolConfig::ProtocolNameContainer ProtocolConfig::ReadProtocolNames(co
     }
     config_file.close();
     LOG4CXX_TRACE(logger_, "system config file " << config_file_name << " (section " << section_name
-    					<< ", protocol mask \"" << protocol_mask << "\") parsed\n");
+                        << ", protocol mask \"" << protocol_mask << "\") parsed");
   }
   else {
     LOG4CXX_ERROR(logger_, "cannot open system config file " << config_file_name);

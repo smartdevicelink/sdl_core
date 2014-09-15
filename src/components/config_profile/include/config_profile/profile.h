@@ -644,7 +644,7 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     recording_file_name_;
     uint32_t                        application_list_update_timeout_;
     uint32_t                        max_thread_pool_size_;
-    uint32_t						default_hub_protocol_index_;
+    uint32_t                        default_hub_protocol_index_;
     /*
      * first value is count of request
      * second is time scale
