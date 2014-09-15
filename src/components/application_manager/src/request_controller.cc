@@ -284,7 +284,7 @@ void RequestController::updateRequestTimeout(
   AutoLock auto_lock(pending_request_set_lock_);
   RequestInfoSet::iterator it = pending_request_set_.begin();
   MobileRequestInfo* mobile_request_info = NULL;
-  RequestInfoPtr request_info(NULL);
+  RequestInfoPtr request_info;
   for (; pending_request_set_.end() != it; ++it) {
     request_info = *it;
     if (false == request_info.valid()) {
