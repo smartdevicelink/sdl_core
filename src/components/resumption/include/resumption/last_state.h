@@ -43,29 +43,32 @@ namespace resumption {
 
 class LastState : public utils::Singleton<LastState> {
  public:
-/**
- * @brief public dictionary
- */
+  /**
+   * @brief Saving dictionary to filesystem
+   */
+  void SaveToFileSystem();
+
+  /**
+   * @brief public dictionary
+   */
   Json::Value dictionary;
 
  private:
-/**
- * @brief Saving dictionary to filesystem
- */
-  void SaveToFileSystem();
-/**
- * @brief Load dictionary from filesystem
- */
-  void LoadFromFileSystem();
-/**
- * @brief Private default constructor
- */
-  LastState();
-/**
- * @brief Private destructor
- */
-  ~LastState();
 
+  /**
+   * @brief Load dictionary from filesystem
+   */
+  void LoadFromFileSystem();
+
+  /**
+   * @brief Private default constructor
+   */
+  LastState();
+
+  /**
+   * @brief Private destructor
+   */
+  ~LastState();
 
   DISALLOW_COPY_AND_ASSIGN(LastState);
 

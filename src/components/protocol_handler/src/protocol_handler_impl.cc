@@ -158,9 +158,9 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
 #ifdef ENABLE_SECURITY
       security_manager_(NULL),
 #endif  // ENABLE_SECURITY
-      raw_ford_messages_from_mobile_("MessagesFromMobileAppHandler", this,
+      raw_ford_messages_from_mobile_("PH FromMobile", this,
                                      threads::ThreadOptions(kStackSize)),
-      raw_ford_messages_to_mobile_("MessagesToMobileAppHandler", this,
+      raw_ford_messages_to_mobile_("PH ToMobile", this,
                                    threads::ThreadOptions(kStackSize))
 #ifdef TIME_TESTER
       , metric_observer_(NULL)

@@ -67,7 +67,7 @@ void OnSystemContextNotification::Run() {
     }
   }
 
-  if (app.valid()) {
+  if (app.valid() && (system_context != app->system_context())) {
     SendSystemContextNotification(app, system_context);
   } else {
     LOG4CXX_ERROR(logger_, "Ignored wrong SystemContext notification!");

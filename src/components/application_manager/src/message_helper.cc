@@ -251,11 +251,15 @@ std::string MessageHelper::CommonLanguageToString(
 }
 
 uint32_t MessageHelper::GetAppCommandLimit(const std::string& policy_app_id) {
+  policy::PolicyManager* policy_manager =
+      policy::PolicyHandler::instance()->policy_manager();
+  if(!policy_manager) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+    return 0;
+  }
   std::string priority;
-  policy::PolicyHandler::instance()->policy_manager()->GetPriority(
-        policy_app_id, &priority);
-  return policy::PolicyHandler::instance()->policy_manager()->
-      GetNotificationsNumber(priority);
+  policy_manager->GetPriority(policy_app_id, &priority);
+  return policy_manager-> GetNotificationsNumber(priority);
 }
 
 void MessageHelper::SendHMIStatusNotification(
@@ -496,7 +500,22 @@ static std::map<std::string, uint16_t> vehicle_data_args = create_get_vehicle_da
 #endif
 
 void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, const std::vector<std::string>& params) {
-#ifdef HMI_JSON_API
+#ifdef HMI_DBUS_API
+  for (std::vector<std::string>::const_iterator it = params.begin();
+       it != params.end(); it++) {
+    smart_objects::SmartObject* request = new smart_objects::SmartObject;
+
+    (*request)[strings::params][strings::message_type] = static_cast<int>(kRequest);
+    (*request)[strings::params][strings::correlation_id] = correlation_id;
+    (*request)[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+    (*request)[strings::params][strings::protocol_type] =
+      commands::CommandImpl::hmi_protocol_type_;
+    (*request)[strings::params][strings::function_id] =
+      static_cast<int>(vehicle_data_args[*it]);
+    ApplicationManagerImpl::instance()->ManageHMICommand(request);
+  }
+#else
   smart_objects::SmartObject* request = new smart_objects::SmartObject;
 
   (*request)[strings::params][strings::message_type] = static_cast<int>(kRequest);
@@ -513,23 +532,6 @@ void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, const s
     (*request)[strings::msg_params][*it] = true;
   }
   ApplicationManagerImpl::instance()->ManageHMICommand(request);
-#endif
-
-#ifdef HMI_DBUS_API
-  for (std::vector<std::string>::const_iterator it = params.begin();
-       it != params.end(); it++) {
-    smart_objects::SmartObject* request = new smart_objects::SmartObject;
-
-    (*request)[strings::params][strings::message_type] = static_cast<int>(kRequest);
-    (*request)[strings::params][strings::correlation_id] = correlation_id;
-    (*request)[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-    (*request)[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-    (*request)[strings::params][strings::function_id] =
-      static_cast<int>(vehicle_data_args[*it]);
-    ApplicationManagerImpl::instance()->ManageHMICommand(request);
-  }
 #endif
 }
 
@@ -570,18 +572,27 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
   (*device_list_so)[strings::device_list] = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
   smart_objects::SmartObject& list_so = (*device_list_so)[strings::device_list];
+  policy::PolicyManager* policy_manager =
+      policy::PolicyHandler::instance()->policy_manager();
+  if(!policy_manager) {
+    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
+  }
   int32_t index = 0;
   for (connection_handler::DeviceMap::const_iterator it = devices.begin();
        devices.end() != it; ++it) {
     const connection_handler::Device& d =
       static_cast<connection_handler::Device>(it->second);
-    list_so[index][strings::name] = d.user_friendly_name();    
+    list_so[index][strings::name] = d.user_friendly_name();
     list_so[index][strings::id] = it->second.device_handle();
-    policy::DeviceConsent device_consent =
-        policy::PolicyHandler::instance()->policy_manager()->
-        GetUserConsentForDevice(it->second.mac_address());
-    list_so[index][strings::isSDLAllowed] =
-        policy::DeviceConsent::kDeviceAllowed == device_consent ? true : false;
+
+    if(policy_manager) {
+      const policy::DeviceConsent device_consent =
+          policy_manager->GetUserConsentForDevice(it->second.mac_address());
+      list_so[index][strings::isSDLAllowed] =
+          policy::DeviceConsent::kDeviceAllowed == device_consent;
+    } else {
+      list_so[index][strings::isSDLAllowed] = true;
+    }
     ++index;
   }
   return device_list_so;
@@ -2152,8 +2163,9 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
       case mobile_apis::SoftButtonType::SBT_BOTH: {
 
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
-            (!VerifySoftButtonString(
-                request_soft_buttons[i][strings::text].asString()))) {
+            ((request_soft_buttons[i][strings::text].length())
+                && (!VerifySoftButtonString(
+                request_soft_buttons[i][strings::text].asString())))) {
           return mobile_apis::Result::INVALID_DATA;
         }
 

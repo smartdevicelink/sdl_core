@@ -60,6 +60,7 @@ class PolicyHandler :
   PolicyManager* policy_manager() const {
     return policy_manager_;
   }
+  bool PolicyEnabled();
   bool InitPolicyTable();
   bool ResetPolicyTable();
   bool ClearUserConsent();
@@ -294,7 +295,7 @@ protected:
    * @param status Internal policy update status
    * @return Converted status for sending to HMI
    */
-  const std::string ConvertUpdateStatus(policy::PolicyTableStatus status);  
+  const std::string ConvertUpdateStatus(policy::PolicyTableStatus status);
 
 private:
   PolicyHandler();

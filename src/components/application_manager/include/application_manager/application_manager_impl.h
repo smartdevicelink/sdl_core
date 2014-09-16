@@ -233,7 +233,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param reason reason of unregistering application
      * @param is_resuming describes - is this unregister
      *        is normal or need to be resumed\
-     * @param is_unexpected_disconnect 
+     * @param is_unexpected_disconnect
      * Indicates if connection was unexpectedly lost(TM layer, HB)
      */
     void UnregisterApplication(const uint32_t& app_id,
@@ -263,7 +263,14 @@ class ApplicationManagerImpl : public ApplicationManager,
      * when User chooses to reset HU.
      * Resets Policy Table if applicable.
      */
-  void HeadUnitReset(mobile_api::AppInterfaceUnregisteredReason::eType reason);
+    void HeadUnitReset(
+        mobile_api::AppInterfaceUnregisteredReason::eType reason);
+
+    /*
+     * @brief Called by HMI on SUSPEND.
+     * SDL must save all persistence data(Resume, Policy)
+     */
+    void HeadUnitSuspend();
 
     /*
      * @brief Closes all registered applications
@@ -688,8 +695,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     // members
 
-
-
     /**
      * @brief List of applications
      */
@@ -759,9 +764,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     class ApplicationListUpdateTimer : public timer::TimerThread<ApplicationManagerImpl> {
      public:
       ApplicationListUpdateTimer(ApplicationManagerImpl* callee) :
-          timer::TimerThread<ApplicationManagerImpl>(
-              callee,
-              &ApplicationManagerImpl::OnApplicationListUpdateTimer
+          timer::TimerThread<ApplicationManagerImpl>("AM ListUpdater",
+              callee, &ApplicationManagerImpl::OnApplicationListUpdateTimer
           ) {
       }
     };

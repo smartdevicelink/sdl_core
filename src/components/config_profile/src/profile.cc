@@ -134,7 +134,7 @@ const char* kTransportManagerDisconnectTimeoutKey = "DisconnectTimeout";
 const char* kTTSDelimiterKey = "TTSDelimiter";
 const char* kRecordingFileNameKey = "RecordingFileName";
 const char* kRecordingFileSourceKey = "RecordingFileSource";
-const char* kPolicyOffKey = "PolicySwitchOff";
+const char* kEnablePolicy = "EnablePolicy";
 const char* kMmeDatabaseNameKey = "MMEDatabase";
 const char* kEventMQKey = "EventMQ";
 const char* kAckMQKey = "AckMQ";
@@ -247,7 +247,7 @@ Profile::Profile()
     app_info_storage_(kDefaultAppInfoFileName),
     heart_beat_timeout_(kDefaultHeartBeatTimeout),
     policy_snapshot_file_name_(kDefaultPoliciesSnapshotFileName),
-    policy_turn_off_(false),
+    enable_policy_(false),
     transport_manager_disconnect_timeout_(
       kDefaultTransportManagerDisconnectTimeout),
     use_last_state_(false),
@@ -490,8 +490,8 @@ const std::string& Profile::policies_snapshot_file_name() const {
   return policy_snapshot_file_name_;
 }
 
-bool Profile::policy_turn_off() const {
-  return policy_turn_off_;
+bool Profile::enable_policy() const {
+  return enable_policy_;
 }
 
 uint32_t Profile::transport_manager_disconnect_timeout() const {
@@ -1138,15 +1138,15 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
                     kPolicySection);
 
   // Turn Policy Off?
-  std::string policy_off;
-  if (ReadValue(&policy_off, kPolicySection, kPolicyOffKey) &&
-      0 == strcmp("true", policy_off.c_str())) {
-    policy_turn_off_ = true;
+  std::string enable_policy_string;
+  if (ReadValue(&enable_policy_string, kPolicySection, kEnablePolicy) &&
+      0 == strcmp("true", enable_policy_string.c_str())) {
+    enable_policy_ = true;
   } else {
-    policy_turn_off_ = false;
+    enable_policy_ = false;
   }
 
-  LOG_UPDATED_BOOL_VALUE(policy_turn_off_, kPolicyOffKey, kPolicySection);
+  LOG_UPDATED_BOOL_VALUE(enable_policy_, kEnablePolicy, kPolicySection);
 
   ReadUIntValue(&application_list_update_timeout_,
       kDefaultApplicationListUpdateTimeout,

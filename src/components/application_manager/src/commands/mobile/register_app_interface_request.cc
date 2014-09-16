@@ -175,22 +175,14 @@ void RegisterAppInterfaceRequest::Run() {
     SendResponse(false, policy_result);
     return;
   }
-  policy::PolicyManager* policy_manager =
-      policy::PolicyHandler::instance()->policy_manager();
-  if (!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    SendResponse(false, mobile_apis::Result::DISALLOWED);
-    return;  
-  }
 
-  mobile_apis::Result::eType coincidence_result =
-      CheckCoincidence();
+  mobile_apis::Result::eType coincidence_result = CheckCoincidence();
 
   if (mobile_apis::Result::SUCCESS != coincidence_result) {
     LOG4CXX_ERROR_EXT(logger_, "Coincidence check failed.");
     if (mobile_apis::Result::DUPLICATE_NAME == coincidence_result) {
       usage_statistics::AppCounter count_of_rejections_duplicate_name(
-        policy_manager, mobile_app_id,
+        policy::PolicyHandler::instance()->policy_manager(), mobile_app_id,
         usage_statistics::REJECTIONS_DUPLICATE_NAME);
       ++count_of_rejections_duplicate_name;
     }
@@ -288,10 +280,8 @@ void RegisterAppInterfaceRequest::Run() {
     policy::PolicyHandler::instance()->SetDeviceInfo(device_mac_address,
         device_info);
 
-    // Add registered application to the policy db.
-    policy::PolicyHandler::instance()->
-        AddApplication(msg_params[strings::app_id].asString());
 
+    SendRegisterAppInterfaceResponseToMobile();
     // Ensure that device has consents to start policy update procedure.
     // In case when device has no consent, EnsureDeviceConsented will send
     // OnSDLConsentNeeded and will start PTU in OnAllowSDLFunctionality.
@@ -300,8 +290,6 @@ void RegisterAppInterfaceRequest::Run() {
       // current update state and will or will not run the exchange process.
       policy::PolicyHandler::instance()->OnPTExchangeNeeded();
     }
-
-    SendRegisterAppInterfaceResponseToMobile();
   }
 }
 
@@ -330,21 +318,17 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   smart_objects::SmartObject* params = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
 
-  if (!params) {
-    std::string mobile_app_id =
-      (*message_)[strings::msg_params][strings::app_id].asString();
-    usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
-      policy::PolicyHandler::instance()->policy_manager(), mobile_app_id,
-      usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
-    ++count_of_rejections_sync_out_of_memory;
-    SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY);
-    return;
-  }
-
   ApplicationManagerImpl* app_manager = ApplicationManagerImpl::instance();
   const HMICapabilities& hmi_capabilities = app_manager->hmi_capabilities();
+  const uint32_t key = connection_key();
   ApplicationSharedPtr application =
-    ApplicationManagerImpl::instance()->application(connection_key());
+    ApplicationManagerImpl::instance()->application(key);
+
+  if (!application.valid()) {
+    LOG4CXX_ERROR(logger_, "There is no application for such connection key" <<
+                  key);
+    return;
+  }
 
   smart_objects::SmartObject& response_params = *params;
 
@@ -577,21 +561,26 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   // TODO(AOleynik): Check is necessary to allow register application in case
   // of disabled policy
   // Remove this check, when HMI will support policy
-  if (profile::Profile::instance()->policy_turn_off()) {
+  if (policy::PolicyHandler::instance()->PolicyEnabled()) {
     return mobile_apis::Result::WARNINGS;
   }
 
   smart_objects::SmartObject& message = *message_;
   policy::StringArray app_nicknames;
-  policy::StringArray app_hmi_types; 
+  policy::StringArray app_hmi_types;
+
+  if(!policy::PolicyHandler::instance()->PolicyEnabled()) {
+    return mobile_apis::Result::WARNINGS;
+  }
 
   // TODO(KKolodiy): need remove method policy_manager
   policy::PolicyManager* policy_manager =
-    policy::PolicyHandler::instance()->policy_manager();
+      policy::PolicyHandler::instance()->policy_manager();
   if (!policy_manager) {
     LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
     return mobile_apis::Result::DISALLOWED;
   }
+
   std::string mobile_app_id = message[strings::msg_params][strings::app_id].asString();
   const bool init_result = policy_manager->GetInitialAppData(mobile_app_id, &app_nicknames,
                                                              &app_hmi_types);

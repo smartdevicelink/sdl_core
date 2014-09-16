@@ -14,10 +14,10 @@
 
 #include "mb_client.hpp"
 
-#define MAX_QUEUE_NAME_SIZE     24
-#define MAX_QUEUE_MSG_SIZE 		4095
-#define MSGQ_MAX_MESSAGES		128
-#define MSGQ_MESSAGE_SIZE 		MAX_QUEUE_MSG_SIZE
+#define MAX_QUEUE_NAME_SIZE   24
+#define MAX_QUEUE_MSG_SIZE    4095
+#define MSGQ_MAX_MESSAGES     128
+#define MSGQ_MESSAGE_SIZE     MAX_QUEUE_MSG_SIZE
 
 /**
  * \namespace NsMessageBroker
@@ -25,6 +25,10 @@
  */
 namespace NsMessageBroker
 {
+  typedef struct {
+        int     size;
+        char    text[30000];
+  } shmem_t;
 
    /**
     * \class Client
@@ -68,6 +72,10 @@ namespace NsMessageBroker
          */
          MqClient();
 
+         int     fd;
+         shmem_t *ptr;
+         int     fd2;
+         shmem_t *ptr2;
 
       private:
 

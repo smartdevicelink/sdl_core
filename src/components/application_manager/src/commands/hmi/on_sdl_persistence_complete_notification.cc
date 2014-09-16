@@ -1,7 +1,4 @@
 /**
- * \file ipod_device.cc
- * \brief ipodDevice class source file.
- *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,54 +30,25 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "transport_manager/ipod/ipod_device.h"
+#include "application_manager/commands/hmi/on_sdl_persistence_complete_notification.h"
 
-#include <errno.h>
-#include <string.h>
-#include <sys/types.h>
-#include <unistd.h>
+namespace application_manager {
 
-#include <algorithm>
-#include <limits>
+namespace commands {
 
-
-
-namespace transport_manager {
-namespace transport_adapter {
-
-
-IpodDevice::IpodDevice(const char* name, uint64_t srcid)
-    : Device(name, std::string("IPOD-") + std::string(name))
-{
-    srcID = srcid;
+OnSDLPersistenceCompleteNotification::OnSDLPersistenceCompleteNotification(
+    const MessageSharedPtr& message)
+    : NotificationToHMI(message) {
 }
 
-const uint64_t IpodDevice::GetSrcId() const {
-  return srcID;
+OnSDLPersistenceCompleteNotification::~OnSDLPersistenceCompleteNotification() {
 }
 
-bool IpodDevice::IsSameAs(const Device* other) const {
-  bool result = false;
-
-  const IpodDevice* other_ipod_device =
-      dynamic_cast<const IpodDevice*>(other);
-
-  if (0 != other_ipod_device) {
-    if (0
-        == (unique_device_id() != other_ipod_device->unique_device_id())) {
-      result = true;
-    }
-  }
-
-  return result;
+void OnSDLPersistenceCompleteNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnSDLpersistenceCompleteNotification::Run");
+  SendNotification();
 }
 
-ApplicationList IpodDevice::GetApplicationList() const {
-// Todd: Multiple protocol strings support
-//  return ApplicationList(rfcomm_channels_.begin(), rfcomm_channels_.end());
-  return ApplicationList(1, 1);
-}
+}  // namespace commands
 
-}  // namespace transport_adapter
-}  // namespace transport_manager
-
+}  // namespace application_manager

@@ -7,7 +7,7 @@ BEGIN TRANSACTION;
     `os_version` VARCHAR(45), 
     `carrier` VARCHAR(45), 
     `max_number_rfcom_ports` INTEGER ,
-    `connection_type` VARCHAR(45), "
+    `connection_type` VARCHAR(45),
     `unpaired` BOOL 
   ); 
   CREATE TABLE IF NOT EXISTS `usage_and_error_count`( 

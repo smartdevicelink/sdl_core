@@ -53,6 +53,9 @@
 #include "utils/file_system.h"
 #include "application_manager/application_impl.h"
 #include "usage_statistics/counter.h"
+#ifdef CUSTOMER_PASA
+#include "resumption/last_state.h"
+#endif
 #include <time.h>
 
 namespace application_manager {
@@ -80,10 +83,10 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     request_ctrl_(),
     hmi_so_factory_(NULL),
     mobile_so_factory_(NULL),
-    messages_from_mobile_("application_manager::FromMobileThreadImpl", this),
-    messages_to_mobile_("application_manager::ToMobileThreadImpl", this),
-    messages_from_hmi_("application_manager::FromHMHThreadImpl", this),
-    messages_to_hmi_("application_manager::ToHMHThreadImpl", this),
+    messages_from_mobile_("AM FromMobile", this),
+    messages_to_mobile_("AM ToMobile", this),
+    messages_from_hmi_("AM FromHMI", this),
+    messages_to_hmi_("AM ToHMI", this),
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::IGNITION_OFF),
     resume_ctrl_(this),
@@ -126,10 +129,13 @@ bool ApplicationManagerImpl::Stop() {
                   "An error occurred during unregistering applications.");
   }
 
+#ifndef CUSTOMER_PASA
+  // for PASA customer policy backup should happen OnExitAllApp(SUSPEND)
   if (policy_manager_) {
     LOG4CXX_INFO(logger_, "Unloading policy library.");
     policy::PolicyHandler::instance()->UnloadPolicyLibrary();
   }
+#endif
   return true;
 }
 
@@ -1103,11 +1109,14 @@ void ApplicationManagerImpl::SendMessageToMobile(
     mobile_apis::FunctionID::eType function_id =
         static_cast<mobile_apis::FunctionID::eType>(
         (*message)[strings::params][strings::function_id].asUInt());
-    mobile_apis::Result::eType check_result = CheckPolicyPermissions(
-                                                app->mobile_app_id()->asString(),
-                                                app->hmi_level(),
-                                                function_id);
+    const mobile_apis::Result::eType check_result =
+        CheckPolicyPermissions( app->mobile_app_id()->asString(),
+                                app->hmi_level(), function_id);
     if (mobile_apis::Result::SUCCESS != check_result) {
+      const std::string string_functionID =
+          MessageHelper::StringifiedFunctionID(function_id);
+      LOG4CXX_WARN(logger_, "Function \"" << string_functionID << "\" (#"
+                   << function_id << ") not allowed by policy");
       return;
     }
 
@@ -1117,7 +1126,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
   }
 
   messages_to_mobile_.PostMessage(impl::MessageToMobile(message_to_send,
-                                  final_message));  
+                                  final_message));
 }
 
 bool ApplicationManagerImpl::ManageMobileCommand(
@@ -1327,61 +1336,56 @@ bool ApplicationManagerImpl::ManageHMICommand(
 
 bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
-  bool init_result = true;
-  do {
-    if (policy_manager_) {
-      LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
-      if (!policy::PolicyHandler::instance()->InitPolicyTable()) {
-        init_result = false;
-        break;
-      }
-    } else  {
+  if (policy::PolicyHandler::instance()->PolicyEnabled()) {
+    if(!policy_manager_) {
       LOG4CXX_ERROR(logger_, "Policy library is not loaded. Check LD_LIBRARY_PATH");
-      init_result = false;
+      return false;
     }
-    const std::string app_storage_folder = 
+    LOG4CXX_INFO(logger_, "Policy library is loaded, now initing PT");
+    if (!policy::PolicyHandler::instance()->InitPolicyTable()) {
+      LOG4CXX_ERROR(logger_, "Policy table is not initialized.");
+      return false;
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "System is configured to work without policy functionality.");
+  }
+  const std::string app_storage_folder =
       profile::Profile::instance()->app_storage_folder();
-    if (!file_system::DirectoryExists(app_storage_folder)) {
-      LOG4CXX_WARN(logger_, "Storage directory doesn't exist");
-      // if storage directory doesn't exist try to create it
-      if (!file_system::CreateDirectoryRecursively(app_storage_folder)) {
-        LOG4CXX_ERROR(logger_, "Unable to create Storage directory "
-                                << app_storage_folder);
-        init_result = false;
-        break;
-      }
+  if (!file_system::DirectoryExists(app_storage_folder)) {
+    LOG4CXX_WARN(logger_, "Storage directory doesn't exist");
+    // if storage directory doesn't exist try to create it
+    if (!file_system::CreateDirectoryRecursively(app_storage_folder)) {
+      LOG4CXX_ERROR(logger_, "Unable to create Storage directory "
+                    << app_storage_folder);
+      return false;
     }
-    if (!(file_system::IsWritingAllowed(app_storage_folder) &&
-          file_system::IsReadingAllowed(app_storage_folder))) {
-      LOG4CXX_ERROR(logger_,
-                   "Storage directory doesn't have read/write permissions");
-      init_result = false;
-      break;
-    }
+  }
+  if (!(file_system::IsWritingAllowed(app_storage_folder) &&
+        file_system::IsReadingAllowed(app_storage_folder))) {
+    LOG4CXX_ERROR(logger_,
+                  "Storage directory doesn't have read/write permissions");
+    return false;
+  }
 
-    const std::string system_files_path = 
+  const std::string system_files_path =
       profile::Profile::instance()->system_files_path();
-    if (!file_system::DirectoryExists(system_files_path)) {
-      LOG4CXX_WARN(logger_, "System files directory doesn't exist");
-      // if system directory doesn't exist try to create it
-      if (!file_system::CreateDirectoryRecursively(system_files_path)) {
-        LOG4CXX_ERROR(logger_, "Unable to create System directory "
-                                << system_files_path);
-        init_result = false;
-        break;
-      }
+  if (!file_system::DirectoryExists(system_files_path)) {
+    LOG4CXX_WARN(logger_, "System files directory doesn't exist");
+    // if system directory doesn't exist try to create it
+    if (!file_system::CreateDirectoryRecursively(system_files_path)) {
+      LOG4CXX_ERROR(logger_, "Unable to create System directory "
+                    << system_files_path);
+      return false;
     }
-    if (!(file_system::IsWritingAllowed(system_files_path) &&
-          file_system::IsReadingAllowed(system_files_path))) {
-      LOG4CXX_ERROR(logger_,
-                   "System directory doesn't have read/write permissions");
-      init_result = false;
-      break;
-    }
-    media_manager_ = media_manager::MediaManagerImpl::instance();
-  } while (false);
-
-  return init_result;
+  }
+  if (!(file_system::IsWritingAllowed(system_files_path) &&
+        file_system::IsReadingAllowed(system_files_path))) {
+    LOG4CXX_ERROR(logger_,
+                  "System directory doesn't have read/write permissions");
+    return false;
+  }
+  media_manager_ = media_manager::MediaManagerImpl::instance();
+  return true;
 }
 
 bool ApplicationManagerImpl::ConvertMessageToSO(
@@ -1792,6 +1796,19 @@ void ApplicationManagerImpl::HeadUnitReset(
   }
 }
 
+void ApplicationManagerImpl::HeadUnitSuspend() {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::HeadUnitSuspend");
+#ifdef CUSTOMER_PASA
+  if (policy_manager_) {
+    LOG4CXX_INFO(logger_, "Unloading policy library.");
+    policy::PolicyHandler::instance()->UnloadPolicyLibrary();
+  }
+
+  resume_controller().SaveAllApplications();
+  resumption::LastState::instance()->SaveToFileSystem();
+#endif
+}
+
 void ApplicationManagerImpl::SendOnSDLClose() {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::SendOnSDLClose");
 
@@ -1872,6 +1889,9 @@ void ApplicationManagerImpl::UnregisterAllApplications(bool generated_by_hmi) {
 
   if (is_ignition_off) {
    resume_controller().IgnitionOff();
+#ifdef CUSTOMER_PASA
+   resumption::LastState::instance()->SaveToFileSystem();
+#endif
   }
 }
 
@@ -2019,15 +2039,14 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     mobile_apis::FunctionID::eType function_id,
     CommandParametersPermissions* params_permissions) {
   LOG4CXX_INFO(logger_, "CheckPolicyPermissions");
-  // TODO(AOleynik): Remove check of policy_turn_off, when this flag will be
+  // TODO(AOleynik): Remove check of policy_enable, when this flag will be
   // unused in config file
-  if (profile::Profile::instance()->policy_turn_off()) {
+  if (!policy::PolicyHandler::instance()->PolicyEnabled()) {
     return mobile_apis::Result::SUCCESS;
   }
-  mobile_apis::Result::eType check_result = mobile_apis::Result::DISALLOWED;
-  if (!policy_manager_) {
+  if (!policy_manager_ ) {
     LOG4CXX_WARN(logger_, "Policy library is not loaded.");
-    return check_result;
+    return mobile_apis::Result::DISALLOWED;
   }
   const std::string stringified_functionID =
       MessageHelper::StringifiedFunctionID(function_id);
@@ -2038,24 +2057,17 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     "Checking permissions for  " << policy_app_id  <<
     " in " << stringified_hmi_level <<
     " rpc " << stringified_functionID);
-  policy::CheckPermissionResult result = policy_manager_->CheckPermissions(
-      policy_app_id,
-      stringified_hmi_level,
-      stringified_functionID);
+    policy::CheckPermissionResult result;
+    policy_manager_->CheckPermissions(
+          policy_app_id,
+          stringified_hmi_level,
+          stringified_functionID,
+          result);
 
   if (NULL != params_permissions) {
-    if (result.list_of_allowed_params.valid()) {
-      params_permissions->allowed_params =
-            *(result.list_of_allowed_params.get());
-    }
-    if (result.list_of_disallowed_params.valid()) {
-      params_permissions->disallowed_params =
-          *(result.list_of_disallowed_params.get());
-    }
-    if (result.list_of_undefined_params.valid()) {
-      params_permissions->undefined_params =
-          *(result.list_of_undefined_params.get());
-    }
+      params_permissions->allowed_params = result.list_of_allowed_params;
+      params_permissions->disallowed_params = result.list_of_disallowed_params;
+      params_permissions->undefined_params = result.list_of_undefined_params;
   }
 
   if (hmi_level == mobile_apis::HMILevel::HMI_NONE
@@ -2082,11 +2094,11 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
 
     switch (result.hmi_level_permitted) {
       case policy::kRpcDisallowed:
-        return check_result = mobile_apis::Result::DISALLOWED;
+        return mobile_apis::Result::DISALLOWED;
       case policy::kRpcUserDisallowed:
-        return check_result = mobile_apis::Result::USER_DISALLOWED;
+        return mobile_apis::Result::USER_DISALLOWED;
       default:
-        return check_result = mobile_apis::Result::INVALID_ENUM;
+        return mobile_apis::Result::INVALID_ENUM;
     }
   }
   LOG4CXX_INFO(logger_, "Request is allowed by policies. "+log_msg);

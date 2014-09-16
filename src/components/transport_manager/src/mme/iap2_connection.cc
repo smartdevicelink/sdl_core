@@ -62,7 +62,7 @@ bool IAP2Connection::Init() {
   if (parent_->RecordByAppId(app_handle_, record)) {
     protocol_name_ = record.first;
     iap2ea_hdl_ = record.second;
-    std::string thread_name = "iAP2 receiver (" + protocol_name_ + ")";
+    const std::string thread_name = "iAP2 " + protocol_name_;
     receiver_thread_delegate_ = new ReceiverThreadDelegate(iap2ea_hdl_, this);
     receiver_thread_ = new threads::Thread(thread_name.c_str(), receiver_thread_delegate_);
     receiver_thread_->start();
@@ -97,7 +97,7 @@ TransportAdapter::Error IAP2Connection::SendData(RawMessagePtr message) {
     LOG4CXX_INFO(logger_, "iAP2: sending thread priority increased");
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP2: could not increase sending thread prioriry");
+    LOG4CXX_WARN(logger_, "iAP2: could not increase sending thread priority");
   }
 #endif
   LOG4CXX_TRACE(logger_, "iAP2: sending data on protocol " << protocol_name_);
@@ -107,7 +107,7 @@ TransportAdapter::Error IAP2Connection::SendData(RawMessagePtr message) {
     LOG4CXX_INFO(logger_, "iAP2: sending thread priority decreased to normal");
   }
   else {
-    LOG4CXX_WARN(logger_, "iAP2: could not decrease sending thread prioriry to normal");
+    LOG4CXX_WARN(logger_, "iAP2: could not decrease sending thread priority to normal");
   }
 #endif
   if (result != -1) {

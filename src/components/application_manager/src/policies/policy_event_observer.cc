@@ -73,7 +73,7 @@ void PolicyEventObserver::on_event(const event_engine::Event& event) {
     }
     default: {
       break;
-    }  
+    }
 #endif
   }
 }
@@ -88,9 +88,11 @@ void PolicyEventObserver::ProcessOdometerEvent(const smart_objects::SmartObject&
       const int kSecondsInDay = 60 * 60 * 24;
       int days_after_epoch = current_time.tv_sec / kSecondsInDay;
 
-      policy_manager_->PTUpdatedAt(
-        message[strings::msg_params][strings::odometer].asInt(),
-        days_after_epoch);
+      if(policy_manager_) {
+        policy_manager_->PTUpdatedAt(
+              message[strings::msg_params][strings::odometer].asInt(),
+            days_after_epoch);
+      }
     }
   }
 }

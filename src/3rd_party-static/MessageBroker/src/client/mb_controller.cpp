@@ -34,8 +34,27 @@ namespace NsMessageBroker
    mControllersIdStart(-1),
    mControllersIdCurrent(0)
    {
-      mControllersName = name;
-      mClientType = MQUEUE;
+     mControllersName = name;
+     mClientType = MQUEUE;
+
+     /* Create the shared memory object */
+     fd = shm_open("/SHNAME_SDLQUEUE", O_RDWR | O_CREAT , 0777);
+     //DBG_MSG(("MqClient::Send:A"));
+     ftruncate(fd, sizeof(shmem_t));
+     /* Set the size of the shared memory object */
+
+     // DBG_MSG(("MqClient::Send::B"));
+     /* Get a pointer to the shared memory, map it into
+      * our address space */
+     ptr = ( shmem_t *)mmap(0, sizeof(shmem_t), PROT_READ, MAP_SHARED, fd, 0);
+     // DBG_MSG(("MqClient::Send:B"));
+
+     fd2 = shm_open("/SHNAME_SDLQUEUE2",  O_RDWR | O_CREAT, 0777);
+     DBG_MSG(("A\n"));
+     ftruncate(fd2, sizeof(shmem_t));
+     /* Get a pointer to the shared memory object */
+     ptr2 =(shmem_t *) mmap(0, sizeof(shmem_t),
+     PROT_WRITE, MAP_SHARED, fd2, 0);
    }
 #endif
 
@@ -46,6 +65,14 @@ namespace NsMessageBroker
 
    CMessageBrokerController::~CMessageBrokerController()
    {
+#ifdef CUSTOMER_PASA
+     ftruncate(fd, 0);
+     munmap(ptr, sizeof(shmem_t));
+     close(fd);
+     ftruncate(fd2, 0);
+     munmap(ptr2, sizeof(shmem_t));
+     close(fd2);
+#endif
    }
 
 #ifdef CUSTOMER_PASA
@@ -62,11 +89,11 @@ namespace NsMessageBroker
    {
 	   switch(mClientType)
 	   {
-		   case TCP: 	return TcpClient::Send(data);
+		   case TCP: 	  return TcpClient::Send(data);
 		   case MQUEUE:	return MqClient::Send(data);
+		   default :    return -1;
 	   }
    }
-
 #endif
    ssize_t CMessageBrokerController::Recv(std::string& data)
    {
@@ -81,6 +108,13 @@ namespace NsMessageBroker
       while (!stop)
       {
          Json::Value root;
+#ifdef CUSTOMER_PASA
+         if (m_receivingBuffer.length() > sizeof(shmem_t))
+         {
+            m_receivingBuffer.clear();
+            return 0;
+         }
+#endif
          if (!m_reader.parse(m_receivingBuffer, root))
          {
             DBG_MSG(("Received not JSON string! %s\n", m_receivingBuffer.c_str()));

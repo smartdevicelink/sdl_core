@@ -83,16 +83,17 @@ SQLPTRepresentation::~SQLPTRepresentation() {
   delete db_;
 }
 
-CheckPermissionResult SQLPTRepresentation::CheckPermissions(
-  const PTString& app_id, const PTString& hmi_level, const PTString& rpc) {
-  CheckPermissionResult result;
+void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
+                                           const PTString& hmi_level,
+                                           const PTString& rpc,
+                                           CheckPermissionResult& result) {
   dbms::SQLQuery query(db());
 
   if (!query.Prepare(sql_pt::kSelectRpc)) {
     LOG4CXX_WARN(
       logger_,
       "Incorrect select statement from rpcs" << query.LastError().text());
-    return result;
+    return;
   }
   query.Bind(0, app_id);
   query.Bind(1, hmi_level);
@@ -108,16 +109,11 @@ CheckPermissionResult SQLPTRepresentation::CheckPermissions(
   std::string parameter;
   while (ret) {
     if (!query.IsNull(0)) {
-      if (!result.list_of_allowed_params) {
-        result.list_of_allowed_params = new std::vector<PTString>();
-      }
       parameter = query.GetString(0);
-      result.list_of_allowed_params->push_back(parameter);
+      result.list_of_allowed_params.push_back(parameter);
     }
     ret = query.Next();
   }
-
-  return result;
 }
 
 bool SQLPTRepresentation::IsPTPreloaded() {
@@ -763,6 +759,13 @@ bool SQLPTRepresentation::SaveApplicationPolicies(
       return false;
     }
   }
+  policy_table::ApplicationPolicies::const_iterator it_device =
+      apps.find(kDeviceId);
+  if (apps.end() != it_pre_data_consented) {
+    if (!SaveSpecificAppPolicy(*it_device)) {
+      return false;
+    }
+  }
   policy_table::ApplicationPolicies::const_iterator it;
   for (it = apps.begin(); it != apps.end(); ++it) {
     // Skip saving of predefined app, since they should be saved before
@@ -1305,10 +1308,10 @@ bool SQLPTRepresentation::SaveApplicationCustomData(const std::string& app_id,
     return false;
   }
 
-  query.Bind(0, app_id);
-  query.Bind(1, is_revoked);
+  query.Bind(0, is_revoked);
   query.Bind(1, is_default);
   query.Bind(2, is_predata);
+  query.Bind(3, app_id);
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Failed update in application");

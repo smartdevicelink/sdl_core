@@ -60,7 +60,7 @@ std::string PlatformUsbDevice::GetDescString(uint8_t index) const {
   const int libusb_ret = libusb_get_string_descriptor_ascii(
                            libusb_device_handle_, index, buf, sizeof(buf));
   if (libusb_ret < 0) {
-    LOG4CXX_INFO(logger_, "Failed to get USB string descriptor: "
+    LOG4CXX_ERROR(logger_, "Failed to get USB string descriptor: "
                  << libusb_error_name(libusb_ret));
     LOG4CXX_TRACE(logger_, "exit with empty string");
     return "";

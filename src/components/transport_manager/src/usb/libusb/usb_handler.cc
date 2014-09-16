@@ -288,19 +288,18 @@ TransportAdapter::Error UsbHandler::Init() {
 
   const int thread_start_error =
     pthread_create(&thread_, 0, &UsbHandlerThread, this);
-  if (0 == thread_start_error) {
-    LOG4CXX_INFO(logger_, "UsbHandler thread started");
-    LOG4CXX_TRACE(logger_,
-                  "exit with TransportAdapter::OK. Condition: 0 == thread_start_error");
-    return TransportAdapter::OK;
-  } else {
+  if (0 != thread_start_error) {
     LOG4CXX_ERROR(logger_, "USB device scanner thread start failed, error code "
                   << thread_start_error);
     LOG4CXX_TRACE(logger_,
                   "exit with TransportAdapter::FAIL. Condition: 0 !== thread_start_error");
     return TransportAdapter::FAIL;
   }
-  LOG4CXX_TRACE(logger_, "exit");
+  LOG4CXX_INFO(logger_, "UsbHandler thread started");
+  pthread_setname_np(thread_, "UsbHandler" );
+  LOG4CXX_TRACE(logger_,
+                "exit with TransportAdapter::OK. Condition: 0 == thread_start_error");
+  return TransportAdapter::OK;
 }
 
 void UsbHandler::Thread() {

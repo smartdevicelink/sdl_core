@@ -47,19 +47,20 @@ GetUrls::~GetUrls() {
 
 void GetUrls::Run() {
   LOG4CXX_INFO(logger_, "GetUrls::Run");
-  policy::PolicyManager* manager =
+  policy::PolicyManager* policy_manager =
     policy::PolicyHandler::instance()->policy_manager();
   smart_objects::SmartObject& object = *message_;
   object[strings::params][strings::message_type] = MessageType::kResponse;
-  if (manager) {
+  if (policy_manager) {
     policy::EndpointUrls endpoints =
-      manager->GetUpdateUrls(
+      policy_manager->GetUpdateUrls(
         object[strings::msg_params][hmi_request::service].asInt());
     object[strings::msg_params].erase(hmi_request::service);
     object[strings::msg_params][hmi_response::urls] =
       smart_objects::SmartObject(smart_objects::SmartType_Array);
     for (size_t i = 0; i < endpoints.size(); ++i) {
-      object[strings::msg_params][hmi_response::urls][i][strings::url] = endpoints[i].url[0];
+      std::string url = endpoints[i].url.empty() ? "" : endpoints[i].url[0];
+      object[strings::msg_params][hmi_response::urls][i][strings::url] = url;
       if (policy::kDefaultId != endpoints[i].app_id) {
         object[strings::msg_params][hmi_response::urls][i][hmi_response::policy_app_id] =
           endpoints[i].app_id;

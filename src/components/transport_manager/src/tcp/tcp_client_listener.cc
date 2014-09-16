@@ -242,6 +242,7 @@ TransportAdapter::Error TcpClientListener::StartListening() {
   if (0 == thread_start_error) {
     thread_started_ = true;
     LOG4CXX_DEBUG(logger_, "Tcp client listener thread started");
+    pthread_setname_np(thread_, "TCP listener");
   } else {
     LOG4CXX_ERROR(logger_, "Tcp client listener thread start failed, error code "
                   << thread_start_error);

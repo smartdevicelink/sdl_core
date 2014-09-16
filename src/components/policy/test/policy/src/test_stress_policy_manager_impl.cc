@@ -224,9 +224,8 @@ TEST_F(PolicyManagerImplTest, StressTestOneCheck) {
   EXPECT_CALL(mock_listener, OnCurrentDeviceIdUpdateRequired("2")).Times(1);
 
   manager->set_listener(&mock_listener);
-  ::policy::CheckPermissionResult output = manager->CheckPermissions("2",
-                                                                     "FULL",
-                                                                     "Func-1");
+  ::policy::CheckPermissionResult output;
+  manager->CheckPermissions("2", "FULL", "Func-1", output);
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
 }
 
@@ -236,8 +235,8 @@ TEST_F(PolicyManagerImplTest, StressTestNoPermission) {
   EXPECT_CALL(mock_listener, OnCurrentDeviceIdUpdateRequired("150")).Times(1);
 
   manager->set_listener(&mock_listener);
-  ::policy::CheckPermissionResult output = manager->CheckPermissions(
-      "150", "FULL", "Func-400");
+  ::policy::CheckPermissionResult output;
+  manager->CheckPermissions("150", "FULL", "Func-400", output);
   EXPECT_EQ(::policy::kRpcDisallowed, output.hmi_level_permitted);
 }
 
@@ -259,8 +258,8 @@ TEST_F(PolicyManagerImplTest, StressTestFewChecks) {
     ss << func << std::endl;
     ss >> func_number;
 
-    ::policy::CheckPermissionResult output = manager->CheckPermissions(
-        app_number, "FULL", "Func-" + func_number);
+    ::policy::CheckPermissionResult output;
+    manager->CheckPermissions(app_number, "FULL", "Func-" + func_number, output);
     EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
   }
 }

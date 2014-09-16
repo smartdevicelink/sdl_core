@@ -269,10 +269,11 @@ int main(int argc, char** argv) {
   threads::Thread::SetMainThread();
 
   LOG4CXX_INFO(logger, "Snapshot: {TAG}");
+  LOG4CXX_INFO(logger, "Git commit: {GIT_COMMIT}");
   LOG4CXX_INFO(logger, "Application main()");
 
   utils::SharedPtr<threads::Thread> applink_notification_thread =
-      new threads::Thread("Applink notification thread", new ApplinkNotificationThreadDelegate());
+      new threads::Thread("ApplinkNotify", new ApplinkNotificationThreadDelegate());
   applink_notification_thread->start();
 
   utils::SubscribeToTerminateSignal(main_namespace::dummy_signal_handler);

@@ -36,6 +36,7 @@
 #include <string>
 #include "utils/macro.h"
 #include "utils/threads/thread_delegate.h"
+#include "utils/conditional_variable.h"
 #include "utils/lock.h"
 
 #ifdef CUSTOMER_PASA
@@ -129,13 +130,14 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
     bool getShouldBeStopped();
     void setShouldBeStopped(bool should_stop);
 
-    uint32_t session_key_;
-    const std::string fileName_;
-    int32_t offset_;
-    volatile bool shouldBeStoped_;
-    sync_primitives::Lock shouldBeStoped_lock_;
+    uint32_t                              session_key_;
+    const std::string                     fileName_;
+    int32_t                               offset_;
+    volatile bool                         shouldBeStoped_;
+    sync_primitives::Lock                 shouldBeStoped_lock_;
+    sync_primitives::ConditionalVariable  shouldBeStoped_cv_;
 
-    static const int32_t kAudioPassThruTimeout;
+    static const int32_t                  kAudioPassThruTimeout;
 
     DISALLOW_COPY_AND_ASSIGN(AudioStreamSenderThread);
 };

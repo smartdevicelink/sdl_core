@@ -105,6 +105,7 @@ class TcpClientListener : public ClientConnectionListener {
   const uint16_t port_;
   const bool enable_keepalive_;
   TransportAdapterController* controller_;
+  // TODO(Eamakhov): change to threads::Thread usage
   pthread_t thread_;
   int socket_;
   bool thread_started_;

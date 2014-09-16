@@ -62,6 +62,12 @@ class OnExitAllApplicationsNotification : public NotificationFromHMI {
   virtual void Run();
 
  private:
+
+  /**
+   * @brief Notify's HMI that SDL stored all data required for resumption
+   **/
+  void SendOnSDLPersistenceComplete();
+
   DISALLOW_COPY_AND_ASSIGN(OnExitAllApplicationsNotification);
 };
 

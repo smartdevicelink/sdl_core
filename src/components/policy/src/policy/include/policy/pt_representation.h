@@ -70,12 +70,13 @@ class PTRepresentation {
      * @param app_id Id of application provided during registration
      * @param hmi_level Current HMI Level of application
      * @param rpc Name of RPC
-     * @return CheckPermissionResult containing flag if HMI Level is allowed
+     * @params CheckPermissionResult containing flag if HMI Level is allowed
      * and list of allowed params.
      */
-    virtual CheckPermissionResult CheckPermissions(const PTString& app_id,
+    virtual void CheckPermissions(const PTString& app_id,
         const PTString& hmi_level,
-        const PTString& rpc) = 0;
+        const PTString& rpc,
+        CheckPermissionResult& result) = 0;
 
     /**
      * @brief Returns true if Policy Table was not updated yet
@@ -214,11 +215,7 @@ class PTRepresentation {
      */
     virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() const = 0;
 
-    /**
-     * Saves policy table in storage
-     * @param table policy table
-     * @return true if successfully
-     */
+
     virtual bool Save(const policy_table::Table& table) = 0;
 
     /**
@@ -285,11 +282,12 @@ class PTRepresentation {
     virtual bool SetDefaultPolicy(const std::string& app_id) = 0;
 
     /**
-     * @brief SaveApplicationCustomData
-     * @param app_id
-     * @param is_revoked
-     * @param is_default
-     * @param is_predata
+     * @brief SaveApplicationCustomData allows to save specific data to database.
+     * This data is only for internal use.
+     * @param app_id the application id for which the data will be saved.
+     * @param is_revoked parameter to save.
+     * @param is_default parameter to save.
+     * @param is_predata parameter to save.
      */
     virtual bool SaveApplicationCustomData(const std::string& app_id,
                                            bool is_revoked,

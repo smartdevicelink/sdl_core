@@ -72,7 +72,7 @@ bool IAP2Device::Init() {
   const ProtocolConfig::ProtocolNameContainer& legacy_protocol_names = ProtocolConfig::IAP2LegacyProtocolNames();
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = legacy_protocol_names.begin(); i != legacy_protocol_names.end(); ++i) {
     std::string protocol_name = i->second;
-    ::std::string thread_name = "iAP2 connect notifier (" + protocol_name + ")";
+    ::std::string thread_name = "iAP2 notifier " + protocol_name ;
     utils::SharedPtr<threads::Thread> thread = new threads::Thread(thread_name.c_str(),
       new IAP2ConnectThreadDelegate(this, protocol_name));
     LOG4CXX_INFO(logger_, "iAP2: starting connection thread for legacy protocol " << protocol_name);
@@ -85,7 +85,7 @@ bool IAP2Device::Init() {
   const ProtocolConfig::ProtocolNameContainer& hub_protocol_names = ProtocolConfig::IAP2HubProtocolNames();
   for (ProtocolConfig::ProtocolNameContainer::const_iterator i = hub_protocol_names.begin(); i != hub_protocol_names.end(); ++i) {
     std::string protocol_name = i->second;
-    ::std::string thread_name = "iAP2 hub connect notifier (" + protocol_name + ")";
+    ::std::string thread_name = "iAP2 hub " + protocol_name;
     utils::SharedPtr<threads::Thread> thread = new threads::Thread(thread_name.c_str(),
       new IAP2HubConnectThreadDelegate(this, protocol_name));
     LOG4CXX_INFO(logger_, "iAP2: starting connection thread for hub protocol " << protocol_name);
@@ -255,7 +255,7 @@ bool IAP2Device::FreeProtocol(const std::string& name) {
 }
 
 void IAP2Device::StartThread(const std::string& protocol_name) {
-  std::string thread_name = "iAP2 connect notifier (" + protocol_name + ")";
+  std::string thread_name = "iAP2 dev " + protocol_name;
   utils::SharedPtr<threads::Thread> thread = new threads::Thread(thread_name.c_str(),
     new IAP2ConnectThreadDelegate(this, protocol_name));
   LOG4CXX_DEBUG(logger_, "iAP2: starting connection thread for protocol " << protocol_name);
@@ -331,7 +331,7 @@ void IAP2Device::IAP2ConnectThreadDelegate::threadMain() {
 
 IAP2Device::ProtocolConnectionTimer::ProtocolConnectionTimer(const std::string& name, IAP2Device* parent)
     : name_(name),
-      timer_(new Timer(this, &ProtocolConnectionTimer::Shoot)),
+      timer_(new Timer("iAP2 proto releaser", this, &ProtocolConnectionTimer::Shoot)),
       parent_(parent) {
 }
 

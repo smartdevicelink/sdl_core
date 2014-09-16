@@ -46,9 +46,9 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     default_hmi(impl::ValueMember(value__, "default_hmi")),
     keep_context(impl::ValueMember(value__, "keep_context")),
     steal_focus(impl::ValueMember(value__, "steal_focus")),
-    memory_kb(impl::ValueMember(value__, "memory_kb")),
-    heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms")),
-    certificate(impl::ValueMember(value__, "certificate")) {
+    memory_kb(impl::ValueMember(value__, "memory_kb"), 0),
+    heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms"), 0),
+    certificate(impl::ValueMember(value__, "certificate"), "not_specified") {
 }
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -343,10 +343,11 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     seconds_between_retries(impl::ValueMember(value__, "seconds_between_retries")),
     endpoints(impl::ValueMember(value__, "endpoints")),
     notifications_per_minute_by_priority(impl::ValueMember(value__, "notifications_per_minute_by_priority")),
-    vehicle_make(impl::ValueMember(value__, "vehicle_make")),
-    vehicle_model(impl::ValueMember(value__, "vehicle_model")),
-    vehicle_year(impl::ValueMember(value__, "vehicle_year")) {
+    vehicle_make(impl::ValueMember(value__, "vehicle_make"), "not_specified"),
+    vehicle_model(impl::ValueMember(value__, "vehicle_model"), "not_specified"),
+    vehicle_year(impl::ValueMember(value__, "vehicle_year"), "none") {
 }
+
 Json::Value ModuleConfig::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("device_certificates", device_certificates, &result__);
@@ -706,7 +707,8 @@ ConsumerFriendlyMessages::ConsumerFriendlyMessages(const Json::Value* value__)
 Json::Value ConsumerFriendlyMessages::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("version", version, &result__);
-  impl::WriteJsonField("messages", messages, &result__);
+  // According to requirements, it is not necessary to provide this to PTS
+  //impl::WriteJsonField("messages", messages, &result__);
   return result__;
 }
 
@@ -768,8 +770,8 @@ ModuleMeta::ModuleMeta(const Json::Value* value__)
     ccpu_version(impl::ValueMember(value__, "ccpu_version")),
     language(impl::ValueMember(value__, "language")),
     wers_country_code(impl::ValueMember(value__, "wers_country_code")),
-    pt_exchanged_at_odometer_x(impl::ValueMember(value__, "pt_exchanged_at_odometer_x")),
-    pt_exchanged_x_days_after_epoch(impl::ValueMember(value__, "pt_exchanged_x_days_after_epoch")),
+    pt_exchanged_at_odometer_x(impl::ValueMember(value__, "pt_exchanged_at_odometer_x"), 0),
+    pt_exchanged_x_days_after_epoch(impl::ValueMember(value__, "pt_exchanged_x_days_after_epoch"), 0),
     ignition_cycles_since_last_exchange(impl::ValueMember(value__, "ignition_cycles_since_last_exchange")),
     vin(impl::ValueMember(value__, "vin")) {
 }
@@ -910,20 +912,20 @@ AppLevel::~AppLevel() {
 }
 AppLevel::AppLevel(const Json::Value* value__)
   : CompositeType(InitHelper(value__, &Json::Value::isObject)),
-    minutes_in_hmi_full(impl::ValueMember(value__, "minutes_in_hmi_full")),
-    app_registration_language_gui(impl::ValueMember(value__, "app_registration_language_gui")),
-    app_registration_language_vui(impl::ValueMember(value__, "app_registration_language_vui")),
-    minutes_in_hmi_limited(impl::ValueMember(value__, "minutes_in_hmi_limited")),
-    minutes_in_hmi_background(impl::ValueMember(value__, "minutes_in_hmi_background")),
-    minutes_in_hmi_none(impl::ValueMember(value__, "minutes_in_hmi_none")),
-    count_of_user_selections(impl::ValueMember(value__, "count_of_user_selections")),
-    count_of_rejections_sync_out_of_memory(impl::ValueMember(value__, "count_of_rejections_sync_out_of_memory")),
-    count_of_rejections_nickname_mismatch(impl::ValueMember(value__, "count_of_rejections_nickname_mismatch")),
-    count_of_rejections_duplicate_name(impl::ValueMember(value__, "count_of_rejections_duplicate_name")),
-    count_of_rejected_rpc_calls(impl::ValueMember(value__, "count_of_rejected_rpc_calls")),
-    count_of_rpcs_sent_in_hmi_none(impl::ValueMember(value__, "count_of_rpcs_sent_in_hmi_none")),
-    count_of_removals_for_bad_behavior(impl::ValueMember(value__, "count_of_removals_for_bad_behavior")),
-    count_of_run_attempts_while_revoked(impl::ValueMember(value__, "count_of_run_attempts_while_revoked")) {
+    minutes_in_hmi_full(impl::ValueMember(value__, "minutes_in_hmi_full"), 0),
+    app_registration_language_gui(impl::ValueMember(value__, "app_registration_language_gui"), "not_specified"),
+    app_registration_language_vui(impl::ValueMember(value__, "app_registration_language_vui"), "not_specified"),
+    minutes_in_hmi_limited(impl::ValueMember(value__, "minutes_in_hmi_limited"), 0),
+    minutes_in_hmi_background(impl::ValueMember(value__, "minutes_in_hmi_background"), 0),
+    minutes_in_hmi_none(impl::ValueMember(value__, "minutes_in_hmi_none"), 0),
+    count_of_user_selections(impl::ValueMember(value__, "count_of_user_selections"), 0),
+    count_of_rejections_sync_out_of_memory(impl::ValueMember(value__, "count_of_rejections_sync_out_of_memory"), 0),
+    count_of_rejections_nickname_mismatch(impl::ValueMember(value__, "count_of_rejections_nickname_mismatch"), 0),
+    count_of_rejections_duplicate_name(impl::ValueMember(value__, "count_of_rejections_duplicate_name"), 0),
+    count_of_rejected_rpc_calls(impl::ValueMember(value__, "count_of_rejected_rpc_calls"), 0),
+    count_of_rpcs_sent_in_hmi_none(impl::ValueMember(value__, "count_of_rpcs_sent_in_hmi_none"), 0),
+    count_of_removals_for_bad_behavior(impl::ValueMember(value__, "count_of_removals_for_bad_behavior"), 0),
+    count_of_run_attempts_while_revoked(impl::ValueMember(value__, "count_of_run_attempts_while_revoked"), 0) {
 }
 Json::Value AppLevel::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -1123,9 +1125,9 @@ UsageAndErrorCounts::~UsageAndErrorCounts() {
 }
 UsageAndErrorCounts::UsageAndErrorCounts(const Json::Value* value__)
   : CompositeType(InitHelper(value__, &Json::Value::isObject)),
-    count_of_iap_buffer_full(impl::ValueMember(value__, "count_of_iap_buffer_full")),
-    count_sync_out_of_memory(impl::ValueMember(value__, "count_sync_out_of_memory")),
-    count_of_sync_reboots(impl::ValueMember(value__, "count_of_sync_reboots")),
+    count_of_iap_buffer_full(impl::ValueMember(value__, "count_of_iap_buffer_full"), 0),
+    count_sync_out_of_memory(impl::ValueMember(value__, "count_sync_out_of_memory"), 0),
+    count_of_sync_reboots(impl::ValueMember(value__, "count_of_sync_reboots"), 0),
     app_level(impl::ValueMember(value__, "app_level")) {
 }
 Json::Value UsageAndErrorCounts::ToJsonValue() const {
@@ -1212,11 +1214,13 @@ ConsentRecords::ConsentRecords()
 }
 ConsentRecords::~ConsentRecords() {
 }
+
 ConsentRecords::ConsentRecords(const Json::Value* value__)
   : CompositeType(InitHelper(value__, &Json::Value::isObject)),
     consent_groups(impl::ValueMember(value__, "consent_groups")),
     input(impl::ValueMember(value__, "input")),
     time_stamp(impl::ValueMember(value__, "time_stamp")) {
+
 }
 Json::Value ConsentRecords::ToJsonValue() const {
   Json::Value result__(Json::objectValue);

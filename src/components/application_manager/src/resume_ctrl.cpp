@@ -23,17 +23,17 @@ namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 ResumeCtrl::ResumeCtrl(ApplicationManagerImpl* app_mngr)
   : app_mngr_(app_mngr),
-    timer_(this, &ResumeCtrl::onTimer) {
+    timer_("ResumeCtrl", this, &ResumeCtrl::onTimer) {
 }
 
 void ResumeCtrl::SaveAllApplications() {
   LOG4CXX_INFO(logger_, "ResumeCtrl::SaveApplications()");
   DCHECK(app_mngr_);
 
-  std::set<ApplicationSharedPtr>::iterator it = 
-								  app_mngr_->application_list_.begin();
+  std::set<ApplicationSharedPtr>::iterator it =
+                  app_mngr_->application_list_.begin();
   std::set<ApplicationSharedPtr>::iterator it_end =
-								   app_mngr_->application_list_.end();
+                   app_mngr_->application_list_.end();
   for (; it != it_end; ++it) {
     SaveApplication(*it);
   }
@@ -134,7 +134,7 @@ bool ResumeCtrl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
 
   mobile_apis::HMILevel::eType default_hmi = mobile_apis::HMILevel::HMI_NONE;
 
-  if (false == profile::Profile::instance()->policy_turn_off()) {
+  if (policy::PolicyHandler::instance()->PolicyEnabled()) {
     policy::PolicyManager* policy_manager =
         policy::PolicyHandler::instance()->policy_manager();
     if (policy_manager) {
@@ -185,8 +185,9 @@ bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
   const std::string device_id =
       MessageHelper::GetDeviceMacAddressForHandle(application->device());
 
-  if ((true == check_policy) && (policy::DeviceConsent::kDeviceAllowed !=
-      policy_manager->GetUserConsentForDevice(device_id))) {
+  if (check_policy && policy_manager &&
+      policy_manager->GetUserConsentForDevice(device_id)
+      != policy::DeviceConsent::kDeviceAllowed) {
     LOG4CXX_ERROR(logger_, "Resumption abort. Data consent wasn't allowed");
     SetupDefaultHMILevel(application);
     return false;
@@ -195,7 +196,7 @@ bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
 
   if ((hmi_level == application->hmi_level()) &&
       (hmi_level != mobile_apis::HMILevel::HMI_NONE)) {
-    LOG4CXX_INFO(logger_, "Hmi level " << hmi_level << " should not be set to "
+    LOG4CXX_WARN(logger_, "Hmi level " << hmi_level << " should not be set to "
                  << application->mobile_app_id()->asString() << "  " << application->hmi_level());
 
     return false;

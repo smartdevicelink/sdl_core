@@ -74,7 +74,7 @@ void PTExchangeHandlerExt::Start() {
   if (pt_snapshot.valid()) {
     if (file_system::CreateDirectoryRecursively(system_files_path) &&
         file_system::WriteBinaryFile(policy_snapshot_full_path, *pt_snapshot)) {
-      MessageHelper::SendPolicyUpdate(policy_snapshot_file_name,
+      MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
                                       policy_manager->TimeoutExchange(),
                                       policy_manager->RetrySequenceDelaysSeconds());
     } else {

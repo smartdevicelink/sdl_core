@@ -1,7 +1,4 @@
 /**
- * \file ipod_transport_adapter.cc
- * \brief IpodTransportAdapter class source file.
- *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -33,33 +30,43 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <unistd.h>
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SDL_PERSISTENCE_COMPLETE_NOTIFICATION_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SDL_PERSISTENCE_COMPLETE_NOTIFICATION_H_
 
-#include <iomanip>
-#include <set>
+#include "application_manager/commands/hmi/notification_to_hmi.h"
 
-#include "transport_manager/ipod/ipod_transport_adapter.h"
-#include "transport_manager/ipod/ipod_device_scanner.h"
-#include "transport_manager/ipod/ipod_connection_factory.h"
+namespace application_manager {
 
-namespace transport_manager {
-namespace transport_adapter {
+namespace commands {
 
-IpodTransportAdapter::~IpodTransportAdapter() {
-}
+/**
+ * @brief OnSDLPersistenceCompleteNotification command class
+ **/
+class OnSDLPersistenceCompleteNotification : public NotificationToHMI {
+  public:
+    /**
+     * @brief OnSDLPersistenceCompleteNotification class constructor
+     *
+     * @param message Incoming SmartObject message
+     **/
+    explicit OnSDLPersistenceCompleteNotification(const MessageSharedPtr& message);
 
-IpodTransportAdapter::IpodTransportAdapter()
-    : TransportAdapterImpl(new IpodDeviceScanner(this, false, 0),
-                           new IpodConnectionFactory(this), 0) {
-}
+    /**
+     * @brief OnSDLPersistenceCompleteNotification class destructor
+     **/
+    virtual ~OnSDLPersistenceCompleteNotification();
 
-DeviceType IpodTransportAdapter::GetDeviceType() const {
-  return "sdl-ipod";
-}
+    /**
+     * @brief Execute command
+     **/
+    virtual void Run();
 
-}  // namespace transport_adapter
-}  // namespace transport_manager
+  private:
+    DISALLOW_COPY_AND_ASSIGN(OnSDLPersistenceCompleteNotification);
+};
 
+}  // namespace commands
+
+}  // namespace application_manager
+
+#endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_ON_SDL_PERSISTENCE_COMPLETE_NOTIFICATION_H_
