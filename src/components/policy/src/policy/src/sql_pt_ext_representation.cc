@@ -823,14 +823,13 @@ bool SQLPTExtRepresentation::GatherAppLevels(
                  << query.LastError().text());
     return false;
   }
-  const int kSecondsInMinute = 60;
   while (query.Next()) {
     policy_table::AppLevel level;
     // value of time fields database is seconds
-    level.minutes_in_hmi_full = query.GetInteger(1) / kSecondsInMinute;
-    level.minutes_in_hmi_limited = query.GetInteger(2) / kSecondsInMinute;
-    level.minutes_in_hmi_background = query.GetInteger(3) / kSecondsInMinute;
-    level.minutes_in_hmi_none = query.GetInteger(4) / kSecondsInMinute;
+    level.minutes_in_hmi_full = query.GetInteger(1);
+    level.minutes_in_hmi_limited = query.GetInteger(2);
+    level.minutes_in_hmi_background = query.GetInteger(3);
+    level.minutes_in_hmi_none = query.GetInteger(4);
     level.count_of_user_selections = query.GetInteger(5);
     level.count_of_rejections_sync_out_of_memory = query.GetInteger(6);
     level.count_of_rejections_nickname_mismatch = query.GetInteger(7);

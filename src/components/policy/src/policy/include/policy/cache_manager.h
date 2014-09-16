@@ -403,7 +403,7 @@ public:
    * @param type type of counter
    */
   void Increment(const std::string& app_id,
-                 usage_statistics::AppCounterId type) const;
+                 usage_statistics::AppCounterId type);
 
   /**
    * Sets value of application information
@@ -413,7 +413,7 @@ public:
    */
   void Set(const std::string& app_id,
            usage_statistics::AppInfoId type,
-           const std::string& value) const;
+           const std::string& value);
 
   /**
    * Adds value to stopwatch of application
@@ -423,7 +423,7 @@ public:
    */
   void Add(const std::string& app_id,
            usage_statistics::AppStopwatchId type,
-           int seconds) const;
+           int seconds);
 
   /**
    * @brief CountUnconsentedGroups allows to obtain the count of unconsented
@@ -551,6 +551,7 @@ private:
   void CopyInternalParams(const std::string &from, const std::string& to);
   utils::SharedPtr<policy_table::Table> pt_;
 
+  long ConvertSecondsToMinute(int seconds);
 
   utils::SharedPtr<PTRepresentation> backup_;
   utils::SharedPtr<PTExtRepresentation> ex_backup_;

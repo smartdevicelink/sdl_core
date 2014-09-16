@@ -35,11 +35,12 @@
 #include <algorithm>
 #include <cstdlib>
 #include <functional>
+#include <ctime>
+#include <math.h>
 
 #include "utils/file_system.h"
 #include "json/reader.h"
 #include "utils/logger.h"
-#include <ctime>
 
 #ifdef EXTENDED_POLICY
 #  include "policy/sql_pt_ext_representation.h"
@@ -907,7 +908,7 @@ void CacheManager::Increment(usage_statistics::GlobalCounterId type) {
 }
 
 void CacheManager::Increment(const std::string &app_id,
-                             usage_statistics::AppCounterId type) const {
+                             usage_statistics::AppCounterId type) {
   switch (type) {
     case usage_statistics::USER_SELECTIONS:
       ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
@@ -949,7 +950,7 @@ void CacheManager::Increment(const std::string &app_id,
 
 void CacheManager::Set(const std::string &app_id,
                        usage_statistics::AppInfoId type,
-                       const std::string &value) const {
+                       const std::string &value) {
   switch (type) {
     case usage_statistics::LANGUAGE_GUI:
       (*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
@@ -967,23 +968,24 @@ void CacheManager::Set(const std::string &app_id,
 
 void CacheManager::Add(const std::string &app_id,
                        usage_statistics::AppStopwatchId type,
-                       int seconds) const {
+                       int seconds) {
+  const int minutes = ConvertSecondsToMinute(seconds);
   switch (type) {
     case usage_statistics::SECONDS_HMI_FULL:
       (*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
-          minutes_in_hmi_full += seconds;
+          minutes_in_hmi_full += minutes;
       break;
     case usage_statistics::SECONDS_HMI_LIMITED:
       (*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
-          minutes_in_hmi_limited += seconds;
+          minutes_in_hmi_limited += minutes;
       break;
     case usage_statistics::SECONDS_HMI_BACKGROUND:
       (*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
-          minutes_in_hmi_background += seconds;;
+          minutes_in_hmi_background += minutes;
       break;
     case usage_statistics::SECONDS_HMI_NONE:
       (*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
-          minutes_in_hmi_none += seconds;;
+          minutes_in_hmi_none += minutes;
       break;
     default:
       LOG4CXX_INFO(logger_, "Type app stopwatch is unknown");
@@ -996,6 +998,11 @@ void CacheManager::CopyInternalParams(const std::string &from,
   is_predata_[to] = is_predata_[from];
   is_default_[to] = is_default_[from];
   is_revoked_[to] = is_revoked_[from];
+}
+
+long CacheManager::ConvertSecondsToMinute(int seconds) {
+  const float seconds_in_minute = 60.0;
+  return std::round(seconds / seconds_in_minute);
 }
 
 bool CacheManager::SetDefaultPolicy(const std::string &app_id) {
