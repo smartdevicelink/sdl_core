@@ -138,7 +138,7 @@ const ProtocolConfig::ProtocolNameContainer ProtocolConfig::ReadProtocolNames(co
           if (line.empty()) { // end of specified section
             break;
           }
-          int prot_mask_pos = line.find(protocol_mask);
+          size_t prot_mask_pos = line.find(protocol_mask);
           if (prot_mask_pos == std::string::npos){  // protocol_mask not found in line
             continue;
           }

@@ -161,7 +161,7 @@ void CacheManager::GetAllAppGroups(const std::string& app_id,
 
     for (; iter != iter_end; ++iter) {
       const uint32_t group_id =
-          static_cast<uint32_t> (abs(GenerateHash(*iter)));
+          static_cast<uint32_t> (labs(GenerateHash(*iter)));
       all_group_ids.push_back(group_id);
     }
   }
@@ -439,7 +439,7 @@ void CacheManager::GetGroupNameByHashID(const uint32_t group_id,
       pt_->policy_table.functional_groupings.end();
 
   for (; fg_iter != fg_iter_end; ++fg_iter) {
-    const uint32_t id = abs(GenerateHash((*fg_iter).first));
+    const uint32_t id = labs(GenerateHash((*fg_iter).first));
     if (group_id == id) {
       group_name = (*fg_iter).first;
     }
@@ -866,7 +866,7 @@ bool CacheManager::GetFunctionalGroupNames(FunctionalGroupNames &names) {
       pt_->policy_table.functional_groupings.end();
 
   for (; iter != iter_end; ++iter) {
-    const uint32_t id = static_cast<uint32_t> (abs(GenerateHash((*iter).first)));
+    const uint32_t id = static_cast<uint32_t> (labs(GenerateHash((*iter).first)));
     std::pair<std::string, std::string> value =
         std::make_pair( *(*iter).second.user_consent_prompt, (*iter).first);
 
