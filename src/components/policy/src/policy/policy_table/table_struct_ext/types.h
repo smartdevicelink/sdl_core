@@ -34,7 +34,7 @@ typedef Array< Enum<Parameter>, 0, 24 > Parameters;
 
 typedef Map< RpcParameters, 0, 50 > Rpc;
 
-typedef Array< String<10, 255>, 1, 3 > URL;
+typedef Array< String<10, 65535>, 1, 3 > URL;
 
 typedef Map< URL, 1, 255 > URLList;
 
@@ -310,7 +310,7 @@ struct ConsentRecords : CompositeType {
 struct DeviceParams : CompositeType {
   public:
     Optional< String<0, 255> > hardware;
-    Optional< Nullable< String<1, 255> > > firmware_rev;
+    Optional< Nullable< String<0, 255> > > firmware_rev;
     Optional< String<0, 255> > os;
     Optional< String<0, 255> > os_version;
     Optional< Nullable< String<0, 255> > > carrier;

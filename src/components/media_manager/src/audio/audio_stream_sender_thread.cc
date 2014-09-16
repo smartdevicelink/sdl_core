@@ -62,7 +62,9 @@ AudioStreamSenderThread::AudioStreamSenderThread(
   const std::string fileName, uint32_t session_key)
   : session_key_(session_key),
     fileName_(fileName),
-    shouldBeStoped_(false) {
+    shouldBeStoped_(false),
+    shouldBeStoped_lock_(),
+    shouldBeStoped_cv_() {
   LOG4CXX_TRACE_ENTER(logger_);
 }
 
@@ -79,7 +81,8 @@ void AudioStreamSenderThread::threadMain() {
 
   while (false == getShouldBeStopped()) {
 #ifndef CUSTOMER_PASA
-    usleep(kAudioPassThruTimeout * 1000000);
+    AutoLock auto_lock(shouldBeStoped_lock_);
+    shouldBeStoped_cv_.WaitFor(auto_lock, kAudioPassThruTimeout * 1000);
 #endif
 #ifdef CUSTOMER_PASA
     mqSendAudioChunkToMobile();
@@ -188,6 +191,7 @@ bool AudioStreamSenderThread::getShouldBeStopped() {
 void AudioStreamSenderThread::setShouldBeStopped(bool should_stop) {
   AutoLock auto_lock(shouldBeStoped_lock_);
   shouldBeStoped_ = should_stop;
+  shouldBeStoped_cv_.NotifyOne();
 }
 
 bool AudioStreamSenderThread::exitThreadMain() {

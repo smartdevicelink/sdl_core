@@ -178,5 +178,7 @@ for entry in $include_bin; do
   done
 done
 
+set +f
+cp -r $specificdir/* $export_dir/
 post_install
 

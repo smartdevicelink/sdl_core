@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -77,6 +77,86 @@ class StatisticsManager {
   virtual void Add(const std::string& app_id,
                    AppStopwatchId type,
                    int32_t timespan_seconds) = 0;
+
+  static std::string EnumToStdString(GlobalCounterId global_counter_id) {
+    std::string counter;
+    switch (global_counter_id) {
+      case usage_statistics::IAP_BUFFER_FULL:
+        counter = "count_of_iap_buffer_full";
+        break;
+      case usage_statistics::SYNC_OUT_OF_MEMORY:
+        counter = "count_sync_out_of_memory";
+        break;
+      case usage_statistics::SYNC_REBOOTS:
+        counter = "count_of_sync_reboots";
+        break;
+    }
+    return counter;
+  }
+
+  static std::string EnumToStdString(AppInfoId app_info_id) {
+    std::string info;
+    switch (app_info_id) {
+      case usage_statistics::LANGUAGE_GUI:
+        info = "app_registration_language_gui";
+        break;
+      case usage_statistics::LANGUAGE_VUI:
+        info = "app_registration_language_vui";
+        break;
+    }
+    return info;
+  }
+
+  static std::string EnumToStdString(AppStopwatchId app_stop_watch_id) {
+    std::string stopwatch;
+    switch (app_stop_watch_id) {
+      // TODO(KKolodiy): rename fields in database
+      case usage_statistics::SECONDS_HMI_FULL:
+        stopwatch = "minutes_in_hmi_full";
+        break;
+      case usage_statistics::SECONDS_HMI_LIMITED:
+        stopwatch = "minutes_in_hmi_limited";
+        break;
+      case usage_statistics::SECONDS_HMI_BACKGROUND:
+        stopwatch = "minutes_in_hmi_background";
+        break;
+      case usage_statistics::SECONDS_HMI_NONE:
+        stopwatch = "minutes_in_hmi_none";
+        break;
+    }
+    return stopwatch;
+  }
+
+  static std::string EnumToStdString(AppCounterId app_counter_id) {
+    std::string counter;
+    switch (app_counter_id) {
+      case usage_statistics::USER_SELECTIONS:
+        counter = "count_of_user_selections";
+        break;
+      case usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY:
+        counter = "count_of_rejections_sync_out_of_memory";
+        break;
+      case usage_statistics::REJECTIONS_NICKNAME_MISMATCH:
+        counter = "count_of_rejections_nickname_mismatch";
+        break;
+      case usage_statistics::REJECTIONS_DUPLICATE_NAME:
+        counter = "count_of_rejections_duplicate_name";
+        break;
+      case usage_statistics::REJECTED_RPC_CALLS:
+        counter = "count_of_rejected_rpcs_calls";
+        break;
+      case usage_statistics::RPCS_IN_HMI_NONE:
+        counter = "count_of_rpcs_sent_in_hmi_none";
+        break;
+      case usage_statistics::REMOVALS_MISBEHAVED:
+        counter = "count_of_removals_for_bad_behavior";
+        break;
+      case usage_statistics::RUN_ATTEMPTS_WHILE_REVOKED:
+        counter = "count_of_run_attempts_while_revoked";
+        break;
+    }
+    return counter;
+  }
 };
 
 }  //  namespace usage_statistics

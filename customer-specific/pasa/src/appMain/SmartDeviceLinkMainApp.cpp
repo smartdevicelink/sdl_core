@@ -270,6 +270,7 @@ int main(int argc, char** argv) {
   threads::Thread::SetMainThread();
 
   LOG4CXX_INFO(logger_, "Snapshot: {TAG}");
+  LOG4CXX_INFO(logger_, "Git commit: {GIT_COMMIT}");
   LOG4CXX_INFO(logger_, "Application main()");
 
   utils::SharedPtr<threads::Thread> applink_notification_thread =

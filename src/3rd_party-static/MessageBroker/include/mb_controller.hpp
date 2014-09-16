@@ -14,7 +14,8 @@
 #include "mb_tcpclient.hpp"
 #ifdef CUSTOMER_PASA
 #include "mb_mqclient.hpp"
-
+#include <sys/mman.h>
+#include <sys/stat.h>
 #endif
 #include "utils/lock.h"
 
@@ -198,6 +199,9 @@ namespace NsMessageBroker
       void* MethodForReceiverThread(void * arg);
 
       virtual void exitReceivingThread() {
+#ifdef CUSTOMER_PASA
+        Close();
+#endif
         stop = true;
         sync_primitives::AutoLock auto_lock(receiving_thread_lock_);
       }

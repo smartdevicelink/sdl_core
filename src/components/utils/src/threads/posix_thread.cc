@@ -199,7 +199,11 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
 
 void Thread::stop() {
   LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_DEBUG(logger_, "Canceling thread (#" << thread_handle_
+                << " \"" << name_ << "\") from #" << pthread_self());
   if (!is_running()) {
+    LOG4CXX_WARN(logger_, "Thread (#" << thread_handle_
+                  << " \"" << name_ << "\") is not running");
     return;
   }
 
@@ -228,11 +232,12 @@ void Thread::stop() {
 
 void Thread::join() {
   LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_DEBUG(logger_, "Join thread (#" << thread_handle_
+                << " \"" << name_ << "\") from #" << pthread_self());
   if (thread_handle_ == pthread_self()) {
     LOG4CXX_ERROR(logger_,
                  "Couldn't join with the same thread (#" << thread_handle_
-                 << "\"" << name_ << "\")");
-    pthread_exit(NULL);
+                 << " \"" << name_ << "\")");
   } else {
     const int pthread_result = pthread_join(thread_handle_, NULL);
     if (pthread_result != EOK) {

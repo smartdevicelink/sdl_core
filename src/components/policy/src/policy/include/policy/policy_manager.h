@@ -99,12 +99,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @param app_id Id of application provided during registration
      * @param hmi_level Current HMI Level of application
      * @param rpc Name of RPC
-     * @return CheckPermissionResult containing flag if HMI Level is allowed
+     * @param CheckPermissionResult containing flag if HMI Level is allowed
      * and list of allowed params.
      */
-    virtual CheckPermissionResult CheckPermissions(const PTString& app_id,
+    virtual void CheckPermissions(const PTString& app_id,
         const PTString& hmi_level,
-        const PTString& rpc) = 0;
+        const PTString& rpc,
+        CheckPermissionResult& result) = 0;
 
     /**
      * @brief Clear all record of user consents. Used during Factory Reset.

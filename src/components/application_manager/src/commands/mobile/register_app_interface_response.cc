@@ -33,6 +33,8 @@
 
 #include "application_manager/commands/mobile/register_app_interface_response.h"
 #include "interfaces/MOBILE_API.h"
+#include "application_manager/policies/policy_handler.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -54,6 +56,18 @@ void RegisterAppInterfaceResponse::Run() {
   }
 
   SendResponse(success, result_code, last_message);
+
+  // Add registered application to the policy db right after response sent to
+  // mobile to be able to check all other API according to app permissions
+  uint32_t connection_key =
+      (*message_)[strings::params][strings::connection_key].asUInt();
+  application_manager::ApplicationConstSharedPtr app =
+      application_manager::ApplicationManagerImpl::instance()->
+      application(connection_key);
+  if (app.valid()) {
+    policy::PolicyHandler::instance()->
+        AddApplication(app->mobile_app_id()->asString());
+  }
 }
 
 }  // namespace commands

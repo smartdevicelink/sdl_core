@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_PROTOCOL_CONFIG_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_MME_PROTOCOL_CONFIG_H_
 
-#include <list>
+#include <map>
 #include <string>
 
 namespace transport_manager {
@@ -41,7 +41,7 @@ namespace transport_adapter {
 
 class ProtocolConfig {
  public:
-  typedef std::list<std::string> ProtocolNameContainer;
+  typedef std::map <int, std::string>ProtocolNameContainer;
 
   static const ProtocolNameContainer& IAPLegacyProtocolNames();
   static const ProtocolNameContainer& IAP2LegacyProtocolNames();

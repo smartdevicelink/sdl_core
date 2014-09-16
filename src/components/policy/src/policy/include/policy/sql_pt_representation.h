@@ -51,9 +51,10 @@ class SQLPTRepresentation : public virtual PTRepresentation {
   public:
     SQLPTRepresentation();
     ~SQLPTRepresentation();
-    virtual CheckPermissionResult CheckPermissions(const PTString& app_id,
+    virtual void CheckPermissions(const PTString& app_id,
         const PTString& hmi_level,
-        const PTString& rpc);
+        const PTString& rpc,
+        CheckPermissionResult& result);
 
     virtual bool IsPTPreloaded();
     virtual int IgnitionCyclesBeforeExchange();
@@ -87,7 +88,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                            StringArray* app_hmi_types = NULL);
     bool GetFunctionalGroupings(policy_table::FunctionalGroupings& groups);
 
-  //protected:
     virtual void GatherModuleMeta(policy_table::ModuleMeta* meta) const;
     virtual void GatherModuleConfig(policy_table::ModuleConfig* config) const;
     virtual bool GatherUsageAndErrorCounts(

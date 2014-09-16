@@ -53,6 +53,9 @@
 #include "utils/file_system.h"
 #include "application_manager/application_impl.h"
 #include "usage_statistics/counter.h"
+#ifdef CUSTOMER_PASA
+#include "resumption/last_state.h"
+#endif
 #include <time.h>
 
 namespace application_manager {
@@ -1801,8 +1804,8 @@ void ApplicationManagerImpl::HeadUnitSuspend() {
     policy::PolicyHandler::instance()->UnloadPolicyLibrary();
   }
 
-  LOG4CXX_INFO(logger_, "Destroying Last State");
-  resumption::LastState::destroy();
+  resume_controller().SaveAllApplications();
+  resumption::LastState::instance()->SaveToFileSystem();
 #endif
 }
 
@@ -1886,6 +1889,9 @@ void ApplicationManagerImpl::UnregisterAllApplications(bool generated_by_hmi) {
 
   if (is_ignition_off) {
    resume_controller().IgnitionOff();
+#ifdef CUSTOMER_PASA
+   resumption::LastState::instance()->SaveToFileSystem();
+#endif
   }
 }
 
@@ -2051,24 +2057,17 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     "Checking permissions for  " << policy_app_id  <<
     " in " << stringified_hmi_level <<
     " rpc " << stringified_functionID);
-  policy::CheckPermissionResult result = policy_manager_->CheckPermissions(
-      policy_app_id,
-      stringified_hmi_level,
-      stringified_functionID);
+    policy::CheckPermissionResult result;
+    policy_manager_->CheckPermissions(
+          policy_app_id,
+          stringified_hmi_level,
+          stringified_functionID,
+          result);
 
   if (NULL != params_permissions) {
-    if (result.list_of_allowed_params.valid()) {
-      params_permissions->allowed_params =
-            *(result.list_of_allowed_params.get());
-    }
-    if (result.list_of_disallowed_params.valid()) {
-      params_permissions->disallowed_params =
-          *(result.list_of_disallowed_params.get());
-    }
-    if (result.list_of_undefined_params.valid()) {
-      params_permissions->undefined_params =
-          *(result.list_of_undefined_params.get());
-    }
+      params_permissions->allowed_params = result.list_of_allowed_params;
+      params_permissions->disallowed_params = result.list_of_disallowed_params;
+      params_permissions->undefined_params = result.list_of_undefined_params;
   }
 
   if (hmi_level == mobile_apis::HMILevel::HMI_NONE
