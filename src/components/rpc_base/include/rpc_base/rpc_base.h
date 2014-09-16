@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -187,6 +187,8 @@ class Integer : public PrimitiveType {
     explicit Integer(dbus::MessageReader* reader);
     Integer(const Json::Value* value, IntType def_value);
     Integer& operator=(IntType new_val);
+    Integer& operator++();
+    Integer& operator+=(int value);
     operator IntType() const;
     Json::Value ToJsonValue() const;
     void ToDbusWriter(dbus::MessageWriter* writer) const;

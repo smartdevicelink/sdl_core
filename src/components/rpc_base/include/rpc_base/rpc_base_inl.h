@@ -1,4 +1,4 @@
-/**
+﻿/**
 * Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
@@ -181,6 +181,18 @@ template<typename T, T minval, T maxval>
 Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator=(IntType new_val) {
   value_ = new_val;
   value_state_ = range_.Includes(value_) ? kValid : kInvalid;
+  return *this;
+}
+
+template<typename T, T minval, T maxval>
+Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator++() {
+  ++value_;
+  return *this;
+}
+
+template<typename T, T minval, T maxval>
+Integer<T, minval, maxval>& Integer<T, minval, maxval>::operator+=(int value) {
+  value_ += value;
   return *this;
 }
 
