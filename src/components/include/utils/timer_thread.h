@@ -304,7 +304,7 @@ void TimerThread<T>::updateTimeOut(const uint32_t timeout_seconds) {
   fflush(stdout);
   thread_reseter.join();
   //seep(2);// there thread will be killed
-  LOG4CXX_DEBUG(logger_, "MY after join ");
+  LOG4CXX_DEBUG(logger_, "TEMP after join ");
   fflush(stdout);
 }
 

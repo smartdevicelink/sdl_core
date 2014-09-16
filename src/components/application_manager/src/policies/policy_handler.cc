@@ -257,12 +257,8 @@ bool PolicyHandler::InitPolicyTable() {
   POLICY_LIB_CHECK(false);
   // Subscribing to notification for system readiness to be able to get system
   // info necessary for policy table
-  int32_t correlation_id =
-    application_manager::ApplicationManagerImpl::instance()
-    ->GetNextHMICorrelationID();
   event_observer_.get()->subscribe_on_event(
-        hmi_apis::FunctionID::BasicCommunication_OnReady,
-        correlation_id);
+        hmi_apis::FunctionID::BasicCommunication_OnReady);
   std::string preloaded_file =
     profile::Profile::instance()->preloaded_pt_file();
   return policy_manager_->InitPT(preloaded_file);

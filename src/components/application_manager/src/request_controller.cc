@@ -274,6 +274,23 @@ void RequestController::terminateAppRequests(
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
+void RequestController::terminateAllHMIRequests() {
+  LOG4CXX_TRACE_ENTER(logger_);
+  AutoLock auto_lock(pending_request_set_lock_);
+  RequestInfoSet::iterator it = pending_request_set_.begin();
+  while (pending_request_set_.end() != it) {
+    HMIRequestInfo* hmi_request_info = dynamic_cast<HMIRequestInfo*>((*it).get());
+    if (NULL == hmi_request_info) {
+      ++it;
+      continue;
+    }
+    hmi_request_info->request_->CleanUp();
+    pending_request_set_.erase(it++);
+    LOG4CXX_INFO(logger_, "HMI request terminated: ");
+  }
+  LOG4CXX_TRACE_EXIT(logger_);
+}
+
 void RequestController::updateRequestTimeout(
     const uint32_t& app_id,
     const uint32_t& mobile_correlation_id,

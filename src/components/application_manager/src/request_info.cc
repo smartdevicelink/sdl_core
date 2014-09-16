@@ -64,10 +64,10 @@ MobileRequestInfo::MobileRequestInfo(
     const uint64_t timeout_sec):
   RequestInfo(timeout_sec),
   request_(request) {
-    commands::CommandRequestImpl* request_to_hmi =
+    commands::CommandRequestImpl* request_from_mobile =
             static_cast<commands::CommandRequestImpl*>(request_.get());
-    mobile_correlation_id_ = request_to_hmi->correlation_id();
-    app_id_ = request_to_hmi->connection_key();
+    mobile_correlation_id_ = request_from_mobile->correlation_id();
+    app_id_ = request_from_mobile->connection_key();
 }
 
 MobileRequestInfo::MobileRequestInfo(

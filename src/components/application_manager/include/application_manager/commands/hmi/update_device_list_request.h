@@ -34,6 +34,9 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_GET_DEVICE_LIST_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/event_engine/event_observer.h"
+#include "utils/lock.h"
+#include "utils/conditional_variable.h"
 
 namespace application_manager {
 
@@ -42,7 +45,8 @@ namespace commands {
 /**
  * @brief UpdateDeviceListRequest command class
  **/
-class UpdateDeviceListRequest : public RequestToHMI {
+class UpdateDeviceListRequest : public RequestToHMI,
+                                public event_engine::EventObserver {
  public:
   /**
    * @brief UpdateDeviceListRequest class constructor
@@ -54,14 +58,30 @@ class UpdateDeviceListRequest : public RequestToHMI {
   /**
    * @brief UpdateDeviceListRequest class destructor
    **/
-  virtual ~UpdateDeviceListRequest();
+  ~UpdateDeviceListRequest();
 
   /**
    * @brief Execute command
    **/
   virtual void Run();
 
+  /**
+   * @brief Interface method that is called whenever new event received
+   * Need to observe OnHMIReady event, to send UpdateDeviceListRequest
+   * when HMI will be ready
+   * @param event The received event
+   */
+  virtual void on_event(const event_engine::Event& event);
+
+ /**
+  * @brief Need to stop execution StopMethod if HMI did not started
+  */
+  virtual bool CleanUp();
+
  private:
+  sync_primitives::Lock                            wait_hmi_lock;
+  sync_primitives::ConditionalVariable             termination_condition_;
+
   DISALLOW_COPY_AND_ASSIGN(UpdateDeviceListRequest);
 };
 

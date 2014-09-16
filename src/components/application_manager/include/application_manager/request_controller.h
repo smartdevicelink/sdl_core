@@ -173,6 +173,11 @@ class RequestController {
     void terminateAppRequests(const uint32_t& app_id);
 
     /**
+    * @brief Terminates all requests from HMI
+    */
+    void terminateAllHMIRequests();
+
+    /**
     * @brief Updates request timeout
     *
     * @param app_id Connection key of application

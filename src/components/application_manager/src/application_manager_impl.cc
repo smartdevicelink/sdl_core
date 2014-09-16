@@ -1358,13 +1358,11 @@ bool ApplicationManagerImpl::ManageHMICommand(
 
   if (command->Init()) {
     command->Run();
-    if (command->CleanUp()) {
       if (kResponse == message_type) {
         int32_t correlation_id = (*(message.get()))[strings::params][strings::correlation_id].asInt();
         request_ctrl_.terminateHMIRequest(correlation_id);
       }
       return true;
-    }
   }
   return false;
 }
@@ -1920,6 +1918,7 @@ void ApplicationManagerImpl::UnregisterAllApplications(bool generated_by_hmi) {
    resumption::LastState::instance()->SaveToFileSystem();
 #endif
   }
+  request_ctrl_.terminateAllHMIRequests();
 }
 
 void ApplicationManagerImpl::UnregisterApplication(
