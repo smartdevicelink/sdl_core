@@ -47,6 +47,7 @@
 
 #include "utils/signals.h"
 #include "utils/system.h"
+#include "utils/log_message_loop_thread.h"
 #include "config_profile/profile.h"
 
 #if defined(EXTENDED_MEDIA_MODE)
@@ -164,6 +165,7 @@ int32_t main(int32_t argc, char** argv) {
   if (profile::Profile::instance()->enable_policy()) {
     if (!utils::System("./init_policy.sh").Execute(true)) {
       LOG4CXX_ERROR(logger_, "Failed initialization of policy database");
+      logger::LogMessageLoopThread::destroy();
       DEINIT_LOGGER();
       exit(EXIT_FAILURE);
     }
@@ -172,6 +174,7 @@ int32_t main(int32_t argc, char** argv) {
 
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
     main_namespace::LifeCycle::instance()->StopComponents();
+    logger::LogMessageLoopThread::destroy();
     DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
@@ -193,6 +196,7 @@ int32_t main(int32_t argc, char** argv) {
 #ifndef NO_HMI
       if (!InitHmi()) {
         main_namespace::LifeCycle::instance()->StopComponents();
+        logger::LogMessageLoopThread::destroy();
         DEINIT_LOGGER();
         exit(EXIT_FAILURE);
       }
@@ -211,6 +215,7 @@ int32_t main(int32_t argc, char** argv) {
   main_namespace::LifeCycle::instance()->StopComponents();
 
   LOG4CXX_INFO(logger_, "Application successfully stopped");
+  logger::LogMessageLoopThread::destroy();
   DEINIT_LOGGER();
 
   return EXIT_SUCCESS;

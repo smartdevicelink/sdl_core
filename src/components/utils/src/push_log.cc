@@ -32,28 +32,29 @@
 
 #include "utils/push_log.h"
 #include "utils/log_message_loop_thread.h"
+#include "utils/logger_status.h"
 
 namespace logger {
 
 bool push_log(log4cxx::LoggerPtr logger, LogLevel level, const std::string& entry, const log4cxx::spi::LocationInfo& location) {
-  typedef enum {LoggerThreadNotCreated, CreatingLoggerThread, LoggerThreadCreated} InternalStatus;
-  static InternalStatus internal_status = LoggerThreadNotCreated;
-
-  if (LoggerThreadCreated == internal_status) {
+  if (LoggerThreadCreated == logger_status) {
     LogMessage message = {logger, level, entry, location};
     LogMessageLoopThread::instance()->PostMessage(message);
     return true;
   }
 
-  if (LoggerThreadNotCreated == internal_status) {
-    internal_status = CreatingLoggerThread;
+  if (LoggerThreadNotCreated == logger_status) {
+    logger_status = CreatingLoggerThread;
 // we'll have to drop messages
 // while creating logger thread
     LogMessage message = {logger, level, entry, location};
     LogMessageLoopThread::instance()->PostMessage(message);
-    internal_status = LoggerThreadCreated;
+    logger_status = LoggerThreadCreated;
     return true;
   }
+
+// also we drop messages
+// while deleting logger thread
 
   return false;
 }

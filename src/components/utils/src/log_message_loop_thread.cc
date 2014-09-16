@@ -31,6 +31,7 @@
  */
 
 #include "utils/log_message_loop_thread.h"
+#include "utils/logger_status.h"
 
 namespace logger {
 
@@ -42,38 +43,32 @@ void LogMessageHandler::Handle(const LogMessage message) {
   switch (message.level) {
     case Fatal:
       if (message.logger->isFatalEnabled()) {
-        ::log4cxx::helpers::MessageBuffer oss_;
-        message.logger->forcedLog(::log4cxx::Level::getFatal(), oss_.str(oss_ << message.entry), message.location);
+        message.logger->forcedLog(::log4cxx::Level::getFatal(), message.entry, message.location);
       }
       break;
     case Error:
       if (message.logger->isErrorEnabled()) {
-        ::log4cxx::helpers::MessageBuffer oss_;
-        message.logger->forcedLog(::log4cxx::Level::getError(), oss_.str(oss_ << message.entry), message.location);
+        message.logger->forcedLog(::log4cxx::Level::getError(), message.entry, message.location);
       }
       break;
     case Warn:
       if (message.logger->isWarnEnabled()) {
-        ::log4cxx::helpers::MessageBuffer oss_;
-        message.logger->forcedLog(::log4cxx::Level::getWarn(), oss_.str(oss_ << message.entry), message.location);
+        message.logger->forcedLog(::log4cxx::Level::getWarn(), message.entry, message.location);
       }
       break;
     case Info:
       if (message.logger->isInfoEnabled()) {
-        ::log4cxx::helpers::MessageBuffer oss_;
-        message.logger->forcedLog(::log4cxx::Level::getInfo(), oss_.str(oss_ << message.entry), message.location);
+        message.logger->forcedLog(::log4cxx::Level::getInfo(), message.entry, message.location);
       }
       break;
     case Debug:
       if (LOG4CXX_UNLIKELY(message.logger->isDebugEnabled())) {
-        ::log4cxx::helpers::MessageBuffer oss_;
-        message.logger->forcedLog(::log4cxx::Level::getDebug(), oss_.str(oss_ << message.entry), message.location);
+        message.logger->forcedLog(::log4cxx::Level::getDebug(), message.entry, message.location);
       }
       break;
     case Trace:
       if (LOG4CXX_UNLIKELY(message.logger->isTraceEnabled())) {
-        ::log4cxx::helpers::MessageBuffer oss_;
-        message.logger->forcedLog(::log4cxx::Level::getTrace(), oss_.str(oss_ << message.entry), message.location);
+        message.logger->forcedLog(::log4cxx::Level::getTrace(), message.entry, message.location);
       }
       break;
   }
@@ -81,6 +76,12 @@ void LogMessageHandler::Handle(const LogMessage message) {
 
 LogMessageLoopThread::LogMessageLoopThread() :
   LogMessageLoopThreadTemplate("Logger", new LogMessageHandler()) {
+}
+
+LogMessageLoopThread::~LogMessageLoopThread() {
+// we'll have to drop messages
+// while deleting logger thread
+  logger_status = DeletingLoggerThread;
 }
 
 }  // namespace logger

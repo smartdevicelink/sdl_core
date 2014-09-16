@@ -30,50 +30,23 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOG_MESSAGE_LOOP_THREAD_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOG_MESSAGE_LOOP_THREAD_H_
-
-#include <string>
-#include <queue>
-#include <log4cxx/logger.h>
-
-#include "utils/threads/message_loop_thread.h"
-#include "utils/log_level.h"
-#include "utils/singleton.h"
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_STATUS_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_STATUS_H_
 
 namespace logger {
 
-typedef struct {
-  log4cxx::LoggerPtr logger;
-  LogLevel level;
-  std::string entry;
-  log4cxx::spi::LocationInfo location;
-} LogMessage;
+typedef enum {
+  LoggerThreadNotCreated,
+  CreatingLoggerThread,
+  LoggerThreadCreated,
+  DeletingLoggerThread
+} LoggerStatus;
 
-typedef std::queue<LogMessage> LogMessageQueue;
-
-typedef threads::MessageLoopThread<LogMessageQueue> LogMessageLoopThreadTemplate;
-
-class LogMessageHandler : public LogMessageLoopThreadTemplate::Handler {
- public:
-  virtual void Handle(const LogMessage message) OVERRIDE;
-};
-
-class LogMessageLoopThread :
-  public LogMessageLoopThreadTemplate,
-  public utils::Singleton<LogMessageLoopThread> {
-
- public:
-  ~LogMessageLoopThread();
-
- private:
-  LogMessageLoopThread();
-
-DISALLOW_COPY_AND_ASSIGN(LogMessageLoopThread);
-FRIEND_BASE_SINGLETON_CLASS(LogMessageLoopThread);
-
-};
+// this variable is only changed when creating and deleting logger thread
+// its reads and writes are believed to be atomic
+// thus it shall be considered thread safe
+extern LoggerStatus logger_status;
 
 }  // namespace logger
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOG_MESSAGE_LOOP_THREAD_H_
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_STATUS_H_

@@ -11,6 +11,7 @@
 #include "utils/system.h"
 #include "utils/signals.h"
 #include "utils/file_system.h"
+#include "utils/log_message_loop_thread.h"
 #include "config_profile/profile.h"
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
@@ -283,6 +284,7 @@ int main(int argc, char** argv) {
   stopSmartDeviceLink();
 
   LOG4CXX_INFO(logger_, "Application successfully stopped");
+  logger::LogMessageLoopThread::destroy();
   DEINIT_LOGGER();
   return EXIT_SUCCESS;
 }
