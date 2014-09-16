@@ -1352,7 +1352,6 @@ bool ApplicationManagerImpl::ManageHMICommand(
   if (kRequest == message_type) {
     pthread_t id = pthread_self();
     LOG4CXX_DEBUG(logger_, " TEMP ManageHMICommand my thread " << id);
-    fflush(stdout);
     request_ctrl_.addHMIRequest(command);
   }
 

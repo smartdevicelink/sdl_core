@@ -44,16 +44,16 @@ namespace application_manager {
 
 
     ActivateAppRequest::~ActivateAppRequest() {
-      LOG4CXX_INFO(logger_, "~ActivateAppRequest");
     }
 
     void ActivateAppRequest::Run() {
-      LOG4CXX_INFO(logger_, "ActivateAppRequest::Run " << correlation_id());
+      LOG4CXX_TRACE(logger_, "enter " << correlation_id());
       uint32_t app_id = RequestToHMI::application_id();
       ApplicationManagerImpl::instance()->set_application_id(correlation_id(), app_id);
       SendRequest();
       subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
                          correlation_id());
+      LOG4CXX_TRACE(logger_, "exit");
     }
 
 

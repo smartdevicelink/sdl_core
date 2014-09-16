@@ -52,12 +52,16 @@ class RequestToHMI : public CommandImpl {
   /*
    * @brief Retrieves correlation ID
    */
-  inline int32_t correlation_id() const;
+  inline int32_t correlation_id() const {
+    return (*message_)[strings::params][strings::correlation_id].asInt();
+  }
 
   /*
    * @brief Retrieves application ID
    */
-  inline uint32_t application_id() const;
+  inline uint32_t application_id() const {
+    return (*message_)[strings::msg_params][strings::app_id].asUInt();
+  }
 
   /**
    * @brief Retrieves request default timeout.
@@ -65,23 +69,15 @@ class RequestToHMI : public CommandImpl {
    *
    * @return Request default timeout
    */
-  inline unsigned int default_timeout() const;
+  inline uint32_t default_timeout() const {
+    return default_timeout_;
+  }
 
  private:
   uint32_t default_timeout_;
 
   DISALLOW_COPY_AND_ASSIGN(RequestToHMI);
 };
-int32_t RequestToHMI::correlation_id() const {
-  return (*message_)[strings::params][strings::correlation_id].asInt();
-}
-uint32_t RequestToHMI::application_id() const {
-  return (*message_)[strings::msg_params][strings::app_id].asUInt();
-}
-
-unsigned int RequestToHMI::default_timeout() const {
-  return default_timeout_;
-}
 
 }  // namespace commands
 

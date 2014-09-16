@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,7 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_CONTROLLER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_REQUEST_CONTROLLER_H_
 
-#include "limits.h"
-
+#include <climits>
 #include <vector>
 #include <list>
 
@@ -72,7 +71,8 @@ class RequestController {
       SUCCESS = 0,
       TOO_MANY_REQUESTS,
       TOO_MANY_PENDING_REQUESTS,
-      NONE_HMI_LEVEL_MANY_REQUESTS
+      NONE_HMI_LEVEL_MANY_REQUESTS,
+      INVALID_DATA
     };
 
     /**
@@ -237,7 +237,6 @@ class RequestController {
         RequestController*                               request_controller_;
         sync_primitives::Lock                            thread_lock_;
         volatile bool                                    stop_flag_;
-        bool                                             is_active_;
     };
 
     /**
@@ -262,7 +261,7 @@ class RequestController {
     std::list<RequestPtr> notification_list_;
 
     timer::TimerThread<RequestController>  timer_;
-    static const uint32_t timer_sleep_time_ = 100;
+    static const uint32_t dafault_sleep_time_ = 100;
 
     DISALLOW_COPY_AND_ASSIGN(RequestController);
 };

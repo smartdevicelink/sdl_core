@@ -66,10 +66,10 @@ class DateTime {
 
   // return MILLISECONDS count between time1 and time2
   static int64_t calculateTimeDiff(const TimevalStruct& time1,
-                                   const TimevalStruct& time2);
+                             const TimevalStruct& time2);
 
   static TimeCompare compareTime(const TimevalStruct& time1,
-                     const TimevalStruct& time2);
+                               const TimevalStruct& time2);
 };
 
 }  // namespace date_time

@@ -82,16 +82,16 @@ int64_t DateTime::calculateTimeDiff(const TimevalStruct &time1,
 }
 
 TimeCompare date_time::DateTime::compareTime(const TimevalStruct &time1, const TimevalStruct &time2) {
-  if (getSecs(time1)== getSecs(time2)) {
-      if (getmSecs(time1)== getmSecs(time2)) {
-          if (getuSecs(time1)== getuSecs(time2)) {
+  if (getSecs(time1) == getSecs(time2)) {
+      if (getmSecs(time1) == getmSecs(time2)) {
+          if (getuSecs(time1) == getuSecs(time2)) {
             return EQUAL;
           }
-          return getuSecs(time1)< getuSecs(time2)?LESS:GREATER;
+          return getuSecs(time1) < getuSecs(time2)?LESS:GREATER;
       }
-      return getmSecs(time1)< getmSecs(time2)?LESS:GREATER;
+      return getmSecs(time1) < getmSecs(time2)?LESS:GREATER;
   }
-  return getSecs(time1)< getSecs(time2)?LESS:GREATER;
+  return getSecs(time1) < getSecs(time2) ? LESS : GREATER;
 
 }
 

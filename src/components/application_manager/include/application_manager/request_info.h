@@ -2,7 +2,7 @@
 * \file request_info.h
 * \brief request information structure header file.
 *
-* Copyright (c) 2013, Ford Motor Company
+* Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without
@@ -33,8 +33,8 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifndef SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_REQUEST_INFO_H_
-#define SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_REQUEST_INFO_H_
+#ifndef SRC_COMPONENTS_APPLCICATION_MANAGER_INCLUDE_REQUEST_REQUEST_INFO_H_
+#define SRC_COMPONENTS_APPLCICATION_MANAGER_INCLUDE_REQUEST_REQUEST_INFO_H_
 
 #include <stdint.h>
 
@@ -69,7 +69,7 @@ namespace request_controller {
 
       virtual ~RequestInfo(){}
 
-      virtual u_int32_t requestId() = 0;
+      virtual uint32_t requestId() = 0;
       virtual commands::Command* request() = 0;
 
     void updateEndTime() {
@@ -132,7 +132,7 @@ namespace request_controller {
 
   struct MobileRequestInfo: public RequestInfo {
       MobileRequestInfo(MobileRequestPtr request, const uint64_t timeout_sec);
-      MobileRequestInfo(MobileRequestPtr request, const TimevalStruct& start_time,const  uint64_t timeout_sec);
+      MobileRequestInfo(MobileRequestPtr request, const TimevalStruct& start_time, const  uint64_t timeout_sec);
     MobileRequestPtr request_;
     uint32_t app_id_;
     mobile_apis::HMILevel::eType hmi_level_;
@@ -233,4 +233,4 @@ namespace request_controller {
 }  //  namespace request_controller
 
 } //  namespace application_manager
-#endif  // SRC_COMPONENTS_REQUEST_WATCHDOG_INCLUDE_REQUEST_WATCHDOG_REQUEST_INFO_H_
+#endif  // SRC_COMPONENTS_APPLCICATION_MANAGER_INCLUDE_REQUEST_REQUEST_INFO_H_

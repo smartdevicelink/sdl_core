@@ -240,11 +240,7 @@ TimerThread<T>::TimerThread(const char* name, T* callee, void (T::*f)(), bool is
   } else {
     delegate_ = new TimerDelegate(this);
   }
-
-  if (delegate_) {
-    thread_ = new threads::Thread("TimerThread", delegate_);
-    fflush(stdout);
-  }
+  thread_ = new threads::Thread("TimerThread", delegate_);
 }
 
 template <class T>
@@ -276,8 +272,7 @@ void TimerThread<T>::start(uint32_t timeout_seconds) {
 template <class T>
 void TimerThread<T>::stop() {
   if (delegate_ && thread_) {
-    LOG4CXX_DEBUG(logger_, " thread before stop\n");
-    fflush(stdout);
+    LOG4CXX_DEBUG(logger_, " thread before stop\n");;
     thread_->stop();
     is_running_ = false;
   }
@@ -288,24 +283,18 @@ bool TimerThread<T>::isRunning() {
   return is_running_;
 }
 
-#include "stdio.h"
-
 template <class T>
 void TimerThread<T>::updateTimeOut(const uint32_t timeout_seconds) {
   pthread_t id = pthread_self();
 
   LOG4CXX_DEBUG(logger_, "updateTimeOut for thread" << id << "from " << thread_->thread_handle());
-  fflush(stdout);
 
   TimerReseter* delegate = new TimerReseter(this, timeout_seconds);
   threads::Thread thread_reseter("TimerReseter", delegate);
   thread_reseter.start();
   LOG4CXX_DEBUG(logger_, " TimerReseter started");
-  fflush(stdout);
   thread_reseter.join();
-  //seep(2);// there thread will be killed
   LOG4CXX_DEBUG(logger_, "TEMP after join ");
-  fflush(stdout);
 }
 
 template <class T>
@@ -373,7 +362,6 @@ void TimerThread<T>::TimerLooperDelegate::threadMain() {
         wait_seconds_left <= 0) {
       TimerDelegate::timer_thread_->onTimeOut();
       LOG4CXX_DEBUG(logger_, "Loopthread Delegate speel fore: " << TimerDelegate::timeout_seconds_);
-      fflush(stdout);
       end_time = time(NULL) + TimerDelegate::timeout_seconds_;
     }
   }
@@ -401,7 +389,6 @@ TimerThread<T>::TimerReseter::TimerReseter(TimerThread *timer_thread,
   timer_thread_(timer_thread),
   timeout_sec_(timeout_sec) {
   DCHECK(timer_thread);
-  DCHECK(timeout_sec > 0);
 }
 
 template <class T>
@@ -409,13 +396,10 @@ void TimerThread<T>::TimerReseter::threadMain() {
   pthread_t id = pthread_self();
   LOG4CXX_DEBUG(logger_, "TimerReseter threadMain my thread = "
                  << id <<"try to stop: " << timer_thread_->thread_->thread_handle());
-  fflush(stdout);
   timer_thread_->stop();
   LOG4CXX_DEBUG(logger_, "after TimerReseter stop \n");
-  fflush(stdout);
   timer_thread_->start(timeout_sec_);
   LOG4CXX_DEBUG(logger_, "after TimerReseter start \n");
-  fflush(stdout);
 }
 
 }  // namespace timer

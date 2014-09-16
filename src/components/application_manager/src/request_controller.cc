@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2013, Ford Motor Company
+/*
+ * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,9 +52,8 @@ RequestController::RequestController()
 {
   LOG4CXX_INFO(logger_, "RequestController::RequestController()");
   InitializeThreadpool();
-  timer_.start(timer_sleep_time_);
+  timer_.start(dafault_sleep_time_);
   LOG4CXX_DEBUG(logger_," TEMP Create timer thread ; timer thread = " << timer_.thread_->thread_handle());
-  fflush(stdout);
 }
 
 RequestController::~RequestController() {
@@ -101,10 +100,17 @@ RequestController::TResult RequestController::addMobileRequest(
     const MobileRequestPtr& request,
     const mobile_apis::HMILevel::eType& hmi_level) {
   LOG4CXX_TRACE_ENTER(logger_);
-  DCHECK(request.valid());
+  if (!request.valid()) {
+    LOG4CXX_INFO(logger_, "Null Pointer request");
+    LOG4CXX_TRACE_EXIT(logger_);
+    cond_var_.NotifyOne();
+    return INVALID_DATA;
+  }
+
+  TResult result = SUCCESS;
   const commands::CommandRequestImpl* request_impl =
       static_cast<commands::CommandRequestImpl*>(request.get());
-  LOG4CXX_INFO(logger_, "addMobileRequest " << request_impl->correlation_id());
+  LOG4CXX_DEBUG(logger_, "addMobileRequest " << request_impl->correlation_id());
   const uint32_t& app_hmi_level_none_time_scale =
       profile::Profile::instance()->app_hmi_level_none_time_scale();
 
@@ -120,26 +126,19 @@ RequestController::TResult RequestController::addMobileRequest(
   const uint32_t& pending_requests_amount =
       profile::Profile::instance()->pending_requests_amount();
 
-  if (false == checkHMILevelTimeScaleMaxRequest(mobile_apis::HMILevel::HMI_NONE,
+  if (!checkHMILevelTimeScaleMaxRequest(mobile_apis::HMILevel::HMI_NONE,
                                                 request_impl->connection_key(), app_hmi_level_none_time_scale,
                                                 app_hmi_level_none_max_request_per_time_scale)) {
     LOG4CXX_ERROR(logger_, "Too many application requests in hmi level NONE");
-    LOG4CXX_TRACE_EXIT(logger_);
-    return RequestController::NONE_HMI_LEVEL_MANY_REQUESTS;
-  }
-
-  if (false == checkTimeScaleMaxRequest(
+    result = RequestController::NONE_HMI_LEVEL_MANY_REQUESTS;
+  } else if (!checkTimeScaleMaxRequest(
         request_impl->connection_key(),
         app_time_scale, max_request_per_time_scale)) {
     LOG4CXX_ERROR(logger_, "Too many application requests");
-    LOG4CXX_TRACE_EXIT(logger_);
-    return RequestController::TOO_MANY_REQUESTS;
-  }
-
-  if (pending_requests_amount == mobile_request_list_.size()) {
+    result = RequestController::TOO_MANY_REQUESTS;
+  } else if (pending_requests_amount == mobile_request_list_.size()) {
     LOG4CXX_ERROR(logger_, "Too many pending request");
-    LOG4CXX_TRACE_EXIT(logger_);
-    return RequestController::TOO_MANY_PENDING_REQUESTS;
+    result = RequestController::TOO_MANY_PENDING_REQUESTS;
   }
   {
     AutoLock auto_lock(mobile_request_list_lock_);
@@ -155,7 +154,7 @@ RequestController::TResult RequestController::addMobileRequest(
   // wake up one thread that is waiting for a task to be available
   cond_var_.NotifyOne();
   LOG4CXX_TRACE_EXIT(logger_);
-  return RequestController::SUCCESS;
+  return result;
 }
 
 RequestController::TResult RequestController::addHMIRequest(
@@ -163,7 +162,7 @@ RequestController::TResult RequestController::addHMIRequest(
   LOG4CXX_TRACE_ENTER(logger_);
   DCHECK(request.valid());
   commands::RequestToHMI* raw_ptr = static_cast<commands::RequestToHMI*>(request.get());
-  LOG4CXX_INFO(logger_, "addHMIRequest " << raw_ptr->correlation_id());
+  LOG4CXX_DEBUG(logger_, "addHMIRequest " << raw_ptr->correlation_id());
   HMIRequestInfo* request_info = new HMIRequestInfo(request, raw_ptr->default_timeout());
   RequestInfoPtr request_info_ptr(request_info );
 
@@ -193,7 +192,7 @@ void RequestController::removeNotification(const commands::Command* notification
   LOG4CXX_TRACE_ENTER(logger_);
   std::list<RequestPtr>::iterator it = notification_list_.begin();
   for (; notification_list_.end() != it; ++it) {
-    if ((*it).get() == notification) {
+    if (it->get() == notification) {
       notification_list_.erase(it);
       break;
     }
@@ -208,7 +207,7 @@ void RequestController::terminateMobileRequest(
   AutoLock auto_lock(pending_request_set_lock_);
   RequestInfoSet::iterator it = pending_request_set_.begin();
   for (; pending_request_set_.end() != it; ++it) {
-    MobileRequestInfo* mobile_request_info = dynamic_cast<MobileRequestInfo*>((*it).get());
+    MobileRequestInfo* mobile_request_info = dynamic_cast<MobileRequestInfo*>(it->get());
     if (NULL == mobile_request_info) {
       continue;
     }
@@ -231,14 +230,14 @@ void RequestController::terminateHMIRequest(const uint32_t &correlation_id) {
   AutoLock auto_lock(pending_request_set_lock_);
   RequestInfoSet::iterator it = pending_request_set_.begin();
   for (; pending_request_set_.end() != it; ++it) {
-    HMIRequestInfo* hmi_request_info = dynamic_cast<HMIRequestInfo*>((*it).get());
+    HMIRequestInfo* hmi_request_info = dynamic_cast<HMIRequestInfo*>(it->get());
     if (NULL == hmi_request_info) {
       continue;
     }
     if (correlation_id == hmi_request_info->requestId()) {
       hmi_request_info->request_->CleanUp();
       pending_request_set_.erase(it);
-      LOG4CXX_INFO(logger_, "HMI request terminated: " << correlation_id);
+      LOG4CXX_DEBUG(logger_, "HMI request terminated: " << correlation_id);
       UpdateTimer();
       LOG4CXX_TRACE_EXIT(logger_);
       return;
@@ -256,7 +255,7 @@ void RequestController::terminateAppRequests(
   AutoLock auto_lock(pending_request_set_lock_);
   RequestInfoSet::iterator it = pending_request_set_.begin();
   while (pending_request_set_.end() != it) {
-    MobileRequestInfo* mobile_request_info = dynamic_cast<MobileRequestInfo*>((*it).get());
+    MobileRequestInfo* mobile_request_info = dynamic_cast<MobileRequestInfo*>(it->get());
     if (NULL == mobile_request_info) {
       ++it;
       continue;
@@ -279,7 +278,7 @@ void RequestController::terminateAllHMIRequests() {
   AutoLock auto_lock(pending_request_set_lock_);
   RequestInfoSet::iterator it = pending_request_set_.begin();
   while (pending_request_set_.end() != it) {
-    HMIRequestInfo* hmi_request_info = dynamic_cast<HMIRequestInfo*>((*it).get());
+    HMIRequestInfo* hmi_request_info = dynamic_cast<HMIRequestInfo*>(it->get());
     if (NULL == hmi_request_info) {
       ++it;
       continue;
@@ -363,9 +362,8 @@ void RequestController::onTimer() {
 }
 
 RequestController::Worker::Worker(RequestController* requestController)
-: request_controller_(requestController)
-, stop_flag_(false)
-, is_active_(true) {
+  : request_controller_(requestController)
+  , stop_flag_(false) {
 }
 
 RequestController::Worker::~Worker() {
@@ -416,8 +414,6 @@ void RequestController::Worker::threadMain() {
     }
   }
 
-  // for correct thread termination
-  is_active_ = false;
 }
 
 bool RequestController::Worker::exitThreadMain() {
@@ -478,7 +474,7 @@ bool RequestController::checkHMILevelTimeScaleMaxRequest(
 
 void RequestController::UpdateTimer() {
   LOG4CXX_TRACE_ENTER(logger_);
-  uint32_t sleep_time = timer_sleep_time_;
+  uint32_t sleep_time = dafault_sleep_time_;
   RequestInfoSet::iterator it = pending_request_set_.begin();
 
   while (it != pending_request_set_.end()) {
@@ -495,7 +491,6 @@ void RequestController::UpdateTimer() {
 
   pthread_t id = pthread_self();
   LOG4CXX_INFO(logger_, "TEMP Update Timer from thread " << id);
-  fflush(stdout);
 
   timer_.updateTimeOut(sleep_time);
   LOG4CXX_INFO(logger_, "Sleep for: " << sleep_time);
