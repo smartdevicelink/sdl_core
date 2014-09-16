@@ -1342,6 +1342,45 @@ bool SQLPTExtRepresentation::SaveMessageString(
   return true;
 }
 
+bool SQLPTExtRepresentation::SaveUsageAndErrorCounts(
+    const policy_table::UsageAndErrorCounts& counts) {
+  LOG4CXX_INFO(logger_, "SaveUsageAndErrorCounts");
+  dbms::SQLQuery query(db());
+  if (!query.Exec(sql_pt::kDeleteAppLevel)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from app level.");
+    return false;
+  }
+  if (!query.Prepare(sql_pt::kInsertAppLevel)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for app level.");
+    return false;
+  }
+
+  policy_table::AppLevels::const_iterator it;
+  const policy_table::AppLevels& app_levels = *counts.app_level;
+  for (it = app_levels.begin(); it != app_levels.end(); ++it) {
+    query.Bind(0, it->first);
+    query.Bind(1, it->second.minutes_in_hmi_full);
+    query.Bind(2, it->second.minutes_in_hmi_limited);
+    query.Bind(3, it->second.minutes_in_hmi_background);
+    query.Bind(4, it->second.minutes_in_hmi_none);
+    query.Bind(5, it->second.count_of_user_selections);
+    query.Bind(6, it->second.count_of_rejections_sync_out_of_memory);
+    query.Bind(7, it->second.count_of_rejections_nickname_mismatch);
+    query.Bind(8, it->second.count_of_rejections_duplicate_name);
+    query.Bind(9, it->second.count_of_rejected_rpc_calls);
+    query.Bind(10, it->second.count_of_rpcs_sent_in_hmi_none);
+    query.Bind(11, it->second.count_of_removals_for_bad_behavior);
+    query.Bind(12, it->second.count_of_run_attempts_while_revoked);
+    query.Bind(13, it->second.app_registration_language_gui);
+    query.Bind(14, it->second.app_registration_language_vui);
+    if (!query.Exec()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into app level.");
+      return false;
+    }
+  }
+  return true;
+}
+
 bool SQLPTExtRepresentation::CleanupUnpairedDevices(
   const DeviceIds& device_ids) const {
   LOG4CXX_INFO(logger_, "CleanupUnpairedDevices");

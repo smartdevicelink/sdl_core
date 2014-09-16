@@ -909,6 +909,7 @@ void CacheManager::Increment(usage_statistics::GlobalCounterId type) {
 
 void CacheManager::Increment(const std::string &app_id,
                              usage_statistics::AppCounterId type) {
+#ifdef EXTENDED_POLICY
   switch (type) {
     case usage_statistics::USER_SELECTIONS:
       ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
@@ -946,11 +947,13 @@ void CacheManager::Increment(const std::string &app_id,
       LOG4CXX_INFO(logger_, "Type app counter is unknown");
       return;
   }
+#endif
 }
 
 void CacheManager::Set(const std::string &app_id,
                        usage_statistics::AppInfoId type,
                        const std::string &value) {
+#ifdef EXTENDED_POLICY
   switch (type) {
     case usage_statistics::LANGUAGE_GUI:
       (*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
@@ -964,11 +967,13 @@ void CacheManager::Set(const std::string &app_id,
       LOG4CXX_INFO(logger_, "Type app info is unknown");
       return;
   }
+#endif
 }
 
 void CacheManager::Add(const std::string &app_id,
                        usage_statistics::AppStopwatchId type,
                        int seconds) {
+#ifdef EXTENDED_POLICY
   const int minutes = ConvertSecondsToMinute(seconds);
   switch (type) {
     case usage_statistics::SECONDS_HMI_FULL:
@@ -991,6 +996,7 @@ void CacheManager::Add(const std::string &app_id,
       LOG4CXX_INFO(logger_, "Type app stopwatch is unknown");
       return;
   }
+#endif
 }
 
 void CacheManager::CopyInternalParams(const std::string &from,
