@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
@@ -247,6 +247,7 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
 
 void CacheManager::Backup() {
   LOG4CXX_TRACE_ENTER(logger_);
+  sync_primitives::AutoLock auto_lock(cache_lock_);
   if (backup_.valid()) {
     backup_->Save(*pt_);
     backup_->SaveUpdateRequired(update_required);
@@ -886,34 +887,108 @@ bool CacheManager::CleanupUnpairedDevices(const DeviceIds &device_ids) {
   return true;
 }
 
-void CacheManager::Increment(const std::string &type) {
+void CacheManager::Increment(usage_statistics::GlobalCounterId type) {
 #ifdef EXTENDED_POLICY
-  // TODO: think about it.
-  if (0 == type.compare("count_of_iap_buffer_full")) {
-    *pt_->policy_table.usage_and_error_counts->count_of_iap_buffer_full = 1;
-  } else if (0 == type.compare("count_sync_out_of_memory")) {
-    *pt_->policy_table.usage_and_error_counts->count_sync_out_of_memory = 1;
-  } else if (0 == type.compare("count_of_sync_reboots")) {
-    *pt_->policy_table.usage_and_error_counts->count_of_sync_reboots = 1;
+  switch (type) {
+    case usage_statistics::IAP_BUFFER_FULL:
+      ++(*pt_->policy_table.usage_and_error_counts->count_of_iap_buffer_full);
+      break;
+    case usage_statistics::SYNC_OUT_OF_MEMORY:
+      ++(*pt_->policy_table.usage_and_error_counts->count_sync_out_of_memory);
+      break;
+    case usage_statistics::SYNC_REBOOTS:
+      ++(*pt_->policy_table.usage_and_error_counts->count_of_sync_reboots);
+      break;
+    default:
+      LOG4CXX_INFO(logger_, "Type global counter is unknown");
+      return;
   }
 #endif // EXTENDED_POLICY
 }
 
 void CacheManager::Increment(const std::string &app_id,
-                             const std::string &type) const {
-
+                             usage_statistics::AppCounterId type) const {
+  switch (type) {
+    case usage_statistics::USER_SELECTIONS:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_user_selections;
+      break;
+    case usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rejections_sync_out_of_memory;
+      break;
+    case usage_statistics::REJECTIONS_NICKNAME_MISMATCH:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rejections_nickname_mismatch;
+      break;
+    case usage_statistics::REJECTIONS_DUPLICATE_NAME:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rejections_duplicate_name;
+      break;
+    case usage_statistics::REJECTED_RPC_CALLS:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rejected_rpc_calls;
+      break;
+    case usage_statistics::RPCS_IN_HMI_NONE:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_rpcs_sent_in_hmi_none;
+      break;
+    case usage_statistics::REMOVALS_MISBEHAVED:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_removals_for_bad_behavior;
+      break;
+    case usage_statistics::RUN_ATTEMPTS_WHILE_REVOKED:
+      ++(*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          count_of_run_attempts_while_revoked;
+      break;
+    default:
+      LOG4CXX_INFO(logger_, "Type app counter is unknown");
+      return;
+  }
 }
 
 void CacheManager::Set(const std::string &app_id,
-                       const std::string &type,
+                       usage_statistics::AppInfoId type,
                        const std::string &value) const {
-
+  switch (type) {
+    case usage_statistics::LANGUAGE_GUI:
+      (*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          app_registration_language_gui = value;
+      break;
+    case usage_statistics::LANGUAGE_VUI:
+      (*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          app_registration_language_vui = value;
+      break;
+    default:
+      LOG4CXX_INFO(logger_, "Type app info is unknown");
+      return;
+  }
 }
 
 void CacheManager::Add(const std::string &app_id,
-                       const std::string &type,
+                       usage_statistics::AppStopwatchId type,
                        int seconds) const {
-
+  switch (type) {
+    case usage_statistics::SECONDS_HMI_FULL:
+      (*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          minutes_in_hmi_full += seconds;
+      break;
+    case usage_statistics::SECONDS_HMI_LIMITED:
+      (*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          minutes_in_hmi_limited += seconds;
+      break;
+    case usage_statistics::SECONDS_HMI_BACKGROUND:
+      (*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          minutes_in_hmi_background += seconds;;
+      break;
+    case usage_statistics::SECONDS_HMI_NONE:
+      (*pt_->policy_table.usage_and_error_counts->app_level)[app_id].
+          minutes_in_hmi_none += seconds;;
+      break;
+    default:
+      LOG4CXX_INFO(logger_, "Type app stopwatch is unknown");
+      return;
+  }
 }
 
 void CacheManager::CopyInternalParams(const std::string &from,

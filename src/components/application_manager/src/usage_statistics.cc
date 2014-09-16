@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -88,8 +88,7 @@ void UsageStatistics::RecordHmiStateChanged(HMILevel::eType new_hmi_level) {
       next_stopwatch = SECONDS_HMI_NONE;
       break;
     default:
-      NOTREACHED()
-      ;
+      NOTREACHED();
   }
   time_in_hmi_state_.Switch(next_stopwatch);
 }

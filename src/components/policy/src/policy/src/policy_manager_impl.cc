@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -1010,112 +1010,39 @@ void PolicyManagerImpl::PTUpdatedAt(int kilometers, int days_after_epoch) {
 }
 
 void PolicyManagerImpl::Increment(usage_statistics::GlobalCounterId type) {
-  std::string counter;
-  switch (type) {
-    case usage_statistics::IAP_BUFFER_FULL:
-      counter = "count_of_iap_buffer_full";
-      break;
-    case usage_statistics::SYNC_OUT_OF_MEMORY:
-      counter = "count_sync_out_of_memory";
-      break;
-    case usage_statistics::SYNC_REBOOTS:
-      counter = "count_of_sync_reboots";
-      break;
-    default:
-      LOG4CXX_INFO(logger_, "Type global counter is unknown");
-      return;
-  }
+  LOG4CXX_INFO(logger_, "Increment without app id" );
+  sync_primitives::AutoLock locker(statistics_lock_);
 #ifdef EXTENDED_POLICY
-  cache.Increment(counter);
+  cache.Increment(type);
 #endif
 }
 
 void PolicyManagerImpl::Increment(const std::string& app_id,
                                   usage_statistics::AppCounterId type) {
-  std::string counter;
-  switch (type) {
-    case usage_statistics::USER_SELECTIONS:
-      counter = "count_of_user_selections";
-      break;
-    case usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY:
-      counter = "count_of_rejections_sync_out_of_memory";
-      break;
-    case usage_statistics::REJECTIONS_NICKNAME_MISMATCH:
-      counter = "count_of_rejections_nickname_mismatch";
-      break;
-    case usage_statistics::REJECTIONS_DUPLICATE_NAME:
-      counter = "count_of_rejections_duplicate_name";
-      break;
-    case usage_statistics::REJECTED_RPC_CALLS:
-      counter = "count_of_rejected_rpcs_calls";
-      break;
-    case usage_statistics::RPCS_IN_HMI_NONE:
-      counter = "count_of_rpcs_sent_in_hmi_none";
-      break;
-    case usage_statistics::REMOVALS_MISBEHAVED:
-      counter = "count_of_removals_for_bad_behavior";
-      break;
-    case usage_statistics::RUN_ATTEMPTS_WHILE_REVOKED:
-      counter = "count_of_run_attempts_while_revoked";
-      break;
-    default:
-      LOG4CXX_INFO(logger_, "Type app counter is unknown");
-      return;
-  }
-#ifdef EXTENDED_POLICY
+  LOG4CXX_INFO(logger_, "Increment " << app_id);
   sync_primitives::AutoLock locker(statistics_lock_);
-  cache.Increment(app_id, counter);
+#ifdef EXTENDED_POLICY
+  cache.Increment(app_id, type);
 #endif
 }
 
 void PolicyManagerImpl::Set(const std::string& app_id,
                             usage_statistics::AppInfoId type,
                             const std::string& value) {
-  std::string info;
-  switch (type) {
-    case usage_statistics::LANGUAGE_GUI:
-      info = "app_registration_language_gui";
-      break;
-    case usage_statistics::LANGUAGE_VUI:
-      info = "app_registration_language_vui";
-      break;
-    default:
-      LOG4CXX_INFO(logger_, "Type app info is unknown");
-      return;
-  }
-
-#ifdef EXTENDED_POLICY
+  LOG4CXX_INFO(logger_, "Set " << app_id);
   sync_primitives::AutoLock locker(statistics_lock_);
-  cache.Set(app_id, info, value);
+#ifdef EXTENDED_POLICY
+  cache.Set(app_id, type, value);
 #endif
 }
 
 void PolicyManagerImpl::Add(const std::string& app_id,
                             usage_statistics::AppStopwatchId type,
                             int32_t timespan_seconds) {
-#ifdef EXTENDED_POLICY
-  std::string stopwatch;
-  switch (type) {
-    // TODO(KKolodiy): rename fields in database
-    case usage_statistics::SECONDS_HMI_FULL:
-      stopwatch = "minutes_in_hmi_full";
-      break;
-    case usage_statistics::SECONDS_HMI_LIMITED:
-      stopwatch = "minutes_in_hmi_limited";
-      break;
-    case usage_statistics::SECONDS_HMI_BACKGROUND:
-      stopwatch = "minutes_in_hmi_background";
-      break;
-    case usage_statistics::SECONDS_HMI_NONE:
-      stopwatch = "minutes_in_hmi_none";
-      break;
-    default:
-      LOG4CXX_INFO(logger_, "Type app stopwatch is unknown");
-      return;
-  }
-
+  LOG4CXX_INFO(logger_, "Add " << app_id);
   sync_primitives::AutoLock locker(statistics_lock_);
-  cache.Add(app_id, stopwatch, timespan_seconds);
+#ifdef EXTENDED_POLICY
+  cache.Add(app_id, type, timespan_seconds);
 #endif
 }
 

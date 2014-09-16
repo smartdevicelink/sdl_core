@@ -1,4 +1,4 @@
-/*
+﻿/*
 * Copyright (c) 2014, Ford Motor Company
 * All rights reserved.
 *
@@ -39,6 +39,7 @@
 #include "policy/pt_representation.h"
 #include "policy/pt_ext_representation.h"
 #include "utils/lock.h"
+#include "usage_statistics/statistics_manager.h"
 
 namespace policy {
 class CacheManager {
@@ -394,14 +395,15 @@ public:
    * Increments global counter
    * @param type type of counter
    */
-  void Increment(const std::string& type);
+  void Increment(usage_statistics::GlobalCounterId type);
 
   /**
    * Increments counter of application
    * @param app_id id application
    * @param type type of counter
    */
-  void Increment(const std::string& app_id, const std::string& type) const;
+  void Increment(const std::string& app_id,
+                 usage_statistics::AppCounterId type) const;
 
   /**
    * Sets value of application information
@@ -409,7 +411,8 @@ public:
    * @param type type of information
    * @param value value of information
    */
-  void Set(const std::string& app_id, const std::string& type,
+  void Set(const std::string& app_id,
+           usage_statistics::AppInfoId type,
            const std::string& value) const;
 
   /**
@@ -418,7 +421,8 @@ public:
    * @param type type of stopwatch
    * @param seconds value for adding in seconds
    */
-  void Add(const std::string& app_id, const std::string& type,
+  void Add(const std::string& app_id,
+           usage_statistics::AppStopwatchId type,
            int seconds) const;
 
   /**

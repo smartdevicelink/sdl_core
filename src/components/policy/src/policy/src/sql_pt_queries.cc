@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, " Ford Motor Company
  All rights reserved.
 
@@ -499,7 +499,15 @@ const std::string kInsertDeviceData =
   "INSERT OR IGNORE INTO `device` (`id`) VALUES (?)";
 
 const std::string kInsertAppLevel =
-  "INSERT INTO `app_level` (`application_id`) VALUES (?)";
+  "INSERT INTO `app_level` (`application_id`, `minutes_in_hmi_full`,"
+    "`minutes_in_hmi_limited` ,`minutes_in_hmi_background`,"
+    "`minutes_in_hmi_none`,`count_of_user_selections`,"
+    "`count_of_rejections_sync_out_of_memory`,"
+    "`count_of_rejections_nickname_mismatch`,"
+    "`count_of_rejections_duplicate_name`,`count_of_rejected_rpcs_calls`,"
+    "`count_of_rpcs_sent_in_hmi_none`,`count_of_removals_for_bad_behavior`,"
+    "`count_of_run_attempts_while_revoked`,`app_registration_language_gui`,"
+    "`app_registration_language_vui`) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 const std::string kDeleteSecondsBetweenRetries =
   "DELETE FROM `seconds_between_retry`";
