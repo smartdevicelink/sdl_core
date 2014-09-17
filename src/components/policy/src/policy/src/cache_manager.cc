@@ -764,9 +764,9 @@ bool CacheManager::GetPriority(const std::string &policy_app_id,
   return app_id_exists;
 }
 
-void CacheManager::CheckSnapshotInitialization()
-{
+void CacheManager::CheckSnapshotInitialization() {
   *(pt_->policy_table.module_config.preloaded_pt) = false;
+#ifdef EXTENDED_POLICY
 
   rpc::Optional<policy_table::ModuleMeta>& module_meta =
       pt_->policy_table.module_meta;
@@ -855,6 +855,7 @@ void CacheManager::CheckSnapshotInitialization()
       }
     }
   }
+#endif
 }
 
 utils::SharedPtr<policy_table::Table>
