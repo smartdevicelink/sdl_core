@@ -67,7 +67,8 @@ void OnSystemContextNotification::Run() {
     }
   }
 
-  if (app.valid() && (system_context != app->system_context())) {
+  if (app.valid() && (system_context != app->system_context()) &&
+      (system_context != mobile_api::SystemContext::INVALID_ENUM)) {
     SendSystemContextNotification(app, system_context);
   } else {
     LOG4CXX_ERROR(logger_, "Ignored wrong SystemContext notification!");
