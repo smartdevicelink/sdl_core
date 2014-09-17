@@ -36,7 +36,7 @@
 #include <cstdlib>
 #include <functional>
 #include <ctime>
-#include <math.h>
+#include <cmath>
 
 #include "utils/file_system.h"
 #include "json/reader.h"
@@ -181,7 +181,7 @@ void CacheManager::GetPreConsentedGroups(const std::string &app_id,
     policy_table::Strings::const_iterator iter_end = (*app_param_iter).second.preconsented_groups->end();
     for (; iter != iter_end; ++iter) {
       const uint32_t group_id =
-          static_cast<uint32_t> (abs(GenerateHash(*iter)));
+          static_cast<uint32_t> (labs(GenerateHash(*iter)));
 
       preconsented_groups.push_back(group_id);
     }
@@ -214,7 +214,7 @@ void CacheManager::GetConsentedGroups(const std::string &device_id,
 
       for (; consent_iter != consent_iter_end; ++consent_iter) {
         const uint32_t group_id =
-            static_cast<uint32_t> (abs(GenerateHash((*consent_iter).first)));
+            static_cast<uint32_t> (labs(GenerateHash((*consent_iter).first)));
 
         if (true == (*consent_iter).second) {
           allowed_groups.push_back(group_id);
