@@ -44,3 +44,6 @@ if(ENABLE_LOG)
   target_link_libraries("Utils" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  target_link_libraries("Utils" pthread)
+endif()

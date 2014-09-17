@@ -806,22 +806,50 @@ bool CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
                                           const std::string& device_id,
                                           int& result) {
   LOG4CXX_TRACE_ENTER(logger_);
+
 #ifdef EXTENDED_POLICY
-  policy_table::DeviceParams& params = (*pt_->policy_table.device_data)[device_id];
-  policy_table::UserConsentRecords& ucr = *(params.user_consent_records);
+  if (pt_->policy_table.app_policies.end() ==
+      pt_->policy_table.app_policies.find(policy_app_id)) {
+    return true;
+  } else if (is_default_.end() != is_default_.find(policy_app_id) ||
+             is_predata_.end() != is_predata_.find(policy_app_id)) {
+    return true;
+  }
 
-  policy_table::ConsentRecords cgr = ucr[policy_app_id];
-
-  policy_table::ConsentGroups::const_iterator con_iter =
-      cgr.consent_groups->begin();
   policy_table::FunctionalGroupings::const_iterator groups_iter =
       pt_->policy_table.functional_groupings.begin();
   policy_table::FunctionalGroupings::const_iterator groups_iter_end =
       pt_->policy_table.functional_groupings.end();
-  for (; groups_iter != groups_iter_end; ++groups_iter) {
-    con_iter = cgr.consent_groups->find((*groups_iter).first);
-    if (con_iter != cgr.consent_groups->end()) {
-      ++result;
+
+  policy_table::Strings::const_iterator app_spec_iter =
+      pt_->policy_table.app_policies[policy_app_id].groups.begin();
+
+  policy_table::Strings::const_iterator app_spec_iter_end =
+      pt_->policy_table.app_policies[policy_app_id].groups.end();
+
+  policy_table::FunctionalGroupings::iterator current_groups_iter;
+  for (; app_spec_iter != app_spec_iter_end; ++app_spec_iter) {
+    current_groups_iter = pt_->policy_table.functional_groupings.find(*app_spec_iter);
+    if (groups_iter_end != current_groups_iter) {
+      if (current_groups_iter->second.user_consent_prompt.is_initialized()) {
+        if (pt_->policy_table.device_data->end() !=
+            pt_->policy_table.device_data->find(device_id)) {
+
+          policy_table::DeviceParams& params = (*pt_->policy_table.device_data)[device_id];
+          policy_table::UserConsentRecords& ucr = *(params.user_consent_records);
+
+          if (ucr.end() != ucr.find(policy_app_id)) {
+            policy_table::ConsentRecords cgr = ucr[policy_app_id];
+            policy_table::ConsentGroups::const_iterator con_iter =
+                cgr.consent_groups->begin();
+
+            con_iter = cgr.consent_groups->find((*groups_iter).first);
+            if (con_iter != cgr.consent_groups->end()) {
+              ++result;
+            }
+          }
+        }
+      }
     }
   }
 #endif // EXTENDED_POLICY

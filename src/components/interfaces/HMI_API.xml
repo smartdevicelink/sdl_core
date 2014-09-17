@@ -427,9 +427,6 @@
   <element name="totalDistance">
     <description> Total distance to destination for navigation</description>
   </element>
-  <element name="navigationText">
-    <description>Navigation text for UpdateTurnList.</description>
-  </element>
   <element name="audioPassThruDisplayText1">
     <description> First line of text for audio pass thru</description>
   </element>
@@ -441,9 +438,6 @@
   </element>
   <element name="sliderFooter">
     <description> Footer text for slider</description>
-  </element>
-  <element name="notificationText">
-    <description>Text of notification to be displayed on screen.</description>
   </element>
   <element name="menuName">
     <description> Primary text for Choice</description>
@@ -458,14 +452,17 @@
     <description> Optional text to label an app menu button (for certain touchscreen platforms).</description>
   </element>
   <element name="timeToDestination"/>
-  <!-- TO DO to be removed -->
+  <element name="navigationText">
+    <description>Navigation text for UpdateTurnList.</description>
+  </element>
+  <element name="notificationText">
+    <description>Text of notification to be displayed on screen.</description>
+  </element>
+    <!-- TO DO to be removed -->
   <element name="turnText"/>
 </enum>
 
 <enum name="ImageFieldName">
-  <element name="locationImage">
-    <description>The optional image of a destination / location</description>
-  </element>
   <element name="softButtonImage">
     <description>The image field for SoftButton</description>
   </element>
@@ -498,6 +495,9 @@
   </element>
   <element name="showConstantTBTNextTurnIcon">
     <description>The secondary image field for ShowConstantTBT</description>
+  </element>
+  <element name="locationImage">
+    <description>The optional image of a destination / location</description>
   </element>
 </enum>
 

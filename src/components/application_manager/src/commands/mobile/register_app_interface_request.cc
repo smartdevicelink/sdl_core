@@ -1,4 +1,4 @@
-/*
+﻿/*
 
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
@@ -561,17 +561,13 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   // TODO(AOleynik): Check is necessary to allow register application in case
   // of disabled policy
   // Remove this check, when HMI will support policy
-  if (policy::PolicyHandler::instance()->PolicyEnabled()) {
+  if (!policy::PolicyHandler::instance()->PolicyEnabled()) {
     return mobile_apis::Result::WARNINGS;
   }
 
   smart_objects::SmartObject& message = *message_;
   policy::StringArray app_nicknames;
   policy::StringArray app_hmi_types;
-
-  if(!policy::PolicyHandler::instance()->PolicyEnabled()) {
-    return mobile_apis::Result::WARNINGS;
-  }
 
   // TODO(KKolodiy): need remove method policy_manager
   policy::PolicyManager* policy_manager =
