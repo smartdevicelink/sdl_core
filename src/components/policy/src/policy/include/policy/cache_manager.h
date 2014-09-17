@@ -177,7 +177,7 @@ public:
    * device_info, statistics, excluding user messages
    * @return Generated structure for obtaining Json string.
    */
-  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() const;
+  virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot();
 
   /**
    * Applies policy table to the current table
@@ -533,7 +533,6 @@ public:
   void Backup();
 
 private:
-
   std::string currentDateTime();
   struct AppHMITypeToString {
       std::string operator()(rpc::Enum<policy_table::AppHMIType> value) {
@@ -547,15 +546,19 @@ private:
   void FillAppSpecificData();
   bool AppExists(const std::string& app_id) const;
   long int GenerateHash(const std::string& str_to_hash);
-
   void CopyInternalParams(const std::string &from, const std::string& to);
-  utils::SharedPtr<policy_table::Table> pt_;
-
   long ConvertSecondsToMinute(int seconds);
 
+  /**
+   * @brief Checks snapshot initialization and initializes to default values, if
+   * necessary
+   */
+  void CheckSnapshotInitialization();
+
+private:
+  utils::SharedPtr<policy_table::Table> pt_;
   utils::SharedPtr<PTRepresentation> backup_;
   utils::SharedPtr<PTExtRepresentation> ex_backup_;
-
   bool update_required;
   std::map<std::string, bool> is_revoked_;
   std::map<std::string, bool> is_default_;

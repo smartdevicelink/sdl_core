@@ -296,21 +296,18 @@ BinaryMessageSptr PolicyManagerImpl::RequestPTUpdate() {
     return NULL;
   }
 
-  // Temporary workaround
-  *(policy_table_snapshot->policy_table.module_config.preloaded_pt) = false;
-
 #ifdef EXTENDED_POLICY
     cache.UnpairedDevicesList(unpaired_device_ids_);
 #endif  // EXTENDED_POLICY
   policy_table_snapshot->SetPolicyTableType(policy_table::PT_SNAPSHOT);
-  /*if (false == policy_table_snapshot->is_valid()) {
+  if (false == policy_table_snapshot->is_valid()) {
     LOG4CXX_INFO(
           logger_, "Policy snappshot is not valid");
     rpc::ValidationReport report("policy_table");
     policy_table_snapshot->ReportErrors(&report);
     LOG4CXX_INFO(logger_,
                  "Errors: " << rpc::PrettyFormat(report));
-  }*/
+  }
 
   Json::Value value = policy_table_snapshot->ToJsonValue();
   Json::FastWriter writer;

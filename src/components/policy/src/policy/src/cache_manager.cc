@@ -36,7 +36,7 @@
 #include <cstdlib>
 #include <functional>
 #include <ctime>
-#include <math.h>
+#include <cmath>
 
 #include "utils/file_system.h"
 #include "json/reader.h"
@@ -181,7 +181,7 @@ void CacheManager::GetPreConsentedGroups(const std::string &app_id,
     policy_table::Strings::const_iterator iter_end = (*app_param_iter).second.preconsented_groups->end();
     for (; iter != iter_end; ++iter) {
       const uint32_t group_id =
-          static_cast<uint32_t> (abs(GenerateHash(*iter)));
+          static_cast<uint32_t> (labs(GenerateHash(*iter)));
 
       preconsented_groups.push_back(group_id);
     }
@@ -214,7 +214,7 @@ void CacheManager::GetConsentedGroups(const std::string &device_id,
 
       for (; consent_iter != consent_iter_end; ++consent_iter) {
         const uint32_t group_id =
-            static_cast<uint32_t> (abs(GenerateHash((*consent_iter).first)));
+            static_cast<uint32_t> (labs(GenerateHash((*consent_iter).first)));
 
         if (true == (*consent_iter).second) {
           allowed_groups.push_back(group_id);
@@ -764,8 +764,103 @@ bool CacheManager::GetPriority(const std::string &policy_app_id,
   return app_id_exists;
 }
 
+void CacheManager::CheckSnapshotInitialization() {
+  *(pt_->policy_table.module_config.preloaded_pt) = false;
+#ifdef EXTENDED_POLICY
+
+  rpc::Optional<policy_table::ModuleMeta>& module_meta =
+      pt_->policy_table.module_meta;
+  if (!module_meta->pt_exchanged_at_odometer_x->is_initialized()) {
+    *(module_meta->pt_exchanged_at_odometer_x) = 0;
+  }
+
+  if (!module_meta->pt_exchanged_x_days_after_epoch->is_initialized()) {
+    *(module_meta->pt_exchanged_x_days_after_epoch) = 0;
+  }
+
+  rpc::Optional<policy_table::UsageAndErrorCounts>& usage_and_error_counts =
+      pt_->policy_table.usage_and_error_counts;
+  if (!usage_and_error_counts->count_of_iap_buffer_full->is_initialized()) {
+    *(usage_and_error_counts->count_of_iap_buffer_full) = 0;
+  }
+
+  if (!usage_and_error_counts->count_of_sync_reboots->is_initialized()) {
+    *(usage_and_error_counts->count_of_sync_reboots) = 0;
+  }
+
+  if (!usage_and_error_counts->count_sync_out_of_memory->is_initialized()) {
+    *(usage_and_error_counts->count_sync_out_of_memory) = 0;
+  }
+
+  if (usage_and_error_counts->app_level->is_initialized()) {
+    policy_table::AppLevels::iterator it =
+        usage_and_error_counts->app_level->begin();
+    policy_table::AppLevels::const_iterator it_end =
+        usage_and_error_counts->app_level->end();
+    for (;it != it_end; ++it) {
+      if (!(*it).second.minutes_in_hmi_full.is_initialized()) {
+        (*it).second.minutes_in_hmi_full = 0;
+      }
+
+      if (!(*it).second.app_registration_language_gui.is_initialized()) {
+        (*it).second.app_registration_language_gui = "unknown";
+      }
+
+      if (!(*it).second.app_registration_language_vui.is_initialized()) {
+        (*it).second.app_registration_language_vui = "unknown";
+      }
+
+      if (!(*it).second.minutes_in_hmi_limited.is_initialized()) {
+        (*it).second.minutes_in_hmi_limited = 0;
+      }
+
+      if (!(*it).second.minutes_in_hmi_background.is_initialized()) {
+        (*it).second.minutes_in_hmi_background = 0;
+      }
+
+      if (!(*it).second.minutes_in_hmi_none.is_initialized()) {
+        (*it).second.minutes_in_hmi_none = 0;
+      }
+
+      if (!(*it).second.count_of_user_selections.is_initialized()) {
+        (*it).second.count_of_user_selections = 0;
+      }
+
+      if (!(*it).second.count_of_rejections_sync_out_of_memory.is_initialized()) {
+        (*it).second.count_of_rejections_sync_out_of_memory = 0;
+      }
+
+      if (!(*it).second.count_of_rejections_nickname_mismatch.is_initialized()) {
+        (*it).second.count_of_rejections_nickname_mismatch = 0;
+      }
+
+      if (!(*it).second.count_of_rejections_duplicate_name.is_initialized()) {
+        (*it).second.count_of_rejections_duplicate_name = 0;
+      }
+
+      if (!(*it).second.count_of_rejected_rpc_calls.is_initialized()) {
+        (*it).second.count_of_rejected_rpc_calls = 0;
+      }
+
+      if (!(*it).second.count_of_rpcs_sent_in_hmi_none.is_initialized()) {
+        (*it).second.count_of_rpcs_sent_in_hmi_none = 0;
+      }
+
+      if (!(*it).second.count_of_removals_for_bad_behavior.is_initialized()) {
+        (*it).second.count_of_removals_for_bad_behavior = 0;
+      }
+
+      if (!(*it).second.count_of_run_attempts_while_revoked.is_initialized()) {
+        (*it).second.count_of_run_attempts_while_revoked = 0;
+      }
+    }
+  }
+#endif
+}
+
 utils::SharedPtr<policy_table::Table>
-CacheManager::GenerateSnapshot() const {
+CacheManager::GenerateSnapshot() {
+  CheckSnapshotInitialization();
   return pt_;
 }
 
