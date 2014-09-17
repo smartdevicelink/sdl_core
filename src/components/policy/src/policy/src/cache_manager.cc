@@ -36,7 +36,6 @@
 #include <cstdlib>
 #include <functional>
 #include <ctime>
-#include <math.h>
 
 #include "utils/file_system.h"
 #include "json/reader.h"
@@ -1130,7 +1129,7 @@ void CacheManager::CopyInternalParams(const std::string &from,
 
 long CacheManager::ConvertSecondsToMinute(int seconds) {
   const float seconds_in_minute = 60.0;
-  return std::round(seconds / seconds_in_minute);
+  return static_cast<long>(seconds / seconds_in_minute);
 }
 
 bool CacheManager::SetDefaultPolicy(const std::string &app_id) {
