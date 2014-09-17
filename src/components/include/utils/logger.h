@@ -61,11 +61,13 @@
     #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
 
     #define LOG_WITH_LEVEL(loggerPtr, logLevel, logEvent) \
-    if (loggerPtr->isEnabledFor(logLevel)) { \
-      std::stringstream accumulator; \
-      accumulator << logEvent; \
-      logger::push_log(loggerPtr, logLevel, accumulator.str(), LOG4CXX_LOCATION); \
-    }
+    do { \
+      if (loggerPtr->isEnabledFor(logLevel)) { \
+        std::stringstream accumulator; \
+        accumulator << logEvent; \
+        logger::push_log(loggerPtr, logLevel, accumulator.str(), LOG4CXX_LOCATION); \
+      } \
+    } while (false)
 
     #undef LOG4CXX_INFO
     #define LOG4CXX_INFO(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getInfo(), logEvent)
