@@ -261,7 +261,7 @@ class RequestController {
     std::list<RequestPtr> notification_list_;
 
     timer::TimerThread<RequestController>  timer_;
-    static const uint32_t dafault_sleep_time_ = 100;
+    static const uint32_t dafault_sleep_time_ = UINT32_MAX;
 
     DISALLOW_COPY_AND_ASSIGN(RequestController);
 };

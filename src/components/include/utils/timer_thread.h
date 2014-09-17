@@ -129,27 +129,6 @@ class TimerThread {
 
   private:
 
-    class TimerReseter: public threads::ThreadDelegate {
-      public:
-        /*
-         * @brief Default constructor
-         *
-         * @param timer_thread The Timer_thread pointer
-         * @timeout_sec new timeout to tetup for timer
-         */
-        TimerReseter(TimerThread* timer_thread, uint32_t timeout_sec);
-
-
-        /*
-         * @brief Thread main function.
-         * will stop timer_thread and run it again
-         */
-        virtual void threadMain();
-      private:
-        TimerThread* timer_thread_;
-        uint32_t timeout_sec_;
-    };
-
     /**
      * @brief Delegate release timer, will call callback function one time
      */
@@ -220,7 +199,7 @@ class TimerThread {
         DISALLOW_COPY_AND_ASSIGN(TimerLooperDelegate);
     };
     void (T::*callback_)();
-    T*                                                 callee_;
+    T*                                                callee_;
     TimerDelegate*                                     delegate_;
     //threads::Thread*                                   thread_;
     mutable bool                                       is_running_;
@@ -272,7 +251,6 @@ void TimerThread<T>::start(uint32_t timeout_seconds) {
 template <class T>
 void TimerThread<T>::stop() {
   if (delegate_ && thread_) {
-    LOG4CXX_DEBUG(logger_, " thread before stop\n");;
     thread_->stop();
     is_running_ = false;
   }
@@ -285,16 +263,7 @@ bool TimerThread<T>::isRunning() {
 
 template <class T>
 void TimerThread<T>::updateTimeOut(const uint32_t timeout_seconds) {
-  pthread_t id = pthread_self();
-
-  LOG4CXX_DEBUG(logger_, "updateTimeOut for thread" << id << "from " << thread_->thread_handle());
-
-  TimerReseter* delegate = new TimerReseter(this, timeout_seconds);
-  threads::Thread thread_reseter("TimerReseter", delegate);
-  thread_reseter.start();
-  LOG4CXX_DEBUG(logger_, " TimerReseter started");
-  thread_reseter.join();
-  LOG4CXX_DEBUG(logger_, "TEMP after join ");
+  delegate_->setTimeOut(timeout_seconds);
 }
 
 template <class T>
@@ -350,19 +319,22 @@ template <class T>
 void TimerThread<T>::TimerLooperDelegate::threadMain() {
   using sync_primitives::ConditionalVariable;
   sync_primitives::AutoLock auto_lock(TimerDelegate::state_lock_);
-  time_t end_time = time(NULL) + TimerDelegate::timeout_seconds_;
-  int32_t wait_seconds_left = int32_t(difftime(end_time, time(NULL)));
   while (!TimerDelegate::stop_flag_) {
-    // Sleep
+    time_t cur_time = time(NULL);
+    uint64_t end_time64 = static_cast<uint64_t>(cur_time) + TimerDelegate::timeout_seconds_;
+    time_t end_time = INT32_MAX;
+    if (end_time64 < INT32_MAX) {
+      end_time = static_cast<time_t>(end_time64);
+    }
+    int32_t wait_seconds_left = int32_t(difftime(end_time, cur_time));
     ConditionalVariable::WaitStatus wait_status =
         TimerDelegate::termination_condition_.WaitFor(auto_lock, wait_seconds_left * 1000);
-    wait_seconds_left = int32_t(difftime(end_time, time(NULL)));
     // Quit sleeping or continue sleeping in case of spurious wake up
     if (ConditionalVariable::kTimeout == wait_status ||
         wait_seconds_left <= 0) {
       TimerDelegate::timer_thread_->onTimeOut();
-      LOG4CXX_DEBUG(logger_, "Loopthread Delegate speel fore: " << TimerDelegate::timeout_seconds_);
-      end_time = time(NULL) + TimerDelegate::timeout_seconds_;
+    } else {
+      LOG4CXX_DEBUG(logger_, "Timeout reset force:" << TimerDelegate::timeout_seconds_);
     }
   }
   TimerDelegate::stop_flag_ = false;
@@ -382,25 +354,9 @@ bool TimerThread<T>::TimerDelegate::exitThreadMain() {
 template <class T>
 void TimerThread<T>::TimerDelegate::setTimeOut(const uint32_t timeout_seconds) {
   timeout_seconds_ = timeout_seconds;
-}
-template <class T>
-TimerThread<T>::TimerReseter::TimerReseter(TimerThread *timer_thread,
-                                        uint32_t timeout_sec):
-  timer_thread_(timer_thread),
-  timeout_sec_(timeout_sec) {
-  DCHECK(timer_thread);
+  termination_condition_.NotifyOne();
 }
 
-template <class T>
-void TimerThread<T>::TimerReseter::threadMain() {
-  pthread_t id = pthread_self();
-  LOG4CXX_DEBUG(logger_, "TimerReseter threadMain my thread = "
-                 << id <<"try to stop: " << timer_thread_->thread_->thread_handle());
-  timer_thread_->stop();
-  LOG4CXX_DEBUG(logger_, "after TimerReseter stop \n");
-  timer_thread_->start(timeout_sec_);
-  LOG4CXX_DEBUG(logger_, "after TimerReseter start \n");
-}
 
 }  // namespace timer
 

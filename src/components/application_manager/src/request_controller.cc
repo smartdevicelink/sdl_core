@@ -84,12 +84,12 @@ void RequestController::InitializeThreadpool()
 
 void RequestController::DestroyThreadpool() {
   LOG4CXX_TRACE_ENTER(logger_);
-  mobile_request_list_lock_.Acquire();
-  pool_state_ = TPoolState::STOPPED;
-  mobile_request_list_lock_.Release();
-
-  LOG4CXX_INFO(logger_, "Broadcasting STOP signal to all threads...");
-  cond_var_.Broadcast(); // notify all threads we are shutting down
+  {
+    sync_primitives::AutoLock auto_lock (mobile_request_list_lock_);
+    pool_state_ = TPoolState::STOPPED;
+    LOG4CXX_INFO(logger_, "Broadcasting STOP signal to all threads...");
+    cond_var_.Broadcast(); // notify all threads we are shutting down
+  }
   for (uint32_t i = 0; i < pool_size_; i++) {
     pool_[i]->stop();
   }

@@ -44,12 +44,16 @@ namespace application_manager {
 
 
     ActivateAppRequest::~ActivateAppRequest() {
+      LOG4CXX_TRACE(logger_, "~ActivateAppRequest");
     }
 
     void ActivateAppRequest::Run() {
       LOG4CXX_TRACE(logger_, "enter " << correlation_id());
       uint32_t app_id = RequestToHMI::application_id();
       ApplicationManagerImpl::instance()->set_application_id(correlation_id(), app_id);
+      mobile_apis::HMILevel::eType requested_hmi_level = static_cast<mobile_apis::HMILevel::eType>(
+          (*message_)[strings::msg_params][strings::activate_app_hmi_level].asInt());
+      LOG4CXX_TRACE(logger_, "requested_hmi_level = " << requested_hmi_level);
       SendRequest();
       subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_ActivateApp,
                          correlation_id());
@@ -73,7 +77,7 @@ namespace application_manager {
                                   application_id(correlation_id);
       mobile_apis::HMILevel::eType requested_hmi_level = static_cast<mobile_apis::HMILevel::eType>(
           (*message_)[strings::msg_params][strings::activate_app_hmi_level].asInt());
-      if (!hmi_app_id) {
+      if (0 == hmi_app_id) {
         LOG4CXX_ERROR(logger_, "Error hmi_app_id = "<< hmi_app_id);
         return;
       }

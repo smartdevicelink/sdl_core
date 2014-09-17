@@ -1251,8 +1251,7 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
     (*message)[strings::msg_params]["priority"] = GetPriorityCode(priority);
   }
 
-  if (hmi_apis::Common_HMILevel::FULL != level &&
-      hmi_apis::Common_HMILevel::INVALID_ENUM != level) {
+  if (hmi_apis::Common_HMILevel::INVALID_ENUM != level) {
     (*message)[strings::msg_params][strings::activate_app_hmi_level] = level;
   }
 
