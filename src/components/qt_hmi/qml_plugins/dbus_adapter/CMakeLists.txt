@@ -130,6 +130,7 @@ elseif (${qt_version} MATCHES "5.1.0")
 endif ()
 
 target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
+target_link_libraries(${target} Utils)
 
 add_custom_target(copy_library_${target} ALL
   COMMAND ${CMAKE_COMMAND} -E copy_if_different
