@@ -71,7 +71,7 @@ CCC_CMD = $(CPP) $(CC_FLAGS) $(DEFS) $(INCLUDES) $(@F:.$(OBJ_EXT)=.cc) -o $(@)
  
 # Archive Options  (Static Library)
 AR_OFLAG = 
-AR_FLAGS = -r
+AR_FLAGS = -rP
 AR_CMD = $(AR) $(AR_FLAGS) $(AR_OFLAG)$(@) $^
 
 # Linker Options

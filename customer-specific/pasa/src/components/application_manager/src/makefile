@@ -179,8 +179,8 @@ local: $(OBJECTS)
 
 # For a static library
 $(COMPONENT_LIB): $(ALL_OBJECTS)
-	@echo $^ > $(OBJS_FILE)
-	xargs --arg-file=$(OBJS_FILE) $(AR) $(AR_FLAGS) $(AR_OFLAG) $(@)
+	@echo $^ | tr " " "\n" > $(OBJS_FILE)
+	xargs -n 100 --arg-file=$(OBJS_FILE) $(AR) $(AR_FLAGS) $(AR_OFLAG) $(@)
 
 
 # Standard set of derived targets
