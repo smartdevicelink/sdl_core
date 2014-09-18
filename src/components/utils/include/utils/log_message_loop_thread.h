@@ -38,14 +38,13 @@
 #include <log4cxx/logger.h>
 
 #include "utils/threads/message_loop_thread.h"
-#include "utils/log_level.h"
 #include "utils/singleton.h"
 
 namespace logger {
 
 typedef struct {
   log4cxx::LoggerPtr logger;
-  LogLevel level;
+  log4cxx::LevelPtr level;
   std::string entry;
   log4cxx::spi::LocationInfo location;
 } LogMessage;

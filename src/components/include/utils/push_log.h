@@ -36,11 +36,9 @@
 #include <log4cxx/logger.h>
 #include <string>
 
-#include "utils/log_level.h"
-
 namespace logger {
 
-bool push_log(log4cxx::LoggerPtr logger, LogLevel level, const std::string& entry, const log4cxx::spi::LocationInfo& location);
+bool push_log(log4cxx::LoggerPtr logger, log4cxx::LevelPtr level, const std::string& entry, const log4cxx::spi::LocationInfo& location);
 
 }  // namespace logger
 

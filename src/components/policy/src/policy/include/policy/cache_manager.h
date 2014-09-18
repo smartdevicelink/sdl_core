@@ -541,11 +541,11 @@ private:
       }
   };
 
-  void GetGroupNameByHashID(const uint32_t group_id, std::string& group_name);
+  void GetGroupNameByHashID(const int32_t group_id, std::string& group_name);
   void FillDeviceSpecificData();
   void FillAppSpecificData();
   bool AppExists(const std::string& app_id) const;
-  long int GenerateHash(const std::string& str_to_hash);
+  int32_t GenerateHash(const std::string& str_to_hash);
   void CopyInternalParams(const std::string &from, const std::string& to);
   long ConvertSecondsToMinute(int seconds);
 

@@ -36,42 +36,7 @@
 namespace logger {
 
 void LogMessageHandler::Handle(const LogMessage message) {
-// these are basically log4cxx macros
-// they cannot be used directly here
-// because they are shadowed by our redefinitions
-// and because location is subject to substitute
-  switch (message.level) {
-    case Fatal:
-      if (message.logger->isFatalEnabled()) {
-        message.logger->forcedLog(::log4cxx::Level::getFatal(), message.entry, message.location);
-      }
-      break;
-    case Error:
-      if (message.logger->isErrorEnabled()) {
-        message.logger->forcedLog(::log4cxx::Level::getError(), message.entry, message.location);
-      }
-      break;
-    case Warn:
-      if (message.logger->isWarnEnabled()) {
-        message.logger->forcedLog(::log4cxx::Level::getWarn(), message.entry, message.location);
-      }
-      break;
-    case Info:
-      if (message.logger->isInfoEnabled()) {
-        message.logger->forcedLog(::log4cxx::Level::getInfo(), message.entry, message.location);
-      }
-      break;
-    case Debug:
-      if (LOG4CXX_UNLIKELY(message.logger->isDebugEnabled())) {
-        message.logger->forcedLog(::log4cxx::Level::getDebug(), message.entry, message.location);
-      }
-      break;
-    case Trace:
-      if (LOG4CXX_UNLIKELY(message.logger->isTraceEnabled())) {
-        message.logger->forcedLog(::log4cxx::Level::getTrace(), message.entry, message.location);
-      }
-      break;
-  }
+  message.logger->forcedLog(message.level, message.entry, message.location);
 }
 
 LogMessageLoopThread::LogMessageLoopThread() :

@@ -80,37 +80,8 @@ void IAP2Connection::Finalize() {
 }
 
 TransportAdapter::Error IAP2Connection::SendData(RawMessagePtr message) {
-// forced priority workaround
-// is used to reduce iap2_eap_send() run time
-// not to block iap2_eap_event_arm() and iap2_eap_recv() for long
-// otherwise data is discarded in iAP2 driver
-// TODO (nvaganov@luxoft.com): move pthread calls to thread wrapper
-#define USE_FORCED_PRIORITY 1
-#if USE_FORCED_PRIORITY
-  pthread_t pid = pthread_self();
-  int policy;
-  struct sched_param param;
-  pthread_getschedparam(pid, &policy, &param);
-  int thread_priority = param.sched_priority;
-  int forced_priority = 63;
-  if (EOK == pthread_setschedprio(pid, forced_priority)) {
-    LOG4CXX_INFO(logger_, "iAP2: sending thread priority increased");
-  }
-  else {
-    LOG4CXX_WARN(logger_, "iAP2: could not increase sending thread priority");
-  }
-#endif
   LOG4CXX_TRACE(logger_, "iAP2: sending data on protocol " << protocol_name_);
-  int result = iap2_eap_send(iap2ea_hdl_, message->data(), message->data_size());
-#if USE_FORCED_PRIORITY
-  if (EOK == pthread_setschedprio(pid, thread_priority)) {
-    LOG4CXX_INFO(logger_, "iAP2: sending thread priority decreased to normal");
-  }
-  else {
-    LOG4CXX_WARN(logger_, "iAP2: could not decrease sending thread priority to normal");
-  }
-#endif
-  if (result != -1) {
+  if (iap2_eap_send(iap2ea_hdl_, message->data(), message->data_size()) != -1) {
     LOG4CXX_INFO(logger_, "iAP2: data on protocol " << protocol_name_ << " sent successfully");
     controller_->DataSendDone(device_uid_, app_handle_, message);
     return TransportAdapter::OK;
