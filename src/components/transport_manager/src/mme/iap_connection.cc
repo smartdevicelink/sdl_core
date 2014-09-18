@@ -137,6 +137,7 @@ void IAPConnection::OnSessionClosed(int session_id) {
   if (session_ids_.empty()) {
     parent_->UnregisterConnection(app_handle_);
     controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
+    controller_->DisconnectDone(device_uid_, app_handle_);
   }
 }
 
