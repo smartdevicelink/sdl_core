@@ -200,7 +200,8 @@ namespace NsMessageBroker
 
       virtual void exitReceivingThread() {
 #ifdef CUSTOMER_PASA
-        Close();
+        TcpClient::Close();
+        MqClient::Close();
 #endif
         stop = true;
         sync_primitives::AutoLock auto_lock(receiving_thread_lock_);
