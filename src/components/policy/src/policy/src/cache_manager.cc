@@ -33,7 +33,6 @@
 #include "policy/cache_manager.h"
 
 #include <algorithm>
-#include <cstdlib>
 #include <functional>
 #include <ctime>
 #include <cmath>
@@ -161,7 +160,7 @@ void CacheManager::GetAllAppGroups(const std::string& app_id,
 
     for (; iter != iter_end; ++iter) {
       const uint32_t group_id =
-          static_cast<uint32_t> (labs(GenerateHash(*iter)));
+          static_cast<uint32_t> ((GenerateHash(*iter)));
       all_group_ids.push_back(group_id);
     }
   }
@@ -180,8 +179,7 @@ void CacheManager::GetPreConsentedGroups(const std::string &app_id,
     policy_table::Strings::const_iterator iter = (*app_param_iter).second.preconsented_groups->begin();
     policy_table::Strings::const_iterator iter_end = (*app_param_iter).second.preconsented_groups->end();
     for (; iter != iter_end; ++iter) {
-      const uint32_t group_id =
-          static_cast<uint32_t> (labs(GenerateHash(*iter)));
+      const int32_t group_id = GenerateHash(*iter);
 
       preconsented_groups.push_back(group_id);
     }
@@ -213,8 +211,7 @@ void CacheManager::GetConsentedGroups(const std::string &device_id,
           (*iter).second.consent_groups->end();
 
       for (; consent_iter != consent_iter_end; ++consent_iter) {
-        const uint32_t group_id =
-            static_cast<uint32_t> (labs(GenerateHash((*consent_iter).first)));
+        const int32_t group_id = GenerateHash((*consent_iter).first);
 
         if (true == (*consent_iter).second) {
           allowed_groups.push_back(group_id);
@@ -430,7 +427,7 @@ bool CacheManager::ReactOnUserDevConsentForApp(const std::string &app_id,
   return result;
 }
 
-void CacheManager::GetGroupNameByHashID(const uint32_t group_id,
+void CacheManager::GetGroupNameByHashID(const int32_t group_id,
                                         std::string& group_name) {
 
   policy_table::FunctionalGroupings::const_iterator fg_iter =
@@ -439,7 +436,7 @@ void CacheManager::GetGroupNameByHashID(const uint32_t group_id,
       pt_->policy_table.functional_groupings.end();
 
   for (; fg_iter != fg_iter_end; ++fg_iter) {
-    const uint32_t id = labs(GenerateHash((*fg_iter).first));
+    const int32_t id = GenerateHash((*fg_iter).first);
     if (group_id == id) {
       group_name = (*fg_iter).first;
     }
@@ -989,7 +986,7 @@ bool CacheManager::GetFunctionalGroupNames(FunctionalGroupNames &names) {
       pt_->policy_table.functional_groupings.end();
 
   for (; iter != iter_end; ++iter) {
-    const uint32_t id = static_cast<uint32_t> (labs(GenerateHash((*iter).first)));
+    const int32_t id = GenerateHash((*iter).first);
     std::pair<std::string, std::string> value =
         std::make_pair( *(*iter).second.user_consent_prompt, (*iter).first);
 
@@ -1343,9 +1340,9 @@ bool CacheManager::AppExists(const std::string &app_id) const {
   return pt_->policy_table.app_policies.end() != policy_iter;
 }
 
-long int CacheManager::GenerateHash(const std::string& str_to_hash) {
+int32_t CacheManager::GenerateHash(const std::string& str_to_hash) {
 
-  unsigned long hash = 5381U;
+  uint32_t hash = 5381U;
   std::string::const_iterator it = str_to_hash.begin();
   std::string::const_iterator it_end = str_to_hash.end();
 
@@ -1353,7 +1350,10 @@ long int CacheManager::GenerateHash(const std::string& str_to_hash) {
        hash = ((hash << 5) + hash) + (*it);
   }
 
-  return hash;
+  // Reset sign bit in case it has been set.
+  // This is needed to avoid overflow for signed int.
+  const int32_t result = hash & 0x7FFFFFFF;
+  return result;
 }
 
 }

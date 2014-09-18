@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -218,7 +218,7 @@ struct FunctionalGroupPermission {
 
     std::string group_alias;
     std::string group_name;
-    uint32_t group_id;
+    int32_t group_id;
     GroupConsent state;
 };
 
@@ -287,7 +287,7 @@ enum GroupType {
 /**
  * @brief Array of functional group id from DB
  */
-typedef std::vector<uint32_t> FunctionalGroupIDs;
+typedef std::vector<int32_t> FunctionalGroupIDs;
 
 /**
  * @brief Array of functional group ids sorted by types
