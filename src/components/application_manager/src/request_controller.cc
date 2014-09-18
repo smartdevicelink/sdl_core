@@ -400,6 +400,7 @@ void RequestController::Worker::threadMain() {
     request_controller_->pending_request_set_.insert(request_info_ptr);
     //pending_request_list_.Acquire();
     if (0 != request->default_timeout()) {
+      LOG4CXX_INFO(logger_, "Add Request with timeout: " << request->default_timeout());
       request_controller_->UpdateTimer();
     } else {
       LOG4CXX_INFO(logger_, "Default timeout was set to 0."
