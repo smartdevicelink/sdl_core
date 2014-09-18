@@ -247,31 +247,33 @@ void CacheManager::Backup() {
   LOG4CXX_TRACE_ENTER(logger_);
   sync_primitives::AutoLock auto_lock(cache_lock_);
   if (backup_.valid()) {
-    backup_->Save(*pt_);
-    backup_->SaveUpdateRequired(update_required);
+    if (pt_.valid()) {
+      backup_->Save(*pt_);
+      backup_->SaveUpdateRequired(update_required);
 
 
-    policy_table::ApplicationPolicies::const_iterator app_policy_iter =
-        pt_->policy_table.app_policies.begin();
-    policy_table::ApplicationPolicies::const_iterator app_policy_iter_end =
-        pt_->policy_table.app_policies.end();
+      policy_table::ApplicationPolicies::const_iterator app_policy_iter =
+          pt_->policy_table.app_policies.begin();
+      policy_table::ApplicationPolicies::const_iterator app_policy_iter_end =
+          pt_->policy_table.app_policies.end();
 
-    for (; app_policy_iter != app_policy_iter_end; ++app_policy_iter) {
+      for (; app_policy_iter != app_policy_iter_end; ++app_policy_iter) {
 
-      const std::string app_id = (*app_policy_iter).first;
-      backup_->SaveApplicationCustomData(app_id,
-                                        is_revoked_[app_id],
-                                        is_default_[app_id],
-                                        is_predata_[app_id]);
-    }
+        const std::string app_id = (*app_policy_iter).first;
+        backup_->SaveApplicationCustomData(app_id,
+                                          IsApplicationRevoked(app_id),
+                                          IsDefaultPolicy(app_id),
+                                          is_predata_[app_id]);
+      }
 
-// In case of extended policy the meta info should be backuped as well.
+  // In case of extended policy the meta info should be backuped as well.
 #ifdef EXTENDED_POLICY
-    if (ex_backup_.valid()) {
-      ex_backup_->SetMetaInfo(*(*pt_->policy_table.module_meta).ccpu_version,
-                              *(*pt_->policy_table.module_meta).wers_country_code,
-                              *(*pt_->policy_table.module_meta).language);
-      ex_backup_->SetVINValue(*(*pt_->policy_table.module_meta).vin);
+      if (ex_backup_.valid()) {
+        ex_backup_->SetMetaInfo(*(*pt_->policy_table.module_meta).ccpu_version,
+                                *(*pt_->policy_table.module_meta).wers_country_code,
+                                *(*pt_->policy_table.module_meta).language);
+        ex_backup_->SetVINValue(*(*pt_->policy_table.module_meta).vin);
+      }
     }
 #endif // EXTENDED_POLICY
   }
