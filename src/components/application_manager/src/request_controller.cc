@@ -46,14 +46,15 @@ using namespace sync_primitives;
 CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController");
 
 RequestController::RequestController()
-  : pool_state_(UNDEFINED)
-  , pool_size_(profile::Profile::instance()->thread_pool_size())
-  , timer_("RequestCtrlTimer", this, &RequestController::onTimer, true)
+  : pool_state_(UNDEFINED),
+    pool_size_(profile::Profile::instance()->thread_pool_size()),
+    pending_request_set_lock_(true),
+    timer_("RequestCtrlTimer", this, &RequestController::onTimer, true)
 {
   LOG4CXX_INFO(logger_, "RequestController::RequestController()");
   InitializeThreadpool();
   timer_.start(dafault_sleep_time_);
-  LOG4CXX_DEBUG(logger_," TEMP Create timer thread ; timer thread = " << timer_.thread_->thread_handle());
+  LOG4CXX_DEBUG(logger_," Create timer thread ; timer thread = " << timer_.thread_->thread_handle());
 }
 
 RequestController::~RequestController() {
@@ -341,24 +342,30 @@ void RequestController::onTimer() {
   LOG4CXX_TRACE_ENTER(logger_);
   AutoLock auto_lock(pending_request_set_lock_);
   RequestInfoSet::iterator probably_expired = pending_request_set_.begin();
-  if (pending_request_set_.end() == probably_expired) {
-    LOG4CXX_ERROR(logger_, "pending_request_set_ is empty");
-    UpdateTimer();
-    return;
-  }
-  RequestInfoPtr request = *probably_expired;
-  if (request->timeout_sec() == 0) {
-    LOG4CXX_ERROR(logger_, "pending_request_set_ are not managed fore TIMEOUT");
-    UpdateTimer();
-    return;
-  }
-  if (request->isExpired()) {
-    pending_request_set_.erase(probably_expired);
-    LOG4CXX_INFO(logger_, "Timeout for request id " << request->requestId() <<
-                          "expired");
-    request->request()->CleanUp();
+  while (pending_request_set_.end() != probably_expired) {
+    RequestInfoPtr request = *probably_expired;
+    if (request->timeout_sec() == 0) {
+      LOG4CXX_INFO(logger_, "Ignore " << request->requestId());
+      ++probably_expired;
+      // This request should not be observed for TIME_OUT
+      continue;
+    }
+    if (request->isExpired()) {
+      pending_request_set_.erase(probably_expired);
+      commands::CommandRequestImpl* mobile_expired_request =
+          dynamic_cast<commands::CommandRequestImpl*>(request->request());
+      if (mobile_expired_request) {
+
+        mobile_expired_request->onTimeOut();
+      }
+      request->request()->CleanUp();
+      LOG4CXX_INFO(logger_, "Timeout for request id " << request->requestId() << " expired");
+      probably_expired = pending_request_set_.begin();
+      break;
+    }
   }
   UpdateTimer();
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 RequestController::Worker::Worker(RequestController* requestController)
@@ -400,7 +407,8 @@ void RequestController::Worker::threadMain() {
     request_controller_->pending_request_set_.insert(request_info_ptr);
     //pending_request_list_.Acquire();
     if (0 != request->default_timeout()) {
-      LOG4CXX_INFO(logger_, "Add Request with timeout: " << request->default_timeout());
+      LOG4CXX_INFO(logger_, "Add Request " << request_info_ptr->requestId() <<
+                            "with timeout: " << request->default_timeout());
       request_controller_->UpdateTimer();
     } else {
       LOG4CXX_INFO(logger_, "Default timeout was set to 0."
@@ -483,16 +491,13 @@ void RequestController::UpdateTimer() {
     DCHECK(request.valid());
     if (0 == request->timeout_sec()) {
       ++it;
+      // This request should not be observed for TIME_OUT
       continue;
     }
     sleep_time = request->end_time().tv_sec -
                            date_time::DateTime::getCurrentTime().tv_sec;
     break;
   }
-
-  pthread_t id = pthread_self();
-  LOG4CXX_INFO(logger_, "TEMP Update Timer from thread " << id);
-
   timer_.updateTimeOut(sleep_time);
   LOG4CXX_INFO(logger_, "Sleep for: " << sleep_time);
   LOG4CXX_TRACE_EXIT(logger_);
