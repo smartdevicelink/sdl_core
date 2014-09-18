@@ -164,8 +164,6 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
                  rpc::PrettyFormat(report));
 
     update_status_manager_.OnWrongUpdateReceived();
-
-    return false;
   }
 
   update_status_manager_.OnValidUpdateReceived();

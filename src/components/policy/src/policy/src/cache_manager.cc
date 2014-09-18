@@ -482,11 +482,14 @@ void CacheManager::SaveUpdateRequired(bool status) {
 }
 
 bool CacheManager::IsApplicationRevoked(const std::string& app_id) {
-
   LOG4CXX_INFO(logger_, "IsAppRevoked");
-  const bool app_revoked = is_revoked_.end() != is_revoked_.find(app_id) &&
-                           is_revoked_[app_id];
-  return app_revoked;
+  bool is_revoked = false;
+  if (pt_->policy_table.app_policies.end() !=
+      pt_->policy_table.app_policies.find(app_id)) {
+    is_revoked = pt_->policy_table.app_policies[app_id].is_null();
+  }
+
+  return is_revoked;
 }
 
 void CacheManager::CheckPermissions(const PTString &app_id,
@@ -905,8 +908,9 @@ bool CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
   if (pt_->policy_table.app_policies.end() ==
       pt_->policy_table.app_policies.find(policy_app_id)) {
     return true;
-  } else if (is_default_.end() != is_default_.find(policy_app_id) ||
-             is_predata_.end() != is_predata_.find(policy_app_id)) {
+  } else if ((AppExists(policy_app_id) && pt_->
+              policy_table.app_policies[policy_app_id].get_string() == "default")
+             || is_predata_.end() != is_predata_.find(policy_app_id)) {
     return true;
   }
 
@@ -1124,8 +1128,6 @@ void CacheManager::Add(const std::string &app_id,
 void CacheManager::CopyInternalParams(const std::string &from,
                                       const std::string& to) {
   is_predata_[to] = is_predata_[from];
-  is_default_[to] = is_default_[from];
-  is_revoked_[to] = is_revoked_[from];
 }
 
 long CacheManager::ConvertSecondsToMinute(int seconds) {
@@ -1152,13 +1154,24 @@ bool CacheManager::SetDefaultPolicy(const std::string &app_id) {
 bool CacheManager::IsDefaultPolicy(const std::string& app_id) {
 
   const bool result =
-      is_default_.end() != is_default_.find(app_id) && is_default_[app_id];
+      pt_->policy_table.app_policies.end() !=
+      pt_->policy_table.app_policies.find(app_id) &&
+      !pt_->policy_table.app_policies[app_id].get_string().empty();
+
   return result;
 }
 
 bool CacheManager::SetIsDefault(const std::string& app_id,
                                 bool is_default) {
-  this->is_default_[app_id] = is_default;
+  policy_table::ApplicationPolicies::const_iterator iter =
+      pt_->policy_table.app_policies.find(app_id);
+  if (pt_->policy_table.app_policies.end() != iter) {
+    if (is_default) {
+      pt_->policy_table.app_policies[app_id].set_to_string("default");
+    } else {
+      pt_->policy_table.app_policies[app_id].set_to_string("");
+    }
+  }
   return true;
 }
 
@@ -1264,8 +1277,6 @@ void CacheManager::FillAppSpecificData() {
     const std::string& app_name = (*iter).first;
 
     is_predata_.insert(std::make_pair(app_name, backup_->IsPredataPolicy(app_name)));
-    is_default_.insert(std::make_pair(app_name, backup_->IsDefaultPolicy(app_name)));
-    is_revoked_.insert(std::make_pair(app_name, backup_->IsApplicationRevoked(app_name)));
   }
 }
 

@@ -560,8 +560,6 @@ private:
   utils::SharedPtr<PTRepresentation> backup_;
   utils::SharedPtr<PTExtRepresentation> ex_backup_;
   bool update_required;
-  std::map<std::string, bool> is_revoked_;
-  std::map<std::string, bool> is_default_;
   std::map<std::string, bool> is_predata_;
   std::map<std::string, bool> is_unpaired_;
 
