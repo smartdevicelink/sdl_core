@@ -132,9 +132,11 @@ void IAPConnection::OnSessionOpened(int session_id) {
 }
 
 void IAPConnection::OnSessionClosed(int session_id) {
-  sync_primitives::AutoLock auto_lock(session_ids_lock_);
+  session_ids_lock_.Acquire();
   session_ids_.erase(session_id);
-  if (session_ids_.empty()) {
+  bool last_session_closed = session_ids_.empty();
+  session_ids_lock_.Release();
+  if (last_session_closed) {
     parent_->UnregisterConnection(app_handle_);
     controller_->ConnectionAborted(device_uid_, app_handle_, CommunicationError());
     controller_->DisconnectDone(device_uid_, app_handle_);
