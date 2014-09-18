@@ -34,6 +34,9 @@
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_THREAD
 
 #include <time.h>
+#include <inttypes.h>
+#include <cstdint>
+#include <limits>
 
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
@@ -321,17 +324,23 @@ void TimerThread<T>::TimerLooperDelegate::threadMain() {
   sync_primitives::AutoLock auto_lock(TimerDelegate::state_lock_);
   while (!TimerDelegate::stop_flag_) {
     time_t cur_time = time(NULL);
-    uint64_t end_time64 = static_cast<uint64_t>(cur_time) + TimerDelegate::timeout_seconds_;
-    time_t end_time = INT32_MAX;
-    if (end_time64 < INT32_MAX) {
-      end_time = static_cast<time_t>(end_time64);
+    time_t end_time = std::numeric_limits<time_t>::max();
+    if (TimerDelegate::timeout_seconds_ < std::numeric_limits<time_t>::max() - cur_time) {
+      end_time = static_cast<time_t>(cur_time) + TimerDelegate::timeout_seconds_;
     }
-    int32_t wait_seconds_left = int32_t(difftime(end_time, cur_time));
+
+    int32_t  wait_seconds_left = static_cast<int32_t>(difftime(end_time, cur_time));
+    int32_t  wait_milliseconds_left = std::numeric_limits<int32_t>::max();
+    const int32_t millisecconds_in_second = 1000;
+    if (wait_seconds_left < std::numeric_limits<int32_t>::max() / millisecconds_in_second) {
+      wait_milliseconds_left = millisecconds_in_second * wait_seconds_left;
+    }
+
     ConditionalVariable::WaitStatus wait_status =
-        TimerDelegate::termination_condition_.WaitFor(auto_lock, wait_seconds_left * 1000);
+        TimerDelegate::termination_condition_.WaitFor(auto_lock, wait_milliseconds_left);
     // Quit sleeping or continue sleeping in case of spurious wake up
     if (ConditionalVariable::kTimeout == wait_status ||
-        wait_seconds_left <= 0) {
+         wait_seconds_left <= 0) {
       TimerDelegate::timer_thread_->onTimeOut();
     } else {
       LOG4CXX_DEBUG(logger_, "Timeout reset force:" << TimerDelegate::timeout_seconds_);
