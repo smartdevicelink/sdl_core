@@ -374,7 +374,7 @@ Rectangle {
 
         onOnAppUnregistered: {
             console.debug("enter onAppUnregistered")            
-            if ((dataContainer.currentApplication.appId === appId)) {
+            if ((dataContainer.currentApplication.appId === appID)) {
                 if (dataContainer.applicationContext) {
                     contentLoader.go("views/ApplicationListView.qml");
                 }
@@ -383,7 +383,7 @@ Rectangle {
                 }
                 dataContainer.currentApplication.reset()
             }
-            dataContainer.removeApplication(appId);
+            dataContainer.removeApplication(appID);
             console.debug("exit onAppUnregistered")
         }
 

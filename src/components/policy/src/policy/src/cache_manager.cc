@@ -247,31 +247,33 @@ void CacheManager::Backup() {
   LOG4CXX_TRACE_ENTER(logger_);
   sync_primitives::AutoLock auto_lock(cache_lock_);
   if (backup_.valid()) {
-    backup_->Save(*pt_);
-    backup_->SaveUpdateRequired(update_required);
+    if (pt_.valid()) {
+      backup_->Save(*pt_);
+      backup_->SaveUpdateRequired(update_required);
 
 
-    policy_table::ApplicationPolicies::const_iterator app_policy_iter =
-        pt_->policy_table.app_policies.begin();
-    policy_table::ApplicationPolicies::const_iterator app_policy_iter_end =
-        pt_->policy_table.app_policies.end();
+      policy_table::ApplicationPolicies::const_iterator app_policy_iter =
+          pt_->policy_table.app_policies.begin();
+      policy_table::ApplicationPolicies::const_iterator app_policy_iter_end =
+          pt_->policy_table.app_policies.end();
 
-    for (; app_policy_iter != app_policy_iter_end; ++app_policy_iter) {
+      for (; app_policy_iter != app_policy_iter_end; ++app_policy_iter) {
 
-      const std::string app_id = (*app_policy_iter).first;
-      backup_->SaveApplicationCustomData(app_id,
-                                        is_revoked_[app_id],
-                                        is_default_[app_id],
-                                        is_predata_[app_id]);
-    }
+        const std::string app_id = (*app_policy_iter).first;
+        backup_->SaveApplicationCustomData(app_id,
+                                          IsApplicationRevoked(app_id),
+                                          IsDefaultPolicy(app_id),
+                                          is_predata_[app_id]);
+      }
 
-// In case of extended policy the meta info should be backuped as well.
+  // In case of extended policy the meta info should be backuped as well.
 #ifdef EXTENDED_POLICY
-    if (ex_backup_.valid()) {
-      ex_backup_->SetMetaInfo(*(*pt_->policy_table.module_meta).ccpu_version,
-                              *(*pt_->policy_table.module_meta).wers_country_code,
-                              *(*pt_->policy_table.module_meta).language);
-      ex_backup_->SetVINValue(*(*pt_->policy_table.module_meta).vin);
+      if (ex_backup_.valid()) {
+        ex_backup_->SetMetaInfo(*(*pt_->policy_table.module_meta).ccpu_version,
+                                *(*pt_->policy_table.module_meta).wers_country_code,
+                                *(*pt_->policy_table.module_meta).language);
+        ex_backup_->SetVINValue(*(*pt_->policy_table.module_meta).vin);
+      }
     }
 #endif // EXTENDED_POLICY
   }
@@ -480,11 +482,14 @@ void CacheManager::SaveUpdateRequired(bool status) {
 }
 
 bool CacheManager::IsApplicationRevoked(const std::string& app_id) {
-
   LOG4CXX_INFO(logger_, "IsAppRevoked");
-  const bool app_revoked = is_revoked_.end() != is_revoked_.find(app_id) &&
-                           is_revoked_[app_id];
-  return app_revoked;
+  bool is_revoked = false;
+  if (pt_->policy_table.app_policies.end() !=
+      pt_->policy_table.app_policies.find(app_id)) {
+    is_revoked = pt_->policy_table.app_policies[app_id].is_null();
+  }
+
+  return is_revoked;
 }
 
 void CacheManager::CheckPermissions(const PTString &app_id,
@@ -903,8 +908,9 @@ bool CacheManager::CountUnconsentedGroups(const std::string& policy_app_id,
   if (pt_->policy_table.app_policies.end() ==
       pt_->policy_table.app_policies.find(policy_app_id)) {
     return true;
-  } else if (is_default_.end() != is_default_.find(policy_app_id) ||
-             is_predata_.end() != is_predata_.find(policy_app_id)) {
+  } else if ((AppExists(policy_app_id) && pt_->
+              policy_table.app_policies[policy_app_id].get_string() == "default")
+             || is_predata_.end() != is_predata_.find(policy_app_id)) {
     return true;
   }
 
@@ -1122,8 +1128,6 @@ void CacheManager::Add(const std::string &app_id,
 void CacheManager::CopyInternalParams(const std::string &from,
                                       const std::string& to) {
   is_predata_[to] = is_predata_[from];
-  is_default_[to] = is_default_[from];
-  is_revoked_[to] = is_revoked_[from];
 }
 
 long CacheManager::ConvertSecondsToMinute(int seconds) {
@@ -1150,13 +1154,24 @@ bool CacheManager::SetDefaultPolicy(const std::string &app_id) {
 bool CacheManager::IsDefaultPolicy(const std::string& app_id) {
 
   const bool result =
-      is_default_.end() != is_default_.find(app_id) && is_default_[app_id];
+      pt_->policy_table.app_policies.end() !=
+      pt_->policy_table.app_policies.find(app_id) &&
+      !pt_->policy_table.app_policies[app_id].get_string().empty();
+
   return result;
 }
 
 bool CacheManager::SetIsDefault(const std::string& app_id,
                                 bool is_default) {
-  this->is_default_[app_id] = is_default;
+  policy_table::ApplicationPolicies::const_iterator iter =
+      pt_->policy_table.app_policies.find(app_id);
+  if (pt_->policy_table.app_policies.end() != iter) {
+    if (is_default) {
+      pt_->policy_table.app_policies[app_id].set_to_string("default");
+    } else {
+      pt_->policy_table.app_policies[app_id].set_to_string("");
+    }
+  }
   return true;
 }
 
@@ -1262,8 +1277,6 @@ void CacheManager::FillAppSpecificData() {
     const std::string& app_name = (*iter).first;
 
     is_predata_.insert(std::make_pair(app_name, backup_->IsPredataPolicy(app_name)));
-    is_default_.insert(std::make_pair(app_name, backup_->IsDefaultPolicy(app_name)));
-    is_revoked_.insert(std::make_pair(app_name, backup_->IsApplicationRevoked(app_name)));
   }
 }
 

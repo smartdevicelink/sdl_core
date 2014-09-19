@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -998,6 +998,13 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
     DeviceConsent consent = policy_manager_->GetUserConsentForDevice(
                               permissions.deviceInfo.device_mac_address);
     permissions.isSDLAllowed = kDeviceAllowed == consent ? true : false;
+
+    // According to the SDLAQ-CRS-2794, p.9
+    // 'priority' should be ommited in case when device
+    // is not allowed.
+    if (permissions.isSDLAllowed == false ) {
+      permissions.priority.clear();
+    }
 
     if (permissions.appRevoked) {
       usage.RecordRunAttemptsWhileRevoked();
