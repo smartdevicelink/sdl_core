@@ -125,6 +125,16 @@ void Logger::forcedLog(const LevelPtr& level1, const std::string& message,
 }
 
 
+void Logger::forcedLog(const LevelPtr& level1, const std::string& message,
+        log4cxx_time_t timeStamp, const LocationInfo& location) const
+{
+        Pool p;
+        LOG4CXX_DECODE_CHAR(msg, message);
+        LoggingEventPtr event(new LoggingEvent(name, level1, msg, timeStamp, location));
+        callAppenders(event, p);
+}
+
+
 void Logger::forcedLog(const LevelPtr& level1, const std::string& message) const
 {
         Pool p;

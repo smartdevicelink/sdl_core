@@ -80,6 +80,23 @@ namespace log4cxx
                                 const LevelPtr& level,   const LogString& message,
                                 const log4cxx::spi::LocationInfo& location);
 
+                        /**
+                        Instantiate a LoggingEvent from the supplied parameters.
+
+                        <p>All the fields of
+                        <code>LoggingEvent</code> are filled when actually needed.
+                        <p>
+                        @param logger The logger of this event.
+                        @param level The level of this event.
+                        @param message  The message of this event.
+                        @param timeStamp Event time stamp.
+                        @param location location of logging request.
+                        */
+                        LoggingEvent(const LogString& logger,
+                                const LevelPtr& level,   const LogString& message,
+                                log4cxx_time_t timeStamp,
+                                const log4cxx::spi::LocationInfo& location);
+
                         ~LoggingEvent();
 
                         /** Return the level of this event. */

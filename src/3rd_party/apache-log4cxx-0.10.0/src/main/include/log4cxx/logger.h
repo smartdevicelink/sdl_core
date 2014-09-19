@@ -522,6 +522,17 @@ namespace log4cxx
         without further checks.
         @param level the level to log.
         @param message message.
+        @param timeStamp event time stamp.
+        @param location location of source of logging request.
+        */
+        void forcedLog(const LevelPtr& level, const std::string& message,
+                        log4cxx_time_t timeStamp,
+                        const log4cxx::spi::LocationInfo& location) const;
+        /**
+        This method creates a new logging event and logs the event
+        without further checks.
+        @param level the level to log.
+        @param message message.
         */
         void forcedLog(const LevelPtr& level, const std::string& message) const;
 
