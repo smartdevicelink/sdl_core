@@ -1,20 +1,6 @@
 # QCC arm COMPILER SETTINGS
 #  Standard form of tool.mk file configured for qnx arm v7
 #  Note: Make sure QNX_HOST is set to install version desired
-uname_S := $(shell sh -c 'uname -s 2>/dev/null || echo not')
-ifeq ($(uname_S),Linux)
-  ifndef QNX_INSTALL_ROOT
-    QNX_INSTALL_ROOT := /opt/qnx650/
-  endif
-  export QNX_HOST := $(QNX_INSTALL_ROOT)host/linux/x86
-else
-  ifndef QNX_INSTALL_ROOT
-    QNX_INSTALL_ROOT := C:/FOR_GF/QNX650SP1/
-  endif
-  export QNX_HOST := $(QNX_INSTALL_ROOT)host/win32/x86
-endif
-
-export QNX_TARGET := $(QNX_INSTALL_ROOT)target/qnx6
 export PATH := $(QNX_HOST)/usr/bin;$(QNX_HOST)/unsupported/Python25;$(PATH)
 export MAKEFLAGS := $(QNX_TARGET)/usr/include
 
