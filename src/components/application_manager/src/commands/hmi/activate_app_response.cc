@@ -45,10 +45,11 @@ ActivateAppResponse::~ActivateAppResponse() {
 }
 
 void ActivateAppResponse::Run() {
-  LOG4CXX_INFO(logger_, "ActivateAppResponse::Run " << correlation_id());
+  LOG4CXX_TRACE(logger_, "enter");
   event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_ActivateApp);
   event.set_smart_object(*message_);
   event.raise();
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 }  // namespace commands

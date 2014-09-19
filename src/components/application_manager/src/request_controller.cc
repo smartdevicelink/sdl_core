@@ -428,6 +428,7 @@ void RequestController::Worker::threadMain() {
 bool RequestController::Worker::exitThreadMain() {
   stop_flag_ = true;
   sync_primitives::AutoLock auto_lock(thread_lock_);
+  // setup stop flag and whit while threadMain will be finished correctly
   return true;
 }
 

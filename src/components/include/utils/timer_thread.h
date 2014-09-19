@@ -343,7 +343,7 @@ void TimerThread<T>::TimerLooperDelegate::threadMain() {
          wait_seconds_left <= 0) {
       TimerDelegate::timer_thread_->onTimeOut();
     } else {
-      LOG4CXX_DEBUG(logger_, "Timeout reset force:" << TimerDelegate::timeout_seconds_);
+      LOG4CXX_DEBUG(logger_, "Timeout reset force: " << TimerDelegate::timeout_seconds_);
     }
   }
   TimerDelegate::stop_flag_ = false;
