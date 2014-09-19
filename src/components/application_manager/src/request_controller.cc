@@ -46,6 +46,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "RequestController")
 RequestController::RequestController()
   : pool_state_(UNDEFINED)
   , pool_size_(profile::Profile::instance()->thread_pool_size())
+  , pending_request_list_lock_(true)
   , watchdog_(NULL) {
   LOG4CXX_INFO(logger_, "RequestController::RequestController()");
   watchdog_ = new request_watchdog::RequestWatchdog;
@@ -221,18 +222,16 @@ void RequestController::onTimeoutExpired(
     const request_watchdog::RequestInfo& info) {
   LOG4CXX_INFO(logger_, "RequestController::onTimeoutExpired()");
 
+  AutoLock auto_lock(pending_request_list_lock_);
   commands::CommandRequestImpl* request_impl = NULL;
-  {
-    AutoLock auto_lock(pending_request_list_lock_);
-    std::list<Request>::iterator it = pending_request_list_.begin();
-    for (; pending_request_list_.end() != it; ++it) {
-      request_impl = static_cast<commands::CommandRequestImpl*>(it->get());
-      if (request_impl->correlation_id() == info.correlationID_ &&
-          request_impl->connection_key() == info.connectionID_) {
-        LOG4CXX_INFO(logger_, "Timeout for request id " << info.correlationID_
-                     << " of application " << info.connectionID_ << " expired");
-        break;
-      }
+  std::list<Request>::iterator it = pending_request_list_.begin();
+  for (; pending_request_list_.end() != it; ++it) {
+    request_impl = static_cast<commands::CommandRequestImpl*>(it->get());
+    if (request_impl->correlation_id() == info.correlationID_ &&
+        request_impl->connection_key() == info.connectionID_) {
+      LOG4CXX_INFO(logger_, "Timeout for request id " << info.correlationID_
+                   << " of application " << info.connectionID_ << " expired");
+      break;
     }
   }
 
