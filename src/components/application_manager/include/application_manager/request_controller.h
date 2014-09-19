@@ -188,13 +188,7 @@ class RequestController {
                               const uint32_t& mobile_correlation_id,
                               const uint32_t& new_timeout);
 
-    /**
-    * @brief Notify subscriber that expired entry should be removed
-    * using Watchdog::removeRequest(int32_t app_id, int32_t correlation_id)
-    *
-    * @param RequestInfo Request related information
-    */
-    void onTimer();
+  protected:
 
     /**
      * @brief Checs if this app as able to add new requests, or limits was exceeded
@@ -213,8 +207,13 @@ class RequestController {
      */
     bool checkHMILevelTimeScaleMaxRequest(const mobile_apis::HMILevel::eType& hmi_level, const uint32_t& app_id, const uint32_t& app_time_scale, const uint32_t& max_request_per_time_scale);
 
-  protected:
-
+    /**
+    * @brief Notify subscriber that expired entry should be removed
+    * using Watchdog::removeRequest(int32_t app_id, int32_t correlation_id)
+    *
+    * @param RequestInfo Request related information
+    */
+    void onTimer();
 
     /**
     * @brief Update timout for next OnTimer
@@ -235,7 +234,7 @@ class RequestController {
       protected:
       private:
         RequestController*                               request_controller_;
-        sync_primitives::Lock                            thread_lock_;
+        sync_primitives::Lock                             thread_lock_;
         volatile bool                                    stop_flag_;
     };
 
