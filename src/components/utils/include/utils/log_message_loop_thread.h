@@ -46,6 +46,7 @@ typedef struct {
   log4cxx::LoggerPtr logger;
   log4cxx::LevelPtr level;
   std::string entry;
+  log4cxx_time_t timeStamp;
   log4cxx::spi::LocationInfo location;
 } LogMessage;
 

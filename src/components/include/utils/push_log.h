@@ -38,7 +38,13 @@
 
 namespace logger {
 
-bool push_log(log4cxx::LoggerPtr logger, log4cxx::LevelPtr level, const std::string& entry, const log4cxx::spi::LocationInfo& location);
+bool push_log(
+        log4cxx::LoggerPtr logger,
+        log4cxx::LevelPtr level,
+        const std::string& entry,
+        log4cxx_time_t timeStamp,
+        const log4cxx::spi::LocationInfo& location
+        );
 
 }  // namespace logger
 
