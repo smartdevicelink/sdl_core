@@ -274,8 +274,8 @@ void CacheManager::Backup() {
                                 *(*pt_->policy_table.module_meta).language);
         ex_backup_->SetVINValue(*(*pt_->policy_table.module_meta).vin);
       }
-    }
 #endif // EXTENDED_POLICY
+    }
   }
   LOG4CXX_TRACE_EXIT(logger_);
 }
