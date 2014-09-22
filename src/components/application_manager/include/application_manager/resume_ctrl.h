@@ -197,6 +197,8 @@ class ResumeCtrl: public event_engine::EventObserver {
      */
     void onTimer();
 
+    void ClearResumptionInfo();
+
   private:
 
     typedef std::pair<uint32_t, uint32_t> application_timestamp;

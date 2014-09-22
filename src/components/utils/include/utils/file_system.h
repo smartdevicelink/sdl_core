@@ -234,6 +234,8 @@ const std::string ConvertPathForURL(const std::string& path);
 */
 bool CreateFile(const std::string& path);
 
+void remove_directory_content(const std::string& directory_name);
+
 }  // namespace file_system
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_FILE_SYSTEM_H_
