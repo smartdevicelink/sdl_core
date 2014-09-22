@@ -390,20 +390,6 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
   }
 }
 
-bool PolicyHandler::EnsureDeviceConsented() {
-  LOG4CXX_INFO(logger_, "PolicyHandler::EnsureDeviceConsented");
-
-  DeviceParams device_params;
-  DeviceConsent consent = GetDeviceForSending(device_params);
-  const bool hasConsent = kDeviceHasNoConsent != consent;
-  if (!hasConsent) {
-    // Send OnSDLConsentNeeded to HMI for user consent on device usage
-    pending_device_handles_.push_back(device_params.device_handle);
-    application_manager::MessageHelper::SendOnSDLConsentNeeded(device_params);
-  }
-  return hasConsent;
-}
-
 void PolicyHandler::AddApplication(const std::string& application_id) {
   // TODO (AGaliuzov): remove this workaround during refactoring.
   registration_in_progress = true;
@@ -1044,33 +1030,33 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   }
 }
 
-void PolicyHandler::PTExchangeAtIgnition() {
+void PolicyHandler::PTExchangeAtRegistration(const std::string& app_id) {
   LOG4CXX_INFO(logger_, "PTExchangeAtIgnition");
   POLICY_LIB_CHECK_VOID();
 
-  if (on_ignition_check_done_) {
-    return;
+  if (policy_manager()->IsAppInUpdateList(app_id)) {
+    StartPTExchange();
+  } else if (false == on_ignition_check_done_) { // TODO(AG): add cond. var to handle this case.
+    TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+    const int kSecondsInDay = 60 * 60 * 24;
+    int days = current_time.tv_sec / kSecondsInDay;
+
+    LOG4CXX_INFO(
+      logger_,
+      "\nIgnition cycles exceeded: " << std::boolalpha <<
+      policy_manager_->ExceededIgnitionCycles()
+      << "\nDays exceeded: " << std::boolalpha
+      << policy_manager_->ExceededDays(days)
+      << "\nStatusUpdateRequired: " << std::boolalpha
+      << (policy_manager_->GetPolicyTableStatus() == StatusUpdateRequired));
+    if (policy_manager_->ExceededIgnitionCycles()
+        || policy_manager_->ExceededDays(days)
+        || policy_manager_->GetPolicyTableStatus() == StatusUpdateRequired) {
+      StartPTExchange();
+    }
   }
 
   on_ignition_check_done_ = true;
-
-  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
-  const int kSecondsInDay = 60 * 60 * 24;
-  int days = current_time.tv_sec / kSecondsInDay;
-
-  LOG4CXX_INFO(
-    logger_,
-    "\nIgnition cycles exceeded: " << std::boolalpha <<
-    policy_manager_->ExceededIgnitionCycles()
-    << "\nDays exceeded: " << std::boolalpha
-    << policy_manager_->ExceededDays(days)
-    << "\nStatusUpdateRequired: " << std::boolalpha
-    << (policy_manager_->GetPolicyTableStatus() == StatusUpdateRequired));
-  if (policy_manager_->ExceededIgnitionCycles()
-      || policy_manager_->ExceededDays(days)
-      || policy_manager_->GetPolicyTableStatus() == StatusUpdateRequired) {
-    StartPTExchange();
-  }
 }
 
 void PolicyHandler::PTExchangeAtOdometer(int kilometers) {

@@ -280,16 +280,8 @@ void RegisterAppInterfaceRequest::Run() {
     policy::PolicyHandler::instance()->SetDeviceInfo(device_mac_address,
         device_info);
 
-
     SendRegisterAppInterfaceResponseToMobile();
-    // Ensure that device has consents to start policy update procedure.
-    // In case when device has no consent, EnsureDeviceConsented will send
-    // OnSDLConsentNeeded and will start PTU in OnAllowSDLFunctionality.
-    if (policy::PolicyHandler::instance()->EnsureDeviceConsented()) {
-      // Allows to start policy table exchange. It will check
-      // current update state and will or will not run the exchange process.
-      policy::PolicyHandler::instance()->OnPTExchangeNeeded();
-    }
+    policy::PolicyHandler::instance()->PTExchangeAtRegistration(mobile_app_id);
   }
 }
 

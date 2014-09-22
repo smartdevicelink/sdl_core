@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -344,6 +344,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @param Application id assigned by Ford to the application
      */
     virtual void AddApplication(const std::string& application_id) = 0;
+
+    /**
+     * @brief IsAppInUpdateList allows to check if specific application
+     * presents in update list.
+     * @param app_id id of the application that should be verified.
+     * @return true in case of application is in update list, false otherwise.
+     */
+    virtual bool IsAppInUpdateList(const std::string& app_id) const = 0;
 
     /**
      * @brief Removes unpaired device records and related records from DB

@@ -1205,7 +1205,7 @@ bool CacheManager::IsPredataPolicy(const std::string &app_id) {
 
 bool CacheManager::SetUnpairedDevice(const std::string &device_id) {
 
-  const bool result = is_predata_.end() != is_unpaired_.find(device_id);
+  const bool result = is_unpaired_.end() != is_unpaired_.find(device_id);
   if (result) {
     is_unpaired_[device_id] = true;
   }
