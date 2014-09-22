@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -520,6 +520,10 @@ std::vector<UserFriendlyMessage> SQLPTExtRepresentation::GetUserFriendlyMsg(
 
 bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
     policy_table::ConsumerFriendlyMessages* messages) const {
+  if (NULL == messages) {
+    LOG4CXX_ERROR(logger_, "NULL pointer has been passed to fill");
+    return false;
+  }
   dbms::SQLQuery query(db());
   bool result = query.Prepare(sql_pt_ext::kCollectFriendlyMsg);
 
@@ -553,7 +557,7 @@ bool SQLPTExtRepresentation::GatherConsumerFriendlyMessages(
 bool SQLPTExtRepresentation::SetMetaInfo(const std::string& ccpu_version,
     const std::string& wers_country_code,
     const std::string& language) {
-  LOG4CXX_INFO(logger_, "SetMetaInfo");
+  LOG4CXX_TRACE_ENTER(logger_);
   dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kUpdateMetaParams)) {
     LOG4CXX_WARN(logger_, "Incorrect statement for insert to module meta.");
@@ -568,7 +572,7 @@ bool SQLPTExtRepresentation::SetMetaInfo(const std::string& ccpu_version,
     LOG4CXX_WARN(logger_, "Incorrect insert to module meta.");
     return false;
   }
-
+  LOG4CXX_TRACE_EXIT(logger_);
   return true;
 }
 
@@ -819,14 +823,13 @@ bool SQLPTExtRepresentation::GatherAppLevels(
                  << query.LastError().text());
     return false;
   }
-  const int kSecondsInMinute = 60;
   while (query.Next()) {
     policy_table::AppLevel level;
     // value of time fields database is seconds
-    level.minutes_in_hmi_full = query.GetInteger(1) / kSecondsInMinute;
-    level.minutes_in_hmi_limited = query.GetInteger(2) / kSecondsInMinute;
-    level.minutes_in_hmi_background = query.GetInteger(3) / kSecondsInMinute;
-    level.minutes_in_hmi_none = query.GetInteger(4) / kSecondsInMinute;
+    level.minutes_in_hmi_full = query.GetInteger(1);
+    level.minutes_in_hmi_limited = query.GetInteger(2);
+    level.minutes_in_hmi_background = query.GetInteger(3);
+    level.minutes_in_hmi_none = query.GetInteger(4);
     level.count_of_user_selections = query.GetInteger(5);
     level.count_of_rejections_sync_out_of_memory = query.GetInteger(6);
     level.count_of_rejections_nickname_mismatch = query.GetInteger(7);
@@ -1336,6 +1339,45 @@ bool SQLPTExtRepresentation::SaveMessageString(
     return false;
   }
 
+  return true;
+}
+
+bool SQLPTExtRepresentation::SaveUsageAndErrorCounts(
+    const policy_table::UsageAndErrorCounts& counts) {
+  LOG4CXX_INFO(logger_, "SaveUsageAndErrorCounts");
+  dbms::SQLQuery query(db());
+  if (!query.Exec(sql_pt::kDeleteAppLevel)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from app level.");
+    return false;
+  }
+  if (!query.Prepare(sql_pt::kInsertAppLevel)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for app level.");
+    return false;
+  }
+
+  policy_table::AppLevels::const_iterator it;
+  const policy_table::AppLevels& app_levels = *counts.app_level;
+  for (it = app_levels.begin(); it != app_levels.end(); ++it) {
+    query.Bind(0, it->first);
+    query.Bind(1, it->second.minutes_in_hmi_full);
+    query.Bind(2, it->second.minutes_in_hmi_limited);
+    query.Bind(3, it->second.minutes_in_hmi_background);
+    query.Bind(4, it->second.minutes_in_hmi_none);
+    query.Bind(5, it->second.count_of_user_selections);
+    query.Bind(6, it->second.count_of_rejections_sync_out_of_memory);
+    query.Bind(7, it->second.count_of_rejections_nickname_mismatch);
+    query.Bind(8, it->second.count_of_rejections_duplicate_name);
+    query.Bind(9, it->second.count_of_rejected_rpc_calls);
+    query.Bind(10, it->second.count_of_rpcs_sent_in_hmi_none);
+    query.Bind(11, it->second.count_of_removals_for_bad_behavior);
+    query.Bind(12, it->second.count_of_run_attempts_while_revoked);
+    query.Bind(13, it->second.app_registration_language_gui);
+    query.Bind(14, it->second.app_registration_language_vui);
+    if (!query.Exec()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into app level.");
+      return false;
+    }
+  }
   return true;
 }
 

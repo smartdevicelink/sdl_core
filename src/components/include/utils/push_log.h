@@ -29,43 +29,19 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "protocol/service_type.h"
 
-#include "utils/logger.h"
-#include "utils/macro.h"
+#ifndef SRC_COMPONENTS_INCLUDE_UTILS_PUSH_LOG_H_
+#define SRC_COMPONENTS_INCLUDE_UTILS_PUSH_LOG_H_
 
-namespace protocol_handler {
+#include <log4cxx/logger.h>
+#include <string>
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
+#include "utils/log_level.h"
 
-namespace {
-// Check if provided service value is one of the specified
-bool IsValid(ServiceType service_type) {
-  switch (service_type) {
-    case kControl:
-    case kRpc:
-    case kAudio:
-    case kMobileNav:
-    case kBulk:
-      return true;
-    default:
-      return false;
-  }
-}
-}  // namespace
+namespace logger {
 
-ServiceType ServiceTypeFromByte(uint8_t byte) {
-  ServiceType type = ServiceType(byte);
-  const bool valid_type = IsValid(type);
-  if (!valid_type) {
-    LOG4CXX_INFO(logger_, "Invalid service type: "<< int32_t(byte));
-  }
-  return valid_type ? type : kInvalidServiceType;
-}
+bool push_log(log4cxx::LoggerPtr logger, LogLevel level, const std::string& entry, const log4cxx::spi::LocationInfo& location);
 
-uint8_t ServiceTypeToByte(ServiceType type) {
-  DCHECK(IsValid(type));
-  return uint8_t(type);
-}
+}  // namespace logger
 
-}  // namespace protocol_handler
+#endif  // SRC_COMPONENTS_INCLUDE_UTILS_PUSH_LOG_H_

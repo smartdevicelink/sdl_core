@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -83,16 +83,17 @@ SQLPTRepresentation::~SQLPTRepresentation() {
   delete db_;
 }
 
-CheckPermissionResult SQLPTRepresentation::CheckPermissions(
-  const PTString& app_id, const PTString& hmi_level, const PTString& rpc) {
-  CheckPermissionResult result;
+void SQLPTRepresentation::CheckPermissions(const PTString& app_id,
+                                           const PTString& hmi_level,
+                                           const PTString& rpc,
+                                           CheckPermissionResult& result) {
   dbms::SQLQuery query(db());
 
   if (!query.Prepare(sql_pt::kSelectRpc)) {
     LOG4CXX_WARN(
       logger_,
       "Incorrect select statement from rpcs" << query.LastError().text());
-    return result;
+    return;
   }
   query.Bind(0, app_id);
   query.Bind(1, hmi_level);
@@ -108,16 +109,11 @@ CheckPermissionResult SQLPTRepresentation::CheckPermissions(
   std::string parameter;
   while (ret) {
     if (!query.IsNull(0)) {
-      if (!result.list_of_allowed_params) {
-        result.list_of_allowed_params = new std::vector<PTString>();
-      }
       parameter = query.GetString(0);
-      result.list_of_allowed_params->push_back(parameter);
+      result.list_of_allowed_params.push_back(parameter);
     }
     ret = query.Next();
   }
-
-  return result;
 }
 
 bool SQLPTRepresentation::IsPTPreloaded() {
@@ -1175,7 +1171,6 @@ bool SQLPTRepresentation::SaveUsageAndErrorCounts(
       return false;
     }
   }
-
   return true;
 }
 

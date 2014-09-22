@@ -11,6 +11,7 @@
 #include "utils/system.h"
 #include "utils/signals.h"
 #include "utils/file_system.h"
+#include "utils/log_message_loop_thread.h"
 #include "config_profile/profile.h"
 
 #include "hmi_message_handler/hmi_message_handler_impl.h"
@@ -39,12 +40,12 @@ namespace {
 // --------------------------------------------------------------------------
 // Logger initialization
 
-CREATE_LOGGERPTR_GLOBAL(logger, "SmartDeviceLinkMainApp")
+CREATE_LOGGERPTR_GLOBAL(logger_, "SmartDeviceLinkMainApp")
 
 // TODO: Remove this code when PASA will support SDL_MSG_START_USB_LOGGING
 // Start section
 bool remoteLoggingFlagFileExists(const std::string& name) {
-  LOG4CXX_INFO(logger, "Check path: " << name);
+  LOG4CXX_INFO(logger_, "Check path: " << name);
 
   struct stat buffer;
   return (stat (name.c_str(), &buffer) == 0);
@@ -82,7 +83,7 @@ void setupRollingFileLogger() {
   LOG4CXX_DECODE_CHAR(logFileName, paramFileName);
   LOG4CXX_DECODE_CHAR(logFileMaxSize, paramLogFileMaxSize);
 
-  log4cxx::LoggerPtr rootLogger = logger->getLoggerRepository()->getRootLogger();
+  log4cxx::LoggerPtr rootLogger = logger_->getLoggerRepository()->getRootLogger();
   log4cxx::RollingFileAppenderPtr fileAppender = rootLogger->getAppender(logFileAppender);
 
   rootLogger->removeAppender("LogFile");
@@ -108,7 +109,7 @@ void setupFileLogger() {
   LOG4CXX_DECODE_CHAR(logFileAppender, paramFileAppender);
   LOG4CXX_DECODE_CHAR(logFileName, paramFileName );
 
-  log4cxx::LoggerPtr rootLogger = logger->getLoggerRepository()->getRootLogger();
+  log4cxx::LoggerPtr rootLogger = logger_->getLoggerRepository()->getRootLogger();
   log4cxx::FileAppenderPtr fileAppender = rootLogger->getAppender(logFileAppender);
 
   rootLogger->removeAppender("RollingLogFile");
@@ -129,7 +130,7 @@ void configureLogging() {
 }
 
 void startUSBLogging() {
-  LOG4CXX_INFO(logger, "Enable logging to USB");
+  LOG4CXX_INFO(logger_, "Enable logging to USB");
 
   int bootCount = getBootCount();
   std::stringstream stream;
@@ -142,7 +143,7 @@ void startUSBLogging() {
                        profile::Profile::instance()->target_log_file_name_pattern();
 
   if (!currentLogFilePath.empty()) {
-     LOG4CXX_INFO(logger, "Copy existing log info to USB from " << currentLogFilePath);
+     LOG4CXX_INFO(logger_, "Copy existing log info to USB from " << currentLogFilePath);
 
      std::vector<uint8_t> targetLogFileContent;
 
@@ -159,7 +160,7 @@ void startUSBLogging() {
   LOG4CXX_DECODE_CHAR(logFileAppender, paramFileAppender);
   LOG4CXX_DECODE_CHAR(logFileName, paramFileName );
 
-  log4cxx::LoggerPtr rootLogger = logger->getLoggerRepository()->getRootLogger();
+  log4cxx::LoggerPtr rootLogger = logger_->getLoggerRepository()->getRootLogger();
 
   log4cxx::FileAppenderPtr fileAppender = rootLogger->getAppender(logFileAppender);
 
@@ -172,8 +173,8 @@ void startUSBLogging() {
 
 void startSmartDeviceLink()
 {
-  LOG4CXX_INFO(logger, " Application started!");
-  LOG4CXX_INFO(logger, "Boot count: " << getBootCount());
+  LOG4CXX_INFO(logger_, " Application started!");
+  LOG4CXX_INFO(logger_, "Boot count: " << getBootCount());
 
   // --------------------------------------------------------------------------
   // Components initialization
@@ -192,7 +193,7 @@ void startSmartDeviceLink()
   // End section
 
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
-    LOG4CXX_INFO(logger, "StartComponents failed.");
+    LOG4CXX_INFO(logger_, "StartComponents failed.");
     exit(EXIT_FAILURE);
   }
 
@@ -200,19 +201,19 @@ void startSmartDeviceLink()
   // Third-Party components initialization.
 
   if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
-    LOG4CXX_INFO(logger, "InitMessageBroker failed");
+    LOG4CXX_INFO(logger_, "InitMessageBroker failed");
     exit(EXIT_FAILURE);
   }
-  LOG4CXX_INFO(logger, "InitMessageBroker successful");
+  LOG4CXX_INFO(logger_, "InitMessageBroker successful");
 
   // --------------------------------------------------------------------------
 }
 
 void stopSmartDeviceLink()
 {
-  LOG4CXX_INFO(logger, " LifeCycle stopping!");
+  LOG4CXX_INFO(logger_, " LifeCycle stopping!");
   main_namespace::LifeCycle::instance()->StopComponents();
-  LOG4CXX_INFO(logger, " LifeCycle stopped!");
+  LOG4CXX_INFO(logger_, " LifeCycle stopped!");
 
   g_bTerminate = true;
 }
@@ -238,7 +239,7 @@ void ApplinkNotificationThreadDelegate::threadMain() {
   utils::System policy_init(kShellInterpreter);
   policy_init.Add(kPolicyInitializationScript);
   if (!policy_init.Execute(true)) {
-    LOG4CXX_ERROR(logger, "QDB initialization failed.");
+    LOG4CXX_ERROR(logger_, "QDB initialization failed.");
   }
 #endif
 
@@ -268,9 +269,9 @@ int main(int argc, char** argv) {
   threads::Thread::MaskSignals();
   threads::Thread::SetMainThread();
 
-  LOG4CXX_INFO(logger, "Snapshot: {TAG}");
-  LOG4CXX_INFO(logger, "Git commit: {GIT_COMMIT}");
-  LOG4CXX_INFO(logger, "Application main()");
+  LOG4CXX_INFO(logger_, "Snapshot: {TAG}");
+  LOG4CXX_INFO(logger_, "Git commit: {GIT_COMMIT}");
+  LOG4CXX_INFO(logger_, "Application main()");
 
   utils::SharedPtr<threads::Thread> applink_notification_thread =
       new threads::Thread("ApplinkNotify", new ApplinkNotificationThreadDelegate());
@@ -280,10 +281,11 @@ int main(int argc, char** argv) {
   threads::Thread::UnmaskSignals();
   pause();
 
-  LOG4CXX_INFO(logger, "Stopping application due to signal caught");
+  LOG4CXX_INFO(logger_, "Stopping application due to signal caught");
   stopSmartDeviceLink();
 
-  LOG4CXX_INFO(logger, "Application successfully stopped");
+  LOG4CXX_INFO(logger_, "Application successfully stopped");
+  logger::LogMessageLoopThread::destroy();
   DEINIT_LOGGER();
   return EXIT_SUCCESS;
 }

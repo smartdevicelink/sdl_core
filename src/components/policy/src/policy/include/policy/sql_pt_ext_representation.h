@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -152,6 +152,9 @@ class SQLPTExtRepresentation : public SQLPTRepresentation,
                                const policy_table::Strings& groups);
     bool SaveMessageString(const std::string& type, const std::string& lang,
                            const policy_table::MessageString& strings);
+
+    virtual bool SaveUsageAndErrorCounts(
+        const policy_table::UsageAndErrorCounts& counts);
 
     bool IsExistAppLevel(const std::string& app_id) const;
 

@@ -500,7 +500,22 @@ static std::map<std::string, uint16_t> vehicle_data_args = create_get_vehicle_da
 #endif
 
 void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, const std::vector<std::string>& params) {
-#ifdef HMI_JSON_API
+#ifdef HMI_DBUS_API
+  for (std::vector<std::string>::const_iterator it = params.begin();
+       it != params.end(); it++) {
+    smart_objects::SmartObject* request = new smart_objects::SmartObject;
+
+    (*request)[strings::params][strings::message_type] = static_cast<int>(kRequest);
+    (*request)[strings::params][strings::correlation_id] = correlation_id;
+    (*request)[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+    (*request)[strings::params][strings::protocol_type] =
+      commands::CommandImpl::hmi_protocol_type_;
+    (*request)[strings::params][strings::function_id] =
+      static_cast<int>(vehicle_data_args[*it]);
+    ApplicationManagerImpl::instance()->ManageHMICommand(request);
+  }
+#else
   smart_objects::SmartObject* request = new smart_objects::SmartObject;
 
   (*request)[strings::params][strings::message_type] = static_cast<int>(kRequest);
@@ -517,23 +532,6 @@ void MessageHelper::CreateGetVehicleDataRequest(uint32_t correlation_id, const s
     (*request)[strings::msg_params][*it] = true;
   }
   ApplicationManagerImpl::instance()->ManageHMICommand(request);
-#endif
-
-#ifdef HMI_DBUS_API
-  for (std::vector<std::string>::const_iterator it = params.begin();
-       it != params.end(); it++) {
-    smart_objects::SmartObject* request = new smart_objects::SmartObject;
-
-    (*request)[strings::params][strings::message_type] = static_cast<int>(kRequest);
-    (*request)[strings::params][strings::correlation_id] = correlation_id;
-    (*request)[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-    (*request)[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-    (*request)[strings::params][strings::function_id] =
-      static_cast<int>(vehicle_data_args[*it]);
-    ApplicationManagerImpl::instance()->ManageHMICommand(request);
-  }
 #endif
 }
 
@@ -2165,8 +2163,9 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
       case mobile_apis::SoftButtonType::SBT_BOTH: {
 
         if ((!request_soft_buttons[i].keyExists(strings::text)) ||
-            (!VerifySoftButtonString(
-                request_soft_buttons[i][strings::text].asString()))) {
+            ((request_soft_buttons[i][strings::text].length())
+                && (!VerifySoftButtonString(
+                request_soft_buttons[i][strings::text].asString())))) {
           return mobile_apis::Result::INVALID_DATA;
         }
 

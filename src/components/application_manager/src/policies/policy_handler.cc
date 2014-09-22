@@ -881,6 +881,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
     DeviceParams device_params;
     application_manager::MessageHelper::GetDeviceInfoForHandle(device_id,
         &device_params);
+    device_params.device_handle = device_id;
     if (kDefaultDeviceMacAddress == device_params.device_mac_address) {
       LOG4CXX_WARN(logger_, "Device with handle " << device_id
                    << " wasn't found.");

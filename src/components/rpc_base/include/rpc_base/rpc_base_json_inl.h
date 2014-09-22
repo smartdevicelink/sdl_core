@@ -199,8 +199,10 @@ String<minlen, maxlen>::String(const Json::Value* value)
 template<size_t minlen, size_t maxlen>
 String<minlen, maxlen>::String(const Json::Value* value, const std::string& def_value)
   : PrimitiveType(InitHelper(value, &Json::Value::isString)),
-    value_(is_valid() ? value->asString() : def_value) {
-  if (is_valid()) {
+    value_(def_value) {
+  if (!is_initialized()) {
+    value_state_ = kValid;
+  } else if (is_valid()) {
     value_state_ = length_range_.Includes(value_.length()) ? kValid : kInvalid;
   }
 }

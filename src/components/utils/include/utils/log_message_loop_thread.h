@@ -29,43 +29,51 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "protocol/service_type.h"
 
-#include "utils/logger.h"
-#include "utils/macro.h"
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOG_MESSAGE_LOOP_THREAD_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOG_MESSAGE_LOOP_THREAD_H_
 
-namespace protocol_handler {
+#include <string>
+#include <queue>
+#include <log4cxx/logger.h>
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
+#include "utils/threads/message_loop_thread.h"
+#include "utils/log_level.h"
+#include "utils/singleton.h"
 
-namespace {
-// Check if provided service value is one of the specified
-bool IsValid(ServiceType service_type) {
-  switch (service_type) {
-    case kControl:
-    case kRpc:
-    case kAudio:
-    case kMobileNav:
-    case kBulk:
-      return true;
-    default:
-      return false;
-  }
-}
-}  // namespace
+namespace logger {
 
-ServiceType ServiceTypeFromByte(uint8_t byte) {
-  ServiceType type = ServiceType(byte);
-  const bool valid_type = IsValid(type);
-  if (!valid_type) {
-    LOG4CXX_INFO(logger_, "Invalid service type: "<< int32_t(byte));
-  }
-  return valid_type ? type : kInvalidServiceType;
-}
+typedef struct {
+  log4cxx::LoggerPtr logger;
+  LogLevel level;
+  std::string entry;
+  log4cxx::spi::LocationInfo location;
+} LogMessage;
 
-uint8_t ServiceTypeToByte(ServiceType type) {
-  DCHECK(IsValid(type));
-  return uint8_t(type);
-}
+typedef std::queue<LogMessage> LogMessageQueue;
 
-}  // namespace protocol_handler
+typedef threads::MessageLoopThread<LogMessageQueue> LogMessageLoopThreadTemplate;
+
+class LogMessageHandler : public LogMessageLoopThreadTemplate::Handler {
+ public:
+  virtual void Handle(const LogMessage message) OVERRIDE;
+};
+
+class LogMessageLoopThread :
+  public LogMessageLoopThreadTemplate,
+  public utils::Singleton<LogMessageLoopThread> {
+
+ public:
+  ~LogMessageLoopThread();
+
+ private:
+  LogMessageLoopThread();
+
+DISALLOW_COPY_AND_ASSIGN(LogMessageLoopThread);
+FRIEND_BASE_SINGLETON_CLASS(LogMessageLoopThread);
+
+};
+
+}  // namespace logger
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOG_MESSAGE_LOOP_THREAD_H_

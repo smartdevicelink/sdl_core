@@ -328,7 +328,7 @@ bool BluetoothPASAConnection::Receive() {
       break;
     }
     LOG4CXX_ERROR(logger_, "recv() failed for connection " << this
-                  << ", error code " << errno_value << " (" << strerror(errno_value) << ")")
+                  << ", error code " << errno_value << " (" << strerror(errno_value) << ")");
     LOG4CXX_TRACE_EXIT(logger_);
     return false;
   }

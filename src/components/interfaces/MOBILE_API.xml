@@ -642,11 +642,7 @@
     <element name="sliderFooter">
       <description> Footer text for slider</description>
     </element>
-    
-    <element name="notificationText">
-      <description> Footer text for slider</description>
-    </element>
-    
+
     <element name="menuName">
       <description> Primary text for Choice</description>
     </element>
@@ -658,20 +654,29 @@
     <element name="tertiaryText">
       <description> Tertiary text for Choice</description>
     </element>
-    
-    <element name="timeToDestination">
-    	<description> Time to destination</description>
-    </element>
-    
-    <element name="turnText">
-        <description> Turn text</description>
-    </element>
 
     <element name="menuTitle">
       <description> Optional text to label an app menu button (for certain touchscreen platforms).</description>
     </element>
-</enum>
-  
+
+    <element name="timeToDestination">
+    	<description> Time to destination</description>
+    </element>
+    
+    <element name="navigationText">
+       <description>Navigation text for UpdateTurnList.</description>
+    </element>
+
+    <element name="notificationText">
+      <description> Footer text for slider</description>
+    </element>
+
+    <element name="turnText">
+        <description> Turn text</description>
+    </element>
+
+  </enum>
+
   <enum name="ImageFieldName">
     <element name="softButtonImage">
       <description>The image field for SoftButton</description>

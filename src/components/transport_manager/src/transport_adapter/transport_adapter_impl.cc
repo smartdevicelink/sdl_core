@@ -605,7 +605,7 @@ DeviceSptr TransportAdapterImpl::FindDevice(const DeviceUID& device_id) const {
   if (it != devices_.end()) {
     ret = it->second;
   } else {
-    LOG4CXX_WARN(logger_, "Device " << device_id << " not found.")
+    LOG4CXX_WARN(logger_, "Device " << device_id << " not found.");
   }
   pthread_mutex_unlock(&devices_mutex_);
   LOG4CXX_TRACE(logger_, "exit with DeviceSptr: " << ret);

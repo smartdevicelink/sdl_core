@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -272,14 +272,13 @@ std::string PolicyManagerImpl::GetUpdateUrl(int service_type) {
 
   static uint32_t index = 0;
   std::string url;
-  if (index < urls.size()) {
-    url = urls[index].url[0];
-  } else if (!urls.empty()) {
-    index = 0;
-    url = urls[index].url[0];
-  }
-  ++index;
 
+  if (!urls.empty() && index >= urls.size()) {
+    index = 0;
+  }
+  url = urls[index].url.empty() ? "" :urls[index].url[0];
+
+  ++index;
   return url;
 }
 
@@ -316,8 +315,10 @@ BinaryMessageSptr PolicyManagerImpl::RequestPTUpdate() {
   return new BinaryMessage(message_string.begin(), message_string.end());
 }
 
-CheckPermissionResult PolicyManagerImpl::CheckPermissions(
-  const PTString& app_id, const PTString& hmi_level, const PTString& rpc) {
+void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
+                                         const PTString& hmi_level,
+                                          const PTString& rpc,
+                                          CheckPermissionResult& result) {
   LOG4CXX_INFO(
     logger_,
     "CheckPermissions for " << app_id << " and rpc " << rpc << " for "
@@ -353,11 +354,9 @@ CheckPermissionResult PolicyManagerImpl::CheckPermissions(
                                    GroupConsent::kGroupUndefined);
   std::for_each(app_groups.begin(), app_groups.end(), processor);
 
-  CheckPermissionResult result;
   if (rpc_permissions.end() == rpc_permissions.find(rpc)) {
     // RPC not found in list == disallowed by backend
     result.hmi_level_permitted = kRpcDisallowed;
-    return result;
   }
 
   // Check HMI level
@@ -377,25 +376,20 @@ CheckPermissionResult PolicyManagerImpl::CheckPermissions(
   }
 
   // Add parameters of RPC, if any
-  result.list_of_allowed_params = new std::vector<PTString>();
   std::copy(rpc_permissions[rpc].parameter_permissions[kAllowedKey].begin(),
             rpc_permissions[rpc].parameter_permissions[kAllowedKey].end(),
-            std::back_inserter(*result.list_of_allowed_params));
+            std::back_inserter(result.list_of_allowed_params));
 
-  result.list_of_disallowed_params = new std::vector<PTString>();
   std::copy(
         rpc_permissions[rpc].parameter_permissions[kUserDisallowedKey].begin(),
         rpc_permissions[rpc].parameter_permissions[kUserDisallowedKey].end(),
-        std::back_inserter(*result.list_of_disallowed_params));
+        std::back_inserter(result.list_of_disallowed_params));
 
-  result.list_of_undefined_params = new std::vector<PTString>();
   std::copy(rpc_permissions[rpc].parameter_permissions[kUndefinedKey].begin(),
             rpc_permissions[rpc].parameter_permissions[kUndefinedKey].end(),
-            std::back_inserter(*result.list_of_undefined_params));
-
-  return result;
+            std::back_inserter(result.list_of_undefined_params));
 #else
-  return cache.CheckPermissions(app_id, hmi_level, rpc);
+  cache.CheckPermissions(app_id, hmi_level, rpc, result);
 #endif
 }
 
@@ -709,7 +703,6 @@ void PolicyManagerImpl::GetUserConsentForApp(
   const std::string& device_id, const std::string& policy_app_id,
   std::vector<FunctionalGroupPermission>& permissions) {
   LOG4CXX_INFO(logger_, "GetUserConsentForApp");
-#ifdef EXTENDED_POLICY
 
   FunctionalIdType group_types;
   if (!cache.GetPermissionsForApp(device_id, policy_app_id,
@@ -736,6 +729,7 @@ void PolicyManagerImpl::GetUserConsentForApp(
     }
   }
 
+#ifdef EXTENDED_POLICY
   FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
   FunctionalGroupIDs preconsented_groups = group_types[kTypePreconsented];
   FunctionalGroupIDs consent_allowed_groups = group_types[kTypeAllowed];
@@ -782,7 +776,21 @@ void PolicyManagerImpl::GetUserConsentForApp(
                                  kGroupDisallowed, permissions);
 #else
   // For basic policy
-  permissions = std::vector<FunctionalGroupPermission>();
+  FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
+  FunctionalGroupIDs default_groups = group_types[kTypeDefault];
+  FunctionalGroupIDs predataconsented_groups =
+      group_types[kTypePreDataConsented];
+
+  FunctionalGroupIDs allowed_groups;
+  FunctionalGroupIDs no_auto = ExcludeSame(all_groups, auto_allowed_groups);
+
+  if (cache.IsDefaultPolicy(policy_app_id)) {
+    allowed_groups = ExcludeSame(no_auto, default_groups);
+  } else if (cache.IsPredataPolicy(policy_app_id)) {
+    allowed_groups = ExcludeSame(no_auto, predataconsented_groups);
+  }
+  FillFunctionalGroupPermissions(allowed_groups, group_names,
+                                 kGroupAllowed, permissions);
 #endif
 }
 
@@ -790,7 +798,6 @@ void PolicyManagerImpl::GetPermissionsForApp(
   const std::string& device_id, const std::string& policy_app_id,
   std::vector<FunctionalGroupPermission>& permissions) {
   LOG4CXX_INFO(logger_, "GetPermissionsForApp");
-#ifdef EXTENDED_POLICY
   std::string app_id_to_check = policy_app_id;  
 
   bool allowed_by_default = false;
@@ -829,14 +836,13 @@ void PolicyManagerImpl::GetPermissionsForApp(
                                    kGroupAllowed, permissions);
   } else {
 
-    LOG4CXX_INFO(logger_, "Get user's allowed groups.");
-
     // The code bellow allows to process application which
     // has specific permissions(not default and pre_DataConsent).
 
     // All groups for specific application
     FunctionalGroupIDs all_groups = group_types[kTypeGeneral];
 
+#ifdef EXTENDED_POLICY
     // Groups assigned by the user for specific application
     FunctionalGroupIDs allowed_groups = group_types[kTypeAllowed];
 
@@ -875,12 +881,14 @@ void PolicyManagerImpl::GetPermissionsForApp(
                                    kGroupAllowed, permissions);
     FillFunctionalGroupPermissions(common_disallowed, group_names,
                                    kGroupDisallowed, permissions);
+#else
+    // In case of GENIVI all groups are allowed
+    FunctionalGroupIDs common_allowed = all_groups;
+    FillFunctionalGroupPermissions(common_allowed, group_names,
+                                   kGroupAllowed, permissions);
+#endif
   }
   return;
-#else
-  // For basic policy
-  permissions = std::vector<FunctionalGroupPermission>();
-#endif
 }
 
 std::string& PolicyManagerImpl::GetCurrentDeviceId(
@@ -999,112 +1007,39 @@ void PolicyManagerImpl::PTUpdatedAt(int kilometers, int days_after_epoch) {
 }
 
 void PolicyManagerImpl::Increment(usage_statistics::GlobalCounterId type) {
-  std::string counter;
-  switch (type) {
-    case usage_statistics::IAP_BUFFER_FULL:
-      counter = "count_of_iap_buffer_full";
-      break;
-    case usage_statistics::SYNC_OUT_OF_MEMORY:
-      counter = "count_sync_out_of_memory";
-      break;
-    case usage_statistics::SYNC_REBOOTS:
-      counter = "count_of_sync_reboots";
-      break;
-    default:
-      LOG4CXX_INFO(logger_, "Type global counter is unknown");
-      return;
-  }
+  LOG4CXX_INFO(logger_, "Increment without app id" );
+  sync_primitives::AutoLock locker(statistics_lock_);
 #ifdef EXTENDED_POLICY
-  cache.Increment(counter);
+  cache.Increment(type);
 #endif
 }
 
 void PolicyManagerImpl::Increment(const std::string& app_id,
                                   usage_statistics::AppCounterId type) {
-  std::string counter;
-  switch (type) {
-    case usage_statistics::USER_SELECTIONS:
-      counter = "count_of_user_selections";
-      break;
-    case usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY:
-      counter = "count_of_rejections_sync_out_of_memory";
-      break;
-    case usage_statistics::REJECTIONS_NICKNAME_MISMATCH:
-      counter = "count_of_rejections_nickname_mismatch";
-      break;
-    case usage_statistics::REJECTIONS_DUPLICATE_NAME:
-      counter = "count_of_rejections_duplicate_name";
-      break;
-    case usage_statistics::REJECTED_RPC_CALLS:
-      counter = "count_of_rejected_rpcs_calls";
-      break;
-    case usage_statistics::RPCS_IN_HMI_NONE:
-      counter = "count_of_rpcs_sent_in_hmi_none";
-      break;
-    case usage_statistics::REMOVALS_MISBEHAVED:
-      counter = "count_of_removals_for_bad_behavior";
-      break;
-    case usage_statistics::RUN_ATTEMPTS_WHILE_REVOKED:
-      counter = "count_of_run_attempts_while_revoked";
-      break;
-    default:
-      LOG4CXX_INFO(logger_, "Type app counter is unknown");
-      return;
-  }
-#ifdef EXTENDED_POLICY
+  LOG4CXX_INFO(logger_, "Increment " << app_id);
   sync_primitives::AutoLock locker(statistics_lock_);
-  cache.Increment(app_id, counter);
+#ifdef EXTENDED_POLICY
+  cache.Increment(app_id, type);
 #endif
 }
 
 void PolicyManagerImpl::Set(const std::string& app_id,
                             usage_statistics::AppInfoId type,
                             const std::string& value) {
-  std::string info;
-  switch (type) {
-    case usage_statistics::LANGUAGE_GUI:
-      info = "app_registration_language_gui";
-      break;
-    case usage_statistics::LANGUAGE_VUI:
-      info = "app_registration_language_vui";
-      break;
-    default:
-      LOG4CXX_INFO(logger_, "Type app info is unknown");
-      return;
-  }
-
-#ifdef EXTENDED_POLICY
+  LOG4CXX_INFO(logger_, "Set " << app_id);
   sync_primitives::AutoLock locker(statistics_lock_);
-  cache.Set(app_id, info, value);
+#ifdef EXTENDED_POLICY
+  cache.Set(app_id, type, value);
 #endif
 }
 
 void PolicyManagerImpl::Add(const std::string& app_id,
                             usage_statistics::AppStopwatchId type,
                             int32_t timespan_seconds) {
-#ifdef EXTENDED_POLICY
-  std::string stopwatch;
-  switch (type) {
-    // TODO(KKolodiy): rename fields in database
-    case usage_statistics::SECONDS_HMI_FULL:
-      stopwatch = "minutes_in_hmi_full";
-      break;
-    case usage_statistics::SECONDS_HMI_LIMITED:
-      stopwatch = "minutes_in_hmi_limited";
-      break;
-    case usage_statistics::SECONDS_HMI_BACKGROUND:
-      stopwatch = "minutes_in_hmi_background";
-      break;
-    case usage_statistics::SECONDS_HMI_NONE:
-      stopwatch = "minutes_in_hmi_none";
-      break;
-    default:
-      LOG4CXX_INFO(logger_, "Type app stopwatch is unknown");
-      return;
-  }
-
+  LOG4CXX_INFO(logger_, "Add " << app_id);
   sync_primitives::AutoLock locker(statistics_lock_);
-  cache.Add(app_id, stopwatch, timespan_seconds);
+#ifdef EXTENDED_POLICY
+  cache.Add(app_id, type, timespan_seconds);
 #endif
 }
 

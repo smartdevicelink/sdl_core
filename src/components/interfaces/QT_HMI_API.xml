@@ -347,12 +347,11 @@
       <element name="STATIC"/>
       <element name="DYNAMIC"/>
     </enum>
-<enum name="ApplicationToNONEReason">
-  <description>Describes the reasons of moving the app to NONE.</description>
-  <element name="DRIVER_DISTRACTION_VIOLATION" />
-  <element name="USER_EXIT" />
-</enum>
-
+    <enum name="ApplicationToNONEReason">
+      <description>Describes the reasons of moving the app to NONE.</description>
+      <element name="DRIVER_DISTRACTION_VIOLATION" />
+      <element name="USER_EXIT" />
+    </enum>
     <enum name="TextFieldName">
       <element name="mainField1">
         <description>The first line of first set of main fields of the persistent display; applies to "Show"</description>
@@ -402,9 +401,6 @@
       <element name="totalDistance">
         <description> Total distance to destination for navigation</description>
       </element>
-      <element name="navigationText">
-        <description>Navigation text for UpdateTurnList.</description>
-      </element>
       <element name="audioPassThruDisplayText1">
         <description> First line of text for audio pass thru</description>
       </element>
@@ -416,9 +412,6 @@
       </element>
       <element name="sliderFooter">
         <description> Footer text for slider</description>
-      </element>
-      <element name="notificationText">
-        <description>Text of notification to be displayed on screen.</description>
       </element>
       <element name="menuName">
         <description> Primary text for Choice</description>
@@ -433,13 +426,16 @@
         <description> Optional text to label an app menu button (for certain touchscreen platforms).</description>
       </element>
       <element name="timeToDestination"/>
-      <!-- TO DO to be removed -->
+      <element name="navigationText">
+        <description>Navigation text for UpdateTurnList.</description>
+      </element>
+      <element name="notificationText">
+        <description>Text of notification to be displayed on screen.</description>
+      </element>
+        <!-- TO DO to be removed -->
       <element name="turnText"/>
     </enum>
     <enum name="ImageFieldName">
-      <element name="locationImage">
-        <description>The optional image of a destination / location</description>
-      </element>
       <element name="softButtonImage">
         <description>The image field for SoftButton</description>
       </element>
@@ -472,6 +468,9 @@
       </element>
       <element name="showConstantTBTNextTurnIcon">
         <description>The secondary image field for ShowConstantTBT</description>
+      </element>
+      <element name="locationImage">
+        <description>The optional image of a destination / location</description>
       </element>
     </enum>
     <enum name="TextAlignment">
@@ -1768,7 +1767,10 @@
         <description>Must be provided if ButtonName is CUSTOM_BUTTON, this references the integer ID passed by a custom button. (e.g. softButtonName)</description>
       </param>
       <param name="appID" type="Integer" mandatory="false">
-        <description>ID of the application.</description>
+        <description>
+          In case the ButtonName is CUSTOM_BUTTON, HMI must include appID parameters to OnButtonPress notification sent to SDL.
+          Otherwise, if appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
+        </description>
       </param>
     </function>
     <function name="OnButtonPress" messagetype="notification" provider="hmi">
@@ -1780,7 +1782,10 @@
         <description>Must be returned if ButtonName is CUSTOM_BUTTON, this references the string passed by a custom button. (e.g. softButtonName)</description>
       </param>
       <param name="appID" type="Integer" mandatory="false">
-        <description>ID of the application.</description>
+        <description>
+          In case the ButtonName is CUSTOM_BUTTON, HMI must include appID parameters to OnButtonPress notification sent to SDL.
+          Otherwise, if appID is not sent together with CUSTOM_BUTTON, this notification will be ignored by SDL.
+        </description>
       </param>
     </function>
   </interface>

@@ -21,6 +21,9 @@ set (SOURCES
     ./src/signals_linux.cc
     ./src/system.cc
     ./src/resource_usage.cc
+    ./src/push_log.cc
+    ./src/log_message_loop_thread.cc
+    ./src/logger_status.cc
 )
 
 if (BUILD_BACKTRACE_SUPPORT)
@@ -41,3 +44,6 @@ if(ENABLE_LOG)
   target_link_libraries("Utils" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  target_link_libraries("Utils" pthread)
+endif()

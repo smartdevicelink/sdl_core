@@ -47,6 +47,7 @@
 
 #include "utils/signals.h"
 #include "utils/system.h"
+#include "utils/log_message_loop_thread.h"
 #include "config_profile/profile.h"
 
 #if defined(EXTENDED_MEDIA_MODE)
@@ -60,7 +61,7 @@
 
 // ----------------------------------------------------------------------------
 
-CREATE_LOGGERPTR_GLOBAL(logger, "appMain")
+CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 extern const char* gitVersion;
 namespace {
 
@@ -79,7 +80,7 @@ bool InitHmi() {
 
 struct stat sb;
 if (stat("hmi_link", &sb) == -1) {
-  LOG4CXX_FATAL(logger, "File with HMI link doesn't exist!");
+  LOG4CXX_FATAL(logger_, "File with HMI link doesn't exist!");
   return false;
 }
 
@@ -87,7 +88,7 @@ std::ifstream file_str;
 file_str.open("hmi_link");
 
 if (!file_str.is_open()) {
-  LOG4CXX_FATAL(logger, "File with HMI link was not opened!");
+  LOG4CXX_FATAL(logger_, "File with HMI link was not opened!");
   return false;
 }
 
@@ -95,12 +96,12 @@ std::string hmi_link;
 std::getline(file_str, hmi_link);
 
 
-LOG4CXX_INFO(logger,
+LOG4CXX_INFO(logger_,
              "Input string:" << hmi_link << " length = " << hmi_link.size());
 file_str.close();
 
 if (stat(hmi_link.c_str(), &sb) == -1) {
-  LOG4CXX_FATAL(logger, "HMI index.html doesn't exist!");
+  LOG4CXX_FATAL(logger_, "HMI index.html doesn't exist!");
   return false;
 }
   return utils::System(kBrowser, kBrowserName).Add(kBrowserParams).Add(hmi_link)
@@ -117,7 +118,7 @@ bool InitHmi() {
   std::string kStartHmi = "./start_hmi.sh";
   struct stat sb;
   if (stat(kStartHmi.c_str(), &sb) == -1) {
-    LOG4CXX_FATAL(logger, "HMI start script doesn't exist!");
+    LOG4CXX_FATAL(logger_, "HMI start script doesn't exist!");
     return false;
   }
 
@@ -140,12 +141,12 @@ int32_t main(int32_t argc, char** argv) {
   // --------------------------------------------------------------------------
   // Logger initialization
   INIT_LOGGER("log4cxx.properties");
-  LOG4CXX_INFO(logger, gitVersion);
+  LOG4CXX_INFO(logger_, gitVersion);
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
-  LOG4CXX_INFO(logger, "Application started!");
-  LOG4CXX_INFO(logger, "Application version " << kApplicationVersion);
+  LOG4CXX_INFO(logger_, "Application started!");
+  LOG4CXX_INFO(logger_, "Application version " << kApplicationVersion);
 
   // Initialize gstreamer. Needed to activate debug from the command line.
 #if defined(EXTENDED_MEDIA_MODE)
@@ -163,7 +164,8 @@ int32_t main(int32_t argc, char** argv) {
 #ifdef __QNX__
   if (profile::Profile::instance()->enable_policy()) {
     if (!utils::System("./init_policy.sh").Execute(true)) {
-      LOG4CXX_ERROR(logger, "Failed initialization of policy database");
+      LOG4CXX_ERROR(logger_, "Failed initialization of policy database");
+      logger::LogMessageLoopThread::destroy();
       DEINIT_LOGGER();
       exit(EXIT_FAILURE);
     }
@@ -172,6 +174,7 @@ int32_t main(int32_t argc, char** argv) {
 
   if (!main_namespace::LifeCycle::instance()->StartComponents()) {
     main_namespace::LifeCycle::instance()->StopComponents();
+    logger::LogMessageLoopThread::destroy();
     DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
@@ -184,19 +187,20 @@ int32_t main(int32_t argc, char** argv) {
     DEINIT_LOGGER();
     exit(EXIT_FAILURE);
   }
-  LOG4CXX_INFO(logger, "InitMessageBroker successful");
+  LOG4CXX_INFO(logger_, "InitMessageBroker successful");
 
   if (profile::Profile::instance()->launch_hmi()) {
     if (profile::Profile::instance()->server_address() == kLocalHostAddress) {
-      LOG4CXX_INFO(logger, "Start HMI on localhost");
+      LOG4CXX_INFO(logger_, "Start HMI on localhost");
 
 #ifndef NO_HMI
       if (!InitHmi()) {
         main_namespace::LifeCycle::instance()->StopComponents();
+        logger::LogMessageLoopThread::destroy();
         DEINIT_LOGGER();
         exit(EXIT_FAILURE);
       }
-      LOG4CXX_INFO(logger, "InitHmi successful");
+      LOG4CXX_INFO(logger_, "InitHmi successful");
 #endif  // #ifndef NO_HMI
     }
   }
@@ -206,11 +210,12 @@ int32_t main(int32_t argc, char** argv) {
   threads::Thread::UnmaskSignals();
 
   pause();
-  LOG4CXX_INFO(logger, "Stopping application due to signal caught");
+  LOG4CXX_INFO(logger_, "Stopping application due to signal caught");
 
   main_namespace::LifeCycle::instance()->StopComponents();
 
-  LOG4CXX_INFO(logger, "Application successfully stopped");
+  LOG4CXX_INFO(logger_, "Application successfully stopped");
+  logger::LogMessageLoopThread::destroy();
   DEINIT_LOGGER();
 
   return EXIT_SUCCESS;

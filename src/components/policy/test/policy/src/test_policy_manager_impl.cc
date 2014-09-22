@@ -234,31 +234,18 @@ TEST_F(PolicyManagerImplTest, CheckPermissions) {
   ::testing::NiceMock<MockPTRepresentation> mock_pt;
   MockPolicyListener mock_listener;
 
-  ::policy::CheckPermissionResult result;
-  result.hmi_level_permitted = ::policy::kRpcAllowed;
-  result.list_of_allowed_params = new std::vector< ::policy::PTString>();
-  result.list_of_allowed_params->push_back("speed");
-  result.list_of_allowed_params->push_back("gps");
-
-#ifdef EXTENDED_POLICY
-  EXPECT_CALL(mock_pt, CheckPermissions("pre_DataConsent", "FULL", "Alert")).WillOnce(
-      Return(result));
-#else  // EXTENDED_POLICY
-  EXPECT_CALL(mock_pt, CheckPermissions("12345678", "FULL", "Alert")).WillOnce(
-      Return(result));
-#endif  // EXTENDED_POLICY
   EXPECT_CALL(mock_listener, OnCurrentDeviceIdUpdateRequired("12345678")).Times(1);
 
   PolicyManagerImpl* manager = new PolicyManagerImpl();
   manager->ResetDefaultPT(::policy::PolicyTable(&mock_pt));
   manager->set_listener(&mock_listener);
-  ::policy::CheckPermissionResult out_result = manager->CheckPermissions(
-      "12345678", "FULL", "Alert");
+  ::policy::CheckPermissionResult out_result;
+  manager->CheckPermissions("12345678", "FULL", "Alert", out_result);
   EXPECT_EQ(::policy::kRpcAllowed, out_result.hmi_level_permitted);
-  ASSERT_TRUE(out_result.list_of_allowed_params);
-  ASSERT_EQ(2u, out_result.list_of_allowed_params->size());
-  EXPECT_EQ("speed", (*out_result.list_of_allowed_params)[0]);
-  EXPECT_EQ("gps", (*out_result.list_of_allowed_params)[1]);
+  ASSERT_TRUE(!out_result.list_of_allowed_params.empty());
+  ASSERT_EQ(2u, out_result.list_of_allowed_params.size());
+  EXPECT_EQ("speed", out_result.list_of_allowed_params[0]);
+  EXPECT_EQ("gps", out_result.list_of_allowed_params[1]);
 }
 
 TEST_F(PolicyManagerImplTest, DISABLED_LoadPT) {

@@ -43,10 +43,11 @@ namespace policy {
 
 class MockPTRepresentation : virtual public PTRepresentation {
   public:
-    MOCK_METHOD3(CheckPermissions,
-                 CheckPermissionResult(const PTString& app_id,
-                                       const PTString& hmi_level,
-                                       const PTString& rpc));
+    MOCK_METHOD4(CheckPermissions,
+                 void (const PTString& app_id,
+                       const PTString& hmi_level,
+                       const PTString& rpc,
+                       CheckPermissionResult& result));
     MOCK_METHOD0(IsPTPreloaded,
                  bool());
     MOCK_METHOD0(IgnitionCyclesBeforeExchange,

@@ -152,7 +152,7 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
   LOG4CXX_INFO(logger_,
                "MobileMessageHandler HandleOutgoingMessageProtocolV2()");
   if (message->json_message().length() == 0) {
-    LOG4CXX_ERROR(logger_, "json string is empty.")
+    LOG4CXX_ERROR(logger_, "json string is empty.");
   }
   uint32_t jsonSize = message->json_message().length();
   uint32_t binarySize = 0;

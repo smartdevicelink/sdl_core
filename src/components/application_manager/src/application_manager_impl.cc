@@ -2053,24 +2053,17 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     "Checking permissions for  " << policy_app_id  <<
     " in " << stringified_hmi_level <<
     " rpc " << stringified_functionID);
-  policy::CheckPermissionResult result = policy_manager_->CheckPermissions(
-      policy_app_id,
-      stringified_hmi_level,
-      stringified_functionID);
+    policy::CheckPermissionResult result;
+    policy_manager_->CheckPermissions(
+          policy_app_id,
+          stringified_hmi_level,
+          stringified_functionID,
+          result);
 
   if (NULL != params_permissions) {
-    if (result.list_of_allowed_params.valid()) {
-      params_permissions->allowed_params =
-            *(result.list_of_allowed_params.get());
-    }
-    if (result.list_of_disallowed_params.valid()) {
-      params_permissions->disallowed_params =
-          *(result.list_of_disallowed_params.get());
-    }
-    if (result.list_of_undefined_params.valid()) {
-      params_permissions->undefined_params =
-          *(result.list_of_undefined_params.get());
-    }
+      params_permissions->allowed_params = result.list_of_allowed_params;
+      params_permissions->disallowed_params = result.list_of_disallowed_params;
+      params_permissions->undefined_params = result.list_of_undefined_params;
   }
 
   if (hmi_level == mobile_apis::HMILevel::HMI_NONE

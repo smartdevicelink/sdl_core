@@ -46,9 +46,9 @@ ApplicationParams::ApplicationParams(const Json::Value* value__)
     default_hmi(impl::ValueMember(value__, "default_hmi")),
     keep_context(impl::ValueMember(value__, "keep_context")),
     steal_focus(impl::ValueMember(value__, "steal_focus")),
-    memory_kb(impl::ValueMember(value__, "memory_kb")),
+    memory_kb(impl::ValueMember(value__, "memory_kb"), 0),
     heart_beat_timeout_ms(impl::ValueMember(value__, "heart_beat_timeout_ms")),
-    certificate(impl::ValueMember(value__, "certificate")) {
+    certificate(impl::ValueMember(value__, "certificate"), "not_specified") {
 }
 Json::Value ApplicationParams::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -347,6 +347,7 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     vehicle_model(impl::ValueMember(value__, "vehicle_model")),
     vehicle_year(impl::ValueMember(value__, "vehicle_year")) {
 }
+
 Json::Value ModuleConfig::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("device_certificates", device_certificates, &result__);
@@ -706,7 +707,8 @@ ConsumerFriendlyMessages::ConsumerFriendlyMessages(const Json::Value* value__)
 Json::Value ConsumerFriendlyMessages::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
   impl::WriteJsonField("version", version, &result__);
-  impl::WriteJsonField("messages", messages, &result__);
+  // According to requirements, it is not necessary to provide this to PTS
+  //impl::WriteJsonField("messages", messages, &result__);
   return result__;
 }
 
@@ -1212,11 +1214,13 @@ ConsentRecords::ConsentRecords()
 }
 ConsentRecords::~ConsentRecords() {
 }
+
 ConsentRecords::ConsentRecords(const Json::Value* value__)
   : CompositeType(InitHelper(value__, &Json::Value::isObject)),
     consent_groups(impl::ValueMember(value__, "consent_groups")),
     input(impl::ValueMember(value__, "input")),
     time_stamp(impl::ValueMember(value__, "time_stamp")) {
+
 }
 Json::Value ConsentRecords::ToJsonValue() const {
   Json::Value result__(Json::objectValue);

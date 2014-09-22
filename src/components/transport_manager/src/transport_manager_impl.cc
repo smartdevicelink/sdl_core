@@ -202,7 +202,7 @@ int TransportManagerImpl::Disconnect(const ConnectionUID& cid) {
 }
 
 int TransportManagerImpl::DisconnectForce(const ConnectionUID& cid) {
-  LOG4CXX_TRACE(logger_, "enter ConnectionUID: " << &cid)
+  LOG4CXX_TRACE(logger_, "enter ConnectionUID: " << &cid);
   if (false == this->is_initialized_) {
     LOG4CXX_ERROR(logger_, "TransportManager is not initialized.");
     LOG4CXX_TRACE(logger_,

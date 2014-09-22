@@ -566,7 +566,7 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
           }
         }
       } else {
-        LOG4CXX_ERROR(logger_, "Can't found choiceSet!")
+        LOG4CXX_ERROR(logger_, "Can't found choiceSet!");
       }
     }
   }

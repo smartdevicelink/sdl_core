@@ -29,43 +29,34 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#include "protocol/service_type.h"
 
-#include "utils/logger.h"
-#include "utils/macro.h"
+#include "utils/push_log.h"
+#include "utils/log_message_loop_thread.h"
+#include "utils/logger_status.h"
 
-namespace protocol_handler {
+namespace logger {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "ConnectionHandler")
-
-namespace {
-// Check if provided service value is one of the specified
-bool IsValid(ServiceType service_type) {
-  switch (service_type) {
-    case kControl:
-    case kRpc:
-    case kAudio:
-    case kMobileNav:
-    case kBulk:
-      return true;
-    default:
-      return false;
+bool push_log(log4cxx::LoggerPtr logger, LogLevel level, const std::string& entry, const log4cxx::spi::LocationInfo& location) {
+  if (LoggerThreadCreated == logger_status) {
+    LogMessage message = {logger, level, entry, location};
+    LogMessageLoopThread::instance()->PostMessage(message);
+    return true;
   }
-}
-}  // namespace
 
-ServiceType ServiceTypeFromByte(uint8_t byte) {
-  ServiceType type = ServiceType(byte);
-  const bool valid_type = IsValid(type);
-  if (!valid_type) {
-    LOG4CXX_INFO(logger_, "Invalid service type: "<< int32_t(byte));
+  if (LoggerThreadNotCreated == logger_status) {
+    logger_status = CreatingLoggerThread;
+// we'll have to drop messages
+// while creating logger thread
+    LogMessage message = {logger, level, entry, location};
+    LogMessageLoopThread::instance()->PostMessage(message);
+    logger_status = LoggerThreadCreated;
+    return true;
   }
-  return valid_type ? type : kInvalidServiceType;
+
+// also we drop messages
+// while deleting logger thread
+
+  return false;
 }
 
-uint8_t ServiceTypeToByte(ServiceType type) {
-  DCHECK(IsValid(type));
-  return uint8_t(type);
-}
-
-}  // namespace protocol_handler
+}  // namespace logger
