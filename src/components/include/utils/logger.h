@@ -39,6 +39,7 @@
   #include <sstream>
   #include <apr_time.h>
   #include <log4cxx/propertyconfigurator.h>
+  #include <log4cxx/spi/loggingevent.h>
   #include "utils/push_log.h"
 #endif  // ENABLE_LOG
 
@@ -66,7 +67,7 @@
       if (loggerPtr->isEnabledFor(logLevel)) { \
         std::stringstream accumulator; \
         accumulator << logEvent; \
-        logger::push_log(loggerPtr, logLevel, accumulator.str(), apr_time_now(), LOG4CXX_LOCATION); \
+        logger::push_log(loggerPtr, logLevel, accumulator.str(), apr_time_now(), LOG4CXX_LOCATION, ::log4cxx::spi::LoggingEvent::getCurrentThreadName()); \
       } \
     } while (false)
 

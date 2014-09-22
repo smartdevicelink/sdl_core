@@ -43,7 +43,8 @@ bool push_log(
         log4cxx::LevelPtr level,
         const std::string& entry,
         log4cxx_time_t timeStamp,
-        const log4cxx::spi::LocationInfo& location
+        const log4cxx::spi::LocationInfo& location,
+        const log4cxx::LogString& threadName
         );
 
 }  // namespace logger

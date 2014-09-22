@@ -40,10 +40,11 @@ bool push_log(log4cxx::LoggerPtr logger,
               log4cxx::LevelPtr level,
               const std::string& entry,
               log4cxx_time_t timeStamp,
-              const log4cxx::spi::LocationInfo& location
+              const log4cxx::spi::LocationInfo& location,
+              const log4cxx::LogString& threadName
               ) {
   if (LoggerThreadCreated == logger_status) {
-    LogMessage message = {logger, level, entry, timeStamp, location};
+    LogMessage message = {logger, level, entry, timeStamp, location, threadName};
     LogMessageLoopThread::instance()->PostMessage(message);
     return true;
   }
@@ -52,7 +53,7 @@ bool push_log(log4cxx::LoggerPtr logger,
     logger_status = CreatingLoggerThread;
 // we'll have to drop messages
 // while creating logger thread
-    LogMessage message = {logger, level, entry, timeStamp, location};
+    LogMessage message = {logger, level, entry, timeStamp, location, threadName};
     LogMessageLoopThread::instance()->PostMessage(message);
     logger_status = LoggerThreadCreated;
     return true;

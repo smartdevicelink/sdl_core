@@ -48,6 +48,7 @@ typedef struct {
   std::string entry;
   log4cxx_time_t timeStamp;
   log4cxx::spi::LocationInfo location;
+  log4cxx::LogString threadName;
 } LogMessage;
 
 typedef std::queue<LogMessage> LogMessageQueue;
