@@ -154,8 +154,7 @@ void PutFileRequest::Run() {
       ApplicationManagerImpl::instance()->GetAvailableSpaceForApp(application->name())) {
       LOG4CXX_ERROR(logger_, "Out of memory");
       SendResponse(false, mobile_apis::Result::OUT_OF_MEMORY,
-                   "Out of memory",
-                   &response_params);
+                   "Out of memory", &response_params);
       return;
     }
   }
@@ -170,9 +169,10 @@ void PutFileRequest::Run() {
   mobile_apis::Result::eType save_result =
       ApplicationManagerImpl::instance()->SaveBinary(binary_data, file_path,
                                                      sync_file_name_, offset_);
-
-  response_params[strings::space_available] = static_cast<int32_t>(
+  if (!is_system_file) {
+    response_params[strings::space_available] = static_cast<int32_t>(
       ApplicationManagerImpl::instance()->GetAvailableSpaceForApp(application->folder_name()));
+  }
 
   sync_file_name_ = file_path + "/" + sync_file_name_;
   switch (save_result) {

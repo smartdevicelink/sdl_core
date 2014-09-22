@@ -1,4 +1,4 @@
-/**
+﻿/**
  * \file mb_controller.hpp
  * \brief MessageBroker Controller.
  * \author AKara
@@ -199,7 +199,8 @@ namespace NsMessageBroker
       void* MethodForReceiverThread(void * arg);
 
       virtual void exitReceivingThread() {
-#ifdef CUSTOMER_PASA
+
+#ifndef CUSTOMER_PASA
         Close();
 #endif
         stop = true;

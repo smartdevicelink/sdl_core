@@ -164,7 +164,6 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
                  rpc::PrettyFormat(report));
 
     update_status_manager_.OnWrongUpdateReceived();
-
     return false;
   }
 
@@ -194,6 +193,8 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     LOG4CXX_WARN(logger_, "Unsuccessful save of updated policy table.");
     return false;
   }
+  // Removing last app request from update requests
+  RemoveAppFromUpdateList();
 
   // If there was a user request for policy table update, it should be started
   // right after current update is finished
@@ -203,8 +204,6 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
     return true;
   }
 
-  // Removing last app request from update requests
-  RemoveAppFromUpdateList();
 
   // TODO(AOleynik): Check, if there is updated info present for apps in list
   // and skip update in this case for given app
@@ -1130,6 +1129,13 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id) {
     PromoteExistedApplication(application_id, device_consent);
   }
   SendNotificationOnPermissionsUpdated(application_id);
+}
+
+bool PolicyManagerImpl::IsAppInUpdateList(const std::string& app_id) const {
+  return update_requests_list_.end() !=
+      std::find(update_requests_list_.begin(),
+                update_requests_list_.end(),
+                app_id);
 }
 
 void PolicyManagerImpl::AddNewApplication(const std::string& application_id,

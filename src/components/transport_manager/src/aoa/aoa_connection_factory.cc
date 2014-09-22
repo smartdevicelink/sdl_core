@@ -68,13 +68,22 @@ TransportAdapter::Error AOAConnectionFactory::CreateConnection(
   }
 
   AOADevicePtr aoa_device = DeviceSptr::static_pointer_cast<AOADevice>(device);
-  ConnectionSptr connection = new AOAConnection(device_uid, app_handle,
+
+  AOAConnection* aoa_connection = new AOAConnection(device_uid, app_handle,
                                                 controller_,
                                                 aoa_device->handle());
+  ConnectionSptr connection(aoa_connection);
   controller_->ConnectionCreated(connection, device_uid, app_handle);
-
   LOG4CXX_INFO(logger_, "AOA: connection created");
-  return TransportAdapter::OK;
+
+  if (aoa_connection->Init()) {
+    LOG4CXX_INFO(logger_, "AOA: connection initialised");
+    return TransportAdapter::OK;
+  }
+  else {
+    LOG4CXX_WARN(logger_, "AOA: Could not initialise AOA connection");
+    return TransportAdapter::FAIL;
+  }
 }
 
 void AOAConnectionFactory::Terminate() {

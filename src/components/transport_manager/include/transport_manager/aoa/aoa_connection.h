@@ -48,6 +48,7 @@ class AOAConnection : public Connection {
                 TransportAdapterController* controller,
                 AOAWrapper::AOAHandle aoa_handle);
   virtual ~AOAConnection();
+  bool Init();
 
  protected:
   virtual TransportAdapter::Error SendData(RawMessagePtr message);
@@ -55,24 +56,26 @@ class AOAConnection : public Connection {
 
  private:
   AOAWrapper* wrapper_;
-  AOADeviceObserver* observer_;
+  AOAConnectionObserver* observer_;
   DeviceUID device_uid_;
   ApplicationHandle app_handle_;
   TransportAdapterController* controller_;
 
   void OnMessageReceived(bool success, RawMessagePtr message);
   void OnMessageTransmitted(bool success, RawMessagePtr message);
+  void OnDisconnected();
   void ReceiveDone(RawMessagePtr message);
   void ReceiveFailed();
   void TransmitDone(RawMessagePtr message);
   void TransmitFailed(RawMessagePtr message);
   void Abort();
 
-  class DeviceObserver : public AOADeviceObserver {
+  class ConnectionObserver : public AOAConnectionObserver {
    public:
-    explicit DeviceObserver(AOAConnection* parent);
+    explicit ConnectionObserver(AOAConnection* const parent);
     void OnMessageReceived(bool success, RawMessagePtr message);
     void OnMessageTransmitted(bool success, RawMessagePtr message);
+    void OnDisconnected();
    private:
     AOAConnection* parent_;
   };

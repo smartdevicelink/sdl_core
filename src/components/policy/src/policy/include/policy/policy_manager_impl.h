@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -156,6 +156,13 @@ class PolicyManagerImpl : public PolicyManager {
     void MarkUnpairedDevice(const std::string& device_id);
 
     void AddApplication(const std::string& application_id);
+
+    /**
+     * @brief IsAppinUpdateList
+     * @param app_id
+     * @return
+     */
+    virtual bool IsAppInUpdateList(const std::string& app_id) const;
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(
         const BinaryMessage& pt_content);
