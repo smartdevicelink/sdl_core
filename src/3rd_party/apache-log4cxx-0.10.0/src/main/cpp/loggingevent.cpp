@@ -81,7 +81,8 @@ LoggingEvent::LoggingEvent(
 LoggingEvent::LoggingEvent(
         const LogString& logger1, const LevelPtr& level1,
         const LogString& message1,
-        log4cxx_time_t timeStamp1, const LocationInfo& locationInfo1) :
+        log4cxx_time_t timeStamp1, const LocationInfo& locationInfo1,
+        const LogString& threadName1) :
    logger(logger1),
    level(level1),
    ndc(0),
@@ -92,7 +93,7 @@ LoggingEvent::LoggingEvent(
    message(message1),
    timeStamp(timeStamp1),
    locationInfo(locationInfo1),
-   threadName(getCurrentThreadName()) {
+   threadName(threadName1) {
 }
 
 LoggingEvent::~LoggingEvent()

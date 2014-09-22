@@ -524,10 +524,12 @@ namespace log4cxx
         @param message message.
         @param timeStamp event time stamp.
         @param location location of source of logging request.
+        @param threadName event thread name.
         */
         void forcedLog(const LevelPtr& level, const std::string& message,
                         log4cxx_time_t timeStamp,
-                        const log4cxx::spi::LocationInfo& location) const;
+                        const log4cxx::spi::LocationInfo& location,
+                        const LogString& threadName) const;
         /**
         This method creates a new logging event and logs the event
         without further checks.
