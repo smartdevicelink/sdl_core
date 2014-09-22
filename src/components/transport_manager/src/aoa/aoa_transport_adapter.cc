@@ -34,9 +34,11 @@
 
 #include "utils/logger.h"
 #include "transport_manager/aoa/aoa_device_scanner.h"
-#include "transport_manager/aoa/aoa_connection_factory.h"
-
-#include "transport_manager/aoa/pps_device_scanner.h"
+#ifdef CUSTOMER_PASA
+#  include "transport_manager/aoa/pps_device_scanner.h"
+#else
+#  include "transport_manager/aoa/aoa_connection_factory.h"
+#endif
 
 namespace transport_manager {
 namespace transport_adapter {

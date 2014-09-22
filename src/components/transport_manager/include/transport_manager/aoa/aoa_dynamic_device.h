@@ -32,7 +32,11 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DYNAMIC_DEVICE_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_AOA_AOA_DYNAMIC_DEVICE_H_
 
+#include <map>
 #include <string>
+
+#include "utils/lock.h"
+#include "utils/conditional_variable.h"
 
 #include "transport_manager/aoa/aoa_device.h"
 
@@ -51,17 +55,28 @@ class AOADynamicDevice : public AOADevice {
   bool Init();
 
  private:
-  static const std::string kPathToConfig;
-  AOAScannerObserver* observer_;
+  typedef std::map<AOAWrapper::AOAHandle, AOADevicePtr> DeviceContainer;
+
+  static DeviceContainer devices_;
+  static sync_primitives::Lock devices_lock_;
+
+  AOADeviceLife* life_;
   TransportAdapterController* controller_;
   AOAWrapper::AOAUsbInfo aoa_usb_info_;
+  sync_primitives::Lock life_lock_;
+  sync_primitives::ConditionalVariable life_cond_;
 
-  void SetHandle(AOAWrapper::AOAHandle hdl);
+  void AddDevice(AOAWrapper::AOAHandle hdl);
+  void LoopDevice(AOAWrapper::AOAHandle hdl);
+  void StopDevice(AOAWrapper::AOAHandle hdl);
+  void RemoveDevice(AOAWrapper::AOAHandle hdl);
+  void Notify();
 
-  class ScannerObserver : public AOAScannerObserver {
+  class DeviceLife : public AOADeviceLife {
    public:
-    explicit ScannerObserver(AOADynamicDevice* parent);
-    void OnDeviceConnected(AOAWrapper::AOAHandle hdl);
+    explicit DeviceLife(AOADynamicDevice* parent);
+    void Loop(AOAWrapper::AOAHandle handle);
+    void OnDied(AOAWrapper::AOAHandle hdl);
    private:
     AOADynamicDevice* parent_;
   };

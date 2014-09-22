@@ -36,6 +36,7 @@
 #include <map>
 
 #include "utils/lock.h"
+#include "utils/conditional_variable.h"
 
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/aoa/aoa_device.h"
@@ -61,20 +62,27 @@ class AOADeviceScanner : public DeviceScanner {
 
   static const std::string kPathToConfig;
   bool initialised_;
-  AOAScannerObserver* observer_;
+  AOADeviceLife* life_;
   TransportAdapterController* controller_;
   DeviceContainer devices_;
   sync_primitives::Lock devices_lock_;
+  sync_primitives::Lock life_lock_;
+  sync_primitives::ConditionalVariable life_cond_;
 
   void AddDevice(AOAWrapper::AOAHandle hdl);
-  void NotifyDevicesUpdated();
+  void LoopDevice(AOAWrapper::AOAHandle hdl);
+  void StopDevice(AOAWrapper::AOAHandle hdl);
+  void RemoveDevice(AOAWrapper::AOAHandle hdl);
+
+  void Notify();
   std::string GetName(const std::string& unique_id);
   std::string GetUniqueId();
 
-  class ScannerObserver : public AOAScannerObserver {
+  class DeviceLife : public AOADeviceLife {
    public:
-    explicit ScannerObserver(AOADeviceScanner* parent);
-    void OnDeviceConnected(AOAWrapper::AOAHandle hdl);
+    explicit DeviceLife(AOADeviceScanner* parent);
+    void Loop(AOAWrapper::AOAHandle hdl);
+    void OnDied(AOAWrapper::AOAHandle hdl);
    private:
     AOADeviceScanner* parent_;
   };

@@ -61,8 +61,8 @@ enum AOAEndpoint {
   AOA_Ept_Accessory_Control
 };
 
-class AOAScannerObserver;
-class AOADeviceObserver;
+class AOADeviceLife;
+class AOAConnectionObserver;
 
 class AOAWrapper {
  public:
@@ -80,15 +80,12 @@ class AOAWrapper {
     uint32_t iface; /* Device interface */
   };
 
-  static bool Init(AOAScannerObserver* observer);
-  static bool Init(const std::string& path_to_config,
-                   AOAScannerObserver* observer);
-  static bool Init(const AOAWrapper::AOAUsbInfo& aoa_usb_info,
-                   AOAScannerObserver* observer);
-  static bool Init(const std::string& path_to_config,
-                   const AOAWrapper::AOAUsbInfo& aoa_usb_info,
-                   AOAScannerObserver* observer);
+  static bool Init(AOADeviceLife* life);
+  static bool Init(AOADeviceLife* life, const std::string& config_path);
+  static bool Init(AOADeviceLife* life, const AOAWrapper::AOAUsbInfo& aoa_usb_info);
   static bool Shutdown();
+  static bool IsHandleValid(AOAWrapper::AOAHandle hdl);
+  static void OnDied(AOAWrapper::AOAHandle hdl);
   static inline bool IsError(int ret);
   static inline void PrintError(int ret);
 
@@ -100,7 +97,7 @@ class AOAWrapper {
   uint32_t GetBufferMaximumSize(AOAEndpoint endpoint) const;
   std::vector<AOAMode> GetModes() const;
   std::vector<AOAEndpoint> GetEndpoints() const;
-  bool Subscribe(AOADeviceObserver* observer);
+  bool Subscribe(AOAConnectionObserver* observer);
   bool Unsubscribe();
   bool SendMessage(RawMessagePtr message) const;
   bool SendControlMessage(uint16_t request, uint16_t value, uint16_t index,
@@ -110,13 +107,16 @@ class AOAWrapper {
                                       uint16_t index) const;
 
  private:
-  static AOAScannerObserver* scanner_observer_;
+  static AOADeviceLife* life_;
   AOAHandle hdl_;
   uint32_t timeout_;
-  AOADeviceObserver* device_observer_;
+  AOAConnectionObserver* connection_observer_;
 
+  static bool Init(AOADeviceLife* life, const char* config_path,
+                   usb_info_s* usb_info);
   static void PrepareUsbInfo(const AOAUsbInfo& aoa_usb_info,
                              usb_info_s* usb_info);
+
   inline AOAVersion Version(uint16_t version) const;
   inline uint32_t BitEndpoint(AOAEndpoint endpoint) const;
   inline bool IsValueInMask(uint32_t bitmask, uint32_t value) const;
@@ -126,18 +126,20 @@ class AOAWrapper {
   bool UnsetCallback(AOAEndpoint endpoint) const;
 };
 
-class AOAScannerObserver {
+class AOADeviceLife {
  public:
-  virtual void OnDeviceConnected(AOAWrapper::AOAHandle handle) = 0;
-  virtual ~AOAScannerObserver() {
+  virtual void Loop(AOAWrapper::AOAHandle handle) = 0;
+  virtual void OnDied(AOAWrapper::AOAHandle handle) = 0;
+  virtual ~AOADeviceLife() {
   }
 };
 
-class AOADeviceObserver {
+class AOAConnectionObserver {
  public:
   virtual void OnMessageReceived(bool success, RawMessagePtr message) = 0;
   virtual void OnMessageTransmitted(bool success, RawMessagePtr message) = 0;
-  virtual ~AOADeviceObserver() {
+  virtual void OnDisconnected() = 0;
+  virtual ~AOAConnectionObserver() {
   }
 };
 

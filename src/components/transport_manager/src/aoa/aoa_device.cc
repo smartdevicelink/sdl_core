@@ -74,5 +74,9 @@ AOAWrapper::AOAHandle AOADevice::handle() const {
   return handle_;
 }
 
+void AOADevice::set_handle(AOAWrapper::AOAHandle handle) {
+  handle_ = handle;
+}
+
 }  // namespace transport_adapter
 }  // namespace transport_manager

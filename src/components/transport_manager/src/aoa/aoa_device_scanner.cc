@@ -47,16 +47,17 @@ const std::string AOADeviceScanner::kPathToConfig = "";  // default on QNX /etc/
 
 AOADeviceScanner::AOADeviceScanner(TransportAdapterController* controller)
     : initialised_(false),
-      observer_(NULL),
+      life_(NULL),
       controller_(controller) {
 }
 
 TransportAdapter::Error AOADeviceScanner::Init() {
-  observer_ = new ScannerObserver(this);
+  LOG4CXX_TRACE(logger_, "AOA: init device scanner");
+  life_ = new DeviceLife(this);
   if (kPathToConfig.empty()) {
-    initialised_ = AOAWrapper::Init(observer_);
+    initialised_ = AOAWrapper::Init(life_);
   } else {
-    initialised_ = AOAWrapper::Init(kPathToConfig, observer_);
+    initialised_ = AOAWrapper::Init(life_, kPathToConfig);
   }
   return (initialised_) ? TransportAdapter::OK : TransportAdapter::FAIL;
 }
@@ -67,15 +68,16 @@ TransportAdapter::Error AOADeviceScanner::Scan() {
 
 void AOADeviceScanner::Terminate() {
   AOAWrapper::Shutdown();
-  delete observer_;
-  observer_ = NULL;
+  delete life_;
+  life_ = NULL;
 }
 
 bool AOADeviceScanner::IsInitialised() const {
   return initialised_;
 }
 
-void AOADeviceScanner::NotifyDevicesUpdated() {
+void AOADeviceScanner::Notify() {
+  LOG4CXX_TRACE(logger_, "AOA: notify about all connected devices");
   DeviceVector devices;
   devices_lock_.Acquire();
   for (DeviceContainer::const_iterator i = devices_.begin();
@@ -102,22 +104,53 @@ std::string AOADeviceScanner::GetUniqueId() {
 }
 
 void AOADeviceScanner::AddDevice(AOAWrapper::AOAHandle hdl) {
+  LOG4CXX_TRACE(logger_, "AOA: add new device " << hdl);
   const std::string unique_id = GetUniqueId();
   const std::string name = GetName(unique_id);
   AOADevicePtr aoa_device(new AOADevice(hdl, name, unique_id));
-  sync_primitives::AutoLock locker(devices_lock_);
+  devices_lock_.Acquire();
   devices_.insert(std::make_pair(hdl, aoa_device));
+  devices_lock_.Release();
+  Notify();
 }
 
-AOADeviceScanner::ScannerObserver::ScannerObserver(AOADeviceScanner* parent)
+void AOADeviceScanner::RemoveDevice(AOAWrapper::AOAHandle hdl) {
+  LOG4CXX_TRACE(logger_, "AOA: remove device " << hdl);
+  devices_lock_.Acquire();
+  devices_.erase(hdl);
+  devices_lock_.Release();
+  Notify();
+}
+
+void AOADeviceScanner::LoopDevice(AOAWrapper::AOAHandle hdl) {
+  LOG4CXX_TRACE(logger_, "AOA: loop of life device " << hdl);
+  sync_primitives::AutoLock locker(life_lock_);
+  while (AOAWrapper::IsHandleValid(hdl)) {
+    LOG4CXX_TRACE(logger_, "AOA: wait cond " << hdl);
+    life_cond_.Wait(locker);
+    // It does nothing because this method is called from libaoa thread so
+    // if it returns from the method then thread will stop
+    // and device will be disconnected
+  }
+}
+
+void AOADeviceScanner::StopDevice(AOAWrapper::AOAHandle hdl) {
+  LOG4CXX_TRACE(logger_, "AOA: stop device " << hdl);
+  life_cond_.Broadcast();
+}
+
+AOADeviceScanner::DeviceLife::DeviceLife(AOADeviceScanner* parent)
     : parent_(parent) {
 }
 
-void AOADeviceScanner::ScannerObserver::OnDeviceConnected(
-    AOAWrapper::AOAHandle hdl) {
-  LOG4CXX_TRACE(logger_, "AOA: new device is connected");
+void AOADeviceScanner::DeviceLife::Loop(AOAWrapper::AOAHandle hdl) {
   parent_->AddDevice(hdl);
-  parent_->NotifyDevicesUpdated();
+  parent_->LoopDevice(hdl);
+  parent_->RemoveDevice(hdl);
+}
+
+void AOADeviceScanner::DeviceLife::OnDied(AOAWrapper::AOAHandle hdl) {
+  parent_->StopDevice(hdl);
 }
 
 }  // namespace transport_adapter
