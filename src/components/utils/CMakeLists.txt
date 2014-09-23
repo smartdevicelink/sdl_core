@@ -21,10 +21,15 @@ set (SOURCES
     ./src/signals_linux.cc
     ./src/system.cc
     ./src/resource_usage.cc
+)
+
+if(ENABLE_LOG)
+  list(APPEND SOURCES
     ./src/push_log.cc
     ./src/log_message_loop_thread.cc
     ./src/logger_status.cc
-)
+  )
+endif()
 
 if (BUILD_BACKTRACE_SUPPORT)
     list(APPEND SOURCES

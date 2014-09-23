@@ -285,7 +285,9 @@ int main(int argc, char** argv) {
   stopSmartDeviceLink();
 
   LOG4CXX_INFO(logger_, "Application successfully stopped");
+#ifdef ENABLE_LOG
   logger::LogMessageLoopThread::destroy();
+#endif
   DEINIT_LOGGER();
   return EXIT_SUCCESS;
 }
