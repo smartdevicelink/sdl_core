@@ -746,6 +746,13 @@ void ResumeCtrl::SetSavedApplication(Json::Value& apps_json) {
   resumption::LastState::instance()->dictionary[strings::resumption] = apps_json ;
 }
 
+void ResumeCtrl::ClearResumptionInfo() {
+	Json::Value empty_json;
+
+	SetSavedApplication(empty_json);
+	resumption::LastState::instance()->SaveToFileSystem();
+}
+
 Json::Value ResumeCtrl::GetApplicationCommands(
     ApplicationConstSharedPtr application) {
   DCHECK(application.get());

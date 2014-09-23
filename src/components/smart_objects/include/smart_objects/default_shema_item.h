@@ -29,77 +29,40 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_OBJECT_SCHEMA_ITEM_H_
-#define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_OBJECT_SCHEMA_ITEM_H_
-
-#include <map>
-#include <string>
-#include <set>
+#ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_DEFAULT_SHEMA_ITEM_H_
+#define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_DEFAULT_SHEMA_ITEM_H_
 
 #include "utils/macro.h"
 #include "utils/shared_ptr.h"
 
 #include "smart_objects/schema_item.h"
 #include "smart_objects/schema_item_parameter.h"
+#include "smart_objects/smart_object.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
+
 /**
- * @brief Object schema item.
+ * @brief Default schema item.
  **/
-class CObjectSchemaItem : public ISchemaItem {
+template<typename Type>
+class CDefaultSchemaItem : public ISchemaItem {
  public:
-  /**
-   * @brief Object member.
-   **/
-  struct SMember {
-    /**
-     * @brief Default constructor.
-     **/
-    SMember();
-    /**
-     * @brief Constructor.
-     * @param SchemaItem Member schema item.
-     * @param IsMandatory true if member is mandatory, false
-     *                    otherwise. Defaults to true.
-     **/
-    SMember(const ISchemaItemPtr SchemaItem,
-            const bool IsMandatory = true);
-    /**
-     * @brief Member schema item.
-     **/
-    ISchemaItemPtr mSchemaItem;
-    /**
-     * @brief true if member is mandatory, false otherwise.
-     **/
-    bool mIsMandatory;
-  };
-  typedef std::map<std::string, SMember> Members;
-  /**
-   * @brief Create a new schema item.
-   *
-   * @param Members Map of member name to SMember structure
-   *                describing the object member.
-   *
-   * @return Shared pointer to a new schema item.
-   **/
-  static utils::SharedPtr<CObjectSchemaItem> create(const Members& Members);
+  typedef TSchemaItemParameter<Type> ParameterType;
   /**
    * @brief Validate smart object.
    * @param Object Object to validate.
    * @return NsSmartObjects::Errors::eType
    **/
   Errors::eType validate(const SmartObject& Object) OVERRIDE;
+
   /**
-   * @brief Apply schema.
-   * @param Object Object to apply schema.
+   * @brief Set default value to an object.
+   * @param Object Object to set default value.
+   * @return true if default value was successfully set, false otherwise.
    **/
-  void applySchema(SmartObject& Object) OVERRIDE;
-  /**
-   * @brief Unapply schema.
-   * @param Object Object to unapply schema.
-   **/
-  void unapplySchema(SmartObject& Object) OVERRIDE;
+  bool setDefaultValue(SmartObject& Object) OVERRIDE;
+
   /**
    * @brief Build smart object by smart schema having copied matched
    *        parameters from pattern smart object
@@ -108,25 +71,60 @@ class CObjectSchemaItem : public ISchemaItem {
    */
   void BuildObjectBySchema(const SmartObject& pattern_object,
                            SmartObject& result_object) OVERRIDE;
-  /**
-   * @brief Get size mMembers map
-   * @return Size of mMembers
-   */
-  size_t GetMemberSize() OVERRIDE;
 
  protected:
+  explicit CDefaultSchemaItem(const ParameterType& DefaultValue);
   /**
-   * @brief Constructor.
-   * @param Members Map of member name to SMember structure
-   *                describing the object member.
-   **/
-  CObjectSchemaItem(const Members& Members);
+   * @brief SmartType getter for primitive types common logic
+   * @return SmartType for ShemaItem
+   */
+  virtual SmartType getSmartType() const = 0;
   /**
-   * @brief Map of member name to SMember structure describing the object member.
-   **/
-  const Members mMembers;
-  DISALLOW_COPY_AND_ASSIGN(CObjectSchemaItem);
+   * @brief Default value getter for primitive types common logic
+   * @return Default value for selected type
+   */
+  virtual Type getDefaultValue() const = 0;
+  /**
+   * @param DefaultValue Default value of a parameter.
+   */
+  const ParameterType mDefaultValue;
+
+ private:
+  DISALLOW_COPY_AND_ASSIGN(CDefaultSchemaItem<Type>);
 };
+
+template<typename Type>
+CDefaultSchemaItem<Type>::CDefaultSchemaItem(const ParameterType& DefaultValue)
+  : mDefaultValue(DefaultValue) {
+}
+
+template<typename Type>
+Errors::eType CDefaultSchemaItem<Type>::validate(const SmartObject& Object) {
+  return (getSmartType() == Object.getType()) ? Errors::OK : Errors::INVALID_VALUE;
+}
+
+template<typename Type>
+bool CDefaultSchemaItem<Type>::setDefaultValue(SmartObject& Object) {
+  Type value;
+  if (mDefaultValue.getValue(value)) {
+    Object = value;
+    return true;
+  }
+  return false;
+}
+
+template<typename Type>
+void CDefaultSchemaItem<Type>::BuildObjectBySchema(
+  const SmartObject& pattern_object, SmartObject& result_object) {
+  if (getSmartType() == pattern_object.getType()) {
+    result_object = pattern_object;
+  } else {
+    if (!setDefaultValue(result_object)) {
+      result_object = getDefaultValue();
+    }
+  }
+}
+
 }  // namespace NsSmartObjects
 }  // namespace NsSmartDeviceLink
-#endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_OBJECT_SCHEMA_ITEM_H_
+#endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_DEFAULT_SHEMA_ITEM_H_

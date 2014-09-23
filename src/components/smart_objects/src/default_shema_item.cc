@@ -29,35 +29,4 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#ifndef SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ALWAYS_TRUE_SCHEMA_ITEM_H_
-#define SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ALWAYS_TRUE_SCHEMA_ITEM_H_
-
-#include "utils/shared_ptr.h"
-#include "smart_objects/schema_item.h"
-
-namespace NsSmartDeviceLink {
-namespace NsSmartObjects {
-/**
- * @brief Always true schema item.
- **/
-class CAlwaysTrueSchemaItem : public ISchemaItem {
- public:
-  /**
-   * @brief Create a new schema item.
-   * @return Shared pointer to a new schema item.
-   **/
-  static utils::SharedPtr<CAlwaysTrueSchemaItem> create();
-  /**
-   * @brief Validate smart object.
-   * @param Object Object to validate.
-   * @return NsSmartObjects::Errors::eType
-   **/
-  Errors::eType validate(const SmartObject& Object) OVERRIDE;
- private:
-  CAlwaysTrueSchemaItem();
-  DISALLOW_COPY_AND_ASSIGN(CAlwaysTrueSchemaItem);
-};
-}  // namespace NsSmartObjects
-}  // namespace NsSmartDeviceLink
-#endif  // SRC_COMPONENTS_SMART_OBJECTS_INCLUDE_SMART_OBJECTS_ALWAYS_TRUE_SCHEMA_ITEM_H_
+#include "smart_objects/default_shema_item.h"

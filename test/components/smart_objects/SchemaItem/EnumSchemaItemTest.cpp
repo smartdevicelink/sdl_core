@@ -86,7 +86,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     TEST_F(EnumSchemaItemTest, test_item_with_default_value)
     {
         SmartObject obj;
-        utils::SharedPtr<ISchemaItem> item = TEnumSchemaItem<TestType::eType>::create(testEnum,
+        ISchemaItemPtr item = TEnumSchemaItem<TestType::eType>::create(testEnum,
             TSchemaItemParameter<TestType::eType>(TestType::FACTORY_DEFAULTS));
 
         //Object - valid enum
@@ -136,7 +136,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         SmartObject obj;
 
-        utils::SharedPtr<ISchemaItem> item = TEnumSchemaItem<TestType::eType>::create(testEnum,
+        ISchemaItemPtr item = TEnumSchemaItem<TestType::eType>::create(testEnum,
             TSchemaItemParameter<TestType::eType>());
 
         //Object - valid enum
@@ -193,7 +193,7 @@ namespace test { namespace components { namespace SmartObjects { namespace Schem
     {
         SmartObject obj;
 
-        utils::SharedPtr<ISchemaItem> item = TEnumSchemaItem<TestType::eType>::create(testEnum,
+        ISchemaItemPtr item = TEnumSchemaItem<TestType::eType>::create(testEnum,
             TSchemaItemParameter<TestType::eType>(TestType::FACTORY_DEFAULTS));
 
         //Object - valid enum

@@ -76,8 +76,10 @@
 // actually being overriden if compiler support is available
 #if __cplusplus >= 201103L
 #define OVERRIDE override
+#define FINAL final
 #else
 #define OVERRIDE
+#define FINAL
 #endif
 
 /*

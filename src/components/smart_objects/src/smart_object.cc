@@ -67,6 +67,8 @@ SmartObject::SmartObject(SmartType Type)
     : m_type(SmartType_Null),
       m_schema() {
   switch (Type) {
+    case SmartType_Null:
+      break;
     case SmartType_Integer:
       set_value_integer(0);
       break;
@@ -96,14 +98,9 @@ SmartObject::SmartObject(SmartType Type)
     case SmartType_Invalid:
       m_type = SmartType_Invalid;
       break;
-    default: {
-/*
-#if !defined UNIT_TESTS
-      NOTREACHED();
-#endif
-*/
+    default:
+      DCHECK(!"Unhandled smart object type");
       break;
-    }
   }
 }
 
@@ -132,34 +129,38 @@ bool SmartObject::operator==(const SmartObject& Other) const {
       return m_data.char_value == Other.m_data.char_value;
     case SmartType_String:
       return *(m_data.str_value) == *(Other.m_data.str_value);
-    case SmartType_Map:
+    case SmartType_Map: {
       if (m_data.map_value == Other.m_data.map_value)
         return true;
+      if (m_data.map_value->size() != Other.m_data.map_value->size())
+        return false;
       return std::equal(m_data.map_value->begin(), m_data.map_value->end(),
                         Other.m_data.map_value->begin());
-    case SmartType_Array:
+      }
+    case SmartType_Array: {
       if (m_data.array_value == Other.m_data.array_value)
         return true;
+      if (m_data.array_value->size() != Other.m_data.array_value->size())
+        return false;
       return std::equal(m_data.array_value->begin(), m_data.array_value->end(),
                         Other.m_data.array_value->begin());
-    case SmartType_Binary:
+      }
+    case SmartType_Binary: {
       if (m_data.binary_value == Other.m_data.binary_value)
         return true;
+      if (m_data.array_value->size() != Other.m_data.array_value->size())
+        return false;
       return std::equal(m_data.binary_value->begin(),
                         m_data.binary_value->end(),
                         Other.m_data.binary_value->begin());
+      }
     case SmartType_Null:
       return true;
     case SmartType_Invalid:
       return true;
-    default: {
-/*
-#if !defined UNIT_TESTS
-      NOTREACHED();
-#endif
-*/
+    default:
+      DCHECK(!"Unhandled smart object type");
       break;
-    }
   }
   return false;
 }
@@ -175,7 +176,7 @@ SmartObject::SmartObject(int32_t InitialValue)
 }
 
 int32_t SmartObject::asInt() const {
-  int64_t convert = convert_int();
+  const int64_t convert = convert_int();
   if (invalid_int64_value == convert) {
     return invalid_int_value;
   }
@@ -184,20 +185,19 @@ int32_t SmartObject::asInt() const {
   return static_cast<int32_t>(convert);
 }
 
-SmartObject& SmartObject::operator=(int32_t NewValue) {
+SmartObject& SmartObject::operator=(const int32_t NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_integer(NewValue);
   }
   return *this;
 }
 
-bool SmartObject::operator==(int32_t Value) const {
-  int64_t comp = convert_int();
-  if (comp == invalid_int_value) {
+bool SmartObject::operator==(const int32_t Value) const {
+  const int64_t comp = convert_int();
+  if (comp == invalid_int64_value) {
     return false;
-  } else {
-    return comp == Value;
   }
+  return comp == static_cast<int64_t>(Value);
 }
 
 void SmartObject::set_value_integer(int64_t NewValue) {
@@ -206,33 +206,19 @@ void SmartObject::set_value_integer(int64_t NewValue) {
 }
 
 int64_t SmartObject::convert_int() const {
-  int64_t retval;
-
   switch (m_type) {
     case SmartType_String:
-      retval = convert_string_to_integer(m_data.str_value);
-      break;
+      return convert_string_to_integer(m_data.str_value);
     case SmartType_Boolean:
-      retval = (m_data.bool_value == true) ? 1 : 0;
-      break;
+      return (m_data.bool_value == true) ? 1 : 0;
     case SmartType_Integer:
-      retval = m_data.int_value;
-      break;
+      return m_data.int_value;
     case SmartType_Double:
-      retval = static_cast<int64_t>(m_data.double_value);
+      return static_cast<int64_t>(m_data.double_value);
+    default:
       break;
-    default: {
-/*
-#if !defined UNIT_TESTS
-      NOTREACHED();
-#endif
-*/
-      retval = invalid_int64_value;
-      break;
-    }
   }
-
-  return retval;
+  return invalid_int64_value;
 }
 
 // =============================================================
@@ -246,7 +232,7 @@ SmartObject::SmartObject(uint32_t InitialValue)
 }
 
 uint32_t SmartObject::asUInt() const {
-  int64_t convert = convert_int();
+  const int64_t convert = convert_int();
   if (invalid_int64_value == convert) {
     return invalid_unsigned_int_value;
   }
@@ -255,20 +241,19 @@ uint32_t SmartObject::asUInt() const {
   return static_cast<uint32_t>(convert);
 }
 
-SmartObject& SmartObject::operator=(uint32_t NewValue) {
+SmartObject& SmartObject::operator=(const uint32_t NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_integer(NewValue);
   }
   return *this;
 }
 
-bool SmartObject::operator==(uint32_t Value) const {
-  int64_t comp = convert_int();
+bool SmartObject::operator==(const uint32_t Value) const {
+  const int64_t comp = convert_int();
   if (comp == invalid_int_value) {
     return false;
-  } else {
-    return static_cast<uint32_t>(comp) == Value;
   }
+  return comp == static_cast<int64_t>(Value);
 }
 
 // =============================================================
@@ -285,20 +270,19 @@ int64_t SmartObject::asInt64() const {
   return convert_int();
 }
 
-SmartObject& SmartObject::operator=(int64_t NewValue) {
+SmartObject& SmartObject::operator=(const int64_t NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_integer(NewValue);
   }
   return *this;
 }
 
-bool SmartObject::operator==(int64_t Value) const {
-  int64_t comp = convert_int();
+bool SmartObject::operator==(const int64_t Value) const {
+  const int64_t comp = convert_int();
   if (comp == invalid_int_value) {
     return false;
-  } else {
-    return comp == Value;
   }
+  return comp == Value;
 }
 
 // =============================================================
@@ -315,54 +299,40 @@ double SmartObject::asDouble() const {
   return convert_double();
 }
 
-SmartObject& SmartObject::operator=(double NewValue) {
+SmartObject& SmartObject::operator=(const double NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_double(NewValue);
   }
   return *this;
 }
 
-bool SmartObject::operator==(double Value) const {
-  double comp = convert_double();
+bool SmartObject::operator==(const double Value) const {
+  const double comp = convert_double();
   if (comp == invalid_double_value) {
     return false;
-  } else {
-    return comp == Value;
   }
+  return comp == Value;
 }
 
-void SmartObject::set_value_double(double NewValue) {
+void SmartObject::set_value_double(const double NewValue) {
   set_new_type(SmartType_Double);
   m_data.double_value = NewValue;
 }
 
 double SmartObject::convert_double() const {
-  double retval;
-
   switch (m_type) {
     case SmartType_String:
-      retval = convert_string_to_double(m_data.str_value);
-      break;
+      return convert_string_to_double(m_data.str_value);
     case SmartType_Boolean:
-      retval = (m_data.bool_value) ? 1.0 : 0.0;
-      break;
+      return (m_data.bool_value) ? 1.0 : 0.0;
     case SmartType_Integer:
-      retval = static_cast<double>(convert_int());
-      break;
+      return static_cast<double>(convert_int());
     case SmartType_Double:
-      retval = m_data.double_value;
-      break;
+      return m_data.double_value;
     default:
-/*
-#if !defined UNIT_TESTS
-      NOTREACHED();
-#endif
-*/
-      retval = invalid_double_value;
       break;
   }
-
-  return retval;
+  return invalid_double_value;
 }
 
 // =============================================================
@@ -380,20 +350,20 @@ bool SmartObject::asBool() const {
   return convert_bool();
 }
 
-SmartObject& SmartObject::operator=(bool NewValue) {
+SmartObject& SmartObject::operator=(const bool NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_bool(NewValue);
   }
   return *this;
 }
 
-bool SmartObject::operator==(bool Value) const {
+bool SmartObject::operator==(const bool Value) const {
   bool comp = convert_bool();
+  // FIXME(EZamakhov): invalide bool?
   if (comp == invalid_bool_value) {
     return false;
-  } else {
-    return comp == Value;
   }
+  return comp == Value;
 }
 
 void SmartObject::set_value_bool(bool NewValue) {
@@ -402,29 +372,17 @@ void SmartObject::set_value_bool(bool NewValue) {
 }
 
 bool SmartObject::convert_bool() const {
-  bool retval;
-
   switch (m_type) {
     case SmartType_Boolean:
-      retval = m_data.bool_value;
-      break;
+      return m_data.bool_value;
     case SmartType_Integer:
-      retval = (m_data.int_value != 0);
-      break;
+      return (m_data.int_value != 0);
     case SmartType_Double:
-      retval = (m_data.double_value != 0.0);
-      break;
+      return (m_data.double_value != 0.0);
     default:
-/*
-#if !defined UNIT_TESTS
-      NOTREACHED();
-#endif
-*/
-      retval = invalid_bool_value;
       break;
   }
-
-  return retval;
+  return invalid_bool_value;
 }
 
 // =============================================================
@@ -442,20 +400,19 @@ char SmartObject::asChar() const {
   return convert_char();
 }
 
-SmartObject& SmartObject::operator=(char NewValue) {
+SmartObject& SmartObject::operator=(const char NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_char(NewValue);
   }
   return *this;
 }
 
-bool SmartObject::operator==(char Value) const {
-  char comp = convert_char();
+bool SmartObject::operator==(const char Value) const {
+  const char comp = convert_char();
   if (comp == invalid_char_value) {
     return false;
-  } else {
-    return comp == Value;
   }
+  return comp == Value;
 }
 
 void SmartObject::set_value_char(char NewValue) {
@@ -464,28 +421,17 @@ void SmartObject::set_value_char(char NewValue) {
 }
 
 char SmartObject::convert_char() const {
-  char retval;
-
   switch (m_type) {
     case SmartType_String:
-      retval =
+     return
           (m_data.str_value->length() == 1) ?
               m_data.str_value->at(0) : invalid_char_value;
-      break;
     case SmartType_Character:
-      retval = m_data.char_value;
-      break;
+      return m_data.char_value;
     default:
-/*
-#if !defined UNIT_TESTS
-      NOTREACHED();
-#endif
-*/
-      retval = invalid_char_value;
       break;
   }
-
-  return retval;
+  return invalid_char_value;
 }
 
 // =============================================================
@@ -507,7 +453,6 @@ const char* SmartObject::asCharArray() const {
   if (m_data.str_value != NULL) {
     return m_data.str_value->c_str();
   }
-
   return "";
 }
 
@@ -519,12 +464,11 @@ SmartObject& SmartObject::operator=(const std::string& NewValue) {
 }
 
 bool SmartObject::operator==(const std::string& Value) const {
-  std::string comp = convert_string();
+  const std::string comp = convert_string();
   if (comp == invalid_string_value) {
     return false;
-  } else {
-    return comp == Value;
   }
+  return comp == Value;
 }
 
 void SmartObject::set_value_string(const std::string& NewValue) {
@@ -533,40 +477,29 @@ void SmartObject::set_value_string(const std::string& NewValue) {
 }
 
 std::string SmartObject::convert_string() const {
-  std::string retval;
-  std::stringstream stream;
-
   switch (m_type) {
     case SmartType_String:
-      retval = *(m_data.str_value);
-      break;
-    case SmartType_Integer:
-      stream << m_data.int_value;
-      retval = stream.str();
-      break;
+      return *(m_data.str_value);
+    case SmartType_Integer: {
+        std::stringstream stream;
+        stream << m_data.int_value;
+        return stream.str();
+      }
     case SmartType_Character:
-      retval = std::string(1, m_data.char_value);
-      break;
+      return std::string(1, m_data.char_value);
     case SmartType_Double:
-      retval = convert_double_to_string(m_data.double_value);
-      break;
+      return convert_double_to_string(m_data.double_value);
     default:
-/*
-#if !defined UNIT_TESTS
-      NOTREACHED();
-#endif
-*/
-      retval = NsSmartDeviceLink::NsSmartObjects::invalid_cstr_value;
       break;
   }
-  return retval;
+  return NsSmartDeviceLink::NsSmartObjects::invalid_cstr_value;
 }
 
 // =============================================================
 // CHAR* TYPE SUPPORT
 // =============================================================
 
-SmartObject::SmartObject(char* InitialValue)
+SmartObject::SmartObject(const char* const InitialValue)
     : m_type(SmartType_Null),
       m_schema() {
   m_data.str_value = NULL;
@@ -582,22 +515,15 @@ SmartObject& SmartObject::operator=(const char* NewValue) {
 }
 
 bool SmartObject::operator==(const char* Value) const {
-  std::string comp = convert_string();
-  std::string val(Value);
+  const std::string comp = convert_string();
   if (comp == invalid_string_value) {
     return false;
-  } else {
-    return comp == val;
   }
+  return (0 == comp.compare(Value));
 }
 
 void SmartObject::set_value_cstr(const char* NewValue) {
-  if (NewValue) {
-    set_value_string(std::string(NewValue));
-  } else {
-    std::string tmp;
-    set_value_string(tmp);
-  }
+  set_value_string(NewValue ? std::string(NewValue) : std::string());
 }
 
 // =============================================================
@@ -616,34 +542,29 @@ SmartBinary SmartObject::asBinary() const {
 
 SmartArray* SmartObject::asArray() const {
   if (m_type != SmartType_Array) {
-/*
-#if !defined UNIT_TESTS
-    NOTREACHED();
-#endif
-*/
     return NULL;
   }
-
   return m_data.array_value;
 }
 
-SmartObject& SmartObject::operator=(SmartBinary NewValue) {
+SmartObject& SmartObject::operator=(const SmartBinary& NewValue) {
   if (m_type != SmartType_Invalid) {
     set_value_binary(NewValue);
   }
   return *this;
 }
 
-bool SmartObject::operator==(SmartBinary Value) const {
-  SmartBinary comp = convert_binary();
+bool SmartObject::operator==(const SmartBinary& Value) const {
+  const SmartBinary comp = convert_binary();
   if (comp == invalid_binary_value) {
     return false;
-  } else {
-    return std::equal(comp.begin(), comp.end(), Value.begin());
   }
+  if (comp.size() != Value.size())
+    return false;
+  return std::equal(comp.begin(), comp.end(), Value.begin());
 }
 
-void SmartObject::set_value_binary(SmartBinary NewValue) {
+void SmartObject::set_value_binary(const SmartBinary& NewValue) {
   set_new_type(SmartType_Binary);
   m_data.binary_value = new SmartBinary(NewValue);
 }
@@ -652,16 +573,9 @@ SmartBinary SmartObject::convert_binary() const {
   switch (m_type) {
     case SmartType_Binary:
       return *(m_data.binary_value);
-    default: {
-/*
-#if !defined UNIT_TESTS
-      NOTREACHED();
-#endif
-*/
-      return invalid_binary_value;
-    }
+    default:
+      break;
   }
-
   return invalid_binary_value;
 }
 
@@ -669,15 +583,15 @@ SmartBinary SmartObject::convert_binary() const {
 // ARRAY INTERFACE SUPPORT
 // =============================================================
 
-SmartObject& SmartObject::operator[](int32_t Index) {
+SmartObject& SmartObject::operator[](const int32_t Index) {
   return handle_array_access(Index);
 }
 
-const SmartObject& SmartObject::operator[](int32_t Index) const {
+const SmartObject& SmartObject::operator[](const int32_t Index) const {
   return getElement(Index);
 }
 
-inline SmartObject& SmartObject::handle_array_access(int32_t Index) {
+inline SmartObject& SmartObject::handle_array_access(const int32_t Index) {
   if (m_type == SmartType_Invalid) {
     return *this;
   }
@@ -687,24 +601,17 @@ inline SmartObject& SmartObject::handle_array_access(int32_t Index) {
     m_type = SmartType_Array;
     m_data.array_value = new SmartArray();
   }
-
-  int32_t sz = m_data.array_value->size();
-  if (Index == -1) {
-    Index = sz;
+  SmartArray& array = *m_data.array_value;
+  if (Index == -1 || static_cast<size_t>(Index) == array.size()) {
+    array.push_back(SmartObject());
+    return array[array.size() - 1];
   }
-  if (Index == sz) {
-    SmartObject uc;
-    m_data.array_value->push_back(uc);
+  if (Index >= 0 && (static_cast<size_t>(Index) < array.size())) {
+    DCHECK(sizeof(Index) >= sizeof(array.size()));
+    return array[Index];
   }
-  if (Index > sz || Index < 0) {
-/*
-#if !defined UNIT_TESTS
-    NOTREACHED();
-#endif
-*/
-    return invalid_object_value;
-  }
-  return m_data.array_value->at(Index);
+  // FIXME(EZamakhov): return always the same reference - multi-thread problem?
+  return invalid_object_value;
 }
 
 // =============================================================
@@ -720,22 +627,19 @@ const SmartObject& SmartObject::operator[] (const std::string& Key) const {
 }
 
 SmartObject& SmartObject::operator[](char* Key) {
-  std::string str(Key);
-  return handle_map_access(str);
+  return handle_map_access(std::string(Key));
 }
- 
+
 const SmartObject& SmartObject::operator[](char* Key) const {
-  std::string str(Key);
-  return getElement(str);
+  return getElement(std::string(Key));
 }
 
 SmartObject& SmartObject::operator[](const char* Key) {
-  std::string str(Key);
-  return handle_map_access(str);
+  return handle_map_access(std::string(Key));
 }
 
 const SmartObject& SmartObject::operator[](const char* Key) const {
-  return getElement(Key);
+  return getElement(std::string(Key));
 }
 
 const SmartObject& SmartObject::getElement(size_t Index) const {
@@ -744,29 +648,16 @@ const SmartObject& SmartObject::getElement(size_t Index) const {
       return m_data.array_value->at(Index);
     }
   }
-
-/*
-#if !defined UNIT_TESTS
-  NOTREACHED();
-#endif
-*/
   return invalid_object_value;
 }
 
-const SmartObject& SmartObject::getElement(const std::string & Key) const {
+const SmartObject& SmartObject::getElement(const std::string& Key) const {
   if (SmartType_Map == m_type) {
-    SmartMap::const_iterator i = m_data.map_value->find(Key);
-
-    if (i != m_data.map_value->end()) {
-      return i->second;
+    SmartMap::const_iterator it = m_data.map_value->find(Key);
+    if (it != m_data.map_value->end()) {
+      return it->second;
     }
   }
-
-/*
-#if !defined UNIT_TESTS
-  NOTREACHED();
-#endif
-*/
   return invalid_object_value;
 }
 
@@ -775,15 +666,14 @@ SmartObject& SmartObject::handle_map_access(const std::string& Key) {
     return *this;
   }
 
-  // TODO(404): implement handling of non-existing keys similar to array
   if (m_type != SmartType_Map) {
     cleanup_data();
     m_type = SmartType_Map;
     m_data.map_value = new SmartMap();
   }
+  SmartMap& map = *m_data.map_value;
 
-  // TODO(404): Add check for key presense
-  return (*(m_data.map_value))[Key];
+  return map[Key];
 }
 
 // =============================================================
@@ -791,10 +681,10 @@ SmartObject& SmartObject::handle_map_access(const std::string& Key) {
 // =============================================================
 void SmartObject::duplicate(const SmartObject& OtherObject) {
   SmartData newData;
-  SmartType newType = OtherObject.m_type;
-  CSmartSchema newSchema = OtherObject.m_schema;
-
+  const SmartType newType = OtherObject.m_type;
   switch (newType) {
+    case SmartType_Null: // on duplicate empty SmartObject
+      return;
     case SmartType_Map:
       newData.map_value = new SmartMap(*OtherObject.m_data.map_value);
       break;
@@ -820,19 +710,15 @@ void SmartObject::duplicate(const SmartObject& OtherObject) {
       newData.binary_value = new SmartBinary(*OtherObject.m_data.binary_value);
       break;
     default:
-/*
-#if !defined UNIT_TESTS
-      NOTREACHED();
-#endif
-*/
-      break;
+      DCHECK(!"Unhandled smart object type");
+      return;
   }
+  m_schema = OtherObject.m_schema;
 
   cleanup_data();
 
   m_type = newType;
   m_data = newData;
-  m_schema = newSchema;
 }
 
 void SmartObject::cleanup_data() {
@@ -850,39 +736,40 @@ void SmartObject::cleanup_data() {
       delete m_data.binary_value;
       break;
     default:
-/*
-#if !defined UNIT_TESTS
-      NOTREACHED();
-#endif
-*/
       break;
   }
 }
 
 size_t SmartObject::length() const {
-  size_t size = 0;
-
   switch (m_type) {
     case SmartType_String:
-      size = m_data.str_value->size();
-      break;
+      return m_data.str_value->size();
     case SmartType_Array:
-      size = m_data.array_value->size();
-      break;
+      return m_data.array_value->size();
     case SmartType_Map:
-      size = m_data.map_value->size();
-      break;
+      return m_data.map_value->size();
+    case SmartType_Binary:
+      return m_data.binary_value->size();
     default:
-/*
-#if !defined UNIT_TESTS
-      NOTREACHED();
-#endif
-*/
-      size = 0;
       break;
   }
+  return 0;
+}
 
-  return size;
+bool SmartObject::empty() const {
+  switch (m_type) {
+    case SmartType_String:
+      return m_data.str_value->empty();
+    case SmartType_Array:
+      return m_data.array_value->empty();
+    case SmartType_Map:
+      return m_data.map_value->empty();
+    case SmartType_Binary:
+      return m_data.binary_value->empty();
+    default:
+      break;
+  }
+  return true;
 }
 
 void SmartObject::set_new_type(SmartType NewType) {
@@ -891,12 +778,7 @@ void SmartObject::set_new_type(SmartType NewType) {
 }
 
 double SmartObject::convert_string_to_double(const std::string* Value) {
-  if (0 == Value->size()) {
-/*
-#if !defined UNIT_TESTS
-    NOTREACHED();
-#endif
-*/
+  if (!Value || Value->empty()) {
     return invalid_double_value;
   }
 
@@ -905,11 +787,6 @@ double SmartObject::convert_string_to_double(const std::string* Value) {
 
   double result = strtod(Value->c_str(), &ptr);
   if (errno || (ptr != (Value->c_str() + Value->length()))) {
-/*
-#if !defined UNIT_TESTS
-    NOTREACHED();
-#endif
-*/
     return invalid_double_value;
   }
 
@@ -935,7 +812,7 @@ std::string SmartObject::convert_double_to_string(const double& Value) {
 }
 
 uint64_t SmartObject::convert_string_to_integer(const std::string* Value) {
-  if (0 == Value->size()) {
+  if (!Value || Value->empty()) {
     return invalid_int64_value;
   }
   int64_t result;
@@ -944,16 +821,14 @@ uint64_t SmartObject::convert_string_to_integer(const std::string* Value) {
   if (stream.eof()) {
     return result;
   }
-  else {
-    return invalid_int64_value;
-  }
+  return invalid_int64_value;
 }
 
 SmartType SmartObject::getType() const {
   return m_type;
 }
 
-std::string NsSmartDeviceLink::NsSmartObjects::SmartObject::OperatorToTransform(const SmartMap::value_type &pair) {
+std::string SmartObject::OperatorToTransform(const SmartMap::value_type &pair) {
     return pair.first;
 }
 
@@ -965,37 +840,24 @@ std::set<std::string> SmartObject::enumerate() const {
             m_data.map_value->begin(),
             m_data.map_value->end(),
             std::inserter(keys, keys.end()),
-            //operator[](const SmartMap::value_type &pair){return pair.first;}
-            &NsSmartDeviceLink::NsSmartObjects::SmartObject::OperatorToTransform
+            &SmartObject::OperatorToTransform
         );
   }
   return keys;
 }
 
-bool SmartObject::keyExists(const std::string & Key) const {
+bool SmartObject::keyExists(const std::string& Key) const {
   if (m_type != SmartType_Map) {
-/*
-#if !defined UNIT_TESTS
-    NOTREACHED();
-#endif
-*/
     return false;
   }
-
-  return m_data.map_value->count(Key);
+  return m_data.map_value->find(Key) != m_data.map_value->end();
 }
 
-bool SmartObject::erase(const std::string & Key) {
+bool SmartObject::erase(const std::string& Key) {
   if (m_type != SmartType_Map) {
-/*
-#if !defined UNIT_TESTS
-    NOTREACHED();
-#endif
-*/
     return false;
   }
-
-  return (1 == m_data.map_value->erase(Key));
+  return (m_data.map_value->erase(Key) > 0);
 }
 
 bool SmartObject::isValid() const {
@@ -1006,7 +868,7 @@ Errors::eType SmartObject::validate() {
   return m_schema.validate(*this);
 }
 
-void SmartObject::setSchema(CSmartSchema schema) {
+void SmartObject::setSchema(const CSmartSchema& schema) {
   m_schema = schema;
 }
 

@@ -63,7 +63,7 @@ void ShowRequest::Run() {
     return;
   }
   //SDLAQ-CRS-494, VC3.1
-  if (0 == (*message_)[strings::msg_params].length()) {
+  if ((*message_)[strings::msg_params].empty()) {
     LOG4CXX_ERROR(logger_, "INVALID_DATA!");
     SendResponse(false, mobile_apis::Result::INVALID_DATA);
     return;

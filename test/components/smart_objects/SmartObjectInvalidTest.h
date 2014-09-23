@@ -28,150 +28,151 @@
 // ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTINVALIDTEST_H_
-#define TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTINVALIDTEST_H_
+#ifndef TEST_COMPONENTS_SMART_OBJECTS_SMARTOBJECTINVALIDTEST_H_
+#define TEST_COMPONENTS_SMART_OBJECTS_SMARTOBJECTINVALIDTEST_H_
 
+#include <string>
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
 #include "smart_objects/smart_object.h"
-#include <string>
 
+namespace test {
+namespace components {
+namespace SmartObjects {
+namespace SmartObjectInvalidTest {
 using namespace NsSmartDeviceLink::NsSmartObjects;
 
+TEST(test_SmartObjectInvalidTest, simple_type_can_be_set_in_constructor) {
+  SmartObject objMap(SmartType_Map);
+  ASSERT_EQ(SmartType_Map, objMap.getType());
 
-namespace test { namespace components { namespace SmartObjects { namespace SmartObjectInvalidTest {
+  SmartObject objArray(SmartType_Array);
+  ASSERT_EQ(SmartType_Array, objArray.getType());
 
-    TEST(test_simple_type_can_be_set_in_constructor, test_SmartObjectInvalidTest)
-    {
-      SmartObject objMap(SmartType_Map);
-      ASSERT_EQ(SmartType_Map, objMap.getType());
+  SmartObject objInt(SmartType_Integer);
+  ASSERT_EQ(SmartType_Integer, objInt.getType());
 
-      SmartObject objArray(SmartType_Array);
-      ASSERT_EQ(SmartType_Array, objArray.getType());
+  SmartObject objDouble(SmartType_Double);
+  ASSERT_EQ(SmartType_Double, objDouble.getType());
 
-        SmartObject objInt(SmartType_Integer);
-        ASSERT_EQ(SmartType_Integer, objInt.getType());
+  SmartObject objBoolean(SmartType_Boolean);
+  ASSERT_EQ(SmartType_Boolean, objBoolean.getType());
 
-        SmartObject objDouble(SmartType_Double);
-        ASSERT_EQ(SmartType_Double, objDouble.getType());
+  SmartObject objChar(SmartType_Character);
+  ASSERT_EQ(SmartType_Character, objChar.getType());
 
-        SmartObject objBoolean(SmartType_Boolean);
-        ASSERT_EQ(SmartType_Boolean, objBoolean.getType());
+  SmartObject objString(SmartType_String);
+  ASSERT_EQ(SmartType_String, objString.getType());
 
-        SmartObject objChar(SmartType_Character);
-        ASSERT_EQ(SmartType_Character, objChar.getType());
+  SmartObject objBinary(SmartType_Binary);
+  ASSERT_EQ(SmartType_Binary, objBinary.getType());
 
-        SmartObject objString(SmartType_String);
-        ASSERT_EQ(SmartType_String, objString.getType());
+  SmartObject objInvalid(SmartType_Invalid);
+  ASSERT_EQ(SmartType_Invalid, objInvalid.getType());
 
-        SmartObject objBinary(SmartType_Binary);
-        ASSERT_EQ(SmartType_Binary, objBinary.getType());
+  SmartObject objNullConstructor(SmartType_Null);
+  ASSERT_EQ(SmartType_Null, objNullConstructor.getType());
 
-        SmartObject objInvalid(SmartType_Invalid);
-        ASSERT_EQ(SmartType_Invalid, objInvalid.getType());
+  SmartObject objNullDefault;
+  ASSERT_EQ(SmartType_Null, objNullDefault.getType());
+}
 
-        SmartObject objNullConstructor(SmartType_Null);
-        ASSERT_EQ(SmartType_Null, objNullConstructor.getType());
+TEST(test_SmartObjectInvalidTest, invalid_object_remains_invalid) {
+  SmartObject obj(SmartType_Invalid);
+  ASSERT_EQ(SmartType_Invalid, obj.getType());
 
-        SmartObject objNullDefault;
-        ASSERT_EQ(SmartType_Null, objNullDefault.getType());
-    }
+  obj = 1;
+  ASSERT_EQ(SmartType_Invalid, obj.getType());
+  ASSERT_EQ(invalid_int_value, obj.asInt());
 
-    TEST(test_invalid_object_remains_invalid, test_SmartObjectInvalidTest)
-    {
-        SmartObject obj(SmartType_Invalid);
-        ASSERT_EQ(SmartType_Invalid, obj.getType());
+  // ---- unsigned int ---- //
+  obj = static_cast<unsigned int>(100);
+  ASSERT_EQ(SmartType_Invalid, obj.getType());
+  ASSERT_EQ(invalid_unsigned_int_value, obj.asUInt());
 
-        obj = 1;
-        ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_int_value, obj.asInt());
+  // ---- DOUBLE ---- //
+  obj = 3.14;
+  ASSERT_EQ(SmartType_Invalid, obj.getType());
+  ASSERT_EQ(invalid_double_value, obj.asDouble());
 
-        // ---- unsigned int ---- //
-        obj = static_cast<unsigned int>(100);
-        ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_unsigned_int_value, obj.asUInt());
+  // ---- CHAR ---- //
+  obj = 'a';
+  ASSERT_EQ(SmartType_Invalid, obj.getType());
+  ASSERT_EQ(invalid_char_value, obj.asChar());
 
-        // ---- DOUBLE ---- //
-        obj = 3.14;
-        ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_double_value, obj.asDouble());
+  // ---- BOOL ---- //
+  obj = true;
+  ASSERT_EQ(SmartType_Invalid, obj.getType());
+  ASSERT_EQ(invalid_bool_value, obj.asBool());
 
-        // ---- CHAR ---- //
-        obj = 'a';
-        ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_char_value, obj.asChar());
+  // ---- CHAR* ---- //
+  obj = "Hello, world";
+  ASSERT_EQ(SmartType_Invalid, obj.getType());
+  ASSERT_EQ(invalid_string_value, obj.asString());
 
-        // ---- BOOL ---- //
-        obj = true;
-        ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_bool_value, obj.asBool());
+  // ---- STD::STRING ---- //
+  obj = std::string("Hello, world");
+  ASSERT_EQ(SmartType_Invalid, obj.getType());
+  ASSERT_EQ(invalid_string_value, obj.asString());
 
-        // ---- CHAR* ---- //
-        obj = "Hello, world";
-        ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_string_value, obj.asString());
+  // ---- BINARY ---- //
+  NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryData;
+  binaryData.push_back('\0');
+  binaryData.push_back('a');
+  obj = binaryData;
+  ASSERT_EQ(SmartType_Invalid, obj.getType());
+  ASSERT_EQ(invalid_binary_value, obj.asBinary());
 
-        // ---- STD::STRING ---- //
-        obj = std::string("Hello, world");
-        ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_string_value, obj.asString());
+  // ---- ARRAY ---- //
+  obj[0] = 1;
+  obj[1] = true;
+  obj[2] = 'a';
+  obj[3] = 3.14;
 
-        // ---- BINARY ---- //
-        NsSmartDeviceLink::NsSmartObjects::SmartBinary binaryData;
-        binaryData.push_back('\0');
-        binaryData.push_back('a');
-        obj = binaryData;
-        ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_binary_value, obj.asBinary());
+  ASSERT_EQ(SmartType_Invalid, obj.getType());
+  ASSERT_EQ(invalid_int_value, obj[0].asInt());
+  ASSERT_EQ(invalid_bool_value, obj[1].asBool());
+  ASSERT_EQ(invalid_char_value, obj[2].asChar());
+  ASSERT_EQ(invalid_double_value, obj[3].asDouble());
 
-        // ---- ARRAY ---- //
-        obj[0] = 1;
-        obj[1] = true;
-        obj[2] = 'a';
-        obj[3] = 3.14;
+  // ---- DEEP ARRAY ---- //
+  obj[0] = 1;
+  obj[1][0] = 3.14;
+  obj[1][1][0] = true;
 
-        ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_int_value, obj[0].asInt());
-        ASSERT_EQ(invalid_bool_value, obj[1].asBool());
-        ASSERT_EQ(invalid_char_value, obj[2].asChar());
-        ASSERT_EQ(invalid_double_value, obj[3].asDouble());
+  ASSERT_EQ(SmartType_Invalid, obj.getType());
+  ASSERT_EQ(invalid_int_value, obj[0].asInt());
+  ASSERT_EQ(invalid_double_value, obj[1][0].asDouble());
+  ASSERT_EQ(invalid_bool_value, obj[1][1][0].asBool());
 
-        // ---- DEEP ARRAY ---- //
-        obj[0] = 1;
-        obj[1][0] = 3.14;
-        obj[1][1][0] = true;
+  // ---- MAP ---- //
+  obj["name"] = "My name";
+  obj["count"] = 10;
+  obj["isValid"] = true;
 
-        ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_int_value, obj[0].asInt());
-        ASSERT_EQ(invalid_double_value, obj[1][0].asDouble());
-        ASSERT_EQ(invalid_bool_value, obj[1][1][0].asBool());
+  ASSERT_EQ(SmartType_Invalid, obj.getType());
+  ASSERT_EQ(invalid_string_value, obj["name"].asString());
+  ASSERT_EQ(invalid_int_value, obj["count"].asInt());
+  ASSERT_EQ(invalid_bool_value, obj["isValid"].asBool());
 
-        // ---- MAP ---- //
-        obj["name"] = "My name";
-        obj["count"] = 10;
-        obj["isValid"] = true;
+  // ---- DEEP MAP ---- //
+  obj["request"]["name"] = "My Request";
+  obj["request"]["id"] = 123;
+  obj["response"]["name"] = "My Response";
+  obj["response"]["id"] = 456;
+  obj["we"]["need"]["to"]["go"]["deeper"] = true;
 
-        ASSERT_EQ(SmartType_Invalid, obj.getType());
-        ASSERT_EQ(invalid_string_value, obj["name"].asString());
-        ASSERT_EQ(invalid_int_value, obj["count"].asInt());
-        ASSERT_EQ(invalid_bool_value, obj["isValid"].asBool());
+  ASSERT_EQ(SmartType_Invalid, obj.getType());
 
-        // ---- DEEP MAP ---- //
-        obj["request"]["name"] = "My Request";
-        obj["request"]["id"] = 123;
-        obj["response"]["name"] = "My Response";
-        obj["response"]["id"] = 456;
-        obj["we"]["need"]["to"]["go"]["deeper"] = true;
-
-        ASSERT_EQ(SmartType_Invalid, obj.getType());
-
-        ASSERT_EQ(invalid_string_value, obj["request"]["name"].asString());
-        ASSERT_EQ(invalid_int_value, obj["request"]["id"].asInt());
-        ASSERT_EQ(invalid_string_value, obj["response"]["name"].asString());
-        ASSERT_EQ(invalid_int_value, obj["response"]["id"].asInt());
-        ASSERT_EQ(invalid_bool_value, obj["we"]["need"]["to"]["go"]["deeper"].asBool());
-    }
-}}}}
-
-#endif  // TEST_COMPONENTS_SMARTOBJECTS_SMARTOBJECTINVALIDTEST_H_
+  ASSERT_EQ(invalid_string_value, obj["request"]["name"].asString());
+  ASSERT_EQ(invalid_int_value, obj["request"]["id"].asInt());
+  ASSERT_EQ(invalid_string_value, obj["response"]["name"].asString());
+  ASSERT_EQ(invalid_int_value, obj["response"]["id"].asInt());
+  ASSERT_EQ(invalid_bool_value, obj["we"]["need"]["to"]["go"]["deeper"].asBool());
+}
+}  // namespace SmartObjectInvalidTest
+}  // namespace SmartObjects
+}  // namespace components
+}  // namespace test
+#endif  // TEST_COMPONENTS_SMART_OBJECTS_SMARTOBJECTINVALIDTEST_H_

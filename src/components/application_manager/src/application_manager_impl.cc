@@ -1398,25 +1398,22 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
   switch (message.protocol_version()) {
     case ProtocolVersion::kV3:
     case ProtocolVersion::kV2: {
-      if (!formatters::CFormatterJsonSDLRPCv2::fromString(
-            message.json_message(),
-            output,
-            message.function_id(),
-            message.type(),
-            message.correlation_id())
-          || !mobile_so_factory().attachSchema(output)
-          || ((output.validate() != smart_objects::Errors::OK)
-              && (output.validate() !=
-                  smart_objects::Errors::UNEXPECTED_PARAMETER))) {
-        LOG4CXX_WARN(logger_, "Failed to parse string to smart object :"
-                     << message.json_message());
-        utils::SharedPtr<smart_objects::SmartObject> response(
-          MessageHelper::CreateNegativeResponse(
-            message.connection_key(), message.function_id(),
-            message.correlation_id(), mobile_apis::Result::INVALID_DATA));
-        ManageMobileCommand(response);
-        return false;
-      }
+        const bool conversion_result =
+            formatters::CFormatterJsonSDLRPCv2::fromString(
+            message.json_message(), output, message.function_id(),
+            message.type(), message.correlation_id());
+        if (!conversion_result
+            || !mobile_so_factory().attachSchema(output)
+            || ((output.validate() != smart_objects::Errors::OK)) ) {
+          LOG4CXX_WARN(logger_, "Failed to parse string to smart object :"
+                       << message.json_message());
+          utils::SharedPtr<smart_objects::SmartObject> response(
+                MessageHelper::CreateNegativeResponse(
+                  message.connection_key(), message.function_id(),
+                  message.correlation_id(), mobile_apis::Result::INVALID_DATA));
+          ManageMobileCommand(response);
+          return false;
+        }
       LOG4CXX_INFO(
         logger_,
         "Convertion result for sdl object is true" << " function_id "
@@ -1446,8 +1443,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         LOG4CXX_WARN(logger_, "Failed to attach schema to object.");
         return false;
       }
-      if (output.validate() != smart_objects::Errors::OK &&
-          output.validate() != smart_objects::Errors::UNEXPECTED_PARAMETER) {
+      if (output.validate() != smart_objects::Errors::OK) {
         LOG4CXX_WARN(
           logger_,
           "Incorrect parameter from HMI");
@@ -1782,6 +1778,8 @@ void ApplicationManagerImpl::HeadUnitReset(
     mobile_api::AppInterfaceUnregisteredReason::eType reason) {
   switch (reason) {
     case mobile_api::AppInterfaceUnregisteredReason::MASTER_RESET: {
+      file_system::remove_directory_content(profile::Profile::instance()->app_storage_folder());
+      resume_controller().ClearResumptionInfo();
       policy::PolicyHandler::instance()->ResetPolicyTable();
       break;
     }
