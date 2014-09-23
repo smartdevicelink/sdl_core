@@ -1,11 +1,7 @@
 # QCC arm COMPILER SETTINGS
 #  Standard form of tool.mk file configured for qnx arm v7
 #  Note: Make sure QNX_HOST is set to install version desired
-ifndef QNX_INSTALL_ROOT
-QNX_INSTALL_ROOT := C:/FOR_GF/QNX650SP1/
-endif
-export QNX_HOST := $(QNX_INSTALL_ROOT)host/win32/x86
-export QNX_TARGET := $(QNX_INSTALL_ROOT)target/qnx6
+
 export PATH := $(QNX_HOST)/usr/bin;$(QNX_HOST)/unsupported/Python25;$(PATH)
 export MAKEFLAGS := $(QNX_TARGET)/usr/include
 
@@ -71,7 +67,7 @@ CCC_CMD = $(CPP) $(CC_FLAGS) $(DEFS) $(INCLUDES) $(@F:.$(OBJ_EXT)=.cc) -o $(@)
  
 # Archive Options  (Static Library)
 AR_OFLAG = 
-AR_FLAGS = -r
+AR_FLAGS = -rP
 AR_CMD = $(AR) $(AR_FLAGS) $(AR_OFLAG)$(@) $^
 
 # Linker Options

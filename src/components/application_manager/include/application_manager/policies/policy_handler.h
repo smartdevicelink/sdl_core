@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -109,7 +109,7 @@ class PolicyHandler :
   /**
    * Initializes PT exchange at ignition if need
    */
-  void PTExchangeAtIgnition();
+  void PTExchangeAtRegistration(const std::string& app_id);
 
   /**
    * Initializes PT exchange at user request
@@ -235,14 +235,6 @@ class PolicyHandler :
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,
                                       bool is_allowed);
-
-  /**
-   * @brief Allows to check consents for the connected device
-   * and send OnSDLConsentNeeded in case when device has no consent.
-   *
-   * @return true in case device has consent,  false otherwise.
-   */
-  virtual bool EnsureDeviceConsented();
 
   /**
    * @brief Allows to add new or update existed application during

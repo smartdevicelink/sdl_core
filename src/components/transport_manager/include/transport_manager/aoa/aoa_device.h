@@ -49,6 +49,9 @@ class AOADevice : public Device {
   AOAWrapper::AOAHandle handle() const;
 
  protected:
+  void set_handle(AOAWrapper::AOAHandle handle);
+
+ private:
   AOAWrapper::AOAHandle handle_;
 };
 

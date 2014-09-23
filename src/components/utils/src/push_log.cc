@@ -36,7 +36,7 @@
 
 namespace logger {
 
-bool push_log(log4cxx::LoggerPtr logger, LogLevel level, const std::string& entry, const log4cxx::spi::LocationInfo& location) {
+bool push_log(log4cxx::LoggerPtr logger, log4cxx::LevelPtr level, const std::string& entry, const log4cxx::spi::LocationInfo& location) {
   if (LoggerThreadCreated == logger_status) {
     LogMessage message = {logger, level, entry, location};
     LogMessageLoopThread::instance()->PostMessage(message);

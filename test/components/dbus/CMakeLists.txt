@@ -15,6 +15,7 @@ set (LIBRARIES
     DBus
     formatters
     SmartObjects
+    Utils
 )
 
 set (SCHEMA_SOURCES
