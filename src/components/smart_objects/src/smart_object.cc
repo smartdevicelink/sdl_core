@@ -607,7 +607,7 @@ inline SmartObject& SmartObject::handle_array_access(const int32_t Index) {
     return array[array.size() - 1];
   }
   if (Index >= 0 && (static_cast<size_t>(Index) < array.size())) {
-    DCHECK(sizeof(Index) >= sizeof(array.size()));
+    DCHECK(sizeof(Index) <= sizeof(array.size()));
     return array[Index];
   }
   // FIXME(EZamakhov): return always the same reference - multi-thread problem?
