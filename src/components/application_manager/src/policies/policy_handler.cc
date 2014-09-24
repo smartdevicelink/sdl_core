@@ -628,7 +628,7 @@ void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
-  if (app.valid() && app->hmi_level() != mobile_apis::HMILevel::HMI_NONE) {
+  if (app.valid()) {
     DeviceParams device_params;
     application_manager::MessageHelper::GetDeviceInfoForApp(app->app_id(),
                                                             &device_params);
