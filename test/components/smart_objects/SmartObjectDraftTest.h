@@ -244,7 +244,7 @@ TEST(SmartObjectsDraftTest, compare_empty_objects_by_types) {
 
 TEST(SmartObjectsDraftTest, compare_integer_type) {
   SmartObject value       = SmartObject(0xFFFFF);
-  SmartObject same_value  = SmartObject(0xFFFFFll);
+  SmartObject same_value  = SmartObject(static_cast<int64_t>(value.asInt()));
 
   ASSERT_EQ(value, same_value);
   ASSERT_EQ(same_value, value);
