@@ -182,9 +182,9 @@ TEST_F(SSLTest, BrokenHandshake) {
   const uint8_t *client_buf;
   size_t server_buf_len;
   size_t client_buf_len;
-  ASSERT_EQ(client_ctx->StartHandshake(&client_buf,
-                                       &client_buf_len),
-            security_manager::SSLContext::Handshake_Result_Success);
+  ASSERT_EQ(security_manager::SSLContext::Handshake_Result_Success,
+            client_ctx->StartHandshake(&client_buf,
+                                       &client_buf_len));
   ASSERT_FALSE(client_buf == NULL);
   ASSERT_GT(client_buf_len, 0u);
   // Broke 3 bytes for get abnormal fail of handshake

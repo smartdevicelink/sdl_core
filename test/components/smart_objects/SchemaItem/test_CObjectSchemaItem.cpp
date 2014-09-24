@@ -266,7 +266,7 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param) {
   obj[S_MSG_PARAMS][Keys::INFO] = "123";
   obj[S_MSG_PARAMS][Keys::SUCCESS] = true;
 
-  obj[fake1] = SmartObject(0ll);
+  obj[fake1] = SmartObject(static_cast<int64_t>(0));
   // any fake parameter is OK
   EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 
@@ -292,7 +292,7 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
   obj[S_MSG_PARAMS][Keys::INFO] = "123";
   obj[S_MSG_PARAMS][Keys::SUCCESS] = true;
 
-  obj[fake1] = SmartObject(0ll);
+  obj[fake1] = SmartObject(static_cast<int64_t>(0));
   obj[S_PARAMS][fake2] = SmartObject("123");
   obj[S_MSG_PARAMS][fake3] = true;
 
@@ -304,7 +304,7 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
   EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(fake3));
   EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 
-  obj[fake1] = SmartObject(0ll);
+  obj[fake1] = SmartObject(static_cast<int64_t>(0));
   obj[S_PARAMS][fake2] = SmartObject("123");
   obj[S_MSG_PARAMS][fake3] = true;
 

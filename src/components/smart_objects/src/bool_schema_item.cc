@@ -42,7 +42,7 @@ utils::SharedPtr<CBoolSchemaItem> CBoolSchemaItem::create(
 
 CBoolSchemaItem::CBoolSchemaItem(
     const TSchemaItemParameter<bool>& DefaultValue)
-    : CDefaultSchemaItem(DefaultValue) {
+    : CDefaultSchemaItem<bool>(DefaultValue) {
 }
 
 SmartType CBoolSchemaItem::getSmartType() const {
