@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -168,16 +168,13 @@ bool CheckAppPolicy::HasSameGroups(const AppPoliciesValueType& app_policy,
   }
 
   if (perms->isAppPermissionsRevoked) {
-    PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(
-                                    pm_->policy_table_.pt_data().get());
-    if (pt_ext) {
+
       std::vector<policy::FunctionalGroupPermission>::const_iterator it =
           perms->appRevokedPermissions.begin();
       std::vector<policy::FunctionalGroupPermission>::const_iterator it_end =
           perms->appRevokedPermissions.end();
       for (;it != it_end; ++it) {
-       pt_ext->RemoveAppConsentForGroup(perms->application_id, it->group_name);
-      }
+       pm_->RemoveAppConsentForGroup(perms->application_id, it->group_name);
     }
   }
 
@@ -368,21 +365,6 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
     SendNotification(app_policy);    
     SendOnPendingPermissions(app_policy, permissions_diff);
   }
-
-  // if 'device' was update with new/other func groups => user consent
-  // for device should be cleared.
-  if (kDeviceId == app_id) {
-#ifdef EXTENDED_POLICY
-    PTExtRepresentation* pt_ext = dynamic_cast<PTExtRepresentation*>(
-                                    pm_->policy_table_.pt_data().get());
-    if (pt_ext) {
-      if (!pt_ext->ResetDeviceConsents()) {
-        return false;
-      }
-    }
-#endif
-  }
-
   return true;
 }
 

@@ -225,6 +225,22 @@ void CacheManager::GetConsentedGroups(const std::string &device_id,
   LOG4CXX_TRACE_EXIT(logger_);
 }
 
+void CacheManager::RemoveAppConsentForGroup(const std::string& app_id,
+                                            const std::string& group_name) {
+  policy_table::DeviceData::iterator device_iter =
+      pt_->policy_table.device_data->begin();
+  policy_table::DeviceData::iterator device_iter_end =
+      pt_->policy_table.device_data->end();
+
+  policy_table::UserConsentRecords::const_iterator ucr_iter;
+  for (; device_iter != device_iter_end; ++device_iter) {
+    ucr_iter = device_iter->second.user_consent_records->find(app_id);
+    if (device_iter->second.user_consent_records->end() != ucr_iter) {
+      device_iter->second.user_consent_records->erase(app_id);
+    }
+  }
+}
+
 bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
   LOG4CXX_TRACE_ENTER(logger_);
 #ifdef EXTENDED_POLICY

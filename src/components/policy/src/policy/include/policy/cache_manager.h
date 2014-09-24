@@ -472,6 +472,9 @@ public:
                           FunctionalGroupIDs& allowed_groups,
                           FunctionalGroupIDs& disallowed_groups);
 
+  void RemoveAppConsentForGroup(const std::string& app_id,
+                                const std::string& group_name);
+
   /**
    * @brief Set app policy to pre_DataConsented policy
    * @param app_id Policy ID of application to be changed
@@ -531,6 +534,8 @@ public:
    * @brief Backup allows to save cache onto hard drive.
    */
   void Backup();
+
+  //void ResetPT(const PolicyTable& policy_table);
 
 private:
   std::string currentDateTime();
