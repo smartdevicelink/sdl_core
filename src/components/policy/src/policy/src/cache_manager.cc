@@ -227,6 +227,7 @@ void CacheManager::GetConsentedGroups(const std::string &device_id,
 
 void CacheManager::RemoveAppConsentForGroup(const std::string& app_id,
                                             const std::string& group_name) {
+#ifdef EXTENDED_POLICY
   policy_table::DeviceData::iterator device_iter =
       pt_->policy_table.device_data->begin();
   policy_table::DeviceData::iterator device_iter_end =
@@ -239,6 +240,7 @@ void CacheManager::RemoveAppConsentForGroup(const std::string& app_id,
       device_iter->second.user_consent_records->erase(app_id);
     }
   }
+#endif // EXTENDED_POLICY
 }
 
 bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
