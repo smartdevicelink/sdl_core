@@ -86,6 +86,42 @@ struct DeactivateApplication {
     connection_handler::DeviceHandle device_id_;
 };
 
+struct SDLAlowedNotification {
+  explicit SDLAlowedNotification(
+    const connection_handler::DeviceHandle& device_id,
+        PolicyManager* policy_manager)
+    : device_id_(device_id),
+      policy_manager_(policy_manager){}
+
+  void operator()(const application_manager::ApplicationSharedPtr& app) {
+    if (device_id_ == app->device()) {
+      app->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
+      application_manager::MessageHelper::SendActivateAppToHMI(
+        app->app_id(), hmi_apis::Common_HMILevel::NONE);
+
+        std::string hmi_level;
+        hmi_apis::Common_HMILevel::eType default_hmi;
+        policy_manager_->GetDefaultHmi(app->mobile_app_id()->asString(), &hmi_level);
+        if ("BACKGROUND" == hmi_level) {
+          default_hmi = hmi_apis::Common_HMILevel::BACKGROUND;
+        } else if ("FULL" == hmi_level) {
+          default_hmi = hmi_apis::Common_HMILevel::FULL;
+        } else if ("LIMITED" == hmi_level) {
+          default_hmi = hmi_apis::Common_HMILevel::LIMITED;
+        } else if ("NONE" == hmi_level) {
+          default_hmi = hmi_apis::Common_HMILevel::NONE;
+        } else {
+          return ;
+        }
+        application_manager::MessageHelper::SendActivateAppToHMI(app->app_id(), default_hmi);
+        application_manager::MessageHelper::SendHMIStatusNotification(*app);
+      }
+    }
+  private:
+    connection_handler::DeviceHandle device_id_;
+    PolicyManager* policy_manager_;
+};
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 struct LinkAppToDevice {
@@ -837,9 +873,9 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
   POLICY_LIB_CHECK_VOID();
   // Device ids, need to be changed
   std::set<uint32_t> device_ids;
-
+  bool device_specific = device_id != 0;
   // Common devices consents change
-  if (!device_id) {
+  if (!device_specific) {
     application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
     const std::set<application_manager::ApplicationSharedPtr> app_list =
         accessor.applications();
@@ -882,6 +918,14 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
       ApplicationList app_list = accessor.applications();
       std::for_each(app_list.begin(), app_list.end(),
                     DeactivateApplication(device_id));
+    } else {
+      if (!device_specific) {
+        application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
+        ApplicationList app_list = accessor.applications();
+
+        std::for_each(app_list.begin(), app_list.end(),
+                      SDLAlowedNotification(device_id, policy_manager()));
+      }
     }
 #endif
   }
@@ -907,6 +951,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
       registration_in_progress = false;
 
     }
+
     application_manager::ApplicationManagerImpl* app_manager =
         application_manager::ApplicationManagerImpl::instance();
 
@@ -922,7 +967,13 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
         // Send HMI status notification to mobile
         // TODO(PV): requires additonal checking
         //app_manager->PutApplicationInFull(app);
-        application_manager::MessageHelper::SendActivateAppToHMI(app->app_id());
+
+        // In case of device specific allowing
+        // We have to send Activate app explictly from here
+        // in other case it has been sent earlier, for all apps.
+        if (device_specific) {
+          application_manager::MessageHelper::SendActivateAppToHMI(app->app_id());
+        }
         app_manager->ActivateApplication(app);
       }
     // Skip device selection, since user already consented device usage
