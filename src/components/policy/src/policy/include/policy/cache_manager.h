@@ -537,6 +537,14 @@ public:
 
   //void ResetPT(const PolicyTable& policy_table);
 
+  /**
+   * @brief Allows to generate hash from the specified string.
+   * The djb2 algorithm uses for hash generation.
+   * @param str_to_hash - the string from which hash should be generated.
+   * @return integer hash for the specified string.
+   */
+  static int32_t GenerateHash(const std::string& str_to_hash);
+
 private:
   std::string currentDateTime();
   struct AppHMITypeToString {
@@ -550,7 +558,6 @@ private:
   void FillDeviceSpecificData();
   void FillAppSpecificData();
   bool AppExists(const std::string& app_id) const;
-  int32_t GenerateHash(const std::string& str_to_hash);
   void CopyInternalParams(const std::string &from, const std::string& to);
   long ConvertSecondsToMinute(int seconds);
 

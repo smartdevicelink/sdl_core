@@ -37,6 +37,7 @@
 #include "policy/sql_pt_queries.h"
 #include "policy/sql_pt_ext_queries.h"
 #include "policy/policy_helper.h"
+#include "policy/cache_manager.h"
 
 namespace policy {
 
@@ -979,8 +980,7 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
           return false;
         }
         query.Bind(0, device_id);
-        // TODO(AGaliuzov): Need GroupID instead of name
-        query.Bind(1, it_groups->first);
+        query.Bind(1, CacheManager::GenerateHash(it_groups->first));
         query.Bind(2, it_groups->second);
         query.Bind(
           3,

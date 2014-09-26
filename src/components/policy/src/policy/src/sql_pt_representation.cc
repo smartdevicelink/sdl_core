@@ -40,7 +40,7 @@
 #include "policy/sql_wrapper.h"
 #include "policy/sql_pt_queries.h"
 #include "policy/policy_helper.h"
-
+#include "policy/cache_manager.h"
 #ifndef __QNX__
 #  include "config_profile/profile.h"
 #endif  // __QNX__
@@ -661,7 +661,7 @@ bool SQLPTRepresentation::SaveFunctionalGroupings(
     // we drop records from the table and add them again.
     // That's why we use hash as a primary key insted of
     // simple auto incremental index.
-    const long int id = abs(GenerateHash(it->first));
+    const long int id = abs(CacheManager::GenerateHash(it->first));
     // SQLite's Bind doesn support 'long' type
     // So we need to explicitly cast it to int64_t
     // to avoid ambiguity.
@@ -1053,19 +1053,6 @@ bool SQLPTRepresentation::SaveLanguage(const std::string& code) {
   }
 
   return true;
-}
-
-unsigned long SQLPTRepresentation::GenerateHash(const std::string& str_to_hash) {
-
-  unsigned long hash = 5381U;
-  std::string::const_iterator it = str_to_hash.begin();
-  std::string::const_iterator it_end = str_to_hash.end();
-
-  for (;it != it_end; ++it) {
-       hash = ((hash << 5) + hash) + (*it);
-  }
-
-  return hash;
 }
 
 bool SQLPTRepresentation::SaveMessageString(
