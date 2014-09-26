@@ -262,7 +262,6 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
 }
 
 void CacheManager::Backup() {
-  LOG4CXX_TRACE_ENTER(logger_);
   sync_primitives::AutoLock auto_lock(cache_lock_);
   if (backup_.valid()) {
     if (pt_.valid()) {
@@ -295,7 +294,6 @@ void CacheManager::Backup() {
 #endif // EXTENDED_POLICY
     }
   }
-  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 std::string CacheManager::currentDateTime() {
@@ -500,7 +498,6 @@ void CacheManager::SaveUpdateRequired(bool status) {
 }
 
 bool CacheManager::IsApplicationRevoked(const std::string& app_id) {
-  LOG4CXX_INFO(logger_, "IsAppRevoked");
   bool is_revoked = false;
   if (pt_->policy_table.app_policies.end() !=
       pt_->policy_table.app_policies.find(app_id)) {

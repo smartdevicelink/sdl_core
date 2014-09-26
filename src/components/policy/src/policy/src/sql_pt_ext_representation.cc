@@ -671,7 +671,6 @@ bool SQLPTExtRepresentation::SaveApplicationPolicies(
 
 bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
     const policy_table::ApplicationPolicies::value_type& app) {
-  LOG4CXX_INFO(logger_, "Saving data for application: " << app.first);
   if (app.second.is_string()) {
     if (kDefaultId.compare(app.second.get_string()) == 0) {
       if (!SetDefaultPolicy(app.first)) {
@@ -926,7 +925,6 @@ void SQLPTExtRepresentation::GatherConsentGroup(
 
 bool SQLPTExtRepresentation::SaveDeviceData(
   const policy_table::DeviceData& devices) {
-  LOG4CXX_INFO(logger_, "SaveDeviceData");
   dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kInsertDeviceData)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for device data.");
@@ -1344,7 +1342,6 @@ bool SQLPTExtRepresentation::SaveMessageString(
 
 bool SQLPTExtRepresentation::SaveUsageAndErrorCounts(
     const policy_table::UsageAndErrorCounts& counts) {
-  LOG4CXX_INFO(logger_, "SaveUsageAndErrorCounts");
   dbms::SQLQuery query(db());
   if (!query.Exec(sql_pt::kDeleteAppLevel)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from app level.");

@@ -637,7 +637,6 @@ bool SQLPTRepresentation::Save(const policy_table::Table& table) {
 
 bool SQLPTRepresentation::SaveFunctionalGroupings(
   const policy_table::FunctionalGroupings& groups) {
-  LOG4CXX_INFO(logger_, "SaveFunctionalGroupings");
   dbms::SQLQuery query_delete(db());
   if (!query_delete.Exec(sql_pt::kDeleteRpc)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from rpc.");
@@ -731,7 +730,6 @@ bool SQLPTRepresentation::SaveRpcs(int64_t group_id,
 
 bool SQLPTRepresentation::SaveApplicationPolicies(
   const policy_table::ApplicationPolicies& apps) {
-  LOG4CXX_INFO(logger_, "SaveApplicationPolicies");
   dbms::SQLQuery query_delete(db());
   if (!query_delete.Exec(sql_pt::kDeleteAppGroup)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from app_group.");
@@ -801,7 +799,6 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
     return false;
   }
 
-  LOG4CXX_INFO(logger_, "Saving data for application: " << app.first);
   if (app.second.is_string()) {
     if (kDefaultId.compare(app.second.get_string()) == 0) {
       if (!SetDefaultPolicy(app.first)) {
@@ -895,14 +892,12 @@ bool SQLPTRepresentation::SaveAppType(const std::string& app_id,
 }
 
 bool SQLPTRepresentation::SaveModuleMeta(const policy_table::ModuleMeta& meta) {
-  LOG4CXX_INFO(logger_, "SaveModuleMeta");
   // Section Module Meta is empty for SDL specific
   return true;
 }
 
 bool SQLPTRepresentation::SaveModuleConfig(
   const policy_table::ModuleConfig& config) {
-  LOG4CXX_INFO(logger_, "SaveModuleConfig");
   dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kUpdateModuleConfig)) {
     LOG4CXX_WARN(logger_, "Incorrect update statement for module config");
@@ -984,7 +979,6 @@ bool SQLPTRepresentation::SaveServiceEndpoints(
 
 bool SQLPTRepresentation::SaveConsumerFriendlyMessages(
   const policy_table::ConsumerFriendlyMessages& messages) {
-  LOG4CXX_INFO(logger_, "SaveConsumerFriendlyMessages");
 
   // According CRS-2419  If there is no “consumer_friendly_messages” key,
   // the current local consumer_friendly_messages section shall be maintained in
@@ -1130,7 +1124,6 @@ bool SQLPTRepresentation::SaveNumberOfNotificationsPerMinute(
 
 bool SQLPTRepresentation::SaveDeviceData(
   const policy_table::DeviceData& devices) {
-  LOG4CXX_INFO(logger_, "SaveDeviceData");
   dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt::kInsertDeviceData)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for device data.");
@@ -1151,7 +1144,6 @@ bool SQLPTRepresentation::SaveDeviceData(
 
 bool SQLPTRepresentation::SaveUsageAndErrorCounts(
   const policy_table::UsageAndErrorCounts& counts) {
-  LOG4CXX_INFO(logger_, "SaveUsageAndErrorCounts");
   dbms::SQLQuery query(db());
   if (!query.Exec(sql_pt::kDeleteAppLevel)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from app level.");
