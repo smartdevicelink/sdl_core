@@ -439,8 +439,6 @@ bool CacheManager::ReactOnUserDevConsentForApp(const std::string &app_id,
     }
   }
 #endif // EXTENDED_POLICY
-  CopyInternalParams(kDefaultId, app_id);
-  SetDefaultPolicy(app_id);
   LOG4CXX_TRACE_EXIT(logger_);
   return result;
 }
