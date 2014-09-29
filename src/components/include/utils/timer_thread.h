@@ -329,7 +329,7 @@ void TimerThread<T>::TimerLooperDelegate::threadMain() {
       end_time = static_cast<time_t>(cur_time) + TimerDelegate::timeout_seconds_;
     }
 
-    int32_t  wait_seconds_left = static_cast<int32_t>(difftime(end_time, cur_time));
+    int64_t  wait_seconds_left = static_cast<int64_t>(difftime(end_time, cur_time));
     int32_t  wait_milliseconds_left = std::numeric_limits<int32_t>::max();
     const int32_t millisecconds_in_second = 1000;
     if (wait_seconds_left < std::numeric_limits<int32_t>::max() / millisecconds_in_second) {
