@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -1245,7 +1245,16 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
   } else {
     policy_manager->GetPriority(app->mobile_app_id()->asString(), &priority);
   }
-  if (!priority.empty()) {
+  // According SDLAQ-CRS-2794
+  // SDL have to send ActivateApp without "proirity" parameter to HMI.
+  // in case of unconsented device
+  std::string mac_adress;
+  connection_handler::DeviceHandle device_handle = app->device();
+  connection_handler::ConnectionHandlerImpl::instance()->
+      GetDataOnDeviceID(device_handle, NULL, NULL, &mac_adress, NULL);
+
+  policy::DeviceConsent consent = policy_manager->GetUserConsentForDevice(mac_adress);
+  if (!priority.empty() && (policy::DeviceConsent::kDeviceAllowed == consent)) {
     (*message)[strings::msg_params]["priority"] = GetPriorityCode(priority);
   }
 
