@@ -835,39 +835,31 @@ smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(
     return NULL;
   }
   smart_objects::SmartObject& vr_help = *result;
-  if (app->vr_help_title()) {
-    vr_help[strings::vr_help_title] = (*app->vr_help_title());
-  } else {
-    vr_help[strings::vr_help_title] = app->name();
-  }
+  vr_help[strings::vr_help_title] = app->name();
 
-  if (app->vr_help()) {
-    vr_help[strings::vr_help] = (*app->vr_help());
-  } else {
-    ApplicationManagerImpl::ApplicationListAccessor accessor;
-    const std::set<ApplicationSharedPtr> apps = accessor.applications();
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  const std::set<ApplicationSharedPtr> apps = accessor.applications();
 
-    int32_t index = 0;
-    std::set<ApplicationSharedPtr>::const_iterator it_app = apps.begin();
-    for (; apps.end() != it_app; ++it_app) {
-      if ((*it_app)->vr_synonyms()) {
-        smart_objects::SmartObject item(smart_objects::SmartType_Map);
-        item[strings::text] = (*((*it_app)->vr_synonyms())).getElement(0);
-        item[strings::position] = index + 1;
-        vr_help[strings::vr_help][index++] = item;
-      }
-    }
-
-    // copy all app VR commands
-    const CommandsMap& commands = app->commands_map();
-    CommandsMap::const_iterator it = commands.begin();
-
-    for (; commands.end() != it; ++it) {
+  int32_t index = 0;
+  std::set<ApplicationSharedPtr>::const_iterator it_app = apps.begin();
+  for (; apps.end() != it_app; ++it_app) {
+    if ((*it_app)->vr_synonyms()) {
       smart_objects::SmartObject item(smart_objects::SmartType_Map);
-      item[strings::text] = (*it->second)[strings::vr_commands][0].asString();
+      item[strings::text] = (*((*it_app)->vr_synonyms())).getElement(0);
       item[strings::position] = index + 1;
       vr_help[strings::vr_help][index++] = item;
     }
+  }
+
+  // copy all app VR commands
+  const CommandsMap& commands = app->commands_map();
+  CommandsMap::const_iterator it = commands.begin();
+
+  for (; commands.end() != it; ++it) {
+    smart_objects::SmartObject item(smart_objects::SmartType_Map);
+    item[strings::text] = (*it->second)[strings::vr_commands][0].asString();
+    item[strings::position] = index + 1;
+    vr_help[strings::vr_help][index++] = item;
   }
   return result;
 }
