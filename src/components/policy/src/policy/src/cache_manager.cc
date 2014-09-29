@@ -245,7 +245,7 @@ void CacheManager::RemoveAppConsentForGroup(const std::string& app_id,
 
 bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
   LOG4CXX_TRACE_ENTER(logger_);
-#ifdef EXTENDED_POLICY
+
   pt_->policy_table.functional_groupings =
       update_pt.policy_table.functional_groupings;
 
@@ -256,7 +256,7 @@ bool CacheManager::ApplyUpdate(const policy_table::Table& update_pt) {
     pt_->policy_table.consumer_friendly_messages =
         update_pt.policy_table.consumer_friendly_messages;
   }
-#endif // EXTENDED_POLICY
+
   LOG4CXX_TRACE_EXIT(logger_);
   return true;
 }
