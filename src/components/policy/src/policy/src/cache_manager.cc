@@ -780,11 +780,14 @@ bool CacheManager::GetPriority(const std::string &policy_app_id,
 }
 
 void CacheManager::CheckSnapshotInitialization() {
-  *(pt_->policy_table.module_config.preloaded_pt) = false;
+  *(snapshot_->policy_table.module_config.preloaded_pt) = false;
 #ifdef EXTENDED_POLICY
 
+  snapshot_->policy_table.consumer_friendly_messages->messages =
+      rpc::Optional<policy_table::Messages>();
+
   rpc::Optional<policy_table::ModuleMeta>& module_meta =
-      pt_->policy_table.module_meta;
+      snapshot_->policy_table.module_meta;
   if (!module_meta->pt_exchanged_at_odometer_x->is_initialized()) {
     *(module_meta->pt_exchanged_at_odometer_x) = 0;
   }
@@ -794,7 +797,7 @@ void CacheManager::CheckSnapshotInitialization() {
   }
 
   rpc::Optional<policy_table::UsageAndErrorCounts>& usage_and_error_counts =
-      pt_->policy_table.usage_and_error_counts;
+      snapshot_->policy_table.usage_and_error_counts;
   if (!usage_and_error_counts->count_of_iap_buffer_full->is_initialized()) {
     *(usage_and_error_counts->count_of_iap_buffer_full) = 0;
   }
@@ -875,8 +878,9 @@ void CacheManager::CheckSnapshotInitialization() {
 
 utils::SharedPtr<policy_table::Table>
 CacheManager::GenerateSnapshot() {
+  snapshot_ = utils::SharedPtr<policy_table::Table>(new policy_table::Table(pt_->policy_table));
   CheckSnapshotInitialization();
-  return pt_;
+  return snapshot_;
 }
 
 bool CacheManager::GetInitialAppData(const std::string& app_id,
