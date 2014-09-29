@@ -95,9 +95,7 @@ struct SDLAlowedNotification {
 
   void operator()(const application_manager::ApplicationSharedPtr& app) {
     if (device_id_ == app->device()) {
-      app->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
-      application_manager::MessageHelper::SendActivateAppToHMI(
-        app->app_id(), hmi_apis::Common_HMILevel::NONE);
+
 
         std::string hmi_level;
         hmi_apis::Common_HMILevel::eType default_hmi;
@@ -113,6 +111,7 @@ struct SDLAlowedNotification {
         } else {
           return ;
         }
+        app->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
         application_manager::MessageHelper::SendActivateAppToHMI(app->app_id(), default_hmi);
         application_manager::MessageHelper::SendHMIStatusNotification(*app);
       }
