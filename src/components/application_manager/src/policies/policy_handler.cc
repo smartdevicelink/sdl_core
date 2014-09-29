@@ -919,13 +919,11 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
       std::for_each(app_list.begin(), app_list.end(),
                     DeactivateApplication(device_id));
     } else {
-      if (!device_specific) {
-        application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
-        ApplicationList app_list = accessor.applications();
+      application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
+      ApplicationList app_list = accessor.applications();
 
-        std::for_each(app_list.begin(), app_list.end(),
-                      SDLAlowedNotification(device_id, policy_manager()));
-      }
+      std::for_each(app_list.begin(), app_list.end(),
+                    SDLAlowedNotification(device_id, policy_manager()));
     }
 #endif
   }
@@ -967,13 +965,6 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
         // Send HMI status notification to mobile
         // TODO(PV): requires additonal checking
         //app_manager->PutApplicationInFull(app);
-
-        // In case of device specific allowing
-        // We have to send Activate app explictly from here
-        // in other case it has been sent earlier, for all apps.
-        if (device_specific) {
-          application_manager::MessageHelper::SendActivateAppToHMI(app->app_id());
-        }
         app_manager->ActivateApplication(app);
       }
     // Skip device selection, since user already consented device usage
