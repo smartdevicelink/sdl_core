@@ -21,7 +21,6 @@ set (INCLUDE_DIR
   ../src/appMain
   ../src/components/application_manager/include
   ../src/components/hmi_message_handler/include
-  ../src/components/request_watchdog/include
   ../src/components/media_manager/include
   ../src/components/config_profile/include
   ../src/components/policy/src/policy/include
@@ -36,8 +35,6 @@ set (INCLUDE_DIR
   ../src/components/utils/include/
   ../src/components/resumption/include/
   ../test/components/mobile_message_handler/include/
-  ../test/components/request_watchdog/include/
-  ../test/components/media_manager/include
   ../test/components/protocol_handler/include/
   ../test/components/utils/include
   ../test/components/json_handler/include
@@ -77,7 +74,6 @@ set(LIBRARIES
     #test_SmartObjectTest
     #test_FormattersCommandsTest
     #test_UtilsTest
-    #test_RequestWatchdogTest
     #test_ProtocolHandlerTest
     #test_JSONCPPTest
     #test_MobileMessageHandlerTest

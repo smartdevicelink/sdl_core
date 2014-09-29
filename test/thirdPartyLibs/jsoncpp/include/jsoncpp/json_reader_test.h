@@ -1,6 +1,6 @@
 /**
-* \file request_watchdog_test.cc
-* \brief RequetWatchdog test source file.
+* \file json_reader_test.h
+* \brief JSONReaderTest test header file.
 *
 * Copyright (c) 2013, Ford Motor Company
 * All rights reserved.
@@ -161,7 +161,7 @@ TEST_F(JSONReaderTest, ParseClosingbracketString) {
   ASSERT_FALSE(reader.parse(closingbracketString_, json));
 }
 
-}  //  namespace request_watchdog_test
+}  //  namespace json_reader_test
 }  //  namespace components
 }  //  namespace test
 

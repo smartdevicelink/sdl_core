@@ -10,7 +10,6 @@ include_directories (
   ../media_manager/include/
   ../connection_handler/include/
   ../config_profile/include/
-  ../request_watchdog/include/
   ../resumption/include/
   ../rpc_base/include/
   ${JSONCPP_INCLUDE_DIRECTORY}

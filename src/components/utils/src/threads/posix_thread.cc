@@ -204,12 +204,13 @@ void Thread::stop() {
   if (!is_running()) {
     LOG4CXX_WARN(logger_, "Thread (#" << thread_handle_
                   << " \"" << name_ << "\") is not running");
+    LOG4CXX_TRACE_EXIT(logger_);
     return;
   }
 
   // TODO (EZamakhov): why exitThreadMain return bool and stop does not?
   if (delegate_ && !delegate_->exitThreadMain()) {
-      if (thread_handle_ == pthread_self()) {
+      if (pthread_self() == thread_handle_) {
         LOG4CXX_ERROR(logger_,
                      "Couldn't cancel the same thread (#" << thread_handle_
                      << "\"" << name_ << "\")");

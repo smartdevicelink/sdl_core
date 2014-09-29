@@ -51,29 +51,45 @@ UpdateDeviceListRequest::~UpdateDeviceListRequest() {
 
 void UpdateDeviceListRequest::Run() {
   LOG4CXX_INFO(logger_, "UpdateDeviceListRequest::Run");
-
+  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
 #ifndef CUSTOMER_PASA
   // Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
   // Flag conditional compilation "CUSTOMER_PASA" is used in order to exclude
   // hit code to RTC
   if (true == profile::Profile::instance()->launch_hmi()) {
-    int32_t connection_key =
-        (*message_)[strings::params][strings::connection_key].asUInt();
-    int32_t correlation_id =
-        (*message_)[strings::params][strings::correlation_id].asUInt();
-    uint32_t default_timeout = profile::Profile::instance()->default_timeout();
-
-    // wait till HMI started
-    while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
-      sleep(1);
-      // TODO(DK): timer_->StartWait(1);
-      ApplicationManagerImpl::instance()->
-          updateRequestTimeout(connection_key, correlation_id, default_timeout);
+    if (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
+      LOG4CXX_INFO(logger_, "MY Wait for HMI Cooperation");
+      subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
+      termination_condition_.Wait(auto_lock);
+      LOG4CXX_INFO(logger_, "MY HMI Cooperation OK");
     }
   }
 #endif
 
   SendRequest();
+}
+
+void UpdateDeviceListRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_INFO(logger_, "UpdateDeviceListRequest::on_event");
+  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
+  switch (event.id()) {
+    case hmi_apis::FunctionID::BasicCommunication_OnReady : {
+      LOG4CXX_INFO(logger_, "received OnReady");
+      unsubscribe_from_event(hmi_apis::FunctionID::BasicCommunication_OnReady);
+      termination_condition_.Broadcast();
+      break;
+    };
+    default : {
+      LOG4CXX_ERROR(logger_, "Unknown event ");
+      break;
+    };
+  }
+}
+
+bool UpdateDeviceListRequest::CleanUp() {
+  sync_primitives::AutoLock auto_lock(wait_hmi_lock);
+  termination_condition_.Broadcast();
+  return true;
 }
 
 }  // namespace commands

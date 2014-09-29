@@ -69,9 +69,6 @@ add_subdirectory(./smart_objects)
 # --- Application manager
 add_subdirectory(./application_manager)
 
-# --- Request watchdog
-add_subdirectory(./request_watchdog)
-
 # --- HMI Message Handler
 add_subdirectory(./hmi_message_handler)
 

@@ -72,8 +72,7 @@ bool AlertRequest::Init() {
     default_timeout_ = def_value;
   }
 
-  // If soft buttons are present, SDL will not use watchdog for response
-  // timeout tracking.
+  // If soft buttons are present, SDL will not use initiate timeout tracking for response.
   if ((*message_)[strings::msg_params].keyExists(strings::soft_buttons)) {
     LOG4CXX_INFO(logger_, "Request contains soft buttons - request timeout "
                  "will be set to 0.");

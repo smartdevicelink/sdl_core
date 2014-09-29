@@ -32,13 +32,15 @@
 
 #include "application_manager/commands/hmi/request_to_hmi.h"
 #include "application_manager/application_manager_impl.h"
+#include "config_profile/profile.h"
 
 namespace application_manager {
 
 namespace commands {
 
 RequestToHMI::RequestToHMI(const MessageSharedPtr& message)
-    : CommandImpl(message) {
+    : CommandImpl(message),
+    default_timeout_(profile::Profile::instance()->default_timeout()) {
   // Replace Mobile connection id with HMI app id
   ApplicationManagerImpl::instance()->ReplaceMobileByHMIAppId(*(message.get()));
 }

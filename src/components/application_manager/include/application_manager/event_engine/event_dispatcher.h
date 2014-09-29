@@ -103,7 +103,7 @@ class EventDispatcher : public utils::Singleton<EventDispatcher> {
 
   // Data types section
   typedef std::list<EventObserver*>                   ObserverList;
-  typedef std::map<int32_t, ObserverList>                 ObserversMap;
+  typedef std::map<int32_t, ObserverList>             ObserversMap;
   typedef std::map<Event::EventID, ObserversMap>      EventObserverMap;
 
   // Members section

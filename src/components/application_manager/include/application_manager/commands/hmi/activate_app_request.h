@@ -42,7 +42,7 @@ namespace commands {
 /**
  * @brief ActivateAppRequest command class
  **/
-class ActivateAppRequest : public RequestToHMI {
+class ActivateAppRequest : public RequestToHMI, event_engine::EventObserver {
   public:
     /**
      * @brief ActivateAppRequest class constructor
@@ -50,6 +50,13 @@ class ActivateAppRequest : public RequestToHMI {
      * @param message Incoming SmartObject message
      **/
     explicit ActivateAppRequest(const MessageSharedPtr& message);
+
+    /**
+     * @brief Calback for response
+     *
+     * @param event - event response
+     **/
+    virtual void on_event(const event_engine::Event& event);
 
     /**
      * @brief ActivateAppRequest class destructor
