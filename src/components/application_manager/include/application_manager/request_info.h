@@ -122,7 +122,7 @@ namespace request_controller {
       HMIRequestInfo(RequestPtr request, const TimevalStruct& start_time,const  uint64_t timeout_sec);
     RequestPtr request_;
     uint32_t correlation_id_;
-    virtual u_int32_t requestId() {
+    virtual uint32_t requestId() {
       return correlation_id_;
     }
     virtual commands::Command* request() {
@@ -138,7 +138,7 @@ namespace request_controller {
     mobile_apis::HMILevel::eType hmi_level_;
     uint32_t mobile_correlation_id_;
 
-    virtual u_int32_t requestId() {
+    virtual uint32_t requestId() {
       return mobile_correlation_id_;
     }
 

@@ -207,12 +207,6 @@ class RequestController {
      */
     bool checkHMILevelTimeScaleMaxRequest(const mobile_apis::HMILevel::eType& hmi_level, const uint32_t& app_id, const uint32_t& app_time_scale, const uint32_t& max_request_per_time_scale);
 
-    /**
-    * @brief Notify subscriber that expired entry should be removed
-    * using Watchdog::removeRequest(int32_t app_id, int32_t correlation_id)
-    *
-    * @param RequestInfo Request related information
-    */
     void onTimer();
 
     /**
@@ -260,7 +254,7 @@ class RequestController {
     std::list<RequestPtr> notification_list_;
 
     timer::TimerThread<RequestController>  timer_;
-    static const uint32_t dafault_sleep_time_ = std::numeric_limits<uint32_t>::max();
+    static const uint32_t dafault_sleep_time_ = UINT_MAX;
 
     DISALLOW_COPY_AND_ASSIGN(RequestController);
 };

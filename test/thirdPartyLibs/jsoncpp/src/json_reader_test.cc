@@ -1,6 +1,6 @@
 /**
-* \file request_watchdog_test.cc
-* \brief RequetWatchdog test source file.
+* \file json_reader_test.cc
+* \brief JSONReaderTest test source file.
 *
 * Copyright (c) 2013, Ford Motor Company
 * All rights reserved.
