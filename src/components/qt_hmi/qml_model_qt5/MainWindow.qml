@@ -339,6 +339,7 @@ Rectangle {
         }
 
         onOnAppRegistered: {
+            console.debug("enter onAppRegistered")
             var appTypeToAdd = 0
             if (application.appType !== undefined) {
                 for (var index in application.appType) {
@@ -372,6 +373,7 @@ Rectangle {
         }
 
         onOnAppUnregistered: {
+            console.debug("enter onAppUnregistered")
             if ((dataContainer.currentApplication.appId === appID)) {
                 if (dataContainer.applicationContext) {
                     contentLoader.go("views/ApplicationListView.qml");
