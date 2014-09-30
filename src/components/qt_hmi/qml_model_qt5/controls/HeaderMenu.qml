@@ -49,7 +49,6 @@ Item {
     }
 
     Item {
-        id:centralMenu
         width: menuText.width
         height: parent.height
         anchors.topMargin: Constants.margin
@@ -86,7 +85,7 @@ Item {
         }
 
         onClicked: {
-            dataContainer.scrollableMessageModel.menuPressed = "Yes"
+            dataContainer.scrollableMessageModel.menuPressed = true
             contentLoader.go("./views/MainMenuView.qml")
         }
     }

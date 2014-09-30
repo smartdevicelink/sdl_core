@@ -39,22 +39,23 @@ import "../hmi_api/Async.js" as Async
 import "../models/Constants.js" as Constants
 import "../models"
 import "../popups"
-import "../controls/HeaderMenu.qml"
 
 GeneralView {
     applicationContext: true
     onLeaveScreen: {
         timer.stop()
         dataContainer.scrollableMessageModel.running = false
-        if(  dataContainer.scrollableMessageModel.menuPressed === "Yes")  {dataContainer.scrollableMessageModel.result = Common.Result.ABORTED}
+        if (dataContainer.scrollableMessageModel.menuPressed === true)
+        {
+            dataContainer.scrollableMessageModel.result = Common.Result.ABORTED
+        }
         DBus.sendReply(dataContainer.scrollableMessageModel.async, { __retCode: dataContainer.scrollableMessageModel.result })
     }
     Component.onCompleted: {
-        dataContainer.scrollableMessageModel.menuPressed = "No"
+        dataContainer.scrollableMessageModel.menuPressed = false
         dataContainer.scrollableMessageModel.running = true
         timer.start()
     }
-
 
     Timer {
         id: timer

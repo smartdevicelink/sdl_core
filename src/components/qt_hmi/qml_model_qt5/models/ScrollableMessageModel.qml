@@ -51,7 +51,5 @@ QtObject {
     property var async
     property bool running: false
     property int result: -1
-    property string menuPressed: "No"
-    
-    
+    property bool menuPressed: false
 }
