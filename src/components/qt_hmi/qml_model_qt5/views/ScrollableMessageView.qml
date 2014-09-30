@@ -39,18 +39,23 @@ import "../hmi_api/Async.js" as Async
 import "../models/Constants.js" as Constants
 import "../models"
 import "../popups"
+import "../controls/HeaderMenu.qml"
 
 GeneralView {
     applicationContext: true
     onLeaveScreen: {
         timer.stop()
         dataContainer.scrollableMessageModel.running = false
+        if(  dataContainer.scrollableMessageModel.menuPressed === "Yes")  {dataContainer.scrollableMessageModel.result = Common.Result.ABORTED}
         DBus.sendReply(dataContainer.scrollableMessageModel.async, { __retCode: dataContainer.scrollableMessageModel.result })
     }
     Component.onCompleted: {
+        dataContainer.scrollableMessageModel.menuPressed = "No"
         dataContainer.scrollableMessageModel.running = true
         timer.start()
     }
+
+
     Timer {
         id: timer
         interval: dataContainer.scrollableMessageModel.timeout
@@ -167,6 +172,7 @@ GeneralView {
     function getBackButton(){
         return backButton
     }
+
     /**
       * Test Support Section End
       */

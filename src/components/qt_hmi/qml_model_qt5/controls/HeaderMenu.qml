@@ -38,7 +38,6 @@ import "../models/Constants.js" as Constants
 Item {
     id: headerMenu
     anchors.fill: parent
-
     Text {        
         anchors.leftMargin: Constants.margin
         anchors.topMargin: Constants.margin
@@ -50,6 +49,7 @@ Item {
     }
 
     Item {
+        id:centralMenu
         width: menuText.width
         height: parent.height
         anchors.topMargin: Constants.margin
@@ -86,6 +86,7 @@ Item {
         }
 
         onClicked: {
+            dataContainer.scrollableMessageModel.menuPressed = "Yes"
             contentLoader.go("./views/MainMenuView.qml")
         }
     }
