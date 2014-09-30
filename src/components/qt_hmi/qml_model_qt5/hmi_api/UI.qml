@@ -342,7 +342,7 @@ Item {
                 newEndTime = endTime ? Internal.hmsTime(endTime.hours, endTime.minutes, endTime.seconds) : -1
                 newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTUP
                 newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
-                newStartTimeForProgress = newStartTime /*Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)*/
+                newStartTimeForProgress = Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)
                 resultCode = Common.Result.SUCCESS
                 break
 
@@ -379,7 +379,6 @@ Item {
             case Common.ClockUpdateMode.RESUME:
                 // Already resumed or cleared
                 if ((app.mediaClock.runningMode === Internal.MediaClockRunningMode.MCR_RUNNING)
-                        || (app.mediaClock.startTime === -1 && app.mediaClock.endTime === -1)
                         || (app.mediaClock.startTime === app.mediaClock.endTime)) {
                     resultCode = Common.Result.IGNORED
                     sendErrorResponce = true
