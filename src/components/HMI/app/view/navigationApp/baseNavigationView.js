@@ -38,10 +38,6 @@ SDL.BaseNavigationView = Em.ContainerView.create({
         'SDL.States.navigationApp.baseNavigation.active:active_state:inactive_state'
     ],
 
-    afterRender: function() {
-        this.update();
-    },
-
     childViews: [
         'mainField1',
         'mainField2',
@@ -114,7 +110,7 @@ SDL.BaseNavigationView = Em.ContainerView.create({
                             softButtonID: naviParams.softButtons[i].softButtonID,
                             systemAction: naviParams.softButtons[i].systemAction,
                             classNames: 'navButton softButton softButton'  + (i + 1),
-                            appID: naviParams.appID
+                            appID: SDL.SDLAppController.model.appID
                         }));
                 }
             }
