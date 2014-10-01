@@ -1288,15 +1288,17 @@ void PolicyHandler::OnUpdateRequestSentToMobile() {
 
 bool PolicyHandler::CheckKeepContext(int system_action,
                                      const std::string& policy_app_id) {
-  bool keep_context = system_action == mobile_apis::SystemAction::KEEP_CONTEXT;
-  bool allowed = policy_manager_->CanAppKeepContext(policy_app_id);
+  const bool keep_context = system_action
+      == mobile_apis::SystemAction::KEEP_CONTEXT;
+  const bool allowed = policy_manager_->CanAppKeepContext(policy_app_id);
   return !(keep_context && !allowed);
 }
 
 bool PolicyHandler::CheckStealFocus(int system_action,
                                     const std::string& policy_app_id) {
-  bool steal_focus = system_action == mobile_apis::SystemAction::STEAL_FOCUS;
-  bool allowed = policy_manager_->CanAppStealFocus(policy_app_id);
+  const bool steal_focus = system_action
+      == mobile_apis::SystemAction::STEAL_FOCUS;
+  const bool allowed = policy_manager_->CanAppStealFocus(policy_app_id);
   return !(steal_focus && !allowed);
 }
 
