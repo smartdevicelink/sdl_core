@@ -325,8 +325,8 @@ void TimerThread<T>::TimerLooperDelegate::threadMain() {
   while (!TimerDelegate::stop_flag_) {
     time_t cur_time = time(NULL);
     time_t end_time = std::numeric_limits<time_t>::max();
-    if (TimerDelegate::timeout_seconds_ < std::numeric_limits<time_t>::max() - cur_time) {
-      end_time = static_cast<time_t>(cur_time) + TimerDelegate::timeout_seconds_;
+    if (TimerDelegate::timeout_seconds_ + cur_time > TimerDelegate::timeout_seconds_) { // no overflow occurred
+      end_time = cur_time + TimerDelegate::timeout_seconds_;
     }
 
     int64_t  wait_seconds_left = static_cast<int64_t>(difftime(end_time, cur_time));

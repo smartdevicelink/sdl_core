@@ -150,7 +150,7 @@ class Notifications_qml(FordXmlParser):
             list_of_params_len = len(list_of_params)
             for param_el in list_of_params:
                 param = self.make_param_desc(param_el, iface_name)
-                if variable_name_needed == True:
+                if variable_name_needed:
                     out.write("%s %s" % (self.qt_param_type(param), param_el.get("name")))
                 else:
                     out.write("%s" % self.qt_param_type(param))
@@ -167,9 +167,8 @@ class Notifications_qml(FordXmlParser):
                     out.write("QDBusConnection::sessionBus().connect(\n")
                     with CodeBlock(out) as out:
                         out.write("\"com.ford.sdl.core\", \"/\", \"com.ford.sdl.core.%s\",\n" % iface_name)
-                        out.write("\"%s\", this, SLOT(slot_%s(" % (notification_name, notification_el.get("name")))
-                need_variable_name_in_slot_connection = False
-                qml_args(need_variable_name_in_slot_connection)
+                        out.write("\"%s\", this, SLOT(slot_%s(" % (notification_name, notification_el.get("name")))      
+                qml_args(variable_name_needed = False)
                 out.write(")));\n")
         out.write("}\n\n")
         for interface_el in self.el_tree.findall('interface'):
@@ -178,8 +177,7 @@ class Notifications_qml(FordXmlParser):
             for notification_el in notifications:
                 notific_full_name = interface_el.get("name") + "_" + notification_el.get("name")
                 out.write("void SdlProxy::slot_%s(" % notification_el.get("name"))
-                need_variable_name_in_func_definition = True
-                qml_args(need_variable_name_in_func_definition)
+                qml_args(variable_name_needed = True)
                 out.write(") {\n")
                 with CodeBlock(out) as out:
                     out.write("LOG4CXX_TRACE(logger_, \"ENTER\");\n\n")     
