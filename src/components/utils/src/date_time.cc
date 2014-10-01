@@ -34,6 +34,7 @@
 #include <stdint.h>
 #include "utils/date_time.h"
 
+
 namespace date_time {
 
 int32_t const DateTime::MILLISECONDS_IN_SECOND;
@@ -46,6 +47,10 @@ TimevalStruct DateTime::getCurrentTime() {
   gettimeofday(&currentTime, &timeZone);
 
   return currentTime;
+}
+
+int64_t date_time::DateTime::getSecs(const TimevalStruct &time) {
+   return static_cast<int64_t>(time.tv_sec);
 }
 
 int64_t DateTime::getmSecs(const TimevalStruct &time) {
@@ -75,5 +80,20 @@ int64_t DateTime::calculateTimeDiff(const TimevalStruct &time1,
   }
   return getmSecs(timeDifference);
 }
+
+TimeCompare date_time::DateTime::compareTime(const TimevalStruct &time1, const TimevalStruct &time2) {
+  if (getSecs(time1) == getSecs(time2)) {
+      if (getmSecs(time1) == getmSecs(time2)) {
+          if (getuSecs(time1) == getuSecs(time2)) {
+            return EQUAL;
+          }
+          return getuSecs(time1) < getuSecs(time2) ? LESS : GREATER;
+      }
+      return getmSecs(time1) < getmSecs(time2) ? LESS : GREATER;
+  }
+  return getSecs(time1) < getSecs(time2) ? LESS : GREATER;
+}
+
+
 
 }  // namespace date_time

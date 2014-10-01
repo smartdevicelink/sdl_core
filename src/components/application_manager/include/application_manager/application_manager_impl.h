@@ -443,14 +443,14 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      * @param ptr Reference to shared pointer that point on hmi notification
      */
-    void addNotification(const CommandSharedPtr& ptr);
+    void addNotification(const CommandSharedPtr ptr);
 
     /**
      * @ Add notification to collection
      *
      * @param ptr Reference to shared pointer that point on hmi notification
      */
-    void removeNotification(const CommandSharedPtr& ptr);
+    void removeNotification(const commands::Command* notification);
 
     /**
      * @ Updates request timeout
@@ -702,11 +702,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     // Lock for applications list
     mutable sync_primitives::Lock applications_list_lock_;
-
-    /**
-     * @brief Set of HMI notifications with timeout.
-     */
-    std::list<CommandSharedPtr> notification_list_;
 
     /**
      * @brief Map of correlation id  and associated application id.

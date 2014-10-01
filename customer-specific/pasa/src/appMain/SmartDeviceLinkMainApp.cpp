@@ -178,7 +178,6 @@ void startSmartDeviceLink()
 
   // --------------------------------------------------------------------------
   // Components initialization
-  profile::Profile::instance()->config_file_name(SDL_INIFILE_PATH);
 
   // TODO: Remove this code when PASA will support SDL_MSG_START_USB_LOGGING
   // Start section
@@ -263,6 +262,7 @@ void ApplinkNotificationThreadDelegate::threadMain() {
  */
 int main(int argc, char** argv) {
 
+  profile::Profile::instance()->config_file_name(SDL_INIFILE_PATH);
   INIT_LOGGER(profile::Profile::instance()->log4cxx_config_file());
   configureLogging();
 
@@ -285,7 +285,9 @@ int main(int argc, char** argv) {
   stopSmartDeviceLink();
 
   LOG4CXX_INFO(logger_, "Application successfully stopped");
+#ifdef ENABLE_LOG
   logger::LogMessageLoopThread::destroy();
+#endif
   DEINIT_LOGGER();
   return EXIT_SUCCESS;
 }

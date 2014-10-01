@@ -74,7 +74,6 @@ set(LIBRARIES
   Utils
   jsoncpp
   ConfigProfile
-  RequestWatchdog
   MediaManager
   Resumption
 )
@@ -133,9 +132,9 @@ include_directories (
 )
 
 add_custom_target(gitversion
-  COMMAND echo -n const char *gitVersion = "\\\"Built against " > ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc
-  COMMAND git rev-parse HEAD | tr -d \"\\n\" >> ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc
-  COMMAND echo " revision\\\"\;" >> ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc
+  COMMAND export GITVERSION=`git rev-parse HEAD` \;
+          if ! grep -s \"\$\${GITVERSION}\" ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc > /dev/null \;
+          then echo -n \"const char *gitVersion = \\\"Built against \$\${GITVERSION} revision\\\"\;\" > ${CMAKE_CURRENT_BINARY_DIR}/gitversion.cc\; fi
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 )
 add_custom_command(

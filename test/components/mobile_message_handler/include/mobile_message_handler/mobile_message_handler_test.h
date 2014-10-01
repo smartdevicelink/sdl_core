@@ -1,6 +1,6 @@
 /**
- * \file request_watchdog_test.cc
- * \brief RequetWatchdog test source file.
+ * \file mobile_message_handler_test.h
+ * \brief MobileMessageHandler test header file.
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.

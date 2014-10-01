@@ -233,7 +233,7 @@ bool file_system::DeleteFile(const std::string& name) {
   return false;
 }
 
-void remove_directory_content(const std::string& directory_name) {
+void file_system::remove_directory_content(const std::string& directory_name) {
   int32_t return_code = 0;
   DIR* directory = NULL;
 #ifndef __QNXNTO__

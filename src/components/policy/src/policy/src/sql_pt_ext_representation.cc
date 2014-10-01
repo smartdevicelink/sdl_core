@@ -37,6 +37,7 @@
 #include "policy/sql_pt_queries.h"
 #include "policy/sql_pt_ext_queries.h"
 #include "policy/policy_helper.h"
+#include "policy/cache_manager.h"
 
 namespace policy {
 
@@ -671,7 +672,6 @@ bool SQLPTExtRepresentation::SaveApplicationPolicies(
 
 bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
     const policy_table::ApplicationPolicies::value_type& app) {
-  LOG4CXX_INFO(logger_, "Saving data for application: " << app.first);
   if (app.second.is_string()) {
     if (kDefaultId.compare(app.second.get_string()) == 0) {
       if (!SetDefaultPolicy(app.first)) {
@@ -926,7 +926,6 @@ void SQLPTExtRepresentation::GatherConsentGroup(
 
 bool SQLPTExtRepresentation::SaveDeviceData(
   const policy_table::DeviceData& devices) {
-  LOG4CXX_INFO(logger_, "SaveDeviceData");
   dbms::SQLQuery query(db());
   if (!query.Prepare(sql_pt_ext::kInsertDeviceData)) {
     LOG4CXX_WARN(logger_, "Incorrect insert statement for device data.");
@@ -981,8 +980,7 @@ bool SQLPTExtRepresentation::SaveConsentGroup(
           return false;
         }
         query.Bind(0, device_id);
-        // TODO(AGaliuzov): Need GroupID instead of name
-        query.Bind(1, it_groups->first);
+        query.Bind(1, CacheManager::GenerateHash(it_groups->first));
         query.Bind(2, it_groups->second);
         query.Bind(
           3,
@@ -1344,7 +1342,6 @@ bool SQLPTExtRepresentation::SaveMessageString(
 
 bool SQLPTExtRepresentation::SaveUsageAndErrorCounts(
     const policy_table::UsageAndErrorCounts& counts) {
-  LOG4CXX_INFO(logger_, "SaveUsageAndErrorCounts");
   dbms::SQLQuery query(db());
   if (!query.Exec(sql_pt::kDeleteAppLevel)) {
     LOG4CXX_WARN(logger_, "Incorrect delete from app level.");

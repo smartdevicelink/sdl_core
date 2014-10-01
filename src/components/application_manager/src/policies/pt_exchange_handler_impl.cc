@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -44,6 +44,7 @@ PTExchangeHandlerImpl::PTExchangeHandlerImpl(PolicyHandler* handler)
     : policy_handler_(handler),
       retry_sequence_("RetrySequence", new RetrySequence(handler)) {
   DCHECK(policy_handler_);
+  LOG4CXX_INFO(logger_, "Exchan created");
 }
 
 PTExchangeHandlerImpl::~PTExchangeHandlerImpl() {
@@ -53,7 +54,12 @@ PTExchangeHandlerImpl::~PTExchangeHandlerImpl() {
 
 void PTExchangeHandlerImpl::Start() {
   sync_primitives::AutoLock locker(retry_sequence_lock_);
-  retry_sequence_.stop();
+  LOG4CXX_INFO(logger_, "Exchan started");
+
+  if (retry_sequence_.is_running()) {
+    retry_sequence_.stop();
+  }
+
   PolicyManager* policy_manager = policy_handler_->policy_manager();
   if (policy_manager) {
     policy_manager->ResetRetrySequence();
@@ -63,7 +69,9 @@ void PTExchangeHandlerImpl::Start() {
 
 void PTExchangeHandlerImpl::Stop() {
   sync_primitives::AutoLock locker(retry_sequence_lock_);
-  retry_sequence_.stop();
+  if (retry_sequence_.is_running()) {
+    retry_sequence_.stop();
+  }
 }
 
 }  //  namespace policy

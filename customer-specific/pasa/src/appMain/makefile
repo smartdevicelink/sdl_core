@@ -36,7 +36,6 @@ INCLUDES = \
 	$(CC_IFLAG)../components/transport_manager/include \
 	$(CC_IFLAG)../components/smart_objects/include \
 	$(CC_IFLAG)../components/formatters/include \
-	$(CC_IFLAG)../components/request_watchdog/include \
 	$(CC_IFLAG)../components/config_profile/include \
 	$(CC_IFLAG)../components/hmi_message_handler/include \
 	$(CC_IFLAG)../components/utils/include \
@@ -73,7 +72,6 @@ STATIC_LIBS += \
 	config_profile$(DEBUG_EXT) \
 	formatters$(DEBUG_EXT) \
 	interfaces$(DEBUG_EXT) \
-	request_watchdog$(DEBUG_EXT) \
 	hmi_message_handler$(DEBUG_EXT) \
 	connection_handler$(DEBUG_EXT) \
 	protocol_handler$(DEBUG_EXT) \

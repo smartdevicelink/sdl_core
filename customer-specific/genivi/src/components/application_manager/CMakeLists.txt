@@ -10,7 +10,6 @@ include_directories (
   ../media_manager/include/
   ../connection_handler/include/
   ../config_profile/include/
-  ../request_watchdog/include/
   ../resumption/include/
   ../rpc_base/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
@@ -33,6 +32,7 @@ set (SOURCES
 ./src/hmi_capabilities.cc
 ./src/application_data_impl.cc
 ./src/request_controller.cc
+./src/request_info.cc
 ./src/resume_ctrl.cpp
 ./src/mobile_message_handler.cc
 )

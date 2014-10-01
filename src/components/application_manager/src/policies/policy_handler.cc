@@ -86,6 +86,41 @@ struct DeactivateApplication {
     connection_handler::DeviceHandle device_id_;
 };
 
+struct SDLAlowedNotification {
+  explicit SDLAlowedNotification(
+    const connection_handler::DeviceHandle& device_id,
+        PolicyManager* policy_manager)
+    : device_id_(device_id),
+      policy_manager_(policy_manager){}
+
+  void operator()(const application_manager::ApplicationSharedPtr& app) {
+    if (device_id_ == app->device()) {
+
+
+        std::string hmi_level;
+        hmi_apis::Common_HMILevel::eType default_hmi;
+        policy_manager_->GetDefaultHmi(app->mobile_app_id()->asString(), &hmi_level);
+        if ("BACKGROUND" == hmi_level) {
+          default_hmi = hmi_apis::Common_HMILevel::BACKGROUND;
+        } else if ("FULL" == hmi_level) {
+          default_hmi = hmi_apis::Common_HMILevel::FULL;
+        } else if ("LIMITED" == hmi_level) {
+          default_hmi = hmi_apis::Common_HMILevel::LIMITED;
+        } else if ("NONE" == hmi_level) {
+          default_hmi = hmi_apis::Common_HMILevel::NONE;
+        } else {
+          return ;
+        }
+        app->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
+        application_manager::MessageHelper::SendActivateAppToHMI(app->app_id(), default_hmi);
+        application_manager::MessageHelper::SendHMIStatusNotification(*app);
+      }
+    }
+  private:
+    connection_handler::DeviceHandle device_id_;
+    PolicyManager* policy_manager_;
+};
+
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 struct LinkAppToDevice {
@@ -221,12 +256,8 @@ bool PolicyHandler::InitPolicyTable() {
   POLICY_LIB_CHECK(false);
   // Subscribing to notification for system readiness to be able to get system
   // info necessary for policy table
-  int32_t correlation_id =
-    application_manager::ApplicationManagerImpl::instance()
-    ->GetNextHMICorrelationID();
   event_observer_.get()->subscribe_on_event(
-        hmi_apis::FunctionID::BasicCommunication_OnReady,
-        correlation_id);
+        hmi_apis::FunctionID::BasicCommunication_OnReady);
   std::string preloaded_file =
     profile::Profile::instance()->preloaded_pt_file();
   return policy_manager_->InitPT(preloaded_file);
@@ -611,8 +642,8 @@ void PolicyHandler::OnVIIsReady() {
 
 void PolicyHandler::OnVehicleDataUpdated(
     const smart_objects::SmartObject& message) {
-#ifdef EXTENDED_POLICY
   POLICY_LIB_CHECK_VOID();
+#ifdef EXTENDED_POLICY
   if (message[application_manager::strings::msg_params].
       keyExists(application_manager::strings::vin)) {
     policy_manager_->SetVINValue(
@@ -628,7 +659,7 @@ void PolicyHandler::OnAppRevoked(const std::string& policy_app_id) {
   application_manager::ApplicationSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
     ->application_by_policy_id(policy_app_id);
-  if (app.valid() && app->hmi_level() != mobile_apis::HMILevel::HMI_NONE) {
+  if (app.valid()) {
     DeviceParams device_params;
     application_manager::MessageHelper::GetDeviceInfoForApp(app->app_id(),
                                                             &device_params);
@@ -837,9 +868,9 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
   POLICY_LIB_CHECK_VOID();
   // Device ids, need to be changed
   std::set<uint32_t> device_ids;
-
+  bool device_specific = device_id != 0;
   // Common devices consents change
-  if (!device_id) {
+  if (!device_specific) {
     application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
     const std::set<application_manager::ApplicationSharedPtr> app_list =
         accessor.applications();
@@ -882,6 +913,12 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
       ApplicationList app_list = accessor.applications();
       std::for_each(app_list.begin(), app_list.end(),
                     DeactivateApplication(device_id));
+    } else {
+      application_manager::ApplicationManagerImpl::ApplicationListAccessor accessor;
+      ApplicationList app_list = accessor.applications();
+
+      std::for_each(app_list.begin(), app_list.end(),
+                    SDLAlowedNotification(device_id, policy_manager()));
     }
 #endif
   }
@@ -907,6 +944,7 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
       registration_in_progress = false;
 
     }
+
     application_manager::ApplicationManagerImpl* app_manager =
         application_manager::ApplicationManagerImpl::instance();
 
@@ -922,7 +960,6 @@ void PolicyHandler::OnAllowSDLFunctionalityNotification(bool is_allowed,
         // Send HMI status notification to mobile
         // TODO(PV): requires additonal checking
         //app_manager->PutApplicationInFull(app);
-        application_manager::MessageHelper::SendActivateAppToHMI(app->app_id());
         app_manager->ActivateApplication(app);
       }
     // Skip device selection, since user already consented device usage
@@ -1001,6 +1038,11 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
     if (!permissions.isSDLAllowed) {
       pending_device_handles_.push_back(permissions.deviceInfo.device_handle);
     }
+
+    if (permissions.appPermissionsConsentNeeded) {
+      application_manager::MessageHelper::SendOnAppPermissionsChangedNotification(
+            app->app_id(), permissions);
+    }
 #else
     permissions.isSDLAllowed = true;
 #endif
@@ -1023,7 +1065,7 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   }
 
   last_activated_app_id_ = connection_key;
-  application_manager::MessageHelper::SendActivateAppResponse(permissions,
+  application_manager::MessageHelper::SendSDLActivateAppResponse(permissions,
                                                               correlation_id);
   if (is_app_activated) {
     application_manager::MessageHelper::SendHMIStatusNotification(*app.get());

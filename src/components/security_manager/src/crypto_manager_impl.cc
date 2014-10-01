@@ -38,7 +38,7 @@
 #include "utils/logger.h"
 #include "utils/atomic.h"
 
-#define TLS1_1_MINIMAL_VERSION            0x1000104fL
+#define TLS1_1_MINIMAL_VERSION            0x1000103fL
 #define CONST_SSL_METHOD_MINIMAL_VERSION  0x00909000L
 
 namespace security_manager {

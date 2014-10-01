@@ -107,7 +107,7 @@ PolicyManagerImpl::PolicyManagerImpl()
 }
 
 void PolicyManagerImpl::ResetDefaultPT(const PolicyTable& policy_table) {
-  policy_table_ = policy_table;
+  //TODO(AG) maybe we need to remove this method since it never used.
   update_status_manager_.OnResetDefaultPT(cache.UpdateRequired());
 
   retry_sequence_index_ = 0;
@@ -1136,6 +1136,11 @@ bool PolicyManagerImpl::IsAppInUpdateList(const std::string& app_id) const {
       std::find(update_requests_list_.begin(),
                 update_requests_list_.end(),
                 app_id);
+}
+
+void PolicyManagerImpl::RemoveAppConsentForGroup(const std::string& app_id,
+                                                 const std::string& group_name) {
+  cache.RemoveAppConsentForGroup(app_id, group_name);
 }
 
 void PolicyManagerImpl::AddNewApplication(const std::string& application_id,

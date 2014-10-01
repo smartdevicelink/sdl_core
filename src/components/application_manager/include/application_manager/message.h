@@ -53,7 +53,7 @@ enum MessageType {
   kRequest = 0,
   kResponse = 1,
   kNotification = 2,
-  kErrorResponse = 3
+  kErrorResponse = 3 // Error Response HMI ONLY
 };
 
 // Map PrcType to corresponding MessageType

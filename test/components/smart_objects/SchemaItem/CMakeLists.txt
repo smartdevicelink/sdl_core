@@ -17,13 +17,15 @@ set (LIBRARIES
     formatters
     jsoncpp
 )
+set (SOURCES
+  ./test_BoolSchemaItemTest.cpp
+  ./test_NumberSchemaItemTest.cpp
+  ./test_StringSchemaItemTest.cpp
+  ./test_ArraySchemaItemTest.cpp
+  ./test_CObjectSchemaItem.cpp
+  ./AlwaysTrueSchemaItemTest.cpp
+  ./AlwaysFalseSchemaItemTest.cpp
+)
 
-create_test("test_SmartObject_BoolSchemaItemTest"           "./test_BoolSchemaItemTest.cpp"   "${LIBRARIES}")
-create_test("test_SmartObject_NumberSchemaItemTest"         "./test_NumberSchemaItemTest.cpp" "${LIBRARIES}")
-create_test("test_SmartObject_StringSchemaItemTest"         "./test_StringSchemaItemTest.cpp" "${LIBRARIES}")
-create_test("test_SmartObject_ArraySchemaItemTest"          "./test_ArraySchemaItemTest.cpp"  "${LIBRARIES}")
-create_test("test_SmartObject_EnumSchemaItemTest"           "./EnumSchemaItemTest.cpp"  "${LIBRARIES}")
-create_test("test_SmartObject_ObjectSchemaItemTest"         "./ObjectSchemaItemTest.cpp"  "${LIBRARIES}")
-create_test("test_SmartObject_AlwaysTrueSchemaItemTest"     "./AlwaysTrueSchemaItemTest.cpp"  "${LIBRARIES}")
-create_test("test_SmartObject_AlwaysFalseSchemaItemTest"    "./AlwaysFalseSchemaItemTest.cpp"  "${LIBRARIES}")
-create_test("test_SmartObject_ObjectOptionalSchemaItemTest" "./object_optional_schema_test.cc"  "${LIBRARIES}")
+add_library(test_SmartObjectSchema ${SOURCES})
+create_test(test_SmartObjectSchemaTest "${SOURCES}" "${LIBRARIES}")

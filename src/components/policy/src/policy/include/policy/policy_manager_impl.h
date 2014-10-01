@@ -163,6 +163,10 @@ class PolicyManagerImpl : public PolicyManager {
      * @return
      */
     virtual bool IsAppInUpdateList(const std::string& app_id) const;
+
+    virtual void RemoveAppConsentForGroup(const std::string& app_id,
+                                          const std::string& group_name);
+
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(
         const BinaryMessage& pt_content);
@@ -238,7 +242,6 @@ class PolicyManagerImpl : public PolicyManager {
     bool IsNewApplication(const std::string& application_id) const;
 
     PolicyListener* listener_;
-    PolicyTable policy_table_;
 
     UpdateStatusManager update_status_manager_;
     CacheManager cache;

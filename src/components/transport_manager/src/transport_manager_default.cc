@@ -55,11 +55,9 @@
 
 #else  // CUSTOMER_PASA
 
-#if defined(AOA_SUPPORT) && defined(__QNXNTO__)
-#include "transport_manager/aoa/aoa_transport_adapter.h"
-#elif defined(USB_SUPPORT)
+#if defined(USB_SUPPORT)
 #include "transport_manager/usb/usb_aoa_adapter.h"
-#endif  // AOA_SUPPORT
+#endif  // USB_SUPPORT
 
 #endif  // CUSTOMER_PASA
 
@@ -115,15 +113,7 @@ int TransportManagerDefault::Init() {
 
 #else  // CUSTOMER_PASA
 
-#if defined(AOA_SUPPORT) && defined(__QNXNTO__)
-  ta = new transport_adapter::AOATransportAdapter();
-#ifdef TIME_TESTER
-  if (metric_observer_) {
-    ta->SetTimeMetricObserver(metric_observer_);
-  }
-#endif  // TIME_TESTER
-  AddTransportAdapter(ta);
-#elif defined(USB_SUPPORT)
+#if defined(USB_SUPPORT)
   ta = new transport_adapter::UsbAoaAdapter();
 #ifdef TIME_TESTER
   if (metric_observer_) {
@@ -131,7 +121,7 @@ int TransportManagerDefault::Init() {
   }
 #endif  // TIME_TESTER
   AddTransportAdapter(ta);
-#endif  // AOA_SUPPORT
+#endif  // USB_SUPPORT
 
 #endif  // CUSTOMER_PASA
 

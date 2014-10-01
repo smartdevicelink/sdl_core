@@ -472,6 +472,9 @@ public:
                           FunctionalGroupIDs& allowed_groups,
                           FunctionalGroupIDs& disallowed_groups);
 
+  void RemoveAppConsentForGroup(const std::string& app_id,
+                                const std::string& group_name);
+
   /**
    * @brief Set app policy to pre_DataConsented policy
    * @param app_id Policy ID of application to be changed
@@ -532,6 +535,16 @@ public:
    */
   void Backup();
 
+  //void ResetPT(const PolicyTable& policy_table);
+
+  /**
+   * @brief Allows to generate hash from the specified string.
+   * The djb2 algorithm uses for hash generation.
+   * @param str_to_hash - the string from which hash should be generated.
+   * @return integer hash for the specified string.
+   */
+  static int32_t GenerateHash(const std::string& str_to_hash);
+
 private:
   std::string currentDateTime();
   struct AppHMITypeToString {
@@ -545,7 +558,6 @@ private:
   void FillDeviceSpecificData();
   void FillAppSpecificData();
   bool AppExists(const std::string& app_id) const;
-  int32_t GenerateHash(const std::string& str_to_hash);
   void CopyInternalParams(const std::string &from, const std::string& to);
   long ConvertSecondsToMinute(int seconds);
 
@@ -557,6 +569,7 @@ private:
 
 private:
   utils::SharedPtr<policy_table::Table> pt_;
+  utils::SharedPtr<policy_table::Table> snapshot_;
   utils::SharedPtr<PTRepresentation> backup_;
   utils::SharedPtr<PTExtRepresentation> ex_backup_;
   bool update_required;

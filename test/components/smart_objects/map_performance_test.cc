@@ -59,7 +59,7 @@ void MakeMapObject(Map &obj, const int size) {
 }
 }
 
-TEST(SmartObjectPerformanceTest, SmartObjectPerformance) {
+TEST(SmartObjectPerformanceTest, SmartObjectMapPerformance) {
   Map object;
   MakeMapObject(object, 100);
 
