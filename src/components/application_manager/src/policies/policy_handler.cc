@@ -95,9 +95,7 @@ struct SDLAlowedNotification {
 
   void operator()(const application_manager::ApplicationSharedPtr& app) {
     if (device_id_ == app->device()) {
-      app->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
-      application_manager::MessageHelper::SendActivateAppToHMI(
-        app->app_id(), hmi_apis::Common_HMILevel::NONE);
+
 
         std::string hmi_level;
         hmi_apis::Common_HMILevel::eType default_hmi;
@@ -113,6 +111,7 @@ struct SDLAlowedNotification {
         } else {
           return ;
         }
+        app->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
         application_manager::MessageHelper::SendActivateAppToHMI(app->app_id(), default_hmi);
         application_manager::MessageHelper::SendHMIStatusNotification(*app);
       }
@@ -643,8 +642,8 @@ void PolicyHandler::OnVIIsReady() {
 
 void PolicyHandler::OnVehicleDataUpdated(
     const smart_objects::SmartObject& message) {
-#ifdef EXTENDED_POLICY
   POLICY_LIB_CHECK_VOID();
+#ifdef EXTENDED_POLICY
   if (message[application_manager::strings::msg_params].
       keyExists(application_manager::strings::vin)) {
     policy_manager_->SetVINValue(
@@ -1038,6 +1037,11 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
     // consent
     if (!permissions.isSDLAllowed) {
       pending_device_handles_.push_back(permissions.deviceInfo.device_handle);
+    }
+
+    if (permissions.appPermissionsConsentNeeded) {
+      application_manager::MessageHelper::SendOnAppPermissionsChangedNotification(
+            app->app_id(), permissions);
     }
 #else
     permissions.isSDLAllowed = true;

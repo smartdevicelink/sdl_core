@@ -133,10 +133,12 @@ void SliderRequest::on_event(const event_engine::Event& event) {
       message[strings::params][hmi_response::code].asInt();
 
   smart_objects::SmartObject response_msg_params = message[strings::msg_params];
-  if (response_code == hmi_apis::Common_Result::ABORTED)
+  if (response_code == hmi_apis::Common_Result::ABORTED) {
     //Copy slider_position info to msg_params section
-    response_msg_params[strings::slider_position] =
-        message[strings::params][strings::data][strings::slider_position];
+    // TODO(DK) : FIXME
+    /*response_msg_params[strings::slider_position] =
+        message[strings::params][strings::data][strings::slider_position];*/
+  }
 
   const bool is_response_success =
       (mobile_apis::Result::SUCCESS == response_code) ||
