@@ -1,5 +1,6 @@
 include_directories(
   ./include
+  ${APR_INCLUDE_DIRECTORY}
 )
 
 set(SOURCES
