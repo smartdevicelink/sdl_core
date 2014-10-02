@@ -1134,7 +1134,12 @@ bool PolicyManagerImpl::IsAppInUpdateList(const std::string& app_id) const {
 
 void PolicyManagerImpl::RemoveAppConsentForGroup(const std::string& app_id,
                                                  const std::string& group_name) {
-  cache.RemoveAppConsentForGroup(app_id, group_name);
+    cache.RemoveAppConsentForGroup(app_id, group_name);
+}
+
+bool PolicyManagerImpl::IsPredataPolicy(const std::string &policy_app_id) {
+    LOG4CXX_INFO(logger_, "IsPredataApp");
+    return cache.IsPredataPolicy(policy_app_id);
 }
 
 void PolicyManagerImpl::AddNewApplication(const std::string& application_id,

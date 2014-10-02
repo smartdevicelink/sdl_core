@@ -420,12 +420,21 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
   for (; it_app_list != it_app_list_end; ++it_app_list) {
     if (device_handle == (*it_app_list).get()->device()) {
 
-      policy_manager_->ReactOnUserDevConsentForApp(
-        it_app_list->get()->mobile_app_id()->asString(),
-        is_allowed);
+      const std::string policy_app_id =
+              (*it_app_list).get()->mobile_app_id()->asString();
 
-      policy_manager_->SendNotificationOnPermissionsUpdated(
-        (*it_app_list).get()->mobile_app_id()->asString());
+      // If app has predata policy, which is assigned without device consent or
+      // with negative data consent, there no necessity to change smth and send
+      // notification for such app in case of device consent is not allowed
+      if (policy_manager_->IsPredataPolicy(policy_app_id) &&
+          !is_allowed) {
+        continue;
+      }
+
+      policy_manager_->ReactOnUserDevConsentForApp(policy_app_id,
+                                                   is_allowed);
+
+      policy_manager_->SendNotificationOnPermissionsUpdated(policy_app_id);
     }
   }
 }
