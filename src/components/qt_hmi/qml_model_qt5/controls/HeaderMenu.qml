@@ -85,7 +85,6 @@ Item {
         }
 
         onClicked: {
-            dataContainer.scrollableMessageModel.menuPressed = true
             contentLoader.go("./views/MainMenuView.qml")
         }
     }

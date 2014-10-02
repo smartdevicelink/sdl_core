@@ -45,14 +45,10 @@ GeneralView {
     onLeaveScreen: {
         timer.stop()
         dataContainer.scrollableMessageModel.running = false
-        if (dataContainer.scrollableMessageModel.menuPressed === true)
-        {
-            dataContainer.scrollableMessageModel.result = Common.Result.ABORTED
-        }
         DBus.sendReply(dataContainer.scrollableMessageModel.async, { __retCode: dataContainer.scrollableMessageModel.result })
     }
     Component.onCompleted: {
-        dataContainer.scrollableMessageModel.menuPressed = false
+        dataContainer.scrollableMessageModel.result = Common.Result.ABORTED
         dataContainer.scrollableMessageModel.running = true
         timer.start()
     }

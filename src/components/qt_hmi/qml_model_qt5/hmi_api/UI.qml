@@ -567,7 +567,6 @@ Item {
     }
 
     function scrollableMessage (messageText, timeout, softButtons, appID) {
-        dataContainer.scrollableMessageModel.result = -1
         var softButtonsLog = "",
             messageTextLog = "";
         if (softButtons) {
