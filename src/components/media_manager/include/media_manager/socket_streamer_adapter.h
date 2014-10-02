@@ -119,7 +119,7 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
         bool is_first_loop_;
         volatile bool is_client_connected_;
         volatile bool stop_flag_;
-
+        sync_primitives::Lock thread_lock;
         DISALLOW_COPY_AND_ASSIGN(Streamer);
     };
 
@@ -128,7 +128,6 @@ class SocketStreamerAdapter : public MediaAdapterImpl {
     threads::Thread*                              thread_;
     Streamer*                                     streamer_;
     MessageQueue<RawMessagePtr>                   messages_;
-
     DISALLOW_COPY_AND_ASSIGN(SocketStreamerAdapter);
 };
 }  //  namespace media_manager

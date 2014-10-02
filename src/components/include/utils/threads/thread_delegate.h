@@ -57,6 +57,8 @@ class ThreadDelegate {
     /**
      * Should be called to free all resources allocated in threadMain
      * and exiting threadMain
+     * This function should be blocking and return only when threadMain() will be
+     * finished in other case segmantation failes are possible
      */
     virtual bool exitThreadMain() {
       return false;
