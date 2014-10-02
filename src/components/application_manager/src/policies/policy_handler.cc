@@ -67,6 +67,8 @@ namespace policy {
   }\
 }
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
+
 typedef std::set<application_manager::ApplicationSharedPtr> ApplicationList;
 
 struct DeactivateApplication {
@@ -99,29 +101,36 @@ struct SDLAlowedNotification {
 
         std::string hmi_level;
         hmi_apis::Common_HMILevel::eType default_hmi;
+        mobile_apis::HMILevel::eType default_mobile_hmi;
         policy_manager_->GetDefaultHmi(app->mobile_app_id()->asString(), &hmi_level);
         if ("BACKGROUND" == hmi_level) {
           default_hmi = hmi_apis::Common_HMILevel::BACKGROUND;
+          default_mobile_hmi = mobile_apis::HMILevel::HMI_BACKGROUND;
         } else if ("FULL" == hmi_level) {
           default_hmi = hmi_apis::Common_HMILevel::FULL;
+          default_mobile_hmi = mobile_apis::HMILevel::HMI_FULL;
         } else if ("LIMITED" == hmi_level) {
           default_hmi = hmi_apis::Common_HMILevel::LIMITED;
+          default_mobile_hmi = mobile_apis::HMILevel::HMI_LIMITED;
         } else if ("NONE" == hmi_level) {
           default_hmi = hmi_apis::Common_HMILevel::NONE;
+          default_mobile_hmi = mobile_apis::HMILevel::HMI_NONE;
         } else {
           return ;
         }
-        app->set_hmi_level(mobile_apis::HMILevel::HMI_NONE);
+        if (app->hmi_level() == default_mobile_hmi) {
+          LOG4CXX_INFO(logger_, "Application already in default hmi state.");
+        } else {
+          app->set_hmi_level(default_mobile_hmi);
+          application_manager::MessageHelper::SendHMIStatusNotification(*app);
+        }
         application_manager::MessageHelper::SendActivateAppToHMI(app->app_id(), default_hmi);
-        application_manager::MessageHelper::SendHMIStatusNotification(*app);
       }
     }
   private:
     connection_handler::DeviceHandle device_id_;
     PolicyManager* policy_manager_;
 };
-
-CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 struct LinkAppToDevice {
   explicit LinkAppToDevice(
