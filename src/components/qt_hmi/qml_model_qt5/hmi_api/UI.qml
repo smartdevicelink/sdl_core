@@ -379,7 +379,7 @@ Item {
             case Common.ClockUpdateMode.RESUME:
                 // Already resumed or cleared
                 if ((app.mediaClock.runningMode === Internal.MediaClockRunningMode.MCR_RUNNING)
-                        || (app.mediaClock.startTime === -1 && app.mediaClock.endTime === -1)) {
+                        || (app.mediaClock.startTime === app.mediaClock.endTime)) {
                     resultCode = Common.Result.IGNORED
                     sendErrorResponce = true
                     break
