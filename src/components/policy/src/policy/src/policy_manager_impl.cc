@@ -1093,17 +1093,11 @@ void PolicyManagerImpl::RemovePendingPermissionChanges(
 }
 
 bool PolicyManagerImpl::CanAppKeepContext(const std::string& app_id) {
-#ifdef EXTENDED_POLICY
   return cache.CanAppKeepContext(app_id);
-#endif // EXTENDED_POLICY
-  return false;
 }
 
 bool PolicyManagerImpl::CanAppStealFocus(const std::string& app_id) {
-#ifdef EXTENDED_POLICY
-  cache.CanAppStealFocus(app_id);
-#endif // EXTENDED_POLICY
-  return false;
+  return cache.CanAppStealFocus(app_id);
 }
 
 void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
