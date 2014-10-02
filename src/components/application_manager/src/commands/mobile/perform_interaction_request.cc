@@ -374,6 +374,8 @@ void PerformInteractionRequest::ProcessVRResponse(
     notification = message;
     notification[strings::params][strings::function_id] =
         static_cast<int32_t>(mobile_apis::FunctionID::eType::OnCommandID);
+    notification[strings::params][strings::message_type] =
+        static_cast<int32_t>(kNotification);
     notification[strings::msg_params][strings::trigger_source] =
         static_cast<int32_t>(mobile_apis::TriggerSource::TS_VR);
     ApplicationManagerImpl::instance()->ManageMobileCommand(notification_so);

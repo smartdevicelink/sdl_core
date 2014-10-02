@@ -37,8 +37,11 @@
   #include <errno.h>
   #include <string.h>
   #include <sstream>
+  #include <apr_time.h>
   #include <log4cxx/propertyconfigurator.h>
+  #include <log4cxx/spi/loggingevent.h>
   #include "utils/push_log.h"
+  #include "utils/logger_status.h"
 #endif  // ENABLE_LOG
 
 #ifdef ENABLE_LOG
@@ -62,10 +65,12 @@
 
     #define LOG_WITH_LEVEL(loggerPtr, logLevel, logEvent) \
     do { \
-      if (loggerPtr->isEnabledFor(logLevel)) { \
-        std::stringstream accumulator; \
-        accumulator << logEvent; \
-        logger::push_log(loggerPtr, logLevel, accumulator.str(), LOG4CXX_LOCATION); \
+      if (logger::logger_status != logger::DeletingLoggerThread) { \
+        if (loggerPtr->isEnabledFor(logLevel)) { \
+          std::stringstream accumulator; \
+          accumulator << logEvent; \
+          logger::push_log(loggerPtr, logLevel, accumulator.str(), apr_time_now(), LOG4CXX_LOCATION, ::log4cxx::spi::LoggingEvent::getCurrentThreadName()); \
+        } \
       } \
     } while (false)
 

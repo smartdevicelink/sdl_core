@@ -40,12 +40,21 @@ typedef struct timeval TimevalStruct;
 
 namespace date_time {
 
+  enum TimeCompare {
+    LESS,
+    EQUAL,
+    GREATER
+  };
+
 class DateTime {
  public:
   static const int32_t MILLISECONDS_IN_SECOND = 1000;
   static const int32_t MICROSECONDS_IN_MILLISECONDS = 1000;
 
   static TimevalStruct getCurrentTime();
+
+  // return SECONDS count
+  static int64_t getSecs(const TimevalStruct& time);
 
   // return MILLISECONDS count
   static int64_t getmSecs(const TimevalStruct& time);
@@ -57,7 +66,10 @@ class DateTime {
 
   // return MILLISECONDS count between time1 and time2
   static int64_t calculateTimeDiff(const TimevalStruct& time1,
-                                   const TimevalStruct& time2);
+                             const TimevalStruct& time2);
+
+  static TimeCompare compareTime(const TimevalStruct& time1,
+                               const TimevalStruct& time2);
 };
 
 }  // namespace date_time

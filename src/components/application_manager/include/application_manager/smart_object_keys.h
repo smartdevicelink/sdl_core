@@ -148,6 +148,7 @@ const char seconds [] = "seconds";
 const char update_mode[] = "updateMode";
 const char trigger_source[] = "triggerSource";
 const char hmi_level[] = "hmiLevel";
+const char activate_app_hmi_level[] = "level";
 const char audio_streaming_state[] = "audioStreamingState";
 const char system_context[] = "systemContext";
 const char speech_capabilities[] = "speechCapabilities";

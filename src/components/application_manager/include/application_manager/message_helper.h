@@ -237,7 +237,7 @@ class MessageHelper {
     * @brief Send SDL_ActivateApp response to HMI
     * @param permissions response parameters
     */
-    static void SendActivateAppResponse(policy::AppPermissions& permissions,
+    static void SendSDLActivateAppResponse(policy::AppPermissions& permissions,
                                         uint32_t correlation_id);
 
     /**

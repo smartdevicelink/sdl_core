@@ -7,8 +7,6 @@ include_directories(
 	${JSONCPP_INCLUDE_DIRECTORY}
 )
 
-
-else ()
 link_directories (
     ${CMAKE_BINARY_DIR}/src/components/policy/src/policy/policy_table/table_struct/
     ${CMAKE_BINARY_DIR}/src/components/rpc_base/

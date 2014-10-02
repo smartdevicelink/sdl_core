@@ -69,7 +69,6 @@ set(LIBRARIES
     HMI_API
     v4_protocol_v1_2_no_extra
     SmartObjects
-    RequestWatchdog
     ProtocolHandler
     Utils
     ConfigProfile

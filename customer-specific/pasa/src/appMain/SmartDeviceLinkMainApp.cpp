@@ -178,7 +178,6 @@ void startSmartDeviceLink()
 
   // --------------------------------------------------------------------------
   // Components initialization
-  profile::Profile::instance()->config_file_name(SDL_INIFILE_PATH);
 
   // TODO: Remove this code when PASA will support SDL_MSG_START_USB_LOGGING
   // Start section
@@ -240,6 +239,7 @@ void ApplinkNotificationThreadDelegate::threadMain() {
   policy_init.Add(kPolicyInitializationScript);
   if (!policy_init.Execute(true)) {
     LOG4CXX_ERROR(logger_, "QDB initialization failed.");
+    exit(EXIT_FAILURE);
   }
 #endif
 
@@ -263,6 +263,7 @@ void ApplinkNotificationThreadDelegate::threadMain() {
  */
 int main(int argc, char** argv) {
 
+  profile::Profile::instance()->config_file_name(SDL_INIFILE_PATH);
   INIT_LOGGER(profile::Profile::instance()->log4cxx_config_file());
   configureLogging();
 
