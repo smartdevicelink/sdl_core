@@ -86,7 +86,7 @@ CommonAppPriorityMap app_priority_values = {
   {"EMERGENCY", hmi_apis::Common_AppPriority::EMERGENCY},
   {"NAVIGATION", hmi_apis::Common_AppPriority::NAVIGATION},
   {"NONE", hmi_apis::Common_AppPriority::NONE},
-  {"VOICECOMM", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
+  {"VOICECOM", hmi_apis::Common_AppPriority::VOICE_COMMUNICATION},
   {"INVALID_ENUM", hmi_apis::Common_AppPriority::INVALID_ENUM}
 };
 
