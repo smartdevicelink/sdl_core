@@ -239,6 +239,7 @@ void ApplinkNotificationThreadDelegate::threadMain() {
   policy_init.Add(kPolicyInitializationScript);
   if (!policy_init.Execute(true)) {
     LOG4CXX_ERROR(logger_, "QDB initialization failed.");
+    exit(EXIT_FAILURE);
   }
 #endif
 
