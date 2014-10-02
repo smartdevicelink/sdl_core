@@ -16,5 +16,7 @@ if [ -f "/fs/usb0/policy" ];
 then
    cat /fs/mp/sql/policy_usb.cfg > /pps/qnx/qdb/config/policy.db
 else
+   # workaround for file system issue on HU
+   sleep 5
    cat /fs/mp/sql/policy.cfg > /pps/qnx/qdb/config/policy.db
 fi

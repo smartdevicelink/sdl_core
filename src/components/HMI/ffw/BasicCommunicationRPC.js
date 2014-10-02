@@ -316,6 +316,24 @@ FFW.BasicCommunication = FFW.RPCObserver
             if (notification.method == this.onStatusUpdateNotification) {
 
                 SDL.TTSPopUp.ActivateTTS(notification.params.status);
+
+                var messageCode = '';
+                switch(notification.params.status){
+                    case "UP_TO_DATE":{
+                        messageCode = "StatusUpToDate";
+                        break;
+                    }
+                    case "UPDATING":{
+                        messageCode = "StatusPending";
+                        break;
+                    }
+                    case "UPDATE_NEEDED":{
+                        messageCode = "StatusNeeded";
+                        break;
+                    }
+                }
+
+                FFW.BasicCommunication.GetUserFriendlyMessage(SDL.SettingsController.simpleParseUserFriendlyMessageData, SDL.SDLAppController.model?SDL.SDLAppController.model.appID:null, [messageCode]);
             }
 
             if (notification.method == this.onAppPermissionChangedNotification) {

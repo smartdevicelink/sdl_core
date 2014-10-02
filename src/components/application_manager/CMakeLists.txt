@@ -20,6 +20,7 @@ include_directories (
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
+  ${CMAKE_SOURCE_DIR}/src/components/include/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include/
   ${LOG4CXX_INCLUDE_DIRECTORY}
@@ -28,6 +29,7 @@ include_directories (
 set (SOURCES
 ./src/application_manager_impl.cc
 ./src/usage_statistics.cc
+./src/request_info.cc
 ./src/message.cc
 ./src/application_impl.cc
 ./src/mobile_command_factory.cc

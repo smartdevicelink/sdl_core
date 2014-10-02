@@ -569,6 +569,7 @@ private:
 
 private:
   utils::SharedPtr<policy_table::Table> pt_;
+  utils::SharedPtr<policy_table::Table> snapshot_;
   utils::SharedPtr<PTRepresentation> backup_;
   utils::SharedPtr<PTExtRepresentation> ex_backup_;
   bool update_required;

@@ -7,7 +7,7 @@ bool IsValidEnum(Priority val) {
   switch (val) {
     case P_EMERGENCY: return true;
     case P_NAVIGATION: return true;
-    case P_VOICECOM: return true;
+    case P_VOICECOMM: return true;
     case P_COMMUNICATION: return true;
     case P_NORMAL: return true;
     case P_NONE: return true;
@@ -18,7 +18,7 @@ const char* EnumToJsonString(Priority val) {
   switch (val) {
     case P_EMERGENCY: return "EMERGENCY";
     case P_NAVIGATION: return "NAVIGATION";
-    case P_VOICECOM: return "VOICECOM";
+    case P_VOICECOMM: return "VOICECOMM";
     case P_COMMUNICATION: return "COMMUNICATION";
     case P_NORMAL: return "NORMAL";
     case P_NONE: return "NONE";
@@ -32,8 +32,8 @@ bool EnumFromJsonString(const std::string& literal, Priority* result) {
   } else if ("NAVIGATION" == literal) {
     *result = P_NAVIGATION;
     return true;
-  } else if ("VOICECOM" == literal) {
-    *result = P_VOICECOM;
+  } else if ("VOICECOMM" == literal) {
+    *result = P_VOICECOMM;
     return true;
   } else if ("COMMUNICATION" == literal) {
     *result = P_COMMUNICATION;

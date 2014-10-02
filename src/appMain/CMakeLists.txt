@@ -74,7 +74,6 @@ set(LIBRARIES
   Utils
   jsoncpp
   ConfigProfile
-  RequestWatchdog
   MediaManager
   Resumption
 )

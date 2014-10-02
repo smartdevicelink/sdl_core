@@ -74,54 +74,37 @@ void ResetGlobalPropertiesRequest::Run() {
 
   bool helpt_promt = false;
   bool timeout_prompt = false;
-  bool vr_help_title = false;
-  bool vr_help_items = false;
+  bool vr_help_title_items = false;
   bool menu_name = false;
   bool menu_icon = false;
   bool is_key_board_properties = false;
+  int number_of_reset_vr = 0;
+  mobile_apis::GlobalProperty::eType global_property =
+      mobile_apis::GlobalProperty::INVALID_ENUM;
 
   for (size_t i = 0; i < obj_length; ++i) {
-    switch ((*message_)[strings::msg_params][strings::properties][i].asInt()) {
-      case GlobalProperty::HELPPROMT: {
-        helpt_promt = ResetHelpPromt(app);
-        break;
-      }
-      case GlobalProperty::TIMEOUTPROMT: {
-        timeout_prompt = ResetTimeoutPromt(app);
-        break;
-      }
-      case GlobalProperty::VRHELPTITLE: {
-        vr_help_title = ResetVrHelpTitle(app);
-        break;
-      }
-      case GlobalProperty::VRHELPITEMS: {
-        vr_help_items = ResetVrHelpItems(app);
-        break;
-      }
-      case mobile_apis::GlobalProperty::MENUNAME: {
-        menu_name = true;
-        break;
-      }
-      case mobile_apis::GlobalProperty::MENUICON: {
-        menu_icon = true;
-        break;
-      }
-      case mobile_apis::GlobalProperty::KEYBOARDPROPERTIES: {
-        is_key_board_properties = true;
-        break;
-      }
-      default: {
-        LOG4CXX_ERROR(
-          logger_,
-          "Unknown global property 0x%02X value"
-          << (*message_)[strings::msg_params][strings::properties][i].asInt());
-        break;
-      }
+    global_property = static_cast<mobile_apis::GlobalProperty::eType>(
+        (*message_)[strings::msg_params][strings::properties][i].asInt());
+
+    if (mobile_apis::GlobalProperty::HELPPROMPT == global_property) {
+      helpt_promt = ResetHelpPromt(app);
+    } else if (mobile_apis::GlobalProperty::TIMEOUTPROMPT == global_property) {
+      timeout_prompt = ResetTimeoutPromt(app);
+    } else if (((mobile_apis::GlobalProperty::VRHELPTITLE == global_property) ||
+        (mobile_apis::GlobalProperty::VRHELPITEMS == global_property)) &&
+        (0 == number_of_reset_vr)) {
+      ++number_of_reset_vr;
+      vr_help_title_items = ResetVrHelpTitleItems(app);
+    } else if (mobile_apis::GlobalProperty::MENUNAME == global_property) {
+      menu_name = true;
+    } else if (mobile_apis::GlobalProperty::MENUICON == global_property) {
+      menu_icon = true;
+    } else if (mobile_apis::GlobalProperty::KEYBOARDPROPERTIES == global_property) {
+      is_key_board_properties = true;
     }
   }
 
-  if (vr_help_title || vr_help_items || menu_name || menu_icon
-      || is_key_board_properties) {
+  if (vr_help_title_items || menu_name || menu_icon || is_key_board_properties) {
     is_ui_send_ = true;
   }
 
@@ -131,12 +114,12 @@ void ResetGlobalPropertiesRequest::Run() {
 
   app->set_reset_global_properties_active(true);
 
-  if (vr_help_title || vr_help_items || menu_name || menu_icon
-      || is_key_board_properties) {
+  if (vr_help_title_items || menu_name || menu_icon || is_key_board_properties) {
+
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
 
-    if (vr_help_title || vr_help_items) {
+    if (vr_help_title_items) {
       smart_objects::SmartObject* vr_help = MessageHelper::CreateAppVrHelp(app);
       if (!vr_help) {
         return;
@@ -248,7 +231,7 @@ bool ResetGlobalPropertiesRequest::ResetTimeoutPromt(
   return true;
 }
 
-bool ResetGlobalPropertiesRequest::ResetVrHelpTitle(
+bool ResetGlobalPropertiesRequest::ResetVrHelpTitleItems(
     application_manager::ApplicationSharedPtr const app) {
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "Null pointer");
@@ -256,17 +239,6 @@ bool ResetGlobalPropertiesRequest::ResetVrHelpTitle(
     return false;
   }
   app->reset_vr_help_title();
-
-  return true;
-}
-
-bool ResetGlobalPropertiesRequest::ResetVrHelpItems(
-    application_manager::ApplicationSharedPtr const app) {
-  if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "Null pointer");
-    SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
-    return false;
-  }
   app->reset_vr_help();
 
   return true;

@@ -35,6 +35,7 @@
 
 #include "utils/shared_ptr.h"
 #include "smart_objects/smart_object.h"
+#include "application_manager/event_engine/event_observer.h"
 #include "application_manager/smart_object_keys.h"
 
 namespace application_manager {

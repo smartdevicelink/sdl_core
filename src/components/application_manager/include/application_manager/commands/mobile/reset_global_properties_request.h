@@ -41,16 +41,6 @@
 namespace application_manager {
 
 namespace commands {
-// TODO(DK): Include GlobalProperty header
-/*
- * @brief Names of all global properties that should be unset.
- */
-enum GlobalProperty {
-  HELPPROMT = 0,
-  TIMEOUTPROMT = 1,
-  VRHELPTITLE = 2,
-  VRHELPITEMS = 3
-};
 
 /**
  * @brief ResetGlobalPropertiesRequest command class
@@ -106,23 +96,14 @@ class ResetGlobalPropertiesRequest : public CommandRequestImpl {
 
   /*
    * @brief Sets default value of the VRHELPTITLE global property
-   * to the application name
-   *
-   * @param app Registered application
-   *
-   * @return TRUE on success, otherwise FALSE
-   */
-  bool ResetVrHelpTitle(application_manager::ApplicationSharedPtr const app);
-
-  /*
-   * @brief Sets default value of the VRHELPITEMS global property
+   * to the application name and value of the VRHELPITEMS global property
    * to value equal to registered command -1(default command “Help / Cancel”.)
    *
    * @param app Registered application
    *
    * @return TRUE on success, otherwise FALSE
    */
-  bool ResetVrHelpItems(application_manager::ApplicationSharedPtr const app);
+  bool ResetVrHelpTitleItems(application_manager::ApplicationSharedPtr const app);
 
   /*
    * @brief Check if there some not delivered hmi responses exist
