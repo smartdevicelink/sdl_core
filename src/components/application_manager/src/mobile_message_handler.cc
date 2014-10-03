@@ -117,6 +117,8 @@ MobileMessageHandler::HandleIncomingMessageProtocolV2(
   outgoing_message->set_protocol_version(
     static_cast<application_manager::ProtocolVersion>(message
         ->protocol_version()));
+  outgoing_message->set_data_size(message->data_size());
+  outgoing_message->set_payload_size(message->payload_size());
 
   if (!payload.data.empty()) {
     outgoing_message->set_binary_data(

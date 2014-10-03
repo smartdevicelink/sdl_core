@@ -1454,6 +1454,17 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       output[strings::params][strings::protocol_version] =
         message.protocol_version();
       if (message.binary_data()) {
+        if (message.payload_size() < message.data_size()) {
+          LOG4CXX_ERROR(logger_, "Incomplete binary" <<
+                                " binary size should be  " << message.data_size() <<
+                                " payload data size is " << message.payload_size());
+          utils::SharedPtr<smart_objects::SmartObject> response(
+                            MessageHelper::CreateNegativeResponse(
+                            message.connection_key(), message.function_id(),
+                            message.correlation_id(), mobile_apis::Result::INVALID_DATA));
+          ManageMobileCommand(response);
+          return false;
+        }
         output[strings::params][strings::binary_data] =
           *(message.binary_data());
       }

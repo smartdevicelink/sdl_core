@@ -39,7 +39,7 @@
 namespace protocol_handler {
 
 ProtocolPacket::ProtocolPacket()
-    : data_offset_(0),
+    : payload_size_(0),
       packet_id_(0),
       connection_id_(0)  {
 }
@@ -54,7 +54,7 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_id,
                                uint32_t packet_id)
   : packet_header_(version, protection, frameType, serviceType,
                    frameData, sessionID, dataSize, messageID),
-    data_offset_(0),
+    payload_size_(0),
     packet_id_(packet_id),
     connection_id_(connection_id) {
   set_data(data, dataSize);
@@ -63,7 +63,7 @@ ProtocolPacket::ProtocolPacket(uint8_t connection_id,
 
 ProtocolPacket::ProtocolPacket(uint8_t connection_id, uint8_t *data_param,
                                uint32_t data_size)
-  : data_offset_(0),
+  : payload_size_(0),
     packet_id_(0),
     connection_id_(connection_id) {
   RESULT_CODE result = deserializePacket(data_param, data_size);
@@ -130,11 +130,11 @@ uint32_t ProtocolPacket::packet_id() const {
 
 RESULT_CODE ProtocolPacket::appendData(uint8_t *chunkData,
                                        uint32_t chunkDataSize) {
-  if (data_offset_ + chunkDataSize <= packet_data_.totalDataBytes) {
+  if (payload_size_ + chunkDataSize <= packet_data_.totalDataBytes) {
     if (chunkData) {
       if (packet_data_.data) {
-        memcpy(packet_data_.data + data_offset_, chunkData, chunkDataSize);
-        data_offset_ += chunkDataSize;
+        memcpy(packet_data_.data + payload_size_, chunkData, chunkDataSize);
+        payload_size_ += chunkDataSize;
         return RESULT_OK;
       }
     }
@@ -194,14 +194,14 @@ RESULT_CODE ProtocolPacket::deserializePacket(const uint8_t *message,
     data = new (std::nothrow) uint8_t[dataPayloadSize];
     if (data) {
       memcpy(data, message + offset, dataPayloadSize);
-      data_offset_ = dataPayloadSize;
+      payload_size_ = dataPayloadSize;
     } else {
       return RESULT_FAIL;
     }
   }
 
   if (packet_header_.frameType == FRAME_TYPE_FIRST) {
-    data_offset_ = 0;
+    payload_size_ = 0;
     const uint8_t *data = message + offset;
     uint32_t total_data_bytes = data[0] << 24;
     total_data_bytes |= data[1] << 16;
@@ -291,6 +291,10 @@ uint32_t ProtocolPacket::total_data_bytes() const {
 
 uint8_t ProtocolPacket::connection_id() const {
   return connection_id_;
+}
+
+uint32_t ProtocolPacket::payload_size() const {
+  return payload_size_;
 }
 
 // End of Deserialization
