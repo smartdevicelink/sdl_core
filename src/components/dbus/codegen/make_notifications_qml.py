@@ -86,11 +86,15 @@ class Notifications_qml(FordXmlParser):
             for notification_el in notifications:
                 with CodeBlock(out) as out:
                     out.write("void slot_%s(" % notification_el.get("name"))
+                param_el_count = 1
                 list_of_params = notification_el.findall("param")
                 list_of_params_len = len(list_of_params)
-                if list_of_params_len > 0:
-                    out.write("const QDBusMessage &data")
-
+                for param_el in list_of_params:
+                    param = self.make_param_desc(param_el, iface_name)
+                    out.write("%s %s" % (self.qt_param_type(param), param_el.get("name")))
+                    if param_el_count < list_of_params_len:
+                        out.write(", ")
+                    param_el_count += 1
                 out.write(");\n")
         out.write("};\n")
 
@@ -140,13 +144,16 @@ class Notifications_qml(FordXmlParser):
 
 
     def make_source(self, out):
-        def qml_args():
+        def qml_args(variable_name_needed):
             param_el_count = 1
             list_of_params = notification_el.findall("param")
             list_of_params_len = len(list_of_params)
             for param_el in list_of_params:
                 param = self.make_param_desc(param_el, iface_name)
-                out.write("%s %s" % (self.qt_param_type(param), param_el.get("name")))
+                if variable_name_needed:
+                    out.write("%s %s" % (self.qt_param_type(param), param_el.get("name")))
+                else:
+                    out.write("%s" % self.qt_param_type(param))
                 if param_el_count < list_of_params_len:
                     out.write(", ")
                 param_el_count += 1
@@ -155,12 +162,14 @@ class Notifications_qml(FordXmlParser):
             iface_name = interface_el.get('name')
             notifications = self.find_notifications_by_provider(interface_el, "sdl")
             for notification_el in notifications:
+                notification_name = notification_el.get('name')
                 with CodeBlock(out) as out:
                     out.write("QDBusConnection::sessionBus().connect(\n")
                     with CodeBlock(out) as out:
                         out.write("\"com.ford.sdl.core\", \"/\", \"com.ford.sdl.core.%s\",\n" % iface_name)
-                        out.write("\"%s\", this, SLOT(slot_%s(" % (notification_el.get("name"), notification_el.get("name")))
-                out.write("const QDBusMessage & )));\n")
+                        out.write("\"%s\", this, SLOT(slot_%s(" % (notification_name, notification_el.get("name")))      
+                qml_args(variable_name_needed = False)
+                out.write(")));\n")
         out.write("}\n\n")
         for interface_el in self.el_tree.findall('interface'):
             iface_name = interface_el.get('name')
@@ -168,39 +177,29 @@ class Notifications_qml(FordXmlParser):
             for notification_el in notifications:
                 notific_full_name = interface_el.get("name") + "_" + notification_el.get("name")
                 out.write("void SdlProxy::slot_%s(" % notification_el.get("name"))
-                list_of_params_count = len(notification_el.findall("param"))
-                if list_of_params_count > 0:
-                    out.write("const QDBusMessage & data")
+                qml_args(variable_name_needed = True)
                 out.write(") {\n")
                 with CodeBlock(out) as out:
-                    out.write("LOG4CXX_TRACE(logger_, \"ENTER\");\n\n")
-                    if list_of_params_count > 0:
-                        out.write("QList<QVariant> outArgs = data.arguments();\n\n")
-                    param_el_count = 0
+                    out.write("LOG4CXX_TRACE(logger_, \"ENTER\");\n\n")     
                     for param_el in notification_el.findall("param"):
-                        print("asdasdadaaaaaaaaaaaa",param_el)
                         param = self.make_param_desc(param_el, iface_name)
                         tmp_param_name = param.name + "_qvariant"
-                        tmp_param_name_qdbus = param.name + "_qdbusarg"
-                        out.write("QDBusArgument %s;\n" % tmp_param_name_qdbus)
-                        out.write("%s = outArgs.at(%s).value<QDBusArgument>();\n" % (tmp_param_name_qdbus, param_el_count))
-                        out.write("%s %s;\n" % (self.qt_param_type(param), param.name))
-                        out.write("%s >> %s;\n" % (tmp_param_name_qdbus, param.name))
-                        out.write("QVariant %s = ValueToVariant(%s);\n" % (tmp_param_name, param.name))
+                        out.write("QVariant %s;\n" % tmp_param_name)
+                        out.write("%s = ValueToVariant(%s);\n" % (tmp_param_name, param.name))
                         self.write_param_validation(param, param.name, "\nLOG4CXX_ERROR(logger_, \"%s in %s out of bounds\")" % (param.name, notific_full_name), out)
-                        out.write("\n")
-                        param_el_count += 1
+                        out.write("\n")                    
                     out.write("emit %s(" % self.first_letter_to_lower_case( notification_el.get("name")) )
-                    param_el_count = 1
-                    list_of_params = notification_el.findall("param")
-                    list_of_params_len = len(list_of_params)
-                    for param_el in list_of_params:
-                        param = self.make_param_desc(param_el, iface_name)
-                        out.write("%s" %  param.name + "_qvariant")
-                        if param_el_count < list_of_params_len:
-                            out.write(", ")
-                        param_el_count += 1  
-                    out.write(");\n")
+                param_el_count = 1
+                list_of_params = notification_el.findall("param")
+                list_of_params_len = len(list_of_params)
+                for param_el in list_of_params:
+                    param = self.make_param_desc(param_el, iface_name)
+                    out.write("%s" %  param.name + "_qvariant")
+                    if param_el_count < list_of_params_len:
+                        out.write(", ")
+                    param_el_count += 1  
+                out.write(");\n")
+                with CodeBlock(out) as out:                    
                     out.write("LOG4CXX_TRACE(logger_, \"EXIT\");\n")                                                 
                 out.write("}\n\n")
 

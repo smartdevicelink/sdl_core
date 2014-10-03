@@ -1093,17 +1093,11 @@ void PolicyManagerImpl::RemovePendingPermissionChanges(
 }
 
 bool PolicyManagerImpl::CanAppKeepContext(const std::string& app_id) {
-#ifdef EXTENDED_POLICY
   return cache.CanAppKeepContext(app_id);
-#endif // EXTENDED_POLICY
-  return false;
 }
 
 bool PolicyManagerImpl::CanAppStealFocus(const std::string& app_id) {
-#ifdef EXTENDED_POLICY
-  cache.CanAppStealFocus(app_id);
-#endif // EXTENDED_POLICY
-  return false;
+  return cache.CanAppStealFocus(app_id);
 }
 
 void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
@@ -1140,7 +1134,12 @@ bool PolicyManagerImpl::IsAppInUpdateList(const std::string& app_id) const {
 
 void PolicyManagerImpl::RemoveAppConsentForGroup(const std::string& app_id,
                                                  const std::string& group_name) {
-  cache.RemoveAppConsentForGroup(app_id, group_name);
+    cache.RemoveAppConsentForGroup(app_id, group_name);
+}
+
+bool PolicyManagerImpl::IsPredataPolicy(const std::string &policy_app_id) {
+    LOG4CXX_INFO(logger_, "IsPredataApp");
+    return cache.IsPredataPolicy(policy_app_id);
 }
 
 void PolicyManagerImpl::AddNewApplication(const std::string& application_id,

@@ -1070,6 +1070,8 @@ SDL.SDLModel = Em.Object.create({
                     }
                     if (params[i].autoCompleteText) {
                         SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.autoCompleteText', params[i].autoCompleteText);
+                    } else {
+                        SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.keyboardProperties.autoCompleteText', '');
                     }
                 } else {
                     SDL.SDLController.getApplicationModel(params.appID).set('globalProperties.' + i, params[i]);

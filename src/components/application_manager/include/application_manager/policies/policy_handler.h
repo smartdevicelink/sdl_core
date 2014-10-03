@@ -74,6 +74,24 @@ class PolicyHandler :
                             const HMILevel& default_hmi);
 
   /**
+   * Checks system action of application for permission of keep context
+   * @param system_action system action (see mobile api)
+   * @param policy_app_id unique application id
+   * @return false if system_action is KEEP_CONTEXT and it isn't allowed by policy
+   * otherwise true
+   */
+  bool CheckKeepContext(int system_action, const std::string& policy_app_id);
+
+  /**
+   * Checks system action of application for permission of steal focus
+   * @param system_action system action (see mobile api)
+   * @param policy_app_id unique application id
+   * @return false if system_action is STEAL_FOCUS and it isn't allowed by policy
+   * otherwise true
+   */
+  bool CheckStealFocus(int system_action, const std::string& policy_app_id);
+
+  /**
    * Lets client to notify PolicyHandler that more kilometers expired
    * @param kms New value of odometer
    */

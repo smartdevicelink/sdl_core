@@ -356,7 +356,7 @@ Rectangle {
                 ngnMediaScreenAppName: application.ngnMediaScreenAppName,
                 icon: application.icon,
                 deviceName: application.deviceName,
-                appId: application.appId,
+                appId: application.appID,
                 hmiDisplayLanguageDesired: application.hmiDisplayLanguageDesired,
                 isMediaApplication: application.isMediaApplication,
                 appType: appTypeToAdd,
@@ -373,7 +373,7 @@ Rectangle {
         }
 
         onOnAppUnregistered: {
-            console.debug("enter onAppUnregistered")            
+            console.debug("enter onAppUnregistered")
             if ((dataContainer.currentApplication.appId === appID)) {
                 if (dataContainer.applicationContext) {
                     contentLoader.go("views/ApplicationListView.qml");
