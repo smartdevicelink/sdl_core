@@ -755,8 +755,12 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
       session_observer_->KeyFromPair(connection_id, packet->session_id());
 
   const RawMessagePtr rawMessage(
-        new RawMessage(connection_key, packet->protocol_version(), packet->data(),
-                       packet->total_data_bytes(), packet->service_type()));
+        new RawMessage(connection_key,
+                       packet->protocol_version(),
+                       packet->data(),
+                       packet->total_data_bytes(),
+                       packet->payload_size(),
+                       packet->service_type()));
   if (!rawMessage) {
     LOG4CXX_TRACE_EXIT(logger_);
     return RESULT_FAIL;
