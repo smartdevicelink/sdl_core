@@ -418,6 +418,34 @@ class Application : public virtual InitialApplicationData,
     virtual connection_handler::DeviceHandle device() const = 0;
     virtual void set_tts_speak_state(bool state_tts_speak) = 0;
     virtual bool tts_speak_state() = 0;
+    /**
+     * @brief sets true if application has sent TTS GlobalProperties
+     * request with empty array help_prompt to HMI with level
+     * NONE BACKGROUND
+     * @param active contains state of sending TTS GlobalProperties
+     */
+    virtual void set_tts_properties_in_none(
+        bool active) = 0;
+    /**
+     * @brief returns true if application has sent TTS GlobalProperties
+     * otherwise return false
+     * @return flag tts_properties_in_none
+     */
+    virtual bool tts_properties_in_none() = 0;
+    /**
+     * @brief sets true if application has sent TTS GlobalProperties
+     * request with default array help_prompt to HMI with level
+     * FULL LIMITED
+     * @param active contains state of sending TTS GlobalProperties
+     */
+    virtual void set_tts_properties_in_full(
+        bool active) = 0;
+    /**
+     * @brief  returns true if application has sent TTS GlobalProperties
+     * otherwise return false
+     * @return flag tts_properties_in_full
+     */
+    virtual bool tts_properties_in_full() = 0;
     virtual void set_version(const Version& version) = 0;
     virtual void set_name(const std::string& name) = 0;
     virtual void set_is_media_application(bool is_media) = 0;

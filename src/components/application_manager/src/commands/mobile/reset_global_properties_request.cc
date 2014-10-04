@@ -71,6 +71,11 @@ void ResetGlobalPropertiesRequest::Run() {
 
   size_t obj_length = (*message_)[strings::msg_params][strings::properties]
                       .length();
+  //if application waits for sending ttsGlobalProperties need to remove this
+  //application from tts_global_properties_app_list_
+  LOG4CXX_INFO(logger_, "RemoveAppFromTTSGlobalPropertiesList");
+  ApplicationManagerImpl::instance()->RemoveAppFromTTSGlobalPropertiesList(
+      app_id);
 
   bool helpt_promt = false;
   bool timeout_prompt = false;
@@ -184,23 +189,9 @@ bool ResetGlobalPropertiesRequest::ResetHelpPromt(
     SendResponse(false, mobile_apis::Result::APPLICATION_NOT_REGISTERED);
     return false;
   }
-
-  const std::vector<std::string>& help_prompt = profile::Profile::instance()
-      ->help_prompt();
-
   smart_objects::SmartObject so_help_prompt = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
-
-  for (uint32_t i = 0; i < help_prompt.size(); ++i) {
-    smart_objects::SmartObject helpPrompt = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    helpPrompt[strings::text] = help_prompt[i];
-    helpPrompt[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
-    so_help_prompt[i] = helpPrompt;
-  }
-
   app->set_help_prompt(so_help_prompt);
-
   return true;
 }
 

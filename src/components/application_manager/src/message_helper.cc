@@ -829,6 +829,51 @@ MessageHelper::SmartObjectList MessageHelper::CreateGlobalPropertiesRequestsToHM
   return requests;
 }
 
+void MessageHelper::SendTTSGlobalProperties(
+    ApplicationSharedPtr app, bool default_help_prompt) {
+  if (!app.valid()) {
+    return;
+  }
+  utils::SharedPtr<smart_objects::SmartObject> tts_global_properties(
+      new smart_objects::SmartObject);
+  if (tts_global_properties) {
+    smart_objects::SmartObject& so_to_send = *tts_global_properties;
+    so_to_send[strings::params][strings::function_id] =
+        static_cast<int>(hmi_apis::FunctionID::TTS_SetGlobalProperties);
+    so_to_send[strings::params][strings::message_type] =
+        static_cast<int>(hmi_apis::messageType::request);
+    so_to_send[strings::params][strings::protocol_version] =
+        commands::CommandImpl::protocol_version_;
+    so_to_send[strings::params][strings::protocol_type] =
+        commands::CommandImpl::hmi_protocol_type_;
+    so_to_send[strings::params][strings::correlation_id] =
+        ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+    msg_params[strings::help_prompt] = smart_objects::SmartObject(
+        smart_objects::SmartType_Array);
+    if (default_help_prompt) {
+      const CommandsMap& commands = app->commands_map();
+      CommandsMap::const_iterator it = commands.begin();
+      uint32_t index = 0;
+      for (; commands.end() != it; ++it) {
+        smart_objects::SmartObject item(smart_objects::SmartType_Map);
+        if ((*it->second).keyExists(strings::menu_params)){
+          item[strings::text] = (*it->second)[strings::menu_params][strings::menu_name].asString();
+          item[strings::type] = mobile_apis::SpeechCapabilities::SC_TEXT;
+        } else {
+          continue;
+        }
+        msg_params[strings::help_prompt][index++] = item;
+      }
+    }
+    app->set_help_prompt(msg_params[strings::help_prompt]);
+    msg_params[strings::app_id] = app->app_id();
+    so_to_send[strings::msg_params] = msg_params;
+    ApplicationManagerImpl::instance()->ManageHMICommand(tts_global_properties);
+  }
+}
+
 smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(
   ApplicationConstSharedPtr app) {
   smart_objects::SmartObject* result = new smart_objects::SmartObject(

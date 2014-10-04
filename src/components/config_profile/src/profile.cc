@@ -149,6 +149,7 @@ const char* kIAP2SystemConfigKey = "IAP2SystemConfig";
 const char* kIAP2HubConnectAttemptskey = "IAP2HubConnectAttempts";
 const char* kIAPHubConnectionWaitTimeoutKey = "ConnectionWaitTimeout";
 const char* kDefaultHubProtocolIndexKey = "DefaultHubProtocolIndex";
+const char* kTTSGlobalPropertiesTimeoutKey = "TTSGlobalPropertiesTimeout";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -206,6 +207,7 @@ const std::pair<uint32_t, uint32_t> kGetVehicleDataFrequency = {5 , 1};
 const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
 const int kDefaultIAPHubConnectionWaitTimeout = 10;
+const uint16_t kDefaultTTSGlobalPropertiesTimeout = 20;
 
 }  // namespace
 
@@ -277,7 +279,8 @@ Profile::Profile()
     iap_system_config_(kDefaultIAPSystemConfig),
     iap2_system_config_(kDefaultIAP2SystemConfig),
     iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts),
-    iap_hub_connection_wait_timeout_(kDefaultIAPHubConnectionWaitTimeout) {
+    iap_hub_connection_wait_timeout_(kDefaultIAPHubConnectionWaitTimeout),
+    tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout) {
 }
 
 Profile::~Profile() {
@@ -584,6 +587,10 @@ int Profile::iap2_hub_connect_attempts() const {
 
 int Profile::iap_hub_connection_wait_timeout() const {
   return iap_hub_connection_wait_timeout_;
+}
+
+uint16_t Profile::tts_global_properties_timeout() const {
+  return tts_global_properties_timeout_;
 }
 
 void Profile::UpdateValues() {
@@ -972,7 +979,16 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
       vr_help_command_value.clear();
       LOG_UPDATED_VALUE(vr_help_command_value, kHelpCommandKey,
                         kVrCommandsSection);
-  }
+    }
+
+    //TTS GlobalProperties timeout
+    ReadUIntValue(&tts_global_properties_timeout_,
+                  kDefaultTTSGlobalPropertiesTimeout,
+                  kGlobalPropertiesSection,
+                  kTTSGlobalPropertiesTimeoutKey);
+
+    LOG_UPDATED_VALUE(tts_global_properties_timeout_, kTTSGlobalPropertiesTimeoutKey,
+                      kGlobalPropertiesSection);
 
     // Application time scale maximum requests
     ReadUIntValue(&app_time_scale_max_requests_,
