@@ -74,6 +74,7 @@ void OnHMIStatusNotification::Run() {
       (mobile_apis::HMILevel::HMI_LIMITED == hmi_level)) {
     if (!(app->tts_properties_in_full())) {
       app->set_tts_properties_in_full(true);
+      LOG4CXX_INFO(logger_, "OnHMIStatusNotification AddAppToTTSGlobalPropertiesList");
       ApplicationManagerImpl::instance()->AddAppToTTSGlobalPropertiesList(
           app->app_id());
     }

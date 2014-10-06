@@ -2294,7 +2294,6 @@ void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
 }
 
 void ApplicationManagerImpl::OnTimerSendTTSGlobalProperties() {
-  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::OnTimerSendTTSGlobalProperties");
   std::vector<uint32_t> app_list;
   {
     sync_primitives::AutoLock lock(tts_global_properties_app_list_lock_);
