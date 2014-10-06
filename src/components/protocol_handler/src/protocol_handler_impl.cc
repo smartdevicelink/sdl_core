@@ -759,8 +759,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
                        packet->protocol_version(),
                        packet->data(),
                        packet->total_data_bytes(),
-                       packet->payload_size(),
-                       packet->service_type()));
+                       packet->service_type(),
+                       packet->payload_size()));
   if (!rawMessage) {
     LOG4CXX_TRACE_EXIT(logger_);
     return RESULT_FAIL;
@@ -851,8 +851,8 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
                            completePacket->protocol_version(),
                            completePacket->data(),
                            completePacket->total_data_bytes(),
-                           completePacket->payload_size(),
-                           completePacket->service_type()));
+                           completePacket->service_type(),
+                           completePacket->payload_size()));
 
       LOG4CXX_INFO(logger_,
                     "total_data_bytes " << completePacket->total_data_bytes() <<
