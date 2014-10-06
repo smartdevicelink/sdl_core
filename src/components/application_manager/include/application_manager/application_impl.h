@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -57,7 +57,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   ApplicationImpl(uint32_t application_id,
                   const std::string& mobile_app_id,
                   const std::string& app_name,
-                  usage_statistics::StatisticsManager* statistics_manager);
+                  usage_statistics::StatisticsManager* const & statistics_manager);
 
   ~ApplicationImpl();
 

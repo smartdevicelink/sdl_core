@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -78,7 +78,6 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     media_manager_(NULL),
     hmi_handler_(NULL),
     connection_handler_(NULL),
-    policy_manager_(policy::PolicyHandler::instance()->LoadPolicyLibrary()),
     protocol_handler_(NULL),
     request_ctrl_(),
     hmi_so_factory_(NULL),
@@ -105,8 +104,6 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_INFO(logger_, "Destructing ApplicationManager.");
 
   SendOnSDLClose();
-
-  policy_manager_ = NULL;
   media_manager_ = NULL;
   hmi_handler_ = NULL;
   connection_handler_ = NULL;
@@ -135,10 +132,8 @@ bool ApplicationManagerImpl::Stop() {
 
 #ifndef CUSTOMER_PASA
   // for PASA customer policy backup should happen OnExitAllApp(SUSPEND)
-  if (policy_manager_) {
-    LOG4CXX_INFO(logger_, "Unloading policy library.");
-    policy::PolicyHandler::instance()->UnloadPolicyLibrary();
-  }
+  LOG4CXX_INFO(logger_, "Unloading policy library.");
+  policy::PolicyHandler::instance()->UnloadPolicyLibrary();
 #endif
   return true;
 }
@@ -300,11 +295,13 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   const std::string& app_name =
     message[strings::msg_params][strings::app_name].asString();
 
+  usage_statistics::StatisticsManager* const& sm =
+      policy::PolicyHandler::instance()->GetStatisticManager();
   ApplicationSharedPtr application(
-    new ApplicationImpl(app_id, mobile_app_id, app_name, policy_manager_));
+    new ApplicationImpl(app_id, mobile_app_id, app_name,sm));
   if (!application) {
     usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
-      policy_manager_, mobile_app_id,
+      sm, mobile_app_id,
       usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
     ++count_of_rejections_sync_out_of_memory;
 
@@ -316,7 +313,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     ManageMobileCommand(response);
     return ApplicationSharedPtr();
   }
-
   application->set_device(device_id);
   application->set_grammar_id(GenerateGrammarID());
   mobile_api::Language::eType launguage_desired =
@@ -1372,7 +1368,7 @@ bool ApplicationManagerImpl::ManageHMICommand(
 bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   if (policy::PolicyHandler::instance()->PolicyEnabled()) {
-    if(!policy_manager_) {
+    if(!policy::PolicyHandler::instance()->LoadPolicyLibrary()) {
       LOG4CXX_ERROR(logger_, "Policy library is not loaded. Check LD_LIBRARY_PATH");
       return false;
     }
@@ -1837,10 +1833,8 @@ void ApplicationManagerImpl::HeadUnitReset(
 void ApplicationManagerImpl::HeadUnitSuspend() {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::HeadUnitSuspend");
 #ifdef CUSTOMER_PASA
-  if (policy_manager_) {
-    LOG4CXX_INFO(logger_, "Unloading policy library.");
-    policy::PolicyHandler::instance()->UnloadPolicyLibrary();
-  }
+  LOG4CXX_INFO(logger_, "Unloading policy library.");
+  policy::PolicyHandler::instance()->UnloadPolicyLibrary();
 
   resume_controller().SaveAllApplications();
   resumption::LastState::instance()->SaveToFileSystem();
@@ -2085,10 +2079,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   if (!policy::PolicyHandler::instance()->PolicyEnabled()) {
     return mobile_apis::Result::SUCCESS;
   }
-  if (!policy_manager_ ) {
-    LOG4CXX_WARN(logger_, "Policy library is not loaded.");
-    return mobile_apis::Result::DISALLOWED;
-  }
+
   const std::string stringified_functionID =
       MessageHelper::StringifiedFunctionID(function_id);
   const std::string stringified_hmi_level =
@@ -2099,7 +2090,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     " in " << stringified_hmi_level <<
     " rpc " << stringified_functionID);
     policy::CheckPermissionResult result;
-    policy_manager_->CheckPermissions(
+    policy::PolicyHandler::instance()->CheckPermissions(
           policy_app_id,
           stringified_hmi_level,
           stringified_functionID,

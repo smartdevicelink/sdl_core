@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -59,24 +59,20 @@ PTExchangeHandlerExt::~PTExchangeHandlerExt() {
 
 void PTExchangeHandlerExt::Start() {
   LOG4CXX_TRACE(logger_, "Start exchange PT");
-  PolicyManager* policy_manager = policy_handler_->policy_manager();
-  if (!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    return;
-  }
+
   const string policy_snapshot_file_name =
       Profile::instance()->policies_snapshot_file_name();
   const std::string system_files_path =
       Profile::instance()->system_files_path();
   const std::string policy_snapshot_full_path = system_files_path + '/' +
       policy_snapshot_file_name;
-  BinaryMessageSptr pt_snapshot = policy_manager->RequestPTUpdate();
+  BinaryMessageSptr pt_snapshot = policy_handler_->RequestPTUpdate();
   if (pt_snapshot.valid()) {
     if (file_system::CreateDirectoryRecursively(system_files_path) &&
         file_system::WriteBinaryFile(policy_snapshot_full_path, *pt_snapshot)) {
       MessageHelper::SendPolicyUpdate(policy_snapshot_full_path,
-                                      policy_manager->TimeoutExchange(),
-                                      policy_manager->RetrySequenceDelaysSeconds());
+                                      policy_handler_->TimeoutExchange(),
+                                      policy_handler_->RetrySequenceDelaysSeconds());
     } else {
       LOG4CXX_ERROR(logger_, "Failed to write snapshot file to " << policy_snapshot_file_name);
     }

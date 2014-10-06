@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -41,6 +41,7 @@ namespace policy {
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 RetrySequence::RetrySequence(PolicyHandler* const policy_handler)
+    // TODO (Risk copy of PolicyHandler Pointer)
     : policy_handler_(policy_handler) {
 }
 
@@ -52,24 +53,19 @@ void RetrySequence::StartNextRetry() {
   LOG4CXX_TRACE(logger_, "Start next retry of exchanging PT");
   DCHECK(policy_handler_);
   // TODO(Ezamakhov): inverstigate StartNextRetry on unload policy lib
-  PolicyManager* policy_manager = policy_handler_->policy_manager();
-  if (!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    return;
-  }
 
-  BinaryMessageSptr pt_snapshot = policy_manager
+  BinaryMessageSptr pt_snapshot = policy_handler_
       ->RequestPTUpdate();
   if (pt_snapshot) {
     policy_handler_->SendMessageToSDK(*pt_snapshot);
 
-    const int timeout = policy_manager->TimeoutExchange();
-    const int seconds = policy_manager->NextRetryTimeout();
+    const int timeout = policy_handler_->TimeoutExchange();
+    const int seconds = policy_handler_->NextRetryTimeout();
     LOG4CXX_DEBUG(logger_,
                   "Timeout response: " << timeout << " Next try: " << seconds);
     if (timeout > 0) {
       sleep(timeout);
-      policy_manager->OnExceededTimeout();
+      policy_handler_->OnExceededTimeout();
     }
     if (seconds > 0) {
       sleep(seconds);

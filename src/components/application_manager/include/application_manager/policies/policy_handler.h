@@ -42,6 +42,7 @@
 #include "application_manager/policies/pt_exchange_handler.h"
 #include "utils/logger.h"
 #include "utils/singleton.h"
+#include "usage_statistics/statistics_manager.h"
 
 namespace Json {
 class Value;
@@ -56,10 +57,10 @@ class PolicyHandler :
     public PolicyListener {
  public:
   virtual ~PolicyHandler();
-  PolicyManager* LoadPolicyLibrary();
-  PolicyManager* policy_manager() const {
+  bool LoadPolicyLibrary();
+  /*PolicyManager* policy_manager() const {
     return policy_manager_;
-  }
+  }*/
   bool PolicyEnabled();
   bool InitPolicyTable();
   bool ResetPolicyTable();
@@ -72,6 +73,29 @@ class PolicyHandler :
   void OnPermissionsUpdated(const std::string& policy_app_id,
                             const Permissions& permissions,
                             const HMILevel& default_hmi);
+
+  bool GetPriority(const std::string& policy_app_id, std::string* priority);
+  void CheckPermissions(const PTString& app_id,
+                   const PTString& hmi_level,
+                   const PTString& rpc,
+                   CheckPermissionResult& result);
+
+  uint32_t GetNotificationsNumber(const std::string& priority);
+  DeviceConsent GetUserConsentForDevice(const std::string& device_id);
+  bool GetDefaultHmi(const std::string& policy_app_id,
+                             std::string* default_hmi);
+  bool GetInitialAppData(const std::string& application_id,
+                                 StringArray* nicknames = NULL,
+                                 StringArray* app_hmi_types = NULL);
+  EndpointUrls GetUpdateUrls(int service_type);
+  void ResetRetrySequence();
+  int NextRetryTimeout();
+  int TimeoutExchange();
+  void OnExceededTimeout();
+  BinaryMessageSptr RequestPTUpdate();
+  const std::vector<int> RetrySequenceDelaysSeconds();
+
+  usage_statistics::StatisticsManager* const & GetStatisticManager();
 
   /**
    * Checks system action of application for permission of keep context

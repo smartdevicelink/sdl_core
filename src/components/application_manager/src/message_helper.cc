@@ -251,15 +251,10 @@ std::string MessageHelper::CommonLanguageToString(
 }
 
 uint32_t MessageHelper::GetAppCommandLimit(const std::string& policy_app_id) {
-  policy::PolicyManager* policy_manager =
-      policy::PolicyHandler::instance()->policy_manager();
-  if(!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    return 0;
-  }
+
   std::string priority;
-  policy_manager->GetPriority(policy_app_id, &priority);
-  return policy_manager-> GetNotificationsNumber(priority);
+  policy::PolicyHandler::instance()->GetPriority(policy_app_id, &priority);
+  return policy::PolicyHandler::instance()->GetNotificationsNumber(priority);
 }
 
 void MessageHelper::SendHMIStatusNotification(
@@ -353,17 +348,13 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
         .tts_name());
   }
   std::string priority;
-  // TODO(KKolodiy): need remove method policy_manager
-  policy::PolicyManager* policy_manager =
-    policy::PolicyHandler::instance()->policy_manager();
-  if (!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-  } else {
-    policy_manager->GetPriority(application_impl.mobile_app_id()->asString(), &priority);
-    if (!priority.empty()) {
-      message[strings::msg_params][strings::priority] = GetPriorityCode(priority);
-    }
+
+  policy::PolicyHandler::instance()->GetPriority(
+        application_impl.mobile_app_id()->asString(), &priority);
+  if (!priority.empty()) {
+    message[strings::msg_params][strings::priority] = GetPriorityCode(priority);
   }
+
   DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
 }
 
@@ -574,11 +565,7 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
   (*device_list_so)[strings::device_list] = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
   smart_objects::SmartObject& list_so = (*device_list_so)[strings::device_list];
-  policy::PolicyManager* policy_manager =
-      policy::PolicyHandler::instance()->policy_manager();
-  if(!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-  }
+
   int32_t index = 0;
   for (connection_handler::DeviceMap::const_iterator it = devices.begin();
        devices.end() != it; ++it) {
@@ -587,16 +574,12 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
     list_so[index][strings::name] = d.user_friendly_name();
     list_so[index][strings::id] = it->second.device_handle();
 
-    if(policy_manager) {
-      const policy::DeviceConsent device_consent =
-          policy_manager->GetUserConsentForDevice(it->second.mac_address());
-      list_so[index][strings::isSDLAllowed] =
-          policy::DeviceConsent::kDeviceAllowed == device_consent;
-    } else {
-      list_so[index][strings::isSDLAllowed] = true;
-    }
-    ++index;
+    const policy::DeviceConsent device_consent =
+        policy::PolicyHandler::instance()->GetUserConsentForDevice(it->second.mac_address());
+    list_so[index][strings::isSDLAllowed] =
+        policy::DeviceConsent::kDeviceAllowed == device_consent;
   }
+  ++index;
   return device_list_so;
 }
 
@@ -1277,13 +1260,9 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
 
   std::string priority;
   // TODO(KKolodiy): need remove method policy_manager
-  policy::PolicyManager* policy_manager =
-    policy::PolicyHandler::instance()->policy_manager();
-  if (!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-  } else {
-    policy_manager->GetPriority(app->mobile_app_id()->asString(), &priority);
-  }
+
+  policy::PolicyHandler::instance()->GetPriority(
+        app->mobile_app_id()->asString(), &priority);
   // According SDLAQ-CRS-2794
   // SDL have to send ActivateApp without "proirity" parameter to HMI.
   // in case of unconsented device
@@ -1292,7 +1271,8 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
   connection_handler::ConnectionHandlerImpl::instance()->
       GetDataOnDeviceID(device_handle, NULL, NULL, &mac_adress, NULL);
 
-  policy::DeviceConsent consent = policy_manager->GetUserConsentForDevice(mac_adress);
+  policy::DeviceConsent consent =
+      policy::PolicyHandler::instance()->GetUserConsentForDevice(mac_adress);
   if (!priority.empty() && (policy::DeviceConsent::kDeviceAllowed == consent)) {
     (*message)[strings::msg_params]["priority"] = GetPriorityCode(priority);
   }
