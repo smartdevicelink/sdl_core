@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -38,7 +38,7 @@
 
 namespace usage_statistics {
 
-GlobalCounter::GlobalCounter(StatisticsManager* statistics_manager,
+GlobalCounter::GlobalCounter(StatisticsManager* const & statistics_manager,
                              GlobalCounterId counter_type)
     : counter_type_(counter_type),
       statistics_manager_(statistics_manager) {
@@ -50,7 +50,7 @@ void GlobalCounter::operator++() const {
   }
 }
 
-AppCounter::AppCounter(StatisticsManager* statistics_manager,
+AppCounter::AppCounter(StatisticsManager* const & statistics_manager,
                        const std::string& app_id,
                        AppCounterId counter_type)
     : app_id_(app_id),
@@ -64,7 +64,7 @@ void AppCounter::operator++() const {
   }
 }
 
-AppInfo::AppInfo(StatisticsManager* statistics_manager,
+AppInfo::AppInfo(StatisticsManager* const & statistics_manager,
                  const std::string& app_id,
                  AppInfoId info_type)
     : app_id_(app_id),
@@ -78,7 +78,7 @@ void AppInfo::Update(const std::string& new_info) const {
   }
 }
 
-AppStopwatch::AppStopwatch(StatisticsManager* statistics_manager,
+AppStopwatch::AppStopwatch(StatisticsManager* const & statistics_manager,
                            const std::string& app_id)
     : app_id_(app_id),
       stopwatch_type_(SECONDS_HMI_NONE),

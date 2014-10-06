@@ -182,7 +182,7 @@ void RegisterAppInterfaceRequest::Run() {
     LOG4CXX_ERROR_EXT(logger_, "Coincidence check failed.");
     if (mobile_apis::Result::DUPLICATE_NAME == coincidence_result) {
       usage_statistics::AppCounter count_of_rejections_duplicate_name(
-        policy::PolicyHandler::instance()->policy_manager(), mobile_app_id,
+        policy::PolicyHandler::instance()->GetStatisticManager(), mobile_app_id,
         usage_statistics::REJECTIONS_DUPLICATE_NAME);
       ++count_of_rejections_duplicate_name;
     }
@@ -561,17 +561,9 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
   policy::StringArray app_nicknames;
   policy::StringArray app_hmi_types;
 
-  // TODO(KKolodiy): need remove method policy_manager
-  policy::PolicyManager* policy_manager =
-      policy::PolicyHandler::instance()->policy_manager();
-  if (!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    return mobile_apis::Result::DISALLOWED;
-  }
-
   std::string mobile_app_id = message[strings::msg_params][strings::app_id].asString();
-  const bool init_result = policy_manager->GetInitialAppData(mobile_app_id, &app_nicknames,
-                                                             &app_hmi_types);
+  const bool init_result = policy::PolicyHandler::instance()->GetInitialAppData(
+        mobile_app_id, &app_nicknames, &app_hmi_types);
 
   if (!init_result) {
     LOG4CXX_ERROR(logger_, "Error during initial application data check.");
@@ -587,7 +579,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
                    "Application name was not found in nicknames list.");
       //App should be unregistered, if its name is not present in nicknames list
       usage_statistics::AppCounter count_of_rejections_nickname_mismatch(
-        policy_manager, mobile_app_id,
+        policy::PolicyHandler::instance()->GetStatisticManager(), mobile_app_id,
         usage_statistics::REJECTIONS_NICKNAME_MISMATCH);
       ++count_of_rejections_nickname_mismatch;
       return mobile_apis::Result::DISALLOWED;

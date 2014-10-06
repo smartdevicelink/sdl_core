@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -747,7 +747,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     hmi_message_handler::HMIMessageHandler* hmi_handler_;
     connection_handler::ConnectionHandler*  connection_handler_;
-    policy::PolicyManager*                  policy_manager_;
     protocol_handler::ProtocolHandler*      protocol_handler_;
     request_controller::RequestController   request_ctrl_;
 

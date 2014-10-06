@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -40,41 +40,41 @@ namespace usage_statistics {
 
 class GlobalCounter {
  public:
-  GlobalCounter(StatisticsManager* statistics_manager,
+  GlobalCounter(StatisticsManager* const & statistics_manager,
                 GlobalCounterId counter_type);
   void operator++() const;
  private:
   GlobalCounterId counter_type_;
-  StatisticsManager* statistics_manager_;
+  StatisticsManager* const & statistics_manager_;
 };
 
 class AppCounter {
  public:
-  AppCounter(StatisticsManager* statistics_manager,
+  AppCounter(StatisticsManager* const & statistics_manager,
              const std::string& app_id,
              AppCounterId counter_type);
   void operator++() const;
  private:
   std::string app_id_;
   AppCounterId counter_type_;
-  StatisticsManager* statistics_manager_;
+  StatisticsManager* const & statistics_manager_;
 };
 
 class AppInfo {
  public:
-  AppInfo(StatisticsManager* statistics_manager,
+  AppInfo(StatisticsManager* const & statistics_manager,
           const std::string& app_id,
           AppInfoId info_type);
   void Update(const std::string& new_info) const;
  private:
   std::string app_id_;
   AppInfoId info_type_;
-  StatisticsManager* statistics_manager_;
+  StatisticsManager* const & statistics_manager_;
 };
 
 class AppStopwatch {
  public:
-  AppStopwatch(StatisticsManager* statistics_manager,
+  AppStopwatch(StatisticsManager* const & statistics_manager,
                const std::string& app_id);
   ~AppStopwatch();
   void Start(AppStopwatchId stopwatch_type);
@@ -84,7 +84,7 @@ class AppStopwatch {
   // Fields
   std::string app_id_;
   AppStopwatchId stopwatch_type_;
-  StatisticsManager* statistics_manager_;
+  StatisticsManager* const & statistics_manager_;
   time_t start_time_;
 };
 
