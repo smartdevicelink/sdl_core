@@ -117,12 +117,13 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   mobile_so_factory_ = NULL;
   protocol_handler_ = NULL;
   media_manager_ = NULL;
+  LOG4CXX_INFO(logger_, "Destroying Policy Handler");
+  policy::PolicyHandler::destroy();
 }
 
 bool ApplicationManagerImpl::Stop() {
   LOG4CXX_INFO(logger_, "Stop ApplicationManager.");
   application_list_update_timer_->stop();
-
   try {
     UnregisterAllApplications();
   } catch (...) {

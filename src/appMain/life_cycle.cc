@@ -373,7 +373,9 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // CUSTOMER_PASA
 
 void LifeCycle::StopComponents() {
+  LOG4CXX_TRACE(logger_, "enter");
   if (components_started == false) {
+    LOG4CXX_TRACE(logger_, "exit");
     LOG4CXX_ERROR(logger_, "Components wasn't started");
     return;
   }
@@ -490,6 +492,7 @@ void LifeCycle::StopComponents() {
   }
 #endif  // TIME_TESTER
   components_started =false;
+  LOG4CXX_TRACE(logger_, "exit");
 }
 
 }  //  namespace main_namespace

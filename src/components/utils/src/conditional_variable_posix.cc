@@ -126,7 +126,7 @@ ConditionalVariable::WaitStatus ConditionalVariable::WaitFor(
       break;
     }
     default: {
-      LOG4CXX_ERROR(logger_, "Failed to timewait for conditional variable");
+      LOG4CXX_ERROR(logger_, "Failed to timewait for conditional variable timedwait_status: " << timedwait_status);
     }
   }
 

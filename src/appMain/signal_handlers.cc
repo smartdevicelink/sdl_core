@@ -32,14 +32,17 @@
 
 #include "signal_handlers.h"
 #include "life_cycle.h"
+#include "utils/logger.h"
 
 namespace main_namespace {
+CREATE_LOGGERPTR_GLOBAL(logger_, "SmartDeviceLinkMainApp")
 
 void dummy_signal_handler(int32_t signal) {
 }
 
 void legacy_signal_handler(int32_t signal) {
+  LOG4CXX_TRACE(logger_, "legacy_signal_handler get signal " << signal);
   LifeCycle::instance()->StopComponents();
 }
 
-}  // namespace main_namespace
+} // namespace main_namespace

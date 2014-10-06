@@ -145,9 +145,9 @@ RequestController::TResult RequestController::addMobileRequest(
     AutoLock auto_lock(mobile_request_list_lock_);
 
     mobile_request_list_.push_back(request);
-    LOG4CXX_INFO(logger_, "RequestController size is "
+    LOG4CXX_INFO(logger_, "mobile_request_list_ size is "
                  << mobile_request_list_.size()
-                 << " Pending request size is "
+                 << " pending_request_set_ size is "
                  << pending_request_set_.size()
                  );
   }
@@ -171,8 +171,8 @@ RequestController::TResult RequestController::addHMIRequest(
   if (0 != raw_ptr->default_timeout()) {
     pending_request_set_lock_.Acquire();
     pending_request_set_.insert(request_info_ptr);
-    LOG4CXX_INFO(logger_, "Pending request size is "
-                 << pending_request_set_.size() );
+    LOG4CXX_INFO(logger_, "pending_request_set_ size is "
+                 << pending_request_set_.size());
     UpdateTimer();
     pending_request_set_lock_.Release();
   } else {
