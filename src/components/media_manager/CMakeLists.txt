@@ -46,6 +46,8 @@ set(LIBRARIES
 endif()
 
 include_directories (
+  /home/vagrant/Work/GIT/applink/src/3rd_party-static/gmock-1.7.0/include
+  /home/vagrant/Work/GIT/applink/src/3rd_party-static/gmock-1.7.0/gtest/include
   ./include
   ./include/audio/
   ./include/video/
@@ -75,3 +77,22 @@ set (SOURCES
 
 add_library("MediaManager" ${SOURCES} ${default_sources})
 target_link_libraries("MediaManager" ${LIBRARIES})
+
+#======================= Unit-Test section ======================= 
+if(BUILD_TESTS)
+  include_directories (
+    ../../3rd_party-static/gmock-1.7.0/include
+    ../../3rd_party-static/gmock-1.7.0/gtest/include)
+  
+  set(testSources
+    ./src/main.cc
+    ./src/media_adapter_impl_test.cc)
+
+  set(testLibraries
+    gmock
+    gtest)
+  
+  add_executable(media_manager_test ${testSources})
+  target_link_libraries(media_manager_test ${testLibraries})
+endif()
+#=================================================================

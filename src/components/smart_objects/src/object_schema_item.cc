@@ -95,14 +95,14 @@ void CObjectSchemaItem::applySchema(SmartObject& Object) {
   for (SmartMap::const_iterator it = Object.map_begin(); it != Object.map_end(); ) {
     const std::string& key = it->first;
     if (mMembers.end() == mMembers.find(key)
-        // FIXME(EZamakhov): Remove illigal usage of filed in AM
+        // FIXME(EZamakhov): Remove illegal usage of filed in AM
         && key.compare(connection_key) != 0
         && key.compare(binary_data) != 0
         && key.compare(app_id) != 0
         ) {
       ++it;
-      // remove fake params
-      Object.erase(key);
+      // FIXME(DK): remove fake params. There are error responses with params
+      // Object.erase(key);
     } else {
       it++;
     }

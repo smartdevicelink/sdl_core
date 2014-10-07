@@ -296,7 +296,7 @@ void PerformInteractionRequest::onTimeOut() {
 
 void PerformInteractionRequest::ProcessVRResponse(
     const smart_objects::SmartObject& message) {
-  LOG4CXX_INFO(logger_, "PerformInteractionRequest::ProcessVRNotification");
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::ProcessVRResponse");
   const uint32_t app_id = connection_key();
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
   if (!app.get()) {
@@ -307,12 +307,13 @@ void PerformInteractionRequest::ProcessVRResponse(
   vr_response_recived = true;
   vr_perform_interaction_code_ = static_cast<mobile_apis::Result::eType>(
       message[strings::params][hmi_response::code].asInt());
-  if (mobile_apis::Result::ABORTED == vr_perform_interaction_code_) {
+  if (mobile_apis::Result::ABORTED == vr_perform_interaction_code_ ||
+      mobile_apis::Result::TIMED_OUT == vr_perform_interaction_code_) {
     LOG4CXX_INFO(logger_, "VR response aborted");
     if (mobile_apis::InteractionMode::VR_ONLY == interaction_mode_) {
-      LOG4CXX_INFO(logger_, "Abort send Close Popup");
+      LOG4CXX_INFO(logger_, "Aborted or Timeout Send Close Popup");
       TerminatePerformInteraction();
-      SendResponse(false, mobile_apis::Result::ABORTED);
+      SendResponse(false, vr_perform_interaction_code_);
       return;
     } else {
       LOG4CXX_INFO(logger_, "Update timeout for UI");
@@ -323,81 +324,71 @@ void PerformInteractionRequest::ProcessVRResponse(
     }
   }
 
+  smart_objects::SmartObject msg_params =
+        smart_objects::SmartObject(smart_objects::SmartType_Map);
+  smart_objects::SmartObject* ptr_msg_params = NULL;
+  if (message[strings::msg_params].keyExists(strings::choice_id)) {
+    if (CheckChoiceIDFromResponse(
+        app, message[strings::msg_params][strings::choice_id].asInt())) {
+      msg_params[strings::choice_id] =
+          message[strings::msg_params][strings::choice_id].asInt();
+      ptr_msg_params = &msg_params;
+    } else {
+      LOG4CXX_ERROR(logger_, "Wrong choiceID was received from HMI");
+      TerminatePerformInteraction();
+      SendResponse(false, mobile_apis::Result::GENERIC_ERROR,
+                   "Wrong choiceID was received from HMI");
+      return;
+    }
+  }
+  mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
+
   if (mobile_apis::Result::UNSUPPORTED_RESOURCE ==
       vr_perform_interaction_code_) {
     LOG4CXX_INFO(logger_, "VR response WARNINGS");
-    TerminatePerformInteraction();
-    SendResponse(true, mobile_apis::Result::WARNINGS);
-    return;
-  }
-
-  int32_t choise_id = message[strings::msg_params][strings::choice_id].asInt();
-  const PerformChoiceSetMap& choice_set_map = app
-      ->performinteraction_choice_set_map();
-  bool choice_id_chosen = false;
-  LOG4CXX_INFO(logger_, "If command was choice id");
-  for (PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
-      choice_set_map.end() != it; ++it) {
-    const smart_objects::SmartObject& choice_set = (*it->second).getElement(
-        strings::choice_set);
-    for (size_t j = 0; j < choice_set.length(); ++j) {
-      if (choise_id ==
-          choice_set.getElement(j).getElement(strings::choice_id).asInt()) {
-        choice_id_chosen = true;
-        break;
-      }
-    }
-  }
-  if (choice_id_chosen) {
-    LOG4CXX_INFO(logger_, "Command was choice id!");
-    TerminatePerformInteraction();
-    (*message_)[strings::params][strings::function_id] =
-        static_cast<int32_t>(mobile_apis::FunctionID::PerformInteractionID);
-    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-    msg_params[strings::choice_id] = choise_id;
-    msg_params[strings::trigger_source] =
-        static_cast<int32_t>(mobile_apis::TriggerSource::TS_VR);
-    SendResponse(true, mobile_apis::Result::SUCCESS, NULL, &(msg_params));
-
+    result_code = mobile_apis::Result::WARNINGS;
   } else {
-    LOG4CXX_INFO(logger_, "Sending OnCommand notification");
-    smart_objects::SmartObject* notification_so =
-        new smart_objects::SmartObject(smart_objects::SmartType_Map);
-    if (!notification_so) {
-      LOG4CXX_ERROR(
-          logger_,
-          "Failed to allocate memory for perform interaction response.");
-      return;
-    }
-    smart_objects::SmartObject& notification = *notification_so;
-    notification = message;
-    notification[strings::params][strings::function_id] =
-        static_cast<int32_t>(mobile_apis::FunctionID::eType::OnCommandID);
-    notification[strings::params][strings::message_type] =
-        static_cast<int32_t>(kNotification);
-    notification[strings::msg_params][strings::trigger_source] =
-        static_cast<int32_t>(mobile_apis::TriggerSource::TS_VR);
-    ApplicationManagerImpl::instance()->ManageMobileCommand(notification_so);
+    LOG4CXX_INFO(logger_, "VR response SUCCESS");
+    result_code = mobile_apis::Result::SUCCESS;
+    msg_params[strings::trigger_source] =
+            static_cast<int32_t>(mobile_apis::TriggerSource::TS_VR);
+    ptr_msg_params = &msg_params;
   }
+  TerminatePerformInteraction();
+  SendResponse(true, result_code, NULL, ptr_msg_params);
 }
 
 void PerformInteractionRequest::ProcessPerformInteractionResponse(
     const smart_objects::SmartObject& message) {
   LOG4CXX_INFO(logger_,
                "PerformInteractionRequest::ProcessPerformInteractionResponse");
+  const uint32_t app_id = connection_key();
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  if (!app.get()) {
+    LOG4CXX_ERROR(logger_, "NULL pointer");
+    return;
+  }
   ui_response_recived = true;
 
   smart_objects::SmartObject msg_params =
       smart_objects::SmartObject(smart_objects::SmartType_Map);
   msg_params = message[strings::msg_params];
-
   bool result = false;
+
   mobile_apis::Result::eType result_code =
-            GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
-                message[strings::params][hmi_response::code].asUInt()));
+      GetMobileResultCode(static_cast<hmi_apis::Common_Result::eType>(
+          message[strings::params][hmi_response::code].asUInt()));
+
   if ((mobile_apis::Result::SUCCESS == result_code) ||
       (mobile_apis::Result::UNSUPPORTED_RESOURCE == result_code)) {
+    if (message[strings::msg_params].keyExists(strings::choice_id) &&
+        !(CheckChoiceIDFromResponse(
+            app, message[strings::msg_params][strings::choice_id].asInt()))) {
+      DisablePerformInteraction();
+      SendResponse(false, mobile_apis::Result::GENERIC_ERROR,
+                   "Wrong choiceID was received from HMI");
+      return;
+    }
     if (message[strings::msg_params].keyExists(strings::manual_text_entry)) {
       msg_params[strings::trigger_source] = mobile_apis::TriggerSource::TS_KEYBOARD;
     } else {
@@ -840,6 +831,26 @@ void PerformInteractionRequest::TerminatePerformInteraction() {
   msg_params[hmi_request::method_name] = "UI.PerformInteraction";
   SendHMIRequest(hmi_apis::FunctionID::UI_ClosePopUp, &msg_params);
   DisablePerformInteraction();
+}
+
+bool PerformInteractionRequest::CheckChoiceIDFromResponse(
+    ApplicationSharedPtr app, int32_t choice_id) {
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::CheckChoiceIDFromResponse");
+  const PerformChoiceSetMap& choice_set_map = app
+        ->performinteraction_choice_set_map();
+
+  for (PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
+      choice_set_map.end() != it; ++it) {
+    const smart_objects::SmartObject& choice_set = (*it->second).getElement(
+        strings::choice_set);
+    for (size_t j = 0; j < choice_set.length(); ++j) {
+      if (choice_id ==
+          choice_set.getElement(j).getElement(strings::choice_id).asInt()) {
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 }  // namespace commands
