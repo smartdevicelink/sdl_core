@@ -29,9 +29,4 @@
 * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
-
-#include "gmock/gmock.h"
-
-TEST(MediaAdapterImplTest, DummyTest) {
-   ASSERT_TRUE(true);
-}
+#include "utils/data_time_tests.h"
