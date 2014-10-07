@@ -278,7 +278,7 @@ int main(int argc, char** argv) {
       new threads::Thread("ApplinkNotify", new ApplinkNotificationThreadDelegate());
   applink_notification_thread->start();
 
-  utils::SubscribeToTerminateSignal(main_namespace::legacy_signal_handler);
+  utils::SubscribeToTerminateSignal(main_namespace::dummy_signal_handler);
   threads::Thread::UnmaskSignals();
   pause();
 
