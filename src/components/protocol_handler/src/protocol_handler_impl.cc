@@ -755,8 +755,12 @@ RESULT_CODE ProtocolHandlerImpl::HandleSingleFrameMessage(
       session_observer_->KeyFromPair(connection_id, packet->session_id());
 
   const RawMessagePtr rawMessage(
-        new RawMessage(connection_key, packet->protocol_version(), packet->data(),
-                       packet->total_data_bytes(), packet->service_type()));
+        new RawMessage(connection_key,
+                       packet->protocol_version(),
+                       packet->data(),
+                       packet->total_data_bytes(),
+                       packet->service_type(),
+                       packet->payload_size()));
   if (!rawMessage) {
     LOG4CXX_TRACE_EXIT(logger_);
     return RESULT_FAIL;
@@ -847,7 +851,14 @@ RESULT_CODE ProtocolHandlerImpl::HandleMultiFrameMessage(
                            completePacket->protocol_version(),
                            completePacket->data(),
                            completePacket->total_data_bytes(),
-                           completePacket->service_type()));
+                           completePacket->service_type(),
+                           completePacket->payload_size()));
+
+      LOG4CXX_INFO(logger_,
+                    "total_data_bytes " << completePacket->total_data_bytes() <<
+                    " packet_size " << completePacket->packet_size() <<
+                    " data size " <<  completePacket->data_size() <<
+                    " payload_size " << completePacket->payload_size());
 
       if (!rawMessage) {
         LOG4CXX_TRACE_EXIT(logger_);

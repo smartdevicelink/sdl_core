@@ -52,10 +52,12 @@ class RawMessage {
    * \param protocolVersion Version of protocol of the message
    * \param data Message string
    * \param dataSize Message size
+   * \param payload_size Received data size
    */
-  RawMessage(uint32_t connection_key, uint32_t protocolVersion,
-             const uint8_t *const data_param, uint32_t dataSize,
-             uint8_t type = ServiceType::kRpc);
+  RawMessage(uint32_t connection_key, uint32_t protocol_version,
+             const uint8_t *const data_param, uint32_t data_size,
+             uint8_t type = ServiceType::kRpc,
+             uint32_t payload_size = 0);
   /**
    * \brief Destructor
    */
@@ -77,6 +79,10 @@ class RawMessage {
    * \brief Getter for message size
    */
   size_t data_size() const;
+  /**
+   * \brief Getter for actual data size
+   */
+  size_t payload_size() const;
   /**
    * \brief Version of SmartDeviceLink protocol
    * used for transferring message.
@@ -102,6 +108,7 @@ class RawMessage {
   size_t data_size_;
   uint32_t protocol_version_;
   ServiceType service_type_;
+  size_t payload_size_;
   bool waiting_;
   DISALLOW_COPY_AND_ASSIGN(RawMessage);
 };

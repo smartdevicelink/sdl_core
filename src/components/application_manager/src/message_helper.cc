@@ -251,15 +251,10 @@ std::string MessageHelper::CommonLanguageToString(
 }
 
 uint32_t MessageHelper::GetAppCommandLimit(const std::string& policy_app_id) {
-  policy::PolicyManager* policy_manager =
-      policy::PolicyHandler::instance()->policy_manager();
-  if(!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-    return 0;
-  }
+
   std::string priority;
-  policy_manager->GetPriority(policy_app_id, &priority);
-  return policy_manager-> GetNotificationsNumber(priority);
+  policy::PolicyHandler::instance()->GetPriority(policy_app_id, &priority);
+  return policy::PolicyHandler::instance()->GetNotificationsNumber(priority);
 }
 
 void MessageHelper::SendHMIStatusNotification(
@@ -353,17 +348,13 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
         .tts_name());
   }
   std::string priority;
-  // TODO(KKolodiy): need remove method policy_manager
-  policy::PolicyManager* policy_manager =
-    policy::PolicyHandler::instance()->policy_manager();
-  if (!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-  } else {
-    policy_manager->GetPriority(application_impl.mobile_app_id()->asString(), &priority);
-    if (!priority.empty()) {
-      message[strings::msg_params][strings::priority] = GetPriorityCode(priority);
-    }
+
+  policy::PolicyHandler::instance()->GetPriority(
+        application_impl.mobile_app_id()->asString(), &priority);
+  if (!priority.empty()) {
+    message[strings::msg_params][strings::priority] = GetPriorityCode(priority);
   }
+
   DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(notification));
 }
 
@@ -574,11 +565,7 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
   (*device_list_so)[strings::device_list] = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
   smart_objects::SmartObject& list_so = (*device_list_so)[strings::device_list];
-  policy::PolicyManager* policy_manager =
-      policy::PolicyHandler::instance()->policy_manager();
-  if(!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-  }
+
   int32_t index = 0;
   for (connection_handler::DeviceMap::const_iterator it = devices.begin();
        devices.end() != it; ++it) {
@@ -587,16 +574,12 @@ smart_objects::SmartObject* MessageHelper::CreateDeviceListSO(
     list_so[index][strings::name] = d.user_friendly_name();
     list_so[index][strings::id] = it->second.device_handle();
 
-    if(policy_manager) {
-      const policy::DeviceConsent device_consent =
-          policy_manager->GetUserConsentForDevice(it->second.mac_address());
-      list_so[index][strings::isSDLAllowed] =
-          policy::DeviceConsent::kDeviceAllowed == device_consent;
-    } else {
-      list_so[index][strings::isSDLAllowed] = true;
-    }
-    ++index;
+    const policy::DeviceConsent device_consent =
+        policy::PolicyHandler::instance()->GetUserConsentForDevice(it->second.mac_address());
+    list_so[index][strings::isSDLAllowed] =
+        policy::DeviceConsent::kDeviceAllowed == device_consent;
   }
+  ++index;
   return device_list_so;
 }
 
@@ -827,6 +810,51 @@ MessageHelper::SmartObjectList MessageHelper::CreateGlobalPropertiesRequestsToHM
     requests.push_back(tts_global_properties);
   }
   return requests;
+}
+
+void MessageHelper::SendTTSGlobalProperties(
+    ApplicationSharedPtr app, bool default_help_prompt) {
+  if (!app.valid()) {
+    return;
+  }
+  utils::SharedPtr<smart_objects::SmartObject> tts_global_properties(
+      new smart_objects::SmartObject);
+  if (tts_global_properties) {
+    smart_objects::SmartObject& so_to_send = *tts_global_properties;
+    so_to_send[strings::params][strings::function_id] =
+        static_cast<int>(hmi_apis::FunctionID::TTS_SetGlobalProperties);
+    so_to_send[strings::params][strings::message_type] =
+        static_cast<int>(hmi_apis::messageType::request);
+    so_to_send[strings::params][strings::protocol_version] =
+        commands::CommandImpl::protocol_version_;
+    so_to_send[strings::params][strings::protocol_type] =
+        commands::CommandImpl::hmi_protocol_type_;
+    so_to_send[strings::params][strings::correlation_id] =
+        ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+    smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+        smart_objects::SmartType_Map);
+    msg_params[strings::help_prompt] = smart_objects::SmartObject(
+        smart_objects::SmartType_Array);
+    if (default_help_prompt) {
+      const CommandsMap& commands = app->commands_map();
+      CommandsMap::const_iterator it = commands.begin();
+      uint32_t index = 0;
+      for (; commands.end() != it; ++it) {
+        smart_objects::SmartObject item(smart_objects::SmartType_Map);
+        if ((*it->second).keyExists(strings::menu_params)){
+          item[strings::text] = (*it->second)[strings::menu_params][strings::menu_name].asString();
+          item[strings::type] = mobile_apis::SpeechCapabilities::SC_TEXT;
+        } else {
+          continue;
+        }
+        msg_params[strings::help_prompt][index++] = item;
+      }
+    }
+    app->set_help_prompt(msg_params[strings::help_prompt]);
+    msg_params[strings::app_id] = app->app_id();
+    so_to_send[strings::msg_params] = msg_params;
+    ApplicationManagerImpl::instance()->ManageHMICommand(tts_global_properties);
+  }
 }
 
 smart_objects::SmartObject* MessageHelper::CreateAppVrHelp(
@@ -1232,13 +1260,9 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
 
   std::string priority;
   // TODO(KKolodiy): need remove method policy_manager
-  policy::PolicyManager* policy_manager =
-    policy::PolicyHandler::instance()->policy_manager();
-  if (!policy_manager) {
-    LOG4CXX_WARN(logger_, "The shared library of policy is not loaded");
-  } else {
-    policy_manager->GetPriority(app->mobile_app_id()->asString(), &priority);
-  }
+
+  policy::PolicyHandler::instance()->GetPriority(
+        app->mobile_app_id()->asString(), &priority);
   // According SDLAQ-CRS-2794
   // SDL have to send ActivateApp without "proirity" parameter to HMI.
   // in case of unconsented device
@@ -1247,7 +1271,8 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
   connection_handler::ConnectionHandlerImpl::instance()->
       GetDataOnDeviceID(device_handle, NULL, NULL, &mac_adress, NULL);
 
-  policy::DeviceConsent consent = policy_manager->GetUserConsentForDevice(mac_adress);
+  policy::DeviceConsent consent =
+      policy::PolicyHandler::instance()->GetUserConsentForDevice(mac_adress);
   if (!priority.empty() && (policy::DeviceConsent::kDeviceAllowed == consent)) {
     (*message)[strings::msg_params]["priority"] = GetPriorityCode(priority);
   }
@@ -2132,8 +2157,18 @@ mobile_apis::Result::eType MessageHelper::ProcessSoftButtons(
   smart_objects::SmartObject soft_buttons = smart_objects::SmartObject(
         smart_objects::SmartType_Array);
 
+  policy::PolicyHandler* policy_handler = policy::PolicyHandler::instance();
+  std::string app_mobile_id = app->mobile_app_id()->asString();
+
   uint32_t j = 0;
-  for (uint32_t i = 0; i < request_soft_buttons.length(); ++i) {
+  size_t size = request_soft_buttons.length();
+  for (uint32_t i = 0; i < size; ++i) {
+    int system_action = request_soft_buttons[i][strings::system_action].asInt();
+    if (!policy_handler->CheckKeepContext(system_action, app_mobile_id) ||
+        !policy_handler->CheckStealFocus(system_action, app_mobile_id)) {
+      return mobile_apis::Result::DISALLOWED;
+    }
+
     switch (request_soft_buttons[i][strings::type].asInt()) {
       case mobile_apis::SoftButtonType::SBT_IMAGE: {
         if (!image_supported) {

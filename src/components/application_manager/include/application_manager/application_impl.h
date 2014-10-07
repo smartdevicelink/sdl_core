@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -57,7 +57,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   ApplicationImpl(uint32_t application_id,
                   const std::string& mobile_app_id,
                   const std::string& app_name,
-                  usage_statistics::StatisticsManager* statistics_manager);
+                  usage_statistics::StatisticsManager* const & statistics_manager);
 
   ~ApplicationImpl();
 
@@ -97,6 +97,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   connection_handler::DeviceHandle device() const;
   void set_tts_speak_state(bool state_tts_speak);
   bool tts_speak_state();
+  void set_tts_properties_in_none(bool active);
+  bool tts_properties_in_none();
+  void set_tts_properties_in_full(bool active);
+  bool tts_properties_in_full();
   void set_version(const Version& ver);
   void set_name(const std::string& name);
   void set_is_media_application(bool is_media);
@@ -185,7 +189,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool                                     is_app_allowed_;
   bool                                     has_been_activated_;
   bool                                     tts_speak_state_;
-
+  bool                                     tts_properties_in_none_;
+  bool                                     tts_properties_in_full_;
   mobile_api::HMILevel::eType              hmi_level_;
   uint32_t                                 put_file_in_none_count_;
   uint32_t                                 delete_file_in_none_count_;

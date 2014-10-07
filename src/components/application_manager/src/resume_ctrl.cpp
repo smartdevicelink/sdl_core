@@ -1,4 +1,4 @@
-#include <fstream>
+﻿#include <fstream>
 
 #include "application_manager/resume_ctrl.h"
 #include "config_profile/profile.h"
@@ -135,31 +135,26 @@ bool ResumeCtrl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
   mobile_apis::HMILevel::eType default_hmi = mobile_apis::HMILevel::HMI_NONE;
 
   if (policy::PolicyHandler::instance()->PolicyEnabled()) {
-    policy::PolicyManager* policy_manager =
-        policy::PolicyHandler::instance()->policy_manager();
-    if (policy_manager) {
-      std::string policy_app_id = application->mobile_app_id()->asString();
-      std::string default_hmi_string = "";
-      bool result_get_hmi = policy_manager->GetDefaultHmi(policy_app_id, &default_hmi_string);
-      if (true == result_get_hmi) {
-        if ("BACKGROUND" == default_hmi_string) {
-          default_hmi = mobile_apis::HMILevel::HMI_BACKGROUND;
-        } else if ("FULL" == default_hmi_string) {
-          default_hmi = mobile_apis::HMILevel::HMI_FULL;
-        } else if ("LIMITED" == default_hmi_string) {
-          default_hmi = mobile_apis::HMILevel::HMI_LIMITED;
-        } else if ("NONE" == default_hmi_string) {
-          default_hmi = mobile_apis::HMILevel::HMI_NONE;
-        } else {
-          LOG4CXX_ERROR(logger_, "Unable to convert " + default_hmi_string + "to HMILevel");
-          return false;
-        }
+    std::string policy_app_id = application->mobile_app_id()->asString();
+    std::string default_hmi_string = "";
+    bool result_get_hmi = policy::PolicyHandler::instance()->GetDefaultHmi(
+          policy_app_id, &default_hmi_string);
+    if (true == result_get_hmi) {
+      if ("BACKGROUND" == default_hmi_string) {
+        default_hmi = mobile_apis::HMILevel::HMI_BACKGROUND;
+      } else if ("FULL" == default_hmi_string) {
+        default_hmi = mobile_apis::HMILevel::HMI_FULL;
+      } else if ("LIMITED" == default_hmi_string) {
+        default_hmi = mobile_apis::HMILevel::HMI_LIMITED;
+      } else if ("NONE" == default_hmi_string) {
+        default_hmi = mobile_apis::HMILevel::HMI_NONE;
       } else {
-        LOG4CXX_ERROR(logger_, "SetupDefaultHMILevel() unable to get default hmi_level for "
-                      << policy_app_id);
+        LOG4CXX_ERROR(logger_, "Unable to convert " + default_hmi_string + "to HMILevel");
+        return false;
       }
     } else {
-      LOG4CXX_ERROR(logger_, "SetupDefaultHMILevel() Unable to load Policy ");
+      LOG4CXX_ERROR(logger_, "SetupDefaultHMILevel() unable to get default hmi_level for "
+                    << policy_app_id);
     }
   }
 
@@ -179,14 +174,12 @@ bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
 #ifdef ENABLE_LOG
   bool seted_up_hmi_level = hmi_level;
 #endif
-  policy::PolicyManager* policy_manager =
-      policy::PolicyHandler::instance()->policy_manager();
 
   const std::string device_id =
       MessageHelper::GetDeviceMacAddressForHandle(application->device());
 
-  if (check_policy && policy_manager &&
-      policy_manager->GetUserConsentForDevice(device_id)
+  if (check_policy &&
+      policy::PolicyHandler::instance()->GetUserConsentForDevice(device_id)
       != policy::DeviceConsent::kDeviceAllowed) {
     LOG4CXX_ERROR(logger_, "Resumption abort. Data consent wasn't allowed");
     SetupDefaultHMILevel(application);

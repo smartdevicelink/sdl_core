@@ -187,7 +187,7 @@ bool Thread::startWithOptions(const ThreadOptions& options) {
   pthread_result = pthread_create(&thread_handle_, &attributes, threadFunc, delegate_);
   isThreadRunning_ = (pthread_result == EOK);
   if (!isThreadRunning_) {
-    LOG4CXX_WARN(logger_, "Couldn't cancel thread. Error code = "
+    LOG4CXX_WARN(logger_, "Couldn't create thread. Error code = "
                  << pthread_result << "(\"" << strerror(pthread_result) << "\")");
   } else {
     LOG4CXX_INFO(logger_,"Created thread: " << name_);

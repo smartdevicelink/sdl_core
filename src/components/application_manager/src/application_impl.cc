@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -74,11 +74,10 @@ namespace application_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
-ApplicationImpl::ApplicationImpl(
-    uint32_t application_id,
+ApplicationImpl::ApplicationImpl(uint32_t application_id,
     const std::string& mobile_app_id,
     const std::string& app_name,
-    usage_statistics::StatisticsManager* statistics_manager)
+    usage_statistics::StatisticsManager* const & statistics_manager)
     : grammar_id_(0),
       app_id_(application_id),
       active_message_(NULL),
@@ -88,6 +87,8 @@ ApplicationImpl::ApplicationImpl(
       is_app_allowed_(true),
       has_been_activated_(false),
       tts_speak_state_(false),
+      tts_properties_in_none_(false),
+      tts_properties_in_full_(false),
       hmi_level_(mobile_api::HMILevel::HMI_NONE),
       put_file_in_none_count_(0),
       delete_file_in_none_count_(0),
@@ -245,6 +246,24 @@ void ApplicationImpl::set_tts_speak_state(bool state_tts_speak) {
 
 bool ApplicationImpl::tts_speak_state() {
   return tts_speak_state_;
+}
+
+void ApplicationImpl::set_tts_properties_in_none(
+    bool active) {
+  tts_properties_in_none_ = active;
+}
+
+bool ApplicationImpl::tts_properties_in_none() {
+  return tts_properties_in_none_;
+}
+
+void ApplicationImpl::set_tts_properties_in_full(
+    bool active) {
+  tts_properties_in_full_ = active;
+}
+
+bool ApplicationImpl::tts_properties_in_full() {
+  return tts_properties_in_full_;
 }
 
 void ApplicationImpl::set_hmi_level(

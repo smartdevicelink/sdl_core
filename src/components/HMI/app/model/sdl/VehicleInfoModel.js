@@ -103,6 +103,7 @@ SDL.SDLVehicleInfoModel = Em.Object
             "fuelLevel_State": "VEHICLEDATA_FUELLEVEL_STATE",
             "instantFuelConsumption": "VEHICLEDATA_FUELCONSUMPTION",
             "prndl": "VEHICLEDATA_PRNDL",
+            "externalTemperature": "VEHICLEDATA_EXTERNTEMP",
             "tirePressure": "VEHICLEDATA_TIREPRESSURE",
             "odometer": "VEHICLEDATA_ODOMETER",
             "beltStatus": "VEHICLEDATA_BELTSTATUS",
@@ -363,27 +364,27 @@ SDL.SDLVehicleInfoModel = Em.Object
 
                 var subscribeVIData = {};
                 for (var key in message.params) {
-                    if (key != 'appID' && SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key]) {
+
+                    if (key === "clusterModeStatus") {
+                        key = "clusterModes";
+                    }
+
+                    if (key != 'appID' && SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] === true) {
                         subscribeVIData[key] = {
                             dataType: this.eVehicleDataType[key],
                             resultCode: "DATA_ALREADY_SUBSCRIBED"
                         };
-                    } else if (key != 'appID' && !SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] && key !== "clusterModeStatus") {
-                        SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] = message.params[key];
+                    } else if (key != 'appID' && key in SDL.SDLController.getApplicationModel(message.params.appID).subscribedData) {
+                        SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] = true;
                         subscribeVIData[key] = {
                             dataType: this.eVehicleDataType[key],
                             resultCode: "SUCCESS"
                         };
-                    } else if (key != 'appID' && message.params[key] && key !== "clusterModeStatus") {
+                    } else if (key === "externalTemperature") {
                         subscribeVIData[key] = {
                             dataType: this.eVehicleDataType[key],
                             resultCode: "VEHICLE_DATA_NOT_AVAILABLE"
-                        }
-                    } else if (key === "clusterModeStatus") {
-                        subscribeVIData["clusterModes"] = {
-                            dataType: this.eVehicleDataType["clusterModes"],
-                            resultCode: "SUCCESS"
-                        }
+                        };
                     }
                 }
             }
@@ -400,28 +401,28 @@ SDL.SDLVehicleInfoModel = Em.Object
 
                 var subscribeVIData = {};
                 for (var key in message.params) {
-                    if (key != 'appID' && !SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key]) {
+
+                    if (key === "clusterModeStatus") {
+                        key = "clusterModes";
+                    }
+
+                    if (key != 'appID' && SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] === false) {
                         SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] = false;
                         subscribeVIData[key] = {
                             dataType: this.eVehicleDataType[key],
                             resultCode: "DATA_NOT_SUBSCRIBED"
                         };
-                    } else if (key != 'appID' && key in SDL.SDLController.getApplicationModel(message.params.appID).subscribedData && key !== "clusterModeStatus") {
+                    } else if (key != 'appID' && key in SDL.SDLController.getApplicationModel(message.params.appID).subscribedData) {
                         SDL.SDLController.getApplicationModel(message.params.appID).subscribedData[key] = false;
                         subscribeVIData[key] = {
                             dataType: this.eVehicleDataType[key],
                             resultCode: "SUCCESS"
                         };
-                    } else if (key != 'appID' && message.params[key] && key !== "clusterModeStatus") {
+                    } else if (key === "externalTemperature") {
                         subscribeVIData[key] = {
                             dataType: this.eVehicleDataType[key],
                             resultCode: "VEHICLE_DATA_NOT_AVAILABLE"
-                        }
-                    } else if (key === "clusterModeStatus") {
-                        subscribeVIData["clusterModes"] = {
-                            dataType: this.eVehicleDataType["clusterModes"],
-                            resultCode: "SUCCESS"
-                        }
+                        };
                     }
                 }
             }

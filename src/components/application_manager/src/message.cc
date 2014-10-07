@@ -62,6 +62,8 @@ Message::Message(protocol_handler::MessagePriority priority)
       priority_(priority),
       connection_key_(0),
       binary_data_(NULL),
+      data_size_(0),
+      payload_size_(0),
       version_(kUnknownProtocol) {
 }
 
@@ -75,6 +77,8 @@ Message& Message::operator=(const Message& message) {
   set_correlation_id(message.correlation_id_);
   set_connection_key(message.connection_key_);
   set_message_type(message.type_);
+  set_data_size(message.data_size_);
+  set_payload_size(message.payload_size_);
   if (message.binary_data_) {
     set_binary_data(message.binary_data_);
   }
@@ -92,13 +96,16 @@ bool Message::operator==(const Message& message) {
   bool type = type_ == message.type_;
   bool json_message = json_message_ == message.json_message_;
   bool version = version_ == message.version_;
+  bool data_size = data_size_ == message.data_size_;
+  bool payload_size = payload_size_ == message.payload_size_;
+
 
   bool binary_data = std::equal(binary_data_->begin(), binary_data_->end(),
                                 message.binary_data_->begin(),
                                 BinaryDataPredicate);
 
   return function_id && correlation_id && connection_key && type && binary_data
-      && json_message && version;
+      && json_message && version && data_size && payload_size;
 }
 
 Message::~Message() {
@@ -137,6 +144,14 @@ const BinaryData* Message::binary_data() const {
 
 bool Message::has_binary_data() const {
   return (binary_data_ != NULL);
+}
+
+size_t Message::data_size() const {
+  return data_size_;
+}
+
+size_t Message::payload_size() const {
+  return payload_size_;
 }
 
 void Message::set_function_id(int32_t id) {
@@ -182,5 +197,13 @@ const smart_objects::SmartObject &Message::smart_object() const {
 
 void Message::set_smart_object(const smart_objects::SmartObject& object) {
   smart_object_ = object;
+}
+
+void Message::set_data_size(size_t data_size) {
+  data_size_ = data_size;
+}
+
+void Message::set_payload_size(size_t payload_size) {
+  payload_size_ = payload_size;
 }
 }  // namespace application_manager
