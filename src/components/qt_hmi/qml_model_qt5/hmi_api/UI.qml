@@ -567,7 +567,6 @@ Item {
     }
 
     function scrollableMessage (messageText, timeout, softButtons, appID) {
-
         var softButtonsLog = "",
             messageTextLog = "";
         if (softButtons) {
@@ -591,7 +590,6 @@ Item {
                     "softButtons: [" + softButtonsLog + "]," +
                     "appID: " + appID + "', " +
                     "}}")
-
         // TODO{ALeshin}: Also check HMILevel, when it will be available. It should be FULL otherwise - REJECTED
         if (contentLoader.item.systemContext !== Common.SystemContext.SYSCTXT_MAIN) {
             return { __retCode: Common.Result.REJECTED, __message: "System Context isn't MAIN" }

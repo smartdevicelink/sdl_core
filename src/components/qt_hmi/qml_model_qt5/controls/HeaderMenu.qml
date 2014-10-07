@@ -38,7 +38,6 @@ import "../models/Constants.js" as Constants
 Item {
     id: headerMenu
     anchors.fill: parent
-
     Text {        
         anchors.leftMargin: Constants.margin
         anchors.topMargin: Constants.margin
