@@ -30,20 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SAFE_FILE_APPENDER_H_
-#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SAFE_FILE_APPENDER_H_
+#ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_APPENDERS_LOADER_H_
+#define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_APPENDERS_LOADER_H_
 
-#include <log4cxx/fileappender.h>
+namespace utils {
 
-namespace log4cxx {
-
-class SafeFileAppender : public FileAppender {
+class AppendersLoader {
  public:
-  DECLARE_LOG4CXX_OBJECT(SafeFileAppender)
- protected:
-  virtual void subAppend(const spi::LoggingEventPtr& event, log4cxx::helpers::Pool& p);
+  AppendersLoader();
+  ~AppendersLoader();
+  bool Loaded() const;
+ private:
+  void* handle_;
 };
 
-}  // namespace log4cxx
+extern AppendersLoader appenders_loader;
 
-#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_SAFE_FILE_APPENDER_H_
+}  // namespace utils
+
+#endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_APPENDERS_LOADER_H_

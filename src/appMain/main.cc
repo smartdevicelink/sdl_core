@@ -51,6 +51,7 @@
 #include "utils/signals.h"
 #include "utils/system.h"
 #include "config_profile/profile.h"
+#include "utils/appenders_loader.h"
 
 #if defined(EXTENDED_MEDIA_MODE)
 #include <gst/gst.h>
@@ -147,6 +148,10 @@ int32_t main(int32_t argc, char** argv) {
   LOG4CXX_INFO(logger_, gitVersion);
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
+
+  if (!utils::appenders_loader.Loaded()) {
+    LOG4CXX_ERROR(logger_, "Appenders plugin not loaded, file logging disabled");
+  }
 
   LOG4CXX_INFO(logger_, "Application started!");
   LOG4CXX_INFO(logger_, "Application version " << kApplicationVersion);

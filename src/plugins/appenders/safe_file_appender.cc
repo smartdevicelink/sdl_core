@@ -30,7 +30,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "utils/safe_file_appender.h"
+#include "safe_file_appender.h"
 
 using namespace log4cxx;
 using namespace log4cxx::helpers;
@@ -41,7 +41,6 @@ void SafeFileAppender::subAppend(const spi::LoggingEventPtr& event, log4cxx::hel
   try {
     WriterAppender::subAppend(event, p);
   }
-  catch (IOException e) {
-    close();
+  catch (...) {
   }
 }
