@@ -284,7 +284,7 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
   const char* fake2 = "FAKE_PARAM2";
   const char* fake3 = "FAKE_PARAM3";
 
-  SmartObject obj;
+  SmartObject obj = SmartObject(SmartType::SmartType_Map);
   obj[S_PARAMS][S_FUNCTION_ID] = 0;
   obj[S_PARAMS][S_CORRELATION_ID] = 0XFF;
   obj[S_PARAMS][S_PROTOCOL_VERSION] = 1;
@@ -298,11 +298,18 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
 
   // Check apply schema
   schema_item->applySchema(obj);
-  // all fake parameters are romed on apply schema
+
+  EXPECT_TRUE(obj.keyExists(fake1));
+  EXPECT_TRUE(obj[S_PARAMS].keyExists(fake2));
+  EXPECT_TRUE(obj[S_MSG_PARAMS].keyExists(fake3));
+  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
+
+  // all fake parameters are removed on unapply schema
+  schema_item->unapplySchema(obj);
+
   EXPECT_FALSE(obj.keyExists(fake1));
   EXPECT_FALSE(obj[S_PARAMS].keyExists(fake2));
   EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(fake3));
-  EXPECT_EQ(Errors::OK, schema_item->validate(obj));
 
   obj[fake1] = SmartObject(static_cast<int64_t>(0));
   obj[S_PARAMS][fake2] = SmartObject("123");
@@ -310,7 +317,7 @@ TEST_F(ObjectSchemaItemTest, validation_unexpected_param_remove) {
 
   // Check unapply schema
   schema_item->unapplySchema(obj);
-  // all fake parameters are romed on apply schema
+  // all fake parameters are removed on apply schema
   EXPECT_FALSE(obj.keyExists(fake1));
   EXPECT_FALSE(obj[S_PARAMS].keyExists(fake2));
   EXPECT_FALSE(obj[S_MSG_PARAMS].keyExists(fake3));
