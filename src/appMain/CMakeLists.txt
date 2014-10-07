@@ -111,11 +111,13 @@ include_directories (
   ../components/transport_manager/include
   ${SecurityManagerIncludeDir}
   ../components/config_profile/include
+  ../components/utils/
   ../components/utils/include/
   ../components/connection_handler/include/
   ../components/hmi_message_handler/include
   ../components/request_watchdog/include
   ../components/smart_objects/include/
+  ../components/media_manager/
   ../components/media_manager/include/
   ${CMAKE_SOURCE_DIR}/src/components/time_tester/include
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
@@ -155,6 +157,33 @@ endif()
 
 add_executable(${PROJECT} ${SOURCES})
 target_link_libraries(${PROJECT} ${LIBRARIES})
+
+
+#======================= Unit-Test section ======================= 
+if(BUILD_TESTS)
+  include_directories (
+    ../3rd_party-static/gmock-1.7.0/include
+    ../3rd_party-static/gmock-1.7.0/gtest/include)
+  
+  set(testSources
+    ./main_test.cc
+    ../components/utils/src/file_system_test.cc
+    ../components/utils/src/date_time_test.cc
+    ../components/media_manager/src/media_adapter_impl_test.cc)
+    
+  set(testLibraries
+    gmock
+    gtest
+    ConfigProfile
+    log4cxx -L${LOG4CXX_LIBS_DIRECTORY}
+    apr-1 -L${APR_LIBS_DIRECTORY}
+    aprutil-1 -L${APR_UTIL_LIBS_DIRECTORY}
+    expat -L${EXPAT_LIBS_DIRECTORY})
+
+  add_executable(${PROJECT}_test ${testSources})
+  target_link_libraries(${PROJECT}_test ${testLibraries})
+endif()
+#=================================================================
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/audio.8bit.wav DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
