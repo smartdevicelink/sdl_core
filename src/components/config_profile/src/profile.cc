@@ -287,8 +287,7 @@ Profile::~Profile() {
 }
 
 void Profile::config_file_name(const std::string& fileName) {
-  if (false == fileName.empty()) {
-    LOG4CXX_INFO(logger_, "setConfigFileName " << fileName);
+  if (false == fileName.empty()) {    
     config_file_name_ = fileName;
     UpdateValues();
   }
