@@ -78,7 +78,6 @@ PopUp {
                     vrPopUp.complete();
                     vrHelpPopup.hide()
                 }
-
             }
         }
     }
