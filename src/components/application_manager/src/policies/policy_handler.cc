@@ -404,6 +404,7 @@ const std::string PolicyHandler::ConvertUpdateStatus(PolicyTableStatus status) {
 
 void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
                                            bool is_allowed) {
+  POLICY_LIB_CHECK_VOID();
   connection_handler::DeviceHandle device_handle;
   application_manager::ApplicationManagerImpl::instance()->connection_handler()
       ->GetDeviceID(device_id, &device_handle);
@@ -420,7 +421,7 @@ void PolicyHandler::OnDeviceConsentChanged(const std::string& device_id,
     if (device_handle == (*it_app_list).get()->device()) {
 
       const std::string policy_app_id =
-              (*it_app_list).get()->mobile_app_id()->asString();
+          (*it_app_list)->mobile_app_id()->asString();
 
       // If app has predata policy, which is assigned without device consent or
       // with negative data consent, there no necessity to change smth and send
