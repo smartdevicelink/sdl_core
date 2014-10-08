@@ -53,9 +53,8 @@ std::string LanguageIdToString(Language::eType lang_id) {
 
 }  // namespace
 
-UsageStatistics::UsageStatistics(
-    const std::string& app_id,
-    usage_statistics::StatisticsManager* statistics_manager)
+UsageStatistics::UsageStatistics(const std::string& app_id,
+    StatisticsManager* const & statistics_manager)
     : time_in_hmi_state_(statistics_manager, app_id),
       app_registration_language_gui_(statistics_manager, app_id, LANGUAGE_GUI),
       app_registration_language_vui_(statistics_manager, app_id, LANGUAGE_VUI),

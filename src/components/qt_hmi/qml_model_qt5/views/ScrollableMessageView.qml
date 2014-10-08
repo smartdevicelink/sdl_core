@@ -48,9 +48,11 @@ GeneralView {
         DBus.sendReply(dataContainer.scrollableMessageModel.async, { __retCode: dataContainer.scrollableMessageModel.result })
     }
     Component.onCompleted: {
+        dataContainer.scrollableMessageModel.result = Common.Result.ABORTED
         dataContainer.scrollableMessageModel.running = true
         timer.start()
     }
+
     Timer {
         id: timer
         interval: dataContainer.scrollableMessageModel.timeout
@@ -167,6 +169,7 @@ GeneralView {
     function getBackButton(){
         return backButton
     }
+
     /**
       * Test Support Section End
       */

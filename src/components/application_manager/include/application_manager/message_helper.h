@@ -457,6 +457,20 @@ class MessageHelper {
      */
     static uint32_t GetAppCommandLimit(const std::string& policy_app_id);
 
+    /**
+     * @brief Creates TTS.SetGlobalProperties request and sends
+     * to HMI for VCA module.
+     * @param app contains application which sends TTS GlobalProperties to HMI
+     * after timeout or first time when application register with level NONE or
+     * BACKGROUND
+     * @param default_help_prompt
+     * if default_help_prompt=TRUE->TTSGlobalProperties request will be created with
+     * default helpPrompt array, otherwise TTSGlobalProperties request will be created
+     * with empty helpPrompt array.
+     */
+    static void SendTTSGlobalProperties(
+        ApplicationSharedPtr app, bool default_help_prompt);
+
     private:
     /**
      * @brief Allows to fill SO according to the  current permissions.

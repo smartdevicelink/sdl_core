@@ -9,7 +9,7 @@ namespace policy_table_interface_base {
 enum Priority {
   P_EMERGENCY,
   P_NAVIGATION,
-  P_VOICECOMM,
+  P_VOICECOM,
   P_COMMUNICATION,
   P_NORMAL,
   P_NONE,

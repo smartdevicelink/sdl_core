@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -78,7 +78,6 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     media_manager_(NULL),
     hmi_handler_(NULL),
     connection_handler_(NULL),
-    policy_manager_(policy::PolicyHandler::instance()->LoadPolicyLibrary()),
     protocol_handler_(NULL),
     request_ctrl_(),
     hmi_so_factory_(NULL),
@@ -93,7 +92,11 @@ ApplicationManagerImpl::ApplicationManagerImpl()
 #ifdef TIME_TESTER
     metric_observer_(NULL),
 #endif  // TIME_TESTER
-    application_list_update_timer_(new ApplicationListUpdateTimer(this)) {
+    application_list_update_timer_(new ApplicationListUpdateTimer(this)),
+    tts_global_properties_timer_("TTSGLPRTimer",
+                                      this,
+                                      &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties,
+                                      true) {
     std::srand(std::time(0));
 }
 
@@ -101,8 +104,6 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_INFO(logger_, "Destructing ApplicationManager.");
 
   SendOnSDLClose();
-
-  policy_manager_ = NULL;
   media_manager_ = NULL;
   hmi_handler_ = NULL;
   connection_handler_ = NULL;
@@ -116,12 +117,13 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   mobile_so_factory_ = NULL;
   protocol_handler_ = NULL;
   media_manager_ = NULL;
+  LOG4CXX_INFO(logger_, "Destroying Policy Handler");
+  policy::PolicyHandler::destroy();
 }
 
 bool ApplicationManagerImpl::Stop() {
   LOG4CXX_INFO(logger_, "Stop ApplicationManager.");
   application_list_update_timer_->stop();
-
   try {
     UnregisterAllApplications();
   } catch (...) {
@@ -131,10 +133,8 @@ bool ApplicationManagerImpl::Stop() {
 
 #ifndef CUSTOMER_PASA
   // for PASA customer policy backup should happen OnExitAllApp(SUSPEND)
-  if (policy_manager_) {
-    LOG4CXX_INFO(logger_, "Unloading policy library.");
-    policy::PolicyHandler::instance()->UnloadPolicyLibrary();
-  }
+  LOG4CXX_INFO(logger_, "Unloading policy library.");
+  policy::PolicyHandler::instance()->UnloadPolicyLibrary();
 #endif
   return true;
 }
@@ -296,11 +296,13 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   const std::string& app_name =
     message[strings::msg_params][strings::app_name].asString();
 
+  usage_statistics::StatisticsManager* const& sm =
+      policy::PolicyHandler::instance()->GetStatisticManager();
   ApplicationSharedPtr application(
-    new ApplicationImpl(app_id, mobile_app_id, app_name, policy_manager_));
+    new ApplicationImpl(app_id, mobile_app_id, app_name,sm));
   if (!application) {
     usage_statistics::AppCounter count_of_rejections_sync_out_of_memory(
-      policy_manager_, mobile_app_id,
+      sm, mobile_app_id,
       usage_statistics::REJECTIONS_SYNC_OUT_OF_MEMORY);
     ++count_of_rejections_sync_out_of_memory;
 
@@ -312,7 +314,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     ManageMobileCommand(response);
     return ApplicationSharedPtr();
   }
-
   application->set_device(device_id);
   application->set_grammar_id(GenerateGrammarID());
   mobile_api::Language::eType launguage_desired =
@@ -1368,7 +1369,7 @@ bool ApplicationManagerImpl::ManageHMICommand(
 bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   if (policy::PolicyHandler::instance()->PolicyEnabled()) {
-    if(!policy_manager_) {
+    if(!policy::PolicyHandler::instance()->LoadPolicyLibrary()) {
       LOG4CXX_ERROR(logger_, "Policy library is not loaded. Check LD_LIBRARY_PATH");
       return false;
     }
@@ -1454,6 +1455,17 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
       output[strings::params][strings::protocol_version] =
         message.protocol_version();
       if (message.binary_data()) {
+        if (message.payload_size() < message.data_size()) {
+          LOG4CXX_ERROR(logger_, "Incomplete binary" <<
+                                " binary size should be  " << message.data_size() <<
+                                " payload data size is " << message.payload_size());
+          utils::SharedPtr<smart_objects::SmartObject> response(
+                            MessageHelper::CreateNegativeResponse(
+                            message.connection_key(), message.function_id(),
+                            message.correlation_id(), mobile_apis::Result::INVALID_DATA));
+          ManageMobileCommand(response);
+          return false;
+        }
         output[strings::params][strings::binary_data] =
           *(message.binary_data());
       }
@@ -1475,9 +1487,7 @@ bool ApplicationManagerImpl::ConvertMessageToSO(
         return false;
       }
       if (output.validate() != smart_objects::Errors::OK) {
-        LOG4CXX_WARN(
-          logger_,
-          "Incorrect parameter from HMI");
+        LOG4CXX_WARN(logger_, "Incorrect parameter from HMI");
         output.erase(strings::msg_params);
         output[strings::params][hmi_response::code] =
           hmi_apis::Common_Result::INVALID_DATA;
@@ -1822,10 +1832,8 @@ void ApplicationManagerImpl::HeadUnitReset(
 void ApplicationManagerImpl::HeadUnitSuspend() {
   LOG4CXX_INFO(logger_, "ApplicationManagerImpl::HeadUnitSuspend");
 #ifdef CUSTOMER_PASA
-  if (policy_manager_) {
-    LOG4CXX_INFO(logger_, "Unloading policy library.");
-    policy::PolicyHandler::instance()->UnloadPolicyLibrary();
-  }
+  LOG4CXX_INFO(logger_, "Unloading policy library.");
+  policy::PolicyHandler::instance()->UnloadPolicyLibrary();
 
   resume_controller().SaveAllApplications();
   resumption::LastState::instance()->SaveToFileSystem();
@@ -1924,6 +1932,8 @@ void ApplicationManagerImpl::UnregisterApplication(
   bool is_resuming, bool is_unexpected_disconnect) {
   LOG4CXX_INFO(logger_,
                "ApplicationManagerImpl::UnregisterApplication " << app_id);
+  //remove appID from tts_global_properties_app_list_
+  RemoveAppFromTTSGlobalPropertiesList(app_id);
 
   sync_primitives::AutoLock lock(applications_list_lock_);
 
@@ -2068,10 +2078,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   if (!policy::PolicyHandler::instance()->PolicyEnabled()) {
     return mobile_apis::Result::SUCCESS;
   }
-  if (!policy_manager_ ) {
-    LOG4CXX_WARN(logger_, "Policy library is not loaded.");
-    return mobile_apis::Result::DISALLOWED;
-  }
+
   const std::string stringified_functionID =
       MessageHelper::StringifiedFunctionID(function_id);
   const std::string stringified_hmi_level =
@@ -2082,7 +2089,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     " in " << stringified_hmi_level <<
     " rpc " << stringified_functionID);
     policy::CheckPermissionResult result;
-    policy_manager_->CheckPermissions(
+    policy::PolicyHandler::instance()->CheckPermissions(
           policy_app_id,
           stringified_hmi_level,
           stringified_functionID,
@@ -2274,6 +2281,66 @@ void ApplicationManagerImpl::OnApplicationListUpdateTimer() {
   applications_list_lock_.Release();
 
   SendUpdateAppList(applications_ids);
+}
+
+void ApplicationManagerImpl::OnTimerSendTTSGlobalProperties() {
+  std::vector<uint32_t> app_list;
+  {
+    sync_primitives::AutoLock lock(tts_global_properties_app_list_lock_);
+    std::map<uint32_t, TimevalStruct>::iterator it =
+        tts_global_properties_app_list_.begin();
+    std::map<uint32_t, TimevalStruct>::iterator it_end =
+        tts_global_properties_app_list_.end();
+    date_time::TimeCompare time_comp;
+    for (; it != it_end; ++it) {
+      time_comp = date_time::DateTime::compareTime(
+          date_time::DateTime::getCurrentTime(), it->second);
+      if (date_time::GREATER == time_comp || date_time::EQUAL == time_comp) {
+        app_list.push_back(it->first);
+      }
+    }
+  }
+  if (!app_list.empty()) {
+    for (uint32_t i = 0; i < app_list.size(); ++i) {
+      LOG4CXX_INFO(logger_, "Send TTS GlobalProperties to HMI with default helpPrompt");
+      MessageHelper::SendTTSGlobalProperties(application(app_list[i]), true);
+      RemoveAppFromTTSGlobalPropertiesList(app_list[i]);
+    }
+  }
+}
+
+void ApplicationManagerImpl::AddAppToTTSGlobalPropertiesList(
+    const uint32_t app_id) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::AddAppToTTSGlobalPropertiesList");
+  uint16_t timeout = profile::Profile::instance()->tts_global_properties_timeout();
+  TimevalStruct current_time = date_time::DateTime::getCurrentTime();
+  current_time.tv_sec += timeout;
+  sync_primitives::AutoLock lock(tts_global_properties_app_list_lock_);
+  if (tts_global_properties_app_list_.end() ==
+      tts_global_properties_app_list_.find(app_id)) {
+    tts_global_properties_app_list_[app_id] = current_time;
+  }
+  //if add first item need to start timer on one second
+  if (1 == tts_global_properties_app_list_.size()) {
+    LOG4CXX_INFO(logger_, "Start tts_global_properties_timer_");
+    tts_global_properties_timer_.start(1);
+  }
+}
+
+void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
+    const uint32_t app_id) {
+  LOG4CXX_INFO(logger_, "ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList");
+  sync_primitives::AutoLock lock(tts_global_properties_app_list_lock_);
+  std::map<uint32_t, TimevalStruct>::iterator it =
+      tts_global_properties_app_list_.find(app_id);
+  if (tts_global_properties_app_list_.end() != it) {
+    tts_global_properties_app_list_.erase(it);
+    if (!(tts_global_properties_app_list_.size())) {
+      LOG4CXX_INFO(logger_, "Stop tts_global_properties_timer_");
+      //if container is empty need to stop timer
+      tts_global_properties_timer_.stop();
+    }
+  }
 }
 
 }  // namespace application_manager

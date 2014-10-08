@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -47,13 +47,11 @@ GetUrls::~GetUrls() {
 
 void GetUrls::Run() {
   LOG4CXX_INFO(logger_, "GetUrls::Run");
-  policy::PolicyManager* policy_manager =
-    policy::PolicyHandler::instance()->policy_manager();
   smart_objects::SmartObject& object = *message_;
   object[strings::params][strings::message_type] = MessageType::kResponse;
-  if (policy_manager) {
+  if (policy::PolicyHandler::instance()->PolicyEnabled()) {
     policy::EndpointUrls endpoints =
-      policy_manager->GetUpdateUrls(
+      policy::PolicyHandler::instance()->GetUpdateUrls(
         object[strings::msg_params][hmi_request::service].asInt());
     object[strings::msg_params].erase(hmi_request::service);
     object[strings::msg_params][hmi_response::urls] =

@@ -112,6 +112,11 @@ void SetGlobalPropertiesRequest::Run() {
     return;
   }
 
+  //if application waits for sending ttsGlobalProperties need to remove this
+  //application from tts_global_properties_app_list_
+  LOG4CXX_INFO(logger_, "RemoveAppFromTTSGlobalPropertiesList");
+  ApplicationManagerImpl::instance()->RemoveAppFromTTSGlobalPropertiesList(
+      app_id);
   bool is_help_prompt_present = msg_params.keyExists(strings::help_prompt);
   bool is_timeout_prompt_present = msg_params.keyExists(
       strings::timeout_prompt);

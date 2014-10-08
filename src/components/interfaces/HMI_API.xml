@@ -2436,11 +2436,10 @@
   </function>
   <function name="SetGlobalProperties" messagetype="request">
     <description>Sets some properties for the application initiated request.</description>
-    <param name="helpPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >
+    <param name="helpPrompt" type="Common.TTSChunk" minsize="0" maxsize="100" array="true" mandatory="false" >
       <description>
           The help prompt.
           An array of text chunks of type TTSChunk. See TTSChunk.
-          The array must have at least one item.
       </description>
     </param>
     <param name="timeoutPrompt" type="Common.TTSChunk" minsize="1" maxsize="100" array="true" mandatory="false" >

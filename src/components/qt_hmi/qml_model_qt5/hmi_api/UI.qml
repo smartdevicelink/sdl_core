@@ -379,7 +379,7 @@ Item {
             case Common.ClockUpdateMode.RESUME:
                 // Already resumed or cleared
                 if ((app.mediaClock.runningMode === Internal.MediaClockRunningMode.MCR_RUNNING)
-                        || (app.mediaClock.startTime === -1 && app.mediaClock.endTime === -1)) {
+                        || (app.mediaClock.startTime === app.mediaClock.endTime)) {
                     resultCode = Common.Result.IGNORED
                     sendErrorResponce = true
                     break
@@ -567,7 +567,6 @@ Item {
     }
 
     function scrollableMessage (messageText, timeout, softButtons, appID) {
-
         var softButtonsLog = "",
             messageTextLog = "";
         if (softButtons) {
@@ -591,7 +590,6 @@ Item {
                     "softButtons: [" + softButtonsLog + "]," +
                     "appID: " + appID + "', " +
                     "}}")
-
         // TODO{ALeshin}: Also check HMILevel, when it will be available. It should be FULL otherwise - REJECTED
         if (contentLoader.item.systemContext !== Common.SystemContext.SYSCTXT_MAIN) {
             return { __retCode: Common.Result.REJECTED, __message: "System Context isn't MAIN" }

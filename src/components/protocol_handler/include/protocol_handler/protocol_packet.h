@@ -263,6 +263,11 @@ class ProtocolPacket {
     */
   uint8_t connection_id() const;
 
+  /**
+    * \brief Getter for data payload size
+    */
+  uint32_t payload_size() const;
+
  private:
   /**
    *\brief Protocol header
@@ -273,6 +278,11 @@ class ProtocolPacket {
    *\brief Message body (without header)
    */
   ProtocolData packet_data_;
+
+  /**
+   *\brief Actual size of received data
+   */
+  uint32_t payload_size_;
 
   /**
    *\brief Offset for multiframe messages

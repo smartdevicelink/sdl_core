@@ -167,6 +167,8 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void RemoveAppConsentForGroup(const std::string& app_id,
                                           const std::string& group_name);
 
+    virtual bool IsPredataPolicy(const std::string& policy_app_id);
+
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(
         const BinaryMessage& pt_content);

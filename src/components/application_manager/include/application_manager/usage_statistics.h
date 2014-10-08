@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -42,7 +42,7 @@ namespace application_manager {
 class UsageStatistics {
  public:
   UsageStatistics(const std::string& app_id,
-                  usage_statistics::StatisticsManager* statistics_manager);
+                  usage_statistics::StatisticsManager* const& statistics_manager);
   void RecordHmiStateChanged(mobile_apis::HMILevel::eType new_hmi_level);
   void RecordAppRegistrationGuiLanguage(
       mobile_apis::Language::eType gui_language);

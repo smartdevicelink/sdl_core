@@ -851,6 +851,9 @@ void PolicyManagerImpl::GetPermissionsForApp(
     // Groups that allowed by default but can be changed by the user
     FunctionalGroupIDs preconsented_groups = group_types[kTypePreconsented];
 
+    // Groups which has user consent promt but there is no any consnets now.
+    FunctionalGroupIDs unconsented_groups = group_types[kTypeUnconsented];
+
     // Pull common groups from allowed and preconsented parts.
     FunctionalGroupIDs allowed_preconsented = Merge(allowed_groups,
                                               preconsented_groups);
@@ -864,21 +867,20 @@ void PolicyManagerImpl::GetPermissionsForApp(
     // all disallowed groups from allowed table.
     FunctionalGroupIDs common_allowed = ExcludeSame(all_allowed,
                                                     common_disallowed);
+    FunctionalGroupIDs consent_disallowed = ExcludeSame(unconsented_groups,
+                                                        preconsented_groups);
 
-    // Remove all disallowed groups from application specific groups.
-    FunctionalGroupIDs no_disallowed = ExcludeSame(all_groups,
-                                                   common_disallowed);
-
-    // Undefined groups are groups that have no allowed or disallowed type.
-    FunctionalGroupIDs undefined_consent = ExcludeSame(no_disallowed,
-                                                       common_allowed);
+    // Disallowed groups are contain all directly disallowed,
+    // plus unconsented minus preconsented.
+    FunctionalGroupIDs all_disallowed = Merge(common_disallowed,
+                                              consent_disallowed);
 
     // Fill result
-    FillFunctionalGroupPermissions(undefined_consent, group_names,
+    FillFunctionalGroupPermissions(unconsented_groups, group_names,
                                    kGroupUndefined, permissions);
     FillFunctionalGroupPermissions(common_allowed, group_names,
                                    kGroupAllowed, permissions);
-    FillFunctionalGroupPermissions(common_disallowed, group_names,
+    FillFunctionalGroupPermissions(all_disallowed, group_names,
                                    kGroupDisallowed, permissions);
 #else
     // In case of GENIVI all groups are allowed
@@ -1093,17 +1095,11 @@ void PolicyManagerImpl::RemovePendingPermissionChanges(
 }
 
 bool PolicyManagerImpl::CanAppKeepContext(const std::string& app_id) {
-#ifdef EXTENDED_POLICY
   return cache.CanAppKeepContext(app_id);
-#endif // EXTENDED_POLICY
-  return false;
 }
 
 bool PolicyManagerImpl::CanAppStealFocus(const std::string& app_id) {
-#ifdef EXTENDED_POLICY
-  cache.CanAppStealFocus(app_id);
-#endif // EXTENDED_POLICY
-  return false;
+  return cache.CanAppStealFocus(app_id);
 }
 
 void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
@@ -1140,7 +1136,12 @@ bool PolicyManagerImpl::IsAppInUpdateList(const std::string& app_id) const {
 
 void PolicyManagerImpl::RemoveAppConsentForGroup(const std::string& app_id,
                                                  const std::string& group_name) {
-  cache.RemoveAppConsentForGroup(app_id, group_name);
+    cache.RemoveAppConsentForGroup(app_id, group_name);
+}
+
+bool PolicyManagerImpl::IsPredataPolicy(const std::string &policy_app_id) {
+    LOG4CXX_INFO(logger_, "IsPredataApp");
+    return cache.IsPredataPolicy(policy_app_id);
 }
 
 void PolicyManagerImpl::AddNewApplication(const std::string& application_id,

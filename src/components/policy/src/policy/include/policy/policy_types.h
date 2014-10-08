@@ -276,6 +276,7 @@ enum GroupType {
     kTypeDefault = 0,      // groups assigned to 'default' permissions section
     kTypeAllowed,          // groups allowed by user for specific application
     kTypeDisallowed,       // groups disallowed by user for specific application
+    kTypeUnconsented,      // groups disallowed by default but consent may be changed by user
     kTypePreconsented,     // groups allowed for specific application without
                            // user consent by default (could be changed by user)
     kTypeGeneral,          // groups assigned to specific application

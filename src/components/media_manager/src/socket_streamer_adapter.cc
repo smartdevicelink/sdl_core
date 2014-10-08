@@ -60,52 +60,49 @@ SocketStreamerAdapter::~SocketStreamerAdapter() {
   thread_->stop();
   streamer_ = NULL;
   delete thread_;
-  if (socket_fd_ != -1) {
-    ::close(socket_fd_);
-  }
 }
 
 void SocketStreamerAdapter::StartActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger, "SocketStreamerAdapter::start");
+  LOG4CXX_TRACE(logger, "enter " << application_key);
 
   if (application_key == current_application_) {
     LOG4CXX_INFO(logger, "Already running for app " << application_key);
-    return;
+  } else {
+    is_ready_ = true;
+    current_application_ = application_key;
+
+    messages_.Reset();
+
+    for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
+         media_listeners_.end() != it;
+         ++it) {
+      (*it)->OnActivityStarted(application_key);
+    }
   }
-
-  is_ready_ = true;
-  current_application_ = application_key;
-
-  messages_.Reset();
-
-  for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
-       media_listeners_.end() != it;
-       ++it) {
-    (*it)->OnActivityStarted(application_key);
-  }
+  LOG4CXX_TRACE(logger, "exit");
 }
 
 void SocketStreamerAdapter::StopActivity(int32_t application_key) {
-  LOG4CXX_INFO(logger, "SocketStreamerAdapter::stop");
+  LOG4CXX_TRACE(logger, "enter " << application_key);
 
   if (application_key != current_application_) {
     LOG4CXX_WARN(logger, "Streaming is not active for " << application_key);
-    return;
-  }
+  } else {
+    is_ready_ = false;
+    current_application_ = 0;
 
-  is_ready_ = false;
-  current_application_ = 0;
+    if (streamer_) {
+      streamer_->stop();
+      messages_.Shutdown();
+    }
 
-  if (streamer_) {
-    streamer_->stop();
-    messages_.Shutdown();
+    for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
+         media_listeners_.end() != it;
+         ++it) {
+      (*it)->OnActivityEnded(application_key);
+    }
   }
-
-  for (std::set<MediaListenerPtr>::iterator it = media_listeners_.begin();
-       media_listeners_.end() != it;
-       ++it) {
-    (*it)->OnActivityEnded(application_key);
-  }
+  LOG4CXX_TRACE(logger, "exit");
 }
 
 bool SocketStreamerAdapter::is_app_performing_activity(
@@ -120,13 +117,15 @@ void SocketStreamerAdapter::Init() {
     thread_ = new threads::Thread("SocketStreamer", streamer_);
     const size_t kStackSize = 16384;
     thread_->startWithOptions(threads::ThreadOptions(kStackSize));
+  } else {
+    LOG4CXX_WARN(logger, "thread is already exist");
   }
 }
 
 void SocketStreamerAdapter::SendData(
   int32_t application_key,
   const RawMessagePtr message) {
-  LOG4CXX_INFO(logger, "SocketStreamerAdapter::sendData");
+  LOG4CXX_INFO(logger, "SendData(application_key = " << application_key << ")");
 
 
   if (application_key != current_application_) {
@@ -154,13 +153,13 @@ SocketStreamerAdapter::Streamer::~Streamer() {
 }
 
 void SocketStreamerAdapter::Streamer::threadMain() {
-  LOG4CXX_INFO(logger, "Streamer::threadMain");
-
+  LOG4CXX_TRACE(logger,"enter " << this);
+  sync_primitives::AutoLock auto_lock(thread_lock);
   start();
 
   while (!stop_flag_) {
     new_socket_fd_ = accept(server_->socket_fd_, NULL, NULL);
-
+    LOG4CXX_INFO(logger, "Client connectd " << new_socket_fd_);
     if (0 > new_socket_fd_) {
       LOG4CXX_ERROR(logger, "Socket is closed " << strerror(errno));
       sleep(1);
@@ -197,18 +196,25 @@ void SocketStreamerAdapter::Streamer::threadMain() {
         stop();
         break;
       }
-
       server_->messages_.wait();
     }
   }
+  LOG4CXX_TRACE(logger,"exit " << this);
 }
 
 bool SocketStreamerAdapter::Streamer::exitThreadMain() {
-  LOG4CXX_INFO(logger, "Streamer::exitThreadMain");
+  LOG4CXX_TRACE(logger,"enter " << this);
   stop_flag_ = true;
   stop();
   server_->messages_.Shutdown();
-  return false;
+  //exith threadMainshould whait while threadMain will be finished
+  if (server_->socket_fd_ != -1) {
+    shutdown(server_->socket_fd_, SHUT_RDWR);
+    close(server_->socket_fd_);
+  }
+  sync_primitives::AutoLock auto_lock(thread_lock);
+  LOG4CXX_TRACE(logger,"exit " << this);
+  return true;
 }
 
 void SocketStreamerAdapter::Streamer::start() {
@@ -247,23 +253,18 @@ void SocketStreamerAdapter::Streamer::start() {
 }
 
 void SocketStreamerAdapter::Streamer::stop() {
-  LOG4CXX_INFO(logger, "SocketStreamerAdapter::Streamer::stop");
-  if (!new_socket_fd_) {
-    return;
+  LOG4CXX_TRACE(logger,"enter " << this);
+  if (0 == new_socket_fd_) {
+    LOG4CXX_ERROR(logger, "Client Socket does not exits: ");
+  } else if (-1 == shutdown(new_socket_fd_, SHUT_RDWR)) {
+    LOG4CXX_ERROR(logger, "Unable to shutdown socket " << strerror(errno));
+  } else if (-1 == ::close(new_socket_fd_)) {
+    LOG4CXX_ERROR(logger, "Unable to close socket " << strerror(errno));
   }
 
-  if (-1 == shutdown(new_socket_fd_, SHUT_RDWR)) {
-    LOG4CXX_ERROR(logger, "Unable to shutdown socket");
-    return;
-  }
-
-  if (-1 == ::close(new_socket_fd_)) {
-    LOG4CXX_ERROR(logger, "Unable to close socket");
-    return;
-  }
-
-  new_socket_fd_ = -1;
+  new_socket_fd_ = 0;
   is_client_connected_ = false;
+  LOG4CXX_TRACE(logger,"exit" << this);
 }
 
 bool SocketStreamerAdapter::Streamer::is_ready() const {
@@ -285,7 +286,6 @@ bool SocketStreamerAdapter::Streamer::is_ready() const {
     LOG4CXX_ERROR_EXT(logger, "The timeout expired");
     result = false;
   }
-
   return result;
 }
 

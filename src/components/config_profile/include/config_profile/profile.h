@@ -356,6 +356,12 @@ class Profile : public utils::Singleton<Profile> {
     uint16_t transport_manager_tcp_adapter_port() const;
 
     /**
+     * @brief Returns value of timeout after which sent
+     * tts global properties for VCA
+     */
+    uint16_t tts_global_properties_timeout() const;
+
+    /**
      * @brief Reads a string value from the profile
      *
      * @param value         Result value
@@ -664,6 +670,7 @@ class Profile : public utils::Singleton<Profile> {
     std::string                     iap2_system_config_;
     int                             iap2_hub_connect_attempts_;
     int                             iap_hub_connection_wait_timeout_;
+    uint16_t                        tts_global_properties_timeout_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

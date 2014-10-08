@@ -135,9 +135,8 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   smart_objects::SmartObject response_msg_params = message[strings::msg_params];
   if (response_code == hmi_apis::Common_Result::ABORTED) {
     //Copy slider_position info to msg_params section
-    // TODO(DK) : FIXME
-    /*response_msg_params[strings::slider_position] =
-        message[strings::params][strings::data][strings::slider_position];*/
+    response_msg_params[strings::slider_position] =
+        message[strings::params][strings::data][strings::slider_position];
   }
 
   const bool is_response_success =

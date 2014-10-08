@@ -119,7 +119,7 @@ GeneralView {
                         id: text1
                         width: parent.width
                         verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: dataContainer.hmiUITextAlignment
+                        horizontalAlignment: dataContainer.currentApplication.hmiUITextAlignment
                         text: dataContainer.currentApplication.hmiUIText.mainField1
                         font.pixelSize: Constants.fontSize
                         color: Constants.primaryColor
@@ -128,7 +128,7 @@ GeneralView {
                     Text {
                         width: parent.width
                         verticalAlignment: Text.AlignVCenter
-                        horizontalAlignment: dataContainer.hmiUITextAlignment
+                        horizontalAlignment: dataContainer.currentApplication.hmiUITextAlignment
                         text: dataContainer.currentApplication.hmiUIText.mainField2
                         font.pixelSize: Constants.fontSize
                         color: Constants.primaryColor

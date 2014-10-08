@@ -60,9 +60,8 @@ void PTExchangeHandlerImpl::Start() {
     retry_sequence_.stop();
   }
 
-  PolicyManager* policy_manager = policy_handler_->policy_manager();
-  if (policy_manager) {
-    policy_manager->ResetRetrySequence();
+  if (policy_handler_) {
+    policy_handler_->ResetRetrySequence();
   }
   retry_sequence_.start();
 }

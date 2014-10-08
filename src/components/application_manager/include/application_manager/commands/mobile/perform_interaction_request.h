@@ -194,6 +194,15 @@ class PerformInteractionRequest : public CommandRequestImpl  {
    */
   void TerminatePerformInteraction();
 
+  /**
+   * @brief Checks parameter ChoiceID from response.
+   * @param app contains pointer to application
+   * @param choice_id contains ChoiceID from response.
+   * @return if ChoiceID from response is correct method returns TRUE
+   * otherwise returns FALSE.
+   */
+  bool CheckChoiceIDFromResponse(ApplicationSharedPtr app, int32_t choice_id);
+
   // members
   timer::TimerThread<PerformInteractionRequest> timer_;
 

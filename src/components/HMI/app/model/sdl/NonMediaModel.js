@@ -40,7 +40,9 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
             var subscribeVIData = {};
 
             for (var key in SDL.SDLVehicleInfoModel.vehicleData) {
-                subscribeVIData[key] = false;
+                if (key != "externalTemperature") {
+                    subscribeVIData[key] = false;
+                }
             }
 
             this.set('subscribedData', subscribeVIData);
