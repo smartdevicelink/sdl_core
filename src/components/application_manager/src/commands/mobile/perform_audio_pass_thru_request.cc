@@ -66,7 +66,7 @@ void PerformAudioPassThruRequest::onTimeOut() {
 }
 
 bool PerformAudioPassThruRequest::Init() {
-  default_timeout_ += (*message_)[str::msg_params][str::max_duration].asInt();
+  default_timeout_ += (((*message_)[str::msg_params][str::max_duration].asInt())/1000);
   return true;
 }
 
