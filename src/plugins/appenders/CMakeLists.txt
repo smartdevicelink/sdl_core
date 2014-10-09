@@ -34,6 +34,10 @@ SET(SOURCES
   safe_file_appender.cc
 )
 
+include_directories(
+  ${LOG4CXX_INCLUDE_DIRECTORY}
+)
+
 add_library(${target} MODULE ${SOURCES})
 
 target_link_libraries(${target} log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
