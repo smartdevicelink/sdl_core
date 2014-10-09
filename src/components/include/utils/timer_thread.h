@@ -202,11 +202,11 @@ class TimerThread {
         DISALLOW_COPY_AND_ASSIGN(TimerLooperDelegate);
     };
     void (T::*callback_)();
-    T*                                                callee_;
-    TimerDelegate*                                     delegate_;
-    //threads::Thread*                                   thread_;
-    mutable bool                                       is_running_;
-    mutable bool                                       is_looper_;
+    T*                  callee_;
+    TimerDelegate*       delegate_;
+    //threads::Thread*     thread_;
+    mutable bool         is_running_;
+    bool                is_looper_;
 
 
     DISALLOW_COPY_AND_ASSIGN(TimerThread);
