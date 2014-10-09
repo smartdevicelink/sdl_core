@@ -1,6 +1,7 @@
 include_directories(
   ./
   ./include
+  ${LOG4CXX_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
