@@ -16,6 +16,8 @@ public:
    */
   UpdateStatusManager();
 
+  ~UpdateStatusManager();
+
   /**
    * @brief Sets listener pointer
    * @param listener Pointer to policy listener implementation
@@ -123,9 +125,9 @@ private:
           callee,
           &UpdateStatusManager::OnUpdateTimeoutOccurs) {
     }
+    ~UpdateResponseTimer();
   };
-  typedef utils::SharedPtr<UpdateResponseTimer> UpdateResponseTimerSptr;
-  UpdateResponseTimerSptr update_response_timer_;
+  UpdateResponseTimer update_response_timer_;
 };
 
 }

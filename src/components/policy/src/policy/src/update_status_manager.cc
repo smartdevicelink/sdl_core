@@ -43,8 +43,12 @@ UpdateStatusManager::UpdateStatusManager() :
   exchange_in_progress_(false),
   update_required_(false),
   exchange_pending_(false),
-  last_update_status_(policy::StatusUnknown) {
-  update_response_timer_ = new UpdateResponseTimer(this);
+  last_update_status_(policy::StatusUnknown),
+  update_response_timer_(this) {
+}
+
+UpdateStatusManager::~UpdateStatusManager() {
+  LOG4CXX_DEBUG(logger_, "Destroy update Status manager");
 }
 
 void UpdateStatusManager::set_listener(PolicyListener* listener) {
@@ -53,7 +57,7 @@ void UpdateStatusManager::set_listener(PolicyListener* listener) {
 
 void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
   LOG4CXX_INFO(logger_, "OnUpdateSentOut");
-  update_response_timer_->start(update_timeout);
+  update_response_timer_.start(update_timeout);
   set_exchange_in_progress(true);
 }
 
@@ -65,14 +69,14 @@ void UpdateStatusManager::OnUpdateTimeoutOccurs() {
 
 void UpdateStatusManager::OnValidUpdateReceived() {
   LOG4CXX_INFO(logger_, "OnValidUpdateReceived");
-  update_response_timer_->stop();
+  update_response_timer_.stop();
   set_update_required(false);
   set_exchange_in_progress(false);
 }
 
 void UpdateStatusManager::OnWrongUpdateReceived() {
   LOG4CXX_INFO(logger_, "OnWrongUpdateReceived");
-  update_response_timer_->stop();
+  update_response_timer_.stop();
   set_update_required(true);
   set_exchange_in_progress(false);
 }
@@ -146,6 +150,10 @@ void UpdateStatusManager::set_update_required(bool value) {
   LOG4CXX_INFO(logger_, "Update required value is:" << std::boolalpha << value);
   update_required_ = value;
   CheckUpdateStatus();
+}
+
+UpdateStatusManager::UpdateResponseTimer::~UpdateResponseTimer() {
+  LOG4CXX_DEBUG(logger_, "Destroy update Status manager timer");
 }
 
 } // namespace policy
