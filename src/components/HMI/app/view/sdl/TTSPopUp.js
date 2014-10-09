@@ -73,8 +73,6 @@ SDL.TTSPopUp = Em.ContainerView.create( {
 
         var self = this;
 
-        //this.requestId = id;
-
         this.set('content', msg);
         this.set('active', true);
 
@@ -99,7 +97,5 @@ SDL.TTSPopUp = Em.ContainerView.create( {
     didInsertElement: function() {
 
         this._super();
-
-        //FFW.TTS.set('isReady', true);
     }
 });

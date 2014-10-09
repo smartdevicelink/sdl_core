@@ -76,6 +76,7 @@ SDL.SDLMediaModel = SDL.SDLAppModel.extend({
             this.set('VRCommands', []);
             this.set('tbtActivate', false);
             this.set('isPlaying', true);
+            this.set('givenControl', false);
             this.set('globalProperties.helpPrompt', []);
             this.set('globalProperties.timeoutPrompt', []);
             this.set('globalProperties.keyboardProperties', Em.Object.create());

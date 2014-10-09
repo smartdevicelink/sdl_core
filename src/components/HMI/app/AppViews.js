@@ -44,7 +44,6 @@ SDL.AppViews = Em.ContainerView.extend( {
         SDL.PhoneView,
         SDL.ClimateView,
         SDL.NavigationView,
-        SDL.ControlButtons,
         SDL.SettingsView,
         SDL.TurnByTurnView,
         SDL.TBTTurnList,
@@ -62,6 +61,7 @@ SDL.AppViews = Em.ContainerView.extend( {
         SDL.TopControls,
         SDL.BottomControls,
         SDL.TTSPopUp,
+        SDL.SwitchPopUp,
         SDL.AlertPopUp,
         SDL.AlertManeuverPopUp,
         SDL.AudioPassThruPopUp,
@@ -70,7 +70,8 @@ SDL.AppViews = Em.ContainerView.extend( {
         SDL.TBTClientStateView,
         SDL.DriverDistraction,
         SDL.ExitApp,
-        SDL.SystemRequest
+        SDL.SystemRequest,
+        SDL.ControlButtons
     ],
 
     /*
@@ -87,6 +88,12 @@ SDL.AppViews = Em.ContainerView.extend( {
         $(window).bind("beforeunload", function(e) {
 
             FFW.BasicCommunication.OnIgnitionCycleOver();
+
+            if (FFW.TDKCommunicationRPC.socket) {
+                FFW.TDKCommunicationRPC.disconnect();
+            }
+
+            FFW.VehicleInfo.OnControlChanged();
 
             FFW.BasicCommunication.disconnect();
             FFW.UI.disconnect();
@@ -109,5 +116,9 @@ SDL.AppViews = Em.ContainerView.extend( {
             }
         })
 
+    },
+
+    actionDown: function(){
+//        SDL.SDLModel.resetControl();
     }
 });

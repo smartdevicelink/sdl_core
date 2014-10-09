@@ -5,6 +5,57 @@
  * @filesource	css/buttonControls.css
  * @version		2.0
  */
+
+#app_controlButtons {
+    width: 800px;
+    height: 100%;
+    left: 800px;
+    z-index: 20032;
+    overflow: hidden;
+    -webkit-transition: 0.5s;
+}
+
+#app_controlButtons .background {
+    background: #222;
+    left: -742px;
+    width: 1600px;
+    height: 480px;
+}
+
+#app_controlButtons.opened {
+    left: 0px;
+}
+#openCloseButton {
+    width: 26px;
+    height: 100%;
+    color: #fff;
+    font-size: 14px;
+    text-align: center;
+    position: absolute;
+    top: 0;
+    left: 742px;
+    background: url("../images/common/button_v.png") 0 0 repeat-y;
+    border: 1px solid #393939;
+    border-width: 0 1px 0 1px;
+}
+#openCloseButton.pressed {
+    background-position: 100% 0;
+}
+#openCloseButton:after {
+    content: " ";
+    display: block;
+    width: 16px;
+    height: 42px;
+    background: url("../images/common/arrows.png") 0 0 no-repeat;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin: -21px 0 0 -8px;
+}
+#app_controlButtons.opened #openCloseButton:after {
+    background-position: -16px 0;
+}
+
 #buttonControls.buttonControls {
 	width: 270px;
 	height: 200px;
@@ -386,9 +437,6 @@
 	top: 55px !important;
 }
 
-#app_controlButtons{
-    z-index: 2;
-}
 #app_controlButtons .systemRequest {
 	top: 252px !important;
 	left: 1059px !important;
@@ -530,17 +578,14 @@
 
 #app_controlButtons .phone_call_button{
     height: 40px;
+    position: absolute;
     width: 163px;
     font-size: 20px;
     line-height: 41px;
     border: 1px solid #FFFF30;
-    top: 2px;
+    top: 420px;
     color: #FFFF30;
     padding-left: 10px;
-    left: 244px;
-    transition: left 2s;
-}
-
-#app_controlButtons .phone_call_button.expand{
-    left: 156px;
+    left: 1198px;
+    z-index: 2;
 }

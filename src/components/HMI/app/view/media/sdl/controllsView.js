@@ -51,17 +51,17 @@ SDL.SDLMediaControlls = Em.ContainerView.create( {
         elementId: 'app_view_info',
 
         template: Em.Handlebars
-                        .compile( '{{#with view}}'
-                                        + '<div class="track-info">'
-                                        + '<div class="device">{{SDL.SDLAppController.model.deviceName}}</div>'
-                                        + '<div class="divider_o"></div>'
-                                        + '<div class="title textLimit" {{bindAttr style="SDL.SDLAppController.model.appInfo.alignment"}}>{{SDL.SDLAppController.model.appInfo.field1}}</div>'
-                                        + '<div class="album textLimit" {{bindAttr style="SDL.SDLAppController.model.appInfo.alignment"}}>{{SDL.SDLAppController.model.appInfo.field2}}</div>'
-                                        + '<div class="artist textLimit"{{bindAttr class="SDL.SDLAppController.model.mediaPreset:hidden"}}>{{SDL.SDLAppController.model.appInfo.field3}}</div>'
-                                        + '<div class="time"{{bindAttr class="SDL.SDLAppController.model.mediaPreset:timeV2"}}>{{SDL.SDLAppController.model.appInfo.mediaClock}}</div>'
-                                        + '<img class="cd_logo" {{bindAttr src="SDL.SDLAppController.model.appInfo.trackIcon" class="SDL.SDLAppController.model.mediaPreset:cd_logoV2"}} />'
-                                        + '</div>' + '{{/with}}' )
-    } ),
+            .compile('{{#with view}}'
+                + '<div class="track-info">'
+                + '<div class="device">{{SDL.SDLAppController.model.deviceName}}</div>'
+                + '<div class="divider_o"></div>'
+                + '<div class="title textLimit" {{bindAttr style="SDL.SDLAppController.model.appInfo.alignment"}}>{{SDL.SDLAppController.model.appInfo.field1}}</div>'
+                + '<div class="album textLimit" {{bindAttr style="SDL.SDLAppController.model.appInfo.alignment"}}>{{SDL.SDLAppController.model.appInfo.field2}}</div>'
+                + '<div class="artist textLimit"{{bindAttr class="SDL.SDLAppController.model.mediaPreset:hidden"}}>{{SDL.SDLAppController.model.appInfo.field3}}</div>'
+                + '<div class="time"{{bindAttr class="SDL.SDLAppController.model.mediaPreset:timeV2"}}>{{SDL.SDLAppController.model.appInfo.mediaClock}}</div>'
+                + '<img class="cd_logo" {{bindAttr src="SDL.SDLAppController.model.appInfo.trackIcon" class="SDL.SDLAppController.model.mediaPreset:cd_logoV2"}} />'
+                + '</div>' + '{{/with}}')
+    }),
 
     Controls: Em.ContainerView.create( {
 
@@ -86,14 +86,10 @@ SDL.SDLMediaControlls = Em.ContainerView.create( {
                     'bc-item-big',
                     'prevcd'
                 ],
-            classNames:
-                [
-                    'bc-item-big',
-                    'prevcd'
-                ],
             icon: 'images/media/ico_prew.png',
             presetName: 'SEEKLEFT'
         } ),
+
         PlayButton: SDL.Button.extend( {
             elementId: 'app_view_controlls_play_button_v2',
             classNames:

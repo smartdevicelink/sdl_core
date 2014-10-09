@@ -31,16 +31,28 @@
  * @version 1.0
  */
 
-SDL.ControlButtons = Em.ContainerView
-    .create( {
+SDL.ControlButtons = Em.ContainerView.create( {
 
-        elementId: 'app_controlButtons',
+    elementId: 'app_controlButtons',
+
+    classNameBindings: ['SDL.SDLAppController.isControlButtonsOpen:opened'],
+
+    childViews: [
+        'background'
+    ],
+
+    background: Em.ContainerView.extend({
+        classNames: ['background'],
 
         childViews: [
+            'openCloseButton',
             'VRButton',
             'buttonControls',
             'driverDistractionControl',
             'infoTable',
+            //'sendData',
+            //'sendDataCheckBox',
+            //'sendDataLabel',
             'vehicleInfo',
             'tbtClientState',
             'ExitApp',
@@ -81,6 +93,17 @@ SDL.ControlButtons = Em.ContainerView
             target: 'SDL.SettingsController',
 
             text: 'Incoming call!'
+        }),
+
+        openCloseButton: SDL.Button.extend( {
+
+            elementId: 'openCloseButton',
+
+            target: 'SDL.SDLAppController',
+
+            action: 'showHideControlButtons',
+
+            onDown: false
         }),
 
         /*
@@ -182,6 +205,45 @@ SDL.ControlButtons = Em.ContainerView
             contentBinding: 'SDL.SDLModel.sdlLanguagesList',
 
             valueBinding: 'SDL.SDLModel.hmiTTSVRLanguage'
+        }),
+
+        /**
+         * Sending data from HMI for processing in SDLCore
+         */
+        sendData: SDL.Button.create( {
+            elementId: 'sendData',
+            classNames: 'sendData btnNotPressed',
+            action: function() {
+
+                FFW.BasicCommunication.SendData(null);
+            },
+            text: 'Send Data',
+            templateName: 'text'
+        }),
+
+        /**
+         * Select for extended param of SendData
+         */
+        sendDataCheckBox: Em.Checkbox.extend( {
+
+            elementId: 'sendDataCheckBox',
+
+            classNames: 'sendDataCheckBox',
+
+            checkedBinding: 'SDL.SDLModel.sendDataExtend'
+
+        }),
+
+        /*
+         * Label for sendDataCheckBox
+         */
+        sendDataLabel: SDL.Label.extend( {
+
+            elementId: 'sendDataLabel',
+
+            classNames: 'sendDataLabel',
+
+            content: 'Use URL'
         }),
 
         /**
@@ -576,4 +638,5 @@ SDL.ControlButtons = Em.ContainerView
                 templateName: 'text'
             })
         })
-    });
+    })
+});

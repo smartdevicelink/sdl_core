@@ -24,16 +24,20 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 /**
- * @name SDL.ClimateView
- * @desc Climate module visual representation
- * @category View
- * @filesource app/view/climate/ClimateView.js
- * @version 1.0
+ * @name SDL.TopControls
+ *
+ * @desc Component for Home top controls
+ *
+ * @category	view
+ * @filesource	app/view/home/topControls.js
+ * @version		1.0
  */
 
 SDL.TopControls = Em.ContainerView.extend( {
 
     elementId: 'app_top_menu_cont',
+
+    classNameBindings:['MFT.StartUpController.isAllStatusHidden:hidden'],
 
     childViews: [
         'controls'
@@ -43,15 +47,35 @@ SDL.TopControls = Em.ContainerView.extend( {
         elementId: 'top_controls',
 
         childViews: [
-            'clock'
+            'clock',
+            'vSeparator',
+            'sdlControlStatus'
         ],
 
-        clock: Em.View.extend( {
-            elementId: 'clock',
+        clock: Em.View.extend({
+            elementId:			'clock',
+            template: Em.Handlebars.compile('<div id="time_num">12:21 86°</div>')
+        }),
 
-            template: Em.Handlebars
-                .compile('<div id="time_num">1:47 86°</div>')
+        vSeparator: Em.View.extend({
+            elementId:	'top_controls_separator',
 
+            classNames: 'help_dev'
+        }),
+
+        sdlControlStatus: SDL.Button.extend( {
+            elementId:			'sdlControlStatus',
+
+            classNameBindings: 'SDL.SDLAppController.model.givenControl:mobile',
+
+            target: 'SDL.SDLModel',
+
+            action: 'resetControl',
+
+            template: Em.Handlebars.compile(
+                '<div class="icon"></div>'+
+                '<div class="mask"></div>'
+            )
         })
     })
 });

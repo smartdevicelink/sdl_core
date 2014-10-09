@@ -36,5 +36,20 @@ SDL.HomeView = Em.ContainerView.create( {
 
     classNameBindings: 'SDL.States.home.active:active_state:inactive_state',
 
-    elementId: 'home'
-} );
+    elementId: 'home',
+
+    childViews: [
+        'widgetPhone',
+        'widgetNavigation',
+        'widgetMedia',
+        'widgetClimate'
+    ],
+
+    widgetPhone:		SDL.WidgetPhoneView,
+
+    widgetNavigation:	SDL.WidgetNavigationView,
+
+    widgetMedia:		SDL.WidgetMediaView,
+
+    widgetClimate:		SDL.WidgetClimateView
+});

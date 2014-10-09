@@ -43,7 +43,6 @@ SDL.NavigationView = Em.ContainerView.create( {
             'windowText'
         ],
 
-
     windowText: SDL.Label.extend( {
 
         classNames: 'windowText',

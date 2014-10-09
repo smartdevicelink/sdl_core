@@ -28,16 +28,20 @@
  * @name SDL.MediaPlayerView
  * @desc Media Player module visual representation
  * @category View
- * @filesource app/view/media/common/MediaPalyerView.js
+ * @filesource app/view/media/playerView.js
  * @version 1.0
  */
-SDL.playerView = Em.View.create( {
+SDL.playerView = Em.ContainerView.create( {
 
     elementId: 'media_player_view_container',
 
-    classNameBindings:
-        [
-            'SDL.States.media.player.active:active_state:inactive_state'
-        ]
+    classNameBindings: [
+        'SDL.States.media.player.active:active_state:inactive_state'
+    ],
 
+    childViews: [
+        SDL.RadioView,
+        SDL.cdView,
+        SDL.usbView
+    ]
 } );

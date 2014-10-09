@@ -40,7 +40,9 @@ SDL.LeftMenuView = Em.ContainerView.extend( {
     childViews:
         [
             'border',
+	    'radio',
             'cdButton',
+            'usbButton',
             'sdlButton'
         ],
     /** Border decoration */
@@ -50,10 +52,23 @@ SDL.LeftMenuView = Em.ContainerView.extend( {
     } ),
 
     /** CD Station Button */
+    radio: SDL.Button.extend({
+        classNameBindings: [
+            'SDL.States.media.player.radio.active:active_state'
+        ],
+        elementId: 'media_radioButton',
+        classNames: 'media-ls-item',
+        action: 'turnOnRadio',
+        target: 'SDL.MediaController',
+        icon: 'images/media/ico_fm.png',
+        textBinding: Ember.Binding.oneWay('SDL.locale.label.view_media_radio')
+    }),
+
+    /** CD Station Button */
     cdButton: SDL.Button.extend( {
         classNameBindings:
             [
-                'SDL.CDModel.active:active_state'
+                'SDL.States.media.player.cd.active:active_state'
             ],
         elementId: 'media_cdButton',
         classNames: 'media-ls-item',
@@ -62,6 +77,20 @@ SDL.LeftMenuView = Em.ContainerView.extend( {
         target: 'SDL.MediaController',
         textBinding: Ember.Binding.oneWay( 'SDL.locale.label.view_media_cd' )
     } ),
+
+    /** USB Station Button */
+    usbButton: SDL.Button.extend({
+        classNameBindings: [
+            'SDL.States.media.player.usb.active:active_state'
+        ],
+        elementId: 'media_usbButton',
+        classNames: 'media-ls-item',
+        action: 'turnOnUSB',
+        icon: 'images/media/ico_usb.png',
+        target: 'SDL.MediaController',
+        textBinding: Ember.Binding.oneWay('SDL.locale.label.view_media_usb')
+    }),
+
     /** SDL Button */
     sdlButton: SDL.Button.extend( {
         classNameBindings:

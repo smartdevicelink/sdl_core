@@ -199,7 +199,5 @@ SDL.VehicleInfo = Em.ContainerView.create( {
      */
     didInsertElement: function() {
         this._super();
-        
-        //FFW.VehicleInfo.set( 'isReady', true );
     }
 } );

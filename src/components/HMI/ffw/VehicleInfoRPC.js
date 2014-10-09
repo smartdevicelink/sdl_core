@@ -43,6 +43,15 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
     isReady: true,
 
     /**
+     * Current running request id's
+     *
+     * @type {Number}
+     */
+    VIStartScanRequestID: null,
+    VIStopScanRequestID: null,
+    VITuneRadioRequestID: null,
+
+    /**
      * Contains response codes for request that should be processed but there were some kind of errors
      * Error codes will be injected into response.
      */
@@ -210,7 +219,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
 
                 Em.Logger.log("FFW." + request.method + "Response");
 
-                // send repsonse
+                    // send response
                 var JSONMessage = {
                     "jsonrpc": "2.0",
                     "id": request.id,
@@ -225,11 +234,90 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
 
                 break;
             }
+                case "VehicleInfo.GrantAccess": {
 
-            default: {
-                // statements_def
-                break;
-            }
+                    SDL.SDLModel.giveControl(request);
+
+                    break;
+                }
+                case "VehicleInfo.CancelAccess": {
+
+                    SDL.SDLModel.cancelControl(request);
+
+                    break;
+                }
+                case "VehicleInfo.StartScan": {
+
+                    this.VIStartScanRequestID = request.id;
+                    SDL.RadioModel.startScan();
+
+                    break;
+                }
+                case "VehicleInfo.StopScan": {
+
+                    this.VIStopScanRequestID = request.id;
+                    SDL.RadioModel.stopScan();
+
+                    break;
+                }
+                case "VehicleInfo.GetRadioDetails": {
+
+                    this.GetRadioDetails(request);
+
+                    break;
+                }
+                case "VehicleInfo.TuneRadio": {
+
+                    this.VITuneRadioRequestID = request.id;
+                    SDL.RadioModel.radioTune(request.params);
+
+                    break;
+                }
+                case "VehicleInfo.TuneUp": {
+
+                    SDL.RadioModel.tuneUp();
+                    FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, "VehicleInfo.TuneUp");
+
+                    break;
+                }
+                case "VehicleInfo.TuneDown": {
+
+                    SDL.RadioModel.tuneDown();
+                    FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, "VehicleInfo.TuneDown");
+
+                    break;
+                }
+                case "VehicleInfo.PrevTrack": {
+                    Em.Logger.log("FFW.VehicleInfo,OnRPCRequest VehicleInfo.PrevTrack");
+
+                    SDL.MediaController.currentSelectedPlayer.onPrevTrackRequest(request.params);
+                    FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, "VehicleInfo.PrevTrack");
+                    FFW.VehicleInfo.sendPlayerDetails();
+
+                    break;
+                }
+                case "VehicleInfo.PlayTrack": {
+                    Em.Logger.log("FFW.VehicleInfo,OnRPCRequest VehicleInfo.PlayTrack");
+
+                    SDL.MediaController.currentSelectedPlayer.onPlayTrackRequest(request.params);
+                    FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, "VehicleInfo.PlayTrack");
+                    FFW.VehicleInfo.sendPlayerDetails();
+
+                    break;
+                }
+                case "VehicleInfo.NextTrack": {
+                    Em.Logger.log("FFW.VehicleInfo,OnRPCRequest VehicleInfo.NextTrack");
+
+                    SDL.MediaController.currentSelectedPlayer.onNextTrackRequest(request.params);
+                    FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, "VehicleInfo.NextTrack");
+                    FFW.VehicleInfo.sendPlayerDetails();
+
+                    break;
+                }
+                default: {
+                    // statements_def
+                    break;
+                }
             }
         }
     },
@@ -287,11 +375,60 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
                 "jsonrpc": "2.0",
                 "id": id,
                 "result": {
+                    "code": resultCode, // type (enum) from SDL protocol
+                    "method": method
+                }
+            };
+            this.client.send(JSONMessage);
+        }
+    },
+
+    /**
+     * Send error response from onRPCRequest
+     *
+     * @param {Number}
+     *            resultCode
+     * @param {Number}
+     *            id
+     * @param {String}
+     *            method
+     */
+    scanResponse: function(resultCode, id, method, message) {
+
+        Em.Logger.log("FFW." + method + "Response");
+
+        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": method == "VehicleInfo.StartScan" ? this.VIStartScanRequestID : this.VIStopScanRequestID,
+                "result": {
                     "code": resultCode,
                     "method": method
                 }
             };
             this.client.send(JSONMessage);
+        } else {
+            // send repsonse
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "id": method == "VehicleInfo.StartScan" ? this.VIStartScanRequestID : this.VIStopScanRequestID,
+                "error": {
+                    "code": resultCode,
+                    "message": message,
+                    "data": {
+                        "method": method
+                    }
+                }
+            };
+            this.client.send(JSONMessage);
+        }
+
+        if (method == "VehicleInfo.StartScan") {
+            this.VIStartScanRequestID = null;
+        } else {
+            this.VIStopScanRequestID = null;
         }
     },
 
@@ -321,6 +458,97 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
 
             this.client.send(JSONMessage);
         }
+    },
+
+    /**
+     * Notification about changed on HMI screen radio presets send to SDL
+     *
+     * @param {Object}
+     */
+    OnPresetsChanged: function(presets) {
+
+        Em.Logger.log("FFW.VehicleInfo.OnPresetsChanged Notification");
+
+        // send repsonse
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "method": "VehicleInfo.OnPresetsChanged",
+            "params": {
+                "customPresets": presets
+            }
+        };
+        this.client.send(JSONMessage);
+
+    },
+
+    /**
+     * Notification When any of current radio tuner details are changed
+     *
+     * @param {Object}
+     */
+    OnRadioDetails: function(data) {
+
+        Em.Logger.log("FFW.VehicleInfo.OnRadioDetails Notification");
+
+        // send repsonse
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "method": "VehicleInfo.OnRadioDetails",
+            "params": {
+            }
+        };
+
+        for (var key in data) {
+            JSONMessage.params[key] = data[key];
+        }
+        this.client.send(JSONMessage);
+
+    },
+
+    /**
+     * Send response for request GetRadioDetails
+     *
+     * @param {Object}
+     */
+    GetRadioDetails: function(request) {
+
+        Em.Logger.log("FFW.VehicleInfo.GetRadioDetails Response");
+
+        // send repsonse
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "id": id,
+            "method": "VehicleInfo.GetRadioDetails",
+            "result": {
+                "code": resultCode,
+                "method": method
+            }
+        };
+
+        for (var key in SDL.RadioModel.radioDetails) {
+            JSONMessage.result[key] = SDL.RadioModel.radioDetails[key];
+        }
+        this.client.send(JSONMessage);
+    },
+
+    /**
+     * Notification about trigered action by user touchstart
+     *
+     */
+    OnControlChanged: function() {
+
+        Em.Logger.log("FFW.VehicleInfo.OnControlChanged Notification");
+
+        // send repsonse
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "method": "VehicleInfo.OnControlChanged",
+            "params": {
+                "reason": "DRIVER_FOCUS"
+            }
+        };
+        this.client.send(JSONMessage);
+
     },
 
     /**
@@ -477,5 +705,51 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
         };
 
         this.client.send(JSONMessage);
+    },
+    /**
+     * Notification when have action in player
+     *
+     * @param {Object}
+     */
+    OnPlayerDetails: function (data) {
+
+        Em.Logger.log("FFW.VehicleInfo.OnPlayerDetails Notification");
+
+        // send response
+        var JSONMessage = {
+            "jsonrpc": "2.0",
+            "method": "VehicleInfo.OnPlayerDetails",
+            "params": {
+            }
+        };
+
+        for (var key in data) {
+            JSONMessage.params[key] = data[key];
+        }
+
+        this.client.send(JSONMessage);
+
+    },
+
+    sendPlayerDetails : function(){
+        var player = SDL.MediaController.get('currentSelectedPlayer');
+
+        if(player){
+            var media = player.data.get('selectedItem'),
+            params = {
+                "songInfo":{
+                    "name": media.name,
+                    "artist": media.artist,
+                    "genre": media.genre,
+                    "album": media.album,
+                    "year": media.year,
+                    "duration": media.duration,
+                    "currentTime" : player.get('currentTime')
+                },
+                "model" : player.name
+            };
+
+            FFW.VehicleInfo.OnPlayerDetails(params);
+        }
     }
 })

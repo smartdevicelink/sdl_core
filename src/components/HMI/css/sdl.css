@@ -234,12 +234,19 @@
 	text-overflow: ellipsis;
 	color: white;
 }
+#tuneButtons .preset-item>span{
+    width: 77px;
+    text-align: center;
+    left: 0;
+}
 
-#sdl_view_container .preset-items {
+#sdl_view_container .preset-items,
+#radio_view_container .preset-items{
 	width: 468px;
 }
 
-#sdl_view_container .main-preset-buttons-wraper .preset-item.a3,#sdl_view_container .main-preset-buttons-wraper .preset-item.a6
+#sdl_view_container .main-preset-buttons-wraper .preset-item.a3,
+#sdl_view_container .main-preset-buttons-wraper .preset-item.a6
 	{
 	width: 155px;
 }
@@ -719,7 +726,7 @@
 }
 
 /* Alert, AudioPassThruPopUp popup*/
-#AlertManeuverPopUp.AlertManeuverPopUp,#AudioPassThruPopUp.AudioPassThruPopUp,#AlertPopUp.AlertPopUp
+#AlertManeuverPopUp.AlertManeuverPopUp,#AudioPassThruPopUp.AudioPassThruPopUp,#AlertPopUp.AlertPopUp,#SwitchPopUp.SwitchPopUp
 	{
 	opacity: 0;
 	left: 200px;
@@ -734,7 +741,11 @@
 	display: none;
 }
 
-#AlertManeuverPopUp .applicationName,#AudioPassThruPopUp .applicationName,#AlertPopUp .applicationName
+#SwitchPopUp.SwitchPopUp {
+    height: 260px;
+}
+
+#AlertManeuverPopUp .applicationName,#AudioPassThruPopUp .applicationName,#AlertPopUp .applicationName, #SwitchPopUp .applicationName
 	{
 	width: 380px;
 	left: 10px;
@@ -782,6 +793,26 @@
 	text-overflow: ellipsis;
 }
 
+#SwitchPopUp .message1{
+    text-align: center;
+    font-size: 23px;
+    line-height: 30px;
+    overflow: hidden;
+    word-wrap: break-word;
+    position: relative;
+    margin-top: 16px;
+}
+
+#SwitchPopUp .message2{
+    text-align: center;
+    font-size: 23px;
+    line-height: 30px;
+    overflow: hidden;
+    word-wrap: break-word;
+    position: relative;
+    margin-top: 24px;
+}
+
 #AudioPassThruPopUp .message2,#AlertPopUp .message2 {
 	top: 70px;
 	left: 105px;
@@ -806,13 +837,12 @@
 	text-overflow: ellipsis;
 }
 
-#AlertManeuverPopUp.AlertManeuverActive,#AudioPassThruPopUp.AudioPassThruActive,#AlertPopUp.AlertActive
-	{
+#AlertManeuverPopUp.AlertManeuverActive,#AudioPassThruPopUp.AudioPassThruActive,#AlertPopUp.AlertActive,#SwitchPopUp.active{
 	opacity: 1;
 	display: block;
 }
 
-#baseNavigation .softButton,#AlertManeuverPopUp .softButton,#AudioPassThruPopUp .softButton,#AlertPopUp .softButton
+#AlertManeuverPopUp .softButton,#AudioPassThruPopUp .softButton,#AlertPopUp .softButton, #SwitchPopUp .softButton
 	{
 	border: 1px solid #393939;
 	border-radius: 3px;
@@ -845,7 +875,16 @@
 	top: 180px;
 	left: 110px;
 }
-
+#SwitchPopUp .buttonOk{
+    margin-top: 38px;
+    width: 180px;
+    margin-left: 8px;
+}
+#SwitchPopUp .buttonCancel{
+    margin-top: 38px;
+    width: 180px;
+    margin-left: 8px;
+}
 #AlertPopUp .alertSoftButtons {
 	margin-left: 8px;
 	top: 120px;

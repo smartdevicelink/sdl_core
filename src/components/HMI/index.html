@@ -12,6 +12,7 @@
         <link rel="stylesheet" type="text/css" href="css/settings.css" />
         <link rel="stylesheet" type="text/css" href="css/media.css" />
         <link rel="stylesheet" type="text/css" href="css/sdl.css" />
+        <link rel="stylesheet" type="text/css" href="css/home.css" />
 		 
 		<!--Libs-->
 
@@ -33,17 +34,20 @@
         <!-- Framework -->
 		<script type="text/javascript" src="ffw/Framework.js"></script>
 		<script type="text/javascript" src="ffw/WebSocket.js"></script>
-		<script type="text/javascript" src="ffw/RPCObserver.js"></script>	
-		<script type="text/javascript" src="ffw/RPCClient.js"></script>	
+		<script type="text/javascript" src="ffw/RPCObserver.js"></script>
+		<script type="text/javascript" src="ffw/RPCClient.js"></script>
 		<script type="text/javascript" src="ffw/ButtonsRPC.js"></script>
 		<script type="text/javascript" src="ffw/UIRPC.js"></script>
 		<script type="text/javascript" src="ffw/NavigationRPC.js"></script>
 		<script type="text/javascript" src="ffw/TTSRPC.js"></script>
 		<script type="text/javascript" src="ffw/VRRPC.js"></script>
+        <script type="text/javascript" src="ffw/Scale.js"></script>
         <script type="text/javascript" src="ffw/VehicleInfoRPC.js"></script>
 		<script type="text/javascript" src="ffw/BasicCommunicationRPC.js"></script>
+        <script type="text/javascript" src="ffw/TDKCommunicationRPC.js"></script>
 
 		<!-- APP -->
+		<script type="text/javascript" src="app/Flags.js"></script>
 		<script type="text/javascript" src="app/SDLApp.js"></script>
 		<!-- locales -->
 		<script type="text/javascript" src="locale/eng.js"></script>
@@ -59,20 +63,29 @@
 		<script type="text/javascript" src="app/controlls/Label.js"></script>
 		<script type="text/javascript" src="app/controlls/ScrollBar.js"></script>
 		<script type="text/javascript" src="app/controlls/List.js"></script>
-        <script type="text/javascript" src="app/controlls/Indicator.js"></script>
+		<script type="text/javascript" src="app/controlls/Indicator.js"></script>
         <script type="text/javascript" src="app/controlls/QWERTYLayout.js"></script>
         <script type="text/javascript" src="app/controlls/QWERTZLayout.js"></script>
         <script type="text/javascript" src="app/controlls/AZERTYLayout.js"></script>
         <script type="text/javascript" src="app/controlls/MenuList.js"></script>
         <script type="text/javascript" src="app/controlls/ScrollableText.js"></script>
+        
+        <script type="text/javascript" src="app/controlls/sdl/PresetButton.js"></script>
+        <script type="text/javascript" src="app/controlls/RadioPresetButton.js"></script>
 
 		<!-- utils -->
-        <script type="text/javascript" src="app/util/Audio.js"></script>
+		<script type="text/javascript" src="app/util/Audio.js"></script>
         <script type="text/javascript" src="app/util/StreamAudio.js"></script>
 
 		<!-- Models -->
 
-       	<script type="text/javascript" src="app/model/media/CDModel.js"></script>
+        <script type="text/javascript" src="app/model/media/PlaylistItem.js"></script>
+        <script type="text/javascript" src="app/model/media/MediaCDPlayer.js"></script>
+        <script type="text/javascript" src="app/model/media/Playlist.js"></script>
+
+        <script type="text/javascript" src="app/model/media/CDModel.js"></script>
+        <script type="text/javascript" src="app/model/media/USBModel.js"></script>
+        <script type="text/javascript" src="app/model/media/RadioModel.js"></script>
 
 		<script type="text/javascript" src="app/model/PhoneModel.js"></script>
 
@@ -106,9 +119,12 @@
 		<!-- phone views -->
         <script type="text/javascript" src="app/view/phone/dialpadView.js"></script>
 
-        <!-- media views -->
+		<!-- media views -->
         <script type="text/javascript" src="app/view/media/sdl/controllsView.js"></script>
 		<script type="text/javascript" src="app/view/media/common/LeftMenuView.js"></script>
+        <script type="text/javascript" src="app/view/media/player/radioView.js"></script>
+        <script type="text/javascript" src="app/view/media/player/cdView.js"></script>
+        <script type="text/javascript" src="app/view/media/player/usbView.js"></script>
         <script type="text/javascript" src="app/view/media/playerView.js"></script>
         <script type="text/javascript" src="app/view/media/sdlmediaView.js"></script>
 
@@ -120,6 +136,10 @@
         <script type="text/javascript" src="app/view/info/devicelistView.js"></script>
         <script type="text/javascript" src="app/view/info/nonMediaView.js"></script>
 
+        <script type="text/javascript" src="app/view/home/widgetClimateView.js"></script>
+        <script type="text/javascript" src="app/view/home/widgetMediaView.js"></script>
+        <script type="text/javascript" src="app/view/home/widgetNavigationView.js"></script>
+        <script type="text/javascript" src="app/view/home/widgetPhoneView.js"></script>
         <!-- settings views -->
 
         <script type="text/javascript" src="app/view/settings/policies/appPermissionsListView.js"></script>
@@ -129,7 +149,6 @@
         <script type="text/javascript" src="app/view/settings/policies/statisticsInfoView.js"></script>
         <script type="text/javascript" src="app/view/settings/policies/systemErrorView.js"></script>
         <script type="text/javascript" src="app/view/settings/policiesView.js"></script>
-
         <script type="text/javascript" src="app/view/homeView.js"></script>
         <script type="text/javascript" src="app/view/mediaView.js"></script>
         <script type="text/javascript" src="app/view/infoView.js"></script>
@@ -161,7 +180,8 @@
         <script type="text/javascript" src="app/view/sdl/shared/keyboard.js"></script>
         <script type="text/javascript" src="app/view/sdl/TTSPopUp.js"></script>
         <script type="text/javascript" src="app/view/sdl/AlertPopUp.js"></script>
-        <script type="text/javascript" src="app/view/sdl/PopUp.js"></script>
+        <script type="text/javascript" src="app/view/sdl/SwitchPopUp.js"></script>
+	<script type="text/javascript" src="app/view/sdl/PopUp.js"></script>
         <script type="text/javascript" src="app/view/sdl/AlertManeuverPopUp.js"></script>
         <script type="text/javascript" src="app/view/sdl/AudioPassThruPopUp.js"></script>
         <script type="text/javascript" src="app/view/sdl/VRPopUp.js"></script>

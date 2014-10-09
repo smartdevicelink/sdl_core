@@ -187,6 +187,13 @@ SDL.SDLModel = Em.Object.create({
     AudioPassThruState: false,
 
     /**
+     * Id of current processed VehicleInfo.GrantAccess request
+     *
+     * @param {Number}
+     */
+    controlRequestID: null,
+
+    /**
      * Current device information
      *
      * @type {Object}
@@ -370,8 +377,6 @@ SDL.SDLModel = Em.Object.create({
         "GENERIC_ERROR"             : 22,
         "USER_DISALLOWED"           : 23
     },
-
-
 
     /**
      * Info navigationApp data for ShowConstantTBT request
@@ -1305,6 +1310,28 @@ SDL.SDLModel = Em.Object.create({
     },
 
     /**
+     * SwitchPopUp activation
+     *
+     * @param {Object}
+     */
+    giveControl: function (message) {
+        SDL.SwitchPopUp.activate(message.params);
+        SDL.SDLModel.controlRequestID = message.id;
+    },
+
+    resetControl: function () {
+        if (SDL.SDLAppController && SDL.SDLAppController.model && SDL.SDLAppController.model.givenControl) {
+            SDL.SDLAppController.model.set('givenControl', false);
+            FFW.VehicleInfo.OnControlChanged();
+        }
+    },
+
+    cancelControl: function (request) {
+        SDL.SDLController.getApplicationModel(request.params.appID).set('givenControl', false);
+        FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, "VehicleInfo.CancelAccess");
+    },
+
+    /**
      * Prompt activation
      *
      * @param {Object}
@@ -1399,17 +1426,6 @@ SDL.SDLModel = Em.Object.create({
             }
         }
     },
-//
-//    /**
-//     * SDL VR DeleteCommand response handler delete command from voice
-//     * recognition window
-//     *
-//     * @param {Number}
-//     */
-//    deleteCommandVR: function (commandID) {
-//
-//        SDL.VRPopUp.DeleteCommand(commandID);
-//    },
 
     onDeactivateApp: function (target, appID) {
 

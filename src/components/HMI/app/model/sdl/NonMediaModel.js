@@ -74,6 +74,7 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
                 uiPerformInteraction: null
             }));
 
+            this.set('givenControl', false);
             this.set('constantTBTParams', null);
 
             this.set('VRCommands', []);

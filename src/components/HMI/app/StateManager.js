@@ -223,6 +223,10 @@ var StateManager = Em.StateManager.extend({
 
             enter: function () {
 
+                if (SDL.SDLAppController.model) {
+                    SDL.SDLAppController.model.set('active', false);
+                }
+
                 this._super();
                 if (SDL.SDLModel.stateLimited) {
                     
@@ -230,7 +234,80 @@ var StateManager = Em.StateManager.extend({
                     SDL.SDLModel.stateLimited = null;
                     SDL.SDLModel.set('limitedExist', false);
                 }
-            }
+	        },
+
+            radio: Em.State.create({
+
+                exit: function() {
+
+                    this._super();
+
+                    SDL.MediaController.deactivateRadio();
+                }
+            }),
+	    	
+            cd: Em.State.create({
+
+                exit: function(){
+                    this._super();
+                    SDL.MediaController.deactivateCD();
+                    SDL.MediaController.currentSelectedPlayer.pause();
+                },
+
+                options: Em.State.create({
+
+                }),
+
+                browse: Em.State.create({
+                    browseall: Em.State.create({
+                        enter: function(){
+                            this._super();
+                            // SDL.MediaController.resetDirectTune();
+                        }
+                    })
+                }),
+
+                moreinfo:Em.State.create({
+                })
+
+            }),
+
+            usb: Em.State.create({
+                exit: function(){
+                    this._super();
+                    SDL.MediaController.deactivateUSB();
+                    SDL.MediaController.currentSelectedPlayer.pause();
+                    //SDL.MediaController.resetUpdatingMessage();
+                },
+
+                options: Em.State.create({
+                    deviceInformation: Em.State.create({
+                    })
+
+                }),
+
+                browse: Em.State.create({
+                    enter: function() {
+                        this._super();
+                        // reset Messages
+                        //SDL.MediaController.resetUpdatingMessage();
+                    },
+                    browseall: Em.State.create({
+                        enter: function(){
+                            this._super();
+                            //SDL.MediaController.resetDirectTune();
+                        }
+                    })
+                }),
+
+                moreinfo:Em.State.create({
+                    enter: function() {
+                        this._super();
+                        // reset Messages
+                        //SDL.MediaController.resetUpdatingMessage();
+                    }
+                })
+            })
         }),
 
         sdlmedia: Em.State.create({

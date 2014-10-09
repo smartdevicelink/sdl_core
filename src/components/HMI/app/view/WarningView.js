@@ -38,6 +38,11 @@ SDL.warningView = Em.ContainerView
             'fade:fadeAnimation:fadeWarning', 'hide:inactive_state',
         ],
 
+        afterRender: function(){
+
+            FFW.Scale.scale();
+        },
+
         elementId: 'warning_view',
 
         childViews: [

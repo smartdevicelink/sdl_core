@@ -55,6 +55,8 @@ SDL.SDLAppController = Em.Object.create({
         SDL.AppPermissionsListView.showAppList();
     }.observes('SDL.SDLModel.registeredApps.@each'),
 
+    isControlButtonsOpen: false,
+
     /**
      * Handeler for command button press
      *
@@ -209,5 +211,9 @@ SDL.SDLAppController = Em.Object.create({
                 "appID": apps[i].appID
             });
         }
+    },
+
+    showHideControlButtons: function() {
+        this.toggleProperty('isControlButtonsOpen')
     }
 });

@@ -60,7 +60,7 @@ div {
 
 /* Home view */
 #home {
-    background: url(../images/home/home_main_image.png) no-repeat;
+    background: url(../images/home/home_screen.png) no-repeat;
     width: 800px;
     height: 369px;
     top: 56px;
@@ -69,7 +69,7 @@ div {
 /* Climate Status */
 #status_climate {
     bottom: 0px;
-    right: 0px;
+    right: 28px;
     text-align: right;
     font-size: 21px;
     width: 324px;
@@ -92,7 +92,7 @@ div {
 /* Navigation Status */
 #status_nav {
     top: 0px;
-    right: 0px;
+    right: 28px;
     text-align: right;
     font-size: 21px;
     width: 324px;
@@ -130,7 +130,7 @@ div {
     width: 295px;
     height: 100px;
     z-index: 1;
-    border-radius: 10 PX;
+    border-radius: 10px;
     top: 8px;
     -webkit-transition: opacity 1s ease-in-out;
     display: none;
@@ -324,7 +324,7 @@ div {
 #clock {
     font-size: 28px;
     text-align: center;
-    width: 225px;
+    width: 160px;
     height: 50px;
     position: relative;
     float: left;
@@ -345,7 +345,7 @@ div {
 #app_top_menu_cont {
     z-index: 10000;
     top: 0px;
-    left: 275px;
+    left: 261px;
     position: relative;
     pointer-events: none;
 }
@@ -545,7 +545,6 @@ div {
 .inactive_state {
     -webkit-transform: translateX(-2000px);
     -moz-transform: translateX(-2000px);
-    overflow: hidden;
 }
 
 .active_state {
@@ -679,21 +678,9 @@ margin-top: 90px;
     cursor: pointer;
     top: 60px;
     left: 347px;
-
-]
-border:
-
-1
-px solid #393939
-
-;
--webkit-border-radius:
-
-3
-px
-
-;
-    }
+    border: 1px solid #393939;
+    -webkit-border-radius: 3px;
+}
 
 #frw .ico {
     top: 13px;
@@ -900,6 +887,7 @@ px
 /* Disabled list items */
 .disabled {
     color: #999;
+    cursor: default!important;
 }
 
 .disabled .ico, .disabled .right_ico {
@@ -923,6 +911,36 @@ px
 
 #sing.yellow {
     background: url(../images/help/yellow_help.png) no-repeat;
+}
+
+#sdlControlStatus {
+    width: 84px;
+    height: 53px;
+    left: 163px;
+    cursor: pointer;
+    z-index: 5000;
+    overflow: hidden;
+    pointer-events: none;
+    background: none;
+}
+
+#sdlControlStatus .icon {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: url("../images/common/car.png") 50% 50% no-repeat;
+}
+#sdlControlStatus.mobile .icon {
+    background: url("../images/common/phone.png") 50% 50% no-repeat;
+}
+
+#sdlControlStatus .mask {
+    width: 93px;
+    height: 53px;
+    z-index: 5000;
+    -webkit-transform: skewX(-43deg);
+    pointer-events: all;
+    left: -27px;
 }
 
 /******************** FOR FAQ ********************************/
@@ -1499,7 +1517,7 @@ to {
     float: left;
 }
 
-/* navigationApp select lable*/
+/* navigation select lable*/
 #sdnav_label {
     position: relative;
     float: left;

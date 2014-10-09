@@ -33,11 +33,32 @@
 
 SDL.CDModel = Em.Object.create( {
     active: true,
-
+    /** CD Player*/
     statusBar: 'The Electric Broncos',
+    init: function(){
+        this._super();
+        this.set('player',SDL.MediaCDPlayer.create({data: this.PlayList}));
+        this.set('player.name', 'CD');
+	this.set('active', true);
+    },
 
-    init: function() {
+    PlayList: SDL.Playlist.create({
 
-        this.set('active', true);
-    }
+        selectedIndex: 0,
+
+        items: {
+            0:SDL.PlaylistItem.create({nameBinding: 'SDL.locale.label.view_media_track_1', album:'Lazer horse',artist:'The Electric Broncos',genreBinding:'MFT.locale.label.view_media_genre_electronic',disk:'Lazerhorse',duration:123}),
+            1:SDL.PlaylistItem.create({nameBinding: 'SDL.locale.label.view_media_track_2', album:'Lazer horse',artist:'The Electric Broncos',genreBinding:'MFT.locale.label.view_media_genre_electronic',disk:'Lazerhorse',duration:123}),
+            2:SDL.PlaylistItem.create({nameBinding: 'SDL.locale.label.view_media_track_3', album:'Lazer horse',artist:'The Electric Broncos',genreBinding:'MFT.locale.label.view_media_genre_electronic',disk:'Lazerhorse',duration:123}),
+            3:SDL.PlaylistItem.create({nameBinding: 'SDL.locale.label.view_media_track_4', album:'Lazer horse',artist:'The Electric Broncos',genreBinding:'MFT.locale.label.view_media_genre_electronic',disk:'Lazerhorse',duration:123}),
+            4:SDL.PlaylistItem.create({nameBinding: 'SDL.locale.label.view_media_track_5', album:'Lazer horse',artist:'The Electric Broncos',genreBinding:'MFT.locale.label.view_media_genre_electronic',disk:'Lazerhorse',duration:123}),
+            5:SDL.PlaylistItem.create({nameBinding: 'SDL.locale.label.view_media_track_6', album:'Lazer horse',artist:'The Electric Broncos',genreBinding:'MFT.locale.label.view_media_genre_electronic',disk:'Lazerhorse',duration:123}),
+            6:SDL.PlaylistItem.create({nameBinding: 'SDL.locale.label.view_media_track_7', album:'Lazer horse',artist:'The Electric Broncos',genreBinding:'MFT.locale.label.view_media_genre_electronic',disk:'Lazerhorse',duration:123}),
+            7:SDL.PlaylistItem.create({nameBinding: 'SDL.locale.label.view_media_track_8', album:'Lazer horse',artist:'The Electric Broncos',genreBinding:'MFT.locale.label.view_media_genre_electronic',disk:'Lazerhorse',duration:123}),
+            8:SDL.PlaylistItem.create({nameBinding: 'SDL.locale.label.view_media_track_9', album:'Lazer horse',artist:'The Electric Broncos',genreBinding:'MFT.locale.label.view_media_genre_electronic',disk:'Lazerhorse',duration:123}),
+            9:SDL.PlaylistItem.create({nameBinding: 'SDL.locale.label.view_media_track_10',album:'Lazer horse',artist:'The Electric Broncos',genreBinding:'MFT.locale.label.view_media_genre_electronic',disk:'Lazerhorse',duration:123})
+        },
+
+        homeWidgetIcon: 'images/media/cd-ico-home.png'
+    })
 });

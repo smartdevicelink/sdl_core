@@ -14,6 +14,18 @@
 	line-height: 48px;
 }
 
+#media_usbButton {
+    font-size: 18px;
+    padding-left: 48px;
+    line-height: 48px;
+}
+
+#media_radioButton {
+    font-size: 18px;
+    padding-left: 48px;
+    line-height: 48px;
+}
+
 #media_sdlButton {
 	font-size: 18px;
 	line-height: 48px;
@@ -127,8 +139,8 @@
 	width: 468px;
 	height: 100px;
 	float: left;
-	left: 165px;
-	top: 290px;
+	left: 4px;
+	top: 222px;
 	z-index: 503;
 }
 
@@ -148,15 +160,93 @@
     vertical-align: top;
     border-right: 1px solid #393939;
     border-bottom: 1px solid #393939;
-	width: 92.6px;
 	height: 49px;
 	cursor: pointer;
+    width: 155px;
+}
+
+#sdl_media_presetButtons_wrapper .preset-item {
+
+    width: 92.6px;
+}
+
+#sdl_media_presetButtons.main-preset-buttons-wraper {
+    top: 291px;
+    left: 165px;
+}
+
+#tuneButtons .preset-item{
+    width: 77px;
+}
+
+#tuneButtons .clear .ico{
+    margin-top: 15px;
+    margin-left: 22px;
+}
+
+.right-stock {
+    position: absolute;
+    margin-right: 4px;
+    float: right;
+    width: 150px;
+    border: 1px solid #393939;
+    border-bottom: none;
+    border-radius: 3px;
+    top: 20px;
+    left: 485px;
+}
+
+.right-stock .hidden {
+    display: none;
+}
+
+.player-right-stock {
+    position: absolute;
+    margin-right: 4px;
+    float: right;
+    width: 150px;
+    border: 1px solid #393939;
+    border-bottom: none;
+    border-radius: 3px;
+    top: 20px;
+    left: 485px;
+}
+
+.rs-item {
+    position: relative;
+    width: 140px;
+    height: 49px;
+    cursor: pointer;
+    border-bottom: 1px solid #333;
+    font-size: 18px;
+    line-height: 46px;
+    padding-left: 10px;
+}
+
+.rs-item.notpressed {
+    background: url(../images/list/list_item_bg.png) repeat-x;
+}
+
+.rs-item.pressed {
+    background: url(../images/list/list_item_pressed.png) repeat-x !important;
+}
+
+.rs-item > .ico {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    width: 24px;
+    height: 50px;
 }
 
 .main-preset-buttons-wraper .preset-item.a0 {
 	background: url(../images/media/bcs-item_bgL.png) no-repeat;
 	border-right: 1px solid #393939;
 	border-bottom: 1px solid #393939;
+}
+
+.tuneButtons .preset-item.a0 {
+    background: url(../images/media/bcs-item_bgL-small.png) no-repeat;
 }
 
 .main-preset-buttons-wraper .preset-item.a0.pressed {
@@ -176,7 +266,7 @@
 
 .main-preset-buttons-wraper .preset-item.a1.pressed {
 	background: url(../images/media/bcs-item_bgS_pressed.png) no-repeat;
-	width: 157px;
+	/*width: 157px;*/
 }
 
 .main-preset-buttons-wraper .preset-item.a1.active {
@@ -303,7 +393,7 @@
 .bc-item-big {
 	position: relative;
 	float: left;
-	width: 156px;
+	width: 155px;
 	height: 100px;
 	line-height: 100px;
 	text-align: center;
@@ -332,6 +422,14 @@
 	background: url(../images/media/cd_play_btn.png) no-repeat;
 }
 
+.bc-item-big.play-usb,
+.bc-item-big.play-cd{
+    width: 157px;
+    height: 98px;
+    border-right: 1px solid #393939;
+    cursor: pointer;
+    background: url(../images/media/cd_play_btn.png) no-repeat;
+}
 .playIcon {
 	position: absolute;
 	left: 66px;
@@ -363,6 +461,28 @@
 	background: url(../images/media/cd-next-btn_pressed.png) no-repeat;
 }
 
+#usb_logo {
+    position: absolute;
+    top: 90px;
+    right: 10px;
+    border: 1px solid #393939;
+    border-radius: 2px;
+    width: 109px;
+    height: 109px;
+    background: url(../images/media/small-fall-image.png) no-repeat;
+}
+
+#cd_logo {
+    position: absolute;
+    top: 90px;
+    right: 10px;
+    border: 1px solid #393939;
+    border-radius: 2px;
+    width: 109px;
+    height: 109px;
+    background: url(../images/media/small-lazerhorse-image.png) no-repeat;
+}
+
 #bt-bg {
 	position: relative;
 	float: left;
@@ -392,8 +512,8 @@
 .player_controlls {
 	z-index: 199;
 	position: absolute;
-	top: 237px;
-	left: 13px;
+	top: 222px;
+	left: 4px;
 	width: 468px;
 	height: 99px;
 	background: url("../images/media/btn_bg.png") repeat;
@@ -401,7 +521,7 @@
 	-webkit-border-radius: 3px;
 }
 
-#sdl_view_container .track-info {
+#sdl_view_container .track-info{
 	left: 165px;
 	top: 55px;
 }
@@ -470,6 +590,45 @@
 	color: #999999;
 }
 
+.track-info>.STAName {
+    font-size: 22px;
+    top: 30px;
+    left: 8px;
+    position: absolute;
+}
+.track-info>.genre {
+    position: absolute;
+    top: 30px;
+    right: 6px;
+    width: 200px;
+    text-align: right;
+    font-size: 24px;
+}
+.track-info>.songInfo {
+    text-transform: uppercase;
+    position: absolute;
+    font-size: 20px;
+    top: 164px;
+    left: 2px;
+    width: 466px;
+}
+
+#radio_view_container .track-info>.station {
+    position: absolute;
+    top: 50px;
+    left: 8px;
+    font-size: 62px;
+ }
+
+#radio_view_container .divider_o {
+    position: absolute;
+    top: 130px;
+    left: 0px;
+    width: 470px;
+    height: 1px;
+    background: url("../images/media/divider_o.png") no-repeat;
+}
+
 .divider_o {
 	position: absolute;
 	top: 120px;
@@ -513,7 +672,7 @@
 }
 
 #media_player_view_container {
-	background: url(../images/media/player_view.png) no-repeat;
+	/*background: url(../images/media/player_view.png) no-repeat;*/
 	width: 635px;
 	height: 323px;
 	top: 70px;
@@ -521,8 +680,30 @@
 	z-index: 501;
 }
 
-#sdl_view_container .ffw_list_menu {
+#sdl_view_container .ffw_list_menu,
+#radio_view_container .ffw_list_menu{
 	top: 90px;
 	left: 650px;
 	width: 140px;
+}
+
+#media_fm_tuneButtons {
+    margin: 4px 5px 0 5px;
+}
+
+#media_fm_tuneButtons .ffw-button {
+    width: 60px;
+    height: 40px;
+    font-size: 22px;
+    text-align: center;
+    line-height: 40px;
+    display: inline-block;
+    vertical-align: top;
+    border: 1px solid #333;
+    border-radius: 3px;
+    position: relative;
+    margin: 0 4px;
+}
+#tuneButtons .ffw-button.disabled > span {
+    color: #999;
 }
