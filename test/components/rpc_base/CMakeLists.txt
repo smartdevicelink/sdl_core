@@ -1,4 +1,5 @@
 include_directories (
+  ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/components/dbus/include
   ${CMAKE_SOURCE_DIR}/src/components/rpc_base/include
   ${GMOCK_INCLUDE_DIRECTORY}

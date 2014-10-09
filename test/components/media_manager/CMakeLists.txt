@@ -1,4 +1,5 @@
 include_directories (
+  ${LOG4CXX_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
   ../../../src/components/media_manager/include
   ../../../src/components/utils/include/

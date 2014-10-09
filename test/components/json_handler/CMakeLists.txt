@@ -7,6 +7,7 @@ GenerateInterface("test_JSONHandler_v4_protocol_v1_2_no_extra.xml" "Gen::test::c
 include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
+  ${LOG4CXX_INCLUDE_DIRECTORY}
 
   ${CMAKE_SOURCE_DIR}/src/components/utils/include
   ${CMAKE_SOURCE_DIR}/src/components/smart_objects/include

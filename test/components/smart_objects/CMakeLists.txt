@@ -4,6 +4,7 @@ add_definitions(-DUNIT_TESTS)
 add_subdirectory(./SchemaItem)
 
 include_directories (
+  ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_SOURCE_DIR}/src/components/utils/include
   ${GMOCK_INCLUDE_DIRECTORY}
   ../../../src/components/smart_objects/include

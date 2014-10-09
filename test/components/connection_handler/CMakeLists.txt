@@ -1,4 +1,5 @@
 include_directories (
+  ${LOG4CXX_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
   ./include
   ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include

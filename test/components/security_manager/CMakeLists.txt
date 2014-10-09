@@ -29,6 +29,7 @@
 # POSSIBILITY OF SUCH DAMAGE.
 
 include_directories(
+  ${LOG4CXX_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
   ./include/
   ../../../src/thirdPartyLibs/gmock-1.7.0/include
