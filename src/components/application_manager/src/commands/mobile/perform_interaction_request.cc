@@ -120,6 +120,18 @@ void PerformInteractionRequest::Run() {
 
   if ((0 == (*message_)
       [strings::msg_params][strings::interaction_choice_set_id_list].length()) &&
+      (mobile_apis::InteractionMode::BOTH ==
+            static_cast<mobile_apis::InteractionMode::eType>(
+                (*message_)[strings::msg_params][strings::interaction_mode].asInt()))) {
+    LOG4CXX_ERROR_EXT(
+        logger_,
+        "interactionChoiceSetIDList is empty and InteractionMode=BOTH");
+    SendResponse(false, mobile_apis::Result::INVALID_DATA);
+    return;
+  }
+
+  if ((0 == (*message_)
+      [strings::msg_params][strings::interaction_choice_set_id_list].length()) &&
       (mobile_apis::LayoutMode::KEYBOARD != interaction_layout)) {
     LOG4CXX_ERROR_EXT(
               logger_,
