@@ -72,7 +72,7 @@ sudo apt-get upgrade
 ```
 
 ## Required RPCs
-There are several RPCs that are "required" to be implemented in order for SDL to work across vehicle manufacturers and applications, listed below.  The RPC specification can be found in the [Mobile API Spec](src/interfaces/MOBILE_API.xml).
+There are several RPCs that are "required" to be implemented in order for SDL to work across vehicle manufacturers and applications, listed below.  The RPC specification can be found in the [Mobile API Spec](src/components/interfaces/MOBILE_API.xml).
 
   * RegisterAppInterface
   * UnregisterAppInterface
