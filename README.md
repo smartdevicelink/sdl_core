@@ -1,6 +1,6 @@
 ## Important
 
-The current stable SDL codebase can be found (here)[http://git.projects.genivi.org/?p=smartdevicelink.git;a=shortlog;h=refs/heads/dev/merge_3.5], an updated 3.x version will follow on github and be mirrored to GENIVI ASAP.
+The current stable SDL codebase can be found [here](http://git.projects.genivi.org/?p=smartdevicelink.git;a=shortlog;h=refs/heads/dev/merge_3.5), an updated 3.x version will follow on github and be mirrored to GENIVI ASAP.
 
 # SmartDeviceLink (SDL)
 
