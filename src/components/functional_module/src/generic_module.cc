@@ -2,6 +2,8 @@
 
 namespace functional_modules {
 
+typedef std::deque<utils::SharedPtr<ModuleObserver>>::iterator ModuleObserverIterator;
+
 GenericModule::GenericModule(ModuleID module_id)
   : kModuleId_(module_id) {}
 
@@ -14,13 +16,20 @@ void GenericModule::AddObserver(utils::SharedPtr<ModuleObserver> observer) {
 }
 
 void GenericModule::RemoveObserver(utils::SharedPtr<ModuleObserver> observer) {
-  for (std::deque<utils::SharedPtr<ModuleObserver>>::iterator it = observers_.begin();
+  for (ModuleObserverIterator it = observers_.begin();
        observers_.end() != it;
        ++it) {
     if (*it == observer) {
       observers_.erase(it);
       return;
     }
+  }
+}
+
+void GenericModule::NotifyObservers(ModuleObserver::Errors error) {
+  for (ModuleObserverIterator it = observers_.begin();
+       observers_.end() != it; ++it) {
+    (*it)->OnError(error);
   }
 }
 

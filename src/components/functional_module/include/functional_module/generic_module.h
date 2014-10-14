@@ -59,6 +59,8 @@ class GenericModule {
     virtual ProcessResult ProcessMessage(const Json::Value& msg) = 0;
     void AddObserver(utils::SharedPtr<ModuleObserver> observer);
     void RemoveObserver(utils::SharedPtr<ModuleObserver> observer);
+  protected:
+    void NotifyObservers(ModuleObserver::Errors error);
   private:
     DISALLOW_COPY_AND_ASSIGN(GenericModule);
     const ModuleID kModuleId_;
