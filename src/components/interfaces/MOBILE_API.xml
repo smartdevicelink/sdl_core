@@ -559,7 +559,6 @@
     <element name="MFD3" />
     <element name="MFD4" />
     <element name="MFD5" />
-    <element name="GEN3_8-INCH" internal_name="GEN3_8_INCH" />
   </enum>
 
   <enum name="TextFieldName">

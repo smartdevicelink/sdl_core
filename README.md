@@ -28,10 +28,8 @@ A quick guide to installing, configuring, and running an instance of the SDL Cor
 
 
 ```
-%make 3rd_party
-%sudo make install-3rd_party
 %make
-%make install
+%sudo make install
 %cp bin/mykey.pem src/appMain
 %cp bin/mycert.pem src/appMain
 %sudo updatedb
