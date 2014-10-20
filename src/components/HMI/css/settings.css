@@ -1,0 +1,129 @@
+#settingsView .in_settings_separate_view{
+    top: 48px;
+    width: 800px;
+    height: 382px;
+    background: black;
+    z-index: 5000;
+}
+
+#settingsView .in_settings_separate_view .backButton {
+    top: 35px;
+    width: 48px;
+    height: 48px;
+    border: 1px solid #333;
+    border-radius: 2px;
+    left: 25px;
+}
+#settingsView .in_settings_separate_view .list{
+    height: 251px;
+    width: 700px;
+    top: 106px;
+    left: 50px;
+}
+#settingsView .in_settings_separate_view .list-item{
+    width: 639px;
+    padding-left: 10px;
+}
+
+#settingsView .in_settings_separate_view .label{
+    top: 35px;
+    left: 100px;
+    width: 620px;
+    background: #393939;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 50px;
+    height: 50px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+#settingsView .backButton .ico {
+    margin-top: 13px;
+    margin-left: 8px;
+}
+
+#settings_leftMenu {
+	background: #333;
+	width: 150px;
+	height: 300px;
+	top: 90px;
+}
+
+#settings_leftMenu .menu-item.info_active {
+	background: url("../images/info/menu_active.png") repeat-x;
+}
+
+#settings_leftMenu .menu-item {
+	z-index: 201;
+	position: relative;
+	width: 150px;
+	height: 50px;
+	cursor: pointer;
+}
+
+#settings_leftMenu .menu-item span {
+	position: absolute;
+	left: 50px;
+	width: 100px;
+	height: 50px;
+	font-size: 18px;
+	line-height: 50px;
+	white-space: nowrap;
+	overflow: hidden;
+}
+
+#settings_leftMenu .ico {
+	height: 50px;
+	width: 50px;
+}
+
+#settings_leftMenu .settings_active {
+	background: url("../images/info/menu_active.png") repeat-x;
+}
+
+#settingsView .in_settings_view{
+    position: absolute;
+    top: 48px;
+    left: 153px;
+    width: 647px;
+    height: 384px;
+    float: left;
+    z-index: 1001;
+    margin-top: 70px;
+}
+
+#settingsView .policies_settings_list{
+    height: 251px;
+    width: 598px;
+    left: 10px;
+}
+
+#policies_settings_list .list-content .ffw-button{
+    width: 537px;
+    padding-left: 10px;
+}
+
+#settingsView .settingsButton{
+    float: left;
+    width: 536px;
+    margin-right: 10px;
+    height: 48px;
+    font-size: 20px;
+    line-height: 50px;
+    border: 1px solid #393939;
+    cursor: pointer;
+    padding-left: 10px;
+    position: relative;
+}
+
+#policies_settings_system_error .listSelect,
+#policies_settings_status_info .listSelect{
+    top: 125px;
+    position: absolute;
+    width: 150px;
+    left: 320px;
+    height: 40px;
+    color: white;
+    background: #393939;
+}
