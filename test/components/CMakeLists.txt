@@ -35,6 +35,12 @@ add_subdirectory(./utils)
 # -- rpc_base
 add_subdirectory(./rpc_base)
 
+# --- Functional module
+add_subdirectory(./functional_module)
+
+# --- CAN Module
+add_subdirectory(./can_cooperation)
+
 # --- DBus
 if(${QT_HMI})
     add_subdirectory(./dbus)
