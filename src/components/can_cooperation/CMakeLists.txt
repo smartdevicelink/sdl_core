@@ -9,6 +9,7 @@ include_directories (
 set (SOURCES
     ./src/can_module.cc
     ./src/can_app_extension.cc
+    ./src/can_tcp_connection.cc
 )
 
 add_library("CANCooperation" ${SOURCES})
