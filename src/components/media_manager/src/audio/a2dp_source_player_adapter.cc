@@ -43,7 +43,9 @@
 
 namespace media_manager {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "A2DPSourcePlayerAdapter")
+CREATE_LOGGERPTR_GLOBAL(logger_, "A2DPSourcePlayerAdapter");
+
+const static size_t BUFSIZE = 32;
 
 class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread
     : public threads::ThreadDelegate {
@@ -60,7 +62,6 @@ class A2DPSourcePlayerAdapter::A2DPSourcePlayerThread
 
     pa_simple* s_in, *s_out;
     std::string device_;
-    const int32_t BUFSIZE_;
     bool should_be_stopped_;
     sync_primitives::Lock should_be_stopped_lock_;
 
@@ -77,10 +78,8 @@ A2DPSourcePlayerAdapter::~A2DPSourcePlayerAdapter() {
        sources_.end() != it;
        ++it) {
     if (NULL != it->second) {
-      if (it->second->is_running()) {
-        it->second->stop();
-      }
-      delete(it->second);
+      it->second->stop();
+      threads::DeleteThread(it->second);
     }
   }
   sources_.clear();
@@ -92,41 +91,25 @@ void A2DPSourcePlayerAdapter::StartActivity(int32_t application_key) {
   if (application_key != current_application_) {
     current_application_ = application_key;
 
-    std::map<int32_t, threads::Thread*>::iterator it =
-      sources_.find(application_key);
-    if (sources_.end() != it) {
-      if (NULL != it->second && !it->second->is_running()) {
-        it->second->start();
-      } else {
-        current_application_ = 0;
-      }
-    } else {
-      uint32_t device_id = 0;
-      connection_handler::ConnectionHandlerImpl::instance()->
-          GetDataOnSessionKey(application_key, 0, NULL, &device_id);
-      std::string mac_adddress;
-      connection_handler::ConnectionHandlerImpl::instance()->GetDataOnDeviceID(
-        device_id,
-        NULL,
-        NULL,
-        &mac_adddress);
+    uint32_t device_id = 0;
+    connection_handler::ConnectionHandlerImpl::instance()->
+        GetDataOnSessionKey(application_key, 0, NULL, &device_id);
+    std::string mac_adddress;
+    connection_handler::ConnectionHandlerImpl::instance()->GetDataOnDeviceID(
+      device_id,
+      NULL,
+      NULL,
+      &mac_adddress);
 
-      // TODO(PK): Convert mac_adddress to the
-      // following format : "bluez_source.XX_XX_XX_XX_XX_XX" if needed
-      // before passing to the A2DPSourcePlayerThread constructor
+    // TODO(PK): Convert mac_adddress to the
+    // following format : "bluez_source.XX_XX_XX_XX_XX_XX" if needed
+    // before passing to the A2DPSourcePlayerThread constructor
 
-      threads::Thread* new_activity = new threads::Thread(
-        mac_adddress.c_str(),
-        new A2DPSourcePlayerAdapter::A2DPSourcePlayerThread(mac_adddress));
-      if (NULL != new_activity) {
-        sources_.insert(std::pair<int32_t, threads::Thread*>(
-                          application_key, new_activity));
-
-        new_activity->start();
-      } else {
-        current_application_ = 0;
-      }
-    }
+    threads::Thread* new_activity = threads::CreateThread(
+      mac_adddress.c_str(),
+      new A2DPSourcePlayerAdapter::A2DPSourcePlayerThread(mac_adddress));
+    sources_[application_key] = new_activity;
+    new_activity->start();
   }
 }
 
@@ -146,6 +129,7 @@ void A2DPSourcePlayerAdapter::StopActivity(int32_t application_key) {
         // Sources thread was started - stop it
         LOG4CXX_DEBUG(logger_, "Sources thread was started - stop it");
         (*it).second->stop();
+        threads::DeleteThread(it->second);
       }
     }
     current_application_ = 0;
@@ -167,8 +151,7 @@ sSampleFormat_ = {
 A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::A2DPSourcePlayerThread(
   const std::string& device)
   : threads::ThreadDelegate(),
-    device_(device),
-    BUFSIZE_(32) {
+    device_(device) {
 }
 
 void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::freeStreams() {
@@ -222,7 +205,7 @@ void A2DPSourcePlayerAdapter::A2DPSourcePlayerThread::threadMain() {
   LOG4CXX_DEBUG(logger_, "Entering main loop");
 
   for (;;) {
-    uint8_t buf[BUFSIZE_];
+    uint8_t buf[BUFSIZE];
 
     pa_usec_t latency;
 

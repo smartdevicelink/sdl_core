@@ -99,6 +99,11 @@ SDL.SDLModel = Em.Object.create({
     stateLimited: null,
 
     /**
+     * Active state of phone call on HMI for Deactivate app to handle event
+     */
+    phoneCallActive: false,
+
+    /**
      * FLAG of any app in limited level exists
      */
     limitedExist: false,
@@ -1470,7 +1475,9 @@ SDL.SDLModel = Em.Object.create({
 
             SDL.TurnByTurnView.deactivate();
 
-            FFW.BasicCommunication.OnAppDeactivated(reason, appID);
+            if (!SDL.SDLModel.phoneCallActive) {
+                FFW.BasicCommunication.OnAppDeactivated(reason, appID);
+            }
         }
     }
 });

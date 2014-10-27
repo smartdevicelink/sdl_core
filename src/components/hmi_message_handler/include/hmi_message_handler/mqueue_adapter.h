@@ -55,7 +55,7 @@ class MqueueAdapter : public HMIMessageAdapter {
  private:
   mqd_t sdl_to_hmi_mqueue_;
   mqd_t hmi_to_sdl_mqueue_;
-  std::auto_ptr<threads::Thread> receiver_thread_;
+  threads::Thread* receiver_thread_;
 };
 
 }  // namespace hmi_message_handler

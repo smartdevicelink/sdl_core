@@ -222,6 +222,5 @@ enum RESULT_CODE {
   RESULT_UNKNOWN = 255
 };
 }  // namespace protocol_handler
-typedef ::protocol_handler::RawMessage    RawMessage;
-typedef ::protocol_handler::RawMessagePtr RawMessagePtr;
+
 #endif  // SRC_COMPONENTS_INCLUDE_PROTOCOL_COMMON_H_

@@ -82,6 +82,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool hmi_supports_navi_audio_streaming() const;
   void set_hmi_supports_navi_audio_streaming(bool supports);
 
+  virtual bool is_voice_communication_supported() const;
+  virtual void set_voice_communication_supported(
+      bool is_voice_communication_supported);
   inline bool app_allowed() const;
   bool has_been_activated() const;
 
@@ -166,6 +169,13 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   virtual void UnsubscribeFromSoftButtons(int32_t cmd_id);
 
+  /**
+   * @brief Check's if it is media, voice communication or navigation application
+   *
+   * @return true if application is media, voice communication or navigation
+   */
+  virtual bool IsAudioApplication() const;
+
  protected:
 
   /**
@@ -220,6 +230,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   std::set<uint32_t>                       subscribed_vehicle_info_;
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
+  bool                                     is_voice_communication_application_;
 
   // NAVI retry stream
   volatile bool                            is_video_stream_retry_active_;

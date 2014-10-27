@@ -49,8 +49,6 @@
 namespace application_manager {
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "HMICapabilities")
-
 std::map<std::string, hmi_apis::Common_Language::eType> languages_enum_values =
 {
     {"EN_US", hmi_apis::Common_Language::EN_US},
@@ -78,6 +76,8 @@ std::map<std::string, hmi_apis::Common_Language::eType> languages_enum_values =
     {"DA_DK", hmi_apis::Common_Language::DA_DK},
     {"NO_NO", hmi_apis::Common_Language::NO_NO}
 };
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "HMICapabilities")
 
 std::map<std::string, hmi_apis::Common_VrCapabilities::eType> vr_enum_capabilities =
 {
@@ -577,11 +577,15 @@ bool HMICapabilities::load_capabilities_from_file() {
     }
     // UI
     if (check_existing_json_member(root_json, "UI")) {
-      Json::Value ui = root_json.get("UI", "");
+      Json::Value ui = root_json.get("UI", Json::Value::null);
 
       if (check_existing_json_member(ui, "language")) {
-        set_active_ui_language(
-            languages_enum_values.find(ui.get("language", "").asString())->second);
+        std::string lang = ui.get("language", "EN_US").asString();
+        std::map<std::string, hmi_apis::Common_Language::eType>::const_iterator
+          it = languages_enum_values.find(lang);
+        if (it != languages_enum_values.end()) {
+          set_active_ui_language(it->second);
+        }
       }
 
       if (check_existing_json_member(ui, "languages")) {

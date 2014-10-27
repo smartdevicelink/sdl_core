@@ -1,4 +1,4 @@
-/**
+/*
 * Copyright (c) 2013, Ford Motor Company
 * All rights reserved.
 *
@@ -47,7 +47,7 @@ class FromMicRecorderAdapter : public MediaAdapterImpl {
     FromMicRecorderAdapter();
     ~FromMicRecorderAdapter();
     void SendData(int32_t application_key,
-                  const RawMessagePtr message) {}
+                  const ::protocol_handler::RawMessagePtr message) {}
     void StartActivity(int32_t application_key);
     void StopActivity(int32_t application_key);
     bool is_app_performing_activity(int32_t application_key);

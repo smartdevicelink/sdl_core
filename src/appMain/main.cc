@@ -66,6 +66,7 @@
 
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
+
 extern const char* gitVersion;
 namespace {
 
@@ -139,13 +140,16 @@ bool InitHmi() {
  * \return EXIT_SUCCESS or EXIT_FAILURE
  */
 int32_t main(int32_t argc, char** argv) {
-  threads::Thread::MaskSignals();
-  threads::Thread::SetMainThread();
 
   // --------------------------------------------------------------------------
   // Logger initialization
   INIT_LOGGER("log4cxx.properties");
   LOG4CXX_INFO(logger_, gitVersion);
+#if defined(__QNXNTO__) and defined(GCOV_ENABLED)
+  LOG4CXX_WARN(logger_,
+                "Attention! This application was built with unsupported "
+                "configuration (gcov + QNX). Use it at your own risk.");
+#endif
 
   threads::Thread::SetNameForId(threads::Thread::CurrentId(), "MainThread");
 
@@ -220,10 +224,7 @@ int32_t main(int32_t argc, char** argv) {
   }
   // --------------------------------------------------------------------------
 
-  utils::SubscribeToTerminateSignal(main_namespace::dummy_signal_handler);
-  threads::Thread::UnmaskSignals();
-
-  pause();
+  main_namespace::LifeCycle::instance()->Run();
   LOG4CXX_INFO(logger_, "Stopping application due to signal caught");
 
   main_namespace::LifeCycle::instance()->StopComponents();

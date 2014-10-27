@@ -99,6 +99,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       device_(0),
       usage_report_(mobile_app_id, statistics_manager),
       protocol_version_(ProtocolVersion::kV3),
+      is_voice_communication_application_(false),
       is_video_stream_retry_active_(false),
       is_audio_stream_retry_active_(false),
       video_stream_retry_number_(0),
@@ -174,6 +175,21 @@ bool ApplicationImpl::allowed_support_navigation() const {
 
 void ApplicationImpl::set_allowed_support_navigation(bool allow) {
   allowed_support_navigation_ = allow;
+}
+
+bool ApplicationImpl::is_voice_communication_supported() const {
+  return is_voice_communication_application_;
+}
+
+void ApplicationImpl::set_voice_communication_supported(
+    bool is_voice_communication_supported) {
+  is_voice_communication_application_ = is_voice_communication_supported;
+}
+
+bool ApplicationImpl::IsAudioApplication() const {
+  return is_media_ ||
+         is_voice_communication_application_ ||
+         allowed_support_navigation_;
 }
 
 const smart_objects::SmartObject* ApplicationImpl::active_message() const {

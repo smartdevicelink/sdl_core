@@ -70,7 +70,7 @@ void TimeManager::Init(protocol_handler::ProtocolHandlerImpl* ph) {
   DCHECK(ph);
   if (!thread_) {
     streamer_ = new Streamer(this);
-    thread_ = new threads::Thread("TimeManager", streamer_ );
+    thread_ = threads::CreateThread("TimeManager", streamer_ );
     application_manager::ApplicationManagerImpl::instance()->SetTimeMetricObserver(&app_observer);
     transport_manager::TransportManagerDefault::instance()->SetTimeMetricObserver(&tm_observer);
     ph->SetTimeMetricObserver(&ph_observer);
@@ -82,7 +82,6 @@ void TimeManager::Init(protocol_handler::ProtocolHandlerImpl* ph) {
 void TimeManager::Stop() {
   if (thread_) {
     thread_->stop();
-    delete thread_;
     thread_ = NULL;
     if (socket_fd_ != -1) {
       ::close(socket_fd_);
@@ -164,8 +163,7 @@ void TimeManager::Streamer::Start() {
     return;
   }
 
-  sockaddr_in serv_addr_;
-  memset(&serv_addr_, 0, sizeof(serv_addr_));
+  sockaddr_in serv_addr_ = { 0 };
   serv_addr_.sin_addr.s_addr = inet_addr(server_->ip_.c_str());
   serv_addr_.sin_family = AF_INET;
   serv_addr_.sin_port = htons(server_->port_);

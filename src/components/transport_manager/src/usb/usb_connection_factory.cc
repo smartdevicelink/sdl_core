@@ -74,9 +74,8 @@ TransportAdapter::Error UsbConnectionFactory::CreateConnection(
   UsbConnection* usb_connection =
     new UsbConnection(device_uid, app_handle, controller_, usb_handler_,
                       usb_device->usb_device());
-  ConnectionSptr connection(usb_connection);
 
-  controller_->ConnectionCreated(connection, device_uid, app_handle);
+  controller_->ConnectionCreated(usb_connection, device_uid, app_handle);
 
   if (usb_connection->Init()) {
     LOG4CXX_INFO(logger_, "USB connection initialised");

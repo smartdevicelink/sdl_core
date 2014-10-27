@@ -48,8 +48,7 @@
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
-  struct statvfs fsInfo;
-  memset(reinterpret_cast<void*>(&fsInfo), 0, sizeof(fsInfo));
+  struct statvfs fsInfo = { 0 };
   if (statvfs(path.c_str(), &fsInfo) == 0) {
     return fsInfo.f_bsize * fsInfo.f_bfree;
   } else {
@@ -59,8 +58,7 @@ uint64_t file_system::GetAvailableDiskSpace(const std::string& path) {
 
 int64_t file_system::FileSize(const std::string &path) {
   if (file_system::FileExists(path)) {
-    struct stat file_info;
-    memset(reinterpret_cast<void*>(&file_info), 0, sizeof(file_info));
+    struct stat file_info = { 0 };
     stat(path.c_str(), &file_info);
     return file_info.st_size;
   }
@@ -82,7 +80,7 @@ size_t file_system::DirectorySize(const std::string& path) {
   struct dirent* dir_element = new(direntbuffer) dirent;
 #endif
   struct dirent* result = NULL;
-  struct stat file_info;
+  struct stat file_info = { 0 };
   directory = opendir(path.c_str());
   if (NULL != directory) {
     return_code = readdir_r(directory, dir_element, &result);
@@ -96,7 +94,6 @@ size_t file_system::DirectorySize(const std::string& path) {
       if (file_system::IsDirectory(full_element_path)) {
         size += DirectorySize(full_element_path);
       } else {
-        memset(reinterpret_cast<void*>(&file_info), 0, sizeof(file_info));
         stat(full_element_path.c_str(), &file_info);
         size += file_info.st_size;
       }
@@ -134,8 +131,7 @@ bool file_system::CreateDirectoryRecursively(const std::string& path) {
 }
 
 bool file_system::IsDirectory(const std::string& name) {
-  struct stat status;
-  memset(&status, 0, sizeof(status));
+  struct stat status = { 0 };
 
   if (-1 == stat(name.c_str(), &status)) {
     return false;
@@ -145,8 +141,7 @@ bool file_system::IsDirectory(const std::string& name) {
 }
 
 bool file_system::DirectoryExists(const std::string& name) {
-  struct stat status;
-  memset(&status, 0, sizeof(status));
+  struct stat status = { 0 };
 
   if (-1 == stat(name.c_str(), &status) || !S_ISDIR(status.st_mode)) {
     return false;
@@ -156,8 +151,7 @@ bool file_system::DirectoryExists(const std::string& name) {
 }
 
 bool file_system::FileExists(const std::string& name) {
-  struct stat status;
-  memset(&status, 0, sizeof(status));
+  struct stat status = { 0 };
 
   if (-1 == stat(name.c_str(), &status)) {
     return false;
@@ -213,16 +207,11 @@ void file_system::Close(std::ofstream* file_stream) {
 }
 
 std::string file_system::CurrentWorkingDirectory() {
-  size_t filename_max_lenght = 1024;
-  char currentAppPath[filename_max_lenght];
-  memset(currentAppPath, 0, filename_max_lenght);
-  if (0 == getcwd(currentAppPath, filename_max_lenght)) {
+  const size_t filename_max_length = 1024;
+  char path[filename_max_length];
+  if (0 == getcwd(path, filename_max_length)) {
     LOG4CXX_WARN(logger_, "Could not get CWD");
   }
-
-  char path[filename_max_lenght];
-  memset(path, 0, filename_max_lenght);
-  snprintf(path, filename_max_lenght - 1, "%s", currentAppPath);
   return std::string(path);
 }
 
@@ -396,7 +385,7 @@ const std::string file_system::ConvertPathForURL(const std::string& path) {
     for (; it_sym != it_sym_end; ++it_sym) {
 
       if (*it_path == *it_sym) {
-        size_t size = 100;
+        const size_t size = 100;
         char percent_value[size];
         snprintf(percent_value, size, "%%%x", *it_path);
         converted_path += percent_value;

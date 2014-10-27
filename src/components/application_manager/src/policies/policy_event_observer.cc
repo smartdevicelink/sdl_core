@@ -45,7 +45,7 @@ PolicyEventObserver::PolicyEventObserver(utils::SharedPtr<PolicyManager> policy_
 }
 
 void PolicyEventObserver::on_event(const event_engine::Event& event) {
-  if (policy_manager_.valid()) {
+  if (!policy_manager_) {
     return;
   }
   const smart_objects::SmartObject& message = event.smart_object();

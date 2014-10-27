@@ -65,32 +65,8 @@ if (BUILD_USB_SUPPORT)
   endif()
 endif(BUILD_USB_SUPPORT)
 
-if (BUILD_MME_SUPPORT)
-  list (APPEND SOURCES
-    src/mme/mme_transport_adapter.cc
-    src/mme/mme_device.cc
-    src/mme/iap_device.cc
-    src/mme/iap2_device.cc
-    src/mme/mme_device_scanner.cc
-    src/mme/mme_connection_factory.cc
-    src/mme/iap_connection.cc
-    src/mme/iap2_connection.cc
-    src/mme/protocol_config.cc
-  )
-endif(BUILD_MME_SUPPORT)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  if (BUILD_AOA_SUPPORT)
-    list (APPEND SOURCES
-      src/aoa/aoa_wrapper.cc
-      src/aoa/aoa_device.cc
-      src/aoa/aoa_dynamic_device.cc
-      src/aoa/aoa_device_scanner.cc
-      src/aoa/aoa_connection.cc
-      src/aoa/aoa_connection_factory.cc
-      src/aoa/aoa_transport_adapter.cc
-    )
-  endif(BUILD_AOA_SUPPORT)
 endif()
 
 add_library(${target} ${SOURCES})
@@ -102,11 +78,6 @@ if (BUILD_USB_SUPPORT)
   endif()
 endif(BUILD_USB_SUPPORT)
 
-if (BUILD_MME_SUPPORT)
-  target_link_libraries (${target} ipod)
-  target_link_libraries (${target} iap2client)
-  target_link_libraries (${target} qdb)
-endif(BUILD_MME_SUPPORT)
 
 if (BUILD_AVAHI_SUPPORT)
   target_link_libraries(${target} avahi-common)
@@ -121,7 +92,4 @@ if (BUILD_BT_SUPPORT)
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  if (BUILD_AOA_SUPPORT)
-    target_link_libraries(${target} aoa)
-  endif(BUILD_AOA_SUPPORT)
 endif()

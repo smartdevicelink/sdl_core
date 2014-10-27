@@ -1,4 +1,4 @@
-/**
+/*
 * Copyright (c) 2013, Ford Motor Company
 * All rights reserved.
 *
@@ -47,7 +47,7 @@ class VideoStreamToFileAdapter : public MediaAdapterImpl {
     explicit VideoStreamToFileAdapter(const std::string& file_name);
     virtual ~VideoStreamToFileAdapter();
     virtual void SendData(int32_t application_key,
-                          const RawMessagePtr message);
+                          const ::protocol_handler::RawMessagePtr message);
     virtual void StartActivity(int32_t application_key);
     virtual void StopActivity(int32_t application_key);
     virtual bool is_app_performing_activity(int32_t application_key);
@@ -104,7 +104,7 @@ class VideoStreamToFileAdapter : public MediaAdapterImpl {
     std::string                                   file_name_;
     bool                                          is_ready_;
     threads::Thread*                              thread_;
-    MessageQueue<RawMessagePtr> messages_;
+    MessageQueue<protocol_handler::RawMessagePtr> messages_;
 };
 }  //  namespace media_manager
 

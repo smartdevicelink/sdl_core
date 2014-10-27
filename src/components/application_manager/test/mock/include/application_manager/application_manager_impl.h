@@ -156,8 +156,8 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD0(Stop, bool());
   MOCK_METHOD1(OnMessageReceived, void (utils::SharedPtr<application_manager::Message>));
   MOCK_METHOD1(OnErrorSending, void (utils::SharedPtr<application_manager::Message>));
-  MOCK_METHOD1(OnMessageReceived, void (const RawMessagePtr));
-  MOCK_METHOD1(OnMobileMessageSent, void (const RawMessagePtr));
+  MOCK_METHOD1(OnMessageReceived, void (const ::protocol_handler::RawMessagePtr));
+  MOCK_METHOD1(OnMobileMessageSent, void (const ::protocol_handler::RawMessagePtr));
   MOCK_METHOD1(OnDeviceListUpdated, void (const connection_handler::DeviceMap&));
   MOCK_METHOD0(OnFindNewApplicationsRequest, void ());
   MOCK_METHOD1(RemoveDevice, void (const connection_handler::DeviceHandle&));
@@ -196,7 +196,6 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD0(HeadUnitSuspend, void());
   MOCK_METHOD1(LoadAppDataToHMI, bool(ApplicationSharedPtr));
   MOCK_METHOD1(ActivateApplication, bool (ApplicationSharedPtr));
-  MOCK_METHOD1(PutApplicationInLimited, mobile_api::HMILevel::eType (ApplicationSharedPtr));
   MOCK_METHOD1(PutApplicationInFull, mobile_api::HMILevel::eType (ApplicationSharedPtr));
   MOCK_METHOD2(UnregisterRevokedApplication, void(uint32_t, mobile_apis::Result::eType));
   MOCK_METHOD1(SetUnregisterAllApplicationsReason, void(mobile_api::AppInterfaceUnregisteredReason::eType));
@@ -251,6 +250,8 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD0(GetNextHMICorrelationID, uint32_t ());
   MOCK_CONST_METHOD0(IsHMICooperating, bool());
   MOCK_METHOD0(OnTimerSendTTSGlobalProperties, void());
+  MOCK_METHOD0(CreatePhoneCallAppList, void());
+  MOCK_METHOD0(ResetPhoneCallAppList, void());
   MOCK_METHOD1(AddAppToTTSGlobalPropertiesList, void(const uint32_t));
   MOCK_METHOD1(RemoveAppFromTTSGlobalPropertiesList, void(const uint32_t));
   MOCK_METHOD1(application_by_hmi_app, ApplicationSharedPtr(uint32_t));
@@ -259,6 +260,10 @@ class ApplicationManagerImpl : public ApplicationManager,
                                         bool));
   MOCK_METHOD4(UnregisterApplication, void(const uint32_t,mobile_apis::Result::eType,
                                         bool, bool));
+  MOCK_CONST_METHOD0(get_limited_media_application, ApplicationSharedPtr());
+  MOCK_CONST_METHOD0(get_limited_navi_application, ApplicationSharedPtr());
+  MOCK_CONST_METHOD0(get_limited_voice_application, ApplicationSharedPtr());
+  MOCK_CONST_METHOD1(DoesAudioAppWithSameHMITypeExistInFullOrLimited, bool(ApplicationSharedPtr));
   MOCK_CONST_METHOD0(active_application, ApplicationSharedPtr ());
   MOCK_METHOD0(OnApplicationListUpdateTimer, void());
 

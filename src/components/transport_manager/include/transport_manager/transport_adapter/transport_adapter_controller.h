@@ -95,7 +95,7 @@ class TransportAdapterController {
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    */
-  virtual void ConnectionCreated(ConnectionSptr connection,
+  virtual void ConnectionCreated(Connection* connection,
                                  const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle) = 0;
 
@@ -164,7 +164,7 @@ class TransportAdapterController {
    */
   virtual void DataReceiveDone(const DeviceUID& device_handle,
                                const ApplicationHandle& app_handle,
-                               RawMessagePtr message) = 0;
+                               ::protocol_handler::RawMessagePtr message) = 0;
 
   /**
    * @brief Launch OnDataReceiveFailed event in the device adapter listener.
@@ -186,7 +186,7 @@ class TransportAdapterController {
    */
   virtual void DataSendDone(const DeviceUID& device_handle,
                             const ApplicationHandle& app_handle,
-                            RawMessagePtr message) = 0;
+                            ::protocol_handler::RawMessagePtr message) = 0;
 
   /**
    * @brief Launch OnDataSendFailed event in the device adapter listener.
@@ -198,7 +198,7 @@ class TransportAdapterController {
    */
   virtual void DataSendFailed(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle,
-                              RawMessagePtr message, const DataSendError&) = 0;
+                              ::protocol_handler::RawMessagePtr message, const DataSendError&) = 0;
 };
 
 }  // namespace transport_adapter

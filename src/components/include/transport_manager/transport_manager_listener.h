@@ -145,7 +145,7 @@ class TransportManagerListener {
    *
    * @param message Recieved message
    **/
-  virtual void OnTMMessageReceived(const RawMessagePtr message) = 0;
+  virtual void OnTMMessageReceived(const ::protocol_handler::RawMessagePtr message) = 0;
 
   /**
    * @brief Reaction to the event, when receiving of massage for transport manager is failed.
@@ -159,7 +159,7 @@ class TransportManagerListener {
   /**
    * @brief Reaction to the event, when transport manager sent a massage.
    */
-  virtual void OnTMMessageSend(const RawMessagePtr message) = 0;
+  virtual void OnTMMessageSend(const ::protocol_handler::RawMessagePtr message) = 0;
 
   /**
    * @brief Reaction to the event, when sending of massage by transport manager is failed.
@@ -168,7 +168,7 @@ class TransportManagerListener {
    * @param message Smart pointer to the raw massage.
    */
   virtual void OnTMMessageSendFailed(const DataSendError& error,
-                                     const RawMessagePtr message) = 0;
+                                     const ::protocol_handler::RawMessagePtr message) = 0;
 };
 }  //  namespace transport_manager
 #endif  // SRC_COMPONENTS_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_LISTENER_H_

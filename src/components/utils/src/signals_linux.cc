@@ -30,15 +30,19 @@
 * POSSIBILITY OF SUCH DAMAGE.
 */
 #include <csignal>
+#include <cstdlib>
 #include <stdint.h>
 
 namespace utils {
 
 bool SubscribeToTerminateSignal(void (*func)(int32_t p)) {
-  void (*prev_func)(int32_t p);
+  struct sigaction act;
+  act.sa_handler = func;
+  sigemptyset(&act.sa_mask);
+  act.sa_flags = 0;
 
-  prev_func = signal(SIGINT, func);
-  return (SIG_ERR != prev_func);
+  return (sigaction(SIGINT, &act, NULL) == 0)
+      && (sigaction(SIGTERM, &act, NULL) == 0);
 }
 
 bool ResetSubscribeToTerminateSignal() {

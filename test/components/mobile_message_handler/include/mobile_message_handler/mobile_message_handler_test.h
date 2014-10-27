@@ -1,4 +1,4 @@
-/**
+/*
  * \file mobile_message_handler_test.h
  * \brief MobileMessageHandler test header file.
  *
@@ -80,7 +80,7 @@ class MobileMessageHandlerTester :
      * \brief Method for sending message to Mobile Application.
      * \param message RawMessage with params to be sent to Mobile App.
      */
-    void SendMessageToMobileApp(const RawMessagePtr& message) {}
+    void SendMessageToMobileApp(const protocol_handler::RawMessagePtr& message) {}
 
     void SendFramesNumber(int connection_key, int number_of_frames) {}
 
@@ -103,7 +103,7 @@ class MobileMessageHandlerTester :
       cond_var.NotifyOne();
     }
 
-    void sendMessageToMobileApp(const RawMessagePtr message) {
+    void sendMessageToMobileApp(const protocol_handler::RawMessagePtr message) {
       //      mmh_->OnMessageReceived(message);//todo: YK uncoment sometime
     }
 

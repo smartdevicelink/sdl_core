@@ -155,7 +155,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
    * @param message Smart pointer to the raw massage.
    * @param connection_id Connection unique identifier.
    */
-  virtual void OnTMMessageReceived(const RawMessagePtr message) {
+  virtual void OnTMMessageReceived(const ::protocol_handler::RawMessagePtr message) {
   }
 
   /**
@@ -171,7 +171,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
   /**
    * @brief Reaction to the event, when transport manager sent a massage.
    */
-  virtual void OnTMMessageSend(const RawMessagePtr message) {
+  virtual void OnTMMessageSend(const ::protocol_handler::RawMessagePtr message) {
   }
 
   /**
@@ -181,7 +181,7 @@ class TransportManagerListenerEmpty : public TransportManagerListener {
    * @param message Smart pointer to the raw massage.
    */
   virtual void OnTMMessageSendFailed(const DataSendError& error,
-                                     const RawMessagePtr message) {
+                                     const ::protocol_handler::RawMessagePtr message) {
   }
 };
 }  // namespace transport_manager

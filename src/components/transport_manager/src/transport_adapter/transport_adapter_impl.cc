@@ -208,8 +208,8 @@ TransportAdapter::Error TransportAdapterImpl::Disconnect(
     LOG4CXX_TRACE(logger_, "exit with BAD_STATE");
     return BAD_STATE;
   }
-  ConnectionSptr connection = FindEstablishedConnection(device_id, app_handle);
-  if (connection.valid()) {
+  Connection* connection = FindEstablishedConnection(device_id, app_handle);
+  if (connection) {
     TransportAdapter::Error err = connection->Disconnect();
     LOG4CXX_TRACE(logger_, "exit with error: " << err);
     return err;
@@ -248,7 +248,7 @@ TransportAdapter::Error TransportAdapterImpl::DisconnectDevice(
 
 TransportAdapter::Error TransportAdapterImpl::SendData(
   const DeviceUID& device_id, const ApplicationHandle& app_handle,
-  const RawMessagePtr data) {
+  const ::protocol_handler::RawMessagePtr data) {
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id << ", app_handle: " <<
                 &app_handle << ", data: " << data);
   if (!initialised_) {
@@ -256,8 +256,8 @@ TransportAdapter::Error TransportAdapterImpl::SendData(
     return BAD_STATE;
   }
 
-  ConnectionSptr connection = FindEstablishedConnection(device_id, app_handle);
-  if (connection.get() != 0) {
+  Connection* connection = FindEstablishedConnection(device_id, app_handle);
+  if (connection) {
     TransportAdapter::Error err = connection->SendData(data);
     LOG4CXX_TRACE(logger_, "exit with error: " << err);
     return err;
@@ -459,7 +459,7 @@ bool TransportAdapterImpl::IsClientOriginatedConnectSupported() const {
 }
 
 void TransportAdapterImpl::ConnectionCreated(
-  ConnectionSptr connection, const DeviceUID& device_id,
+  Connection* connection, const DeviceUID& device_id,
   const ApplicationHandle& app_handle) {
   LOG4CXX_TRACE(logger_, "enter connection:" << connection << ", device_id: " << &device_id
                 << ", app_handle: " << &app_handle);
@@ -546,7 +546,7 @@ void TransportAdapterImpl::DisconnectDone(
 
 void TransportAdapterImpl::DataReceiveDone(const DeviceUID& device_id,
     const ApplicationHandle& app_handle,
-    RawMessagePtr message) {
+    ::protocol_handler::RawMessagePtr message) {
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id << ", app_handle: " <<
                 &app_handle << ", message: " << message);
 
@@ -575,7 +575,7 @@ void TransportAdapterImpl::DataReceiveFailed(
 
 void TransportAdapterImpl::DataSendDone(const DeviceUID& device_id,
                                         const ApplicationHandle& app_handle,
-                                        RawMessagePtr message) {
+                                        ::protocol_handler::RawMessagePtr message) {
   LOG4CXX_TRACE(logger_, "enter");
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
        it != listeners_.end(); ++it) {
@@ -586,7 +586,7 @@ void TransportAdapterImpl::DataSendDone(const DeviceUID& device_id,
 
 void TransportAdapterImpl::DataSendFailed(const DeviceUID& device_id,
     const ApplicationHandle& app_handle,
-    RawMessagePtr message,
+    ::protocol_handler::RawMessagePtr message,
     const DataSendError& error) {
   LOG4CXX_TRACE(logger_, "enter");
   for (TransportAdapterListenerList::iterator it = listeners_.begin();
@@ -763,11 +763,11 @@ bool TransportAdapterImpl::ToBeAutoConnected(DeviceSptr device) const {
   return false;
 }
 
-ConnectionSptr TransportAdapterImpl::FindEstablishedConnection(
+Connection* TransportAdapterImpl::FindEstablishedConnection(
   const DeviceUID& device_id, const ApplicationHandle& app_handle) const {
   LOG4CXX_TRACE(logger_, "enter. device_id: " << &device_id << ", app_handle: " <<
                 &app_handle);
-  ConnectionSptr connection;
+  Connection* connection = NULL;
   pthread_mutex_lock(&connections_mutex_);
   ConnectionMap::const_iterator it =
     connections_.find(std::make_pair(device_id, app_handle));
@@ -778,7 +778,7 @@ ConnectionSptr TransportAdapterImpl::FindEstablishedConnection(
     }
   }
   pthread_mutex_unlock(&connections_mutex_);
-  LOG4CXX_TRACE(logger_, "exit with ConnectionSptr: " << connection);
+  LOG4CXX_TRACE(logger_, "exit with Connection: " << connection);
   return connection;
 }
 

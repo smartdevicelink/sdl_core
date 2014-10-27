@@ -116,12 +116,12 @@ void OnAppDeactivatedNotification::Run() {
     case hmi_apis::Common_DeactivateReason::PHONEMENU:
     case hmi_apis::Common_DeactivateReason::SYNCSETTINGS:
     case hmi_apis::Common_DeactivateReason::GENERAL: {
-      if (app->is_media_application()) {
-        if (mobile_api::HMILevel::HMI_FULL == app->hmi_level()) {
-          app->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
-        }
-      } else {
+      if ((!app->IsAudioApplication()) ||
+          ApplicationManagerImpl::instance()->
+          DoesAudioAppWithSameHMITypeExistInFullOrLimited(app)) {
         app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
+      } else {
+        app->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
       }
       break;
     }

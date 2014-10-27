@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -52,13 +52,12 @@ VideoStreamToFileAdapter::~VideoStreamToFileAdapter() {
   }
 
   thread_->stop();
-  delete thread_;
 }
 
 void VideoStreamToFileAdapter::Init() {
   if (!thread_) {
     LOG4CXX_INFO(logger, "Create and start sending thread");
-    thread_ = new threads::Thread("VideoStreamer",
+    thread_ = threads::CreateThread("VideoStreamer",
                                   new Streamer(this));
     const size_t kStackSize = 16384;
     thread_->startWithOptions(threads::ThreadOptions(kStackSize));
@@ -67,7 +66,7 @@ void VideoStreamToFileAdapter::Init() {
 
 void VideoStreamToFileAdapter::SendData(
   int32_t application_key,
-  const RawMessagePtr message) {
+  const ::protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger, "VideoStreamToFileAdapter::SendData "
                << application_key);
 
@@ -143,7 +142,7 @@ void VideoStreamToFileAdapter::Streamer::threadMain() {
 
   while (!stop_flag_) {
     while (!server_->messages_.empty()) {
-      RawMessagePtr msg = server_->messages_.pop();
+      ::protocol_handler::RawMessagePtr msg = server_->messages_.pop();
       if (!msg) {
         LOG4CXX_ERROR(logger, "Null pointer message");
         continue;

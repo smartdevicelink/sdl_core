@@ -288,7 +288,7 @@ void MessageHelper::SendHMIStatusNotification(
 }
 
 void MessageHelper::SendOnAppRegisteredNotificationToHMI(
-  const Application& application_impl, bool resumption) {
+  const Application& application_impl, bool resumption, bool need_restore_vr) {
   smart_objects::SmartObject* notification = new smart_objects::SmartObject;
   if (!notification) {
     // TODO(VS): please add logger.
@@ -307,8 +307,10 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
   const smart_objects::SmartObject* ngn_media_screen_name = application_impl
       .ngn_media_screen_name();
 
+  // Due to current requirements in case when we're in resumption mode
+  // we have to always send resumeVRGrammar field.
   if (resumption) {
-    message[strings::msg_params][strings::resume_vr_grammars] = true;
+    message[strings::msg_params][strings::resume_vr_grammars] = need_restore_vr;
   }
 
   if (ngn_media_screen_name) {
@@ -1277,7 +1279,9 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
     (*message)[strings::msg_params]["priority"] = GetPriorityCode(priority);
   }
 
-  if (hmi_apis::Common_HMILevel::INVALID_ENUM != level) {
+  // We haven't send HMI level to HMI in case it FULL.
+  if (hmi_apis::Common_HMILevel::INVALID_ENUM != level &&
+      hmi_apis::Common_HMILevel::FULL != level) {
     (*message)[strings::msg_params][strings::activate_app_hmi_level] = level;
   }
 

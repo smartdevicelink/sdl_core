@@ -38,6 +38,9 @@
 
 #include "transport_manager/transport_adapter/client_connection_listener.h"
 
+#include "utils/threads/thread_delegate.h"
+#include "utils/threads/thread.h"
+
 namespace transport_manager {
 namespace transport_adapter {
 
@@ -46,7 +49,8 @@ class TransportAdapterController;
 /**
  * @brief Listener of device adapter that use TCP transport.
  */
-class TcpClientListener : public ClientConnectionListener {
+class TcpClientListener : public ClientConnectionListener,
+                          public threads::ThreadDelegate {
  public:
   /**
    * @breaf Constructor.
@@ -62,7 +66,9 @@ class TcpClientListener : public ClientConnectionListener {
   /**
    * @brief Start TCP client listener thread.
    */
-  void Thread();
+  void threadMain();
+
+  bool exitThreadMain();
  protected:
 
   /**
@@ -106,10 +112,9 @@ class TcpClientListener : public ClientConnectionListener {
   const bool enable_keepalive_;
   TransportAdapterController* controller_;
   // TODO(Eamakhov): change to threads::Thread usage
-  pthread_t thread_;
+  threads::Thread* thread_;
   int socket_;
   bool thread_started_;
-  bool shutdown_requested_;
   bool thread_stop_requested_;
 };
 

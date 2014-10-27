@@ -35,6 +35,7 @@
 #include "utils/logger.h"
 #include "application_manager/policies/policy_handler.h"
 #include "application_manager/policies/policy_retry_sequence.h"
+#include "utils/threads/thread_manager.h"
 
 namespace policy {
 
@@ -42,7 +43,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyHandler")
 
 PTExchangeHandlerImpl::PTExchangeHandlerImpl(PolicyHandler* handler)
     : policy_handler_(handler),
-      retry_sequence_("RetrySequence", new RetrySequence(handler)) {
+      retry_sequence_(threads::CreateThread("RetrySequence", new RetrySequence(handler))) {
   DCHECK(policy_handler_);
   LOG4CXX_INFO(logger_, "Exchan created");
 }
@@ -56,20 +57,20 @@ void PTExchangeHandlerImpl::Start() {
   sync_primitives::AutoLock locker(retry_sequence_lock_);
   LOG4CXX_INFO(logger_, "Exchan started");
 
-  if (retry_sequence_.is_running()) {
-    retry_sequence_.stop();
-  }
+  retry_sequence_->stop();
+  threads::DeleteThread(retry_sequence_);
+  retry_sequence_ = threads::CreateThread("RetrySequence", new RetrySequence(policy_handler_));
 
   if (policy_handler_) {
     policy_handler_->ResetRetrySequence();
   }
-  retry_sequence_.start();
+  retry_sequence_->start();
 }
 
 void PTExchangeHandlerImpl::Stop() {
   sync_primitives::AutoLock locker(retry_sequence_lock_);
-  if (retry_sequence_.is_running()) {
-    retry_sequence_.stop();
+  if (retry_sequence_->is_running()) {
+    retry_sequence_->stop();
   }
 }
 

@@ -117,7 +117,7 @@ BluetoothDeviceScanner::BluetoothDeviceScanner(
                                                   };
   sdp_uuid128_create(&smart_device_link_service_uuid_,
                      smart_device_link_service_uuid_data);
-  thread_ = new threads::Thread("BT Device Scaner", new  BluetoothDeviceScannerDelegate(this));
+  thread_ = threads::CreateThread("BT Device Scaner", new  BluetoothDeviceScannerDelegate(this));
 }
 
 BluetoothDeviceScanner::~BluetoothDeviceScanner() {
@@ -444,10 +444,9 @@ void BluetoothDeviceScanner::Terminate() {
     }
     LOG4CXX_INFO(logger_,
                  "Waiting for bluetooth device scanner thread termination");
-    thread_->join();
+    thread_->stop();
     LOG4CXX_INFO(logger_, "PASA Bluetooth device scanner thread joined");
   }
-  delete thread_;
   LOG4CXX_TRACE(logger_, "exit");
 }
 

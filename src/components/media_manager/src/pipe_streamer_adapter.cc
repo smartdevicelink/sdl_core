@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -58,12 +58,11 @@ PipeStreamerAdapter::~PipeStreamerAdapter() {
   }
 
   thread_->stop();
-  delete thread_;
 }
 
 void PipeStreamerAdapter::SendData(
   int32_t application_key,
-  const RawMessagePtr message) {
+  const ::protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger, "PipeStreamerAdapter::SendData");
 
   if (application_key != current_application_) {
@@ -122,7 +121,7 @@ bool PipeStreamerAdapter::is_app_performing_activity(
 void PipeStreamerAdapter::Init() {
   if (!thread_) {
     LOG4CXX_INFO(logger, "Create and start sending thread");
-    thread_ = new threads::Thread("PipeStreamer", new Streamer(this));
+    thread_ = threads::CreateThread("PipeStreamer", new Streamer(this));
     const size_t kStackSize = 16384;
     thread_->startWithOptions(threads::ThreadOptions(kStackSize));
   }
@@ -146,7 +145,7 @@ void PipeStreamerAdapter::Streamer::threadMain() {
 
   while (!stop_flag_) {
     while (!server_->messages_.empty()) {
-      RawMessagePtr msg = server_->messages_.pop();
+      ::protocol_handler::RawMessagePtr msg = server_->messages_.pop();
       if (!msg) {
         LOG4CXX_ERROR(logger, "Null pointer message");
         continue;

@@ -35,13 +35,6 @@
 
 #include <pthread.h>
 
-#ifdef RWLOCK_SUPPORT
-#  if (defined(OS_LINUX) && (defined(__USE_UNIX98) || defined(__USE_XOPEN2K))) || \
-      (defined(OS_QNX)   && (defined(__EXT_POSIX1_200112)))
-#  define USE_RWLOCK
-#  endif
-#endif
-
 #include <queue>
 #include <map>
 #include <list>
@@ -57,17 +50,18 @@
 #ifdef TIME_TESTER
 #include "transport_manager/time_metric_observer.h"
 #endif  // TIME_TESTER
+#include "utils/threads/message_loop_thread.h"
+#include "transport_manager/transport_adapter/transport_adapter_event.h"
 
 namespace transport_manager {
 
 /**
  * @brief Implementation of transport manager.s
  */
-class TransportManagerImpl : public TransportManager {
+class TransportManagerImpl : public TransportManager,
+                             public threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> >::Handler,
+                             public threads::MessageLoopThread<std::queue<TransportAdapterEvent> >::Handler {
  public:
-  /**
-   * @brief Hold connection parameters.
-   */
   struct Connection {
     ConnectionUID id;
     DeviceUID device;
@@ -157,7 +151,7 @@ class TransportManagerImpl : public TransportManager {
    *
    * @return Code error.
    **/
-  virtual int SendMessageToDevice(const RawMessagePtr message);
+  virtual int SendMessageToDevice(const protocol_handler::RawMessagePtr message);
 
   /**
    * @brief Post event in the event queue.
@@ -244,25 +238,10 @@ class TransportManagerImpl : public TransportManager {
    *
    * @param message Smart pointer to the raw massage.
    **/
-  void PostMessage(const RawMessagePtr message);
+  void PostMessage(const ::protocol_handler::RawMessagePtr message);
 
-  /**
-   * @brief update message in queue
-   *
-   * @param message shared pointer to raw massage
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  /*not clear when this function shall be used
-   * void updateMessage(const RawMessagePtr old_message, const RawMessagePtr
-   * new_message);*/
-
-  /**
-   * @brief Remove message from the container of massages.
-   *
-   * @param message Smart pointer to the raw massage.
-   **/
-  void RemoveMessage(const RawMessagePtr message);
+  void Handle(::protocol_handler::RawMessagePtr msg);
+  void Handle(TransportAdapterEvent msg);
 
   /**
    * @brief Post event to the container of events.
@@ -270,67 +249,6 @@ class TransportManagerImpl : public TransportManager {
    * @param event Event of device adapter.
    **/
   void PostEvent(const TransportAdapterEvent& event);
-
-  /**
-   * @brief Type definition of container that holds smart pointer to the raw
-   *massages.
-   **/
-  typedef std::list<RawMessagePtr> MessageQueue;
-
-  /**
-   * @brief Type definition of container that holds events of device adapters.
-   **/
-  typedef std::vector<TransportAdapterEvent> EventQueue;
-
-  static void* MessageQueueStartThread(void* data);
-
-  /**
-   * @brief Scan message's queue and pull messages according to priority and
-   *serial number
-   *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   */
-  void MessageQueueThread();
-
-  /**
-   * @brief Launch EventListenerThread().
-   */
-  static void* EventListenerStartThread(void*);
-  /**
-   * @brief wait until event happens
-   *
-   * @param
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   */
-  void EventListenerThread();
-
-  /**
-   * @brief store messages
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  MessageQueue message_queue_;
-
-  /**
-   * @brief Mutex restricting access to messages.
-   **/
-
-#ifdef USE_RWLOCK
-  mutable sync_primitives::RWLock message_queue_rwlock_;
-#endif
-  mutable pthread_mutex_t message_queue_mutex_;
-
-  pthread_cond_t message_queue_cond_;
-
-  /**
-   * @brief store events from comming device
-   *
-   * @see @ref components_transportmanager_client_connection_management
-   **/
-  EventQueue event_queue_;
 
   /**
    * @brief flag that indicates that thread is active
@@ -344,30 +262,10 @@ class TransportManagerImpl : public TransportManager {
    **/
   TransportManagerListenerList transport_manager_listener_;
 
-  // TODO(Eamakhov): change to threads::Thread usage
-  /**
-   * @brief ID of message queue processing thread
-   **/
-  pthread_t message_queue_thread_;
-
-  /**
-   * @brief Conditional event thread
-   **/
-  pthread_t event_queue_thread_;
-
   /**
    * @brief Condition variable to wake up event
    **/
   pthread_cond_t device_listener_thread_wakeup_;
-
-  /**
-   * @brief Mutex restricting access to events.
-   **/
-
-#ifdef USE_RWLOCK
-  mutable sync_primitives::RWLock event_queue_rwlock_;
-#endif
-  mutable pthread_mutex_t event_queue_mutex_;
 
   /**
    * @brief Flag that TM is initialized
@@ -428,6 +326,8 @@ class TransportManagerImpl : public TransportManager {
   /** For keep listeners which were add TMImpl */
   std::map<TransportAdapter*, TransportAdapterListenerImpl*>
       transport_adapter_listeners_;
+  threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> > message_queue_;
+  threads::MessageLoopThread<std::queue<TransportAdapterEvent> > event_queue_;
 
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
   DeviceInfoList;

@@ -1076,12 +1076,13 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
                          protocol_version, packet.service_type());
     return RESULT_OK;
   }
-  const uint32_t connection_key =
-      session_observer_->KeyFromPair(connection_id, session_id);
 
 #ifdef ENABLE_SECURITY
   // for packet is encrypted and security plugin is enable
   if (protection && security_manager_) {
+    const uint32_t connection_key =
+        session_observer_->KeyFromPair(connection_id, session_id);
+
     security_manager::SSLContext *ssl_context =
         security_manager_->CreateSSLContext(connection_key);
     if (!ssl_context) {
@@ -1120,7 +1121,7 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageStartSession(
   SendStartSessionAck(connection_id, session_id, packet.protocol_version(),
                       hash_id, packet.service_type(), PROTECTION_OFF);
   return RESULT_OK;
-  }
+}
 
 RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
     ConnectionID connection_id, const ProtocolPacket &packet) {

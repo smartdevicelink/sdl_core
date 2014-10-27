@@ -171,9 +171,6 @@ bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
     LOG4CXX_ERROR(logger_, "SetupHMILevel() application pointer in invalid");
     return false;
   }
-#ifdef ENABLE_LOG
-  bool seted_up_hmi_level = hmi_level;
-#endif
 
   const std::string device_id =
       MessageHelper::GetDeviceMacAddressForHandle(application->device());
@@ -195,53 +192,57 @@ bool ResumeCtrl::SetupHMILevel(ApplicationSharedPtr application,
     return false;
   }
 
-  if (hmi_level == mobile_apis::HMILevel::HMI_FULL) {
-#ifdef ENABLE_LOG
-    seted_up_hmi_level = app_mngr_->PutApplicationInFull(application);
-#else
-    app_mngr_->PutApplicationInFull(application);
-#endif
-  } else if (hmi_level == mobile_apis::HMILevel::HMI_LIMITED) {
-#ifdef ENABLE_LOG
-    seted_up_hmi_level = app_mngr_->PutApplicationInLimited(application);
-#else
-    app_mngr_->PutApplicationInLimited(application);
-#endif
-    if (audio_streaming_state == mobile_apis::AudioStreamingState::AUDIBLE) {
-      //implemented SDLAQ-CRS-839
-      //checking the existence of application with AudioStreamingState=AUDIBLE
-      //notification resumeAudioSource is sent if only resumed application has
-      //AudioStreamingState=AUDIBLE
-      bool application_exist_with_audible_state = false;
-      ApplicationManagerImpl::ApplicationListAccessor accessor;
-      const std::set<ApplicationSharedPtr> app_list = accessor.applications();
-      std::set<ApplicationSharedPtr>::const_iterator app_list_it = app_list.begin();
-      uint32_t app_id = application->app_id();
-      for (; app_list.end() != app_list_it; ++app_list_it) {
-        if (((*app_list_it)->audio_streaming_state() ==
-             mobile_apis::AudioStreamingState::AUDIBLE) &&
-            ((*app_list_it))->app_id() != app_id) {
-          application_exist_with_audible_state = true;
-          break;
+  if (mobile_apis::HMILevel::HMI_FULL == hmi_level) {
+    hmi_level = app_mngr_->PutApplicationInFull(application);
+
+    if ((mobile_apis::HMILevel::HMI_FULL == hmi_level ||
+        mobile_apis::HMILevel::HMI_LIMITED == hmi_level) &&
+        (mobile_apis::AudioStreamingState::AUDIBLE == audio_streaming_state)) {
+      application->set_audio_streaming_state(audio_streaming_state);
+    }
+  } else if (mobile_apis::HMILevel::HMI_LIMITED == hmi_level) {
+    if ((false == application->IsAudioApplication()) ||
+        app_mngr_->DoesAudioAppWithSameHMITypeExistInFullOrLimited(application)) {
+      hmi_level = mobile_apis::HMILevel::HMI_BACKGROUND;
+    } else {
+      if (audio_streaming_state == mobile_apis::AudioStreamingState::AUDIBLE) {
+        //implemented SDLAQ-CRS-839
+        //checking the existence of application with AudioStreamingState=AUDIBLE
+        //notification resumeAudioSource is sent if only resumed application has
+        //AudioStreamingState=AUDIBLE
+        bool application_exist_with_audible_state = false;
+        ApplicationManagerImpl::ApplicationListAccessor accessor;
+        const std::set<ApplicationSharedPtr> app_list = accessor.applications();
+        std::set<ApplicationSharedPtr>::const_iterator app_list_it = app_list
+            .begin();
+        uint32_t app_id = application->app_id();
+        for (; app_list.end() != app_list_it; ++app_list_it) {
+          if ((mobile_apis::AudioStreamingState::AUDIBLE ==
+              (*app_list_it)->audio_streaming_state())
+              && ((*app_list_it))->app_id() != app_id) {
+            application_exist_with_audible_state = true;
+            break;
+          }
         }
-      }
-      if (application_exist_with_audible_state) {
-        application->set_audio_streaming_state(
+        if (application_exist_with_audible_state) {
+          application->set_audio_streaming_state(
               mobile_apis::AudioStreamingState::NOT_AUDIBLE);
-      } else {
-        MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
+        } else {
+          MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
+        }
       }
     }
   }
-  application->set_hmi_level(hmi_level);
+
   if (hmi_level != mobile_apis::HMILevel::HMI_FULL) {
-    //APPLINK-7244
-    MessageHelper::SendHMIStatusNotification(*(application.get()));
+    application->set_hmi_level(hmi_level);
   }
+
+  MessageHelper::SendHMIStatusNotification(*(application.get()));
 
   LOG4CXX_INFO(logger_, "Set up application "
                << application->mobile_app_id()->asString()
-               << " to HMILevel " << seted_up_hmi_level);
+               << " to HMILevel " << hmi_level);
   return true;
 }
 

@@ -65,7 +65,7 @@ class TransportManagerMock: public ::transport_manager::TransportManager {
   MOCK_METHOD1(DisconnectForce,
                int(const ConnectionUID &));
   MOCK_METHOD1(SendMessageToDevice,
-               int(const RawMessagePtr));
+               int(const ::protocol_handler::RawMessagePtr));
   MOCK_METHOD1(ReceiveEventFromDevice,
                int(const TransportAdapterEvent&));
   MOCK_METHOD1(AddTransportAdapter,

@@ -1,4 +1,4 @@
-/**
+/*
  * \file usb_connection.h
  * \brief UsbConnection class header file.
  *
@@ -58,7 +58,7 @@ class UsbConnection : public Connection {
 
   virtual ~UsbConnection();
  protected:
-  virtual TransportAdapter::Error SendData(RawMessagePtr message);
+  virtual TransportAdapter::Error SendData(::protocol_handler::RawMessagePtr message);
   virtual TransportAdapter::Error Disconnect();
  private:
   friend void InTransferCallback(usbd_urb* urb, usbd_pipe*, void*);
@@ -86,8 +86,8 @@ class UsbConnection : public Connection {
   usbd_urb* in_urb_;
   usbd_urb* out_urb_;
 
-  std::list<RawMessagePtr> out_messages_;
-  RawMessagePtr current_out_message_;
+  std::list<protocol_handler::RawMessagePtr> out_messages_;
+  ::protocol_handler::RawMessagePtr current_out_message_;
   pthread_mutex_t out_messages_mutex_;
   size_t bytes_sent_;
   bool disconnecting_;

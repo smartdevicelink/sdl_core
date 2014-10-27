@@ -165,7 +165,7 @@ class TransportAdapterImpl : public TransportAdapter,
    **/
   virtual TransportAdapter::Error SendData(const DeviceUID& device_handle,
                                            const ApplicationHandle& app_handle,
-                                           const RawMessagePtr data);
+                                           const ::protocol_handler::RawMessagePtr data);
 
   /**
    * @brief Start client listener.
@@ -264,7 +264,7 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    */
-  virtual void ConnectionCreated(ConnectionSptr connection,
+  virtual void ConnectionCreated(Connection* connection,
                                  const DeviceUID& device_handle,
                                  const ApplicationHandle& app_handle);
 
@@ -337,7 +337,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual void DataReceiveDone(const DeviceUID& device_handle,
                                const ApplicationHandle& app_handle,
-                               RawMessagePtr message);
+                               ::protocol_handler::RawMessagePtr message);
 
   /**
    * @brief Launch OnDataReceiveFailed event in the device adapter listener.
@@ -359,7 +359,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual void DataSendDone(const DeviceUID& device_handle,
                             const ApplicationHandle& app_handle,
-                            RawMessagePtr message);
+                            ::protocol_handler::RawMessagePtr message);
 
   /**
    * @brief Launch OnDataSendFailed event in the device adapter listener.
@@ -371,7 +371,7 @@ class TransportAdapterImpl : public TransportAdapter,
    */
   virtual void DataSendFailed(const DeviceUID& device_handle,
                               const ApplicationHandle& app_handle,
-                              RawMessagePtr message,
+                              ::protocol_handler::RawMessagePtr message,
                               const DataSendError& error);
 
   /**
@@ -431,9 +431,9 @@ class TransportAdapterImpl : public TransportAdapter,
    * @param device_handle Device unique identifier.
    * @param app_handle Handle of application.
    *
-   * @return ConnectionSptr smart pointer to the connection.
+   * @return pointer to the connection.
    */
-  ConnectionSptr FindEstablishedConnection(const DeviceUID& device_handle,
+  Connection* FindEstablishedConnection(const DeviceUID& device_handle,
                                            const ApplicationHandle& app_handle) const;
 
  private:
@@ -464,7 +464,7 @@ class TransportAdapterImpl : public TransportAdapter,
    * @brief Structure that holds information about connection.
    */
   struct ConnectionInfo {
-    ConnectionSptr connection;
+    Connection* connection;
     DeviceUID device_id;
     ApplicationHandle app_handle;
     enum {
