@@ -60,6 +60,8 @@ set(MEDIA_MODE_OPTION 	"$ENV{MEDIA_MODE}")
 set(HMI_ADAPTER_OPTION 	"$ENV{HMI_ADAPTER}")
 set(ENABLE_LOG_OPTION 	"$ENV{ENABLE_LOG}")
 set(ARCH_TYPE_OPTION	"$ENV{ARCH_TYPE}")
+set(POLICY_OPTION 	"$ENV{POLICY_TYPE}")
+set(SECURITY_OPTION 	"$ENV{SECURITY_MODE}")
 
 add_custom_target(pasa-tarball
   COMMAND ${CMAKE_SOURCE_DIR}/tools/Utils/export-customer-specific.sh ${CMAKE_SOURCE_DIR} ${CMAKE_BINARY_DIR} pasa
@@ -148,6 +150,21 @@ if (ENABLE_LOG_OPTION)
   endif()
 endif()
 
+if (POLICY_OPTION)
+  if (${POLICY_OPTION} STREQUAL "EXTENDED_POLICY")
+    message(STATUS "Jenkins integration: Extended policy is used")
+    set (EXTENDED_POLICY_FLAG ON)
+  endif()
+endif()
+
+if (SECURITY_OPTION)
+  if (${SECURITY_OPTION} STREQUAL "SEC_OFF")
+    message(STATUS "Jenkins integration: Security is turned OFF")
+    set (ENABLE_SECURITY OFF)
+  endif()
+endif()
+
+
 #Jenkins integration section end
 
 project (${PROJECT})
@@ -182,15 +199,6 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL "QNX")
   SET(EXTENDED_MEDIA_MODE OFF)
 endif()
 
-if (BUILD_AOA_SUPPORT)
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  add_definitions(-DAOA_SUPPORT)
-  set(BUILD_USB_SUPPORT OFF)
-  message(STATUS "AOA support is enabled")
-else ()
-  message(FATAL_ERROR "Library libAOA is supported on QNX only")
-endif()
-endif(BUILD_AOA_SUPPORT)
 
 if (BUILD_USB_SUPPORT)
   add_definitions(-DUSB_SUPPORT)
@@ -203,10 +211,6 @@ if (BUILD_BT_SUPPORT)
   message(STATUS "Bluetooth support is enabled")
 endif()
 
-if (BUILD_MME_SUPPORT)
-  add_definitions(-DMME_SUPPORT)
-  message(STATUS "MME support is enabled")
-endif(BUILD_MME_SUPPORT)
 
 if (BUILD_AVAHI_SUPPORT)
   add_definitions(-DAVAHI_SUPPORT)
@@ -398,12 +402,20 @@ set (install-3rd_party_logger_var "")
 set (install-3rd_party_dbus_var "")
 set (is_logger_actual 1)
 set (is_dbus_actual 1)
+set (is_git_folder 1)
+execute_process(
+    COMMAND /bin/bash -c "cd ${CMAKE_CURRENT_SOURCE_DIR} && git log . 1>/dev/null 2>&1; if [ $? == 0 ]; then exit 0; else exit 1; fi"
+    RESULT_VARIABLE is_git_folder
+)
+
 if(ENABLE_LOG)
   #build logger
-  execute_process(
+  if(is_git_folder EQUAL 0)
+    execute_process(
       COMMAND /bin/bash -c "cd ${CMAKE_CURRENT_SOURCE_DIR} && grep .commit_hash ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib/liblog4cxx.so 1>/dev/null 2>&1; if [ $? == 0 ]; then VAR1=\$(readelf -p .commit_hash ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib/liblog4cxx.so 2>/dev/null); VAR1=\$(echo $VAR1 | awk '{print \$NF}'); VAR2=\$(git log --pretty=\"format:%H\" -1 ${3RD_PARTY_SOURCE_DIRECTORY}/apache-log4cxx-0.10.0); if [[ \$VAR1 == \$VAR2 ]]; then exit 0; else exit 1; fi; else exit 1; fi"
       RESULT_VARIABLE is_logger_actual
-  )
+    )
+  endif()
   if(is_logger_actual EQUAL 0)
     message(STATUS "Logger is actual.")
   else()
@@ -526,3 +538,4 @@ FIND_PACKAGE(Doxygen)
     MESSAGE(STATUS "To enable processing of MscGen comments please install mscgen")
     MESSAGE(STATUS "sudo apt-get install mscgen")
 ENDIF(DOXYGEN_FOUND)
+
