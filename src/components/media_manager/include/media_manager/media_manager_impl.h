@@ -62,9 +62,9 @@ class MediaManagerImpl : public MediaManager,
     virtual void StartAudioStreaming(int32_t application_key);
     virtual void StopAudioStreaming(int32_t application_key);
     virtual void OnMessageReceived(
-      const RawMessagePtr message);
+      const ::protocol_handler::RawMessagePtr message);
     virtual void OnMobileMessageSent(
-      const RawMessagePtr message);
+      const ::protocol_handler::RawMessagePtr message);
     virtual void FramesProcessed(int32_t application_key, int32_t frame_number);
 
   protected:

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -31,9 +31,16 @@
  */
 
 #include "utils/threads/thread_manager.h"
+#include "utils/threads/thread_delegate.h"
+#include "utils/lock.h"
+#include "utils/conditional_variable.h"
+#include "utils/threads/thread.h"
 #include "utils/logger.h"
 
+#include <pthread.h>
+
 #include <sstream>
+#include <list>
 
 #if defined(OS_LINUX)
 #include <sys/syscall.h>
@@ -41,75 +48,7 @@
 #endif
 
 namespace threads {
-namespace impl {
-using namespace std;
-using namespace sync_primitives;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
-namespace {
-  const char* kUnknownName = "UnnamedThread";
-}
-
-UnnamedThreadRegistry::UnnamedThreadRegistry() {
-}
-
-UnnamedThreadRegistry::~UnnamedThreadRegistry() {
-}
-
-std::string UnnamedThreadRegistry::GetUniqueName(PlatformThreadHandle id) {
-  AutoLock auto_lock(state_lock_);
-  IdNameMap::iterator found = id_number_.find(id);
-  if (found != id_number_.end()) {
-    return found->second;
-  }
-  ++last_thread_number_;
-  std::stringstream namestream;
-  namestream << kUnknownName << last_thread_number_;
-  return id_number_[id] = namestream.str();
-}
-
-ThreadManager::ThreadManager() {
-  names_.insert(kUnknownName);
-}
-
-ThreadManager::~ThreadManager() {
-}
-
-void ThreadManager::RegisterName(PlatformThreadHandle id, const string& name) {
-  AutoLock auto_lock(state_lock_);
-  if (names_.find(name) != names_.end()) {
-    LOG4CXX_ERROR(logger_, "Ignoring duplicate thread name: " << name);
-    return;
-  }
-  names_.insert(name);
-  pair<IdNamesMap::iterator, bool> inserted =
-      id_names_.insert(make_pair(id, name));
-  if (!inserted.second) {
-    LOG4CXX_ERROR(logger_, "Trying to register thread name " << name
-                           <<", but it is already registered with name "
-                           <<inserted.first->second);
-  }
-}
-
-string ThreadManager::GetName(PlatformThreadHandle id) const {
-  AutoLock auto_lock(state_lock_);
-  IdNamesMap::const_iterator found = id_names_.find(id);
-  if (found == id_names_.end()) {
-    LOG4CXX_WARN(logger_, "Thread " << id << " doesn't have associated name");
-    return unnamed_thread_namer_.GetUniqueName(id);
-  }
-  return found->second;
-}
-
-void ThreadManager::Unregister(PlatformThreadHandle id) {
-  AutoLock auto_lock(state_lock_);
-  IdNamesMap::iterator it = id_names_.find(id);
-  if(it != id_names_.end()) {
-    names_.erase(it->second);
-    id_names_.erase(it);
-  }
-}
-
-} // namespace impl
 } // namespace threads

@@ -101,6 +101,23 @@ class CommandImpl : public Command {
    */
   virtual uint32_t correlation_id() const;
 
+  /*
+   * @brief Retrieves connection key
+   */
+  virtual uint32_t connection_key() const;
+
+  /*
+   * @brief Retrieves request ID
+   */
+  virtual int32_t function_id() const;
+
+  /*
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   *
+   */
+  virtual void onTimeOut();
+
   // members
   static const int32_t hmi_protocol_type_;
   static const int32_t mobile_protocol_type_;

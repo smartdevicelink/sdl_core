@@ -361,6 +361,7 @@ const char result[] = "result";
 const char statistic_type[] = "statisticType";
 const char error[] = "error";
 const char policyfile[] = "policyfile";
+const char is_active[] = "isActive";
 
 }  // namespace hmi_notification
 

@@ -314,7 +314,7 @@ utils::SharedPtr<ObjectType>::operator*() const {
 
 template<typename ObjectType>
 utils::SharedPtr<ObjectType>::operator bool() const {
-  return 0 != mObject;
+  return valid();
 }
 
 template<typename ObjectType> void
@@ -361,7 +361,10 @@ ObjectType* SharedPtr<ObjectType>::get() const {
 
 template<typename ObjectType>
 inline bool SharedPtr<ObjectType>::valid() const {
-  return (mObject != NULL);
+  if (mReferenceCounter && (0 < *mReferenceCounter)) {
+    return (mObject != NULL);
+  }
+  return false;
 }
 
 }  // namespace utils

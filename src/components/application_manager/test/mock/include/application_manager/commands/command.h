@@ -90,6 +90,24 @@ class Command {
    * @brief Retrieves correlation ID
    */
   virtual uint32_t correlation_id() const = 0;
+
+  /*
+   * @brief Retrieves connection_key
+   */
+  virtual uint32_t connection_key() const = 0;
+
+  /*
+   * @brief Retrieves request ID
+   */
+  virtual int32_t function_id() const = 0;
+
+  /*
+   * @brief Function is called by RequestController when request execution time
+   * has exceed it's limit
+   *
+   */
+  virtual void onTimeOut() = 0;
+
 };
 
 }  // namespace commands

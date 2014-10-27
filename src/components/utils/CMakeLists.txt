@@ -44,7 +44,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
     )
 endif()
 
-add_library("Utils" ${SOURCES})
+add_library("Utils" SHARED ${SOURCES})
 
 if(ENABLE_LOG)
   list(APPEND LIBRARIES log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
@@ -62,3 +62,10 @@ if(BUILD_TESTS)
   add_subdirectory(test)
 endif()
 
+install(TARGETS "Utils"
+  DESTINATION bin
+  PERMISSIONS
+    OWNER_READ OWNER_WRITE
+    GROUP_READ
+    WORLD_READ
+)

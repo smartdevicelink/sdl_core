@@ -50,7 +50,7 @@ SecurityManagerImpl::SecurityManagerImpl()
 }
 
 void SecurityManagerImpl::OnMessageReceived(
-    const RawMessagePtr message) {
+    const ::protocol_handler::RawMessagePtr message) {
   if (message->service_type() != protocol_handler::kControl) {
     return;
   }
@@ -73,7 +73,7 @@ void SecurityManagerImpl::OnMessageReceived(
 }
 
 void SecurityManagerImpl::OnMobileMessageSent(
-    const RawMessagePtr ) {
+    const ::protocol_handler::RawMessagePtr ) {
 }
 
 void SecurityManagerImpl::set_session_observer(
@@ -297,7 +297,7 @@ bool SecurityManagerImpl::ProccessHandshakeData(const SecurityMessage &inMessage
 }
 
 bool SecurityManagerImpl::ProccessInternalError(const SecurityMessage &inMessage) {
-  LOG4CXX_INFO(logger_, "Recieved InternalError with Json message"
+  LOG4CXX_INFO(logger_, "Received InternalError with Json message"
                 << inMessage->get_json_message());
   Json::Value root;
   Json::Reader reader;
@@ -305,7 +305,7 @@ bool SecurityManagerImpl::ProccessInternalError(const SecurityMessage &inMessage
       reader.parse(inMessage->get_json_message(), root);
   if (!parsingSuccessful)
     return false;
-  LOG4CXX_DEBUG(logger_, "Recieved InternalError id " << root[kErrId].asString()
+  LOG4CXX_DEBUG(logger_, "Received InternalError id " << root[kErrId].asString()
                 << ", text: " << root[kErrText].asString());
   return true;
 }
@@ -350,7 +350,7 @@ void SecurityManagerImpl::SendQuery(const SecurityQuery& query,
                                 const uint32_t connection_key) {
   const std::vector<uint8_t> data_sending = query.DeserializeQuery();
 
-  const RawMessagePtr rawMessagePtr(
+  const ::protocol_handler::RawMessagePtr rawMessagePtr(
         new protocol_handler::RawMessage(connection_key,
                                          protocol_handler::PROTOCOL_VERSION_3,
                                          &data_sending[0], data_sending.size(),

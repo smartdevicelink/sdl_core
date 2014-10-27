@@ -81,16 +81,6 @@ class CommandRequestImpl : public CommandImpl,
   virtual void on_event(const event_engine::Event& event);
 
   /*
-   * @brief Retrieves request ID
-   */
-  inline int32_t function_id() const;
-
-  /*
-   * @brief Retrieves connection key
-   */
-  inline uint32_t connection_key() const;
-
-  /*
    * @brief Creates Mobile response
    *
    * @param success true if successful; false, if failed
@@ -193,14 +183,6 @@ protected:
    */
   void AddDisallowedParametersToInfo(smart_objects::SmartObject& response) const;
 };
-
-int32_t CommandRequestImpl::function_id() const {
-  return (*message_)[strings::params][strings::function_id].asInt();
-}
-
-uint32_t CommandRequestImpl::connection_key() const {
-  return (*message_)[strings::params][strings::connection_key].asUInt();
-}
 
 }  // namespace commands
 

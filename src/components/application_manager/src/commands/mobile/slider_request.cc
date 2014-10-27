@@ -142,9 +142,7 @@ void SliderRequest::on_event(const event_engine::Event& event) {
   const bool is_response_success =
       (mobile_apis::Result::SUCCESS == response_code) ||
       //Aborted has slider_position data
-      (mobile_apis::Result::ABORTED == response_code) ||
-      //according with SDLAQ-CRS-2904
-      (mobile_apis::Result::TIMED_OUT == response_code);
+      (mobile_apis::Result::ABORTED == response_code);
 
   SendResponse(is_response_success,
                mobile_apis::Result::eType(response_code),

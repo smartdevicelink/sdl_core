@@ -107,7 +107,7 @@ class TransportManager {
    *
    * @return Code error.
    **/
-  virtual int SendMessageToDevice(const RawMessagePtr message) = 0;
+  virtual int SendMessageToDevice(const protocol_handler::RawMessagePtr message) = 0;
 
   /**
    * @brief Post event in the event queue.

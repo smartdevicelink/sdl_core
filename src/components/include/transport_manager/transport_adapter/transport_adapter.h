@@ -224,7 +224,7 @@ class TransportAdapter {
    **/
   virtual Error SendData(const DeviceUID& device_handle,
                          const ApplicationHandle& app_handle,
-                         const RawMessagePtr data) = 0;
+                         const protocol_handler::RawMessagePtr data) = 0;
 
   /**
    * @brief Create container(vector) of device unique identifiers.

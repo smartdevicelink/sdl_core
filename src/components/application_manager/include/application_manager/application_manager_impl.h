@@ -203,6 +203,41 @@ class ApplicationManagerImpl : public ApplicationManager,
     std::vector<ApplicationSharedPtr> applications_with_navi();
 
     /**
+     * @brief Returns media application with LIMITED HMI Level if exist.
+     *
+     * @return Shared pointer to application if application does not
+     * exist returns empty shared pointer.
+     */
+    ApplicationSharedPtr get_limited_media_application() const;
+
+    /**
+     * @brief Returns navigation application with LIMITED HMI Level if exist.
+     *
+     * @return Shared pointer to application if application does not
+     * exist returns empty shared pointer
+     */
+    ApplicationSharedPtr get_limited_navi_application() const;
+
+    /**
+     * @brief Returns voice communication application with LIMITED HMI Level if exist.
+     *
+     * @return Shared pointer to application if application does not
+     * exist returns empty shared pointer
+     */
+    ApplicationSharedPtr get_limited_voice_application() const;
+
+    /**
+     * @brief Check's if there are audio(media, voice communication or navi) applications
+     *        exist in HMI_FULL or HMI_LIMITED level with same audible HMI type.
+     *        Used for resumption.
+     *
+     * @param app Pointer to application to compare with
+     *
+     * @return true if exist otherwise false
+     */
+    bool DoesAudioAppWithSameHMITypeExistInFullOrLimited(ApplicationSharedPtr app) const;
+
+    /**
      * @brief Notifies all components interested in Vehicle Data update
      * i.e. new value of odometer etc and returns list of applications
      * subscribed for event.
@@ -281,14 +316,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
     bool LoadAppDataToHMI(ApplicationSharedPtr app);
     bool ActivateApplication(ApplicationSharedPtr app);
-    /**
-     * @brief Put application in Limited HMI Level if possible,
-     *        otherwise put applicatuion other HMI level.
-     *        do not send any notifications to mobile
-     * @param app, application, that need to be puted in Limeted
-     * @return seted HMI Level
-     */
-    mobile_api::HMILevel::eType PutApplicationInLimited(ApplicationSharedPtr app);
 
     /**
      * @brief Put application in FULL HMI Level if possible,
@@ -404,27 +431,27 @@ class ApplicationManagerImpl : public ApplicationManager,
     // if |final_message| parameter is set connection to mobile will be closed
     // after processing this message
     void SendMessageToMobile(
-      const utils::SharedPtr<smart_objects::SmartObject>& message,
+      const utils::SharedPtr<smart_objects::SmartObject> message,
       bool final_message = false);
     bool ManageMobileCommand(
-      const utils::SharedPtr<smart_objects::SmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject> message);
     void SendMessageToHMI(
-      const utils::SharedPtr<smart_objects::SmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject> message);
     bool ManageHMICommand(
-      const utils::SharedPtr<smart_objects::SmartObject>& message);
+      const utils::SharedPtr<smart_objects::SmartObject> message);
 
     /////////////////////////////////////////////////////////
     /*
      * @brief Overriden ProtocolObserver method
      */
     virtual void OnMessageReceived(
-        const RawMessagePtr message);
+        const ::protocol_handler::RawMessagePtr message);
 
     /*
      * @brief Overriden ProtocolObserver method
      */
     virtual void OnMobileMessageSent(
-        const RawMessagePtr message);
+        const ::protocol_handler::RawMessagePtr message);
 
     void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
     void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
@@ -458,7 +485,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      * @param connection_key Connection key of application
      * @param mobile_correlation_id Correlation ID of the mobile request
-     * @param new_timeout_value New timeout to be set
+     * @param new_timeout_value New timeout in milliseconds to be set
      */
     void updateRequestTimeout(uint32_t connection_key,
                               uint32_t mobile_correlation_id,
@@ -601,6 +628,20 @@ class ApplicationManagerImpl : public ApplicationManager,
     void RemoveAppFromTTSGlobalPropertiesList(const uint32_t app_id);
 
     /**
+     * @brief method adds application in FULL and LIMITED state
+     * to on_phone_call_app_list_.
+     * Also OnHMIStateNotification with BACKGROUND state sent for these apps
+     */
+    void CreatePhoneCallAppList();
+
+    /**
+     * @brief method removes application from on_phone_call_app_list_.
+     *
+     * Also OnHMIStateNotification with previous HMI state sent for these apps
+     */
+    void ResetPhoneCallAppList();
+
+    /**
      * Function used only by HMI request/response/notification base classes
      * to change HMI app id to Mobile app id and vice versa.
      * Dot use it inside Core
@@ -684,10 +725,10 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool ConvertSOtoMessage(const smart_objects::SmartObject& message,
                             Message& output);
     utils::SharedPtr<Message> ConvertRawMsgToMessage(
-      const RawMessagePtr message);
+      const ::protocol_handler::RawMessagePtr message);
 
-    void ProcessMessageFromMobile(const utils::SharedPtr<Message>& message);
-    void ProcessMessageFromHMI(const utils::SharedPtr<Message>& message);
+    void ProcessMessageFromMobile(const utils::SharedPtr<Message> message);
+    void ProcessMessageFromHMI(const utils::SharedPtr<Message> message);
 
     // threads::MessageLoopThread<*>::Handler implementations
     /*
@@ -737,6 +778,27 @@ class ApplicationManagerImpl : public ApplicationManager,
      * will send TTS global properties to HMI after timeout
      */
     std::map<uint32_t, TimevalStruct> tts_global_properties_app_list_;
+
+
+    struct AppState {
+      AppState(const mobile_apis::HMILevel::eType& level,
+               const mobile_apis::AudioStreamingState::eType& streaming_state,
+               const mobile_apis::SystemContext::eType& context)
+      : hmi_level(level),
+        audio_streaming_state(streaming_state),
+        system_context(context) { }
+
+      mobile_apis::HMILevel::eType            hmi_level;
+      mobile_apis::AudioStreamingState::eType audio_streaming_state;
+      mobile_apis::SystemContext::eType       system_context;
+    };
+
+    /**
+     * @brief Map contains apps with HMI state before incoming call
+     * After incoming call ends previous HMI state must restore
+     *
+     */
+    std::map<uint32_t, AppState> on_phone_call_app_list_;
 
     bool audio_pass_thru_active_;
     sync_primitives::Lock audio_pass_thru_lock_;
@@ -790,8 +852,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      public:
       ApplicationListUpdateTimer(ApplicationManagerImpl* callee) :
           timer::TimerThread<ApplicationManagerImpl>("AM ListUpdater",
-              callee, &ApplicationManagerImpl::OnApplicationListUpdateTimer
-          ) {
+              callee, &ApplicationManagerImpl::OnApplicationListUpdateTimer) {
       }
     };
     typedef utils::SharedPtr<ApplicationListUpdateTimer> ApplicationListUpdateTimerSptr;

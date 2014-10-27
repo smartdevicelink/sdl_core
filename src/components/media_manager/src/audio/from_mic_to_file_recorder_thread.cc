@@ -198,12 +198,8 @@ void FromMicToFileRecorderThread::threadMain() {
     timeout.pipeline = pipeline;
     timeout.duration = duration;
 
-    sleepThread_ = new threads::Thread("SleepThread"
-                                       , new SleepThreadDelegate(timeout));
-
-    if (NULL != sleepThread_) {
-      sleepThread_->start();
-    }
+    sleepThread_ = threads::CreateThread("SleepThread", new SleepThreadDelegate(timeout));
+    sleepThread_->start();
   }
 
   loop = g_main_loop_new(NULL, FALSE);
@@ -250,7 +246,7 @@ bool FromMicToFileRecorderThread::exitThreadMain() {
   if (NULL != sleepThread_) {
     LOG4CXX_TRACE(logger_, "Stop sleep thread\n");
     sleepThread_->stop();
-    delete sleepThread_;
+    threads::DeleteThread(sleepThread_);
     sleepThread_ = NULL;
   }
 

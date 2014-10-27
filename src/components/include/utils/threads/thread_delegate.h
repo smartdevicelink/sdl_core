@@ -43,11 +43,6 @@ namespace threads {
  */
 class ThreadDelegate {
   public:
-    /**
-     * Dtor.
-     */
-    virtual ~ThreadDelegate() {
-    }
 
     /**
      * Thread procedure.
@@ -63,6 +58,7 @@ class ThreadDelegate {
     virtual bool exitThreadMain() {
       return false;
     }
+    virtual ~ThreadDelegate() { }
 };
 
 }  // namespace threads

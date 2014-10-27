@@ -50,7 +50,7 @@ class PTExchangeHandlerImpl : public PTExchangeHandler {
 
  protected:
   PolicyHandler* policy_handler_;
-  threads::Thread retry_sequence_;
+  threads::Thread* retry_sequence_;
   sync_primitives::Lock retry_sequence_lock_;
 
   friend class RetrySequence;

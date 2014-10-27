@@ -96,6 +96,10 @@ class ThreadOptions {
     return is_joinable_;
   }
 
+  void is_joinable(bool val) {
+    is_joinable_ = val;
+  }
+
  protected:
   size_t stack_size_;
   bool is_joinable_;

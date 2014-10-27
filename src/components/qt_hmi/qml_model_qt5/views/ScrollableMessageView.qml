@@ -42,6 +42,7 @@ import "../popups"
 
 GeneralView {
     applicationContext: true
+    systemContext: Common.SystemContext.SYSCTXT_HMI_OBSCURED
     onLeaveScreen: {
         timer.stop()
         dataContainer.scrollableMessageModel.running = false

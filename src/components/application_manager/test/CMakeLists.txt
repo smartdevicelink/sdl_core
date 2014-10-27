@@ -44,22 +44,13 @@ set (AM_SOURCES
   ${AM_SOURCE_DIR}/src/mobile_message_handler.cc
 )
 
-if (EXTENDED_POLICY_FLAG)
   include_directories(
-    ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct_ext
-  )
-  list(APPEND AM_SOURCES
-    ${COMPONENTS_DIR}/src/policies/pt_exchange_handler_ext.cc
-  )
-else ()
-  include_directories(
-    ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
+    ${AM_SOURCE_DIR}/policy/src/policy/policy_table/table_struct
   )
   list(APPEND AM_SOURCES
     ${COMPONENTS_DIR}/application_manager/src/policies/pt_exchange_handler_impl.cc
     ${COMPONENTS_DIR}/application_manager/src/policies/policy_retry_sequence.cc
   )
-endif ()
 
 set(testLibraries
   gmock

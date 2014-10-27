@@ -48,7 +48,6 @@ FromMicRecorderListener::FromMicRecorderListener(
 FromMicRecorderListener::~FromMicRecorderListener() {
   if (reader_) {
     reader_->stop();
-    delete reader_;
     reader_ = NULL;
   }
 }
@@ -72,7 +71,7 @@ void FromMicRecorderListener::OnActivityStarted(int32_t application_key) {
   if (!reader_) {
     AudioStreamSenderThread* thread_delegate =
       new AudioStreamSenderThread(file_name_, application_key);
-    reader_ = new threads::Thread("RecorderSender", thread_delegate);
+    reader_ = threads::CreateThread("RecorderSender", thread_delegate);
   }
   if (reader_) {
     reader_->start();
@@ -90,7 +89,6 @@ void FromMicRecorderListener::OnActivityEnded(int32_t application_key) {
   }
   if (reader_) {
     reader_->stop();
-    delete reader_;
     reader_ = NULL;
   }
   current_application_ = 0;

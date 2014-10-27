@@ -41,7 +41,7 @@ namespace media_manager {
 class MediaAdapter {
  public:
   virtual void SendData(int32_t application_key,
-                        const RawMessagePtr message) = 0;
+                        const ::protocol_handler::RawMessagePtr message) = 0;
   virtual void StartActivity(int32_t application_key) = 0;
   virtual void StopActivity(int32_t application_key) = 0;
   virtual bool is_app_performing_activity(int32_t application_key) = 0;

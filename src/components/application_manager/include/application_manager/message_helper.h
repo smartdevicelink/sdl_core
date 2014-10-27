@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -92,7 +92,9 @@ class MessageHelper {
      *
      **/
     static void SendOnAppRegisteredNotificationToHMI(
-      const Application& application_impl, bool resumption = false);
+        const Application& application_impl,
+        bool resumption = false,
+        bool need_restore_vr = false);
 
     /**
      * @brief Create mobile HashUpdateNotification

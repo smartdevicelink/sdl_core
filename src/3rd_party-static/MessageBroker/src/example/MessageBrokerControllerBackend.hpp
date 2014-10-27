@@ -19,7 +19,7 @@
 namespace NsMessageBroker
 {
   /**
-  * \class CMessageBrokerControllerBackend
+  *Â \class CMessageBrokerControllerBackend
   * \brief MessageBroker Controller.
   */
 

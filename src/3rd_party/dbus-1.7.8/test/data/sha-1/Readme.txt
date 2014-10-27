@@ -42,10 +42,10 @@ procedure MonteCarlo(string SEED)
 	M := SEED;
 	for j = 0 to 99 do {
 		for i = 1 to 50000 do {
-			for a = 1 to (j/4*8 + 24) do M := M || ’0’;	/*‘0' is the binary zero bit. */
-			M := M || i; 	/* Here, the value for ‘i’ is expressed as a 32-bit word
-					   and concatenated with ‘M’. The first bit
-					   concatenated with ‘M’ is the most significant bit of
+			for a = 1 to (j/4*8 + 24) do M := M || â€™0â€™;	/*â€˜0' is the binary zero bit. */
+			M := M || i; 	/* Here, the value for â€˜iâ€™ is expressed as a 32-bit word
+					   and concatenated with â€˜Mâ€™. The first bit
+					   concatenated with â€˜Mâ€™ is the most significant bit of
 					   this 32-bit word. */
 			M := SHA(M);
 			}
@@ -54,7 +54,7 @@ procedure MonteCarlo(string SEED)
 	}
 
 NOTE: In the above procedure, || denotes concatenation. Also, M || i denotes appending the 32-bit
-word representing the value ‘i’, as defined in section 2 of the SHS.  Within the procedure, M is a string
+word representing the value â€˜iâ€™, as defined in section 2 of the SHS.  Within the procedure, M is a string
 of variable length. The initial length of 416 bits ensures that the length of M never exceeds 512 bits
 during execution of the above procedure, and it ensures that messages will be of a byte length.  Each
 element printed should be 160 bits in length.

@@ -118,6 +118,7 @@ void DBusMessageAdapter::SubscribeTo() {
   DBusMessageController::SubscribeTo("BasicCommunication", "OnIgnitionCycleOver");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnSystemRequest");
   DBusMessageController::SubscribeTo("BasicCommunication", "OnSystemInfoChanged");
+  DBusMessageController::SubscribeTo("BasicCommunication", "OnPhoneCall");
   DBusMessageController::SubscribeTo("TTS", "Started");
   DBusMessageController::SubscribeTo("TTS", "Stopped");
   DBusMessageController::SubscribeTo("TTS", "OnLanguageChange");

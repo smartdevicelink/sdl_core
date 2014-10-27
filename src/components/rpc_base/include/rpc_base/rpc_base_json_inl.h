@@ -89,7 +89,7 @@ namespace impl {
 // static
 inline const Json::Value* ValueMember(const Json::Value* value,
                                       const char* member_name) {
-  if (value && value->isMember(member_name)) {
+  if (value && value->isObject() && value->isMember(member_name)) {
     return &(*value)[member_name];
   }
   return NULL;

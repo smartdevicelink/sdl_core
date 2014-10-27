@@ -226,7 +226,7 @@ class TransportAdapterListenerImpl
   virtual void OnDataReceiveDone(const TransportAdapter* adapter,
                                  const DeviceUID& device,
                                  const ApplicationHandle& app_id,
-                                 const RawMessagePtr data_container);
+                                 const ::protocol_handler::RawMessagePtr data_container);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -257,7 +257,7 @@ class TransportAdapterListenerImpl
   virtual void OnDataSendDone(const TransportAdapter* adapter,
                               const DeviceUID& device,
                               const ApplicationHandle& app_id,
-                              const RawMessagePtr data_container);
+                              const ::protocol_handler::RawMessagePtr data_container);
 
   /**
    * @brief Search specified device adapter in the container of shared pointers
@@ -267,7 +267,7 @@ class TransportAdapterListenerImpl
   virtual void OnDataSendFailed(const TransportAdapter* adapter,
                                 const DeviceUID& device,
                                 const ApplicationHandle& app_id,
-                                const RawMessagePtr data_container,
+                                const ::protocol_handler::RawMessagePtr data_container,
                                 const DataSendError& error);
 
   /**

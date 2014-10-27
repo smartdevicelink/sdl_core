@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -55,7 +55,7 @@
 #define atomic_post_dec(ptr) (*(ptr))--
 #endif
 
-#if defined(_QNXNTO__)
+#if defined(__QNXNTO__)
 // on QNX pointer assignment is believed to be atomic
 #define atomic_pointer_assign(dst, src) (dst) = (src)
 #elif defined(__GNUG__)
@@ -64,6 +64,22 @@
 #else
 #warning atomic_pointer_assign() implementation may be non-atomic
 #define atomic_pointer_assign(dst, src) (dst) = (src)
+#endif
+
+#if defined(__QNXNTO__)
+#define atomic_post_set(dst) atomic_set_value(dst, 1)
+#elif defined(__GNUG__)
+#define atomic_post_set(dst) __sync_val_compare_and_swap((dst), 0, 1)
+#else
+#error "atomic post set operation not defined"
+#endif
+
+#if defined(__QNXNTO__)
+#define atomic_post_clr(dst) atomic_clr_value(dst, 1)
+#elif defined(__GNUG__)
+#define atomic_post_clr(dst) __sync_val_compare_and_swap((dst), 1, 0)
+#else
+#error "atomic post clear operation not defined"
 #endif
 
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_ATOMIC_H_

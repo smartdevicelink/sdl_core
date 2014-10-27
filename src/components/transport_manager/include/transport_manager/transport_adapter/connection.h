@@ -63,18 +63,13 @@ class Connection {
    *
    * @return Error Information about possible reason of sending data failure.
    */
-  virtual TransportAdapter::Error SendData(RawMessagePtr message) = 0;
+  virtual TransportAdapter::Error SendData(::protocol_handler::RawMessagePtr message) = 0;
 
   /**
    * @brief Disconnect the current connection.
    */
   virtual TransportAdapter::Error Disconnect() = 0;
 };
-
-/**
- * @typedef Type definition of smart pointer to the Connection class.
- */
-typedef utils::SharedPtr<Connection> ConnectionSptr;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager

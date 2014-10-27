@@ -70,11 +70,21 @@ uint32_t CommandImpl::default_timeout() const {
   return default_timeout_;
 }
 
-
 uint32_t CommandImpl::correlation_id() const {
   return (*message_)[strings::params][strings::correlation_id].asUInt();
 }
 
+int32_t CommandImpl::function_id() const {
+  return (*message_)[strings::params][strings::function_id].asInt();
+}
+
+uint32_t CommandImpl::connection_key() const {
+  return (*message_)[strings::params][strings::connection_key].asUInt();
+}
+
+void CommandImpl::onTimeOut() {
+
+}
 
 }  // namespace commands
 }  // namespace application_manager

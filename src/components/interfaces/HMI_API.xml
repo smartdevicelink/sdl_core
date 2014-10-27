@@ -1907,6 +1907,12 @@
     <function name="OnUpdateDeviceList" messagetype="notification">
       <description>Notification from HMI to SDL sent when HMI requires update of device list (i.e. when user clicks 'Change Device' button)</description>
     </function>
+    <function name="OnPhoneCall" messagetype="notification">
+        <description>Sender: HMI->SDL. When: upon phone-call event started or ended</description>
+        <param name="isActive" type="Boolean" mandatory="true">
+            <description>Must be 'true' - when the phone call is started on HMI. Must be 'false' when the phone call is ended on HMI</description>
+        </param>
+    </function>
     <function name="OnResumeAudioSource" messagetype="notification">
       <description>This method must be invoked by SDL to update audio state.</description>
       <param name="appID" type="Integer" mandatory="true">

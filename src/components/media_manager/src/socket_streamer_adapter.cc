@@ -59,7 +59,6 @@ SocketStreamerAdapter::SocketStreamerAdapter()
 SocketStreamerAdapter::~SocketStreamerAdapter() {
   thread_->stop();
   streamer_ = NULL;
-  delete thread_;
 }
 
 void SocketStreamerAdapter::StartActivity(int32_t application_key) {
@@ -114,7 +113,7 @@ void SocketStreamerAdapter::Init() {
   if (!thread_) {
     LOG4CXX_INFO(logger, "Create and start sending thread");
     streamer_ = new Streamer(this);
-    thread_ = new threads::Thread("SocketStreamer", streamer_);
+    thread_ = threads::CreateThread("SocketStreamer", streamer_);
     const size_t kStackSize = 16384;
     thread_->startWithOptions(threads::ThreadOptions(kStackSize));
   } else {
@@ -124,7 +123,7 @@ void SocketStreamerAdapter::Init() {
 
 void SocketStreamerAdapter::SendData(
   int32_t application_key,
-  const RawMessagePtr message) {
+  const ::protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger, "SendData(application_key = " << application_key << ")");
 
 
@@ -170,24 +169,24 @@ void SocketStreamerAdapter::Streamer::threadMain() {
     is_first_loop_ = true;
     while (is_client_connected_) {
       while (!server_->messages_.empty()) {
-        RawMessagePtr msg = server_->messages_.pop();
+        ::protocol_handler::RawMessagePtr msg = server_->messages_.pop();
         if (!msg) {
           LOG4CXX_ERROR(logger, "Null pointer message");
           continue;
         }
 
         is_client_connected_ = send(msg);
-        static int32_t messsages_for_session = 0;
-        ++messsages_for_session;
+        static int32_t messages_for_session = 0;
+        ++messages_for_session;
 
         LOG4CXX_INFO(logger, "Handling map streaming message. This is "
-            << messsages_for_session << " the message for "
+            << messages_for_session << " the message for "
             << server_->current_application_);
         std::set<MediaListenerPtr>::iterator it = server_->media_listeners_
             .begin();
         for (; server_->media_listeners_.end() != it; ++it) {
           (*it)->OnDataReceived(server_->current_application_,
-                                messsages_for_session);
+                                messages_for_session);
         }
       }
 
@@ -232,8 +231,7 @@ void SocketStreamerAdapter::Streamer::start() {
     return;
   }
 
-  struct sockaddr_in serv_addr_;
-  memset(&serv_addr_, 0, sizeof(serv_addr_));
+  struct sockaddr_in serv_addr_ = { 0 };
   serv_addr_.sin_addr.s_addr = inet_addr(server_->ip_.c_str());
   serv_addr_.sin_family = AF_INET;
   serv_addr_.sin_port = htons(server_->port_);
@@ -290,7 +288,7 @@ bool SocketStreamerAdapter::Streamer::is_ready() const {
 }
 
 bool SocketStreamerAdapter::Streamer::send(
-  const RawMessagePtr msg) {
+  const ::protocol_handler::RawMessagePtr msg) {
   if (!is_ready()) {
     LOG4CXX_ERROR_EXT(logger, " Socket is not ready");
     return false;

@@ -1,4 +1,4 @@
-/**
+/*
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -50,6 +50,8 @@
 #  include <netinet/tcp_var.h>
 #endif  // __linux__
 
+#include <sstream>
+
 #include "utils/logger.h"
 
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
@@ -67,20 +69,9 @@ TcpClientListener::TcpClientListener(TransportAdapterController* controller,
   : port_(port),
     enable_keepalive_(enable_keepalive),
     controller_(controller),
-    thread_(),
+    thread_(threads::CreateThread("TcpClientListener", this)),
     socket_(-1),
-    thread_started_(false),
-    shutdown_requested_(false),
-    thread_stop_requested_(false) {}
-
-void* tcpClientListenerThread(void* data) {
-  LOG4CXX_TRACE(logger_, "enter. data  " << data);
-  TcpClientListener* tcpClientListener = static_cast<TcpClientListener*>(data);
-  assert(tcpClientListener != 0);
-  tcpClientListener->Thread();
-  LOG4CXX_TRACE(logger_, "exit");
-  return 0;
-}
+    thread_stop_requested_(false) { }
 
 TransportAdapter::Error TcpClientListener::Init() {
   return TransportAdapter::OK;
@@ -88,7 +79,6 @@ TransportAdapter::Error TcpClientListener::Init() {
 
 void TcpClientListener::Terminate() {
   LOG4CXX_TRACE(logger_, "enter");
-  shutdown_requested_ = true;
   if (TransportAdapter::OK != StopListening()) {
     LOG4CXX_ERROR(logger_, "Cannot stop listening TCP");
   }
@@ -117,11 +107,10 @@ void SetKeepaliveOptions(const int fd) {
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
   setsockopt(fd, IPPROTO_TCP, TCP_USER_TIMEOUT, &user_timeout,
              sizeof(user_timeout));
-#elif __QNX__  // __linux__
+#elif defined(__QNX__)  // __linux__
   // TODO (KKolodiy): Out of order!
   const int kMidLength = 4;
   int mib[kMidLength];
-  timeval tval;
 
   mib[0] = CTL_NET;
   mib[1] = AF_INET;
@@ -141,7 +130,7 @@ void SetKeepaliveOptions(const int fd) {
   mib[3] = TCPCTL_KEEPINTVL;
   sysctl(mib, kMidLength, NULL, NULL, &keepintvl, sizeof(keepintvl));
 
-  memset(&tval, sizeof(tval), 0);
+  struct timeval tval = { 0 };
   tval.tv_sec = keepidle;
   setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &yes, sizeof(yes));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPALIVE, &tval, sizeof(tval));
@@ -149,9 +138,9 @@ void SetKeepaliveOptions(const int fd) {
   LOG4CXX_TRACE(logger_, "exit");
 }
 
-void TcpClientListener::Thread() {
+void TcpClientListener::threadMain() {
   LOG4CXX_TRACE(logger_, "enter");
-  while (false == thread_stop_requested_) {
+  while (!thread_stop_requested_) {
     sockaddr_in client_address;
     socklen_t client_address_size = sizeof(client_address);
     const int connection_fd = accept(socket_, (struct sockaddr*)&client_address,
@@ -200,7 +189,7 @@ void TcpClientListener::Thread() {
 
 TransportAdapter::Error TcpClientListener::StartListening() {
   LOG4CXX_TRACE(logger_, "enter");
-  if (thread_started_) {
+  if (thread_->is_running()) {
     LOG4CXX_TRACE(logger_,
                   "exit with TransportAdapter::BAD_STATE. Condition: thread_started_");
     return TransportAdapter::BAD_STATE;
@@ -214,8 +203,7 @@ TransportAdapter::Error TcpClientListener::StartListening() {
     return TransportAdapter::FAIL;
   }
 
-  sockaddr_in server_address;
-  memset(&server_address, 0, sizeof(server_address));
+  sockaddr_in server_address = { 0 };
   server_address.sin_family = AF_INET;
   server_address.sin_port = htons(port_);
   server_address.sin_addr.s_addr = INADDR_ANY;
@@ -237,47 +225,42 @@ TransportAdapter::Error TcpClientListener::StartListening() {
     return TransportAdapter::FAIL;
   }
 
-  const int thread_start_error = pthread_create(&thread_, 0,
-                                 &tcpClientListenerThread, this);
-  if (0 == thread_start_error) {
-    thread_started_ = true;
+  if (thread_->start()) {
     LOG4CXX_DEBUG(logger_, "Tcp client listener thread started");
-    pthread_setname_np(thread_, "TCP listener");
   } else {
-    LOG4CXX_ERROR(logger_, "Tcp client listener thread start failed, error code "
-                  << thread_start_error);
-    LOG4CXX_TRACE(logger_,
-                  "exit with TransportAdapter::FAIL. Condition: 0 !== thread_start_error");
+    LOG4CXX_ERROR(logger_, "Tcp client listener thread start failed");
     return TransportAdapter::FAIL;
   }
   LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK");
   return TransportAdapter::OK;
 }
 
+bool TcpClientListener::exitThreadMain() {
+  StopListening();
+  return true;
+}
+
 TransportAdapter::Error TcpClientListener::StopListening() {
   LOG4CXX_TRACE(logger_, "enter");
-  if (!thread_started_) {
+  if (!thread_->is_running()) {
     LOG4CXX_TRACE(logger_,
                   "exit with TransportAdapter::BAD_STATE. Condition !thread_started_");
     return TransportAdapter::BAD_STATE;
   }
 
   thread_stop_requested_ = true;
-  int byebyesocket = socket(AF_INET, SOCK_STREAM, 0);
-  sockaddr_in server_address;
-  memset(&server_address, 0, sizeof(server_address));
+  // We need to connect to the listening socket to unblock accept() call
+  int byesocket = socket(AF_INET, SOCK_STREAM, 0);
+  sockaddr_in server_address = { 0 };
   server_address.sin_family = AF_INET;
   server_address.sin_port = htons(port_);
   server_address.sin_addr.s_addr = INADDR_ANY;
-  connect(byebyesocket, (sockaddr*)&server_address, sizeof(server_address));
-  shutdown(byebyesocket, SHUT_RDWR);
-  close(byebyesocket);
-  pthread_join(thread_, 0);
+  connect(byesocket, (sockaddr*)&server_address, sizeof(server_address));
+  shutdown(byesocket, SHUT_RDWR);
+  close(byesocket);
   LOG4CXX_DEBUG(logger_, "Tcp client listener thread terminated");
   close(socket_);
   socket_ = -1;
-  thread_started_ = false;
-  thread_stop_requested_ = false;
   LOG4CXX_TRACE(logger_, "exit with TransportAdapter::OK");
   return TransportAdapter::OK;
 }

@@ -58,7 +58,7 @@ SDL.TTSPopUp = Em.ContainerView.create( {
 
     appID: null,
 
-    timerSeconds: 10,
+    timerSeconds: 5,
 
     popUp: Ember.TextArea.extend( {
 

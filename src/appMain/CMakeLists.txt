@@ -219,6 +219,7 @@ if(ENABLE_LOG)
   list(APPEND test_exec_libraries expat -L${EXPAT_LIBS_DIRECTORY})
 endif()
 
+  include(${CMAKE_SOURCE_DIR}/src/components/policy/test/include.cmake)
 
   IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
     list(REMOVE_ITEM test_exec_libraries dl)

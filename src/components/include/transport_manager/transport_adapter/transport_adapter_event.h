@@ -55,7 +55,7 @@ class TransportAdapterEvent {
                         transport_adapter::TransportAdapter* adapter,
                         const DeviceUID& device_handle,
                         const ApplicationHandle& application_id,
-                        RawMessagePtr data, BaseErrorPtr error)
+                        ::protocol_handler::RawMessagePtr data, BaseErrorPtr error)
     : event_type(type),
       application_id(application_id),
       device_uid(device_handle),
@@ -82,7 +82,7 @@ class TransportAdapterEvent {
   /**
    * @brief Smart pointer to the raw message
    */
-  RawMessagePtr event_data;
+  ::protocol_handler::RawMessagePtr event_data;
   /**
    * @brief Pointer to the class that contain details of error.
    */

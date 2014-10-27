@@ -56,7 +56,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "MobileMessageHandler")
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV1(
-  const RawMessagePtr message) {
+  const ::protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger_,
                "MobileMessageHandler HandleIncomingMessageProtocolV1()");
   application_manager::Message* outgoing_message =
@@ -86,7 +86,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
 
 application_manager::Message*
 MobileMessageHandler::HandleIncomingMessageProtocolV2(
-  const RawMessagePtr message) {
+  const ::protocol_handler::RawMessagePtr message) {
   LOG4CXX_INFO(logger_,
                "MobileMessageHandler HandleIncomingMessageProtocolV2()");
 

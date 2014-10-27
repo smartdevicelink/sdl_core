@@ -67,7 +67,7 @@ void FromMicRecorderAdapter::StartActivity(int32_t application_key) {
     FromMicToFileRecorderThread* thread_delegate =
       new FromMicToFileRecorderThread(
       output_file_, duration_);
-    recorder_thread_ = new threads::Thread("MicrophoneRec",
+    recorder_thread_ = threads::CreateThread("MicrophoneRec",
                                            thread_delegate);
   }
 
@@ -88,7 +88,6 @@ void FromMicRecorderAdapter::StopActivity(int32_t application_key) {
 
   if (NULL != recorder_thread_) {
     recorder_thread_->stop();
-    delete recorder_thread_;
     recorder_thread_ = NULL;
   }
   current_application_ = 0;

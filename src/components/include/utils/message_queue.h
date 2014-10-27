@@ -150,7 +150,6 @@ template<typename T, class Q> bool MessageQueue<T, Q>::empty() const {
 }
 
 template<typename T, class Q> bool MessageQueue<T, Q>::IsShuttingDown() const {
-  sync_primitives::AutoLock auto_lock(queue_lock_);
   return shutting_down_;
 }
 
@@ -169,14 +168,10 @@ template<typename T, class Q> void MessageQueue<T, Q>::push(const T& element) {
 
 template<typename T, class Q> T MessageQueue<T, Q>::pop() {
   sync_primitives::AutoLock auto_lock(queue_lock_);
-  if (shutting_down_) {
-    CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-    LOG4CXX_ERROR(logger_, "Runtime error, pop from queue"
-                         " that is being shut down");
-  }
   if (queue_.empty()) {
     CREATE_LOGGERPTR_LOCAL(logger_, "Utils")
-    LOG4CXX_ERROR(logger_, "Runtime error, popping out of empty que");
+    LOG4CXX_ERROR(logger_, "Runtime error, popping out of empty queue");
+    NOTREACHED();
   }
   T result = queue_.front();
   queue_.pop();
@@ -184,10 +179,8 @@ template<typename T, class Q> T MessageQueue<T, Q>::pop() {
 }
 
 template<typename T, class Q> void MessageQueue<T, Q>::Shutdown() {
-  {
-    sync_primitives::AutoLock auto_lock(queue_lock_);
-    shutting_down_ = true;
-  }
+  sync_primitives::AutoLock auto_lock(queue_lock_);
+  shutting_down_ = true;
   queue_new_items_.Broadcast();
 }
 

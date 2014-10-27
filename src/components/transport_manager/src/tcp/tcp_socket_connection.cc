@@ -95,8 +95,7 @@ bool TcpServerOiginatedSocketConnection::Establish(ConnectError** error) {
     return false;
   }
 
-  struct sockaddr_in addr;
-  memset((char*) &addr, 0, sizeof(addr));
+  struct sockaddr_in addr = { 0 };
   addr.sin_family = AF_INET;
   addr.sin_addr.s_addr = tcp_device->in_addr();
   addr.sin_port = htons(port);

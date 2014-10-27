@@ -47,7 +47,7 @@ class MessageBrokerAdapter : public HMIMessageAdapter,
  public:
   MessageBrokerAdapter(HMIMessageHandler* handler_param, const std::string&
                                 server_address, uint16_t port);
-    ~MessageBrokerAdapter();
+  ~MessageBrokerAdapter();
   void SendMessageToHMI(MessageSharedPointer message);
 
   /*Methods from CMessageBrokerController*/

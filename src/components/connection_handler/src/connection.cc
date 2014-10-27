@@ -45,6 +45,8 @@
 #include "security_manager/security_manager.h"
 #endif  // ENABLE_SECURITY
 
+#include "utils/threads/thread_manager.h"
+
 /**
  * \namespace connection_handler
  * \brief SmartDeviceLink ConnectionHandler namespace.
@@ -82,7 +84,7 @@ Connection::Connection(ConnectionHandle connection_handle,
   DCHECK(connection_handler_);
 
   heartbeat_monitor_ = new HeartBeatMonitor(heartbeat_timeout, this);
-  heart_beat_monitor_thread_ = new threads::Thread("HeartBeatMonitor",
+  heart_beat_monitor_thread_ = threads::CreateThread("HeartBeatMonitor",
                                                    heartbeat_monitor_);
   heart_beat_monitor_thread_->start();
 }
@@ -90,7 +92,7 @@ Connection::Connection(ConnectionHandle connection_handle,
 Connection::~Connection() {
   LOG4CXX_TRACE_ENTER(logger_);
   heart_beat_monitor_thread_->stop();
-  delete heart_beat_monitor_thread_;
+  threads::DeleteThread(heart_beat_monitor_thread_);
   sync_primitives::AutoLock lock(session_map_lock_);
   session_map_.clear();
   LOG4CXX_TRACE_EXIT(logger_);

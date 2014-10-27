@@ -132,7 +132,7 @@ bool Lock::Try() {
 #ifndef NDEBUG
 void Lock::AssertFreeAndMarkTaken() {
   if ((lock_taken_ > 0) && !is_mutex_recursive_) {
-    LOG4CXX_ERROR(logger_, "Locking already taken not recurcive mutex");
+    LOG4CXX_ERROR(logger_, "Locking already taken not recursive mutex");
     NOTREACHED();
   }
   lock_taken_++;

@@ -4,9 +4,6 @@ set (AM_TEST_DIR ${AM_SOURCE_DIR}/test)
 set (AM_MOCK_DIR ${AM_TEST_DIR}/mock)
 
 
-if (EXTENDED_POLICY_FLAG)
-  add_definitions(-DEXTENDED_POLICY)
-endif()
 
 include_directories (
   include/
@@ -40,14 +37,6 @@ ${AM_SOURCE_DIR}/src/policies/policy_handler.cc
 ${AM_SOURCE_DIR}/src/policies/policy_event_observer.cc
 )
 
-if (EXTENDED_POLICY_FLAG)
-  include_directories(
-    ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct_ext
-  )
-  list(APPEND POLICIES_MANAGER
-    ${AM_SOURCE_DIR}/src/policies/pt_exchange_handler_ext.cc
-  )
-else ()
   include_directories(
     ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
   )
@@ -55,7 +44,6 @@ else ()
     ${AM_SOURCE_DIR}/src/policies/pt_exchange_handler_impl.cc
     ${AM_SOURCE_DIR}/src/policies/policy_retry_sequence.cc
   )
-endif ()
 
 file (GLOB EVENT_ENGINE
   ${AM_SOURCE_DIR}/src/event_engine/*
@@ -258,6 +246,7 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/get_urls_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_device_state_changed_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_tts_reset_timeout_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_phone_call_notification.cc
 )
 
 set (HMI_COMMANDS_SOURCES_JSON

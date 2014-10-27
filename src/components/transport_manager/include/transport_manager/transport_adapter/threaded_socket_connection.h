@@ -40,6 +40,8 @@
 
 #include "transport_manager/transport_adapter/connection.h"
 #include "protocol/common.h"
+#include "utils/threads/thread_delegate.h"
+#include "utils/threads/thread.h"
 
 using ::transport_manager::transport_adapter::Connection;
 
@@ -51,7 +53,8 @@ class TransportAdapterController;
 /**
  * @brief Class responsible for communication over sockets.
  */
-class ThreadedSocketConnection : public Connection {
+class ThreadedSocketConnection : public Connection,
+                                 public threads::ThreadDelegate {
  public:
 
   /**
@@ -61,7 +64,7 @@ class ThreadedSocketConnection : public Connection {
    *
    * @return Error Information about possible reason of sending data failure.
    */
-  TransportAdapter::Error SendData(RawMessagePtr message);
+  TransportAdapter::Error SendData(::protocol_handler::RawMessagePtr message);
 
   /**
    * @brief Disconnect the current connection.
@@ -129,7 +132,8 @@ class ThreadedSocketConnection : public Connection {
 
   int read_fd_;
   int write_fd_;
-  void Thread();
+  void threadMain();
+  bool exitThreadMain();
   void Transmit();
   void Finalize();
   TransportAdapter::Error Notify() const;
@@ -137,24 +141,20 @@ class ThreadedSocketConnection : public Connection {
   bool Send();
   void Abort();
 
-  friend void* StartThreadedSocketConnection(void*);
-
   TransportAdapterController* controller_;
   /**
    * @brief Frames that must be sent to remote device.
    **/
-  typedef std::queue<RawMessagePtr> FrameQueue;
+  typedef std::queue<protocol_handler::RawMessagePtr> FrameQueue;
   FrameQueue frames_to_send_;
   mutable pthread_mutex_t frames_to_send_mutex_;
-
-  // TODO(Eamakhov): change to threads::Thread usage
-  pthread_t thread_;
 
   int socket_;
   bool terminate_flag_;
   bool unexpected_disconnect_;
   const DeviceUID device_uid_;
   const ApplicationHandle app_handle_;
+  threads::Thread* thread_;
 };
 }  // namespace transport_adapter
 }  // namespace transport_manager
