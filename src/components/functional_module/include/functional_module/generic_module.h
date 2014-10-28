@@ -67,6 +67,8 @@ class GenericModule {
     std::deque<utils::SharedPtr<ModuleObserver> > observers_;
 };
 
+typedef utils::SharedPtr<GenericModule> ModulePtr;
+
 }  //  namespace functional_modules
 
 #endif  //  SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_GENERIC_MODULE_H_

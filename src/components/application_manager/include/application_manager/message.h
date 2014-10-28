@@ -123,6 +123,9 @@ class Message {
   size_t payload_size_;
   ProtocolVersion version_;
 };
+
+typedef utils::SharedPtr<application_manager::Message> MobileMessage;
+
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_H_

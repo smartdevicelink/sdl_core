@@ -529,6 +529,7 @@ class Application : public virtual InitialApplicationData,
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;
 typedef utils::SharedPtr<const Application> ApplicationConstSharedPtr;
+typedef uint32_t ApplicationId;
 
 }  // namespace application_manager
 
