@@ -49,6 +49,12 @@ enum ProcessResult {
 
 typedef int ModuleID;
 
+enum ModuleState {
+  NORMAL = 0,
+  SUSPENDED,
+  LOWVOLTAGE
+};
+
 class GenericModule {
   public:
     explicit GenericModule(ModuleID module_id);
@@ -57,6 +63,9 @@ class GenericModule {
       return kModuleId_;
     }
     virtual ProcessResult ProcessMessage(const Json::Value& msg) = 0;
+    virtual void ChangeModuleState(ModuleState state) {
+      state_ = state;
+    }
     void AddObserver(utils::SharedPtr<ModuleObserver> observer);
     void RemoveObserver(utils::SharedPtr<ModuleObserver> observer);
   protected:
@@ -65,6 +74,7 @@ class GenericModule {
     DISALLOW_COPY_AND_ASSIGN(GenericModule);
     const ModuleID kModuleId_;
     std::deque<utils::SharedPtr<ModuleObserver> > observers_;
+    ModuleState state_;
 };
 
 typedef utils::SharedPtr<GenericModule> ModulePtr;

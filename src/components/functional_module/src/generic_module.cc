@@ -5,7 +5,8 @@ namespace functional_modules {
 typedef std::deque<utils::SharedPtr<ModuleObserver>>::iterator ModuleObserverIterator;
 
 GenericModule::GenericModule(ModuleID module_id)
-  : kModuleId_(module_id) {}
+  : kModuleId_(module_id)
+  , state_(ModuleState::NORMAL) {}
 
 GenericModule::~GenericModule() {
   observers_.clear();

@@ -33,8 +33,12 @@
 #ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANANGER_H_
 #define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANANGER_H_
 
+#include <set>
+#include <map>
 #include "functional_module/generic_module.h"
- #include "application_manager/service.h"
+#include "application_manager/service.h"
+#include "application_manager/message.h"
+#include "utils/singleton.h"
 
 namespace functional_modules {
 
@@ -46,24 +50,30 @@ struct PluginInfo {
   int version;
   ModuleID id;
   std::deque<MobileFunctionID> mobile_function_list;
+  ModulePtr plugin;
 };
 
-class PluginManager {
+class PluginManager : public utils::Singleton<PluginManager> {
 public:
   ~PluginManager();
   int LoadPlugins();
   void UnloadPlugins();
   void ProcessMessage(application_manager::MobileMessage msg);
-  void SetServiceHandler(utils::SharedPtr<IService> service);
+  void SetServiceHandler(application_manager::ServicePtr service) {
+    service_ = service;
+  }
   bool IsMessageForPlugin(application_manager::MobileMessage msg);
-  void ChangePluginsState();
+  void ChangePluginsState(ModuleState state);
   void SubscribeOnHMIFunction(ModuleID module_id, const HMIFunctionID& function_id);
   void OnHMIResponse(application_manager::MobileMessage msg);
 private:
+  PluginManager();
+  DISALLOW_COPY_AND_ASSIGN(PluginManager);
+  FRIEND_BASE_SINGLETON_CLASS(PluginManager);
   std::set<PluginInfo> plugins_;
   std::map<MobileFunctionID, ModulePtr> mobile_subscribers_;
   std::map<HMIFunctionID, ModulePtr> hmi_subscribers_;
-  ServicePtr service_;
+  application_manager::ServicePtr service_;
 };
 }  //  namespace functional_modules
 
