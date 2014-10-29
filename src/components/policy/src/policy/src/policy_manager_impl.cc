@@ -155,7 +155,7 @@ bool PolicyManagerImpl::LoadPT(const std::string& file,
 
 #ifdef EXTENDED_POLICY
   file_system::DeleteFile(file);
-#endif  
+#endif
 
   if (!pt_update->is_valid()) {
     rpc::ValidationReport report("policy_table");
@@ -287,7 +287,7 @@ EndpointUrls PolicyManagerImpl::GetUpdateUrls(int service_type) {
 }
 
 BinaryMessageSptr PolicyManagerImpl::RequestPTUpdate() {
-  LOG4CXX_INFO(logger_, "Creating PT Snapshot");  
+  LOG4CXX_INFO(logger_, "Creating PT Snapshot");
   utils::SharedPtr<policy_table::Table> policy_table_snapshot =
       cache.GenerateSnapshot();
   if (!policy_table_snapshot) {
@@ -797,7 +797,7 @@ void PolicyManagerImpl::GetPermissionsForApp(
   const std::string& device_id, const std::string& policy_app_id,
   std::vector<FunctionalGroupPermission>& permissions) {
   LOG4CXX_INFO(logger_, "GetPermissionsForApp");
-  std::string app_id_to_check = policy_app_id;  
+  std::string app_id_to_check = policy_app_id;
 
   bool allowed_by_default = false;
   if (cache.IsDefaultPolicy(policy_app_id)) {

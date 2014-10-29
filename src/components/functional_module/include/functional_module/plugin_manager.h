@@ -42,17 +42,6 @@
 
 namespace functional_modules {
 
-typedef std::string HMIFunctionID;
-typedef int MobileFunctionID;
-
-struct PluginInfo {
-  std::string name;
-  int version;
-  ModuleID id;
-  std::deque<MobileFunctionID> mobile_function_list;
-  ModulePtr plugin;
-};
-
 class PluginManager : public utils::Singleton<PluginManager> {
 public:
   ~PluginManager();

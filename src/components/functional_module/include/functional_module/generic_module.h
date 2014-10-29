@@ -36,6 +36,8 @@
 #include "functional_module/module_observer.h"
 #include "json/json.h"
 #include "utils/shared_ptr.h"
+#include "utils/singleton.h"
+#include "application_manager/service.h"
 
 namespace functional_modules {
 
@@ -55,13 +57,32 @@ enum ModuleState {
   LOWVOLTAGE
 };
 
-class GenericModule {
+typedef std::string HMIFunctionID;
+typedef int MobileFunctionID;
+
+class GenericModule;
+typedef utils::SharedPtr<GenericModule> ModulePtr;
+
+struct PluginInfo {
+  std::string name;
+  int version;
+  ModuleID id;
+  std::deque<MobileFunctionID> mobile_function_list;
+  ModulePtr plugin;
+};
+
+class GenericModule : public utils::Singleton<GenericModule> {
   public:
-    explicit GenericModule(ModuleID module_id);
     virtual ~GenericModule();
     ModuleID GetModuleID() const {
       return kModuleId_;
     }
+    virtual PluginInfo GetPluginInfo() const = 0;
+
+    void SetServiceHandler(application_manager::ServicePtr service) {
+      service_ = service;
+    }
+
     virtual ProcessResult ProcessMessage(const Json::Value& msg) = 0;
     virtual void ChangeModuleState(ModuleState state) {
       state_ = state;
@@ -69,15 +90,17 @@ class GenericModule {
     void AddObserver(utils::SharedPtr<ModuleObserver> observer);
     void RemoveObserver(utils::SharedPtr<ModuleObserver> observer);
   protected:
+    explicit GenericModule(ModuleID module_id);
     void NotifyObservers(ModuleObserver::Errors error);
+    virtual void RemoveAppExtensions() = 0;
   private:
     DISALLOW_COPY_AND_ASSIGN(GenericModule);
+    FRIEND_BASE_SINGLETON_CLASS(GenericModule);
     const ModuleID kModuleId_;
     std::deque<utils::SharedPtr<ModuleObserver> > observers_;
     ModuleState state_;
+    application_manager::ServicePtr service_;
 };
-
-typedef utils::SharedPtr<GenericModule> ModulePtr;
 
 }  //  namespace functional_modules
 

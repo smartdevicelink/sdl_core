@@ -72,6 +72,11 @@
 
 #define NOTREACHED() DCHECK(false)
 
+#define EXPORT_FUNCTION(TypeName) \
+  extern "C" TypeName* Create() { \
+    return TypeName::instance(); \
+  }
+
 // Allows to perform static check that virtual function from base class is
 // actually being overriden if compiler support is available
 #if __cplusplus >= 201103L
