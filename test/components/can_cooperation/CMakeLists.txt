@@ -18,6 +18,6 @@ set (LIBRARIES
     FunctionalModule
 )
 
-create_test("test_can_module" "./src/can_module_test.cc" "${LIBRARIES}")
+#create_test("test_can_module" "./src/can_module_test.cc" "${LIBRARIES}")
 create_test("test_can_app_extension" "./src/can_app_extension_test.cc" "${LIBRARIES}")
 create_test("test_can_tcp_connection" "./src/can_tcp_connection_test.cc" "${LIBRARIES}")

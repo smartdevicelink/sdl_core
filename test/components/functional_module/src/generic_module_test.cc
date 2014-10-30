@@ -9,6 +9,9 @@ class MockGenericModule : public GenericModule {
   public:
     MockGenericModule(ModuleID module_id): GenericModule(module_id) {}
     MOCK_METHOD1(ProcessMessage, ProcessResult(const Json::Value& msg));
+    MOCK_CONST_METHOD0(GetPluginInfo, PluginInfo());
+    MOCK_METHOD1(ChangeModuleState, void(ModuleState));
+    MOCK_METHOD0(RemoveAppExtensions, void(void));
 };
 
 class ErrorGenericModule : public GenericModule {
@@ -18,6 +21,9 @@ class ErrorGenericModule : public GenericModule {
       NotifyObservers(ModuleObserver::FS_FAILURE);
       return ProcessResult::FAILED;
     }
+    MOCK_CONST_METHOD0(GetPluginInfo, PluginInfo());
+    MOCK_METHOD1(ChangeModuleState, void(ModuleState));
+    MOCK_METHOD0(RemoveAppExtensions, void());
 };
 
 class MockModuleObserver : public ModuleObserver {
