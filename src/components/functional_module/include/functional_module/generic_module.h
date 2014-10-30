@@ -71,7 +71,7 @@ struct PluginInfo {
   ModulePtr plugin;
 };
 
-class GenericModule : public utils::Singleton<GenericModule> {
+class GenericModule {
   public:
     virtual ~GenericModule();
     ModuleID GetModuleID() const {
@@ -95,7 +95,6 @@ class GenericModule : public utils::Singleton<GenericModule> {
     virtual void RemoveAppExtensions() = 0;
   private:
     DISALLOW_COPY_AND_ASSIGN(GenericModule);
-    FRIEND_BASE_SINGLETON_CLASS(GenericModule);
     const ModuleID kModuleId_;
     std::deque<utils::SharedPtr<ModuleObserver> > observers_;
     ModuleState state_;

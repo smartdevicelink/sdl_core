@@ -1,3 +1,5 @@
+set(target PluginMock)
+
 include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
@@ -16,6 +18,9 @@ set (LIBRARIES
     FunctionalModule
 )
 
-add_subdirectory(plugins)
+set(SOURCES
+  ./plugin_mock.cc
+)
 
-create_test("test_generic_module" "./src/generic_module_test.cc" "${LIBRARIES}")
+add_library(${target} SHARED ${SOURCES})
+target_link_libraries(${target} ${LIBRARIES} )
