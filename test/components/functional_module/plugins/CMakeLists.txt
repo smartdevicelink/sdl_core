@@ -16,6 +16,7 @@ set (LIBRARIES
     gmock_main
     jsoncpp
     FunctionalModule
+    Utils
 )
 
 set(SOURCES

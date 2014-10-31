@@ -7,7 +7,7 @@ typedef std::deque<utils::SharedPtr<ModuleObserver>>::iterator ModuleObserverIte
 GenericModule::GenericModule(ModuleID module_id)
   : kModuleId_(module_id)
   , state_(ModuleState::NORMAL)
-  , service_(NULL) {}
+  , service_() {}
 
 GenericModule::~GenericModule() {
   observers_.clear();

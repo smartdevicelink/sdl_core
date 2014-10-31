@@ -15,6 +15,4 @@ class MockGenericModule : public GenericModule,
     FRIEND_BASE_SINGLETON_CLASS(MockGenericModule);
 };
 
-//namespace functional_modules {
 EXPORT_FUNCTION(MockGenericModule)
-//}
