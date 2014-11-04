@@ -645,6 +645,38 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
   }
 }
 
+AppExtension* ApplicationImpl::QueryInterface(AppExtensionUID uid) {
+  std::list<AppExtension*>::const_iterator it =
+      extensions_.begin();
+  for (;it != extensions_.end(); ++it) {
+    if ((*it)->uid() == uid) {
+      return (*it);
+    }
+  }
 
+  return NULL;
+}
+
+bool ApplicationImpl::IsExtensionInitialized(AppExtensionUID uid) {
+  std::list<AppExtension*>::const_iterator it =
+        extensions_.begin();
+
+  for (; it != extensions_.end(); ++it) {
+    if ((*it)->uid() == uid) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool ApplicationImpl::AddExtension(AppExtension* extension) {
+  if (IsExtensionInitialized(extension->uid())) {
+    return false;
+  }
+
+  extensions_.push_back(extension);
+  return true;
+}
 
 }  // namespace application_manager

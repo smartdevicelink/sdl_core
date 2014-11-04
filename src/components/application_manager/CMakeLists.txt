@@ -16,6 +16,7 @@ include_directories (
   ../request_watchdog/include/
   ../resumption/include/
   ../rpc_base/include/
+  ../functional_module/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${ENCRYPTION_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
@@ -40,6 +41,7 @@ set (SOURCES
 ./src/request_controller.cc
 ./src/resume_ctrl.cpp
 ./src/mobile_message_handler.cc
+./src/core_service.cc
 )
 
 set (POLICIES_MANAGER

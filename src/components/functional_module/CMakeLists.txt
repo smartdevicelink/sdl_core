@@ -2,8 +2,10 @@ include_directories (
   ./include/
   ../include/
   ../application_manager/include
+  ../connection_handler/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set (SOURCES

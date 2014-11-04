@@ -115,6 +115,8 @@ bool LifeCycle::StartComponents() {
     return false;
   }
 
+  core_service_ = new application_manager::CoreService();
+
   hmi_handler_ =
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_ != NULL)
@@ -401,6 +403,9 @@ void LifeCycle::StopComponents() {
 
   LOG4CXX_INFO(logger_, "Destroying Protocol Handler");
   delete protocol_handler_;
+
+  LOG4CXX_INFO(logger_, "Destroying Core Service");
+  delete core_service_;
 
   LOG4CXX_INFO(logger_, "Destroying Connection Handler.");
   connection_handler::ConnectionHandlerImpl::destroy();

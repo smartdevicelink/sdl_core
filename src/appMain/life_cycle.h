@@ -45,6 +45,7 @@
 #  include "hmi_message_handler/mqueue_adapter.h"
 #endif  // MQUEUE_HMIADAPTER
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/core_service.h"
 #include "connection_handler/connection_handler_impl.h"
 #include "protocol_handler/protocol_handler_impl.h"
 #include "transport_manager/transport_manager.h"
@@ -95,6 +96,7 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
     hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
     media_manager::MediaManagerImpl* media_manager_;
+    application_manager::CoreService* core_service_;
 #ifdef TIME_TESTER
     time_tester::TimeManager* time_tester_;
 #endif  // TIME_TESTER

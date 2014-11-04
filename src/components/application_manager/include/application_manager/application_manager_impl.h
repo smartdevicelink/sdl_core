@@ -625,6 +625,19 @@ class ApplicationManagerImpl : public ApplicationManager,
         mobile_apis::FunctionID::eType function_id,
         CommandParametersPermissions* params_permissions = NULL);
 
+
+    /**
+     * @brief  Places a message to the queue to be sent to mobile. Called from plugins.
+     * @param message Message to mobile
+     */
+    void PostMessageToMobileQueque(const MobileMessage& message);
+
+    /**
+     * @brief  Places a message to the queue to be sent to HMI. Called from plugins.
+     * @param message Message to HMI
+     */
+    void PostMessageToHMIQueque(const HMIMessage& message);
+
     // typedef for Applications list
     typedef const std::set<ApplicationSharedPtr> TAppList;
 

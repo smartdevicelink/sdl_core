@@ -2136,6 +2136,15 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   return mobile_api::Result::SUCCESS;
 }
 
+
+void ApplicationManagerImpl::PostMessageToMobileQueque(const MobileMessage& message) {
+  messages_to_mobile_.PostMessage(impl::MessageToMobile(message, false));
+}
+
+void ApplicationManagerImpl::PostMessageToHMIQueque(const HMIMessage& message) {
+  messages_to_hmi_.PostMessage(impl::MessageToHmi(message));
+}
+
 void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
   mobile_apis::AudioStreamingState::eType state =
     hmi_capabilities_.attenuated_supported()

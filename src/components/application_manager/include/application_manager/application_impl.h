@@ -36,11 +36,13 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <list>
 #include <utility>
 
 #include "utils/date_time.h"
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
+#include "application_manager/app_extension.h"
 #include "connection_handler/device.h"
 #include "utils/lock.h"
 
@@ -172,6 +174,27 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   void LoadPersistentFiles();
 
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  AppExtension* QueryInterface(AppExtensionUID uid);
+
+  /**
+   * @brief Checks if extension initialized
+   * @param uid uid of extension
+   * @return true if extension initialized, otherwise false
+   */
+  bool IsExtensionInitialized(AppExtensionUID uid);
+
+  /**
+   * @brief Add extension to application
+   * @param extension pointer to extension
+   * @return true if success, false if extension already initialized
+   */
+  bool AddExtension(AppExtension* extention);
+
  private:
 
   uint32_t                                 hash_val_;
@@ -205,6 +228,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   std::set<uint32_t>                       subscribed_vehicle_info_;
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
+
+  std::list<AppExtension*> extensions_;
 
   /**
    * @brief Defines number per time in seconds limits
