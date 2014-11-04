@@ -657,21 +657,8 @@ AppExtension* ApplicationImpl::QueryInterface(AppExtensionUID uid) {
   return NULL;
 }
 
-bool ApplicationImpl::IsExtensionInitialized(AppExtensionUID uid) {
-  std::list<AppExtension*>::const_iterator it =
-        extensions_.begin();
-
-  for (; it != extensions_.end(); ++it) {
-    if ((*it)->uid() == uid) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
 bool ApplicationImpl::AddExtension(AppExtension* extension) {
-  if (IsExtensionInitialized(extension->uid())) {
+  if (NULL == QueryInterface(extension->uid())) {
     return false;
   }
 

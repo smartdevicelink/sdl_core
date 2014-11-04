@@ -182,13 +182,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   AppExtension* QueryInterface(AppExtensionUID uid);
 
   /**
-   * @brief Checks if extension initialized
-   * @param uid uid of extension
-   * @return true if extension initialized, otherwise false
-   */
-  bool IsExtensionInitialized(AppExtensionUID uid);
-
-  /**
    * @brief Add extension to application
    * @param extension pointer to extension
    * @return true if success, false if extension already initialized
