@@ -53,6 +53,7 @@
 #include "utils/file_system.h"
 #include "application_manager/application_impl.h"
 #include "usage_statistics/counter.h"
+#include "functional_module/plugin_manager.h"
 #ifdef CUSTOMER_PASA
 #include "resumption/last_state.h"
 #endif
@@ -2003,6 +2004,16 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
     return;
   }
+
+  functional_modules::PluginManager* plugin_manager =
+      functional_modules::PluginManager::instance();
+
+  if (plugin_manager->IsMessageForPlugin(message)) {
+    LOG4CXX_INFO(logger_, "Message will be processed by plugin.");
+    plugin_manager->ProcessMessage(message);
+    return;
+  }
+
   ProcessMessageFromMobile(message);
 }
 
@@ -2050,6 +2061,16 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromHmi message) {
 
   if (!message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
+    return;
+  }
+
+
+  functional_modules::PluginManager* plugin_manager =
+      functional_modules::PluginManager::instance();
+
+  if (plugin_manager->IsMessageForPlugin(message)) {
+    LOG4CXX_INFO(logger_, "Message will be processed by plugin.");
+    plugin_manager->ProcessMessage(message);
     return;
   }
 
@@ -2137,11 +2158,11 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
 }
 
 
-void ApplicationManagerImpl::PostMessageToMobileQueque(const MobileMessage& message) {
+void ApplicationManagerImpl::PostMessageToMobileQueque(const MessagePtr& message) {
   messages_to_mobile_.PostMessage(impl::MessageToMobile(message, false));
 }
 
-void ApplicationManagerImpl::PostMessageToHMIQueque(const HMIMessage& message) {
+void ApplicationManagerImpl::PostMessageToHMIQueque(const MessagePtr& message) {
   messages_to_hmi_.PostMessage(impl::MessageToHmi(message));
 }
 

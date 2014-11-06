@@ -60,7 +60,7 @@ void PluginManager::UnloadPlugins() {
   }
 }
 
-void PluginManager::ProcessMessage(application_manager::MobileMessage msg) {
+void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
   DCHECK(msg);
   if (application_manager::ProtocolVersion::kUnknownProtocol != msg->protocol_version()
     && application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
@@ -75,7 +75,7 @@ void PluginManager::ProcessMessage(application_manager::MobileMessage msg) {
   }
 }
 
-bool PluginManager::IsMessageForPlugin(application_manager::MobileMessage msg) {
+bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {
   DCHECK(msg);
   if (application_manager::ProtocolVersion::kUnknownProtocol != msg->protocol_version()
     && application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
@@ -97,7 +97,7 @@ void PluginManager::SubscribeOnHMIFunction(ModuleID module_id,
   // TODO(PV)
 }
 
-void PluginManager::OnHMIResponse(application_manager::MobileMessage msg) {
+void PluginManager::OnHMIResponse(application_manager::MessagePtr msg) {
   // TODO(PV)
 }
 

@@ -47,14 +47,14 @@ public:
   ~PluginManager();
   int LoadPlugins();
   void UnloadPlugins();
-  void ProcessMessage(application_manager::MobileMessage msg);
+  void ProcessMessage(application_manager::MessagePtr msg);
   void SetServiceHandler(application_manager::ServicePtr service) {
     service_ = service;
   }
-  bool IsMessageForPlugin(application_manager::MobileMessage msg);
+  bool IsMessageForPlugin(application_manager::MessagePtr msg);
   void ChangePluginsState(ModuleState state);
   void SubscribeOnHMIFunction(ModuleID module_id, const HMIFunctionID& function_id);
-  void OnHMIResponse(application_manager::MobileMessage msg);
+  void OnHMIResponse(application_manager::MessagePtr msg);
 private:
   PluginManager();
   DISALLOW_COPY_AND_ASSIGN(PluginManager);

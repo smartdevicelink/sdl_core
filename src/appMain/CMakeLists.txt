@@ -76,6 +76,7 @@ set(LIBRARIES
   ConfigProfile
   MediaManager
   Resumption
+  FunctionalModule  
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -117,6 +118,7 @@ include_directories (
   ../components/request_watchdog/include
   ../components/smart_objects/include/
   ../components/media_manager/include/
+  ../components/functional_module/include/
   ${CMAKE_SOURCE_DIR}/src/components/time_tester/include
   ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/include/
   ../components/resumption/include/

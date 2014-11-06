@@ -50,11 +50,11 @@ ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {
   return ApplicationManagerImpl::instance()->application(app_id);
 }
 
-void CoreService::SendMessageToHMI(const HMIMessage& message) {
+void CoreService::SendMessageToHMI(const MessagePtr& message) {
   ApplicationManagerImpl::instance()->PostMessageToMobileQueque(message);
 }
 
-void CoreService ::SendMessageToMobile(const MobileMessage& message) {
+void CoreService ::SendMessageToMobile(const MessagePtr& message) {
   ApplicationManagerImpl::instance()->PostMessageToHMIQueque(message);
 }
 

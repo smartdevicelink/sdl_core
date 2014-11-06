@@ -67,13 +67,13 @@ class Service {
    * @brief Send message to HMI
    * @param message Message to HMI
    */
-  virtual void SendMessageToHMI(const HMIMessage& message) = 0;
+  virtual void SendMessageToHMI(const MessagePtr& message) = 0;
 
   /**
    * @brief Send message to mobile device
    * @param message Message to mobile
    */
-  virtual void SendMessageToMobile(const MobileMessage& message) = 0;
+  virtual void SendMessageToMobile(const MessagePtr& message) = 0;
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;

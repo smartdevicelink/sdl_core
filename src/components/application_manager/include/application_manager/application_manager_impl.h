@@ -630,13 +630,13 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief  Places a message to the queue to be sent to mobile. Called from plugins.
      * @param message Message to mobile
      */
-    void PostMessageToMobileQueque(const MobileMessage& message);
+    void PostMessageToMobileQueque(const MessagePtr& message);
 
     /**
      * @brief  Places a message to the queue to be sent to HMI. Called from plugins.
      * @param message Message to HMI
      */
-    void PostMessageToHMIQueque(const HMIMessage& message);
+    void PostMessageToHMIQueque(const MessagePtr& message);
 
     // typedef for Applications list
     typedef const std::set<ApplicationSharedPtr> TAppList;

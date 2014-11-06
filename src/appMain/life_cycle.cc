@@ -117,6 +117,9 @@ bool LifeCycle::StartComponents() {
 
   core_service_ = new application_manager::CoreService();
 
+  plugin_manager_ = functional_modules::PluginManager::instance();
+  plugin_manager_->SetServiceHandler(core_service_);
+
   hmi_handler_ =
     hmi_message_handler::HMIMessageHandlerImpl::instance();
   DCHECK(hmi_handler_ != NULL)

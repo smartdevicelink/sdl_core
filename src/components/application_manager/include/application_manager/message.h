@@ -134,8 +134,7 @@ class Message {
 };
 
 typedef utils::SharedPtr<application_manager::Message> MobileMessage;
-typedef utils::SharedPtr<application_manager::Message> HMIMessage;
-
+typedef utils::SharedPtr<application_manager::Message> MessagePtr;
 }  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_MESSAGE_H_

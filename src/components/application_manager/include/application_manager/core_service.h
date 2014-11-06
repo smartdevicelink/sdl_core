@@ -73,13 +73,13 @@ class CoreService : public Service {
    * @brief Send message to HMI
    * @param message Message to HMI
    */
-  virtual void SendMessageToHMI(const HMIMessage& message);
+  virtual void SendMessageToHMI(const MessagePtr& message);
 
   /**
    * @brief Send message to mobile device
    * @param message Message to mobile
    */
-  virtual void SendMessageToMobile(const MobileMessage& message);
+  virtual void SendMessageToMobile(const MessagePtr& message);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CoreService);
