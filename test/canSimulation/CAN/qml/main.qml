@@ -1,13 +1,13 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.1
-import "qrc:///qml/components" 1.0
+import "components" 1.0
 
 ApplicationWindow {
 
     id: root
     visible: true
-    width: 640
-    height: 480
+    width: 800
+    height: Style.windowHeight
     title: qsTr("Hello World")
 
     menuBar: MenuBar {
@@ -24,13 +24,12 @@ ApplicationWindow {
 
         id: viewsTab
         width: parent.width
-        height: 400
+        height: root.height - 47 - tcpLogsView.height
 
         Tab {
             title: "Media"
             Media {
                 id: mediaComponent
-
             }
         }
         Tab {
@@ -55,17 +54,41 @@ ApplicationWindow {
         }
     }
 
+    Rectangle {
+        id: appearRect
+
+        width: root.width
+        anchors.left: root.left
+        anchors.right: root.right
+        height: 20
+        anchors.top: viewsTab.bottom
+        color: "gray"
+
+        Text {
+            text: "Logger"
+        }
+
+        MouseArea {
+            anchors.fill: parent
+            onClicked: {
+                if (tcpLogsView.height === 0) {
+                    tcpLogsView.height = 100
+                } else {
+
+                    tcpLogsView.height = 0
+                }
+
+            }
+        }
+    }
+
     TextArea {
 
         id: tcpLogsView
         width: parent.width
-        anchors.top: viewsTab.bottom
-        height: parent.height - viewsTab.height
+        anchors.top: appearRect.bottom
+        height: 00
         visible: true
-        text:
-            "Lorem ipsum dolor sit amet, consectetur adipisicing elit, " +
-            "sed do eiusmod tempor incididunt ut labore et dolore magna " +
-            "aliqua. Ut enim ad minim veniam, quis nostrud exercitation " +
-            "ullamco laboris nisi ut aliquip ex ea commodo cosnsequat. ";
+        text: "Logger";
     }
 }
