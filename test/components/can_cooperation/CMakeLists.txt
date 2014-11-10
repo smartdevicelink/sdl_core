@@ -4,8 +4,8 @@ include_directories (
   ../../../src/components/functional_module/include/
   ../../../src/components/can_cooperation/include/
   ../../../src/components/include/
+  ../../../src/components/application_manager/include
   ${JSONCPP_INCLUDE_DIRECTORY}
-  ${CMAKE_BINARY_DIR}
 )
 
 set (LIBRARIES

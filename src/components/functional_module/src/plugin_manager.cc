@@ -30,15 +30,21 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <dlfcn.h>
 #include "functional_module/plugin_manager.h"
-
+#include "utils/file_system.h"
+#include "utils/logger.h"
+ 
 namespace functional_modules {
 
-typedef std::set<PluginInfo>::iterator PluginInfoIterator;
+CREATE_LOGGERPTR_GLOBAL(logger_, "PluginManager")
+
+typedef std::map<ModuleID, ModulePtr>::iterator PluginsIterator;
 typedef std::map<MobileFunctionID, ModulePtr>::iterator PluginFunctionsIterator;
 
 PluginManager::PluginManager()
-: service_(NULL) {
+: service_() {
+  LOG4CXX_DEBUG(logger_, "Creating plugin mgr");
 }
 
 PluginManager::~PluginManager() {
@@ -49,14 +55,56 @@ PluginManager::~PluginManager() {
   plugins_.clear();
 }
 
-int PluginManager::LoadPlugins() {
-  return 0;
+int PluginManager::LoadPlugins(const std::string& plugin_path) {
+  LOG4CXX_INFO(logger_, "Loading plugins from " << plugin_path);
+  std::vector<std::string> plugin_files = file_system::ListFiles(
+    plugin_path);
+  for(size_t i = 0; i < plugin_files.size(); ++i) {
+    size_t pos = plugin_files[i].find_last_of(".");
+    if (std::string::npos != pos) {
+      if (plugin_files[i].substr(pos+1).compare("so") != 0)
+        continue; 
+    } else {
+      continue;
+    }
+    void* generic_plugin_dll = dlopen(plugin_files[i].c_str(), RTLD_LAZY);
+    if (NULL == generic_plugin_dll) {
+      char* failed_to_open = dlerror();
+      LOG4CXX_ERROR(logger_, "Failed to open dll " << plugin_files[i] << "\n"
+        << failed_to_open);
+      continue;
+    }
+    typedef GenericModule* (*Create)();
+    Create create_manager = reinterpret_cast<Create>(dlsym(generic_plugin_dll, "Create"));
+    char* error_string = dlerror();
+    if (NULL != error_string) {
+      LOG4CXX_ERROR(logger_, "Failed to export dll's " << plugin_files[i] << " symbols\n"
+        << error_string);
+      dlclose(generic_plugin_dll);
+      continue;
+    }
+    GenericModule* module = create_manager();
+    if (!module) {
+      LOG4CXX_ERROR(logger_, "Failed to create plugin main class " << plugin_files[i]);
+      dlclose(generic_plugin_dll);
+      continue; 
+    } else {
+      LOG4CXX_DEBUG(logger_, "Opened and working plugin from "
+        << plugin_files[i] << " with id " << module->GetModuleID());
+      dlls_.insert(std::pair<ModuleID, void*>(
+        module->GetModuleID(), generic_plugin_dll));
+      plugins_.insert(std::pair<ModuleID, ModulePtr>(
+        module->GetModuleID(), module));
+    }
+  }
+  return plugins_.size();
 }
 
 void PluginManager::UnloadPlugins() {
-  for (PluginInfoIterator it = plugins_.begin();
-    plugins_.end() != it; ++it) {
-
+  plugins_.clear();
+  for(std::map<ModuleID, void*>::iterator it = dlls_.begin();
+    dlls_.end() != it; ++it) {
+    dlclose(it->second);
   }
 }
 
@@ -86,9 +134,9 @@ bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {
 }
 
 void PluginManager::ChangePluginsState(ModuleState state) {
-  for(PluginInfoIterator it = plugins_.begin();
+  for(PluginsIterator it = plugins_.begin();
     plugins_.end() != it; ++it) {
-    it->plugin->ChangeModuleState(state);
+    it->second->ChangeModuleState(state);
   }
 }
 

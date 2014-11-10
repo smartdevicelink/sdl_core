@@ -33,7 +33,6 @@
 #ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANANGER_H_
 #define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANANGER_H_
 
-#include <set>
 #include <map>
 #include "functional_module/generic_module.h"
 #include "application_manager/service.h"
@@ -45,7 +44,7 @@ namespace functional_modules {
 class PluginManager : public utils::Singleton<PluginManager> {
 public:
   ~PluginManager();
-  int LoadPlugins();
+  int LoadPlugins(const std::string& plugin_path);
   void UnloadPlugins();
   void ProcessMessage(application_manager::MessagePtr msg);
   void SetServiceHandler(application_manager::ServicePtr service) {
@@ -59,7 +58,8 @@ private:
   PluginManager();
   DISALLOW_COPY_AND_ASSIGN(PluginManager);
   FRIEND_BASE_SINGLETON_CLASS(PluginManager);
-  std::set<PluginInfo> plugins_;
+  std::map<ModuleID, ModulePtr> plugins_;
+  std::map<ModuleID, void*> dlls_;
   std::map<MobileFunctionID, ModulePtr> mobile_subscribers_;
   std::map<HMIFunctionID, ModulePtr> hmi_subscribers_;
   application_manager::ServicePtr service_;

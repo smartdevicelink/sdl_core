@@ -3,6 +3,7 @@ include_directories (
   ../include/
   ../application_manager/include
   ../connection_handler/include/
+  ../utils/include
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/

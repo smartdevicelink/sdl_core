@@ -36,15 +36,23 @@
 #include "functional_module/generic_module.h"
 
 namespace can_cooperation {
-class CANModule : public functional_modules::GenericModule {
+class CANModule : public functional_modules::GenericModule,
+	public utils::Singleton<CANModule> {
   public:
-    CANModule();
     ~CANModule();
+    functional_modules::PluginInfo GetPluginInfo() const;
     virtual functional_modules::ProcessResult ProcessMessage(const Json::Value& msg);
+protected:
+	void RemoveAppExtensions();
   private:
     DISALLOW_COPY_AND_ASSIGN(CANModule);
+    FRIEND_BASE_SINGLETON_CLASS(CANModule);
+    CANModule();
     static const functional_modules::ModuleID kCANModuleID = 153;
 };
+
+EXPORT_FUNCTION(CANModule);
+
 }
 
 #endif  //  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_

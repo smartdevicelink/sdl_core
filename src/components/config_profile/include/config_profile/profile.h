@@ -351,6 +351,11 @@ class Profile : public utils::Singleton<Profile> {
     const std::string& system_files_path() const;
 
     /**
+      * @brief Returns folder containing all plugins
+      */
+    const std::string& plugins_folder() const;
+
+    /**
      * @brief Returns port for TCP transport adapter
      */
     uint16_t transport_manager_tcp_adapter_port() const;
@@ -630,6 +635,7 @@ class Profile : public utils::Singleton<Profile> {
     bool                            use_last_state_;
     std::vector<uint32_t>           supported_diag_modes_;
     std::string                     system_files_path_;
+    std::string                     plugins_folder_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
 #ifdef CUSTOMER_PASA

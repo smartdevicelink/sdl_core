@@ -119,6 +119,7 @@ bool LifeCycle::StartComponents() {
 
   plugin_manager_ = functional_modules::PluginManager::instance();
   plugin_manager_->SetServiceHandler(core_service_);
+  plugin_manager_->LoadPlugins(profile::Profile::instance()->plugins_folder());
 
   hmi_handler_ =
     hmi_message_handler::HMIMessageHandlerImpl::instance();

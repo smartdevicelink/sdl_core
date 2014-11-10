@@ -73,7 +73,6 @@ const char* kIAPSection = "IAP";
 const char* kHmiCapabilitiesKey = "HMICapabilities";
 const char* kPathToSnapshotKey = "PathToSnapshot";
 const char* kPreloadedPTKey = "PreloadedPT";
-//const char* kPoliciesTableKey = "PoliciesTable";
 const char* kServerAddressKey = "ServerAddress";
 const char* kAppInfoStorageKey = "AppInfoStorage";
 const char* kAppStorageFolderKey = "AppStorageFolder";
@@ -107,6 +106,7 @@ const char* kTimeoutPromptKey = "TimeOutPromt";
 const char* kHelpTitleKey = "HelpTitle";
 const char* kHelpCommandKey = "HelpCommand";
 const char* kSystemFilesPathKey = "SystemFilesPath";
+const char* kPluginsFolderKey = "PluginFolder";
 const char* kHeartBeatTimeoutKey = "HeartBeatTimeout";
 const char* kUseLastStateKey = "UseLastState";
 const char* kTCPAdapterPortKey = "TCPAdapterPort";
@@ -157,6 +157,7 @@ const char* kDefaultPreloadedPTFileName = "sdl_preloaded_pt.json";
 const char* kDefaultServerAddress = "127.0.0.1";
 const char* kDefaultAppInfoFileName = "app_info.dat";
 const char* kDefaultSystemFilesPath = "/tmp/fs/mp/images/ivsu_cache";
+const char* kDefaultPluginsPath = "plugins";
 const char* kDefaultTtsDelimiter = ",";
 #ifdef CUSTOMER_PASA
 const char* kDefaultMQName = "/dev/mqueue/AppLinkAudioPass";
@@ -255,6 +256,7 @@ Profile::Profile()
     use_last_state_(false),
     supported_diag_modes_(),
     system_files_path_(kDefaultSystemFilesPath),
+    plugins_folder_(kDefaultPluginsPath),
     transport_manager_tcp_adapter_port_(kDefautTransportManagerTCPPort),
     tts_delimiter_(kDefaultTtsDelimiter),
 #ifdef CUSTOMER_PASA
@@ -506,6 +508,10 @@ bool Profile::use_last_state() const {
 
 const std::string& Profile::system_files_path() const {
   return system_files_path_;
+}
+
+const std::string& Profile::plugins_folder() const {
+  return plugins_folder_;
 }
 
 const std::vector<uint32_t>& Profile::supported_diag_modes() const {
@@ -1062,6 +1068,11 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
                   kSystemFilesPathKey);
 
   LOG_UPDATED_VALUE(system_files_path_, kSystemFilesPathKey, kMainSection);
+
+  // Plugins folder
+  ReadStringValue(&plugins_folder_, kDefaultPluginsPath, kMainSection,
+    kPluginsFolderKey);
+  LOG_UPDATED_VALUE(plugins_folder_, kPluginsFolderKey, kMainSection);
 
   // Heartbeat timeout
   ReadUIntValue(&heart_beat_timeout_, kDefaultHeartBeatTimeout, kMainSection,

@@ -95,6 +95,7 @@ set(LIBRARIES
     Resumption
     Policy
     ${SecurityManagerLibrary}
+    FunctionalModule
 )
 if(ENABLE_SECURITY)
   LIST(APPEND LIBRARIES test_SecurityManager)
