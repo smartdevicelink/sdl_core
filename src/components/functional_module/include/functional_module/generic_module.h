@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_GENERIC_MODULE_H_
 
 #include "functional_module/module_observer.h"
+#include "functional_module/function_ids.h"
 #include "json/json.h"
 #include "utils/shared_ptr.h"
 #include "utils/singleton.h"
@@ -58,7 +59,6 @@ enum ModuleState {
 };
 
 typedef std::string HMIFunctionID;
-typedef int MobileFunctionID;
 
 class GenericModule;
 typedef utils::SharedPtr<GenericModule> ModulePtr;
@@ -66,7 +66,6 @@ typedef utils::SharedPtr<GenericModule> ModulePtr;
 struct PluginInfo {
   std::string name;
   int version;
-  ModuleID id;
   std::deque<MobileFunctionID> mobile_function_list;
   ModulePtr plugin;
 };
@@ -83,16 +82,17 @@ class GenericModule {
       service_ = service;
     }
 
-    virtual ProcessResult ProcessMessage(const Json::Value& msg) = 0;
+    virtual ProcessResult ProcessMessage(application_manager::MessagePtr msg) = 0;
     virtual void ChangeModuleState(ModuleState state) {
       state_ = state;
     }
     void AddObserver(utils::SharedPtr<ModuleObserver> observer);
     void RemoveObserver(utils::SharedPtr<ModuleObserver> observer);
+    virtual void RemoveAppExtensions() = 0;
   protected:
     explicit GenericModule(ModuleID module_id);
     void NotifyObservers(ModuleObserver::Errors error);
-    virtual void RemoveAppExtensions() = 0;
+
   private:
     DISALLOW_COPY_AND_ASSIGN(GenericModule);
     const ModuleID kModuleId_;

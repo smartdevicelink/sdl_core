@@ -30,32 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_
+#ifndef SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_
+#define SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_
 
-#include "functional_module/generic_module.h"
 
-namespace can_cooperation {
-class CANModule : public functional_modules::GenericModule,
-    public utils::Singleton<CANModule> {
- public:
-  ~CANModule();
+namespace functional_modules {
 
-  virtual functional_modules::PluginInfo GetPluginInfo() const;
-  virtual functional_modules::ProcessResult ProcessMessage(
-      application_manager::MessagePtr msg);
-  virtual void RemoveAppExtensions();
- private:
-  DISALLOW_COPY_AND_ASSIGN(CANModule);
-  FRIEND_BASE_SINGLETON_CLASS(CANModule);
-  CANModule();
-  static const functional_modules::ModuleID kCANModuleID = 153;
-
-  functional_modules::PluginInfo plugin_info_;
+enum MobileFunctionID {
+  TUNE_RADIO = 100005
 };
 
-EXPORT_FUNCTION(CANModule);
+}  //  namespace functional_modules
 
-}
-
-#endif  //  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_
+#endif  //  SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_FUNCTION_IDS_H_

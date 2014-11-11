@@ -32,9 +32,10 @@
 
 #include <dlfcn.h>
 #include "functional_module/plugin_manager.h"
+#include "functional_module/function_ids.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
- 
+
 namespace functional_modules {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PluginManager")
@@ -112,13 +113,10 @@ void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
   DCHECK(msg);
   if (application_manager::ProtocolVersion::kUnknownProtocol != msg->protocol_version()
     && application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
-    PluginFunctionsIterator subscribed_plugin_itr = mobile_subscribers_.find(msg->function_id());
+    PluginFunctionsIterator subscribed_plugin_itr = mobile_subscribers_.find(
+        static_cast<MobileFunctionID>(msg->function_id()));
     if (mobile_subscribers_.end() != subscribed_plugin_itr) {
-      Json::Reader reader;
-      Json::Value value;
-      if (reader.parse(msg->json_message(), value, 0)) {
-        subscribed_plugin_itr->second->ProcessMessage(value);
-      }
+      subscribed_plugin_itr->second->ProcessMessage(msg);
     }
   }
 }
@@ -127,7 +125,8 @@ bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {
   DCHECK(msg);
   if (application_manager::ProtocolVersion::kUnknownProtocol != msg->protocol_version()
     && application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
-    return (mobile_subscribers_.find(msg->function_id()) != mobile_subscribers_.end());
+    MobileFunctionID id = static_cast<MobileFunctionID>(msg->function_id());
+    return (mobile_subscribers_.find(id) != mobile_subscribers_.end());
   } else {
     return false;
   }
