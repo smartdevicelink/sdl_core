@@ -35,7 +35,7 @@
 
 #include <string>
 #include <deque>
-#include "./can_connection.h"
+#include "can_cooperation/can_connection.h"
 #include "json/json.h"
 
 namespace can_cooperation {

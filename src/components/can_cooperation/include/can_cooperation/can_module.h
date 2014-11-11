@@ -34,24 +34,25 @@
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_
 
 #include "functional_module/generic_module.h"
+#include "can_cooperation/can_connection.h"
 
 namespace can_cooperation {
 class CANModule : public functional_modules::GenericModule,
-    public utils::Singleton<CANModule> {
- public:
-  ~CANModule();
-
-  virtual functional_modules::PluginInfo GetPluginInfo() const;
-  virtual functional_modules::ProcessResult ProcessMessage(
-      application_manager::MessagePtr msg);
-  virtual void RemoveAppExtensions();
- private:
-  DISALLOW_COPY_AND_ASSIGN(CANModule);
-  FRIEND_BASE_SINGLETON_CLASS(CANModule);
-  CANModule();
-  static const functional_modules::ModuleID kCANModuleID = 153;
-
-  functional_modules::PluginInfo plugin_info_;
+	public utils::Singleton<CANModule> {
+  public:
+    ~CANModule();
+    functional_modules::PluginInfo GetPluginInfo() const;
+    virtual functional_modules::ProcessResult ProcessMessage(
+        application_manager::MessagePtr msg);
+protected:
+	void RemoveAppExtensions();
+  private:
+    DISALLOW_COPY_AND_ASSIGN(CANModule);
+    FRIEND_BASE_SINGLETON_CLASS(CANModule);
+    CANModule();
+    static const functional_modules::ModuleID kCANModuleID = 153;
+    utils::SharedPtr<CANConnection> can_connection;
+    functional_modules::PluginInfo plugin_info_;
 };
 
 EXPORT_FUNCTION(CANModule);

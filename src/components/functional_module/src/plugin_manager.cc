@@ -38,7 +38,7 @@
 
 namespace functional_modules {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PluginManager")
+CREATE_LOGGERPTR_GLOBAL(logger_, "PluginManager");
 
 typedef std::map<ModuleID, ModulePtr>::iterator PluginsIterator;
 typedef std::map<MobileFunctionID, ModulePtr>::iterator PluginFunctionsIterator;

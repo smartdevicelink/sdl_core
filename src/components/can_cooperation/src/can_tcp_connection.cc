@@ -1,11 +1,16 @@
-#include "./can_tcp_connection.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <cstring>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <fstream>
+#include "./can_tcp_connection.h"
+#include "json/json.h"
+#include "utils/logger.h"
 
 namespace can_cooperation {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "CANTCPConnection");
 
 CANTCPConnection::CANTCPConnection()
 : address_("127.0.0.1")
@@ -16,6 +21,17 @@ CANTCPConnection::CANTCPConnection()
 	if (-1 == socket_) {
 		current_state_ = INVALID;
 	}
+  std::ifstream in("./plugins/can_config.json");
+  if (in.is_open()) {
+    Json::Reader reader;
+    Json::Value value;
+    if (reader.parse(in, value, false)) {
+      address_ = value["address"].asString();
+      port_ = value["port"].asUInt();
+    }
+  }
+  LOG4CXX_INFO(logger_, "Connecting to "
+        << address_ << " on port " << port_);
 }
 
 CANTCPConnection::~CANTCPConnection() {

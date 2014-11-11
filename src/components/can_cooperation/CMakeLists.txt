@@ -40,9 +40,21 @@ add_custom_target(copy_library_${target} ALL
     DEPENDS ${target}
     COMMENT "Copying library ${library_name}")
 
-install(TARGETS ${target}
+add_custom_target(copy_config_${target} ALL
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/can_config.json"
+    ${copy_destination}
+    DEPENDS ${target}
+    COMMENT "Copying library ${library_name}")
+
+install(TARGETS ${target} 
   DESTINATION ${install_destination}
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_EXECUTE
     WORLD_READ WORLD_EXECUTE
+)
+
+install(
+  FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/can_config.json"
+  DESTINATION ${install_destination}
 )

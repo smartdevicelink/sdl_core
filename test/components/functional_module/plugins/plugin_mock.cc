@@ -9,7 +9,7 @@ class MockGenericModule : public GenericModule,
   public:
     MockGenericModule(ModuleID module_id = 19): GenericModule(module_id) {}
     MOCK_CONST_METHOD0(GetPluginInfo, PluginInfo());
-    MOCK_METHOD1(ProcessMessage, ProcessResult(const Json::Value& msg));
+    MOCK_METHOD1(ProcessMessage, ProcessResult(application_manager::MessagePtr));
     MOCK_METHOD0(RemoveAppExtensions, void(void));
   private:
     FRIEND_BASE_SINGLETON_CLASS(MockGenericModule);
