@@ -13,8 +13,12 @@ ApplicationWindow {
     signal viewClicked(string name)
     signal createConnection(string ip, int port)
 
-    function incoming(msg) {
-        console.log("Got message:", msg)
+    function incoming(message) {
+
+        console.log("     ");
+
+        console.log("Got message:", message);
+        tcpLogsView.append("CAN message received: " + message);
         return "some return value"
     }
 
