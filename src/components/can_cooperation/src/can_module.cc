@@ -81,10 +81,27 @@ functional_modules::PluginInfo CANModule::GetPluginInfo() const {
   return plugin_info_;
 }
 
+
+
 ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
-  //static_cast<CANTCPConnection*>(can_connection.get())->WriteData(msg);
+  Json::Value can_msg;
+
+  switch (msg->function_id()) {
+    case MobileFunctionID::TUNE_RADIO: {
+      can_msg["id"] = 1;
+      can_msg["jsonrpc"] = "2.0";
+      can_msg["method"] = "CAN.TuneRadio";
+      can_msg["params"] = msg->json_message();
+      break;
+    }
+    default: {
+      return ProcessResult::CANNOT_PROCESS;
+    }
+  }
+
   from_mobile_.PostMessage(msg);
-  return ProcessResult::CANNOT_PROCESS;
+
+  return ProcessResult::PROCESSED;
 }
 
 void CANModule::ProcessCANMessage(const MessageFromCAN& can_msg) {
@@ -92,6 +109,7 @@ void CANModule::ProcessCANMessage(const MessageFromCAN& can_msg) {
 }
 
 void CANModule::Handle(const application_manager::MessagePtr message) {
+
   if (ConnectionState::OPENED != can_connection->Flash()) {
     LOG4CXX_ERROR(logger_, "Failed to send message to CAN");
   }

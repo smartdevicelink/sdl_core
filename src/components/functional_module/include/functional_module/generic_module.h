@@ -33,9 +33,10 @@
 #ifndef SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_GENERIC_MODULE_H_
 #define SRC_COMPONENTS_FUNCTINAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_GENERIC_MODULE_H_
 
+#include <deque>
+
 #include "functional_module/module_observer.h"
 #include "functional_module/function_ids.h"
-#include "json/json.h"
 #include "utils/shared_ptr.h"
 #include "utils/singleton.h"
 #include "application_manager/service.h"
