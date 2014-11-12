@@ -23,6 +23,7 @@ set (SOURCES
 set (LIBRARIES
     jsoncpp
     FunctionalModule
+    ApplicationManager
     Utils
 )
 

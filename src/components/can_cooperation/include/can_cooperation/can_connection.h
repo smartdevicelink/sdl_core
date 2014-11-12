@@ -30,16 +30,22 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
- #ifndef SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
- #define SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
+
+#include "json/json.h"
 
 namespace can_cooperation {
+
+	typedef Json::Value MessageFromCAN;
+
 	enum ConnectionState {
 		NONE = -1,
 		OPENED,
 		CLOSED,
 		INVALID
 	};
+
 	class CANConnection {
 		public:
 			virtual ~CANConnection() {}
@@ -50,4 +56,4 @@ namespace can_cooperation {
 	};
 }  //  namespace can_cooperation
 
- #endif  //  SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
+#endif  //  SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_

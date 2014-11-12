@@ -36,7 +36,6 @@
 #include <string>
 #include <deque>
 #include "can_cooperation/can_connection.h"
-#include "json/json.h"
 
 namespace can_cooperation {
 
@@ -48,8 +47,8 @@ namespace can_cooperation {
 			ConnectionState CloseConnection();
 			ConnectionState Flash();
 			ConnectionState GetData();
-			void WriteData(const Json::Value& message);
-			Json::Value ReadData();
+			void WriteData(const MessageFromCAN& message);
+			MessageFromCAN ReadData();
 		private:
 			std::deque<std::string> to_send_;
 			std::deque<std::string> received_;

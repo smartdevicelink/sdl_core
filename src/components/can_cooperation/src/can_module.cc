@@ -13,12 +13,14 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule");
 
 CANModule::CANModule()
   : GenericModule(kCANModuleID)
-  , can_connection() {
+  , can_connection()
+  , from_can_("FromCan To Mobile", this)
+  , from_mobile_("FromMobile To Can", this) {
   	can_connection = new CANTCPConnection;
   	if (ConnectionState::OPENED != can_connection->OpenConnection()) {
   		LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
   	}
-plugin_info_.name = "ReverseSDLPlugin";
+  plugin_info_.name = "ReverseSDLPlugin";
   plugin_info_.version = 1;
   plugin_info_.plugin = this;
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_RADIO);
@@ -36,11 +38,22 @@ functional_modules::PluginInfo CANModule::GetPluginInfo() const {
 
 ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   //static_cast<CANTCPConnection*>(can_connection.get())->WriteData(msg);
+  from_mobile_.PostMessage(msg);
+  return ProcessResult::CANNOT_PROCESS;
+}
+
+void CANModule::ProcessCANMessage(const MessageFromCAN& can_msg) {
+  from_can_.PostMessage(can_msg);
+}
+
+void CANModule::Handle(const application_manager::MessagePtr message) {
   if (ConnectionState::OPENED != can_connection->Flash()) {
     LOG4CXX_ERROR(logger_, "Failed to send message to CAN");
-    return ProcessResult::FAILED;
   }
-  return ProcessResult::CANNOT_PROCESS;
+}
+  
+void CANModule::Handle(const MessageFromCAN message) {
+  // TODO(PV): process and send response/notification to mobile
 }
 
 void CANModule::RemoveAppExtensions() {

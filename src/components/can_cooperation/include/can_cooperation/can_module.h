@@ -35,15 +35,22 @@
 
 #include "functional_module/generic_module.h"
 #include "can_cooperation/can_connection.h"
+#include "utils/threads/message_loop_thread.h"
 
 namespace can_cooperation {
 class CANModule : public functional_modules::GenericModule,
-	public utils::Singleton<CANModule> {
+	public utils::Singleton<CANModule>,
+    public threads::MessageLoopThread<std::queue<MessageFromCAN>>::Handler,
+    public threads::MessageLoopThread<
+        std::queue<application_manager::MessagePtr>>::Handler {
   public:
     ~CANModule();
     functional_modules::PluginInfo GetPluginInfo() const;
     virtual functional_modules::ProcessResult ProcessMessage(
         application_manager::MessagePtr msg);
+    void ProcessCANMessage(const MessageFromCAN& can_msg);
+    void Handle(const application_manager::MessagePtr message);
+    void Handle(const MessageFromCAN message);
 protected:
 	void RemoveAppExtensions();
   private:
@@ -53,6 +60,8 @@ protected:
     static const functional_modules::ModuleID kCANModuleID = 153;
     utils::SharedPtr<CANConnection> can_connection;
     functional_modules::PluginInfo plugin_info_;
+    threads::MessageLoopThread<std::queue<MessageFromCAN>> from_can_;
+    threads::MessageLoopThread<std::queue<application_manager::MessagePtr>> from_mobile_;
 };
 
 EXPORT_FUNCTION(CANModule);
