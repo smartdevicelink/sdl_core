@@ -37,6 +37,10 @@
 #include "can_cooperation/can_connection.h"
 #include "utils/threads/message_loop_thread.h"
 
+namespace threads {
+    class Thread;
+}
+
 namespace can_cooperation {
 class CANModule : public functional_modules::GenericModule,
 	public utils::Singleton<CANModule>,
@@ -62,6 +66,8 @@ protected:
     functional_modules::PluginInfo plugin_info_;
     threads::MessageLoopThread<std::queue<MessageFromCAN>> from_can_;
     threads::MessageLoopThread<std::queue<application_manager::MessagePtr>> from_mobile_;
+    threads::Thread* thread_;
+    friend class TCPClientDelegate;
 };
 
 EXPORT_FUNCTION(CANModule);
