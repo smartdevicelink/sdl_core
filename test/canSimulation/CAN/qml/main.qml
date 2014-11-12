@@ -10,6 +10,10 @@ ApplicationWindow {
     height: Style.windowHeight
     title: qsTr("Hello World")
 
+    signal viewClicked(string name)
+    signal createConnection(string ip, int port)
+    signal incoming(string message)
+
     menuBar: MenuBar {
         Menu {
             title: qsTr("File")
@@ -30,6 +34,21 @@ ApplicationWindow {
             title: "Media"
             Media {
                 id: mediaComponent
+
+                onRequestButtonClick: {
+                    tcpLogsView.textColor = "green"
+                    tcpLogsView.append("Request " + item.objectName + " send")
+                    switch (item.objectName) {
+                        case "asd": {
+
+                            root.viewClicked(item.objectName)
+
+                            break;
+                        }
+                    }
+
+
+                }
             }
         }
         Tab {
@@ -50,7 +69,15 @@ ApplicationWindow {
         }
         Tab {
             title: "Settings"
-            Rectangle { color: "black" }
+            Settings {
+                id: settingsComponent
+
+                onConnect: {
+
+                    console.log(settingsComponent.ip, settingsComponent.port)
+                    createConnection(settingsComponent.ip, settingsComponent.port);
+                }
+            }
         }
     }
 

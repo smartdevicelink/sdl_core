@@ -20,5 +20,8 @@ Rectangle {
         font.weight: Font.Bold
         text: root.textInput
         width: parent.width
+        onTextChanged: {
+            root.textInput = text;
+        }
     }
 }

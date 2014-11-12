@@ -597,14 +597,12 @@ Rectangle {
 
     signal requestButtonClick(QtObject item)
 
-    onRequestButtonClick: {
-        tcpLogsView.textColor = "green"
-        tcpLogsView.append("Request " + item.objectName + " send")
-    }
-
     signal responseButtonClick(QtObject item)
 
     onResponseButtonClick: {
+
+
+
         tcpLogsView.textColor = "red"
         tcpLogsView.append("Response " + item.objectName + " send")
     }

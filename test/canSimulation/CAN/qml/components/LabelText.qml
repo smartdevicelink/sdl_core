@@ -27,5 +27,8 @@ Rectangle {
         anchors.left: label.right
         textInput: root.dataText
         widthInput: Style.widthInput
+        onTextInputChanged: {
+            root.dataText = textInput;
+        }
     }
 }
