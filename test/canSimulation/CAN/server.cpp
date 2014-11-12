@@ -2,7 +2,7 @@
 
 #include "server.h"
 
-Server::Server() : QObject() {
+Server::Server(QObject *rootObject) : rootView(rootObject), QObject() {
 
     tcpServer = new QTcpServer(this);
 
@@ -36,13 +36,24 @@ void Server::connected()
 
 void Server::readyRead()
 {
-    qDebug() << "reading...";
 
-    QString str = clientConnection->readAll();
+    QVariant message = clientConnection->readAll();
 
-    rootObject.incoming(str);
+    qDebug() <<  "Get Request - " << message;
 
-    qDebug() << str;
+    QVariant returnedValue;
+
+    QMetaObject::invokeMethod(rootView, "incoming",
+            Q_RETURN_ARG(QVariant, returnedValue),
+            Q_ARG(QVariant, message));
+
+    qDebug() << "Send Response - " << returnedValue;
+
+    QString response = returnedValue.toString();
+
+    const char* str = response.toStdString().c_str();
+
+    clientConnection->write(str);
 }
 
 void Server::disconnected()

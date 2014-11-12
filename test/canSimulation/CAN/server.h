@@ -11,8 +11,7 @@ class Server : public QObject
     Q_OBJECT
 
 public:
-    Server(QObject *parent);
-    Server();
+    Server(QObject *rootObject);
 
 public slots:
     void write(QString);
@@ -25,6 +24,7 @@ public slots:
 private:
 
     QTcpServer *tcpServer;
+    QObject *rootView;
     QString currentFortune;
     quint16 blockSize;
     QTcpSocket *clientConnection;

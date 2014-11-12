@@ -12,7 +12,11 @@ ApplicationWindow {
 
     signal viewClicked(string name)
     signal createConnection(string ip, int port)
-    signal incoming(string message)
+
+    function incoming(msg) {
+        console.log("Got message:", msg)
+        return "some return value"
+    }
 
     menuBar: MenuBar {
         Menu {
@@ -39,8 +43,9 @@ ApplicationWindow {
                     tcpLogsView.textColor = "green"
                     tcpLogsView.append("Request " + item.objectName + " send")
                     switch (item.objectName) {
-                        case "asd": {
+                        case "OnRadioDetails": {
 
+                            console.log("HAHAHAHAHA")
                             root.viewClicked(item.objectName)
 
                             break;
