@@ -92,6 +92,8 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
       can_msg["jsonrpc"] = "2.0";
       can_msg["method"] = "CAN.TuneRadio";
       can_msg["params"] = msg->json_message();
+
+      msg->set_json_message(can_msg.asString());
       break;
     }
     default: {
@@ -100,7 +102,6 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   }
 
   from_mobile_.PostMessage(msg);
-
   return ProcessResult::PROCESSED;
 }
 
@@ -109,6 +110,8 @@ void CANModule::ProcessCANMessage(const MessageFromCAN& can_msg) {
 }
 
 void CANModule::Handle(const application_manager::MessagePtr message) {
+  static_cast<CANTCPConnection*>(can_connection.get())->WriteData(
+      message->json_message());
 
   if (ConnectionState::OPENED != can_connection->Flash()) {
     LOG4CXX_ERROR(logger_, "Failed to send message to CAN");
