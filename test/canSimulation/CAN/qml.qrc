@@ -7,5 +7,6 @@
         <file>qml/components/CastomInput.qml</file>
         <file>qml/components/LabelText.qml</file>
         <file>qml/components/Settings.qml</file>
+        <file>qml/components/requestHandler.qml</file>
     </qresource>
 </RCC>

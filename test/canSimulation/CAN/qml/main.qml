@@ -16,13 +16,32 @@ ApplicationWindow {
 
     function incoming(message) {
 
-        return "some return value"
+        var result = JSON.parse(message);
+
+        console.log(message);
+
+        if (result.method === "CAN.TuneRadio") {
+            var response = {
+                "id": result.id,
+                "jsonrpc": "2.0",
+                "result": {
+                    "method": "CAN.TuneRadio",
+                    "code": 0
+                }
+            }
+        }
+
+        var resp = JSON.stringify(response);
+
+        console.log(resp);
+
+        return JSON.stringify(resp);
     }
 
     function logger(message) {
 
         tcpLogsView.append(message);
-        return "some return value"
+        return true
     }
 
     menuBar: MenuBar {

@@ -72,7 +72,11 @@ void Server::readyRead()
 
     loger("Received..." + qMessage);
 
-    write(cMessage);
+    qb = returnedValue.toString().toUtf8();
+
+    char *ch = qb.data();
+
+    write(ch);
 }
 
 void Server::disconnected()
