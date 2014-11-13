@@ -96,6 +96,10 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
         module->GetModuleID(), generic_plugin_dll));
       plugins_.insert(std::pair<ModuleID, ModulePtr>(
         module->GetModuleID(), module));
+      std::deque<MobileFunctionID> subscribers = module->GetPluginInfo().mobile_function_list;
+      for(size_t i = 0; i < subscribers.size(); ++i) {
+        mobile_subscribers_.insert(std::pair<MobileFunctionID, ModulePtr>(subscribers[i], module));
+      }
     }
   }
   return plugins_.size();

@@ -46,14 +46,14 @@ class CANModule : public functional_modules::GenericModule,
 	public utils::Singleton<CANModule>,
     public threads::MessageLoopThread<std::queue<MessageFromCAN>>::Handler,
     public threads::MessageLoopThread<
-        std::queue<application_manager::MessagePtr>>::Handler {
+        std::queue<std::string>>::Handler {
   public:
     ~CANModule();
     functional_modules::PluginInfo GetPluginInfo() const;
     virtual functional_modules::ProcessResult ProcessMessage(
         application_manager::MessagePtr msg);
     void ProcessCANMessage(const MessageFromCAN& can_msg);
-    void Handle(const application_manager::MessagePtr message);
+    void Handle(const std::string message);
     void Handle(const MessageFromCAN message);
 protected:
 	void RemoveAppExtensions();
@@ -65,7 +65,7 @@ protected:
     utils::SharedPtr<CANConnection> can_connection;
     functional_modules::PluginInfo plugin_info_;
     threads::MessageLoopThread<std::queue<MessageFromCAN>> from_can_;
-    threads::MessageLoopThread<std::queue<application_manager::MessagePtr>> from_mobile_;
+    threads::MessageLoopThread<std::queue<std::string>> from_mobile_;
     threads::Thread* thread_;
     friend class TCPClientDelegate;
 };
