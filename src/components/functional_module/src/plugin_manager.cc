@@ -100,6 +100,7 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
       for(size_t i = 0; i < subscribers.size(); ++i) {
         mobile_subscribers_.insert(std::pair<MobileFunctionID, ModulePtr>(subscribers[i], module));
       }
+      module->SetServiceHandler(service_);
     }
   }
   return plugins_.size();

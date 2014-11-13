@@ -2049,7 +2049,7 @@ void ApplicationManagerImpl::Handle(const impl::MessageToMobile message) {
   }
 
   protocol_handler_->SendMessageToMobileApp(rawMessage, is_final);
-  LOG4CXX_INFO(logger_, "Message for mobile given away");
+  LOG4CXX_INFO(logger_, "Message for mobile given away with id " << message->function_id());
 
   if (close_session) {
     connection_handler_->CloseSession(message->connection_key());

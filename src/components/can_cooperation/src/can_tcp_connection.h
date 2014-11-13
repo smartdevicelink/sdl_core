@@ -47,7 +47,7 @@ namespace can_cooperation {
 			ConnectionState CloseConnection();
 			ConnectionState Flash();
 			ConnectionState GetData();
-			void WriteData(const MessageFromCAN& message);
+			void WriteData(const std::string& message);
 			MessageFromCAN ReadData();
 		private:
 			std::deque<std::string> to_send_;

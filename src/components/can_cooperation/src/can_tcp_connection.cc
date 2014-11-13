@@ -91,10 +91,9 @@ ConnectionState CANTCPConnection::GetData() {
   return current_state_;
 }
 
-void CANTCPConnection::WriteData(const Json::Value& message) {
+void CANTCPConnection::WriteData(const std::string& message) {
   if (INVALID != current_state_) {
-    Json::FastWriter writer;
-    to_send_.push_back(writer.write(message));
+    to_send_.push_back(message);
   }
 }
 

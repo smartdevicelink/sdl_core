@@ -156,7 +156,9 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
         msg_params["resultCode"] = "GENERIC_ERROR";
       }
 
-      msg->set_json_message(msg_params.asString());
+      Json::FastWriter writer;
+      std::string msg_to_send = writer.write(msg_params);
+      msg->set_json_message(msg_to_send);
       service_->SendMessageToMobile(msg);
     }
   }
