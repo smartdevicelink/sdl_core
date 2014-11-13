@@ -12,6 +12,7 @@ class Server : public QObject
 
 public:
     Server(QObject *rootObject);
+    ~Server();
 
 public slots:
     void write(QString);
@@ -24,10 +25,11 @@ public slots:
 private:
 
     QTcpServer *tcpServer;
-    QObject *rootView;
     QString currentFortune;
     quint16 blockSize;
     QTcpSocket *clientConnection;
+    QObject *rootView;
+    QVariant loger(QString);
 };
 
 #endif // NETWORK_H

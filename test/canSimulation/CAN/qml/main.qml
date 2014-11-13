@@ -13,12 +13,15 @@ ApplicationWindow {
     signal viewClicked(string name)
     signal createConnection(string ip, int port)
 
+
     function incoming(message) {
 
-        console.log("     ");
+        return "some return value"
+    }
 
-        console.log("Got message:", message);
-        tcpLogsView.append("CAN message received: " + message);
+    function logger(message) {
+
+        tcpLogsView.append(message);
         return "some return value"
     }
 
@@ -45,11 +48,9 @@ ApplicationWindow {
 
                 onRequestButtonClick: {
                     tcpLogsView.textColor = "green"
-                    tcpLogsView.append("Request " + item.objectName + " send")
                     switch (item.objectName) {
                         case "OnRadioDetails": {
 
-                            console.log("HAHAHAHAHA")
                             root.viewClicked(item.objectName)
 
                             break;
@@ -82,8 +83,6 @@ ApplicationWindow {
                 id: settingsComponent
 
                 onConnect: {
-
-                    console.log(settingsComponent.ip, settingsComponent.port)
                     createConnection(settingsComponent.ip, settingsComponent.port);
                 }
             }

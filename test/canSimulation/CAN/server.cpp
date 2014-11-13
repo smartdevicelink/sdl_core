@@ -1,5 +1,5 @@
 #include <stdlib.h>
-
+#include <sstream>
 #include "server.h"
 
 Server::Server(QObject *rootObject) : rootView(rootObject), QObject() {
@@ -11,22 +11,41 @@ Server::Server(QObject *rootObject) : rootView(rootObject), QObject() {
     connect(tcpServer, SIGNAL(newConnection()),this, SLOT(connected()));
 }
 
+Server::~Server()
+{
+    delete tcpServer;
+}
+
 void Server::createConection(QString IP, int port)
 {
-    qDebug() << "qDebug locale is createConection" << IP << port;
+    //qDebug() << "qDebug locale is createConection" << IP << port;
+
+    loger("Listen:" + IP + ":" + QString::number(port));
 
     QHostAddress hostadd(IP);
 
     if (!tcpServer->listen(hostadd, port)) {
-        qDebug() << "Fortune Server" << "Unable to start the server: %1." << tcpServer->errorString();
-
+        //qDebug() << "Unable to start the server: %1." << tcpServer->errorString();
+        loger("Unable to start the server: %1." + tcpServer->errorString());
         return;
     }
 }
 
+QVariant Server::loger(QString message)
+{
+    QVariant returnedValue;
+
+    qDebug() << message;
+
+    QMetaObject::invokeMethod(rootView, "logger",
+            Q_RETURN_ARG(QVariant, returnedValue),
+            Q_ARG(QVariant, message));
+}
+
 void Server::connected()
 {
-    qDebug() << "connected...";
+
+    loger("connected...");
 
     clientConnection = tcpServer->nextPendingConnection();
 
@@ -37,40 +56,48 @@ void Server::connected()
 void Server::readyRead()
 {
 
-    QVariant message = clientConnection->readAll();
+//    qDebug() << "Start reading data";
 
-    qDebug() <<  "Get Request - " << message;
+    QByteArray qb = clientConnection->readAll();
+
+    const char *cMessage = qb.data();
 
     QVariant returnedValue;
 
+    QString qMessage = QString::fromUtf8(cMessage);
+
     QMetaObject::invokeMethod(rootView, "incoming",
             Q_RETURN_ARG(QVariant, returnedValue),
-            Q_ARG(QVariant, message));
+            Q_ARG(QVariant,  qMessage));
 
-    qDebug() << "Send Response - " << returnedValue;
+    loger("Received..." + qMessage);
 
-    QString response = returnedValue.toString();
-
-    const char* str = response.toStdString().c_str();
-
-    clientConnection->write(str);
+    write(cMessage);
 }
 
 void Server::disconnected()
 {
-    qDebug() << "disconnected...";
+    loger("disconnected...");
+
+    clientConnection->deleteLater();
 }
 
 void Server::write(QString name)
 {
-    qDebug() << "qDebug locale is response";
 
-    const char* str = name.toStdString().c_str();
+//    qDebug() << name;
 
-    clientConnection->write(str);
+    QByteArray qb = name.toUtf8();
+    char *cName = qb.data();
+
+    loger("Send:" + name);
+
+    clientConnection->write(cName);
+
+//    qDebug() << QString::fromUtf8(cName);
 }
 
 void Server::displayError(QAbstractSocket::SocketError socketError)
 {
-    qDebug() << "qDebug locale is displayError" + socketError;
+    loger("Error: " + socketError);
 }
