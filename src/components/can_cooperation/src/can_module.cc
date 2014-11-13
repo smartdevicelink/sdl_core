@@ -50,6 +50,8 @@ bool TCPClientDelegate::exitThreadMain() {
   return false;
 }
 
+uint32_t CANModule::next_correlation_id_ = 1;
+
 CANModule::CANModule()
   : GenericModule(kCANModuleID)
   , can_connection()
@@ -67,7 +69,7 @@ CANModule::CANModule()
   thread_ = new threads::Thread("CANClientListener", new TCPClientDelegate(this));
   const size_t kStackSize = 16384;
   thread_->startWithOptions(threads::ThreadOptions(kStackSize));
- }
+}
 
 CANModule::~CANModule() {
   thread_->stop();
@@ -89,7 +91,15 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   switch (msg->function_id()) {
     case MobileFunctionID::TUNE_RADIO: {
       Json::Value can_msg;
-      can_msg["id"] = 1;
+
+      HMIResponseSubscriberInfo subscriber_info;
+      subscriber_info.connection_key_ = msg->connection_key();
+      subscriber_info.correlation_id_ = msg->correlation_id();
+      subscriber_info.function_id_ = msg->function_id();
+
+      hmi_response_subscribers_[next_correlation_id_] = subscriber_info;
+
+      can_msg["id"] = next_correlation_id_++;
       can_msg["jsonrpc"] = "2.0";
       can_msg["method"] = "CAN.TuneRadio";
       can_msg["params"] = msg->json_message();
@@ -120,8 +130,36 @@ void CANModule::Handle(const std::string message) {
   }
 }
   
-void CANModule::Handle(const MessageFromCAN message) {
-  // TODO(PV): process and send response/notification to mobile
+void CANModule::Handle(const MessageFromCAN can_msg) {
+  if (can_msg.isMember("id")) {
+    std::map<uint32_t, HMIResponseSubscriberInfo>::iterator it =
+        hmi_response_subscribers_.find(can_msg["id"].asInt());
+    if (it != hmi_response_subscribers_.end()) {
+      application_manager::MessagePtr msg(new application_manager::Message(
+              protocol_handler::MessagePriority::kDefault));
+      msg->set_connection_key(it->second.connection_key_);
+      msg->set_correlation_id(it->second.correlation_id_);
+      msg->set_function_id(it->second.function_id_);
+      msg->set_protocol_version(application_manager::ProtocolVersion::kV3);
+      msg->set_message_type(application_manager::MessageType::kResponse);
+
+      Json::Value msg_params;
+
+      if ((can_msg.isMember("result")) &&
+          (can_msg["result"].isMember("code")) &&
+          (0 == can_msg["result"]["code"].asInt())) {
+
+        msg_params["success"] = true;
+        msg_params["resultCode"] = "SUCCESS";
+      } else {
+        msg_params["success"] = false;
+        msg_params["resultCode"] = "GENERIC_ERROR";
+      }
+
+      msg->set_json_message(msg_params.asString());
+      service_->SendMessageToMobile(msg);
+    }
+  }
 }
 
 void CANModule::RemoveAppExtensions() {

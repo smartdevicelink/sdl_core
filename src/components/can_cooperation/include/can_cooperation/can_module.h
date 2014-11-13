@@ -57,17 +57,26 @@ class CANModule : public functional_modules::GenericModule,
     void Handle(const MessageFromCAN message);
 protected:
 	void RemoveAppExtensions();
-  private:
-    DISALLOW_COPY_AND_ASSIGN(CANModule);
-    FRIEND_BASE_SINGLETON_CLASS(CANModule);
-    CANModule();
-    static const functional_modules::ModuleID kCANModuleID = 153;
-    utils::SharedPtr<CANConnection> can_connection;
-    functional_modules::PluginInfo plugin_info_;
-    threads::MessageLoopThread<std::queue<MessageFromCAN>> from_can_;
-    threads::MessageLoopThread<std::queue<std::string>> from_mobile_;
-    threads::Thread* thread_;
-    friend class TCPClientDelegate;
+private:
+ DISALLOW_COPY_AND_ASSIGN(CANModule);
+ FRIEND_BASE_SINGLETON_CLASS(CANModule);
+ CANModule();
+
+ struct HMIResponseSubscriberInfo {
+   int32_t connection_key_;
+   int32_t correlation_id_;
+   int32_t function_id_;
+ };
+
+ static const functional_modules::ModuleID kCANModuleID = 153;
+ static uint32_t next_correlation_id_;
+ std::map<uint32_t, HMIResponseSubscriberInfo> hmi_response_subscribers_;
+ utils::SharedPtr<CANConnection> can_connection;
+ functional_modules::PluginInfo plugin_info_;
+ threads::MessageLoopThread<std::queue<MessageFromCAN>> from_can_;
+ threads::MessageLoopThread<std::queue<std::string>> from_mobile_;
+ threads::Thread* thread_;
+ friend class TCPClientDelegate;
 };
 
 EXPORT_FUNCTION(CANModule);

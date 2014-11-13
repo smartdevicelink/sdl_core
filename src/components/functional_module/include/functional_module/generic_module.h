@@ -94,12 +94,12 @@ class GenericModule {
     explicit GenericModule(ModuleID module_id);
     void NotifyObservers(ModuleObserver::Errors error);
 
+    application_manager::ServicePtr service_;
   private:
     DISALLOW_COPY_AND_ASSIGN(GenericModule);
     const ModuleID kModuleId_;
     std::deque<utils::SharedPtr<ModuleObserver> > observers_;
     ModuleState state_;
-    application_manager::ServicePtr service_;
 };
 
 }  //  namespace functional_modules
