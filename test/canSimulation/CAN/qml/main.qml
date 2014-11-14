@@ -35,7 +35,7 @@ ApplicationWindow {
 
         console.log(resp);
 
-        return JSON.stringify(resp);
+        return resp;
     }
 
     function logger(message) {
