@@ -62,26 +62,60 @@ ApplicationWindow {
                 onRequestButtonClick: {
                     tcpLogsView.textColor = "green"
                     switch (item.objectName) {
-                    case "OnRadioDetails": {
+                        case "OnControlChanged": {
 
-                        root.viewClicked(item.objectName)
+                            //root.sendMessage(RequestHandler.onRadioDetails());
 
-                        break;
-                    }
-                    case "OnControlChanged": {
+                            break;
+                        }
+                        case "OnRadioDetails": {
 
-                        root.sendMessage(RequestHandler.sendRequest());
+                            root.sendMessage(RequestHandler.onRadioDetails());
 
-                        break;
-                    }
+                            break;
+                        }
                         default: {
 
                             //RequestHandler.func();
                             break;
                         }
                     }
+                }
 
 
+                onResponseButtonClick: {
+                    tcpLogsView.textColor = "red"
+                    switch (item.objectName) {
+                        case "TuneUp": {
+
+                            RequestHandler.tuneUp();
+
+                            break;
+                        }
+                        case "TuneDown": {
+
+                            RequestHandler.tuneDown();
+
+                            break;
+                        }
+                        case "StartScan": {
+
+                            RequestHandler.startScan();
+
+                            break;
+                        }
+                        case "StopScan": {
+
+                            RequestHandler.stopScan();
+
+                            break;
+                        }
+                        default: {
+
+                            //RequestHandler.func();
+                            break;
+                        }
+                    }
                 }
             }
         }

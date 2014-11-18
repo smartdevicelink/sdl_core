@@ -1,7 +1,7 @@
 pragma Singleton
 import QtQuick 2.0
 
-QtObject {
+Item {
     id: dataHandler
 
     //OnPresetsChanged
@@ -51,9 +51,16 @@ QtObject {
     property string street: "DEFAULT";
     property string gpsCoordinates: "DEFAULT";
 
-    function receivedMessage(result)
-    {
-        var response;
+    Timer {
+        id: tuneUpTimer
+        interval: 100;
+        running: false;
+        repeat: true
+        onTriggered: tuneUp()
+    }
+
+
+    function receivedMessage(result) {
 
         switch (result.method) {
             case "CAN.TuneRadio": {
@@ -73,29 +80,118 @@ QtObject {
                     dataHandler.currentHD = result.params.radioStation.currentHD
                 }
 
-                response = {
-                    "id": result.id,
-                    "jsonrpc": "2.0",
-                    "result": {
-                        "method": "CAN.TuneRadio",
-                        "code": 0
-                    }
-                }
+                break;
+            }
+            case "CAN.TuneUp": {
+
+                tuneUp();
 
                 break;
+            }
+            case "CAN.TuneDown": {
+
+                tuneDown();
+
+                break;
+            }
+            case "CAN.StartScan": {
+
+                startScan();
+
+                break;
+            }
+            case "CAN.StopScan": {
+
+                stopScan();
+
+                break;
+            }
+        }
+
+        return successResponse(result.id, result.method);
+    }
+
+    function tuneUp() {
+
+        dataHandler.fraction += 2;
+        if (dataHandler.fraction == 10) {
+            dataHandler.fraction = 0;
+            dataHandler.frequency += 1;
+        } else if (dataHandler.fraction == 11) {
+            dataHandler.fraction = 1;
+            dataHandler.frequency += 1;
+        }
+
+        if (dataHandler.frequency == 108) {
+            dataHandler.frequency = 87;
+            dataHandler.fraction = 8;
+        }
+    }
+
+    function tuneDown() {
+
+        dataHandler.fraction -= 2;
+        if (dataHandler.fraction == -2) {
+            dataHandler.fraction = 8;
+            dataHandler.frequency -= 1;
+        } else if (dataHandler.fraction == -1) {
+            dataHandler.fraction = 9;
+            dataHandler.frequency -= 1;
+        }
+
+        if (dataHandler.frequency == 87 && dataHandler.fraction < 8) {
+            dataHandler.frequency = 108;
+            dataHandler.fraction = 0;
+        }
+    }
+
+    function startScan() {
+        tuneUpTimer.start();
+    }
+
+    function stopScan() {
+        tuneUpTimer.stop();
+    }
+
+    function successResponse (id, method) {
+
+        var response;
+
+        response = {
+            "id": id,
+            "jsonrpc": "2.0",
+            "result": {
+                "method": method,
+                "code": 0
             }
         }
 
         return response;
     }
 
+    function onRadioDetailsFractionChanged() {
 
-    function sendRequest()
+        var response;
+
+        response = {
+            "jsonrpc": "2.0",
+            "method": "CAN.OnRadioDetails",
+            "params": {
+                "radioStation":{
+                    "frequency": dataHandler.frequency,
+                    "fraction": dataHandler.fraction
+                }
+            }
+        }
+
+        return response;
+    }
+
+    function onRadioDetails()
     {
         var response;
 
         response = {
-            "id": 2,
             "jsonrpc": "2.0",
             "method": "CAN.OnRadioDetails",
             "params": {

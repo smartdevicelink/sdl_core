@@ -191,6 +191,7 @@ Rectangle {
                                 target: RequestHandler
                                 onFractionChanged: {
                                     fractionBox.dataText = RequestHandler.fraction
+                                    sendMessage(RequestHandler.onRadioDetailsFractionChanged());
                                 }
                             }
                         }
@@ -845,12 +846,4 @@ Rectangle {
     signal requestButtonClick(QtObject item)
 
     signal responseButtonClick(QtObject item)
-
-    onResponseButtonClick: {
-
-
-
-        tcpLogsView.textColor = "red"
-        tcpLogsView.append("Response " + item.objectName + " send")
-    }
 }
