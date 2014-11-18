@@ -89,10 +89,20 @@ class GenericModule {
     }
     void AddObserver(utils::SharedPtr<ModuleObserver> observer);
     void RemoveObserver(utils::SharedPtr<ModuleObserver> observer);
-    virtual void RemoveAppExtensions() = 0;
+
+    /**
+     * @brief Remove extension created for specified application
+     * @param app_id application id
+     */
+    virtual void RemoveAppExtension(uint32_t app_id) = 0;
   protected:
     explicit GenericModule(ModuleID module_id);
     void NotifyObservers(ModuleObserver::Errors error);
+
+    /**
+     * @brief Remove extension for all applications
+     */
+    virtual void RemoveAppExtensions() = 0;
 
     application_manager::ServicePtr service_;
   private:

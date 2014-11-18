@@ -55,8 +55,17 @@ class CANModule : public functional_modules::GenericModule,
     void ProcessCANMessage(const MessageFromCAN& can_msg);
     void Handle(const std::string message);
     void Handle(const MessageFromCAN message);
+
+    /**
+     * @brief Remove extension created for specified application
+     * @param app_id application id
+     */
+    virtual void RemoveAppExtension(uint32_t app_id);
 protected:
-	void RemoveAppExtensions();
+    /**
+     * @brief Remove extension for all applications
+     */
+    virtual void RemoveAppExtensions();
 private:
  DISALLOW_COPY_AND_ASSIGN(CANModule);
  FRIEND_BASE_SINGLETON_CLASS(CANModule);

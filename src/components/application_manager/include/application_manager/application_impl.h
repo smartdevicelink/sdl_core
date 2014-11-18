@@ -42,7 +42,6 @@
 #include "utils/date_time.h"
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
-#include "application_manager/app_extension.h"
 #include "connection_handler/device.h"
 #include "utils/lock.h"
 

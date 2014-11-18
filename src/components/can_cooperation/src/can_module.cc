@@ -168,5 +168,9 @@ void CANModule::RemoveAppExtensions() {
 
 }
 
+void CANModule::RemoveAppExtension(uint32_t app_id) {
+
+}
+
 }  //  namespace can_cooperation
 
