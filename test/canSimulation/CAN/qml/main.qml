@@ -12,30 +12,24 @@ ApplicationWindow {
 
     signal viewClicked(string name)
     signal createConnection(string ip, int port)
-
+    signal sendMessageTCP(string message)
 
     function incoming(message) {
 
         var result = JSON.parse(message);
 
-        console.log(message);
+        var resp = RequestHandler.receivedMessage(result);
 
-        if (result.method === "CAN.TuneRadio") {
-            var response = {
-                "id": result.id,
-                "jsonrpc": "2.0",
-                "result": {
-                    "method": "CAN.TuneRadio",
-                    "code": 0
-                }
-            }
-        }
+        var respJson = JSON.stringify(resp);
 
-        var resp = JSON.stringify(response);
+        return respJson;
+    }
 
-        console.log(resp);
+    function sendMessage(message) {
 
-        return resp;
+        var messageJson = JSON.stringify(message);
+
+        sendMessageTCP(messageJson);
     }
 
     function logger(message) {
@@ -68,10 +62,21 @@ ApplicationWindow {
                 onRequestButtonClick: {
                     tcpLogsView.textColor = "green"
                     switch (item.objectName) {
-                        case "OnRadioDetails": {
+                    case "OnRadioDetails": {
 
-                            root.viewClicked(item.objectName)
+                        root.viewClicked(item.objectName)
 
+                        break;
+                    }
+                    case "OnControlChanged": {
+
+                        root.sendMessage(RequestHandler.sendRequest());
+
+                        break;
+                    }
+                        default: {
+
+                            //RequestHandler.func();
                             break;
                         }
                     }

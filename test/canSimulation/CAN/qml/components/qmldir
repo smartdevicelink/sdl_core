@@ -1,4 +1,5 @@
 singleton Style 1.0 Style.qml
+singleton RequestHandler 1.0 RequestHandler.qml
 Media 1.0 Media.qml
 CastomInput 1.0 CastomInput.qml
 LabelText 1.0 LabelText.qml

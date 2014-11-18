@@ -18,8 +18,9 @@ int main(int argc, char *argv[])
     Server myServer(rootObject);
 
     // Step 2: connect qml signal to C++ slot
-    qDebug() << QObject::connect(rootObject,SIGNAL(viewClicked(QString)), &myServer, SLOT(write(QString)));
-    qDebug() << QObject::connect(rootObject,SIGNAL(createConnection(QString, int)), &myServer, SLOT(createConection(QString, int)));
+    QObject::connect(rootObject,SIGNAL(viewClicked(QString)), &myServer, SLOT(write(QString)));
+    QObject::connect(rootObject,SIGNAL(createConnection(QString, int)), &myServer, SLOT(createConection(QString, int)));
+    QObject::connect(rootObject,SIGNAL(sendMessageTCP(QString)), &myServer, SLOT(write(QString)));
 
     //qDebug() << QObject::connect(&myServer, SIGNAL(), rootObject, SLOT(incoming(QString)));
 

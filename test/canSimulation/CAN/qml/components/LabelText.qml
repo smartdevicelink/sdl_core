@@ -5,7 +5,7 @@ Rectangle {
 
     id: root
 
-    property string dataText: "Default"
+    property variant dataText: "Default"
     property string textLabel: "Not initialised"
 
     width: Style.textBoxWidth
@@ -29,6 +29,12 @@ Rectangle {
         widthInput: Style.widthInput
         onTextInputChanged: {
             root.dataText = textInput;
+        }
+        Connections {
+            target: root
+            onDataTextChanged: {
+                input.textInput = root.dataText
+            }
         }
     }
 }

@@ -13,6 +13,10 @@ Rectangle {
     radius: 3
     clip: true
 
+    onTextInputChanged: {
+        tuneInput.text = textInput
+    }
+
     TextInput {
         id: tuneInput
         anchors.verticalCenter: parent.verticalCenter
@@ -22,6 +26,18 @@ Rectangle {
         width: parent.width
         onTextChanged: {
             root.textInput = text;
+        }
+        onFocusChanged: {
+            if (focus) {
+                text = 0
+            }
+        }
+
+        Connections {
+            target: root
+            onTextInputChanged: {
+                tuneInput.text = root.textInput
+            }
         }
     }
 }

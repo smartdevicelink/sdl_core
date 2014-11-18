@@ -2,11 +2,11 @@
 #include <sstream>
 #include "server.h"
 
-Server::Server(QObject *rootObject) : rootView(rootObject), QObject() {
+Server::Server(QObject *rootObject) : rootView(rootObject), clientConnection(NULL), QObject() {
 
     tcpServer = new QTcpServer(this);
 
-    qDebug() << "port..." << tcpServer->serverPort() << tcpServer->serverAddress();
+    //qDebug() << "port..." << tcpServer->serverPort() << tcpServer->serverAddress();
 
     connect(tcpServer, SIGNAL(newConnection()),this, SLOT(connected()));
 }
@@ -35,7 +35,7 @@ QVariant Server::loger(QString message)
 {
     QVariant returnedValue;
 
-    qDebug() << message;
+    //qDebug() << message;
 
     QMetaObject::invokeMethod(rootView, "logger",
             Q_RETURN_ARG(QVariant, returnedValue),
@@ -88,15 +88,18 @@ void Server::disconnected()
 
 void Server::write(QString name)
 {
-
-//    qDebug() << name;
-
     QByteArray qb = name.toUtf8();
     char *cName = qb.data();
 
-    loger("Send:" + name);
 
-    clientConnection->write(cName);
+    if ((clientConnection != NULL) && (clientConnection->state() == QTcpSocket::ConnectedState)){
+
+        clientConnection->write(cName);
+        loger("Send:" + name);
+    } else {
+        loger("Client is not connected yet...");
+    }
+
 
 //    qDebug() << QString::fromUtf8(cName);
 }
