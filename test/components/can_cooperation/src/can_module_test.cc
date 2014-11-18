@@ -7,15 +7,21 @@ using namespace functional_modules;
 using namespace can_cooperation;
 
 TEST(can_module, create) {
-  CANModule module;
-  ASSERT_TRUE(module.GetModuleID() == 153);
+  CANModule* module = CANModule::instance();
+  ASSERT_TRUE(module->GetModuleID() == 153);
 }
 
 TEST(can_module, notify_observer) {
-  CANModule module;
-  Json::Value val;
-  //ProcessResult res = module.ProcessMessage(val);
-  //EXPECT_TRUE(res == ProcessResult::CANNOT_PROCESS);
+  CANModule& module = *CANModule::instance();
+  application_manager::MessagePtr message = 
+  new application_manager::Message(
+    protocol_handler::MessagePriority::FromServiceType(protocol_handler::ServiceType::kRpc));
+  message->set_function_id(MobileFunctionID::TUNE_RADIO);
+  ProcessResult res = module.ProcessMessage(message);
+  EXPECT_TRUE(res == ProcessResult::PROCESSED);
+  message->set_function_id(-1);
+  res = module.ProcessMessage(message);
+  EXPECT_TRUE(res == ProcessResult::CANNOT_PROCESS);
 }
 
 int main(int argc, char** argv) {

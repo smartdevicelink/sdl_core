@@ -107,11 +107,11 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 endif()
 
-add_executable("test_suit" "./test_suit.cc")
-file(COPY ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem DESTINATION ${CMAKE_BINARY_DIR}/test/)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+#add_executable("test_suit" "./test_suit.cc")
+#file(COPY ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem DESTINATION ${CMAKE_BINARY_DIR}/test/)
+#file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 include_directories(${INCLUDE_DIR})
-target_link_libraries("test_suit" ${LIBRARIES})
+#target_link_libraries("test_suit" ${LIBRARIES})
 
 # vim: set ts=2 sw=2 et:

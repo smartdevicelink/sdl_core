@@ -118,7 +118,7 @@ TEST(can_module, create) {
   received_msg["data"]["additional"] = 987;
   msg = writer.write(received_msg);
   printf("Modified received message %s\n", msg.c_str());
-  connection.WriteData(received_msg);
+  connection.WriteData(msg);
   ASSERT_TRUE(OPENED == connection.Flash());
   std::string server_msg;
   ASSERT_TRUE(server.Receive(&server_msg));

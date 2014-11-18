@@ -4,8 +4,10 @@ include_directories (
   ../../../src/components/functional_module/include/
   ../../../src/components/can_cooperation/include/
   ../../../src/components/include/
-  ../../../src/components/application_manager/include
+  ../../../src/components/application_manager/include  
+  ../../../src/components/connection_handler/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
+  ${CMAKE_BINARY_DIR}/src/components/
 )
 
 set (LIBRARIES
@@ -18,6 +20,6 @@ set (LIBRARIES
     FunctionalModule
 )
 
-#create_test("test_can_module" "./src/can_module_test.cc" "${LIBRARIES}")
+create_test("test_can_module" "./src/can_module_test.cc" "${LIBRARIES}")
 create_test("test_can_app_extension" "./src/can_app_extension_test.cc" "${LIBRARIES}")
 create_test("test_can_tcp_connection" "./src/can_tcp_connection_test.cc" "${LIBRARIES}")
