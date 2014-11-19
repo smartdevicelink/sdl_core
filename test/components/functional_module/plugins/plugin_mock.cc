@@ -18,6 +18,7 @@ class MockGenericModule : public GenericModule,
     }
     MOCK_METHOD1(ProcessMessage, ProcessResult(application_manager::MessagePtr));
     MOCK_METHOD0(RemoveAppExtensions, void(void));
+    MOCK_METHOD1(RemoveAppExtension, void(uint32_t));
   private:
     FRIEND_BASE_SINGLETON_CLASS(MockGenericModule);
 };

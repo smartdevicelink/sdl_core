@@ -22,6 +22,7 @@ class MockGenericModule : public GenericModule {
     }
     MOCK_METHOD1(ChangeModuleState, void(ModuleState));
     MOCK_METHOD0(RemoveAppExtensions, void(void));
+    MOCK_METHOD1(RemoveAppExtension, void(uint32_t));
 };
 
 TEST(generic_module, create) {
@@ -57,6 +58,7 @@ class ErrorGenericModule : public GenericModule {
     MOCK_CONST_METHOD0(GetPluginInfo, PluginInfo());
     MOCK_METHOD1(ChangeModuleState, void(ModuleState));
     MOCK_METHOD0(RemoveAppExtensions, void());
+    MOCK_METHOD1(RemoveAppExtension, void(uint32_t));
 };
 
 class MockModuleObserver : public ModuleObserver {
