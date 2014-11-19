@@ -13,10 +13,18 @@ GenericModule::~GenericModule() {
 }
 
 void GenericModule::AddObserver(utils::SharedPtr<ModuleObserver> observer) {
+  DCHECK(observer);
+  if (!observer) {
+    return;
+  }
   observers_.push_back(observer);
 }
 
 void GenericModule::RemoveObserver(utils::SharedPtr<ModuleObserver> observer) {
+  DCHECK(observer);
+  if (!observer) {
+    return;
+  }
   for (ModuleObserverIterator it = observers_.begin();
        observers_.end() != it;
        ++it) {

@@ -116,6 +116,10 @@ void PluginManager::UnloadPlugins() {
 
 void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
   DCHECK(msg);
+  if (!msg) {
+    LOG4CXX_ERROR(logger_, "Null pointer message was received.");
+    return;
+  }
   if (application_manager::ProtocolVersion::kUnknownProtocol != msg->protocol_version()
     && application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
     PluginFunctionsIterator subscribed_plugin_itr = mobile_subscribers_.find(
@@ -128,6 +132,10 @@ void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
 
 bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {
   DCHECK(msg);
+  if (!msg) {
+    LOG4CXX_ERROR(logger_, "Null pointer message was received.");
+    return false;
+  }
   if (application_manager::ProtocolVersion::kUnknownProtocol != msg->protocol_version()
     && application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
     MobileFunctionID id = static_cast<MobileFunctionID>(msg->function_id());

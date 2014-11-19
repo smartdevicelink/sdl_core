@@ -8,11 +8,18 @@ class MockGenericModule : public GenericModule,
   public utils::Singleton<MockGenericModule> {
   public:
     MockGenericModule(ModuleID module_id = 19): GenericModule(module_id) {}
-    MOCK_CONST_METHOD0(GetPluginInfo, PluginInfo());
+    PluginInfo GetPluginInfo() const {
+      PluginInfo info;
+      info.name = "MockGenericModule";
+      info.version = 1;
+      info.mobile_function_list.push_back(
+        static_cast<MobileFunctionID>(101));
+      return info;
+    }
     MOCK_METHOD1(ProcessMessage, ProcessResult(application_manager::MessagePtr));
     MOCK_METHOD0(RemoveAppExtensions, void(void));
   private:
     FRIEND_BASE_SINGLETON_CLASS(MockGenericModule);
 };
 
-EXPORT_FUNCTION(MockGenericModule)
+EXPORT_FUNCTION(MockGenericModule);

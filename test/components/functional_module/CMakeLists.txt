@@ -14,12 +14,13 @@ set (LIBRARIES
     gtest
     gtest_main
     gmock
-    gmock_main
-    Utils
+    gmock_main    
     FunctionalModule
     dl
     ApplicationManager
     jsoncpp
+    Utils
+    ConfigProfile
 )
 
 # use, i.e. don't skip the full RPATH for the build tree

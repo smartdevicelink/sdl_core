@@ -645,8 +645,8 @@ void ApplicationImpl::UnsubscribeFromSoftButtons(int32_t cmd_id) {
   }
 }
 
-AppExtension* ApplicationImpl::QueryInterface(AppExtensionUID uid) {
-  std::list<AppExtension*>::const_iterator it =
+AppExtensionPtr ApplicationImpl::QueryInterface(AppExtensionUID uid) {
+  std::list<AppExtensionPtr>::const_iterator it =
       extensions_.begin();
   for (;it != extensions_.end(); ++it) {
     if ((*it)->uid() == uid) {
@@ -654,16 +654,26 @@ AppExtension* ApplicationImpl::QueryInterface(AppExtensionUID uid) {
     }
   }
 
-  return NULL;
+  return AppExtensionPtr();
 }
 
-bool ApplicationImpl::AddExtension(AppExtension* extension) {
-  if (NULL == QueryInterface(extension->uid())) {
-    return false;
+bool ApplicationImpl::AddExtension(AppExtensionPtr extension) {
+  if (!QueryInterface(extension->uid())) {
+    extensions_.push_back(extension);
+    return true;
   }
+  return false;  
+}
 
-  extensions_.push_back(extension);
-  return true;
+bool ApplicationImpl::RemoveExtension(AppExtensionUID uid) {
+  for(std::list<AppExtensionPtr>::iterator it = 
+    extensions_.begin(); extensions_.end() != it; ++it) {
+    if ((*it)->uid() == uid) {
+      extensions_.erase(it);
+      return true;
+    }
+  }
+  return false;
 }
 
 }  // namespace application_manager

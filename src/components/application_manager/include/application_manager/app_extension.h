@@ -33,6 +33,8 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_EXTENSION_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_APP_EXTENSION_H_
 
+#include "utils/shared_ptr.h"
+
 namespace application_manager {
 
 typedef int AppExtensionUID;
@@ -48,6 +50,8 @@ class AppExtension {
   private:
     const AppExtensionUID kUid_;
 };
+
+typedef utils::SharedPtr<AppExtension> AppExtensionPtr;
 
 }  //  namespace application_manager
 

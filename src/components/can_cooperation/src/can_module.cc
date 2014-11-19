@@ -61,31 +61,36 @@ CANModule::CANModule()
   	can_connection = new CANTCPConnection;
   	if (ConnectionState::OPENED != can_connection->OpenConnection()) {
   		LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
-  	}
+  	} else {
+      thread_ = new threads::Thread("CANClientListener", new TCPClientDelegate(this));
+      const size_t kStackSize = 16384;
+      thread_->startWithOptions(threads::ThreadOptions(kStackSize));
+    }
   plugin_info_.name = "ReverseSDLPlugin";
   plugin_info_.version = 1;
-  plugin_info_.plugin = this;
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_RADIO);
-  thread_ = new threads::Thread("CANClientListener", new TCPClientDelegate(this));
-  const size_t kStackSize = 16384;
-  thread_->startWithOptions(threads::ThreadOptions(kStackSize));
 }
 
 CANModule::~CANModule() {
-  thread_->stop();
   if (can_connection) {
-		can_connection->CloseConnection();
-	}
-  delete thread_;
+    can_connection->CloseConnection();
+  }
+  if (thread_ ) {
+    thread_->stop();
+    delete thread_;
+  }
 }
 
 functional_modules::PluginInfo CANModule::GetPluginInfo() const {
   return plugin_info_;
 }
 
-
-
 ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
+  DCHECK(msg);
+  if (!msg) {
+    LOG4CXX_ERROR(logger_, "Null pointer message received.");
+    return ProcessResult::FAILED;
+  }
   std::string msg_to_send;
 
   switch (msg->function_id()) {
@@ -118,6 +123,7 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
 }
 
 void CANModule::ProcessCANMessage(const MessageFromCAN& can_msg) {
+  DCHECK(Json::ValueType::objectValue == can_msg.type());
   from_can_.PostMessage(can_msg);
 }
 

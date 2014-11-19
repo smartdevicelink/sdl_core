@@ -528,18 +528,25 @@ class Application : public virtual InitialApplicationData,
     virtual void UnsubscribeFromSoftButtons(int32_t cmd_id) = 0;
 
     /**
-     * @brief Return pointer to extension by uid
-     * @param uid uid of extension
-     * @return Pointer to extension, if extension was initialized, otherwise NULL
-     */
-    virtual AppExtension* QueryInterface(AppExtensionUID uid) = 0;
+      * @brief Return pointer to extension by uid
+      * @param uid uid of extension
+      * @return Pointer to extension, if extension was initialized, otherwise NULL
+      */
+    virtual AppExtensionPtr QueryInterface(AppExtensionUID uid) = 0;
 
     /**
-     * @brief Add extension to application
-     * @param extension pointer to extension
-     * @return true if success, false if extension already initialized
-     */
-    virtual bool AddExtension(AppExtension* extention) = 0;
+      * @brief Add extension to application
+      * @param extension pointer to extension
+      * @return true if success, false if extension already initialized
+      */
+    virtual bool AddExtension(AppExtensionPtr extention) = 0;
+
+    /**
+      * @brief Remove extension from application
+      * @param uid uid of extension
+      * @return true if success, false if extension is not present
+      */
+    virtual bool RemoveExtension(AppExtensionUID uid) = 0;
 };
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;

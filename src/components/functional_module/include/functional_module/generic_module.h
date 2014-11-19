@@ -68,7 +68,6 @@ struct PluginInfo {
   std::string name;
   int version;
   std::deque<MobileFunctionID> mobile_function_list;
-  ModulePtr plugin;
 };
 
 class GenericModule {

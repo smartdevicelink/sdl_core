@@ -178,14 +178,21 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @param uid uid of extension
    * @return Pointer to extension, if extension was initialized, otherwise NULL
    */
-  AppExtension* QueryInterface(AppExtensionUID uid);
+  AppExtensionPtr QueryInterface(AppExtensionUID uid);
 
   /**
    * @brief Add extension to application
    * @param extension pointer to extension
    * @return true if success, false if extension already initialized
    */
-  bool AddExtension(AppExtension* extention);
+  bool AddExtension(AppExtensionPtr extention);
+
+  /**
+   * @brief Remove extension from application
+   * @param uid uid of extension
+   * @return true if success, false if extension is not present
+   */
+  bool RemoveExtension(AppExtensionUID uid);
 
  private:
 
@@ -221,7 +228,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
 
-  std::list<AppExtension*> extensions_;
+  std::list<AppExtensionPtr> extensions_;
 
   /**
    * @brief Defines number per time in seconds limits
