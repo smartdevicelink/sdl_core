@@ -51,8 +51,6 @@ enum ProcessResult {
   FAILED
 };
 
-typedef int ModuleID;
-
 enum ModuleState {
   NORMAL = 0,
   SUSPENDED,

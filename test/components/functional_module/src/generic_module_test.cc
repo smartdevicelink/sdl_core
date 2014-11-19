@@ -63,14 +63,14 @@ class ErrorGenericModule : public GenericModule {
 
 class MockModuleObserver : public ModuleObserver {
   public:
-    MOCK_METHOD1(OnError, void(ModuleObserver::Errors));
+    MOCK_METHOD2(OnError, void(ModuleObserver::Errors, ModuleID));
 };
 
 TEST(generic_module, notify_observer) {
   ErrorGenericModule module(3);
   utils::SharedPtr<MockModuleObserver> p_observer1 = new MockModuleObserver;
   module.AddObserver(p_observer1);
-  EXPECT_CALL(*p_observer1, OnError(ModuleObserver::FS_FAILURE))
+  EXPECT_CALL(*p_observer1, OnError(ModuleObserver::FS_FAILURE, 3))
   .Times(1)
   ;
   application_manager::MessagePtr message = 
@@ -81,23 +81,23 @@ TEST(generic_module, notify_observer) {
   ProcessResult res = module.ProcessMessage(message);
   EXPECT_TRUE(res == ProcessResult::FAILED);
   module.RemoveObserver(p_observer1);
-  EXPECT_CALL(*p_observer1, OnError(ModuleObserver::FS_FAILURE))
+  EXPECT_CALL(*p_observer1, OnError(ModuleObserver::FS_FAILURE, 3))
   .Times(0);
   module.ProcessMessage(message);
   utils::SharedPtr<MockModuleObserver> p_observer2 = new MockModuleObserver;
   module.AddObserver(p_observer1);
   module.AddObserver(p_observer2);
-  EXPECT_CALL(*p_observer1, OnError(ModuleObserver::FS_FAILURE)).Times(1);
-  EXPECT_CALL(*p_observer2, OnError(MockModuleObserver::FS_FAILURE)).Times(1);
+  EXPECT_CALL(*p_observer1, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
+  EXPECT_CALL(*p_observer2, OnError(MockModuleObserver::FS_FAILURE, 3)).Times(1);
   module.ProcessMessage(message);
   for (size_t i = 0; i < 2; ++i) {
     module.RemoveObserver(p_observer2);
-    EXPECT_CALL(*p_observer1, OnError(ModuleObserver::FS_FAILURE)).Times(1);
-    EXPECT_CALL(*p_observer2, OnError(MockModuleObserver::FS_FAILURE)).Times(0);
+    EXPECT_CALL(*p_observer1, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
+    EXPECT_CALL(*p_observer2, OnError(MockModuleObserver::FS_FAILURE, 3)).Times(0);
     module.ProcessMessage(message);
   }
   module.RemoveObserver(p_observer1);
-  EXPECT_CALL(*p_observer1, OnError(ModuleObserver::FS_FAILURE))
+  EXPECT_CALL(*p_observer1, OnError(ModuleObserver::FS_FAILURE, 3))
   .Times(0);
   module.ProcessMessage(message);
 

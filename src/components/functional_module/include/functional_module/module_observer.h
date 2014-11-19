@@ -34,6 +34,9 @@
 #define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_MODULE_OBSERVER_H_
 
 namespace functional_modules {
+
+typedef int ModuleID;
+
 class ModuleObserver {
   public:
     enum Errors {
@@ -42,7 +45,7 @@ class ModuleObserver {
       FS_FAILURE
     };
     virtual ~ModuleObserver() {}
-    virtual void OnError(Errors error) = 0;
+    virtual void OnError(Errors error, ModuleID module_id) = 0;
 };
 }  //  namespace functional_modules {
 

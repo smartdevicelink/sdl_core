@@ -101,13 +101,19 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
         mobile_subscribers_.insert(std::pair<MobileFunctionID, ModulePtr>(subscribers[i], module));
       }
       module->SetServiceHandler(service_);
+      module->AddObserver(this);
     }
   }
   return plugins_.size();
 }
 
 void PluginManager::UnloadPlugins() {
+  for(PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
+    it->second->RemoveObserver(this);
+  }
+
   plugins_.clear();
+  
   for(std::map<ModuleID, void*>::iterator it = dlls_.begin();
     dlls_.end() != it; ++it) {
     dlclose(it->second);
@@ -158,6 +164,22 @@ void PluginManager::SubscribeOnHMIFunction(ModuleID module_id,
 }
 
 void PluginManager::OnHMIResponse(application_manager::MessagePtr msg) {
+  // TODO(PV)
+}
+
+void PluginManager::OnError(ModuleObserver::Errors error, ModuleID module_id) {
+  std::string error_string;
+  switch(error) {
+    case ModuleObserver::Errors::OUT_OF_MEMORY:
+      error_string = "Module run out of memory.";
+      break;
+    case ModuleObserver::Errors::FS_FAILURE:
+      error_string = "Plugin failed to run file system operation.";
+      break;
+    default: break;
+  }
+  LOG4CXX_ERROR(logger_, "Error " << error_string << 
+    " was received from module " << module_id);
   // TODO(PV)
 }
 

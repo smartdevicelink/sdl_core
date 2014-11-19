@@ -38,7 +38,7 @@ void GenericModule::RemoveObserver(utils::SharedPtr<ModuleObserver> observer) {
 void GenericModule::NotifyObservers(ModuleObserver::Errors error) {
   for (ModuleObserverIterator it = observers_.begin();
        observers_.end() != it; ++it) {
-    (*it)->OnError(error);
+    (*it)->OnError(error, kModuleId_);
   }
 }
 

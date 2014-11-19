@@ -79,6 +79,7 @@ CANModule::~CANModule() {
     thread_->stop();
     delete thread_;
   }
+  RemoveAppExtensions();
 }
 
 functional_modules::PluginInfo CANModule::GetPluginInfo() const {

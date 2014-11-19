@@ -41,7 +41,8 @@
 
 namespace functional_modules {
 
-class PluginManager : public utils::Singleton<PluginManager> {
+class PluginManager : public utils::Singleton<PluginManager>,
+  public ModuleObserver {
 public:
   ~PluginManager();
   int LoadPlugins(const std::string& plugin_path);
@@ -54,6 +55,7 @@ public:
   void ChangePluginsState(ModuleState state);
   void SubscribeOnHMIFunction(ModuleID module_id, const HMIFunctionID& function_id);
   void OnHMIResponse(application_manager::MessagePtr msg);
+  void OnError(ModuleObserver::Errors error, ModuleID module_id);
 private:
   PluginManager();
   DISALLOW_COPY_AND_ASSIGN(PluginManager);
