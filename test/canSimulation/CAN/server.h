@@ -9,6 +9,7 @@ class QNetworkSession;
 class Server : public QObject
 {
     Q_OBJECT
+    Q_ENUMS(Color)
 
 public:
     Server(QObject *rootObject);
@@ -29,7 +30,7 @@ private:
     quint16 blockSize;
     QTcpSocket *clientConnection;
     QObject *rootView;
-    QVariant loger(QString);
+    QVariant loger(QString, int);
 };
 
 #endif // NETWORK_H

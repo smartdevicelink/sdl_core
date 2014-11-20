@@ -3,7 +3,9 @@ TEMPLATE = app
 QT += qml quick widgets
 
 SOURCES += main.cpp \
-    server.cpp
+    server.cpp \
+    FileSystem.cpp \
+    loger.cpp
 
 RESOURCES += qml.qrc
 
@@ -16,4 +18,7 @@ QML_IMPORT_PATH =
 include(deployment.pri)
 
 HEADERS += \
-    server.h
+    server.h \
+    FileSystem.h \
+    loger.h \
+    color.h

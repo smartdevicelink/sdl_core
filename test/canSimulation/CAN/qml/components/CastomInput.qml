@@ -12,6 +12,7 @@ Rectangle {
     height: parent.height
     radius: 3
     clip: true
+    color: Style.colorCastomInputBackground
 
     onTextInputChanged: {
         tuneInput.text = textInput
@@ -24,12 +25,13 @@ Rectangle {
         font.weight: Font.Bold
         text: root.textInput
         width: parent.width
+        color: Style.colorCastomInputText
         onTextChanged: {
             root.textInput = text;
         }
         onFocusChanged: {
             if (focus) {
-                text = 0
+                selectAll();
             }
         }
 

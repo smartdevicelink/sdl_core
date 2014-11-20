@@ -13,6 +13,7 @@ Rectangle {
     radius: Style.radius
     anchors.left: parent.left
     anchors.leftMargin: Style.labelTextLeftMargin
+    color: Style.colorLabelTextBackground
 
     Text {
         id: label

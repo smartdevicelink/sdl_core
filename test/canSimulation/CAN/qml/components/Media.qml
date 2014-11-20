@@ -4,10 +4,16 @@ import "."
 
 Rectangle {
     id: root
-    color: "gray"
     width: parent.width
     height: Style.componentHeight
     anchors.margins: 10
+
+    gradient: Gradient {
+        GradientStop { position: 0 ; color: Style.colorMainDarkGradient}
+        GradientStop { position: 0.6 ; color: Style.colorMainLightGradient}
+        GradientStop { position: 0.7 ; color: Style.colorMainLightGradient}
+        GradientStop { position: 1 ; color: Style.colorMainDarkGradient}
+    }
 
     ScrollView {
 
@@ -17,14 +23,14 @@ Rectangle {
         Row {
 
             id: apiRow
-
-            spacing: 20
+            spacing: 2
 
             Column {
 
                 id: requestsColumn
+                spacing: 2
 
-                Button {
+                CastomButton {
                     id: controlButton
                     width: Style.buttonWidth
                     text: "OnControlChanged"
@@ -32,7 +38,7 @@ Rectangle {
                     onClicked: requestButtonClick(this)
                 }
 
-                Button {
+                CastomButton {
                     id: presetButton
                     width: Style.buttonWidth
                     text: "OnPresetsChanged"
@@ -40,7 +46,7 @@ Rectangle {
                     onClicked: requestButtonClick(this)
                 }
 
-                Button {
+                CastomButton {
                     id: radioDetailsButton
                     width: Style.buttonWidth
                     text: "OnRadioDetails"
@@ -48,7 +54,7 @@ Rectangle {
                     onClicked: requestButtonClick(this)
                 }
 
-                Button {
+                CastomButton {
                     id: playerDetailsButton
                     width: Style.buttonWidth
                     text: "OnPlayerDetails"
@@ -60,8 +66,9 @@ Rectangle {
             Column {
 
                 id: responsesColumn
+                spacing: 2
 
-                Button {
+                CastomButton {
                     id: accessButton
                     width: Style.buttonWidth
                     text: "GrantAccess"
@@ -69,7 +76,7 @@ Rectangle {
                     onClicked: responseButtonClick(this)
                 }
 
-                Button {
+                CastomButton {
                     id: cancelButton
                     width: Style.buttonWidth
                     text: "CancelAccess"
@@ -77,7 +84,7 @@ Rectangle {
                     onClicked: responseButtonClick(this)
                 }
 
-                Button {
+                CastomButton {
                     id: tuneUpButton
                     width: Style.buttonWidth
                     text: "TuneUp"
@@ -85,7 +92,7 @@ Rectangle {
                     onClicked: responseButtonClick(this)
                 }
 
-                Button {
+                CastomButton {
                     id: tuneDownButton
                     width: Style.buttonWidth
                     text: "TuneDown"
@@ -93,7 +100,7 @@ Rectangle {
                     onClicked: responseButtonClick(this)
                 }
 
-                Button {
+                CastomButton {
                     id: tuneButton
                     width: Style.buttonWidth
                     text: "TuneRadio"
@@ -101,7 +108,7 @@ Rectangle {
                     onClicked: responseButtonClick(this)
                 }
 
-                Button {
+                CastomButton {
                     id: startScan
                     width: Style.buttonWidth
                     text: "StartScan"
@@ -109,7 +116,7 @@ Rectangle {
                     onClicked: responseButtonClick(this)
                 }
 
-                Button {
+                CastomButton {
                     id: stopScan
                     width: Style.buttonWidth
                     text: "StopScan"
@@ -117,7 +124,7 @@ Rectangle {
                     onClicked: responseButtonClick(this)
                 }
 
-                Button {
+                CastomButton {
                     id: prevTrackButton
                     width: Style.buttonWidth
                     text: "PrevTrack"
@@ -125,7 +132,7 @@ Rectangle {
                     onClicked: responseButtonClick(this)
                 }
 
-                Button {
+                CastomButton {
                     id: playTrackButton
                     width: Style.buttonWidth
                     text: "PlayTrack"
@@ -133,7 +140,7 @@ Rectangle {
                     onClicked: responseButtonClick(this)
                 }
 
-                Button {
+                CastomButton {
                     id: nextTrackButton
                     width: Style.buttonWidth
                     text: "NextTrack"
@@ -148,10 +155,15 @@ Rectangle {
 
                 Rectangle {
 
-                    border.color: "orange"
+                    border.color: "#C6DCEC"
                     width: tuneRadioContainer.width + 20
                     height: tuneRadioContainer.height + 20
-                    color: Qt.rgba(0.24, 0.22, 0.53)
+                    gradient: Gradient {
+                        GradientStop { position: 0 ; color: "#006F97" }
+                        GradientStop { position: 0.4 ; color: "#006F97" }
+                        GradientStop { position: 0.5 ; color: "#006F97" }
+                        GradientStop { position: 1 ; color: "#5D97C3" }
+                    }
                     radius: Style.radius
 
                     Column {
@@ -232,10 +244,15 @@ Rectangle {
 
                 Rectangle {
 
-                    border.color: "white"
+                    border.color: "#C6DCEC"
                     width: presetsContainer.width + 20
                     height: presetsContainer.height + 20
-                    color: Qt.rgba(0.22, 0.53, 0.498)
+                    gradient: Gradient {
+                        GradientStop { position: 0 ; color: "#006F97" }
+                        GradientStop { position: 0.4 ; color: "#006F97" }
+                        GradientStop { position: 0.5 ; color: "#006F97" }
+                        GradientStop { position: 1 ; color: "#5D97C3" }
+                    }
                     radius: Style.radius
 
                     Column {
@@ -347,10 +364,15 @@ Rectangle {
 
                 Rectangle {
 
-                    border.color: "blue"
+                    border.color: "#C6DCEC"
                     width: eventDetailsContainer.width + 20
                     height: eventDetailsContainer.height + 20
-                    color: Qt.rgba(0.53, 0.22, 0.51)
+                    gradient: Gradient {
+                        GradientStop { position: 0 ; color: "#006F97" }
+                        GradientStop { position: 0.4 ; color: "#006F97" }
+                        GradientStop { position: 0.5 ; color: "#006F97" }
+                        GradientStop { position: 1 ; color: "#5D97C3" }
+                    }
                     radius: Style.radius
 
                     Column {
@@ -526,10 +548,15 @@ Rectangle {
 
                 Rectangle {
 
-                    border.color: "orange"
+                    border.color: "#C6DCEC"
                     width: advertisementContainer.width + 20
                     height: advertisementContainer.height + 20
-                    color: Qt.rgba(0.24, 0.22, 0.53)
+                    gradient: Gradient {
+                        GradientStop { position: 0 ; color: "#006F97" }
+                        GradientStop { position: 0.4 ; color: "#006F97" }
+                        GradientStop { position: 0.5 ; color: "#006F97" }
+                        GradientStop { position: 1 ; color: "#5D97C3" }
+                    }
                     radius: Style.radius
 
                     Column {
@@ -577,10 +604,15 @@ Rectangle {
 
                 Rectangle {
 
-                    border.color: "orange"
+                    border.color: "#C6DCEC"
                     width: webActivityContainer.width + 20
                     height: webActivityContainer.height + 20
-                    color: Qt.rgba(0.22, 0.53, 0.498)
+                    gradient: Gradient {
+                        GradientStop { position: 0 ; color: "#006F97" }
+                        GradientStop { position: 0.4 ; color: "#006F97" }
+                        GradientStop { position: 0.5 ; color: "#006F97" }
+                        GradientStop { position: 1 ; color: "#5D97C3" }
+                    }
                     radius: Style.radius
 
                     Column {
@@ -628,10 +660,15 @@ Rectangle {
 
                 Rectangle {
 
-                    border.color: "orange"
+                    border.color: "#C6DCEC"
                     width: songInfoContainer.width + 20
                     height: songInfoContainer.height + 20
-                    color: Qt.rgba(0.53, 0.22, 0.51)
+                    gradient: Gradient {
+                        GradientStop { position: 0 ; color: "#006F97" }
+                        GradientStop { position: 0.4 ; color: "#006F97" }
+                        GradientStop { position: 0.5 ; color: "#006F97" }
+                        GradientStop { position: 1 ; color: "#5D97C3" }
+                    }
                     radius: Style.radius
 
                     Column {
@@ -743,10 +780,15 @@ Rectangle {
 
                 Rectangle {
 
-                    border.color: "orange"
+                    border.color: "#C6DCEC"
                     width: locationContainer.width + 20
                     height: locationContainer.height + 20
-                    color: Qt.rgba(0.31, 0.53, 0.22)
+                    gradient: Gradient {
+                        GradientStop { position: 0 ; color: "#006F97" }
+                        GradientStop { position: 0.4 ; color: "#006F97" }
+                        GradientStop { position: 0.5 ; color: "#006F97" }
+                        GradientStop { position: 1 ; color: "#5D97C3" }
+                    }
                     radius: Style.radius
 
                     Column {

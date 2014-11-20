@@ -8,11 +8,20 @@ ApplicationWindow {
     visible: true
     width: 800
     height: Style.windowHeight
-    title: qsTr("Hello World")
+    title: qsTr("Can Simulation      by Luxoft")
+
+    property ListModel logModel: ListModel { }
+    property string logURL: "log.txt"
 
     signal viewClicked(string name)
     signal createConnection(string ip, int port)
     signal sendMessageTCP(string message)
+    signal saveLog(string source, string data)
+
+    function setCurrentPath(path) {
+        root.logURL = path + "/log.txt";
+        logModel.append({"color":Style.colorLogError, "text": "Carrent log location: " + root.logURL});
+    }
 
     function incoming(message) {
 
@@ -32,9 +41,9 @@ ApplicationWindow {
         sendMessageTCP(messageJson);
     }
 
-    function logger(message) {
+    function logger(message, color) {
 
-        tcpLogsView.append(message);
+        tcpLogsView.append(message, color);
         return true
     }
 
@@ -60,7 +69,6 @@ ApplicationWindow {
                 id: mediaComponent
 
                 onRequestButtonClick: {
-                    tcpLogsView.textColor = "green"
                     switch (item.objectName) {
                         case "OnControlChanged": {
 
@@ -84,7 +92,6 @@ ApplicationWindow {
 
 
                 onResponseButtonClick: {
-                    tcpLogsView.textColor = "red"
                     switch (item.objectName) {
                         case "TuneUp": {
 
@@ -121,27 +128,62 @@ ApplicationWindow {
         }
         Tab {
             title: "Climate"
-            Rectangle { color: "blue" }
+            Rectangle {
+                gradient: Gradient {
+                    GradientStop { position: 0 ; color: Style.colorMainDarkGradient}
+                    GradientStop { position: 0.1 ; color: Style.colorMainLightGradient}
+                    GradientStop { position: 0.2 ; color: Style.colorMainLightGradient}
+                    GradientStop { position: 1 ; color: Style.colorMainDarkGradient}
+                }
+            }
         }
         Tab {
             title: "Navigation"
-            Rectangle { color: "green" }
+            Rectangle {
+                gradient: Gradient {
+                    GradientStop { position: 0 ; color: Style.colorMainDarkGradient}
+                    GradientStop { position: 0.6 ; color: Style.colorMainLightGradient}
+                    GradientStop { position: 0.7 ; color: Style.colorMainLightGradient}
+                    GradientStop { position: 1 ; color: Style.colorMainDarkGradient}
+                }
+            }
         }
         Tab {
             title: "Phone"
-            Rectangle { color: "yellow" }
+            Rectangle {
+                gradient: Gradient {
+                    GradientStop { position: 0 ; color: Style.colorMainLightGradient}
+                    GradientStop { position: 0.2 ; color: Style.colorMainLightGradient}
+                    GradientStop { position: 1 ; color: Style.colorMainDarkGradient}
+                }
+            }
         }
         Tab {
             title: "MCS"
-            Rectangle { color: "white" }
+            Rectangle {
+                gradient: Gradient {
+                    GradientStop { position: 0 ; color: Style.colorMainDarkGradient}
+                    GradientStop { position: 0.7 ; color: Style.colorMainLightGradient}
+                    GradientStop { position: 0.8 ; color: Style.colorMainLightGradient}
+                    GradientStop { position: 1 ; color: Style.colorMainDarkGradient}
+                }
+            }
         }
         Tab {
             title: "Settings"
             Settings {
                 id: settingsComponent
 
+                Component.onCompleted: {
+
+                    logLocation = root.logURL
+                }
                 onConnect: {
                     createConnection(settingsComponent.ip, settingsComponent.port);
+                }
+                onLogLocationChanged: {
+                    root.logURL = logLocation + "/log.txt";
+                    logModel.append({"color":Style.colorLogError, "text": "You chose: " + root.logURL});
                 }
             }
         }
@@ -155,10 +197,31 @@ ApplicationWindow {
         anchors.right: root.right
         height: 20
         anchors.top: viewsTab.bottom
-        color: "gray"
+        color: Style.colorMainDarkGradient
+        border.color: Style.colorButtonGradBot
 
         Text {
             text: "Logger"
+            color: Style.colorButtonText
+        }
+
+        CastomButton {
+            height: parent.height
+            text: "Save Log"
+            anchors.right: parent.right
+            anchors.top: parent.top
+            z: parent.z + 1
+            onClicked: {
+
+                var data;
+
+                for (var i=0; i < logModel.count; i++) {
+                    data += "\n";
+                    data += logModel.get(i).text;
+                }
+
+                saveLog(root.logURL, data);
+            }
         }
 
         MouseArea {
@@ -175,13 +238,70 @@ ApplicationWindow {
         }
     }
 
-    TextArea {
+    Rectangle {
 
         id: tcpLogsView
         width: parent.width
         anchors.top: appearRect.bottom
         height: 00
         visible: true
-        text: "Logger";
+
+        gradient: Gradient {
+            GradientStop { position: 0 ; color: Style.colorMainDarkGradient}
+            GradientStop { position: 0.1 ; color: Style.colorMainLightGradient}
+            GradientStop { position: 0.8 ; color: Style.colorMainLightGradient}
+            GradientStop { position: 1 ; color: Style.colorMainDarkGradient}
+        }
+
+        Component {
+            id: logDelegate
+            Rectangle {
+                color: "transparent"
+                width: tcpLogsView.width
+                height: logItemText.height
+                Text {
+                    id: logItemText
+                    width: tcpLogsView.width;
+                    color: model.color
+                    text: model.text
+                    wrapMode: Text.WordWrap
+                    font.family: "Helvetica"
+                }
+            }
+        }
+
+        ListView {
+            id: logView
+            delegate: logDelegate
+            model: logModel
+            anchors.fill: parent
+            clip: true
+
+            highlight: highlight
+            highlightFollowsCurrentItem: true
+            focus: true
+            onCountChanged: {
+                currentIndex = count - 1;
+            }
+        }
+
+        function append(message, colorEnum) {
+            var colorString;
+            switch (colorEnum) {
+            case 0:
+                colorString =  Style.colorLogError
+                break;
+
+            case 1:
+                colorString =  Style.colorLogReceived
+                break;
+
+            case 2:
+                colorString = Style.colorLogSend
+                break;
+            }
+
+            logModel.append({"color":colorString, "text": message});
+        }
     }
 }

@@ -13,4 +13,17 @@ QtObject {
     property int radius: 3
     property int labelTextLeftMargin: 10
     property int widthInput: 140
+    property string colorButtonGradTop: "#006F97"
+    property string colorButtonGradBot: "#5D97C3"
+    property string colorButtonBorder: "#1B6CA9"
+    property string colorButtonText: "#CBE4F7"
+    property string colorCastomInputBackground: "#E2F2FD"
+    property string colorCastomInputText: "#1C405B"
+    property string colorLabelTextBackground: "#C6DCEC"
+    property string colorMainDarkGradient: "#1C496C"
+    property string colorMainLightGradient: "#0091AE"
+
+    property string colorLogError: "#FF9595"
+    property string colorLogReceived: "#95FFAB"
+    property string colorLogSend: "#94FFF9"
 }
