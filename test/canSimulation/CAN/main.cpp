@@ -11,7 +11,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
 
     QQmlApplicationEngine engine;
-    engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));   
+    engine.load(QUrl(QStringLiteral("qrc:///qml/main.qml")));
 
     // Step 1: get access to the root object
 

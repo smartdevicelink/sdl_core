@@ -23,7 +23,7 @@ Rectangle {
         folder: logLocation
         onAccepted: {
             var str = Qt.resolvedUrl( fileDialog.fileUrl ).toString();
-            logLocation = str.slice(7, str.length)
+            logLocation = str.slice(7, str.length) + "/log.txt";
         }
     }
 

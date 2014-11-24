@@ -1,6 +1,7 @@
 import QtQuick 2.2
 import QtQuick.Controls 1.1
 import "components" 1.0
+import "."
 
 ApplicationWindow {
 
@@ -182,7 +183,7 @@ ApplicationWindow {
                     createConnection(settingsComponent.ip, settingsComponent.port);
                 }
                 onLogLocationChanged: {
-                    root.logURL = logLocation + "/log.txt";
+                    root.logURL = logLocation
                     logModel.append({"color":Style.colorLogError, "text": "You chose: " + root.logURL});
                 }
             }
@@ -221,6 +222,7 @@ ApplicationWindow {
                 }
 
                 saveLog(root.logURL, data);
+                logModel.clear();
             }
         }
 
@@ -281,7 +283,7 @@ ApplicationWindow {
             highlightFollowsCurrentItem: true
             focus: true
             onCountChanged: {
-                currentIndex = count - 1;
+                currentIndex = count > 0 ? count - 1 : 0;
             }
         }
 

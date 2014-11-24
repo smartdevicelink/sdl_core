@@ -2,10 +2,6 @@
 #include "loger.h"
 #include "color.h"
 
-FileSystem::FileSystem(): QObject() {
-
-}
-
 bool FileSystem::write(QString source, QString data)
 {
 

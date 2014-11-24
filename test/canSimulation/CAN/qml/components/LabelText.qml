@@ -17,15 +17,18 @@ Rectangle {
 
     Text {
         id: label
-
+        anchors.leftMargin: 5
+        anchors.left: root.left
         text: root.textLabel
         width: Style.labelWidth
+        verticalAlignment: Text.AlignVCenter
+        height: root.height
     }
 
     CastomInput {
         id: input
 
-        anchors.left: label.right
+        anchors.right: root.right
         textInput: root.dataText
         widthInput: Style.widthInput
         onTextInputChanged: {

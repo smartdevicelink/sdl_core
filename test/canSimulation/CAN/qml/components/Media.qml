@@ -175,6 +175,14 @@ Rectangle {
 
                         spacing: 10
 
+                        Text {
+                            text: "RadioStation"
+                            color: Style.colorButtonText
+                            width: parent.width
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+
                         LabelText {
                             id: frequencyBox
 
@@ -263,6 +271,14 @@ Rectangle {
                         anchors.top: parent.top
 
                         spacing: 10
+
+                        Text {
+                            text: "CustomPresets"
+                            color: Style.colorButtonText
+                            width: parent.width
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
+                        }
 
                         LabelText {
                             id: preset0
@@ -383,6 +399,14 @@ Rectangle {
                         anchors.top: parent.top
 
                         spacing: 10
+
+                        Text {
+                            text: "EventDetails"
+                            color: Style.colorButtonText
+                            width: parent.width
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
+                        }
 
                         LabelText {
                             id: eventName
@@ -568,6 +592,14 @@ Rectangle {
 
                         spacing: 10
 
+                        Text {
+                            text: "Advertisement"
+                            color: Style.colorButtonText
+                            width: parent.width
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+
                         LabelText {
                             id: productName
 
@@ -624,6 +656,14 @@ Rectangle {
 
                         spacing: 10
 
+                        Text {
+                            text: "WebActivity"
+                            color: Style.colorButtonText
+                            width: parent.width
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
+                        }
+
                         LabelText {
                             id: url
 
@@ -679,6 +719,14 @@ Rectangle {
                         anchors.top: parent.top
 
                         spacing: 10
+
+                        Text {
+                            text: "SongInfo"
+                            color: Style.colorButtonText
+                            width: parent.width
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
+                        }
 
                         LabelText {
                             id: name
@@ -799,6 +847,14 @@ Rectangle {
                         anchors.top: parent.top
 
                         spacing: 10
+
+                        Text {
+                            text: "Location"
+                            color: Style.colorButtonText
+                            width: parent.width
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
+                        }
 
                         LabelText {
                             id: state
