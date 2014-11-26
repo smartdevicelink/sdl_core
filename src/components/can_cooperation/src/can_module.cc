@@ -68,6 +68,10 @@ CANModule::CANModule()
     }
   plugin_info_.name = "ReverseSDLPlugin";
   plugin_info_.version = 1;
+  SubscribeOnFunctions();
+}
+
+void CANModule::SubscribeOnFunctions() {
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_RADIO);
 }
 
@@ -120,6 +124,11 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   }
 
   from_mobile_.PostMessage(msg_to_send);
+  return ProcessResult::PROCESSED;
+}
+
+ProcessResult CANModule::ProcessHMIMessage(application_manager::MessagePtr msg) {
+
   return ProcessResult::PROCESSED;
 }
 

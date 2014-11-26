@@ -52,6 +52,8 @@ class CANModule : public functional_modules::GenericModule,
     functional_modules::PluginInfo GetPluginInfo() const;
     virtual functional_modules::ProcessResult ProcessMessage(
         application_manager::MessagePtr msg);
+    virtual functional_modules::ProcessResult ProcessHMIMessage(
+        application_manager::MessagePtr msg);
     void ProcessCANMessage(const MessageFromCAN& can_msg);
     void Handle(const std::string message);
     void Handle(const MessageFromCAN message);
@@ -70,6 +72,8 @@ private:
  DISALLOW_COPY_AND_ASSIGN(CANModule);
  FRIEND_BASE_SINGLETON_CLASS(CANModule);
  CANModule();
+
+ void SubscribeOnFunctions() ;
 
  struct HMIResponseSubscriberInfo {
    int32_t connection_key_;

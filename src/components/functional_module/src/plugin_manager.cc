@@ -35,6 +35,7 @@
 #include "functional_module/function_ids.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
+#include "json/json.h"
 
 namespace functional_modules {
 
@@ -42,6 +43,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "PluginManager");
 
 typedef std::map<ModuleID, ModulePtr>::iterator PluginsIterator;
 typedef std::map<MobileFunctionID, ModulePtr>::iterator PluginFunctionsIterator;
+typedef std::map<HMIFunctionID, ModulePtr>::iterator PluginHMIFunctionsIterator;
 
 PluginManager::PluginManager()
 : service_() {
@@ -100,6 +102,13 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
       for(size_t i = 0; i < subscribers.size(); ++i) {
         mobile_subscribers_.insert(std::pair<MobileFunctionID, ModulePtr>(subscribers[i], module));
       }
+
+      std::deque<HMIFunctionID> hmi_subscribers =
+          module->GetPluginInfo().hmi_function_list;
+      for(size_t i = 0; i < hmi_subscribers.size(); ++i) {
+        hmi_subscribers_.insert(
+            std::pair<HMIFunctionID, ModulePtr>(hmi_subscribers[i], module));
+      }
       module->SetServiceHandler(service_);
       module->AddObserver(this);
     }
@@ -120,6 +129,8 @@ void PluginManager::UnloadPlugins() {
   }
 }
 
+// TODO(VS): Optimize similar code in ProcessMessage, IsMessageForPlugin,
+//           ProcessHMIMessage, IsHMIMessageForPlugin methods
 void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
   DCHECK(msg);
   if (!msg) {
@@ -133,6 +144,38 @@ void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
     if (mobile_subscribers_.end() != subscribed_plugin_itr) {
       subscribed_plugin_itr->second->ProcessMessage(msg);
     }
+  }
+}
+
+void PluginManager::ProcessHMIMessage(application_manager::MessagePtr msg) {
+  DCHECK(msg);
+  if (!msg) {
+    LOG4CXX_ERROR(logger_, "Null pointer message was received.");
+    return;
+  }
+
+  Json::Value value(msg->json_message());
+  std::string function_name;
+  if (application_manager::ProtocolVersion::kHMI == msg->protocol_version()) {
+    // Request or notification from HMI
+    if (value.isMember("method")) {
+      function_name = value["method"].asCString();
+    // Response from HMI
+    } else if (value.isMember("result") && value["result"].isMember("method")) {
+      function_name = value["result"]["method"].asCString();
+    // Error response from HMI
+    }  else if (value.isMember("error") && value["error"].isMember("data") &&
+        value["error"]["data"].isMember("method")) {
+      function_name = value["error"]["data"]["method"].asCString();
+    } else {
+      DCHECK(false);
+    }
+  }
+
+  PluginHMIFunctionsIterator subscribed_plugin_itr =
+      hmi_subscribers_.find(function_name);
+  if (hmi_subscribers_.end() != subscribed_plugin_itr) {
+    subscribed_plugin_itr->second->ProcessHMIMessage(msg);
   }
 }
 
@@ -151,16 +194,43 @@ bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {
   }
 }
 
+
+bool PluginManager::IsHMIMessageForPlugin(application_manager::MessagePtr msg) {
+  DCHECK(msg);
+  if (!msg) {
+    LOG4CXX_ERROR(logger_, "Null pointer message was received.");
+    return false;
+  }
+
+  Json::Value value(msg->json_message());
+
+  if (application_manager::ProtocolVersion::kHMI == msg->protocol_version()) {
+    // Request or notification from HMI
+    if (value.isMember("method")) {
+      return (hmi_subscribers_.find(value["method"].asCString()) !=
+            hmi_subscribers_.end());
+    // Response from HMI
+    } else if (value.isMember("result") && value["result"].isMember("method")) {
+      return (hmi_subscribers_.find(value["result"]["method"].asCString()) !=
+              hmi_subscribers_.end());
+    // Error response from HMI
+    }  else if (value.isMember("error") && value["error"].isMember("data") &&
+        value["error"]["data"].isMember("method")) {
+      return (hmi_subscribers_.find(value["error"]["data"]["method"].asCString()) !=
+              hmi_subscribers_.end());
+    } else {
+      DCHECK(false);
+    }
+  }
+
+  return false;
+}
+
 void PluginManager::ChangePluginsState(ModuleState state) {
   for(PluginsIterator it = plugins_.begin();
     plugins_.end() != it; ++it) {
     it->second->ChangeModuleState(state);
   }
-}
-
-void PluginManager::SubscribeOnHMIFunction(ModuleID module_id,
-  const HMIFunctionID& function_id) {
-  // TODO(PV)
 }
 
 void PluginManager::OnHMIResponse(application_manager::MessagePtr msg) {

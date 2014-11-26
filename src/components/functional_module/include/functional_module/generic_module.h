@@ -66,6 +66,7 @@ struct PluginInfo {
   std::string name;
   int version;
   std::deque<MobileFunctionID> mobile_function_list;
+  std::deque<HMIFunctionID> hmi_function_list;
 };
 
 class GenericModule {
@@ -81,6 +82,7 @@ class GenericModule {
     }
 
     virtual ProcessResult ProcessMessage(application_manager::MessagePtr msg) = 0;
+    virtual ProcessResult ProcessHMIMessage(application_manager::MessagePtr msg) = 0;
     virtual void ChangeModuleState(ModuleState state) {
       state_ = state;
     }
@@ -107,6 +109,8 @@ class GenericModule {
     const ModuleID kModuleId_;
     std::deque<utils::SharedPtr<ModuleObserver> > observers_;
     ModuleState state_;
+
+
 };
 
 }  //  namespace functional_modules

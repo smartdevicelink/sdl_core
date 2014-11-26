@@ -2068,9 +2068,9 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromHmi message) {
   functional_modules::PluginManager* plugin_manager =
       functional_modules::PluginManager::instance();
 
-  if (plugin_manager->IsMessageForPlugin(message)) {
+  if (plugin_manager->IsHMIMessageForPlugin(message)) {
     LOG4CXX_INFO(logger_, "Message will be processed by plugin.");
-    plugin_manager->ProcessMessage(message);
+    plugin_manager->ProcessHMIMessage(message);
     return;
   }
 

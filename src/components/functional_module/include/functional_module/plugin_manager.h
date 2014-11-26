@@ -48,12 +48,13 @@ public:
   int LoadPlugins(const std::string& plugin_path);
   void UnloadPlugins();
   void ProcessMessage(application_manager::MessagePtr msg);
+  void ProcessHMIMessage(application_manager::MessagePtr msg);
   void SetServiceHandler(application_manager::ServicePtr service) {
     service_ = service;
   }
   bool IsMessageForPlugin(application_manager::MessagePtr msg);
+  bool IsHMIMessageForPlugin(application_manager::MessagePtr msg);
   void ChangePluginsState(ModuleState state);
-  void SubscribeOnHMIFunction(ModuleID module_id, const HMIFunctionID& function_id);
   void OnHMIResponse(application_manager::MessagePtr msg);
   void OnError(ModuleObserver::Errors error, ModuleID module_id);
 private:
