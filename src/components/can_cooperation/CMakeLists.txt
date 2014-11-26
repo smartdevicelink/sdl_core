@@ -18,6 +18,10 @@ set (SOURCES
     ./src/can_module.cc
     ./src/can_app_extension.cc
     ./src/can_tcp_connection.cc
+    ./src/can_module_event.cc
+    ./src/mobile_command_factory.cc
+    ./src/hmi_command_factory.cc
+    ./src/can_command_factory.cc
 )
 
 set (LIBRARIES

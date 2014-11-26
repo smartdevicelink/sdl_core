@@ -37,6 +37,7 @@
 #include "can_cooperation/can_connection.h"
 #include "utils/threads/message_loop_thread.h"
 
+
 namespace threads {
     class Thread;
 }
@@ -45,8 +46,7 @@ namespace can_cooperation {
 class CANModule : public functional_modules::GenericModule,
 	public utils::Singleton<CANModule>,
     public threads::MessageLoopThread<std::queue<MessageFromCAN>>::Handler,
-    public threads::MessageLoopThread<
-        std::queue<std::string>>::Handler {
+    public threads::MessageLoopThread<std::queue<std::string>>::Handler {
   public:
     ~CANModule();
     functional_modules::PluginInfo GetPluginInfo() const;
