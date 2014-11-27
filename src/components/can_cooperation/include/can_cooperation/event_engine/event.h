@@ -48,18 +48,12 @@ class Event {
    * @param id Event ID.
    * @param message Message received in event
    */
-  explicit Event(EventMessage& message, const EventID& id);
+  Event(EventMessage& message, const EventID& id);
 
   /*
    * @brief Destructor
    */
   virtual ~Event() {};
-
-  /*
-   * @brief Sends synchronously event to all subscribers.
-   *
-   */
-  void raise();
 
   /*
    * @brief Provides event ID

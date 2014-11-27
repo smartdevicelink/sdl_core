@@ -51,8 +51,7 @@ class CanModuleEvent :
    * @param id Event ID. (HMI or CAN function name)
    * @param message Message received in HMI or CAN response
    */
-  explicit CanModuleEvent(application_manager::Message& message,
-                          const std::string& id);
+  CanModuleEvent(application_manager::Message& message, const std::string& id);
 
   /*
    * @brief Destructor

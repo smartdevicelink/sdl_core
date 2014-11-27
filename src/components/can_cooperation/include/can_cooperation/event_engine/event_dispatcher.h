@@ -66,7 +66,7 @@ class EventDispatcher :
    */
   void add_observer(const EventID& event_id,
                     int32_t hmi_correlation_id,
-                    EventObserver<EventMessage, EventID>* const observer);
+                    const EventObserver<EventMessage, EventID>* const observer);
 
   /*
    * @brief Unsubscribes the observer from specific event
@@ -75,14 +75,15 @@ class EventDispatcher :
    * @param observer    The observer to be unsubscribed
    */
   void remove_observer(const EventID& event_id,
-                       EventObserver<EventMessage, EventID>* const observer);
+                    const EventObserver<EventMessage, EventID>* const observer);
 
   /*
    * @brief Unsubscribes the observer from all events
    *
    * @param observer  The observer to be unsubscribed
    */
-  void remove_observer(EventObserver<EventMessage, EventID>* const observer);
+  void remove_observer(
+      const EventObserver<EventMessage, EventID>* const observer);
 
  protected:
 
@@ -160,9 +161,9 @@ void EventDispatcher<EventMessage, EventID>::raise_event(
 
 template<typename EventMessage, typename EventID>
 void EventDispatcher<EventMessage, EventID>::add_observer(
-                         const EventID& event_id,
-                         int32_t hmi_correlation_id,
-                         EventObserver<EventMessage, EventID>* const observer) {
+                   const EventID& event_id,
+                   int32_t hmi_correlation_id,
+                   const EventObserver<EventMessage, EventID>* const observer) {
   sync_primitives::AutoLock auto_lock(state_lock_);
   observers_[event_id][hmi_correlation_id].push_back(observer);
 }
@@ -170,8 +171,8 @@ void EventDispatcher<EventMessage, EventID>::add_observer(
 
 template<typename EventMessage, typename EventID>
 void EventDispatcher<EventMessage, EventID>::remove_observer(
-                         const EventID& event_id,
-                         EventObserver<EventMessage, EventID>* const observer) {
+                   const EventID& event_id,
+                   const EventObserver<EventMessage, EventID>* const observer) {
   sync_primitives::AutoLock auto_lock(state_lock_);
   typename ObserversMap::iterator it =  observers_[event_id].begin();
   for (; observers_[event_id].end() != it; ++it) {
@@ -191,7 +192,7 @@ void EventDispatcher<EventMessage, EventID>::remove_observer(
 
 template<typename EventMessage, typename EventID>
 void EventDispatcher<EventMessage, EventID>::remove_observer(
-    EventObserver<EventMessage, EventID>* const observer) {
+                  const EventObserver<EventMessage, EventID>* const observer) {
   sync_primitives::AutoLock auto_lock(state_lock_);
   typename EventObserverMap::iterator event_map = observers_.begin();
   for (; observers_.end() != event_map; ++event_map) {

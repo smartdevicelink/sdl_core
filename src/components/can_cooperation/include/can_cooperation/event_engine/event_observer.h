@@ -36,10 +36,6 @@
 #include <string>
 #include "can_cooperation/event_engine/event_dispatcher.h"
 
-typedef std::vector<std::string>  List;
-
-void f(const std::vector<std::string>& x);
-
 
 namespace event_engine {
 
@@ -47,8 +43,6 @@ template<typename EventMessage, typename EventID>
 class EventObserver
 {
  public:
-
-  //friend class EventDispatcher;
 
   // Typedef for possible Observer ID's from mobile_apis functionID enum
   typedef unsigned long ObserverID;
