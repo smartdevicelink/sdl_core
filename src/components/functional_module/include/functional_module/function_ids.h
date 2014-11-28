@@ -37,8 +37,45 @@
 namespace functional_modules {
 
 enum MobileFunctionID {
-  TUNE_RADIO = 100005
+  // Reverse SDL functions ids
+  GRANT_ACCESS = 100001,
+  CANCEL_ACCESS = 100002,
+  START_SCAN = 100003,
+  STOP_SCAN = 100004,
+  TUNE_RADIO = 100005,
+  TUNE_UP = 100006,
+  TUNE_DOWN = 100007,
+  ON_CONTROL_CHANGED = 100008,
+  ON_RADIO_DETAILS = 100009,
+  ON_PRESET_CHANGED = 100010
+  /////////////////////////////
 };
+
+namespace hmi_api {
+  const char grant_access[]       = "VehicleInfo.GrantAccess";
+  const char cancel_access[]      = "VehicleInfo.CancelAccess";
+  const char start_scan[]         = "VehicleInfo.StartScan";
+  const char stop_scan[]          = "VehicleInfo.StopScan";
+  const char tune_radion[]        = "VehicleInfo.TuneRadio";
+  const char tune_up[]            = "VehicleInfo.TuneUp";
+  const char tune_down[]          = "VehicleInfo.TuneDown";
+  const char on_control_changed[] = "VehicleInfo.OnControlChanged";
+  const char on_radio_details[]   = "VehicleInfo.OnRadioDetails";
+  const char on_preset_changed[]  = "VehicleInfo.OnPresetChanged";
+}
+
+namespace can_api {
+  const char grant_access[]       = "CAN.GrantAccess";
+  const char cancel_access[]      = "CAN.CancelAccess";
+  const char start_scan[]         = "CAN.StartScan";
+  const char stop_scan[]          = "CAN.StopScan";
+  const char tune_radion[]        = "CAN.TuneRadio";
+  const char tune_up[]            = "CAN.TuneUp";
+  const char tune_down[]          = "CAN.TuneDown";
+  const char on_control_changed[] = "CAN.OnControlChanged";
+  const char on_radio_details[]   = "CAN.OnRadioDetails";
+  const char on_preset_changed[]  = "CAN.OnPresetChanged";
+}
 
 }  //  namespace functional_modules
 

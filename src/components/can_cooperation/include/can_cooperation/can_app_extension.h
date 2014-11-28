@@ -40,6 +40,21 @@ class CANAppExtenstion : public application_manager::AppExtension {
   public:
     explicit CANAppExtenstion(application_manager::AppExtensionUID uid);
     ~CANAppExtenstion();
+
+    /**
+     * @brief Checks is application has access to a radio tune control
+     * @return true if control given
+     */
+    bool IsControlGiven() const;
+
+    /**
+     * @brief Give radio tune control to application
+     * @param is_control_given true - give control, false - cancel control
+     */
+    void GiveControl(bool is_control_given);
+
+  private:
+    bool is_control_given_;
 };
 }  //  namespace can_cooperation
 

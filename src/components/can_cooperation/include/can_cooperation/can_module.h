@@ -59,6 +59,18 @@ class CANModule : public functional_modules::GenericModule,
     void Handle(const MessageFromCAN message);
 
     /**
+     * @brief Checks if radio scan started
+     * @return true if radio scan started
+     */
+    bool IsScanStarted() const;
+
+    /**
+     * @brief Checks if radio scan started
+     * @param is_scan_sarted true - scan started? false - scan stopped
+     */
+    void SetScanStarted(bool is_scan_started);
+
+    /**
      * @brief Remove extension created for specified application
      * @param app_id application id
      */
@@ -89,6 +101,7 @@ private:
  threads::MessageLoopThread<std::queue<MessageFromCAN>> from_can_;
  threads::MessageLoopThread<std::queue<std::string>> from_mobile_;
  threads::Thread* thread_;
+ bool is_scan_started_;
  friend class TCPClientDelegate;
 };
 

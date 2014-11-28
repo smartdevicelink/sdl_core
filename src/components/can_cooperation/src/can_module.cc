@@ -57,7 +57,8 @@ CANModule::CANModule()
   , can_connection()
   , from_can_("FromCan To Mobile", this)
   , from_mobile_("FromMobile To Can", this)
-  , thread_(NULL) {
+  , thread_(NULL)
+  , is_scan_started_(false) {
   	can_connection = new CANTCPConnection;
   	if (ConnectionState::OPENED != can_connection->OpenConnection()) {
   		LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
@@ -178,6 +179,14 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
       service_->SendMessageToMobile(msg);
     }
   }
+}
+
+bool CANModule::IsScanStarted() const {
+  return is_scan_started_;
+}
+
+void CANModule::SetScanStarted(bool is_scan_started) {
+  is_scan_started_ = is_scan_started;
 }
 
 void CANModule::RemoveAppExtensions() {
