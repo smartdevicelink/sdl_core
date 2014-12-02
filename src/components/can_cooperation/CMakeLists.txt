@@ -22,6 +22,7 @@ set (SOURCES
     ./src/mobile_command_factory.cc
     ./src/hmi_command_factory.cc
     ./src/can_command_factory.cc
+    ./src/request_controller.cc
 )
 
 set (LIBRARIES

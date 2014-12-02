@@ -9,6 +9,7 @@ using functional_modules::ProcessResult;
 using functional_modules::GenericModule;
 using functional_modules::PluginInfo;
 using functional_modules::MobileFunctionID;
+namespace hmi_api = functional_modules::hmi_api;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule");
 
@@ -74,6 +75,29 @@ CANModule::CANModule()
 
 void CANModule::SubscribeOnFunctions() {
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_RADIO);
+  plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_UP);
+  plugin_info_.mobile_function_list.push_back(MobileFunctionID::TUNE_DOWN);
+  plugin_info_.mobile_function_list.push_back(MobileFunctionID::GRANT_ACCESS);
+  plugin_info_.mobile_function_list.push_back(MobileFunctionID::CANCEL_ACCESS);
+  plugin_info_.mobile_function_list.push_back(MobileFunctionID::START_SCAN);
+  plugin_info_.mobile_function_list.push_back(MobileFunctionID::STOP_SCAN);
+  plugin_info_.mobile_function_list.push_back(
+      MobileFunctionID::ON_CONTROL_CHANGED);
+  plugin_info_.mobile_function_list.push_back(
+      MobileFunctionID::ON_RADIO_DETAILS);
+  plugin_info_.mobile_function_list.push_back(
+      MobileFunctionID::ON_PRESET_CHANGED);
+
+  plugin_info_.hmi_function_list.push_back(hmi_api::grant_access);
+  plugin_info_.hmi_function_list.push_back(hmi_api::cancel_access);
+  plugin_info_.hmi_function_list.push_back(hmi_api::start_scan);
+  plugin_info_.hmi_function_list.push_back(hmi_api::stop_scan);
+  plugin_info_.hmi_function_list.push_back(hmi_api::tune_radion);
+  plugin_info_.hmi_function_list.push_back(hmi_api::tune_up);
+  plugin_info_.hmi_function_list.push_back(hmi_api::tune_down);
+  plugin_info_.hmi_function_list.push_back(hmi_api::on_control_changed);
+  plugin_info_.hmi_function_list.push_back(hmi_api::on_radio_details);
+  plugin_info_.hmi_function_list.push_back(hmi_api::on_preset_changed);
 }
 
 CANModule::~CANModule() {
@@ -179,6 +203,10 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
       service_->SendMessageToMobile(msg);
     }
   }
+}
+
+void CANModule::SendResponseToMobile(application_manager::MessagePtr msg) const {
+  service_->SendMessageToMobile(msg);
 }
 
 bool CANModule::IsScanStarted() const {

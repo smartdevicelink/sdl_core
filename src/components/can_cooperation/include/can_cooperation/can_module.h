@@ -59,6 +59,12 @@ class CANModule : public functional_modules::GenericModule,
     void Handle(const MessageFromCAN message);
 
     /**
+     * @brief Sends response to mobile application
+     * @param msg response mesage
+     */
+    void SendResponseToMobile(application_manager::MessagePtr msg) const;
+
+    /**
      * @brief Checks if radio scan started
      * @return true if radio scan started
      */
