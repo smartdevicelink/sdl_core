@@ -30,49 +30,21 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_
-
-#include "can_cooperation/commands/base_command_request.h"
-#include "can_cooperation/event_engine/event.h"
+#include "can_cooperation/commands/on_control_changed_notification.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
-/**
- * @brief GrantAccessRequest command class
- */
-class GrantAccessRequest : public BaseCommandRequest {
- public:
-  /**
-   * @brief GrantAccessRequest class constructor
-   *
-   * @param message Message from mobile
-   **/
-  explicit GrantAccessRequest(const application_manager::MessagePtr& message);
+OnControlChangedNotification::OnControlChangedNotification(
+    const application_manager::MessagePtr& message)
+  : BaseCommandNotification(message) {
+}
 
-  /**
-   * @brief Execute command
-   */
-  virtual void Run();
+void OnControlChangedNotification::Run() {
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void on_event(const event_engine::Event<application_manager::MessagePtr,
-                std::string>& event);
-
-  /**
-   * @brief GrantAccessRequest class destructor
-   */
-  virtual ~GrantAccessRequest();
-};
+}
 
 }  // namespace commands
 
 }  // namespace can_cooperation
-
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_

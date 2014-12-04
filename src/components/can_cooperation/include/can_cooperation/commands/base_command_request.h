@@ -42,7 +42,7 @@ namespace can_cooperation {
 namespace commands {
 
 /**
- * @brief Base command class
+ * @brief Base command class for requests
  */
 class BaseCommandRequest : public Command,
 public event_engine::EventObserver<application_manager::MessagePtr, std::string>{

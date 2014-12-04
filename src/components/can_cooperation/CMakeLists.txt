@@ -26,6 +26,15 @@ set (SOURCES
     ./src/message_helper.cc
     ./src/command/base_command_request.cc
     ./src/command/grant_access_request.cc
+    ./src/command/cancel_access_request.cc
+    ./src/command/start_scan_request.cc
+    ./src/command/stop_scan_request.cc
+    ./src/command/tune_radio_request.cc
+    ./src/command/tune_down_request.cc
+    ./src/command/tune_up_request.cc
+    ./src/command/on_radio_details_notification.cc
+    ./src/command/on_control_changed_notification.cc
+    ./src/command/on_preset_changed_notification.cc
 )
 
 set (LIBRARIES

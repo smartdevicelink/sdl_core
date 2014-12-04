@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_TUNE_DOWN_REQUEST_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_TUNE_DOWN_REQUEST_H_
 
 #include "can_cooperation/commands/base_command_request.h"
 #include "can_cooperation/event_engine/event.h"
@@ -41,16 +41,16 @@ namespace can_cooperation {
 namespace commands {
 
 /**
- * @brief GrantAccessRequest command class
+ * @brief TuneDownRequest command class
  */
-class GrantAccessRequest : public BaseCommandRequest {
+class TuneDownRequest : public BaseCommandRequest {
  public:
   /**
-   * @brief GrantAccessRequest class constructor
+   * @brief TuneDownRequest class constructor
    *
    * @param message Message from mobile
    **/
-  explicit GrantAccessRequest(const application_manager::MessagePtr& message);
+  explicit TuneDownRequest(const application_manager::MessagePtr& message);
 
   /**
    * @brief Execute command
@@ -66,13 +66,13 @@ class GrantAccessRequest : public BaseCommandRequest {
                 std::string>& event);
 
   /**
-   * @brief GrantAccessRequest class destructor
+   * @brief TuneDownRequest class destructor
    */
-  virtual ~GrantAccessRequest();
+  virtual ~TuneDownRequest();
 };
 
 }  // namespace commands
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_TUNE_DOWN_REQUEST_H_

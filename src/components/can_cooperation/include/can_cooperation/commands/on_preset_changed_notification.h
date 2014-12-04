@@ -30,27 +30,26 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_PRESET_CHANGED_NOTIFICATION_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_PRESET_CHANGED_NOTIFICATION_H_
 
-#include "can_cooperation/commands/base_command_request.h"
-#include "can_cooperation/event_engine/event.h"
+#include "can_cooperation/commands/base_command_notification.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
 /**
- * @brief GrantAccessRequest command class
+ * @brief OnPresetChangedNotification command class
  */
-class GrantAccessRequest : public BaseCommandRequest {
+class OnPresetChangedNotification : public BaseCommandNotification {
  public:
   /**
-   * @brief GrantAccessRequest class constructor
+   * @brief OnPresetChangedNotification class constructor
    *
-   * @param message Message from mobile
+   * @param message Message with notification
    **/
-  explicit GrantAccessRequest(const application_manager::MessagePtr& message);
+  explicit OnPresetChangedNotification(const application_manager::MessagePtr& message);
 
   /**
    * @brief Execute command
@@ -58,21 +57,13 @@ class GrantAccessRequest : public BaseCommandRequest {
   virtual void Run();
 
   /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
+   * @brief OnPresetChangedNotification class destructor
    */
-  void on_event(const event_engine::Event<application_manager::MessagePtr,
-                std::string>& event);
-
-  /**
-   * @brief GrantAccessRequest class destructor
-   */
-  virtual ~GrantAccessRequest();
+  virtual ~OnPresetChangedNotification();
 };
 
 }  // namespace commands
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_ON_PRESET_CHANGED_NOTIFICATION_H_

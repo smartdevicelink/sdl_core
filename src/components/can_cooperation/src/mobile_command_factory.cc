@@ -31,12 +31,71 @@
  */
 
 #include "can_cooperation/mobile_command_factory.h"
+#include "functional_module/function_ids.h"
+#include "can_cooperation/commands/grant_access_request.h"
+#include "can_cooperation/commands/cancel_access_request.h"
+#include "can_cooperation/commands/start_scan_request.h"
+#include "can_cooperation/commands/stop_scan_request.h"
+#include "can_cooperation/commands/tune_radio_request.h"
+#include "can_cooperation/commands/tune_up_request.h"
+#include "can_cooperation/commands/tune_down_request.h"
+#include "can_cooperation/commands/on_control_changed_notification.h"
+#include "can_cooperation/commands/on_preset_changed_notification.h"
+#include "can_cooperation/commands/on_radio_details_notification.h"
+
 
 namespace can_cooperation {
 
+using functional_modules::MobileFunctionID;
+
 commands::Command* MobileCommandFactory::CreateCommand(
     const application_manager::MessagePtr& msg) {
-  return NULL;
+
+  switch (msg->function_id()) {
+    case MobileFunctionID::GRANT_ACCESS: {
+      return new commands::GrantAccessRequest(msg);
+      break;
+    }
+    case MobileFunctionID::CANCEL_ACCESS: {
+      return new commands::CancelAccessRequest(msg);
+      break;
+    }
+    case MobileFunctionID::START_SCAN: {
+      return new commands::StartScanRequest(msg);
+      break;
+    }
+    case MobileFunctionID::STOP_SCAN: {
+      return new commands::StopScanRequest(msg);
+      break;
+    }
+    case MobileFunctionID::TUNE_RADIO: {
+      return new commands::TuneRadioRequest(msg);
+      break;
+    }
+    case MobileFunctionID::TUNE_UP: {
+      return new commands::TuneUpRequest(msg);
+      break;
+    }
+    case MobileFunctionID::TUNE_DOWN: {
+      return new commands::TuneDownRequest(msg);
+      break;
+    }
+    case MobileFunctionID::ON_CONTROL_CHANGED: {
+      return new commands::OnControlChangedNotification(msg);
+      break;
+    }
+    case MobileFunctionID::ON_RADIO_DETAILS: {
+      return new commands::OnRadioDetailsNotification(msg);
+      break;
+    }
+    case MobileFunctionID::ON_PRESET_CHANGED: {
+      return new commands::OnPresetChangedNotification(msg);
+      break;
+    }
+    default: {
+      return NULL;
+    }
+  }
 }
 
 }  // namespace can_cooperation;

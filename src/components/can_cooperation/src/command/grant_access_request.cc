@@ -36,11 +36,16 @@ namespace can_cooperation {
 
 namespace commands {
 
-void Run() {
+GrantAccessRequest::GrantAccessRequest(
+    const application_manager::MessagePtr& message)
+  : BaseCommandRequest(message) {
+}
+
+void GrantAccessRequest::Run() {
 
 }
 
-void on_event(const event_engine::Event<application_manager::MessagePtr,
+void GrantAccessRequest::on_event(const event_engine::Event<application_manager::MessagePtr,
               std::string>& event) {
 
 }

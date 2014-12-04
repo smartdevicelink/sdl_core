@@ -30,49 +30,39 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_BASE_COMMAND_NOTIFICATION_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_BASE_COMMAND_NOTIFICATION_H_
 
-#include "can_cooperation/commands/base_command_request.h"
-#include "can_cooperation/event_engine/event.h"
+#include "can_cooperation/commands/command.h"
+#include "application_manager/message.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
 /**
- * @brief GrantAccessRequest command class
+ * @brief Base command class for notifications
  */
-class GrantAccessRequest : public BaseCommandRequest {
+class BaseCommandNotification : public Command {
  public:
   /**
-   * @brief GrantAccessRequest class constructor
+   * @brief BaseCommandNotification class constructor
    *
    * @param message Message from mobile
    **/
-  explicit GrantAccessRequest(const application_manager::MessagePtr& message);
+  explicit BaseCommandNotification(const application_manager::MessagePtr& message);
 
   /**
-   * @brief Execute command
+   * @brief BaseCommandNotification class destructor
    */
-  virtual void Run();
+  virtual ~BaseCommandNotification();
 
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void on_event(const event_engine::Event<application_manager::MessagePtr,
-                std::string>& event);
-
-  /**
-   * @brief GrantAccessRequest class destructor
-   */
-  virtual ~GrantAccessRequest();
+ protected:
+  application_manager::MessagePtr message_;
 };
 
 }  // namespace commands
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_BASE_COMMAND_NOTIFICATION_H_
