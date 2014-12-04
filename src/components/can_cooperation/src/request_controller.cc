@@ -39,9 +39,8 @@ RequestController::RequestController() {
 }
 
 void RequestController::AddRequest(const uint32_t& mobile_correlation_id,
-                                   commands::Command* command) {
-  mobile_request_list_[mobile_correlation_id] =
-      utils::SharedPtr<commands::Command>(command);
+                                   MobileRequestPtr request) {
+  mobile_request_list_[mobile_correlation_id] = request;
 }
 
 void RequestController::DeleteRequest(const uint32_t& mobile_correlation_id) {

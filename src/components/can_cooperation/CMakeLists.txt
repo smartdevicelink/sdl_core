@@ -23,6 +23,9 @@ set (SOURCES
     ./src/hmi_command_factory.cc
     ./src/can_command_factory.cc
     ./src/request_controller.cc
+    ./src/message_helper.cc
+    ./src/command/base_command_request.cc
+    ./src/command/grant_access_request.cc
 )
 
 set (LIBRARIES

@@ -74,6 +74,13 @@ class Service {
    * @param message Message to mobile
    */
   virtual void SendMessageToMobile(const MessagePtr& message) = 0;
+
+  /**
+   * @brief Returns unique correlation ID for next HMI request
+   *
+   * @return Unique correlation ID
+   */
+  virtual uint32_t GetNextCorrelationID() = 0;
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;

@@ -30,33 +30,41 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_COMMAND_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_COMMAND_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_BASE_COMMAND_REQUEST_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_BASE_COMMAND_REQUEST_H_
 
-#include "utils/shared_ptr.h"
+#include "can_cooperation/commands/command.h"
+#include "can_cooperation/event_engine/event_observer.h"
+#include "application_manager/message.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
 /**
- * @brief Command interface
- **/
-class Command {
+ * @brief Base command class
+ */
+class BaseCommandRequest : public Command,
+public event_engine::EventObserver<application_manager::MessagePtr, std::string>{
  public:
   /**
-   * @brief Execute command
-   */
-  virtual void Run() = 0;
+   * @brief BaseCommandRequest class constructor
+   *
+   * @param message Message from mobile
+   **/
+  explicit BaseCommandRequest(const application_manager::MessagePtr& message);
 
   /**
-   * \brief Command class destructor
+   * @brief BaseCommandRequest class destructor
    */
-  virtual ~Command() {}
+  virtual ~BaseCommandRequest();
+
+ protected:
+  application_manager::MessagePtr message_;
 };
 
 }  // namespace commands
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_COMMAND_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_BASE_COMMAND_REQUEST_H_

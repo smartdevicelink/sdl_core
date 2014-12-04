@@ -54,25 +54,16 @@ enum MobileFunctionID {
 namespace hmi_api {
   const char grant_access[]       = "VehicleInfo.GrantAccess";
   const char cancel_access[]      = "VehicleInfo.CancelAccess";
-  const char start_scan[]         = "VehicleInfo.StartScan";
-  const char stop_scan[]          = "VehicleInfo.StopScan";
-  const char tune_radion[]        = "VehicleInfo.TuneRadio";
-  const char tune_up[]            = "VehicleInfo.TuneUp";
-  const char tune_down[]          = "VehicleInfo.TuneDown";
   const char on_control_changed[] = "VehicleInfo.OnControlChanged";
-  const char on_radio_details[]   = "VehicleInfo.OnRadioDetails";
   const char on_preset_changed[]  = "VehicleInfo.OnPresetChanged";
 }
 
 namespace can_api {
-  const char grant_access[]       = "CAN.GrantAccess";
-  const char cancel_access[]      = "CAN.CancelAccess";
   const char start_scan[]         = "CAN.StartScan";
   const char stop_scan[]          = "CAN.StopScan";
   const char tune_radion[]        = "CAN.TuneRadio";
   const char tune_up[]            = "CAN.TuneUp";
   const char tune_down[]          = "CAN.TuneDown";
-  const char on_control_changed[] = "CAN.OnControlChanged";
   const char on_radio_details[]   = "CAN.OnRadioDetails";
   const char on_preset_changed[]  = "CAN.OnPresetChanged";
 }

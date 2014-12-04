@@ -1,7 +1,8 @@
-#include "utils/threads/thread.h"
 #include "can_cooperation/can_module.h"
+#include "can_cooperation/mobile_command_factory.h"
 #include "./can_tcp_connection.h"
 #include "utils/logger.h"
+#include "utils/threads/thread.h"
 
 namespace can_cooperation {
 
@@ -90,13 +91,7 @@ void CANModule::SubscribeOnFunctions() {
 
   plugin_info_.hmi_function_list.push_back(hmi_api::grant_access);
   plugin_info_.hmi_function_list.push_back(hmi_api::cancel_access);
-  plugin_info_.hmi_function_list.push_back(hmi_api::start_scan);
-  plugin_info_.hmi_function_list.push_back(hmi_api::stop_scan);
-  plugin_info_.hmi_function_list.push_back(hmi_api::tune_radion);
-  plugin_info_.hmi_function_list.push_back(hmi_api::tune_up);
-  plugin_info_.hmi_function_list.push_back(hmi_api::tune_down);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_control_changed);
-  plugin_info_.hmi_function_list.push_back(hmi_api::on_radio_details);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_preset_changed);
 }
 
@@ -121,7 +116,14 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
     LOG4CXX_ERROR(logger_, "Null pointer message received.");
     return ProcessResult::FAILED;
   }
-  std::string msg_to_send;
+
+  commands::Command* command = MobileCommandFactory::CreateCommand(msg);
+  if (command) {
+    request_controller_.AddRequest(msg->correlation_id(), command);
+    command->Run();
+  }
+
+/*  std::string msg_to_send;
 
   switch (msg->function_id()) {
     case MobileFunctionID::TUNE_RADIO: {
@@ -148,7 +150,7 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
     }
   }
 
-  from_mobile_.PostMessage(msg_to_send);
+  from_mobile_.PostMessage(msg_to_send);*/
   return ProcessResult::PROCESSED;
 }
 
@@ -205,8 +207,9 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
   }
 }
 
-void CANModule::SendResponseToMobile(application_manager::MessagePtr msg) const {
+void CANModule::SendResponseToMobile(application_manager::MessagePtr msg) {
   service_->SendMessageToMobile(msg);
+  request_controller_.DeleteRequest(msg->correlation_id());
 }
 
 bool CANModule::IsScanStarted() const {

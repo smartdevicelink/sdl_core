@@ -54,8 +54,12 @@ void CoreService::SendMessageToHMI(const MessagePtr& message) {
   ApplicationManagerImpl::instance()->PostMessageToHMIQueque(message);
 }
 
-void CoreService ::SendMessageToMobile(const MessagePtr& message) {
+void CoreService::SendMessageToMobile(const MessagePtr& message) {
   ApplicationManagerImpl::instance()->PostMessageToMobileQueque(message);
+}
+
+uint32_t CoreService::GetNextCorrelationID() {
+  return ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 }
 
 }  // namespace application_manager

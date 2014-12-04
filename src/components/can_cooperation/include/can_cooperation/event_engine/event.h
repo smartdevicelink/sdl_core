@@ -96,15 +96,6 @@ class Event {
  private:
 
   EventID id_;
-
-  /*
-   * @brief Default constructor
-   *
-   * Unimplemented to avoid misusing
-   */
-  Event();
-
-  DISALLOW_COPY_AND_ASSIGN(Event);
 };
 
 template<typename EventMessage, typename EventID>

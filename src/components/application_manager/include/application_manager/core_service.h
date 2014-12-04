@@ -81,6 +81,13 @@ class CoreService : public Service {
    */
   virtual void SendMessageToMobile(const MessagePtr& message);
 
+  /**
+   * @brief Returns unique correlation ID for next HMI request
+   *
+   * @return Unique correlation ID
+   */
+  virtual uint32_t GetNextCorrelationID();
+
  private:
   DISALLOW_COPY_AND_ASSIGN(CoreService);
 };

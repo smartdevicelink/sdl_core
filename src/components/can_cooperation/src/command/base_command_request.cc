@@ -30,33 +30,22 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_COMMAND_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_COMMAND_H_
-
-#include "utils/shared_ptr.h"
+#include "can_cooperation/commands/base_command_request.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
-/**
- * @brief Command interface
- **/
-class Command {
- public:
-  /**
-   * @brief Execute command
-   */
-  virtual void Run() = 0;
+BaseCommandRequest::BaseCommandRequest(
+    const application_manager::MessagePtr& message)
+  : message_(message) {
+}
 
-  /**
-   * \brief Command class destructor
-   */
-  virtual ~Command() {}
-};
+
+BaseCommandRequest::~BaseCommandRequest() {
+}
 
 }  // namespace commands
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_COMMAND_H_

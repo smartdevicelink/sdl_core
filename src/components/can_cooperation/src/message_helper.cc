@@ -30,33 +30,15 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_COMMAND_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_COMMAND_H_
-
-#include "utils/shared_ptr.h"
+#include "can_cooperation/message_helper.h"
 
 namespace can_cooperation {
 
-namespace commands {
+uint32_t MessageHelper::next_correlation_id_ = 1;
 
-/**
- * @brief Command interface
- **/
-class Command {
- public:
-  /**
-   * @brief Execute command
-   */
-  virtual void Run() = 0;
-
-  /**
-   * \brief Command class destructor
-   */
-  virtual ~Command() {}
-};
-
-}  // namespace commands
+uint32_t MessageHelper::GetNextCANCorrelationID() {
+  return next_correlation_id_++;
+}
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_COMMAND_H_

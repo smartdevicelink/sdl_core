@@ -41,6 +41,8 @@
 
 #include "can_cooperation/event_engine/event.h"
 
+#include "interfaces/HMI_API.h"
+
 namespace event_engine {
 
 template<typename EventMessage, typename EventID> class EventObserver;
@@ -133,7 +135,7 @@ void EventDispatcher<EventMessage, EventID>::raise_event(
   {
     sync_primitives::AutoLock auto_lock(state_lock_);
     // check if event is notification
-    if (application_manager::MessageType::kNotification ==
+    if (hmi_apis::messageType::notification ==
         event.event_message_type()) {
 
       //ObserversMap iterator
@@ -143,9 +145,9 @@ void EventDispatcher<EventMessage, EventID>::raise_event(
       }
     }
 
-    if ((application_manager::MessageType::kNotification  ==
+    if ((hmi_apis::messageType::response  ==
         event.event_message_type())
-        || (application_manager::MessageType::kErrorResponse ==
+        || (hmi_apis::messageType::error_response ==
             event.event_message_type())) {
       list = observers_[event.id()][event.smart_object_correlation_id()];
     }

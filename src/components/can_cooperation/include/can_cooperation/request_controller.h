@@ -61,7 +61,7 @@ class RequestController {
    * @param command pointer to request created in mobile factory
    */
   void AddRequest(const uint32_t& mobile_correlation_id,
-                  commands::Command* command);
+                  MobileRequestPtr request);
 
   /**
    * @brief Removes request

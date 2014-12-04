@@ -30,33 +30,42 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_COMMAND_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_COMMAND_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_
 
-#include "utils/shared_ptr.h"
+#include "can_cooperation/commands/base_command_request.h"
+#include "can_cooperation/event_engine/event.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
 /**
- * @brief Command interface
- **/
-class Command {
+ * @brief GrantAccessRequest command class
+ */
+class GrantAccessRequest : public BaseCommandRequest {
  public:
   /**
    * @brief Execute command
    */
-  virtual void Run() = 0;
+  virtual void Run();
 
   /**
-   * \brief Command class destructor
+   * @brief Interface method that is called whenever new event received
+   *
+   * @param event The received event
    */
-  virtual ~Command() {}
+  void on_event(const event_engine::Event<application_manager::MessagePtr,
+                std::string>& event);
+
+  /**
+   * @brief AddCommandRequest class destructor
+   */
+  virtual ~GrantAccessRequest();
 };
 
 }  // namespace commands
 
 }  // namespace can_cooperation
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_COMMAND_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_COMMANDS_GRANT_ACCESS_REQUEST_H_

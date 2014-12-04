@@ -35,6 +35,7 @@
 
 #include "functional_module/generic_module.h"
 #include "can_cooperation/can_connection.h"
+#include "can_cooperation/request_controller.h"
 #include "utils/threads/message_loop_thread.h"
 
 
@@ -62,7 +63,7 @@ class CANModule : public functional_modules::GenericModule,
      * @brief Sends response to mobile application
      * @param msg response mesage
      */
-    void SendResponseToMobile(application_manager::MessagePtr msg) const;
+    void SendResponseToMobile(application_manager::MessagePtr msg);
 
     /**
      * @brief Checks if radio scan started
@@ -108,6 +109,7 @@ private:
  threads::MessageLoopThread<std::queue<std::string>> from_mobile_;
  threads::Thread* thread_;
  bool is_scan_started_;
+ request_controller::RequestController request_controller_;
  friend class TCPClientDelegate;
 };
 
