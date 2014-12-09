@@ -73,6 +73,9 @@
 #define NOTREACHED() DCHECK(false)
 
 #define EXPORT_FUNCTION(TypeName) \
+  extern "C" TypeName* Create();
+
+#define EXPORT_FUNCTION_IMPL(TypeName) \
   extern "C" TypeName* Create() { \
     return TypeName::instance(); \
   }

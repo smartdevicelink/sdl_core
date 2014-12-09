@@ -12,6 +12,7 @@ using functional_modules::PluginInfo;
 using functional_modules::MobileFunctionID;
 namespace hmi_api = functional_modules::hmi_api;
 
+EXPORT_FUNCTION_IMPL(CANModule);
 CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule");
 
 class TCPClientDelegate : public threads::ThreadDelegate {
