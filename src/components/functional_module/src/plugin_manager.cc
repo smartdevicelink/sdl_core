@@ -157,7 +157,10 @@ void PluginManager::ProcessHMIMessage(application_manager::MessagePtr msg) {
     return;
   }
 
-  Json::Value value(msg->json_message());
+  Json::Value value;
+  Json::Reader reader;
+  reader.parse(msg->json_message(), value);
+
   std::string function_name;
   if (application_manager::ProtocolVersion::kHMI == msg->protocol_version()) {
     // Request or notification from HMI
@@ -208,7 +211,9 @@ bool PluginManager::IsHMIMessageForPlugin(application_manager::MessagePtr msg) {
     return false;
   }
 
-  Json::Value value(msg->json_message());
+  Json::Value value;
+  Json::Reader reader;
+  reader.parse(msg->json_message(), value);
 
   if (application_manager::ProtocolVersion::kHMI == msg->protocol_version()) {
     // Request or notification from HMI
