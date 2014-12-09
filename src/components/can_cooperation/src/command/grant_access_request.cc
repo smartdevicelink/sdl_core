@@ -54,6 +54,12 @@ void GrantAccessRequest::Run() {
     return;
   }
 
+  CANAppExtensionPtr extension = GetAppExtension(app);
+  if (extension->IsControlGiven()) {
+    LOG4CXX_ERROR(logger_, "Application already have access!");
+    SendResponse(false, "REJECTED", "");
+  }
+
   Json::Value params;
 
   params["params"]["appID"] = message_->connection_key();

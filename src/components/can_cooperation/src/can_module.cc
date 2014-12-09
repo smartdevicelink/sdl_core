@@ -215,6 +215,22 @@ functional_modules::ProcessResult CANModule::HandleMessage(
       break;
     }
     case application_manager::MessageType::kNotification: {
+      if (functional_modules::can_api::on_preset_changed ==
+          function_name) {
+        msg->set_function_id(MobileFunctionID::ON_CONTROL_CHANGED);
+      } else if (functional_modules::hmi_api::on_control_changed ==
+                 function_name) {
+        msg->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);
+      } else if (functional_modules::can_api::on_radio_details ==
+                 function_name) {
+        msg->set_function_id(MobileFunctionID::ON_PRESET_CHANGED);
+      }
+
+      commands::Command* command = MobileCommandFactory::CreateCommand(msg);
+      if (command) {
+        command->Run();
+      }
+
       break;
     }
     case application_manager::MessageType::kRequest:
