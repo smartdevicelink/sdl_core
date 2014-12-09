@@ -49,7 +49,6 @@ class CANModule : public functional_modules::GenericModule,
     public threads::MessageLoopThread<std::queue<MessageFromCAN>>::Handler,
     public threads::MessageLoopThread<std::queue<std::string>>::Handler {
   public:
-    ~CANModule();
     functional_modules::PluginInfo GetPluginInfo() const;
     virtual functional_modules::ProcessResult ProcessMessage(
         application_manager::MessagePtr msg);
@@ -64,6 +63,12 @@ class CANModule : public functional_modules::GenericModule,
      * @param msg response mesage
      */
     void SendResponseToMobile(application_manager::MessagePtr msg);
+
+    /**
+     * @brief Post message to can to queue
+     * @param msg response mesage
+     */
+    void SendMessageToCan(const std::string& msg);
 
     /**
      * @brief Checks if radio scan started
@@ -82,6 +87,12 @@ class CANModule : public functional_modules::GenericModule,
      * @param app_id application id
      */
     virtual void RemoveAppExtension(uint32_t app_id);
+
+    /**
+     * @brief Returns pointer to SDL core service interface
+     * @return pointer to core service interface
+     */
+    application_manager::ServicePtr GetServiceHandler();
 protected:
     /**
      * @brief Remove extension for all applications
@@ -91,18 +102,14 @@ private:
  DISALLOW_COPY_AND_ASSIGN(CANModule);
  FRIEND_BASE_SINGLETON_CLASS(CANModule);
  CANModule();
+ ~CANModule();
 
  void SubscribeOnFunctions() ;
 
- struct HMIResponseSubscriberInfo {
-   int32_t connection_key_;
-   int32_t correlation_id_;
-   int32_t function_id_;
- };
-
+functional_modules::ProcessResult HandleMessage(
+    application_manager::MessagePtr msg);
+ // TODO(VS): must be uid
  static const functional_modules::ModuleID kCANModuleID = 153;
- static uint32_t next_correlation_id_;
- std::map<uint32_t, HMIResponseSubscriberInfo> hmi_response_subscribers_;
  utils::SharedPtr<CANConnection> can_connection;
  functional_modules::PluginInfo plugin_info_;
  threads::MessageLoopThread<std::queue<MessageFromCAN>> from_can_;
@@ -113,7 +120,7 @@ private:
  friend class TCPClientDelegate;
 };
 
-EXPORT_FUNCTION(CANModule);
+//EXPORT_FUNCTION(CANModule);
 
 }
 

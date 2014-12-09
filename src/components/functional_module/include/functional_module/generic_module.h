@@ -109,8 +109,6 @@ class GenericModule {
     const ModuleID kModuleId_;
     std::deque<utils::SharedPtr<ModuleObserver> > observers_;
     ModuleState state_;
-
-
 };
 
 }  //  namespace functional_modules

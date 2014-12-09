@@ -31,6 +31,7 @@
  */
 
 #include "can_cooperation/commands/on_control_changed_notification.h"
+#include "functional_module/function_ids.h"
 
 namespace can_cooperation {
 

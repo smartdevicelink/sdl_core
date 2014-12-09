@@ -31,6 +31,8 @@
  */
 
 #include "can_cooperation/commands/stop_scan_request.h"
+#include "functional_module/function_ids.h"
+#include "json/json.h"
 
 namespace can_cooperation {
 

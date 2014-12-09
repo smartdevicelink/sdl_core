@@ -36,6 +36,10 @@
 #include "can_cooperation/commands/command.h"
 #include "can_cooperation/event_engine/event_observer.h"
 #include "application_manager/message.h"
+#include "application_manager/service.h"
+#include "utils/logger.h"
+#include "interfaces/HMI_API.h"
+#include "can_cooperation/can_app_extension.h"
 
 namespace can_cooperation {
 
@@ -61,6 +65,48 @@ public event_engine::EventObserver<application_manager::MessagePtr, std::string>
 
  protected:
   application_manager::MessagePtr message_;
+  application_manager::ServicePtr service_;
+
+  /**
+   * @brief Get extension for specified application. If extension doesn't exist, it will be created
+   * @param app pointer to application
+   * @return pointer to extension
+   */
+  CANAppExtensionPtr GetAppExtension(
+      application_manager::ApplicationSharedPtr app) const;
+
+  /**
+   * @brief Converts HMI result code to string with mobile result code
+   *
+   * @param hmi_code HMI result code
+   * @return String with mobile result code
+   */
+  const char* GetMobileResultCode(
+      const hmi_apis::Common_Result::eType& hmi_code) const;
+
+  /**
+   * @brief Creates Mobile response
+   *
+   * @param success true if successful; false, if failed
+   * @param result_code Mobile result code in string ("SUCCESS", "INVALID_DATA", e.t.c)
+   * @param info Provides additional human readable info regarding the result(may be empty)
+   */
+  void SendResponse(const bool success,
+                    const char* result_code,
+                    const std::string info);
+
+  /**
+   * @brief Sends request to CAN or HMI
+   * @param function_id request ID
+   * @param msg_params json with message params
+   */
+  void SendRequest(const char* function_id,
+                      const std::string& msg_params,
+                      bool is_hmi_request = false);
+
+#ifdef ENABLE_LOG
+  static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
 };
 
 }  // namespace commands

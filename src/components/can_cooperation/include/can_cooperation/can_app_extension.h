@@ -36,10 +36,10 @@
 #include "application_manager/app_extension.h"
 
 namespace can_cooperation {
-class CANAppExtenstion : public application_manager::AppExtension {
+class CANAppExtension : public application_manager::AppExtension {
   public:
-    explicit CANAppExtenstion(application_manager::AppExtensionUID uid);
-    ~CANAppExtenstion();
+    explicit CANAppExtension(application_manager::AppExtensionUID uid);
+    ~CANAppExtension();
 
     /**
      * @brief Checks is application has access to a radio tune control
@@ -56,6 +56,8 @@ class CANAppExtenstion : public application_manager::AppExtension {
   private:
     bool is_control_given_;
 };
+
+typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;
 }  //  namespace can_cooperation
 
 #endif  //  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_APP_EXTENSION_H_

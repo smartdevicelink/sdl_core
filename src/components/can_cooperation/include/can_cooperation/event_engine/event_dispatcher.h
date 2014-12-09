@@ -30,8 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_DISPATCHER_H_
-#define  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_DISPATCHER_H_
+#ifndef  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_DISPATCHER_H_
+#define  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_DISPATCHER_H_
 
 #include <list>
 #include <map>
@@ -40,12 +40,14 @@
 #include "utils/singleton.h"
 
 #include "can_cooperation/event_engine/event.h"
+#include "can_cooperation/event_engine/event_observer.h"
 
 #include "interfaces/HMI_API.h"
 
 namespace event_engine {
 
-template<typename EventMessage, typename EventID> class EventObserver;
+/*template<typename EventMessage, typename EventID>
+class EventObserver;*/
 
 template<typename EventMessage, typename EventID>
 class EventDispatcher :
@@ -68,7 +70,7 @@ class EventDispatcher :
    */
   void add_observer(const EventID& event_id,
                     int32_t hmi_correlation_id,
-                    const EventObserver<EventMessage, EventID>* const observer);
+                    EventObserver<EventMessage, EventID>* const observer);
 
   /*
    * @brief Unsubscribes the observer from specific event
@@ -149,7 +151,7 @@ void EventDispatcher<EventMessage, EventID>::raise_event(
         event.event_message_type())
         || (hmi_apis::messageType::error_response ==
             event.event_message_type())) {
-      list = observers_[event.id()][event.smart_object_correlation_id()];
+      list = observers_[event.id()][event.event_message_correlation_id()];
     }
   }
 
@@ -165,7 +167,7 @@ template<typename EventMessage, typename EventID>
 void EventDispatcher<EventMessage, EventID>::add_observer(
                    const EventID& event_id,
                    int32_t hmi_correlation_id,
-                   const EventObserver<EventMessage, EventID>* const observer) {
+                   EventObserver<EventMessage, EventID>* const observer) {
   sync_primitives::AutoLock auto_lock(state_lock_);
   observers_[event_id][hmi_correlation_id].push_back(observer);
 }
@@ -217,4 +219,4 @@ void EventDispatcher<EventMessage, EventID>::remove_observer(
 
 }
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_DISPATCHER_H_
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_DISPATCHER_H_

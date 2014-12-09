@@ -31,6 +31,8 @@
  */
 
 #include "can_cooperation/commands/grant_access_request.h"
+#include "functional_module/function_ids.h"
+#include "json/json.h"
 
 namespace can_cooperation {
 
@@ -42,12 +44,80 @@ GrantAccessRequest::GrantAccessRequest(
 }
 
 void GrantAccessRequest::Run() {
+  LOG4CXX_INFO(logger_, "GrantAccessRequest::Run");
 
+  application_manager::ApplicationSharedPtr app =
+      service_->GetApplication(message_->connection_key());
+  if (!app.valid()) {
+    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
+    SendResponse(false, "APPLICATION_NOT_REGISTERED", "");
+    return;
+  }
+
+  Json::Value params;
+
+  params["params"]["appID"] = message_->connection_key();
+
+  Json::FastWriter writer;
+
+  SendRequest(functional_modules::hmi_api::grant_access, writer.write(params), true);
 }
 
-void GrantAccessRequest::on_event(const event_engine::Event<application_manager::MessagePtr,
-              std::string>& event) {
+void GrantAccessRequest::on_event(
+                      const event_engine::Event<application_manager::MessagePtr,
+                      std::string>& event) {
+  LOG4CXX_INFO(logger_, "GrantAccessRequest::on_event");
 
+  application_manager::ApplicationSharedPtr app =
+      service_->GetApplication(message_->connection_key());
+  if (!app.valid()) {
+    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
+    SendResponse(false, "APPLICATION_NOT_REGISTERED", "");
+    return;
+  }
+
+  if (functional_modules::hmi_api::grant_access == event.id()) {
+    // TODO(VS): create function for result code parsing an use it in all command
+    std::string result_code = "INVALID_DATA";
+    std::string info = "";
+    bool success = false;
+    application_manager::MessagePtr message = event.event_message();
+
+    Json::Value value;
+     Json::Reader reader;
+     reader.parse(message->json_message(), value);
+
+    if (application_manager::MessageType::kResponse == message->type()) {
+      if (value["result"].isMember("code")) {
+        result_code = GetMobileResultCode(
+            static_cast<hmi_apis::Common_Result::eType>(
+                value["result"]["code"].asInt()));
+      }
+    } else if (application_manager::MessageType::kErrorResponse ==
+               message->type()) {
+      if (value["error"].isMember("code")) {
+        result_code = GetMobileResultCode(
+            static_cast<hmi_apis::Common_Result::eType>(
+                value["error"]["code"].asInt()));
+      }
+
+      if (value["error"].isMember("message")) {
+        info = value["result"]["message"].asCString();
+      }
+    }
+
+    if (("SUCCESS" == result_code) || ("WARNINGS" == result_code)) {
+      success = true;
+      CANAppExtensionPtr extension = GetAppExtension(app);
+
+      extension->GiveControl(true);
+    }
+
+    SendResponse(success, result_code.c_str(), info);
+  } else {
+    LOG4CXX_ERROR(logger_,"Received unknown event: " << event.id());
+    return;
+  }
 }
 
 }  // namespace commands

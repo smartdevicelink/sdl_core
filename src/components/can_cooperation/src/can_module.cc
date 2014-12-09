@@ -1,8 +1,12 @@
 #include "can_cooperation/can_module.h"
 #include "can_cooperation/mobile_command_factory.h"
+#include "can_cooperation/can_module_event.h"
+#include "can_cooperation/event_engine/event_dispatcher.h"
+#include "application_manager/application.h"
 #include "./can_tcp_connection.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
+
 
 namespace can_cooperation {
 
@@ -10,6 +14,7 @@ using functional_modules::ProcessResult;
 using functional_modules::GenericModule;
 using functional_modules::PluginInfo;
 using functional_modules::MobileFunctionID;
+using event_engine::EventDispatcher;
 namespace hmi_api = functional_modules::hmi_api;
 
 EXPORT_FUNCTION_IMPL(CANModule);
@@ -53,8 +58,6 @@ bool TCPClientDelegate::exitThreadMain() {
   return false;
 }
 
-uint32_t CANModule::next_correlation_id_ = 1;
-
 CANModule::CANModule()
   : GenericModule(kCANModuleID)
   , can_connection()
@@ -93,7 +96,6 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.hmi_function_list.push_back(hmi_api::grant_access);
   plugin_info_.hmi_function_list.push_back(hmi_api::cancel_access);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_control_changed);
-  plugin_info_.hmi_function_list.push_back(hmi_api::on_preset_changed);
 }
 
 CANModule::~CANModule() {
@@ -124,40 +126,15 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
     command->Run();
   }
 
-/*  std::string msg_to_send;
-
-  switch (msg->function_id()) {
-    case MobileFunctionID::TUNE_RADIO: {
-      Json::Value can_msg;
-
-      HMIResponseSubscriberInfo subscriber_info;
-      subscriber_info.connection_key_ = msg->connection_key();
-      subscriber_info.correlation_id_ = msg->correlation_id();
-      subscriber_info.function_id_ = msg->function_id();
-
-      hmi_response_subscribers_[next_correlation_id_] = subscriber_info;
-
-      can_msg["id"] = next_correlation_id_++;
-      can_msg["jsonrpc"] = "2.0";
-      can_msg["method"] = "CAN.TuneRadio";
-      can_msg["params"] = msg->json_message();
-
-      Json::FastWriter writer;
-      msg_to_send = writer.write(can_msg);
-      break;
-    }
-    default: {
-      return ProcessResult::CANNOT_PROCESS;
-    }
-  }
-
-  from_mobile_.PostMessage(msg_to_send);*/
   return ProcessResult::PROCESSED;
 }
 
-ProcessResult CANModule::ProcessHMIMessage(application_manager::MessagePtr msg) {
+void CANModule::SendMessageToCan(const std::string& msg) {
+  from_mobile_.PostMessage(msg);
+}
 
-  return ProcessResult::PROCESSED;
+ProcessResult CANModule::ProcessHMIMessage(application_manager::MessagePtr msg) {
+  return HandleMessage(msg);
 }
 
 void CANModule::ProcessCANMessage(const MessageFromCAN& can_msg) {
@@ -175,37 +152,78 @@ void CANModule::Handle(const std::string message) {
 }
   
 void CANModule::Handle(const MessageFromCAN can_msg) {
-  if (can_msg.isMember("id")) {
-    std::map<uint32_t, HMIResponseSubscriberInfo>::iterator it =
-        hmi_response_subscribers_.find(can_msg["id"].asInt());
-    if (it != hmi_response_subscribers_.end()) {
-      application_manager::MessagePtr msg(new application_manager::Message(
-              protocol_handler::MessagePriority::kDefault));
-      msg->set_connection_key(it->second.connection_key_);
-      msg->set_correlation_id(it->second.correlation_id_);
-      msg->set_function_id(it->second.function_id_);
-      msg->set_protocol_version(application_manager::ProtocolVersion::kV3);
-      msg->set_message_type(application_manager::MessageType::kResponse);
+  application_manager::MessagePtr msg(new application_manager::Message(
+      protocol_handler::MessagePriority::kDefault));
 
-      Json::Value msg_params;
+  Json::FastWriter writer;
+  std::string msg_to_send = writer.write(can_msg);
+  msg->set_json_message(msg_to_send);
 
-      if ((can_msg.isMember("result")) &&
-          (can_msg["result"].isMember("code")) &&
-          (0 == can_msg["result"]["code"].asInt())) {
+  if (ProcessResult::PROCESSED != HandleMessage(msg)) {
+    LOG4CXX_ERROR(logger_, "Failed process CAN message!");
+  }
+}
 
-        msg_params["success"] = true;
-        msg_params["resultCode"] = "SUCCESS";
-      } else {
-        msg_params["success"] = false;
-        msg_params["resultCode"] = "GENERIC_ERROR";
-      }
+functional_modules::ProcessResult CANModule::HandleMessage(
+    application_manager::MessagePtr msg) {
 
-      Json::FastWriter writer;
-      std::string msg_to_send = writer.write(msg_params);
-      msg->set_json_message(msg_to_send);
-      service_->SendMessageToMobile(msg);
+  Json::Value value;
+  Json::Reader reader;
+  reader.parse(msg->json_message(), value);
+
+  std::string function_name;
+
+  // Request or notification
+  if (value.isMember("method")) {
+    function_name = value["method"].asCString();
+
+    if (value.isMember("id")) {
+      msg->set_message_type(application_manager::MessageType::kRequest);
+    } else {
+      msg->set_message_type(application_manager::MessageType::kNotification);
+    }
+  // Response
+  } else if (value.isMember("result") && value["result"].isMember("method")) {
+    function_name = value["result"]["method"].asCString();
+    msg->set_message_type(application_manager::MessageType::kResponse);
+  // Error response
+  }  else if (value.isMember("error") && value["error"].isMember("data") &&
+              value["error"]["data"].isMember("method")) {
+    function_name = value["error"]["data"]["method"].asCString();
+    msg->set_message_type(application_manager::MessageType::kErrorResponse);
+  } else {
+    DCHECK(false);
+    return ProcessResult::FAILED;
+  }
+
+
+  if (value.isMember("id")) {
+    msg->set_correlation_id(value["id"].asInt());
+  } else if (application_manager::MessageType::kNotification !=  msg->type()) {
+    DCHECK(false);
+    return ProcessResult::FAILED;
+  }
+
+  msg->set_protocol_version(application_manager::ProtocolVersion::kV3);
+
+  switch (msg->type()) {
+    case application_manager::MessageType::kResponse:
+    case application_manager::MessageType::kErrorResponse: {
+      CanModuleEvent event(msg, function_name);
+      EventDispatcher<application_manager::MessagePtr, std::string>::instance()->
+          raise_event(event);
+      break;
+    }
+    case application_manager::MessageType::kNotification: {
+      break;
+    }
+    case application_manager::MessageType::kRequest:
+    default: {
+      return  ProcessResult::FAILED;;
     }
   }
+
+  return ProcessResult::PROCESSED;
 }
 
 void CANModule::SendResponseToMobile(application_manager::MessagePtr msg) {
@@ -226,7 +244,21 @@ void CANModule::RemoveAppExtensions() {
 }
 
 void CANModule::RemoveAppExtension(uint32_t app_id) {
+  application_manager::ApplicationSharedPtr app =
+      service_->GetApplication(app_id);
 
+  if (app.valid()) {
+    application_manager::AppExtensionPtr extension =
+        app->QueryInterface(kCANModuleID);
+
+   if (extension.valid()) {
+      app->RemoveExtension(kCANModuleID);
+    }
+  }
+}
+
+application_manager::ServicePtr CANModule::GetServiceHandler() {
+  return service_;
 }
 
 }  //  namespace can_cooperation

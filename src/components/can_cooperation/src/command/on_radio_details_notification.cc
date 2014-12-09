@@ -31,6 +31,7 @@
  */
 
 #include "can_cooperation/commands/on_radio_details_notification.h"
+#include "functional_module/function_ids.h"
 
 namespace can_cooperation {
 

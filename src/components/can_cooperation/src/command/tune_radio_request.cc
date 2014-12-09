@@ -31,6 +31,8 @@
  */
 
 #include "can_cooperation/commands/tune_radio_request.h"
+#include "functional_module/function_ids.h"
+#include "json/json.h"
 
 namespace can_cooperation {
 
@@ -42,12 +44,77 @@ TuneRadioRequest::TuneRadioRequest(
 }
 
 void TuneRadioRequest::Run() {
+  LOG4CXX_INFO(logger_, "TuneRadioRequest::Run");
 
+  application_manager::ApplicationSharedPtr app =
+      service_->GetApplication(message_->connection_key());
+  if (!app.valid()) {
+    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
+    SendResponse(false, "APPLICATION_NOT_REGISTERED", "");
+    return;
+  }
+
+  CANAppExtensionPtr extension = GetAppExtension(app);
+  if (!extension->IsControlGiven()) {
+    LOG4CXX_ERROR(logger_, "Application doesn't have access!");
+    SendResponse(false, "REJECTED", "");
+  }
+
+  SendRequest(functional_modules::can_api::tune_radion,
+              message_->json_message());
 }
 
 void TuneRadioRequest::on_event(const event_engine::Event<application_manager::MessagePtr,
               std::string>& event) {
+  LOG4CXX_INFO(logger_, "TuneRadioRequest::on_event");
 
+  application_manager::ApplicationSharedPtr app =
+      service_->GetApplication(message_->connection_key());
+  if (!app.valid()) {
+    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
+    SendResponse(false, "APPLICATION_NOT_REGISTERED", "");
+    return;
+  }
+
+  if (functional_modules::can_api::tune_radion == event.id()) {
+    // TODO(VS): create function for result code parsing an use it in all command
+    std::string result_code = "INVALID_DATA";
+    std::string info = "";
+    bool success = false;
+    application_manager::MessagePtr message = event.event_message();
+
+    Json::Value value;
+     Json::Reader reader;
+     reader.parse(message->json_message(), value);
+
+    if (application_manager::MessageType::kResponse == message->type()) {
+      if (value["result"].isMember("code")) {
+        result_code = GetMobileResultCode(
+            static_cast<hmi_apis::Common_Result::eType>(
+                value["result"]["code"].asInt()));
+      }
+    } else if (application_manager::MessageType::kErrorResponse ==
+               message->type()) {
+      if (value["error"].isMember("code")) {
+        result_code = GetMobileResultCode(
+            static_cast<hmi_apis::Common_Result::eType>(
+                value["error"]["code"].asInt()));
+      }
+
+      if (value["error"].isMember("message")) {
+        info = value["result"]["message"].asCString();
+      }
+    }
+
+    if (("SUCCESS" == result_code) || ("WARNINGS" == result_code)) {
+      success = true;
+    }
+
+    SendResponse(success, result_code.c_str(), info);
+  } else {
+    LOG4CXX_ERROR(logger_,"Received unknown event: " << event.id());
+    return;
+  }
 }
 
 }  // namespace commands

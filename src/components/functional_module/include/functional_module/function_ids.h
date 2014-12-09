@@ -55,7 +55,6 @@ namespace hmi_api {
   const char grant_access[]       = "VehicleInfo.GrantAccess";
   const char cancel_access[]      = "VehicleInfo.CancelAccess";
   const char on_control_changed[] = "VehicleInfo.OnControlChanged";
-  const char on_preset_changed[]  = "VehicleInfo.OnPresetChanged";
 }
 
 namespace can_api {

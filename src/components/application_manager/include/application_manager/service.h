@@ -38,6 +38,7 @@
 #include "application_manager/application.h"
 #include "application_manager/message.h"
 
+
 namespace application_manager {
 
 /**
@@ -81,6 +82,14 @@ class Service {
    * @return Unique correlation ID
    */
   virtual uint32_t GetNextCorrelationID() = 0;
+
+
+  /**
+   * @brief Returns all applications
+   *
+   * @return List with shared pointers to applications
+   */
+  virtual const std::set<ApplicationSharedPtr> GetApplications() = 0;
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;

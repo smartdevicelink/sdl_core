@@ -30,11 +30,11 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_OBSERVER_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_OBSERVER_H_
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_OBSERVER_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_OBSERVER_H_
 
 #include <string>
-#include "can_cooperation/event_engine/event_dispatcher.h"
+#include "can_cooperation/event_engine/event.h"
 
 
 namespace event_engine {
@@ -76,28 +76,28 @@ class EventObserver
 
  protected:
 
-  /*
+/*
    * @brief Subscribe to an event
    *
    * @param event_id            The event ID to subscribe for
    * @param hmi_correlation_id  The event HMI correlation ID.
    * If param is omitted, it means subscription for HMI notification
-   */
+
   void subscribe_on_event(const EventID& event_id,
                           int32_t hmi_correlation_id = 0);
 
-  /*
+
    * @brief Unsubscribes the observer from specific event
    *
    * @param event_id    The event ID to unsubscribe from
-   */
+
   void unsubscribe_from_event(const EventID& event_id);
 
-  /*
+
    * @brief Unsubscribes the observer from all events
    *
-   */
-  void unsubscribe_from_all_events();
+
+  void unsubscribe_from_all_events();*/
 
  private:
 
@@ -115,10 +115,10 @@ EventObserver<EventMessage, EventID>::EventObserver()
 
 template<typename EventMessage, typename EventID>
 EventObserver<EventMessage, EventID>::~EventObserver() {
-  unsubscribe_from_all_events();
+  //unsubscribe_from_all_events();
 }
 
-template<typename EventMessage, typename EventID>
+/*template<typename EventMessage, typename EventID>
 void EventObserver<EventMessage, EventID>::subscribe_on_event(
                                   const EventID& event_id,
                                   int32_t hmi_correlation_id) {
@@ -136,8 +136,8 @@ void EventObserver<EventMessage, EventID>::unsubscribe_from_event(
 template<typename EventMessage, typename EventID>
 void EventObserver<EventMessage, EventID>::unsubscribe_from_all_events() {
   EventDispatcher<EventMessage, EventID>::instance()->remove_observer(this);
-}
+}*/
 
 }
 
-#endif // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_OBSERVER_H_
+#endif // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_EVENT_ENGINE_EVENT_OBSERVER_H_

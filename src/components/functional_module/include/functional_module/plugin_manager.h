@@ -57,6 +57,12 @@ public:
   void ChangePluginsState(ModuleState state);
   void OnHMIResponse(application_manager::MessagePtr msg);
   void OnError(ModuleObserver::Errors error, ModuleID module_id);
+
+  /**
+   * @brief Remove extension created for specified application
+   * @param app_id application id
+   */
+  void RemoveAppExtension(uint32_t app_id);
 private:
   PluginManager();
   DISALLOW_COPY_AND_ASSIGN(PluginManager);

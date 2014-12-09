@@ -62,4 +62,9 @@ uint32_t CoreService::GetNextCorrelationID() {
   return ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 }
 
+const std::set<ApplicationSharedPtr> CoreService::GetApplications() {
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  return accessor.applications();
+}
+
 }  // namespace application_manager

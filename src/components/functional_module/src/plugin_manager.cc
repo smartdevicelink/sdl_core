@@ -130,7 +130,7 @@ void PluginManager::UnloadPlugins() {
 }
 
 // TODO(VS): Optimize similar code in ProcessMessage, IsMessageForPlugin,
-//           ProcessHMIMessage, IsHMIMessageForPlugin methods
+//           ProcessHMIMessage, IsHMIMessageForPlugin methods(also we have similar code in can module)
 void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
   DCHECK(msg);
   if (!msg) {
@@ -142,7 +142,10 @@ void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
     PluginFunctionsIterator subscribed_plugin_itr = mobile_subscribers_.find(
         static_cast<MobileFunctionID>(msg->function_id()));
     if (mobile_subscribers_.end() != subscribed_plugin_itr) {
-      subscribed_plugin_itr->second->ProcessMessage(msg);
+      if (ProcessResult::PROCESSED !=
+          subscribed_plugin_itr->second->ProcessMessage(msg)) {
+        LOG4CXX_ERROR(logger_, "Failed process HMI message!");
+      }
     }
   }
 }
@@ -175,7 +178,10 @@ void PluginManager::ProcessHMIMessage(application_manager::MessagePtr msg) {
   PluginHMIFunctionsIterator subscribed_plugin_itr =
       hmi_subscribers_.find(function_name);
   if (hmi_subscribers_.end() != subscribed_plugin_itr) {
-    subscribed_plugin_itr->second->ProcessHMIMessage(msg);
+    if (ProcessResult::PROCESSED !=
+        subscribed_plugin_itr->second->ProcessHMIMessage(msg)) {
+      LOG4CXX_ERROR(logger_, "Failed process HMI message!");
+    }
   }
 }
 
@@ -251,6 +257,12 @@ void PluginManager::OnError(ModuleObserver::Errors error, ModuleID module_id) {
   LOG4CXX_ERROR(logger_, "Error " << error_string << 
     " was received from module " << module_id);
   // TODO(PV)
+}
+
+void PluginManager::RemoveAppExtension(uint32_t app_id) {
+  for(PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
+    it->second->RemoveAppExtension(app_id);
+  }
 }
 
 }  //  namespace functional_modules

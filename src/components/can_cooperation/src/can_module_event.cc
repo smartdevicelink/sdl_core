@@ -35,9 +35,9 @@
 
 namespace can_cooperation {
 
-CanModuleEvent::CanModuleEvent(application_manager::Message& message,
+CanModuleEvent::CanModuleEvent(application_manager::MessagePtr& message,
                                const std::string& id)
-: event_engine::Event<application_manager::Message, std::string>(message, id) {
+: event_engine::Event<application_manager::MessagePtr, std::string>(message, id) {
 }
 
 
@@ -45,15 +45,15 @@ CanModuleEvent::~CanModuleEvent() {
 }
 
 int32_t CanModuleEvent::event_message_function_id() const {
-  return event_message_.function_id();
+  return event_message_->function_id();
 }
 
 int32_t CanModuleEvent::event_message_correlation_id() const {
-  return event_message_.correlation_id();
+  return event_message_->correlation_id();
 }
 
 int32_t CanModuleEvent::event_message_type() const {
-  return event_message_.type();
+  return event_message_->type();
 }
 
 }  //  namespace can_cooperation

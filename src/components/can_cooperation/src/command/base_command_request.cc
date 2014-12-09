@@ -31,18 +31,212 @@
  */
 
 #include "can_cooperation/commands/base_command_request.h"
+#include "can_cooperation/event_engine/event_dispatcher.h"
+#include "can_cooperation/message_helper.h"
+#include "json/json.h"
+#include "can_cooperation/can_module.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
+using event_engine::EventDispatcher;
+
 BaseCommandRequest::BaseCommandRequest(
     const application_manager::MessagePtr& message)
   : message_(message) {
+    service_ = CANModule::instance()->GetServiceHandler();
 }
 
 
 BaseCommandRequest::~BaseCommandRequest() {
+  EventDispatcher<application_manager::MessagePtr, std::string>::instance()->
+      remove_observer(this);
+}
+
+// TODO(VS): Add string(in json format) with response params
+void BaseCommandRequest::SendResponse(const bool success,
+                  const char* result_code,
+                  const std::string info) {
+ message_->set_message_type(application_manager::MessageType::kResponse);
+ Json::Value msg_params;
+
+ msg_params["success"] = success;
+ msg_params["resultCode"] = result_code;
+ if (!info.empty()) {
+   msg_params["info"] = info;
+ }
+
+ Json::FastWriter writer;
+ std::string params = writer.write(msg_params);
+ message_->set_json_message(params);
+ CANModule::instance()->SendResponseToMobile(message_);
+}
+
+void  BaseCommandRequest::SendRequest(const char* function_id,
+                    const std::string& message_params,
+                    bool is_hmi_request) {
+  Json::Value msg;
+
+  if (is_hmi_request) {
+    msg["id"] = service_->GetNextCorrelationID();
+  } else {
+    msg["id"] = MessageHelper::GetNextCANCorrelationID();
+  }
+
+  EventDispatcher<application_manager::MessagePtr, std::string>::instance()->
+      add_observer(function_id, msg["id"].asInt(), this);
+
+  msg["jsonrpc"] = "2.0";
+  msg["method"] = function_id;
+  if (!message_params.empty()) {
+    msg["params"] = message_params;
+  }
+
+  Json::FastWriter writer;
+  std::string json_msg = writer.write(msg);
+  if (is_hmi_request) {
+    application_manager::MessagePtr message_to_send(
+        new application_manager::Message(
+            protocol_handler::MessagePriority::kDefault));
+    message_to_send->set_protocol_version(
+        application_manager::ProtocolVersion::kHMI);
+    message_to_send->set_correlation_id(msg["id"].asInt());
+    message_to_send->set_json_message(json_msg);
+    message_to_send->set_message_type(
+        application_manager::MessageType::kRequest);
+
+    service_->SendMessageToHMI(message_to_send);
+  } else {
+    CANModule::instance()->SendMessageToCan(json_msg);
+  }
+}
+
+// TODO(VS): Create string constants for result codes and use them everywhere in module
+const char* BaseCommandRequest::GetMobileResultCode(
+    const hmi_apis::Common_Result::eType& hmi_code) const {
+  switch (hmi_code) {
+    case hmi_apis::Common_Result::SUCCESS: {
+      return "SUCCESS";
+      break;
+    }
+    case hmi_apis::Common_Result::UNSUPPORTED_REQUEST: {
+      return "UNSUPPORTED_REQUEST";
+      break;
+    }
+    case hmi_apis::Common_Result::UNSUPPORTED_RESOURCE: {
+      return "UNSUPPORTED_RESOURCE";
+      break;
+    }
+    case hmi_apis::Common_Result::DISALLOWED: {
+      return "DISALLOWED";
+      break;
+    }
+    case hmi_apis::Common_Result::REJECTED: {
+      return "REJECTED";
+      break;
+    }
+    case hmi_apis::Common_Result::ABORTED: {
+      return "ABORTED";
+      break;
+    }
+    case hmi_apis::Common_Result::IGNORED: {
+      return "IGNORED";
+      break;
+    }
+    case hmi_apis::Common_Result::RETRY: {
+      return "RETRY";
+      break;
+    }
+    case hmi_apis::Common_Result::IN_USE: {
+      return "IN_USE";
+      break;
+    }
+    case hmi_apis::Common_Result::DATA_NOT_AVAILABLE: {
+      return "VEHICLE_DATA_NOT_AVAILABLE";
+      break;
+    }
+    case hmi_apis::Common_Result::TIMED_OUT: {
+      return "TIMED_OUT";
+      break;
+    }
+    case hmi_apis::Common_Result::INVALID_DATA: {
+      return "INVALID_DATA";
+      break;
+    }
+    case hmi_apis::Common_Result::CHAR_LIMIT_EXCEEDED: {
+      return "CHAR_LIMIT_EXCEEDED";
+      break;
+    }
+    case hmi_apis::Common_Result::INVALID_ID: {
+      return "INVALID_ID";
+      break;
+    }
+    case hmi_apis::Common_Result::DUPLICATE_NAME: {
+      return "DUPLICATE_NAME";
+      break;
+    }
+    case hmi_apis::Common_Result::APPLICATION_NOT_REGISTERED: {
+      return "APPLICATION_NOT_REGISTERED";
+      break;
+    }
+    case hmi_apis::Common_Result::WRONG_LANGUAGE: {
+      return "WRONG_LANGUAGE";
+      break;
+    }
+    case hmi_apis::Common_Result::OUT_OF_MEMORY: {
+      return "OUT_OF_MEMORY";
+      break;
+    }
+    case hmi_apis::Common_Result::TOO_MANY_PENDING_REQUESTS: {
+      return "TOO_MANY_PENDING_REQUESTS";
+      break;
+    }
+    case hmi_apis::Common_Result::NO_APPS_REGISTERED: {
+      return "APPLICATION_NOT_REGISTERED";
+      break;
+    }
+    case hmi_apis::Common_Result::NO_DEVICES_CONNECTED: {
+      return "APPLICATION_NOT_REGISTERED";
+      break;
+    }
+    case hmi_apis::Common_Result::WARNINGS: {
+      return "WARNINGS";
+      break;
+    }
+    case hmi_apis::Common_Result::GENERIC_ERROR: {
+      return "GENERIC_ERROR";
+      break;
+    }
+    case hmi_apis::Common_Result::USER_DISALLOWED: {
+      return "USER_DISALLOWED";
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_, "Unknown HMI result code " << hmi_code);
+      return "GENERIC_ERROR";
+      break;
+    }
+  }
+}
+
+CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
+    application_manager::ApplicationSharedPtr app) const {
+  if (!app.valid()) {
+    return CANAppExtensionPtr();
+  }
+
+  functional_modules::ModuleID id = CANModule::instance()->GetModuleID();
+
+  CANAppExtensionPtr ptr = static_cast<CANAppExtension*>(
+      app->QueryInterface(id).get());
+
+  if (!ptr.valid()) {
+    ptr = new CANAppExtension(id);
+    app->AddExtension(ptr);
+  }
+
+  return ptr;
 }
 
 }  // namespace commands

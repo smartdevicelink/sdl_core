@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "functional_module/plugin_manager.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
@@ -121,6 +122,8 @@ ApplicationImpl::~ApplicationImpl() {
     delete active_message_;
     active_message_ = NULL;
   }
+
+  functional_modules::PluginManager::instance()->RemoveAppExtension(app_id_);
 
   subscribed_buttons_.clear();
   subscribed_vehicle_info_.clear();
