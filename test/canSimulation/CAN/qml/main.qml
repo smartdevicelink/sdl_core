@@ -15,31 +15,53 @@ ApplicationWindow {
     property string logURL: "log.txt"
 
     signal viewClicked(string name)
-    signal createConnection(string ip, int port)
+    signal createConnectionTCP(string ip, int port)
+    signal createConnectionWS(string ip, int port)
     signal sendMessageTCP(string message)
+    signal sendMessageWS(string message)
     signal saveLog(string source, string data)
+
+    Connections {
+        target: RequestHandler
+        onSendMessageHMI: {
+
+            var messageJson = JSON.stringify(message);
+
+            sendMessageWS(messageJson);
+        }
+    }
+
+    Connections {
+        target: RequestHandler
+        onSendMessageSDL: {
+
+            var messageJson = JSON.stringify(message);
+
+            sendMessageTCP(messageJson);
+        }
+    }
 
     function setCurrentPath(path) {
         root.logURL = path + "/log.txt";
         logModel.append({"color":Style.colorLogError, "text": "Carrent log location: " + root.logURL});
     }
 
+    function incomingWS(message) {
+
+        var result = JSON.parse(message);
+
+        RequestHandler.receivedMessageWS(result);
+    }
+
     function incoming(message) {
 
         var result = JSON.parse(message);
 
-        var resp = RequestHandler.receivedMessage(result);
+        var resp = RequestHandler.receivedMessageTCP(result);
 
         var respJson = JSON.stringify(resp);
 
         return respJson;
-    }
-
-    function sendMessage(message) {
-
-        var messageJson = JSON.stringify(message);
-
-        sendMessageTCP(messageJson);
     }
 
     function logger(message, color) {
@@ -79,7 +101,7 @@ ApplicationWindow {
                         }
                         case "OnRadioDetails": {
 
-                            root.sendMessage(RequestHandler.onRadioDetails());
+                            RequestHandler.sendMessageSDL(RequestHandler.onRadioDetails());
 
                             break;
                         }
@@ -93,6 +115,9 @@ ApplicationWindow {
 
 
                 onResponseButtonClick: {
+
+                    var notify;
+
                     switch (item.objectName) {
                         case "TuneUp": {
 
@@ -108,11 +133,25 @@ ApplicationWindow {
                         }
                         case "StartScan": {
 
+                            notify = {
+                                "jsonrpc": "2.0",
+                                "method": "CAN.StartScan"
+                            }
+
+                            RequestHandler.sendMessageHMI(notify);
+
                             RequestHandler.startScan();
 
                             break;
                         }
                         case "StopScan": {
+
+                            notify = {
+                                "jsonrpc": "2.0",
+                                "method": "CAN.StopScan"
+                            }
+
+                            RequestHandler.sendMessageHMI(notify);
 
                             RequestHandler.stopScan();
 
@@ -179,8 +218,11 @@ ApplicationWindow {
 
                     logLocation = root.logURL
                 }
-                onConnect: {
-                    createConnection(settingsComponent.ip, settingsComponent.port);
+                onConnectTCP: {
+                    createConnectionTCP(settingsComponent.ip, settingsComponent.port);
+                }
+                onConnectWS: {
+                    createConnectionWS(settingsComponent.wsIP, settingsComponent.wsPort);
                 }
                 onLogLocationChanged: {
                     root.logURL = logLocation
@@ -209,6 +251,7 @@ ApplicationWindow {
         CastomButton {
             height: parent.height
             text: "Save Log"
+            id: saveLog
             anchors.right: parent.right
             anchors.top: parent.top
             z: parent.z + 1
@@ -222,6 +265,17 @@ ApplicationWindow {
                 }
 
                 saveLog(root.logURL, data);
+                logModel.clear();
+            }
+        }
+
+        CastomButton {
+            height: parent.height
+            text: "Clear Log"
+            anchors.right: saveLog.left
+            anchors.top: parent.top
+            z: parent.z + 1
+            onClicked: {
                 logModel.clear();
             }
         }

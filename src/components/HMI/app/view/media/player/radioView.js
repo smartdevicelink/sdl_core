@@ -51,9 +51,18 @@ SDL.RadioView = Em.ContainerView
             'tuneButtons'
         ],
 
+        songInfo: "",
+
+        genre: "",
+
         info: Em.View.extend( {
+
+            STAName: function() {
+                return 'STA-' + SDL.RadioModel.station.toString().replace('.', '');
+            }.property('SDL.RadioModel.station'),
+
             songInfo: function() {
-                var data = SDL.RadioModel.get('activeMetaData');
+                var data = SDL.RadioModel.radioDetails;
 
                 if (data) {
                     if (!(data.songInfo.name && data.songInfo.artist)) {
@@ -63,14 +72,10 @@ SDL.RadioView = Em.ContainerView
                             return data.songInfo.artist;
                         }
                     } else {
-                        return data.songInfo.name + ' - ' + data.songInfo.artist;
+                            return data.songInfo.name + ' - ' + data.songInfo.artist;
                     }
                 }
-            }.property('SDL.RadioModel.activePreset'),
-
-            STAName: function() {
-                return 'STA-' + SDL.RadioModel.station.toString().replace('.', '');
-            }.property('SDL.RadioModel.station'),
+            }.property('SDL.RadioModel.radioDetails.songInfo.artist', 'SDL.RadioModel.radioDetails.songInfo.name'),
 
             template: Em.Handlebars
                 .compile( '{{#with view}}'
@@ -78,7 +83,7 @@ SDL.RadioView = Em.ContainerView
                     + '<div class="STAName">{{STAName}}</div>'
                     + '<div class="station">{{SDL.RadioModel.station}}</div>'
                     + '<div class="divider_o"></div>'
-                    + '<div class="genre">{{SDL.RadioModel.activeMetaData.songInfo.genre}}</div>'
+                    + '<div class="genre">{{SDL.RadioView.radioDetails.songInfo.genre}}</div>'
                     + '<div class="songInfo">{{songInfo}}</div>'
                     + '</div>' + '{{/with}}' )
         } ),

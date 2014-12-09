@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QQmlApplicationEngine>
 #include "server.h"
+#include "webServer.h"
 #include "FileSystem.h"
 #include "loger.h"
 #include <QDebug>
@@ -17,19 +18,28 @@ int main(int argc, char *argv[])
 
     QObject *rootObject = engine.rootObjects().first();
 
-    Server myServer(rootObject);
+    WebServer webServer(rootObject);
+    Server tcpServer(rootObject);
     FileSystem fileSystem;
+
     Loger::rootView=rootObject;
 
     QMetaObject::invokeMethod(rootObject, "setCurrentPath",
             Q_ARG(QVariant,  QDir::currentPath()));
 
     // Step 2: connect qml signal to C++ slot
-    QObject::connect(rootObject,SIGNAL(viewClicked(QString)), &myServer, SLOT(write(QString)));
-    QObject::connect(rootObject,SIGNAL(createConnection(QString, int)), &myServer, SLOT(createConection(QString, int)));
-    QObject::connect(rootObject,SIGNAL(sendMessageTCP(QString)), &myServer, SLOT(write(QString)));
+    QObject::connect(rootObject,SIGNAL(viewClicked(QString)), &tcpServer, SLOT(write(QString)));
+    QObject::connect(rootObject,SIGNAL(createConnectionTCP(QString, int)), &tcpServer, SLOT(createConection(QString, int)));
+    QObject::connect(rootObject,SIGNAL(sendMessageTCP(QString)), &tcpServer, SLOT(write(QString)));
     QObject::connect(rootObject,SIGNAL(saveLog(QString, QString)), &fileSystem, SLOT(write(QString, QString)));
 
+
+    QObject::connect(rootObject,SIGNAL(createConnectionWS(QString, int)), &webServer, SLOT(createConection(QString, int)));
+    QObject::connect(rootObject,SIGNAL(sendMessageWS(QString)), &webServer, SLOT(write(QString)));
+
+
+    //QObject::connect(&webServer,SIGNAL(sendToSDL(QString, QString)), &tcpServer, SLOT(write(QString, QString)));
+    //QObject::connect(&tcpServer,SIGNAL(sendToHMI(QString, QString)), &webServer, SLOT(write(QString, QString)));
 
     return app.exec();
 }

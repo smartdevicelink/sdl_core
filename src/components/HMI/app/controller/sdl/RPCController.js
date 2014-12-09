@@ -41,7 +41,10 @@ SDL.RPCController = Em.Object
          */
         ConnectToSDL: function() {
 
-            FFW.TDKCommunicationRPC.connect();
+            if (FLAGS.CAN) {
+                FFW.CAN.connect();
+            }
+
             if (FLAGS.Buttons) {
                 FFW.Buttons.connect();
             }

@@ -265,7 +265,7 @@ SDL.SDLController = Em.Object
                 SDL.SwitchPopUp.deactivate();
                 if (value) {
                     FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode['SUCCESS'], SDL.SDLModel.controlRequestID, "VehicleInfo.GrantAccess");
-                    FFW.VehicleInfo.OnRadioDetails({"radioStation": SDL.RadioModel.radioDetails.radioStation});
+                    FFW.CAN.OnRadioDetails({"radioStation": SDL.RadioModel.radioDetails.radioStation});
                 } else {
                     FFW.VehicleInfo.sendError(SDL.SDLModel.resultCode['REJECTED'], SDL.SDLModel.controlRequestID, "VehicleInfo.GrantAccess", "Request cancelled.");
                 }

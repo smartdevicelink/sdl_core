@@ -382,55 +382,55 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
             this.client.send(JSONMessage);
         }
     },
-
-    /**
-     * Send error response from onRPCRequest
-     *
-     * @param {Number}
-     *            resultCode
-     * @param {Number}
-     *            id
-     * @param {String}
-     *            method
-     */
-    scanResponse: function(resultCode, id, method, message) {
-
-        Em.Logger.log("FFW." + method + "Response");
-
-        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
-
-            // send repsonse
-            var JSONMessage = {
-                "jsonrpc": "2.0",
-                "id": method == "VehicleInfo.StartScan" ? this.VIStartScanRequestID : this.VIStopScanRequestID,
-                "result": {
-                    "code": resultCode,
-                    "method": method
-                }
-            };
-            this.client.send(JSONMessage);
-        } else {
-            // send repsonse
-            var JSONMessage = {
-                "jsonrpc": "2.0",
-                "id": method == "VehicleInfo.StartScan" ? this.VIStartScanRequestID : this.VIStopScanRequestID,
-                "error": {
-                    "code": resultCode,
-                    "message": message,
-                    "data": {
-                        "method": method
-                    }
-                }
-            };
-            this.client.send(JSONMessage);
-        }
-
-        if (method == "VehicleInfo.StartScan") {
-            this.VIStartScanRequestID = null;
-        } else {
-            this.VIStopScanRequestID = null;
-        }
-    },
+//
+//    /**
+//     * Send error response from onRPCRequest
+//     *
+//     * @param {Number}
+//     *            resultCode
+//     * @param {Number}
+//     *            id
+//     * @param {String}
+//     *            method
+//     */
+//    scanResponse: function(resultCode, id, method, message) {
+//
+//        Em.Logger.log("FFW." + method + "Response");
+//
+//        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
+//
+//            // send repsonse
+//            var JSONMessage = {
+//                "jsonrpc": "2.0",
+//                "id": method == "VehicleInfo.StartScan" ? this.VIStartScanRequestID : this.VIStopScanRequestID,
+//                "result": {
+//                    "code": resultCode,
+//                    "method": method
+//                }
+//            };
+//            this.client.send(JSONMessage);
+//        } else {
+//            // send repsonse
+//            var JSONMessage = {
+//                "jsonrpc": "2.0",
+//                "id": method == "VehicleInfo.StartScan" ? this.VIStartScanRequestID : this.VIStopScanRequestID,
+//                "error": {
+//                    "code": resultCode,
+//                    "message": message,
+//                    "data": {
+//                        "method": method
+//                    }
+//                }
+//            };
+//            this.client.send(JSONMessage);
+//        }
+//
+//        if (method == "VehicleInfo.StartScan") {
+//            this.VIStartScanRequestID = null;
+//        } else {
+//            this.VIStopScanRequestID = null;
+//        }
+//    },
 
     /**
      * Send response from onRPCRequest
@@ -458,51 +458,6 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
 
             this.client.send(JSONMessage);
         }
-    },
-
-    /**
-     * Notification about changed on HMI screen radio presets send to SDL
-     *
-     * @param {Object}
-     */
-    OnPresetsChanged: function(presets) {
-
-        Em.Logger.log("FFW.VehicleInfo.OnPresetsChanged Notification");
-
-        // send repsonse
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "VehicleInfo.OnPresetsChanged",
-            "params": {
-                "customPresets": presets
-            }
-        };
-        this.client.send(JSONMessage);
-
-    },
-
-    /**
-     * Notification When any of current radio tuner details are changed
-     *
-     * @param {Object}
-     */
-    OnRadioDetails: function(data) {
-
-        Em.Logger.log("FFW.VehicleInfo.OnRadioDetails Notification");
-
-        // send repsonse
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "VehicleInfo.OnRadioDetails",
-            "params": {
-            }
-        };
-
-        for (var key in data) {
-            JSONMessage.params[key] = data[key];
-        }
-        this.client.send(JSONMessage);
-
     },
 
     /**

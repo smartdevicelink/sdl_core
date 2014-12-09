@@ -4,6 +4,10 @@ import QtQuick 2.0
 Item {
     id: dataHandler
 
+
+    signal sendMessageHMI(variant message);
+    signal sendMessageSDL(variant message);
+
     //OnPresetsChanged
     property string preset0: "DEFAULT";
     property string preset1: "DEFAULT";
@@ -51,24 +55,190 @@ Item {
     property string street: "DEFAULT";
     property string gpsCoordinates: "DEFAULT";
 
+    property var stationsData: {
+        "1001": {
+                    "radioStation": {
+                        "frequency": 100,
+                        "fraction": 1,
+                        "availableHDs": 0,
+                        "currentHD": 0
+                    },
+                    "songInfo": {
+                        "name": "Song2",
+                        "artist": "Artist2",
+                        "genre": "Genre2",
+                        "album": "Album2",
+                        "year": 2002,
+                        "duration": 20
+                    }
+                },
+        "895":  {
+                    "radioStation": {
+                        "frequency": 89,
+                        "fraction": 5,
+                        "availableHDs": 0,
+                        "currentHD": 0
+                    },
+                    "songInfo": {
+                        "name": "Song1",
+                        "artist": "Artist1",
+                        "genre": "Genre1",
+                        "album": "Album1",
+                        "year": 2001,
+                        "duration": 10
+                    }
+                },
+        "953":  {
+                    "radioStation": {
+                        "frequency": 95,
+                        "fraction": 3,
+                        "availableHDs": 0,
+                        "currentHD": 0
+                    },
+                    "songInfo": {
+                        "name": "Song3",
+                        "artist": "Artist3",
+                        "genre": "Genre3",
+                        "album": "Album3",
+                        "year": 2003,
+                        "duration": 30
+                    }
+                },
+        "1035":  {
+                    "radioStation": {
+                        "frequency": 103,
+                        "fraction": 5,
+                        "availableHDs": 0,
+                        "currentHD": 0
+                    },
+                    "songInfo": {
+                        "name": "Song4",
+                        "artist": "Artist4",
+                        "genre": "Genre4",
+                        "album": "Album4",
+                        "year": 2004,
+                        "duration": 40
+                    }
+                },
+        "1053":  {
+                    "radioStation": {
+                        "frequency": 105,
+                        "fraction": 3,
+                        "availableHDs": 0,
+                        "currentHD": 0
+                    },
+                    "songInfo": {
+                        "name": "Song5",
+                        "artist": "Artist5",
+                        "genre": "Genre5",
+                        "album": "Album5",
+                        "year": 2005,
+                        "duration": 50
+                    }
+                }
+    }
+
     Timer {
         id: tuneUpTimer
-        interval: 100;
+
+        // Specify a timeout interval of 100 miliseconds
+        interval: 150;
         running: false;
         repeat: true
         onTriggered: tuneUp()
     }
 
+    Timer {
+        id: pauseTimer
 
-    function receivedMessage(result) {
+        // Specify a timeout interval of 2 seconds
+        interval: 3000
+
+        onTriggered: {
+            tuneUpTimer.start();
+            pauseTimer.stop();
+        }
+    }
+
+    function receivedMessageTCP(result) {
+
+
+        var notify;
 
         switch (result.method) {
             case "CAN.TuneRadio": {
 
                 if (result.params.radioStation.frequency) {
                     dataHandler.frequency = result.params.radioStation.frequency
-                    console.log("RequestHandler receivedMessage radioStation.frequency", result.params.radioStation.frequency);
-                    console.log("RequestHandler dataHandler frequency", dataHandler.frequency);
+                }
+                if (result.params.radioStation.availableHDs) {
+                    dataHandler.availableHDs = result.params.radioStation.availableHDs
+                }
+                if (result.params.radioStation.currentHD) {
+                    dataHandler.currentHD = result.params.radioStation.currentHD
+                }
+                if (result.params.radioStation.fraction) {
+                    dataHandler.fraction = result.params.radioStation.fraction
+                }
+
+                data = result.params.radioStation.frequency * 10 + result.params.radioStation.fraction;
+
+                checkRadioDetailsSongInfo(data);
+
+                break;
+            }
+            case "CAN.TuneUp": {
+
+                tuneUp();
+
+                break;
+            }
+            case "CAN.TuneDown": {
+
+                tuneDown();
+
+                break;
+            }
+            case "CAN.StartScan": {
+
+                notify = {
+                    "jsonrpc": "2.0",
+                    "method": "CAN.StartScan"
+                }
+
+                sendMessageHMI(notify);
+
+                startScan();
+
+                break;
+            }
+            case "CAN.StopScan": {
+
+                notify = {
+                    "jsonrpc": "2.0",
+                    "method": "CAN.StopScan"
+                }
+
+                sendMessageHMI(notify);
+
+                stopScan();
+
+                break;
+            }
+        }
+
+        return successResponse(result.id, result.method);
+    }
+
+    function receivedMessageWS(result) {
+
+        var data = 0;
+
+        switch (result.method) {
+            case "CAN.TuneRadio": {
+
+                if (result.params.radioStation.frequency) {
+                    dataHandler.frequency = result.params.radioStation.frequency
                 }
                 if (result.params.radioStation.fraction) {
                     dataHandler.fraction = result.params.radioStation.fraction
@@ -80,11 +250,36 @@ Item {
                     dataHandler.currentHD = result.params.radioStation.currentHD
                 }
 
+                data = result.params.radioStation.frequency * 10 + result.params.radioStation.fraction;
+
+                checkRadioDetailsSongInfo(data);
+
                 break;
             }
             case "CAN.TuneUp": {
 
                 tuneUp();
+
+                break;
+            }
+            case "CAN.OnRadioDetails": {
+
+                if (result.params.radioStation.frequency) {
+                    dataHandler.frequency = result.params.radioStation.frequency
+                }
+                if (result.params.radioStation.fraction) {
+                    dataHandler.fraction = result.params.radioStation.fraction
+                }
+                if (result.params.radioStation.availableHDs) {
+                    dataHandler.availableHDs = result.params.radioStation.availableHDs
+                }
+                if (result.params.radioStation.currentHD) {
+                    dataHandler.currentHD = result.params.radioStation.currentHD
+                }
+
+                data = result.params.radioStation.frequency * 10 + result.params.radioStation.fraction;
+
+                checkRadioDetailsSongInfo(data);
 
                 break;
             }
@@ -106,43 +301,93 @@ Item {
 
                 break;
             }
+            case "CAN.OnPresetsChanged": {
+
+                presetsChangeWS(result.params);
+
+                break;
+            }
         }
 
         return successResponse(result.id, result.method);
     }
 
+    function checkRadioDetailsSongInfo(data) {
+
+        if (dataHandler.stationsData[data]) {
+
+            if (tuneUpTimer.running) {
+                tuneUpTimer.stop();
+                pauseTimer.start();
+            }
+
+            var notification;
+
+            notification = {
+                "jsonrpc": "2.0",
+                "method": "CAN.OnRadioDetails",
+                "params": dataHandler.stationsData[data]
+            }
+
+            sendMessageHMI(notification);
+            sendMessageSDL(notification);
+        }
+    }
+
+    function presetsChangeWS(params) {
+
+        dataHandler.preset0 = params.customPresets[0];
+        dataHandler.preset1 = params.customPresets[1];
+        dataHandler.preset2 = params.customPresets[2];
+        dataHandler.preset3 = params.customPresets[3];
+        dataHandler.preset4 = params.customPresets[4];
+        dataHandler.preset5 = params.customPresets[5];
+
+        sendMessageHMI(dataHandler.onPresetsChanged(params.customPresets));
+    }
+
+    function presetsChangeTCP(params) {
+
+        dataHandler.preset0 = params.customPresets[0];
+        dataHandler.preset1 = params.customPresets[1];
+        dataHandler.preset2 = params.customPresets[2];
+        dataHandler.preset3 = params.customPresets[3];
+        dataHandler.preset4 = params.customPresets[4];
+        dataHandler.preset5 = params.customPresets[5];
+
+        sendMessageHMI(dataHandler.onPresetsChanged(params.customPresets));
+    }
+
     function tuneUp() {
 
-        dataHandler.fraction += 2;
-        if (dataHandler.fraction == 10) {
-            dataHandler.fraction = 0;
-            dataHandler.frequency += 1;
-        } else if (dataHandler.fraction == 11) {
-            dataHandler.fraction = 1;
-            dataHandler.frequency += 1;
+        var data = dataHandler.fraction + dataHandler.frequency * 10;
+
+        data += 2;
+
+        if (data >= 1080) {
+            data = 879;
         }
 
-        if (dataHandler.frequency == 108) {
-            dataHandler.frequency = 87;
-            dataHandler.fraction = 8;
-        }
+        dataHandler.frequency = Math.floor(data / 10);
+        dataHandler.fraction = data % 10;
+
+        checkRadioDetailsSongInfo(data);
     }
 
     function tuneDown() {
 
-        dataHandler.fraction -= 2;
-        if (dataHandler.fraction == -2) {
-            dataHandler.fraction = 8;
-            dataHandler.frequency -= 1;
-        } else if (dataHandler.fraction == -1) {
-            dataHandler.fraction = 9;
-            dataHandler.frequency -= 1;
+        var data = dataHandler.fraction + dataHandler.frequency * 10;
+
+        data -= 2;
+
+        if (data <= 877) {
+            data = 1079;
         }
 
-        if (dataHandler.frequency == 87 && dataHandler.fraction < 8) {
-            dataHandler.frequency = 108;
-            dataHandler.fraction = 0;
-        }
+        dataHandler.frequency = Math.floor(data / 10);
+        dataHandler.fraction = data % 10;
+
+        checkRadioDetailsSongInfo(data);
     }
 
     function startScan() {
@@ -151,6 +396,7 @@ Item {
 
     function stopScan() {
         tuneUpTimer.stop();
+        pauseTimer.stop();
     }
 
     function successResponse (id, method) {
@@ -181,6 +427,21 @@ Item {
                     "frequency": dataHandler.frequency,
                     "fraction": dataHandler.fraction
                 }
+            }
+        }
+
+        return response;
+    }
+
+    function onPresetsChanged(presets) {
+
+        var response;
+
+        response = {
+            "jsonrpc": "2.0",
+            "method": "CAN.OnRadioDetails",
+            "params": {
+                "customPresets":presets
             }
         }
 

@@ -123,10 +123,6 @@ SDL.RadioModel = Em.Object.create( {
         }
     ],
 
-    activeMetaData: function() {
-        return this.activePreset != null ? this.presetMetaData[this.activePreset] : null;
-    }.property('activePreset'),
-
     directTuneItems: [],
 
     directTuneKeyItems: [],
@@ -180,12 +176,12 @@ SDL.RadioModel = Em.Object.create( {
             actionCode: 5
         },
         songInfo: {
-            name: "String",
-            artist: "String",
-            genre: "String",
-            album: "String",
-            year: 2013,
-            duration: "String"
+            name: "",
+            artist: "",
+            genre: "",
+            album: "",
+            year: 0,
+            duration: ""
         },
         location: {
             address: {
@@ -210,9 +206,7 @@ SDL.RadioModel = Em.Object.create( {
         this.preset[element.preset] = this.station;
 
         SDL.RadioModel.set('activePreset', element.preset);
-//        FFW.VehicleInfo.OnPresetsChanged(this.preset);
-        FFW.TDKCommunicationRPC.send('frequency_set_' + Number(this.station)*1000);
-        FFW.TDKCommunicationRPC.send('store_preset_' + (element.preset + 1));
+        FFW.CAN.OnPresetsChanged(this.preset);
     },
 
     directTune: function(){
@@ -222,6 +216,77 @@ SDL.RadioModel = Em.Object.create( {
         } else {
             this.set('station', this.temp);
             this.set('directTuneFinished', false);
+        }
+    },
+
+    updateSongInfo: function(params) {
+
+        if (!params) {
+
+            this.set("radioDetails.songInfo.name", "");
+            this.set("radioDetails.songInfo.album", "");
+            this.set("radioDetails.songInfo.artist", "");
+            this.set("radioDetails.songInfo.genre", "");
+            this.set("radioDetails.songInfo.year", "");
+
+        } else {
+            if (SDL.RadioModel.activeBand == 'fm') {
+
+
+                if (params.name != null) {
+                    this.set("radioDetails.songInfo.name", params.name);
+                } else {
+                    this.set("radioDetails.songInfo.name", "");
+                }
+                if (params.album != null) {
+                    this.set("radioDetails.songInfo.album", params.album);
+                } else {
+                    this.set("radioDetails.songInfo.album", "");
+                }
+                if (params.artist != null) {
+                    this.set("radioDetails.songInfo.artist", params.artist);
+                } else {
+                    this.set("radioDetails.songInfo.artist", "");
+                }
+                if (params.genre != null) {
+                    this.set("radioDetails.songInfo.genre", params.genre);
+                } else {
+                    this.set("radioDetails.songInfo.genre", "");
+                }
+                if (params.year != null) {
+                    this.set("radioDetails.songInfo.year", params.year);
+                } else {
+                    this.set("radioDetails.songInfo.year", "");
+                }
+                if (params.duration != null) {
+                    this.set("radioDetails.songInfo.duration", params.duration);
+                } else {
+                    this.set("radioDetails.songInfo.duration", "");
+                }
+            }
+        }
+    },
+
+    updateRadioFrequency: function(params) {
+        if (SDL.RadioModel.activeBand == 'fm') {
+
+            if (params.frequency != null) {
+                SDL.RadioModel.radioDetails.radioStation.frequency = params.frequency;
+            }
+            if (params.fraction != null) {
+                SDL.RadioModel.radioDetails.radioStation.fraction = params.fraction;
+            }
+            if (params.availableHDs != null) {
+                SDL.RadioModel.radioDetails.radioStation.availableHDs = params.availableHDs;
+            }
+            if (params.currentHD != null) {
+                SDL.RadioModel.radioDetails.radioStation.currentHD = params.currentHD;
+            }
+            SDL.RadioModel.set('station', SDL.RadioModel.radioDetails.radioStation.frequency
+                + '.'
+                + SDL.RadioModel.radioDetails.radioStation.fraction);
+
+            SDL.RadioModel.findStationPresets();
         }
     },
 
@@ -254,9 +319,7 @@ SDL.RadioModel = Em.Object.create( {
         SDL.RadioModel.set('activePreset', element.preset);
         SDL.RadioModel.radioDetails.radioStation.frequency = parseInt(SDL.RadioModel.station.slice(0, -1));
         SDL.RadioModel.radioDetails.radioStation.fraction = parseInt(SDL.RadioModel.station.slice(-1));
-        FFW.VehicleInfo.OnRadioDetails({"radioStation": SDL.RadioModel.radioDetails.radioStation});
-//        FFW.TDKCommunicationRPC.send('set_preset_' +(element.preset + 1));
-        FFW.TDKCommunicationRPC.send('frequency_set_' + Number(this.station)*1000);
+        FFW.CAN.OnRadioDetails({"radioStation": SDL.RadioModel.radioDetails.radioStation});
 
         SDL.SDLModel.resetControl();
     },
@@ -282,8 +345,7 @@ SDL.RadioModel = Em.Object.create( {
 
             this.findStationPresets();
 
-            FFW.VehicleInfo.OnRadioDetails({"radioStation": SDL.RadioModel.radioDetails.radioStation});
-            FFW.TDKCommunicationRPC.send('frequency_set_' + Number(SDL.RadioModel.station)*1000);
+            FFW.CAN.OnRadioDetails({"radioStation": SDL.RadioModel.radioDetails.radioStation});
 
             SDL.SDLModel.resetControl();
         }
@@ -313,29 +375,8 @@ SDL.RadioModel = Em.Object.create( {
     startScan: function(){
 
         this.toggleProperty('scanState');
-        this.radioDetails.radioStation.frequency = 87;
-        this.radioDetails.radioStation.fraction = 9;
-        if (SDL.RadioModel) {
-            this.scanTimer = setInterval(function(){
 
-                if (SDL.RadioModel.radioDetails.radioStation.fraction < 9) {
-                    SDL.RadioModel.radioDetails.radioStation.fraction++;
-                } else if (SDL.RadioModel.radioDetails.radioStation.frequency < 107) {
-                    SDL.RadioModel.radioDetails.radioStation.frequency++;
-                    SDL.RadioModel.radioDetails.radioStation.fraction = 0;
-                }
-                SDL.RadioModel.set('station', SDL.RadioModel.radioDetails.radioStation.frequency + '.' + SDL.RadioModel.radioDetails.radioStation.fraction);
-
-                SDL.RadioModel.findStationPresets();
-
-                FFW.VehicleInfo.OnRadioDetails({"radioStation": SDL.RadioModel.radioDetails.radioStation});
-                FFW.TDKCommunicationRPC.send('frequency_set_' + Number(SDL.RadioModel.station)*1000);
-
-                if (SDL.RadioModel.radioDetails.radioStation.frequency == 107 && SDL.RadioModel.radioDetails.radioStation.fraction == 9) {
-                    SDL.RadioModel.stopScan(true); // True parameter means that scan is finished
-                }
-            }, 100);
-        }
+        FFW.CAN.StartScan();
     },
 
     /*
@@ -346,22 +387,9 @@ SDL.RadioModel = Em.Object.create( {
     stopScan: function(timedOut){
 
         this.toggleProperty('scanState');
-        clearInterval(this.scanTimer);
-        this.set('temp', this.station);
-        if (timedOut && FFW.VehicleInfo.VIStartScanRequestID) {
 
-            FFW.VehicleInfo.scanResponse(SDL.SDLModel.resultCode["SUCCESS"], FFW.VehicleInfo.VIStartScanRequestID, "VehicleInfo.StartScan");
 
-        } else if (FFW.VehicleInfo.VIStartScanRequestID && !FFW.VehicleInfo.VIStopScanRequestID) {
-
-            FFW.VehicleInfo.scanResponse(SDL.SDLModel.resultCode["ABORTED"], FFW.VehicleInfo.VIStartScanRequestID, "VehicleInfo.StartScan", "Scan stopped by driver.");
-
-        } else if (FFW.VehicleInfo.VIStartScanRequestID && FFW.VehicleInfo.VIStopScanRequestID) {
-
-            FFW.VehicleInfo.scanResponse(SDL.SDLModel.resultCode["ABORTED"], FFW.VehicleInfo.VIStartScanRequestID, "VehicleInfo.StartScan", "Scan stopped by mobile user.");
-            FFW.VehicleInfo.scanResponse(SDL.SDLModel.resultCode["SUCCESS"], FFW.VehicleInfo.VIStopScanRequestID, "VehicleInfo.StopScan");
-
-        }
+        FFW.CAN.StopScan();
     },
 
     radioTune: function(params){
@@ -373,7 +401,7 @@ SDL.RadioModel = Em.Object.create( {
         this.findStationPresets();
 
         FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode["SUCCESS"], FFW.VehicleInfo.VITuneRadioRequestID, "VehicleInfo.TuneRadio");
-        FFW.TDKCommunicationRPC.send('frequency_set_' + Number(SDL.RadioModel.station)*1000);
+        FFW.CAN.send('frequency_set_' + Number(SDL.RadioModel.station)*1000);
     },
 
     tuneUpPress: function () {
@@ -389,11 +417,11 @@ SDL.RadioModel = Em.Object.create( {
     },
 
     tuneUp: function () {
-        FFW.TDKCommunicationRPC.send('step_up');
+        FFW.CAN.TuneUp('step_up');
     },
 
     tuneDown: function () {
-        FFW.TDKCommunicationRPC.send('step_down');
+        FFW.CAN.TuneDown('step_down');
     },
 
     findStationPresets: function() {

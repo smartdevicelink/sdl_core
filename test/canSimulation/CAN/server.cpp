@@ -18,12 +18,12 @@ Server::~Server()
 
 void Server::createConection(QString IP, int port)
 {
-    Loger::loger("Start listening:" + IP + ":" + QString::number(port), RED);
+    Loger::loger("Start listening TCP:" + IP + ":" + QString::number(port), RED);
 
     QHostAddress hostadd(IP);
 
     if (!tcpServer->listen(hostadd, port)) {
-        Loger::loger("Unable to start the server: " + tcpServer->errorString(), RED);
+        Loger::loger("Unable to start the TCP server: " + tcpServer->errorString(), RED);
         return;
     }
 }
@@ -31,7 +31,7 @@ void Server::createConection(QString IP, int port)
 void Server::connected()
 {
 
-    Loger::loger("connected...", RED);
+    Loger::loger("TCP connected...", RED);
 
     clientConnection = tcpServer->nextPendingConnection();
 
@@ -54,7 +54,7 @@ void Server::readyRead()
             Q_RETURN_ARG(QVariant, returnedValue),
             Q_ARG(QVariant,  qMessage));
 
-    Loger::loger("Received..." + qMessage, GREEN);
+    Loger::loger("TCP Received..." + qMessage, GREEN);
 
     qb = returnedValue.toString().toUtf8();
 
@@ -65,7 +65,7 @@ void Server::readyRead()
 
 void Server::disconnected()
 {
-    Loger::loger("disconnected...", RED);
+    Loger::loger("TCP disconnected...", RED);
 
     clientConnection->deleteLater();
 }
@@ -75,17 +75,16 @@ void Server::write(QString name)
     QByteArray qb = name.toUtf8();
     char *cName = qb.data();
 
-
     if ((clientConnection != NULL) && (clientConnection->state() == QTcpSocket::ConnectedState)){
 
         clientConnection->write(cName);
-        Loger::loger("Send:" + name, BLUE);
+        Loger::loger("TCP Send:" + name, BLUE);
     } else {
-        Loger::loger("Client is not connected yet...", RED);
+        Loger::loger("TCP Client is not connected yet...", RED);
     }
 }
 
 void Server::displayError(QAbstractSocket::SocketError socketError)
 {
-    Loger::loger("Error: " + socketError, RED);
+    Loger::loger("TCP Error: " + socketError, RED);
 }

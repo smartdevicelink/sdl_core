@@ -31,14 +31,6 @@ Rectangle {
                 spacing: 2
 
                 CastomButton {
-                    id: controlButton
-                    width: Style.buttonWidth
-                    text: "OnControlChanged"
-                    objectName: text
-                    onClicked: requestButtonClick(this)
-                }
-
-                CastomButton {
                     id: presetButton
                     width: Style.buttonWidth
                     text: "OnPresetsChanged"
@@ -67,22 +59,6 @@ Rectangle {
 
                 id: responsesColumn
                 spacing: 2
-
-                CastomButton {
-                    id: accessButton
-                    width: Style.buttonWidth
-                    text: "GrantAccess"
-                    objectName: text
-                    onClicked: responseButtonClick(this)
-                }
-
-                CastomButton {
-                    id: cancelButton
-                    width: Style.buttonWidth
-                    text: "CancelAccess"
-                    objectName: text
-                    onClicked: responseButtonClick(this)
-                }
 
                 CastomButton {
                     id: tuneUpButton
@@ -211,7 +187,9 @@ Rectangle {
                                 target: RequestHandler
                                 onFractionChanged: {
                                     fractionBox.dataText = RequestHandler.fraction
-                                    sendMessage(RequestHandler.onRadioDetailsFractionChanged());
+
+                                    RequestHandler.sendMessageSDL(RequestHandler.onRadioDetailsFractionChanged());
+                                    RequestHandler.sendMessageHMI(RequestHandler.onRadioDetailsFractionChanged());
                                 }
                             }
                         }

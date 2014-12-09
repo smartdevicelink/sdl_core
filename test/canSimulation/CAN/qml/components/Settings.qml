@@ -12,9 +12,12 @@ Rectangle {
 
     property int port: 1234
     property string ip: "127.0.0.1"
+    property int wsPort: 2468
+    property string wsIP: "127.0.0.1"
     property string logLocation: "."
 
-    signal connect()
+    signal connectTCP()
+    signal connectWS()
 
     FileDialog {
         id: fileDialog
@@ -50,7 +53,7 @@ Rectangle {
                 id: ipInput
 
                 dataText: root.ip
-                textLabel: "IP:"
+                textLabel: "TCP IP:"
                 onDataTextChanged: {
                     root.ip = dataText;
                 }
@@ -60,17 +63,44 @@ Rectangle {
                 id: portInput
 
                 dataText: root.port
-                textLabel: "PORT:"
+                textLabel: "TCP PORT:"
                 onDataTextChanged: {
                     root.port = parseInt(dataText, 10);
                 }
             }
 
+            LabelText {
+                id: ipWSInput
+
+                dataText: root.wsIP
+                textLabel: "WS IP:"
+                onDataTextChanged: {
+                    root.wsIP = dataText;
+                }
+            }
+
+            LabelText {
+                id: portWSInput
+
+                dataText: root.wsPort
+                textLabel: "WS PORT:"
+                onDataTextChanged: {
+                    root.wsPort = parseInt(dataText, 10);
+                }
+            }
+
             CastomButton {
-                id: okButton
+                id: okTCPButton
                 width: Style.buttonWidth
-                text: "Create Connection"
-                onClicked: connect()
+                text: "Create Connection TCP"
+                onClicked: connectTCP()
+            }
+
+            CastomButton {
+                id: okWSButton
+                width: Style.buttonWidth
+                text: "Create Connection WS"
+                onClicked: connectWS()
             }
 
             CastomButton {
