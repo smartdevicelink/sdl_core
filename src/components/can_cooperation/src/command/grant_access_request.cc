@@ -43,6 +43,9 @@ GrantAccessRequest::GrantAccessRequest(
   : BaseCommandRequest(message) {
 }
 
+GrantAccessRequest::~GrantAccessRequest() {
+}
+
 void GrantAccessRequest::Run() {
   LOG4CXX_INFO(logger_, "GrantAccessRequest::Run");
 

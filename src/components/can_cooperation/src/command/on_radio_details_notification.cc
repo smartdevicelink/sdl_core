@@ -44,6 +44,9 @@ OnRadioDetailsNotification::OnRadioDetailsNotification(
   : BaseCommandNotification(message) {
 }
 
+OnRadioDetailsNotification::~OnRadioDetailsNotification() {
+}
+
 void OnRadioDetailsNotification::Run() {
   LOG4CXX_INFO(logger_, "OnRadioDetailsNotification::Run");
   // TODO(VS): Create function to get app with control and use it in notifications

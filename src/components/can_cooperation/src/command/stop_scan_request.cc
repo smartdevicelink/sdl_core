@@ -44,6 +44,9 @@ StopScanRequest::StopScanRequest(
   : BaseCommandRequest(message) {
 }
 
+StopScanRequest::~StopScanRequest() {
+}
+
 void StopScanRequest::Run() {
   LOG4CXX_INFO(logger_, "StopScanRequest::Run");
 

@@ -44,6 +44,9 @@ StartScanRequest::StartScanRequest(
   : BaseCommandRequest(message) {
 }
 
+StartScanRequest::~StartScanRequest() {
+}
+
 void StartScanRequest::Run() {
   LOG4CXX_INFO(logger_, "StartScanRequest::Run");
 

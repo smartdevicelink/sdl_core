@@ -44,6 +44,8 @@ CancelAccessRequest::CancelAccessRequest(
   : BaseCommandRequest(message) {
 }
 
+CancelAccessRequest::~CancelAccessRequest() {
+}
 
 void CancelAccessRequest::Run() {
   LOG4CXX_INFO(logger_, "CancelAccessRequest::Run");

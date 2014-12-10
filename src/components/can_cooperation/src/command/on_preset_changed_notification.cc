@@ -44,6 +44,9 @@ OnPresetChangedNotification::OnPresetChangedNotification(
   : BaseCommandNotification(message) {
 }
 
+OnPresetChangedNotification::~OnPresetChangedNotification() {
+}
+
 void OnPresetChangedNotification::Run() {
   LOG4CXX_INFO(logger_, "OnPresetChangedNotification::Run");
   // TODO(VS): Create function to get app with control and use it in notifications

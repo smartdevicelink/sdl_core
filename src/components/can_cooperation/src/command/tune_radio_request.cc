@@ -43,6 +43,9 @@ TuneRadioRequest::TuneRadioRequest(
   : BaseCommandRequest(message) {
 }
 
+TuneRadioRequest::~TuneRadioRequest() {
+}
+
 void TuneRadioRequest::Run() {
   LOG4CXX_INFO(logger_, "TuneRadioRequest::Run");
 

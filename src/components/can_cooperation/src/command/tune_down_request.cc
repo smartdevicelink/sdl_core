@@ -43,6 +43,9 @@ TuneDownRequest::TuneDownRequest(
   : BaseCommandRequest(message) {
 }
 
+TuneDownRequest::~TuneDownRequest() {
+}
+
 void TuneDownRequest::Run() {
   LOG4CXX_INFO(logger_, "TuneDownRequest::Run");
 
