@@ -31,6 +31,8 @@
  */
 
 #include "can_cooperation/commands/on_preset_changed_notification.h"
+#include "can_cooperation/can_module.h"
+#include "can_cooperation/can_app_extension.h"
 #include "functional_module/function_ids.h"
 
 namespace can_cooperation {
@@ -43,7 +45,30 @@ OnPresetChangedNotification::OnPresetChangedNotification(
 }
 
 void OnPresetChangedNotification::Run() {
+  LOG4CXX_INFO(logger_, "OnPresetChangedNotification::Run");
+  // TODO(VS): Create function to get app with control and use it in notifications
 
+  const std::set<application_manager::ApplicationSharedPtr> applications =
+      service_->GetApplications();
+
+  std::set<application_manager::ApplicationSharedPtr>::iterator it =
+      applications.begin();
+
+  for (;it != applications.end(); ++it) {
+    if (it->valid()) {
+      CANAppExtensionPtr extension =
+         static_cast<CANAppExtension*>(
+           (*it)->QueryInterface(CANModule::instance()->GetModuleID()).get());
+
+      if (extension.valid()) {
+        if (extension->IsControlGiven()) {
+          message_->set_connection_key((*it)->app_id());
+          service_->SendMessageToMobile(message_);
+          break;
+        }
+      }
+    }
+  }
 }
 
 }  // namespace commands

@@ -35,6 +35,8 @@
 
 #include "can_cooperation/commands/command.h"
 #include "application_manager/message.h"
+#include "application_manager/service.h"
+#include "utils/logger.h"
 
 namespace can_cooperation {
 
@@ -59,6 +61,11 @@ class BaseCommandNotification : public Command {
 
  protected:
   application_manager::MessagePtr message_;
+  application_manager::ServicePtr service_;
+
+#ifdef ENABLE_LOG
+  static log4cxx::LoggerPtr logger_;
+#endif // ENABLE_LOG
 };
 
 }  // namespace commands

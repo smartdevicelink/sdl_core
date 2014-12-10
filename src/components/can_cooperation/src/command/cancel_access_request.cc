@@ -108,9 +108,11 @@ void CancelAccessRequest::on_event(const event_engine::Event<application_manager
 
     if (("SUCCESS" == result_code) || ("WARNINGS" == result_code)) {
       success = true;
-      CANAppExtensionPtr extension = GetAppExtension(app);
 
+      CANAppExtensionPtr extension = GetAppExtension(app);
       extension->GiveControl(false);
+
+      //CANModule::instance()->SetScanStarted(false);
     }
 
     SendResponse(success, result_code.c_str(), info);

@@ -39,6 +39,15 @@ namespace commands {
 BaseCommandNotification::BaseCommandNotification(
     const application_manager::MessagePtr& message)
   : message_(message) {
+  service_ = CANModule::instance()->GetServiceHandler();
+
+  Json::Value value;
+  Json::Reader reader;
+  reader.parse(message_->json_message(), value);
+  if (value.isMember("params")) {
+    Json::Writer writer;
+    message_->set_json_message(writer.write(value["params"]));
+  }
 }
 
 
