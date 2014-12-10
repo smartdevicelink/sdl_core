@@ -63,6 +63,7 @@ void OnControlChangedNotification::Run() {
         if (extension.valid()) {
           if (extension->IsControlGiven()) {
             extension->GiveControl(false);
+            CANModule::instance()->SetScanStarted(false);
             message_->set_connection_key((*it)->app_id());
             service_->SendMessageToMobile(message_);
             break;

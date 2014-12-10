@@ -120,7 +120,7 @@ functional_modules::ProcessResult HandleMessage(
  friend class TCPClientDelegate;
 };
 
-//EXPORT_FUNCTION(CANModule);
+EXPORT_FUNCTION(CANModule);
 
 }
 

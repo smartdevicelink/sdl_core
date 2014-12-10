@@ -31,6 +31,7 @@
  */
 
 #include "can_cooperation/commands/cancel_access_request.h"
+#include "can_cooperation/can_module.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
 
@@ -112,7 +113,7 @@ void CancelAccessRequest::on_event(const event_engine::Event<application_manager
       CANAppExtensionPtr extension = GetAppExtension(app);
       extension->GiveControl(false);
 
-      //CANModule::instance()->SetScanStarted(false);
+      CANModule::instance()->SetScanStarted(false);
     }
 
     SendResponse(success, result_code.c_str(), info);
