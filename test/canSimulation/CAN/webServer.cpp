@@ -1,24 +1,22 @@
+#include "QtWebSockets/qwebsocketserver.h"
+#include "QtWebSockets/qwebsocket.h"
 #include "webServer.h"
 #include "loger.h"
 #include "color.h"
-#include "QtWebSockets/qwebsocketserver.h"
-#include "QtWebSockets/qwebsocket.h"
-#include <QtCore/QDebug>
+//#include <QtCore/QDebug>
 
-QT_USE_NAMESPACE
+//QT_USE_NAMESPACE
 
-WebServer::WebServer(QObject *rootObject) :
-    m_pWebSocketServer(new QWebSocketServer(QStringLiteral("Web Server"),
-                                            QWebSocketServer::NonSecureMode, this)),
-    rootView(rootObject),
-    m_client(NULL)
-{
+WebServer::WebServer(QObject *rootObject) : rootView(rootObject), m_client(NULL), QObject() {
+
+    m_pWebSocketServer = new QWebSocketServer(QStringLiteral("Web Server"), QWebSocketServer::NonSecureMode, this);
+
     connect(m_pWebSocketServer, &QWebSocketServer::newConnection, this, &WebServer::onNewConnection);
 }
 
 WebServer::~WebServer()
 {
-    m_pWebSocketServer->close();
+    //m_pWebSocketServer->close();
     delete m_client;
 }
 

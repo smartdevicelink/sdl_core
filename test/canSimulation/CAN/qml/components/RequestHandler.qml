@@ -343,7 +343,7 @@ Item {
         dataHandler.preset4 = params.customPresets[4];
         dataHandler.preset5 = params.customPresets[5];
 
-        sendMessageHMI(dataHandler.onPresetsChanged(params.customPresets));
+        sendMessageSDL(dataHandler.onPresetsChanged(params.customPresets));
     }
 
     function presetsChangeTCP(params) {

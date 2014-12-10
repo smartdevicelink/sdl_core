@@ -32,8 +32,8 @@ cmake_minimum_required(VERSION 2.8.11)
 
 project(CAN)
 
-set(CAN_SOURCES main.cpp server.cpp FileSystem.cpp loger.cpp)
-set(CAN_HEADERS server.h FileSystem.h loger.h color.h)
+set(CAN_SOURCES server.cpp webServer.cpp FileSystem.cpp loger.cpp main.cpp)
+set(CAN_HEADERS server.h webServer.h FileSystem.h loger.h color.h)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -48,7 +48,7 @@ QT5_ADD_RESOURCES(RESOURCES qml.qrc)
 # Tell CMake to create the helloworld executable
 add_executable(CAN ${CAN_SOURCES} ${RESOURCES})
 
-qt5_use_modules(CAN Qml Quick Widgets)
+qt5_use_modules(CAN Qml Quick WebSockets Widgets)
 
 # Use the Widgets module from Qt 5.
 target_link_libraries(CAN Qt5::Widgets)
