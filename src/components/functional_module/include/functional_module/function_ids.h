@@ -64,7 +64,7 @@ namespace can_api {
   const char tune_up[]            = "CAN.TuneUp";
   const char tune_down[]          = "CAN.TuneDown";
   const char on_radio_details[]   = "CAN.OnRadioDetails";
-  const char on_preset_changed[]  = "CAN.OnPresetChanged";
+  const char on_preset_changed[]  = "CAN.OnPresetsChanged";
 }
 
 }  //  namespace functional_modules
