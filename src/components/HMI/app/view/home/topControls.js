@@ -66,7 +66,7 @@ SDL.TopControls = Em.ContainerView.extend( {
         sdlControlStatus: SDL.Button.extend( {
             elementId:			'sdlControlStatus',
 
-            classNameBindings: 'SDL.SDLAppController.model.givenControl:mobile',
+            classNameBindings: 'SDL.SDLModel.givenControlFlag:mobile',
 
             target: 'SDL.SDLModel',
 

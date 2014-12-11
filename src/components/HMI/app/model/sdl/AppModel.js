@@ -71,13 +71,6 @@ SDL.SDLAppModel = Em.Object.extend({
          */
         navigationAudioStream: null,
 
-        /**
-         * Parameter of controll permissions deligation to mobile app
-         *
-         * @type {Boolean}
-         */
-        givenControl: false,
-
 
         /**
          * Parameter is applicable app type classification

@@ -187,6 +187,20 @@ SDL.SDLModel = Em.Object.create({
     AudioPassThruState: false,
 
     /**
+     * Parameter of controll permissions deligation to mobile app
+     *
+     * @type {number}
+     */
+    givenControl: null,
+
+    /**
+     * Parameter of controll permissions deligation to mobile app
+     *
+     * @type {number}
+     */
+    givenControlFlag: false,
+
+    /**
      * Id of current processed VehicleInfo.GrantAccess request
      *
      * @param {Number}
@@ -1315,20 +1329,21 @@ SDL.SDLModel = Em.Object.create({
      * @param {Object}
      */
     giveControl: function (message) {
-        SDL.SwitchPopUp.activate(message.params);
+        SDL.SwitchPopUp.activate(message.params.appID);
         SDL.SDLModel.controlRequestID = message.id;
     },
 
     resetControl: function () {
-        if (SDL.SDLAppController && SDL.SDLAppController.model && SDL.SDLAppController.model.givenControl) {
-            SDL.SDLAppController.model.set('givenControl', false);
+        if (SDL.SDLAppController && SDL.SDLAppController.model && SDL.SDLModel.givenControl) {
             FFW.VehicleInfo.OnControlChanged();
+            SDL.SDLModel.givenControl = null;
         }
     },
 
     cancelControl: function (request) {
-        SDL.SDLController.getApplicationModel(request.params.appID).set('givenControl', false);
         FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, "VehicleInfo.CancelAccess");
+        SDL.SDLModel.givenControl = null;
+        SDL.SDLModel.set('givenControlFlag', false);
     },
 
     /**

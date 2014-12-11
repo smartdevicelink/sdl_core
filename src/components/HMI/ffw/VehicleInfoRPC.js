@@ -492,6 +492,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
      */
     OnControlChanged: function() {
 
+        SDL.SDLModel.set('givenControlFlag', false);
         Em.Logger.log("FFW.VehicleInfo.OnControlChanged Notification");
 
         // send repsonse

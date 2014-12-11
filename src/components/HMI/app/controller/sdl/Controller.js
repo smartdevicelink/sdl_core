@@ -260,16 +260,17 @@ SDL.SDLController = Em.Object
          *
          * @type {Object}
          */
-        SwitchPopUpAction: function (value) {
+        SwitchPopUpAction: function (appID) {
             if (SDL.SDLAppController && SDL.SDLAppController.model) {
                 SDL.SwitchPopUp.deactivate();
-                if (value) {
+                if (appID) {
                     FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode['SUCCESS'], SDL.SDLModel.controlRequestID, "VehicleInfo.GrantAccess");
+                    SDL.SDLModel.set('givenControl', appID);
+                    SDL.SDLModel.set('givenControlFlag', true);
                     FFW.CAN.OnRadioDetails({"radioStation": SDL.RadioModel.radioDetails.radioStation});
                 } else {
                     FFW.VehicleInfo.sendError(SDL.SDLModel.resultCode['REJECTED'], SDL.SDLModel.controlRequestID, "VehicleInfo.GrantAccess", "Request cancelled.");
                 }
-                SDL.SDLAppController.model.set('givenControl', value);
                 SDL.SDLModel.set('controlRequestID', null);
             }
         },

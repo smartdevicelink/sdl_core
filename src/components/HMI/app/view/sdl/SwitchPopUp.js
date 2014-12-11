@@ -69,6 +69,8 @@ SDL.SwitchPopUp = Em.ContainerView.create({
 
     timer: null,
 
+    appID: null,
+
     /**
      * Wagning image on Alert PopUp
      */
@@ -129,7 +131,8 @@ SDL.SwitchPopUp = Em.ContainerView.create({
     buttonOk: SDL.Button.extend({
         classNames: 'buttonOk softButton',
         actionUp: function () {
-            SDL.SDLController.SwitchPopUpAction(true);
+            SDL.SDLController.SwitchPopUpAction(SDL.SwitchPopUp.appID);
+            SDL.SwitchPopUp.appID = null;
             return false;
         },
         value: true,
@@ -143,15 +146,17 @@ SDL.SwitchPopUp = Em.ContainerView.create({
     buttonCancel: SDL.Button.extend({
         classNames: 'buttonCancel softButton',
         actionUp: function () {
-            SDL.SDLController.SwitchPopUpAction(false);
+            SDL.SDLController.SwitchPopUpAction(null);
+            SDL.SwitchPopUp.appID = null;
         },
         templateName: 'text',
         text: 'Deny'
     }),
 
-    activate: function(params) {
+    activate: function(appID) {
 
-        this.set('appName', SDL.SDLController.getApplicationModel(params.appID).appName);
+        this.set('appName', SDL.SDLController.getApplicationModel(appID).appName);
+        SDL.SwitchPopUp.appID = appID;
         if (this.appName) {
             this.set('content1', 'Mobile Device "'+ this.appName +'" is requesting access to take control of the onboard HD Radio system.');
         }
