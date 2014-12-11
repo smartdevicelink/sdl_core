@@ -113,7 +113,7 @@ void StartScanRequest::on_event(const event_engine::Event<application_manager::M
       }
 
       if (value["error"].isMember("message")) {
-        info = value["result"]["message"].asCString();
+        info = value["error"]["message"].asCString();
       }
     }
 

@@ -217,7 +217,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     case application_manager::MessageType::kNotification: {
       if (functional_modules::can_api::on_preset_changed ==
           function_name) {
-        msg->set_function_id(MobileFunctionID::ON_PRESET_CHANGED);
+        msg->set_function_id(MobileFunctionID::ON_CONTROL_CHANGED);
       } else if (functional_modules::hmi_api::on_control_changed ==
                  function_name) {
         msg->set_function_id(MobileFunctionID::ON_CONTROL_CHANGED);
