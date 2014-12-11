@@ -64,6 +64,7 @@ void CancelAccessRequest::Run() {
   if (!extension->IsControlGiven()) {
     LOG4CXX_ERROR(logger_, "Application doesn't have access!");
     SendResponse(false, "REJECTED", "");
+    return;
   }
 
   SendRequest(functional_modules::hmi_api::cancel_access, "", true);

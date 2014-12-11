@@ -61,13 +61,13 @@ void OnControlChangedNotification::Run() {
 
     for (;it != applications.end(); ++it) {
       if (it->valid()) {
-        CANAppExtensionPtr extension =
-           static_cast<CANAppExtension*>(
-             (*it)->QueryInterface(CANModule::instance()->GetModuleID()).get());
-
-        if (extension.valid()) {
-          if (extension->IsControlGiven()) {
-            extension->GiveControl(false);
+        application_manager::AppExtensionPtr app_extension =
+            (*it)->QueryInterface(CANModule::instance()->GetModuleID());
+        if (app_extension.valid()) {
+          CANAppExtensionPtr can_app_extension =
+             static_cast<CANAppExtension*>(app_extension.get());
+          if (can_app_extension->IsControlGiven()) {
+            can_app_extension->GiveControl(false);
             CANModule::instance()->SetScanStarted(false);
             message_->set_connection_key((*it)->app_id());
             service_->SendMessageToMobile(message_);

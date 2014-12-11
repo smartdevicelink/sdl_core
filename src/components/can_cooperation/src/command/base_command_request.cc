@@ -230,15 +230,16 @@ CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
 
   functional_modules::ModuleID id = CANModule::instance()->GetModuleID();
 
-  CANAppExtensionPtr ptr = static_cast<CANAppExtension*>(
-      app->QueryInterface(id).get());
-
-  if (!ptr.valid()) {
-    ptr = new CANAppExtension(id);
-    app->AddExtension(ptr);
+  CANAppExtensionPtr can_app_extension;
+  application_manager::AppExtensionPtr app_extension = app->QueryInterface(id);
+  if (!app_extension.valid()) {
+    can_app_extension = new CANAppExtension(id);
+    app->AddExtension(can_app_extension);
+  } else {
+    can_app_extension = static_cast<CANAppExtension*>(app_extension.get());
   }
 
-  return ptr;
+  return can_app_extension;
 }
 
 }  // namespace commands
