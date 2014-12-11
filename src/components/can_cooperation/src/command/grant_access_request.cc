@@ -68,7 +68,7 @@ void GrantAccessRequest::Run() {
 
   Json::Value params;
 
-  params["appID"] = message_->connection_key();
+  params["appID"] = app->app_id();
 
   Json::FastWriter writer;
 
