@@ -64,7 +64,7 @@ void OnPresetChangedNotification::Run() {
       application_manager::AppExtensionPtr app_extension =
           (*it)->QueryInterface(CANModule::instance()->GetModuleID());
       if (app_extension.valid()) {
-        CANAppExtensionPtr can_app_extension =
+        CANAppExtension* can_app_extension =
            static_cast<CANAppExtension*>(app_extension.get());
         if (can_app_extension->IsControlGiven()) {
           message_->set_connection_key((*it)->app_id());

@@ -90,7 +90,7 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
 
   msg["jsonrpc"] = "2.0";
   msg["method"] = function_id;
-  if (message_params.isNull()) {
+  if (!message_params.isNull()) {
     Json::Reader reader;
     msg["params"] = message_params;
   }

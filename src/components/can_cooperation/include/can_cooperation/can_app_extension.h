@@ -57,7 +57,7 @@ class CANAppExtension : public application_manager::AppExtension {
     bool is_control_given_;
 };
 
-typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;
+//typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;
 }  //  namespace can_cooperation
 
 #endif  //  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_APP_EXTENSION_H_

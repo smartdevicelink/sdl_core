@@ -59,7 +59,7 @@ void GrantAccessRequest::Run() {
     return;
   }
 
-  CANAppExtensionPtr extension = GetAppExtension(app);
+  CANAppExtension* extension = GetAppExtension(app);
   if (extension->IsControlGiven()) {
     LOG4CXX_ERROR(logger_, "Application already have access!");
     SendResponse(false, "REJECTED", "");
@@ -114,13 +114,13 @@ void GrantAccessRequest::on_event(
       }
 
       if (value["error"].isMember("message")) {
-        info = value["result"]["message"].asCString();
+        info = value["error"]["message"].asCString();
       }
     }
 
     if (("SUCCESS" == result_code) || ("WARNINGS" == result_code)) {
       success = true;
-      CANAppExtensionPtr extension = GetAppExtension(app);
+      CANAppExtension* extension = GetAppExtension(app);
 
       extension->GiveControl(true);
     }

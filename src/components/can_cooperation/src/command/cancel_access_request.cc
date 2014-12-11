@@ -60,7 +60,7 @@ void CancelAccessRequest::Run() {
     return;
   }
 
-  CANAppExtensionPtr extension = GetAppExtension(app);
+  CANAppExtension* extension = GetAppExtension(app);
   if (!extension->IsControlGiven()) {
     LOG4CXX_ERROR(logger_, "Application doesn't have access!");
     SendResponse(false, "REJECTED", "");
@@ -115,7 +115,7 @@ void CancelAccessRequest::on_event(const event_engine::Event<application_manager
     if (("SUCCESS" == result_code) || ("WARNINGS" == result_code)) {
       success = true;
 
-      CANAppExtensionPtr extension = GetAppExtension(app);
+      CANAppExtension* extension = GetAppExtension(app);
       extension->GiveControl(false);
 
       CANModule::instance()->SetScanStarted(false);
