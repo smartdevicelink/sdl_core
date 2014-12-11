@@ -63,6 +63,7 @@ void TuneUpRequest::Run() {
   if (!extension->IsControlGiven()) {
     LOG4CXX_ERROR(logger_, "Application doesn't have access!");
     SendResponse(false, "REJECTED",  "");
+    return;
   }
 
   SendRequest(functional_modules::can_api::tune_up, "");

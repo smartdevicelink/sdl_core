@@ -63,6 +63,7 @@ void GrantAccessRequest::Run() {
   if (extension->IsControlGiven()) {
     LOG4CXX_ERROR(logger_, "Application already have access!");
     SendResponse(false, "REJECTED", "");
+    return;
   }
 
   Json::Value params;

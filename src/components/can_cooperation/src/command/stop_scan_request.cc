@@ -64,6 +64,7 @@ void StopScanRequest::Run() {
   if (!extension->IsControlGiven()) {
     LOG4CXX_ERROR(logger_, "Application doesn't have access!");
     SendResponse(false, "REJECTED",  "");
+    return;
   }
 
   if (!CANModule::instance()->IsScanStarted()) {
