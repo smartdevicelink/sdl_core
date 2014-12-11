@@ -62,10 +62,6 @@ class BaseCommandNotification : public Command {
  protected:
   application_manager::MessagePtr message_;
   application_manager::ServicePtr service_;
-
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
 };
 
 }  // namespace commands

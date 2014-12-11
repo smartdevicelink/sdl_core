@@ -31,6 +31,8 @@
  */
 
 #include "can_cooperation/commands/base_command_notification.h"
+#include "json/json.h"
+#include "can_cooperation/can_module.h"
 
 namespace can_cooperation {
 
@@ -45,7 +47,7 @@ BaseCommandNotification::BaseCommandNotification(
   Json::Reader reader;
   reader.parse(message_->json_message(), value);
   if (value.isMember("params")) {
-    Json::Writer writer;
+    Json::FastWriter writer;
     message_->set_json_message(writer.write(value["params"]));
   }
 }

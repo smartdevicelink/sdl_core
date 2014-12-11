@@ -25,6 +25,7 @@ set (SOURCES
     ./src/request_controller.cc
     ./src/message_helper.cc
     ./src/command/base_command_request.cc
+    ./src/command/base_command_notification.cc
     ./src/command/grant_access_request.cc
     ./src/command/cancel_access_request.cc
     ./src/command/start_scan_request.cc

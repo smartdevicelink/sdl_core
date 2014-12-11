@@ -38,6 +38,8 @@ namespace can_cooperation {
 
 namespace commands {
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "TuneDownRequest");
+
 TuneDownRequest::TuneDownRequest(
     const application_manager::MessagePtr& message)
   : BaseCommandRequest(message) {

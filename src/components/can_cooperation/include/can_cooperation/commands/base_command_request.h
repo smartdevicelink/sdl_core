@@ -103,10 +103,6 @@ public event_engine::EventObserver<application_manager::MessagePtr, std::string>
   void SendRequest(const char* function_id,
                       const std::string& msg_params,
                       bool is_hmi_request = false);
-
-#ifdef ENABLE_LOG
-  static log4cxx::LoggerPtr logger_;
-#endif // ENABLE_LOG
 };
 
 }  // namespace commands
