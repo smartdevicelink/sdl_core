@@ -268,6 +268,7 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
         app->QueryInterface(kCANModuleID);
 
    if (extension.valid()) {
+   // TOD(VS) : memory leak
       app->RemoveExtension(kCANModuleID);
     }
   }

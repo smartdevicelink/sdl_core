@@ -92,7 +92,8 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
   msg["jsonrpc"] = "2.0";
   msg["method"] = function_id;
   if (!message_params.empty()) {
-    msg["params"] = message_params;
+    Json::Reader reader;
+    reader.parse(message_params, msg["params"]);
   }
 
   Json::FastWriter writer;
@@ -222,15 +223,15 @@ const char* BaseCommandRequest::GetMobileResultCode(
   }
 }
 
-CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
+CANAppExtension* BaseCommandRequest::GetAppExtension(
     application_manager::ApplicationSharedPtr app) const {
   if (!app.valid()) {
-    return CANAppExtensionPtr();
+    return NULL;
   }
 
   functional_modules::ModuleID id = CANModule::instance()->GetModuleID();
 
-  CANAppExtensionPtr can_app_extension;
+  CANAppExtension* can_app_extension;
   application_manager::AppExtensionPtr app_extension = app->QueryInterface(id);
   if (!app_extension.valid()) {
     can_app_extension = new CANAppExtension(id);

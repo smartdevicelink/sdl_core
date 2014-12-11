@@ -72,7 +72,7 @@ public event_engine::EventObserver<application_manager::MessagePtr, std::string>
    * @param app pointer to application
    * @return pointer to extension
    */
-  CANAppExtensionPtr GetAppExtension(
+  CANAppExtension* GetAppExtension(
       application_manager::ApplicationSharedPtr app) const;
 
   /**
