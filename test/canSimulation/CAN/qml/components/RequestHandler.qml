@@ -440,7 +440,7 @@ Item {
 
         response = {
             "jsonrpc": "2.0",
-            "method": "CAN.OnRadioDetails",
+            "method": "CAN.OnPresetsChanged",
             "params": {
                 "customPresets":presets
             }
