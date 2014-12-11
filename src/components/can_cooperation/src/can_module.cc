@@ -167,6 +167,8 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
 functional_modules::ProcessResult CANModule::HandleMessage(
     application_manager::MessagePtr msg) {
 
+  LOG4CXX_ERROR(logger_, "CANModule::HandleMessage");
+
   Json::Value value;
   Json::Reader reader;
   reader.parse(msg->json_message(), value);
