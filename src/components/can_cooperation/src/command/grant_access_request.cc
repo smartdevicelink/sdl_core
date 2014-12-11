@@ -68,7 +68,7 @@ void GrantAccessRequest::Run() {
 
   Json::Value params;
 
-  params["appID"] = app->app_id();
+  params["appID"] = app->hmi_app_id();
 
   Json::FastWriter writer;
 
