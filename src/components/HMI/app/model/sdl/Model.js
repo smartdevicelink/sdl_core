@@ -1334,7 +1334,7 @@ SDL.SDLModel = Em.Object.create({
     },
 
     resetControl: function () {
-        if (SDL.SDLAppController && SDL.SDLAppController.model && SDL.SDLModel.givenControl) {
+        if (SDL.SDLAppController && SDL.SDLModel.givenControl != null) {
             FFW.VehicleInfo.OnControlChanged();
             SDL.SDLModel.givenControl = null;
         }
