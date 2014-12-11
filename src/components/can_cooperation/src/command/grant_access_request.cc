@@ -68,11 +68,11 @@ void GrantAccessRequest::Run() {
 
   Json::Value params;
 
-  params["params"]["appID"] = message_->connection_key();
+  params["appID"] = message_->connection_key();
 
   Json::FastWriter writer;
 
-  SendRequest(functional_modules::hmi_api::grant_access, writer.write(params), true);
+  SendRequest(functional_modules::hmi_api::grant_access, params, true);
 }
 
 void GrantAccessRequest::on_event(

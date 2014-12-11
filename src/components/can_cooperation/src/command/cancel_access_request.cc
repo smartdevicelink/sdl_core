@@ -67,7 +67,7 @@ void CancelAccessRequest::Run() {
     return;
   }
 
-  SendRequest(functional_modules::hmi_api::cancel_access, "", true);
+  SendRequest(functional_modules::hmi_api::cancel_access, Json::Value(), true);
 }
 
 void CancelAccessRequest::on_event(const event_engine::Event<application_manager::MessagePtr,

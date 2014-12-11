@@ -66,7 +66,7 @@ void TuneDownRequest::Run() {
     return;
   }
 
-  SendRequest(functional_modules::can_api::tune_down, "");
+  SendRequest(functional_modules::can_api::tune_down, Json::Value());
 }
 
 void TuneDownRequest::on_event(const event_engine::Event<application_manager::MessagePtr,

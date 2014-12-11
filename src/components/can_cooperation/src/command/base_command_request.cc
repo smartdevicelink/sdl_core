@@ -33,7 +33,6 @@
 #include "can_cooperation/commands/base_command_request.h"
 #include "can_cooperation/event_engine/event_dispatcher.h"
 #include "can_cooperation/message_helper.h"
-#include "json/json.h"
 #include "can_cooperation/can_module.h"
 
 namespace can_cooperation {
@@ -76,7 +75,7 @@ void BaseCommandRequest::SendResponse(const bool success,
 }
 
 void  BaseCommandRequest::SendRequest(const char* function_id,
-                    const std::string& message_params,
+                    const Json::Value& message_params,
                     bool is_hmi_request) {
   Json::Value msg;
 
@@ -91,9 +90,9 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
 
   msg["jsonrpc"] = "2.0";
   msg["method"] = function_id;
-  if (!message_params.empty()) {
+  if (message_params.isNull()) {
     Json::Reader reader;
-    reader.parse(message_params, msg["params"]);
+    msg["params"] = message_params;
   }
 
   Json::FastWriter writer;

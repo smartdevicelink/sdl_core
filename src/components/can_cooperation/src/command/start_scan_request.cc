@@ -72,7 +72,7 @@ void StartScanRequest::Run() {
     return;
   }
 
-  SendRequest(functional_modules::can_api::start_scan, "");
+  SendRequest(functional_modules::can_api::start_scan, Json::Value());
 }
 
 void StartScanRequest::on_event(const event_engine::Event<application_manager::MessagePtr,

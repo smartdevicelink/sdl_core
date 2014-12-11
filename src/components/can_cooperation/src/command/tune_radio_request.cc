@@ -66,8 +66,12 @@ void TuneRadioRequest::Run() {
     return;
   }
 
-  SendRequest(functional_modules::can_api::tune_radion,
-              message_->json_message());
+  Json::Value params;
+
+  Json::Reader reader;
+  reader.parse(message_->json_message(), params);
+
+  SendRequest(functional_modules::can_api::tune_radion, params);
 }
 
 void TuneRadioRequest::on_event(const event_engine::Event<application_manager::MessagePtr,

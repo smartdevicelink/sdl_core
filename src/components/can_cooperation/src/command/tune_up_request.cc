@@ -66,7 +66,7 @@ void TuneUpRequest::Run() {
     return;
   }
 
-  SendRequest(functional_modules::can_api::tune_up, "");
+  SendRequest(functional_modules::can_api::tune_up, Json::Value());
 }
 
 void TuneUpRequest::on_event(const event_engine::Event<application_manager::MessagePtr,

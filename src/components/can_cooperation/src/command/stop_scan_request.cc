@@ -72,7 +72,7 @@ void StopScanRequest::Run() {
     SendResponse(false, "REJECTED",  "");
   }
 
-  SendRequest(functional_modules::can_api::stop_scan, "");
+  SendRequest(functional_modules::can_api::stop_scan, Json::Value());
 }
 
 void StopScanRequest::on_event(const event_engine::Event<application_manager::MessagePtr,

@@ -40,6 +40,7 @@
 #include "utils/logger.h"
 #include "interfaces/HMI_API.h"
 #include "can_cooperation/can_app_extension.h"
+#include "json/json.h"
 
 namespace can_cooperation {
 
@@ -101,8 +102,8 @@ public event_engine::EventObserver<application_manager::MessagePtr, std::string>
    * @param msg_params json with message params
    */
   void SendRequest(const char* function_id,
-                      const std::string& msg_params,
-                      bool is_hmi_request = false);
+                   const Json::Value& message_params,
+                   bool is_hmi_request = false);
 };
 
 }  // namespace commands
