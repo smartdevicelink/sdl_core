@@ -168,16 +168,16 @@ Item {
         switch (result.method) {
             case "CAN.TuneRadio": {
 
-                if (result.params.radioStation.frequency) {
+                if ("frequency" in result.params.radioStation) {
                     dataHandler.frequency = result.params.radioStation.frequency
                 }
-                if (result.params.radioStation.availableHDs) {
+                if ("availableHDs" in result.params.radioStation) {
                     dataHandler.availableHDs = result.params.radioStation.availableHDs
                 }
-                if (result.params.radioStation.currentHD) {
+                if ("currentHD" in result.params.radioStation) {
                     dataHandler.currentHD = result.params.radioStation.currentHD
                 }
-                if (result.params.radioStation.fraction) {
+                if ("fraction" in result.params.radioStation) {
                     dataHandler.fraction = result.params.radioStation.fraction
                 }
 
@@ -237,17 +237,17 @@ Item {
         switch (result.method) {
             case "CAN.TuneRadio": {
 
-                if (result.params.radioStation.frequency) {
+                if ("frequency" in result.params.radioStation) {
                     dataHandler.frequency = result.params.radioStation.frequency
                 }
-                if (result.params.radioStation.fraction) {
-                    dataHandler.fraction = result.params.radioStation.fraction
-                }
-                if (result.params.radioStation.availableHDs) {
+                if ("availableHDs" in result.params.radioStation) {
                     dataHandler.availableHDs = result.params.radioStation.availableHDs
                 }
-                if (result.params.radioStation.currentHD) {
+                if ("currentHD" in result.params.radioStation) {
                     dataHandler.currentHD = result.params.radioStation.currentHD
+                }
+                if ("fraction" in result.params.radioStation) {
+                    dataHandler.fraction = result.params.radioStation.fraction
                 }
 
                 data = result.params.radioStation.frequency * 10 + result.params.radioStation.fraction;
@@ -264,17 +264,18 @@ Item {
             }
             case "CAN.OnRadioDetails": {
 
-                if (result.params.radioStation.frequency) {
+
+                if ("frequency" in result.params.radioStation) {
                     dataHandler.frequency = result.params.radioStation.frequency
                 }
-                if (result.params.radioStation.fraction) {
-                    dataHandler.fraction = result.params.radioStation.fraction
-                }
-                if (result.params.radioStation.availableHDs) {
+                if ("availableHDs" in result.params.radioStation) {
                     dataHandler.availableHDs = result.params.radioStation.availableHDs
                 }
-                if (result.params.radioStation.currentHD) {
+                if ("currentHD" in result.params.radioStation) {
                     dataHandler.currentHD = result.params.radioStation.currentHD
+                }
+                if ("fraction" in result.params.radioStation) {
+                    dataHandler.fraction = result.params.radioStation.fraction
                 }
 
                 data = result.params.radioStation.frequency * 10 + result.params.radioStation.fraction;
