@@ -222,7 +222,7 @@ const char* BaseCommandRequest::GetMobileResultCode(
   }
 }
 
-CANAppExtension* BaseCommandRequest::GetAppExtension(
+CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
     application_manager::ApplicationSharedPtr app) const {
   if (!app.valid()) {
     return NULL;
@@ -230,14 +230,16 @@ CANAppExtension* BaseCommandRequest::GetAppExtension(
 
   functional_modules::ModuleID id = CANModule::instance()->GetModuleID();
 
-  CANAppExtension* can_app_extension;
+  CANAppExtensionPtr can_app_extension;
   application_manager::AppExtensionPtr app_extension = app->QueryInterface(id);
   if (!app_extension.valid()) {
-    can_app_extension = new CANAppExtension(id);
-    app->AddExtension(can_app_extension);
-  } else {
-    can_app_extension = static_cast<CANAppExtension*>(app_extension.get());
-  }
+    app_extension = new CANAppExtension(id);
+    app->AddExtension(app_extension);
+  } 
+    
+  can_app_extension = 
+    application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
+      app_extension);
 
   return can_app_extension;
 }

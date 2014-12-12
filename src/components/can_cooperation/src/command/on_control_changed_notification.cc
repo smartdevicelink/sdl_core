@@ -64,8 +64,9 @@ void OnControlChangedNotification::Run() {
         application_manager::AppExtensionPtr app_extension =
             (*it)->QueryInterface(CANModule::instance()->GetModuleID());
         if (app_extension.valid()) {
-          CANAppExtension* can_app_extension =
-             static_cast<CANAppExtension*>(app_extension.get());
+          CANAppExtensionPtr can_app_extension =
+             application_manager::AppExtensionPtr::
+              static_pointer_cast<CANAppExtension>(app_extension);
           if (can_app_extension->IsControlGiven()) {
             can_app_extension->GiveControl(false);
             CANModule::instance()->SetScanStarted(false);

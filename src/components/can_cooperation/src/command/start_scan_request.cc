@@ -60,7 +60,7 @@ void StartScanRequest::Run() {
     return;
   }
 
-  CANAppExtension* extension = GetAppExtension(app);
+  CANAppExtensionPtr extension = GetAppExtension(app);
   if (!extension->IsControlGiven()) {
     LOG4CXX_ERROR(logger_, "Application doesn't have access!");
     SendResponse(false, "REJECTED",  "");

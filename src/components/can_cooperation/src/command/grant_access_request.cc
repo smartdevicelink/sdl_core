@@ -59,7 +59,7 @@ void GrantAccessRequest::Run() {
     return;
   }
 
-  CANAppExtension* extension = GetAppExtension(app);
+  CANAppExtensionPtr extension = GetAppExtension(app);
   if (extension->IsControlGiven()) {
     LOG4CXX_ERROR(logger_, "Application already have access!");
     SendResponse(false, "REJECTED", "");
@@ -120,7 +120,7 @@ void GrantAccessRequest::on_event(
 
     if (("SUCCESS" == result_code) || ("WARNINGS" == result_code)) {
       success = true;
-      CANAppExtension* extension = GetAppExtension(app);
+      CANAppExtensionPtr extension = GetAppExtension(app);
 
       extension->GiveControl(true);
     }

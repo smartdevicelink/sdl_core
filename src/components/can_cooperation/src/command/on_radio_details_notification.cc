@@ -64,8 +64,9 @@ void OnRadioDetailsNotification::Run() {
         application_manager::AppExtensionPtr app_extension =
             (*it)->QueryInterface(CANModule::instance()->GetModuleID());
         if (app_extension.valid()) {
-          CANAppExtension* can_app_extension =
-             static_cast<CANAppExtension*>(app_extension.get());
+          CANAppExtensionPtr can_app_extension =
+             application_manager::AppExtensionPtr::
+              static_pointer_cast<CANAppExtension>(app_extension);
           if (can_app_extension->IsControlGiven()) {
             message_->set_connection_key((*it)->app_id());
             service_->SendMessageToMobile(message_);
