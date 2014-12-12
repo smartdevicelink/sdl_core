@@ -5,7 +5,7 @@
 using namespace can_cooperation;
 
 TEST(can_app_extension, create) {
-  CANAppExtenstion extension(7);
+  CANAppExtension extension(7);
   ASSERT_TRUE(extension.uid() == 7);
 }
 

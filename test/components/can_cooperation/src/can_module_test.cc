@@ -16,11 +16,11 @@ TEST(can_module, notify_observer) {
   application_manager::MessagePtr message = 
   new application_manager::Message(
     protocol_handler::MessagePriority::FromServiceType(protocol_handler::ServiceType::kRpc));
-  message->set_function_id(MobileFunctionID::TUNE_RADIO);
+  /*message->set_function_id(MobileFunctionID::TUNE_RADIO);
   ProcessResult res = module.ProcessMessage(message);
-  EXPECT_TRUE(res == ProcessResult::PROCESSED);
+  EXPECT_TRUE(res == ProcessResult::PROCESSED);*/
   message->set_function_id(-1);
-  res = module.ProcessMessage(message);
+  ProcessResult res = module.ProcessMessage(message);
   EXPECT_TRUE(res == ProcessResult::CANNOT_PROCESS);
 }
 

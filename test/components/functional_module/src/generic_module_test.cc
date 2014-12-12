@@ -23,6 +23,8 @@ class MockGenericModule : public GenericModule {
     MOCK_METHOD1(ChangeModuleState, void(ModuleState));
     MOCK_METHOD0(RemoveAppExtensions, void(void));
     MOCK_METHOD1(RemoveAppExtension, void(uint32_t));
+    // TODO(PV): add test for ProcessHMIMessage
+    MOCK_METHOD1(ProcessHMIMessage, ProcessResult(application_manager::MessagePtr msg));
 };
 
 TEST(generic_module, create) {
@@ -59,6 +61,7 @@ class ErrorGenericModule : public GenericModule {
     MOCK_METHOD1(ChangeModuleState, void(ModuleState));
     MOCK_METHOD0(RemoveAppExtensions, void());
     MOCK_METHOD1(RemoveAppExtension, void(uint32_t));
+    MOCK_METHOD1(ProcessHMIMessage, ProcessResult(application_manager::MessagePtr msg));
 };
 
 class MockModuleObserver : public ModuleObserver {
