@@ -31,15 +31,11 @@ int main(int argc, char *argv[])
     QObject::connect(rootObject,SIGNAL(viewClicked(QString)), &tcpServer, SLOT(write(QString)));
     QObject::connect(rootObject,SIGNAL(createConnectionTCP(QString, int)), &tcpServer, SLOT(createConection(QString, int)));
     QObject::connect(rootObject,SIGNAL(sendMessageTCP(QString)), &tcpServer, SLOT(write(QString)));
-    QObject::connect(rootObject,SIGNAL(saveLog(QString, QString)), &fileSystem, SLOT(write(QString, QString)));
+    QObject::connect(rootObject,SIGNAL(saveLogToFile(QString, QString)), &fileSystem, SLOT(write(QString, QString)));
 
 
     QObject::connect(rootObject,SIGNAL(createConnectionWS(QString, int)), &webServer, SLOT(createConection(QString, int)));
     QObject::connect(rootObject,SIGNAL(sendMessageWS(QString)), &webServer, SLOT(write(QString)));
-
-
-    //QObject::connect(&webServer,SIGNAL(sendToSDL(QString, QString)), &tcpServer, SLOT(write(QString, QString)));
-    //QObject::connect(&tcpServer,SIGNAL(sendToHMI(QString, QString)), &webServer, SLOT(write(QString, QString)));
 
     return app.exec();
 }

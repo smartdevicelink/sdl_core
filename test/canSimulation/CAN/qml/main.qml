@@ -19,7 +19,7 @@ ApplicationWindow {
     signal createConnectionWS(string ip, int port)
     signal sendMessageTCP(string message)
     signal sendMessageWS(string message)
-    signal saveLog(string source, string data)
+    signal saveLogToFile(string source, string data)
 
     Connections {
         target: RequestHandler
@@ -106,7 +106,6 @@ ApplicationWindow {
                         }
                     }
                 }
-
 
                 onResponseButtonClick: {
 
@@ -258,7 +257,7 @@ ApplicationWindow {
                     data += logModel.get(i).text;
                 }
 
-                saveLog(root.logURL, data);
+                saveLogToFile(root.logURL, data);
                 logModel.clear();
             }
         }
