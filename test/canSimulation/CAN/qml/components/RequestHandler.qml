@@ -332,6 +332,10 @@ Item {
 
             sendMessageHMI(notification);
             sendMessageSDL(notification);
+        } else {
+
+            sendMessageSDL(onRadioDetailsFractionChanged());
+            sendMessageHMI(onRadioDetailsFractionChanged());
         }
     }
 
@@ -525,6 +529,7 @@ Item {
             }
         }
 
-        return response;
+        sendMessageHMI(response);
+        sendMessageSDL(response);
     }
 }

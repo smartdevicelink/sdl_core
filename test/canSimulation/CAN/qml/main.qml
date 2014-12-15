@@ -93,21 +93,15 @@ ApplicationWindow {
 
                 onRequestButtonClick: {
                     switch (item.objectName) {
-                        case "OnControlChanged": {
-
-                            //root.sendMessage(RequestHandler.onRadioDetails());
-
-                            break;
-                        }
                         case "OnRadioDetails": {
 
-                            RequestHandler.sendMessageSDL(RequestHandler.onRadioDetails());
+                            RequestHandler.onRadioDetails();
 
                             break;
                         }
                         default: {
 
-                            //RequestHandler.func();
+                            //Default behavior for other cases
                             break;
                         }
                     }

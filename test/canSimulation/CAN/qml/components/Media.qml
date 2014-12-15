@@ -187,9 +187,6 @@ Rectangle {
                                 target: RequestHandler
                                 onFractionChanged: {
                                     fractionBox.dataText = RequestHandler.fraction
-
-                                    RequestHandler.sendMessageSDL(RequestHandler.onRadioDetailsFractionChanged());
-                                    RequestHandler.sendMessageHMI(RequestHandler.onRadioDetailsFractionChanged());
                                 }
                             }
                         }
