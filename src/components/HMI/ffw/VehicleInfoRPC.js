@@ -382,55 +382,6 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
             this.client.send(JSONMessage);
         }
     },
-//
-//    /**
-//     * Send error response from onRPCRequest
-//     *
-//     * @param {Number}
-//     *            resultCode
-//     * @param {Number}
-//     *            id
-//     * @param {String}
-//     *            method
-//     */
-//    scanResponse: function(resultCode, id, method, message) {
-//
-//        Em.Logger.log("FFW." + method + "Response");
-//
-//        if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
-//
-//            // send repsonse
-//            var JSONMessage = {
-//                "jsonrpc": "2.0",
-//                "id": method == "VehicleInfo.StartScan" ? this.VIStartScanRequestID : this.VIStopScanRequestID,
-//                "result": {
-//                    "code": resultCode,
-//                    "method": method
-//                }
-//            };
-//            this.client.send(JSONMessage);
-//        } else {
-//            // send repsonse
-//            var JSONMessage = {
-//                "jsonrpc": "2.0",
-//                "id": method == "VehicleInfo.StartScan" ? this.VIStartScanRequestID : this.VIStopScanRequestID,
-//                "error": {
-//                    "code": resultCode,
-//                    "message": message,
-//                    "data": {
-//                        "method": method
-//                    }
-//                }
-//            };
-//            this.client.send(JSONMessage);
-//        }
-//
-//        if (method == "VehicleInfo.StartScan") {
-//            this.VIStartScanRequestID = null;
-//        } else {
-//            this.VIStopScanRequestID = null;
-//        }
-//    },
 
     /**
      * Send response from onRPCRequest
@@ -498,10 +449,7 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
         // send repsonse
         var JSONMessage = {
             "jsonrpc": "2.0",
-            "method": "VehicleInfo.OnControlChanged",
-            "params": {
-                "reason": "DRIVER_FOCUS"
-            }
+            "method": "VehicleInfo.OnControlChanged"
         };
         this.client.send(JSONMessage);
 
@@ -661,51 +609,5 @@ FFW.VehicleInfo = FFW.RPCObserver.create( {
         };
 
         this.client.send(JSONMessage);
-    },
-    /**
-     * Notification when have action in player
-     *
-     * @param {Object}
-     */
-    OnPlayerDetails: function (data) {
-
-        Em.Logger.log("FFW.VehicleInfo.OnPlayerDetails Notification");
-
-        // send response
-        var JSONMessage = {
-            "jsonrpc": "2.0",
-            "method": "VehicleInfo.OnPlayerDetails",
-            "params": {
-            }
-        };
-
-        for (var key in data) {
-            JSONMessage.params[key] = data[key];
-        }
-
-        this.client.send(JSONMessage);
-
-    },
-
-    sendPlayerDetails : function(){
-        var player = SDL.MediaController.get('currentSelectedPlayer');
-
-        if(player){
-            var media = player.data.get('selectedItem'),
-            params = {
-                "songInfo":{
-                    "name": media.name,
-                    "artist": media.artist,
-                    "genre": media.genre,
-                    "album": media.album,
-                    "year": media.year,
-                    "duration": media.duration,
-                    "currentTime" : player.get('currentTime')
-                },
-                "model" : player.name
-            };
-
-            FFW.VehicleInfo.OnPlayerDetails(params);
-        }
     }
 })
