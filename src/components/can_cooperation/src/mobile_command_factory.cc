@@ -88,7 +88,7 @@ commands::Command* MobileCommandFactory::CreateCommand(
       return new commands::OnRadioDetailsNotification(msg);
       break;
     }
-    case MobileFunctionID::ON_PRESET_CHANGED: {
+    case MobileFunctionID::ON_PRESETS_CHANGED: {
       return new commands::OnPresetChangedNotification(msg);
       break;
     }

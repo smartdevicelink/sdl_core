@@ -91,7 +91,7 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.mobile_function_list.push_back(
       MobileFunctionID::ON_RADIO_DETAILS);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::ON_PRESET_CHANGED);
+      MobileFunctionID::ON_PRESETS_CHANGED);
 
   plugin_info_.hmi_function_list.push_back(hmi_api::grant_access);
   plugin_info_.hmi_function_list.push_back(hmi_api::cancel_access);
@@ -167,7 +167,9 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
 functional_modules::ProcessResult CANModule::HandleMessage(
     application_manager::MessagePtr msg) {
 
-  LOG4CXX_ERROR(logger_, "CANModule::HandleMessage");
+  LOG4CXX_INFO(logger_, "CANModule::HandleMessage");
+
+  LOG4CXX_INFO(logger_, "HMI message: " << msg->json_message());
 
   Json::Value value;
   Json::Reader reader;
@@ -194,6 +196,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     function_name = value["error"]["data"]["method"].asCString();
     msg->set_message_type(application_manager::MessageType::kErrorResponse);
   } else {
+    LOG4CXX_ERROR(logger_, "Wrong HMI message!");
     DCHECK(false);
     return ProcessResult::FAILED;
   }
@@ -219,7 +222,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     case application_manager::MessageType::kNotification: {
       if (functional_modules::can_api::on_preset_changed ==
           function_name) {
-        msg->set_function_id(MobileFunctionID::ON_CONTROL_CHANGED);
+        msg->set_function_id(MobileFunctionID::ON_PRESETS_CHANGED);
       } else if (functional_modules::hmi_api::on_control_changed ==
                  function_name) {
         msg->set_function_id(MobileFunctionID::ON_CONTROL_CHANGED);

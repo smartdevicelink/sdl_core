@@ -47,7 +47,7 @@ enum MobileFunctionID {
   TUNE_DOWN = 100007,
   ON_CONTROL_CHANGED = 100008,
   ON_RADIO_DETAILS = 100009,
-  ON_PRESET_CHANGED = 100010
+  ON_PRESETS_CHANGED = 100010
   /////////////////////////////
 };
 
