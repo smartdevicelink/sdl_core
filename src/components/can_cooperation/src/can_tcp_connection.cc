@@ -80,7 +80,8 @@ ConnectionState CANTCPConnection::Flash() {
 
 ConnectionState CANTCPConnection::GetData() {
   if (OPENED == current_state_) {
-    char buf[500];
+    // TODO(PV): correct buffer size
+    char buf[5000];
     if (-1 == read(socket_, buf, sizeof(buf))) {
       current_state_ = INVALID;
       CloseConnection();

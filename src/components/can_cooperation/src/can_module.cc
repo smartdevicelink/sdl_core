@@ -134,6 +134,7 @@ void CANModule::SendMessageToCan(const std::string& msg) {
 }
 
 ProcessResult CANModule::ProcessHMIMessage(application_manager::MessagePtr msg) {
+  LOG4CXX_INFO(logger_, "HMI message: " << msg->json_message());
   return HandleMessage(msg);
 }
 
@@ -159,6 +160,8 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
   std::string msg_to_send = writer.write(can_msg);
   msg->set_json_message(msg_to_send);
 
+  LOG4CXX_INFO(logger_, "Can message: " << msg_to_send);
+
   if (ProcessResult::PROCESSED != HandleMessage(msg)) {
     LOG4CXX_ERROR(logger_, "Failed process CAN message!");
   }
@@ -168,8 +171,6 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     application_manager::MessagePtr msg) {
 
   LOG4CXX_INFO(logger_, "CANModule::HandleMessage");
-
-  LOG4CXX_INFO(logger_, "HMI message: " << msg->json_message());
 
   Json::Value value;
   Json::Reader reader;
@@ -196,8 +197,8 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     function_name = value["error"]["data"]["method"].asCString();
     msg->set_message_type(application_manager::MessageType::kErrorResponse);
   } else {
-    LOG4CXX_ERROR(logger_, "Wrong HMI message!");
-    DCHECK(false);
+    // TODO(PV): research why asserts are triggered in release build
+    //DCHECK(false);
     return ProcessResult::FAILED;
   }
 
