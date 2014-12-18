@@ -34,7 +34,7 @@ Item {
     property int year: 0;
     property int month: 0;
     property int day: 0;
-    property real tzd: 0;
+    property string tzd: "DEFAULT";
         //Advertisement
     property string productName: "DEFAULT";
     property string companyName: "DEFAULT";
@@ -163,7 +163,7 @@ Item {
     function receivedMessageTCP(result) {
 
 
-        var notify;
+        var notify, response;
 
         switch (result.method) {
             case "CAN.TuneRadio": {
@@ -224,6 +224,31 @@ Item {
                 stopScan();
 
                 break;
+            }
+            case "CAN.GetSeatControl": {
+
+                //TO DO
+                //Add handler for this request
+
+                break;
+            }
+            case "CAN.ClimateControlOn": {
+
+                response = {
+                    "jsonrpc": "2.0",
+                    "id": result.id,
+                    "result": {
+                        "code": 0,
+                        "capabilities": {
+                            "isRearEnabled": true,
+                            "isCooledSeatEnabled": true,
+                            "isHeatedSteerWheelEnabled": true
+                        },
+                        "method": result.method
+                    }
+                }
+
+                return response;
             }
         }
 
