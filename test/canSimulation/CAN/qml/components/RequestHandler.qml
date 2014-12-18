@@ -168,7 +168,7 @@ Item {
         switch (result.method) {
             case "CAN.TuneRadio": {
 
-                if ("frequency" in result.params.radioStation) {
+                if ("frequency" in result.params.radioStation && result.params.radioStation.frequency <= 108 && result.params.radioStation.frequency >= 87) {
                     dataHandler.frequency = result.params.radioStation.frequency
                 }
                 if ("availableHDs" in result.params.radioStation) {
@@ -177,13 +177,11 @@ Item {
                 if ("currentHD" in result.params.radioStation) {
                     dataHandler.currentHD = result.params.radioStation.currentHD
                 }
-                if ("fraction" in result.params.radioStation) {
+                if ("fraction" in result.params.radioStation && result.params.radioStation.fraction <= 9  && result.params.radioStation.fraction >= 0) {
                     dataHandler.fraction = result.params.radioStation.fraction
                 }
 
-                data = result.params.radioStation.frequency * 10 + result.params.radioStation.fraction;
-
-                checkRadioDetailsSongInfo(data);
+                checkRadioDetailsSongInfo();
 
                 break;
             }
@@ -257,12 +255,10 @@ Item {
 
     function receivedMessageWS(result) {
 
-        var data = 0;
-
         switch (result.method) {
             case "CAN.TuneRadio": {
 
-                if ("frequency" in result.params.radioStation) {
+                if ("frequency" in result.params.radioStation && result.params.radioStation.frequency <= 108 && result.params.radioStation.frequency >= 87) {
                     dataHandler.frequency = result.params.radioStation.frequency
                 }
                 if ("availableHDs" in result.params.radioStation) {
@@ -271,13 +267,11 @@ Item {
                 if ("currentHD" in result.params.radioStation) {
                     dataHandler.currentHD = result.params.radioStation.currentHD
                 }
-                if ("fraction" in result.params.radioStation) {
+                if ("fraction" in result.params.radioStation && result.params.radioStation.fraction <= 9  && result.params.radioStation.fraction >= 0) {
                     dataHandler.fraction = result.params.radioStation.fraction
                 }
 
-                data = result.params.radioStation.frequency * 10 + result.params.radioStation.fraction;
-
-                checkRadioDetailsSongInfo(data);
+                checkRadioDetailsSongInfo();
 
                 break;
             }
@@ -289,8 +283,7 @@ Item {
             }
             case "CAN.OnRadioDetails": {
 
-
-                if ("frequency" in result.params.radioStation) {
+                if ("frequency" in result.params.radioStation && result.params.radioStation.frequency <= 108 && result.params.radioStation.frequency >= 87) {
                     dataHandler.frequency = result.params.radioStation.frequency
                 }
                 if ("availableHDs" in result.params.radioStation) {
@@ -299,13 +292,11 @@ Item {
                 if ("currentHD" in result.params.radioStation) {
                     dataHandler.currentHD = result.params.radioStation.currentHD
                 }
-                if ("fraction" in result.params.radioStation) {
+                if ("fraction" in result.params.radioStation && result.params.radioStation.fraction <= 9  && result.params.radioStation.fraction >= 0) {
                     dataHandler.fraction = result.params.radioStation.fraction
                 }
 
-                data = result.params.radioStation.frequency * 10 + result.params.radioStation.fraction;
-
-                checkRadioDetailsSongInfo(data);
+                checkRadioDetailsSongInfo();
 
                 break;
             }
@@ -338,7 +329,9 @@ Item {
         return successResponse(result.id, result.method);
     }
 
-    function checkRadioDetailsSongInfo(data) {
+    function checkRadioDetailsSongInfo() {
+
+        var data = dataHandler.fraction + dataHandler.frequency * 10;
 
         if (dataHandler.stationsData[data]) {
 

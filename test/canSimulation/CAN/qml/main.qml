@@ -277,7 +277,7 @@ ApplicationWindow {
             anchors.fill: parent
             onClicked: {
                 if (tcpLogsView.height === 0) {
-                    tcpLogsView.height = 100
+                    tcpLogsView.height = 150
                 } else {
 
                     tcpLogsView.height = 0
