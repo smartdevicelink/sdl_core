@@ -33,6 +33,8 @@ set (SOURCES
     ./src/command/tune_radio_request.cc
     ./src/command/tune_down_request.cc
     ./src/command/tune_up_request.cc
+    ./src/command/climate_control_on_request.cc
+    ./src/command/get_seat_control_request.cc
     ./src/command/on_radio_details_notification.cc
     ./src/command/on_control_changed_notification.cc
     ./src/command/on_preset_changed_notification.cc

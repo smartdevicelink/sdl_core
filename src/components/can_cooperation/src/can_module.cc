@@ -87,6 +87,10 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::START_SCAN);
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::STOP_SCAN);
   plugin_info_.mobile_function_list.push_back(
+      MobileFunctionID::GET_SEAT_CONTROL);
+  plugin_info_.mobile_function_list.push_back(
+      MobileFunctionID::CLIMATE_CONTROL_ON);
+  plugin_info_.mobile_function_list.push_back(
       MobileFunctionID::ON_CONTROL_CHANGED);
   plugin_info_.mobile_function_list.push_back(
       MobileFunctionID::ON_RADIO_DETAILS);

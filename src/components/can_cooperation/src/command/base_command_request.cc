@@ -62,6 +62,10 @@ void BaseCommandRequest::SendResponse(const bool success,
  message_->set_message_type(application_manager::MessageType::kResponse);
  Json::Value msg_params;
 
+ if (!response_params_.isNull()) {
+   msg_params = response_params_;
+ }
+
  msg_params["success"] = success;
  msg_params["resultCode"] = result_code;
  if (!info.empty()) {
@@ -91,7 +95,6 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
   msg["jsonrpc"] = "2.0";
   msg["method"] = function_id;
   if (!message_params.isNull()) {
-    Json::Reader reader;
     msg["params"] = message_params;
   }
 

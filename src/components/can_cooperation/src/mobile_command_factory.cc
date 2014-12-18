@@ -39,6 +39,8 @@
 #include "can_cooperation/commands/tune_radio_request.h"
 #include "can_cooperation/commands/tune_up_request.h"
 #include "can_cooperation/commands/tune_down_request.h"
+#include "can_cooperation/commands/climate_control_on_request.h"
+#include "can_cooperation/commands/get_seat_control_request.h"
 #include "can_cooperation/commands/on_control_changed_notification.h"
 #include "can_cooperation/commands/on_preset_changed_notification.h"
 #include "can_cooperation/commands/on_radio_details_notification.h"
@@ -78,6 +80,14 @@ commands::Command* MobileCommandFactory::CreateCommand(
     }
     case MobileFunctionID::TUNE_DOWN: {
       return new commands::TuneDownRequest(msg);
+      break;
+    }
+    case MobileFunctionID::GET_SEAT_CONTROL: {
+      return new commands::GetSeatControlRequest(msg);
+      break;
+    }
+    case MobileFunctionID::CLIMATE_CONTROL_ON: {
+      return new commands::ClimateControlOnRequest(msg);
       break;
     }
     case MobileFunctionID::ON_CONTROL_CHANGED: {

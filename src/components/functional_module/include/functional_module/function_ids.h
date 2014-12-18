@@ -47,7 +47,9 @@ enum MobileFunctionID {
   TUNE_DOWN = 100007,
   ON_CONTROL_CHANGED = 100008,
   ON_RADIO_DETAILS = 100009,
-  ON_PRESETS_CHANGED = 100010
+  ON_PRESETS_CHANGED = 100010,
+  CLIMATE_CONTROL_ON = 100011,
+  GET_SEAT_CONTROL = 100012
   /////////////////////////////
 };
 
@@ -65,6 +67,8 @@ namespace can_api {
   const char tune_down[]          = "CAN.TuneDown";
   const char on_radio_details[]   = "CAN.OnRadioDetails";
   const char on_preset_changed[]  = "CAN.OnPresetsChanged";
+  const char climate_control_on[] = "CAN.ClimateControlOn";
+  const char get_seat_control[]   = "CAN.GetSeatControl";
 }
 
 }  //  namespace functional_modules

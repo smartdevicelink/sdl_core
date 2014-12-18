@@ -67,6 +67,7 @@ public event_engine::EventObserver<application_manager::MessagePtr, std::string>
  protected:
   application_manager::MessagePtr message_;
   application_manager::ServicePtr service_;
+  Json::Value response_params_;
 
   /**
    * @brief Get extension for specified application. If extension doesn't exist, it will be created
