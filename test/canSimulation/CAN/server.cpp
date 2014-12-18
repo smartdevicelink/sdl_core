@@ -73,11 +73,11 @@ void Server::disconnected()
 void Server::write(QString name)
 {
     QByteArray qb = name.toUtf8();
-    char *cName = qb.data();
 
     if ((clientConnection != NULL) && (clientConnection->state() == QTcpSocket::ConnectedState)){
 
-        clientConnection->write(cName);
+        clientConnection->write(qb);
+        clientConnection->flush();
         Loger::loger("TCP Send:" + name, BLUE);
     } else {
         Loger::loger("TCP Client is not connected yet...", RED);
