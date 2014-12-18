@@ -3,6 +3,7 @@
 #include "server.h"
 #include "loger.h"
 #include "color.h"
+#include <unistd.h>
 
 Server::Server(QObject *rootObject) : rootView(rootObject), clientConnection(NULL), QObject() {
 
@@ -72,6 +73,7 @@ void Server::disconnected()
 
 void Server::write(QString name)
 {
+    sleep(3);
     QByteArray qb = name.toUtf8();
 
     if ((clientConnection != NULL) && (clientConnection->state() == QTcpSocket::ConnectedState)){
