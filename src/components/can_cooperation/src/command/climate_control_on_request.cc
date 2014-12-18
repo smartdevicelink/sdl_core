@@ -109,7 +109,7 @@ void ClimateControlOnRequest::on_event(const event_engine::Event<application_man
     }
 
     if (value.isMember("result") && value["result"].isMember("capabilities")) {
-      response_params_ = value["result"]["capabilities"];
+      response_params_["capabilities"] = value["result"]["capabilities"];
     }
 
     SendResponse(success, result_code.c_str(), info);
