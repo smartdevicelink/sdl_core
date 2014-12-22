@@ -81,12 +81,26 @@ ConnectionState CANTCPConnection::Flash() {
 ConnectionState CANTCPConnection::GetData() {
   if (OPENED == current_state_) {
     // TODO(PV): correct buffer size
-    char buf[5000];
-    if (-1 == read(socket_, buf, sizeof(buf))) {
-      current_state_ = INVALID;
-      CloseConnection();
-    } else {
-      received_.push_back(buf);
+    std::string data;
+    const int kSize = 500;
+    int read_chars = 0;
+    do {
+      char buf[kSize];
+      read_chars = read(socket_, buf, sizeof(buf));
+      switch(read_chars) {
+        case 0: // closed connection
+          current_state_ = CLOSED;
+          break;
+        case -1:  // error while reading
+          current_state_ = INVALID;
+          break;
+        default:
+          data += buf;
+          break;
+      }
+    } while (read_chars >= kSize && OPENED == current_state_);
+    if (!data.empty()) {
+      received_.push_back(data);
     }
   }
   return current_state_;
