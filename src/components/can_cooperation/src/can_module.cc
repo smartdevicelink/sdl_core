@@ -128,6 +128,8 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   if (command) {
     request_controller_.AddRequest(msg->correlation_id(), command);
     command->Run();
+  } else {
+    return ProcessResult::CANNOT_PROCESS;
   }
 
   return ProcessResult::PROCESSED;

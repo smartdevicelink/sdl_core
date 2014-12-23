@@ -20,8 +20,6 @@ set (SOURCES
     ./src/can_tcp_connection.cc
     ./src/can_module_event.cc
     ./src/mobile_command_factory.cc
-    ./src/hmi_command_factory.cc
-    ./src/can_command_factory.cc
     ./src/request_controller.cc
     ./src/message_helper.cc
     ./src/command/base_command_request.cc

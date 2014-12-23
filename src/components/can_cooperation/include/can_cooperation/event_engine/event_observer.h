@@ -74,31 +74,6 @@ class EventObserver
    */
   virtual void on_event(const Event<EventMessage, EventID>& event) = 0;
 
- protected:
-
-/*
-   * @brief Subscribe to an event
-   *
-   * @param event_id            The event ID to subscribe for
-   * @param hmi_correlation_id  The event HMI correlation ID.
-   * If param is omitted, it means subscription for HMI notification
-
-  void subscribe_on_event(const EventID& event_id,
-                          int32_t hmi_correlation_id = 0);
-
-
-   * @brief Unsubscribes the observer from specific event
-   *
-   * @param event_id    The event ID to unsubscribe from
-
-  void unsubscribe_from_event(const EventID& event_id);
-
-
-   * @brief Unsubscribes the observer from all events
-   *
-
-  void unsubscribe_from_all_events();*/
-
  private:
 
   ObserverID id_;
@@ -117,26 +92,6 @@ template<typename EventMessage, typename EventID>
 EventObserver<EventMessage, EventID>::~EventObserver() {
   //unsubscribe_from_all_events();
 }
-
-/*template<typename EventMessage, typename EventID>
-void EventObserver<EventMessage, EventID>::subscribe_on_event(
-                                  const EventID& event_id,
-                                  int32_t hmi_correlation_id) {
-  EventDispatcher<EventMessage, EventID>::instance()->
-                              add_observer(event_id, hmi_correlation_id, this);
-}
-
-template<typename EventMessage, typename EventID>
-void EventObserver<EventMessage, EventID>::unsubscribe_from_event(
-                                                      const EventID& event_id) {
-  EventDispatcher<EventMessage, EventID>::instance()->
-                                                remove_observer(event_id, this);
-}
-
-template<typename EventMessage, typename EventID>
-void EventObserver<EventMessage, EventID>::unsubscribe_from_all_events() {
-  EventDispatcher<EventMessage, EventID>::instance()->remove_observer(this);
-}*/
 
 }
 

@@ -89,7 +89,7 @@ class Service {
    *
    * @return List with shared pointers to applications
    */
-  virtual const std::set<ApplicationSharedPtr> GetApplications() = 0;
+  virtual std::set<ApplicationSharedPtr> GetApplications() = 0;
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;

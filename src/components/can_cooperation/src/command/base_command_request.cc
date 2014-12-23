@@ -55,10 +55,9 @@ BaseCommandRequest::~BaseCommandRequest() {
       remove_observer(this);
 }
 
-// TODO(VS): Add string(in json format) with response params
-void BaseCommandRequest::SendResponse(const bool success,
+void BaseCommandRequest::SendResponse(bool success,
                   const char* result_code,
-                  const std::string info) {
+                  const std::string& info) {
  message_->set_message_type(application_manager::MessageType::kResponse);
  Json::Value msg_params;
 

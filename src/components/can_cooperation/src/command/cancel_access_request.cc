@@ -130,4 +130,4 @@ void CancelAccessRequest::on_event(const event_engine::Event<application_manager
 
 }  // namespace commands
 
-}  // namespace can_cCopy of grant_access_request.hooperation
+}  // namespace can_cooperation

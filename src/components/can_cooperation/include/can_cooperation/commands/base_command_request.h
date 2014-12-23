@@ -93,9 +93,9 @@ public event_engine::EventObserver<application_manager::MessagePtr, std::string>
    * @param result_code Mobile result code in string ("SUCCESS", "INVALID_DATA", e.t.c)
    * @param info Provides additional human readable info regarding the result(may be empty)
    */
-  void SendResponse(const bool success,
+  void SendResponse(bool success,
                     const char* result_code,
-                    const std::string info);
+                    const std::string& info);
 
   /**
    * @brief Sends request to CAN or HMI

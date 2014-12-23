@@ -93,7 +93,7 @@ class CoreService : public Service {
    *
    * @return List with shared pointers to applications
    */
-  virtual const std::set<ApplicationSharedPtr> GetApplications();
+  virtual std::set<ApplicationSharedPtr> GetApplications();
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CoreService);
