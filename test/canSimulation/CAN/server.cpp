@@ -73,7 +73,6 @@ void Server::disconnected()
 
 void Server::write(QString name)
 {
-    sleep(3);
     QByteArray qb = name.toUtf8();
 
     if ((clientConnection != NULL) && (clientConnection->state() == QTcpSocket::ConnectedState)){
