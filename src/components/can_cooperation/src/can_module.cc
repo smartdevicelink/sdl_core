@@ -136,6 +136,7 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
 }
 
 void CANModule::SendMessageToCan(const std::string& msg) {
+  LOG4CXX_INFO(logger_, "Message to Can: " << msg);
   from_mobile_.PostMessage(msg);
 }
 
@@ -163,10 +164,10 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
       protocol_handler::MessagePriority::kDefault));
 
   Json::FastWriter writer;
-  std::string msg_to_send = writer.write(can_msg);
-  msg->set_json_message(msg_to_send);
+  std::string json_string = writer.write(can_msg);
+  msg->set_json_message(json_string);
 
-  LOG4CXX_INFO(logger_, "Can message: " << msg_to_send);
+  LOG4CXX_INFO(logger_, "Can message: " << json_string);
 
   if (ProcessResult::PROCESSED != HandleMessage(msg)) {
     LOG4CXX_ERROR(logger_, "Failed process CAN message!");

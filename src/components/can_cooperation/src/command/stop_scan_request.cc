@@ -70,6 +70,7 @@ void StopScanRequest::Run() {
   if (!CANModule::instance()->IsScanStarted()) {
     LOG4CXX_ERROR(logger_, "Scan doesn't started!");
     SendResponse(false, "REJECTED",  "");
+    return;
   }
 
   SendRequest(functional_modules::can_api::stop_scan, Json::Value());
