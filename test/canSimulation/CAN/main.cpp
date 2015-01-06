@@ -24,6 +24,7 @@ int main(int argc, char *argv[])
 
     Loger::rootView=rootObject;
 
+    // Path to log.txt is set co directory where CAN is executed
     QMetaObject::invokeMethod(rootObject, "setCurrentPath",
             Q_ARG(QVariant,  QDir::currentPath()));
 

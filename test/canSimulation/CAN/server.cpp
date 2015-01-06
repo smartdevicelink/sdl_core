@@ -34,6 +34,7 @@ void Server::connected()
 
     Loger::loger("TCP connected...", RED);
 
+    // New connected client is only one client TCP Server is working with
     clientConnection = tcpServer->nextPendingConnection();
 
     connect(clientConnection, SIGNAL(readyRead()),this, SLOT(readyRead()));
@@ -51,17 +52,25 @@ void Server::readyRead()
 
     QString qMessage = QString::fromUtf8(cMessage);
 
+    Loger::loger("TCP Received..." + qMessage, GREEN);
+
+    // Read all data came from client and redirect it to QML request handler
+
     QMetaObject::invokeMethod(rootView, "incoming",
             Q_RETURN_ARG(QVariant, returnedValue),
             Q_ARG(QVariant,  qMessage));
 
-    Loger::loger("TCP Received..." + qMessage, GREEN);
+    // If processed data type was request
+    // than response from QML is sent back to client
 
-    qb = returnedValue.toString().toUtf8();
+    if (returnedValue != "false") {
 
-    char *ch = qb.data();
+        qb = returnedValue.toString().toUtf8();
 
-    write(ch);
+        char *ch = qb.data();
+
+        write(ch);
+    }
 }
 
 void Server::disconnected()
@@ -71,15 +80,15 @@ void Server::disconnected()
     clientConnection->deleteLater();
 }
 
-void Server::write(QString name)
+void Server::write(QString qMessage)
 {
-    QByteArray qb = name.toUtf8();
+    QByteArray qb = qMessage.toUtf8();
 
     if ((clientConnection != NULL) && (clientConnection->state() == QTcpSocket::ConnectedState)){
 
         clientConnection->write(qb);
         clientConnection->flush();
-        Loger::loger("TCP Send:" + name, BLUE);
+        Loger::loger("TCP Send:" + qMessage, BLUE);
     } else {
         Loger::loger("TCP Client is not connected yet...", RED);
     }

@@ -67,7 +67,7 @@ ApplicationWindow {
     function logger(message, color) {
 
         tcpLogsView.append(message, color);
-        return true
+        return true;
     }
 
     menuBar: MenuBar {

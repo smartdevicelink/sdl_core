@@ -2,9 +2,10 @@
 #include "loger.h"
 
 QObject* Loger::rootView = NULL;
-
-
-void Loger::loger(QString message, int c)
+/*
+ *
+ */
+bool Loger::loger(QString message, int c)
 {
     QVariant returnedValue;
 
@@ -12,4 +13,6 @@ void Loger::loger(QString message, int c)
             Q_RETURN_ARG(QVariant, returnedValue),
             Q_ARG(QVariant, message),
             Q_ARG(QVariant, c));
+
+    return returnedValue.toBool();
 }

@@ -426,13 +426,18 @@ Item {
 
         var response;
 
-        response = {
-            "id": id,
-            "jsonrpc": "2.0",
-            "result": {
-                "method": method,
-                "code": 0
+        if (id) {
+
+            response = {
+                "id": id,
+                "jsonrpc": "2.0",
+                "result": {
+                    "method": method,
+                    "code": 0
+                }
             }
+        } else {
+            response = false;
         }
 
         return response;
