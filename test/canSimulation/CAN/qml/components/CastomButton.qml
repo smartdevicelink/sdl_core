@@ -8,12 +8,8 @@ Button {
     text: "A button"
     style: ButtonStyle {
         background: Rectangle {
-            implicitWidth: 100
-            implicitHeight: 25
-            color: 'white'
-            border.width: control.activeFocus ? 2 : 1
             border.color: Style.colorButtonBorder
-            radius: 4
+            radius: Style.radius
             gradient: Gradient {
                 GradientStop { position: 0 ; color: control.pressed ? Style.colorButtonGradTop : Style.colorButtonGradBot }
                 GradientStop { position: 0.4 ; color: control.pressed ? Style.colorButtonGradTop : Style.colorButtonGradTop }

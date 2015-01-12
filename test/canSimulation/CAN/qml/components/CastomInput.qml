@@ -5,17 +5,16 @@ Rectangle {
 
     id: root
     property string textInput: "105.3"
-    property int widthInput: 50
 
     border.color: Style.inputBorderColor
-    width: root.widthInput
+    width: Style.customInputWidthInput
     height: parent.height
-    radius: 3
+    radius: Style.radius
     clip: true
     color: Style.colorCastomInputBackground
 
     onTextInputChanged: {
-        tuneInput.text = textInput
+        tuneInput.text = textInput //Bidirectional binding
     }
 
     TextInput {
@@ -27,7 +26,7 @@ Rectangle {
         width: parent.width
         color: Style.colorCastomInputText
         onTextChanged: {
-            root.textInput = text;
+            root.textInput = text //Bidirectional binding
         }
         onFocusChanged: {
             if (focus) {
@@ -35,6 +34,9 @@ Rectangle {
             }
         }
 
+        /**
+         * Connections for bidirectional binding
+         */
         Connections {
             target: root
             onTextInputChanged: {

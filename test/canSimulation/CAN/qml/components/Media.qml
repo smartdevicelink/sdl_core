@@ -6,7 +6,11 @@ Rectangle {
     id: root
     width: parent.width
     height: Style.componentHeight
-    anchors.margins: 10
+    anchors.margins: Style.margins
+
+    signal requestButtonClick(QtObject item)
+
+    signal responseButtonClick(QtObject item)
 
     gradient: Gradient {
         GradientStop { position: 0 ; color: Style.colorMainDarkGradient}
@@ -23,12 +27,15 @@ Rectangle {
         Row {
 
             id: apiRow
-            spacing: 2
+            spacing: Style.rowSpacing
 
+            /**
+             * Notification buttons column
+             */
             Column {
 
                 id: requestsColumn
-                spacing: 2
+                spacing: Style.rowSpacing
 
                 CastomButton {
                     id: presetButton
@@ -53,12 +60,15 @@ Rectangle {
                     objectName: text
                     onClicked: requestButtonClick(this)
                 }
-
             }
+
+            /**
+             * Media buttons column
+             */
             Column {
 
                 id: responsesColumn
-                spacing: 2
+                spacing: Style.rowSpacing
 
                 CastomButton {
                     id: tuneUpButton
@@ -124,32 +134,37 @@ Rectangle {
                     onClicked: responseButtonClick(this)
                 }
             }
+
+            /**
+             * Column with API data structures
+             */
             Column {
                 id: dispayedItems
 
-                spacing: 2
+                spacing: Style.rowSpacing
 
                 Rectangle {
 
-                    border.color: "#C6DCEC"
-                    width: tuneRadioContainer.width + 20
-                    height: tuneRadioContainer.height + 20
+                    id: tuneRadioRectangle
+
+                    border.color: Style.colorLabelTextBackground
+                    width: tuneRadioContainer.width + Style.dataStructureContainerMargin
+                    height: tuneRadioContainer.height + Style.dataStructureContainerMargin
+
                     gradient: Gradient {
-                        GradientStop { position: 0 ; color: "#006F97" }
-                        GradientStop { position: 0.4 ; color: "#006F97" }
-                        GradientStop { position: 0.5 ; color: "#006F97" }
-                        GradientStop { position: 1 ; color: "#5D97C3" }
+                        GradientStop { position: 0 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.4 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.5 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 1 ; color: Style.Style.colorButtonGradBot }
                     }
                     radius: Style.radius
 
                     Column {
 
                         id: tuneRadioContainer
-                        anchors.margins: 10
-                        anchors.topMargin: 10
+                        anchors.margins: Style.margins
                         anchors.top: parent.top
-
-                        spacing: 10
+                        spacing: Style.columnSpacing
 
                         Text {
                             text: "RadioStation"
@@ -227,25 +242,25 @@ Rectangle {
 
                 Rectangle {
 
-                    border.color: "#C6DCEC"
-                    width: presetsContainer.width + 20
-                    height: presetsContainer.height + 20
+                    border.color: Style.colorLabelTextBackground
+                    width: presetsContainer.width + Style.dataStructureContainerMargin
+                    height: presetsContainer.height + Style.dataStructureContainerMargin
+
                     gradient: Gradient {
-                        GradientStop { position: 0 ; color: "#006F97" }
-                        GradientStop { position: 0.4 ; color: "#006F97" }
-                        GradientStop { position: 0.5 ; color: "#006F97" }
-                        GradientStop { position: 1 ; color: "#5D97C3" }
+                        GradientStop { position: 0 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.4 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.5 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 1 ; color: Style.colorButtonGradBot }
                     }
                     radius: Style.radius
 
                     Column {
 
                         id: presetsContainer
-                        anchors.margins: 10
-                        anchors.topMargin: 10
+                        anchors.margins: Style.margins
                         anchors.top: parent.top
 
-                        spacing: 10
+                        spacing: Style.columnSpacing
 
                         Text {
                             text: "CustomPresets"
@@ -355,25 +370,24 @@ Rectangle {
 
                 Rectangle {
 
-                    border.color: "#C6DCEC"
-                    width: eventDetailsContainer.width + 20
-                    height: eventDetailsContainer.height + 20
+                    border.color: Style.colorLabelTextBackground
+                    width: eventDetailsContainer.width + Style.dataStructureContainerMargin
+                    height: eventDetailsContainer.height + Style.dataStructureContainerMargin
                     gradient: Gradient {
-                        GradientStop { position: 0 ; color: "#006F97" }
-                        GradientStop { position: 0.4 ; color: "#006F97" }
-                        GradientStop { position: 0.5 ; color: "#006F97" }
-                        GradientStop { position: 1 ; color: "#5D97C3" }
+                        GradientStop { position: 0 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.4 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.5 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 1 ; color: Style.colorButtonGradBot }
                     }
                     radius: Style.radius
 
                     Column {
 
                         id: eventDetailsContainer
-                        anchors.margins: 10
-                        anchors.topMargin: 10
+                        anchors.margins: Style.margins
                         anchors.top: parent.top
 
-                        spacing: 10
+                        spacing: Style.columnSpacing
 
                         Text {
                             text: "EventDetails"
@@ -547,25 +561,24 @@ Rectangle {
 
                 Rectangle {
 
-                    border.color: "#C6DCEC"
-                    width: advertisementContainer.width + 20
-                    height: advertisementContainer.height + 20
+                    border.color: Style.colorLabelTextBackground
+                    width: advertisementContainer.width + Style.dataStructureContainerMargin
+                    height: advertisementContainer.height + Style.dataStructureContainerMargin
                     gradient: Gradient {
-                        GradientStop { position: 0 ; color: "#006F97" }
-                        GradientStop { position: 0.4 ; color: "#006F97" }
-                        GradientStop { position: 0.5 ; color: "#006F97" }
-                        GradientStop { position: 1 ; color: "#5D97C3" }
+                        GradientStop { position: 0 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.4 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.5 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 1 ; color: Style.colorButtonGradBot }
                     }
                     radius: Style.radius
 
                     Column {
 
                         id: advertisementContainer
-                        anchors.margins: 10
-                        anchors.topMargin: 10
+                        anchors.margins: Style.margins
                         anchors.top: parent.top
 
-                        spacing: 10
+                        spacing: Style.columnSpacing
 
                         Text {
                             text: "Advertisement"
@@ -611,25 +624,24 @@ Rectangle {
 
                 Rectangle {
 
-                    border.color: "#C6DCEC"
-                    width: webActivityContainer.width + 20
-                    height: webActivityContainer.height + 20
+                    border.color: Style.colorLabelTextBackground
+                    width: webActivityContainer.width + Style.dataStructureContainerMargin
+                    height: webActivityContainer.height + Style.dataStructureContainerMargin
                     gradient: Gradient {
-                        GradientStop { position: 0 ; color: "#006F97" }
-                        GradientStop { position: 0.4 ; color: "#006F97" }
-                        GradientStop { position: 0.5 ; color: "#006F97" }
-                        GradientStop { position: 1 ; color: "#5D97C3" }
+                        GradientStop { position: 0 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.4 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.5 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 1 ; color: Style.colorButtonGradBot }
                     }
                     radius: Style.radius
 
                     Column {
 
                         id: webActivityContainer
-                        anchors.margins: 10
-                        anchors.topMargin: 10
+                        anchors.margins: Style.margins
                         anchors.top: parent.top
 
-                        spacing: 10
+                        spacing: Style.columnSpacing
 
                         Text {
                             text: "WebActivity"
@@ -675,25 +687,24 @@ Rectangle {
 
                 Rectangle {
 
-                    border.color: "#C6DCEC"
-                    width: songInfoContainer.width + 20
-                    height: songInfoContainer.height + 20
+                    border.color: Style.colorLabelTextBackground
+                    width: songInfoContainer.width + Style.dataStructureContainerMargin
+                    height: songInfoContainer.height + Style.dataStructureContainerMargin
                     gradient: Gradient {
-                        GradientStop { position: 0 ; color: "#006F97" }
-                        GradientStop { position: 0.4 ; color: "#006F97" }
-                        GradientStop { position: 0.5 ; color: "#006F97" }
-                        GradientStop { position: 1 ; color: "#5D97C3" }
+                        GradientStop { position: 0 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.4 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.5 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 1 ; color: Style.colorButtonGradBot }
                     }
                     radius: Style.radius
 
                     Column {
 
                         id: songInfoContainer
-                        anchors.margins: 10
-                        anchors.topMargin: 10
+                        anchors.margins: Style.margins
                         anchors.top: parent.top
 
-                        spacing: 10
+                        spacing: Style.columnSpacing
 
                         Text {
                             text: "SongInfo"
@@ -803,25 +814,24 @@ Rectangle {
 
                 Rectangle {
 
-                    border.color: "#C6DCEC"
-                    width: locationContainer.width + 20
-                    height: locationContainer.height + 20
+                    border.color: Style.colorLabelTextBackground
+                    width: locationContainer.width + Style.dataStructureContainerMargin
+                    height: locationContainer.height + Style.dataStructureContainerMargin
                     gradient: Gradient {
-                        GradientStop { position: 0 ; color: "#006F97" }
-                        GradientStop { position: 0.4 ; color: "#006F97" }
-                        GradientStop { position: 0.5 ; color: "#006F97" }
-                        GradientStop { position: 1 ; color: "#5D97C3" }
+                        GradientStop { position: 0 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.4 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 0.5 ; color: Style.colorButtonGradTop }
+                        GradientStop { position: 1 ; color: Style.colorButtonGradBot }
                     }
                     radius: Style.radius
 
                     Column {
 
                         id: locationContainer
-                        anchors.margins: 10
-                        anchors.topMargin: 10
+                        anchors.margins: Style.margins
                         anchors.top: parent.top
 
-                        spacing: 10
+                        spacing: Style.columnSpacing
 
                         Text {
                             text: "Location"
@@ -915,8 +925,4 @@ Rectangle {
             }
         }
    }
-
-    signal requestButtonClick(QtObject item)
-
-    signal responseButtonClick(QtObject item)
 }

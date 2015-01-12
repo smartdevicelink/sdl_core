@@ -141,7 +141,7 @@ Item {
     Timer {
         id: tuneUpTimer
 
-        // Specify a timeout interval of 100 miliseconds
+        // Specify a timeout interval of 150 miliseconds for scan interval emulation
         interval: 150;
         running: false;
         repeat: true
@@ -151,7 +151,7 @@ Item {
     Timer {
         id: pauseTimer
 
-        // Specify a timeout interval of 2 seconds
+        // Specify a timeout interval of 3 seconds for Scan emulation
         interval: 3000
 
         onTriggered: {
@@ -160,11 +160,16 @@ Item {
         }
     }
 
+    /**
+     * Method to process requsets and notifications came from TCP client
+     * @param result - Incoming message from TCP
+     */
     function receivedMessageTCP(result) {
 
 
         var notify, response;
 
+        //Requsets parser by method name
         switch (result.method) {
             case "CAN.TuneRadio": {
 
@@ -253,6 +258,11 @@ Item {
         return successResponse(result.id, result.method);
     }
 
+
+    /**
+     * Method to process requsets and notifications came from WS client
+     * @param result - Incoming message from WS
+     */
     function receivedMessageWS(result) {
 
         switch (result.method) {
@@ -329,6 +339,10 @@ Item {
         return successResponse(result.id, result.method);
     }
 
+    /**
+     * Method to process requsets with data for RadioDetails structure
+     * save data to model and send notification OnRadioDetails to WS and TCP
+     */
     function checkRadioDetailsSongInfo() {
 
         var data = dataHandler.fraction + dataHandler.frequency * 10;
@@ -357,6 +371,10 @@ Item {
         }
     }
 
+    /**
+     * Method to process requsets data for Presets structure
+     * save data to model and send notification onPresetsChanged to WS
+     */
     function presetsChangeWS(params) {
 
         dataHandler.preset0 = params.customPresets[0];
@@ -369,6 +387,10 @@ Item {
         sendMessageSDL(dataHandler.onPresetsChanged(params.customPresets));
     }
 
+    /**
+     * Method to process requsets data for Presets structure
+     * save data to model and send notification onPresetsChanged to TCP
+     */
     function presetsChangeTCP(params) {
 
         dataHandler.preset0 = params.customPresets[0];
@@ -381,6 +403,11 @@ Item {
         sendMessageHMI(dataHandler.onPresetsChanged(params.customPresets));
     }
 
+
+    /**
+     * Method to emulate TuneUp behavior
+     * change data in model and send notification OnRadioDetails to WS and TCP
+     */
     function tuneUp() {
 
         var data = dataHandler.fraction + dataHandler.frequency * 10;
@@ -397,6 +424,10 @@ Item {
         checkRadioDetailsSongInfo(data);
     }
 
+    /**
+     * Method to emulate TuneDoen behavior
+     * change data in model and send notification OnRadioDetails to WS and TCP
+     */
     function tuneDown() {
 
         var data = dataHandler.fraction + dataHandler.frequency * 10;
@@ -413,10 +444,17 @@ Item {
         checkRadioDetailsSongInfo(data);
     }
 
+    /**
+     * Method to emulate Scan behavior
+     * change data in model and send notification OnRadioDetails to WS and TCP
+     */
     function startScan() {
         tuneUpTimer.start();
     }
 
+    /**
+     * Method to stop Scan behavior
+     */
     function stopScan() {
         tuneUpTimer.stop();
         pauseTimer.stop();
@@ -443,6 +481,9 @@ Item {
         return response;
     }
 
+    /**
+     * Method to prepare OnRadioDetails structure to sent to Client
+     */
     function onRadioDetailsFractionChanged() {
 
         var response;
@@ -461,6 +502,9 @@ Item {
         return response;
     }
 
+    /**
+     * Method to prepare OnPresetsChanged structure to sent to Client
+     */
     function onPresetsChanged(presets) {
 
         var response;
@@ -476,6 +520,9 @@ Item {
         return response;
     }
 
+    /**
+     * Method to prepare OnRadioDetails structure to sent to Client
+     */
     function onRadioDetails()
     {
         var response;

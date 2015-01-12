@@ -17,7 +17,7 @@ Rectangle {
 
     Text {
         id: label
-        anchors.leftMargin: 5
+        anchors.leftMargin: Style.labelTextLabelLeftMargin
         anchors.left: root.left
         text: root.textLabel
         width: Style.labelWidth
@@ -30,10 +30,13 @@ Rectangle {
 
         anchors.right: root.right
         textInput: root.dataText
-        widthInput: Style.widthInput
         onTextInputChanged: {
-            root.dataText = textInput;
+            root.dataText = textInput; //Bidirectional binding
         }
+
+        /**
+         * Connections for bidirectional binding
+         */
         Connections {
             target: root
             onDataTextChanged: {

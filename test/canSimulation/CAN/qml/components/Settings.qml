@@ -5,15 +5,14 @@ import "."
 
 Rectangle {
     id: root
-    color: "black"
     width: parent.width
     height: Style.componentHeight
     anchors.margins: 10
 
-    property int port: 1234
-    property string ip: "127.0.0.1"
-    property int wsPort: 2468
-    property string wsIP: "127.0.0.1"
+    property int port: 1234 //Default port for TCP connection
+    property string ip: "127.0.0.1" //Default IP adress for TCP connection
+    property int wsPort: 2468 //Default port for WS connection
+    property string wsIP: "127.0.0.1" //Default IP adress for WS connection
     property string logLocation: "."
 
     signal connectTCP()
@@ -26,6 +25,9 @@ Rectangle {
         folder: logLocation
         onAccepted: {
             var str = Qt.resolvedUrl( fileDialog.fileUrl ).toString();
+
+            //remove default QT appender before current location path
+            // and added log file name "log.txt"
             logLocation = str.slice(7, str.length) + "/log.txt";
         }
     }
@@ -44,7 +46,7 @@ Rectangle {
 
         Column {
 
-            spacing: Style.spacing
+            spacing: Style.columnSpacing
             anchors.margins: 10
             anchors.topMargin: 10
             anchors.top: parent.top

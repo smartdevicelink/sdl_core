@@ -41,11 +41,22 @@ ApplicationWindow {
         }
     }
 
+    /**
+     * Method to show current location of CAN on SettingView
+     * @param path - Location path
+     */
     function setCurrentPath(path) {
         root.logURL = path + "/log.txt";
-        logModel.append({"color":Style.colorLogError, "text": "Carrent log location: " + root.logURL});
+        logModel.append({
+                            "color": Style.colorLogError,
+                            "text": "Carrent log location: " + root.logURL
+                        });
     }
 
+    /**
+     * Method to redirect incoming fom WS messages to RequestHandler
+     * @param message - Text message came from WS
+     */
     function incomingWS(message) {
 
         var result = JSON.parse(message);
@@ -53,6 +64,11 @@ ApplicationWindow {
         RequestHandler.receivedMessageWS(result);
     }
 
+    /**
+     * Method to redirect incoming fom TCP messages to RequestHandler
+     * and send response back to TCP client
+     * @param message - Text message came from TCP
+     */
     function incoming(message) {
 
         var result = JSON.parse(message);
@@ -64,6 +80,11 @@ ApplicationWindow {
         return respJson;
     }
 
+    /**
+     * Method to add new messages to LogView
+     * @param message - Text message to show in Logger
+     * @param color - Number value of color Enum
+     */
     function logger(message, color) {
 
         tcpLogsView.append(message, color);
@@ -330,6 +351,7 @@ ApplicationWindow {
             highlightFollowsCurrentItem: true
             focus: true
             onCountChanged: {
+                //Change index for auto scrolling messages in Logger
                 currentIndex = count > 0 ? count - 1 : 0;
             }
         }
