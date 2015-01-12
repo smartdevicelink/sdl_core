@@ -3,6 +3,17 @@ set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_S
 set(install_destination ${CMAKE_BINARY_DIR}/bin/plugins)
 set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain/plugins)
 
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror")
+if (CMAKE_BUILD_TYPE)
+  if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "")
+  else ()
+    set(CMAKE_CXX_FLAGS_RELEASE "")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g3 -ggdb3 -DDEBUG")
+  endif()
+endif()
+
 include_directories (
   ./include/
   ../include/
