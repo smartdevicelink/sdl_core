@@ -152,12 +152,22 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 # flag is handled by CMake
 set(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR})
 set(ARCHIVE_OUTPUT_DIRECTORY ./bin)
-set(CMAKE_CXX_FLAGS "-fPIC -g3 -ggdb3 -std=gnu++0x -Wall -Werror -Wuninitialized")
+
 if (ENABLE_GCOV)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
   add_definitions(-DGCOV_ENABLED)
 endif()
-set(CMAKE_CXX_FLAGS_RELEASE "-fPIC -s -O2") #It will be appended to CMAKE_CXX_FLAGS in release
+
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror")
+if (CMAKE_BUILD_TYPE)
+  if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "")
+  else ()
+    set(CMAKE_CXX_FLAGS_RELEASE "")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g3 -ggdb3 -DDEBUG")
+  endif()
+endif()
 
 #include_directories(
 #  ../../../src/components/policy/
@@ -225,16 +235,6 @@ endif()
 
 # TODO(AK): check current OS here
 add_definitions(-DOS_POSIX)
-
-# FIXME(DC): weird logic
-IF(CMAKE_C_FLAGS_DEBUG)
-    SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DDEBUG" )
-    add_definitions(-DDEBUG)
-ELSE (CMAKE_C_FLAGS_DEBUG)
-    SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DRELEASE" )
-    add_definitions(-DRELEASE)
-ENDIF(CMAKE_C_FLAGS_DEBUG)
-
 
 if (EXTENDED_MEDIA_MODE)
 add_definitions(-DEXTENDED_MEDIA_MODE)

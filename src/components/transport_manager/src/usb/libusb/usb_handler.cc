@@ -357,7 +357,7 @@ void UsbHandler::SubmitControlTransfer(
   assert(transfer->Type() == UsbControlTransfer::VENDOR);
   const libusb_request_type request_type = LIBUSB_REQUEST_TYPE_VENDOR;
 
-  libusb_endpoint_direction endpoint_direction;
+  libusb_endpoint_direction endpoint_direction = LIBUSB_ENDPOINT_IN;
   if (transfer->Direction() == UsbControlTransfer::IN) {
     endpoint_direction = LIBUSB_ENDPOINT_IN;
   } else if (transfer->Direction() == UsbControlTransfer::OUT) {
