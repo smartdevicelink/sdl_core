@@ -1,0 +1,24 @@
+-summary(../results/raw_flexelint_summary.txt)
+
++cpp(cc)
+
++fce
+
+--i../../../src/3rd_party
+--i../../../src/3rd_party-static/gmock-1.7.0
+--i../../../src/3rd_party-static/jsoncpp
+--i../../../src/3rd_party-static/libusbx-1.0.16
+
+--i../config/
+--i../tmp/
+
+-width(0,0)
+
+// include path used by the gcc compiler
+co-gcc.lnt
+
+// sdl include path
+sdl-include-path.lnt
+
+// sdl modules
+sdl-modules.lnt

@@ -1,0 +1,6 @@
+<SmartDeviceLink>
+	<!-- BINARIES -->
+	<file_name>ALL</file_name>
+	<host_location>SmartDeviceLink/bin/armle-v7/release</host_location>
+	<target_location>/mp/apps</target_location>
+</SmartDeviceLink>

@@ -1,0 +1,317 @@
+/*
+* Copyright (c) 2013, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE. 
+ */
+
+Version = 1.0
+
+This file describes message structure for communication between SDL and HMI.
+JSON RPC 2.0 format is taken as basis. Please refer to http://www.jsonrpc.org/specification. Additions to this format are marked as 'Additions' hereinafter. Blocks marked as 'Spec' are excerpt from oficial specification of JSON RPC 2.0. Samples are also provided.
+This document comes in pair with HMI_API.xml.
+
+#########################################################################################
+
+Notifications:
+
+/****
+
+	* Spec (from http://www.jsonrpc.org/specification):
+	A Notification is a Request object without an "id" member. A Request object that is a Notification signifies the Client's lack of interest in the corresponding Response object, and as such no Response object needs to be returned to the client. The Server MUST NOT reply to a Notification, including those that are within a batch request.
+***/
+
+//No params:
+{
+	"jsonrpc" : "2.0",
+	"method" : "UI.OnReady"
+}
+
+//With params:
+
+{
+	"jsonrpc" : "2.0",
+	"method" : "BasicCommunication.OnDeviceListUpdated",
+	"params" : 
+	{
+		"deviceList" : [ "XT910", "GT-I9300", "HTC Explorer A310e" ]
+	}
+}
+
+{
+	"jsonrpc" : "2.0",
+	"method" : "Buttons.OnButtonPress",
+	"params" : 
+	{
+		"mode" : "SHORT",
+		"name" : "OK"
+	}
+}
+
+#########################################################################################
+
+/*****
+	Request-response pairs
+
+	* Spec (from http://www.jsonrpc.org/specification):
+	Request object
+	A rpc call is represented by sending a Request object to a Server. The Request object has the following members:
+
+		jsonrpc
+		A String specifying the version of the JSON-RPC protocol. MUST be exactly "2.0".
+		method
+		A String containing the name of the method to be invoked. Method names that begin with the word rpc followed by a period character (U+002E or ASCII 46) are reserved for rpc-internal methods and extensions and MUST NOT be used for anything else.
+		params
+		A Structured value that holds the parameter values to be used during the invocation of the method. This member MAY be omitted.
+		id
+		An identifier established by the Client that MUST contain a String, Number, or NULL value if included. If it is not included it is assumed to be a notification. The value SHOULD normally not be Null and Numbers SHOULD NOT contain fractional parts
+*****/
+
+//Params in request
+{
+	"id" : 36,
+	"jsonrpc" : "2.0",
+	"method" : "UI.Alert",
+	"params" : 
+	{
+		"alertText1" : "Alert Line 1",
+		"alertText2" : "Alert Line 2",
+		"alertText3" : "Alert Line 3",
+		"appId" : 65537,
+		"duration" : 5000,
+		"playTone" : true,
+		"ttsChunks" : 
+		[
+			
+			{
+				"text" : "Text to Speak"
+			}
+		]
+	}
+}
+
+//No params in request
+{
+	"id" : 19,
+	"jsonrpc" : "2.0",
+	"method" : "Buttons.GetCapabilities"
+}
+
+/****
+	* Spec (from http://www.jsonrpc.org/specification):
+	Response object
+	When a rpc call is made, the Server MUST reply with a Response, except for in the case of Notifications. The Response is expressed as a single JSON Object, with the following members:
+
+		jsonrpc
+		A String specifying the version of the JSON-RPC protocol. MUST be exactly "2.0".
+		result
+		This member is REQUIRED on success.
+		This member MUST NOT exist if there was an error invoking the method.
+		The value of this member is determined by the method invoked on the Server.
+		error
+		This member is REQUIRED on error.
+		This member MUST NOT exist if there was no error triggered during invocation.
+		The value for this member MUST be an Object as defined below.
+		id
+		This member is REQUIRED.
+		It MUST be the same as the value of the id member in the Request Object.
+		If there was an error in detecting the id in the Request object (e.g. Parse error/Invalid Request), it MUST be Null.
+	* Additions:
+		result MUST contain 'method' which has to be the same as in 'request'.
+
+
+****/
+
+/****
+	* Error object
+	When a rpc call encounters an error, the Response Object MUST contain the error member with a value that is a Object with the following members:
+
+		code
+		A Number that indicates the error type that occurred.
+		This MUST be an integer.
+		message
+		A String providing a short description of the error.
+		The message SHOULD be limited to a concise single sentence.
+		data
+		A Primitive or Structured value that contains additional information about the error.
+		This may be omitted.
+		The value of this member is defined by the Server (e.g. detailed error information, nested errors etc.).
+	
+
+	* Additions:
+		result along with error MUST contain 'code' which is value from Result enum provided in HMI_API.xml
+		error MUST contain 'method' which is the same as 'method' in request for this error in field 'data'.
+****/
+
+//Response with no params in it (code and method are necessary)
+{
+	"id" : 36,
+	"jsonrpc" : "2.0",
+	"result" : 
+	{
+		"code" : 0,
+		"method": "UI.Alert"
+	}
+}
+
+// extra params in response
+{
+	"id" : 19,
+	"jsonrpc" : "2.0",
+	"result" : 
+	{
+		"capabilities" : 
+		[
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "PRESET_0",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "PRESET_1",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "PRESET_2",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "PRESET_3",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "PRESET_4",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "PRESET_5",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "PRESET_6",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "PRESET_7",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "PRESET_8",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "PRESET_9",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "OK",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "SEEKLEFT",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "SEEKRIGHT",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "TUNEUP",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			},
+			
+			{
+				"longPressAvailable" : true,
+				"name" : "TUNEDOWN",
+				"shortPressAvailable" : true,
+				"upDownAvailable" : true
+			}
+		],
+		"presetBankCapabilities" : 
+		{
+			"onScreenPresetsAvailable" : true
+		},
+		"code" : 0,
+		"method" : "Buttons.GetCapabilities"
+	}
+}
+
+//Erroneous response
+{
+	"id" : 35,
+	"jsonrpc" : "2.0",
+	"error" : 
+	{
+		"code" : 12,
+		"message" : "File with this name is not available",
+		"data" : {
+			"method" : "Buttons.GetCapabilities"
+		}
+	}
+}

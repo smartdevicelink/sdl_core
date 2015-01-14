@@ -1,0 +1,62 @@
+/*
+* Copyright (c) 2013, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+Version = 1.0
+
+This file describes message structure for communication between SDL and Mobile SDK.
+
+Json string used for communication consists of parameter names and values which can be either objects, arrays or 'simple' values such as strings, numbers and boolean values.
+Example:
+{"syncFileName":"action.png","fileType":"GRAPHIC_PNG"}
+where
+- syncFileName - name of parameter with value of type string ("action.png")
+- fileType - name of parameter with value passed as type string ("GRAPHIC_PNG").
+{"resultCode" : "SUCCESS", "success" : true}
+- resultCode - name of parameter with value passed as type string("SUCCESS")
+- success - name of parameter with value of type boolean (true)
+
+Parameter names, types, fields of possible values are provided in specification stored in MOBILE_API.xml file.
+
+Each RPC described in this document can be represented in json format;
+RPC type (Request/Response/Notification) is passed in binary header which comes along with json string as well as ID representing particular RPC. For instance, according to MOBILE_API.xml PutFile RPC has functionID="PutFileID" which can be found in FunctionID enum with value equal to 32. Hence binary header for this RPC Request will contain RPC Type half-byte set to 0 (Request), RPC Function ID 3.5 bytes set to 32.
+PutFile RPC Request has mandatory params:
+syncFileName of type String
+fileType of enum type FileType
+and optional parameter:
+persistentFile of type Boolean.
+Hence with file name set to 'action.png' and file type to PNG, optional parameter ommited, json string of PutFile RPC Request will look like:
+{"syncFileName":"action.png","fileType":"GRAPHIC_PNG"}
+
+PutFile Response RPC as any other Response RPC in MOBILE_API.xml must have resultCode (with values from provided enum) and success (with value of type boolean) parameters and optional info parameter (with value of type string). PutFile Response RPC also has mandatory parameter spaceAvailable with value of type Integer in range from 0 to 2000000000.
+Hence, Json string for PutFile Response RPC can look like follows:
+{"resultCode":"SUCCESS","spaceAvailable":104845882,"success":true}
+for successful execution of RPC.

@@ -1,0 +1,19 @@
+// options lint file
+-w1 				// remove informational
+//-e506				// constant value boolean
+//-e19				// useless decl
+//-e534				// ignoring return value
+-wlib(1)
++cpp(cc)
+// Add formatting for parsing
+ // Output options: One line, file info always; Use full path names
+-hF1
++ffn
+// since we have only the default eclipse error parser available.
+-"format=%(%f:%l:%C:%) %t %n: %m"
+-frl
+// Do not break lines
+-width(0)
+// And make sure no foreign includes change the format
++flm
+-summary()

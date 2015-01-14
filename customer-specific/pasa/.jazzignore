@@ -1,0 +1,51 @@
+### Jazz Ignore 0
+# Default value for core.ignore.recursive is *.class
+#  Changing this value changes check-in behaviour for the entire project. 
+#
+# Default value for core.ignore is bin
+#  Changing this value changes check-in behaviour for the local directory.
+#
+# Ignore properties should contain a space separated list of filename patterns.
+# Each pattern is case sensitive and surrounded by braces ('{' and '}'). 
+# "*" matches zero or more characters, and "?" matches single characters. 
+#
+#   e.g: {*.sh} {\.*}    ignores shell scripts and hidden files
+
+# NOTE: modifying ignore files will not change the ignore status of derived 
+# resources.
+
+core.ignore.recursive= \
+	{*.chm} \
+	{*.zip} \
+	{*.zipx} \
+	{*.gzip} \
+	{*.7z} \
+	{*.ipg} \
+	{*.gzi} \
+	{*.gz} \
+	{*.rar} \
+	{*.tar} \
+	{*.tgz} \
+	{*.pup} \
+	{*.sea} \
+	{*.sfx} \
+	{*.sit} \
+	{*.sitx} \
+	{*.war} \
+	{*.jar} \
+	{*.a} \
+	{*.ar} \
+	{*.arc} \
+	{*.o} \
+  {.objs.txt}
+
+core.ignore= \
+	{.project} \
+	{.cprojet} \
+	{dist} \
+	{arm} \
+	{x86} \
+	{bin} \
+	{bld} \
+	{lib} \
+	{dll}

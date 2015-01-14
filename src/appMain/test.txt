@@ -1,0 +1,3 @@
+{'request': {'parameters': {'vrSynonyms': ['Stitcher'], 'appName': 'Stitcher', 'languageDesired': 'EN-US', 'syncMsgVersion': {'majorVersion': 1, 'minorVersion': 1}, 'isMediaApplication': True, 'autoActivateID': '', 'ngnMediaScreenAppName': 'Stitc'}, 'correlationID': 1, 'name': 'RegisterAppInterface'}}
+{'request': {'parameters': {}, 'name':'Show'}}
+{'request': {'parameters': {'mediaTrack': 'Stitcher', 'mainField1': 'Stitcher Radio', 'alignment': 'CENTERED', 'mainField2': ''}, 'correlationID': 3000, 'name': 'Show'}}

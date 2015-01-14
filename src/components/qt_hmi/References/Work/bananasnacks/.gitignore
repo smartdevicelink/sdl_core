@@ -1,0 +1,11 @@
+*.o
+*.pri
+*.so
+*.dll
+.DS_Store
+
+/BananaSnacks.app
+/BananaSnacks
+/BananaSnacks.pro.user
+Makefile
+moc_*.cpp

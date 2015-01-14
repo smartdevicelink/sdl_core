@@ -1,0 +1,6 @@
+flake8
+pep8-naming
+pep257
+mccabe
+pylint
+mock
