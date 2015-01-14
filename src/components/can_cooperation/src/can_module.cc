@@ -2,6 +2,7 @@
 #include "can_cooperation/mobile_command_factory.h"
 #include "can_cooperation/can_module_event.h"
 #include "can_cooperation/event_engine/event_dispatcher.h"
+#include "can_cooperation/can_module_constants.h"
 #include "application_manager/application.h"
 #include "./can_tcp_connection.h"
 #include "utils/logger.h"
@@ -9,6 +10,8 @@
 
 
 namespace can_cooperation {
+
+using namespace json_keys;
 
 using functional_modules::ProcessResult;
 using functional_modules::GenericModule;
@@ -186,22 +189,22 @@ functional_modules::ProcessResult CANModule::HandleMessage(
   std::string function_name;
 
   // Request or notification
-  if (value.isMember("method")) {
-    function_name = value["method"].asCString();
+  if (value.isMember(kMethod)) {
+    function_name = value[kMethod].asCString();
 
-    if (value.isMember("id")) {
+    if (value.isMember(kId)) {
       msg->set_message_type(application_manager::MessageType::kRequest);
     } else {
       msg->set_message_type(application_manager::MessageType::kNotification);
     }
   // Response
-  } else if (value.isMember("result") && value["result"].isMember("method")) {
-    function_name = value["result"]["method"].asCString();
+  } else if (value.isMember(kResult) && value[kResult].isMember(kMethod)) {
+    function_name = value[kResult][kMethod].asCString();
     msg->set_message_type(application_manager::MessageType::kResponse);
   // Error response
-  }  else if (value.isMember("error") && value["error"].isMember("data") &&
-              value["error"]["data"].isMember("method")) {
-    function_name = value["error"]["data"]["method"].asCString();
+  }  else if (value.isMember(kError) && value[kError].isMember(kData) &&
+              value[kError][kData].isMember(kMethod)) {
+    function_name = value[kError][kData][kMethod].asCString();
     msg->set_message_type(application_manager::MessageType::kErrorResponse);
   } else {
     // TODO(PV): research why asserts are triggered in release build
@@ -210,8 +213,8 @@ functional_modules::ProcessResult CANModule::HandleMessage(
   }
 
 
-  if (value.isMember("id")) {
-    msg->set_correlation_id(value["id"].asInt());
+  if (value.isMember(kId)) {
+    msg->set_correlation_id(value[kId].asInt());
   } else if (application_manager::MessageType::kNotification !=  msg->type()) {
     DCHECK(false);
     return ProcessResult::FAILED;

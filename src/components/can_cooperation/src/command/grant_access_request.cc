@@ -31,6 +31,7 @@
  */
 
 #include "can_cooperation/commands/grant_access_request.h"
+#include "can_cooperation/can_module_constants.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
 
@@ -55,20 +56,20 @@ void GrantAccessRequest::Run() {
       service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, "APPLICATION_NOT_REGISTERED", "");
+    SendResponse(false, result_codes::kApplicationNotRegistered, "");
     return;
   }
 
   CANAppExtensionPtr extension = GetAppExtension(app);
   if (extension->IsControlGiven()) {
     LOG4CXX_ERROR(logger_, "Application already have access!");
-    SendResponse(false, "REJECTED", "");
+    SendResponse(false, result_codes::kRejected, "");
     return;
   }
 
   Json::Value params;
 
-  params["appID"] = app->hmi_app_id();
+  params[json_keys::kAppId] = app->hmi_app_id();
 
   Json::FastWriter writer;
 
@@ -84,7 +85,7 @@ void GrantAccessRequest::on_event(
       service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, "APPLICATION_NOT_REGISTERED", "");
+    SendResponse(false, result_codes::kApplicationNotRegistered, "");
     return;
   }
 

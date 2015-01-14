@@ -34,12 +34,15 @@
 #include "can_cooperation/event_engine/event_dispatcher.h"
 #include "can_cooperation/message_helper.h"
 #include "can_cooperation/can_module.h"
+#include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 
 namespace commands {
 
 using event_engine::EventDispatcher;
+
+using namespace json_keys;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "BaseCommandRequest");
 
@@ -65,10 +68,10 @@ void BaseCommandRequest::SendResponse(bool success,
    msg_params = response_params_;
  }
 
- msg_params["success"] = success;
- msg_params["resultCode"] = result_code;
+ msg_params[kSuccess] = success;
+ msg_params[kResultCode] = result_code;
  if (!info.empty()) {
-   msg_params["info"] = info;
+   msg_params[kInfo] = info;
  }
 
  Json::FastWriter writer;
@@ -83,18 +86,18 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
   Json::Value msg;
 
   if (is_hmi_request) {
-    msg["id"] = service_->GetNextCorrelationID();
+    msg[kId] = service_->GetNextCorrelationID();
   } else {
-    msg["id"] = MessageHelper::GetNextCANCorrelationID();
+    msg[kId] = MessageHelper::GetNextCANCorrelationID();
   }
 
   EventDispatcher<application_manager::MessagePtr, std::string>::instance()->
-      add_observer(function_id, msg["id"].asInt(), this);
+      add_observer(function_id, msg[kId].asInt(), this);
 
-  msg["jsonrpc"] = "2.0";
-  msg["method"] = function_id;
+  msg[kJsonrpc] = "2.0";
+  msg[kMethod] = function_id;
   if (!message_params.isNull()) {
-    msg["params"] = message_params;
+    msg[kParams] = message_params;
   }
 
   Json::FastWriter writer;
@@ -105,7 +108,7 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
             protocol_handler::MessagePriority::kDefault));
     message_to_send->set_protocol_version(
         application_manager::ProtocolVersion::kHMI);
-    message_to_send->set_correlation_id(msg["id"].asInt());
+    message_to_send->set_correlation_id(msg[kId].asInt());
     message_to_send->set_json_message(json_msg);
     message_to_send->set_message_type(
         application_manager::MessageType::kRequest);
@@ -121,104 +124,104 @@ const char* BaseCommandRequest::GetMobileResultCode(
     const hmi_apis::Common_Result::eType& hmi_code) const {
   switch (hmi_code) {
     case hmi_apis::Common_Result::SUCCESS: {
-      return "SUCCESS";
+      return result_codes::kSuccess;
       break;
     }
     case hmi_apis::Common_Result::UNSUPPORTED_REQUEST: {
-      return "UNSUPPORTED_REQUEST";
+      return result_codes::kUnsupportedRequest;
       break;
     }
     case hmi_apis::Common_Result::UNSUPPORTED_RESOURCE: {
-      return "UNSUPPORTED_RESOURCE";
+      return result_codes::kUnsupportedResource;
       break;
     }
     case hmi_apis::Common_Result::DISALLOWED: {
-      return "DISALLOWED";
+      return result_codes::kDisallowed;
       break;
     }
     case hmi_apis::Common_Result::REJECTED: {
-      return "REJECTED";
+      return result_codes::kRejected;
       break;
     }
     case hmi_apis::Common_Result::ABORTED: {
-      return "ABORTED";
+      return result_codes::kAborted;
       break;
     }
     case hmi_apis::Common_Result::IGNORED: {
-      return "IGNORED";
+      return result_codes::kIgnored;
       break;
     }
     case hmi_apis::Common_Result::RETRY: {
-      return "RETRY";
+      return result_codes::kRetry;
       break;
     }
     case hmi_apis::Common_Result::IN_USE: {
-      return "IN_USE";
+      return result_codes::kInUse;
       break;
     }
     case hmi_apis::Common_Result::DATA_NOT_AVAILABLE: {
-      return "VEHICLE_DATA_NOT_AVAILABLE";
+      return result_codes::kVehicleDataNotAvailable;
       break;
     }
     case hmi_apis::Common_Result::TIMED_OUT: {
-      return "TIMED_OUT";
+      return result_codes::kTimedOut;
       break;
     }
     case hmi_apis::Common_Result::INVALID_DATA: {
-      return "INVALID_DATA";
+      return result_codes::kInvalidData;
       break;
     }
     case hmi_apis::Common_Result::CHAR_LIMIT_EXCEEDED: {
-      return "CHAR_LIMIT_EXCEEDED";
+      return result_codes::kCharLimitExceeded;
       break;
     }
     case hmi_apis::Common_Result::INVALID_ID: {
-      return "INVALID_ID";
+      return result_codes::kInvalidId;
       break;
     }
     case hmi_apis::Common_Result::DUPLICATE_NAME: {
-      return "DUPLICATE_NAME";
+      return result_codes::kDuplicateName;
       break;
     }
     case hmi_apis::Common_Result::APPLICATION_NOT_REGISTERED: {
-      return "APPLICATION_NOT_REGISTERED";
+      return result_codes::kApplicationNotRegistered;
       break;
     }
     case hmi_apis::Common_Result::WRONG_LANGUAGE: {
-      return "WRONG_LANGUAGE";
+      return result_codes::kWrongLanguage;
       break;
     }
     case hmi_apis::Common_Result::OUT_OF_MEMORY: {
-      return "OUT_OF_MEMORY";
+      return result_codes::kOutOfMemory;
       break;
     }
     case hmi_apis::Common_Result::TOO_MANY_PENDING_REQUESTS: {
-      return "TOO_MANY_PENDING_REQUESTS";
+      return result_codes::kTooManyPendingRequests;
       break;
     }
     case hmi_apis::Common_Result::NO_APPS_REGISTERED: {
-      return "APPLICATION_NOT_REGISTERED";
+      return result_codes::kApplicationNotRegistered;
       break;
     }
     case hmi_apis::Common_Result::NO_DEVICES_CONNECTED: {
-      return "APPLICATION_NOT_REGISTERED";
+      return result_codes::kApplicationNotRegistered;
       break;
     }
     case hmi_apis::Common_Result::WARNINGS: {
-      return "WARNINGS";
+      return result_codes::kWarnings;
       break;
     }
     case hmi_apis::Common_Result::GENERIC_ERROR: {
-      return "GENERIC_ERROR";
+      return result_codes::kGenericError;
       break;
     }
     case hmi_apis::Common_Result::USER_DISALLOWED: {
-      return "USER_DISALLOWED";
+      return result_codes::kUserDisallowed;
       break;
     }
     default: {
       LOG4CXX_ERROR(logger_, "Unknown HMI result code " << hmi_code);
-      return "GENERIC_ERROR";
+      return result_codes::kGenericError;
       break;
     }
   }

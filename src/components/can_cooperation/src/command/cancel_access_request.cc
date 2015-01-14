@@ -31,6 +31,7 @@
  */
 
 #include "can_cooperation/commands/cancel_access_request.h"
+#include "can_cooperation/can_module_constants.h"
 #include "can_cooperation/can_module.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
@@ -56,14 +57,14 @@ void CancelAccessRequest::Run() {
       service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, "APPLICATION_NOT_REGISTERED",  "");
+    SendResponse(false, result_codes::kApplicationNotRegistered,  "");
     return;
   }
 
   CANAppExtensionPtr extension = GetAppExtension(app);
   if (!extension->IsControlGiven()) {
     LOG4CXX_ERROR(logger_, "Application doesn't have access!");
-    SendResponse(false, "REJECTED", "");
+    SendResponse(false, result_codes::kRejected, "");
     return;
   }
 
@@ -78,13 +79,13 @@ void CancelAccessRequest::on_event(const event_engine::Event<application_manager
       service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, "APPLICATION_NOT_REGISTERED", "");
+    SendResponse(false, result_codes::kApplicationNotRegistered, "");
     return;
   }
 
   if (functional_modules::hmi_api::cancel_access == event.id()) {
     // TODO(VS): create function for result code parsing an use it in all command
-    std::string result_code = "INVALID_DATA";
+    std::string result_code = result_codes::kInvalidData;
     std::string info = "";
     bool success = false;
     application_manager::MessagePtr message = event.event_message();

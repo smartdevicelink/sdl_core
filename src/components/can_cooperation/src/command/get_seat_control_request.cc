@@ -31,6 +31,7 @@
  */
 
 #include "can_cooperation/commands/get_seat_control_request.h"
+#include "can_cooperation/can_module_constants.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
 
@@ -55,7 +56,7 @@ void GetSeatControlRequest::Run() {
       service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, "APPLICATION_NOT_REGISTERED", "");
+    SendResponse(false, result_codes::kApplicationNotRegistered, "");
     return;
   }
 
@@ -75,7 +76,7 @@ void GetSeatControlRequest::on_event(const event_engine::Event<application_manag
       service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, "APPLICATION_NOT_REGISTERED", "");
+    SendResponse(false, result_codes::kApplicationNotRegistered, "");
     return;
   }
 

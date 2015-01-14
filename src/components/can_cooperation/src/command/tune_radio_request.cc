@@ -31,6 +31,7 @@
  */
 
 #include "can_cooperation/commands/tune_radio_request.h"
+#include "can_cooperation/can_module_constants.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
 
@@ -55,14 +56,14 @@ void TuneRadioRequest::Run() {
       service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, "APPLICATION_NOT_REGISTERED", "");
+    SendResponse(false, result_codes::kApplicationNotRegistered, "");
     return;
   }
 
   CANAppExtensionPtr extension = GetAppExtension(app);
   if (!extension->IsControlGiven()) {
     LOG4CXX_ERROR(logger_, "Application doesn't have access!");
-    SendResponse(false, "REJECTED", "");
+    SendResponse(false, result_codes::kRejected, "");
     return;
   }
 
@@ -82,7 +83,7 @@ void TuneRadioRequest::on_event(const event_engine::Event<application_manager::M
       service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, "APPLICATION_NOT_REGISTERED", "");
+    SendResponse(false, result_codes::kApplicationNotRegistered, "");
     return;
   }
 
