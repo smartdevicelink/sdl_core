@@ -1,5 +1,0 @@
-include ':GooglePlayDownloaderLibrary'
-include ':GooglePlayLicensingLibrary'
-include ':GooglePlayZipLibrary'
-include ':avatar'
-include 'sdl:SyncProxyAndroid'
