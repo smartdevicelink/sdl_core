@@ -72,9 +72,8 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
     }
     void* generic_plugin_dll = dlopen(plugin_files[i].c_str(), RTLD_LAZY);
     if (NULL == generic_plugin_dll) {
-      char* failed_to_open = dlerror();
       LOG4CXX_ERROR(logger_, "Failed to open dll " << plugin_files[i] << "\n"
-        << failed_to_open);
+        << dlerror());
       continue;
     }
     typedef GenericModule* (*Create)();

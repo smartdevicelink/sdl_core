@@ -63,19 +63,6 @@ if(ENABLE_LOG)
   target_link_libraries("CANCooperation" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
 
-add_custom_target(copy_library_${target} ALL
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    ${CMAKE_CURRENT_BINARY_DIR}/${library_name}
-    ${copy_destination}
-    DEPENDS ${target}
-    COMMENT "Copying library ${library_name}")
-
-add_custom_target(copy_config_${target} ALL
-  COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/can_config.json"
-    ${copy_destination}
-    DEPENDS ${target}
-    COMMENT "Copying library ${library_name}")
 
 install(TARGETS ${target} 
   DESTINATION ${install_destination}

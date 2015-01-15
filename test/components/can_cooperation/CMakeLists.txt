@@ -20,6 +20,24 @@ set (LIBRARIES
     FunctionalModule
 )
 
+
+
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
+
+#SET(CMAKE_INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/can_lib")
+SET(CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/src/components/can_cooperation/")
+
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+#SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 create_test("test_can_module" "./src/can_module_test.cc" "${LIBRARIES}")
 create_test("test_can_app_extension" "./src/can_app_extension_test.cc" "${LIBRARIES}")
 create_test("test_can_tcp_connection" "./src/can_tcp_connection_test.cc" "${LIBRARIES}")
+create_test("test_can_library" "./src/can_library_test.cc" "${LIBRARIES}")

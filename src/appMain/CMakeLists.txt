@@ -206,8 +206,8 @@ install(
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
 )
+
 file(MAKE_DIRECTORY bin/plugins)
-#install(DIRECTORY plugins DESTINATION bin)
 
 if (${WEB_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
