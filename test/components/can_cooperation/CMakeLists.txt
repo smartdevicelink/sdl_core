@@ -20,7 +20,13 @@ set (LIBRARIES
     FunctionalModule
 )
 
+set(CMAKE_CXX_FLAGS 
+  "${CMAKE_CXX_FLAGS} -ftest-coverage -fprofile-arcs"
+)
 
+configure_file(lc.awk lc.awk COPYONLY)
+configure_file(run_calc_comments.sh run_calc_comments.sh COPYONLY)
+configure_file(run_mem_check.sh run_mem_check.sh COPYONLY)
 
 # use, i.e. don't skip the full RPATH for the build tree
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -32,10 +38,6 @@ SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 #SET(CMAKE_INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/can_lib")
 SET(CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/src/components/can_cooperation/")
 
-
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-#SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 create_test("test_can_module" "./src/can_module_test.cc" "${LIBRARIES}")
 create_test("test_can_app_extension" "./src/can_app_extension_test.cc" "${LIBRARIES}")

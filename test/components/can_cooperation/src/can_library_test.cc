@@ -41,6 +41,5 @@ TEST(can_library_test, load) {
   ASSERT_EQ(0, LoadPluginLibrary(library_path, dll, module));
   ASSERT_FALSE(NULL == dll);
   ASSERT_TRUE(module);
-  // destroy module
   UnloadPluginLibrary(dll);
 }
