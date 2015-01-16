@@ -67,4 +67,12 @@ std::set<ApplicationSharedPtr> CoreService::GetApplications() {
   return accessor.applications();
 }
 
+void CoreService::SubscribeToHMINotification(
+    const std::string& hmi_notification) {
+  if (!hmi_notification.empty()) {
+    ApplicationManagerImpl::instance()->SubscribeToHMINotification(
+        hmi_notification);
+  }
+}
+
 }  // namespace application_manager

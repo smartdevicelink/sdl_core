@@ -90,6 +90,13 @@ class Service {
    * @return List with shared pointers to applications
    */
   virtual std::set<ApplicationSharedPtr> GetApplications() = 0;
+
+  /**
+   * @brief Subscribes to notification from HMI
+   * @param hmi_notification string with notification name
+   */
+  virtual void SubscribeToHMINotification(
+      const std::string& hmi_notification) = 0;
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;

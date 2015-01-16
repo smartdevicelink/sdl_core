@@ -56,6 +56,13 @@ class HMIMessageAdapter : public HMIMessageSender {
    */
   virtual ~HMIMessageAdapter();
 
+  /**
+   * @brief Subscribes to notification from HMI
+   * @param hmi_notification string with notification name
+   */
+  virtual void SubscribeToHMINotification(
+      const std::string& hmi_notification) = 0;
+
  protected:
   /**
    * \brief Interface for subscriptions.

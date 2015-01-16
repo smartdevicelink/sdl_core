@@ -141,9 +141,14 @@ void MessageBrokerAdapter::SubscribeTo() {
   MessageBrokerController::subscribeTo("SDL.AddStatisticsInfo");
   MessageBrokerController::subscribeTo("SDL.OnDeviceStateChanged");
   MessageBrokerController::subscribeTo("SDL.OnPolicyUpdate");
-  MessageBrokerController::subscribeTo("VehicleInfo.OnControlChanged");
+
 
   LOG4CXX_INFO(logger_, "Subscribed to notifications.");
+}
+
+void MessageBrokerAdapter::SubscribeToHMINotification(
+    const std::string& hmi_notification) {
+  MessageBrokerController::subscribeTo(hmi_notification);
 }
 
 void* MessageBrokerAdapter::SubscribeAndBeginReceiverThread(void* param) {

@@ -2373,4 +2373,9 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
   }
 }
 
+void ApplicationManagerImpl::SubscribeToHMINotification(
+    const std::string& hmi_notification) {
+  hmi_handler_->SubscribeToHMINotification(hmi_notification);
+}
+
 }  // namespace application_manager

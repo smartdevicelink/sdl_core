@@ -95,6 +95,12 @@ class CoreService : public Service {
    */
   virtual std::set<ApplicationSharedPtr> GetApplications();
 
+  /**
+   * @brief Subscribes to notification from HMI
+   * @param hmi_notification string with notification name
+   */
+  virtual void SubscribeToHMINotification(const std::string& hmi_notification);
+
  private:
   DISALLOW_COPY_AND_ASSIGN(CoreService);
 };

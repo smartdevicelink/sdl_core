@@ -122,5 +122,14 @@ void HMIMessageHandlerImpl::Handle(const impl::MessageToHmi message) {
   }
 }
 
+void  HMIMessageHandlerImpl::SubscribeToHMINotification(const std::string& hmi_notification) {
+  for (std::set<HMIMessageAdapter*>::iterator it =
+        message_adapters_.begin();
+        it != message_adapters_.end();
+        ++it) {
+      (*it)->SubscribeToHMINotification(hmi_notification);
+    }
+}
+
 
 }  //  namespace hmi_message_handler

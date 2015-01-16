@@ -82,6 +82,13 @@ class MessageBrokerAdapter : public HMIMessageAdapter,
 
   void* SubscribeAndBeginReceiverThread(void* param);
 
+  /**
+   * @brief Subscribes to notification from HMI
+   * @param hmi_notification string with notification name
+   */
+  virtual void SubscribeToHMINotification(
+      const std::string& hmi_notification);
+
  protected:
   void ProcessRecievedFromMB(Json::Value& root);
 
