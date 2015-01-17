@@ -209,8 +209,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     function_name = value[kError][kData][kMethod].asCString();
     msg->set_message_type(application_manager::MessageType::kErrorResponse);
   } else {
-    // TODO(PV): research why asserts are triggered in release build
-    //DCHECK(false);
+    DCHECK(false);
     return ProcessResult::FAILED;
   }
 

@@ -119,7 +119,6 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
   }
 }
 
-// TODO(VS): Create string constants for result codes and use them everywhere in module
 const char* BaseCommandRequest::GetMobileResultCode(
     const hmi_apis::Common_Result::eType& hmi_code) const {
   switch (hmi_code) {

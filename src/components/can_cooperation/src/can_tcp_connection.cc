@@ -80,7 +80,6 @@ ConnectionState CANTCPConnection::Flash() {
 
 ConnectionState CANTCPConnection::GetData() {
   if (OPENED == current_state_) {
-    // TODO(PV): correct buffer size
     std::string data;
     const int kSize = 500;
     int read_chars = 0;
