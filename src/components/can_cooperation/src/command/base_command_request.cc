@@ -249,6 +249,34 @@ CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
   return can_app_extension;
 }
 
+bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
+                                         std::string& result_code,
+                                         std::string& info) {
+  result_code = result_codes::kInvalidData;
+  info = "";
+
+  if (value.isMember(kResult) && value[kResult].isMember(kCode)) {
+    result_code = GetMobileResultCode(
+        static_cast<hmi_apis::Common_Result::eType>(
+            value[kResult][kCode].asInt()));
+  } else if (value.isMember(kError) && value[kError].isMember(kCode)) {
+    result_code = GetMobileResultCode(
+        static_cast<hmi_apis::Common_Result::eType>(
+            value[kError][kCode].asInt()));
+
+    if (value[kError].isMember(kMessage)) {
+      info = value[kError][kMessage].asCString();
+    }
+  }
+
+  if ((result_codes::kSuccess == result_code) ||
+      (result_codes::kWarnings == result_code)) {
+    return true;
+  }
+
+  return false;
+}
+
 }  // namespace commands
 
 }  // namespace can_cooperation

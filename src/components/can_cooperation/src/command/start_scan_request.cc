@@ -89,37 +89,16 @@ void StartScanRequest::on_event(const event_engine::Event<application_manager::M
   }
 
   if (functional_modules::can_api::start_scan == event.id()) {
-    // TODO(VS): create function for result code parsing an use it in all command
-    std::string result_code = "INVALID_DATA";
-    std::string info = "";
-    bool success = false;
-    application_manager::MessagePtr message = event.event_message();
+    std::string result_code;
+    std::string info;
 
     Json::Value value;
-     Json::Reader reader;
-     reader.parse(message->json_message(), value);
+    Json::Reader reader;
+    reader.parse(event.event_message()->json_message(), value);
 
-    if (application_manager::MessageType::kResponse == message->type()) {
-      if (value["result"].isMember("code")) {
-        result_code = GetMobileResultCode(
-            static_cast<hmi_apis::Common_Result::eType>(
-                value["result"]["code"].asInt()));
-      }
-    } else if (application_manager::MessageType::kErrorResponse ==
-               message->type()) {
-      if (value["error"].isMember("code")) {
-        result_code = GetMobileResultCode(
-            static_cast<hmi_apis::Common_Result::eType>(
-                value["error"]["code"].asInt()));
-      }
+    bool success = ParseResultCode(value, result_code, info);
 
-      if (value["error"].isMember("message")) {
-        info = value["error"]["message"].asCString();
-      }
-    }
-
-    if (("SUCCESS" == result_code) || ("WARNINGS" == result_code)) {
-      success = true;
+    if (success) {
       CANModule::instance()->SetScanStarted(true);
     }
 

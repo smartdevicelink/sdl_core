@@ -98,6 +98,18 @@ public event_engine::EventObserver<application_manager::MessagePtr, std::string>
                     const std::string& info);
 
   /**
+   * @brief Parse result code from response
+   *
+   * @param message Response from HMI or Can
+   * @param result_code Outgoing param with mobile result code in string ("SUCCESS", "INVALID_DATA", e.t.c)
+   * @param info Outgoing param with additional human readable info regarding the result(may be empty)
+   * @return true if it is success response? otherwise false
+   */
+  bool ParseResultCode(const Json::Value& value,
+                       std::string&  result_code,
+                       std::string& info);
+
+  /**
    * @brief Sends request to CAN or HMI
    * @param function_id request ID
    * @param msg_params json with message params
