@@ -77,9 +77,7 @@ class GenericModule {
     }
     virtual PluginInfo GetPluginInfo() const = 0;
 
-    void SetServiceHandler(application_manager::ServicePtr service) {
-      service_ = service;
-    }
+    void SetServiceHandler(application_manager::ServicePtr service);
 
     virtual ProcessResult ProcessMessage(application_manager::MessagePtr msg) = 0;
     virtual ProcessResult ProcessHMIMessage(application_manager::MessagePtr msg) = 0;

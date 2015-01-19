@@ -684,7 +684,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     friend class ApplicationListAccessor;
 
-
     /**
      * @brief Subscribes to notification from HMI
      * @param hmi_notification string with notification name

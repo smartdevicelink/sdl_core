@@ -42,4 +42,11 @@ void GenericModule::NotifyObservers(ModuleObserver::Errors error) {
   }
 }
 
+void GenericModule::SetServiceHandler(application_manager::ServicePtr service) {
+  service_ = service;
+
+  // Whe module obtain pointer to service, we can subscribe to necessary HMI notifications
+  service_->SubscribeToHMINotification(hmi_api::on_control_changed);
+}
+
 }  //  namespace functional_modules

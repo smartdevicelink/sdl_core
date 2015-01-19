@@ -103,8 +103,6 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.hmi_function_list.push_back(hmi_api::grant_access);
   plugin_info_.hmi_function_list.push_back(hmi_api::cancel_access);
   plugin_info_.hmi_function_list.push_back(hmi_api::on_control_changed);
-
-  service_->SubscribeToHMINotification(hmi_api::on_control_changed);
 }
 
 CANModule::~CANModule() {
