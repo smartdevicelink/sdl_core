@@ -3,7 +3,7 @@
 
 show_help() {
   echo "
-        Usage: ./run_calc_comments.sh [OPTION]... 
+        Usage: ./run_calc_comments.sh [OPTION]...
         Counts comment percentage in source files.\n
         Arguments:
         -h    displays help message and exits
@@ -24,7 +24,7 @@ file_type="*.h"
 
 while getopts "hd:f:" opt; do
     case "$opt" in
-    h) 
+    h)
         show_help
         exit 0
         ;;

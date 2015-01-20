@@ -21,8 +21,6 @@ add_subdirectory(./security_manager)
 add_subdirectory(./connection_handler)
 endif()
 
-add_subdirectory(./hmi_message_handler)
-
 # --- Utils
 add_subdirectory(./utils)
 
@@ -43,6 +41,7 @@ add_subdirectory(./can_cooperation)
 
 # --- DBus
 if(${QT_HMI})
+    add_subdirectory(./hmi_message_handler)
     add_subdirectory(./dbus)
     add_subdirectory(./qt_hmi)
 endif(${QT_HMI})

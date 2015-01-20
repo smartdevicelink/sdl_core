@@ -49,6 +49,7 @@ class MockHandler : public HMIMessageHandler {
   virtual void RemoveHMIMessageAdapter(HMIMessageAdapter* adapter) {}
   virtual void OnErrorSending(MessageSharedPointer message) {}
   virtual void SendMessageToHMI(MessageSharedPointer message) {}
+  MOCK_METHOD1(SubscribeToHMINotification, void(const std::string&));
 };
 
 TEST(MqueueAdapter, Send) {

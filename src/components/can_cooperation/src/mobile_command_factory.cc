@@ -108,4 +108,4 @@ commands::Command* MobileCommandFactory::CreateCommand(
   }
 }
 
-}  // namespace can_cooperation;
+}  // namespace can_cooperation

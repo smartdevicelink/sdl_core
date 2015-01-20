@@ -1,3 +1,35 @@
+/*
+ Copyright (c) 2013, Ford Motor Company
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+
+ Redistributions of source code must retain the above copyright notice, this
+ list of conditions and the following disclaimer.
+
+ Redistributions in binary form must reproduce the above copyright notice,
+ this list of conditions and the following
+ disclaimer in the documentation and/or other materials provided with the
+ distribution.
+
+ Neither the name of the Ford Motor Company nor the names of its contributors
+ may be used to endorse or promote products derived from this software
+ without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include "can_cooperation/can_module.h"
 #include "can_cooperation/mobile_command_factory.h"
 #include "can_cooperation/can_module_event.h"
@@ -24,12 +56,12 @@ EXPORT_FUNCTION_IMPL(CANModule);
 CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule");
 
 class TCPClientDelegate : public threads::ThreadDelegate {
-public:
+ public:
   explicit TCPClientDelegate(CANModule* can_module);
   ~TCPClientDelegate();
   void threadMain();
   bool exitThreadMain();
-private:
+ private:
   CANModule* can_module_;
   bool stop_flag_;
 };
@@ -46,8 +78,8 @@ TCPClientDelegate::~TCPClientDelegate() {
 }
 
 void TCPClientDelegate::threadMain() {
-  while(!stop_flag_) {
-    while(ConnectionState::OPENED == 
+  while (!stop_flag_) {
+    while (ConnectionState::OPENED ==
         can_module_->can_connection->GetData()) {
       can_module_->from_can_.PostMessage(
         static_cast<CANTCPConnection*>(can_module_->can_connection.get())
@@ -68,11 +100,12 @@ CANModule::CANModule()
   , from_mobile_("FromMobile To Can", this)
   , thread_(NULL)
   , is_scan_started_(false) {
-  	can_connection = new CANTCPConnection;
-  	if (ConnectionState::OPENED != can_connection->OpenConnection()) {
-  		LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
-  	} else {
-      thread_ = new threads::Thread("CANClientListener", new TCPClientDelegate(this));
+    can_connection = new CANTCPConnection;
+    if (ConnectionState::OPENED != can_connection->OpenConnection()) {
+      LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
+    } else {
+      thread_ = new threads::Thread("CANClientListener",
+                                    new TCPClientDelegate(this));
       const size_t kStackSize = 16384;
       thread_->startWithOptions(threads::ThreadOptions(kStackSize));
     }
@@ -109,7 +142,7 @@ CANModule::~CANModule() {
   if (can_connection) {
     can_connection->CloseConnection();
   }
-  if (thread_ ) {
+  if (thread_) {
     thread_->stop();
     delete thread_;
   }
@@ -143,7 +176,8 @@ void CANModule::SendMessageToCan(const std::string& msg) {
   from_mobile_.PostMessage(msg);
 }
 
-ProcessResult CANModule::ProcessHMIMessage(application_manager::MessagePtr msg) {
+ProcessResult CANModule::ProcessHMIMessage(
+              application_manager::MessagePtr msg) {
   LOG4CXX_INFO(logger_, "HMI message: " << msg->json_message());
   return HandleMessage(msg);
 }
@@ -161,7 +195,7 @@ void CANModule::Handle(const std::string message) {
     LOG4CXX_ERROR(logger_, "Failed to send message to CAN");
   }
 }
-  
+
 void CANModule::Handle(const MessageFromCAN can_msg) {
   application_manager::MessagePtr msg(new application_manager::Message(
       protocol_handler::MessagePriority::kDefault));
@@ -225,7 +259,8 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     case application_manager::MessageType::kResponse:
     case application_manager::MessageType::kErrorResponse: {
       CanModuleEvent event(msg, function_name);
-      EventDispatcher<application_manager::MessagePtr, std::string>::instance()->
+      EventDispatcher<application_manager::MessagePtr,
+                      std::string>::instance()->
           raise_event(event);
       break;
     }
@@ -271,7 +306,7 @@ void CANModule::SetScanStarted(bool is_scan_started) {
 }
 
 void CANModule::RemoveAppExtensions() {
-
+  // TODO(VS): fill this method or get rid of it
 }
 
 void CANModule::RemoveAppExtension(uint32_t app_id) {
@@ -281,9 +316,8 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
   if (app.valid()) {
     application_manager::AppExtensionPtr extension =
         app->QueryInterface(kCANModuleID);
-
-   if (extension.valid()) {
-   // TOD(VS) : memory leak
+    if (extension.valid()) {
+      // TOD(VS) : memory leak
       app->RemoveExtension(kCANModuleID);
     }
   }
