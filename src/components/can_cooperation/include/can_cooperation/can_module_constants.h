@@ -77,7 +77,7 @@ const char kError[] = "error";
 const char kMessage[] = "message";
 const char kData[] = "data";
 const char kAppId[] = "appID";
-const char kCode[] = "kCode";
+const char kCode[] = "code";
 } //  json_keys
 
 }  //  namespace can_cooperation

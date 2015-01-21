@@ -81,7 +81,7 @@ application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicatio
     }
   }
 
-  return NULL;
+  return application_manager::ApplicationSharedPtr();
 }
 
 }  // namespace commands
