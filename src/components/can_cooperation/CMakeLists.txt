@@ -3,7 +3,16 @@ set(library_name ${CMAKE_SHARED_LIBRARY_PREFIX}${target}${CMAKE_SHARED_LIBRARY_S
 set(install_destination ${CMAKE_BINARY_DIR}/bin/plugins)
 set(copy_destination ${CMAKE_BINARY_DIR}/src/appMain/plugins)
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror")
+option(ENABLE_TEST_COV_COUNT "Enable compilation flags to count test coverage" OFF)
+
+if (ENABLE_TEST_COV_COUNT)
+  set(GCOV_FLAGS "-ftest-coverage -fprofile-arcs")
+else()
+  set(GCOV_FLAGS "")
+endif()
+
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror ${GCOV_FLAGS}")
+
 if (CMAKE_BUILD_TYPE)
   if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
@@ -64,7 +73,7 @@ if(ENABLE_LOG)
 endif()
 
 
-install(TARGETS ${target} 
+install(TARGETS ${target}
   DESTINATION ${install_destination}
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE
     GROUP_READ GROUP_EXECUTE

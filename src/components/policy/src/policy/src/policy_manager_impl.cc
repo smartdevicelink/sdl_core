@@ -96,7 +96,7 @@ bool CheckGcov() {
                 "configuration (gcov + QNX). Use it at your own risk.");
   return true;
 }
-bool check_gcov = CheckGcov();
+//bool check_gcov = CheckGcov();
 #endif
 
 PolicyManagerImpl::PolicyManagerImpl()
