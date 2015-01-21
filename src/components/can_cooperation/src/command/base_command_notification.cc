@@ -59,6 +59,31 @@ BaseCommandNotification::BaseCommandNotification(
 BaseCommandNotification::~BaseCommandNotification() {
 }
 
+application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicationWithControl(
+                                        CANAppExtensionPtr& can_app_extension) {
+  const std::set<application_manager::ApplicationSharedPtr> applications =
+        service_->GetApplications();
+
+  std::set<application_manager::ApplicationSharedPtr>::iterator it =
+      applications.begin();
+
+  for (;it != applications.end(); ++it) {
+    if (it->valid()) {
+      application_manager::AppExtensionPtr app_extension =
+          (*it)->QueryInterface(CANModule::instance()->GetModuleID());
+      if (app_extension.valid()) {
+        can_app_extension = application_manager::AppExtensionPtr::
+            static_pointer_cast<CANAppExtension>(app_extension);
+        if (can_app_extension->IsControlGiven()) {
+          return (*it);
+        }
+      }
+    }
+  }
+
+  return NULL;
+}
+
 }  // namespace commands
 
 }  // namespace can_cooperation

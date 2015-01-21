@@ -51,32 +51,17 @@ OnControlChangedNotification::~OnControlChangedNotification() {
 
 void OnControlChangedNotification::Run() {
   LOG4CXX_INFO(logger_, "OnControlChangedNotification::Run");
-  // TODO(VS): Create function to get app with control and use it in notifications
 
-  const std::set<application_manager::ApplicationSharedPtr> applications =
-        service_->GetApplications();
+  CANAppExtensionPtr can_app_extension;
+  application_manager::ApplicationSharedPtr app =
+      GetApplicationWithControl(can_app_extension);
 
-    std::set<application_manager::ApplicationSharedPtr>::iterator it =
-        applications.begin();
-
-    for (;it != applications.end(); ++it) {
-      if (it->valid()) {
-        application_manager::AppExtensionPtr app_extension =
-            (*it)->QueryInterface(CANModule::instance()->GetModuleID());
-        if (app_extension.valid()) {
-          CANAppExtensionPtr can_app_extension =
-             application_manager::AppExtensionPtr::
-              static_pointer_cast<CANAppExtension>(app_extension);
-          if (can_app_extension->IsControlGiven()) {
-            can_app_extension->GiveControl(false);
-            CANModule::instance()->SetScanStarted(false);
-            message_->set_connection_key((*it)->app_id());
-            service_->SendMessageToMobile(message_);
-            break;
-          }
-        }
-      }
-    }
+  if (app.valid()) {
+    can_app_extension->GiveControl(false);
+    CANModule::instance()->SetScanStarted(false);
+    message_->set_connection_key(app->app_id());
+    service_->SendMessageToMobile(message_);
+  }
 }
 
 }  // namespace commands

@@ -36,6 +36,7 @@
 #include "can_cooperation/commands/command.h"
 #include "application_manager/message.h"
 #include "application_manager/service.h"
+#include "can_cooperation/can_app_extension.h"
 #include "utils/logger.h"
 
 namespace can_cooperation {
@@ -62,6 +63,17 @@ class BaseCommandNotification : public Command {
  protected:
   application_manager::MessagePtr message_;
   application_manager::ServicePtr service_;
+
+  /**
+   * @brief Retrieves application with access
+   *
+   * @param app_extesion Outgoing param with app extension for Can
+   *
+   * @return pointer to application
+   */
+  application_manager::ApplicationSharedPtr GetApplicationWithControl(
+                                        CANAppExtensionPtr& can_app_extension);
+
 };
 
 }  // namespace commands
