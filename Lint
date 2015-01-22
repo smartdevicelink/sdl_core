@@ -27,7 +27,7 @@ function print_usage {
 	echo
 	echo "\"MISRA=ON|MISRA=OFF\" Turns custom MISRA configuration ON"
 	echo -e '\t' "and OFF respectively (OFF by defaul)"
-	echo
+	echo -e "\nExample: ./Lint ALL BUILD_PATH=../build/ w1\n"
 	echo
 }
 
@@ -183,7 +183,7 @@ SUPPRESS="-e830 -e831 +e900"
 
 OTHER_PARAMS="-dOS_POSIX"
 MISRA_CONFIGURATION=""
-SOURCE_CODE_PATH="./src/components/ ./src/appMain/"
+SOURCE_CODE_PATH="./src/components/can_cooperation/" 
 EXLUDE_FROM_SOURCE_CODE_PATH="./src/components/qt_hmi/ ./src/components/dbus/ ./src/components/transport_manager/src/usb/qnx"
 
 echo
