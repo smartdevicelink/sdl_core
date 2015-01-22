@@ -17,7 +17,7 @@ public slots:
      * @return return - true if data was successfuly saved
      *      otherway returned false
      */
-    bool write(QString source, QString data);
+    bool write(const QString &source, const QString &data);
 
 };
 

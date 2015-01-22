@@ -55,7 +55,7 @@ private Q_SLOTS:
      * @brief write
      * @param qMessage - text message to be sent to TCP Client
      */
-    void write(QString qMessage);
+    void write(const QString &qMessage);
 
     /**
      * @brief createConection
@@ -63,7 +63,7 @@ private Q_SLOTS:
      * @param port
      * Parameters to be used for connection to TCP Server
      */
-    void createConection(QString IP, int port);
+    void createConection(const QString &IP, int port);
 
 private:
     QWebSocketServer *m_pWebSocketServer;

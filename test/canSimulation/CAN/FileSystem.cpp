@@ -2,7 +2,7 @@
 #include "loger.h"
 #include "color.h"
 
-bool FileSystem::write(QString source, QString data)
+bool FileSystem::write(const QString &source, const QString &data)
 {
 
     if (source.isEmpty()) {

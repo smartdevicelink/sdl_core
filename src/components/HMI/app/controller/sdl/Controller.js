@@ -261,7 +261,7 @@ SDL.SDLController = Em.Object
          * @type {Object}
          */
         SwitchPopUpAction: function (appID) {
-            if (SDL.SDLAppController && SDL.SDLAppController.model) {
+            if (SDL.SwitchPopUp.active) {
                 SDL.SwitchPopUp.deactivate();
                 if (appID) {
                     FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode['SUCCESS'], SDL.SDLModel.controlRequestID, "VehicleInfo.GrantAccess");

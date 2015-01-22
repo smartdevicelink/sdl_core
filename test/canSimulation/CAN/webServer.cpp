@@ -51,7 +51,7 @@ void WebServer::socketDisconnected()
     m_client->deleteLater();
 }
 
-void WebServer::write(QString qMessage)
+void WebServer::write(const QString &qMessage)
 {
     QByteArray qb = qMessage.toUtf8();
     char *cMessage = qb.data();
@@ -65,7 +65,7 @@ void WebServer::write(QString qMessage)
     }
 }
 
-void WebServer::createConection(QString IP, int port)
+void WebServer::createConection(const QString &IP, int port)
 {
 
     QHostAddress hostadd(IP);

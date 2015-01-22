@@ -17,7 +17,7 @@ Server::~Server()
     delete tcpServer;
 }
 
-void Server::createConection(QString IP, int port)
+void Server::createConection(const QString &IP, int port)
 {
     Loger::loger("Start listening TCP:" + IP + ":" + QString::number(port), RED);
 
@@ -69,7 +69,9 @@ void Server::readyRead()
 
         char *ch = qb.data();
 
-        write(ch);
+        QString message = QString::fromUtf8(ch);
+
+        write(message);
     }
 }
 
@@ -80,7 +82,7 @@ void Server::disconnected()
     clientConnection->deleteLater();
 }
 
-void Server::write(QString qMessage)
+void Server::write(const QString &qMessage)
 {
     QByteArray qb = qMessage.toUtf8();
 
