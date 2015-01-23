@@ -2864,7 +2864,6 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
 
 void ApplicationManagerImpl::CreatePhoneCallAppList() {
   LOG4CXX_AUTO_TRACE(logger_);
-
   ApplicationManagerImpl::ApplicationListAccessor accessor;
 
   ApplicationManagerImpl::ApplictionSetIt it = accessor.begin();
@@ -2893,7 +2892,6 @@ void ApplicationManagerImpl::CreatePhoneCallAppList() {
 
 void ApplicationManagerImpl::ResetPhoneCallAppList() {
   LOG4CXX_AUTO_TRACE(logger_);
-
   std::map<uint32_t, AppState>::iterator it =
       on_phone_call_app_list_.begin();
   std::map<uint32_t, AppState>::iterator it_end =
@@ -2902,7 +2900,6 @@ void ApplicationManagerImpl::ResetPhoneCallAppList() {
     ApplicationSharedPtr app = application(it->first);
     if (app) {
       ChangeAppsHMILevel(app->app_id(), it->second.hmi_level);
-
       app->set_audio_streaming_state(it->second.audio_streaming_state);
       app->set_system_context(it->second.system_context);
       MessageHelper::SendHMIStatusNotification(*app);

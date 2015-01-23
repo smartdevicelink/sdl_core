@@ -170,10 +170,6 @@ void ApplicationImpl::ChangeSupportingAppHMIType() {
   }
 }
 
-bool ApplicationImpl::IsAudible() const {
-  return mobile_api::HMILevel::HMI_FULL == hmi_level_
-      || mobile_api::HMILevel::HMI_LIMITED == hmi_level_;
-}
 
 void ApplicationImpl::set_is_navi(bool allow) {
   is_navi_ = allow;

@@ -97,7 +97,7 @@ class ApplicationManagerImpl;
 
 enum VRTTSSessionChanging {
   kVRSessionChanging = 0,
-  kTTSSessionChanging = 1
+  kTTSSessionChanging
 };
 
 struct CommandParametersPermissions;
@@ -1086,7 +1086,9 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     bool IsLowVoltage();
 
+  private:
     /**
+
      * @brief OnHMILevelChanged the callback that allows SDL to react when
      * application's HMILeval has been changed.
      *
