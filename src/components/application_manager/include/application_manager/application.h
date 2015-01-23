@@ -398,7 +398,6 @@ class Application : public virtual InitialApplicationData,
     virtual void CloseActiveMessage() = 0;
     virtual bool IsFullscreen() const = 0;
     virtual void ChangeSupportingAppHMIType() = 0;
-    virtual bool IsAudible() const = 0;
     virtual bool is_navi() const = 0;
     virtual void set_is_navi(bool allow) = 0;
     virtual bool hmi_supports_navi_video_streaming() const = 0;
@@ -445,8 +444,7 @@ class Application : public virtual InitialApplicationData,
      * NONE BACKGROUND
      * @param active contains state of sending TTS GlobalProperties
      */
-    virtual void set_tts_properties_in_none(
-        bool active) = 0;
+    virtual void set_tts_properties_in_none(bool active) = 0;
     /**
      * @brief returns true if application has sent TTS GlobalProperties
      * otherwise return false

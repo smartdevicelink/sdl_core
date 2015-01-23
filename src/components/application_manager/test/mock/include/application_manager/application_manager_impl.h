@@ -79,7 +79,7 @@
 namespace application_manager {
   enum VRTTSSessionChanging {
     kVRSessionChanging = 0,
-    kTTSSessionChanging = 1
+    kTTSSessionChanging
   };
 
 namespace impl {

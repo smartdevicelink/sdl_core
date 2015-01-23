@@ -75,7 +75,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @brief change supporting COMMUNICATION NAVIGATION
    */
   virtual void ChangeSupportingAppHMIType();
-  bool IsAudible() const;
 
   // navi
   inline bool is_navi() const { return is_navi_; }
