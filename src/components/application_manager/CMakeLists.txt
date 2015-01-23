@@ -120,6 +120,7 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_exit_all_applications_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_exit_application_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_start_device_discovery.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_emergency_event_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/close_popup_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/close_popup_response.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_app_activated_notification.cc
