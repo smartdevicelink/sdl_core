@@ -527,6 +527,12 @@
   <element name="DD_OFF" />
 </enum>
 
+<enum name="EmergencyState">
+  <description>Enumeration that describes possible states of emergency event.</description>
+  <element name="EMERGENCY_ON" />
+  <element name="EMERGENCY_OFF" />
+</enum>
+
 <enum name="MediaClockFormat">
   <element name="CLOCK1">
     <description>
@@ -2216,6 +2222,13 @@
         In the event of automatic deletion by the system, the app will receive a rejection and have to resend the file.
         If omitted, the value will be set to false.
       </description>
+    </param>
+  </function>
+
+  <function name="OnEmergencyEvent" messagetype="notification">
+    <description>Notification must be sent from HMI to SDL e.g. in case rear camera is active.</description>
+    <param name="state" type="Common.EmergencyState" mandatory="true">
+      <description>See EmergencyState. </description>
     </param>
   </function>
 
