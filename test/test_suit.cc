@@ -37,6 +37,8 @@
 #include "utils/logger.h"
 
 #include "protocol_handler/protocol_handler_tm_test.h"
+#include "protocol_handler/incoming_data_handler_test.h"
+#include "protocol_handler/protocol_header_validator_test.h"
 #include "application_manager/formatters_commands.h"
 
 #include "connection_handler/heart_beat_monitor_test.h"

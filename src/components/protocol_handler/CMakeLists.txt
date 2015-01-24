@@ -7,6 +7,7 @@ include_directories(
 )
 
 set(SOURCES
+    ./src/incoming_data_handler.cc
     ./src/protocol_handler_impl.cc
     ./src/protocol_packet.cc
     ./src/protocol_payload.cc

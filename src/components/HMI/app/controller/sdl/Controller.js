@@ -55,7 +55,7 @@ SDL.SDLController = Em.Object
          */
         sysContext: function() {
 
-            if (SDL.VRPopUp.VRActive) {
+            if (SDL.SDLModel.VRActive) {
                 return 'VRSESSION';
             }
             if (SDL.AlertPopUp.active) {
@@ -78,7 +78,7 @@ SDL.SDLController = Em.Object
         }.property('SDL.OptionsView.active',
             'SDL.SliderView.active',
             'SDL.SDLModel.AudioPassThruState',
-            'SDL.VRPopUp.VRActive',
+            'SDL.SDLModel.VRActive',
             'SDL.AlertPopUp.active',
             'SDL.States.info.nonMedia.active',
             'SDL.States.media.sdlmedia.active',
@@ -200,7 +200,9 @@ SDL.SDLController = Em.Object
                         SDL.VRHelpListView.deactivate();
                     }
                 }
-            }
+            } else if (SDL.VRHelpListView.active) {
+                    SDL.VRHelpListView.deactivate();
+                }
         }.observes('SDL.SDLModel.VRActive', 'SDL.SDLModel.interactionData.vrHelp'),
 
         /**
@@ -414,6 +416,15 @@ SDL.SDLController = Em.Object
             FFW.BasicCommunication.ExitAllApplications(state);
         },
         /**
+         * OnAwakeSDL from HMI returns SDL to normal operation
+         * after OnExitAllApplications(SUSPEND)
+         *
+         */
+        onAwakeSDLNotificationSend: function() {
+            FFW.BasicCommunication.OnAwakeSDL();
+        },
+
+        /**
          * Method to sent notification with selected reason of OnSystemRequest
          *
          * @param {String}
@@ -458,6 +469,8 @@ SDL.SDLController = Em.Object
             if (choiceID && SDL.TTSPopUp.active && FFW.TTS.requestId == null) {
                 SDL.TTSPopUp.DeactivateTTS();
             }
+
+            SDL.SDLModel.interactionData.helpPrompt = null;
         },
         /**
          * Method to sent notification for Alert
@@ -640,6 +653,10 @@ SDL.SDLController = Em.Object
             if (SDL.SDLModel.stateLimited == appID) {
                 SDL.SDLModel.set('stateLimited', null);
             }
+
+            if (SDL.VRHelpListView.active) {
+                this.showVRHelpItems();
+            }
         },
         /**
          * SDL Driver Distraction ON/OFF switcher
@@ -734,6 +751,9 @@ SDL.SDLController = Em.Object
          */
         onActivateSDLApp: function(element) {
 
+            if (SDL.SDLModel.VRActive) {
+                SDL.SDLModel.toggleProperty('VRActive');
+            }
             FFW.BasicCommunication.ActivateApp(element.appID);
         },
         /**

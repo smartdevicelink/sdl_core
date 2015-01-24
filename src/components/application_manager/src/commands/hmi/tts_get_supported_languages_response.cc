@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -46,7 +46,7 @@ TTSGetSupportedLanguagesResponse::~TTSGetSupportedLanguagesResponse() {
 }
 
 void TTSGetSupportedLanguagesResponse::Run() {
-  LOG4CXX_INFO(logger_, "TTSGetSupportedLanguagesResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const hmi_apis::Common_Result::eType code =
       static_cast<hmi_apis::Common_Result::eType>(

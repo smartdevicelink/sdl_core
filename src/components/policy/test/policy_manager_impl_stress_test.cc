@@ -39,6 +39,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+#include "config_profile/profile.h"
+
 #include "mock_policy_listener.h"
 #include "policy/policy_manager_impl.h"
 
@@ -79,6 +81,8 @@ void PolicyManagerImplStressTest::SetUpTestCase() {
   ofs.open(kNameFile.c_str(), std::ofstream::out);
   CreateTable(ofs);
   ofs.close();
+
+  profile::Profile::instance()->config_file_name("smartDeviceLink.ini");
 
   manager = new PolicyManagerImpl();
   mock_listener = new MockPolicyListener();

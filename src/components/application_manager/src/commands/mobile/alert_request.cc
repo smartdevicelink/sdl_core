@@ -84,7 +84,7 @@ bool AlertRequest::Init() {
 }
 
 void AlertRequest::Run() {
-  LOG4CXX_INFO(logger_, "AlertRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asInt();
@@ -116,7 +116,7 @@ void AlertRequest::onTimeOut() {
 }
 
 void AlertRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "AlertRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -206,7 +206,9 @@ void AlertRequest::on_event(const event_engine::Event& event) {
       response_success_ = true;
     }
 
-    if (mobile_apis::Result::ABORTED == tts_speak_response_ &&
+    if (
+        ((mobile_apis::Result::ABORTED == tts_speak_response_ )||
+        (mobile_apis::Result::REJECTED == tts_speak_response_)) &&
         (!flag_other_component_sent_)) {
       response_success_ = false;
       response_result_ = tts_speak_response_;
@@ -348,7 +350,7 @@ void AlertRequest::SendSpeakRequest(int32_t app_id) {
 }
 
 void AlertRequest::SendPlayToneNotification(int32_t app_id) {
-  LOG4CXX_INFO(logger_, "AlertRequest::SendPlayToneNotification");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   // check playtone parameter
   if ((*message_)[strings::msg_params].keyExists(strings::play_tone)) {
@@ -356,7 +358,7 @@ void AlertRequest::SendPlayToneNotification(int32_t app_id) {
       // crate HMI basic communication playtone request
       smart_objects::SmartObject msg_params = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
-
+      msg_params[strings::app_id] = app_id;
       CreateHMINotification(hmi_apis::FunctionID::BasicCommunication_PlayTone,
                             msg_params);
     }
@@ -364,7 +366,7 @@ void AlertRequest::SendPlayToneNotification(int32_t app_id) {
 }
 
 bool AlertRequest::CheckStringsOfAlertRequest() {
-  LOG4CXX_INFO(logger_, "AlertRequest::CheckStringsOfAlertRequest");
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::alert_text1)) {

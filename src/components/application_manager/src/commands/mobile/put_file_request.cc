@@ -55,7 +55,7 @@ PutFileRequest::~PutFileRequest() {
 }
 
 void PutFileRequest::Run() {
-  LOG4CXX_INFO(logger_, "PutFileRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(connection_key());
@@ -224,7 +224,7 @@ void PutFileRequest::Run() {
       break;
     }
     default:
-      LOG4CXX_INFO(logger_, "Save in unsuccessful. Result = " << save_result);
+      LOG4CXX_WARN(logger_, "Save in unsuccessful. Result = " << save_result);
       SendResponse(false, save_result, "Can't save file", &response_params);
       break;
   }

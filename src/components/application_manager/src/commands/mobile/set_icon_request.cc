@@ -51,7 +51,7 @@ SetIconRequest::~SetIconRequest() {
 }
 
 void SetIconRequest::Run() {
-  LOG4CXX_INFO(logger_, "SetIconRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());
@@ -102,7 +102,7 @@ void SetIconRequest::Run() {
 }
 
 void SetIconRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "SetIconRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {
@@ -116,6 +116,11 @@ void SetIconRequest::on_event(const event_engine::Event& event) {
       if (result) {
         ApplicationSharedPtr app =
             ApplicationManagerImpl::instance()->application(connection_key());
+
+        if (!message_.valid() || !app.valid()) {
+           LOG4CXX_ERROR(logger_, "NULL pointer.");
+           return;
+        }
 
         const std::string path = (*message_)[strings::msg_params]
                                             [strings::sync_file_name]

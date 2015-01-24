@@ -601,6 +601,25 @@
 	background: #393939;
 }
 
+#exitAppView .onAwakeSDLLabel{
+    top: 200px;
+    width: 600px;
+    left: 40px;
+    height: 20px;
+    padding: 10px;
+    background: #535353;
+}
+
+#exitAppView .onAwakeSDLButton{
+    right: 268px;
+    top: 250px;
+    width: 150px;
+    height: 19px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid white;
+}
+
 #VehicleInfo .odometrTitle{
     top: 180px;
     width: 290px;

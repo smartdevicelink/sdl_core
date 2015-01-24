@@ -61,6 +61,9 @@ void NotificationFromHMI::Run() {
 
 void NotificationFromHMI::SendNotificationToMobile(
     const MessageSharedPtr& message) {
+
+  (*message)[strings::params][strings::message_type] =
+      static_cast<int32_t>(application_manager::MessageType::kNotification);
   ApplicationManagerImpl::instance()->ManageMobileCommand(message);
 }
 

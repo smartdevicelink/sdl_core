@@ -3,6 +3,7 @@ include_directories (
   ./include
   ${CMAKE_SOURCE_DIR}/src/components/transport_manager/include
   ${CMAKE_SOURCE_DIR}/src/components/config_profile/include/
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include/
   ${LIBUSB_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )

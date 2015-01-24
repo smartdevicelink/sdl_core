@@ -47,7 +47,7 @@ UnsubscribeButtonResponse::~UnsubscribeButtonResponse() {
 }
 
 void UnsubscribeButtonResponse::Run() {
-  LOG4CXX_INFO(logger_, "UnsubscribeButtonResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 

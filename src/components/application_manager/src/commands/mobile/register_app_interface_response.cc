@@ -42,7 +42,7 @@ namespace application_manager {
 namespace commands {
 
 void RegisterAppInterfaceResponse::Run() {
-  LOG4CXX_INFO(logger_, "RegisterAppInterfaceResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
   bool success = (*message_)[strings::msg_params][strings::success].asBool();
@@ -75,7 +75,7 @@ void RegisterAppInterfaceResponse::Run() {
 
 void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
     uint32_t connection_key, const std::string& mobile_app_id) {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
   policy::PolicyHandler *policy_handler = policy::PolicyHandler::instance();
   if (policy_handler->PolicyEnabled()) {
     const int32_t timeout = policy_handler->HeartBeatTimeout(mobile_app_id);
@@ -86,7 +86,6 @@ void RegisterAppInterfaceResponse::SetHeartBeatTimeout(
   } else {
     LOG4CXX_INFO(logger_, "Policy is turn off");
   }
-  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands

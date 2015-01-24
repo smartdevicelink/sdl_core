@@ -39,10 +39,16 @@
 #include <vector>
 #include "policy/policy_manager.h"
 #include "application_manager/policies/policy_event_observer.h"
-#include "application_manager/policies/pt_exchange_handler.h"
+#include "application_manager/policies/delegates/statistics_delegate.h"
 #include "utils/logger.h"
 #include "utils/singleton.h"
+#include "utils/threads/thread.h"
+#include "utils/threads/thread_delegate.h"
+#include "utils/conditional_variable.h"
+#include "utils/rwlock.h"
 #include "usage_statistics/statistics_manager.h"
+#include "policy_handler_observer.h"
+#include "utils/threads/async_runner.h"
 
 namespace Json {
 class Value;
@@ -54,7 +60,8 @@ typedef std::vector<uint32_t> DeviceHandles;
 
 class PolicyHandler :
     public utils::Singleton<PolicyHandler, utils::deleters::Deleter<PolicyHandler> >,
-    public PolicyListener {
+    public PolicyListener,
+    public threads::AsyncRunner {
  public:
   virtual ~PolicyHandler();
   bool LoadPolicyLibrary();
@@ -62,14 +69,17 @@ class PolicyHandler :
   bool InitPolicyTable();
   bool ResetPolicyTable();
   bool ClearUserConsent();
-  bool SendMessageToSDK(const BinaryMessage& pt_string);
+  bool SendMessageToSDK(const BinaryMessage& pt_string, const std::string& url);
   bool ReceiveMessageFromSDK(const std::string& file,
                              const BinaryMessage& pt_string);
   bool UnloadPolicyLibrary();
-  void OnPTExchangeNeeded();
   void OnPermissionsUpdated(const std::string& policy_app_id,
                             const Permissions& permissions,
                             const HMILevel& default_hmi);
+
+  virtual void OnSnapshotCreated(const BinaryMessage& pt_string,
+                                 const std::vector<int>& retry_delay_seconds,
+                                 int timeout_exchange);
 
   bool GetPriority(const std::string& policy_app_id, std::string* priority);
   void CheckPermissions(const PTString& app_id,
@@ -85,13 +95,14 @@ class PolicyHandler :
   bool GetInitialAppData(const std::string& application_id,
                                  StringArray* nicknames = NULL,
                                  StringArray* app_hmi_types = NULL);
-  EndpointUrls GetUpdateUrls(int service_type);
+  void GetUpdateUrls(int service_type, EndpointUrls& end_points);
   void ResetRetrySequence();
   int NextRetryTimeout();
   int TimeoutExchange();
   void OnExceededTimeout();
-  BinaryMessageSptr RequestPTUpdate();
-  const std::vector<int> RetrySequenceDelaysSeconds();
+  void OnSystemReady();
+  void PTUpdatedAt(int kilometers, int days_after_epoch);
+  void set_listener(PolicyHandlerObserver* listener);
 
   utils::SharedPtr<usage_statistics::StatisticsManager> GetStatisticManager();
 
@@ -147,11 +158,6 @@ class PolicyHandler :
   void OnPendingPermissionChange(const std::string& policy_app_id);
 
   /**
-   * Initializes PT exchange at ignition if need
-   */
-  void PTExchangeAtRegistration(const std::string& app_id);
-
-  /**
    * Initializes PT exchange at user request
    * @param correlation_id correlation id of request
    */
@@ -171,7 +177,7 @@ class PolicyHandler :
    * @param permissions User-changed group permissions consent
    */
   void OnAppPermissionConsent(const uint32_t connection_key,
-                              PermissionConsent& permissions);
+                              const PermissionConsent &permissions);
 
   /**
    * @brief Get appropriate message parameters and send them with response
@@ -204,7 +210,7 @@ class PolicyHandler :
    * @brief Send notification to HMI with changed policy update status
    * @param status Current policy update state
    */
-  void OnUpdateStatusChanged(policy::PolicyTableStatus status);
+  void OnUpdateStatusChanged(const std::string& status);
 
   /**
    * @brief Update currently used device id in policies manager for given
@@ -271,10 +277,14 @@ class PolicyHandler :
 
   std::string GetAppName(const std::string& policy_app_id);
 
-  virtual void OnUserRequestedUpdateCheckRequired();
+  virtual void OnUpdateHMIAppType(std::map<std::string, StringArray> app_hmi_types);
 
   virtual void OnDeviceConsentChanged(const std::string& device_id,
                                       bool is_allowed);
+
+  virtual void OnPTExchangeNeeded();
+
+  virtual void GetAvailableApps(std::queue<std::string>& apps);
 
   /**
    * @brief Allows to add new or update existed application during
@@ -314,7 +324,6 @@ class PolicyHandler :
                    usage_statistics::AppStopwatchId type,
                    int32_t timespan_seconds);
 
-
 protected:
 
   /**
@@ -322,72 +331,62 @@ protected:
    */
   void StartNextRetry();
 
-  /**
-   * Initializes PT exchange at odometer if need
-   * @param kilometers value from odometer in kilometers
-   */
-  void PTExchangeAtOdometer(int kilometers);
-
-  /**
-     * Starts proccess updating policy table
-   */
-    void StartPTExchange(bool skip_device_selection = false);
-
  private:
-  /**
-   * @brief Choose device according to app HMI status and user consent for
-   * device
-   * @param device_info Struct with selected device parameters
-   * @return consent status for selected device
-   */
-  DeviceConsent GetDeviceForSending(DeviceParams& device_params);
 
   /**
-   * @brief Convert internal policy update status to appropriate status for HMI
-   * @param status Internal policy update status
-   * @return Converted status for sending to HMI
+   * @brief OnAppPermissionConsentInternal reacts on permission changing
+   *
+   * @param connection_key connection key
+   *
+   * @param permissions new permissions.
    */
-  const std::string ConvertUpdateStatus(policy::PolicyTableStatus status);
-
+  void OnAppPermissionConsentInternal(const uint32_t connection_key,
+                                      PermissionConsent& permissions);
 private:
-
   class StatisticManagerImpl: public usage_statistics::StatisticsManager {
       //TODO(AKutsan) REMOVE THIS UGLY HOTFIX
         virtual void Increment(usage_statistics::GlobalCounterId type) {
-        return PolicyHandler::instance()->Increment(type);
+
+        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(type));
       }
 
         virtual void Increment(const std::string& app_id,
                                usage_statistics::AppCounterId type) {
-        return PolicyHandler::instance()->Increment(app_id, type);
+
+        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(app_id,
+                                                                   type));
       }
 
         virtual void Set(const std::string& app_id,
                          usage_statistics::AppInfoId type,
                          const std::string& value) {
-        return PolicyHandler::instance()->Set(app_id, type, value);
+
+        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(app_id,
+                                                                   type,
+                                                                   value));
       }
 
         virtual void Add(const std::string& app_id,
                          usage_statistics::AppStopwatchId type,
                          int32_t timespan_seconds) {
-        return PolicyHandler::instance()->Add(app_id, type, timespan_seconds);
+
+        PolicyHandler::instance()->AsyncRun(new StatisticsDelegate(
+                                              app_id, type, timespan_seconds));
       }
   };
   //TODO(AKutsan) REMOVE THIS UGLY HOTFIX
 
 
   PolicyHandler();
+  bool SaveSnapshot(const BinaryMessage& pt_string, std::string& snap_path);
   static PolicyHandler* instance_;
   static const std::string kLibrary;
+  mutable sync_primitives::RWLock policy_manager_lock_;
   utils::SharedPtr<PolicyManager> policy_manager_;
   void* dl_handle_;
   AppIds last_used_app_ids_;
-  utils::SharedPtr<PTExchangeHandler> exchange_handler_;
   utils::SharedPtr<PolicyEventObserver> event_observer_;
-  bool on_ignition_check_done_;
   uint32_t last_activated_app_id_;
-  bool registration_in_progress;
 
   /**
    * @brief Contains device handles, which were sent for user consent to HMI
@@ -396,7 +395,7 @@ private:
 
   inline bool CreateManager();
 
-  bool is_user_requested_policy_table_update_;
+  PolicyHandlerObserver* listener_;
 
   /**
    * @brief Application-to-device map is used for getting/setting user consents
@@ -404,9 +403,12 @@ private:
    */
   std::map<std::string, std::string> app_to_device_link_;
 
+  // Lock for app to device list
+  sync_primitives::Lock app_to_device_link_lock_;
 
   utils::SharedPtr<StatisticManagerImpl> statistic_manager_impl_;
 
+  friend class AppPermissionDelegate;
 
   DISALLOW_COPY_AND_ASSIGN(PolicyHandler);
   FRIEND_BASE_SINGLETON_CLASS_WITH_DELETER(PolicyHandler,

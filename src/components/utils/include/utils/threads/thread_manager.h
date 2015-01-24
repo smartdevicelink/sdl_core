@@ -63,12 +63,7 @@ namespace threads {
  */
 class ThreadManager : public utils::Singleton<ThreadManager> {
  public:
-  struct ThreadDesc {
-    pthread_t handle;
-    ThreadDelegate* delegate;
-  };
   ThreadManager() {}
-  MessageQueue<ThreadDesc> threads_to_terminate;
  private:
   DISALLOW_COPY_AND_ASSIGN(ThreadManager);
 

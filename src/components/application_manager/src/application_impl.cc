@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
+#include "application_manager/application_manager_impl.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
@@ -148,7 +149,7 @@ bool ApplicationImpl::IsFullscreen() const {
 }
 
 bool ApplicationImpl::MakeFullscreen() {
-  hmi_level_ = mobile_api::HMILevel::HMI_FULL;
+  set_hmi_level(mobile_api::HMILevel::HMI_FULL);
   if (is_media_ && !tts_speak_state_) {
     audio_streaming_state_ = mobile_api::AudioStreamingState::AUDIBLE;
   }
@@ -158,6 +159,25 @@ bool ApplicationImpl::MakeFullscreen() {
   }
   return true;
 }
+void ApplicationImpl::ChangeSupportingAppHMIType() {
+  allowed_support_navigation_ = false;
+  is_voice_communication_application_ = false;
+  const smart_objects::SmartObject& array_app_types = *app_types_;
+  uint32_t lenght_app_types = array_app_types.length();
+
+  for (uint32_t i = 0; i < lenght_app_types; ++i) {
+    if (mobile_apis::AppHMIType::NAVIGATION ==
+        static_cast<mobile_apis::AppHMIType::eType>(
+            array_app_types[i].asUInt())) {
+      allowed_support_navigation_ = true;
+    }
+    if (mobile_apis::AppHMIType::COMMUNICATION ==
+        static_cast<mobile_apis::AppHMIType::eType>(
+            array_app_types[i].asUInt())) {
+      is_voice_communication_application_ = true;
+    }
+  }
+}
 
 bool ApplicationImpl::IsAudible() const {
   return mobile_api::HMILevel::HMI_FULL == hmi_level_
@@ -165,7 +185,7 @@ bool ApplicationImpl::IsAudible() const {
 }
 
 void ApplicationImpl::MakeNotAudible() {
-  hmi_level_ = mobile_api::HMILevel::HMI_BACKGROUND;
+  set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
   audio_streaming_state_ = mobile_api::AudioStreamingState::NOT_AUDIBLE;
 }
 
@@ -295,7 +315,7 @@ void ApplicationImpl::set_hmi_level(
     delete_file_in_none_count_ = 0;
     list_files_in_none_count_ = 0;
   }
-
+  LOG4CXX_INFO(logger_, "hmi_level = " << hmi_level);
   hmi_level_ = hmi_level;
   usage_report_.RecordHmiStateChanged(hmi_level);
 }
@@ -372,7 +392,7 @@ void ApplicationImpl::OnVideoStreamRetry() {
     video_stream_retry_timer_->updateTimeOut(time_out);
   } else {
     LOG4CXX_INFO(logger_, "Stop video streaming retry");
-    video_stream_retry_timer_.release();
+    video_stream_retry_timer_->stop();
     set_video_stream_retry_active(false);
   }
 }
@@ -391,7 +411,7 @@ void ApplicationImpl::OnAudioStreamRetry() {
     audio_stream_retry_timer_->updateTimeOut(time_out);
   } else {
     LOG4CXX_INFO(logger_, "Stop audio streaming retry");
-    audio_stream_retry_timer_.release();
+    audio_stream_retry_timer_->stop();
     set_audio_stream_retry_active(false);
   }
 }
@@ -656,6 +676,7 @@ uint32_t ApplicationImpl::curHash() const {
 }
 
 uint32_t ApplicationImpl::UpdateHash() {
+  LOG4CXX_AUTO_TRACE(logger_);
   uint32_t new_hash= nextHash();
   MessageHelper::SendHashUpdateNotification(app_id());
   return new_hash;

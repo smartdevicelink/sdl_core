@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ SDLActivateAppRequest::~SDLActivateAppRequest() {
 }
 
 void SDLActivateAppRequest::Run() {
-  LOG4CXX_INFO(logger_, "SDLActivateAppRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   policy::PolicyHandler::instance()->OnActivateApp(
       (*message_)[strings::msg_params][strings::app_id].asUInt(),
       (*message_)[strings::params][strings::correlation_id].asInt());

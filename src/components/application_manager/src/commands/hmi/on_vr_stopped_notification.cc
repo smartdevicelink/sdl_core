@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -46,7 +46,7 @@ OnVRStoppedNotification::~OnVRStoppedNotification() {
 }
 
 void OnVRStoppedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnVRStoppedNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->set_vr_session_started(false);
   ApplicationManagerImpl::instance()->Unmute(kVRSessionChanging);

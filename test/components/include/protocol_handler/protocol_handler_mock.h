@@ -45,7 +45,7 @@ namespace protocol_handler_test {
 class ProtocolHandlerMock: public ::protocol_handler::ProtocolHandler {
  public:
   MOCK_METHOD2(SendMessageToMobileApp,
-               void(const RawMessagePtr message,
+               void(const ::protocol_handler::RawMessagePtr message,
                     bool final_message));
   MOCK_METHOD1(AddProtocolObserver,
                void(::protocol_handler::ProtocolObserver *observer));

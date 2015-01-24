@@ -1,4 +1,4 @@
-/**
+/*
  * \file bluetooth_transport_adapter.cc
  * \brief BluetoothTransportAdapter class source file.
  *

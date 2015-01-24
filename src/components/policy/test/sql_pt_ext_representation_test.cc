@@ -283,7 +283,7 @@ TEST_F(SQLPTExtRepresentationTest, SetUnpairedDevice) {
   const char* query_insert = "INSERT INTO `device` (`id`) VALUES('12345')";
   ASSERT_TRUE(dbms->Exec(query_insert));
 
-  ASSERT_TRUE(reps->SetUnpairedDevice("12345"));
+  ASSERT_TRUE(reps->SetUnpairedDevice("12345", true));
 
   const char* query_select = "SELECT `id` FROM `device` WHERE `unpaired` = 1";
   EXPECT_EQ("12345", dbms->FetchOneString(query_select));

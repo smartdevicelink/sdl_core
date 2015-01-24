@@ -1,4 +1,4 @@
-/**
+/*
  * \file tcp_socket_connection.h
  * \brief TcpSocketConnection class header file.
  *

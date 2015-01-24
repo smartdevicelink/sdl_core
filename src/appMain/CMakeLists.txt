@@ -182,6 +182,7 @@ include_directories (
     ./main_test.cc
     ${CMAKE_SOURCE_DIR}/src/components/utils/test/date_time_test.cc
     ${CMAKE_SOURCE_DIR}/src/components/utils/test/file_system_test.cc
+    ${CMAKE_SOURCE_DIR}/src/components/utils/test/messagemeter_test.cc
     ${CMAKE_SOURCE_DIR}/src/components/media_manager/test/media_adapter_impl_test.cc
     ${AM_TEST_DIR}/command_impl_test.cc
   )

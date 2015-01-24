@@ -1,4 +1,4 @@
-/**
+/*
  * \file tcp_connection_factory.h
  * \brief TcpConnectionFactory class header file.
  *
@@ -54,7 +54,6 @@ class TcpConnectionFactory : public ServerConnectionFactory {
    * @param controller Pointer to the device adapter controller.
    */
   TcpConnectionFactory(TransportAdapterController* controller);
- protected:
 
   /**
    * @brief Start TCP connection factory.
@@ -69,8 +68,8 @@ class TcpConnectionFactory : public ServerConnectionFactory {
    *
    * @return Error information about possible reason of failure.
    */
-  virtual TransportAdapter::Error CreateConnection(const DeviceUID& device_uid,
-                                                const ApplicationHandle& app_handle);
+  virtual TransportAdapter::Error CreateConnection(
+      const DeviceUID& device_uid, const ApplicationHandle& app_handle);
 
   /**
    * @brief

@@ -96,6 +96,12 @@ class SessionObserver {
       const protocol_handler::ServiceType &service_type) = 0;
 
   /**
+   * \brief Callback function used by ProtocolHandler
+   * when Mobile Application start message flood
+   * \param connection_key used by other components as application identifier
+   */
+  virtual void OnApplicationFloodCallBack(const uint32_t &connection_key) = 0;
+  /**
    * \brief Creates unique identifier of session (can be used as hash)
    * from given connection identifier
    * within which session exists and session number.
@@ -156,6 +162,7 @@ class SessionObserver {
   virtual bool  IsHeartBeatSupported(
     transport_manager::ConnectionUID connection_handle,
     uint8_t session_id) = 0;
+
 
 #ifdef ENABLE_SECURITY
   /**

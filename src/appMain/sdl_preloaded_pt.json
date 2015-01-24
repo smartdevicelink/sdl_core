@@ -14,11 +14,15 @@
 			"endpoints": {
 				"0x07": {
 					"default": ["http://policies.telematics.ford.com/api/policies"]
+				},
+				"0x04": {
+					"default": ["http://ivsu.software.ford.com/api/getsoftwareupdates"]
 				}
 			},
 			"notifications_per_minute_by_priority": {
 				"EMERGENCY": 60,
 				"NAVIGATION": 15,
+				"VOICECOM": 20,
 				"COMMUNICATION": 6,
 				"NORMAL": 4,
 				"NONE": 0
@@ -108,11 +112,13 @@
 					},
 					"OnButtonEvent": {
 						"hmi_levels": ["FULL",
-						"LIMITED"]
+						"LIMITED",
+						"BACKGROUND"]
 					},
 					"OnButtonPress": {
 						"hmi_levels": ["FULL",
-						"LIMITED"]
+						"LIMITED",
+						"BACKGROUND"]
 					},
 					"OnCommand": {
 						"hmi_levels": ["BACKGROUND",
@@ -183,7 +189,8 @@
 					"ResetGlobalProperties": {
 						"hmi_levels": ["BACKGROUND",
 						"FULL",
-						"LIMITED"]
+						"LIMITED",
+						"NONE"]
 					},
 					"ScrollableMessage": {
 						"hmi_levels": ["FULL"]
@@ -203,11 +210,13 @@
 					"SetGlobalProperties": {
 						"hmi_levels": ["BACKGROUND",
 						"FULL",
-						"LIMITED"]
+						"LIMITED",
+						"NONE"]
 					},
 					"SetMediaClockTimer": {
 						"hmi_levels": ["FULL",
-						"LIMITED"]
+						"LIMITED",
+						"BACKGROUND"]
 					},
 					"Show": {
 						"hmi_levels": ["BACKGROUND",
@@ -429,6 +438,39 @@
 					}
 				}
 			},
+			"PropriataryData-2": {
+				"rpcs": {
+					"DiagnosticMessage": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"GetDTCs": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"ReadDID": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					}
+				}
+			},
+			"ProprietaryData-3": {
+				"rpcs": {
+					"GetDTCs": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"ReadDID": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					}
+				}
+			},
 			"Emergency-1": {
 				"rpcs": {
 					"GetVehicleData": {
@@ -482,6 +524,246 @@
 						"LIMITED"]
 					},
 					"UpdateTurnList": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					}
+				}
+			},
+			"Base-6": {
+				"rpcs": {
+					"AddCommand": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"AddSubMenu": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"Alert": {
+						"hmi_levels": ["FULL",
+						"LIMITED"]
+					},
+					"ChangeRegistration": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"CreateInteractionChoiceSet": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"DeleteCommand": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"DeleteFile": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"DeleteInteractionChoiceSet": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"DeleteSubMenu": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"EncodedSyncPData": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"EndAudioPassThru": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"GenericResponse": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"ListFiles": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"OnAppInterfaceUnregistered": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"OnAudioPassThru": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"OnButtonEvent": {
+						"hmi_levels": ["FULL",
+						"LIMITED"]
+					},
+					"OnButtonPress": {
+						"hmi_levels": ["FULL",
+						"LIMITED"]
+					},
+					"OnCommand": {
+						"hmi_levels": ["FULL",
+						"LIMITED"]
+					},
+					"OnDriverDistraction": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"OnEncodedSyncPData": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"OnHMIStatus": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"OnLanguageChange": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"OnPermissionsChange": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"OnSyncPData": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"OnTBTClientState": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"PerformAudioPassThru": {
+						"hmi_levels": ["FULL",
+						"LIMITED"]
+					},
+					"PerformInteraction": {
+						"hmi_levels": ["FULL",
+						"LIMITED"]
+					},
+					"PutFile": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"RegisterAppInterface": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"ResetGlobalProperties": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"ScrollableMessage": {
+						"hmi_levels": ["FULL"]
+					},
+					"SetAppIcon": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"SetDisplayLayout": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"SetGlobalProperties": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"SetMediaClockTimer": {
+						"hmi_levels": ["FULL"]
+					},
+					"Show": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"Slider": {
+						"hmi_levels": ["FULL"]
+					},
+					"Speak": {
+						"hmi_levels": ["FULL",
+						"LIMITED"]
+					},
+					"SubscribeButton": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					},
+					"SyncPData": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"UnregisterAppInterface": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"UnsubscribeButton": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					}
+				}
+			},
+			"OnKeyboardInputOnlyGroup": {
+				"rpcs": {
+					"OnKeyboardInput": {
+						"hmi_levels": ["FULL"]
+					}
+				}
+			},
+			"OnTouchEventOnlyGroup": {
+				"rpcs": {
+					"OnTouchEvent": {
+						"hmi_levels": ["FULL"]
+					}
+				}
+			},
+			"DiagnosticMessageOnly": {
+				"rpcs": {
+					"DiagnosticMessage": {
 						"hmi_levels": ["BACKGROUND",
 						"FULL",
 						"LIMITED"]
@@ -572,6 +854,18 @@
 						"LIMITED",
 						"NONE"]
 					},
+					"ResetGlobalProperties": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
+					"SetGlobalProperties": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED",
+						"NONE"]
+					},
 					"SetAppIcon": {
 						"hmi_levels": ["BACKGROUND",
 						"FULL",
@@ -597,10 +891,32 @@
 						"NONE"]
 					}
 				}
+			},
+			"SendLocation": {
+				"rpcs": {
+					"SendLocation": {
+						"hmi_levels": ["BACKGROUND",
+						"FULL",
+						"LIMITED"]
+					}
+				}
+			},
+			"BackgroundAPT": {
+				"rpcs": {
+					"EndAudioPassThru": {
+						"hmi_levels": ["BACKGROUND"]
+					},
+					"OnAudioPassThru": {
+						"hmi_levels": ["BACKGROUND"]
+					},
+					"PerformAudioPassThru": {
+						"hmi_levels": ["BACKGROUND"]
+					}
+				}
 			}
 		},
 		"consumer_friendly_messages": {
-			"version": "001.001.019",
+			"version": "001.001.021",
 			"messages": {
 				"AppPermissions": {
 					"languages": {
@@ -645,7 +961,8 @@
 						"es-mx": {
 							"tts": "%appName% solicita el uso de la siguiente información y permisos del vehículo: %functionalGroupLabels%. Si presiona Sí, acepta que %vehicleMake% no se hará responsable por los daños o pérdidas de privacidad relacionados con el uso que %appName% haga de sus datos. Presione Sí para permitir y No para denegar.",
 							"line1": "¿Otorgar permiso(s)",
-							"line2": "solicitado(s)?"
+							"line2": "solicitado(s)?",
+							"textBody": "%appName% solicita el uso de la siguiente información y permisos del vehículo: %functionalGroupLabels%. \n\nSi presiona Sí, acepta que %vehicleMake% no se hará responsable por los daños o pérdidas de privacidad relacionados con el uso que %appName% haga de sus datos. Presione Sí para permitir y No para denegar. Puede cambiar estos permisos y consultar descripciones detalladas en el menú de configuración de las aplicaciones móviles."
 						},
 						"fr-ca": {
 							"tts": "%appName% demande d’utiliser les informations du véhicule et les permissions suivantes : %functionalGroupLabels%. Si vous appuyez sur Oui, vous acceptez que %vehicleMake% ne sera pas responsable des dommages ou des pertes de confidentialité reliées à l’utilisation de vos données par %appName%. Veuillez appuyer sur Oui pour autoriser ou sur Non pour refuser.",
@@ -873,7 +1190,8 @@
 						},
 						"es-mx": {
 							"tts": "Esta versión de %appName% no tiene autorización y no funcionará con SYNC.",
-							"line1": "no autorizada"
+							"line1": "no autorizada",
+							"textBody": "Esta versión de %appName% no tiene autorización y no funcionará con SYNC."
 						},
 						"fr-ca": {
 							"tts": "Cette version de %appName% n’est pas autorisée et ne fonctionnera pas avec SYNC.",
@@ -961,7 +1279,8 @@
 						},
 						"es-mx": {
 							"tts": "Esta versión de %appName% no es compatible con SYNC.",
-							"line1": "no compatible"
+							"line1": "no compatible",
+							"textBody": "Esta versión de %appName% no es compatible con SYNC."
 						},
 						"fr-ca": {
 							"tts": "Cette version de %appName% n’est pas prise en charge par SYNC.",
@@ -1017,27 +1336,27 @@
 				"DataConsent": {
 					"languages": {
 						"en-gb": {
-							"textBody": "Would you like to enable Mobile Apps on SYNC? To use Mobile Apps with SYNC, SYNC will communicate with Ford at least once per month using your mobile device’s data plan. Standard rates may apply. SYNC will send your VIN and SYNC module number to Ford U.S. Updates are about the size of an email, and the occurrence of updates depends on your vehicle usage and when a new app is found on your device. To turn on or off, visit the SYNC Settings menu. See your Owner Guide for more information."
+							"textBody": "Would you like to enable Mobile Apps on SYNC? To use Mobile Apps with SYNC, SYNC will communicate with Ford at least once per month using your mobile device’s data plan. Standard rates may apply. SYNC will send your VIN and SYNC module number to Ford U.S. \r\n\r\nUpdates are about the size of an email, and the occurrence of updates depends on your vehicle usage and when a new app is found on your device. To turn on or off, visit the SYNC Settings menu. See your Owner Guide for more information."
 						},
 						"en-us": {
 							"line1": "Enable Mobile Apps",
 							"line2": "on SYNC? (Uses Data)",
-							"textBody": "Would you like to enable Mobile Apps on SYNC?\n\nTo use Mobile Apps with SYNC, SYNC will communicate with Ford at least once per month using your mobile device’s data plan. Standard rates may apply. SYNC will send your VIN and SYNC module number to Ford U.S.\n\nUpdates are about the size of an email, and the occurrence of updates depends on your vehicle usage and when a new app is found on your device. To turn on or off, visit the SYNC Settings menu. See your Owner Guide for more information."
+							"textBody": "Would you like to enable Mobile Apps on SYNC?\r\n\r\nTo use Mobile Apps with SYNC, SYNC will communicate with Ford at least once per month using your mobile device’s data plan. Standard rates may apply. SYNC will send your VIN and SYNC module number to Ford U.S.\r\n\r\nUpdates are about the size of an email, and the occurrence of updates depends on your vehicle usage and when a new app is found on your device. To turn on or off, visit the SYNC Settings menu. See your Owner Guide for more information."
 						},
-						"es-en": {
-							"textBody": "Para usar aplicaciones móviles con SYNC, este debe comunicarse con Ford al menos una vez al mes a través del plan de datos de su dispositivo móvil. Pueden aplicar tarifas normales. SYNC enviará su VIN y el número de módulo de SYNC a Ford de Estados Unidos de América. Las actualizaciones tienen el tamaño aproximado de un mensaje de correo electrónico, y la frecuencia de las actualizaciones depende del uso de su vehículo y de si se encuentran nuevas aplicaciones en su dispositivo. Para obtener más información, consulte la Guía del propietario. /r Presione Sí para permitir y No para denegar."
+						"es-mx": {
+							"textBody": "Para usar aplicaciones móviles con SYNC, este debe comunicarse con Ford al menos una vez al mes a través del plan de datos de su dispositivo móvil. Pueden aplicar tarifas normales. SYNC enviará su VIN y el número de módulo de SYNC a Ford de Estados Unidos de América. \n\nLas actualizaciones tienen el tamaño aproximado de un mensaje de correo electrónico, y la frecuencia de las actualizaciones depende del uso de su vehículo y de si se encuentran nuevas aplicaciones en su dispositivo. Para obtener más información, consulte la Guía del propietario. \n\nPresione Sí para permitir y No para denegar."
 						},
 						"fr-ca": {
-							"textBody": "Pour utiliser AppLink, SYNC devra communiquer avec Ford au moins une fois par mois en utilisant le forfait de données de votre appareil mobile. Les tarifs réguliers peuvent s’appliquer. SYNC enverra votre NIV et le numéro de votre module SYNC à Ford États-Unis. Les mises à jour ont la taille d’un courriel et la fréquence des mises à jour dépend de l’utilisation de votre véhicule et si une nouvelle application se trouve sur votre appareil. Consultez le Guide de l’utilisateur pour obtenir d’autres renseignements. /r Veuillez appuyer sur Oui pour autoriser ou sur Non pour refuser."
+							"textBody": "Pour utiliser AppLink, SYNC devra communiquer avec Ford au moins une fois par mois en utilisant le forfait de données de votre appareil mobile. Les tarifs réguliers peuvent s’appliquer. SYNC enverra votre NIV et le numéro de votre module SYNC à Ford États-Unis. Les mises à jour ont la taille d’un courriel et la fréquence des mises à jour dépend de l’utilisation de votre véhicule et si une nouvelle application se trouve sur votre appareil. Consultez le Guide de l’utilisateur pour obtenir d’autres renseignements.\r\n\r\nVeuillez appuyer sur Oui pour autoriser ou sur Non pour refuser."
 						}
 					}
 				},
 				"DataConsentHelp": {
 					"languages": {
 						"en-us": {
-							"textBody": "Updates are about the size of an email, and the occurrence of updates depends on your vehicle usage and when a new app is found on your device. See your Owner Guide for more information."
+							"textBody": "By enabling mobile apps, you consent to allowing SYNC to communicate with Ford at least once per month using your mobile device’s data plan. Disabling will stop all data usage, but you will not be able to use mobile apps on SYNC. See your Owner Guide for more information."
 						},
-						"es-en": {
+						"es-mx": {
 							"textBody": "Las actualizaciones tienen el tamaño aproximado de un mensaje de correo electrónico, y la frecuencia de las actualizaciones depende del uso de su vehículo y de si se encuentran nuevas aplicaciones en su dispositivo. Para obtener más información, consulte la Guía del propietario."
 						},
 						"fr-ca": {
@@ -1072,7 +1391,7 @@
 							"tts": "Disabling automatic updates will also disable sync mobile apps. You will not be able to use any mobile apps with SYNC. Please press yes to confirm or no to cancel.",
 							"line1": "Disable Auto-Updates",
 							"line2": "and Mobile Apps?",
-							"textBody": "Disabling automatic updates will also disable sync mobile apps. You will not be able to use any mobile apps with SYNC. Please press yes to confirm or no to cancel."
+							"textBody": "If you disable, you will not be able to use any mobile apps with SYNC and your vehicle will stop receiving mobile app permission updates via your device`s data plan. Please press yes to disable mobile apps or no to cancel."
 						},
 						"es-en": {
 							"tts": "Si se desactivan las actualizaciones automáticas, también se desactivarán las aplicaciones móviles de SYNC. No podrá usar ninguna aplicación móvil con SYNC. Presione Sí para confirmar o No para cancelar.",
@@ -1088,7 +1407,8 @@
 						"es-mx": {
 							"tts": "Si se desactivan las actualizaciones automáticas, también se desactivarán las aplicaciones móviles de SYNC. No podrá usar ninguna aplicación móvil con SYNC. Presione Sí para confirmar o No para cancelar.",
 							"line1": "¿Deshab. actualiz.",
-							"line2": "autom. y aplic. móv.?"
+							"line2": "autom. y aplic. móv.?",
+							"textBody": "Si se desactivan las actualizaciones automáticas, también se desactivarán las aplicaciones móviles de SYNC. No podrá usar ninguna aplicación móvil con SYNC. Presione Sí para confirmar o No para cancelar."
 						},
 						"fr-ca": {
 							"tts": "La désactivation des mises à jour automatiques désactivera aussi les applications mobiles SYNC. Vous ne pourrez pas utiliser d’application mobile avec SYNC. Veuillez appuyer sur Oui pour confirmer ou sur Non pour annuler.",
@@ -1188,7 +1508,8 @@
 						},
 						"es-mx": {
 							"tts": "Las aplicaciones pueden acceder a las siguientes características del manejo: Consumo de combustible, MyKey, Estado del cinturón de seguridad.",
-							"label": "Características del manejo"
+							"label": "Características del manejo",
+							"textBody": "Las aplicaciones pueden acceder a las siguientes características del manejo: Consumo de combustible, MyKey, Estado del cinturón de seguridad."
 						},
 						"fr-ca": {
 							"tts": "Une application peut accéder aux caractéristiques de conduite suivantes: Consommation de carburant, MyKey, État des ceintures de sécurité.",
@@ -1276,7 +1597,8 @@
 						},
 						"es-mx": {
 							"tts": "Las aplicaciones pueden acceder al GPS y a la velocidad del vehículo.",
-							"label": "GPS y velocidad"
+							"label": "GPS y velocidad",
+							"textBody": "Las aplicaciones pueden acceder al GPS y a la velocidad del vehículo."
 						},
 						"fr-ca": {
 							"tts": "Une application peut accéder au GPS et à la vitesse du véhicule.",
@@ -1364,7 +1686,8 @@
 						},
 						"es-mx": {
 							"tts": "Las aplicaciones pueden enviar notificaciones cuando se ejecutan en segundo plano.",
-							"label": "Notificaciones tipo Push"
+							"label": "Notificaciones tipo Push",
+							"textBody": "Las aplicaciones pueden enviar notificaciones cuando se ejecutan en segundo plano."
 						},
 						"fr-ca": {
 							"tts": "Une application peut envoyer des avis lorsqu’elle fonctionne en arrière-plan.",
@@ -1443,7 +1766,8 @@
 							"line1": "Desact. actual."
 						},
 						"es-mx": {
-							"line1": "Deshab. actual."
+							"line1": "Deshab. actual.",
+							"textBody": "Deshab. actual."
 						},
 						"fr-ca": {
 							"line1": "Désactiver MAJ",
@@ -1565,7 +1889,7 @@
 						},
 						"en-us": {
 							"line1": "Request Update",
-							"textBody": "Select `Update now` to receive app authorization information for your SYNC-enabled mobile apps. This may enable additional functionality depending on the app and your settings. If your phone has a working data connection, an update should complete in less than 1 minute."
+							"textBody": "Select `Update now` to receive app permissions for your SYNC-enabled mobile apps. This may enable additional functionality depending on the app and your settings. If your phone has a working data connection, an update should complete in less than 1 minute."
 						},
 						"es-en": {
 							"line1": "Solicit. actualiz.",
@@ -1575,7 +1899,8 @@
 							"line1": "Solicitar actual."
 						},
 						"es-mx": {
-							"line1": "Solicit. actualiz."
+							"line1": "Solicit. actualiz.",
+							"textBody": "Solicit. actualiz."
 						},
 						"fr-ca": {
 							"line1": "Demander MAJ",
@@ -1643,7 +1968,8 @@
 							"line1": "Actu. necesaria"
 						},
 						"es-mx": {
-							"line1": "Actualiz. neces."
+							"line1": "Actualiz. neces.",
+							"textBody": "Actualiz. neces."
 						},
 						"fr-ca": {
 							"line1": "Màj requise",
@@ -1711,7 +2037,8 @@
 							"line1": "Actualizando..."
 						},
 						"es-mx": {
-							"line1": "Actualizando..."
+							"line1": "Actualizando...",
+							"textBody": "Actualizando..."
 						},
 						"fr-ca": {
 							"line1": "MAJ en cours...",
@@ -1779,7 +2106,8 @@
 							"line1": "Actualizada"
 						},
 						"es-mx": {
-							"line1": "Actualizado"
+							"line1": "Actualizado",
+							"textBody": "Actualizado"
 						},
 						"fr-ca": {
 							"line1": "Déjà à jour",
@@ -1855,7 +2183,8 @@
 						},
 						"es-mx": {
 							"tts": "Las aplicaciones pueden acceder a la siguiente información del vehículo: Nivel de combustible, Economía de combustible, RPM del motor, Cuentakilómetros, Número de identificación del vehículo, Temperatura externa, Posición del cambio, Presión de los neumáticos.",
-							"label": "Información del vehículo"
+							"label": "Información del vehículo",
+							"textBody": "Las aplicaciones pueden acceder a la siguiente información del vehículo: Nivel de combustible, Economía de combustible, RPM del motor, Cuentakilómetros, Número de identificación del vehículo, Temperatura externa, Posición del cambio, Presión de los neumáticos."
 						},
 						"fr-ca": {
 							"tts": "Une application peut accéder aux informations suivantes du véhicule: Niveau de carburant, Économie de carburant, Au régime du moteur, Odomètre, NIV, Température extérieure, Position d’embrayage, Pression des pneus.",

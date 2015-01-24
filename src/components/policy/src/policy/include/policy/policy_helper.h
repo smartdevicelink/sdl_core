@@ -99,7 +99,8 @@ struct CheckAppPolicy {
      * @param group_name the group for which consent will be checked.
      * @return true if consent is required, false otherwise.
      */
-    bool IsConsentRequired(const std::string& group_name) const;
+    bool IsConsentRequired(const std::string& app_id,
+                           const std::string& group_name) const;
     PolicyManagerImpl* pm_;
     const utils::SharedPtr<policy_table::Table> update_;
     const utils::SharedPtr<policy_table::Table> snapshot_;

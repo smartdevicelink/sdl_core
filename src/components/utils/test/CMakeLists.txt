@@ -4,6 +4,7 @@ include_directories (
 
 set(testSources
   main.cc
+  messagemeter_test.cc
   file_system_test.cc
   date_time_test.cc)
 

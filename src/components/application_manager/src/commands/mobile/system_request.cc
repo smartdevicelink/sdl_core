@@ -55,7 +55,7 @@ SystemRequest::~SystemRequest() {
 }
 
 void SystemRequest::Run() {
-  LOG4CXX_INFO(logger_, "SystemRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(connection_key());

@@ -28,6 +28,7 @@
 * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 * POSSIBILITY OF SUCH DAMAGE.
 */
+#include <sys/stat.h>
 
 #include "gtest/gtest.h"
 
@@ -139,6 +140,18 @@ TEST(SQLDatabaseTest, BadTransaction) {
   SQLDatabase db;
   EXPECT_FALSE(db.BeginTransaction());
   EXPECT_TRUE(IsError(db.LastError()));
+}
+
+TEST(SQLDatabaseTest, IsReadWrite) {
+  SQLDatabase db("test-database");
+  ASSERT_TRUE(db.Open());
+  EXPECT_TRUE(db.IsReadWrite());
+  db.Close();
+  chmod("test-database.sqlite", S_IRUSR);
+  ASSERT_TRUE(db.Open());
+  EXPECT_FALSE(db.IsReadWrite());
+  db.Close();
+  remove("test-database.sqlite");
 }
 
 }  // namespace dbms

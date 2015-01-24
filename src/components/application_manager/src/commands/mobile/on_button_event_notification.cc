@@ -51,7 +51,7 @@ OnButtonEventNotification::~OnButtonEventNotification() {
 }
 
 void OnButtonEventNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnButtonEventNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const uint32_t btn_id =
       static_cast<uint32_t>(

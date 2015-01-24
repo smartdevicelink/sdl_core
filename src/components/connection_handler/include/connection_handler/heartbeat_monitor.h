@@ -72,7 +72,7 @@ class HeartBeatMonitor: public threads::ThreadDelegate {
   /**
    * \brief Thread exit procedure.
    */
-  virtual bool exitThreadMain();
+  virtual void exitThreadMain();
 
   void set_heartbeat_timeout_seconds(int32_t timeout);
 

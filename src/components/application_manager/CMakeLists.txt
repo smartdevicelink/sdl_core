@@ -35,14 +35,12 @@ file (GLOB SOURCES
 set (POLICIES_MANAGER
 ${AM_SOURCE_DIR}/src/policies/policy_handler.cc
 ${AM_SOURCE_DIR}/src/policies/policy_event_observer.cc
+${AM_SOURCE_DIR}/src/policies/delegates/app_permission_delegate.cc
+${AM_SOURCE_DIR}/src/policies/delegates/statistics_delegate.cc
 )
 
   include_directories(
     ${COMPONENTS_DIR}/policy/src/policy/policy_table/table_struct
-  )
-  list(APPEND POLICIES_MANAGER
-    ${AM_SOURCE_DIR}/src/policies/pt_exchange_handler_impl.cc
-    ${AM_SOURCE_DIR}/src/policies/policy_retry_sequence.cc
   )
 
 file (GLOB EVENT_ENGINE

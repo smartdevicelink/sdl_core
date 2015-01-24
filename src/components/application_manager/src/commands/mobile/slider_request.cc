@@ -60,7 +60,7 @@ bool SliderRequest::Init() {
 }
 
 void SliderRequest::Run() {
-  LOG4CXX_INFO(logger_, "SliderRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
       application_manager::ApplicationManagerImpl::instance()->application(
@@ -110,7 +110,7 @@ void SliderRequest::Run() {
 }
 
 void SliderRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "SliderRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   const event_engine::Event::EventID event_id = event.id();

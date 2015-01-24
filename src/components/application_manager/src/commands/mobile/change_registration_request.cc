@@ -55,7 +55,7 @@ ChangeRegistrationRequest::~ChangeRegistrationRequest() {
 }
 
 void ChangeRegistrationRequest::Run() {
-  LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl* instance = ApplicationManagerImpl::instance();
   const HMICapabilities& hmi_capabilities = instance->hmi_capabilities();
@@ -166,19 +166,19 @@ void ChangeRegistrationRequest::Run() {
                  &tts_params, true);
 }
 
-bool ChangeRegistrationRequest::WasAnySuccess(
+bool ChangeRegistrationRequest::AllHmiResponsesSuccess(
       const hmi_apis::Common_Result::eType ui,
       const hmi_apis::Common_Result::eType vr,
       const hmi_apis::Common_Result::eType tts) {
 
   return
-      hmi_apis::Common_Result::SUCCESS == ui ||
-      hmi_apis::Common_Result::SUCCESS == vr ||
+      hmi_apis::Common_Result::SUCCESS == ui &&
+      hmi_apis::Common_Result::SUCCESS == vr &&
       hmi_apis::Common_Result::SUCCESS == tts;
 }
 
 void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   hmi_apis::FunctionID::eType event_id = event.id();
@@ -237,7 +237,7 @@ void ChangeRegistrationRequest::on_event(const event_engine::Event& event) {
     (*message_)[strings::params][strings::function_id] =
           mobile_apis::FunctionID::eType::ChangeRegistrationID;
 
-    SendResponse(WasAnySuccess(ui_result_, vr_result_, tts_result_),
+    SendResponse(AllHmiResponsesSuccess(ui_result_, vr_result_, tts_result_),
                  static_cast<mobile_apis::Result::eType>(greates_result_code),
                  NULL, &(message[strings::msg_params]));
   } else {
@@ -374,7 +374,7 @@ bool ChangeRegistrationRequest::IsWhiteSpaceExist() {
 }
 
 mobile_apis::Result::eType ChangeRegistrationRequest::CheckCoincidence() {
-  LOG4CXX_INFO(logger_, "ChangeRegistrationRequest::CheckCoincidence");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];

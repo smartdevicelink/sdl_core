@@ -36,6 +36,7 @@ include_directories(
   ../src/policy/sqlite_wrapper/include
   ../src/policy/qdb_wrapper/include
   ../src/policy/usage_statistics/include
+  ${CMAKE_SOURCE_DIR}/src/components/config_profile/include
   ${CMAKE_SOURCE_DIR}/src/components/rpc_base/include
   ${CMAKE_SOURCE_DIR}/src/components/utils/include/
 )
@@ -49,6 +50,7 @@ set(testLibraries
   dl
   UsageStatistics
   dbms
+  ConfigProfile
 )
 
 set(testSources
@@ -94,3 +96,4 @@ target_link_libraries(policy_test ${testLibraries})
 file(COPY valid_sdl_pt_update.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY sdl_preloaded_pt.json DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY log4cxx.properties DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY smartDeviceLink.ini DESTINATION ${CMAKE_CURRENT_BINARY_DIR})

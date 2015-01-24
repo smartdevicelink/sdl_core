@@ -1,4 +1,4 @@
-/**
+/*
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -56,12 +56,15 @@ void DnssdServiceBrowser::Terminate() {
   }
   if (0 != avahi_service_browser_) {
     avahi_service_browser_free(avahi_service_browser_);
+    avahi_service_browser_ = NULL;
   }
   if (0 != avahi_client_) {
     avahi_client_free(avahi_client_);
+    avahi_client_ = NULL;
   }
   if (0 != avahi_threaded_poll_) {
     avahi_threaded_poll_free(avahi_threaded_poll_);
+    avahi_threaded_poll_ = NULL;
   }
   LOG4CXX_TRACE(logger_, "exit");
 }
@@ -78,11 +81,9 @@ DnssdServiceBrowser::DnssdServiceBrowser(TransportAdapterController* controller)
     service_records_(),
     mutex_(),
     initialised_(false) {
-  pthread_mutex_init(&mutex_, 0);
 }
 
 DnssdServiceBrowser::~DnssdServiceBrowser() {
-  pthread_mutex_destroy(&mutex_);
 }
 
 void DnssdServiceBrowser::OnClientConnected() {
@@ -172,8 +173,8 @@ void AvahiServiceBrowserCallback(AvahiServiceBrowser* avahi_service_browser,
 
 void DnssdServiceBrowser::ServiceResolved(
   const DnssdServiceRecord& service_record) {
-  LOG4CXX_TRACE(logger_, "enter");
-  pthread_mutex_lock(&mutex_);
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock locker(mutex_);
   ServiceRecords::iterator service_record_it = std::find(
         service_records_.begin(), service_records_.end(), service_record);
   if (service_record_it != service_records_.end()) {
@@ -181,23 +182,19 @@ void DnssdServiceBrowser::ServiceResolved(
   }
   DeviceVector device_vector = PrepareDeviceVector();
   controller_->SearchDeviceDone(device_vector);
-  pthread_mutex_unlock(&mutex_);
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 void DnssdServiceBrowser::ServiceResolveFailed(
   const DnssdServiceRecord& service_record) {
-  LOG4CXX_TRACE(logger_, "enter");
-  LOG4CXX_ERROR(logger_,
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_,
                 "AvahiServiceResolver failure for: " << service_record.name);
-  pthread_mutex_lock(&mutex_);
+  sync_primitives::AutoLock locker(mutex_);
   ServiceRecords::iterator service_record_it = std::find(
         service_records_.begin(), service_records_.end(), service_record);
   if (service_record_it != service_records_.end()) {
     service_records_.erase(service_record_it);
   }
-  pthread_mutex_unlock(&mutex_);
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 void AvahiServiceResolverCallback(AvahiServiceResolver* avahi_service_resolver,
@@ -246,9 +243,11 @@ TransportAdapter::Error DnssdServiceBrowser::CreateAvahiClientAndBrowser() {
   LOG4CXX_TRACE(logger_, "enter");
   if (0 != avahi_service_browser_) {
     avahi_service_browser_free(avahi_service_browser_);
+    avahi_service_browser_ = NULL;
   }
   if (0 != avahi_client_) {
     avahi_client_free(avahi_client_);
+    avahi_client_ = NULL;
   }
 
   int avahi_error;
@@ -261,9 +260,9 @@ TransportAdapter::Error DnssdServiceBrowser::CreateAvahiClientAndBrowser() {
     return TransportAdapter::FAIL;
   }
 
-  pthread_mutex_lock(&mutex_);
+  mutex_.Acquire();
   service_records_.clear();
-  pthread_mutex_unlock(&mutex_);
+  mutex_.Release();
 
   avahi_service_browser_ = avahi_service_browser_new(
                              avahi_client_, AVAHI_IF_UNSPEC, /* TODO use only required iface */
@@ -305,7 +304,8 @@ TransportAdapter::Error DnssdServiceBrowser::Scan() {
 void DnssdServiceBrowser::AddService(AvahiIfIndex interface,
                                      AvahiProtocol protocol, const char* name,
                                      const char* type, const char* domain) {
-  LOG4CXX_TRACE(logger_, "enter: interface " << interface << " protocol " << protocol <<
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "interface " << interface << " protocol " << protocol <<
                 " name " << name << " type " << type << " domain " << domain);
   DnssdServiceRecord record;
   record.interface = interface;
@@ -314,7 +314,7 @@ void DnssdServiceBrowser::AddService(AvahiIfIndex interface,
   record.name = name;
   record.type = type;
 
-  pthread_mutex_lock(&mutex_);
+  sync_primitives::AutoLock locker(mutex_);
   if (service_records_.end()
       == std::find(service_records_.begin(), service_records_.end(), record)) {
     service_records_.push_back(record);
@@ -323,15 +323,14 @@ void DnssdServiceBrowser::AddService(AvahiIfIndex interface,
       AVAHI_PROTO_INET, static_cast<AvahiLookupFlags>(0),
       AvahiServiceResolverCallback, this);
   }
-  pthread_mutex_unlock(&mutex_);
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 void DnssdServiceBrowser::RemoveService(AvahiIfIndex interface,
                                         AvahiProtocol protocol,
                                         const char* name, const char* type,
                                         const char* domain) {
-  LOG4CXX_TRACE(logger_, "enter: interface " << interface << " protocol " << protocol <<
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "interface " << interface << " protocol " << protocol <<
                 " name " << name << " type " << type << " domain " << domain);
   DnssdServiceRecord record;
   record.interface = interface;
@@ -340,16 +339,14 @@ void DnssdServiceBrowser::RemoveService(AvahiIfIndex interface,
   record.type = type;
   record.domain_name = domain;
 
-  pthread_mutex_lock(&mutex_);
+  sync_primitives::AutoLock locker(mutex_);
   service_records_.erase(
     std::remove(service_records_.begin(), service_records_.end(), record),
     service_records_.end());
-  pthread_mutex_unlock(&mutex_);
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 DeviceVector DnssdServiceBrowser::PrepareDeviceVector() const {
-  LOG4CXX_TRACE(logger_, "enter");
+  LOG4CXX_AUTO_TRACE(logger_);
   std::map<uint32_t, TcpDevice*> devices;
   for (ServiceRecords::const_iterator it = service_records_.begin();
        it != service_records_.end(); ++it) {
@@ -372,7 +369,6 @@ DeviceVector DnssdServiceBrowser::PrepareDeviceVector() const {
        it != devices.end(); ++it) {
     device_vector.push_back(DeviceSptr(it->second));
   }
-  LOG4CXX_TRACE(logger_, "exit");
   return device_vector;
 }
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -49,7 +49,7 @@ OnVRLanguageChangeNotification::~OnVRLanguageChangeNotification() {
 }
 
 void OnVRLanguageChangeNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnVRLanguageChangeNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();

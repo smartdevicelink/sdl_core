@@ -1,34 +1,34 @@
 /*
-* Copyright (c) 2014, Ford Motor Company
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* Redistributions of source code must retain the above copyright notice, this
-* list of conditions and the following disclaimer.
-*
-* Redistributions in binary form must reproduce the above copyright notice,
-* this list of conditions and the following
-* disclaimer in the documentation and/or other materials provided with the
-* distribution.
-*
-* Neither the name of the Ford Motor Company nor the names of its contributors
-* may be used to endorse or promote products derived from this software
-* without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*/
+ * Copyright (c) 2014, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "time_manager.h"
 
@@ -59,34 +59,32 @@ TimeManager::TimeManager():
   ph_observer(this) {
     ip_ = profile::Profile::instance()->server_address();
     port_ = profile::Profile::instance()->time_testing_port();
+    streamer_ = new Streamer(this);
+    thread_ = threads::CreateThread("TimeManager", streamer_ );
 }
 
 TimeManager::~TimeManager() {
-  LOG4CXX_INFO(logger_, "Destroing TimeManager");
+  LOG4CXX_AUTO_TRACE(logger_);
   Stop();
+  thread_->join();
+  delete streamer_;
+  threads::DeleteThread(thread_);
 }
 
 void TimeManager::Init(protocol_handler::ProtocolHandlerImpl* ph) {
   DCHECK(ph);
-  if (!thread_) {
-    streamer_ = new Streamer(this);
-    thread_ = threads::CreateThread("TimeManager", streamer_ );
-    application_manager::ApplicationManagerImpl::instance()->SetTimeMetricObserver(&app_observer);
-    transport_manager::TransportManagerDefault::instance()->SetTimeMetricObserver(&tm_observer);
-    ph->SetTimeMetricObserver(&ph_observer);
-    thread_->startWithOptions(threads::ThreadOptions());
-    LOG4CXX_INFO(logger_, "Create and start sending thread");
-    }
+  application_manager::ApplicationManagerImpl::instance()->SetTimeMetricObserver(&app_observer);
+  transport_manager::TransportManagerDefault::instance()->SetTimeMetricObserver(&tm_observer);
+  ph->SetTimeMetricObserver(&ph_observer);
+    thread_->start(threads::ThreadOptions());
+  LOG4CXX_INFO(logger_, "Create and start sending thread");
 }
 
 void TimeManager::Stop() {
-  if (thread_) {
-    thread_->stop();
-    thread_ = NULL;
-    if (socket_fd_ != -1) {
-      ::close(socket_fd_);
-    }
+  if (socket_fd_ != -1) {
+    ::close(socket_fd_);
   }
+  thread_->stop();
   messages_.Reset();
   LOG4CXX_INFO(logger_, "TimeManager stopped");
 }
@@ -110,7 +108,7 @@ TimeManager::Streamer::~Streamer() {
 }
 
 void TimeManager::Streamer::threadMain() {
-  LOG4CXX_INFO(logger_, "Streamer::threadMain");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   Start();
 
@@ -140,12 +138,11 @@ void TimeManager::Streamer::threadMain() {
   }
 }
 
-bool TimeManager::Streamer::exitThreadMain() {
+void TimeManager::Streamer::exitThreadMain() {
   LOG4CXX_INFO(logger_, "Streamer::exitThreadMain");
   stop_flag_ = true;
   Stop();
   server_->messages_.Shutdown();
-  return false;
 }
 
 void TimeManager::Streamer::Start() {
@@ -207,7 +204,7 @@ bool TimeManager::Streamer::IsReady() const {
   fd_set fds;
   FD_ZERO(&fds);
   FD_SET(new_socket_fd_, &fds);
-  TimevalStruct tv;
+  TimevalStruct tv = {0, 0};
   tv.tv_sec = 5;                       // set a 5 second timeout
   tv.tv_usec = 0;
 

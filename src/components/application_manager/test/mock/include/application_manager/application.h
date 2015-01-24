@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -36,6 +36,7 @@
 #include <string>
 #include <map>
 #include "utils/shared_ptr.h"
+#include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
 #include "application_manager/message.h"
@@ -164,6 +165,7 @@ class DynamicApplicationData {
     virtual const smart_objects::SmartObject* menu_title() const = 0;
     virtual const smart_objects::SmartObject* menu_icon() const = 0;
 
+    virtual void load_global_properties(const smart_objects::SmartObject& so) = 0;
     virtual void set_help_prompt(
       const smart_objects::SmartObject& help_prompt) = 0;
     virtual void set_timeout_prompt(
@@ -268,7 +270,7 @@ class DynamicApplicationData {
      *
      * @return ChoiceSet map that is currently in use
      */
-    virtual const PerformChoiceSetMap&
+    virtual DataAccessor<PerformChoiceSetMap>
     performinteraction_choice_set_map() const = 0;
 
     /*
@@ -285,17 +287,17 @@ class DynamicApplicationData {
     /*
      * @brief Retrieve application commands
      */
-    virtual const CommandsMap& commands_map() const = 0;
+    virtual DataAccessor<CommandsMap> commands_map() const = 0;
 
     /*
      * @brief Retrieve application sub menus
      */
-    virtual const SubMenuMap& sub_menu_map() const = 0;
+    virtual DataAccessor<SubMenuMap> sub_menu_map() const = 0;
 
     /*
      * @brief Retrieve application choice set map
      */
-    virtual const ChoiceSetMap& choice_set_map() const = 0;
+    virtual DataAccessor<ChoiceSetMap> choice_set_map() const = 0;
 
     /*
      * @brief Sets perform interaction state
@@ -391,6 +393,7 @@ class Application : public virtual InitialApplicationData,
     virtual void CloseActiveMessage() = 0;
     virtual bool IsFullscreen() const = 0;
     virtual bool MakeFullscreen() = 0;
+    virtual void ChangeSupportingAppHMIType() = 0;
     virtual bool IsAudible() const = 0;
     virtual void MakeNotAudible() = 0;
     virtual bool allowed_support_navigation() const = 0;

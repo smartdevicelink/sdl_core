@@ -37,11 +37,11 @@
   #include <errno.h>
   #include <string.h>
   #include <sstream>
-  #include <apr_time.h>
   #include <log4cxx/propertyconfigurator.h>
   #include <log4cxx/spi/loggingevent.h>
   #include "utils/push_log.h"
   #include "utils/logger_status.h"
+  #include "utils/auto_trace.h"
 #endif  // ENABLE_LOG
 
 #ifdef ENABLE_LOG
@@ -57,11 +57,14 @@
     #define INIT_LOGGER(file_name) \
       log4cxx::PropertyConfigurator::configure(file_name);
 
-    // without this line log4cxx threads continue using some instances destroyed by exit()
-    #define DEINIT_LOGGER() \
-      log4cxx::Logger::getRootLogger()->closeNestedAppenders();
+    // Logger deinitilization function and macro, need to stop log4cxx writing
+    // without this deinitilization log4cxx threads continue using some instances destroyed by exit()
+    void deinit_logger ();
+    #define DEINIT_LOGGER() deinit_logger()
 
     #define LOG4CXX_IS_TRACE_ENABLED(logger) logger->isTraceEnabled()
+
+    log4cxx_time_t time_now();
 
     #define LOG_WITH_LEVEL(loggerPtr, logLevel, logEvent) \
     do { \
@@ -69,7 +72,8 @@
         if (loggerPtr->isEnabledFor(logLevel)) { \
           std::stringstream accumulator; \
           accumulator << logEvent; \
-          logger::push_log(loggerPtr, logLevel, accumulator.str(), apr_time_now(), LOG4CXX_LOCATION, ::log4cxx::spi::LoggingEvent::getCurrentThreadName()); \
+          logger::push_log(loggerPtr, logLevel, accumulator.str(), time_now(), \
+                           LOG4CXX_LOCATION, ::log4cxx::spi::LoggingEvent::getCurrentThreadName()); \
         } \
       } \
     } while (false)
@@ -110,8 +114,8 @@
     #undef LOG4CXX_TRACE
     #define LOG4CXX_TRACE(loggerPtr, logEvent) LOG_WITH_LEVEL(loggerPtr, ::log4cxx::Level::getTrace(), logEvent)
 
-    #define LOG4CXX_TRACE_ENTER(logger) LOG4CXX_TRACE(logger, "ENTER: " << __PRETTY_FUNCTION__ )
-    #define LOG4CXX_TRACE_EXIT(logger) LOG4CXX_TRACE(logger, "EXIT: " << __PRETTY_FUNCTION__ )
+    #define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace) logger::AutoTrace auto_trace(loggerPtr, LOG4CXX_LOCATION)
+    #define LOG4CXX_AUTO_TRACE(loggerPtr) LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, SDL_local_auto_trace_object)
 
     #define LOG4CXX_ERROR_WITH_ERRNO(logger, message) \
       LOG4CXX_ERROR(logger, message << ", error code " << errno << " (" << strerror(errno) << ")")
@@ -173,8 +177,8 @@
     #define LOG4CXX_FATAL_EXT(logger, logEvent)
     #define LOG4CXX_FATAL_STR_EXT(logger, logEvent)
 
-    #define LOG4CXX_TRACE_ENTER(logger)
-    #define LOG4CXX_TRACE_EXIT(logger)
+    #define LOG4CXX_AUTO_TRACE_WITH_NAME_SPECIFIED(loggerPtr, auto_trace)
+    #define LOG4CXX_AUTO_TRACE(loggerPtr)
 #endif  // ENABLE_LOG
 
 #endif  // SRC_COMPONENTS_UTILS_INCLUDE_UTILS_LOGGER_H_

@@ -57,7 +57,7 @@ class PulseThreadDelegate : public ThreadDelegate {
   */
   PulseThreadDelegate();
   virtual void threadMain();
-  virtual bool exitThreadMain();
+  virtual void exitThreadMain();
 
  protected:
 /**
@@ -86,7 +86,7 @@ class PulseThreadDelegate : public ThreadDelegate {
  private:
   enum {PULSE_CODE = _PULSE_CODE_MINAVAIL + 1};
 
-  bool run_;
+  volatile bool run_;
   int chid_;
   int coid_;
 };

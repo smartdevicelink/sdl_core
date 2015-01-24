@@ -78,6 +78,7 @@ MobileMessageHandler::HandleIncomingMessageProtocolV1(
                 message->data_size()));
 
   if (outgoing_message->json_message().empty()) {
+    delete outgoing_message;
     return NULL;
   }
 
@@ -144,6 +145,8 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV1(
 
   protocol_handler::RawMessage* result = new protocol_handler::RawMessage(
     message->connection_key(), 1, rawMessage, messageString.length() + 1);
+
+  delete [] rawMessage;
 
   return result;
 }
@@ -215,6 +218,8 @@ MobileMessageHandler::HandleOutgoingMessageProtocolV2(
                                      message->protocol_version(),
                                      dataForSending,
                                      dataForSendingSize);
+
+  delete [] dataForSending;
 
   return msgToProtocolHandler;
 }

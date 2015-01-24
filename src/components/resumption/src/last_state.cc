@@ -40,7 +40,7 @@ namespace resumption {
 CREATE_LOGGERPTR_GLOBAL(logger_, "LastState");
 
 void LastState::SaveToFileSystem() {
-  LOG4CXX_INFO(logger_, "LastState::SaveToFileSystem");
+  LOG4CXX_AUTO_TRACE(logger_);
   const std::string file =
       profile::Profile::instance()->app_info_storage();
   const std::string& str = dictionary.toStyledString();

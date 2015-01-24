@@ -1,4 +1,4 @@
-/**
+/*
  * \file tcp_transport_adapter.h
  * \brief TcpTransportAdapter class header file.
  *

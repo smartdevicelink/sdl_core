@@ -1,4 +1,4 @@
-/**
+/*
  * \file bluetooth_device.h
  * \brief BluetoothDevice class header file.
  *
@@ -37,11 +37,6 @@
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_BLUETOOTH_BLUETOOTH_DEVICE_H_
 
 #include <bluetooth/bluetooth.h>
-#include <bluetooth/hci.h>
-#include <bluetooth/hci_lib.h>
-#include <bluetooth/sdp.h>
-#include <bluetooth/sdp_lib.h>
-#include <bluetooth/rfcomm.h>
 
 #include <vector>
 

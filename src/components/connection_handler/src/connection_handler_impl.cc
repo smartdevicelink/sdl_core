@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -70,6 +70,7 @@ ConnectionHandlerImpl::ConnectionHandlerImpl()
   : connection_handler_observer_(NULL),
     transport_manager_(NULL),
     protocol_handler_(NULL),
+    connection_handler_observer_lock_(true),
     connection_list_deleter_(&connection_list_) {
 }
 
@@ -78,19 +79,19 @@ ConnectionHandlerImpl::~ConnectionHandlerImpl() {
 }
 
 void ConnectionHandlerImpl::Stop() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
   ConnectionList::iterator itr = connection_list_.begin();
   while (itr != connection_list_.end()) {
     RemoveConnection(itr->second->connection_handle());
     itr = connection_list_.begin();
   }
-  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void ConnectionHandlerImpl::set_connection_handler_observer(
     ConnectionHandlerObserver *observer) {
   LOG4CXX_DEBUG(logger_, "ConnectionHandlerImpl::set_connection_handler_observer() "
                 << observer);
+  sync_primitives::AutoLock lock(connection_handler_observer_lock_);
   if (!observer) {
     LOG4CXX_WARN(logger_, "Set Null pointer to observer.");
   }
@@ -121,12 +122,14 @@ void ConnectionHandlerImpl::set_protocol_handler(
 void ConnectionHandlerImpl::OnDeviceListUpdated(
     const std::vector<transport_manager::DeviceInfo>&) {
   LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::OnDeviceListUpdated()");
+  sync_primitives::AutoLock lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
 }
 
 void ConnectionHandlerImpl::OnFindNewApplicationsRequest() {
+  sync_primitives::AutoLock lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->OnFindNewApplicationsRequest();
   }
@@ -145,6 +148,7 @@ void ConnectionHandlerImpl::OnDeviceAdded(
           device_info.device_handle(),
           Device(device_info.device_handle(), device_info.name(),
                  device_info.mac_address(), device_info.connection_type())));
+  sync_primitives::AutoLock lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
@@ -176,6 +180,7 @@ void ConnectionHandlerImpl::OnDeviceRemoved(
   }
 
   device_list_.erase(device_info.device_handle());
+  sync_primitives::AutoLock lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->RemoveDevice(device_info.device_handle());
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
@@ -219,7 +224,7 @@ void ConnectionHandlerImpl::OnConnectionFailed(
 
 void ConnectionHandlerImpl::OnConnectionClosed(
     transport_manager::ConnectionUID connection_id) {
-  LOG4CXX_INFO(logger_, "ConnectionHandlerImpl::OnConnectionClosed");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   OnConnectionEnded(connection_id);
 }
@@ -296,7 +301,7 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     const transport_manager::ConnectionUID &connection_handle,
     const uint8_t session_id, const protocol_handler::ServiceType &service_type,
     const bool is_protected, uint32_t* hash_id) {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if (hash_id) {
     *hash_id = protocol_handler::HASH_ID_WRONG;
@@ -306,12 +311,10 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     return 0;
   }
 #endif  // ENABLE_SECURITY
-
   sync_primitives::AutoLock lock(connection_list_lock_);
   ConnectionList::iterator it = connection_list_.find(connection_handle);
   if (connection_list_.end() == it) {
     LOG4CXX_ERROR(logger_, "Unknown connection!");
-    LOG4CXX_TRACE_EXIT(logger_);
     return 0;
   }
   uint32_t new_session_id = 0;
@@ -321,7 +324,6 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
     new_session_id = connection->AddNewSession();
     if (0 == new_session_id) {
       LOG4CXX_ERROR(logger_, "Couldn't start new session!");
-      LOG4CXX_TRACE_EXIT(logger_);
       return 0;
     }
     if (hash_id) {
@@ -335,7 +337,6 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
 #endif  // ENABLE_SECURITY
                     << " service " << static_cast<int>(service_type)
                     << " for session " << static_cast<int>(session_id));
-      LOG4CXX_TRACE_EXIT(logger_);
       return 0;
     }
     new_session_id = session_id;
@@ -343,23 +344,43 @@ uint32_t ConnectionHandlerImpl::OnSessionStartedCallback(
       *hash_id = protocol_handler::HASH_ID_NOT_SUPPORTED;
     }
   }
-
+  sync_primitives::AutoLock lock2(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     const uint32_t session_key = KeyFromPair(connection_handle, new_session_id);
     const bool success = connection_handler_observer_->OnServiceStartedCallback(
-        connection->connection_device_handle(), session_key, service_type);
+          connection->connection_device_handle(), session_key, service_type);
     if (!success) {
       if (protocol_handler::kRpc == service_type) {
         connection->RemoveSession(new_session_id);
       } else {
         connection->RemoveService(session_id, service_type);
       }
-      LOG4CXX_TRACE_EXIT(logger_);
       return 0;
     }
   }
-  LOG4CXX_TRACE_EXIT(logger_);
   return new_session_id;
+}
+
+void ConnectionHandlerImpl::OnApplicationFloodCallBack(const uint32_t &connection_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  {
+    sync_primitives::AutoLock lock(connection_handler_observer_lock_);
+    if(connection_handler_observer_) {
+      connection_handler_observer_->OnApplicationFloodCallBack(connection_key);
+    }
+  }
+  transport_manager::ConnectionUID connection_handle = 0;
+  uint8_t session_id = 0;
+  PairFromKey(connection_key, &connection_handle, &session_id);
+
+  LOG4CXX_INFO(logger_, "Disconnect flooding application");
+  if (session_id != 0) {
+    CloseSession(connection_handle, session_id, kFlood);
+  } else {
+    transport_manager::ConnectionUID connection_uid =
+        ConnectionUIDFromHandle(connection_handle);
+    transport_manager_->DisconnectForce(connection_uid);
+  }
 }
 
 uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
@@ -404,6 +425,7 @@ uint32_t ConnectionHandlerImpl::OnSessionEndedCallback(
     }
   }
 
+  sync_primitives::AutoLock lock2(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->OnServiceEndedCallback(session_key,
                                                          service_type);
@@ -622,6 +644,7 @@ void ConnectionHandlerImpl::StartDevicesDiscovery() {
     return;
   }
   transport_manager_->SearchDevices();
+  sync_primitives::AutoLock lock(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     connection_handler_observer_->OnDeviceListUpdated(device_list_);
   }
@@ -703,18 +726,20 @@ uint32_t ConnectionHandlerImpl::GetConnectionSessionsCount(
   return 0;
 }
 
-void ConnectionHandlerImpl::CloseSession(uint32_t key) {
+void ConnectionHandlerImpl::CloseSession(uint32_t key,
+                                         CloseSessionReason close_reason) {
   LOG4CXX_TRACE(logger_, "ConnectionHandlerImpl::CloseSession");
 
   uint32_t connection_handle = 0;
   uint8_t session_id = 0;
   PairFromKey(key, &connection_handle, &session_id);
 
-  CloseSession(connection_handle, session_id);
+  CloseSession(connection_handle, session_id, close_reason);
 }
 
 void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
-                                         uint8_t session_id) {
+                                         uint8_t session_id,
+                                         CloseSessionReason close_reason) {
   if (protocol_handler_) {
     protocol_handler_->SendEndSession(connection_handle, session_id);
   }
@@ -726,7 +751,7 @@ void ConnectionHandlerImpl::CloseSession(ConnectionHandle connection_handle,
   ConnectionList::iterator itr = connection_list_.find(connection_id);
 
   if (connection_list_.end() != itr) {
-    if (connection_handler_observer_) {
+    if (connection_handler_observer_ && kCommon == close_reason) {
       SessionMap session_map = itr->second->session_map();
       SessionMap::iterator session_it = session_map.find(session_id);
       if (session_it != session_map.end()) {
@@ -800,6 +825,7 @@ void ConnectionHandlerImpl::OnConnectionEnded(
     return;
   }
 
+  sync_primitives::AutoLock lock2(connection_handler_observer_lock_);
   if (connection_handler_observer_) {
     const Connection *connection = itr->second;
     const SessionMap session_map = connection->session_map();

@@ -45,7 +45,9 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         'popUp',
         'message',
         'okButton',
-        'timerText'
+        'timerText',
+        'checkBoxLabel',
+        'checkBox'
     ],
 
     requestId: null,
@@ -86,6 +88,25 @@ SDL.TTSPopUp = Em.ContainerView.create( {
         disabledBinding: 'parentView.buttons'
     }),
 
+    checkBoxLabel: SDL.Label.extend({
+
+        elementId: 'checkBoxLabel',
+
+        classNames: 'checkBoxLabel',
+
+        content: 'Send response'
+    }),
+
+    checkBox: Em.Checkbox.extend( {
+
+        elementId: 'checkBoxTTS',
+
+        classNames: 'checkBoxTTS',
+
+        checked: true
+
+    }),
+
     timerText: SDL.Label.extend({
 
         elementId: 'timerText',
@@ -94,6 +115,8 @@ SDL.TTSPopUp = Em.ContainerView.create( {
 
         contentBinding: 'parentView.timerSeconds'
     }),
+
+
 
     resetTimeout: function () {
         this.set('timerSeconds', 10);
@@ -126,9 +149,12 @@ SDL.TTSPopUp = Em.ContainerView.create( {
     DeactivateTTS: function() {
         clearInterval(this.timer);
         this.set('active', false);
-        this.set('timerSeconds', 10);
-        SDL.SDLController.TTSResponseHandler();
-        FFW.TTS.Stopped();
+        this.set('timerSeconds', 5);
+
+        if (this.checkBox.checked) {
+            SDL.SDLController.TTSResponseHandler();
+            FFW.TTS.Stopped();
+        }
     },
 
     /**

@@ -17,6 +17,7 @@ set (INCLUDE_DIR
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${MESSAGE_BROKER_INCLUDE_DIRECTORY}
   ${LOG4CXX_INCLUDE_DIRECTORY}
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include
   ../src/appMain
   ../src/components/application_manager/include
   ../src/components/hmi_message_handler/include

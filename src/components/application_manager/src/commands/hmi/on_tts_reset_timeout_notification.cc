@@ -16,7 +16,7 @@ OnTTSResetTimeoutNotification::~OnTTSResetTimeoutNotification() {
 }
 
 void OnTTSResetTimeoutNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnTTSResetTimeoutNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::TTS_OnResetTimeout);
   event.set_smart_object(*message_);

@@ -1,4 +1,4 @@
-/**
+/*
  * \file tcp_device.h
  * \brief TcpDevice class header file.
  *
@@ -46,6 +46,8 @@
 #include <netinet/in.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+
+#include "utils/lock.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -136,7 +138,7 @@ class TcpDevice : public Device {
     uint16_t port;
   };
   std::map<ApplicationHandle, Application> applications_;
-  mutable pthread_mutex_t applications_mutex_;
+  mutable sync_primitives::Lock applications_mutex_;
   const in_addr_t in_addr_;
   const std::string name_;
   ApplicationHandle last_handle_;

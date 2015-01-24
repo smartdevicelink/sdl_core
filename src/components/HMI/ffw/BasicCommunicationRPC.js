@@ -1004,6 +1004,24 @@ FFW.BasicCommunication = FFW.RPCObserver
         },
 
         /**
+         * OnAwakeSDL from HMI returns SDL to normal operation
+         * after OnExitAllApplications(SUSPEND)
+         */
+        OnAwakeSDL: function() {
+
+            Em.Logger.log("FFW.BasicCommunication.OnAwakeSDL");
+
+            // send request
+            var JSONMessage = {
+                "jsonrpc": "2.0",
+                "method": "BasicCommunication.OnAwakeSDL"
+            };
+            this.client.send(JSONMessage);
+        },
+
+
+
+        /**
          * Used by HMI when User chooses to exit application.
          *
          * @params {Number}

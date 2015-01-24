@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -52,7 +52,7 @@ OnDriverDistractionNotification::~OnDriverDistractionNotification() {
 }
 
 void OnDriverDistractionNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnDriverDistractionNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const hmi_apis::Common_DriverDistractionState::eType state =
       static_cast<hmi_apis::Common_DriverDistractionState::eType>(

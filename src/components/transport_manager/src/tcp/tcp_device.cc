@@ -1,4 +1,4 @@
-/**
+/*
  *
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
@@ -43,9 +43,9 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "TransportManager")
 TcpDevice::TcpDevice(const in_addr_t& in_addr, const std::string& name)
   :
   Device(name, name),
+    applications_mutex_(),
     in_addr_(in_addr),
     last_handle_(0) {
-  pthread_mutex_init(&applications_mutex_, 0);
 }
 
 bool TcpDevice::IsSameAs(const Device* other) const {
@@ -63,57 +63,53 @@ bool TcpDevice::IsSameAs(const Device* other) const {
 }
 
 ApplicationList TcpDevice::GetApplicationList() const {
-  LOG4CXX_TRACE(logger_, "enter");
-  pthread_mutex_lock(&applications_mutex_);
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock locker(applications_mutex_);
   ApplicationList app_list;
   for (std::map<ApplicationHandle, Application>::const_iterator it =
          applications_.begin(); it != applications_.end(); ++it) {
     app_list.push_back(it->first);
   }
-  pthread_mutex_unlock(&applications_mutex_);
-  LOG4CXX_TRACE(logger_, "exit with app_list. It's size = " << app_list.size());
   return app_list;
 }
 
 ApplicationHandle TcpDevice::AddIncomingApplication(int socket_fd) {
-  LOG4CXX_TRACE(logger_, "enter. Socket_fd: " << socket_fd);
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Socket_fd: " << socket_fd);
   Application app;
   app.incoming = true;
   app.socket = socket_fd;
   app.port = 0; // this line removes compiler warning
-  pthread_mutex_lock(&applications_mutex_);
+  sync_primitives::AutoLock locker(applications_mutex_);
   const ApplicationHandle app_handle = ++last_handle_;
   applications_[app_handle] = app;
-  pthread_mutex_unlock(&applications_mutex_);
-  LOG4CXX_TRACE(logger_, "exit with app_handle " << app_handle);
+  LOG4CXX_DEBUG(logger_, "App_handle " << app_handle);
   return app_handle;
 }
 
 ApplicationHandle TcpDevice::AddDiscoveredApplication(int port) {
-  LOG4CXX_TRACE(logger_, "enter. port " << port);
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "Port " << port);
   Application app;
   app.incoming = false;
   app.socket = 0;  // this line removes compiler warning
   app.port = port;
-  pthread_mutex_lock(&applications_mutex_);
+  sync_primitives::AutoLock locker(applications_mutex_);
   const ApplicationHandle app_handle = ++last_handle_;
   applications_[app_handle] = app;
-  pthread_mutex_unlock(&applications_mutex_);
-  LOG4CXX_TRACE(logger_, "exit with app_handle " << app_handle);
+  LOG4CXX_DEBUG(logger_, "App_handle " << app_handle);
   return app_handle;
 }
 
 
 void TcpDevice::RemoveApplication(const ApplicationHandle app_handle) {
-  LOG4CXX_TRACE(logger_, "enter. ApplicationHandle: " << app_handle);
-  pthread_mutex_lock(&applications_mutex_);
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "ApplicationHandle: " << app_handle);
+  sync_primitives::AutoLock locker(applications_mutex_);
   applications_.erase(app_handle);
-  pthread_mutex_unlock(&applications_mutex_);
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 TcpDevice::~TcpDevice() {
-  pthread_mutex_destroy(&applications_mutex_);
 }
 
 int TcpDevice::GetApplicationSocket(const ApplicationHandle app_handle) const {

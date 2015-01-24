@@ -46,7 +46,7 @@ SendLocationRequest::~SendLocationRequest() {
 }
 
 void SendLocationRequest::Run() {
-  LOG4CXX_INFO(logger_, "SendLocationRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = application_manager::ApplicationManagerImpl::instance()
       ->application(connection_key());

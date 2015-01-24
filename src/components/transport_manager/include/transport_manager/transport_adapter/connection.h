@@ -1,4 +1,4 @@
-/**
+/*
  * \file connection.h
  * \brief Connection class header.
  * Copyright (c) 2013, Ford Motor Company

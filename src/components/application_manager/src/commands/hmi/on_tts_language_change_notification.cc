@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -49,7 +49,7 @@ OnTTSLanguageChangeNotification::~OnTTSLanguageChangeNotification() {
 }
 
 void OnTTSLanguageChangeNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnTTSLanguageChangeNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();

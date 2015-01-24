@@ -53,7 +53,7 @@ CreateInteractionChoiceSetRequest::~CreateInteractionChoiceSetRequest() {
 }
 
 void CreateInteractionChoiceSetRequest::Run() {
-  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
@@ -114,7 +114,7 @@ void CreateInteractionChoiceSetRequest::Run() {
 
 mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
     ApplicationConstSharedPtr app) {
-  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::CheckChoiceSet");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const smart_objects::SmartArray* new_choice_set_array =
     (*message_)[strings::msg_params][strings::choice_set].asArray();
@@ -141,7 +141,8 @@ mobile_apis::Result::eType CreateInteractionChoiceSetRequest::CheckChoiceSet(
     }
 
     // Check new choice set params along with already registered choice sets
-    const ChoiceSetMap& app_choice_set_map = app->choice_set_map();
+    const DataAccessor<ChoiceSetMap> accessor = app->choice_set_map();
+    const ChoiceSetMap& app_choice_set_map = accessor.GetData();
     ChoiceSetMap::const_iterator it = app_choice_set_map.begin();
     ChoiceSetMap::const_iterator itEnd = app_choice_set_map.end();
     for (; it != itEnd; ++it) {
@@ -257,7 +258,7 @@ bool CreateInteractionChoiceSetRequest::compareStr(
 
 bool CreateInteractionChoiceSetRequest::IsWhiteSpaceExist(
     const smart_objects::SmartObject& choice_set) {
-  LOG4CXX_INFO(logger_, "CreateInteractionChoiceSetRequest::IsWhiteSpaceExist");
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   str = choice_set[strings::menu_name].asCharArray();

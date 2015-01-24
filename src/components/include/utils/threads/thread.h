@@ -43,16 +43,16 @@
 #include "utils/macro.h"
 #include "utils/threads/thread_delegate.h"
 #include "utils/threads/thread_options.h"
+#include "utils/conditional_variable.h"
+#include "utils/lock.h"
 
 namespace threads {
 
-namespace impl {
 #if defined(OS_POSIX)
 typedef pthread_t PlatformThreadHandle;
 #else
 #error Please implement thread for your OS
 #endif
-}
 
 /**
  * Non platform specific thread abstraction that establishes a
@@ -76,56 +76,69 @@ typedef pthread_t PlatformThreadHandle;
  * printf("ok!\n");
  */
 class Thread;
+void enqueue_to_join(Thread*);
+
 Thread* CreateThread(const char* name, ThreadDelegate* delegate);
 void DeleteThread(Thread*);
 
 class Thread {
-  friend Thread* CreateThread(const char*, ThreadDelegate*);
-  friend void DeleteThread(Thread*);
+ private:
+  const std::string name_;
+  // Should be locked to protect delegate_ value
+  sync_primitives::Lock delegate_lock_;
+  ThreadDelegate* delegate_;
+  PlatformThreadHandle handle_;
+  ThreadOptions thread_options_;
+  // Should be locked to protect isThreadRunning_ and thread_created_ values
+  sync_primitives::Lock state_lock_;
+  volatile unsigned int isThreadRunning_;
+  volatile bool stopped_;
+  volatile bool finalized_;
+  bool thread_created_;
+  // Signalled when Thread::start() is called
+  sync_primitives::ConditionalVariable run_cond_;
  public:
-  /**
-   * Class that represents unique in-process thread identifier
-   * due to restriction of pthread API it only allows checks
-   * for equality to different thread id and no ordering.
-   *
-   * ostream<< operator is provided for this class which
-   * outputs thread name associated to an identifier.
-   */
-  class Id {
-   public:
-    explicit Id(const impl::PlatformThreadHandle& id): id_(id) {}
-    bool operator==(const Id& that) const;
-    impl::PlatformThreadHandle Handle() const { return id_; }
-   private:
-    impl::PlatformThreadHandle id_;
-    friend class Thread;
-  };
-
-  // Get unique ID of currently executing thread
-  static Id CurrentId();
-
-  // Get name associated with thread identified by thread_id
-  static std::string NameFromId(const Id& thread_id);
-
-  // Give thread thread_id a name, helpful for debugging
-  static void SetNameForId(const Id& thread_id, const std::string& name);
-
   /**
    * Starts the thread.
    * @return true if the thread was successfully started.
    */
   bool start();
 
-  ThreadDelegate* delegate() const;
-
   /**
-   * Starts the thread. Behaves exactly like Start in addition to
+   * Starts the thread. Behaves exactly like \ref start() in addition to
    * allow to override the default options.
-   * @param options - thread options. Look for 'threads/thread_options.h'
+   * @param options Thread options. Look for 'threads/thread_options.h'
    * for details.
    * @return true if the thread was successfully started.
    */
-  bool startWithOptions(const ThreadOptions& options);
+  bool start(const ThreadOptions& options);
+
+  void WaitForRun();
+
+  sync_primitives::Lock& delegate_lock() {
+    return delegate_lock_;
+  }
+
+  ThreadDelegate *delegate() const {
+    return delegate_;
+  }
+
+  void set_delegate(ThreadDelegate *delegate) {
+    DCHECK(!isThreadRunning_);
+    delegate_ = delegate;
+  }
+
+  friend Thread* CreateThread(const char* name, ThreadDelegate* delegate);
+  friend void DeleteThread(Thread*);
+
+ public:
+
+  // Get unique ID of currently executing thread
+  static PlatformThreadHandle CurrentId();
+
+  // Give thread thread_id a name, helpful for debugging
+  static void SetNameForId(const PlatformThreadHandle& thread_id, std::string name);
+
 
   /**
    * Signals the thread to exit and returns once the thread has exited.
@@ -137,11 +150,14 @@ class Thread {
    */
   void stop();
 
+
+  void join();
+
   /**
    * Get thread name.
    * @return thread name
    */
-  const std::string& thread_name() {
+  const std::string& name() {
     return name_;
   }
 
@@ -154,9 +170,7 @@ class Thread {
     return isThreadRunning_;
   }
 
-  void set_running(bool running) {
-    isThreadRunning_ = running;
-  }
+  void set_running(bool running);
 
   /**
    * Is thread joinable?
@@ -178,16 +192,8 @@ class Thread {
    * The native thread handle.
    * @return thread handle.
    */
-  impl::PlatformThreadHandle thread_handle() const {
-    return thread_handle_;
-  }
-
-  /**
-   * Thread id.
-   * @return return thread id.
-   */
-  Id thread_id() const {
-    return Id(thread_handle());
+  PlatformThreadHandle thread_handle() const {
+    return handle_;
   }
 
   /**
@@ -204,11 +210,7 @@ class Thread {
   static size_t kMinStackSize;
 
  protected:
-  const std::string name_;
-  ThreadDelegate* delegate_;
-  impl::PlatformThreadHandle thread_handle_;
-  ThreadOptions thread_options_;
-  volatile unsigned int isThreadRunning_;
+  sync_primitives::ConditionalVariable state_cond_;
 
  private:
   /**
@@ -216,19 +218,17 @@ class Thread {
    * @param name - display string to identify the thread.
    * @param delegate - thread procedure delegate. Look for
    * 'threads/thread_delegate.h' for details.
-   * NOTE: delegate will be deleted by destructor.
+   * LifeCycle thread , otherwise it will be joined in stop method
+   * NOTE: delegate will be deleted after thread will be joined
    *       This constructor made private to prevent
    *       Thread object to be created on stack
    */
   Thread(const char* name, ThreadDelegate* delegate);
-
   DISALLOW_COPY_AND_ASSIGN(Thread);
-  virtual ~Thread() { }
+  virtual ~Thread();
+  static void* threadFunc(void* arg);
+  static void cleanup(void* arg);
 };
 
-inline bool operator!= (const Thread::Id& left, const Thread::Id& right) {
-  return !(left == right);
-}
-std::ostream& operator<<(std::ostream& os, const Thread::Id& thread_id);
 }  // namespace threads
 #endif  // SRC_COMPONENTS_INCLUDE_UTILS_THREADS_THREAD_H_

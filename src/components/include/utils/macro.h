@@ -32,8 +32,12 @@
 #ifndef SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_
 #define SRC_COMPONENTS_INCLUDE_UTILS_MACRO_H_
 
+#ifdef DEBUG
 #include <assert.h>
+#else  // RELEASE
 #include <stdio.h>
+#endif
+#include "logger.h"
 
 
 
@@ -54,14 +58,27 @@
 #define FRIEND_DELETER_DESTRUCTOR(TypeName) \
   friend utils::deleters::Deleter<TypeName>::~Deleter()
 
+#ifdef DEBUG
+  #define ASSERT(condition) \
+    do { \
+      DEINIT_LOGGER(); \
+      assert(condition); \
+    } while (false)
+#else  // RELEASE
+  #define ASSERT(condition) \
+    fprintf(stderr, "Failed condition \"" #condition "\" [%s:%d][%s]\n\n", \
+                    __FILE__, __LINE__, __FUNCTION__)
+#endif
+
 #define DCHECK(condition) \
   if (!(condition)) { \
-    printf("\nDCHECK  [%s:%d][%s]", __FILE__, __LINE__, __FUNCTION__); \
-    printf("[Check failed: " #condition "]\n\n"); \
-    assert(false); \
+    CREATE_LOGGERPTR_LOCAL(logger_, "assert"); \
+    LOG4CXX_FATAL(logger_,  "DCHECK failed with \"" << #condition \
+       << "\" [" << __FUNCTION__ << "][" << __FILE__ << ':' << __LINE__ << ']'); \
+    ASSERT((condition)); \
   }
 
-#define NOTREACHED() DCHECK(false)
+#define NOTREACHED() DCHECK(!"Unreachable code")
 
 // Allows to perform static check that virtual function from base class is
 // actually being overriden if compiler support is available

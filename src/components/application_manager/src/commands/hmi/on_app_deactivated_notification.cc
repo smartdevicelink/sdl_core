@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -49,7 +49,7 @@ OnAppDeactivatedNotification::~OnAppDeactivatedNotification() {
 }
 
 void OnAppDeactivatedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnAppDeactivatedNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   uint32_t app_id = (*message_)[strings::msg_params][strings::app_id].asUInt();
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(app_id);
@@ -89,21 +89,13 @@ void OnAppDeactivatedNotification::Run() {
           app->set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
         }
       }
-      // switch HMI level for all applications in FULL or LIMITED
-      ApplicationManagerImpl::ApplicationListAccessor accessor;
-      ApplicationManagerImpl::TAppList applications =
-          accessor.applications();
-      ApplicationManagerImpl::TAppListIt it =
-          applications.begin();
-      for (; applications.end() != it; ++it) {
-          ApplicationSharedPtr app = *it;
-          if (app.valid()) {
-            if (mobile_apis::HMILevel::eType::HMI_FULL == app->hmi_level() ||
-                mobile_apis::HMILevel::eType::HMI_LIMITED == app->hmi_level()) {
-                app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
-                MessageHelper::SendHMIStatusNotification(*app);
-            }
-          }
+      // HMI must send this notification for each active app
+      if (app.valid()) {
+        if (mobile_apis::HMILevel::eType::HMI_FULL == app->hmi_level() ||
+            mobile_apis::HMILevel::eType::HMI_LIMITED == app->hmi_level()) {
+          app->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
+          MessageHelper::SendHMIStatusNotification(*app);
+        }
       }
       break;
     }

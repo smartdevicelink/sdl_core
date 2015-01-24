@@ -40,7 +40,7 @@
 #include "mock_cache_manager.h"
 #include "mock_update_status_manager.h"
 #include "policy/policy_manager_impl.h"
-#include "policy/update_status_manager_interface.h"
+#include "policy/update_status_manager.h"
 #include "policy/cache_manager_interface.h"
 #include "json/value.h"
 #include "utils/shared_ptr.h"
@@ -56,12 +56,11 @@ using ::policy::MockPolicyListener;
 using ::policy::MockPTRepresentation;
 using ::policy::MockPTExtRepresentation;
 using ::policy::MockCacheManagerInterface;
-using ::policy::MockUpdateStatusManagerInterface;
+using ::policy::MockUpdateStatusManager;
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
 using ::policy::EndpointUrls;
 using ::policy::CacheManagerInterfaceSPtr;
-using ::policy::UpdateStatusManagerInterfaceSPtr;
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -73,7 +72,7 @@ class PolicyManagerImplTest : public ::testing::Test {
  protected:
   PolicyManagerImpl* manager;
   MockCacheManagerInterface* cache_manager;
-  MockUpdateStatusManagerInterface* update_manager;
+  MockUpdateStatusManager update_manager;
   MockPolicyListener* listener;
 
   void SetUp() {
@@ -82,19 +81,11 @@ class PolicyManagerImplTest : public ::testing::Test {
     cache_manager = new MockCacheManagerInterface();
     manager->set_cache_manager(cache_manager);
 
-    update_manager = new MockUpdateStatusManagerInterface();
-    manager->set_update_status_manager(update_manager);
-
     listener = new MockPolicyListener();
-    EXPECT_CALL(*update_manager, set_listener(listener)).Times(1);
     manager->set_listener(listener);
   }
 
   void TearDown() {
-    EXPECT_CALL(*update_manager, GetUpdateStatus()).Times(1)
-        .WillOnce(Return(::policy::StatusUpToDate));
-    EXPECT_CALL(*cache_manager, Backup()).Times(1);
-    EXPECT_CALL(*cache_manager, SaveUpdateRequired(_)).Times(1);
     delete manager;
     delete listener;
   }
@@ -110,33 +101,7 @@ class PolicyManagerImplTest : public ::testing::Test {
  }
 };
 
-TEST_F(PolicyManagerImplTest, ExceededIgnitionCycles) {
-  EXPECT_CALL(*cache_manager, IgnitionCyclesBeforeExchange()).Times(2).WillOnce(
-      Return(5)).WillOnce(Return(0));
-  EXPECT_CALL(*cache_manager, IncrementIgnitionCycles()).Times(1);
-
-  EXPECT_FALSE(manager->ExceededIgnitionCycles());
-  manager->IncrementIgnitionCycles();
-  EXPECT_TRUE(manager->ExceededIgnitionCycles());
-}
-
-TEST_F(PolicyManagerImplTest, ExceededDays) {
-  EXPECT_CALL(*cache_manager, DaysBeforeExchange(_)).Times(2).WillOnce(
-      Return(5)).WillOnce(Return(0));
-
-  EXPECT_FALSE(manager->ExceededDays(5));
-  EXPECT_TRUE(manager->ExceededDays(15));
-}
-
-TEST_F(PolicyManagerImplTest, ExceededKilometers) {
-  EXPECT_CALL(*cache_manager, KilometersBeforeExchange(_)).Times(2).WillOnce(
-      Return(50)).WillOnce(Return(0));
-
-  EXPECT_FALSE(manager->ExceededKilometers(50));
-  EXPECT_TRUE(manager->ExceededKilometers(150));
-}
-
-TEST_F(PolicyManagerImplTest, RefreshRetrySequence) {
+TEST_F(PolicyManagerImplTest, DISABLED_RefreshRetrySequence) {
   std::vector<int> seconds;
   seconds.push_back(50);
   seconds.push_back(100);
@@ -153,26 +118,14 @@ TEST_F(PolicyManagerImplTest, RefreshRetrySequence) {
   EXPECT_EQ(0, manager->NextRetryTimeout());
 }
 
-TEST_F(PolicyManagerImplTest, RefreshRetrySequence) {
-  ::testing::NiceMock<MockPTRepresentation> mock_pt;
-  std::vector<int> seconds, seconds_empty;
-  seconds.push_back(50);
-  seconds.push_back(100);
-  seconds.push_back(200);
+TEST_F(PolicyManagerImplTest, DISABLED_GetUpdateUrl) {
 
-  EXPECT_CALL(mock_pt, TimeoutResponse()).Times(2).WillOnce(Return(0)).WillOnce(
-    Return(60));
-  EXPECT_CALL(mock_pt, SecondsBetweenRetries(_)).Times(2).WillOnce(
-    DoAll(SetArgPointee<0>(seconds_empty), Return(true))).WillOnce(
-      DoAll(SetArgPointee<0>(seconds), Return(true)));
+  EXPECT_CALL(*cache_manager, GetUpdateUrls(7,_)).Times(1);
+  EXPECT_CALL(*cache_manager, GetUpdateUrls(4,_)).Times(1);
 
-  PolicyManagerImpl* manager = new PolicyManagerImpl();
-  manager->ResetDefaultPT(::policy::PolicyTable(&mock_pt));
-  manager->RefreshRetrySequence();
-  EXPECT_EQ(60, manager->TimeoutExchange());
-  EXPECT_EQ(50, manager->NextRetryTimeout());
-  EXPECT_EQ(100, manager->NextRetryTimeout());
-  EXPECT_EQ(200, manager->NextRetryTimeout());
+  EXPECT_EQ("http://policies.telematics.ford.com/api/policies", manager->GetUpdateUrl(7));
+  EXPECT_EQ("http://policies.ford.com/api/policies", manager->GetUpdateUrl(4));
+
 }
 
 
@@ -186,7 +139,6 @@ TEST_F(PolicyManagerImplTest, ResetPT) {
   EXPECT_FALSE(manager->ResetPT("filename"));
 }
 
-// EXTENDED_POLICY
 TEST_F(PolicyManagerImplTest, CheckPermissions) {
   ::policy::CheckPermissionResult expected;
   expected.hmi_level_permitted = ::policy::kRpcAllowed;
@@ -296,13 +248,14 @@ TEST_F(PolicyManagerImplTest, LoadPT) {
   utils::SharedPtr<policy_table::Table> snapshot =
       new policy_table::Table(update.policy_table);
 
-  EXPECT_CALL(*update_manager, OnValidUpdateReceived()).Times(1);
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).Times(1).WillOnce(Return(snapshot));
   EXPECT_CALL(*cache_manager, ApplyUpdate(_)).Times(1).WillOnce(Return(true));
   EXPECT_CALL(*listener, GetAppName("1234")).Times(1).WillOnce(Return(""));
+  EXPECT_CALL(*listener, OnUpdateStatusChanged(_)).Times(1);
+  EXPECT_CALL(*cache_manager, SaveUpdateRequired(false)).Times(1);
   EXPECT_CALL(*cache_manager, TimeoutResponse()).Times(1);
   EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_)).Times(1);
-  EXPECT_CALL(*listener, OnUserRequestedUpdateCheckRequired()).Times(1);
+
 
   EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
 }
@@ -310,14 +263,9 @@ TEST_F(PolicyManagerImplTest, LoadPT) {
 TEST_F(PolicyManagerImplTest, RequestPTUpdate) {
   ::utils::SharedPtr< ::policy_table::Table> p_table =
       new ::policy_table::Table();
-  std::string json = p_table->ToJsonValue().toStyledString();
-  ::policy::BinaryMessageSptr expect = new ::policy::BinaryMessage(json.begin(),
-      json.end());
 
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(p_table));
-
-  ::policy::BinaryMessageSptr output = manager->RequestPTUpdate();
-  EXPECT_EQ(*expect, *output);
+  manager->RequestPTUpdate();
 }
 
 

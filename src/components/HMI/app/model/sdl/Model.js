@@ -1224,7 +1224,6 @@ SDL.SDLModel = Em.Object.create({
         setTimeout(function(){
             if (SDL.SDLModel.vrActiveRequests.vrPerformInteraction) {
                 SDL.SDLModel.onPrompt(message.params.timeoutPrompt);
-                SDL.SDLModel.interactionData.helpPrompt = null;
             }
         }, message.params.timeout - 2000); //Magic numer is a platform depended HMI behavior: -2 seconds for timeout prompt
 

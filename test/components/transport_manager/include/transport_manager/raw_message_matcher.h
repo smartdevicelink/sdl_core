@@ -45,6 +45,9 @@ using ::testing::Matcher;
 using ::testing::MatcherInterface;
 using ::testing::MatchResultListener;
 
+using RawMessagePtr = ::protocol_handler::RawMessagePtr;
+using RawMessage = ::protocol_handler::RawMessage;
+
 namespace test {
 namespace components {
 namespace transport_manager {

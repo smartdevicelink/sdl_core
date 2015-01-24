@@ -7,10 +7,10 @@
 include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include
   ../../../src/components/application_manager/include
   ../../../src/components/smart_objects/include
   ../../../src/components/formatters/include/
-  ../../../src/components/utils/include/
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
 )

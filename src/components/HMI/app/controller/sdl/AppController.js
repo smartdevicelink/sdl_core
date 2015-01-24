@@ -107,11 +107,10 @@ SDL.SDLAppController = Em.Object.create({
      */
     VRPerformAction: function (element) {
 
-        SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode["SUCCESS"], element.commandID);
-
         if (SDL.SDLModel.VRActive) {
             SDL.SDLModel.toggleProperty('VRActive');
         }
+        SDL.SDLController.vrInteractionResponse(SDL.SDLModel.resultCode["SUCCESS"], element.commandID);
     },
 
     /**
@@ -144,6 +143,9 @@ SDL.SDLAppController = Em.Object.create({
      */
     onVRCommand: function (element) {
 
+        if (SDL.SDLModel.VRActive) {
+            SDL.SDLModel.toggleProperty('VRActive');
+        }
         FFW.VR.onCommand(element.commandID, element.appID);
     },
 
