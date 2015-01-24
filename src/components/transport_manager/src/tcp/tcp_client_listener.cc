@@ -42,7 +42,8 @@
 #include <sys/sysctl.h>
 #include <sys/socket.h>
 #ifdef __linux__
-#  include <linux/tcp.h>
+//#  include <linux/tcp.h>
+#  include <netinet/tcp.h>
 #else  // __linux__
 #  include <sys/time.h>
 #  include <netinet/in.h>
@@ -105,6 +106,9 @@ void SetKeepaliveOptions(const int fd) {
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &keepidle, sizeof(keepidle));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPCNT, &keepcnt, sizeof(keepcnt));
   setsockopt(fd, IPPROTO_TCP, TCP_KEEPINTVL, &keepintvl, sizeof(keepintvl));
+#ifndef TCP_USER_TIMEOUT
+#define TCP_USER_TIMEOUT 18 // how long for loss retry before timeout [ms]
+#endif
   setsockopt(fd, IPPROTO_TCP, TCP_USER_TIMEOUT, &user_timeout,
              sizeof(user_timeout));
 #elif defined(__QNX__)  // __linux__
