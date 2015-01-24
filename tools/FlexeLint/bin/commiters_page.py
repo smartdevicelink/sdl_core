@@ -17,12 +17,13 @@ def MakeListItem(commiter_info):
 # Parse args
 parser = argparse.ArgumentParser(
   description='Generate html file with links to commiter reports.')
+parser.add_argument('gitrepo', metavar='gitrepo')
 parser.add_argument('destfile', metavar='destfile', type=argparse.FileType('w'),
                    default=sys.stdout, nargs='?',
                    help='html file with links')
 args = parser.parse_args()
 
-commiter_infos = gittools.BranchCommiters()
+commiter_infos = gittools.BranchCommiters(args.gitrepo)
 
 # Produce HTML
 commiters_link_list = [ MakeListItem(i) for i in commiter_infos ]

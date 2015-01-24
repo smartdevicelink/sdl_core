@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 
-ret=$(git blame -c -L $2,$2 $1  2> /dev/null | awk '{print $2 " " $3}' | awk '{print substr($1,2) $2; }')
+repo=$1
+file=$2
+line=$3
+
+ret=$(git -C ${repo} blame -c -L ${line},${line} ${file}  2> /dev/null | awk '{print $2 " " $3}' | awk '{print substr($1,2) $2; }')
 
 echo -n $ret :
 

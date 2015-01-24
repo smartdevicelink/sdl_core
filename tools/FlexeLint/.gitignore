@@ -2,3 +2,6 @@ gcc-include-path.lnt
 lint_cmac.h
 lint_cppmac.h
 size-options.lnt
+sdl-modules.lnt
+sdl-include-path.lnt
+sdl-main.lnt

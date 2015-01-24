@@ -10,6 +10,8 @@ else
 	WORDSIZE=-d__WORDSIZE=32
 fi
 
-./${FLINT_BINARY} "$@"
+dir=`dirname $0`
+
+${dir}/${FLINT_BINARY} "$@"
 
 exit $?

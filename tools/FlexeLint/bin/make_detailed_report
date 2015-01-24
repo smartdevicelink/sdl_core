@@ -1,57 +1,65 @@
 #!/usr/bin/env bash
 
-awk '/Error / || /Warning / || /Info / || /Note /' ../results/raw_flexelint_report.txt > ../tmp/err_warn_inf.tmp
-awk '!/0  Note 1960/' ../tmp/err_warn_inf.tmp > ../tmp/err_warn_inf_filtered1.tmp
-awk '!/Error 309: #error/' ../tmp/err_warn_inf_filtered1.tmp > ../tmp/err_warn_inf_filtered2.tmp
-awk '!/.lnt/' ../tmp/err_warn_inf_filtered2.tmp > ../tmp/err_warn_inf_filtered.tmp
-awk '{system("./get_code_author " $1 " " $2); print " " $0}' ../tmp/err_warn_inf_filtered.tmp > ../tmp/err_warn_inf_names.tmp
+dir=`dirname $0`
+git_repo=$1
+lint_result=$2
+lint_tmp=`mktemp -d /tmp/lint-tmp.XXX`
+escaped_git_repo=$(echo "$git_repo" | awk '{ gsub(/\//, "\\/"); print }' | awk '{ gsub(/\./, "\\."); print }' )
 
-touch ../results/developers/total.txt
+awk '/Error / || /Warning / || /Info / || /Note /' ${lint_result}/raw-flexelint-report.txt > ${lint_tmp}/err_warn_inf.tmp
+awk '!/0  Note 1960/' ${lint_tmp}/err_warn_inf.tmp > ${lint_tmp}/err_warn_inf_filtered1.tmp
+awk '!/Error 309: #error/' ${lint_tmp}/err_warn_inf_filtered1.tmp > ${lint_tmp}/err_warn_inf_filtered2.tmp
+awk '!/.lnt/' ${lint_tmp}/err_warn_inf_filtered2.tmp > ${lint_tmp}/err_warn_inf_filtered3.tmp
+awk "{ sub(/${escaped_git_repo}/,\".\"); print }" ${lint_tmp}/err_warn_inf_filtered3.tmp > ${lint_tmp}/err_warn_inf_filtered.tmp
+awk "{system(\"${dir}/get_code_author ${git_repo} \" \$1 \" \" \$2); print \" \" \$0}" ${lint_tmp}/err_warn_inf_filtered.tmp > ${lint_tmp}/err_warn_inf_names.tmp
 
-./commiters_page.py ../results/developers/index.html
+touch ${lint_result}/developers/total.txt
+
+${dir}/commiters_page.py ${git_repo} ${lint_result}/developers/index.html
 
 while read line
 do
 	name=$(echo "$line" | awk '{print $1}')
 
-	touch ../tmp/developers_report.tmp
+	touch ${lint_tmp}/developers_report.tmp
 
 	for alias in $(echo "$line" | awk '{$1=""; print $0}'); do
-		awk -v a=$alias '$1 == a {$1=""; $2=""; print $0}' ../tmp/err_warn_inf_names.tmp | awk '!x[$0]++' >> ../tmp/developers_report.tmp
+		awk -v a=$alias '$1 == a {$1=""; $2=""; print $0}' ${lint_tmp}/err_warn_inf_names.tmp | awk '!x[$0]++' >> ${lint_tmp}/developers_report.tmp
     done
 
-	error_quantity=$(awk -v val="Error" -v counter=0 '$3==val {counter++} END {print counter}' ../tmp/developers_report.tmp)
-	warning_quantity=$(awk -v val="Warning" -v counter=0 '$3==val {counter++} END {print counter}' ../tmp/developers_report.tmp)
-	info_quantity=$(awk -v val="Info" -v counter=0 '$3==val {counter++} END {print counter}' ../tmp/developers_report.tmp)
-	note_quantity=$(awk -v val="Note" -v counter=0 '$3==val {counter++} END {print counter}' ../tmp/developers_report.tmp)
+	error_quantity=$(awk -v val="Error" -v counter=0 '$3==val {counter++} END {print counter}' ${lint_tmp}/developers_report.tmp)
+	warning_quantity=$(awk -v val="Warning" -v counter=0 '$3==val {counter++} END {print counter}' ${lint_tmp}/developers_report.tmp)
+	info_quantity=$(awk -v val="Info" -v counter=0 '$3==val {counter++} END {print counter}' ${lint_tmp}/developers_report.tmp)
+	note_quantity=$(awk -v val="Note" -v counter=0 '$3==val {counter++} END {print counter}' ${lint_tmp}/developers_report.tmp)
 
-	touch ../results/developers/$name.txt
+	touch ${lint_result}/developers/$name.txt
 
-	echo 	Summary >> ../results/developers/$name.txt
-	echo >> ../results/developers/$name.txt
-	echo -e ' \t 'Errors:   $error_quantity >> ../results/developers/$name.txt
-	echo -e ' \t 'Warnings: $warning_quantity >> ../results/developers/$name.txt
-	echo -e ' \t 'Infos:    $info_quantity >> ../results/developers/$name.txt
-	echo -e ' \t 'Notes:    $note_quantity >> ../results/developers/$name.txt
-	echo >> ../results/developers/$name.txt
-	echo >> ../results/developers/$name.txt
+	echo 	Summary >> ${lint_result}/developers/$name.txt
+	echo >> ${lint_result}/developers/$name.txt
+	echo -e ' \t 'Errors:   $error_quantity >> ${lint_result}/developers/$name.txt
+	echo -e ' \t 'Warnings: $warning_quantity >> ${lint_result}/developers/$name.txt
+	echo -e ' \t 'Infos:    $info_quantity >> ${lint_result}/developers/$name.txt
+	echo -e ' \t 'Notes:    $note_quantity >> ${lint_result}/developers/$name.txt
+	echo >> ${lint_result}/developers/$name.txt
+	echo >> ${lint_result}/developers/$name.txt
 
-	cat ../tmp/developers_report.tmp >> ../results/developers/$name.txt
-	rm ../tmp/developers_report.tmp
+	cat ${lint_tmp}/developers_report.tmp >> ${lint_result}/developers/$name.txt
+	rm ${lint_tmp}/developers_report.tmp
 
-done < <(./commiters_list.py) 
+done < <(${dir}/commiters_list.py ${git_repo})
 
-total_error_quantity=$(awk '{print $0}' ../tmp/err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Error" -v counter=0 '$5==val {counter++} END {print counter}')
-total_warning_quantity=$(awk '{print $0}' ../tmp/err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Warning" -v counter=0 '$5==val {counter++} END {print counter}')
-total_info_quantity=$(awk '{print $0}' ../tmp/err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Info" -v counter=0 '$5==val {counter++} END {print counter}')
-total_note_quantity=$(awk '{print $0}' ../tmp/err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Note" -v counter=0 '$5==val {counter++} END {print counter}')
+total_error_quantity=$(awk '{print $0}' ${lint_tmp}/err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Error" -v counter=0 '$5==val {counter++} END {print counter}')
+total_warning_quantity=$(awk '{print $0}' ${lint_tmp}/err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Warning" -v counter=0 '$5==val {counter++} END {print counter}')
+total_info_quantity=$(awk '{print $0}' ${lint_tmp}/err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Info" -v counter=0 '$5==val {counter++} END {print counter}')
+total_note_quantity=$(awk '{print $0}' ${lint_tmp}/err_warn_inf_names.tmp | awk '!x[$0]++' | awk -v val="Note" -v counter=0 '$5==val {counter++} END {print counter}')
 
-awk '{print $0}' ../tmp/err_warn_inf_names.tmp | awk '!x[$0]++' >> ../results/list_of_err_warn_inf_note.txt
+awk '{print $0}' ${lint_tmp}/err_warn_inf_names.tmp | awk '!x[$0]++' >> ${lint_result}/list-of-err-warn-inf-note.txt
 
-echo 	Summary >> ../results/developers/total.txt
-echo >> ../results/developers/total.txt
-echo -e ' \t 'Errors:   $total_error_quantity >> ../results/developers/total.txt
-echo -e ' \t 'Warnings: $total_warning_quantity >> ../results/developers/total.txt
-echo -e ' \t 'Infos:    $total_info_quantity >> ../results/developers/total.txt
-echo -e ' \t 'Notes:    $total_note_quantity >> ../results/developers/total.txt
+echo 	Summary >> ${lint_result}/developers/total.txt
+echo >> ${lint_result}/developers/total.txt
+echo -e ' \t 'Errors:   $total_error_quantity >> ${lint_result}/developers/total.txt
+echo -e ' \t 'Warnings: $total_warning_quantity >> ${lint_result}/developers/total.txt
+echo -e ' \t 'Infos:    $total_info_quantity >> ${lint_result}/developers/total.txt
+echo -e ' \t 'Notes:    $total_note_quantity >> ${lint_result}/developers/total.txt
 
+rm -r ${lint_tmp}
