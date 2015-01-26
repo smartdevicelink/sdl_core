@@ -1,5 +1,5 @@
 /*
- Copyright (c) 2013, Ford Motor Company
+ Copyright (c) 2015, Ford Motor Company
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
@@ -30,23 +30,18 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_EXCHANGE_HANDLER_EXT_H_
-#define SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_EXCHANGE_HANDLER_EXT_H_
+#include "application_manager/state_controller.h"
+#include "application_manager/application_manager_impl.h"
 
-#include "application_manager/policies/pt_exchange_handler.h"
-#include "application_manager/policies/policy_handler.h"
+namespace application_manager {
 
-namespace policy {
-class PTExchangeHandlerExt : public PTExchangeHandler {
- public:
-  PTExchangeHandlerExt(PolicyHandler* policy_handler);
-  ~PTExchangeHandlerExt();
-  virtual void Start();
-  virtual void Stop();
+void StateController::set_state(StateID id) {
 
- private:
-  PolicyHandler* policy_handler_;
-};
-}  //  namespace policy
+}
 
-#endif  //  SRC_COMPONENTS_POLICY_INCLUDE_POLICY_PT_EXCHANGE_HANDLER_EXT_H_
+void StateController::set_state(mobile_apis::HMILevel::eType hmi_level,
+               mobile_apis::AudioStreamingState::eType audio_state) {
+
+}
+
+}

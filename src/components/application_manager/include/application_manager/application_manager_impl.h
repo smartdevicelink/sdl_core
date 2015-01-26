@@ -47,6 +47,7 @@
 #include "application_manager/request_controller.h"
 #include "application_manager/resume_ctrl.h"
 #include "application_manager/vehicle_info_data.h"
+#include "application_manager/state_controller.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
@@ -782,6 +783,11 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void OnWakeUp();
 
+    void set_state(StateController::StateID state_id);
+
+    void set_state(mobile_api::HMILevel::eType hmi_level,
+                   mobile_api::AudioStreamingState::eType audio_state);
+
     struct ApplicationsAppIdSorter {
       bool operator() (const ApplicationSharedPtr lhs,
                        const ApplicationSharedPtr rhs) {
@@ -1296,6 +1302,16 @@ private:
     timer::TimerThread<ApplicationManagerImpl> end_services_timer;
     uint32_t wait_end_service_timeout_;
     uint32_t navi_app_to_stop_;
+    
+    StateController state_ctrl_;
+
+#ifdef CUSTOMER_PASA
+    /**
+     * @brief Contains TRUE if SDL has received onExitAllApplication notification with
+     * reason "SUSPENDED" otherwise contains FALSE.
+     */
+    bool is_state_suspended_;
+#endif // CUSTOMER_PASA
 
 
 #ifdef TIME_TESTER
