@@ -46,6 +46,7 @@
 #include "application_manager/request_controller.h"
 #include "application_manager/resume_ctrl.h"
 #include "application_manager/vehicle_info_data.h"
+#include "application_manager/state_controller.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
@@ -287,6 +288,9 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD0(OnLowVoltage, void());
   MOCK_METHOD0(OnWakeUp, void());
   MOCK_METHOD1(OnUpdateHMIAppType, void(std::map<std::string, std::vector<std::string> >));
+  MOCK_METHOD1(set_state, void(StateController::StateID));
+  MOCK_METHOD2(set_state, void(mobile_apis::HMILevel::eType,
+                               mobile_apis::AudioStreamingState::eType));
 
   struct ApplicationsAppIdSorter {
     bool operator() (const ApplicationSharedPtr lhs,
