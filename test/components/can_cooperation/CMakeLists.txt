@@ -43,6 +43,6 @@ SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 SET(CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/src/components/can_cooperation/")
 
 #create_test("test_can_module" "./src/can_module_test.cc" "${LIBRARIES}")
-#create_test("test_can_app_extension" "./src/can_app_extension_test.cc" "${LIBRARIES}")
+create_test("test_can_app_extension" "./src/can_app_extension_test.cc" "${LIBRARIES}")
 #create_test("test_can_tcp_connection" "./src/can_tcp_connection_test.cc" "${LIBRARIES}")
 create_test("test_can_library" "./src/can_library_test.cc" "${LIBRARIES}")
