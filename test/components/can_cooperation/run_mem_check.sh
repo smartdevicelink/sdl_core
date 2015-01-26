@@ -8,15 +8,26 @@ command_name="valgrind"
 
 show_help() {
   echo "
-        Usage: ./run_mem_check.sh [OPTION]... 
-        Runs valgring against binary.
+        Usage: ./run_mem_check.sh [OPTION]...
+          Runs valgring against binary.
         Arguments:
-        -h    displays help message and exits
-        -b    specifies binary to be tested. Default is test_can_library.
-        -q    install missing software without prompting. Default is false.
-        -i    only install missing software and exit. No prompts will be issued.
+          -h    displays help message and exits
+          -b    specifies binary to be tested. Default is test_can_library.
+          -q    install missing software without prompting. Default is false.
+          -i    only install missing software and exit. No prompts will be issued.
+          -x    <file> save XML output to file. Only for memcheck tool.
+          -t    <name> module tool name for analyse (memcheck - default, callgrind, massif and etc.)
+
+        GUI tools which you can use to analyse:
+          Valkyrie - memcheck
+          KCachegrind- callgrind
+          Massif-Visualizer - massif
+
         Example:
-        ./run_mem_check.sh -b ./test_can_module "
+          ./run_mem_check.sh -b ./test_can_module
+          ./run_mem_check.sh -t callgrind
+          ./run_men_check.sh -x output.xml
+"
 }
 
 installation_prompt() {
@@ -46,9 +57,10 @@ install_if_not() {
 
 binary_test="./test_can_library"
 
-while getopts "hqib:" opt; do
+tool_name=memcheck
+while getopts "t:x:hqib:" opt; do
     case "$opt" in
-    h) 
+    h)
         show_help
         exit 0
         ;;
@@ -61,9 +73,17 @@ while getopts "hqib:" opt; do
         ;;
     b)  binary_test=$OPTARG
         ;;
+    x)  xml_report="--xml=yes --xml-file=$OPTARG"
+        ;;
+    t)  tool_name=$OPTARG
+        ;;
     esac
 done
 
 install_if_not
 
-$command_name --tool=memcheck --leak-check=full --leak-check-heuristics=all --show-leak-kinds=all $binary_test
+if [ "$tool_name" == "memcheck" ]; then
+    params="--leak-check=full --leak-check-heuristics=all --show-leak-kinds=all"
+fi
+
+$command_name --tool=$tool_name $params $xml_report $binary_test
