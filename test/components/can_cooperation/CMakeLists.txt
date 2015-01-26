@@ -1,11 +1,11 @@
 include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
   ${GMOCK_INCLUDE_DIRECTORY}
-  ../../../src/components/functional_module/include/
-  ../../../src/components/can_cooperation/include/
-  ../../../src/components/include/
-  ../../../src/components/application_manager/include
-  ../../../src/components/connection_handler/include/
+  ${CMAKE_SOURCE_DIR}/src/components/functional_module/include/
+  ${CMAKE_SOURCE_DIR}/src/components/can_cooperation/include/
+  ${CMAKE_SOURCE_DIR}/src/components/include/
+  ${CMAKE_SOURCE_DIR}/src/components/application_manager/include
+  ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
 )
@@ -16,8 +16,8 @@ set (LIBRARIES
     gmock
     gmock_main
     CANCooperation
-    jsoncpp
-    FunctionalModule
+#    jsoncpp
+#    FunctionalModule
     gcov
 )
 
@@ -42,8 +42,7 @@ SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
 SET(CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/src/components/can_cooperation/")
 
-
-create_test("test_can_module" "./src/can_module_test.cc" "${LIBRARIES}")
-create_test("test_can_app_extension" "./src/can_app_extension_test.cc" "${LIBRARIES}")
-create_test("test_can_tcp_connection" "./src/can_tcp_connection_test.cc" "${LIBRARIES}")
+#create_test("test_can_module" "./src/can_module_test.cc" "${LIBRARIES}")
+#create_test("test_can_app_extension" "./src/can_app_extension_test.cc" "${LIBRARIES}")
+#create_test("test_can_tcp_connection" "./src/can_tcp_connection_test.cc" "${LIBRARIES}")
 create_test("test_can_library" "./src/can_library_test.cc" "${LIBRARIES}")

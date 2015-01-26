@@ -1,45 +1,48 @@
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
 #include <dlfcn.h>
-#include "functional_module/generic_module.h"
+#include "gtest/gtest.h"
+#include "can_cooperation/can_module.h"
 
-using namespace functional_modules;
+using can_cooperation::CANModule;
+using functional_modules::PluginInfo;
 
-int LoadPluginLibrary(const std::string& path, void*& generic_plugin_dll, GenericModule*& module) {
-  generic_plugin_dll = dlopen(path.c_str(), RTLD_LAZY);
-  if (NULL == generic_plugin_dll) {
-    char* failed_to_open = dlerror();
-    printf("Failed to open dll %s with error %s \n", path.c_str(),
-      failed_to_open);
-    return -1;
+namespace test {
+namespace components {
+namespace can_cooperation {
+
+::testing::AssertionResult IsError(void* error) {
+  if (error) {
+    return ::testing::AssertionSuccess() << static_cast<const char*>(error);
+  } else {
+    return ::testing::AssertionFailure() << error;
   }
-  typedef GenericModule* (*Create)();
-  Create create_manager = reinterpret_cast<Create>(dlsym(generic_plugin_dll, "Create"));
-  char* error_string = dlerror();
-  if (NULL != error_string) {
-    printf("Failed to export dll's %s symbols: %s \n", path.c_str(), error_string);
-    dlclose(generic_plugin_dll);
-    return -1;
-  }
-  module = create_manager();
-  if (!module) {
-    printf("Failed to create plugin main class %s \n", path.c_str());
-    dlclose(generic_plugin_dll);
-    return -1; 
-  }
-  return 0;
 }
 
-void UnloadPluginLibrary(void* dll) {
-  dlclose(dll);
-}
+TEST(CanLibraryTest, Load) {
+  const std::string kLibraryPath = "libCANCooperation.so";
 
-TEST(can_library_test, load) {
-  const std::string library_path = "libCANCooperation.so";
-  void* dll = NULL;
-  GenericModule* module = NULL;
-  ASSERT_EQ(0, LoadPluginLibrary(library_path, dll, module));
-  ASSERT_FALSE(NULL == dll);
+  void* handle = dlopen(kLibraryPath.c_str(), RTLD_LAZY);
+  EXPECT_FALSE(IsError(dlerror()));
+  ASSERT_TRUE(handle);
+
+  const std::string kSymbol = "Create";
+  void* symbol = dlsym(handle, kSymbol.c_str());
+  EXPECT_FALSE(IsError(dlerror()));
+  ASSERT_TRUE(symbol);
+
+  typedef CANModule* (*Create)();
+  Create create_manager = reinterpret_cast<Create>(symbol);
+  CANModule* module = create_manager();
   ASSERT_TRUE(module);
-  UnloadPluginLibrary(dll);
+
+  PluginInfo plugin = module->GetPluginInfo();
+  EXPECT_EQ(plugin.name, "ReverseSDLPlugin");
+  EXPECT_EQ(plugin.version, 1);
+
+  int ret = dlclose(handle);
+  EXPECT_FALSE(ret);
+  EXPECT_FALSE(IsError(dlerror()));
 }
+
+}  // namespace can_cooperation
+}  // namespace components
+}  // namespace test
