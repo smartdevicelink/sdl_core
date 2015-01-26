@@ -42,7 +42,6 @@
 #include <sys/sysctl.h>
 #include <sys/socket.h>
 #ifdef __linux__
-//#  include <linux/tcp.h>
 #  include <netinet/tcp.h>
 #else  // __linux__
 #  include <sys/time.h>
