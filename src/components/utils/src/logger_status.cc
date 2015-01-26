@@ -34,6 +34,6 @@
 
 namespace logger {
 
-volatile LoggerStatus logger_status = LoggerThreadNotCreated;
+LoggerStatus logger_status = LoggerThreadNotCreated;
 
 }  // namespace logger

@@ -47,7 +47,7 @@
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
-#include "application_manager/policies/policy_handler_observer.h"
+
 #include "media_manager/media_manager_impl.h"
 
 #include "connection_handler/connection_handler_observer.h"
@@ -73,6 +73,10 @@
 #include "utils/threads/message_loop_thread.h"
 #include "utils/lock.h"
 #include "utils/singleton.h"
+
+namespace policy {
+class PolicyManager;
+}
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -159,26 +163,15 @@ typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromMobile> > 
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToMobile> > ToMobileQueue;
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageFromHmi> > FromHmiQueue;
 typedef threads::MessageLoopThread<utils::PrioritizedQueue<MessageToHmi> > ToHmiQueue;
-
-// AudioPassThru
-typedef struct  {
-std::vector<uint8_t> binary_data;
-int32_t              session_key;
-} AudioData;
-typedef std::queue<AudioData>                          RawAudioDataQueue;
-typedef threads::MessageLoopThread<RawAudioDataQueue>  AudioPassThruQueue;
 }
-
 typedef std::vector<std::string> RPCParams;
 
 class ApplicationManagerImpl : public ApplicationManager,
   public hmi_message_handler::HMIMessageObserver,
   public protocol_handler::ProtocolObserver,
   public connection_handler::ConnectionHandlerObserver,
-  public policy::PolicyHandlerObserver,
   public impl::FromMobileQueue::Handler, public impl::ToMobileQueue::Handler,
   public impl::FromHmiQueue::Handler, public impl::ToHmiQueue::Handler,
-  public impl::AudioPassThruQueue::Handler,
   public utils::Singleton<ApplicationManagerImpl> {
 
     friend class ResumeCtrl;
@@ -310,6 +303,12 @@ class ApplicationManagerImpl : public ApplicationManager,
         mobile_api::AppInterfaceUnregisteredReason::eType reason);
 
     /*
+     * @brief Called by HMI on SUSPEND.
+     * SDL must save all persistence data(Resume, Policy)
+     */
+    void HeadUnitSuspend();
+
+    /*
      * @brief Closes all registered applications
      */
     void UnregisterAllApplications(bool generated_by_hmi = false);
@@ -392,20 +391,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void set_all_apps_allowed(const bool& allowed);
 
-
-    /**
-     * @brief Notification from PolicyHandler about PTU.
-     * Compares AppHMIType between saved in app and received from PTU. If they are different method sends:
-     * UI_ChangeRegistration with list new AppHMIType;
-     * ActivateApp with HMI level BACKGROUND;
-     * OnHMIStatus notification;
-     * for app with HMI level FULL or LIMITED.
-     * method sends:
-     * UI_ChangeRegistration with list new AppHMIType
-     * for app with HMI level BACKGROUND.
-     */
-    virtual void OnUpdateHMIAppType(std::map<std::string, std::vector<std::string> > app_hmi_types);
-
     /*
      * @brief Starts audio pass thru thread
      *
@@ -427,17 +412,8 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void StopAudioPassThru(int32_t application_key);
 
-    /*
-     * @brief Creates AudioPassThru data chunk and inserts it
-     * to audio_pass_thru_messages_
-     *
-     * @param session_key Id of application for which
-     * audio pass thru should be sent
-     *
-     * @param binary_data AudioPassThru data chunk
-     */
     void SendAudioPassThroughNotification(uint32_t session_key,
-                                          std::vector<uint8_t>& binary_data);
+                                          std::vector<uint8_t> binaryData);
 
     std::string GetDeviceName(connection_handler::DeviceHandle handle);
 
@@ -465,27 +441,31 @@ class ApplicationManagerImpl : public ApplicationManager,
       const utils::SharedPtr<smart_objects::SmartObject> message);
 
     /////////////////////////////////////////////////////////
-    // Overriden ProtocolObserver method
+    /*
+     * @brief Overriden ProtocolObserver method
+     */
     virtual void OnMessageReceived(
-        const ::protocol_handler::RawMessagePtr message) OVERRIDE;
+        const ::protocol_handler::RawMessagePtr message);
+
+    /*
+     * @brief Overriden ProtocolObserver method
+     */
     virtual void OnMobileMessageSent(
-        const ::protocol_handler::RawMessagePtr message) OVERRIDE;
+        const ::protocol_handler::RawMessagePtr message);
 
-    // Overriden HMIMessageObserver method
-    void OnMessageReceived(hmi_message_handler::MessageSharedPointer message) OVERRIDE;
-    void OnErrorSending(hmi_message_handler::MessageSharedPointer message) OVERRIDE;
+    void OnMessageReceived(hmi_message_handler::MessageSharedPointer message);
+    void OnErrorSending(hmi_message_handler::MessageSharedPointer message);
 
-    // Overriden ConnectionHandlerObserver method
-    void OnDeviceListUpdated(const connection_handler::DeviceMap& device_list) OVERRIDE;
+    void OnDeviceListUpdated(const connection_handler::DeviceMap& device_list);
     //TODO (EZamakhov): fix all indentations in this file
-    void OnFindNewApplicationsRequest() OVERRIDE;
-    void RemoveDevice(const connection_handler::DeviceHandle& device_handle) OVERRIDE;
+  virtual void OnFindNewApplicationsRequest();
+    void RemoveDevice(const connection_handler::DeviceHandle& device_handle);
     bool OnServiceStartedCallback(
-        const connection_handler::DeviceHandle& device_handle,
-        const int32_t& session_key, const protocol_handler::ServiceType& type) OVERRIDE;
+      const connection_handler::DeviceHandle& device_handle,
+      const int32_t& session_key, const protocol_handler::ServiceType& type);
     void OnServiceEndedCallback(const int32_t& session_key,
-                                const protocol_handler::ServiceType& type) OVERRIDE;
-    void OnApplicationFloodCallBack(const uint32_t& connection_key) OVERRIDE;
+                                const protocol_handler::ServiceType& type);
+
     /**
      * @ Add notification to collection
      *
@@ -687,15 +667,6 @@ class ApplicationManagerImpl : public ApplicationManager,
         mobile_apis::FunctionID::eType function_id,
         const RPCParams& rpc_params,
         CommandParametersPermissions* params_permissions = NULL);
-    /*
-     * @brief Function Should be called when Low Voltage is occured
-     */
-    void OnLowVoltage();
-
-    /*
-     * @brief Function Should be called when WakeUp occures after Low Voltage
-     */
-    void OnWakeUp();
 
     // typedef for Applications list
     typedef const std::set<ApplicationSharedPtr> TAppList;
@@ -746,22 +717,6 @@ class ApplicationManagerImpl : public ApplicationManager,
   private:
     ApplicationManagerImpl();
 
-    /**
-     * @brief Method transforms string to AppHMIType
-     * @param str contains string AppHMIType
-     * @return enum AppHMIType
-     */
-    mobile_apis::AppHMIType::eType StringToAppHMIType(std::string str);
-
-    /**
-     * @brief Method compares arrays of app HMI type
-     * @param from_policy contains app HMI type from policy
-     * @param from_application contains app HMI type from application
-     * @return return TRUE if arrays of appHMIType equal, otherwise return FALSE
-     */
-    bool CompareAppHMIType (const smart_objects::SmartObject& from_policy,
-                            const smart_objects::SmartObject& from_application);
-
     hmi_apis::HMI_API& hmi_so_factory();
     mobile_apis::MOBILE_API& mobile_so_factory();
 
@@ -792,9 +747,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     // CALLED ON messages_to_hmi_ thread!
     virtual void Handle(const impl::MessageToHmi message) OVERRIDE;
 
-    // CALLED ON audio_pass_thru_messages_ thread!
-    virtual void Handle(const impl::AudioData message) OVERRIDE;
-
     void SendUpdateAppList(const std::list<uint32_t>& applications_ids);
     void OnApplicationListUpdateTimer();
 
@@ -803,11 +755,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      * to notify HMI that SDL is shutting down.
      */
     void SendOnSDLClose();
-
-    /*
-     * @brief returns true if low voltage state is active
-     */
-    bool IsLowVoltage();
 
   private:
 
@@ -884,8 +831,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     impl::FromHmiQueue messages_from_hmi_;
     // Thread that pumps messages being passed to HMI.
     impl::ToHmiQueue messages_to_hmi_;
-    // Thread that pumps messages audio pass thru to mobile.
-    impl::AudioPassThruQueue audio_pass_thru_messages_;
 
 
     HMICapabilities                         hmi_capabilities_;
@@ -898,7 +843,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      * application in case INGITION_OFF or MASTER_RESSET
      */
     ResumeCtrl resume_ctrl_;
-
 
 #ifdef TIME_TESTER
     AMMetricObserver* metric_observer_;
@@ -916,7 +860,6 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     timer::TimerThread<ApplicationManagerImpl>  tts_global_properties_timer_;
 
-    bool is_low_voltage_;
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 
     FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);

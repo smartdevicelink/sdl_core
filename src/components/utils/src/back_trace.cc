@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -89,7 +89,7 @@ vector<string> Backtrace::CallStack() const {
   return callstack;
 }
 
-threads::PlatformThreadHandle Backtrace::ThreadId() const {
+Thread::Id Backtrace::ThreadId() const {
   return thread_id_;
 }
 

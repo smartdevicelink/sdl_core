@@ -48,7 +48,7 @@ DeleteSubMenuRequest::~DeleteSubMenuRequest() {
 }
 
 void DeleteSubMenuRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::Run");
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
@@ -77,10 +77,9 @@ void DeleteSubMenuRequest::Run() {
 }
 
 void DeleteSubMenuRequest::DeleteSubMenuVRCommands(ApplicationConstSharedPtr app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::DeleteSubMenuVRCommands");
 
-  const DataAccessor<CommandsMap> accessor = app->commands_map();
-  const CommandsMap& commands = accessor.GetData();
+  const CommandsMap& commands = app->commands_map();
   CommandsMap::const_iterator it = commands.begin();
 
   for (; commands.end() != it; ++it) {
@@ -105,10 +104,9 @@ void DeleteSubMenuRequest::DeleteSubMenuVRCommands(ApplicationConstSharedPtr app
 }
 
 void DeleteSubMenuRequest::DeleteSubMenuUICommands(ApplicationSharedPtr const app) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::DeleteSubMenuUICommands");
 
-  const DataAccessor<CommandsMap> accessor = app->commands_map();
-  const CommandsMap& commands = accessor.GetData();
+  const CommandsMap& commands = app->commands_map();
   CommandsMap::const_iterator it = commands.begin();
 
   while (commands.end() != it) {
@@ -138,7 +136,7 @@ void DeleteSubMenuRequest::DeleteSubMenuUICommands(ApplicationSharedPtr const ap
 }
 
 void DeleteSubMenuRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "DeleteSubMenuRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {

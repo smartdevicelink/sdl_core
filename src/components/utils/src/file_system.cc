@@ -325,12 +325,10 @@ std::vector<std::string> file_system::ListFiles(
     }
 
     closedir(directory);
-
-  }
-
 #ifdef __QNXNTO__
-  delete[] direntbuffer;
+    delete[] direntbuffer;
 #endif
+  }
 
   return listFiles;
 }

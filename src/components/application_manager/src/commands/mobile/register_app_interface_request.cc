@@ -124,15 +124,14 @@ namespace commands {
 
 RegisterAppInterfaceRequest::RegisterAppInterfaceRequest(
   const MessageSharedPtr& message)
-  : CommandRequestImpl(message),
-    result_checking_app_hmi_type_(mobile_apis::Result::INVALID_ENUM) {
+  : CommandRequestImpl(message) {
 }
 
 RegisterAppInterfaceRequest::~RegisterAppInterfaceRequest() {
 }
 
 bool RegisterAppInterfaceRequest::Init() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Init");
   return true;
 }
 
@@ -140,9 +139,8 @@ void RegisterAppInterfaceRequest::Run() {
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::Run " << connection_key());
 
   // Fix problem with SDL and HMI HTML. This problem is not actual for HMI PASA.
-  // Flag conditional compilation specific to customer is used in order to exclude hit code
+  // Flag conditional compilation "CUSTOMER_PASA" is used in order to exclude hit code
   // to RTC
-  // FIXME(EZamakhov): on shutdown - get freez
   if (true == profile::Profile::instance()->launch_hmi()) {
     // wait till HMI started
     while (!ApplicationManagerImpl::instance()->IsHMICooperating()) {
@@ -188,6 +186,13 @@ void RegisterAppInterfaceRequest::Run() {
       ++count_of_rejections_duplicate_name;
     }
     SendResponse(false, coincidence_result);
+    return;
+  }
+
+  mobile_apis::Result::eType restriction_result = CheckRestrictions();
+  if (mobile_apis::Result::SUCCESS != restriction_result) {
+    LOG4CXX_ERROR_EXT(logger_, "Param names restrictions check failed.");
+    SendResponse(false, restriction_result);
     return;
   }
 
@@ -276,11 +281,16 @@ void RegisterAppInterfaceRequest::Run() {
         device_info);
 
     SendRegisterAppInterfaceResponseToMobile();
+
+    MessageHelper::SendLockScreenIconUrlNotification(
+    (*message_)[strings::params][strings::connection_key].asInt());
+
+    policy::PolicyHandler::instance()->PTExchangeAtRegistration(mobile_app_id);
   }
 }
 
 void RegisterAppInterfaceRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::on_event");
   switch (event.id()) {
     case hmi_apis::FunctionID::TTS_Speak: {
       const smart_objects::SmartObject& message = event.smart_object();
@@ -459,8 +469,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
   uint32_t hash_id = 0;
 
-  std::string add_info("");
-  bool resumption = (*message_)[strings::msg_params].keyExists(strings::hash_id);
+  const char* add_info = "";
+  const bool resumption = (*message_)[strings::msg_params].keyExists(strings::hash_id);
   bool need_restore_vr = resumption;
   if (resumption) {
     hash_id = (*message_)[strings::msg_params][strings::hash_id].asUInt();
@@ -478,17 +488,8 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
       add_info = " Resume Succeed";
     }
   }
-  if ((mobile_apis::Result::SUCCESS == result) &&
-      (mobile_apis::Result::INVALID_ENUM != result_checking_app_hmi_type_)) {
-    add_info += response_info_;
-    result = result_checking_app_hmi_type_;
-  }
-  SendResponse(true, result, add_info.c_str(), params);
 
-  // in case application exist in resumption we need to send resumeVrgrammars
-  if (false == resumption) {
-    resumption = resumer.IsApplicationSaved(application->mobile_app_id()->asString());
-  }
+  SendResponse(true, result, add_info, params);
 
   MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()),
                                                       resumption,
@@ -505,7 +506,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
 mobile_apis::Result::eType
 RegisterAppInterfaceRequest::CheckCoincidence() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_TRACE_ENTER(logger_);
   const smart_objects::SmartObject& msg_params =
     (*message_)[strings::msg_params];
 
@@ -607,7 +608,7 @@ mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckWithPolicyData() {
       if (!log.empty()) {
         response_info_ = "Following AppHMITypes are not present in policy "
                          "table:" + log;
-        result_checking_app_hmi_type_ = mobile_apis::Result::WARNINGS;
+        result = mobile_apis::Result::WARNINGS;
       }
     }
     // Replace AppHMITypes in request with values allowed by policy table
@@ -660,6 +661,75 @@ void RegisterAppInterfaceRequest::FillDeviceInfo(
   }
 }
 
+mobile_apis::Result::eType RegisterAppInterfaceRequest::CheckRestrictions() const {
+
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::CheckRestrictions");
+
+  const smart_objects::SmartObject& msg_params =
+    (*message_)[strings::msg_params];
+
+  const std::string& app_name = msg_params[strings::app_name].asString();
+
+  if (ClearParamName(app_name).empty()) {
+    printf("Application name is empty.\n");
+    return mobile_apis::Result::INVALID_DATA;
+  }
+
+  if ((app_name[0] == '\n') ||
+      ((app_name[0] == '\\') && (app_name[1] == 'n'))) {
+
+    printf("Application name has invalid characters.");
+    return mobile_apis::Result::INVALID_DATA;
+  }
+
+  if (msg_params.keyExists(strings::tts_name)) {
+
+    const smart_objects::SmartArray* tts =
+      msg_params[strings::tts_name].asArray();
+
+    smart_objects::SmartArray::const_iterator it = tts->begin();
+    smart_objects::SmartArray::const_iterator it_end = tts->end();
+
+    for (; it != it_end; ++it) {
+
+      const std::string& tts_name = (*it)[strings::text].asString();
+
+      if (ClearParamName(tts_name).empty()) {
+        printf("TTS value is empty.");
+        return mobile_apis::Result::INVALID_DATA;
+      }
+
+      if ((tts_name[0] == '\n') ||
+          ((tts_name[0] == '\\') && (tts_name[1] == 'n'))) {
+
+        printf("TTS value(s) has invalid characters.");
+        return mobile_apis::Result::INVALID_DATA;
+      }
+    }
+  }
+
+  return mobile_apis::Result::SUCCESS;
+}
+
+std::string
+RegisterAppInterfaceRequest::ClearParamName(std::string param_name) const {
+
+  // Expecting for chars different from newlines and spaces in the appName
+  //
+  // There is an agreement, that "\n" is not allowed symbols, so we have to
+  // check for this case also
+
+  std::string newline = "\\n";
+  while (std::string::npos != param_name.find(newline)) {
+    param_name.erase(param_name.find(newline), newline.length());
+  }
+
+  std::string::iterator param_name_new_end =
+    std::remove_if(param_name.begin(), param_name.end(), ::isspace);
+
+  return std::string(param_name.begin(), param_name_new_end);
+}
+
 bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 
   LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::"
@@ -684,7 +754,7 @@ bool RegisterAppInterfaceRequest::IsApplicationWithSameAppIdRegistered() {
 }
 
 bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "RegisterAppInterfaceRequest::IsWhiteSpaceExist");
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::app_name].asCharArray();

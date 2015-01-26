@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -46,7 +46,7 @@ UISetGlobalPropertiesResponse::~UISetGlobalPropertiesResponse() {
 }
 
 void UISetGlobalPropertiesResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "UISetGlobalPropertiesResponse::Run");
 
   event_engine::Event event(hmi_apis::FunctionID::UI_SetGlobalProperties);
   event.set_smart_object(*message_);

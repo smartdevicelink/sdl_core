@@ -1,4 +1,4 @@
-﻿/*
+﻿/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -71,11 +71,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void CloseActiveMessage();
   bool IsFullscreen() const;
   bool MakeFullscreen();
-
-  /**
-   * @brief change supporting COMMUNICATION NAVIGATION
-   */
-  virtual void ChangeSupportingAppHMIType();
   bool IsAudible() const;
   void MakeNotAudible();
 
@@ -156,6 +151,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   virtual uint32_t nextHash();
   virtual uint32_t curHash() const;
+
   /**
    * @brief Change Hash for current application
    * and send notification to mobile
@@ -235,6 +231,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
   bool                                     is_voice_communication_application_;
+
   // NAVI retry stream
   volatile bool                            is_video_stream_retry_active_;
   volatile bool                            is_audio_stream_retry_active_;

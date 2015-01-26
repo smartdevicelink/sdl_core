@@ -1,4 +1,4 @@
-/*
+/**
  * \file threaded_socket_connection.h
  * \brief Header for classes responsible for communication over sockets.
  * Copyright (c) 2013, Ford Motor Company
@@ -41,11 +41,9 @@
 #include "transport_manager/transport_adapter/connection.h"
 #include "protocol/common.h"
 #include "utils/threads/thread_delegate.h"
-#include "utils/lock.h"
+#include "utils/threads/thread.h"
 
 using ::transport_manager::transport_adapter::Connection;
-
-class Thread;
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -135,7 +133,7 @@ class ThreadedSocketConnection : public Connection,
   int read_fd_;
   int write_fd_;
   void threadMain();
-  void exitThreadMain();
+  bool exitThreadMain();
   void Transmit();
   void Finalize();
   TransportAdapter::Error Notify() const;
@@ -149,7 +147,7 @@ class ThreadedSocketConnection : public Connection,
    **/
   typedef std::queue<protocol_handler::RawMessagePtr> FrameQueue;
   FrameQueue frames_to_send_;
-  mutable sync_primitives::Lock frames_to_send_mutex_;
+  mutable pthread_mutex_t frames_to_send_mutex_;
 
   int socket_;
   bool terminate_flag_;

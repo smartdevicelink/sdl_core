@@ -46,11 +46,9 @@ FromMicRecorderListener::FromMicRecorderListener(
 }
 
 FromMicRecorderListener::~FromMicRecorderListener() {
-  LOG4CXX_AUTO_TRACE(logger_);
   if (reader_) {
-    reader_->join();
-    delete reader_->delegate();
-    threads::DeleteThread(reader_);
+    reader_->stop();
+    reader_ = NULL;
   }
 }
 
@@ -91,6 +89,7 @@ void FromMicRecorderListener::OnActivityEnded(int32_t application_key) {
   }
   if (reader_) {
     reader_->stop();
+    reader_ = NULL;
   }
   current_application_ = 0;
 }

@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -189,13 +189,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     const protocol_handler::ServiceType &service_type);
 
   /**
-   * \brief Callback function used by ProtocolHandler
-   * when Mobile Application start message flood
-   * \param connection_key  used by other components as application identifier
-   */
-  void OnApplicationFloodCallBack(const uint32_t &connection_key) OVERRIDE;
-
-  /**
    * \brief Creates unique identifier of session (can be used as hash)
    * from given connection identifier
    * within which session exists and session number.
@@ -305,7 +298,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \brief Close session associated with the key
    * \param key Unique key used by other components as session identifier
    */
-  virtual void CloseSession(uint32_t key, CloseSessionReason close_reason);
+  virtual void CloseSession(uint32_t key);
 
   /**
    * \brief Function used by HearbeatMonitior to close session on HB timeout
@@ -313,8 +306,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param session_id Identifier of the session to be ended
    */
   virtual void CloseSession(ConnectionHandle connection_handle,
-                            uint8_t session_id,
-                            CloseSessionReason close_reason);
+                            uint8_t session_id);
 
   /**
    * \brief Return count of session for specified connection
@@ -409,7 +401,6 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    *  \brief Lock for applications list
    */
   mutable sync_primitives::Lock connection_list_lock_;
-  mutable sync_primitives::Lock connection_handler_observer_lock_;
 
   /**
    * \brief Cleans connection list on destruction

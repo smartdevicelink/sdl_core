@@ -49,7 +49,7 @@ SetDisplayLayoutRequest::~SetDisplayLayoutRequest() {
 }
 
 void SetDisplayLayoutRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::Run");
   ApplicationConstSharedPtr app = ApplicationManagerImpl::instance()
   ->application(connection_key());
 
@@ -66,7 +66,7 @@ void SetDisplayLayoutRequest::Run() {
 }
 
 void SetDisplayLayoutRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "SetDisplayLayoutRequest::on_event");
 
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {

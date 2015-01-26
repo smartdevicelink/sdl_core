@@ -40,9 +40,7 @@
 #include "security_manager/crypto_manager_impl.h"
 #endif  // ENABLE_SECURITY
 
-#ifdef ENABLE_LOG
-#include "utils/log_message_loop_thread.h"
-#endif
+#include "utils/threads/thread_manager.h"
 
 using threads::Thread;
 
@@ -53,7 +51,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "appMain")
 namespace {
 void NameMessageBrokerThread(const System::Thread& thread,
                              const std::string& name) {
-  Thread::SetNameForId(thread.GetId(), name);
+  Thread::SetNameForId(Thread::Id(thread.GetId()), name);
 }
 }  // namespace
 
@@ -94,9 +92,7 @@ bool LifeCycle::StartComponents() {
   DCHECK(transport_manager_ != NULL);
 
   protocol_handler_ =
-    new protocol_handler::ProtocolHandlerImpl(transport_manager_,
-                                              profile::Profile::instance()->message_frequency_time(),
-                                              profile::Profile::instance()->message_frequency_count());
+    new protocol_handler::ProtocolHandlerImpl(transport_manager_);
   DCHECK(protocol_handler_ != NULL);
 
   connection_handler_ =
@@ -340,34 +336,26 @@ bool LifeCycle::InitMessageSystem() {
 #endif  // MQUEUE_HMIADAPTER
 
 namespace {
-
   void sig_handler(int sig) {
-    // Do nothing
+    MessageQueue<threads::ThreadManager::ThreadDesc>& threads = ::threads::ThreadManager::instance()->threads_to_terminate;
+    threads.Shutdown();
   }
-
-  void agony(int sig) {
-// these actions are not signal safe
-// (in case logger is on)
-// but they cannot be moved to a separate thread
-// because the application most probably will crash as soon as this handler returns
-//
-// the application is anyway about to crash
-    LOG4CXX_FATAL(logger_, "Stopping application due to segmentation fault");
-#ifdef ENABLE_LOG
-    logger::LogMessageLoopThread::destroy();
-#endif
-  }
-
-}  //  namespace
-
-void LifeCycle::Run() {
-  // First, register signal handlers
-  ::utils::SubscribeToTerminateSignal(&sig_handler);
-  ::utils::SubscribeToFaultSignal(&agony);
-  // Now wait for any signal
-  pause();
 }
 
+void LifeCycle::Run() {
+  // First, register signal handler
+  ::utils::SubscribeToTerminateSignal(&sig_handler);
+  // Then run main loop until signal caught
+  MessageQueue<threads::ThreadManager::ThreadDesc>& threads = ::threads::ThreadManager::instance()->threads_to_terminate;
+  while(!threads.IsShuttingDown()) {
+    while (!threads.empty()) {
+      ::threads::ThreadManager::ThreadDesc desc = threads.pop();
+      pthread_join(desc.handle, NULL);
+      delete desc.delegate;
+    }
+    threads.wait();
+  }
+}
 
 void LifeCycle::StopComponents() {
   if (!components_started_) {
@@ -380,14 +368,11 @@ void LifeCycle::StopComponents() {
   protocol_handler_->RemoveProtocolObserver(app_manager_);
   app_manager_->Stop();
 
-  LOG4CXX_INFO(logger_, "Stopping Protocol Handler");
+  LOG4CXX_INFO(logger_, "Destroying Media Manager");
   protocol_handler_->RemoveProtocolObserver(media_manager_);
 #ifdef ENABLE_SECURITY
   protocol_handler_->RemoveProtocolObserver(security_manager_);
 #endif  // ENABLE_SECURITY
-  protocol_handler_->Stop();
-
-  LOG4CXX_INFO(logger_, "Destroying Media Manager");
   media_manager_->SetProtocolHandler(NULL);
   media_manager::MediaManagerImpl::destroy();
 
@@ -441,9 +426,6 @@ void LifeCycle::StopComponents() {
     mb_adapter_->unregisterController();
     mb_adapter_->Close();
     mb_adapter_->exitReceivingThread();
-    if (mb_adapter_thread_) {
-      mb_adapter_thread_->Join();
-    }
     delete mb_adapter_;
   }
   if (mb_adapter_thread_) {

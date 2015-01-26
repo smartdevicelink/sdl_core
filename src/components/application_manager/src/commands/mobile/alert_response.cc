@@ -49,7 +49,7 @@ AlertResponse::~AlertResponse() {
 }
 
 void AlertResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "AlertResponse::Run");
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

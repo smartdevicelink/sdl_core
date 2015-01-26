@@ -1,4 +1,4 @@
-/*
+/**
  * \file dnssd_service_browser.h
  * \brief DnssdServiceBrowser class header file.
  *
@@ -38,12 +38,12 @@
 
 #include <string>
 #include <vector>
+#include <pthread.h>
 #include <avahi-client/client.h>
 #include <avahi-client/lookup.h>
 #include <avahi-common/error.h>
 #include <avahi-common/thread-watch.h>
 
-#include "utils/lock.h"
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/transport_adapter/transport_adapter.h"
 
@@ -121,7 +121,7 @@ class DnssdServiceBrowser : public DeviceScanner {
   typedef std::vector<DnssdServiceRecord> ServiceRecords;
   ServiceRecords service_records_;
 
-  sync_primitives::Lock mutex_;
+  pthread_mutex_t mutex_;
 
   bool initialised_;
 }

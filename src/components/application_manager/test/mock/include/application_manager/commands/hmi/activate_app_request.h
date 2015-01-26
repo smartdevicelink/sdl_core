@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -52,7 +52,7 @@ class ActivateAppRequest : public RequestToHMI, event_engine::EventObserver {
     explicit ActivateAppRequest(const MessageSharedPtr& message);
 
     /**
-     * @brief Callback for response
+     * @brief Calback for response
      *
      * @param event - event response
      **/

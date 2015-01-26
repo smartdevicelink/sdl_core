@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -74,17 +74,17 @@ void MessageBrokerAdapter::SendMessageToHMI(
 
 void MessageBrokerAdapter::processResponse(std::string method,
     Json::Value& root) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processResponse");
   ProcessRecievedFromMB(root);
 }
 
 void MessageBrokerAdapter::processRequest(Json::Value& root) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processRequest");
   ProcessRecievedFromMB(root);
 }
 
 void MessageBrokerAdapter::processNotification(Json::Value& root) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::processNotification");
   ProcessRecievedFromMB(root);
 }
 
@@ -137,15 +137,13 @@ void MessageBrokerAdapter::SubscribeTo() {
 
 void* MessageBrokerAdapter::SubscribeAndBeginReceiverThread(void* param) {
   PassToThread(threads::Thread::CurrentId());
-  // For PASA we don't need to subscribe and register controller
-  // this will prevent from errors on start up
   registerController();
   SubscribeTo();
   return MethodForReceiverThread(param);
 }
 
 void MessageBrokerAdapter::ProcessRecievedFromMB(Json::Value& root) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "MessageBrokerAdapter::ProcessRecievedFromMB");
   if (root.isNull()) {
     // LOG
     return;

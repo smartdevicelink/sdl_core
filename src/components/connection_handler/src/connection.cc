@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -45,6 +45,7 @@
 #include "security_manager/security_manager.h"
 #endif  // ENABLE_SECURITY
 
+#include "utils/threads/thread_manager.h"
 
 /**
  * \namespace connection_handler
@@ -79,22 +80,22 @@ Connection::Connection(ConnectionHandle connection_handle,
     : connection_handler_(connection_handler),
       connection_handle_(connection_handle),
       connection_device_handle_(connection_device_handle) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_TRACE_ENTER(logger_);
   DCHECK(connection_handler_);
 
   heartbeat_monitor_ = new HeartBeatMonitor(heartbeat_timeout, this);
   heart_beat_monitor_thread_ = threads::CreateThread("HeartBeatMonitor",
-                                                     heartbeat_monitor_);
+                                                   heartbeat_monitor_);
   heart_beat_monitor_thread_->start();
 }
 
 Connection::~Connection() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  heart_beat_monitor_thread_->join();
-  delete heartbeat_monitor_;
+  LOG4CXX_TRACE_ENTER(logger_);
+  heart_beat_monitor_thread_->stop();
   threads::DeleteThread(heart_beat_monitor_thread_);
   sync_primitives::AutoLock lock(session_map_lock_);
   session_map_.clear();
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 // Finds a key not presented in std::map<unsigned char, T>
@@ -112,7 +113,7 @@ uint32_t findGap(const std::map<unsigned char, T> &map) {
 }  // namespace
 
 uint32_t Connection::AddNewSession() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_TRACE_ENTER(logger_);
   sync_primitives::AutoLock lock(session_map_lock_);
   const uint32_t session_id = findGap(session_map_);
   if (session_id > 0) {
@@ -311,9 +312,7 @@ void Connection::CloseSession(uint8_t session_id) {
     size = session_map_.size();
   }
 
-  connection_handler_->CloseSession(connection_handle_,
-                                    session_id,
-                                    connection_handler::kCommon);
+  connection_handler_->CloseSession(connection_handle_, session_id);
 
   //Close connection if it is last session
   if (1 == size) {

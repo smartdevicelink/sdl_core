@@ -86,10 +86,8 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
         ],
 
         click: function() {
-            if (this._parentView.active) {
-                SDL.InteractionChoicesView.timerUpdate();
-                SDL.SDLController.onResetTimeout(SDL.SDLAppController.model.appID, "UI.PerformInteraction");
-            }
+            SDL.InteractionChoicesView.timerUpdate();
+            SDL.SDLController.onResetTimeout(SDL.SDLAppController.model.appID, "UI.PerformInteraction");
         },
 
         naviChoises: Em.ContainerView.extend({
@@ -121,10 +119,8 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
         itemsOnPage: 5,
         items: [],
         click: function() {
-            if (this._parentView.active) {
-                SDL.InteractionChoicesView.timerUpdate();
-                SDL.SDLController.onResetTimeout(SDL.SDLAppController.model.appID, "UI.PerformInteraction");
-            }
+            SDL.InteractionChoicesView.timerUpdate();
+            SDL.SDLController.onResetTimeout(SDL.SDLAppController.model.appID, "UI.PerformInteraction");
         }
     }),
 
@@ -147,7 +143,7 @@ SDL.InteractionChoicesView = SDL.SDLAbstractView.create({
      * Method updates popup timer when data changes through keyboard
      */
     timerUpdate: function (){
-        if (this.timeout) {
+        if (this.timeout && this.input.value !== null) {
             clearTimeout(this.timer);
             var self = this;
             this.timer = setTimeout(function () {

@@ -45,8 +45,7 @@ namespace test {
 namespace components {
 namespace policy {
 
-TEST(PolicyGeneratedCodeTest, DISABLED_TestValidPTPreloadJsonIsValid) {
-  // TODO(AGaliuzov) APPLINK-10657 neet to enable this tests
+TEST(PolicyGeneratedCodeTest, TestValidPTPreloadJsonIsValid) {
   std::ifstream json_file("sdl_preloaded_pt.json");
   ASSERT_TRUE(json_file.is_open());
   Json::Value valid_table;
@@ -57,8 +56,7 @@ TEST(PolicyGeneratedCodeTest, DISABLED_TestValidPTPreloadJsonIsValid) {
   ASSERT_RPCTYPE_VALID(table);
 }
 
-TEST(PolicyGeneratedCodeTest, DISABLED_TestValidPTUpdateJsonIsValid) {
-  // TODO(AGaliuzov) APPLINK-10657 neet to enable this tests
+TEST(PolicyGeneratedCodeTest, TestValidPTUpdateJsonIsValid) {
   std::ifstream json_file("valid_sdl_pt_update.json");
   ASSERT_TRUE(json_file.is_open());
   Json::Value valid_table;

@@ -126,10 +126,6 @@ bool CheckAppPolicy::HasSameGroups(const AppPoliciesValueType& app_policy,
 
   std::pair<StringsConstItr, StringsConstItr> diff;
 
-  // PM has to notify app about changed permissions, i.e. groups, even if these
-  // groups don't require user consent
-  bool is_new_group_present = false;
-
   while (it_groups_new_end != new_it && it_groups_curr_end != old_it) {
     size_t size = ((it_groups_new_end - new_it) > (it_groups_curr_end - old_it))
                   ? it_groups_curr_end - old_it : it_groups_new_end - new_it;
@@ -140,7 +136,7 @@ bool CheckAppPolicy::HasSameGroups(const AppPoliciesValueType& app_policy,
       break;
     }
     if (Compare(*diff.first, *diff.second) &&
-        IsConsentRequired(app_id, *(diff.first))) {
+        IsConsentRequired(*(diff.first))) {
       perms->isAppPermissionsRevoked = true;
       FunctionalGroupPermission group;
       group.group_name = *(diff.first);
@@ -148,18 +144,17 @@ bool CheckAppPolicy::HasSameGroups(const AppPoliciesValueType& app_policy,
       old_it = ++diff.first;
       new_it = diff.second;
     } else {
-      is_new_group_present = true;
       // according to the SDLAQ-CRS-2757 we have to set
       // appPermissionsConsentNeeded should not be set to true
       // in case if this group is auto-allowed
-      perms->appPermissionsConsentNeeded = IsConsentRequired(app_id, *new_it);
+      perms->appPermissionsConsentNeeded = IsConsentRequired(*new_it);
       old_it = diff.first;
       new_it = ++diff.second;
     }
   }
 
   for (StringsConstItr it = old_it; it != it_groups_curr_end; ++it) {
-    if (!IsConsentRequired(app_id, *it)) {
+    if (!IsConsentRequired(*it)) {
       continue;
     }
     perms->isAppPermissionsRevoked = true;
@@ -169,16 +164,11 @@ bool CheckAppPolicy::HasSameGroups(const AppPoliciesValueType& app_policy,
   }
 
   if (it_groups_new_end != new_it) {
-    is_new_group_present = true;
-    for (; new_it != it_groups_new_end; ++new_it) {
-      if (IsConsentRequired(app_id, *new_it)) {
-        perms->appPermissionsConsentNeeded = true;
-        break;
-      }
-    }
+    perms->appPermissionsConsentNeeded = true;
   }
 
   if (perms->isAppPermissionsRevoked) {
+
       std::vector<policy::FunctionalGroupPermission>::const_iterator it =
           perms->appRevokedPermissions.begin();
       std::vector<policy::FunctionalGroupPermission>::const_iterator it_end =
@@ -190,8 +180,7 @@ bool CheckAppPolicy::HasSameGroups(const AppPoliciesValueType& app_policy,
 
 
   return !(perms->appRevokedPermissions.size() > 0
-           || perms->appPermissionsConsentNeeded
-           || is_new_group_present);
+           || perms->appPermissionsConsentNeeded);
 }
 
 bool CheckAppPolicy::IsNewAppication(const std::string& application_id) const {
@@ -247,7 +236,6 @@ void CheckAppPolicy::SendOnPendingPermissions(
   }
   // TODO(AOleynik): Seems, it is unused part?
   if (permissions.isAppPermissionsRevoked) {
-    sync_primitives::AutoLock lock(pm_->app_permissions_diff_lock_);
     pm_->app_permissions_diff_.insert(
       std::make_pair(app_policy.first, permissions));
     pm_->listener()->OnPendingPermissionChange(app_policy.first);
@@ -256,7 +244,6 @@ void CheckAppPolicy::SendOnPendingPermissions(
 
 bool CheckAppPolicy::IsAppRevoked(
   const AppPoliciesValueType& app_policy) const {
-  LOG4CXX_AUTO_TRACE(logger_);
   // Application params are not initialized = application revoked
   // i.e. "123":null
   return app_policy.second.is_null();
@@ -295,9 +282,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   // Check revocation
   if (!IsPredefinedApp(app_policy) && IsAppRevoked(app_policy)) {
     permissions_diff.appRevoked = true;
-    pm_->app_permissions_diff_lock_.Acquire();
     pm_->app_permissions_diff_.insert(std::make_pair(app_id, permissions_diff));
-    pm_->app_permissions_diff_lock_.Release();
     pm_->listener()->OnAppRevoked(app_id);
     policy_table::ApplicationPolicies::iterator it = current_policies.find(
           app_id);
@@ -324,9 +309,7 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
 
   if (!IsPredefinedApp(app_policy) && !NicknamesMatch(app_id, app_policy)) {
     permissions_diff.appUnauthorized = true;
-    pm_->app_permissions_diff_lock_.Acquire();
     pm_->app_permissions_diff_.insert(std::make_pair(app_id, permissions_diff));
-    pm_->app_permissions_diff_lock_.Release();
     pm_->listener()->OnPendingPermissionChange(app_policy.first);
     policy_table::ApplicationPolicies::iterator it = current_policies.find(
           app_id);
@@ -360,20 +343,15 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   return true;
 }
 
-bool CheckAppPolicy::IsConsentRequired(const std::string& app_id,
-                                       const std::string& group_name) const {
+bool CheckAppPolicy::IsConsentRequired(const std::string& group_name) const {
   const policy_table::FunctionalGroupings& functional_groupings =
       snapshot_->policy_table.functional_groupings;
-
   FuncGroupConstItr it = functional_groupings.find(group_name);
-
   if (functional_groupings.end() == it) {
     return false;
   }
 
-  bool is_preconsented = false;
-
-  return it->second.user_consent_prompt.is_initialized() && !is_preconsented;
+  return it->second.user_consent_prompt.is_initialized();
 }
 
 FillNotificationData::FillNotificationData(Permissions& data,

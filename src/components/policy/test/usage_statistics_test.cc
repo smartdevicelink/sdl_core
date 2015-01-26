@@ -92,20 +92,18 @@ TEST(UsageStatisticsTest, TestAppInfoUpdatesTwice) {
   gui_language_info.Update("UA");
 }
 
-TEST(UsageStatisticsTest, DISABLED_TestAppStopwatchAutoStopsAndAddsZero) {
+TEST(UsageStatisticsTest, TestAppStopwatchAutoStopsAndAddsZero) {
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
-  const std::uint32_t time_out = 1;
-  AppStopwatch hmi_full_stopwatch(msm, "HelloApp", time_out);
+  AppStopwatch hmi_full_stopwatch(msm, "HelloApp");
 
   EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_FULL, 0)).Times(1);
 
   hmi_full_stopwatch.Start(SECONDS_HMI_FULL);
 }
 
-TEST(UsageStatisticsTest, DISABLED_TestAppStopwatchAddsZero) {
+TEST(UsageStatisticsTest, TestAppStopwatchAddsZero) {
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
-  const std::uint32_t time_out = 1;
-  AppStopwatch hmi_full_stopwatch(msm, "HelloApp", time_out);
+  AppStopwatch hmi_full_stopwatch(msm, "HelloApp");
 
   InSequence s;
   EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_FULL, 0)).Times(1);
@@ -115,15 +113,12 @@ TEST(UsageStatisticsTest, DISABLED_TestAppStopwatchAddsZero) {
   hmi_full_stopwatch.Start(SECONDS_HMI_FULL);
   hmi_full_stopwatch.Switch(SECONDS_HMI_BACKGROUND);
   hmi_full_stopwatch.Switch(SECONDS_HMI_FULL);
-  // TODO(AOleynik): Fix test
-  //hmi_full_stopwatch.Stop();
+  hmi_full_stopwatch.Stop();
 }
 
-TEST(UsageStatisticsTest, DISABLED_TestAppStopwatchAutoStopsInASecond) {
-  // TODO(AGaliuzov) APPLINK-10657 neet to enable this tests
+TEST(UsageStatisticsTest, TestAppStopwatchAutoStopsInASecond) {
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
-  const std::uint32_t time_out = 1;
-  AppStopwatch hmi_full_stopwatch(msm, "HelloApp", time_out);
+  AppStopwatch hmi_full_stopwatch(msm, "HelloApp");
 
   EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_FULL, 1)).Times(1);
 
@@ -131,21 +126,19 @@ TEST(UsageStatisticsTest, DISABLED_TestAppStopwatchAutoStopsInASecond) {
   sleep(1);
 }
 
-TEST(UsageStatisticsTest, DISABLED_TestAppStopwatchStopsInTwoSeconds) {
-  // TODO(AGaliuzov) APPLINK-10657 neet to enable this tests
+TEST(UsageStatisticsTest, TestAppStopwatchStopsInTwoSeconds) {
   MockStatisticsManager* msm = new StrictMock<MockStatisticsManager>();
-  const std::uint32_t time_out = 1;
-  AppStopwatch hmi_full_stopwatch(msm, "HelloApp", time_out);
+  AppStopwatch hmi_full_stopwatch(msm, "HelloApp");
 
-  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_NONE, 0)).Times(0);
+  EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_NONE, 0)).Times(1);
   EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_FULL, 1)).Times(1);
   EXPECT_CALL(*msm, Add("HelloApp", SECONDS_HMI_BACKGROUND, 1)).Times(1);
 
   hmi_full_stopwatch.Start(SECONDS_HMI_NONE);
   hmi_full_stopwatch.Switch(SECONDS_HMI_FULL);
-  sleep(2);
+  sleep(1);
   hmi_full_stopwatch.Switch(SECONDS_HMI_BACKGROUND);
-  sleep(2);
+  sleep(1);
 }
 
 }  // namespace test

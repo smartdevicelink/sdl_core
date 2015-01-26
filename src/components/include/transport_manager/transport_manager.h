@@ -59,12 +59,6 @@ class TransportManager {
   virtual int Init() = 0;
 
   /**
-   * @brief Reinitializes transport manager
-   * @return Error code
-   */
-  virtual int Reinit() = 0;
-
-  /**
     * @brief Start scanning for new devices.
     *
     * @return Code error.

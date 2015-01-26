@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -44,7 +44,7 @@ NaviIsReadyResponse::~NaviIsReadyResponse() {
 }
 
 void NaviIsReadyResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "NaviIsReadyResponse::Run");
   smart_objects::SmartObject& object = *message_;
 
   bool is_available = false;

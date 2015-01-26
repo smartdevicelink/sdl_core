@@ -47,7 +47,7 @@ SetMediaClockTimerResponse::~SetMediaClockTimerResponse() {
 }
 
 void SetMediaClockTimerResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "SetMediaClockTimerResponse::Run");
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

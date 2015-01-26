@@ -44,7 +44,7 @@ if(ENABLE_LOG)
   set(LOG4CXX_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
 endif()
 
-if(ENABLE_LOG)
+if(ENABLE_LOG AND NOT (${is_logger_actual} EQUAL 0))
   # --- libapr-1
   add_subdirectory(apr-cmake)
 
@@ -64,7 +64,7 @@ if(HMI_DBUS_API)
   set(DBUS_LIBS_DIRECTORY ${3RD_PARTY_INSTALL_PREFIX_ARCH}/lib PARENT_SCOPE)
 endif()
 
-if(HMI_DBUS_API)
+if(HMI_DBUS_API AND NOT (${is_dbus_actual} EQUAL 0))
   add_subdirectory(dbus-cmake)
 endif()
 

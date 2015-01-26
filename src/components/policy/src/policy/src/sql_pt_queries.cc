@@ -67,7 +67,6 @@ const std::string kCreateSchema =
   "); "
   "CREATE TABLE IF NOT EXISTS `module_config`( "
   "  `preloaded_pt` BOOL NOT NULL, "
-  "  `is_first_run` BOOL NOT NULL, "
   "  `exchange_after_x_ignition_cycles` INTEGER NOT NULL, "
   "  `exchange_after_x_kilometers` INTEGER NOT NULL, "
   "  `exchange_after_x_days` INTEGER NOT NULL, "
@@ -189,7 +188,7 @@ const std::string kCreateSchema =
   "  `functional_group_id` INTEGER NOT NULL, "
   "  `is_consented` BOOL NOT NULL, "
   "  `input` VARCHAR(45), "
-  "  `time_stamp` VARCHAR(45), "
+  "  `time_stamp` DATETIME DEFAULT CURRENT_TIMESTAMP, "
   "  PRIMARY KEY(`device_id`,`functional_group_id`), "
   "  CONSTRAINT `fk_device_has_functional_group_device1` "
   "    FOREIGN KEY(`device_id`) "
@@ -262,7 +261,7 @@ const std::string kCreateSchema =
   "  `functional_group_id` INTEGER NOT NULL, "
   "  `is_consented` BOOL NOT NULL, "
   "  `input` VARCHAR(45), "
-  "  `time_stamp` VARCHAR(45), "
+  "  `time_stamp` DATETIME DEFAULT CURRENT_TIMESTAMP, "
   "  PRIMARY KEY(`application_id`,`functional_group_id`,`device_id`), "
   "  CONSTRAINT `fk_consent_group_device1` "
   "    FOREIGN KEY(`device_id`) "
@@ -319,10 +318,10 @@ const std::string kInsertInitData =
   "  `pt_exchanged_x_days_after_epoch`, `ignition_cycles_since_last_exchange`,"
   "  `flag_update_required`) "
   "  VALUES (0, 0, 0, 0); "
-  "INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, `is_first_run`,"
+  "INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, "
   "  `exchange_after_x_ignition_cycles`, `exchange_after_x_kilometers`, "
   "  `exchange_after_x_days`, `timeout_after_x_seconds`) "
-  "  VALUES(1, 0, 0, 0, 0, 0); "
+  "  VALUES(1, 0, 0, 0, 0); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('EMERGENCY'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('NAVIGATION'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('VOICECOMMUNICATION'); "
@@ -533,7 +532,9 @@ const std::string kSelectModuleConfig =
   " FROM `module_config`";
 
 const std::string kSelectEndpoints =
-  "SELECT `url`, `service`, `application_id` FROM `endpoint` ";
+  "SELECT `url`, `service`, `application_id` "
+  "FROM `endpoint` "
+  "GROUP BY `application_id`";
 
 const std::string kSelectNotificationsPerMin =
   "SELECT `priority_value`, `value` FROM notifications_by_priority";

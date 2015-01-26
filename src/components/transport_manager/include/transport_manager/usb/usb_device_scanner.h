@@ -1,4 +1,4 @@
-/*
+/**
  * \file usb_device_scanner.h
  * \brief UsbDeviceScanner class header file.
  *
@@ -38,7 +38,8 @@
 
 #include <list>
 
-#include "utils/lock.h"
+#include <pthread.h>
+
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "transport_manager/usb/common.h"
 
@@ -68,7 +69,7 @@ class UsbDeviceScanner : public DeviceScanner, public UsbDeviceListener {
 
   typedef std::list<PlatformUsbDevice*> Devices;
   Devices devices_;
-  sync_primitives::Lock devices_mutex_;
+  pthread_mutex_t devices_mutex_;
 };
 
 }  // namespace

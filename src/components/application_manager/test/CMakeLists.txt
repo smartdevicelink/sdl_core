@@ -10,7 +10,6 @@ set_property(DIRECTORY "" PROPERTY INCLUDE_DIRECTORIES ${the_include_dirs})
 include_directories (
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
-  ${COMPONENTS_DIR}/application_manager/include/application_manager/policies
 )
 
 set(testSources
@@ -47,6 +46,10 @@ set (AM_SOURCES
 
   include_directories(
     ${AM_SOURCE_DIR}/policy/src/policy/policy_table/table_struct
+  )
+  list(APPEND AM_SOURCES
+    ${COMPONENTS_DIR}/application_manager/src/policies/pt_exchange_handler_impl.cc
+    ${COMPONENTS_DIR}/application_manager/src/policies/policy_retry_sequence.cc
   )
 
 set(testLibraries

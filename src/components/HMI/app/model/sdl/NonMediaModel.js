@@ -198,12 +198,10 @@ SDL.SDLNonMediaModel = SDL.SDLAppModel.extend({
                 this.appInfo.set('alignment', "text-align:center");
             }
 
-            if (params.graphic != null) {
-                if (params.graphic.value != "") {
-                    this.appInfo.set('mainImage', params.graphic.value);
-                } else {
-                    this.appInfo.set('mainImage', 'images/sdl/audio_icon.jpg');
-                }
+            if (params.graphic) {
+                this.appInfo.set('mainImage', params.graphic.value);
+            } else {
+                this.appInfo.set('mainImage', 'images/sdl/audio_icon.jpg');
             }
 
             // Magic number is a count of Preset Buttons on HMI = 8

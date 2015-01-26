@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -51,16 +51,14 @@ CREATE_LOGGERPTR_GLOBAL(logger, "SocketStreamerAdapter")
 SocketStreamerAdapter::SocketStreamerAdapter()
   : socket_fd_(0),
     is_ready_(false),
-    streamer_(new Streamer(this)),
-    thread_(threads::CreateThread("SocketStreamer", streamer_)),
+    thread_(NULL),
+    streamer_(NULL),
     messages_() {
 }
 
 SocketStreamerAdapter::~SocketStreamerAdapter() {
-  LOG4CXX_AUTO_TRACE(logger);
-  thread_->join();
-  delete streamer_;
-  threads::DeleteThread(thread_);
+  thread_->stop();
+  streamer_ = NULL;
 }
 
 void SocketStreamerAdapter::StartActivity(int32_t application_key) {
@@ -112,9 +110,15 @@ bool SocketStreamerAdapter::is_app_performing_activity(
 }
 
 void SocketStreamerAdapter::Init() {
-  LOG4CXX_DEBUG(logger, "Start sending thread");
-  const size_t kStackSize = 16384;
-  thread_->start(threads::ThreadOptions(kStackSize));
+  if (!thread_) {
+    LOG4CXX_INFO(logger, "Create and start sending thread");
+    streamer_ = new Streamer(this);
+    thread_ = threads::CreateThread("SocketStreamer", streamer_);
+    const size_t kStackSize = 16384;
+    thread_->startWithOptions(threads::ThreadOptions(kStackSize));
+  } else {
+    LOG4CXX_WARN(logger, "thread is already exist");
+  }
 }
 
 void SocketStreamerAdapter::SendData(
@@ -197,16 +201,19 @@ void SocketStreamerAdapter::Streamer::threadMain() {
   LOG4CXX_TRACE(logger,"exit " << this);
 }
 
-void SocketStreamerAdapter::Streamer::exitThreadMain() {
+bool SocketStreamerAdapter::Streamer::exitThreadMain() {
   LOG4CXX_TRACE(logger,"enter " << this);
   stop_flag_ = true;
   stop();
   server_->messages_.Shutdown();
+  //exith threadMainshould whait while threadMain will be finished
   if (server_->socket_fd_ != -1) {
     shutdown(server_->socket_fd_, SHUT_RDWR);
     close(server_->socket_fd_);
   }
+  sync_primitives::AutoLock auto_lock(thread_lock);
   LOG4CXX_TRACE(logger,"exit " << this);
+  return true;
 }
 
 void SocketStreamerAdapter::Streamer::start() {
@@ -246,7 +253,7 @@ void SocketStreamerAdapter::Streamer::start() {
 void SocketStreamerAdapter::Streamer::stop() {
   LOG4CXX_TRACE(logger,"enter " << this);
   if (0 == new_socket_fd_) {
-    LOG4CXX_ERROR(logger, "Client Socket does not exist: ");
+    LOG4CXX_ERROR(logger, "Client Socket does not exits: ");
   } else if (-1 == shutdown(new_socket_fd_, SHUT_RDWR)) {
     LOG4CXX_ERROR(logger, "Unable to shutdown socket " << strerror(errno));
   } else if (-1 == ::close(new_socket_fd_)) {

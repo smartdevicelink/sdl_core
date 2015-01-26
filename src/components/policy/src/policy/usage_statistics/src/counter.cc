@@ -83,41 +83,33 @@ AppStopwatch::AppStopwatch(utils::SharedPtr<usage_statistics::StatisticsManager>
     : app_id_(app_id),
       stopwatch_type_(SECONDS_HMI_NONE),
       statistics_manager_(statistics_manager),
-      timer_(new Timer("HMI levels timer",this, &AppStopwatch::WriteTime, true)),
-      time_out_(60) {
-}
-
-AppStopwatch::AppStopwatch(utils::SharedPtr<StatisticsManager> statistics_manager,
-                           const std::string& app_id,
-                           std::uint32_t time_out)
-  : app_id_(app_id),
-    stopwatch_type_(SECONDS_HMI_NONE),
-    statistics_manager_(statistics_manager),
-    timer_(new Timer("HMI levels timer",this, &AppStopwatch::WriteTime, true)),
-    time_out_(time_out) {
-
+      start_time_() {
 }
 
 AppStopwatch::~AppStopwatch() {
-  if (NULL != timer_) {
-    timer_->stop();
-    delete timer_;
+  if (start_time_) {
+    Stop();
   }
 }
 
 void AppStopwatch::Start(AppStopwatchId stopwatch_type) {
+  assert(0 == start_time_);
   stopwatch_type_ = stopwatch_type;
-  timer_->start(time_out_);
+  start_time_ = time(NULL);
 }
 
 void AppStopwatch::Switch(AppStopwatchId stopwatch_type) {
+  Stop();
   Start(stopwatch_type);
 }
 
-void AppStopwatch::WriteTime() {
+void AppStopwatch::Stop() {
+  assert(start_time_ != 0);
+  double difference = difftime(time(NULL), start_time_);
   if (statistics_manager_) {
-    statistics_manager_->Add(app_id_, stopwatch_type_, time_out_);
+    statistics_manager_->Add(app_id_, stopwatch_type_, int32_t(difference));
   }
+  start_time_ = 0;
 }
 
 }  //  namespace usage_statistics

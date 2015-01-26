@@ -1,4 +1,4 @@
-﻿/*
+/*
  Copyright (c) 2014, Ford Motor Company
  All rights reserved.
 
@@ -43,19 +43,12 @@ UpdateStatusManager::UpdateStatusManager() :
   exchange_in_progress_(false),
   update_required_(false),
   exchange_pending_(false),
-  last_update_status_(policy::StatusUnknown) {
-  update_status_thread_delegate_ = new UpdateThreadDelegate(this);
-  thread_ = threads::CreateThread("UpdateStatusThread", update_status_thread_delegate_);
-  thread_->start();
+  last_update_status_(policy::StatusUnknown),
+  update_response_timer_(this) {
 }
 
 UpdateStatusManager::~UpdateStatusManager() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(update_status_thread_delegate_);
-  DCHECK(thread_);
-  thread_->join();
-  delete update_status_thread_delegate_;
-  threads::DeleteThread(thread_);
+  LOG4CXX_DEBUG(logger_, "Destroy update Status manager");
 }
 
 void UpdateStatusManager::set_listener(PolicyListener* listener) {
@@ -64,33 +57,26 @@ void UpdateStatusManager::set_listener(PolicyListener* listener) {
 
 void UpdateStatusManager::OnUpdateSentOut(uint32_t update_timeout) {
   LOG4CXX_INFO(logger_, "OnUpdateSentOut");
-  DCHECK(update_status_thread_delegate_);
-  const unsigned milliseconds_in_second = 1000;
-  update_status_thread_delegate_->updateTimeOut(update_timeout *
-                                                milliseconds_in_second);
+  update_response_timer_.start(update_timeout);
   set_exchange_in_progress(true);
-  set_exchange_pending(true);
-  set_update_required(false);
 }
 
 void UpdateStatusManager::OnUpdateTimeoutOccurs() {
   LOG4CXX_INFO(logger_, "OnUpdateTimeoutOccurs");
   set_update_required(true);
   set_exchange_in_progress(false);
-  DCHECK(update_status_thread_delegate_);
-  update_status_thread_delegate_->updateTimeOut(0); // Stop Timer
 }
 
 void UpdateStatusManager::OnValidUpdateReceived() {
   LOG4CXX_INFO(logger_, "OnValidUpdateReceived");
-  update_status_thread_delegate_->updateTimeOut(0); // Stop Timer
-  set_exchange_pending(false);
+  update_response_timer_.stop();
+  set_update_required(false);
   set_exchange_in_progress(false);
 }
 
 void UpdateStatusManager::OnWrongUpdateReceived() {
   LOG4CXX_INFO(logger_, "OnWrongUpdateReceived");
-  update_status_thread_delegate_->updateTimeOut(0); // Stop Timer
+  update_response_timer_.stop();
   set_update_required(true);
   set_exchange_in_progress(false);
 }
@@ -121,8 +107,8 @@ void UpdateStatusManager::OnPolicyInit(bool is_update_required) {
   update_required_ = is_update_required;
 }
 
-PolicyTableStatus UpdateStatusManager::GetUpdateStatus() const {
-  LOG4CXX_AUTO_TRACE(logger_);
+PolicyTableStatus UpdateStatusManager::GetUpdateStatus() {
+  LOG4CXX_INFO(logger_, "GetUpdateStatus");
   if (!exchange_in_progress_ && !exchange_pending_ && !update_required_) {
     return PolicyTableStatus::StatusUpToDate;
   }
@@ -134,38 +120,11 @@ PolicyTableStatus UpdateStatusManager::GetUpdateStatus() const {
   return PolicyTableStatus::StatusUpdatePending;
 }
 
-bool UpdateStatusManager::IsUpdateRequired() const {
-  return update_required_;
-}
-
-bool UpdateStatusManager::IsUpdatePending() const {
-  return exchange_pending_;
-}
-
-void UpdateStatusManager::ScheduleUpdate() {
-  set_update_required(true);
-}
-
-std::string UpdateStatusManager::StringifiedUpdateStatus() const {
-  switch (GetUpdateStatus()) {
-    case policy::StatusUpdatePending:
-      return "UPDATING";
-    case policy::StatusUpdateRequired:
-      return "UPDATE_NEEDED";
-    case policy::StatusUpToDate:
-      return "UP_TO_DATE";
-    default: {
-      return "UNKNOWN";
-    }
-  }
-}
-
 void UpdateStatusManager::CheckUpdateStatus() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "CheckUpdateStatus");
   policy::PolicyTableStatus status = GetUpdateStatus();
   if (listener_ && last_update_status_ != status) {
-    LOG4CXX_INFO(logger_, "Send OnUpdateStatusChanged");
-    listener_->OnUpdateStatusChanged(StringifiedUpdateStatus());
+    listener_->OnUpdateStatusChanged(status);
   }
   last_update_status_ = status;
 }
@@ -193,50 +152,8 @@ void UpdateStatusManager::set_update_required(bool value) {
   CheckUpdateStatus();
 }
 
-UpdateStatusManager::UpdateThreadDelegate::UpdateThreadDelegate(UpdateStatusManager* update_status_manager):
-                      timeout_(0),
-                      stop_flag_(false),
-                      state_lock_(true),
-                      update_status_manager_(update_status_manager) {
-  LOG4CXX_INFO(logger_, "Create UpdateThreadDelegate");
-}
-
-UpdateStatusManager::UpdateThreadDelegate::~UpdateThreadDelegate() {
-  LOG4CXX_INFO(logger_, "Delete UpdateThreadDelegate");
-}
-
-void UpdateStatusManager::UpdateThreadDelegate::threadMain() {
-  LOG4CXX_DEBUG(logger_, "UpdateStatusManager thread started (started normal)");
-  sync_primitives::AutoLock auto_lock(state_lock_);
-  while (false == stop_flag_) {
-    if (timeout_ > 0) {
-      LOG4CXX_DEBUG(logger_, "Timeout is greater then 0");
-      sync_primitives::ConditionalVariable::WaitStatus wait_status =
-              termination_condition_.WaitFor(auto_lock, timeout_);
-      if (sync_primitives::ConditionalVariable::kTimeout == wait_status ) {
-        if (update_status_manager_) {
-          update_status_manager_->OnUpdateTimeoutOccurs();
-        }
-      }
-    } else {
-      // Time is not active, wait, while timeout will be seted,
-      // or UpdateStatusManager will be deleted
-      termination_condition_.Wait(auto_lock);
-    }
-  }
-}
-
-void UpdateStatusManager::UpdateThreadDelegate::exitThreadMain() {
-  sync_primitives::AutoLock auto_lock(state_lock_);
-  stop_flag_ = true;
-  LOG4CXX_INFO(logger_, "before notify");
-  termination_condition_.NotifyOne();
-}
-
-void UpdateStatusManager::UpdateThreadDelegate::updateTimeOut(const uint32_t timeout_ms) {
-  sync_primitives::AutoLock auto_lock(state_lock_);
-  timeout_ = timeout_ms;
-  termination_condition_.NotifyOne();
+UpdateStatusManager::UpdateResponseTimer::~UpdateResponseTimer() {
+  LOG4CXX_DEBUG(logger_, "Destroy update Status manager timer");
 }
 
 } // namespace policy

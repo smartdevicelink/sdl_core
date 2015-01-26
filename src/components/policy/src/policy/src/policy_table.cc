@@ -32,6 +32,7 @@
 
 #include "policy/policy_table.h"
 
+// EXTENDED_POLICY
 #  include "policy/sql_pt_representation.h"
 
 #include "utils/logger.h"
@@ -42,6 +43,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyTable")
 
 PolicyTable::PolicyTable()
     : pt_data_(
+// EXTENDED_POLICY
                new SQLPTRepresentation()
                ) {
 }

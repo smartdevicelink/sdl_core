@@ -94,7 +94,6 @@ GeneralView {
                             case Internal.MenuItemType.MI_NODE:
                                 sdlUI.onCommand(model.id, dataContainer.currentApplication.appId)
                                 contentLoader.back()
-                                dataContainer.currentApplication.currentSubMenu = dataContainer.currentApplication.options
                                 break;
                             case Internal.MenuItemType.MI_SUBMENU:
                             case Internal.MenuItemType.MI_PARENT:

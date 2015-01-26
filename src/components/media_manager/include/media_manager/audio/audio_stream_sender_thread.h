@@ -99,7 +99,7 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
      */
     uint32_t session_key() const;
 
-    void exitThreadMain();
+    bool exitThreadMain();
 
   private:
     /*
@@ -129,7 +129,6 @@ class AudioStreamSenderThread : public threads::ThreadDelegate {
     sync_primitives::ConditionalVariable  shouldBeStoped_cv_;
 
     static const int32_t                  kAudioPassThruTimeout;
-
 
     DISALLOW_COPY_AND_ASSIGN(AudioStreamSenderThread);
 };

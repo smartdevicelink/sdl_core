@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -147,7 +147,6 @@ class Profile : public utils::Singleton<Profile> {
      * @brief Default timeout for waiting for resuming
      */
     const uint32_t& app_resuming_timeout() const;
-    const uint32_t& app_resumption_save_persistent_data_timeout() const;
 
     /**
      * @brief Returns desirable thread stack size
@@ -440,19 +439,6 @@ class Profile : public utils::Singleton<Profile> {
      */
     int iap_hub_connection_wait_timeout() const;
 
-    /*
-     * ProtocolHandler section
-     */
-    size_t maximum_payload_size() const;
-
-    size_t message_frequency_count() const;
-
-    size_t message_frequency_time() const;
-
-    uint16_t attempts_to_open_policy_db() const;
-
-    uint16_t open_attempt_timeout_ms() const;
-
   private:
     /**
      * Default constructor
@@ -567,7 +553,6 @@ class Profile : public utils::Singleton<Profile> {
     uint32_t                        max_cmd_id_;
     uint32_t                        default_timeout_;
     uint32_t                        app_resuming_timeout_;
-    uint32_t                        app_resumption_save_persistent_data_timeout_;
     std::string                     vr_help_title_;
     uint32_t                        app_dir_quota_;
     std::string                     video_consumer_type_;
@@ -629,8 +614,6 @@ class Profile : public utils::Singleton<Profile> {
     int                             iap2_hub_connect_attempts_;
     int                             iap_hub_connection_wait_timeout_;
     uint16_t                        tts_global_properties_timeout_;
-    uint16_t                        attempts_to_open_policy_db_;
-    uint16_t                        open_attempt_timeout_ms_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

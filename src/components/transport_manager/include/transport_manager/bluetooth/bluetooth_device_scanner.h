@@ -1,4 +1,4 @@
-/*
+/**
  * \file bluetooth_device_scanner.h
  * \brief BluetoothDeviceScanner class header file.
  *
@@ -46,9 +46,7 @@
 #include "transport_manager/transport_adapter/device_scanner.h"
 #include "utils/conditional_variable.h"
 #include "utils/lock.h"
-#include "utils/threads/thread_delegate.h"
-
-class Thread;
+#include "utils/threads/thread.h"
 
 namespace transport_manager {
 namespace transport_adapter {

@@ -86,7 +86,6 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     void Run();
     void StopComponents();
 
-
   private:
     LifeCycle();
     transport_manager::TransportManager* transport_manager_;

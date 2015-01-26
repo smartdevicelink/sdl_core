@@ -50,7 +50,7 @@ DeleteInteractionChoiceSetRequest::~DeleteInteractionChoiceSetRequest() {
 }
 
 void DeleteInteractionChoiceSetRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetRequest::Run");
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
@@ -94,9 +94,8 @@ void DeleteInteractionChoiceSetRequest::Run() {
 bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(ApplicationConstSharedPtr app) {
   if (app->is_perform_interaction_active()) {
     // retrieve stored choice sets for perform interaction
-  const DataAccessor<PerformChoiceSetMap> accessor =
-      app->performinteraction_choice_set_map();
-  const PerformChoiceSetMap& choice_set_map = accessor.GetData();
+    const PerformChoiceSetMap& choice_set_map = app
+        ->performinteraction_choice_set_map();
 
     PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
     for (; choice_set_map.end() != it; ++it) {

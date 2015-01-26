@@ -1,4 +1,4 @@
-/*
+/**
  * \file usb_handler.cc
  * \brief UsbHandler class source file.
  *
@@ -39,9 +39,7 @@
 #include "transport_manager/usb/common.h"
 #include "transport_manager/transport_adapter/transport_adapter_impl.h"
 
-#include "utils/macro.h"
 #include "utils/logger.h"
-#include "utils/threads/thread.h"
 
 namespace transport_manager {
 namespace transport_adapter {
@@ -77,16 +75,14 @@ class UsbHandler::ControlTransferSequenceState {
 
 UsbHandler::UsbHandler()
   : shutdown_requested_(false),
-    thread_(NULL),
+    thread_(),
     usb_device_listeners_(),
     devices_(),
     transfer_sequences_(),
     device_handles_to_close_(),
     libusb_context_(NULL),
     arrived_callback_handle_(),
-    left_callback_handle_() {
-  thread_ = threads::CreateThread("UsbHandler", new UsbHandlerDelegate(this));
-}
+    left_callback_handle_() {}
 
 UsbHandler::~UsbHandler() {
   shutdown_requested_ = true;
@@ -95,15 +91,12 @@ UsbHandler::~UsbHandler() {
                                        arrived_callback_handle_);
     libusb_hotplug_deregister_callback(libusb_context_, left_callback_handle_);
   }
-  thread_->stop();
+  pthread_join(thread_, 0);
   LOG4CXX_INFO(logger_, "UsbHandler thread finished");
   if (libusb_context_) {
     libusb_exit(libusb_context_);
     libusb_context_ = 0;
   }
-  thread_->join();
-  delete thread_->delegate();
-  threads::DeleteThread(thread_);
 }
 
 void UsbHandler::DeviceArrived(libusb_device* device_libusb) {
@@ -216,6 +209,11 @@ void UsbHandler::CloseDeviceHandle(libusb_device_handle* device_handle) {
   device_handles_to_close_.push_back(device_handle);
 }
 
+void* UsbHandlerThread(void* data) {
+  static_cast<UsbHandler*>(data)->Thread();
+  return 0;
+}
+
 int ArrivedCallback(libusb_context* context, libusb_device* device,
                     libusb_hotplug_event event, void* data) {
   LOG4CXX_TRACE(logger_, "enter. libusb device arrived (bus number "
@@ -288,12 +286,19 @@ TransportAdapter::Error UsbHandler::Init() {
     return TransportAdapter::FAIL;
   }
 
-  if (!thread_->start()) {
-    LOG4CXX_ERROR(logger_, "USB device scanner thread start failed, error code");
+  const int thread_start_error =
+    pthread_create(&thread_, 0, &UsbHandlerThread, this);
+  if (0 != thread_start_error) {
+    LOG4CXX_ERROR(logger_, "USB device scanner thread start failed, error code "
+                  << thread_start_error);
     LOG4CXX_TRACE(logger_,
-                  "exit with TransportAdapter::FAIL.");
+                  "exit with TransportAdapter::FAIL. Condition: 0 !== thread_start_error");
     return TransportAdapter::FAIL;
   }
+  LOG4CXX_INFO(logger_, "UsbHandler thread started");
+  pthread_setname_np(thread_, "UsbHandler" );
+  LOG4CXX_TRACE(logger_,
+                "exit with TransportAdapter::OK. Condition: 0 == thread_start_error");
   return TransportAdapter::OK;
 }
 
@@ -352,13 +357,13 @@ void UsbHandler::SubmitControlTransfer(
   assert(transfer->Type() == UsbControlTransfer::VENDOR);
   const libusb_request_type request_type = LIBUSB_REQUEST_TYPE_VENDOR;
 
-  libusb_endpoint_direction endpoint_direction = LIBUSB_ENDPOINT_IN;
+  libusb_endpoint_direction endpoint_direction;
   if (transfer->Direction() == UsbControlTransfer::IN) {
     endpoint_direction = LIBUSB_ENDPOINT_IN;
   } else if (transfer->Direction() == UsbControlTransfer::OUT) {
     endpoint_direction = LIBUSB_ENDPOINT_OUT;
   } else {
-    NOTREACHED();
+    assert(0);
   }
   const uint8_t request = transfer->Request();
   const uint16_t value = transfer->Value();
@@ -465,16 +470,5 @@ void UsbHandler::ControlTransferSequenceState::Finish() {
   finished_ = true;
 }
 
-UsbHandler::UsbHandlerDelegate::UsbHandlerDelegate(
-    UsbHandler* handler)
-  : handler_(handler) {
-}
-
-void UsbHandler::UsbHandlerDelegate::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(handler_);
-  handler_->Thread();
-}
-
-}  // namespace transport_adapter
-}  // namespace transport_manager
+}  // namespace
+}  // namespace

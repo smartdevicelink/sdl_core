@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -69,13 +69,10 @@ const char* kTransportManagerSection = "TransportManager";
 const char* kApplicationManagerSection = "ApplicationManager";
 const char* kFilesystemRestrictionsSection = "FILESYSTEM RESTRICTIONS";
 const char* kIAPSection = "IAP";
-const char* kProtocolHandlerSection = "ProtocolHandler";
 
 const char* kHmiCapabilitiesKey = "HMICapabilities";
 const char* kPathToSnapshotKey = "PathToSnapshot";
 const char* kPreloadedPTKey = "PreloadedPT";
-const char* kAttemptsToOpenPolicyDBKey = "AttemptsToOpenPolicyDB";
-const char* kOpenAttemptTimeoutMsKey = "OpenAttemptTimeoutMs";
 //const char* kPoliciesTableKey = "PoliciesTable";
 const char* kServerAddressKey = "ServerAddress";
 const char* kAppInfoStorageKey = "AppInfoStorage";
@@ -113,7 +110,6 @@ const char* kDeleteFileRequestKey = "DeleteFileRequest";
 const char* kListFilesRequestKey = "ListFilesRequest";
 const char* kDefaultTimeoutKey = "DefaultTimeout";
 const char* kAppResumingTimeoutKey = "ApplicationResumingTimeout";
-const char* kAppSavePersistentDataTimeoutKey = "AppSavePersistentDataTimeout";
 const char* kAppDirectoryQuotaKey = "AppDirectoryQuota";
 const char* kAppTimeScaleMaxRequestsKey = "AppTimeScaleMaxRequests";
 const char* kAppRequestsTimeScaleKey = "AppRequestsTimeScale";
@@ -143,9 +139,6 @@ const char* kIAP2HubConnectAttemptskey = "IAP2HubConnectAttempts";
 const char* kIAPHubConnectionWaitTimeoutKey = "ConnectionWaitTimeout";
 const char* kDefaultHubProtocolIndexKey = "DefaultHubProtocolIndex";
 const char* kTTSGlobalPropertiesTimeoutKey = "TTSGlobalPropertiesTimeout";
-const char* kMaximumPayloadSizeKey ="MaximumPayloadSize";
-const char* kFrequencyCount ="FrequencyCount";
-const char* kFrequencyTime ="FrequencyTime";
 
 const char* kDefaultPoliciesSnapshotFileName = "sdl_snapshot.json";
 const char* kDefaultHmiCapabilitiesFileName = "hmi_capabilities.json";
@@ -178,14 +171,13 @@ const uint32_t kDefaultPutFileRequestInNone = 5;
 const uint32_t kDefaultDeleteFileRequestInNone = 5;
 const uint32_t kDefaultListFilesRequestInNone = 5;
 const uint32_t kDefaultTimeout = 10;
-const uint32_t kDefaultAppResumingTimeout = 3;
-const uint32_t kDefaultAppSavePersistentDataTimeout = 10;
+const uint32_t kDefaultAppResumingTimeout = 5;
 const uint32_t kDefaultDirQuota = 104857600;
-const uint32_t kDefaultAppTimeScaleMaxRequests = 0;
-const uint32_t kDefaultAppRequestsTimeScale = 0;
+const uint32_t kDefaultAppTimeScaleMaxRequests = 100;
+const uint32_t kDefaultAppRequestsTimeScale = 10;
 const uint32_t kDefaultAppHmiLevelNoneTimeScaleMaxRequests = 100;
 const uint32_t kDefaultAppHmiLevelNoneRequestsTimeScale = 10;
-const uint32_t kDefaultPendingRequestsAmount = 0;
+const uint32_t kDefaultPendingRequestsAmount = 1000;
 const uint32_t kDefaultTransportManagerDisconnectTimeout = 0;
 const uint32_t kDefaultApplicationListUpdateTimeout = 1;
 const std::pair<uint32_t, uint32_t> kReadDIDFrequency = {5 , 1};
@@ -195,12 +187,6 @@ const uint32_t kDefaultMaxThreadPoolSize = 2;
 const int kDefaultIAP2HubConnectAttempts = 0;
 const int kDefaultIAPHubConnectionWaitTimeout = 10;
 const uint16_t kDefaultTTSGlobalPropertiesTimeout = 20;
-// TCP MTU - header size = 1500 - 12
-const size_t kDefaultMaximumPayloadSize = 1500 - 12;
-const size_t kDefaultFrequencyCount = 1000;
-const size_t kDefaultFrequencyTime  = 1000;
-const uint16_t kDefaultAttemptsToOpenPolicyDB = 5;
-const uint16_t kDefaultOpenAttemptTimeoutMsKey = 500;
 
 }  // namespace
 
@@ -263,16 +249,14 @@ Profile::Profile()
     iap2_system_config_(kDefaultIAP2SystemConfig),
     iap2_hub_connect_attempts_(kDefaultIAP2HubConnectAttempts),
     iap_hub_connection_wait_timeout_(kDefaultIAPHubConnectionWaitTimeout),
-    tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout),
-    attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB),
-    open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB) {
+    tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout) {
 }
 
 Profile::~Profile() {
 }
 
 void Profile::config_file_name(const std::string& fileName) {
-  if (false == fileName.empty()) {
+  if (false == fileName.empty()) {    
     config_file_name_ = fileName;
     UpdateValues();
   }
@@ -328,10 +312,6 @@ const uint32_t& Profile::default_timeout() const {
 
 const uint32_t& Profile::app_resuming_timeout() const {
   return app_resuming_timeout_;
-}
-
-const uint32_t& Profile::app_resumption_save_persistent_data_timeout() const {
-  return app_resumption_save_persistent_data_timeout_;
 }
 
 const std::string& Profile::vr_help_title() const {
@@ -513,7 +493,7 @@ uint32_t Profile::thread_pool_size() const  {
 }
 
 uint32_t Profile::default_hub_protocol_index() const{
-  return default_hub_protocol_index_;
+	return default_hub_protocol_index_;
 }
 
 const std::string& Profile::iap_legacy_protocol_mask() const {
@@ -544,41 +524,12 @@ int Profile::iap_hub_connection_wait_timeout() const {
   return iap_hub_connection_wait_timeout_;
 }
 
-size_t Profile::maximum_payload_size() const {
-  size_t maximum_payload_size = 0;
-  ReadUIntValue(&maximum_payload_size, kDefaultMaximumPayloadSize,
-                kProtocolHandlerSection, kMaximumPayloadSizeKey);
-  return maximum_payload_size;
-}
-
-size_t Profile::message_frequency_count() const {
-  size_t message_frequency_count = 0;
-  ReadUIntValue(&message_frequency_count, kDefaultFrequencyCount,
-                kProtocolHandlerSection, kFrequencyCount);
-  return message_frequency_count;
-}
-
-size_t Profile::message_frequency_time() const {
-  size_t message_frequency_time = 0;
-  ReadUIntValue(&message_frequency_time, kDefaultFrequencyTime,
-                kProtocolHandlerSection,kFrequencyTime );
-  return message_frequency_time;
-}
-
-uint16_t Profile::attempts_to_open_policy_db() const {
-  return attempts_to_open_policy_db_;
-}
-
-uint16_t Profile::open_attempt_timeout_ms() const {
-  return open_attempt_timeout_ms_;
-}
-
 uint16_t Profile::tts_global_properties_timeout() const {
   return tts_global_properties_timeout_;
 }
 
 void Profile::UpdateValues() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "Profile::UpdateValues");
 
   // Launch HMI parameter
   std::string launch_value;
@@ -818,15 +769,6 @@ ReadStringValue(&app_info_storage_, kDefaultAppInfoFileName,
     if (app_resuming_timeout_ <= 0) {
         app_resuming_timeout_ = kDefaultAppResumingTimeout;
   }
-    // Save resumption info to File System
-    LOG_UPDATED_VALUE(app_resuming_timeout_, kAppSavePersistentDataTimeoutKey,
-                      kMainSection);
-    ReadUIntValue(&app_resumption_save_persistent_data_timeout_,
-                  kDefaultAppSavePersistentDataTimeout,
-                  kMainSection, kAppSavePersistentDataTimeoutKey);
-    if (app_resuming_timeout_ <= 0) {
-        app_resuming_timeout_ = kDefaultAppSavePersistentDataTimeout;
-    }
 
     LOG_UPDATED_VALUE(app_resuming_timeout_, kAppResumingTimeoutKey,
                       kMainSection);
@@ -1090,24 +1032,6 @@ LOG_UPDATED_VALUE(event_mq_name_, kEventMQKey, kTransportManagerSection);
 
   LOG_UPDATED_VALUE(policy_snapshot_file_name_, kPathToSnapshotKey,
                     kPolicySection);
-
-  // Attempts number for opening policy DB
-  ReadUIntValue(&attempts_to_open_policy_db_,
-      kDefaultAttemptsToOpenPolicyDB,
-      kPolicySection,
-      kAttemptsToOpenPolicyDBKey);
-
-  LOG_UPDATED_VALUE(attempts_to_open_policy_db_,
-      kAttemptsToOpenPolicyDBKey, kPolicySection);
-
-  // Open attempt timeout in ms
-  ReadUIntValue(&open_attempt_timeout_ms_,
-      kDefaultOpenAttemptTimeoutMsKey,
-      kPolicySection,
-      kOpenAttemptTimeoutMsKey);
-
-  LOG_UPDATED_VALUE(open_attempt_timeout_ms_,
-      kOpenAttemptTimeoutMsKey, kPolicySection);
 
   // Turn Policy Off?
   std::string enable_policy_string;

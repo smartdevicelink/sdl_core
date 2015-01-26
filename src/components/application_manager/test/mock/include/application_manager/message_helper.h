@@ -178,7 +178,7 @@ class MessageHelper {
     /**
      * @brief Sends IVI subscriptions
      */
-    static SmartObjectList GetIVISubscriptionRequests(ApplicationSharedPtr app);
+    static SmartObjectList GetIVISubscribtionRequests(const uint32_t app_id);
 
     static void SendAppDataToHMI(ApplicationConstSharedPtr app);
     static void SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app);
@@ -192,11 +192,6 @@ class MessageHelper {
     static void SendAddCommandRequestToHMI(ApplicationConstSharedPtr app);
     static SmartObjectList CreateAddCommandRequestToHMI(ApplicationConstSharedPtr app);
 
-    /**
-     * @brief Sends UI_ChangeRegistration to HMI with list of AppHMIType
-     * @param app applicaton instace
-     */
-    static void SendUIChangeRegistrationRequestToHMI(ApplicationConstSharedPtr app);
     static void SendChangeRegistrationRequestToHMI(ApplicationConstSharedPtr app);
     static void SendAddVRCommandToHMI(
       uint32_t cmd_id, const smart_objects::SmartObject& vr_commands,
@@ -228,8 +223,7 @@ class MessageHelper {
                                                 bool is_unexpected_disconnect = false);
     static void SendActivateAppToHMI(
       uint32_t const app_id,
-      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL,
-      bool send_policy_priority = true);
+      hmi_apis::Common_HMILevel::eType level = hmi_apis::Common_HMILevel::FULL);
 
     static void SendOnResumeAudioSourceToHMI(const uint32_t app_id);
 
@@ -427,16 +421,6 @@ class MessageHelper {
       smart_objects::SmartObject& message_params,
       ApplicationConstSharedPtr app);
 
-    /**
-     * @brief checkWithPolicy allows to check soft button's parameters
-     * according to the current policy
-     * @param system_action system action
-     * @param app_mobile_id policy application id
-     * @return
-     */
-    static bool CheckWithPolicy(int system_action,
-                                const std::string& app_mobile_id);
-
     /*
      * @brief subscribe application to softbutton
      *
@@ -497,8 +481,7 @@ class MessageHelper {
                                    smart_objects::SmartObject& message);
 
     static smart_objects::SmartObject* CreateChangeRegistration(
-      int32_t function_id, int32_t language, uint32_t app_id,
-      const smart_objects::SmartObject* app_types = NULL);
+      int32_t function_id, int32_t language, uint32_t app_id);
 
     MessageHelper();
 

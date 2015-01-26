@@ -306,12 +306,10 @@ class PTExtRepresentation : public virtual PTRepresentation {
 
     /**
      * Sets flag of unpaired device
-     * @param device_id Unique device id
-     * @param unpaired True, if unpaired, otherwise - false
+     * @param device_id
      * @return true if success
      */
-    virtual bool SetUnpairedDevice(const std::string& device_id,
-                                   bool unpaired) const = 0;
+    virtual bool SetUnpairedDevice(const std::string& device_id) const = 0;
 
     /**
      * Gets list of unpaired devices

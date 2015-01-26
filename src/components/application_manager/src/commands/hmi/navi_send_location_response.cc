@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -44,7 +44,7 @@ NaviSendLocationResponse::~NaviSendLocationResponse() {
 }
 
 void NaviSendLocationResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "NaviSendLocationResponse::Run");
 
   event_engine::Event event(hmi_apis::FunctionID::Navigation_SendLocation);
   event.set_smart_object(*message_);

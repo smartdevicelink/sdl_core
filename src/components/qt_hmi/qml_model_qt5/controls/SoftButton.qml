@@ -49,7 +49,7 @@ OvalButton {
     highlighted: button ? button.isHighlighted : false
     onPressed: {
         actionOrder = SoftButton.Action.doOnClicked
-        sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonEventMode.BUTTONDOWN, button.softButtonID, appId)
+        sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonEventMode.BUTTONDOWN, button.softButtonID)
     }
 
     onReleased: {
@@ -67,11 +67,11 @@ OvalButton {
             }
         }
 
-        sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonEventMode.BUTTONUP, button.softButtonID, appId)
+        sdlButtons.onButtonEvent(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonEventMode.BUTTONUP, button.softButtonID)
     }
 
     onClicked: {
-        sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonPressMode.SHORT, button.softButtonID, appId);
+        sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonPressMode.SHORT, button.softButtonID);
         switch (button.systemAction) {
         case Common.SystemAction.DEFAULT_ACTION:
             defaultAction();
@@ -87,7 +87,7 @@ OvalButton {
 
     onPressAndHold: {
         actionOrder = SoftButton.Action.doOnReleased; // action should be triggered on release
-        sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonPressMode.LONG, button.softButtonID, appId);
+        sdlButtons.onButtonPress(Common.ButtonName.CUSTOM_BUTTON, Common.ButtonPressMode.LONG, button.softButtonID);
     }
 
     onButtonChanged: {

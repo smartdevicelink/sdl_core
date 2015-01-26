@@ -37,7 +37,6 @@
 #include <vector>
 
 #include "utils/lock.h"
-#include "utils/threads/thread.h"
 #include "connection_handler/device.h"
 #include "connection_handler/heartbeat_monitor.h"
 #include "protocol/service_type.h"
@@ -289,7 +288,7 @@ class Connection {
   /**
    * \brief monitor that closes connection if there is no traffic over it
    */
-  HeartBeatMonitor* heartbeat_monitor_;
+  HeartBeatMonitor *heartbeat_monitor_;
   threads::Thread *heart_beat_monitor_thread_;
 
   DISALLOW_COPY_AND_ASSIGN(Connection);

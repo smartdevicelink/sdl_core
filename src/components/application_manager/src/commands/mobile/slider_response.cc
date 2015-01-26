@@ -46,7 +46,7 @@ SliderResponse::~SliderResponse() {
 }
 
 void SliderResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "SliderResponse::Run");
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

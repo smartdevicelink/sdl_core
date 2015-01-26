@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -52,7 +52,7 @@ OnSystemRequestNotification::~OnSystemRequestNotification() {
 }
 
 void OnSystemRequestNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "OnSystemRequestNotification::Run");
 
   smart_objects::SmartObject& params = (*message_)[strings::params];
   smart_objects::SmartObject& msg_params = (*message_)[strings::msg_params];
@@ -60,8 +60,7 @@ void OnSystemRequestNotification::Run() {
   params[strings::function_id] =
     static_cast<int32_t>(mobile_apis::FunctionID::eType::OnSystemRequestID);
 
-  const std::string app_id = msg_params[strings::app_id].asString();
-  LOG4CXX_DEBUG(logger_, "Received OnSystemRequest for " << app_id );
+  std::string app_id = msg_params[strings::app_id].asString();
 
   if (strings::default_app_id == app_id) {
     PolicyHandler* policy_handler = PolicyHandler::instance();
@@ -82,8 +81,7 @@ void OnSystemRequestNotification::Run() {
     ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application_by_policy_id(app_id);
     if (!app.valid()) {
-      LOG4CXX_WARN(logger_, "Application with id " << app_id
-                   << " is not registered.");
+      LOG4CXX_WARN(logger_, "Application with such id is not yet registered.");
       return;
     }
     params[strings::connection_key] = app->app_id();

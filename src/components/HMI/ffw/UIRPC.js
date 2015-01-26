@@ -168,25 +168,6 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.Alert":
                 {
 
-                    // Werify if there is an ansupported data in request
-                    if (this.errorResponsePull[request.id] != null) {
-
-                        //Check if there is any available data to  process the request
-                        if (request.params.alertStrings.length > 0
-                            || "softButtons" in request.params) {
-
-                            this.errorResponsePull[request.id].code = SDL.SDLModel.resultCode["WARNINGS"];
-                        } else {
-                            //If no available data sent error response and stop process current request
-
-                            this.sendError(this.errorResponsePull[request.id].code, request.id, request.method,
-                                    "Unsupported " + this.errorResponsePull[request.id].type + " type. Request was not processed.");
-                            this.errorResponsePull[request.id] = null;
-
-                            return;
-                        }
-                    }
-
                     if (SDL.SDLModel.onUIAlert(request.params, request.id)) {
                         SDL.SDLController.onSystemContextChange(request.params.appID);
                     }
@@ -196,28 +177,6 @@ FFW.UI = FFW.RPCObserver.create({
                 case "UI.Show":
                 {
 
-                    // Werify if there is an ansupported data in request
-                    if (this.errorResponsePull[request.id] != null) {
-
-                        //Check if there is any available data to  process the request
-                        if (request.params.showStrings.length > 0
-                            || "graphic" in request.params
-                            || "secondaryGraphic" in request.params
-                            || "softButtons" in request.params
-                            || "customPresets" in request.params) {
-
-                            this.errorResponsePull[request.id].code = SDL.SDLModel.resultCode["WARNINGS"];
-                        } else {
-                            //If no available data sent error response and stop process current request
-
-                            this.sendError(this.errorResponsePull[request.id].code, request.id, request.method,
-                            "Unsupported " + this.errorResponsePull[request.id].type + " type. Request was not processed.");
-                            this.errorResponsePull[request.id] = null;
-
-                            return;
-                        }
-                    }
-
                     SDL.TurnByTurnView.deactivate();
                     SDL.SDLController.getApplicationModel(request.params.appID).onSDLUIShow(request.params);
                     this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
@@ -226,29 +185,14 @@ FFW.UI = FFW.RPCObserver.create({
                 }
                 case "UI.SetGlobalProperties":
                 {
-
-                    // Werify if there is an ansupported data in request
-                    if (this.errorResponsePull[request.id] != null) {
-
-                        //Check if there is any available data to  process the request
-                        if ("menuTitle" in request.params
-                            || "keyboardProperties" in request.params
-                            || "vrHelp" in request.params
-                            || "menuIcon" in request.params) {
-
-                            this.errorResponsePull[request.id].code = SDL.SDLModel.resultCode["WARNINGS"];
-                        } else {
-                            //If no available data sent error response and stop process current request
-
-                            this.sendError(this.errorResponsePull[request.id].code, request.id, request.method,
-                                    "Unsupported " + this.errorResponsePull[request.id].type + " type. Request was not processed.");
-                            this.errorResponsePull[request.id] = null;
-
-                            return;
-                        }
-                    }
-
                     SDL.SDLModel.setProperties(request.params);
+
+                    this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
+
+                    break;
+                }
+                case "UI.ResetGlobalProperties":
+                {
 
                     this.sendUIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, request.method);
 
@@ -256,25 +200,6 @@ FFW.UI = FFW.RPCObserver.create({
                 }
                 case "UI.AddCommand":
                 {
-
-                    // Werify if there is an ansupported data in request
-                    if (this.errorResponsePull[request.id] != null) {
-
-                        //Check if there is any available data to  process the request
-                        if ("cmdIcon" in request.params
-                            || "menuParams" in request.params) {
-
-                            this.errorResponsePull[request.id].code = SDL.SDLModel.resultCode["WARNINGS"];
-                        } else {
-                            //If no available data sent error response and stop process current request
-
-                            this.sendError(this.errorResponsePull[request.id].code, request.id, request.method,
-                                    "Unsupported " + this.errorResponsePull[request.id].type + " type. Request was not processed.");
-                            this.errorResponsePull[request.id] = null;
-
-                            return;
-                        }
-                    }
 
                     SDL.SDLController.getApplicationModel(request.params.appID).addCommand(request);
 
@@ -304,26 +229,6 @@ FFW.UI = FFW.RPCObserver.create({
                 }
                 case "UI.PerformInteraction":
                 {
-
-                    // Werify if there is an ansupported data in request
-                    if (this.errorResponsePull[request.id] != null) {
-
-                        //Check if there is any available data to  process the request
-                        if ("choiceSet" in request.params
-                            && request.params
-                            && request.params.interactionLayout != "KEYBOARD") {
-
-                            this.errorResponsePull[request.id].code = SDL.SDLModel.resultCode["WARNINGS"];
-                        } else {
-                            //If no available data sent error response and stop process current request
-
-                            this.sendError(this.errorResponsePull[request.id].code, request.id, request.method,
-                                    "Unsupported " + this.errorResponsePull[request.id].type + " type. Request was not processed.");
-                            this.errorResponsePull[request.id] = null;
-
-                            return;
-                        }
-                    }
 
                     if (SDL.SDLModel.uiPerformInteraction(request)) {
                         SDL.SDLController.onSystemContextChange();
@@ -866,20 +771,6 @@ FFW.UI = FFW.RPCObserver.create({
                 }
                 case "UI.SetAppIcon":
                 {
-
-                    // Werify if there is an ansupported data in request
-                    if (this.errorResponsePull[request.id] != null) {
-
-                        //Check if there is any available data to  process the request
-                        if (!("syncFileName" in request.params)) {
-
-                            this.sendError(this.errorResponsePull[request.id].code, request.id, request.method,
-                                    "Unsupported " + this.errorResponsePull[request.id].type + " type. Request was not processed.");
-                            this.errorResponsePull[request.id] = null;
-
-                            return;
-                        }
-                    }
 
                     SDL.SDLModel.onSDLSetAppIcon(request.params, request.id, request.method);
 
@@ -1429,14 +1320,6 @@ FFW.UI = FFW.RPCObserver.create({
      */
     sendUIResult: function (resultCode, id, method) {
 
-        if (this.errorResponsePull[id]) {
-
-            this.sendError(this.errorResponsePull[id].code, id, method,
-                    "Unsupported " + this.errorResponsePull[id].type + " type. Available data in request was processed.");
-            this.errorResponsePull[id] = null;
-            return;
-        }
-
         Em.Logger.log("FFW." + method + "Response");
 
         if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
@@ -1468,8 +1351,16 @@ FFW.UI = FFW.RPCObserver.create({
 
         switch (resultCode) {
             case SDL.SDLModel.resultCode["SUCCESS"]: {
-
-                this.sendUIResult(resultCode, id, 'UI.Alert');
+                // send repsonse
+                var JSONMessage = {
+                    "jsonrpc": "2.0",
+                    "id": id,
+                    "result": {
+                        "code": resultCode, // type (enum) from SDL protocol
+                        "method": 'UI.Alert'
+                    }
+                };
+                this.client.send(JSONMessage);
 
                 break;
             }
@@ -1503,7 +1394,6 @@ FFW.UI = FFW.RPCObserver.create({
 
         if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
 
-            this.sendUIResult(resultCode, id, 'UI.Alert');
             // send repsonse
             var JSONMessage = {
                 "jsonrpc": "2.0",
@@ -1639,36 +1529,6 @@ FFW.UI = FFW.RPCObserver.create({
     interactionResponse: function (requestID, resultCode, commandID, manualTextEntry) {
 
         Em.Logger.log("FFW.UI.PerformInteractionResponse");
-
-        if (this.errorResponsePull[requestID]) {
-
-            if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
-                // send repsonse
-                var JSONMessage = {
-                    "jsonrpc": "2.0",
-                    "id": requestID,
-                    "error": {
-                        "code": this.errorResponsePull[requestID].code,
-                        "message": "Unsupported " + this.errorResponsePull[requestID].type + " type. Available data in request was processed.",
-                        "data": {
-                            "method": "UI.PerformInteraction"
-                        }
-                    }
-                };
-
-                if (commandID) {
-                    JSONMessage.error.data.choiceID = commandID;
-                }
-
-                if (manualTextEntry != null) {
-                    JSONMessage.error.data.manualTextEntry = manualTextEntry;
-                }
-            }
-
-            this.client.send(JSONMessage);
-            this.errorResponsePull[requestID] = null;
-            return;
-        }
 
         if (resultCode === SDL.SDLModel.resultCode["SUCCESS"]) {
             // send repsonse

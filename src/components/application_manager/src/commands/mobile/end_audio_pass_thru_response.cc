@@ -47,7 +47,7 @@ EndAudioPassThruResponse::~EndAudioPassThruResponse() {
 }
 
 void EndAudioPassThruResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "EndAudioPassThruResponse::Run");
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

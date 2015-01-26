@@ -64,7 +64,7 @@ PerformInteractionRequest::~PerformInteractionRequest() {
 }
 
 void PerformInteractionRequest::onTimer() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimer");
 }
 
 bool PerformInteractionRequest::Init() {
@@ -87,7 +87,7 @@ bool PerformInteractionRequest::Init() {
 }
 
 void PerformInteractionRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::Run");
 
   ApplicationSharedPtr app =
       ApplicationManagerImpl::instance()->application(connection_key());
@@ -243,7 +243,7 @@ void PerformInteractionRequest::Run() {
 }
 
 void PerformInteractionRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::on_event");
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_OnResetTimeout: {
@@ -271,7 +271,7 @@ void PerformInteractionRequest::on_event(const event_engine::Event& event) {
 }
 
 void PerformInteractionRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::onTimeOut");
 
   switch (interaction_mode_) {
     case mobile_apis::InteractionMode::BOTH: {
@@ -308,7 +308,7 @@ void PerformInteractionRequest::onTimeOut() {
 
 void PerformInteractionRequest::ProcessVRResponse(
     const smart_objects::SmartObject& message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::ProcessVRResponse");
   const uint32_t app_id = connection_key();
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
   if (!app.get()) {
@@ -334,14 +334,6 @@ void PerformInteractionRequest::ProcessVRResponse(
                                                                default_timeout());
       return;
     }
-  }
-
-  if (mobile_apis::Result::SUCCESS == vr_perform_interaction_code_ &&
-      mobile_apis::InteractionMode::MANUAL_ONLY == interaction_mode_) {
-    LOG4CXX_INFO(logger_, "VR response SUCCESS in MANUAL_ONLY mode " <<
-                          "Wait for UI response");
-    // in case MANUAL_ONLY mode VR.PI SUCCESS just return
-    return;
   }
 
   smart_objects::SmartObject msg_params =
@@ -380,7 +372,8 @@ void PerformInteractionRequest::ProcessVRResponse(
 
 void PerformInteractionRequest::ProcessPerformInteractionResponse(
     const smart_objects::SmartObject& message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_,
+               "PerformInteractionRequest::ProcessPerformInteractionResponse");
   const uint32_t app_id = connection_key();
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
   if (!app.get()) {
@@ -572,7 +565,6 @@ void PerformInteractionRequest::SendVRPerformInteractionRequest(
             smart_objects::SmartObject item(smart_objects::SmartType_Map);
             // Since there is no custom data from application side, SDL should
             // construct prompt and append delimiter to each item
-            item[strings::type] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
             item[strings::text] = vr_commands[0].asString() +
                                   profile::Profile::instance()->tts_delimiter();
             msg_params[strings::help_prompt][index++] = item;
@@ -760,7 +752,7 @@ void PerformInteractionRequest::DisablePerformInteraction() {
 }
 
 bool PerformInteractionRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::IsWhiteSpaceExist");
   const char* str = NULL;
 
   str = (*message_)[strings::msg_params][strings::initial_text].asCharArray();
@@ -855,10 +847,9 @@ void PerformInteractionRequest::TerminatePerformInteraction() {
 
 bool PerformInteractionRequest::CheckChoiceIDFromResponse(
     ApplicationSharedPtr app, int32_t choice_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  const DataAccessor<PerformChoiceSetMap> accessor =
-      app->performinteraction_choice_set_map();
-  const PerformChoiceSetMap& choice_set_map = accessor.GetData();
+  LOG4CXX_INFO(logger_, "PerformInteractionRequest::CheckChoiceIDFromResponse");
+  const PerformChoiceSetMap& choice_set_map = app
+        ->performinteraction_choice_set_map();
 
   for (PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
       choice_set_map.end() != it; ++it) {

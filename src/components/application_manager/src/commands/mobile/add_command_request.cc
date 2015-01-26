@@ -56,13 +56,13 @@ AddCommandRequest::~AddCommandRequest() {
 }
 
 void AddCommandRequest::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "AddCommandRequest::onTimeOut");
   RemoveCommand();
   CommandRequestImpl::onTimeOut();
 }
 
 void AddCommandRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "AddCommandRequest::Run");
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[strings::params][strings::connection_key].asUInt());
@@ -198,8 +198,7 @@ bool AddCommandRequest::CheckCommandName(ApplicationConstSharedPtr app) {
     return false;
   }
 
-  const DataAccessor<CommandsMap> accessor = app->commands_map();
-  const CommandsMap& commands = accessor.GetData();
+  const CommandsMap& commands = app->commands_map();
   CommandsMap::const_iterator i = commands.begin();
   uint32_t saved_parent_id = 0;
   uint32_t parent_id = 0;
@@ -236,8 +235,7 @@ bool AddCommandRequest::CheckCommandVRSynonym(ApplicationConstSharedPtr app) {
     return false;
   }
 
-  const DataAccessor<CommandsMap> accessor = app->commands_map();
-  const CommandsMap& commands = accessor.GetData();
+  const CommandsMap& commands = app->commands_map();
   CommandsMap::const_iterator it = commands.begin();
 
   for (; commands.end() != it; ++it) {
@@ -286,7 +284,7 @@ bool AddCommandRequest::CheckCommandParentId(ApplicationConstSharedPtr app) {
 }
 
 void AddCommandRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "AddCommandRequest::on_event");
 
   const smart_objects::SmartObject& message = event.smart_object();
 
@@ -362,7 +360,7 @@ bool AddCommandRequest::IsPendingResponseExist() {
 }
 
 bool AddCommandRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "AddCommandRequest::IsWhiteSpaceExist");
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::menu_params)) {
@@ -400,7 +398,7 @@ bool AddCommandRequest::IsWhiteSpaceExist() {
 }
 
 void AddCommandRequest::RemoveCommand() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "AddCommandRequest::RemoveCommand");
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       connection_key());
   if (!app.valid()) {

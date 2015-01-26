@@ -83,11 +83,12 @@ void HeartBeatMonitor::Process() {
 }
 
 void HeartBeatMonitor::RefreshExpiration(TimevalStruct* expiration) const {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_TRACE_ENTER(logger_);
   sync_primitives::AutoLock locker(heartbeat_timeout_seconds_lock_);
   DCHECK(expiration);
   *expiration = date_time::DateTime::getCurrentTime();
   expiration->tv_sec += heartbeat_timeout_seconds_;
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void HeartBeatMonitor::threadMain() {
@@ -143,12 +144,12 @@ void HeartBeatMonitor::KeepAlive(uint8_t session_id) {
   }
 }
 
-void HeartBeatMonitor::exitThreadMain() {
-  // FIXME (dchmerev@luxoft.com): thread requested to stop should stop as soon as possible,
-  // not running one more iteration before actual stop
-  LOG4CXX_AUTO_TRACE(logger_);
+bool HeartBeatMonitor::exitThreadMain() {
+  LOG4CXX_TRACE_ENTER(logger_);
   run_ = false;
   AutoLock main_lock(main_thread_lock_);
+  LOG4CXX_TRACE_EXIT(logger_);
+  return true;
 }
 
 void HeartBeatMonitor::set_heartbeat_timeout_seconds(int32_t timeout) {

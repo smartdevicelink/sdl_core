@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ VISubscribeVehicleDataResponse::~VISubscribeVehicleDataResponse() {
 }
 
 void VISubscribeVehicleDataResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "VISubscribeVehicleDataResponse::Run");
   event_engine::Event event(
       hmi_apis::FunctionID::VehicleInfo_SubscribeVehicleData
       );

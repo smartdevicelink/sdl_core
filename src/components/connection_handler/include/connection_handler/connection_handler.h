@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -45,12 +45,6 @@
  * \brief SmartDeviceLink connection_handler namespace.
  */
 namespace connection_handler {
-
-  enum CloseSessionReason {
-    kCommon = 0,
-    kFlood
-  };
-
 /**
  * \class ConnectionHandler
  * \brief SmartDeviceLink ConnectionHandler interface class
@@ -106,14 +100,13 @@ class ConnectionHandler {
   /**
    * Close session associated with the key
    */
-  virtual void CloseSession(uint32_t key, CloseSessionReason close_reason) = 0;
+  virtual void CloseSession(uint32_t key) = 0;
 
   /**
    * Close session
    */
   virtual void CloseSession(ConnectionHandle connection_handle,
-                            uint8_t session_id,
-                            CloseSessionReason close_reason) = 0;
+                            uint8_t session_id) = 0;
 
   /**
    * \brief Start heartbeat for specified session

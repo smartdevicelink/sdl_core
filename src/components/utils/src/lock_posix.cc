@@ -1,4 +1,4 @@
-﻿/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -34,8 +34,6 @@
 
 #include <errno.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "utils/logger.h"
 
@@ -49,7 +47,7 @@ Lock::Lock()
         is_mutex_recursive_(false)
 #endif // NDEBUG
 {
-  const int32_t status = pthread_mutex_init(&mutex_, NULL);
+  int32_t status = pthread_mutex_init(&mutex_, NULL);
   if (status != 0) {
     LOG4CXX_ERROR(logger_, "Failed to initialize mutex");
   }
@@ -81,29 +79,54 @@ Lock::Lock(bool is_mutex_recursive)
 Lock::~Lock() {
 #ifndef NDEBUG
   if (lock_taken_ > 0) {
-    LOG4CXX_ERROR(logger_, "Destroying non-released mutex " << &mutex_);
+    LOG4CXX_ERROR(logger_, "Destroying non-released mutex");
   }
 #endif
   int32_t status = pthread_mutex_destroy(&mutex_);
   if (status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to destroy mutex " << &mutex_ << ": " << strerror(status)); }
+    LOG4CXX_ERROR(logger_, "Failed to destroy mutex");
+  }
 }
 
 void Lock::Acquire() {
   int32_t status = pthread_mutex_lock(&mutex_);
   if (status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to acquire mutex " << &mutex_ << ": " << strerror(status));
-  } else {
-    AssertFreeAndMarkTaken();
+    LOG4CXX_ERROR(logger_, "Failed to acquire mutex");
   }
+  AssertFreeAndMarkTaken();
 }
 
 void Lock::Release() {
   AssertTakenAndMarkFree();
   int32_t status = pthread_mutex_unlock(&mutex_);
   if (status != 0) {
-    LOG4CXX_ERROR(logger_, "Failed to unlock mutex" << &mutex_ << ": " << strerror(status));
+    LOG4CXX_ERROR(logger_, "Failed to unlock mutex");
   }
+}
+
+bool Lock::Try() {
+  bool ackquired = false;
+#ifndef NDEBUG
+  if ((lock_taken_ > 0) && !is_mutex_recursive_) {
+    LOG4CXX_ERROR(logger_, "Trying to lock already taken not recurcive mutex");
+  }
+#endif
+  switch(pthread_mutex_trylock(&mutex_)) {
+    case 0: {
+      ackquired = true;
+#ifndef NDEBUG
+      lock_taken_++;
+#endif
+    } break;
+    case EBUSY: {
+      ackquired = false;
+    } break;
+    default: {
+      ackquired = false;
+      LOG4CXX_ERROR(logger_, "Failed to try lock the mutex");
+    }
+  }
+  return ackquired;
 }
 
 #ifndef NDEBUG

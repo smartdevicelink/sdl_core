@@ -13,8 +13,6 @@
 namespace transport_manager {
 namespace transport_adapter {
 
-using RawMessage = ::protocol_handler::RawMessage;
-
 TEST(TcpAdapterBasicTest, Basic) {
   TransportAdapter* transport_adapter = new TcpTransportAdapter(12345);
 

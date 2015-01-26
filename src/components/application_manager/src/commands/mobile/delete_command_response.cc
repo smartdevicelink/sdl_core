@@ -46,7 +46,7 @@ DeleteCommandResponse::~DeleteCommandResponse() {
 }
 
 void DeleteCommandResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "DeleteCommandResponse::Run");
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

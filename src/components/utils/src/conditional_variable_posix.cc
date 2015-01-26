@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -81,15 +81,6 @@ void ConditionalVariable::Broadcast() {
   if (signaled != 0)
     LOG4CXX_ERROR(logger_, "Failed to broadcast conditional variable");
 
-}
-
-void ConditionalVariable::Wait(Lock& lock) {
-  lock.AssertTakenAndMarkFree();
-  int32_t wait_status = pthread_cond_wait(&cond_var_,
-                                      &lock.mutex_);
-  lock.AssertFreeAndMarkTaken();
-  if (wait_status != 0)
-    LOG4CXX_ERROR(logger_, "Failed to wait for conditional variable");
 }
 
 void ConditionalVariable::Wait(AutoLock& auto_lock) {

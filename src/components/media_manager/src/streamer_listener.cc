@@ -59,7 +59,7 @@ void StreamerListener::OnErrorReceived(
 }
 
 void StreamerListener::OnActivityStarted(int32_t application_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "StreamerListener::OnActivityStarted");
   if (current_application_ == application_key) {
     LOG4CXX_WARN(logger_, "Already performing activity for "
                  << application_key);
@@ -69,7 +69,7 @@ void StreamerListener::OnActivityStarted(int32_t application_key) {
 }
 
 void StreamerListener::OnActivityEnded(int32_t application_key) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "StreamerListener::OnActivityEnded");
   if (current_application_ != application_key) {
     LOG4CXX_WARN(logger_, "Already not performing activity for "
                  << application_key);

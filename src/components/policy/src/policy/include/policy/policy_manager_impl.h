@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -39,7 +39,7 @@
 #include "policy/policy_manager.h"
 #include "policy/policy_table.h"
 #include "policy/cache_manager_interface.h"
-#include "policy/update_status_manager.h"
+#include "policy/update_status_manager_interface.h"
 #include "./functions.h"
 #include "usage_statistics/statistics_manager.h"
 
@@ -51,6 +51,7 @@ struct CheckAppPolicy;
 class PolicyManagerImpl : public PolicyManager {
   public:
     PolicyManagerImpl();
+    virtual ~PolicyManagerImpl();
     virtual void set_listener(PolicyListener* listener);
     PolicyListener* listener() const {
       return listener_;
@@ -59,18 +60,19 @@ class PolicyManagerImpl : public PolicyManager {
     virtual bool LoadPT(const std::string& file, const BinaryMessage& pt_content);
     virtual bool ResetPT(const std::string& file_name);
     virtual std::string GetUpdateUrl(int service_type);
-    virtual void GetUpdateUrls(int service_type, EndpointUrls& end_points);
-    virtual void RequestPTUpdate();
+    virtual EndpointUrls GetUpdateUrls(int service_type);
+    virtual BinaryMessageSptr RequestPTUpdate();
     virtual void CheckPermissions(const PTString& app_id,
         const PTString& hmi_level,
         const PTString& rpc,
         const RPCParams& rpc_params,
         CheckPermissionResult& result);
     virtual bool ResetUserConsent();
-    virtual void KmsChanged(int kilometers);
+    virtual bool ExceededIgnitionCycles();
+    virtual bool ExceededDays(int days);
+    virtual bool ExceededKilometers(int kilometers);
     virtual void IncrementIgnitionCycles();
-    virtual std::string ForcePTExchange();
-    virtual std::string GetPolicyTableStatus() const;
+    virtual PolicyTableStatus GetPolicyTableStatus();
     virtual void ResetRetrySequence();
     virtual int NextRetryTimeout();
     virtual int TimeoutExchange();
@@ -126,6 +128,8 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual uint32_t GetNotificationsNumber(const std::string& priority);
 
+    virtual int IsConsentNeeded(const std::string& app_id);
+
     virtual void SetVINValue(const std::string& value);
 
     // Interface StatisticsManager (begin)
@@ -153,23 +157,28 @@ class PolicyManagerImpl : public PolicyManager {
 
     void AddApplication(const std::string& application_id);
 
+    /**
+     * @brief IsAppinUpdateList
+     * @param app_id
+     * @return
+     */
+    virtual bool IsAppInUpdateList(const std::string& app_id) const;
+
     virtual void RemoveAppConsentForGroup(const std::string& app_id,
                                           const std::string& group_name);
 
     virtual uint16_t HeartBeatTimeout(const std::string& app_id) const;
 
-    virtual void SaveUpdateStatusRequired(bool is_update_needed);
-
     virtual bool IsPredataPolicy(const std::string& policy_app_id);
     void set_cache_manager(CacheManagerInterface* cache_manager);
+    void set_update_status_manager(
+        UpdateStatusManagerInterface* update_manager);
 
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(
         const BinaryMessage& pt_content);
 
   private:
-    bool HasConsentedDevice();
-    void CheckTriggers();
     /*
      * @brief Checks policy table update along with current data for any changes
      * in assigned functional group list of application
@@ -193,6 +202,17 @@ class PolicyManagerImpl : public PolicyManager {
       const policy_table::Strings& group_names,
       const std::vector<FunctionalGroupPermission>& group_permission,
       Permissions& notification_data);
+
+    /**
+     * @brief Add application id at the end of update permissions request list
+     * @param Application id
+     */
+    void AddAppToUpdateList(const std::string& application_id);
+
+    /**
+     * @brief Remove first application in the update permissions request list
+     */
+    void RemoveAppFromUpdateList();
 
     /**
      * @brief Validate PermissionConsent structure according to currently
@@ -228,39 +248,18 @@ class PolicyManagerImpl : public PolicyManager {
      */
     bool IsNewApplication(const std::string& application_id) const;
 
-    /**
-     * Checks existing and permissions of AppStorageFolder
-     * @return true if AppStorageFolder exists and has permissions read/write
-     */
-    bool CheckAppStorageFolder() const;
-
-    /**
-     * @brief Checks whether need ask the permission of users
-     * @return true if user consent is needed
-     */
-    virtual bool IsConsentNeeded(const std::string& app_id);
-
-    /**
-     * @brief Changes isConsentNeeded for app pending permissions, in case
-     * user set permissions before app activation.
-     * @param Unique app id
-     * @param Current permissions for app
-     */
-    void CheckPendingPermissionsChanges(
-                const std::string& policy_app_id,
-                const std::vector<FunctionalGroupPermission>& current_permissions);
-
-    virtual void StartPTExchange();
-    virtual bool ExceededDays();
-    virtual bool ExceededIgnitionCycles();
-
     PolicyListener* listener_;
 
-    UpdateStatusManager update_status_manager_;
+    UpdateStatusManagerInterfaceSPtr update_status_manager_;
     CacheManagerInterfaceSPtr cache_;
+    sync_primitives::Lock update_request_list_lock_;
     sync_primitives::Lock apps_registration_lock_;
-    sync_primitives::Lock app_permissions_diff_lock_;
     std::map<std::string, AppPermissions> app_permissions_diff_;
+
+    /**
+     * @brief List of application, which require update of permissions
+     */
+    std::list<std::string> update_requests_list_;
 
     /**
      * Timeout to wait response with UpdatePT
@@ -293,7 +292,10 @@ class PolicyManagerImpl : public PolicyManager {
      */
     std::string last_device_id_;
 
-    bool ignition_check;
+    /**
+     * @brief Holds device ids, which were unpaired
+     */
+    DeviceIds unpaired_device_ids_;
 
     friend struct CheckAppPolicy;
 };

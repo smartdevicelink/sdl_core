@@ -49,7 +49,7 @@ ReadDIDRequest::~ReadDIDRequest() {
 }
 
 void ReadDIDRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "ReadDIDRequest::Run");
 
   uint32_t app_id = (*message_)[strings::params][strings::connection_key]
       .asUInt();
@@ -96,7 +96,7 @@ void ReadDIDRequest::Run() {
 }
 
 void ReadDIDRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "ReadDIDRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
 
   switch (event.id()) {

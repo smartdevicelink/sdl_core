@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -39,7 +39,7 @@ namespace media_manager {
 CREATE_LOGGERPTR_GLOBAL(logger, "PipeAudioStreamerAdapter")
 
 PipeAudioStreamerAdapter::PipeAudioStreamerAdapter() {
-  LOG4CXX_AUTO_TRACE(logger);
+  LOG4CXX_INFO(logger, "PipeAudioStreamerAdapter::PipeAudioStreamerAdapter");
   named_pipe_path_ = profile::Profile::instance()->named_audio_pipe_path();
 
   Init();

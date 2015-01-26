@@ -61,7 +61,6 @@
     <element name="WARNINGS" value="21"/>
     <element name="GENERIC_ERROR" value="22"/>
     <element name="USER_DISALLOWED" value="23"/>
-    <element name="TRUNCATED_DATA" value="24"/>
 </enum>
 
 <enum name="ButtonName">
@@ -1924,7 +1923,7 @@
     </function>
     <function name="UpdateAppList" messagetype="request">
       <description>Issued by SDL to notify HMI about new applications registered.</description>
-      <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="0" maxsize="100"/>
+      <param name="applications" type="Common.HMIApplication" mandatory="true" array="true" minsize="1" maxsize="100"/>
     </function>
     <function name="UpdateAppList" messagetype="response">
     </function>
@@ -2053,11 +2052,6 @@
         <description>Specifies reason for exiting all apllications.</description>
       </param>
     </function>
-    <function name="OnAwakeSDL" messagetype="notification">
-        <description>
-            Sender: HMI->SDL. Must be sent to return SDL to normal operation after 'Suspend' or 'LowVoltage' events
-        </description>
-    </function>
     <function name="MixingAudioSupported" messagetype="request">
       <description>Request from SDL to HMI to find out if the last one supports mixing audio (i.e. recording TTS command and playing audio).</description>
     </function>
@@ -2069,9 +2063,6 @@
     </function>
     <function name="PlayTone" messagetype="notification">
       <description>Sent by SDL to HMI to notify that the tone should be played.</description>
-      <param name="appID" type="Integer" mandatory="true">
-         <description>ID of the application that invoked this notification</description>
-      </param>
     </function>
     <!-- Policies -->
 
@@ -2738,11 +2729,6 @@
     <param name="language" type="Common.Language" mandatory="true">
       <description>The language application wants to switch to.</description>
     </param>
-    <param name="appHMIType" type="Common.AppHMIType" minsize="1" maxsize="100" array="true" mandatory="false">
-      <description>
-       Sent when app's requested-during-registration AppHMIType is changed to different one due to Policies update. Contains the updated list of all allowed app's AppHMITypes.
-      </description>
-    </param>    
     <param name="appID" type="Integer" mandatory="true">
       <description>ID of application that concerns this RPC.</description>
     </param>

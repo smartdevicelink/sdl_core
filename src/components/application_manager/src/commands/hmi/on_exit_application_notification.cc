@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -49,7 +49,7 @@ OnExitApplicationNotification::~OnExitApplicationNotification() {
 }
 
 void OnExitApplicationNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "OnExitApplicationNotification::Run");
 
   ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
   ApplicationSharedPtr app_impl = app_mgr->application(

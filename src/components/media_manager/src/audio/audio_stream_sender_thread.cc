@@ -38,7 +38,6 @@
 
 
 #include <string>
-#include <string.h>
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/mobile_command_factory.h"
 #include "application_manager/application_impl.h"
@@ -66,14 +65,14 @@ AudioStreamSenderThread::AudioStreamSenderThread(
     shouldBeStoped_(false),
     shouldBeStoped_lock_(),
     shouldBeStoped_cv_() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_TRACE_ENTER(logger_);
 }
 
 AudioStreamSenderThread::~AudioStreamSenderThread() {
 }
 
 void AudioStreamSenderThread::threadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_TRACE_ENTER(logger_);
 
   offset_ = 0;
 
@@ -83,10 +82,11 @@ void AudioStreamSenderThread::threadMain() {
     sendAudioChunkToMobile();
   }
 
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void AudioStreamSenderThread::sendAudioChunkToMobile() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_TRACE_ENTER(logger_);
 
   std::vector<uint8_t> binaryData;
   std::vector<uint8_t>::iterator from;
@@ -112,10 +112,10 @@ void AudioStreamSenderThread::sendAudioChunkToMobile() {
     LOG4CXX_INFO_EXT(logger_, "from != binaryData.end()");
 
     offset_ = offset_ + to - from;
-    std::vector<uint8_t> data(from, to);
 
     application_manager::ApplicationManagerImpl::instance()->
-    SendAudioPassThroughNotification(session_key_, data);
+    SendAudioPassThroughNotification(session_key_,
+                                     std::vector<uint8_t>(from, to));
     binaryData.clear();
   }
 #if !defined(EXTENDED_MEDIA_MODE)
@@ -136,9 +136,10 @@ void AudioStreamSenderThread::setShouldBeStopped(bool should_stop) {
   shouldBeStoped_cv_.NotifyOne();
 }
 
-void AudioStreamSenderThread::exitThreadMain() {
-  LOG4CXX_AUTO_TRACE(logger_);
+bool AudioStreamSenderThread::exitThreadMain() {
+  LOG4CXX_INFO(logger_, "AudioStreamSenderThread::exitThreadMain");
   setShouldBeStopped(true);
+  return true;
 }
 
 uint32_t AudioStreamSenderThread::session_key() const {

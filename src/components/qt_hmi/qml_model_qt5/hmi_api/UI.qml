@@ -203,7 +203,6 @@ Item {
                 "updateMode": Internal.MediaClockUpdateMode.MCU_COUNTUP,
                 "runningMode": Internal.MediaClockRunningMode.MCR_STOPPED,
                 "magic": Internal.stringToHmsTime(fieldSubstrings[Common.TextFieldName.mediaClock]),
-                "startTime": Internal.stringToHmsTime(fieldSubstrings[Common.TextFieldName.mediaClock]),
                 "startTimeForProgress": -1
             }
         }
@@ -340,11 +339,7 @@ Item {
                     break
                 }
                 newStartTime = Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)
-                newEndTime = endTime ? Internal.hmsTime(endTime.hours,
-                                                        endTime.minutes,
-                                                        endTime.seconds)
-                          : dataContainer.currentApplication.mediaClock.upperTimeLimit
-
+                newEndTime = endTime ? Internal.hmsTime(endTime.hours, endTime.minutes, endTime.seconds) : -1
                 newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTUP
                 newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
                 newStartTimeForProgress = Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)
@@ -358,7 +353,7 @@ Item {
                     break
                 }
                 newStartTime = Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)
-                newEndTime = endTime ? Internal.hmsTime(endTime.hours, endTime.minutes, endTime.seconds) : 0
+                newEndTime = endTime ? Internal.hmsTime(endTime.hours, endTime.minutes, endTime.seconds) : -1
                 newUpdateMode = Internal.MediaClockUpdateMode.MCU_COUNTDOWN
                 newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
                 newStartTimeForProgress = Internal.hmsTime(startTime.hours, startTime.minutes, startTime.seconds)
@@ -377,7 +372,7 @@ Item {
                 newEndTime = app.mediaClock.endTime
                 newRunningMode = Internal.MediaClockRunningMode.MCR_STOPPED
                 newUpdateMode = app.mediaClock.updateMode
-                newStartTimeForProgress = app.mediaClock.startTimeForProgress
+                newStartTimeForProgress = app.mediaClock.startTime
                 resultCode = Common.Result.SUCCESS
                 break
 
@@ -392,7 +387,7 @@ Item {
                 newStartTime = app.mediaClock.startTime
                 newEndTime = app.mediaClock.endTime
                 newRunningMode = Internal.MediaClockRunningMode.MCR_RUNNING
-                newStartTimeForProgress = app.mediaClock.startTimeForProgress
+                newStartTimeForProgress = app.mediaClock.startTime
                 newUpdateMode = app.mediaClock.updateMode
                 resultCode = Common.Result.SUCCESS
                 break
@@ -636,7 +631,7 @@ Item {
         }
     }
 
-    function performAudioPassThru (appID, audioPassThruDisplayTexts, timeout) {
+    function performAudioPassThru (audioPassThruDisplayTexts, timeout, appID) {
         var displayTextsLog = "";
         if (audioPassThruDisplayTexts) {
             for (var i = 0; i < audioPassThruDisplayTexts.length; i++) {

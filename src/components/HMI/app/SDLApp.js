@@ -48,7 +48,7 @@ SDL = Em.Application.create( {
     helpMode: false,
 
     // determine home view {string}
-    homeView: 'home',
+    homeView: 'info_view',
 
     /** Set language for localization */
     localization: 'eng',

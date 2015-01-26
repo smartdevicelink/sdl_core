@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -120,7 +120,7 @@ class RequestController {
     * @return Result code
     *
     */
-    TResult addMobileRequest(const RequestPtr request,
+    TResult addMobileRequest(const MobileRequestPtr& request,
                              const mobile_apis::HMILevel::eType& hmi_level);
 
 
@@ -146,7 +146,7 @@ class RequestController {
     * @param mobile_corellation_id Active mobile request correlation ID
     *
     */
-    void terminateMobileRequest(const uint32_t& mobile_correlation_id, const uint32_t& connection_key);
+    void terminateMobileRequest(const uint32_t& mobile_correlation_id);
 
 
     /**
@@ -177,12 +177,6 @@ class RequestController {
     */
     void terminateAllHMIRequests();
 
-
-    /**
-    * @brief Terminates all requests from Mobile
-    */
-    void terminateAllMobileRequests();
-
     /**
     * @brief Updates request timeout
     *
@@ -194,49 +188,29 @@ class RequestController {
                               const uint32_t& mobile_correlation_id,
                               const uint32_t& new_timeout);
 
-    /*
-     * @brief Function Should be called when Low Voltage is occured
-     */
-    void OnLowVoltage();
-
-    /*
-     * @brief Function Should be called when Low Voltage is occured
-     */
-    void OnWakeUp();
-
-    bool IsLowVoltage();
   protected:
 
     /**
-     * @brief Check if this app is able to add new requests, or limits was exceeded
+     * @brief Checs if this app as able to add new requests, or limits was exceeded
      * @param app_id - application id
      * @param app_time_scale - time scale (seconds)
-     * @param max_request_per_time_scale - maximum count of request that should be allowed for app_time_scale seconds
-     * @return True if new request could be added, false otherwise
+     * @param max_request_per_time_scale - maximum count of request that should be allowed for app_time_scale secconds
      */
-    bool CheckTimeScaleMaxRequest(const uint32_t& app_id,
+    bool checkTimeScaleMaxRequest(const uint32_t& app_id,
                                   const uint32_t& app_time_scale,
                                   const uint32_t& max_request_per_time_scale);
 
     /**
-     * @brief Check if this app is able to add new requests in current hmi_level, or limits was exceeded
+     * @brief Checs if this app as able to add new requests in current hmi_level, or limits was exceeded
      * @param hmi_level - hmi level
      * @param app_id - application id
      * @param app_time_scale - time scale (seconds)
-     * @param max_request_per_time_scale - maximum count of request that should be allowed for app_time_scale seconds
-     * @return True if new request could be added, false otherwise
+     * @param max_request_per_time_scale - maximum count of request that should be allowed for app_time_scale secconds
      */
-    bool CheckHMILevelTimeScaleMaxRequest(const mobile_apis::HMILevel::eType& hmi_level,
+    bool checkHMILevelTimeScaleMaxRequest(const mobile_apis::HMILevel::eType& hmi_level,
                                           const uint32_t& app_id,
                                           const uint32_t& app_time_scale,
                                           const uint32_t& max_request_per_time_scale);
-
-    /**
-     * @brief Check Posibility to add new requests, or limits was exceeded
-     * @param pending_requests_amount - maximum count of request that should be allowed for all applications
-     * @return True if new request could be added, false otherwise
-     */
-    bool CheckPendingRequestsAmount(const uint32_t& pending_requests_amount);
 
     void onTimer();
 
@@ -245,7 +219,6 @@ class RequestController {
     * Not thread safe
     */
     void UpdateTimer();
-
 
   private:
 
@@ -256,7 +229,7 @@ class RequestController {
         Worker(RequestController* requestController);
         virtual ~Worker();
         virtual void threadMain();
-        virtual void exitThreadMain();
+        virtual bool exitThreadMain();
       protected:
       private:
         RequestController*                               request_controller_;
@@ -269,7 +242,7 @@ class RequestController {
     uint32_t pool_size_;
     sync_primitives::ConditionalVariable cond_var_;
 
-    std::list<RequestPtr> mobile_request_list_;
+    std::list<MobileRequestPtr> mobile_request_list_;
     sync_primitives::Lock mobile_request_list_lock_;
 
     RequestInfoSet pending_request_set_;
@@ -283,7 +256,6 @@ class RequestController {
     timer::TimerThread<RequestController>  timer_;
     static const uint32_t dafault_sleep_time_ = UINT_MAX;
 
-    bool is_low_voltage_;
     DISALLOW_COPY_AND_ASSIGN(RequestController);
 };
 

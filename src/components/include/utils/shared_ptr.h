@@ -164,6 +164,7 @@ class SharedPtr {
     operator bool() const;
     void reset();
     void reset(ObjectType* other);
+    void release();
     ObjectType* get() const;
 
     /**
@@ -196,8 +197,6 @@ class SharedPtr {
      * @brief Pointer to reference counter.
      **/
     uint32_t* mReferenceCounter;
-
-    void release();
 };
 
 template<typename ObjectType>

@@ -50,7 +50,7 @@ UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {
 }
 
 void UnsubscribeButtonRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "UnsubscribeButtonRequest::Run");
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
       (*message_)[str::params][str::connection_key].asUInt());

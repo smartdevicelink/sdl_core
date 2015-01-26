@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -28,7 +28,7 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
- */
+*/
 
 #ifndef SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_THREAD
 #define SRC_COMPONENTS_UTILS_INCLUDE_UTILS_TIMER_THREAD
@@ -52,9 +52,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "Utils")
 
 class TimerDelegate;
 
-/**
- * \class TimerThread
- * \brief TimerThread class provide possibility to run timer in a separate thread.
+/*
+ * The TimerThread class provide possibility to run timer in a separate thread.
  * The client should specify callee and const callback function.
  * Example usage:
  *
@@ -111,17 +110,12 @@ class TimerThread {
     virtual void stop();
 
     /**
-     * @brief Tell timer status
+     * @brief Tell tmer status
      * @return true if timer is currently running, otherwise return false
      */
     virtual bool isRunning();
 
-    /**
-     * @brief method suspends timer execution
-     */
-    virtual void pause();
-
-    /**
+    /*
      * @brief Stop timer update timeout and start timer again
      * Note that it cancel thread of timer, If you use it from callback,
      * it probably will stop execution of callback function
@@ -129,6 +123,7 @@ class TimerThread {
      *
      */
     virtual void updateTimeOut(const uint32_t timeout_seconds);
+    threads::Thread*                                   thread_;
   protected:
 
     /**
@@ -164,7 +159,7 @@ class TimerThread {
         /**
          * @brief Called by thread::thread to free all allocated resources.
          */
-        virtual void exitThreadMain();
+        virtual bool exitThreadMain();
 
         /**
          * @brief Set new Timeout
@@ -207,12 +202,13 @@ class TimerThread {
       private:
         DISALLOW_COPY_AND_ASSIGN(TimerLooperDelegate);
     };
-    threads::Thread*     thread_;
     void (T::*callback_)();
     T*                  callee_;
     TimerDelegate*       delegate_;
+    //threads::Thread*     thread_;
     std::string       name_;
-    volatile bool     is_looper_;
+    mutable bool      is_running_;
+    bool              is_looper_;
 
     DISALLOW_COPY_AND_ASSIGN(TimerThread);
 };
@@ -223,55 +219,53 @@ TimerThread<T>::TimerThread(const char* name, T* callee, void (T::*f)(), bool is
     callback_(f),
     callee_(callee),
     delegate_(NULL),
-    name_(name),
+    is_running_(false),
     is_looper_(is_looper) {
-  delegate_ = is_looper_ ?
-      new TimerLooperDelegate(this) :
-      new TimerDelegate(this);
-
-  thread_ = threads::CreateThread(name_.c_str(), delegate_);
 }
 
 template <class T>
 TimerThread<T>::~TimerThread() {
-  LOG4CXX_DEBUG(logger_, "TimerThread is to be destroyed " << name_);
-  thread_->join();
-  delete delegate_;
-  threads::DeleteThread(thread_);
+  LOG4CXX_INFO(logger_, "TimerThread is to destroy " << name_);
+  stop();
   callback_ = NULL;
   callee_ = NULL;
 }
 
 template <class T>
 void TimerThread<T>::start(uint32_t timeout_seconds) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (isRunning()) {
+  LOG4CXX_TRACE(logger_, "Starting timer " << this);
+  if (is_running_) {
     LOG4CXX_INFO(logger_, "TimerThread start needs stop " << name_);
     stop();
   }
-  updateTimeOut(timeout_seconds);
-  thread_->start();
+
+  delegate_ = is_looper_ ?
+      new TimerLooperDelegate(this) :
+      new TimerDelegate(this);
+  delegate_->setTimeOut(timeout_seconds);
+
+  thread_ = threads::CreateThread("TimerThread", delegate_);
+  if (delegate_ && thread_) {
+    is_running_ = true;
+    thread_->start();
+  }
 }
 
 template <class T>
 void TimerThread<T>::stop() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(thread_);
-  LOG4CXX_DEBUG(logger_, "Stopping timer  " << name_);
-  thread_->join();
+  LOG4CXX_TRACE(logger_, "Stopping timer " << this);
+  if (is_running_ && delegate_ && thread_) {
+    LOG4CXX_INFO(logger_, "TimerThread thread_ stop " << name_);
+    thread_->stop();
+    is_running_ = false;
+  } else {
+    LOG4CXX_INFO(logger_, "TimerThread thread_ not stop " << name_);
+  }
 }
 
 template <class T>
 bool TimerThread<T>::isRunning() {
-  DCHECK(thread_);
-  return thread_->is_running();
-}
-
-template <class T>
-void TimerThread<T>::pause() {
-  LOG4CXX_DEBUG(logger_, "Suspension of timer " << name_);
-  const uint32_t  wait_seconds = std::numeric_limits<uint32_t>::max();
-  updateTimeOut(wait_seconds);
+  return is_running_;
 }
 
 template <class T>
@@ -279,9 +273,15 @@ void TimerThread<T>::updateTimeOut(const uint32_t timeout_seconds) {
   delegate_->setTimeOut(timeout_seconds);
 }
 
-template <class T>void TimerThread<T>::onTimeOut() const {
+template <class T>
+void TimerThread<T>::onTimeOut() const {
   if (callee_ && callback_) {
     (callee_->*callback_)();
+    /*
+    if (!is_looper_) {
+      stop();
+    }
+    */
   }
 }
 
@@ -308,7 +308,6 @@ template <class T>
 void TimerThread<T>::TimerDelegate::threadMain() {
   using sync_primitives::ConditionalVariable;
   sync_primitives::AutoLock auto_lock(state_lock_);
-  stop_flag_ = false;
   while (!stop_flag_) {
     // Sleep
     int32_t  wait_milliseconds_left = TimerDelegate::calculateMillisecondsLeft();
@@ -317,13 +316,12 @@ void TimerThread<T>::TimerDelegate::threadMain() {
     // Quit sleeping or continue sleeping in case of spurious wake up
     if (ConditionalVariable::kTimeout == wait_status ||
         wait_milliseconds_left <= 0) {
-      LOG4CXX_TRACE(logger_, "Timer timeout " << wait_milliseconds_left << " ms");
-      timer_thread_->onTimeOut();
-      return;
-    } else {
-      LOG4CXX_DEBUG(logger_, "Timeout reset force: " << TimerDelegate::timeout_seconds_);
-      return;
+      break;
     }
+  }
+  if (!stop_flag_) {
+    timer_thread_->onTimeOut();
+    timer_thread_->stop();
   }
 }
 
@@ -331,7 +329,6 @@ template <class T>
 void TimerThread<T>::TimerLooperDelegate::threadMain() {
   using sync_primitives::ConditionalVariable;
   sync_primitives::AutoLock auto_lock(TimerDelegate::state_lock_);
-  TimerDelegate::stop_flag_ = false;
   while (!TimerDelegate::stop_flag_) {
     int32_t  wait_milliseconds_left = TimerDelegate::calculateMillisecondsLeft();
     ConditionalVariable::WaitStatus wait_status =
@@ -339,7 +336,7 @@ void TimerThread<T>::TimerLooperDelegate::threadMain() {
     // Quit sleeping or continue sleeping in case of spurious wake up
     if (ConditionalVariable::kTimeout == wait_status ||
          wait_milliseconds_left <= 0) {
-      LOG4CXX_TRACE(logger_, "Timer timeout " << wait_milliseconds_left << " ms");
+      LOG4CXX_TRACE(logger_, "Timer timeout " << wait_milliseconds_left);
       TimerDelegate::timer_thread_->onTimeOut();
     } else {
       LOG4CXX_DEBUG(logger_, "Timeout reset force: " << TimerDelegate::timeout_seconds_);
@@ -349,10 +346,11 @@ void TimerThread<T>::TimerLooperDelegate::threadMain() {
 
 
 template <class T>
-void TimerThread<T>::TimerDelegate::exitThreadMain() {
+bool TimerThread<T>::TimerDelegate::exitThreadMain() {
   sync_primitives::AutoLock auto_lock(state_lock_);
   stop_flag_ = true;
   termination_condition_.NotifyOne();
+  return true;
 }
 
 template <class T>
@@ -371,9 +369,9 @@ int32_t TimerThread<T>::TimerThread::TimerDelegate::calculateMillisecondsLeft() 
 
   int64_t  wait_seconds_left = static_cast<int64_t>(difftime(end_time, cur_time));
   int32_t  wait_milliseconds_left = std::numeric_limits<int32_t>::max();
-  const int32_t milliseconds_in_second = 1000;
-  if (wait_seconds_left < std::numeric_limits<int32_t>::max() / milliseconds_in_second) {
-    wait_milliseconds_left = milliseconds_in_second * wait_seconds_left;
+  const int32_t millisecconds_in_second = 1000;
+  if (wait_seconds_left < std::numeric_limits<int32_t>::max() / millisecconds_in_second) {
+    wait_milliseconds_left = millisecconds_in_second * wait_seconds_left;
   }
   return wait_milliseconds_left;
 }

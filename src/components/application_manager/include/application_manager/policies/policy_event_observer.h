@@ -34,26 +34,26 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_EVENT_OBSERVER_H_
 
 #include "application_manager/event_engine/event_observer.h"
+#include "utils/shared_ptr.h"
 
 namespace policy {
 namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
 
-class PolicyHandler;
+class PolicyManager;
 
 class PolicyEventObserver :
     public application_manager::event_engine::EventObserver {
  public:
-  explicit PolicyEventObserver(policy::PolicyHandler* const policy_handler);
-  void set_policy_handler(policy::PolicyHandler* const policy_handler);
+  PolicyEventObserver(utils::SharedPtr<PolicyManager> policy_manager);
   void on_event(const application_manager::event_engine::Event& event);
   void subscribe_on_event(
       const application_manager::event_engine::Event::EventID& event_id,
       int32_t hmi_correlation_id = 0);
  private:
-  sync_primitives::Lock policy_handler_lock_;
-  PolicyHandler* policy_handler_;
+  utils::SharedPtr<PolicyManager> policy_manager_;
   void ProcessOdometerEvent(const smart_objects::SmartObject& message);
 };
 
 }  //  namespace policy
+
 #endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_POLICY_EVENT_OBSERVER_H_

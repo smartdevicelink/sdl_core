@@ -40,7 +40,6 @@ SDL.LeftMenuView = Em.ContainerView.extend( {
     childViews:
         [
             'border',
-            'cdButton',
             'sdlButton'
         ],
     /** Border decoration */

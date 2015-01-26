@@ -59,7 +59,7 @@ SetGlobalPropertiesRequest::~SetGlobalPropertiesRequest() {
 }
 
 void SetGlobalPropertiesRequest::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::Run");
 
   const smart_objects::SmartObject& msg_params =
       (*message_)[strings::msg_params];
@@ -197,8 +197,7 @@ void SetGlobalPropertiesRequest::Run() {
     SendHMIRequest(hmi_apis::FunctionID::UI_SetGlobalProperties,
                        &params, true);
   } else if (!is_vr_help_title_present && !is_vr_help_present) {
-    const DataAccessor<CommandsMap> accessor = app->commands_map();
-    const CommandsMap& cmdMap = accessor.GetData();
+    const CommandsMap& cmdMap = app->commands_map();
     CommandsMap::const_iterator command_it = cmdMap.begin();
 
     int32_t index = 0;
@@ -305,7 +304,7 @@ bool SetGlobalPropertiesRequest::CheckVrHelpItemsOrder() {
 }
 
 void SetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::on_event");
   const smart_objects::SmartObject& message = event.smart_object();
 
   ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(CommandRequestImpl::connection_key());
@@ -384,7 +383,7 @@ bool SetGlobalPropertiesRequest::ValidateConditionalMandatoryParameters(
 }
 
 bool SetGlobalPropertiesRequest::IsWhiteSpaceExist() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "SetGlobalPropertiesRequest::IsWhiteSpaceExist");
   const char* str;
 
   const smart_objects::SmartObject& msg_params =

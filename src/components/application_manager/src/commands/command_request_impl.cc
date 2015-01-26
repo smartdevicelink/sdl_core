@@ -75,7 +75,7 @@ CommandRequestImpl::CommandRequestImpl(const MessageSharedPtr& message)
 CommandRequestImpl::~CommandRequestImpl() {
 }
 
-bool CommandRequestImpl::Init() {
+bool CommandRequestImpl::Init() {  
   return true;
 }
 
@@ -91,11 +91,10 @@ void CommandRequestImpl::Run() {
 }
 
 void CommandRequestImpl::onTimeOut() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_INFO(logger_, "CommandRequestImpl::onTimeOut");
 
   unsubscribe_from_all_events();
   {
-    // FIXME (dchmerev@luxoft.com): atomic_xchg fits better
     sync_primitives::AutoLock auto_lock(state_lock_);
     if (kCompleted == current_state_) {
       // don't send timeout if request completed
@@ -206,7 +205,7 @@ void CommandRequestImpl::SendHMIRequest(
   const uint32_t hmi_correlation_id =
        ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
   if (use_events) {
-    LOG4CXX_DEBUG(logger_, "subscribe_on_event " << function_id << " " << hmi_correlation_id);
+    LOG4CXX_WARN(logger_, "subscribe_on_event " << function_id << " " << hmi_correlation_id);
     subscribe_on_event(function_id, hmi_correlation_id);
   }
 
@@ -386,10 +385,7 @@ bool CommandRequestImpl::CheckAllowedParameters() {
         smart_objects::SmartMap::iterator iter_end = s_map.map_end();
 
         for (; iter != iter_end; ++iter) {
-          if (true == iter->second.asBool()) {
-            LOG4CXX_INFO(logger_, "Request's param: " << iter->first);
-            params.push_back(iter->first);
-          }
+          params.push_back(iter->first);
         }
       }
 
