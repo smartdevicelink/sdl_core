@@ -12,6 +12,7 @@ include_directories (
   ${LOG4CXX_INCLUDE_DIRECTORY}
 )
 if (BUILD_BT_SUPPORT)
+  find_package(Bluetooth REQUIRED)
   include_directories(
   )
 endif()
