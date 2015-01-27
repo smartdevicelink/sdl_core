@@ -1,55 +1,62 @@
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
-#include "can_cooperation/../../src/can_tcp_connection.h"
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <cstring>
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <cstring>
+#include "gtest/gtest.h"
+#include "can_cooperation/can_tcp_connection.h"
 
-namespace can_module_testing {
-using namespace can_cooperation;
+using can_cooperation::CANTCPConnection;
+using can_cooperation::ConnectionState;
+
+namespace test {
+namespace components {
+namespace can_cooperation {
 
 class TCPServer {
-public:
+ public:
   TCPServer(const std::string& address, int port);
   ~TCPServer();
-  static void* Start(void* self_object);
+  void Start();
+  void WaitConnect();
   void Stop();
   bool Send(const std::string& message);
   bool Receive(std::string* message);
-private:
+ private:
+  static void* Listen(void* self_object);
   std::string address_;
   int port_;
   int socket_;
   int client_socket_;
+  pthread_t thread_;
 };
 
 TCPServer::TCPServer(const std::string& address, int port)
-: address_(address)
-, port_(port)
-, socket_(-1)
-, client_socket_(-1) {
+    : address_(address),
+      port_(port),
+      socket_(-1),
+      client_socket_(-1),
+      thread_(0) {
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
-}
-
-TCPServer::~TCPServer() {
-}
-
-void* TCPServer::Start(void *self_object) {
-  TCPServer* self = static_cast<TCPServer*>(self_object);
   struct sockaddr_in server_addr;
   memset(&server_addr, 0, sizeof(server_addr));
   server_addr.sin_family = AF_INET;
-  server_addr.sin_addr.s_addr = inet_addr(self->address_.c_str());
-  server_addr.sin_port = htons(self->port_);
+  server_addr.sin_addr.s_addr = inet_addr(address_.c_str());
+  server_addr.sin_port = htons(port_);
 
-  if (-1 == bind(self->socket_, (struct sockaddr *)&server_addr,
+  if (-1 == bind(socket_, (struct sockaddr *)&server_addr,
          sizeof(server_addr))) {
     printf("Failed to bind\n" );
-    return (void*)-1;
   }
+}
+
+TCPServer::~TCPServer() {
+  close(socket_);
+}
+
+void* TCPServer::Listen(void *self_object) {
+  TCPServer* self = static_cast<TCPServer*>(self_object);
   if (-1 == listen(self->socket_, 1)) {
     printf("failed to listen");
     return (void*)-1;
@@ -66,9 +73,18 @@ void* TCPServer::Start(void *self_object) {
   return NULL;
 }
 
+void TCPServer::Start() {
+  int result = pthread_create(&thread_, 0, &TCPServer::Listen, this);
+  printf("Result of thread creation is %d\n", result);
+}
+
+void TCPServer::WaitConnect() {
+  int result = pthread_join(thread_, 0);
+  printf("Join result is %d\n", result);
+}
+
 void TCPServer::Stop() {
   close(client_socket_);
-  close(socket_);
 }
 
 bool TCPServer::Send(const std::string& message) {
@@ -78,58 +94,76 @@ bool TCPServer::Send(const std::string& message) {
 }
 
 bool TCPServer::Receive(std::string* message) {
-  char buf[500];
+  char buf[500] = {0};
   if (-1 == read(client_socket_, buf, sizeof(buf)))
     return false;
   *message = buf;
   return true;
 }
 
-TEST(can_module, create) {
+TEST(CanTcpConnectionTest, OpenClose) {
   TCPServer server("127.0.0.1", 8090);
-  pthread_t thread;
-  int result = pthread_create(&thread, 0, &TCPServer::Start, &server);
-  printf("Result of thread creation is %d\n", result);
-  sleep(1);
+  server.Start();
 
-  //  Test connection established
-  CANTCPConnection connection;
-  ASSERT_TRUE(OPENED == connection.OpenConnection());
-  void * res;
-  result = pthread_join(thread, &res);
-  printf("Join result is %d\n", result);
-  free(res);
+  CANTCPConnection conn;
+  EXPECT_EQ(ConnectionState::OPENED, conn.OpenConnection());
+  server.WaitConnect();
+  EXPECT_EQ(ConnectionState::CLOSED, conn.CloseConnection());
 
-  //  Test sending message from server to client
+  server.Stop();
+}
+
+TEST(CanTcpConnectionTest, WriteData) {
+  TCPServer server("127.0.0.1", 8090);
+  server.Start();
+
+  CANTCPConnection conn;
+  EXPECT_EQ(ConnectionState::OPENED, conn.OpenConnection());
+  server.WaitConnect();
+
   Json::Value value;
   value["model"] = "Mustang";
   value["data"] = Json::Value(Json::ValueType::objectValue);
   value["data"]["version"] = 1.0;
   value["data"]["series"] = "A";
-  Json::FastWriter writer;
-  std::string msg = writer.write(value);
-  printf("Message to be sent %s", msg.c_str());
-  server.Send(writer.write(value));
-  ASSERT_TRUE(OPENED == connection.GetData());
-  Json::Value received_msg = connection.ReadData();
-  ASSERT_TRUE(received_msg == value);
+  value["data"]["additional"] = 987;
 
-  //  Test sending message from client to server
-  received_msg["data"]["additional"] = 987;
-  msg = writer.write(received_msg);
-  printf("Modified received message %s\n", msg.c_str());
-  connection.WriteData(msg);
-  ASSERT_TRUE(OPENED == connection.Flash());
+  conn.WriteData(value.toStyledString());
+  EXPECT_EQ(ConnectionState::OPENED, conn.Flash());
   std::string server_msg;
-  ASSERT_TRUE(server.Receive(&server_msg));
-  printf("Server recieved: %s\n", server_msg.c_str());
-  Json::Value server_msg_json;
-  Json::Reader reader;
-  reader.parse(server_msg, server_msg_json, false);
-  ASSERT_TRUE(server_msg_json == received_msg);
+  EXPECT_TRUE(server.Receive(&server_msg));
+  EXPECT_EQ(value.toStyledString(), server_msg);
 
-  //  Test closing the connection
-  ASSERT_TRUE(CLOSED == connection.CloseConnection());
+  EXPECT_EQ(ConnectionState::CLOSED, conn.CloseConnection());
+
   server.Stop();
 }
-}  //  namespace can_module_testing
+
+TEST(CanTcpConnectionTest, ReadData) {
+  TCPServer server("127.0.0.1", 8090);
+  server.Start();
+
+  CANTCPConnection conn;
+  EXPECT_EQ(ConnectionState::OPENED, conn.OpenConnection());
+  server.WaitConnect();
+
+  Json::Value value;
+  value["model"] = "Mustang";
+  value["data"] = Json::Value(Json::ValueType::objectValue);
+  value["data"]["version"] = 1.0;
+  value["data"]["series"] = "A";
+
+  server.Send(value.toStyledString());
+  EXPECT_EQ(ConnectionState::OPENED, conn.GetData());
+
+  Json::Value received_msg = conn.ReadData();
+  EXPECT_EQ(value.toStyledString(), received_msg.toStyledString());
+
+  EXPECT_EQ(ConnectionState::CLOSED, conn.CloseConnection());
+
+  server.Stop();
+}
+
+}  // namespace can_cooperation
+}  // namespace components
+}  // namespace test

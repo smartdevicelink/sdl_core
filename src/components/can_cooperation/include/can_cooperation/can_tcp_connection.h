@@ -39,24 +39,24 @@
 
 namespace can_cooperation {
 
-	class CANTCPConnection : public CANConnection {
-		public:
-			CANTCPConnection();
-			~CANTCPConnection();
-			ConnectionState OpenConnection();
-			ConnectionState CloseConnection();
-			ConnectionState Flash();
-			ConnectionState GetData();
-			void WriteData(const std::string& message);
-			MessageFromCAN ReadData();
-		private:
-			std::deque<std::string> to_send_;
-			std::deque<std::string> received_;
-			std::string address_;
-			int port_;
-			int socket_;
-			ConnectionState current_state_;
-	};
+class CANTCPConnection : public CANConnection {
+ public:
+  CANTCPConnection();
+  ~CANTCPConnection();
+  ConnectionState OpenConnection();
+  ConnectionState CloseConnection();
+  ConnectionState Flash();
+  ConnectionState GetData();
+  void WriteData(const std::string& message);
+  MessageFromCAN ReadData();
+ private:
+  std::deque<std::string> to_send_;
+  std::deque<std::string> received_;
+  std::string address_;
+  int port_;
+  int socket_;
+  ConnectionState current_state_;
+};
 }  //  namespace can_cooperation
 
- #endif  //  SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_TCP_CONNECTION_H_
+#endif  //  SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_TCP_CONNECTION_H_

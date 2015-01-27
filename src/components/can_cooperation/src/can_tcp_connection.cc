@@ -30,7 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "./can_tcp_connection.h"
+#include "can_cooperation/can_tcp_connection.h"
+
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -116,7 +117,7 @@ ConnectionState CANTCPConnection::GetData() {
     const int kSize = 500;
     int read_chars = 0;
     do {
-      char buf[kSize];
+      char buf[kSize] = {0};
       read_chars = read(socket_, buf, sizeof(buf));
       switch (read_chars) {
         case 0:  // closed connection
@@ -126,7 +127,7 @@ ConnectionState CANTCPConnection::GetData() {
           current_state_ = INVALID;
           break;
         default:
-          data += buf;
+          data.append(buf, read_chars);
           break;
       }
     } while (read_chars >= kSize && OPENED == current_state_);

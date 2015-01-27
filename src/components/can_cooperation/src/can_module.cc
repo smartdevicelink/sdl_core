@@ -36,7 +36,7 @@
 #include "can_cooperation/event_engine/event_dispatcher.h"
 #include "can_cooperation/can_module_constants.h"
 #include "application_manager/application.h"
-#include "./can_tcp_connection.h"
+#include "can_cooperation/can_tcp_connection.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 
