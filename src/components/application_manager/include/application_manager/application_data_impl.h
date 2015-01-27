@@ -267,7 +267,15 @@ class DynamicApplicationDataImpl : public virtual Application {
      */
     inline bool is_reset_global_properties_active() const;
 
-  protected:
+    virtual int32_t connection_id() const;
+
+    virtual void set_connection_id(const int32_t connection_id);
+
+    virtual bool is_greyed_out() const;
+
+    virtual void set_greyed_out(bool is_greyed_out);
+
+protected:
     smart_objects::SmartObject* help_prompt_;
     smart_objects::SmartObject* timeout_prompt_;
     smart_objects::SmartObject* vr_help_title_;
@@ -292,7 +300,10 @@ class DynamicApplicationDataImpl : public virtual Application {
     uint32_t perform_interaction_ui_corrid_;
     bool is_reset_global_properties_active_;
     int32_t perform_interaction_mode_;
-  private:
+    int32_t connection_id_;
+    bool is_greyed_out_;
+
+private:
     void SetGlobalProperties(const smart_objects::SmartObject& param,
                              void (DynamicApplicationData::*callback)(
                                const NsSmartDeviceLink::NsSmartObjects::SmartObject&));

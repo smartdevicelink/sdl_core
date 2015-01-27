@@ -35,6 +35,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_ON_HMI_STATUS_NOTIFICATION_FROM_MOBILE_H_
 
 #include "application_manager/commands/command_notification_from_mobile_impl.h"
+#include "interfaces/MOBILE_API.h"
 #include "utils/macro.h"
 
 namespace application_manager {
@@ -65,7 +66,6 @@ class OnHMIStatusNotificationFromMobile :
   virtual void Run();
 
 private:
-  static bool is_apps_requested_;
   DISALLOW_COPY_AND_ASSIGN(OnHMIStatusNotificationFromMobile);
 };
 

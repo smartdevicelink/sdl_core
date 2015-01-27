@@ -361,8 +361,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   if (connection_handler_) {
     connection_handler::ConnectionHandlerImpl* con_handler_impl =
       static_cast<connection_handler::ConnectionHandlerImpl*>(
-
         connection_handler_);
+
     if (con_handler_impl->GetDataOnSessionKey(connection_key, &app_id,
         &sessions_list, &device_id)
         == -1) {
@@ -384,6 +384,19 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   const std::string& app_name =
     message[strings::msg_params][strings::app_name].asString();
 
+  int32_t connection_id = get_connection_id(connection_key);
+  if (-1 == connection_id) {
+    LOG4CXX_ERROR(logger_, "Can't get connection id for application:"
+                  << app_id);
+    utils::SharedPtr<smart_objects::SmartObject> response(
+      MessageHelper::CreateNegativeResponse(
+        connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
+        message[strings::params][strings::correlation_id].asUInt(),
+        mobile_apis::Result::GENERIC_ERROR));
+    ManageMobileCommand(response);
+    return ApplicationSharedPtr();
+  }
+
   ApplicationSharedPtr application(
     new ApplicationImpl(app_id,
                         mobile_app_id, app_name,
@@ -403,6 +416,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     return ApplicationSharedPtr();
   }
 
+  application->set_connection_id(connection_id);
   application->set_device(device_id);
   application->set_grammar_id(GenerateGrammarID());
   mobile_api::Language::eType launguage_desired =
@@ -740,6 +754,28 @@ void ApplicationManagerImpl::OnMessageReceived(
   }
 
   messages_from_hmi_.PostMessage(impl::MessageFromHmi(message));
+}
+
+bool ApplicationManagerImpl::IsAppsQueriedFrom(int32_t connection_id) const {
+  sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+  AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
+  AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
+  for (; it != it_end; ++it) {
+    if (connection_id == (*it)->connection_id()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(
+    bool is_greyed_out) {
+  sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+  AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
+  AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
+  for (; it != it_end; ++it) {
+    (*it)->set_greyed_out(is_greyed_out);
+  }
 }
 
 void ApplicationManagerImpl::OnErrorSending(
@@ -1192,7 +1228,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
     if (function_id == mobile_apis::FunctionID::OnSystemRequestID) {
       mobile_apis::RequestType::eType request_type =
           static_cast<mobile_apis::RequestType::eType>(
-          (*message)[strings::msg_params][strings::request_type].asUInt());
+          (*message)[strings::params][strings::request_type].asUInt());
       if (mobile_apis::RequestType::PROPRIETARY == request_type ||
           mobile_apis::RequestType::HTTP == request_type) {
         policy::PolicyHandler::instance()->OnUpdateRequestSentToMobile();
@@ -1842,8 +1878,8 @@ HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
   return hmi_capabilities_;
 }
 
-void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array) {
-
+void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
+                                                const uint32_t connection_key) {
   using namespace policy;
 
   const std::size_t arr_size(obj_array.size());
@@ -1851,10 +1887,19 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array) {
 
     const SmartObject& app_data = obj_array[idx];
     if (app_data.isValid()) {
-      const std::string url_schema(app_data[strings::urlSchema].asString());
-      const std::string package_name(app_data[strings::packageName].asString());
-      const std::string mobile_app_id(app_data[strings::app_id].asString());
-      const std::string appName(app_data[strings::app_name].asString());
+      std::string url_scheme;
+      std::string package_name;
+      if (app_data.keyExists(strings::ios)) {
+        url_scheme = app_data[strings::ios][strings::urlScheme].asString();
+      } else if (app_data.keyExists(strings::android)) {
+        package_name =
+            app_data[strings::android][strings::packageName].asString();
+      } else {
+        LOG4CXX_ERROR(logger_, "Can't find mobile OS type in json file.");
+        return;
+      }
+      const std::string mobile_app_id(app_data[strings::jsonAppId].asString());
+      const std::string appName(app_data[strings::jsonAppName].asString());
 
       const uint32_t hmi_app_id(GenerateNewHMIAppID());
 
@@ -1864,9 +1909,21 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array) {
                                 appName,
                                 PolicyHandler::instance()->GetStatisticManager()));
       if (app) {
-        app->SetShemaUrl(url_schema);
-        app->SetPackageName(package_name);
+        if (!url_scheme.empty()) {
+          app->SetShemaUrl(url_scheme);
+        } else if (!package_name.empty()) {
+          app->SetPackageName(package_name);
+        }
         app->set_hmi_application_id(hmi_app_id);
+
+        int32_t connection_id = get_connection_id(connection_key);
+        if (-1 != connection_id) {
+          app->set_connection_id(connection_id);
+        } else {
+          LOG4CXX_ERROR(logger_, "Error during getting connection id for "
+                        "application: " << mobile_app_id);
+          return;
+        }
 
         sync_primitives::AutoLock lock(apps_to_register_list_lock_);
         apps_to_register_.insert(app);
@@ -1876,15 +1933,16 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array) {
 }
 
 void ApplicationManagerImpl::ProcessQueryApp(
-    const smart_objects::SmartObject& sm_object) {
+    const smart_objects::SmartObject& sm_object,
+    const uint32_t connection_key) {
   using namespace policy;
   using namespace profile;
 
-  if (sm_object.keyExists(strings::application)) {
-    SmartArray* obj_array = sm_object[strings::application].asArray();
+  if (sm_object.keyExists("response")) {
+    SmartArray* obj_array = sm_object["response"].asArray();
     if (NULL != obj_array) {
       const std::string app_icon_dir(Profile::instance()->app_icons_folder());
-      CreateApplications(*obj_array);
+      CreateApplications(*obj_array, connection_key);
       SendUpdateAppList();
 
       AppsWaitRegistrationSet::const_iterator it = apps_to_register_.begin();
@@ -2908,6 +2966,22 @@ ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
 
   LOG4CXX_DEBUG(logger_, "SDL Supported protocol version "<<ProtocolVersion::kV2);
   return ProtocolVersion::kV2;
+}
+
+const int32_t ApplicationManagerImpl::get_connection_id(
+    uint32_t connection_key) const {
+  if (connection_handler_) {
+    connection_handler::ConnectionHandlerImpl* con_handler_impl =
+      static_cast<connection_handler::ConnectionHandlerImpl*>(
+        connection_handler_);
+
+    uint32_t connection_id = 0;
+    uint8_t session_id = 0;
+    con_handler_impl->PairFromKey(connection_key, &connection_id, &session_id);
+    return static_cast<int32_t>(connection_id);
+  }
+
+  return -1;
 }
 
 

@@ -1214,6 +1214,10 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
   output[strings::hmi_display_language_desired] = app->ui_language();
   output[strings::is_media_application] = app->is_media_application();
 
+  if (!app->IsRegistered()) {
+    output[strings::greyOut] = app->is_greyed_out();
+  }
+
   if (ngn_media_screen_name) {
     output[strings::ngn_media_screen_app_name] = ngn_media_screen_name->asString();
   }
@@ -1860,7 +1864,7 @@ void MessageHelper::SendLaunchApp(uint32_t connection_key,
   content[strings::msg_params][strings::request_type] = RequestType::LAUNCH_APP;
   content[strings::msg_params][strings::app_id] = connection_key;
   if (!urlSchema.empty()) {
-    content[strings::msg_params][strings::urlSchema] = urlSchema;
+    content[strings::msg_params][strings::urlScheme] = urlSchema;
   } else if (!packageName.empty()) {
     content[strings::msg_params][strings::packageName] = packageName;
   }

@@ -100,6 +100,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const std::string folder_name() const;
   bool is_media_application() const;
   const mobile_api::HMILevel::eType& hmi_level() const;
+  virtual bool is_foreground() const;
+  virtual void set_foreground(bool is_foreground);
   const uint32_t put_file_in_none_count() const;
   const uint32_t delete_file_in_none_count() const;
   const uint32_t list_files_in_none_count() const;
@@ -219,6 +221,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool                                     tts_properties_in_none_;
   bool                                     tts_properties_in_full_;
   mobile_api::HMILevel::eType              hmi_level_;
+  bool                                     is_foreground_;
   uint32_t                                 put_file_in_none_count_;
   uint32_t                                 delete_file_in_none_count_;
   uint32_t                                 list_files_in_none_count_;

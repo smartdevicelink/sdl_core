@@ -1327,6 +1327,10 @@
       <description>List of all applicable app types stating which classifications to be given to the app.</description>
       <description>e.g. for platforms like GEN2, this determines which "corner(s)" the app can populate.</description>
     </param>
+    <param name="greyOut" type="Boolean" mandatory="false">
+      <description>Indicates whether application should be dimmed on the screen.</description>
+      <description>Applicable only for apps received through QueryApps and still not registered.</description>
+    </param>
 </struct>
 
 <struct name="MenuParams">

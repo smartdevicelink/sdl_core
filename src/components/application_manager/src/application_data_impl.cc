@@ -172,7 +172,9 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
       is_perform_interaction_active_(false),
       perform_interaction_ui_corrid_(0),
       is_reset_global_properties_active_(false),
-      perform_interaction_mode_(-1) {
+      perform_interaction_mode_(-1),
+      connection_id_(-1),
+      is_greyed_out_(false) {
 }
 
 DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
@@ -542,6 +544,23 @@ void DynamicApplicationDataImpl::set_reset_global_properties_active(
     bool active) {
   is_reset_global_properties_active_ = active;
 }
+
+int32_t DynamicApplicationDataImpl::connection_id() const {
+  return connection_id_;
+}
+
+void DynamicApplicationDataImpl::set_connection_id(const int32_t connection_id) {
+  connection_id_ = connection_id;
+}
+
+bool DynamicApplicationDataImpl::is_greyed_out() const {
+  return is_greyed_out_;
+}
+
+void DynamicApplicationDataImpl::set_greyed_out(bool is_greyed_out) {
+  is_greyed_out_ = is_greyed_out;
+}
+
 
 void DynamicApplicationDataImpl::set_perform_interaction_mode(int32_t mode) {
   perform_interaction_mode_ = mode;

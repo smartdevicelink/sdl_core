@@ -356,6 +356,30 @@ class DynamicApplicationData {
      * @return TRUE if perform interaction active, otherwise FALSE
      */
     virtual bool is_reset_global_properties_active() const = 0;
+
+    /**
+     * @brief Returns connection id used by application
+     */
+    virtual int32_t connection_id() const = 0;
+
+    /**
+     * @brief Set connection id used by application
+     * @param connection_id Connection id
+     */
+    virtual void set_connection_id(const int32_t connection_id) = 0;
+
+    /**
+     * @brief Returns is application should be greyed out on HMI
+     */
+    virtual bool is_greyed_out() const = 0;
+
+    /**
+     * @brief Sets application as should be greyed out on HMI
+     * @param is_greyed_out True, if should be greyed out on HMI,
+     * otherwise - false
+     */
+    virtual void set_greyed_out(bool is_greyed_out) = 0;
+
 };
 
 class Application : public virtual InitialApplicationData,
@@ -422,6 +446,8 @@ class Application : public virtual InitialApplicationData,
     virtual const std::string folder_name() const = 0;
     virtual bool is_media_application() const = 0;
     virtual const mobile_api::HMILevel::eType& hmi_level() const = 0;
+    virtual bool is_foreground() const = 0;
+    virtual void set_foreground(bool is_foreground) = 0;
     virtual const uint32_t put_file_in_none_count() const = 0;
     virtual const uint32_t delete_file_in_none_count() const = 0;
     virtual const uint32_t list_files_in_none_count() const = 0;

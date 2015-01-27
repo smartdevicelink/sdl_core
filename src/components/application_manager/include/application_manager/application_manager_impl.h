@@ -267,8 +267,10 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      * @param sm_object smart object wich is actually parsed json obtained within
      * system request.
+     * @param connection_key connection key for app, which sent system request
      */
-    void ProcessQueryApp(const smart_objects::SmartObject& sm_object);
+    void ProcessQueryApp(const smart_objects::SmartObject& sm_object,
+                         const uint32_t connection_key);
 
 #ifdef TIME_TESTER
     /**
@@ -922,6 +924,27 @@ class ApplicationManagerImpl : public ApplicationManager,
       }
     };
 
+    /**
+     * @brief Sends UpdateAppList notification to HMI
+     */
+    void SendUpdateAppList();
+
+    /**
+     * @brief Marks applications received through QueryApps as should be
+     * greyed out on HMI
+     * @param is_greyed_out, true, if should be greyed out, otherwise - false
+     */
+    void MarkAppsGreyOut(bool is_greyed_out);
+
+    bool IsAppsQueriedFrom(int32_t connection_id) const;
+
+    /**
+     * @brief Gets connection id for certain connection key
+     * @param connection_key Connection key
+     * @return Connection identified
+     */
+    const int32_t get_connection_id(uint32_t connection_key) const;
+
   private:
     ApplicationManagerImpl();
 
@@ -972,16 +995,15 @@ class ApplicationManagerImpl : public ApplicationManager,
     virtual void Handle(const impl::MessageToHmi message) OVERRIDE;
 
     // CALLED ON audio_pass_thru_messages_ thread!
-    virtual void Handle(const impl::AudioData message) OVERRIDE;
-
-    void SendUpdateAppList();
+    virtual void Handle(const impl::AudioData message) OVERRIDE;    
 
     template<typename ApplicationList>
     void PrepareApplicationListSO(ApplicationList app_list,
                                   smart_objects::SmartObject& applications) {
       CREATE_LOGGERPTR_LOCAL(logger_, "ApplicatinManagerImpl");
 
-      uint32_t app_count = 0;
+      smart_objects::SmartArray* app_array = applications.asArray();
+      uint32_t app_count = NULL == app_array ? 0 : app_array->size();
       typename ApplicationList::const_iterator it;
       for (it = app_list.begin(); it != app_list.end(); ++it) {
         if (!it->valid()) {
@@ -1010,11 +1032,11 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      * @param obj_array applications array.
      *
-     * @param app_icon_dir application icons directory
-     *
-     * @param apps_with_icon container which store application and it's icon path.
+     * @param connection_key connection key of app, which provided app list to
+     * be created
      */
-    void CreateApplications(smart_objects::SmartArray& obj_array);
+    void CreateApplications(smart_objects::SmartArray& obj_array,
+                            const uint32_t connection_key);
 
     /*
      * @brief Function is called on IGN_OFF, Master_reset or Factory_defaults
@@ -1026,8 +1048,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief returns true if low voltage state is active
      */
     bool IsLowVoltage();
-
-  private:
 
     /**
      * @brief OnHMILevelChanged the callback that allows SDL to react when
@@ -1108,7 +1128,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     ProtocolVersion SupportedSDLVersion() const;
 
-    // members
+  private:
 
     /**
      * @brief List of applications

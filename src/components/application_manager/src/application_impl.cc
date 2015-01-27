@@ -221,6 +221,14 @@ const mobile_api::HMILevel::eType& ApplicationImpl::hmi_level() const {
   return hmi_level_;
 }
 
+bool application_manager::ApplicationImpl::is_foreground() const {
+  return is_foreground_;
+}
+
+void application_manager::ApplicationImpl::set_foreground(bool is_foreground) {
+  is_foreground_ = is_foreground;
+}
+
 const uint32_t ApplicationImpl::put_file_in_none_count() const {
   return put_file_in_none_count_;
 }
