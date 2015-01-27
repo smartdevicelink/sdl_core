@@ -49,4 +49,8 @@ void GenericModule::SetServiceHandler(application_manager::ServicePtr service) {
   service_->SubscribeToHMINotification(hmi_api::on_control_changed);
 }
 
+application_manager::ServicePtr GenericModule::GetServiceHandler() {
+  return service_;
+}
+
 }  //  namespace functional_modules

@@ -56,7 +56,7 @@ void OnRadioDetailsNotification::Run() {
   application_manager::ApplicationSharedPtr app =
       GetApplicationWithControl(can_app_extension);
 
-  if (app.valid()) {
+  if (app) {
     message_->set_connection_key(app->app_id());
     service_->SendMessageToMobile(message_);
   }

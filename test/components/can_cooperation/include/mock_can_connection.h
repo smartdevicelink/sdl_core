@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,36 +29,25 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_CAN_CONNECTION_H_
+#define TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_CAN_CONNECTION_H_
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
-
-#include "json/json.h"
-#include "utils/shared_ptr.h"
+#include "can_cooperation/can_connection.h"
 
 namespace can_cooperation {
 
-typedef Json::Value MessageFromCAN;
-
-enum ConnectionState {
-  NONE = -1,
-  OPENED,
-  CLOSED,
-  INVALID
-};
-
-class CANConnection {
+class MockCANConnection : public CANConnection {
  public:
-  virtual ~CANConnection() {
-  }
-  virtual ConnectionState OpenConnection() = 0;
-  virtual ConnectionState CloseConnection() = 0;
-  virtual ConnectionState Flash() = 0;
-  virtual ConnectionState GetData() = 0;
+  MOCK_METHOD0(OpenConnection,
+      ConnectionState());
+  MOCK_METHOD0(CloseConnection,
+      ConnectionState());
+  MOCK_METHOD0(Flash,
+      ConnectionState());
+  MOCK_METHOD0(GetData,
+      ConnectionState());
 };
 
-typedef utils::SharedPtr<CANConnection> CANConnectionSPtr;
+}  // namespace can_cooperation
 
-}  //  namespace can_cooperation
-
-#endif  //  SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
+#endif  // TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_CAN_CONNECTION_H_

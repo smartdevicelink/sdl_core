@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,36 +29,32 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_
+#define TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
+#include "gmock/gmock.h"
+#include "application_manager/service.h"
 
-#include "json/json.h"
-#include "utils/shared_ptr.h"
+namespace application_manager {
 
-namespace can_cooperation {
-
-typedef Json::Value MessageFromCAN;
-
-enum ConnectionState {
-  NONE = -1,
-  OPENED,
-  CLOSED,
-  INVALID
-};
-
-class CANConnection {
+class MockService : public Service {
  public:
-  virtual ~CANConnection() {
-  }
-  virtual ConnectionState OpenConnection() = 0;
-  virtual ConnectionState CloseConnection() = 0;
-  virtual ConnectionState Flash() = 0;
-  virtual ConnectionState GetData() = 0;
+  MOCK_METHOD1(CheckPolicyPermissions,
+      bool(std::string& json_message));
+  MOCK_METHOD1(GetApplication,
+      ApplicationSharedPtr(ApplicationId app_id));
+  MOCK_METHOD1(SendMessageToHMI,
+      void(const MessagePtr& message));
+  MOCK_METHOD1(SendMessageToMobile,
+      void(const MessagePtr& message));
+  MOCK_METHOD0(GetNextCorrelationID,
+      uint32_t());
+  MOCK_METHOD0(GetApplications,
+      std::set<ApplicationSharedPtr>());
+  MOCK_METHOD1(SubscribeToHMINotification,
+      void(const std::string& hmi_notification));
 };
 
-typedef utils::SharedPtr<CANConnection> CANConnectionSPtr;
+}  // namespace application_manager
 
-}  //  namespace can_cooperation
-
-#endif  //  SRC_COMPONENTS_CAN_COOPERATION_SRC_CAN_CONNECTION_H_
+#endif  // TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_

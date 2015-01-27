@@ -68,10 +68,10 @@ application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicatio
       applications.begin();
 
   for (;it != applications.end(); ++it) {
-    if (it->valid()) {
+    if (*it) {
       application_manager::AppExtensionPtr app_extension =
           (*it)->QueryInterface(CANModule::instance()->GetModuleID());
-      if (app_extension.valid()) {
+      if (app_extension) {
         can_app_extension = application_manager::AppExtensionPtr::
             static_pointer_cast<CANAppExtension>(app_extension);
         if (can_app_extension->IsControlGiven()) {

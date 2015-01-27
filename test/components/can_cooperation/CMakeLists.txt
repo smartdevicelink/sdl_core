@@ -6,19 +6,28 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/src/components/include/
   ${CMAKE_SOURCE_DIR}/src/components/application_manager/include
   ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include
+  ${CMAKE_SOURCE_DIR}/src/components/smart_objects/include
+  ${CMAKE_SOURCE_DIR}/src/components/policy/src/policy/usage_statistics/include
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
+  include
+)
+
+set (SOURCES
+  src/can_module_test.cc
+  src/can_app_extension_test.cc
+  src/can_tcp_connection_test.cc
+  src/can_library_test.cc
 )
 
 set (LIBRARIES
-    gtest
-    gtest_main
-    gmock
-    gmock_main
-    CANCooperation
-#    jsoncpp
-#    FunctionalModule
-    gcov
+  gtest
+  gtest_main
+  gmock
+  gmock_main
+  CANCooperation
+  SmartObjects
+  gcov
 )
 
 if (ENABLE_TEST_COV_COUNT)
@@ -42,7 +51,4 @@ SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
 SET(CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/src/components/can_cooperation/")
 
-#create_test("test_can_module" "./src/can_module_test.cc" "${LIBRARIES}")
-create_test("test_can_app_extension" "./src/can_app_extension_test.cc" "${LIBRARIES}")
-create_test("test_can_tcp_connection" "./src/can_tcp_connection_test.cc" "${LIBRARIES}")
-create_test("test_can_library" "./src/can_library_test.cc" "${LIBRARIES}")
+create_test("can_cooperation_test" "${SOURCES}" "${LIBRARIES}")

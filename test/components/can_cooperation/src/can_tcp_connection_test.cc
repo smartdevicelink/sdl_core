@@ -30,6 +30,7 @@ class TCPServer {
   int socket_;
   int client_socket_;
   pthread_t thread_;
+  pthread_mutex_t mutex_;
 };
 
 TCPServer::TCPServer(const std::string& address, int port)
@@ -37,7 +38,8 @@ TCPServer::TCPServer(const std::string& address, int port)
       port_(port),
       socket_(-1),
       client_socket_(-1),
-      thread_(0) {
+      thread_(0),
+      mutex_(PTHREAD_MUTEX_INITIALIZER) {
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
   struct sockaddr_in server_addr;
   memset(&server_addr, 0, sizeof(server_addr));
@@ -57,8 +59,9 @@ TCPServer::~TCPServer() {
 
 void* TCPServer::Listen(void *self_object) {
   TCPServer* self = static_cast<TCPServer*>(self_object);
+  pthread_mutex_unlock(&self->mutex_);
   if (-1 == listen(self->socket_, 1)) {
-    printf("failed to listen");
+    printf("failed to listen\n");
     return (void*)-1;
   }
   struct sockaddr_in client_addr;
@@ -74,13 +77,20 @@ void* TCPServer::Listen(void *self_object) {
 }
 
 void TCPServer::Start() {
+  pthread_mutex_lock(&mutex_);
   int result = pthread_create(&thread_, 0, &TCPServer::Listen, this);
-  printf("Result of thread creation is %d\n", result);
+  if (result != 0) {
+    printf("Result of thread creation is %d\n", result);
+  }
+  pthread_mutex_lock(&mutex_);
+  pthread_mutex_unlock(&mutex_);
 }
 
 void TCPServer::WaitConnect() {
   int result = pthread_join(thread_, 0);
-  printf("Join result is %d\n", result);
+  if (result != 0) {
+    printf("Join result is %d\n", result);
+  }
 }
 
 void TCPServer::Stop() {
@@ -101,24 +111,31 @@ bool TCPServer::Receive(std::string* message) {
   return true;
 }
 
-TEST(CanTcpConnectionTest, OpenClose) {
-  TCPServer server("127.0.0.1", 8090);
-  server.Start();
+class CanTcpConnectionTest : public ::testing::Test {
+ protected:
+  static TCPServer server;
 
+  void SetUp() {
+    server.Start();
+  }
+
+  void TearDown() {
+    server.Stop();
+  }
+};
+
+TCPServer CanTcpConnectionTest::server("127.0.0.1", 8090);
+
+TEST_F(CanTcpConnectionTest, OpenClose) {
   CANTCPConnection conn;
-  EXPECT_EQ(ConnectionState::OPENED, conn.OpenConnection());
+  ASSERT_EQ(ConnectionState::OPENED, conn.OpenConnection());
   server.WaitConnect();
   EXPECT_EQ(ConnectionState::CLOSED, conn.CloseConnection());
-
-  server.Stop();
 }
 
-TEST(CanTcpConnectionTest, WriteData) {
-  TCPServer server("127.0.0.1", 8090);
-  server.Start();
-
+TEST_F(CanTcpConnectionTest, WriteData) {
   CANTCPConnection conn;
-  EXPECT_EQ(ConnectionState::OPENED, conn.OpenConnection());
+  ASSERT_EQ(ConnectionState::OPENED, conn.OpenConnection());
   server.WaitConnect();
 
   Json::Value value;
@@ -135,16 +152,11 @@ TEST(CanTcpConnectionTest, WriteData) {
   EXPECT_EQ(value.toStyledString(), server_msg);
 
   EXPECT_EQ(ConnectionState::CLOSED, conn.CloseConnection());
-
-  server.Stop();
 }
 
-TEST(CanTcpConnectionTest, ReadData) {
-  TCPServer server("127.0.0.1", 8090);
-  server.Start();
-
+TEST_F(CanTcpConnectionTest, ReadData) {
   CANTCPConnection conn;
-  EXPECT_EQ(ConnectionState::OPENED, conn.OpenConnection());
+  ASSERT_EQ(ConnectionState::OPENED, conn.OpenConnection());
   server.WaitConnect();
 
   Json::Value value;
@@ -160,8 +172,6 @@ TEST(CanTcpConnectionTest, ReadData) {
   EXPECT_EQ(value.toStyledString(), received_msg.toStyledString());
 
   EXPECT_EQ(ConnectionState::CLOSED, conn.CloseConnection());
-
-  server.Stop();
 }
 
 }  // namespace can_cooperation

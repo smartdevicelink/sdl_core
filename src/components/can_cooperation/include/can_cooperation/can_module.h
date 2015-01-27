@@ -38,86 +38,81 @@
 #include "can_cooperation/request_controller.h"
 #include "utils/threads/message_loop_thread.h"
 
-
 namespace threads {
-    class Thread;
+class Thread;
 }
 
 namespace can_cooperation {
 class CANModule : public functional_modules::GenericModule,
-	public utils::Singleton<CANModule>,
-    public threads::MessageLoopThread<std::queue<MessageFromCAN>>::Handler,
-    public threads::MessageLoopThread<std::queue<std::string>>::Handler {
-  public:
-    functional_modules::PluginInfo GetPluginInfo() const;
-    virtual functional_modules::ProcessResult ProcessMessage(
-        application_manager::MessagePtr msg);
-    virtual functional_modules::ProcessResult ProcessHMIMessage(
-        application_manager::MessagePtr msg);
-    void ProcessCANMessage(const MessageFromCAN& can_msg);
-    void Handle(const std::string message);
-    void Handle(const MessageFromCAN message);
+    public utils::Singleton<CANModule>, public threads::MessageLoopThread<
+        std::queue<MessageFromCAN>>::Handler, public threads::MessageLoopThread<
+        std::queue<std::string>>::Handler {
+ public:
+  functional_modules::PluginInfo GetPluginInfo() const;
+  virtual functional_modules::ProcessResult ProcessMessage(
+      application_manager::MessagePtr msg);
+  virtual functional_modules::ProcessResult ProcessHMIMessage(
+      application_manager::MessagePtr msg);
+  void ProcessCANMessage(const MessageFromCAN& can_msg);
+  void Handle(const std::string message);
+  void Handle(const MessageFromCAN message);
 
-    /**
-     * @brief Sends response to mobile application
-     * @param msg response mesage
-     */
-    void SendResponseToMobile(application_manager::MessagePtr msg);
+  /**
+   * @brief Sends response to mobile application
+   * @param msg response mesage
+   */
+  void SendResponseToMobile(application_manager::MessagePtr msg);
 
-    /**
-     * @brief Post message to can to queue
-     * @param msg response mesage
-     */
-    void SendMessageToCan(const std::string& msg);
+  /**
+   * @brief Post message to can to queue
+   * @param msg response mesage
+   */
+  void SendMessageToCan(const std::string& msg);
 
-    /**
-     * @brief Checks if radio scan started
-     * @return true if radio scan started
-     */
-    bool IsScanStarted() const;
+  /**
+   * @brief Checks if radio scan started
+   * @return true if radio scan started
+   */
+  bool IsScanStarted() const;
 
-    /**
-     * @brief Checks if radio scan started
-     * @param is_scan_sarted true - scan started? false - scan stopped
-     */
-    void SetScanStarted(bool is_scan_started);
+  /**
+   * @brief Checks if radio scan started
+   * @param is_scan_sarted true - scan started? false - scan stopped
+   */
+  void SetScanStarted(bool is_scan_started);
 
-    /**
-     * @brief Remove extension created for specified application
-     * @param app_id application id
-     */
-    virtual void RemoveAppExtension(uint32_t app_id);
+  /**
+   * @brief Remove extension created for specified application
+   * @param app_id application id
+   */
+  virtual void RemoveAppExtension(uint32_t app_id);
 
-    /**
-     * @brief Returns pointer to SDL core service interface
-     * @return pointer to core service interface
-     */
-    application_manager::ServicePtr GetServiceHandler();
-protected:
-    /**
-     * @brief Remove extension for all applications
-     */
-    virtual void RemoveAppExtensions();
-private:
- DISALLOW_COPY_AND_ASSIGN(CANModule);
- FRIEND_BASE_SINGLETON_CLASS(CANModule);
- CANModule();
- ~CANModule();
+  void set_can_connection(CANConnectionSPtr);
 
- void SubscribeOnFunctions() ;
+ protected:
+  /**
+   * @brief Remove extension for all applications
+   */
+  virtual void RemoveAppExtensions();
+ private:
+  DISALLOW_COPY_AND_ASSIGN(CANModule);FRIEND_BASE_SINGLETON_CLASS(CANModule);
+  CANModule();
+  ~CANModule();
 
-functional_modules::ProcessResult HandleMessage(
-    application_manager::MessagePtr msg);
- // TODO(VS): must be uid
- static const functional_modules::ModuleID kCANModuleID = 153;
- utils::SharedPtr<CANConnection> can_connection;
- functional_modules::PluginInfo plugin_info_;
- threads::MessageLoopThread<std::queue<MessageFromCAN>> from_can_;
- threads::MessageLoopThread<std::queue<std::string>> from_mobile_;
- threads::Thread* thread_;
- bool is_scan_started_;
- request_controller::RequestController request_controller_;
- friend class TCPClientDelegate;
+  void SubscribeOnFunctions();
+
+  functional_modules::ProcessResult HandleMessage(
+      application_manager::MessagePtr msg);
+  // TODO(VS): must be uid
+  static const functional_modules::ModuleID kCANModuleID = 153;
+  CANConnectionSPtr can_connection_;
+  functional_modules::PluginInfo plugin_info_;
+  threads::MessageLoopThread<std::queue<MessageFromCAN>> from_can_;
+  threads::MessageLoopThread<std::queue<std::string>> from_mobile_;
+  threads::Thread* thread_;
+  bool is_scan_started_;
+  request_controller::RequestController request_controller_;
+  friend class TCPClientDelegate;
 };
 
 EXPORT_FUNCTION(CANModule);

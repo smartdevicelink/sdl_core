@@ -77,7 +77,13 @@ class GenericModule {
     }
     virtual PluginInfo GetPluginInfo() const = 0;
 
-    void SetServiceHandler(application_manager::ServicePtr service);
+    virtual void SetServiceHandler(application_manager::ServicePtr service);
+
+    /**
+     * @brief Returns pointer to SDL core service interface
+     * @return pointer to core service interface
+     */
+    virtual application_manager::ServicePtr GetServiceHandler();
 
     virtual ProcessResult ProcessMessage(application_manager::MessagePtr msg) = 0;
     virtual ProcessResult ProcessHMIMessage(application_manager::MessagePtr msg) = 0;
@@ -101,9 +107,12 @@ class GenericModule {
      */
     virtual void RemoveAppExtensions() = 0;
 
-    application_manager::ServicePtr service_;
+    application_manager::ServicePtr service() {
+      return service_;
+    }
   private:
     DISALLOW_COPY_AND_ASSIGN(GenericModule);
+    application_manager::ServicePtr service_;
     const ModuleID kModuleId_;
     std::deque<utils::SharedPtr<ModuleObserver> > observers_;
     ModuleState state_;

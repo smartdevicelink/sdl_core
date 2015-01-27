@@ -40,7 +40,6 @@
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
 
-
 namespace can_cooperation {
 
 using namespace json_keys;
@@ -67,8 +66,8 @@ class TCPClientDelegate : public threads::ThreadDelegate {
 };
 
 TCPClientDelegate::TCPClientDelegate(CANModule* can_module)
-: can_module_(can_module)
-, stop_flag_(false) {
+    : can_module_(can_module),
+      stop_flag_(false) {
   DCHECK(can_module);
 }
 
@@ -79,11 +78,10 @@ TCPClientDelegate::~TCPClientDelegate() {
 
 void TCPClientDelegate::threadMain() {
   while (!stop_flag_) {
-    while (ConnectionState::OPENED ==
-        can_module_->can_connection->GetData()) {
+    while (ConnectionState::OPENED == can_module_->can_connection_->GetData()) {
       can_module_->from_can_.PostMessage(
-        static_cast<CANTCPConnection*>(can_module_->can_connection.get())
-          ->ReadData());
+          CANConnectionSPtr::static_pointer_cast<CANTCPConnection>(
+              can_module_->can_connection_)->ReadData());
     }
   }
 }
@@ -94,21 +92,20 @@ bool TCPClientDelegate::exitThreadMain() {
 }
 
 CANModule::CANModule()
-  : GenericModule(kCANModuleID)
-  , can_connection()
-  , from_can_("FromCan To Mobile", this)
-  , from_mobile_("FromMobile To Can", this)
-  , thread_(NULL)
-  , is_scan_started_(false) {
-    can_connection = new CANTCPConnection;
-    if (ConnectionState::OPENED != can_connection->OpenConnection()) {
-      LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
-    } else {
-      thread_ = new threads::Thread("CANClientListener",
-                                    new TCPClientDelegate(this));
-      const size_t kStackSize = 16384;
-      thread_->startWithOptions(threads::ThreadOptions(kStackSize));
-    }
+    : GenericModule(kCANModuleID),
+      can_connection_(new CANTCPConnection),
+      from_can_("FromCan To Mobile", this),
+      from_mobile_("FromMobile To Can", this),
+      thread_(NULL),
+      is_scan_started_(false) {
+  if (ConnectionState::OPENED != can_connection_->OpenConnection()) {
+    LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
+  } else {
+    thread_ = new threads::Thread("CANClientListener",
+                                  new TCPClientDelegate(this));
+    const size_t kStackSize = 16384;
+    thread_->startWithOptions(threads::ThreadOptions(kStackSize));
+  }
   plugin_info_.name = "ReverseSDLPlugin";
   plugin_info_.version = 1;
   SubscribeOnFunctions();
@@ -139,8 +136,8 @@ void CANModule::SubscribeOnFunctions() {
 }
 
 CANModule::~CANModule() {
-  if (can_connection) {
-    can_connection->CloseConnection();
+  if (can_connection_) {
+    can_connection_->CloseConnection();
   }
   if (thread_) {
     thread_->stop();
@@ -177,7 +174,7 @@ void CANModule::SendMessageToCan(const std::string& msg) {
 }
 
 ProcessResult CANModule::ProcessHMIMessage(
-              application_manager::MessagePtr msg) {
+    application_manager::MessagePtr msg) {
   LOG4CXX_INFO(logger_, "HMI message: " << msg->json_message());
   return HandleMessage(msg);
 }
@@ -188,17 +185,18 @@ void CANModule::ProcessCANMessage(const MessageFromCAN& can_msg) {
 }
 
 void CANModule::Handle(const std::string message) {
-  static_cast<CANTCPConnection*>(can_connection.get())->WriteData(
-      message);
+  CANConnectionSPtr::static_pointer_cast<CANTCPConnection>(can_connection_)
+      ->WriteData(message);
 
-  if (ConnectionState::OPENED != can_connection->Flash()) {
+  if (ConnectionState::OPENED != can_connection_->Flash()) {
     LOG4CXX_ERROR(logger_, "Failed to send message to CAN");
   }
 }
 
 void CANModule::Handle(const MessageFromCAN can_msg) {
-  application_manager::MessagePtr msg(new application_manager::Message(
-      protocol_handler::MessagePriority::kDefault));
+  application_manager::MessagePtr msg(
+      new application_manager::Message(
+          protocol_handler::MessagePriority::kDefault));
 
   Json::FastWriter writer;
   std::string json_string = writer.write(can_msg);
@@ -231,13 +229,13 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     } else {
       msg->set_message_type(application_manager::MessageType::kNotification);
     }
-  // Response
+    // Response
   } else if (value.isMember(kResult) && value[kResult].isMember(kMethod)) {
     function_name = value[kResult][kMethod].asCString();
     msg->set_message_type(application_manager::MessageType::kResponse);
-  // Error response
-  }  else if (value.isMember(kError) && value[kError].isMember(kData) &&
-              value[kError][kData].isMember(kMethod)) {
+    // Error response
+  } else if (value.isMember(kError) && value[kError].isMember(kData)
+      && value[kError][kData].isMember(kMethod)) {
     function_name = value[kError][kData][kMethod].asCString();
     msg->set_message_type(application_manager::MessageType::kErrorResponse);
   } else {
@@ -245,10 +243,9 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     return ProcessResult::FAILED;
   }
 
-
   if (value.isMember(kId)) {
     msg->set_correlation_id(value[kId].asInt());
-  } else if (application_manager::MessageType::kNotification !=  msg->type()) {
+  } else if (application_manager::MessageType::kNotification != msg->type()) {
     DCHECK(false);
     return ProcessResult::FAILED;
   }
@@ -259,20 +256,18 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     case application_manager::MessageType::kResponse:
     case application_manager::MessageType::kErrorResponse: {
       CanModuleEvent event(msg, function_name);
-      EventDispatcher<application_manager::MessagePtr,
-                      std::string>::instance()->
-          raise_event(event);
+      EventDispatcher<application_manager::MessagePtr, std::string>::instance()
+          ->raise_event(event);
       break;
     }
     case application_manager::MessageType::kNotification: {
-      if (functional_modules::can_api::on_preset_changed ==
-          function_name) {
+      if (functional_modules::can_api::on_preset_changed == function_name) {
         msg->set_function_id(MobileFunctionID::ON_PRESETS_CHANGED);
-      } else if (functional_modules::hmi_api::on_control_changed ==
-                 function_name) {
+      } else if (functional_modules::hmi_api::on_control_changed
+          == function_name) {
         msg->set_function_id(MobileFunctionID::ON_CONTROL_CHANGED);
-      } else if (functional_modules::can_api::on_radio_details ==
-                 function_name) {
+      } else if (functional_modules::can_api::on_radio_details
+          == function_name) {
         msg->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);
       }
 
@@ -285,7 +280,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     }
     case application_manager::MessageType::kRequest:
     default: {
-      return  ProcessResult::FAILED;;
+      return ProcessResult::FAILED;;
     }
   }
 
@@ -293,7 +288,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
 }
 
 void CANModule::SendResponseToMobile(application_manager::MessagePtr msg) {
-  service_->SendMessageToMobile(msg);
+  service()->SendMessageToMobile(msg);
   request_controller_.DeleteRequest(msg->correlation_id());
 }
 
@@ -310,21 +305,21 @@ void CANModule::RemoveAppExtensions() {
 }
 
 void CANModule::RemoveAppExtension(uint32_t app_id) {
-  application_manager::ApplicationSharedPtr app =
-      service_->GetApplication(app_id);
+  application_manager::ApplicationSharedPtr app = service()->GetApplication(
+      app_id);
 
-  if (app.valid()) {
-    application_manager::AppExtensionPtr extension =
-        app->QueryInterface(kCANModuleID);
-    if (extension.valid()) {
+  if (app) {
+    application_manager::AppExtensionPtr extension = app->QueryInterface(
+        kCANModuleID);
+    if (extension) {
       // TOD(VS) : memory leak
       app->RemoveExtension(kCANModuleID);
     }
   }
 }
 
-application_manager::ServicePtr CANModule::GetServiceHandler() {
-  return service_;
+void CANModule::set_can_connection(CANConnectionSPtr conn) {
+  can_connection_ = conn;
 }
 
 }  //  namespace can_cooperation
