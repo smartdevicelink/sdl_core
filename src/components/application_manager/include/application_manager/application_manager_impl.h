@@ -809,6 +809,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     // typedef for Applications list const iterator
     typedef ApplictionSet::const_iterator ApplictionSetConstIt;
 
+    DataAccessor<AppsWaitRegistrationSet> apps_waiting_for_registration() const;
+    ApplicationConstSharedPtr waiting_app(const uint32_t hmi_id) const;
 
     /**
      * Class for thread-safe access to applications list

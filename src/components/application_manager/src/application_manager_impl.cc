@@ -756,6 +756,29 @@ void ApplicationManagerImpl::OnMessageReceived(
   messages_from_hmi_.PostMessage(impl::MessageFromHmi(message));
 }
 
+ApplicationConstSharedPtr ApplicationManagerImpl::waiting_app(
+    const uint32_t hmi_id) const {
+  AppsWaitRegistrationSet app_list = apps_waiting_for_registration().GetData();
+
+  AppsWaitRegistrationSet::const_iterator it = app_list.begin();
+  AppsWaitRegistrationSet::const_iterator it_end = app_list.end();
+
+  HmiAppIdPredicate finder(hmi_id);
+  ApplicationSharedPtr result;
+  ApplictionSetConstIt it_app = std::find_if(it, it_end, finder);
+  if (it != it_end) {
+    result = *it_app;
+  }
+  return result;
+}
+
+DataAccessor<ApplicationManagerImpl::AppsWaitRegistrationSet>
+ApplicationManagerImpl::apps_waiting_for_registration() const {
+  return DataAccessor<AppsWaitRegistrationSet>(
+        ApplicationManagerImpl::instance()->apps_to_register_,
+        ApplicationManagerImpl::instance()->apps_to_register_list_lock_);
+}
+
 bool ApplicationManagerImpl::IsAppsQueriedFrom(int32_t connection_id) const {
   sync_primitives::AutoLock lock(apps_to_register_list_lock_);
   AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
@@ -1889,17 +1912,22 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     if (app_data.isValid()) {
       std::string url_scheme;
       std::string package_name;
+      std::string os_type;
       if (app_data.keyExists(strings::ios)) {
-        url_scheme = app_data[strings::ios][strings::urlScheme].asString();
+        os_type = strings::ios;
+        url_scheme = app_data[os_type][strings::urlScheme].asString();
       } else if (app_data.keyExists(strings::android)) {
+        os_type = strings::android;
         package_name =
-            app_data[strings::android][strings::packageName].asString();
+            app_data[os_type][strings::packageName].asString();
       } else {
         LOG4CXX_ERROR(logger_, "Can't find mobile OS type in json file.");
         return;
       }
       const std::string mobile_app_id(app_data[strings::jsonAppId].asString());
       const std::string appName(app_data[strings::jsonAppName].asString());
+      const bool is_media(
+            app_data[os_type][strings::is_media_application].asBool());
 
       const uint32_t hmi_app_id(GenerateNewHMIAppID());
 
@@ -1924,6 +1952,22 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
                         "application: " << mobile_app_id);
           return;
         }
+
+        uint32_t device_id = 0;
+        connection_handler::ConnectionHandlerImpl* con_handler_impl =
+          static_cast<connection_handler::ConnectionHandlerImpl*>(
+            connection_handler_);
+
+        if (-1 == con_handler_impl->GetDataOnSessionKey(
+              connection_key, NULL, NULL, &device_id)) {
+          LOG4CXX_ERROR(logger_,
+                        "Failed to create application: no connection info.");
+          return;
+        }
+
+        app->set_device(device_id);
+        app->set_app_types(app_data[os_type][strings::json_app_hmi_type]);
+        app->set_is_media_application(is_media);
 
         sync_primitives::AutoLock lock(apps_to_register_list_lock_);
         apps_to_register_.insert(app);

@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_SDL_ACTIVATE_APP_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_from_hmi.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
@@ -75,6 +76,8 @@ class SDLActivateAppRequest : public RequestFromHMI {
     virtual void on_event(const event_engine::Event& event);
   private:
     uint32_t app_id() const;
+    ApplicationSharedPtr FindRegularAppOnSameConnection(
+            int32_t connection_id);
     DISALLOW_COPY_AND_ASSIGN(SDLActivateAppRequest);
 };
 

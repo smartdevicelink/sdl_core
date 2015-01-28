@@ -94,7 +94,8 @@ void OnHMIStatusNotificationFromMobile::Run() {
   }
 
   if (is_apps_requested_before) {
-    LOG4CXX_DEBUG(logger_, "Remote apps list had been requested already.");
+    LOG4CXX_DEBUG(logger_, "Remote apps list had been requested already "
+                  " for connection id: " << connection_id);
 
     if (ProtocolVersion::kV4 == app->protocol_version()) {
       ApplicationManagerImpl::ApplicationListAccessor accessor;

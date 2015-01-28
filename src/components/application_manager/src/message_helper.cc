@@ -1211,7 +1211,11 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
   output[strings::icon] = app->app_icon_path();
   output[strings::device_name] = device_name;
   output[strings::app_id] = app->hmi_app_id();
-  output[strings::hmi_display_language_desired] = app->ui_language();
+
+  if (app->IsRegistered()) {
+    output[strings::hmi_display_language_desired] = app->ui_language();
+  }
+
   output[strings::is_media_application] = app->is_media_application();
 
   if (!app->IsRegistered()) {

@@ -50,11 +50,32 @@ void SDLActivateAppRequest::Run() {
   using namespace hmi_apis::FunctionID;
 
   const uint32_t application_id = app_id();
+
   ApplicationConstSharedPtr app =
       ApplicationManagerImpl::instance()->application(application_id);
 
-  if (app && !app->IsRegistered()) {
-    MessageHelper::SendLaunchApp(application_id,
+  if (!app) {
+    LOG4CXX_WARN(logger_, "Can't find application within regular apps: "
+                  << application_id);
+
+    app = ApplicationManagerImpl::instance()->waiting_app(application_id);
+
+    if (!app) {
+      LOG4CXX_WARN(logger_, "Can't find application within waiting apps: "
+                    << application_id);
+      return;
+    }
+  }
+
+  if (!app->IsRegistered()) {
+    ApplicationSharedPtr app_for_sending =
+        FindRegularAppOnSameConnection(app->connection_id());
+    if (!app_for_sending) {
+      LOG4CXX_ERROR(logger_, "Can't find regular app with the same "
+                    "connection id:" << app->connection_id());
+      return;
+    }
+    MessageHelper::SendLaunchApp(app_for_sending->app_id(),
                                  app->SchemaUrl(),
                                  app->PackageName());
     subscribe_on_event(BasicCommunication_OnAppRegistered);
@@ -93,6 +114,22 @@ uint32_t SDLActivateAppRequest::app_id() const {
   }
   LOG4CXX_DEBUG(logger_, "app_id section is absent in the message.");
   return 0;
+}
+
+ApplicationSharedPtr
+SDLActivateAppRequest::FindRegularAppOnSameConnection(int32_t connection_id) {
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  ApplicationManagerImpl::ApplictionSet app_list = accessor.GetData();
+
+  ApplicationManagerImpl::ApplictionSetIt it = app_list.begin();
+  ApplicationManagerImpl::ApplictionSetIt it_end = app_list.end();
+
+  for (;it != it_end; ++it) {
+    if (connection_id == (*it)->connection_id()) {
+      return *it;
+    }
+  }
+  return ApplicationSharedPtr();
 }
 
 }  // namespace commands

@@ -78,6 +78,7 @@ const char language_desired[] = "languageDesired";
 const char auto_activated_id[] = "autoActivateID";
 const char app_type[] = "appType";
 const char app_hmi_type[] = "appHMIType";
+const char json_app_hmi_type[] = "appHmiType";
 const char tts_name[] = "ttsName";
 const char binary_data[] = "binary_data";
 const char timeout_prompt[] = "timeoutPrompt";
