@@ -6,7 +6,8 @@ SOURCES += main.cpp \
     server.cpp \
     FileSystem.cpp \
     loger.cpp \
-    webServer.cpp
+    webServer.cpp \
+    messageHandler.cpp
 
 RESOURCES += qml.qrc
 
@@ -23,4 +24,5 @@ HEADERS += \
     FileSystem.h \
     loger.h \
     color.h \
-    webServer.h
+    webServer.h \
+    messageHandler.h

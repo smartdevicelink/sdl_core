@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
             Q_ARG(QVariant,  QDir::currentPath()));
 
     // Step 2: connect qml signal to C++ slot
-    QObject::connect(rootObject,SIGNAL(viewClicked(QString)), &tcpServer, SLOT(write(const QString&)));
+    //QObject::connect(rootObject,SIGNAL(viewClicked(QString)), &tcpServer, SLOT(write(const QString&)));
     QObject::connect(rootObject,SIGNAL(createConnectionTCP(QString, int)), &tcpServer, SLOT(createConection(const QString&, int)));
     QObject::connect(rootObject,SIGNAL(sendMessageTCP(QString)), &tcpServer, SLOT(write(const QString&)));
     QObject::connect(rootObject,SIGNAL(saveLogToFile(QString, QString)), &fileSystem, SLOT(write(const QString&, const QString&)));

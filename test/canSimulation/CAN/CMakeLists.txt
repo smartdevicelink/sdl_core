@@ -32,8 +32,8 @@ cmake_minimum_required(VERSION 2.8.11)
 
 project(CAN)
 
-set(CAN_SOURCES server.cpp webServer.cpp FileSystem.cpp loger.cpp main.cpp)
-set(CAN_HEADERS server.h webServer.h FileSystem.h loger.h color.h)
+set(CAN_SOURCES server.cpp webServer.cpp FileSystem.cpp loger.cpp messageHandler.cpp main.cpp)
+set(CAN_HEADERS server.h webServer.h FileSystem.h loger.h messageHandler.h color.h)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

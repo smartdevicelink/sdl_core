@@ -14,7 +14,7 @@ ApplicationWindow {
     property ListModel logModel: ListModel { }
     property string logURL: "log.txt"
 
-    signal viewClicked(string name)
+    //signal viewClicked(string name)
     signal createConnectionTCP(string ip, int port)
     signal createConnectionWS(string ip, int port)
     signal sendMessageTCP(string message)

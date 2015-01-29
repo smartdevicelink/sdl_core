@@ -3,6 +3,7 @@
 
 #include <QtNetwork>
 #include <QTcpSocket>
+#include "messageHandler.h"
 class QTcpServer;
 class QNetworkSession;
 
@@ -22,24 +23,21 @@ public:
      * To get access to QML from C++ rootView must be main QObject of QML view
      */
     Server(QObject *rootObject);
+
+    /**
+     * @brief addThread
+     * @param client
+     */
+    void addThread(QTcpSocket *client);
+
+    QVector<QString> messagePull;
+
     /**
      * dtor
      */
     ~Server();
 
 public slots:
-    /**
-     * @brief write
-     * @param qMessage - text message to be sent to TCP Client
-     */
-    void write(const QString &qMessage);
-
-    /**
-     * @brief readyRead
-     * Method to redirect requests and responses from TCP Client to QML
-     * and send responses to TCP Client using method "write" if necessary
-     */
-    void readyRead();
 
     /**
      * @brief connected
@@ -49,19 +47,6 @@ public slots:
     void connected();
 
     /**
-     * @brief disconnected
-     * Handler for disconnected TCP Client connection
-     */
-    void disconnected();
-
-    /**
-     * @brief displayError
-     * @param socketError - TCP Soocket error mesage
-     * Redirect error message to QML using Loger
-     */
-    void displayError(QAbstractSocket::SocketError socketError);
-
-    /**
      * @brief createConection
      * @param IP - IP adres v4
      * @param port
@@ -69,11 +54,22 @@ public slots:
      */
     void createConection(const QString &IP, int port);
 
+    void write(const QString &message);
+
+    void requestFromTCP(const QString &qMessage);
+
+    void log(const QString &qMessage, int color);
+
+signals:
+
+    void stopAllThreads();
+    void startAgaing();
+
 private:
 
     QTcpServer *tcpServer;
-    QTcpSocket *clientConnection;
     QObject *rootView;
+    QMutex *mutex;
 };
 
 #endif // NETWORK_H

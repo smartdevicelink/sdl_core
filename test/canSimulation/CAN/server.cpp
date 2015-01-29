@@ -5,15 +5,48 @@
 #include "color.h"
 #include <unistd.h>
 
-Server::Server(QObject *rootObject) : rootView(rootObject), clientConnection(NULL), QObject() {
+Server::Server(QObject *rootObject) : rootView(rootObject), QObject() {
 
     tcpServer = new QTcpServer(this);
+
+    mutex = new QMutex();
 
     connect(tcpServer, SIGNAL(newConnection()),this, SLOT(connected()));
 }
 
+void Server::addThread(QTcpSocket *client)
+{
+    MessageHandler* messageHandler = new MessageHandler(rootView, client, mutex, messagePull);
+    QThread* thread = new QThread;
+
+
+    //thread->run();
+
+    messageHandler->moveToThread(thread);
+
+    connect(thread, SIGNAL(started()), messageHandler, SLOT(process()));
+
+    connect(this, SIGNAL(stopAllThreads()), messageHandler, SLOT(stop()));
+
+    connect(messageHandler, SIGNAL(disconnect()), messageHandler, SLOT(deleteLater()));
+
+    connect(this, SIGNAL(startAgaing()), messageHandler, SLOT(process()));
+
+    connect(messageHandler, SIGNAL(requestFromTCP(const QString&)), this, SLOT(requestFromTCP(const QString&)));
+
+    connect(messageHandler, SIGNAL(log(const QString&, int)), this, SLOT(log(const QString&, int)));
+
+    Loger::loger("Thread Started", RED);
+
+
+    thread->start();
+
+    return;
+}
+
 Server::~Server()
 {
+    emit  stopAllThreads();
     delete tcpServer;
 }
 
@@ -29,32 +62,19 @@ void Server::createConection(const QString &IP, int port)
     }
 }
 
-void Server::connected()
+void Server::write(const QString &message)
 {
 
-    Loger::loger("TCP connected...", RED);
-
-    // New connected client is only one client TCP Server is working with
-    clientConnection = tcpServer->nextPendingConnection();
-
-    connect(clientConnection, SIGNAL(readyRead()),this, SLOT(readyRead()));
-    connect(clientConnection, SIGNAL(disconnected()),this, SLOT(disconnected()));
+    mutex->lock();
+    messagePull.push_back(message);
+    qDebug() << messagePull.count();
+    mutex->unlock();
+    emit startAgaing();
 }
 
-void Server::readyRead()
+void Server::requestFromTCP(const QString &qMessage)
 {
-
-    QByteArray qb = clientConnection->readAll();
-
-    const char *cMessage = qb.data();
-
     QVariant returnedValue;
-
-    QString qMessage = QString::fromUtf8(cMessage);
-
-    Loger::loger("TCP Received..." + qMessage, GREEN);
-
-    // Read all data came from client and redirect it to QML request handler
 
     QMetaObject::invokeMethod(rootView, "incoming",
             Q_RETURN_ARG(QVariant, returnedValue),
@@ -65,38 +85,25 @@ void Server::readyRead()
 
     if (returnedValue != "false") {
 
-        qb = returnedValue.toString().toUtf8();
-
-        char *ch = qb.data();
-
-        QString message = QString::fromUtf8(ch);
+        QString message = returnedValue.toString();
 
         write(message);
     }
 }
 
-void Server::disconnected()
+void Server::log(const QString &qMessage, int color)
 {
-    Loger::loger("TCP disconnected...", RED);
-
-    clientConnection->deleteLater();
+    Loger::loger(qMessage, color);
 }
 
-void Server::write(const QString &qMessage)
+void Server::connected()
 {
-    QByteArray qb = qMessage.toUtf8();
 
-    if ((clientConnection != NULL) && (clientConnection->state() == QTcpSocket::ConnectedState)){
+    Loger::loger("TCP connected...", RED);
 
-        clientConnection->write(qb);
-        clientConnection->flush();
-        Loger::loger("TCP Send:" + qMessage, BLUE);
-    } else {
-        Loger::loger("TCP Client is not connected yet...", RED);
-    }
-}
+    // New connected client is only one client TCP Server is working with
+    QTcpSocket *clientConnection = tcpServer->nextPendingConnection();
+    clientConnection->setParent(this);
 
-void Server::displayError(QAbstractSocket::SocketError socketError)
-{
-    Loger::loger("TCP Error: " + socketError, RED);
+    addThread(clientConnection);
 }
