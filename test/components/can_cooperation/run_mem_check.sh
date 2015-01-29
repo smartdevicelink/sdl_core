@@ -12,7 +12,7 @@ show_help() {
           Runs valgring against binary.
         Arguments:
           -h    displays help message and exits
-          -b    specifies binary to be tested. Default is test_can_library.
+          -b    specifies binary to be tested. Default is can_cooperation_test.
           -q    install missing software without prompting. Default is false.
           -i    only install missing software and exit. No prompts will be issued.
           -x    <file> save XML output to file. Only for memcheck tool.
@@ -55,7 +55,7 @@ install_if_not() {
   fi
 }
 
-binary_test="./test_can_library"
+binary_test="./can_cooperation_test"
 
 tool_name=memcheck
 while getopts "t:x:hqib:" opt; do
