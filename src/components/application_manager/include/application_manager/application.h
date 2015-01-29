@@ -356,34 +356,11 @@ class DynamicApplicationData {
      * @return TRUE if perform interaction active, otherwise FALSE
      */
     virtual bool is_reset_global_properties_active() const = 0;
-
-    /**
-     * @brief Returns connection id used by application
-     */
-    virtual int32_t connection_id() const = 0;
-
-    /**
-     * @brief Set connection id used by application
-     * @param connection_id Connection id
-     */
-    virtual void set_connection_id(const int32_t connection_id) = 0;
-
-    /**
-     * @brief Returns is application should be greyed out on HMI
-     */
-    virtual bool is_greyed_out() const = 0;
-
-    /**
-     * @brief Sets application as should be greyed out on HMI
-     * @param is_greyed_out True, if should be greyed out on HMI,
-     * otherwise - false
-     */
-    virtual void set_greyed_out(bool is_greyed_out) = 0;
-
 };
 
 class Application : public virtual InitialApplicationData,
   public virtual DynamicApplicationData {
+
   public:
     enum ApplicationState {
       kRegistered = 0,
@@ -391,6 +368,11 @@ class Application : public virtual InitialApplicationData,
     };
 
   public:
+    Application() :
+      connection_id_(-1),
+      is_greyed_out_(false) {
+    }
+
     virtual ~Application() {
     }
 
@@ -629,6 +611,31 @@ class Application : public virtual InitialApplicationData,
      */
     std::string GetDeviceId() const {return device_id_;}
 
+    /**
+     * @brief Returns connection id used by application
+     */
+    ssize_t connection_id() const {return connection_id_;}
+
+    /**
+     * @brief Set connection id used by application
+     * @param connection_id Connection id
+     */
+    void set_connection_id(const ssize_t connection_id) {
+        connection_id_ = connection_id;
+    }
+
+    /**
+     * @brief Returns is application should be greyed out on HMI
+     */
+    bool is_greyed_out() const {return is_greyed_out_;}
+
+    /**
+     * @brief Sets application as should be greyed out on HMI
+     * @param is_greyed_out True, if should be greyed out on HMI,
+     * otherwise - false
+     */
+    void set_greyed_out(bool is_greyed_out) {is_greyed_out_ = is_greyed_out;}
+
   protected:
 
     // interfaces for NAVI retry sequence
@@ -646,6 +653,8 @@ class Application : public virtual InitialApplicationData,
     std::string device_id_;
     bool can_stream_;
     bool streaming_;
+    ssize_t connection_id_;
+    bool is_greyed_out_;
 };
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;

@@ -935,17 +935,18 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Marks applications received through QueryApps as should be
      * greyed out on HMI
      * @param is_greyed_out, true, if should be greyed out, otherwise - false
+     * @param connection_id, ID of connection, related to applications source
      */
-    void MarkAppsGreyOut(bool is_greyed_out);
+    void MarkAppsGreyOut(const ssize_t connection_id, bool is_greyed_out);
 
-    bool IsAppsQueriedFrom(int32_t connection_id) const;
+    bool IsAppsQueriedFrom(ssize_t connection_id) const;
 
     /**
      * @brief Gets connection id for certain connection key
      * @param connection_key Connection key
      * @return Connection identified
      */
-    const int32_t get_connection_id(uint32_t connection_key) const;
+    const ssize_t get_connection_id(uint32_t connection_key) const;
 
   private:
     ApplicationManagerImpl();
@@ -997,7 +998,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     virtual void Handle(const impl::MessageToHmi message) OVERRIDE;
 
     // CALLED ON audio_pass_thru_messages_ thread!
-    virtual void Handle(const impl::AudioData message) OVERRIDE;    
+    virtual void Handle(const impl::AudioData message) OVERRIDE;
 
     template<typename ApplicationList>
     void PrepareApplicationListSO(ApplicationList app_list,

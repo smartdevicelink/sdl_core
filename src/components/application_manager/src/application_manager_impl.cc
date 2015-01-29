@@ -384,7 +384,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   const std::string& app_name =
     message[strings::msg_params][strings::app_name].asString();
 
-  int32_t connection_id = get_connection_id(connection_key);
+  ssize_t connection_id = get_connection_id(connection_key);
   if (-1 == connection_id) {
     LOG4CXX_ERROR(logger_, "Can't get connection id for application:"
                   << app_id);
@@ -779,7 +779,7 @@ ApplicationManagerImpl::apps_waiting_for_registration() const {
         ApplicationManagerImpl::instance()->apps_to_register_list_lock_);
 }
 
-bool ApplicationManagerImpl::IsAppsQueriedFrom(int32_t connection_id) const {
+bool ApplicationManagerImpl::IsAppsQueriedFrom(ssize_t connection_id) const {
   sync_primitives::AutoLock lock(apps_to_register_list_lock_);
   AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
   AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
@@ -792,12 +792,15 @@ bool ApplicationManagerImpl::IsAppsQueriedFrom(int32_t connection_id) const {
 }
 
 void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(
+    const ssize_t connection_id,
     bool is_greyed_out) {
   sync_primitives::AutoLock lock(apps_to_register_list_lock_);
   AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
   AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
   for (; it != it_end; ++it) {
-    (*it)->set_greyed_out(is_greyed_out);
+    if (connection_id == (*it)->connection_id()) {
+      (*it)->set_greyed_out(is_greyed_out);
+    }
   }
 }
 
@@ -1944,7 +1947,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
         }
         app->set_hmi_application_id(hmi_app_id);
 
-        int32_t connection_id = get_connection_id(connection_key);
+        ssize_t connection_id = get_connection_id(connection_key);
         if (-1 != connection_id) {
           app->set_connection_id(connection_id);
         } else {
@@ -3012,7 +3015,7 @@ ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
   return ProtocolVersion::kV2;
 }
 
-const int32_t ApplicationManagerImpl::get_connection_id(
+const ssize_t ApplicationManagerImpl::get_connection_id(
     uint32_t connection_key) const {
   if (connection_handler_) {
     connection_handler::ConnectionHandlerImpl* con_handler_impl =

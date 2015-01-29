@@ -70,7 +70,7 @@ void OnHMIStatusNotificationFromMobile::Run() {
 
   app->set_foreground(is_current_state_foreground);
 
-  int32_t connection_id =
+  ssize_t connection_id =
       application_manager::ApplicationManagerImpl::instance()->
       get_connection_id(connection_key());
 
@@ -112,13 +112,8 @@ void OnHMIStatusNotificationFromMobile::Run() {
       }
 
       if (!is_another_foreground_sdl4_app) {
-        if (is_current_state_foreground) {
-          application_manager::ApplicationManagerImpl::instance()->
-              MarkAppsGreyOut(false);
-        } else {
-          application_manager::ApplicationManagerImpl::instance()->
-              MarkAppsGreyOut(true);
-        }
+        application_manager::ApplicationManagerImpl::instance()->
+            MarkAppsGreyOut(connection_id, !is_current_state_foreground);
         application_manager::ApplicationManagerImpl::instance()->
             SendUpdateAppList();
       }
