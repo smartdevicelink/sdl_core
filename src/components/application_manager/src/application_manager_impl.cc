@@ -760,13 +760,12 @@ ApplicationConstSharedPtr ApplicationManagerImpl::waiting_app(
     const uint32_t hmi_id) const {
   AppsWaitRegistrationSet app_list = apps_waiting_for_registration().GetData();
 
-  AppsWaitRegistrationSet::const_iterator it = app_list.begin();
   AppsWaitRegistrationSet::const_iterator it_end = app_list.end();
 
   HmiAppIdPredicate finder(hmi_id);
   ApplicationSharedPtr result;
-  ApplictionSetConstIt it_app = std::find_if(it, it_end, finder);
-  if (it != it_end) {
+  ApplictionSetConstIt it_app = std::find_if(app_list.begin(), it_end, finder);
+  if (it_app != it_end) {
     result = *it_app;
   }
   return result;
