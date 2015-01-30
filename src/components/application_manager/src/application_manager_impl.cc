@@ -1486,17 +1486,19 @@ bool ApplicationManagerImpl::ManageHMICommand(
     return false;
   }
 
-  int32_t message_type = (*(message.get()))[strings::params][strings::message_type].asInt();
+  int32_t message_type =
+      (*(message.get()))[strings::params][strings::message_type].asInt();
 
-  if (kRequest == message_type) {
-    LOG4CXX_DEBUG(logger_, "ManageHMICommand");
-    request_ctrl_.addHMIRequest(command);
-  }
-
+  // Init before adding to request controller to be able to set request timeout
   if (command->Init()) {
+    if (kRequest == message_type) {
+      LOG4CXX_DEBUG(logger_, "ManageHMICommand");
+      request_ctrl_.addHMIRequest(command);
+    }
     command->Run();
       if (kResponse == message_type) {
-        int32_t correlation_id = (*(message.get()))[strings::params][strings::correlation_id].asInt();
+        int32_t correlation_id =
+            (*(message.get()))[strings::params][strings::correlation_id].asInt();
         request_ctrl_.terminateHMIRequest(correlation_id);
       }
       return true;

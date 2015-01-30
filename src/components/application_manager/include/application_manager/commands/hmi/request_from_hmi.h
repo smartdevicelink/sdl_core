@@ -58,17 +58,11 @@
     virtual void on_event(const event_engine::Event& event);
     /**
      * @brief SendResponse allows to send response to hmi
-     *
-     * @param success the response result.
-     *
      * @param correlation_id the correlation id for the rfesponse.
-     *
      * @param function_id the function id for which response will be sent
-     *
      * @param result_code the result code.
      */
-    void SendResponse(bool success,
-                      uint32_t correlation_id,
+    void SendResponse(uint32_t correlation_id,
                       hmi_apis::FunctionID::eType function_id,
                       hmi_apis::Common_Result::eType result_code);
    private:

@@ -90,9 +90,8 @@ void SDLActivateAppRequest::onTimeOut() {
   using namespace hmi_apis::Common_Result;
   using namespace application_manager;
   unsubscribe_from_event(BasicCommunication_OnAppRegistered);
-  const bool is_success = false;
-  SendResponse(is_success, correlation_id(),
-               BasicCommunication_ActivateApp, APPLICATION_NOT_REGISTERED);
+  SendResponse(correlation_id(),
+               SDL_ActivateApp, APPLICATION_NOT_REGISTERED);
 }
 
 void SDLActivateAppRequest::on_event(const event_engine::Event& event) {

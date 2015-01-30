@@ -187,7 +187,7 @@ const uint32_t kDefaultMaxCmdId = 2000000000;
 const uint32_t kDefaultPutFileRequestInNone = 5;
 const uint32_t kDefaultDeleteFileRequestInNone = 5;
 const uint32_t kDefaultListFilesRequestInNone = 5;
-const uint32_t kDefaultTimeout = 10;
+const uint32_t kDefaultTimeout = 10000;
 const uint32_t kDefaultAppResumingTimeout = 3;
 const uint32_t kDefaultAppSavePersistentDataTimeout = 10;
 const uint32_t kDefaultResumptionDelayBeforeIgn = 30;
@@ -1090,6 +1090,7 @@ void Profile::UpdateValues() {
     char* str = NULL;
     str = strtok(const_cast<char*>(supported_diag_modes_value.c_str()), ",");
     while (str != NULL) {
+      errno = 0;
       uint32_t user_value = strtol(str, NULL, 16);
       if (user_value && errno != ERANGE) {
         correct_diag_modes += str;
@@ -1445,6 +1446,7 @@ bool Profile::ReadUIntValue(uint16_t* value, uint16_t default_value,
     *value = default_value;
     return false;
   } else {
+    errno = 0;
     uint16_t user_value = strtoul(string_value.c_str(), NULL, 10);
     if (!user_value || errno == ERANGE) {
       *value = default_value;
@@ -1464,6 +1466,7 @@ bool Profile::ReadUIntValue(uint32_t* value, uint32_t default_value,
     *value = default_value;
     return false;
   } else {
+    errno = 0;
     uint32_t user_value = strtoul(string_value.c_str(), NULL, 10);
     if (!user_value || errno == ERANGE) {
       *value = default_value;
@@ -1483,6 +1486,7 @@ bool Profile::ReadUIntValue(uint64_t* value, uint64_t default_value,
     *value = default_value;
     return false;
   } else {
+    errno = 0;
     uint64_t user_value = strtoull(string_value.c_str(), NULL, 10);
     if (!user_value || errno == ERANGE) {
       *value = default_value;
