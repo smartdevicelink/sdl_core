@@ -71,6 +71,8 @@ struct PluginInfo {
 
 class GenericModule {
   public:
+    typedef std::deque<utils::SharedPtr<ModuleObserver> > Observers;
+
     virtual ~GenericModule();
     ModuleID GetModuleID() const {
       return kModuleId_;
@@ -98,6 +100,10 @@ class GenericModule {
      * @param app_id application id
      */
     virtual void RemoveAppExtension(uint32_t app_id) = 0;
+
+    const Observers& observers() {
+      return observers_;
+    }
   protected:
     explicit GenericModule(ModuleID module_id);
     void NotifyObservers(ModuleObserver::Errors error);
@@ -110,11 +116,12 @@ class GenericModule {
     application_manager::ServicePtr service() {
       return service_;
     }
-  private:
+
+ private:
     DISALLOW_COPY_AND_ASSIGN(GenericModule);
     application_manager::ServicePtr service_;
     const ModuleID kModuleId_;
-    std::deque<utils::SharedPtr<ModuleObserver> > observers_;
+    Observers observers_;
     ModuleState state_;
 };
 
