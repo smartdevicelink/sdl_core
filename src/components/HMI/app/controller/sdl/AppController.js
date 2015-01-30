@@ -51,7 +51,6 @@ SDL.SDLAppController = Em.Object.create({
      */
     showAppList: function() {
 
-        SDL.InfoAppsView.showAppList();
         SDL.AppPermissionsListView.showAppList();
     }.observes('SDL.SDLModel.registeredApps.@each'),
 

@@ -448,6 +448,13 @@ SDL.SDLModel = Em.Object.create({
     unRegisteredApps: [],
 
     /**
+     * List of applications to show on appList view came in BC.UpdateAppList
+     *
+     * @type object
+     */
+    updatedAppsList: [],
+
+    /**
      * List of objects with params for connected devices
      *
      * @type object

@@ -431,13 +431,9 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                     SDL.PopUp.create().appendTo('body').popupActivate(message);
 
-                    for(var app in request.params.applications) {
+                    SDL.SDLModel.set('updatedAppsList', request.params.applications);
 
-                        if (request.params.applications.hasOwnProperty(app)) {
-                            SDL.SDLModel.onAppRegistered(request.params.applications[app]);
-                        }
-                        //SDL.SDLController.registerApplication(request.params.applications[app], request.params.applications[app].isMediaApplication !== undefined ? request.params.applications[app].isMediaApplication : null);
-                    }
+                    SDL.InfoAppsView.showAppList();
 
                     this.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
