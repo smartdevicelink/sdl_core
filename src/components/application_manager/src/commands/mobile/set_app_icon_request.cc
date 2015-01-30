@@ -180,6 +180,10 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
   }
 
   for (size_t counter = 0; counter < icons_amount; ++counter) {
+    if (!icon_modification_time.size()) {
+      LOG4CXX_ERROR(logger_, "No more icons left for deletion.");
+      return;
+    }
     const std::string file_name = icon_modification_time.begin()->second;
     const std::string file_path = storage + "/" + file_name;
     if (!file_system::DeleteFile(file_path)) {
