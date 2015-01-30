@@ -185,6 +185,7 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
     if (!file_system::DeleteFile(file_path)) {
       LOG4CXX_DEBUG(logger_, "Error while deleting icon " << file_path);
     }
+    icon_modification_time.erase(icon_modification_time.begin());
     LOG4CXX_DEBUG(logger_, "Old icon " << file_path
                   << " was deleted successfully.");
   }
