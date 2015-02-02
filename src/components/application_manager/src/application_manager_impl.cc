@@ -1510,39 +1510,22 @@ bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   const std::string app_storage_folder =
       profile::Profile::instance()->app_storage_folder();
-  if (!file_system::DirectoryExists(app_storage_folder)) {
-    LOG4CXX_WARN(logger_, "Storage directory doesn't exist");
-    // if storage directory doesn't exist try to create it
-    if (!file_system::CreateDirectoryRecursively(app_storage_folder)) {
-      LOG4CXX_ERROR(logger_, "Unable to create Storage directory "
-                    << app_storage_folder);
-      return false;
-    }
-  }
-  if (!(file_system::IsWritingAllowed(app_storage_folder) &&
-        file_system::IsReadingAllowed(app_storage_folder))) {
-    LOG4CXX_ERROR(logger_,
-                  "Storage directory doesn't have read/write permissions");
+  if (!InitDirectory(app_storage_folder, TYPE_STORAGE)) {
     return false;
   }
 
   const std::string system_files_path =
       profile::Profile::instance()->system_files_path();
-  if (!file_system::DirectoryExists(system_files_path)) {
-    LOG4CXX_WARN(logger_, "System files directory doesn't exist");
-    // if system directory doesn't exist try to create it
-    if (!file_system::CreateDirectoryRecursively(system_files_path)) {
-      LOG4CXX_ERROR(logger_, "Unable to create System directory "
-                    << system_files_path);
-      return false;
-    }
-  }
-  if (!(file_system::IsWritingAllowed(system_files_path) &&
-        file_system::IsReadingAllowed(system_files_path))) {
-    LOG4CXX_ERROR(logger_,
-                  "System directory doesn't have read/write permissions");
+  if (!InitDirectory(system_files_path, TYPE_SYSTEM)) {
     return false;
   }
+
+  const std::string app_icons_folder =
+      profile::Profile::instance()->app_icons_folder();
+  if (!InitDirectory(app_icons_folder, TYPE_ICONS)) {
+    return false;
+  }
+
   if (policy::PolicyHandler::instance()->PolicyEnabled()) {
     if(!policy::PolicyHandler::instance()->LoadPolicyLibrary()) {
       LOG4CXX_ERROR(logger_, "Policy library is not loaded. Check LD_LIBRARY_PATH");
@@ -3028,6 +3011,37 @@ ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
 
   LOG4CXX_DEBUG(logger_, "SDL Supported protocol version "<<ProtocolVersion::kV2);
   return ProtocolVersion::kV2;
+}
+
+const std::string ApplicationManagerImpl::DirectoryTypeToString(
+    ApplicationManagerImpl::DirectoryType type) const {
+  DirectoryTypeMap::const_iterator it = dir_type_to_string_map_.find(type);
+  if (it != dir_type_to_string_map_.end()) {
+    return it->second;
+  }
+  return "Unknown";
+}
+
+bool ApplicationManagerImpl::InitDirectory(
+    const std::string& path,
+    ApplicationManagerImpl::DirectoryType type) const {
+  const std::string directory_type = DirectoryTypeToString(type);
+  if (!file_system::DirectoryExists(path)) {
+    LOG4CXX_WARN(logger_, directory_type << " directory doesn't exist");
+    // if storage directory doesn't exist try to create it
+    if (!file_system::CreateDirectoryRecursively(path)) {
+      LOG4CXX_ERROR(logger_, "Unable to create " << directory_type
+                    << " directory " << path);
+      return false;
+    }
+  }
+  if (!(file_system::IsWritingAllowed(path) &&
+        file_system::IsReadingAllowed(path))) {
+    LOG4CXX_ERROR(logger_, directory_type
+                  << " directory doesn't have read/write permissions");
+    return false;
+  }
+  return true;
 }
 
 const ssize_t ApplicationManagerImpl::get_connection_id(

@@ -1131,6 +1131,37 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     ProtocolVersion SupportedSDLVersion() const;
 
+    /**
+     * @brief Types of directories used by Application Manager
+     */
+    enum DirectoryType {
+      TYPE_STORAGE,
+      TYPE_SYSTEM,
+      TYPE_ICONS
+    };
+
+    typedef std::map<DirectoryType, std::string> DirectoryTypeMap;
+    DirectoryTypeMap dir_type_to_string_map_ = {
+      {TYPE_STORAGE, "Storage"},
+      {TYPE_SYSTEM, "System"},
+      {TYPE_ICONS, "Icons"}
+    };
+
+    /**
+     * @brief Converts directory type to string
+     * @param type Directory type
+     * @return Stringified type
+     */
+    const std::string DirectoryTypeToString(DirectoryType type) const;
+
+    /**
+     * @brief Creates directory path, if necesary, checks permissions
+     * @param path Directory path
+     * @param type Directory type
+     * @return true, if succedeed, otherwise - false
+     */
+    bool InitDirectory(const std::string& path, DirectoryType type) const;
+
   private:
 
     /**
