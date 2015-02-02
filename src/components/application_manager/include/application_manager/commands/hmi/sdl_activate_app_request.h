@@ -76,6 +76,7 @@ class SDLActivateAppRequest : public RequestFromHMI {
     virtual void on_event(const event_engine::Event& event);
   private:
     uint32_t app_id() const;
+    uint32_t hmi_app_id(const smart_objects::SmartObject& so) const;
     ApplicationSharedPtr FindRegularAppOnSameConnection(
             int32_t connection_id);
     DISALLOW_COPY_AND_ASSIGN(SDLActivateAppRequest);

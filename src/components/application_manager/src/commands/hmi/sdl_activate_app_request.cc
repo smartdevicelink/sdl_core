@@ -100,18 +100,46 @@ void SDLActivateAppRequest::on_event(const event_engine::Event& event) {
     return;
   }
   unsubscribe_from_event(BasicCommunication_OnAppRegistered);
-  policy::PolicyHandler::instance()->OnActivateApp(app_id(),
+
+  // Have to use HMI app id from event, since HMI app id from original request
+  // message will be changed after app, initially requested for launch via
+  // SDL.ActivateApp, will be registered
+  const uint32_t hmi_application_id = hmi_app_id(event.smart_object());
+
+  ApplicationSharedPtr app =
+      application_manager::ApplicationManagerImpl::instance()->
+      application_by_hmi_app(hmi_application_id);
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Application not found by HMI app id: "
+                  << hmi_application_id);
+    return;
+  }
+  policy::PolicyHandler::instance()->OnActivateApp(app->app_id(),
                                                    correlation_id());
 }
 
 uint32_t SDLActivateAppRequest::app_id() const {
-
   if ((*message_).keyExists(strings::msg_params)) {
     if ((*message_)[strings::msg_params].keyExists(strings::app_id)){
         return (*message_)[strings::msg_params][strings::app_id].asUInt();
     }
   }
   LOG4CXX_DEBUG(logger_, "app_id section is absent in the message.");
+  return 0;
+}
+
+uint32_t SDLActivateAppRequest::hmi_app_id(
+    const smart_objects::SmartObject& so) const {
+  if (so.keyExists(strings::params)) {
+    if (so[strings::msg_params].keyExists(strings::application)){
+      if (so[strings::msg_params][strings::application].
+          keyExists(strings::app_id)) {
+        return so[strings::msg_params][strings::application]
+            [strings::app_id].asUInt();
+      }
+    }
+  }
+  LOG4CXX_DEBUG(logger_, "Can't find app_id section is absent in the message.");
   return 0;
 }
 
