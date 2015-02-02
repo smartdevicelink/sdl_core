@@ -56,7 +56,7 @@ public:
   }
   bool IsMessageForPlugin(application_manager::MessagePtr msg);
   bool IsHMIMessageForPlugin(application_manager::MessagePtr msg);
-  void ChangePluginsState(ModuleState state);
+  void OnServiceStateChanged(ServiceState state);
   void OnHMIResponse(application_manager::MessagePtr msg);
   void OnError(ModuleObserver::Errors error, ModuleID module_id);
 

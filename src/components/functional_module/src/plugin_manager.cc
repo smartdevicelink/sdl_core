@@ -237,10 +237,10 @@ bool PluginManager::IsHMIMessageForPlugin(application_manager::MessagePtr msg) {
   return false;
 }
 
-void PluginManager::ChangePluginsState(ModuleState state) {
+void PluginManager::OnServiceStateChanged(ServiceState state) {
   for(PluginsIterator it = plugins_.begin();
     plugins_.end() != it; ++it) {
-    it->second->ChangeModuleState(state);
+    it->second->OnServiceStateChanged(state);
   }
 }
 

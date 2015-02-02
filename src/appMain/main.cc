@@ -194,13 +194,6 @@ int32_t main(int32_t argc, char** argv) {
   // --------------------------------------------------------------------------
   // Third-Party components initialization.
 
-  if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
-    main_namespace::LifeCycle::instance()->StopComponents();
-    DEINIT_LOGGER();
-    exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger_, "InitMessageBroker successful");
-
   if (profile::Profile::instance()->launch_hmi()) {
     if (profile::Profile::instance()->server_address() == kLocalHostAddress) {
       LOG4CXX_INFO(logger_, "Start HMI on localhost");

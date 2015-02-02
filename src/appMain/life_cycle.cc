@@ -226,6 +226,16 @@ bool LifeCycle::StartComponents() {
   plugin_manager_->SetServiceHandler(core_service_);
   plugin_manager_->LoadPlugins(profile::Profile::instance()->plugins_folder());
 
+  if (!InitMessageSystem()) {
+    LOG4CXX_INFO(logger_, "InitMessageBroker failed");
+    return false;
+  }
+
+  LOG4CXX_INFO(logger_, "InitMessageBroker successful");
+
+  plugin_manager_->OnServiceStateChanged(
+      functional_modules::ServiceState::HMI_ADAPTER_INITIALIZED);
+
   return true;
 }
 

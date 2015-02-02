@@ -51,10 +51,11 @@ enum ProcessResult {
   FAILED
 };
 
-enum ModuleState {
-  NORMAL = 0,
+enum ServiceState {
+  IDLE = 0,
   SUSPENDED,
-  LOWVOLTAGE
+  LOWVOLTAGE,
+  HMI_ADAPTER_INITIALIZED
 };
 
 typedef std::string HMIFunctionID;
@@ -89,9 +90,7 @@ class GenericModule {
 
     virtual ProcessResult ProcessMessage(application_manager::MessagePtr msg) = 0;
     virtual ProcessResult ProcessHMIMessage(application_manager::MessagePtr msg) = 0;
-    virtual void ChangeModuleState(ModuleState state) {
-      state_ = state;
-    }
+    virtual void OnServiceStateChanged(ServiceState state);
     void AddObserver(utils::SharedPtr<ModuleObserver> observer);
     void RemoveObserver(utils::SharedPtr<ModuleObserver> observer);
 
@@ -121,8 +120,9 @@ class GenericModule {
     DISALLOW_COPY_AND_ASSIGN(GenericModule);
     application_manager::ServicePtr service_;
     const ModuleID kModuleId_;
+
     Observers observers_;
-    ModuleState state_;
+    ServiceState state_;
 };
 
 }  //  namespace functional_modules

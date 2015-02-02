@@ -196,17 +196,6 @@ void startSmartDeviceLink()
     LOG4CXX_INFO(logger_, "StartComponents failed.");
     exit(EXIT_FAILURE);
   }
-
-  // --------------------------------------------------------------------------
-  // Third-Party components initialization.
-
-  if (!main_namespace::LifeCycle::instance()->InitMessageSystem()) {
-    LOG4CXX_INFO(logger_, "InitMessageBroker failed");
-    exit(EXIT_FAILURE);
-  }
-  LOG4CXX_INFO(logger_, "InitMessageBroker successful");
-
-  // --------------------------------------------------------------------------
 }
 
 void stopSmartDeviceLink()

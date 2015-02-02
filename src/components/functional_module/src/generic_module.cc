@@ -6,7 +6,7 @@ typedef std::deque<utils::SharedPtr<ModuleObserver>>::iterator ModuleObserverIte
 
 GenericModule::GenericModule(ModuleID module_id)
   : kModuleId_(module_id)
-  , state_(ModuleState::NORMAL) {}
+  , state_(ServiceState::IDLE) {}
 
 GenericModule::~GenericModule() {
   observers_.clear();
@@ -44,9 +44,15 @@ void GenericModule::NotifyObservers(ModuleObserver::Errors error) {
 
 void GenericModule::SetServiceHandler(application_manager::ServicePtr service) {
   service_ = service;
+}
 
-  // Whe module obtain pointer to service, we can subscribe to necessary HMI notifications
-  service_->SubscribeToHMINotification(hmi_api::on_control_changed);
+void GenericModule::OnServiceStateChanged(ServiceState state) {
+  state_ = state;
+
+  if (HMI_ADAPTER_INITIALIZED == state_) {
+    // We must subscribe to necessary HMI notifications
+    service_->SubscribeToHMINotification(hmi_api::on_control_changed);
+  }
 }
 
 application_manager::ServicePtr GenericModule::GetServiceHandler() {
