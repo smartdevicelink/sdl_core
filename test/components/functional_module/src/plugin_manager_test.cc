@@ -1,35 +1,131 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 #include "functional_module/plugin_manager.h"
-#include "utils/file_system.h"
+#include "mock_generic_module.h"
 
-//
-//TEST(plugin_manager, loadModule) {
-//  std::vector<std::string> plugin_files = file_system::ListFiles(
-//  "./plugins/");
-//  size_t plugins = 0;
-//  printf("Number of files: %d\n", plugin_files.size());
-//  for(size_t i = 0; i < plugin_files.size(); ++i) {
-//    size_t pos = plugin_files[i].find_last_of(".");
-//    if (std::string::npos != pos) {
-//      if (plugin_files[i].substr(pos+1).compare("so") != 0)
-//        continue;
-//    } else {
-//      continue;
-//    }
-//    printf("Working with plugin %s\n", plugin_files[i].c_str());
-//    void* generic_plugin_dll = dlopen(plugin_files[i].c_str(), RTLD_LAZY);
-//    ASSERT_TRUE(generic_plugin_dll != 0);
-//    typedef GenericModule* (*Create)();
-//    Create create_manager = reinterpret_cast<Create>(dlsym(generic_plugin_dll, "Create"));
-//    char* error_string = dlerror();
-//    ASSERT_TRUE(error_string == NULL);
-//    GenericModule* module = create_manager();
-//    ASSERT_TRUE(module);
-//    ASSERT_TRUE(module->GetModuleID() == 19);
-//    dlclose(generic_plugin_dll);
-//    ++plugins;
-//  }
-//  PluginManager* manager = PluginManager::instance();
-//  ASSERT_EQ(plugins, manager->LoadPlugins("./plugins/"));
-//}
+using functional_modules::PluginManager;
+using functional_modules::ModulePtr;
+using functional_modules::ModuleState;
+using application_manager::Message;
+using application_manager::ProtocolVersion;
+
+namespace test {
+namespace components {
+namespace functional_module {
+
+class PluginManagerTest : public ::testing::Test {
+ protected:
+  static PluginManager* manager;
+  static MockGenericModule* module;
+
+  static void SetUpTestCase() {
+    manager = PluginManager::instance();
+    ASSERT_EQ(1, manager->LoadPlugins("./plugins/"));
+    const PluginManager::Modules& plugins = manager->plugins();
+    PluginManager::Modules::const_iterator i = plugins.begin();
+    module = ModulePtr::static_pointer_cast<MockGenericModule>(i->second).get();
+  }
+
+  static void TearDownTestCase() {
+//    PluginManager::destroy(); try to uncomment after fix PluginManager
+  }
+};
+
+PluginManager* PluginManagerTest::manager = 0;
+MockGenericModule* PluginManagerTest::module = 0;
+
+TEST_F(PluginManagerTest, ChangePluginsState) {
+  ModuleState kState = ModuleState::SUSPENDED;
+  EXPECT_CALL(*module, ChangeModuleState(kState)).Times(1);
+  manager->ChangePluginsState(kState);
+}
+
+TEST_F(PluginManagerTest, IsMessageForPluginFail) {
+  Message* msg = new Message(
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
+  msg->set_protocol_version(ProtocolVersion::kUnknownProtocol);
+  EXPECT_FALSE(manager->IsMessageForPlugin(msg));
+}
+
+TEST_F(PluginManagerTest, IsMessageForPluginPass) {
+  Message* msg = new Message(
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
+  msg->set_protocol_version(ProtocolVersion::kV3);
+  msg->set_function_id(101);  // see MockGenericModule
+  EXPECT_TRUE(manager->IsMessageForPlugin(msg));
+}
+
+TEST_F(PluginManagerTest, IsHMIMessageForPluginFail) {
+  Message* msg = new Message(
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
+  msg->set_protocol_version(ProtocolVersion::kUnknownProtocol);
+  EXPECT_FALSE(manager->IsHMIMessageForPlugin(msg));
+}
+
+TEST_F(PluginManagerTest, IsHMIMessageForPluginPass) {
+  Message* msg = new Message(
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
+  msg->set_protocol_version(ProtocolVersion::kHMI);
+  std::string json = "{\"method\": \"HMI-Func-1\"}";  // see MockGenericModule
+  msg->set_json_message(json);
+  EXPECT_TRUE(manager->IsHMIMessageForPlugin(msg));
+}
+
+TEST_F(PluginManagerTest, RemoveAppExtension) {
+  const uint32_t kAppId = 2;
+  EXPECT_CALL(*module, RemoveAppExtension(kAppId)).Times(1);
+  manager->RemoveAppExtension(kAppId);
+}
+
+TEST_F(PluginManagerTest, ProcessMessageFail) {
+  Message* msg = new Message(
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
+  application_manager::MessagePtr message(msg);
+  msg->set_protocol_version(ProtocolVersion::kUnknownProtocol);
+  EXPECT_CALL(*module, ProcessMessage(message)).Times(0);
+  manager->ProcessMessage(message);
+}
+
+TEST_F(PluginManagerTest, ProcessMessagePass) {
+  Message* msg = new Message(
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
+  application_manager::MessagePtr message(msg);
+  msg->set_protocol_version(ProtocolVersion::kV3);
+  msg->set_function_id(101);  // see MockGenericModule
+  EXPECT_CALL(*module, ProcessMessage(message)).Times(1).WillOnce(
+      Return(ProcessResult::PROCESSED));
+  manager->ProcessMessage(message);
+}
+
+TEST_F(PluginManagerTest, ProcessHMIMessageFail) {
+  Message* msg = new Message(
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
+  application_manager::MessagePtr message(msg);
+  message->set_protocol_version(ProtocolVersion::kUnknownProtocol);
+  EXPECT_CALL(*module, ProcessHMIMessage(message)).Times(0);
+  manager->ProcessHMIMessage(message);
+}
+
+TEST_F(PluginManagerTest, ProcessHMIMessagePass) {
+  Message* msg = new Message(
+      protocol_handler::MessagePriority::FromServiceType(
+          protocol_handler::ServiceType::kRpc));
+  application_manager::MessagePtr message(msg);
+  message->set_protocol_version(ProtocolVersion::kHMI);
+  std::string json = "{\"method\": \"HMI-Func-1\"}"; // see MockGenericModule
+  message->set_json_message(json);
+  EXPECT_CALL(*module, ProcessHMIMessage(message)).Times(1).WillOnce(
+      Return(ProcessResult::PROCESSED));
+  manager->ProcessHMIMessage(message);
+}
+
+}  // namespace functional_module
+}  // namespace components
+}  // namespace test

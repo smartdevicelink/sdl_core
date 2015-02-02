@@ -9,6 +9,7 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
   ${CMAKE_BINARY_DIR}/src/components/
   include
+  plugins
 )
 
 set (LIBRARIES
@@ -19,9 +20,8 @@ set (LIBRARIES
   FunctionalModule
   dl
   ApplicationManager
-#    jsoncpp
-#    Utils
-#    ConfigProfile
+  jsoncpp
+  Utils
 )
 
 set(SOURCES
@@ -42,5 +42,6 @@ SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 # which point to directories outside the build tree to the install RPATH
 #SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+add_subdirectory(plugins)
 
 create_test("function_module_test" "${SOURCES}" "${LIBRARIES}")

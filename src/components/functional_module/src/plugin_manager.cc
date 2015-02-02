@@ -70,7 +70,8 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
     } else {
       continue;
     }
-    void* generic_plugin_dll = dlopen(plugin_files[i].c_str(), RTLD_LAZY);
+    std::string full_name = plugin_path + '/' + plugin_files[i];
+    void* generic_plugin_dll = dlopen(full_name.c_str(), RTLD_LAZY);
     if (NULL == generic_plugin_dll) {
       LOG4CXX_ERROR(logger_, "Failed to open dll " << plugin_files[i] << "\n"
         << dlerror());
@@ -116,7 +117,7 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
 }
 
 void PluginManager::UnloadPlugins() {
-  for(PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
+  for(Modules::iterator it = plugins_.begin(); plugins_.end() != it; ++it) {
     it->second->RemoveObserver(this);
   }
 

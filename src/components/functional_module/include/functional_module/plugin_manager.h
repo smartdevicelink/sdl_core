@@ -44,6 +44,8 @@ namespace functional_modules {
 class PluginManager : public utils::Singleton<PluginManager>,
   public ModuleObserver {
 public:
+  typedef std::map<ModuleID, ModulePtr> Modules;
+
   ~PluginManager();
   int LoadPlugins(const std::string& plugin_path);
   void UnloadPlugins();
@@ -63,11 +65,15 @@ public:
    * @param app_id application id
    */
   void RemoveAppExtension(uint32_t app_id);
+
+  const Modules& plugins() {
+    return plugins_;
+  }
 private:
   PluginManager();
   DISALLOW_COPY_AND_ASSIGN(PluginManager);
   FRIEND_BASE_SINGLETON_CLASS(PluginManager);
-  std::map<ModuleID, ModulePtr> plugins_;
+  Modules plugins_;
   std::map<ModuleID, void*> dlls_;
   std::map<MobileFunctionID, ModulePtr> mobile_subscribers_;
   std::map<HMIFunctionID, ModulePtr> hmi_subscribers_;
