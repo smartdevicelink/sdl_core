@@ -360,7 +360,7 @@ void TimerThread<T>::TimerDelegate::setTimeOut(const uint32_t timeout_seconds) {
 }
 
 template <class T>
-int32_t TimerThread<T>::TimerThread::TimerDelegate::calculateMillisecondsLeft() {
+int32_t TimerThread<T>::TimerDelegate::calculateMillisecondsLeft() {
   time_t cur_time = time(NULL);
   time_t end_time = std::numeric_limits<time_t>::max();
   if (TimerDelegate::timeout_seconds_ + cur_time > TimerDelegate::timeout_seconds_) { // no overflow occurred
