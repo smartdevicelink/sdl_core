@@ -1253,7 +1253,7 @@ void ApplicationManagerImpl::SendMessageToMobile(
     if (function_id == mobile_apis::FunctionID::OnSystemRequestID) {
       mobile_apis::RequestType::eType request_type =
           static_cast<mobile_apis::RequestType::eType>(
-          (*message)[strings::params][strings::request_type].asUInt());
+          (*message)[strings::msg_params][strings::request_type].asUInt());
       if (mobile_apis::RequestType::PROPRIETARY == request_type ||
           mobile_apis::RequestType::HTTP == request_type) {
         policy::PolicyHandler::instance()->OnUpdateRequestSentToMobile();
