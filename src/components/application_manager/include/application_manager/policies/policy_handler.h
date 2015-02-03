@@ -86,6 +86,7 @@ class PolicyHandler :
                                  StringArray* nicknames = NULL,
                                  StringArray* app_hmi_types = NULL);
   EndpointUrls GetUpdateUrls(int service_type);
+  std::string GetLockScreenIconUrl() const;
   void ResetRetrySequence();
   int NextRetryTimeout();
   int TimeoutExchange();

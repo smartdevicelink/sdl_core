@@ -2100,6 +2100,7 @@
     <element name="AUTH_CHALLENGE" />
     <element name="AUTH_ACK" />
     <element name="PROPRIETARY" />
+    <element name="LOCK_SCREEN_ICON_URL" />
   </enum>
 
   <enum name="AppHMIType">

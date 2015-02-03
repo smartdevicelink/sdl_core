@@ -61,6 +61,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual bool ResetPT(const std::string& file_name);
     virtual std::string GetUpdateUrl(int service_type);
     virtual EndpointUrls GetUpdateUrls(int service_type);
+    virtual std::string GetLockScreenIconUrl() const;
     virtual BinaryMessageSptr RequestPTUpdate();
     virtual void CheckPermissions(const PTString& app_id,
         const PTString& hmi_level,
