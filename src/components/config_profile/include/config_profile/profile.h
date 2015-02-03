@@ -580,7 +580,20 @@ class Profile : public utils::Singleton<Profile> {
     void LogContainer(const std::vector<std::string>& container,
                       std::string* log);
 
-    // Members section
+    /**
+     * @brief Checks, if path is relative
+     * @param path Path
+     * @return true, if is relative, otherwise - false
+     */
+    bool IsRelativePath(const std::string& path);
+
+    /**
+     * @brief Makes relative path absolute
+     * @param path Path
+     */
+    void MakeAbsolutePath(std::string& path);
+
+private:
     bool                            launch_hmi_;
     std::string                     app_config_folder_;
     std::string                     app_storage_folder_;

@@ -66,7 +66,6 @@ void SetAppIconRequest::Run() {
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
   std::string full_file_path =
-      file_system::CurrentWorkingDirectory() + "/" +
       profile::Profile::instance()->app_storage_folder() + "/";
   full_file_path += app->folder_name();
   full_file_path += "/";
@@ -197,13 +196,13 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
 
 void SetAppIconRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const smart_objects::SmartObject& message = event.smart_object();
+  const smart_objects::SmartObject& event_message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetAppIcon: {
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
+              event_message[strings::params][hmi_response::code].asInt());
 
       bool result = mobile_apis::Result::SUCCESS == result_code;
 
@@ -225,7 +224,7 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
                      "Icon path was set to '" << app->app_icon_path() << "'");
       }
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(result, result_code, NULL, &(event_message[strings::msg_params]));
       break;
     }
     default: {

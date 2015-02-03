@@ -649,6 +649,10 @@ void Profile::UpdateValues() {
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppConfigFolderKey);
 
+  if (IsRelativePath(app_config_folder_)) {
+    MakeAbsolutePath(app_config_folder_);
+  }
+
   LOG_UPDATED_VALUE(app_config_folder_, kAppConfigFolderKey, kMainSection);
 
   // Application storage folder
@@ -656,12 +660,20 @@ void Profile::UpdateValues() {
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppStorageFolderKey);
 
+  if (IsRelativePath(app_storage_folder_)) {
+    MakeAbsolutePath(app_storage_folder_);
+  }
+
   LOG_UPDATED_VALUE(app_storage_folder_, kAppStorageFolderKey, kMainSection);
 
   // Application resourse folder
   ReadStringValue(&app_resourse_folder_,
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppResourseFolderKey);
+
+  if (IsRelativePath(app_resourse_folder_)) {
+    MakeAbsolutePath(app_resourse_folder_);
+  }
 
   LOG_UPDATED_VALUE(app_resourse_folder_, kAppResourseFolderKey,
                     kMainSection);
@@ -681,6 +693,10 @@ void Profile::UpdateValues() {
   ReadStringValue(&app_icons_folder_,
                   file_system::CurrentWorkingDirectory().c_str(),
                   kSDL4Section, kAppIconsFolderKey);
+
+  if (IsRelativePath(app_icons_folder_)) {
+    MakeAbsolutePath(app_icons_folder_);
+  }
 
   LOG_UPDATED_VALUE(app_icons_folder_, kAppIconsFolderKey,
                     kSDL4Section);
@@ -1515,4 +1531,17 @@ void Profile::LogContainer(const std::vector<std::string>& container,
 
   log->append(container.back());
 }
+
+bool Profile::IsRelativePath(const std::string& path) {
+  if (path.empty()) {
+    LOG4CXX_ERROR(logger_, "Empty path passed.");
+    return false;
+  }
+  return '/' != path[0];
+}
+
+void Profile::MakeAbsolutePath(std::string& path) {
+  path = file_system::CurrentWorkingDirectory() + "/" + path;
+}
+
 }  //  namespace profile

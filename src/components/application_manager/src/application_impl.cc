@@ -699,8 +699,23 @@ void ApplicationImpl::CleanupFiles() {
 }
 
 void ApplicationImpl::LoadPersistentFiles() {
-  std::string directory_name =
-      profile::Profile::instance()->app_storage_folder();
+  using namespace profile;
+
+  if (kWaitingForRegistration == app_state_) {
+    const std::string app_icon_dir(Profile::instance()->app_icons_folder());
+    const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id_);
+    if (file_system::FileExists(full_icon_path)) {
+      AppFile file;
+      file.is_persistent = true;
+      file.is_download_complete = true;
+      file.file_name = full_icon_path;
+      file.file_type = mobile_apis::FileType::GRAPHIC_PNG;
+      AddFile(file);
+    }
+    return;
+  }
+
+  std::string directory_name = Profile::instance()->app_storage_folder();
   directory_name += "/" + folder_name();
 
   if (file_system::DirectoryExists(directory_name)) {

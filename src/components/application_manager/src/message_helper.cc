@@ -1208,7 +1208,12 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
 
   output = smart_objects::SmartObject(smart_objects::SmartType_Map);
   output[strings::app_name] = app->name();
-  output[strings::icon] = app->app_icon_path();
+
+  const std::string icon_path = app->app_icon_path();
+  if (!icon_path.empty()) {
+    output[strings::icon] = icon_path;
+  }
+
   output[strings::device_name] = device_name;
   output[strings::app_id] = app->hmi_app_id();
 

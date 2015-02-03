@@ -1892,6 +1892,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
                                                 const uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace policy;
+  using namespace profile;
 
   const std::size_t arr_size(obj_array.size());
   for (std::size_t idx = 0; idx < arr_size; ++idx) {
@@ -1915,6 +1916,9 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
           app_data[os_type][json::is_media_application].asBool());
 
     const uint32_t hmi_app_id(GenerateNewHMIAppID());
+
+    const std::string app_icon_dir(Profile::instance()->app_icons_folder());
+    const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id);
 
     ssize_t connection_id = get_connection_id(connection_key);
     if (-1 == connection_id) {
@@ -1941,11 +1945,9 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
                               appName,
                               PolicyHandler::instance()->GetStatisticManager()));
     if (app) {
-      if (!url_scheme.empty()) {
-        app->SetShemaUrl(url_scheme);
-      } else if (!package_name.empty()) {
-        app->SetPackageName(package_name);
-      }
+      app->SetShemaUrl(url_scheme);
+      app->SetPackageName(package_name);
+      app->set_app_icon_path(full_icon_path);
       app->set_connection_id(connection_id);
       app->set_hmi_application_id(hmi_app_id);
       app->set_device(device_id);
@@ -1963,18 +1965,16 @@ void ApplicationManagerImpl::ProcessQueryApp(
     const uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace policy;
-  using namespace profile;
 
   SmartArray* obj_array = sm_object[json::response].asArray();
   if (NULL != obj_array) {
-    const std::string app_icon_dir(Profile::instance()->app_icons_folder());
     CreateApplications(*obj_array, connection_key);
     SendUpdateAppList();
 
     AppsWaitRegistrationSet::const_iterator it = apps_to_register_.begin();
     for (; it != apps_to_register_.end(); ++it) {
 
-      const std::string full_icon_path(app_icon_dir + "/" + (*it)->mobile_app_id());
+      const std::string full_icon_path((*it)->app_icon_path());
       if (file_system::FileExists(full_icon_path)) {
         MessageHelper::SendSetAppIcon((*it)->hmi_app_id(), full_icon_path);
       }
