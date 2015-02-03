@@ -221,6 +221,10 @@ void PolicyManagerImpl::RequestPTUpdate() {
   update_status_manager_.ResetUpdateSchedule();
 }
 
+std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
+  return cache_->GetLockScreenIconUrl();
+}
+
 void PolicyManagerImpl::StartPTExchange() {
   LOG4CXX_AUTO_TRACE(logger_);
 

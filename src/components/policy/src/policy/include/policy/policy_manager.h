@@ -72,7 +72,14 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual bool ResetPT(const std::string& file_name) = 0;
 
     /**
-     * @brief Gets all URLs for particular service.
+     * @brief GetLockScreenIcon allows to obtain lock screen icon url;
+     *
+     * @return url which point to the resourse where lock screen icon could be obtained.
+     */
+    virtual std::string GetLockScreenIconUrl() const = 0;
+
+    /**
+     * @brief Gets all URLs for sending PTS to from PT itself.
      * @param service_type Service specifies user of URL
      * @return vector of urls
      */

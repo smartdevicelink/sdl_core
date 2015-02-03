@@ -99,6 +99,16 @@ class MessageHelper {
     static smart_objects::SmartObjectSPtr GetHashUpdateNotification(const uint32_t app_id);
 
     /**
+     * @brief Create OnSystemRequest notification for lock screen icon url
+     */
+    static smart_objects::SmartObject* GetLockScreenIconUrlNotification(const uint32_t connection_key);
+
+    /**
+    * @brief Send the OnSystemRequest notification for lock screen icon url to the mobile device
+    */
+    static void SendLockScreenIconUrlNotification(const uint32_t connection_key);
+
+    /**
      * @brief Sends to mobile HashUpdateNotification
      */
     static void SendHashUpdateNotification(const uint32_t app_id);
