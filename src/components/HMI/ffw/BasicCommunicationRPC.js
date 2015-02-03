@@ -213,7 +213,7 @@ FFW.BasicCommunication = FFW.RPCObserver
                 }
             }
 
-            if (response.result.method == "SDL.ActivateApp") {
+            if (response.result.method == "SDL.ActivateApp" && response.result.code === 0) {
 
                 Em.Logger.log("SDL.ActivateApp: Response from SDL!");
 
@@ -270,6 +270,13 @@ FFW.BasicCommunication = FFW.RPCObserver
 
                     delete SDL.SDLModel.activateAppRequestsList[response.id];
                 }
+            } else if (response.result.method == "SDL.ActivateApp" && response.result.code != 0) {
+                Em.Logger.error("SDL.ActivateApp: Wrong Response from SDL!");
+            }
+
+            if ("error" in response && "data" in response.error && "method" in response.error.data && response.error.data.method == "SDL.ActivateApp" && response.result.code === 15) {
+
+                SDL.PopUp.create().appendTo('body').popupActivate("Activation FAILED! Application not registered!");
             }
 
             if (response.result.method == "SDL.GetListOfPermissions") {
