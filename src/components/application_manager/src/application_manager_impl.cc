@@ -1897,35 +1897,24 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
   for (std::size_t idx = 0; idx < arr_size; ++idx) {
 
     const SmartObject& app_data = obj_array[idx];
-    if (!app_data.isValid()) {
-      LOG4CXX_ERROR(logger_, "Wrong application data in json file.");
-      continue;
-    }
     std::string url_scheme;
     std::string package_name;
     std::string os_type;
-    if (app_data.keyExists(strings::ios)) {
-      os_type = strings::ios;
-      url_scheme = app_data[os_type][strings::urlScheme].asString();
-    } else if (app_data.keyExists(strings::android)) {
-      os_type = strings::android;
+    if (app_data.keyExists(json::ios)) {
+      os_type = json::ios;
+      url_scheme = app_data[os_type][json::urlScheme].asString();
+    } else if (app_data.keyExists(json::android)) {
+      os_type = json::android;
       package_name =
-          app_data[os_type][strings::packageName].asString();
-    } else {
-      LOG4CXX_ERROR(logger_, "Can't find mobile OS type in json file.");
-      continue;
+          app_data[os_type][json::packageName].asString();
     }
-    const std::string mobile_app_id(app_data[strings::jsonAppId].asString());
-    const std::string appName(app_data[strings::jsonAppName].asString());
+
+    const std::string mobile_app_id(app_data[json::appId].asString());
+    const std::string appName(app_data[json::name].asString());
     const bool is_media(
-          app_data[os_type][strings::is_media_application].asBool());
+          app_data[os_type][json::is_media_application].asBool());
 
     const uint32_t hmi_app_id(GenerateNewHMIAppID());
-
-    if (!app_data[os_type].keyExists(strings::json_app_hmi_type)) {
-      LOG4CXX_ERROR(logger_, "Can't find app HMI type in json file.");
-      continue;
-    }
 
     ssize_t connection_id = get_connection_id(connection_key);
     if (-1 == connection_id) {
@@ -1960,7 +1949,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
       app->set_connection_id(connection_id);
       app->set_hmi_application_id(hmi_app_id);
       app->set_device(device_id);
-      app->set_app_types(app_data[os_type][strings::json_app_hmi_type]);
+      app->set_app_types(app_data[os_type][json::appHmiType]);
       app->set_is_media_application(is_media);
 
       sync_primitives::AutoLock lock(apps_to_register_list_lock_);
@@ -1976,16 +1965,7 @@ void ApplicationManagerImpl::ProcessQueryApp(
   using namespace policy;
   using namespace profile;
 
-  if (!sm_object.isValid()) {
-    LOG4CXX_ERROR(logger_, "QueryApps response is not valid.");
-    return;
-  }
-  if (!sm_object.keyExists("response")) {
-    LOG4CXX_ERROR(logger_,
-                  "QueryApps response does not contain necessary parameter.");
-    return;
-  }
-  SmartArray* obj_array = sm_object["response"].asArray();
+  SmartArray* obj_array = sm_object[json::response].asArray();
   if (NULL != obj_array) {
     const std::string app_icon_dir(Profile::instance()->app_icons_folder());
     CreateApplications(*obj_array, connection_key);
