@@ -66,9 +66,6 @@ public:
    */
   void RemoveAppExtension(uint32_t app_id);
 
-  const Modules& plugins() {
-    return plugins_;
-  }
 private:
   PluginManager();
   DISALLOW_COPY_AND_ASSIGN(PluginManager);
@@ -78,7 +75,10 @@ private:
   std::map<MobileFunctionID, ModulePtr> mobile_subscribers_;
   std::map<HMIFunctionID, ModulePtr> hmi_subscribers_;
   application_manager::ServicePtr service_;
+
+  friend class PluginManagerTest;
 };
+
 }  //  namespace functional_modules
 
 #endif  //  SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANANGER_H_

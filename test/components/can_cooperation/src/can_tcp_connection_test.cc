@@ -7,11 +7,6 @@
 #include "gtest/gtest.h"
 #include "can_cooperation/can_tcp_connection.h"
 
-using can_cooperation::CANTCPConnection;
-using can_cooperation::ConnectionState;
-
-namespace test {
-namespace components {
 namespace can_cooperation {
 
 class TCPServer {
@@ -175,5 +170,3 @@ TEST_F(CanTcpConnectionTest, ReadData) {
 }
 
 }  // namespace can_cooperation
-}  // namespace components
-}  // namespace test

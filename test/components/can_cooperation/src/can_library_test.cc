@@ -2,11 +2,8 @@
 #include "gtest/gtest.h"
 #include "can_cooperation/can_module.h"
 
-using can_cooperation::CANModule;
 using functional_modules::PluginInfo;
 
-namespace test {
-namespace components {
 namespace can_cooperation {
 
 ::testing::AssertionResult IsError(void* error) {
@@ -45,5 +42,3 @@ TEST(CanLibraryTest, Load) {
 }
 
 }  // namespace can_cooperation
-}  // namespace components
-}  // namespace test

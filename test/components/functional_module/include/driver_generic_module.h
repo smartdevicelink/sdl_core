@@ -55,6 +55,10 @@ class DriverGenericModule : public GenericModule {
   }
   virtual void RemoveAppExtension(uint32_t app_id) {}
   virtual void RemoveAppExtensions() {}
+
+  const Observers& observers() {
+    return GenericModule::observer();
+  }
 };
 
 }  // namespace functional_modules

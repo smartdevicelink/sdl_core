@@ -7,15 +7,11 @@
 #include "mock_service.h"
 #include "mock_can_connection.h"
 
-using can_cooperation::CANModule;
-using can_cooperation::CANAppExtension;
-using can_cooperation::ConnectionState;
 using functional_modules::PluginInfo;
 using functional_modules::ProcessResult;
 using functional_modules::MobileFunctionID;
 using application_manager::ServicePtr;
 
-using can_cooperation::MockCANConnection;
 using application_manager::MockService;
 using application_manager::MockApplication;
 

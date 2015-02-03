@@ -7,17 +7,11 @@
 #include "mock_service.h"
 
 using application_manager::ServicePtr;
-using functional_modules::ModuleObserver;
-using functional_modules::DriverGenericModule;
-
 using application_manager::MockService;
-using functional_modules::MockModuleObserver;
 
 using ::testing::_;
 
-namespace test {
-namespace components {
-namespace functional_module {
+namespace functional_modules {
 
 TEST(GenericModuleTest, SetService) {
   DriverGenericModule module(18);
@@ -105,6 +99,4 @@ TEST(GenericModuleTest, NotifyObserversComplex) {
   module.ProcessMessage(message);
 }
 
-}  // namespace functional_module
-}  // namespace components
-}  // namespace test
+}  // namespace functional_modules

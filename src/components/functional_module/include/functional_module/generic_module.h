@@ -100,9 +100,6 @@ class GenericModule {
      */
     virtual void RemoveAppExtension(uint32_t app_id) = 0;
 
-    const Observers& observers() {
-      return observers_;
-    }
   protected:
     explicit GenericModule(ModuleID module_id);
     void NotifyObservers(ModuleObserver::Errors error);
@@ -114,6 +111,10 @@ class GenericModule {
 
     application_manager::ServicePtr service() {
       return service_;
+    }
+
+    const Observers& observer() {
+      return observers_;
     }
 
  private:

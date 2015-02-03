@@ -3,15 +3,10 @@
 #include "functional_module/plugin_manager.h"
 #include "mock_generic_module.h"
 
-using functional_modules::PluginManager;
-using functional_modules::ModulePtr;
-using functional_modules::ModuleState;
 using application_manager::Message;
 using application_manager::ProtocolVersion;
 
-namespace test {
-namespace components {
-namespace functional_module {
+namespace functional_modules {
 
 class PluginManagerTest : public ::testing::Test {
  protected:
@@ -21,7 +16,7 @@ class PluginManagerTest : public ::testing::Test {
   static void SetUpTestCase() {
     manager = PluginManager::instance();
     ASSERT_EQ(1, manager->LoadPlugins("./plugins/"));
-    const PluginManager::Modules& plugins = manager->plugins();
+    const PluginManager::Modules& plugins = manager->plugins_;
     PluginManager::Modules::const_iterator i = plugins.begin();
     module = ModulePtr::static_pointer_cast<MockGenericModule>(i->second).get();
   }
@@ -126,6 +121,4 @@ TEST_F(PluginManagerTest, ProcessHMIMessagePass) {
   manager->ProcessHMIMessage(message);
 }
 
-}  // namespace functional_module
-}  // namespace components
-}  // namespace test
+}  // namespace functional_modules

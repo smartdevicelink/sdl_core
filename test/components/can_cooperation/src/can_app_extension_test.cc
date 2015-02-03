@@ -1,10 +1,6 @@
 #include "gtest/gtest.h"
 #include "can_cooperation/can_app_extension.h"
 
-using can_cooperation::CANAppExtension;
-
-namespace test {
-namespace components {
 namespace can_cooperation {
 
 TEST(CanAppExtensionTest, Create) {
@@ -21,5 +17,3 @@ TEST(CanAppExtensionTest, Control) {
 }
 
 }  // namespace can_cooperation
-}  // namespace components
-}  // namespace test
