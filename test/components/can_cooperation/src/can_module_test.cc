@@ -24,8 +24,6 @@ using ::testing::NiceMock;
 using ::testing::StrictMock;
 using ::testing::Return;
 
-namespace test {
-namespace components {
 namespace can_cooperation {
 
 class CanModuleTest : public ::testing::Test {
@@ -38,7 +36,7 @@ class CanModuleTest : public ::testing::Test {
     module = CANModule::instance();
     mock_conn = new MockCANConnection();
     ::can_cooperation::CANConnectionSPtr conn(mock_conn);
-    module->set_can_connection(conn);
+    module->can_connection_ = conn;
 
     mock_service = new MockService();
     ServicePtr exp_service(mock_service);
@@ -171,5 +169,3 @@ TEST_F(CanModuleTest, DISABLED_HandleMessage) {
 }
 
 }  // namespace can_cooperation
-}  // namespace components
-}  // namespace test

@@ -87,8 +87,6 @@ class CANModule : public functional_modules::GenericModule,
    */
   virtual void RemoveAppExtension(uint32_t app_id);
 
-  void set_can_connection(CANConnectionSPtr);
-
  protected:
   /**
    * @brief Remove extension for all applications
@@ -113,6 +111,8 @@ class CANModule : public functional_modules::GenericModule,
   bool is_scan_started_;
   request_controller::RequestController request_controller_;
   friend class TCPClientDelegate;
+
+  friend class CanModuleTest;
 };
 
 EXPORT_FUNCTION(CANModule);

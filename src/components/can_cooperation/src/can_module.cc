@@ -318,9 +318,5 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
   }
 }
 
-void CANModule::set_can_connection(CANConnectionSPtr conn) {
-  can_connection_ = conn;
-}
-
 }  //  namespace can_cooperation
 
