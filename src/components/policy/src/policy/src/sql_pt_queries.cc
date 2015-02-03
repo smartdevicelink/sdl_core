@@ -279,7 +279,7 @@ const std::string kCreateSchema =
   "CREATE INDEX IF NOT EXISTS `consent_group.fk_consent_group_functional_group1_idx` "
   "  ON `consent_group`(`functional_group_id`); "
   "CREATE TABLE IF NOT EXISTS `endpoint`( "
-  "  `service` INTEGER NOT NULL, "
+  "  `service` VARCHAR(100) NOT NULL, "
   "  `url` VARCHAR(100) NOT NULL, "
   "  `application_id` VARCHAR(45) NOT NULL, "
   "  CONSTRAINT `fk_endpoint_application1` "
@@ -438,6 +438,9 @@ const std::string kSetNotFirstRun =
 
 const std::string kSelectEndpoint =
   "SELECT `url`, `application_id` FROM `endpoint` WHERE `service` = ? ";
+
+const std::string kSelectLockScreenIcon =
+  "SELECT `url` FROM `endpoint` WHERE `service` = ? AND `application_id` = ?";
 
 const std::string kInsertFunctionalGroup =
   "INSERT INTO `functional_group` (`id`, `name`, `user_consent_prompt`) "
