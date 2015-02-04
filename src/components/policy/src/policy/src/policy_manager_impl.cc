@@ -269,6 +269,10 @@ EndpointUrls PolicyManagerImpl::GetUpdateUrls(int service_type) {
   return cache_->GetUpdateUrls(service_type);
 }
 
+std::string PolicyManagerImpl::GetLockScreenIconUrl() const {
+  return cache_->GetLockScreenIconUrl();
+}
+
 BinaryMessageSptr PolicyManagerImpl::RequestPTUpdate() {
   LOG4CXX_INFO(logger_, "Creating PT Snapshot");
   utils::SharedPtr<policy_table::Table> policy_table_snapshot =

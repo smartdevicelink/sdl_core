@@ -396,8 +396,8 @@ smart_objects::SmartObject* MessageHelper::GetLockScreenIconUrlNotification(cons
 
   (*message)[strings::msg_params][strings::request_type] = mobile_apis::RequestType::LOCK_SCREEN_ICON_URL;
 
-  (*message)[strings::msg_params][strings::url] =
-  "http://www.livioconnect.com/wp-content/uploads/2012/03/icon-Livio-Connect.png";
+  (*message)[strings::msg_params][strings::url] = policy::PolicyHandler::instance()->GetLockScreenIconUrl();
+
 
   return message;
 }

@@ -1177,6 +1177,11 @@ EndpointUrls PolicyHandler::GetUpdateUrls(int service_type) {
   return policy_manager_->GetUpdateUrls(service_type);
 }
 
+std::string PolicyHandler::GetLockScreenIconUrl() const {
+  POLICY_LIB_CHECK(std::string(""));
+  return policy_manager_->GetLockScreenIconUrl();
+}
+
 void PolicyHandler::ResetRetrySequence() {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->ResetRetrySequence();

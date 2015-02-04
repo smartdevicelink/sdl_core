@@ -249,6 +249,29 @@ EndpointUrls SQLPTRepresentation::GetUpdateUrls(int service_type) {
   return ret;
 }
 
+std::string SQLPTRepresentation::GetLockScreenIconUrl() const {
+  dbms::SQLQuery query(db());
+  std::string ret;
+  if (query.Prepare(sql_pt::kSelectLockScreenIcon)) {
+    query.Bind(0, std::string("lock_screen_icon_url"));
+    query.Bind(1, std::string("default"));
+
+    if(!query.Exec()) {
+      LOG4CXX_WARN(logger_, "Incorrect select from notifications by priority.");
+      return ret;
+    }
+
+    if (!query.IsNull(0)) {
+      ret = query.GetString(0);
+    }
+
+  } else {
+    LOG4CXX_WARN(logger_, "Invalid select endpoints statement.");
+  }
+  return ret;
+}
+
+
 int SQLPTRepresentation::GetNotificationsNumber(const std::string& priority) {
   LOG4CXX_INFO(logger_, "GetNotificationsNumber");
   dbms::SQLQuery query(db());
@@ -958,11 +981,7 @@ bool SQLPTRepresentation::SaveServiceEndpoints(
       const policy_table::URL& urls = app_it->second;
       policy_table::URL::const_iterator url_it;
       for (url_it = urls.begin(); url_it != urls.end(); ++url_it) {
-        std::stringstream temp_stream(it->first);
-        int service;
-        temp_stream.seekg(3);
-        temp_stream >> service;
-        query.Bind(0, service);
+        query.Bind(0, it->first);
         query.Bind(1, *url_it);
         query.Bind(2, app_it->first);
         if (!query.Exec() || !query.Reset()) {

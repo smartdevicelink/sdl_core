@@ -49,6 +49,7 @@ extern const std::string kSelectPreloaded;
 extern const std::string kIsFirstRun;
 extern const std::string kSetNotFirstRun;
 extern const std::string kSelectEndpoint;
+extern const std::string kSelectLockScreenIcon;
 extern const std::string kSelectModuleConfig;
 extern const std::string kSelectEndpoints;
 extern const std::string kSelectNotificationsPerMin;
