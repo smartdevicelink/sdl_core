@@ -38,7 +38,7 @@
 using functional_modules::GenericModule;
 using functional_modules::PluginInfo;
 using functional_modules::ProcessResult;
-using functional_modules::ModuleState;
+using functional_modules::ServiceState;
 
 using ::testing::_;
 using ::testing::Return;
@@ -56,8 +56,8 @@ class MockGenericModule : public GenericModule {
       ProcessResult(application_manager::MessagePtr msg));
   MOCK_METHOD1(ProcessHMIMessage,
       ProcessResult(application_manager::MessagePtr msg));
-  MOCK_METHOD1(ChangeModuleState,
-      void(ModuleState state));
+  MOCK_METHOD1(OnServiceStateChanged,
+      void(ServiceState state));
   MOCK_METHOD1(RemoveAppExtension,
       void(uint32_t app_id));
   MOCK_METHOD0(RemoveAppExtensions,

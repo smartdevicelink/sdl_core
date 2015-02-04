@@ -1,11 +1,8 @@
 #include "mock_generic_module.h"
 
 using functional_modules::GenericModule;
-using functional_modules::ModuleID;
 using functional_modules::MobileFunctionID;
 using functional_modules::PluginInfo;
-using functional_modules::ProcessResult;
-using functional_modules::ModuleState;
 
 using ::testing::_;
 using ::testing::Return;

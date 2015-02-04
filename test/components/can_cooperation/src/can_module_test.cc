@@ -36,7 +36,6 @@ class CanModuleTest : public ::testing::Test {
 
     mock_service = new MockService();
     ServicePtr exp_service(mock_service);
-    EXPECT_CALL(*mock_service, SubscribeToHMINotification(_)).Times(1);
     module->SetServiceHandler(exp_service);
     ServicePtr out_service = module->GetServiceHandler();
     EXPECT_EQ(exp_service.get(), out_service.get());

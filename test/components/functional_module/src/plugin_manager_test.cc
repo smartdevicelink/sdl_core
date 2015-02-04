@@ -30,9 +30,9 @@ PluginManager* PluginManagerTest::manager = 0;
 MockGenericModule* PluginManagerTest::module = 0;
 
 TEST_F(PluginManagerTest, ChangePluginsState) {
-  ModuleState kState = ModuleState::SUSPENDED;
-  EXPECT_CALL(*module, ChangeModuleState(kState)).Times(1);
-  manager->ChangePluginsState(kState);
+  ServiceState kState = ServiceState::SUSPENDED;
+  EXPECT_CALL(*module, OnServiceStateChanged(kState)).Times(1);
+  manager->OnServiceStateChanged(kState);
 }
 
 TEST_F(PluginManagerTest, IsMessageForPluginFail) {

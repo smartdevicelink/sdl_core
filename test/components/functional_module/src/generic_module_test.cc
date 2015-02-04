@@ -18,12 +18,32 @@ TEST(GenericModuleTest, SetService) {
   MockService* mock_service = new MockService();
   ServicePtr exp_service(mock_service);
 
-  EXPECT_CALL(*mock_service, SubscribeToHMINotification(_)).Times(1);
-
   module.SetServiceHandler(exp_service);
   ServicePtr out_service = module.GetServiceHandler();
 
   EXPECT_EQ(exp_service.get(), out_service.get());
+}
+
+TEST(GenericModuleTest, OnServiceStateChangedFail) {
+  DriverGenericModule module(18);
+  MockService* mock_service = new MockService();
+  ServicePtr exp_service(mock_service);
+  module.SetServiceHandler(exp_service);
+
+  EXPECT_CALL(*mock_service, SubscribeToHMINotification(_)).Times(0);
+
+  module.OnServiceStateChanged(LOWVOLTAGE);
+}
+
+TEST(GenericModuleTest, OnServiceStateChangedPass) {
+  DriverGenericModule module(18);
+  MockService* mock_service = new MockService();
+  ServicePtr exp_service(mock_service);
+  module.SetServiceHandler(exp_service);
+
+  EXPECT_CALL(*mock_service, SubscribeToHMINotification(_)).Times(1);
+
+  module.OnServiceStateChanged(HMI_ADAPTER_INITIALIZED);
 }
 
 TEST(GenericModuleTest, AddObserver) {
