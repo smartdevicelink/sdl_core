@@ -460,9 +460,15 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     }
   }
 
+  // Keep HMI add id in case app is present in "waiting for registration" list
   apps_to_register_list_lock_.Acquire();
-  apps_to_register_.erase(application);
+  AppsWaitRegistrationSet::iterator it = apps_to_register_.find(application);
+  if (apps_to_register_.end() != it) {
+    application->set_hmi_application_id((*it)->hmi_app_id());
+    apps_to_register_.erase(application);
+  }
   apps_to_register_list_lock_.Release();
+
   ApplicationListAccessor app_list_accesor;
   application->MarkRegistered();
   app_list_accesor.Insert(application);

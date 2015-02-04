@@ -229,7 +229,7 @@ void RegisterAppInterfaceRequest::Run() {
     // there is side affect with 2 mobile app with the same mobile app_id
     if (resumer.IsApplicationSaved(mobile_app_id)) {
       app->set_hmi_application_id(resumer.GetHMIApplicationID(mobile_app_id));
-    } else {
+    } else if (!app->hmi_app_id()) {
       app->set_hmi_application_id(
         ApplicationManagerImpl::instance()->GenerateNewHMIAppID());
     }
