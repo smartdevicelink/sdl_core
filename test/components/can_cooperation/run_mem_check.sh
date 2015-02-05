@@ -58,7 +58,7 @@ install_if_not() {
 binary_test="./can_cooperation_test"
 
 tool_name=memcheck
-while getopts "t:x:hqib:" opt; do
+while getopts "t:x:hqib:f:" opt; do
     case "$opt" in
     h)
         show_help
@@ -77,6 +77,8 @@ while getopts "t:x:hqib:" opt; do
         ;;
     t)  tool_name=$OPTARG
         ;;
+    f)  gtest_filter="--gtest_filter=$OPTARG"
+        ;;
     esac
 done
 
@@ -86,4 +88,4 @@ if [ "$tool_name" == "memcheck" ]; then
     params="--leak-check=full --leak-check-heuristics=all --show-leak-kinds=all"
 fi
 
-$command_name --tool=$tool_name $params $xml_report $binary_test
+$command_name --tool=$tool_name $params $xml_report $binary_test $gtest_filter
