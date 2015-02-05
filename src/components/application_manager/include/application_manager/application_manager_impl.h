@@ -917,6 +917,25 @@ class ApplicationManagerImpl : public ApplicationManager,
       }
     };
 
+    struct ConnectionIdSDL4Predicate {
+      ssize_t connection_id_;
+      ConnectionIdSDL4Predicate(const ssize_t connection_id):
+        connection_id_(connection_id) {}
+      bool operator () (const ApplicationSharedPtr app) const {
+        return app ? connection_id_ == app->connection_id() &&
+                     ProtocolVersion::kV4 == app->protocol_version() : false;
+      }
+    };
+
+    struct ConnectionIdPredicate {
+      ssize_t connection_id_;
+      ConnectionIdPredicate(const ssize_t connection_id):
+        connection_id_(connection_id) {}
+      bool operator () (const ApplicationSharedPtr app) const {
+        return connection_id_ == app->connection_id() ? true : false;
+      }
+    };
+
     struct SubscribedToIVIPredicate {
       int32_t vehicle_info_;
       SubscribedToIVIPredicate(int32_t  vehicle_info)
@@ -948,7 +967,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     const ssize_t get_connection_id(uint32_t connection_key) const;
 
-  private:
+private:
     ApplicationManagerImpl();
 
     /**
@@ -1157,6 +1176,12 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @return true, if succedeed, otherwise - false
      */
     bool InitDirectory(const std::string& path, DirectoryType type) const;
+
+    /**
+     * @brief Removes apps, waiting for registration, with certain connection id
+     * @param connection_id Connection id
+     */
+    void RemoveWaitingApps(const ssize_t connection_id);
 
   private:
 

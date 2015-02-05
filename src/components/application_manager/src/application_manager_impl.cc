@@ -2157,6 +2157,25 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   request_ctrl_.terminateAllHMIRequests();
 }
 
+void ApplicationManagerImpl::RemoveWaitingApps(const ssize_t connection_id) {
+  ConnectionIdPredicate conn_finder(connection_id);
+  apps_to_register_list_lock_.Acquire();
+  AppsWaitRegistrationSet::iterator it_app =
+      std::find_if(apps_to_register_.begin(), apps_to_register_.end(),
+                conn_finder);
+
+  while (apps_to_register_.end()!= it_app) {
+    LOG4CXX_DEBUG(logger_, "Waiting app: " << (*it_app)->name()
+                  << " is removed.");
+    apps_to_register_.erase(it_app);
+    it_app = std::find_if(apps_to_register_.begin(),
+                          apps_to_register_.end(),
+                          conn_finder);
+  }
+
+  apps_to_register_list_lock_.Release();
+}
+
 void ApplicationManagerImpl::UnregisterApplication(
   const uint32_t& app_id, mobile_apis::Result::eType reason,
   bool is_resuming, bool is_unexpected_disconnect) {
@@ -2190,12 +2209,14 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
 
   ApplicationSharedPtr app_to_remove;
+  ssize_t connection_id = -1;
   {
     ApplicationListAccessor accessor;
     ApplictionSetConstIt it = accessor.begin();
     for (; it != accessor.end(); ++it) {
       if ((*it)->app_id() == app_id) {
         app_to_remove = *it;
+        connection_id = app_to_remove->connection_id();
         break;
       }
     }
@@ -2204,7 +2225,18 @@ void ApplicationManagerImpl::UnregisterApplication(
       return;
     }
     accessor.Erase(app_to_remove);
+
+    ConnectionIdSDL4Predicate finder(connection_id);
+    ApplicationSharedPtr app = accessor.Find(finder);
+    if (!app) {
+      LOG4CXX_DEBUG(logger_, "There is no more SDL4 apps with connection id: "
+                    << connection_id);
+
+      RemoveWaitingApps(connection_id);
+      SendUpdateAppList();
+    }
   }
+
   if (is_resuming) {
       resume_ctrl_.SaveApplication(app_to_remove);
   } else {
