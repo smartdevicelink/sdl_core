@@ -1141,11 +1141,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     };
 
     typedef std::map<DirectoryType, std::string> DirectoryTypeMap;
-    DirectoryTypeMap dir_type_to_string_map_ = {
-      {TYPE_STORAGE, "Storage"},
-      {TYPE_SYSTEM, "System"},
-      {TYPE_ICONS, "Icons"}
-    };
+    DirectoryTypeMap dir_type_to_string_map_;
 
     /**
      * @brief Converts directory type to string

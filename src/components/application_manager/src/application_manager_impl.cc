@@ -112,6 +112,12 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     is_low_voltage_(false) {
     std::srand(std::time(0));
     AddPolicyObserver(this);
+
+    dir_type_to_string_map_ = {
+      {TYPE_STORAGE, "Storage"},
+      {TYPE_SYSTEM, "System"},
+      {TYPE_ICONS, "Icons"}
+    };
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
