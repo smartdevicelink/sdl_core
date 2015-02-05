@@ -17,6 +17,7 @@ show_help() {
           -i    only install missing software and exit. No prompts will be issued.
           -x    <file> save XML output to file. Only for memcheck tool.
           -t    <name> module tool name for analyse (memcheck - default, callgrind, massif and etc.)
+          -f    <filter> to run selected tests (see examples below)
 
         GUI tools which you can use to analyse:
           Valkyrie - memcheck
@@ -26,7 +27,9 @@ show_help() {
         Example:
           ./run_mem_check.sh -b ./test_can_module
           ./run_mem_check.sh -t callgrind
-          ./run_men_check.sh -x output.xml
+          ./run_mem_check.sh -x output.xml
+          ./run_mem_check.sh -f CanTcpConnectionTest*
+          ./run_mem_check.sh -f *WriteData
 "
 }
 
