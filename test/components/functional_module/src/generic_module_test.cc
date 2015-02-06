@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-#include "driver_generic_module.h"
+#include "driver_generic_module_test.h"
 
 #include "mock_module_observer.h"
 #include "mock_service.h"
@@ -14,7 +14,7 @@ using ::testing::_;
 namespace functional_modules {
 
 TEST(GenericModuleTest, SetService) {
-  DriverGenericModule module(18);
+  DriverGenericModuleTest module(18);
   MockService* mock_service = new MockService();
   ServicePtr exp_service(mock_service);
 
@@ -25,7 +25,7 @@ TEST(GenericModuleTest, SetService) {
 }
 
 TEST(GenericModuleTest, OnServiceStateChangedFail) {
-  DriverGenericModule module(18);
+  DriverGenericModuleTest module(18);
   MockService* mock_service = new MockService();
   ServicePtr exp_service(mock_service);
   module.set_service(exp_service);
@@ -36,7 +36,7 @@ TEST(GenericModuleTest, OnServiceStateChangedFail) {
 }
 
 TEST(GenericModuleTest, OnServiceStateChangedPass) {
-  DriverGenericModule module(18);
+  DriverGenericModuleTest module(18);
   MockService* mock_service = new MockService();
   ServicePtr exp_service(mock_service);
   module.set_service(exp_service);
@@ -47,49 +47,63 @@ TEST(GenericModuleTest, OnServiceStateChangedPass) {
 }
 
 TEST(GenericModuleTest, AddObserver) {
-  DriverGenericModule module(18);
-  utils::SharedPtr<MockModuleObserver> observer(new MockModuleObserver());
+  DriverGenericModuleTest module(18);
+  MockModuleObserver* observer = new MockModuleObserver();
   module.AddObserver(observer);
-  const DriverGenericModule::Observers& full = module.observers();
+  const DriverGenericModuleTest::Observers& full = module.observers();
   ASSERT_EQ(1, full.size());
-  EXPECT_EQ(observer.get(), full[0].get());
+  EXPECT_EQ(observer, full[0]);
+  delete observer;
 }
 
 TEST(GenericModuleTest, RemoveObserver) {
-  DriverGenericModule module(18);
-  utils::SharedPtr<MockModuleObserver> observer(new MockModuleObserver());
+  DriverGenericModuleTest module(18);
+  MockModuleObserver* observer = new MockModuleObserver();
   module.AddObserver(observer);
 
   module.RemoveObserver(observer);
-  const DriverGenericModule::Observers& empty = module.observers();
+  const DriverGenericModuleTest::Observers& empty = module.observers();
   ASSERT_TRUE(empty.empty());
+  delete observer;
 }
 
 TEST(GenericModuleTest, EmptyRemoveObserver) {
-  DriverGenericModule module(18);
-  utils::SharedPtr<MockModuleObserver> observer(new MockModuleObserver());
+  DriverGenericModuleTest module(18);
+  MockModuleObserver* observer = new MockModuleObserver();
   module.RemoveObserver(observer);
-  const DriverGenericModule::Observers& empty = module.observers();
+  const DriverGenericModuleTest::Observers& empty = module.observers();
   ASSERT_TRUE(empty.empty());
+  delete observer;
 }
 
 TEST(GenericModuleTest, WrongRemoveObserver) {
-  DriverGenericModule module(18);
-  utils::SharedPtr<MockModuleObserver> observer(new MockModuleObserver());
+  DriverGenericModuleTest module(18);
+  MockModuleObserver* observer = new MockModuleObserver();
   module.AddObserver(observer);
 
-  utils::SharedPtr<MockModuleObserver> wrong_observer(new MockModuleObserver());
+  MockModuleObserver* wrong_observer = new MockModuleObserver();
   module.RemoveObserver(wrong_observer);
-  const DriverGenericModule::Observers& empty = module.observers();
+  const DriverGenericModuleTest::Observers& empty = module.observers();
   ASSERT_EQ(1, empty.size());
-  EXPECT_EQ(observer.get(), empty[0].get());
+  EXPECT_EQ(observer, empty[0]);
+  delete wrong_observer;
+  delete observer;
+}
+
+TEST(GenericModuleTest, CrashRemovedObserver) {
+  DriverGenericModuleTest module(18);
+  MockModuleObserver* observer = new MockModuleObserver();
+  module.AddObserver(observer);
+  EXPECT_EQ(13, observer->ObserverMethod());
+  module.RemoveObserver(observer);
+  EXPECT_EQ(13, observer->ObserverMethod());
+  delete observer;
 }
 
 TEST(GenericModuleTest, NotifyObservers) {
-  DriverGenericModule module(3);
+  DriverGenericModuleTest module(3);
   MockModuleObserver* observer = new MockModuleObserver();
-  utils::SharedPtr<MockModuleObserver> mock_observer(observer);
-  module.AddObserver(mock_observer);
+  module.AddObserver(observer);
 
   EXPECT_CALL(*observer, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
 
@@ -98,13 +112,11 @@ TEST(GenericModuleTest, NotifyObservers) {
 }
 
 TEST(GenericModuleTest, NotifyObserversComplex) {
-  DriverGenericModule module(3);
+  DriverGenericModuleTest module(3);
   MockModuleObserver* observer_1 = new MockModuleObserver();
-  utils::SharedPtr<MockModuleObserver> mock_observer_1(observer_1);
-  module.AddObserver(mock_observer_1);
+  module.AddObserver(observer_1);
   MockModuleObserver* observer_2 = new MockModuleObserver();
-  utils::SharedPtr<MockModuleObserver> mock_observer_2(observer_2);
-  module.AddObserver(mock_observer_2);
+  module.AddObserver(observer_2);
 
   EXPECT_CALL(*observer_1, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
   EXPECT_CALL(*observer_2, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
@@ -112,7 +124,7 @@ TEST(GenericModuleTest, NotifyObserversComplex) {
   application_manager::MessagePtr message;
   module.ProcessMessage(message);
 
-  module.RemoveObserver(mock_observer_1);
+  module.RemoveObserver(observer_1);
   EXPECT_CALL(*observer_1, OnError(ModuleObserver::FS_FAILURE, 3)).Times(0);
   EXPECT_CALL(*observer_2, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
 

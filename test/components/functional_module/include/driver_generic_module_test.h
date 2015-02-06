@@ -36,13 +36,13 @@
 
 namespace functional_modules {
 
-class DriverGenericModule : public GenericModule {
- public:
-  explicit DriverGenericModule(ModuleID module_id) : GenericModule(module_id) {}
-  virtual ~DriverGenericModule() {}
+class DriverGenericModuleTest : public GenericModule {
+public:
+  explicit DriverGenericModuleTest(ModuleID module_id) : GenericModule(module_id) {}
+  virtual ~DriverGenericModuleTest() {}
   virtual PluginInfo GetPluginInfo() const {
     PluginInfo info;
-    info.name = "DriverGenericModule";
+    info.name = "DriverGenericModuleTest";
     info.version = 1;
     return info;
   }
@@ -57,7 +57,7 @@ class DriverGenericModule : public GenericModule {
   virtual void RemoveAppExtensions() {}
 
   const Observers& observers() {
-    return GenericModule::observer();
+    return observers_;
   }
 };
 

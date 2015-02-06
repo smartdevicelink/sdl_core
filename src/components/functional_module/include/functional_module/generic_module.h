@@ -71,55 +71,67 @@ struct PluginInfo {
 };
 
 class GenericModule {
-  public:
-    typedef std::deque<utils::SharedPtr<ModuleObserver> > Observers;
+ public:
+  typedef std::deque<ModuleObserver* > Observers;
 
-    virtual ~GenericModule();
-    ModuleID GetModuleID() const {
-      return kModuleId_;
-    }
-    virtual PluginInfo GetPluginInfo() const = 0;
+  virtual ~GenericModule();
+  ModuleID GetModuleID() const {
+    return kModuleId_;
+  }
+  virtual PluginInfo GetPluginInfo() const = 0;
 
-    virtual void set_service(application_manager::ServicePtr service);
+  virtual void set_service(application_manager::ServicePtr service);
 
-    /**
-     * @brief Returns pointer to SDL core service interface
-     * @return pointer to core service interface
-     */
-    virtual application_manager::ServicePtr service();
+  /**
+   * @brief Returns pointer to SDL core service interface
+   * @return pointer to core service interface
+   */
+  virtual application_manager::ServicePtr service();
 
-    virtual ProcessResult ProcessMessage(application_manager::MessagePtr msg) = 0;
-    virtual ProcessResult ProcessHMIMessage(application_manager::MessagePtr msg) = 0;
-    virtual void OnServiceStateChanged(ServiceState state);
-    void AddObserver(utils::SharedPtr<ModuleObserver> observer);
-    void RemoveObserver(utils::SharedPtr<ModuleObserver> observer);
+  virtual ProcessResult ProcessMessage(application_manager::MessagePtr msg) = 0;
+  virtual ProcessResult ProcessHMIMessage(application_manager::MessagePtr msg) = 0;
+  virtual void OnServiceStateChanged(ServiceState state);
 
-    /**
-     * @brief Remove extension created for specified application
-     * @param app_id application id
-     */
-    virtual void RemoveAppExtension(uint32_t app_id) = 0;
+  /**
+    * @brief Adds pointer to observer of module to be notified about
+    * exceptional sutiations in module.
+    * Raw pointer is passed to avoid circular dependencies.
+    * Module is not responsible for freeing observer's memory.
+    */
+  void AddObserver(ModuleObserver* const  observer);
 
-  protected:
-    explicit GenericModule(ModuleID module_id);
-    void NotifyObservers(ModuleObserver::Errors error);
+  /**
+    * @brief Removes pointer to observer of module when it's no loger
+    * wants to be notified about exceptional sutiations in module.
+    * Raw pointer is passed to avoid circular dependencies.
+    * Module is not responsible for freeing observer's memory.
+    */
+  void RemoveObserver(ModuleObserver* const observer);
 
-    /**
-     * @brief Remove extension for all applications
-     */
-    virtual void RemoveAppExtensions() = 0;
+  /**
+   * @brief Remove extension created for specified application
+   * @param app_id application id
+   */
+  virtual void RemoveAppExtension(uint32_t app_id) = 0;
 
-    const Observers& observer() {
-      return observers_;
-    }
+ protected:
+  explicit GenericModule(ModuleID module_id);
+  void NotifyObservers(ModuleObserver::Errors error);
+
+  /**
+   * @brief Remove extension for all applications
+   */
+  virtual void RemoveAppExtensions() = 0;
 
  private:
-    DISALLOW_COPY_AND_ASSIGN(GenericModule);
-    application_manager::ServicePtr service_;
-    const ModuleID kModuleId_;
+  DISALLOW_COPY_AND_ASSIGN(GenericModule);
+  application_manager::ServicePtr service_;
+  const ModuleID kModuleId_;
 
-    Observers observers_;
-    ServiceState state_;
+  Observers observers_;
+  ServiceState state_;
+
+  friend class DriverGenericModuleTest;
 };
 
 }  //  namespace functional_modules
