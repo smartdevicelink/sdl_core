@@ -1967,7 +1967,11 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
       app->set_is_media_application(is_media);
 
       sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+      LOG4CXX_DEBUG(logger_, "apps_to_register_ size before: "
+                    << apps_to_register_.size());
       apps_to_register_.insert(app);
+      LOG4CXX_DEBUG(logger_, "apps_to_register_ size after: "
+                    << apps_to_register_.size());
     }
   }
 }

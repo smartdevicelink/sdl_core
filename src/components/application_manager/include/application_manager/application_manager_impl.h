@@ -800,7 +800,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     typedef std::set<ApplicationSharedPtr,
                      ApplicationsAppIdSorter> ApplictionSet;
 
-    typedef std::set<ApplicationSharedPtr,
+    typedef std::multiset<ApplicationSharedPtr,
                      ApplicationsMobileAppIdSorter> AppsWaitRegistrationSet;
 
     // typedef for Applications list iterator
