@@ -16,7 +16,7 @@ MockGenericModule::MockGenericModule()
   info.hmi_function_list.push_back("HMI-Func-1");
 
   EXPECT_CALL(*this, GetPluginInfo()).Times(2).WillRepeatedly(Return(info));
-  EXPECT_CALL(*this, SetServiceHandler(_)).Times(1);
+  EXPECT_CALL(*this, set_service(_)).Times(1);
 }
 
 static MockGenericModule mock;

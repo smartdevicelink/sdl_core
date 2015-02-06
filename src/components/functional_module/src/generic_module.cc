@@ -42,7 +42,7 @@ void GenericModule::NotifyObservers(ModuleObserver::Errors error) {
   }
 }
 
-void GenericModule::SetServiceHandler(application_manager::ServicePtr service) {
+void GenericModule::set_service(application_manager::ServicePtr service) {
   service_ = service;
 }
 
@@ -55,7 +55,7 @@ void GenericModule::OnServiceStateChanged(ServiceState state) {
   }
 }
 
-application_manager::ServicePtr GenericModule::GetServiceHandler() {
+application_manager::ServicePtr GenericModule::service() {
   return service_;
 }
 

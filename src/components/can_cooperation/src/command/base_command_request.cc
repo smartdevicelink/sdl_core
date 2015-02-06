@@ -49,7 +49,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "BaseCommandRequest");
 BaseCommandRequest::BaseCommandRequest(
     const application_manager::MessagePtr& message)
   : message_(message) {
-    service_ = CANModule::instance()->GetServiceHandler();
+    service_ = CANModule::instance()->service();
 }
 
 

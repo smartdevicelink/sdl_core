@@ -48,9 +48,9 @@ class MockGenericModule : public GenericModule {
   MockGenericModule();
   MOCK_CONST_METHOD0(GetPluginInfo,
       PluginInfo());
-  MOCK_METHOD1(SetServiceHandler,
+  MOCK_METHOD1(set_service,
       void(application_manager::ServicePtr service));
-  MOCK_METHOD0(GetServiceHandler,
+  MOCK_METHOD0(service,
       application_manager::ServicePtr());
   MOCK_METHOD1(ProcessMessage,
       ProcessResult(application_manager::MessagePtr msg));

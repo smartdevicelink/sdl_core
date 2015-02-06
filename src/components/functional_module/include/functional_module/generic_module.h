@@ -80,13 +80,13 @@ class GenericModule {
     }
     virtual PluginInfo GetPluginInfo() const = 0;
 
-    virtual void SetServiceHandler(application_manager::ServicePtr service);
+    virtual void set_service(application_manager::ServicePtr service);
 
     /**
      * @brief Returns pointer to SDL core service interface
      * @return pointer to core service interface
      */
-    virtual application_manager::ServicePtr GetServiceHandler();
+    virtual application_manager::ServicePtr service();
 
     virtual ProcessResult ProcessMessage(application_manager::MessagePtr msg) = 0;
     virtual ProcessResult ProcessHMIMessage(application_manager::MessagePtr msg) = 0;
@@ -108,10 +108,6 @@ class GenericModule {
      * @brief Remove extension for all applications
      */
     virtual void RemoveAppExtensions() = 0;
-
-    application_manager::ServicePtr service() {
-      return service_;
-    }
 
     const Observers& observer() {
       return observers_;

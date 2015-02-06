@@ -18,8 +18,8 @@ TEST(GenericModuleTest, SetService) {
   MockService* mock_service = new MockService();
   ServicePtr exp_service(mock_service);
 
-  module.SetServiceHandler(exp_service);
-  ServicePtr out_service = module.GetServiceHandler();
+  module.set_service(exp_service);
+  ServicePtr out_service = module.service();
 
   EXPECT_EQ(exp_service.get(), out_service.get());
 }
@@ -28,7 +28,7 @@ TEST(GenericModuleTest, OnServiceStateChangedFail) {
   DriverGenericModule module(18);
   MockService* mock_service = new MockService();
   ServicePtr exp_service(mock_service);
-  module.SetServiceHandler(exp_service);
+  module.set_service(exp_service);
 
   EXPECT_CALL(*mock_service, SubscribeToHMINotification(_)).Times(0);
 
@@ -39,7 +39,7 @@ TEST(GenericModuleTest, OnServiceStateChangedPass) {
   DriverGenericModule module(18);
   MockService* mock_service = new MockService();
   ServicePtr exp_service(mock_service);
-  module.SetServiceHandler(exp_service);
+  module.set_service(exp_service);
 
   EXPECT_CALL(*mock_service, SubscribeToHMINotification(_)).Times(1);
 

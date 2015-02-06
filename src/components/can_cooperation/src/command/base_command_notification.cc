@@ -44,7 +44,7 @@ using namespace json_keys;
 BaseCommandNotification::BaseCommandNotification(
     const application_manager::MessagePtr& message)
   : message_(message) {
-  service_ = CANModule::instance()->GetServiceHandler();
+  service_ = CANModule::instance()->service();
 
   Json::Value value;
   Json::Reader reader;

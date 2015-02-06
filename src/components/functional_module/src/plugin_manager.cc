@@ -109,7 +109,7 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
         hmi_subscribers_.insert(
             std::pair<HMIFunctionID, ModulePtr>(hmi_subscribers[i], module));
       }
-      module->SetServiceHandler(service_);
+      module->set_service(service_);
       module->AddObserver(this);
     }
   }

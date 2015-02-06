@@ -36,8 +36,8 @@ class CanModuleTest : public ::testing::Test {
 
     mock_service = new MockService();
     ServicePtr exp_service(mock_service);
-    module->SetServiceHandler(exp_service);
-    ServicePtr out_service = module->GetServiceHandler();
+    module->set_service(exp_service);
+    ServicePtr out_service = module->service();
     EXPECT_EQ(exp_service.get(), out_service.get());
   }
 
