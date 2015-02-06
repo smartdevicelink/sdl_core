@@ -48,12 +48,11 @@ TEST(GenericModuleTest, OnServiceStateChangedPass) {
 
 TEST(GenericModuleTest, AddObserver) {
   DriverGenericModuleTest module(18);
-  MockModuleObserver* observer = new MockModuleObserver();
-  module.AddObserver(observer);
+  MockModuleObserver observer;
+  module.AddObserver(&observer);
   const DriverGenericModuleTest::Observers& full = module.observers();
   ASSERT_EQ(1, full.size());
-  EXPECT_EQ(observer, full[0]);
-  delete observer;
+  EXPECT_EQ(&observer, full[0]);
 }
 
 TEST(GenericModuleTest, RemoveObserver) {
@@ -78,16 +77,15 @@ TEST(GenericModuleTest, EmptyRemoveObserver) {
 
 TEST(GenericModuleTest, WrongRemoveObserver) {
   DriverGenericModuleTest module(18);
-  MockModuleObserver* observer = new MockModuleObserver();
-  module.AddObserver(observer);
+  MockModuleObserver observer;
+  module.AddObserver(&observer);
 
   MockModuleObserver* wrong_observer = new MockModuleObserver();
   module.RemoveObserver(wrong_observer);
   const DriverGenericModuleTest::Observers& empty = module.observers();
   ASSERT_EQ(1, empty.size());
-  EXPECT_EQ(observer, empty[0]);
+  EXPECT_EQ(&observer, empty[0]);
   delete wrong_observer;
-  delete observer;
 }
 
 TEST(GenericModuleTest, CrashRemovedObserver) {
@@ -98,14 +96,19 @@ TEST(GenericModuleTest, CrashRemovedObserver) {
   module.RemoveObserver(observer);
   EXPECT_EQ(13, observer->ObserverMethod());
   delete observer;
+  MockModuleObserver second_observer;
+  module.AddObserver(&second_observer);
+  EXPECT_EQ(13, second_observer.ObserverMethod());
+  module.RemoveObserver(&second_observer);
+  EXPECT_EQ(13, second_observer.ObserverMethod());
 }
 
 TEST(GenericModuleTest, NotifyObservers) {
   DriverGenericModuleTest module(3);
-  MockModuleObserver* observer = new MockModuleObserver();
-  module.AddObserver(observer);
+  MockModuleObserver observer;
+  module.AddObserver(&observer);
 
-  EXPECT_CALL(*observer, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
+  EXPECT_CALL(observer, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
 
   application_manager::MessagePtr message;
   module.ProcessMessage(message);
@@ -113,20 +116,20 @@ TEST(GenericModuleTest, NotifyObservers) {
 
 TEST(GenericModuleTest, NotifyObserversComplex) {
   DriverGenericModuleTest module(3);
-  MockModuleObserver* observer_1 = new MockModuleObserver();
-  module.AddObserver(observer_1);
-  MockModuleObserver* observer_2 = new MockModuleObserver();
-  module.AddObserver(observer_2);
+  MockModuleObserver observer_1;
+  module.AddObserver(&observer_1);
+  MockModuleObserver observer_2;
+  module.AddObserver(&observer_2);
 
-  EXPECT_CALL(*observer_1, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
-  EXPECT_CALL(*observer_2, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
+  EXPECT_CALL(observer_1, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
+  EXPECT_CALL(observer_2, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
 
   application_manager::MessagePtr message;
   module.ProcessMessage(message);
 
-  module.RemoveObserver(observer_1);
-  EXPECT_CALL(*observer_1, OnError(ModuleObserver::FS_FAILURE, 3)).Times(0);
-  EXPECT_CALL(*observer_2, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
+  module.RemoveObserver(&observer_1);
+  EXPECT_CALL(observer_1, OnError(ModuleObserver::FS_FAILURE, 3)).Times(0);
+  EXPECT_CALL(observer_2, OnError(ModuleObserver::FS_FAILURE, 3)).Times(1);
 
   module.ProcessMessage(message);
 }

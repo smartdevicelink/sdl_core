@@ -29,15 +29,15 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef TEST_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_DRIVER_GENERIC_MODULE_H_
-#define TEST_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_DRIVER_GENERIC_MODULE_H_
+#ifndef TEST_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_DRIVER_GENERIC_MODULE_TEST_H_
+#define TEST_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_DRIVER_GENERIC_MODULE_TEST_H_
 
 #include "functional_module/generic_module.h"
 
 namespace functional_modules {
 
 class DriverGenericModuleTest : public GenericModule {
-public:
+ public:
   explicit DriverGenericModuleTest(ModuleID module_id) : GenericModule(module_id) {}
   virtual ~DriverGenericModuleTest() {}
   virtual PluginInfo GetPluginInfo() const {
@@ -63,4 +63,4 @@ public:
 
 }  // namespace functional_modules
 
-#endif  // TEST_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_DRIVER_GENERIC_MODULE_H_
+#endif  // TEST_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_DRIVER_GENERIC_MODULE_TEST_H_
