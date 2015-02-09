@@ -46,10 +46,12 @@ OnAppRegisteredNotification::~OnAppRegisteredNotification() {
 
 void OnAppRegisteredNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
+  // SDL must notify system about app registration before any dependent actions
+  // will be started
+  SendNotification();
   event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnAppRegistered);
   event.set_smart_object(*message_);
   event.raise();
-  SendNotification();
 }
 
 }  // namespace commands
