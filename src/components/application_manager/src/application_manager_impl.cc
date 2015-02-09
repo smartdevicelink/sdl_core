@@ -1916,8 +1916,18 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
 
   const std::size_t arr_size(obj_array.size());
   for (std::size_t idx = 0; idx < arr_size; ++idx) {
-
     const SmartObject& app_data = obj_array[idx];
+
+    const std::string mobile_app_id(app_data[json::appId].asString());
+    ApplicationSharedPtr registered_app =
+        ApplicationManagerImpl::instance()->
+        application_by_policy_id(mobile_app_id);
+    if (registered_app) {
+      LOG4CXX_DEBUG(logger_, "Application with the same id: " << mobile_app_id
+                    << " is registered already.");
+      continue;
+    }
+
     std::string url_scheme;
     std::string package_name;
     std::string os_type;
@@ -1930,7 +1940,6 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
           app_data[os_type][json::packageName].asString();
     }
 
-    const std::string mobile_app_id(app_data[json::appId].asString());
     const std::string appName(app_data[json::name].asString());
     const bool is_media(
           app_data[os_type][json::is_media_application].asBool());
