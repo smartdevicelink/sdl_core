@@ -967,6 +967,11 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     const ssize_t get_connection_id(uint32_t connection_key) const;
 
+    /**
+     * @brief Checks, if icons saving to configured folder is enabled
+     */
+    bool IsIconsSavingEnabled() const;
+
 private:
     ApplicationManagerImpl();
 
@@ -1170,12 +1175,20 @@ private:
     const std::string DirectoryTypeToString(DirectoryType type) const;
 
     /**
-     * @brief Creates directory path, if necesary, checks permissions
+     * @brief Creates directory path, if necessary
      * @param path Directory path
      * @param type Directory type
      * @return true, if succedeed, otherwise - false
      */
     bool InitDirectory(const std::string& path, DirectoryType type) const;
+
+    /**
+     * @brief Checks, whether r/w permissions are present for particular path
+     * @param path Directory path
+     * @param type Directory type
+     * @return true, if allowed, otherwise - false
+     */
+    bool IsReadWriteAllowed(const std::string& path, DirectoryType type) const;
 
     /**
      * @brief Removes apps, waiting for registration, with certain connection id
@@ -1300,6 +1313,9 @@ private:
     timer::TimerThread<ApplicationManagerImpl>  tts_global_properties_timer_;
 
     bool is_low_voltage_;
+
+    bool is_icons_saving_enabled_;
+
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 
     FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);

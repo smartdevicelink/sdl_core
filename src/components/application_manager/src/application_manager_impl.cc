@@ -109,7 +109,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
                                       this,
                                       &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties,
                                       true),
-    is_low_voltage_(false) {
+    is_low_voltage_(false),
+    is_icons_saving_enabled_(false) {
     std::srand(std::time(0));
     AddPolicyObserver(this);
 
@@ -1522,13 +1523,15 @@ bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   const std::string app_storage_folder =
       profile::Profile::instance()->app_storage_folder();
-  if (!InitDirectory(app_storage_folder, TYPE_STORAGE)) {
+  if (!InitDirectory(app_storage_folder, TYPE_STORAGE) ||
+      !IsReadWriteAllowed(app_storage_folder, TYPE_STORAGE)) {
     return false;
   }
 
   const std::string system_files_path =
       profile::Profile::instance()->system_files_path();
-  if (!InitDirectory(system_files_path, TYPE_SYSTEM)) {
+  if (!InitDirectory(system_files_path, TYPE_SYSTEM) ||
+      !IsReadWriteAllowed(system_files_path, TYPE_SYSTEM)) {
     return false;
   }
 
@@ -1536,6 +1539,11 @@ bool ApplicationManagerImpl::Init() {
       profile::Profile::instance()->app_icons_folder();
   if (!InitDirectory(app_icons_folder, TYPE_ICONS)) {
     return false;
+  }
+  // In case there is no R/W permissions for this location, SDL just has to
+  // log this and proceed
+  if (IsReadWriteAllowed(app_icons_folder, TYPE_ICONS)) {
+    is_icons_saving_enabled_ = true;
   }
 
   if (policy::PolicyHandler::instance()->PolicyEnabled()) {
@@ -3055,20 +3063,34 @@ bool ApplicationManagerImpl::InitDirectory(
     ApplicationManagerImpl::DirectoryType type) const {
   const std::string directory_type = DirectoryTypeToString(type);
   if (!file_system::DirectoryExists(path)) {
-    LOG4CXX_WARN(logger_, directory_type << " directory doesn't exist");
+    LOG4CXX_WARN(logger_, directory_type << " directory doesn't exist.");
     // if storage directory doesn't exist try to create it
     if (!file_system::CreateDirectoryRecursively(path)) {
       LOG4CXX_ERROR(logger_, "Unable to create " << directory_type
                     << " directory " << path);
       return false;
     }
+    LOG4CXX_DEBUG(logger_, directory_type << " directory has been created: "
+                  << path);
   }
+
+  return true;
+}
+
+bool ApplicationManagerImpl::IsReadWriteAllowed(
+    const std::string& path,
+    DirectoryType type) const {
+  const std::string directory_type = DirectoryTypeToString(type);
   if (!(file_system::IsWritingAllowed(path) &&
         file_system::IsReadingAllowed(path))) {
     LOG4CXX_ERROR(logger_, directory_type
-                  << " directory doesn't have read/write permissions");
+                  << " directory doesn't have read/write permissions.");
     return false;
   }
+
+  LOG4CXX_DEBUG(logger_, directory_type
+                << " directory has read/write permissions.");
+
   return true;
 }
 
@@ -3086,6 +3108,10 @@ const ssize_t ApplicationManagerImpl::get_connection_id(
   }
 
   return -1;
+}
+
+bool ApplicationManagerImpl::IsIconsSavingEnabled() const {
+  return is_icons_saving_enabled_;
 }
 
 

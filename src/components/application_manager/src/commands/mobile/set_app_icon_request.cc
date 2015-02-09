@@ -77,7 +77,9 @@ void SetAppIconRequest::Run() {
     return;
   }
 
-  CopyToIconStorage(full_file_path);
+  if (ApplicationManagerImpl::instance()->IsIconsSavingEnabled()) {
+    CopyToIconStorage(full_file_path);
+  }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
