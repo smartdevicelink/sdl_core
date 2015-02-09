@@ -301,7 +301,21 @@ void CANModule::SetScanStarted(bool is_scan_started) {
 }
 
 void CANModule::RemoveAppExtensions() {
-  // TODO(VS): fill this method or get rid of it
+  const std::set<application_manager::ApplicationSharedPtr> applications =
+        service()->GetApplications();
+
+  std::set<application_manager::ApplicationSharedPtr>::iterator it =
+      applications.begin();
+
+  for (;it != applications.end(); ++it) {
+    if (*it) {
+      application_manager::AppExtensionPtr app_extension =
+          (*it)->QueryInterface(CANModule::instance()->GetModuleID());
+      if (app_extension) {
+        (*it)->RemoveExtension(CANModule::instance()->GetModuleID());
+      }
+    }
+  }
 }
 
 void CANModule::RemoveAppExtension(uint32_t app_id) {
@@ -312,7 +326,6 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
     application_manager::AppExtensionPtr extension = app->QueryInterface(
         kCANModuleID);
     if (extension) {
-      // TODO(VS) : memory leak
       app->RemoveExtension(kCANModuleID);
     }
   }
