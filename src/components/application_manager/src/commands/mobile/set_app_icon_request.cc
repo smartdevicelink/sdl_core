@@ -136,9 +136,17 @@ void SetAppIconRequest::CopyToIconStorage(
   const uint64_t storage_size = static_cast<uint64_t>(
                                   file_system::DirectorySize(icon_storage));
   if (storage_max_size < (file_size + storage_size)) {
-    RemoveOldestIcons(icon_storage,
-                      profile::Profile::instance()->
-                      app_icons_amount_to_remove());
+    const uint32_t icons_amount =
+        profile::Profile::instance()->app_icons_amount_to_remove();
+
+    if (!icons_amount) {
+      LOG4CXX_DEBUG(logger_,
+                    "No icons will be deleted, since amount icons to remove "
+                    "is zero. Icon saving skipped.");
+      return;
+    }
+
+    RemoveOldestIcons(icon_storage, icons_amount);
   }
   ApplicationConstSharedPtr app =
           application_manager::ApplicationManagerImpl::instance()->
@@ -170,11 +178,6 @@ void SetAppIconRequest::CopyToIconStorage(
 
 void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
                                           const uint32_t icons_amount) const {
-  if (!icons_amount) {
-    LOG4CXX_DEBUG(logger_,
-                  "No icons will be deleted, since amount of files is zero.");
-    return;
-  }
   const std::vector<std::string> icons_list = file_system::ListFiles(storage);
   std::map<uint64_t, std::string> icon_modification_time;
   std::vector<std::string>::const_iterator it = icons_list.begin();
