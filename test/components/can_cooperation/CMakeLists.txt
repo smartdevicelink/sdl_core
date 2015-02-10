@@ -22,7 +22,6 @@ set (SOURCES
 
 set (LIBRARIES
   gtest
-  gtest_main
   gmock
   gmock_main
   CANCooperation

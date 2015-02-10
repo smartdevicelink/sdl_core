@@ -45,8 +45,6 @@ class PluginManager : public utils::Singleton<PluginManager>,
   public ModuleObserver {
 public:
   typedef std::map<ModuleID, ModulePtr> Modules;
-
-  ~PluginManager();
   int LoadPlugins(const std::string& plugin_path);
   void UnloadPlugins();
   void ProcessMessage(application_manager::MessagePtr msg);
@@ -68,6 +66,7 @@ public:
 
 private:
   PluginManager();
+  ~PluginManager();
   DISALLOW_COPY_AND_ASSIGN(PluginManager);
   FRIEND_BASE_SINGLETON_CLASS(PluginManager);
   Modules plugins_;

@@ -55,7 +55,6 @@ PluginManager::~PluginManager() {
   mobile_subscribers_.clear();
   hmi_subscribers_.clear();
   UnloadPlugins();
-  plugins_.clear();
 }
 
 int PluginManager::LoadPlugins(const std::string& plugin_path) {
@@ -66,7 +65,7 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
     size_t pos = plugin_files[i].find_last_of(".");
     if (std::string::npos != pos) {
       if (plugin_files[i].substr(pos+1).compare("so") != 0)
-        continue; 
+        continue;
     } else {
       continue;
     }
@@ -86,11 +85,11 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
       dlclose(generic_plugin_dll);
       continue;
     }
-    GenericModule* module = create_manager();
+    ModulePtr module = create_manager();
     if (!module) {
       LOG4CXX_ERROR(logger_, "Failed to create plugin main class " << plugin_files[i]);
       dlclose(generic_plugin_dll);
-      continue; 
+      continue;
     } else {
       LOG4CXX_DEBUG(logger_, "Opened and working plugin from "
         << plugin_files[i] << " with id " << module->GetModuleID());
@@ -117,16 +116,16 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
 }
 
 void PluginManager::UnloadPlugins() {
-  for(Modules::iterator it = plugins_.begin(); plugins_.end() != it; ++it) {
+  for (Modules::iterator it = plugins_.begin(); plugins_.end() != it; ++it) {
     it->second->RemoveObserver(this);
   }
-
   plugins_.clear();
-  
-  for(std::map<ModuleID, void*>::iterator it = dlls_.begin();
+
+  for (std::map<ModuleID, void*>::iterator it = dlls_.begin();
     dlls_.end() != it; ++it) {
     dlclose(it->second);
   }
+  dlls_.clear();
 }
 
 // TODO(VS): Optimize similar code in ProcessMessage, IsMessageForPlugin,

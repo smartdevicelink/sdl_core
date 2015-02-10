@@ -9,10 +9,7 @@ include_directories (
 )
 
 set (LIBRARIES
-    gtest
-    gtest_main
-    gmock
-    gmock_main
+  gtest
 )
 
 set(SOURCES

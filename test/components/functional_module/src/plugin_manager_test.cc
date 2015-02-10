@@ -2,19 +2,25 @@
 #include "gmock/gmock.h"
 #include "functional_module/plugin_manager.h"
 #include "mock_generic_module.h"
+#include "mock_service.h"
 
 using application_manager::Message;
 using application_manager::ProtocolVersion;
+using application_manager::MockService;
 
 namespace functional_modules {
 
 class PluginManagerTest : public ::testing::Test {
  protected:
   static PluginManager* manager;
+  static MockService* service;
   static MockGenericModule* module;
 
   static void SetUpTestCase() {
     manager = PluginManager::instance();
+    service = new MockService();
+    manager->SetServiceHandler(service);
+
     ASSERT_EQ(1, manager->LoadPlugins("./plugins/"));
     const PluginManager::Modules& plugins = manager->plugins_;
     PluginManager::Modules::const_iterator i = plugins.begin();
@@ -22,11 +28,12 @@ class PluginManagerTest : public ::testing::Test {
   }
 
   static void TearDownTestCase() {
-//    PluginManager::destroy(); try to uncomment after fix PluginManager
+    PluginManager::destroy();
   }
 };
 
 PluginManager* PluginManagerTest::manager = 0;
+MockService* PluginManagerTest::service = 0;
 MockGenericModule* PluginManagerTest::module = 0;
 
 TEST_F(PluginManagerTest, ChangePluginsState) {

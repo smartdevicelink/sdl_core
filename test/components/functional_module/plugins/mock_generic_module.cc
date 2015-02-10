@@ -19,8 +19,6 @@ MockGenericModule::MockGenericModule()
   EXPECT_CALL(*this, set_service(_)).Times(1);
 }
 
-static MockGenericModule mock;
-
-extern "C" MockGenericModule* Create() {
-  return &mock;
+extern "C" GenericModule* Create() {
+  return new MockGenericModule();
 }

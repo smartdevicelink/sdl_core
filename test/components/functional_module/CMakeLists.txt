@@ -14,7 +14,6 @@ include_directories (
 
 set (LIBRARIES
   gtest
-  gtest_main
   gmock
   gmock_main
   FunctionalModule
@@ -28,19 +27,6 @@ set(SOURCES
   ./src/generic_module_test.cc
   ./src/plugin_manager_test.cc
 )
-
-# use, i.e. don't skip the full RPATH for the build tree
-SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
-
-# when building, don't use the install RPATH already
-# (but later on when installing)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE) 
-
-#SET(CMAKE_INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/plugins")
-
-# add the automatically determined parts of the RPATH
-# which point to directories outside the build tree to the install RPATH
-#SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 add_subdirectory(plugins)
 
