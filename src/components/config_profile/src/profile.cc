@@ -705,6 +705,10 @@ void Profile::UpdateValues() {
   ReadUIntValue(&app_icons_folder_max_size_, kDefaultAppIconsFolderMaxSize,
                 kSDL4Section, kAppIconsFolderMaxSizeKey);
 
+  if (app_icons_folder_max_size_ < kDefaultAppIconsFolderMaxSize) {
+    app_icons_folder_max_size_ = kDefaultAppIconsFolderMaxSize;
+  }
+
   LOG_UPDATED_VALUE(app_icons_folder_max_size_, kAppIconsFolderMaxSizeKey,
                     kSDL4Section);
 
@@ -1515,6 +1519,7 @@ bool Profile::StringToNumber(const std::string& input, uint64_t* output) const {
   const char* input_value = input.c_str();
   char* endptr;
   const int base = 10;
+  errno = 0;
   uint64_t user_value = strtoull(input_value, &endptr, base);
   bool is_real_zero_value =
       (!user_value && endptr != input_value && *endptr == '\0');
