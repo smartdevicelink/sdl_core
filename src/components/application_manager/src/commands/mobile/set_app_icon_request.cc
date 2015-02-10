@@ -125,6 +125,14 @@ void SetAppIconRequest::CopyToIconStorage(
       static_cast<uint64_t>(
         profile::Profile::instance()->app_icons_folder_max_size());
   const uint64_t file_size = file_system::FileSize(path_to_file);
+
+  if (storage_max_size < file_size) {
+    LOG4CXX_ERROR(logger_, "Icon size (" << file_size << ") is bigger, than "
+                  " icons storage maximum size (" << storage_max_size << ")."
+                  "Copying skipped.");
+    return;
+  }
+
   const uint64_t storage_size = static_cast<uint64_t>(
                                   file_system::DirectorySize(icon_storage));
   if (storage_max_size < (file_size + storage_size)) {
