@@ -72,8 +72,13 @@ SDL.InfoAppsView = Em.ContainerView
                     disabled: apps[i].greyOut
                 };
 
-                if (apps[i].icon) {
-                    btn.iconBinding = 'SDL.SDLModel.updatedAppsList.' + i + '.icon'
+                if (SDL.SDLController.getApplicationModel(apps[i].appID)) {
+                    var index = SDL.SDLModel.registeredApps.indexOf(
+                        SDL.SDLController.getApplicationModel(apps[i].appID)
+                    );
+                    btn.iconBinding = 'SDL.SDLModel.registeredApps.' + index + '.appIcon';
+                } else {
+                    btn.icon = apps[i].icon ?  apps[i].icon : SDL.SDLModel.defaultListOfIcons.app;
                 }
 
                 this.get('listOfApplications.list.childViews').pushObject(SDL.Button.create(btn));
