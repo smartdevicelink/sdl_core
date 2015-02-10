@@ -69,10 +69,10 @@ void SDLActivateAppRequest::Run() {
 
   if (!app->IsRegistered()) {
     ApplicationSharedPtr app_for_sending =
-        FindRegularAppOnSameConnection(app->connection_id());
+        FindRegularAppOnSameDevice(app->device());
     if (!app_for_sending) {
       LOG4CXX_ERROR(logger_, "Can't find regular app with the same "
-                    "connection id:" << app->connection_id());
+                    "connection id:" << app->device());
       return;
     }
     MessageHelper::SendLaunchApp(app_for_sending->app_id(),
@@ -144,7 +144,8 @@ uint32_t SDLActivateAppRequest::hmi_app_id(
 }
 
 ApplicationSharedPtr
-SDLActivateAppRequest::FindRegularAppOnSameConnection(int32_t connection_id) {
+SDLActivateAppRequest::FindRegularAppOnSameDevice(
+    const connection_handler::DeviceHandle handle) const {
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   ApplicationManagerImpl::ApplictionSet app_list = accessor.GetData();
 
@@ -152,7 +153,7 @@ SDLActivateAppRequest::FindRegularAppOnSameConnection(int32_t connection_id) {
   ApplicationManagerImpl::ApplictionSetIt it_end = app_list.end();
 
   for (;it != it_end; ++it) {
-    if (connection_id == (*it)->connection_id()) {
+    if (handle == (*it)->device()) {
       return *it;
     }
   }

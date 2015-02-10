@@ -369,7 +369,6 @@ class Application : public virtual InitialApplicationData,
 
   public:
     Application() :
-      connection_id_(-1),
       is_greyed_out_(false) {
     }
 
@@ -610,19 +609,6 @@ class Application : public virtual InitialApplicationData,
      * @return device the device id.
      */
     std::string GetDeviceId() const {return device_id_;}
-
-    /**
-     * @brief Returns connection id used by application
-     */
-    ssize_t connection_id() const {return connection_id_;}
-
-    /**
-     * @brief Set connection id used by application
-     * @param connection_id Connection id
-     */
-    void set_connection_id(const ssize_t connection_id) {
-        connection_id_ = connection_id;
-    }
 
     /**
      * @brief Returns is application should be greyed out on HMI

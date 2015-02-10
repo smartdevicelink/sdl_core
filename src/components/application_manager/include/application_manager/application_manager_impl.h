@@ -917,22 +917,22 @@ class ApplicationManagerImpl : public ApplicationManager,
       }
     };
 
-    struct ConnectionIdSDL4Predicate {
-      ssize_t connection_id_;
-      ConnectionIdSDL4Predicate(const ssize_t connection_id):
-        connection_id_(connection_id) {}
+    struct AppV4DevicePredicate {
+      connection_handler::DeviceHandle handle_;
+      AppV4DevicePredicate(const connection_handler::DeviceHandle handle):
+        handle_(handle) {}
       bool operator () (const ApplicationSharedPtr app) const {
-        return app ? connection_id_ == app->connection_id() &&
+        return app ? handle_ == app->device() &&
                      ProtocolVersion::kV4 == app->protocol_version() : false;
       }
     };
 
-    struct ConnectionIdPredicate {
-      ssize_t connection_id_;
-      ConnectionIdPredicate(const ssize_t connection_id):
-        connection_id_(connection_id) {}
+    struct DevicePredicate {
+      connection_handler::DeviceHandle handle_;
+      DevicePredicate(const connection_handler::DeviceHandle handle):
+        handle_(handle) {}
       bool operator () (const ApplicationSharedPtr app) const {
-        return connection_id_ == app->connection_id() ? true : false;
+        return handle_ == app->device() ? true : false;
       }
     };
 
@@ -954,18 +954,17 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Marks applications received through QueryApps as should be
      * greyed out on HMI
      * @param is_greyed_out, true, if should be greyed out, otherwise - false
-     * @param connection_id, ID of connection, related to applications source
+     * @param handle, device handle
      */
-    void MarkAppsGreyOut(const ssize_t connection_id, bool is_greyed_out);
-
-    bool IsAppsQueriedFrom(ssize_t connection_id) const;
+    void MarkAppsGreyOut(const connection_handler::DeviceHandle handle,
+                         bool is_greyed_out);
 
     /**
-     * @brief Gets connection id for certain connection key
-     * @param connection_key Connection key
-     * @return Connection identified
+     * @brief Checks, if apps list had been queried already from certain device
+     * @param handle, Device handle
+     * @return true, if list had been queried already, otherwise - false
      */
-    const ssize_t get_connection_id(uint32_t connection_key) const;
+    bool IsAppsQueriedFrom(const connection_handler::DeviceHandle handle) const;
 
     /**
      * @brief Checks, if icons saving to configured folder is enabled
@@ -1191,10 +1190,12 @@ private:
     bool IsReadWriteAllowed(const std::string& path, DirectoryType type) const;
 
     /**
-     * @brief Removes apps, waiting for registration, with certain connection id
-     * @param connection_id Connection id
+     * @brief Removes apps, waiting for registration related to
+     * certain device handle
+     * @param handle, Device handle
      */
-    void RemoveWaitingApps(const ssize_t connection_id);
+    void RemoveAppsWaitingForRegistration(
+        const connection_handler::DeviceHandle handle);
 
   private:
 

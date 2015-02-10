@@ -70,19 +70,13 @@ void OnHMIStatusNotificationFromMobile::Run() {
 
   app->set_foreground(is_current_state_foreground);
 
-  ssize_t connection_id =
-      application_manager::ApplicationManagerImpl::instance()->
-      get_connection_id(connection_key());
-
-  if (-1 == connection_id) {
-    LOG4CXX_ERROR(logger_, "Can't get connection id for application:"
-                  << app->mobile_app_id());
-    return;
-  }
-
+  connection_handler::DeviceHandle handle = app->device();
   bool is_apps_requested_before =
       application_manager::ApplicationManagerImpl::instance()->
-      IsAppsQueriedFrom(connection_id);
+      IsAppsQueriedFrom(handle);
+
+  LOG4CXX_DEBUG(logger_, "Mobile HMI state notication came for connection key:"
+                << connection_key() << " and handle: " << handle);
 
   if (!is_apps_requested_before &&
       ProtocolVersion::kV4 == app->protocol_version() && app->is_foreground()) {
@@ -95,7 +89,7 @@ void OnHMIStatusNotificationFromMobile::Run() {
 
   if (is_apps_requested_before) {
     LOG4CXX_DEBUG(logger_, "Remote apps list had been requested already "
-                  " for connection id: " << connection_id);
+                  " for handle: " << handle);
 
     if (ProtocolVersion::kV4 == app->protocol_version()) {
       ApplicationManagerImpl::ApplicationListAccessor accessor;
@@ -113,7 +107,7 @@ void OnHMIStatusNotificationFromMobile::Run() {
 
       if (!is_another_foreground_sdl4_app) {
         application_manager::ApplicationManagerImpl::instance()->
-            MarkAppsGreyOut(connection_id, !is_current_state_foreground);
+            MarkAppsGreyOut(handle, !is_current_state_foreground);
         application_manager::ApplicationManagerImpl::instance()->
             SendUpdateAppList();
       }

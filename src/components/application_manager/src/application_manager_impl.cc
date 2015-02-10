@@ -391,18 +391,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   const std::string& app_name =
     message[strings::msg_params][strings::app_name].asString();
 
-  ssize_t connection_id = get_connection_id(connection_key);
-  if (-1 == connection_id) {
-    LOG4CXX_ERROR(logger_, "Can't get connection id for application:"
-                  << app_id);
-    utils::SharedPtr<smart_objects::SmartObject> response(
-      MessageHelper::CreateNegativeResponse(
-        connection_key, mobile_apis::FunctionID::RegisterAppInterfaceID,
-        message[strings::params][strings::correlation_id].asUInt(),
-        mobile_apis::Result::GENERIC_ERROR));
-    ManageMobileCommand(response);
-    return ApplicationSharedPtr();
-  }
+  LOG4CXX_DEBUG(logger_, "App with connection key: " << connection_key
+                << " registered from handle: " << device_id);
 
   ApplicationSharedPtr application(
     new ApplicationImpl(app_id,
@@ -423,7 +413,6 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     return ApplicationSharedPtr();
   }
 
-  application->set_connection_id(connection_id);
   application->set_device(device_id);
   application->set_grammar_id(GenerateGrammarID());
   mobile_api::Language::eType launguage_desired =
@@ -791,12 +780,13 @@ ApplicationManagerImpl::apps_waiting_for_registration() const {
         ApplicationManagerImpl::instance()->apps_to_register_list_lock_);
 }
 
-bool ApplicationManagerImpl::IsAppsQueriedFrom(ssize_t connection_id) const {
+bool ApplicationManagerImpl::IsAppsQueriedFrom(
+    const connection_handler::DeviceHandle handle) const {
   sync_primitives::AutoLock lock(apps_to_register_list_lock_);
   AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
   AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
   for (; it != it_end; ++it) {
-    if (connection_id == (*it)->connection_id()) {
+    if (handle == (*it)->device()) {
       return true;
     }
   }
@@ -804,13 +794,13 @@ bool ApplicationManagerImpl::IsAppsQueriedFrom(ssize_t connection_id) const {
 }
 
 void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(
-    const ssize_t connection_id,
+    const connection_handler::DeviceHandle handle,
     bool is_greyed_out) {
   sync_primitives::AutoLock lock(apps_to_register_list_lock_);
   AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
   AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
   for (; it != it_end; ++it) {
-    if (connection_id == (*it)->connection_id()) {
+    if (handle == (*it)->device()) {
       (*it)->set_greyed_out(is_greyed_out);
     }
   }
@@ -1949,13 +1939,6 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     const std::string app_icon_dir(Profile::instance()->app_icons_folder());
     const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id);
 
-    ssize_t connection_id = get_connection_id(connection_key);
-    if (-1 == connection_id) {
-      LOG4CXX_ERROR(logger_, "Error during getting connection id for "
-                    "application: " << mobile_app_id);
-      continue;
-    }
-
     uint32_t device_id = 0;
     connection_handler::ConnectionHandlerImpl* con_handler_impl =
       static_cast<connection_handler::ConnectionHandlerImpl*>(
@@ -1977,7 +1960,6 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
       app->SetShemaUrl(url_scheme);
       app->SetPackageName(package_name);
       app->set_app_icon_path(full_icon_path);
-      app->set_connection_id(connection_id);
       app->set_hmi_application_id(hmi_app_id);
       app->set_device(device_id);
       app->set_app_types(app_data[os_type][json::appHmiType]);
@@ -2178,12 +2160,13 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   request_ctrl_.terminateAllHMIRequests();
 }
 
-void ApplicationManagerImpl::RemoveWaitingApps(const ssize_t connection_id) {
-  ConnectionIdPredicate conn_finder(connection_id);
+void ApplicationManagerImpl::RemoveAppsWaitingForRegistration(
+    const connection_handler::DeviceHandle handle) {
+  DevicePredicate device_finder(handle);
   apps_to_register_list_lock_.Acquire();
   AppsWaitRegistrationSet::iterator it_app =
       std::find_if(apps_to_register_.begin(), apps_to_register_.end(),
-                conn_finder);
+                device_finder);
 
   while (apps_to_register_.end()!= it_app) {
     LOG4CXX_DEBUG(logger_, "Waiting app: " << (*it_app)->name()
@@ -2191,7 +2174,7 @@ void ApplicationManagerImpl::RemoveWaitingApps(const ssize_t connection_id) {
     apps_to_register_.erase(it_app);
     it_app = std::find_if(apps_to_register_.begin(),
                           apps_to_register_.end(),
-                          conn_finder);
+                          device_finder);
   }
 
   apps_to_register_list_lock_.Release();
@@ -2230,14 +2213,14 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
 
   ApplicationSharedPtr app_to_remove;
-  ssize_t connection_id = -1;
+  connection_handler::DeviceHandle handle = 0;
   {
     ApplicationListAccessor accessor;
     ApplictionSetConstIt it = accessor.begin();
     for (; it != accessor.end(); ++it) {
       if ((*it)->app_id() == app_id) {
         app_to_remove = *it;
-        connection_id = app_to_remove->connection_id();
+        handle = app_to_remove->device();
         break;
       }
     }
@@ -2247,13 +2230,13 @@ void ApplicationManagerImpl::UnregisterApplication(
     }
     accessor.Erase(app_to_remove);
 
-    ConnectionIdSDL4Predicate finder(connection_id);
+    AppV4DevicePredicate finder(handle);
     ApplicationSharedPtr app = accessor.Find(finder);
     if (!app) {
-      LOG4CXX_DEBUG(logger_, "There is no more SDL4 apps with connection id: "
-                    << connection_id);
+      LOG4CXX_DEBUG(logger_, "There is no more SDL4 apps with device handle: "
+                    << handle);
 
-      RemoveWaitingApps(connection_id);
+      RemoveAppsWaitingForRegistration(handle);
       SendUpdateAppList();
     }
   }
@@ -3101,22 +3084,6 @@ bool ApplicationManagerImpl::IsReadWriteAllowed(
                 << " directory has read/write permissions.");
 
   return true;
-}
-
-const ssize_t ApplicationManagerImpl::get_connection_id(
-    uint32_t connection_key) const {
-  if (connection_handler_) {
-    connection_handler::ConnectionHandlerImpl* con_handler_impl =
-      static_cast<connection_handler::ConnectionHandlerImpl*>(
-        connection_handler_);
-
-    uint32_t connection_id = 0;
-    uint8_t session_id = 0;
-    con_handler_impl->PairFromKey(connection_key, &connection_id, &session_id);
-    return static_cast<int32_t>(connection_id);
-  }
-
-  return -1;
 }
 
 bool ApplicationManagerImpl::IsIconsSavingEnabled() const {
