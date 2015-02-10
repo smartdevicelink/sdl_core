@@ -1,8 +1,12 @@
 #include <dlfcn.h>
 #include "gtest/gtest.h"
 #include "can_cooperation/can_module.h"
+#include "mock_service.h"
 
 using functional_modules::PluginInfo;
+using application_manager::MockService;
+
+using ::testing::Return;
 
 namespace can_cooperation {
 
@@ -34,6 +38,11 @@ TEST(CanLibraryTest, Load) {
   PluginInfo plugin = module->GetPluginInfo();
   EXPECT_EQ(plugin.name, "ReverseSDLPlugin");
   EXPECT_EQ(plugin.version, 1);
+
+  MockService* service = new MockService();
+  module->set_service(service);
+  std::set<application_manager::ApplicationSharedPtr> apps;
+  EXPECT_CALL(*service, GetApplications()).Times(1).WillOnce(Return(apps));
 
   CANModule::destroy();
   int ret = dlclose(handle);

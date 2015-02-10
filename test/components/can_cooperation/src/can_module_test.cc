@@ -44,6 +44,8 @@ class CanModuleTest : public ::testing::Test {
   static void TearDownTestCase() {
     const ConnectionState kRet = ConnectionState::CLOSED;
     EXPECT_CALL(*mock_conn, CloseConnection()).Times(1).WillOnce(Return(kRet));
+    std::set<application_manager::ApplicationSharedPtr> apps;
+    EXPECT_CALL(*mock_service, GetApplications()).Times(1).WillOnce(Return(apps));
     CANModule::destroy();
   }
 };
