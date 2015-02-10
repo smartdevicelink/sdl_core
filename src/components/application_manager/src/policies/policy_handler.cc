@@ -1012,7 +1012,9 @@ bool PolicyHandler::SaveSnapshot(const BinaryMessage& pt_string,
 void PolicyHandler::OnSnapshotCreated(const BinaryMessage& pt_string,
                                       const std::vector<int>& retry_delay_seconds,
                                       int timeout_exchange) {
-  SendMessageToSDK(pt_string, policy_manager_->GetUpdateUrl(POLICY));
+  EndpointUrls urls;
+  policy_manager_->GetServiceUrls("0x07", urls);
+  SendMessageToSDK(pt_string, urls.front().url.front());
 }
 
 bool PolicyHandler::GetPriority(const std::string& policy_app_id,
@@ -1054,9 +1056,9 @@ bool PolicyHandler::GetInitialAppData(const std::string& application_id,
   return policy_manager_->GetInitialAppData(application_id, nicknames, app_hmi_types);
 }
 
-void PolicyHandler::GetUpdateUrls(int service_type, EndpointUrls& end_points) {
+void PolicyHandler::GetServiceUrls(const std::string& service_type, EndpointUrls& end_points) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->GetUpdateUrls(service_type, end_points);
+  policy_manager_->GetServiceUrls(service_type, end_points);
 }
 
 void PolicyHandler::ResetRetrySequence() {
@@ -1232,9 +1234,15 @@ uint16_t PolicyHandler::HeartBeatTimeout(const std::string& app_id) const {
 }
 
 const std::string PolicyHandler::RemoteAppsUrl() const {
-  const std::string default_url = "";
+  const std::string default_url;
   POLICY_LIB_CHECK(default_url);
-  return policy_manager_->RemoteAppsUrl();
+  EndpointUrls endpoints;
+  policy_manager_->GetServiceUrls("queryAppsUrl", endpoints);
+  if (endpoints.empty() || endpoints[0].url.empty()) {
+    return default_url;
+  }
+
+  return endpoints[0].url[0];
 }
 
 void policy::PolicyHandler::OnAppsSearchStarted() {

@@ -516,24 +516,19 @@ std::vector<UserFriendlyMessage> CacheManager::GetUserFriendlyMsg(
   return result;
 }
 
-void CacheManager::GetUpdateUrls(int service_type,
+void CacheManager::GetServiceUrls(const std::string& service_type,
                                  EndpointUrls& end_points) {
   LOG4CXX_AUTO_TRACE(logger_);
-
   CACHE_MANAGER_CHECK_VOID();
-  char buff[32];
-  sprintf(buff, "%x", service_type);
-
-  std::string serv_type(buff);
-  // TODO: remove this workaround
-  if (service_type <= 0x9) {
-    serv_type.insert(0,"0x0", 3);
-  } else {
-    serv_type.insert(0,"0x", 2);
+  std::string search_value;
+  if (!IsNumberService(service_type, search_value)) {
+    search_value = service_type;
   }
 
+  LOG4CXX_DEBUG(logger_, "Search service value is: " << search_value);
+
   policy_table::ServiceEndpoints::const_iterator iter =
-      pt_->policy_table.module_config.endpoints.find(serv_type);
+      pt_->policy_table.module_config.endpoints.find(search_value);
 
   if (pt_->policy_table.module_config.endpoints.end() != iter) {
     policy_table::URLList::const_iterator url_list_iter = (*iter).second.begin();
@@ -682,8 +677,27 @@ bool CacheManager::IsPermissionsCalculated(
   return false;
 }
 
-std::string CacheManager::RemoteAppsUrl() const {
-  return "Not implemented";
+bool policy::CacheManager::IsNumberService(const std::string& input,
+                                          std::string& output) const {
+  const char* input_value = input.c_str();
+  char* endptr;
+  const int base = 10;
+  errno = 0;
+  uint32_t service_value = strtoul(input_value, &endptr, base);
+  bool is_real_zero_value =
+      (!service_value && endptr != input_value && *endptr == '\0');
+  if (!is_real_zero_value && (!service_value || errno == ERANGE)) {
+    return false;
+  }
+
+  output = input;
+  if (service_value <= 9) {
+    output.insert(0,"0x0", 3);
+  } else {
+    output.insert(0,"0x", 2);
+  }
+
+  return true;
 }
 
 utils::SharedPtr<policy_table::Table>

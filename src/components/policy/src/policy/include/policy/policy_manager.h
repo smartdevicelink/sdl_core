@@ -72,18 +72,12 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual bool ResetPT(const std::string& file_name) = 0;
 
     /**
-     * @brief Gets URL for sending PTS to from PT itself.
-       * @param service_type Service specifies user of URL
-     * @return string URL
-     */
-    virtual std::string GetUpdateUrl(int service_type) const = 0;
-
-    /**
-     * @brief Gets all URLs for sending PTS to from PT itself.
+     * @brief Gets all URLs for particular service.
      * @param service_type Service specifies user of URL
      * @return vector of urls
      */
-    virtual void GetUpdateUrls(int service_type, EndpointUrls& end_points) = 0;
+    virtual void GetServiceUrls(const std::string& service_type,
+                                EndpointUrls& end_points) = 0;
 
     /**
      * @brief PTU is needed, for this PTS has to be formed and sent.
@@ -391,13 +385,6 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @brief SaveUpdateStatusRequired alows to save update status.
      */
     virtual void SaveUpdateStatusRequired(bool is_update_needed) = 0;
-
-    /**
-     * @brief RemoteAppsUrl allows to obtain url for QUERY_APP system request.
-     *
-     * @return url.
-     */
-    virtual std::string RemoteAppsUrl() const = 0;
 
     /**
      * @brief Handler on applications search started

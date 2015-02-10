@@ -51,8 +51,10 @@ void GetUrls::Run() {
   object[strings::params][strings::message_type] = MessageType::kResponse;
   if (policy::PolicyHandler::instance()->PolicyEnabled()) {
     policy::EndpointUrls endpoints;
-    policy::PolicyHandler::instance()->GetUpdateUrls(
-        object[strings::msg_params][hmi_request::service].asInt(), endpoints);
+    policy::PolicyHandler::instance()->GetServiceUrls(
+        object[strings::msg_params][hmi_request::service].asString(),
+        endpoints);
+
     if (!endpoints.empty()) {
       object[strings::msg_params].erase(hmi_request::service);
 

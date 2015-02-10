@@ -58,8 +58,8 @@ class PolicyManagerImpl : public PolicyManager {
     virtual bool InitPT(const std::string& file_name);
     virtual bool LoadPT(const std::string& file, const BinaryMessage& pt_content);
     virtual bool ResetPT(const std::string& file_name);
-    virtual std::string GetUpdateUrl(int service_type) const;
-    virtual void GetUpdateUrls(int service_type, EndpointUrls& end_points);
+    virtual void GetServiceUrls(const std::string& service_type,
+                                EndpointUrls& end_points);
     virtual void RequestPTUpdate();
     virtual void CheckPermissions(const PTString& app_id,
         const PTString& hmi_level,
@@ -162,8 +162,6 @@ class PolicyManagerImpl : public PolicyManager {
     virtual bool IsPredataPolicy(const std::string& policy_app_id);
     void set_cache_manager(CacheManagerInterface* cache_manager);
 
-    virtual std::string RemoteAppsUrl() const;
-
     virtual void OnAppsSearchStarted();
 
     virtual void OnAppsSearchCompleted();
@@ -260,6 +258,7 @@ class PolicyManagerImpl : public PolicyManager {
     bool IsPTValid(utils::SharedPtr<policy_table::Table> policy_table,
                    policy_table::PolicyTableType type) const;
 
+private:
     PolicyListener* listener_;
 
     UpdateStatusManager update_status_manager_;

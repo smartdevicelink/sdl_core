@@ -149,11 +149,12 @@ class CacheManager : public CacheManagerInterface {
     const std::vector<std::string>& msg_codes, const std::string& language);
 
   /**
-   * @brief Get list of URL to send PTS to
+   * @brief Get list of URLs related to particular service
    * @param service_type If URLs for specific service are preset,
    * return them otherwise default URLs.
    */
-  virtual void GetUpdateUrls(int service_type, EndpointUrls& end_points);
+  virtual void GetServiceUrls(const std::string& service_type,
+                              EndpointUrls& end_points);
 
   /**
    * @brief Get allowed number of notifications
@@ -584,7 +585,15 @@ private:
                                const std::string& policy_app_id,
                                policy::Permissions& permission);
 
-  virtual std::string RemoteAppsUrl() const;
+private:
+  /**
+   * @brief Checks, if input string is known service represented by number, than
+   * converts input string to service number
+   * @param input Input string
+   * @param output Output service
+   * @return true, if successfully converted, otherwise - false
+   */
+  bool IsNumberService(const std::string& input, std::string& output) const;
 
 private:
   utils::SharedPtr<policy_table::Table> pt_;

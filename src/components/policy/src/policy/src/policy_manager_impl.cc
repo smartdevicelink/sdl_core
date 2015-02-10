@@ -188,30 +188,10 @@ void PolicyManagerImpl::PrepareNotificationData(
   std::for_each(group_names.begin(), group_names.end(), processor);
 }
 
-std::string PolicyManagerImpl::GetUpdateUrl(int service_type) const {
+void PolicyManagerImpl::GetServiceUrls(const std::string& service_type,
+                                       EndpointUrls& end_points) {
   LOG4CXX_AUTO_TRACE(logger_);
-  EndpointUrls urls;
-  cache_->GetUpdateUrls(service_type, urls);
-
-  std::string url;
-  if (!urls.empty()) {
-    static uint32_t index = 0;
-
-    if (!urls.empty() && index >= urls.size()) {
-      index = 0;
-    }
-    url = urls[index].url.empty() ? "" :urls[index].url[0];
-
-    ++index;
-  } else {
-    LOG4CXX_ERROR(logger_, "The endpoint entry is empty");
-  }
-  return url;
-}
-
-void PolicyManagerImpl::GetUpdateUrls(int service_type, EndpointUrls& end_points) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  cache_->GetUpdateUrls(service_type, end_points);
+  cache_->GetServiceUrls(service_type, end_points);
 }
 
 void PolicyManagerImpl::RequestPTUpdate() {
@@ -268,13 +248,6 @@ void PolicyManagerImpl::StartPTExchange() {
       RequestPTUpdate();
     }
   }
-}
-
-std::string PolicyManagerImpl::RemoteAppsUrl() const {
-  // TODO(AOleynik): Will be used after implementation of necessary section
-  // support in policy table
-  //return cache_->RemoteAppsUrl();
-  return GetUpdateUrl(7);
 }
 
 void PolicyManagerImpl::OnAppsSearchStarted() {

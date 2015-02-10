@@ -145,11 +145,12 @@ class CacheManagerInterface {
       const std::string& language) = 0;
 
   /**
-   * @brief Get list of URL to send PTS to
+   * @brief Get list of URLs related to particular service
    * @param service_type If URLs for specific service are preset,
    * return them otherwise default URLs.
    */
-  virtual void GetUpdateUrls(int service_type, EndpointUrls& end_points) = 0;
+  virtual void GetServiceUrls(const std::string& service_type,
+                              EndpointUrls& end_points) = 0;
 
   /**
    * @brief Get allowed number of notifications
@@ -565,12 +566,6 @@ class CacheManagerInterface {
       const std::string& device_id,
       const std::string& policy_app_id,
       policy::Permissions& permission) = 0;
-
-  /**
-   * @brief RemoteAppsUrl allows to obtain url for QUERY_APP system request.
-   * @return url.
-   */
-  virtual std::string RemoteAppsUrl() const = 0;
 };
 
 typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;
