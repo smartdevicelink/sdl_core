@@ -146,7 +146,9 @@ void SetAppIconRequest::CopyToIconStorage(
       return;
     }
 
-    RemoveOldestIcons(icon_storage, icons_amount);
+    while (!IsEnoughSpaceForIcon(file_size)) {
+      RemoveOldestIcons(icon_storage, icons_amount);
+    }
   }
   ApplicationConstSharedPtr app =
           application_manager::ApplicationManagerImpl::instance()->
@@ -205,6 +207,17 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
     LOG4CXX_DEBUG(logger_, "Old icon " << file_path
                   << " was deleted successfully.");
   }
+}
+
+bool SetAppIconRequest::IsEnoughSpaceForIcon(const uint64_t icon_size) const {
+  const std::string icon_storage =
+          profile::Profile::instance()->app_icons_folder();
+  const uint64_t storage_max_size =
+      static_cast<uint64_t>(
+        profile::Profile::instance()->app_icons_folder_max_size());
+  const uint64_t storage_size = static_cast<uint64_t>(
+                                  file_system::DirectorySize(icon_storage));
+  return storage_max_size >= (icon_size + storage_size);
 }
 
 void SetAppIconRequest::on_event(const event_engine::Event& event) {
