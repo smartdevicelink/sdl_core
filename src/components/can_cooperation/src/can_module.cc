@@ -323,11 +323,7 @@ void CANModule::RemoveAppExtension(uint32_t app_id) {
       app_id);
 
   if (app) {
-    application_manager::AppExtensionPtr extension = app->QueryInterface(
-        kCANModuleID);
-    if (extension) {
-      app->RemoveExtension(kCANModuleID);
-    }
+    app->RemoveExtension(kCANModuleID);
   }
 }
 
