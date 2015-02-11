@@ -966,11 +966,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     bool IsAppsQueriedFrom(const connection_handler::DeviceHandle handle) const;
 
-    /**
-     * @brief Checks, if icons saving to configured folder is enabled
-     */
-    bool IsIconsSavingEnabled() const;
-
 private:
     ApplicationManagerImpl();
 
@@ -1314,8 +1309,6 @@ private:
     timer::TimerThread<ApplicationManagerImpl>  tts_global_properties_timer_;
 
     bool is_low_voltage_;
-
-    bool is_icons_saving_enabled_;
 
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 

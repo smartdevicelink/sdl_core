@@ -100,6 +100,12 @@ class SetAppIconRequest : public CommandRequestImpl {
    */
   bool IsEnoughSpaceForIcon(const uint64_t icon_size) const;
   DISALLOW_COPY_AND_ASSIGN(SetAppIconRequest);
+
+private:
+  /**
+   * @brief Checks, if icons saving to configured folder is enabled
+   */
+  static int8_t is_icons_saving_enabled_;
 };
 
 }  // namespace commands

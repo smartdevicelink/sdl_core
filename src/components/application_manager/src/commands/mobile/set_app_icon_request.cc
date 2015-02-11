@@ -43,8 +43,16 @@ namespace application_manager {
 
 namespace commands {
 
+int8_t SetAppIconRequest::is_icons_saving_enabled_ = -1;
+
 SetAppIconRequest::SetAppIconRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
+  if (-1 == is_icons_saving_enabled_) {
+    const std::string path = profile::Profile::instance()->app_icons_folder();
+    is_icons_saving_enabled_ =
+        file_system::IsWritingAllowed(path) &&
+        file_system::IsReadingAllowed(path);
+  }
 }
 
 SetAppIconRequest::~SetAppIconRequest() {
@@ -77,7 +85,7 @@ void SetAppIconRequest::Run() {
     return;
   }
 
-  if (ApplicationManagerImpl::instance()->IsIconsSavingEnabled()) {
+  if (is_icons_saving_enabled_) {
     CopyToIconStorage(full_file_path);
   }
 

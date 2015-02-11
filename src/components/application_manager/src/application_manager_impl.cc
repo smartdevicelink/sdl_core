@@ -109,8 +109,7 @@ ApplicationManagerImpl::ApplicationManagerImpl()
                                       this,
                                       &ApplicationManagerImpl::OnTimerSendTTSGlobalProperties,
                                       true),
-    is_low_voltage_(false),
-    is_icons_saving_enabled_(false) {
+    is_low_voltage_(false) {
     std::srand(std::time(0));
     AddPolicyObserver(this);
 
@@ -1532,9 +1531,7 @@ bool ApplicationManagerImpl::Init() {
   }
   // In case there is no R/W permissions for this location, SDL just has to
   // log this and proceed
-  if (IsReadWriteAllowed(app_icons_folder, TYPE_ICONS)) {
-    is_icons_saving_enabled_ = true;
-  }
+  IsReadWriteAllowed(app_icons_folder, TYPE_ICONS);
 
   if (policy::PolicyHandler::instance()->PolicyEnabled()) {
     if(!policy::PolicyHandler::instance()->LoadPolicyLibrary()) {
@@ -3085,11 +3082,6 @@ bool ApplicationManagerImpl::IsReadWriteAllowed(
 
   return true;
 }
-
-bool ApplicationManagerImpl::IsIconsSavingEnabled() const {
-  return is_icons_saving_enabled_;
-}
-
 
 ApplicationManagerImpl::ApplicationListAccessor::~ApplicationListAccessor() {
 }

@@ -591,7 +591,7 @@ class Profile : public utils::Singleton<Profile> {
      * @param output Output number
      * @return true, if successfully converted, otherwise - false
      */
-    bool StringToNumber(const std::string& input, uint64_t* output) const;
+    bool StringToNumber(const std::string& input, uint64_t& output) const;
 
 private:
     bool                            launch_hmi_;

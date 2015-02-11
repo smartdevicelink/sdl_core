@@ -1467,7 +1467,7 @@ bool Profile::ReadUIntValue(uint16_t* value, uint16_t default_value,
     return false;
   } else {
     uint64_t user_value;
-    if (!StringToNumber(string_value, &user_value)) {
+    if (!StringToNumber(string_value, user_value)) {
       *value = default_value;
       return false;
     }
@@ -1486,7 +1486,7 @@ bool Profile::ReadUIntValue(uint32_t* value, uint32_t default_value,
     return false;
   } else {
     uint64_t user_value;
-    if (!StringToNumber(string_value, &user_value)) {
+    if (!StringToNumber(string_value, user_value)) {
       *value = default_value;
       return false;
     }
@@ -1505,7 +1505,7 @@ bool Profile::ReadUIntValue(uint64_t* value, uint64_t default_value,
     return false;
   } else {
     uint64_t user_value;
-    if (!StringToNumber(string_value, &user_value)) {
+    if (!StringToNumber(string_value, user_value)) {
       *value = default_value;
       return false;
     }
@@ -1515,10 +1515,10 @@ bool Profile::ReadUIntValue(uint64_t* value, uint64_t default_value,
   }
 }
 
-bool Profile::StringToNumber(const std::string& input, uint64_t* output) const {
+bool Profile::StringToNumber(const std::string& input, uint64_t& output) const {
   const char* input_value = input.c_str();
   char* endptr;
-  const int base = 10;
+  const int8_t base = 10;
   errno = 0;
   uint64_t user_value = strtoull(input_value, &endptr, base);
   bool is_real_zero_value =
@@ -1526,7 +1526,7 @@ bool Profile::StringToNumber(const std::string& input, uint64_t* output) const {
   if (!is_real_zero_value && (!user_value || errno == ERANGE)) {
     return false;
   }
-  *output = user_value;
+  output = user_value;
   return true;
 }
 
