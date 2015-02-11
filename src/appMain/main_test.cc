@@ -28,20 +28,23 @@
  * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
+ *
+ *
+ * FILE CONTENTS
+ *  main()
  */
 
-#include <stdlib.h>
 #include <stdio.h>
-
-#include "gtest/gtest.h"
-#include "gmock/gmock.h"
+#include <stdlib.h>
 
 #include "config_profile/profile.h"
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
 #include "utils/logger.h"
 
 #ifdef __cplusplus
 extern "C" void __gcov_flush();
-#endif
+#endif  // __cplusplus
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleMock(&argc, argv);
@@ -51,9 +54,9 @@ int main(int argc, char **argv) {
 
   int result = RUN_ALL_TESTS();
 
-#if defined(__cplusplus) and defined(GCOV_ENABLED)
+#if (defined(__cplusplus) && defined(GCOV_ENABLED))
   __gcov_flush();
-#endif
+#endif  // (defined(__cplusplus) && defined(GCOV_ENABLED))
 
   sleep(2);
   DEINIT_LOGGER();
