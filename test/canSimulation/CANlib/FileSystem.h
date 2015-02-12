@@ -9,6 +9,10 @@ class FileSystem : public QObject
 {
     Q_OBJECT
 
+signals:
+
+    void log(const QString &qMessage, int color);
+
 public slots:
     /**
      * @brief write

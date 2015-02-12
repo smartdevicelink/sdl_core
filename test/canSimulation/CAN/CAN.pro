@@ -2,12 +2,13 @@ TEMPLATE = app
 
 QT += qml quick widgets websockets
 
+# Adds the CANLib project path to the header file include lookup path
+INCLUDEPATH += $$PWD/../CANlib
+
 SOURCES += main.cpp \
-    server.cpp \
-    FileSystem.cpp \
-    loger.cpp \
-    webServer.cpp \
-    messageHandler.cpp
+    loger.cpp
+
+HEADERS += loger.h
 
 RESOURCES += qml.qrc
 
@@ -16,13 +17,8 @@ CONFIG += declarative_debug
 # Additional import path used to resolve QML modules in Qt Creator's code model
 QML_IMPORT_PATH =
 
+unix:LIBS += -L$$OUT_PWD/../CANlib -lCANlib
+
 # Default rules for deployment.
 include(deployment.pri)
 
-HEADERS += \
-    server.h \
-    FileSystem.h \
-    loger.h \
-    color.h \
-    webServer.h \
-    messageHandler.h

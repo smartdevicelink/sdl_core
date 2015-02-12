@@ -1,10 +1,10 @@
 #include "messageHandler.h"
-#include "loger.h"
+//#include "logMessageHandlerer.h"
 #include "color.h"
 #include <QDebug>
 
-MessageHandler::MessageHandler(QObject *rootObject, QTcpSocket *client, QMutex *mu, QVector<QString> &msgPull)
-    : rootView(rootObject), QObject(), mutex(mu), messagePull(msgPull)
+MessageHandler::MessageHandler(QTcpSocket *client, QMutex *mu, QVector<QString> &msgPull)
+    : QObject(), mutex(mu), messagePull(msgPull)
 {
     clientConnection = client;
 
@@ -26,7 +26,7 @@ void MessageHandler::readFromTCP()
 
     QString qMessage = QString::fromUtf8(cMessage);
 
-    emit log("TCP Received..." + qMessage, GREEN);
+    emit logMessageHandler("TCP Received..." + qMessage, GREEN);
 
     // Read all data came from client and redirect it to QML request handler
 
@@ -41,15 +41,15 @@ void MessageHandler::writeToTCP(const QString &qMessage)
 
         clientConnection->write(qb);
         clientConnection->flush();
-        emit log("TCP Send:" + qMessage, BLUE);
+        emit logMessageHandler("TCP Send:" + qMessage, BLUE);
     } else {
-        emit log("TCP Client is not connected yet...", RED);
+        emit logMessageHandler("TCP Client is not connected yet...", RED);
     }
 }
 
 void MessageHandler::disconnected()
 {
-    emit log("TCP disconnected...", RED);
+    emit logMessageHandler("TCP disconnected...", RED);
 
     emit disconnect();
 
@@ -77,5 +77,5 @@ void MessageHandler::stop()
 
 void MessageHandler::displayError(QAbstractSocket::SocketError socketError)
 {
-    emit log("TCP Error: " + socketError, RED);
+    emit logMessageHandler("TCP Error: " + socketError, RED);
 }

@@ -23,7 +23,7 @@ public:
      * ctor
      * Initialized with QTcpSocket of newly connected client
      */
-    MessageHandler(QObject *rootObject, QTcpSocket *client, QMutex *mu, QVector<QString> &msgPull);
+    MessageHandler(QTcpSocket *client, QMutex *mu, QVector<QString> &msgPull);
 
     /**
      * dtor
@@ -63,14 +63,14 @@ public slots:
     void stop();
 
 signals:
+
+    void logMessageHandler(const QString &qMessage, int color);
     void disconnect();
     void requestFromTCP(const QString &qMessage);
-    void log(const QString &qMessage, int);
 
 private:
 
     QTcpSocket *clientConnection;
-    QObject *rootView;
     QMutex *mutex;
     QVector<QString>& messagePull;
 

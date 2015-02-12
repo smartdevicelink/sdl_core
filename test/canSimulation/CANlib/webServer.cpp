@@ -1,17 +1,12 @@
 #include "QtWebSockets/qwebsocketserver.h"
 #include "QtWebSockets/qwebsocket.h"
 #include "webServer.h"
-#include "loger.h"
 #include "color.h"
 //#include <QtCore/QDebug>
 
-//QT_USE_NAMESPACE
+QT_USE_NAMESPACE
 
-namespace {
-const int x = 10;
-}
-
-WebServer::WebServer(QObject *rootObject) : rootView(rootObject), m_client(NULL), QObject() {
+WebServer::WebServer() : m_client(NULL), QObject() {
 
     m_pWebSocketServer = new QWebSocketServer(QStringLiteral("Web Server"), QWebSocketServer::NonSecureMode, this);
 
@@ -26,7 +21,7 @@ WebServer::~WebServer()
 
 void WebServer::onNewConnection()
 {
-    Loger::loger("WS connected...", RED);
+    emit log("WS connected...", RED);
 
     // New connected client is only one client TCP Server is working with
     QWebSocket *pSocket = m_pWebSocketServer->nextPendingConnection();
@@ -40,10 +35,9 @@ void WebServer::onNewConnection()
 void WebServer::processTextMessage(QString qMessage)
 {
 
-    Loger::loger("WS Received..." + qMessage, GREEN);
+    emit log("WS Received..." + qMessage, GREEN);
 
-    QMetaObject::invokeMethod(rootView, "incomingWS",
-            Q_ARG(QVariant,  qMessage));
+    emit readFromWS(qMessage);
 }
 
 void WebServer::socketDisconnected()
@@ -51,7 +45,7 @@ void WebServer::socketDisconnected()
     m_client->deleteLater();
 }
 
-void WebServer::write(const QString &qMessage)
+bool WebServer::write(const QString &qMessage)
 {
     QByteArray qb = qMessage.toUtf8();
     char *cMessage = qb.data();
@@ -59,23 +53,31 @@ void WebServer::write(const QString &qMessage)
     if ((m_client != NULL) && (m_client->state() == QTcpSocket::ConnectedState)){
 
         m_client->sendTextMessage(cMessage);
-        Loger::loger("WS Send:" + qMessage, BLUE);
+        emit log("WS Send:" + qMessage, BLUE);
+
+        return true;
     } else {
-        Loger::loger("WS Client is not connected yet...", RED);
+        emit log("WS Client is not connected yet...", RED);
+
+        return false;
     }
 }
 
-void WebServer::createConection(const QString &IP, int port)
+bool WebServer::createConection(const QString &IP, int port)
 {
 
     QHostAddress hostadd(IP);
 
     if (m_pWebSocketServer->listen(hostadd, port)) {
-        Loger::loger("Start listening WebSocket:" + IP + ":" + QString::number(port), RED);
+        emit log("Start listening WebSocket:" + IP + ":" + QString::number(port), RED);
 
         connect(m_pWebSocketServer, &QWebSocketServer::closed, this, &WebServer::socketDisconnected);
+
+        return true;
     } else {
-        Loger::loger("Unable to start the WS server: " + m_pWebSocketServer->errorString(), RED);
+        emit log("Unable to start the WS server: " + m_pWebSocketServer->errorString(), RED);
+
+        return false;
     }
 
 }

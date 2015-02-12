@@ -1,11 +1,10 @@
 #include <stdlib.h>
 #include <sstream>
 #include "server.h"
-#include "loger.h"
 #include "color.h"
 #include <unistd.h>
 
-Server::Server(QObject *rootObject) : rootView(rootObject), QObject() {
+Server::Server() : QObject() {
 
     tcpServer = new QTcpServer(this);
 
@@ -16,7 +15,7 @@ Server::Server(QObject *rootObject) : rootView(rootObject), QObject() {
 
 void Server::addThread(QTcpSocket *client)
 {
-    MessageHandler* messageHandler = new MessageHandler(rootView, client, mutex, messagePull);
+    MessageHandler* messageHandler = new MessageHandler(client, mutex, messagePull);
     QThread* thread = new QThread;
 
 
@@ -34,9 +33,9 @@ void Server::addThread(QTcpSocket *client)
 
     connect(messageHandler, SIGNAL(requestFromTCP(const QString&)), this, SLOT(requestFromTCP(const QString&)));
 
-    connect(messageHandler, SIGNAL(log(const QString&, int)), this, SLOT(log(const QString&, int)));
+    connect(messageHandler, SIGNAL(logMessageHandler(const QString&, int)), this, SLOT(logMessageHandler(const QString&, int)));
 
-    Loger::loger("Thread Started", RED);
+    emit log("Thread Started", RED);
 
 
     thread->start();
@@ -52,21 +51,21 @@ Server::~Server()
 
 void Server::createConection(const QString &IP, int port)
 {
-    Loger::loger("Start listening TCP:" + IP + ":" + QString::number(port), RED);
+    emit log("Start listening TCP:" + IP + ":" + QString::number(port), RED);
 
     QHostAddress hostadd(IP);
 
     if (!tcpServer->listen(hostadd, port)) {
-        Loger::loger("Unable to start the TCP server: " + tcpServer->errorString(), RED);
+        emit log("Unable to start the TCP server: " + tcpServer->errorString(), RED);
         return;
     }
 }
 
-void Server::write(const QString &message)
+bool Server::write(const QString &qMessage)
 {
 
     mutex->lock();
-    messagePull.push_back(message);
+    messagePull.push_back(qMessage);
     qDebug() << messagePull.count();
     mutex->unlock();
     emit startAgaing();
@@ -74,32 +73,19 @@ void Server::write(const QString &message)
 
 void Server::requestFromTCP(const QString &qMessage)
 {
-    QVariant returnedValue;
 
-    QMetaObject::invokeMethod(rootView, "incoming",
-            Q_RETURN_ARG(QVariant, returnedValue),
-            Q_ARG(QVariant,  qMessage));
-
-    // If processed data type was request
-    // than response from QML is sent back to client
-
-    if (returnedValue != "false") {
-
-        QString message = returnedValue.toString();
-
-        write(message);
-    }
+    emit readFromTCP(qMessage);
 }
 
-void Server::log(const QString &qMessage, int color)
+void Server::logMessageHandler(const QString &qMessage, int color)
 {
-    Loger::loger(qMessage, color);
+    emit log(qMessage, color);
 }
 
 void Server::connected()
 {
 
-    Loger::loger("TCP connected...", RED);
+    emit log("TCP connected...", RED);
 
     // New connected client is only one client TCP Server is working with
     QTcpSocket *clientConnection = tcpServer->nextPendingConnection();

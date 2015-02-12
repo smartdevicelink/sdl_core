@@ -1,26 +1,26 @@
 #include "FileSystem.h"
-#include "loger.h"
 #include "color.h"
+#include <QDebug>
 
 bool FileSystem::write(const QString &source, const QString &data)
 {
 
     if (source.isEmpty()) {
-        Loger::loger("File path is empty!!!", RED);
+        emit log("File path is empty!!!", RED);
         return false;
     }
 
     QByteArray array = source.toLocal8Bit();
     char* buffer = array.data();
 
-    Loger::loger(buffer, RED);
+    emit log(buffer, RED);
 
     QFile file(buffer);
     if (!file.open(QFile::WriteOnly | QFile::Truncate)) {
-        Loger::loger("File can not be open!!!", RED);
+        emit log("File can not be open!!!", RED);
         return false;
     } else {
-        Loger::loger("File opened for write!!!", RED);
+        emit log("File opened for write!!!", RED);
     }
 
     QTextStream out(&file);

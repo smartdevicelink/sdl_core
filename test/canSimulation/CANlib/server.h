@@ -4,8 +4,8 @@
 #include <QtNetwork>
 #include <QTcpSocket>
 #include "messageHandler.h"
-class QTcpServer;
-class QNetworkSession;
+//class QTcpServer;
+//class QNetworkSession;
 
 class Server : public QObject
 {
@@ -20,9 +20,9 @@ public:
      * @brief Server
      * @param rootObject
      * ctor
-     * To get access to QML from C++ rootView must be main QObject of QML view
+     * To get access to QML from C++
      */
-    Server(QObject *rootObject);
+    Server();
 
     /**
      * @brief addThread
@@ -54,21 +54,24 @@ public slots:
      */
     void createConection(const QString &IP, int port);
 
-    void write(const QString &message);
+    bool write(const QString &qMessage);
 
     void requestFromTCP(const QString &qMessage);
 
-    void log(const QString &qMessage, int color);
+    void logMessageHandler(const QString &qMessage, int color);
+
 
 signals:
 
     void stopAllThreads();
     void startAgaing();
 
+    void readFromTCP(const QString &qMessage);
+    void log(const QString &qMessage, int color);
+
 private:
 
     QTcpServer *tcpServer;
-    QObject *rootView;
     QMutex *mutex;
 };
 

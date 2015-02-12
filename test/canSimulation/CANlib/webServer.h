@@ -18,16 +18,16 @@ public:
      * @param rootObject
      * ctor
      *
-     * To get access to QML from C++ rootView must be main QObject of QML view
+     * To get access to QML from C++
      */
-    WebServer(QObject *rootObject);
+    WebServer();
 
     /**
      * dtor
      */
     ~WebServer();
 
-private Q_SLOTS:
+public slots:
 
     /**
      * @brief onNewConnection
@@ -55,7 +55,7 @@ private Q_SLOTS:
      * @brief write
      * @param qMessage - text message to be sent to TCP Client
      */
-    void write(const QString &qMessage);
+    bool write(const QString &qMessage);
 
     /**
      * @brief createConection
@@ -63,11 +63,15 @@ private Q_SLOTS:
      * @param port
      * Parameters to be used for connection to TCP Server
      */
-    void createConection(const QString &IP, int port);
+    bool createConection(const QString &IP, int port);
+
+signals:
+
+    void log(const QString &qMessage, int color);
+    void readFromWS(const QString &qMessage);
 
 private:
     QWebSocketServer *m_pWebSocketServer;
-    QObject *rootView;
     QWebSocket *m_client;
 };
 
