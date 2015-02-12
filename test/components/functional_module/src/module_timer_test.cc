@@ -1,65 +1,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
-
-#include "utils/macro.h"
-#include "functional_module/module_timer.h"
+#include "module_timer_test.h"
 
 namespace functional_modules {
-
-class TestTrackable : Trackable {
- public:
-  explicit TestTrackable(TimeUnit interval = 0)
-    : custorm_interval_(interval) {}
-
-  virtual TimeUnit custorm_interval() const {
-    return custorm_interval_;
-  }
-  virtual TimeUnit start_time() const {
-    return start_time_;
-  }
-  virtual void set_start_time(TimeUnit start_time) {
-    start_time_ = start_time;
-  }
-
-  bool operator<(const TestTrackable& other) const {
-    return custorm_interval_ < other.custorm_interval_;
-  }
- private:
-  TimeUnit start_time_;
-  TimeUnit custorm_interval_;
-};
-
-class ModuleTimerTest {
- public:
-  ModuleTimerTest(ModuleTimer<TestTrackable>& timer)
-    : timer_(timer) {}
-  TimeUnit period() const {
-    return timer_.period_;
-  }
-  int observers_size() const {
-    return timer_.observers_.size();
-  }
-  bool keeps_running() const {
-    return timer_.keep_running_;
-  }
-  int trackables_size() const {
-    return timer_.trackables_.size();
-  }
-  TestTrackable trackable(const TestTrackable& track) const {
-    return *timer_.trackables_.find(track);
-  }
-  TimeUnit current_time() const {
-    return timer_.CurrentTime();
-  }
- private:
-  ModuleTimer<TestTrackable>& timer_;
-};
-
-class MockTimerObserver : public TimerObserver<TestTrackable> {
- public:
-  MOCK_METHOD1(OnTimeoutTriggered, void(const TestTrackable& expired));
-};
-
 
 TEST(ModuleTimerTest, set_period) {
   ModuleTimer<TestTrackable> timer;
@@ -95,23 +38,33 @@ TEST(ModuleTimerTest, remove_observer) {
   EXPECT_EQ(0, test.observers_size());
 }
 
-/*TEST(ModuleTimerTest, start) {
+TEST(ModuleTimerTest, start) {
   ModuleTimer<TestTrackable> timer;
   ModuleTimerTest test(timer);
-  EXPECT_FALSE(test.keeps_running());
-  timer.Start();
-  ASSERT_TRUE(test.keeps_running());
+  timer.set_period(1);
+  MockTimerObserver observer;
+  timer.AddObserver(&observer);
+  TestTrackable track;
+  timer.AddTrackable(track);
+  sleep(2);
+  EXPECT_CALL(observer, OnTimeoutTriggered(track)).Times(1);
+  timer.CheckTimeout();
+  EXPECT_EQ(0, test.trackables_size());
+  timer.set_period(4);
+  timer.AddTrackable(track);
+  sleep(2);
+  EXPECT_CALL(observer, OnTimeoutTriggered(track)).Times(0);
+  timer.CheckTimeout();
+  EXPECT_EQ(1, test.trackables_size());
+  TestTrackable track2(1);
+  timer.AddTrackable(track2);
+  timer.AddTrackable(track);
+  sleep(2);
+  EXPECT_CALL(observer, OnTimeoutTriggered(track2)).Times(1);
+  EXPECT_CALL(observer, OnTimeoutTriggered(track)).Times(0);
+  timer.CheckTimeout();
+  EXPECT_EQ(1, test.trackables_size());
 }
-
-TEST(ModuleTimerTest, stop) {
-  ModuleTimer<TestTrackable> timer;
-  ModuleTimerTest test(timer);
-  timer.Stop();
-  EXPECT_FALSE(test.keeps_running());
-  timer.Start();
-  timer.Stop();
-  ASSERT_FALSE(test.keeps_running());
-}*/
 
 TEST(ModuleTimerTest, add_trackable) {
   ModuleTimer<TestTrackable> timer;
@@ -128,12 +81,10 @@ TEST(ModuleTimerTest, add_trackable) {
   EXPECT_TRUE(
     test.trackable(track).start_time() - test.current_time() < 1);
   timer.AddTrackable(track);
-  printf("%d\n", test.current_time());
   sleep(3);
-  printf("%d\n", test.current_time());
   EXPECT_TRUE(
-    test.trackable(track).start_time() - test.current_time() < 4000 &&
-    test.trackable(track).start_time() - test.current_time() > 2000);
+    test.current_time() - test.trackable(track).start_time() < 4 &&
+    test.current_time() - test.trackable(track).start_time() > 2);
 }
 
 TEST(ModuleTimerTest, remove_trackable) {
@@ -155,7 +106,20 @@ TEST(ModuleTimerTest, remove_trackable) {
 }
 
 TEST(ModuleTimerTest, notify) {
-  //ModuleTimer<TestTrackable>
+  ModuleTimer<TestTrackable> timer;
+  ModuleTimerTest test(timer);
+  timer.set_period(1);
+  MockTimerObserver observer;
+  timer.AddObserver(&observer);
+  TestTrackable track;
+  timer.AddTrackable(track);
+  TestTrackable track2(2);
+  timer.AddTrackable(track2);
+  sleep(2);
+  EXPECT_CALL(observer, OnTimeoutTriggered(track)).Times(1);
+  EXPECT_CALL(observer, OnTimeoutTriggered(track2)).Times(0);
+  timer.CheckTimeout();
+  EXPECT_EQ(1, test.trackables_size());
 }
 
 }   //  namespace functional_modules

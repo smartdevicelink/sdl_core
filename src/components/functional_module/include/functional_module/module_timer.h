@@ -33,13 +33,15 @@
 #ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_MODULE_TIMER_H_
 #define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_MODULE_TIMER_H_
 
-#include <set>
+#include <list>
 #include <deque>
+#include <algorithm>
 #include <time.h>
+#include "utils/lock.h"
 
 namespace functional_modules {
 
-typedef unsigned int TimeUnit;  //millisecs
+typedef unsigned int TimeUnit;  //seconds
 
 class Trackable {
  public:
@@ -70,14 +72,19 @@ template<class Trackable> class ModuleTimer {
   inline void set_period(TimeUnit period) {
     period_ = period;
   }
+  inline TimeUnit period() const {
+    return period_;
+  }
   void AddObserver(TimerObserver<Trackable>* observer);
   void RemoveObserver(TimerObserver<Trackable>* observer);
 
-  void Start();
-  void Stop() {
-    keep_running_ = false;
-  }
+  void CheckTimeout();
 
+  /*
+   * @brief Adds object to be tracked by timer.
+   If same object is already added replaces it with new one
+   correspondingly updating start time of tracking.
+   */
   void AddTrackable(Trackable object);
   void RemoveTrackable(const Trackable& object);
 
@@ -85,27 +92,24 @@ template<class Trackable> class ModuleTimer {
   void Notify(const Trackable& object);
   void OnTimeout(const Trackable& object);
   TimeUnit CurrentTime() const;
-  typename std::set<Trackable> trackables_;
-  TimeUnit period_;
+  typename std::list<Trackable> trackables_;
+  volatile TimeUnit period_;
  private:
   std::deque<TimerObserver<Trackable>*> observers_;
-  volatile bool keep_running_;
-
+  mutable sync_primitives::Lock trackables_lock_;
   friend class ModuleTimerTest;
 };
 
-typedef std::set<Trackable> TrackablesCollection;
-
 template<class Trackable>
 ModuleTimer<Trackable>::ModuleTimer()
-  : period_(10)
-  , keep_running_(false) {
+  : period_(10) {
 
 }
 
 template<class Trackable>
 ModuleTimer<Trackable>::~ModuleTimer() {
   observers_.clear();
+  sync_primitives::AutoLock auto_lock(trackables_lock_);
   trackables_.clear();
 }
 
@@ -135,34 +139,41 @@ void ModuleTimer<Trackable>::RemoveObserver(TimerObserver<Trackable>* observer) 
 }
 
 template<class Trackable>
-void ModuleTimer<Trackable>::Start() {
-  if (keep_running_) {
-    this->Stop();
-  }
-  keep_running_ = true;
-  while (keep_running_) {
-    for (TrackablesCollection::iterator it = trackables_.begin();
-         trackables_.end() != it; ++it) {
-      TimeUnit period = it->custorm_interval();
-      if (!period) {
-        period = period_;
-      }
-      if (it->start_time() - CurrentTime() >= period) {
-        OnTimeout(*it);
-      }
+void ModuleTimer<Trackable>::CheckTimeout() {
+  sync_primitives::AutoLock trackables_lock(trackables_lock_);
+  for (typename std::list<Trackable>::iterator it = trackables_.begin();
+       trackables_.end() != it; ++it) {
+    TimeUnit period = it->custorm_interval();
+    if (!period) {
+      period = period_;
+    }
+    if (CurrentTime() - it->start_time() >= period) {
+      OnTimeout(*it);
+      it = trackables_.erase(it);
     }
   }
 }
 
 template<class Trackable>
 void ModuleTimer<Trackable>::AddTrackable(Trackable object) {
+  sync_primitives::AutoLock trackables_lock(trackables_lock_);
+  typename std::list<Trackable>::iterator it = std::find(
+        trackables_.begin(), trackables_.end(), object);
+  if (trackables_.end() != it) {
+    trackables_.erase(it);
+  }
   object.set_start_time(CurrentTime());
-  trackables_.insert(object);
+  trackables_.push_back(object);
 }
 
 template<class Trackable>
 void ModuleTimer<Trackable>::RemoveTrackable(const Trackable& object) {
-  trackables_.erase(object);
+  sync_primitives::AutoLock trackables_lock(trackables_lock_);
+  typename std::list<Trackable>::iterator it = std::find(
+        trackables_.begin(), trackables_.end(), object);
+  if (trackables_.end() != it) {
+    trackables_.erase(it);
+  }
 }
 
 template<class Trackable>
@@ -180,8 +191,21 @@ void ModuleTimer<Trackable>::OnTimeout(const Trackable& object) {
 
 template<class Trackable>
 TimeUnit ModuleTimer<Trackable>::CurrentTime() const {
-  return 1000 * ((float)clock()) / CLOCKS_PER_SEC;
+  // TODO(PV): move outside to platform-dependant parts
+  struct timespec current_time;
+  if (0 == clock_gettime(CLOCK_MONOTONIC, &current_time)) {
+    return current_time.tv_sec;
+  } else {
+    return 0;
+  }
 }
+
+/*template<class Trackable>
+bool ModuleTimer<Trackable>::keep_running() const {
+  sync_primitives::AutoLock run_lock(keep_running_lock_);
+  bool keep_running = keep_running_;
+  return keep_running;
+}*/
 
 }  //  namespace functional_modules
 

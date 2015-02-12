@@ -33,11 +33,43 @@
 #ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_H_
 #define SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_H_
 
+#include <map>
+#include "utils/threads/thread.h"
+#include "utils/conditional_variable.h"
+#include "functional_module/module_timer.h"
+
 namespace functional_modules {
+
+template<class Trackable> class TimerThreadDelegate : public threads::ThreadDelegate {
+ public:
+  explicit TimerThreadDelegate(const ModuleTimer<Trackable>& timer);
+  void threadMain();
+  bool exitThreadMain();
+ private:
+  ModuleTimer<Trackable>& timer_;
+  volatile bool keep_running_;
+  mutable sync_primitives::Lock keep_running_lock_;
+  mutable sync_primitives::ConditionalVariable keep_running_cond_;
+};
 
 class TimerDirector {
  public:
+  TimerDirector();
+  ~TimerDirector();
 
+  /*
+   * @brief Register timer for execution in separate thread.
+   Registers only one timer of a type. Attempt to register timer
+   of already existing type will fail.
+   */
+  template<class Trackable> void RegisterTimer(const ModuleTimer<Trackable>& timer);
+  template<class Trackable> void UnregisterTimer(const ModuleTimer<Trackable>& timer);
+  void UnregisterAllTimers();
+ private:
+  DISALLOW_COPY_AND_ASSIGN(TimerDirector);
+  std::map<std::string, threads::Thread*> timer_threads_;
+  typename std::map<std::string, TimerThreadDelegate<
+  Trackable>*> thread_delegates_;
 };
 
 }  //  namespace functional_modules
