@@ -24,7 +24,7 @@ class PluginManagerTest : public ::testing::Test {
     ASSERT_EQ(1, manager->LoadPlugins("./plugins/"));
     const PluginManager::Modules& plugins = manager->plugins_;
     PluginManager::Modules::const_iterator i = plugins.begin();
-    module = ModulePtr::static_pointer_cast<MockGenericModule>(i->second).get();
+    module = static_cast<MockGenericModule*>(i->second.get());
   }
 
   static void TearDownTestCase() {

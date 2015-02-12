@@ -114,7 +114,6 @@ TEST_F(CanModuleTest, RemoveAppExtensionPassWay) {
 
   EXPECT_CALL(*mock_service, GetApplication(kAppId)).Times(1).WillOnce(
       Return(valid_app));
-  EXPECT_CALL(*app, QueryInterface(kUid)).Times(1).WillOnce(Return(valid_ext));
   EXPECT_CALL(*app, RemoveExtension(kUid)).Times(1);
 
   module->RemoveAppExtension(kAppId);
@@ -139,9 +138,7 @@ TEST_F(CanModuleTest, RemoveAppExtensionIfExtNoExist) {
 
   EXPECT_CALL(*mock_service, GetApplication(kAppId)).Times(1).WillOnce(
       Return(valid_app));
-  EXPECT_CALL(*app, QueryInterface(kUid)).Times(1).WillOnce(
-      Return(invalid_ext));
-  EXPECT_CALL(*app, RemoveExtension(kUid)).Times(0);
+  EXPECT_CALL(*app, RemoveExtension(kUid)).Times(1);
 
   module->RemoveAppExtension(kAppId);
 }

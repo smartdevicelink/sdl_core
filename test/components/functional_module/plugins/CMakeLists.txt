@@ -8,13 +8,9 @@ include_directories (
   ${JSONCPP_INCLUDE_DIRECTORY}
 )
 
-set (LIBRARIES
-  gtest
-)
-
 set(SOURCES
   ./mock_generic_module.cc
 )
 
 add_library(${target} SHARED ${SOURCES})
-target_link_libraries(${target} ${LIBRARIES} )
+target_link_libraries(${target})
