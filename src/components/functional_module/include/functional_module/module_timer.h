@@ -76,25 +76,25 @@ template<class Trackable> class ModuleTimer {
   void Start();
   void Stop() {
     keep_running_ = false;
-    return true;
   }
 
-  void AddTrackable(const Trackable& object);
+  void AddTrackable(Trackable object);
   void RemoveTrackable(const Trackable& object);
 
  protected:
   void Notify(const Trackable& object);
   void OnTimeout(const Trackable& object);
   TimeUnit CurrentTime() const;
-  std::set<Trackable> trackables_;
+  typename std::set<Trackable> trackables_;
   TimeUnit period_;
  private:
   std::deque<TimerObserver<Trackable>*> observers_;
   volatile bool keep_running_;
+
+  friend class ModuleTimerTest;
 };
 
 typedef std::set<Trackable> TrackablesCollection;
-typedef std::deque<TimerObserver<Trackable>*> TimerObserversCollection;
 
 template<class Trackable>
 ModuleTimer<Trackable>::ModuleTimer()
@@ -124,7 +124,7 @@ void ModuleTimer<Trackable>::RemoveObserver(TimerObserver<Trackable>* observer) 
   if (!observer) {
     return;
   }
-  for (TimerObserversCollection::iterator it = observers_.begin();
+  for (typename std::deque<TimerObserver<Trackable>*>::iterator it = observers_.begin();
        observers_.end() != it;
        ++it) {
     if (*it == observer) {
@@ -155,7 +155,7 @@ void ModuleTimer<Trackable>::Start() {
 }
 
 template<class Trackable>
-void ModuleTimer<Trackable>::AddTrackable(const Trackable& object) {
+void ModuleTimer<Trackable>::AddTrackable(Trackable object) {
   object.set_start_time(CurrentTime());
   trackables_.insert(object);
 }
@@ -167,7 +167,7 @@ void ModuleTimer<Trackable>::RemoveTrackable(const Trackable& object) {
 
 template<class Trackable>
 void ModuleTimer<Trackable>::Notify(const Trackable& object) {
-  for (TimerObserversCollection::const_iterator it = observers_.begin();
+  for (typename std::deque<TimerObserver<Trackable>*>::const_iterator it = observers_.begin();
        observers_.end() != it; ++it) {
     (*it)->OnTimeoutTriggered(object);
   }
