@@ -48,6 +48,7 @@ SDLActivateAppRequest::~SDLActivateAppRequest() {
 void SDLActivateAppRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace hmi_apis::FunctionID;
+  using namespace hmi_apis::Common_Result;
 
   const uint32_t application_id = app_id();
 
@@ -71,8 +72,10 @@ void SDLActivateAppRequest::Run() {
     ApplicationSharedPtr app_for_sending =
         FindRegularAppOnSameDevice(app->device());
     if (!app_for_sending) {
-      LOG4CXX_ERROR(logger_, "Can't find regular app with the same "
+      LOG4CXX_ERROR(logger_, "Can't find regular foreground app with the same "
                     "connection id:" << app->device());
+      SendResponse(correlation_id(),
+                   SDL_ActivateApp, NO_APPS_REGISTERED);
       return;
     }
     MessageHelper::SendLaunchApp(app_for_sending->app_id(),
@@ -153,7 +156,7 @@ SDLActivateAppRequest::FindRegularAppOnSameDevice(
   ApplicationManagerImpl::ApplictionSetIt it_end = app_list.end();
 
   for (;it != it_end; ++it) {
-    if (handle == (*it)->device()) {
+    if (handle == (*it)->device() && (*it)->is_foreground()) {
       return *it;
     }
   }
