@@ -39,14 +39,14 @@
 
 namespace functional_modules {
 
-template<class Trackable>
-TimerThreadDelegate<Trackable>::TimerThreadDelegate(const ModuleTimer<Trackable>& timer)
+template<class T>
+TimerThreadDelegate<T>::TimerThreadDelegate(ModuleTimer<T>& timer)
   : timer_(timer)
   , keep_running_(false) {
 }
 
-template<class Trackable>
-void TimerThreadDelegate<Trackable>::threadMain() {
+template<class T>
+void TimerThreadDelegate<T>::threadMain() {
   if (keep_running_) {
     this->exitThreadMain();
   }
@@ -66,8 +66,8 @@ void TimerThreadDelegate<Trackable>::threadMain() {
   }
 }
 
-template<class Trackable>
-bool TimerThreadDelegate<Trackable>::exitThreadMain() {
+template<class T>
+bool TimerThreadDelegate<T>::exitThreadMain() {
   {
     sync_primitives::AutoLock run_lock(keep_running_lock_);
     keep_running_ = false;
@@ -83,8 +83,8 @@ TimerDirector::~TimerDirector() {
   UnregisterAllTimers();
 }
 
-template<class Trackable>
-void TimerDirector::RegisterTimer(const ModuleTimer<Trackable>& timer) {
+template<class T>
+void TimerDirector::RegisterTimer(ModuleTimer<T>& timer) {
   std::string type_name = typeid(timer).name();
   std::map<std::string, threads::Thread*>::iterator it =
     timer_threads_.find(type_name);
@@ -92,25 +92,20 @@ void TimerDirector::RegisterTimer(const ModuleTimer<Trackable>& timer) {
     //  Attempt to register timer of already existing type fail.
     return;
   }
-  TimerThreadDelegate<Trackable>* delegate = new TimerThreadDelegate<Trackable>(
+  TimerThreadDelegate<T>* delegate = new TimerThreadDelegate<T>(
     timer);
-  threads::Thread* thread = new threads::Thread(type_name, delegate);
+  threads::Thread* thread = new threads::Thread(type_name.c_str(), delegate);
 
   const size_t kStackSize = 16384;
   if (thread->startWithOptions(threads::ThreadOptions(kStackSize))) {
     timer_threads_.insert(std::make_pair(type_name, thread));
-    thread_delegates_.insert(
-      std::make_pair<std::string, TimerThreadDelegate<Trackable>*>(
-        type_name, delegate));
   } else {
-    //  Failed to start timer thread for "
+    //  Failed to start timer thread for
   }
 }
-typedef typename std::map<std::string,
-        TimerThreadDelegate<Trackable>*>::iterator TimerThreadDelegateIterator;
 
-template<class Trackable>
-void TimerDirector::UnregisterTimer(const ModuleTimer<Trackable>& timer) {
+template<class T>
+void TimerDirector::UnregisterTimer(const ModuleTimer<T>& timer) {
   std::string type_name = typeid(timer).name();
   std::map<std::string, threads::Thread*>::iterator it =
     timer_threads_.find(type_name);
@@ -120,11 +115,6 @@ void TimerDirector::UnregisterTimer(const ModuleTimer<Trackable>& timer) {
   }
   it->second->stop();
   delete it->second;
-  TimerThreadDelegateIterator deleage_it = thread_delegates_.find(type_name);
-  if (thread_delegates_.end() != deleage_it) {
-    delete deleage_it->second;
-    thread_delegates_.erase(deleage_it);
-  }
   timer_threads_.erase(it);
 }
 
@@ -134,12 +124,7 @@ void TimerDirector::UnregisterAllTimers() {
     it->second->stop();
     delete it->second;
   }
-  for (TimerThreadDelegateIterator it = thread_delegates_.begin();
-       thread_delegates_.end() != it; ++it) {
-    delete it->second;
-  }
   timer_threads_.clear();
-  thread_delegates_.clear();
 }
 
 }  //  namespace functional_modules

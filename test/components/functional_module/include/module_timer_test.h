@@ -3,26 +3,20 @@
 
 namespace functional_modules {
 
-class TestTrackable : Trackable {
+class TestTrackable : public Trackable {
  public:
   explicit TestTrackable(TimeUnit interval = 0)
-    : custorm_interval_(interval) {}
+    : Trackable()
+    , custorm_interval_(interval) {}
 
   virtual TimeUnit custorm_interval() const {
     return custorm_interval_;
-  }
-  virtual TimeUnit start_time() const {
-    return start_time_;
-  }
-  virtual void set_start_time(TimeUnit start_time) {
-    start_time_ = start_time;
   }
 
   bool operator==(const TestTrackable& other) const {
     return custorm_interval_ == other.custorm_interval_;
   }
  private:
-  TimeUnit start_time_;
   TimeUnit custorm_interval_;
 };
 

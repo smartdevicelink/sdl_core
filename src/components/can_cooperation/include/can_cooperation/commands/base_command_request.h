@@ -50,7 +50,7 @@ namespace commands {
  * @brief Base command class for requests
  */
 class BaseCommandRequest : public Command,
-public event_engine::EventObserver<application_manager::MessagePtr, std::string>{
+  public event_engine::EventObserver<application_manager::MessagePtr, std::string> {
  public:
   /**
    * @brief BaseCommandRequest class constructor
@@ -64,6 +64,11 @@ public event_engine::EventObserver<application_manager::MessagePtr, std::string>
    */
   virtual ~BaseCommandRequest();
 
+  /**
+   * \brief BaseCommandRequest on timeout reaction
+   */
+  virtual void OnTimeout();
+
  protected:
   application_manager::MessagePtr message_;
   application_manager::ServicePtr service_;
@@ -75,7 +80,7 @@ public event_engine::EventObserver<application_manager::MessagePtr, std::string>
    * @return pointer to extension
    */
   CANAppExtensionPtr GetAppExtension(
-      application_manager::ApplicationSharedPtr app) const;
+    application_manager::ApplicationSharedPtr app) const;
 
   /**
    * @brief Converts HMI result code to string with mobile result code
@@ -84,7 +89,7 @@ public event_engine::EventObserver<application_manager::MessagePtr, std::string>
    * @return String with mobile result code
    */
   const char* GetMobileResultCode(
-      const hmi_apis::Common_Result::eType& hmi_code) const;
+    const hmi_apis::Common_Result::eType& hmi_code) const;
 
   /**
    * @brief Creates Mobile response

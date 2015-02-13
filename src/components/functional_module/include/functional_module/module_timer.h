@@ -45,6 +45,8 @@ typedef unsigned int TimeUnit;  //seconds
 
 class Trackable {
  public:
+  Trackable()
+    : start_time_(0) {}
   virtual ~Trackable() {}
   virtual TimeUnit custorm_interval() const {
     return 0;

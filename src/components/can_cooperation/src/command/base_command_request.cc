@@ -47,42 +47,51 @@ using namespace json_keys;
 CREATE_LOGGERPTR_GLOBAL(logger_, "BaseCommandRequest");
 
 BaseCommandRequest::BaseCommandRequest(
-    const application_manager::MessagePtr& message)
+  const application_manager::MessagePtr& message)
   : message_(message) {
-    service_ = CANModule::instance()->service();
+  service_ = CANModule::instance()->service();
 }
 
 
 BaseCommandRequest::~BaseCommandRequest() {
   EventDispatcher<application_manager::MessagePtr, std::string>::instance()->
-      remove_observer(this);
+  remove_observer(this);
+}
+
+
+void BaseCommandRequest::OnTimeout() {
+  SendResponse(false, result_codes::kTimedOut, "Request timeout expired.");
 }
 
 void BaseCommandRequest::SendResponse(bool success,
-                  const char* result_code,
-                  const std::string& info) {
- message_->set_message_type(application_manager::MessageType::kResponse);
- Json::Value msg_params;
+                                      const char* result_code,
+                                      const std::string& info) {
+  message_->set_message_type(application_manager::MessageType::kResponse);
+  Json::Value msg_params;
 
- if (!response_params_.isNull()) {
-   msg_params = response_params_;
- }
+  if (!response_params_.isNull()) {
+    msg_params = response_params_;
+  }
 
- msg_params[kSuccess] = success;
- msg_params[kResultCode] = result_code;
- if (!info.empty()) {
-   msg_params[kInfo] = info;
- }
+  msg_params[kSuccess] = success;
+  msg_params[kResultCode] = result_code;
+  if (!info.empty()) {
+    msg_params[kInfo] = info;
+  }
 
- Json::FastWriter writer;
- std::string params = writer.write(msg_params);
- message_->set_json_message(params);
- CANModule::instance()->SendResponseToMobile(message_);
+  Json::FastWriter writer;
+  std::string params = writer.write(msg_params);
+  message_->set_json_message(params);
+  if (0 == strcmp(result_code, result_codes::kTimedOut)) {
+    CANModule::instance()->SendTimeoutResponseToMobile(message_);
+  } else {
+    CANModule::instance()->SendResponseToMobile(message_);
+  }
 }
 
 void  BaseCommandRequest::SendRequest(const char* function_id,
-                    const Json::Value& message_params,
-                    bool is_hmi_request) {
+                                      const Json::Value& message_params,
+                                      bool is_hmi_request) {
   Json::Value msg;
 
   if (is_hmi_request) {
@@ -92,7 +101,7 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
   }
 
   EventDispatcher<application_manager::MessagePtr, std::string>::instance()->
-      add_observer(function_id, msg[kId].asInt(), this);
+  add_observer(function_id, msg[kId].asInt(), this);
 
   msg[kJsonrpc] = "2.0";
   msg[kMethod] = function_id;
@@ -104,14 +113,14 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
   std::string json_msg = writer.write(msg);
   if (is_hmi_request) {
     application_manager::MessagePtr message_to_send(
-        new application_manager::Message(
-            protocol_handler::MessagePriority::kDefault));
+      new application_manager::Message(
+        protocol_handler::MessagePriority::kDefault));
     message_to_send->set_protocol_version(
-        application_manager::ProtocolVersion::kHMI);
+      application_manager::ProtocolVersion::kHMI);
     message_to_send->set_correlation_id(msg[kId].asInt());
     message_to_send->set_json_message(json_msg);
     message_to_send->set_message_type(
-        application_manager::MessageType::kRequest);
+      application_manager::MessageType::kRequest);
 
     service_->SendMessageToHMI(message_to_send);
   } else {
@@ -120,7 +129,7 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
 }
 
 const char* BaseCommandRequest::GetMobileResultCode(
-    const hmi_apis::Common_Result::eType& hmi_code) const {
+  const hmi_apis::Common_Result::eType& hmi_code) const {
   switch (hmi_code) {
     case hmi_apis::Common_Result::SUCCESS: {
       return result_codes::kSuccess;
@@ -227,7 +236,7 @@ const char* BaseCommandRequest::GetMobileResultCode(
 }
 
 CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
-    application_manager::ApplicationSharedPtr app) const {
+  application_manager::ApplicationSharedPtr app) const {
   if (!app.valid()) {
     return NULL;
   }
@@ -239,9 +248,9 @@ CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
   if (!app_extension.valid()) {
     app_extension = new CANAppExtension(id);
     app->AddExtension(app_extension);
-  } 
-    
-  can_app_extension = 
+  }
+
+  can_app_extension =
     application_manager::AppExtensionPtr::static_pointer_cast<CANAppExtension>(
       app_extension);
 
@@ -249,19 +258,19 @@ CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
 }
 
 bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
-                                         std::string& result_code,
-                                         std::string& info) {
+    std::string& result_code,
+    std::string& info) {
   result_code = result_codes::kInvalidData;
   info = "";
 
   if (value.isMember(kResult) && value[kResult].isMember(kCode)) {
     result_code = GetMobileResultCode(
-        static_cast<hmi_apis::Common_Result::eType>(
-            value[kResult][kCode].asInt()));
+                    static_cast<hmi_apis::Common_Result::eType>(
+                      value[kResult][kCode].asInt()));
   } else if (value.isMember(kError) && value[kError].isMember(kCode)) {
     result_code = GetMobileResultCode(
-        static_cast<hmi_apis::Common_Result::eType>(
-            value[kError][kCode].asInt()));
+                    static_cast<hmi_apis::Common_Result::eType>(
+                      value[kError][kCode].asInt()));
 
     if (value[kError].isMember(kMessage)) {
       info = value[kError][kMessage].asCString();

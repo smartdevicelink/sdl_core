@@ -35,7 +35,6 @@
 
 #include <map>
 #include "functional_module/generic_module.h"
-#include "functional_module/timer_director.h"
 #include "application_manager/service.h"
 #include "application_manager/message.h"
 #include "utils/singleton.h"
@@ -65,11 +64,6 @@ class PluginManager : public utils::Singleton<PluginManager>,
    */
   void RemoveAppExtension(uint32_t app_id);
 
-  template<class Trackable> void RegisterTimer(
-    const ModuleTimer<Trackable>& timer);
-  template<class Trackable> void UnregisterTimer(
-    const ModuleTimer<Trackable>& timer);
-
  private:
   PluginManager();
   ~PluginManager();
@@ -80,7 +74,6 @@ class PluginManager : public utils::Singleton<PluginManager>,
   std::map<MobileFunctionID, ModulePtr> mobile_subscribers_;
   std::map<HMIFunctionID, ModulePtr> hmi_subscribers_;
   application_manager::ServicePtr service_;
-  TimerDirector timer_director_;
 
   friend class PluginManagerTest;
 };

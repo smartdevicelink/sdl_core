@@ -36,7 +36,6 @@
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #include "json/json.h"
-#include "./timer_director_impl.h"
 
 namespace functional_modules {
 
@@ -269,18 +268,6 @@ void PluginManager::RemoveAppExtension(uint32_t app_id) {
   for (PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
     it->second->RemoveAppExtension(app_id);
   }
-}
-
-template<class Trackable>
-void PluginManager::RegisterTimer(
-  const ModuleTimer<Trackable>& timer) {
-  timer_director_.RegisterTimer(timer);
-}
-
-template<class Trackable>
-void PluginManager::UnregisterTimer(
-  const ModuleTimer<Trackable>& timer) {
-  timer_director_.UnregisterTimer(timer);
 }
 
 }  //  namespace functional_modules

@@ -66,8 +66,8 @@ class TCPClientDelegate : public threads::ThreadDelegate {
 };
 
 TCPClientDelegate::TCPClientDelegate(CANModule* can_module)
-    : can_module_(can_module),
-      stop_flag_(false) {
+  : can_module_(can_module),
+    stop_flag_(false) {
   DCHECK(can_module);
 }
 
@@ -80,8 +80,8 @@ void TCPClientDelegate::threadMain() {
   while (!stop_flag_) {
     while (ConnectionState::OPENED == can_module_->can_connection_->GetData()) {
       can_module_->from_can_.PostMessage(
-          CANConnectionSPtr::static_pointer_cast<CANTCPConnection>(
-              can_module_->can_connection_)->ReadData());
+        CANConnectionSPtr::static_pointer_cast<CANTCPConnection>(
+          can_module_->can_connection_)->ReadData());
     }
   }
 }
@@ -92,12 +92,12 @@ bool TCPClientDelegate::exitThreadMain() {
 }
 
 CANModule::CANModule()
-    : GenericModule(kCANModuleID),
-      can_connection_(new CANTCPConnection),
-      from_can_("FromCan To Mobile", this),
-      from_mobile_("FromMobile To Can", this),
-      thread_(NULL),
-      is_scan_started_(false) {
+  : GenericModule(kCANModuleID),
+    can_connection_(new CANTCPConnection),
+    from_can_("FromCan To Mobile", this),
+    from_mobile_("FromMobile To Can", this),
+    thread_(NULL),
+    is_scan_started_(false) {
   if (ConnectionState::OPENED != can_connection_->OpenConnection()) {
     LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
   } else {
@@ -120,15 +120,15 @@ void CANModule::SubscribeOnFunctions() {
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::START_SCAN);
   plugin_info_.mobile_function_list.push_back(MobileFunctionID::STOP_SCAN);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::GET_SEAT_CONTROL);
+    MobileFunctionID::GET_SEAT_CONTROL);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::CLIMATE_CONTROL_ON);
+    MobileFunctionID::CLIMATE_CONTROL_ON);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::ON_CONTROL_CHANGED);
+    MobileFunctionID::ON_CONTROL_CHANGED);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::ON_RADIO_DETAILS);
+    MobileFunctionID::ON_RADIO_DETAILS);
   plugin_info_.mobile_function_list.push_back(
-      MobileFunctionID::ON_PRESETS_CHANGED);
+    MobileFunctionID::ON_PRESETS_CHANGED);
 
   plugin_info_.hmi_function_list.push_back(hmi_api::grant_access);
   plugin_info_.hmi_function_list.push_back(hmi_api::cancel_access);
@@ -174,7 +174,7 @@ void CANModule::SendMessageToCan(const std::string& msg) {
 }
 
 ProcessResult CANModule::ProcessHMIMessage(
-    application_manager::MessagePtr msg) {
+  application_manager::MessagePtr msg) {
   LOG4CXX_INFO(logger_, "HMI message: " << msg->json_message());
   return HandleMessage(msg);
 }
@@ -186,7 +186,7 @@ void CANModule::ProcessCANMessage(const MessageFromCAN& can_msg) {
 
 void CANModule::Handle(const std::string message) {
   CANConnectionSPtr::static_pointer_cast<CANTCPConnection>(can_connection_)
-      ->WriteData(message);
+  ->WriteData(message);
 
   if (ConnectionState::OPENED != can_connection_->Flash()) {
     LOG4CXX_ERROR(logger_, "Failed to send message to CAN");
@@ -195,8 +195,8 @@ void CANModule::Handle(const std::string message) {
 
 void CANModule::Handle(const MessageFromCAN can_msg) {
   application_manager::MessagePtr msg(
-      new application_manager::Message(
-          protocol_handler::MessagePriority::kDefault));
+    new application_manager::Message(
+      protocol_handler::MessagePriority::kDefault));
 
   Json::FastWriter writer;
   std::string json_string = writer.write(can_msg);
@@ -210,7 +210,7 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
 }
 
 functional_modules::ProcessResult CANModule::HandleMessage(
-    application_manager::MessagePtr msg) {
+  application_manager::MessagePtr msg) {
 
   LOG4CXX_INFO(logger_, "CANModule::HandleMessage");
 
@@ -235,7 +235,7 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     msg->set_message_type(application_manager::MessageType::kResponse);
     // Error response
   } else if (value.isMember(kError) && value[kError].isMember(kData)
-      && value[kError][kData].isMember(kMethod)) {
+             && value[kError][kData].isMember(kMethod)) {
     function_name = value[kError][kData][kMethod].asCString();
     msg->set_message_type(application_manager::MessageType::kErrorResponse);
   } else {
@@ -257,17 +257,17 @@ functional_modules::ProcessResult CANModule::HandleMessage(
     case application_manager::MessageType::kErrorResponse: {
       CanModuleEvent event(msg, function_name);
       EventDispatcher<application_manager::MessagePtr, std::string>::instance()
-          ->raise_event(event);
+      ->raise_event(event);
       break;
     }
     case application_manager::MessageType::kNotification: {
       if (functional_modules::can_api::on_preset_changed == function_name) {
         msg->set_function_id(MobileFunctionID::ON_PRESETS_CHANGED);
       } else if (functional_modules::hmi_api::on_control_changed
-          == function_name) {
+                 == function_name) {
         msg->set_function_id(MobileFunctionID::ON_CONTROL_CHANGED);
       } else if (functional_modules::can_api::on_radio_details
-          == function_name) {
+                 == function_name) {
         msg->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);
       }
 
@@ -292,6 +292,11 @@ void CANModule::SendResponseToMobile(application_manager::MessagePtr msg) {
   request_controller_.DeleteRequest(msg->correlation_id());
 }
 
+void CANModule::SendTimeoutResponseToMobile(
+  application_manager::MessagePtr msg) {
+  service()->SendMessageToMobile(msg);
+}
+
 bool CANModule::IsScanStarted() const {
   return is_scan_started_;
 }
@@ -302,15 +307,15 @@ void CANModule::SetScanStarted(bool is_scan_started) {
 
 void CANModule::RemoveAppExtensions() {
   const std::set<application_manager::ApplicationSharedPtr> applications =
-        service()->GetApplications();
+    service()->GetApplications();
 
   std::set<application_manager::ApplicationSharedPtr>::iterator it =
-      applications.begin();
+    applications.begin();
 
-  for (;it != applications.end(); ++it) {
+  for (; it != applications.end(); ++it) {
     if (*it) {
       application_manager::AppExtensionPtr app_extension =
-          (*it)->QueryInterface(CANModule::instance()->GetModuleID());
+        (*it)->QueryInterface(CANModule::instance()->GetModuleID());
       if (app_extension) {
         (*it)->RemoveExtension(CANModule::instance()->GetModuleID());
       }
@@ -320,7 +325,7 @@ void CANModule::RemoveAppExtensions() {
 
 void CANModule::RemoveAppExtension(uint32_t app_id) {
   application_manager::ApplicationSharedPtr app = service()->GetApplication(
-      app_id);
+        app_id);
 
   if (app) {
     app->RemoveExtension(kCANModuleID);

@@ -36,26 +36,26 @@
 #include <map>
 #include "utils/threads/thread.h"
 #include "utils/conditional_variable.h"
+#include "utils/singleton.h"
 #include "functional_module/module_timer.h"
 
 namespace functional_modules {
 
-template<class Trackable> class TimerThreadDelegate : public threads::ThreadDelegate {
+template<class T> class TimerThreadDelegate : public threads::ThreadDelegate {
  public:
-  explicit TimerThreadDelegate(const ModuleTimer<Trackable>& timer);
+  explicit TimerThreadDelegate(ModuleTimer<T>& timer);
   void threadMain();
   bool exitThreadMain();
  private:
-  ModuleTimer<Trackable>& timer_;
+  ModuleTimer<T>& timer_;
   volatile bool keep_running_;
   mutable sync_primitives::Lock keep_running_lock_;
   mutable sync_primitives::ConditionalVariable keep_running_cond_;
   friend class TimerThreadDelegateTest;
 };
 
-class TimerDirector {
+class TimerDirector : public utils::Singleton<TimerDirector> {
  public:
-  TimerDirector();
   ~TimerDirector();
 
   /*
@@ -63,14 +63,14 @@ class TimerDirector {
    Registers only one timer of a type. Attempt to register timer
    of already existing type will fail.
    */
-  template<class Trackable> void RegisterTimer(const ModuleTimer<Trackable>& timer);
-  template<class Trackable> void UnregisterTimer(const ModuleTimer<Trackable>& timer);
+  template<class T> void RegisterTimer(ModuleTimer<T>& timer);
+  template<class T> void UnregisterTimer(const ModuleTimer<T>& timer);
   void UnregisterAllTimers();
  private:
+  TimerDirector();
   DISALLOW_COPY_AND_ASSIGN(TimerDirector);
+  FRIEND_BASE_SINGLETON_CLASS(TimerDirector);
   std::map<std::string, threads::Thread*> timer_threads_;
-  typename std::map<std::string, TimerThreadDelegate<
-  Trackable>*> thread_delegates_;
 };
 
 }  //  namespace functional_modules

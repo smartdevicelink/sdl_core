@@ -57,6 +57,12 @@ class RequestController : public functional_modules::TimerObserver<TrackableMess
   RequestController();
 
   /**
+  * @brief Class destructor
+  *
+  */
+  virtual ~RequestController();
+
+  /**
    * @brief Adds pointer to request.
    * @param mobile_correlation_id mobile request correlation id
    * @param command pointer to request created in mobile factory
