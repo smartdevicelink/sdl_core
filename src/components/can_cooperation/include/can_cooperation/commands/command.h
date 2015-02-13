@@ -53,6 +53,11 @@ class Command {
    * \brief Command class destructor
    */
   virtual ~Command() {}
+
+  /**
+   * \brief Command on timeout reaction
+   */
+  virtual void OnTimeout() = 0;
 };
 
 }  // namespace commands

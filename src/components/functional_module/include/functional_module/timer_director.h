@@ -30,54 +30,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANANGER_H_
-#define SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANANGER_H_
+#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_H_
+#define SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_H_
 
 #include <map>
-#include "functional_module/generic_module.h"
-#include "application_manager/service.h"
-#include "application_manager/message.h"
+#include "utils/threads/thread.h"
+#include "utils/conditional_variable.h"
 #include "utils/singleton.h"
+#include "functional_module/module_timer.h"
 
 namespace functional_modules {
 
-class PluginManager : public utils::Singleton<PluginManager>,
-  public ModuleObserver {
+template<class T> class TimerThreadDelegate : public threads::ThreadDelegate {
  public:
-  typedef std::map<ModuleID, ModulePtr> Modules;
-  int LoadPlugins(const std::string& plugin_path);
-  void UnloadPlugins();
-  void ProcessMessage(application_manager::MessagePtr msg);
-  void ProcessHMIMessage(application_manager::MessagePtr msg);
-  void SetServiceHandler(application_manager::ServicePtr service) {
-    service_ = service;
-  }
-  bool IsMessageForPlugin(application_manager::MessagePtr msg);
-  bool IsHMIMessageForPlugin(application_manager::MessagePtr msg);
-  void OnServiceStateChanged(ServiceState state);
-  void OnHMIResponse(application_manager::MessagePtr msg);
-  void OnError(ModuleObserver::Errors error, ModuleID module_id);
-
-  /**
-   * @brief Remove extension created for specified application
-   * @param app_id application id
-   */
-  void RemoveAppExtension(uint32_t app_id);
-
+  explicit TimerThreadDelegate(ModuleTimer<T>& timer);
+  void threadMain();
+  bool exitThreadMain();
  private:
-  PluginManager();
-  ~PluginManager();
-  DISALLOW_COPY_AND_ASSIGN(PluginManager);
-  FRIEND_BASE_SINGLETON_CLASS(PluginManager);
-  Modules plugins_;
-  std::map<ModuleID, void*> dlls_;
-  std::map<MobileFunctionID, ModulePtr> mobile_subscribers_;
-  std::map<HMIFunctionID, ModulePtr> hmi_subscribers_;
-  application_manager::ServicePtr service_;
+  ModuleTimer<T>& timer_;
+  volatile bool keep_running_;
+  mutable sync_primitives::Lock keep_running_lock_;
+  mutable sync_primitives::ConditionalVariable keep_running_cond_;
+  friend class TimerThreadDelegateTest;
+};
 
-  friend class PluginManagerTest;
+class TimerDirector : public utils::Singleton<TimerDirector> {
+ public:
+  ~TimerDirector();
+
+  /*
+   * @brief Register timer for execution in separate thread.
+   Registers only one timer of a type. Attempt to register timer
+   of already existing type will fail.
+   */
+  template<class T> void RegisterTimer(ModuleTimer<T>& timer);
+  template<class T> void UnregisterTimer(const ModuleTimer<T>& timer);
+  void UnregisterAllTimers();
+ private:
+  TimerDirector();
+  DISALLOW_COPY_AND_ASSIGN(TimerDirector);
+  FRIEND_BASE_SINGLETON_CLASS(TimerDirector);
+  std::map<std::string, threads::Thread*> timer_threads_;
 };
 
 }  //  namespace functional_modules
 
-#endif  //  SRC_COMPONENTS_FUNCTIONAL_MODULE_INCLUDE_FUNCTIONAL_MODULE_PLUGIN_MANANGER_H_
+#endif  //  SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_H_

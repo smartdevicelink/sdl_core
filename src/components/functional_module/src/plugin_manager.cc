@@ -46,7 +46,7 @@ typedef std::map<MobileFunctionID, ModulePtr>::iterator PluginFunctionsIterator;
 typedef std::map<HMIFunctionID, ModulePtr>::iterator PluginHMIFunctionsIterator;
 
 PluginManager::PluginManager()
-: service_() {
+  : service_() {
   LOG4CXX_DEBUG(logger_, "Creating plugin mgr");
 }
 
@@ -60,12 +60,13 @@ PluginManager::~PluginManager() {
 int PluginManager::LoadPlugins(const std::string& plugin_path) {
   LOG4CXX_INFO(logger_, "Loading plugins from " << plugin_path);
   std::vector<std::string> plugin_files = file_system::ListFiles(
-    plugin_path);
-  for(size_t i = 0; i < plugin_files.size(); ++i) {
+      plugin_path);
+  for (size_t i = 0; i < plugin_files.size(); ++i) {
     size_t pos = plugin_files[i].find_last_of(".");
     if (std::string::npos != pos) {
-      if (plugin_files[i].substr(pos+1).compare("so") != 0)
+      if (plugin_files[i].substr(pos + 1).compare("so") != 0) {
         continue;
+      }
     } else {
       continue;
     }
@@ -73,7 +74,7 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
     void* generic_plugin_dll = dlopen(full_name.c_str(), RTLD_LAZY);
     if (NULL == generic_plugin_dll) {
       LOG4CXX_ERROR(logger_, "Failed to open dll " << plugin_files[i] << "\n"
-        << dlerror());
+                    << dlerror());
       continue;
     }
     typedef GenericModule* (*Create)();
@@ -81,7 +82,7 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
     char* error_string = dlerror();
     if (NULL != error_string) {
       LOG4CXX_ERROR(logger_, "Failed to export dll's " << plugin_files[i] << " symbols\n"
-        << error_string);
+                    << error_string);
       dlclose(generic_plugin_dll);
       continue;
     }
@@ -92,21 +93,21 @@ int PluginManager::LoadPlugins(const std::string& plugin_path) {
       continue;
     } else {
       LOG4CXX_DEBUG(logger_, "Opened and working plugin from "
-        << plugin_files[i] << " with id " << module->GetModuleID());
+                    << plugin_files[i] << " with id " << module->GetModuleID());
       dlls_.insert(std::pair<ModuleID, void*>(
-        module->GetModuleID(), generic_plugin_dll));
+                     module->GetModuleID(), generic_plugin_dll));
       plugins_.insert(std::pair<ModuleID, ModulePtr>(
-        module->GetModuleID(), module));
+                        module->GetModuleID(), module));
       std::deque<MobileFunctionID> subscribers = module->GetPluginInfo().mobile_function_list;
-      for(size_t i = 0; i < subscribers.size(); ++i) {
+      for (size_t i = 0; i < subscribers.size(); ++i) {
         mobile_subscribers_.insert(std::pair<MobileFunctionID, ModulePtr>(subscribers[i], module));
       }
 
       std::deque<HMIFunctionID> hmi_subscribers =
-          module->GetPluginInfo().hmi_function_list;
-      for(size_t i = 0; i < hmi_subscribers.size(); ++i) {
+        module->GetPluginInfo().hmi_function_list;
+      for (size_t i = 0; i < hmi_subscribers.size(); ++i) {
         hmi_subscribers_.insert(
-            std::pair<HMIFunctionID, ModulePtr>(hmi_subscribers[i], module));
+          std::pair<HMIFunctionID, ModulePtr>(hmi_subscribers[i], module));
       }
       module->set_service(service_);
       module->AddObserver(this);
@@ -122,7 +123,7 @@ void PluginManager::UnloadPlugins() {
   plugins_.clear();
 
   for (std::map<ModuleID, void*>::iterator it = dlls_.begin();
-    dlls_.end() != it; ++it) {
+       dlls_.end() != it; ++it) {
     dlclose(it->second);
   }
   dlls_.clear();
@@ -137,9 +138,9 @@ void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
     return;
   }
   if (application_manager::ProtocolVersion::kUnknownProtocol != msg->protocol_version()
-    && application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
+      && application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
     PluginFunctionsIterator subscribed_plugin_itr = mobile_subscribers_.find(
-        static_cast<MobileFunctionID>(msg->function_id()));
+          static_cast<MobileFunctionID>(msg->function_id()));
     if (mobile_subscribers_.end() != subscribed_plugin_itr) {
       if (ProcessResult::PROCESSED !=
           subscribed_plugin_itr->second->ProcessMessage(msg)) {
@@ -165,12 +166,12 @@ void PluginManager::ProcessHMIMessage(application_manager::MessagePtr msg) {
     // Request or notification from HMI
     if (value.isMember("method")) {
       function_name = value["method"].asCString();
-    // Response from HMI
+      // Response from HMI
     } else if (value.isMember("result") && value["result"].isMember("method")) {
       function_name = value["result"]["method"].asCString();
-    // Error response from HMI
+      // Error response from HMI
     }  else if (value.isMember("error") && value["error"].isMember("data") &&
-        value["error"]["data"].isMember("method")) {
+                value["error"]["data"].isMember("method")) {
       function_name = value["error"]["data"]["method"].asCString();
     } else {
       DCHECK(false);
@@ -178,7 +179,7 @@ void PluginManager::ProcessHMIMessage(application_manager::MessagePtr msg) {
   }
 
   PluginHMIFunctionsIterator subscribed_plugin_itr =
-      hmi_subscribers_.find(function_name);
+    hmi_subscribers_.find(function_name);
   if (hmi_subscribers_.end() != subscribed_plugin_itr) {
     if (ProcessResult::PROCESSED !=
         subscribed_plugin_itr->second->ProcessHMIMessage(msg)) {
@@ -194,7 +195,7 @@ bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {
     return false;
   }
   if (application_manager::ProtocolVersion::kUnknownProtocol != msg->protocol_version()
-    && application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
+      && application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
     MobileFunctionID id = static_cast<MobileFunctionID>(msg->function_id());
     return (mobile_subscribers_.find(id) != mobile_subscribers_.end());
   } else {
@@ -218,14 +219,14 @@ bool PluginManager::IsHMIMessageForPlugin(application_manager::MessagePtr msg) {
     // Request or notification from HMI
     if (value.isMember("method")) {
       return (hmi_subscribers_.find(value["method"].asCString()) !=
-            hmi_subscribers_.end());
-    // Response from HMI
+              hmi_subscribers_.end());
+      // Response from HMI
     } else if (value.isMember("result") && value["result"].isMember("method")) {
       return (hmi_subscribers_.find(value["result"]["method"].asCString()) !=
               hmi_subscribers_.end());
-    // Error response from HMI
+      // Error response from HMI
     }  else if (value.isMember("error") && value["error"].isMember("data") &&
-        value["error"]["data"].isMember("method")) {
+                value["error"]["data"].isMember("method")) {
       return (hmi_subscribers_.find(value["error"]["data"]["method"].asCString()) !=
               hmi_subscribers_.end());
     } else {
@@ -237,8 +238,8 @@ bool PluginManager::IsHMIMessageForPlugin(application_manager::MessagePtr msg) {
 }
 
 void PluginManager::OnServiceStateChanged(ServiceState state) {
-  for(PluginsIterator it = plugins_.begin();
-    plugins_.end() != it; ++it) {
+  for (PluginsIterator it = plugins_.begin();
+       plugins_.end() != it; ++it) {
     it->second->OnServiceStateChanged(state);
   }
 }
@@ -249,7 +250,7 @@ void PluginManager::OnHMIResponse(application_manager::MessagePtr msg) {
 
 void PluginManager::OnError(ModuleObserver::Errors error, ModuleID module_id) {
   std::string error_string;
-  switch(error) {
+  switch (error) {
     case ModuleObserver::Errors::OUT_OF_MEMORY:
       error_string = "Module run out of memory.";
       break;
@@ -258,13 +259,13 @@ void PluginManager::OnError(ModuleObserver::Errors error, ModuleID module_id) {
       break;
     default: break;
   }
-  LOG4CXX_ERROR(logger_, "Error " << error_string << 
-    " was received from module " << module_id);
+  LOG4CXX_ERROR(logger_, "Error " << error_string <<
+                " was received from module " << module_id);
   // TODO(PV)
 }
 
 void PluginManager::RemoveAppExtension(uint32_t app_id) {
-  for(PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
+  for (PluginsIterator it = plugins_.begin(); plugins_.end() != it; ++it) {
     it->second->RemoveAppExtension(app_id);
   }
 }

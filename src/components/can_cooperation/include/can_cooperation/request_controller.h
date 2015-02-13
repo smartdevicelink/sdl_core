@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
 
 #include "can_cooperation/commands/command.h"
+#include "can_cooperation/can_module_timer.h"
 
 #include <map>
 
@@ -43,10 +44,10 @@ namespace request_controller {
 typedef utils::SharedPtr<commands::Command> MobileRequestPtr;
 typedef uint32_t  correlation_id;
 
-  /**
-   * @brief RequestController class is used to manage mobile requests lifetime.
-   */
-class RequestController {
+/**
+ * @brief RequestController class is used to manage mobile requests lifetime.
+ */
+class RequestController : public functional_modules::TimerObserver<TrackableMessage> {
  public:
 
   /**
@@ -54,6 +55,12 @@ class RequestController {
   *
   */
   RequestController();
+
+  /**
+  * @brief Class destructor
+  *
+  */
+  virtual ~RequestController();
 
   /**
    * @brief Adds pointer to request.
@@ -69,10 +76,13 @@ class RequestController {
    */
   void DeleteRequest(const uint32_t& mobile_correlation_id);
 
+  void OnTimeoutTriggered(const TrackableMessage& expired);
+
  private:
   DISALLOW_COPY_AND_ASSIGN(RequestController);
 
   std::map<correlation_id, MobileRequestPtr> mobile_request_list_;
+  functional_modules::ModuleTimer<TrackableMessage> timer_;
 };
 
 }  // namespace request_controller

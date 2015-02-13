@@ -60,6 +60,11 @@ class BaseCommandNotification : public Command {
    */
   virtual ~BaseCommandNotification();
 
+  /**
+   * \brief BaseCommandNotification on timeout reaction
+   */
+  virtual void OnTimeout() {}
+
  protected:
   application_manager::MessagePtr message_;
   application_manager::ServicePtr service_;
@@ -72,7 +77,7 @@ class BaseCommandNotification : public Command {
    * @return pointer to application
    */
   application_manager::ApplicationSharedPtr GetApplicationWithControl(
-                                        CANAppExtensionPtr& can_app_extension);
+    CANAppExtensionPtr& can_app_extension);
 
 };
 

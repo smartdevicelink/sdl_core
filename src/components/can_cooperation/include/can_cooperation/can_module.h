@@ -44,15 +44,15 @@ class Thread;
 
 namespace can_cooperation {
 class CANModule : public functional_modules::GenericModule,
-    public utils::Singleton<CANModule>, public threads::MessageLoopThread<
-        std::queue<MessageFromCAN>>::Handler, public threads::MessageLoopThread<
-        std::queue<std::string>>::Handler {
+  public utils::Singleton<CANModule>, public threads::MessageLoopThread <
+  std::queue<MessageFromCAN >>::Handler, public threads::MessageLoopThread <
+                            std::queue<std::string >>::Handler {
  public:
   functional_modules::PluginInfo GetPluginInfo() const;
   virtual functional_modules::ProcessResult ProcessMessage(
-      application_manager::MessagePtr msg);
+    application_manager::MessagePtr msg);
   virtual functional_modules::ProcessResult ProcessHMIMessage(
-      application_manager::MessagePtr msg);
+    application_manager::MessagePtr msg);
   void ProcessCANMessage(const MessageFromCAN& can_msg);
   void Handle(const std::string message);
   void Handle(const MessageFromCAN message);
@@ -62,6 +62,12 @@ class CANModule : public functional_modules::GenericModule,
    * @param msg response mesage
    */
   void SendResponseToMobile(application_manager::MessagePtr msg);
+
+  /**
+   * @brief Sends timeout response to mobile application
+   * @param msg response mesage
+   */
+  void SendTimeoutResponseToMobile(application_manager::MessagePtr msg);
 
   /**
    * @brief Post message to can to queue
@@ -93,14 +99,14 @@ class CANModule : public functional_modules::GenericModule,
    */
   virtual void RemoveAppExtensions();
  private:
-  DISALLOW_COPY_AND_ASSIGN(CANModule);FRIEND_BASE_SINGLETON_CLASS(CANModule);
+  DISALLOW_COPY_AND_ASSIGN(CANModule); FRIEND_BASE_SINGLETON_CLASS(CANModule);
   CANModule();
   ~CANModule();
 
   void SubscribeOnFunctions();
 
   functional_modules::ProcessResult HandleMessage(
-      application_manager::MessagePtr msg);
+    application_manager::MessagePtr msg);
   // TODO(VS): must be uid
   static const functional_modules::ModuleID kCANModuleID = 153;
   CANConnectionSPtr can_connection_;

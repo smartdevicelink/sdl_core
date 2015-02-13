@@ -37,6 +37,7 @@
 #include "SmartDeviceLinkMainApp.h"
 #endif
 #include "resumption/last_state.h"
+#include "functional_module/timer_director_impl.h"
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager_impl.h"
@@ -84,14 +85,14 @@ LifeCycle::LifeCycle()
   , mb_adapter_thread_(NULL)
 #endif  // MESSAGEBROKER_HMIADAPTER
 #ifdef CUSTOMER_PASA
-// Todd: PASA support
+  // Todd: PASA support
 #ifdef PASA_HMI
   , mb_pasa_adapter_(NULL)
   , mb_pasa_adapter_thread_(NULL)
 #endif  // PASA_HMI
 #endif  // CUSTOMER_PASA
-  , components_started(false)
-{ }
+  , components_started(false) {
+}
 
 bool LifeCycle::StartComponents() {
   LOG4CXX_INFO(logger_, "LifeCycle::StartComponents()");
@@ -125,35 +126,35 @@ bool LifeCycle::StartComponents() {
   // FIXME(EZamakhov): move to Config or in Sm initialization method
   std::string cert_filename;
   profile::Profile::instance()->ReadStringValue(
-        &cert_filename, "",
-        security_manager::SecurityManagerImpl::ConfigSection(), "CertificatePath");
+    &cert_filename, "",
+    security_manager::SecurityManagerImpl::ConfigSection(), "CertificatePath");
 
   std::string ssl_mode;
   profile::Profile::instance()->ReadStringValue(
-          &ssl_mode, "CLIENT", security_manager::SecurityManagerImpl::ConfigSection(), "SSLMode");
+    &ssl_mode, "CLIENT", security_manager::SecurityManagerImpl::ConfigSection(), "SSLMode");
   crypto_manager_ = new security_manager::CryptoManagerImpl();
 
   std::string key_filename;
   profile::Profile::instance()->ReadStringValue(
-        &key_filename, "", security_manager::SecurityManagerImpl::ConfigSection(), "KeyPath");
+    &key_filename, "", security_manager::SecurityManagerImpl::ConfigSection(), "KeyPath");
 
   std::string ciphers_list;
   profile::Profile::instance()->ReadStringValue(
-        &ciphers_list, SSL_TXT_ALL, security_manager::SecurityManagerImpl::ConfigSection(), "CipherList");
+    &ciphers_list, SSL_TXT_ALL, security_manager::SecurityManagerImpl::ConfigSection(), "CipherList");
 
   bool verify_peer;
   profile::Profile::instance()->ReadBoolValue(
-        &verify_peer, false, security_manager::SecurityManagerImpl::ConfigSection(), "VerifyPeer");
+    &verify_peer, false, security_manager::SecurityManagerImpl::ConfigSection(), "VerifyPeer");
 
   std::string protocol_name;
   profile::Profile::instance()->ReadStringValue(
-      &protocol_name, "TLSv1.2", security_manager::SecurityManagerImpl::ConfigSection(), "Protocol");
+    &protocol_name, "TLSv1.2", security_manager::SecurityManagerImpl::ConfigSection(), "Protocol");
 
   security_manager::Protocol protocol;
   if (protocol_name == "TLSv1.0") {
     protocol = security_manager::TLSv1;
   } else if (protocol_name == "TLSv1.1") {
-      protocol = security_manager::TLSv1_1;
+    protocol = security_manager::TLSv1_1;
   } else if (protocol_name == "TLSv1.2") {
     protocol = security_manager::TLSv1_2;
   } else if (protocol_name == "SSLv3") {
@@ -164,12 +165,12 @@ bool LifeCycle::StartComponents() {
   }
 
   if (!crypto_manager_->Init(
-      ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
-          protocol,
-          cert_filename,
-          key_filename,
-          ciphers_list,
-          verify_peer)) {
+        ssl_mode == "SERVER" ? security_manager::SERVER : security_manager::CLIENT,
+        protocol,
+        cert_filename,
+        key_filename,
+        ciphers_list,
+        verify_peer)) {
     LOG4CXX_ERROR(logger_, "CryptoManager initialization fail.");
     return false;
   }
@@ -234,7 +235,7 @@ bool LifeCycle::StartComponents() {
   LOG4CXX_INFO(logger_, "InitMessageBroker successful");
 
   plugin_manager_->OnServiceStateChanged(
-      functional_modules::ServiceState::HMI_ADAPTER_INITIALIZED);
+    functional_modules::ServiceState::HMI_ADAPTER_INITIALIZED);
 
   return true;
 }
@@ -246,7 +247,7 @@ bool LifeCycle::InitMessageSystem() {
     hmi_message_handler::HMIMessageHandlerImpl::instance(),
     std::string(PREFIX_STR_FROMSDL_QUEUE),
     std::string(PREFIX_STR_TOSDL_QUEUE));
-    hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
+  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     mb_pasa_adapter_);
   if (!mb_pasa_adapter_->MqOpen()) {
     LOG4CXX_FATAL(logger_, "Cannot connect to remote peer!");
@@ -309,12 +310,12 @@ bool LifeCycle::InitMessageSystem() {
     profile::Profile::instance()->server_address(),
     profile::Profile::instance()->server_port());
 
-    hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
+  hmi_message_handler::HMIMessageHandlerImpl::instance()->AddHMIMessageAdapter(
     mb_adapter_);
-    if (!mb_adapter_->Connect()) {
-      LOG4CXX_FATAL(logger_, "Cannot connect to remote peer!");
-      return false;
-    }
+  if (!mb_adapter_->Connect()) {
+    LOG4CXX_FATAL(logger_, "Cannot connect to remote peer!");
+    return false;
+  }
 
   LOG4CXX_INFO(logger_, "Start CMessageBroker thread!");
   mb_thread_ = new System::Thread(
@@ -396,6 +397,7 @@ void LifeCycle::StopComponents() {
     LOG4CXX_ERROR(logger_, "Components wasn't started");
     return;
   }
+  functional_modules::TimerDirector::instance()->UnregisterAllTimers();
   hmi_handler_->set_message_observer(NULL);
   connection_handler_->set_connection_handler_observer(NULL);
   protocol_handler_->RemoveProtocolObserver(app_manager_);
@@ -511,7 +513,7 @@ void LifeCycle::StopComponents() {
     time_tester_ = NULL;
   }
 #endif  // TIME_TESTER
-  components_started =false;
+  components_started = false;
   LOG4CXX_TRACE(logger_, "exit");
 }
 
