@@ -1,5 +1,5 @@
 #include "utils/macro.h"
-#include "functional_module/module_timer.h"
+#include "functional_module/timer/module_timer.h"
 
 namespace functional_modules {
 
@@ -7,17 +7,17 @@ class TestTrackable : public Trackable {
  public:
   explicit TestTrackable(TimeUnit interval = 0)
     : Trackable()
-    , custorm_interval_(interval) {}
+    , custom_interval_(interval) {}
 
-  virtual TimeUnit custorm_interval() const {
-    return custorm_interval_;
+  virtual TimeUnit custom_interval() const {
+    return custom_interval_;
   }
 
   bool operator==(const TestTrackable& other) const {
-    return custorm_interval_ == other.custorm_interval_;
+    return custom_interval_ == other.custom_interval_;
   }
  private:
-  TimeUnit custorm_interval_;
+  TimeUnit custom_interval_;
 };
 
 class ModuleTimerTest {

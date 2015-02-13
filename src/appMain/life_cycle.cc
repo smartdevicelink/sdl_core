@@ -37,7 +37,7 @@
 #include "SmartDeviceLinkMainApp.h"
 #endif
 #include "resumption/last_state.h"
-#include "functional_module/timer_director_impl.h"
+#include "functional_module/timer/timer_director_impl.h"
 
 #ifdef ENABLE_SECURITY
 #include "security_manager/security_manager_impl.h"

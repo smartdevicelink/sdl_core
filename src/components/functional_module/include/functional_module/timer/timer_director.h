@@ -37,7 +37,7 @@
 #include "utils/threads/thread.h"
 #include "utils/conditional_variable.h"
 #include "utils/singleton.h"
-#include "functional_module/module_timer.h"
+#include "functional_module/timer/module_timer.h"
 
 namespace functional_modules {
 

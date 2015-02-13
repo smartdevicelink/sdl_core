@@ -33,16 +33,14 @@
 #ifndef SRC_COMPONENTS_CAN_MODULE_INCLUDE_CAN_MODULE_CAN_MODULE_TIMER_H_
 #define SRC_COMPONENTS_CAN_MODULE_INCLUDE_CAN_MODULE_CAN_MODULE_TIMER_H_
 
-#include "functional_module/module_timer.h"
+#include "functional_module/timer/module_timer.h"
 
 namespace can_cooperation {
 
 class TrackableMessage : public functional_modules::Trackable {
  public:
   TrackableMessage(uint32_t app_id, uint32_t correlation_id)
-    : custorm_interval_(0)
-    , app_id_(app_id)
-    , correlation_id_(correlation_id) {
+    : custorm_interval_(0), app_id_(app_id), correlation_id_(correlation_id) {
   }
 
   functional_modules::TimeUnit custorm_interval() const {

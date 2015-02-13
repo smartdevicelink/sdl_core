@@ -33,7 +33,7 @@
 #ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_IMPL_H_
 #define SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_IMPL_H_
 
-#include "functional_module/timer_director.h"
+#include "functional_module/timer/timer_director.h"
 #include <typeinfo>
 #include "utils/logger.h"
 
@@ -41,8 +41,7 @@ namespace functional_modules {
 
 template<class T>
 TimerThreadDelegate<T>::TimerThreadDelegate(ModuleTimer<T>& timer)
-  : timer_(timer)
-  , keep_running_(false) {
+  : timer_(timer), keep_running_(false) {
 }
 
 template<class T>
@@ -56,9 +55,10 @@ void TimerThreadDelegate<T>::threadMain() {
   }
   sync_primitives::AutoLock run_lock(keep_running_lock_);
   while (keep_running_) {
+    const size_t kMilisecsC = 1000;
     sync_primitives::ConditionalVariable::WaitStatus wait_status =
       keep_running_cond_.WaitFor(run_lock,
-                                 timer_.period() * 1000);
+                                 timer_.period() * kMilisecsC);
     if (sync_primitives::ConditionalVariable::kTimeout ==
         wait_status && keep_running_) {
       timer_.CheckTimeout();

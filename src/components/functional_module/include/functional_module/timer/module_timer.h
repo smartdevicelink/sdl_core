@@ -48,7 +48,7 @@ class Trackable {
   Trackable()
     : start_time_(0) {}
   virtual ~Trackable() {}
-  virtual TimeUnit custorm_interval() const {
+  virtual TimeUnit custom_interval() const {
     return 0;
   }
   virtual TimeUnit start_time() const {
@@ -71,10 +71,10 @@ template<class Trackable> class ModuleTimer {
  public:
   ModuleTimer();
   ~ModuleTimer();
-  inline void set_period(TimeUnit period) {
+  void set_period(TimeUnit period) {
     period_ = period;
   }
-  inline TimeUnit period() const {
+  TimeUnit period() const {
     return period_;
   }
   void AddObserver(TimerObserver<Trackable>* observer);
@@ -145,7 +145,7 @@ void ModuleTimer<Trackable>::CheckTimeout() {
   sync_primitives::AutoLock trackables_lock(trackables_lock_);
   for (typename std::list<Trackable>::iterator it = trackables_.begin();
        trackables_.end() != it; ++it) {
-    TimeUnit period = it->custorm_interval();
+    TimeUnit period = it->custom_interval();
     if (!period) {
       period = period_;
     }
@@ -201,13 +201,6 @@ TimeUnit ModuleTimer<Trackable>::CurrentTime() const {
     return 0;
   }
 }
-
-/*template<class Trackable>
-bool ModuleTimer<Trackable>::keep_running() const {
-  sync_primitives::AutoLock run_lock(keep_running_lock_);
-  bool keep_running = keep_running_;
-  return keep_running;
-}*/
 
 }  //  namespace functional_modules
 
