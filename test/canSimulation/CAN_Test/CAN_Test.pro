@@ -7,7 +7,7 @@
 # Adds the CANLib project path to the header file include lookup path
 INCLUDEPATH += $$PWD/../CANlib
 
-QT       += core testlib
+QT       += core testlib network
 
 QT       -= gui
 

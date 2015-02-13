@@ -4,8 +4,6 @@
 #include <QtNetwork>
 #include <QTcpSocket>
 #include "messageHandler.h"
-//class QTcpServer;
-//class QNetworkSession;
 
 class Server : public QObject
 {

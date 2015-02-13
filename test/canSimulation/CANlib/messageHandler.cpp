@@ -63,8 +63,8 @@ void MessageHandler::process()
 
     while (messagePull.count() > 0) {
 
-        writeToTCP(messagePull[0]);
         mutex->lock();
+        writeToTCP(messagePull[0]);
         messagePull.pop_front();
         mutex->unlock();
     }

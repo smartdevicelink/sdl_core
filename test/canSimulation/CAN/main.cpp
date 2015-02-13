@@ -2,7 +2,6 @@
 #include <QQmlApplicationEngine>
 #include "canlib.h"
 #include "loger.h"
-#include <QDebug>
 
 QObject* rootObject = NULL;
 
