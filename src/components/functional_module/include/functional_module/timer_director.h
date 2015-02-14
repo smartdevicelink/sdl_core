@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2014, Ford Motor Company
+/*
+ * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,56 +30,49 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
-#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
-
-#include "can_cooperation/commands/command.h"
-#include "can_cooperation/can_module_timer.h"
+#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_H_
+#define SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_H_
 
 #include <map>
+#include "utils/threads/thread.h"
+#include "utils/conditional_variable.h"
+#include "functional_module/module_timer.h"
 
-namespace can_cooperation {
-namespace request_controller {
+namespace functional_modules {
 
-typedef utils::SharedPtr<commands::Command> MobileRequestPtr;
-typedef uint32_t  correlation_id;
-
-/**
- * @brief RequestController class is used to manage mobile requests lifetime.
- */
-class RequestController : public functional_modules::TimerObserver<TrackableMessage> {
+template<class Trackable> class TimerThreadDelegate : public threads::ThreadDelegate {
  public:
-
-  /**
-  * @brief Class constructor
-  *
-  */
-  RequestController();
-
-  /**
-   * @brief Adds pointer to request.
-   * @param mobile_correlation_id mobile request correlation id
-   * @param command pointer to request created in mobile factory
-   */
-  void AddRequest(const uint32_t& mobile_correlation_id,
-                  MobileRequestPtr request);
-
-  /**
-   * @brief Removes request
-   * @param mobile_corellation_id mobile request correlation id
-   */
-  void DeleteRequest(const uint32_t& mobile_correlation_id);
-
-  void OnTimeoutTriggered(const TrackableMessage& expired);
-
+  explicit TimerThreadDelegate(const ModuleTimer<Trackable>& timer);
+  void threadMain();
+  bool exitThreadMain();
  private:
-  DISALLOW_COPY_AND_ASSIGN(RequestController);
-
-  std::map<correlation_id, MobileRequestPtr> mobile_request_list_;
-  functional_modules::ModuleTimer<TrackableMessage> timer_;
+  ModuleTimer<Trackable>& timer_;
+  volatile bool keep_running_;
+  mutable sync_primitives::Lock keep_running_lock_;
+  mutable sync_primitives::ConditionalVariable keep_running_cond_;
+  friend class TimerThreadDelegateTest;
 };
 
-}  // namespace request_controller
-}  // namespace can_cooperation
+class TimerDirector {
+ public:
+  TimerDirector();
+  ~TimerDirector();
 
-#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_REQUEST_CONTROLLER_H_
+  /*
+   * @brief Register timer for execution in separate thread.
+   Registers only one timer of a type. Attempt to register timer
+   of already existing type will fail.
+   */
+  template<class Trackable> void RegisterTimer(const ModuleTimer<Trackable>& timer);
+  template<class Trackable> void UnregisterTimer(const ModuleTimer<Trackable>& timer);
+  void UnregisterAllTimers();
+ private:
+  DISALLOW_COPY_AND_ASSIGN(TimerDirector);
+  std::map<std::string, threads::Thread*> timer_threads_;
+  typename std::map<std::string, TimerThreadDelegate<
+  Trackable>*> thread_delegates_;
+};
+
+}  //  namespace functional_modules
+
+#endif  //  SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_H_

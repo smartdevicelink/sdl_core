@@ -30,48 +30,44 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_H_
-#define SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_H_
+#ifndef SRC_COMPONENTS_CAN_MODULE_INCLUDE_CAN_MODULE_CAN_MODULE_TIMER_H_
+#define SRC_COMPONENTS_CAN_MODULE_INCLUDE_CAN_MODULE_CAN_MODULE_TIMER_H_
 
-#include <map>
-#include "utils/threads/thread.h"
-#include "utils/conditional_variable.h"
 #include "functional_module/module_timer.h"
 
-namespace functional_modules {
+namespace can_cooperation {
 
-template<class Trackable> class TimerThreadDelegate : public threads::ThreadDelegate {
+class TrackableMessage : public functional_modules::Trackable {
  public:
-  explicit TimerThreadDelegate(const ModuleTimer<Trackable>& timer);
-  void threadMain();
-  bool exitThreadMain();
+  TrackableMessage(uint32_t app_id, uint32_t correlation_id)
+    : custorm_interval_(0)
+    , app_id_(app_id)
+    , correlation_id_(correlation_id) {
+  }
+
+  functional_modules::TimeUnit custorm_interval() const {
+    return custorm_interval_;
+  }
+
+  uint32_t app_id() const {
+    return app_id_;
+  }
+
+  uint32_t correlation_id() const {
+    return correlation_id_;
+  }
+
+  bool operator==(const TrackableMessage& other) const {
+    return (other.app_id_ == app_id_ &&
+            other.correlation_id_ == correlation_id_);
+  }
+
  private:
-  ModuleTimer<Trackable>& timer_;
-  volatile bool keep_running_;
-  mutable sync_primitives::Lock keep_running_lock_;
-  mutable sync_primitives::ConditionalVariable keep_running_cond_;
+  functional_modules::TimeUnit custorm_interval_;
+  uint32_t app_id_;
+  uint32_t correlation_id_;
 };
 
-class TimerDirector {
- public:
-  TimerDirector();
-  ~TimerDirector();
+}  //  namesapce can_cooperation
 
-  /*
-   * @brief Register timer for execution in separate thread.
-   Registers only one timer of a type. Attempt to register timer
-   of already existing type will fail.
-   */
-  template<class Trackable> void RegisterTimer(const ModuleTimer<Trackable>& timer);
-  template<class Trackable> void UnregisterTimer(const ModuleTimer<Trackable>& timer);
-  void UnregisterAllTimers();
- private:
-  DISALLOW_COPY_AND_ASSIGN(TimerDirector);
-  std::map<std::string, threads::Thread*> timer_threads_;
-  typename std::map<std::string, TimerThreadDelegate<
-  Trackable>*> thread_delegates_;
-};
-
-}  //  namespace functional_modules
-
-#endif  //  SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_H_
+#endif  //  SRC_COMPONENTS_CAN_MODULE_INCLUDE_CAN_MODULE_CAN_MODULE_TIMER_H_

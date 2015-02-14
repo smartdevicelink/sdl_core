@@ -36,15 +36,27 @@ namespace can_cooperation {
 namespace request_controller {
 
 RequestController::RequestController() {
+  // TODO(PV): read from ini
+  timer_.set_period(10);
+  timer_.AddObserver(this);
 }
 
 void RequestController::AddRequest(const uint32_t& mobile_correlation_id,
                                    MobileRequestPtr request) {
   mobile_request_list_[mobile_correlation_id] = request;
+  // TODO(VS): add app id
+  timer_.AddTrackable(TrackableMessage(0, mobile_correlation_id));
 }
 
 void RequestController::DeleteRequest(const uint32_t& mobile_correlation_id) {
   mobile_request_list_.erase(mobile_correlation_id);
+  //  TODO(VS): add app id
+  timer_.RemoveTrackable(TrackableMessage(0, mobile_correlation_id));
+}
+
+void RequestController::OnTimeoutTriggered(const TrackableMessage& expired) {
+  // TODO(PV): create negative response
+  mobile_request_list_.erase(expired.correlation_id());
 }
 
 }  //  namespace request_controller

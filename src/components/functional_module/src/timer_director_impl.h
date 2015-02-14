@@ -30,13 +30,14 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "./timer_director.h"
+#ifndef SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_IMPL_H_
+#define SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_IMPL_H_
+
+#include "functional_module/timer_director.h"
 #include <typeinfo>
 #include "utils/logger.h"
 
 namespace functional_modules {
-
-CREATE_LOGGERPTR_GLOBAL(logger_, "TimerDirector");
 
 template<class Trackable>
 TimerThreadDelegate<Trackable>::TimerThreadDelegate(const ModuleTimer<Trackable>& timer)
@@ -88,7 +89,7 @@ void TimerDirector::RegisterTimer(const ModuleTimer<Trackable>& timer) {
   std::map<std::string, threads::Thread*>::iterator it =
     timer_threads_.find(type_name);
   if (timer_threads_.end() != it) {
-    LOG4CXX_WARN(logger_, "Attempt to register timer of already existing type fail.");
+    //  Attempt to register timer of already existing type fail.
     return;
   }
   TimerThreadDelegate<Trackable>* delegate = new TimerThreadDelegate<Trackable>(
@@ -102,7 +103,7 @@ void TimerDirector::RegisterTimer(const ModuleTimer<Trackable>& timer) {
       std::make_pair<std::string, TimerThreadDelegate<Trackable>*>(
         type_name, delegate));
   } else {
-    LOG4CXX_ERROR(logger_, "Failed to start timer thread for " << type_name);
+    //  Failed to start timer thread for "
   }
 }
 typedef typename std::map<std::string,
@@ -114,8 +115,7 @@ void TimerDirector::UnregisterTimer(const ModuleTimer<Trackable>& timer) {
   std::map<std::string, threads::Thread*>::iterator it =
     timer_threads_.find(type_name);
   if (timer_threads_.end() == it) {
-    LOG4CXX_ERROR(logger_, "Failed to unregister timer that was \
-        not registered " << type_name);
+    ///  Failed to unregister timer that was not registered
     return;
   }
   it->second->stop();
@@ -143,3 +143,5 @@ void TimerDirector::UnregisterAllTimers() {
 }
 
 }  //  namespace functional_modules
+
+#endif  //  SRC_COMPONENTS_FUNCTIONAL_MODULE_SRC_TIMER_DIRECTOR_IMPL_H_

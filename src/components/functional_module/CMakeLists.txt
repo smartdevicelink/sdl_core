@@ -12,7 +12,6 @@ include_directories (
 set (SOURCES
     ./src/generic_module.cc
     ./src/plugin_manager.cc
-    ./src/timer_director.cc
 )
 
 add_library("FunctionalModule" ${SOURCES})
