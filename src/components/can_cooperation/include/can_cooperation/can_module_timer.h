@@ -40,11 +40,11 @@ namespace can_cooperation {
 class TrackableMessage : public functional_modules::Trackable {
  public:
   TrackableMessage(uint32_t app_id, uint32_t correlation_id)
-    : custorm_interval_(0), app_id_(app_id), correlation_id_(correlation_id) {
+    : custom_interval_(0), app_id_(app_id), correlation_id_(correlation_id) {
   }
 
-  functional_modules::TimeUnit custorm_interval() const {
-    return custorm_interval_;
+  functional_modules::TimeUnit custom_interval() const {
+    return custom_interval_;
   }
 
   uint32_t app_id() const {
@@ -61,7 +61,7 @@ class TrackableMessage : public functional_modules::Trackable {
   }
 
  private:
-  functional_modules::TimeUnit custorm_interval_;
+  functional_modules::TimeUnit custom_interval_;
   uint32_t app_id_;
   uint32_t correlation_id_;
 };
