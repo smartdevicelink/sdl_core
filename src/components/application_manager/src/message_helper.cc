@@ -1873,9 +1873,9 @@ void MessageHelper::SendLaunchApp(uint32_t connection_key,
   content[strings::msg_params][strings::request_type] = RequestType::LAUNCH_APP;
   content[strings::msg_params][strings::app_id] = connection_key;
   if (!urlSchema.empty()) {
-    content[strings::msg_params][strings::urlScheme] = urlSchema;
+    content[strings::msg_params][strings::url] = urlSchema;
   } else if (!packageName.empty()) {
-    content[strings::msg_params][strings::packageName] = packageName;
+    content[strings::msg_params][strings::url] = packageName;
   }
 
   SendSystemRequestNotification(connection_key, content);
