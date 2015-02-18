@@ -281,10 +281,6 @@ void RegisterAppInterfaceRequest::Run() {
         device_info);
 
     SendRegisterAppInterfaceResponseToMobile();
-
-    //MessageHelper::SendLockScreenIconUrlNotification(
-    //(*message_)[strings::params][strings::connection_key].asInt());
-
     policy::PolicyHandler::instance()->PTExchangeAtRegistration(mobile_app_id);
   }
 }
