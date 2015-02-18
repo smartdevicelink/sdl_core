@@ -30,15 +30,16 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_QDB_WRAPPER_INCLUDE_QDB_WRAPPER_SQL_DATABASE_H_
-#define SRC_COMPONENTS_POLICY_QDB_WRAPPER_INCLUDE_QDB_WRAPPER_SQL_DATABASE_H_
+#ifndef SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_DATABASE_H_
+#define SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_DATABASE_H_
 
-#include <qdb/qdb.h>
 #include <string>
-#include "qdb_wrapper/sql_error.h"
+#include "sqlite_wrapper/sql_error.h"
 #include "utils/lock.h"
 
-namespace policy {
+struct sqlite3;
+
+namespace utils {
 namespace dbms {
 
 class SQLQuery;
@@ -48,7 +49,8 @@ class SQLQuery;
  */
 class SQLDatabase {
  public:
-  explicit SQLDatabase(const std::string& db_name);
+  SQLDatabase();
+  explicit SQLDatabase(const std::string& filename);
   ~SQLDatabase();
 
   /**
@@ -87,21 +89,34 @@ class SQLDatabase {
   SQLError LastError() const;
 
   /**
+   * Sets path to database
+   * If the database is already opened then need reopen it
+   */
+  void set_path(const std::string& path);
+
+  /**
+   * Checks if database is read/write
+   * @return true if database is read/write
+   */
+  bool IsReadWrite();
+
+  /**
    * Call backup for opened DB
    */
   bool Backup();
+
  protected:
   /**
    * Gets connection to the SQLite database
    * @return pointer to connection
    */
-  qdb_hdl_t* conn() const;
+  sqlite3* conn() const;
 
  private:
   /**
    * The connection to the SQLite database
    */
-  qdb_hdl_t* conn_;
+  sqlite3* conn_;
 
   /**
    * Lock for guarding connection to database
@@ -109,14 +124,25 @@ class SQLDatabase {
   sync_primitives::Lock conn_lock_;
 
   /**
-   * The database name
+   * The filename of database
    */
-  std::string db_name_;
+  std::string databasename_;
 
   /**
    * The last error that occurred on the database
    */
-  Error error_;
+  int error_;
+
+  /**
+   *  The temporary in-memory database
+   *  @see SQLite manual
+   */
+  static const std::string kInMemory;
+
+  /**
+   * The extension of filename of database
+   */
+  static const std::string kExtension;
 
   /**
    * Execs query for internal using in this class
@@ -129,6 +155,6 @@ class SQLDatabase {
 };
 
 }  // namespace dbms
-}  // namespace policy
+}  // namespace utils
 
-#endif  // SRC_COMPONENTS_POLICY_QDB_WRAPPER_INCLUDE_QDB_WRAPPER_SQL_DATABASE_H_
+#endif  // SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_DATABASE_H_

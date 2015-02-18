@@ -33,7 +33,7 @@
 #include "sqlite_wrapper/sql_database.h"
 #include <sqlite3.h>
 
-namespace policy {
+namespace utils {
 namespace dbms {
 
 const std::string SQLDatabase::kInMemory = ":memory:";
@@ -107,4 +107,4 @@ bool SQLDatabase::Backup() {
    return true;
 }
 }  // namespace dbms
-}  // namespace policy
+}  // namespace utils

@@ -32,7 +32,7 @@
 
 #include "sqlite_wrapper/sql_error.h"
 
-namespace policy {
+namespace utils {
 namespace dbms {
 
 SQLError::SQLError(Error number, const std::string& text)
@@ -149,5 +149,5 @@ std::string SQLError::text() const {
 }
 
 }  // namespace dbms
-}  // namespace policy
+}  // namespace utils
 

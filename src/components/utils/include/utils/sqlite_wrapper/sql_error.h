@@ -35,7 +35,7 @@
 
 #include <string>
 
-namespace policy {
+namespace utils {
 namespace dbms {
 
 typedef enum Error {
@@ -104,6 +104,6 @@ class SQLError {
 };
 
 }  // namespace dbms
-}  // namespace policy
+}  // namespace utils
 
 #endif  // SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_ERROR_H_

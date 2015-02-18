@@ -38,13 +38,13 @@
 #include "qdb_wrapper/sql_database.h"
 #include "qdb_wrapper/sql_query.h"
 
-using ::policy::dbms::SQLError;
-using ::policy::dbms::SQLDatabase;
-using ::policy::dbms::SQLQuery;
+using ::utils::dbms::SQLError;
+using ::utils::dbms::SQLDatabase;
+using ::utils::dbms::SQLQuery;
 
 namespace test {
 namespace components {
-namespace policy {
+namespace utils {
 namespace dbms {
 
 class SQLQueryTest : public ::testing::Test {
@@ -296,6 +296,6 @@ TEST_F(SQLQueryTest, DoublePrepare) {
 }
 
 }  // namespace dbms
-}  // namespace policy
+}  // namespace utils
 }  // namespace components
 }  // namespace test

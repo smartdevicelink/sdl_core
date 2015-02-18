@@ -34,7 +34,7 @@
 #include "qdb_wrapper/sql_database.h"
 #include "utils/logger.h"
 
-namespace policy {
+namespace utils {
 namespace dbms {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "SQLDatabase")
@@ -111,4 +111,4 @@ bool SQLDatabase::Backup() {
 }
 
 }  // namespace dbms
-}  // namespace policy
+}  // namespace utils

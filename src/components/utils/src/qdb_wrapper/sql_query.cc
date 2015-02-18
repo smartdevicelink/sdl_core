@@ -36,7 +36,7 @@
 #include <algorithm>
 #include "qdb_wrapper/sql_database.h"
 
-namespace policy {
+namespace utils {
 namespace dbms {
 
 class SetBindInteger {
@@ -274,5 +274,5 @@ int64_t SQLQuery::LastInsertId() const {
 }
 
 }  // namespace dbms
-}  // namespace policy
+}  // namespace utils
 

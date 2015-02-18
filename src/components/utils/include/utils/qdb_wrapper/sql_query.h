@@ -30,17 +30,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_QUERY_H_
-#define SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_QUERY_H_
+#ifndef SRC_COMPONENTS_POLICY_QDB_WRAPPER_INCLUDE_QDB_WRAPPER_SQL_QUERY_H_
+#define SRC_COMPONENTS_POLICY_QDB_WRAPPER_INCLUDE_QDB_WRAPPER_SQL_QUERY_H_
 
 #include <stdint.h>
+#include <qdb/qdb.h>
 #include <string>
-#include "sqlite_wrapper/sql_error.h"
+#include <vector>
+#include <utility>
+#include "qdb_wrapper/sql_error.h"
 #include "utils/lock.h"
 
-struct sqlite3_stmt;
-
-namespace policy {
+namespace utils {
 namespace dbms {
 
 class SQLDatabase;
@@ -190,7 +191,7 @@ class SQLQuery {
   /**
    * The instantiation of database
    */
-  SQLDatabase& db_;
+  SQLDatabase* db_;
 
   /**
    * The string of query
@@ -198,22 +199,53 @@ class SQLQuery {
   std::string query_;
 
   /**
-   * The SQL statement in SQLite
+   * The id of SQL statement in QDB
    */
-  sqlite3_stmt* statement_;
+  int statement_;
 
   /**
-   * Lock for guarding statement
+   * Containers for keeping bind data
    */
-  sync_primitives::Lock statement_lock_;
+  std::vector<std::pair<int, int64_t> > int_binds_;
+  std::vector<std::pair<int, double> > double_binds_;
+  std::vector<std::pair<int, std::string> > string_binds_;
+  std::vector<int> null_binds_;
+
+  /**
+   * The array for binging data to the prepare query
+   */
+  qdb_binding_t* bindings_;
+
+  /**
+   * Lock for guarding bindings
+   */
+  sync_primitives::Lock bindings_lock_;
+
+  /**
+   * The result of query
+   */
+  qdb_result_t *result_;
+
+  /**
+   * The current row in result for select
+   */
+  int current_row_;
+
+  /**
+   * The number of rows in a result
+   */
+  int rows_;
 
   /**
    * The last error that occurred with this query
    */
-  int error_;
+  Error error_;
+
+  uint8_t SetBinds();
+  bool Result();
 };
 
 }  // namespace dbms
-}  // namespace policy
+}  // namespace utils
 
-#endif  // SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_QUERY_H_
+#endif  // SRC_COMPONENTS_POLICY_QDB_WRAPPER_INCLUDE_QDB_WRAPPER_SQL_QUERY_H_

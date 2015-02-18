@@ -30,25 +30,15 @@
 
 set(target dbms)
 
-include_directories(include)
+find_package(Sqlite3 REQUIRED)
+
+include_directories(${COMPONENTS_DIR}/utils/include/utils)
 
 set(SOURCES
-  src/sql_database.cc
-  src/sql_query.cc
-  src/sql_error.cc
+  ./sql_database.cc
+  ./sql_query.cc
+  ./sql_error.cc
 )
 
 add_library(${target} ${SOURCES})
-target_link_libraries(${target} qdb Utils)
-
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/policy.ini DESTINATION ${CMAKE_BINARY_DIR}/src/appMain)
-  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/qdbserver.sh DESTINATION ${CMAKE_BINARY_DIR}/src/appMain)
-endif ()
-
-if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
-  install(FILES policy.ini DESTINATION bin)
-  install(FILES qdbserver.sh DESTINATION bin
-    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ
-      GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-endif ()
+target_link_libraries(${target} Utils)

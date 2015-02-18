@@ -35,7 +35,7 @@
 #include <cassert>
 #include "sqlite_wrapper/sql_database.h"
 
-namespace policy {
+namespace utils {
 namespace dbms {
 
 SQLQuery::SQLQuery(SQLDatabase* db)
@@ -153,5 +153,5 @@ int64_t SQLQuery::LastInsertId() const {
 }
 
 }  // namespace dbms
-}  // namespace policy
+}  // namespace utils
 

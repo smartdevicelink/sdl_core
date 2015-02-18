@@ -39,7 +39,7 @@
 #include "sqlite_wrapper/sql_database.h"
 
 namespace policy_table = rpc::policy_table_interface_base;
-namespace dbms = policy::dbms;
+namespace dbms = utils::dbms;
 
 namespace rpc {
 namespace policy_table_interface_base {

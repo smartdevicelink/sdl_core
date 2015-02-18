@@ -38,13 +38,13 @@
 #include "sqlite_wrapper/sql_database.h"
 #include "sqlite_wrapper/sql_query.h"
 
-using ::policy::dbms::SQLError;
-using ::policy::dbms::SQLDatabase;
-using ::policy::dbms::SQLQuery;
+using ::utils::dbms::SQLError;
+using ::utils::dbms::SQLDatabase;
+using ::utils::dbms::SQLQuery;
 
 namespace test {
 namespace components {
-namespace policy {
+namespace utils {
 namespace dbms {
 
 class SQLQueryTest : public ::testing::Test {
@@ -69,7 +69,7 @@ class SQLQueryTest : public ::testing::Test {
   }
 
   ::testing::AssertionResult IsError(SQLError error) {
-    if (error.number() != ::policy::dbms::OK) {
+    if (error.number() != ::utils::dbms::OK) {
       return ::testing::AssertionSuccess() << error.text();
     } else {
       return ::testing::AssertionFailure() << error.text();
@@ -77,7 +77,7 @@ class SQLQueryTest : public ::testing::Test {
   }
 
   ::testing::AssertionResult IsDone(SQLError error) {
-    if (error.number() == ::policy::dbms::DONE) {
+    if (error.number() == ::utils::dbms::DONE) {
       return ::testing::AssertionSuccess() << error.text();
     } else {
       return ::testing::AssertionFailure() << error.text();
@@ -85,7 +85,7 @@ class SQLQueryTest : public ::testing::Test {
   }
 
   ::testing::AssertionResult IsRow(SQLError error) {
-    if (error.number() == ::policy::dbms::ROW) {
+    if (error.number() == ::utils::dbms::ROW) {
       return ::testing::AssertionSuccess() << error.text();
     } else {
       return ::testing::AssertionFailure() << error.text();
@@ -370,6 +370,6 @@ TEST_F(SQLQueryTest, DoublePrepare_TwicePrepareQuery_ActWithoutErrors) {
 }
 
 }  // namespace dbms
-}  // namespace policy
+}  // namespace utils
 }  // namespace components
 }  // namespace test

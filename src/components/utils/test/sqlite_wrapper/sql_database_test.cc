@@ -33,16 +33,16 @@
 #include "sqlite_wrapper/sql_error.h"
 #include "sqlite_wrapper/sql_database.h"
 
-using ::policy::dbms::SQLError;
-using ::policy::dbms::SQLDatabase;
+using ::utils::dbms::SQLError;
+using ::utils::dbms::SQLDatabase;
 
 namespace test {
 namespace components {
-namespace policy {
+namespace utils {
 namespace dbms {
 
 ::testing::AssertionResult IsError(SQLError error) {
-  if (error.number() != ::policy::dbms::OK) {
+  if (error.number() != ::utils::dbms::OK) {
     return ::testing::AssertionSuccess() << error.text();
   } else {
     return ::testing::AssertionFailure() << error.text();
@@ -224,6 +224,6 @@ TEST(SQLDatabaseTest, IsReadWrite_FirstOpenDBIsRWSecondIsNot) {
 }
 
 }  // namespace dbms
-}  // namespace policy
+}  // namespace utils
 }  // namespace components
 }  // namespace test
