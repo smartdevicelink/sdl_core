@@ -87,7 +87,7 @@ template<class Trackable> class ModuleTimer {
    If same object is already added replaces it with new one
    correspondingly updating start time of tracking.
    */
-  void AddTrackable(Trackable object);
+  void AddTrackable(const Trackable& object);
   void RemoveTrackable(const Trackable& object);
 
  protected:
@@ -157,25 +157,17 @@ void ModuleTimer<Trackable>::CheckTimeout() {
 }
 
 template<class Trackable>
-void ModuleTimer<Trackable>::AddTrackable(Trackable object) {
+void ModuleTimer<Trackable>::AddTrackable(const Trackable& object) {
   sync_primitives::AutoLock trackables_lock(trackables_lock_);
-  typename std::list<Trackable>::iterator it = std::find(
-        trackables_.begin(), trackables_.end(), object);
-  if (trackables_.end() != it) {
-    trackables_.erase(it);
-  }
-  object.set_start_time(CurrentTime());
+  trackables_.remove(object);
   trackables_.push_back(object);
+  trackables_.back().set_start_time(CurrentTime());
 }
 
 template<class Trackable>
 void ModuleTimer<Trackable>::RemoveTrackable(const Trackable& object) {
   sync_primitives::AutoLock trackables_lock(trackables_lock_);
-  typename std::list<Trackable>::iterator it = std::find(
-        trackables_.begin(), trackables_.end(), object);
-  if (trackables_.end() != it) {
-    trackables_.erase(it);
-  }
+  trackables_.remove(object);
 }
 
 template<class Trackable>

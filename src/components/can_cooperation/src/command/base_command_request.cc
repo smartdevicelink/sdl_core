@@ -31,6 +31,7 @@
  */
 
 #include "can_cooperation/commands/base_command_request.h"
+#include <cstring>
 #include "can_cooperation/event_engine/event_dispatcher.h"
 #include "can_cooperation/message_helper.h"
 #include "can_cooperation/can_module.h"
