@@ -59,24 +59,6 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 namespace {
 
-hmi_apis::Common_Language::eType ToCommonLanguage(
-  mobile_apis::Language::eType mobile_language) {
-  // Update this check if mobile_api::Language
-  // or hmi_apis::Common_Language changes.
-  // Or, better, generate functions like this from XML
-  long lang_val = long(mobile_language);
-  long max_common_lang_val = long(hmi_apis::Common_Language::NO_NO);
-  long max_mobile_lang = long(mobile_apis::Language::NO_NO);
-  if (max_common_lang_val != max_mobile_lang) {
-    LOG4CXX_ERROR(logger_, "Mapping between Common_Language and Language"
-                  " has changed! Please update converter function");
-  }
-  if (lang_val > max_common_lang_val) {
-    LOG4CXX_ERROR(logger_, "Non-convertable language ID");
-  }
-  return hmi_apis::Common_Language::eType(lang_val);
-}
-
 typedef
 std::map<std::string, hmi_apis::Common_AppPriority::eType> CommonAppPriorityMap;
 

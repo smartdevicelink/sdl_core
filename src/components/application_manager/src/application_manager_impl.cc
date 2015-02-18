@@ -1905,6 +1905,11 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
   for (std::size_t idx = 0; idx < arr_size; ++idx) {
     const SmartObject& app_data = obj_array[idx];
 
+    if (!(app_data.keyExists(json::name) && app_data.keyExists(json::appId))) {
+      LOG4CXX_DEBUG(logger_, "The entry in qeury apps json is not valid");
+      continue;
+    }
+
     const std::string mobile_app_id(app_data[json::appId].asString());
     ApplicationSharedPtr registered_app =
         ApplicationManagerImpl::instance()->
@@ -1928,8 +1933,6 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     }
 
     const std::string appName(app_data[json::name].asString());
-    const bool is_media(
-          app_data[os_type][json::is_media_application].asBool());
 
     const uint32_t hmi_app_id(GenerateNewHMIAppID());
 
@@ -1959,8 +1962,6 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
       app->set_app_icon_path(full_icon_path);
       app->set_hmi_application_id(hmi_app_id);
       app->set_device(device_id);
-      app->set_app_types(app_data[os_type][json::appHmiType]);
-      app->set_is_media_application(is_media);
 
       sync_primitives::AutoLock lock(apps_to_register_list_lock_);
       LOG4CXX_DEBUG(logger_, "apps_to_register_ size before: "
