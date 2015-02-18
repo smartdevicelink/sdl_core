@@ -1894,6 +1894,25 @@ void application_manager::MessageHelper::SendQueryApps(
   content[strings::msg_params][strings::timeout] =
       policy_handler->TimeoutExchange();
 
+  SmartObject http (SmartType_Map);
+  SmartObject& http_header = http[http_request::httpRequest][http_request::headers];
+
+  const int timeout = policy_handler->TimeoutExchange();
+
+  http_header[http_request::content_type] = "application/json";
+  http_header[http_request::connect_timeout] = timeout;
+  http_header[http_request::do_output] = true;
+  http_header[http_request::do_input] = true;
+  http_header[http_request::use_caches] = false;
+  http_header[http_request::request_method] = http_request::GET;
+  http_header[http_request::read_timeout] = timeout;
+  http_header[http_request::instance_follow_redirect] = false;
+  http_header[http_request::charset] = "utf-8";
+  http_header[http_request::content_lenght] = 0;
+
+  content[strings::params][strings::binary_data] = http;
+  content[strings::msg_params][strings::file_type] = FileType::BINARY;
+
   SendSystemRequestNotification(connection_key, content);
 }
 

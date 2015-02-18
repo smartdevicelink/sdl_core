@@ -289,6 +289,22 @@ const char response[] = "response";
 const char is_media_application[] = "isMediaApplication";
 } // namespace json
 
+namespace http_request {
+const char httpRequest[] = "HTTPRequest";
+const char headers[] = "headers";
+const char content_type[] = "ContentType";
+const char connect_timeout[] = "ConnectTimout";
+const char do_output[] = "DoOutput";
+const char do_input[] = "DoInput";
+const char use_caches[] = "UseCaches";
+const char request_method[] = "RequestMethod";
+const char read_timeout[] = "ReadTimeout";
+const char instance_follow_redirect[] = "InstanceFollowRedirect";
+const char charset[] = "charset";
+const char content_lenght[] = "Content_Lenght";
+const char GET[] = "GET";
+} // http_request
+
 namespace mobile_notification {
 const char state[] = "state";
 const char syncp_timeout[] = "Timeout";
