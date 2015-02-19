@@ -1906,7 +1906,7 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     const SmartObject& app_data = obj_array[idx];
 
     if (!(app_data.keyExists(json::name) && app_data.keyExists(json::appId))) {
-      LOG4CXX_DEBUG(logger_, "The entry in qeury apps json is not valid");
+      LOG4CXX_DEBUG(logger_, "The entry in query apps json is not valid");
       continue;
     }
 

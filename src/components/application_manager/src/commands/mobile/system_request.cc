@@ -221,40 +221,32 @@ bool SystemRequest::ValidateQueryAppData(
       os_type = json::ios;
       if (!app_data[os_type].keyExists(json::urlScheme)) {
         LOG4CXX_ERROR(logger_, "Can't find URL scheme in json file.");
-        return false;
+        continue;
       }
     } else if (app_data.keyExists(json::android)) {
       os_type = json::android;
       if (!app_data[os_type].keyExists(json::packageName)) {
         LOG4CXX_ERROR(logger_, "Can't find package name in json file.");
-        return false;
+        continue;
       }
     }
 
     if (os_type.empty()) {
       LOG4CXX_ERROR(logger_, "Can't find mobile OS type in json file.");
-      return false;
+      continue;
     }
 
     if (!app_data.keyExists(json::appId)) {
       LOG4CXX_ERROR(logger_, "Can't find app ID in json file.");
-      return false;
+      continue;
     }
 
     if (!app_data.keyExists(json::name)) {
       LOG4CXX_ERROR(logger_, "Can't find app name in json file.");
-      return false;
+      continue;
     }
 
-    if (!app_data[os_type].keyExists(json::is_media_application)) {
-      LOG4CXX_ERROR(logger_, "Can't find app media flag in json file.");
-      return false;
-    }
-
-    if (!app_data[os_type].keyExists(json::appHmiType)) {
-      LOG4CXX_ERROR(logger_, "Can't find app HMI type in json file.");
-      return false;
-    }
+    return true;
   }
 
   return true;
