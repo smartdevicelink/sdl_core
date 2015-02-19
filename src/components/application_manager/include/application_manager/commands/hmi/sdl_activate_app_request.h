@@ -40,6 +40,7 @@ namespace application_manager {
 
 namespace commands {
 
+  typedef std::pair<ApplicationSharedPtr, std::vector<ApplicationSharedPtr> > DevicesApps;
 /**
  * @brief SDLActivateAppRequest command class
  **/
@@ -77,8 +78,9 @@ class SDLActivateAppRequest : public RequestFromHMI {
   private:
     uint32_t app_id() const;
     uint32_t hmi_app_id(const smart_objects::SmartObject& so) const;
-    ApplicationSharedPtr FindRegularAppOnSameDevice(
-            const connection_handler::DeviceHandle handle) const;
+
+    DevicesApps FindAllAppOnParticularDevice(
+        const connection_handler::DeviceHandle handle);
     DISALLOW_COPY_AND_ASSIGN(SDLActivateAppRequest);
 };
 

@@ -69,19 +69,28 @@ void SDLActivateAppRequest::Run() {
   }
 
   if (!app->IsRegistered()) {
-    ApplicationSharedPtr app_for_sending =
-        FindRegularAppOnSameDevice(app->device());
-    if (!app_for_sending) {
+    DevicesApps devices_apps =
+        FindAllAppOnParticularDevice(app->device());
+    if (!devices_apps.first && devices_apps.second.empty()) {
       LOG4CXX_ERROR(logger_, "Can't find regular foreground app with the same "
                     "connection id:" << app->device());
       SendResponse(correlation_id(),
                    SDL_ActivateApp, NO_APPS_REGISTERED);
       return;
     }
-    MessageHelper::SendLaunchApp(app_for_sending->app_id(),
-                                 app->SchemaUrl(),
-                                 app->PackageName());
-    subscribe_on_event(BasicCommunication_OnAppRegistered);
+    if (devices_apps.first) {
+      MessageHelper::SendLaunchApp(devices_apps.first->app_id(),
+                                   app->SchemaUrl(),
+                                   app->PackageName());
+    } else {
+      std::vector<ApplicationSharedPtr>::const_iterator it = devices_apps.second.begin();
+      for (; it != devices_apps.second.end(); ++it) {
+        MessageHelper::SendLaunchApp((*it)->app_id(),
+                                     app->SchemaUrl(),
+                                     app->PackageName());
+      }
+      subscribe_on_event(BasicCommunication_OnAppRegistered);
+    }
   } else {
     policy::PolicyHandler::instance()->OnActivateApp(application_id,
                                                      correlation_id());
@@ -146,9 +155,11 @@ uint32_t SDLActivateAppRequest::hmi_app_id(
   return 0;
 }
 
-ApplicationSharedPtr
-SDLActivateAppRequest::FindRegularAppOnSameDevice(
-    const connection_handler::DeviceHandle handle) const {
+DevicesApps
+SDLActivateAppRequest::FindAllAppOnParticularDevice(
+    const connection_handler::DeviceHandle handle) {
+  DevicesApps apps;
+
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   ApplicationManagerImpl::ApplictionSet app_list = accessor.GetData();
 
@@ -156,11 +167,14 @@ SDLActivateAppRequest::FindRegularAppOnSameDevice(
   ApplicationManagerImpl::ApplictionSetIt it_end = app_list.end();
 
   for (;it != it_end; ++it) {
-    if (handle == (*it)->device() && (*it)->is_foreground()) {
-      return *it;
+    if (handle == (*it)->device()) {
+      if ((*it)->is_foreground()) {
+        apps.first = *it;
+      }
+      apps.second.push_back(*it);
     }
   }
-  return ApplicationSharedPtr();
+  return apps;
 }
 
 }  // namespace commands
