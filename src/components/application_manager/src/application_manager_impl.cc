@@ -1263,6 +1263,9 @@ void ApplicationManagerImpl::SendMessageToMobile(
     }
   }
 
+  if (message_to_send->binary_data()) {
+    LOG4CXX_DEBUG(logger_, "Binary data size: " << message_to_send->binary_data()->size());
+  }
   messages_to_mobile_.PostMessage(impl::MessageToMobile(message_to_send,
                                   final_message));
 }

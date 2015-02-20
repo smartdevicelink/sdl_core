@@ -53,6 +53,10 @@
 #include "utils/macro.h"
 #include "utils/logger.h"
 
+#include "formatters/formatter_json_rpc.h"
+#include "formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "formatters/CFormatterJsonSDLRPCv1.hpp"
+
 namespace application_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
@@ -1876,8 +1880,8 @@ void application_manager::MessageHelper::SendQueryApps(
   content[strings::msg_params][strings::timeout] =
       policy_handler->TimeoutExchange();
 
-  SmartObject http (SmartType_Map);
-  SmartObject& http_header = http[http_request::httpRequest][http_request::headers];
+  Json::Value http;
+  Json::Value& http_header = http[http_request::httpRequest][http_request::headers];
 
   const int timeout = policy_handler->TimeoutExchange();
 
@@ -1892,7 +1896,10 @@ void application_manager::MessageHelper::SendQueryApps(
   http_header[http_request::charset] = "utf-8";
   http_header[http_request::content_lenght] = 0;
 
-  content[strings::params][strings::binary_data] = http;
+  std::string data = http_header.toStyledString();
+  std::vector<uint8_t> binary_data(data.begin(), data.end());
+
+  content[strings::params][strings::binary_data] = SmartObject(binary_data);
   content[strings::msg_params][strings::file_type] = FileType::BINARY;
 
   SendSystemRequestNotification(connection_key, content);
