@@ -1,11 +1,13 @@
 #include "messageHandler.h"
-//#include "logMessageHandlerer.h"
 #include "color.h"
 #include <QDebug>
 
 MessageHandler::MessageHandler(QTcpSocket *client, QMutex *mu, QVector<QString> &msgPull)
     : QObject(), mutex(mu), messagePull(msgPull)
 {
+
+    qDebug() << "MessageHandler()";
+
     clientConnection = client;
 
     connect(clientConnection, SIGNAL(readyRead()),this, SLOT(readFromTCP()));
@@ -15,11 +17,18 @@ MessageHandler::MessageHandler(QTcpSocket *client, QMutex *mu, QVector<QString> 
 
 MessageHandler::~MessageHandler()
 {
+    qDebug() << "~MessageHandler()";
     clientConnection->deleteLater();
+
+    if (clientConnection) {
+        delete clientConnection;
+        clientConnection = NULL;
+    }
 }
 
 void MessageHandler::readFromTCP()
 {
+
     QByteArray qb = clientConnection->readAll();
 
     const char *cMessage = qb.data();
@@ -31,6 +40,7 @@ void MessageHandler::readFromTCP()
     // Read all data came from client and redirect it to QML request handler
 
     emit requestFromTCP(qMessage);
+
 }
 
 void MessageHandler::writeToTCP(const QString &qMessage)
@@ -58,9 +68,6 @@ void MessageHandler::disconnected()
 
 void MessageHandler::process()
 {
-    qDebug() << "Thread process()!";
-    qDebug() << messagePull.count();
-
     while (messagePull.count() > 0) {
 
         mutex->lock();
@@ -72,7 +79,7 @@ void MessageHandler::process()
 
 void MessageHandler::stop()
 {
-    //
+    //TO DO
 }
 
 void MessageHandler::displayError(QAbstractSocket::SocketError socketError)

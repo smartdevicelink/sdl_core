@@ -5,59 +5,65 @@ CANTest::CANTest(QObject *parent) :
 {
 }
 
-void CANTest::connectServer()
-{
-    qDebug() << "connection attempt" << endl;
-    qTestServerSocket = qTestServer->nextPendingConnection();
-}
-
 void CANTest::initTestCase()
 {
-    QString ipAddress = "127.0.0.1";
-    quint16 port = 9999;
 
-    qTestServerSocket = NULL;
-    qTestServer = new QTcpServer();
-    qTestServer->listen( QHostAddress(ipAddress), port );
-    QVERIFY( qTestServer->isListening() );
-    connect( qTestServer, SIGNAL(newConnection()), SLOT(connectServer()) );
-
-    qTestClientSocket = new QTcpSocket();
-    qTestClientSocket->connectToHost( QHostAddress(ipAddress), port );
-
-    QVERIFY( qTestClientSocket->waitForConnected( 5000 ) );
-    QVERIFY( qTestClientSocket->state() == QTcpSocket::ConnectedState );
 }
 
 void CANTest::cleanupTestCase()
 {
-    if (qTestClientSocket != NULL) {
-
-        qTestClientSocket->deleteLater();
-    }
-
-    if (qTestServerSocket != NULL) {
-
-        qTestServerSocket->deleteLater();
-    }
-
-    if (qTestServer != NULL) {
-
-        qTestServer->deleteLater();
-    }
 }
 
 void CANTest::connectionTest()
 {
+     Server server;
 
-    bool connected = (qTestClientSocket->state() == QTcpSocket::ConnectedState);
+     QString ipAddress = "127.0.0.1";
+     quint16 port = 6666;
+     server.createConection(ipAddress, port );
 
-    qDebug() << "TCP Socket connection state - " <<qTestClientSocket->state();
+     QTcpSocket s;
+     QSignalSpy spy(&server, SIGNAL(newConnection()));
+     s.connectToHost(QHostAddress(ipAddress), port );
 
-    QVERIFY( connected );
+     QCOMPARE(spy.isValid(), true);
+
+     QTRY_COMPARE_WITH_TIMEOUT(spy.count(),1, 1000);
+     s.close();
+
+     s.deleteLater();
+     server.deleteLater();
 }
 
 void CANTest::sendDataTest()
 {
+    QString qMessage = "Hello";
+
+    Server server;
+
+    QString ipAddress = "127.0.0.1";
+    quint16 port = 6667;
+    server.createConection(ipAddress, port );
+
+    QTcpSocket s;
+    QSignalSpy spy(&server, SIGNAL(readFromTCP(const QString &)));
+    s.connectToHost(QHostAddress(ipAddress), port );
+
+    QCOMPARE(spy.isValid(), true); // Returns true if the signal spy listens to a valid signal, otherwise false.
+
+    QVERIFY2(s.waitForConnected( 5000 ), "TCP Client can not connect!");
+
+    QVERIFY2(s.write(qMessage.toUtf8()) != -1, "Data can not be writen!");
+    QVERIFY2(s.flush(), "Data was not send!");
+
+    QTRY_COMPARE_WITH_TIMEOUT(spy.count(),1, 2000); // make sure the signal was emitted exactly one time
+
+    QList<QVariant> arguments = spy.takeFirst(); // take the first signal
+
+    QVERIFY2(qMessage == arguments.at(0).toString(), "Received message on server is not valid!"); // verify the first argument
+
+    s.close();
+    s.deleteLater();
+    server.deleteLater();
 
 }

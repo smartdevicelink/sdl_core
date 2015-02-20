@@ -2,14 +2,15 @@
 #define CANTEST_H
 
 #include <QtCore/QString>
-#include <QtTest/QtTest>
+#include <QtTest>
 
 #include <iostream>
 
 #include <QTcpSocket>
 #include <QTcpServer>
 
-#include "canlib.h"
+//#include "canlib.h"
+#include "server.h"
 
 class CANTest : public QObject
 {
@@ -23,13 +24,8 @@ private Q_SLOTS:
     void sendDataTest();
     void cleanupTestCase();
 
-public slots:
-    void connectServer();
-
 private:
-    QTcpSocket *qTestServerSocket;
-    QTcpSocket *qTestClientSocket;
-    QTcpServer *qTestServer;
+
 };
 
 #endif // CANTEST_H

@@ -3,9 +3,11 @@
 #include "server.h"
 #include "color.h"
 #include <unistd.h>
+#include <QDebug>
 
 Server::Server() : QObject() {
 
+    qDebug() << "Server()";
     tcpServer = new QTcpServer(this);
 
     mutex = new QMutex();
@@ -15,8 +17,10 @@ Server::Server() : QObject() {
 
 void Server::addThread(QTcpSocket *client)
 {
-    MessageHandler* messageHandler = new MessageHandler(client, mutex, messagePull);
-    QThread* thread = new QThread;
+
+    //TO DO - Add vector with MessageHandler and QThread Objects
+    messageHandler = new MessageHandler(client, mutex, messagePull);
+    thread = new QThread;
 
 
     //thread->run();
@@ -45,8 +49,25 @@ void Server::addThread(QTcpSocket *client)
 
 Server::~Server()
 {
+    qDebug() << "~Server()";
     emit  stopAllThreads();
-    delete tcpServer;
+
+    thread->quit();
+    thread->wait();
+
+    delete messageHandler;
+    messageHandler = NULL;
+
+    if (mutex) {
+        delete mutex;
+        mutex = NULL;
+    }
+
+    tcpServer->deleteLater();
+    if (tcpServer) {
+        delete tcpServer;
+        tcpServer = NULL;
+    }
 }
 
 void Server::createConection(const QString &IP, int port)
@@ -73,7 +94,6 @@ bool Server::write(const QString &qMessage)
 
 void Server::requestFromTCP(const QString &qMessage)
 {
-
     emit readFromTCP(qMessage);
 }
 
@@ -87,6 +107,7 @@ void Server::connected()
 
     emit log("TCP connected...", RED);
 
+    emit newConnection();
     // New connected client is only one client TCP Server is working with
     QTcpSocket *clientConnection = tcpServer->nextPendingConnection();
     clientConnection->setParent(this);

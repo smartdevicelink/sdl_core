@@ -63,6 +63,7 @@ signals:
 
     void stopAllThreads();
     void startAgaing();
+    void newConnection();
 
     void readFromTCP(const QString &qMessage);
     void log(const QString &qMessage, int color);
@@ -71,6 +72,8 @@ private:
 
     QTcpServer *tcpServer;
     QMutex *mutex;
+    MessageHandler *messageHandler;
+    QThread *thread;
 };
 
 #endif // NETWORK_H
