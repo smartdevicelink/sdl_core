@@ -37,19 +37,22 @@
 #include <set>
 #include <vector>
 #include <utility>
+#include <list>
 
 #include "utils/date_time.h"
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
+#include "application_manager/hmi_state.h"
+
 #include "connection_handler/device.h"
 #include "utils/timer_thread.h"
 #include "utils/lock.h"
-
 namespace usage_statistics {
 class StatisticsManager;
 }  // namespace usage_statistics
 
 namespace application_manager {
+
 namespace mobile_api = mobile_apis;
 
 class ApplicationImpl : public virtual InitialApplicationDataImpl,

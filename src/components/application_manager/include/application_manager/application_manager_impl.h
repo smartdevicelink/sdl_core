@@ -783,9 +783,10 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void OnWakeUp();
 
-    void set_state(StateController::StateID state_id);
+    void set_state(StateController::StateEventID state_id);
 
-    void set_state(mobile_api::HMILevel::eType hmi_level,
+    void set_state(ApplicationSharedPtr app,
+                   mobile_api::HMILevel::eType hmi_level,
                    mobile_api::AudioStreamingState::eType audio_state);
 
     struct ApplicationsAppIdSorter {

@@ -32,48 +32,115 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_STATE_CONTROLLER_H_
+#include <list>
 
-#include "interfaces/MOBILE_API.h"
+#include "application_manager/hmi_state.h"
+#include "application_manager/application.h"
 
 namespace application_manager {
 
 class StateController {
   public:
-    enum StateID {
-      STATE_ID_DEFAULT,
-      STATE_ID_PHONE_CALL_STARTED,
-      STATE_ID_PHONE_CALL_ENDED,
-      STATE_ID_SAFETY_MODE_ENABLED,
-      STATE_ID_SAFETY_MODE_DISABLED,
-      STATE_ID_VR_STARTED,
-      STATE_ID_VR_ENDED,
-      STATE_ID_TTS_STARTED,
-      STATE_ID_TTS_ENDED
+
+    /**
+     * @brief The StateEventID enum describes events to change HMIState
+     * of applications
+     */
+    enum StateEventID {
+      EVENT_ID_DEFAULT,
+      EVENT_ID_PHONE_CALL_STARTED,
+      EVENT_ID_PHONE_CALL_ENDED,
+      EVENT_ID_SAFETY_MODE_ENABLED,
+      EVENT_ID_SAFETY_MODE_DISABLED,
+      EVENT_ID_VR_STARTED,
+      EVENT_ID_VR_ENDED,
+      EVENT_ID_TTS_STARTED,
+      EVENT_ID_TTS_ENDED
     };
 
-    void set_state(StateID id);
-    void set_state(mobile_apis::HMILevel::eType hmi_level,
-                   mobile_apis::AudioStreamingState::eType audio_state);
+    /**
+     * @brief ProcessStateEvent process event and change
+     * HmiState for all applications
+     * @param id - event ID to process
+     */
+    void ProcessStateEvent(const StateEventID id);
+
+    /**
+     * @brief SetDefaultState setup original hmiState, tha will appear if no
+     * specific events are active
+     * @param app appication to detup default State`
+     * @param hmi_level hmi level of defailt state
+     * @param audio_state audio_streaming state of default state
+     */
+    void SetDefaultState(ApplicationSharedPtr app,
+                         const mobile_apis::HMILevel::eType hmi_level,
+                         const  mobile_apis::AudioStreamingState::eType audio_state);
+
+
+    /**
+     * @brief SetDefaultState setup original hmiState, tha will appear if no
+     * specific events are active
+     * @param app appication to detup default State`
+     * @param hmi_level hmi level of defailt state
+     * @param audio_state audio_streaming state of default state
+     */
+    void SetDefaultState(ApplicationSharedPtr app,
+                         utils::SharedPtr<HmiState> state);
+
+    /**
+     * @brief setSystemContext setup new system_context for all all applications
+     * @param system_context system context to setup
+     */
+    void SetSystemContext(const mobile_apis::SystemContext::eType system_context);
 
   private:
+    /**
+     * @brief OnPhoneCallStarted process Phone Call Started event
+     */
     void OnPhoneCallStarted();
+
+    /**
+     * @brief OnPhoneCallEnded process Phone Call Ended event
+     */
     void OnPhoneCallEnded();
+
+
+    /**
+     * @brief OnSafetyModeEnabled process Safety Mode Enable event
+     */
     void OnSafetyModeEnabled();
+
+    /**
+     * @brief OnSafetyModeDisabled process Safety Mode Disable event
+     */
     void OnSafetyModeDisabled();
+
+    /**
+     * @brief OnVRStarted process VR session started
+     */
     void OnVRStarted();
+
+    /**
+     * @brief OnVREnded process VR session ended
+     */
     void OnVREnded();
+    /**
+     * @brief OnTTSStarted process TTS session started
+     */
     void OnTTSStarted();
+
+    /**
+     * @brief OnTTSEnded process TTS session ended
+     */
     void OnTTSEnded();
 
   private:
-    struct State {
-      StateID id;
-      mobile_apis::HMILevel::eType hmi_level;
-      mobile_apis::AudioStreamingState::eType audio_state;
-      mobile_apis::SystemContext::eType system_context;
-    };
 
-    State current_state_;
+    /**
+     * @brief Active states of application
+     */
+    std::list<HmiState::StateID> current_state_;
+    mobile_apis::SystemContext::eType system_context_;
 };
 
 }

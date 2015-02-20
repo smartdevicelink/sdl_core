@@ -35,12 +35,84 @@
 
 namespace application_manager {
 
-void StateController::set_state(StateID id) {
+void StateController::ProcessStateEvent(const StateEventID id) {
+  switch (id) {
+    case EVENT_ID_PHONE_CALL_STARTED:
+      OnPhoneCallStarted(); break;
+    case EVENT_ID_PHONE_CALL_ENDED:
+      OnPhoneCallEnded(); break;
+    case EVENT_ID_SAFETY_MODE_ENABLED:
+      OnSafetyModeEnabled(); break;
+    case EVENT_ID_SAFETY_MODE_DISABLED:
+      OnSafetyModeDisabled(); break;
+    case EVENT_ID_TTS_STARTED:
+      OnTTSStarted(); break;
+    case EVENT_ID_TTS_ENDED:
+      OnTTSEnded(); break;
+    case EVENT_ID_VR_STARTED:
+      OnVRStarted(); break;
+    case EVENT_ID_VR_ENDED:
+      OnVREnded(); break;
+    default:
+      break;
+  }
+}
+
+void StateController::SetDefaultState(ApplicationSharedPtr app,
+                                      const mobile_apis::HMILevel::eType hmi_level,
+                                      const mobile_apis::AudioStreamingState::eType audio_state) {
+  HmiStateList& default_hmi_state = app->GetHmiStateList();
+  DCHECK_OR_RETURN_VOID(default_hmi_state.empty() == false);
+  utils::SharedPtr<HmiState> hmi_state(new HmiState(hmi_level,
+                                                    audio_state,
+                                                    system_context_));
+  default_hmi_state.erase(default_hmi_state.begin());
+  default_hmi_state.push_front(hmi_state);
+}
+
+void StateController::SetDefaultState(ApplicationSharedPtr app,
+                                      utils::SharedPtr<HmiState> state) {
+  DCHECK_OR_RETURN_VOID(state)
+  HmiStateList& default_hmi_state = app->GetHmiStateList();
+  DCHECK_OR_RETURN_VOID(default_hmi_state.empty() == false);
+  default_hmi_state.erase(default_hmi_state.begin());
+  default_hmi_state.push_front(state);
+}
+
+void StateController::SetSystemContext(const mobile_apis::SystemContext::eType system_context) {
+  system_context_ = system_context;
+  //TODO (APPLINK-8555) Need to setup system context for app applications
+}
+
+void StateController::OnPhoneCallStarted() {
 
 }
 
-void StateController::set_state(mobile_apis::HMILevel::eType hmi_level,
-               mobile_apis::AudioStreamingState::eType audio_state) {
+void StateController::OnPhoneCallEnded() {
+
+}
+
+void StateController::OnSafetyModeEnabled() {
+
+}
+
+void StateController::OnSafetyModeDisabled() {
+
+}
+
+void StateController::OnVRStarted() {
+
+}
+
+void StateController::OnVREnded() {
+
+}
+
+void StateController::OnTTSStarted() {
+
+}
+
+void StateController::OnTTSEnded() {
 
 }
 
