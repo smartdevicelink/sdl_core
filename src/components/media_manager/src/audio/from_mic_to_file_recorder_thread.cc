@@ -1,34 +1,34 @@
 /*
-* Copyright (c) 2014, Ford Motor Company
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without
-* modification, are permitted provided that the following conditions are met:
-*
-* Redistributions of source code must retain the above copyright notice, this
-* list of conditions and the following disclaimer.
-*
-* Redistributions in binary form must reproduce the above copyright notice,
-* this list of conditions and the following
-* disclaimer in the documentation and/or other materials provided with the
-* distribution.
-*
-* Neither the name of the Ford Motor Company nor the names of its contributors
-* may be used to endorse or promote products derived from this software
-* without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-* AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-* IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-* ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
-* LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
-* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
-* SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
-* INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
-* CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-* ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*/
+ * Copyright (c) 2014, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
 
 #include "media_manager/audio/from_mic_to_file_recorder_thread.h"
 #include <unistd.h>
@@ -49,19 +49,27 @@ FromMicToFileRecorderThread::FromMicToFileRecorderThread(
     tKey_("-t"),
     sleepThread_(NULL),
     outputFileName_(output_file) {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
   set_record_duration(duration);
+}
+
+FromMicToFileRecorderThread::~FromMicToFileRecorderThread() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (sleepThread_) {
+    sleepThread_->join();
+    delete sleepThread_->delegate();
+    threads::DeleteThread(sleepThread_);
+  }
 }
 
 void FromMicToFileRecorderThread::set_output_file(
   const std::string& output_file) {
-  LOG4CXX_TRACE_ENTER(logger_);
-
+  LOG4CXX_AUTO_TRACE(logger_);
   outputFileName_ = output_file;
 }
 
 void FromMicToFileRecorderThread::set_record_duration(int32_t duration) {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
   std::stringstream stringStream;
   stringStream << duration / 1000;
@@ -69,7 +77,7 @@ void FromMicToFileRecorderThread::set_record_duration(int32_t duration) {
 }
 
 void FromMicToFileRecorderThread::initArgs() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
   argv_ = new gchar*[argc_];
 
@@ -87,7 +95,7 @@ void FromMicToFileRecorderThread::initArgs() {
 }
 
 void FromMicToFileRecorderThread::threadMain() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
   {
     sync_primitives::AutoLock auto_lock(stopFlagLock_);
@@ -181,6 +189,7 @@ void FromMicToFileRecorderThread::threadMain() {
 
     bool shouldBeStoped;
     {
+      // FIXME(dchmerev@luxoft.com):
       sync_primitives::AutoLock auto_lock(stopFlagLock_);
       shouldBeStoped = shouldBeStoped_;
     }
@@ -233,8 +242,8 @@ void FromMicToFileRecorderThread::SleepThreadDelegate::threadMain() {
   }
 }
 
-bool FromMicToFileRecorderThread::exitThreadMain() {
-  LOG4CXX_TRACE_ENTER(logger_);
+void FromMicToFileRecorderThread::exitThreadMain() {
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if (NULL != loop) {
     if (g_main_loop_is_running(loop)) {
@@ -243,20 +252,14 @@ bool FromMicToFileRecorderThread::exitThreadMain() {
     }
   }
 
-  if (NULL != sleepThread_) {
-    LOG4CXX_TRACE(logger_, "Stop sleep thread\n");
+  if (sleepThread_) {
+    LOG4CXX_DEBUG(logger_, "Stop sleep thread\n");
     sleepThread_->stop();
-    threads::DeleteThread(sleepThread_);
-    sleepThread_ = NULL;
   }
 
   LOG4CXX_TRACE(logger_, "Set should be stopped flag\n");
-  {
-    sync_primitives::AutoLock auto_lock(stopFlagLock_);
-    shouldBeStoped_ = true;
-  }
-
-  return true;
+  sync_primitives::AutoLock auto_lock(stopFlagLock_);
+  shouldBeStoped_ = true;
 }
 
 }  // namespace media_manager

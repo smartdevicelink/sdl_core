@@ -349,15 +349,22 @@ void SecurityManagerImpl::SendInternalError(const uint32_t connection_key,
 void SecurityManagerImpl::SendQuery(const SecurityQuery& query,
                                 const uint32_t connection_key) {
   const std::vector<uint8_t> data_sending = query.DeserializeQuery();
-
-  const ::protocol_handler::RawMessagePtr rawMessagePtr(
-        new protocol_handler::RawMessage(connection_key,
-                                         protocol_handler::PROTOCOL_VERSION_3,
-                                         &data_sending[0], data_sending.size(),
-                                         protocol_handler::kControl));
-  DCHECK(protocol_handler_);
-  // Add RawMessage to ProtocolHandler message query
-  protocol_handler_->SendMessageToMobileApp(rawMessagePtr, false);
+  uint32_t connection_handle = 0;
+  uint8_t sessionID = 0;
+  uint8_t protocol_version;
+  session_observer_->PairFromKey(connection_key, &connection_handle,
+                                   &sessionID);
+  if (session_observer_->ProtocolVersionUsed(connection_handle, sessionID,
+		  protocol_version)) {
+    const ::protocol_handler::RawMessagePtr rawMessagePtr(
+      new protocol_handler::RawMessage(connection_key,
+    		                           protocol_version,
+                                       &data_sending[0], data_sending.size(),
+                                       protocol_handler::kControl));
+    DCHECK(protocol_handler_);
+    // Add RawMessage to ProtocolHandler message query
+    protocol_handler_->SendMessageToMobileApp(rawMessagePtr, false);
+  }
 }
 
 const char *SecurityManagerImpl::ConfigSection() {

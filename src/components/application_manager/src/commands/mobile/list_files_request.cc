@@ -50,7 +50,7 @@ ListFilesRequest::~ListFilesRequest() {
 }
 
 void ListFilesRequest::Run() {
-  LOG4CXX_INFO(logger_, "ListFilesRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(connection_key());

@@ -37,6 +37,7 @@
 #include <queue>
 #include <log4cxx/logger.h>
 
+#include "utils/macro.h"
 #include "utils/threads/message_loop_thread.h"
 #include "utils/singleton.h"
 

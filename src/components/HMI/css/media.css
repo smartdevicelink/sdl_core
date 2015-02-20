@@ -1,7 +1,7 @@
 #media_leftmenu {
 	z-index: 301;
 	position: absolute;
-	top: 0px;
+	top: 90px;
 	left: 0px;
 	width: 150px;
 	height: 300px;
@@ -55,7 +55,7 @@
 	left: 0px;
 	width: 153px;
 	height: 306px;
-	background: black no-repeat;
+	background: url(../images/common/ls_border.png) no-repeat;
 }
 
 .media-ls-items {
@@ -73,7 +73,7 @@
 }
 
 .media-ls-item.active_state {
-	background: black no-repeat !important;
+	background: url(../images/media/ls-item_bg_act.png) no-repeat !important;
 }
 
 .media-ls-item>.bg {
@@ -124,19 +124,19 @@
 
 .main-preset-buttons-wraper {
 	position: relative;
-	width: 800px;
+	width: 468px;
 	height: 100px;
 	float: left;
-/*	left: 165px;*/
-	top: 350px;
+	left: 165px;
+	top: 290px;
 	z-index: 503;
 }
 
 .main-preset-buttons-wraper .preset-items {
 	position: relative;
-/*	width: 467px;
+	width: 467px;
 	height: 99px;
-	border: 1px solid #393939;*/
+	border: 1px solid #393939;
 	-moz-border-radius: 2px;
 	-webkit-border-radius: 2px;
 	z-index: 1;
@@ -148,8 +148,7 @@
     vertical-align: top;
     border-right: 1px solid #393939;
     border-bottom: 1px solid #393939;
-    border-top: 1px solid #393939;
-	width: 79px;
+	width: 92.6px;
 	height: 49px;
 	cursor: pointer;
 }
@@ -315,20 +314,22 @@
 	{
 	width: 155px;
 	height: 98px;
+	border-right: 1px solid #393939;
 	cursor: pointer;
-	background: black no-repeat;
+	background: url(../images/media/cd-prev-btn.png) no-repeat;
 }
 
 .bc-item-big.prevcd.pressed,.bc-item-big.prevusb.pressed,.bc-item-big.prevsd.pressed,.bc-item-big.prevblue.pressed
 	{
-	background: gray no-repeat;
+	background: url(../images/media/cd-prev-btn_pressed.png) no-repeat;
 }
 
 .bc-item-big.playcd {
 	width: 157px;
 	height: 98px;
+	border-right: 1px solid #393939;
 	cursor: pointer;
-	background: black no-repeat;
+	background: url(../images/media/cd_play_btn.png) no-repeat;
 }
 
 .playIcon {
@@ -346,7 +347,7 @@
 
 .bc-item-big.playcd.pressed,.bc-item-big.playusb.pressed,.bc-item-big.playsd.pressed,.bc-item-big.playblue.pressed
 	{
-	background: DarkGray no-repeat;
+	background: url(../images/media/cd_play_btn_pressed.png) no-repeat;
 }
 
 .bc-item-big.nextcd,.bc-item-big.nextusb,.bc-item-big.nextsd,.bc-item-big.nextblue
@@ -354,12 +355,12 @@
 	width: 154px;
 	height: 98px;
 	cursor: pointer;
-	background: black no-repeat;
+	background: url(../images/media/cd-next-btn.png) no-repeat;
 }
 
 .bc-item-big.nextcd.pressed,.bc-item-big.nextusb.pressed,.bc-item-big.nextsd.pressed,.bc-item-big.nextblue.pressed
 	{
-	background: DarkGray no-repeat;
+	background: url(../images/media/cd-next-btn_pressed.png) no-repeat;
 }
 
 #bt-bg {
@@ -395,12 +396,14 @@
 	left: 13px;
 	width: 468px;
 	height: 99px;
+	background: url("../images/media/btn_bg.png") repeat;
+	border: 1px solid #393939;
 	-webkit-border-radius: 3px;
 }
 
 #sdl_view_container .track-info {
 	left: 165px;
-/*	top: 55px;*/
+	top: 55px;
 }
 
 #sdl_view_container .list-content {
@@ -458,7 +461,6 @@
 }
 
 .track-info>.device {
-	display: none;
 	position: absolute;
 	top: 30px;
 	left: 10px;
@@ -469,7 +471,6 @@
 }
 
 .divider_o {
-	display: none;
 	position: absolute;
 	top: 120px;
 	left: 0px;
@@ -521,7 +522,7 @@
 }
 
 #sdl_view_container .ffw_list_menu {
-	/*top: 90px;*/
+	top: 90px;
 	left: 650px;
 	width: 140px;
 }

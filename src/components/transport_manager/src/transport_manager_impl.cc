@@ -32,7 +32,6 @@
 
 #include "transport_manager/transport_manager_impl.h"
 
-#include <pthread.h>
 #include <stdint.h>
 #include <cstring>
 #include <queue>
@@ -70,22 +69,20 @@ TransportManagerImpl::Connection TransportManagerImpl::convert(
 }
 
 TransportManagerImpl::TransportManagerImpl()
-  : all_thread_active_(false),
-    device_listener_thread_wakeup_(),
-    is_initialized_(false),
+  : is_initialized_(false),
 #ifdef TIME_TESTER
     metric_observer_(NULL),
 #endif  // TIME_TESTER
     connection_id_counter_(0),
     message_queue_("TM MessageQueue", this),
     event_queue_("TM EventQueue", this) {
-  LOG4CXX_INFO(logger_, "==============================================");
-  pthread_cond_init(&device_listener_thread_wakeup_, NULL);
-  LOG4CXX_DEBUG(logger_, "TransportManager object created");
+  LOG4CXX_TRACE(logger_, "TransportManager has created");
 }
 
 TransportManagerImpl::~TransportManagerImpl() {
   LOG4CXX_DEBUG(logger_, "TransportManager object destroying");
+  message_queue_.Shutdown();
+  event_queue_.Shutdown();
 
   for (std::vector<TransportAdapter*>::iterator it =
          transport_adapters_.begin();
@@ -99,7 +96,6 @@ TransportManagerImpl::~TransportManagerImpl() {
     delete it->second;
   }
 
-  pthread_cond_destroy(&device_listener_thread_wakeup_);
   LOG4CXX_INFO(logger_, "TransportManager object destroyed");
 }
 
@@ -226,18 +222,48 @@ int TransportManagerImpl::AddEventListener(TransportManagerListener* listener) {
   return E_SUCCESS;
 }
 
+void TransportManagerImpl::DisconnectAllDevices() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  for (DeviceInfoList::iterator i = device_list_.begin();
+      i != device_list_.end(); ++i) {
+    DeviceInfo& device = i->second;
+    DisconnectDevice(device.device_handle());
+  }
+}
+
+void TransportManagerImpl::TerminateAllAdapters() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  for (std::vector<TransportAdapter*>::iterator i = transport_adapters_.begin();
+      i != transport_adapters_.end(); ++i) {
+    (*i)->Terminate();
+  }
+}
+
+int TransportManagerImpl::InitAllAdapters() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  for (std::vector<TransportAdapter*>::iterator i = transport_adapters_.begin();
+      i != transport_adapters_.end(); ++i) {
+    if ((*i)->Init() != TransportAdapter::OK) {
+      return E_ADAPTERS_FAIL;
+    }
+  }
+  return E_SUCCESS;
+}
+
 int TransportManagerImpl::Stop() {
-  LOG4CXX_TRACE(logger_, "enter");
-  if (!all_thread_active_) {
-    LOG4CXX_TRACE(logger_,
-                  "exit with E_TM_IS_NOT_INITIALIZED. Condition: !all_thread_active_");
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (!is_initialized_) {
+    LOG4CXX_WARN(logger_, "TransportManager is not initialized_");
     return E_TM_IS_NOT_INITIALIZED;
   }
-  all_thread_active_ = false;
 
-  pthread_cond_signal(&device_listener_thread_wakeup_);
+  message_queue_.Shutdown();
+  event_queue_.Shutdown();
 
-  LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
+  DisconnectAllDevices();
+  TerminateAllAdapters();
+
+  is_initialized_ = false;
   return E_SUCCESS;
 }
 
@@ -390,10 +416,17 @@ int TransportManagerImpl::SearchDevices() {
 
 int TransportManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "enter");
-  all_thread_active_ = true;
   is_initialized_ = true;
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
+}
+
+int TransportManagerImpl::Reinit() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  DisconnectAllDevices();
+  TerminateAllAdapters();
+  int ret = InitAllAdapters();
+  return ret;
 }
 
 int TransportManagerImpl::Visibility(const bool& on_off) const {
@@ -478,10 +511,9 @@ void TransportManagerImpl::PostMessage(const ::protocol_handler::RawMessagePtr m
 }
 
 void TransportManagerImpl::PostEvent(const TransportAdapterEvent& event) {
-  LOG4CXX_TRACE(logger_, "enter. TransportAdapterEvent: " << &event);
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_DEBUG(logger_, "TransportAdapterEvent: " << &event);
   event_queue_.PostMessage(event);
-  pthread_cond_signal(&device_listener_thread_wakeup_);
-  LOG4CXX_TRACE(logger_, "exit");
 }
 
 void TransportManagerImpl::AddConnection(const ConnectionInternal& c) {

@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -46,27 +46,48 @@ GetUrls::~GetUrls() {
 }
 
 void GetUrls::Run() {
-  LOG4CXX_INFO(logger_, "GetUrls::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject& object = *message_;
   object[strings::params][strings::message_type] = MessageType::kResponse;
   if (policy::PolicyHandler::instance()->PolicyEnabled()) {
-    policy::EndpointUrls endpoints =
-      policy::PolicyHandler::instance()->GetUpdateUrls(
-        object[strings::msg_params][hmi_request::service].asInt());
-    object[strings::msg_params].erase(hmi_request::service);
-    object[strings::msg_params][hmi_response::urls] =
-      smart_objects::SmartObject(smart_objects::SmartType_Array);
-    for (size_t i = 0; i < endpoints.size(); ++i) {
-      std::string url = endpoints[i].url.empty() ? "" : endpoints[i].url[0];
-      object[strings::msg_params][hmi_response::urls][i][strings::url] = url;
-      if (policy::kDefaultId != endpoints[i].app_id) {
-        object[strings::msg_params][hmi_response::urls][i][hmi_response::policy_app_id] =
-          endpoints[i].app_id;
+    policy::EndpointUrls endpoints;
+    policy::PolicyHandler::instance()->GetUpdateUrls(
+        object[strings::msg_params][hmi_request::service].asInt(), endpoints);
+    if (!endpoints.empty()) {
+      object[strings::msg_params].erase(hmi_request::service);
+
+      object[strings::msg_params][hmi_response::urls] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+      smart_objects::SmartObject& urls =
+          object[strings::msg_params][hmi_response::urls];
+
+      size_t index = 0;
+
+      for (size_t i = 0; i < endpoints.size(); ++i) {
+        for (size_t k = 0; k < endpoints[i].url.size(); ++k, ++index) {
+          const std::string url = endpoints[i].url[k];
+
+          urls[index] = smart_objects::SmartObject(
+                smart_objects::SmartType_Map);
+          smart_objects::SmartObject& service_info = urls[index];
+
+          service_info[strings::url] = url;
+          if (policy::kDefaultId != endpoints[i].app_id) {
+            service_info[hmi_response::policy_app_id] =
+              endpoints[i].app_id;
+          }
+        }
       }
+      object[strings::params][hmi_response::code] =
+          hmi_apis::Common_Result::SUCCESS;
+    } else {
+      object[strings::params][hmi_response::code] =
+          hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
     }
-    object[strings::params][hmi_response::code] = hmi_apis::Common_Result::SUCCESS;
   } else {
-    object[strings::params][hmi_response::code] = hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
+    object[strings::params][hmi_response::code] =
+        hmi_apis::Common_Result::DATA_NOT_AVAILABLE;
   }
   ApplicationManagerImpl::instance()->ManageHMICommand(message_);
 }

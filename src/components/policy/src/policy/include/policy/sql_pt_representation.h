@@ -66,14 +66,14 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     virtual void ResetIgnitionCycles();
     virtual int TimeoutResponse();
     virtual bool SecondsBetweenRetries(std::vector<int>* seconds);
-
+    virtual bool RefreshDB();
     virtual VehicleData GetVehicleData();
 
     virtual std::vector<UserFriendlyMessage> GetUserFriendlyMsg(
       const std::vector<std::string>& msg_codes, const std::string& language);
 
     virtual EndpointUrls GetUpdateUrls(int service_type);
-    virtual std::string GetLockScreenIconUrl() const;
+
     virtual int GetNotificationsNumber(const std::string& priority);
     virtual bool GetPriority(const std::string& policy_app_id,
                              std::string* priority);
@@ -81,6 +81,7 @@ class SQLPTRepresentation : public virtual PTRepresentation {
     bool Close();
     bool Clear();
     bool Drop();
+    virtual void WriteDb();
     virtual utils::SharedPtr<policy_table::Table> GenerateSnapshot() const;
     virtual bool Save(const policy_table::Table& table);
     bool GetInitialAppData(const std::string& app_id, StringArray* nicknames =

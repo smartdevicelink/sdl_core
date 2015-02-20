@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ VIIsReadyResponse::~VIIsReadyResponse() {
 }
 
 void VIIsReadyResponse::Run() {
-  LOG4CXX_INFO(logger_, "VIIsReadyResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject& object = *message_;
 
   bool is_available = false;

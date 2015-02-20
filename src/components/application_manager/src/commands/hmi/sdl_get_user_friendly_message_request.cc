@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -48,7 +48,7 @@ SDLGetUserFriendlyMessageRequest::~SDLGetUserFriendlyMessageRequest() {
 }
 
 void SDLGetUserFriendlyMessageRequest::Run() {
-  LOG4CXX_INFO(logger_, "SDLGetUserFriendlyMessageRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   const std::string messageCodes = "messageCodes";
   if (!(*message_)[strings::msg_params].keyExists(messageCodes)) {
     LOG4CXX_WARN(logger_,

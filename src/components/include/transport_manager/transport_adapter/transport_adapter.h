@@ -1,4 +1,4 @@
-/**
+/*
  * \file transport_adapter.h
  * \brief TransportAdapter class header file.
  *
@@ -121,6 +121,12 @@ class TransportAdapter {
    * @return Error information about possible reason of failure.
    **/
   virtual Error Init() = 0;
+
+  /**
+   * @brief Stops device adapter
+   * Called from transport manager to stop device adapter
+   */
+  virtual void Terminate() = 0;
 
   /**
    * @brief Add listener to the container(list) of device adapter listeners.

@@ -1,4 +1,4 @@
-/* Copyright (c) 2013, Ford Motor Company
+﻿/* Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -32,36 +32,30 @@
 #include <vector>
 
 #include "gtest/gtest.h"
-#include "gmock/gmock.h"
-
 #include "mock_policy_listener.h"
-#include "mock_pt_representation.h"
 #include "mock_pt_ext_representation.h"
 #include "mock_cache_manager.h"
 #include "mock_update_status_manager.h"
 #include "policy/policy_manager_impl.h"
-#include "policy/update_status_manager_interface.h"
-#include "policy/cache_manager_interface.h"
-#include "json/value.h"
-#include "utils/shared_ptr.h"
 
 using ::testing::_;
 using ::testing::Return;
 using ::testing::DoAll;
 using ::testing::SetArgReferee;
 using ::testing::NiceMock;
+using ::testing::AtLeast;
 
 using ::policy::PTRepresentation;
 using ::policy::MockPolicyListener;
 using ::policy::MockPTRepresentation;
 using ::policy::MockPTExtRepresentation;
 using ::policy::MockCacheManagerInterface;
-using ::policy::MockUpdateStatusManagerInterface;
+
+using ::policy::MockUpdateStatusManager;
+
 using ::policy::PolicyManagerImpl;
 using ::policy::PolicyTable;
 using ::policy::EndpointUrls;
-using ::policy::CacheManagerInterfaceSPtr;
-using ::policy::UpdateStatusManagerInterfaceSPtr;
 
 namespace policy_table = rpc::policy_table_interface_base;
 
@@ -73,7 +67,7 @@ class PolicyManagerImplTest : public ::testing::Test {
  protected:
   PolicyManagerImpl* manager;
   MockCacheManagerInterface* cache_manager;
-  MockUpdateStatusManagerInterface* update_manager;
+  MockUpdateStatusManager update_manager;
   MockPolicyListener* listener;
 
   void SetUp() {
@@ -82,19 +76,11 @@ class PolicyManagerImplTest : public ::testing::Test {
     cache_manager = new MockCacheManagerInterface();
     manager->set_cache_manager(cache_manager);
 
-    update_manager = new MockUpdateStatusManagerInterface();
-    manager->set_update_status_manager(update_manager);
-
     listener = new MockPolicyListener();
-    EXPECT_CALL(*update_manager, set_listener(listener)).Times(1);
     manager->set_listener(listener);
   }
 
   void TearDown() {
-    EXPECT_CALL(*update_manager, GetUpdateStatus()).Times(1)
-        .WillOnce(Return(::policy::StatusUpToDate));
-    EXPECT_CALL(*cache_manager, Backup()).Times(1);
-    EXPECT_CALL(*cache_manager, SaveUpdateRequired(_)).Times(1);
     delete manager;
     delete listener;
   }
@@ -107,107 +93,83 @@ class PolicyManagerImplTest : public ::testing::Test {
       table.ReportErrors(&report);
       return ::testing::AssertionFailure() << ::rpc::PrettyFormat(report);
     }
- }
+  }
 };
 
-TEST_F(PolicyManagerImplTest, ExceededIgnitionCycles) {
-  EXPECT_CALL(*cache_manager, IgnitionCyclesBeforeExchange()).Times(2).WillOnce(
-      Return(5)).WillOnce(Return(0));
-  EXPECT_CALL(*cache_manager, IncrementIgnitionCycles()).Times(1);
+TEST_F(PolicyManagerImplTest, RefreshRetrySequence_SetSecondsBetweenRetries_ExpectRetryTimeoutSequenceWithSameSeconds) {
 
-  EXPECT_FALSE(manager->ExceededIgnitionCycles());
-  manager->IncrementIgnitionCycles();
-  EXPECT_TRUE(manager->ExceededIgnitionCycles());
-}
-
-TEST_F(PolicyManagerImplTest, ExceededDays) {
-  EXPECT_CALL(*cache_manager, DaysBeforeExchange(_)).Times(2).WillOnce(
-      Return(5)).WillOnce(Return(0));
-
-  EXPECT_FALSE(manager->ExceededDays(5));
-  EXPECT_TRUE(manager->ExceededDays(15));
-}
-
-TEST_F(PolicyManagerImplTest, ExceededKilometers) {
-  EXPECT_CALL(*cache_manager, KilometersBeforeExchange(_)).Times(2).WillOnce(
-      Return(50)).WillOnce(Return(0));
-
-  EXPECT_FALSE(manager->ExceededKilometers(50));
-  EXPECT_TRUE(manager->ExceededKilometers(150));
-}
-
-TEST_F(PolicyManagerImplTest, RefreshRetrySequence) {
+  //arrange
   std::vector<int> seconds;
   seconds.push_back(50);
   seconds.push_back(100);
   seconds.push_back(200);
 
-  EXPECT_CALL(*cache_manager, TimeoutResponse()).Times(1).WillOnce(Return(60));
-  EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_)).Times(1).WillOnce(
+  //assert
+  EXPECT_CALL(*cache_manager, TimeoutResponse()).WillOnce(Return(60));
+  EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_)).WillOnce(
       DoAll(SetArgReferee<0>(seconds), Return(true)));
 
+  //act
   manager->RefreshRetrySequence();
+
+  //assert
   EXPECT_EQ(50, manager->NextRetryTimeout());
   EXPECT_EQ(100, manager->NextRetryTimeout());
   EXPECT_EQ(200, manager->NextRetryTimeout());
   EXPECT_EQ(0, manager->NextRetryTimeout());
 }
 
-TEST_F(PolicyManagerImplTest, RefreshRetrySequence) {
-  ::testing::NiceMock<MockPTRepresentation> mock_pt;
-  std::vector<int> seconds, seconds_empty;
-  seconds.push_back(50);
-  seconds.push_back(100);
-  seconds.push_back(200);
+TEST_F(PolicyManagerImplTest, DISABLED_GetUpdateUrl) {
 
-  EXPECT_CALL(mock_pt, TimeoutResponse()).Times(2).WillOnce(Return(0)).WillOnce(
-    Return(60));
-  EXPECT_CALL(mock_pt, SecondsBetweenRetries(_)).Times(2).WillOnce(
-    DoAll(SetArgPointee<0>(seconds_empty), Return(true))).WillOnce(
-      DoAll(SetArgPointee<0>(seconds), Return(true)));
+  EXPECT_CALL(*cache_manager, GetUpdateUrls(7,_));
+  EXPECT_CALL(*cache_manager, GetUpdateUrls(4,_));
 
-  PolicyManagerImpl* manager = new PolicyManagerImpl();
-  manager->ResetDefaultPT(::policy::PolicyTable(&mock_pt));
-  manager->RefreshRetrySequence();
-  EXPECT_EQ(60, manager->TimeoutExchange());
-  EXPECT_EQ(50, manager->NextRetryTimeout());
-  EXPECT_EQ(100, manager->NextRetryTimeout());
-  EXPECT_EQ(200, manager->NextRetryTimeout());
+  EXPECT_EQ("http://policies.telematics.ford.com/api/policies",
+            manager->GetUpdateUrl(7));
+  EXPECT_EQ("http://policies.ford.com/api/policies", manager->GetUpdateUrl(4));
+
 }
 
 
 TEST_F(PolicyManagerImplTest, ResetPT) {
   EXPECT_CALL(*cache_manager, ResetPT("filename")).WillOnce(Return(true))
       .WillOnce(Return(false));
-  EXPECT_CALL(*cache_manager, TimeoutResponse()).Times(1);
-  EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_)).Times(1);
+  EXPECT_CALL(*cache_manager, TimeoutResponse());
+  EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
 
   EXPECT_TRUE(manager->ResetPT("filename"));
   EXPECT_FALSE(manager->ResetPT("filename"));
 }
 
-// EXTENDED_POLICY
-TEST_F(PolicyManagerImplTest, CheckPermissions) {
+TEST_F(PolicyManagerImplTest, CheckPermissions_SetHmiLevelFullForAlert_ExpectAllowedPermissions) {
+
+  //arrange
   ::policy::CheckPermissionResult expected;
   expected.hmi_level_permitted = ::policy::kRpcAllowed;
   expected.list_of_allowed_params.push_back("speed");
   expected.list_of_allowed_params.push_back("gps");
 
-  EXPECT_CALL(*cache_manager, CheckPermissions("12345678", "FULL", "Alert", _))
-      .Times(1).WillOnce(SetArgReferee<3>(expected));
+  //assert
+  EXPECT_CALL(*cache_manager, CheckPermissions("12345678", "FULL", "Alert", _)).
+      WillOnce(SetArgReferee<3>(expected));
 
+  //act
   ::policy::RPCParams input_params;
   ::policy::CheckPermissionResult output;
   manager->CheckPermissions("12345678", "FULL", "Alert", input_params, output);
 
+  //assert
   EXPECT_EQ(::policy::kRpcAllowed, output.hmi_level_permitted);
+
   ASSERT_TRUE(!output.list_of_allowed_params.empty());
   ASSERT_EQ(2u, output.list_of_allowed_params.size());
   EXPECT_EQ("speed", output.list_of_allowed_params[0]);
   EXPECT_EQ("gps", output.list_of_allowed_params[1]);
 }
 
-TEST_F(PolicyManagerImplTest, LoadPT) {
+TEST_F(PolicyManagerImplTest, LoadPT_SetPT_PTIsLoaded) {
+
+  //arrange
   Json::Value table(Json::objectValue);
   table["policy_table"] = Json::Value(Json::objectValue);
 
@@ -288,51 +250,57 @@ TEST_F(PolicyManagerImplTest, LoadPT) {
 
   policy_table::Table update(&table);
   update.SetPolicyTableType(rpc::policy_table_interface_base::PT_UPDATE);
+
+  //assert
   ASSERT_TRUE(IsValid(update));
 
+
+  //act
   std::string json = table.toStyledString();
   ::policy::BinaryMessage msg(json.begin(), json.end());
 
-  utils::SharedPtr<policy_table::Table> snapshot =
-      new policy_table::Table(update.policy_table);
+  utils::SharedPtr<policy_table::Table> snapshot = new policy_table::Table(
+      update.policy_table);
 
-  EXPECT_CALL(*update_manager, OnValidUpdateReceived()).Times(1);
-  EXPECT_CALL(*cache_manager, GenerateSnapshot()).Times(1).WillOnce(Return(snapshot));
-  EXPECT_CALL(*cache_manager, ApplyUpdate(_)).Times(1).WillOnce(Return(true));
-  EXPECT_CALL(*listener, GetAppName("1234")).Times(1).WillOnce(Return(""));
-  EXPECT_CALL(*cache_manager, TimeoutResponse()).Times(1);
-  EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_)).Times(1);
-  EXPECT_CALL(*listener, OnUserRequestedUpdateCheckRequired()).Times(1);
+  //assert
+  EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(snapshot));
+  EXPECT_CALL(*cache_manager, ApplyUpdate(_)).WillOnce(Return(true));
+  EXPECT_CALL(*listener, GetAppName("1234")).WillOnce(Return(""));
+  EXPECT_CALL(*listener, OnUpdateStatusChanged(_));
+  EXPECT_CALL(*cache_manager, SaveUpdateRequired(false));
+  EXPECT_CALL(*cache_manager, TimeoutResponse());
+  EXPECT_CALL(*cache_manager, SecondsBetweenRetries(_));
 
   EXPECT_TRUE(manager->LoadPT("file_pt_update.json", msg));
 }
 
-TEST_F(PolicyManagerImplTest, RequestPTUpdate) {
-  ::utils::SharedPtr< ::policy_table::Table> p_table =
-      new ::policy_table::Table();
-  std::string json = p_table->ToJsonValue().toStyledString();
-  ::policy::BinaryMessageSptr expect = new ::policy::BinaryMessage(json.begin(),
-      json.end());
+TEST_F(PolicyManagerImplTest, RequestPTUpdate_SetPT_GeneratedSnapshotAndPTUpdate) {
 
+  //arrange
+  ::utils::SharedPtr< ::policy_table::Table > p_table =
+      new ::policy_table::Table();
+
+  //assert
   EXPECT_CALL(*cache_manager, GenerateSnapshot()).WillOnce(Return(p_table));
 
-  ::policy::BinaryMessageSptr output = manager->RequestPTUpdate();
-  EXPECT_EQ(*expect, *output);
+  //act
+  manager->RequestPTUpdate();
 }
 
 
-TEST_F(PolicyManagerImplTest, AddApplication) {
+TEST_F(PolicyManagerImplTest, DISABLED_AddApplication) {
   // TODO(AOleynik): Implementation of method should be changed to avoid
   // using of snapshot
   //manager->AddApplication("12345678");
 }
 
-TEST_F(PolicyManagerImplTest, GetPolicyTableStatus) {
+TEST_F(PolicyManagerImplTest, DISABLED_GetPolicyTableStatus) {
   // TODO(AOleynik): Test is not finished, to be continued
   //manager->GetPolicyTableStatus();
 }
 
 
-}  // namespace policy
-}  // namespace components
+}
+// namespace policy
+}// namespace components
 }  // namespace test

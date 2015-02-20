@@ -1,4 +1,4 @@
-/**
+/*
  * @file generic_json_formatter.h
  * @brief Generic JSON formatter header file.
  */

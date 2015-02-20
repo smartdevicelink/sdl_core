@@ -1,4 +1,4 @@
-/**
+/*
  * \file connection.h
  * \brief Connection class header.
  * Copyright (c) 2013, Ford Motor Company
@@ -39,7 +39,6 @@
 #include "transport_manager/transport_adapter/transport_adapter.h"
 
 namespace transport_manager {
-
 namespace transport_adapter {
 
 /**
@@ -47,10 +46,6 @@ namespace transport_adapter {
  **/
 class Connection {
  public:
-  /**
-   * @brief Constructor.
-   */
-  Connection() {}
   /**
    * @brief Destructor.
    **/
@@ -70,6 +65,8 @@ class Connection {
    */
   virtual TransportAdapter::Error Disconnect() = 0;
 };
+
+typedef utils::SharedPtr<Connection> ConnectionSPtr;
 
 }  // namespace transport_adapter
 }  // namespace transport_manager

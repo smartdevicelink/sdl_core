@@ -1,4 +1,4 @@
-/**
+/*
  * \file platform_usb_device.h
  * \brief libusb PlatformUsbDevice class header file.
  *

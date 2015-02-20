@@ -98,7 +98,7 @@ SDL.sdlView = Em.ContainerView
                     ],
 
                     optionsButton: SDL.Button.extend( {
-                        text: 'Menu',
+                        text: 'Options',
 
                         templateName: 'arrow',
 

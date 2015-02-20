@@ -48,7 +48,7 @@ SendLocationResponse::~SendLocationResponse() {
 }
 
 void SendLocationResponse::Run() {
-  LOG4CXX_INFO(logger_, "SendLocationResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }

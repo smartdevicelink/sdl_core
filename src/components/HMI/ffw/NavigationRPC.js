@@ -172,6 +172,24 @@ FFW.Navigation = FFW.RPCObserver.create( {
                 }
                 case "Navigation.AlertManeuver": {
 
+                    // Werify if there is an ansupported data in request
+                    if (this.errorResponsePull[request.id] != null) {
+
+                        //Check if there is any available data to  process the request
+                        if ("softButtons" in request.params) {
+
+                            this.errorResponsePull[request.id].code = SDL.SDLModel.resultCode["WARNINGS"];
+                        } else {
+                            //If no available data sent error response and stop process current request
+
+                            this.sendError(this.errorResponsePull[request.id].code, request.id, request.method,
+                                    "Unsupported " + this.errorResponsePull[request.id].type + " type. Request was not processed.");
+                            this.errorResponsePull[request.id] = null;
+
+                            return;
+                        }
+                    }
+
                     this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
                         request.method);
@@ -179,6 +197,12 @@ FFW.Navigation = FFW.RPCObserver.create( {
                     break;
                 }
                 case "Navigation.ShowConstantTBT": {
+
+                    // Werify if there is an ansupported data in request
+                    if (this.errorResponsePull[request.id] != null) {
+
+                        this.errorResponsePull[request.id].code = SDL.SDLModel.resultCode["WARNINGS"];
+                    }
 
                     SDL.SDLModel.tbtActivate(request.params);
                     this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
@@ -189,6 +213,24 @@ FFW.Navigation = FFW.RPCObserver.create( {
                 }
                 case "Navigation.UpdateTurnList": {
 
+                    // Werify if there is an ansupported data in request
+                    if (this.errorResponsePull[request.id] != null) {
+
+                        //Check if there is any available data to  process the request
+                        if ("turnList" in request.params || "softButtons" in request.params) {
+
+                            this.errorResponsePull[request.id].code = SDL.SDLModel.resultCode["WARNINGS"];
+                        } else {
+                            //If no available data sent error response and stop process current request
+
+                            this.sendError(this.errorResponsePull[request.id].code, request.id, request.method,
+                                    "Unsupported " + this.errorResponsePull[request.id].type + " type. Request was not processed.");
+                            this.errorResponsePull[request.id] = null;
+
+                            return;
+                        }
+                    }
+
                     SDL.SDLModel.tbtTurnListUpdate(request.params);
                     this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
@@ -198,11 +240,7 @@ FFW.Navigation = FFW.RPCObserver.create( {
                 }
                 case "Navigation.StartAudioStream": {
 
-                    SDL.SDLModel.startAudioStream(request.params);
-
-                    this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
-                        request.id,
-                        request.method);
+                    SDL.SDLModel.startAudioStream(request);
 
                     break;
                 }
@@ -218,11 +256,7 @@ FFW.Navigation = FFW.RPCObserver.create( {
                 }
                 case "Navigation.StartStream": {
 
-                    SDL.SDLModel.startStream(request.params);
-
-                    this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
-                        request.id,
-                        request.method);
+                    SDL.SDLModel.startStream(request);
 
                     break;
                 }
@@ -237,6 +271,12 @@ FFW.Navigation = FFW.RPCObserver.create( {
                     break;
                 }
                 case "Navigation.SendLocation": {
+
+                    // Werify if there is an ansupported data in request
+                    if (this.errorResponsePull[request.id] != null) {
+
+                        this.errorResponsePull[request.id].code = SDL.SDLModel.resultCode["WARNINGS"];
+                    }
 
                     this.sendNavigationResult(SDL.SDLModel.resultCode["SUCCESS"],
                         request.id,
@@ -291,6 +331,14 @@ FFW.Navigation = FFW.RPCObserver.create( {
      *            method
      */
     sendNavigationResult: function(resultCode, id, method) {
+
+        if (this.errorResponsePull[id]) {
+
+            this.sendError(this.errorResponsePull[id].code, id, method,
+                    "Unsupported " + this.errorResponsePull[id].type + " type. Available data in request was processed.");
+            this.errorResponsePull[id] = null;
+            return;
+        }
 
         Em.Logger.log("FFW.UI." + method + "Response");
 

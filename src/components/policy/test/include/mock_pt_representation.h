@@ -79,8 +79,8 @@ class MockPTRepresentation : virtual public PTRepresentation {
   MOCK_METHOD2(GetUserFriendlyMsg,
       std::vector<UserFriendlyMessage>(const std::vector<std::string>& msg_code,
           const std::string& language));
-  MOCK_METHOD1(GetUpdateUrls,
-      EndpointUrls(int service_type));
+  MOCK_METHOD2(GetUpdateUrls,
+      void(int service_type, EndpointUrls&));
   MOCK_METHOD1(GetNotificationsNumber,
       int(const std::string& priority));
   MOCK_METHOD0(Init,

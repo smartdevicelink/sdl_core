@@ -77,7 +77,7 @@ TEST(generated_factory, create) {
     "application_manager::SomeClass",
     new test_command::SomeClass);
 
-  if (!thread->startWithOptions(
+  if (!thread->start(
         threads::ThreadOptions(16384))) {
     std::cout << "Something went wrong with thread." << std::endl;
     return;

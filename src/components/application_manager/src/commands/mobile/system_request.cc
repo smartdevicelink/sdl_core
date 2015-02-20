@@ -40,6 +40,8 @@ Copyright (c) 2013, Ford Motor Company
 #include "interfaces/MOBILE_API.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
+#include "formatters/CFormatterJsonBase.hpp"
+#include "json/json.h"
 
 namespace application_manager {
 
@@ -55,7 +57,7 @@ SystemRequest::~SystemRequest() {
 }
 
 void SystemRequest::Run() {
-  LOG4CXX_INFO(logger_, "SystemRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(connection_key());
@@ -66,12 +68,14 @@ void SystemRequest::Run() {
     return;
   }
 
-  mobile_apis::RequestType::eType request_type =
+  const mobile_apis::RequestType::eType request_type =
       static_cast<mobile_apis::RequestType::eType>(
           (*message_)[strings::msg_params][strings::request_type].asInt());
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data) &&
-      mobile_apis::RequestType::PROPRIETARY == request_type) {
+      (mobile_apis::RequestType::PROPRIETARY == request_type ||
+       mobile_apis::RequestType::QUERY_APPS == request_type)) {
+
       LOG4CXX_ERROR(logger_, "Binary data empty");
 
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -81,6 +85,18 @@ void SystemRequest::Run() {
   std::vector<uint8_t> binary_data;
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
     binary_data = (*message_)[strings::params][strings::binary_data].asBinary();
+  }
+
+  if (mobile_apis::RequestType::QUERY_APPS == request_type) {
+    using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
+
+    smart_objects::SmartObject sm_object;
+    CFormatterJsonBase::jsonValueToObj(Json::Value(
+                                         std::string(binary_data.begin(),
+                                                     binary_data.end())),
+                                       sm_object);
+    ApplicationManagerImpl::instance()->ProcessQueryApp(sm_object);
+    return;
   }
 
   std::string file_path = profile::Profile::instance()->system_files_path();
@@ -125,7 +141,7 @@ void SystemRequest::Run() {
   }
 
   if (mobile_apis::RequestType::PROPRIETARY != request_type) {
-    msg_params[strings::app_id] = (application->mobile_app_id())->asString();
+    msg_params[strings::app_id] = (application->mobile_app_id());
   }
   msg_params[strings::request_type] =
       (*message_)[strings::msg_params][strings::request_type];

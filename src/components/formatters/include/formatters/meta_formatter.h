@@ -1,4 +1,4 @@
-/**
+/*
  * @file meta_fromatter.h
  * @brief file describes class CMetaFormatter which is designed to format
  *        the smart object against given schema for given formatter
