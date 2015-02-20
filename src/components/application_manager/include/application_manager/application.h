@@ -35,12 +35,14 @@
 
 #include <string>
 #include <map>
+#include <set>
+#include <list>
 #include "utils/shared_ptr.h"
 #include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
 #include "application_manager/message.h"
-#include <set>
+#include "application_manager/hmi_state.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -438,6 +440,24 @@ class Application : public virtual InitialApplicationData,
     virtual connection_handler::DeviceHandle device() const = 0;
     virtual void set_tts_speak_state(bool state_tts_speak) = 0;
     virtual bool tts_speak_state() = 0;
+
+    /**
+     * @brief Active states of application
+     */
+    virtual HmiStateList& GetHmiStateList() {
+      return hmi_states_;
+    }
+
+    /**
+     * @brief Current hmi state
+     */
+    const utils::SharedPtr<HmiState> CurrentHmiState() const {
+      if (hmi_states_.empty()) {
+        return utils::SharedPtr<HmiState>();
+      }
+      return hmi_states_.back();
+    }
+
     /**
      * @brief sets true if application has sent TTS GlobalProperties
      * request with empty array help_prompt to HMI with level
@@ -631,6 +651,12 @@ class Application : public virtual InitialApplicationData,
     virtual void OnAudioStreamRetry() = 0;
 
   protected:
+
+    /**
+     * @brief Active states of application
+     */
+    HmiStateList hmi_states_;
+
     ApplicationState app_state_;
     std::string url_;
     std::string package_name_;

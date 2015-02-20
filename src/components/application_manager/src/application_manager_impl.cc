@@ -809,17 +809,19 @@ void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(
       (*it)->set_greyed_out(is_greyed_out);
     }
   }
+}
+
+void ApplicationManagerImpl::set_state(StateController::StateEventID state_id) {
+  state_ctrl_.ProcessStateEvent(state_id);
+}
 
 void ApplicationManagerImpl::set_state(
+    ApplicationSharedPtr app,
     mobile_apis::HMILevel::eType hmi_level,
     mobile_apis::AudioStreamingState::eType audio_state) {
-  state_ctrl_.set_state(hmi_level, audio_state);
+  state_ctrl_.SetDefaultState(app, hmi_level, audio_state);
 }
 
-void ApplicationManagerImpl::set_state(
-    application_manager::StateController::StateID state_id) {
-  state_ctrl_.set_state(state_id);
-}
 
 void ApplicationManagerImpl::OnErrorSending(
   hmi_message_handler::MessageSharedPointer message) {

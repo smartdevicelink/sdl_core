@@ -2240,13 +2240,6 @@
     </param>
   </function>
 
-  <function name="OnEmergencyEvent" messagetype="notification">
-    <description>Notification must be sent from HMI to SDL e.g. in case rear camera is active.</description>
-    <param name="state" type="Common.EmergencyState" mandatory="true">
-      <description>See EmergencyState. </description>
-    </param>
-  </function>
-
 <!-- Policies -->
   <function name="GetSystemInfo" messagetype="request">
     <description>Request from SDL to HMI to obtain information about head unit system.</description>
