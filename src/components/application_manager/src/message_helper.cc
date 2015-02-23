@@ -1207,7 +1207,9 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
     output[strings::hmi_display_language_desired] = app->ui_language();
   }
 
-  output[strings::is_media_application] = app->is_media_application();
+  if (app->IsRegistered()) {
+    output[strings::is_media_application] = app->is_media_application();
+  }
 
   if (!app->IsRegistered()) {
     output[strings::greyOut] = app->is_greyed_out();
