@@ -464,6 +464,12 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   }
   apps_to_register_list_lock_.Release();
 
+  if (!application->hmi_app_id()) {
+    resume_ctrl_.IsApplicationSaved(application->mobile_app_id())?
+              resume_ctrl_.GetHMIApplicationID(application->mobile_app_id()) :
+          GenerateNewHMIAppID();
+  }
+
   ApplicationListAccessor app_list_accesor;
   application->MarkRegistered();
   app_list_accesor.Insert(application);
@@ -1937,7 +1943,9 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
 
     const std::string appName(app_data[json::name].asString());
 
-    const uint32_t hmi_app_id(GenerateNewHMIAppID());
+
+    const uint32_t hmi_app_id = resume_ctrl_.IsApplicationSaved(mobile_app_id)?
+          resume_ctrl_.GetHMIApplicationID(mobile_app_id) : GenerateNewHMIAppID();
 
     const std::string app_icon_dir(Profile::instance()->app_icons_folder());
     const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id);

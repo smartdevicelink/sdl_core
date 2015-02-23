@@ -221,19 +221,6 @@ void RegisterAppInterfaceRequest::Run() {
                       msg_params[strings::app_name].asString() <<
                       "  hasn't been registered!");
   } else {
-
-    // For resuming application need to restore hmi_app_id from resumeCtrl
-    const std::string mobile_app_id = msg_params[strings::app_id].asString();
-    ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
-
-    // there is side affect with 2 mobile app with the same mobile app_id
-    if (resumer.IsApplicationSaved(mobile_app_id)) {
-      app->set_hmi_application_id(resumer.GetHMIApplicationID(mobile_app_id));
-    } else if (!app->hmi_app_id()) {
-      app->set_hmi_application_id(
-        ApplicationManagerImpl::instance()->GenerateNewHMIAppID());
-    }
-
     app->set_is_media_application(
       msg_params[strings::is_media_application].asBool());
 
