@@ -249,7 +249,7 @@ bool SystemRequest::ValidateQueryAppData(
     return true;
   }
 
-  return true;
+  return false;
 }
 
 }  // namespace commands
