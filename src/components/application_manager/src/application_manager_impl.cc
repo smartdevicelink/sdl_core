@@ -530,6 +530,20 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   return true;
 }
 
+void ApplicationManagerImpl::DeactivateApplication(ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  using namespace mobile_apis::HMILevel;
+
+  if (app->IsAudioApplication() && !(ApplicationManagerImpl::instance()->
+          DoesAudioAppWithSameHMITypeExistInFullOrLimited(app))) {
+    ChangeAppsHMILevel(app->app_id(), HMI_LIMITED);
+  } else {
+    ChangeAppsHMILevel(app->app_id(), HMI_BACKGROUND);
+  }
+  MessageHelper::SendHMIStatusNotification(*app);
+}
+
 mobile_api::HMILevel::eType ApplicationManagerImpl::IsHmiLevelFullAllowed(
   ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);

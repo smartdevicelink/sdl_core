@@ -327,6 +327,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
     bool LoadAppDataToHMI(ApplicationSharedPtr app);
     bool ActivateApplication(ApplicationSharedPtr app);
+    void DeactivateApplication(ApplicationSharedPtr app);
 
     /**
      * @brief Put application in FULL HMI Level if possible,
