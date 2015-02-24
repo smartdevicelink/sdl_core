@@ -45,6 +45,8 @@ void MessageHandler::readFromTCP()
 
 void MessageHandler::writeToTCP(const QString &qMessage)
 {
+    qDebug() << "Write message to TCP " << qMessage;
+
     QByteArray qb = qMessage.toUtf8();
 
     if ((clientConnection != NULL) && (clientConnection->state() == QTcpSocket::ConnectedState)){

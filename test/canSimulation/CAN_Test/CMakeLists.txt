@@ -30,10 +30,10 @@
 
 cmake_minimum_required(VERSION 2.8.11)
 
-project(CAN)
+project(CAN_Test)
 
-set(CAN_SOURCES loger.cpp main.cpp)
-set(CAN_HEADERS loger.h)
+set(CAN_TEST_SOURCES cantest.cpp main.cpp)
+set(CAN_TEST_HEADERS cantest.h)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../CANlib)
 
@@ -45,15 +45,10 @@ set(CMAKE_AUTOMOC ON)
 # Find the QtWidgets library
 find_package(Qt5Widgets REQUIRED)
 
-QT5_ADD_RESOURCES(RESOURCES qml.qrc)
-
 # Tell CMake to create the helloworld executable
-add_executable(CAN ${CAN_SOURCES} ${RESOURCES})
+add_executable(CAN_Test ${CAN_TEST_SOURCES})
 
-link_directories(${CMAKE_LIBRARY_PATH})
-
-qt5_use_modules(CAN Core Qml Quick Widgets)
+qt5_use_modules(CAN_Test Test Core Network WebSockets)
 
 # Use the Widgets module from Qt 5.
-target_link_libraries(CAN Qt5::Widgets CANlib)
-
+target_link_libraries(CAN_Test CANlib)

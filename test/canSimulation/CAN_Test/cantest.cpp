@@ -12,6 +12,7 @@ void CANTest::initTestCase()
 
 void CANTest::cleanupTestCase()
 {
+
 }
 
 void CANTest::connectionTest()
@@ -35,7 +36,7 @@ void CANTest::connectionTest()
      server.deleteLater();
 }
 
-void CANTest::sendDataTest()
+void CANTest::receiveTCPDataTest()
 {
     QString qMessage = "Hello";
 
@@ -66,4 +67,32 @@ void CANTest::sendDataTest()
     s.deleteLater();
     server.deleteLater();
 
+}
+
+void CANTest::sendTCPDataTest()
+{
+    QString qMessage = "Hello";
+
+    Server server;
+
+    QString ipAddress = "127.0.0.1";
+    quint16 port = 6669;
+    server.createConection(ipAddress, port );
+
+    QTcpSocket s;
+    s.connectToHost(QHostAddress(ipAddress), port );
+
+    QVERIFY2(s.waitForConnected( 5000 ), "TCP Client can not connect!");
+
+    QTest::qWait(1000);
+
+    server.write(qMessage);
+
+    QVERIFY(s.waitForReadyRead(5000));
+    QByteArray arr = s.readAll();
+    QCOMPARE(arr.constData(), qMessage.toUtf8().data());
+
+    s.close();
+    s.deleteLater();
+    server.deleteLater();
 }

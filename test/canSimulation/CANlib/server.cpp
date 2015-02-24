@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <QDebug>
 
-Server::Server() : QObject() {
+Server::Server() : QObject(), messageHandler(NULL), thread(NULL) {
 
     qDebug() << "Server()";
     tcpServer = new QTcpServer(this);
@@ -52,11 +52,15 @@ Server::~Server()
     qDebug() << "~Server()";
     emit  stopAllThreads();
 
-    thread->quit();
-    thread->wait();
+    if (thread) {
+        thread->quit();
+        thread->wait();
+    }
 
-    delete messageHandler;
-    messageHandler = NULL;
+    if (messageHandler) {
+        delete messageHandler;
+        messageHandler = NULL;
+    }
 
     if (mutex) {
         delete mutex;

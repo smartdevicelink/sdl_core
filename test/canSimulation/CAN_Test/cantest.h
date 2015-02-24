@@ -20,9 +20,10 @@ public:
 
 private Q_SLOTS:
     void initTestCase();
-    void connectionTest();
-    void sendDataTest();
     void cleanupTestCase();
+    void connectionTest();
+    void receiveTCPDataTest();
+    void sendTCPDataTest();
 
 private:
 
