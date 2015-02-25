@@ -36,7 +36,7 @@ PhoneCallHmiState::PhoneCallHmiState(utils::SharedPtr<HmiState> previous):
 
 SafetyModeHmiState::SafetyModeHmiState(utils::SharedPtr<HmiState> previous):
   HmiState(previous) {
-
+  audio_streaming_state_ = mobile_apis::AudioStreamingState::NOT_AUDIBLE;
 }
 
 

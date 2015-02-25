@@ -182,6 +182,27 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   virtual bool IsAudioApplication() const;
 
+
+  /**
+   * @brief AddHMIState the function that will change application's
+   * hmi state.
+   *
+   * @param app_id id of the application whose hmi level should be changed.
+   *
+   * @param state new hmi state for certain application.
+   */
+  virtual void AddHMIState(utils::SharedPtr<HmiState> state);
+
+  /**
+   * @brief RemoveHMIState the function that will turn back hmi_level after end
+   * of some event
+   *
+   * @param app_id id of the application whose hmi level should be changed.
+   *
+   * @param state_id that should be removed
+   */
+  virtual void RemoveHMIState(HmiState::StateID state_id);
+
  protected:
 
   /**

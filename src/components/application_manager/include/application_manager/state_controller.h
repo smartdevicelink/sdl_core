@@ -36,35 +36,14 @@
 
 #include "application_manager/hmi_state.h"
 #include "application_manager/application.h"
+#include "event_engine/event_observer.h"
 
 namespace application_manager {
 
-class StateController {
+class StateController : public event_engine::EventObserver {
   public:
 
-    /**
-     * @brief The StateEventID enum describes events to change HMIState
-     * of applications
-     */
-    enum StateEventID {
-      EVENT_ID_DEFAULT,
-      EVENT_ID_PHONE_CALL_STARTED,
-      EVENT_ID_PHONE_CALL_ENDED,
-      EVENT_ID_SAFETY_MODE_ENABLED,
-      EVENT_ID_SAFETY_MODE_DISABLED,
-      EVENT_ID_VR_STARTED,
-      EVENT_ID_VR_ENDED,
-      EVENT_ID_TTS_STARTED,
-      EVENT_ID_TTS_ENDED
-    };
-
-    /**
-     * @brief ProcessStateEvent process event and change
-     * HmiState for all applications
-     * @param id - event ID to process
-     */
-    void ProcessStateEvent(const StateEventID id);
-
+    StateController();
     /**
      * @brief SetDefaultState setup original hmiState, tha will appear if no
      * specific events are active
@@ -93,7 +72,12 @@ class StateController {
      */
     void SetSystemContext(const mobile_apis::SystemContext::eType system_context);
 
+    // EventObserver interface
+    void on_event(const event_engine::Event& event);
+
   private:
+    bool IsStatusChanged(utils::SharedPtr<HmiState> old_state,
+                         utils::SharedPtr<HmiState> new_state);
     /**
      * @brief OnPhoneCallStarted process Phone Call Started event
      */
@@ -134,13 +118,12 @@ class StateController {
      */
     void OnTTSEnded();
 
-  private:
-
     /**
      * @brief Active states of application
      */
     std::list<HmiState::StateID> current_state_;
     mobile_apis::SystemContext::eType system_context_;
+
 };
 
 }
