@@ -32,6 +32,7 @@
 
 #include "application_manager/state_controller.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
@@ -44,13 +45,13 @@ StateController::StateController():EventObserver() {
 void StateController::SetDefaultState(ApplicationSharedPtr app,
                                       const mobile_apis::HMILevel::eType hmi_level,
                                       const mobile_apis::AudioStreamingState::eType audio_state) {
-  HmiStateList& default_hmi_state = app->GetHmiStateList();
-  DCHECK_OR_RETURN_VOID(default_hmi_state.empty() == false);
+  HmiStateList& hmi_state_list = app->GetHmiStateList();
+  DCHECK_OR_RETURN_VOID(hmi_state_list.empty() == false);
   utils::SharedPtr<HmiState> hmi_state(new HmiState(hmi_level,
                                                     audio_state,
                                                     system_context_));
-  default_hmi_state.erase(default_hmi_state.begin());
-  default_hmi_state.push_front(hmi_state);
+  hmi_state_list.erase(hmi_state_list.begin());
+  hmi_state_list.push_front(hmi_state);
 }
 
 void StateController::SetDefaultState(ApplicationSharedPtr app,

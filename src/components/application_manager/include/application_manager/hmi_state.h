@@ -1,9 +1,9 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMISTATE_H
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMISTATE_H
 
+#include <list>
 #include "interfaces/MOBILE_API.h"
 #include "utils/shared_ptr.h"
-#include <list>
 
 namespace application_manager {
 

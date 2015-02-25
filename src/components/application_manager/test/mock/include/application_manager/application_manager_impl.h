@@ -288,8 +288,8 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD0(OnLowVoltage, void());
   MOCK_METHOD0(OnWakeUp, void());
   MOCK_METHOD1(OnUpdateHMIAppType, void(std::map<std::string, std::vector<std::string> >));
-  MOCK_METHOD1(set_state, void(StateController::StateID));
-  MOCK_METHOD2(set_state, void(mobile_apis::HMILevel::eType,
+  MOCK_METHOD3(set_state, void(ApplicationSharedPtr app,
+                               mobile_apis::HMILevel::eType,
                                mobile_apis::AudioStreamingState::eType));
 
   struct ApplicationsAppIdSorter {
