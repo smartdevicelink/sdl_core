@@ -3,11 +3,9 @@
 #include "server.h"
 #include "color.h"
 #include <unistd.h>
-#include <QDebug>
 
 Server::Server() : QObject(), messageHandler(NULL), thread(NULL) {
 
-    qDebug() << "Server()";
     tcpServer = new QTcpServer(this);
 
     mutex = new QMutex();
@@ -49,7 +47,6 @@ void Server::addThread(QTcpSocket *client)
 
 Server::~Server()
 {
-    qDebug() << "~Server()";
     emit  stopAllThreads();
 
     if (thread) {
@@ -91,7 +88,6 @@ bool Server::write(const QString &qMessage)
 
     mutex->lock();
     messagePull.push_back(qMessage);
-    qDebug() << messagePull.count();
     mutex->unlock();
     emit startAgaing();
 }
@@ -108,7 +104,6 @@ void Server::logMessageHandler(const QString &qMessage, int color)
 
 void Server::connected()
 {
-
     emit log("TCP connected...", RED);
 
     emit newConnection();

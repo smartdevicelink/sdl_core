@@ -1,6 +1,5 @@
 #include "FileSystem.h"
 #include "color.h"
-#include <QDebug>
 
 bool FileSystem::write(const QString &source, const QString &data)
 {

@@ -1,12 +1,9 @@
 #include "messageHandler.h"
 #include "color.h"
-#include <QDebug>
 
 MessageHandler::MessageHandler(QTcpSocket *client, QMutex *mu, QVector<QString> &msgPull)
     : QObject(), mutex(mu), messagePull(msgPull)
 {
-
-    qDebug() << "MessageHandler()";
 
     clientConnection = client;
 
@@ -17,7 +14,6 @@ MessageHandler::MessageHandler(QTcpSocket *client, QMutex *mu, QVector<QString> 
 
 MessageHandler::~MessageHandler()
 {
-    qDebug() << "~MessageHandler()";
     clientConnection->deleteLater();
 
     if (clientConnection) {
@@ -45,7 +41,6 @@ void MessageHandler::readFromTCP()
 
 void MessageHandler::writeToTCP(const QString &qMessage)
 {
-    qDebug() << "Write message to TCP " << qMessage;
 
     QByteArray qb = qMessage.toUtf8();
 

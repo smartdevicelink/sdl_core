@@ -1,4 +1,3 @@
-#include <QDebug>
 #include "canlib.h"
 
 CANlib::CANlib() : QObject() {

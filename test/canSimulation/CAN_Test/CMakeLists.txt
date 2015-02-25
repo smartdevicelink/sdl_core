@@ -32,7 +32,7 @@ cmake_minimum_required(VERSION 2.8.11)
 
 project(CAN_Test)
 
-set(CAN_TEST_SOURCES cantest.cpp main.cpp)
+set(CAN_TEST_SOURCES cantcptest.cpp canwstest.cpp canfstest.cpp main.cpp)
 set(CAN_TEST_HEADERS cantest.h)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../CANlib)

@@ -69,6 +69,7 @@ signals:
 
     void log(const QString &qMessage, int color);
     void readFromWS(const QString &qMessage);
+    void newConnection();
 
 private:
     QWebSocketServer *m_pWebSocketServer;

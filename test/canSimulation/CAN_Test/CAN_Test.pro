@@ -7,7 +7,7 @@
 # Adds the CANLib project path to the header file include lookup path
 INCLUDEPATH += $$PWD/../CANlib
 
-QT       += core testlib network
+QT       += core testlib network websockets
 
 QT       -= gui
 
@@ -21,7 +21,11 @@ TEMPLATE = app
 unix:LIBS += -L$$OUT_PWD/../CANlib -lCANlib
 
 SOURCES += main.cpp \
-    cantest.cpp
+    canwstest.cpp \
+    cantcptest.cpp \
+    canfstest.cpp
 
 HEADERS += \
-    cantest.h
+    canwstest.h \
+    cantcptest.h \
+    canfstest.h

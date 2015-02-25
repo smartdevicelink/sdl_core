@@ -1,21 +1,11 @@
-#include "cantest.h"
+#include "cantcptest.h"
 
-CANTest::CANTest(QObject *parent) :
+canTCPTest::canTCPTest(QObject *parent) :
     QObject(parent)
 {
 }
 
-void CANTest::initTestCase()
-{
-
-}
-
-void CANTest::cleanupTestCase()
-{
-
-}
-
-void CANTest::connectionTest()
+void canTCPTest::connectionTest()
 {
      Server server;
 
@@ -31,12 +21,9 @@ void CANTest::connectionTest()
 
      QTRY_COMPARE_WITH_TIMEOUT(spy.count(),1, 1000);
      s.close();
-
-     s.deleteLater();
-     server.deleteLater();
 }
 
-void CANTest::receiveTCPDataTest()
+void canTCPTest::receiveTCPDataTest()
 {
     QString qMessage = "Hello";
 
@@ -69,7 +56,7 @@ void CANTest::receiveTCPDataTest()
 
 }
 
-void CANTest::sendTCPDataTest()
+void canTCPTest::sendTCPDataTest()
 {
     QString qMessage = "Hello";
 

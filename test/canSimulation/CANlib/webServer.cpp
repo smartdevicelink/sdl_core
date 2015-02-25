@@ -2,7 +2,6 @@
 #include "QtWebSockets/qwebsocket.h"
 #include "webServer.h"
 #include "color.h"
-//#include <QtCore/QDebug>
 
 QT_USE_NAMESPACE
 
@@ -30,6 +29,8 @@ void WebServer::onNewConnection()
     connect(pSocket, &QWebSocket::disconnected, this, &WebServer::socketDisconnected);
 
     m_client = pSocket;
+
+    emit newConnection();
 }
 
 void WebServer::processTextMessage(QString qMessage)
@@ -50,7 +51,7 @@ bool WebServer::write(const QString &qMessage)
     QByteArray qb = qMessage.toUtf8();
     char *cMessage = qb.data();
 
-    if ((m_client != NULL) && (m_client->state() == QTcpSocket::ConnectedState)){
+    if ((m_client != NULL) && (m_client->state() == QAbstractSocket::ConnectedState)){
 
         m_client->sendTextMessage(cMessage);
         emit log("WS Send:" + qMessage, BLUE);

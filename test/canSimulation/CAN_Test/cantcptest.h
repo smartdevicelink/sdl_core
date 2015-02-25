@@ -9,23 +9,18 @@
 #include <QTcpSocket>
 #include <QTcpServer>
 
-//#include "canlib.h"
 #include "server.h"
 
-class CANTest : public QObject
+class canTCPTest : public QObject
 {
     Q_OBJECT
 public:
-    explicit CANTest(QObject *parent = 0);
+    explicit canTCPTest(QObject *parent = 0);
 
 private Q_SLOTS:
-    void initTestCase();
-    void cleanupTestCase();
     void connectionTest();
     void receiveTCPDataTest();
     void sendTCPDataTest();
-
-private:
 
 };
 
