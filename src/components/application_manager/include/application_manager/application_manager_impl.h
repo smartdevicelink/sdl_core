@@ -624,6 +624,10 @@ class ApplicationManagerImpl : public ApplicationManager,
       return resume_ctrl_;
     }
 
+    StateController& get_state_controller() {
+      return state_ctrl_;
+    }
+
     /**
      * Generate grammar ID
      *
@@ -782,8 +786,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Function Should be called when WakeUp occures after Low Voltage
      */
     void OnWakeUp();
-
-    void set_state(StateController::StateEventID state_id);
 
     void set_state(ApplicationSharedPtr app,
                    mobile_api::HMILevel::eType hmi_level,

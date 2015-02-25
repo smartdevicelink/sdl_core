@@ -22,10 +22,10 @@ class HmiState {
      */
     enum StateID {
       STATE_ID_DEFAULT,
-      EVENT_ID_PHONE_CALL,
-      EVENT_ID_SAFETY_MODE,
-      EVENT_ID_VR,
-      EVENT_ID_TTS,
+      STATE_ID_PHONE_CALL,
+      STATE_ID_SAFETY_MODE,
+      STAE_ID_VR_SESSION,
+      STATE_ID_TTS_SESSION,
     };
 
     HmiState(utils::SharedPtr<HmiState> previous);
@@ -33,7 +33,8 @@ class HmiState {
                     mobile_apis::AudioStreamingState::eType audio_streaming_state,
                     mobile_apis::SystemContext::eType system_context);
 
-    const utils::SharedPtr<HmiState> previous() {
+    virtual ~HmiState() {};
+    const utils::SharedPtr<HmiState> previous() const {
       return previous_;
     }
 
@@ -41,7 +42,7 @@ class HmiState {
      * @brief hmi_level
      * @return return hmi level member
      */
-    mobile_apis::HMILevel::eType hmi_level() const {
+    virtual mobile_apis::HMILevel::eType hmi_level() const {
       return hmi_level_;
     }
 
@@ -49,7 +50,7 @@ class HmiState {
      * @brief audio_streaming_state
      * @return return audio streaming state member
      */
-    mobile_apis::AudioStreamingState::eType audio_streaming_state() const {
+    virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const {
       return audio_streaming_state_;
     }
 
@@ -57,12 +58,12 @@ class HmiState {
      * @brief system_context
      * @return return system context member
      */
-    mobile_apis::SystemContext::eType system_context() const {
+    virtual mobile_apis::SystemContext::eType system_context() const {
       return system_context_;
     }
 
-  private:
-    utils::SharedPtr<HmiState>  previous_;
+  protected:
+    utils::SharedPtr<HmiState> previous_;
     mobile_apis::HMILevel::eType hmi_level_;
     mobile_apis::AudioStreamingState::eType audio_streaming_state_;
     mobile_apis::SystemContext::eType system_context_;\
@@ -90,6 +91,14 @@ class PhoneCallHmiState : public HmiState {
 class SafetyModeHmiState : public HmiState {
   public:
     SafetyModeHmiState(utils::SharedPtr<HmiState> previous);
+
+    mobile_apis::SystemContext::eType system_context() const {
+      return previous()->system_context();
+    }
+
+    mobile_apis::HMILevel::eType hmi_level() const {
+      return previous()->hmi_level();
+    }
 };
 
 

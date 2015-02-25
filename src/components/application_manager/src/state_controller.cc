@@ -35,27 +35,10 @@
 
 namespace application_manager {
 
-void StateController::ProcessStateEvent(const StateEventID id) {
-  switch (id) {
-    case EVENT_ID_PHONE_CALL_STARTED:
-      OnPhoneCallStarted(); break;
-    case EVENT_ID_PHONE_CALL_ENDED:
-      OnPhoneCallEnded(); break;
-    case EVENT_ID_SAFETY_MODE_ENABLED:
-      OnSafetyModeEnabled(); break;
-    case EVENT_ID_SAFETY_MODE_DISABLED:
-      OnSafetyModeDisabled(); break;
-    case EVENT_ID_TTS_STARTED:
-      OnTTSStarted(); break;
-    case EVENT_ID_TTS_ENDED:
-      OnTTSEnded(); break;
-    case EVENT_ID_VR_STARTED:
-      OnVRStarted(); break;
-    case EVENT_ID_VR_ENDED:
-      OnVREnded(); break;
-    default:
-      break;
-  }
+CREATE_LOGGERPTR_GLOBAL(logger_, "StateController")
+
+StateController::StateController():EventObserver() {
+  subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnEmergencyEvent);
 }
 
 void StateController::SetDefaultState(ApplicationSharedPtr app,
@@ -84,6 +67,30 @@ void StateController::SetSystemContext(const mobile_apis::SystemContext::eType s
   //TODO (APPLINK-8555) Need to setup system context for app applications
 }
 
+void StateController::on_event(const event_engine::Event& event) {
+  using namespace smart_objects;
+  using namespace event_engine;
+  using namespace hmi_apis;
+
+  LOG4CXX_AUTO_TRACE(logger_);
+  const SmartObject& message = event.smart_object();
+  const FunctionID::eType id = static_cast<FunctionID::eType> (event.id());
+  switch (id) {
+    case FunctionID::BasicCommunication_OnEmergencyEvent: {
+      bool is_active =
+          message[strings::msg_params][hmi_notification::is_active].asBool();
+      if (is_active) {
+        OnSafetyModeEnabled();
+      } else {
+        OnSafetyModeDisabled();
+      }
+      break;
+    }
+    default:
+      break;
+  }
+}
+
 void StateController::OnPhoneCallStarted() {
 
 }
@@ -92,12 +99,49 @@ void StateController::OnPhoneCallEnded() {
 
 }
 
-void StateController::OnSafetyModeEnabled() {
+bool StateController::IsStatusChanged(utils::SharedPtr<HmiState> old_state,
+                                      utils::SharedPtr<HmiState> new_state) {
+  if (old_state->hmi_level() != new_state->hmi_level()
+      && old_state->audio_streaming_state() != new_state->audio_streaming_state()
+      && old_state->system_context() != new_state->system_context() ) {
+    return true;
+  }
+  return false;
+}
 
+void StateController::OnSafetyModeEnabled() {
+  using namespace utils;
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  for (ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
+       it != accessor.end(); ++it) {
+    ApplicationConstSharedPtr const_app = *it;
+    ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(const_app->app_id());
+    SharedPtr<HmiState> old_hmi_state = const_app->CurrentHmiState();
+    SharedPtr<HmiState> new_hmi_state(new SafetyModeHmiState(old_hmi_state));
+    app->AddHMIState(new_hmi_state);
+    if (IsStatusChanged(old_hmi_state, new_hmi_state)) {
+      MessageHelper::SendHMIStatusNotification(*app);
+    }
+  }
 }
 
 void StateController::OnSafetyModeDisabled() {
-
+  using namespace utils;
+  LOG4CXX_AUTO_TRACE(logger_);
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  for (ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
+       it != accessor.end(); ++it) {
+    ApplicationConstSharedPtr const_app = *it;
+    ApplicationSharedPtr app =
+        ApplicationManagerImpl::instance()->application(const_app->app_id());
+    SharedPtr<HmiState> old_hmi_state = const_app->CurrentHmiState();
+    app->RemoveHMIState(HmiState::STATE_ID_SAFETY_MODE);
+    SharedPtr<HmiState> new_hmi_state = const_app->CurrentHmiState();
+    if (IsStatusChanged(old_hmi_state, new_hmi_state)) {
+      MessageHelper::SendHMIStatusNotification(*app);
+    }
+  }
 }
 
 void StateController::OnVRStarted() {

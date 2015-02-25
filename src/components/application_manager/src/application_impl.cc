@@ -187,7 +187,17 @@ void ApplicationImpl::set_voice_communication_supported(
 bool ApplicationImpl::IsAudioApplication() const {
   return is_media_ ||
          is_voice_communication_application_ ||
-         is_navi_;
+      is_navi_;
+}
+
+void application_manager::ApplicationImpl::AddHMIState(utils::SharedPtr<HmiState> state) {
+  if (state) {
+
+  }
+}
+
+void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
+
 }
 
 const smart_objects::SmartObject* ApplicationImpl::active_message() const {

@@ -544,6 +544,26 @@ class Application : public virtual InitialApplicationData,
     virtual UsageStatistics& usage_report() = 0;
 
     /**
+     * @brief AddHMIState the function that will change application's
+     * hmi state.
+     *
+     * @param app_id id of the application whose hmi level should be changed.
+     *
+     * @param state new hmi state for certain application.
+     */
+    virtual void AddHMIState(utils::SharedPtr<HmiState> state) = 0;
+
+    /**
+     * @brief RemoveHMIState the function that will turn back hmi_level after end
+     * of some event
+     *
+     * @param app_id id of the application whose hmi level should be changed.
+     *
+     * @param state_id that should be removed
+     */
+    virtual void RemoveHMIState(HmiState::StateID state_id) = 0;
+
+    /**
      * @brief Keeps id of softbuttons which is created in commands:
      * Alert, Show, ScrollableMessage, ShowConstantTBT, AlertManeuver, UpdateTurnList
      * @param cmd_id Unique command id from mobile API
