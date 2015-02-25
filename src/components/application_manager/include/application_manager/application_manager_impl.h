@@ -246,7 +246,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      * @return true if exist otherwise false
      */
-    bool DoesAudioAppWithSameHMITypeExistInFullOrLimited(ApplicationSharedPtr app) const;
+    bool IsAppTypeExistsInFullOrLimited(ApplicationSharedPtr app) const;
 
     /**
      * @brief Notifies all components interested in Vehicle Data update
