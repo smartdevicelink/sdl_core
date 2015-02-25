@@ -45,11 +45,11 @@ class StateController : public event_engine::EventObserver {
 
     StateController();
     /**
-     * @brief SetDefaultState setup original hmiState, tha will appear if no
-     * specific events are active
-     * @param app appication to detup default State`
-     * @param hmi_level hmi level of defailt state
-     * @param audio_state audio_streaming state of default state
+     * @brief SetDefaultState setup original hmi state, that will appear
+     *        if no specific events are active
+     * @param app appication to setup default State`
+     * @param hmi_level hmi level of default state
+     * @param audio_state audio streaming state of default state
      */
     void SetDefaultState(ApplicationSharedPtr app,
                          const mobile_apis::HMILevel::eType hmi_level,
@@ -57,17 +57,17 @@ class StateController : public event_engine::EventObserver {
 
 
     /**
-     * @brief SetDefaultState setup original hmiState, tha will appear if no
+     * @brief SetDefaultState setup original hmi state, tha will appear if no
      * specific events are active
-     * @param app appication to detup default State`
+     * @param app appication to setup default State
      * @param hmi_level hmi level of defailt state
-     * @param audio_state audio_streaming state of default state
+     * @param audio_state audio streaming state of default state
      */
     void SetDefaultState(ApplicationSharedPtr app,
                          utils::SharedPtr<HmiState> state);
 
     /**
-     * @brief setSystemContext setup new system_context for all all applications
+     * @brief setSystemContext setup new system_context for all applications
      * @param system_context system context to setup
      */
     void SetSystemContext(const mobile_apis::SystemContext::eType system_context);
@@ -76,8 +76,15 @@ class StateController : public event_engine::EventObserver {
     void on_event(const event_engine::Event& event);
 
   private:
+    /**
+     * @brief IsStatusChanged
+     * @param old_state old state of application
+     * @param new_state new state of application
+     * @return true if old and new state are different
+     */
     bool IsStatusChanged(utils::SharedPtr<HmiState> old_state,
                          utils::SharedPtr<HmiState> new_state);
+
     /**
      * @brief OnPhoneCallStarted process Phone Call Started event
      */
