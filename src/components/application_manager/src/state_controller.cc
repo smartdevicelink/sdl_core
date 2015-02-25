@@ -38,29 +38,42 @@ namespace application_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "StateController")
 
+bool IsStatusChanged(HmiStatePtr old_state,
+                                      HmiStatePtr new_state) {
+  if (old_state->hmi_level() != new_state->hmi_level()
+      && old_state->audio_streaming_state() != new_state->audio_streaming_state()
+      && old_state->system_context() != new_state->system_context() ) {
+    return true;
+  }
+  return false;
+}
+
 StateController::StateController():EventObserver() {
   subscribe_on_event(hmi_apis::FunctionID::BasicCommunication_OnEmergencyEvent);
+  subscribe_on_event(hmi_apis::FunctionID::TTS_Started);
+  subscribe_on_event(hmi_apis::FunctionID::TTS_Stopped);
+
 }
 
-void StateController::SetDefaultState(ApplicationSharedPtr app,
+void StateController::SetRegularState(ApplicationSharedPtr app,
                                       const mobile_apis::HMILevel::eType hmi_level,
                                       const mobile_apis::AudioStreamingState::eType audio_state) {
-  HmiStateList& hmi_state_list = app->GetHmiStateList();
-  DCHECK_OR_RETURN_VOID(hmi_state_list.empty() == false);
-  utils::SharedPtr<HmiState> hmi_state(new HmiState(hmi_level,
-                                                    audio_state,
+  HmiStatePtr hmi_state(new HmiState(hmi_level, audio_state,
                                                     system_context_));
-  hmi_state_list.erase(hmi_state_list.begin());
-  hmi_state_list.push_front(hmi_state);
+  SetRegularState(app, hmi_state);
 }
 
-void StateController::SetDefaultState(ApplicationSharedPtr app,
-                                      utils::SharedPtr<HmiState> state) {
-  DCHECK_OR_RETURN_VOID(state)
-  HmiStateList& default_hmi_state = app->GetHmiStateList();
-  DCHECK_OR_RETURN_VOID(default_hmi_state.empty() == false);
-  default_hmi_state.erase(default_hmi_state.begin());
-  default_hmi_state.push_front(state);
+void StateController::SetRegularState(ApplicationSharedPtr app,
+                                      HmiStatePtr state) {
+  DCHECK_OR_RETURN_VOID(app);
+  DCHECK_OR_RETURN_VOID(state);
+  HmiStatePtr old_state(new HmiState(*(app->CurrentHmiState())));
+  app->SetRegularState(state);
+  HmiStatePtr new_state = app->CurrentHmiState();
+
+  if (IsStatusChanged(old_state, new_state)) {
+    OnStateChanged(app, old_state, new_state);
+  }
 }
 
 void StateController::SetSystemContext(const mobile_apis::SystemContext::eType system_context) {
@@ -87,78 +100,104 @@ void StateController::on_event(const event_engine::Event& event) {
       }
       break;
     }
+    case FunctionID::TTS_Started: {
+      OnTTSStarted();
+      break;
+    }
+    case FunctionID::TTS_Stopped: {
+      OnTTSStopped();
+      break;
+    }
     default:
       break;
   }
 }
 
-void StateController::OnPhoneCallStarted() {
+void StateController::OnStateChanged(ApplicationSharedPtr app,
+                                     HmiStatePtr old_state,
+                                     HmiStatePtr new_state) {
 
+}
+
+void StateController::OnPhoneCallStarted() {
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
 void StateController::OnPhoneCallEnded() {
-
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
-bool StateController::IsStatusChanged(utils::SharedPtr<HmiState> old_state,
-                                      utils::SharedPtr<HmiState> new_state) {
-  if (old_state->hmi_level() != new_state->hmi_level()
-      && old_state->audio_streaming_state() != new_state->audio_streaming_state()
-      && old_state->system_context() != new_state->system_context() ) {
-    return true;
+template <typename HMIStatusNAme>
+void HMIStateStarted () {
+  using namespace utils;
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  for (ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
+       it != accessor.end(); ++it) {
+    if (it->valid()) {
+      ApplicationConstSharedPtr const_app = *it;
+      ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(const_app->app_id());
+      DCHECK_OR_RETURN_VOID(app);
+      HmiStatePtr old_hmi_state = const_app->CurrentHmiState();
+      HmiStatePtr new_hmi_state(new HMIStatusNAme(old_hmi_state));
+      app->AddHMIState(new_hmi_state);
+      if (IsStatusChanged(old_hmi_state, new_hmi_state)) {
+        MessageHelper::SendHMIStatusNotification(*app);
+      } else {
+        LOG4CXX_FATAL(logger_, "Invalid pointer in application collection");
+      }
+    }
   }
-  return false;
+}
+
+void HMIStateStopped(HmiState::StateID state_id) {
+  using namespace utils;
+  ApplicationManagerImpl::ApplicationListAccessor accessor;
+  for (ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
+       it != accessor.end(); ++it) {
+    if (it->valid()) {
+      ApplicationConstSharedPtr const_app = *it;
+      ApplicationSharedPtr app =
+          ApplicationManagerImpl::instance()->application(const_app->app_id());
+      DCHECK_OR_RETURN_VOID(app);
+      HmiStatePtr old_hmi_state(new HmiState(*(const_app->CurrentHmiState())));
+
+      app->RemoveHMIState(state_id);
+      HmiStatePtr new_hmi_state = const_app->CurrentHmiState();
+      if (IsStatusChanged(old_hmi_state, new_hmi_state)) {
+        MessageHelper::SendHMIStatusNotification(*app);
+      }
+    } else {
+      LOG4CXX_FATAL(logger_, "Invalid pointer in application collection");
+    }
+  }
 }
 
 void StateController::OnSafetyModeEnabled() {
-  using namespace utils;
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-  for (ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
-       it != accessor.end(); ++it) {
-    ApplicationConstSharedPtr const_app = *it;
-    ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(const_app->app_id());
-    SharedPtr<HmiState> old_hmi_state = const_app->CurrentHmiState();
-    SharedPtr<HmiState> new_hmi_state(new SafetyModeHmiState(old_hmi_state));
-    app->AddHMIState(new_hmi_state);
-    if (IsStatusChanged(old_hmi_state, new_hmi_state)) {
-      MessageHelper::SendHMIStatusNotification(*app);
-    }
-  }
+  HMIStateStarted<SafetyModeHmiState>();
 }
 
 void StateController::OnSafetyModeDisabled() {
-  using namespace utils;
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-  for (ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
-       it != accessor.end(); ++it) {
-    ApplicationConstSharedPtr const_app = *it;
-    ApplicationSharedPtr app =
-        ApplicationManagerImpl::instance()->application(const_app->app_id());
-    SharedPtr<HmiState> old_hmi_state = const_app->CurrentHmiState();
-    app->RemoveHMIState(HmiState::STATE_ID_SAFETY_MODE);
-    SharedPtr<HmiState> new_hmi_state = const_app->CurrentHmiState();
-    if (IsStatusChanged(old_hmi_state, new_hmi_state)) {
-      MessageHelper::SendHMIStatusNotification(*app);
-    }
-  }
+  HMIStateStopped(HmiState::STATE_ID_SAFETY_MODE);
 }
 
 void StateController::OnVRStarted() {
-
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
 void StateController::OnVREnded() {
-
+  LOG4CXX_AUTO_TRACE(logger_);
 }
 
 void StateController::OnTTSStarted() {
-
+  LOG4CXX_AUTO_TRACE(logger_);
+  HMIStateStarted<TTSHmiState>();
 }
 
-void StateController::OnTTSEnded() {
-
+void StateController::OnTTSStopped() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  HMIStateStopped(HmiState::STATE_ID_TTS_SESSION);
 }
 
 }

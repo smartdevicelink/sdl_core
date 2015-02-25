@@ -45,26 +45,25 @@ class StateController : public event_engine::EventObserver {
 
     StateController();
     /**
-     * @brief SetDefaultState setup original hmi state, that will appear
+     * @brief SetRegularState setup original hmi state, that will appear
      *        if no specific events are active
      * @param app appication to setup default State`
      * @param hmi_level hmi level of default state
      * @param audio_state audio streaming state of default state
      */
-    void SetDefaultState(ApplicationSharedPtr app,
+    void SetRegularState(ApplicationSharedPtr app,
                          const mobile_apis::HMILevel::eType hmi_level,
                          const  mobile_apis::AudioStreamingState::eType audio_state);
 
-
     /**
-     * @brief SetDefaultState setup original hmi state, tha will appear if no
+     * @brief SetRegularState setup original hmi state, tha will appear if no
      * specific events are active
      * @param app appication to setup default State
      * @param hmi_level hmi level of defailt state
      * @param audio_state audio streaming state of default state
      */
-    void SetDefaultState(ApplicationSharedPtr app,
-                         utils::SharedPtr<HmiState> state);
+    void SetRegularState(ApplicationSharedPtr app,
+                         HmiStatePtr state);
 
     /**
      * @brief setSystemContext setup new system_context for all applications
@@ -75,15 +74,9 @@ class StateController : public event_engine::EventObserver {
     // EventObserver interface
     void on_event(const event_engine::Event& event);
 
+    void OnStateChanged(ApplicationSharedPtr app, HmiStatePtr old_state,
+                        HmiStatePtr new_state);
   private:
-    /**
-     * @brief IsStatusChanged
-     * @param old_state old state of application
-     * @param new_state new state of application
-     * @return true if old and new state are different
-     */
-    bool IsStatusChanged(utils::SharedPtr<HmiState> old_state,
-                         utils::SharedPtr<HmiState> new_state);
 
     /**
      * @brief OnPhoneCallStarted process Phone Call Started event
@@ -123,13 +116,14 @@ class StateController : public event_engine::EventObserver {
     /**
      * @brief OnTTSEnded process TTS session ended
      */
-    void OnTTSEnded();
+    void OnTTSStopped();
 
     /**
      * @brief Active states of application
      */
     std::list<HmiState::StateID> current_state_;
     mobile_apis::SystemContext::eType system_context_;
+
 
 };
 

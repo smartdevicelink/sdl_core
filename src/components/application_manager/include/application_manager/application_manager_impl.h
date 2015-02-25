@@ -624,10 +624,6 @@ class ApplicationManagerImpl : public ApplicationManager,
       return resume_ctrl_;
     }
 
-    StateController& get_state_controller() {
-      return state_ctrl_;
-    }
-
     /**
      * Generate grammar ID
      *
