@@ -238,9 +238,9 @@ class ApplicationManagerImpl : public ApplicationManager,
     ApplicationSharedPtr get_limited_voice_application() const;
 
     /**
-     * @brief Check's if there are audio(media, voice communication or navi) applications
-     *        exist in HMI_FULL or HMI_LIMITED level with same audible HMI type.
-     *        Used for resumption.
+     * @brief Checks if application with the same HMI type 
+     *        (media, voice communication or navi) exists
+     *        in HMI_FULL or HMI_LIMITED level.
      *
      * @param app Pointer to application to compare with
      *
