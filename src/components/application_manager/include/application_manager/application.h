@@ -444,19 +444,32 @@ class Application : public virtual InitialApplicationData,
     /**
      * @brief Active states of application
      */
-    virtual HmiStateList& GetHmiStateList() {
-      return hmi_states_;
+    void SetRegularState(HmiStatePtr state) {
+      DCHECK_OR_RETURN_VOID(state);
+      sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+      DCHECK_OR_RETURN_VOID(hmi_states_.empty() == false);
+      hmi_states_.erase(hmi_states_.begin());
+      hmi_states_.push_front(state);
+    }
+    /**
+     * @brief Active states of application
+     */
+    DataAccessor<HmiStateList> GetHmiStateListAccessor() {
+      DataAccessor<HmiStateList> hmi_states_da =
+          DataAccessor<HmiStateList>(hmi_states_, hmi_states_lock_);
+      return hmi_states_da;
     }
 
     /**
      * @brief Current hmi state
      */
-    const utils::SharedPtr<HmiState> CurrentHmiState() const {
-      if (hmi_states_.empty()) {
-        return utils::SharedPtr<HmiState>();
-      }
-      return hmi_states_.back();
-    }
+    virtual const HmiStatePtr CurrentHmiState() const = 0;
+
+
+    /**
+     * @brief Current hmi state
+     */
+    virtual const HmiStatePtr RegularHmiState() const = 0;
 
     /**
      * @brief sets true if application has sent TTS GlobalProperties
@@ -551,7 +564,7 @@ class Application : public virtual InitialApplicationData,
      *
      * @param state new hmi state for certain application.
      */
-    virtual void AddHMIState(utils::SharedPtr<HmiState> state) = 0;
+    virtual void AddHMIState(HmiStatePtr state) = 0;
 
     /**
      * @brief RemoveHMIState the function that will turn back hmi_level after end
@@ -676,6 +689,7 @@ class Application : public virtual InitialApplicationData,
      * @brief Active states of application
      */
     HmiStateList hmi_states_;
+    sync_primitives::Lock hmi_states_lock_;
 
     ApplicationState app_state_;
     std::string url_;

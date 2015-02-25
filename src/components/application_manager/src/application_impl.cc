@@ -190,14 +190,42 @@ bool ApplicationImpl::IsAudioApplication() const {
       is_navi_;
 }
 
-void application_manager::ApplicationImpl::AddHMIState(utils::SharedPtr<HmiState> state) {
-  if (state) {
+void application_manager::ApplicationImpl::AddHMIState(
+    HmiStatePtr state) {
+  DCHECK_OR_RETURN_VOID(state);
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  hmi_states_.push_back(state);
+}
 
+struct StateIdFoundPredicate {
+    HmiState::StateID state_id_;
+    StateIdFoundPredicate(HmiState::StateID state_id):
+      state_id_(state_id) {}
+    bool operator ()(const HmiStatePtr cur) {
+      return cur->state_id() == state_id_;
+    }
+};
+
+void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  HmiStateList::iterator it =
+      std::find_if(hmi_states_.begin(), hmi_states_.end(),
+                   StateIdFoundPredicate(state_id));
+  if (it != hmi_states_.end()) {
+    hmi_states_.erase(it);
+  } else {
+    LOG4CXX_ERROR(logger_, "Unsuccesfull remove HmiState: " << state_id);
   }
 }
 
-void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
+const HmiStatePtr application_manager::ApplicationImpl::CurrentHmiState() const {
+  //TODO(APPLINK-11448) Need implement
+  return HmiStatePtr ();
+}
 
+const HmiStatePtr ApplicationImpl::RegularHmiState() const {
+  //TODO(APPLINK-11448) Need implement
+  return HmiStatePtr ();
 }
 
 const smart_objects::SmartObject* ApplicationImpl::active_message() const {
@@ -281,8 +309,15 @@ void ApplicationImpl::set_tts_speak_state(bool state_tts_speak) {
   tts_speak_state_ = state_tts_speak;
 }
 
+bool IsTTSState(const HmiStatePtr state) {
+  return state->state_id() == HmiState::STATE_ID_TTS_SESSION ;
+}
+
 bool ApplicationImpl::tts_speak_state() {
-  return tts_speak_state_;
+  DataAccessor<HmiStateList> da = GetHmiStateListAccessor();
+  HmiStateList::const_iterator it =
+      std::find_if(da.GetData().begin(), da.GetData().end(), IsTTSState);
+  return it != da.GetData().end();
 }
 
 void ApplicationImpl::set_tts_properties_in_none(

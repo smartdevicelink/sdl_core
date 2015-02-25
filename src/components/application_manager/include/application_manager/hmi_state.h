@@ -7,6 +7,10 @@
 
 namespace application_manager {
 
+class HmiState;
+typedef utils::SharedPtr<HmiState> HmiStatePtr;
+typedef std::list<HmiStatePtr > HmiStateList;
+
  /**
  * @brief The HmiState class
  *  Handle Hmi state of application (hmi level,
@@ -21,21 +25,28 @@ class HmiState {
      * If no events occured STATE_ID_DEFAULT shuld be presented
      */
     enum StateID {
-      STATE_ID_DEFAULT,
+      STATE_ID_REGULAR,
       STATE_ID_PHONE_CALL,
       STATE_ID_SAFETY_MODE,
-      STAE_ID_VR_SESSION,
+      STATE_ID_VR_SESSION,
       STATE_ID_TTS_SESSION,
     };
 
-    HmiState(utils::SharedPtr<HmiState> previous);
+    HmiState(HmiStatePtr parent);
+    HmiState();
+
+    HmiState(const HmiState& copy_from);
+
     HmiState(mobile_apis::HMILevel::eType hmi_level,
                     mobile_apis::AudioStreamingState::eType audio_streaming_state,
                     mobile_apis::SystemContext::eType system_context);
 
     virtual ~HmiState() {};
-    const utils::SharedPtr<HmiState> previous() const {
-      return previous_;
+
+    void setParent(HmiStatePtr parent);
+
+    const HmiStatePtr parent() const {
+      return parent_;
     }
 
     /**
@@ -61,43 +72,48 @@ class HmiState {
     virtual mobile_apis::SystemContext::eType system_context() const {
       return system_context_;
     }
-
+    StateID state_id() const {
+      return state_id_;
+    }
   protected:
-    utils::SharedPtr<HmiState> previous_;
+    StateID state_id_;
+    HmiStatePtr parent_;
     mobile_apis::HMILevel::eType hmi_level_;
     mobile_apis::AudioStreamingState::eType audio_streaming_state_;
-    mobile_apis::SystemContext::eType system_context_;\
+    mobile_apis::SystemContext::eType system_context_;
 
-    DISALLOW_COPY_AND_ASSIGN(HmiState);
+  private:
+    void operator=(const HmiState&);
 };
-
-typedef std::list<utils::SharedPtr<HmiState> > HmiStateList;
 
 class VRHmiState : public HmiState {
   public:
-    VRHmiState(utils::SharedPtr<HmiState> previous);
+    VRHmiState(HmiStatePtr parent);
 };
 
 class TTSHmiState : public HmiState {
   public:
-    TTSHmiState(utils::SharedPtr<HmiState> previous);
+    TTSHmiState(HmiStatePtr parent);
+    mobile_apis::AudioStreamingState::eType audio_streaming_state() const {
+      return parent()->audio_streaming_state();
+    }
 };
 
 class PhoneCallHmiState : public HmiState {
   public:
-    PhoneCallHmiState(utils::SharedPtr<HmiState> previous);
+    PhoneCallHmiState(HmiStatePtr parent);
 };
 
 class SafetyModeHmiState : public HmiState {
   public:
-    SafetyModeHmiState(utils::SharedPtr<HmiState> previous);
+    SafetyModeHmiState(HmiStatePtr parent);
 
     mobile_apis::SystemContext::eType system_context() const {
-      return previous()->system_context();
+      return parent()->system_context();
     }
 
     mobile_apis::HMILevel::eType hmi_level() const {
-      return previous()->hmi_level();
+      return parent()->hmi_level();
     }
 };
 
