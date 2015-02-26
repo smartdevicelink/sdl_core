@@ -792,6 +792,10 @@ class ApplicationManagerImpl : public ApplicationManager,
     struct ApplicationsMobileAppIdSorter {
       bool operator() (const ApplicationSharedPtr lhs,
                        const ApplicationSharedPtr rhs) {
+
+        if (lhs->mobile_app_id() == rhs->mobile_app_id()) {
+          return lhs->device() < rhs->device();
+        }
         return lhs->mobile_app_id() < rhs->mobile_app_id();
       }
     };
