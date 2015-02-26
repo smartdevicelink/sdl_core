@@ -264,32 +264,33 @@ void MediaManagerImpl::StopAudioStreaming(int32_t application_key) {
 }
 
 void MediaManagerImpl::OnMessageReceived(
-  const ::protocol_handler::RawMessagePtr message) {
+    const ::protocol_handler::RawMessagePtr message) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
   using namespace application_manager;
   using namespace protocol_handler;
 
   streaming_app_id_ = message->connection_key();
-  const bool can_stream =
-      ApplicationManagerImpl::instance()->CanAppStream(streaming_app_id_);
-  if (!can_stream) {
-    ApplicationManagerImpl::instance()->ForbidStreaming(streaming_app_id_);
-    LOG4CXX_DEBUG(logger_, "The application trying to stream when it should not.");
-    return;
+  ServiceType streaming_app_service_type = message->service_type();
+
+  MediaAdapterImpl* streamer = 0;
+  if (streaming_app_service_type == kMobileNav) {
+    if ((ApplicationManagerImpl::instance()-> IsVideoStreamingAllowed(streaming_app_id_))) {
+      streamer = video_streamer_;
+    }
+  } else if (streaming_app_service_type == kAudio) {
+    if ((ApplicationManagerImpl::instance()-> IsAudioStreamingAllowed(streaming_app_id_))) {
+      streamer = audio_streamer_;
+    }
   }
 
-  if (message->service_type() == kMobileNav) {
-    if ((ApplicationManagerImpl::instance()-> IsVideoStreamingAllowed(streaming_app_id_))) {
-      if (video_streamer_) {
-        video_streamer_->SendData(message->connection_key(), message);
-        streaming_timer_.start(stop_streaming_timeout_);
-      }
-    }
-  } else if (message->service_type() == kAudio) {
-    if ((ApplicationManagerImpl::instance()-> IsAudioStreamingAllowed(streaming_app_id_))) {
-      if (audio_streamer_) {
-        audio_streamer_->SendData(message->connection_key(), message);
-        streaming_timer_.start(stop_streaming_timeout_);
-      }
+  if (streamer) {
+    if (ApplicationManagerImpl::instance()->CanAppStream(streaming_app_id_)) {
+      streamer->SendData(streaming_app_id_, message);
+      streaming_timer_.start(stop_streaming_timeout_);
+    } else {
+      ApplicationManagerImpl::instance()->ForbidStreaming(streaming_app_id_);
+      LOG4CXX_DEBUG(logger_, "The application trying to stream when it should not.");
     }
   }
 }
