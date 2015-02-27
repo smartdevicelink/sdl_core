@@ -37,6 +37,7 @@
 #include "application_manager/hmi_state.h"
 #include "application_manager/application.h"
 #include "event_engine/event_observer.h"
+#include "application_manager/message_helper.h"
 
 namespace application_manager {
 
@@ -56,11 +57,10 @@ class StateController : public event_engine::EventObserver {
                          const  mobile_apis::AudioStreamingState::eType audio_state);
 
     /**
-     * @brief SetRegularState setup original hmi state, tha will appear if no
+     * @brief SetRegularState setup regular hmi state, tha will appear if no
      * specific events are active
      * @param app appication to setup default State
-     * @param hmi_level hmi level of defailt state
-     * @param audio_state audio streaming state of default state
+     * @param state state of new defailt state
      */
     void SetRegularState(ApplicationSharedPtr app,
                          HmiStatePtr state);
@@ -76,8 +76,85 @@ class StateController : public event_engine::EventObserver {
 
     void OnStateChanged(ApplicationSharedPtr app, HmiStatePtr old_state,
                         HmiStatePtr new_state);
-  private:
 
+
+
+
+  private:
+    template <typename Predicate, typename ContextAcessor>
+    void ForEachApplication(Predicate pred) {
+      using namespace utils;
+      typename ContextAcessor::ApplicationListAccessor accessor;
+      for (typename ContextAcessor::ApplictionSetConstIt it = accessor.begin();
+           it != accessor.end(); ++it) {
+        if (it->valid()) {
+          ApplicationConstSharedPtr const_app = *it;
+          ApplicationSharedPtr app = ContextAcessor::instance()->application(const_app->app_id());
+          if (app.valid()) {
+            pred(app);
+          }
+        }
+      }
+    }
+
+    struct HmiLevelConflictResolver {
+        ApplicationSharedPtr applied_;
+        HmiStatePtr state_;
+        StateController* state_ctrl_;
+        HmiLevelConflictResolver(ApplicationSharedPtr app, HmiStatePtr state, StateController* state_ctrl):
+          applied_(app), state_(state){}
+        void operator () (ApplicationSharedPtr to_resolve);
+    };
+
+    template <typename HmiStateName>
+    struct HMIStateStarted {
+        HMIStateStarted(StateController* state_ctrl):
+          state_ctrl_(state_ctrl){}
+        StateController* state_ctrl_;
+        void operator ()(ApplicationSharedPtr app) {
+          HmiStatePtr old_hmi_state = app->CurrentHmiState();
+          HmiStatePtr new_hmi_state(new HmiStateName(old_hmi_state));
+          app->AddHMIState(new_hmi_state);
+          state_ctrl_->OnStateChanged(app,old_hmi_state, new_hmi_state);
+        }
+    };
+
+    struct HMIStateStopped {
+
+        StateController* state_ctrl_;
+        HmiState::StateID state_id_;
+        HMIStateStopped(StateController* state_ctrl,
+                        HmiState::StateID state_id):
+          state_ctrl_(state_ctrl), state_id_(state_id){}
+        void operator ()(ApplicationSharedPtr app) {
+          HmiStatePtr old_hmi_state(new HmiState(*(app->CurrentHmiState())));
+          app->RemoveHMIState(state_id_);
+          HmiStatePtr new_hmi_state = app->CurrentHmiState();
+          state_ctrl_->OnStateChanged(app,old_hmi_state, new_hmi_state);
+        }
+    };
+
+
+    /**
+     * @brief ProcessApplyingRegularState setup regular hmi state, tha will appear if no
+     * specific events are active, without sending ActivateApp
+     * @param app appication to setup default State
+     * @param state state of new defailt state
+     */
+    void ApplyRegularState(ApplicationSharedPtr app,
+                                     HmiStatePtr state);
+
+    void SetupRegularHmiState(ApplicationSharedPtr app,
+                              HmiStatePtr state);
+
+    bool IsSameAppType(ApplicationConstSharedPtr app1,
+                     ApplicationConstSharedPtr app2);
+
+    void SetupRegularHmiState(ApplicationSharedPtr app,
+                      const mobile_apis::HMILevel::eType hmi_level,
+                      const  mobile_apis::AudioStreamingState::eType audio_state);
+
+    void OnActivateAppResponse(const smart_objects::SmartObject& message);
     /**
      * @brief OnPhoneCallStarted process Phone Call Started event
      */
@@ -123,7 +200,7 @@ class StateController : public event_engine::EventObserver {
      */
     std::list<HmiState::StateID> current_state_;
     mobile_apis::SystemContext::eType system_context_;
-
+    std::map<uint32_t, HmiStatePtr> waiting_for_activate;
 
 };
 

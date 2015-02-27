@@ -47,6 +47,7 @@
 #include "resumption/last_state.h"
 #include "policy/policy_manager_impl.h"
 #include "application_manager/policies/policy_handler.h"
+#include "application_manager/state_controller.h"
 
 namespace application_manager {
 
@@ -223,23 +224,18 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
           ApplicationManagerImpl::instance()->GetDefaultHmiLevel(application);
     }
   }
+  if (HMILevel::HMI_LIMITED == restored_hmi_level) {
+    MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
+  }
 
   const AudioStreamingState::eType restored_audio_state =
       HMILevel::HMI_FULL == restored_hmi_level ||
       HMILevel::HMI_LIMITED == restored_hmi_level ? AudioStreamingState::AUDIBLE:
                                                     AudioStreamingState::NOT_AUDIBLE;
 
-  application->set_audio_streaming_state(restored_audio_state);
-
-  if (HMILevel::HMI_FULL == restored_hmi_level) {
-    MessageHelper::SendActivateAppToHMI(application->app_id());
-  } else {
-    if (HMILevel::HMI_LIMITED == restored_hmi_level) {
-      MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
-    }
-    application->set_hmi_level(restored_hmi_level);
-    MessageHelper::SendHMIStatusNotification(*(application.get()));
-  }
+  ApplicationManagerImpl::instance()->SetState(application->app_id(),
+                                               restored_hmi_level,
+                                               restored_audio_state);
   LOG4CXX_INFO(logger_, "Set up application "
                << application->mobile_app_id()
                << " to HMILevel " << hmi_level);

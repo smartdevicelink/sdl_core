@@ -56,6 +56,9 @@ class HmiState {
     virtual mobile_apis::HMILevel::eType hmi_level() const {
       return hmi_level_;
     }
+    void set_hmi_level(mobile_apis::HMILevel::eType hmi_level) {
+      hmi_level_ = hmi_level;
+    }
 
     /**
      * @brief audio_streaming_state
@@ -65,6 +68,12 @@ class HmiState {
       return audio_streaming_state_;
     }
 
+    virtual void set_audio_streaming_state(mobile_apis::AudioStreamingState::eType ass){
+      audio_streaming_state_ = ass;
+    }
+
+
+
     /**
      * @brief system_context
      * @return return system context member
@@ -72,6 +81,11 @@ class HmiState {
     virtual mobile_apis::SystemContext::eType system_context() const {
       return system_context_;
     }
+
+    virtual void set_system_context(mobile_apis::SystemContext::eType system_context){
+      system_context_ = system_context;
+    }
+
     StateID state_id() const {
       return state_id_;
     }

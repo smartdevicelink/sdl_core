@@ -255,6 +255,9 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD0(StartDevicesDiscovery, void());
   MOCK_METHOD2(SendAudioPassThroughNotification, void(uint32_t, std::vector<uint8_t>&));
   MOCK_METHOD1(set_all_apps_allowed, void(const bool));
+  MOCK_METHOD3(SetState, void(uint32_t, mobile_api::HMILevel::eType,
+                              mobile_apis::AudioStreamingState::eType));
+
   MOCK_CONST_METHOD0(all_apps_allowed, bool());
   MOCK_METHOD1(set_vr_session_started, void(const bool));
   MOCK_CONST_METHOD0(vr_session_started, bool());

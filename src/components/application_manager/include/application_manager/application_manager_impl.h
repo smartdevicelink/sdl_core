@@ -405,6 +405,29 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void set_all_apps_allowed(const bool& allowed);
 
+    void SetState(uint32_t app_id,
+                  mobile_api::HMILevel::eType hmi_level,
+                  mobile_apis::AudioStreamingState::eType ass);
+
+#ifdef CUSTOMER_PASA
+    /**
+     * @brief Retrieves value of is_state_suspended_
+     *
+     * @return Returns TRUE if SDL has received OnExitAllApplication notification with reason "SUSPEND"
+     * otherwise returns FALSE
+     */
+    inline bool state_suspended() const;
+
+    /**
+     * @brief Sets value of is_state_suspended_
+     *
+     * @param contains TRUE if method is called when SDL has received
+     * OnExitAllApplication notification with reason "SUSPEND"
+     * contains FALSE if method is called when SDL has received
+     * OnAwakeSDL notification.
+     */
+    void set_state_suspended(const bool flag_suspended);
+#endif // CUSTOMER_PASA
 
     /**
      * @brief Notification from PolicyHandler about PTU.
@@ -782,10 +805,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief Function Should be called when WakeUp occures after Low Voltage
      */
     void OnWakeUp();
-
-    void set_state(ApplicationSharedPtr app,
-                   mobile_api::HMILevel::eType hmi_level,
-                   mobile_api::AudioStreamingState::eType audio_state);
 
     struct ApplicationsAppIdSorter {
       bool operator() (const ApplicationSharedPtr lhs,

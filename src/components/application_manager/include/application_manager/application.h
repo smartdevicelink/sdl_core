@@ -427,9 +427,9 @@ class Application : public virtual InitialApplicationData,
     virtual const std::string& name() const = 0;
     virtual const std::string folder_name() const = 0;
     virtual bool is_media_application() const = 0;
-    virtual const mobile_api::HMILevel::eType& hmi_level() const = 0;
     virtual bool is_foreground() const = 0;
     virtual void set_foreground(bool is_foreground) = 0;
+    virtual const mobile_api::HMILevel::eType hmi_level() const = 0;
     virtual const uint32_t put_file_in_none_count() const = 0;
     virtual const uint32_t delete_file_in_none_count() const = 0;
     virtual const uint32_t list_files_in_none_count() const = 0;
@@ -447,7 +447,7 @@ class Application : public virtual InitialApplicationData,
     void SetRegularState(HmiStatePtr state) {
       DCHECK_OR_RETURN_VOID(state);
       sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-      DCHECK_OR_RETURN_VOID(hmi_states_.empty() == false);
+      DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
       hmi_states_.erase(hmi_states_.begin());
       hmi_states_.push_front(state);
     }
@@ -501,7 +501,6 @@ class Application : public virtual InitialApplicationData,
     virtual void set_version(const Version& version) = 0;
     virtual void set_name(const std::string& name) = 0;
     virtual void set_is_media_application(bool is_media) = 0;
-    virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
     virtual void increment_put_file_in_none_count() = 0;
     virtual void increment_delete_file_in_none_count() = 0;
     virtual void increment_list_files_in_none_count() = 0;
@@ -689,7 +688,7 @@ class Application : public virtual InitialApplicationData,
      * @brief Active states of application
      */
     HmiStateList hmi_states_;
-    sync_primitives::Lock hmi_states_lock_;
+    mutable sync_primitives::Lock hmi_states_lock_;
 
     ApplicationState app_state_;
     std::string url_;
