@@ -122,6 +122,9 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
 
   // load persistent files
   LoadPersistentFiles();
+  SetRegularState(new HmiState(mobile_apis::HMILevel::INVALID_ENUM,
+                               mobile_apis::AudioStreamingState::INVALID_ENUM,
+                               mobile_apis::SystemContext::INVALID_ENUM));
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -207,25 +210,40 @@ struct StateIdFoundPredicate {
 };
 
 void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   HmiStateList::iterator it =
       std::find_if(hmi_states_.begin(), hmi_states_.end(),
                    StateIdFoundPredicate(state_id));
   if (it != hmi_states_.end()) {
+    // unable to remove regular state
+    DCHECK_OR_RETURN_VOID(it != hmi_states_.begin());
+    HmiStateList::iterator next = it;
+    HmiStateList::iterator prev = it;
+    next++;
+    prev--;
+    if (next != hmi_states_.end()) {
+      HmiStatePtr next_state = *next;
+      HmiStatePtr prev_state = *prev;
+      next_state->setParent(prev_state);
+    }
     hmi_states_.erase(it);
   } else {
     LOG4CXX_ERROR(logger_, "Unsuccesfull remove HmiState: " << state_id);
   }
 }
 
-const HmiStatePtr application_manager::ApplicationImpl::CurrentHmiState() const {
+const HmiStatePtr ApplicationImpl::CurrentHmiState() const {
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
   //TODO(APPLINK-11448) Need implement
-  return HmiStatePtr ();
+  return hmi_states_.back();
 }
 
-const HmiStatePtr ApplicationImpl::RegularHmiState() const {
-  //TODO(APPLINK-11448) Need implement
-  return HmiStatePtr ();
+const HmiStatePtr ApplicationImpl::RegularHmiState() const{
+  //sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  DCHECK_OR_RETURN(!hmi_states_.empty(), HmiStatePtr());
+  return hmi_states_.front();
 }
 
 const smart_objects::SmartObject* ApplicationImpl::active_message() const {
@@ -252,8 +270,13 @@ bool ApplicationImpl::is_media_application() const {
   return is_media_;
 }
 
-const mobile_api::HMILevel::eType& ApplicationImpl::hmi_level() const {
-  return hmi_level_;
+const mobile_api::HMILevel::eType ApplicationImpl::hmi_level() const {
+  using namespace mobile_apis;
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  HMILevel::eType hmi_level;
+  hmi_state.valid() ? hmi_level = CurrentHmiState()->hmi_level() :
+                      hmi_level = HMILevel::INVALID_ENUM;
+  return hmi_level;
 }
 
 bool application_manager::ApplicationImpl::is_foreground() const {
@@ -299,10 +322,6 @@ void ApplicationImpl::set_name(const std::string& name) {
 
 void ApplicationImpl::set_is_media_application(bool is_media) {
   is_media_ = is_media;
-  // Audio streaming state for non-media application can not be different
-  // from NOT_AUDIBLE
-  if (!is_media)
-    set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
 }
 
 void ApplicationImpl::set_tts_speak_state(bool state_tts_speak) {
@@ -338,18 +357,18 @@ bool ApplicationImpl::tts_properties_in_full() {
   return tts_properties_in_full_;
 }
 
-void ApplicationImpl::set_hmi_level(
-    const mobile_api::HMILevel::eType& hmi_level) {
-  if (mobile_api::HMILevel::HMI_NONE != hmi_level_ &&
-      mobile_api::HMILevel::HMI_NONE == hmi_level) {
-    put_file_in_none_count_ = 0;
-    delete_file_in_none_count_ = 0;
-    list_files_in_none_count_ = 0;
-  }
-  LOG4CXX_INFO(logger_, "hmi_level = " << hmi_level);
-  hmi_level_ = hmi_level;
-  usage_report_.RecordHmiStateChanged(hmi_level);
-}
+//void ApplicationImpl::set_hmi_level(
+//    const mobile_api::HMILevel::eType& hmi_level) {
+//  if (mobile_api::HMILevel::HMI_NONE != hmi_level_ &&
+//      mobile_api::HMILevel::HMI_NONE == hmi_level) {
+//    put_file_in_none_count_ = 0;
+//    delete_file_in_none_count_ = 0;
+//    list_files_in_none_count_ = 0;
+//  }
+//  LOG4CXX_INFO(logger_, "hmi_level = " << hmi_level);
+//  hmi_level_ = hmi_level;
+//  usage_report_.RecordHmiStateChanged(hmi_level);
+//}
 
 void ApplicationImpl::set_hmi_supports_navi_video_streaming(bool supports) {
   hmi_supports_navi_video_streaming_ = supports;
