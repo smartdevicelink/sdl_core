@@ -15,6 +15,7 @@ bool FileSystem::write(const QString &source, const QString &data)
     emit log(buffer, RED);
 
     QFile file(buffer);
+
     if (!file.open(QFile::WriteOnly | QFile::Truncate)) {
         emit log("File can not be open!!!", RED);
         return false;

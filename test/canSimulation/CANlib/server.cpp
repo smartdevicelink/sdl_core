@@ -89,7 +89,8 @@ bool Server::write(const QString &qMessage)
     mutex->lock();
     messagePull.push_back(qMessage);
     mutex->unlock();
-    emit startAgaing();
+
+    emit startAgaing(); //Emit signal for thread to send messages to TCP client
 }
 
 void Server::requestFromTCP(const QString &qMessage)

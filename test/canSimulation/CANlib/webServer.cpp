@@ -16,6 +16,7 @@ WebServer::~WebServer()
 {
     m_pWebSocketServer->close();
     delete m_client;
+    m_client = NULL;
 }
 
 void WebServer::onNewConnection()
@@ -44,6 +45,7 @@ void WebServer::processTextMessage(QString qMessage)
 void WebServer::socketDisconnected()
 {
     m_client->deleteLater();
+    m_client = NULL;
 }
 
 bool WebServer::write(const QString &qMessage)

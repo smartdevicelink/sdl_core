@@ -34,8 +34,7 @@ public slots:
 
     /**
      * @brief readFromTCP
-     * Method to redirect requests and responses from TCP Client to QML
-     * and send responses to TCP Client using method "write" if necessary
+     * Method to redirect requests and responses from TCP Client to external interface
      */
     void readFromTCP();
 
@@ -43,6 +42,7 @@ public slots:
     /**
      * @brief writeToTCP
      * @param qMessage - text message to be sent to TCP Client
+     * Method to send message to TCP client
      */
     void writeToTCP(const QString &qMessage);
 
@@ -59,13 +59,39 @@ public slots:
      */
     void displayError(QAbstractSocket::SocketError socketError);
 
+    /**
+     * @brief process
+     *
+     * Main process of Server's thread that send's messages to TCP client
+     */
     void process();
+
     void stop();
 
 signals:
 
+    /**
+     * @brief logMessageHandler
+     * @param qMessage
+     * @param color
+     *
+     * Signal invoked to notify that MessageHandler forwarding a log message
+     */
     void logMessageHandler(const QString &qMessage, int color);
+
+    /**
+     * @brief disconnect
+     *
+     * Signal invoked when TCP client disconnects
+     */
     void disconnect();
+
+    /**
+     * @brief requestFromTCP
+     * @param qMessage
+     *
+     * Signal emits from thread when message came to TCP server from client
+     */
     void requestFromTCP(const QString &qMessage);
 
 private:

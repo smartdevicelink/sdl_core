@@ -1,6 +1,5 @@
 #include "canfstest.h"
 #include <QDir>
-#include <QDebug>
 
 canFSTest::canFSTest(QObject *parent) :
     QObject(parent)

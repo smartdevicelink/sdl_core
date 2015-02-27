@@ -33,7 +33,7 @@ void MessageHandler::readFromTCP()
 
     emit logMessageHandler("TCP Received..." + qMessage, GREEN);
 
-    // Read all data came from client and redirect it to QML request handler
+    // Read all data came from client and redirect it to external interface
 
     emit requestFromTCP(qMessage);
 
@@ -68,8 +68,8 @@ void MessageHandler::process()
     while (messagePull.count() > 0) {
 
         mutex->lock();
-        writeToTCP(messagePull[0]);
-        messagePull.pop_front();
+        writeToTCP(messagePull[0]); //Send firs itmet to TCP client
+        messagePull.pop_front(); //And delete first item from messages pull
         mutex->unlock();
     }
 }

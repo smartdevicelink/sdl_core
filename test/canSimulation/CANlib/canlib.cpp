@@ -12,23 +12,35 @@ CANlib::~CANlib()
 bool CANlib::init()
 {
 
-    QObject::connect(this, SIGNAL(internal_createConectionTCP(const QString&, int)), &tcpServer, SLOT(createConection(const QString&, int)));
-    QObject::connect(this, SIGNAL(internal_writeToTCP(const QString&)), &tcpServer, SLOT(write(const QString&)));
+    QObject::connect(this, SIGNAL(internal_createConectionTCP(const QString&, int)),
+                     &tcpServer, SLOT(createConection(const QString&, int)));
+    QObject::connect(this, SIGNAL(internal_writeToTCP(const QString&)),
+                     &tcpServer, SLOT(write(const QString&)));
 
-    QObject::connect(this, SIGNAL(internal_writeToFS(const QString&, const QString&)), &fileSystem, SLOT(write(const QString&, const QString&)));
+    QObject::connect(this, SIGNAL(internal_writeToFS(const QString&, const QString&)),
+                     &fileSystem, SLOT(write(const QString&, const QString&)));
 
-    QObject::connect(this, SIGNAL(internal_createConectionWS(const QString&, int)), &webServer, SLOT(createConection(const QString&, int)));
-    QObject::connect(this, SIGNAL(internal_writeToWS(const QString&)), &webServer, SLOT(write(const QString&)));
+    QObject::connect(this, SIGNAL(internal_createConectionWS(const QString&, int)),
+                     &webServer, SLOT(createConection(const QString&, int)));
+    QObject::connect(this, SIGNAL(internal_writeToWS(const QString&)),
+                     &webServer, SLOT(write(const QString&)));
 
-    QObject::connect(&tcpServer,SIGNAL(readFromTCP(const QString&)), this, SLOT(readFromTCP(const QString &)));
-    QObject::connect(&webServer,SIGNAL(readFromWS(const QString&)), this, SLOT(readFromWS(const QString &)));
+    QObject::connect(&tcpServer,SIGNAL(readFromTCP(const QString&)),
+                     this, SLOT(readFromTCP(const QString &)));
+    QObject::connect(&webServer,SIGNAL(readFromWS(const QString&)),
+                     this, SLOT(readFromWS(const QString &)));
 
-    QObject::connect(&fileSystem,SIGNAL(log(const QString&, int)), this, SLOT(log(const QString&, int)));
-    QObject::connect(&tcpServer,SIGNAL(log(const QString&, int)), this, SLOT(log(const QString&, int)));
-    QObject::connect(&webServer,SIGNAL(log(const QString&, int)), this, SLOT(log(const QString&, int)));
+    QObject::connect(&fileSystem,SIGNAL(log(const QString&, int)),
+                     this, SLOT(log(const QString&, int)));
+    QObject::connect(&tcpServer,SIGNAL(log(const QString&, int)),
+                     this, SLOT(log(const QString&, int)));
+    QObject::connect(&webServer,SIGNAL(log(const QString&, int)),
+                     this, SLOT(log(const QString&, int)));
 
     return true;
 }
+
+//-------------Redirect-invoced-functions-from-external-interfaces-to-responsible-components--------------
 
 void CANlib::createConectionTCP(const QString &IP, int port)
 {
