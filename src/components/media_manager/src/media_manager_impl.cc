@@ -273,7 +273,7 @@ void MediaManagerImpl::OnMessageReceived(
   streaming_app_id_ = message->connection_key();
   ServiceType streaming_app_service_type = message->service_type();
 
-  MediaAdapterImpl* streamer = 0;
+  MediaAdapterImpl* streamer = NULL;
   if (streaming_app_service_type == kMobileNav) {
     if ((ApplicationManagerImpl::instance()-> IsVideoStreamingAllowed(streaming_app_id_))) {
       streamer = video_streamer_;
@@ -290,7 +290,7 @@ void MediaManagerImpl::OnMessageReceived(
       streaming_timer_.start(stop_streaming_timeout_);
     } else {
       ApplicationManagerImpl::instance()->ForbidStreaming(streaming_app_id_);
-      LOG4CXX_DEBUG(logger_, "The application trying to stream when it should not.");
+      LOG4CXX_ERROR(logger_, "The application trying to stream when it should not.");
     }
   }
 }
