@@ -240,6 +240,19 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns path to testing file to which redirects audio stream
       */
     const std::string& audio_stream_file() const;
+
+    /**
+     * @brief Returns timeout for SDL to wait for the next package of raw data
+     * over audio service
+     */
+    const std::uint32_t audio_data_stopped_timeout() const;
+
+    /**
+     * @brief Returns timeout for SDL to wait for the next package of raw data
+     * over video service
+     */
+    const std::uint32_t video_data_stopped_timeout() const;
+
     /**
      * @brief Returns allowable max amount of requests per time scale for
      * application in hmi level none
@@ -661,6 +674,8 @@ private:
     std::string                     system_files_path_;
     uint16_t                        transport_manager_tcp_adapter_port_;
     std::string                     tts_delimiter_;
+    std::uint32_t                   audio_data_stopped_timeout_;
+    std::uint32_t                   video_data_stopped_timeout_;
     std::string                     mme_db_name_;
     std::string                     event_mq_name_;
     std::string                     ack_mq_name_;

@@ -3201,6 +3201,18 @@
   </function>
   <function name="StopAudioStream" messagetype="response">
   </function>
+  <function name="OnAudioDataStreaming" messagetype="notification">
+    <description>Sender: SDL->HMI. Purpose: notify about raw audio data presence over the URL provided via StartAudioStream SDL's request.</description>
+    <param name="available" type="Boolean" mandatory="true">
+      <description>If "true" - audio data started. If "false" - audio data stopped.</description>
+    </param>
+  </function>
+  <function name="OnVideoDataStreaming" messagetype="notification">
+    <description>Sender: SDL->HMI. Purpose: notify about raw video data presence over the URL provided via StartStream SDL's request.</description>
+    <param name="available" type="Boolean" mandatory="true">
+      <description>If "true" - video data started. If "false" - video data stopped.</description>
+    </param>
+  </function>
 
 </interface>
 

@@ -402,6 +402,9 @@ class MessageHelper {
      */
     static void SendAudioStopStream(int32_t connection_key);
 
+    static void SendOnDataStreaming(protocol_handler::ServiceType service,
+                                    bool available);
+
     /*
      * @brief Sends notification to HMI to stop audioPathThru
      *

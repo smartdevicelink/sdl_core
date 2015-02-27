@@ -115,6 +115,8 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_update_device_list.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/update_device_list_request.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/update_device_list_response.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_audio_data_streaming_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_video_data_streaming_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_sdl_consent_needed_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_sdl_persistence_complete_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_exit_all_applications_notification.cc

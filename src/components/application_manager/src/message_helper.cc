@@ -1842,6 +1842,36 @@ void MessageHelper::SendAudioStopStream(int32_t connection_key) {
   ApplicationManagerImpl::instance()->ManageHMICommand(stop_stream);
 }
 
+void MessageHelper::SendOnDataStreaming(protocol_handler::ServiceType service,
+                                        bool available) {
+  using namespace protocol_handler;
+  smart_objects::SmartObjectSPtr notification = new smart_objects::SmartObject(
+      smart_objects::SmartType_Map);
+
+  if (!notification) {
+    return;
+  }
+
+  if (ServiceType::kAudio != service && ServiceType::kMobileNav != service) {
+    return;
+  }
+
+  (*notification)[strings::params][strings::function_id] =
+      ServiceType::kAudio == service
+      ? hmi_apis::FunctionID::Navigation_OnAudioDataStreaming
+      : hmi_apis::FunctionID::Navigation_OnVideoDataStreaming;
+  (*notification)[strings::params][strings::message_type] =
+    hmi_apis::messageType::notification;
+  (*notification)[strings::params][strings::protocol_version] =
+    commands::CommandImpl::protocol_version_;
+  (*notification)[strings::params][strings::protocol_type] =
+    commands::CommandImpl::hmi_protocol_type_;
+
+  (*notification)[strings::msg_params]["available"] = available;
+
+  ApplicationManagerImpl::instance()->ManageHMICommand(notification);
+}
+
 bool MessageHelper::SendStopAudioPathThru() {
   LOG4CXX_INFO(logger_, "MessageHelper::SendAudioStopAudioPathThru");
 
