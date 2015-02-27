@@ -2189,7 +2189,6 @@ void ApplicationManagerImpl::HeadUnitReset(
   }
 }
 
-
 void ApplicationManagerImpl::SendOnSDLClose() {
   LOG4CXX_AUTO_TRACE(logger_);
 

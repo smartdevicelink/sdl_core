@@ -150,6 +150,13 @@ class SQLQuery {
   /**
    * Gets value in the result record
    * @param pos position of value
+   * @return unsigned integer value
+   */
+  uint32_t GetUInteger(int pos) const;
+
+  /**
+   * Gets value in the result record
+   * @param pos position of value
    * @return double value
    */
   double GetDouble(int pos) const;

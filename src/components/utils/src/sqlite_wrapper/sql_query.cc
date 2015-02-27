@@ -121,6 +121,11 @@ int SQLQuery::GetInteger(int pos) const {
   return sqlite3_column_int(statement_, pos);
 }
 
+uint32_t SQLQuery::GetUInteger(int pos) const {
+  return static_cast<uint32_t>(
+      sqlite3_column_int64(statement_, pos));
+}
+
 double SQLQuery::GetDouble(int pos) const {
   return sqlite3_column_double(statement_, pos);
 }

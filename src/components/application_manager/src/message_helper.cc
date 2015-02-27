@@ -1155,6 +1155,54 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
   return requests;
 }
 
+static smart_objects::SmartObjectList
+MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(ApplicationConstSharedPtr app) {
+  smart_objects::SmartObjectList requests;
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Invalid application");
+    return requests;
+  }
+  const DataAccessor<ChoiceSetMap> accessor = app->choice_set_map();
+  const ChoiceSetMap& choices = accessor.GetData();
+  ChoiceSetMap::const_iterator it = choices.begin();
+  for (; choices.end() != it; ++it) {
+    const uint32_t choice_grammar_id = (*(it->second))[strings::grammar_id].asUint();
+    const size_t size = (*(it->second))[strings::choice_set].length();
+    for (size_t j = 0; j < size; ++j) {
+      smart_objects::SmartObjectSPtr vr_command = new smart_objects::SmartObject(
+          smart_objects::SmartType_Map);
+      if (!vr_command) {
+        return requests;
+      }
+      (*vr_command)[strings::params][strings::function_id] =
+          static_cast<int>(hmi_apis::FunctionID::VR_AddCommand);
+      (*vr_command)[strings::params][strings::message_type] =
+          static_cast<int>(hmi_apis::messageType::request);
+      (*vr_command)[strings::params][strings::protocol_version] =
+          commands::CommandImpl::protocol_version_;
+      (*vr_command)[strings::params][strings::protocol_type] =
+          commands::CommandImpl::hmi_protocol_type_;
+      (*vr_command)[strings::params][strings::correlation_id] =
+          ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+      smart_objects::SmartObject msg_params = smart_objects::SmartObject(
+          smart_objects::SmartType_Map);
+      msg_params[strings::app_id] = application->app_id();
+      msg_params[strings::cmd_id] =
+          (*(it->second))[strings::choice_set][j][strings::choice_id];
+      msg_params[strings::vr_commands] = smart_objects::SmartObject(
+          smart_objects::SmartType_Array);
+      msg_params[strings::vr_commands] =
+          (*(it->second))[strings::choice_set][j][strings::vr_commands];
+
+      msg_params[strings::type] = hmi_apis::Common_VRCommandType::Choice;
+      msg_params[strings::grammar_id] =  choice_grammar_id;
+      (*vr_command)[strings::msg_params] = msg_params;
+      requests.push_back(vr_command);
+    }
+  }
+  return requests;
+}
+
 smart_objects::SmartObjectSPtr MessageHelper::CreateChangeRegistration(
     int32_t function_id, int32_t language, uint32_t app_id,
     const smart_objects::SmartObject* app_types) {

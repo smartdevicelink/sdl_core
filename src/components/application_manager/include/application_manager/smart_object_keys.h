@@ -52,7 +52,7 @@ const char method_name[] = "methodName";
 const char info[] = "info";
 const char app_id[] = "appID";
 const char hmi_app_id[] = "hmiAppID";
-const char device_mac[] = "deviceMAC";
+const char device_id[] = "deviceID";
 const char url[] = "url";
 const char urlScheme[] = "urlScheme";
 const char packageName[] = "packageName";
@@ -250,7 +250,7 @@ const char priority[] = "priority";
 //resuming
 const char application_commands[] = "applicationCommands";
 const char application_submenus[] = "applicationSubMenus";
-const char application_choise_sets[] = "applicationChoiceSets";
+const char application_choice_sets[] = "applicationChoiceSets";
 const char application_global_properties[] = "globalProperties";
 const char application_vehicle_info[] = "vehicleInfo";
 const char application_buttons[] = "buttons";

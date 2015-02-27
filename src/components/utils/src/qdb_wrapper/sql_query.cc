@@ -240,6 +240,15 @@ int SQLQuery::GetInteger(int pos) const {
   return 0;
 }
 
+uint32_t SQLQuery::GetUInteger(int pos) const {
+  void* ret = qdb_cell(result_, current_row_, pos);
+  if (rows_ !=0 && ret) {
+    return *static_cast<uint32_t*>(ret);
+  }
+  return 0;
+}
+
+
 double SQLQuery::GetDouble(int pos) const {
   void* ret = qdb_cell(result_, current_row_, pos);
   if (rows_ !=0 && ret) {

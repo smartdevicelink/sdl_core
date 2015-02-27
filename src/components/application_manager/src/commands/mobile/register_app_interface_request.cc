@@ -227,6 +227,21 @@ void RegisterAppInterfaceRequest::Run() {
                       msg_params[strings::app_name].asString() <<
                       "  hasn't been registered!");
   } else {
+
+    // For resuming application need to restore hmi_app_id from resumeCtrl
+    const std::string mobile_app_id = msg_params[strings::app_id].asString();
+    const std::string device_id =
+        MessageHelper::GetDeviceMacAddressForHandle(application->device());
+    ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
+
+    // there is side affect with 2 mobile app with the same mobile app_id
+    if (resumer.IsApplicationSaved(mobile_app_id, device_id)) {
+      app->set_hmi_application_id(
+          resumer.GetHMIApplicationID(mobile_app_id, device_id));
+    } else {
+      app->set_hmi_application_id(
+          ApplicationManagerImpl::instance()->GenerateNewHMIAppID());
+    }
     app->set_is_media_application(
       msg_params[strings::is_media_application].asBool());
 
@@ -492,7 +507,9 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
 
   // in case application exist in resumption we need to send resumeVrgrammars
   if (false == resumption) {
-    resumption = resumer.IsApplicationSaved(application->mobile_app_id());
+    resumption = resumer.IsApplicationSaved(
+        application->mobile_app_id(),
+        MessageHelper::GetDeviceMacAddressForHandle(application->device()));
   }
 
 

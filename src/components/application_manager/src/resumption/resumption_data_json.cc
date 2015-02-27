@@ -1,0 +1,475 @@
+/*
+ * Copyright (c) 2015, Ford Motor Company
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions are met:
+ *
+ * Redistributions of source code must retain the above copyright notice, this
+ * list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright notice,
+ * this list of conditions and the following
+ * disclaimer in the documentation and/or other materials provided with the
+ * distribution.
+ *
+ * Neither the name of the Ford Motor Company nor the names of its contributors
+ * may be used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+ * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+ * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+ * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+ * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#include "application_manager/resumption/resumption_data_json.h"
+#include "smart_objects/smart_object.h"
+#include "json/json.h"
+namespace application_manager {
+namespace resumption {
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "ResumptionDataJson")
+
+void ResumptionDataJson::SaveApplication(ApplicationConstSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  DCHECK(application.get());
+
+  if (!application) {
+    LOG4CXX_FATAL(logger_, "Application object is NULL.");
+    return;
+  }
+
+  const std::string& m_app_id = application->mobile_app_id();
+  LOG4CXX_TRACE(logger_, "ENTER app_id : " << application->app_id()
+                << " mobile app_id : " << m_app_id);
+
+  // let's make a copy not to depend on application
+  const std::string hash = application->curHash();
+  const uint32_t grammar_id = application->get_grammar_id();
+  const uint32_t time_stamp = (uint32_t)time(NULL);
+  const std::string device_id =
+      MessageHelper::GetDeviceMacAddressForHandle(application->device());
+
+  const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
+
+  Json::Value tmp;
+
+  Json::Value& json_app = GetFromSavedOrAppend(m_app_id, device_id);
+
+  json_app[strings::device_id] = device_id;
+
+  json_app[strings::app_id] = m_app_id;
+  json_app[strings::grammar_id] = grammar_id;
+  json_app[strings::connection_key] = application->app_id();
+  json_app[strings::hmi_app_id] = application->hmi_app_id();
+  json_app[strings::is_media_application] = application->IsAudioApplication();
+  json_app[strings::hmi_level] = static_cast<int32_t> (hmi_level);
+  json_app[strings::ign_off_count] = 0;
+  json_app[strings::suspend_count] = 0;
+  json_app[strings::hash_id] = hash;
+  Formatters::CFormatterJsonBase::objToJsonValue(
+      GetApplicationCommands(application), tmp);
+  json_app[strings::application_commands] = tmp;
+  Formatters::CFormatterJsonBase::objToJsonValue(
+      GetApplicationSubMenus(application), tmp);
+  json_app[strings::application_submenus] = tmp;
+  Formatters::CFormatterJsonBase::objToJsonValue(
+      GetApplicationInteractionChoiseSets(application), tmp);
+  json_app[strings::application_choice_sets] = tmp;
+  Formatters::CFormatterJsonBase::objToJsonValue(
+      GetApplicationGlobalProperties(application), tmp);
+  json_app[strings::application_global_properties] = tmp;
+  Formatters::CFormatterJsonBase::objToJsonValue(
+      GetApplicationSubscriptions(application), tmp);
+  json_app[strings::application_subscribtions] = tmp;
+  Formatters::CFormatterJsonBase::objToJsonValue(
+      GetApplicationFiles(application), tmp);
+  json_app[strings::application_files] = tmp;
+  json_app[strings::time_stamp] = time_stamp;
+  LOG4CXX_DEBUG(logger_, "SaveApplication : " << json_app.toStyledString());
+}
+
+int ResumptionDataJson::GetStoredHMILevel(const std::string& m_app_id,
+                                 const std::string& device_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  int idx  = GetObjectIndex(m_app_id, device_id);
+  if (idx != -1) {
+    const Json::Value& json_app = GetSavedApplications()[idx];
+    if (json_app.isMember(strings::hmi_level)) {
+      return json_app[strings::hmi_level].asInt();
+    }
+  }
+  LOG4CXX_FATAL(logger_, "There are some unknown keys among the stored apps");
+  return -1;
+}
+
+bool ResumptionDataJson::RestoreApplicationData(
+    ApplicationSharedPtr application) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  if (!application.valid()) {
+    LOG4CXX_ERROR(logger_, "Application pointer in invalid");
+    return false;
+  }
+
+  LOG4CXX_DEBUG(logger_, "ENTER app_id : " << application->app_id());
+  smart_objects::SmartObject saved_app(smart_objects::SmartType_Map);
+  bool result = GetSavedApplication(application->mobile_app_id(),
+      MessageHelper::GetDeviceMacAddressForHandle(application->device()),
+      saved_app);
+  if (result) {
+    if(saved_app.keyExists(strings::grammar_id)) {
+      const uint32_t app_grammar_id = saved_app[strings::grammar_id].asUInt();
+      application->set_grammar_id(app_grammar_id);
+
+      AddFiles(application, so_saved_app);
+      AddSubmenues(application, so_saved_app);
+      AddCommands(application, so_saved_app);
+      AddChoicesets(application, so_saved_app);
+      SetGlobalProperties(application, so_saved_app);
+      AddSubscriptions(application, so_saved_app);
+      return true;
+    } else {
+      LOG4CXX_WARN(logger_, "Saved data of application does not contain grammar_id");
+      return false;
+    }
+  }
+  LOG4CXX_WARN(logger_, "Application not saved");
+  return false;
+}
+
+bool ResumptionDataJson::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  for (Json::Value::iterator it = GetSavedApplications().begin();
+      it != GetSavedApplications().end(); ++it) {
+    if ((*it).isMember(strings::hmi_app_id)) {
+      if ((*it)[strings::hmi_app_id].asUInt() == hmi_app_id) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+bool ResumptionDataJson::CheckSavedApplication(const std::string& mobile_app_id,
+                                               const std::string& device_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  int index = IsApplicationSaved(mobile_app_id, device_id);
+  if (-1 == index) {
+    return false;
+  }
+
+  if (!IsResumptionDataValid(index)) {
+    LOG4CXX_INFO(logger_, "Resumption data for app_id " << mobile_app_id <<
+                 " device id " << device_id <<
+                 " is corrupted. Remove application from resumption list");
+    RemoveApplicationFromSaved(mobile_app_id, device_id);
+    return false;
+  }
+  return true;
+}
+
+uint32_t ResumptionDataJson::GetHMIApplicationID(
+    const std::string& mobile_app_id, const std::string& device_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  uint32_t hmi_app_id = 0;
+
+  const int idx = GetObjectIndex(mobile_app_id, device_id);
+  if (-1 == idx) {
+    LOG4CXX_WARN(logger_, "Application not saved");
+    return hmi_app_id;
+  }
+
+  const Json::Value& json_app = GetSavedApplications()[idx];
+  if (json_app.isMember(strings::app_id) &&
+      json_app.isMember(strings::device_id)) {
+    hmi_app_id = json_app[strings::hmi_app_id].asUInt();
+  }
+  LOG4CXX_DEBUG(logger_, "hmi_app_id :"  << hmi_app_id);
+  return hmi_app_id;
+}
+
+void ResumptionDataJson::Suspend() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  Json::Value to_save;
+  for (Json::Value::iterator it = GetSavedApplications().begin();
+      it != GetSavedApplications().end(); ++it) {
+    if ((*it).isMember(strings::suspend_count)) {
+      const uint32_t suspend_count = (*it)[strings::suspend_count].asUInt();
+      (*it)[strings::suspend_count] = suspend_count + 1;
+    } else {
+      LOG4CXX_WARN(logger_, "Unknown key among saved applications");
+      (*it)[strings::suspend_count] = 1;
+    }
+    if ((*it).isMember(strings::ign_off_count)) {
+      const uint32_t ign_off_count = (*it)[strings::ign_off_count].asUInt();
+      if (ign_off_count < kApplicationLifes) {
+        (*it)[strings::ign_off_count] = ign_off_count + 1;
+        to_save.append(*it);
+      }
+    } else {
+      LOG4CXX_WARN(logger_, "Unknown key among saved applications");
+      (*it)[strings::ign_off_count] = 1;
+    }
+  }
+  SetSavedApplication(to_save);
+  SetLastIgnOffTime(time(NULL));
+  LOG4CXX_DEBUG(logger_,
+                GetResumptionData().toStyledString());
+  resumption::LastState::instance()->SaveToFileSystem();
+}
+
+void ResumptionDataJson::OnAwake() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  for (Json::Value::iterator it = GetSavedApplications().begin();
+      it != GetSavedApplications().end(); ++it) {
+    if ((*it).isMember(strings::ign_off_count)) {
+      const uint32_t ign_off_count = (*it)[strings::ign_off_count].asUInt();
+      (*it)[strings::ign_off_count] = ign_off_count - 1;
+    } else {
+      LOG4CXX_WARN(logger_, "Unknown key among saved applications");
+      (*it)[strings::ign_off_count] = 0;
+    }
+  }
+}
+
+bool ResumptionDataJson::GetHashId(const std::string& mobile_app_id,
+                                   const std::string& device_id,
+                                   std::string& hash_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const int idx = GetObjectIndex(mobile_app_id, device_id);
+  if (-1 == idx) {
+    LOG4CXX_WARN(logger_, "Application not saved");
+    return false;
+  }
+
+  const Json::Value& json_app = GetSavedApplications()[idx];
+  LOG4CXX_DEBUG(logger_, "Saved_application_data: " << json_app.toStyledString());
+  if (json_app.isMember(strings::hash_id) && json_app.isMember(strings::time_stamp)) {
+    hash_id = json_app[strings::hash_id].asString();
+    return true;
+  }
+  LOG4CXX_WARN(logger_, "There are some unknown keys in the dictionary.");
+  return false;
+}
+
+bool ResumptionDataJson::GetSavedApplication(const std::string& mobile_app_id,
+                                             const std::string& device_id,
+                                             smart_objects::SmartObject& saved_app) {
+  const int idx = GetObjectIndex(mobile_app_id, device_id);
+  if (-1 == idx) {
+    return false;
+  }
+  const Json::Value& json_saved_app = GetSavedApplications()[idx];
+  Formatters::CFormatterJsonBase::jsonValueToObj(json_saved_app, saved_app);
+  return true;
+}
+
+bool ResumptionDataJson::RemoveApplicationFromSaved(const std::string& mobile_app_id,
+                                                    const std::string& device_id) {
+  LOG4CXX_TRACE(logger_, "Remove mobile_app_id " << mobile_app_id);
+
+  bool result = false;
+  std::vector<Json::Value> temp;
+  for (Json::Value::iterator it = GetSavedApplications().begin();
+      it != GetSavedApplications().end(); ++it) {
+    if ((*it).isMember(strings::app_id) &&
+        (*it).isMember(strings::device_id)) {
+      const std::string& saved_m_app_id = (*it)[strings::app_id].asString();
+      const std::string& saved_device_id = (*it)[strings::device_id].asString();
+      if (saved_m_app_id != mobile_app_id && saved_device_id != device_id) {
+        temp.push_back((*it));
+      } else {
+        result = true;
+      }
+    }
+  }
+
+  if (false == result) {
+    LOG4CXX_TRACE(logger_, "EXIT result: " << (result ? "true" : "false"));
+    return result;
+  }
+
+  GetSavedApplications().clear();
+  for (std::vector<Json::Value>::iterator it = temp.begin();
+      it != temp.end(); ++it) {
+    GetSavedApplications().append((*it));
+  }
+  LOG4CXX_TRACE(logger_, "EXIT result: " << (result ? "true" : "false"));
+  return result;
+}
+
+uint32_t ResumptionDataJson::GetIgnOffTime() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  Json::Value& resumption = GetResumptionData();
+  if (!resumption.isMember(strings::last_ign_off_time)) {
+    resumption[strings::last_ign_off_time] = 0;
+    LOG4CXX_WARN(logger_, "last_save_time section is missed");
+  }
+  return resumption[strings::last_ign_off_time].asUInt();
+}
+
+int ResumptionDataJson::IsApplicationSaved(const std::string& mobile_app_id,
+                                           const std::string& device_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return GetObjectIndex(mobile_app_id, device_id);
+}
+
+Json::Value& ResumptionDataJson::GetFromSavedOrAppend(const std::string& mobile_app_id,
+                                  const std::string& device_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  for (Json::Value::iterator it = GetSavedApplications().begin();
+      it != GetSavedApplications().end(); ++it) {
+    if (device_id == (*it)[strings::device_id].asString() &&
+        mobile_app_id == (*it)[strings::app_id].asString()) {
+      return *it;
+    }
+  }
+
+  return GetSavedApplications().append(Json::Value());
+}
+
+void ResumptionDataJson::GetDataForLoadResumeData(
+    smart_objects::SmartObject& saved_data) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObject so_array_data(smart_objects::SmartType_Array);
+  int i = 0;
+  for (Json::Value::iterator it = GetSavedApplications().begin();
+      it != GetSavedApplications().end(); ++it) {
+    if (((*it).isMember(strings::hmi_level)) &&
+        ((*it).isMember(strings::ign_off_count)) &&
+        ((*it).isMember(strings::time_stamp)) &&
+        ((*it).isMember(strings::app_id)) &&
+        ((*it).isMember(strings::device_id))) {
+      smart_objects::SmartObject so(smart_objects::SmartType_Map);
+      so[strings::hmi_level] = (*it)[strings::hmi_level].asInt();
+      so[strings::ign_off_count] = (*it)[strings::ign_off_count].asInt();
+      so[strings::time_stamp] = (*it)[strings::time_stamp].asUInt();
+      so[strings::app_id] = (*it)[strings::app_id].asString();
+      so[strings::device_id] = (*it)[strings::device_id].asString();
+      so_array_data[i++] = so;
+    }
+  }
+  saved_data = so_array_data;
+}
+
+void ResumptionDataJson::SetHMILevelForSavedApplication(const std::string& mobile_app_id,
+                                                        const std::string& device_id,
+                                                        int32_t hmi_level) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  int idx = GetObjIndex(mobile_app_id, device_id);
+  if (-1 == idx) {
+    LOG4CXX_WARN(logger_, "Application isn't saved with mobile_app_id = "
+                 <<mobile_app_id<<" device_id = "<<device_id);
+    return;
+  }
+  GetSavedApplications()[idx][strings::hmi_level] = hmi_level;
+}
+
+Json::Value& ResumptionDataJson::GetSavedApplications() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  Json::Value& resumption = GetResumptionData();
+  if (!resumption.isMember(strings::resume_app_list)) {
+    resumption[strings::resume_app_list] = Json::Value(Json::arrayValue);
+    LOG4CXX_WARN(logger_, "app_list section is missed");
+  }
+  Json::Value& resume_app_list = resumption[strings::resume_app_list];
+  if (!resume_app_list.isArray()) {
+    LOG4CXX_ERROR(logger_, "resume_app_list type INVALID rewrite");
+    resume_app_list =  Json::Value(Json::arrayValue);
+  }
+  return resume_app_list;
+}
+
+Json::Value& ResumptionDataJson::GetResumptionData() {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  Json::Value& last_state = resumption::LastState::instance()->dictionary;
+  if (!last_state.isMember(strings::resumption)) {
+    last_state[strings::resumption] = Json::Value(Json::objectValue);
+    LOG4CXX_WARN(logger_, "resumption section is missed");
+  }
+  Json::Value& resumption =  last_state[strings::resumption];
+  if (!resumption.isObject()) {
+    LOG4CXX_ERROR(logger_, "resumption type INVALID rewrite");
+    resumption =  Json::Value(Json::objectValue);
+  }
+  return resumption;
+}
+
+int ResumptionDataJson::GetObjectIndex(const std::string& mobile_app_id,
+                               const std::string& device_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const Json::Value& apps = GetSavedApplications();
+  const Json::ArrayIndex size = apps.size();
+  Json::ArrayIndex idx = 0;
+  for (; idx != size; ++idx) {
+    if (apps[idx].isMember(strings::app_id) &&
+        apps[idx].isMember(strings::device_id)) {
+      const std::string& saved_app_id = apps[idx][strings::app_id].asString();
+      const std::string& saved_device_id = apps[idx][strings::device_id].asString();
+      if (device_id == saved_device_id &&
+          mobile_app_id == saved_app_id) {
+        LOG4CXX_DEBUG(logger_, "Found " << idx);
+        return idx;
+      }
+    }
+  }
+  return -1;
+}
+
+bool ResumptionDataJson::IsResumptionDataValid(uint32_t index) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  const Json::Value& json_app = GetSavedApplications()[index];
+  if (!json_app.isMember(strings::app_id) ||
+      !json_app.isMember(strings::ign_off_count) ||
+      !json_app.isMember(strings::hmi_level) ||
+      !json_app.isMember(strings::hmi_app_id) ||
+      !json_app.isMember(strings::time_stamp) ||
+      !json_app.isMember(strings::device_id)) {
+    LOG4CXX_ERROR(logger_, "Wrong resumption data");
+    return false;
+  }
+
+  if (json_app.isMember(strings::hmi_app_id) &&
+      0 >= json_app[strings::hmi_app_id].asUInt()) {
+    LOG4CXX_ERROR(logger_, "Wrong resumption hmi app ID");
+    return false;
+  }
+
+  return true;
+}
+
+void ResumptionDataJson::SetSavedApplication(Json::Value& apps_json) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  Json::Value& app_list = GetSavedApplications();
+  app_list = apps_json;
+}
+
+void ResumptionDataJson::SetLastIgnOffTime(time_t ign_off_time) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  LOG4CXX_WARN(logger_, "ign_off_time = " << ign_off_time);
+  Json::Value& resumption = GetResumptionData();
+  resumption[strings::last_ign_off_time] = static_cast<uint32_t>(ign_off_time);
+}
+
+} // resumption
+} // application_manager
