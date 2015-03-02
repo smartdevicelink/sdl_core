@@ -179,11 +179,6 @@ ProcessResult CANModule::ProcessHMIMessage(
   return HandleMessage(msg);
 }
 
-void CANModule::ProcessCANMessage(const MessageFromCAN& can_msg) {
-  DCHECK(Json::ValueType::objectValue == can_msg.type());
-  from_can_.PostMessage(can_msg);
-}
-
 void CANModule::Handle(const std::string message) {
   CANConnectionSPtr::static_pointer_cast<CANTCPConnection>(can_connection_)
   ->WriteData(message);

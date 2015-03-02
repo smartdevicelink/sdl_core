@@ -53,7 +53,6 @@ class CANModule : public functional_modules::GenericModule,
     application_manager::MessagePtr msg);
   virtual functional_modules::ProcessResult ProcessHMIMessage(
     application_manager::MessagePtr msg);
-  void ProcessCANMessage(const MessageFromCAN& can_msg);
   void Handle(const std::string message);
   void Handle(const MessageFromCAN message);
 

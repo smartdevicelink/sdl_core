@@ -68,12 +68,16 @@ void TimerThreadDelegate<T>::threadMain() {
 
 template<class T>
 bool TimerThreadDelegate<T>::exitThreadMain() {
-  {
-    sync_primitives::AutoLock run_lock(keep_running_lock_);
-    keep_running_ = false;
+  if (keep_running_) {
+    {
+      sync_primitives::AutoLock run_lock(keep_running_lock_);
+      keep_running_ = false;
+    }
+    keep_running_cond_.NotifyOne();
+    return true;
+  } else {
+    return false;
   }
-  keep_running_cond_.NotifyOne();
-  return false;
 }
 
 TimerDirector::TimerDirector() {
