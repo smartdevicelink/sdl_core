@@ -40,7 +40,7 @@
 #include "application_manager/message_helper.h"
 
 namespace application_manager {
-
+class ApplicationManagerImpl;
 class StateController : public event_engine::EventObserver {
   public:
 
@@ -77,22 +77,17 @@ class StateController : public event_engine::EventObserver {
     void OnStateChanged(ApplicationSharedPtr app, HmiStatePtr old_state,
                         HmiStatePtr new_state);
 
-
-
-
   private:
-    template <typename Predicate, typename ContextAcessor>
-    void ForEachApplication(Predicate pred) {
+    template <typename UnaryFunction,
+              typename ContextAcessor = ApplicationManagerImpl>
+    void ForEachApplication(UnaryFunction func) {
       using namespace utils;
       typename ContextAcessor::ApplicationListAccessor accessor;
-      for (typename ContextAcessor::ApplictionSetConstIt it = accessor.begin();
-           it != accessor.end(); ++it) {
+      typedef typename ContextAcessor::ApplictionSetConstIt Iter;
+      for (Iter it = accessor.begin(); it != accessor.end(); ++it) {
         if (it->valid()) {
           ApplicationConstSharedPtr const_app = *it;
-          ApplicationSharedPtr app = ContextAcessor::instance()->application(const_app->app_id());
-          if (app.valid()) {
-            pred(app);
-          }
+          func(ContextAcessor::instance()->application(const_app->app_id()));
         }
       }
     }
@@ -107,33 +102,23 @@ class StateController : public event_engine::EventObserver {
     };
 
     template <typename HmiStateName>
-    struct HMIStateStarted {
-        HMIStateStarted(StateController* state_ctrl):
-          state_ctrl_(state_ctrl){}
-        StateController* state_ctrl_;
-        void operator ()(ApplicationSharedPtr app) {
-          HmiStatePtr old_hmi_state = app->CurrentHmiState();
-          HmiStatePtr new_hmi_state(new HmiStateName(old_hmi_state));
-          app->AddHMIState(new_hmi_state);
-          state_ctrl_->OnStateChanged(app,old_hmi_state, new_hmi_state);
-        }
-    };
+    void HMIStateStarted(ApplicationSharedPtr app) {
+      if (!app) {
+        return;
+      }
+      HmiStatePtr old_hmi_state = app->CurrentHmiState();
+      HmiStatePtr new_hmi_state(new HmiStateName(old_hmi_state));
+      app->AddHMIState(new_hmi_state);
+      OnStateChanged(app,old_hmi_state, new_hmi_state);
+    }
 
-    struct HMIStateStopped {
-
-        StateController* state_ctrl_;
-        HmiState::StateID state_id_;
-        HMIStateStopped(StateController* state_ctrl,
-                        HmiState::StateID state_id):
-          state_ctrl_(state_ctrl), state_id_(state_id){}
-        void operator ()(ApplicationSharedPtr app) {
-          HmiStatePtr old_hmi_state(new HmiState(*(app->CurrentHmiState())));
-          app->RemoveHMIState(state_id_);
-          HmiStatePtr new_hmi_state = app->CurrentHmiState();
-          state_ctrl_->OnStateChanged(app,old_hmi_state, new_hmi_state);
-        }
-    };
-
+    template <HmiState::StateID ID>
+    void HMIStateStopped(ApplicationSharedPtr app) {
+        HmiStatePtr old_hmi_state(new HmiState(*(app->CurrentHmiState())));
+        app->RemoveHMIState(ID);
+        HmiStatePtr new_hmi_state = app->CurrentHmiState();
+        OnStateChanged(app,old_hmi_state, new_hmi_state);
+    }
 
     /**
      * @brief ProcessApplyingRegularState setup regular hmi state, tha will appear if no
