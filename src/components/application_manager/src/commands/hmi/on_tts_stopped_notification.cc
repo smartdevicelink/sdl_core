@@ -52,8 +52,6 @@ void OnTTSStoppedNotification::Run() {
   event_engine::Event event(hmi_apis::FunctionID::TTS_Stopped);
   event.set_smart_object(*message_);
   event.raise();
-  ApplicationManagerImpl::instance()->Unmute(kTTSSessionChanging);
-
 }
 
 }  // namespace commands

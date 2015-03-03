@@ -97,7 +97,6 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       delete_file_in_none_count_(0),
       list_files_in_none_count_(0),
       system_context_(mobile_api::SystemContext::SYSCTXT_MAIN),
-      audio_streaming_state_(mobile_api::AudioStreamingState::NOT_AUDIBLE),
       device_(0),
       usage_report_(mobile_app_id, statistics_manager),
       protocol_version_(ProtocolVersion::kV3),
@@ -481,17 +480,6 @@ void ApplicationImpl::increment_list_files_in_none_count() {
 void ApplicationImpl::set_system_context(
     const mobile_api::SystemContext::eType& system_context) {
   system_context_ = system_context;
-}
-
-void ApplicationImpl::set_audio_streaming_state(
-    const mobile_api::AudioStreamingState::eType& state) {
-  if (!(is_media_application() || is_navi())
-      && state != mobile_api::AudioStreamingState::NOT_AUDIBLE) {
-    LOG4CXX_WARN(logger_, "Trying to set audio streaming state"
-                  " for non-media application to different from NOT_AUDIBLE");
-    return;
-  }
-  audio_streaming_state_ = state;
 }
 
 bool ApplicationImpl::set_app_icon_path(const std::string& path) {

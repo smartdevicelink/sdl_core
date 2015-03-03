@@ -406,8 +406,43 @@ class ApplicationManagerImpl : public ApplicationManager,
     void set_all_apps_allowed(const bool& allowed);
 
     void SetState(uint32_t app_id,
-                  mobile_api::HMILevel::eType hmi_level,
-                  mobile_apis::AudioStreamingState::eType ass);
+                  mobile_apis::AudioStreamingState::eType ass) {
+      ApplicationSharedPtr app  = application(app_id);
+      state_ctrl_.SetRegularState(app, ass);
+    }
+
+    template <bool SendActivateApp>
+    void SetState(uint32_t app_id,
+                  HmiStatePtr new_state) {
+      ApplicationSharedPtr app  = application(app_id);
+      state_ctrl_.SetRegularState<SendActivateApp>(app, new_state);
+    }
+
+    template <bool SendActivateApp>
+    void SetState(uint32_t app_id,
+                  mobile_apis::HMILevel::eType hmi_level){
+      ApplicationSharedPtr app  = application(app_id);
+      state_ctrl_.SetRegularState<SendActivateApp>(app, hmi_level);
+    }
+
+
+    template <bool SendActivateApp>
+    void SetState(uint32_t app_id,
+                  mobile_apis::HMILevel::eType hmi_level,
+                  mobile_apis::AudioStreamingState::eType audio_state){
+      ApplicationSharedPtr app  = application(app_id);
+      state_ctrl_.SetRegularState<SendActivateApp>(app, hmi_level, audio_state);
+    }
+
+    template <bool SendActivateApp>
+    void SetState(uint32_t app_id, mobile_apis::HMILevel::eType hmi_level,
+                  mobile_apis::AudioStreamingState::eType audio_state,
+                  mobile_apis::SystemContext::eType system_context) {
+      ApplicationSharedPtr app  = application(app_id);
+      state_ctrl_.SetRegularState<SendActivateApp>(app, hmi_level,
+                                                   audio_state, system_context);
+    }
+
 
 #ifdef CUSTOMER_PASA
     /**
@@ -581,25 +616,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     void RemovePolicyObserver(PolicyHandlerObserver* listener);
 
     /*
-     * @brief Change AudioStreamingState for all application according to
-     * system audio-mixing capabilities (NOT_AUDIBLE/ATTENUATED) and
-     * send notification for this changes
-     * @param If changing_state == kVRSessionChanging function is used by
-     * on_vr_started_notification, if changing_state == kTTSSessionChanging
-     * function is used by on_tts_started_notification
-     */
-    void Mute(VRTTSSessionChanging changing_state);
-
-    /*
-     * @brief Change AudioStreamingState for all application to AUDIBLE and
-     * send notification for this changes
-     * @param If changing_state == kVRSessionChanging function is used by
-     * on_vr_stopped_notification, if changing_state == kTTSSessionChanging
-     * function is used by on_tts_stopped_notification
-     */
-    void Unmute(VRTTSSessionChanging changing_state);
-
-    /*
      * @brief Checks HMI level and returns true if audio streaming is allowed
      */
     bool IsAudioStreamingAllowed(uint32_t connection_key) const;
@@ -752,23 +768,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param level new hmi level for certain application.
      */
     void ChangeAppsHMILevel(uint32_t app_id, mobile_apis::HMILevel::eType level);
-
-    /**
-     * @brief MakeAppNotAudible allows to make certain application not audible.
-     *
-     * @param app_id applicatin's id whose audible state should be changed.
-     */
-    void MakeAppNotAudible(uint32_t app_id);
-
-    /**
-     * @brief MakeAppFullScreen allows ti change application's properties
-     * in order to make it full screen.
-     *
-     * @param app_id the id of application which should be in full screen  mode.
-     *
-     * @return true if operation was success, false otherwise.
-     */
-    bool MakeAppFullScreen(uint32_t app_id);
 
     /**
      * Function used only by HMI request/response/notification base classes
@@ -1256,27 +1255,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      * will send TTS global properties to HMI after timeout
      */
     std::map<uint32_t, TimevalStruct> tts_global_properties_app_list_;
-
-
-    struct AppState {
-      AppState(const mobile_apis::HMILevel::eType& level,
-               const mobile_apis::AudioStreamingState::eType& streaming_state,
-               const mobile_apis::SystemContext::eType& context)
-      : hmi_level(level),
-        audio_streaming_state(streaming_state),
-        system_context(context) { }
-
-      mobile_apis::HMILevel::eType            hmi_level;
-      mobile_apis::AudioStreamingState::eType audio_streaming_state;
-      mobile_apis::SystemContext::eType       system_context;
-    };
-
-    /**
-     * @brief Map contains apps with HMI state before incoming call
-     * After incoming call ends previous HMI state must restore
-     *
-     */
-    std::map<uint32_t, AppState> on_phone_call_app_list_;
 
     bool audio_pass_thru_active_;
     sync_primitives::Lock audio_pass_thru_lock_;

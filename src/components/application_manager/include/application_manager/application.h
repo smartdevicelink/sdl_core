@@ -434,7 +434,7 @@ class Application : public virtual InitialApplicationData,
     virtual const uint32_t delete_file_in_none_count() const = 0;
     virtual const uint32_t list_files_in_none_count() const = 0;
     virtual const mobile_api::SystemContext::eType& system_context() const = 0;
-    virtual const mobile_api::AudioStreamingState::eType&
+    virtual const mobile_api::AudioStreamingState::eType
     audio_streaming_state() const = 0;
     virtual const std::string& app_icon_path() const = 0;
     virtual connection_handler::DeviceHandle device() const = 0;
@@ -506,8 +506,6 @@ class Application : public virtual InitialApplicationData,
     virtual void increment_list_files_in_none_count() = 0;
     virtual void set_system_context(
       const mobile_api::SystemContext::eType& system_context) = 0;
-    virtual void set_audio_streaming_state(
-      const mobile_api::AudioStreamingState::eType& state) = 0;
     virtual bool set_app_icon_path(const std::string& file_name) = 0;
     virtual void set_app_allowed(const bool& allowed) = 0;
     virtual void set_device(connection_handler::DeviceHandle device) = 0;

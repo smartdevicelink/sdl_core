@@ -59,27 +59,17 @@ StateController::StateController():EventObserver() {
 }
 
 void StateController::SetRegularState(ApplicationSharedPtr app,
-                                      const mobile_apis::HMILevel::eType hmi_level,
                                       const mobile_apis::AudioStreamingState::eType audio_state) {
-  HmiStatePtr hmi_state(new HmiState(hmi_level, audio_state, system_context_));
-  SetRegularState(app, hmi_state);
-}
-
-void StateController::SetRegularState(ApplicationSharedPtr app,
-                                      HmiStatePtr state) {
   DCHECK_OR_RETURN_VOID(app);
-  DCHECK_OR_RETURN_VOID(state);
-  DCHECK_OR_RETURN_VOID(state->state_id() == HmiState::STATE_ID_REGULAR);
-
-  HmiStatePtr old_state(new HmiState(*(app->RegularHmiState())));
-  if (state->hmi_level() == mobile_api::HMILevel::HMI_FULL
-    && old_state->hmi_level() != mobile_api::HMILevel::HMI_FULL) {
-      MessageHelper::SendActivateAppToHMI(app->app_id());
-      waiting_for_activate[app->app_id()] = state;
-  } else {
-    ApplyRegularState(app, state);
-  }
+  HmiStatePtr prev_regular = app->RegularHmiState();
+  DCHECK_OR_RETURN_VOID(prev_regular);
+  HmiStatePtr hmi_state(new HmiState(prev_regular->hmi_level(),
+                                     audio_state,
+                                     prev_regular->system_context()));
+  SetRegularState<false>(app, hmi_state);
 }
+
+
 
 void StateController::HmiLevelConflictResolver::operator ()
     (ApplicationSharedPtr to_resolve) {
@@ -105,24 +95,26 @@ void StateController::HmiLevelConflictResolver::operator ()
 }
 
 void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
+                                           HmiStatePtr state) {
+  HmiStatePtr old_state(new HmiState(*(app->CurrentHmiState())));
+  app->SetRegularState(state);
+  HmiStatePtr new_state = app->RegularHmiState();
+  OnStateChanged(app, old_state, new_state);
+}
+
+void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
                                    const mobile_apis::HMILevel::eType hmi_level,
                                    const mobile_apis::AudioStreamingState::eType audio_state) {
   using namespace mobile_apis;
   using namespace helpers;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN_VOID(app);
+  HmiStatePtr prev_state = app->RegularHmiState();
+  DCHECK_OR_RETURN_VOID(prev_state);
   HmiStatePtr new_state(new HmiState(hmi_level,
                                      audio_state,
-                                     system_context_));
+                                     prev_state->system_context()));
   SetupRegularHmiState(app, new_state);
-}
-
-void StateController::SetupRegularHmiState(ApplicationSharedPtr app,
-                                           HmiStatePtr state) {
-  HmiStatePtr old_state(new HmiState(*(app->CurrentHmiState())));
-  app->SetRegularState(state);
-  HmiStatePtr new_state = app->RegularHmiState();
-  OnStateChanged(app, old_state, new_state);
 }
 
 void StateController::ApplyRegularState(ApplicationSharedPtr app,
@@ -142,11 +134,6 @@ bool StateController::IsSameAppType(ApplicationConstSharedPtr app1,
            app1->is_voice_communication_supported() == app2->is_voice_communication_supported();
 }
 
-void StateController::SetSystemContext(const mobile_apis::SystemContext::eType system_context) {
-  system_context_ = system_context;
-  //TODO (APPLINK-8555) Need to setup system context for app applications
-}
-
 void StateController::on_event(const event_engine::Event& event) {
   using namespace smart_objects;
   using namespace event_engine;
@@ -156,6 +143,10 @@ void StateController::on_event(const event_engine::Event& event) {
   const SmartObject& message = event.smart_object();
   const FunctionID::eType id = static_cast<FunctionID::eType> (event.id());
   switch (id) {
+    case FunctionID::BasicCommunication_ActivateApp: {
+      OnActivateAppResponse(message);
+      break;
+    }
     case FunctionID::BasicCommunication_OnEmergencyEvent: {
       bool is_active =
           message[strings::msg_params][hmi_notification::is_active].asBool();

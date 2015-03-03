@@ -29,7 +29,6 @@ HmiState::HmiState(const HmiState& copy_from):
 
 }
 
-
 HmiState::HmiState(mobile_apis::HMILevel::eType hmi_level,
                                  mobile_apis::AudioStreamingState::eType audio_streaming_state,
                                  mobile_apis::SystemContext::eType system_context):
@@ -42,7 +41,6 @@ void HmiState::setParent(HmiStatePtr parent) {
   DCHECK_OR_RETURN_VOID(parent);
   parent_ = parent;
 }
-
 
 VRHmiState::VRHmiState(HmiStatePtr previous):
   HmiState(previous) {
