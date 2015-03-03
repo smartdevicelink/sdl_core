@@ -68,7 +68,7 @@ class HmiState {
       return audio_streaming_state_;
     }
 
-    virtual void set_audio_streaming_state(mobile_apis::AudioStreamingState::eType ass){
+    virtual void set_audio_streaming_state(mobile_apis::AudioStreamingState::eType ass) {
       audio_streaming_state_ = ass;
     }
 

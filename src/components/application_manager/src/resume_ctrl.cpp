@@ -233,9 +233,15 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
       HMILevel::HMI_LIMITED == restored_hmi_level ? AudioStreamingState::AUDIBLE:
                                                     AudioStreamingState::NOT_AUDIBLE;
 
-  ApplicationManagerImpl::instance()->SetState(application->app_id(),
-                                               restored_hmi_level,
-                                               restored_audio_state);
+  if (restored_hmi_level == HMILevel::HMI_FULL) {
+    ApplicationManagerImpl::instance()->SetState<true>(application->app_id(),
+                                                       restored_hmi_level,
+                                                       restored_audio_state);
+  } else {
+    ApplicationManagerImpl::instance()->SetState<false>(application->app_id(),
+                                                        restored_hmi_level,
+                                                        restored_audio_state);
+  }
   LOG4CXX_INFO(logger_, "Set up application "
                << application->mobile_app_id()
                << " to HMILevel " << hmi_level);

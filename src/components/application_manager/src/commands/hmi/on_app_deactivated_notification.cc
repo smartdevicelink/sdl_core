@@ -80,51 +80,29 @@ void OnAppDeactivatedNotification::Run() {
   if (HMI_NONE == app->hmi_level()) {
     return;
   }
+  HmiStatePtr regular = app->RegularHmiState();
+  DCHECK_OR_RETURN_VOID(regular);
+  HmiStatePtr new_regular(new HmiState(*regular));
 
-  eType new_hmi_level = app->hmi_level();
   switch ((*message_)[strings::msg_params][hmi_request::reason].asInt()) {
     case hmi_apis::Common_DeactivateReason::AUDIO: {
-      if (app->is_media_application()) {
-        if (profile::Profile::instance()->is_mixing_audio_supported() &&
-            (ApplicationManagerImpl::instance()->vr_session_started() ||
-             app->tts_speak_state())) {
-          app->set_audio_streaming_state(mobile_api::AudioStreamingState::ATTENUATED);
-        } else {
-          app->set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
-        }
-      }
-      // HMI must send this notification for each active app
-      if (app.valid()) {
-        if (Compare<eType, EQ, ONE>(app->hmi_level(), HMI_FULL, HMI_LIMITED)) {
-          new_hmi_level = HMI_BACKGROUND;
-        }
-      }
+      new_regular->set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
+      new_regular->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       break;
     }
     case hmi_apis::Common_DeactivateReason::NAVIGATIONMAP:
     case hmi_apis::Common_DeactivateReason::PHONEMENU:
     case hmi_apis::Common_DeactivateReason::SYNCSETTINGS:
     case hmi_apis::Common_DeactivateReason::GENERAL: {
-      if ((!app->IsAudioApplication()) ||
-          ApplicationManagerImpl::instance()->
-          DoesAudioAppWithSameHMITypeExistInFullOrLimited(app)) {
-        new_hmi_level = HMI_BACKGROUND;
+      if (app->IsAudioApplication()) {
+        new_regular->set_hmi_level(mobile_api::HMILevel::HMI_LIMITED);
       } else {
-        new_hmi_level = HMI_LIMITED;
+        new_regular->set_hmi_level(mobile_api::HMILevel::HMI_BACKGROUND);
       }
-      break;
-    }
-    default: {
-      LOG4CXX_ERROR_EXT(logger_, "Unknown reason of app deactivation");
-      return;
     }
   }
+  ApplicationManagerImpl::instance()->SetState<false>(app, new_regular);
 
-  if (new_hmi_level != app->hmi_level()) {
-    ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                           new_hmi_level);
-    MessageHelper::SendHMIStatusNotification(*app);
-  }
 }
 
 }  // namespace commands

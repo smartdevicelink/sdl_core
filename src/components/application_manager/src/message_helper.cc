@@ -1299,25 +1299,26 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
   ApplicationManagerImpl::instance()->ManageHMICommand(notification);
 }
 
-void MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
+uint32_t MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority) {
+  u_int32_t correlation_id = 0;
   application_manager::ApplicationConstSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
     ->application(app_id);
   if (!app) {
     LOG4CXX_WARN(logger_, "Invalid app_id: " << app_id);
-    return;
+    return correlation_id;
   }
 
+  correlation_id =
+      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
   utils::SharedPtr<smart_objects::SmartObject> message = new smart_objects::SmartObject(
     smart_objects::SmartType_Map);
-
   (*message)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::BasicCommunication_ActivateApp;
   (*message)[strings::params][strings::message_type] = MessageType::kRequest;
-  (*message)[strings::params][strings::correlation_id] =
-    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+  (*message)[strings::params][strings::correlation_id] = correlation_id;
   (*message)[strings::msg_params][strings::app_id] = app_id;
 
   if (send_policy_priority) {
@@ -1348,6 +1349,7 @@ void MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
   }
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
+  return correlation_id;
 }
 
 void MessageHelper::SendOnResumeAudioSourceToHMI(const uint32_t app_id) {

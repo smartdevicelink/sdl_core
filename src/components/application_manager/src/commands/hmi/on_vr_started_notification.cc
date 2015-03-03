@@ -49,7 +49,7 @@ void OnVRStartedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->set_vr_session_started(true);
-  ApplicationManagerImpl::instance()->Mute(kVRSessionChanging);
+  //ApplicationManagerImpl::instance()->Mute(kVRSessionChanging);
 }
 
 }  // namespace commands

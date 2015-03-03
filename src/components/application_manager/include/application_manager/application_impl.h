@@ -107,8 +107,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const uint32_t delete_file_in_none_count() const;
   const uint32_t list_files_in_none_count() const;
   const mobile_api::SystemContext::eType& system_context() const;
-  inline const mobile_api::AudioStreamingState::eType&
-  audio_streaming_state() const;
+  inline const mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
   void set_tts_speak_state(bool state_tts_speak);
@@ -125,8 +124,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void increment_list_files_in_none_count();
   void set_system_context(
       const mobile_api::SystemContext::eType& system_context);
-  void set_audio_streaming_state(
-      const mobile_api::AudioStreamingState::eType& state);
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool& allowed);
   void set_device(connection_handler::DeviceHandle device);
@@ -259,7 +256,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   uint32_t                                 delete_file_in_none_count_;
   uint32_t                                 list_files_in_none_count_;
   mobile_api::SystemContext::eType         system_context_;
-  mobile_api::AudioStreamingState::eType   audio_streaming_state_;
   std::string                              app_icon_path_;
   connection_handler::DeviceHandle         device_;
 
@@ -309,9 +305,14 @@ uint32_t ApplicationImpl::app_id() const {
   return app_id_;
 }
 
-const mobile_api::AudioStreamingState::eType&
+const mobile_api::AudioStreamingState::eType
 ApplicationImpl::audio_streaming_state() const {
-  return audio_streaming_state_;
+  using namespace mobile_apis;
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  AudioStreamingState::eType audio_state;
+  hmi_state.valid() ? audio_state = CurrentHmiState()->audio_streaming_state() :
+                      audio_state = AudioStreamingState::INVALID_ENUM;
+  return audio_state;
 }
 
 bool ApplicationImpl::app_allowed() const {

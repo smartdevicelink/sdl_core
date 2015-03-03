@@ -49,7 +49,7 @@ void OnVRStoppedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl::instance()->set_vr_session_started(false);
-  ApplicationManagerImpl::instance()->Unmute(kVRSessionChanging);
+  //ApplicationManagerImpl::instance()->Unmute(kVRSessionChanging);
 }
 
 }  // namespace commands

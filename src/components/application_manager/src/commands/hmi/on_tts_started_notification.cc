@@ -50,7 +50,6 @@ void OnTTSStartedNotification::Run() {
   event_engine::Event event(hmi_apis::FunctionID::TTS_Started);
   event.set_smart_object(*message_);
   event.raise();
-  ApplicationManagerImpl::instance()->Mute(kTTSSessionChanging);
 }
 
 }  // namespace commands
