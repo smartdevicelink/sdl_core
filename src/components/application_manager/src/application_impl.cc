@@ -122,7 +122,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
 
   // load persistent files
   LoadPersistentFiles();
-  SetRegularState(new HmiState(mobile_apis::HMILevel::INVALID_ENUM,
+  hmi_states_.push_back(new HmiState(mobile_apis::HMILevel::INVALID_ENUM,
                                mobile_apis::AudioStreamingState::INVALID_ENUM,
                                mobile_apis::SystemContext::INVALID_ENUM));
 }

@@ -34,7 +34,7 @@ HmiState::HmiState(mobile_apis::HMILevel::eType hmi_level,
                                  mobile_apis::AudioStreamingState::eType audio_streaming_state,
                                  mobile_apis::SystemContext::eType system_context):
   state_id_(STATE_ID_REGULAR),
-  parent_(NULL), hmi_level_(hmi_level),
+  hmi_level_(hmi_level),
   audio_streaming_state_(audio_streaming_state), system_context_(system_context) {
 }
 
