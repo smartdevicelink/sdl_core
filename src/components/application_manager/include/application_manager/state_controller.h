@@ -103,9 +103,7 @@ class StateController : public event_engine::EventObserver {
 
     template <typename HmiStateName>
     void HMIStateStarted(ApplicationSharedPtr app) {
-      if (!app) {
-        return;
-      }
+      DCHECK_OR_RETURN_VOID(app);
       HmiStatePtr old_hmi_state = app->CurrentHmiState();
       HmiStatePtr new_hmi_state(new HmiStateName(old_hmi_state));
       app->AddHMIState(new_hmi_state);
@@ -114,10 +112,11 @@ class StateController : public event_engine::EventObserver {
 
     template <HmiState::StateID ID>
     void HMIStateStopped(ApplicationSharedPtr app) {
-        HmiStatePtr old_hmi_state(new HmiState(*(app->CurrentHmiState())));
-        app->RemoveHMIState(ID);
-        HmiStatePtr new_hmi_state = app->CurrentHmiState();
-        OnStateChanged(app,old_hmi_state, new_hmi_state);
+      DCHECK_OR_RETURN_VOID(app);
+      HmiStatePtr old_hmi_state(new HmiState(*(app->CurrentHmiState())));
+      app->RemoveHMIState(ID);
+      HmiStatePtr new_hmi_state = app->CurrentHmiState();
+      OnStateChanged(app,old_hmi_state, new_hmi_state);
     }
 
     /**
