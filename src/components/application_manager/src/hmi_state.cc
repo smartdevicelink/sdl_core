@@ -63,15 +63,6 @@ TTSHmiState::TTSHmiState(HmiStatePtr previous):
 PhoneCallHmiState::PhoneCallHmiState(HmiStatePtr previous):
   HmiState(previous) {
   state_id_ = STATE_ID_PHONE_CALL;
-  using namespace mobile_apis;
-  using namespace helpers;
-  if (Compare<HMILevel::eType, NEQ, ALL>(hmi_level(),
-                                         HMILevel::HMI_NONE,
-                                         HMILevel::HMI_BACKGROUND)) {
-    audio_streaming_state_ = AudioStreamingState::NOT_AUDIBLE;
-  } else {
-    audio_streaming_state_ = previous->audio_streaming_state();
-  }
 }
 
 SafetyModeHmiState::SafetyModeHmiState(HmiStatePtr previous):
