@@ -61,8 +61,7 @@ StateController::StateController():EventObserver() {
 void StateController::SetRegularState(ApplicationSharedPtr app,
                                       const mobile_apis::HMILevel::eType hmi_level,
                                       const mobile_apis::AudioStreamingState::eType audio_state) {
-  HmiStatePtr hmi_state(new HmiState(hmi_level, audio_state,
-                                                    system_context_));
+  HmiStatePtr hmi_state(new HmiState(hmi_level, audio_state, system_context_));
   SetRegularState(app, hmi_state);
 }
 
