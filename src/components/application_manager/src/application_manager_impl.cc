@@ -2834,46 +2834,6 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
   tts_global_properties_app_list_lock_.Release();
 }
 
-void ApplicationManagerImpl::CreatePhoneCallAppList() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationManagerImpl::ApplicationListAccessor accessor;
-
-  ApplicationManagerImpl::ApplictionSetIt it = accessor.begin();
-  ApplicationManagerImpl::ApplictionSetIt itEnd = accessor.end();
-
-  using namespace mobile_apis::HMILevel;
-  using namespace helpers;
-  for (; it != itEnd; ++it) {
-    if (Compare<eType, EQ, ONE>((*it)->hmi_level(), HMI_FULL, HMI_LIMITED)) {
-
-      // back up app state
-      on_phone_call_app_list_.insert(std::pair<uint32_t, AppState>(
-          (*it)->app_id(), AppState((*it)->hmi_level(),
-                                    (*it)->audio_streaming_state(),
-                                    (*it)->system_context())));
-    }
-  }
-}
-
-void ApplicationManagerImpl::ResetPhoneCallAppList() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  std::map<uint32_t, AppState>::iterator it =
-      on_phone_call_app_list_.begin();
-  std::map<uint32_t, AppState>::iterator it_end =
-      on_phone_call_app_list_.end();
-  for (; it != it_end; ++it) {
-    ApplicationSharedPtr app = application(it->first);
-    if (app) {
-      ChangeAppsHMILevel(app->app_id(), it->second.hmi_level);
-      app->set_audio_streaming_state(it->second.audio_streaming_state);
-      app->set_system_context(it->second.system_context);
-      MessageHelper::SendHMIStatusNotification(*app);
-    }
-  }
-
-  on_phone_call_app_list_.clear();
-}
-
 void ApplicationManagerImpl::ChangeAppsHMILevel(uint32_t app_id,
                                                 mobile_apis::HMILevel::eType level) {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -41,7 +41,7 @@ class HmiState {
                     mobile_apis::AudioStreamingState::eType audio_streaming_state,
                     mobile_apis::SystemContext::eType system_context);
 
-    virtual ~HmiState() {};
+    virtual ~HmiState() {}
 
     void setParent(HmiStatePtr parent);
 
@@ -71,8 +71,6 @@ class HmiState {
     virtual void set_audio_streaming_state(mobile_apis::AudioStreamingState::eType ass){
       audio_streaming_state_ = ass;
     }
-
-
 
     /**
      * @brief system_context
@@ -116,6 +114,10 @@ class TTSHmiState : public HmiState {
 class PhoneCallHmiState : public HmiState {
   public:
     PhoneCallHmiState(HmiStatePtr parent);
+
+    mobile_apis::SystemContext::eType system_context() const {
+      return parent()->system_context();
+    }
 };
 
 class SafetyModeHmiState : public HmiState {
@@ -130,8 +132,5 @@ class SafetyModeHmiState : public HmiState {
       return parent()->hmi_level();
     }
 };
-
-
-
 }
 #endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMISTATE_H
