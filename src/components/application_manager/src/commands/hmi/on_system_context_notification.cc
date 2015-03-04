@@ -77,8 +77,8 @@ void OnSystemContextNotification::Run() {
 
 void OnSystemContextNotification::SendSystemContextNotification(ApplicationSharedPtr app,
     mobile_api::SystemContext::eType system_context) {
-  app->set_system_context(system_context);
-  MessageHelper::SendHMIStatusNotification(*app);
+  ApplicationManagerImpl::instance()->SetState(app->app_id(),
+                                               system_context);
 }
 
 }  // namespace commands

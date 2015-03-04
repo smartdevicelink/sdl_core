@@ -32,7 +32,8 @@ class HmiState {
       STATE_ID_TTS_SESSION,
     };
 
-    HmiState(HmiStatePtr parent);
+    HmiState(HmiStatePtr parent, StateID state_id);
+
     HmiState();
 
     HmiState(const HmiState& copy_from);
@@ -54,8 +55,12 @@ class HmiState {
      * @return return hmi level member
      */
     virtual mobile_apis::HMILevel::eType hmi_level() const {
+      if (parent_) {
+        return parent_->hmi_level();
+      }
       return hmi_level_;
     }
+
     void set_hmi_level(mobile_apis::HMILevel::eType hmi_level) {
       hmi_level_ = hmi_level;
     }
@@ -65,6 +70,9 @@ class HmiState {
      * @return return audio streaming state member
      */
     virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const {
+      if (parent_) {
+        return parent_->audio_streaming_state();
+      }
       return audio_streaming_state_;
     }
 
@@ -77,6 +85,9 @@ class HmiState {
      * @return return system context member
      */
     virtual mobile_apis::SystemContext::eType system_context() const {
+      if (parent_) {
+        return parent_->system_context();
+      }
       return system_context_;
     }
 
@@ -88,8 +99,8 @@ class HmiState {
       return state_id_;
     }
   protected:
-    StateID state_id_;
     HmiStatePtr parent_;
+    StateID state_id_;
     mobile_apis::HMILevel::eType hmi_level_;
     mobile_apis::AudioStreamingState::eType audio_streaming_state_;
     mobile_apis::SystemContext::eType system_context_;
@@ -101,13 +112,16 @@ class HmiState {
 class VRHmiState : public HmiState {
   public:
     VRHmiState(HmiStatePtr parent);
+    virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const {
+      return audio_streaming_state_;
+    }
 };
 
 class TTSHmiState : public HmiState {
   public:
     TTSHmiState(HmiStatePtr parent);
     mobile_apis::AudioStreamingState::eType audio_streaming_state() const {
-      return parent()->audio_streaming_state();
+      return audio_streaming_state_;
     }
 };
 
@@ -123,14 +137,6 @@ class PhoneCallHmiState : public HmiState {
 class SafetyModeHmiState : public HmiState {
   public:
     SafetyModeHmiState(HmiStatePtr parent);
-
-    mobile_apis::SystemContext::eType system_context() const {
-      return parent()->system_context();
-    }
-
-    mobile_apis::HMILevel::eType hmi_level() const {
-      return parent()->hmi_level();
-    }
 };
 }
 #endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMISTATE_H

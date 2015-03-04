@@ -443,6 +443,12 @@ class ApplicationManagerImpl : public ApplicationManager,
                                                    audio_state, system_context);
     }
 
+    void SetState(uint32_t app_id,
+                  mobile_apis::SystemContext::eType system_context) {
+      ApplicationSharedPtr app  = application(app_id);
+      state_ctrl_.SetRegularState(app, system_context);
+    }
+
 
 #ifdef CUSTOMER_PASA
     /**

@@ -488,17 +488,13 @@ bool ApplicationManagerImpl::LoadAppDataToHMI(ApplicationSharedPtr app) {
 bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   using namespace mobile_api;
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!app) {
-    LOG4CXX_ERROR(logger_, "Null-pointer application received.");
-    NOTREACHED();
-    return false;
-  }
+  DCHECK_OR_RETURN(app, false);
   // remove from resumption if app was activated by user
   resume_controller().OnAppActivated(app);
   HMILevel::eType hmi_level = HMILevel::HMI_FULL;
   AudioStreamingState::eType ass;
   app->IsAudioApplication() ? ass = AudioStreamingState::AUDIBLE :
-                                    AudioStreamingState::NOT_AUDIBLE;
+                              ass = AudioStreamingState::NOT_AUDIBLE;
   state_ctrl_.SetRegularState<false>(app, hmi_level, ass);
   return true;
 }

@@ -38,6 +38,7 @@
 #include "application_manager/application.h"
 #include "event_engine/event_observer.h"
 #include "application_manager/message_helper.h"
+#include "interfaces/MOBILE_API.h"
 
 namespace application_manager {
 class ApplicationManagerImpl;
@@ -105,6 +106,17 @@ class StateController : public event_engine::EventObserver {
       SetRegularState<SendActivateApp>(app, hmi_state);
     }
 
+    void SetRegularState(ApplicationSharedPtr app,
+                                          const mobile_apis::SystemContext::eType system_context) {
+      DCHECK_OR_RETURN_VOID(app);
+      HmiStatePtr prev_regular = app->RegularHmiState();
+      DCHECK_OR_RETURN_VOID(prev_regular);
+      HmiStatePtr hmi_state(new HmiState(app->hmi_level(),
+                                         prev_regular->audio_streaming_state(),
+                                         system_context));
+      SetRegularState<false>(app, hmi_state);
+    }
+
     // EventObserver interface
     void on_event(const event_engine::Event& event);
 
@@ -148,10 +160,16 @@ class StateController : public event_engine::EventObserver {
     void HMIStateStopped(ApplicationSharedPtr app) {
       DCHECK_OR_RETURN_VOID(app);
       HmiStatePtr old_hmi_state(new HmiState(*(app->CurrentHmiState())));
+      if(app->tts_speak_state()) {
+        app->set_tts_speak_state(false);
+      }
       app->RemoveHMIState(ID);
       HmiStatePtr new_hmi_state = app->CurrentHmiState();
       OnStateChanged(app,old_hmi_state, new_hmi_state);
     }
+
+    mobile_apis::AudioStreamingState::eType
+    TTSVRCalcAudioSS(mobile_apis::HMILevel::eType level) const;
 
     /**
      * @brief ProcessApplyingRegularState setup regular hmi state, tha will appear if no

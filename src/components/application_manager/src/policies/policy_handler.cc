@@ -868,7 +868,6 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   if (false == permissions.appRevoked && true == permissions.isSDLAllowed) {
         LOG4CXX_INFO(logger_, "Application will be activated");
         if (ApplicationManagerImpl::instance()->ActivateApplication(app)) {
-          MessageHelper::SendHMIStatusNotification(*(app.get()));
           last_activated_app_id_ = 0;
         }
   } else {

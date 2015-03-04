@@ -101,7 +101,7 @@ void OnAppDeactivatedNotification::Run() {
       }
     }
   }
-  ApplicationManagerImpl::instance()->SetState<false>(app, new_regular);
+  ApplicationManagerImpl::instance()->SetState<false>(app->app_id(), new_regular);
 
 }
 
