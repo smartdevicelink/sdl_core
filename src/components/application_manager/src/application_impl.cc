@@ -92,11 +92,9 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       tts_speak_state_(false),
       tts_properties_in_none_(false),
       tts_properties_in_full_(false),
-      hmi_level_(mobile_api::HMILevel::HMI_NONE),
       put_file_in_none_count_(0),
       delete_file_in_none_count_(0),
       list_files_in_none_count_(0),
-      system_context_(mobile_api::SystemContext::SYSCTXT_MAIN),
       device_(0),
       usage_report_(mobile_app_id, statistics_manager),
       protocol_version_(ProtocolVersion::kV3),
@@ -123,7 +121,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
   LoadPersistentFiles();
   hmi_states_.push_back(new HmiState(mobile_apis::HMILevel::INVALID_ENUM,
                                mobile_apis::AudioStreamingState::INVALID_ENUM,
-                               mobile_apis::SystemContext::INVALID_ENUM));
+                               mobile_api::SystemContext::SYSCTXT_MAIN));
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -149,7 +147,7 @@ void ApplicationImpl::CloseActiveMessage() {
 }
 
 bool ApplicationImpl::IsFullscreen() const {
-  return mobile_api::HMILevel::HMI_FULL == hmi_level_;
+  return mobile_api::HMILevel::HMI_FULL == hmi_level();
 }
 
 void ApplicationImpl::ChangeSupportingAppHMIType() {
@@ -298,9 +296,14 @@ const uint32_t ApplicationImpl::list_files_in_none_count() const {
   return list_files_in_none_count_;
 }
 
-const mobile_api::SystemContext::eType&
+const mobile_api::SystemContext::eType
 ApplicationImpl::system_context() const {
-  return system_context_;
+  using namespace mobile_apis;
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  SystemContext::eType system_context;
+  hmi_state.valid() ? system_context = CurrentHmiState()->system_context() :
+                      system_context = SystemContext::INVALID_ENUM;
+  return system_context;
 }
 
 const std::string& ApplicationImpl::app_icon_path() const {
@@ -355,19 +358,6 @@ void ApplicationImpl::set_tts_properties_in_full(
 bool ApplicationImpl::tts_properties_in_full() {
   return tts_properties_in_full_;
 }
-
-//void ApplicationImpl::set_hmi_level(
-//    const mobile_api::HMILevel::eType& hmi_level) {
-//  if (mobile_api::HMILevel::HMI_NONE != hmi_level_ &&
-//      mobile_api::HMILevel::HMI_NONE == hmi_level) {
-//    put_file_in_none_count_ = 0;
-//    delete_file_in_none_count_ = 0;
-//    list_files_in_none_count_ = 0;
-//  }
-//  LOG4CXX_INFO(logger_, "hmi_level = " << hmi_level);
-//  hmi_level_ = hmi_level;
-//  usage_report_.RecordHmiStateChanged(hmi_level);
-//}
 
 void ApplicationImpl::set_hmi_supports_navi_video_streaming(bool supports) {
   hmi_supports_navi_video_streaming_ = supports;
@@ -477,11 +467,6 @@ void ApplicationImpl::increment_list_files_in_none_count() {
   ++list_files_in_none_count_;
 }
 
-void ApplicationImpl::set_system_context(
-    const mobile_api::SystemContext::eType& system_context) {
-  system_context_ = system_context;
-}
-
 bool ApplicationImpl::set_app_icon_path(const std::string& path) {
   if (app_files_.find(path) != app_files_.end()) {
     app_icon_path_ = path;
@@ -504,6 +489,12 @@ uint32_t ApplicationImpl::get_grammar_id() const {
 
 void ApplicationImpl::set_grammar_id(uint32_t value) {
   grammar_id_ = value;
+}
+
+void ApplicationImpl::reset_data_in_none() {
+      put_file_in_none_count_ = 0;
+      delete_file_in_none_count_ = 0;
+      list_files_in_none_count_ = 0;
 }
 
 bool ApplicationImpl::has_been_activated() const {

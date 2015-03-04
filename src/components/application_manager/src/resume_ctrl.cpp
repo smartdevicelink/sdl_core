@@ -160,12 +160,10 @@ bool ResumeCtrl::RestoreAppHMIState(ApplicationSharedPtr application) {
 }
 
 bool ResumeCtrl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
-  if (false == application.valid()) {
-    LOG4CXX_ERROR(logger_, "SetupDefaultHMILevel application pointer is invalid");
-    return false;
-  }
-  LOG4CXX_TRACE(logger_, "ENTER app_id : " << application->app_id());
-  mobile_apis::HMILevel::eType default_hmi = ApplicationManagerImpl::instance()-> GetDefaultHmiLevel(application);
+  DCHECK_OR_RETURN_VOID(application);
+  LOG4CXX_AUTO_TRACE(logger_);
+  mobile_apis::HMILevel::eType default_hmi =
+      ApplicationManagerImpl::instance()-> GetDefaultHmiLevel(application);
   bool result = SetAppHMIState(application, default_hmi, false);
   return result;
 }
@@ -179,9 +177,9 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
     LOG4CXX_ERROR(logger_, "Application pointer in invalid");
     return false;
   }
-  LOG4CXX_TRACE(logger_, " ENTER Params : ( " << application->app_id()
-                << "," << hmi_level
-                << "," << check_policy << " )");
+  LOG4CXX_TRACE(logger_, " app_id : ( " << application->app_id()
+                << ", hmi_level : " << hmi_level
+                << ", check_policy : " << check_policy << " )");
   const std::string device_id =
       MessageHelper::GetDeviceMacAddressForHandle(application->device());
 

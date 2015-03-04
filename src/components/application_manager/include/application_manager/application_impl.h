@@ -106,7 +106,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const uint32_t put_file_in_none_count() const;
   const uint32_t delete_file_in_none_count() const;
   const uint32_t list_files_in_none_count() const;
-  const mobile_api::SystemContext::eType& system_context() const;
+  const mobile_api::SystemContext::eType system_context() const;
   inline const mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
@@ -122,13 +122,12 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void increment_put_file_in_none_count();
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
-  void set_system_context(
-      const mobile_api::SystemContext::eType& system_context);
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool& allowed);
   void set_device(connection_handler::DeviceHandle device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
+  virtual void reset_data_in_none();
 
   virtual void set_protocol_version(const ProtocolVersion& protocol_version);
   virtual ProtocolVersion protocol_version() const;
@@ -250,12 +249,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool                                     tts_speak_state_;
   bool                                     tts_properties_in_none_;
   bool                                     tts_properties_in_full_;
-  mobile_api::HMILevel::eType              hmi_level_;
   bool                                     is_foreground_;
   uint32_t                                 put_file_in_none_count_;
   uint32_t                                 delete_file_in_none_count_;
   uint32_t                                 list_files_in_none_count_;
-  mobile_api::SystemContext::eType         system_context_;
   std::string                              app_icon_path_;
   connection_handler::DeviceHandle         device_;
 

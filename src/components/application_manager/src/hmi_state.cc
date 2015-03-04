@@ -3,30 +3,26 @@
 
 namespace application_manager {
 
-// GAL some thing wrong heres
-HmiState::HmiState(HmiStatePtr prev):
+HmiState::HmiState(HmiStatePtr prev, StateID state_id):
   parent_(prev),
+  state_id_(state_id),
   hmi_level_(mobile_apis::HMILevel::INVALID_ENUM),
   audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM),
   system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
-
 }
 
 HmiState::HmiState():
   state_id_(STATE_ID_REGULAR),
-  parent_(NULL),
   hmi_level_(mobile_apis::HMILevel::INVALID_ENUM),
   audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM),
   system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
-
 }
 
 HmiState::HmiState(const HmiState& copy_from):
   state_id_(STATE_ID_REGULAR),
-  parent_(copy_from.parent()), hmi_level_(copy_from.hmi_level()),
+  hmi_level_(copy_from.hmi_level()),
   audio_streaming_state_(copy_from.audio_streaming_state()),
   system_context_(copy_from.system_context()) {
-
 }
 
 HmiState::HmiState(mobile_apis::HMILevel::eType hmi_level,
@@ -43,29 +39,21 @@ void HmiState::setParent(HmiStatePtr parent) {
 }
 
 VRHmiState::VRHmiState(HmiStatePtr previous):
-  HmiState(previous) {
+  HmiState(previous, STATE_ID_VR_SESSION) {
 }
 
 TTSHmiState::TTSHmiState(HmiStatePtr previous):
-  HmiState(previous) {
-  using namespace mobile_apis;
-  state_id_ = STATE_ID_TTS_SESSION;
-  if (HMILevel::HMI_NONE != hmi_level() &&
-      HMILevel::HMI_BACKGROUND!= hmi_level()) {
-    audio_streaming_state_ = AudioStreamingState::ATTENUATED;
-  } else {
-    audio_streaming_state_ = previous->audio_streaming_state();
-  }
+  HmiState(previous, STATE_ID_TTS_SESSION) {
 }
 
 PhoneCallHmiState::PhoneCallHmiState(HmiStatePtr previous):
-  HmiState(previous) {
-  state_id_ = STATE_ID_PHONE_CALL;
+  HmiState(previous, STATE_ID_PHONE_CALL) {
 }
 
 SafetyModeHmiState::SafetyModeHmiState(HmiStatePtr previous):
-  HmiState(previous) {
-  state_id_ = STATE_ID_SAFETY_MODE;
+  HmiState(previous, STATE_ID_SAFETY_MODE) {
+  using namespace mobile_apis;
+  audio_streaming_state_ = AudioStreamingState::NOT_AUDIBLE;
 }
 
 }

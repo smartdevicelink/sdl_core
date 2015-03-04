@@ -433,7 +433,7 @@ class Application : public virtual InitialApplicationData,
     virtual const uint32_t put_file_in_none_count() const = 0;
     virtual const uint32_t delete_file_in_none_count() const = 0;
     virtual const uint32_t list_files_in_none_count() const = 0;
-    virtual const mobile_api::SystemContext::eType& system_context() const = 0;
+    virtual const mobile_api::SystemContext::eType system_context() const = 0;
     virtual const mobile_api::AudioStreamingState::eType
     audio_streaming_state() const = 0;
     virtual const std::string& app_icon_path() const = 0;
@@ -449,6 +449,11 @@ class Application : public virtual InitialApplicationData,
       sync_primitives::AutoLock auto_lock(hmi_states_lock_);
       DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
       hmi_states_.erase(hmi_states_.begin());
+      if (hmi_states_.begin() != hmi_states_.end()) {
+        HmiStatePtr first_temp = *(hmi_states_.begin());
+        DCHECK_OR_RETURN_VOID(first_temp);
+        first_temp->setParent(state);
+      }
       hmi_states_.push_front(state);
     }
     /**
@@ -504,14 +509,12 @@ class Application : public virtual InitialApplicationData,
     virtual void increment_put_file_in_none_count() = 0;
     virtual void increment_delete_file_in_none_count() = 0;
     virtual void increment_list_files_in_none_count() = 0;
-    virtual void set_system_context(
-      const mobile_api::SystemContext::eType& system_context) = 0;
     virtual bool set_app_icon_path(const std::string& file_name) = 0;
     virtual void set_app_allowed(const bool& allowed) = 0;
     virtual void set_device(connection_handler::DeviceHandle device) = 0;
     virtual uint32_t get_grammar_id() const = 0 ;
     virtual void set_grammar_id(uint32_t value) = 0;
-
+    virtual void reset_data_in_none() = 0;
     virtual void set_protocol_version(
         const ProtocolVersion& protocol_version) = 0;
     virtual ProtocolVersion protocol_version() const = 0;
