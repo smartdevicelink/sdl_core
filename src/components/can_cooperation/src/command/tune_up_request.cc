@@ -39,10 +39,10 @@ namespace can_cooperation {
 
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "TuneUpRequest");
+CREATE_LOGGERPTR_GLOBAL(logger_, "TuneUpRequest")
 
 TuneUpRequest::TuneUpRequest(
-    const application_manager::MessagePtr& message)
+  const application_manager::MessagePtr& message)
   : BaseCommandRequest(message) {
 }
 
@@ -53,7 +53,7 @@ void TuneUpRequest::Run() {
   LOG4CXX_INFO(logger_, "TuneUpRequest::Run");
 
   application_manager::ApplicationSharedPtr app =
-      service_->GetApplication(message_->connection_key());
+    service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
     SendResponse(false, result_codes::kApplicationNotRegistered,  "");
@@ -71,11 +71,11 @@ void TuneUpRequest::Run() {
 }
 
 void TuneUpRequest::on_event(const event_engine::Event<application_manager::MessagePtr,
-              std::string>& event) {
+                             std::string>& event) {
   LOG4CXX_INFO(logger_, "TuneUpRequest::on_event");
 
   application_manager::ApplicationSharedPtr app =
-      service_->GetApplication(message_->connection_key());
+    service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
     SendResponse(false, result_codes::kApplicationNotRegistered, "");
@@ -94,7 +94,7 @@ void TuneUpRequest::on_event(const event_engine::Event<application_manager::Mess
 
     SendResponse(success, result_code.c_str(), info);
   } else {
-    LOG4CXX_ERROR(logger_,"Received unknown event: " << event.id());
+    LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
     return;
   }
 }

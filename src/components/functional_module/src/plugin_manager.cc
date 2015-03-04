@@ -39,7 +39,7 @@
 
 namespace functional_modules {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "PluginManager");
+CREATE_LOGGERPTR_GLOBAL(logger_, "PluginManager")
 
 typedef std::map<ModuleID, ModulePtr>::iterator PluginsIterator;
 typedef std::map<MobileFunctionID, ModulePtr>::iterator PluginFunctionsIterator;
@@ -142,8 +142,8 @@ void PluginManager::ProcessMessage(application_manager::MessagePtr msg) {
     PluginFunctionsIterator subscribed_plugin_itr = mobile_subscribers_.find(
           static_cast<MobileFunctionID>(msg->function_id()));
     if (mobile_subscribers_.end() != subscribed_plugin_itr) {
-      if (ProcessResult::PROCESSED !=
-          subscribed_plugin_itr->second->ProcessMessage(msg)) {
+      if (subscribed_plugin_itr->second->ProcessMessage(msg) !=
+          ProcessResult::PROCESSED) {
         LOG4CXX_ERROR(logger_, "Failed process HMI message!");
       }
     }
@@ -181,8 +181,8 @@ void PluginManager::ProcessHMIMessage(application_manager::MessagePtr msg) {
   PluginHMIFunctionsIterator subscribed_plugin_itr =
     hmi_subscribers_.find(function_name);
   if (hmi_subscribers_.end() != subscribed_plugin_itr) {
-    if (ProcessResult::PROCESSED !=
-        subscribed_plugin_itr->second->ProcessHMIMessage(msg)) {
+    if (subscribed_plugin_itr->second->ProcessHMIMessage(msg) !=
+        ProcessResult::PROCESSED) {
       LOG4CXX_ERROR(logger_, "Failed process HMI message!");
     }
   }

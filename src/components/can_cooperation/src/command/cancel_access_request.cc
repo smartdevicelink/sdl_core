@@ -40,10 +40,10 @@ namespace can_cooperation {
 
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "CancelAccessRequest");
+CREATE_LOGGERPTR_GLOBAL(logger_, "CancelAccessRequest")
 
 CancelAccessRequest::CancelAccessRequest(
-    const application_manager::MessagePtr& message)
+  const application_manager::MessagePtr& message)
   : BaseCommandRequest(message) {
 }
 
@@ -54,7 +54,7 @@ void CancelAccessRequest::Run() {
   LOG4CXX_INFO(logger_, "CancelAccessRequest::Run");
 
   application_manager::ApplicationSharedPtr app =
-      service_->GetApplication(message_->connection_key());
+    service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
     SendResponse(false, result_codes::kApplicationNotRegistered,  "");
@@ -72,11 +72,11 @@ void CancelAccessRequest::Run() {
 }
 
 void CancelAccessRequest::on_event(const event_engine::Event<application_manager::MessagePtr,
-              std::string>& event) {
+                                   std::string>& event) {
   LOG4CXX_INFO(logger_, "CancelAccessRequest::on_event");
 
   application_manager::ApplicationSharedPtr app =
-      service_->GetApplication(message_->connection_key());
+    service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
     SendResponse(false, result_codes::kApplicationNotRegistered, "");
@@ -102,7 +102,7 @@ void CancelAccessRequest::on_event(const event_engine::Event<application_manager
 
     SendResponse(success, result_code.c_str(), info);
   } else {
-    LOG4CXX_ERROR(logger_,"Received unknown event: " << event.id());
+    LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
     return;
   }
 }

@@ -39,7 +39,7 @@
 namespace can_cooperation {
 namespace request_controller {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "CANRequestController");
+CREATE_LOGGERPTR_GLOBAL(logger_, "CANRequestController")
 
 RequestController::RequestController() {
   // TODO(PV): move setting to separate instance

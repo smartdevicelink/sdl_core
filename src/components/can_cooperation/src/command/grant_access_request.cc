@@ -39,10 +39,10 @@ namespace can_cooperation {
 
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "GrantAccessRequest");
+CREATE_LOGGERPTR_GLOBAL(logger_, "GrantAccessRequest")
 
 GrantAccessRequest::GrantAccessRequest(
-    const application_manager::MessagePtr& message)
+  const application_manager::MessagePtr& message)
   : BaseCommandRequest(message) {
 }
 
@@ -53,7 +53,7 @@ void GrantAccessRequest::Run() {
   LOG4CXX_INFO(logger_, "GrantAccessRequest::Run");
 
   application_manager::ApplicationSharedPtr app =
-      service_->GetApplication(message_->connection_key());
+    service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
     SendResponse(false, result_codes::kApplicationNotRegistered, "");
@@ -77,12 +77,12 @@ void GrantAccessRequest::Run() {
 }
 
 void GrantAccessRequest::on_event(
-                      const event_engine::Event<application_manager::MessagePtr,
-                      std::string>& event) {
+  const event_engine::Event<application_manager::MessagePtr,
+  std::string>& event) {
   LOG4CXX_INFO(logger_, "GrantAccessRequest::on_event");
 
   application_manager::ApplicationSharedPtr app =
-      service_->GetApplication(message_->connection_key());
+    service_->GetApplication(message_->connection_key());
   if (!app.valid()) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
     SendResponse(false, result_codes::kApplicationNotRegistered, "");
@@ -107,7 +107,7 @@ void GrantAccessRequest::on_event(
 
     SendResponse(success, result_code.c_str(), info);
   } else {
-    LOG4CXX_ERROR(logger_,"Received unknown event: " << event.id());
+    LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
     return;
   }
 }

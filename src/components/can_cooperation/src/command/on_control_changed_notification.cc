@@ -39,10 +39,10 @@ namespace can_cooperation {
 
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "OnControlChangedNotification");
+CREATE_LOGGERPTR_GLOBAL(logger_, "OnControlChangedNotification")
 
 OnControlChangedNotification::OnControlChangedNotification(
-    const application_manager::MessagePtr& message)
+  const application_manager::MessagePtr& message)
   : BaseCommandNotification(message) {
 }
 
@@ -54,7 +54,7 @@ void OnControlChangedNotification::Run() {
 
   CANAppExtensionPtr can_app_extension;
   application_manager::ApplicationSharedPtr app =
-      GetApplicationWithControl(can_app_extension);
+    GetApplicationWithControl(can_app_extension);
 
   if (app.valid()) {
     can_app_extension->GiveControl(false);

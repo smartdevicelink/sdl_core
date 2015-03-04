@@ -43,13 +43,13 @@
 
 namespace can_cooperation {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "CANTCPConnection");
+CREATE_LOGGERPTR_GLOBAL(logger_, "CANTCPConnection")
 
 CANTCPConnection::CANTCPConnection()
-: address_("127.0.0.1")
-, port_(8090)
-, socket_(-1)
-, current_state_(NONE) {
+  : address_("127.0.0.1")
+  , port_(8090)
+  , socket_(-1)
+  , current_state_(NONE) {
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
   if (-1 == socket_) {
     current_state_ = INVALID;
@@ -64,7 +64,7 @@ CANTCPConnection::CANTCPConnection()
     }
   }
   LOG4CXX_INFO(logger_, "Connecting to "
-        << address_ << " on port " << port_);
+               << address_ << " on port " << port_);
 }
 
 CANTCPConnection::~CANTCPConnection() {
@@ -81,8 +81,8 @@ ConnectionState CANTCPConnection::OpenConnection() {
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr(address_.c_str());
     server_addr.sin_port = htons(port_);
-    if (-1 == connect(socket_, (struct sockaddr *)&server_addr,
-              sizeof(server_addr))) {
+    if (-1 == connect(socket_, (struct sockaddr*)&server_addr,
+                      sizeof(server_addr))) {
       current_state_ = INVALID;
     } else {
       current_state_ = OPENED;
@@ -92,10 +92,11 @@ ConnectionState CANTCPConnection::OpenConnection() {
 }
 
 ConnectionState CANTCPConnection::CloseConnection() {
-  if (-1 == close(socket_))
+  if (-1 == close(socket_)) {
     current_state_ = INVALID;
-  else
+  } else {
     current_state_ = CLOSED;
+  }
   return current_state_;
 }
 

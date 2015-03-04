@@ -52,7 +52,7 @@ using event_engine::EventDispatcher;
 namespace hmi_api = functional_modules::hmi_api;
 
 EXPORT_FUNCTION_IMPL(CANModule);
-CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule");
+CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule")
 
 class TCPClientDelegate : public threads::ThreadDelegate {
  public:
@@ -78,7 +78,7 @@ TCPClientDelegate::~TCPClientDelegate() {
 
 void TCPClientDelegate::threadMain() {
   while (!stop_flag_) {
-    while (ConnectionState::OPENED == can_module_->can_connection_->GetData()) {
+    while (can_module_->can_connection_->GetData() == ConnectionState::OPENED) {
       can_module_->from_can_.PostMessage(
         CANConnectionSPtr::static_pointer_cast<CANTCPConnection>(
           can_module_->can_connection_)->ReadData());
@@ -98,7 +98,7 @@ CANModule::CANModule()
     from_mobile_("FromMobile To Can", this),
     thread_(NULL),
     is_scan_started_(false) {
-  if (ConnectionState::OPENED != can_connection_->OpenConnection()) {
+  if (can_connection_->OpenConnection() != ConnectionState::OPENED) {
     LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
   } else {
     thread_ = new threads::Thread("CANClientListener",
@@ -183,7 +183,7 @@ void CANModule::Handle(const std::string message) {
   CANConnectionSPtr::static_pointer_cast<CANTCPConnection>(can_connection_)
   ->WriteData(message);
 
-  if (ConnectionState::OPENED != can_connection_->Flash()) {
+  if (can_connection_->Flash() != ConnectionState::OPENED) {
     LOG4CXX_ERROR(logger_, "Failed to send message to CAN");
   }
 }
@@ -199,7 +199,7 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
 
   LOG4CXX_INFO(logger_, "Can message: " << json_string);
 
-  if (ProcessResult::PROCESSED != HandleMessage(msg)) {
+  if (HandleMessage(msg) != ProcessResult::PROCESSED) {
     LOG4CXX_ERROR(logger_, "Failed process CAN message!");
   }
 }

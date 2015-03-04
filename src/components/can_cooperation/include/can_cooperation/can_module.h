@@ -120,7 +120,7 @@ class CANModule : public functional_modules::GenericModule,
   friend class CanModuleTest;
 };
 
-EXPORT_FUNCTION(CANModule);
+EXPORT_FUNCTION(CANModule)
 
 }
 

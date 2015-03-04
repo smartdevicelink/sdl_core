@@ -45,7 +45,7 @@ using event_engine::EventDispatcher;
 
 using namespace json_keys;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "BaseCommandRequest");
+CREATE_LOGGERPTR_GLOBAL(logger_, "BaseCommandRequest")
 
 BaseCommandRequest::BaseCommandRequest(
   const application_manager::MessagePtr& message)
