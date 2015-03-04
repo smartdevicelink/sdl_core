@@ -60,11 +60,14 @@ using ::testing::Invoke;
 
 class ProtocolHandlerImplTest : public ::testing::Test {
  protected:
-  void IntitProtocolHandlerImpl(const size_t period_msec,
-                                const size_t max_messages) {
+  void IntitProtocolHandlerImpl(
+      const size_t period_msec, const size_t max_messages,
+      const size_t malformd_period_msec = 0u,
+      const size_t malformd_max_messages = 0u) {
     protocol_handler_impl.reset(
-        new ProtocolHandlerImpl(&transport_manager_mock, period_msec,
-                                max_messages));
+        new ProtocolHandlerImpl(&transport_manager_mock,
+                                period_msec, max_messages,
+                                malformd_period_msec, malformd_max_messages));
     protocol_handler_impl->set_session_observer(&session_observer_mock);
     tm_listener = protocol_handler_impl.get();
   }
@@ -192,10 +195,9 @@ TEST_F(ProtocolHandlerImplTest, RecieveEmptyRawMessage) {
 /*
  * ProtocolHandler shall disconnect on no connection
  */
-TEST_F(ProtocolHandlerImplTest, RecieveOnUnknownConenction) {
-  // expect malformed message callback call on no connection for received data
-  EXPECT_CALL(session_observer_mock,
-      OnMalformedMessageCallback(connection_id));
+TEST_F(ProtocolHandlerImplTest, RecieveOnUnknownConnection) {
+  EXPECT_CALL(transport_manager_mock, DisconnectForce(connection_id)).
+      WillOnce(Return(E_SUCCESS));
 
   SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF,
                 FRAME_TYPE_CONTROL, kRpc, FRAME_DATA_START_SERVICE,

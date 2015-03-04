@@ -132,11 +132,15 @@ class ProtocolHandlerImpl
    * \param message_frequency_time used as time for flood filtering
    * \param message_frequency_count used as maximum value of messages
    *        per message_frequency_time period
+   * \param malformed_message_frequency_time used as time for malformed flood filtering
+   * \param malformed_message_frequency_count used as maximum value of malformed
+   *        messages per message_frequency_time period
    * message exchange.
    */
-  explicit ProtocolHandlerImpl(
-      transport_manager::TransportManager *transport_manager_param,
-      size_t message_frequency_time, size_t message_frequency_count);
+  explicit ProtocolHandlerImpl(transport_manager::TransportManager *transport_manager_param,
+                               size_t message_frequency_time, size_t message_frequency_count,
+                               size_t malformed_message_frequency_time,
+                               size_t malformed_message_frequency_count);
 
   /**
    * \brief Destructor
@@ -459,6 +463,8 @@ class ProtocolHandlerImpl
 
   bool TrackMessage(const uint32_t& connection_key);
 
+  bool TrackMalformedMessage(const uint32_t& connection_key);
+
  private:
   /**
    *\brief Pointer on instance of class implementing IProtocolObserver
@@ -520,6 +526,9 @@ class ProtocolHandlerImpl
   // Use uint32_t as application identifier
   utils::MessageMeter<uint32_t> message_meter_;
   size_t message_max_frequency_;
+  // Use uint32_t as connection identifier
+  utils::MessageMeter<uint32_t> malformed_message_meter_;
+  size_t malformed_message_max_frequency_;
 
 #ifdef ENABLE_SECURITY
   security_manager::SecurityManager *security_manager_;

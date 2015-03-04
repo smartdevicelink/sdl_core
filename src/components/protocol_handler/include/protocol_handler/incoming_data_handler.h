@@ -60,9 +60,11 @@ class IncomingDataHandler {
    * \param result of convertion
    *   - RESULT_FAIL - packet serialization or validation error occurs
    *   - RESULT_OK - no error ocures
+   *   - RESULT_MALFORMED_OCCURS - on malformed message occurs
    * \return list of complete, correct packets
    */
-  std::list<ProtocolFramePtr> ProcessData(const RawMessage& tm_message, RESULT_CODE* result);
+  std::list<ProtocolFramePtr> ProcessData(const RawMessage& tm_message,
+                                          RESULT_CODE* result);
   /**
    * @brief Add connection for data handling and verification
    */
@@ -91,7 +93,8 @@ class IncomingDataHandler {
    */
   RESULT_CODE CreateFrame(std::vector<uint8_t>& incoming_data,
                           std::list<ProtocolFramePtr>& out_frames,
-                          const transport_manager::ConnectionUID connection_id);
+                          const transport_manager::ConnectionUID connection_id,
+                          bool *malformed_occurs);
 
   typedef std::map<transport_manager::ConnectionUID, std::vector<uint8_t> > ConnectionsDataMap;
   ConnectionsDataMap connections_data_;

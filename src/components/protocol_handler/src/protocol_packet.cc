@@ -410,7 +410,7 @@ void ProtocolPacket::set_total_data_bytes(size_t dataBytes) {
   if (dataBytes) {
     delete[] packet_data_.data;
     packet_data_.data = new (std::nothrow) uint8_t[dataBytes];
-    packet_data_.totalDataBytes = packet_data_.data ? dataBytes : 0;
+    packet_data_.totalDataBytes = packet_data_.data ? dataBytes : 0u;
   }
 }
 
@@ -424,7 +424,7 @@ void ProtocolPacket::set_data(
       memcpy(packet_data_.data, new_data, packet_data_.totalDataBytes);
     } else {
       // TODO(EZamakhov): add log info about memory problem
-      packet_header_.dataSize = packet_data_.totalDataBytes = 0;
+      packet_header_.dataSize = packet_data_.totalDataBytes = 0u;
     }
   }
 }

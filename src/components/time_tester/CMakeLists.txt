@@ -62,3 +62,4 @@ set (SOURCES
 
 add_library("TimeTester" ${SOURCES})
 target_link_libraries("TimeTester" ${LIBRARIES})
+add_dependencies("TimeTester" HMI_API MOBILE_API)

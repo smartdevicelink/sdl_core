@@ -221,8 +221,8 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Version) {
   }
   for (FrameList::iterator it = malformed_packets.begin(); it != malformed_packets.end(); ++it) {
     ProcessPacket(**it);
-    EXPECT_EQ(RESULT_FAIL, result_code)
-        << "Malformed vesion " << static_cast<int>((*it)->protocol_version());
+    EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code)
+        << "Malformed version " << static_cast<int>((*it)->protocol_version());
     // All malformed messages shall be ignored
     EXPECT_EQ(0u, actual_frames.size());
   }
@@ -249,7 +249,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_ServiceType) {
   }
   for (FrameList::iterator it = malformed_packets.begin(); it != malformed_packets.end(); ++it) {
     ProcessPacket(**it);
-    EXPECT_EQ(RESULT_FAIL, result_code)
+    EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code)
         << "Malformed service type " << static_cast<int>((*it)->service_type());
     // All malformed messages shall be ignored
     EXPECT_EQ(0u, actual_frames.size());
@@ -272,7 +272,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_FrameType) {
   }
   for (FrameList::iterator it = malformed_packets.begin(); it != malformed_packets.end(); ++it) {
     ProcessPacket(**it);
-    EXPECT_EQ(RESULT_FAIL, result_code)
+    EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code)
         << "Malformed frame type " << static_cast<int>((*it)->service_type());
     // All malformed messages shall be ignored
     EXPECT_EQ(0u, actual_frames.size());
@@ -295,7 +295,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_ControlFrame) {
   }
   for (FrameList::iterator it = malformed_packets.begin(); it != malformed_packets.end(); ++it) {
     ProcessPacket(**it);
-    EXPECT_EQ(RESULT_FAIL, result_code)
+    EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code)
         << "Malformed Control frame with data " << static_cast<int>((*it)->frame_data());
     // All malformed messages shall be ignored
     EXPECT_EQ(0u, actual_frames.size());
@@ -318,7 +318,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_SingleFrame) {
   }
   for (FrameList::iterator it = malformed_packets.begin(); it != malformed_packets.end(); ++it) {
     ProcessPacket(**it);
-    EXPECT_EQ(RESULT_FAIL, result_code)
+    EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code)
         << "Malformed Single frame with data " << static_cast<int>((*it)->frame_data());
     // All malformed messages shall be ignored
     EXPECT_EQ(0u, actual_frames.size());
@@ -342,7 +342,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_FirstFrame) {
   }
   for (FrameList::iterator it = malformed_packets.begin(); it != malformed_packets.end(); ++it) {
     ProcessPacket(**it);
-    EXPECT_EQ(RESULT_FAIL, result_code)
+    EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code)
         << "Malformed First frame with data " << static_cast<int>((*it)->frame_data());
     // All malformed messages shall be ignored
     EXPECT_EQ(0u, actual_frames.size());

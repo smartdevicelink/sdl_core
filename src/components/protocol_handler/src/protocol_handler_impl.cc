@@ -64,7 +64,8 @@ const size_t kStackSize = 32768;
 
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     transport_manager::TransportManager *transport_manager_param,
-    size_t message_frequency_time, size_t message_frequency_count)
+    size_t message_frequency_time, size_t message_frequency_count,
+    size_t malformed_message_frequency_time, size_t malformed_message_frequency_count)
     : protocol_observers_(),
       session_observer_(0),
       transport_manager_(transport_manager_param),
@@ -98,6 +99,21 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
     }
   } else {
     LOG4CXX_WARN(logger_, "Frequency meter is disabled");
+  }
+  const size_t malformed_time_range_msecs = malformed_message_frequency_time;
+  malformed_message_meter_.set_time_range(malformed_time_range_msecs);
+  if (malformed_time_range_msecs > 0) {
+    malformed_message_max_frequency_ = malformed_message_frequency_count;
+    if (malformed_message_max_frequency_ > 0) {
+      LOG4CXX_DEBUG(logger_, "Malformed frequency meter is enabled ( " << message_max_frequency_
+                    << " per " << malformed_time_range_msecs << " mSecond)");
+    } else {
+      LOG4CXX_WARN(logger_, "Invalid malformed massage frequency value."
+                   <<" MalformedMessageMeter will be disabled");
+      malformed_message_meter_.set_time_range(0u);
+    }
+  } else {
+    LOG4CXX_WARN(logger_, "Malformed frequency meter is disabled");
   }
 }
 
@@ -422,12 +438,12 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   RESULT_CODE result;
   const std::list<ProtocolFramePtr> protocol_frames =
       incoming_data_handler_.ProcessData(*tm_message, &result);
-  if (result == RESULT_FAIL) {
-    LOG4CXX_ERROR(logger_,
-                  "Incoming data processing failed. Terminating connection.");
-    if (session_observer_) {
-      session_observer_->OnMalformedMessageCallback(tm_message->connection_key());
+  if (result != RESULT_OK) {
+    if (result == RESULT_MALFORMED_OCCURS) {
+      LOG4CXX_WARN(logger_, "Malformed message occurs.");
+      TrackMalformedMessage(tm_message->connection_key());
     } else {
+      LOG4CXX_ERROR(logger_, "Incoming data processing failed.");
       transport_manager_->DisconnectForce(tm_message->connection_key());
     }
   }
@@ -537,6 +553,7 @@ void ProtocolHandlerImpl::OnConnectionClosed(
     const transport_manager::ConnectionUID &connection_id) {
   incoming_data_handler_.RemoveConnection(connection_id);
   message_meter_.ClearIdentifiers();
+  malformed_message_meter_.ClearIdentifiers();
 }
 
 RESULT_CODE ProtocolHandlerImpl::SendFrame(const ProtocolFramePtr packet) {
@@ -1073,8 +1090,26 @@ bool ProtocolHandlerImpl::TrackMessage(const uint32_t& connection_key) {
   LOG4CXX_DEBUG(logger_, "Frequency of " << connection_key << " is " << message_frequency);
   if (message_frequency > message_max_frequency_) {
     LOG4CXX_WARN(logger_, "Frequency of " << connection_key << " is marked as high.");
-    session_observer_->OnApplicationFloodCallBack(connection_key);
+    if (session_observer_) {
+      session_observer_->OnApplicationFloodCallBack(connection_key);
+    }
     message_meter_.RemoveIdentifier(connection_key);
+    return true;
+  }
+  return false;
+}
+
+bool ProtocolHandlerImpl::TrackMalformedMessage(const uint32_t &connection_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  const size_t message_frequency = malformed_message_meter_.TrackMessage(connection_key);
+  LOG4CXX_DEBUG(logger_, "Malformed frequency of " << connection_key
+                << " is " << message_frequency);
+  if (message_frequency > malformed_message_max_frequency_) {
+    LOG4CXX_WARN(logger_, "Malformed frequency of " << connection_key << " is marked as high.");
+    if (session_observer_) {
+      session_observer_->OnMalformedMessageCallback(connection_key);
+    }
+    malformed_message_meter_.RemoveIdentifier(connection_key);
     return true;
   }
   return false;
