@@ -44,7 +44,6 @@ endif()
 
 set(SOURCES
     media_manager_impl_test.cc
-    main.cc
 )
 
 set(LIBRARIES

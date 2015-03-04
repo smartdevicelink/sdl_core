@@ -307,7 +307,7 @@ endmacro(GenerateInterface)
 
 # --- Useful macro
 macro(create_test NAME SOURCES LIBS)
-  add_executable("${NAME}" ${SOURCES})
+  add_executable("${NAME}" ${CMAKE_SOURCE_DIR}/src/components/test_main.cc ${SOURCES})
   target_link_libraries("${NAME}" ${LIBS})
   target_link_libraries("${NAME}" Utils)
   if(CMAKE_SYSTEM_NAME STREQUAL "QNX")

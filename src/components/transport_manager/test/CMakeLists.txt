@@ -67,7 +67,6 @@ endif()
 
 
 set(SOURCES
-  ${COMPONENTS_DIR}/transport_manager/test/main.cc
   ${COMPONENTS_DIR}/transport_manager/test/mock_application.cc
   ${COMPONENTS_DIR}/transport_manager/test/transport_manager_test.cc
   ${COMPONENTS_DIR}/transport_manager/test/mock_connection_factory.cc
