@@ -42,8 +42,6 @@ class CanModuleTest : public ::testing::Test {
   }
 
   static void TearDownTestCase() {
-    const ConnectionState kRet = ConnectionState::CLOSED;
-    EXPECT_CALL(*mock_conn, CloseConnection()).Times(1).WillOnce(Return(kRet));
     std::set<application_manager::ApplicationSharedPtr> apps;
     EXPECT_CALL(*mock_service, GetApplications()).Times(1).WillOnce(Return(apps));
     CANModule::destroy();
@@ -63,8 +61,8 @@ TEST_F(CanModuleTest, Create) {
 
 TEST_F(CanModuleTest, ProcessMessageWrongMessage) {
   application_manager::MessagePtr message = new application_manager::Message(
-      protocol_handler::MessagePriority::FromServiceType(
-          protocol_handler::ServiceType::kRpc));
+    protocol_handler::MessagePriority::FromServiceType(
+      protocol_handler::ServiceType::kRpc));
   message->set_function_id(-1);
   EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(0);
   EXPECT_EQ(ProcessResult::CANNOT_PROCESS, module->ProcessMessage(message));
@@ -72,8 +70,8 @@ TEST_F(CanModuleTest, ProcessMessageWrongMessage) {
 
 TEST_F(CanModuleTest, ProcessMessageEmptyAppsList) {
   application_manager::MessagePtr message = new application_manager::Message(
-      protocol_handler::MessagePriority::FromServiceType(
-          protocol_handler::ServiceType::kRpc));
+    protocol_handler::MessagePriority::FromServiceType(
+      protocol_handler::ServiceType::kRpc));
   message->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);
 
   std::set<application_manager::ApplicationSharedPtr> apps;
@@ -84,8 +82,8 @@ TEST_F(CanModuleTest, ProcessMessageEmptyAppsList) {
 
 TEST_F(CanModuleTest, ProcessMessagePass) {
   application_manager::MessagePtr message = new application_manager::Message(
-      protocol_handler::MessagePriority::FromServiceType(
-          protocol_handler::ServiceType::kRpc));
+    protocol_handler::MessagePriority::FromServiceType(
+      protocol_handler::ServiceType::kRpc));
   message->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);
 
   std::set<application_manager::ApplicationSharedPtr> apps;
@@ -113,7 +111,7 @@ TEST_F(CanModuleTest, RemoveAppExtensionPassWay) {
   const application_manager::ApplicationId kAppId = 1;
 
   EXPECT_CALL(*mock_service, GetApplication(kAppId)).Times(1).WillOnce(
-      Return(valid_app));
+    Return(valid_app));
   EXPECT_CALL(*app, RemoveExtension(kUid)).Times(1);
 
   module->RemoveAppExtension(kAppId);
@@ -124,7 +122,7 @@ TEST_F(CanModuleTest, RemoveAppExtensionIfAppNoExist) {
   const application_manager::ApplicationId kAppId = 1;
 
   EXPECT_CALL(*mock_service, GetApplication(kAppId)).Times(1).WillOnce(
-      Return(invalid_app));
+    Return(invalid_app));
 
   module->RemoveAppExtension(kAppId);
 }
@@ -137,7 +135,7 @@ TEST_F(CanModuleTest, RemoveAppExtensionIfExtNoExist) {
   const application_manager::ApplicationId kAppId = 1;
 
   EXPECT_CALL(*mock_service, GetApplication(kAppId)).Times(1).WillOnce(
-      Return(valid_app));
+    Return(valid_app));
   EXPECT_CALL(*app, RemoveExtension(kUid)).Times(1);
 
   module->RemoveAppExtension(kAppId);
@@ -145,21 +143,21 @@ TEST_F(CanModuleTest, RemoveAppExtensionIfExtNoExist) {
 
 TEST_F(CanModuleTest, SendResponseToMobile) {
   application_manager::MessagePtr message = new application_manager::Message(
-      protocol_handler::MessagePriority::FromServiceType(
-          protocol_handler::ServiceType::kRpc));
+    protocol_handler::MessagePriority::FromServiceType(
+      protocol_handler::ServiceType::kRpc));
 
   EXPECT_CALL(*mock_service, SendMessageToMobile(message)).Times(1);
 
   module->SendResponseToMobile(message);
 }
 
-TEST_F(CanModuleTest, DISABLED_HandleMessage) {
+/*TEST_F(CanModuleTest, DISABLED_HandleMessage) {
   std::string kMessage = "Message to handle";
   const ConnectionState kRet = ConnectionState::INVALID;
 
   EXPECT_CALL(*mock_conn, Flash()).Times(1).WillOnce(Return(kRet));
 
   module->Handle(kMessage);
-}
+}*/
 
 }  // namespace can_cooperation

@@ -38,21 +38,25 @@
 #include "can_cooperation/request_controller.h"
 #include "utils/threads/message_loop_thread.h"
 
-namespace threads {
-class Thread;
-}
 
 namespace can_cooperation {
+struct MessageFromCAN : public std::string {
+  explicit MessageFromCAN(const std::string& other): std::string(other) {}
+};
+
 class CANModule : public functional_modules::GenericModule,
-  public utils::Singleton<CANModule>, public threads::MessageLoopThread <
-  std::queue<MessageFromCAN >>::Handler, public threads::MessageLoopThread <
-                            std::queue<std::string >>::Handler {
+  public utils::Singleton<CANModule>,
+  public CANConnectionObserver,
+  public threads::MessageLoopThread <std::queue<MessageFromCAN >>::Handler,
+      public threads::MessageLoopThread <std::queue<std::string >>::Handler {
  public:
   functional_modules::PluginInfo GetPluginInfo() const;
   virtual functional_modules::ProcessResult ProcessMessage(
     application_manager::MessagePtr msg);
   virtual functional_modules::ProcessResult ProcessHMIMessage(
     application_manager::MessagePtr msg);
+  void OnCANMessageReceived(const CANMessage& message);
+  void OnCANConnectionError(ConnectionState state);
   void Handle(const std::string message);
   void Handle(const MessageFromCAN message);
 
@@ -112,16 +116,13 @@ class CANModule : public functional_modules::GenericModule,
   functional_modules::PluginInfo plugin_info_;
   threads::MessageLoopThread<std::queue<MessageFromCAN>> from_can_;
   threads::MessageLoopThread<std::queue<std::string>> from_mobile_;
-  threads::Thread* thread_;
   bool is_scan_started_;
   request_controller::RequestController request_controller_;
-  friend class TCPClientDelegate;
 
   friend class CanModuleTest;
 };
 
 EXPORT_FUNCTION(CANModule);
-
 }
 
 #endif  //  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_

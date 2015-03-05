@@ -38,7 +38,7 @@
 
 namespace can_cooperation {
 
-typedef Json::Value MessageFromCAN;
+typedef std::string CANMessage;
 
 enum ConnectionState {
   NONE = -1,
@@ -47,14 +47,26 @@ enum ConnectionState {
   INVALID
 };
 
+class CANConnectionObserver {
+ public:
+  virtual void OnCANMessageReceived(const CANMessage& message) = 0;
+  virtual void OnCANConnectionError(ConnectionState state) = 0;
+};
+
 class CANConnection {
  public:
   virtual ~CANConnection() {
+    observer_ = NULL;
   }
-  virtual ConnectionState OpenConnection() = 0;
-  virtual ConnectionState CloseConnection() = 0;
-  virtual ConnectionState Flash() = 0;
-  virtual ConnectionState GetData() = 0;
+  virtual ConnectionState SendMessage(const CANMessage& message) = 0;
+  virtual void set_observer(CANConnectionObserver* observer) {
+    DCHECK(observer);
+    observer_ = observer;
+  }
+ protected:
+  CANConnection(): observer_(NULL) {}
+  virtual ConnectionState ReadMessage(CANMessage* message) = 0;
+  CANConnectionObserver* observer_;
 };
 
 typedef utils::SharedPtr<CANConnection> CANConnectionSPtr;

@@ -38,14 +38,10 @@ namespace can_cooperation {
 
 class MockCANConnection : public CANConnection {
  public:
-  MOCK_METHOD0(OpenConnection,
-      ConnectionState());
-  MOCK_METHOD0(CloseConnection,
-      ConnectionState());
-  MOCK_METHOD0(Flash,
-      ConnectionState());
-  MOCK_METHOD0(GetData,
-      ConnectionState());
+  MOCK_METHOD1(SendMessage,
+               ConnectionState(const CANMessage& message));
+  MOCK_METHOD1(ReadMessage,
+               ConnectionState(CANMessage* message));
 };
 
 }  // namespace can_cooperation

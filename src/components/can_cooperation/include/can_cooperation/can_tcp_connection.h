@@ -37,25 +37,30 @@
 #include <deque>
 #include "can_cooperation/can_connection.h"
 
+namespace threads {
+class Thread;
+}
+
 namespace can_cooperation {
 
 class CANTCPConnection : public CANConnection {
  public:
   CANTCPConnection();
   ~CANTCPConnection();
+  ConnectionState SendMessage(const CANMessage& message);
+  ConnectionState ReadMessage(CANMessage* message);
+ private:
   ConnectionState OpenConnection();
   ConnectionState CloseConnection();
   ConnectionState Flash();
-  ConnectionState GetData();
-  void WriteData(const std::string& message);
-  MessageFromCAN ReadData();
- private:
   std::deque<std::string> to_send_;
-  std::deque<std::string> received_;
   std::string address_;
   int port_;
   int socket_;
   ConnectionState current_state_;
+  threads::Thread* thread_;
+
+  friend class TCPClientDelegate;
 };
 }  //  namespace can_cooperation
 
