@@ -186,7 +186,7 @@ TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
   // consecutive packet Bulk
   mobile_packets.push_back(
         new ProtocolPacket(
-          uid1, PROTOCOL_VERSION_3, PROTECTION_ON, FRAME_TYPE_CONSECUTIVE,
+          uid1, PROTOCOL_VERSION_4, PROTECTION_ON, FRAME_TYPE_CONSECUTIVE,
           kBulk, FRAME_DATA_LAST_CONSECUTIVE, ++some_session_id, some_data2_size,
           ++some_message_id, some_data2));
   for (FrameList::iterator it = mobile_packets.begin(); it != mobile_packets.end(); ++it) {
@@ -400,6 +400,18 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
           kRpc, FRAME_DATA_HEART_BEAT, some_session_id, some_data_size,
           protov1_message_id, some_data));
   AppendPacketToTMData(*mobile_packets.back());
+  // Add malformed bytes
+  tm_data.insert(tm_data.end(), 5, 0x5);
+
+  // single packet Audio
+  mobile_packets.push_back(
+        new ProtocolPacket(
+          uid1, PROTOCOL_VERSION_1, PROTECTION_OFF, FRAME_TYPE_CONTROL,
+          kAudio, FRAME_DATA_HEART_BEAT, some_session_id, some_data_size,
+          protov1_message_id, some_data));
+  AppendPacketToTMData(*mobile_packets.back());
+  // Add malformed bytes
+  tm_data.insert(tm_data.end(), 6, 0x6);
 
   ProcessData(uid1, &tm_data[0], tm_data.size());
   EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code);
@@ -413,7 +425,70 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
   }
 }
 
-// TODO(EZamakhov): add correctness on handling 2+ connection data
+// For Single and First frames Frame info value shall be equal 0x00
+TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
+  FrameList mobile_packets;
+  // single packet RPC
+  mobile_packets.push_back(
+        new ProtocolPacket(
+          uid1, PROTOCOL_VERSION_1, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+          kRpc, FRAME_DATA_SINGLE, some_session_id, some_data_size,
+          protov1_message_id, some_data));
+  AppendPacketToTMData(*mobile_packets.back());
+
+  // consecutive packet Audio
+  mobile_packets.push_back(
+        new ProtocolPacket(
+          uid1, PROTOCOL_VERSION_2, PROTECTION_ON, FRAME_TYPE_CONSECUTIVE,
+          kAudio, FRAME_DATA_LAST_CONSECUTIVE, ++some_session_id, some_data2_size,
+          some_message_id, some_data2));
+  AppendPacketToTMData(*mobile_packets.back());
+
+  // Malformed packet
+  const uint8_t malformed_version = 5;
+  const ProtocolPacket malformed_packet1(
+          uid1, malformed_version, PROTECTION_ON, FRAME_TYPE_SINGLE,
+          kMobileNav, FRAME_DATA_SINGLE, ++some_session_id, some_data_size,
+          ++some_message_id, some_data);
+  AppendPacketToTMData(malformed_packet1);
+
+  // consecutive packet Bulk
+  mobile_packets.push_back(
+        new ProtocolPacket(
+          uid1, PROTOCOL_VERSION_3, PROTECTION_ON, FRAME_TYPE_CONSECUTIVE,
+          kBulk, FRAME_DATA_LAST_CONSECUTIVE, ++some_session_id, some_data2_size,
+          ++some_message_id, some_data2));
+  AppendPacketToTMData(*mobile_packets.back());
+
+  // Malformed packet
+  const uint8_t malformed_type = FRAME_TYPE_MAX_VALUE - 1;
+  ProtocolPacket malformed_packet2(
+          uid1, PROTOCOL_VERSION_4, PROTECTION_OFF, malformed_type,
+          kRpc, FRAME_DATA_HEART_BEAT, some_session_id, some_data_size,
+          protov1_message_id, some_data);
+  AppendPacketToTMData(malformed_packet2);
+
+  // Corrupted audio packet
+  mobile_packets.push_back(
+        new ProtocolPacket(
+          uid1, PROTOCOL_VERSION_4, PROTECTION_OFF, FRAME_TYPE_CONTROL,
+          kAudio, FRAME_DATA_HEART_BEAT, some_session_id, some_data_size,
+          protov1_message_id, some_data));
+  AppendPacketToTMData(*mobile_packets.back());
+
+  ProcessData(uid1, &tm_data[0], tm_data.size());
+  EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code);
+  EXPECT_EQ(mobile_packets.size(), actual_frames.size());
+  FrameList::iterator it_exp = mobile_packets.begin();
+  for (FrameList::const_iterator it = actual_frames.begin(); it != actual_frames.end();
+       ++it, ++it_exp) {
+    // TODO(EZamakhov): investigate valgrind warning (unitialized value)
+    EXPECT_EQ(**it, **it_exp)
+        << "Element number " << std::distance(mobile_packets.begin(), it_exp);
+  }
+}
+
+// TODO(EZamakhov): add tests for handling 2+ connection data
 
 }  // namespace protocol_handler_test
 }  // namespace components
