@@ -4,6 +4,12 @@ SmartDeviceLink is a way to connect applications on a smart phone to a vehicle s
 
 Pull Requests Welcome!
 
+## Documentation
+
+  * [Software Architecture Document](https://app.box.com/s/v5ymu5kathzkwfx8iigxxdpr7d5a2xhh)
+  * [Transport Manager Programming Guide](https://app.box.com/s/1pjquttvmhf19uujtw4x4fv4t1leqasa)
+  * [Software Detailed Design](https://app.box.com/s/ohgrvemtx39f8hfea1ab676xxrzvyx1y)
+
 ## SDL Core
 
 The Core component of SDL is meant to run on a vehicle's computing system. It connects to a consumer's smartphone over a variety of transports such as Bluetooth, USB, Android AOA, and TCP. Transport adapters can be written to extend the capabilities of Core's transport manager. Once a smartphone is connected over a preferred transport applications on the mobile phone that implement the mobile libraries can begin to communicate with the vehicle. First, the Core component queries the phone to understand which applications are compatible. The user interface shows the list of compatible applications to the driver. When the user selects an application, it is sent an HMI_STATUS level of FULL (all applications start with a BACKGROUND status). Once an application has the FULL status, it is allowed to populate a template, defined by the vehicle manufacturer, with content such as metadata, artwork, buttons and even supported grammars for voice commands (voice recognition engine not included).
