@@ -194,12 +194,13 @@ TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
   }
   ProcessData(uid1, &tm_data[0], tm_data.size());
   EXPECT_EQ(RESULT_OK, result_code);
-  EXPECT_EQ(actual_frames.size(), mobile_packets.size());
-  FrameList::const_iterator it2 = mobile_packets.begin();
+  EXPECT_EQ(mobile_packets.size(), actual_frames.size());
+  FrameList::iterator it_exp = mobile_packets.begin();
   for (FrameList::const_iterator it = actual_frames.begin(); it != actual_frames.end();
-       ++it, ++it2) {
+       ++it, ++it_exp) {
     // TODO(EZamakhov): investigate valgrind warning (unitialized value)
-    EXPECT_EQ(**it, **it2);
+    EXPECT_EQ(**it, **it_exp)
+        << "Element number " << std::distance(mobile_packets.begin(), it_exp);
   }
 }
 
@@ -346,6 +347,69 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_FirstFrame) {
         << "Malformed First frame with data " << static_cast<int>((*it)->frame_data());
     // All malformed messages shall be ignored
     EXPECT_EQ(0u, actual_frames.size());
+  }
+}
+
+// For Single and First frames Frame info value shall be equal 0x00
+TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
+  FrameList mobile_packets;
+  // single packet RPC
+  mobile_packets.push_back(
+        new ProtocolPacket(
+          uid1, PROTOCOL_VERSION_1, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+          kRpc, FRAME_DATA_SINGLE, some_session_id, some_data_size,
+          protov1_message_id, some_data));
+  AppendPacketToTMData(*mobile_packets.back());
+  // Add malformed byte
+  tm_data.insert(tm_data.end(), 1, 0x1);
+
+  // consecutive packet Audio
+  mobile_packets.push_back(
+        new ProtocolPacket(
+          uid1, PROTOCOL_VERSION_2, PROTECTION_ON, FRAME_TYPE_CONSECUTIVE,
+          kAudio, FRAME_DATA_LAST_CONSECUTIVE, ++some_session_id, some_data2_size,
+          some_message_id, some_data2));
+  AppendPacketToTMData(*mobile_packets.back());
+  // Add malformed bytes
+  tm_data.insert(tm_data.end(), 2, 0x2);
+
+  // single packet Nav
+  mobile_packets.push_back(
+        new ProtocolPacket(
+          uid1, PROTOCOL_VERSION_3, PROTECTION_ON, FRAME_TYPE_SINGLE,
+          kMobileNav, FRAME_DATA_SINGLE, ++some_session_id, some_data_size,
+          ++some_message_id, some_data));
+  AppendPacketToTMData(*mobile_packets.back());
+  // Add malformed bytes
+  tm_data.insert(tm_data.end(), 3, 0x3);
+
+  // consecutive packet Bulk
+  mobile_packets.push_back(
+        new ProtocolPacket(
+          uid1, PROTOCOL_VERSION_3, PROTECTION_ON, FRAME_TYPE_CONSECUTIVE,
+          kBulk, FRAME_DATA_LAST_CONSECUTIVE, ++some_session_id, some_data2_size,
+          ++some_message_id, some_data2));
+  AppendPacketToTMData(*mobile_packets.back());
+  // Add malformed bytes
+  tm_data.insert(tm_data.end(), 4, 0x4);
+
+  // single packet RPC
+  mobile_packets.push_back(
+        new ProtocolPacket(
+          uid1, PROTOCOL_VERSION_1, PROTECTION_OFF, FRAME_TYPE_CONTROL,
+          kRpc, FRAME_DATA_HEART_BEAT, some_session_id, some_data_size,
+          protov1_message_id, some_data));
+  AppendPacketToTMData(*mobile_packets.back());
+
+  ProcessData(uid1, &tm_data[0], tm_data.size());
+  EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code);
+  EXPECT_EQ(mobile_packets.size(), actual_frames.size());
+  FrameList::iterator it_exp = mobile_packets.begin();
+  for (FrameList::const_iterator it = actual_frames.begin(); it != actual_frames.end();
+       ++it, ++it_exp) {
+    // TODO(EZamakhov): investigate valgrind warning (unitialized value)
+    EXPECT_EQ(**it, **it_exp)
+        << "Element number " << std::distance(mobile_packets.begin(), it_exp);
   }
 }
 

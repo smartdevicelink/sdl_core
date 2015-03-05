@@ -60,7 +60,7 @@ using ::testing::Invoke;
 
 class ProtocolHandlerImplTest : public ::testing::Test {
  protected:
-  void IntitProtocolHandlerImpl(
+  void IntiProtocolHandlerImpl(
       const size_t period_msec, const size_t max_messages,
       const size_t malformd_period_msec = 0u,
       const size_t malformd_max_messages = 0u) {
@@ -72,7 +72,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     tm_listener = protocol_handler_impl.get();
   }
   void SetUp() OVERRIDE {
-    IntitProtocolHandlerImpl(0u, 0u);
+    IntiProtocolHandlerImpl(0u, 0u);
     connection_id = 0xAu;
     session_id = 0xFFu;
     connection_key = 0xFF00AAu;
@@ -677,7 +677,7 @@ TEST_F(ProtocolHandlerImplTest,
     FloodVerification) {
   const size_t period_msec = 1000;
   const size_t max_messages = 1000;
-  IntitProtocolHandlerImpl(period_msec, max_messages);
+  IntiProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -696,7 +696,7 @@ TEST_F(ProtocolHandlerImplTest,
     FloodVerification_ThresholdValue) {
   const size_t period_msec = 1000;
   const size_t max_messages = 1000;
-  IntitProtocolHandlerImpl(period_msec, max_messages);
+  IntiProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -711,7 +711,7 @@ TEST_F(ProtocolHandlerImplTest,
     FloodVerification_VideoFrameSkip) {
   const size_t period_msec = 1000;
   const size_t max_messages = 1000;
-  IntitProtocolHandlerImpl(period_msec, max_messages);
+  IntiProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -726,7 +726,7 @@ TEST_F(ProtocolHandlerImplTest,
     FloodVerification_AudioFrameSkip) {
   const size_t period_msec = 1000;
   const size_t max_messages = 1000;
-  IntitProtocolHandlerImpl(period_msec, max_messages);
+  IntiProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -741,7 +741,7 @@ TEST_F(ProtocolHandlerImplTest,
     FloodVerificationDisable) {
   const size_t period_msec = 0;
   const size_t max_messages = 0;
-  IntitProtocolHandlerImpl(period_msec, max_messages);
+  IntiProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 

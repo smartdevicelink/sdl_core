@@ -122,7 +122,6 @@ RESULT_CODE IncomingDataHandler::CreateFrame(std::vector<uint8_t>& incoming_data
   DCHECK(malformed_occurs);
   *malformed_occurs = false;
   std::vector<uint8_t>::iterator data_it = incoming_data.begin();
-//  uint8_t* data = &incoming_data[0];
   size_t data_size = incoming_data.size();
   while (data_size >= MIN_HEADER_SIZE) {
     header_.deserialize(&*data_it, data_size);
@@ -136,7 +135,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(std::vector<uint8_t>& incoming_data
       --data_size;
       LOG4CXX_DEBUG(logger_, "Moved to the next byte " << std::hex
                     << static_cast<const void *>(&*data_it));
-      return RESULT_MALFORMED_OCCURS;
+      continue;
     }
     LOG4CXX_DEBUG(logger_, "Payload size " << header_.dataSize);
     const uint32_t packet_size = GetPacketSize(header_);
@@ -150,6 +149,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(std::vector<uint8_t>& incoming_data
     }
     if (data_size < packet_size) {
       LOG4CXX_DEBUG(logger_, "Packet data is not available yet");
+      incoming_data.erase(incoming_data.begin(), data_it);
       return RESULT_DEFERRED;
     }
     ProtocolFramePtr frame(new protocol_handler::ProtocolPacket(connection_id));
@@ -157,15 +157,15 @@ RESULT_CODE IncomingDataHandler::CreateFrame(std::vector<uint8_t>& incoming_data
         frame->deserializePacket(&*data_it, packet_size);
     if (deserialize_result != RESULT_OK) {
       LOG4CXX_WARN(logger_, "Packet deserialization failed");
+      incoming_data.erase(incoming_data.begin(), data_it);
       return RESULT_FAIL;
     }
     out_frames.push_back(frame);
 
-    incoming_data.erase(data_it, data_it + packet_size);
-//    data = &incoming_data[0];
-    data_it = incoming_data.begin();
-    data_size = incoming_data.size();
+    data_it += packet_size;
+    data_size -= packet_size;
   }
+  incoming_data.erase(incoming_data.begin(), data_it);
   return RESULT_OK;
 }
 }  // namespace protocol_handler
