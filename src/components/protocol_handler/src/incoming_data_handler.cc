@@ -86,9 +86,9 @@ std::list<ProtocolFramePtr> IncomingDataHandler::ProcessData(
   } else {
     if (RESULT_DEFERRED == *result) {
       LOG4CXX_DEBUG(logger_,
-                    "No packets has been created. Waiting next portion of data.");
+                    "No packets have been created. Waiting next portion of data.");
     } else {
-      LOG4CXX_WARN(logger_, "No packets has been created.");
+      LOG4CXX_WARN(logger_, "No packets have been created.");
     }
   }
   if (malformed_occurs) {

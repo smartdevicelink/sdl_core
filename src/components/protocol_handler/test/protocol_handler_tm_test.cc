@@ -77,7 +77,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     session_id = 0xFFu;
     connection_key = 0xFF00AAu;
     message_id = 0xABCDEFu;
-    some_date.resize(256, 0xAB);
+    some_data.resize(256, 0xAB);
 
     // expect ConnectionHandler support methods call (conversion, check heartbeat)
     EXPECT_CALL(session_observer_mock,
@@ -162,7 +162,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
   // uniq id as connection_id and session_id in one
   uint32_t connection_key;
   uint32_t message_id;
-  std::vector<uint8_t> some_date;
+  std::vector<uint8_t> some_data;
   // Strict mocks (same as all methods EXPECT_CALL().Times(0))
   testing::StrictMock<protocol_handler_test::TransportManagerMock> transport_manager_mock;
   testing::StrictMock<protocol_handler_test::SessionObserverMock> session_observer_mock;
@@ -691,7 +691,7 @@ TEST_F(ProtocolHandlerImplTest,
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kControl, FRAME_DATA_SINGLE, session_id,
-        some_date.size(), message_id, &some_date[0]);
+        some_data.size(), message_id, &some_data[0]);
   }
 }
 TEST_F(ProtocolHandlerImplTest,
@@ -706,7 +706,7 @@ TEST_F(ProtocolHandlerImplTest,
   for (size_t i = 0; i < max_messages - 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kControl, FRAME_DATA_SINGLE, session_id,
-        some_date.size(), message_id, &some_date[0]);
+        some_data.size(), message_id, &some_data[0]);
   }
 }
 TEST_F(ProtocolHandlerImplTest,
@@ -721,7 +721,7 @@ TEST_F(ProtocolHandlerImplTest,
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kMobileNav, FRAME_DATA_SINGLE, session_id,
-        some_date.size(), message_id, &some_date[0]);
+        some_data.size(), message_id, &some_data[0]);
   }
 }
 TEST_F(ProtocolHandlerImplTest,
@@ -736,7 +736,7 @@ TEST_F(ProtocolHandlerImplTest,
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kAudio, FRAME_DATA_SINGLE, session_id,
-        some_date.size(), message_id, &some_date[0]);
+        some_data.size(), message_id, &some_data[0]);
   }
 }
 TEST_F(ProtocolHandlerImplTest,
@@ -751,7 +751,7 @@ TEST_F(ProtocolHandlerImplTest,
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id, PROTOCOL_VERSION_3, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kControl, FRAME_DATA_SINGLE, session_id,
-        some_date.size(), message_id, &some_date[0]);
+        some_data.size(), message_id, &some_data[0]);
   }
 }
 
@@ -773,7 +773,7 @@ TEST_F(ProtocolHandlerImplTest,
   for (size_t i = 0; i < max_messages * 2; ++i) {
     SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kControl, FRAME_DATA_SINGLE, session_id,
-        some_date.size(), message_id, &some_date[0]);
+        some_data.size(), message_id, &some_data[0]);
   }
 }
 
@@ -795,7 +795,7 @@ TEST_F(ProtocolHandlerImplTest,
   for (size_t i = 0; i < max_messages + 1; ++i) {
     SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
                   kControl, FRAME_DATA_SINGLE, session_id,
-                  some_date.size(), message_id, &some_date[0]);
+                  some_data.size(), message_id, &some_data[0]);
   }
 }
 
