@@ -445,7 +445,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
   AppendPacketToTMData(*mobile_packets.back());
 
   // Malformed packet
-  const uint8_t malformed_version = 5;
+  const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
   const ProtocolPacket malformed_packet1(
           uid1, malformed_version, PROTECTION_ON, FRAME_TYPE_SINGLE,
           kMobileNav, FRAME_DATA_SINGLE, ++some_session_id, some_data_size,
@@ -461,7 +461,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
   AppendPacketToTMData(*mobile_packets.back());
 
   // Malformed packet
-  const uint8_t malformed_type = FRAME_TYPE_MAX_VALUE - 1;
+  const uint8_t malformed_type = FRAME_TYPE_MAX_VALUE;
   ProtocolPacket malformed_packet2(
           uid1, PROTOCOL_VERSION_4, PROTECTION_OFF, malformed_type,
           kRpc, FRAME_DATA_HEART_BEAT, some_session_id, some_data_size,

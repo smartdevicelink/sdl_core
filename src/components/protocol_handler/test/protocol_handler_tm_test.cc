@@ -60,7 +60,7 @@ using ::testing::Invoke;
 
 class ProtocolHandlerImplTest : public ::testing::Test {
  protected:
-  void IntiProtocolHandlerImpl(
+  void InitProtocolHandlerImpl(
       const size_t period_msec, const size_t max_messages,
       const size_t malformd_period_msec = 0u,
       const size_t malformd_max_messages = 0u) {
@@ -72,7 +72,7 @@ class ProtocolHandlerImplTest : public ::testing::Test {
     tm_listener = protocol_handler_impl.get();
   }
   void SetUp() OVERRIDE {
-    IntiProtocolHandlerImpl(0u, 0u);
+    InitProtocolHandlerImpl(0u, 0u);
     connection_id = 0xAu;
     session_id = 0xFFu;
     connection_key = 0xFF00AAu;
@@ -673,11 +673,13 @@ TEST_F(ProtocolHandlerImplTest,
 
   SendControlMessage(PROTECTION_ON, start_service, NEW_SESSION_ID, FRAME_DATA_START_SERVICE);
 }
+#endif  // ENABLE_SECURITY
+
 TEST_F(ProtocolHandlerImplTest,
     FloodVerification) {
-  const size_t period_msec = 1000;
+  const size_t period_msec = 10000;
   const size_t max_messages = 1000;
-  IntiProtocolHandlerImpl(period_msec, max_messages);
+  InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -694,9 +696,9 @@ TEST_F(ProtocolHandlerImplTest,
 }
 TEST_F(ProtocolHandlerImplTest,
     FloodVerification_ThresholdValue) {
-  const size_t period_msec = 1000;
+  const size_t period_msec = 10000;
   const size_t max_messages = 1000;
-  IntiProtocolHandlerImpl(period_msec, max_messages);
+  InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -709,9 +711,9 @@ TEST_F(ProtocolHandlerImplTest,
 }
 TEST_F(ProtocolHandlerImplTest,
     FloodVerification_VideoFrameSkip) {
-  const size_t period_msec = 1000;
+  const size_t period_msec = 10000;
   const size_t max_messages = 1000;
-  IntiProtocolHandlerImpl(period_msec, max_messages);
+  InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -724,9 +726,9 @@ TEST_F(ProtocolHandlerImplTest,
 }
 TEST_F(ProtocolHandlerImplTest,
     FloodVerification_AudioFrameSkip) {
-  const size_t period_msec = 1000;
+  const size_t period_msec = 10000;
   const size_t max_messages = 1000;
-  IntiProtocolHandlerImpl(period_msec, max_messages);
+  InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -741,7 +743,7 @@ TEST_F(ProtocolHandlerImplTest,
     FloodVerificationDisable) {
   const size_t period_msec = 0;
   const size_t max_messages = 0;
-  IntiProtocolHandlerImpl(period_msec, max_messages);
+  InitProtocolHandlerImpl(period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -752,8 +754,51 @@ TEST_F(ProtocolHandlerImplTest,
         some_date.size(), message_id, &some_date[0]);
   }
 }
-#endif  // ENABLE_SECURITY
+
+TEST_F(ProtocolHandlerImplTest,
+    MalformedLimitVerification) {
+  const size_t period_msec = 10000;
+  const size_t max_messages = 1000;
+  InitProtocolHandlerImpl(0u, 0u, period_msec, max_messages);
+  AddConnection();
+  AddSession();
+
+  // expect malformed notification to CH
+  EXPECT_CALL(session_observer_mock,
+      OnMalformedMessageCallback(connection_id)).
+  Times(1);
+
+  // Sending malformed packets
+  const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
+  for (size_t i = 0; i < max_messages * 2; ++i) {
+    SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+        kControl, FRAME_DATA_SINGLE, session_id,
+        some_date.size(), message_id, &some_date[0]);
+  }
 }
-  // namespace test
-} // namespace components
+
+TEST_F(ProtocolHandlerImplTest,
+       MalformedLimitVerificationDisabled) {
+  const size_t period_msec = 0;
+  const size_t max_messages = 0;
+  InitProtocolHandlerImpl(0u, 0u, period_msec, max_messages);
+  AddConnection();
+  AddSession();
+
+  // expect no malformed notification to CH
+  EXPECT_CALL(session_observer_mock,
+              OnMalformedMessageCallback(connection_id)).
+      Times(0);
+
+  // Sending malformed packets
+  const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
+  for (size_t i = 0; i < max_messages + 1; ++i) {
+    SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_date.size(), message_id, &some_date[0]);
+  }
+}
+
+}  // namespace test
+}  // namespace components
 }  // namespace protocol_handler_test

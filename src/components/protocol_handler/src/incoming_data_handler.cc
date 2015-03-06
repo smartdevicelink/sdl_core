@@ -41,18 +41,21 @@ IncomingDataHandler::IncomingDataHandler()
   : header_(), validator_(NULL) {}
 
 void IncomingDataHandler::set_validator(
-    const ProtocolPacket::ProtocolHeaderValidator* const validator) {
+  const ProtocolPacket::ProtocolHeaderValidator *const validator) {
   validator_ = validator;
 }
 
-static const size_t MIN_HEADER_SIZE = std::min(PROTOCOL_HEADER_V1_SIZE, PROTOCOL_HEADER_V2_SIZE);
+static const size_t MIN_HEADER_SIZE = std::min(PROTOCOL_HEADER_V1_SIZE,
+                                               PROTOCOL_HEADER_V2_SIZE);
 
-std::list<ProtocolFramePtr> IncomingDataHandler::ProcessData(const RawMessage& tm_message,
-                                                             RESULT_CODE* result) {
+std::list<ProtocolFramePtr> IncomingDataHandler::ProcessData(
+    const RawMessage &tm_message,
+    RESULT_CODE *result) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(result);
-  const transport_manager::ConnectionUID connection_id = tm_message.connection_key();
-  const uint8_t* data = tm_message.data();
+  const transport_manager::ConnectionUID connection_id =
+    tm_message.connection_key();
+  const uint8_t *data = tm_message.data();
   const size_t tm_message_size = tm_message.data_size();
   if (tm_message_size == 0 || data == NULL) {
     LOG4CXX_WARN(logger_, "Wrong raw message " << tm_message_size << " bytes");
@@ -67,19 +70,28 @@ std::list<ProtocolFramePtr> IncomingDataHandler::ProcessData(const RawMessage& t
     *result = RESULT_FAIL;
     return std::list<ProtocolFramePtr>();
   }
-  std::vector<uint8_t>& connection_data = it->second;
+  std::vector<uint8_t> &connection_data = it->second;
   connection_data.insert(connection_data.end(), data, data + tm_message_size);
   LOG4CXX_DEBUG(logger_, "Total data size for connection "
                 << connection_id << " is " << connection_data.size());
   std::list<ProtocolFramePtr> out_frames;
   bool malformed_occurs = false;
-  *result = CreateFrame(connection_data, out_frames, connection_id, &malformed_occurs);
+  *result = CreateFrame(connection_data, out_frames, connection_id,
+                        &malformed_occurs);
   LOG4CXX_DEBUG(logger_, "New data size for connection " << connection_id
                 << " is " << connection_data.size());
-  if(!out_frames.empty()) {
-    LOG4CXX_DEBUG(logger_, "Created and passed " << out_frames.size() << " packets");
+  if (!out_frames.empty()) {
+    LOG4CXX_DEBUG(logger_, "Created and passed " << out_frames.size() <<
+                  " packets");
+  } else {
+    if (RESULT_DEFERRED == *result) {
+      LOG4CXX_DEBUG(logger_,
+                    "No packets has been created. Waiting next portion of data.");
+    } else {
+      LOG4CXX_WARN(logger_, "No packets has been created.");
+    }
   }
-  if(malformed_occurs) {
+  if (malformed_occurs) {
     *result = RESULT_MALFORMED_OCCURS;
   } else {
     *result = RESULT_OK;
@@ -99,7 +111,7 @@ void IncomingDataHandler::RemoveConnection(
 }
 
 uint32_t IncomingDataHandler::GetPacketSize(
-    const ProtocolPacket::ProtocolHeader& header) {
+  const ProtocolPacket::ProtocolHeader &header) {
   switch (header.version) {
     case PROTOCOL_VERSION_1:
       return header.dataSize + PROTOCOL_HEADER_V1_SIZE;
@@ -114,10 +126,11 @@ uint32_t IncomingDataHandler::GetPacketSize(
   return 0u;
 }
 
-RESULT_CODE IncomingDataHandler::CreateFrame(std::vector<uint8_t>& incoming_data,
-                                             std::list<ProtocolFramePtr>& out_frames,
-                                             const transport_manager::ConnectionUID connection_id,
-                                             bool *malformed_occurs) {
+RESULT_CODE IncomingDataHandler::CreateFrame(
+    std::vector<uint8_t> &incoming_data,
+    std::list<ProtocolFramePtr> &out_frames,
+    const transport_manager::ConnectionUID connection_id,
+    bool *malformed_occurs) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(malformed_occurs);
   *malformed_occurs = false;
@@ -126,7 +139,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(std::vector<uint8_t>& incoming_data
   while (data_size >= MIN_HEADER_SIZE) {
     header_.deserialize(&*data_it, data_size);
     const RESULT_CODE validate_result =
-        validator_ ? validator_->validate(header_) : RESULT_OK;
+      validator_ ? validator_->validate(header_) : RESULT_OK;
 
     if (validate_result != RESULT_OK) {
       LOG4CXX_WARN(logger_, "Packet validation failed");
@@ -154,7 +167,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(std::vector<uint8_t>& incoming_data
     }
     ProtocolFramePtr frame(new protocol_handler::ProtocolPacket(connection_id));
     const RESULT_CODE deserialize_result =
-        frame->deserializePacket(&*data_it, packet_size);
+      frame->deserializePacket(&*data_it, packet_size);
     if (deserialize_result != RESULT_OK) {
       LOG4CXX_WARN(logger_, "Packet deserialization failed");
       incoming_data.erase(incoming_data.begin(), data_it);
