@@ -132,6 +132,10 @@ class BaseCommandRequest : public Command,
     to_can_ = value;
   }
 
+  application_manager::ApplicationSharedPtr app() {
+    return app_;
+  }
+
   /**
    * @brief executes specific logic of children classes
    */
@@ -139,6 +143,7 @@ class BaseCommandRequest : public Command,
 
  private:
   bool to_can_;
+  application_manager::ApplicationSharedPtr app_;
 };
 
 }  // namespace commands

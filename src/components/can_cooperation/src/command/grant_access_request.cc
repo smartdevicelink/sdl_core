@@ -44,7 +44,6 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "GrantAccessRequest")
 GrantAccessRequest::GrantAccessRequest(
   const application_manager::MessagePtr& message)
   : BaseCommandRequest(message) {
-  set_to_can(false);
 }
 
 GrantAccessRequest::~GrantAccessRequest() {
@@ -52,7 +51,9 @@ GrantAccessRequest::~GrantAccessRequest() {
 
 void GrantAccessRequest::Execute() {
   LOG4CXX_INFO(logger_, "GrantAccessRequest::Run");
-  // Need to remove this message
+  // Need to remove this message but temporary it is used indent setting message
+  // to create CAN extension
+  CANAppExtensionPtr extension = GetAppExtension(app());
 }
 
 void GrantAccessRequest::on_event(

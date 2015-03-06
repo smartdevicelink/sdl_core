@@ -239,7 +239,7 @@ const char* BaseCommandRequest::GetMobileResultCode(
 
 CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
   application_manager::ApplicationSharedPtr app) const {
-  if (!app.valid()) {
+  if (!app) {
     return NULL;
   }
 
@@ -247,7 +247,7 @@ CANAppExtensionPtr BaseCommandRequest::GetAppExtension(
 
   CANAppExtensionPtr can_app_extension;
   application_manager::AppExtensionPtr app_extension = app->QueryInterface(id);
-  if (!app_extension.valid()) {
+  if (!app_extension) {
     app_extension = new CANAppExtension(id);
     app->AddExtension(app_extension);
   }
@@ -288,27 +288,25 @@ bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
 }
 
 void BaseCommandRequest::Run() {
-  if (!to_can_) {
-    Execute();
-    return;
-  }
-
-  application_manager::ApplicationSharedPtr app =
-      service_->GetApplication(message_->connection_key());
-  if (!app) {
+  app_ = service_->GetApplication(message_->connection_key());
+  if (!app_) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
     SendResponse(false, result_codes::kApplicationNotRegistered, "");
     return;
   }
 
-// TODO(KKolodiy): getting seat will be here
-//  CANAppExtensionPtr extension = GetAppExtension(app);
+  if (!to_can_) {
+    Execute();
+    return;
+  }
+
+// TODO(KKolodiy): get seat and give into CheckPolicyPermissions
+//  CANAppExtensionPtr extension = GetAppExtension(app_);
 //  if (!extension->IsControlGiven()) {
 //    LOG4CXX_ERROR(logger_, "Application doesn't have access!");
 //    SendResponse(false, result_codes::kRejected, "");
 //    return;
 //  }
-
 
   application_manager::TypeGrant grant = service_->CheckPolicyPermissions(
       message_->json_message());
@@ -322,7 +320,7 @@ void BaseCommandRequest::Run() {
       break;
     case application_manager::kManual: {
       Json::Value params;
-      params[json_keys::kAppId] = app->hmi_app_id();
+      params[json_keys::kAppId] = app_->hmi_app_id();
       SendRequest(functional_modules::hmi_api::grant_access, params, true);
       break;
     }
