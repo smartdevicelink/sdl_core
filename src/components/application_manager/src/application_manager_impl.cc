@@ -472,6 +472,7 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   ApplicationListAccessor app_list_accesor;
   application->MarkRegistered();
+  state_ctrl_.ApplyStatesForApp(application);
   app_list_accesor.Insert(application);
 
   return application;
@@ -492,10 +493,10 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   // remove from resumption if app was activated by user
   resume_controller().OnAppActivated(app);
   HMILevel::eType hmi_level = HMILevel::HMI_FULL;
-  AudioStreamingState::eType ass;
-  app->IsAudioApplication() ? ass = AudioStreamingState::AUDIBLE :
-                              ass = AudioStreamingState::NOT_AUDIBLE;
-  state_ctrl_.SetRegularState<false>(app, hmi_level, ass);
+  AudioStreamingState::eType audio_state;
+  app->IsAudioApplication() ? audio_state = AudioStreamingState::AUDIBLE :
+                              audio_state = AudioStreamingState::NOT_AUDIBLE;
+  state_ctrl_.SetRegularState<false>(app, hmi_level, audio_state);
   return true;
 }
 
@@ -618,6 +619,17 @@ void ApplicationManagerImpl::set_vr_session_started(const bool& state) {
 
 void ApplicationManagerImpl::set_all_apps_allowed(const bool& allowed) {
   is_all_apps_allowed_ = allowed;
+}
+
+HmiStatePtr ApplicationManagerImpl::CreateRegularState(uint32_t app_id,
+                                    mobile_apis::HMILevel::eType hmi_level,
+                                    mobile_apis::AudioStreamingState::eType audio_state,
+                                    mobile_apis::SystemContext::eType system_context) const{
+  HmiStatePtr state(new HmiState(app_id, state_ctrl_.state_context()));
+  state->set_hmi_level(hmi_level);
+  state->set_audio_streaming_state(audio_state);
+  state->set_system_context(system_context);
+  return state;
 }
 
 void ApplicationManagerImpl::StartAudioPassThruThread(int32_t session_key,
@@ -2566,66 +2578,6 @@ void ApplicationManagerImpl::OnWakeUp() {
     request_ctrl_.OnWakeUp();
 }
 
-//void ApplicationManagerImpl::Mute(VRTTSSessionChanging changing_state) {
-//  mobile_apis::AudioStreamingState::eType state =
-//      mobile_apis::AudioStreamingState::NOT_AUDIBLE;
-
-//  // ATTENUATED state applicable only for TTS
-//  if ((kTTSSessionChanging == changing_state) &&
-//       hmi_capabilities_.attenuated_supported()) {
-//    state = mobile_apis::AudioStreamingState::ATTENUATED;
-//  }
-
-//  ApplicationManagerImpl::ApplicationListAccessor accessor;
-
-//  ApplicationManagerImpl::ApplictionSetConstIt it =
-//      accessor.begin();
-//  ApplicationManagerImpl::ApplictionSetConstIt
-//      itEnd = accessor.end();
-//  for (; it != itEnd; ++it) {
-//    if ((*it).valid()) {
-//      if ((*it)->is_media_application()) {
-//        if (kTTSSessionChanging == changing_state) {
-//          (*it)->set_tts_speak_state(true);
-//        }
-//        if ((*it)->audio_streaming_state() != state &&
-//            (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level()) &&
-//            (mobile_api::HMILevel::HMI_BACKGROUND != (*it)->hmi_level())) {
-//          (*it)->set_audio_streaming_state(state);
-//          MessageHelper::SendHMIStatusNotification(*(*it));
-//        }
-//      }
-//    }
-//  }
-//}
-
-//void ApplicationManagerImpl::Unmute(VRTTSSessionChanging changing_state) {
-
-//  ApplicationManagerImpl::ApplicationListAccessor accessor;
-//  ApplicationManagerImpl::ApplictionSetConstIt it = accessor.begin();
-//  ApplicationManagerImpl::ApplictionSetConstIt itEnd = accessor.end();
-
-//  for (; it != itEnd; ++it) {
-//    if ((*it).valid()) {
-//      if ((*it)->is_media_application()) {
-//        if (kTTSSessionChanging == changing_state) {
-//          (*it)->set_tts_speak_state(false);
-//        }
-//        if ((!(vr_session_started())) &&
-//            (!((*it)->tts_speak_state())) &&
-//            ((*it)->audio_streaming_state() !=
-//             mobile_apis::AudioStreamingState::AUDIBLE) &&
-//            (mobile_api::HMILevel::HMI_NONE != (*it)->hmi_level()) &&
-//            (mobile_api::HMILevel::HMI_BACKGROUND != (*it)->hmi_level())) {
-//          (*it)->set_audio_streaming_state(
-//              mobile_apis::AudioStreamingState::AUDIBLE);
-//          MessageHelper::SendHMIStatusNotification(*(*it));
-//        }
-//      }
-//    }
-//  }
-//}
-
 mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
   const std::vector<uint8_t>& binary_data, const std::string& file_path,
   const std::string& file_name, const int64_t offset) {
@@ -2789,7 +2741,6 @@ void ApplicationManagerImpl::ChangeAppsHMILevel(uint32_t app_id,
   new_state->set_hmi_level(level);
   //state_ctrl_.SetRegularState(app, new_state);
 }
-
 
 mobile_apis::AppHMIType::eType ApplicationManagerImpl::StringToAppHMIType(std::string str) {
   LOG4CXX_AUTO_TRACE(logger_);

@@ -4,12 +4,13 @@
 #include <list>
 #include "interfaces/MOBILE_API.h"
 #include "utils/shared_ptr.h"
+#include "application_manager/state_context.h"
 
 namespace application_manager {
 
 class HmiState;
 typedef utils::SharedPtr<HmiState> HmiStatePtr;
-typedef std::list<HmiStatePtr > HmiStateList;
+typedef std::list<HmiStatePtr> HmiStateList;
 
  /**
  * @brief The HmiState class
@@ -32,20 +33,23 @@ class HmiState {
       STATE_ID_TTS_SESSION,
     };
 
-    HmiState(HmiStatePtr parent, StateID state_id);
+    HmiState(uint32_t app_id, const StateContext& state_context_);
+    HmiState(uint32_t app_id, const StateContext& state_context_,
+             StateID state_id);
 
-    HmiState();
-
-    HmiState(const HmiState& copy_from);
-
-    HmiState(mobile_apis::HMILevel::eType hmi_level,
-                    mobile_apis::AudioStreamingState::eType audio_streaming_state,
-                    mobile_apis::SystemContext::eType system_context);
 
     virtual ~HmiState() {}
 
-    void setParent(HmiStatePtr parent);
+    /**
+     * @brief setParent setup parent state
+     * @param parent state to setup
+     */
+    void set_parent(HmiStatePtr parent);
 
+    /**
+     * @brief parent get parent state
+     * @return parent state
+     */
     const HmiStatePtr parent() const {
       return parent_;
     }
@@ -60,7 +64,10 @@ class HmiState {
       }
       return hmi_level_;
     }
-
+    /**
+     * @brief set_hmi_level set hmi_level member
+     * @param hmi_level hmi level to setup
+     */
     void set_hmi_level(mobile_apis::HMILevel::eType hmi_level) {
       hmi_level_ = hmi_level;
     }
@@ -69,15 +76,20 @@ class HmiState {
      * @brief audio_streaming_state
      * @return return audio streaming state member
      */
-    virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const {
+    virtual mobile_apis::AudioStreamingState::eType
+    audio_streaming_state() const {
       if (parent_) {
         return parent_->audio_streaming_state();
       }
       return audio_streaming_state_;
     }
-
-    virtual void set_audio_streaming_state(mobile_apis::AudioStreamingState::eType ass) {
-      audio_streaming_state_ = ass;
+    /**
+     * @brief set_audio_streaming_state set audio_streaming_state member
+     * @param audio_state audio_state to setup
+     */
+    virtual void set_audio_streaming_state(
+        mobile_apis::AudioStreamingState::eType audio_state) {
+      audio_streaming_state_ = audio_state;
     }
 
     /**
@@ -91,52 +103,74 @@ class HmiState {
       return system_context_;
     }
 
-    virtual void set_system_context(mobile_apis::SystemContext::eType system_context){
+    /**
+     * @brief set_system_context set system_context member
+     * @param system_context system_context to setup
+     */
+    virtual void set_system_context(
+        mobile_apis::SystemContext::eType system_context){
       system_context_ = system_context;
     }
 
+    /**
+     * @brief state_id state type
+     * @return reutrn state type
+     */
     StateID state_id() const {
       return state_id_;
     }
   protected:
-    HmiStatePtr parent_;
+    uint32_t app_id_;
     StateID state_id_;
+    const StateContext& state_context_;
+    HmiStatePtr parent_;
     mobile_apis::HMILevel::eType hmi_level_;
     mobile_apis::AudioStreamingState::eType audio_streaming_state_;
     mobile_apis::SystemContext::eType system_context_;
-
   private:
     void operator=(const HmiState&);
 };
 
+/**
+ * @brief The VRHmiState class impement logic of VR temporary state
+ */
 class VRHmiState : public HmiState {
   public:
-    VRHmiState(HmiStatePtr parent);
-    virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const {
-      return audio_streaming_state_;
-    }
+    virtual mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
+    VRHmiState(uint32_t app_id, StateContext& state_context);
 };
 
+/**
+ * @brief The TTSHmiState class impement logic of TTS temporary state
+ */
 class TTSHmiState : public HmiState {
   public:
-    TTSHmiState(HmiStatePtr parent);
-    mobile_apis::AudioStreamingState::eType audio_streaming_state() const {
-      return audio_streaming_state_;
-    }
+    TTSHmiState(uint32_t app_id, StateContext& state_context);
+    virtual  mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
 };
 
+/**
+ * @brief The PhoneCallHmiState class impement logic of PhoneCall temporary state
+ */
 class PhoneCallHmiState : public HmiState {
   public:
-    PhoneCallHmiState(HmiStatePtr parent);
-
-    mobile_apis::SystemContext::eType system_context() const {
-      return parent()->system_context();
+    PhoneCallHmiState(uint32_t app_id, StateContext& state_context);
+    virtual mobile_apis::HMILevel::eType hmi_level() const;
+    virtual  mobile_apis::AudioStreamingState::eType audio_streaming_state() const {
+      return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
     }
 };
 
+/**
+ * @brief The SafetyModeHmiState class impement logic of SafetyMode temporary state
+ */
 class SafetyModeHmiState : public HmiState {
   public:
-    SafetyModeHmiState(HmiStatePtr parent);
+    SafetyModeHmiState(uint32_t app_id, StateContext& state_context);
+    virtual  mobile_apis::AudioStreamingState::eType audio_streaming_state() const {
+      return mobile_apis::AudioStreamingState::NOT_AUDIBLE;
+    }
 };
+
 }
 #endif // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_HMISTATE_H

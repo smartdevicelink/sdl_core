@@ -1302,7 +1302,7 @@ void MessageHelper::SendOnAppUnregNotificationToHMI(
 uint32_t MessageHelper::SendActivateAppToHMI(uint32_t const app_id,
     hmi_apis::Common_HMILevel::eType level,
     bool send_policy_priority) {
-  u_int32_t correlation_id = 0;
+  uint32_t correlation_id = 0;
   application_manager::ApplicationConstSharedPtr app =
     application_manager::ApplicationManagerImpl::instance()
     ->application(app_id);

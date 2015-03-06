@@ -405,12 +405,36 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void set_all_apps_allowed(const bool& allowed);
 
+    /**
+     * @brief CreateRegularState create regular HMI state for application
+     * @param app_id
+     * @param hmi_level of returned state
+     * @param audio_state of returned state
+     * @param system_context of returned state
+     * @return new regular HMI state
+     */
+    HmiStatePtr CreateRegularState(
+        uint32_t app_id, mobile_apis::HMILevel::eType hmi_level,
+        mobile_apis::AudioStreamingState::eType audio_state,
+        mobile_apis::SystemContext::eType system_context) const;
+
+    /**
+     * @brief SetState set regular audio state
+     * @param app_id applicatio id
+     * @param audio_state aaudio streaming state
+     */
     void SetState(uint32_t app_id,
-                  mobile_apis::AudioStreamingState::eType ass) {
+                  mobile_apis::AudioStreamingState::eType audio_state) {
       ApplicationSharedPtr app  = application(app_id);
-      state_ctrl_.SetRegularState(app, ass);
+      state_ctrl_.SetRegularState(app, audio_state);
     }
 
+    /**
+     * @brief SetState setup regular hmi state, tha will appear if no
+     * specific events are active
+     * @param app appication to setup regular State
+     * @param state state of new regular state
+     */
     template <bool SendActivateApp>
     void SetState(uint32_t app_id,
                   HmiStatePtr new_state) {
@@ -418,6 +442,11 @@ class ApplicationManagerImpl : public ApplicationManager,
       state_ctrl_.SetRegularState<SendActivateApp>(app, new_state);
     }
 
+    /**
+     * @brief SetState Change regular audio state
+     * @param app appication to setup regular State
+     * @param audio_state of new regular state
+     */
     template <bool SendActivateApp>
     void SetState(uint32_t app_id,
                   mobile_apis::HMILevel::eType hmi_level){
@@ -425,7 +454,13 @@ class ApplicationManagerImpl : public ApplicationManager,
       state_ctrl_.SetRegularState<SendActivateApp>(app, hmi_level);
     }
 
-
+    /**
+     * @brief SetState Change regular hmi level and audio state
+     * @param app appication to setup regular State
+     * @param hmi_level of new regular state
+     * @param audio_state of new regular state
+     * @param SendActivateApp: if true, ActivateAppRequest will be sent on HMI
+     */
     template <bool SendActivateApp>
     void SetState(uint32_t app_id,
                   mobile_apis::HMILevel::eType hmi_level,
@@ -434,6 +469,13 @@ class ApplicationManagerImpl : public ApplicationManager,
       state_ctrl_.SetRegularState<SendActivateApp>(app, hmi_level, audio_state);
     }
 
+    /**
+     * @brief SetState Change regular hmi level and audio state
+     * @param app appication to setup regular State
+     * @param hmi_level of new regular state
+     * @param audio_state of new regular state
+     * @param SendActivateApp: if true, ActivateAppRequest will be sent on HMI
+     */
     template <bool SendActivateApp>
     void SetState(uint32_t app_id, mobile_apis::HMILevel::eType hmi_level,
                   mobile_apis::AudioStreamingState::eType audio_state,
@@ -443,6 +485,11 @@ class ApplicationManagerImpl : public ApplicationManager,
                                                    audio_state, system_context);
     }
 
+    /**
+     * @brief SetState Change regular  system context
+     * @param app appication to setup regular State
+     * @param system_context of new regular state
+     */
     void SetState(uint32_t app_id,
                   mobile_apis::SystemContext::eType system_context) {
       ApplicationSharedPtr app  = application(app_id);
@@ -764,16 +811,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      * Also OnHMIStateNotification with previous HMI state sent for these apps
      */
     void ResetPhoneCallAppList();
-
-    /**
-     * @brief ChangeAppsHMILevel the function that will change application's
-     * hmi level.
-     *
-     * @param app_id id of the application whose hmi level should be changed.
-     *
-     * @param level new hmi level for certain application.
-     */
-    void ChangeAppsHMILevel(uint32_t app_id, mobile_apis::HMILevel::eType level);
 
     /**
      * Function used only by HMI request/response/notification base classes

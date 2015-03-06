@@ -255,6 +255,10 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD0(StartDevicesDiscovery, void());
   MOCK_METHOD2(SendAudioPassThroughNotification, void(uint32_t, std::vector<uint8_t>&));
   MOCK_METHOD1(set_all_apps_allowed, void(const bool));
+  MOCK_METHOD4(CreateRegularState, HmiStatePtr (uint32_t, mobile_api::HMILevel::eType,
+                                                     mobile_apis::AudioStreamingState::eType,
+                                                     mobile_apis::SystemContext::eType));
+
   template<bool SendActivateApp>
   MOCK_METHOD2(SetState, void(uint32_t, HmiState));
   template<bool SendActivateApp>

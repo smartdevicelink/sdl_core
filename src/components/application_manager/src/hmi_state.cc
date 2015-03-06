@@ -3,57 +3,81 @@
 
 namespace application_manager {
 
-HmiState::HmiState(HmiStatePtr prev, StateID state_id):
-  parent_(prev),
+HmiState::HmiState(uint32_t app_id, const StateContext& state_context_,
+                   StateID state_id):
+  app_id_(app_id),
   state_id_(state_id),
+  state_context_(state_context_),
   hmi_level_(mobile_apis::HMILevel::INVALID_ENUM),
   audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM),
   system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
 }
 
-HmiState::HmiState():
+
+HmiState::HmiState(uint32_t app_id, const StateContext& state_context):
+  app_id_(app_id),
   state_id_(STATE_ID_REGULAR),
+  state_context_(state_context),
   hmi_level_(mobile_apis::HMILevel::INVALID_ENUM),
   audio_streaming_state_(mobile_apis::AudioStreamingState::INVALID_ENUM),
   system_context_(mobile_apis::SystemContext::INVALID_ENUM) {
 }
 
-HmiState::HmiState(const HmiState& copy_from):
-  state_id_(STATE_ID_REGULAR),
-  hmi_level_(copy_from.hmi_level()),
-  audio_streaming_state_(copy_from.audio_streaming_state()),
-  system_context_(copy_from.system_context()) {
-}
-
-HmiState::HmiState(mobile_apis::HMILevel::eType hmi_level,
-                                 mobile_apis::AudioStreamingState::eType audio_streaming_state,
-                                 mobile_apis::SystemContext::eType system_context):
-  state_id_(STATE_ID_REGULAR),
-  hmi_level_(hmi_level),
-  audio_streaming_state_(audio_streaming_state), system_context_(system_context) {
-}
-
-void HmiState::setParent(HmiStatePtr parent) {
+void HmiState::set_parent(HmiStatePtr parent) {
   DCHECK_OR_RETURN_VOID(parent);
   parent_ = parent;
 }
 
-VRHmiState::VRHmiState(HmiStatePtr previous):
-  HmiState(previous, STATE_ID_VR_SESSION) {
-}
-
-TTSHmiState::TTSHmiState(HmiStatePtr previous):
-  HmiState(previous, STATE_ID_TTS_SESSION) {
-}
-
-PhoneCallHmiState::PhoneCallHmiState(HmiStatePtr previous):
-  HmiState(previous, STATE_ID_PHONE_CALL) {
-}
-
-SafetyModeHmiState::SafetyModeHmiState(HmiStatePtr previous):
-  HmiState(previous, STATE_ID_SAFETY_MODE) {
+mobile_apis::AudioStreamingState::eType
+VRHmiState::audio_streaming_state() const {
+  using namespace helpers;
   using namespace mobile_apis;
-  audio_streaming_state_ = AudioStreamingState::NOT_AUDIBLE;
+  AudioStreamingState::eType expected_state = AudioStreamingState::NOT_AUDIBLE;
+  if (state_context_.is_attenuated_supported() &&
+      Compare<HMILevel::eType, EQ, ONE> (hmi_level(), HMILevel::HMI_FULL,
+                                         HMILevel::HMI_LIMITED)) {
+      expected_state = AudioStreamingState::ATTENUATED;
+  }
+  return expected_state;
+}
+
+VRHmiState::VRHmiState(uint32_t app_id, StateContext& state_context):
+  HmiState(app_id, state_context, STATE_ID_VR_SESSION) {
+}
+
+TTSHmiState::TTSHmiState(uint32_t app_id, StateContext& state_context):
+  HmiState(app_id, state_context, STATE_ID_TTS_SESSION) {
+}
+
+mobile_apis::AudioStreamingState::eType
+TTSHmiState::audio_streaming_state() const {
+  using namespace helpers;
+  using namespace mobile_apis;
+  AudioStreamingState::eType expected_state = AudioStreamingState::NOT_AUDIBLE;
+  if (state_context_.is_attenuated_supported() &&
+      Compare<HMILevel::eType, EQ, ONE> (hmi_level(), HMILevel::HMI_FULL,
+                                         HMILevel::HMI_LIMITED)) {
+      expected_state = AudioStreamingState::ATTENUATED;
+  }
+  return expected_state;
+}
+
+PhoneCallHmiState::PhoneCallHmiState(uint32_t app_id, StateContext& state_context):
+  HmiState(app_id, state_context, STATE_ID_PHONE_CALL) {
+}
+
+mobile_apis::HMILevel::eType PhoneCallHmiState::hmi_level() const {
+  using namespace mobile_apis;
+   HMILevel::eType expected_level(HMILevel::HMI_BACKGROUND);
+   if (parent()->hmi_level() == HMILevel::HMI_FULL
+       && state_context_.is_navi_app(app_id_)) {
+     expected_level = HMILevel::HMI_LIMITED;
+   }
+   return expected_level;
+}
+
+SafetyModeHmiState::SafetyModeHmiState(uint32_t app_id, StateContext& state_context):
+  HmiState(app_id, state_context, STATE_ID_SAFETY_MODE) {
 }
 
 }
