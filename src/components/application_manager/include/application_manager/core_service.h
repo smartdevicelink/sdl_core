@@ -60,7 +60,7 @@ class CoreService : public Service {
    * @param json string with params in json format
    * @return false if message blocked by policy
    */
-  virtual bool CheckPolicyPermissions(std::string& json_message);
+  virtual TypeGrant CheckPolicyPermissions(const std::string& json_message);
 
   /**
    * @brief Get pointer to application by application id

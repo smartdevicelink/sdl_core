@@ -65,9 +65,14 @@ class BaseCommandRequest : public Command,
   virtual ~BaseCommandRequest();
 
   /**
-   * \brief BaseCommandRequest on timeout reaction
+   * @brief BaseCommandRequest on timeout reaction
    */
   virtual void OnTimeout();
+
+  /**
+   * @brief runs command
+   */
+  void Run();
 
  protected:
   application_manager::MessagePtr message_;
@@ -122,6 +127,18 @@ class BaseCommandRequest : public Command,
   void SendRequest(const char* function_id,
                    const Json::Value& message_params,
                    bool is_hmi_request = false);
+
+  void set_to_can(bool value) {
+    to_can_ = value;
+  }
+
+  /**
+   * @brief executes specific logic of children classes
+   */
+  void virtual Execute() = 0;
+
+ private:
+  bool to_can_;
 };
 
 }  // namespace commands

@@ -50,9 +50,9 @@ CoreService::CoreService() {
 CoreService::~CoreService() {
 }
 
-bool CoreService::CheckPolicyPermissions(std::string& json_message) {
-  // TODO(VS): Will be implemented later
-  return true;
+TypeGrant CoreService::CheckPolicyPermissions(const std::string& json_message) {
+  // TODO(KKolodiy): stub it will be implemented later
+  return kManual;
 }
 
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {

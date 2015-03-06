@@ -41,6 +41,12 @@
 
 namespace application_manager {
 
+enum TypeGrant {
+  kDisallowed,
+  kAllowed,
+  kManual
+};
+
 /**
  * @brief Interface to core service
  */
@@ -55,7 +61,7 @@ class Service {
    * @param json string with params in json format
    * @return false if message blocked by policy
    */
-  virtual bool CheckPolicyPermissions(std::string& json_message) = 0;
+  virtual TypeGrant CheckPolicyPermissions(const std::string& json_message) = 0;
 
   /**
    * @brief Get pointer to application by application id

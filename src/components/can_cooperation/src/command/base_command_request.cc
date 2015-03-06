@@ -49,7 +49,8 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "BaseCommandRequest")
 
 BaseCommandRequest::BaseCommandRequest(
   const application_manager::MessagePtr& message)
-  : message_(message) {
+  : message_(message),
+    to_can_(true) {
   service_ = CANModule::instance()->service();
 }
 
@@ -286,7 +287,51 @@ bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
   return false;
 }
 
-}  // namespace commands
+void BaseCommandRequest::Run() {
+  if (!to_can_) {
+    Execute();
+    return;
+  }
 
+  application_manager::ApplicationSharedPtr app =
+      service_->GetApplication(message_->connection_key());
+  if (!app) {
+    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
+    SendResponse(false, result_codes::kApplicationNotRegistered, "");
+    return;
+  }
+
+// TODO(KKolodiy): getting seat will be here
+//  CANAppExtensionPtr extension = GetAppExtension(app);
+//  if (!extension->IsControlGiven()) {
+//    LOG4CXX_ERROR(logger_, "Application doesn't have access!");
+//    SendResponse(false, result_codes::kRejected, "");
+//    return;
+//  }
+
+
+  application_manager::TypeGrant grant = service_->CheckPolicyPermissions(
+      message_->json_message());
+
+  switch (grant) {
+    case application_manager::kAllowed:
+      Execute();
+      break;
+    case application_manager::kDisallowed:
+      SendResponse(false, result_codes::kDisallowed, "");
+      break;
+    case application_manager::kManual: {
+      Json::Value params;
+      params[json_keys::kAppId] = app->hmi_app_id();
+      SendRequest(functional_modules::hmi_api::grant_access, params, true);
+      break;
+    }
+    default:
+      LOG4CXX_ERROR(logger_, "Internal issue");
+      SendResponse(false, result_codes::kDisallowed, "Internal issue");
+  }
+}
+
+}  // namespace commands
 }  // namespace can_cooperation
 

@@ -49,16 +49,8 @@ ClimateControlOnRequest::ClimateControlOnRequest(
 ClimateControlOnRequest::~ClimateControlOnRequest() {
 }
 
-void ClimateControlOnRequest::Run() {
+void ClimateControlOnRequest::Execute() {
   LOG4CXX_INFO(logger_, "ClimateControlOnRequest::Run");
-
-  application_manager::ApplicationSharedPtr app =
-    service_->GetApplication(message_->connection_key());
-  if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, result_codes::kApplicationNotRegistered, "");
-    return;
-  }
 
   SendRequest(functional_modules::can_api::climate_control_on, Json::Value());
 }

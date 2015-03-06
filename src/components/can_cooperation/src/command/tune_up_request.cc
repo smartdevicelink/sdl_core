@@ -49,23 +49,8 @@ TuneUpRequest::TuneUpRequest(
 TuneUpRequest::~TuneUpRequest() {
 }
 
-void TuneUpRequest::Run() {
+void TuneUpRequest::Execute() {
   LOG4CXX_INFO(logger_, "TuneUpRequest::Run");
-
-  application_manager::ApplicationSharedPtr app =
-    service_->GetApplication(message_->connection_key());
-  if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, result_codes::kApplicationNotRegistered,  "");
-    return;
-  }
-
-  CANAppExtensionPtr extension = GetAppExtension(app);
-  if (!extension->IsControlGiven()) {
-    LOG4CXX_ERROR(logger_, "Application doesn't have access!");
-    SendResponse(false, result_codes::kRejected,  "");
-    return;
-  }
 
   SendRequest(functional_modules::can_api::tune_up, Json::Value());
 }

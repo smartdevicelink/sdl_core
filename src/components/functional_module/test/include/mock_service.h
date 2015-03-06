@@ -40,7 +40,7 @@ namespace application_manager {
 class MockService : public Service {
  public:
   MOCK_METHOD1(CheckPolicyPermissions,
-      bool(std::string& json_message));
+      TypeGrant(const std::string& json_message));
   MOCK_METHOD1(GetApplication,
       ApplicationSharedPtr(ApplicationId app_id));
   MOCK_METHOD1(SendMessageToHMI,

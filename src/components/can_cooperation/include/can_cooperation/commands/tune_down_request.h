@@ -55,7 +55,7 @@ class TuneDownRequest : public BaseCommandRequest {
   /**
    * @brief Execute command
    */
-  virtual void Run();
+  virtual void Execute();
 
   /**
    * @brief Interface method that is called whenever new event received

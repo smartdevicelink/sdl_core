@@ -44,36 +44,15 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "GrantAccessRequest")
 GrantAccessRequest::GrantAccessRequest(
   const application_manager::MessagePtr& message)
   : BaseCommandRequest(message) {
+  set_to_can(false);
 }
 
 GrantAccessRequest::~GrantAccessRequest() {
 }
 
-void GrantAccessRequest::Run() {
+void GrantAccessRequest::Execute() {
   LOG4CXX_INFO(logger_, "GrantAccessRequest::Run");
-
-  application_manager::ApplicationSharedPtr app =
-    service_->GetApplication(message_->connection_key());
-  if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, result_codes::kApplicationNotRegistered, "");
-    return;
-  }
-
-  CANAppExtensionPtr extension = GetAppExtension(app);
-  if (extension->IsControlGiven()) {
-    LOG4CXX_ERROR(logger_, "Application already have access!");
-    SendResponse(false, result_codes::kRejected, "");
-    return;
-  }
-
-  Json::Value params;
-
-  params[json_keys::kAppId] = app->hmi_app_id();
-
-  Json::FastWriter writer;
-
-  SendRequest(functional_modules::hmi_api::grant_access, params, true);
+  // Need to remove this message
 }
 
 void GrantAccessRequest::on_event(
