@@ -59,6 +59,7 @@ CANModule::CANModule()
     from_can_("FromCan To Mobile", this),
     from_mobile_("FromMobile To Can", this),
     is_scan_started_(false) {
+  can_connection_->set_observer(this);
   plugin_info_.name = "ReverseSDLPlugin";
   plugin_info_.version = 1;
   SubscribeOnFunctions();
@@ -147,11 +148,9 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
     new application_manager::Message(
       protocol_handler::MessagePriority::kDefault));
 
-  Json::FastWriter writer;
-  std::string json_string = writer.write(can_msg);
-  msg->set_json_message(json_string);
+  msg->set_json_message(can_msg);
 
-  LOG4CXX_INFO(logger_, "Can message: " << json_string);
+  LOG4CXX_INFO(logger_, "Can message: " << can_msg);
 
   if (ProcessResult::PROCESSED != HandleMessage(msg)) {
     LOG4CXX_ERROR(logger_, "Failed process CAN message!");
