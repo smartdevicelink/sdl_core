@@ -160,7 +160,7 @@ bool ResumeCtrl::RestoreAppHMIState(ApplicationSharedPtr application) {
 }
 
 bool ResumeCtrl::SetupDefaultHMILevel(ApplicationSharedPtr application) {
-  DCHECK_OR_RETURN_VOID(application);
+  DCHECK_OR_RETURN(application, false);
   LOG4CXX_AUTO_TRACE(logger_);
   mobile_apis::HMILevel::eType default_hmi =
       ApplicationManagerImpl::instance()-> GetDefaultHmiLevel(application);

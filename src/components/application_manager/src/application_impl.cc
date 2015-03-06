@@ -89,7 +89,6 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       hmi_supports_navi_audio_streaming_(false),
       is_app_allowed_(true),
       has_been_activated_(false),
-      tts_speak_state_(false),
       tts_properties_in_none_(false),
       tts_properties_in_full_(false),
       put_file_in_none_count_(0),
@@ -119,9 +118,12 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
 
   // load persistent files
   LoadPersistentFiles();
-  hmi_states_.push_back(new HmiState(mobile_apis::HMILevel::INVALID_ENUM,
-                               mobile_apis::AudioStreamingState::INVALID_ENUM,
-                               mobile_api::SystemContext::SYSCTXT_MAIN));
+  HmiStatePtr initial_state =
+      ApplicationManagerImpl::instance()->CreateRegularState(app_id(),
+                                          mobile_apis::HMILevel::INVALID_ENUM,
+                                          mobile_apis::AudioStreamingState::INVALID_ENUM,
+                                          mobile_api::SystemContext::SYSCTXT_MAIN);
+  hmi_states_.push_back(initial_state);
 }
 
 ApplicationImpl::~ApplicationImpl() {
@@ -190,16 +192,28 @@ bool ApplicationImpl::IsAudioApplication() const {
       is_navi_;
 }
 
-void application_manager::ApplicationImpl::AddHMIState(
-    HmiStatePtr state) {
+void ApplicationImpl::SetRegularState(HmiStatePtr state) {
+  DCHECK_OR_RETURN_VOID(state);
+  sync_primitives::AutoLock auto_lock(hmi_states_lock_);
+  DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
+  hmi_states_.erase(hmi_states_.begin());
+  if (hmi_states_.begin() != hmi_states_.end()) {
+    HmiStatePtr first_temp = hmi_states_.front();
+    DCHECK_OR_RETURN_VOID(first_temp);
+    first_temp->set_parent(state);
+  }
+  hmi_states_.push_front(state);
+}
+
+void ApplicationImpl::AddHMIState(HmiStatePtr state) {
   DCHECK_OR_RETURN_VOID(state);
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   hmi_states_.push_back(state);
 }
 
-struct StateIdFoundPredicate {
+struct StateIdFindPredicate {
     HmiState::StateID state_id_;
-    StateIdFoundPredicate(HmiState::StateID state_id):
+    StateIdFindPredicate(HmiState::StateID state_id):
       state_id_(state_id) {}
     bool operator ()(const HmiStatePtr cur) {
       return cur->state_id() == state_id_;
@@ -211,7 +225,7 @@ void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
   sync_primitives::AutoLock auto_lock(hmi_states_lock_);
   HmiStateList::iterator it =
       std::find_if(hmi_states_.begin(), hmi_states_.end(),
-                   StateIdFoundPredicate(state_id));
+                   StateIdFindPredicate(state_id));
   if (it != hmi_states_.end()) {
     // unable to remove regular state
     DCHECK_OR_RETURN_VOID(it != hmi_states_.begin());
@@ -222,7 +236,7 @@ void ApplicationImpl::RemoveHMIState(HmiState::StateID state_id) {
     if (next != hmi_states_.end()) {
       HmiStatePtr next_state = *next;
       HmiStatePtr prev_state = *prev;
-      next_state->setParent(prev_state);
+      next_state->set_parent(prev_state);
     }
     hmi_states_.erase(it);
   } else {
@@ -270,10 +284,7 @@ bool ApplicationImpl::is_media_application() const {
 const mobile_api::HMILevel::eType ApplicationImpl::hmi_level() const {
   using namespace mobile_apis;
   const HmiStatePtr hmi_state = CurrentHmiState();
-  HMILevel::eType hmi_level;
-  hmi_state.valid() ? hmi_level = CurrentHmiState()->hmi_level() :
-                      hmi_level = HMILevel::INVALID_ENUM;
-  return hmi_level;
+  return hmi_state ? hmi_state->hmi_level() : HMILevel::INVALID_ENUM;
 }
 
 bool application_manager::ApplicationImpl::is_foreground() const {
@@ -300,10 +311,8 @@ const mobile_api::SystemContext::eType
 ApplicationImpl::system_context() const {
   using namespace mobile_apis;
   const HmiStatePtr hmi_state = CurrentHmiState();
-  SystemContext::eType system_context;
-  hmi_state.valid() ? system_context = CurrentHmiState()->system_context() :
-                      system_context = SystemContext::INVALID_ENUM;
-  return system_context;
+  return hmi_state ? hmi_state->system_context() :
+                     SystemContext::INVALID_ENUM;;
 }
 
 const std::string& ApplicationImpl::app_icon_path() const {
@@ -326,19 +335,15 @@ void ApplicationImpl::set_is_media_application(bool is_media) {
   is_media_ = is_media;
 }
 
-void ApplicationImpl::set_tts_speak_state(bool state_tts_speak) {
-  tts_speak_state_ = state_tts_speak;
-}
-
 bool IsTTSState(const HmiStatePtr state) {
   return state->state_id() == HmiState::STATE_ID_TTS_SESSION ;
 }
 
 bool ApplicationImpl::tts_speak_state() {
-  DataAccessor<HmiStateList> da = GetHmiStateListAccessor();
+  sync_primitives::AutoLock autolock(hmi_states_lock_);
   HmiStateList::const_iterator it =
-      std::find_if(da.GetData().begin(), da.GetData().end(), IsTTSState);
-  return it != da.GetData().end();
+      std::find_if(hmi_states_.begin(), hmi_states_.end(), IsTTSState);
+  return it != hmi_states_.end();
 }
 
 void ApplicationImpl::set_tts_properties_in_none(
@@ -491,7 +496,7 @@ void ApplicationImpl::set_grammar_id(uint32_t value) {
   grammar_id_ = value;
 }
 
-void ApplicationImpl::reset_data_in_none() {
+void ApplicationImpl::ResetDataInNone() {
       put_file_in_none_count_ = 0;
       delete_file_in_none_count_ = 0;
       list_files_in_none_count_ = 0;

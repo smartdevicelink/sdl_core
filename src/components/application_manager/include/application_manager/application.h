@@ -438,24 +438,8 @@ class Application : public virtual InitialApplicationData,
     audio_streaming_state() const = 0;
     virtual const std::string& app_icon_path() const = 0;
     virtual connection_handler::DeviceHandle device() const = 0;
-    virtual void set_tts_speak_state(bool state_tts_speak) = 0;
     virtual bool tts_speak_state() = 0;
 
-    /**
-     * @brief Active states of application
-     */
-    void SetRegularState(HmiStatePtr state) {
-      DCHECK_OR_RETURN_VOID(state);
-      sync_primitives::AutoLock auto_lock(hmi_states_lock_);
-      DCHECK_OR_RETURN_VOID(!hmi_states_.empty());
-      hmi_states_.erase(hmi_states_.begin());
-      if (hmi_states_.begin() != hmi_states_.end()) {
-        HmiStatePtr first_temp = *(hmi_states_.begin());
-        DCHECK_OR_RETURN_VOID(first_temp);
-        first_temp->setParent(state);
-      }
-      hmi_states_.push_front(state);
-    }
     /**
      * @brief Active states of application
      */
@@ -472,7 +456,8 @@ class Application : public virtual InitialApplicationData,
 
 
     /**
-     * @brief Current hmi state
+     * @brief RegularHmiState of application without active events VR, TTS etc ...
+     * @return HmiState of application
      */
     virtual const HmiStatePtr RegularHmiState() const = 0;
 
@@ -514,7 +499,7 @@ class Application : public virtual InitialApplicationData,
     virtual void set_device(connection_handler::DeviceHandle device) = 0;
     virtual uint32_t get_grammar_id() const = 0 ;
     virtual void set_grammar_id(uint32_t value) = 0;
-    virtual void reset_data_in_none() = 0;
+
     virtual void set_protocol_version(
         const ProtocolVersion& protocol_version) = 0;
     virtual ProtocolVersion protocol_version() const = 0;
@@ -542,6 +527,11 @@ class Application : public virtual InitialApplicationData,
     virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type_) = 0;
 
     /**
+     * @brief ResetDataInNone reset data counters in NONE
+     */
+    virtual void ResetDataInNone() = 0;
+
+    /**
      * @brief Check, if limits for command number per time is exceeded
      * @param cmd_id Unique command id from mobile API
      * @param source Limits source, e.g. policy table, config file etc.
@@ -555,6 +545,12 @@ class Application : public virtual InitialApplicationData,
      * @return object for recording statistics
      */
     virtual UsageStatistics& usage_report() = 0;
+
+    /**
+     * @brief SetRegularState set permanent state of application
+     * @param state state to setup
+     */
+    virtual void SetRegularState(HmiStatePtr state)  = 0;
 
     /**
      * @brief AddHMIState the function that will change application's

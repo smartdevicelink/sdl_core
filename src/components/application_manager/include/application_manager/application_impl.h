@@ -110,7 +110,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   inline const mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
-  void set_tts_speak_state(bool state_tts_speak);
   bool tts_speak_state();
   void set_tts_properties_in_none(bool active);
   bool tts_properties_in_none();
@@ -127,7 +126,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_device(connection_handler::DeviceHandle device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
-  virtual void reset_data_in_none();
+
 
   virtual void set_protocol_version(const ProtocolVersion& protocol_version);
   virtual ProtocolVersion protocol_version() const;
@@ -147,6 +146,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool SubscribeToIVI(uint32_t vehicle_info_type_);
   bool IsSubscribedToIVI(uint32_t vehicle_info_type_);
   bool UnsubscribeFromIVI(uint32_t vehicle_info_type_);
+
+  /**
+   * @brief ResetDataInNone reset data counters in NONE
+   */
+  virtual void ResetDataInNone();
 
   virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const;
   virtual const  std::set<uint32_t>& SubscribesIVI() const;
@@ -176,6 +180,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   virtual bool IsAudioApplication() const;
 
+  /*
+  * @brief SetRegularState set permanent state of application
+  * @param state state to setup
+  */
+  virtual void SetRegularState(HmiStatePtr state);
 
   /**
    * @brief AddHMIState the function that will change application's
@@ -204,7 +213,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   virtual const HmiStatePtr CurrentHmiState() const;
 
   /**
-   * @brief HmiState of application without active events PhoneCall, TTS< etc ...
+   * @brief RegularHmiState of application without active events VR, TTS etc ...
    * @return HmiState of application
    */
   virtual const HmiStatePtr RegularHmiState() const;
@@ -246,7 +255,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool                                     hmi_supports_navi_audio_streaming_;
   bool                                     is_app_allowed_;
   bool                                     has_been_activated_;
-  bool                                     tts_speak_state_;
   bool                                     tts_properties_in_none_;
   bool                                     tts_properties_in_full_;
   bool                                     is_foreground_;
@@ -306,10 +314,8 @@ const mobile_api::AudioStreamingState::eType
 ApplicationImpl::audio_streaming_state() const {
   using namespace mobile_apis;
   const HmiStatePtr hmi_state = CurrentHmiState();
-  AudioStreamingState::eType audio_state;
-  hmi_state.valid() ? audio_state = CurrentHmiState()->audio_streaming_state() :
-                      audio_state = AudioStreamingState::INVALID_ENUM;
-  return audio_state;
+  return hmi_state ? hmi_state->audio_streaming_state() :
+                     AudioStreamingState::INVALID_ENUM;
 }
 
 bool ApplicationImpl::app_allowed() const {

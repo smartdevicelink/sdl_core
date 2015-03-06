@@ -630,23 +630,21 @@ void PolicyHandler::OnPendingPermissionChange(
 
   const uint32_t app_id = app->app_id();
 
-  namespace ma = mobile_apis;
-
   if (permissions.appRevoked) {
     application_manager::MessageHelper::SendOnAppPermissionsChangedNotification(
       app_id, permissions);
     ApplicationManagerImpl::instance()->SetState<false>(app->app_id(),
-                                                 ma::HMILevel::HMI_NONE,
-                                                 ma::AudioStreamingState::NOT_AUDIBLE);
+                                                 mobile_apis::HMILevel::HMI_NONE,
+                                                 mobile_apis::AudioStreamingState::NOT_AUDIBLE);
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
     return;
   }
 
-  ma::HMILevel::eType app_hmi_level = app->hmi_level();
+  mobile_apis::HMILevel::eType app_hmi_level = app->hmi_level();
 
   switch (app_hmi_level) {
-  case ma::HMILevel::eType::HMI_FULL:
-  case ma::HMILevel::eType::HMI_LIMITED: {
+  case mobile_apis::HMILevel::eType::HMI_FULL:
+  case mobile_apis::HMILevel::eType::HMI_LIMITED: {
     if (permissions.appPermissionsConsentNeeded) {
       MessageHelper::
           SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
@@ -655,7 +653,7 @@ void PolicyHandler::OnPendingPermissionChange(
     }
     break;
   }
-  case ma::HMILevel::eType::HMI_BACKGROUND: {
+  case mobile_apis::HMILevel::eType::HMI_BACKGROUND: {
     if (permissions.isAppPermissionsRevoked) {
       MessageHelper::
           SendOnAppPermissionsChangedNotification(app->app_id(), permissions);

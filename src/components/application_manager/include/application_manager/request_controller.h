@@ -213,7 +213,6 @@ class RequestController {
 
     bool IsLowVoltage();
 
-
   protected:
     /**
     * @brief Timer Callback
