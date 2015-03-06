@@ -18,7 +18,7 @@ The Core component of SDL is meant to run on a vehicle's computing system. It co
 The communication between the Core component and the mobile phone is based on JSON RPC. The communication between the Core component and the user interface is also via JSON RPC. The current code base includes an HTML5 user interface that was released by Ford Motor Company for the My Ford Touch system. The core component can also be configured to support QT5 and DBus, and includes a QT interface as well.
 
 ## Project Status
-We're ramping up our efforts to get SmartDeviceLink developed and maintained directly in the open. For the Mobile libraries, we're expecting better integration soon, SDL Core is slightly more complicated. We are currently working on generating documentation, creating a developer portal, an open forum, interface requirements, HMI guidelines, Mobile validation, and everything else that we've been asked for to renew the community's interest in this project. From a technical standpoint, SDL is stable, and the most work is being put into making it a more robust solution for app connectivity. We are, however, definitely looking for and interesting in other people and company's contributions to SDL whether it be feature based, bug fixes, healthy conversation, or even just suggestions for improvement.
+We're ramping up our efforts to get SmartDeviceLink developed and maintained directly in the open. For the Mobile libraries, we're expecting better integration soon, SDL Core is slightly more complicated. We are currently working on generating documentation, creating a developer portal, an open forum, interface requirements, HMI guidelines, Mobile validation, and everything else that we've been asked for to renew the community's interest in this project. From a technical standpoint, SDL is stable, and the most work is being put into making it a more robust solution for app connectivity. We are, however, definitely looking for and interested in other people and company's contributions to SDL whether it be feature based, bug fixes, healthy conversation, or even just suggestions for improvement.
 
 # Getting Started
 A quick guide to installing, configuring, and running an instance of the SDL Core on a linux OS.
@@ -32,11 +32,9 @@ A quick guide to installing, configuring, and running an instance of the SDL Cor
 
 ```
 %make
-%sudo make install
+%make install
 %cp bin/mykey.pem src/appMain
 %cp bin/mycert.pem src/appMain
-%sudo updatedb
-%sudo ldconfig
 ```
 
 ## Start SDL Core
