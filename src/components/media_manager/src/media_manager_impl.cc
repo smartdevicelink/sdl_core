@@ -219,6 +219,11 @@ void MediaManagerImpl::StopMicrophoneRecording(int32_t application_key) {
   if (from_mic_listener_) {
     from_mic_listener_->OnActivityEnded(application_key);
   }
+#if defined(EXTENDED_MEDIA_MODE)
+  if (from_mic_recorder_) {
+    from_mic_recorder_->RemoveListener(from_mic_listener_);
+  }
+#endif
 }
 
 void MediaManagerImpl::StartVideoStreaming(int32_t application_key) {
