@@ -121,12 +121,17 @@ TEST_F(PolicyManagerImplTest, RefreshRetrySequence_SetSecondsBetweenRetries_Expe
 
 TEST_F(PolicyManagerImplTest, DISABLED_GetUpdateUrl) {
 
-  EXPECT_CALL(*cache_manager, GetUpdateUrls(7,_));
-  EXPECT_CALL(*cache_manager, GetUpdateUrls(4,_));
+  EXPECT_CALL(*cache_manager, GetServiceUrls("7",_));
+  EXPECT_CALL(*cache_manager, GetServiceUrls("4",_));
 
-  EXPECT_EQ("http://policies.telematics.ford.com/api/policies",
-            manager->GetUpdateUrl(7));
-  EXPECT_EQ("http://policies.ford.com/api/policies", manager->GetUpdateUrl(4));
+  EndpointUrls ep_7;
+
+  manager->GetServiceUrls("7", ep_7);
+  EXPECT_EQ("http://policies.telematics.ford.com/api/policies", ep_7[0].url[0] );
+
+  EndpointUrls ep_4;
+  manager->GetServiceUrls("4", ep_4);
+  EXPECT_EQ("http://policies.ford.com/api/policies", ep_4[0].url[0]);
 
 }
 

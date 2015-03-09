@@ -43,8 +43,16 @@ namespace application_manager {
 
 namespace commands {
 
+int8_t SetAppIconRequest::is_icons_saving_enabled_ = -1;
+
 SetAppIconRequest::SetAppIconRequest(const MessageSharedPtr& message)
     : CommandRequestImpl(message) {
+  if (-1 == is_icons_saving_enabled_) {
+    const std::string path = profile::Profile::instance()->app_icons_folder();
+    is_icons_saving_enabled_ =
+        file_system::IsWritingAllowed(path) &&
+        file_system::IsReadingAllowed(path);
+  }
 }
 
 SetAppIconRequest::~SetAppIconRequest() {
@@ -66,7 +74,6 @@ void SetAppIconRequest::Run() {
       (*message_)[strings::msg_params][strings::sync_file_name].asString();
 
   std::string full_file_path =
-      file_system::CurrentWorkingDirectory() + "/" +
       profile::Profile::instance()->app_storage_folder() + "/";
   full_file_path += app->folder_name();
   full_file_path += "/";
@@ -78,7 +85,9 @@ void SetAppIconRequest::Run() {
     return;
   }
 
-  CopyToIconStorage(full_file_path);
+  if (is_icons_saving_enabled_) {
+    CopyToIconStorage(full_file_path);
+  }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -124,12 +133,30 @@ void SetAppIconRequest::CopyToIconStorage(
       static_cast<uint64_t>(
         profile::Profile::instance()->app_icons_folder_max_size());
   const uint64_t file_size = file_system::FileSize(path_to_file);
+
+  if (storage_max_size < file_size) {
+    LOG4CXX_ERROR(logger_, "Icon size (" << file_size << ") is bigger, than "
+                  " icons storage maximum size (" << storage_max_size << ")."
+                  "Copying skipped.");
+    return;
+  }
+
   const uint64_t storage_size = static_cast<uint64_t>(
                                   file_system::DirectorySize(icon_storage));
   if (storage_max_size < (file_size + storage_size)) {
-    RemoveOldestIcons(icon_storage,
-                      profile::Profile::instance()->
-                      app_icons_amount_to_remove());
+    const uint32_t icons_amount =
+        profile::Profile::instance()->app_icons_amount_to_remove();
+
+    if (!icons_amount) {
+      LOG4CXX_DEBUG(logger_,
+                    "No icons will be deleted, since amount icons to remove "
+                    "is zero. Icon saving skipped.");
+      return;
+    }
+
+    while (!IsEnoughSpaceForIcon(file_size)) {
+      RemoveOldestIcons(icon_storage, icons_amount);
+    }
   }
   ApplicationConstSharedPtr app =
           application_manager::ApplicationManagerImpl::instance()->
@@ -161,11 +188,6 @@ void SetAppIconRequest::CopyToIconStorage(
 
 void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
                                           const uint32_t icons_amount) const {
-  if (!icons_amount) {
-    LOG4CXX_DEBUG(logger_,
-                  "No icons will be deleted, since amount of files is zero.");
-    return;
-  }
   const std::vector<std::string> icons_list = file_system::ListFiles(storage);
   std::map<uint64_t, std::string> icon_modification_time;
   std::vector<std::string>::const_iterator it = icons_list.begin();
@@ -180,25 +202,41 @@ void SetAppIconRequest::RemoveOldestIcons(const std::string& storage,
   }
 
   for (size_t counter = 0; counter < icons_amount; ++counter) {
+    if (!icon_modification_time.size()) {
+      LOG4CXX_ERROR(logger_, "No more icons left for deletion.");
+      return;
+    }
     const std::string file_name = icon_modification_time.begin()->second;
     const std::string file_path = storage + "/" + file_name;
     if (!file_system::DeleteFile(file_path)) {
       LOG4CXX_DEBUG(logger_, "Error while deleting icon " << file_path);
     }
+    icon_modification_time.erase(icon_modification_time.begin());
     LOG4CXX_DEBUG(logger_, "Old icon " << file_path
                   << " was deleted successfully.");
   }
 }
 
+bool SetAppIconRequest::IsEnoughSpaceForIcon(const uint64_t icon_size) const {
+  const std::string icon_storage =
+          profile::Profile::instance()->app_icons_folder();
+  const uint64_t storage_max_size =
+      static_cast<uint64_t>(
+        profile::Profile::instance()->app_icons_folder_max_size());
+  const uint64_t storage_size = static_cast<uint64_t>(
+                                  file_system::DirectorySize(icon_storage));
+  return storage_max_size >= (icon_size + storage_size);
+}
+
 void SetAppIconRequest::on_event(const event_engine::Event& event) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const smart_objects::SmartObject& message = event.smart_object();
+  const smart_objects::SmartObject& event_message = event.smart_object();
 
   switch (event.id()) {
     case hmi_apis::FunctionID::UI_SetAppIcon: {
       mobile_apis::Result::eType result_code =
           static_cast<mobile_apis::Result::eType>(
-              message[strings::params][hmi_response::code].asInt());
+              event_message[strings::params][hmi_response::code].asInt());
 
       bool result = mobile_apis::Result::SUCCESS == result_code;
 
@@ -220,7 +258,7 @@ void SetAppIconRequest::on_event(const event_engine::Event& event) {
                      "Icon path was set to '" << app->app_icon_path() << "'");
       }
 
-      SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
+      SendResponse(result, result_code, NULL, &(event_message[strings::msg_params]));
       break;
     }
     default: {

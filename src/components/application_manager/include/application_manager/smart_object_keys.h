@@ -47,8 +47,6 @@ const char connection_key[] = "connection_key";
 const char error[] = "error";
 const char error_msg[] = "message";
 const char default_app_id[] = "default";
-
-
 const char msg_params[] = "msg_params";
 const char method_name[] = "methodName";
 const char info[] = "info";
@@ -56,7 +54,7 @@ const char app_id[] = "appID";
 const char hmi_app_id[] = "hmiAppID";
 const char device_mac[] = "deviceMAC";
 const char url[] = "url";
-const char urlSchema[] = "urlSchema";
+const char urlScheme[] = "urlScheme";
 const char packageName[] = "packageName";
 const char cmd_icon[] = "cmdIcon";
 const char result_code[] = "resultCode";
@@ -69,6 +67,7 @@ const char ngn_media_screen_app_name[] = "ngnMediaScreenAppName";
 const char vr_synonyms[] = "vrSynonyms";
 const char uses_vehicle_data[] = "usesVehicleData";
 const char is_media_application[] = "isMediaApplication";
+const char greyOut[] = "greyOut";
 const char language_desired[] = "languageDesired";
 const char auto_activated_id[] = "autoActivateID";
 const char app_type[] = "appType";
@@ -277,6 +276,34 @@ const char address_lines[] = "addressLines";
 const char phone_number[] = "phoneNumber";
 const char location_image[] = "locationImage";
 }  // namespace strings
+
+namespace json {
+const char appId[] = "appId";
+const char name[] = "name";
+const char ios[] = "ios";
+const char android[] = "android";
+const char appHmiType[] = "appHmiType";
+const char urlScheme[] = "urlScheme";
+const char packageName[] = "packageName";
+const char response[] = "response";
+const char is_media_application[] = "isMediaApplication";
+} // namespace json
+
+namespace http_request {
+const char httpRequest[] = "HTTPRequest";
+const char headers[] = "headers";
+const char content_type[] = "ContentType";
+const char connect_timeout[] = "ConnectTimout";
+const char do_output[] = "DoOutput";
+const char do_input[] = "DoInput";
+const char use_caches[] = "UseCaches";
+const char request_method[] = "RequestMethod";
+const char read_timeout[] = "ReadTimeout";
+const char instance_follow_redirect[] = "InstanceFollowRedirect";
+const char charset[] = "charset";
+const char content_lenght[] = "Content_Lenght";
+const char GET[] = "GET";
+} // http_request
 
 namespace mobile_notification {
 const char state[] = "state";

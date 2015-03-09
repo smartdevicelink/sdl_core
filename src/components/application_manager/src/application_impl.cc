@@ -80,6 +80,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
     const std::string& app_name,
     utils::SharedPtr<usage_statistics::StatisticsManager> statistics_manager)
     : grammar_id_(0),
+      hmi_app_id_(0),
       app_id_(application_id),
       active_message_(NULL),
       is_media_(false),
@@ -219,6 +220,14 @@ bool ApplicationImpl::is_media_application() const {
 
 const mobile_api::HMILevel::eType& ApplicationImpl::hmi_level() const {
   return hmi_level_;
+}
+
+bool application_manager::ApplicationImpl::is_foreground() const {
+  return is_foreground_;
+}
+
+void application_manager::ApplicationImpl::set_foreground(bool is_foreground) {
+  is_foreground_ = is_foreground;
 }
 
 const uint32_t ApplicationImpl::put_file_in_none_count() const {
@@ -691,8 +700,23 @@ void ApplicationImpl::CleanupFiles() {
 }
 
 void ApplicationImpl::LoadPersistentFiles() {
-  std::string directory_name =
-      profile::Profile::instance()->app_storage_folder();
+  using namespace profile;
+
+  if (kWaitingForRegistration == app_state_) {
+    const std::string app_icon_dir(Profile::instance()->app_icons_folder());
+    const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id_);
+    if (file_system::FileExists(full_icon_path)) {
+      AppFile file;
+      file.is_persistent = true;
+      file.is_download_complete = true;
+      file.file_name = full_icon_path;
+      file.file_type = mobile_apis::FileType::GRAPHIC_PNG;
+      AddFile(file);
+    }
+    return;
+  }
+
+  std::string directory_name = Profile::instance()->app_storage_folder();
   directory_name += "/" + folder_name();
 
   if (file_system::DirectoryExists(directory_name)) {

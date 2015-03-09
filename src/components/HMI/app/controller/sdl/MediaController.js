@@ -136,5 +136,7 @@ SDL.SDLMediaController = Em.Object.create( {
 
         SDL.SDLModel.stopStream(appID);
         SDL.SDLModel.get('registeredApps').removeObjects(SDL.SDLModel.get('registeredApps').filterProperty('appID', appID));
+        SDL.SDLModel.get('updatedAppsList').removeObjects(SDL.SDLModel.get('updatedAppsList').filterProperty('appID', appID));
+        SDL.InfoAppsView.showAppList();
     }
 });

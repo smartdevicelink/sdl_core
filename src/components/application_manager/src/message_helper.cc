@@ -53,29 +53,15 @@
 #include "utils/macro.h"
 #include "utils/logger.h"
 
+#include "formatters/formatter_json_rpc.h"
+#include "formatters/CFormatterJsonSDLRPCv2.hpp"
+#include "formatters/CFormatterJsonSDLRPCv1.hpp"
+
 namespace application_manager {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ApplicationManager")
 
 namespace {
-
-hmi_apis::Common_Language::eType ToCommonLanguage(
-  mobile_apis::Language::eType mobile_language) {
-  // Update this check if mobile_api::Language
-  // or hmi_apis::Common_Language changes.
-  // Or, better, generate functions like this from XML
-  long lang_val = long(mobile_language);
-  long max_common_lang_val = long(hmi_apis::Common_Language::NO_NO);
-  long max_mobile_lang = long(mobile_apis::Language::NO_NO);
-  if (max_common_lang_val != max_mobile_lang) {
-    LOG4CXX_ERROR(logger_, "Mapping between Common_Language and Language"
-                  " has changed! Please update converter function");
-  }
-  if (lang_val > max_common_lang_val) {
-    LOG4CXX_ERROR(logger_, "Non-convertable language ID");
-  }
-  return hmi_apis::Common_Language::eType(lang_val);
-}
 
 typedef
 std::map<std::string, hmi_apis::Common_AppPriority::eType> CommonAppPriorityMap;
@@ -1208,11 +1194,26 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
 
   output = smart_objects::SmartObject(smart_objects::SmartType_Map);
   output[strings::app_name] = app->name();
-  output[strings::icon] = app->app_icon_path();
+
+  const std::string icon_path = app->app_icon_path();
+  if (!icon_path.empty()) {
+    output[strings::icon] = icon_path;
+  }
+
   output[strings::device_name] = device_name;
   output[strings::app_id] = app->hmi_app_id();
-  output[strings::hmi_display_language_desired] = app->ui_language();
-  output[strings::is_media_application] = app->is_media_application();
+
+  if (app->IsRegistered()) {
+    output[strings::hmi_display_language_desired] = app->ui_language();
+  }
+
+  if (app->IsRegistered()) {
+    output[strings::is_media_application] = app->is_media_application();
+  }
+
+  if (!app->IsRegistered()) {
+    output[strings::greyOut] = app->is_greyed_out();
+  }
 
   if (ngn_media_screen_name) {
     output[strings::ngn_media_screen_app_name] = ngn_media_screen_name->asString();
@@ -1860,9 +1861,9 @@ void MessageHelper::SendLaunchApp(uint32_t connection_key,
   content[strings::msg_params][strings::request_type] = RequestType::LAUNCH_APP;
   content[strings::msg_params][strings::app_id] = connection_key;
   if (!urlSchema.empty()) {
-    content[strings::msg_params][strings::urlSchema] = urlSchema;
+    content[strings::msg_params][strings::url] = urlSchema;
   } else if (!packageName.empty()) {
-    content[strings::msg_params][strings::packageName] = packageName;
+    content[strings::msg_params][strings::url] = packageName;
   }
 
   SendSystemRequestNotification(connection_key, content);
@@ -1880,6 +1881,28 @@ void application_manager::MessageHelper::SendQueryApps(
   content[strings::msg_params][strings::url] = policy_handler->RemoteAppsUrl();
   content[strings::msg_params][strings::timeout] =
       policy_handler->TimeoutExchange();
+
+  Json::Value http;
+  Json::Value& http_header = http[http_request::httpRequest][http_request::headers];
+
+  const int timeout = policy_handler->TimeoutExchange();
+
+  http_header[http_request::content_type] = "application/json";
+  http_header[http_request::connect_timeout] = timeout;
+  http_header[http_request::do_output] = true;
+  http_header[http_request::do_input] = true;
+  http_header[http_request::use_caches] = false;
+  http_header[http_request::request_method] = http_request::GET;
+  http_header[http_request::read_timeout] = timeout;
+  http_header[http_request::instance_follow_redirect] = false;
+  http_header[http_request::charset] = "utf-8";
+  http_header[http_request::content_lenght] = 0;
+
+  std::string data = http_header.toStyledString();
+  std::vector<uint8_t> binary_data(data.begin(), data.end());
+
+  content[strings::params][strings::binary_data] = SmartObject(binary_data);
+  content[strings::msg_params][strings::file_type] = FileType::BINARY;
 
   SendSystemRequestNotification(connection_key, content);
 }

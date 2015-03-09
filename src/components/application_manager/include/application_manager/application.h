@@ -360,6 +360,7 @@ class DynamicApplicationData {
 
 class Application : public virtual InitialApplicationData,
   public virtual DynamicApplicationData {
+
   public:
     enum ApplicationState {
       kRegistered = 0,
@@ -367,6 +368,10 @@ class Application : public virtual InitialApplicationData,
     };
 
   public:
+    Application() :
+      is_greyed_out_(false) {
+    }
+
     virtual ~Application() {
     }
 
@@ -422,6 +427,8 @@ class Application : public virtual InitialApplicationData,
     virtual const std::string folder_name() const = 0;
     virtual bool is_media_application() const = 0;
     virtual const mobile_api::HMILevel::eType& hmi_level() const = 0;
+    virtual bool is_foreground() const = 0;
+    virtual void set_foreground(bool is_foreground) = 0;
     virtual const uint32_t put_file_in_none_count() const = 0;
     virtual const uint32_t delete_file_in_none_count() const = 0;
     virtual const uint32_t list_files_in_none_count() const = 0;
@@ -603,6 +610,18 @@ class Application : public virtual InitialApplicationData,
      */
     std::string GetDeviceId() const {return device_id_;}
 
+    /**
+     * @brief Returns is application should be greyed out on HMI
+     */
+    bool is_greyed_out() const {return is_greyed_out_;}
+
+    /**
+     * @brief Sets application as should be greyed out on HMI
+     * @param is_greyed_out True, if should be greyed out on HMI,
+     * otherwise - false
+     */
+    void set_greyed_out(bool is_greyed_out) {is_greyed_out_ = is_greyed_out;}
+
   protected:
 
     // interfaces for NAVI retry sequence
@@ -620,6 +639,8 @@ class Application : public virtual InitialApplicationData,
     std::string device_id_;
     bool can_stream_;
     bool streaming_;
+    ssize_t connection_id_;
+    bool is_greyed_out_;
 };
 
 typedef utils::SharedPtr<Application> ApplicationSharedPtr;

@@ -187,7 +187,7 @@ const uint32_t kDefaultMaxCmdId = 2000000000;
 const uint32_t kDefaultPutFileRequestInNone = 5;
 const uint32_t kDefaultDeleteFileRequestInNone = 5;
 const uint32_t kDefaultListFilesRequestInNone = 5;
-const uint32_t kDefaultTimeout = 10;
+const uint32_t kDefaultTimeout = 10000;
 const uint32_t kDefaultAppResumingTimeout = 3;
 const uint32_t kDefaultAppSavePersistentDataTimeout = 10;
 const uint32_t kDefaultResumptionDelayBeforeIgn = 30;
@@ -215,7 +215,7 @@ const size_t kDefaultFrequencyCount = 1000;
 const size_t kDefaultFrequencyTime  = 1000;
 const uint16_t kDefaultAttemptsToOpenPolicyDB = 5;
 const uint16_t kDefaultOpenAttemptTimeoutMsKey = 500;
-const uint32_t kDefaultAppIconsFolderMaxSize = 104857600;
+const uint32_t kDefaultAppIconsFolderMaxSize = 1048576;
 const uint32_t kDefaultAppIconsAmountToRemove = 1;
 
 }  // namespace
@@ -649,6 +649,10 @@ void Profile::UpdateValues() {
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppConfigFolderKey);
 
+  if (IsRelativePath(app_config_folder_)) {
+    MakeAbsolutePath(app_config_folder_);
+  }
+
   LOG_UPDATED_VALUE(app_config_folder_, kAppConfigFolderKey, kMainSection);
 
   // Application storage folder
@@ -656,12 +660,20 @@ void Profile::UpdateValues() {
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppStorageFolderKey);
 
+  if (IsRelativePath(app_storage_folder_)) {
+    MakeAbsolutePath(app_storage_folder_);
+  }
+
   LOG_UPDATED_VALUE(app_storage_folder_, kAppStorageFolderKey, kMainSection);
 
   // Application resourse folder
   ReadStringValue(&app_resourse_folder_,
                   file_system::CurrentWorkingDirectory().c_str(),
                   kMainSection, kAppResourseFolderKey);
+
+  if (IsRelativePath(app_resourse_folder_)) {
+    MakeAbsolutePath(app_resourse_folder_);
+  }
 
   LOG_UPDATED_VALUE(app_resourse_folder_, kAppResourseFolderKey,
                     kMainSection);
@@ -682,12 +694,20 @@ void Profile::UpdateValues() {
                   file_system::CurrentWorkingDirectory().c_str(),
                   kSDL4Section, kAppIconsFolderKey);
 
+  if (IsRelativePath(app_icons_folder_)) {
+    MakeAbsolutePath(app_icons_folder_);
+  }
+
   LOG_UPDATED_VALUE(app_icons_folder_, kAppIconsFolderKey,
                     kSDL4Section);
 
   // Application icon folder maximum size
   ReadUIntValue(&app_icons_folder_max_size_, kDefaultAppIconsFolderMaxSize,
                 kSDL4Section, kAppIconsFolderMaxSizeKey);
+
+  if (app_icons_folder_max_size_ < kDefaultAppIconsFolderMaxSize) {
+    app_icons_folder_max_size_ = kDefaultAppIconsFolderMaxSize;
+  }
 
   LOG_UPDATED_VALUE(app_icons_folder_max_size_, kAppIconsFolderMaxSizeKey,
                     kSDL4Section);
@@ -1090,6 +1110,7 @@ void Profile::UpdateValues() {
     char* str = NULL;
     str = strtok(const_cast<char*>(supported_diag_modes_value.c_str()), ",");
     while (str != NULL) {
+      errno = 0;
       uint32_t user_value = strtol(str, NULL, 16);
       if (user_value && errno != ERANGE) {
         correct_diag_modes += str;
@@ -1445,13 +1466,13 @@ bool Profile::ReadUIntValue(uint16_t* value, uint16_t default_value,
     *value = default_value;
     return false;
   } else {
-    uint16_t user_value = strtoul(string_value.c_str(), NULL, 10);
-    if (!user_value || errno == ERANGE) {
+    uint64_t user_value;
+    if (!StringToNumber(string_value, user_value)) {
       *value = default_value;
       return false;
     }
 
-    *value = user_value;
+    *value = static_cast<uint16_t>(user_value);
     return true;
   }
 }
@@ -1464,13 +1485,13 @@ bool Profile::ReadUIntValue(uint32_t* value, uint32_t default_value,
     *value = default_value;
     return false;
   } else {
-    uint32_t user_value = strtoul(string_value.c_str(), NULL, 10);
-    if (!user_value || errno == ERANGE) {
+    uint64_t user_value;
+    if (!StringToNumber(string_value, user_value)) {
       *value = default_value;
       return false;
     }
 
-    *value = user_value;
+    *value = static_cast<uint32_t>(user_value);
     return true;
   }
 }
@@ -1483,8 +1504,8 @@ bool Profile::ReadUIntValue(uint64_t* value, uint64_t default_value,
     *value = default_value;
     return false;
   } else {
-    uint64_t user_value = strtoull(string_value.c_str(), NULL, 10);
-    if (!user_value || errno == ERANGE) {
+    uint64_t user_value;
+    if (!StringToNumber(string_value, user_value)) {
       *value = default_value;
       return false;
     }
@@ -1494,21 +1515,31 @@ bool Profile::ReadUIntValue(uint64_t* value, uint64_t default_value,
   }
 }
 
-void Profile::LogContainer(const std::vector<std::string>& container,
-                           std::string* log) {
-  if (container.empty()) {
-    return;
+bool Profile::StringToNumber(const std::string& input, uint64_t& output) const {
+  const char* input_value = input.c_str();
+  char* endptr;
+  const int8_t base = 10;
+  errno = 0;
+  uint64_t user_value = strtoull(input_value, &endptr, base);
+  bool is_real_zero_value =
+      (!user_value && endptr != input_value && *endptr == '\0');
+  if (!is_real_zero_value && (!user_value || errno == ERANGE)) {
+    return false;
   }
-  if (NULL == log) {
-    return;
-  }
-  std::vector<std::string>::const_iterator it = container.begin();
-  std::vector<std::string>::const_iterator it_end = container.end();
-  for (; it != it_end-1; ++it) {
-    log->append(*it);
-    log->append(" ; ");
-  }
-
-  log->append(container.back());
+  output = user_value;
+  return true;
 }
+
+bool Profile::IsRelativePath(const std::string& path) {
+  if (path.empty()) {
+    LOG4CXX_ERROR(logger_, "Empty path passed.");
+    return false;
+  }
+  return '/' != path[0];
+}
+
+void Profile::MakeAbsolutePath(std::string& path) {
+  path = file_system::CurrentWorkingDirectory() + "/" + path;
+}
+
 }  //  namespace profile

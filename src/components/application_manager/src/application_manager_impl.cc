@@ -112,6 +112,12 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     is_low_voltage_(false) {
     std::srand(std::time(0));
     AddPolicyObserver(this);
+
+    dir_type_to_string_map_ = {
+      {TYPE_STORAGE, "Storage"},
+      {TYPE_SYSTEM, "System"},
+      {TYPE_ICONS, "Icons"}
+    };
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -361,8 +367,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   if (connection_handler_) {
     connection_handler::ConnectionHandlerImpl* con_handler_impl =
       static_cast<connection_handler::ConnectionHandlerImpl*>(
-
         connection_handler_);
+
     if (con_handler_impl->GetDataOnSessionKey(connection_key, &app_id,
         &sessions_list, &device_id)
         == -1) {
@@ -383,6 +389,9 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   const std::string& mobile_app_id = params[strings::app_id].asString();
   const std::string& app_name =
     message[strings::msg_params][strings::app_name].asString();
+
+  LOG4CXX_DEBUG(logger_, "App with connection key: " << connection_key
+                << " registered from handle: " << device_id);
 
   ApplicationSharedPtr application(
     new ApplicationImpl(app_id,
@@ -446,9 +455,21 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
     }
   }
 
+  // Keep HMI add id in case app is present in "waiting for registration" list
   apps_to_register_list_lock_.Acquire();
-  apps_to_register_.erase(application);
+  AppsWaitRegistrationSet::iterator it = apps_to_register_.find(application);
+  if (apps_to_register_.end() != it) {
+    application->set_hmi_application_id((*it)->hmi_app_id());
+    apps_to_register_.erase(application);
+  }
   apps_to_register_list_lock_.Release();
+
+  if (!application->hmi_app_id()) {
+    resume_ctrl_.IsApplicationSaved(application->mobile_app_id())?
+              resume_ctrl_.GetHMIApplicationID(application->mobile_app_id()) :
+          GenerateNewHMIAppID();
+  }
+
   ApplicationListAccessor app_list_accesor;
   application->MarkRegistered();
   app_list_accesor.Insert(application);
@@ -740,6 +761,54 @@ void ApplicationManagerImpl::OnMessageReceived(
   }
 
   messages_from_hmi_.PostMessage(impl::MessageFromHmi(message));
+}
+
+ApplicationConstSharedPtr ApplicationManagerImpl::waiting_app(
+    const uint32_t hmi_id) const {
+  AppsWaitRegistrationSet app_list = apps_waiting_for_registration().GetData();
+
+  AppsWaitRegistrationSet::const_iterator it_end = app_list.end();
+
+  HmiAppIdPredicate finder(hmi_id);
+  ApplicationSharedPtr result;
+  ApplictionSetConstIt it_app = std::find_if(app_list.begin(), it_end, finder);
+  if (it_app != it_end) {
+    result = *it_app;
+  }
+  return result;
+}
+
+DataAccessor<ApplicationManagerImpl::AppsWaitRegistrationSet>
+ApplicationManagerImpl::apps_waiting_for_registration() const {
+  return DataAccessor<AppsWaitRegistrationSet>(
+        ApplicationManagerImpl::instance()->apps_to_register_,
+        ApplicationManagerImpl::instance()->apps_to_register_list_lock_);
+}
+
+bool ApplicationManagerImpl::IsAppsQueriedFrom(
+    const connection_handler::DeviceHandle handle) const {
+  sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+  AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
+  AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
+  for (; it != it_end; ++it) {
+    if (handle == (*it)->device()) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(
+    const connection_handler::DeviceHandle handle,
+    bool is_greyed_out) {
+  sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+  AppsWaitRegistrationSet::iterator it = apps_to_register_.begin();
+  AppsWaitRegistrationSet::const_iterator it_end = apps_to_register_.end();
+  for (; it != it_end; ++it) {
+    if (handle == (*it)->device()) {
+      (*it)->set_greyed_out(is_greyed_out);
+    }
+  }
 }
 
 void ApplicationManagerImpl::OnErrorSending(
@@ -1200,6 +1269,9 @@ void ApplicationManagerImpl::SendMessageToMobile(
     }
   }
 
+  if (message_to_send->binary_data()) {
+    LOG4CXX_DEBUG(logger_, "Binary data size: " << message_to_send->binary_data()->size());
+  }
   messages_to_mobile_.PostMessage(impl::MessageToMobile(message_to_send,
                                   final_message));
 }
@@ -1425,17 +1497,19 @@ bool ApplicationManagerImpl::ManageHMICommand(
     return false;
   }
 
-  int32_t message_type = (*(message.get()))[strings::params][strings::message_type].asInt();
+  int32_t message_type =
+      (*(message.get()))[strings::params][strings::message_type].asInt();
 
-  if (kRequest == message_type) {
-    LOG4CXX_DEBUG(logger_, "ManageHMICommand");
-    request_ctrl_.addHMIRequest(command);
-  }
-
+  // Init before adding to request controller to be able to set request timeout
   if (command->Init()) {
+    if (kRequest == message_type) {
+      LOG4CXX_DEBUG(logger_, "ManageHMICommand");
+      request_ctrl_.addHMIRequest(command);
+    }
     command->Run();
       if (kResponse == message_type) {
-        int32_t correlation_id = (*(message.get()))[strings::params][strings::correlation_id].asInt();
+        int32_t correlation_id =
+            (*(message.get()))[strings::params][strings::correlation_id].asInt();
         request_ctrl_.terminateHMIRequest(correlation_id);
       }
       return true;
@@ -1447,39 +1521,27 @@ bool ApplicationManagerImpl::Init() {
   LOG4CXX_TRACE(logger_, "Init application manager");
   const std::string app_storage_folder =
       profile::Profile::instance()->app_storage_folder();
-  if (!file_system::DirectoryExists(app_storage_folder)) {
-    LOG4CXX_WARN(logger_, "Storage directory doesn't exist");
-    // if storage directory doesn't exist try to create it
-    if (!file_system::CreateDirectoryRecursively(app_storage_folder)) {
-      LOG4CXX_ERROR(logger_, "Unable to create Storage directory "
-                    << app_storage_folder);
-      return false;
-    }
-  }
-  if (!(file_system::IsWritingAllowed(app_storage_folder) &&
-        file_system::IsReadingAllowed(app_storage_folder))) {
-    LOG4CXX_ERROR(logger_,
-                  "Storage directory doesn't have read/write permissions");
+  if (!InitDirectory(app_storage_folder, TYPE_STORAGE) ||
+      !IsReadWriteAllowed(app_storage_folder, TYPE_STORAGE)) {
     return false;
   }
 
   const std::string system_files_path =
       profile::Profile::instance()->system_files_path();
-  if (!file_system::DirectoryExists(system_files_path)) {
-    LOG4CXX_WARN(logger_, "System files directory doesn't exist");
-    // if system directory doesn't exist try to create it
-    if (!file_system::CreateDirectoryRecursively(system_files_path)) {
-      LOG4CXX_ERROR(logger_, "Unable to create System directory "
-                    << system_files_path);
-      return false;
-    }
-  }
-  if (!(file_system::IsWritingAllowed(system_files_path) &&
-        file_system::IsReadingAllowed(system_files_path))) {
-    LOG4CXX_ERROR(logger_,
-                  "System directory doesn't have read/write permissions");
+  if (!InitDirectory(system_files_path, TYPE_SYSTEM) ||
+      !IsReadWriteAllowed(system_files_path, TYPE_SYSTEM)) {
     return false;
   }
+
+  const std::string app_icons_folder =
+      profile::Profile::instance()->app_icons_folder();
+  if (!InitDirectory(app_icons_folder, TYPE_ICONS)) {
+    return false;
+  }
+  // In case there is no R/W permissions for this location, SDL just has to
+  // log this and proceed
+  IsReadWriteAllowed(app_icons_folder, TYPE_ICONS);
+
   if (policy::PolicyHandler::instance()->PolicyEnabled()) {
     if(!policy::PolicyHandler::instance()->LoadPolicyLibrary()) {
       LOG4CXX_ERROR(logger_, "Policy library is not loaded. Check LD_LIBRARY_PATH");
@@ -1842,58 +1904,103 @@ HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
   return hmi_capabilities_;
 }
 
-void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array) {
-
+void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
+                                                const uint32_t connection_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace policy;
+  using namespace profile;
 
   const std::size_t arr_size(obj_array.size());
   for (std::size_t idx = 0; idx < arr_size; ++idx) {
-
     const SmartObject& app_data = obj_array[idx];
-    if (app_data.isValid()) {
-      const std::string url_schema(app_data[strings::urlSchema].asString());
-      const std::string package_name(app_data[strings::packageName].asString());
-      const std::string mobile_app_id(app_data[strings::app_id].asString());
-      const std::string appName(app_data[strings::app_name].asString());
 
-      const uint32_t hmi_app_id(GenerateNewHMIAppID());
+    if (!(app_data.keyExists(json::name) && app_data.keyExists(json::appId))) {
+      LOG4CXX_DEBUG(logger_, "The entry in query apps json is not valid");
+      continue;
+    }
 
-      ApplicationSharedPtr app(
-            new ApplicationImpl(0,
-                                mobile_app_id,
-                                appName,
-                                PolicyHandler::instance()->GetStatisticManager()));
-      if (app) {
-        app->SetShemaUrl(url_schema);
-        app->SetPackageName(package_name);
-        app->set_hmi_application_id(hmi_app_id);
+    const std::string mobile_app_id(app_data[json::appId].asString());
+    ApplicationSharedPtr registered_app =
+        ApplicationManagerImpl::instance()->
+        application_by_policy_id(mobile_app_id);
+    if (registered_app) {
+      LOG4CXX_DEBUG(logger_, "Application with the same id: " << mobile_app_id
+                    << " is registered already.");
+      continue;
+    }
 
-        sync_primitives::AutoLock lock(apps_to_register_list_lock_);
-        apps_to_register_.insert(app);
-      }
+    std::string url_scheme;
+    std::string package_name;
+    std::string os_type;
+    if (app_data.keyExists(json::ios)) {
+      os_type = json::ios;
+      url_scheme = app_data[os_type][json::urlScheme].asString();
+    } else if (app_data.keyExists(json::android)) {
+      os_type = json::android;
+      package_name =
+          app_data[os_type][json::packageName].asString();
+    }
+
+    const std::string appName(app_data[json::name].asString());
+
+
+    const uint32_t hmi_app_id = resume_ctrl_.IsApplicationSaved(mobile_app_id)?
+          resume_ctrl_.GetHMIApplicationID(mobile_app_id) : GenerateNewHMIAppID();
+
+    const std::string app_icon_dir(Profile::instance()->app_icons_folder());
+    const std::string full_icon_path(app_icon_dir + "/" + mobile_app_id);
+
+    uint32_t device_id = 0;
+    connection_handler::ConnectionHandlerImpl* con_handler_impl =
+      static_cast<connection_handler::ConnectionHandlerImpl*>(
+        connection_handler_);
+
+    if (-1 == con_handler_impl->GetDataOnSessionKey(
+          connection_key, NULL, NULL, &device_id)) {
+      LOG4CXX_ERROR(logger_,
+                    "Failed to create application: no connection info.");
+      continue;
+    }
+
+    ApplicationSharedPtr app(
+          new ApplicationImpl(0,
+                              mobile_app_id,
+                              appName,
+                              PolicyHandler::instance()->GetStatisticManager()));
+    if (app) {
+      app->SetShemaUrl(url_scheme);
+      app->SetPackageName(package_name);
+      app->set_app_icon_path(full_icon_path);
+      app->set_hmi_application_id(hmi_app_id);
+      app->set_device(device_id);
+
+      sync_primitives::AutoLock lock(apps_to_register_list_lock_);
+      LOG4CXX_DEBUG(logger_, "apps_to_register_ size before: "
+                    << apps_to_register_.size());
+      apps_to_register_.insert(app);
+      LOG4CXX_DEBUG(logger_, "apps_to_register_ size after: "
+                    << apps_to_register_.size());
     }
   }
 }
 
 void ApplicationManagerImpl::ProcessQueryApp(
-    const smart_objects::SmartObject& sm_object) {
+    const smart_objects::SmartObject& sm_object,
+    const uint32_t connection_key) {
+  LOG4CXX_AUTO_TRACE(logger_);
   using namespace policy;
-  using namespace profile;
 
-  if (sm_object.keyExists(strings::application)) {
-    SmartArray* obj_array = sm_object[strings::application].asArray();
-    if (NULL != obj_array) {
-      const std::string app_icon_dir(Profile::instance()->app_icons_folder());
-      CreateApplications(*obj_array);
-      SendUpdateAppList();
+  SmartArray* obj_array = sm_object[json::response].asArray();
+  if (NULL != obj_array) {
+    CreateApplications(*obj_array, connection_key);
+    SendUpdateAppList();
 
-      AppsWaitRegistrationSet::const_iterator it = apps_to_register_.begin();
-      for (; it != apps_to_register_.end(); ++it) {
+    AppsWaitRegistrationSet::const_iterator it = apps_to_register_.begin();
+    for (; it != apps_to_register_.end(); ++it) {
 
-        const std::string full_icon_path(app_icon_dir + "/" + (*it)->mobile_app_id());
-        if (file_system::FileExists(full_icon_path)) {
-          MessageHelper::SendSetAppIcon((*it)->hmi_app_id(), full_icon_path);
-        }
+      const std::string full_icon_path((*it)->app_icon_path());
+      if (file_system::FileExists(full_icon_path)) {
+        MessageHelper::SendSetAppIcon((*it)->hmi_app_id(), full_icon_path);
       }
     }
   }
@@ -2062,6 +2169,26 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
   request_ctrl_.terminateAllHMIRequests();
 }
 
+void ApplicationManagerImpl::RemoveAppsWaitingForRegistration(
+    const connection_handler::DeviceHandle handle) {
+  DevicePredicate device_finder(handle);
+  apps_to_register_list_lock_.Acquire();
+  AppsWaitRegistrationSet::iterator it_app =
+      std::find_if(apps_to_register_.begin(), apps_to_register_.end(),
+                device_finder);
+
+  while (apps_to_register_.end()!= it_app) {
+    LOG4CXX_DEBUG(logger_, "Waiting app: " << (*it_app)->name()
+                  << " is removed.");
+    apps_to_register_.erase(it_app);
+    it_app = std::find_if(apps_to_register_.begin(),
+                          apps_to_register_.end(),
+                          device_finder);
+  }
+
+  apps_to_register_list_lock_.Release();
+}
+
 void ApplicationManagerImpl::UnregisterApplication(
   const uint32_t& app_id, mobile_apis::Result::eType reason,
   bool is_resuming, bool is_unexpected_disconnect) {
@@ -2095,12 +2222,14 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
 
   ApplicationSharedPtr app_to_remove;
+  connection_handler::DeviceHandle handle = 0;
   {
     ApplicationListAccessor accessor;
     ApplictionSetConstIt it = accessor.begin();
     for (; it != accessor.end(); ++it) {
       if ((*it)->app_id() == app_id) {
         app_to_remove = *it;
+        handle = app_to_remove->device();
         break;
       }
     }
@@ -2109,7 +2238,18 @@ void ApplicationManagerImpl::UnregisterApplication(
       return;
     }
     accessor.Erase(app_to_remove);
+
+    AppV4DevicePredicate finder(handle);
+    ApplicationSharedPtr app = accessor.Find(finder);
+    if (!app) {
+      LOG4CXX_DEBUG(logger_, "There is no more SDL4 apps with device handle: "
+                    << handle);
+
+      RemoveAppsWaitingForRegistration(handle);
+      SendUpdateAppList();
+    }
   }
+
   if (is_resuming) {
       resume_ctrl_.SaveApplication(app_to_remove);
   } else {
@@ -2910,6 +3050,50 @@ ProtocolVersion ApplicationManagerImpl::SupportedSDLVersion() const {
   return ProtocolVersion::kV2;
 }
 
+const std::string ApplicationManagerImpl::DirectoryTypeToString(
+    ApplicationManagerImpl::DirectoryType type) const {
+  DirectoryTypeMap::const_iterator it = dir_type_to_string_map_.find(type);
+  if (it != dir_type_to_string_map_.end()) {
+    return it->second;
+  }
+  return "Unknown";
+}
+
+bool ApplicationManagerImpl::InitDirectory(
+    const std::string& path,
+    ApplicationManagerImpl::DirectoryType type) const {
+  const std::string directory_type = DirectoryTypeToString(type);
+  if (!file_system::DirectoryExists(path)) {
+    LOG4CXX_WARN(logger_, directory_type << " directory doesn't exist.");
+    // if storage directory doesn't exist try to create it
+    if (!file_system::CreateDirectoryRecursively(path)) {
+      LOG4CXX_ERROR(logger_, "Unable to create " << directory_type
+                    << " directory " << path);
+      return false;
+    }
+    LOG4CXX_DEBUG(logger_, directory_type << " directory has been created: "
+                  << path);
+  }
+
+  return true;
+}
+
+bool ApplicationManagerImpl::IsReadWriteAllowed(
+    const std::string& path,
+    DirectoryType type) const {
+  const std::string directory_type = DirectoryTypeToString(type);
+  if (!(file_system::IsWritingAllowed(path) &&
+        file_system::IsReadingAllowed(path))) {
+    LOG4CXX_ERROR(logger_, directory_type
+                  << " directory doesn't have read/write permissions.");
+    return false;
+  }
+
+  LOG4CXX_DEBUG(logger_, directory_type
+                << " directory has read/write permissions.");
+
+  return true;
+}
 
 ApplicationManagerImpl::ApplicationListAccessor::~ApplicationListAccessor() {
 }

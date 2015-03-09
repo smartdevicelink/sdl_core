@@ -573,14 +573,27 @@ class Profile : public utils::Singleton<Profile> {
                        const char* const pKey) const;
 
     /**
-     * @brief Write to log content of container
-     * @param array Source array
-     * @param log Log string
+     * @brief Checks, if path is relative
+     * @param path Path
+     * @return true, if is relative, otherwise - false
      */
-    void LogContainer(const std::vector<std::string>& container,
-                      std::string* log);
+    bool IsRelativePath(const std::string& path);
 
-    // Members section
+    /**
+     * @brief Makes relative path absolute
+     * @param path Path
+     */
+    void MakeAbsolutePath(std::string& path);
+
+    /**
+     * @brief Converts input string to number
+     * @param input Input string
+     * @param output Output number
+     * @return true, if successfully converted, otherwise - false
+     */
+    bool StringToNumber(const std::string& input, uint64_t& output) const;
+
+private:
     bool                            launch_hmi_;
     std::string                     app_config_folder_;
     std::string                     app_storage_folder_;

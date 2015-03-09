@@ -58,16 +58,6 @@ const std::string kDefaultId = "default";
 const std::string kDeviceId = "device";
 
 /*
- *@brief Policy Services specifies Users of Updates
- * received from cloud through mobile device
- */
-enum PolicyServiceTypes {
-    SERVICE_NONE = 0,
-    IVSU = 0x04,
-    POLICY = 0x07
-};
-
-/*
  * @brief Status of policy table update
  */
 enum PolicyTableStatus {

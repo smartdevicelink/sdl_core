@@ -267,7 +267,7 @@ class DynamicApplicationDataImpl : public virtual Application {
      */
     inline bool is_reset_global_properties_active() const;
 
-  protected:
+protected:
     smart_objects::SmartObject* help_prompt_;
     smart_objects::SmartObject* timeout_prompt_;
     smart_objects::SmartObject* vr_help_title_;
@@ -292,7 +292,8 @@ class DynamicApplicationDataImpl : public virtual Application {
     uint32_t perform_interaction_ui_corrid_;
     bool is_reset_global_properties_active_;
     int32_t perform_interaction_mode_;
-  private:
+
+private:
     void SetGlobalProperties(const smart_objects::SmartObject& param,
                              void (DynamicApplicationData::*callback)(
                                const NsSmartDeviceLink::NsSmartObjects::SmartObject&));

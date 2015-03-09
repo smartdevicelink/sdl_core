@@ -1047,14 +1047,24 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
   LOG4CXX_INFO(
       logger_,
       "Sending heart beat acknowledgment for connection " << connection_id);
-  if (session_observer_->IsHeartBeatSupported(
-      connection_id, packet.session_id())) {
+  uint8_t protocol_version;
+  if (session_observer_->ProtocolVersionUsed(
+      connection_id, packet.session_id(), protocol_version)) {
     // TODO(EZamakhov): investigate message_id for HeartBeatAck
-    return SendHeartBeatAck(connection_id, packet.session_id(),
-                            packet.message_id());
+    if (PROTOCOL_VERSION_3 == protocol_version ||
+        PROTOCOL_VERSION_4 == protocol_version) {
+      return SendHeartBeatAck(connection_id, packet.session_id(),
+                              packet.message_id());
+    }
+    else {
+      LOG4CXX_WARN(logger_, "HeartBeat is not supported");
+      return RESULT_HEARTBEAT_IS_NOT_SUPPORTED;
+    }
+
+  } else {
+    LOG4CXX_WARN(logger_, "SendHeartBeatAck is failed connection or session does not exist");
+    return RESULT_FAIL;
   }
-  LOG4CXX_WARN(logger_, "HeartBeat is not supported");
-  return RESULT_HEARTBEAT_IS_NOT_SUPPORTED;
 }
 
 bool ProtocolHandlerImpl::TrackMessage(const uint32_t& connection_key) {

@@ -267,8 +267,10 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      * @param sm_object smart object wich is actually parsed json obtained within
      * system request.
+     * @param connection_key connection key for app, which sent system request
      */
-    void ProcessQueryApp(const smart_objects::SmartObject& sm_object);
+    void ProcessQueryApp(const smart_objects::SmartObject& sm_object,
+                         const uint32_t connection_key);
 
 #ifdef TIME_TESTER
     /**
@@ -790,6 +792,10 @@ class ApplicationManagerImpl : public ApplicationManager,
     struct ApplicationsMobileAppIdSorter {
       bool operator() (const ApplicationSharedPtr lhs,
                        const ApplicationSharedPtr rhs) {
+
+        if (lhs->mobile_app_id() == rhs->mobile_app_id()) {
+          return lhs->device() < rhs->device();
+        }
         return lhs->mobile_app_id() < rhs->mobile_app_id();
       }
     };
@@ -798,7 +804,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     typedef std::set<ApplicationSharedPtr,
                      ApplicationsAppIdSorter> ApplictionSet;
 
-    typedef std::set<ApplicationSharedPtr,
+    typedef std::multiset<ApplicationSharedPtr,
                      ApplicationsMobileAppIdSorter> AppsWaitRegistrationSet;
 
     // typedef for Applications list iterator
@@ -807,6 +813,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     // typedef for Applications list const iterator
     typedef ApplictionSet::const_iterator ApplictionSetConstIt;
 
+    DataAccessor<AppsWaitRegistrationSet> apps_waiting_for_registration() const;
+    ApplicationConstSharedPtr waiting_app(const uint32_t hmi_id) const;
 
     /**
      * Class for thread-safe access to applications list
@@ -913,6 +921,25 @@ class ApplicationManagerImpl : public ApplicationManager,
       }
     };
 
+    struct AppV4DevicePredicate {
+      connection_handler::DeviceHandle handle_;
+      AppV4DevicePredicate(const connection_handler::DeviceHandle handle):
+        handle_(handle) {}
+      bool operator () (const ApplicationSharedPtr app) const {
+        return app ? handle_ == app->device() &&
+                     ProtocolVersion::kV4 == app->protocol_version() : false;
+      }
+    };
+
+    struct DevicePredicate {
+      connection_handler::DeviceHandle handle_;
+      DevicePredicate(const connection_handler::DeviceHandle handle):
+        handle_(handle) {}
+      bool operator () (const ApplicationSharedPtr app) const {
+        return handle_ == app->device() ? true : false;
+      }
+    };
+
     struct SubscribedToIVIPredicate {
       int32_t vehicle_info_;
       SubscribedToIVIPredicate(int32_t  vehicle_info)
@@ -922,7 +949,28 @@ class ApplicationManagerImpl : public ApplicationManager,
       }
     };
 
-  private:
+    /**
+     * @brief Sends UpdateAppList notification to HMI
+     */
+    void SendUpdateAppList();
+
+    /**
+     * @brief Marks applications received through QueryApps as should be
+     * greyed out on HMI
+     * @param is_greyed_out, true, if should be greyed out, otherwise - false
+     * @param handle, device handle
+     */
+    void MarkAppsGreyOut(const connection_handler::DeviceHandle handle,
+                         bool is_greyed_out);
+
+    /**
+     * @brief Checks, if apps list had been queried already from certain device
+     * @param handle, Device handle
+     * @return true, if list had been queried already, otherwise - false
+     */
+    bool IsAppsQueriedFrom(const connection_handler::DeviceHandle handle) const;
+
+private:
     ApplicationManagerImpl();
 
     /**
@@ -974,14 +1022,13 @@ class ApplicationManagerImpl : public ApplicationManager,
     // CALLED ON audio_pass_thru_messages_ thread!
     virtual void Handle(const impl::AudioData message) OVERRIDE;
 
-    void SendUpdateAppList();
-
     template<typename ApplicationList>
     void PrepareApplicationListSO(ApplicationList app_list,
                                   smart_objects::SmartObject& applications) {
       CREATE_LOGGERPTR_LOCAL(logger_, "ApplicatinManagerImpl");
 
-      uint32_t app_count = 0;
+      smart_objects::SmartArray* app_array = applications.asArray();
+      uint32_t app_count = NULL == app_array ? 0 : app_array->size();
       typename ApplicationList::const_iterator it;
       for (it = app_list.begin(); it != app_list.end(); ++it) {
         if (!it->valid()) {
@@ -1010,11 +1057,11 @@ class ApplicationManagerImpl : public ApplicationManager,
      *
      * @param obj_array applications array.
      *
-     * @param app_icon_dir application icons directory
-     *
-     * @param apps_with_icon container which store application and it's icon path.
+     * @param connection_key connection key of app, which provided app list to
+     * be created
      */
-    void CreateApplications(smart_objects::SmartArray& obj_array);
+    void CreateApplications(smart_objects::SmartArray& obj_array,
+                            const uint32_t connection_key);
 
     /*
      * @brief Function is called on IGN_OFF, Master_reset or Factory_defaults
@@ -1026,8 +1073,6 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @brief returns true if low voltage state is active
      */
     bool IsLowVoltage();
-
-  private:
 
     /**
      * @brief OnHMILevelChanged the callback that allows SDL to react when
@@ -1108,7 +1153,50 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     ProtocolVersion SupportedSDLVersion() const;
 
-    // members
+    /**
+     * @brief Types of directories used by Application Manager
+     */
+    enum DirectoryType {
+      TYPE_STORAGE,
+      TYPE_SYSTEM,
+      TYPE_ICONS
+    };
+
+    typedef std::map<DirectoryType, std::string> DirectoryTypeMap;
+    DirectoryTypeMap dir_type_to_string_map_;
+
+    /**
+     * @brief Converts directory type to string
+     * @param type Directory type
+     * @return Stringified type
+     */
+    const std::string DirectoryTypeToString(DirectoryType type) const;
+
+    /**
+     * @brief Creates directory path, if necessary
+     * @param path Directory path
+     * @param type Directory type
+     * @return true, if succedeed, otherwise - false
+     */
+    bool InitDirectory(const std::string& path, DirectoryType type) const;
+
+    /**
+     * @brief Checks, whether r/w permissions are present for particular path
+     * @param path Directory path
+     * @param type Directory type
+     * @return true, if allowed, otherwise - false
+     */
+    bool IsReadWriteAllowed(const std::string& path, DirectoryType type) const;
+
+    /**
+     * @brief Removes apps, waiting for registration related to
+     * certain device handle
+     * @param handle, Device handle
+     */
+    void RemoveAppsWaitingForRegistration(
+        const connection_handler::DeviceHandle handle);
+
+  private:
 
     /**
      * @brief List of applications
@@ -1225,6 +1313,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     timer::TimerThread<ApplicationManagerImpl>  tts_global_properties_timer_;
 
     bool is_low_voltage_;
+
     DISALLOW_COPY_AND_ASSIGN(ApplicationManagerImpl);
 
     FRIEND_BASE_SINGLETON_CLASS(ApplicationManagerImpl);

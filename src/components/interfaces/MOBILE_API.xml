@@ -4908,11 +4908,6 @@
     <param name="length" type="Integer" minvalue="0" maxvalue="100000000000" mandatory="false">
        <description>Optional length in bytes for resuming partial data chunks</description>
     </param>
-
-    <!--Parameters below are used only with requestType = LAUNCH_APP -->
-    <param name="appID" type="String" maxlength="100" mandatory="false" />
-    <param name="packageName" type="String" maxlength="1000" mandatory="false" />
-    <param name="urlSchema" type="String" maxlength="1000" mandatory="false" />
   </function>	
 
 <!-- ~~~~~~~~~~~~~~~~~~ -->
