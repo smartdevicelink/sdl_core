@@ -60,7 +60,7 @@ class TCPClientDelegate : public threads::ThreadDelegate {
 CANTCPConnection::CANTCPConnection()
   : CANConnection()
   , address_("127.0.0.1")
-  , port_(8090)
+  , port_(8092)
   , socket_(-1)
   , current_state_(NONE)
   , thread_(NULL) {

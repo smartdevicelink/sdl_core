@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-#include "gmock/gmock.h"
 #include "can_cooperation/can_module.h"
 #include "can_cooperation/can_app_extension.h"
 #include "functional_module/module_observer.h"

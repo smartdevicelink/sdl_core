@@ -6,7 +6,7 @@
 #include <cstring>
 #include "gtest/gtest.h"
 #include "can_cooperation/can_tcp_connection.h"
-#include "utils/logger.h"
+#include "mock_can_connection.h"
 
 namespace can_cooperation {
 
@@ -109,20 +109,6 @@ bool TCPServer::Receive(std::string* message) {
   return true;
 }
 
-class CanTcpConnectionTest : public ::testing::Test {
- protected:
-  static TCPServer server;
-
-  void SetUp() {
-    INIT_LOGGER("log4cxx.properties");
-    server.Start();
-  }
-
-  void TearDown() {
-    server.Stop();
-  }
-};
-
 class TcpConnectionTest {
  public:
   TcpConnectionTest(CANTCPConnection& conn)
@@ -134,19 +120,15 @@ class TcpConnectionTest {
   CANTCPConnection& conn_;
 };
 
-TCPServer CanTcpConnectionTest::server("127.0.0.1", 8090);
-
-TEST_F(CanTcpConnectionTest, OpenClose) {
+TEST(CanTcpConnectionTest, OpenClose) {
+  TCPServer server("127.0.0.1", 8092);
+  server.Start();
+  sleep(4);
   CANTCPConnection conn;
+  MockCANConnectionObserver mock;
+  conn.set_observer(&mock);
   TcpConnectionTest test(conn);
   ASSERT_EQ(ConnectionState::OPENED, test.state());
-  server.WaitConnect();
-  EXPECT_EQ(ConnectionState::CLOSED, test.state());
-}
-/*
-TEST_F(CanTcpConnectionTest, WriteData) {
-  CANTCPConnection conn;
-  ASSERT_EQ(ConnectionState::OPENED, conn.OpenConnection());
   server.WaitConnect();
 
   Json::Value value;
@@ -156,33 +138,26 @@ TEST_F(CanTcpConnectionTest, WriteData) {
   value["data"]["series"] = "A";
   value["data"]["additional"] = 987;
 
-  conn.WriteData(value.toStyledString());
-  EXPECT_EQ(ConnectionState::OPENED, conn.Flash());
+  conn.SendMessage(value.toStyledString());
+  ASSERT_EQ(ConnectionState::OPENED, test.state());
   std::string server_msg;
   EXPECT_TRUE(server.Receive(&server_msg));
-  EXPECT_EQ(value.toStyledString(), server_msg);
+  ASSERT_EQ(value.toStyledString(), server_msg);
 
-  EXPECT_EQ(ConnectionState::CLOSED, conn.CloseConnection());
-}
-
-TEST_F(CanTcpConnectionTest, ReadData) {
-  CANTCPConnection conn;
-  ASSERT_EQ(ConnectionState::OPENED, conn.OpenConnection());
-  server.WaitConnect();
-
-  Json::Value value;
   value["model"] = "Mustang";
   value["data"] = Json::Value(Json::ValueType::objectValue);
-  value["data"]["version"] = 1.0;
-  value["data"]["series"] = "A";
+  value["data"]["version"] = 2.0;
+  value["data"]["series"] = "B";
 
   server.Send(value.toStyledString());
-  EXPECT_EQ(ConnectionState::OPENED, conn.GetData());
+  std::string received_msg;
+  ASSERT_EQ(ConnectionState::OPENED, conn.ReadMessage(&received_msg));
+  ASSERT_EQ(ConnectionState::OPENED, test.state());
+  ASSERT_EQ(value.toStyledString(), received_msg);
 
-  Json::Value received_msg = conn.ReadData();
-  EXPECT_EQ(value.toStyledString(), received_msg.toStyledString());
-
-  EXPECT_EQ(ConnectionState::CLOSED, conn.CloseConnection());
+  server.Stop();
+  sleep(2);
+  EXPECT_EQ(ConnectionState::CLOSED, conn.SendMessage("hello"));
 }
-*/
+
 }  // namespace can_cooperation
