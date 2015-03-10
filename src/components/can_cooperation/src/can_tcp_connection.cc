@@ -44,7 +44,7 @@
 
 namespace can_cooperation {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "CANTCPConnection");
+CREATE_LOGGERPTR_GLOBAL(logger_, "CANTCPConnection")
 
 class TCPClientDelegate : public threads::ThreadDelegate {
  public:
@@ -61,7 +61,7 @@ CANTCPConnection::CANTCPConnection()
   : CANConnection()
   , address_("127.0.0.1")
   , port_(8092)
-  , socket_(-1)
+, socket_(-1)
   , current_state_(NONE)
   , thread_(NULL) {
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
@@ -78,7 +78,7 @@ CANTCPConnection::CANTCPConnection()
     }
   }
   LOG4CXX_INFO(logger_, "Connecting to "
-               << address_ << " on port " << port_);
+        << address_ << " on port " << port_);
   if (OpenConnection() == ConnectionState::OPENED) {
     thread_ = new threads::Thread("CANClientListener",
                                   new TCPClientDelegate(this));
@@ -86,7 +86,7 @@ CANTCPConnection::CANTCPConnection()
     thread_->startWithOptions(threads::ThreadOptions(kStackSize));
   } else {
     LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
-  }
+}
 }
 
 CANTCPConnection::~CANTCPConnection() {
@@ -146,8 +146,8 @@ ConnectionState CANTCPConnection::OpenConnection() {
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr(address_.c_str());
     server_addr.sin_port = htons(port_);
-    if (-1 == connect(socket_, (struct sockaddr*)&server_addr,
-                      sizeof(server_addr))) {
+    if (-1 == connect(socket_, (struct sockaddr *)&server_addr,
+              sizeof(server_addr))) {
       current_state_ = INVALID;
     } else {
       current_state_ = OPENED;
@@ -182,7 +182,7 @@ TCPClientDelegate::TCPClientDelegate(CANTCPConnection* can_connection)
   : can_connection_(can_connection),
     stop_flag_(false) {
   DCHECK(can_connection);
-}
+      }
 
 TCPClientDelegate::~TCPClientDelegate() {
   can_connection_ = NULL;
@@ -195,13 +195,13 @@ void TCPClientDelegate::threadMain() {
     while (can_connection_->ReadMessage(&message_from_can) ==
            ConnectionState::OPENED) {
       can_connection_->observer_->OnCANMessageReceived(message_from_can);
-    }
+  }
     if (can_connection_->current_state_ != ConnectionState::OPENED) {
       can_connection_->observer_->OnCANConnectionError(
         can_connection_->current_state_);
+}
     }
   }
-}
 
 bool TCPClientDelegate::exitThreadMain() {
   stop_flag_ = true;

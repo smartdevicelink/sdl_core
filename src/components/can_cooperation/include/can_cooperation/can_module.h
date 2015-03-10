@@ -122,7 +122,8 @@ class CANModule : public functional_modules::GenericModule,
   friend class CanModuleTest;
 };
 
-EXPORT_FUNCTION(CANModule);
+EXPORT_FUNCTION(CANModule)
+
 }
 
 #endif  //  SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_H_

@@ -39,10 +39,10 @@ namespace can_cooperation {
 
 namespace commands {
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "OnRadioDetailsNotification");
+CREATE_LOGGERPTR_GLOBAL(logger_, "OnRadioDetailsNotification")
 
 OnRadioDetailsNotification::OnRadioDetailsNotification(
-    const application_manager::MessagePtr& message)
+  const application_manager::MessagePtr& message)
   : BaseCommandNotification(message) {
 }
 
@@ -54,7 +54,7 @@ void OnRadioDetailsNotification::Run() {
 
   CANAppExtensionPtr can_app_extension;
   application_manager::ApplicationSharedPtr app =
-      GetApplicationWithControl(can_app_extension);
+    GetApplicationWithControl(can_app_extension);
 
   if (app) {
     message_->set_connection_key(app->app_id());

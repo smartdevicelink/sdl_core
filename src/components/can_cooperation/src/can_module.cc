@@ -51,7 +51,7 @@ using event_engine::EventDispatcher;
 namespace hmi_api = functional_modules::hmi_api;
 
 EXPORT_FUNCTION_IMPL(CANModule);
-CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule");
+CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule")
 
 CANModule::CANModule()
   : GenericModule(kCANModuleID),
@@ -152,7 +152,7 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
 
   LOG4CXX_INFO(logger_, "Can message: " << can_msg);
 
-  if (ProcessResult::PROCESSED != HandleMessage(msg)) {
+  if (HandleMessage(msg) != ProcessResult::PROCESSED) {
     LOG4CXX_ERROR(logger_, "Failed process CAN message!");
   }
 }
