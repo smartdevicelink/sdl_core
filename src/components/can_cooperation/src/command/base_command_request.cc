@@ -307,12 +307,6 @@ void BaseCommandRequest::Run() {
   application_manager::TypeGrant grant = service_->CheckPolicyPermissions(
       message_->json_message(), seat);
 
-  // TODO(KKolodiy): this check only support GrantAccessRequest
-  // Need to remove later when CoreService was implemented
-  if (extension->IsControlGiven()) {
-    grant = application_manager::kAllowed;
-  }
-
   switch (grant) {
     case application_manager::kAllowed:
       Execute();
@@ -352,15 +346,12 @@ void BaseCommandRequest::on_event(const event_engine::Event<application_manager:
     std::string info;
     bool allowed = ParseResultCode(value, result_code, info);
 
+    service_->SetAccess(app_, message_->function_id(), allowed);
     if (allowed) {
-      // service_->SetGrantAccess(true)
       Execute();
     } else {
-      // service_->SetGrantAccess(false)
       SendResponse(false, result_codes::kDisallowed, "");
     }
-    // TODO(KKolodiy): remove next line after remove GrantAccessRequest
-    SendResponse(allowed, result_code.c_str(), info);
   } else {
     OnEvent(event);
   }

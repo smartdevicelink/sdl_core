@@ -43,7 +43,8 @@ using namespace json_keys;
 
 BaseCommandNotification::BaseCommandNotification(
     const application_manager::MessagePtr& message)
-  : message_(message) {
+  : message_(message),
+    need_reset_(false) {
   service_ = CANModule::instance()->service();
 
   Json::Value value;
@@ -87,7 +88,9 @@ application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicatio
 }
 
 void BaseCommandNotification::Run() {
-  service_->ResetAccess(message_->function_id());
+  if (need_reset_) {
+    service_->ResetAccess(message_->function_id());
+  }
   Execute();
 }
 

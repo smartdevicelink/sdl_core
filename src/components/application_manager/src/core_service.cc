@@ -44,7 +44,7 @@ struct AppExtensionPredicate {
 };
 }
 
-CoreService::CoreService() {
+CoreService::CoreService() : access_(TypeGrant::kManual) {
 }
 
 CoreService::~CoreService() {
@@ -53,17 +53,18 @@ CoreService::~CoreService() {
 TypeGrant CoreService::CheckPolicyPermissions(const std::string& json_message,
                                               const std::string& seat) {
   // TODO(KKolodiy): stub it will be implemented later
-  return kManual;
+  return access_;
 }
 
-void CoreService::SetAccess(const std::string& policy_app_id,
-                            const std::string& functional_group,
+void CoreService::SetAccess(ApplicationSharedPtr app, int32_t function_id,
                             bool access) {
   // TODO(KKolodiy): stub it will be implemented later
+  access_ = access ? TypeGrant::kAllowed : TypeGrant::kDisallowed;
 }
 
 void CoreService::ResetAccess(int32_t function_id) {
   // TODO(KKolodiy): stub it will be implemented later
+  access_ = TypeGrant::kManual;
 }
 
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {

@@ -55,8 +55,8 @@ class MockService : public Service {
   MOCK_METHOD1(SubscribeToHMINotification,
       void(const std::string& hmi_notification));
   MOCK_METHOD3(SetAccess,
-      void(const std::string& policy_app_id,
-           const std::string& functional_group,
+      void(ApplicationSharedPtr app,
+           int32_t function_id,
            bool access));
   MOCK_METHOD1(ResetAccess, void(int32_t function_id));
 };

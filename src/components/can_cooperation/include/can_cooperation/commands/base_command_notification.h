@@ -85,6 +85,13 @@ class BaseCommandNotification : public Command {
    * @brief executes specific logic of children classes
    */
   virtual void Execute() = 0;
+
+  void set_need_reset(bool need_reset) {
+    need_reset_ = need_reset;
+  }
+
+ private:
+  bool need_reset_;
 };
 
 }  // namespace commands

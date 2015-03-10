@@ -65,13 +65,12 @@ class Service {
                                            const std::string& seat) = 0;
 
   /**
-   * Sets access to functional group for application
-   * @param policy_app_id
-   * @param functional_group name of functional group
+   * Sets access to functional group which contains given RPC for application
+   * @param app pointer of application
+   * @param function_id id RPC
    * @param access true if assess is allowed
    */
-  virtual void SetAccess(const std::string& policy_app_id,
-                         const std::string& functional_group,
+  virtual void SetAccess(ApplicationSharedPtr app, int32_t function_id,
                          bool access) = 0;
 
   /**

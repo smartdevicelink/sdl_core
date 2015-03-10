@@ -51,11 +51,7 @@ GrantAccessRequest::~GrantAccessRequest() {
 
 void GrantAccessRequest::Execute() {
   LOG4CXX_TRACE_ENTER(logger_);
-  // Need to remove this message but temporary it is used indent setting message
-  // to create CAN extension
-  CANAppExtensionPtr extension = GetAppExtension(app());
-  extension->GiveControl(true);
-  LOG4CXX_TRACE_EXIT(logger_);
+  SendResponse(true, result_codes::kSuccess, "Allowed");
 }
 
 void GrantAccessRequest::OnEvent(
