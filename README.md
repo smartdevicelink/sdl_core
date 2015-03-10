@@ -4,6 +4,13 @@ SmartDeviceLink is a way to connect applications on a smart phone to a vehicle s
 
 Pull Requests Welcome!
 
+## Documentation
+
+  * [Software Architecture Document](https://app.box.com/s/v5ymu5kathzkwfx8iigxxdpr7d5a2xhh)
+  * [Transport Manager Programming Guide](https://app.box.com/s/1pjquttvmhf19uujtw4x4fv4t1leqasa)
+  * [Software Detailed Design](https://app.box.com/s/ohgrvemtx39f8hfea1ab676xxrzvyx1y)
+  * [Integration Guidelines](https://app.box.com/s/uikmmpeozq6j902uzl1he43n6ct010jp)
+
 ## SDL Core
 
 The Core component of SDL is meant to run on a vehicle's computing system. It connects to a consumer's smartphone over a variety of transports such as Bluetooth, USB, Android AOA, and TCP. Transport adapters can be written to extend the capabilities of Core's transport manager. Once a smartphone is connected over a preferred transport applications on the mobile phone that implement the mobile libraries can begin to communicate with the vehicle. First, the Core component queries the phone to understand which applications are compatible. The user interface shows the list of compatible applications to the driver. When the user selects an application, it is sent an HMI_STATUS level of FULL (all applications start with a BACKGROUND status). Once an application has the FULL status, it is allowed to populate a template, defined by the vehicle manufacturer, with content such as metadata, artwork, buttons and even supported grammars for voice commands (voice recognition engine not included).
@@ -11,7 +18,7 @@ The Core component of SDL is meant to run on a vehicle's computing system. It co
 The communication between the Core component and the mobile phone is based on JSON RPC. The communication between the Core component and the user interface is also via JSON RPC. The current code base includes an HTML5 user interface that was released by Ford Motor Company for the My Ford Touch system. The core component can also be configured to support QT5 and DBus, and includes a QT interface as well.
 
 ## Project Status
-We're ramping up our efforts to get SmartDeviceLink developed and maintained directly in the open. For the Mobile libraries, we're expecting better integration soon, SDL Core is slightly more complicated. We are currently working on generating documentation, creating a developer portal, an open forum, interface requirements, HMI guidelines, Mobile validation, and everything else that we've been asked for to renew the community's interest in this project. From a technical standpoint, SDL is stable, and the most work is being put into making it a more robust solution for app connectivity. We are, however, definitely looking for and interesting in other people and company's contributions to SDL whether it be feature based, bug fixes, healthy conversation, or even just suggestions for improvement.
+We're ramping up our efforts to get SmartDeviceLink developed and maintained directly in the open. For the Mobile libraries, we're expecting better integration soon, SDL Core is slightly more complicated. We are currently working on generating documentation, creating a developer portal, an open forum, interface requirements, HMI guidelines, Mobile validation, and everything else that we've been asked for to renew the community's interest in this project. From a technical standpoint, SDL is stable, and the most work is being put into making it a more robust solution for app connectivity. We are, however, definitely looking for and interested in other people and company's contributions to SDL whether it be feature based, bug fixes, healthy conversation, or even just suggestions for improvement.
 
 # Getting Started
 A quick guide to installing, configuring, and running an instance of the SDL Core on a linux OS.
@@ -25,11 +32,9 @@ A quick guide to installing, configuring, and running an instance of the SDL Cor
 
 ```
 %make
-%sudo make install
+%make install
 %cp bin/mykey.pem src/appMain
 %cp bin/mycert.pem src/appMain
-%sudo updatedb
-%sudo ldconfig
 ```
 
 ## Start SDL Core
