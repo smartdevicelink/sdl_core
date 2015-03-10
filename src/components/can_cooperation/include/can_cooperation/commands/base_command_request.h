@@ -69,10 +69,9 @@ class BaseCommandRequest : public Command,
    */
   virtual void OnTimeout();
 
-  /**
-   * @brief runs command
-   */
   void Run();
+  void on_event(const event_engine::Event<application_manager::MessagePtr,
+                std::string>& event);
 
  protected:
   application_manager::MessagePtr message_;
@@ -140,6 +139,13 @@ class BaseCommandRequest : public Command,
    * @brief executes specific logic of children classes
    */
   void virtual Execute() = 0;
+
+  /**
+   * @brief Interface method that is called whenever new event received
+   * @param event The received event
+   */
+  void virtual OnEvent(const event_engine::Event<application_manager::MessagePtr,
+                  std::string>& event) = 0;
 
  private:
   bool to_can_;

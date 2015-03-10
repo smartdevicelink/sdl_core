@@ -51,22 +51,15 @@ CancelAccessRequest::~CancelAccessRequest() {
 }
 
 void CancelAccessRequest::Execute() {
-  LOG4CXX_INFO(logger_, "CancelAccessRequest::Run");
+  LOG4CXX_TRACE_ENTER(logger_);
 
   SendRequest(functional_modules::hmi_api::cancel_access, Json::Value(), true);
 }
 
-void CancelAccessRequest::on_event(const event_engine::Event<application_manager::MessagePtr,
-                                   std::string>& event) {
-  LOG4CXX_INFO(logger_, "CancelAccessRequest::on_event");
-
-  application_manager::ApplicationSharedPtr app =
-    service_->GetApplication(message_->connection_key());
-  if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, result_codes::kApplicationNotRegistered, "");
-    return;
-  }
+void CancelAccessRequest::OnEvent(
+    const event_engine::Event<application_manager::MessagePtr,
+    std::string>& event) {
+  LOG4CXX_TRACE_ENTER(logger_);
 
   if (functional_modules::hmi_api::cancel_access == event.id()) {
     std::string result_code;
@@ -79,7 +72,7 @@ void CancelAccessRequest::on_event(const event_engine::Event<application_manager
     bool success = ParseResultCode(value, result_code, info);
 
     if (success) {
-      CANAppExtensionPtr extension = GetAppExtension(app);
+      CANAppExtensionPtr extension = GetAppExtension(app());
       extension->GiveControl(false);
 
       CANModule::instance()->SetScanStarted(false);
@@ -88,8 +81,8 @@ void CancelAccessRequest::on_event(const event_engine::Event<application_manager
     SendResponse(success, result_code.c_str(), info);
   } else {
     LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
-    return;
   }
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands

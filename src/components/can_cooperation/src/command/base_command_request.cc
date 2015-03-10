@@ -288,6 +288,7 @@ bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
 }
 
 void BaseCommandRequest::Run() {
+  LOG4CXX_TRACE_ENTER(logger_);
   app_ = service_->GetApplication(message_->connection_key());
   if (!app_) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
@@ -300,16 +301,17 @@ void BaseCommandRequest::Run() {
     return;
   }
 
-// TODO(KKolodiy): get seat and give into CheckPolicyPermissions
-//  CANAppExtensionPtr extension = GetAppExtension(app_);
-//  if (!extension->IsControlGiven()) {
-//    LOG4CXX_ERROR(logger_, "Application doesn't have access!");
-//    SendResponse(false, result_codes::kRejected, "");
-//    return;
-//  }
+  // TODO(KKolodiy): get seat and give into CheckPolicyPermissions
+  CANAppExtensionPtr extension = GetAppExtension(app_);
 
   application_manager::TypeGrant grant = service_->CheckPolicyPermissions(
       message_->json_message());
+
+  // TODO(KKolodiy): this check only support GrantAccessRequest
+  // Need to remove later when CoreService was implemented
+  if (extension->IsControlGiven()) {
+    grant = application_manager::kAllowed;
+  }
 
   switch (grant) {
     case application_manager::kAllowed:
@@ -328,6 +330,41 @@ void BaseCommandRequest::Run() {
       LOG4CXX_ERROR(logger_, "Internal issue");
       SendResponse(false, result_codes::kDisallowed, "Internal issue");
   }
+  LOG4CXX_TRACE_EXIT(logger_);
+}
+
+void BaseCommandRequest::on_event(const event_engine::Event<application_manager::MessagePtr,
+                std::string>& event) {
+  LOG4CXX_TRACE_ENTER(logger_);
+  app_ = service_->GetApplication(message_->connection_key());
+  if (!app_) {
+    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
+    SendResponse(false, result_codes::kApplicationNotRegistered, "");
+    return;
+  }
+
+  if (event.id() == functional_modules::hmi_api::grant_access) {
+    Json::Value value;
+    Json::Reader reader;
+    reader.parse(event.event_message()->json_message(), value);
+
+    std::string result_code;
+    std::string info;
+    bool allowed = ParseResultCode(value, result_code, info);
+
+    if (allowed) {
+      // service_->SetGrantAccess(true)
+      Execute();
+    } else {
+      // service_->SetGrantAccess(false)
+      SendResponse(false, result_codes::kDisallowed, "");
+    }
+    // TODO(KKolodiy): remove next line after remove GrantAccessRequest
+    SendResponse(allowed, result_code.c_str(), info);
+  } else {
+    OnEvent(event);
+  }
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands

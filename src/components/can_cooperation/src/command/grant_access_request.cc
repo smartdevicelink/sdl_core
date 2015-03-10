@@ -50,46 +50,17 @@ GrantAccessRequest::~GrantAccessRequest() {
 }
 
 void GrantAccessRequest::Execute() {
-  LOG4CXX_INFO(logger_, "GrantAccessRequest::Run");
+  LOG4CXX_TRACE_ENTER(logger_);
   // Need to remove this message but temporary it is used indent setting message
   // to create CAN extension
   CANAppExtensionPtr extension = GetAppExtension(app());
+  extension->GiveControl(true);
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
-void GrantAccessRequest::on_event(
-  const event_engine::Event<application_manager::MessagePtr,
-  std::string>& event) {
-  LOG4CXX_INFO(logger_, "GrantAccessRequest::on_event");
-
-  application_manager::ApplicationSharedPtr app =
-    service_->GetApplication(message_->connection_key());
-  if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, result_codes::kApplicationNotRegistered, "");
-    return;
-  }
-
-  if (functional_modules::hmi_api::grant_access == event.id()) {
-    std::string result_code;
-    std::string info;
-
-    Json::Value value;
-    Json::Reader reader;
-    reader.parse(event.event_message()->json_message(), value);
-
-    bool success = ParseResultCode(value, result_code, info);
-
-    if (success) {
-      CANAppExtensionPtr extension = GetAppExtension(app);
-
-      extension->GiveControl(true);
-    }
-
-    SendResponse(success, result_code.c_str(), info);
-  } else {
-    LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
-    return;
-  }
+void GrantAccessRequest::OnEvent(
+    const event_engine::Event<application_manager::MessagePtr,
+    std::string>& event) {
 }
 
 }  // namespace commands

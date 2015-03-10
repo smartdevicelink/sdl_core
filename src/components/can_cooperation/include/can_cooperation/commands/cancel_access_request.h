@@ -62,7 +62,7 @@ class CancelAccessRequest : public BaseCommandRequest {
    *
    * @param event The received event
    */
-  void on_event(const event_engine::Event<application_manager::MessagePtr,
+  void OnEvent(const event_engine::Event<application_manager::MessagePtr,
                 std::string>& event);
 
   /**

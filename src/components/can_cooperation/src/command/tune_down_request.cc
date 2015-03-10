@@ -50,22 +50,15 @@ TuneDownRequest::~TuneDownRequest() {
 }
 
 void TuneDownRequest::Execute() {
-  LOG4CXX_INFO(logger_, "TuneDownRequest::Run");
+  LOG4CXX_TRACE_ENTER(logger_);
 
   SendRequest(functional_modules::can_api::tune_down, Json::Value());
 }
 
-void TuneDownRequest::on_event(const event_engine::Event<application_manager::MessagePtr,
-                               std::string>& event) {
-  LOG4CXX_INFO(logger_, "TuneDownRequest::on_event");
-
-  application_manager::ApplicationSharedPtr app =
-    service_->GetApplication(message_->connection_key());
-  if (!app.valid()) {
-    LOG4CXX_ERROR(logger_, "Application doesn't registered!");
-    SendResponse(false, result_codes::kApplicationNotRegistered, "");
-    return;
-  }
+void TuneDownRequest::OnEvent(
+    const event_engine::Event<application_manager::MessagePtr,
+    std::string>& event) {
+  LOG4CXX_TRACE_ENTER(logger_);
 
   if (functional_modules::can_api::tune_down == event.id()) {
     std::string result_code;
@@ -80,8 +73,8 @@ void TuneDownRequest::on_event(const event_engine::Event<application_manager::Me
     SendResponse(success, result_code.c_str(), info);
   } else {
     LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
-    return;
   }
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands
