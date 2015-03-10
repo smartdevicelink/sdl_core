@@ -86,6 +86,11 @@ application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicatio
   return application_manager::ApplicationSharedPtr();
 }
 
+void BaseCommandNotification::Run() {
+  service_->ResetAccess(message_->function_id());
+  Execute();
+}
+
 }  // namespace commands
 
 }  // namespace can_cooperation

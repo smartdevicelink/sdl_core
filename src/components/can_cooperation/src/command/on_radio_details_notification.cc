@@ -50,8 +50,8 @@ OnRadioDetailsNotification::OnRadioDetailsNotification(
 OnRadioDetailsNotification::~OnRadioDetailsNotification() {
 }
 
-void OnRadioDetailsNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnRadioDetailsNotification::Run");
+void OnRadioDetailsNotification::Execute() {
+  LOG4CXX_TRACE_ENTER(logger_);
 
 /*  std::string json = message_->json_message();
   if (validators::ValidationResult::SUCCESS ==
@@ -71,6 +71,7 @@ void OnRadioDetailsNotification::Run() {
     message_->set_connection_key(app->app_id());
     service_->SendMessageToMobile(message_);
   }
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands

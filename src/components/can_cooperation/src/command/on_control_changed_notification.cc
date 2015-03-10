@@ -49,19 +49,21 @@ OnControlChangedNotification::OnControlChangedNotification(
 OnControlChangedNotification::~OnControlChangedNotification() {
 }
 
-void OnControlChangedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnControlChangedNotification::Run");
+void OnControlChangedNotification::Execute() {
+  LOG4CXX_TRACE_ENTER(logger_);
 
   CANAppExtensionPtr can_app_extension;
   application_manager::ApplicationSharedPtr app =
     GetApplicationWithControl(can_app_extension);
 
-  if (app.valid()) {
+  if (app) {
+    // TODO(KKolodiy): need to remove next line after implementing CoreService
     can_app_extension->GiveControl(false);
     CANModule::instance()->SetScanStarted(false);
     message_->set_connection_key(app->app_id());
     service_->SendMessageToMobile(message_);
   }
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands

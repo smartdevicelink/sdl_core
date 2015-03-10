@@ -65,6 +65,8 @@ class BaseCommandNotification : public Command {
    */
   virtual void OnTimeout() {}
 
+  void Run();
+
  protected:
   application_manager::MessagePtr message_;
   application_manager::ServicePtr service_;
@@ -79,6 +81,10 @@ class BaseCommandNotification : public Command {
   application_manager::ApplicationSharedPtr GetApplicationWithControl(
     CANAppExtensionPtr& can_app_extension);
 
+  /**
+   * @brief executes specific logic of children classes
+   */
+  virtual void Execute() = 0;
 };
 
 }  // namespace commands

@@ -54,7 +54,7 @@ class OnRadioDetailsNotification : public BaseCommandNotification {
   /**
    * @brief Execute command
    */
-  virtual void Run();
+  virtual void Execute();
 
   /**
    * @brief OnRadioDetailsNotification class destructor

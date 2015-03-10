@@ -38,7 +38,6 @@
 #include "application_manager/application.h"
 #include "application_manager/message.h"
 
-
 namespace application_manager {
 
 enum TypeGrant {
@@ -59,9 +58,28 @@ class Service {
    * @brief Checks message permissions and parameters according to policy table
    * permissions
    * @param json string with params in json format
+   * @param seat seat of user
    * @return false if message blocked by policy
    */
-  virtual TypeGrant CheckPolicyPermissions(const std::string& json_message) = 0;
+  virtual TypeGrant CheckPolicyPermissions(const std::string& json_message,
+                                           const std::string& seat) = 0;
+
+  /**
+   * Sets access to functional group for application
+   * @param policy_app_id
+   * @param functional_group name of functional group
+   * @param access true if assess is allowed
+   */
+  virtual void SetAccess(const std::string& policy_app_id,
+                         const std::string& functional_group,
+                         bool access) = 0;
+
+  /**
+   * Resets access to functional group which contains given RPC
+   * for all applications which use this group
+   * @param function_id id RPC
+   */
+  virtual void ResetAccess(int32_t function_id) = 0;
 
   /**
    * @brief Get pointer to application by application id

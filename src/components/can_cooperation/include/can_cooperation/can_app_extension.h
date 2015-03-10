@@ -33,6 +33,7 @@
 #ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_APP_EXTENSION_H_
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_APP_EXTENSION_H_
 
+#include <string>
 #include "application_manager/app_extension.h"
 
 namespace can_cooperation {
@@ -53,8 +54,13 @@ class CANAppExtension : public application_manager::AppExtension {
      */
     void GiveControl(bool is_control_given);
 
+    std::string seat() {
+      return seat_;
+    }
+
   private:
     bool is_control_given_;
+    std::string seat_;
 };
 
 typedef utils::SharedPtr<CANAppExtension> CANAppExtensionPtr;

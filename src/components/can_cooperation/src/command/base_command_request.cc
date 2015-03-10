@@ -301,11 +301,11 @@ void BaseCommandRequest::Run() {
     return;
   }
 
-  // TODO(KKolodiy): get seat and give into CheckPolicyPermissions
   CANAppExtensionPtr extension = GetAppExtension(app_);
+  std::string seat = extension->seat();
 
   application_manager::TypeGrant grant = service_->CheckPolicyPermissions(
-      message_->json_message());
+      message_->json_message(), seat);
 
   // TODO(KKolodiy): this check only support GrantAccessRequest
   // Need to remove later when CoreService was implemented

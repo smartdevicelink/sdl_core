@@ -50,8 +50,8 @@ OnPresetChangedNotification::OnPresetChangedNotification(
 OnPresetChangedNotification::~OnPresetChangedNotification() {
 }
 
-void OnPresetChangedNotification::Run() {
-  LOG4CXX_INFO(logger_, "OnPresetChangedNotification::Run");
+void OnPresetChangedNotification::Execute() {
+  LOG4CXX_TRACE_ENTER(logger_);
 
  /* std::string json = message_->json_message();
   if (validators::ValidationResult::SUCCESS ==
@@ -67,10 +67,11 @@ void OnPresetChangedNotification::Run() {
   application_manager::ApplicationSharedPtr app =
     GetApplicationWithControl(can_app_extension);
 
-  if (app.valid())  {
+  if (app)  {
     message_->set_connection_key(app->app_id());
     service_->SendMessageToMobile(message_);
   }
+  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands
