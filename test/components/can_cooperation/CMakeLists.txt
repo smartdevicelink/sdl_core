@@ -16,7 +16,7 @@ include_directories (
 set (SOURCES
   src/can_module_test.cc
   src/can_app_extension_test.cc
-  #src/can_tcp_connection_test.cc
+  src/can_tcp_connection_test.cc
   src/can_library_test.cc
 )
 

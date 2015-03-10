@@ -61,6 +61,7 @@ class CANTCPConnection : public CANConnection {
   threads::Thread* thread_;
 
   friend class TCPClientDelegate;
+  friend class TcpConnectionTest;
 };
 }  //  namespace can_cooperation
 
