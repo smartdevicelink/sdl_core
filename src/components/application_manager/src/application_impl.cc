@@ -436,7 +436,7 @@ void ApplicationImpl::OnVideoStreamRetry() {
     video_stream_retry_timer_->updateTimeOut(time_out);
   } else {
     LOG4CXX_INFO(logger_, "Stop video streaming retry");
-    video_stream_retry_timer_->stop();
+    video_stream_retry_timer_->suspend();
     set_video_stream_retry_active(false);
   }
 }
@@ -455,7 +455,7 @@ void ApplicationImpl::OnAudioStreamRetry() {
     audio_stream_retry_timer_->updateTimeOut(time_out);
   } else {
     LOG4CXX_INFO(logger_, "Stop audio streaming retry");
-    audio_stream_retry_timer_->stop();
+    audio_stream_retry_timer_->suspend();
     set_audio_stream_retry_active(false);
   }
 }
