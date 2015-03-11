@@ -32,6 +32,7 @@
 
 #include "application_manager/core_service.h"
 #include "application_manager/application_manager_impl.h"
+#include "application_manager/policies/policy_handler.h"
 
 namespace application_manager {
 
@@ -44,27 +45,42 @@ struct AppExtensionPredicate {
 };
 }
 
-CoreService::CoreService() : access_(TypeGrant::kManual) {
+CoreService::CoreService() {
 }
 
 CoreService::~CoreService() {
 }
 
-TypeGrant CoreService::CheckPolicyPermissions(const std::string& json_message,
-                                              const std::string& seat) {
+TypeGrant CoreService::CheckPolicyPermissions(
+  PluginFunctionID function_id,
+  ApplicationId app_id,
+  const std::string& json_message,
+  const std::string& seat) {
   // TODO(KKolodiy): stub it will be implemented later
-  return access_;
+  ApplicationSharedPtr app = GetApplication(app_id);
+  if (!app) {
+    return kNone;
+  }
+
+  const mobile_apis::Result::eType check_result = ApplicationManagerImpl::instance()->CheckPolicyPermissions(
+        app->mobile_app_id()->asString(),
+        app->hmi_level(),
+        function_id);
+  if (mobile_apis::Result::SUCCESS != check_result) {
+    return TypeGrant::kDisallowed;
+  }
+  return TypeGrant::kManual;
 }
 
 void CoreService::SetAccess(ApplicationSharedPtr app, int32_t function_id,
                             bool access) {
   // TODO(KKolodiy): stub it will be implemented later
-  access_ = access ? TypeGrant::kAllowed : TypeGrant::kDisallowed;
+  //access_ = access ? TypeGrant::kAllowed : TypeGrant::kDisallowed;
 }
 
 void CoreService::ResetAccess(int32_t function_id) {
   // TODO(KKolodiy): stub it will be implemented later
-  access_ = TypeGrant::kManual;
+  // access_ = TypeGrant::kManual;
 }
 
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {

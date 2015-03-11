@@ -30,14 +30,46 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <string>
 #include "can_cooperation/message_helper.h"
 
 namespace can_cooperation {
+using functional_modules::MobileFunctionID;
+namespace {
+std::map<MobileFunctionID, std::string> GenerateAPINames() {
+  std::map<MobileFunctionID, std::string> result;
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::GRANT_ACCESS, "GrantAccess"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::CANCEL_ACCESS, "CancelAccess"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::START_SCAN, "StartScan"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::STOP_SCAN, "StopScan"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::TUNE_RADIO, "TuneRadio"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::TUNE_UP, "TuneUp"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::TUNE_DOWN, "TuneDown"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::ON_CONTROL_CHANGED, "OnControlChanged"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::ON_RADIO_DETAILS, "OnRadioDetails"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::ON_PRESETS_CHANGED, "OnPresetsChanged"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::CLIMATE_CONTROL_ON, "ClimateControlOn"));
+  result.insert(std::make_pair<MobileFunctionID, std::string>(MobileFunctionID::GET_SEAT_CONTROL, "GetSeatControl"));
+  return result;
+}
+}
 
 uint32_t MessageHelper::next_correlation_id_ = 1;
+const std::map<MobileFunctionID, std::string>
+MessageHelper::kMobileAPINames = GenerateAPINames();
 
 uint32_t MessageHelper::GetNextCANCorrelationID() {
   return next_correlation_id_++;
+}
+
+const std::string MessageHelper::GetMobileAPIName(MobileFunctionID func_id) {
+  std::map<MobileFunctionID, std::string>::const_iterator it =
+    kMobileAPINames.find(func_id);
+  if (kMobileAPINames.end() != it) {
+    return it->second;
+  } else {
+    return "";
+  }
 }
 
 std::string MessageHelper::ValueToString(const Json::Value& value) {

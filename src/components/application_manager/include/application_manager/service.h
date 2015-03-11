@@ -41,16 +41,18 @@
 namespace application_manager {
 
 enum TypeGrant {
+  kNone,
   kDisallowed,
   kAllowed,
   kManual
 };
 
+typedef std::string PluginFunctionID;
 /**
  * @brief Interface to core service
  */
 class Service {
-  public:
+ public:
   virtual ~Service() {
   }
 
@@ -61,8 +63,11 @@ class Service {
    * @param seat seat of user
    * @return false if message blocked by policy
    */
-  virtual TypeGrant CheckPolicyPermissions(const std::string& json_message,
-                                           const std::string& seat) = 0;
+  virtual TypeGrant CheckPolicyPermissions(
+    PluginFunctionID function_id,
+    ApplicationId app_id,
+    const std::string& json_message,
+    const std::string& seat) = 0;
 
   /**
    * Sets access to functional group which contains given RPC for application
@@ -118,7 +123,7 @@ class Service {
    * @param hmi_notification string with notification name
    */
   virtual void SubscribeToHMINotification(
-      const std::string& hmi_notification) = 0;
+    const std::string& hmi_notification) = 0;
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;

@@ -304,8 +304,18 @@ void BaseCommandRequest::Run() {
   CANAppExtensionPtr extension = GetAppExtension(app_);
   std::string seat = extension->seat();
 
+  const std::string stringified_rpc_name =
+    can_cooperation::MessageHelper::GetMobileAPIName(
+      static_cast<functional_modules::MobileFunctionID>(message_->function_id()));
+  if (stringified_rpc_name.empty()) {
+    //  TODO(PV): error
+  }
+
   application_manager::TypeGrant grant = service_->CheckPolicyPermissions(
-      message_->json_message(), seat);
+      stringified_rpc_name,
+      message_->connection_key(),
+      message_->json_message(),
+      seat);
 
   switch (grant) {
     case application_manager::kAllowed:
@@ -328,7 +338,7 @@ void BaseCommandRequest::Run() {
 }
 
 void BaseCommandRequest::on_event(const event_engine::Event<application_manager::MessagePtr,
-                std::string>& event) {
+                                  std::string>& event) {
   LOG4CXX_TRACE_ENTER(logger_);
   app_ = service_->GetApplication(message_->connection_key());
   if (!app_) {

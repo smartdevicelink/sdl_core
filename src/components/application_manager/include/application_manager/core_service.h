@@ -61,8 +61,11 @@ class CoreService : public Service {
    * @param seat seat of user
    * @return false if message blocked by policy
    */
-  virtual TypeGrant CheckPolicyPermissions(const std::string& json_message,
-                                           const std::string& seat);
+  virtual TypeGrant CheckPolicyPermissions(
+    PluginFunctionID function_id,
+    ApplicationId app_id,
+    const std::string& json_message,
+    const std::string& seat);
 
   /**
    * Sets access to functional group which contains given RPC for application
@@ -121,8 +124,6 @@ class CoreService : public Service {
 
  private:
   DISALLOW_COPY_AND_ASSIGN(CoreService);
-
-  TypeGrant access_;
 };
 
 }  // namespace application_manager
