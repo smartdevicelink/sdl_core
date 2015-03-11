@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -78,6 +78,8 @@ class DateTime {
   static bool Greater(const TimevalStruct& time1, const TimevalStruct& time2);
   static bool Less(const TimevalStruct& time1, const TimevalStruct& time2);
   static bool Equal(const TimevalStruct& time1, const TimevalStruct& time2);
+ private:
+  static TimevalStruct ConvertionUsecs(const TimevalStruct &time);
 };
 
 }  // namespace date_time
