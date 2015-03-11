@@ -139,6 +139,11 @@ class TimerThread {
   virtual void pause();
 
   /**
+   * @brief Suspends timer execution after next loop.
+   */
+  virtual void suspend();
+
+  /**
    * @brief Stop timer update timeout and start timer again
    * Note that it cancel thread of timer, If you use it from callback,
    * it probably will stop execution of callback function
@@ -186,6 +191,11 @@ class TimerThread {
      * @param timeout_seconds New timeout to be set
      */
     virtual void setTimeOut(const uint32_t timeout_seconds);
+
+    /**
+     * @brief Quits threadMain function after next loop.
+     */
+    virtual void shouldBeStoped();
 
    protected:
     TimerThread* timer_thread_;
@@ -298,6 +308,12 @@ void TimerThread<T>::pause() {
 }
 
 template<class T>
+void TimerThread<T>::suspend() {
+  LOG4CXX_DEBUG(logger_, "Suspend timer " << name_ << " after next loop");
+  delegate_->shouldBeStoped();
+}
+
+template<class T>
 void TimerThread<T>::updateTimeOut(const uint32_t timeout_seconds) {
   delegate_->setTimeOut(timeout_seconds);
 }
@@ -387,6 +403,12 @@ template<class T>
 void TimerThread<T>::TimerDelegate::setTimeOut(const uint32_t timeout_seconds) {
   timeout_seconds_ = timeout_seconds;
   termination_condition_.NotifyOne();
+}
+
+template<class T>
+void TimerThread<T>::TimerDelegate::shouldBeStoped() {
+  sync_primitives::AutoLock auto_lock(state_lock_);
+  stop_flag_ = true;
 }
 
 template<class T>
