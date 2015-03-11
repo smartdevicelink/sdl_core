@@ -48,7 +48,7 @@ class MockCANConnection : public CANConnection {
 class MockCANConnectionObserver : public CANConnectionObserver {
  public:
   MOCK_METHOD1(OnCANMessageReceived, void(const CANMessage& message));
-  void OnCANConnectionError(ConnectionState state) {}
+  void OnCANConnectionError(ConnectionState state, const std::string& info) {}
 };
 
 }  // namespace can_cooperation

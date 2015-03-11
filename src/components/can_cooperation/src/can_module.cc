@@ -115,7 +115,7 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   return ProcessResult::PROCESSED;
 }
 
-void CANModule::SendMessageToCan(const std::string& msg) {
+void CANModule::SendMessageToCan(const MessageFromMobile& msg) {
   LOG4CXX_INFO(logger_, "Message to Can: " << msg);
   from_mobile_.PostMessage(msg);
 }
@@ -130,14 +130,16 @@ void CANModule::OnCANMessageReceived(const CANMessage& message) {
   from_can_.PostMessage(MessageFromCAN(message));
 }
 
-void CANModule::OnCANConnectionError(ConnectionState state) {
+void CANModule::OnCANConnectionError(ConnectionState state,
+                                     const std::string& info) {
   if (ConnectionState::INVALID == state) {
     this->NotifyObservers(
       functional_modules::ModuleObserver::CAN_CONNECTION_FAILURE);
   }
+  // TODO(PV): remove pending requests to CAN with error response.
 }
 
-void CANModule::Handle(const std::string message) {
+void CANModule::Handle(const MessageFromMobile message) {
   if (ConnectionState::OPENED != can_connection_->SendMessage(message)) {
     LOG4CXX_ERROR(logger_, "Failed to send message to CAN");
   }
@@ -148,7 +150,8 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
     new application_manager::Message(
       protocol_handler::MessagePriority::kDefault));
 
-  msg->set_json_message(can_msg);
+  Json::FastWriter writer;
+  msg->set_json_message(writer.write(can_msg));
 
   LOG4CXX_INFO(logger_, "Can message: " << can_msg);
 

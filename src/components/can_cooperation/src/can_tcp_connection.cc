@@ -61,7 +61,7 @@ CANTCPConnection::CANTCPConnection()
   : CANConnection()
   , address_("127.0.0.1")
   , port_(8092)
-, socket_(-1)
+  , socket_(-1)
   , current_state_(NONE)
   , thread_(NULL) {
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
@@ -78,7 +78,7 @@ CANTCPConnection::CANTCPConnection()
     }
   }
   LOG4CXX_INFO(logger_, "Connecting to "
-        << address_ << " on port " << port_);
+               << address_ << " on port " << port_);
   if (OpenConnection() == ConnectionState::OPENED) {
     thread_ = new threads::Thread("CANClientListener",
                                   new TCPClientDelegate(this));
@@ -86,7 +86,7 @@ CANTCPConnection::CANTCPConnection()
     thread_->startWithOptions(threads::ThreadOptions(kStackSize));
   } else {
     LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
-}
+  }
 }
 
 CANTCPConnection::~CANTCPConnection() {
@@ -133,7 +133,13 @@ ConnectionState CANTCPConnection::ReadMessage(CANMessage* message) {
       }
     } while (read_chars >= kSize && OPENED == current_state_);
     if (!data.empty()) {
-      *message = data;
+      Json::Reader reader;
+      Json::Value value;
+      if (reader.parse(data, value, false)) {
+        *message = value;
+      } else {
+        LOG4CXX_ERROR(logger_, "Failed to parse incoming message from CAN ")
+      }
     }
   }
   return current_state_;
@@ -146,8 +152,8 @@ ConnectionState CANTCPConnection::OpenConnection() {
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr(address_.c_str());
     server_addr.sin_port = htons(port_);
-    if (-1 == connect(socket_, (struct sockaddr *)&server_addr,
-              sizeof(server_addr))) {
+    if (-1 == connect(socket_, (struct sockaddr*)&server_addr,
+                      sizeof(server_addr))) {
       current_state_ = INVALID;
     } else {
       current_state_ = OPENED;
@@ -167,7 +173,8 @@ ConnectionState CANTCPConnection::CloseConnection() {
 
 ConnectionState CANTCPConnection::Flash() {
   if (OPENED == current_state_ && to_send_.size() > 0) {
-    std::string msg = to_send_.front();
+    Json::FastWriter writer;
+    std::string msg = writer.write(to_send_.front());
     to_send_.pop_front();
     if (-1 == write(socket_, msg.c_str(), msg.size())) {
       current_state_ = INVALID;
@@ -182,7 +189,7 @@ TCPClientDelegate::TCPClientDelegate(CANTCPConnection* can_connection)
   : can_connection_(can_connection),
     stop_flag_(false) {
   DCHECK(can_connection);
-      }
+}
 
 TCPClientDelegate::~TCPClientDelegate() {
   can_connection_ = NULL;
@@ -191,17 +198,32 @@ TCPClientDelegate::~TCPClientDelegate() {
 
 void TCPClientDelegate::threadMain() {
   while (!stop_flag_) {
-    std::string message_from_can;
+    Json::Value message_from_can;
     while (can_connection_->ReadMessage(&message_from_can) ==
            ConnectionState::OPENED) {
       can_connection_->observer_->OnCANMessageReceived(message_from_can);
-  }
+    }
     if (can_connection_->current_state_ != ConnectionState::OPENED) {
+      std::string info;
+      switch (can_connection_->current_state_) {
+        case ConnectionState::CLOSED:
+          info = "Connection was closed by CAN-bus module.";
+          break;
+        case ConnectionState::INVALID:
+          info = "Failed to perform IO operation with CAN-bus module.";
+          break;
+        case ConnectionState::NONE:
+          info = "Connection with CAN-bus module is not established.";
+          break;
+        case ConnectionState::OPENED:
+        default:
+          break;
+      }
       can_connection_->observer_->OnCANConnectionError(
-        can_connection_->current_state_);
-}
+        can_connection_->current_state_, info);
     }
   }
+}
 
 bool TCPClientDelegate::exitThreadMain() {
   stop_flag_ = true;

@@ -41,7 +41,7 @@ namespace can_cooperation {
 /**
  * @brief Type for CAN<->RSDL messages
  */
-typedef std::string CANMessage;
+typedef Json::Value CANMessage;
 
 /**
  * @brief Enum describing possible CAN<->RSDL connection states
@@ -53,7 +53,6 @@ enum ConnectionState {
   INVALID
 };
 
-
 /**
   * @class CANConnectionObserver
   * @brief Interface class describing notifications of receiving message/
@@ -63,7 +62,8 @@ enum ConnectionState {
 class CANConnectionObserver {
  public:
   virtual void OnCANMessageReceived(const CANMessage& message) = 0;
-  virtual void OnCANConnectionError(ConnectionState state) = 0;
+  virtual void OnCANConnectionError(ConnectionState state,
+                                    const std::string& info) = 0;
 };
 
 /**
@@ -96,7 +96,9 @@ class CANConnection {
     */
   virtual void set_observer(CANConnectionObserver* observer) {
     DCHECK(observer);
-    observer_ = observer;
+    if (observer) {
+      observer_ = observer;
+    }
   }
  protected:
   /**

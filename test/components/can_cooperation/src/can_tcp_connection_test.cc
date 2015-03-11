@@ -138,26 +138,30 @@ TEST(CanTcpConnectionTest, OpenClose) {
   value["data"]["series"] = "A";
   value["data"]["additional"] = 987;
 
-  conn.SendMessage(value.toStyledString());
+  conn.SendMessage(value);
   ASSERT_EQ(ConnectionState::OPENED, test.state());
   std::string server_msg;
   EXPECT_TRUE(server.Receive(&server_msg));
-  ASSERT_EQ(value.toStyledString(), server_msg);
+  Json::FastWriter writer;
+  std::string result = writer.write(value);
+  ASSERT_EQ(result, server_msg);
 
   value["model"] = "Mustang";
   value["data"] = Json::Value(Json::ValueType::objectValue);
   value["data"]["version"] = 2.0;
   value["data"]["series"] = "B";
 
-  server.Send(value.toStyledString());
-  std::string received_msg;
+  result = writer.write(value);
+  server.Send(result);
+  Json::Value received_msg;
   ASSERT_EQ(ConnectionState::OPENED, conn.ReadMessage(&received_msg));
   ASSERT_EQ(ConnectionState::OPENED, test.state());
-  ASSERT_EQ(value.toStyledString(), received_msg);
+  std::string client_result = writer.write(received_msg);
+  ASSERT_EQ(result, client_result);
 
   server.Stop();
   sleep(2);
-  EXPECT_EQ(ConnectionState::CLOSED, conn.SendMessage("hello"));
+  EXPECT_EQ(ConnectionState::CLOSED, conn.SendMessage(received_msg));
 }
 
 }  // namespace can_cooperation

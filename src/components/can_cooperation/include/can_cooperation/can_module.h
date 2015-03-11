@@ -40,15 +40,16 @@
 
 
 namespace can_cooperation {
-struct MessageFromCAN : public std::string {
-  explicit MessageFromCAN(const std::string& other): std::string(other) {}
+struct MessageFromCAN : public Json::Value {
+  explicit MessageFromCAN(const Json::Value& other): Json::Value(other) {}
 };
+typedef Json::Value MessageFromMobile;
 
 class CANModule : public functional_modules::GenericModule,
   public utils::Singleton<CANModule>,
   public CANConnectionObserver,
   public threads::MessageLoopThread <std::queue<MessageFromCAN >>::Handler,
-      public threads::MessageLoopThread <std::queue<std::string >>::Handler {
+      public threads::MessageLoopThread <std::queue<MessageFromMobile >>::Handler {
  public:
   functional_modules::PluginInfo GetPluginInfo() const;
   virtual functional_modules::ProcessResult ProcessMessage(
@@ -56,8 +57,8 @@ class CANModule : public functional_modules::GenericModule,
   virtual functional_modules::ProcessResult ProcessHMIMessage(
     application_manager::MessagePtr msg);
   void OnCANMessageReceived(const CANMessage& message);
-  void OnCANConnectionError(ConnectionState state);
-  void Handle(const std::string message);
+  void OnCANConnectionError(ConnectionState state, const std::string& info);
+  void Handle(const MessageFromMobile message);
   void Handle(const MessageFromCAN message);
 
   /**
@@ -76,7 +77,7 @@ class CANModule : public functional_modules::GenericModule,
    * @brief Post message to can to queue
    * @param msg response mesage
    */
-  void SendMessageToCan(const std::string& msg);
+  void SendMessageToCan(const MessageFromMobile& msg);
 
   /**
    * @brief Checks if radio scan started
@@ -115,7 +116,7 @@ class CANModule : public functional_modules::GenericModule,
   CANConnectionSPtr can_connection_;
   functional_modules::PluginInfo plugin_info_;
   threads::MessageLoopThread<std::queue<MessageFromCAN>> from_can_;
-  threads::MessageLoopThread<std::queue<std::string>> from_mobile_;
+  threads::MessageLoopThread<std::queue<MessageFromMobile>> from_mobile_;
   bool is_scan_started_;
   request_controller::RequestController request_controller_;
 
