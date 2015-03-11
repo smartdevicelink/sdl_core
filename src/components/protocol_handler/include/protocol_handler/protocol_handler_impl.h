@@ -52,7 +52,7 @@
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener_empty.h"
 #ifdef TIME_TESTER
-#include "time_metric_observer.h"
+#include "protocol_handler/time_metric_observer.h"
 #endif  // TIME_TESTER
 
 #ifdef ENABLE_SECURITY
@@ -90,7 +90,8 @@ struct RawFordMessageFromMobile: public ProtocolFramePtr {
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return MessagePriority::FromServiceType(
-          ServiceTypeFromByte(get()->service_type())).OrderingValue(); }
+             ServiceTypeFromByte(get()->service_type())).OrderingValue();
+  }
 };
 
 struct RawFordMessageToMobile: public ProtocolFramePtr {
@@ -100,15 +101,16 @@ struct RawFordMessageToMobile: public ProtocolFramePtr {
   // PrioritizedQueue requires this method to decide which priority to assign
   size_t PriorityOrder() const {
     return MessagePriority::FromServiceType(
-          ServiceTypeFromByte(get()->service_type())).OrderingValue(); }
+             ServiceTypeFromByte(get()->service_type())).OrderingValue();
+  }
   // Signals whether connection to mobile must be closed after processing this message
   bool is_final;
 };
 
 // Short type names for prioritized message queues
-typedef threads::MessageLoopThread<
+typedef threads::MessageLoopThread <
   utils::PrioritizedQueue<RawFordMessageFromMobile> > FromMobileQueue;
-typedef threads::MessageLoopThread<
+typedef threads::MessageLoopThread <
   utils::PrioritizedQueue<RawFordMessageToMobile> > ToMobileQueue;
 }  // namespace impl
 
@@ -121,7 +123,7 @@ typedef threads::MessageLoopThread<
  * about activities around sessions.
  */
 class ProtocolHandlerImpl
-    : public ProtocolHandler,
+  : public ProtocolHandler,
     public TransportManagerListenerEmpty,
     public impl::FromMobileQueue::Handler,
     public impl::ToMobileQueue::Handler {
@@ -137,10 +139,11 @@ class ProtocolHandlerImpl
    *        messages per message_frequency_time period
    * message exchange.
    */
-  explicit ProtocolHandlerImpl(transport_manager::TransportManager *transport_manager_param,
-                               size_t message_frequency_time, size_t message_frequency_count,
-                               size_t malformed_message_frequency_time,
-                               size_t malformed_message_frequency_count);
+  explicit ProtocolHandlerImpl(
+    transport_manager::TransportManager *transport_manager_param,
+    size_t message_frequency_time, size_t message_frequency_count,
+    size_t malformed_message_frequency_time,
+    size_t malformed_message_frequency_count);
 
   /**
    * \brief Destructor
@@ -284,8 +287,9 @@ class ProtocolHandlerImpl
                           uint8_t protocol_version,
                           uint8_t service_type);
 
-  private:
-  void SendEndServicePrivate(int32_t connection_id, uint8_t session_id, uint8_t service_type);
+ private:
+  void SendEndServicePrivate(int32_t connection_id, uint8_t session_id,
+                             uint8_t service_type);
 
   /*
    * Prepare and send heartbeat acknowledge message
@@ -300,7 +304,7 @@ class ProtocolHandlerImpl
    * @param message Received message
    **/
   virtual void OnTMMessageReceived(
-      const RawMessagePtr message);
+    const RawMessagePtr message);
 
   /**
    * @brief Notifies about error on receiving message from TM.
@@ -308,7 +312,7 @@ class ProtocolHandlerImpl
    * @param error Occurred error
    **/
   virtual void OnTMMessageReceiveFailed(
-      const transport_manager::DataReceiveError &error);
+    const transport_manager::DataReceiveError &error);
 
   /**
    * @brief Notifies about successfully sending message.
@@ -324,15 +328,15 @@ class ProtocolHandlerImpl
    * @param message Message during sending which error occurred.
    **/
   virtual void OnTMMessageSendFailed(
-      const transport_manager::DataSendError &error,
-      const RawMessagePtr message);
+    const transport_manager::DataSendError &error,
+    const RawMessagePtr message);
 
   virtual void OnConnectionEstablished(
-      const transport_manager::DeviceInfo &device_info,
-      const transport_manager::ConnectionUID &connection_id);
+    const transport_manager::DeviceInfo &device_info,
+    const transport_manager::ConnectionUID &connection_id);
 
   virtual void OnConnectionClosed(
-      const transport_manager::ConnectionUID &connection_id);
+    const transport_manager::ConnectionUID &connection_id);
 
   /**
    * @brief Notifies subscribers about message
@@ -398,8 +402,8 @@ class ProtocolHandlerImpl
    * \return \saRESULT_CODE Status of operation
    */
   RESULT_CODE HandleMessage(
-      ConnectionID connection_id,
-      const ProtocolFramePtr packet);
+    ConnectionID connection_id,
+    const ProtocolFramePtr packet);
 
   /**
    * \brief Handles message received in single frame.
@@ -409,8 +413,8 @@ class ProtocolHandlerImpl
    * \return \saRESULT_CODE Status of operation
    */
   RESULT_CODE HandleSingleFrameMessage(
-      ConnectionID connection_id,
-      const ProtocolFramePtr packet);
+    ConnectionID connection_id,
+    const ProtocolFramePtr packet);
   /**
    * \brief Handles message received in multiple frames. Collects all frames
    * of message.
@@ -420,8 +424,8 @@ class ProtocolHandlerImpl
    * \return \saRESULT_CODE Status of operation
    */
   RESULT_CODE HandleMultiFrameMessage(
-      ConnectionID connection_id,
-      const ProtocolFramePtr packet);
+    ConnectionID connection_id,
+    const ProtocolFramePtr packet);
 
   /**
    * \brief Handles message received in single frame.
@@ -431,20 +435,20 @@ class ProtocolHandlerImpl
    * \return \saRESULT_CODE Status of operation
    */
   RESULT_CODE HandleControlMessage(
-      ConnectionID connection_id,
-      const ProtocolFramePtr packet);
+    ConnectionID connection_id,
+    const ProtocolFramePtr packet);
 
   RESULT_CODE HandleControlMessageEndSession(
-      ConnectionID connection_id,
-      const ProtocolPacket &packet);
+    ConnectionID connection_id,
+    const ProtocolPacket &packet);
 
   RESULT_CODE HandleControlMessageStartSession(
-      ConnectionID connection_id,
-      const ProtocolPacket &packet);
+    ConnectionID connection_id,
+    const ProtocolPacket &packet);
 
   RESULT_CODE HandleControlMessageHeartBeat(
-      ConnectionID connection_id,
-      const ProtocolPacket &packet);
+    ConnectionID connection_id,
+    const ProtocolPacket &packet);
 
   // threads::MessageLoopThread<*>::Handler implementations
   // CALLED ON raw_ford_messages_from_mobile_ thread!
@@ -461,9 +465,9 @@ class ProtocolHandlerImpl
   RESULT_CODE DecryptFrame(ProtocolFramePtr packet);
 #endif  // ENABLE_SECURITY
 
-  bool TrackMessage(const uint32_t& connection_key);
+  bool TrackMessage(const uint32_t &connection_key);
 
-  bool TrackMalformedMessage(const uint32_t& connection_key);
+  bool TrackMalformedMessage(const uint32_t &connection_key);
 
  private:
   /**
