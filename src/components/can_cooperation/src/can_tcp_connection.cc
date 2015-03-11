@@ -40,16 +40,30 @@
 #include <fstream>
 #include "json/json.h"
 #include "utils/logger.h"
+#include "utils/threads/thread.h"
 
 namespace can_cooperation {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "CANTCPConnection")
 
+class TCPClientDelegate : public threads::ThreadDelegate {
+ public:
+  explicit TCPClientDelegate(CANTCPConnection* can_connection);
+  ~TCPClientDelegate();
+  void threadMain();
+  bool exitThreadMain();
+ private:
+  CANTCPConnection* can_connection_;
+  bool stop_flag_;
+};
+
 CANTCPConnection::CANTCPConnection()
-  : address_("127.0.0.1")
-  , port_(8090)
+  : CANConnection()
+  , address_("127.0.0.1")
+  , port_(8092)
   , socket_(-1)
-  , current_state_(NONE) {
+  , current_state_(NONE)
+  , thread_(NULL) {
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
   if (-1 == socket_) {
     current_state_ = INVALID;
@@ -65,13 +79,70 @@ CANTCPConnection::CANTCPConnection()
   }
   LOG4CXX_INFO(logger_, "Connecting to "
                << address_ << " on port " << port_);
+  if (OpenConnection() == ConnectionState::OPENED) {
+    thread_ = new threads::Thread("CANClientListener",
+                                  new TCPClientDelegate(this));
+    const size_t kStackSize = 16384;
+    thread_->startWithOptions(threads::ThreadOptions(kStackSize));
+  } else {
+    LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
+  }
 }
 
 CANTCPConnection::~CANTCPConnection() {
   if (INVALID != current_state_ && CLOSED != current_state_) {
     CloseConnection();
   }
+  if (thread_) {
+    thread_->stop();
+    delete thread_;
+  }
   current_state_ = NONE;
+}
+
+ConnectionState CANTCPConnection::SendMessage(const CANMessage& message) {
+  if (INVALID != current_state_) {
+    to_send_.push_back(message);
+  }
+  return Flash();
+}
+
+ConnectionState CANTCPConnection::ReadMessage(CANMessage* message) {
+  if (OPENED == current_state_) {
+    DCHECK(message);
+    if (!message) {
+      LOG4CXX_ERROR(logger_, "Nul-pointer provided");
+      return current_state_;
+    }
+    std::string data;
+    const int kSize = 500;
+    int read_chars = 0;
+    do {
+      char buf[kSize] = {0};
+      read_chars = read(socket_, buf, sizeof(buf));
+      switch (read_chars) {
+        case 0:  // closed connection
+          current_state_ = CLOSED;
+          break;
+        case -1:  // error while reading
+          current_state_ = INVALID;
+          break;
+        default:
+          data.append(buf, read_chars);
+          break;
+      }
+    } while (read_chars >= kSize && OPENED == current_state_);
+    if (!data.empty()) {
+      Json::Reader reader;
+      Json::Value value;
+      if (reader.parse(data, value, false)) {
+        *message = value;
+      } else {
+        LOG4CXX_ERROR(logger_, "Failed to parse incoming message from CAN ")
+      }
+    }
+  }
+  return current_state_;
 }
 
 ConnectionState CANTCPConnection::OpenConnection() {
@@ -102,7 +173,8 @@ ConnectionState CANTCPConnection::CloseConnection() {
 
 ConnectionState CANTCPConnection::Flash() {
   if (OPENED == current_state_ && to_send_.size() > 0) {
-    std::string msg = to_send_.front();
+    Json::FastWriter writer;
+    std::string msg = writer.write(to_send_.front());
     to_send_.pop_front();
     if (-1 == write(socket_, msg.c_str(), msg.size())) {
       current_state_ = INVALID;
@@ -112,50 +184,50 @@ ConnectionState CANTCPConnection::Flash() {
   return current_state_;
 }
 
-ConnectionState CANTCPConnection::GetData() {
-  if (OPENED == current_state_) {
-    std::string data;
-    const int kSize = 500;
-    int read_chars = 0;
-    do {
-      char buf[kSize] = {0};
-      read_chars = read(socket_, buf, sizeof(buf));
-      switch (read_chars) {
-        case 0:  // closed connection
-          current_state_ = CLOSED;
+//  -------------- ThreadDelegate --------------
+TCPClientDelegate::TCPClientDelegate(CANTCPConnection* can_connection)
+  : can_connection_(can_connection),
+    stop_flag_(false) {
+  DCHECK(can_connection);
+}
+
+TCPClientDelegate::~TCPClientDelegate() {
+  can_connection_ = NULL;
+  stop_flag_ = true;
+}
+
+void TCPClientDelegate::threadMain() {
+  while (!stop_flag_) {
+    Json::Value message_from_can;
+    while (can_connection_->ReadMessage(&message_from_can) ==
+           ConnectionState::OPENED) {
+      can_connection_->observer_->OnCANMessageReceived(message_from_can);
+    }
+    if (can_connection_->current_state_ != ConnectionState::OPENED) {
+      std::string info;
+      switch (can_connection_->current_state_) {
+        case ConnectionState::CLOSED:
+          info = "Connection was closed by CAN-bus module.";
           break;
-        case -1:  // error while reading
-          current_state_ = INVALID;
+        case ConnectionState::INVALID:
+          info = "Failed to perform IO operation with CAN-bus module.";
           break;
+        case ConnectionState::NONE:
+          info = "Connection with CAN-bus module is not established.";
+          break;
+        case ConnectionState::OPENED:
         default:
-          data.append(buf, read_chars);
           break;
       }
-    } while (read_chars >= kSize && OPENED == current_state_);
-    if (!data.empty()) {
-      received_.push_back(data);
+      can_connection_->observer_->OnCANConnectionError(
+        can_connection_->current_state_, info);
     }
-  }
-  return current_state_;
-}
-
-void CANTCPConnection::WriteData(const std::string& message) {
-  if (INVALID != current_state_) {
-    to_send_.push_back(message);
   }
 }
 
-Json::Value CANTCPConnection::ReadData() {
-  Json::Value json_value;
-  if (OPENED == current_state_ && received_.size() > 0) {
-    Json::Reader reader;
-    if (!reader.parse(received_.front(), json_value, false)) {
-      json_value = Json::Value();
-    }
-    received_.pop_front();
-  }
-
-  return json_value;
+bool TCPClientDelegate::exitThreadMain() {
+  stop_flag_ = true;
+  return true;
 }
 
 }  //  namespace can_cooperation

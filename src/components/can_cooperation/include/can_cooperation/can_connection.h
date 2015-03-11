@@ -38,8 +38,14 @@
 
 namespace can_cooperation {
 
-typedef Json::Value MessageFromCAN;
+/**
+ * @brief Type for CAN<->RSDL messages
+ */
+typedef Json::Value CANMessage;
 
+/**
+ * @brief Enum describing possible CAN<->RSDL connection states
+ */
 enum ConnectionState {
   NONE = -1,
   OPENED,
@@ -47,16 +53,72 @@ enum ConnectionState {
   INVALID
 };
 
-class CANConnection {
+/**
+  * @class CANConnectionObserver
+  * @brief Interface class describing notifications of receiving message/
+  * error occured during communication with CAN.
+  * CANModule implements this interfaces.
+  */
+class CANConnectionObserver {
  public:
-  virtual ~CANConnection() {
-  }
-  virtual ConnectionState OpenConnection() = 0;
-  virtual ConnectionState CloseConnection() = 0;
-  virtual ConnectionState Flash() = 0;
-  virtual ConnectionState GetData() = 0;
+  virtual void OnCANMessageReceived(const CANMessage& message) = 0;
+  virtual void OnCANConnectionError(ConnectionState state,
+                                    const std::string& info) = 0;
 };
 
+/**
+  * @class
+  * @brief Abstract class defining methods for communication between
+  * CAN-integration software and RSDL.
+  * Class implementing CANConnection has to have subscriber (see @CANConnectionObserver).
+  * Class implementing CANConnection has to define SendMessage and ReadMessage methods.
+  */
+class CANConnection {
+ public:
+  /**
+   * @brief Destructor
+   */
+  virtual ~CANConnection() {
+    observer_ = NULL;
+  }
+  /**
+    * @brief Implementation of SendMessage pure virtual function should
+    * send message from RSDL to CAN-integration software.
+    * @param message Message to be sent to CAN-integration software
+    * @return current state of connection with CAN-integration software
+    */
+  virtual ConnectionState SendMessage(const CANMessage& message) = 0;
+
+  /**
+    * @brief Sets observer of events occuring during communication
+    * between RSDL and CAN-integration software
+    * @param observer Pointer to implementation of CANConnectionObserver interface
+    */
+  virtual void set_observer(CANConnectionObserver* observer) {
+    DCHECK(observer);
+    if (observer) {
+      observer_ = observer;
+    }
+  }
+ protected:
+  /**
+   * \brief Class constructor
+   */
+  CANConnection(): observer_(NULL) {}
+  /**
+    * @brief Implementation of pure virtual function ReadMessage should
+    * receive message from CAN-integration software and forward it to RSDL
+    * via CANConnectionObserver implementation member.
+    * @param message Message received from CAN-integration software
+    * @return current state of connection with CAN-integration software
+    */
+  virtual ConnectionState ReadMessage(CANMessage* message) = 0;
+  CANConnectionObserver* observer_;
+};
+
+/**
+ * @brief Type for smart pointer to CANConnection.
+ */
 typedef utils::SharedPtr<CANConnection> CANConnectionSPtr;
 
 }  //  namespace can_cooperation

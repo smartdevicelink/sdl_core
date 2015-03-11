@@ -111,7 +111,6 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
   }
 
   Json::FastWriter writer;
-  std::string json_msg = writer.write(msg);
   if (is_hmi_request) {
     application_manager::MessagePtr message_to_send(
       new application_manager::Message(
@@ -119,13 +118,14 @@ void  BaseCommandRequest::SendRequest(const char* function_id,
     message_to_send->set_protocol_version(
       application_manager::ProtocolVersion::kHMI);
     message_to_send->set_correlation_id(msg[kId].asInt());
+    std::string json_msg = writer.write(msg);
     message_to_send->set_json_message(json_msg);
     message_to_send->set_message_type(
       application_manager::MessageType::kRequest);
 
     service_->SendMessageToHMI(message_to_send);
   } else {
-    CANModule::instance()->SendMessageToCan(json_msg);
+    CANModule::instance()->SendMessageToCan(msg);
   }
 }
 

@@ -6,6 +6,7 @@
 #include <cstring>
 #include "gtest/gtest.h"
 #include "can_cooperation/can_tcp_connection.h"
+#include "mock_can_connection.h"
 
 namespace can_cooperation {
 
@@ -29,12 +30,12 @@ class TCPServer {
 };
 
 TCPServer::TCPServer(const std::string& address, int port)
-    : address_(address),
-      port_(port),
-      socket_(-1),
-      client_socket_(-1),
-      thread_(0),
-      mutex_(PTHREAD_MUTEX_INITIALIZER) {
+  : address_(address),
+    port_(port),
+    socket_(-1),
+    client_socket_(-1),
+    thread_(0),
+    mutex_(PTHREAD_MUTEX_INITIALIZER) {
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
   struct sockaddr_in server_addr;
   memset(&server_addr, 0, sizeof(server_addr));
@@ -42,9 +43,9 @@ TCPServer::TCPServer(const std::string& address, int port)
   server_addr.sin_addr.s_addr = inet_addr(address_.c_str());
   server_addr.sin_port = htons(port_);
 
-  if (-1 == bind(socket_, (struct sockaddr *)&server_addr,
-         sizeof(server_addr))) {
-    printf("Failed to bind\n" );
+  if (-1 == bind(socket_, (struct sockaddr*)&server_addr,
+                 sizeof(server_addr))) {
+    printf("Failed to bind\n");
   }
 }
 
@@ -52,21 +53,21 @@ TCPServer::~TCPServer() {
   close(socket_);
 }
 
-void* TCPServer::Listen(void *self_object) {
+void* TCPServer::Listen(void* self_object) {
   TCPServer* self = static_cast<TCPServer*>(self_object);
   pthread_mutex_unlock(&self->mutex_);
   if (-1 == listen(self->socket_, 1)) {
     printf("failed to listen\n");
-    return (void*)-1;
+    return (void*) - 1;
   }
   struct sockaddr_in client_addr;
   socklen_t client_addr_size = sizeof(client_addr);
   self->client_socket_ = accept(self->socket_, (struct sockaddr*) &client_addr,
-    &client_addr_size);
+                                &client_addr_size);
   if (-1 == self->client_socket_) {
     printf("Failed to accept\n");
     close(self->socket_);
-    return (void*) -1;
+    return (void*) - 1;
   }
   return NULL;
 }
@@ -93,44 +94,41 @@ void TCPServer::Stop() {
 }
 
 bool TCPServer::Send(const std::string& message) {
-  if (-1 == write(client_socket_, message.c_str(), message.size()))
+  if (-1 == write(client_socket_, message.c_str(), message.size())) {
     return false;
+  }
   return true;
 }
 
 bool TCPServer::Receive(std::string* message) {
   char buf[500] = {0};
-  if (-1 == read(client_socket_, buf, sizeof(buf)))
+  if (-1 == read(client_socket_, buf, sizeof(buf))) {
     return false;
+  }
   *message = buf;
   return true;
 }
 
-class CanTcpConnectionTest : public ::testing::Test {
- protected:
-  static TCPServer server;
-
-  void SetUp() {
-    server.Start();
+class TcpConnectionTest {
+ public:
+  TcpConnectionTest(CANTCPConnection& conn)
+    : conn_(conn) {}
+  ConnectionState state() const {
+    return conn_.current_state_;
   }
-
-  void TearDown() {
-    server.Stop();
-  }
+ private:
+  CANTCPConnection& conn_;
 };
 
-TCPServer CanTcpConnectionTest::server("127.0.0.1", 8090);
-
-TEST_F(CanTcpConnectionTest, OpenClose) {
+TEST(CanTcpConnectionTest, OpenClose) {
+  TCPServer server("127.0.0.1", 8092);
+  server.Start();
+  sleep(4);
   CANTCPConnection conn;
-  ASSERT_EQ(ConnectionState::OPENED, conn.OpenConnection());
-  server.WaitConnect();
-  EXPECT_EQ(ConnectionState::CLOSED, conn.CloseConnection());
-}
-
-TEST_F(CanTcpConnectionTest, WriteData) {
-  CANTCPConnection conn;
-  ASSERT_EQ(ConnectionState::OPENED, conn.OpenConnection());
+  MockCANConnectionObserver mock;
+  conn.set_observer(&mock);
+  TcpConnectionTest test(conn);
+  ASSERT_EQ(ConnectionState::OPENED, test.state());
   server.WaitConnect();
 
   Json::Value value;
@@ -140,33 +138,30 @@ TEST_F(CanTcpConnectionTest, WriteData) {
   value["data"]["series"] = "A";
   value["data"]["additional"] = 987;
 
-  conn.WriteData(value.toStyledString());
-  EXPECT_EQ(ConnectionState::OPENED, conn.Flash());
+  conn.SendMessage(value);
+  ASSERT_EQ(ConnectionState::OPENED, test.state());
   std::string server_msg;
   EXPECT_TRUE(server.Receive(&server_msg));
-  EXPECT_EQ(value.toStyledString(), server_msg);
+  Json::FastWriter writer;
+  std::string result = writer.write(value);
+  ASSERT_EQ(result, server_msg);
 
-  EXPECT_EQ(ConnectionState::CLOSED, conn.CloseConnection());
-}
-
-TEST_F(CanTcpConnectionTest, ReadData) {
-  CANTCPConnection conn;
-  ASSERT_EQ(ConnectionState::OPENED, conn.OpenConnection());
-  server.WaitConnect();
-
-  Json::Value value;
   value["model"] = "Mustang";
   value["data"] = Json::Value(Json::ValueType::objectValue);
-  value["data"]["version"] = 1.0;
-  value["data"]["series"] = "A";
+  value["data"]["version"] = 2.0;
+  value["data"]["series"] = "B";
 
-  server.Send(value.toStyledString());
-  EXPECT_EQ(ConnectionState::OPENED, conn.GetData());
+  result = writer.write(value);
+  server.Send(result);
+  Json::Value received_msg;
+  ASSERT_EQ(ConnectionState::OPENED, conn.ReadMessage(&received_msg));
+  ASSERT_EQ(ConnectionState::OPENED, test.state());
+  std::string client_result = writer.write(received_msg);
+  ASSERT_EQ(result, client_result);
 
-  Json::Value received_msg = conn.ReadData();
-  EXPECT_EQ(value.toStyledString(), received_msg.toStyledString());
-
-  EXPECT_EQ(ConnectionState::CLOSED, conn.CloseConnection());
+  server.Stop();
+  sleep(2);
+  EXPECT_EQ(ConnectionState::CLOSED, conn.SendMessage(received_msg));
 }
 
 }  // namespace can_cooperation

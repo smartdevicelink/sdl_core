@@ -37,25 +37,39 @@
 #include <deque>
 #include "can_cooperation/can_connection.h"
 
+namespace threads {
+class Thread;
+}
+
 namespace can_cooperation {
 
+/**
+  * @class CANTCPConnection
+  * @brief Implementation of CANConnection using TCP communication
+  * between itself and CAN integrator software.
+  * Configuration of connection is done in "can_config.json" file.
+  * By default port is 8092, address is "127.0.0.1".
+  * CAN integrator software acts as server, CANTCPConnection connects as client.
+  */
 class CANTCPConnection : public CANConnection {
  public:
   CANTCPConnection();
   ~CANTCPConnection();
+  ConnectionState SendMessage(const CANMessage& message);
+  ConnectionState ReadMessage(CANMessage* message);
+ private:
   ConnectionState OpenConnection();
   ConnectionState CloseConnection();
   ConnectionState Flash();
-  ConnectionState GetData();
-  void WriteData(const std::string& message);
-  MessageFromCAN ReadData();
- private:
-  std::deque<std::string> to_send_;
-  std::deque<std::string> received_;
+  std::deque<CANMessage> to_send_;
   std::string address_;
   int port_;
   int socket_;
   ConnectionState current_state_;
+  threads::Thread* thread_;
+
+  friend class TCPClientDelegate;
+  friend class TcpConnectionTest;
 };
 }  //  namespace can_cooperation
 

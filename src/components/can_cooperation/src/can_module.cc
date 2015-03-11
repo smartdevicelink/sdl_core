@@ -38,7 +38,6 @@
 #include "application_manager/application.h"
 #include "can_cooperation/can_tcp_connection.h"
 #include "utils/logger.h"
-#include "utils/threads/thread.h"
 
 namespace can_cooperation {
 
@@ -54,58 +53,13 @@ namespace hmi_api = functional_modules::hmi_api;
 EXPORT_FUNCTION_IMPL(CANModule);
 CREATE_LOGGERPTR_GLOBAL(logger_, "CanModule")
 
-class TCPClientDelegate : public threads::ThreadDelegate {
- public:
-  explicit TCPClientDelegate(CANModule* can_module);
-  ~TCPClientDelegate();
-  void threadMain();
-  bool exitThreadMain();
- private:
-  CANModule* can_module_;
-  bool stop_flag_;
-};
-
-TCPClientDelegate::TCPClientDelegate(CANModule* can_module)
-  : can_module_(can_module),
-    stop_flag_(false) {
-  DCHECK(can_module);
-}
-
-TCPClientDelegate::~TCPClientDelegate() {
-  can_module_ = NULL;
-  stop_flag_ = true;
-}
-
-void TCPClientDelegate::threadMain() {
-  while (!stop_flag_) {
-    while (can_module_->can_connection_->GetData() == ConnectionState::OPENED) {
-      can_module_->from_can_.PostMessage(
-        CANConnectionSPtr::static_pointer_cast<CANTCPConnection>(
-          can_module_->can_connection_)->ReadData());
-    }
-  }
-}
-
-bool TCPClientDelegate::exitThreadMain() {
-  stop_flag_ = true;
-  return false;
-}
-
 CANModule::CANModule()
   : GenericModule(kCANModuleID),
     can_connection_(new CANTCPConnection),
     from_can_("FromCan To Mobile", this),
     from_mobile_("FromMobile To Can", this),
-    thread_(NULL),
     is_scan_started_(false) {
-  if (can_connection_->OpenConnection() != ConnectionState::OPENED) {
-    LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
-  } else {
-    thread_ = new threads::Thread("CANClientListener",
-                                  new TCPClientDelegate(this));
-    const size_t kStackSize = 16384;
-    thread_->startWithOptions(threads::ThreadOptions(kStackSize));
-  }
+  can_connection_->set_observer(this);
   plugin_info_.name = "ReverseSDLPlugin";
   plugin_info_.version = 1;
   SubscribeOnFunctions();
@@ -136,13 +90,6 @@ void CANModule::SubscribeOnFunctions() {
 }
 
 CANModule::~CANModule() {
-  if (can_connection_) {
-    can_connection_->CloseConnection();
-  }
-  if (thread_) {
-    thread_->stop();
-    delete thread_;
-  }
   RemoveAppExtensions();
 }
 
@@ -168,7 +115,7 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
   return ProcessResult::PROCESSED;
 }
 
-void CANModule::SendMessageToCan(const std::string& msg) {
+void CANModule::SendMessageToCan(const MessageFromMobile& msg) {
   LOG4CXX_INFO(logger_, "Message to Can: " << msg);
   from_mobile_.PostMessage(msg);
 }
@@ -179,11 +126,21 @@ ProcessResult CANModule::ProcessHMIMessage(
   return HandleMessage(msg);
 }
 
-void CANModule::Handle(const std::string message) {
-  CANConnectionSPtr::static_pointer_cast<CANTCPConnection>(can_connection_)
-  ->WriteData(message);
+void CANModule::OnCANMessageReceived(const CANMessage& message) {
+  from_can_.PostMessage(MessageFromCAN(message));
+}
 
-  if (can_connection_->Flash() != ConnectionState::OPENED) {
+void CANModule::OnCANConnectionError(ConnectionState state,
+                                     const std::string& info) {
+  if (ConnectionState::INVALID == state) {
+    this->NotifyObservers(
+      functional_modules::ModuleObserver::CAN_CONNECTION_FAILURE);
+  }
+  // TODO(PV): remove pending requests to CAN with error response.
+}
+
+void CANModule::Handle(const MessageFromMobile message) {
+  if (ConnectionState::OPENED != can_connection_->SendMessage(message)) {
     LOG4CXX_ERROR(logger_, "Failed to send message to CAN");
   }
 }
@@ -194,10 +151,9 @@ void CANModule::Handle(const MessageFromCAN can_msg) {
       protocol_handler::MessagePriority::kDefault));
 
   Json::FastWriter writer;
-  std::string json_string = writer.write(can_msg);
-  msg->set_json_message(json_string);
+  msg->set_json_message(writer.write(can_msg));
 
-  LOG4CXX_INFO(logger_, "Can message: " << json_string);
+  LOG4CXX_INFO(logger_, "Can message: " << can_msg);
 
   if (HandleMessage(msg) != ProcessResult::PROCESSED) {
     LOG4CXX_ERROR(logger_, "Failed process CAN message!");

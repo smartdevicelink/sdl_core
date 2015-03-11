@@ -33,19 +33,22 @@
 #define TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_CAN_CONNECTION_H_
 
 #include "can_cooperation/can_connection.h"
+#include "gmock/gmock.h"
 
 namespace can_cooperation {
 
 class MockCANConnection : public CANConnection {
  public:
-  MOCK_METHOD0(OpenConnection,
-      ConnectionState());
-  MOCK_METHOD0(CloseConnection,
-      ConnectionState());
-  MOCK_METHOD0(Flash,
-      ConnectionState());
-  MOCK_METHOD0(GetData,
-      ConnectionState());
+  MOCK_METHOD1(SendMessage,
+               ConnectionState(const CANMessage& message));
+  MOCK_METHOD1(ReadMessage,
+               ConnectionState(CANMessage* message));
+};
+
+class MockCANConnectionObserver : public CANConnectionObserver {
+ public:
+  MOCK_METHOD1(OnCANMessageReceived, void(const CANMessage& message));
+  void OnCANConnectionError(ConnectionState state, const std::string& info) {}
 };
 
 }  // namespace can_cooperation
