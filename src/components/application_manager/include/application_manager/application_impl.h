@@ -275,7 +275,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool                                     is_voice_communication_application_;
   // NAVI retry stream
   volatile bool                            is_video_stream_retry_active_;
+  mutable sync_primitives::Lock            is_video_stream_retry_active_lock_;
   volatile bool                            is_audio_stream_retry_active_;
+  mutable sync_primitives::Lock            is_audio_stream_retry_active_lock_;
   uint32_t                                 video_stream_retry_number_;
   uint32_t                                 audio_stream_retry_number_;
   utils::SharedPtr<timer::TimerThread<ApplicationImpl>> video_stream_retry_timer_;

@@ -415,18 +415,22 @@ bool ApplicationImpl::hmi_supports_navi_audio_streaming() const {
 }
 
 bool ApplicationImpl::video_stream_retry_active() const {
+  sync_primitives::AutoLock auto_lock(is_video_stream_retry_active_lock_);
   return is_video_stream_retry_active_;
 }
 
 void ApplicationImpl::set_video_stream_retry_active(bool active) {
+  sync_primitives::AutoLock auto_lock(is_video_stream_retry_active_lock_);
   is_video_stream_retry_active_ = active;
 }
 
 bool ApplicationImpl::audio_stream_retry_active() const {
+  sync_primitives::AutoLock auto_lock(is_audio_stream_retry_active_lock_);
   return is_audio_stream_retry_active_;
 }
 
 void ApplicationImpl::set_audio_stream_retry_active(bool active) {
+  sync_primitives::AutoLock auto_lock(is_audio_stream_retry_active_lock_);
   is_audio_stream_retry_active_ = active;
 }
 
