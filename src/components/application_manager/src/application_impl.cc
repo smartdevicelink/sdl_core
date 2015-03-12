@@ -435,6 +435,7 @@ void ApplicationImpl::set_audio_stream_retry_active(bool active) {
 }
 
 void ApplicationImpl::OnVideoStreamRetry() {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!hmi_supports_navi_video_streaming() && video_stream_retry_number_) {
     LOG4CXX_INFO(logger_, "Send video stream retry "
                  << video_stream_retry_number_);
@@ -454,6 +455,7 @@ void ApplicationImpl::OnVideoStreamRetry() {
 }
 
 void ApplicationImpl::OnAudioStreamRetry() {
+  LOG4CXX_AUTO_TRACE(logger_);
   if (!hmi_supports_navi_audio_streaming() && audio_stream_retry_number_) {
     LOG4CXX_INFO(logger_, "Send audio streaming retry "
                  << audio_stream_retry_number_);
