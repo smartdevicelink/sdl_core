@@ -62,11 +62,13 @@ class ProtocolHandlerImplTest : public ::testing::Test {
  protected:
   void InitProtocolHandlerImpl(
       const size_t period_msec, const size_t max_messages,
+      bool malformed_message_filtering = false,
       const size_t malformd_period_msec = 0u,
       const size_t malformd_max_messages = 0u) {
     protocol_handler_impl.reset(
         new ProtocolHandlerImpl(&transport_manager_mock,
                                 period_msec, max_messages,
+                                malformed_message_filtering,
                                 malformd_period_msec, malformd_max_messages));
     protocol_handler_impl->set_session_observer(&session_observer_mock);
     tm_listener = protocol_handler_impl.get();
@@ -757,10 +759,31 @@ TEST_F(ProtocolHandlerImplTest,
 
 
 TEST_F(ProtocolHandlerImplTest,
+       MalformedVerificationDisable) {
+  const size_t period_msec = 10000;
+  const size_t max_messages = 100;
+  InitProtocolHandlerImpl(0u, 0u, false, period_msec, max_messages);
+  AddConnection();
+  AddSession();
+
+  // expect malformed notification to CH
+  EXPECT_CALL(session_observer_mock,
+              OnMalformedMessageCallback(connection_id)).
+      Times(max_messages);
+
+  const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
+  for (size_t i = 0; i < max_messages; ++i) {
+    SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+  }
+}
+
+TEST_F(ProtocolHandlerImplTest,
        MalformedLimitVerification) {
   const size_t period_msec = 10000;
   const size_t max_messages = 100;
-  InitProtocolHandlerImpl(0u, 0u, period_msec, max_messages);
+  InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -787,7 +810,7 @@ TEST_F(ProtocolHandlerImplTest,
     MalformedLimitVerification_MalformedStock) {
   const size_t period_msec = 10000;
   const size_t max_messages = 100;
-  InitProtocolHandlerImpl(0u, 0u, period_msec, max_messages);
+  InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -825,7 +848,7 @@ TEST_F(ProtocolHandlerImplTest,
        MalformedLimitVerification_MalformedOnly) {
   const size_t period_msec = 10000;
   const size_t max_messages = 100;
-  InitProtocolHandlerImpl(0u, 0u, period_msec, max_messages);
+  InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
   AddSession();
 
@@ -857,10 +880,31 @@ TEST_F(ProtocolHandlerImplTest,
 }
 
 TEST_F(ProtocolHandlerImplTest,
-       MalformedLimitVerificationDisabled) {
+       MalformedLimitVerification_NullTimePeriod) {
   const size_t period_msec = 0;
+  const size_t max_messages = 1000;
+  InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
+  AddConnection();
+  AddSession();
+
+  // expect no malformed notification to CH
+  EXPECT_CALL(session_observer_mock,
+              OnMalformedMessageCallback(connection_id)).
+      Times(0);
+
+  // Sending malformed packets
+  const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
+  for (size_t i = 0; i < max_messages + 1; ++i) {
+    SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+  }
+}
+TEST_F(ProtocolHandlerImplTest,
+       MalformedLimitVerification_NullCount) {
+  const size_t period_msec = 10000;
   const size_t max_messages = 0;
-  InitProtocolHandlerImpl(0u, 0u, period_msec, max_messages);
+  InitProtocolHandlerImpl(0u, 0u, true, period_msec, max_messages);
   AddConnection();
   AddSession();
 

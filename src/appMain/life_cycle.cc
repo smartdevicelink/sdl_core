@@ -97,6 +97,7 @@ bool LifeCycle::StartComponents() {
     new protocol_handler::ProtocolHandlerImpl(transport_manager_,
                                               profile::Profile::instance()->message_frequency_time(),
                                               profile::Profile::instance()->message_frequency_count(),
+                                              profile::Profile::instance()->malformed_message_filtering(),
                                               profile::Profile::instance()->malformed_frequency_time(),
                                               profile::Profile::instance()->malformed_frequency_count());
   DCHECK(protocol_handler_ != NULL);

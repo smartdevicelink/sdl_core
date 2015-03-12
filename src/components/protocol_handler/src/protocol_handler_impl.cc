@@ -65,12 +65,17 @@ const size_t kStackSize = 32768;
 ProtocolHandlerImpl::ProtocolHandlerImpl(
     transport_manager::TransportManager *transport_manager_param,
     size_t message_frequency_time, size_t message_frequency_count,
+    bool malformed_message_filtering,
     size_t malformed_message_frequency_time, size_t malformed_message_frequency_count)
     : protocol_observers_(),
       session_observer_(0),
       transport_manager_(transport_manager_param),
       kPeriodForNaviAck(5),
-      message_max_frequency_(0),
+      message_max_frequency_(message_frequency_count),
+      message_frequency_time_(message_frequency_time),
+      malformed_message_filtering_(malformed_message_filtering),
+      malformed_message_max_frequency_(malformed_message_frequency_count),
+      malformed_message_frequency_time_(malformed_message_frequency_time),
 #ifdef ENABLE_SECURITY
       security_manager_(NULL),
 #endif  // ENABLE_SECURITY
@@ -86,34 +91,28 @@ ProtocolHandlerImpl::ProtocolHandlerImpl(
   LOG4CXX_AUTO_TRACE(logger_);
   protocol_header_validator_.set_max_payload_size(profile::Profile::instance()->maximum_payload_size());
   incoming_data_handler_.set_validator(&protocol_header_validator_);
-  const size_t time_range_msecs = message_frequency_time;
-  message_meter_.set_time_range(time_range_msecs);
-  if (time_range_msecs > 0) {
-    message_max_frequency_ = message_frequency_count;
-    if (message_max_frequency_ > 0) {
-      LOG4CXX_DEBUG(logger_, "Frequency meter is enabled ( " << message_max_frequency_
-                    << " per " << time_range_msecs << " mSecond)");
-    } else {
-      LOG4CXX_WARN(logger_, "Invalid massage frequency value. MessageMeter will be disabled");
-      message_meter_.set_time_range(0u);
-    }
+
+  if (message_frequency_time_ > 0u &&
+      message_max_frequency_ > 0u) {
+    message_meter_.set_time_range(message_frequency_time_);
+    LOG4CXX_DEBUG(logger_, "Frequency meter is enabled ( " << message_max_frequency_
+                  << " per " << message_frequency_time_ << " mSecond)");
   } else {
     LOG4CXX_WARN(logger_, "Frequency meter is disabled");
   }
-  const size_t malformed_time_range_msecs = malformed_message_frequency_time;
-  malformed_message_meter_.set_time_range(malformed_time_range_msecs);
-  if (malformed_time_range_msecs > 0) {
-    malformed_message_max_frequency_ = malformed_message_frequency_count;
-    if (malformed_message_max_frequency_ > 0) {
-      LOG4CXX_DEBUG(logger_, "Malformed frequency meter is enabled ( " << message_max_frequency_
-                    << " per " << malformed_time_range_msecs << " mSecond)");
+
+  if (malformed_message_filtering_) {
+    if(malformed_message_frequency_time_ > 0u &&
+       malformed_message_max_frequency_ > 0u) {
+      malformed_message_meter_.set_time_range(malformed_message_frequency_time_);
+      LOG4CXX_DEBUG(logger_, "Malformed frequency meter is enabled ( " << malformed_message_max_frequency_
+                    << " per " << malformed_message_frequency_time_ << " mSecond)");
     } else {
-      LOG4CXX_WARN(logger_, "Invalid malformed massage frequency value."
-                   <<" MalformedMessageMeter will be disabled");
-      malformed_message_meter_.set_time_range(0u);
+      LOG4CXX_WARN(logger_, "Malformed frequency meter is disabled");
     }
   } else {
-    LOG4CXX_WARN(logger_, "Malformed frequency meter is disabled");
+    LOG4CXX_WARN(logger_, "Malformed message filtering is disabled."
+                 << "Connection will be close on first malformed message detection");
   }
 }
 
@@ -423,11 +422,7 @@ void ProtocolHandlerImpl::SendMessageToMobileApp(const RawMessagePtr message,
 void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  if (tm_message) {
-    LOG4CXX_DEBUG(logger_,
-      "Received data from TM  with connection id " << tm_message->connection_key() <<
-      " msg data_size "      << tm_message->data_size());
-  } else {
+  if (!tm_message) {
     LOG4CXX_ERROR(
         logger_,
         "Invalid incoming message received in"
@@ -435,19 +430,31 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
     return;
   }
 
+  const uint32_t connection_key = tm_message->connection_key();
+  LOG4CXX_DEBUG(logger_,
+    "Received data from TM  with connection id " << connection_key <<
+    " msg data_size "      << tm_message->data_size());
+
   RESULT_CODE result;
   const std::list<ProtocolFramePtr> protocol_frames =
       incoming_data_handler_.ProcessData(*tm_message, &result);
+  LOG4CXX_DEBUG(logger_, "Proccessed " << protocol_frames.size() << "frames");
   if (result != RESULT_OK) {
     if (result == RESULT_MALFORMED_OCCURS) {
-      LOG4CXX_WARN(logger_, "Malformed message occurs.");
+      LOG4CXX_WARN(logger_, "Malformed message occurs, connection id "
+                   << connection_key);
+      if (!malformed_message_filtering_) {
+        LOG4CXX_DEBUG(logger_, "Malformed message filterign disabled");
+        if (session_observer_) {
+          session_observer_->OnMalformedMessageCallback(connection_key);
+        }
       // For tracking only malformed occurrence check outpute
-      if(!protocol_frames.empty()) {
-        TrackMalformedMessage(tm_message->connection_key());
+      } else if(!protocol_frames.empty()) {
+        TrackMalformedMessage(connection_key);
       }
     } else {
       LOG4CXX_ERROR(logger_, "Incoming data processing failed.");
-      transport_manager_->DisconnectForce(tm_message->connection_key());
+      transport_manager_->DisconnectForce(connection_key);
     }
   }
 
@@ -1089,31 +1096,38 @@ RESULT_CODE ProtocolHandlerImpl::HandleControlMessageHeartBeat(
 
 bool ProtocolHandlerImpl::TrackMessage(const uint32_t& connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const size_t message_frequency = message_meter_.TrackMessage(connection_key);
-  LOG4CXX_DEBUG(logger_, "Frequency of " << connection_key << " is " << message_frequency);
-  if (message_frequency > message_max_frequency_) {
-    LOG4CXX_WARN(logger_, "Frequency of " << connection_key << " is marked as high.");
-    if (session_observer_) {
-      session_observer_->OnApplicationFloodCallBack(connection_key);
+  if (message_frequency_time_ > 0u &&
+      message_max_frequency_ > 0u) {
+    const size_t message_frequency = message_meter_.TrackMessage(connection_key);
+    LOG4CXX_DEBUG(logger_, "Frequency of " << connection_key << " is " << message_frequency);
+    if (message_frequency > message_max_frequency_) {
+      LOG4CXX_WARN(logger_, "Frequency of " << connection_key << " is marked as high.");
+      if (session_observer_) {
+        session_observer_->OnApplicationFloodCallBack(connection_key);
+      }
+      message_meter_.RemoveIdentifier(connection_key);
+      return true;
     }
-    message_meter_.RemoveIdentifier(connection_key);
-    return true;
   }
   return false;
 }
 
 bool ProtocolHandlerImpl::TrackMalformedMessage(const uint32_t &connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
-  const size_t message_frequency = malformed_message_meter_.TrackMessage(connection_key);
-  LOG4CXX_DEBUG(logger_, "Malformed frequency of " << connection_key
-                << " is " << message_frequency);
-  if (message_frequency > malformed_message_max_frequency_) {
-    LOG4CXX_WARN(logger_, "Malformed frequency of " << connection_key << " is marked as high.");
-    if (session_observer_) {
-      session_observer_->OnMalformedMessageCallback(connection_key);
+  if (malformed_message_frequency_time_ > 0u &&
+      malformed_message_max_frequency_ > 0u) {
+    const size_t message_frequency = malformed_message_meter_.TrackMessage(connection_key);
+    LOG4CXX_DEBUG(logger_, "Malformed frequency of " << connection_key
+                  << " is " << message_frequency);
+    if (!malformed_message_filtering_ ||
+        message_frequency > malformed_message_max_frequency_) {
+      LOG4CXX_WARN(logger_, "Malformed frequency of " << connection_key << " is marked as high.");
+      if (session_observer_) {
+        session_observer_->OnMalformedMessageCallback(connection_key);
+      }
+      malformed_message_meter_.RemoveIdentifier(connection_key);
+      return true;
     }
-    malformed_message_meter_.RemoveIdentifier(connection_key);
-    return true;
   }
   return false;
 }
