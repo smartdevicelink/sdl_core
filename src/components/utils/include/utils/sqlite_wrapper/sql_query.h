@@ -35,7 +35,7 @@
 
 #include <stdint.h>
 #include <string>
-#include "sqlite_wrapper/sql_error.h"
+#include "utils/sqlite_wrapper/sql_error.h"
 #include "utils/lock.h"
 
 struct sqlite3_stmt;

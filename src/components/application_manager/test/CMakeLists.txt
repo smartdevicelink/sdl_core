@@ -45,6 +45,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
   ${COMPONENTS_DIR}/application_manager/include/application_manager/
   ${COMPONENTS_DIR}/application_manager/include/application_manager/policies
+  ${COMPONENTS_DIR}/application_manager/include/
 )
 
 set(testSources
@@ -79,7 +80,7 @@ set(AM_SOURCES
   ${AM_SOURCE_DIR}/src/hmi_capabilities.cc
   ${AM_SOURCE_DIR}/src/application_data_impl.cc
   ${AM_SOURCE_DIR}/src/request_controller.cc
-  ${AM_SOURCE_DIR}/src/resume_ctrl.cpp
+  ${AM_SOURCE_DIR}/src/resumption/resume_ctrl.cc
   ${AM_SOURCE_DIR}/src/mobile_message_handler.cc
 )
   include_directories(

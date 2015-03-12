@@ -33,8 +33,11 @@
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_JSON_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_JSON_H_
 
+#include "application_manager/resumption/resumption_data.h"
+#include "json/json.h"
 namespace application_manager {
 namespace resumption {
+
 class ResumptionDataJson : public ResumptionData {
   public:
   /**
@@ -91,7 +94,7 @@ class ResumptionDataJson : public ResumptionData {
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  virtual void Suspend();
+  virtual void OnSuspend();
 
   /**
    * @brief Increments ignition counter for all registered applications
@@ -220,6 +223,13 @@ class ResumptionDataJson : public ResumptionData {
    */
   void SetLastIgnOffTime(time_t ign_off_time);
 
+  /*
+   * @brief Return true if application resumption data is valid,
+   * otherwise false
+   *
+   * @param index application index in the resumption list
+   */
+  bool IsResumptionDataValid(uint32_t index);
 
 };
 }  // namespace resumption

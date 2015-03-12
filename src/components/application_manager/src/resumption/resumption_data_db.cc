@@ -31,13 +31,7 @@
  */
 #include "application_manager/resumption/resumption_data_db.h"
 #include "application_manager/resumption/resumption_sql_queries.h"
-#if __QNX__
-#  include "qdb_wrapper/sql_database.h"
-#  include "qdb_wrapper/sql_query.h"
-#else  // __QNX__
-#  include "sqlite_wrapper/sql_database.h"
-#  include "sqlite_wrapper/sql_query.h"
-#endif  // __QNX__
+#include "application_manager/smart_object_keys.h"
 
 namespace application_manager {
 namespace resumption {
@@ -84,7 +78,7 @@ uint32_t ResumptionDataDB::GetHMIApplicationID(const std::string& mobile_app_id,
   return hmi_app_id;
 }
 
-void ResumptionDataDB::Suspend() {
+void ResumptionDataDB::OnSuspend() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   utils::dbms::SQLQuery query_delete_applications(db());
@@ -92,9 +86,9 @@ void ResumptionDataDB::Suspend() {
   utils::dbms::SQLQuery query_update_last_ign_off_time(db());
 
   if (query_delete_applications.Prepare(kDeleteApplicationsAccordingWithIgnOffCount)) {
-    query_delete_applications.Bind(0, static_cast<int>(kApplicationLifes));
+    query_delete_applications.Bind(0, static_cast<int>(3));
     if (query_delete_applications.Exec()) {
-      LOG4CXX_INFO(logger_, "Saved application with ign_off_count = "<<kApplicationLifes
+      LOG4CXX_INFO(logger_, "Saved application with ign_off_count = "<< 3 // kApplicationLifes
                    <<" was deleted");
     }
   }
@@ -106,7 +100,7 @@ void ResumptionDataDB::Suspend() {
   }
 
   if (query_update_last_ign_off_time.Prepare(KUpdateLastIgnOffTime)) {
-    query_update_lals_ign_off_time.Bind(0, static_cast<uint32_t>(time(NULL)));
+    query_update_last_ign_off_time.Bind(0, static_cast<int>(time(NULL)));
     if (query_update_last_ign_off_time.Exec()) {
       LOG4CXX_INFO(logger_, "Data last_ign_off_time was updated");
     }
@@ -184,7 +178,7 @@ bool ResumptionDataDB::CheckExistenceHMIId(const uint32_t hmi_app_id) {
 
   utils::dbms::SQLQuery query(db());
   if (query.Prepare(kCheckHMIId)) {
-    query.Bind(0, hmi_app_id);
+    query.Bind(0, static_cast<int>(hmi_app_id));
     if (query.Exec() && !(query.IsNull(0))) {
       LOG4CXX_INFO(logger_, "Saved data has HMI appID");
       return true;
@@ -210,8 +204,8 @@ void ResumptionDataDB::SelectHMIId(const std::string& mobile_app_id,
     }
   }
   LOG4CXX_FATAL(logger_, "Saved data doesn't have application with "
-                "device id = "<<device_id<<" and mobile appID = "<<mobi_app_id
-                "or hmi id"<<);
+                "device id = "<<device_id<<" and mobile appID = "<< mobile_app_id
+                << "or hmi id");
 }
 
 bool ResumptionDataDB::SelectHashId(const std::string& mobile_app_id,
@@ -230,8 +224,8 @@ bool ResumptionDataDB::SelectHashId(const std::string& mobile_app_id,
     }
   }
   LOG4CXX_FATAL(logger_, "Saved data doesn't have application with "
-                "device id = "<<device_id<<" and mobile appID = "<<mobi_app_id
-                "or hashID");
+                "device id = "<<device_id<<" and mobile appID = "<<mobile_app_id
+                << "or hashID");
   return false;
 }
 
@@ -247,6 +241,7 @@ uint32_t ResumptionDataDB::SelectIgnOffTime() {
     }
   }
   LOG4CXX_FATAL(logger_, "Problem with prepare query");
+  return ignOffTime;
 }
 
 bool ResumptionDataDB::CheckExistenceApplication(const std::string& mobile_app_id,
@@ -337,6 +332,17 @@ void ResumptionDataDB::UpdateDataOnAwake() {
       LOG4CXX_INFO(logger_, "Values of ignition off counts were updated successfully");
     }
   }
+}
+
+utils::dbms::SQLDatabase* ResumptionDataDB::db() const {
+//#ifdef __QNX__
+//  utils::dbms::SQLDatabase* db = new utils::dbms::SQLDatabase(kDatabaseName);
+//  db->Open();
+//  return db;
+//#else
+//  return db_;
+//#endif
+  return NULL;
 }
 
 

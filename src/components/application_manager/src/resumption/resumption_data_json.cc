@@ -33,8 +33,15 @@
 #include "application_manager/resumption/resumption_data_json.h"
 #include "smart_objects/smart_object.h"
 #include "json/json.h"
+#include "formatters/CFormatterJsonBase.hpp"
+#include "application_manager/message_helper.h"
+#include "application_manager/smart_object_keys.h"
+#include "resumption/last_state.h"
+
 namespace application_manager {
 namespace resumption {
+
+namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ResumptionDataJson")
 
@@ -112,41 +119,6 @@ int ResumptionDataJson::GetStoredHMILevel(const std::string& m_app_id,
   return -1;
 }
 
-bool ResumptionDataJson::RestoreApplicationData(
-    ApplicationSharedPtr application) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (!application.valid()) {
-    LOG4CXX_ERROR(logger_, "Application pointer in invalid");
-    return false;
-  }
-
-  LOG4CXX_DEBUG(logger_, "ENTER app_id : " << application->app_id());
-  smart_objects::SmartObject saved_app(smart_objects::SmartType_Map);
-  bool result = GetSavedApplication(application->mobile_app_id(),
-      MessageHelper::GetDeviceMacAddressForHandle(application->device()),
-      saved_app);
-  if (result) {
-    if(saved_app.keyExists(strings::grammar_id)) {
-      const uint32_t app_grammar_id = saved_app[strings::grammar_id].asUInt();
-      application->set_grammar_id(app_grammar_id);
-
-      AddFiles(application, so_saved_app);
-      AddSubmenues(application, so_saved_app);
-      AddCommands(application, so_saved_app);
-      AddChoicesets(application, so_saved_app);
-      SetGlobalProperties(application, so_saved_app);
-      AddSubscriptions(application, so_saved_app);
-      return true;
-    } else {
-      LOG4CXX_WARN(logger_, "Saved data of application does not contain grammar_id");
-      return false;
-    }
-  }
-  LOG4CXX_WARN(logger_, "Application not saved");
-  return false;
-}
-
 bool ResumptionDataJson::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -200,7 +172,7 @@ uint32_t ResumptionDataJson::GetHMIApplicationID(
   return hmi_app_id;
 }
 
-void ResumptionDataJson::Suspend() {
+void ResumptionDataJson::OnSuspend() {
   LOG4CXX_AUTO_TRACE(logger_);
   Json::Value to_save;
   for (Json::Value::iterator it = GetSavedApplications().begin();
@@ -214,7 +186,7 @@ void ResumptionDataJson::Suspend() {
     }
     if ((*it).isMember(strings::ign_off_count)) {
       const uint32_t ign_off_count = (*it)[strings::ign_off_count].asUInt();
-      if (ign_off_count < kApplicationLifes) {
+      if (ign_off_count < 3) { // TODO read from profile
         (*it)[strings::ign_off_count] = ign_off_count + 1;
         to_save.append(*it);
       }
@@ -227,7 +199,7 @@ void ResumptionDataJson::Suspend() {
   SetLastIgnOffTime(time(NULL));
   LOG4CXX_DEBUG(logger_,
                 GetResumptionData().toStyledString());
-  resumption::LastState::instance()->SaveToFileSystem();
+  ::resumption::LastState::instance()->SaveToFileSystem();
 }
 
 void ResumptionDataJson::OnAwake() {
@@ -370,15 +342,15 @@ void ResumptionDataJson::GetDataForLoadResumeData(
 void ResumptionDataJson::SetHMILevelForSavedApplication(const std::string& mobile_app_id,
                                                         const std::string& device_id,
                                                         int32_t hmi_level) {
-  LOG4CXX_AUTO_TRACE(logger_);
+//  LOG4CXX_AUTO_TRACE(logger_);
 
-  int idx = GetObjIndex(mobile_app_id, device_id);
-  if (-1 == idx) {
-    LOG4CXX_WARN(logger_, "Application isn't saved with mobile_app_id = "
-                 <<mobile_app_id<<" device_id = "<<device_id);
-    return;
-  }
-  GetSavedApplications()[idx][strings::hmi_level] = hmi_level;
+//  int idx = GetObjIndex(mobile_app_id, device_id);
+//  if (-1 == idx) {
+//    LOG4CXX_WARN(logger_, "Application isn't saved with mobile_app_id = "
+//                 <<mobile_app_id<<" device_id = "<<device_id);
+//    return;
+//  }
+//  GetSavedApplications()[idx][strings::hmi_level] = hmi_level;
 }
 
 Json::Value& ResumptionDataJson::GetSavedApplications() {
@@ -400,7 +372,7 @@ Json::Value& ResumptionDataJson::GetSavedApplications() {
 Json::Value& ResumptionDataJson::GetResumptionData() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  Json::Value& last_state = resumption::LastState::instance()->dictionary;
+  Json::Value& last_state = ::resumption::LastState::instance()->dictionary;
   if (!last_state.isMember(strings::resumption)) {
     last_state[strings::resumption] = Json::Value(Json::objectValue);
     LOG4CXX_WARN(logger_, "resumption section is missed");

@@ -32,6 +32,8 @@
 
 #include "application_manager/resumption/resumption_data.h"
 #include "utils/logger.h"
+#include "application_manager/smart_object_keys.h"
+#include "application_manager/vehicle_info_data.h"
 
 namespace application_manager {
 namespace resumption {
@@ -185,129 +187,8 @@ smart_objects::SmartObject ResumptionData::GetApplicationFiles(
   return files;
 }
 
-void ResumptionData::AddFiles(ApplicationSharedPtr application,
-                const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (saved_app.keyExists(strings::application_files)) {
-    const smart_objects::SmartObject& application_files =
-        saved_app[strings::application_files];
-    for (int i = 0; i < application_files.length(); ++i) {
-      const smart_objects::SmartObject& file_data =
-          appliction_files[i];
-      const bool is_persistent = file_data.keyExists(strings::persistent_file) &&
-          file_data[strings::persistent_file].asBool();
-      if (is_persistent) {
-        AppFile file;
-        file.is_persistent = is_persistent;
-        file.is_download_complete =
-            file_data[strings::is_download_complete].asBool();
-        file.file_name = file_data[strings::sync_file_name].asString();
-        file.file_type = static_cast<mobile_apis::FileType::eType> (
-            file_data[strings::file_type].asInt());
-        application->AddFile(file);
-      }
-    }
-  } else {
-    LOG4CXX_FATAL(logger_, "application_files section is not exists");
-  }
-}
-
-void ResumptionData::AddSubmenues(ApplicationSharedPtr application,
-                                  const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (saved_app.keyExists(strings::application_submenus)) {
-    const smart_objects::SmartObject& app_submenus =
-        saved_app[strings::application_submenus];
-    for (int i = 0; i < app_submenus.length(); ++i) {
-      const smart_objects::SmartObject& submenu = app_submenues[i];
-      application->AddSubMenu(submenu[strings::menu_id].asUInt(), submenu);
-    }
-  } else {
-    LOG4CXX_FATAL(logger_, "application_submenus section is not exists");
-  }
-}
-
-void ResumptionData::AddCommands(ApplicationSharedPtr application,
-                                 const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (saved_app.keyExists(strings::application_commands)) {
-    const smart_objects::SmartObject& app_commands =
-        saved_app[strings::application_commands];
-    for (int i = 0; i < app_commands.length(); ++i) {
-      const smart_objects::SmartObject& command =
-          app_commands[i];
-      application->AddCommand(command[strings::cmd_id].asUInt(), command);
-    }
-  } else {
-    LOG4CXX_FATAL(logger_, "application_commands section is not exists");
-  }
-}
-
-void ResumptionData::AddChoicesets(ApplicationSharedPtr application,
-                                   const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (saved_app.keyExists(strings::application_choice_sets)) {
-    const smart_objects::SmartObject& app_choice_sets =
-        saved_app[strings::application_choice_sets];
-    for (int i = 0; i < app_choice_sets.length(); ++i)  {
-      const smart_objects::SmartObject& choice_set =
-          app_choice_sets[i];
-      const int32_t choice_set_id =
-          choice_set[strings::interaction_choice_set_id].asInt();
-      application->AddChoiceSet(choice_set_id, choice_set);
-    }
-  } else {
-    LOG4CXX_FATAL(logger_, "There is no any choicesets");
-  }
-}
-
-void ResumptionData::SetGlobalProperties(ApplicationSharedPtr application,
-                           const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  if (saved_app.keyExists(strings::application_global_properties)) {
-    const smart_objects::SmartObject& properties_so =
-        saved_app[strings::application_global_properties];
-    application->load_global_properties(properties_so);
-  }
-}
-
-void ResumptionData::AddSubscriptions(ApplicationSharedPtr application,
-                                      const smart_objects::SmartObject& saved_app) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  if (saved_app.keyExists(strings::application_subscribtions)) {
-    const smart_objects::SmartObject& subscribtions =
-        saved_app[strings::application_subscribtions];
-
-    if (subscribtions.keyExists(strings::application_buttons)) {
-      const smart_objects::SmartObject& subscribtions_buttons =
-          subscribtions[strings::application_buttons];
-      mobile_apis::ButtonName::eType btn;
-      for (int i = 0; i < subscribtions_buttons.length(); ++i) {
-        btn = static_cast<mobile_apis::ButtonName::eType>(
-            (subscribtions_buttons[i]).asInt());
-        application->SubscribeToButton(btn);
-      }
-    }
-
-    if (subscribtions.keyExists(strings::application_vehicle_info)) {
-      const smart_objects::SmartObject& subscribtions_ivi =
-          subscribtions[strings::application_vehicle_info];
-      VehicleDataType ivi;
-      for (int i = 0; i < subscribtions_ivi.length(); ++i) {
-        ivi = static_cast<VehicleDataType>((subscribtions_ivi[i]).asInt());
-        application->SubscribeToIVI(ivi);
-      }
-    }
-  }
-}
-
 smart_objects::SmartObject ResumptionData::PointerToSmartObj(
-    smart_objects::SmartObject* ptr) {
+    const smart_objects::SmartObject* ptr) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject temp;
   if (ptr) {

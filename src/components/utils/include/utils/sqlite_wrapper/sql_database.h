@@ -34,7 +34,7 @@
 #define SRC_COMPONENTS_POLICY_SQLITE_WRAPPER_INCLUDE_SQLITE_WRAPPER_SQL_DATABASE_H_
 
 #include <string>
-#include "sqlite_wrapper/sql_error.h"
+#include "utils/sqlite_wrapper/sql_error.h"
 #include "utils/lock.h"
 
 struct sqlite3;

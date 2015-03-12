@@ -44,7 +44,7 @@
 #include "application_manager/hmi_capabilities.h"
 #include "application_manager/message.h"
 #include "application_manager/request_controller.h"
-#include "application_manager/resume_ctrl.h"
+#include "application_manager/resumption/resume_ctrl.h"
 #include "application_manager/vehicle_info_data.h"
 #include "application_manager/state_controller.h"
 #include "protocol_handler/protocol_observer.h"
@@ -244,7 +244,8 @@ class ApplicationManagerImpl : public ApplicationManager,
                                 const int64_t));
   MOCK_METHOD1(ReplaceHMIByMobileAppId, void(smart_objects::SmartObject&));
   MOCK_METHOD1(ReplaceMobileByHMIAppId, void(smart_objects::SmartObject&));
-  MOCK_METHOD0(resume_controller, ResumeCtrl&());
+  MOCK_METHOD0(resume_controller, resumption::ResumeCtrl&());
+  MOCK_METHOD1(IsVideoStreamingAllowed, bool(uint32_t));
   MOCK_METHOD1(GetDefaultHmiLevel, mobile_api::HMILevel::eType (ApplicationSharedPtr));
 
   MOCK_METHOD2(HMILevelAllowsStreaming, bool(uint32_t, protocol_handler::ServiceType));

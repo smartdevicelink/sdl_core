@@ -32,6 +32,14 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_DB_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_DB_H_
+#include "application_manager/resumption/resumption_data.h"
+#if __QNX__
+#  include "qdb_wrapper/sql_database.h"
+#  include "qdb_wrapper/sql_query.h"
+#else  // __QNX__
+#include "utils/sqlite_wrapper/sql_database.h"
+#include "utils/sqlite_wrapper/sql_query.h"
+#endif  // __QNX__
 
 namespace application_manager {
 namespace resumption {
@@ -90,7 +98,7 @@ class ResumptionDataDB : public ResumptionData {
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  virtual void Suspend();                                                         ////////////////////////////////////////////
+  virtual void OnSuspend();                                                         ////////////////////////////////////////////
 
   /**
    * @brief Retrieves hash ID for the given mobile app ID
@@ -249,7 +257,7 @@ class ResumptionDataDB : public ResumptionData {
    */
   void UpdateDataOnAwake();
 
-
+ utils::dbms::SQLDatabase* db() const;
 
 };
 }  // namespace resumption

@@ -514,7 +514,8 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(app, false);
 
-
+  // remove from resumption if app was activated by user
+  resume_controller().OnAppActivated(app);
   HMILevel::eType hmi_level = HMILevel::HMI_FULL;
   AudioStreamingState::eType audio_state;
   app->IsAudioApplication() ? audio_state = AudioStreamingState::AUDIBLE :
@@ -2267,7 +2268,7 @@ void ApplicationManagerImpl::UnregisterAllApplications() {
     it = accessor.begin();
   }
   if (is_ignition_off) {
-    resume_controller().Suspend();
+    resume_controller().OnSuspend();
   }
   request_ctrl_.terminateAllHMIRequests();
 }
@@ -2367,7 +2368,7 @@ void ApplicationManagerImpl::UnregisterApplication(
   if (is_resuming) {
       resume_ctrl_.SaveApplication(app_to_remove);
   } else {
-    resume_ctrl_.RemoveApplicationFromSaved(app_to_remove->mobile_app_id());
+//    resume_ctrl_.RemoveApplicationFromSaved(app_to_remove->mobile_app_id());
   }
 
   if (audio_pass_thru_active_) {

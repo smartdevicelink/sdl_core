@@ -32,6 +32,8 @@
 
 #ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_H_
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_H_
+#include "smart_objects/smart_object.h"
+#include "application_manager/application.h"
 
 namespace application_manager {
 namespace resumption {
@@ -52,13 +54,6 @@ class ResumptionData {
    */
   virtual int GetStoredHMILevel(const std::string& m_app_id,
                                const std::string& device_id) = 0;
-
-  /**
-   * @brief restores saved data of application
-   * @param application contains application for which restores data
-   * @return true if success, otherwise return false
-   */
-  virtual bool RestoreApplicationData(ApplicationSharedPtr application) = 0;
 
   /**
    * @brief Check if saved data of applications have hmi app id
@@ -91,7 +86,7 @@ class ResumptionData {
    * @brief Increments ignition counter for all registered applications
    * and remember ign_off time stamp
    */
-  virtual void Suspend() = 0;
+  virtual void OnSuspend() = 0;
 
   /**
    * @brief Retrieves hash ID for the given mobile app ID
@@ -220,63 +215,11 @@ class ResumptionData {
       ApplicationConstSharedPtr application);
 
   /**
-   * @brief AddFiles allows to add files for the application
-   * which should be resumed
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddFiles(ApplicationSharedPtr application,
-                const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddSubmenues allows to add sub menues for the application
-   * which should be resumed
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddSubmenues(ApplicationSharedPtr application,
-                    const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddCommands allows to add commands for the application
-   * which should be resumed
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddCommands(ApplicationSharedPtr application,
-                   const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddChoicesets allows to add choice sets for the application
-   * which should be resumed
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddChoicesets(ApplicationSharedPtr application,
-                     const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief SetGlobalProperties allows to restore global properties.
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void SetGlobalProperties(ApplicationSharedPtr application,
-                           const smart_objects::SmartObject& saved_app);
-
-  /**
-   * @brief AddSubscriptions allows to restore subscriptions
-   * @param application application which will be resumed
-   * @param saved_app application specific section from backup file
-   */
-  void AddSubscriptions(ApplicationSharedPtr application,
-                        const smart_objects::SmartObject& saved_app);
-
-  /**
    * @brief checks pointer that it is not equal NULL
    * @param contains pointer which need to check
    * @return smartObject from pointer
    */
-  smart_objects::SmartObject PointerToSmartObj (smart_objects::SmartObject* ptr);
+  smart_objects::SmartObject PointerToSmartObj (const NsSmartDeviceLink::NsSmartObjects::SmartObject* ptr);
 
   template<typename Iterator>
   void Append(Iterator first,

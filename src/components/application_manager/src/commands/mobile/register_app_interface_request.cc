@@ -232,7 +232,7 @@ void RegisterAppInterfaceRequest::Run() {
     const std::string mobile_app_id = msg_params[strings::app_id].asString();
     const std::string device_id =
         MessageHelper::GetDeviceMacAddressForHandle(application->device());
-    ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
+    resumption::ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
 
     // there is side affect with 2 mobile app with the same mobile app_id
     if (resumer.IsApplicationSaved(mobile_app_id, device_id)) {
@@ -477,7 +477,7 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
   response_params[strings::hmi_capabilities][strings::phone_call] =
       hmi_capabilities.phone_call_supported();
 
-  ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
+  resumption::ResumeCtrl& resumer = ApplicationManagerImpl::instance()->resume_controller();
   std::string hash_id = "";
 
   std::string add_info("");
