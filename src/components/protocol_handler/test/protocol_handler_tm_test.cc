@@ -755,10 +755,38 @@ TEST_F(ProtocolHandlerImplTest,
   }
 }
 
+
 TEST_F(ProtocolHandlerImplTest,
-    MalformedLimitVerification) {
+       MalformedLimitVerification) {
   const size_t period_msec = 10000;
-  const size_t max_messages = 1000;
+  const size_t max_messages = 100;
+  InitProtocolHandlerImpl(0u, 0u, period_msec, max_messages);
+  AddConnection();
+  AddSession();
+
+  // expect malformed notification to CH
+  EXPECT_CALL(session_observer_mock,
+              OnMalformedMessageCallback(connection_id)).
+      Times(1);
+
+  // Sending malformed packets
+  const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
+  for (size_t i = 0; i < max_messages * 2; ++i) {
+    // Malformed message
+    SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+    // Common message
+    SendTMMessage(connection_id, PROTOCOL_VERSION_1, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+  }
+}
+
+TEST_F(ProtocolHandlerImplTest,
+    MalformedLimitVerification_MalformedStock) {
+  const size_t period_msec = 10000;
+  const size_t max_messages = 100;
   InitProtocolHandlerImpl(0u, 0u, period_msec, max_messages);
   AddConnection();
   AddSession();
@@ -770,10 +798,61 @@ TEST_F(ProtocolHandlerImplTest,
 
   // Sending malformed packets
   const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
+  const uint8_t malformed_frame_type = FRAME_TYPE_MAX_VALUE;
+  const uint8_t malformed_service_type = kInvalidServiceType;
   for (size_t i = 0; i < max_messages * 2; ++i) {
+    // Malformed message 1
     SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
         kControl, FRAME_DATA_SINGLE, session_id,
         some_data.size(), message_id, &some_data[0]);
+    // Malformed message 2
+    SendTMMessage(connection_id, PROTOCOL_VERSION_1, PROTECTION_OFF, malformed_frame_type,
+        kControl, FRAME_DATA_SINGLE, session_id,
+        some_data.size(), message_id, &some_data[0]);
+    // Malformed message 3
+    SendTMMessage(connection_id, PROTOCOL_VERSION_1, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+        malformed_service_type, FRAME_DATA_SINGLE, session_id,
+        some_data.size(), message_id, &some_data[0]);
+
+    // Common message
+    SendTMMessage(connection_id, PROTOCOL_VERSION_1, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+  }
+}
+
+TEST_F(ProtocolHandlerImplTest,
+       MalformedLimitVerification_MalformedOnly) {
+  const size_t period_msec = 10000;
+  const size_t max_messages = 100;
+  InitProtocolHandlerImpl(0u, 0u, period_msec, max_messages);
+  AddConnection();
+  AddSession();
+
+  // expect NO malformed notification to CH
+  EXPECT_CALL(session_observer_mock,
+              OnMalformedMessageCallback(connection_id)).
+      Times(0);
+
+  // Sending malformed packets
+  const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
+  const uint8_t malformed_frame_type = FRAME_TYPE_MAX_VALUE;
+  const uint8_t malformed_service_type = kInvalidServiceType;
+  for (size_t i = 0; i < max_messages * 2; ++i) {
+    // Malformed message 1
+    SendTMMessage(connection_id, malformed_version, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+    // Malformed message 2
+    SendTMMessage(connection_id, PROTOCOL_VERSION_1, PROTECTION_OFF, malformed_frame_type,
+                  kControl, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+    // Malformed message 3
+    SendTMMessage(connection_id, PROTOCOL_VERSION_1, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+                  malformed_service_type, FRAME_DATA_SINGLE, session_id,
+                  some_data.size(), message_id, &some_data[0]);
+
+    // No common message
   }
 }
 

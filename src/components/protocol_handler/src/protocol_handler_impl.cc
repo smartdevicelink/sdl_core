@@ -441,7 +441,10 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
   if (result != RESULT_OK) {
     if (result == RESULT_MALFORMED_OCCURS) {
       LOG4CXX_WARN(logger_, "Malformed message occurs.");
-      TrackMalformedMessage(tm_message->connection_key());
+      // For tracking only malformed occurrence check outpute
+      if(!protocol_frames.empty()) {
+        TrackMalformedMessage(tm_message->connection_key());
+      }
     } else {
       LOG4CXX_ERROR(logger_, "Incoming data processing failed.");
       transport_manager_->DisconnectForce(tm_message->connection_key());
