@@ -48,7 +48,6 @@ DeleteSubMenuResponse::~DeleteSubMenuResponse() {
 void DeleteSubMenuResponse::Run() {
   LOG4CXX_INFO(logger_, "DeleteSubMenuResponse::Run");
 
-
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 

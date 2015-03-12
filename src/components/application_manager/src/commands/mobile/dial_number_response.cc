@@ -31,57 +31,24 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_REQUEST_H_
-#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_REQUEST_H_
-
-#include "application_manager/commands/command_request_impl.h"
-#include "utils/macro.h"
+#include "application_manager/commands/mobile/dial_number_response.h"
+#include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-/**
- * @brief DialNumber request command class
- **/
-class DialNumberRequest : public CommandRequestImpl {
- public:
-  /**
-   * \brief DialNumberRequest class constructor
-   **/
-  explicit DialNumberRequest(const MessageSharedPtr& message);
+DialNumberResponse::DialNumberResponse(const MessageSharedPtr& message)
+    : CommandResponseImpl(message) {
+}
 
-  /**
-   * \brief DialNumberRequest class destructor
-   **/
-  virtual ~DialNumberRequest();
+DialNumberResponse::~DialNumberResponse() {
+}
 
-  /**
-   * @brief Execute command
-   **/
-  virtual void Run();
-
-  /**
-   * @brief Interface method that is called whenever new event received
-   *
-   * @param event The received event
-   */
-  void on_event(const event_engine::Event& event);
-
- private:
-
-  /**
-   * @brief Removes from number param all characters
-   * except the + character and digits.
-   *
-   */
-  void StripNumberParam();
-
-  DISALLOW_COPY_AND_ASSIGN(DialNumberRequest);
-};
+void DialNumberResponse::Run() {
+  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
+}
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_REQUEST_H_
