@@ -253,7 +253,9 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool                                     is_media_;
   bool                                     is_navi_;
   bool                                     hmi_supports_navi_video_streaming_;
+  mutable sync_primitives::Lock            hmi_supports_navi_video_streaming_lock_;
   bool                                     hmi_supports_navi_audio_streaming_;
+  mutable sync_primitives::Lock            hmi_supports_navi_audio_streaming_lock_;
   bool                                     is_app_allowed_;
   bool                                     has_been_activated_;
   bool                                     tts_properties_in_none_;

@@ -365,7 +365,10 @@ bool ApplicationImpl::tts_properties_in_full() {
 }
 
 void ApplicationImpl::set_hmi_supports_navi_video_streaming(bool supports) {
-  hmi_supports_navi_video_streaming_ = supports;
+  {
+    sync_primitives::AutoLock auto_lock(hmi_supports_navi_video_streaming_lock_);
+    hmi_supports_navi_video_streaming_ = supports;
+  }
 
   if ((!supports) && (!video_stream_retry_active())) {
     std::pair<uint32_t, int32_t> stream_retry =
@@ -382,11 +385,15 @@ void ApplicationImpl::set_hmi_supports_navi_video_streaming(bool supports) {
 }
 
 bool ApplicationImpl::hmi_supports_navi_video_streaming() const {
+  sync_primitives::AutoLock auto_lock(hmi_supports_navi_video_streaming_lock_);
   return hmi_supports_navi_video_streaming_;
 }
 
 void ApplicationImpl::set_hmi_supports_navi_audio_streaming(bool supports) {
-  hmi_supports_navi_audio_streaming_ = supports;
+  {
+    sync_primitives::AutoLock auto_lock(hmi_supports_navi_audio_streaming_lock_);
+    hmi_supports_navi_audio_streaming_ = supports;
+  }
 
   if ((!supports) && (!audio_stream_retry_active())) {
     std::pair<uint32_t, int32_t> stream_retry =
@@ -403,6 +410,7 @@ void ApplicationImpl::set_hmi_supports_navi_audio_streaming(bool supports) {
 }
 
 bool ApplicationImpl::hmi_supports_navi_audio_streaming() const {
+  sync_primitives::AutoLock auto_lock(hmi_supports_navi_audio_streaming_lock_);
   return hmi_supports_navi_audio_streaming_;
 }
 
