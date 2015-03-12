@@ -134,11 +134,6 @@ class TimerThread {
   virtual bool isRunning();
 
   /**
-   * @brief method suspends timer execution
-   */
-  virtual void pause();
-
-  /**
    * @brief Suspends timer execution after next loop.
    */
   virtual void suspend();
@@ -298,13 +293,6 @@ template<class T>
 bool TimerThread<T>::isRunning() {
   DCHECK(thread_);
   return thread_->is_running();
-}
-
-template<class T>
-void TimerThread<T>::pause() {
-  LOG4CXX_DEBUG(logger_, "Suspension of timer " << name_);
-  const uint32_t wait_seconds = std::numeric_limits<uint32_t>::max();
-  updateTimeOut(wait_seconds);
 }
 
 template<class T>

@@ -2758,7 +2758,7 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
       LOG4CXX_INFO(logger_, "Stop tts_global_properties_timer_");
       // if container is empty need to stop timer
       tts_global_properties_app_list_lock_.Release();
-      tts_global_properties_timer_.pause();
+      tts_global_properties_timer_.suspend();
       return;
     }
   }
