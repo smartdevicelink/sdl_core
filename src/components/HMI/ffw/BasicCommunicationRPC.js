@@ -488,20 +488,28 @@ FFW.BasicCommunication = FFW.RPCObserver
                 if (request.method == "BasicCommunication.DialNumber") {
 
                     SDL.PopUp.create().appendTo('body').popupActivate(
-                        "Would you like to accept incoming call?",
+                        "Would you like to dial " + request.params.number + " ?",
                         function (result) {
                             if (result) {
+
+                                FFW.BasicCommunication.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
+                                    request.id,
+                                    request.method);
 
                                 SDL.SDLModel.onDeactivateApp('call', request.params.appID);
                                 SDL.States.goToStates('phone.dialpad');
                                 SDL.PhoneController.incomingCall(request);
+                            } else {
+
+
+                                FFW.BasicCommunication.sendError(SDL.SDLModel.resultCode["REJECTED"],
+                                    request.id,
+                                    request.method,
+                                    "No paired device!"
+                                );
                             }
                         },
                         false);
-
-                    FFW.BasicCommunication.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
-                        request.id,
-                        request.method);
                 }
                 if (request.method == "BasicCommunication.ActivateApp") {
 
