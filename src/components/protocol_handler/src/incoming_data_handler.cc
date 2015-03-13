@@ -50,9 +50,11 @@ static const size_t MIN_HEADER_SIZE = std::min(PROTOCOL_HEADER_V1_SIZE,
 
 std::list<ProtocolFramePtr> IncomingDataHandler::ProcessData(
     const RawMessage &tm_message,
-    RESULT_CODE *result) {
+    RESULT_CODE *result,
+    size_t *malformed_occurrence) {
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(result);
+  DCHECK(malformed_occurrence);
   const transport_manager::ConnectionUID connection_id =
     tm_message.connection_key();
   const uint8_t *data = tm_message.data();
@@ -75,9 +77,8 @@ std::list<ProtocolFramePtr> IncomingDataHandler::ProcessData(
   LOG4CXX_DEBUG(logger_, "Total data size for connection "
                 << connection_id << " is " << connection_data.size());
   std::list<ProtocolFramePtr> out_frames;
-  bool malformed_occurs = false;
-  *result = CreateFrame(connection_data, out_frames, connection_id,
-                        &malformed_occurs);
+  *malformed_occurrence = 0;
+  *result = CreateFrame(connection_data, out_frames, *malformed_occurrence, connection_id);
   LOG4CXX_DEBUG(logger_, "New data size for connection " << connection_id
                 << " is " << connection_data.size());
   if (!out_frames.empty()) {
@@ -91,7 +92,7 @@ std::list<ProtocolFramePtr> IncomingDataHandler::ProcessData(
       LOG4CXX_WARN(logger_, "No packets have been created.");
     }
   }
-  if (malformed_occurs) {
+  if (*malformed_occurrence > 0u) {
     *result = RESULT_MALFORMED_OCCURS;
   } else {
     *result = RESULT_OK;
@@ -129,11 +130,10 @@ uint32_t IncomingDataHandler::GetPacketSize(
 RESULT_CODE IncomingDataHandler::CreateFrame(
     std::vector<uint8_t> &incoming_data,
     std::list<ProtocolFramePtr> &out_frames,
-    const transport_manager::ConnectionUID connection_id,
-    bool *malformed_occurs) {
+    size_t &malformed_occurrence,
+    const transport_manager::ConnectionUID connection_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  DCHECK(malformed_occurs);
-  *malformed_occurs = false;
+  bool correct_frame_occurs = true;
   std::vector<uint8_t>::iterator data_it = incoming_data.begin();
   size_t data_size = incoming_data.size();
   while (data_size >= MIN_HEADER_SIZE) {
@@ -143,7 +143,10 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
 
     if (validate_result != RESULT_OK) {
       LOG4CXX_WARN(logger_, "Packet validation failed");
-      *malformed_occurs = true;
+      if(correct_frame_occurs) {
+        ++malformed_occurrence;
+      }
+      correct_frame_occurs = false;
       ++data_it;
       --data_size;
       LOG4CXX_DEBUG(logger_, "Moved to the next byte " << std::hex
@@ -174,6 +177,7 @@ RESULT_CODE IncomingDataHandler::CreateFrame(
       return RESULT_FAIL;
     }
     out_frames.push_back(frame);
+    correct_frame_occurs = true;
 
     data_it += packet_size;
     data_size -= packet_size;

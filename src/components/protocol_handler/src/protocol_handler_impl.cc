@@ -436,8 +436,9 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
     " msg data_size "      << tm_message->data_size());
 
   RESULT_CODE result;
+  size_t malformed_occurs = false;
   const std::list<ProtocolFramePtr> protocol_frames =
-      incoming_data_handler_.ProcessData(*tm_message, &result);
+      incoming_data_handler_.ProcessData(*tm_message, &result, &malformed_occurs);
   LOG4CXX_DEBUG(logger_, "Proccessed " << protocol_frames.size() << "frames");
   if (result != RESULT_OK) {
     if (result == RESULT_MALFORMED_OCCURS) {
@@ -450,7 +451,7 @@ void ProtocolHandlerImpl::OnTMMessageReceived(const RawMessagePtr tm_message) {
         }
       // For tracking only malformed occurrence check outpute
       } else if(!protocol_frames.empty()) {
-        TrackMalformedMessage(connection_key);
+        TrackMalformedMessage(connection_key, malformed_occurs);
       }
     } else {
       LOG4CXX_ERROR(logger_, "Incoming data processing failed.");
@@ -1112,16 +1113,19 @@ bool ProtocolHandlerImpl::TrackMessage(const uint32_t& connection_key) {
   return false;
 }
 
-bool ProtocolHandlerImpl::TrackMalformedMessage(const uint32_t &connection_key) {
+bool ProtocolHandlerImpl::TrackMalformedMessage(const uint32_t &connection_key,
+                                                const size_t count) {
   LOG4CXX_AUTO_TRACE(logger_);
   if (malformed_message_frequency_time_ > 0u &&
       malformed_message_max_frequency_ > 0u) {
-    const size_t message_frequency = malformed_message_meter_.TrackMessage(connection_key);
+    const size_t message_frequency =
+        malformed_message_meter_.TrackMessages(connection_key, count);
     LOG4CXX_DEBUG(logger_, "Malformed frequency of " << connection_key
                   << " is " << message_frequency);
     if (!malformed_message_filtering_ ||
         message_frequency > malformed_message_max_frequency_) {
-      LOG4CXX_WARN(logger_, "Malformed frequency of " << connection_key << " is marked as high.");
+      LOG4CXX_WARN(logger_, "Malformed frequency of " << connection_key
+                   << " is marked as high.");
       if (session_observer_) {
         session_observer_->OnMalformedMessageCallback(connection_key);
       }

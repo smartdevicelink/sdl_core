@@ -58,13 +58,16 @@ class IncomingDataHandler {
    * @brief Contecat TM messages to ford frames and validate ford header data
    * \param TM messages for converting to frames
    * \param result of convertion
-   *   - RESULT_FAIL - packet serialization or validation error occurs
+   * \param malformed_occurrence count of malformed messages occurrence
    *   - RESULT_OK - no error ocures
-   *   - RESULT_MALFORMED_OCCURS - on malformed message occurs
+   *   - RESULT_MALFORMED_OCCURS - massages contecated,
+   *                               but malformed message occurs
+   *   - RESULT_FAIL - packet serialization or validation error occurs
    * \return list of complete, correct packets
    */
   std::list<ProtocolFramePtr> ProcessData(const RawMessage &tm_message,
-                                          RESULT_CODE *result);
+                                          RESULT_CODE *result,
+                                          size_t *malformed_occurrence);
   /**
    * @brief Add connection for data handling and verification
    */
@@ -84,6 +87,7 @@ class IncomingDataHandler {
   /**
    * @brief Try to create frame from incoming data
    * \param incommung_data raw stream
+   * \param malformed_occurrence count of malformed messages occurrence
    * \param out_frames list for read frames
    *
    * \return operation RESULT_CODE
@@ -93,8 +97,8 @@ class IncomingDataHandler {
    */
   RESULT_CODE CreateFrame(std::vector<uint8_t> &incoming_data,
                           std::list<ProtocolFramePtr> &out_frames,
-                          const transport_manager::ConnectionUID connection_id,
-                          bool *malformed_occurs);
+                          size_t &malformed_occurrence,
+                          const transport_manager::ConnectionUID connection_id);
 
   typedef std::map<transport_manager::ConnectionUID, std::vector<uint8_t> >
   ConnectionsDataMap;

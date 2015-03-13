@@ -469,7 +469,8 @@ class ProtocolHandlerImpl
 
   bool TrackMessage(const uint32_t &connection_key);
 
-  bool TrackMalformedMessage(const uint32_t &connection_key);
+  bool TrackMalformedMessage(const uint32_t &connection_key,
+                             const size_t count);
 
  private:
   /**

@@ -68,7 +68,7 @@ class IncomingDataHandlerTest : public ::testing::Test {
   void ProcessData(transport_manager::ConnectionUID uid, const uint8_t *const data,
                    const uint32_t data_size ) {
     actual_frames = data_handler.ProcessData(RawMessage(uid, 0, data, data_size),
-                                             &result_code);
+                                             &result_code, &malformed_occurs);
   }
 
   void AppendPacketToTMData(const ProtocolPacket& packet) {
@@ -89,6 +89,7 @@ class IncomingDataHandlerTest : public ::testing::Test {
   typedef std::list<ProtocolFramePtr> FrameList;
   FrameList actual_frames;
   RESULT_CODE result_code;
+  size_t malformed_occurs;
   uint8_t* some_data, *some_data2;
   size_t some_data_size, some_data2_size;
   uint32_t protov1_message_id;
@@ -114,15 +115,18 @@ TEST_F(IncomingDataHandlerTest, NullData) {
 }
 
 TEST_F(IncomingDataHandlerTest, DataForUnknownConnection) {
+  size_t malformed_count = 0;
   actual_frames = data_handler.ProcessData(RawMessage(uid_unknown, 0, NULL, 0),
-                                    &result_code);
+                                    &result_code, &malformed_count);
   EXPECT_EQ(RESULT_FAIL, result_code);
+  EXPECT_EQ(malformed_count, 0u);
   EXPECT_TRUE(actual_frames.empty());
 
   AppendPacketToTMData(ProtocolPacket());
   actual_frames = data_handler.ProcessData(RawMessage(uid_unknown, 0, tm_data.data(), tm_data.size()),
-                                    &result_code);
+                                           &result_code, &malformed_count);
   EXPECT_EQ(RESULT_FAIL, result_code);
+  EXPECT_EQ(malformed_count, 0u);
   EXPECT_TRUE(actual_frames.empty());
 }
 
@@ -137,10 +141,12 @@ TEST_F(IncomingDataHandlerTest, Heartbeat_per_byte) {
     for (size_t i = 0; i < tm_data.size() - 1; ++i) {
       ProcessData(uid1, &tm_data[i] , 1);
       EXPECT_EQ(RESULT_OK, result_code);
+      EXPECT_EQ(malformed_occurs, 0u);
       EXPECT_TRUE(actual_frames.empty());
     }
     ProcessData(uid1, &*(tm_data.end()-1), 1);
     EXPECT_EQ(RESULT_OK, result_code);
+    EXPECT_EQ(malformed_occurs, 0u);
     EXPECT_EQ(1u, actual_frames.size());
     EXPECT_EQ(hb_packet, **actual_frames.begin());
     tm_data.clear();
@@ -157,6 +163,7 @@ TEST_F(IncomingDataHandlerTest, Heartbeat_pack) {
   }
   ProcessData(uid1, &tm_data[0], tm_data.size());
   EXPECT_EQ(RESULT_OK, result_code);
+  EXPECT_EQ(malformed_occurs, 0u);
   EXPECT_EQ(hb_count, actual_frames.size());
   for (FrameList::iterator it = actual_frames.begin(); it != actual_frames.end(); ++it) {
     EXPECT_EQ(hb_packet, **it);
@@ -194,6 +201,7 @@ TEST_F(IncomingDataHandlerTest, MixedPayloadData_TwoConnections) {
   }
   ProcessData(uid1, &tm_data[0], tm_data.size());
   EXPECT_EQ(RESULT_OK, result_code);
+  EXPECT_EQ(malformed_occurs, 0u);
   EXPECT_EQ(mobile_packets.size(), actual_frames.size());
   FrameList::iterator it_exp = mobile_packets.begin();
   for (FrameList::const_iterator it = actual_frames.begin(); it != actual_frames.end();
@@ -224,6 +232,8 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Version) {
     ProcessPacket(**it);
     EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code)
         << "Malformed version " << static_cast<int>((*it)->protocol_version());
+    // Stream of malformed messages is a one occurrence
+    EXPECT_EQ(malformed_occurs, 1u);
     // All malformed messages shall be ignored
     EXPECT_EQ(0u, actual_frames.size());
   }
@@ -252,6 +262,8 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_ServiceType) {
     ProcessPacket(**it);
     EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code)
         << "Malformed service type " << static_cast<int>((*it)->service_type());
+    // Stream of malformed messages is a one occurrence
+    EXPECT_EQ(malformed_occurs, 1u);
     // All malformed messages shall be ignored
     EXPECT_EQ(0u, actual_frames.size());
   }
@@ -275,6 +287,8 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_FrameType) {
     ProcessPacket(**it);
     EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code)
         << "Malformed frame type " << static_cast<int>((*it)->service_type());
+    // Stream of malformed messages is a one occurrence
+    EXPECT_EQ(malformed_occurs, 1u);
     // All malformed messages shall be ignored
     EXPECT_EQ(0u, actual_frames.size());
   }
@@ -298,6 +312,8 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_ControlFrame) {
     ProcessPacket(**it);
     EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code)
         << "Malformed Control frame with data " << static_cast<int>((*it)->frame_data());
+    // Stream of malformed messages is a one occurrence
+    EXPECT_EQ(malformed_occurs, 1u);
     // All malformed messages shall be ignored
     EXPECT_EQ(0u, actual_frames.size());
   }
@@ -321,6 +337,8 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_SingleFrame) {
     ProcessPacket(**it);
     EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code)
         << "Malformed Single frame with data " << static_cast<int>((*it)->frame_data());
+    // Stream of malformed messages is a one occurrence
+    EXPECT_EQ(malformed_occurs, 1u);
     // All malformed messages shall be ignored
     EXPECT_EQ(0u, actual_frames.size());
   }
@@ -345,6 +363,8 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_FirstFrame) {
     ProcessPacket(**it);
     EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code)
         << "Malformed First frame with data " << static_cast<int>((*it)->frame_data());
+    // Stream of malformed messages is a one occurrence
+    EXPECT_EQ(malformed_occurs, 1u);
     // All malformed messages shall be ignored
     EXPECT_EQ(0u, actual_frames.size());
   }
@@ -413,9 +433,20 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_AdditionalByte) {
   // Add malformed bytes
   tm_data.insert(tm_data.end(), 6, 0x6);
 
+  // single packet RPC
+  mobile_packets.push_back(
+        new ProtocolPacket(
+          uid1, PROTOCOL_VERSION_1, PROTECTION_OFF, FRAME_TYPE_SINGLE,
+          kRpc, FRAME_DATA_SINGLE, some_session_id, some_data_size,
+          protov1_message_id, some_data));
+  AppendPacketToTMData(*mobile_packets.back());
+
   ProcessData(uid1, &tm_data[0], tm_data.size());
   EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code);
   EXPECT_EQ(mobile_packets.size(), actual_frames.size());
+  // Stream has 6 unexpected bytes
+  EXPECT_EQ(malformed_occurs, 6u);
+
   FrameList::iterator it_exp = mobile_packets.begin();
   for (FrameList::const_iterator it = actual_frames.begin(); it != actual_frames.end();
        ++it, ++it_exp) {
@@ -444,7 +475,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
           some_message_id, some_data2));
   AppendPacketToTMData(*mobile_packets.back());
 
-  // Malformed packet
+  // Malformed packet 1
   const uint8_t malformed_version = PROTOCOL_VERSION_MAX;
   const ProtocolPacket malformed_packet1(
           uid1, malformed_version, PROTECTION_ON, FRAME_TYPE_SINGLE,
@@ -460,7 +491,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
           ++some_message_id, some_data2));
   AppendPacketToTMData(*mobile_packets.back());
 
-  // Malformed packet
+  // Malformed packet 2
   const uint8_t malformed_type = FRAME_TYPE_MAX_VALUE;
   ProtocolPacket malformed_packet2(
           uid1, PROTOCOL_VERSION_4, PROTECTION_OFF, malformed_type,
@@ -468,7 +499,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
           protov1_message_id, some_data);
   AppendPacketToTMData(malformed_packet2);
 
-  // Corrupted audio packet
+  // Audio packet
   mobile_packets.push_back(
         new ProtocolPacket(
           uid1, PROTOCOL_VERSION_4, PROTECTION_OFF, FRAME_TYPE_CONTROL,
@@ -478,6 +509,7 @@ TEST_F(IncomingDataHandlerTest, MalformedPacket_Mix) {
 
   ProcessData(uid1, &tm_data[0], tm_data.size());
   EXPECT_EQ(RESULT_MALFORMED_OCCURS, result_code);
+  EXPECT_EQ(malformed_occurs, 2u);
   EXPECT_EQ(mobile_packets.size(), actual_frames.size());
   FrameList::iterator it_exp = mobile_packets.begin();
   for (FrameList::const_iterator it = actual_frames.begin(); it != actual_frames.end();
