@@ -39,9 +39,8 @@ namespace application_manager {
 
 class MockService : public Service {
  public:
-  MOCK_METHOD2(CheckPolicyPermissions,
-      TypeGrant(const std::string& json_message,
-                const std::string& seat));
+  MOCK_METHOD1(CheckPolicyPermissions,
+      mobile_apis::Result::eType(MessagePtr msg));
   MOCK_METHOD1(GetApplication,
       ApplicationSharedPtr(ApplicationId app_id));
   MOCK_METHOD1(SendMessageToHMI,
@@ -54,11 +53,15 @@ class MockService : public Service {
       std::vector<ApplicationSharedPtr>(AppExtensionUID uid));
   MOCK_METHOD1(SubscribeToHMINotification,
       void(const std::string& hmi_notification));
+  MOCK_METHOD3(CheckAccess,
+               TypeAccess(ApplicationId app_id,
+                          const PluginFunctionID& function_id,
+                          const std::string& seat));
   MOCK_METHOD3(SetAccess,
-      void(ApplicationSharedPtr app,
-           int32_t function_id,
+      void(ApplicationId app_id,
+           const PluginFunctionID& function_id,
            bool access));
-  MOCK_METHOD1(ResetAccess, void(int32_t function_id));
+  MOCK_METHOD1(ResetAccess, void(const PluginFunctionID& function_id));
 };
 
 }  // namespace application_manager

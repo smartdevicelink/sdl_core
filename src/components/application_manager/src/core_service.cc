@@ -51,36 +51,52 @@ CoreService::CoreService() {
 CoreService::~CoreService() {
 }
 
-TypeGrant CoreService::CheckPolicyPermissions(
-  PluginFunctionID function_id,
-  ApplicationId app_id,
-  const std::string& json_message,
-  const std::string& seat) {
-  // TODO(KKolodiy): stub it will be implemented later
-  ApplicationSharedPtr app = GetApplication(app_id);
+mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
+  ApplicationSharedPtr app = GetApplication(msg->connection_key());
   if (!app) {
-    return kNone;
+    return mobile_apis::Result::eType::APPLICATION_NOT_REGISTERED;
   }
 
-  const mobile_apis::Result::eType check_result = ApplicationManagerImpl::instance()->CheckPolicyPermissions(
-        app->mobile_app_id()->asString(),
-        app->hmi_level(),
-        function_id);
-  if (mobile_apis::Result::SUCCESS != check_result) {
-    return TypeGrant::kDisallowed;
+  CommandParametersPermissions params;
+  const mobile_apis::Result::eType check_result =
+      ApplicationManagerImpl::instance()->CheckPolicyPermissions(
+          app->mobile_app_id()->asString(), app->hmi_level(),
+          msg->function_name(), &params);
+
+  if (check_result == mobile_apis::Result::eType::SUCCESS) {
+    FilterParameters(msg, params);
   }
-  return TypeGrant::kManual;
+
+  return check_result;
 }
 
-void CoreService::SetAccess(ApplicationSharedPtr app, int32_t function_id,
-                            bool access) {
-  // TODO(KKolodiy): stub it will be implemented later
-  //access_ = access ? TypeGrant::kAllowed : TypeGrant::kDisallowed;
+application_manager::TypeAccess CoreService::CheckAccess(ApplicationId app_id,
+    const PluginFunctionID& function_id, const std::string& seat) {
+  ApplicationSharedPtr app = GetApplication(app_id);
+  if (app) {
+    return kManual;
+  }
+//  Json::Value value;
+//  Json::Reader reader;
+//  reader.parse(json_message, value);
+//
+//  const std::string zone = value[kZone].asString();
+//  return policy::PolicyHandler::instance()->IsAvailableZoneControl(
+//      app, function_id, seat, zone);
+  return kNone;
 }
 
-void CoreService::ResetAccess(int32_t function_id) {
-  // TODO(KKolodiy): stub it will be implemented later
-  // access_ = TypeGrant::kManual;
+void CoreService::SetAccess(ApplicationId app_id,
+                            const PluginFunctionID& function_id, bool access) {
+  ApplicationSharedPtr app = GetApplication(app_id);
+  if (app) {
+    policy::PolicyHandler::instance()->SetAccess(
+        app->mobile_app_id()->asString(), function_id, access);
+  }
+}
+
+void CoreService::ResetAccess(const PluginFunctionID& function_id) {
+  policy::PolicyHandler::instance()->ResetAccess(function_id);
 }
 
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {
@@ -112,6 +128,12 @@ void CoreService::SubscribeToHMINotification(
     ApplicationManagerImpl::instance()->SubscribeToHMINotification(
         hmi_notification);
   }
+}
+
+void CoreService::FilterParameters(MessagePtr msg,
+                                   const CommandParametersPermissions& params) {
+  // TODO(KKolodiy): need to implement filter parameters
+  // see application_manager::command::CommandRequestImpl::RemoveDisallowedParameters
 }
 
 }  // namespace application_manager

@@ -1279,5 +1279,14 @@ void PolicyHandler::Add(const std::string& app_id,
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 
-}  //  namespace policy
+void PolicyHandler::CheckAccess(const PTString& rpc) {
+}
 
+void PolicyHandler::SetAccess(const PTString& app_id, const PTString& rpc,
+                              bool access) {
+}
+
+void PolicyHandler::ResetAccess(const PTString& rpc) {
+}
+
+}  //  namespace policy

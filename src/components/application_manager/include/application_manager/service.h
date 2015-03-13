@@ -40,7 +40,7 @@
 
 namespace application_manager {
 
-enum TypeGrant {
+enum TypeAccess {
   kNone,
   kDisallowed,
   kAllowed,
@@ -57,33 +57,40 @@ class Service {
   }
 
   /**
-   * @brief Checks message permissions and parameters according to policy table
-   * permissions
-   * @param json string with params in json format
-   * @param seat seat of user
-   * @return false if message blocked by policy
+   * @brief Checks message permissions and cuts parameters according
+   * to policy table permissions
+   * @param msg message to cut disallowed parameters
+   * @return result according by mobile API
    */
-  virtual TypeGrant CheckPolicyPermissions(
-    PluginFunctionID function_id,
-    ApplicationId app_id,
-    const std::string& json_message,
-    const std::string& seat) = 0;
+  virtual mobile_apis::Result::eType CheckPolicyPermissions(MessagePtr msg) = 0;
+
+  /**
+   * Checks access to requested equipment of vehicle
+   * @param app_id id of application
+   * @param function_id name of RPC
+   * @param seat seat of owner's mobile device
+   * @return return allowed if access exist,
+   * manual if need to send question to driver otherwise disallowed
+   */
+  virtual TypeAccess CheckAccess(ApplicationId app_id,
+                                 const PluginFunctionID& function_id,
+                                 const std::string& seat) = 0;
 
   /**
    * Sets access to functional group which contains given RPC for application
-   * @param app pointer of application
+   * @param app_id id of application
    * @param function_id id RPC
    * @param access true if assess is allowed
    */
-  virtual void SetAccess(ApplicationSharedPtr app, int32_t function_id,
-                         bool access) = 0;
+  virtual void SetAccess(ApplicationId app_id,
+                         const PluginFunctionID& function_id, bool access) = 0;
 
   /**
    * Resets access to functional group which contains given RPC
    * for all applications which use this group
    * @param function_id id RPC
    */
-  virtual void ResetAccess(int32_t function_id) = 0;
+  virtual void ResetAccess(const PluginFunctionID& function_id) = 0;
 
   /**
    * @brief Get pointer to application by application id
