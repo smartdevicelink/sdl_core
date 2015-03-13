@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -40,6 +40,7 @@
 #include "policy/policy_manager.h"
 #include "application_manager/policies/policy_event_observer.h"
 #include "application_manager/policies/delegates/statistics_delegate.h"
+#include "application_manager/service.h"
 #include "utils/logger.h"
 #include "utils/singleton.h"
 #include "utils/threads/thread.h"
@@ -94,9 +95,12 @@ class PolicyHandler :
 
   /**
    * Checks access to equipment of vehicle for application by RPC
+   * @param app_id policy id application
    * @param rpc name of RPC
    */
-  void CheckAccess(const PTString& rpc);
+  application_manager::TypeAccess CheckAccess(const PTString& app_id,
+                                              const PTString& rpc,
+                                              const std::string& seat);
 
   /**
    * Sets access to equipment of vehicle for application by RPC
@@ -454,6 +458,8 @@ private:
    * for all apps
    */
   std::map<std::string, std::string> app_to_device_link_;
+
+  application_manager::TypeAccess access_;
 
   // Lock for app to device list
   sync_primitives::Lock app_to_device_link_lock_;

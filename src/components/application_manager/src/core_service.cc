@@ -70,20 +70,14 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
   return check_result;
 }
 
-application_manager::TypeAccess CoreService::CheckAccess(
+TypeAccess CoreService::CheckAccess(
     ApplicationId app_id, const PluginFunctionID& function_id,
     const std::string& seat) {
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-    return kManual;
+    return policy::PolicyHandler::instance()->CheckAccess(
+        app->mobile_app_id()->asString(), function_id, seat);
   }
-//  Json::Value value;
-//  Json::Reader reader;
-//  reader.parse(json_message, value);
-//
-//  const std::string zone = value[kZone].asString();
-//  return policy::PolicyHandler::instance()->IsAvailableZoneControl(
-//      app, function_id, seat, zone);
   return kNone;
 }
 

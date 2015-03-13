@@ -241,7 +241,8 @@ PolicyHandler::PolicyHandler()
     dl_handle_(0),
     last_activated_app_id_(0),
     app_to_device_link_lock_(true),
-    statistic_manager_impl_(new StatisticManagerImpl()) {
+    statistic_manager_impl_(new StatisticManagerImpl()),
+    access_(application_manager::TypeAccess::kManual) {
 }
 
 PolicyHandler::~PolicyHandler() {
@@ -1284,9 +1285,12 @@ void PolicyHandler::CheckAccess(const PTString& rpc) {
 
 void PolicyHandler::SetAccess(const PTString& app_id, const PTString& rpc,
                               bool access) {
+  access_ = access ? application_manager::TypeAccess::kAllowed :
+      application_manager::TypeAccess::kDisallowed;
 }
 
 void PolicyHandler::ResetAccess(const PTString& rpc) {
+  access_ = application_manager::TypeAccess::kManual;
 }
 
 }  //  namespace policy
