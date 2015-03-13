@@ -70,8 +70,9 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
   return check_result;
 }
 
-application_manager::TypeAccess CoreService::CheckAccess(ApplicationId app_id,
-    const PluginFunctionID& function_id, const std::string& seat) {
+application_manager::TypeAccess CoreService::CheckAccess(
+    ApplicationId app_id, const PluginFunctionID& function_id,
+    const std::string& seat) {
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
     return kManual;

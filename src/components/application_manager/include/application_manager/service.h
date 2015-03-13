@@ -130,7 +130,7 @@ class Service {
    * @param hmi_notification string with notification name
    */
   virtual void SubscribeToHMINotification(
-    const std::string& hmi_notification) = 0;
+      const std::string& hmi_notification) = 0;
 };
 
 typedef utils::SharedPtr<Service> ServicePtr;

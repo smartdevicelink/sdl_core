@@ -140,5 +140,4 @@ class CoreService : public Service {
 
 }  // namespace application_manager
 
-
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_CORE_SERVICE_H_
