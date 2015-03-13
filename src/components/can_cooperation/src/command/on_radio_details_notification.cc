@@ -45,7 +45,6 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "OnRadioDetailsNotification")
 OnRadioDetailsNotification::OnRadioDetailsNotification(
   const application_manager::MessagePtr& message)
   : BaseCommandNotification(message) {
-  set_need_reset(true);
 }
 
 OnRadioDetailsNotification::~OnRadioDetailsNotification() {

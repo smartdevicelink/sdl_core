@@ -44,6 +44,7 @@ CREATE_LOGGERPTR_GLOBAL(logger_, "OnControlChangedNotification")
 OnControlChangedNotification::OnControlChangedNotification(
   const application_manager::MessagePtr& message)
   : BaseCommandNotification(message) {
+  set_need_reset(true);
 }
 
 OnControlChangedNotification::~OnControlChangedNotification() {

@@ -297,29 +297,28 @@ void BaseCommandRequest::Run() {
   }
 
   if (!to_can_) {
-    Execute();
+    Execute(); // run child's logic
+    return;
+  }
+
+  mobile_apis::Result::eType ret = service_->CheckPolicyPermissions(message_);
+  if (ret != mobile_apis::Result::eType::SUCCESS) {
+    SendResponse(false, result_codes::kDisallowed, "");
     return;
   }
 
   CANAppExtensionPtr extension = GetAppExtension(app_);
-  std::string seat = extension->seat();
-
-  const std::string stringified_rpc_name =
-    can_cooperation::MessageHelper::GetMobileAPIName(
-      static_cast<functional_modules::MobileFunctionID>(message_->function_id()));
-  if (stringified_rpc_name.empty()) {
-    //  TODO(PV): error
+  std::string seat;
+  if (extension) {
+    seat = extension->seat();
   }
 
-  application_manager::TypeGrant grant = service_->CheckPolicyPermissions(
-      stringified_rpc_name,
-      message_->connection_key(),
-      message_->json_message(),
-      seat);
+  application_manager::TypeAccess access = service_->CheckAccess(
+      app_->app_id(), message_->function_name(), seat);
 
-  switch (grant) {
+  switch (access) {
     case application_manager::kAllowed:
-      Execute();
+      Execute();  // run child's logic
       break;
     case application_manager::kDisallowed:
       SendResponse(false, result_codes::kDisallowed, "");
@@ -330,6 +329,10 @@ void BaseCommandRequest::Run() {
       SendRequest(functional_modules::hmi_api::grant_access, params, true);
       break;
     }
+    case application_manager::kNone:
+      LOG4CXX_ERROR(logger_, "Internal issue");
+      SendResponse(false, result_codes::kDisallowed, "Internal issue");
+      break;
     default:
       LOG4CXX_ERROR(logger_, "Internal issue");
       SendResponse(false, result_codes::kDisallowed, "Internal issue");
@@ -356,14 +359,14 @@ void BaseCommandRequest::on_event(const event_engine::Event<application_manager:
     std::string info;
     bool allowed = ParseResultCode(value, result_code, info);
 
-    service_->SetAccess(app_, message_->function_id(), allowed);
+    service_->SetAccess(app_->app_id(), message_->function_name(), allowed);
     if (allowed) {
-      Execute();
+      Execute();  // run child's logic
     } else {
       SendResponse(false, result_codes::kDisallowed, "");
     }
   } else {
-    OnEvent(event);
+    OnEvent(event);  // run child's logic
   }
   LOG4CXX_TRACE_EXIT(logger_);
 }
