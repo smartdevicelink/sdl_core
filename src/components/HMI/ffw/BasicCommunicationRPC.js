@@ -485,6 +485,24 @@ FFW.BasicCommunication = FFW.RPCObserver
                         request.id,
                         request.method);
                 }
+                if (request.method == "BasicCommunication.DialNumber") {
+
+                    SDL.PopUp.create().appendTo('body').popupActivate(
+                        "Would you like to accept incoming call?",
+                        function (result) {
+                            if (result) {
+
+                                SDL.SDLModel.onDeactivateApp('call', request.params.appID);
+                                SDL.States.goToStates('phone.dialpad');
+                                SDL.PhoneController.incomingCall(request);
+                            }
+                        },
+                        false);
+
+                    FFW.BasicCommunication.sendBCResult(SDL.SDLModel.resultCode["SUCCESS"],
+                        request.id,
+                        request.method);
+                }
                 if (request.method == "BasicCommunication.ActivateApp") {
 
                     if (!request.params.level || request.params.level == "FULL") {
