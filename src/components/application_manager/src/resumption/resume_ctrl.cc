@@ -670,7 +670,6 @@ ResumeCtrl::IsHmiLevelFullAllowed(ApplicationConstSharedPtr app) {
 
 void ResumeCtrl::LoadResumeData() {
   LOG4CXX_AUTO_TRACE(logger_);
-  sync_primitives::AutoLock lock(resumtion_lock_);
   smart_objects::SmartObject so_applications_data;
   resumption_storage_->GetDataForLoadResumeData(so_applications_data);
   size_t length = so_applications_data.length();
@@ -684,26 +683,26 @@ void ResumeCtrl::LoadResumeData() {
     if (first_ign == so_applications_data[i][strings::ign_off_count].asInt()) {
       const mobile_apis::HMILevel::eType saved_hmi_level =
           static_cast<mobile_apis::HMILevel::eType>(
-            so_application_data[i][strings::hmi_level].asInt());
+            so_applications_data[i][strings::hmi_level].asInt());
       const time_t saved_time_stamp = static_cast<time_t>(
-                                        so_application_data[i][strings::time_stamp].asUInt());
+                                        so_applications_data[i][strings::time_stamp].asUInt());
       if (mobile_apis::HMILevel::HMI_FULL == saved_hmi_level) {
         if (time_stamp_full < saved_time_stamp) {
           time_stamp_full = saved_time_stamp;
-          full_app = &(so_application_data[i]);
+          full_app = &(so_applications_data[i]);
         }
       }
       if (mobile_apis::HMILevel::HMI_LIMITED == saved_hmi_level) {
         if (time_stamp_limited < saved_time_stamp) {
           time_stamp_limited = saved_time_stamp;
-          limited_app = &(so_application_data[i]);
+          limited_app = &(so_applications_data[i]);
         }
       }
     }
     // set invalid HMI level for all
     resumption_storage_->UpdateHmiLevel (
-          so_application_data[i][strings::app_id].asString(),
-        so_application_data[i][strings::device_id].asString(),
+          so_applications_data[i][strings::app_id].asString(),
+        so_applications_data[i][strings::device_id].asString(),
         static_cast<int32_t>(mobile_apis::HMILevel::INVALID_ENUM));
   }
   if (full_app != NULL) {
