@@ -1281,16 +1281,19 @@ void PolicyHandler::Add(const std::string& app_id,
 
 application_manager::TypeAccess PolicyHandler::CheckAccess(
     const PTString& app_id, const PTString& rpc, const std::string& seat) {
+  POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
   policy::TypeAccess access = policy_manager_->CheckAccess(app_id, rpc, seat);
   return ConvertTypeAccess(access);
 }
 
 void PolicyHandler::SetAccess(const PTString& app_id, const PTString& rpc,
                               bool access) {
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->SetAccess(app_id, rpc, access);
 }
 
 void PolicyHandler::ResetAccess(const PTString& rpc) {
+  POLICY_LIB_CHECK_VOID();
   policy_manager_->ResetAccess(rpc);
 }
 

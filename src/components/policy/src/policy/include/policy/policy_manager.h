@@ -403,6 +403,29 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      */
     virtual void OnAppsSearchCompleted() = 0;
 
+    /**
+     * Checks access to equipment of vehicle for application by RPC
+     * @param app_id policy id application
+     * @param rpc name of RPC
+     */
+    virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
+                                   const std::string& seat) = 0;
+
+    /**
+     * Sets access to equipment of vehicle for application by RPC
+     * @param app_id policy id application
+     * @param rpc name of RPC
+     * @param access true if access is allowed
+     */
+    virtual void SetAccess(const PTString& app_id, const PTString& rpc,
+                           bool access) = 0;
+
+    /**
+     * Resets access to equipment of vehicle for all application by RPC
+     * @param rpc name of RPC
+     */
+    virtual void ResetAccess(const PTString& rpc) = 0;
+
   protected:
     /**
      * Checks is PT exceeded IgnitionCycles

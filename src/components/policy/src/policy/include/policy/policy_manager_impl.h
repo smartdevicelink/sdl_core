@@ -166,10 +166,11 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual void OnAppsSearchCompleted();
 
-    TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
-        const std::string& seat);
-    void SetAccess(const PTString& app_id, const PTString& rpc, bool access);
-    void ResetAccess(const PTString& rpc);
+    virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
+                                   const std::string& seat);
+    virtual void SetAccess(const PTString& app_id, const PTString& rpc,
+                           bool access);
+    virtual void ResetAccess(const PTString& rpc);
 
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(
