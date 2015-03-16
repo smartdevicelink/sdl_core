@@ -61,13 +61,18 @@ PolicyManagerImpl::PolicyManagerImpl()
     cache_(new CacheManager),
     retry_sequence_timeout_(60),
     retry_sequence_index_(0),
-    ignition_check(true),
-    access_(TypeAccess::kManual) {
+    ignition_check(true) {
+  zone_ = new ZoneControllerImpl(cache);
 }
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
   update_status_manager_.set_listener(listener);
+}
+
+PolicyManagerImpl::~PolicyManagerImpl() {
+  LOG4CXX_INFO(logger_, "Destroying policy manager.");
+  delete zone_;
 }
 
 utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
@@ -888,16 +893,24 @@ void PolicyManagerImpl::set_cache_manager(
 
 TypeAccess PolicyManagerImpl::CheckAccess(
     const PTString& app_id, const PTString& rpc, const std::string& seat) {
-  return access_;
+  TypeAccess access = TypeAccess::kDisallowed;
+  std::string dev_id = GetCurrentDeviceId(app_id);
+  if (zone_->IsDriver(dev_id) || zone_->IsPassengerZone(seat, "zone")) {
+    access = kAllowed;
+  } else {
+    access = zone_->IsAccess(dev_id, app_id, rpc);
+  }
+  return access;
 }
 
 void PolicyManagerImpl::SetAccess(const PTString& app_id, const PTString& rpc,
                               bool access) {
-  access_ = access ? TypeAccess::kAllowed : TypeAccess::kDisallowed;
+  std::string dev_id = GetCurrentDeviceId(app_id);
+  zone_->SetAccess(dev_id, app_id, rpc, access);
 }
 
 void PolicyManagerImpl::ResetAccess(const PTString& rpc) {
-  access_ = TypeAccess::kManual;
+  zone_->ResetAccess(rpc);
 }
 
 }  //  namespace policy

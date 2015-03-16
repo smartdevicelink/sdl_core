@@ -634,5 +634,6 @@ private:
   sync_primitives::Lock backuper_locker_;
   BackgroundBackuper* backuper_;
 };
-}  // namespace policy
+} // policy
+
 #endif // SRC_COMPONENTS_POLICY_INCLUDE_CACHE_MANAGER_H_

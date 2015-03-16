@@ -59,6 +59,7 @@ set(SOURCES
   ./src/sql_pt_representation.cc
   ./src/update_status_manager.cc
   ./src/cache_manager.cc
+  ./src/zone_controller_impl.cc
   ${CMAKE_SOURCE_DIR}/src/components/rpc_base/src/rpc_base/rpc_base.cc
 )
 

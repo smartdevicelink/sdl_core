@@ -38,14 +38,9 @@
 #include "policy/policy_types.h"
 #include "policy/policy_listener.h"
 #include "usage_statistics/statistics_manager.h"
+#include "policy/zone_controller.h"
 
 namespace policy {
-
-enum TypeAccess {
-  kDisallowed,
-  kAllowed,
-  kManual
-};
 
 class PolicyManager : public usage_statistics::StatisticsManager {
   public:
