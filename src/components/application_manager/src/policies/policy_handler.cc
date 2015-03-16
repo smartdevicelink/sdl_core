@@ -1297,19 +1297,19 @@ void PolicyHandler::ResetAccess(const PTString& rpc) {
 
 application_manager::TypeAccess PolicyHandler::ConvertTypeAccess(
     policy::TypeAccess access) const {
-  TypeAccess converted = TypeAccess::kNone;
+  application_manager::TypeAccess converted;
   switch (access) {
     case policy::TypeAccess::kAllowed:
-      converted = TypeAccess::kAllowed;
+      converted = application_manager::TypeAccess::kAllowed;
       break;
     case policy::TypeAccess::kManual:
-      converted = TypeAccess::kManual;
+      converted = application_manager::TypeAccess::kManual;
       break;
     case policy::TypeAccess::kDisallowed:
-      converted = TypeAccess::kDisallowed;
+      converted = application_manager::TypeAccess::kDisallowed;
       break;
     default:
-      converted = TypeAccess::kNone;
+      converted = application_manager::TypeAccess::kNone;
   }
   return converted;
 }
