@@ -37,6 +37,7 @@
 #include "can_cooperation/can_module_constants.h"
 #include "application_manager/application.h"
 #include "can_cooperation/can_tcp_connection.h"
+#include "can_cooperation/message_helper.h"
 #include "utils/logger.h"
 
 namespace can_cooperation {
@@ -103,6 +104,9 @@ ProcessResult CANModule::ProcessMessage(application_manager::MessagePtr msg) {
     LOG4CXX_ERROR(logger_, "Null pointer message received.");
     return ProcessResult::FAILED;
   }
+
+  msg->set_function_name(MessageHelper::GetMobileAPIName(
+      static_cast<functional_modules::MobileFunctionID>(msg->function_id())));
 
   commands::Command* command = MobileCommandFactory::CreateCommand(msg);
   if (command) {

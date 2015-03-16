@@ -89,9 +89,9 @@ application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicatio
 
 void BaseCommandNotification::Run() {
   if (need_reset_) {
-    service_->ResetAccess(message_->function_id());
+    service_->ResetAccess(message_->function_name());
   }
-  Execute();
+  Execute();  // run child's logic
 }
 
 }  // namespace commands
