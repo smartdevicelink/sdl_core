@@ -62,6 +62,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
 
     ResumeCtrl();
 
+    ~ResumeCtrl();
     /**
      * @brief Event, that raised if application get resumption response from HMI
      * @param event : event object, that contains smart_object with HMI message

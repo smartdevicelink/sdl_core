@@ -65,6 +65,10 @@ ResumeCtrl::ResumeCtrl():
   resumption_storage_(new ResumptionDataJson()) {
 }
 
+ResumeCtrl::~ResumeCtrl() {
+  delete resumption_storage_;
+}
+
 void ResumeCtrl::SaveAllApplications() {
   ApplicationManagerImpl::ApplicationListAccessor accessor;
   std::for_each(accessor.GetData().begin(),
@@ -208,13 +212,19 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
   }
   const HMILevel::eType restored_hmi_level =
       ResolveHMILevelConflicts(application, hmi_level);
-  AudioStreamingState::eType restored_audio_state =
+  const AudioStreamingState::eType restored_audio_state =
       HMILevel::HMI_FULL == restored_hmi_level ||
       HMILevel::HMI_LIMITED == restored_hmi_level ? AudioStreamingState::AUDIBLE:
                                                     AudioStreamingState::NOT_AUDIBLE;
-  restored_audio_state = restored_audio_state;
-  //TODO(AKutsan)
-  // Set State
+  if (restored_hmi_level == HMILevel::HMI_FULL) {
+    ApplicationManagerImpl::instance()->SetState<true>(application->app_id(),
+                                                       restored_hmi_level,
+                                                       restored_audio_state);
+  } else {
+    ApplicationManagerImpl::instance()->SetState<false>(application->app_id(),
+                                                        restored_hmi_level,
+                                                        restored_audio_state);
+  }
   LOG4CXX_INFO(logger_, "Set up application "
                << application->mobile_app_id()
                << " to HMILevel " << hmi_level);
@@ -264,7 +274,6 @@ void ResumeCtrl::StopSavePersistentDataTimer() {
 
 bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
                                  const std::string& hash) {
-  //sync_primitives::AutoLock lock(resumtion_lock_);
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(application, false);
   LOG4CXX_DEBUG(logger_, " Resume app_id = " << application->app_id()
@@ -280,7 +289,6 @@ bool ResumeCtrl::StartResumption(ApplicationSharedPtr application,
     const std::string saved_hash = saved_app[strings::hash_id].asString();
     result = saved_hash == hash ? RestoreApplicationData(application) : false;
     application->UpdateHash();
-    //sync_primitives::AutoUnlock unlock(lock);
     AddToResumptionTimerQueue(application->app_id());
   }
   return result;
@@ -570,12 +578,13 @@ bool ResumeCtrl::CheckAppRestrictions(ApplicationConstSharedPtr application,
   const bool is_media_app = application->is_media_application();
   const HMILevel::eType hmi_level =
       static_cast<HMILevel::eType>(saved_app[strings::hmi_level].asInt());
+  const bool result = Compare<HMILevel::eType, EQ, ONE>(hmi_level,
+                                                        HMILevel::HMI_FULL,
+                                                        HMILevel::HMI_LIMITED)
+                                                        ? true : false;
   LOG4CXX_DEBUG(logger_, "is_media_app " << is_media_app
-               << "; hmi_level " << hmi_level);
-
-  return Compare<HMILevel::eType, EQ, ONE>(hmi_level,
-                                           HMILevel::HMI_FULL,
-                                           HMILevel::HMI_LIMITED) ? true : false;
+               << "; hmi_level " << hmi_level << " result " << result);
+  return ;
 }
 
 bool ResumeCtrl::CheckIcons(ApplicationSharedPtr application,
@@ -726,7 +735,22 @@ ApplicationManagerImpl* ResumeCtrl::appMngr() {
 void ResumeCtrl::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,
     const smart_objects::SmartObject* msg_params, bool use_events) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  smart_objects::SmartObjectSPtr result =
+      MessageHelper::CreateModuleInfoSO(function_id);
+  int32_t hmi_correlation_id =
+      (*result)[strings::params][strings::correlation_id].asInt();
+  if (use_events) {
+    subscribe_on_event(function_id, hmi_correlation_id);
+  }
 
+  if (msg_params) {
+    (*result)[strings::msg_params] = *msg_params;
+  }
+
+  if (!ApplicationManagerImpl::instance()->ManageHMICommand(result)) {
+    LOG4CXX_ERROR(logger_, "Unable to send request");
+  }
 }
 
 }  // namespce resumption

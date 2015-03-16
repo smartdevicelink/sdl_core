@@ -2366,22 +2366,22 @@ void ApplicationManagerImpl::UnregisterApplication(
   }
 
   if (is_resuming) {
-      resume_ctrl_.SaveApplication(app_to_remove);
+    resume_ctrl_.SaveApplication(app_to_remove);
   } else {
-//    resume_ctrl_.RemoveApplicationFromSaved(app_to_remove->mobile_app_id());
+    resume_ctrl_.RemoveApplicationFromSaved(app_to_remove->mobile_app_id());
   }
 
   if (audio_pass_thru_active_) {
-    // May be better to put this code in MessageHelper?
-    end_audio_pass_thru();
-    StopAudioPassThru(app_id);
-    MessageHelper::SendStopAudioPathThru();
-  }
-  MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove,
-                                                 is_unexpected_disconnect);
+     // May be better to put this code in MessageHelper?
+     end_audio_pass_thru();
+     StopAudioPassThru(app_id);
+     MessageHelper::SendStopAudioPathThru();
+   }
+   MessageHelper::SendOnAppUnregNotificationToHMI(app_to_remove,
+                                                  is_unexpected_disconnect);
 
-  request_ctrl_.terminateAppRequests(app_id);
-  return;
+   request_ctrl_.terminateAppRequests(app_id);
+   return;
 }
 
 
