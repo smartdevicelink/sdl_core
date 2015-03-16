@@ -40,6 +40,13 @@
 #include "usage_statistics/statistics_manager.h"
 
 namespace policy {
+
+enum TypeAccess {
+  kDisallowed,
+  kAllowed,
+  kManual
+};
+
 class PolicyManager : public usage_statistics::StatisticsManager {
   public:
     virtual ~PolicyManager() {

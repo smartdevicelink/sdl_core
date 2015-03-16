@@ -1280,17 +1280,38 @@ void PolicyHandler::Add(const std::string& app_id,
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 
-void PolicyHandler::CheckAccess(const PTString& rpc) {
+application_manager::TypeAccess PolicyHandler::CheckAccess(
+    const PTString& app_id, const PTString& rpc, const std::string& seat) {
+  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, rpc, seat);
+  return ConvertTypeAccess(access);
 }
 
 void PolicyHandler::SetAccess(const PTString& app_id, const PTString& rpc,
                               bool access) {
-  access_ = access ? application_manager::TypeAccess::kAllowed :
-      application_manager::TypeAccess::kDisallowed;
+  policy_manager_->SetAccess(app_id, rpc, access);
 }
 
 void PolicyHandler::ResetAccess(const PTString& rpc) {
-  access_ = application_manager::TypeAccess::kManual;
+  policy_manager_->ResetAccess(rpc);
+}
+
+application_manager::TypeAccess PolicyHandler::ConvertTypeAccess(
+    policy::TypeAccess access) const {
+  TypeAccess converted = TypeAccess::kNone;
+  switch (access) {
+    case policy::TypeAccess::kAllowed:
+      converted = TypeAccess::kAllowed;
+      break;
+    case policy::TypeAccess::kManual:
+      converted = TypeAccess::kManual;
+      break;
+    case policy::TypeAccess::kDisallowed:
+      converted = TypeAccess::kDisallowed;
+      break;
+    default:
+      converted = TypeAccess::kNone;
+  }
+  return converted;
 }
 
 }  //  namespace policy

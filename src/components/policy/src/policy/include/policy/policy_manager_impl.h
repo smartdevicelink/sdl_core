@@ -166,6 +166,11 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual void OnAppsSearchCompleted();
 
+    TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
+        const std::string& seat);
+    void SetAccess(const PTString& app_id, const PTString& rpc, bool access);
+    void ResetAccess(const PTString& rpc);
+
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(
         const BinaryMessage& pt_content);
@@ -299,6 +304,8 @@ private:
     std::string last_device_id_;
 
     bool ignition_check;
+
+    TypeAccess access_;
 
     friend struct CheckAppPolicy;
 };

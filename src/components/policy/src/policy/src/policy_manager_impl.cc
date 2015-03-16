@@ -61,7 +61,8 @@ PolicyManagerImpl::PolicyManagerImpl()
     cache_(new CacheManager),
     retry_sequence_timeout_(60),
     retry_sequence_index_(0),
-    ignition_check(true) {
+    ignition_check(true),
+    access_(TypeAccess::kManual) {
 }
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
@@ -883,6 +884,20 @@ void PolicyManagerImpl::SaveUpdateStatusRequired(bool is_update_needed) {
 void PolicyManagerImpl::set_cache_manager(
     CacheManagerInterface* cache_manager) {
   cache_ = cache_manager;
+}
+
+TypeAccess PolicyManagerImpl::CheckAccess(
+    const PTString& app_id, const PTString& rpc, const std::string& seat) {
+  return access_;
+}
+
+void PolicyManagerImpl::SetAccess(const PTString& app_id, const PTString& rpc,
+                              bool access) {
+  access_ = access ? TypeAccess::kAllowed : TypeAccess::kDisallowed;
+}
+
+void PolicyManagerImpl::ResetAccess(const PTString& rpc) {
+  access_ = TypeAccess::kManual;
 }
 
 }  //  namespace policy
