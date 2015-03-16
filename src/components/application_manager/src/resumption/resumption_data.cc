@@ -39,6 +39,11 @@ namespace resumption {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ResumptionData")
 
+ResumptionData::ResumptionData():
+  resumption_lock_(true) {
+
+}
+
 smart_objects::SmartObject ResumptionData::GetApplicationCommands(
     app_mngr::ApplicationConstSharedPtr application) {
   using namespace app_mngr;

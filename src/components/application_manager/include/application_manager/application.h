@@ -70,11 +70,6 @@ enum APIVersion {
   kAPIV4 = 4
 };
 
-enum StateApplicationData {
-  kNotSavedDataForResumption,
-  kSavedDataForResumption
-};
-
 enum TLimitSource {
   POLICY_TABLE = 0,
   CONFIG_FILE
@@ -404,14 +399,14 @@ class Application : public virtual InitialApplicationData,
      * @return TRUE if data of application need to save for resumption, otherwise
      * return FALSE
      */
-    virtual StateApplicationData is_application_data_changed() const = 0;
+    virtual bool is_application_data_changed() const = 0;
 
     /**
      * @brief method is called after SDL saved application data for resumption
      * @param state_application_data contains FALSE after saving data
      */
     virtual void set_is_application_data_changed(
-        StateApplicationData state_application_data) = 0;
+        bool state_application_data) = 0;
 
     virtual void CloseActiveMessage() = 0;
     virtual bool IsFullscreen() const = 0;

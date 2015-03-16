@@ -42,6 +42,8 @@ namespace app_mngr = application_manager;
 
 class ResumptionData {
   public:
+
+    ResumptionData();
   /**
    * @brief Save application persistent info for future resuming
    * @param application is application witch need to be saved
@@ -235,6 +237,8 @@ class ResumptionData {
       ++first;
     }
   }
+
+  sync_primitives::Lock           resumption_lock_;
 };
 }  // namespace resumption
 

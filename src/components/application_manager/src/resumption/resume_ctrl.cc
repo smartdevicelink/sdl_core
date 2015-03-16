@@ -73,9 +73,12 @@ void ResumeCtrl::SaveAllApplications() {
 }
 
 void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
-  resumption_storage_->SaveApplication(application);
   app_mngr::ApplicationSharedPtr app = appMngr()->application(application->app_id());
-  app->set_is_application_data_changed(kSavedDataForResumption);
+  DCHECK_OR_RETURN_VOID(app);
+  if (app->is_application_data_changed()) {
+    resumption_storage_->SaveApplication(application);
+    app->set_is_application_data_changed(false);
+  }
 }
 
 void ResumeCtrl::on_event(const event_engine::Event& event) {
@@ -159,7 +162,7 @@ ResumeCtrl::ResolveHMILevelConflicts(ApplicationSharedPtr application,
 void ResumeCtrl::ApplicationResumptiOnTimer() {
   LOG4CXX_AUTO_TRACE(logger_);
   sync_primitives::AutoLock auto_lock(queue_lock_);
-  std::vector<uint32_t>::iterator it = waiting_for_timer_.begin();
+  WaitingForTimerList::iterator it = waiting_for_timer_.begin();
 
   for (; it != waiting_for_timer_.end(); ++it) {
     ApplicationSharedPtr app =
@@ -170,6 +173,19 @@ void ResumeCtrl::ApplicationResumptiOnTimer() {
 
   is_resumption_active_ = false;
   waiting_for_timer_.clear();
+}
+
+void ResumeCtrl::OnAppActivated(ApplicationSharedPtr application) {
+  if (is_resumption_active_) {
+    RemoveFromResumption(application->app_id());
+  }
+}
+
+void ResumeCtrl::RemoveFromResumption(uint32_t app_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  queue_lock_.Acquire();
+  waiting_for_timer_.remove(app_id);
+  queue_lock_.Release();
 }
 
 bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
@@ -563,7 +579,7 @@ bool ResumeCtrl::CheckAppRestrictions(ApplicationConstSharedPtr application,
 }
 
 bool ResumeCtrl::CheckIcons(ApplicationSharedPtr application,
-                            const smart_objects::SmartObject& obj) {
+                            smart_objects::SmartObject& obj) {
   using namespace smart_objects;
   LOG4CXX_AUTO_TRACE(logger_);
   const mobile_apis::Result::eType verify_images =
@@ -652,10 +668,61 @@ ResumeCtrl::IsHmiLevelFullAllowed(ApplicationConstSharedPtr app) {
   return result;
 }
 
+void ResumeCtrl::LoadResumeData() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock lock(resumtion_lock_);
+  smart_objects::SmartObject so_applications_data;
+  resumption_storage_->GetDataForLoadResumeData(so_applications_data);
+  size_t length = so_applications_data.length();
+  smart_objects::SmartObject* full_app = NULL;
+  smart_objects::SmartObject* limited_app = NULL;
+  time_t time_stamp_full = 0;
+  time_t time_stamp_limited = 0;
+  // only apps with first IGN should be resumed
+  const int32_t first_ign = 1;
+  for (size_t i = 0; i < length; ++i) {
+    if (first_ign == so_applications_data[i][strings::ign_off_count].asInt()) {
+      const mobile_apis::HMILevel::eType saved_hmi_level =
+          static_cast<mobile_apis::HMILevel::eType>(
+            so_application_data[i][strings::hmi_level].asInt());
+      const time_t saved_time_stamp = static_cast<time_t>(
+                                        so_application_data[i][strings::time_stamp].asUInt());
+      if (mobile_apis::HMILevel::HMI_FULL == saved_hmi_level) {
+        if (time_stamp_full < saved_time_stamp) {
+          time_stamp_full = saved_time_stamp;
+          full_app = &(so_application_data[i]);
+        }
+      }
+      if (mobile_apis::HMILevel::HMI_LIMITED == saved_hmi_level) {
+        if (time_stamp_limited < saved_time_stamp) {
+          time_stamp_limited = saved_time_stamp;
+          limited_app = &(so_application_data[i]);
+        }
+      }
+    }
+    // set invalid HMI level for all
+    resumption_storage_->UpdateHmiLevel (
+          so_application_data[i][strings::app_id].asString(),
+        so_application_data[i][strings::device_id].asString(),
+        static_cast<int32_t>(mobile_apis::HMILevel::INVALID_ENUM));
+  }
+  if (full_app != NULL) {
+    resumption_storage_->UpdateHmiLevel (
+          (*full_app)[strings::app_id].asString(),
+        (*full_app)[strings::device_id].asString(),
+        static_cast<int32_t>(mobile_apis::HMILevel::HMI_FULL));
+  }
+  if (limited_app != NULL) {
+    resumption_storage_->UpdateHmiLevel (
+          (*limited_app)[strings::app_id].asString(),
+        (*limited_app)[strings::device_id].asString(),
+        static_cast<int32_t>(mobile_apis::HMILevel::HMI_LIMITED));
+  }
+}
+
 ApplicationManagerImpl* ResumeCtrl::appMngr() {
   return ::application_manager::ApplicationManagerImpl::instance();
 }
-
 
 void ResumeCtrl::SendHMIRequest(
     const hmi_apis::FunctionID::eType& function_id,

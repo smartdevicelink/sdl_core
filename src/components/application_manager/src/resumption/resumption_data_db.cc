@@ -85,7 +85,8 @@ void ResumptionDataDB::OnSuspend() {
   utils::dbms::SQLQuery query_update_last_ign_off_time(db());
 
   if (query_delete_applications.Prepare(kDeleteApplicationsAccordingWithIgnOffCount)) {
-    query_delete_applications.Bind(0, static_cast<int>(3));
+    const uint32_t application_lifes = 3; // TODO make profile variable
+    query_delete_applications.Bind(0, static_cast<int>(application_lifes));
     if (query_delete_applications.Exec()) {
       LOG4CXX_INFO(logger_, "Saved application with ign_off_count = "<< 3 // kApplicationLifes
                    <<" was deleted");

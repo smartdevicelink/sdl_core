@@ -254,6 +254,20 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
      */
     void ApplicationResumptiOnTimer();
 
+    /**
+     * @brief Removes activated application from resumption list
+     *
+     * @param application application witch need to be removed from resumption
+     */
+    void OnAppActivated(app_mngr::ApplicationSharedPtr application);
+
+    /**
+     * @brief Removes app from resumption list
+     *
+     * app_id Application to remove
+     */
+    void RemoveFromResumption(uint32_t app_id);
+
   private:
 
     /**
@@ -333,7 +347,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
      * @return true in case icons exists, false otherwise
      */
     bool CheckIcons(app_mngr::ApplicationSharedPtr application,
-                    const smart_objects::SmartObject& obj);
+                    smart_objects::SmartObject& obj);
 
     /**
      * @brief CheckDelayAfterIgnOn should check if SDL was started less
@@ -406,6 +420,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
     mobile_apis::HMILevel::eType IsHmiLevelFullAllowed(
         app_mngr::ApplicationConstSharedPtr app);
 
+    void LoadResumeData();
     app_mngr::ApplicationManagerImpl* appMngr();
 
     /**
@@ -414,12 +429,11 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
     *
     */
     mutable sync_primitives::Lock   queue_lock_;
-    sync_primitives::Lock           resumtion_lock_;
-//    timer::TimerThread<ResumeCtrl>  save_persistent_data_timer_;
     timer::TimerThread<ResumeCtrl>  restore_hmi_level_timer_;
     bool                            is_resumption_active_;
     timer::TimerThread<ResumeCtrl>  save_persistent_data_timer_;
-    std::vector<uint32_t>           waiting_for_timer_;
+    typedef std::list<uint32_t>     WaitingForTimerList;
+    WaitingForTimerList             waiting_for_timer_;
     bool is_data_saved_;
     time_t launch_time_;
     ResumptionData*                 resumption_storage_;

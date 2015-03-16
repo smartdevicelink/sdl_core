@@ -37,12 +37,18 @@
 #include "application_manager/message_helper.h"
 #include "application_manager/smart_object_keys.h"
 #include "resumption/last_state.h"
+#include "config_profile/profile.h"
 
 namespace resumption {
 
 namespace Formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ResumptionDataJson")
+
+ResumptionDataJson::ResumptionDataJson():
+  ResumptionData(){
+
+}
 
 void ResumptionDataJson::SaveApplication(
     app_mngr::ApplicationConstSharedPtr application) {
@@ -60,6 +66,7 @@ void ResumptionDataJson::SaveApplication(
       MessageHelper::GetDeviceMacAddressForHandle(application->device());
   const mobile_apis::HMILevel::eType hmi_level = application->hmi_level();
 
+  sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value tmp;
   Json::Value& json_app = GetFromSavedOrAppend(m_app_id, device_id);
 
@@ -99,6 +106,7 @@ int ResumptionDataJson::GetStoredHMILevel(const std::string& m_app_id,
                                  const std::string& device_id) {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
   int idx  = GetObjectIndex(m_app_id, device_id);
   if (idx != -1) {
     const Json::Value& json_app = GetSavedApplications()[idx];
@@ -113,7 +121,7 @@ int ResumptionDataJson::GetStoredHMILevel(const std::string& m_app_id,
 bool ResumptionDataJson::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
-
+  sync_primitives::AutoLock autolock(resumption_lock_);
   for (Json::Value::iterator it = GetSavedApplications().begin();
       it != GetSavedApplications().end(); ++it) {
     if ((*it).isMember(strings::hmi_app_id)) {
@@ -129,6 +137,7 @@ bool ResumptionDataJson::CheckSavedApplication(const std::string& mobile_app_id,
                                                const std::string& device_id) {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
   int index = IsApplicationSaved(mobile_app_id, device_id);
   if (-1 == index) {
     return false;
@@ -148,7 +157,7 @@ uint32_t ResumptionDataJson::GetHMIApplicationID(
     const std::string& mobile_app_id, const std::string& device_id) {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
-
+  sync_primitives::AutoLock autolock(resumption_lock_);
   uint32_t hmi_app_id = 0;
 
   const int idx = GetObjectIndex(mobile_app_id, device_id);
@@ -168,7 +177,9 @@ uint32_t ResumptionDataJson::GetHMIApplicationID(
 
 void ResumptionDataJson::OnSuspend() {
   using namespace app_mngr;
+  using namespace profile;
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value to_save;
   for (Json::Value::iterator it = GetSavedApplications().begin();
       it != GetSavedApplications().end(); ++it) {
@@ -181,7 +192,8 @@ void ResumptionDataJson::OnSuspend() {
     }
     if ((*it).isMember(strings::ign_off_count)) {
       const uint32_t ign_off_count = (*it)[strings::ign_off_count].asUInt();
-      if (ign_off_count < 3) { // TODO read from profile
+      const uint32_t application_lifes = 3; // TODO make profile variable
+      if (ign_off_count < application_lifes) { // TODO read from profile
         (*it)[strings::ign_off_count] = ign_off_count + 1;
         to_save.append(*it);
       }
@@ -199,6 +211,7 @@ void ResumptionDataJson::OnSuspend() {
 
 void ResumptionDataJson::OnAwake() {
   using namespace app_mngr;
+  sync_primitives::AutoLock autolock(resumption_lock_);
   LOG4CXX_AUTO_TRACE(logger_);
 
   for (Json::Value::iterator it = GetSavedApplications().begin();
@@ -218,7 +231,7 @@ bool ResumptionDataJson::GetHashId(const std::string& mobile_app_id,
                                    std::string& hash_id) {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
-
+  sync_primitives::AutoLock autolock(resumption_lock_);
   const int idx = GetObjectIndex(mobile_app_id, device_id);
   if (-1 == idx) {
     LOG4CXX_WARN(logger_, "Application not saved");
@@ -238,6 +251,8 @@ bool ResumptionDataJson::GetHashId(const std::string& mobile_app_id,
 bool ResumptionDataJson::GetSavedApplication(const std::string& mobile_app_id,
                                              const std::string& device_id,
                                              smart_objects::SmartObject& saved_app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
   const int idx = GetObjectIndex(mobile_app_id, device_id);
   if (-1 == idx) {
     return false;
@@ -250,8 +265,8 @@ bool ResumptionDataJson::GetSavedApplication(const std::string& mobile_app_id,
 bool ResumptionDataJson::RemoveApplicationFromSaved(const std::string& mobile_app_id,
                                                     const std::string& device_id) {
   using namespace app_mngr;
-  LOG4CXX_TRACE(logger_, "Remove mobile_app_id " << mobile_app_id);
-
+  LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
   bool result = false;
   std::vector<Json::Value> temp;
   for (Json::Value::iterator it = GetSavedApplications().begin();
@@ -285,6 +300,7 @@ bool ResumptionDataJson::RemoveApplicationFromSaved(const std::string& mobile_ap
 uint32_t ResumptionDataJson::GetIgnOffTime() {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value& resumption = GetResumptionData();
   if (!resumption.isMember(strings::last_ign_off_time)) {
     resumption[strings::last_ign_off_time] = 0;
@@ -296,6 +312,7 @@ uint32_t ResumptionDataJson::GetIgnOffTime() {
 int ResumptionDataJson::IsApplicationSaved(const std::string& mobile_app_id,
                                            const std::string& device_id) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
   return GetObjectIndex(mobile_app_id, device_id);
 }
 
@@ -303,7 +320,7 @@ Json::Value& ResumptionDataJson::GetFromSavedOrAppend(const std::string& mobile_
                                   const std::string& device_id) {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
-
+  sync_primitives::AutoLock autolock(resumption_lock_);
   for (Json::Value::iterator it = GetSavedApplications().begin();
       it != GetSavedApplications().end(); ++it) {
     if (device_id == (*it)[strings::device_id].asString() &&
@@ -319,6 +336,7 @@ void ResumptionDataJson::GetDataForLoadResumeData(
     smart_objects::SmartObject& saved_data) {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
   smart_objects::SmartObject so_array_data(smart_objects::SmartType_Array);
   int i = 0;
   for (Json::Value::iterator it = GetSavedApplications().begin();
@@ -347,13 +365,13 @@ ResumptionDataJson::~ResumptionDataJson() {
 void ResumptionDataJson::UpdateHmiLevel(const std::string& mobile_app_id,
                                         const std::string& device_id,
                                         int32_t hmi_level) {
- //TODO Update HNI Level in saved App
+ //TODO Update HMI Level in saved App
 }
 
 Json::Value& ResumptionDataJson::GetSavedApplications() {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
-
+  sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value& resumption = GetResumptionData();
   if (!resumption.isMember(strings::resume_app_list)) {
     resumption[strings::resume_app_list] = Json::Value(Json::arrayValue);
@@ -370,7 +388,7 @@ Json::Value& ResumptionDataJson::GetSavedApplications() {
 Json::Value& ResumptionDataJson::GetResumptionData() {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
-
+  sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value& last_state = ::resumption::LastState::instance()->dictionary;
   if (!last_state.isMember(strings::resumption)) {
     last_state[strings::resumption] = Json::Value(Json::objectValue);
@@ -388,7 +406,7 @@ int ResumptionDataJson::GetObjectIndex(const std::string& mobile_app_id,
                                const std::string& device_id) {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
-
+  sync_primitives::AutoLock autolock(resumption_lock_);
   const Json::Value& apps = GetSavedApplications();
   const Json::ArrayIndex size = apps.size();
   Json::ArrayIndex idx = 0;
@@ -410,7 +428,7 @@ int ResumptionDataJson::GetObjectIndex(const std::string& mobile_app_id,
 bool ResumptionDataJson::IsResumptionDataValid(uint32_t index) {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
-
+  sync_primitives::AutoLock autolock(resumption_lock_);
   const Json::Value& json_app = GetSavedApplications()[index];
   if (!json_app.isMember(strings::app_id) ||
       !json_app.isMember(strings::ign_off_count) ||
@@ -433,12 +451,14 @@ bool ResumptionDataJson::IsResumptionDataValid(uint32_t index) {
 
 void ResumptionDataJson::SetSavedApplication(Json::Value& apps_json) {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoLock autolock(resumption_lock_);
   Json::Value& app_list = GetSavedApplications();
   app_list = apps_json;
 }
 
 void ResumptionDataJson::SetLastIgnOffTime(time_t ign_off_time) {
   using namespace app_mngr;
+  sync_primitives::AutoLock autolock(resumption_lock_);
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_WARN(logger_, "ign_off_time = " << ign_off_time);
   Json::Value& resumption = GetResumptionData();

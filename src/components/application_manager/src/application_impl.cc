@@ -96,8 +96,7 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       has_been_activated_(false),
       tts_properties_in_none_(false),
       tts_properties_in_full_(false),
-      is_application_data_changed_(
-          StateApplicationData::kNotSaveDataForResumption),
+      is_application_data_changed_(false),
       put_file_in_none_count_(0),
       delete_file_in_none_count_(0),
       list_files_in_none_count_(0),
@@ -780,19 +779,18 @@ const std::string& ApplicationImpl::curHash() const {
   return hash_val_;
 }
 
-StateApplicationData ApplicationImpl::is_application_data_changed() const {
+bool ApplicationImpl::is_application_data_changed() const {
   return is_application_data_changed_;
 }
 
-void ApplicationImpl::set_is_application_data_changed(
-    StateApplicationData state_application_data) {
+void ApplicationImpl::set_is_application_data_changed(bool state_application_data) {
   is_application_data_changed_ = state_application_data;
 }
 
 void ApplicationImpl::UpdateHash() {
   LOG4CXX_AUTO_TRACE(logger_);
   hash_val_ = utils::gen_hash(profile::Profile::instance()->hash_string_size());
-  is_application_data_changed_ = kNotSavedDataForResumption;
+  set_is_application_data_changed(true);
   MessageHelper::SendHashUpdateNotification(app_id());
 }
 

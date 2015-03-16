@@ -40,6 +40,9 @@ namespace resumption {
 
 class ResumptionDataJson : public ResumptionData {
   public:
+
+    ResumptionDataJson();
+
   /**
    * @brief Save application persistent info for future resuming on json format
    * @param application is application witch need to be saved
