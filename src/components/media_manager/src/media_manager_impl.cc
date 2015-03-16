@@ -65,7 +65,12 @@ MediaManagerImpl::MediaManagerImpl()
   , audio_streamer_(NULL)
   , video_stream_active_(false)
   , audio_stream_active_(false)
-  , streaming_timer_("Streaming timer", this, &MediaManagerImpl::OnStreamingEnded)
+  , audio_streaming_timer_("Audio streaming timer", this,
+                           &MediaManagerImpl::OnAudioStreamingTimeout)
+  , video_streaming_timer_("Video streaming timer", this,
+                           &MediaManagerImpl::OnVideoStreamingTimeout)
+  , audio_streaming_suspended_(true)
+  , video_streaming_suspended_(true)
   , streaming_app_id_(0) {
   Init();
 }
@@ -138,8 +143,28 @@ void MediaManagerImpl::Init() {
   }
 }
 
-void MediaManagerImpl::OnStreamingEnded() {
-  application_manager::ApplicationManagerImpl::instance()->StreamingEnded(streaming_app_id_);
+void MediaManagerImpl::OnAudioStreamingTimeout() {
+  using namespace application_manager;
+  using namespace protocol_handler;
+  LOG4CXX_DEBUG(logger_, "Data is not available for service type "
+                << ServiceType::kAudio);
+  MessageHelper::SendOnDataStreaming(ServiceType::kAudio, false);
+  ApplicationManagerImpl::instance()->StreamingEnded(streaming_app_id_);
+
+  sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
+  audio_streaming_suspended_ = true;
+}
+
+void media_manager::MediaManagerImpl::OnVideoStreamingTimeout() {
+  using namespace application_manager;
+  using namespace protocol_handler;
+  LOG4CXX_DEBUG(logger_, "Data is not available for service type "
+                << ServiceType::kMobileNav);
+  MessageHelper::SendOnDataStreaming(ServiceType::kMobileNav, false);
+  ApplicationManagerImpl::instance()->StreamingEnded(streaming_app_id_);
+
+  sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
+  video_streaming_suspended_ = true;
 }
 
 void MediaManagerImpl::PlayA2DPSource(int32_t application_key) {
@@ -278,24 +303,43 @@ void MediaManagerImpl::OnMessageReceived(
   streaming_app_id_ = message->connection_key();
   ServiceType streaming_app_service_type = message->service_type();
 
-  MediaAdapterImpl* streamer = NULL;
   if (streaming_app_service_type == kMobileNav) {
-    if ((ApplicationManagerImpl::instance()-> IsVideoStreamingAllowed(streaming_app_id_))) {
-      streamer = video_streamer_;
+    if ((ApplicationManagerImpl::instance()->
+         IsVideoStreamingAllowed(streaming_app_id_))) {
+      if (ApplicationManagerImpl::instance()->CanAppStream(streaming_app_id_)) {
+        sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
+        if (video_streaming_suspended_) {
+          LOG4CXX_DEBUG(logger_, "Data is available for service type "
+                        << streaming_app_service_type);
+          MessageHelper::SendOnDataStreaming(streaming_app_service_type, true);
+          video_streaming_suspended_ = false;
+        }
+        video_streamer_->SendData(streaming_app_id_, message);
+        video_streaming_timer_.start(video_data_stopped_timeout_);
+      } else {
+        ApplicationManagerImpl::instance()->ForbidStreaming(streaming_app_id_);
+        LOG4CXX_ERROR(logger_,
+                      "The application trying to stream when it should not.");
+      }
     }
   } else if (streaming_app_service_type == kAudio) {
-    if ((ApplicationManagerImpl::instance()-> IsAudioStreamingAllowed(streaming_app_id_))) {
-      streamer = audio_streamer_;
-    }
-  }
-
-  if (streamer) {
-    if (ApplicationManagerImpl::instance()->CanAppStream(streaming_app_id_)) {
-      streamer->SendData(streaming_app_id_, message);
-      streaming_timer_.start(stop_streaming_timeout_);
-    } else {
-      ApplicationManagerImpl::instance()->ForbidStreaming(streaming_app_id_);
-      LOG4CXX_ERROR(logger_, "The application trying to stream when it should not.");
+    if ((ApplicationManagerImpl::instance()->
+         IsAudioStreamingAllowed(streaming_app_id_))) {
+      if (ApplicationManagerImpl::instance()->CanAppStream(streaming_app_id_)) {
+        sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
+        if (audio_streaming_suspended_) {
+          LOG4CXX_DEBUG(logger_, "Data is available for service type "
+                        << streaming_app_service_type);
+          MessageHelper::SendOnDataStreaming(streaming_app_service_type, true);
+          audio_streaming_suspended_ = false;
+        }
+        audio_streamer_->SendData(streaming_app_id_, message);
+        audio_streaming_timer_.start(audio_data_stopped_timeout_);
+      } else {
+        ApplicationManagerImpl::instance()->ForbidStreaming(streaming_app_id_);
+        LOG4CXX_ERROR(logger_,
+                      "The application trying to stream when it should not.");
+      }
     }
   }
 }
