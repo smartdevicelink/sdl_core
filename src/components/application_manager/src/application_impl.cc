@@ -375,10 +375,12 @@ void ApplicationImpl::set_hmi_supports_navi_video_streaming(bool supports) {
         profile::Profile::instance()->start_stream_retry_amount();
     set_video_stream_retry_active(true);
     video_stream_retry_number_ = stream_retry.first;
-    video_stream_retry_timer_ =
-        utils::SharedPtr<timer::TimerThread<ApplicationImpl>>(
-            new timer::TimerThread<ApplicationImpl>(
-                "VideoStreamRetry", this, &ApplicationImpl::OnVideoStreamRetry, true));
+    if (!video_stream_retry_timer_.valid()){
+      video_stream_retry_timer_ =
+          utils::SharedPtr<timer::TimerThread<ApplicationImpl>>(
+              new timer::TimerThread<ApplicationImpl>(
+                  "VideoStreamRetry", this, &ApplicationImpl::OnVideoStreamRetry, true));
+    }
     // start separate pthread for timer without delays
     video_stream_retry_timer_->start(0);
   }
@@ -400,10 +402,12 @@ void ApplicationImpl::set_hmi_supports_navi_audio_streaming(bool supports) {
         profile::Profile::instance()->start_stream_retry_amount();
     set_audio_stream_retry_active(true);
     audio_stream_retry_number_ = stream_retry.first;
-    audio_stream_retry_timer_ =
-        utils::SharedPtr<timer::TimerThread<ApplicationImpl>>(
-            new timer::TimerThread<ApplicationImpl>(
-                "AudioStreamRetry", this, &ApplicationImpl::OnAudioStreamRetry, true));
+    if (!audio_stream_retry_timer_.valid()){
+      audio_stream_retry_timer_ =
+          utils::SharedPtr<timer::TimerThread<ApplicationImpl>>(
+              new timer::TimerThread<ApplicationImpl>(
+                  "AudioStreamRetry", this, &ApplicationImpl::OnAudioStreamRetry, true));
+    }
     // start separate pthread for timer without delays
     audio_stream_retry_timer_->start(0);
   }
