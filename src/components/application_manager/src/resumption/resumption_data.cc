@@ -35,18 +35,17 @@
 #include "application_manager/smart_object_keys.h"
 #include "application_manager/vehicle_info_data.h"
 
-namespace application_manager {
 namespace resumption {
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "ResumptionData")
 
 smart_objects::SmartObject ResumptionData::GetApplicationCommands(
-    ApplicationConstSharedPtr application) {
+    app_mngr::ApplicationConstSharedPtr application) {
+  using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
-
-  DCHECK(application.get());
   smart_objects::SmartObject commands_array = smart_objects::SmartObject(
       smart_objects::SmartType_Array);
+  DCHECK_OR_RETURN(application, commands_array);
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL Pointer App");
     return commands_array;
@@ -61,7 +60,8 @@ smart_objects::SmartObject ResumptionData::GetApplicationCommands(
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationSubMenus(
-    ApplicationConstSharedPtr application) {
+    app_mngr::ApplicationConstSharedPtr application) {
+  using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
 
   DCHECK(application.get());
@@ -82,7 +82,8 @@ smart_objects::SmartObject ResumptionData::GetApplicationSubMenus(
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationInteractionChoiseSets(
-      ApplicationConstSharedPtr application) {
+      app_mngr::ApplicationConstSharedPtr application) {
+  using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
 
   DCHECK(application.get());
@@ -102,7 +103,8 @@ smart_objects::SmartObject ResumptionData::GetApplicationInteractionChoiseSets(
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationGlobalProperties(
-      ApplicationConstSharedPtr application) {
+      app_mngr::ApplicationConstSharedPtr application) {
+  using namespace app_mngr; 
   LOG4CXX_AUTO_TRACE(logger_);
 
   DCHECK(application.get());
@@ -133,7 +135,8 @@ smart_objects::SmartObject ResumptionData::GetApplicationGlobalProperties(
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationSubscriptions(
-        ApplicationConstSharedPtr application) {
+        app_mngr::ApplicationConstSharedPtr application) {
+  using namespace app_mngr; 
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(application.get());
   smart_objects::SmartObject subscriptions =
@@ -157,7 +160,9 @@ smart_objects::SmartObject ResumptionData::GetApplicationSubscriptions(
 }
 
 smart_objects::SmartObject ResumptionData::GetApplicationFiles(
-    ApplicationConstSharedPtr application) {
+    app_mngr::ApplicationConstSharedPtr application) {
+  using namespace app_mngr; 
+  LOG4CXX_AUTO_TRACE(logger_);
   DCHECK(application.get());
   LOG4CXX_TRACE(logger_, "ENTER app_id:"
                 << application->app_id());
@@ -198,4 +203,3 @@ smart_objects::SmartObject ResumptionData::PointerToSmartObj(
 }
 
 }  // namespace resumption
-}  // namespace application_manager

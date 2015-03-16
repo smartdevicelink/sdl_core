@@ -33,7 +33,6 @@
 #include "application_manager/resumption/resumption_sql_queries.h"
 #include "application_manager/smart_object_keys.h"
 
-namespace application_manager {
 namespace resumption {
 CREATE_LOGGERPTR_GLOBAL(logger_, "ResumptionDataDB")
 
@@ -150,12 +149,6 @@ void ResumptionDataDB::GetDataForLoadResumeData(smart_objects::SmartObject& save
   SelectDataForLoadResumeData(saved_data);
 }
 
-void ResumptionDataDB::SetHMILevelForSavedApplication(const std::string& mobile_app_id,
-                                                      const std::string& device_id, int32_t hmi_level) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  UpdateHmiLevel(mobile_app_id, device_id, hmi_level);
-}
-
 bool ResumptionDataDB::SelectHMILevel(const std::string& m_app_id,
                                       const std::string& device_id,
                                       int& hmi_level) {
@@ -264,6 +257,7 @@ bool ResumptionDataDB::CheckExistenceApplication(const std::string& mobile_app_i
 
 void ResumptionDataDB::SelectDataForLoadResumeData(
     smart_objects::SmartObject& saved_data) {
+  using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
 
   utils::dbms::SQLQuery query(db());
@@ -348,4 +342,3 @@ utils::dbms::SQLDatabase* ResumptionDataDB::db() const {
 
 
 }  // namespace resumption
-}  // namespace application_manager

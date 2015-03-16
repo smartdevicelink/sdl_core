@@ -35,15 +35,18 @@
 #include "smart_objects/smart_object.h"
 #include "application_manager/application.h"
 
-namespace application_manager {
 namespace resumption {
+
+namespace smart_objects = NsSmartDeviceLink::NsSmartObjects;
+namespace app_mngr = application_manager;
+
 class ResumptionData {
   public:
   /**
    * @brief Save application persistent info for future resuming
    * @param application is application witch need to be saved
    */
-  virtual void SaveApplication(ApplicationConstSharedPtr application) = 0;
+  virtual void SaveApplication(app_mngr::ApplicationConstSharedPtr application) = 0;
 
   /**
    * @brief Returns HMI level of application from saved data
@@ -150,19 +153,18 @@ class ResumptionData {
    */
   virtual void GetDataForLoadResumeData(smart_objects::SmartObject& saved_data) = 0;
 
-  /**
-   * @brief Changed HMI level for saved application
-   * @param mobile_app_id - mobile application id
-   * @param device_id - contains id of device on which is running application
-   * @param hmi_level - contains new hmi level for saved application
-   */
-  virtual void SetHMILevelForSavedApplication(const std::string& mobile_app_id,
-                                              const std::string& device_id,
-                                              int32_t hmi_level) = 0;
+    /**
+     * @brief Updates HMI level of saved application
+     * @param mobile_app_id - mobile application id
+     * @param device_id - contains id of device on which is running application
+     * @param hmi_level - contains hmi level for saved appliction
+     */
+    virtual void UpdateHmiLevel(const std::string& mobile_app_id,
+                        const std::string& device_id,
+                        int32_t hmi_level) = 0;
+
 
   virtual ~ResumptionData() {};
-
-
 
   protected:
 
@@ -172,7 +174,7 @@ class ResumptionData {
    * @return list of commands
    */
   smart_objects::SmartObject GetApplicationCommands(
-      ApplicationConstSharedPtr application);
+      application_manager::ApplicationConstSharedPtr application);
 
   /**
    * @brief Do selection of submenues from application
@@ -180,7 +182,7 @@ class ResumptionData {
    * @return list of submenues
    */
   smart_objects::SmartObject GetApplicationSubMenus(
-      ApplicationConstSharedPtr application);
+      application_manager::ApplicationConstSharedPtr application);
 
   /**
    * @brief Do selection of interactionChoiceSet from application
@@ -188,7 +190,7 @@ class ResumptionData {
    * @return list of interaction choice set
    */
   smart_objects::SmartObject GetApplicationInteractionChoiseSets(
-      ApplicationConstSharedPtr application);
+      application_manager::ApplicationConstSharedPtr application);
 
   /**
    * @brief Do selection of global properties from application
@@ -196,7 +198,7 @@ class ResumptionData {
    * @return global properties of application
    */
   smart_objects::SmartObject GetApplicationGlobalProperties(
-      ApplicationConstSharedPtr application);
+      application_manager::ApplicationConstSharedPtr application);
 
   /**
    * @brief Do selection of subscriptions from application
@@ -204,7 +206,7 @@ class ResumptionData {
    * @return subscriptions of application
    */
   smart_objects::SmartObject GetApplicationSubscriptions(
-        ApplicationConstSharedPtr application);
+        application_manager::ApplicationConstSharedPtr application);
 
   /**
    * @brief Do selection of files from application
@@ -212,7 +214,7 @@ class ResumptionData {
    * @return files of application
    */
   smart_objects::SmartObject GetApplicationFiles(
-      ApplicationConstSharedPtr application);
+      application_manager::ApplicationConstSharedPtr application);
 
   /**
    * @brief checks pointer that it is not equal NULL
@@ -235,6 +237,5 @@ class ResumptionData {
   }
 };
 }  // namespace resumption
-}  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_H_

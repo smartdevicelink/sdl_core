@@ -35,7 +35,7 @@
 
 #include "application_manager/resumption/resumption_data.h"
 #include "json/json.h"
-namespace application_manager {
+
 namespace resumption {
 
 class ResumptionDataJson : public ResumptionData {
@@ -44,7 +44,7 @@ class ResumptionDataJson : public ResumptionData {
    * @brief Save application persistent info for future resuming on json format
    * @param application is application witch need to be saved
    */
-  virtual void SaveApplication(ApplicationConstSharedPtr application);
+    virtual void SaveApplication(app_mngr::ApplicationConstSharedPtr application);
 
   /**
    * @brief Returns HMI level of application from saved data
@@ -55,13 +55,6 @@ class ResumptionDataJson : public ResumptionData {
    */
   virtual int GetStoredHMILevel(const std::string& m_app_id,
                                  const std::string& device_id);
-
-  /**
-   * @brief restores saved data of application
-   * @param application contains application for which restores data
-   * @return true if success, otherwise return false
-   */
-  virtual bool RestoreApplicationData(ApplicationSharedPtr application);
 
   /**
    * @brief Check if saved data of applications have hmi app id
@@ -158,18 +151,18 @@ class ResumptionDataJson : public ResumptionData {
    */
   virtual void GetDataForLoadResumeData(smart_objects::SmartObject& saved_data);
 
-  /**
-   * @brief Changed HMI level for saved application
-   * @param mobile_app_id - mobile application id
-   * @param device_id - contains id of device on which is running application
-   * @param hmi_level - contains new hmi level for saved application
-   */
-  virtual void SetHMILevelForSavedApplication(const std::string& mobile_app_id,
-                                              const std::string& device_id,
-                                              int32_t hmi_level);
-
-
   virtual ~ResumptionDataJson();
+
+    /**
+     * @brief Updates HMI level of saved application
+     * @param mobile_app_id - mobile application id
+     * @param device_id - contains id of device on which is running application
+     * @param hmi_level - contains hmi level for saved appliction
+     */
+    void UpdateHmiLevel(const std::string& mobile_app_id,
+                        const std::string& device_id,
+                        int32_t hmi_level);
+
   private:
 
   /**
@@ -233,6 +226,5 @@ class ResumptionDataJson : public ResumptionData {
 
 };
 }  // namespace resumption
-}  // namespace application_manager
 
 #endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_DATA_JSON_H_

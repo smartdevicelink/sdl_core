@@ -31,7 +31,6 @@
  */
 #include "application_manager/resumption/resumption_sql_queries.h"
 
-namespace application_manager {
 namespace resumption {
 
 const std::string kCreateSchema;
@@ -95,4 +94,3 @@ const std::string KUpdateLastIgnOffTime =
     "SET `last_ign_off_time` = ?";
 
 }  // namespace resumption
-}  // namespace application_manager

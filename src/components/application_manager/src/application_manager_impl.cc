@@ -294,7 +294,7 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
 }
 
 bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
-    ApplicationSharedPtr app) const {
+    ApplicationConstSharedPtr app) const {
   bool voice_state = app->is_voice_communication_supported();
   bool media_state = app->is_media_application();
   bool navi_state = app->is_navi();
@@ -889,7 +889,7 @@ void ApplicationManagerImpl::RemoveDevice(
 }
 
 mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
-    ApplicationSharedPtr application) const {
+    ApplicationConstSharedPtr application) const {
   using namespace mobile_apis;
   LOG4CXX_AUTO_TRACE(logger_);
   HMILevel::eType default_hmi = HMILevel::HMI_NONE;

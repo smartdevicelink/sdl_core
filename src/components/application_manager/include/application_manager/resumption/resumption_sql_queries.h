@@ -35,7 +35,6 @@
 
 #include <string>
 
-namespace application_manager {
 namespace resumption {
 
 extern const std::string kCreateSchema;
@@ -54,6 +53,5 @@ extern const std::string kUpdateSuspendData;
 extern const std::string KUpdateLastIgnOffTime;
 
 }  // namespace resumption
-}  // namespace application_manager
 
 #endif  //  SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_RESUMPTION_RESUMPTION_SQL_QUERY_H_

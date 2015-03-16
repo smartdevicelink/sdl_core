@@ -246,7 +246,8 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD1(ReplaceMobileByHMIAppId, void(smart_objects::SmartObject&));
   MOCK_METHOD0(resume_controller, resumption::ResumeCtrl&());
   MOCK_METHOD1(IsVideoStreamingAllowed, bool(uint32_t));
-  MOCK_METHOD1(GetDefaultHmiLevel, mobile_api::HMILevel::eType (ApplicationSharedPtr));
+  MOCK_METHOD1(GetDefaultHmiLevel,
+               mobile_api::HMILevel::eType (ApplicationConstSharedPtr));
 
   MOCK_METHOD2(HMILevelAllowsStreaming, bool(uint32_t, protocol_handler::ServiceType));
   MOCK_METHOD2(CanAppStream, bool(uint32_t, protocol_handler::ServiceType));
@@ -306,7 +307,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_CONST_METHOD0(get_limited_media_application, ApplicationSharedPtr());
   MOCK_CONST_METHOD0(get_limited_navi_application, ApplicationSharedPtr());
   MOCK_CONST_METHOD0(get_limited_voice_application, ApplicationSharedPtr());
-  MOCK_CONST_METHOD1(IsAppTypeExistsInFullOrLimited, bool(ApplicationSharedPtr));
+  MOCK_CONST_METHOD1(IsAppTypeExistsInFullOrLimited, bool(ApplicationConstSharedPtr));
   MOCK_CONST_METHOD0(active_application, ApplicationSharedPtr ());
   MOCK_METHOD0(OnApplicationListUpdateTimer, void());
   MOCK_METHOD0(OnLowVoltage, void());
