@@ -241,8 +241,7 @@ PolicyHandler::PolicyHandler()
     dl_handle_(0),
     last_activated_app_id_(0),
     app_to_device_link_lock_(true),
-    statistic_manager_impl_(new StatisticManagerImpl()),
-    access_(application_manager::TypeAccess::kManual) {
+    statistic_manager_impl_(new StatisticManagerImpl()) {
 }
 
 PolicyHandler::~PolicyHandler() {
