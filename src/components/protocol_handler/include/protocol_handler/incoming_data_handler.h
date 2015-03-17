@@ -55,12 +55,12 @@ class IncomingDataHandler {
    */
   void set_validator(const ProtocolPacket::ProtocolHeaderValidator *const validator);
   /**
-   * @brief Contecat TM messages to ford frames and validate ford header data
+   * @brief Concatenate TM messages to ford frames and validate ford header data
    * \param TM messages for converting to frames
    * \param result of convertion
    * \param malformed_occurrence count of malformed messages occurrence
    *   - RESULT_OK - no error ocures
-   *   - RESULT_MALFORMED_OCCURS - massages contecated,
+   *   - RESULT_MALFORMED_OCCURS - messages concatenated,
    *                               but malformed message occurs
    *   - RESULT_FAIL - packet serialization or validation error occurs
    * \return list of complete, correct packets

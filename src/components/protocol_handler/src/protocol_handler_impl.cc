@@ -1118,12 +1118,12 @@ bool ProtocolHandlerImpl::TrackMalformedMessage(const uint32_t &connection_key,
   LOG4CXX_AUTO_TRACE(logger_);
   if (malformed_message_frequency_time_ > 0u &&
       malformed_message_max_frequency_ > 0u) {
-    const size_t message_frequency =
+    const size_t malformed_message_frequency =
         malformed_message_meter_.TrackMessages(connection_key, count);
     LOG4CXX_DEBUG(logger_, "Malformed frequency of " << connection_key
-                  << " is " << message_frequency);
+                  << " is " << malformed_message_frequency);
     if (!malformed_message_filtering_ ||
-        message_frequency > malformed_message_max_frequency_) {
+        malformed_message_frequency > malformed_message_max_frequency_) {
       LOG4CXX_WARN(logger_, "Malformed frequency of " << connection_key
                    << " is marked as high.");
       if (session_observer_) {
