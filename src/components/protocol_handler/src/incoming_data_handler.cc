@@ -102,12 +102,14 @@ std::list<ProtocolFramePtr> IncomingDataHandler::ProcessData(
 
 void IncomingDataHandler::AddConnection(
   const transport_manager::ConnectionUID connection_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   // Add empty list of session to new connection
   connections_data_[connection_id] = ConnectionsDataMap::mapped_type();
 }
 
 void IncomingDataHandler::RemoveConnection(
   const transport_manager::ConnectionUID connection_id) {
+  LOG4CXX_AUTO_TRACE(logger_);
   connections_data_.erase(connection_id);
 }
 

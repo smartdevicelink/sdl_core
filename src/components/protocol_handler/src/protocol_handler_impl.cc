@@ -1359,7 +1359,7 @@ std::string ConvertPacketDataToString(const uint8_t *data,
       break;
     }
   }
-  return is_printable_array ? std::string(text) : std::string("is raw data");
+  return is_printable_array ? std::string(text, data_size) : std::string("is raw data");
 }
 
 uint8_t SupportedSDLProtocolVersion() {
