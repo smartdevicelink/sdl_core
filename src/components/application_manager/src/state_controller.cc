@@ -214,6 +214,9 @@ void StateController::OnStateChanged(ApplicationSharedPtr app,
     if (new_state->hmi_level() == mobile_apis::HMILevel::HMI_NONE) {
       app->ResetDataInNone();
     }
+    ApplicationManagerImpl::instance()->OnHMILevelChanged(app->app_id(),
+        old_state->hmi_level(), new_state->hmi_level());
+    app->usage_report().RecordHmiStateChanged(new_state->hmi_level());
   } else {
     LOG4CXX_ERROR(logger_, "Status not changed");
   }

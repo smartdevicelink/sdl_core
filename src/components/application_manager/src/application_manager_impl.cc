@@ -2545,6 +2545,10 @@ void ApplicationManagerImpl::OnHMILevelChanged(uint32_t app_id,
   using namespace mobile_apis::HMILevel;
   using namespace helpers;
 
+  if (from == to) {
+    return;
+  }
+
   ApplicationSharedPtr app = application(app_id);
   if (!(app && app->is_navi())) {
     return;
