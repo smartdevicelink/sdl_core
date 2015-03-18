@@ -43,6 +43,7 @@ set_property(DIRECTORY "" PROPERTY INCLUDE_DIRECTORIES ${the_include_dirs})
 include_directories(
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/include
   ${CMAKE_SOURCE_DIR}/src/3rd_party-static/gmock-1.7.0/gtest/include
+  ${COMPONENTS_DIR}/application_manager/include/application_manager/
   ${COMPONENTS_DIR}/application_manager/include/application_manager/policies
 )
 
@@ -56,34 +57,9 @@ set(mockedSources
   ${AM_MOCK_DIR}/src/application_manager_impl.cc
 )
 
-set(AM_SOURCES
-  ${AM_SOURCE_DIR}/src/policies/policy_handler.cc
-  ${AM_SOURCE_DIR}/src/policies/policy_event_observer.cc
-
-  ${AM_SOURCE_DIR}/src/commands/command_impl.cc
-  ${AM_SOURCE_DIR}/src/commands/command_request_impl.cc
-  ${AM_SOURCE_DIR}/src/commands/command_response_impl.cc
-  ${AM_SOURCE_DIR}/src/commands/command_notification_impl.cc
-  ${AM_SOURCE_DIR}/src/commands/command_notification_from_mobile_impl.cc
-  ${AM_SOURCE_DIR}/src/commands/pending.cc
-
-  ${AM_SOURCE_DIR}/src/usage_statistics.cc
-  ${AM_SOURCE_DIR}/src/request_info.cc
-  ${AM_SOURCE_DIR}/src/message.cc
-  ${AM_SOURCE_DIR}/src/application_impl.cc
-  ${AM_SOURCE_DIR}/src/mobile_command_factory.cc
-  ${AM_SOURCE_DIR}/src/message_helper.cc
-  ${AM_SOURCE_DIR}/src/hmi_command_factory.cc
-  ${AM_SOURCE_DIR}/src/hmi_capabilities.cc
-  ${AM_SOURCE_DIR}/src/application_data_impl.cc
-  ${AM_SOURCE_DIR}/src/request_controller.cc
-  ${AM_SOURCE_DIR}/src/resume_ctrl.cpp
-  ${AM_SOURCE_DIR}/src/mobile_message_handler.cc
+include_directories(
+  ${AM_SOURCE_DIR}/policy/src/policy/policy_table/table_struct
 )
-
-  include_directories(
-    ${AM_SOURCE_DIR}/policy/src/policy/policy_table/table_struct
-  )
 
 set(testLibraries
   gmock
@@ -120,7 +96,7 @@ if(ENABLE_LOG)
   list(APPEND LIBRARIES expat -L${EXPAT_LIBS_DIRECTORY})
 endif()
 
-add_library("ApplicationManagerTest" ${mockedSources} ${testSources} ${AM_SOURCES})
+add_library("ApplicationManagerTest" ${mockedSources} ${testSources})
 
 target_link_libraries("ApplicationManagerTest" ${testLibraries} AMHMICommandsLibrary
                                                                 AMMobileCommandsLibrary
@@ -128,7 +104,17 @@ target_link_libraries("ApplicationManagerTest" ${testLibraries} AMHMICommandsLib
                                                                 AMPolicyLibrary)
 
 create_test("application_manager_test" "${testSources}" "${ApplicationManagerTest}")
-target_link_libraries("application_manager_test" ApplicationManagerTest ${test_exec_libraries})
+target_link_libraries("application_manager_test"
+  ApplicationManagerTest ${test_exec_libraries}
+  ApplicationManager
+  ProtocolLibrary
+  connectionHandler
+  ConfigProfile
+  jsoncpp
+  MediaManager
+  ProtocolHandler
+  Resumption
+)
 
 #add_executable(application_manager_test ${testSources})
 #target_link_libraries(application_manager_test ApplicationManagerTest ${test_exec_libraries})

@@ -30,6 +30,8 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include "application_manager/message_helper.h"
+
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
 #undef __STDC_FORMAT_MACROS
@@ -43,7 +45,6 @@
 #include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/commands/command_impl.h"
-#include "application_manager/message_helper.h"
 #include "application_manager/policies/policy_handler.h"
 #include "config_profile/profile.h"
 #include "connection_handler/connection_handler_impl.h"
