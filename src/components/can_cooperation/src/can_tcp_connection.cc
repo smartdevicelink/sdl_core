@@ -58,12 +58,12 @@ class TCPClientDelegate : public threads::ThreadDelegate {
 };
 
 CANTCPConnection::CANTCPConnection()
-  : CANConnection()
-  , address_("127.0.0.1")
-  , port_(8092)
-  , socket_(-1)
-  , current_state_(NONE)
-  , thread_(NULL) {
+    : CANConnection(),
+      address_("127.0.0.1"),
+      port_(8092),
+      socket_(-1),
+      current_state_(NONE),
+      thread_(NULL) {
   socket_ = socket(AF_INET, SOCK_STREAM, 0);
   if (-1 == socket_) {
     current_state_ = INVALID;
@@ -138,7 +138,7 @@ ConnectionState CANTCPConnection::ReadMessage(CANMessage* message) {
       if (reader.parse(data, value, false)) {
         *message = value;
       } else {
-        LOG4CXX_ERROR(logger_, "Failed to parse incoming message from CAN ")
+        LOG4CXX_ERROR(logger_, "Failed to parse incoming message from CAN ");
       }
     }
   }
@@ -152,8 +152,8 @@ ConnectionState CANTCPConnection::OpenConnection() {
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr(address_.c_str());
     server_addr.sin_port = htons(port_);
-    if (-1 == connect(socket_, (struct sockaddr*)&server_addr,
-                      sizeof(server_addr))) {
+    if (-1 == connect(socket_, reinterpret_cast<sockaddr*>(&server_addr),
+      sizeof(server_addr))) {
       current_state_ = INVALID;
     } else {
       current_state_ = OPENED;
