@@ -51,12 +51,15 @@ GrantAccessRequest::~GrantAccessRequest() {
 
 void GrantAccessRequest::Execute() {
   LOG4CXX_TRACE_ENTER(logger_);
+  // TODO(KKolodiy): to backward compatibility the current mobile application
   SendResponse(true, result_codes::kSuccess, "Allowed");
 }
 
 void GrantAccessRequest::OnEvent(
     const event_engine::Event<application_manager::MessagePtr,
     std::string>& event) {
+  // TODO(KKolodiy): this is virtual method so it should be implemented
+  // this method do nothing to backward compatibility the current mobile application
 }
 
 }  // namespace commands

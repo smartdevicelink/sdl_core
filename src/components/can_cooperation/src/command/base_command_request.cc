@@ -359,8 +359,8 @@ void BaseCommandRequest::on_event(const event_engine::Event<application_manager:
     std::string info;
     bool allowed = ParseResultCode(value, result_code, info);
 
-    service_->SetAccess(app_->app_id(), message_->function_name(), allowed);
     if (allowed) {
+      service_->SetAccess(app_->app_id(), message_->function_name());
       Execute();  // run child's logic
     } else {
       SendResponse(false, result_codes::kDisallowed, "");

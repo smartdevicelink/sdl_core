@@ -89,7 +89,7 @@ application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicatio
 
 void BaseCommandNotification::Run() {
   if (need_reset_) {
-    service_->ResetAccess(message_->function_name());
+    service_->RemoveAccess(message_->function_name());
   }
   Execute();  // run child's logic
 }
