@@ -150,7 +150,6 @@ void ConnectionHandlerImpl::OnDeviceAdded(
           device_info.device_handle(),
           Device(device_info.device_handle(), device_info.name(),
                  device_info.mac_address(), device_info.connection_type())));
-  sync_primitives::AutoLock lock(connection_handler_observer_lock_);
 }
 
 void ConnectionHandlerImpl::OnDeviceRemoved(
