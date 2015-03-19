@@ -63,6 +63,7 @@ ResumeCtrl::ResumeCtrl():
                               this, &ResumeCtrl::SaveDataOnTimer, true),
   is_data_saved_(false),
   resumption_storage_(new ResumptionDataJson()) {
+  LoadResumeData();
 }
 
 ResumeCtrl::~ResumeCtrl() {
@@ -584,7 +585,7 @@ bool ResumeCtrl::CheckAppRestrictions(ApplicationConstSharedPtr application,
                                                         ? true : false;
   LOG4CXX_DEBUG(logger_, "is_media_app " << is_media_app
                << "; hmi_level " << hmi_level << " result " << result);
-  return ;
+  return result;
 }
 
 bool ResumeCtrl::CheckIcons(ApplicationSharedPtr application,
