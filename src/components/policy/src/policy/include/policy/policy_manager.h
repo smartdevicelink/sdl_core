@@ -412,14 +412,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @param rpc name of RPC
      * @param access true if access is allowed
      */
-    virtual void SetAccess(const PTString& app_id, const PTString& rpc,
-                           bool access) = 0;
+    virtual void SetAccess(const PTString& app_id, const PTString& rpc) = 0;
 
     /**
      * Resets access to equipment of vehicle for all application by RPC
      * @param rpc name of RPC
      */
-    virtual void ResetAccess(const PTString& rpc) = 0;
+    virtual void RemoveAccess(const PTString& rpc) = 0;
 
   protected:
     /**

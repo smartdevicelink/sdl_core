@@ -80,17 +80,16 @@ class Service {
    * Sets access to functional group which contains given RPC for application
    * @param app_id id of application
    * @param function_id id RPC
-   * @param access true if assess is allowed
    */
   virtual void SetAccess(ApplicationId app_id,
-                         const PluginFunctionID& function_id, bool access) = 0;
+                         const PluginFunctionID& function_id) = 0;
 
   /**
-   * Resets access to functional group which contains given RPC
+   * Removes access to functional group which contains given RPC
    * for all applications which use this group
    * @param function_id id RPC
    */
-  virtual void ResetAccess(const PluginFunctionID& function_id) = 0;
+  virtual void RemoveAccess(const PluginFunctionID& function_id) = 0;
 
   /**
    * @brief Get pointer to application by application id

@@ -82,16 +82,16 @@ TypeAccess CoreService::CheckAccess(
 }
 
 void CoreService::SetAccess(ApplicationId app_id,
-                            const PluginFunctionID& function_id, bool access) {
+                            const PluginFunctionID& function_id) {
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
     policy::PolicyHandler::instance()->SetAccess(
-        app->mobile_app_id()->asString(), function_id, access);
+        app->mobile_app_id()->asString(), function_id);
   }
 }
 
-void CoreService::ResetAccess(const PluginFunctionID& function_id) {
-  policy::PolicyHandler::instance()->ResetAccess(function_id);
+void CoreService::RemoveAccess(const PluginFunctionID& function_id) {
+  policy::PolicyHandler::instance()->RemoveAccess(function_id);
 }
 
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {

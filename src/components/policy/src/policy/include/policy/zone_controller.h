@@ -79,16 +79,15 @@ class ZoneController {
    * @param dev_id unique device id
    * @param app_id application id
    * @param func_id name of RPC
-   * @param access true if need to allow access
    */
   virtual void SetAccess(const PTString& dev_id, const PTString& app_id,
-                         const PTString& func_id, bool access) = 0;
+                         const PTString& func_id) = 0;
 
   /**
    * Resets access to control equipment for all passengers' devices by name of RPC
    * @param func_id name of RPC
    */
-  virtual void ResetAccess(const PTString& func_id) = 0;
+  virtual void RemoveAccess(const PTString& func_id) = 0;
 };
 
 }  // namespace policy

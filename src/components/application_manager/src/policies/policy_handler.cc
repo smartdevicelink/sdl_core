@@ -1286,15 +1286,14 @@ application_manager::TypeAccess PolicyHandler::CheckAccess(
   return ConvertTypeAccess(access);
 }
 
-void PolicyHandler::SetAccess(const PTString& app_id, const PTString& rpc,
-                              bool access) {
+void PolicyHandler::SetAccess(const PTString& app_id, const PTString& rpc) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->SetAccess(app_id, rpc, access);
+  policy_manager_->SetAccess(app_id, rpc);
 }
 
-void PolicyHandler::ResetAccess(const PTString& rpc) {
+void PolicyHandler::RemoveAccess(const PTString& rpc) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->ResetAccess(rpc);
+  policy_manager_->RemoveAccess(rpc);
 }
 
 application_manager::TypeAccess PolicyHandler::ConvertTypeAccess(

@@ -106,15 +106,14 @@ class PolicyHandler :
    * Sets access to equipment of vehicle for application by RPC
    * @param app_id policy id application
    * @param rpc name of RPC
-   * @param access true if access is allowed
    */
-  void SetAccess(const PTString& app_id, const PTString& rpc, bool access);
+  void SetAccess(const PTString& app_id, const PTString& rpc);
 
   /**
-   * Resets access to equipment of vehicle for all application by RPC
+   * Removes access to equipment of vehicle for all application by RPC
    * @param rpc name of RPC
    */
-  void ResetAccess(const PTString& rpc);
+  void RemoveAccess(const PTString& rpc);
 
   uint32_t GetNotificationsNumber(const std::string& priority);
   DeviceConsent GetUserConsentForDevice(const std::string& device_id);

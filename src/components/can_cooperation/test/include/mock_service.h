@@ -57,11 +57,10 @@ class MockService : public Service {
                TypeAccess(ApplicationId app_id,
                           const PluginFunctionID& function_id,
                           const std::string& seat));
-  MOCK_METHOD3(SetAccess,
+  MOCK_METHOD2(SetAccess,
       void(ApplicationId app_id,
-           const PluginFunctionID& function_id,
-           bool access));
-  MOCK_METHOD1(ResetAccess, void(const PluginFunctionID& function_id));
+           const PluginFunctionID& function_id));
+  MOCK_METHOD1(RemoveAccess, void(const PluginFunctionID& function_id));
 };
 
 }  // namespace application_manager

@@ -903,14 +903,13 @@ TypeAccess PolicyManagerImpl::CheckAccess(
   return access;
 }
 
-void PolicyManagerImpl::SetAccess(const PTString& app_id, const PTString& rpc,
-                              bool access) {
+void PolicyManagerImpl::SetAccess(const PTString& app_id, const PTString& rpc) {
   std::string dev_id = GetCurrentDeviceId(app_id);
-  zone_->SetAccess(dev_id, app_id, rpc, access);
+  zone_->SetAccess(dev_id, app_id, rpc);
 }
 
-void PolicyManagerImpl::ResetAccess(const PTString& rpc) {
-  zone_->ResetAccess(rpc);
+void PolicyManagerImpl::RemoveAccess(const PTString& rpc) {
+  zone_->RemoveAccess(rpc);
 }
 
 }  //  namespace policy

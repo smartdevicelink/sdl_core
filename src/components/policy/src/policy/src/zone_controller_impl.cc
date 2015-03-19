@@ -57,11 +57,11 @@ TypeAccess ZoneControllerImpl::IsAccess(const PTString& dev_id,
 
 void ZoneControllerImpl::SetAccess(const PTString& dev_id,
                                    const PTString& app_id,
-                                   const PTString& func_id, bool access) {
-  access_ = access ? kAllowed : kDisallowed;
+                                   const PTString& func_id) {
+  access_ = kAllowed;
 }
 
-void ZoneControllerImpl::ResetAccess(const PTString& func_id) {
+void ZoneControllerImpl::RemoveAccess(const PTString& func_id) {
   access_ = kManual;
 }
 

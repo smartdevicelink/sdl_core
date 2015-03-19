@@ -48,8 +48,8 @@ class ZoneControllerImpl : public ZoneController {
                                       const PTString& app_id,
                                       const PTString& func_id);
   virtual void SetAccess(const PTString& dev_id, const PTString& app_id,
-                         const PTString& func_id, bool access);
-  virtual void ResetAccess(const PTString& func_id);
+                         const PTString& func_id);
+  virtual void RemoveAccess(const PTString& func_id);
 
  private:
   CacheManager& cache_;
