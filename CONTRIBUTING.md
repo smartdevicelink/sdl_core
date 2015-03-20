@@ -12,4 +12,4 @@ We use Gitflow as our branch management system. Please read up on it [here](http
 * If applicable, follow [this Pull Request's format](https://github.com/smartdevicelink/SmartDeviceLink-iOS/pull/45).
 
 ### Contributor's License Agreement (CLA)
-Coming Soon! Unfortunately, we cannot accept third party contributions until this is ready. We are working quickly on the CLA as we have contributions waiting! (A good problem to have)
+In order to accept Pull Requests from contributors, you must first sign [the Contributor's License Agreement](https://docs.google.com/forms/d/1VNR8EUd5b46cQ7uNbCq1fJmnu0askNpUp5dudLKRGpU/viewform). If you need to make a change to information that you entered, [please contact us](mailto:justin@livio.io).
