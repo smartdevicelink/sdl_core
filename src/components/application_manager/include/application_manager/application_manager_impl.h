@@ -970,7 +970,19 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     bool IsAppsQueriedFrom(const connection_handler::DeviceHandle handle) const;
 
-private:
+  private:
+    /**
+     * @brief PullLanguagesInfo allows to pull information about languages.
+     *
+     * @param app_data entry to parse
+     *
+     * @param ttsName tts name that should be filled.
+     * @param vrSynonym vr synonymus that should be filled.
+     */
+    void PullLanguagesInfo(const smart_objects::SmartObject& app_data,
+                           smart_objects::SmartObject& ttsName,
+                           smart_objects::SmartObject& vrSynonym);
+
     ApplicationManagerImpl();
 
     /**

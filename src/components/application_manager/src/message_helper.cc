@@ -1205,14 +1205,18 @@ bool MessageHelper::CreateHMIApplicationStruct(ApplicationConstSharedPtr app,
 
   if (app->IsRegistered()) {
     output[strings::hmi_display_language_desired] = app->ui_language();
-  }
-
-  if (app->IsRegistered()) {
     output[strings::is_media_application] = app->is_media_application();
   }
 
   if (!app->IsRegistered()) {
     output[strings::greyOut] = app->is_greyed_out();
+    if (!app->tts_name()->empty()) {
+      output[json::ttsName][strings::text] = *(app->tts_name());
+      output[json::ttsName][strings::speech_capabilities] = hmi_apis::Common_SpeechCapabilities::SC_TEXT;
+    }
+    if (!app->vr_synonyms()->empty()) {
+      output[json::vrSynonyms] = *(app->vr_synonyms());
+    }
   }
 
   if (ngn_media_screen_name) {
