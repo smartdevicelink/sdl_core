@@ -36,9 +36,12 @@
 #include <queue>
 #include <map>
 #include <list>
+#include <vector>
+#include <utility>
 #include <algorithm>
 
 #include "utils/timer_thread.h"
+#include "utils/rwlock.h"
 
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_listener.h"
@@ -52,12 +55,17 @@
 
 namespace transport_manager {
 
+typedef threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> >
+  RawMessageLoopThread;
+typedef threads::MessageLoopThread<std::queue<TransportAdapterEvent> >
+  TransportAdapterEventLoopThread;
+
 /**
  * @brief Implementation of transport manager.s
  */
 class TransportManagerImpl : public TransportManager,
-                             public threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> >::Handler,
-                             public threads::MessageLoopThread<std::queue<TransportAdapterEvent> >::Handler {
+                             public RawMessageLoopThread::Handler,
+                             public TransportAdapterEventLoopThread::Handler {
  public:
   struct Connection {
     ConnectionUID id;
@@ -87,7 +95,6 @@ class TransportManagerImpl : public TransportManager,
     void DisconnectFailedRoutine();
   };
  public:
-
   /**
    * @brief Destructor.
    **/
@@ -226,7 +233,6 @@ class TransportManagerImpl : public TransportManager,
   TransportManagerImpl();
 
  protected:
-
   template <class Proc, class... Args>
   void RaiseEvent(Proc proc, Args... args) {
     for (TransportManagerListenerList::iterator it =
@@ -312,14 +318,15 @@ class TransportManagerImpl : public TransportManager,
 
   explicit TransportManagerImpl(const TransportManagerImpl&);
   int connection_id_counter_;
+  sync_primitives::RWLock connections_lock_;
   std::vector<ConnectionInternal> connections_;
   std::map<DeviceUID, TransportAdapter*> device_to_adapter_map_;
   std::vector<TransportAdapter*> transport_adapters_;
   /** For keep listeners which were add TMImpl */
   std::map<TransportAdapter*, TransportAdapterListenerImpl*>
       transport_adapter_listeners_;
-  threads::MessageLoopThread<std::queue<protocol_handler::RawMessagePtr> > message_queue_;
-  threads::MessageLoopThread<std::queue<TransportAdapterEvent> > event_queue_;
+  RawMessageLoopThread message_queue_;
+  TransportAdapterEventLoopThread event_queue_;
 
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
   DeviceInfoList;
@@ -339,7 +346,7 @@ class TransportManagerImpl : public TransportManager,
   bool GetFrameSize(unsigned char* data, unsigned int data_size,
                     unsigned int& frame_size);
   bool GetFrame(std::map<ConnectionUID,
-                         std::pair<unsigned int, unsigned char*> >& container,
+                std::pair<unsigned int, unsigned char*> >& container,
                 ConnectionUID id, unsigned int frame_size,
                 unsigned char** frame);
 
@@ -348,9 +355,6 @@ class TransportManagerImpl : public TransportManager,
   void TerminateAllAdapters();
   int InitAllAdapters();
   static Connection convert(const ConnectionInternal& p);
-};
-// class ;
-
+};  // class TransportManagerImpl
 }  // namespace transport_manager
-
-#endif
+#endif  // SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_TRANSPORT_MANAGER_IMPL_H_
