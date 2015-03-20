@@ -230,6 +230,7 @@ int TransportManagerImpl::AddEventListener(TransportManagerListener* listener) {
 
 void TransportManagerImpl::DisconnectAllDevices() {
   LOG4CXX_AUTO_TRACE(logger_);
+  sync_primitives::AutoReadLock lock(device_list_lock_);
   for (DeviceInfoList::iterator i = device_list_.begin();
       i != device_list_.end(); ++i) {
     DeviceInfo& device = i->second;
@@ -470,6 +471,9 @@ int TransportManagerImpl::Visibility(const bool& on_off) const {
 void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
   LOG4CXX_TRACE(logger_, "enter. TransportAdapter: " << ta);
   std::set<DeviceInfo> old_devices;
+  std::set<DeviceInfo> new_devices;
+  {
+  sync_primitives::AutoWriteLock lock(device_list_lock_);
   for (DeviceInfoList::iterator it = device_list_.begin();
        it != device_list_.end();) {
     if (it->first == ta) {
@@ -480,7 +484,6 @@ void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
     }
   }
 
-  std::set<DeviceInfo> new_devices;
   const DeviceList dev_list = ta->GetDeviceList();
   for (DeviceList::const_iterator it = dev_list.begin();
        it != dev_list.end(); ++it) {
@@ -488,6 +491,7 @@ void TransportManagerImpl::UpdateDeviceList(TransportAdapter* ta) {
     DeviceInfo info(device_handle, *it, ta->DeviceName(*it), ta->GetConnectionType());
     device_list_.push_back(std::make_pair(ta, info));
     new_devices.insert(info);
+  }
   }
 
   std::set<DeviceInfo> added_devices;
@@ -589,10 +593,12 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
   }
   UpdateDeviceList(ta);
   std::vector<DeviceInfo> device_infos;
+  device_list_lock_.AcquireForReading();
   for (DeviceInfoList::const_iterator it = device_list_.begin();
        it != device_list_.end(); ++it) {
     device_infos.push_back(it->second);
   }
+  device_list_lock_.Release();
   RaiseEvent(&TransportManagerListener::OnDeviceListUpdated, device_infos);
   LOG4CXX_TRACE(logger_, "exit");
 }

@@ -338,6 +338,7 @@ class TransportManagerImpl : public TransportManager,
 
   typedef std::vector<std::pair<const TransportAdapter*, DeviceInfo> >
   DeviceInfoList;
+  sync_primitives::RWLock device_list_lock_;
   DeviceInfoList device_list_;
 
   void AddConnection(const ConnectionInternal& c);
