@@ -288,6 +288,8 @@ class TransportManagerImpl : public TransportManager,
     }
 
     DeviceHandle UidToHandle(const DeviceUID& dev_uid, bool& is_new) {
+      {
+      sync_primitives::AutoReadLock lock(conversion_table_lock);
       ConversionTable::iterator it = std::find(
           conversion_table_.begin(), conversion_table_.end(), dev_uid);
       if (it != conversion_table_.end()) {
@@ -295,12 +297,15 @@ class TransportManagerImpl : public TransportManager,
         return std::distance(conversion_table_.begin(), it) +
                1;  // handle begin since 1 (one)
       }
+      }
       is_new = true;
+      sync_primitives::AutoWriteLock lock(conversion_table_lock);
       conversion_table_.push_back(dev_uid);
       return conversion_table_.size();  // handle begin since 1 (one)
     }
 
     DeviceUID HandleToUid(DeviceHandle handle) {
+      sync_primitives::AutoReadLock lock(conversion_table_lock);
       if (handle == 0 || handle > conversion_table_.size()) {
         return DeviceUID();
       }
@@ -308,6 +313,7 @@ class TransportManagerImpl : public TransportManager,
     }
 
     ConversionTable conversion_table_;
+    sync_primitives::RWLock conversion_table_lock;
   };
 
   /**
