@@ -111,12 +111,14 @@ int TransportManagerImpl::ConnectDevice(const DeviceHandle& device_handle) {
   DeviceUID device_id = converter_.HandleToUid(device_handle);
   LOG4CXX_DEBUG(logger_, "Convert handle to id " << device_id);
 
-  transport_adapter::TransportAdapter* ta = device_to_adapter_map_[device_id];
-  if (NULL == ta) {
+  sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
+  DeviceToAdapterMap::iterator it  = device_to_adapter_map_.find(device_id);
+  if (it == device_to_adapter_map_.end()) {
     LOG4CXX_ERROR(logger_, "No device adapter found by id " << device_id);
     LOG4CXX_TRACE(logger_, "exit with E_INVALID_HANDLE. Condition: NULL == ta");
     return E_INVALID_HANDLE;
   }
+  transport_adapter::TransportAdapter* ta = it->second;
 
   TransportAdapter::Error ta_error = ta->ConnectDevice(device_id);
   int err = (TransportAdapter::OK == ta_error) ? E_SUCCESS : E_INTERNAL_ERROR;
@@ -135,12 +137,14 @@ int TransportManagerImpl::DisconnectDevice(const DeviceHandle& device_handle) {
   DeviceUID device_id = converter_.HandleToUid(device_handle);
   LOG4CXX_DEBUG(logger_, "Convert handle to id" << device_id);
 
-  transport_adapter::TransportAdapter* ta = device_to_adapter_map_[device_id];
-  if (NULL == ta) {
+  sync_primitives::AutoReadLock lock(device_to_adapter_map_lock_);
+  DeviceToAdapterMap::iterator it  = device_to_adapter_map_.find(device_id);
+  if (it == device_to_adapter_map_.end()) {
     LOG4CXX_WARN(logger_, "No device adapter found by id " << device_id);
     LOG4CXX_TRACE(logger_, "exit with E_INVALID_HANDLE. Condition: NULL == ta");
     return E_INVALID_HANDLE;
   }
+  transport_adapter::TransportAdapter* ta = it->second;
   ta->DisconnectDevice(device_id);
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
@@ -329,6 +333,7 @@ int TransportManagerImpl::RemoveDevice(const DeviceHandle& device_handle) {
                   "exit with E_TM_IS_NOT_INITIALIZED. Condition: false == this->is_initialized_");
     return E_TM_IS_NOT_INITIALIZED;
   }
+  sync_primitives::AutoWriteLock lock(device_to_adapter_map_lock_);
   device_to_adapter_map_.erase(device_id);
   LOG4CXX_TRACE(logger_, "exit with E_SUCCESS");
   return E_SUCCESS;
@@ -575,7 +580,9 @@ void TransportManagerImpl::OnDeviceListUpdated(TransportAdapter* ta) {
   LOG4CXX_DEBUG(logger_, "DEVICE_LIST_UPDATED " << device_list.size());
   for (DeviceList::const_iterator it = device_list.begin();
        it != device_list.end(); ++it) {
+    device_to_adapter_map_lock_.AcquireForWriting();
     device_to_adapter_map_.insert(std::make_pair(*it, ta));
+    device_to_adapter_map_lock_.Release();
     DeviceHandle device_handle = converter_.UidToHandle(*it);
     DeviceInfo info(device_handle, *it, ta->DeviceName(*it), ta->GetConnectionType());
     RaiseEvent(&TransportManagerListener::OnDeviceFound, info);

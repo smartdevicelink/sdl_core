@@ -326,7 +326,9 @@ class TransportManagerImpl : public TransportManager,
   int connection_id_counter_;
   sync_primitives::RWLock connections_lock_;
   std::vector<ConnectionInternal> connections_;
-  std::map<DeviceUID, TransportAdapter*> device_to_adapter_map_;
+  sync_primitives::RWLock device_to_adapter_map_lock_;
+  typedef std::map<DeviceUID, TransportAdapter*> DeviceToAdapterMap;
+  DeviceToAdapterMap device_to_adapter_map_;
   std::vector<TransportAdapter*> transport_adapters_;
   /** For keep listeners which were add TMImpl */
   std::map<TransportAdapter*, TransportAdapterListenerImpl*>
