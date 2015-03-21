@@ -490,8 +490,7 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   using namespace mobile_api;
   LOG4CXX_AUTO_TRACE(logger_);
   DCHECK_OR_RETURN(app, false);
-  // remove from resumption if app was activated by user
-  resume_controller().OnAppActivated(app);
+
   HMILevel::eType hmi_level = HMILevel::HMI_FULL;
   AudioStreamingState::eType audio_state;
   app->IsAudioApplication() ? audio_state = AudioStreamingState::AUDIBLE :
@@ -770,17 +769,6 @@ void application_manager::ApplicationManagerImpl::MarkAppsGreyOut(
       (*it)->set_greyed_out(is_greyed_out);
     }
   }
-}
-
-void ApplicationManagerImpl::set_state(StateController::StateEventID state_id) {
-  state_ctrl_.ProcessStateEvent(state_id);
-}
-
-void ApplicationManagerImpl::set_state(
-    ApplicationSharedPtr app,
-    mobile_apis::HMILevel::eType hmi_level,
-    mobile_apis::AudioStreamingState::eType audio_state) {
-  state_ctrl_.SetRegularState(app, hmi_level, audio_state);
 }
 
 void ApplicationManagerImpl::OnErrorSending(
@@ -2770,21 +2758,6 @@ void ApplicationManagerImpl::RemoveAppFromTTSGlobalPropertiesList(
     }
   }
   tts_global_properties_app_list_lock_.Release();
-}
-
-void ApplicationManagerImpl::ChangeAppsHMILevel(uint32_t app_id,
-                                                mobile_apis::HMILevel::eType level) {
-  LOG4CXX_AUTO_TRACE(logger_);
-  LOG4CXX_DEBUG(logger_, "AppID to change: " << app_id << " -> "
-                << level);
-  ApplicationSharedPtr app = application(app_id);
-  if (!app) {
-    LOG4CXX_DEBUG(logger_, "There is no app with id: " << app_id);
-    return;
-  }
-  HmiStatePtr new_state( new HmiState(*(app->RegularHmiState())));
-  new_state->set_hmi_level(level);
-  //state_ctrl_.SetRegularState(app, new_state);
 }
 
 mobile_apis::AppHMIType::eType ApplicationManagerImpl::StringToAppHMIType(std::string str) {

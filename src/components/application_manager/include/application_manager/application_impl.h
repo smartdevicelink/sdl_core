@@ -103,6 +103,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool is_media_application() const;
   virtual bool is_foreground() const;
   virtual void set_foreground(bool is_foreground);
+  virtual const mobile_api::HMILevel::eType hmi_level() const;
   const uint32_t put_file_in_none_count() const;
   const uint32_t delete_file_in_none_count() const;
   const uint32_t list_files_in_none_count() const;

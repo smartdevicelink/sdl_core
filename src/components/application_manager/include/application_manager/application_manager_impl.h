@@ -496,27 +496,6 @@ class ApplicationManagerImpl : public ApplicationManager,
       state_ctrl_.SetRegularState(app, system_context);
     }
 
-
-#ifdef CUSTOMER_PASA
-    /**
-     * @brief Retrieves value of is_state_suspended_
-     *
-     * @return Returns TRUE if SDL has received OnExitAllApplication notification with reason "SUSPEND"
-     * otherwise returns FALSE
-     */
-    inline bool state_suspended() const;
-
-    /**
-     * @brief Sets value of is_state_suspended_
-     *
-     * @param contains TRUE if method is called when SDL has received
-     * OnExitAllApplication notification with reason "SUSPEND"
-     * contains FALSE if method is called when SDL has received
-     * OnAwakeSDL notification.
-     */
-    void set_state_suspended(const bool flag_suspended);
-#endif // CUSTOMER_PASA
-
     /**
      * @brief Notification from PolicyHandler about PTU.
      * Compares AppHMIType between saved in app and received from PTU. If they are different method sends:
@@ -1355,15 +1334,6 @@ class ApplicationManagerImpl : public ApplicationManager,
     uint32_t navi_app_to_stop_;
     
     StateController state_ctrl_;
-
-#ifdef CUSTOMER_PASA
-    /**
-     * @brief Contains TRUE if SDL has received onExitAllApplication notification with
-     * reason "SUSPENDED" otherwise contains FALSE.
-     */
-    bool is_state_suspended_;
-#endif // CUSTOMER_PASA
-
 
 #ifdef TIME_TESTER
     AMMetricObserver* metric_observer_;
