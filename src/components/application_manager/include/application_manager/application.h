@@ -402,6 +402,8 @@ class Application : public virtual InitialApplicationData,
     virtual void ChangeSupportingAppHMIType() = 0;
     virtual bool is_navi() const = 0;
     virtual void set_is_navi(bool allow) = 0;
+    virtual void StartVideoStartStreamRetryTimer() = 0;
+    virtual void StartAudioStartStreamRetryTimer() = 0;
     virtual bool hmi_supports_navi_video_streaming() const = 0;
     virtual void set_hmi_supports_navi_video_streaming(bool supports) = 0;
     virtual bool hmi_supports_navi_audio_streaming() const = 0;
@@ -411,7 +413,6 @@ class Application : public virtual InitialApplicationData,
     void set_streaming_allowed(bool can_stream) { can_stream_ = can_stream;}
     bool streaming() const {return streaming_;}
     void set_streaming(bool can_stream) { streaming_ = can_stream;}
-
 
     virtual bool is_voice_communication_supported() const = 0;
     virtual void set_voice_communication_supported(
@@ -668,16 +669,6 @@ class Application : public virtual InitialApplicationData,
      * otherwise - false
      */
     void set_greyed_out(bool is_greyed_out) {is_greyed_out_ = is_greyed_out;}
-
-  protected:
-
-    // interfaces for NAVI retry sequence
-    virtual bool video_stream_retry_active() const = 0;
-    virtual void set_video_stream_retry_active(bool active) = 0;
-    virtual bool audio_stream_retry_active() const = 0;
-    virtual void set_audio_stream_retry_active(bool active) = 0;
-    virtual void OnVideoStreamRetry() = 0;
-    virtual void OnAudioStreamRetry() = 0;
 
   protected:
 

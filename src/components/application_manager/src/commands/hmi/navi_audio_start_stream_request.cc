@@ -31,6 +31,8 @@
  */
 
 #include "application_manager/commands/hmi/navi_audio_start_stream_request.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
@@ -47,11 +49,19 @@ AudioStartStreamRequest::~AudioStartStreamRequest() {
 void AudioStartStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->active_application();
+
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_, "AudioStartStreamRequest no active app!");
+    return;
+  }
+
   SendRequest();
+  app->StartAudioStartStreamRetryTimer();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-
 

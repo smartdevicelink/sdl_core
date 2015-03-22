@@ -98,8 +98,6 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       usage_report_(mobile_app_id, statistics_manager),
       protocol_version_(ProtocolVersion::kV3),
       is_voice_communication_application_(false),
-      is_video_stream_retry_active_(false),
-      is_audio_stream_retry_active_(false),
       video_stream_retry_number_(0),
       audio_stream_retry_number_(0) {
 
@@ -364,117 +362,99 @@ bool ApplicationImpl::tts_properties_in_full() {
   return tts_properties_in_full_;
 }
 
-void ApplicationImpl::set_hmi_supports_navi_video_streaming(bool supports) {
-  {
-    sync_primitives::AutoLock auto_lock(hmi_supports_navi_video_streaming_lock_);
-    hmi_supports_navi_video_streaming_ = supports;
+void ApplicationImpl::StartVideoStartStreamRetryTimer() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (video_stream_retry_timer_ && video_stream_retry_timer_->isRunning()) {
+    LOG4CXX_INFO(logger_, "Video start stream retry timer is already running");
+    return;
   }
 
-  if ((!supports) && (!video_stream_retry_active())) {
-    std::pair<uint32_t, int32_t> stream_retry =
-        profile::Profile::instance()->start_stream_retry_amount();
-    set_video_stream_retry_active(true);
-    video_stream_retry_number_ = stream_retry.first;
-    if (!video_stream_retry_timer_.valid()){
-      video_stream_retry_timer_ =
-          utils::SharedPtr<timer::TimerThread<ApplicationImpl>>(
-              new timer::TimerThread<ApplicationImpl>(
-                  "VideoStreamRetry", this, &ApplicationImpl::OnVideoStreamRetry, true));
-    }
-    // start separate pthread for timer without delays
-    video_stream_retry_timer_->start(0);
+  std::pair<uint32_t, int32_t> stream_retry =
+      profile::Profile::instance()->start_stream_retry_amount();
+  video_stream_retry_number_ = stream_retry.first;
+  if (!video_stream_retry_timer_) {
+    video_stream_retry_timer_ =
+        utils::SharedPtr<timer::TimerThread<ApplicationImpl>>(
+            new timer::TimerThread<ApplicationImpl>(
+                "VideoStartStreamRetry", this,
+                &ApplicationImpl::OnVideoStartStreamRetry, true));
+  }
+  video_stream_retry_timer_->start(stream_retry.second);
+  LOG4CXX_INFO(logger_, "Video start stream retry timer started");
+}
+
+void ApplicationImpl::StartAudioStartStreamRetryTimer() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (audio_stream_retry_timer_ && audio_stream_retry_timer_->isRunning()) {
+    LOG4CXX_INFO(logger_, "Audio start stream retry timer is already running");
+    return;
+  }
+
+  std::pair<uint32_t, int32_t> stream_retry =
+      profile::Profile::instance()->start_stream_retry_amount();
+  audio_stream_retry_number_ = stream_retry.first;
+  if (!audio_stream_retry_timer_) {
+    audio_stream_retry_timer_ =
+        utils::SharedPtr<timer::TimerThread<ApplicationImpl>>(
+            new timer::TimerThread<ApplicationImpl>(
+                "AudioStartStreamRetry", this,
+                &ApplicationImpl::OnAudioStartStreamRetry, true));
+  }
+  audio_stream_retry_timer_->start(stream_retry.second);
+  LOG4CXX_INFO(logger_, "Audio start stream retry timer started");
+}
+
+void ApplicationImpl::set_hmi_supports_navi_video_streaming(bool supports) {
+  hmi_supports_navi_video_streaming_ = supports;
+
+  if (supports && video_stream_retry_timer_ &&
+      video_stream_retry_timer_->isRunning()) {
+    video_stream_retry_timer_->stop();
   }
 }
 
 bool ApplicationImpl::hmi_supports_navi_video_streaming() const {
-  sync_primitives::AutoLock auto_lock(hmi_supports_navi_video_streaming_lock_);
   return hmi_supports_navi_video_streaming_;
 }
 
 void ApplicationImpl::set_hmi_supports_navi_audio_streaming(bool supports) {
-  {
-    sync_primitives::AutoLock auto_lock(hmi_supports_navi_audio_streaming_lock_);
-    hmi_supports_navi_audio_streaming_ = supports;
-  }
+  hmi_supports_navi_audio_streaming_ = supports;
 
-  if ((!supports) && (!audio_stream_retry_active())) {
-    std::pair<uint32_t, int32_t> stream_retry =
-        profile::Profile::instance()->start_stream_retry_amount();
-    set_audio_stream_retry_active(true);
-    audio_stream_retry_number_ = stream_retry.first;
-    if (!audio_stream_retry_timer_.valid()){
-      audio_stream_retry_timer_ =
-          utils::SharedPtr<timer::TimerThread<ApplicationImpl>>(
-              new timer::TimerThread<ApplicationImpl>(
-                  "AudioStreamRetry", this, &ApplicationImpl::OnAudioStreamRetry, true));
-    }
-    // start separate pthread for timer without delays
-    audio_stream_retry_timer_->start(0);
+  if (supports && audio_stream_retry_timer_ &&
+      audio_stream_retry_timer_->isRunning()) {
+    audio_stream_retry_timer_->stop();
   }
 }
 
 bool ApplicationImpl::hmi_supports_navi_audio_streaming() const {
-  sync_primitives::AutoLock auto_lock(hmi_supports_navi_audio_streaming_lock_);
   return hmi_supports_navi_audio_streaming_;
 }
 
-bool ApplicationImpl::video_stream_retry_active() const {
-  sync_primitives::AutoLock auto_lock(is_video_stream_retry_active_lock_);
-  return is_video_stream_retry_active_;
-}
-
-void ApplicationImpl::set_video_stream_retry_active(bool active) {
-  sync_primitives::AutoLock auto_lock(is_video_stream_retry_active_lock_);
-  is_video_stream_retry_active_ = active;
-}
-
-bool ApplicationImpl::audio_stream_retry_active() const {
-  sync_primitives::AutoLock auto_lock(is_audio_stream_retry_active_lock_);
-  return is_audio_stream_retry_active_;
-}
-
-void ApplicationImpl::set_audio_stream_retry_active(bool active) {
-  sync_primitives::AutoLock auto_lock(is_audio_stream_retry_active_lock_);
-  is_audio_stream_retry_active_ = active;
-}
-
-void ApplicationImpl::OnVideoStreamRetry() {
+void ApplicationImpl::OnVideoStartStreamRetry() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!hmi_supports_navi_video_streaming() && video_stream_retry_number_) {
-    LOG4CXX_INFO(logger_, "Send video stream retry "
+  if (video_stream_retry_number_) {
+    LOG4CXX_INFO(logger_, "Send video start stream retry "
                  << video_stream_retry_number_);
 
     application_manager::MessageHelper::SendNaviStartStream(app_id());
     --video_stream_retry_number_;
-
-    std::pair<uint32_t, int32_t> stream_retry =
-        profile::Profile::instance()->start_stream_retry_amount();
-    int32_t time_out = stream_retry.second;
-    video_stream_retry_timer_->updateTimeOut(time_out);
   } else {
-    LOG4CXX_INFO(logger_, "Stop video streaming retry");
     video_stream_retry_timer_->suspend();
-    set_video_stream_retry_active(false);
+    LOG4CXX_INFO(logger_, "Video start stream retry timer stoped");
   }
 }
 
-void ApplicationImpl::OnAudioStreamRetry() {
+void ApplicationImpl::OnAudioStartStreamRetry() {
   LOG4CXX_AUTO_TRACE(logger_);
-  if (!hmi_supports_navi_audio_streaming() && audio_stream_retry_number_) {
-    LOG4CXX_INFO(logger_, "Send audio streaming retry "
+  if (audio_stream_retry_number_) {
+    LOG4CXX_INFO(logger_, "Send audio start stream retry "
                  << audio_stream_retry_number_);
 
     application_manager::MessageHelper::SendAudioStartStream(app_id());
     --audio_stream_retry_number_;
-
-    std::pair<uint32_t, int32_t> stream_retry =
-        profile::Profile::instance()->start_stream_retry_amount();
-    int32_t time_out = stream_retry.second;
-    audio_stream_retry_timer_->updateTimeOut(time_out);
   } else {
-    LOG4CXX_INFO(logger_, "Stop audio streaming retry");
     audio_stream_retry_timer_->suspend();
-    set_audio_stream_retry_active(false);
+    LOG4CXX_INFO(logger_, "Audio start stream retry timer stoped");
   }
 }
 

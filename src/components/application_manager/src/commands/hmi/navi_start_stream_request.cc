@@ -31,6 +31,8 @@
  */
 
 #include "application_manager/commands/hmi/navi_start_stream_request.h"
+#include "application_manager/application_manager_impl.h"
+#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
@@ -47,7 +49,16 @@ NaviStartStreamRequest::~NaviStartStreamRequest() {
 void NaviStartStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->active_application();
+
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_, "NaviStartStreamRequest no active app!");
+    return;
+  }
+
   SendRequest();
+  app->StartVideoStartStreamRetryTimer();
 }
 
 }  // namespace commands

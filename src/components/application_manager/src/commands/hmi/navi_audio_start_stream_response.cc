@@ -61,9 +61,6 @@ void AudioStartStreamResponse::Run() {
   if (hmi_apis::Common_Result::SUCCESS == code) {
     LOG4CXX_INFO(logger_, "AudioStartStreamResponse SUCCESS");
     app->set_hmi_supports_navi_audio_streaming(true);
-  } else {
-    LOG4CXX_INFO(logger_, "AudioStartStreamResponse NOT SUCCESS");
-    app->set_hmi_supports_navi_audio_streaming(false);
   }
 }
 

@@ -2494,11 +2494,13 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
       LOG4CXX_DEBUG(logger_, "Going to end video service");
       connection_handler_->SendEndService(navi_app_to_stop_, kMobileNav);
       service_status_[kMobileNav] = std::make_pair(send_end_service, ack_received);
+      app->set_hmi_supports_navi_video_streaming(false);
     }
     if (app->hmi_supports_navi_audio_streaming()) {
       LOG4CXX_DEBUG(logger_, "Going to end audio service");
       connection_handler_->SendEndService(navi_app_to_stop_, kAudio);
       service_status_[kAudio] = std::make_pair(send_end_service, ack_received);
+      app->set_hmi_supports_navi_audio_streaming(false);
     }
   }
   // this timer will check if appropriate acks from mobile were received.

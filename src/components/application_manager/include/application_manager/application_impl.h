@@ -86,6 +86,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_hmi_supports_navi_video_streaming(bool supports);
   bool hmi_supports_navi_audio_streaming() const;
   void set_hmi_supports_navi_audio_streaming(bool supports);
+  void StartVideoStartStreamRetryTimer();
+  void StartAudioStartStreamRetryTimer();
 
   virtual bool is_voice_communication_supported() const;
   virtual void set_voice_communication_supported(
@@ -234,12 +236,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
  private:
 
   // interfaces for NAVI retry sequence
-  bool video_stream_retry_active() const;
-  void set_video_stream_retry_active(bool active);
-  bool audio_stream_retry_active() const;
-  void set_audio_stream_retry_active(bool active);
-  void OnVideoStreamRetry();
-  void OnAudioStreamRetry();
+  void OnVideoStartStreamRetry();
+  void OnAudioStartStreamRetry();
 
   std::string                              hash_val_;
   uint32_t                                 grammar_id_;
@@ -253,9 +251,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool                                     is_media_;
   bool                                     is_navi_;
   bool                                     hmi_supports_navi_video_streaming_;
-  mutable sync_primitives::Lock            hmi_supports_navi_video_streaming_lock_;
   bool                                     hmi_supports_navi_audio_streaming_;
-  mutable sync_primitives::Lock            hmi_supports_navi_audio_streaming_lock_;
   bool                                     is_app_allowed_;
   bool                                     has_been_activated_;
   bool                                     tts_properties_in_none_;
@@ -274,15 +270,10 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   ProtocolVersion                          protocol_version_;
   bool                                     is_voice_communication_application_;
   // NAVI retry stream
-  volatile bool                            is_video_stream_retry_active_;
-  mutable sync_primitives::Lock            is_video_stream_retry_active_lock_;
-  volatile bool                            is_audio_stream_retry_active_;
-  mutable sync_primitives::Lock            is_audio_stream_retry_active_lock_;
   uint32_t                                 video_stream_retry_number_;
   uint32_t                                 audio_stream_retry_number_;
   utils::SharedPtr<timer::TimerThread<ApplicationImpl>> video_stream_retry_timer_;
   utils::SharedPtr<timer::TimerThread<ApplicationImpl>> audio_stream_retry_timer_;
-
 
   /**
    * @brief Defines number per time in seconds limits
