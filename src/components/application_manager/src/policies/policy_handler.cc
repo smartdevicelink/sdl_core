@@ -58,6 +58,41 @@ namespace policy {
 
 using namespace application_manager;
 
+namespace {
+using namespace mobile_apis;
+typedef std::map<RequestType::eType, std::string> RequestTypeMap;
+RequestTypeMap TypeToString = {
+  {RequestType::INVALID_ENUM, "INVALID_ENUM"},
+  {RequestType::HTTP, "HTTP"},
+  {RequestType::FILE_RESUME, "FILE_RESUME"},
+  {RequestType::AUTH_REQUEST, "AUTH_REQUEST"},
+  {RequestType::AUTH_CHALLENGE, "AUTH_CHALLENGE"},
+  {RequestType::AUTH_ACK, "AUTH_ACK"},
+  {RequestType::PROPRIETARY, "PROPRIETARY"},
+  {RequestType::QUERY_APPS, "QUERY_APPS"},
+  {RequestType::LAUNCH_APP, "LAUNCH_APP"},
+  {RequestType::LOCK_SCREEN_ICON_URL, "LOCK_SCREEN_ICON_URL"},
+  {RequestType::TRAFFIC_MESSAGE_CHANNEL, "TRAFFIC_MESSAGE_CHANNEL"},
+  {RequestType::DRIVER_PROFILE, "DRIVER_PROFILE"},
+  {RequestType::VOICE_SEARCH, "VOICE_SEARCH"},
+  {RequestType::NAVIGATION, "NAVIGATION"},
+  {RequestType::PHONE,"PHONE"},
+  {RequestType::CLIMATE, "CLIMATE"},
+  {RequestType::SETTINGS, "SETTINGS"},
+  {RequestType::VEHICLE_DIAGNOSTICS, "VEHICLE_DIAGNOSTICS"},
+  {RequestType::EMERGENCY, "EMERGENCY"},
+  {RequestType::MEDIA, "MEDIA"},
+  {RequestType::FOTA, "FOTA"}
+};
+
+const std::string RequestTypeToString(RequestType::eType type) {
+  RequestTypeMap::const_iterator it = TypeToString.find(type);
+  if (TypeToString.end() != it) {
+    return (*it).second;
+  }
+  return "";
+}
+}
 #define POLICY_LIB_CHECK(return_value) {\
   sync_primitives::AutoReadLock lock(policy_manager_lock_); \
   if (!policy_manager_) {\
@@ -702,6 +737,11 @@ void PolicyHandler::OnPendingPermissionChange(
 
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
   }
+  if (permissions.requestTypeChanged) {
+    MessageHelper::
+        SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
+    policy_manager_->RemovePendingPermissionChanges(policy_app_id);
+  }
 }
 
 bool PolicyHandler::SendMessageToSDK(const BinaryMessage& pt_string,
@@ -1253,6 +1293,38 @@ void policy::PolicyHandler::OnAppsSearchStarted() {
 void policy::PolicyHandler::OnAppsSearchCompleted() {
   POLICY_LIB_CHECK();
   policy_manager_->OnAppsSearchCompleted();
+}
+
+bool PolicyHandler::IsRequestTypeAllowed(
+    const std::string& policy_app_id,
+    mobile_apis::RequestType::eType type) const {
+  POLICY_LIB_CHECK(false);
+  using namespace mobile_apis;
+
+
+  std::string stringified_type = RequestTypeToString(type);
+  if (stringified_type.empty()) {
+    LOG4CXX_ERROR(logger_, "Unknown request type.");
+    return false;
+  }
+
+  std::vector<std::string> request_types =
+      policy_manager_->GetAppRequestTypes(policy_app_id);
+
+  // If no request types are assigned to app - any is allowed
+  if (request_types.empty()) {
+    return true;
+  }
+
+  std::vector<std::string>::const_iterator it =
+      std::find(request_types.begin(), request_types.end(), stringified_type);
+  return request_types.end() != it;
+}
+
+const std::vector<std::string> PolicyHandler::GetAppRequestTypes(
+    const std::string& policy_app_id) const {
+  POLICY_LIB_CHECK(std::vector<std::string>());
+  return policy_manager_->GetAppRequestTypes(policy_app_id);
 }
 
 void PolicyHandler::Increment(usage_statistics::GlobalCounterId type) {

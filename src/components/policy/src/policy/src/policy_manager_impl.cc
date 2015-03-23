@@ -209,6 +209,8 @@ void PolicyManagerImpl::RequestPTUpdate() {
   Json::FastWriter writer;
   std::string message_string = writer.write(value);
 
+  LOG4CXX_DEBUG(logger_, "Snapshot contents is : " << message_string );
+
   BinaryMessage update(message_string.begin(), message_string.end());
 
 
@@ -263,6 +265,12 @@ void PolicyManagerImpl::OnAppsSearchCompleted() {
   }
 }
 
+const std::vector<std::string> PolicyManagerImpl::GetAppRequestTypes(
+    const std::string policy_app_id) const {
+  std::vector<std::string> request_types;
+  cache_->GetAppRequestTypes(policy_app_id, request_types);
+  return request_types;
+}
 void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
                                          const PTString& hmi_level,
                                           const PTString& rpc,
@@ -760,8 +768,8 @@ AppPermissions PolicyManagerImpl::GetAppPermissionsChanges(
   } else {
     permissions.appPermissionsConsentNeeded = IsConsentNeeded(policy_app_id);
     permissions.appRevoked = IsApplicationRevoked(policy_app_id);
+    GetPriority(permissions.application_id, &permissions.priority);
   }
-  GetPriority(permissions.application_id, &permissions.priority);
   return permissions;
 }
 

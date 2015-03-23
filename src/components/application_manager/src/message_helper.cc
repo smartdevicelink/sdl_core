@@ -328,6 +328,24 @@ void MessageHelper::SendOnAppRegisteredNotificationToHMI(
     message[strings::msg_params][strings::application][strings::app_type] =
       *app_type;
   }
+  if (application_impl.IsRegistered()) {
+    std::vector<std::string> request_types =
+        policy::PolicyHandler::instance()->GetAppRequestTypes(
+            application_impl.mobile_app_id());
+
+    message[strings::msg_params][strings::application][strings::request_type] =
+        smart_objects::SmartObject(smart_objects::SmartType_Array);
+
+    smart_objects::SmartObject& request_array =
+        message[strings::msg_params][strings::application][strings::request_type];
+
+    uint32_t index = 0;
+    std::vector<std::string>::const_iterator it = request_types.begin();
+    for (; request_types.end() != it; ++it) {
+      request_array[index] = *it;
+      ++index;
+    }
+  }
   if (application_impl.vr_synonyms()) {
     message[strings::msg_params][strings::vr_synonyms] = *(application_impl
         .vr_synonyms());
@@ -2051,13 +2069,13 @@ void MessageHelper::FillAppRevokedPermissions(
 
 void MessageHelper::SendOnAppPermissionsChangedNotification(
   uint32_t connection_key, const policy::AppPermissions& permissions) {
-  smart_objects::SmartObjectSPtr notification = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  using namespace smart_objects;
+  SmartObjectSPtr notification = new SmartObject(SmartType_Map);
   if (!notification) {
     return;
   }
 
-  smart_objects::SmartObject& message = *notification;
+  SmartObject& message = *notification;
 
   message[strings::params][strings::function_id] =
     hmi_apis::FunctionID::SDL_OnAppPermissionChanged;
@@ -2087,6 +2105,14 @@ void MessageHelper::SendOnAppPermissionsChangedNotification(
   if (!permissions.priority.empty()) {
     message[strings::msg_params]["priority"] = GetPriorityCode(
           permissions.priority);
+  }
+  if (permissions.requestTypeChanged) {
+    SmartObject request_types_array = SmartObject(SmartType_Array);
+    for (uint16_t index = 0; index < permissions.requestType.size(); ++index) {
+      request_types_array[index] = permissions.requestType[index];
+    }
+    message[strings::msg_params][strings::request_type] =
+        request_types_array;
   }
 
   ApplicationManagerImpl::instance()->ManageHMICommand(notification);

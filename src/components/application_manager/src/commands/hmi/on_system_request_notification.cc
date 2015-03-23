@@ -63,6 +63,7 @@ void OnSystemRequestNotification::Run() {
   const std::string app_id = msg_params[strings::app_id].asString();
   LOG4CXX_DEBUG(logger_, "Received OnSystemRequest for " << app_id );
 
+  ApplicationSharedPtr app;
   if (strings::default_app_id == app_id) {
     PolicyHandler* policy_handler = PolicyHandler::instance();
     uint32_t selected_app_id = policy_handler->GetAppIdForSending();
@@ -72,23 +73,29 @@ void OnSystemRequestNotification::Run() {
       return;
     }
     ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-    ApplicationSharedPtr selected_app = app_mgr->application(selected_app_id);
-    if (!selected_app.valid()) {
-      LOG4CXX_ERROR(logger_, "PolicyHandler selected invalid app_id");
-      return;
-    }
-    params[strings::connection_key] = selected_app_id;
+    app = app_mgr->application(selected_app_id);
   } else {
-    ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->application_by_policy_id(app_id);
-    if (!app.valid()) {
-      LOG4CXX_WARN(logger_, "Application with id " << app_id
-                   << " is not registered.");
-      return;
-    }
-    params[strings::connection_key] = app->app_id();
+    app = ApplicationManagerImpl::instance()->application_by_policy_id(app_id);
   }
 
+  if (!app.valid()) {
+    LOG4CXX_WARN(logger_, "Application with connection key " << app_id <<
+                 "is not registered.");
+    return;
+  }
+
+  const mobile_apis::RequestType::eType request_type =
+      static_cast<mobile_apis::RequestType::eType>(
+          (*message_)[strings::msg_params][strings::request_type].asInt());
+
+  if (!policy::PolicyHandler::instance()->IsRequestTypeAllowed(
+           app->mobile_app_id(), request_type)) {
+      LOG4CXX_WARN(logger_, "Request type "  << request_type
+                   <<" is not allowed by policies");
+    return;
+  }
+
+  params[strings::connection_key] = app->app_id();
   SendNotificationToMobile(message_);
 }
 

@@ -241,6 +241,25 @@ bool CreateFile(const std::string& path);
  */
 uint64_t GetFileModificationTime(const std::string& path);
 
+/**
+  * @brief Copy file from source to destination
+  *
+  * @param src Source file path
+  * @param dst Destination file path
+  * @return if result success return true
+*/
+bool CopyFile(const std::string& src,
+              const std::string& dst);
+
+/**
+  * @brief Move file from source to destination
+  *
+  * @param src Source file path
+  * @param dst Destination file path
+  * @return if result success return true
+*/
+bool MoveFile(const std::string& src,
+              const std::string& dst);
 void remove_directory_content(const std::string& directory_name);
 
 }  // namespace file_system

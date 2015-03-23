@@ -395,6 +395,13 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @brief Handler on applications search completed
      */
     virtual void OnAppsSearchCompleted() = 0;
+    /**
+     * @brief Gets request types for application
+     * @param policy_app_id Unique application id
+     * @return request_types Request types of application
+     */
+    virtual const std::vector<std::string> GetAppRequestTypes(
+      const std::string policy_app_id) const = 0;
 
   protected:
     /**

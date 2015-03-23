@@ -54,11 +54,14 @@ typedef Map< Rpcs, 1, 255 > FunctionalGroupings;
 
 typedef Map< DeviceParams, 0, 255 > DeviceData;
 
+typedef Array< Enum<RequestType>, 0, 255 > RequestTypes;
+
 struct ApplicationParams : CompositeType {
   public:
     Strings groups;
     Optional< Strings > nicknames;
     Optional< AppHMITypes > AppHMIType;
+    Optional< RequestTypes > RequestType;
     Enum<Priority> priority;
     Optional< Integer<uint16_t, 0, 65225> > memory_kb;
     Optional< Integer<uint16_t, 0, 65225> > heart_beat_timeout_ms;

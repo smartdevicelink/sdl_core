@@ -328,6 +328,10 @@ bool CheckAppPolicy::operator()(const AppPoliciesValueType& app_policy) {
   }
 
   PermissionsCheckResult result = CheckPermissionsChanges(app_policy);
+  if (!IsPredefinedApp(app_policy) && IsRequestTypeChanged(app_policy)) {
+    SetPendingPermissions(app_policy, RESULT_REQUEST_TYPE_CHANGED);
+    NotifySystem(app_policy);
+  }
   if (RESULT_NO_CHANGES == result) {
     LOG4CXX_INFO(logger_, "Permissions for application:" << app_id <<
                  " wasn't changed.");
@@ -378,6 +382,11 @@ void policy::CheckAppPolicy::SetPendingPermissions(
     permissions_diff.appRevokedPermissions = GetRevokedGroups(app_policy);
     RemoveRevokedConsents(app_policy, permissions_diff.appRevokedPermissions);
     break;
+  case RESULT_REQUEST_TYPE_CHANGED:
+    permissions_diff.priority.clear();
+    permissions_diff.requestTypeChanged = true;
+    permissions_diff.requestType = pm_->GetAppRequestTypes(app_id);
+    break;
   default:
     return;
   }
@@ -423,6 +432,28 @@ bool CheckAppPolicy::IsConsentRequired(const std::string& app_id,
   bool is_preconsented = false;
 
   return it->second.user_consent_prompt.is_initialized() && !is_preconsented;
+}
+
+bool CheckAppPolicy::IsRequestTypeChanged(
+    const AppPoliciesValueType& app_policy) const {
+  policy::AppPoliciesConstItr it =
+      snapshot_->policy_table.app_policies.find(app_policy.first);
+  if (it == snapshot_->policy_table.app_policies.end()) {
+    if (!app_policy.second.RequestType->empty()) {
+      return true;
+    }
+    return false;
+  }
+  if (it->second.RequestType->size() != app_policy.second.RequestType->size()) {
+    return true;
+  }
+  policy_table::RequestTypes diff;
+  std::set_difference(it->second.RequestType->begin(),
+                      it->second.RequestType->end(),
+                      app_policy.second.RequestType->begin(),
+                      app_policy.second.RequestType->end(),
+                      std::back_inserter(diff));
+  return diff.size();
 }
 
 FillNotificationData::FillNotificationData(Permissions& data,
