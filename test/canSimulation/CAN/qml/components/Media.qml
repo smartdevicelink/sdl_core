@@ -38,14 +38,6 @@ Rectangle {
                 spacing: Style.rowSpacing
 
                 CastomButton {
-                    id: presetButton
-                    width: Style.buttonWidth
-                    text: "OnPresetsChanged"
-                    objectName: text
-                    onClicked: requestButtonClick(this)
-                }
-
-                CastomButton {
                     id: radioDetailsButton
                     width: Style.buttonWidth
                     text: "OnRadioDetails"

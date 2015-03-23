@@ -9,7 +9,7 @@ Rectangle {
     height: Style.componentHeight
     anchors.margins: 10
 
-    property int port: 1234 //Default port for TCP connection
+    property int port: 8092 //Default port for TCP connection
     property string ip: "127.0.0.1" //Default IP adress for TCP connection
     property int wsPort: 2468 //Default port for WS connection
     property string wsIP: "127.0.0.1" //Default IP adress for WS connection

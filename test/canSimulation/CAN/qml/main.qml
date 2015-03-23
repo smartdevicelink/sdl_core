@@ -69,7 +69,7 @@ ApplicationWindow {
      * and send response back to TCP client
      * @param message - Text message came from TCP
      */
-    function incoming(message) {
+    function incomingTCP(message) {
 
         var result = JSON.parse(message);
 

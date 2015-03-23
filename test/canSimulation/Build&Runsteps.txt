@@ -15,7 +15,7 @@ This instruction contains the information on how to build and run CAN simulation
 2) Build and run on Linux.
   2.1: Build CAN:
     2.1.1: Make build directory "$mkdir <Project_Build_SimulatorCAN>  && cd <Project_Build_SimulatorCAN>"
-    2.1.2: Configure build "cmake <Project_Root_Src/test/canSimulation/CAN>".
+    2.1.2: Configure build "cmake <Project_Root_Src/test/canSimulation>".
     2.1.3: Run build process "$make"
 
   2.2 Run SDL:
