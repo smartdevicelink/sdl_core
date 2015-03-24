@@ -71,13 +71,19 @@ ApplicationWindow {
      */
     function incomingTCP(message) {
 
-        var result = JSON.parse(message);
+        var result = JSON.parse(message),
+            resp,
+            respJson;
 
-        var resp = RequestHandler.receivedMessageTCP(result);
+        resp = RequestHandler.receivedMessageTCP(result);
 
-        var respJson = JSON.stringify(resp);
+        if (resp !== false) {
 
-        return respJson;
+            respJson = JSON.stringify(resp);
+
+            sendMessageTCP(respJson);
+        }
+
     }
 
     /**
