@@ -30,63 +30,57 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/commands/base_command_notification.h"
-#include "json/json.h"
-#include "can_cooperation/can_module.h"
+#include "can_cooperation/validators/radio_station_validator.h"
 #include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 
-namespace commands {
+namespace validators {
 
-using namespace json_keys;
+using namespace message_params;
+using namespace validation_params;
 
-BaseCommandNotification::BaseCommandNotification(
-    const application_manager::MessagePtr& message)
-  : message_(message) {
-  service_ = CANModule::instance()->service();
+RadioStationValidator::RadioStationValidator() {
+  // name="frequency"
+  frequency_[kType] = ValueType::INT;
+  frequency_[kMinValue] = 87;
+  frequency_[kMaxValue] = 100;
+  frequency_[kArray] = 0;
+  frequency_[kMandatory] = 1;
 
-  Json::Value value;
-  Json::Reader reader;
-  reader.parse(message_->json_message(), value);
-  if (value.isMember(kParams)) {
-    Json::FastWriter writer;
-    message_->set_json_message(writer.write(value[kParams]));
-  } else {
-    message_->set_json_message("");
-  }
+  // name="fraction"
+  fraction_[kType] = ValueType::INT;
+  fraction_[kMinValue] = 0;
+  fraction_[kMaxValue] = 9;
+  fraction_[kArray] = 0;
+  fraction_[kMandatory] = 0;
+
+  // name="availableHDs"
+  available_hds_[kType] = ValueType::INT;
+  available_hds_[kMinValue] = 1;
+  available_hds_[kMaxValue] = 3;
+  available_hds_[kArray] = 0;
+  available_hds_[kMandatory] = 0;
+
+  // name="currentHD"
+  current_hd_[kType] = ValueType::INT;
+  current_hd_[kMinValue] = 1;
+  current_hd_[kMaxValue] = 3;
+  current_hd_[kArray] = 0;
+  current_hd_[kMandatory] = 0;
+
+  validation_scope_map_[kFrequency] = &frequency_;
+  validation_scope_map_[kFraction] =  &fraction_;
+  validation_scope_map_[kAvailableHDs] = &frequency_;
+  validation_scope_map_[kCurrentHD] = &current_hd_;
 }
 
-
-BaseCommandNotification::~BaseCommandNotification() {
+ValidationResult RadioStationValidator::Validate(const Json::Value& json,
+                                                 Json::Value& outgoing_json) {
+  return ValidateSimpleValues(json, outgoing_json);
 }
 
-application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicationWithControl(
-                                        CANAppExtensionPtr& can_app_extension) {
-  const std::set<application_manager::ApplicationSharedPtr> applications =
-        service_->GetApplications();
-
-  std::set<application_manager::ApplicationSharedPtr>::iterator it =
-      applications.begin();
-
-  for (;it != applications.end(); ++it) {
-    if (*it) {
-      application_manager::AppExtensionPtr app_extension =
-          (*it)->QueryInterface(CANModule::instance()->GetModuleID());
-      if (app_extension) {
-        can_app_extension = application_manager::AppExtensionPtr::
-            static_pointer_cast<CANAppExtension>(app_extension);
-        if (can_app_extension->IsControlGiven()) {
-          return (*it);
-        }
-      }
-    }
-  }
-
-  return application_manager::ApplicationSharedPtr();
-}
-
-}  // namespace commands
+}  // namespace valdiators
 
 }  // namespace can_cooperation
 

@@ -30,63 +30,45 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/commands/base_command_notification.h"
-#include "json/json.h"
-#include "can_cooperation/can_module.h"
+#include "can_cooperation/validators/location_validator.h"
+#include "can_cooperation/validators/address_validator.h"
 #include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 
-namespace commands {
+namespace validators {
 
-using namespace json_keys;
+using namespace message_params;
+using namespace validation_params;
 
-BaseCommandNotification::BaseCommandNotification(
-    const application_manager::MessagePtr& message)
-  : message_(message) {
-  service_ = CANModule::instance()->service();
+LocationValidator::LocationValidator() {
+  // name="gpsCoordinates"
+  gps_coordinates_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+  gps_coordinates_[kMinLength] = 0;
+  gps_coordinates_[kMaxLength] = 100;
+  gps_coordinates_[kArray] = 0;
+  gps_coordinates_[kMandatory] = 0;
 
-  Json::Value value;
-  Json::Reader reader;
-  reader.parse(message_->json_message(), value);
-  if (value.isMember(kParams)) {
-    Json::FastWriter writer;
-    message_->set_json_message(writer.write(value[kParams]));
-  } else {
-    message_->set_json_message("");
-  }
+  validation_scope_map_[kGPSCoordinates] = &gps_coordinates_;
 }
 
+ValidationResult LocationValidator::Validate(const Json::Value& json,
+                                             Json::Value& outgoing_json) {
+  ValidationResult result = ValidateSimpleValues(json, outgoing_json);
 
-BaseCommandNotification::~BaseCommandNotification() {
-}
-
-application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicationWithControl(
-                                        CANAppExtensionPtr& can_app_extension) {
-  const std::set<application_manager::ApplicationSharedPtr> applications =
-        service_->GetApplications();
-
-  std::set<application_manager::ApplicationSharedPtr>::iterator it =
-      applications.begin();
-
-  for (;it != applications.end(); ++it) {
-    if (*it) {
-      application_manager::AppExtensionPtr app_extension =
-          (*it)->QueryInterface(CANModule::instance()->GetModuleID());
-      if (app_extension) {
-        can_app_extension = application_manager::AppExtensionPtr::
-            static_pointer_cast<CANAppExtension>(app_extension);
-        if (can_app_extension->IsControlGiven()) {
-          return (*it);
-        }
-      }
-    }
+  if (result != ValidationResult::SUCCESS) {
+    return result;
   }
 
-  return application_manager::ApplicationSharedPtr();
+  if (json.isMember(kAddress)) {
+    result = AddressValidator::instance()->Validate(json[kLocation],
+                                                    outgoing_json[kLocation]);
+  }
+
+  return result;
 }
 
-}  // namespace commands
+}  // namespace valdiators
 
 }  // namespace can_cooperation
 

@@ -30,30 +30,45 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/message_helper.h"
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_WEB_ACTIVITY_VALIDATOR_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_WEB_ACTIVITY_VALIDATOR_H_
+
+#include "can_cooperation/validators/validator.h"
+#include "utils/singleton.h"
 
 namespace can_cooperation {
 
-uint32_t MessageHelper::next_correlation_id_ = 1;
+namespace validators {
 
-uint32_t MessageHelper::GetNextCANCorrelationID() {
-  return next_correlation_id_++;
-}
+/**
+ * @brief WebActivityValidator class
+ */
+class WebActivityValidator : public Validator, public utils::Singleton<WebActivityValidator> {
+ public:
 
-std::string MessageHelper::ValueToString(const Json::Value& value) {
-  Json::FastWriter writer;
+  /**
+   * @brief Validate json with message params
+   *
+   * @param json incoming json
+   * @param outgoing_json outgoing json where is param will be copied after verification
+   *
+   * @return validation result
+   */
+  ValidationResult Validate(const Json::Value& json,
+                            Json::Value& outgoing_json);
 
-  return writer.write(value);
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(WebActivityValidator);
+  FRIEND_BASE_SINGLETON_CLASS(WebActivityValidator);
+  WebActivityValidator();
+  ~WebActivityValidator() {};
 
-Json::Value MessageHelper::StringToValue(const std::string& string) {
-  Json::Reader reader;
+  std::map<std::string, int> url_;
+  std::map<std::string, int> action_code_;
+};
 
-  Json::Value json;
-  reader.parse(string, json);
-
-  return json;
-}
+}  // namespace valdiators
 
 }  // namespace can_cooperation
 
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_WEB_ACTIVITY_VALIDATOR_H_

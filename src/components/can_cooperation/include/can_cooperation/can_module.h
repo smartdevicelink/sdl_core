@@ -103,7 +103,9 @@ class CANModule : public functional_modules::GenericModule,
    */
   virtual void RemoveAppExtensions();
  private:
-  DISALLOW_COPY_AND_ASSIGN(CANModule); FRIEND_BASE_SINGLETON_CLASS(CANModule);
+  DISALLOW_COPY_AND_ASSIGN(CANModule);
+  FRIEND_BASE_SINGLETON_CLASS(CANModule);
+
   CANModule();
   ~CANModule();
 

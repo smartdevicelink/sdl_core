@@ -30,30 +30,41 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/message_helper.h"
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_RADIO_DETAILS_NOTIFICATION_VALIDATOR_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_RADIO_DETAILS_NOTIFICATION_VALIDATOR_H_
+
+#include "can_cooperation/validators/validator.h"
+#include "utils/singleton.h"
 
 namespace can_cooperation {
 
-uint32_t MessageHelper::next_correlation_id_ = 1;
+namespace validators {
 
-uint32_t MessageHelper::GetNextCANCorrelationID() {
-  return next_correlation_id_++;
-}
+/**
+ * @brief OnRadioDetailsNotificationValidator class
+ */
+class OnRadioDetailsNotificationValidator : public Validator,
+                  public utils::Singleton<OnRadioDetailsNotificationValidator> {
+ public:
 
-std::string MessageHelper::ValueToString(const Json::Value& value) {
-  Json::FastWriter writer;
+  /**
+   * @brief Validate json with message params
+   *
+   * @param json_string string with message params(fake params will be cut off)
+   *
+   * @return validation result
+   */
+  ValidationResult Validate(std::string& json_string);
 
-  return writer.write(value);
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(OnRadioDetailsNotificationValidator);
+  FRIEND_BASE_SINGLETON_CLASS(OnRadioDetailsNotificationValidator);
+  OnRadioDetailsNotificationValidator();
+  ~OnRadioDetailsNotificationValidator() {};
+};
 
-Json::Value MessageHelper::StringToValue(const std::string& string) {
-  Json::Reader reader;
-
-  Json::Value json;
-  reader.parse(string, json);
-
-  return json;
-}
+}  // namespace valdiators
 
 }  // namespace can_cooperation
 
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_ON_RADIO_DETAILS_NOTIFICATION_VALIDATOR_H_

@@ -56,6 +56,18 @@ set (SOURCES
     ./src/command/on_radio_details_notification.cc
     ./src/command/on_control_changed_notification.cc
     ./src/command/on_preset_changed_notification.cc
+    ./src/validators/validator.cc
+    ./src/validators/on_preset_changed_notification_validator.cc
+    ./src/validators/radio_station_validator.cc
+    ./src/validators/tune_radio_request_validator.cc
+    ./src/validators/time_validator.cc
+    ./src/validators/address_validator.cc
+    ./src/validators/location_validator.cc
+    ./src/validators/song_info_validator.cc
+    ./src/validators/advertisement_validator.cc
+    ./src/validators/event_details_validator.cc
+    ./src/validators/web_activity_validator.cc
+    ./src/validators/on_radio_details_notification_validator.cc  
 )
 
 set (LIBRARIES

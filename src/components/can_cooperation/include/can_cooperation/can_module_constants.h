@@ -80,6 +80,92 @@ const char kAppId[] = "appID";
 const char kCode[] = "code";
 } //  json_keys
 
+namespace message_params {
+const char kCustomPresets[] = "customPresets";
+const char kRadioStation[]  = "radioStation";
+const char kSongInfo[]      = "songInfo";
+const char kEvent[]         = "event";
+const char kAdvertisement[] = "advertisement";
+const char kActivity[]      = "activity";
+const char kTriggerSource[] = "triggerSource";
+
+// RadioStation struct
+const char kFrequency[]     = "frequency";
+const char kFraction[]      = "fraction";
+const char kAvailableHDs[]  = "availableHDs";
+const char kCurrentHD[]     = "currentHD";
+// RadioStation struct
+
+// Time struct
+const char kHours[]   = "hours";
+const char kMinutes[] = "minutes";
+const char kSeconds[] = "seconds";
+const char kYear[]    = "year";
+const char kMonth[]   = "month";
+const char kDay[]     = "day";
+const char kTZD[]     = "TZD";
+// Time struct
+
+// Address struct
+const char kState[]   = "state";
+const char kZipCode[] = "zipcode";
+const char kCity[]    = "city";
+const char kStreet[]  = "street";
+// Address struct
+
+// Location struct
+const char kGPSCoordinates[] = "gpsCoordinates";
+const char kAddress[]        = "address";
+// Location struct
+
+// SongInfo struct
+const char kName[]     = "name";
+const char kArtist[]   = "artist";
+const char kGenre[]    = "genre";
+const char kAlbum[]    = "album";
+const char kSongYear[] = "year";
+const char kDuration[] = "duration";
+// SongInfo struct
+
+// Advertisement struct
+const char kProductName[] = "productName";
+const char kCompanyName[] = "companyName";
+const char kPhoneNumber[] = "phoneNumber";
+const char kLocation[]    = "location";
+// Advertisement struct
+
+// EventDetails struct
+const char kEventName[]      = "eventName";
+// const char kPhoneNumber[] = "phoneNumber";
+const char kPrice[]          = "price";
+const char kEventTime[]      = "eventTime";
+// EventDetails struct
+
+// WebActivity struct
+const char kURL[]        = "url";
+const char kActionCode[] = "actionCode";
+// WebActivity struct
+} //  namespace message_params
+
+namespace enums_value {
+  // TriggerSource enum
+  const char kMenu[]              = "MENU";
+  const char kVR[]                = "VR";
+// TriggerSource enum
+} //  namespace enums
+
+namespace validation_params {
+const char kMinLength[] = "minlength";
+const char kMaxLength[] = "maxlength";
+const char kMinValue[]  = "minvalue";
+const char kMaxValue[]  = "maxvalue";
+const char kMinSize[]   = "minsize";
+const char kMaxSize[]   = "maxsize";
+const char kArray[]     = "array";
+const char kMandatory[] = "mandatory";
+const char kType[] =       "type";
+} //  validation_params
+
 }  //  namespace can_cooperation
 
 #endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_CAN_MODULE_CONSTANTS_H_

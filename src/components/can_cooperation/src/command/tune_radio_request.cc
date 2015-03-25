@@ -31,6 +31,7 @@
  */
 
 #include "can_cooperation/commands/tune_radio_request.h"
+#include "can_cooperation/validators/tune_radio_request_validator.h"
 #include "can_cooperation/can_module_constants.h"
 #include "functional_module/function_ids.h"
 #include "json/json.h"
@@ -51,6 +52,18 @@ TuneRadioRequest::~TuneRadioRequest() {
 
 void TuneRadioRequest::Run() {
   LOG4CXX_INFO(logger_, "TuneRadioRequest::Run");
+
+
+  /*Json::Value outgoing_json;
+
+  if (validators::ValidationResult::SUCCESS !=
+      validators::TuneRadioRequestValidator::instance()->Validate(
+          message_->json_message(), outgoing_json)) {
+    LOG4CXX_INFO(logger_, "TuneRadioRequest validation failed!");
+    SendResponse(false, result_codes::kInvalidData,
+                 "Mobile request validation failed!");
+    return;
+  }*/
 
   application_manager::ApplicationSharedPtr app =
     service_->GetApplication(message_->connection_key());

@@ -65,6 +65,8 @@ RequestController::~RequestController() {
 
 void RequestController::AddRequest(const uint32_t& mobile_correlation_id,
                                    MobileRequestPtr request) {
+  // TODO(VS) Research and fix be problem with overlap correlation ids from two
+  // different apllications(on two different mobile devices)
   mobile_request_list_[mobile_correlation_id] = request;
   // TODO(VS): add app id
   timer_.AddTrackable(TrackableMessage(0, mobile_correlation_id));

@@ -30,30 +30,49 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/message_helper.h"
+#ifndef SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_SONG_INFO_VALIDATOR_H_
+#define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_SONG_INFO_VALIDATOR_H_
+
+#include "can_cooperation/validators/validator.h"
+#include "utils/singleton.h"
 
 namespace can_cooperation {
 
-uint32_t MessageHelper::next_correlation_id_ = 1;
+namespace validators {
 
-uint32_t MessageHelper::GetNextCANCorrelationID() {
-  return next_correlation_id_++;
-}
+/**
+ * @brief SongInfoValidator class
+ */
+class SongInfoValidator : public Validator, public utils::Singleton<SongInfoValidator> {
+ public:
 
-std::string MessageHelper::ValueToString(const Json::Value& value) {
-  Json::FastWriter writer;
+  /**
+   * @brief Validate json with message params
+   *
+   * @param json incoming json
+   * @param outgoing_json outgoing json where is param will be copied after verification
+   *
+   * @return validation result
+   */
+  ValidationResult Validate(const Json::Value& json,
+                            Json::Value& outgoing_json);
 
-  return writer.write(value);
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(SongInfoValidator);
+  FRIEND_BASE_SINGLETON_CLASS(SongInfoValidator);
+  SongInfoValidator();
+  ~SongInfoValidator() {};
 
-Json::Value MessageHelper::StringToValue(const std::string& string) {
-  Json::Reader reader;
+  std::map<std::string, int> name_;
+  std::map<std::string, int> artist_;
+  std::map<std::string, int> genre_;
+  std::map<std::string, int> album_;
+  std::map<std::string, int> year_;
+  std::map<std::string, int> duration_;
+};
 
-  Json::Value json;
-  reader.parse(string, json);
-
-  return json;
-}
+}  // namespace valdiators
 
 }  // namespace can_cooperation
 
+#endif  // SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_VALIDATORS_SONG_INFO_VALIDATOR_H_

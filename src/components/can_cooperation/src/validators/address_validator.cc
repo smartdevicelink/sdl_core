@@ -30,63 +30,57 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/commands/base_command_notification.h"
-#include "json/json.h"
-#include "can_cooperation/can_module.h"
+#include "can_cooperation/validators/address_validator.h"
 #include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 
-namespace commands {
+namespace validators {
 
-using namespace json_keys;
+using namespace message_params;
+using namespace validation_params;
 
-BaseCommandNotification::BaseCommandNotification(
-    const application_manager::MessagePtr& message)
-  : message_(message) {
-  service_ = CANModule::instance()->service();
+AddressValidator::AddressValidator() {
+  // name="state"
+  state_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+  state_[kMinLength] = 0;
+  state_[kMaxLength] = 100;
+  state_[kArray] = 0;
+  state_[kMandatory] = 0;
 
-  Json::Value value;
-  Json::Reader reader;
-  reader.parse(message_->json_message(), value);
-  if (value.isMember(kParams)) {
-    Json::FastWriter writer;
-    message_->set_json_message(writer.write(value[kParams]));
-  } else {
-    message_->set_json_message("");
-  }
+  // name="zipcode"
+  zip_code_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+  zip_code_[kMinLength] = 0;
+  zip_code_[kMaxLength] = 100;
+  zip_code_[kArray] = 0;
+  zip_code_[kMandatory] = 0;
+
+  // name="city"
+  city_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+  city_[kMinLength] = 0;
+  city_[kMaxLength] = 100;
+  city_[kArray] = 0;
+  city_[kMandatory] = 0;
+
+  // name="street"
+  street_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+  street_[kMinLength] = 0;
+  street_[kMaxLength] = 100;
+  street_[kArray] = 0;
+  street_[kMandatory] = 0;
+
+  validation_scope_map_[kState] = &state_;
+  validation_scope_map_[kZipCode] =  &zip_code_;
+  validation_scope_map_[kCity] = &city_;
+  validation_scope_map_[kStreet] = &street_;
 }
 
-
-BaseCommandNotification::~BaseCommandNotification() {
+ValidationResult AddressValidator::Validate(const Json::Value& json,
+                                                 Json::Value& outgoing_json) {
+  return ValidateSimpleValues(json, outgoing_json);
 }
 
-application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicationWithControl(
-                                        CANAppExtensionPtr& can_app_extension) {
-  const std::set<application_manager::ApplicationSharedPtr> applications =
-        service_->GetApplications();
-
-  std::set<application_manager::ApplicationSharedPtr>::iterator it =
-      applications.begin();
-
-  for (;it != applications.end(); ++it) {
-    if (*it) {
-      application_manager::AppExtensionPtr app_extension =
-          (*it)->QueryInterface(CANModule::instance()->GetModuleID());
-      if (app_extension) {
-        can_app_extension = application_manager::AppExtensionPtr::
-            static_pointer_cast<CANAppExtension>(app_extension);
-        if (can_app_extension->IsControlGiven()) {
-          return (*it);
-        }
-      }
-    }
-  }
-
-  return application_manager::ApplicationSharedPtr();
-}
-
-}  // namespace commands
+}  // namespace valdiators
 
 }  // namespace can_cooperation
 

@@ -31,6 +31,7 @@
  */
 
 #include "can_cooperation/commands/on_radio_details_notification.h"
+#include "can_cooperation/validators/on_radio_details_notification_validator.h"
 #include "can_cooperation/can_module.h"
 #include "can_cooperation/can_app_extension.h"
 #include "functional_module/function_ids.h"
@@ -51,6 +52,16 @@ OnRadioDetailsNotification::~OnRadioDetailsNotification() {
 
 void OnRadioDetailsNotification::Run() {
   LOG4CXX_INFO(logger_, "OnRadioDetailsNotification::Run");
+
+/*  std::string json = message_->json_message();
+  if (validators::ValidationResult::SUCCESS ==
+      validators::OnRadioDetailsNotificationValidator::instance()->
+      Validate(json)) {
+    message_->set_json_message(json);
+  } else {
+    LOG4CXX_INFO(logger_, "HMI notification validation failed!");
+    return;
+  }*/
 
   CANAppExtensionPtr can_app_extension;
   application_manager::ApplicationSharedPtr app =

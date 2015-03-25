@@ -34,8 +34,10 @@
 #define SRC_COMPONENTS_CAN_COOPERATION_INCLUDE_CAN_COOPERATION_MESSAGE_HELPER_H_
 
 #include <stdint.h>
+#include <string>
 
 #include "utils/macro.h"
+#include "json/json.h"
 
 namespace can_cooperation {
 
@@ -52,12 +54,33 @@ class MessageHelper {
    */
   static uint32_t GetNextCANCorrelationID();
 
+  /**
+   * @brief Convert Json::Value to std::string
+   *
+   * @param value Value with json
+   *
+   * @return string with json
+   */
+  static std::string ValueToString(const Json::Value& value);
+
+  /**
+   * @brief Convert std::string to Json::Value
+   *
+   * @param string string with json
+   *
+   * @return Value created from string with json
+   */
+  static Json::Value StringToValue(const std::string& string);
+
  private:
   DISALLOW_COPY_AND_ASSIGN(MessageHelper);
 
-  MessageHelper() {};
+  MessageHelper();
 
   static uint32_t next_correlation_id_;
+
+  // map with enums. key - enum name, value - vector with enum values
+  // static std::map<std::string, std::vector<std::string>> enums_;
 };
 
 }  // namespace can_cooperation

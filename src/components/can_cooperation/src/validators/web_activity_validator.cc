@@ -30,63 +30,41 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "can_cooperation/commands/base_command_notification.h"
-#include "json/json.h"
-#include "can_cooperation/can_module.h"
+#include "can_cooperation/validators/web_activity_validator.h"
 #include "can_cooperation/can_module_constants.h"
 
 namespace can_cooperation {
 
-namespace commands {
+namespace validators {
 
-using namespace json_keys;
+using namespace message_params;
+using namespace validation_params;
 
-BaseCommandNotification::BaseCommandNotification(
-    const application_manager::MessagePtr& message)
-  : message_(message) {
-  service_ = CANModule::instance()->service();
+WebActivityValidator::WebActivityValidator() {
+  // name="url"
+  url_[kType] = ValueType::STRING; // TODO(VS): Research Min-Max Length
+  url_[kMinLength] = 0;
+  url_[kMaxLength] = 100;
+  url_[kArray] = 0;
+  url_[kMandatory] = 1;
 
-  Json::Value value;
-  Json::Reader reader;
-  reader.parse(message_->json_message(), value);
-  if (value.isMember(kParams)) {
-    Json::FastWriter writer;
-    message_->set_json_message(writer.write(value[kParams]));
-  } else {
-    message_->set_json_message("");
-  }
+  // name="actionCode"
+  action_code_[kType] = ValueType::INT; // TODO(VS): Research Min-Max Value
+  action_code_[kMinValue] = 0;
+  action_code_[kMaxValue] = 100;
+  action_code_[kArray] = 0;
+  action_code_[kMandatory] = 0;
+
+  validation_scope_map_[kURL] = &url_;
+  validation_scope_map_[kActionCode] =  &action_code_;
 }
 
-
-BaseCommandNotification::~BaseCommandNotification() {
+ValidationResult WebActivityValidator::Validate(const Json::Value& json,
+                                                 Json::Value& outgoing_json) {
+  return ValidateSimpleValues(json, outgoing_json);
 }
 
-application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicationWithControl(
-                                        CANAppExtensionPtr& can_app_extension) {
-  const std::set<application_manager::ApplicationSharedPtr> applications =
-        service_->GetApplications();
-
-  std::set<application_manager::ApplicationSharedPtr>::iterator it =
-      applications.begin();
-
-  for (;it != applications.end(); ++it) {
-    if (*it) {
-      application_manager::AppExtensionPtr app_extension =
-          (*it)->QueryInterface(CANModule::instance()->GetModuleID());
-      if (app_extension) {
-        can_app_extension = application_manager::AppExtensionPtr::
-            static_pointer_cast<CANAppExtension>(app_extension);
-        if (can_app_extension->IsControlGiven()) {
-          return (*it);
-        }
-      }
-    }
-  }
-
-  return application_manager::ApplicationSharedPtr();
-}
-
-}  // namespace commands
+}  // namespace valdiators
 
 }  // namespace can_cooperation
 
