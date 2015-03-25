@@ -239,7 +239,7 @@ bool ResumeCtrl::IsHMIApplicationIdExist(uint32_t hmi_app_id) {
 
 bool ResumeCtrl::IsApplicationSaved(const std::string& mobile_app_id,
                                     const std::string& device_id) {
-  return resumption_storage_->IsApplicationSaved(mobile_app_id, device_id);
+  return -1 != resumption_storage_->IsApplicationSaved(mobile_app_id, device_id);
 }
 
 uint32_t ResumeCtrl::GetHMIApplicationID(const std::string& mobile_app_id,
