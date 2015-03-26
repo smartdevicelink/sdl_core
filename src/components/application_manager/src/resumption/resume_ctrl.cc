@@ -228,7 +228,7 @@ bool ResumeCtrl::SetAppHMIState(ApplicationSharedPtr application,
   }
   LOG4CXX_INFO(logger_, "Set up application "
                << application->mobile_app_id()
-               << " to HMILevel " << hmi_level);
+               << " to HMILevel " << restored_hmi_level);
   return true;
 }
 
@@ -663,13 +663,16 @@ ResumeCtrl::IsHmiLevelFullAllowed(ApplicationConstSharedPtr app) {
   bool is_active_app_exist = appMngr()->active_application().valid();
 
   mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_FULL;
-  if (is_audio_app
-      && !does_audio_app_with_same_type_exist
-      && is_active_app_exist) {
-    result = mobile_apis::HMILevel::HMI_LIMITED;
-  } else {
+  if (is_audio_app) {
+    if (does_audio_app_with_same_type_exist) {
+      result = appMngr()->GetDefaultHmiLevel(app);
+    } else if (is_active_app_exist) {
+      result = mobile_apis::HMILevel::HMI_LIMITED;
+    }
+  } else if (is_active_app_exist) {
     result = appMngr()->GetDefaultHmiLevel(app);
   }
+
   LOG4CXX_DEBUG(logger_, "is_audio_app : " << is_audio_app
                 << "; does_audio_app_with_same_type_exist : "
                 << does_audio_app_with_same_type_exist
