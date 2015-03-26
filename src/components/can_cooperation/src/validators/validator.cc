@@ -41,6 +41,8 @@ using namespace validation_params;
 using namespace enums_value;
 using namespace message_params;
 
+Validator::~Validator() {}
+
 ValidationResult Validator::ValidateSimpleValues(const Json::Value& json,
                                        Json::Value& outgoing_json) {
   ValidationScopeMap::iterator it = validation_scope_map_.begin();

@@ -68,10 +68,13 @@ class Validator {
 
  protected:
   /**
-  * @brief Validate simple values(integers, strings, boolean)
+  * @brief Validate simple values(integers, strings, boolean), cut fake params,
+  *        If invalid param will be found, validation stops, error will be returned as result,
+  *        and outgoing_json should not be used.
   *
   * @param json incoming json with request-response params
-  * @param outgoing_json outgoing json where is param will be copied after verification
+  * @param outgoing_json outgoing json where is param will be copied after
+  *                 verification(without fake params)
   *
   * @return validation result
   */

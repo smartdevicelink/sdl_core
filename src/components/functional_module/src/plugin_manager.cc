@@ -197,7 +197,6 @@ bool PluginManager::IsMessageForPlugin(application_manager::MessagePtr msg) {
   if (application_manager::ProtocolVersion::kUnknownProtocol != msg->protocol_version()
       && application_manager::ProtocolVersion::kHMI != msg->protocol_version()) {
     MobileFunctionID id = static_cast<MobileFunctionID>(msg->function_id());
-    LOG4CXX_ERROR(logger_, "FUNCTION ID:: "<<static_cast<MobileFunctionID>(msg->function_id()));
     return (mobile_subscribers_.find(id) != mobile_subscribers_.end());
   } else {
     return false;

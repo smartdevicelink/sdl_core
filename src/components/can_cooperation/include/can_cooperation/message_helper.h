@@ -78,9 +78,6 @@ class MessageHelper {
   MessageHelper();
 
   static uint32_t next_correlation_id_;
-
-  // map with enums. key - enum name, value - vector with enum values
-  // static std::map<std::string, std::vector<std::string>> enums_;
 };
 
 }  // namespace can_cooperation
