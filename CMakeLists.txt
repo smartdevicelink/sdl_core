@@ -400,8 +400,8 @@ endif()
 
 SET(RPATH_DIRECTORIES
   ${CMAKE_INSTALL_PREFIX}/bin/plugins
-  /usr/local
   /usr/local/lib
+  /usr/local
   ${CMAKE_INSTALL_PREFIX}/bin
 )
 SET(CMAKE_SKIP_BUILD_RPATH  FALSE)

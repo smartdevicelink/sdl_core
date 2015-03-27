@@ -29,6 +29,20 @@ set(SOURCES
   ./src/module_timer_test.cc
 )
 
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+
+SET(RPATH_DIRECTORIES
+  /usr/local/lib
+  /usr/local
+)
+
+SET(CMAKE_INSTALL_RPATH "${RPATH_DIRECTORIES}")
+
 add_subdirectory(plugins)
 
 create_test("function_module_test" "${SOURCES}" "${LIBRARIES}")

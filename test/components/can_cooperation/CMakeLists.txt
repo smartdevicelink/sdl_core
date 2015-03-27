@@ -48,6 +48,12 @@ SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
 # (but later on when installing)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
 
-SET(CMAKE_INSTALL_RPATH "${CMAKE_BINARY_DIR}/src/components/can_cooperation/")
+SET(RPATH_DIRECTORIES
+  ${CMAKE_BINARY_DIR}/src/components/can_cooperation/
+  /usr/local/lib
+  /usr/local
+)
+
+SET(CMAKE_INSTALL_RPATH "${RPATH_DIRECTORIES}")
 
 create_test("can_cooperation_test" "${SOURCES}" "${LIBRARIES}")
