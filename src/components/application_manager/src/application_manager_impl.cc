@@ -1904,6 +1904,40 @@ HMICapabilities& ApplicationManagerImpl::hmi_capabilities() {
   return hmi_capabilities_;
 }
 
+void ApplicationManagerImpl::PullLanguagesInfo(const SmartObject& app_data,
+                                               SmartObject& ttsName,
+                                               SmartObject& vrSynonym) {
+  LOG4CXX_AUTO_TRACE(logger_);
+  if (app_data.keyExists(json::languages)) {
+
+    const HMICapabilities& hmi_cap = hmi_capabilities();
+    std::string vr(MessageHelper::CommonLanguageToString(hmi_cap.active_vr_language()));
+    const SmartObject& arr = app_data[json::languages];
+
+    std::transform(vr.begin(), vr.end(), vr.begin(), ::toupper);
+
+    ssize_t default_idx = -1;
+    ssize_t specific_idx = -1;
+
+    const size_t size = arr.length();
+    for (size_t idx = 0; idx < size; ++idx) {
+      if (arr[idx].keyExists(vr)) {
+        specific_idx = idx; break;
+      } else if (arr[idx].keyExists(json::default_)) { default_idx = idx; }
+      else { LOG4CXX_DEBUG(logger_, "Unknown key was specified."); }
+    }
+
+    const ssize_t regular_id = specific_idx != -1 ? specific_idx : default_idx;
+
+    if (regular_id != -1 &&
+        app_data[json::languages][regular_id][vr].keyExists(json::ttsName) &&
+        app_data[json::languages][regular_id][vr].keyExists(json::vrSynonyms)) {
+      ttsName = app_data[json::languages][regular_id][vr][json::ttsName];
+      vrSynonym = app_data[json::languages][regular_id][vr][json::vrSynonyms];
+    }
+  }
+}
+
 void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
                                                 const uint32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -1932,6 +1966,11 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
     std::string url_scheme;
     std::string package_name;
     std::string os_type;
+    SmartObject vrSynonym;
+    SmartObject ttsName;
+
+    const std::string appName(app_data[json::name].asString());
+
     if (app_data.keyExists(json::ios)) {
       os_type = json::ios;
       url_scheme = app_data[os_type][json::urlScheme].asString();
@@ -1941,8 +1980,11 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
           app_data[os_type][json::packageName].asString();
     }
 
-    const std::string appName(app_data[json::name].asString());
+    PullLanguagesInfo(app_data[os_type], ttsName, vrSynonym);
 
+    if (ttsName.empty() || vrSynonym.empty()) {
+      ttsName = vrSynonym = appName;
+    }
 
     const uint32_t hmi_app_id = resume_ctrl_.IsApplicationSaved(mobile_app_id)?
           resume_ctrl_.GetHMIApplicationID(mobile_app_id) : GenerateNewHMIAppID();
@@ -1973,6 +2015,9 @@ void ApplicationManagerImpl::CreateApplications(SmartArray& obj_array,
       app->set_app_icon_path(full_icon_path);
       app->set_hmi_application_id(hmi_app_id);
       app->set_device(device_id);
+
+      app->set_vr_synonyms(vrSynonym);
+      app->set_tts_name(ttsName);
 
       sync_primitives::AutoLock lock(apps_to_register_list_lock_);
       LOG4CXX_DEBUG(logger_, "apps_to_register_ size before: "

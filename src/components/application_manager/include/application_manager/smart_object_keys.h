@@ -287,6 +287,10 @@ const char urlScheme[] = "urlScheme";
 const char packageName[] = "packageName";
 const char response[] = "response";
 const char is_media_application[] = "isMediaApplication";
+const char default_[] = "default";
+const char languages[] = "languages";
+const char ttsName[] = "ttsName";
+const char vrSynonyms[] = "vrSynonyms";
 } // namespace json
 
 namespace http_request {
