@@ -44,6 +44,10 @@ TEST(CanLibraryTest, Load) {
   std::set<application_manager::ApplicationSharedPtr> apps;
   EXPECT_CALL(*service, GetApplications()).Times(1).WillOnce(Return(apps));
 
+  //  in order for all sub-threads to start before shutting them down
+  //  The logic conditions must be chosen to insure that the "signal" is executed if the "wait" is ever processed.
+  //  (see http://www.yolinux.com/TUTORIALS/LinuxTutorialPosixThreads.html)
+  sleep(3);
   CANModule::destroy();
   int ret = dlclose(handle);
   EXPECT_FALSE(ret);
