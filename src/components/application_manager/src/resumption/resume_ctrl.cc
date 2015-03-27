@@ -159,7 +159,8 @@ ResumeCtrl::ResolveHMILevelConflicts(ApplicationSharedPtr application,
     restored_hmi_level = IsLimmitedAllowed(application) ?
                            HMILevel::HMI_LIMITED:
                            appMngr()->GetDefaultHmiLevel(application);
-  } else if (HMILevel::HMI_LIMITED == restored_hmi_level) {
+  }
+  if (HMILevel::HMI_LIMITED == restored_hmi_level) {
     MessageHelper::SendOnResumeAudioSourceToHMI(application->app_id());
   }
   return restored_hmi_level;
