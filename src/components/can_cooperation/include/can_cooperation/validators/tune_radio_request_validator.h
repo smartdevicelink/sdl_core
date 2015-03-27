@@ -55,7 +55,7 @@ class TuneRadioRequestValidator : public Validator,
    *
    * @return validation result
    */
-  ValidationResult Validate(const std::string& json_string,
+  ValidationResult Validate(const Json::Value& json,
                             Json::Value& outgoing_json);
 
  private:

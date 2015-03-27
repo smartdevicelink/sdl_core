@@ -47,7 +47,7 @@ ValidationResult Validator::ValidateSimpleValues(const Json::Value& json,
                                        Json::Value& outgoing_json) {
   ValidationScopeMap::iterator it = validation_scope_map_.begin();
 
-  ValidationResult result;
+  ValidationResult result = ValidationResult::INVALID_DATA;
 
   for (; it != validation_scope_map_.end(); ++it) {
     result = ValidateValue(it->first, json, outgoing_json, *(it->second));
@@ -93,7 +93,7 @@ ValidationResult Validator::ValidateValue(const std::string& value_name,
     }
   }
 
-  ValidationResult result = ValidationResult::SUCCESS;
+  ValidationResult result = ValidationResult::INVALID_DATA;
 
   // Check if param array. If it is array check array borders
   if (validation_scope[kArray]) {

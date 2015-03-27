@@ -54,11 +54,15 @@ void TuneRadioRequest::Run() {
   LOG4CXX_INFO(logger_, "TuneRadioRequest::Run");
 
 
-  /*Json::Value outgoing_json;
+  /*
+  Json::Value json;
+
+  json = MessageHelper::StringToValue(message_->json_message());
+  Json::Value outgoing_json;
 
   if (validators::ValidationResult::SUCCESS !=
       validators::TuneRadioRequestValidator::instance()->Validate(
-          message_->json_message(), outgoing_json)) {
+          json, outgoing_json)) {
     LOG4CXX_INFO(logger_, "TuneRadioRequest validation failed!");
     SendResponse(false, result_codes::kInvalidData,
                  "Mobile request validation failed!");

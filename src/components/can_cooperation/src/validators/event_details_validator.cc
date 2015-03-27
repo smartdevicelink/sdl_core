@@ -91,10 +91,6 @@ ValidationResult EventDetailsValidator::Validate(const Json::Value& json,
                                                      outgoing_json[kLocation]);
   }
 
-  if (result != ValidationResult::SUCCESS) {
-    return result;
-  }
-
   return result;
 }
 

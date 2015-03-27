@@ -50,9 +50,12 @@ Json::Value MessageHelper::StringToValue(const std::string& string) {
   Json::Reader reader;
 
   Json::Value json;
-  reader.parse(string, json);
 
-  return json;
+  if (reader.parse(string, json)) {
+    return json;
+  }
+
+  return Json::Value(Json::ValueType::nullValue);
 }
 
 }  // namespace can_cooperation
