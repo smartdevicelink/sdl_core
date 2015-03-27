@@ -62,6 +62,7 @@ ResumeCtrl::ResumeCtrl():
   save_persistent_data_timer_("RsmCtrlPercist",
                               this, &ResumeCtrl::SaveDataOnTimer, true),
   is_data_saved_(false),
+  launch_time_(time(NULL)),
   resumption_storage_(new ResumptionDataJson()) {
   LoadResumeData();
 }
@@ -336,6 +337,10 @@ void ResumeCtrl::StartAppHmiStateResumption(ApplicationSharedPtr application) {
     LOG4CXX_INFO(logger_, "Do not need to resume application "
                  << application->mobile_app_id());
   }
+}
+
+void ResumeCtrl::ResetLaunchTime() {
+  launch_time_ = time(NULL);
 }
 
 bool ResumeCtrl::CheckPersistenceFilesForResumption(ApplicationSharedPtr application) {
