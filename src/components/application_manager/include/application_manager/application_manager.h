@@ -47,7 +47,6 @@ namespace connection_handler {
 namespace application_manager {
 
 class Application;
-class HMIMatrix;
 
 class ApplicationManager {
   public:

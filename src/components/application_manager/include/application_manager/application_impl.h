@@ -37,19 +37,22 @@
 #include <set>
 #include <vector>
 #include <utility>
+#include <list>
 
 #include "utils/date_time.h"
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
+#include "application_manager/hmi_state.h"
+
 #include "connection_handler/device.h"
 #include "utils/timer_thread.h"
 #include "utils/lock.h"
-
 namespace usage_statistics {
 class StatisticsManager;
 }  // namespace usage_statistics
 
 namespace application_manager {
+
 namespace mobile_api = mobile_apis;
 
 class ApplicationImpl : public virtual InitialApplicationDataImpl,
@@ -75,7 +78,6 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @brief change supporting COMMUNICATION NAVIGATION
    */
   virtual void ChangeSupportingAppHMIType();
-  bool IsAudible() const;
 
   // navi
   inline bool is_navi() const { return is_navi_; }
@@ -99,18 +101,15 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   const std::string& name() const;
   const std::string folder_name() const;
   bool is_media_application() const;
-  const mobile_api::HMILevel::eType& hmi_level() const;
   virtual bool is_foreground() const;
   virtual void set_foreground(bool is_foreground);
   const uint32_t put_file_in_none_count() const;
   const uint32_t delete_file_in_none_count() const;
   const uint32_t list_files_in_none_count() const;
-  const mobile_api::SystemContext::eType& system_context() const;
-  inline const mobile_api::AudioStreamingState::eType&
-  audio_streaming_state() const;
+  const mobile_api::SystemContext::eType system_context() const;
+  inline const mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
   const std::string& app_icon_path() const;
   connection_handler::DeviceHandle device() const;
-  void set_tts_speak_state(bool state_tts_speak);
   bool tts_speak_state();
   void set_tts_properties_in_none(bool active);
   bool tts_properties_in_none();
@@ -119,19 +118,15 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void set_version(const Version& ver);
   void set_name(const std::string& name);
   void set_is_media_application(bool is_media);
-  void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level);
   void increment_put_file_in_none_count();
   void increment_delete_file_in_none_count();
   void increment_list_files_in_none_count();
-  void set_system_context(
-      const mobile_api::SystemContext::eType& system_context);
-  void set_audio_streaming_state(
-      const mobile_api::AudioStreamingState::eType& state);
   bool set_app_icon_path(const std::string& path);
   void set_app_allowed(const bool& allowed);
   void set_device(connection_handler::DeviceHandle device);
   virtual uint32_t get_grammar_id() const;
   virtual void set_grammar_id(uint32_t value);
+
 
   virtual void set_protocol_version(const ProtocolVersion& protocol_version);
   virtual ProtocolVersion protocol_version() const;
@@ -151,6 +146,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool SubscribeToIVI(uint32_t vehicle_info_type_);
   bool IsSubscribedToIVI(uint32_t vehicle_info_type_);
   bool UnsubscribeFromIVI(uint32_t vehicle_info_type_);
+
+  /**
+   * @brief ResetDataInNone reset data counters in NONE
+   */
+  virtual void ResetDataInNone();
 
   virtual const std::set<mobile_apis::ButtonName::eType>& SubscribedButtons() const;
   virtual const  std::set<uint32_t>& SubscribesIVI() const;
@@ -179,6 +179,44 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    * @return true if application is media, voice communication or navigation
    */
   virtual bool IsAudioApplication() const;
+
+  /*
+  * @brief SetRegularState set permanent state of application
+  * @param state state to setup
+  */
+  virtual void SetRegularState(HmiStatePtr state);
+
+  /**
+   * @brief AddHMIState the function that will change application's
+   * hmi state.
+   *
+   * @param app_id id of the application whose hmi level should be changed.
+   *
+   * @param state new hmi state for certain application.
+   */
+  virtual void AddHMIState(HmiStatePtr state);
+
+  /**
+   * @brief RemoveHMIState the function that will turn back hmi_level after end
+   * of some event
+   *
+   * @param app_id id of the application whose hmi level should be changed.
+   *
+   * @param state_id that should be removed
+   */
+  virtual void RemoveHMIState(HmiState::StateID state_id);
+
+  /**
+   * @brief HmiState of application within active events PhoneCall, TTS< etc ...
+   * @return Active HmiState of application
+   */
+  virtual const HmiStatePtr CurrentHmiState() const;
+
+  /**
+   * @brief RegularHmiState of application without active events VR, TTS etc ...
+   * @return HmiState of application
+   */
+  virtual const HmiStatePtr RegularHmiState() const;
 
  protected:
 
@@ -217,16 +255,12 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool                                     hmi_supports_navi_audio_streaming_;
   bool                                     is_app_allowed_;
   bool                                     has_been_activated_;
-  bool                                     tts_speak_state_;
   bool                                     tts_properties_in_none_;
   bool                                     tts_properties_in_full_;
-  mobile_api::HMILevel::eType              hmi_level_;
   bool                                     is_foreground_;
   uint32_t                                 put_file_in_none_count_;
   uint32_t                                 delete_file_in_none_count_;
   uint32_t                                 list_files_in_none_count_;
-  mobile_api::SystemContext::eType         system_context_;
-  mobile_api::AudioStreamingState::eType   audio_streaming_state_;
   std::string                              app_icon_path_;
   connection_handler::DeviceHandle         device_;
 
@@ -276,9 +310,12 @@ uint32_t ApplicationImpl::app_id() const {
   return app_id_;
 }
 
-const mobile_api::AudioStreamingState::eType&
+const mobile_api::AudioStreamingState::eType
 ApplicationImpl::audio_streaming_state() const {
-  return audio_streaming_state_;
+  using namespace mobile_apis;
+  const HmiStatePtr hmi_state = CurrentHmiState();
+  return hmi_state ? hmi_state->audio_streaming_state() :
+                     AudioStreamingState::INVALID_ENUM;
 }
 
 bool ApplicationImpl::app_allowed() const {

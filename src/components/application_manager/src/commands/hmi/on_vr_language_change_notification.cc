@@ -74,8 +74,8 @@ void OnVRLanguageChangeNotification::Run() {
     if (static_cast<int32_t>(app->language())
         != (*message_)[strings::msg_params][strings::language].asInt()) {
 
-      ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                             mobile_api::HMILevel::HMI_NONE);
+      ApplicationManagerImpl::instance()->SetState<false>(app->app_id(),
+                                          mobile_api::HMILevel::HMI_NONE);
 
       MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app->app_id(),

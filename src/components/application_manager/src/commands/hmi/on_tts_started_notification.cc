@@ -47,8 +47,9 @@ OnTTSStartedNotification::~OnTTSStartedNotification() {
 
 void OnTTSStartedNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-
-  ApplicationManagerImpl::instance()->Mute(kTTSSessionChanging);
+  event_engine::Event event(hmi_apis::FunctionID::TTS_Started);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands

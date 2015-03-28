@@ -29,33 +29,31 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
-#include "application_manager/commands/hmi/on_app_activated_notification.h"
+#include "application_manager/state_context.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_helper.h"
-#include "interfaces/HMI_API.h"
-
 namespace application_manager {
 
-namespace commands {
 
-OnAppActivatedNotification::OnAppActivatedNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+bool StateContext::is_navi_app(const uint32_t app_id) const {
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  DCHECK_OR_RETURN(app, false);
+  return app ? app->is_navi() : false;
 }
 
-OnAppActivatedNotification::~OnAppActivatedNotification() {
+bool StateContext::is_meida_app(const uint32_t app_id) const {
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  return app ? app->is_media_application() : false;
 }
 
-void OnAppActivatedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  uint32_t app_id = ((*message_)[strings::msg_params][strings::app_id]).asUInt();
-  ApplicationManagerImpl::instance()->SetState<true>(app_id,
-                                               mobile_apis::HMILevel::HMI_FULL
-                                               );
+bool StateContext::is_voice_comunication_app(const uint32_t app_id) const {
+  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(app_id);
+  return app ? app->is_voice_communication_supported() : false;
 }
 
-}  // namespace commands
+bool StateContext::is_attenuated_supported() const{
+  const HMICapabilities& hmi_capabilities =
+      ApplicationManagerImpl::instance()->hmi_capabilities();
+  return hmi_capabilities.attenuated_supported();
+}
 
-}  // namespace application_manager
-
+}

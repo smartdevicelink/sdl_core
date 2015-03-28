@@ -35,12 +35,14 @@
 
 #include <string>
 #include <map>
+#include <set>
+#include <list>
 #include "utils/shared_ptr.h"
 #include "utils/data_accessor.h"
 #include "interfaces/MOBILE_API.h"
 #include "connection_handler/device.h"
 #include "application_manager/message.h"
-#include <set>
+#include "application_manager/hmi_state.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -398,7 +400,6 @@ class Application : public virtual InitialApplicationData,
     virtual void CloseActiveMessage() = 0;
     virtual bool IsFullscreen() const = 0;
     virtual void ChangeSupportingAppHMIType() = 0;
-    virtual bool IsAudible() const = 0;
     virtual bool is_navi() const = 0;
     virtual void set_is_navi(bool allow) = 0;
     virtual bool hmi_supports_navi_video_streaming() const = 0;
@@ -426,27 +427,47 @@ class Application : public virtual InitialApplicationData,
     virtual const std::string& name() const = 0;
     virtual const std::string folder_name() const = 0;
     virtual bool is_media_application() const = 0;
-    virtual const mobile_api::HMILevel::eType& hmi_level() const = 0;
     virtual bool is_foreground() const = 0;
     virtual void set_foreground(bool is_foreground) = 0;
+    virtual const mobile_api::HMILevel::eType hmi_level() const = 0;
     virtual const uint32_t put_file_in_none_count() const = 0;
     virtual const uint32_t delete_file_in_none_count() const = 0;
     virtual const uint32_t list_files_in_none_count() const = 0;
-    virtual const mobile_api::SystemContext::eType& system_context() const = 0;
-    virtual const mobile_api::AudioStreamingState::eType&
+    virtual const mobile_api::SystemContext::eType system_context() const = 0;
+    virtual const mobile_api::AudioStreamingState::eType
     audio_streaming_state() const = 0;
     virtual const std::string& app_icon_path() const = 0;
     virtual connection_handler::DeviceHandle device() const = 0;
-    virtual void set_tts_speak_state(bool state_tts_speak) = 0;
     virtual bool tts_speak_state() = 0;
+
+    /**
+     * @brief Active states of application
+     */
+    DataAccessor<HmiStateList> GetHmiStateListAccessor() {
+      DataAccessor<HmiStateList> hmi_states_da =
+          DataAccessor<HmiStateList>(hmi_states_, hmi_states_lock_);
+      return hmi_states_da;
+    }
+
+    /**
+     * @brief Current hmi state
+     */
+    virtual const HmiStatePtr CurrentHmiState() const = 0;
+
+
+    /**
+     * @brief RegularHmiState of application without active events VR, TTS etc ...
+     * @return HmiState of application
+     */
+    virtual const HmiStatePtr RegularHmiState() const = 0;
+
     /**
      * @brief sets true if application has sent TTS GlobalProperties
      * request with empty array help_prompt to HMI with level
      * NONE BACKGROUND
      * @param active contains state of sending TTS GlobalProperties
      */
-    virtual void set_tts_properties_in_none(
-        bool active) = 0;
+    virtual void set_tts_properties_in_none(bool active) = 0;
     /**
      * @brief returns true if application has sent TTS GlobalProperties
      * otherwise return false
@@ -470,14 +491,9 @@ class Application : public virtual InitialApplicationData,
     virtual void set_version(const Version& version) = 0;
     virtual void set_name(const std::string& name) = 0;
     virtual void set_is_media_application(bool is_media) = 0;
-    virtual void set_hmi_level(const mobile_api::HMILevel::eType& hmi_level) = 0;
     virtual void increment_put_file_in_none_count() = 0;
     virtual void increment_delete_file_in_none_count() = 0;
     virtual void increment_list_files_in_none_count() = 0;
-    virtual void set_system_context(
-      const mobile_api::SystemContext::eType& system_context) = 0;
-    virtual void set_audio_streaming_state(
-      const mobile_api::AudioStreamingState::eType& state) = 0;
     virtual bool set_app_icon_path(const std::string& file_name) = 0;
     virtual void set_app_allowed(const bool& allowed) = 0;
     virtual void set_device(connection_handler::DeviceHandle device) = 0;
@@ -511,6 +527,11 @@ class Application : public virtual InitialApplicationData,
     virtual bool UnsubscribeFromIVI(uint32_t vehicle_info_type_) = 0;
 
     /**
+     * @brief ResetDataInNone reset data counters in NONE
+     */
+    virtual void ResetDataInNone() = 0;
+
+    /**
      * @brief Check, if limits for command number per time is exceeded
      * @param cmd_id Unique command id from mobile API
      * @param source Limits source, e.g. policy table, config file etc.
@@ -524,6 +545,32 @@ class Application : public virtual InitialApplicationData,
      * @return object for recording statistics
      */
     virtual UsageStatistics& usage_report() = 0;
+
+    /**
+     * @brief SetRegularState set permanent state of application
+     * @param state state to setup
+     */
+    virtual void SetRegularState(HmiStatePtr state)  = 0;
+
+    /**
+     * @brief AddHMIState the function that will change application's
+     * hmi state.
+     *
+     * @param app_id id of the application whose hmi level should be changed.
+     *
+     * @param state new hmi state for certain application.
+     */
+    virtual void AddHMIState(HmiStatePtr state) = 0;
+
+    /**
+     * @brief RemoveHMIState the function that will turn back hmi_level after end
+     * of some event
+     *
+     * @param app_id id of the application whose hmi level should be changed.
+     *
+     * @param state_id that should be removed
+     */
+    virtual void RemoveHMIState(HmiState::StateID state_id) = 0;
 
     /**
      * @brief Keeps id of softbuttons which is created in commands:
@@ -633,6 +680,13 @@ class Application : public virtual InitialApplicationData,
     virtual void OnAudioStreamRetry() = 0;
 
   protected:
+
+    /**
+     * @brief Active states of application
+     */
+    HmiStateList hmi_states_;
+    mutable sync_primitives::Lock hmi_states_lock_;
+
     ApplicationState app_state_;
     std::string url_;
     std::string package_name_;
