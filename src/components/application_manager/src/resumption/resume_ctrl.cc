@@ -467,6 +467,7 @@ void ResumeCtrl::AddSubmenues(ApplicationSharedPtr application,
       const smart_objects::SmartObject& submenu = app_submenus[i];
       application->AddSubMenu(submenu[strings::menu_id].asUInt(), submenu);
     }
+    ProcessHMIRequests(MessageHelper::CreateAddSubMenuRequestToHMI(application));
   } else {
     LOG4CXX_FATAL(logger_, "application_submenus section is not exists");
   }
@@ -484,6 +485,7 @@ void ResumeCtrl::AddCommands(ApplicationSharedPtr application,
           app_commands[i];
       application->AddCommand(command[strings::cmd_id].asUInt(), command);
     }
+    ProcessHMIRequests(MessageHelper::CreateAddCommandRequestToHMI(application));
   } else {
     LOG4CXX_FATAL(logger_, "application_commands section is not exists");
   }
@@ -503,6 +505,8 @@ void ResumeCtrl::AddChoicesets(ApplicationSharedPtr application,
           choice_set[strings::interaction_choice_set_id].asInt();
       application->AddChoiceSet(choice_set_id, choice_set);
     }
+    ProcessHMIRequests(
+        MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(application));
   } else {
     LOG4CXX_FATAL(logger_, "There is no any choicesets");
   }
@@ -516,6 +520,7 @@ void ResumeCtrl::SetGlobalProperties(ApplicationSharedPtr application,
     const smart_objects::SmartObject& properties_so =
         saved_app[strings::application_global_properties];
     application->load_global_properties(properties_so);
+    MessageHelper::SendGlobalPropertiesToHMI(application);
   }
 }
 
@@ -546,6 +551,7 @@ void ResumeCtrl::AddSubscriptions(ApplicationSharedPtr application,
         application->SubscribeToIVI(ivi);
       }
     }
+    ProcessHMIRequests(MessageHelper::GetIVISubscriptionRequests(application));
   }
 }
 
@@ -644,6 +650,14 @@ bool ResumeCtrl::ProcessHMIRequest(smart_objects::SmartObjectSPtr request,
     return false;
   }
   return true;
+}
+
+void ResumeCtrl::ProcessHMIRequests(const smart_objects::SmartObjectList& requests) {
+  for (smart_objects::SmartObjectList::const_iterator it = requests.begin(),
+       total = requests.end();
+       it != total; ++it) {
+    ProcessHMIRequest(*it, true);
+  }
 }
 
 void ResumeCtrl::AddToResumptionTimerQueue(uint32_t app_id) {

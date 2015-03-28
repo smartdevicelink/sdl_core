@@ -213,14 +213,8 @@ class MessageHelper {
     static void SendAddCommandRequestToHMI(ApplicationConstSharedPtr app);
     static smart_objects::SmartObjectList CreateAddCommandRequestToHMI(ApplicationConstSharedPtr app);
 
-//    /**
-//     * @brief prepares commands in order to send it to HMI
-//     * @param app applicaton instace
-//     */
-//    static smart_objects::SmartObjectList CreateAddVRCommandRequestFromChoiceToHMI(
-//        ApplicationConstSharedPtr app);
-
-//    void CreateAddVRCommandRequestFromChoiceToHMI();
+    static smart_objects::SmartObjectList CreateAddVRCommandRequestFromChoiceToHMI(
+        ApplicationConstSharedPtr app);
 
     /**
      * @brief Sends UI_ChangeRegistration to HMI with list of AppHMIType

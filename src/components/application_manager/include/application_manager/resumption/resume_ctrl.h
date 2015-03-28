@@ -414,6 +414,8 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
         smart_objects::SmartObjectSPtr request = NULL,
         bool use_events = false);
 
+    void ProcessHMIRequests(const smart_objects::SmartObjectList& requests);
+
     void InsertToTimerQueue(uint32_t app_id, uint32_t time_stamp);
 
     void AddToResumptionTimerQueue(uint32_t app_id);
