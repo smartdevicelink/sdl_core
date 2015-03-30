@@ -548,6 +548,12 @@ class MessageHelper {
                                const std::string& icon_path);
   private:
     /**
+     * @brief Creates new request object and fill its header
+     * @return New request object
+     */
+    static smart_objects::SmartObjectSPtr CreateRequestObject();
+
+    /**
      * @brief Allows to fill SO according to the  current permissions.
      * @param permissions application permissions.
      * @param message which should be filled.

@@ -246,6 +246,25 @@ uint32_t MessageHelper::GetAppCommandLimit(const std::string& policy_app_id) {
   return policy::PolicyHandler::instance()->GetNotificationsNumber(priority);
 }
 
+smart_objects::SmartObjectSPtr MessageHelper::CreateRequestObject() {
+  using namespace smart_objects;
+
+  SmartObjectSPtr request(new SmartObject(SmartType_Map));
+  if (request) {
+    SmartObject& ref = *request;
+
+    ref[strings::params][strings::message_type] =
+      static_cast<int>(hmi_apis::messageType::request);
+    ref[strings::params][strings::protocol_version] =
+      commands::CommandImpl::protocol_version_;
+    ref[strings::params][strings::protocol_type] =
+      commands::CommandImpl::hmi_protocol_type_;
+    ref[strings::params][strings::correlation_id] =
+      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+  }
+  return request;
+}
+
 void MessageHelper::SendHMIStatusNotification(
   const Application& application_impl) {
   LOG4CXX_AUTO_TRACE(logger_);
@@ -800,19 +819,11 @@ void MessageHelper::SendAllOnButtonSubscriptionNotificationsForApp(
 void MessageHelper::SendSetAppIcon(uint32_t app_id,
                                    const std::string& icon_path) {
   using namespace smart_objects;
-  SmartObjectSPtr set_app_icon(new smart_objects::SmartObject);
+  SmartObjectSPtr set_app_icon = CreateRequestObject();
   if (set_app_icon) {
     SmartObject& so_to_send = *set_app_icon;
     so_to_send[strings::params][strings::function_id] =
       static_cast<int>(hmi_apis::FunctionID::UI_SetAppIcon);
-    so_to_send[strings::params][strings::message_type] =
-      static_cast<int>(hmi_apis::messageType::request);
-    so_to_send[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-    so_to_send[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-    so_to_send[strings::params][strings::correlation_id] =
-      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
     so_to_send[strings::msg_params] = smart_objects::SmartObject(
                                         smart_objects::SmartType_Map);
@@ -843,7 +854,7 @@ void MessageHelper::SendGlobalPropertiesToHMI(ApplicationConstSharedPtr app) {
   smart_objects::SmartObjectList requests = CreateGlobalPropertiesRequestsToHMI(app);
   for (smart_objects::SmartObjectList::const_iterator it = requests.begin();
        it != requests.end(); ++it) {
-    DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(*it))
+    DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(*it));
   }
 }
 
@@ -860,23 +871,13 @@ smart_objects::SmartObjectList MessageHelper::CreateGlobalPropertiesRequestsToHM
   // UI global properties
 
   if (app->vr_help_title() || app->vr_help()) {
-    smart_objects::SmartObjectSPtr ui_global_properties =
-        new smart_objects::SmartObject(smart_objects::SmartType_Map);
-
+    smart_objects::SmartObjectSPtr ui_global_properties = CreateRequestObject();
     if (!ui_global_properties) {
       return requests;
     }
 
     (*ui_global_properties)[strings::params][strings::function_id] =
       static_cast<int>(hmi_apis::FunctionID::UI_SetGlobalProperties);
-    (*ui_global_properties)[strings::params][strings::message_type] =
-      static_cast<int>(hmi_apis::messageType::request);
-    (*ui_global_properties)[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-    (*ui_global_properties)[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-    (*ui_global_properties)[strings::params][strings::correlation_id] =
-      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
     smart_objects::SmartObject ui_msg_params = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
@@ -904,23 +905,13 @@ smart_objects::SmartObjectList MessageHelper::CreateGlobalPropertiesRequestsToHM
 
   // TTS global properties
   if (app->help_prompt() || app->timeout_prompt()) {
-    smart_objects::SmartObjectSPtr tts_global_properties =
-        new smart_objects::SmartObject(smart_objects::SmartType_Map);
-
+    smart_objects::SmartObjectSPtr tts_global_properties = CreateRequestObject();
     if (!tts_global_properties) {
       return requests;
     }
 
     (*tts_global_properties)[strings::params][strings::function_id] =
       static_cast<int>(hmi_apis::FunctionID::TTS_SetGlobalProperties);
-    (*tts_global_properties)[strings::params][strings::message_type] =
-      static_cast<int>(hmi_apis::messageType::request);
-    (*tts_global_properties)[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-    (*tts_global_properties)[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-    (*tts_global_properties)[strings::params][strings::correlation_id] =
-      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
     smart_objects::SmartObject tts_msg_params = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
@@ -945,20 +936,12 @@ void MessageHelper::SendTTSGlobalProperties(
   if (!app) {
     return;
   }
-  smart_objects::SmartObjectSPtr tts_global_properties(
-      new smart_objects::SmartObject);
+  smart_objects::SmartObjectSPtr tts_global_properties = CreateRequestObject();
   if (tts_global_properties) {
     smart_objects::SmartObject& so_to_send = *tts_global_properties;
     so_to_send[strings::params][strings::function_id] =
         static_cast<int>(hmi_apis::FunctionID::TTS_SetGlobalProperties);
-    so_to_send[strings::params][strings::message_type] =
-        static_cast<int>(hmi_apis::messageType::request);
-    so_to_send[strings::params][strings::protocol_version] =
-        commands::CommandImpl::protocol_version_;
-    so_to_send[strings::params][strings::protocol_type] =
-        commands::CommandImpl::hmi_protocol_type_;
-    so_to_send[strings::params][strings::correlation_id] =
-        ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
     msg_params[strings::help_prompt] = smart_objects::SmartObject(
@@ -1028,18 +1011,10 @@ smart_objects::SmartObjectList MessageHelper::CreateShowRequestToHMI(
   }
 
   if (app->show_command()) {
-    smart_objects::SmartObjectSPtr ui_show = new smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
+    smart_objects::SmartObjectSPtr ui_show = CreateRequestObject();
     (*ui_show)[strings::params][strings::function_id] =
       static_cast<int>(hmi_apis::FunctionID::UI_Show);
-    (*ui_show)[strings::params][strings::message_type] =
-      static_cast<int>(hmi_apis::messageType::request);
-    (*ui_show)[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-    (*ui_show)[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-    (*ui_show)[strings::params][strings::correlation_id] =
-      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
     (*ui_show)[strings::msg_params] = (*app->show_command());
     requests.push_back(ui_show);
   }
@@ -1066,21 +1041,13 @@ void MessageHelper::SendShowConstantTBTRequestToHMI(
   }
 
   if (app->tbt_show_command()) {
-    utils::SharedPtr<smart_objects::SmartObject> navi_show_tbt =
-        new smart_objects::SmartObject(smart_objects::SmartType_Map);
+    smart_objects::SmartObjectSPtr navi_show_tbt = CreateRequestObject();
     if (!navi_show_tbt) {
       return;
     }
     (*navi_show_tbt)[strings::params][strings::function_id] =
       static_cast<int>(hmi_apis::FunctionID::Navigation_ShowConstantTBT);
-    (*navi_show_tbt)[strings::params][strings::message_type] =
-      static_cast<int>(hmi_apis::messageType::request);
-    (*navi_show_tbt)[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-    (*navi_show_tbt)[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-    (*navi_show_tbt)[strings::params][strings::correlation_id] =
-      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
+
     (*navi_show_tbt)[strings::msg_params] = (*app->tbt_show_command());
     DCHECK(ApplicationManagerImpl::instance()->ManageHMICommand(navi_show_tbt));
   }
@@ -1112,23 +1079,13 @@ smart_objects::SmartObjectList MessageHelper::CreateAddCommandRequestToHMI(
   for (; commands.end() != i; ++i) {
     // UI Interface
     if ((*i->second).keyExists(strings::menu_params)) {
-      smart_objects::SmartObjectSPtr ui_command = new smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
-
+      smart_objects::SmartObjectSPtr ui_command = CreateRequestObject();
       if (!ui_command) {
         return requests;
       }
 
       (*ui_command)[strings::params][strings::function_id] =
         static_cast<int>(hmi_apis::FunctionID::UI_AddCommand);
-      (*ui_command)[strings::params][strings::message_type] =
-        static_cast<int>(hmi_apis::messageType::request);
-      (*ui_command)[strings::params][strings::protocol_version] =
-        commands::CommandImpl::protocol_version_;
-      (*ui_command)[strings::params][strings::protocol_type] =
-        commands::CommandImpl::hmi_protocol_type_;
-      (*ui_command)[strings::params][strings::correlation_id] =
-        ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
       smart_objects::SmartObject msg_params = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
@@ -1170,22 +1127,13 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(ApplicationConstSharedPt
     const uint32_t choice_grammar_id = (*(it->second))[strings::grammar_id].asUInt();
     const size_t size = (*(it->second))[strings::choice_set].length();
     for (size_t j = 0; j < size; ++j) {
-      smart_objects::SmartObjectSPtr vr_command = new smart_objects::SmartObject(
-          smart_objects::SmartType_Map);
+      smart_objects::SmartObjectSPtr vr_command = CreateRequestObject();
       if (!vr_command) {
         return requests;
       }
 
       (*vr_command)[strings::params][strings::function_id] =
           static_cast<int>(hmi_apis::FunctionID::VR_AddCommand);
-      (*vr_command)[strings::params][strings::message_type] =
-          static_cast<int>(hmi_apis::messageType::request);
-      (*vr_command)[strings::params][strings::protocol_version] =
-          commands::CommandImpl::protocol_version_;
-      (*vr_command)[strings::params][strings::protocol_type] =
-          commands::CommandImpl::hmi_protocol_type_;
-      (*vr_command)[strings::params][strings::correlation_id] =
-          ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
       smart_objects::SmartObject msg_params = smart_objects::SmartObject(
           smart_objects::SmartType_Map);
@@ -1209,24 +1157,12 @@ MessageHelper::CreateAddVRCommandRequestFromChoiceToHMI(ApplicationConstSharedPt
 smart_objects::SmartObjectSPtr MessageHelper::CreateChangeRegistration(
     int32_t function_id, int32_t language, uint32_t app_id,
     const smart_objects::SmartObject* app_types) {
-  smart_objects::SmartObjectSPtr command = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObjectSPtr command = CreateRequestObject();
   if (!command) {
     return NULL;
   }
   smart_objects::SmartObject& params = *command;
-
-  params[strings::params][strings::message_type] =
-    static_cast<int>(hmi_apis::messageType::request);
-  params[strings::params][strings::protocol_version] =
-    commands::CommandImpl::protocol_version_;
-  params[strings::params][strings::protocol_type] =
-    commands::CommandImpl::hmi_protocol_type_;
-
   params[strings::params][strings::function_id] = function_id;
-
-  params[strings::params][strings::correlation_id] =
-    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -1306,23 +1242,13 @@ void MessageHelper::SendAddVRCommandToHMI(
 smart_objects::SmartObjectSPtr MessageHelper::CreateAddVRCommandToHMI(
     uint32_t cmd_id, const smart_objects::SmartObject& vr_commands,
     uint32_t app_id) {
-  smart_objects::SmartObjectSPtr vr_command = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-
+  smart_objects::SmartObjectSPtr vr_command = CreateRequestObject();
   if (!vr_command) {
     return NULL;
   }
 
   (*vr_command)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::VR_AddCommand;
-  (*vr_command)[strings::params][strings::message_type] =
-    hmi_apis::messageType::request;
-  (*vr_command)[strings::params][strings::protocol_version] =
-    commands::CommandImpl::protocol_version_;
-  (*vr_command)[strings::params][strings::protocol_type] =
-    commands::CommandImpl::hmi_protocol_type_;
-  (*vr_command)[strings::params][strings::correlation_id] =
-    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -1436,23 +1362,13 @@ smart_objects::SmartObjectList MessageHelper::CreateAddSubMenuRequestToHMI(
   const SubMenuMap& sub_menu = accessor.GetData();
   SubMenuMap::const_iterator i = sub_menu.begin();
   for (; sub_menu.end() != i; ++i) {
-    smart_objects::SmartObjectSPtr ui_sub_menu = new smart_objects::SmartObject(
-        smart_objects::SmartType_Map);
-
+    smart_objects::SmartObjectSPtr ui_sub_menu = CreateRequestObject();
     if (!ui_sub_menu) {
       return requsets;
     }
 
     (*ui_sub_menu)[strings::params][strings::function_id] =
       hmi_apis::FunctionID::UI_AddSubMenu;
-    (*ui_sub_menu)[strings::params][strings::message_type] =
-      hmi_apis::messageType::request;
-    (*ui_sub_menu)[strings::params][strings::protocol_version] =
-      commands::CommandImpl::protocol_version_;
-    (*ui_sub_menu)[strings::params][strings::protocol_type] =
-      commands::CommandImpl::hmi_protocol_type_;
-    (*ui_sub_menu)[strings::params][strings::correlation_id] =
-      ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
     smart_objects::SmartObject msg_params = smart_objects::SmartObject(
         smart_objects::SmartType_Map);
@@ -1672,18 +1588,10 @@ void MessageHelper::SendPolicyUpdate(
   const std::string& file_path,
   int timeout,
   const std::vector<int>& retries) {
-  smart_objects::SmartObjectSPtr message = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObjectSPtr message = CreateRequestObject();
   smart_objects::SmartObject& object = *message;
   object[strings::params][strings::function_id] =
     hmi_apis::FunctionID::BasicCommunication_PolicyUpdate;
-  object[strings::params][strings::message_type] = MessageType::kRequest;
-  object[strings::params][strings::correlation_id] =
-    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-  object[strings::params][strings::protocol_version] =
-    commands::CommandImpl::protocol_version_;
-  object[strings::params][strings::protocol_type] =
-    commands::CommandImpl::hmi_protocol_type_;
 
   object[strings::msg_params][hmi_request::file] = file_path;
   object[strings::msg_params][strings::timeout] = timeout;
@@ -1827,23 +1735,13 @@ smart_objects::SmartObjectSPtr MessageHelper::CreateNegativeResponse(
 
 void MessageHelper::SendNaviStartStream(int32_t connection_key) {
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObjectSPtr start_stream = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-
+  smart_objects::SmartObjectSPtr start_stream = CreateRequestObject();
   if (!start_stream) {
     return;
   }
 
   (*start_stream)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::Navigation_StartStream;
-  (*start_stream)[strings::params][strings::message_type] =
-    hmi_apis::messageType::request;
-  (*start_stream)[strings::params][strings::protocol_version] =
-    commands::CommandImpl::protocol_version_;
-  (*start_stream)[strings::params][strings::protocol_type] =
-    commands::CommandImpl::hmi_protocol_type_;
-  (*start_stream)[strings::params][strings::correlation_id] =
-    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -1875,23 +1773,13 @@ void MessageHelper::SendNaviStartStream(int32_t connection_key) {
 }
 
 void MessageHelper::SendNaviStopStream(int32_t connection_key) {
-  smart_objects::SmartObjectSPtr stop_stream = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-
+  smart_objects::SmartObjectSPtr stop_stream = CreateRequestObject();
   if (!stop_stream) {
     return;
   }
 
   (*stop_stream)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::Navigation_StopStream;
-  (*stop_stream)[strings::params][strings::message_type] =
-    hmi_apis::messageType::request;
-  (*stop_stream)[strings::params][strings::protocol_version] =
-    commands::CommandImpl::protocol_version_;
-  (*stop_stream)[strings::params][strings::protocol_type] =
-    commands::CommandImpl::hmi_protocol_type_;
-  (*stop_stream)[strings::params][strings::correlation_id] =
-    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -1909,23 +1797,13 @@ void MessageHelper::SendNaviStopStream(int32_t connection_key) {
 
 void MessageHelper::SendAudioStartStream(int32_t connection_key) {
 
-  smart_objects::SmartObjectSPtr start_stream = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-
+  smart_objects::SmartObjectSPtr start_stream = CreateRequestObject();
   if (!start_stream) {
     return;
   }
 
   (*start_stream)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::Navigation_StartAudioStream;
-  (*start_stream)[strings::params][strings::message_type] =
-    hmi_apis::messageType::request;
-  (*start_stream)[strings::params][strings::protocol_version] =
-    commands::CommandImpl::protocol_version_;
-  (*start_stream)[strings::params][strings::protocol_type] =
-    commands::CommandImpl::hmi_protocol_type_;
-  (*start_stream)[strings::params][strings::correlation_id] =
-    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -1958,23 +1836,13 @@ void MessageHelper::SendAudioStartStream(int32_t connection_key) {
 }
 
 void MessageHelper::SendAudioStopStream(int32_t connection_key) {
-  smart_objects::SmartObjectSPtr stop_stream = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
-
+  smart_objects::SmartObjectSPtr stop_stream = CreateRequestObject();
   if (!stop_stream) {
     return;
   }
 
   (*stop_stream)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::Navigation_StopAudioStream;
-  (*stop_stream)[strings::params][strings::message_type] =
-    hmi_apis::messageType::request;
-  (*stop_stream)[strings::params][strings::protocol_version] =
-    commands::CommandImpl::protocol_version_;
-  (*stop_stream)[strings::params][strings::protocol_type] =
-    commands::CommandImpl::hmi_protocol_type_;
-  (*stop_stream)[strings::params][strings::correlation_id] =
-    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
       smart_objects::SmartType_Map);
@@ -2023,18 +1891,12 @@ void MessageHelper::SendOnDataStreaming(protocol_handler::ServiceType service,
 bool MessageHelper::SendStopAudioPathThru() {
   LOG4CXX_INFO(logger_, "MessageHelper::SendAudioStopAudioPathThru");
 
-  smart_objects::SmartObjectSPtr result = new smart_objects::SmartObject;
-  const uint32_t hmi_correlation_id = ApplicationManagerImpl::instance()
-                                      ->GetNextHMICorrelationID();
+  smart_objects::SmartObjectSPtr result = CreateRequestObject();
+
   smart_objects::SmartObject& request = *result;
-  request[strings::params][strings::message_type] = MessageType::kRequest;
   request[strings::params][strings::function_id] =
     hmi_apis::FunctionID::UI_EndAudioPassThru;
-  request[strings::params][strings::correlation_id] = hmi_correlation_id;
-  request[strings::params][strings::protocol_version] =
-    commands::CommandImpl::protocol_version_;
-  request[strings::params][strings::protocol_type] =
-    commands::CommandImpl::hmi_protocol_type_;
+
   return ApplicationManagerImpl::instance()->ManageHMICommand(result);
 }
 
@@ -2382,22 +2244,13 @@ void MessageHelper::SendOnStatusUpdate(const std::string& status) {
 }
 
 void MessageHelper::SendGetSystemInfoRequest() {
-  smart_objects::SmartObjectSPtr message = new smart_objects::SmartObject(
-      smart_objects::SmartType_Map);
+  smart_objects::SmartObjectSPtr message = CreateRequestObject();
   if (!message) {
     return;
   }
 
   (*message)[strings::params][strings::function_id] =
     hmi_apis::FunctionID::BasicCommunication_GetSystemInfo;
-  (*message)[strings::params][strings::message_type] =
-    MessageType::kRequest;
-  (*message)[strings::params][strings::correlation_id] =
-    ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
-  (*message)[strings::params][strings::protocol_version] =
-    commands::CommandImpl::protocol_version_;
-  (*message)[strings::params][strings::protocol_type] =
-    commands::CommandImpl::hmi_protocol_type_;
 
   ApplicationManagerImpl::instance()->ManageHMICommand(message);
 }
