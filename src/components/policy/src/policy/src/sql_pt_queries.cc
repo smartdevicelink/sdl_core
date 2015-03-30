@@ -626,6 +626,8 @@ const std::string kUpdateCountersSuccessfulUpdate =
 
 const std::string kDeleteApplication = "DELETE FROM `application`";
 
+const std::string kDeleteRequestType = "DELETE FROM `request_type`";
+
 const std::string kSelectApplicationRevoked =
   "SELECT `is_revoked` FROM `application` WHERE `id` = ?";
 

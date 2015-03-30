@@ -792,6 +792,11 @@ bool SQLPTRepresentation::SaveApplicationPolicies(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteRequestType)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from request type.");
+    return false;
+  }
+
   // All predefined apps (e.g. default, pre_DataConsent) should be saved first,
   // otherwise another app with the predefined permissions can get incorrect
   // permissions

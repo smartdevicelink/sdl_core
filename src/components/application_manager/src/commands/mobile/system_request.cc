@@ -73,6 +73,12 @@ void SystemRequest::Run() {
       static_cast<mobile_apis::RequestType::eType>(
           (*message_)[strings::msg_params][strings::request_type].asInt());
 
+  if (!policy::PolicyHandler::instance()->IsRequestTypeAllowed(
+           application->mobile_app_id(), request_type)) {
+    SendResponse(false, mobile_apis::Result::DISALLOWED);
+    return;
+  }
+
   if (!(*message_)[strings::params].keyExists(strings::binary_data) &&
       (mobile_apis::RequestType::PROPRIETARY == request_type ||
        mobile_apis::RequestType::QUERY_APPS == request_type)) {
@@ -140,11 +146,6 @@ void SystemRequest::Run() {
       return;
     }
   } else {
-    if (!policy::PolicyHandler::instance()->IsRequestTypeAllowed(
-             application->mobile_app_id(), request_type)) {
-      SendResponse(false, mobile_apis::Result::DISALLOWED);
-      return;
-    }
     std::string app_file_path =
         profile::Profile::instance()->app_storage_folder();
     std::string app_full_file_path = app_file_path + "/" + file_name;

@@ -84,17 +84,6 @@ void OnSystemRequestNotification::Run() {
     return;
   }
 
-  const mobile_apis::RequestType::eType request_type =
-      static_cast<mobile_apis::RequestType::eType>(
-          (*message_)[strings::msg_params][strings::request_type].asInt());
-
-  if (!policy::PolicyHandler::instance()->IsRequestTypeAllowed(
-           app->mobile_app_id(), request_type)) {
-      LOG4CXX_WARN(logger_, "Request type "  << request_type
-                   <<" is not allowed by policies");
-    return;
-  }
-
   params[strings::connection_key] = app->app_id();
   SendNotificationToMobile(message_);
 }
