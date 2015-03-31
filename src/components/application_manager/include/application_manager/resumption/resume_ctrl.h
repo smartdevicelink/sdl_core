@@ -410,10 +410,22 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
                         const smart_objects::SmartObject* msg_params = NULL,
                         bool use_events = false);
 
+    /**
+     * @brief Process specified HMI request
+     *
+     * @param request Request to process
+     * @param use_events Process request events or not flag
+     *
+     * @return TRUE on success, otherwise FALSE
+     */
     bool ProcessHMIRequest(
         smart_objects::SmartObjectSPtr request = NULL,
         bool use_events = false);
 
+    /**
+     * @brief Process list of HMI requests using ProcessHMIRequest method
+     * @param requests List of requests to process
+     */
     void ProcessHMIRequests(const smart_objects::SmartObjectList& requests);
 
     void InsertToTimerQueue(uint32_t app_id, uint32_t time_stamp);
