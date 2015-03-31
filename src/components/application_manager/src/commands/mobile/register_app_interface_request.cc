@@ -465,13 +465,13 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
     resumption = resumer.IsApplicationSaved(application->mobile_app_id());
   }
 
-  MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()),
-                                                      resumption,
-                                                      need_restore_vr);
 
   MessageHelper::SendChangeRegistrationRequestToHMI(application);
 
   SendResponse(true, result, add_info.c_str(), &response_params);
+  MessageHelper::SendOnAppRegisteredNotificationToHMI(*(application.get()),
+                                                      resumption,
+                                                      need_restore_vr);
   if (result != mobile_apis::Result::RESUME_FAILED) {
     resumer.StartResumption(application, hash_id);
   } else {

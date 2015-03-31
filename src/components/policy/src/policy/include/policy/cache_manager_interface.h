@@ -566,6 +566,15 @@ class CacheManagerInterface {
       const std::string& device_id,
       const std::string& policy_app_id,
       policy::Permissions& permission) = 0;
+
+  /**
+   * @brief Gets request types for application
+   * @param policy_app_id Unique application id
+   * @param request_types Request types of application
+   */
+  virtual void GetAppRequestTypes(
+      const std::string& policy_app_id,
+      std::vector<std::string>& request_types) const = 0;
 };
 
 typedef utils::SharedPtr<CacheManagerInterface> CacheManagerInterfaceSPtr;

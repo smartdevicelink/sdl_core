@@ -1039,6 +1039,27 @@ int32_t CacheManager::GenerateHash(const std::string& str_to_hash) {
   return result;
 }
 
+void CacheManager::GetAppRequestTypes(
+    const std::string& policy_app_id,
+    std::vector<std::string>& request_types) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+  CACHE_MANAGER_CHECK_VOID();
+  policy_table::ApplicationPolicies::iterator policy_iter =
+      pt_->policy_table.app_policies.find(policy_app_id);
+  if (pt_->policy_table.app_policies.end() == policy_iter) {
+    LOG4CXX_DEBUG(logger_, "Can't find request types for app_id "
+                  << policy_app_id);
+    return;
+  }
+  policy_table::RequestTypes::iterator it_request_type =
+      policy_iter->second.RequestType->begin();
+  for (;it_request_type != policy_iter->second.RequestType->end();
+       ++it_request_type) {
+    request_types.push_back(EnumToJsonString(*it_request_type));
+  }
+  return;
+}
+
 CacheManager::BackgroundBackuper::BackgroundBackuper(CacheManager* cache_manager)
   : cache_manager_(cache_manager),
     stop_flag_(false),

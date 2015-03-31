@@ -923,6 +923,20 @@
       <element name="AUTH_CHALLENGE"/>
       <element name="AUTH_ACK"/>
       <element name="PROPRIETARY"/>
+      <element name="QUERY_APPS" />
+      <element name="LAUNCH_APP" />
+      <element name="LOCK_SCREEN_ICON_URL" />
+      <element name="TRAFFIC_MESSAGE_CHANNEL" />
+      <element name="DRIVER_PROFILE" />
+      <element name="VOICE_SEARCH" />
+      <element name="NAVIGATION" />
+      <element name="PHONE" />
+      <element name="CLIMATE" />
+      <element name="SETTINGS" />
+      <element name="VEHICLE_DIAGNOSTICS" />
+      <element name="EMERGENCY" />
+      <element name="MEDIA" />
+      <element name="FOTA" />
     </enum>
     <enum name="ECallConfirmationStatus">
       <description>Reflects the status of the eCall Notification.</description>
@@ -1269,6 +1283,13 @@
       <param name="greyOut" type="Boolean" mandatory="false">
         <description>Indicates whether application should be dimmed on the screen.</description>
         <description>Applicable only for apps received through QueryApps and still not registered.</description>
+      </param>
+      <param name="requestType" type="Common.RequestType" minsize="0" maxsize="100" array="true" mandatory="false">
+        <description>The list of SystemRequest's RequestTypes allowed by policies for the named application</description>
+        <description>(the app's SystemRequest sent with RequestType out of this list will get 'disallowed' response from SDL).</description>
+        <description>If SDL sends an empty array - any RequestType is allowed for this app.</description>
+        <description>If SDL omits this parameter - none RequestType is allowed for this app</description>
+        <description>(either this is a pre-registered app or such is dictated by policies).</description>
       </param>
     </struct>
     <struct name="MenuParams">
@@ -4095,6 +4116,12 @@
       </param>
       <param name="priority" type="Common.AppPriority" mandatory="false">
         <description>Send to HMI so that it can coordinate order of requests/notifications correspondingly.</description>
+      </param>
+      <param name="requestType" type="Common.RequestType" minsize="0" maxsize="100" array="true" mandatory="false">
+        <description>The list of SystemRequest's RequestTypes allowed by policies for the named application (the app's SystemRequest sent with RequestType           out of this list will get 'disallowed' response from SDL).
+        If SDL sends an empty array - any RequestType is allowed for this app.
+        If SDL omits this parameter - nothing is changed for RequestType in the policies
+        </description>
       </param>
     </function>
     <function name="OnSDLConsentNeeded" messagetype="notification" provider="sdl">

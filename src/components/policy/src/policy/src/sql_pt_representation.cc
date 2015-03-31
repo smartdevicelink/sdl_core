@@ -635,14 +635,16 @@ bool SQLPTRepresentation::GatherApplicationPolicies(
     if (!GatherAppGroup(app_id, &params.groups)) {
       return false;
     }
-    // TODO(IKozyrenko): Check logic if optional container is missing
     if (!GatherNickName(app_id, &*params.nicknames)) {
       return false;
     }
-    // TODO(IKozyrenko): Check logic if optional container is missing
     if (!GatherAppType(app_id, &*params.AppHMIType)) {
       return false;
     }
+    if (!GatherRequestType(app_id, &*params.RequestType)) {
+      return false;
+    }
+
     (*apps)[app_id] = params;
   }
   return true;
@@ -790,6 +792,11 @@ bool SQLPTRepresentation::SaveApplicationPolicies(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteRequestType)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from request type.");
+    return false;
+  }
+
   // All predefined apps (e.g. default, pre_DataConsent) should be saved first,
   // otherwise another app with the predefined permissions can get incorrect
   // permissions
@@ -862,12 +869,14 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
   if (!SaveAppGroup(app.first, app.second.groups)) {
     return false;
   }
-  // TODO(IKozyrenko): Check logic if optional container is missing
   if (!SaveNickname(app.first, *app.second.nicknames)) {
     return false;
   }
-  // TODO(IKozyrenko): Check logic if optional container is missing
   if (!SaveAppType(app.first, *app.second.AppHMIType)) {
+    return false;
+  }
+
+  if (!SaveRequestType(app.first, *app.second.RequestType)) {
     return false;
   }
 
@@ -934,6 +943,28 @@ bool SQLPTRepresentation::SaveAppType(const std::string& app_id,
     query.Bind(1, std::string(policy_table::EnumToJsonString(*it)));
     if (!query.Exec() || !query.Reset()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into app type.");
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool SQLPTRepresentation::SaveRequestType(
+    const std::string& app_id,
+    const policy_table::RequestTypes& types) {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kInsertRequestType)) {
+    LOG4CXX_WARN(logger_, "Incorrect insert statement for request types.");
+    return false;
+  }
+
+  policy_table::RequestTypes::const_iterator it;
+  for (it = types.begin(); it != types.end(); ++it) {
+    query.Bind(0, app_id);
+    query.Bind(1, std::string(policy_table::EnumToJsonString(*it)));
+    if (!query.Exec() || !query.Reset()) {
+      LOG4CXX_WARN(logger_, "Incorrect insert into request types.");
       return false;
     }
   }
@@ -1293,6 +1324,26 @@ bool SQLPTRepresentation::GatherAppType(
       return false;
     }
     app_types->push_back(type);
+  }
+  return true;
+}
+
+bool SQLPTRepresentation::GatherRequestType(
+    const std::string& app_id,
+    policy_table::RequestTypes* request_types) const {
+  dbms::SQLQuery query(db());
+  if (!query.Prepare(sql_pt::kSelectRequestTypes)) {
+    LOG4CXX_WARN(logger_, "Incorrect select from request types.");
+    return false;
+  }
+
+  query.Bind(0, app_id);
+  while (query.Next()) {
+    policy_table::RequestType type;
+    if (!policy_table::EnumFromJsonString(query.GetString(0), &type)) {
+      return false;
+    }
+    request_types->push_back(type);
   }
   return true;
 }

@@ -552,6 +552,13 @@ class CacheManager : public CacheManagerInterface {
    */
   static int32_t GenerateHash(const std::string& str_to_hash);
 
+  /**
+   * @brief Gets request types for application
+   * @param policy_app_id Unique application id
+   * @param request_types Request types of application
+   */
+  void GetAppRequestTypes(const std::string& policy_app_id,
+                          std::vector<std::string>& request_types) const;
 private:
   std::string currentDateTime();
   struct AppHMITypeToString {

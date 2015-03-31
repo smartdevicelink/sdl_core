@@ -2119,6 +2119,18 @@
     <element name="PROPRIETARY" />
     <element name="QUERY_APPS" />
     <element name="LAUNCH_APP" />
+    <element name="LOCK_SCREEN_ICON_URL" />
+    <element name="TRAFFIC_MESSAGE_CHANNEL" />
+    <element name="DRIVER_PROFILE" />
+    <element name="VOICE_SEARCH" />
+    <element name="NAVIGATION" />
+    <element name="PHONE" />
+    <element name="CLIMATE" />
+    <element name="SETTINGS" />
+    <element name="VEHICLE_DIAGNOSTICS" />
+    <element name="EMERGENCY" />
+    <element name="MEDIA" />
+    <element name="FOTA" />
   </enum>
 
   <enum name="AppHMIType">
@@ -4626,6 +4638,13 @@
         <element name="REJECTED"/> 
         <element name="INVALID_CERT"/> 
         <element name="EXPIRED_CERT"/> 
+        <element name="UNSUPPORTED_REQUEST"/>
+        <element name="UNSUPPORTED_RESOURCE"/>
+        <element name="DISALLOWED"/>
+        <element name="ABORTED"/>
+        <element name="WARNINGS"/>
+        <element name="TIMED_OUT"/>
+        <element name="IGNORED"/>
      </param>
   </function> 
 

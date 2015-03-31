@@ -92,7 +92,8 @@ struct CheckAppPolicy {
         RESULT_PERMISSIONS_REVOKED,
         RESULT_CONSENT_NEEDED,
         RESULT_CONSENT_NOT_REQIURED,
-        RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED
+        RESULT_PERMISSIONS_REVOKED_AND_CONSENT_NEEDED,
+        RESULT_REQUEST_TYPE_CHANGED
     };
 
     void SetPendingPermissions(const AppPoliciesValueType& app_policy,
@@ -121,6 +122,9 @@ struct CheckAppPolicy {
      */
     bool IsConsentRequired(const std::string& app_id,
                            const std::string& group_name) const;
+    bool IsRequestTypeChanged(const AppPoliciesValueType& app_policy) const;
+
+  private:
     PolicyManagerImpl* pm_;
     const utils::SharedPtr<policy_table::Table> update_;
     const utils::SharedPtr<policy_table::Table> snapshot_;

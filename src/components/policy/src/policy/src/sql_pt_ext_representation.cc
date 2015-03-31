@@ -634,6 +634,11 @@ bool SQLPTExtRepresentation::SaveApplicationPolicies(
     return false;
   }
 
+  if (!query_delete.Exec(sql_pt::kDeleteRequestType)) {
+    LOG4CXX_WARN(logger_, "Incorrect delete from request type.");
+    return false;
+  }
+
   // First, all predefined apps (e.g. default, pre_DataConsent) should be saved,
   // otherwise another app with the predefined permissions can get incorrect
   // permissions
@@ -680,8 +685,14 @@ bool SQLPTExtRepresentation::SaveSpecificAppPolicy(
       if (!SetDefaultPolicy(app.first)) {
         return false;
       }
+      if (!SaveRequestType(app.first, *app.second.RequestType)) {
+        return false;
+      }
     } else if (kPreDataConsentId.compare(app.second.get_string()) == 0) {
       if (!SetPredataPolicy(app.first)) {
+        return false;
+      }
+      if (!SaveRequestType(app.first, *app.second.RequestType)) {
         return false;
       }
     }
@@ -776,15 +787,15 @@ bool SQLPTExtRepresentation::GatherApplicationPolicies(
     if (!GatherAppGroup(app_id, &params.groups)) {
       return false;
     }
-    // TODO(IKozyrenko): Check logic if optional container is missing
     if (!GatherNickName(app_id, &*params.nicknames)) {
       return false;
     }
-    // TODO(IKozyrenko): Check logic if optional container is missing
     if (!GatherAppType(app_id, &*params.AppHMIType)) {
       return false;
     }
-    // TODO(IKozyrenko): Check logic if optional container is missing
+    if (!GatherRequestType(app_id, &*params.RequestType)) {
+      return false;
+    }
     GatherPreconsentedGroup(app_id, &*params.preconsented_groups);
     (*apps)[app_id] = params;
   }

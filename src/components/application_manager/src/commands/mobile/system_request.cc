@@ -37,6 +37,7 @@ Copyright (c) 2013, Ford Motor Company
 #include "application_manager/commands/mobile/system_request.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "application_manager/policies/policy_handler.h"
 #include "interfaces/MOBILE_API.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
@@ -71,6 +72,12 @@ void SystemRequest::Run() {
   const mobile_apis::RequestType::eType request_type =
       static_cast<mobile_apis::RequestType::eType>(
           (*message_)[strings::msg_params][strings::request_type].asInt());
+
+  if (!policy::PolicyHandler::instance()->IsRequestTypeAllowed(
+           application->mobile_app_id(), request_type)) {
+    SendResponse(false, mobile_apis::Result::DISALLOWED);
+    return;
+  }
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data) &&
       (mobile_apis::RequestType::PROPRIETARY == request_type ||
@@ -139,10 +146,17 @@ void SystemRequest::Run() {
       return;
     }
   } else {
-    if (!(file_system::CreateFile(full_file_path))) {
-      SendResponse(false, mobile_apis::Result::GENERIC_ERROR);
+    std::string app_file_path =
+        profile::Profile::instance()->app_storage_folder();
+    std::string app_full_file_path = app_file_path + "/" + file_name;
+
+    const AppFile* file = application->GetFile(app_full_file_path);
+    if (!file || !file->is_download_complete ||
+        !file_system::MoveFile(app_full_file_path, full_file_path)) {
+      SendResponse(false, mobile_apis::Result::REJECTED);
       return;
     }
+    processing_file_ = full_file_path;
   }
 
   smart_objects::SmartObject msg_params = smart_objects::SmartObject(
@@ -182,6 +196,10 @@ void SystemRequest::on_event(const event_engine::Event& event) {
         return;
       }
 
+      if (!processing_file_.empty()) {
+        file_system::DeleteFile(processing_file_);
+        processing_file_.clear();
+      }
       SendResponse(result, result_code, NULL, &(message[strings::msg_params]));
       break;
     }
