@@ -130,15 +130,11 @@ FakeRequestInfo::FakeRequestInfo(uint32_t app_id, uint32_t correaltion_id) {
 }
 
 bool RequestInfoSet::Add(RequestInfoPtr request_info) {
-  DCHECK(request_info);
-  if (!request_info) {
-    LOG4CXX_ERROR(logger_, "NULL ponter request_info");
-    return false;
-  }
+  DCHECK_OR_RETURN(request_info, false);
   LOG4CXX_DEBUG(logger_, "Add request app_id = " << request_info->app_id()
                 << "; corr_id = " << request_info->requestId());
-  CheckSetSizes();
   sync_primitives::AutoLock lock(this_lock_);
+  CheckSetSizes();
   const std::pair<HashSortedRequestInfoSet::iterator, bool>& insert_resilt =
       hash_sorted_pending_requests_.insert(request_info);
   if (insert_resilt.second == true) {

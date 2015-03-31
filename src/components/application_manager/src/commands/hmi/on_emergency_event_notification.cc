@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,32 +30,30 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_app_activated_notification.h"
+#include "application_manager/commands/hmi/on_emergency_event_notification.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/message_helper.h"
-#include "interfaces/HMI_API.h"
 
 namespace application_manager {
 
 namespace commands {
 
-OnAppActivatedNotification::OnAppActivatedNotification(
+OnEmergencyEventNotification::OnEmergencyEventNotification(
     const MessageSharedPtr& message)
     : NotificationFromHMI(message) {
 }
 
-OnAppActivatedNotification::~OnAppActivatedNotification() {
+OnEmergencyEventNotification::~OnEmergencyEventNotification() {
 }
 
-void OnAppActivatedNotification::Run() {
+void OnEmergencyEventNotification::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
-  uint32_t app_id = ((*message_)[strings::msg_params][strings::app_id]).asUInt();
-  ApplicationManagerImpl::instance()->SetState<true>(app_id,
-                                               mobile_apis::HMILevel::HMI_FULL
-                                               );
+  event_engine::Event event(hmi_apis::FunctionID::BasicCommunication_OnEmergencyEvent);
+  event.set_smart_object(*message_);
+  event.raise();
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
+
 

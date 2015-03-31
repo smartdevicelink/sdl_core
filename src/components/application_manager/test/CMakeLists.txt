@@ -72,6 +72,7 @@ set(AM_SOURCES
   ${AM_SOURCE_DIR}/src/request_info.cc
   ${AM_SOURCE_DIR}/src/message.cc
   ${AM_SOURCE_DIR}/src/application_impl.cc
+  ${AM_SOURCE_DIR}/src/state_controller.cc
   ${AM_SOURCE_DIR}/src/mobile_command_factory.cc
   ${AM_SOURCE_DIR}/src/message_helper.cc
   ${AM_SOURCE_DIR}/src/hmi_command_factory.cc
