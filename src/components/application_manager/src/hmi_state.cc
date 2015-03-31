@@ -30,15 +30,8 @@ void HmiState::set_parent(HmiStatePtr parent) {
 
 mobile_apis::AudioStreamingState::eType
 VRHmiState::audio_streaming_state() const {
-  using namespace helpers;
   using namespace mobile_apis;
-  AudioStreamingState::eType expected_state = AudioStreamingState::NOT_AUDIBLE;
-  if (state_context_.is_attenuated_supported() &&
-      Compare<HMILevel::eType, EQ, ONE> (hmi_level(), HMILevel::HMI_FULL,
-                                         HMILevel::HMI_LIMITED)) {
-      expected_state = AudioStreamingState::ATTENUATED;
-  }
-  return expected_state;
+  return AudioStreamingState::NOT_AUDIBLE;
 }
 
 VRHmiState::VRHmiState(uint32_t app_id, StateContext& state_context):
