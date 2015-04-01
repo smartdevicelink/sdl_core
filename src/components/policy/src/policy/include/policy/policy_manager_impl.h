@@ -166,6 +166,7 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual void OnAppsSearchCompleted();
 
+    void OnAppRegisteredOnMobile(const std::string& application_id);
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(
         const BinaryMessage& pt_content);

@@ -472,6 +472,8 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
 
   ApplicationListAccessor app_list_accesor;
   application->MarkRegistered();
+  policy::PolicyHandler::instance()->AddApplication(application->mobile_app_id());
+  application->set_hmi_level(GetDefaultHmiLevel(application));
   app_list_accesor.Insert(application);
 
   return application;

@@ -781,6 +781,12 @@ bool PolicyManagerImpl::CanAppStealFocus(const std::string& app_id) {
 void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
 }
 
+void PolicyManagerImpl::OnAppRegisteredOnMobile(
+    const std::string& application_id) {
+  StartPTExchange();
+  SendNotificationOnPermissionsUpdated(application_id);
+}
+
 void PolicyManagerImpl::AddApplication(const std::string& application_id) {
   LOG4CXX_INFO(logger_, "AddApplication");
   const std::string device_id = GetCurrentDeviceId(application_id);
@@ -793,8 +799,6 @@ void PolicyManagerImpl::AddApplication(const std::string& application_id) {
   } else {
     PromoteExistedApplication(application_id, device_consent);
   }
-  StartPTExchange();
-  SendNotificationOnPermissionsUpdated(application_id);
 }
 
 void PolicyManagerImpl::RemoveAppConsentForGroup(const std::string& app_id,
