@@ -287,9 +287,13 @@ void ResetGlobalPropertiesRequest::on_event(const event_engine::Event& event) {
 
     ApplicationSharedPtr application =
         ApplicationManagerImpl::instance()->application(connection_key());
-    SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
-                     return_info, &(message[strings::msg_params]));
-    application->UpdateHash();
+    if (application) {
+      SendResponse(result, static_cast<mobile_apis::Result::eType>(result_code),
+                       return_info, &(message[strings::msg_params]));
+      application->UpdateHash();
+    } else {
+      LOG4CXX_WARN(logger_, "unable to find application: " << connection_key());
+    }
   }
 }
 
