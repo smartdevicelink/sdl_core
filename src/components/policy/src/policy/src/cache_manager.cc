@@ -895,7 +895,10 @@ bool CacheManager::IsPredataPolicy(const std::string &app_id) {
                         specific_app.groups.end(),
                         std::back_inserter(res));
 
-  return !res.empty();
+  bool is_marked_as_predata =
+      kPreDataConsentId == pt_->policy_table.app_policies[app_id].get_string();
+
+  return !res.empty() && is_marked_as_predata;
 }
 
 bool CacheManager::SetUnpairedDevice(const std::string &device_id,
