@@ -170,10 +170,10 @@ void PolicyManagerImpl::CheckPermissionsChanges(
 
   // Replace predefined policies with its actual setting, e.g. "123":"default"
   // to actual values of default section
-  UnwrapAppPolicies(pt_update->policy_table.app_policies);
+  UnwrapAppPolicies(pt_update->policy_table.app_policies_section.apps);
 
-  std::for_each(pt_update->policy_table.app_policies.begin(),
-                pt_update->policy_table.app_policies.end(),
+  std::for_each(pt_update->policy_table.app_policies_section.apps.begin(),
+                pt_update->policy_table.app_policies_section.apps.end(),
                 CheckAppPolicy(this, pt_update, snapshot));
 }
 

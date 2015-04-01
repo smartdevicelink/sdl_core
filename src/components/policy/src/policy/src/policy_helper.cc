@@ -133,7 +133,7 @@ bool policy::CheckAppPolicy::HasRevokedGroups(
     const policy::AppPoliciesValueType& app_policy,
     policy_table::Strings* revoked_groups) const {
   AppPoliciesConstItr it =
-      snapshot_->policy_table.app_policies.find(app_policy.first);
+      snapshot_->policy_table.app_policies_section.apps.find(app_policy.first);
 
   policy_table::Strings groups_new = app_policy.second.groups;
   std::sort(groups_new.begin(), groups_new.end(), Compare);
@@ -163,7 +163,7 @@ bool policy::CheckAppPolicy::HasNewGroups(
     const policy::AppPoliciesValueType& app_policy,
     policy_table::Strings* new_groups) const {
   AppPoliciesConstItr it =
-      snapshot_->policy_table.app_policies.find(app_policy.first);
+      snapshot_->policy_table.app_policies_section.apps.find(app_policy.first);
 
   policy_table::Strings groups_new = app_policy.second.groups;
   std::sort(groups_new.begin(), groups_new.end(), Compare);
@@ -244,7 +244,7 @@ void policy::CheckAppPolicy::RemoveRevokedConsents(
 bool CheckAppPolicy::IsKnownAppication(
     const std::string& application_id) const {
   const policy_table::ApplicationPolicies& current_policies =
-      snapshot_->policy_table.app_policies;
+      snapshot_->policy_table.app_policies_section.apps;
 
   return !(current_policies.end() == current_policies.find(application_id));
 }
@@ -430,15 +430,14 @@ bool CheckAppPolicy::IsConsentRequired(const std::string& app_id,
   }
 
   bool is_preconsented = false;
-
   return it->second.user_consent_prompt.is_initialized() && !is_preconsented;
 }
 
 bool CheckAppPolicy::IsRequestTypeChanged(
     const AppPoliciesValueType& app_policy) const {
   policy::AppPoliciesConstItr it =
-      snapshot_->policy_table.app_policies.find(app_policy.first);
-  if (it == snapshot_->policy_table.app_policies.end()) {
+      snapshot_->policy_table.app_policies_section.apps.find(app_policy.first);
+  if (it == snapshot_->policy_table.app_policies_section.apps.end()) {
     if (!app_policy.second.RequestType->empty()) {
       return true;
     }

@@ -99,8 +99,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       policy_table::FunctionalGroupings* groups) const;
     virtual bool GatherConsumerFriendlyMessages(
       policy_table::ConsumerFriendlyMessages* messages) const;
-    virtual bool GatherApplicationPolicies(
-      policy_table::ApplicationPolicies* apps) const;
+    virtual bool GatherApplicationPoliciesSection(
+      policy_table::ApplicationPoliciesSection* policies) const;
 
     bool GatherAppGroup(const std::string& app_id,
                         policy_table::Strings* app_groups) const;
@@ -125,10 +125,11 @@ class SQLPTRepresentation : public virtual PTRepresentation {
       const policy_table::FunctionalGroupings& groups);
     virtual bool SaveConsumerFriendlyMessages(
       const policy_table::ConsumerFriendlyMessages& messages);
-    virtual bool SaveApplicationPolicies(
-      const policy_table::ApplicationPolicies& apps);
+    virtual bool SaveApplicationPoliciesSection(
+      const policy_table::ApplicationPoliciesSection& policies);
     virtual bool SaveSpecificAppPolicy(
       const policy_table::ApplicationPolicies::value_type& app);
+    virtual bool SaveDevicePolicy(const policy_table::DevicePolicy& device);
 
     virtual bool SaveMessageString(const std::string& type,
                                    const std::string& lang,
