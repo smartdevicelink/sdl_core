@@ -56,6 +56,8 @@ namespace Json {
 class Value;
 }
 
+using application_manager::SeatLocation;
+
 namespace policy {
 typedef std::vector<uint32_t> AppIds;
 typedef std::vector<uint32_t> DeviceHandles;
@@ -100,20 +102,27 @@ class PolicyHandler :
    */
   application_manager::TypeAccess CheckAccess(const PTString& app_id,
                                               const PTString& rpc,
-                                              const std::string& seat);
+                                              const SeatLocation& seat,
+                                              const SeatLocation& zone);
 
   /**
    * Sets access to equipment of vehicle for application by RPC
    * @param app_id policy id application
    * @param rpc name of RPC
    */
-  void SetAccess(const PTString& app_id, const PTString& rpc);
+  void AddAccess(const PTString& app_id, const PTString& rpc);
 
   /**
    * Removes access to equipment of vehicle for all application by RPC
    * @param rpc name of RPC
    */
   void RemoveAccess(const PTString& rpc);
+
+  /**
+   * Sets device as driver's device
+   * @param dev_id ID device
+   */
+  void SetDriverDevice(const std::string& dev_id);
 
   uint32_t GetNotificationsNumber(const std::string& priority);
   DeviceConsent GetUserConsentForDevice(const std::string& device_id);

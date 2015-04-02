@@ -42,18 +42,22 @@ class ZoneControllerImpl : public ZoneController {
  public:
   explicit ZoneControllerImpl(CacheManager& cache);
 
-  virtual bool IsDriver(const PTString& dev_id);
-  virtual bool IsPassengerZone(const PTString& seat, const PTString& zone);
-  virtual policy::TypeAccess IsAccess(const PTString& dev_id,
-                                      const PTString& app_id,
-                                      const PTString& func_id);
-  virtual void SetAccess(const PTString& dev_id, const PTString& app_id,
+  virtual bool IsDriverDevice(const PTString& dev_id) const;
+  virtual bool IsPassengerZone(const SeatLocation& seat,
+                               const SeatLocation& zone) const;
+  virtual policy::TypeAccess CheckAccess(const PTString& dev_id,
+                                         const PTString& app_id,
+                                         const PTString& func_id,
+                                         const SeatLocation& zone) const;
+  virtual void AddAccess(const PTString& dev_id, const PTString& app_id,
                          const PTString& func_id);
   virtual void RemoveAccess(const PTString& func_id);
+  virtual void SetDriverDevice(const PTString& dev_id);
 
  private:
   CacheManager& cache_;
   TypeAccess access_;
+  PTString driver_device_;
 };
 
 }  // namespace policy

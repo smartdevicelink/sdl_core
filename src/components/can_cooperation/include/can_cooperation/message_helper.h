@@ -39,6 +39,7 @@
 
 #include "utils/macro.h"
 #include "json/json.h"
+#include "functional_module/function_ids.h"
 
 namespace can_cooperation {
 

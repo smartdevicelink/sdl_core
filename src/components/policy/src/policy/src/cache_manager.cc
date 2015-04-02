@@ -366,7 +366,7 @@ void CacheManager::CheckPermissions(const PTString &app_id,
                   << " was not found in policy DB.");
     return;
   }
-
+// TODO(KKolodiy): here need choose other goups for revsdl if it is needed
   policy_table::Strings::const_iterator app_groups_iter =
       pt_->policy_table.app_policies[app_id].groups.begin();
 

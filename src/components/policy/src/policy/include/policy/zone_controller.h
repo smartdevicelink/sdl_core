@@ -42,6 +42,8 @@ enum TypeAccess {
   kManual
 };
 
+typedef int SeatLocation;
+
 class ZoneController {
  public:
   virtual ~ZoneController() {
@@ -52,7 +54,7 @@ class ZoneController {
    * @param dev_id unique device id
    * @return true if device is have driver
    */
-  virtual bool IsDriver(const PTString& dev_id) = 0;
+  virtual bool IsDriverDevice(const PTString& dev_id) const = 0;
 
   /**
    * Checks passenger can control of the requested zone without asking driver
@@ -60,19 +62,22 @@ class ZoneController {
    * @param zone requested zone to control
    * @return true if passenger can control this zone
    */
-  virtual bool IsPassengerZone(const PTString& seat, const PTString& zone) = 0;
+  virtual bool IsPassengerZone(const SeatLocation& seat,
+                               const SeatLocation& zone) const = 0;
 
   /**
    * Checks user has access to control equipment
    * @param dev_id unique device id
    * @param app_id application id
    * @param func_id name of RPC
+   * @param zone requested zone to control
    * @return allowed if access was given, disallowed if access was denied
    * manual if need to ask driver
    */
-  virtual policy::TypeAccess IsAccess(const PTString& dev_id,
-                                      const PTString& app_id,
-                                      const PTString& func_id) = 0;
+  virtual policy::TypeAccess CheckAccess(const PTString& dev_id,
+                                         const PTString& app_id,
+                                         const PTString& func_id,
+                                         const SeatLocation& zone) const = 0;
 
   /**
    * Sets access to control equipment
@@ -80,7 +85,7 @@ class ZoneController {
    * @param app_id application id
    * @param func_id name of RPC
    */
-  virtual void SetAccess(const PTString& dev_id, const PTString& app_id,
+  virtual void AddAccess(const PTString& dev_id, const PTString& app_id,
                          const PTString& func_id) = 0;
 
   /**
@@ -88,6 +93,12 @@ class ZoneController {
    * @param func_id name of RPC
    */
   virtual void RemoveAccess(const PTString& func_id) = 0;
+
+  /**
+   * Sets device as driver's device
+   * @param dev_id ID device
+   */
+  virtual void SetDriverDevice(const PTString& dev_id) = 0;
 };
 
 }  // namespace policy

@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_SERVICE_H_
 
 #include <string>
+#include <sstream>
 
 #include "application_manager/application.h"
 #include "application_manager/message.h"
@@ -46,6 +47,8 @@ enum TypeAccess {
   kAllowed,
   kManual
 };
+
+typedef int SeatLocation;
 
 typedef std::string PluginFunctionID;
 /**
@@ -74,14 +77,15 @@ class Service {
    */
   virtual TypeAccess CheckAccess(ApplicationId app_id,
                                  const PluginFunctionID& function_id,
-                                 const std::string& seat) = 0;
+                                 const SeatLocation& seat,
+                                 const SeatLocation& zone) = 0;
 
   /**
-   * Sets access to functional group which contains given RPC for application
+   * Adds access to functional group which contains given RPC for application
    * @param app_id id of application
    * @param function_id id RPC
    */
-  virtual void SetAccess(ApplicationId app_id,
+  virtual void AddAccess(ApplicationId app_id,
                          const PluginFunctionID& function_id) = 0;
 
   /**
@@ -90,6 +94,12 @@ class Service {
    * @param function_id id RPC
    */
   virtual void RemoveAccess(const PluginFunctionID& function_id) = 0;
+
+  /**
+   * Sets device as driver's device
+   * @param dev_id ID device
+   */
+  virtual void SetDriverDevice(const std::string& dev_id) = 0;
 
   /**
    * @brief Get pointer to application by application id

@@ -892,24 +892,29 @@ void PolicyManagerImpl::set_cache_manager(
 }
 
 TypeAccess PolicyManagerImpl::CheckAccess(
-    const PTString& app_id, const PTString& rpc, const std::string& seat) {
+    const PTString& app_id, const PTString& rpc, const SeatLocation& seat,
+    const SeatLocation& zone) {
   TypeAccess access = TypeAccess::kDisallowed;
   std::string dev_id = GetCurrentDeviceId(app_id);
-  if (zone_->IsDriver(dev_id) || zone_->IsPassengerZone(seat, "zone")) {
+  if (zone_->IsDriverDevice(dev_id) || zone_->IsPassengerZone(seat, zone)) {
     access = kAllowed;
   } else {
-    access = zone_->IsAccess(dev_id, app_id, rpc);
+    access = zone_->CheckAccess(dev_id, app_id, rpc, zone);
   }
   return access;
 }
 
-void PolicyManagerImpl::SetAccess(const PTString& app_id, const PTString& rpc) {
+void PolicyManagerImpl::AddAccess(const PTString& app_id, const PTString& rpc) {
   std::string dev_id = GetCurrentDeviceId(app_id);
-  zone_->SetAccess(dev_id, app_id, rpc);
+  zone_->AddAccess(dev_id, app_id, rpc);
 }
 
 void PolicyManagerImpl::RemoveAccess(const PTString& rpc) {
   zone_->RemoveAccess(rpc);
+}
+
+void PolicyManagerImpl::SetDriverDevice(const PTString& dev_id) {
+  zone_->SetDriverDevice(dev_id);
 }
 
 }  //  namespace policy

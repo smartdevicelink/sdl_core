@@ -53,16 +53,19 @@ class MockService : public Service {
       std::vector<ApplicationSharedPtr>(AppExtensionUID));
   MOCK_METHOD1(SubscribeToHMINotification,
       void(const std::string& hmi_notification));
-  MOCK_METHOD3(CheckAccess,
-               TypeAccess(ApplicationId app_id,
-                          const PluginFunctionID& function_id,
-                          const std::string& seat));
-  MOCK_METHOD2(SetAccess,
+  MOCK_METHOD4(CheckAccess,
+      TypeAccess(ApplicationId app_id,
+          const PluginFunctionID& function_id,
+          const SeatLocation& seat,
+          const SeatLocation& zone));
+  MOCK_METHOD2(AddAccess,
       void(ApplicationId app_id,
-           const PluginFunctionID& function_id));
+          const PluginFunctionID& function_id));
   MOCK_METHOD1(RemoveAccess, void(const PluginFunctionID& function_id));
+  MOCK_METHOD1(SetDriverDevice, void (const std::string& dev_id));
 };
 
-}  // namespace application_manager
+}
+  // namespace application_manager
 
 #endif  // TEST_COMPONENTS_CAN_COOPERATION_INCLUDE_MOCK_SERVICE_H_

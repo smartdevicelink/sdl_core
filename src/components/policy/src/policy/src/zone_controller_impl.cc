@@ -37,25 +37,27 @@ namespace policy {
 
 ZoneControllerImpl::ZoneControllerImpl(CacheManager& cache)
     : cache_(cache),
-      access_(kManual) {
+      access_(kManual),
+      driver_device_() {
 }
 
-bool ZoneControllerImpl::IsDriver(const PTString& dev_id) {
-  return false;
+bool ZoneControllerImpl::IsDriverDevice(const PTString& dev_id) const {
+  return driver_device_ == dev_id;
 }
 
-bool ZoneControllerImpl::IsPassengerZone(const PTString& seat,
-                                         const PTString& zone) {
-  return false;
+bool ZoneControllerImpl::IsPassengerZone(const SeatLocation& seat,
+                                         const SeatLocation& zone) const {
+  return seat == zone;
 }
 
-TypeAccess ZoneControllerImpl::IsAccess(const PTString& dev_id,
-                                        const PTString& app_id,
-                                        const PTString& func_id) {
+TypeAccess ZoneControllerImpl::CheckAccess(const PTString& dev_id,
+                                           const PTString& app_id,
+                                           const PTString& func_id,
+                                           const SeatLocation& zone) const {
   return access_;
 }
 
-void ZoneControllerImpl::SetAccess(const PTString& dev_id,
+void ZoneControllerImpl::AddAccess(const PTString& dev_id,
                                    const PTString& app_id,
                                    const PTString& func_id) {
   access_ = kAllowed;
@@ -63,6 +65,10 @@ void ZoneControllerImpl::SetAccess(const PTString& dev_id,
 
 void ZoneControllerImpl::RemoveAccess(const PTString& func_id) {
   access_ = kManual;
+}
+
+void ZoneControllerImpl::SetDriverDevice(const PTString& dev_id) {
+  driver_device_ = dev_id;
 }
 
 }  // namespace policy

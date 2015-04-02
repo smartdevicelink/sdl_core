@@ -404,7 +404,8 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @param rpc name of RPC
      */
     virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
-                                   const std::string& seat) = 0;
+                                   const SeatLocation& seat,
+                                   const SeatLocation& zone) = 0;
 
     /**
      * Sets access to equipment of vehicle for application by RPC
@@ -412,13 +413,19 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @param rpc name of RPC
      * @param access true if access is allowed
      */
-    virtual void SetAccess(const PTString& app_id, const PTString& rpc) = 0;
+    virtual void AddAccess(const PTString& app_id, const PTString& rpc) = 0;
 
     /**
      * Resets access to equipment of vehicle for all application by RPC
      * @param rpc name of RPC
      */
     virtual void RemoveAccess(const PTString& rpc) = 0;
+
+    /**
+     * Sets driver as driver's device
+     * @param dev_id ID device
+     */
+    virtual void SetDriverDevice(const PTString& dev_id) = 0;
 
   protected:
     /**

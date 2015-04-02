@@ -88,9 +88,10 @@ application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicatio
 }
 
 void BaseCommandNotification::Run() {
-  if (need_reset_) {
-    service_->RemoveAccess(message_->function_name());
-  }
+  // TODO(KKolodiy): No explicit requirements to remove access if notification is received from CAN
+  //if (need_reset_) {
+  //  service_->RemoveAccess(message_->function_name());
+  //}
   Execute();  // run child's logic
 }
 

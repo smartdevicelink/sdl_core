@@ -167,9 +167,11 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void OnAppsSearchCompleted();
 
     virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
-                                   const std::string& seat);
-    virtual void SetAccess(const PTString& app_id, const PTString& rpc);
+                                   const SeatLocation& seat,
+                                   const SeatLocation& zone);
+    virtual void AddAccess(const PTString& app_id, const PTString& rpc);
     virtual void RemoveAccess(const PTString& rpc);
+    virtual void SetDriverDevice(const PTString& dev_id);
 
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(

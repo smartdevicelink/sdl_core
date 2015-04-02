@@ -42,6 +42,7 @@ namespace can_cooperation {
 namespace commands {
 
 using event_engine::EventDispatcher;
+using application_manager::SeatLocation;
 
 using namespace json_keys;
 
@@ -308,13 +309,14 @@ void BaseCommandRequest::Run() {
   }
 
   CANAppExtensionPtr extension = GetAppExtension(app_);
-  std::string seat;
+  SeatLocation seat;
   if (extension) {
     seat = extension->seat();
   }
 
+  SeatLocation zone;
   application_manager::TypeAccess access = service_->CheckAccess(
-      app_->app_id(), message_->function_name(), seat);
+      app_->app_id(), message_->function_name(), seat, zone);
 
   switch (access) {
     case application_manager::kAllowed:
@@ -334,8 +336,8 @@ void BaseCommandRequest::Run() {
       SendResponse(false, result_codes::kDisallowed, "Internal issue");
       break;
     default:
-      LOG4CXX_ERROR(logger_, "Internal issue");
-      SendResponse(false, result_codes::kDisallowed, "Internal issue");
+      LOG4CXX_ERROR(logger_, "Unknown issue");
+      SendResponse(false, result_codes::kDisallowed, "Unknown issue");
   }
   LOG4CXX_TRACE_EXIT(logger_);
 }
@@ -360,7 +362,7 @@ void BaseCommandRequest::on_event(const event_engine::Event<application_manager:
     bool allowed = ParseResultCode(value, result_code, info);
 
     if (allowed) {
-      service_->SetAccess(app_->app_id(), message_->function_name());
+      service_->AddAccess(app_->app_id(), message_->function_name());
       Execute();  // run child's logic
     } else {
       SendResponse(false, result_codes::kDisallowed, "");

@@ -74,14 +74,15 @@ class CoreService : public Service {
    */
   virtual TypeAccess CheckAccess(ApplicationId app_id,
                                  const PluginFunctionID& function_id,
-                                 const std::string& seat);
+                                 const SeatLocation& seat,
+                                 const SeatLocation& zone);
 
   /**
    * Sets access to functional group which contains given RPC for application
    * @param app_id id of application
    * @param function_id name of RPC
    */
-  virtual void SetAccess(ApplicationId app_id,
+  virtual void AddAccess(ApplicationId app_id,
                          const PluginFunctionID& function_id);
 
   /**
@@ -90,6 +91,12 @@ class CoreService : public Service {
    * @param function_id name of RPC
    */
   virtual void RemoveAccess(const PluginFunctionID& function_id);
+
+  /**
+   * Sets device as driver's device
+   * @param dev_id ID device
+   */
+  virtual void SetDriverDevice(const std::string& dev_id);
 
   /**
    * @brief Get pointer to application by application id

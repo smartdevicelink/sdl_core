@@ -1280,20 +1280,27 @@ void PolicyHandler::Add(const std::string& app_id,
 }
 
 application_manager::TypeAccess PolicyHandler::CheckAccess(
-    const PTString& app_id, const PTString& rpc, const std::string& seat) {
+    const PTString& app_id, const PTString& rpc, const SeatLocation& seat,
+    const SeatLocation& zone) {
   POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
-  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, rpc, seat);
+  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, rpc, seat,
+                                                           zone);
   return ConvertTypeAccess(access);
 }
 
-void PolicyHandler::SetAccess(const PTString& app_id, const PTString& rpc) {
+void PolicyHandler::AddAccess(const PTString& app_id, const PTString& rpc) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->SetAccess(app_id, rpc);
+  policy_manager_->AddAccess(app_id, rpc);
 }
 
 void PolicyHandler::RemoveAccess(const PTString& rpc) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->RemoveAccess(rpc);
+}
+
+void PolicyHandler::SetDriverDevice(const std::string& dev_id) {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->SetDriverDevice(dev_id);
 }
 
 application_manager::TypeAccess PolicyHandler::ConvertTypeAccess(
