@@ -582,7 +582,7 @@ const std::string kSelectAppTypes = "SELECT DISTINCT `name` FROM `app_type` "
                                     "WHERE `application_id` = ?";
 
 const std::string kSelectRequestTypes =
-    "SELECT DISTINCT `name` FROM `request_type` WHERE `application_id` = ?";
+    "SELECT DISTINCT `request_type` FROM `request_type` WHERE `application_id` = ?";
 
 const std::string kSelectSecondsBetweenRetries =
   "SELECT `value` FROM `seconds_between_retry` ORDER BY `index`";
