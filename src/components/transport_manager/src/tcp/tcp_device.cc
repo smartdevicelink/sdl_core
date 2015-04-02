@@ -142,7 +142,7 @@ int TcpDevice::GetApplicationPort(const ApplicationHandle app_handle) const {
     return -1;
   }
   if (it->second.incoming) {
-    LOG4CXX_WARN(logger_, "Application is incoming");
+    LOG4CXX_DEBUG(logger_, "Application is incoming");
     return -1;
   }
   LOG4CXX_DEBUG(logger_, "port " << it->second.port);
