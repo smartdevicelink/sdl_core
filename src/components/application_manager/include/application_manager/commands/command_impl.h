@@ -118,6 +118,25 @@ class CommandImpl : public Command {
    */
   virtual void onTimeOut();
 
+  /**
+ * @brief AllowedToTerminate tells request Controller if it can terminate this
+ * request by response.
+ * By default, RequestCtrl should terminate all requests by their responses.
+ *  If request need to terminate itself, it should override this function false
+ * @return allowed_to_terminate_ value
+ */
+  virtual bool AllowedToTerminate() {
+    return allowed_to_terminate_;
+  }
+
+  /**
+  * @brief SetAllowedToTerminate set up allowed to terminate flag.
+  * If true, request controller will terminate request on response
+  */
+  virtual void SetAllowedToTerminate(bool allowed) {
+      allowed_to_terminate_ = allowed;
+  }
+
   // members
   static const int32_t hmi_protocol_type_;
   static const int32_t mobile_protocol_type_;
@@ -126,7 +145,7 @@ class CommandImpl : public Command {
  protected:
   MessageSharedPtr message_;
   uint32_t default_timeout_;
-
+  bool allowed_to_terminate_;
 #ifdef ENABLE_LOG
   static log4cxx::LoggerPtr logger_;
 #endif // ENABLE_LOG
