@@ -48,7 +48,7 @@ void Event::raise() {
   EventDispatcher::instance()->raise_event(*this);
 }
 
-void Event::set_smart_object(smart_objects::SmartObject& so) {
+void Event::set_smart_object(const smart_objects::SmartObject& so) {
   response_so_ = so;
 }
 

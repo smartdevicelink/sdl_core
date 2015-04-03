@@ -1,4 +1,4 @@
-/**
+/*
  * @file named_pipe_notifier.cc
  * @brief NamedPipeNotifier class implementation file.
  * Copyright (c) 2013, Ford Motor Company

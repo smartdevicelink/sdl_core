@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -47,7 +47,7 @@ AddStatisticsInfoNotification::~AddStatisticsInfoNotification() {
 }
 
 void AddStatisticsInfoNotification::Run() {
-  LOG4CXX_INFO(logger_, "AddStatisticsInfoNotification::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   int type = (*message_)[strings::msg_params][hmi_notification::statistic_type]
       .asInt();

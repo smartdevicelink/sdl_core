@@ -47,9 +47,13 @@ SDL.InfoView = Em.ContainerView.create( {
     /** Settings components */
     childViews:
         [
+            'leftMenu',
+            SDL.InfoServicesView,
+            SDL.InfoTravelLinkView,
+            SDL.InfoCalendarView,
             SDL.InfoAppsView,
-            SDL.DeviceListView,
-	    SDL.InfoNonMedia
+            SDL.InfoNonMedia,
+            SDL.DeviceListView
         ],
 
     /** Left menu */
@@ -78,8 +82,12 @@ SDL.InfoView = Em.ContainerView.create( {
 
             childViews:
                 [
+                    'servicesButton',
+                    'travelLinkButton',
+                    'calendarButton',
                     'appsButton',
-                    'sdlButton'
+                    'sdlButton',
+                    'goToCD'
                 ],
 
             servicesButton: SDL.Button.extend( {

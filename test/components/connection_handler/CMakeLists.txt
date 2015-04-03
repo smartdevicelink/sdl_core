@@ -4,6 +4,7 @@ include_directories (
   ./include
   ${CMAKE_SOURCE_DIR}/src/components/connection_handler/include
   ${CMAKE_SOURCE_DIR}/src/components/protocol_handler/include
+  ${CMAKE_SOURCE_DIR}/src/components/utils/include
   ../../../src/components/utils/include
   ../../../src/components/config_profile/include
   ../security_manager/include

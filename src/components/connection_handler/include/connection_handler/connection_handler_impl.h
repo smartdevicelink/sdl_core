@@ -189,6 +189,20 @@ class ConnectionHandlerImpl : public ConnectionHandler,
     const protocol_handler::ServiceType &service_type);
 
   /**
+   * \brief Callback function used by ProtocolHandler
+   * when Mobile Application start message flood
+   * \param connection_key  used by other components as application identifier
+   */
+  void OnApplicationFloodCallBack(const uint32_t &connection_key) OVERRIDE;
+
+  /**
+   * \brief Callback function used by ProtocolHandler
+   * when Mobile Application sends malformed message
+   * \param connection_key  used by other components as application identifier
+   */
+  void OnMalformedMessageCallback(const uint32_t &connection_key) OVERRIDE;
+
+  /**
    * \brief Creates unique identifier of session (can be used as hash)
    * from given connection identifier
    * within which session exists and session number.
@@ -298,7 +312,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \brief Close session associated with the key
    * \param key Unique key used by other components as session identifier
    */
-  virtual void CloseSession(uint32_t key);
+  virtual void CloseSession(uint32_t key, CloseSessionReason close_reason);
 
   /**
    * \brief Function used by HearbeatMonitior to close session on HB timeout
@@ -306,7 +320,18 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    * \param session_id Identifier of the session to be ended
    */
   virtual void CloseSession(ConnectionHandle connection_handle,
-                            uint8_t session_id);
+                            uint8_t session_id,
+                            CloseSessionReason close_reason);
+
+  /**
+   * \brief Function used by OnApplicationFloodCallback and
+   * OnMalformedMessageCallback to close all connection sessions before
+   * connection closing
+   * \param connection_handle Connection identifier within which session exists
+   * \param close_reason The reason of connection closing
+   */
+  virtual void CloseConnectionSessions(
+      ConnectionHandle connection_handle, CloseSessionReason close_reason);
 
   /**
    * \brief Return count of session for specified connection
@@ -319,6 +344,16 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    */
   virtual void SendHeartBeat(ConnectionHandle connection_handle,
                              uint8_t session_id);
+
+  /**
+   * @brief SendEndService allows to end up specific service.
+   *
+   * @param key application identifier whose service should be closed.
+   *
+   * @param service_type the service that should be closed.
+   */
+  virtual void SendEndService(uint32_t key,
+                              uint8_t service_type);
 
   /**
    * \brief Start heartbeat for specified session
@@ -358,7 +393,17 @@ class ConnectionHandlerImpl : public ConnectionHandler,
   virtual bool IsHeartBeatSupported(
     transport_manager::ConnectionUID connection_handle,
     uint8_t session_id);
- private:
+
+  /**
+   * @brief returns protocol version which application supports
+   * @param connection_id id of connection
+   * @param session_id id of session
+   * @param method writes value protocol version to protocol_version
+   * @return TRUE if session and connection exist otherwise returns FALSE
+   */
+  virtual bool ProtocolVersionUsed(uint32_t connection_id,
+  		  uint8_t session_id, uint8_t& protocol_version);
+  private:
   /**
    * \brief Default class constructor
    */
@@ -401,6 +446,7 @@ class ConnectionHandlerImpl : public ConnectionHandler,
    *  \brief Lock for applications list
    */
   mutable sync_primitives::Lock connection_list_lock_;
+  mutable sync_primitives::Lock connection_handler_observer_lock_;
 
   /**
    * \brief Cleans connection list on destruction

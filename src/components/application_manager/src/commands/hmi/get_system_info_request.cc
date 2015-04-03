@@ -1,4 +1,4 @@
-﻿/**
+﻿/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ GetSystemInfoRequest::~GetSystemInfoRequest() {
 }
 
 void GetSystemInfoRequest::Run() {
-  LOG4CXX_INFO(logger_, "GetSystemInfoRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
   uint32_t correlation_id = RequestToHMI::correlation_id();
   uint32_t app_id = RequestToHMI::application_id();
   ApplicationManagerImpl::instance()->set_application_id(correlation_id, app_id);

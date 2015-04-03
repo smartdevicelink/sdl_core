@@ -36,7 +36,7 @@
 #ifndef SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_CONNECTION_H_
 #define SRC_COMPONENTS_TRANSPORT_MANAGER_INCLUDE_TRANSPORT_MANAGER_USB_QNX_USB_CONNECTION_H_
 
-#include <pthread.h>
+#include "utils/lock.h"
 
 #include "transport_manager/transport_adapter/transport_adapter_controller.h"
 #include "transport_manager/transport_adapter/connection.h"
@@ -51,7 +51,7 @@ class UsbConnection : public Connection {
   UsbConnection(const DeviceUID& device_uid,
                 const ApplicationHandle& app_handle,
                 TransportAdapterController* controller,
-                const UsbHandlerSptr& libusb_handler,
+                const UsbHandlerSptr libusb_handler,
                 PlatformUsbDevice* device);
 
   bool Init();
@@ -82,13 +82,13 @@ class UsbConnection : public Connection {
 
   unsigned char* in_buffer_;
   void* out_buffer_;
-  
+
   usbd_urb* in_urb_;
   usbd_urb* out_urb_;
 
   std::list<protocol_handler::RawMessagePtr> out_messages_;
   ::protocol_handler::RawMessagePtr current_out_message_;
-  pthread_mutex_t out_messages_mutex_;
+  sync_primitives::Lock out_messages_mutex_;
   size_t bytes_sent_;
   bool disconnecting_;
   bool pending_in_transfer_;

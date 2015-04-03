@@ -50,7 +50,7 @@ DeleteInteractionChoiceSetResponse::~DeleteInteractionChoiceSetResponse() {
 }
 
 void DeleteInteractionChoiceSetResponse::Run() {
-  LOG4CXX_INFO(logger_, "DeleteInteractionChoiceSetResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   // check if response false
   if (true == (*message_)[strings::msg_params].keyExists(strings::success)) {

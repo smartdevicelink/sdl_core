@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -45,7 +45,7 @@ UISliderResponse::~UISliderResponse() {
 }
 
 void UISliderResponse::Run() {
-  LOG4CXX_INFO(logger_, "UISliderResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::UI_Slider);
   event.set_smart_object(*message_);

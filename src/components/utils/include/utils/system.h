@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, Ford Motor Company
  * All rights reserved.
  *
@@ -75,6 +75,9 @@ class System {
    * @return true if success
    */
   bool Execute(bool wait);
+
+  std::string command() const;
+  std::vector<std::string> argv() const;
 
  private:
   /**

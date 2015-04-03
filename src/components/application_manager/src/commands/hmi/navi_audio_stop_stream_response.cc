@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -43,7 +43,7 @@ AudioStopStreamResponse::~AudioStopStreamResponse() {
 }
 
 void AudioStopStreamResponse::Run() {
-  LOG4CXX_INFO(logger_, "AudioStopStreamResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
 }
 

@@ -1,4 +1,4 @@
-/**
+/*
  * \file aoa_common.h
  * \brief Google AOA protocol header file.
  *

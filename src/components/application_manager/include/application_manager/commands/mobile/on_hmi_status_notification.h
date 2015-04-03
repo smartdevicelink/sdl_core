@@ -63,7 +63,7 @@ class OnHMIStatusNotification : public CommandNotificationImpl {
    **/
   virtual void Run();
 
- private:
+private:
   DISALLOW_COPY_AND_ASSIGN(OnHMIStatusNotification);
 };
 

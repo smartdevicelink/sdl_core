@@ -52,7 +52,7 @@ AlertManeuverRequest::~AlertManeuverRequest() {
 }
 
 void AlertManeuverRequest::Run() {
-  LOG4CXX_INFO(logger_, "AlertManeuverRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if ((!(*message_)[strings::msg_params].keyExists(strings::soft_buttons)) &&
       (!(*message_)[strings::msg_params].keyExists(strings::tts_chunks))) {
@@ -127,7 +127,7 @@ void AlertManeuverRequest::Run() {
 }
 
 void AlertManeuverRequest::on_event(const event_engine::Event& event) {
-  LOG4CXX_INFO(logger_, "AlertManeuverRequest::on_event");
+  LOG4CXX_AUTO_TRACE(logger_);
   const smart_objects::SmartObject& message = event.smart_object();
 
   mobile_apis::Result::eType result_code = mobile_apis::Result::INVALID_ENUM;
@@ -206,7 +206,7 @@ void AlertManeuverRequest::on_event(const event_engine::Event& event) {
 }
 
 bool AlertManeuverRequest::IsWhiteSpaceExist() {
-  LOG4CXX_INFO(logger_, "AlertManeuverRequest::IsWhiteSpaceExist");
+  LOG4CXX_AUTO_TRACE(logger_);
   const char* str = NULL;
 
   if ((*message_)[strings::msg_params].keyExists(strings::tts_chunks)) {

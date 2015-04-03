@@ -40,6 +40,8 @@ Copyright (c) 2013, Ford Motor Company
 #include "interfaces/MOBILE_API.h"
 #include "config_profile/profile.h"
 #include "utils/file_system.h"
+#include "formatters/CFormatterJsonBase.hpp"
+#include "json/json.h"
 
 namespace application_manager {
 
@@ -55,7 +57,7 @@ SystemRequest::~SystemRequest() {
 }
 
 void SystemRequest::Run() {
-  LOG4CXX_INFO(logger_, "SystemRequest::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationSharedPtr application =
       ApplicationManagerImpl::instance()->application(connection_key());
@@ -66,12 +68,14 @@ void SystemRequest::Run() {
     return;
   }
 
-  mobile_apis::RequestType::eType request_type =
+  const mobile_apis::RequestType::eType request_type =
       static_cast<mobile_apis::RequestType::eType>(
           (*message_)[strings::msg_params][strings::request_type].asInt());
 
   if (!(*message_)[strings::params].keyExists(strings::binary_data) &&
-      mobile_apis::RequestType::PROPRIETARY == request_type) {
+      (mobile_apis::RequestType::PROPRIETARY == request_type ||
+       mobile_apis::RequestType::QUERY_APPS == request_type)) {
+
       LOG4CXX_ERROR(logger_, "Binary data empty");
 
       SendResponse(false, mobile_apis::Result::INVALID_DATA);
@@ -81,6 +85,31 @@ void SystemRequest::Run() {
   std::vector<uint8_t> binary_data;
   if ((*message_)[strings::params].keyExists(strings::binary_data)) {
     binary_data = (*message_)[strings::params][strings::binary_data].asBinary();
+  }
+
+  if (mobile_apis::RequestType::QUERY_APPS == request_type) {
+    using namespace NsSmartDeviceLink::NsJSONHandler::Formatters;
+
+    const std::string json(binary_data.begin(), binary_data.end());
+    Json::Value value;
+    Json::Reader reader;
+    if (!reader.parse(json.c_str(), value)) {
+      LOG4CXX_ERROR(logger_, "Can't parse json received from QueryApps.");
+      return;
+    }
+
+    smart_objects::SmartObject sm_object;
+    CFormatterJsonBase::jsonValueToObj(value, sm_object);
+
+    if (!ValidateQueryAppData(sm_object)) {
+      SendResponse(false, mobile_apis::Result::INVALID_DATA);
+      return;
+    }
+
+    ApplicationManagerImpl::instance()->ProcessQueryApp(sm_object,
+                                                        connection_key());
+    SendResponse(true, mobile_apis::Result::SUCCESS);
+    return;
   }
 
   std::string file_path = profile::Profile::instance()->system_files_path();
@@ -125,7 +154,7 @@ void SystemRequest::Run() {
   }
 
   if (mobile_apis::RequestType::PROPRIETARY != request_type) {
-    msg_params[strings::app_id] = (application->mobile_app_id())->asString();
+    msg_params[strings::app_id] = (application->mobile_app_id());
   }
   msg_params[strings::request_type] =
       (*message_)[strings::msg_params][strings::request_type];
@@ -161,6 +190,66 @@ void SystemRequest::on_event(const event_engine::Event& event) {
       return;
     }
   }
+}
+
+bool SystemRequest::ValidateQueryAppData(
+    const smart_objects::SmartObject& data) const  {
+  if (!data.isValid()) {
+    LOG4CXX_ERROR(logger_, "QueryApps response is not valid.");
+    return false;
+  }
+  if (!data.keyExists(json::response)) {
+    LOG4CXX_ERROR(logger_,
+                  "QueryApps response does not contain '"
+                  << json::response << "' parameter.");
+    return false;
+  }
+  smart_objects::SmartArray* obj_array = data[json::response].asArray();
+  if (NULL == obj_array) {
+    return false;
+  }
+
+  const std::size_t arr_size(obj_array->size());
+  for (std::size_t idx = 0; idx < arr_size; ++idx) {
+    const smart_objects::SmartObject& app_data = (*obj_array)[idx];
+    if (!app_data.isValid()) {
+      LOG4CXX_ERROR(logger_, "Wrong application data in json file.");
+      continue;
+    }
+    std::string os_type;
+    if (app_data.keyExists(json::ios)) {
+      os_type = json::ios;
+      if (!app_data[os_type].keyExists(json::urlScheme)) {
+        LOG4CXX_ERROR(logger_, "Can't find URL scheme in json file.");
+        continue;
+      }
+    } else if (app_data.keyExists(json::android)) {
+      os_type = json::android;
+      if (!app_data[os_type].keyExists(json::packageName)) {
+        LOG4CXX_ERROR(logger_, "Can't find package name in json file.");
+        continue;
+      }
+    }
+
+    if (os_type.empty()) {
+      LOG4CXX_ERROR(logger_, "Can't find mobile OS type in json file.");
+      continue;
+    }
+
+    if (!app_data.keyExists(json::appId)) {
+      LOG4CXX_ERROR(logger_, "Can't find app ID in json file.");
+      continue;
+    }
+
+    if (!app_data.keyExists(json::name)) {
+      LOG4CXX_ERROR(logger_, "Can't find app name in json file.");
+      continue;
+    }
+
+    return true;
+  }
+
+  return false;
 }
 
 }  // namespace commands

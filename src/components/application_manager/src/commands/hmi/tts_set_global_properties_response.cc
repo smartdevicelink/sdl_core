@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2013, Ford Motor Company
  * All rights reserved.
  *
@@ -46,7 +46,7 @@ TTSSetGlobalPropertiesResponse::~TTSSetGlobalPropertiesResponse() {
 }
 
 void TTSSetGlobalPropertiesResponse::Run() {
-  LOG4CXX_INFO(logger_, "TTSSetGlobalPropertiesResponse::Run");
+  LOG4CXX_AUTO_TRACE(logger_);
 
   event_engine::Event event(hmi_apis::FunctionID::TTS_SetGlobalProperties);
   event.set_smart_object(*message_);
