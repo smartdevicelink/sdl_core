@@ -485,6 +485,8 @@ class Profile : public utils::Singleton<Profile> {
 
     uint32_t hash_string_size() const;
 
+    bool logs_enabled() const;
+
     /*
      * @brief Updates all related values from ini file
      */
@@ -686,6 +688,7 @@ private:
     uint32_t                        resumption_delay_before_ign_;
     uint32_t                        resumption_delay_after_ign_;
     uint32_t                        hash_string_size_;
+    bool                            logs_enabled_;
 
     FRIEND_BASE_SINGLETON_CLASS(Profile);
     DISALLOW_COPY_AND_ASSIGN(Profile);

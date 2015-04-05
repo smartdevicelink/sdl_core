@@ -2747,10 +2747,14 @@ mobile_apis::Result::eType ApplicationManagerImpl::SaveBinary(
   if (!file_system::Write(file_stream, binary_data.data(),
                           binary_data.size())) {
     file_system::Close(file_stream);
+    delete file_stream;
+    file_stream = NULL;
     return mobile_apis::Result::GENERIC_ERROR;
   }
 
   file_system::Close(file_stream);
+  delete file_stream;
+  file_stream = NULL;
   LOG4CXX_INFO(logger_, "Successfully write data to file");
   return mobile_apis::Result::SUCCESS;
 }
