@@ -896,7 +896,7 @@ TypeAccess PolicyManagerImpl::CheckAccess(
     const SeatLocation& zone) {
   TypeAccess access = TypeAccess::kDisallowed;
   std::string dev_id = GetCurrentDeviceId(app_id);
-  if (zone_->IsDriverDevice(dev_id) || zone_->IsPassengerZone(seat, zone)) {
+  if (zone_->IsPrimaryDevice(dev_id) || zone_->IsPassengerZone(seat, zone)) {
     access = kAllowed;
   } else {
     access = zone_->CheckAccess(dev_id, app_id, rpc, zone);

@@ -31,18 +31,46 @@
  */
 
 #include "policy/zone_controller_impl.h"
+
+#include <algorithm>
 #include "policy/cache_manager.h"
+#include "types.h"
+
+using policy_table::DeviceData;
 
 namespace policy {
+
+struct IsPrimary {
+  bool operator ()(const DeviceData::MapType::value_type& item) {
+    return *item.second.primary == true;
+  }
+};
+
+struct SetPrimary {
+ private:
+  bool value_;
+ public:
+  explicit SetPrimary(bool value) : value_(value) {
+  }
+  void operator ()(DeviceData::MapType::value_type& item) {
+    *item.second.primary = value_;
+  }
+};
 
 ZoneControllerImpl::ZoneControllerImpl(CacheManager& cache)
     : cache_(cache),
       access_(kManual),
-      driver_device_() {
+      primary_device_() {
+  DeviceData& devices = *cache_.pt_->policy_table.device_data;
+  DeviceData::iterator d = std::find_if(devices.begin(), devices.end(),
+                                        IsPrimary());
+  if (d != devices.end()) {
+    primary_device_ = d->first;
+  }
 }
 
-bool ZoneControllerImpl::IsDriverDevice(const PTString& dev_id) const {
-  return driver_device_ == dev_id;
+bool ZoneControllerImpl::IsPrimaryDevice(const PTString& dev_id) const {
+  return primary_device_ == dev_id;
 }
 
 bool ZoneControllerImpl::IsPassengerZone(const SeatLocation& seat,
@@ -61,14 +89,20 @@ void ZoneControllerImpl::AddAccess(const PTString& dev_id,
                                    const PTString& app_id,
                                    const PTString& func_id) {
   access_ = kAllowed;
+  cache_.Backup();
 }
 
 void ZoneControllerImpl::RemoveAccess(const PTString& func_id) {
   access_ = kManual;
+  cache_.Backup();
 }
 
 void ZoneControllerImpl::SetDriverDevice(const PTString& dev_id) {
-  driver_device_ = dev_id;
+  primary_device_ = dev_id;
+  DeviceData& devices = *cache_.pt_->policy_table.device_data;
+  std::for_each(devices.begin(), devices.end(), SetPrimary(false));
+  *devices[dev_id].primary = true;
+  cache_.Backup();
 }
 
 }  // namespace policy

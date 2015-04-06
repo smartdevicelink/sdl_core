@@ -54,7 +54,7 @@ class ZoneController {
    * @param dev_id unique device id
    * @return true if device is have driver
    */
-  virtual bool IsDriverDevice(const PTString& dev_id) const = 0;
+  virtual bool IsPrimaryDevice(const PTString& dev_id) const = 0;
 
   /**
    * Checks passenger can control of the requested zone without asking driver

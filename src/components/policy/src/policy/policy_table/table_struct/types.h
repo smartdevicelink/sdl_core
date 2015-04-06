@@ -253,6 +253,7 @@ struct UsageAndErrorCounts : CompositeType {
 
 struct DeviceParams : CompositeType {
   public:
+    Optional< Boolean > primary;
   public:
     DeviceParams();
     ~DeviceParams();

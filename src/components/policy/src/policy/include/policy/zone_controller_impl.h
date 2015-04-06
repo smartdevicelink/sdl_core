@@ -42,7 +42,7 @@ class ZoneControllerImpl : public ZoneController {
  public:
   explicit ZoneControllerImpl(CacheManager& cache);
 
-  virtual bool IsDriverDevice(const PTString& dev_id) const;
+  virtual bool IsPrimaryDevice(const PTString& dev_id) const;
   virtual bool IsPassengerZone(const SeatLocation& seat,
                                const SeatLocation& zone) const;
   virtual policy::TypeAccess CheckAccess(const PTString& dev_id,
@@ -57,7 +57,7 @@ class ZoneControllerImpl : public ZoneController {
  private:
   CacheManager& cache_;
   TypeAccess access_;
-  PTString driver_device_;
+  PTString primary_device_;
 };
 
 }  // namespace policy
