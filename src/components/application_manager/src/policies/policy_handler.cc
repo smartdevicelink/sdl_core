@@ -1298,9 +1298,9 @@ void PolicyHandler::RemoveAccess(const PTString& rpc) {
   policy_manager_->RemoveAccess(rpc);
 }
 
-void PolicyHandler::SetDriverDevice(const std::string& dev_id) {
+void PolicyHandler::SetPrimaryDevice(const std::string& dev_id) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->SetDriverDevice(dev_id);
+  policy_manager_->SetPrimaryDevice(dev_id);
 }
 
 application_manager::TypeAccess PolicyHandler::ConvertTypeAccess(

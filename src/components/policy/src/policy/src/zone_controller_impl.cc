@@ -97,7 +97,7 @@ void ZoneControllerImpl::RemoveAccess(const PTString& func_id) {
   cache_.Backup();
 }
 
-void ZoneControllerImpl::SetDriverDevice(const PTString& dev_id) {
+void ZoneControllerImpl::SetPrimaryDevice(const PTString& dev_id) {
   primary_device_ = dev_id;
   DeviceData& devices = *cache_.pt_->policy_table.device_data;
   std::for_each(devices.begin(), devices.end(), SetPrimary(false));

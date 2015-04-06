@@ -171,7 +171,7 @@ class PolicyManagerImpl : public PolicyManager {
                                    const SeatLocation& zone);
     virtual void AddAccess(const PTString& app_id, const PTString& rpc);
     virtual void RemoveAccess(const PTString& rpc);
-    virtual void SetDriverDevice(const PTString& dev_id);
+    virtual void SetPrimaryDevice(const PTString& dev_id);
 
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(

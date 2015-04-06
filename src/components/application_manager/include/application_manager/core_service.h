@@ -97,10 +97,10 @@ class CoreService : public Service {
   virtual void RemoveAccess(const PluginFunctionID& function_id);
 
   /**
-   * Sets device as driver's device
+   * Sets device as primary device
    * @param dev_id ID device
    */
-  virtual void SetDriverDevice(const std::string& dev_id);
+  virtual void SetPrimaryDevice(const std::string& dev_id);
 
   /**
    * @brief Get pointer to application by application id

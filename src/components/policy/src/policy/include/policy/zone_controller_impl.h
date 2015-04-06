@@ -52,7 +52,7 @@ class ZoneControllerImpl : public ZoneController {
   virtual void AddAccess(const PTString& dev_id, const PTString& app_id,
                          const PTString& func_id);
   virtual void RemoveAccess(const PTString& func_id);
-  virtual void SetDriverDevice(const PTString& dev_id);
+  virtual void SetPrimaryDevice(const PTString& dev_id);
 
  private:
   CacheManager& cache_;

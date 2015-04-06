@@ -62,7 +62,7 @@ class MockService : public Service {
       void(ApplicationId app_id,
           const PluginFunctionID& function_id));
   MOCK_METHOD1(RemoveAccess, void(const PluginFunctionID& function_id));
-  MOCK_METHOD1(SetDriverDevice, void (const std::string& dev_id));
+  MOCK_METHOD1(SetPrimaryDevice, void (const std::string& dev_id));
 };
 
 }

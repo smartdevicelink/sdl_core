@@ -98,7 +98,7 @@ class ZoneController {
    * Sets device as driver's device
    * @param dev_id ID device
    */
-  virtual void SetDriverDevice(const PTString& dev_id) = 0;
+  virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
 };
 
 }  // namespace policy

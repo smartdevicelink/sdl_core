@@ -102,8 +102,8 @@ void CoreService::RemoveAccess(const PluginFunctionID& function_id) {
   policy::PolicyHandler::instance()->RemoveAccess(function_id);
 }
 
-void CoreService::SetDriverDevice(const std::string& dev_id) {
-  policy::PolicyHandler::instance()->SetDriverDevice(dev_id);
+void CoreService::SetPrimaryDevice(const std::string& dev_id) {
+  policy::PolicyHandler::instance()->SetPrimaryDevice(dev_id);
 }
 
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {

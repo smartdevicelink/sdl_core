@@ -913,8 +913,8 @@ void PolicyManagerImpl::RemoveAccess(const PTString& rpc) {
   zone_->RemoveAccess(rpc);
 }
 
-void PolicyManagerImpl::SetDriverDevice(const PTString& dev_id) {
-  zone_->SetDriverDevice(dev_id);
+void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {
+  zone_->SetPrimaryDevice(dev_id);
 }
 
 }  //  namespace policy

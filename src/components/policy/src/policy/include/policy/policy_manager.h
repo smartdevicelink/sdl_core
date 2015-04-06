@@ -422,10 +422,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
     virtual void RemoveAccess(const PTString& rpc) = 0;
 
     /**
-     * Sets driver as driver's device
+     * Sets driver as primary device
      * @param dev_id ID device
      */
-    virtual void SetDriverDevice(const PTString& dev_id) = 0;
+    virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
 
   protected:
     /**

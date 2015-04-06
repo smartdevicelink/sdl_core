@@ -96,10 +96,10 @@ class Service {
   virtual void RemoveAccess(const PluginFunctionID& function_id) = 0;
 
   /**
-   * Sets device as driver's device
+   * Sets device as primary device
    * @param dev_id ID device
    */
-  virtual void SetDriverDevice(const std::string& dev_id) = 0;
+  virtual void SetPrimaryDevice(const std::string& dev_id) = 0;
 
   /**
    * @brief Get pointer to application by application id
