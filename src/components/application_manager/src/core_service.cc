@@ -30,9 +30,12 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <vector>
+#include <algorithm>
 #include "application_manager/core_service.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/policies/policy_handler.h"
+#include "json/json.h"
 
 namespace application_manager {
 
@@ -58,21 +61,26 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
   }
 
   CommandParametersPermissions params;
-  const mobile_apis::Result::eType check_result =
-      ApplicationManagerImpl::instance()->CheckPolicyPermissions(
-          app->mobile_app_id()->asString(), app->hmi_level(),
-          msg->function_name(), &params);
+  const mobile_apis::Result::eType ret = ApplicationManagerImpl::instance()
+      ->CheckPolicyPermissions(app->mobile_app_id()->asString(),
+                               app->hmi_level(), msg->function_name(), &params);
 
-  if (check_result == mobile_apis::Result::eType::SUCCESS) {
-    FilterParameters(msg, params);
+  if (ret != mobile_apis::Result::eType::SUCCESS) {
+    return ret;
   }
 
-  return check_result;
+  FilterParameters(msg, params);
+  if (!AreParametersAllowed(msg, params)) {
+    return mobile_apis::Result::eType::DISALLOWED;
+  }
+
+  return ret;
 }
 
-TypeAccess CoreService::CheckAccess(
-    ApplicationId app_id, const PluginFunctionID& function_id,
-    const SeatLocation& seat, const SeatLocation& zone) {
+TypeAccess CoreService::CheckAccess(ApplicationId app_id,
+                                    const PluginFunctionID& function_id,
+                                    const SeatLocation& seat,
+                                    const SeatLocation& zone) {
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
     return policy::PolicyHandler::instance()->CheckAccess(
@@ -131,8 +139,43 @@ void CoreService::SubscribeToHMINotification(
 
 void CoreService::FilterParameters(MessagePtr msg,
                                    const CommandParametersPermissions& params) {
-  // TODO(KKolodiy): need to implement filter parameters
+  // TODO(KKolodiy): may be need to implement filter parameters
   // see application_manager::command::CommandRequestImpl::RemoveDisallowedParameters
+}
+
+bool CoreService::AreParametersAllowed(
+    MessagePtr msg, const CommandParametersPermissions& params) {
+  Json::Reader reader;
+  Json::Value json;
+  bool ret = reader.parse(msg->json_message(), json);
+  if (ret) {
+    return CheckParams(json.get(strings::params, Json::Value(Json::nullValue)),
+                       params.allowed_params);
+  }
+  return false;
+}
+
+bool CoreService::CheckParams(const Json::Value& object,
+                              const std::vector<std::string>& allowed_params) {
+  if (!object.isObject()) {
+    return true;
+  }
+  for (Json::Value::iterator i = object.begin(); i != object.end(); ++i) {
+    std::string name = i.memberName();
+    const Json::Value& value = *i;
+    bool allowed = IsAllowed(name, allowed_params)
+        && CheckParams(value, allowed_params);
+    if (!allowed) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool CoreService::IsAllowed(const std::string& name,
+                            const std::vector<std::string>& allowed_params) {
+  return std::find(allowed_params.begin(), allowed_params.end(), name)
+      != allowed_params.end();
 }
 
 }  // namespace application_manager

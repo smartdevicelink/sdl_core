@@ -37,6 +37,10 @@
 #include "application_manager/service.h"
 #include "application_manager/application.h"
 
+namespace Json {
+  class Value;
+}
+
 namespace application_manager {
 
 struct CommandParametersPermissions;
@@ -142,6 +146,12 @@ class CoreService : public Service {
 
   void FilterParameters(MessagePtr msg,
                         const CommandParametersPermissions& params);
+  bool AreParametersAllowed(MessagePtr msg,
+                            const CommandParametersPermissions& params);
+  bool CheckParams(const Json::Value& object,
+                   const std::vector<std::string>& allowed_params);
+  bool IsAllowed(const std::string& name,
+                 const std::vector<std::string>& allowed_params);
 };
 
 }  // namespace application_manager
