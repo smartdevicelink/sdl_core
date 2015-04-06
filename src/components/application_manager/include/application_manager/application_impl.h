@@ -47,11 +47,17 @@
 #include "connection_handler/device.h"
 #include "utils/timer_thread.h"
 #include "utils/lock.h"
+#include "protocol/service_type.h"
+
 namespace usage_statistics {
+
 class StatisticsManager;
 }  // namespace usage_statistics
 
 namespace application_manager {
+using namespace utils;
+using namespace timer;
+using protocol_handler::ServiceType;
 
 namespace mobile_api = mobile_apis;
 
@@ -79,15 +85,19 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   virtual void ChangeSupportingAppHMIType();
 
-  // navi
   inline bool is_navi() const { return is_navi_; }
   void set_is_navi(bool allow);
-  bool hmi_supports_navi_video_streaming() const;
-  void set_hmi_supports_navi_video_streaming(bool supports);
-  bool hmi_supports_navi_audio_streaming() const;
-  void set_hmi_supports_navi_audio_streaming(bool supports);
-  void StartVideoStartStreamRetryTimer();
-  void StartAudioStartStreamRetryTimer();
+
+  bool video_streaming_started() const;
+  void set_video_streaming_started(bool state);
+  bool audio_streaming_started() const;
+  void set_audio_streaming_started(bool state);
+
+  void StartStreaming(ServiceType service_type);
+  void StopStreaming(ServiceType service_type);
+
+  void SuspendStreaming(ServiceType service_type);
+  void WakeUpStreaming(ServiceType service_type);
 
   virtual bool is_voice_communication_supported() const;
   virtual void set_voice_communication_supported(
@@ -234,14 +244,34 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   void LoadPersistentFiles();
 
  private:
+  typedef SharedPtr<TimerThread<ApplicationImpl>> ApplicationTimerPtr;
 
-  // interfaces for NAVI retry sequence
+  /**
+   * @brief Callback for video start stream retry timer.
+   * Sends start video stream request to HMI
+   */
   void OnVideoStartStreamRetry();
+
+  /**
+   * @brief Callback for audio start stream retry timer.
+   * Sends start audio stream request to HMI
+   */
   void OnAudioStartStreamRetry();
+
+  /**
+   * @brief Callback for video streaming suspend timer.
+   * Suspends video streaming process for application
+   */
+  void OnVideoStreamSuspend();
+
+  /**
+   * @brief Callback for audio streaming suspend timer.
+   * Suspends audio streaming process for application
+   */
+  void OnAudioStreamSuspend();
 
   std::string                              hash_val_;
   uint32_t                                 grammar_id_;
-
 
   Version version_;
   std::string                              app_name_;
@@ -250,8 +280,14 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   smart_objects::SmartObject*              active_message_;
   bool                                     is_media_;
   bool                                     is_navi_;
-  bool                                     hmi_supports_navi_video_streaming_;
-  bool                                     hmi_supports_navi_audio_streaming_;
+
+  bool                                     video_streaming_started_;
+  bool                                     audio_streaming_started_;
+  bool                                     video_streaming_suspended_;
+  bool                                     audio_streaming_suspended_;
+  sync_primitives::Lock                    video_streaming_suspended_lock_;
+  sync_primitives::Lock                    audio_streaming_suspended_lock_;
+
   bool                                     is_app_allowed_;
   bool                                     has_been_activated_;
   bool                                     tts_properties_in_none_;
@@ -269,11 +305,15 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   UsageStatistics                          usage_report_;
   ProtocolVersion                          protocol_version_;
   bool                                     is_voice_communication_application_;
-  // NAVI retry stream
+
   uint32_t                                 video_stream_retry_number_;
   uint32_t                                 audio_stream_retry_number_;
-  utils::SharedPtr<timer::TimerThread<ApplicationImpl>> video_stream_retry_timer_;
-  utils::SharedPtr<timer::TimerThread<ApplicationImpl>> audio_stream_retry_timer_;
+  uint32_t                                 video_stream_suspend_timeout_;
+  uint32_t                                 audio_stream_suspend_timeout_;
+  ApplicationTimerPtr                      video_stream_retry_timer_;
+  ApplicationTimerPtr                      audio_stream_retry_timer_;
+  ApplicationTimerPtr                      video_stream_suspend_timer_;
+  ApplicationTimerPtr                      audio_stream_suspend_timer_;
 
   /**
    * @brief Defines number per time in seconds limits
