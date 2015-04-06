@@ -35,7 +35,6 @@
 
 #include <string>
 #include "utils/singleton.h"
-#include "utils/timer_thread.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
 #include "protocol/service_type.h"
@@ -44,24 +43,29 @@
 #include "media_manager/media_adapter_listener.h"
 
 namespace media_manager {
+using protocol_handler::ServiceType;
 
 class MediaManagerImpl : public MediaManager,
   public protocol_handler::ProtocolObserver,
   public utils::Singleton<MediaManagerImpl> {
   public:
     virtual ~MediaManagerImpl();
-    virtual void SetProtocolHandler(
-      protocol_handler::ProtocolHandler* protocol_handler);
+
     virtual void PlayA2DPSource(int32_t application_key);
     virtual void StopA2DPSource(int32_t application_key);
+
     virtual void StartMicrophoneRecording(int32_t application_key,
                                           const std::string& outputFileName,
                                           int32_t duration);
     virtual void StopMicrophoneRecording(int32_t application_key);
-    virtual void StartVideoStreaming(int32_t application_key);
-    virtual void StopVideoStreaming(int32_t application_key);
-    virtual void StartAudioStreaming(int32_t application_key);
-    virtual void StopAudioStreaming(int32_t application_key);
+
+    virtual void StartStreaming(int32_t application_key,
+                                ServiceType service_type);
+    virtual void StopStreaming(int32_t application_key,
+                               ServiceType service_type);
+
+    virtual void SetProtocolHandler(
+      protocol_handler::ProtocolHandler* protocol_handler);
     virtual void OnMessageReceived(
       const ::protocol_handler::RawMessagePtr message);
     virtual void OnMobileMessageSent(
@@ -71,33 +75,21 @@ class MediaManagerImpl : public MediaManager,
   protected:
     MediaManagerImpl();
     virtual void Init();
+
     protocol_handler::ProtocolHandler* protocol_handler_;
     MediaAdapter*                      a2dp_player_;
+
     MediaAdapterImpl*                  from_mic_recorder_;
     MediaListenerPtr                   from_mic_listener_;
-    MediaAdapterImpl*                  video_streamer_;
-    MediaAdapterImpl*                  audio_streamer_;
-    uint32_t                           stop_streaming_timeout_;
-    MediaListenerPtr                   video_streamer_listener_;
-    MediaListenerPtr                   audio_streamer_listener_;
-    bool                               video_stream_active_;
-    bool                               audio_stream_active_;
+
+    std::map<ServiceType, MediaAdapterImplPtr> streamer_;
+    std::map<ServiceType, MediaListenerPtr>    streamer_listener_;
 
   private:
-    void OnAudioStreamingTimeout();
-    void OnVideoStreamingTimeout();
-
-    timer::TimerThread<MediaManagerImpl> audio_streaming_timer_;
-    timer::TimerThread<MediaManagerImpl> video_streaming_timer_;
-    bool                                 audio_streaming_suspended_;
-    bool                                 video_streaming_suspended_;
-    sync_primitives::Lock                audio_streaming_suspended_lock_;
-    sync_primitives::Lock                video_streaming_suspended_lock_;
-
-    uint32_t streaming_app_id_;
     DISALLOW_COPY_AND_ASSIGN(MediaManagerImpl);
     FRIEND_BASE_SINGLETON_CLASS(MediaManagerImpl);
 };
 
 }  //  namespace media_manager
+
 #endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_IMPL_H_

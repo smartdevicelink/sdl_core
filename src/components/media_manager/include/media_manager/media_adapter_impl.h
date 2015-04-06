@@ -56,6 +56,9 @@ class MediaAdapterImpl : public MediaAdapter {
   private:
     DISALLOW_COPY_AND_ASSIGN(MediaAdapterImpl);
 };
+
+typedef utils::SharedPtr<MediaAdapterImpl> MediaAdapterImplPtr;
+
 }  //  namespace media_manager
 
 #endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_ADAPTER_IMPL_H_

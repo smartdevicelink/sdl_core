@@ -34,22 +34,29 @@
 #define SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
 
 #include <string>
+#include "protocol/service_type.h"
 
 namespace media_manager {
+using protocol_handler::ServiceType;
+
 class MediaManager {
   public:
     virtual void PlayA2DPSource(int32_t application_key) = 0;
     virtual void StopA2DPSource(int32_t application_key) = 0;
+
     virtual void StartMicrophoneRecording(int32_t application_key,
                                           const std::string& outputFileName,
                                           int32_t duration) = 0;
     virtual void StopMicrophoneRecording(int32_t application_key) = 0;
-    virtual void StartVideoStreaming(int32_t application_key) = 0;
-    virtual void StopVideoStreaming(int32_t application_key) = 0;
-    virtual void StartAudioStreaming(int32_t application_key) = 0;
-    virtual void StopAudioStreaming(int32_t application_key) = 0;
+
+    virtual void StartStreaming(int32_t application_key,
+                                ServiceType service_type) = 0;
+    virtual void StopStreaming(int32_t application_key,
+                               ServiceType service_type) = 0;
 
     virtual ~MediaManager(){}
 };
+
 }  // namespace media_manager
+
 #endif  // SRC_COMPONENTS_MEDIA_MANAGER_INCLUDE_MEDIA_MANAGER_MEDIA_MANAGER_H_
