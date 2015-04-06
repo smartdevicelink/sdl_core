@@ -32,7 +32,6 @@
 
 #include "application_manager/commands/hmi/navi_start_stream_request.h"
 #include "application_manager/application_manager_impl.h"
-#include "application_manager/application_impl.h"
 
 namespace application_manager {
 
@@ -44,25 +43,60 @@ NaviStartStreamRequest::NaviStartStreamRequest(
 }
 
 NaviStartStreamRequest::~NaviStartStreamRequest() {
+    LOG4CXX_AUTO_TRACE(logger_);
 }
 
 void NaviStartStreamRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app =
-      ApplicationManagerImpl::instance()->active_application();
+  subscribe_on_event(hmi_apis::FunctionID::Navigation_StartStream,
+                     correlation_id());
+  SendRequest();
+}
 
-  if (!app) {
-    LOG4CXX_ERROR_EXT(logger_, "NaviStartStreamRequest no active app!");
+void NaviStartStreamRequest::on_event(const event_engine::Event& event) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
+  if (!app_mgr) {
+    LOG4CXX_ERROR_EXT(logger_, "Application manager not found");
     return;
   }
 
-  SendRequest();
-  app->StartVideoStartStreamRetryTimer();
+  ApplicationSharedPtr app = app_mgr->application_by_hmi_app(application_id());
+  if (!app) {
+    LOG4CXX_ERROR_EXT(logger_,
+        "NaviStartStreamRequest aborted. Application not found");
+    return;
+  }
+
+  const smart_objects::SmartObject& message = event.smart_object();
+  switch (event.id()) {
+    case hmi_apis::FunctionID::Navigation_StartStream: {
+      LOG4CXX_INFO(logger_, "Received StartStream event");
+
+      const hmi_apis::Common_Result::eType code =
+          static_cast<hmi_apis::Common_Result::eType>(
+              message[strings::params][hmi_response::code].asInt());
+
+      if (hmi_apis::Common_Result::SUCCESS == code) {
+        LOG4CXX_INFO(logger_, "NaviStartStreamResponse SUCCESS");
+        if (app_mgr->IsStreamingAllowed(app->app_id(), ServiceType::kMobileNav)) {
+          app->set_video_streaming_started(true);
+        } else {
+          LOG4CXX_INFO(logger_,
+                       "NaviStartStreamRequest aborted. Application can not stream");
+        }
+      }
+      break;
+    }
+    default: {
+      LOG4CXX_ERROR(logger_,"Received unknown event" << event.id());
+      return;
+    }
+  }
 }
 
 }  // namespace commands
 
 }  // namespace application_manager
-
-

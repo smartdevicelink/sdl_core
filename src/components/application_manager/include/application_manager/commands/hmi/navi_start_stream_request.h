@@ -34,6 +34,7 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_START_STREAM_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_to_hmi.h"
+#include "application_manager/event_engine/event_observer.h"
 
 namespace application_manager {
 
@@ -42,7 +43,8 @@ namespace commands {
 /**
  * @brief NaviStartStreamRequest command class
  **/
-class NaviStartStreamRequest : public RequestToHMI {
+class NaviStartStreamRequest : public RequestToHMI,
+                               public event_engine::EventObserver {
  public:
   /**
    * @brief NaviStartStreamRequest class constructor
@@ -60,6 +62,11 @@ class NaviStartStreamRequest : public RequestToHMI {
    * @brief Execute command
    **/
   virtual void Run();
+
+  /**
+   * @brief On event callback
+   **/
+  virtual void on_event(const event_engine::Event& event);
 
  private:
   DISALLOW_COPY_AND_ASSIGN(NaviStartStreamRequest);
