@@ -1,4 +1,4 @@
-/*
+﻿/*
  Copyright (c) 2013, Ford Motor Company
  All rights reserved.
 
@@ -39,6 +39,7 @@
 #include "json/writer.h"
 #include "policy/policy_table.h"
 #include "policy/pt_representation.h"
+#include "policy/access_remote_impl.h"
 #include "policy/policy_helper.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
@@ -62,7 +63,7 @@ PolicyManagerImpl::PolicyManagerImpl()
     retry_sequence_timeout_(60),
     retry_sequence_index_(0),
     ignition_check(true) {
-  zone_ = new ZoneControllerImpl(cache);
+  access_remote_ = new AccessRemoteImpl(cache);
 }
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
@@ -72,7 +73,7 @@ void PolicyManagerImpl::set_listener(PolicyListener* listener) {
 
 PolicyManagerImpl::~PolicyManagerImpl() {
   LOG4CXX_INFO(logger_, "Destroying policy manager.");
-  delete zone_;
+  delete access_remote_;
 }
 
 utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
@@ -895,26 +896,31 @@ TypeAccess PolicyManagerImpl::CheckAccess(
     const PTString& app_id, const PTString& rpc, const SeatLocation& seat,
     const SeatLocation& zone) {
   TypeAccess access = TypeAccess::kDisallowed;
+
   std::string dev_id = GetCurrentDeviceId(app_id);
-  if (zone_->IsPrimaryDevice(dev_id) || zone_->IsPassengerZone(seat, zone)) {
-    access = kAllowed;
-  } else {
-    access = zone_->CheckAccess(dev_id, app_id, rpc, zone);
+  if (access_remote_->IsPrimaryDevice(dev_id)) {
+    access = TypeAccess::kAllowed;
+  } else if (access_remote_->IsEnabled()) {
+    if (access_remote_->IsPassengerZone(seat, zone)) {
+      access = TypeAccess::kAllowed;
+    } else {
+      //access = access_remote_->Check(dev_id, app_id, rpc, zone);
+    }
   }
   return access;
 }
 
 void PolicyManagerImpl::AddAccess(const PTString& app_id, const PTString& rpc) {
   std::string dev_id = GetCurrentDeviceId(app_id);
-  zone_->AddAccess(dev_id, app_id, rpc);
+  //access_remote_->Allow(dev_id, app_id, rpc);
 }
 
 void PolicyManagerImpl::RemoveAccess(const PTString& rpc) {
-  zone_->RemoveAccess(rpc);
+  //access_remote_->RemoveAccess(rpc);
 }
 
 void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {
-  zone_->SetPrimaryDevice(dev_id);
+  access_remote_->SetPrimaryDevice(dev_id);
 }
 
 }  //  namespace policy

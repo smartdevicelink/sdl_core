@@ -46,11 +46,13 @@
 namespace policy_table = rpc::policy_table_interface_base;
 
 namespace policy {
+class AccessRemote;
 struct CheckAppPolicy;
 
 class PolicyManagerImpl : public PolicyManager {
   public:
     PolicyManagerImpl();
+    virtual ~PolicyManagerImpl();
     virtual void set_listener(PolicyListener* listener);
     PolicyListener* listener() const {
       return listener_;
@@ -270,7 +272,7 @@ private:
 
     UpdateStatusManager update_status_manager_;
     CacheManagerInterfaceSPtr cache_;
-    ZoneController* zone_;
+    AccessRemote* access_remote_;
     sync_primitives::Lock apps_registration_lock_;
     sync_primitives::Lock app_permissions_diff_lock_;
     std::map<std::string, AppPermissions> app_permissions_diff_;

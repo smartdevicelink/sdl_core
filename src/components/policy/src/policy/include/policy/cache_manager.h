@@ -633,6 +633,8 @@ private:
   threads::Thread* backup_thread_;
   sync_primitives::Lock backuper_locker_;
   BackgroundBackuper* backuper_;
+
+  friend class AccessRemoteImpl;
 };
 } // policy
 

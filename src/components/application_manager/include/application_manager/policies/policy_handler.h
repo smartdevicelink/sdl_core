@@ -122,7 +122,7 @@ class PolicyHandler :
    * Sets device as primary device
    * @param dev_id ID device
    */
-  void SetPrimaryDevice(const std::string& dev_id);
+  void SetPrimaryDevice(const PTString& dev_id);
 
   uint32_t GetNotificationsNumber(const std::string& priority);
   DeviceConsent GetUserConsentForDevice(const std::string& device_id);

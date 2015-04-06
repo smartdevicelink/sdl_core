@@ -1298,7 +1298,7 @@ void PolicyHandler::RemoveAccess(const PTString& rpc) {
   policy_manager_->RemoveAccess(rpc);
 }
 
-void PolicyHandler::SetPrimaryDevice(const std::string& dev_id) {
+void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SetPrimaryDevice(dev_id);
 }

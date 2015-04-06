@@ -29,12 +29,14 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ZONE_CONTROLLER_H_
-#define SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ZONE_CONTROLLER_H_
+#ifndef SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_H_
+#define SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_H_
 
 #include "policy/policy_types.h"
 
 namespace policy {
+
+typedef int SeatLocation;
 
 enum TypeAccess {
   kDisallowed,
@@ -42,12 +44,42 @@ enum TypeAccess {
   kManual
 };
 
-typedef int SeatLocation;
+struct Subject {
+  PTString dev_id;
+  PTString app_id;
+};
+inline bool operator<(const Subject& x, const Subject& y) {
+  return x.dev_id < y.dev_id && x.app_id < y.app_id;
+}
 
-class ZoneController {
+struct Object {
+  PTString group_id;
+  SeatLocation zone;
+};
+inline bool operator<(const Object& x, const Object& y) {
+  return x.group_id < y.group_id && x.zone < y.zone;
+}
+
+class AccessRemote {
  public:
-  virtual ~ZoneController() {
+  virtual ~AccessRemote() {
   }
+
+  /**
+   * Enables remote control
+   */
+  virtual void Enable() = 0;
+
+  /**
+   * Disables remote control
+   */
+  virtual void Disable() = 0;
+
+  /**
+   * Checks if remote control is enabled
+   * @return true if enabled
+   */
+  virtual bool IsEnabled() const = 0;
 
   /**
    * Checks whether device is driver's device
@@ -55,6 +87,12 @@ class ZoneController {
    * @return true if device is have driver
    */
   virtual bool IsPrimaryDevice(const PTString& dev_id) const = 0;
+
+  /**
+   * Sets device as driver's device
+   * @param dev_id ID device
+   */
+  virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
 
   /**
    * Checks passenger can control of the requested zone without asking driver
@@ -66,41 +104,35 @@ class ZoneController {
                                const SeatLocation& zone) const = 0;
 
   /**
-   * Checks user has access to control equipment
-   * @param dev_id unique device id
-   * @param app_id application id
-   * @param func_id name of RPC
-   * @param zone requested zone to control
+   * Allows access subject to object
+   * @param who subject is dev_id and app_id
+   * @param what object is group_id and zone
+   */
+  virtual void Allow(const Subject& who, const Object& what) = 0;
+
+  /**
+   * Denies access subject to object
+   * @param who subject is dev_id and app_id
+   * @param what object is group_id and zone
+   */
+  virtual void Deny(const Subject& who, const Object& what) = 0;
+
+  /**
+   * Resets access subject to all object
+   * @param who subject is dev_id and app_id
+   */
+  virtual void Reset(const Subject& who) = 0;
+
+  /**
+   * Checks access subject to object
+   * @param who subject is dev_id and app_id
+   * @param what object is group_id and zone
    * @return allowed if access was given, disallowed if access was denied
    * manual if need to ask driver
    */
-  virtual policy::TypeAccess CheckAccess(const PTString& dev_id,
-                                         const PTString& app_id,
-                                         const PTString& func_id,
-                                         const SeatLocation& zone) const = 0;
-
-  /**
-   * Sets access to control equipment
-   * @param dev_id unique device id
-   * @param app_id application id
-   * @param func_id name of RPC
-   */
-  virtual void AddAccess(const PTString& dev_id, const PTString& app_id,
-                         const PTString& func_id) = 0;
-
-  /**
-   * Resets access to control equipment for all passengers' devices by name of RPC
-   * @param func_id name of RPC
-   */
-  virtual void RemoveAccess(const PTString& func_id) = 0;
-
-  /**
-   * Sets device as driver's device
-   * @param dev_id ID device
-   */
-  virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
+  virtual TypeAccess Check(const Subject& who, const Object& what) const = 0;
 };
 
 }  // namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ZONE_CONTROLLER_H_
+#endif  // SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_H_

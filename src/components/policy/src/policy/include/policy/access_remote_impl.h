@@ -29,37 +29,49 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ZONE_CONTROLLER_IMPL_H_
-#define SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ZONE_CONTROLLER_IMPL_H_
+#ifndef SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_IMPL_H_
+#define SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_IMPL_H_
 
-#include "policy/zone_controller.h"
+#include <map>
+#include "policy/access_remote.h"
 
 namespace policy {
 
 class CacheManager;
 
-class ZoneControllerImpl : public ZoneController {
+class AccessRemoteImpl : public AccessRemote {
  public:
-  explicit ZoneControllerImpl(CacheManager& cache);
+  explicit AccessRemoteImpl(CacheManager& cache);
+
+  virtual void Enable();
+  virtual void Disable();
+  virtual bool IsEnabled() const;
 
   virtual bool IsPrimaryDevice(const PTString& dev_id) const;
+  virtual void SetPrimaryDevice(const PTString& dev_id);
   virtual bool IsPassengerZone(const SeatLocation& seat,
                                const SeatLocation& zone) const;
-  virtual policy::TypeAccess CheckAccess(const PTString& dev_id,
-                                         const PTString& app_id,
-                                         const PTString& func_id,
-                                         const SeatLocation& zone) const;
-  virtual void AddAccess(const PTString& dev_id, const PTString& app_id,
-                         const PTString& func_id);
-  virtual void RemoveAccess(const PTString& func_id);
-  virtual void SetPrimaryDevice(const PTString& dev_id);
+
+  virtual void Allow(const Subject& who, const Object& what);
+  virtual void Deny(const Subject& who, const Object& what);
+  virtual void Reset(const Subject& who);
+  virtual TypeAccess Check(const Subject& who, const Object& what) const;
 
  private:
+  typedef std::map<Subject, TypeAccess> AccessControlRow;
+  typedef std::map<Object, AccessControlRow> AccessControlList;
+
+  inline void set_enabled(bool value);
+
   CacheManager& cache_;
-  TypeAccess access_;
   PTString primary_device_;
+  bool enabled_;
+  AccessControlList acl_;
+
+  friend struct Erase;
+  friend struct IsTypeAccess;
 };
 
 }  // namespace policy
 
-#endif  // SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ZONE_CONTROLLER_IMPL_H_
+#endif  // SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_IMPL_H_
