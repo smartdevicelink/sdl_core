@@ -192,6 +192,27 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
    */
   void LoadPersistentFiles();
 
+  /**
+   * @brief Return pointer to extension by uid
+   * @param uid uid of extension
+   * @return Pointer to extension, if extension was initialized, otherwise NULL
+   */
+  AppExtensionPtr QueryInterface(AppExtensionUID uid);
+
+  /**
+   * @brief Add extension to application
+   * @param extension pointer to extension
+   * @return true if success, false if extension already initialized
+   */
+  bool AddExtension(AppExtensionPtr extention);
+
+  /**
+   * @brief Remove extension from application
+   * @param uid uid of extension
+   * @return true if success, false if extension is not present
+   */
+  bool RemoveExtension(AppExtensionUID uid);
+
  private:
 
   // interfaces for NAVI retry sequence

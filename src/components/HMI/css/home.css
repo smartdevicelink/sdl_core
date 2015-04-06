@@ -1,0 +1,175 @@
+#home_widgetPhone {
+    position: absolute;
+    width: 399px;
+    height: 183px;
+    background: url("../images/home/home_phoneWidget.png") 0 0 no-repeat;
+}
+
+#home_widgetNavigation {
+    position: absolute;
+    width: 399px;
+    height: 183px;
+    left: 401px;
+    background: url("../images/home/home_navigationWidget.png") 0 0 no-repeat;
+}
+
+#home_widgetMedia {
+     position: absolute;
+     width: 399px;
+     height: 183px;
+     top: 185px;
+ }
+
+#home_widgetClimate {
+    position: absolute;
+    width: 399px;
+    height: 183px;
+    left: 401px;
+    top: 185px;
+    background: url("../images/home/home_climateWidget.png") 0 0 no-repeat;
+}
+
+#radio_media_home_presetButtons_wrapper {
+    top: 82px;
+    left: 34px;
+    border-radius: 3px;
+    border: 1px solid #393939;
+    width: 328px;
+    height: 79px;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item {
+    position: relative;
+    float: left;
+    width: 109px;
+    height: 39px;
+    cursor: pointer;
+    text-align: center;
+    line-height: 39px;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a0 {
+    background: url(../images/media/h-media-l-bg.png) no-repeat;
+    border-right: 1px solid #393939;
+    border-bottom: 1px solid #393939;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a0.pressed {
+    background: url(../images/media/h-media-l-bg-pressed.png) no-repeat;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a0.active {
+    background: url(../images/media/h-media-actbg.png) repeat;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a1 {
+    background: url(../images/media/h-media-sbg.png) no-repeat;
+    border-right: 1px solid #393939;
+    border-bottom: 1px solid #393939;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a1.pressed {
+    background: url(../images/media/h-media-sbg-pressed.png) no-repeat;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a1.active {
+    background: url(../images/media/h-media-actbg.png) repeat;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a2 {
+    background: url(../images/media/h-media-rbg.png) no-repeat;
+    border-bottom: 1px solid #393939;
+    width: 108px;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a2.pressed {
+    background: url(../images/media/h-media-rbg-pressed.png) no-repeat;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a2.active {
+    background: url(../images/media/h-media-actbg.png) no-repeat;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a3 {
+    background: url(../images/media/h-media-l-bg.png) no-repeat;
+    border-right: 1px solid #393939;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a3.pressed {
+    background: url(../images/media/h-media-l-bg-pressed.png) no-repeat;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a3.active {
+    background: url(../images/media/h-media-actbg.png) repeat;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a4 {
+    background: url(../images/media/h-media-sbg.png) no-repeat;
+    border-right: 1px solid #393939;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a4.pressed {
+    background: url(../images/media/h-media-sbg-pressed.png) no-repeat;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a4.active {
+    background: url(../images/media/h-media-actbg.png) repeat;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a5 {
+    background: url(../images/media/h-media-rbg.png) no-repeat;
+    width: 108px;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a5.pressed {
+    background: url(../images/media/h-media-rbg-pressed.png) no-repeat;
+}
+
+#radio_media_home_presetButtons_wrapper .preset-item.a5.active {
+    background: url(../images/media/h-media-actbg.png) repeat;
+}
+
+.stationInfo {
+     width: 200px;
+     height: 50px;
+     left: 86px;
+     top: 29px;
+}
+
+.stationInfo .station {
+      font-size: 36px;
+      left: 40px;
+      position: absolute;
+      width: 243px;
+}
+.stationInfo .stationimg {
+     background: url(../images/media/ant.png) no-repeat;
+     width: 27px;
+     height: 28px;
+     top: 6px;
+ }
+
+#home_widgetMedia_tuneButtons {
+    height: 40px;
+    width: 120px;
+    top: 28px;
+    left: 248px;
+}
+
+#home_widgetMedia_tuneButtons .ffw-button {
+    width: 50px;
+    height: 38px;
+    color: #fff;
+    font-size: 22px;
+    border: 1px solid #393939;
+    border-radius: 2px;
+    display: inline-block;
+    margin-left: 6px;
+    position: relative;
+    text-align: center;
+    line-height: 38px;
+    vertical-align: top;
+}
+
+
+

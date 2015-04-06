@@ -79,25 +79,25 @@ SDL.TurnByTurnView = SDL.SDLAbstractView.create( {
 
             for ( var i = 0; i < naviParams.navigationTexts.length; i++) {
                 switch (naviParams.navigationTexts[i].fieldName) {
-                    case 'navigationText1': {
-                        this.set('captionText.content',
-                            naviParams.navigationTexts[i].fieldText);
-                        break;
-                    }
-                    case 'navigationText2': {
-                        this.set('navigationText2',
-                            naviParams.navigationTexts[i].fieldText);
-                        break;
-                    }
-                    case 'ETA': {
-                        this.set('eta', naviParams.navigationTexts[i].fieldText);
-                        break;
-                    }
-                    case 'totalDistance': {
-                        this.set('totalDistance',
-                            naviParams.navigationTexts[i].fieldText);
-                        break;
-                    }
+                case 'navigationText1': {
+                    this.set('captionText.content',
+                        naviParams.navigationTexts[i].fieldText);
+                    break;
+                }
+                case 'navigationText2': {
+                    this.set('navigationText2',
+                        naviParams.navigationTexts[i].fieldText);
+                    break;
+                }
+                case 'ETA': {
+                    this.set('eta', naviParams.navigationTexts[i].fieldText);
+                    break;
+                }
+                case 'totalDistance': {
+                    this.set('totalDistance',
+                        naviParams.navigationTexts[i].fieldText);
+                    break;
+                }
                 }
             }
 

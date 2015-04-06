@@ -77,6 +77,7 @@ set(LIBRARIES
   jsoncpp
   ConfigProfile
   Resumption
+  FunctionalModule
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")

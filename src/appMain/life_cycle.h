@@ -51,6 +51,7 @@
 #include "transport_manager/transport_manager.h"
 #include "transport_manager/transport_manager_default.h"
 #include "media_manager/media_manager_impl.h"
+#include "functional_module/plugin_manager.h"
 #include "utils/singleton.h"
 #ifdef TIME_TESTER
 #include "time_tester/time_manager.h"
@@ -94,6 +95,7 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     protocol_handler::ProtocolHandlerImpl* protocol_handler_;
     connection_handler::ConnectionHandlerImpl* connection_handler_;
     application_manager::ApplicationManagerImpl* app_manager_;
+    functional_modules::PluginManager* plugin_manager_;
 #ifdef ENABLE_SECURITY
     security_manager::CryptoManager* crypto_manager_;
     security_manager::SecurityManager* security_manager_;
@@ -101,6 +103,7 @@ class LifeCycle : public utils::Singleton<LifeCycle> {
     hmi_message_handler::HMIMessageHandlerImpl* hmi_handler_;
     hmi_message_handler::HMIMessageAdapter* hmi_message_adapter_;
     media_manager::MediaManagerImpl* media_manager_;
+    application_manager::CoreService* core_service_;
 #ifdef TIME_TESTER
     time_tester::TimeManager* time_tester_;
 #endif  // TIME_TESTER

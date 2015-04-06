@@ -37,4 +37,4 @@ SDL.HomeView = Em.ContainerView.create( {
     classNameBindings: 'SDL.States.home.active:active_state:inactive_state',
 
     elementId: 'home'
-} );
+});

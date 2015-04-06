@@ -1,0 +1,7 @@
+singleton Style 1.0 Style.qml
+singleton RequestHandler 1.0 RequestHandler.qml
+Media 1.0 Media.qml
+CastomInput 1.0 CastomInput.qml
+CastomButton 1.0 CastomButton.qml
+LabelText 1.0 LabelText.qml
+Settings 1.0 Settings.qml

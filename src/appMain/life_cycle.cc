@@ -213,6 +213,23 @@ bool LifeCycle::StartComponents() {
   transport_manager_->Visibility(true);
 
   components_started_ = true;
+
+  core_service_ = new application_manager::CoreService();
+
+  plugin_manager_ = functional_modules::PluginManager::instance();
+  plugin_manager_->SetServiceHandler(core_service_);
+  plugin_manager_->LoadPlugins(profile::Profile::instance()->plugins_folder());
+
+  if (!InitMessageSystem()) {
+    LOG4CXX_INFO(logger_, "InitMessageBroker failed");
+    return false;
+  }
+
+  LOG4CXX_INFO(logger_, "InitMessageBroker successful");
+
+  plugin_manager_->OnServiceStateChanged(
+    functional_modules::ServiceState::HMI_ADAPTER_INITIALIZED);
+
   return true;
 }
 

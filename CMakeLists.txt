@@ -238,6 +238,17 @@ pkg_check_modules(GLIB2 REQUIRED glib-2.0)
 add_definitions(${GLIB2_CFLAGS})
 endif()
 
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++0x -Wall -Werror")
+if (CMAKE_BUILD_TYPE)
+  if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")
+    set(CMAKE_CXX_FLAGS_DEBUG "")
+  else ()
+    set(CMAKE_CXX_FLAGS_RELEASE "")
+    set(CMAKE_CXX_FLAGS_DEBUG "-g3 -ggdb3 -DDEBUG")
+  endif()
+endif()
+
 # --- Interface generator
 
 find_package(PythonInterp)
@@ -622,6 +633,18 @@ set(RTLIB rt)
 if(CMAKE_SYSTEM_NAME STREQUAL "QNX")
 set(RTLIB )
 endif()
+
+SET(RPATH_DIRECTORIES
+  ${CMAKE_INSTALL_PREFIX}/bin/plugins
+  /usr/local/lib
+  /usr/local
+  ${CMAKE_INSTALL_PREFIX}/bin
+)
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+SET(CMAKE_INSTALL_RPATH "${RPATH_DIRECTORIES}")
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 
 # Building tests
 if(BUILD_TESTS)
