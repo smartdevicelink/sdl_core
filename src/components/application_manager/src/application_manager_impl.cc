@@ -465,9 +465,9 @@ ApplicationSharedPtr ApplicationManagerImpl::RegisterApplication(
   apps_to_register_list_lock_.Release();
 
   if (!application->hmi_app_id()) {
-    resume_ctrl_.IsApplicationSaved(application->mobile_app_id())?
-              resume_ctrl_.GetHMIApplicationID(application->mobile_app_id()) :
-          GenerateNewHMIAppID();
+    const bool is_saved = resume_ctrl_.IsApplicationSaved(mobile_app_id);
+    application->set_hmi_application_id(is_saved ?
+              resume_ctrl_.GetHMIApplicationID(mobile_app_id) : GenerateNewHMIAppID());
   }
 
   ApplicationListAccessor app_list_accesor;
