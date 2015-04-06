@@ -53,6 +53,7 @@
 #include "utils/threads/thread.h"
 #include "utils/file_system.h"
 #include "utils/helpers.h"
+#include "protocol/service_type.h"
 #include "smart_objects/enum_schema_item.h"
 #include "interfaces/HMI_API_schema.h"
 #include "application_manager/application_impl.h"
@@ -76,6 +77,7 @@ namespace formatters = NsSmartDeviceLink::NsJSONHandler::Formatters;
 namespace jhs = NsSmartDeviceLink::NsJSONHandler::strings;
 
 using namespace NsSmartDeviceLink::NsSmartObjects;
+using protocol_handler::ServiceType;
 
 ApplicationManagerImpl::ApplicationManagerImpl()
   : applications_list_lock_(true),
@@ -99,8 +101,8 @@ ApplicationManagerImpl::ApplicationManagerImpl()
     hmi_capabilities_(this),
     unregister_reason_(mobile_api::AppInterfaceUnregisteredReason::INVALID_ENUM),
     resume_ctrl_(this),
-    end_services_timer("EndServiceTimer", this, &ApplicationManagerImpl::EndNaviServices),
-    wait_end_service_timeout_(profile::Profile::instance()->stop_streaming_timeout()),
+    navi_close_app_timeout_(profile::Profile::instance()->stop_streaming_timeout()),
+    navi_end_stream_timeout_(profile::Profile::instance()->stop_streaming_timeout()),
 #ifdef TIME_TESTER
     metric_observer_(NULL),
 #endif  // TIME_TESTER
@@ -118,6 +120,11 @@ ApplicationManagerImpl::ApplicationManagerImpl()
       {TYPE_SYSTEM, "System"},
       {TYPE_ICONS, "Icons"}
     };
+
+    sync_primitives::AutoLock lock(timer_pool_lock_);
+    ApplicationManagerTimerPtr clearTimerPoolTimer(new TimerThread<ApplicationManagerImpl>(
+        "ClearTimerPoolTimer", this, &ApplicationManagerImpl::ClearTimerPool));
+    clearTimerPoolTimer->start(10);
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -140,6 +147,9 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
   LOG4CXX_INFO(logger_, "Destroying Policy Handler");
   RemovePolicyObserver(this);
   policy::PolicyHandler::destroy();
+
+  sync_primitives::AutoLock lock(timer_pool_lock_);
+  timer_pool_.clear();
 }
 
 bool ApplicationManagerImpl::Stop() {
@@ -284,7 +294,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
     ApplicationSharedPtr app) const {
   bool voice_state = app->is_voice_communication_supported();
   bool media_state = app->is_media_application();
-  bool navi_state = app->hmi_supports_navi_video_streaming();
+  bool navi_state = app->video_streaming_started();
   ApplicationSharedPtr active_app = active_application();
   // Check app in FULL level
   if (active_app.valid()) {
@@ -302,7 +312,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
       return true;
     }
 
-    if (navi_state && active_app->hmi_supports_navi_video_streaming()) {
+    if (navi_state && active_app->video_streaming_started()) {
       return true;
     }
   }
@@ -831,34 +841,6 @@ void ApplicationManagerImpl::RemoveDevice(
   LOG4CXX_INFO(logger_, "device_handle " << device_handle);
 }
 
-bool ApplicationManagerImpl::IsAudioStreamingAllowed(uint32_t application_key) const {
-  ApplicationSharedPtr app = application(application_key);
-
-  using namespace mobile_apis::HMILevel;
-  using namespace helpers;
-  if (!app) {
-    LOG4CXX_WARN(logger_, "An application is not registered.");
-    return false;
-  }
-
-  return Compare<eType, EQ, ONE>(
-        app->hmi_level(), HMI_FULL, HMI_LIMITED);
-}
-
-bool ApplicationManagerImpl::IsVideoStreamingAllowed(uint32_t application_key) const {
-  ApplicationSharedPtr app = application(application_key);
-  using namespace mobile_apis::HMILevel;
-  using namespace helpers;
-
-  if (!app) {
-    LOG4CXX_WARN(logger_, "An application is not registered.");
-    return false;
-  }
-
-  LOG4CXX_DEBUG(logger_, "HMILevel: " << app->hmi_level());
-  return Compare<eType, EQ, ONE>(app->hmi_level(), HMI_FULL, HMI_LIMITED);
-}
-
 mobile_apis::HMILevel::eType ApplicationManagerImpl::GetDefaultHmiLevel(
     ApplicationSharedPtr application) const {
   using namespace mobile_apis;
@@ -983,8 +965,9 @@ void ApplicationManagerImpl::ReplaceHMIByMobileAppId(
   }
 }
 
-bool ApplicationManagerImpl::ProcessNaviService(protocol_handler::ServiceType type,
-                                                uint32_t connection_key) {
+bool ApplicationManagerImpl::StartNaviService(
+    uint32_t app_id, ServiceType service_type) {
+  using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (!media_manager_) {
@@ -992,29 +975,56 @@ bool ApplicationManagerImpl::ProcessNaviService(protocol_handler::ServiceType ty
     return false;
   }
 
-  bool result = false;
-  switch (type) {
-    case protocol_handler::kMobileNav:
-      LOG4CXX_DEBUG(logger_, "Video service is about to be started.");
-      if (IsVideoStreamingAllowed(connection_key)) {
-        media_manager_->StartVideoStreaming(connection_key);
-        result = true;
+  if (IsStreamingAllowed(app_id, service_type)) {
+    NaviServiceStatusMap::iterator it =
+        navi_service_status_.find(app_id);
+    if (navi_service_status_.end() == it) {
+      std::pair<NaviServiceStatusMap::iterator, bool> res =
+          navi_service_status_.insert(std::pair<uint32_t, std::pair<bool, bool> >(
+              app_id, std::make_pair(false, false)));
+      if (!res.second) {
+        return false;
       }
-      break;
-    case protocol_handler::kAudio:
-      LOG4CXX_DEBUG(logger_, "Audio service is about to be started.");
-      if (IsAudioStreamingAllowed(connection_key)) {
-        media_manager_->StartAudioStreaming(connection_key);
-        result = true;
-      }
-      break;
-    default:
-      LOG4CXX_DEBUG(logger_, "Unknown type of service to be started.");
-      break;
+      it = res.first;
+    }
+    service_type == kMobileNav ? it->second.first =
+        true : it->second.second = true;
+
+    application(app_id)->StartStreaming(service_type);
+    media_manager_->StartStreaming(app_id, service_type);
+
+    return true;
+  }
+  return false;
+}
+
+void ApplicationManagerImpl::StopNaviService(
+    uint32_t app_id, ServiceType service_type) {
+  using namespace protocol_handler;
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  NaviServiceStatusMap::iterator it =
+      navi_service_status_.find(app_id);
+  if (navi_service_status_.end() == it) {
+    LOG4CXX_WARN(logger_, "No Information about navi service "
+                 << service_type);
+  } else {
+    service_type == kMobileNav ? it->second.first =
+        false : it->second.second = false;
   }
 
-  service_status_[type] = std::make_pair(result, false);
-  return result;
+  if (!media_manager_) {
+    LOG4CXX_DEBUG(logger_, "The media manager is not initialized.");
+    return;
+  }
+  media_manager_->StopStreaming(app_id, service_type);
+
+  ApplicationSharedPtr app = application(app_id);
+  if (!app) {
+    LOG4CXX_WARN(logger_, "An application is not registered.");
+    return;
+  }
+  app->StopStreaming(service_type);
 }
 
 bool ApplicationManagerImpl::OnServiceStartedCallback(
@@ -1037,22 +1047,24 @@ bool ApplicationManagerImpl::OnServiceStartedCallback(
                   " doesn't exists.");
     return false;
   }
-  bool result = false;
+
   if (Compare<ServiceType, EQ, ONE>(type, kMobileNav, kAudio)) {
     if (app->is_navi()) {
-      result = ProcessNaviService(type, session_key);
-      app->set_streaming_allowed(result);
+      return StartNaviService(session_key, type);
     }
   }
-  return result;
+  return false;
 }
 
 void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
     const protocol_handler::ServiceType& type) {
   using namespace protocol_handler;
-  LOG4CXX_DEBUG(logger_,
-                "OnServiceEndedCallback " << type
-                << " in session 0x" << std::hex << session_key);
+  using namespace helpers;
+
+  LOG4CXX_DEBUG(
+    logger_,
+    "OnServiceEndedCallback " << type  << " in session 0x"
+        << std::hex << session_key);
 
   if (type == kRpc) {
     LOG4CXX_INFO(logger_, "Remove application.");
@@ -1065,25 +1077,8 @@ void ApplicationManagerImpl::OnServiceEndedCallback(const int32_t& session_key,
     return;
   }
 
-  if (media_manager_) {
-    switch (type) {
-      case protocol_handler::kMobileNav: {
-        LOG4CXX_INFO(logger_, "Stop video streaming.");
-        media_manager_->StopVideoStreaming(session_key);
-        break;
-      }
-      case protocol_handler::kAudio: {
-        LOG4CXX_INFO(logger_, "Stop audio service.");
-        media_manager_->StopAudioStreaming(session_key);
-        break;
-      }
-      default:
-        LOG4CXX_WARN(logger_, "Unknown type of service to be ended." << type);
-        break;
-    }
-    service_status_[type].second = true;
-    LOG4CXX_DEBUG(logger_, "Ack status: " << service_status_[type].first <<" : "
-                  << service_status_[type].second);
+  if (Compare<ServiceType, EQ, ONE>(type, kMobileNav, kAudio)) {
+    StopNaviService(session_key, type);
   }
 }
 
@@ -2206,6 +2201,13 @@ void ApplicationManagerImpl::UnregisterApplication(
                << "; reason = " << reason
                << "; is_resuming = " << is_resuming
                << "; is_unexpected_disconnect = " << is_unexpected_disconnect);
+
+  NaviServiceStatusMap::iterator it =
+      navi_service_status_.find(app_id);
+  if (navi_service_status_.end() != it) {
+    navi_service_status_.erase(it);
+  }
+
   //remove appID from tts_global_properties_app_list_
     MessageHelper::SendOnAppInterfaceUnregisteredNotificationToMobile(
           app_id, unregister_reason_);
@@ -2467,78 +2469,98 @@ bool ApplicationManagerImpl::IsLowVoltage() {
   return is_low_voltage_;
 }
 
-void ApplicationManagerImpl::NaviAppStreamStatus(bool stream_active) {
-  ApplicationSharedPtr active_app = active_application();
-  using namespace mobile_apis;
-  if(active_app && active_app->is_media_application()) {
-    LOG4CXX_DEBUG(logger_, "Stream status: " << active_app->app_id());
-    SetState(active_app->app_id(),
-             stream_active ? AudioStreamingState::ATTENUATED :
-             AudioStreamingState::AUDIBLE);
+bool ApplicationManagerImpl::IsStreamingAllowed(
+    uint32_t app_id, ServiceType service_type) const {
+
+  using namespace mobile_apis::HMILevel;
+  using namespace helpers;
+
+  ApplicationSharedPtr app = application(app_id);
+  if (!app) {
+    LOG4CXX_WARN(logger_, "An application is not registered.");
+    return false;
   }
+  return Compare<eType, EQ, ONE>(
+        app->hmi_level(), HMI_FULL, HMI_LIMITED);
+}
+
+bool ApplicationManagerImpl::CanAppStream(
+    uint32_t app_id, ServiceType service_type) const {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationSharedPtr app = application(app_id);
+  if (!app) {
+    LOG4CXX_WARN(logger_, "An application is not registered.");
+    return false;
+  }
+
+  bool is_started = false;
+  if (ServiceType::kMobileNav == service_type) {
+    is_started = app->video_streaming_started();
+  } else if (ServiceType::kAudio == service_type) {
+    is_started = app->audio_streaming_started();
+  }
+  return IsStreamingAllowed(app_id, service_type) && is_started;
 }
 
 void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace mobile_apis::AppInterfaceUnregisteredReason;
+  using namespace mobile_apis::Result;
   using namespace protocol_handler;
+
+  LOG4CXX_AUTO_TRACE(logger_);
+
   ApplicationSharedPtr app = application(app_id);
-  if (!(app && app->is_navi())) {
+  if (!app || !app->is_navi()) {
     LOG4CXX_DEBUG(logger_, " There is no application with id: " << app_id);
+    return;
+  }
+
+  NaviServiceStatusMap::iterator it =
+      navi_service_status_.find(app_id);
+  if (navi_service_status_.end() == it ||
+      (!it->second.first && !it->second.second)) {
+    SetUnregisterAllApplicationsReason(PROTOCOL_VIOLATION);
+    UnregisterApplication(app_id, ABORTED);
+    return;
+  }
+  EndNaviServices(app_id);
+}
+
+void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
+  using namespace protocol_handler;
+
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationSharedPtr app = application(app_id);
+  if (!app || !app->is_navi()) {
+    LOG4CXX_DEBUG(logger_, " There is no application with id: " << app_id);
+    return;
+  }
+
+  NaviServiceStatusMap::iterator it =
+      navi_service_status_.find(app_id);
+  if (navi_service_status_.end() == it) {
     return;
   }
 
   if (connection_handler_) {
-    const bool send_end_service = true;
-    const bool ack_received = false;
-    if (app->hmi_supports_navi_video_streaming()) {
+    if (it->second.first) {
       LOG4CXX_DEBUG(logger_, "Going to end video service");
-      connection_handler_->SendEndService(navi_app_to_stop_, kMobileNav);
-      service_status_[kMobileNav] = std::make_pair(send_end_service, ack_received);
-      app->set_hmi_supports_navi_video_streaming(false);
+      connection_handler_->SendEndService(app_id, kMobileNav);
     }
-    if (app->hmi_supports_navi_audio_streaming()) {
+    if (it->second.second) {
       LOG4CXX_DEBUG(logger_, "Going to end audio service");
-      connection_handler_->SendEndService(navi_app_to_stop_, kAudio);
-      service_status_[kAudio] = std::make_pair(send_end_service, ack_received);
-      app->set_hmi_supports_navi_audio_streaming(false);
+      connection_handler_->SendEndService(app_id, kAudio);
     }
+    navi_app_to_stop_.push(app_id);
+
+    sync_primitives::AutoLock lock(timer_pool_lock_);
+    ApplicationManagerTimerPtr closeTimer(new TimerThread<ApplicationManagerImpl>(
+        "CloseAppTimer", this, &ApplicationManagerImpl::CloseNaviApp));
+    closeTimer->start(navi_close_app_timeout_);
+    timer_pool_.push_back(closeTimer);
   }
-  // this timer will check if appropriate acks from mobile were received.
-  // in case no acks, the application will be unregistered.
-  end_services_timer.start(wait_end_service_timeout_, this, &ApplicationManagerImpl::CloseNaviApp);
-  bool const allow_streaming = false;
-  ChangeStreamStatus(app_id, allow_streaming);
-}
-
-bool ApplicationManagerImpl::CanAppStream(uint32_t app_id) const {
-  LOG4CXX_AUTO_TRACE(logger_);
-
-  ApplicationSharedPtr app = application(app_id);
-  if (!(app && app->is_navi())) {
-    LOG4CXX_DEBUG(logger_, " There is no application with id: " << app_id);
-    return false;
-  }
-
-  return app->is_streaming_allowed();
-}
-
-void ApplicationManagerImpl::ChangeStreamStatus(uint32_t app_id, bool can_stream) {
-  ApplicationSharedPtr app = application(app_id);
-  if (!app) {
-    LOG4CXX_DEBUG(logger_, " There is no application with id: " << app_id);
-    return;
-  }
-
-  // Change streaming status only in case incoming value is different.
-  if (can_stream != app->streaming()) {
-    NaviAppStreamStatus(can_stream);
-    app->set_streaming(can_stream);
-  }
-}
-
-void ApplicationManagerImpl::StreamingEnded(uint32_t app_id) {
-  LOG4CXX_DEBUG(logger_, "Streaming has been stoped.");
-  ChangeStreamStatus(app_id, false);
 }
 
 void ApplicationManagerImpl::OnHMILevelChanged(uint32_t app_id,
@@ -2546,33 +2568,52 @@ void ApplicationManagerImpl::OnHMILevelChanged(uint32_t app_id,
                                                mobile_apis::HMILevel::eType to) {
   using namespace mobile_apis::HMILevel;
   using namespace helpers;
+  using namespace protocol_handler;
 
   if (from == to) {
     return;
   }
 
   ApplicationSharedPtr app = application(app_id);
-  if (!(app && app->is_navi())) {
+  if (!app || !app->is_navi()) {
+    LOG4CXX_ERROR(logger_, "Navi application not found");
     return;
   }
 
-  if (Compare<eType, EQ, ONE>(from, HMI_FULL, HMI_LIMITED)) {
-    navi_app_to_stop_ = app_id;
-    NaviAppChangeLevel(to);
-  } else if (Compare<eType, EQ, ONE>(to, HMI_FULL, HMI_LIMITED)) {
-    LOG4CXX_DEBUG(logger_, "Restore streaming ability");
-    app->set_streaming_allowed(true);
+  if (to == HMI_FULL || to == HMI_LIMITED) {
+    if (from == HMI_BACKGROUND) {
+      RestoreStreamingAbility(app_id);
+    }
+  } else if (to == HMI_BACKGROUND) {
+    if (from == HMI_FULL || from == HMI_LIMITED) {
+      sync_primitives::AutoLock lock(timer_pool_lock_);
+      ApplicationManagerTimerPtr endStreamTimer(new TimerThread<ApplicationManagerImpl>(
+          "EndStreamTimer", this, &ApplicationManagerImpl::EndNaviStreaming));
+      endStreamTimer->start(navi_end_stream_timeout_);
+      timer_pool_.push_back(endStreamTimer);
+    }
+  } else if (to == HMI_NONE) {
+    if (from == HMI_FULL || from == HMI_LIMITED ||
+        from == HMI_BACKGROUND) {
+      EndNaviServices(app_id);
+    }
   }
 }
 
-void ApplicationManagerImpl::EndNaviServices() {
+void ApplicationManagerImpl::ClearTimerPool() {
   LOG4CXX_AUTO_TRACE(logger_);
-  ApplicationSharedPtr app = application(navi_app_to_stop_);
-  if (!app) {
-    LOG4CXX_DEBUG(logger_, "The application doesn't exists anymore.");
-    return;
+
+  std::vector<ApplicationManagerTimerPtr> new_timer_pool;
+  new_timer_pool.push_back(timer_pool_[0]);
+
+  for (size_t i = 1; i < timer_pool_.size(); i++) {
+    if (timer_pool_[i]->isRunning()) {
+      new_timer_pool.push_back(timer_pool_[i]);
+    }
   }
-  app->set_streaming_allowed(false);
+
+  sync_primitives::AutoLock lock(timer_pool_lock_);
+  timer_pool_.swap(new_timer_pool);
 }
 
 void ApplicationManagerImpl::CloseNaviApp() {
@@ -2580,39 +2621,72 @@ void ApplicationManagerImpl::CloseNaviApp() {
   using namespace mobile_apis::AppInterfaceUnregisteredReason;
   using namespace mobile_apis::Result;
   using namespace protocol_handler;
-  const bool is_ack_received = AckReceived(kAudio) && AckReceived(kMobileNav);
-  if (!is_ack_received) {
-    SetUnregisterAllApplicationsReason(PROTOCOL_VIOLATION);
-    UnregisterApplication(navi_app_to_stop_, ABORTED);
+
+  uint32_t app_id = navi_app_to_stop_.front();
+  navi_app_to_stop_.pop();
+
+  NaviServiceStatusMap::iterator it =
+      navi_service_status_.find(app_id);
+  if (navi_service_status_.end() != it) {
+    if (it->second.first || it->second.second) {
+      SetUnregisterAllApplicationsReason(PROTOCOL_VIOLATION);
+      UnregisterApplication(app_id, ABORTED);
+    }
   }
 }
 
-bool ApplicationManagerImpl::AckReceived(protocol_handler::ServiceType type) {
+void ApplicationManagerImpl::EndNaviStreaming() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace mobile_apis::AppInterfaceUnregisteredReason;
+  using namespace mobile_apis::Result;
+  using namespace protocol_handler;
+
+  uint32_t app_id = navi_app_to_end_stream_.front();
+  navi_app_to_end_stream_.pop();
+  SuspendStreamingAbility(app_id);
+}
+
+void ApplicationManagerImpl::SuspendStreamingAbility(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
   using namespace protocol_handler;
 
-  const bool sent = service_status_[type].first;
-  const bool received = service_status_[type].second;
+  ApplicationSharedPtr app = application(app_id);
+  if (!app || !app->is_navi()) {
+    LOG4CXX_ERROR(logger_, "Navi application not found");
+    return;
+  }
 
-  LOG4CXX_DEBUG(logger_, "Ack for services type " << type
-                << " is send: " << sent
-                << " is received: " << received);
-
-  return sent == received;
+  NaviServiceStatusMap::iterator it =
+      navi_service_status_.find(app_id);
+  if (navi_service_status_.end() != it) {
+    if (it->second.first) {
+      app->StopStreaming(kMobileNav);
+    }
+    if (it->second.second) {
+      app->StopStreaming(kAudio);
+    }
+  }
 }
 
-void ApplicationManagerImpl::NaviAppChangeLevel(mobile_apis::HMILevel::eType new_level) {
+void ApplicationManagerImpl::RestoreStreamingAbility(uint32_t app_id) {
   LOG4CXX_AUTO_TRACE(logger_);
-  using namespace mobile_apis;
-  if (new_level == HMILevel::HMI_BACKGROUND) {
-    end_services_timer.start(wait_end_service_timeout_, this, &ApplicationManagerImpl::EndNaviServices);
-  } else if (new_level == HMILevel::HMI_NONE) {
-    EndNaviServices();
-    LOG4CXX_DEBUG(logger_, "Send end services start close app timer");
-    end_services_timer.start(wait_end_service_timeout_, this, &ApplicationManagerImpl::CloseNaviApp);
-  } else {
-    LOG4CXX_DEBUG(logger_, "There is no defined behavior for hmi " <<
-                  "levels that are differen from NONE or BACKGROUND");
+  using namespace protocol_handler;
+
+  ApplicationSharedPtr app = application(app_id);
+  if (!app || !app->is_navi()) {
+    LOG4CXX_ERROR(logger_, "Navi application not found");
+    return;
+  }
+
+  NaviServiceStatusMap::iterator it =
+      navi_service_status_.find(app_id);
+  if (navi_service_status_.end() != it) {
+    if (it->second.first) {
+      app->StartStreaming(kMobileNav);
+    }
+    if (it->second.second) {
+      app->StartStreaming(kAudio);
+    }
   }
 }
 
