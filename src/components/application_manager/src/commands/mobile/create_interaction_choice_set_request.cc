@@ -413,6 +413,12 @@ void CreateInteractionChoiceSetRequest::OnAllHMIResponsesReceived() {
     DeleteChoices();
   } else {
     SendResponse(true, mobile_apis::Result::SUCCESS);
+    ApplicationSharedPtr application =
+      ApplicationManagerImpl::instance()->application(connection_key());
+    if (!application) {
+      return;
+    }
+    application->UpdateHash();
   }
   ApplicationManagerImpl::instance()->TerminateRequest(connection_key(),
                                                        correlation_id());

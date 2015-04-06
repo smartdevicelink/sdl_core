@@ -192,11 +192,12 @@ RequestInfoPtr RequestInfoSet::FrontWithNotNullTimeout() {
   RequestInfoPtr result;
   TimeSortedRequestInfoSet::iterator it = time_sorted_pending_requests_.begin();
   while (it != time_sorted_pending_requests_.end()) {
-    if (0 != (*it)->timeout_sec()) {
-      result =*it;
-      it = time_sorted_pending_requests_.end();
-    } else {
+    RequestInfoPtr tmp = *it;
+    if ( tmp ->timeout_sec() || !tmp->request()->AllowedToTerminate()) {
       ++it;
+    } else {
+      result = tmp;
+      it = time_sorted_pending_requests_.end();
     }
   }
   return result;
