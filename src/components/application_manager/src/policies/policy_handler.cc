@@ -1303,6 +1303,11 @@ void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
   policy_manager_->SetPrimaryDevice(dev_id);
 }
 
+void PolicyHandler::SetRemoteControl(bool enabled) {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->SetRemoteControl(enabled);
+}
+
 application_manager::TypeAccess PolicyHandler::ConvertTypeAccess(
     policy::TypeAccess access) const {
   application_manager::TypeAccess converted;

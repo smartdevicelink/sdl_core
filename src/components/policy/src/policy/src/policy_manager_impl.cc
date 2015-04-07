@@ -904,7 +904,9 @@ TypeAccess PolicyManagerImpl::CheckAccess(
     if (access_remote_->IsPassengerZone(seat, zone)) {
       access = TypeAccess::kAllowed;
     } else {
-      //access = access_remote_->Check(dev_id, app_id, rpc, zone);
+      Subject who = {dev_id, app_id};
+      Object what = {rpc, zone};
+      access = access_remote_->Check(who, what);
     }
   }
   return access;
@@ -921,6 +923,14 @@ void PolicyManagerImpl::RemoveAccess(const PTString& rpc) {
 
 void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {
   access_remote_->SetPrimaryDevice(dev_id);
+}
+
+void PolicyManagerImpl::SetRemoteControl(bool enabled) {
+  if (enabled) {
+    access_remote_->Enable();
+  } else {
+    access_remote_->Disable();
+  }
 }
 
 }  //  namespace policy

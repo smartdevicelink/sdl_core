@@ -427,6 +427,12 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      */
     virtual void SetPrimaryDevice(const PTString& dev_id) = 0;
 
+    /**
+     * Sets mode of remote control (on/off)
+     * @param enabled true if remote control is turned on
+     */
+    virtual void SetRemoteControl(bool enabled) = 0;
+
   protected:
     /**
      * Checks is PT exceeded IgnitionCycles

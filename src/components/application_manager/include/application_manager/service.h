@@ -102,6 +102,12 @@ class Service {
   virtual void SetPrimaryDevice(const std::string& dev_id) = 0;
 
   /**
+   * Sets mode of remote control (on/off)
+   * @param enabled true if remote control is turned on
+   */
+  virtual void SetRemoteControl(bool enabled) = 0;
+
+  /**
    * @brief Get pointer to application by application id
    * @param app_id application id
    * return pointer to application

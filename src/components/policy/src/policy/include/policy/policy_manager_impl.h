@@ -174,6 +174,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void AddAccess(const PTString& app_id, const PTString& rpc);
     virtual void RemoveAccess(const PTString& rpc);
     virtual void SetPrimaryDevice(const PTString& dev_id);
+    virtual void SetRemoteControl(bool enabled);
 
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(

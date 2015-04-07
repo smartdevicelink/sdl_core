@@ -106,6 +106,10 @@ void CoreService::SetPrimaryDevice(const std::string& dev_id) {
   policy::PolicyHandler::instance()->SetPrimaryDevice(dev_id);
 }
 
+void CoreService::SetRemoteControl(bool enabled) {
+  policy::PolicyHandler::instance()->SetRemoteControl(enabled);
+}
+
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {
   return ApplicationManagerImpl::instance()->application(app_id);
 }
