@@ -83,10 +83,9 @@ class Service {
    */
   virtual uint32_t GetNextCorrelationID() = 0;
 
-
-  /**
-   * @brief Returns all applications
-   *
+  /*
+   * @brief Returns all applications related to plugin
+   * @param uid ID provided by plugin to its extension to app.
    * @return List with shared pointers to applications
    */
   virtual std::vector<ApplicationSharedPtr> GetApplications(AppExtensionUID uid) = 0;

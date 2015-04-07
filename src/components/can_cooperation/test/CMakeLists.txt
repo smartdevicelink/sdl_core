@@ -52,6 +52,7 @@ SET(RPATH_DIRECTORIES
   ${CMAKE_BINARY_DIR}/src/components/can_cooperation/
   /usr/local/lib
   /usr/local
+  ${CMAKE_BINARY_DIR}/src/components/utils
 )
 
 SET(CMAKE_INSTALL_RPATH "${RPATH_DIRECTORIES}")

@@ -19,3 +19,7 @@ add_library("FunctionalModule" ${SOURCES})
 if(ENABLE_LOG)
   target_link_libraries("FunctionalModule" log4cxx -L${LOG4CXX_LIBS_DIRECTORY})
 endif()
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()

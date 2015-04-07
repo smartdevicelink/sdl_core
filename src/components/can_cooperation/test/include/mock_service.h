@@ -49,8 +49,8 @@ class MockService : public Service {
       void(const MessagePtr& message));
   MOCK_METHOD0(GetNextCorrelationID,
       uint32_t());
-  MOCK_METHOD0(GetApplications,
-      std::set<ApplicationSharedPtr>());
+  MOCK_METHOD1(GetApplications,
+      std::vector<ApplicationSharedPtr>(AppExtensionUID uid));
   MOCK_METHOD1(SubscribeToHMINotification,
       void(const std::string& hmi_notification));
 };

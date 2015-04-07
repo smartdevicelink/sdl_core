@@ -41,8 +41,9 @@ class CanModuleTest : public ::testing::Test {
   }
 
   static void TearDownTestCase() {
-    std::set<application_manager::ApplicationSharedPtr> apps;
-    EXPECT_CALL(*mock_service, GetApplications()).Times(1).WillOnce(Return(apps));
+    std::vector<application_manager::ApplicationSharedPtr> apps;
+    EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())
+      ).Times(1).WillOnce(Return(apps));
     CANModule::destroy();
   }
 };
@@ -73,8 +74,9 @@ TEST_F(CanModuleTest, ProcessMessageEmptyAppsList) {
       protocol_handler::ServiceType::kRpc));
   message->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);
 
-  std::set<application_manager::ApplicationSharedPtr> apps;
-  EXPECT_CALL(*mock_service, GetApplications()).Times(1).WillOnce(Return(apps));
+  std::vector<application_manager::ApplicationSharedPtr> apps;
+  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())
+    ).Times(1).WillOnce(Return(apps));
   EXPECT_CALL(*mock_service, SendMessageToMobile(_)).Times(0);
   EXPECT_EQ(ProcessResult::PROCESSED, module->ProcessMessage(message));
 }
@@ -85,9 +87,9 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
       protocol_handler::ServiceType::kRpc));
   message->set_function_id(MobileFunctionID::ON_RADIO_DETAILS);
 
-  std::set<application_manager::ApplicationSharedPtr> apps;
+  std::vector<application_manager::ApplicationSharedPtr> apps;
   MockApplication* app = new MockApplication();
-  apps.insert(app);
+  apps.push_back(app);
   application_manager::AppExtensionUID uid = module->GetModuleID();
   CANAppExtension* can_ext = new CANAppExtension(uid);
   can_ext->GiveControl(true);
@@ -95,7 +97,8 @@ TEST_F(CanModuleTest, ProcessMessagePass) {
 
   EXPECT_CALL(*app, QueryInterface(uid)).Times(1).WillOnce(Return(ext));
   EXPECT_CALL(*app, app_id()).Times(1).WillOnce(Return(1));
-  EXPECT_CALL(*mock_service, GetApplications()).Times(1).WillOnce(Return(apps));
+  EXPECT_CALL(*mock_service, GetApplications(module->GetModuleID())
+    ).Times(1).WillOnce(Return(apps));
   EXPECT_CALL(*mock_service, SendMessageToMobile(message)).Times(1);
 
   EXPECT_EQ(ProcessResult::PROCESSED, module->ProcessMessage(message));

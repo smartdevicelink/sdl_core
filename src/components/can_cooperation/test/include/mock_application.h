@@ -43,12 +43,10 @@ class MockApplication : public Application {
  public:
   MOCK_CONST_METHOD0(active_message,
       const smart_objects::SmartObject*());
-  MOCK_METHOD0(nextHash,
-      uint32_t());
   MOCK_CONST_METHOD0(curHash,
-      uint32_t());
+      const std::string&());
   MOCK_METHOD0(UpdateHash,
-      uint32_t());
+      void());
   MOCK_METHOD0(CloseActiveMessage,
       void());
   MOCK_CONST_METHOD0(IsFullscreen,
@@ -256,15 +254,15 @@ class MockApplication : public Application {
   MOCK_METHOD0(DeletePerformInteractionChoiceSetMap,
       void());
   MOCK_CONST_METHOD0(performinteraction_choice_set_map,
-      const PerformChoiceSetMap&());
+      DataAccessor<PerformChoiceSetMap>());
   MOCK_CONST_METHOD1(FindPerformInteractionChoiceSet,
       smart_objects::SmartObject*(uint32_t choice_set_id));
   MOCK_CONST_METHOD0(commands_map,
-      const CommandsMap&());
+      DataAccessor<CommandsMap>());
   MOCK_CONST_METHOD0(sub_menu_map,
-      const SubMenuMap&());
+      DataAccessor<SubMenuMap>());
   MOCK_CONST_METHOD0(choice_set_map,
-      const ChoiceSetMap&());
+      DataAccessor<ChoiceSetMap>());
   MOCK_METHOD1(set_perform_interaction_active,
       void(uint32_t active));
   MOCK_CONST_METHOD0(is_perform_interaction_active,
@@ -286,7 +284,7 @@ class MockApplication : public Application {
   MOCK_CONST_METHOD0(vr_synonyms,
       const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(mobile_app_id,
-      const smart_objects::SmartObject*());
+      std::string());
   MOCK_CONST_METHOD0(tts_name,
       const smart_objects::SmartObject*());
   MOCK_CONST_METHOD0(ngn_media_screen_name,
@@ -309,6 +307,29 @@ class MockApplication : public Application {
       void(const mobile_api::Language::eType& language));
   MOCK_METHOD1(set_ui_language,
       void(const mobile_api::Language::eType& ui_language));
+  MOCK_METHOD1(load_global_properties,
+      void(const smart_objects::SmartObject& so));
+  MOCK_METHOD1(set_mobile_app_id,
+      void(const std::string& mobile_app_id));
+  MOCK_METHOD0(ChangeSupportingAppHMIType, void());
+  MOCK_CONST_METHOD0(is_navi, bool());
+  MOCK_METHOD1(set_is_navi, void(bool allow));
+  MOCK_CONST_METHOD0(hmi_supports_navi_video_streaming, bool());
+  MOCK_METHOD1(set_hmi_supports_navi_video_streaming, void(bool supports));
+  MOCK_CONST_METHOD0(hmi_supports_navi_audio_streaming, bool());
+  MOCK_METHOD1(set_hmi_supports_navi_audio_streaming, void(bool supports));
+  MOCK_CONST_METHOD0(is_voice_communication_supported, bool());
+  MOCK_METHOD1(set_voice_communication_supported, void(bool));
+  MOCK_METHOD1(set_activated, bool(bool is_active));
+  MOCK_CONST_METHOD0(is_foreground, bool());
+  MOCK_METHOD1(set_foreground, void(bool is_foreground));
+  MOCK_CONST_METHOD0(IsAudioApplication, bool());
+  MOCK_CONST_METHOD0(video_stream_retry_active, bool());
+  MOCK_METHOD1(set_video_stream_retry_active, void(bool active));
+  MOCK_CONST_METHOD0(audio_stream_retry_active, bool());
+  MOCK_METHOD1(set_audio_stream_retry_active, void(bool active));
+  MOCK_METHOD0(OnVideoStreamRetry, void());
+  MOCK_METHOD0(OnAudioStreamRetry, void());
 };
 
 }  // namespace application_manager

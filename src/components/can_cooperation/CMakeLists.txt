@@ -67,7 +67,7 @@ set (SOURCES
     ./src/validators/advertisement_validator.cc
     ./src/validators/event_details_validator.cc
     ./src/validators/web_activity_validator.cc
-    ./src/validators/on_radio_details_notification_validator.cc  
+    ./src/validators/on_radio_details_notification_validator.cc
 )
 
 set (LIBRARIES
@@ -96,3 +96,7 @@ install(
   FILES "${CMAKE_CURRENT_SOURCE_DIR}/src/can_config.json"
   DESTINATION ${install_destination}
 )
+
+if(BUILD_TESTS)
+  add_subdirectory(test)
+endif()
