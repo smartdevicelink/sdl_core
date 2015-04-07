@@ -41,6 +41,7 @@
 #include "json/json.h"
 #include "utils/logger.h"
 #include "utils/threads/thread.h"
+#include "utils/conditional_variable.h"
 
 namespace can_cooperation {
 
@@ -51,10 +52,12 @@ class TCPClientDelegate : public threads::ThreadDelegate {
   explicit TCPClientDelegate(CANTCPConnection* can_connection);
   ~TCPClientDelegate();
   void threadMain();
-  bool exitThreadMain();
+  void exitThreadMain();
  private:
   CANTCPConnection* can_connection_;
-  bool stop_flag_;
+  volatile bool stop_flag_;
+  mutable sync_primitives::Lock stop_flag_lock_;
+  mutable sync_primitives::ConditionalVariable stop_flag_cond_;
 };
 
 CANTCPConnection::CANTCPConnection()
@@ -80,10 +83,10 @@ CANTCPConnection::CANTCPConnection()
   LOG4CXX_INFO(logger_, "Connecting to "
                << address_ << " on port " << port_);
   if (OpenConnection() == ConnectionState::OPENED) {
-    thread_ = new threads::Thread("CANClientListener",
+    thread_ = threads::CreateThread("CANClientListener",
                                   new TCPClientDelegate(this));
     const size_t kStackSize = 16384;
-    thread_->startWithOptions(threads::ThreadOptions(kStackSize));
+    thread_->start(threads::ThreadOptions(kStackSize));
   } else {
     LOG4CXX_ERROR(logger_, "Failed to connect to CAN");
   }
@@ -95,7 +98,7 @@ CANTCPConnection::~CANTCPConnection() {
   }
   if (thread_) {
     thread_->stop();
-    delete thread_;
+    DeleteThread(thread_);
   }
   current_state_ = NONE;
 }
@@ -223,11 +226,19 @@ void TCPClientDelegate::threadMain() {
         can_connection_->current_state_, info);
     }
   }
+  stop_flag_cond_.NotifyOne();
 }
 
-bool TCPClientDelegate::exitThreadMain() {
+void TCPClientDelegate::exitThreadMain() {
+  if (stop_flag_) return;
+  sync_primitives::AutoLock run_lock(stop_flag_lock_);
   stop_flag_ = true;
-  return true;
+  sync_primitives::ConditionalVariable::WaitStatus wait_status =
+  stop_flag_cond_.WaitFor(run_lock, 10000);
+  if (sync_primitives::ConditionalVariable::kTimeout ==
+        wait_status) {
+    threads::ThreadDelegate::exitThreadMain();
+  }
 }
 
 }  //  namespace can_cooperation

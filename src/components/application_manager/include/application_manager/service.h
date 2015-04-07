@@ -89,7 +89,7 @@ class Service {
    *
    * @return List with shared pointers to applications
    */
-  virtual std::set<ApplicationSharedPtr> GetApplications() = 0;
+  virtual std::vector<ApplicationSharedPtr> GetApplications(AppExtensionUID uid) = 0;
 
   /**
    * @brief Subscribes to notification from HMI

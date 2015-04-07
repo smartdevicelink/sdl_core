@@ -67,14 +67,11 @@ void TimerThreadDelegate<T>::threadMain() {
 }
 
 template<class T>
-bool TimerThreadDelegate<T>::exitThreadMain() {
+void TimerThreadDelegate<T>::exitThreadMain() {
   if (keep_running_) {
     sync_primitives::AutoLock run_lock(keep_running_lock_);
     keep_running_ = false;
     keep_running_cond_.NotifyOne();
-    return true;
-  } else {
-    return false;
   }
 }
 
@@ -96,10 +93,10 @@ void TimerDirector::RegisterTimer(ModuleTimer<T>& timer) {
   }
   TimerThreadDelegate<T>* delegate = new TimerThreadDelegate<T>(
     timer);
-  threads::Thread* thread = new threads::Thread(type_name.c_str(), delegate);
+  threads::Thread* thread = threads::CreateThread(type_name.c_str(), delegate);
 
   const size_t kStackSize = 16384;
-  if (thread->startWithOptions(threads::ThreadOptions(kStackSize))) {
+  if (thread->start(threads::ThreadOptions(kStackSize))) {
     timer_threads_.insert(std::make_pair(type_name, thread));
   } else {
     //  Failed to start timer thread for
@@ -116,7 +113,7 @@ void TimerDirector::UnregisterTimer(const ModuleTimer<T>& timer) {
     return;
   }
   it->second->stop();
-  delete it->second;
+  DeleteThread(it->second);
   timer_threads_.erase(it);
 }
 
@@ -124,7 +121,7 @@ void TimerDirector::UnregisterAllTimers() {
   for (std::map<std::string, threads::Thread*>::iterator it =
          timer_threads_.begin(); timer_threads_.end() != it; ++it) {
     it->second->stop();
-    delete it->second;
+    DeleteThread(it->second);
   }
   timer_threads_.clear();
 }

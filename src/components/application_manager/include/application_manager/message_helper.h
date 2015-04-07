@@ -43,6 +43,7 @@
 #include "application_manager/application.h"
 #include "application_manager/vehicle_info_data.h"
 #include "policy/policy_types.h"
+#include "smart_objects/smart_object.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {

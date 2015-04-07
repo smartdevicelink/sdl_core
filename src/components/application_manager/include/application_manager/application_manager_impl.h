@@ -772,6 +772,25 @@ class ApplicationManagerImpl : public ApplicationManager,
         mobile_apis::FunctionID::eType function_id,
         const RPCParams& rpc_params,
         CommandParametersPermissions* params_permissions = NULL);
+
+    /**
+     * @brief  Places a message to the queue to be sent to mobile. Called from plugins.
+     * @param message Message to mobile
+     */
+    void PostMessageToMobileQueque(const MessagePtr& message);
+
+    /**
+     * @brief  Places a message to the queue to be sent to HMI. Called from plugins.
+     * @param message Message to HMI
+     */
+    void PostMessageToHMIQueque(const MessagePtr& message);
+
+    /*
+     * @brief Subscribes to notification from HMI
+     * @param hmi_notification string with notification name
+     */
+    void SubscribeToHMINotification( const std::string& hmi_notification);
+
     /*
      * @brief Function Should be called when Low Voltage is occured
      */

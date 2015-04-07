@@ -63,10 +63,10 @@ BaseCommandNotification::~BaseCommandNotification() {
 
 application_manager::ApplicationSharedPtr BaseCommandNotification::GetApplicationWithControl(
                                         CANAppExtensionPtr& can_app_extension) {
-  const std::set<application_manager::ApplicationSharedPtr> applications =
-        service_->GetApplications();
+  std::vector<application_manager::ApplicationSharedPtr> applications =
+        service_->GetApplications(CANModule::instance()->GetModuleID());
 
-  std::set<application_manager::ApplicationSharedPtr>::iterator it =
+  std::vector<application_manager::ApplicationSharedPtr>::iterator it =
       applications.begin();
 
   for (;it != applications.end(); ++it) {

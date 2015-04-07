@@ -93,7 +93,7 @@ class CoreService : public Service {
    *
    * @return List with shared pointers to applications
    */
-  virtual std::set<ApplicationSharedPtr> GetApplications();
+  virtual std::vector<ApplicationSharedPtr> GetApplications(AppExtensionUID uid);
 
   /**
    * @brief Subscribes to notification from HMI

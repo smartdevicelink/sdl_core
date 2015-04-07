@@ -191,6 +191,7 @@ void Message::set_protocol_version(ProtocolVersion version) {
   version_ = version;
 }
 
+#ifdef HMI_DBUS_API
 const smart_objects::SmartObject &Message::smart_object() const {
   return smart_object_;
 }
@@ -198,6 +199,7 @@ const smart_objects::SmartObject &Message::smart_object() const {
 void Message::set_smart_object(const smart_objects::SmartObject& object) {
   smart_object_ = object;
 }
+#endif
 
 void Message::set_data_size(size_t data_size) {
   data_size_ = data_size;

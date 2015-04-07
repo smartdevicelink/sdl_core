@@ -45,7 +45,7 @@ template<class T> class TimerThreadDelegate : public threads::ThreadDelegate {
  public:
   explicit TimerThreadDelegate(ModuleTimer<T>& timer);
   void threadMain();
-  bool exitThreadMain();
+  void exitThreadMain();
  private:
   ModuleTimer<T>& timer_;
   volatile bool keep_running_;

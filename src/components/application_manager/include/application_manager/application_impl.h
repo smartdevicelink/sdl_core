@@ -36,6 +36,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <list>
 #include <utility>
 
 #include "utils/date_time.h"

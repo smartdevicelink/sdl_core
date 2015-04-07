@@ -35,6 +35,15 @@
 
 namespace application_manager {
 
+namespace {
+struct AppExtensionPredicate {
+  AppExtensionUID uid;
+      bool operator() (const ApplicationSharedPtr app) {
+        return app? app->QueryInterface(uid).valid() : false;
+      }
+};
+}
+
 CoreService::CoreService() {
 }
 
@@ -62,9 +71,11 @@ uint32_t CoreService::GetNextCorrelationID() {
   return ApplicationManagerImpl::instance()->GetNextHMICorrelationID();
 }
 
-std::set<ApplicationSharedPtr> CoreService::GetApplications() {
+std::vector<ApplicationSharedPtr> CoreService::GetApplications(AppExtensionUID uid) {
   ApplicationManagerImpl::ApplicationListAccessor accessor;
-  return accessor.applications();
+  AppExtensionPredicate predicate;
+  predicate.uid = uid;
+  return accessor.FindAll(predicate);
 }
 
 void CoreService::SubscribeToHMINotification(
