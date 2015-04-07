@@ -108,6 +108,11 @@ void CoreService::ResetAccess(const ApplicationId& app_id) {
   }
 }
 
+void CoreService::ResetAccess(const std::string& group_name,
+                              const SeatLocation& zone) {
+  policy::PolicyHandler::instance()->ResetAccess(group_name, zone);
+}
+
 void CoreService::SetPrimaryDevice(const std::string& dev_id) {
   policy::PolicyHandler::instance()->SetPrimaryDevice(dev_id);
 }

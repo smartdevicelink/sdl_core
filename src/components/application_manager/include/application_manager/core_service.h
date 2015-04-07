@@ -94,10 +94,19 @@ class CoreService : public Service {
                          bool allowed);
 
   /**
-   * Resets access application to all resources
-   * @param app_id ID application
+   * Resets access by group name for all applications
+   * @param group_name group name
+   * @param zone zone control
    */
   virtual void ResetAccess(const ApplicationId& app_id);
+
+  /**
+   * Resets access by group name for all applications
+   * @param group_name group name
+   * @param zone zone control
+   */
+  virtual void ResetAccess(const std::string& group_name,
+                           const SeatLocation& zone);
 
   /**
    * Sets device as primary device

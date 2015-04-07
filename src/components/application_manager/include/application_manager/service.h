@@ -99,6 +99,14 @@ class Service {
   virtual void ResetAccess(const ApplicationId& app_id) = 0;
 
   /**
+   * Resets access by group name for all applications
+   * @param group_name group name
+   * @param zone zone control
+   */
+  virtual void ResetAccess(const std::string& group_name,
+                           const SeatLocation& zone) = 0;
+
+  /**
    * Sets device as primary device
    * @param dev_id ID device
    */
