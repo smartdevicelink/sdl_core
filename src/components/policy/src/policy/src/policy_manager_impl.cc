@@ -875,6 +875,7 @@ bool PolicyManagerImpl::InitPT(const std::string& file_name) {
   if (ret) {
     RefreshRetrySequence();
     update_status_manager_.OnPolicyInit(cache_->UpdateRequired());
+    access_remote_->Init();
   }
   return ret;
 }

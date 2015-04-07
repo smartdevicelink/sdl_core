@@ -66,6 +66,11 @@ class AccessRemote {
   }
 
   /**
+   * Initializes oneself
+   */
+  virtual void Init() = 0;
+
+  /**
    * Enables remote control
    */
   virtual void Enable() = 0;

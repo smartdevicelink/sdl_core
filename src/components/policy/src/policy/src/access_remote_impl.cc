@@ -35,6 +35,9 @@
 #include "policy/access_remote_impl.h"
 #include "policy/cache_manager.h"
 #include "types.h"
+#include "utils/logger.h"
+
+CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyManagerImpl")
 
 using policy_table::DeviceData;
 
@@ -87,6 +90,10 @@ AccessRemoteImpl::AccessRemoteImpl(CacheManager& cache)
       primary_device_(),
       enabled_(true),
       acl_() {
+}
+
+void AccessRemoteImpl::Init() {
+  DCHECK(cache_.pt_);
   enabled_ = cache_.pt_->policy_table.module_config.remote_control;
 
   DeviceData& devices = *cache_.pt_->policy_table.device_data;
@@ -108,6 +115,7 @@ bool AccessRemoteImpl::IsPassengerZone(const SeatLocation& seat,
 
 TypeAccess AccessRemoteImpl::Check(const Subject& who,
                                    const Object& what) const {
+  LOG4CXX_TRACE_ENTER(logger_);
   TypeAccess ret = TypeAccess::kDisallowed;
   AccessControlList::const_iterator i = acl_.find(what);
   if (i != acl_.end()) {
@@ -132,6 +140,7 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
     // Nobody controls this object
     ret = TypeAccess::kManual;
   }
+  LOG4CXX_TRACE_EXIT(logger_);
   return ret;
 }
 

@@ -483,6 +483,7 @@ void SQLPTRepresentation::GatherModuleConfig(
     *config->vehicle_make = query.GetString(5);
     *config->vehicle_model = query.GetString(6);
     *config->vehicle_year = query.GetString(7);
+    config->remote_control = query.GetBoolean(8);
   }
 
   dbms::SQLQuery endpoints(db());
@@ -536,10 +537,13 @@ void SQLPTRepresentation::GatherDeviceData(
 
   dbms::SQLQuery query(db());
   if (query.Prepare(sql_pt::kSelectDeviceData)) {
-    policy_table::DeviceParams device_data_empty;
-    device_data_empty.mark_initialized();
+    policy_table::DeviceParams device_data;
+    device_data.mark_initialized();
     while (query.Next()) {
-      (*data)[query.GetString(0)] = device_data_empty;
+      if (!query.IsNull(9)) {
+        *device_data.primary = query.GetBoolean(9);
+      }
+      (*data)[query.GetString(0)] = device_data;
     }
   }
 }
@@ -966,6 +970,7 @@ bool SQLPTRepresentation::SaveModuleConfig(
   query.Bind(6, *(config.vehicle_model)) : query.Bind(6);
   config.vehicle_year.is_initialized() ?
   query.Bind(7, *(config.vehicle_year)) : query.Bind(7);
+  query.Bind(8, config.remote_control);
 
   if (!query.Exec()) {
     LOG4CXX_WARN(logger_, "Incorrect update module config");
@@ -1168,7 +1173,10 @@ bool SQLPTRepresentation::SaveDeviceData(
 
   policy_table::DeviceData::const_iterator it;
   for (it = devices.begin(); it != devices.end(); ++it) {
+    const policy_table::DeviceParams& params = it->second;
     query.Bind(0, it->first);
+    params.primary.is_initialized() ? query.Bind(1, params.primary)
+        : query.Bind(1);
     if (!query.Exec()) {
       LOG4CXX_WARN(logger_, "Incorrect insert into device data.");
       return false;

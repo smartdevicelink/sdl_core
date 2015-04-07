@@ -295,7 +295,8 @@ ModuleConfig::ModuleConfig(const Json::Value* value__)
     notifications_per_minute_by_priority(impl::ValueMember(value__, "notifications_per_minute_by_priority")),
     vehicle_make(impl::ValueMember(value__, "vehicle_make")),
     vehicle_model(impl::ValueMember(value__, "vehicle_model")),
-    vehicle_year(impl::ValueMember(value__, "vehicle_year")) {
+    vehicle_year(impl::ValueMember(value__, "vehicle_year")),
+    remote_control(impl::ValueMember(value__, "remote_control")) {
 }
 Json::Value ModuleConfig::ToJsonValue() const {
   Json::Value result__(Json::objectValue);
@@ -311,6 +312,7 @@ Json::Value ModuleConfig::ToJsonValue() const {
   impl::WriteJsonField("vehicle_make", vehicle_make, &result__);
   impl::WriteJsonField("vehicle_model", vehicle_model, &result__);
   impl::WriteJsonField("vehicle_year", vehicle_year, &result__);
+  impl::WriteJsonField("remote_control", remote_control, &result__);
   return result__;
 }
 bool ModuleConfig::is_valid() const {
@@ -348,6 +350,9 @@ bool ModuleConfig::is_valid() const {
     return false;
   }
   if (!vehicle_year.is_valid()) {
+    return false;
+  }
+  if (!remote_control.is_valid()) {
     return false;
   }
   return Validate();
@@ -397,6 +402,9 @@ bool ModuleConfig::struct_empty() const {
   if (vehicle_year.is_initialized()) {
     return false;
   }
+  if (remote_control.is_initialized()) {
+    return false;
+  }
 
   return true;
 }
@@ -440,6 +448,9 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
   if (!vehicle_year.is_valid()) {
     vehicle_year.ReportErrors(&report__->ReportSubobject("vehicle_year"));
   }
+  if (!remote_control.is_valid()) {
+    remote_control.ReportErrors(&report__->ReportSubobject("remote_control"));
+  }
   if (PT_PRELOADED == GetPolicyTableType()) {
     std::string validation_info = ommited_validation_info +
                                   PolicyTableTypeToString(GetPolicyTableType());
@@ -454,6 +465,10 @@ void ModuleConfig::ReportErrors(rpc::ValidationReport* report__) const {
     }
     if (vehicle_model.is_initialized()) {
       ommited_field_report = &report__->ReportSubobject("vehicle_model");
+      ommited_field_report->set_validation_info(validation_info);
+    }
+    if (remote_control.is_initialized()) {
+      ommited_field_report = &report__->ReportSubobject("remote_control");
       ommited_field_report->set_validation_info(validation_info);
     }
   }
@@ -473,6 +488,7 @@ void ModuleConfig::SetPolicyTableType(PolicyTableType pt_type) {
   vehicle_make.SetPolicyTableType(pt_type);
   vehicle_model.SetPolicyTableType(pt_type);
   vehicle_year.SetPolicyTableType(pt_type);
+  remote_control.SetPolicyTableType(pt_type);
 }
 
 // MessageString methods

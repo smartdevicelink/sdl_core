@@ -48,7 +48,8 @@ const std::string kCreateSchema =
   "  `carrier` VARCHAR(45), "
   "  `max_number_rfcom_ports` INTEGER,"
   "  `connection_type` VARCHAR(45), "
-  "  `unpaired` BOOL "
+  "  `unpaired` BOOL,"
+  "  `primary` BOOL "
   "); "
   "CREATE TABLE IF NOT EXISTS `usage_and_error_count`( "
   "  `count_of_iap_buffer_full` INTEGER, "
@@ -74,7 +75,8 @@ const std::string kCreateSchema =
   "  `timeout_after_x_seconds` INTEGER NOT NULL, "
   "  `vehicle_make` VARCHAR(45), "
   "  `vehicle_model` VARCHAR(45), "
-  "  `vehicle_year` VARCHAR(4) "
+  "  `vehicle_year` VARCHAR(4),"
+  "  `remote_control` BOOL NOT NULL "
   "); "
   "CREATE TABLE IF NOT EXISTS `functional_group`( "
   "  `id` INTEGER PRIMARY KEY NOT NULL, "
@@ -321,8 +323,8 @@ const std::string kInsertInitData =
   "  VALUES (0, 0, 0, 0); "
   "INSERT OR IGNORE INTO `module_config` (`preloaded_pt`, `is_first_run`,"
   "  `exchange_after_x_ignition_cycles`, `exchange_after_x_kilometers`, "
-  "  `exchange_after_x_days`, `timeout_after_x_seconds`) "
-  "  VALUES(1, 0, 0, 0, 0, 0); "
+  "  `exchange_after_x_days`, `timeout_after_x_seconds`, `remote_control`) "
+  "  VALUES(1, 0, 0, 0, 0, 0, 1); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('EMERGENCY'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('NAVIGATION'); "
   "INSERT OR IGNORE INTO `priority`(`value`) VALUES ('VOICECOMMUNICATION'); "
@@ -483,7 +485,7 @@ const std::string kUpdateModuleConfig =
   "  `exchange_after_x_ignition_cycles` = ?,"
   "  `exchange_after_x_kilometers` = ?, `exchange_after_x_days` = ?, "
   "  `timeout_after_x_seconds` = ?, `vehicle_make` = ?, "
-  "  `vehicle_model` = ?, `vehicle_year` = ?";
+  "  `vehicle_model` = ?, `vehicle_year` = ?, `remote_control` = ?";
 
 const std::string kInsertEndpoint =
   "INSERT INTO `endpoint` (`service`, `url`, `application_id`) "
@@ -497,7 +499,7 @@ const std::string kInsertNotificationsByPriority =
   "  VALUES (?, ?)";
 
 const std::string kInsertDeviceData =
-  "INSERT OR IGNORE INTO `device` (`id`) VALUES (?)";
+  "INSERT OR IGNORE INTO `device` (`id`, `primary`) VALUES (?, ?)";
 
 const std::string kInsertAppLevel =
   "INSERT INTO `app_level` (`application_id`, `minutes_in_hmi_full`,"
@@ -529,7 +531,7 @@ const std::string kSelectModuleConfig =
   "SELECT `preloaded_pt`, `exchange_after_x_ignition_cycles`, "
   " `exchange_after_x_kilometers`, `exchange_after_x_days`, "
   " `timeout_after_x_seconds`, `vehicle_make`,"
-  " `vehicle_model`, `vehicle_year` "
+  " `vehicle_model`, `vehicle_year`, `remote_control` "
   " FROM `module_config`";
 
 const std::string kSelectEndpoints =

@@ -43,6 +43,7 @@ class AccessRemoteImpl : public AccessRemote {
  public:
   explicit AccessRemoteImpl(CacheManager& cache);
 
+  virtual void Init();
   virtual void Enable();
   virtual void Disable();
   virtual bool IsEnabled() const;
