@@ -297,6 +297,7 @@ void BaseCommandRequest::Run() {
     return;
   }
 
+  // TODO(KKolodiy): may be we won't have mobile API for needs SDL so it redundant
   if (!to_can_) {
     Execute(); // run child's logic
     return;
@@ -366,6 +367,7 @@ void BaseCommandRequest::on_event(const event_engine::Event<application_manager:
     } else {
       SendResponse(false, result_codes::kDisallowed, "");
     }
+    // TODO(KKolodiy): get group name and zone from message
     std::string group_name = "Radio";
     SeatLocation zone = 1;
     service_->SetAccess(app_->app_id(), group_name, zone, allowed);

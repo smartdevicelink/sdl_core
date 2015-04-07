@@ -55,6 +55,7 @@ class AccessRemoteImpl : public AccessRemote {
   virtual void Allow(const Subject& who, const Object& what);
   virtual void Deny(const Subject& who, const Object& what);
   virtual void Reset(const Subject& who);
+  virtual void Reset(const Object& what);
   virtual TypeAccess Check(const Subject& who, const Object& what) const;
 
  private:

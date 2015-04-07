@@ -147,6 +147,10 @@ void AccessRemoteImpl::Reset(const Subject& who) {
   std::for_each(acl_.begin(), acl_.end(), Erase(who));
 }
 
+void AccessRemoteImpl::Reset(const Object& what) {
+  acl_.erase(what);
+}
+
 void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id) {
   primary_device_ = dev_id;
   DeviceData& devices = *cache_.pt_->policy_table.device_data;

@@ -124,6 +124,12 @@ class AccessRemote {
   virtual void Reset(const Subject& who) = 0;
 
   /**
+   * Resets access to object for all subjects
+   * @param what object is group and zone
+   */
+  virtual void Reset(const Object& what) = 0;
+
+  /**
    * Checks access subject to object
    * @param who subject is dev_id and app_id
    * @param what object is group_id and zone

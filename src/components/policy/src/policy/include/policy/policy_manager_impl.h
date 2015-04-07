@@ -174,6 +174,8 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void SetAccess(const PTString& app_id, const PTString& group_name,
                            const SeatLocation zone, bool allowed);
     virtual void ResetAccess(const PTString& rpc);
+    virtual void ResetAccess(const PTString& group_name,
+                             const SeatLocation zone);
     virtual void SetPrimaryDevice(const PTString& dev_id);
     virtual void SetRemoteControl(bool enabled);
 

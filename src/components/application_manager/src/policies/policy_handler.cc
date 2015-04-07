@@ -1301,6 +1301,12 @@ void PolicyHandler::ResetAccess(const PTString& app_id) {
   policy_manager_->ResetAccess(app_id);
 }
 
+void PolicyHandler::ResetAccess(const std::string& group_name,
+                                const SeatLocation& zone) {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->ResetAccess(group_name, zone);
+}
+
 void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {
   POLICY_LIB_CHECK_VOID();
   policy_manager_->SetPrimaryDevice(dev_id);

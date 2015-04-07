@@ -905,7 +905,9 @@ TypeAccess PolicyManagerImpl::CheckAccess(
       access = TypeAccess::kAllowed;
     } else {
       Subject who = {dev_id, app_id};
-      Object what = {rpc, zone};
+      // TODO(KKolodiy) get group by rpc
+      PTString group_name = "Radio";
+      Object what = {group_name, zone};
       access = access_remote_->Check(who, what);
     }
   }
@@ -929,6 +931,12 @@ void PolicyManagerImpl::SetAccess(const PTString& app_id,
 void PolicyManagerImpl::ResetAccess(const PTString& app_id) {
   std::string dev_id = GetCurrentDeviceId(app_id);
   Subject who = {dev_id, app_id};
+  access_remote_->Reset(who);
+}
+
+void PolicyManagerImpl::ResetAccess(const PTString& group_name,
+                                    const SeatLocation zone) {
+  Object who = {group_name, zone};
   access_remote_->Reset(who);
 }
 

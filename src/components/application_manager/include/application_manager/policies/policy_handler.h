@@ -122,6 +122,13 @@ class PolicyHandler :
   void ResetAccess(const PTString& app_id);
 
   /**
+   * Resets access by group name for all applications
+   * @param group_name group name
+   * @param zone zone control
+   */
+  void ResetAccess(const std::string& group_name, const SeatLocation& zone);
+
+  /**
    * Sets device as primary device
    * @param dev_id ID device
    */
