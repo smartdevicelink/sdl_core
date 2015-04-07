@@ -116,13 +116,15 @@ class CreateInteractionChoiceSetRequest : public CommandRequestImpl {
 
     int32_t choice_set_id_;
     size_t expected_chs_count_;
+    size_t recived_chs_count_;
+
 
     /**
      * @brief Flag for stop sending VR commands to HMI, in case one of responses
      * failed
      */
     volatile bool error_from_hmi_;
-    sync_primitives::Lock cmd_ids_lock;
+    sync_primitives::Lock vr_commands_lock_;
     /*
      * @brief Sends VR AddCommand request to HMI
      *
