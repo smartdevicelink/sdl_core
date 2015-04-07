@@ -77,7 +77,7 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
   return ret;
 }
 
-TypeAccess CoreService::CheckAccess(ApplicationId app_id,
+TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
                                     const PluginFunctionID& function_id,
                                     const SeatLocation& seat,
                                     const SeatLocation& zone) {
@@ -89,17 +89,23 @@ TypeAccess CoreService::CheckAccess(ApplicationId app_id,
   return kNone;
 }
 
-void CoreService::AddAccess(ApplicationId app_id,
-                            const PluginFunctionID& function_id) {
+void CoreService::SetAccess(const ApplicationId& app_id,
+                            const std::string& group_name,
+                            const SeatLocation& zone,
+                            bool allowed) {
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-    policy::PolicyHandler::instance()->AddAccess(
-        app->mobile_app_id()->asString(), function_id);
+    policy::PolicyHandler::instance()->SetAccess(
+        app->mobile_app_id()->asString(), group_name, zone, allowed);
   }
 }
 
-void CoreService::RemoveAccess(const PluginFunctionID& function_id) {
-  policy::PolicyHandler::instance()->RemoveAccess(function_id);
+void CoreService::ResetAccess(const ApplicationId& app_id) {
+  ApplicationSharedPtr app = GetApplication(app_id);
+  if (app) {
+    policy::PolicyHandler::instance()->ResetAccess(
+        app->mobile_app_id()->asString());
+  }
 }
 
 void CoreService::SetPrimaryDevice(const std::string& dev_id) {

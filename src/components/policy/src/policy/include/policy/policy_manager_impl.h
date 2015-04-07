@@ -171,8 +171,9 @@ class PolicyManagerImpl : public PolicyManager {
     virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
                                    const SeatLocation& seat,
                                    const SeatLocation& zone);
-    virtual void AddAccess(const PTString& app_id, const PTString& rpc);
-    virtual void RemoveAccess(const PTString& rpc);
+    virtual void SetAccess(const PTString& app_id, const PTString& group_name,
+                           const SeatLocation zone, bool allowed);
+    virtual void ResetAccess(const PTString& rpc);
     virtual void SetPrimaryDevice(const PTString& dev_id);
     virtual void SetRemoteControl(bool enabled);
 

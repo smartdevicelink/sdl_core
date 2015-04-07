@@ -1288,14 +1288,17 @@ application_manager::TypeAccess PolicyHandler::CheckAccess(
   return ConvertTypeAccess(access);
 }
 
-void PolicyHandler::AddAccess(const PTString& app_id, const PTString& rpc) {
+void PolicyHandler::SetAccess(const PTString& app_id,
+                              const PTString& group_name,
+                              const SeatLocation& zone,
+                              bool allowed) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->AddAccess(app_id, rpc);
+  policy_manager_->SetAccess(app_id, group_name, zone, allowed);
 }
 
-void PolicyHandler::RemoveAccess(const PTString& rpc) {
+void PolicyHandler::ResetAccess(const PTString& app_id) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->RemoveAccess(rpc);
+  policy_manager_->ResetAccess(app_id);
 }
 
 void PolicyHandler::SetPrimaryDevice(const PTString& dev_id) {

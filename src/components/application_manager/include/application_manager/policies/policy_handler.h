@@ -108,15 +108,18 @@ class PolicyHandler :
   /**
    * Sets access to equipment of vehicle for application by RPC
    * @param app_id policy id application
-   * @param rpc name of RPC
+   * @param group_name RPC group name
+   * @param zone zone control
+   * @param allowed true if access is allowed
    */
-  void AddAccess(const PTString& app_id, const PTString& rpc);
+  void SetAccess(const PTString& app_id, const PTString& group_name,
+                 const SeatLocation& zone, bool allowed);
 
   /**
-   * Removes access to equipment of vehicle for all application by RPC
-   * @param rpc name of RPC
+   * Resets access application to all resources
+   * @param app_id policy id application
    */
-  void RemoveAccess(const PTString& rpc);
+  void ResetAccess(const PTString& app_id);
 
   /**
    * Sets device as primary device

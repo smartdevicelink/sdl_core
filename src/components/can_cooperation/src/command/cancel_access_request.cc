@@ -74,7 +74,7 @@ void CancelAccessRequest::OnEvent(
     if (success) {
       CANAppExtensionPtr extension = GetAppExtension(app());
       extension->GiveControl(false);
-      service_->RemoveAccess(message_->function_name());
+      service_->ResetAccess(app()->app_id());
       CANModule::instance()->SetScanStarted(false);
     }
 

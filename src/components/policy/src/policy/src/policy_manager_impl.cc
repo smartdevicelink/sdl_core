@@ -912,13 +912,24 @@ TypeAccess PolicyManagerImpl::CheckAccess(
   return access;
 }
 
-void PolicyManagerImpl::AddAccess(const PTString& app_id, const PTString& rpc) {
+void PolicyManagerImpl::SetAccess(const PTString& app_id,
+                                  const PTString& group_name,
+                                  const SeatLocation zone,
+                                  bool allowed) {
   std::string dev_id = GetCurrentDeviceId(app_id);
-  //access_remote_->Allow(dev_id, app_id, rpc);
+  Subject who = {dev_id, app_id};
+  Object what = {group_name, zone};
+  if (allowed) {
+    access_remote_->Allow(who, what);
+  } else {
+    access_remote_->Deny(who, what);
+  }
 }
 
-void PolicyManagerImpl::RemoveAccess(const PTString& rpc) {
-  //access_remote_->RemoveAccess(rpc);
+void PolicyManagerImpl::ResetAccess(const PTString& app_id) {
+  std::string dev_id = GetCurrentDeviceId(app_id);
+  Subject who = {dev_id, app_id};
+  access_remote_->Reset(who);
 }
 
 void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {

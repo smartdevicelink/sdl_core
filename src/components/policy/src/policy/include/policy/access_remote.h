@@ -53,11 +53,11 @@ inline bool operator<(const Subject& x, const Subject& y) {
 }
 
 struct Object {
-  PTString func_id;
+  PTString group_id;
   SeatLocation zone;
 };
 inline bool operator<(const Object& x, const Object& y) {
-  return x.func_id < y.func_id && x.zone < y.zone;
+  return x.group_id < y.group_id && x.zone < y.zone;
 }
 
 class AccessRemote {

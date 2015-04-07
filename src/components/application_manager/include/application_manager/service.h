@@ -75,25 +75,28 @@ class Service {
    * @return return allowed if access exist,
    * manual if need to send question to driver otherwise disallowed
    */
-  virtual TypeAccess CheckAccess(ApplicationId app_id,
+  virtual TypeAccess CheckAccess(const ApplicationId& app_id,
                                  const PluginFunctionID& function_id,
                                  const SeatLocation& seat,
                                  const SeatLocation& zone) = 0;
 
   /**
-   * Adds access to functional group which contains given RPC for application
+   * Sets access to functional group which contains given RPC for application
    * @param app_id id of application
-   * @param function_id id RPC
+   * @param group_id id RPC
+   * @param zone requested zone
+   * @param allowed true if driver has given access
    */
-  virtual void AddAccess(ApplicationId app_id,
-                         const PluginFunctionID& function_id) = 0;
+  virtual void SetAccess(const ApplicationId& app_id,
+                         const std::string& group_id,
+                         const SeatLocation& zone,
+                         bool allowed) = 0;
 
   /**
-   * Removes access to functional group which contains given RPC
-   * for all applications which use this group
-   * @param function_id id RPC
+   * Resets access application to all resources
+   * @param app_id ID application
    */
-  virtual void RemoveAccess(const PluginFunctionID& function_id) = 0;
+  virtual void ResetAccess(const ApplicationId& app_id) = 0;
 
   /**
    * Sets device as primary device

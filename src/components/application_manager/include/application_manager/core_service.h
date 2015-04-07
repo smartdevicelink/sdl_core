@@ -76,7 +76,7 @@ class CoreService : public Service {
    * @return return allowed if access exist,
    * manual if need to send question to driver otherwise disallowed
    */
-  virtual TypeAccess CheckAccess(ApplicationId app_id,
+  virtual TypeAccess CheckAccess(const ApplicationId& app_id,
                                  const PluginFunctionID& function_id,
                                  const SeatLocation& seat,
                                  const SeatLocation& zone);
@@ -84,17 +84,20 @@ class CoreService : public Service {
   /**
    * Sets access to functional group which contains given RPC for application
    * @param app_id id of application
-   * @param function_id name of RPC
+   * @param group_id id RPC
+   * @param zone requested zone
+   * @param allowed true if driver has given access
    */
-  virtual void AddAccess(ApplicationId app_id,
-                         const PluginFunctionID& function_id);
+  virtual void SetAccess(const ApplicationId& app_id,
+                         const std::string& group_id,
+                         const SeatLocation& zone,
+                         bool allowed);
 
   /**
-   * Removes access to functional group which contains given RPC
-   * for all applications which use this group
-   * @param function_id name of RPC
+   * Resets access application to all resources
+   * @param app_id ID application
    */
-  virtual void RemoveAccess(const PluginFunctionID& function_id);
+  virtual void ResetAccess(const ApplicationId& app_id);
 
   /**
    * Sets device as primary device
@@ -106,7 +109,7 @@ class CoreService : public Service {
    * Sets mode of remote control (on/off)
    * @param enabled true if remote control is turned on
    */
-  virtual void SetRemoteControl(bool enabled) = 0;
+  virtual void SetRemoteControl(bool enabled);
 
   /**
    * @brief Get pointer to application by application id

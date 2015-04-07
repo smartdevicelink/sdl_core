@@ -54,15 +54,18 @@ class MockService : public Service {
   MOCK_METHOD1(SubscribeToHMINotification,
       void(const std::string& hmi_notification));
   MOCK_METHOD4(CheckAccess,
-      TypeAccess(ApplicationId app_id,
+      TypeAccess(const ApplicationId& app_id,
           const PluginFunctionID& function_id,
           const SeatLocation& seat,
           const SeatLocation& zone));
-  MOCK_METHOD2(AddAccess,
-      void(ApplicationId app_id,
-          const PluginFunctionID& function_id));
-  MOCK_METHOD1(RemoveAccess, void(const PluginFunctionID& function_id));
-  MOCK_METHOD1(SetPrimaryDevice, void (const std::string& dev_id));
+  MOCK_METHOD4(SetAccess,
+      void(const ApplicationId& app_id,
+           const std::string& group_id,
+           const SeatLocation& zone,
+           bool allowed));
+  MOCK_METHOD1(ResetAccess, void(const ApplicationId& app_id));
+  MOCK_METHOD1(SetPrimaryDevice, void(const std::string& dev_id));
+  MOCK_METHOD1(SetRemoteControl, void(bool enabled));
 };
 
 }

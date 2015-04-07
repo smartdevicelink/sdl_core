@@ -362,11 +362,13 @@ void BaseCommandRequest::on_event(const event_engine::Event<application_manager:
     bool allowed = ParseResultCode(value, result_code, info);
 
     if (allowed) {
-      service_->AddAccess(app_->app_id(), message_->function_name());
       Execute();  // run child's logic
     } else {
       SendResponse(false, result_codes::kDisallowed, "");
     }
+    std::string group_name = "Radio";
+    SeatLocation zone = 1;
+    service_->SetAccess(app_->app_id(), group_name, zone, allowed);
   } else {
     OnEvent(event);  // run child's logic
   }
