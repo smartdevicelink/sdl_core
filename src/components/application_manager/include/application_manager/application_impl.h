@@ -265,6 +265,7 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   utils::SharedPtr<timer::TimerThread<ApplicationImpl>> video_stream_retry_timer_;
   utils::SharedPtr<timer::TimerThread<ApplicationImpl>> audio_stream_retry_timer_;
 
+  std::list<AppExtensionPtr> extensions_;
 
   /**
    * @brief Defines number per time in seconds limits

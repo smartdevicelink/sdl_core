@@ -62,6 +62,8 @@ class MobileMessageHandler {
     static protocol_handler::RawMessage* HandleOutgoingMessageProtocolV2(
       const MobileMessage& message);
 
+    //! -------------------------------------------------------------
+  private:
     DISALLOW_COPY_AND_ASSIGN(MobileMessageHandler);
 };
 }  // namespace application_manager

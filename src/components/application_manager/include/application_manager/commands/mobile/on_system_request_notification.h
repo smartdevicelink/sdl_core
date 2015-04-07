@@ -64,7 +64,8 @@ class OnSystemRequestNotification : public CommandNotificationImpl {
    * @brief Execute command
    **/
   virtual void Run();
-  private:
+
+ private:
   DISALLOW_COPY_AND_ASSIGN(OnSystemRequestNotification);
 };
 

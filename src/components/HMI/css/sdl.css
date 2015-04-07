@@ -234,12 +234,19 @@
 	text-overflow: ellipsis;
 	color: white;
 }
+#tuneButtons .preset-item>span{
+    width: 77px;
+    text-align: center;
+    left: 0;
+}
 
-#sdl_view_container .preset-items {
+#sdl_view_container .preset-items,
+#radio_view_container .preset-items{
 	width: 468px;
 }
 
-#sdl_view_container .main-preset-buttons-wraper .preset-item.a3,#sdl_view_container .main-preset-buttons-wraper .preset-item.a6
+#sdl_view_container .main-preset-buttons-wraper .preset-item.a3,
+#sdl_view_container .main-preset-buttons-wraper .preset-item.a6
 	{
 	width: 155px;
 }
@@ -769,7 +776,11 @@
 	display: none;
 }
 
-#AlertManeuverPopUp .applicationName,#AudioPassThruPopUp .applicationName,#AlertPopUp .applicationName
+#SwitchPopUp.SwitchPopUp {
+    height: 260px;
+}
+
+#AlertManeuverPopUp .applicationName,#AudioPassThruPopUp .applicationName,#AlertPopUp .applicationName, #SwitchPopUp .applicationName
 	{
 	width: 380px;
 	left: 10px;
@@ -815,6 +826,26 @@
 	line-height: 30px;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+#SwitchPopUp .message1{
+    text-align: center;
+    font-size: 23px;
+    line-height: 30px;
+    overflow: hidden;
+    word-wrap: break-word;
+    position: relative;
+    margin-top: 16px;
+}
+
+#SwitchPopUp .message2{
+    text-align: center;
+    font-size: 23px;
+    line-height: 30px;
+    overflow: hidden;
+    word-wrap: break-word;
+    position: relative;
+    margin-top: 24px;
 }
 
 #AudioPassThruPopUp .message2,#AlertPopUp .message2 {
@@ -881,6 +912,16 @@
 	left: 110px;
 }
 
+#SwitchPopUp .buttonOk{
+    margin-top: 38px;
+    width: 180px;
+    margin-left: 8px;
+}
+#SwitchPopUp .buttonCancel{
+    margin-top: 38px;
+    width: 180px;
+    margin-left: 8px;
+}
 #AlertPopUp .alertSoftButtons {
 	margin-left: 8px;
 	top: 120px;

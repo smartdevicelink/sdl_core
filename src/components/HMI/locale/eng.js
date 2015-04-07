@@ -54,9 +54,29 @@ SDL.eng = {
     view_info_leftmenu_calendar: 'Calendar',
     view_info_leftmenu_apps: 'Apps',
 
+    view_media_radio: 'FM',
     view_media_cd: 'CD',
+    view_media_usb: 'USB',
     view_phone_dial: 'Dial',
     view_phone_end: 'End',
     view_phone_phone: 'Phone',
-    view_phone_popUp_callEnded: 'Call Ended'
+    view_phone_popUp_callEnded: 'Call Ended',
+    view_media_repeat: 'Repeat',
+    view_media_shuffle: 'Shuffle',
+    view_media_replay: 'Replay',
+    view_media_scan : 'Scan',
+    view_media_moreInfo : 'More Info',
+    view_media_options : 'Options',
+    view_media_browse : 'Browse',
+
+    view_media_track_1: 'Track 1',
+    view_media_track_2: 'Track 2',
+    view_media_track_3: 'Track 3',
+    view_media_track_4: 'Track 4',
+    view_media_track_5: 'Track 5',
+    view_media_track_6: 'Track 6',
+    view_media_track_7: 'Track 7',
+    view_media_track_8: 'Track 8',
+    view_media_track_9: 'Track 9',
+    view_media_track_10: 'Track 10'
 };

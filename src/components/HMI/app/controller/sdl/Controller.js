@@ -258,6 +258,26 @@ SDL.SDLController = Em.Object
         },
 
         /**
+         * Button action to sent response for VehicleInfo.GrantAccess request
+         *
+         * @type {Object}
+         */
+        SwitchPopUpAction: function (appID) {
+            if (SDL.SwitchPopUp.active) {
+                SDL.SwitchPopUp.deactivate();
+                if (appID) {
+                    FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode['SUCCESS'], SDL.SDLModel.controlRequestID, "VehicleInfo.GrantAccess");
+                    SDL.SDLModel.set('givenControl', appID);
+                    SDL.SDLModel.set('givenControlFlag', true);
+                    FFW.CAN.OnRadioDetails({"radioStation": SDL.RadioModel.radioDetails.radioStation});
+                } else {
+                    FFW.VehicleInfo.sendError(SDL.SDLModel.resultCode['REJECTED'], SDL.SDLModel.controlRequestID, "VehicleInfo.GrantAccess", "Request cancelled.");
+                }
+                SDL.SDLModel.set('controlRequestID', null);
+            }
+        },
+
+        /**
          * Default action for SoftButtons: closes window, popUp or clears
          * applications screen
          * 

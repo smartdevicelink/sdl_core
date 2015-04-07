@@ -57,6 +57,7 @@
 #include "interfaces/HMI_API_schema.h"
 #include "application_manager/application_impl.h"
 #include "usage_statistics/counter.h"
+#include "functional_module/plugin_manager.h"
 #include <time.h>
 
 namespace {
@@ -2326,6 +2327,14 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromMobile message) {
     LOG4CXX_ERROR(logger_, "Null-pointer message received.");
     return;
   }
+  functional_modules::PluginManager* plugin_manager =
+      functional_modules::PluginManager::instance();
+
+  if (plugin_manager->IsMessageForPlugin(message)) {
+    LOG4CXX_INFO(logger_, "Message will be processed by plugin.");
+    plugin_manager->ProcessMessage(message);
+    return;
+  }
   ProcessMessageFromMobile(message);
 }
 
@@ -2370,6 +2379,14 @@ void ApplicationManagerImpl::Handle(const impl::MessageFromHmi message) {
     return;
   }
 
+  functional_modules::PluginManager* plugin_manager =
+      functional_modules::PluginManager::instance();
+
+  if (plugin_manager->IsHMIMessageForPlugin(message)) {
+    LOG4CXX_INFO(logger_, "Message will be processed by plugin.");
+    plugin_manager->ProcessHMIMessage(message);
+    return;
+  }
   ProcessMessageFromHMI(message);
 }
 

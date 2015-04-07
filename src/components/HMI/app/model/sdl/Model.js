@@ -192,6 +192,27 @@ SDL.SDLModel = Em.Object.create({
     AudioPassThruState: false,
 
     /**
+     * Parameter of controll permissions deligation to mobile app
+     *
+     * @type {number}
+     */
+    givenControl: null,
+
+    /**
+     * Parameter of controll permissions deligation to mobile app
+     *
+     * @type {number}
+     */
+    givenControlFlag: false,
+
+    /**
+     * Id of current processed VehicleInfo.GrantAccess request
+     *
+     * @param {Number}
+     */
+    controlRequestID: null,
+
+    /**
      * Current device information
      *
      * @type {Object}
@@ -1386,6 +1407,29 @@ SDL.SDLModel = Em.Object.create({
         } else {
             FFW.UI.sendError(this.resultCode["REJECTED"], FFW.UI.endAudioPassThruRequestID, "UI.EndAudioPassThru", "UI.PerformAudioPassThru are not processed at the moment!");
         }
+    },
+
+    /**
+     * SwitchPopUp activation
+     *
+     * @param {Object}
+     */
+    giveControl: function (message) {
+        SDL.SwitchPopUp.activate(message.params.appID);
+        SDL.SDLModel.controlRequestID = message.id;
+    },
+
+    resetControl: function () {
+        if (SDL.SDLAppController && SDL.SDLModel.givenControl != null) {
+            FFW.VehicleInfo.OnControlChanged();
+            SDL.SDLModel.givenControl = null;
+        }
+    },
+
+    cancelControl: function (request) {
+        FFW.VehicleInfo.sendVIResult(SDL.SDLModel.resultCode["SUCCESS"], request.id, "VehicleInfo.CancelAccess");
+        SDL.SDLModel.givenControl = null;
+        SDL.SDLModel.set('givenControlFlag', false);
     },
 
     /**
