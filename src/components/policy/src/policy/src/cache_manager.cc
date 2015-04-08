@@ -353,7 +353,30 @@ bool CacheManager::IsApplicationRevoked(const std::string& app_id) const {
   return is_revoked;
 }
 
-void CacheManager::CheckPermissions(const PTString &app_id,
+const policy_table::Strings& CacheManager::GetGroups(const PTString &device_id,
+                                                     const PTString &app_id) {
+  policy_table::Strings& groups = pt_->policy_table.app_policies[app_id].groups;
+
+  const policy_table::AppHMITypes& hmi_types =
+      *pt_->policy_table.app_policies[app_id].AppHMIType;
+  const policy_table::AppHMITypes::const_iterator i = std::find(
+      hmi_types.begin(), hmi_types.end(), policy_table::AHT_REMOTE_CONTROL);
+
+  if (i != hmi_types.end()) {
+    policy_table::DeviceData& devices = *pt_->policy_table.device_data;
+    bool primary = *devices[device_id].primary;
+    if (primary) {
+      groups = pt_->policy_table.app_policies[app_id].groups_primaryRC;
+    } else {
+      groups = pt_->policy_table.app_policies[app_id].groups_non_primaryRC;
+    }
+  }
+
+  return groups;
+}
+
+void CacheManager::CheckPermissions(const PTString &device_id,
+                                    const PTString &app_id,
                                     const PTString &hmi_level,
                                     const PTString &rpc,
                                     CheckPermissionResult &result) {
@@ -366,12 +389,10 @@ void CacheManager::CheckPermissions(const PTString &app_id,
                   << " was not found in policy DB.");
     return;
   }
-// TODO(KKolodiy): here need choose other goups for revsdl if it is needed
-  policy_table::Strings::const_iterator app_groups_iter =
-      pt_->policy_table.app_policies[app_id].groups.begin();
 
-  policy_table::Strings::const_iterator app_groups_iter_end =
-      pt_->policy_table.app_policies[app_id].groups.end();
+  const policy_table::Strings& groups = GetGroups(device_id, app_id);
+  policy_table::Strings::const_iterator app_groups_iter = groups.begin();
+  policy_table::Strings::const_iterator app_groups_iter_end = groups.end();
 
   policy_table::FunctionalGroupings::const_iterator concrete_group;
 

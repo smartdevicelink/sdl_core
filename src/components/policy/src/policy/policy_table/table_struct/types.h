@@ -57,6 +57,8 @@ typedef Map< DeviceParams, 0, 255 > DeviceData;
 struct ApplicationParams : CompositeType {
   public:
     Strings groups;
+    Strings groups_primaryRC;
+    Strings groups_non_primaryRC;
     Optional< Strings > nicknames;
     Optional< AppHMITypes > AppHMIType;
     Enum<Priority> priority;

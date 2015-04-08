@@ -281,6 +281,10 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
     << hmi_level << " level.");
 
   cache_->CheckPermissions(app_id, hmi_level, rpc, result);
+
+//  const std::string device_id = GetCurrentDeviceId(app_id);
+//  cache.CheckPermissions(device_id, app_id, hmi_level, rpc, result);
+
 }
 
 bool PolicyManagerImpl::ResetUserConsent() {
