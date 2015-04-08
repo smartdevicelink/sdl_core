@@ -31,6 +31,7 @@ class HmiState {
       STATE_ID_SAFETY_MODE,
       STATE_ID_VR_SESSION,
       STATE_ID_TTS_SESSION,
+      STATE_ID_NAVI_STREAMING,
     };
 
     HmiState(uint32_t app_id, const StateContext& state_context_);
@@ -146,6 +147,15 @@ class VRHmiState : public HmiState {
 class TTSHmiState : public HmiState {
   public:
     TTSHmiState(uint32_t app_id, StateContext& state_context);
+    virtual  mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
+};
+
+/**
+ * @brief The NaviStreamingState class impement logic of NaviStreaming temporary state
+ */
+class NaviStreamingHmiState : public HmiState {
+  public:
+    NaviStreamingHmiState(uint32_t app_id, StateContext& state_context);
     virtual  mobile_apis::AudioStreamingState::eType audio_streaming_state() const;
 };
 

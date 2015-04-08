@@ -689,6 +689,13 @@ class ApplicationManagerImpl : public ApplicationManager,
     void ForbidStreaming(uint32_t app_id);
 
     /**
+     * @brief Callback calls when application starts/stops data streaming
+     * @param app_id Streaming application id
+     * @param state Shows if streaming started or stopped
+     */
+    void OnAppStreaming(uint32_t app_id, bool state);
+
+    /**
      * @brief OnHMILevelChanged the callback that allows SDL to react when
      * application's HMILeval has been changed.
      *

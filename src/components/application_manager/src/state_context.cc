@@ -31,6 +31,8 @@
  */
 #include "application_manager/state_context.h"
 #include "application_manager/application_manager_impl.h"
+#include "config_profile/profile.h"
+
 namespace application_manager {
 
 
@@ -53,7 +55,8 @@ bool StateContext::is_voice_comunication_app(const uint32_t app_id) const {
 bool StateContext::is_attenuated_supported() const{
   const HMICapabilities& hmi_capabilities =
       ApplicationManagerImpl::instance()->hmi_capabilities();
-  return hmi_capabilities.attenuated_supported();
+  return hmi_capabilities.attenuated_supported() &&
+         profile::Profile::instance()->is_mixing_audio_supported();
 }
 
 }

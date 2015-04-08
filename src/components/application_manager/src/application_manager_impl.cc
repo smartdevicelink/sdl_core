@@ -2540,6 +2540,18 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
   EndNaviServices(app_id);
 }
 
+void ApplicationManagerImpl::OnAppStreaming(uint32_t app_id, bool state) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  ApplicationSharedPtr app = application(app_id);
+  if (!app || !app->is_navi()) {
+    LOG4CXX_DEBUG(logger_, " There is no application with id: " << app_id);
+    return;
+  }
+  state ? state_ctrl_.OnNaviStreamingStarted() :
+          state_ctrl_.OnNaviStreamingStopped();
+}
+
 void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
   using namespace protocol_handler;
 

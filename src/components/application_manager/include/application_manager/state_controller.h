@@ -189,6 +189,17 @@ class StateController : public event_engine::EventObserver {
      * @param app application to apply states
      */
     void ApplyStatesForApp(ApplicationSharedPtr app);
+
+    /**
+     * @brief OnNaviStreamingStarted process Navi streaming started
+     */
+    void OnNaviStreamingStarted();
+
+    /**
+     * @brief OnNaviStreamingStopped process Navi streaming stopped
+     */
+    void OnNaviStreamingStopped();
+
   private:
     /**
      * Execute Unary punction for each application

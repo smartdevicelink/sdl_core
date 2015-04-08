@@ -484,10 +484,12 @@ void ApplicationImpl::SuspendStreaming(ServiceType service_type) {
 
   if (ServiceType::kMobileNav == service_type) {
     video_stream_suspend_timer_->suspend();
+    ApplicationManagerImpl::instance()->OnAppStreaming(app_id(), false);
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     video_streaming_suspended_ = true;
   } else if (ServiceType::kAudio == service_type) {
     audio_stream_suspend_timer_->suspend();
+    ApplicationManagerImpl::instance()->OnAppStreaming(app_id(), false);
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     audio_streaming_suspended_ = true;
   }
@@ -500,6 +502,7 @@ void ApplicationImpl::WakeUpStreaming(ServiceType service_type) {
   if (ServiceType::kMobileNav == service_type) {
     sync_primitives::AutoLock lock(video_streaming_suspended_lock_);
     if (video_streaming_suspended_) {
+      ApplicationManagerImpl::instance()->OnAppStreaming(app_id(), true);
       MessageHelper::SendOnDataStreaming(ServiceType::kMobileNav, true);
       video_streaming_suspended_ = false;
     }
@@ -507,6 +510,7 @@ void ApplicationImpl::WakeUpStreaming(ServiceType service_type) {
   } else if (ServiceType::kAudio == service_type) {
     sync_primitives::AutoLock lock(audio_streaming_suspended_lock_);
     if (audio_streaming_suspended_) {
+      ApplicationManagerImpl::instance()->OnAppStreaming(app_id(), true);
       MessageHelper::SendOnDataStreaming(ServiceType::kAudio, true);
       audio_streaming_suspended_ = false;
     }
