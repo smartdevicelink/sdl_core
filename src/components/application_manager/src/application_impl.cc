@@ -87,6 +87,8 @@ ApplicationImpl::ApplicationImpl(uint32_t application_id,
       is_navi_(false),
       video_streaming_started_(false),
       audio_streaming_started_(false),
+      video_streaming_allowed_(false),
+      audio_streaming_allowed_(false),
       video_streaming_suspended_(true),
       audio_streaming_suspended_(true),
       is_app_allowed_(true),
@@ -391,9 +393,11 @@ void ApplicationImpl::set_video_streaming_started(bool state) {
     if (video_stream_retry_timer_->isRunning()) {
       video_stream_retry_timer_->stop();
       video_streaming_started_ = state;
+      set_video_streaming_allowed(state);
     }
   } else {
     video_streaming_started_ = state;
+    set_video_streaming_allowed(state);
   }
 }
 
@@ -406,14 +410,32 @@ void ApplicationImpl::set_audio_streaming_started(bool state) {
     if (audio_stream_retry_timer_->isRunning()) {
       audio_stream_retry_timer_->stop();
       audio_streaming_started_ = state;
+      set_audio_streaming_allowed(state);
     }
   } else {
     audio_streaming_started_ = state;
+    set_audio_streaming_allowed(state);
   }
 }
 
 bool ApplicationImpl::audio_streaming_started() const {
   return audio_streaming_started_;
+}
+
+void ApplicationImpl::set_video_streaming_allowed(bool state) {
+  video_streaming_allowed_ = state;
+}
+
+bool ApplicationImpl::video_streaming_allowed() const {
+  return video_streaming_allowed_;
+}
+
+void ApplicationImpl::set_audio_streaming_allowed(bool state) {
+  audio_streaming_allowed_ = state;
+}
+
+bool ApplicationImpl::audio_streaming_allowed() const {
+  return audio_streaming_allowed_;
 }
 
 void ApplicationImpl::StartStreaming(ServiceType service_type) {

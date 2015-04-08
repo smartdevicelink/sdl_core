@@ -37,6 +37,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <deque>
 #include <algorithm>
 
 #include "application_manager/hmi_command_factory.h"
@@ -1315,8 +1316,8 @@ class ApplicationManagerImpl : public ApplicationManager,
     ResumeCtrl resume_ctrl_;
 
     NaviServiceStatusMap                    navi_service_status_;
-    std::queue<uint32_t>                    navi_app_to_stop_;
-    std::queue<uint32_t>                    navi_app_to_end_stream_;
+    std::deque<uint32_t>                    navi_app_to_stop_;
+    std::deque<uint32_t>                    navi_app_to_end_stream_;
     uint32_t                                navi_close_app_timeout_;
     uint32_t                                navi_end_stream_timeout_;
 

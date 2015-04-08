@@ -93,6 +93,11 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool audio_streaming_started() const;
   void set_audio_streaming_started(bool state);
 
+  bool video_streaming_allowed() const;
+  void set_video_streaming_allowed(bool state);
+  bool audio_streaming_allowed() const;
+  void set_audio_streaming_allowed(bool state);
+
   void StartStreaming(ServiceType service_type);
   void StopStreaming(ServiceType service_type);
 
@@ -283,6 +288,8 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
 
   bool                                     video_streaming_started_;
   bool                                     audio_streaming_started_;
+  bool                                     video_streaming_allowed_;
+  bool                                     audio_streaming_allowed_;
   bool                                     video_streaming_suspended_;
   bool                                     audio_streaming_suspended_;
   sync_primitives::Lock                    video_streaming_suspended_lock_;

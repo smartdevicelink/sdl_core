@@ -412,6 +412,11 @@ class Application : public virtual InitialApplicationData,
     virtual bool audio_streaming_started() const = 0;
     virtual void set_audio_streaming_started(bool state) = 0;
 
+    virtual bool video_streaming_allowed() const = 0;
+    virtual void set_video_streaming_allowed(bool state) = 0;
+    virtual bool audio_streaming_allowed() const = 0;
+    virtual void set_audio_streaming_allowed(bool state) = 0;
+
     /**
      * @brief Starts streaming service for application
      * @param service_type Type of streaming service

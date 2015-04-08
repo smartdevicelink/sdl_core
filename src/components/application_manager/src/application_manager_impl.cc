@@ -123,8 +123,9 @@ ApplicationManagerImpl::ApplicationManagerImpl()
 
     sync_primitives::AutoLock lock(timer_pool_lock_);
     ApplicationManagerTimerPtr clearTimerPoolTimer(new TimerThread<ApplicationManagerImpl>(
-        "ClearTimerPoolTimer", this, &ApplicationManagerImpl::ClearTimerPool));
+        "ClearTimerPoolTimer", this, &ApplicationManagerImpl::ClearTimerPool, true));
     clearTimerPoolTimer->start(10);
+    timer_pool_.push_back(clearTimerPoolTimer);
 }
 
 ApplicationManagerImpl::~ApplicationManagerImpl() {
@@ -150,6 +151,9 @@ ApplicationManagerImpl::~ApplicationManagerImpl() {
 
   sync_primitives::AutoLock lock(timer_pool_lock_);
   timer_pool_.clear();
+
+  navi_app_to_stop_.clear();
+  navi_app_to_end_stream_.clear();
 }
 
 bool ApplicationManagerImpl::Stop() {
@@ -2496,9 +2500,11 @@ bool ApplicationManagerImpl::CanAppStream(
 
   bool is_started = false;
   if (ServiceType::kMobileNav == service_type) {
-    is_started = app->video_streaming_started();
+    is_started = app->video_streaming_started() &&
+                 app->video_streaming_allowed();
   } else if (ServiceType::kAudio == service_type) {
-    is_started = app->audio_streaming_started();
+    is_started = app->audio_streaming_started() &&
+                 app->audio_streaming_allowed();
   }
   return IsStreamingAllowed(app_id, service_type) && is_started;
 }
@@ -2512,7 +2518,14 @@ void ApplicationManagerImpl::ForbidStreaming(uint32_t app_id) {
 
   ApplicationSharedPtr app = application(app_id);
   if (!app || !app->is_navi()) {
-    LOG4CXX_DEBUG(logger_, " There is no application with id: " << app_id);
+    LOG4CXX_DEBUG(logger_, "There is no application with id: " << app_id);
+    return;
+  }
+
+  if (navi_app_to_stop_.end() != std::find(navi_app_to_stop_.begin(),
+          navi_app_to_stop_.end(), app_id) ||
+      navi_app_to_end_stream_.end() != std::find(navi_app_to_end_stream_.begin(),
+          navi_app_to_end_stream_.end(), app_id)) {
     return;
   }
 
@@ -2534,7 +2547,7 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
 
   ApplicationSharedPtr app = application(app_id);
   if (!app || !app->is_navi()) {
-    LOG4CXX_DEBUG(logger_, " There is no application with id: " << app_id);
+    LOG4CXX_DEBUG(logger_, "There is no application with id: " << app_id);
     return;
   }
 
@@ -2553,12 +2566,13 @@ void ApplicationManagerImpl::EndNaviServices(uint32_t app_id) {
       LOG4CXX_DEBUG(logger_, "Going to end audio service");
       connection_handler_->SendEndService(app_id, kAudio);
     }
-    navi_app_to_stop_.push(app_id);
+    navi_app_to_stop_.push_back(app_id);
 
-    sync_primitives::AutoLock lock(timer_pool_lock_);
     ApplicationManagerTimerPtr closeTimer(new TimerThread<ApplicationManagerImpl>(
         "CloseAppTimer", this, &ApplicationManagerImpl::CloseNaviApp));
     closeTimer->start(navi_close_app_timeout_);
+
+    sync_primitives::AutoLock lock(timer_pool_lock_);
     timer_pool_.push_back(closeTimer);
   }
 }
@@ -2586,10 +2600,13 @@ void ApplicationManagerImpl::OnHMILevelChanged(uint32_t app_id,
     }
   } else if (to == HMI_BACKGROUND) {
     if (from == HMI_FULL || from == HMI_LIMITED) {
-      sync_primitives::AutoLock lock(timer_pool_lock_);
+      navi_app_to_end_stream_.push_back(app_id);
+
       ApplicationManagerTimerPtr endStreamTimer(new TimerThread<ApplicationManagerImpl>(
           "EndStreamTimer", this, &ApplicationManagerImpl::EndNaviStreaming));
       endStreamTimer->start(navi_end_stream_timeout_);
+
+      sync_primitives::AutoLock lock(timer_pool_lock_);
       timer_pool_.push_back(endStreamTimer);
     }
   } else if (to == HMI_NONE) {
@@ -2604,6 +2621,8 @@ void ApplicationManagerImpl::ClearTimerPool() {
   LOG4CXX_AUTO_TRACE(logger_);
 
   std::vector<ApplicationManagerTimerPtr> new_timer_pool;
+
+  sync_primitives::AutoLock lock(timer_pool_lock_);
   new_timer_pool.push_back(timer_pool_[0]);
 
   for (size_t i = 1; i < timer_pool_.size(); i++) {
@@ -2612,8 +2631,8 @@ void ApplicationManagerImpl::ClearTimerPool() {
     }
   }
 
-  sync_primitives::AutoLock lock(timer_pool_lock_);
   timer_pool_.swap(new_timer_pool);
+  new_timer_pool.clear();
 }
 
 void ApplicationManagerImpl::CloseNaviApp() {
@@ -2623,7 +2642,7 @@ void ApplicationManagerImpl::CloseNaviApp() {
   using namespace protocol_handler;
 
   uint32_t app_id = navi_app_to_stop_.front();
-  navi_app_to_stop_.pop();
+  navi_app_to_stop_.pop_front();
 
   NaviServiceStatusMap::iterator it =
       navi_service_status_.find(app_id);
@@ -2642,8 +2661,12 @@ void ApplicationManagerImpl::EndNaviStreaming() {
   using namespace protocol_handler;
 
   uint32_t app_id = navi_app_to_end_stream_.front();
-  navi_app_to_end_stream_.pop();
-  SuspendStreamingAbility(app_id);
+  navi_app_to_end_stream_.pop_front();
+
+  if (navi_app_to_stop_.end() == std::find(navi_app_to_stop_.begin(),
+          navi_app_to_stop_.end(), app_id)) {
+    SuspendStreamingAbility(app_id);
+  }
 }
 
 void ApplicationManagerImpl::SuspendStreamingAbility(uint32_t app_id) {
@@ -2660,10 +2683,16 @@ void ApplicationManagerImpl::SuspendStreamingAbility(uint32_t app_id) {
       navi_service_status_.find(app_id);
   if (navi_service_status_.end() != it) {
     if (it->second.first) {
-      app->StopStreaming(kMobileNav);
+      if (media_manager_) {
+        media_manager_->StopStreaming(app_id, kMobileNav);
+      }
+      app->set_video_streaming_allowed(false);
     }
     if (it->second.second) {
-      app->StopStreaming(kAudio);
+      if (media_manager_) {
+        media_manager_->StopStreaming(app_id, kAudio);
+      }
+      app->set_audio_streaming_allowed(false);
     }
   }
 }
@@ -2682,10 +2711,16 @@ void ApplicationManagerImpl::RestoreStreamingAbility(uint32_t app_id) {
       navi_service_status_.find(app_id);
   if (navi_service_status_.end() != it) {
     if (it->second.first) {
-      app->StartStreaming(kMobileNav);
+      if (media_manager_) {
+        media_manager_->StartStreaming(app_id, kMobileNav);
+      }
+      app->set_video_streaming_allowed(true);
     }
     if (it->second.second) {
-      app->StartStreaming(kAudio);
+      if (media_manager_) {
+        media_manager_->StartStreaming(app_id, kAudio);
+      }
+      app->set_audio_streaming_allowed(true);
     }
   }
 }
