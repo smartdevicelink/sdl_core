@@ -30,7 +30,6 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 #include "application_manager/commands/hmi/navi_audio_start_stream_response.h"
-#include "application_manager/event_engine/event_dispatcher.h"
 
 namespace application_manager {
 

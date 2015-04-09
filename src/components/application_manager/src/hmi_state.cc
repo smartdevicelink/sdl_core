@@ -64,7 +64,8 @@ NaviStreamingHmiState::audio_streaming_state() const {
   using namespace helpers;
   using namespace mobile_apis;
   AudioStreamingState::eType expected_state = parent()->audio_streaming_state();
-  if (Compare<HMILevel::eType, EQ, ONE> (hmi_level(), HMILevel::HMI_FULL)) {
+  if (Compare<HMILevel::eType, EQ, ONE> (hmi_level(), HMILevel::HMI_FULL) &&
+      !state_context_.is_navi_app(app_id_)) {
     if (state_context_.is_attenuated_supported()) {
       expected_state = AudioStreamingState::ATTENUATED;
     } else {

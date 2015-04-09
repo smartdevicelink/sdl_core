@@ -35,6 +35,7 @@
 #include "application_manager/application_impl.h"
 #include "application_manager/message_helper.h"
 #include "application_manager/application_manager_impl.h"
+#include "protocol_handler/protocol_handler.h"
 #include "config_profile/profile.h"
 #include "interfaces/MOBILE_API.h"
 #include "utils/file_system.h"
@@ -438,7 +439,9 @@ bool ApplicationImpl::audio_streaming_allowed() const {
   return audio_streaming_allowed_;
 }
 
-void ApplicationImpl::StartStreaming(ServiceType service_type) {
+void ApplicationImpl::StartStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
   std::pair<uint32_t, int32_t> stream_retry =
@@ -459,7 +462,9 @@ void ApplicationImpl::StartStreaming(ServiceType service_type) {
   }
 }
 
-void ApplicationImpl::StopStreaming(ServiceType service_type) {
+void ApplicationImpl::StopStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (ServiceType::kMobileNav == service_type) {
@@ -479,7 +484,9 @@ void ApplicationImpl::StopStreaming(ServiceType service_type) {
   }
 }
 
-void ApplicationImpl::SuspendStreaming(ServiceType service_type) {
+void ApplicationImpl::SuspendStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (ServiceType::kMobileNav == service_type) {
@@ -496,7 +503,9 @@ void ApplicationImpl::SuspendStreaming(ServiceType service_type) {
   MessageHelper::SendOnDataStreaming(service_type, false);
 }
 
-void ApplicationImpl::WakeUpStreaming(ServiceType service_type) {
+void ApplicationImpl::WakeUpStreaming(
+    protocol_handler::ServiceType service_type) {
+  using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (ServiceType::kMobileNav == service_type) {
@@ -549,12 +558,14 @@ void ApplicationImpl::OnAudioStartStreamRetry() {
 }
 
 void ApplicationImpl::OnVideoStreamSuspend() {
+  using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_INFO(logger_, "Suspend video streaming by timer");
   SuspendStreaming(ServiceType::kMobileNav);
 }
 
 void ApplicationImpl::OnAudioStreamSuspend() {
+  using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
   LOG4CXX_INFO(logger_, "Suspend audio streaming by timer");
   SuspendStreaming(ServiceType::kAudio);

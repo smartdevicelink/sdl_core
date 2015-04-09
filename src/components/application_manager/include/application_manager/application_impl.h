@@ -43,11 +43,11 @@
 #include "application_manager/application_data_impl.h"
 #include "application_manager/usage_statistics.h"
 #include "application_manager/hmi_state.h"
+#include "protocol_handler/protocol_handler.h"
 
 #include "connection_handler/device.h"
 #include "utils/timer_thread.h"
 #include "utils/lock.h"
-#include "protocol/service_type.h"
 
 namespace usage_statistics {
 
@@ -57,7 +57,6 @@ class StatisticsManager;
 namespace application_manager {
 using namespace utils;
 using namespace timer;
-using protocol_handler::ServiceType;
 
 namespace mobile_api = mobile_apis;
 
@@ -98,11 +97,15 @@ class ApplicationImpl : public virtual InitialApplicationDataImpl,
   bool audio_streaming_allowed() const;
   void set_audio_streaming_allowed(bool state);
 
-  void StartStreaming(ServiceType service_type);
-  void StopStreaming(ServiceType service_type);
+  void StartStreaming(
+      protocol_handler::ServiceType service_type);
+  void StopStreaming(
+      protocol_handler::ServiceType service_type);
 
-  void SuspendStreaming(ServiceType service_type);
-  void WakeUpStreaming(ServiceType service_type);
+  void SuspendStreaming(
+      protocol_handler::ServiceType service_type);
+  void WakeUpStreaming(
+      protocol_handler::ServiceType service_type);
 
   virtual bool is_voice_communication_supported() const;
   virtual void set_voice_communication_supported(

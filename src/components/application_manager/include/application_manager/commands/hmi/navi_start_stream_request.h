@@ -34,7 +34,6 @@
 #define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_HMI_NAVI_START_STREAM_REQUEST_H_
 
 #include "application_manager/commands/hmi/request_to_hmi.h"
-#include "application_manager/event_engine/event_observer.h"
 
 namespace application_manager {
 

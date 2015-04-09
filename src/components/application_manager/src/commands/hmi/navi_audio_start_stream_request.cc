@@ -32,6 +32,7 @@
 
 #include "application_manager/commands/hmi/navi_audio_start_stream_request.h"
 #include "application_manager/application_manager_impl.h"
+#include "protocol_handler/protocol_handler.h"
 
 namespace application_manager {
 
@@ -54,6 +55,7 @@ void AudioStartStreamRequest::Run() {
 }
 
 void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
+  using namespace protocol_handler;
   LOG4CXX_AUTO_TRACE(logger_);
 
   ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
@@ -72,18 +74,18 @@ void AudioStartStreamRequest::on_event(const event_engine::Event& event) {
   const smart_objects::SmartObject& message = event.smart_object();
   switch (event.id()) {
     case hmi_apis::FunctionID::Navigation_StartAudioStream: {
-      LOG4CXX_INFO(logger_, "Received StartStream event");
+      LOG4CXX_DEBUG(logger_, "Received StartStream event");
 
       const hmi_apis::Common_Result::eType code =
           static_cast<hmi_apis::Common_Result::eType>(
               message[strings::params][hmi_response::code].asInt());
 
       if (hmi_apis::Common_Result::SUCCESS == code) {
-        LOG4CXX_INFO(logger_, "StartAudioStreamResponse SUCCESS");
+        LOG4CXX_DEBUG(logger_, "StartAudioStreamResponse SUCCESS");
         if (app_mgr->IsStreamingAllowed(app->app_id(), ServiceType::kAudio)) {
           app->set_audio_streaming_started(true);
         } else {
-          LOG4CXX_INFO(logger_,
+          LOG4CXX_DEBUG(logger_,
                        "StartAudioStreamRequest aborted. Application can not stream");
         }
       }

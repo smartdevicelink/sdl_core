@@ -43,7 +43,7 @@
 #include "connection_handler/device.h"
 #include "application_manager/message.h"
 #include "application_manager/hmi_state.h"
-#include "protocol/service_type.h"
+#include "protocol_handler/protocol_handler.h"
 
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
@@ -53,7 +53,6 @@ class SmartObject;
 }
 
 namespace application_manager {
-using protocol_handler::ServiceType;
 
 namespace mobile_api = mobile_apis;
 
@@ -421,25 +420,29 @@ class Application : public virtual InitialApplicationData,
      * @brief Starts streaming service for application
      * @param service_type Type of streaming service
      */
-    virtual void StartStreaming(ServiceType service_type) = 0;
+    virtual void StartStreaming(
+        protocol_handler::ServiceType service_type) = 0;
 
     /**
      * @brief Stops streaming service for application
      * @param service_type Type of streaming service
      */
-    virtual void StopStreaming(ServiceType service_type) = 0;
+    virtual void StopStreaming(
+        protocol_handler::ServiceType service_type) = 0;
 
     /**
      * @brief Suspends streaming process for application
      * @param service_type Type of streaming service
      */
-    virtual void SuspendStreaming(ServiceType service_type) = 0;
+    virtual void SuspendStreaming(
+        protocol_handler::ServiceType service_type) = 0;
 
     /**
      * @brief Wakes up streaming process for application
      * @param service_type Type of streaming service
      */
-    virtual void WakeUpStreaming(ServiceType service_type) = 0;
+    virtual void WakeUpStreaming(
+        protocol_handler::ServiceType service_type) = 0;
 
     virtual bool is_voice_communication_supported() const = 0;
     virtual void set_voice_communication_supported(

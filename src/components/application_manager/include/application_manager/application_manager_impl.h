@@ -50,7 +50,7 @@
 #include "application_manager/vehicle_info_data.h"
 #include "application_manager/state_controller.h"
 #include "protocol_handler/protocol_observer.h"
-#include "protocol/service_type.h"
+#include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
 #include "application_manager/policies/policy_handler_observer.h"
@@ -79,8 +79,6 @@
 #include "utils/singleton.h"
 #include "utils/data_accessor.h"
 
-
-
 namespace NsSmartDeviceLink {
 namespace NsSmartObjects {
 class SmartObject;
@@ -97,7 +95,6 @@ namespace application_manager {
 namespace mobile_api = mobile_apis;
 using namespace utils;
 using namespace timer;
-using protocol_handler::ServiceType;
 
 class ApplicationManagerImpl;
 
@@ -665,7 +662,8 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param service_type Service type to check
      * @return True if streaming is allowed, false in other case
      */
-    bool IsStreamingAllowed(uint32_t app_id, ServiceType service_type) const;
+    bool IsStreamingAllowed(
+        uint32_t app_id, protocol_handler::ServiceType service_type) const;
 
     /**
      * @brief Checks if application can stream (streaming service is started and
@@ -674,7 +672,8 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param service_type Service type to check
      * @return True if streaming is allowed, false in other case
      */
-    bool CanAppStream(uint32_t app_id, ServiceType service_type) const;
+    bool CanAppStream(
+        uint32_t app_id, protocol_handler::ServiceType service_type) const;
 
     /**
      * @brief Ends opened navi services (audio/video) for application
@@ -1156,7 +1155,14 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool IsLowVoltage();
 
   private:
+    /*
+     * NaviServiceStatusMap shows which navi service (audio/video) is opened
+     * for specified application. Two bool values in std::pair mean:
+     * 1st value - is video service opened or not
+     * 2nd value - is audio service opened or not
+     */
     typedef std::map<uint32_t, std::pair<bool, bool> > NaviServiceStatusMap;
+
     typedef SharedPtr<TimerThread<ApplicationManagerImpl> > ApplicationManagerTimerPtr;
 
     /**
@@ -1172,7 +1178,7 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     /**
      * @brief Suspends streaming ability of application in case application's HMI level
-     * has been changed to BACKGROUND
+     * has been changed to not allowed for streaming
      */
     void EndNaviStreaming();
 
@@ -1182,28 +1188,30 @@ class ApplicationManagerImpl : public ApplicationManager,
      * @param service_type Type of service to start
      * @return True on success, false on fail
      */
-    bool StartNaviService(uint32_t app_id, ServiceType service_type);
+    bool StartNaviService(
+        uint32_t app_id, protocol_handler::ServiceType service_type);
 
     /**
      * @brief Stops specified navi service for application
      * @param app_id Application to proceed
      * @param service_type Type of service to stop
      */
-    void StopNaviService(uint32_t app_id, ServiceType service_type);
+    void StopNaviService(
+        uint32_t app_id, protocol_handler::ServiceType service_type);
 
     /**
-     * @brief Suspends streaming ability for application, but doesn't close
-     * opened services. Streaming ability could be restored by RestoreStreamingAbility()
+     * @brief Allows streaming for application if it was disallowed by
+     * DisallowStreaming()
      * @param app_id Application to proceed
      */
-    void SuspendStreamingAbility(uint32_t app_id);
+    void AllowStreaming(uint32_t app_id);
 
     /**
-     * @brief Restores streaming ability for application if it was suspended by
-     * SuspendStreamingAbility()
+     * @brief Disallows streaming for application, but doesn't close
+     * opened services. Streaming ability could be restored by AllowStreaming();
      * @param app_id Application to proceed
      */
-    void RestoreStreamingAbility(uint32_t app_id);
+    void DisallowStreaming(uint32_t app_id);
 
     /**
      * @brief Function returns supported SDL Protocol Version

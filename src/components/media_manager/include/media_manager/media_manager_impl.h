@@ -37,13 +37,11 @@
 #include "utils/singleton.h"
 #include "protocol_handler/protocol_observer.h"
 #include "protocol_handler/protocol_handler.h"
-#include "protocol/service_type.h"
 #include "media_manager/media_manager.h"
 #include "media_manager/media_adapter_impl.h"
 #include "media_manager/media_adapter_listener.h"
 
 namespace media_manager {
-using protocol_handler::ServiceType;
 
 class MediaManagerImpl : public MediaManager,
   public protocol_handler::ProtocolObserver,
@@ -59,10 +57,10 @@ class MediaManagerImpl : public MediaManager,
                                           int32_t duration);
     virtual void StopMicrophoneRecording(int32_t application_key);
 
-    virtual void StartStreaming(int32_t application_key,
-                                ServiceType service_type);
-    virtual void StopStreaming(int32_t application_key,
-                               ServiceType service_type);
+    virtual void StartStreaming(
+        int32_t application_key, protocol_handler::ServiceType service_type);
+    virtual void StopStreaming(
+        int32_t application_key, protocol_handler::ServiceType service_type);
 
     virtual void SetProtocolHandler(
       protocol_handler::ProtocolHandler* protocol_handler);
@@ -82,8 +80,8 @@ class MediaManagerImpl : public MediaManager,
     MediaAdapterImpl*                  from_mic_recorder_;
     MediaListenerPtr                   from_mic_listener_;
 
-    std::map<ServiceType, MediaAdapterImplPtr> streamer_;
-    std::map<ServiceType, MediaListenerPtr>    streamer_listener_;
+    std::map<protocol_handler::ServiceType, MediaAdapterImplPtr> streamer_;
+    std::map<protocol_handler::ServiceType, MediaListenerPtr>    streamer_listener_;
 
   private:
     DISALLOW_COPY_AND_ASSIGN(MediaManagerImpl);

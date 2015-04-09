@@ -48,6 +48,7 @@
 #include "application_manager/vehicle_info_data.h"
 #include "application_manager/state_controller.h"
 #include "protocol_handler/protocol_observer.h"
+#include "protocol_handler/protocol_handler.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
 

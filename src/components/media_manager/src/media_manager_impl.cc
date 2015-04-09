@@ -38,6 +38,7 @@
 #include "application_manager/application.h"
 #include "application_manager/application_manager_impl.h"
 #include "application_manager/application_impl.h"
+#include "protocol_handler/protocol_handler.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
 #if defined(EXTENDED_MEDIA_MODE)
@@ -53,6 +54,7 @@
 namespace media_manager {
 
 using profile::Profile;
+using timer::TimerThread;
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "MediaManagerImpl")
 
@@ -76,6 +78,7 @@ MediaManagerImpl::~MediaManagerImpl() {
 }
 
 void MediaManagerImpl::Init() {
+  using namespace protocol_handler;
   LOG4CXX_INFO(logger_, "MediaManagerImpl::Init()");
 
 #if defined(EXTENDED_MEDIA_MODE)
@@ -200,8 +203,8 @@ void MediaManagerImpl::StopMicrophoneRecording(int32_t application_key) {
 #endif
 }
 
-void MediaManagerImpl::StartStreaming(int32_t application_key,
-                                      ServiceType service_type) {
+void MediaManagerImpl::StartStreaming(
+    int32_t application_key, protocol_handler::ServiceType service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (streamer_[service_type]) {
@@ -212,8 +215,8 @@ void MediaManagerImpl::StartStreaming(int32_t application_key,
   }
 }
 
-void MediaManagerImpl::StopStreaming(int32_t application_key,
-                                     ServiceType service_type) {
+void MediaManagerImpl::StopStreaming(
+    int32_t application_key, protocol_handler::ServiceType service_type) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   if (streamer_listener_[service_type]) {
@@ -231,9 +234,10 @@ void MediaManagerImpl::SetProtocolHandler(
 
 void MediaManagerImpl::OnMessageReceived(
     const ::protocol_handler::RawMessagePtr message) {
-  LOG4CXX_AUTO_TRACE(logger_);
+  using namespace protocol_handler;
   using namespace application_manager;
   using namespace helpers;
+  LOG4CXX_AUTO_TRACE(logger_);
 
   const uint32_t streaming_app_id = message->connection_key();
   const ServiceType service_type = message->service_type();
@@ -245,10 +249,7 @@ void MediaManagerImpl::OnMessageReceived(
   }
 
   ApplicationManagerImpl* app_mgr = ApplicationManagerImpl::instance();
-  if (!app_mgr) {
-    LOG4CXX_ERROR(logger_, "Application manager not found");
-    return;
-  }
+  DCHECK_OR_RETURN_VOID(app_mgr);
 
   if (!app_mgr->CanAppStream(streaming_app_id, service_type)) {
     app_mgr->ForbidStreaming(streaming_app_id);
