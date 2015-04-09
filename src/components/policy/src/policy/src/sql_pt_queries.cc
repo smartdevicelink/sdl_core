@@ -165,6 +165,36 @@ const std::string kCreateSchema =
   "  ON `app_group`(`functional_group_id`); "
   "CREATE INDEX IF NOT EXISTS `app_group.fk_application_has_functional_group_application1_idx` "
   "  ON `app_group`(`application_id`); "
+  "CREATE TABLE IF NOT EXISTS `app_group_primary`( "
+  "  `application_id` VARCHAR(45) NOT NULL, "
+  "  `functional_group_id` INTEGER NOT NULL, "
+  "  PRIMARY KEY(`application_id`,`functional_group_id`), "
+  "  CONSTRAINT `fk_application_has_functional_group_application1` "
+  "    FOREIGN KEY(`application_id`) "
+  "    REFERENCES `application`(`id`), "
+  "  CONSTRAINT `fk_application_has_functional_group_functional_group1` "
+  "    FOREIGN KEY(`functional_group_id`) "
+  "    REFERENCES `functional_group`(`id`) "
+  "); "
+  "CREATE INDEX IF NOT EXISTS `app_group_primary.fk_application_has_functional_group_functional_group1_idx` "
+  "  ON `app_group_primary`(`functional_group_id`); "
+  "CREATE INDEX IF NOT EXISTS `app_group_primary.fk_application_has_functional_group_application1_idx` "
+  "  ON `app_group_primary`(`application_id`); "
+  "CREATE TABLE IF NOT EXISTS `app_group_non_primary`( "
+  "  `application_id` VARCHAR(45) NOT NULL, "
+  "  `functional_group_id` INTEGER NOT NULL, "
+  "  PRIMARY KEY(`application_id`,`functional_group_id`), "
+  "  CONSTRAINT `fk_application_has_functional_group_application1` "
+  "    FOREIGN KEY(`application_id`) "
+  "    REFERENCES `application`(`id`), "
+  "  CONSTRAINT `fk_application_has_functional_group_functional_group1` "
+  "    FOREIGN KEY(`functional_group_id`) "
+  "    REFERENCES `functional_group`(`id`) "
+  "); "
+  "CREATE INDEX IF NOT EXISTS `app_group_non_primary.fk_application_has_functional_group_functional_group1_idx` "
+  "  ON `app_group_non_primary`(`functional_group_id`); "
+  "CREATE INDEX IF NOT EXISTS `app_group_non_primary.fk_application_has_functional_group_application1_idx` "
+  "  ON `app_group_non_primary`(`application_id`); "
   "CREATE TABLE IF NOT EXISTS `preconsented_group`( "
   "  `application_id` VARCHAR(45) NOT NULL, "
   "  `functional_group_id` INTEGER NOT NULL, "
@@ -366,6 +396,12 @@ const std::string kDropSchema =
   "DROP INDEX IF EXISTS `app_group.fk_application_has_functional_group_application1_idx`; "
   "DROP INDEX IF EXISTS `app_group.fk_application_has_functional_group_functional_group1_idx`; "
   "DROP TABLE IF EXISTS `app_group`; "
+  "DROP INDEX IF EXISTS `app_group_primary.fk_application_has_functional_group_application1_idx`; "
+  "DROP INDEX IF EXISTS `app_group_primary.fk_application_has_functional_group_functional_group1_idx`; "
+  "DROP TABLE IF EXISTS `app_group_primary`; "
+  "DROP INDEX IF EXISTS `app_group_non_primary.fk_application_has_functional_group_application1_idx`; "
+  "DROP INDEX IF EXISTS `app_group_non_primary.fk_application_has_functional_group_functional_group1_idx`; "
+  "DROP TABLE IF EXISTS `app_group_non_primary`; "
   "DROP INDEX IF EXISTS `application.fk_application_priorities1_idx`; "
   "DROP INDEX IF EXISTS `application.fk_application_hmi_level1_idx`; "
   "DROP TABLE IF EXISTS `application`; "
@@ -400,6 +436,8 @@ const std::string kDeleteData =
   "DELETE FROM `seconds_between_retry`; "
   "DELETE FROM `preconsented_group`; "
   "DELETE FROM `app_group`; "
+  "DELETE FROM `app_group_primary`; "
+  "DELETE FROM `app_group_non_primary`; "
   "DELETE FROM `application`; "
   "DELETE FROM `rpc`; "
   "DELETE FROM `version`; "
@@ -460,6 +498,14 @@ const std::string kInsertApplication =
 
 const std::string kInsertAppGroup =
   "INSERT INTO `app_group` (`application_id`, `functional_group_id`)"
+  "  SELECT ?, `id` FROM `functional_group` WHERE `name` = ? LIMIT 1";
+
+const std::string kInsertAppGroupPrimary =
+  "INSERT INTO `app_group_primary` (`application_id`, `functional_group_id`)"
+  "  SELECT ?, `id` FROM `functional_group` WHERE `name` = ? LIMIT 1";
+
+const std::string kInsertAppGroupNonPrimary =
+  "INSERT INTO `app_group_non_primary` (`application_id`, `functional_group_id`)"
   "  SELECT ?, `id` FROM `functional_group` WHERE `name` = ? LIMIT 1";
 
 const std::string kInsertNickname =
@@ -565,6 +611,18 @@ const std::string kSelectAppGroups = "SELECT `f`.`name` FROM `app_group` AS `a`"
                                      "  LEFT JOIN `functional_group` AS `f` "
                                      "    ON (`f`.`id` = `a`.`functional_group_id`)"
                                      "  WHERE `a`.`application_id` = ?";
+
+const std::string kSelectAppGroupsPrimary =
+  "SELECT `f`.`name` FROM `app_group_primary` AS `a`"
+  "  LEFT JOIN `functional_group` AS `f` "
+  "    ON (`f`.`id` = `a`.`functional_group_id`)"
+  "  WHERE `a`.`application_id` = ?";
+
+const std::string kSelectAppGroupsNonPrimary =
+  "SELECT `f`.`name` FROM `app_group_non_primary` AS `a`"
+  "  LEFT JOIN `functional_group` AS `f` "
+  "    ON (`f`.`id` = `a`.`functional_group_id`)"
+  "  WHERE `a`.`application_id` = ?";
 
 const std::string kSelectNicknames = "SELECT DISTINCT `name` FROM `nickname` "
                                      "WHERE `application_id` = ?";

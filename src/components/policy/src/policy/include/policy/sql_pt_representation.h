@@ -104,6 +104,10 @@ class SQLPTRepresentation : public virtual PTRepresentation {
 
     bool GatherAppGroup(const std::string& app_id,
                         policy_table::Strings* app_groups) const;
+    bool GatherAppGroupPrimary(const std::string& app_id,
+                               policy_table::Strings* app_groups) const;
+    bool GatherAppGroupNonPrimary(const std::string& app_id,
+                                  policy_table::Strings* app_groups) const;
     bool GatherAppType(const std::string& app_id,
                        policy_table::AppHMITypes* app_types) const;
     bool GatherNickName(const std::string& app_id,
@@ -134,6 +138,10 @@ class SQLPTRepresentation : public virtual PTRepresentation {
 
     bool SaveAppGroup(const std::string& app_id,
                       const policy_table::Strings& app_groups);
+    bool SaveAppGroupPrimary(const std::string& app_id,
+                             const policy_table::Strings& app_groups);
+    bool SaveAppGroupNonPrimary(const std::string& app_id,
+                                const policy_table::Strings& app_groups);
     bool SaveNickname(const std::string& app_id,
                       const policy_table::Strings& nicknames);
     bool SaveAppType(const std::string& app_id,
