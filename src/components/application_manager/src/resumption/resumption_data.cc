@@ -44,12 +44,16 @@ ResumptionData::ResumptionData():
 
 }
 
+bool ResumptionData::Init() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return true;
+}
+
 smart_objects::SmartObject ResumptionData::GetApplicationCommands(
     app_mngr::ApplicationConstSharedPtr application) {
   using namespace app_mngr;
   LOG4CXX_AUTO_TRACE(logger_);
-  smart_objects::SmartObject commands_array = smart_objects::SmartObject(
-      smart_objects::SmartType_Array);
+  smart_objects::SmartObject commands_array(smart_objects::SmartType_Array);
   DCHECK_OR_RETURN(application, commands_array);
   if (!application) {
     LOG4CXX_ERROR(logger_, "NULL Pointer App");
@@ -182,7 +186,7 @@ smart_objects::SmartObject ResumptionData::GetApplicationFiles(
   const AppFilesMap& app_files = application->getAppFiles();
   int i = 0;
   for(AppFilesMap::const_iterator file_it = app_files.begin();
-      file_it != app_files.end(); file_it++, ++i) {
+      file_it != app_files.end(); file_it++) {
     const AppFile& file = file_it->second;
     if (file.is_persistent) {
       smart_objects::SmartObject file_data =
@@ -191,7 +195,7 @@ smart_objects::SmartObject ResumptionData::GetApplicationFiles(
       file_data[strings::is_download_complete] = file.is_download_complete;
       file_data[strings::sync_file_name] = file.file_name;
       file_data[strings::file_type] = file.file_type;
-      files[i] = file_data;
+      files[i++] = file_data;
     }
   }
   return files;
@@ -201,10 +205,9 @@ smart_objects::SmartObject ResumptionData::PointerToSmartObj(
     const smart_objects::SmartObject* ptr) {
   LOG4CXX_AUTO_TRACE(logger_);
   smart_objects::SmartObject temp;
-  if (ptr) {
+  if (ptr != NULL) {
     temp = *ptr;
   }
   return temp;
 }
-
 }  // namespace resumption

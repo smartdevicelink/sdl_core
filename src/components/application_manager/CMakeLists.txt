@@ -337,7 +337,12 @@ SET (LIBRARIES
   UsageStatistics
   dl
   formatters
+  dbms
 )
+
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  list(APPEND LIBRARIES sqlite3)
+endif ()
 
 IF(${CMAKE_SYSTEM_NAME} MATCHES "QNX")
   list(REMOVE_ITEM LIBRARIES dl)
@@ -345,7 +350,6 @@ endif()
 
 add_library("AMEventEngine" ${EVENT_ENGINE})
 target_link_libraries("AMEventEngine" ${LIBRARIES})
-
 
 
 add_library("AMPolicyLibrary" ${POLICIES_MANAGER} )

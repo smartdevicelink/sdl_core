@@ -269,6 +269,14 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
      */
     void RemoveFromResumption(uint32_t app_id);
 
+
+    /**
+     * @brief Initialization data for Resume controller
+     * @return true if initialization is success otherwise
+     * returns false
+     */
+    bool Init();
+
   private:
 
     /**
@@ -451,7 +459,7 @@ class ResumeCtrl: public app_mngr::event_engine::EventObserver {
     WaitingForTimerList             waiting_for_timer_;
     bool is_data_saved_;
     time_t launch_time_;
-    ResumptionData*                 resumption_storage_;
+    utils::SharedPtr<ResumptionData>    resumption_storage_;
 };
 
 }  // namespace resumption

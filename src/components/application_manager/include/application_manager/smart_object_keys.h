@@ -201,6 +201,7 @@ const char os[] = "os";
 const char os_version[] = "osVersion";
 const char carrier[] = "carrier";
 const char slider_header[] = "sliderHeader";
+const char key_press_mode[] = "keypressMode";
 
 // duplicate names from hmi_request
 const char limited_character_list[] = "limitedCharacterList";

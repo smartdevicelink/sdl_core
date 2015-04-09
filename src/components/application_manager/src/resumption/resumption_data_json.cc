@@ -465,4 +465,10 @@ void ResumptionDataJson::SetLastIgnOffTime(time_t ign_off_time) {
   resumption[strings::last_ign_off_time] = static_cast<uint32_t>(ign_off_time);
 }
 
+bool ResumptionDataJson::Init() {
+  LOG4CXX_AUTO_TRACE(logger_);
+  return true;
+}
+
+
 } // resumption

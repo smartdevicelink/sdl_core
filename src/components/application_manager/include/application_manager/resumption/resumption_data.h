@@ -155,15 +155,20 @@ class ResumptionData {
    */
   virtual void GetDataForLoadResumeData(smart_objects::SmartObject& saved_data) = 0;
 
-    /**
-     * @brief Updates HMI level of saved application
-     * @param mobile_app_id - mobile application id
-     * @param device_id - contains id of device on which is running application
-     * @param hmi_level - contains hmi level for saved appliction
-     */
-    virtual void UpdateHmiLevel(const std::string& mobile_app_id,
-                        const std::string& device_id,
-                        int32_t hmi_level) = 0;
+  /**
+   * @brief Updates HMI level of saved application
+   * @param mobile_app_id - mobile application id
+   * @param device_id - contains id of device on which is running application
+   * @param hmi_level - contains hmi level for saved appliction
+   */
+  virtual void UpdateHmiLevel(const std::string& mobile_app_id,
+                              const std::string& device_id,
+                              int32_t hmi_level) = 0;
+
+  /**
+   * @brief Uses for overload on heir classes
+   */
+  virtual bool Init();
 
 
   virtual ~ResumptionData() {};

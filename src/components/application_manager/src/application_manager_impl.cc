@@ -1577,6 +1577,11 @@ bool ApplicationManagerImpl::Init() {
     return false;
   }
 
+  if(!resume_ctrl_.Init()) {
+    LOG4CXX_ERROR(logger_, "Problem with initialization resume controller");
+    return false;
+  }
+
   const std::string system_files_path =
       profile::Profile::instance()->system_files_path();
   if (!InitDirectory(system_files_path, TYPE_SYSTEM) ||

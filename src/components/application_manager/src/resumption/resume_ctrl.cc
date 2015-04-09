@@ -62,13 +62,27 @@ ResumeCtrl::ResumeCtrl():
   save_persistent_data_timer_("RsmCtrlPercist",
                               this, &ResumeCtrl::SaveDataOnTimer, true),
   is_data_saved_(false),
-  launch_time_(time(NULL)),
-  resumption_storage_(new ResumptionDataJson()) {
+  launch_time_(time(NULL)) {
+
+}
+
+bool ResumeCtrl::Init() {
+  using namespace profile;
+  bool use_db = Profile::instance()->use_db_for_resumption();
+  if (use_db) {
+    resumption_storage_.reset(new ResumptionDataDB());
+    if (!(resumption_storage_->Init())) {
+      return false;
+    }
+  } else {
+    resumption_storage_.reset(new ResumptionDataJson());
+  }
   LoadResumeData();
+  return true;
 }
 
 ResumeCtrl::~ResumeCtrl() {
-  delete resumption_storage_;
+
 }
 
 void ResumeCtrl::SaveAllApplications() {
@@ -81,7 +95,10 @@ void ResumeCtrl::SaveAllApplications() {
 void ResumeCtrl::SaveApplication(ApplicationConstSharedPtr application) {
   app_mngr::ApplicationSharedPtr app = appMngr()->application(application->app_id());
   DCHECK_OR_RETURN_VOID(app);
+  LOG4CXX_AUTO_TRACE(logger_);
   if (app->is_application_data_changed()) {
+    LOG4CXX_INFO(logger_,"application with appID "<<application->app_id()
+                 <<" will be saved");
     resumption_storage_->SaveApplication(application);
     app->set_is_application_data_changed(false);
   }
@@ -313,6 +330,7 @@ bool ResumeCtrl::StartResumptionOnlyHMILevel(ApplicationSharedPtr application) {
     //sync_primitives::AutoUnlock unlock(lock);
     AddToResumptionTimerQueue(application->app_id());
   }
+  LOG4CXX_INFO(logger_, "StartResumptionOnlyHMILevel::Result = "<<result);
   return result;
 }
 
@@ -483,6 +501,7 @@ void ResumeCtrl::AddCommands(ApplicationSharedPtr application,
     for (size_t i = 0; i < app_commands.length(); ++i) {
       const smart_objects::SmartObject& command =
           app_commands[i];
+
       application->AddCommand(command[strings::cmd_id].asUInt(), command);
     }
     ProcessHMIRequests(MessageHelper::CreateAddCommandRequestToHMI(application));

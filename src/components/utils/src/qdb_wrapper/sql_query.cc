@@ -248,6 +248,14 @@ uint32_t SQLQuery::GetUInteger(int pos) const {
   return 0;
 }
 
+int64_t SQLQuery::GetLongInt(int pos) const {
+  void* ret = qdb_cell(result_, current_row_, pos);
+  if (rows_ !=0 && ret) {
+    return *static_cast<int64_t*>(ret);
+  }
+  return 0;
+}
+
 
 double SQLQuery::GetDouble(int pos) const {
   void* ret = qdb_cell(result_, current_row_, pos);

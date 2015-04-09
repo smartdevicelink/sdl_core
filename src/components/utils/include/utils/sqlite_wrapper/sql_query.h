@@ -157,6 +157,13 @@ class SQLQuery {
   /**
    * Gets value in the result record
    * @param pos position of value
+   * @return  int64_t value
+   */
+  int64_t GetLongInt(int pos) const;
+
+  /**
+   * Gets value in the result record
+   * @param pos position of value
    * @return double value
    */
   double GetDouble(int pos) const;
