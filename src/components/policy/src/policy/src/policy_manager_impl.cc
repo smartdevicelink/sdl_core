@@ -898,7 +898,8 @@ void PolicyManagerImpl::set_cache_manager(
 }
 
 TypeAccess PolicyManagerImpl::CheckAccess(
-    const PTString& app_id, const PTString& rpc, const SeatLocation& seat,
+    const PTString& app_id, const PTString& rpc,
+    const RemoteControlParams& params,const SeatLocation& seat,
     const SeatLocation& zone) {
   TypeAccess access = TypeAccess::kDisallowed;
 
@@ -910,10 +911,14 @@ TypeAccess PolicyManagerImpl::CheckAccess(
       access = TypeAccess::kAllowed;
     } else {
       Subject who = {dev_id, app_id};
-      // TODO(KKolodiy) get group by rpc
-      PTString group_name = "Radio";
-      Object what = {group_name, zone};
-      access = access_remote_->Check(who, what);
+      PTString group_name = access_remote_->FindGroup(who, rpc, params);
+      if (group_name.empty()) {
+        // Group wasn't found => request is disallowed
+        access = TypeAccess::kDisallowed;
+      } else {
+        Object what = {group_name, zone};
+        access = access_remote_->Check(who, what);
+      }
     }
   }
   return access;

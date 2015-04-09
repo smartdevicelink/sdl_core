@@ -169,6 +169,7 @@ class PolicyManagerImpl : public PolicyManager {
     virtual void OnAppsSearchCompleted();
 
     virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
+                                   const RemoteControlParams& params,
                                    const SeatLocation& seat,
                                    const SeatLocation& zone);
     virtual void SetAccess(const PTString& app_id, const PTString& group_name,

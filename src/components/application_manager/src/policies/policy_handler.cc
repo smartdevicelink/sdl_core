@@ -1280,11 +1280,12 @@ void PolicyHandler::Add(const std::string& app_id,
 }
 
 application_manager::TypeAccess PolicyHandler::CheckAccess(
-    const PTString& app_id, const PTString& rpc, const SeatLocation& seat,
+    const PTString& app_id, const PTString& rpc,
+    const RemoteControlParams& params, const SeatLocation& seat,
     const SeatLocation& zone) {
   POLICY_LIB_CHECK(application_manager::TypeAccess::kNone);
-  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, rpc, seat,
-                                                           zone);
+  policy::TypeAccess access = policy_manager_->CheckAccess(app_id, rpc, params,
+                                                           seat, zone);
   return ConvertTypeAccess(access);
 }
 

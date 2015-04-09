@@ -40,11 +40,13 @@
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyManagerImpl")
 
 using policy_table::DeviceData;
+using policy_table::FunctionalGroupings;
+using rpc::policy_table_interface_base::EnumFromJsonString;
 
 namespace policy {
 
 struct IsPrimary {
-  bool operator ()(const DeviceData::MapType::value_type& item) {
+  bool operator ()(const DeviceData::value_type& item) const {
     return *item.second.primary == true;
   }
 };
@@ -56,7 +58,7 @@ struct SetPrimary {
   explicit SetPrimary(bool value)
       : value_(value) {
   }
-  void operator ()(DeviceData::MapType::value_type& item) {
+  void operator ()(DeviceData::value_type& item) const {
     *item.second.primary = value_;
   }
 };
@@ -68,7 +70,7 @@ struct Erase {
   explicit Erase(const Subject& who)
       : who_(who) {
   }
-  void operator ()(AccessRemoteImpl::AccessControlList::value_type& row) {
+  void operator ()(AccessRemoteImpl::AccessControlList::value_type& row) const {
     row.second.erase(who_);
   }
 };
@@ -80,12 +82,52 @@ struct IsTypeAccess {
   explicit IsTypeAccess(const TypeAccess& type)
       : type_(type) {
   }
-  bool operator ()(const AccessRemoteImpl::AccessControlRow::value_type& item) {
+  bool operator ()(
+      const AccessRemoteImpl::AccessControlRow::value_type& item) const {
     return item.second == type_;
   }
 };
 
-AccessRemoteImpl::AccessRemoteImpl(CacheManager& cache)
+struct Match {
+ private:
+  const FunctionalGroupings& groups_;
+  const PTString& rpc_;
+  const RemoteControlParams& params_;
+ public:
+  Match(const FunctionalGroupings& groups, const PTString& rpc,
+        const RemoteControlParams& params)
+      : groups_(groups),
+        rpc_(rpc),
+        params_(params) {
+  }
+  bool operator ()(const PTString& item) const {
+    const FunctionalGroupings::const_iterator i = groups_.find(item);
+    if (i == groups_.end()) {
+      return false;
+    }
+    const policy_table::Rpc::const_iterator j = i->second.rpcs.find(rpc_);
+    if (j == i->second.rpcs.end()) {
+      return false;
+    }
+    const policy_table::Parameters& params = *j->second.parameters;
+    if (params_.size() != params.size()) {
+      return false;
+    }
+    for (RemoteControlParams::const_iterator j = params_.begin();
+        j != params_.end(); ++j) {
+      policy_table::AppHMIType value;
+      if (EnumFromJsonString(*j, &value)) {
+        return false;
+      }
+      if (std::find(params.begin(), params.end(), value) == params.end()) {
+        return false;
+      }
+    }
+    return true;
+  }
+};
+
+AccessRemoteImpl::AccessRemoteImpl(CacheManager & cache)
     : cache_(cache),
       primary_device_(),
       enabled_(true),
@@ -96,9 +138,9 @@ void AccessRemoteImpl::Init() {
   DCHECK(cache_.pt_);
   enabled_ = cache_.pt_->policy_table.module_config.remote_control;
 
-  DeviceData& devices = *cache_.pt_->policy_table.device_data;
-  DeviceData::iterator d = std::find_if(devices.begin(), devices.end(),
-                                        IsPrimary());
+  const DeviceData& devices = *cache_.pt_->policy_table.device_data;
+  DeviceData::const_iterator d = std::find_if(devices.begin(), devices.end(),
+                                              IsPrimary());
   if (d != devices.end()) {
     primary_device_ = d->first;
   }
@@ -139,8 +181,7 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
   } else {
     // Nobody controls this object
     ret = TypeAccess::kManual;
-  }
-  LOG4CXX_TRACE_EXIT(logger_);
+  }LOG4CXX_TRACE_EXIT(logger_);
   return ret;
 }
 
@@ -184,6 +225,22 @@ void AccessRemoteImpl::set_enabled(bool value) {
 
 bool AccessRemoteImpl::IsEnabled() const {
   return enabled_;
+}
+
+PTString AccessRemoteImpl::FindGroup(const Subject& who, const PTString& rpc,
+                                     const RemoteControlParams& params) const {
+  const policy_table::Strings& groups =
+      cache_.pt_->policy_table.app_policies[who.app_id].groups_non_primaryRC;
+  const FunctionalGroupings& all_groups = cache_.pt_->policy_table
+      .functional_groupings;
+
+  policy_table::Strings::const_iterator i = std::find_if(
+      groups.begin(), groups.end(), Match(all_groups, rpc, params));
+
+  if (i != groups.end()) {
+    return *i;
+  }
+  return "";
 }
 
 }  // namespace policy

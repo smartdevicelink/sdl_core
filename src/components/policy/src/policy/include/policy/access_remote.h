@@ -32,6 +32,7 @@
 #ifndef SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_H_
 #define SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_H_
 
+#include <vector>
 #include "policy/policy_types.h"
 
 namespace policy {
@@ -59,6 +60,8 @@ struct Object {
 inline bool operator<(const Object& x, const Object& y) {
   return x.group_id < y.group_id && x.zone < y.zone;
 }
+
+typedef std::vector<PTString> RemoteControlParams;
 
 class AccessRemote {
  public:
@@ -142,6 +145,16 @@ class AccessRemote {
    * manual if need to ask driver
    */
   virtual TypeAccess Check(const Subject& who, const Object& what) const = 0;
+
+  /**
+   * Find group by RPC name and list of parameters
+   * @param who subject is dev_id and app_id
+   * @param rpc name of RPC
+   * @param params parameters list
+   * @return name of group
+   */
+  virtual PTString FindGroup(const Subject& who, const PTString& rpc,
+                             const RemoteControlParams& params) const = 0;
 };
 
 }  // namespace policy

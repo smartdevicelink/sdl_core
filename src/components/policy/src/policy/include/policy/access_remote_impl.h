@@ -58,6 +58,8 @@ class AccessRemoteImpl : public AccessRemote {
   virtual void Reset(const Subject& who);
   virtual void Reset(const Object& what);
   virtual TypeAccess Check(const Subject& who, const Object& what) const;
+  virtual PTString FindGroup(const Subject& who, const PTString& rpc,
+                             const RemoteControlParams& params) const;
 
  private:
   typedef std::map<Subject, TypeAccess> AccessControlRow;

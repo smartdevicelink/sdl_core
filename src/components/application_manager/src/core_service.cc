@@ -79,12 +79,14 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
 
 TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
                                     const PluginFunctionID& function_id,
+                                    const std::vector<std::string>& params,
                                     const SeatLocation& seat,
                                     const SeatLocation& zone) {
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
+
     return policy::PolicyHandler::instance()->CheckAccess(
-        app->mobile_app_id()->asString(), function_id, seat, zone);
+        app->mobile_app_id()->asString(), function_id, params, seat, zone);
   }
   return kNone;
 }

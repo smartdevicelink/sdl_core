@@ -53,20 +53,21 @@ class MockService : public Service {
       std::vector<ApplicationSharedPtr>(AppExtensionUID uid));
   MOCK_METHOD1(SubscribeToHMINotification,
       void(const std::string& hmi_notification));
-  MOCK_METHOD4(CheckAccess,
+  MOCK_METHOD5(CheckAccess,
       TypeAccess(const ApplicationId& app_id,
           const PluginFunctionID& function_id,
+          const std::vector<std::string>& params,
           const SeatLocation& seat,
           const SeatLocation& zone));
   MOCK_METHOD4(SetAccess,
       void(const ApplicationId& app_id,
-           const std::string& group_id,
-           const SeatLocation& zone,
-           bool allowed));
+          const std::string& group_id,
+          const SeatLocation& zone,
+          bool allowed));
   MOCK_METHOD1(ResetAccess, void(const ApplicationId& app_id));
   MOCK_METHOD1(SetPrimaryDevice, void(const std::string& dev_id));
   MOCK_METHOD2(ResetAccess, void(const std::string& group_name,
-                                 const SeatLocation& zone));
+          const SeatLocation& zone));
   MOCK_METHOD1(SetRemoteControl, void(bool enabled));
 };
 

@@ -99,9 +99,13 @@ class PolicyHandler :
    * Checks access to equipment of vehicle for application by RPC
    * @param app_id policy id application
    * @param rpc name of RPC
+   * @param params parameters list
+   * @param seat current seat of passenger
+   * @param zone requested zone control
    */
   application_manager::TypeAccess CheckAccess(const PTString& app_id,
                                               const PTString& rpc,
+                                              const RemoteControlParams& params,
                                               const SeatLocation& seat,
                                               const SeatLocation& zone);
 

@@ -315,9 +315,11 @@ void BaseCommandRequest::Run() {
     seat = extension->seat();
   }
 
+  // TODO(KKolodiy): get zone and params
   SeatLocation zone;
+  std::vector<std::string> params;
   application_manager::TypeAccess access = service_->CheckAccess(
-      app_->app_id(), message_->function_name(), seat, zone);
+      app_->app_id(), message_->function_name(), params, seat, zone);
 
   switch (access) {
     case application_manager::kAllowed:

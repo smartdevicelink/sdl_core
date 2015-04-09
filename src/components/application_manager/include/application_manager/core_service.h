@@ -72,12 +72,14 @@ class CoreService : public Service {
    * Checks access to requested equipment of vehicle
    * @param app_id id of application
    * @param function_id name of RPC
+   * @param params parameters list
    * @param seat seat of owner's mobile device
    * @return return allowed if access exist,
    * manual if need to send question to driver otherwise disallowed
    */
   virtual TypeAccess CheckAccess(const ApplicationId& app_id,
                                  const PluginFunctionID& function_id,
+                                 const std::vector<std::string>& params,
                                  const SeatLocation& seat,
                                  const SeatLocation& zone);
 

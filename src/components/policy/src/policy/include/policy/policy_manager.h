@@ -402,8 +402,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * Checks access to equipment of vehicle for application by RPC
      * @param app_id policy id application
      * @param rpc name of RPC
+     * @param params parameters list
      */
     virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
+                                   const RemoteControlParams& params,
                                    const SeatLocation& seat,
                                    const SeatLocation& zone) = 0;
 
