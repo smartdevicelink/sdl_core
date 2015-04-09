@@ -298,7 +298,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
     ApplicationSharedPtr app) const {
   bool voice_state = app->is_voice_communication_supported();
   bool media_state = app->is_media_application();
-  bool navi_state = app->video_streaming_started();
+  bool navi_state = app->is_navi();
   ApplicationSharedPtr active_app = active_application();
   // Check app in FULL level
   if (active_app.valid()) {
@@ -316,7 +316,7 @@ bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
       return true;
     }
 
-    if (navi_state && active_app->video_streaming_started()) {
+    if (navi_state && active_app->is_navi()) {
       return true;
     }
   }

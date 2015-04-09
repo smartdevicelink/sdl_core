@@ -243,10 +243,14 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD1(ReplaceHMIByMobileAppId, void(smart_objects::SmartObject&));
   MOCK_METHOD1(ReplaceMobileByHMIAppId, void(smart_objects::SmartObject&));
   MOCK_METHOD0(resume_controller, ResumeCtrl&());
-  MOCK_METHOD1(IsVideoStreamingAllowed, bool(uint32_t));
   MOCK_METHOD1(GetDefaultHmiLevel, mobile_api::HMILevel::eType (ApplicationSharedPtr));
 
-  MOCK_METHOD1(IsAudioStreamingAllowed, bool(uint32_t));
+  MOCK_METHOD2(IsStreamingAllowed, bool(uint32_t, protocol_handler::ServiceType));
+  MOCK_METHOD2(CanAppStream, bool(uint32_t, protocol_handler::ServiceType));
+  MOCK_METHOD1(EndNaviServices, void(int32_t));
+  MOCK_METHOD1(ForbidStreaming, void(int32_t));
+  MOCK_METHOD2(OnAppStreaming, void(int32_t, bool));
+
   MOCK_METHOD1(Unmute, void(VRTTSSessionChanging));
   MOCK_METHOD1(Mute, void(VRTTSSessionChanging));
   MOCK_METHOD2(set_application_id, void(const int32_t, const uint32_t));
