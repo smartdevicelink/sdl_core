@@ -1255,6 +1255,11 @@ void policy::PolicyHandler::OnAppsSearchCompleted() {
   policy_manager_->OnAppsSearchCompleted();
 }
 
+void PolicyHandler::OnAppRegisteredOnMobile(const std::string& application_id) {
+  POLICY_LIB_CHECK_VOID();
+  policy_manager_->OnAppRegisteredOnMobile(application_id);
+}
+
 void PolicyHandler::Increment(usage_statistics::GlobalCounterId type) {
   POLICY_LIB_CHECK();
   policy_manager_->Increment(type);

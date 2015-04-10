@@ -325,6 +325,15 @@ class PolicyHandler :
    */
   virtual void OnAppsSearchCompleted();
 
+  /**
+   * @brief OnAppRegisteredOnMobile alows to handle event when application were
+   * succesfully registered on mobile device.
+   * It will send OnAppPermissionSend notification and will try to start PTU.
+   *
+   * @param application_id registered application.
+   */
+  void OnAppRegisteredOnMobile(const std::string& application_id);
+
 //TODO(AKutsan) REMOVE THIS UGLY HOTFIX
   virtual void Increment(usage_statistics::GlobalCounterId type);
   virtual void Increment(const std::string& app_id,
