@@ -39,7 +39,6 @@
 #include "json/writer.h"
 #include "policy/policy_table.h"
 #include "policy/pt_representation.h"
-#include "policy/access_remote_impl.h"
 #include "policy/policy_helper.h"
 #include "utils/file_system.h"
 #include "utils/logger.h"
@@ -47,6 +46,10 @@
 #include "policy/cache_manager.h"
 #include "policy/update_status_manager.h"
 #include "config_profile/profile.h"
+
+#ifdef SDL_REMOTE_CONTROL
+#include "policy/access_remote_impl.h"
+#endif  // SDL_REMOTE_CONTROL
 
 policy::PolicyManager* CreateManager() {
   return new policy::PolicyManagerImpl();
@@ -63,7 +66,9 @@ PolicyManagerImpl::PolicyManagerImpl()
     retry_sequence_timeout_(60),
     retry_sequence_index_(0),
     ignition_check(true) {
+#ifdef SDL_REMOTE_CONTROL
   access_remote_ = new AccessRemoteImpl(cache);
+#endif  // SDL_REMOTE_CONTROL
 }
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
@@ -73,7 +78,9 @@ void PolicyManagerImpl::set_listener(PolicyListener* listener) {
 
 PolicyManagerImpl::~PolicyManagerImpl() {
   LOG4CXX_INFO(logger_, "Destroying policy manager.");
+#ifdef SDL_REMOTE_CONTROL
   delete access_remote_;
+#endif  // SDL_REMOTE_CONTROL
 }
 
 utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
@@ -879,7 +886,9 @@ bool PolicyManagerImpl::InitPT(const std::string& file_name) {
   if (ret) {
     RefreshRetrySequence();
     update_status_manager_.OnPolicyInit(cache_->UpdateRequired());
+#ifdef SDL_REMOTE_CONTROL
     access_remote_->Init();
+#endif  // SDL_REMOTE_CONTROL
   }
   return ret;
 }
@@ -897,6 +906,7 @@ void PolicyManagerImpl::set_cache_manager(
   cache_ = cache_manager;
 }
 
+#ifdef SDL_REMOTE_CONTROL
 TypeAccess PolicyManagerImpl::CheckAccess(
     const PTString& app_id, const PTString& rpc,
     const RemoteControlParams& params,const SeatLocation& seat,
@@ -961,6 +971,7 @@ void PolicyManagerImpl::SetRemoteControl(bool enabled) {
     access_remote_->Disable();
   }
 }
+#endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy
 

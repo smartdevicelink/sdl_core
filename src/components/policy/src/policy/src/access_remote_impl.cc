@@ -136,7 +136,7 @@ AccessRemoteImpl::AccessRemoteImpl(CacheManager & cache)
 
 void AccessRemoteImpl::Init() {
   DCHECK(cache_.pt_);
-  enabled_ = cache_.pt_->policy_table.module_config.remote_control;
+  enabled_ = *cache_.pt_->policy_table.module_config.remote_control;
 
   const DeviceData& devices = *cache_.pt_->policy_table.device_data;
   DeviceData::const_iterator d = std::find_if(devices.begin(), devices.end(),
@@ -219,7 +219,7 @@ void AccessRemoteImpl::Disable() {
 
 void AccessRemoteImpl::set_enabled(bool value) {
   enabled_ = value;
-  cache_.pt_->policy_table.module_config.remote_control = enabled_;
+  *cache_.pt_->policy_table.module_config.remote_control = enabled_;
   cache_.Backup();
 }
 
@@ -230,7 +230,7 @@ bool AccessRemoteImpl::IsEnabled() const {
 PTString AccessRemoteImpl::FindGroup(const Subject& who, const PTString& rpc,
                                      const RemoteControlParams& params) const {
   const policy_table::Strings& groups =
-      cache_.pt_->policy_table.app_policies[who.app_id].groups_non_primaryRC;
+      *cache_.pt_->policy_table.app_policies[who.app_id].groups_non_primaryRC;
   const FunctionalGroupings& all_groups = cache_.pt_->policy_table
       .functional_groupings;
 

@@ -59,10 +59,15 @@ set(SOURCES
   ./src/sql_pt_representation.cc
   ./src/update_status_manager.cc
   ./src/cache_manager.cc
-  ./src/access_remote_impl.cc
   ${CMAKE_SOURCE_DIR}/src/components/rpc_base/src/rpc_base/rpc_base.cc
 )
 
+
+if (REVSDL)
+  list(APPEND SOURCES
+    ./src/access_remote_impl.cc
+  )
+endif()
 
 add_subdirectory(usage_statistics)
 

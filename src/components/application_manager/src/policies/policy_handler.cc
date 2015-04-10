@@ -1279,6 +1279,7 @@ void PolicyHandler::Add(const std::string& app_id,
   policy_manager_->Add(app_id, type, timespan_seconds);
 }
 
+#ifdef SDL_REMOTE_CONTROL
 application_manager::TypeAccess PolicyHandler::CheckAccess(
     const PTString& app_id, const PTString& rpc,
     const RemoteControlParams& params, const SeatLocation& seat,
@@ -1336,5 +1337,6 @@ application_manager::TypeAccess PolicyHandler::ConvertTypeAccess(
   }
   return converted;
 }
+#endif  // SDL_REMOTE_CONTROL
 
 }  //  namespace policy

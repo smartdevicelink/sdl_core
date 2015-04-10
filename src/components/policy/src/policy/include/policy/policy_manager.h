@@ -398,6 +398,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      */
     virtual void OnAppsSearchCompleted() = 0;
 
+#ifdef SDL_REMOTE_CONTROL
     /**
      * Checks access to equipment of vehicle for application by RPC
      * @param app_id policy id application
@@ -444,6 +445,7 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @param enabled true if remote control is turned on
      */
     virtual void SetRemoteControl(bool enabled) = 0;
+#endif  // SDL_REMOTE_CONTROL
 
   protected:
     /**

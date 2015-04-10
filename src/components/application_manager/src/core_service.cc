@@ -70,9 +70,12 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
   }
 
   FilterParameters(msg, params);
+
+#ifdef SDL_REMOTE_CONTROL
   if (!AreParametersAllowed(msg, params)) {
     return mobile_apis::Result::eType::DISALLOWED;
   }
+#endif  // SDL_REMOTE_CONTROL
 
   return ret;
 }
@@ -82,12 +85,14 @@ TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
                                     const std::vector<std::string>& params,
                                     const SeatLocation& seat,
                                     const SeatLocation& zone) {
+#ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
 
     return policy::PolicyHandler::instance()->CheckAccess(
         app->mobile_app_id()->asString(), function_id, params, seat, zone);
   }
+#endif  // SDL_REMOTE_CONTROL
   return kNone;
 }
 
@@ -95,32 +100,42 @@ void CoreService::SetAccess(const ApplicationId& app_id,
                             const std::string& group_name,
                             const SeatLocation& zone,
                             bool allowed) {
+#ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
     policy::PolicyHandler::instance()->SetAccess(
         app->mobile_app_id()->asString(), group_name, zone, allowed);
   }
+#endif  // SDL_REMOTE_CONTROL
 }
 
 void CoreService::ResetAccess(const ApplicationId& app_id) {
+#ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
     policy::PolicyHandler::instance()->ResetAccess(
         app->mobile_app_id()->asString());
   }
+#endif  // SDL_REMOTE_CONTROL
 }
 
 void CoreService::ResetAccess(const std::string& group_name,
                               const SeatLocation& zone) {
+#ifdef SDL_REMOTE_CONTROL
   policy::PolicyHandler::instance()->ResetAccess(group_name, zone);
+#endif  // SDL_REMOTE_CONTROL
 }
 
 void CoreService::SetPrimaryDevice(const std::string& dev_id) {
+#ifdef SDL_REMOTE_CONTROL
   policy::PolicyHandler::instance()->SetPrimaryDevice(dev_id);
+#endif  // SDL_REMOTE_CONTROL
 }
 
 void CoreService::SetRemoteControl(bool enabled) {
+#ifdef SDL_REMOTE_CONTROL
   policy::PolicyHandler::instance()->SetRemoteControl(enabled);
+#endif  // SDL_REMOTE_CONTROL
 }
 
 ApplicationSharedPtr CoreService::GetApplication(ApplicationId app_id) {

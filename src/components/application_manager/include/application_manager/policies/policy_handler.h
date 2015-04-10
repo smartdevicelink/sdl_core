@@ -95,6 +95,7 @@ class PolicyHandler :
                    const RPCParams& rpc_params,
                    CheckPermissionResult& result);
 
+#ifdef SDL_REMOTE_CONTROL
   /**
    * Checks access to equipment of vehicle for application by RPC
    * @param app_id policy id application
@@ -143,6 +144,7 @@ class PolicyHandler :
    * @param enabled true if remote control is turned on
    */
   void SetRemoteControl(bool enabled);
+#endif  // SDL_REMOTE_CONTROL
 
   uint32_t GetNotificationsNumber(const std::string& priority);
   DeviceConsent GetUserConsentForDevice(const std::string& device_id);
@@ -424,6 +426,12 @@ protected:
    */
   void OnAppPermissionConsentInternal(const uint32_t connection_key,
                                       PermissionConsent& permissions);
+
+#ifdef SDL_REMOTE_CONTROL
+  application_manager::TypeAccess ConvertTypeAccess(
+      policy::TypeAccess access) const;
+#endif  // SDL_REMOTE_CONTROL
+
 private:
   class StatisticManagerImpl: public usage_statistics::StatisticsManager {
       //TODO(AKutsan) REMOVE THIS UGLY HOTFIX

@@ -277,7 +277,9 @@ private:
 
     UpdateStatusManager update_status_manager_;
     CacheManagerInterfaceSPtr cache_;
+#ifdef SDL_REMOTE_CONTROL
     AccessRemote* access_remote_;
+#endif  // SDL_REMOTE_CONTROL
     sync_primitives::Lock apps_registration_lock_;
     sync_primitives::Lock app_permissions_diff_lock_;
     std::map<std::string, AppPermissions> app_permissions_diff_;
