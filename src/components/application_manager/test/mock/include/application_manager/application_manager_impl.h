@@ -287,6 +287,7 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD0(OnApplicationListUpdateTimer, void());
   MOCK_METHOD0(OnLowVoltage, void());
   MOCK_METHOD0(OnWakeUp, void());
+  MOCK_METHOD2(IsApplicationForbidden,  bool (uint32_t, const std::string&));
   MOCK_METHOD1(OnUpdateHMIAppType, void(std::map<std::string, std::vector<std::string> >));
 
   struct ApplicationsAppIdSorter {

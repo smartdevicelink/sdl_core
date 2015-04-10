@@ -783,6 +783,19 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     void OnWakeUp();
 
+    /**
+     * @brief IsApplicationForbidden allows to distinguish if application is
+     * not allowed to register, becuase of spaming.
+     *
+     * @param connection_key the conection key ofthe required application
+     *
+     * @param mobile_app_id application's mobile(policy) identifier.
+     *
+     * @return true in case application is allowed to register, false otherwise.
+     */
+    bool IsApplicationForbidden(uint32_t connection_key,
+                                const std::string& mobile_app_id);
+
     struct ApplicationsAppIdSorter {
       bool operator() (const ApplicationSharedPtr lhs,
                        const ApplicationSharedPtr rhs) {
@@ -807,6 +820,8 @@ class ApplicationManagerImpl : public ApplicationManager,
 
     typedef std::multiset<ApplicationSharedPtr,
                      ApplicationsMobileAppIdSorter> AppsWaitRegistrationSet;
+
+    typedef std::set<std::string> ForbiddenApps;
 
     // typedef for Applications list iterator
     typedef ApplictionSet::iterator ApplictionSetIt;
@@ -1101,6 +1116,19 @@ class ApplicationManagerImpl : public ApplicationManager,
                            mobile_apis::HMILevel::eType to);
 
     /**
+     * @brief GetHashedAppID allows to obtain unique application id as a string.
+     * It concatanates device mac and application id to obtain unique id.
+     *
+     * @param connection_key connection key for which need to obtain device mac;
+     *
+     * @param mobile_app_id mobile(policy) application id on particular device.
+     * This parameter will be concatenated with device id.
+     *
+     * @return unique aplication identifier.
+     */
+    std::string GetHashedAppID(uint32_t connection_key, const std::string& mobile_app_id);
+
+    /**
      * @brief EndNaviServices either send EndService to mobile or proceed
      * unregister application procedure.
      */
@@ -1216,6 +1244,7 @@ class ApplicationManagerImpl : public ApplicationManager,
      */
     ApplictionSet applications_;
     AppsWaitRegistrationSet apps_to_register_;
+    ForbiddenApps forbidden_applications;
 
     // Lock for applications list
     mutable sync_primitives::Lock applications_list_lock_;
