@@ -51,7 +51,6 @@ set(testLibraries
 )
 
 set(testSources
-  main.cc
   usage_statistics_test.cc    
   shared_library_test.cc    
   generated_code_test.cc #APPLINK-10657

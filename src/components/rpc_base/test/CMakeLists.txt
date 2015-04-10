@@ -46,7 +46,6 @@ set(LIBRARIES
 set(SOURCES
   rpc_base_json_test.cc
   rpc_base_test.cc
-  main.cc
 )
 
 if (${HMI_DBUS_API})

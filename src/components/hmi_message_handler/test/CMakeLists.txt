@@ -42,7 +42,6 @@ set(LIBRARIES
 )
 
 set(SOURCES
-    ${COMPONENTS_DIR}/hmi_message_handler/test/main.cc  
     ${COMPONENTS_DIR}/hmi_message_handler/test/mqueue_adapter_test.cc 
 )          
 
