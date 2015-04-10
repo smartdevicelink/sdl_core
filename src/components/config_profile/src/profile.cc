@@ -82,6 +82,7 @@ const char* kServerAddressKey = "ServerAddress";
 const char* kAppInfoStorageKey = "AppInfoStorage";
 const char* kAppStorageFolderKey = "AppStorageFolder";
 const char* kAppResourseFolderKey = "AppResourceFolder";
+const char* kLogsEnabledKey = "LogsEnabled";
 const char* kAppConfigFolderKey = "AppConfigFolder";
 const char* kEnableProtocol4Key = "EnableProtocol4";
 const char* kAppIconsFolderKey = "AppIconsFolder";
@@ -292,7 +293,8 @@ Profile::Profile()
     tts_global_properties_timeout_(kDefaultTTSGlobalPropertiesTimeout),
     attempts_to_open_policy_db_(kDefaultAttemptsToOpenPolicyDB),
     open_attempt_timeout_ms_(kDefaultAttemptsToOpenPolicyDB),
-    hash_string_size_(kDefaultHashStringSize) {
+    hash_string_size_(kDefaultHashStringSize),
+    logs_enabled_(false) {
 }
 
 Profile::~Profile() {
@@ -657,6 +659,10 @@ uint16_t Profile::tts_global_properties_timeout() const {
   return tts_global_properties_timeout_;
 }
 
+bool Profile::logs_enabled() const {
+  return logs_enabled_;
+}
+
 void Profile::UpdateValues() {
   LOG4CXX_AUTO_TRACE(logger_);
 
@@ -670,6 +676,11 @@ void Profile::UpdateValues() {
   }
 
   LOG_UPDATED_BOOL_VALUE(launch_hmi_, kLaunchHMIKey, kHmiSection);
+
+  // Logs enabled
+  ReadBoolValue(&logs_enabled_, false, kMainSection, kLogsEnabledKey);
+
+  LOG_UPDATED_BOOL_VALUE(logs_enabled_, kLogsEnabledKey, kMainSection);
 
   // Application config folder
   ReadStringValue(&app_config_folder_,
