@@ -31,23 +31,21 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/delete_sub_menu_response.h"
+#include "application_manager/commands/mobile/dial_number_response.h"
 #include "application_manager/application_manager_impl.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DeleteSubMenuResponse::DeleteSubMenuResponse(const MessageSharedPtr& message)
+DialNumberResponse::DialNumberResponse(const MessageSharedPtr& message)
     : CommandResponseImpl(message) {
 }
 
-DeleteSubMenuResponse::~DeleteSubMenuResponse() {
+DialNumberResponse::~DialNumberResponse() {
 }
 
-void DeleteSubMenuResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-
+void DialNumberResponse::Run() {
   ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
 }
 

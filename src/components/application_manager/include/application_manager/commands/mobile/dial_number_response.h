@@ -31,26 +31,43 @@
  POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/mobile/delete_sub_menu_response.h"
-#include "application_manager/application_manager_impl.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_RESPONSE_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_RESPONSE_H_
+
+#include "application_manager/commands/command_response_impl.h"
+#include "utils/macro.h"
 
 namespace application_manager {
 
 namespace commands {
 
-DeleteSubMenuResponse::DeleteSubMenuResponse(const MessageSharedPtr& message)
-    : CommandResponseImpl(message) {
-}
+/**
+ * @brief DialNumberResponse command class
+ **/
+class DialNumberResponse : public CommandResponseImpl {
+ public:
+  /**
+   * @brief DialNumberResponse class constructor
+   *
+   * @param message Incoming SmartObject message
+   **/
+  explicit DialNumberResponse(const MessageSharedPtr& message);
 
-DeleteSubMenuResponse::~DeleteSubMenuResponse() {
-}
+  /**
+   * @brief DialNumberResponse class destructor
+   **/
+  virtual ~DialNumberResponse();
 
-void DeleteSubMenuResponse::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
+  /**
+   * @brief Execute command
+   **/
+  virtual void Run();
 
-  ApplicationManagerImpl::instance()->SendMessageToMobile(message_);
-}
+ private:
+  DISALLOW_COPY_AND_ASSIGN(DialNumberResponse);
+};
 
 }  // namespace commands
-
 }  // namespace application_manager
+
+#endif  // SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_COMMANDS_DIAL_NUMBER_RESPONSE_H_

@@ -274,6 +274,7 @@ const char location_name[] = "locationName";
 const char location_description[] = "locationDescription";
 const char address_lines[] = "addressLines";
 const char phone_number[] = "phoneNumber";
+const char number[] = "number";
 const char location_image[] = "locationImage";
 }  // namespace strings
 
