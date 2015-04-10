@@ -280,7 +280,7 @@ std::vector<ApplicationSharedPtr> ApplicationManagerImpl::IviInfoUpdated(
   return apps;
 }
 
-bool ApplicationManagerImpl::DoesAudioAppWithSameHMITypeExistInFullOrLimited(
+bool ApplicationManagerImpl::IsAppTypeExistsInFullOrLimited(
     ApplicationSharedPtr app) const {
   bool voice_state = app->is_voice_communication_supported();
   bool media_state = app->is_media_application();
@@ -487,6 +487,7 @@ bool ApplicationManagerImpl::LoadAppDataToHMI(ApplicationSharedPtr app) {
 
 bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
   LOG4CXX_AUTO_TRACE(logger_);
+
   if (!app) {
     LOG4CXX_ERROR(logger_, "Null-pointer application received.");
     NOTREACHED();
@@ -498,57 +499,77 @@ bool ApplicationManagerImpl::ActivateApplication(ApplicationSharedPtr app) {
     return false;
   }
 
-  using namespace mobile_api::HMILevel;
+  using namespace mobile_api;
 
-  bool is_new_app_media = app->is_media_application();
-  ApplicationSharedPtr current_active_app = active_application();
-
-  if (HMI_LIMITED != app->hmi_level()) {
+  if (HMILevel::HMI_LIMITED != app->hmi_level()) {
     if (app->has_been_activated()) {
       MessageHelper::SendAppDataToHMI(app);
     }
   }
 
-  if (current_active_app) {
+  bool is_new_app_media = app->is_media_application();
+  bool is_new_app_voice = app->is_voice_communication_supported();
+  bool is_new_app_navi = app->is_navi();
+
+  ApplicationSharedPtr limited_media_app = get_limited_media_application();
+  ApplicationSharedPtr limited_voice_app = get_limited_voice_application();
+  ApplicationSharedPtr limited_navi_app = get_limited_navi_application();
+
+  ApplicationSharedPtr current_active_app = active_application();
+  if (current_active_app.valid()) {
     if (is_new_app_media && current_active_app->is_media_application()) {
       MakeAppNotAudible(current_active_app->app_id());
+      MessageHelper::SendHMIStatusNotification(*current_active_app);
     } else {
-      ChangeAppsHMILevel(current_active_app->app_id(),
-                         current_active_app->IsAudioApplication() ? HMI_LIMITED :
-                                                                    HMI_BACKGROUND);
+      DeactivateApplication(current_active_app);
     }
-
-    MessageHelper::SendHMIStatusNotification(*current_active_app);
   }
 
   MakeAppFullScreen(app->app_id());
 
   if (is_new_app_media) {
-    ApplicationSharedPtr limited_app = get_limited_media_application();
-    if (limited_app ) {
-      if (!limited_app->is_navi()) {
-        MakeAppNotAudible(limited_app->app_id());
-        MessageHelper::SendHMIStatusNotification(*limited_app);
+    if (limited_media_app.valid()) {
+      if (!limited_media_app->is_navi()) {
+        MakeAppNotAudible(limited_media_app->app_id());
+        MessageHelper::SendHMIStatusNotification(*limited_media_app);
       } else {
-        app->set_audio_streaming_state(mobile_apis::AudioStreamingState::ATTENUATED);
+        app->set_audio_streaming_state(AudioStreamingState::ATTENUATED);
         MessageHelper::SendHMIStatusNotification(*app);
       }
     }
   }
 
-  if (app->is_voice_communication_supported() || app->is_navi()) {
-    ApplicationSharedPtr limited_app = get_limited_voice_application();
-    if (limited_app.valid()) {
-      if (limited_app->is_media_application()) {
-        limited_app->set_audio_streaming_state(
-            mobile_api::AudioStreamingState::NOT_AUDIBLE);
-      }
-      ChangeAppsHMILevel(app->app_id(), HMI_BACKGROUND);
-      MessageHelper::SendHMIStatusNotification(*limited_app);
+  if (is_new_app_voice && limited_voice_app.valid()) {
+    if (limited_voice_app->is_media_application()) {
+      MakeAppNotAudible(limited_voice_app->app_id());
     }
+    ChangeAppsHMILevel(limited_voice_app->app_id(), HMILevel::HMI_BACKGROUND);
+    MessageHelper::SendHMIStatusNotification(*limited_voice_app);
+  }
+
+  if (is_new_app_navi && limited_navi_app.valid()) {
+    if (limited_navi_app->is_media_application()) {
+      MakeAppNotAudible(limited_navi_app->app_id());
+    }
+    ChangeAppsHMILevel(limited_navi_app->app_id(), HMILevel::HMI_BACKGROUND);
+    MessageHelper::SendHMIStatusNotification(*limited_navi_app);
   }
 
   return true;
+}
+
+void ApplicationManagerImpl::DeactivateApplication(ApplicationSharedPtr app) {
+  LOG4CXX_AUTO_TRACE(logger_);
+
+  using namespace mobile_apis::HMILevel;
+
+  if (app->IsAudioApplication() && !(ApplicationManagerImpl::instance()->
+          IsAppTypeExistsInFullOrLimited(app))) {
+    ChangeAppsHMILevel(app->app_id(), HMI_LIMITED);
+  } else {
+    ChangeAppsHMILevel(app->app_id(), HMI_BACKGROUND);
+  }
+  MessageHelper::SendHMIStatusNotification(*app);
 }
 
 mobile_api::HMILevel::eType ApplicationManagerImpl::IsHmiLevelFullAllowed(
@@ -561,10 +582,8 @@ mobile_api::HMILevel::eType ApplicationManagerImpl::IsHmiLevelFullAllowed(
   }
   bool is_audio_app = app->IsAudioApplication();
   bool does_audio_app_with_same_type_exist =
-      DoesAudioAppWithSameHMITypeExistInFullOrLimited(app);
+      IsAppTypeExistsInFullOrLimited(app);
   bool is_active_app_exist = active_application().valid();
-
-
 
   mobile_api::HMILevel::eType result = mobile_api::HMILevel::HMI_FULL;
   if (is_audio_app && does_audio_app_with_same_type_exist) {

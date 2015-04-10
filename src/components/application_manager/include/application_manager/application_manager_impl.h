@@ -238,15 +238,15 @@ class ApplicationManagerImpl : public ApplicationManager,
     ApplicationSharedPtr get_limited_voice_application() const;
 
     /**
-     * @brief Check's if there are audio(media, voice communication or navi) applications
-     *        exist in HMI_FULL or HMI_LIMITED level with same audible HMI type.
-     *        Used for resumption.
+     * @brief Checks if application with the same HMI type 
+     *        (media, voice communication or navi) exists
+     *        in HMI_FULL or HMI_LIMITED level.
      *
      * @param app Pointer to application to compare with
      *
      * @return true if exist otherwise false
      */
-    bool DoesAudioAppWithSameHMITypeExistInFullOrLimited(ApplicationSharedPtr app) const;
+    bool IsAppTypeExistsInFullOrLimited(ApplicationSharedPtr app) const;
 
     /**
      * @brief Notifies all components interested in Vehicle Data update
@@ -329,6 +329,7 @@ class ApplicationManagerImpl : public ApplicationManager,
     bool RemoveAppDataFromHMI(ApplicationSharedPtr app);
     bool LoadAppDataToHMI(ApplicationSharedPtr app);
     bool ActivateApplication(ApplicationSharedPtr app);
+    void DeactivateApplication(ApplicationSharedPtr app);
 
     /**
      * @brief Put application in FULL HMI Level if possible,
