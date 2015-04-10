@@ -48,7 +48,8 @@ namespace connection_handler {
 
   enum CloseSessionReason {
     kCommon = 0,
-    kFlood
+    kFlood,
+    kMalformed
   };
 
 /**
