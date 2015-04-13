@@ -283,8 +283,14 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
     "CheckPermissions for " << app_id << " and rpc " << rpc << " for "
     << hmi_level << " level.");
 
-  const std::string device_id = GetCurrentDeviceId(app_id);
-  cache_->CheckPermissions(device_id, app_id, hmi_level, rpc, result);
+#ifdef SDL_REMOTE_CONTROL
+  const PTString device_id = GetCurrentDeviceId(app_id);
+  const policy_table::Strings& groups =
+      access_remote_->GetGroups(device_id, app_id);
+#else  // SDL_REMOTE_CONTROL
+  const policy_table::Strings& groups = cache_->GetGroups(app_id);
+#endif  // SDL_REMOTE_CONTROL
+  cache_->CheckPermissions(groups, hmi_level, rpc, result);
 }
 
 bool PolicyManagerImpl::ResetUserConsent() {
@@ -792,18 +798,22 @@ bool PolicyManagerImpl::CanAppStealFocus(const std::string& app_id) {
 void PolicyManagerImpl::MarkUnpairedDevice(const std::string& device_id) {
 }
 
-void PolicyManagerImpl::AddApplication(const std::string& application_id) {
+void PolicyManagerImpl::AddApplication(const std::string& application_id,
+                                       const std::vector<std::string> hmi_types) {
   LOG4CXX_INFO(logger_, "AddApplication");
   const std::string device_id = GetCurrentDeviceId(application_id);
   DeviceConsent device_consent = GetUserConsentForDevice(device_id);
   sync_primitives::AutoLock lock(apps_registration_lock_);
 
   if (IsNewApplication(application_id)) {
-    AddNewApplication(application_id, device_consent);
+    AddNewApplication(application_id, device_consent, hmi_types);
     update_status_manager_.OnNewApplicationAdded();
   } else {
     PromoteExistedApplication(application_id, device_consent);
   }
+#if SDL_REMOTE_CONTROL
+  access_remote_->SetDefaultHmiTypes(application_id, hmi_types);
+#endif  // SDL_REMOTE_CONTROL
   StartPTExchange();
   SendNotificationOnPermissionsUpdated(application_id);
 }
@@ -819,7 +829,8 @@ bool PolicyManagerImpl::IsPredataPolicy(const std::string &policy_app_id) {
 }
 
 void PolicyManagerImpl::AddNewApplication(const std::string& application_id,
-                                          DeviceConsent device_consent) {
+                                          DeviceConsent device_consent,
+                                          const std::vector<std::string> hmi_types) {
   LOG4CXX_AUTO_TRACE(logger_);
 
   cache_->SetDefaultPolicy(application_id);
@@ -949,8 +960,8 @@ void PolicyManagerImpl::ResetAccess(const PTString& app_id) {
 
 void PolicyManagerImpl::ResetAccess(const PTString& group_name,
                                     const SeatLocation zone) {
-  Object what = {group_name, zone};
-  access_remote_->Reset(what);
+  Object who = {group_name, zone};
+  access_remote_->Reset(who);
 }
 
 void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {

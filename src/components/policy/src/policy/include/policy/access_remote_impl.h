@@ -76,17 +76,23 @@ class AccessRemoteImpl : public AccessRemote {
   virtual TypeAccess Check(const Subject& who, const Object& what) const;
   virtual PTString FindGroup(const Subject& who, const PTString& rpc,
                              const RemoteControlParams& params) const;
+  virtual void SetDefaultHmiTypes(const std::string& app_id,
+                                  const std::vector<std::string>& hmi_types);
+  virtual const policy_table::Strings& GetGroups(const PTString& device_id,
+                                                 const PTString& app_id);
 
  private:
   typedef std::map<Subject, TypeAccess> AccessControlRow;
   typedef std::map<Object, AccessControlRow> AccessControlList;
-
+  typedef std::map<std::string, policy_table::AppHMITypes> HMIList;
   inline void set_enabled(bool value);
+  const policy_table::AppHMITypes& HmiTypes(const std::string& app_id);
 
   utils::SharedPtr<CacheManager> cache_;
   PTString primary_device_;
   bool enabled_;
   AccessControlList acl_;
+  HMIList hmi_types_;
 
   friend struct Erase;
   friend struct IsTypeAccess;

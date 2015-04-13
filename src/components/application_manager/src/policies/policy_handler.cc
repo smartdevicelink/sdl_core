@@ -405,9 +405,19 @@ void PolicyHandler::GetAvailableApps(std::queue<std::string>& apps) {
   }
 }
 
-void PolicyHandler::AddApplication(const std::string& application_id) {
+struct SOToString {
+  std::string operator ()(const smart_objects::SmartObject& item) const {
+    return item.asString();
+  }
+};
+
+void PolicyHandler::AddApplication(const std::string& application_id,
+                                   const smart_objects::SmartArray* app_types) {
   POLICY_LIB_CHECK_VOID();
-  policy_manager_->AddApplication(application_id);
+  std::vector<std::string> hmi_types(app_types->size());
+  std::transform(app_types->begin(), app_types->end(), hmi_types.begin(),
+                 SOToString());
+  policy_manager_->AddApplication(application_id, hmi_types);
 }
 
 void PolicyHandler::SetDeviceInfo(std::string& device_id,

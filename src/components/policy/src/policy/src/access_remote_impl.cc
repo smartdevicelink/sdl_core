@@ -32,12 +32,15 @@
 #include "policy/access_remote_impl.h"
 
 #include <algorithm>
+#include <iterator>
 
+#include "policy/cache_manager.h"
 #include "utils/logger.h"
 
 CREATE_LOGGERPTR_GLOBAL(logger_, "PolicyManagerImpl")
 
 using policy_table::DeviceData;
+using policy_table::FunctionalGroupings;
 using rpc::policy_table_interface_base::EnumFromJsonString;
 
 namespace policy {
@@ -117,6 +120,16 @@ bool Match::operator ()(const PTString& item) const {
   }
   return true;
 }
+
+struct ToHMIType {
+  policy_table::AppHMITypes::value_type operator ()(const std::string& item) const {
+    policy_table::AppHMIType value;
+    if (!EnumFromJsonString(item, &value)) {
+      value = policy_table::AHT_DEFAULT;
+    }
+    return policy_table::AppHMITypes::value_type(value);
+  }
+};
 
 AccessRemoteImpl::AccessRemoteImpl()
     : cache_(new CacheManager()),
@@ -241,4 +254,37 @@ PTString AccessRemoteImpl::FindGroup(const Subject& who, const PTString& rpc,
   return "";
 }
 
-}  // namespace policy
+void AccessRemoteImpl::SetDefaultHmiTypes(
+    const std::string& app_id, const std::vector<std::string>& hmi_types) {
+  HMIList::mapped_type types;
+  std::transform(hmi_types.begin(), hmi_types.end(), std::back_inserter(types),
+                 ToHMIType());
+  hmi_types_[app_id] = types;
+}
+
+const policy_table::AppHMITypes& AccessRemoteImpl::HmiTypes(
+    const std::string& app_id) {
+  if (cache_->IsDefaultPolicy(app_id)) {
+    return hmi_types_[app_id];
+  } else {
+    return *cache_->pt_->policy_table.app_policies[app_id].AppHMIType;
+  }
+}
+
+const policy_table::Strings& AccessRemoteImpl::GetGroups(
+    const PTString& device_id, const PTString& app_id) {
+  const policy_table::AppHMITypes& hmi_types = HmiTypes(app_id);
+  bool reverse = std::find(hmi_types.begin(), hmi_types.end(),
+                           policy_table::AHT_REMOTE_CONTROL) != hmi_types.end();
+
+  if (reverse) {
+    return
+        IsPrimaryDevice(device_id) ?
+            *cache_->pt_->policy_table.app_policies[app_id].groups_primaryRC :
+            *cache_->pt_->policy_table.app_policies[app_id].groups_non_primaryRC;
+  }
+  return cache_->GetGroups(app_id);
+}
+
+}
+// namespace policy

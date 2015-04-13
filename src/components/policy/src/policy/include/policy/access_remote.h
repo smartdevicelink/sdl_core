@@ -33,7 +33,10 @@
 #define SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_H_
 
 #include <vector>
+#include "./types.h"
 #include "policy/policy_types.h"
+
+namespace policy_table = ::rpc::policy_table_interface_base;
 
 namespace policy {
 
@@ -161,6 +164,23 @@ class AccessRemote {
    */
   virtual PTString FindGroup(const Subject& who, const PTString& rpc,
                              const RemoteControlParams& params) const = 0;
+
+  /**
+   * Sets HMI types if application has default policy permissions
+   * @param app_id ID application
+   * @param hmi_types list of HMI types
+   */
+  virtual void SetDefaultHmiTypes(
+      const std::string& app_id, const std::vector<std::string>& hmi_types) = 0;
+
+  /**
+   * Gets groups
+   * @param device_id ID device
+   * @param app_id ID application
+   * @return list of groups
+   */
+  virtual const policy_table::Strings& GetGroups(
+      const PTString& device_id, const PTString& app_id) = 0;
 };
 
 }  // namespace policy

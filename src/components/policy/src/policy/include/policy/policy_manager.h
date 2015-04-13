@@ -328,8 +328,10 @@ class PolicyManager : public usage_statistics::StatisticsManager {
      * @brief Adds, application to the db or update existed one
      * run PTU if policy update is necessary for application.
      * @param Application id assigned by Ford to the application
+     * @param hmi_types list of hmi types
      */
-    virtual void AddApplication(const std::string& application_id) = 0;
+    virtual void AddApplication(const std::string& application_id,
+                                const std::vector<std::string> hmi_types) = 0;
 
     /**
      * @brief Removes unpaired device records and related records from DB

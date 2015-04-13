@@ -151,7 +151,8 @@ class PolicyManagerImpl : public PolicyManager {
     bool CanAppStealFocus(const std::string& app_id);
     void MarkUnpairedDevice(const std::string& device_id);
 
-    void AddApplication(const std::string& application_id);
+    void AddApplication(const std::string& application_id,
+                        const std::vector<std::string> hmi_types);
 
     virtual void RemoveAppConsentForGroup(const std::string& app_id,
                                           const std::string& group_name);
@@ -225,9 +226,11 @@ class PolicyManagerImpl : public PolicyManager {
      * policy db.
      * @param policy application id.
      * @param cuuren consent for application's device.
+     * @param hmi_types list of hmi types
      */
     void AddNewApplication(const std::string& application_id,
-                           DeviceConsent device_consent);
+                           DeviceConsent device_consent,
+                           const std::vector<std::string> hmi_types);
 
     /**
      * @brief Allows to process case when added application is already

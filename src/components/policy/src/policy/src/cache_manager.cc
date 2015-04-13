@@ -353,44 +353,17 @@ bool CacheManager::IsApplicationRevoked(const std::string& app_id) const {
   return is_revoked;
 }
 
-const policy_table::Strings& CacheManager::GetGroups(const PTString &device_id,
-                                                     const PTString &app_id) {
-  policy_table::Strings& groups = pt_->policy_table.app_policies[app_id].groups;
-#ifdef SDL_REMOTE_CONTROL
-  const policy_table::AppHMITypes& hmi_types =
-      *pt_->policy_table.app_policies[app_id].AppHMIType;
-  bool reverse = std::find(hmi_types.begin(), hmi_types.end(),
-                           policy_table::AHT_REMOTE_CONTROL) != hmi_types.end();
-
-  if (reverse) {
-    policy_table::DeviceData& devices = *pt_->policy_table.device_data;
-    bool primary = *devices[device_id].primary;
-    if (primary) {
-      groups = *pt_->policy_table.app_policies[app_id].groups_primaryRC;
-    } else {
-      groups = *pt_->policy_table.app_policies[app_id].groups_non_primaryRC;
-    }
-  }
-#endif  // SDL_REMOTE_CONTROL
-  return groups;
+const policy_table::Strings& CacheManager::GetGroups(const PTString &app_id) {
+  return pt_->policy_table.app_policies[app_id].groups;
 }
 
-void CacheManager::CheckPermissions(const PTString &device_id,
-                                    const PTString &app_id,
+void CacheManager::CheckPermissions(const policy_table::Strings &groups,
                                     const PTString &hmi_level,
                                     const PTString &rpc,
                                     CheckPermissionResult &result) {
   LOG4CXX_AUTO_TRACE(logger_);
   CACHE_MANAGER_CHECK_VOID();
 
-  if (pt_->policy_table.app_policies.end() ==
-      pt_->policy_table.app_policies.find(app_id)) {
-    LOG4CXX_ERROR(logger_, "Application id " << app_id
-                  << " was not found in policy DB.");
-    return;
-  }
-
-  const policy_table::Strings& groups = GetGroups(device_id, app_id);
   policy_table::Strings::const_iterator app_groups_iter = groups.begin();
   policy_table::Strings::const_iterator app_groups_iter_end = groups.end();
 
