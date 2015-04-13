@@ -52,8 +52,8 @@ UnsubscribeButtonRequest::~UnsubscribeButtonRequest() {
 void UnsubscribeButtonRequest::Run() {
   LOG4CXX_AUTO_TRACE(logger_);
 
-  ApplicationSharedPtr app = ApplicationManagerImpl::instance()->application(
-      (*message_)[str::params][str::connection_key].asUInt());
+  ApplicationSharedPtr app =
+      ApplicationManagerImpl::instance()->application(connection_key());
 
   if (!app) {
     LOG4CXX_ERROR_EXT(logger_, "APPLICATION_NOT_REGISTERED");
@@ -61,8 +61,8 @@ void UnsubscribeButtonRequest::Run() {
     return;
   }
 
-  const uint32_t btn_id = (*message_)[str::msg_params][str::button_name]
-      .asUInt();
+  const uint32_t btn_id =
+      (*message_)[str::msg_params][str::button_name].asUInt();
 
   if (!app->IsSubscribedToButton(static_cast<mobile_apis::ButtonName::eType>(btn_id))) {
     LOG4CXX_ERROR_EXT(logger_, "App doesn't subscibe to button " << btn_id);
@@ -71,7 +71,22 @@ void UnsubscribeButtonRequest::Run() {
   }
 
   app->UnsubscribeFromButton(static_cast<mobile_apis::ButtonName::eType>(btn_id));
+
+  SendUnsubscribeButtonNotification();
   SendResponse(true, mobile_apis::Result::SUCCESS);
+}
+
+void UnsubscribeButtonRequest::SendUnsubscribeButtonNotification() {
+  using namespace smart_objects;
+  using namespace hmi_apis;
+
+  // send OnButtonSubscription notification
+  SmartObject msg_params = SmartObject(SmartType_Map);
+  msg_params[strings::app_id] = connection_key();
+  msg_params[strings::name] = static_cast<Common_ButtonName::eType>(
+      (*message_)[strings::msg_params][strings::button_name].asUInt());
+  msg_params[strings::is_suscribed] = false;
+  CreateHMINotification(FunctionID::Buttons_OnButtonSubscription, msg_params);
 }
 
 }  // namespace commands

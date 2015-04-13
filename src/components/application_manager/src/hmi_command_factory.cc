@@ -227,6 +227,7 @@
 #include "application_manager/commands/hmi/on_navi_tbt_client_state_notification.h"
 #include "application_manager/commands/hmi/on_button_event_notification.h"
 #include "application_manager/commands/hmi/on_button_press_notification.h"
+#include "application_manager/commands/hmi/on_button_subscription_notification.h"
 #include "application_manager/commands/hmi/on_vi_vehicle_data_notification.h"
 #include "application_manager/commands/hmi/on_ui_keyboard_input_notification.h"
 #include "application_manager/commands/hmi/on_ui_touch_event_notification.h"
@@ -1168,6 +1169,10 @@ CommandSharedPtr HMICommandFactory::CreateCommand(
     }
     case hmi_apis::FunctionID::Buttons_OnButtonPress: {
       command.reset(new commands::hmi::OnButtonPressNotification(message));
+      break;
+    }
+    case hmi_apis::FunctionID::Buttons_OnButtonSubscription: {
+      command.reset(new commands::hmi::OnButtonSubscriptionNotification(message));
       break;
     }
 #ifdef HMI_DBUS_API

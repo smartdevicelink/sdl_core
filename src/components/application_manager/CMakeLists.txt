@@ -243,6 +243,7 @@ file (GLOB MOBILE_COMMANDS_SOURCES
   ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_language_change_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_button_event_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_button_press_notification.cc
+  ${AM_SOURCE_DIR}/src/commands/hmi/on_button_subscription_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_find_applications.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_keyboard_input_notification.cc
   ${AM_SOURCE_DIR}/src/commands/hmi/on_ui_touch_event_notification.cc

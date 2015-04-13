@@ -469,6 +469,10 @@ void RegisterAppInterfaceRequest::SendRegisterAppInterfaceResponseToMobile(
                                                       resumption,
                                                       need_restore_vr);
 
+  // By default app subscribed to CUSTOM_BUTTON
+  // Need to send notification to HMI
+  SendSubscribeCustomButtonNotification();
+
   MessageHelper::SendChangeRegistrationRequestToHMI(application);
 
   SendResponse(true, result, add_info.c_str(), &response_params);
@@ -789,6 +793,35 @@ bool RegisterAppInterfaceRequest::IsWhiteSpaceExist() {
     }
   }
   return false;
+}
+
+void RegisterAppInterfaceRequest::CheckResponseVehicleTypeParam(
+    smart_objects::SmartObject& vehicle_type,
+    const std::string& param,
+    const std::string& backup_value) {
+  using namespace hmi_response;
+  if (!vehicle_type.keyExists(param) ||
+      vehicle_type[param].empty()) {
+    if (!backup_value.empty()) {
+      LOG4CXX_DEBUG(logger_, param << " is missing."
+                    "Will be replaced with policy table value.");
+      vehicle_type[param] = backup_value;
+    } else {
+      vehicle_type.erase(param);
+    }
+  }
+}
+
+void RegisterAppInterfaceRequest::SendSubscribeCustomButtonNotification() {
+  using namespace smart_objects;
+  using namespace hmi_apis;
+
+  SmartObject msg_params = SmartObject(SmartType_Map);
+  msg_params[strings::app_id] = connection_key();
+  msg_params[strings::name] = Common_ButtonName::CUSTOM_BUTTON;
+  msg_params[strings::is_suscribed] = true;
+  CreateHMINotification(FunctionID::Buttons_OnButtonSubscription,
+                        msg_params);
 }
 
 }  // namespace commands

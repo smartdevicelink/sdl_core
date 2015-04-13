@@ -79,6 +79,12 @@ class SubscribeButtonRequest : public CommandRequestImpl {
   bool IsSubscribtionAllowed(ApplicationSharedPtr app,
                              const mobile_apis::ButtonName::eType btn_id);
 
+  /**
+   * @brief Sends ButtonSubscription notification
+   * to notify HMI that app subscribed on the button.
+   */
+  void SendSubscribeButtonNotification();
+
   DISALLOW_COPY_AND_ASSIGN(SubscribeButtonRequest);
 };
 
