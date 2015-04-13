@@ -297,7 +297,7 @@ bool CheckAppPolicy::NicknamesMatch(
          app_policy.second.nicknames->begin();
          app_policy.second.nicknames->end() != it; ++it) {
       std::string temp = *it;
-      if (temp.compare(app_name) == 0) {
+      if (!strcasecmp(temp.c_str(), app_name.c_str())) {
         return true;
       }
     }
