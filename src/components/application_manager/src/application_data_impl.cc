@@ -169,8 +169,8 @@ DynamicApplicationDataImpl::DynamicApplicationDataImpl()
       sub_menu_(),
       choice_set_map_(),
       performinteraction_choice_set_map_(),
+      performinteraction_choice_set_lock_(true),
       is_perform_interaction_active_(false),
-      perform_interaction_ui_corrid_(0),
       is_reset_global_properties_active_(false),
       perform_interaction_mode_(-1) {
 }
@@ -220,7 +220,11 @@ DynamicApplicationDataImpl::~DynamicApplicationDataImpl() {
 
   PerformChoiceSetMap::iterator it = performinteraction_choice_set_map_.begin();
   for (; performinteraction_choice_set_map_.end() != it; ++it) {
-    delete it->second;
+    PerformChoice::iterator choice_it = performinteraction_choice_set_map_[it->first].begin();
+    for (; performinteraction_choice_set_map_[it->first].end() != choice_it; ++choice_it) {
+      delete choice_it->second;      
+    }
+    performinteraction_choice_set_map_[it->first].clear();
   }
   performinteraction_choice_set_map_.clear();
 }
@@ -406,7 +410,10 @@ void DynamicApplicationDataImpl::SetGlobalProperties(
 void DynamicApplicationDataImpl::AddCommand(
   uint32_t cmd_id, const smart_objects::SmartObject& command) {
   sync_primitives::AutoLock lock(commands_lock_);
-  commands_[cmd_id] = new smart_objects::SmartObject(command);
+  CommandsMap::const_iterator it = commands_.find(cmd_id);
+  if (commands_.end() == it) {
+    commands_[cmd_id] = new smart_objects::SmartObject(command);
+  }
 }
 
 void DynamicApplicationDataImpl::RemoveCommand(uint32_t cmd_id) {
@@ -433,7 +440,10 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindCommand(
 void DynamicApplicationDataImpl::AddSubMenu(
   uint32_t menu_id, const smart_objects::SmartObject& menu) {
   sync_primitives::AutoLock lock(sub_menu_lock_);
-  sub_menu_[menu_id] = new smart_objects::SmartObject(menu);
+  SubMenuMap::const_iterator it = sub_menu_.find(menu_id);
+  if (sub_menu_.end() == it) {
+    sub_menu_[menu_id] = new smart_objects::SmartObject(menu);
+  }
 }
 
 void DynamicApplicationDataImpl::RemoveSubMenu(uint32_t menu_id) {
@@ -474,7 +484,10 @@ bool DynamicApplicationDataImpl::IsSubMenuNameAlreadyExist(
 void DynamicApplicationDataImpl::AddChoiceSet(
   uint32_t choice_set_id, const smart_objects::SmartObject& choice_set) {
   sync_primitives::AutoLock lock(choice_set_map_lock_);
-  choice_set_map_[choice_set_id] = new smart_objects::SmartObject(choice_set);
+  ChoiceSetMap::const_iterator it = choice_set_map_.find(choice_set_id);
+  if (choice_set_map_.end() == it) {
+    choice_set_map_[choice_set_id] = new smart_objects::SmartObject(choice_set);
+  }
 }
 
 void DynamicApplicationDataImpl::RemoveChoiceSet(uint32_t choice_set_id) {
@@ -499,43 +512,28 @@ smart_objects::SmartObject* DynamicApplicationDataImpl::FindChoiceSet(
 }
 
 void DynamicApplicationDataImpl::AddPerformInteractionChoiceSet(
-  uint32_t choice_set_id, const smart_objects::SmartObject& vr_commands) {
+  uint32_t correlation_id, uint32_t choice_set_id,
+  const smart_objects::SmartObject& vr_commands) {
   sync_primitives::AutoLock lock(performinteraction_choice_set_lock_);
-  performinteraction_choice_set_map_[choice_set_id] =
-      new smart_objects::SmartObject(vr_commands);
+  performinteraction_choice_set_map_[correlation_id].insert(
+      std::make_pair(choice_set_id, new smart_objects::SmartObject(vr_commands)));
 }
 
-void DynamicApplicationDataImpl::DeletePerformInteractionChoiceSetMap() {
+void DynamicApplicationDataImpl::DeletePerformInteractionChoiceSet(
+  uint32_t correlation_id) {
   sync_primitives::AutoLock lock(performinteraction_choice_set_lock_);
-  PerformChoiceSetMap::iterator it = performinteraction_choice_set_map_.begin();
-  for (; performinteraction_choice_set_map_.end() != it; ++it) {
+  PerformChoice::iterator it =
+      performinteraction_choice_set_map_[correlation_id].begin();
+  for (; performinteraction_choice_set_map_[correlation_id].end() != it; ++it) {
     delete it->second;
   }
-  performinteraction_choice_set_map_.clear();
-}
-
-smart_objects::SmartObject*
-DynamicApplicationDataImpl::FindPerformInteractionChoiceSet(
-  uint32_t choice_set_id) const {
-  sync_primitives::AutoLock lock(performinteraction_choice_set_lock_);
-  PerformChoiceSetMap::const_iterator it = performinteraction_choice_set_map_
-      .find(choice_set_id);
-
-  if (it != performinteraction_choice_set_map_.end()) {
-    return it->second;
-  }
-
-  return NULL;
+  performinteraction_choice_set_map_[correlation_id].clear();
+  performinteraction_choice_set_map_.erase(correlation_id);
 }
 
 void DynamicApplicationDataImpl::set_perform_interaction_active(
     uint32_t active) {
   is_perform_interaction_active_ = active;
-}
-
-void DynamicApplicationDataImpl::set_perform_interaction_ui_corrid(
-    uint32_t corr_id) {
-  perform_interaction_ui_corrid_ = corr_id;
 }
 
 void DynamicApplicationDataImpl::set_reset_global_properties_active(

@@ -139,9 +139,18 @@ typedef std::map<uint32_t, smart_objects::SmartObject*> SubMenuMap;
 typedef std::map<uint32_t, smart_objects::SmartObject*> ChoiceSetMap;
 
 /*
- * @brief Typedef for perform interaction choice set
+ * @brief Typedef for perform interaction choice
+ * @param choice id
+ * @param SmartObject choice
  */
-typedef std::map<uint32_t, smart_objects::SmartObject*> PerformChoiceSetMap;
+typedef std::map<uint32_t, smart_objects::SmartObject*> PerformChoice;
+
+/*
+ * @brief Typedef for perform interaction choice set
+ * @param request corellation id
+ * @param map of choices
+ */
+typedef std::map<uint32_t, PerformChoice> PerformChoiceSetMap;
 
 /**
  * @brief Defines id of SoftButton
@@ -252,18 +261,20 @@ class DynamicApplicationData {
     /*
      * @brief Adds perform interaction choice set to the application
      *
-     * @param choice_set_id Unique ID used for this interaction choice set
+     * @param correlation_id Unique ID of the request that added this choice set
+     * @param choice_set_id  Unique ID used for this interaction choice set
      * @param choice_set SmartObject that represents choice set
      */
     virtual void AddPerformInteractionChoiceSet(
-      uint32_t choice_set_id,
+      uint32_t correlation_id, uint32_t choice_set_id,
       const smart_objects::SmartObject& choice_set) = 0;
 
     /*
-     * @brief Deletes entirely perform interaction choice set map
+     * @brief Deletes entirely perform interaction choice set for request
+     * @param correlation_id Unique ID of the request that added this choice set
      *
      */
-    virtual void DeletePerformInteractionChoiceSetMap() = 0;
+    virtual void DeletePerformInteractionChoiceSet(uint32_t correlation_id) = 0;
 
     /*
      * @brief Retrieves entirely ChoiceSet - VR commands map
@@ -272,17 +283,6 @@ class DynamicApplicationData {
      */
     virtual DataAccessor<PerformChoiceSetMap>
     performinteraction_choice_set_map() const = 0;
-
-    /*
-     * @brief Retrieves choice set that is currently in use by perform
-     * interaction
-     *
-     * @param choice_set_id Unique ID of the interaction choice set
-     *
-     * @return SmartObject that represents choice set
-     */
-    virtual smart_objects::SmartObject* FindPerformInteractionChoiceSet(
-      uint32_t choice_set_id) const = 0;
 
     /*
      * @brief Retrieve application commands
@@ -312,22 +312,6 @@ class DynamicApplicationData {
      * @return TRUE if perform interaction active, otherwise FALSE
      */
     virtual uint32_t is_perform_interaction_active() const = 0;
-
-    /*
-     * @brief Sets the choice that was selected in
-     * response to PerformInteraction
-     *
-     * @param choice Choice that was selected
-     */
-    virtual void set_perform_interaction_ui_corrid(uint32_t choice) = 0;
-
-    /*
-     * @brief Retrieve the choice that was selected in
-     * response to PerformInteraction
-     *
-     * @return Choice that was selected in response to PerformInteraction
-     */
-    virtual uint32_t perform_interaction_ui_corrid() const = 0;
 
     /*
      * @brief Sets the mode for perform interaction: UI/VR/BOTH

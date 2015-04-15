@@ -100,12 +100,15 @@ bool DeleteInteractionChoiceSetRequest::ChoiceSetInUse(ApplicationConstSharedPtr
 
     PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
     for (; choice_set_map.end() != it; ++it) {
-      if (it->first
-          == (*message_)[strings::msg_params]
-                         [strings::interaction_choice_set_id].asUInt()) {
-        LOG4CXX_ERROR_EXT(logger_,
-                          "DeleteInteractionChoiceSetRequest::ChoiceSetInUse");
-        return true;
+      const PerformChoice& choice =  it->second;
+      PerformChoice::const_iterator choice_it = choice.begin();
+      for (; choice.end() != choice_it; ++choice_it) {
+        if (choice_it->first == (*message_)[strings::msg_params]
+                                [strings::interaction_choice_set_id].asUInt()) {
+          LOG4CXX_ERROR_EXT(logger_,
+                            "DeleteInteractionChoiceSetRequest::ChoiceSetInUse");
+          return true;
+        }
       }
     }
   }

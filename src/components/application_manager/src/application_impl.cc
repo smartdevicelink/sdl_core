@@ -136,7 +136,6 @@ ApplicationImpl::~ApplicationImpl() {
   if (is_perform_interaction_active()) {
     set_perform_interaction_active(0);
     set_perform_interaction_mode(-1);
-    DeletePerformInteractionChoiceSetMap();
   }
   CleanupFiles();
 }

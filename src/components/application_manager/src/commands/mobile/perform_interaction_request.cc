@@ -46,6 +46,8 @@ namespace application_manager {
 
 namespace commands {
 
+uint32_t PerformInteractionRequest::pi_requests_count_ = 0;
+
 PerformInteractionRequest::PerformInteractionRequest(
   const MessageSharedPtr& message)
 : CommandRequestImpl(message),
@@ -200,6 +202,8 @@ void PerformInteractionRequest::Run() {
 
   app->set_perform_interaction_mode(static_cast<int32_t>(interaction_mode_));
   app->set_perform_interaction_active(true);
+  // increment amount of active requests
+  ++pi_requests_count_;
   SendVRPerformInteractionRequest(app);
   SendUIPerformInteractionRequest(app);
 }
@@ -454,7 +458,8 @@ void PerformInteractionRequest::SendUIPerformInteractionRequest(
         choice_set_id_list[i].asInt());
     if (choice_set) {
       // save perform interaction choice set
-      app->AddPerformInteractionChoiceSet(choice_set_id_list[i].asInt(),
+      app->AddPerformInteractionChoiceSet(correlation_id(),
+                                          choice_set_id_list[i].asInt(),
                                           *choice_set);
       for (size_t j = 0; j < (*choice_set)[strings::choice_set].length(); ++j) {
         if (mobile_apis::InteractionMode::VR_ONLY != mode) {
@@ -724,12 +729,15 @@ void PerformInteractionRequest::DisablePerformInteraction() {
     return;
   }
 
-  if (app->is_perform_interaction_active() &&
-      (!app_pi_was_active_before_)) {
-    app->set_perform_interaction_active(false);
-    app->set_perform_interaction_mode(-1);
-    app->DeletePerformInteractionChoiceSetMap();
+  if (app->is_perform_interaction_active()) {
+    // decrease amount of active requests
+    --pi_requests_count_;
+    if (!pi_requests_count_) {
+      app->set_perform_interaction_active(false);
+      app->set_perform_interaction_mode(-1);
+    }
   }
+  app->DeletePerformInteractionChoiceSet(correlation_id());
 }
 
 bool PerformInteractionRequest::IsWhiteSpaceExist() {
@@ -833,14 +841,19 @@ bool PerformInteractionRequest::CheckChoiceIDFromResponse(
       app->performinteraction_choice_set_map();
   const PerformChoiceSetMap& choice_set_map = accessor.GetData();
 
-  for (PerformChoiceSetMap::const_iterator it = choice_set_map.begin();
-      choice_set_map.end() != it; ++it) {
-    const smart_objects::SmartObject& choice_set = (*it->second).getElement(
-        strings::choice_set);
-    for (size_t j = 0; j < choice_set.length(); ++j) {
-      if (choice_id ==
-          choice_set.getElement(j).getElement(strings::choice_id).asInt()) {
-        return true;
+  PerformChoiceSetMap::const_iterator choice_set_map_it =
+      choice_set_map.find(correlation_id());
+  if (choice_set_map.end() != choice_set_map_it) {
+    const PerformChoice& choice = choice_set_map_it->second;
+    PerformChoice::const_iterator it = choice.begin();
+    for (; choice.end() != it; ++it) {
+      const smart_objects::SmartObject& choice_set = (*it->second).getElement(
+          strings::choice_set);
+      for (size_t j = 0; j < choice_set.length(); ++j) {
+        if (choice_id ==
+            choice_set.getElement(j).getElement(strings::choice_id).asInt()) {
+          return true;
+        }
       }
     }
   }
