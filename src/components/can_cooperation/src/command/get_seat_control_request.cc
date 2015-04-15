@@ -50,7 +50,7 @@ GetSeatControlRequest::~GetSeatControlRequest() {
 }
 
 void GetSeatControlRequest::Execute() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
   Json::Value params;
 
@@ -63,7 +63,7 @@ void GetSeatControlRequest::Execute() {
 void GetSeatControlRequest::OnEvent(
     const event_engine::Event<application_manager::MessagePtr,
     std::string>& event) {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::can_api::get_seat_control == event.id()) {
     std::string result_code;
@@ -79,7 +79,6 @@ void GetSeatControlRequest::OnEvent(
   } else {
     LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
   }
-  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands

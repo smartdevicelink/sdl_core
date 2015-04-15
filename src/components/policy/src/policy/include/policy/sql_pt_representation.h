@@ -104,10 +104,6 @@ class SQLPTRepresentation : public virtual PTRepresentation {
 
     bool GatherAppGroup(const std::string& app_id,
                         policy_table::Strings* app_groups) const;
-    bool GatherAppGroupPrimary(const std::string& app_id,
-                               policy_table::Strings* app_groups) const;
-    bool GatherAppGroupNonPrimary(const std::string& app_id,
-                                  policy_table::Strings* app_groups) const;
     bool GatherAppType(const std::string& app_id,
                        policy_table::AppHMITypes* app_types) const;
     bool GatherNickName(const std::string& app_id,
@@ -144,12 +140,8 @@ class SQLPTRepresentation : public virtual PTRepresentation {
                      const policy_table::AppHMITypes& types);
 
 #ifdef SDL_REMOTE_CONTROL
-    bool GatherAppGroupPrimary(const std::string& app_id,
-                               policy_table::Strings* app_groups) const;
     bool GatherAppGroupNonPrimary(const std::string& app_id,
                                   policy_table::Strings* app_groups) const;
-    bool SaveAppGroupPrimary(const std::string& app_id,
-                             const policy_table::Strings& app_groups);
     bool SaveAppGroupNonPrimary(const std::string& app_id,
                                 const policy_table::Strings& app_groups);
 #endif  // SDL_REMOTE_CONTROL

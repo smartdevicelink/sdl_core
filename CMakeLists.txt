@@ -47,8 +47,6 @@ option(TIME_TESTER "Enable profiling time test util" ON)
 option(ENABLE_LOG "Logging feature" ON)
 option(ENABLE_GCOV "gcov code coverage feature" OFF)
 option(ENABLE_SANITIZE "Sanitize tool" OFF)
-option(ENABLE_SECURITY "Security Ford protocol protection" ON)
-option(REVSDL "Build with support remote control" OFF)
 
 set(OS_TYPE_OPTION 	"$ENV{OS_TYPE}")
 set(DEBUG_OPTION 	"$ENV{DEBUG}")
@@ -62,6 +60,7 @@ set(POLICY_OPTION 	"$ENV{POLICY_TYPE}")
 set(SECURITY_OPTION 	"$ENV{SECURITY_MODE}")
 set(COMPONENTS_DIR ${CMAKE_SOURCE_DIR}/src/components)
 set(SNAPSHOT_TAG 	"$ENV{SNAPSHOT_TAG}")
+set(REMOTE_CONTROL "$ENV{REMOTE_CONTROL}")
 
 
 
@@ -140,6 +139,11 @@ if (SECURITY_OPTION)
     message(STATUS "Jenkins integration: Security is turned OFF")
     set (ENABLE_SECURITY OFF)
   endif()
+endif()
+
+if (REMOTE_CONTROL)
+  add_definitions(-DSDL_REMOTE_CONTROL)
+  message(STATUS "Remote control support is enabled (aka Reverse SDL or SDL-RC)")
 endif()
 
 #Jenkins integration section end

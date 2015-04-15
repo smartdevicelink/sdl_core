@@ -278,7 +278,7 @@ private:
     UpdateStatusManager update_status_manager_;
     CacheManagerInterfaceSPtr cache_;
 #ifdef SDL_REMOTE_CONTROL
-    AccessRemote* access_remote_;
+    utils::SharedPtr<AccessRemote> access_remote_;
 #endif  // SDL_REMOTE_CONTROL
     sync_primitives::Lock apps_registration_lock_;
     sync_primitives::Lock app_permissions_diff_lock_;
@@ -316,8 +316,6 @@ private:
     std::string last_device_id_;
 
     bool ignition_check;
-
-    TypeAccess access_;
 
     friend struct CheckAppPolicy;
 };

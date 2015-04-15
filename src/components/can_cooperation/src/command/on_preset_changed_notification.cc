@@ -51,7 +51,7 @@ OnPresetChangedNotification::~OnPresetChangedNotification() {
 }
 
 void OnPresetChangedNotification::Execute() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
  /* std::string json = message_->json_message();
   if (validators::ValidationResult::SUCCESS ==
@@ -71,7 +71,6 @@ void OnPresetChangedNotification::Execute() {
     message_->set_connection_key(app->app_id());
     service_->SendMessageToMobile(message_);
   }
-  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands

@@ -51,7 +51,7 @@ OnControlChangedNotification::~OnControlChangedNotification() {
 }
 
 void OnControlChangedNotification::Execute() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
   CANAppExtensionPtr can_app_extension;
   application_manager::ApplicationSharedPtr app =
@@ -64,7 +64,6 @@ void OnControlChangedNotification::Execute() {
     message_->set_connection_key(app->app_id());
     service_->SendMessageToMobile(message_);
   }
-  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands

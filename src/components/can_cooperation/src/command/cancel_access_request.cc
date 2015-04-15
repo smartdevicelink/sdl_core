@@ -51,7 +51,7 @@ CancelAccessRequest::~CancelAccessRequest() {
 }
 
 void CancelAccessRequest::Execute() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest(functional_modules::hmi_api::cancel_access, Json::Value(), true);
 }
@@ -59,7 +59,7 @@ void CancelAccessRequest::Execute() {
 void CancelAccessRequest::OnEvent(
     const event_engine::Event<application_manager::MessagePtr,
     std::string>& event) {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::hmi_api::cancel_access == event.id()) {
     std::string result_code;
@@ -82,7 +82,6 @@ void CancelAccessRequest::OnEvent(
   } else {
     LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
   }
-  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands

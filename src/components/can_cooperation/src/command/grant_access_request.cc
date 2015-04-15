@@ -50,7 +50,7 @@ GrantAccessRequest::~GrantAccessRequest() {
 }
 
 void GrantAccessRequest::Execute() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
   // TODO(KKolodiy): to backward compatibility the current mobile application
   SendResponse(true, result_codes::kSuccess, "Allowed");
 }

@@ -63,24 +63,20 @@ PolicyManagerImpl::PolicyManagerImpl()
   : PolicyManager(),
     listener_(NULL),
     cache_(new CacheManager),
+#ifdef SDL_REMOTE_CONTROL
+      access_remote_(
+          new AccessRemoteImpl(
+              CacheManagerInterfaceSPtr::static_pointer_cast<CacheManager>(
+                  cache_))),
+#endif  // SDL_REMOTE_CONTROL
     retry_sequence_timeout_(60),
     retry_sequence_index_(0),
     ignition_check(true) {
-#ifdef SDL_REMOTE_CONTROL
-  access_remote_ = new AccessRemoteImpl(cache);
-#endif  // SDL_REMOTE_CONTROL
 }
 
 void PolicyManagerImpl::set_listener(PolicyListener* listener) {
   listener_ = listener;
   update_status_manager_.set_listener(listener);
-}
-
-PolicyManagerImpl::~PolicyManagerImpl() {
-  LOG4CXX_INFO(logger_, "Destroying policy manager.");
-#ifdef SDL_REMOTE_CONTROL
-  delete access_remote_;
-#endif  // SDL_REMOTE_CONTROL
 }
 
 utils::SharedPtr<policy_table::Table> PolicyManagerImpl::Parse(
@@ -287,11 +283,8 @@ void PolicyManagerImpl::CheckPermissions(const PTString& app_id,
     "CheckPermissions for " << app_id << " and rpc " << rpc << " for "
     << hmi_level << " level.");
 
-  cache_->CheckPermissions(app_id, hmi_level, rpc, result);
-
-//  const std::string device_id = GetCurrentDeviceId(app_id);
-//  cache.CheckPermissions(device_id, app_id, hmi_level, rpc, result);
-
+  const std::string device_id = GetCurrentDeviceId(app_id);
+  cache_->CheckPermissions(device_id, app_id, hmi_level, rpc, result);
 }
 
 bool PolicyManagerImpl::ResetUserConsent() {

@@ -63,7 +63,7 @@ set(SOURCES
 )
 
 
-if (REVSDL)
+if (REMOTE_CONTROL)
   list(APPEND SOURCES
     ./src/access_remote_impl.cc
   )

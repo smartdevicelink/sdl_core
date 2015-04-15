@@ -1248,12 +1248,12 @@ void ApplicationManagerImpl::SendMessageToMobile(
         }
       }
     }
+    const std::string string_functionID =
+        MessageHelper::StringifiedFunctionID(function_id);
     const mobile_apis::Result::eType check_result =
         CheckPolicyPermissions( app->mobile_app_id(),
-                                app->hmi_level(), function_id, params);
+                                app->hmi_level(), string_functionID, params);
     if (mobile_apis::Result::SUCCESS != check_result) {
-      const std::string string_functionID =
-          MessageHelper::StringifiedFunctionID(function_id);
       LOG4CXX_WARN(logger_, "Function \"" << string_functionID << "\" (#"
                    << function_id << ") not allowed by policy");
       return;
@@ -2439,7 +2439,7 @@ void ApplicationManagerImpl::Handle(const impl::AudioData message) {
 mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     const std::string& policy_app_id,
     mobile_apis::HMILevel::eType hmi_level,
-    mobile_apis::FunctionID::eType function_id,
+    const std::string& function_id,
     const RPCParams& rpc_params,
     CommandParametersPermissions* params_permissions) {
   LOG4CXX_INFO(logger_, "CheckPolicyPermissions");
@@ -2449,20 +2449,18 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
     return mobile_apis::Result::SUCCESS;
   }
 
-  const std::string stringified_functionID =
-      MessageHelper::StringifiedFunctionID(function_id);
   const std::string stringified_hmi_level =
       MessageHelper::StringifiedHMILevel(hmi_level);
   LOG4CXX_INFO(
     logger_,
     "Checking permissions for  " << policy_app_id  <<
     " in " << stringified_hmi_level <<
-    " rpc " << stringified_functionID);
+    " rpc " << function_id);
     policy::CheckPermissionResult result;
     policy::PolicyHandler::instance()->CheckPermissions(
           policy_app_id,
           stringified_hmi_level,
-          stringified_functionID,
+          function_id,
           rpc_params,
           result);
 
@@ -2473,7 +2471,8 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   }
 
   if (hmi_level == mobile_apis::HMILevel::HMI_NONE
-      && function_id != mobile_apis::FunctionID::UnregisterAppInterfaceID) {
+      && function_id != MessageHelper::StringifiedFunctionID(
+          mobile_apis::FunctionID::UnregisterAppInterfaceID)) {
     ApplicationSharedPtr app = application_by_policy_id(policy_app_id);
     if (!app) {
       LOG4CXX_ERROR(logger_, "No application for policy id " << policy_app_id);
@@ -2485,7 +2484,7 @@ mobile_apis::Result::eType ApplicationManagerImpl::CheckPolicyPermissions(
   }
 
   const std::string log_msg = "Application: "+ policy_app_id+
-                              ", RPC: "+stringified_functionID+
+                              ", RPC: " + function_id +
                               ", HMI status: "+stringified_hmi_level;
 
   if (result.hmi_level_permitted != policy::kRpcAllowed) {

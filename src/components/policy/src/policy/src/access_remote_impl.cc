@@ -127,7 +127,7 @@ struct Match {
   }
 };
 
-AccessRemoteImpl::AccessRemoteImpl(CacheManager & cache)
+AccessRemoteImpl::AccessRemoteImpl(utils::SharedPtr<CacheManager> cache)
     : cache_(cache),
       primary_device_(),
       enabled_(true),
@@ -135,10 +135,10 @@ AccessRemoteImpl::AccessRemoteImpl(CacheManager & cache)
 }
 
 void AccessRemoteImpl::Init() {
-  DCHECK(cache_.pt_);
-  enabled_ = *cache_.pt_->policy_table.module_config.remote_control;
+  DCHECK(cache_->pt_);
+  enabled_ = *cache_->pt_->policy_table.module_config.remote_control;
 
-  const DeviceData& devices = *cache_.pt_->policy_table.device_data;
+  const DeviceData& devices = *cache_->pt_->policy_table.device_data;
   DeviceData::const_iterator d = std::find_if(devices.begin(), devices.end(),
                                               IsPrimary());
   if (d != devices.end()) {
@@ -157,7 +157,7 @@ bool AccessRemoteImpl::IsPassengerZone(const SeatLocation& seat,
 
 TypeAccess AccessRemoteImpl::Check(const Subject& who,
                                    const Object& what) const {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
   TypeAccess ret = TypeAccess::kDisallowed;
   AccessControlList::const_iterator i = acl_.find(what);
   if (i != acl_.end()) {
@@ -181,7 +181,7 @@ TypeAccess AccessRemoteImpl::Check(const Subject& who,
   } else {
     // Nobody controls this object
     ret = TypeAccess::kManual;
-  }LOG4CXX_TRACE_EXIT(logger_);
+  }
   return ret;
 }
 
@@ -203,10 +203,10 @@ void AccessRemoteImpl::Reset(const Object& what) {
 
 void AccessRemoteImpl::SetPrimaryDevice(const PTString& dev_id) {
   primary_device_ = dev_id;
-  DeviceData& devices = *cache_.pt_->policy_table.device_data;
+  DeviceData& devices = *cache_->pt_->policy_table.device_data;
   std::for_each(devices.begin(), devices.end(), SetPrimary(false));
   *devices[dev_id].primary = true;
-  cache_.Backup();
+  cache_->Backup();
 }
 
 void AccessRemoteImpl::Enable() {
@@ -219,8 +219,8 @@ void AccessRemoteImpl::Disable() {
 
 void AccessRemoteImpl::set_enabled(bool value) {
   enabled_ = value;
-  *cache_.pt_->policy_table.module_config.remote_control = enabled_;
-  cache_.Backup();
+  *cache_->pt_->policy_table.module_config.remote_control = enabled_;
+  cache_->Backup();
 }
 
 bool AccessRemoteImpl::IsEnabled() const {
@@ -230,8 +230,8 @@ bool AccessRemoteImpl::IsEnabled() const {
 PTString AccessRemoteImpl::FindGroup(const Subject& who, const PTString& rpc,
                                      const RemoteControlParams& params) const {
   const policy_table::Strings& groups =
-      *cache_.pt_->policy_table.app_policies[who.app_id].groups_non_primaryRC;
-  const FunctionalGroupings& all_groups = cache_.pt_->policy_table
+      *cache_->pt_->policy_table.app_policies[who.app_id].groups_non_primaryRC;
+  const FunctionalGroupings& all_groups = cache_->pt_->policy_table
       .functional_groupings;
 
   policy_table::Strings::const_iterator i = std::find_if(

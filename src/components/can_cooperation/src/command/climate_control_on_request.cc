@@ -50,7 +50,7 @@ ClimateControlOnRequest::~ClimateControlOnRequest() {
 }
 
 void ClimateControlOnRequest::Execute() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest(functional_modules::can_api::climate_control_on, Json::Value());
 }
@@ -58,7 +58,7 @@ void ClimateControlOnRequest::Execute() {
 void ClimateControlOnRequest::OnEvent(
     const event_engine::Event<application_manager::MessagePtr,
     std::string>& event) {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::can_api::climate_control_on == event.id()) {
     std::string result_code;
@@ -78,7 +78,6 @@ void ClimateControlOnRequest::OnEvent(
   } else {
     LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
   }
-  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands

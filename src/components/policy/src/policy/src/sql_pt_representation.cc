@@ -640,9 +640,6 @@ bool SQLPTRepresentation::GatherApplicationPolicies(
       return false;
     }
 #ifdef SDL_REMOTE_CONTROL
-    if (!GatherAppGroupPrimary(app_id, &*params.groups_primaryRC)) {
-      return false;
-    }
     if (!GatherAppGroupNonPrimary(app_id, &*params.groups_non_primaryRC)) {
       return false;
     }
@@ -875,9 +872,6 @@ bool SQLPTRepresentation::SaveSpecificAppPolicy(
     return false;
   }
 #ifdef SDL_REMOTE_CONTROL
-  if (!SaveAppGroupPrimary(app.first, *app.second.groups_primaryRC)) {
-    return false;
-  }
   if (!SaveAppGroupNonPrimary(app.first, *app.second.groups_non_primaryRC)) {
     return false;
   }
@@ -1352,21 +1346,6 @@ bool SQLPTRepresentation::GatherAppGroup(
 }
 
 #ifdef SDL_REMOTE_CONTROL
-bool SQLPTRepresentation::GatherAppGroupPrimary(
-  const std::string& app_id, policy_table::Strings* app_groups) const {
-  dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kSelectAppGroupsPrimary)) {
-    LOG4CXX_WARN(logger_, "Incorrect select from app groups for primary RC");
-    return false;
-  }
-
-  query.Bind(0, app_id);
-  while (query.Next()) {
-    app_groups->push_back(query.GetString(0));
-  }
-  return true;
-}
-
 bool SQLPTRepresentation::GatherAppGroupNonPrimary(
   const std::string& app_id, policy_table::Strings* app_groups) const {
   dbms::SQLQuery query(db());
@@ -1379,30 +1358,6 @@ bool SQLPTRepresentation::GatherAppGroupNonPrimary(
   while (query.Next()) {
     app_groups->push_back(query.GetString(0));
   }
-  return true;
-}
-
-bool SQLPTRepresentation::SaveAppGroupPrimary(
-  const std::string& app_id, const policy_table::Strings& app_groups) {
-  dbms::SQLQuery query(db());
-  if (!query.Prepare(sql_pt::kInsertAppGroupPrimary)) {
-    LOG4CXX_WARN(logger_, "Incorrect insert statement for app group primary");
-    return false;
-  }
-  policy_table::Strings::const_iterator it;
-  for (it = app_groups.begin(); it != app_groups.end(); ++it) {
-    std::string ssss = *it;
-    LOG4CXX_INFO(logger_, "Group: " << ssss);
-    query.Bind(0, app_id);
-    query.Bind(1, *it);
-    if (!query.Exec() || !query.Reset()) {
-      LOG4CXX_WARN(
-        logger_,
-        "Incorrect insert into app group primary." << query.LastError().text());
-      return false;
-    }
-  }
-
   return true;
 }
 
@@ -1527,10 +1482,8 @@ bool SQLPTRepresentation::SetDefaultPolicy(const std::string& app_id) {
   bool ret = ( GatherAppGroup(kDefaultId, &default_groups)
       && SaveAppGroup(app_id, default_groups));
 #ifdef SDL_REMOTE_CONTROL
-  ret = ret && (GatherAppGroupPrimary(kDefaultId, &default_groups)
-        && SaveAppGroupPrimary(app_id, default_groups))
-      && (GatherAppGroupNonPrimary(kDefaultId, &default_groups)
-        &&SaveAppGroupNonPrimary(app_id, default_groups));
+  ret = ret && (GatherAppGroupNonPrimary(kDefaultId, &default_groups)
+        && SaveAppGroupNonPrimary(app_id, default_groups));
 #endif  // SDL_REMOTE_CONTROL
 
   if (ret) {

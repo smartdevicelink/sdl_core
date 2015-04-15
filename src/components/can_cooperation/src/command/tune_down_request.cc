@@ -50,7 +50,7 @@ TuneDownRequest::~TuneDownRequest() {
 }
 
 void TuneDownRequest::Execute() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
   SendRequest(functional_modules::can_api::tune_down, Json::Value());
 }
@@ -58,7 +58,7 @@ void TuneDownRequest::Execute() {
 void TuneDownRequest::OnEvent(
     const event_engine::Event<application_manager::MessagePtr,
     std::string>& event) {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
 
   if (functional_modules::can_api::tune_down == event.id()) {
     std::string result_code;
@@ -74,7 +74,6 @@ void TuneDownRequest::OnEvent(
   } else {
     LOG4CXX_ERROR(logger_, "Received unknown event: " << event.id());
   }
-  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands

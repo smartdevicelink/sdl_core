@@ -60,10 +60,11 @@ mobile_apis::Result::eType CoreService::CheckPolicyPermissions(MessagePtr msg) {
     return mobile_apis::Result::eType::APPLICATION_NOT_REGISTERED;
   }
 
+  const RPCParams rpc_params;
   CommandParametersPermissions params;
   const mobile_apis::Result::eType ret = ApplicationManagerImpl::instance()
-      ->CheckPolicyPermissions(app->mobile_app_id()->asString(),
-                               app->hmi_level(), msg->function_name(), &params);
+      ->CheckPolicyPermissions(app->mobile_app_id(), app->hmi_level(),
+                               msg->function_name(), rpc_params, &params);
 
   if (ret != mobile_apis::Result::eType::SUCCESS) {
     return ret;
@@ -90,7 +91,7 @@ TypeAccess CoreService::CheckAccess(const ApplicationId& app_id,
   if (app) {
 
     return policy::PolicyHandler::instance()->CheckAccess(
-        app->mobile_app_id()->asString(), function_id, params, seat, zone);
+        app->mobile_app_id(), function_id, params, seat, zone);
   }
 #endif  // SDL_REMOTE_CONTROL
   return kNone;
@@ -104,7 +105,7 @@ void CoreService::SetAccess(const ApplicationId& app_id,
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
     policy::PolicyHandler::instance()->SetAccess(
-        app->mobile_app_id()->asString(), group_name, zone, allowed);
+        app->mobile_app_id(), group_name, zone, allowed);
   }
 #endif  // SDL_REMOTE_CONTROL
 }
@@ -113,8 +114,7 @@ void CoreService::ResetAccess(const ApplicationId& app_id) {
 #ifdef SDL_REMOTE_CONTROL
   ApplicationSharedPtr app = GetApplication(app_id);
   if (app) {
-    policy::PolicyHandler::instance()->ResetAccess(
-        app->mobile_app_id()->asString());
+    policy::PolicyHandler::instance()->ResetAccess(app->mobile_app_id());
   }
 #endif  // SDL_REMOTE_CONTROL
 }

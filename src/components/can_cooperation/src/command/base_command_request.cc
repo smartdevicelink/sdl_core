@@ -289,7 +289,7 @@ bool BaseCommandRequest::ParseResultCode(const Json::Value& value,
 }
 
 void BaseCommandRequest::Run() {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
   app_ = service_->GetApplication(message_->connection_key());
   if (!app_) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
@@ -342,12 +342,11 @@ void BaseCommandRequest::Run() {
       LOG4CXX_ERROR(logger_, "Unknown issue");
       SendResponse(false, result_codes::kDisallowed, "Unknown issue");
   }
-  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 void BaseCommandRequest::on_event(const event_engine::Event<application_manager::MessagePtr,
                                   std::string>& event) {
-  LOG4CXX_TRACE_ENTER(logger_);
+  LOG4CXX_AUTO_TRACE(logger_);
   app_ = service_->GetApplication(message_->connection_key());
   if (!app_) {
     LOG4CXX_ERROR(logger_, "Application doesn't registered!");
@@ -376,7 +375,6 @@ void BaseCommandRequest::on_event(const event_engine::Event<application_manager:
   } else {
     OnEvent(event);  // run child's logic
   }
-  LOG4CXX_TRACE_EXIT(logger_);
 }
 
 }  // namespace commands

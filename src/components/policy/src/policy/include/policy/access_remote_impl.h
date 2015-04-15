@@ -33,6 +33,7 @@
 #define SRC_COMPONENTS_POLICY_SRC_POLICY_INCLUDE_POLICY_ACCESS_REMOTE_IMPL_H_
 
 #include <map>
+#include "utils/shared_ptr.h"
 #include "policy/access_remote.h"
 
 namespace policy {
@@ -41,7 +42,7 @@ class CacheManager;
 
 class AccessRemoteImpl : public AccessRemote {
  public:
-  explicit AccessRemoteImpl(CacheManager& cache);
+  explicit AccessRemoteImpl(utils::SharedPtr<CacheManager> cache);
 
   virtual void Init();
   virtual void Enable();
@@ -67,7 +68,7 @@ class AccessRemoteImpl : public AccessRemote {
 
   inline void set_enabled(bool value);
 
-  CacheManager& cache_;
+  utils::SharedPtr<CacheManager> cache_;
   PTString primary_device_;
   bool enabled_;
   AccessControlList acl_;
