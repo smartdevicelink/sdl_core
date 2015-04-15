@@ -52,7 +52,6 @@ struct CheckAppPolicy;
 class PolicyManagerImpl : public PolicyManager {
   public:
     PolicyManagerImpl();
-    virtual ~PolicyManagerImpl();
     virtual void set_listener(PolicyListener* listener);
     PolicyListener* listener() const {
       return listener_;
@@ -168,6 +167,7 @@ class PolicyManagerImpl : public PolicyManager {
 
     virtual void OnAppsSearchCompleted();
 
+#ifdef SDL_REMOTE_CONTROL
     virtual TypeAccess CheckAccess(const PTString& app_id, const PTString& rpc,
                                    const RemoteControlParams& params,
                                    const SeatLocation& seat,
@@ -179,6 +179,7 @@ class PolicyManagerImpl : public PolicyManager {
                              const SeatLocation zone);
     virtual void SetPrimaryDevice(const PTString& dev_id);
     virtual void SetRemoteControl(bool enabled);
+#endif  // SDL_REMOTE_CONTROL
 
   protected:
     virtual utils::SharedPtr<policy_table::Table> Parse(

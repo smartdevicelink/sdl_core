@@ -46,8 +46,8 @@ namespace policy {
 
 class MockCacheManagerInterface : public CacheManagerInterface {
  public:
-  MOCK_METHOD4(CheckPermissions,
-      void(const PTString& app_id, const PTString& hmi_level, const PTString& rpc, CheckPermissionResult& result));
+  MOCK_METHOD5(CheckPermissions,
+      void(const PTString& device_id, const PTString& app_id, const PTString& hmi_level, const PTString& rpc, CheckPermissionResult& result));
   MOCK_METHOD0(IsPTPreloaded,
       bool());
   MOCK_METHOD0(IgnitionCyclesBeforeExchange,

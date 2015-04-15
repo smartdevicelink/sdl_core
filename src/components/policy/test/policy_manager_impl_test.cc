@@ -155,8 +155,8 @@ TEST_F(PolicyManagerImplTest, CheckPermissions_SetHmiLevelFullForAlert_ExpectAll
   expected.list_of_allowed_params.push_back("gps");
 
   //assert
-  EXPECT_CALL(*cache_manager, CheckPermissions("12345678", "FULL", "Alert", _)).
-      WillOnce(SetArgReferee<3>(expected));
+  EXPECT_CALL(*cache_manager, CheckPermissions(_, "12345678", "FULL", "Alert", _)).
+      WillOnce(SetArgReferee<4>(expected));
 
   //act
   ::policy::RPCParams input_params;
