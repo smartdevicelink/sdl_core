@@ -527,6 +527,12 @@
   <element name="DD_OFF" />
 </enum>
 
+<enum name="EmergencyState">
+  <description>Enumeration that describes possible states of emergency event.</description>
+  <element name="EMERGENCY_ON" />
+  <element name="EMERGENCY_OFF" />
+</enum>
+
 <enum name="MediaClockFormat">
   <element name="CLOCK1">
     <description>

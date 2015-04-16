@@ -37,6 +37,7 @@
 #include "usage_statistics/statistics_manager.h"
 #include "utils/shared_ptr.h"
 #include "utils/timer_thread.h"
+
 namespace usage_statistics {
 
 class GlobalCounter {

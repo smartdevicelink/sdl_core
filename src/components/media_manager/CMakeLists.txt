@@ -87,7 +87,7 @@ include_directories (
     ${COMPONENTS_DIR}/application_manager/include/
     ${COMPONENTS_DIR}/smart_objects/include/
     ${COMPONENTS_DIR}/hmi_message_handler/include/
-    ${COMPONENTS_DIR}/formatters/include
+    ${COMPONENTS_DIR}/formatters/include/
     ${COMPONENTS_DIR}/config_profile/include/
     ${JSONCPP_INCLUDE_DIRECTORY}
     ${CMAKE_BINARY_DIR}/src/components/

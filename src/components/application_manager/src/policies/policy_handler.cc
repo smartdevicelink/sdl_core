@@ -103,14 +103,9 @@ struct DeactivateApplication {
 
     void operator()(const ApplicationSharedPtr& app) {
       if (device_id_ == app->device()) {
-        if (mobile_api::HMILevel::HMI_NONE != app->hmi_level()) {
-          ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                                 mobile_apis::HMILevel::HMI_NONE);
-          app->set_audio_streaming_state(mobile_api::AudioStreamingState::NOT_AUDIBLE);
-          MessageHelper::SendActivateAppToHMI(
-                app->app_id(), hmi_apis::Common_HMILevel::NONE);
-          MessageHelper::SendHMIStatusNotification(*app.get());
-        }
+        ApplicationManagerImpl::instance()->SetState<true>(app->app_id(),
+                                                     mobile_apis::HMILevel::HMI_NONE,
+                                                     mobile_apis::AudioStreamingState::NOT_AUDIBLE);
       }
     }
 
@@ -130,32 +125,22 @@ struct SDLAlowedNotification {
     }
     if (device_id_ == app->device()) {
         std::string hmi_level;
-        hmi_apis::Common_HMILevel::eType default_hmi;
         mobile_apis::HMILevel::eType default_mobile_hmi;
         policy_manager_->GetDefaultHmi(app->mobile_app_id(), &hmi_level);
         if ("BACKGROUND" == hmi_level) {
-          default_hmi = hmi_apis::Common_HMILevel::BACKGROUND;
           default_mobile_hmi = mobile_apis::HMILevel::HMI_BACKGROUND;
         } else if ("FULL" == hmi_level) {
-          default_hmi = hmi_apis::Common_HMILevel::FULL;
           default_mobile_hmi = mobile_apis::HMILevel::HMI_FULL;
         } else if ("LIMITED" == hmi_level) {
-          default_hmi = hmi_apis::Common_HMILevel::LIMITED;
           default_mobile_hmi = mobile_apis::HMILevel::HMI_LIMITED;
         } else if ("NONE" == hmi_level) {
-          default_hmi = hmi_apis::Common_HMILevel::NONE;
           default_mobile_hmi = mobile_apis::HMILevel::HMI_NONE;
         } else {
           return ;
         }
-        if (app->hmi_level() == default_mobile_hmi) {
-          LOG4CXX_DEBUG(logger_, "Application already in default hmi state.");
-        } else {
-          ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                                 default_mobile_hmi);
-          MessageHelper::SendHMIStatusNotification(*app);
-        }
-        MessageHelper::SendActivateAppToHMI(app->app_id(), default_hmi);
+        ApplicationManagerImpl::instance()->SetState<true>(app->app_id(),
+                                                     default_mobile_hmi
+                                                     );
       }
     }
   private:
@@ -645,27 +630,21 @@ void PolicyHandler::OnPendingPermissionChange(
 
   const uint32_t app_id = app->app_id();
 
-  using mobile_apis::HMILevel::eType;
-
   if (permissions.appRevoked) {
     application_manager::MessageHelper::SendOnAppPermissionsChangedNotification(
       app_id, permissions);
-
-    ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                           eType::HMI_NONE);
-    app->set_audio_streaming_state(mobile_apis::AudioStreamingState::NOT_AUDIBLE);
-    application_manager::MessageHelper::SendActivateAppToHMI(
-          app_id, hmi_apis::Common_HMILevel::NONE);
-    application_manager::MessageHelper::SendHMIStatusNotification(*app);
+    ApplicationManagerImpl::instance()->SetState<false>(app->app_id(),
+                                                 mobile_apis::HMILevel::HMI_NONE,
+                                                 mobile_apis::AudioStreamingState::NOT_AUDIBLE);
     policy_manager_->RemovePendingPermissionChanges(policy_app_id);
     return;
   }
 
-  eType app_hmi_level = app->hmi_level();
+  mobile_apis::HMILevel::eType app_hmi_level = app->hmi_level();
 
   switch (app_hmi_level) {
-  case eType::HMI_FULL:
-  case eType::HMI_LIMITED: {
+  case mobile_apis::HMILevel::eType::HMI_FULL:
+  case mobile_apis::HMILevel::eType::HMI_LIMITED: {
     if (permissions.appPermissionsConsentNeeded) {
       MessageHelper::
           SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
@@ -674,7 +653,7 @@ void PolicyHandler::OnPendingPermissionChange(
     }
     break;
   }
-  case eType::HMI_BACKGROUND: {
+  case mobile_apis::HMILevel::eType::HMI_BACKGROUND: {
     if (permissions.isAppPermissionsRevoked) {
       MessageHelper::
           SendOnAppPermissionsChangedNotification(app->app_id(), permissions);
@@ -887,7 +866,6 @@ void PolicyHandler::OnActivateApp(uint32_t connection_key,
   if (false == permissions.appRevoked && true == permissions.isSDLAllowed) {
         LOG4CXX_INFO(logger_, "Application will be activated");
         if (ApplicationManagerImpl::instance()->ActivateApplication(app)) {
-          MessageHelper::SendHMIStatusNotification(*(app.get()));
           last_activated_app_id_ = 0;
         }
   } else {
@@ -947,17 +925,9 @@ void PolicyHandler::OnPermissionsUpdated(const std::string& policy_app_id,
       LOG4CXX_INFO(logger_, "Changing hmi level of application "
                    << policy_app_id
                    << " to default hmi level " << default_hmi);
-      // If default is FULL, send request to HMI. Notification to mobile will be
-      // sent on response receiving.
-      if (mobile_apis::HMILevel::HMI_FULL == hmi_level) {
-        MessageHelper::SendActivateAppToHMI(app->app_id());
-      } else {
-        // Set application hmi level
-        ApplicationManagerImpl::instance()->ChangeAppsHMILevel(app->app_id(),
-                                                               hmi_level);
-        // If hmi Level is full, it will be seted after ActivateApp response
-        MessageHelper::SendHMIStatusNotification(*app.get());
-      }
+      ApplicationManagerImpl::instance()->SetState<true>(app->app_id(),
+                                                   mobile_apis::HMILevel::HMI_FULL
+                                                   );
       break;
     }
     default:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2013, Ford Motor Company
+ * Copyright (c) 2015, Ford Motor Company
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -30,32 +30,46 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "application_manager/commands/hmi/on_app_activated_notification.h"
-#include "application_manager/application_manager_impl.h"
-#include "application_manager/message_helper.h"
-#include "interfaces/HMI_API.h"
+#ifndef SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_STATE_CONTEXT_H_
+#define SRC_COMPONENTS_APPLICATION_MANAGER_INCLUDE_APPLICATION_MANAGER_STATE_CONTEXT_H_
+
+#include <inttypes.h>
 
 namespace application_manager {
+/**
+* @brief The StateContext implement acessing to data, that is required by HmiState
+*/
+class StateContext {
+  public:
 
-namespace commands {
+    /**
+     * @brief is_navi_app check if app is navi
+     * @param app_id application id
+     * @return true if app is navi, otherwise return false
+     */
+    bool is_navi_app(const uint32_t app_id) const;
 
-OnAppActivatedNotification::OnAppActivatedNotification(
-    const MessageSharedPtr& message)
-    : NotificationFromHMI(message) {
+    /**
+     * @brief is_meida_app check if app is is meida
+     * @param app_id application id
+     * @return @return true if meida_app, otherwise return false
+     */
+    bool is_meida_app(const uint32_t app_id) const;
+
+    /**
+     * @brief is_voice_comunication_app check if app is voice comunication
+     * @param app_id application id
+     * @return @return true if voice_comunication_app, otherwise return false
+     */
+    bool is_voice_comunication_app(const uint32_t app_id) const;
+
+    /**
+     * @brief is_attenuated_supported check if HMI support attenuated mode
+     * @return true if supported, otherwise return false
+     */
+    bool is_attenuated_supported() const;
+};
+
 }
-
-OnAppActivatedNotification::~OnAppActivatedNotification() {
-}
-
-void OnAppActivatedNotification::Run() {
-  LOG4CXX_AUTO_TRACE(logger_);
-  uint32_t app_id = ((*message_)[strings::msg_params][strings::app_id]).asUInt();
-  ApplicationManagerImpl::instance()->SetState<true>(app_id,
-                                               mobile_apis::HMILevel::HMI_FULL
-                                               );
-}
-
-}  // namespace commands
-
-}  // namespace application_manager
+#endif // STATE_CONTEXT_H
 

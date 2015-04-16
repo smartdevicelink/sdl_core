@@ -46,6 +46,7 @@
 #include "application_manager/request_controller.h"
 #include "application_manager/resume_ctrl.h"
 #include "application_manager/vehicle_info_data.h"
+#include "application_manager/state_controller.h"
 #include "protocol_handler/protocol_observer.h"
 #include "hmi_message_handler/hmi_message_observer.h"
 #include "hmi_message_handler/hmi_message_sender.h"
@@ -79,7 +80,7 @@
 namespace application_manager {
   enum VRTTSSessionChanging {
     kVRSessionChanging = 0,
-    kTTSSessionChanging = 1
+    kTTSSessionChanging
   };
 
 namespace impl {
@@ -254,6 +255,24 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD0(StartDevicesDiscovery, void());
   MOCK_METHOD2(SendAudioPassThroughNotification, void(uint32_t, std::vector<uint8_t>&));
   MOCK_METHOD1(set_all_apps_allowed, void(const bool));
+  MOCK_METHOD4(CreateRegularState, HmiStatePtr (uint32_t, mobile_api::HMILevel::eType,
+                                                     mobile_apis::AudioStreamingState::eType,
+                                                     mobile_apis::SystemContext::eType));
+
+  template<bool SendActivateApp>
+  MOCK_METHOD2(SetState, void(uint32_t, HmiState));
+  template<bool SendActivateApp>
+  MOCK_METHOD2(SetState, void(uint32_t, mobile_api::HMILevel::eType));
+  template<bool SendActivateApp>
+  MOCK_METHOD3(SetState, void(uint32_t, mobile_api::HMILevel::eType,
+                              mobile_apis::AudioStreamingState::eType));
+  template<bool SendActivateApp>
+  MOCK_METHOD4(SetState, void(uint32_t, mobile_api::HMILevel::eType,
+                              mobile_apis::AudioStreamingState::eType,
+                              mobile_apis::SystemContext::eType));
+  MOCK_METHOD2(SetState, void(uint32_t,
+                              mobile_apis::AudioStreamingState::eType));
+
   MOCK_CONST_METHOD0(all_apps_allowed, bool());
   MOCK_METHOD1(set_vr_session_started, void(const bool));
   MOCK_CONST_METHOD0(vr_session_started, bool());
@@ -267,8 +286,6 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD0(CreatePhoneCallAppList, void());
   MOCK_METHOD0(ResetPhoneCallAppList, void());
   MOCK_METHOD2(ChangeAppsHMILevel, void(uint32_t, mobile_apis::HMILevel::eType));
-  MOCK_METHOD1(MakeAppNotAudible, void(uint32_t app_id));
-  MOCK_METHOD1(MakeAppFullScreen, bool(uint32_t app_id));
   MOCK_METHOD1(AddAppToTTSGlobalPropertiesList, void(const uint32_t));
   MOCK_METHOD1(RemoveAppFromTTSGlobalPropertiesList, void(const uint32_t));
   MOCK_METHOD1(application_by_hmi_app, ApplicationSharedPtr(uint32_t));
@@ -287,6 +304,9 @@ class ApplicationManagerImpl : public ApplicationManager,
   MOCK_METHOD0(OnLowVoltage, void());
   MOCK_METHOD0(OnWakeUp, void());
   MOCK_METHOD1(OnUpdateHMIAppType, void(std::map<std::string, std::vector<std::string> >));
+  MOCK_METHOD3(set_state, void(ApplicationSharedPtr app,
+                               mobile_apis::HMILevel::eType,
+                               mobile_apis::AudioStreamingState::eType));
 
   struct ApplicationsAppIdSorter {
     bool operator() (const ApplicationSharedPtr lhs,
