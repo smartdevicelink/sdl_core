@@ -61,7 +61,12 @@ class Profile : public utils::Singleton<Profile> {
       * @brief Returns true if HMI should be started, otherwise false
       */
     bool launch_hmi() const;
-
+#ifdef WEB_HMI
+    /**
+      * @brief Returns link to web hmi
+      */
+    std::string link_to_web_hmi() const;
+#endif // WEB_HMI
     /**
       * @brief Returns application configuration path
       */
@@ -601,6 +606,9 @@ class Profile : public utils::Singleton<Profile> {
 
 private:
     bool                            launch_hmi_;
+#ifdef WEB_HMI
+    std::string                     link_to_web_hmi_;
+#endif // WEB_HMI
     std::string                     app_config_folder_;
     std::string                     app_storage_folder_;
     std::string                     app_resourse_folder_;

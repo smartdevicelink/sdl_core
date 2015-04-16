@@ -188,10 +188,6 @@ if (${QT_HMI})
 
   file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/start_hmi.sh
     "#!/bin/sh\n${start_command} ${command_arguments}\n")
-elseif (${WEB_HMI})
-  file(COPY ${CMAKE_HOME_DIRECTORY}/src/components/HMI/ DESTINATION ${CMAKE_BINARY_DIR}/src/components/HMI/)
-  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/hmi_link
-    "${CMAKE_BINARY_DIR}/src/components/HMI/index.html")
 endif ()
 
 # Install rules
@@ -202,9 +198,10 @@ install(
     ${CMAKE_SOURCE_DIR}/mycert.pem ${CMAKE_SOURCE_DIR}/mykey.pem
   DESTINATION bin
 )
+
 if (${WEB_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/hmi_link DESTINATION bin)
+    install( DIRECTORY ${CMAKE_HOME_DIRECTORY}/src/components/HMI/ DESTINATION bin/HMI)
   endif ()
 elseif (${QT_HMI})
   if (CMAKE_SYSTEM_NAME STREQUAL "QNX")
