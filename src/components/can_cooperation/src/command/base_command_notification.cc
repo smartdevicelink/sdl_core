@@ -41,6 +41,8 @@ namespace commands {
 
 using namespace json_keys;
 
+CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
+
 BaseCommandNotification::BaseCommandNotification(
     const application_manager::MessagePtr& message)
   : message_(message),
@@ -92,7 +94,14 @@ void BaseCommandNotification::Run() {
   //if (need_reset_) {
   //  service_->RemoveAccess(message_->function_name());
   //}
-  Execute();  // run child's logic
+  mobile_apis::Result::eType ret = service_->CheckPolicyPermissions(message_);
+  if (ret == mobile_apis::Result::eType::SUCCESS) {
+    Execute();  // run child's logic
+  } else {
+    LOG4CXX_WARN(logger_,
+                 "Function \"" << message_->function_name() << "\" (#"
+                 << message_->function_id() << ") not allowed by policy");
+  }
 }
 
 }  // namespace commands

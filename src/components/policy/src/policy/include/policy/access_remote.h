@@ -52,6 +52,9 @@ struct Subject {
 inline bool operator<(const Subject& x, const Subject& y) {
   return x.dev_id < y.dev_id && x.app_id < y.app_id;
 }
+inline bool operator==(const Subject& x, const Subject& y) {
+  return x.dev_id == y.dev_id && x.app_id == y.app_id;
+}
 
 struct Object {
   PTString group_id;
@@ -59,6 +62,9 @@ struct Object {
 };
 inline bool operator<(const Object& x, const Object& y) {
   return x.group_id < y.group_id && x.zone < y.zone;
+}
+inline bool operator==(const Object& x, const Object& y) {
+  return x.group_id == y.group_id && x.zone == y.zone;
 }
 
 typedef std::vector<PTString> RemoteControlParams;

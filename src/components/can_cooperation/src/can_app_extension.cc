@@ -35,7 +35,8 @@
 namespace can_cooperation {
 CANAppExtension::CANAppExtension(application_manager::AppExtensionUID uid)
   : AppExtension(uid) ,
-    is_control_given_(false) {
+    is_control_given_(false),
+    seat_(0) {
 }
 
 bool CANAppExtension::IsControlGiven() const {

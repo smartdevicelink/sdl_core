@@ -46,7 +46,7 @@ using application_manager::SeatLocation;
 
 using namespace json_keys;
 
-CREATE_LOGGERPTR_GLOBAL(logger_, "BaseCommandRequest")
+CREATE_LOGGERPTR_GLOBAL(logger_, "CANCooperation")
 
 BaseCommandRequest::BaseCommandRequest(
   const application_manager::MessagePtr& message)
@@ -297,15 +297,19 @@ void BaseCommandRequest::Run() {
     return;
   }
 
-  // TODO(KKolodiy): may be we won't have mobile API for needs SDL so it redundant
-  if (!to_can_) {
-    Execute(); // run child's logic
-    return;
-  }
 
   mobile_apis::Result::eType ret = service_->CheckPolicyPermissions(message_);
   if (ret != mobile_apis::Result::eType::SUCCESS) {
     SendResponse(false, result_codes::kDisallowed, "");
+    LOG4CXX_WARN(logger_,
+                 "Function \"" << message_->function_name() << "\" (#"
+                 << message_->function_id() << ") not allowed by policy");
+    return;
+  }
+
+  // TODO(KKolodiy): may be we won't have mobile API for needs SDL so it is redundant
+  if (!to_can_) {
+    Execute(); // run child's logic
     return;
   }
 

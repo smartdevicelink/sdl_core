@@ -319,6 +319,8 @@ private:
     bool ignition_check;
 
     friend struct CheckAppPolicy;
+    friend class PolicyManagerImplTest;
+    //FRIEND_TEST(PolicyManagerImplTest, ReadStatFileTest);
 };
 
 }  // namespace policy

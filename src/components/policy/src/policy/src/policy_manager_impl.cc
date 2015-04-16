@@ -949,8 +949,8 @@ void PolicyManagerImpl::ResetAccess(const PTString& app_id) {
 
 void PolicyManagerImpl::ResetAccess(const PTString& group_name,
                                     const SeatLocation zone) {
-  Object who = {group_name, zone};
-  access_remote_->Reset(who);
+  Object what = {group_name, zone};
+  access_remote_->Reset(what);
 }
 
 void PolicyManagerImpl::SetPrimaryDevice(const PTString& dev_id) {
